@@ -61,7 +61,7 @@ Tagline: *"Billing state, modeled clearly."*
 - [ ] HEEx templates that work in plain-text AND HTML, rendering consistently across major email clients
 - [ ] Single-point branding config (logo, colors, from-name, from-address) for 80% case
 - [ ] Per-template override for full customization
-- [ ] MJML support via `swoosh_mjml` for responsive templates
+- [ ] MJML support via `mjml_eex` for responsive templates
 
 **PDF**
 - [ ] `Accrue.PDF` behaviour with `Accrue.PDF.ChromicPDF` default adapter, `Accrue.PDF.Test` for assertion-based testing, documented path for custom adapters (Gotenberg sidecar, external services)
