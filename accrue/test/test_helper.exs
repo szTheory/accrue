@@ -1,5 +1,11 @@
 Accrue.MoxSetup.define_mocks()
 
+# Configure webhook signing secrets for test fixtures (Plan 06).
+# Must be set before TestRepo starts so any compile-time config reads see it.
+Application.put_env(:accrue, :webhook_signing_secrets, %{
+  stripe: [Accrue.WebhookFixtures.default_secret()]
+})
+
 # Start Accrue.TestRepo once for the whole test run. Individual tests
 # that need a DB connection check it out via Accrue.RepoCase's setup
 # block (Ecto.Adapters.SQL.Sandbox.start_owner!/2). Plan 03 Wave 2.
