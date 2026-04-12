@@ -81,11 +81,14 @@ defmodule Accrue.Webhook.Ingest do
             end
         end
       end)
-      |> Ecto.Multi.run(:maybe_enqueue, fn _repo, %{persist: result} ->
+      |> Ecto.Multi.run(:maybe_enqueue, fn repo, %{persist: result} ->
         case result do
           {:new, row} ->
+            # Use repo.insert to ensure the Oban job is created within the
+            # same transaction, not via Oban's configured repo which may
+            # differ in a multi-database setup (WR-06).
             job_changeset = DispatchWorker.new(%{webhook_event_id: row.id})
-            Oban.insert(job_changeset)
+            repo.insert(job_changeset)
 
           {:duplicate, _} ->
             {:ok, :skipped}
