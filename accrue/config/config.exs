@@ -1,5 +1,10 @@
 import Config
 
+# ex_money / ex_cldr backend wiring. Required at compile-time for the
+# Money.Application supervisor to start. Plan 02 wraps this behind Accrue.Money.
+config :ex_cldr, default_backend: Accrue.Cldr
+config :ex_money, default_cldr_backend: Accrue.Cldr
+
 # Compile-stable env marker. Plan 05 Auth.Default boot_check reads this via
 # Application.get_env(:accrue, :env, Mix.env()) — runtime lookup with Mix.env fallback.
 config :accrue, :env, Mix.env()
@@ -23,6 +28,11 @@ config :accrue,
 #
 #     config :my_app, Oban,
 #       queues: [accrue_mailers: 20, accrue_webhooks: 10]
+
+# Swoosh: disable default api_client to avoid the hackney dep. Host apps that
+# use API-based adapters (SendGrid, Mailgun, Postmark) re-enable it with their
+# own HTTP client (Finch recommended).
+config :swoosh, :api_client, false
 
 # Swoosh mailer shim — placeholder; env-specific adapter is set in dev.exs / test.exs.
 config :accrue, Accrue.Mailer.Swoosh, adapter: Swoosh.Adapters.Local
