@@ -34,6 +34,11 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_payment_methods, [:customer_id])
     create index(:accrue_payment_methods, [:processor_id])
 
+    create unique_index(:accrue_payment_methods, [:processor, :processor_id],
+      where: "processor_id IS NOT NULL",
+      name: :accrue_payment_methods_processor_processor_id_index
+    )
+
     # --- Subscriptions ---
 
     create table(:accrue_subscriptions, primary_key: false) do
@@ -60,6 +65,11 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_subscriptions, [:customer_id])
     create index(:accrue_subscriptions, [:processor_id])
 
+    create unique_index(:accrue_subscriptions, [:processor, :processor_id],
+      where: "processor_id IS NOT NULL",
+      name: :accrue_subscriptions_processor_processor_id_index
+    )
+
     # --- Subscription Items ---
 
     create table(:accrue_subscription_items, primary_key: false) do
@@ -80,6 +90,11 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
 
     create index(:accrue_subscription_items, [:subscription_id])
     create index(:accrue_subscription_items, [:processor_id])
+
+    create unique_index(:accrue_subscription_items, [:processor, :processor_id],
+      where: "processor_id IS NOT NULL",
+      name: :accrue_subscription_items_processor_processor_id_index
+    )
 
     # --- Charges ---
 
@@ -106,6 +121,11 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_charges, [:subscription_id])
     create index(:accrue_charges, [:processor_id])
 
+    create unique_index(:accrue_charges, [:processor, :processor_id],
+      where: "processor_id IS NOT NULL",
+      name: :accrue_charges_processor_processor_id_index
+    )
+
     # --- Invoices ---
 
     create table(:accrue_invoices, primary_key: false) do
@@ -131,6 +151,11 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_invoices, [:subscription_id])
     create index(:accrue_invoices, [:processor_id])
 
+    create unique_index(:accrue_invoices, [:processor, :processor_id],
+      where: "processor_id IS NOT NULL",
+      name: :accrue_invoices_processor_processor_id_index
+    )
+
     # --- Coupons ---
 
     create table(:accrue_coupons, primary_key: false) do
@@ -154,5 +179,10 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     end
 
     create index(:accrue_coupons, [:processor_id])
+
+    create unique_index(:accrue_coupons, [:processor, :processor_id],
+      where: "processor_id IS NOT NULL",
+      name: :accrue_coupons_processor_processor_id_index
+    )
   end
 end
