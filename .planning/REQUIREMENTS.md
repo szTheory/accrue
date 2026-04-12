@@ -290,17 +290,219 @@ Explicitly excluded from v1.0 AND v1.x. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Populated during roadmap creation.
+Which phases cover which requirements. Every v1 requirement maps to exactly one phase.
 
 | Requirement | Phase | Status |
 |---|---|---|
-| *(populated by gsd-roadmapper)* | | |
+| FND-01 | Phase 1 | Pending |
+| FND-02 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Pending |
+| FND-05 | Phase 1 | Pending |
+| FND-06 | Phase 1 | Pending |
+| FND-07 | Phase 1 | Pending |
+| PROC-01 | Phase 1 | Pending |
+| PROC-02 | Phase 3 | Pending |
+| PROC-03 | Phase 1 | Pending |
+| PROC-04 | Phase 2 | Pending |
+| PROC-05 | Phase 5 | Pending |
+| PROC-06 | Phase 2 | Pending |
+| PROC-07 | Phase 1 | Pending |
+| BILL-01 | Phase 2 | Pending |
+| BILL-02 | Phase 2 | Pending |
+| BILL-03 | Phase 3 | Pending |
+| BILL-04 | Phase 3 | Pending |
+| BILL-05 | Phase 3 | Pending |
+| BILL-06 | Phase 3 | Pending |
+| BILL-07 | Phase 3 | Pending |
+| BILL-08 | Phase 3 | Pending |
+| BILL-09 | Phase 3 | Pending |
+| BILL-10 | Phase 3 | Pending |
+| BILL-11 | Phase 4 | Pending |
+| BILL-12 | Phase 4 | Pending |
+| BILL-13 | Phase 4 | Pending |
+| BILL-14 | Phase 4 | Pending |
+| BILL-15 | Phase 4 | Pending |
+| BILL-16 | Phase 4 | Pending |
+| BILL-17 | Phase 3 | Pending |
+| BILL-18 | Phase 3 | Pending |
+| BILL-19 | Phase 3 | Pending |
+| BILL-20 | Phase 3 | Pending |
+| BILL-21 | Phase 3 | Pending |
+| BILL-22 | Phase 3 | Pending |
+| BILL-23 | Phase 3 | Pending |
+| BILL-24 | Phase 3 | Pending |
+| BILL-25 | Phase 3 | Pending |
+| BILL-26 | Phase 3 | Pending |
+| BILL-27 | Phase 4 | Pending |
+| BILL-28 | Phase 4 | Pending |
+| CHKT-01 | Phase 4 | Pending |
+| CHKT-02 | Phase 4 | Pending |
+| CHKT-03 | Phase 4 | Pending |
+| CHKT-04 | Phase 4 | Pending |
+| CHKT-05 | Phase 4 | Pending |
+| CHKT-06 | Phase 4 | Pending |
+| CONN-01 | Phase 5 | Pending |
+| CONN-02 | Phase 5 | Pending |
+| CONN-03 | Phase 5 | Pending |
+| CONN-04 | Phase 5 | Pending |
+| CONN-05 | Phase 5 | Pending |
+| CONN-06 | Phase 5 | Pending |
+| CONN-07 | Phase 5 | Pending |
+| CONN-08 | Phase 5 | Pending |
+| CONN-09 | Phase 5 | Pending |
+| CONN-10 | Phase 5 | Pending |
+| CONN-11 | Phase 5 | Pending |
+| WH-01 | Phase 2 | Pending |
+| WH-02 | Phase 2 | Pending |
+| WH-03 | Phase 2 | Pending |
+| WH-04 | Phase 2 | Pending |
+| WH-05 | Phase 2 | Pending |
+| WH-06 | Phase 2 | Pending |
+| WH-07 | Phase 2 | Pending |
+| WH-08 | Phase 4 | Pending |
+| WH-09 | Phase 3 | Pending |
+| WH-10 | Phase 2 | Pending |
+| WH-11 | Phase 2 | Pending |
+| WH-12 | Phase 2 | Pending |
+| WH-13 | Phase 4 | Pending |
+| WH-14 | Phase 2 | Pending |
+| EVT-01 | Phase 1 | Pending |
+| EVT-02 | Phase 1 | Pending |
+| EVT-03 | Phase 1 | Pending |
+| EVT-04 | Phase 2 | Pending |
+| EVT-05 | Phase 4 | Pending |
+| EVT-06 | Phase 4 | Pending |
+| EVT-07 | Phase 1 | Pending |
+| EVT-08 | Phase 1 | Pending |
+| EVT-09 | Phase 7 | Pending |
+| EVT-10 | Phase 4 | Pending |
+| MAIL-01 | Phase 1 | Pending |
+| MAIL-02 | Phase 6 | Pending |
+| MAIL-03 | Phase 6 | Pending |
+| MAIL-04 | Phase 6 | Pending |
+| MAIL-05 | Phase 6 | Pending |
+| MAIL-06 | Phase 6 | Pending |
+| MAIL-07 | Phase 6 | Pending |
+| MAIL-08 | Phase 6 | Pending |
+| MAIL-09 | Phase 6 | Pending |
+| MAIL-10 | Phase 6 | Pending |
+| MAIL-11 | Phase 6 | Pending |
+| MAIL-12 | Phase 6 | Pending |
+| MAIL-13 | Phase 6 | Pending |
+| MAIL-14 | Phase 6 | Pending |
+| MAIL-15 | Phase 6 | Pending |
+| MAIL-16 | Phase 6 | Pending |
+| MAIL-17 | Phase 6 | Pending |
+| MAIL-18 | Phase 6 | Pending |
+| MAIL-19 | Phase 6 | Pending |
+| MAIL-20 | Phase 6 | Pending |
+| MAIL-21 | Phase 6 | Pending |
+| PDF-01 | Phase 1 | Pending |
+| PDF-02 | Phase 6 | Pending |
+| PDF-03 | Phase 6 | Pending |
+| PDF-04 | Phase 6 | Pending |
+| PDF-05 | Phase 6 | Pending |
+| PDF-06 | Phase 6 | Pending |
+| PDF-07 | Phase 6 | Pending |
+| PDF-08 | Phase 6 | Pending |
+| PDF-09 | Phase 6 | Pending |
+| PDF-10 | Phase 6 | Pending |
+| PDF-11 | Phase 6 | Pending |
+| ADMIN-01 | Phase 7 | Pending |
+| ADMIN-02 | Phase 7 | Pending |
+| ADMIN-03 | Phase 7 | Pending |
+| ADMIN-04 | Phase 7 | Pending |
+| ADMIN-05 | Phase 7 | Pending |
+| ADMIN-06 | Phase 7 | Pending |
+| ADMIN-07 | Phase 7 | Pending |
+| ADMIN-08 | Phase 7 | Pending |
+| ADMIN-09 | Phase 7 | Pending |
+| ADMIN-10 | Phase 7 | Pending |
+| ADMIN-11 | Phase 7 | Pending |
+| ADMIN-12 | Phase 7 | Pending |
+| ADMIN-13 | Phase 7 | Pending |
+| ADMIN-14 | Phase 7 | Pending |
+| ADMIN-15 | Phase 7 | Pending |
+| ADMIN-16 | Phase 7 | Pending |
+| ADMIN-17 | Phase 7 | Pending |
+| ADMIN-18 | Phase 7 | Pending |
+| ADMIN-19 | Phase 7 | Pending |
+| ADMIN-20 | Phase 7 | Pending |
+| ADMIN-21 | Phase 7 | Pending |
+| ADMIN-22 | Phase 7 | Pending |
+| ADMIN-23 | Phase 7 | Pending |
+| ADMIN-24 | Phase 7 | Pending |
+| ADMIN-25 | Phase 7 | Pending |
+| ADMIN-26 | Phase 7 | Pending |
+| ADMIN-27 | Phase 7 | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 7 | Pending |
+| AUTH-04 | Phase 8 | Pending |
+| AUTH-05 | Phase 8 | Pending |
+| INST-01 | Phase 8 | Pending |
+| INST-02 | Phase 8 | Pending |
+| INST-03 | Phase 8 | Pending |
+| INST-04 | Phase 8 | Pending |
+| INST-05 | Phase 8 | Pending |
+| INST-06 | Phase 8 | Pending |
+| INST-07 | Phase 8 | Pending |
+| INST-08 | Phase 8 | Pending |
+| INST-09 | Phase 8 | Pending |
+| INST-10 | Phase 8 | Pending |
+| OBS-01 | Phase 1 | Pending |
+| OBS-02 | Phase 8 | Pending |
+| OBS-03 | Phase 4 | Pending |
+| OBS-04 | Phase 4 | Pending |
+| OBS-05 | Phase 4 | Pending |
+| OBS-06 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 8 | Pending |
+| TEST-03 | Phase 8 | Pending |
+| TEST-04 | Phase 8 | Pending |
+| TEST-05 | Phase 8 | Pending |
+| TEST-06 | Phase 8 | Pending |
+| TEST-07 | Phase 8 | Pending |
+| TEST-08 | Phase 3 | Pending |
+| TEST-09 | Phase 2 | Pending |
+| TEST-10 | Phase 8 | Pending |
+| OSS-01 | Phase 9 | Pending |
+| OSS-02 | Phase 9 | Pending |
+| OSS-03 | Phase 9 | Pending |
+| OSS-04 | Phase 9 | Pending |
+| OSS-05 | Phase 9 | Pending |
+| OSS-06 | Phase 9 | Pending |
+| OSS-07 | Phase 9 | Pending |
+| OSS-08 | Phase 9 | Pending |
+| OSS-09 | Phase 9 | Pending |
+| OSS-10 | Phase 9 | Pending |
+| OSS-11 | Phase 1 | Pending |
+| OSS-12 | Phase 9 | Pending |
+| OSS-13 | Phase 9 | Pending |
+| OSS-14 | Phase 9 | Pending |
+| OSS-15 | Phase 9 | Pending |
+| OSS-16 | Phase 9 | Pending |
+| OSS-17 | Phase 9 | Pending |
+| OSS-18 | Phase 9 | Pending |
 
 **Coverage:**
-- v1 requirements: ~150 total (see counts by category above)
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 0 ⚠️ (will verify after roadmap)
+- v1 requirements: 191 total (FND 7, PROC 7, BILL 28, CHKT 6, CONN 11, WH 14, EVT 10, MAIL 21, PDF 11, ADMIN 27, AUTH 5, INST 10, OBS 6, TEST 10, OSS 18)
+- Mapped to phases: 191 (100%)
+- Unmapped: 0 ✓
+
+**Phase distribution:**
+- Phase 1 (Foundations): 23 requirements
+- Phase 2 (Schemas + Webhook Plumbing): 17 requirements
+- Phase 3 (Core Subscription Lifecycle): 21 requirements
+- Phase 4 (Advanced Billing + Webhook Hardening): 22 requirements
+- Phase 5 (Connect): 12 requirements
+- Phase 6 (Email + PDF): 30 requirements
+- Phase 7 (Admin UI): 29 requirements
+- Phase 8 (Install + Polish + Testing): 20 requirements
+- Phase 9 (Release): 17 requirements
+- **Total: 191 ✓**
 
 ---
 *Requirements defined: 2026-04-11*
-*Last updated: 2026-04-11 after initial definition*
+*Last updated: 2026-04-11 — traceability populated by gsd-roadmapper*
