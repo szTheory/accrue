@@ -59,7 +59,14 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
   3. Mounting `Accrue.Webhook.Plug` does not affect streaming or body parsing on any non-webhook route — the raw-body capture is scoped to the webhook pipeline only, verified by a test that asserts `Plug.Parsers` still runs globally.
   4. Every Billing context write that mutates state emits a corresponding `accrue_events` row in the **same transaction** as the state mutation — asserted by a test that triggers a rollback and sees both the state change and event disappear together.
   5. Webhook signature verification rejects a payload with a tampered body AND accepts a payload signed by any one of multiple configured rotation secrets.
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+- [ ] 02-01-PLAN.md — Ecto schemas (Customer, PaymentMethod, Subscription, SubscriptionItem, Charge, Invoice, Coupon, WebhookEvent) + migrations
+- [ ] 02-02-PLAN.md — use Accrue.Billable macro + Accrue.Billing context with lazy customer fetch-or-create
+- [ ] 02-03-PLAN.md — Webhook plug pipeline: CachingBodyReader, Signature wrapper, Router macro, mix.exs deps
+- [ ] 02-04-PLAN.md — Transactional ingest + Oban dispatch + Handler behaviour + DefaultHandler + Pruner
+- [ ] 02-05-PLAN.md — Deterministic idempotency keys + API version override + EVT-04 rollback proof
+- [ ] 02-06-PLAN.md — Test infrastructure: ConnCase, WebhookFixtures, StreamData property tests, Oban test config
 **UI hint**: no
 
 ### Phase 3: Core Subscription Lifecycle
@@ -165,7 +172,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations | 0/TBD | Not started | - |
-| 2. Schemas + Webhook Plumbing | 0/TBD | Not started | - |
+| 2. Schemas + Webhook Plumbing | 0/6 | Planned | - |
 | 3. Core Subscription Lifecycle | 0/TBD | Blocked on lattice_stripe 0.3 | - |
 | 4. Advanced Billing + Webhook Hardening | 0/TBD | Not started | - |
 | 5. Connect | 0/TBD | Not started | - |
