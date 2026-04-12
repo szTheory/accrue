@@ -55,8 +55,14 @@ defmodule Accrue.MixProject do
       {:telemetry, "~> 1.3"},
       {:jason, "~> 1.4"},
       {:decimal, "~> 2.0"},
+      {:plug, "~> 1.16"},
 
       # Optional deps — conditionally compiled; see CLAUDE.md §Conditional Compilation.
+      #
+      # Phoenix is optional for core accrue — the Router macro uses
+      # Phoenix.Router.forward/3 when Phoenix is loaded, but the webhook
+      # plug works without Phoenix (plain Plug.Router).
+      {:phoenix, "~> 1.8", optional: true},
       #
       # NOTE on :sigra — not yet published to Hex. Per D-41 the
       # Accrue.Integrations.Sigra adapter is conditionally compiled via

@@ -108,6 +108,16 @@ defmodule Accrue.Config do
       type: :atom,
       default: :usd,
       doc: "Default currency when one is not explicitly supplied."
+    ],
+
+    # --- Webhook pipeline (Plan 03 reads these) ----------------------------
+    webhook_signing_secrets: [
+      type: :any,
+      default: %{},
+      doc:
+        "Map of processor atom to signing secret(s). Each value is a string " <>
+          "or list of strings for rotation (D2-05). Example: " <>
+          "`%{stripe: [\"whsec_old\", \"whsec_new\"]}`."
     ]
   ]
 
@@ -193,6 +203,30 @@ defmodule Accrue.Config do
 
     _ = NimbleOptions.validate!(opts, @schema)
     :ok
+  end
+
+  # --- webhook helpers --------------------------------------------------
+
+  @doc """
+  Returns the signing secret(s) for the given processor.
+
+  Looks up `webhook_signing_secrets` in the `:accrue` application env
+  and extracts the value for the given processor atom. Returns a list
+  of strings (for multi-secret rotation support). Raises
+  `Accrue.ConfigError` if no secrets are configured for the processor.
+  """
+  @spec webhook_signing_secrets(atom()) :: String.t() | [String.t()]
+  def webhook_signing_secrets(processor) when is_atom(processor) do
+    secrets_map = get!(:webhook_signing_secrets)
+
+    case Map.fetch(secrets_map, processor) do
+      {:ok, secrets} when is_list(secrets) and secrets != [] -> secrets
+      {:ok, secret} when is_binary(secret) and secret != "" -> secret
+      _ ->
+        raise Accrue.ConfigError,
+          key: :webhook_signing_secrets,
+          message: "no webhook signing secrets configured for processor #{inspect(processor)}"
+    end
   end
 
   # --- internals --------------------------------------------------------
