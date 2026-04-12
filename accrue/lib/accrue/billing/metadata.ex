@@ -124,9 +124,9 @@ defmodule Accrue.Billing.Metadata do
 
   defp validate_value_lengths(changeset, field, metadata) do
     long_values =
-      Enum.filter(metadata, fn
-        {key, value} when is_binary(value) -> String.length(value) > @max_value_length && key
-        _ -> false
+      metadata
+      |> Enum.filter(fn {_key, value} ->
+        is_binary(value) and String.length(value) > @max_value_length
       end)
       |> Enum.map(fn {key, _} -> key end)
 
