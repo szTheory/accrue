@@ -1,0 +1,18 @@
+# Elixir / Mix build artifacts
+_build/
+deps/
+*.ez
+
+# ElixirLS
+.elixir_ls/
+
+# Dialyzer PLTs
+priv/plts/*.plt
+priv/plts/*.plt.hash
+
+# Coverage
+cover/
+
+# Editor / OS noise
+.DS_Store
+*~
