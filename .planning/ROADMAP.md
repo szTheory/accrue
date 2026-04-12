@@ -40,8 +40,14 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
   3. Every `Accrue.Error` raised in the library is pattern-matchable via `%Accrue.CardError{}`, `%Accrue.RateLimitError{}`, `%Accrue.SignatureError{}`, etc., and Stripe errors surfaced through `Accrue.Processor.Stripe` are mapped to this hierarchy with metadata preserved.
   4. A write to `accrue_events` cannot be updated or deleted by the application role — attempting `Repo.update/delete` on an event row raises a Postgres permission/trigger error.
   5. `mix compile --warnings-as-errors` succeeds in both `with_sigra` and `without_sigra` builds of the monorepo, proving the conditional-compile pattern is correct on day one.
-**Plans**: TBD
-**UI hint**: no (headless foundations only; brand CSS variables land in `lib/accrue/brand.css` for downstream consumers but no LiveView)
+**Plans**: 6 plans
+- [ ] 01-01-bootstrap-PLAN.md — Wave 0: mix scaffold (accrue + accrue_admin), Mox/ExUnit test harness, MIT LICENSE
+- [ ] 01-02-money-errors-config-telemetry-PLAN.md — Accrue.Money (ex_money wrapper, property tests), Error hierarchy, NimbleOptions Config, Telemetry + Actor
+- [ ] 01-03-event-ledger-PLAN.md — accrue_events table + trigger + REVOKE stub, Accrue.Events.record/record_multi, immutability integration tests
+- [ ] 01-04-processor-PLAN.md — Accrue.Processor behaviour, deterministic Fake adapter with test clock, Stripe adapter + error mapper + facade lockdown
+- [ ] 01-05-mailer-pdf-auth-PLAN.md — Mailer behaviour + Default + Oban worker + PaymentSucceeded (corrected mjml_eex pattern), PDF behaviour + ChromicPDF/Test adapters, Auth behaviour + dev/prod Default
+- [ ] 01-06-application-sigra-brand-ci-PLAN.md — Accrue.Application empty supervisor + boot checks, conditional-compile Sigra scaffold, brand.css, GitHub Actions CI matrix with with_sigra/without_sigra
+**UI hint**: no (headless foundations only; brand CSS variables land in `accrue/priv/static/brand.css` for downstream consumers but no LiveView)
 
 ### Phase 2: Schemas + Webhook Plumbing
 **Goal**: All Billing schemas exist as polymorphic Ecto modules with `data` jsonb + deep-merge metadata, the `use Accrue.Billable` macro makes any host schema billable, and a scoped raw-body webhook pipeline verifies signatures, deduplicates on `UNIQUE(processor_event_id)`, and enqueues Oban jobs transactionally — all driven end-to-end through the Fake processor without any lattice_stripe 0.3 dependency.
