@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test (elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }})
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Floor — minimum supported (CLAUDE.md §CI Matrix).
+          - elixir: '1.17.3'
+            otp: '27.0'
+            sigra: 'off'
+            continue-on-error: false
+          # Primary dev target.
+          - elixir: '1.18.0'
+            otp: '27.0'
+            sigra: 'off'
+            continue-on-error: false
+          # Forward-compat smoke test (OTP 28).
+          - elixir: '1.18.0'
+            otp: '28.0'
+            sigra: 'off'
+            continue-on-error: false
+          # with_sigra cell. Currently allowed to fail because :sigra is
+          # not yet published to Hex (see Plan 01-01 Summary Deviation 1).
+          # Once :sigra publishes, flip continue-on-error to false and
+          # this becomes a hard gate on Phase 1 Success Criterion #5.
+          - elixir: '1.18.0'
+            otp: '27.0'
+            sigra: 'on'
+            continue-on-error: true
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_CI_SIGRA: ${{ matrix.sigra == 'on' && '1' || '' }}
+
+    continue-on-error: ${{ matrix.continue-on-error }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+
+      - name: Restore deps cache
+        uses: actions/cache@v4
+        with:
+          path: accrue/deps
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-deps-${{ hashFiles('accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-deps-
+
+      - name: Restore _build cache
+        uses: actions/cache@v4
+        with:
+          path: accrue/_build
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-build-${{ hashFiles('accrue/mix.lock') }}
+
+      - name: Install deps
+        run: cd accrue && mix deps.get
+
+      - name: Check formatting
+        run: cd accrue && mix format --check-formatted
+
+      - name: Compile (warnings as errors)
+        run: cd accrue && mix compile --warnings-as-errors
+
+      - name: Run facade lockdown via compile_matrix script
+        run: bash scripts/ci/compile_matrix.sh
+
+      - name: Run tests
+        run: cd accrue && mix test --warnings-as-errors
+
+      - name: Credo (strict)
+        run: cd accrue && mix credo --strict
+
+      # --- Dialyzer with split restore/save PLT cache (CLAUDE.md recipe) ---
+      - name: Restore PLT cache
+        id: plt_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: accrue/priv/plts
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-plt-${{ hashFiles('accrue/mix.lock') }}
+
+      - name: Create PLTs
+        if: steps.plt_cache.outputs.cache-hit != 'true'
+        run: cd accrue && mix dialyzer --plt
+
+      - name: Save PLT cache
+        if: steps.plt_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: accrue/priv/plts
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-plt-${{ hashFiles('accrue/mix.lock') }}
+
+      - name: Run Dialyzer
+        run: cd accrue && mix dialyzer --format github
