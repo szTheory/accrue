@@ -141,7 +141,7 @@ defmodule Accrue.Billing do
           name: Map.get(processor_result, :name),
           email: Map.get(processor_result, :email),
           metadata: Map.get(processor_result, :metadata, %{}),
-          data: processor_result
+          data: Map.drop(processor_result, [:address, :phone, :shipping, "address", "phone", "shipping"])
         })
       end)
       |> Ecto.Multi.run(:event, fn _repo, %{customer: customer} ->
