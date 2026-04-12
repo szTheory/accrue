@@ -14,6 +14,9 @@ defmodule Accrue.ErrorsTest do
   describe "all error structs" do
     for mod <- @errors do
       test "#{inspect(mod)} is an Exception" do
+        # Force the module to load before introspection; in parallel test
+        # runs it may not yet be in the code server.
+        Code.ensure_loaded!(unquote(mod))
         assert function_exported?(unquote(mod), :exception, 1)
         assert function_exported?(unquote(mod), :message, 1)
         err = unquote(mod).exception(message: "hi")
