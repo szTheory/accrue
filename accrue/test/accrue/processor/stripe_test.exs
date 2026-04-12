@@ -166,7 +166,10 @@ defmodule Accrue.Processor.StripeTest do
       allowed =
         Enum.sort([
           "lib/accrue/processor/stripe.ex",
-          "lib/accrue/processor/stripe/error_mapper.ex"
+          "lib/accrue/processor/stripe/error_mapper.ex",
+          "lib/accrue/webhook/event.ex",
+          "lib/accrue/webhook/ingest.ex",
+          "lib/accrue/webhook/signature.ex"
         ])
 
       assert files == allowed,
