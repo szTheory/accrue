@@ -49,16 +49,41 @@ defmodule Accrue.Billing do
     billable_type = mod.__accrue__(:billable_type)
     owner_id = to_string(id)
 
+    case fetch_customer(billable_type, owner_id) do
+      %Customer{} = existing ->
+        {:ok, existing}
+
+      nil ->
+        case create_customer(billable) do
+          {:ok, customer} ->
+            {:ok, customer}
+
+          {:error, %Ecto.Changeset{} = cs} ->
+            # Unique constraint race -- another process created the customer
+            # between our SELECT and INSERT. Retry the fetch.
+            if cs.errors[:owner_id] do
+              case fetch_customer(billable_type, owner_id) do
+                %Customer{} = existing -> {:ok, existing}
+                nil -> {:error, cs}
+              end
+            else
+              {:error, cs}
+            end
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  defp fetch_customer(billable_type, owner_id) do
     query =
       from(c in Customer,
         where: c.owner_type == ^billable_type and c.owner_id == ^owner_id,
         limit: 1
       )
 
-    case Repo.one(query) do
-      %Customer{} = existing -> {:ok, existing}
-      nil -> create_customer(billable)
-    end
+    Repo.one(query)
   end
 
   @doc """
