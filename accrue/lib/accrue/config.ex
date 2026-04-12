@@ -169,6 +169,32 @@ defmodule Accrue.Config do
   @spec schema() :: keyword()
   def schema, do: @schema
 
+  @doc """
+  Reads the current `:accrue` application env at boot time, filters it to
+  the schema-known keys, and validates via `NimbleOptions.validate!/2`.
+
+  Called by `Accrue.Application.start/2` before the supervision tree
+  starts. Raises `NimbleOptions.ValidationError` on misconfig — fail loud
+  rather than limp into production with silently-broken config.
+
+  Only schema-known keys are validated. Extra keys in the `:accrue` env
+  (e.g., per-module adapter configs like `Accrue.Mailer.Swoosh`) are
+  ignored here — they belong to their own libraries and would otherwise
+  produce spurious `unknown option` errors.
+  """
+  @spec validate_at_boot!() :: :ok
+  def validate_at_boot! do
+    known_keys = Keyword.keys(@schema)
+
+    opts =
+      :accrue
+      |> Application.get_all_env()
+      |> Keyword.take(known_keys)
+
+    _ = NimbleOptions.validate!(opts, @schema)
+    :ok
+  end
+
   # --- internals --------------------------------------------------------
 
   @spec default_for(atom()) :: term()

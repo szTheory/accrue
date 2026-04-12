@@ -1,0 +1,27 @@
+/*
+ * Accrue brand palette — Phase 1 foundational tokens (FND-07).
+ *
+ * These CSS custom properties are the v1.0 stable public API for Accrue's
+ * visual language. Consumed by `accrue_admin` (Phase 7) and any host app
+ * that wants to align with Accrue's brand.
+ *
+ * Palette sourced from `.planning/PROJECT.md` §Brand:
+ *   Foundation: Ink / Slate / Fog / Paper
+ *   Accents:    Moss / Cobalt / Amber
+ *
+ * Variable names (`--accrue-*`) are stable at v1.0 — renaming is a
+ * breaking change. Hex values MAY shift at minor versions if brand
+ * guidance evolves.
+ */
+:root {
+  /* Foundation — neutrals */
+  --accrue-ink:    #111418;  /* primary text, headings */
+  --accrue-slate:  #24303B;  /* secondary text, nav */
+  --accrue-fog:    #E9EEF2;  /* borders, dividers, muted surfaces */
+  --accrue-paper:  #FAFBFC;  /* page backgrounds */
+
+  /* Accents — semantic */
+  --accrue-moss:   #5E9E84;  /* success, active subscription, primary */
+  --accrue-cobalt: #5D79F6;  /* interactive, links, secondary actions */
+  --accrue-amber:  #C8923B;  /* warning, grace period, dunning */
+}

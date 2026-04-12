@@ -22,12 +22,15 @@ defmodule Accrue.MixProject do
 
   # Configuration for the OTP application.
   #
-  # NOTE: No `mod:` key at Wave 0 — Accrue.Application is wired in Plan 06 (FND-05).
-  # Keeping `mod:` out here means Wave 1 plans can add code without OTP app boot side
-  # effects.
+  # Plan 01-06 wires `Accrue.Application` as the OTP entry point (FND-05).
+  # The application runs two boot-time validations (config schema + Auth
+  # refuse-to-boot) and then starts an empty supervisor — Accrue is a
+  # library, so Repo/Oban/ChromicPDF/Finch remain host-owned (D-33, D-42,
+  # Pitfall #4).
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Accrue.Application, []}
     ]
   end
 
