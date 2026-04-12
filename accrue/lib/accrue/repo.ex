@@ -77,6 +77,15 @@ defmodule Accrue.Repo do
   end
 
   @doc """
+  Delegates to `c:Ecto.Repo.transaction/2`. Accepts an `Ecto.Multi` or
+  a function. Used by `Accrue.Billing` for multi-step atomic writes.
+  """
+  @spec transaction(Ecto.Multi.t() | (-> any()), keyword()) ::
+          {:ok, any()} | {:error, any()}
+  def transaction(multi_or_fun, opts \\ []),
+    do: repo().transaction(multi_or_fun, opts)
+
+  @doc """
   Returns the configured host Repo module. Raises `Accrue.ConfigError`
   when `:repo` is not configured (prevents runtime `UndefinedFunctionError`
   with confusing stacktraces).
