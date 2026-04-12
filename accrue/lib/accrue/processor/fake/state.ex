@@ -24,7 +24,8 @@ defmodule Accrue.Processor.Fake.State do
             payment_method: non_neg_integer()
           },
           clock: DateTime.t(),
-          stubs: %{optional(atom()) => (... -> term())}
+          stubs: %{optional(atom()) => (... -> term())},
+          idempotency_cache: %{optional(String.t()) => term()}
         }
 
   @epoch ~U[2026-01-01 00:00:00Z]
@@ -42,7 +43,8 @@ defmodule Accrue.Processor.Fake.State do
               payment_method: 0
             },
             clock: @epoch,
-            stubs: %{}
+            stubs: %{},
+            idempotency_cache: %{}
 
   @doc "The module's epoch DateTime — the value `clock` is reset to on `reset/0`."
   @spec epoch() :: DateTime.t()

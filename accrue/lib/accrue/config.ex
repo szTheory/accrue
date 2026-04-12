@@ -271,6 +271,12 @@ defmodule Accrue.Config do
   @spec webhook_handlers() :: [module()]
   def webhook_handlers, do: get!(:webhook_handlers)
 
+  @doc """
+  Returns the configured Stripe API version string (D2-14).
+  """
+  @spec stripe_api_version() :: String.t()
+  def stripe_api_version, do: get!(:stripe_api_version)
+
   # --- internals --------------------------------------------------------
 
   @spec default_for(atom()) :: term()

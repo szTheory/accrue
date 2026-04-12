@@ -67,6 +67,36 @@ defmodule Accrue.Actor do
     end
   end
 
+  # ---------------------------------------------------------------------------
+  # Operation ID (D2-12 — idempotency seed for outbound Stripe calls)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Returns the current operation ID from the process dictionary, or `nil`
+  if unset. Used by `Accrue.Processor.Stripe` as the seed for
+  deterministic idempotency keys (D2-12).
+  """
+  @spec current_operation_id() :: String.t() | nil
+  def current_operation_id do
+    Process.get(:accrue_operation_id)
+  end
+
+  @doc """
+  Stores an operation ID in the process dictionary. Oban middleware and
+  webhook plug set this automatically so downstream processor calls
+  produce deterministic idempotency keys.
+  """
+  @spec put_operation_id(String.t() | nil) :: :ok
+  def put_operation_id(nil) do
+    Process.delete(:accrue_operation_id)
+    :ok
+  end
+
+  def put_operation_id(id) when is_binary(id) do
+    Process.put(:accrue_operation_id, id)
+    :ok
+  end
+
   @doc """
   Returns the fixed actor-type enum. Useful for downstream validation.
   """

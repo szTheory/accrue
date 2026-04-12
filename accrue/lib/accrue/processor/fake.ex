@@ -153,17 +153,27 @@ defmodule Accrue.Processor.Fake do
         {:reply, reply, state}
 
       :miss ->
-        next = bump(state, :customer)
-        id = id_for(:customer, next.counters.customer)
+        idem_key = Keyword.get(opts, :idempotency_key)
 
-        customer =
-          params
-          |> Map.put(:id, id)
-          |> Map.put(:object, "customer")
-          |> Map.put(:created, state.clock)
+        case idempotency_hit(state, idem_key) do
+          {:hit, cached_result} ->
+            {:reply, cached_result, state}
 
-        state = %{next | customers: Map.put(next.customers, id, customer)}
-        {:reply, {:ok, customer}, state}
+          :miss ->
+            next = bump(state, :customer)
+            id = id_for(:customer, next.counters.customer)
+
+            customer =
+              params
+              |> Map.put(:id, id)
+              |> Map.put(:object, "customer")
+              |> Map.put(:created, state.clock)
+
+            result = {:ok, customer}
+            next = %{next | customers: Map.put(next.customers, id, customer)}
+            next = cache_idempotency(next, idem_key, result)
+            {:reply, result, next}
+        end
     end
   end
 
@@ -245,5 +255,20 @@ defmodule Accrue.Processor.Fake do
       {:ok, fun} -> {:hit, apply(fun, args)}
       :error -> :miss
     end
+  end
+
+  defp idempotency_hit(_state, nil), do: :miss
+
+  defp idempotency_hit(%State{idempotency_cache: cache}, key) do
+    case Map.fetch(cache, key) do
+      {:ok, result} -> {:hit, result}
+      :error -> :miss
+    end
+  end
+
+  defp cache_idempotency(state, nil, _result), do: state
+
+  defp cache_idempotency(%State{idempotency_cache: cache} = state, key, result) do
+    %{state | idempotency_cache: Map.put(cache, key, result)}
   end
 end

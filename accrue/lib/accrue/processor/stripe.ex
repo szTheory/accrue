@@ -47,7 +47,11 @@ defmodule Accrue.Processor.Stripe do
   alias Accrue.Processor.Stripe.ErrorMapper
   alias Accrue.Telemetry
 
-  @default_api_version "2026-03-25.dahlia"
+  require Logger
+
+  # Default API version is in Accrue.Config.stripe_api_version/0.
+  # Kept as documentation reference only.
+  # @default_api_version "2026-03-25.dahlia"
 
   # ---------------------------------------------------------------------------
   # Behaviour callbacks
@@ -59,10 +63,16 @@ defmodule Accrue.Processor.Stripe do
       [:accrue, :processor, :customer, :create],
       %{adapter: :stripe, operation: :create_customer},
       fn ->
-        client = build_client!()
+        client = build_client!(opts)
+        idem_key = compute_idempotency_key(:create_customer, params[:email] || "new", opts)
+
+        stripe_opts =
+          opts
+          |> Keyword.put(:idempotency_key, idem_key)
+          |> Keyword.put(:stripe_version, resolve_api_version(opts))
 
         client
-        |> LatticeStripe.Customer.create(stringify_keys(params), opts)
+        |> LatticeStripe.Customer.create(stringify_keys(params), stripe_opts)
         |> translate_customer()
       end
     )
@@ -74,10 +84,12 @@ defmodule Accrue.Processor.Stripe do
       [:accrue, :processor, :customer, :retrieve],
       %{adapter: :stripe, operation: :retrieve_customer},
       fn ->
-        client = build_client!()
+        client = build_client!(opts)
+
+        stripe_opts = Keyword.put(opts, :stripe_version, resolve_api_version(opts))
 
         client
-        |> LatticeStripe.Customer.retrieve(id, opts)
+        |> LatticeStripe.Customer.retrieve(id, stripe_opts)
         |> translate_customer()
       end
     )
@@ -90,21 +102,71 @@ defmodule Accrue.Processor.Stripe do
       [:accrue, :processor, :customer, :update],
       %{adapter: :stripe, operation: :update_customer},
       fn ->
-        client = build_client!()
+        client = build_client!(opts)
+        idem_key = compute_idempotency_key(:update_customer, id, opts)
+
+        stripe_opts =
+          opts
+          |> Keyword.put(:idempotency_key, idem_key)
+          |> Keyword.put(:stripe_version, resolve_api_version(opts))
 
         client
-        |> LatticeStripe.Customer.update(id, stringify_keys(params), opts)
+        |> LatticeStripe.Customer.update(id, stringify_keys(params), stripe_opts)
         |> translate_customer()
       end
     )
   end
 
   # ---------------------------------------------------------------------------
+  # Idempotency keys (D2-11, D2-12, PROC-04)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Computes a deterministic idempotency key from the operation, subject ID,
+  and a seed (D2-11). The seed resolution chain is (D2-12):
+
+    1. `opts[:operation_id]` (explicit)
+    2. `Accrue.Actor.current_operation_id/0` (process dict)
+    3. Random UUID + `Logger.warning` (non-deterministic fallback)
+
+  Returns a string like `"accr_<22 url-safe base64 chars>"`.
+  """
+  @spec compute_idempotency_key(atom(), String.t(), keyword()) :: String.t()
+  def compute_idempotency_key(op, subject_id, opts \\ [])
+      when is_atom(op) and is_list(opts) do
+    seed =
+      Keyword.get(opts, :operation_id) ||
+        Accrue.Actor.current_operation_id() ||
+        random_seed_with_warning(op, subject_id)
+
+    raw = :crypto.hash(:sha256, "#{op}|#{subject_id}|#{seed}")
+    "accr_" <> (Base.url_encode64(raw, padding: false) |> binary_part(0, 22))
+  end
+
+  # ---------------------------------------------------------------------------
+  # API version override (D2-14, D2-15, PROC-06)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Resolves the Stripe API version using three-level precedence (D2-14):
+
+    1. `opts[:api_version]` (explicit per-call override)
+    2. `Process.get(:accrue_stripe_api_version)` (scoped via `Accrue.Stripe.with_api_version/2`)
+    3. `Accrue.Config.stripe_api_version/0` (application config default)
+  """
+  @spec resolve_api_version(keyword()) :: String.t()
+  def resolve_api_version(opts \\ []) when is_list(opts) do
+    Keyword.get(opts, :api_version) ||
+      Process.get(:accrue_stripe_api_version) ||
+      Accrue.Config.stripe_api_version()
+  end
+
+  # ---------------------------------------------------------------------------
   # Internals
   # ---------------------------------------------------------------------------
 
-  @spec build_client!() :: LatticeStripe.Client.t()
-  defp build_client! do
+  @spec build_client!(keyword()) :: LatticeStripe.Client.t()
+  defp build_client!(opts) do
     key =
       case Application.get_env(:accrue, :stripe_secret_key) do
         nil ->
@@ -123,9 +185,20 @@ defmodule Accrue.Processor.Stripe do
           value
       end
 
-    api_version = Application.get_env(:accrue, :stripe_api_version, @default_api_version)
+    api_version = resolve_api_version(opts)
 
     LatticeStripe.Client.new!(api_key: key, api_version: api_version)
+  end
+
+  defp random_seed_with_warning(op, subject_id) do
+    seed = Ecto.UUID.generate()
+
+    Logger.warning(
+      "Accrue.Processor.Stripe: no operation_id seed for #{op}/#{subject_id}; " <>
+        "retries will NOT be idempotent"
+    )
+
+    seed
   end
 
   @spec translate_customer({:ok, LatticeStripe.Customer.t()} | {:error, term()}) ::
