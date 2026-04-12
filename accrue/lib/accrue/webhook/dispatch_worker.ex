@@ -6,19 +6,101 @@ defmodule Accrue.Webhook.DispatchWorker do
   webhook event row. Loads the `WebhookEvent`, projects it to
   `%Accrue.Webhook.Event{}`, and dispatches to the handler chain.
 
+  ## Dispatch order (D2-30)
+
+  1. `Accrue.Webhook.DefaultHandler` runs first (non-disableable)
+  2. User handlers from `Accrue.Config.webhook_handlers/0` run sequentially
+  3. Each handler is rescue-wrapped for crash isolation
+
   ## Retry policy
 
   25 attempts with exponential backoff (WH-05). On final attempt,
   transitions the webhook event to `:dead` status (D2-35).
+
+  ## Status lifecycle
+
+      :received -> :processing -> :succeeded
+                                -> :failed (retryable)
+                                -> :dead (final attempt)
   """
 
   use Oban.Worker,
     queue: :accrue_webhooks,
     max_attempts: 25
 
+  alias Accrue.Webhook.{WebhookEvent, Event, DefaultHandler}
+
+  require Logger
+
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"webhook_event_id" => _id}}) do
-    # Full implementation in Task 2
-    :ok
+  def perform(%Oban.Job{
+        args: %{"webhook_event_id" => id},
+        attempt: attempt,
+        max_attempts: max_attempts
+      }) do
+    repo = Accrue.Repo.repo()
+    row = repo.get!(WebhookEvent, id)
+
+    # Transition to :processing
+    row
+    |> WebhookEvent.status_changeset(:processing)
+    |> repo.update!()
+
+    event = Event.from_webhook_event(row)
+    ctx = %{attempt: attempt, max_attempts: max_attempts, webhook_event_id: id}
+
+    # Push actor context (D2-12)
+    Accrue.Actor.put_current(%{type: :webhook, id: row.processor_event_id})
+
+    # D2-30: Default handler first (non-disableable), then user handlers
+    default_result = safe_handle(DefaultHandler, event, ctx)
+
+    _user_results =
+      Accrue.Config.webhook_handlers()
+      |> Enum.map(fn handler -> safe_handle(handler, event, ctx) end)
+
+    # Only re-raise if default handler failed (D2-30).
+    # User handler crashes are logged but do not cause retry.
+    case default_result do
+      :ok ->
+        mark_succeeded(repo, row)
+        :ok
+
+      {:error, reason} ->
+        mark_failed_or_dead(repo, row, attempt, max_attempts)
+        {:error, reason}
+    end
+  end
+
+  @doc false
+  def safe_handle(handler, event, ctx) do
+    handler.handle_event(event.type, event, ctx)
+  rescue
+    e ->
+      Logger.error(
+        "Webhook handler #{inspect(handler)} crashed: #{Exception.format(:error, e, __STACKTRACE__)}"
+      )
+
+      :telemetry.execute(
+        [:accrue, :webhook, :handler, :exception],
+        %{},
+        %{module: handler, error: e}
+      )
+
+      {:error, e}
+  end
+
+  defp mark_succeeded(repo, row) do
+    row
+    |> WebhookEvent.status_changeset(:succeeded)
+    |> repo.update!()
+  end
+
+  defp mark_failed_or_dead(repo, row, attempt, max_attempts) do
+    status = if attempt >= max_attempts, do: :dead, else: :failed
+
+    row
+    |> WebhookEvent.status_changeset(status)
+    |> repo.update!()
   end
 end
