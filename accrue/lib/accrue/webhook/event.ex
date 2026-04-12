@@ -11,6 +11,12 @@ defmodule Accrue.Webhook.Event do
   in Plan 04, using `String.to_existing_atom/1` with a bounded allow-list.
   """
 
+  @processor_atoms %{
+    "stripe" => :stripe,
+    "stripe_connect" => :stripe_connect,
+    "fake" => :fake
+  }
+
   defstruct [:type, :object_id, :livemode, :created_at, :processor_event_id, :processor]
 
   @type t :: %__MODULE__{
@@ -74,7 +80,14 @@ defmodule Accrue.Webhook.Event do
       livemode: row.livemode,
       created_at: row.received_at,
       processor_event_id: row.processor_event_id,
-      processor: String.to_existing_atom(row.processor)
+      processor: processor_to_atom(row.processor)
     }
+  end
+
+  defp processor_to_atom(processor_str) do
+    case Map.fetch(@processor_atoms, processor_str) do
+      {:ok, atom} -> atom
+      :error -> raise ArgumentError, "unknown processor: #{inspect(processor_str)}"
+    end
   end
 end
