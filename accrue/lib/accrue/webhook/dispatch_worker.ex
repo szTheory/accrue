@@ -41,10 +41,11 @@ defmodule Accrue.Webhook.DispatchWorker do
     repo = Accrue.Repo.repo()
     row = repo.get!(WebhookEvent, id)
 
-    # Transition to :processing
-    row
-    |> WebhookEvent.status_changeset(:processing)
-    |> repo.update!()
+    # Transition to :processing (capture updated row to avoid stale struct)
+    row =
+      row
+      |> WebhookEvent.status_changeset(:processing)
+      |> repo.update!()
 
     event = Event.from_webhook_event(row)
     ctx = %{attempt: attempt, max_attempts: max_attempts, webhook_event_id: id}
