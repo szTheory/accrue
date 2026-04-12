@@ -61,12 +61,12 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
   5. Webhook signature verification rejects a payload with a tampered body AND accepts a payload signed by any one of multiple configured rotation secrets.
 **Plans**: 6 plans
 Plans:
-- [ ] 02-01-PLAN.md — Ecto schemas (Customer, PaymentMethod, Subscription, SubscriptionItem, Charge, Invoice, Coupon, WebhookEvent) + migrations
-- [ ] 02-02-PLAN.md — use Accrue.Billable macro + Accrue.Billing context with lazy customer fetch-or-create
-- [ ] 02-03-PLAN.md — Webhook plug pipeline: CachingBodyReader, Signature wrapper, Router macro, mix.exs deps
-- [ ] 02-04-PLAN.md — Transactional ingest + Oban dispatch + Handler behaviour + DefaultHandler + Pruner
-- [ ] 02-05-PLAN.md — Deterministic idempotency keys + API version override + EVT-04 rollback proof
-- [ ] 02-06-PLAN.md — Test infrastructure: ConnCase, WebhookFixtures, StreamData property tests, Oban test config
+- [x] 02-01-PLAN.md — Ecto schemas (Customer, PaymentMethod, Subscription, SubscriptionItem, Charge, Invoice, Coupon, WebhookEvent) + migrations
+- [x] 02-02-PLAN.md — use Accrue.Billable macro + Accrue.Billing context with lazy customer fetch-or-create
+- [x] 02-03-PLAN.md — Webhook plug pipeline: CachingBodyReader, Signature wrapper, Router macro, mix.exs deps
+- [x] 02-04-PLAN.md — Transactional ingest + Oban dispatch + Handler behaviour + DefaultHandler + Pruner
+- [x] 02-05-PLAN.md — Deterministic idempotency keys + API version override + EVT-04 rollback proof
+- [x] 02-06-PLAN.md — Test infrastructure: ConnCase, WebhookFixtures, StreamData property tests, Oban test config
 **UI hint**: no
 
 ### Phase 3: Core Subscription Lifecycle
