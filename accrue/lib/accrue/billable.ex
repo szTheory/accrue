@@ -60,14 +60,23 @@ defmodule Accrue.Billable do
 
     quote do
       @__accrue_billable_type__ unquote(billable_type)
-
-      has_one :accrue_customer, Accrue.Billing.Customer,
-        foreign_key: :owner_id,
-        references: :id,
-        where: [owner_type: unquote(billable_type)]
+      @before_compile Accrue.Billable
 
       @doc false
       def __accrue__(:billable_type), do: @__accrue_billable_type__
+    end
+  end
+
+  @doc false
+  defmacro __before_compile__(env) do
+    billable_type = Module.get_attribute(env.module, :__accrue_billable_type__)
+
+    quote do
+      Ecto.Schema.has_one(:accrue_customer, Accrue.Billing.Customer,
+        foreign_key: :owner_id,
+        references: :id,
+        where: [owner_type: unquote(billable_type)]
+      )
 
       @doc """
       Lazily fetches or creates the `Accrue.Billing.Customer` for this
