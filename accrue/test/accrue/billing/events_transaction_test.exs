@@ -82,25 +82,31 @@ defmodule Accrue.Billing.EventsTransactionTest do
     test "rollback removes both customer and event" do
       user = test_user()
 
+      # Capture baseline counts (robust against pre-existing data)
+      customer_count_before = Accrue.TestRepo.aggregate(Customer, :count)
+      event_count_before = Accrue.TestRepo.aggregate(Event, :count)
+
+      # Use Accrue.Repo (same facade as Billing context) so the outer
+      # transaction and inner Multi share the same savepoint chain.
       result =
-        Accrue.TestRepo.transaction(fn ->
+        Accrue.Repo.transaction(fn ->
           {:ok, customer} = Billing.create_customer(user)
 
           # Both should exist within the transaction
-          assert Accrue.TestRepo.get(Customer, customer.id)
+          assert Accrue.Repo.repo().get(Customer, customer.id)
 
-          assert Accrue.TestRepo.one(
+          assert Accrue.Repo.repo().one(
                    from(e in Event, where: e.subject_id == ^customer.id)
                  )
 
-          Accrue.TestRepo.rollback(:test_rollback)
+          Accrue.Repo.repo().rollback(:test_rollback)
         end)
 
       assert {:error, :test_rollback} = result
 
-      # After rollback, BOTH should be gone
-      assert Accrue.TestRepo.aggregate(Customer, :count) == 0
-      assert Accrue.TestRepo.aggregate(Event, :count) == 0
+      # After rollback, counts should return to baseline — BOTH rows gone
+      assert Accrue.TestRepo.aggregate(Customer, :count) == customer_count_before
+      assert Accrue.TestRepo.aggregate(Event, :count) == event_count_before
     end
   end
 

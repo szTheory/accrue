@@ -154,6 +154,81 @@ defmodule Accrue.Billing do
   end
 
   # ---------------------------------------------------------------------------
+  # Customer — update (D2-07, D2-09)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Updates a `Customer` with the given attributes.
+
+  Uses `Ecto.Multi` to atomically update the customer and record a
+  `"customer.updated"` event (EVT-04). Metadata is validated per D2-07
+  (flat string map, max 50 keys, etc.). Optimistic locking via
+  `lock_version` prevents torn writes (D2-09).
+
+  ## Examples
+
+      {:ok, customer} = Accrue.Billing.update_customer(customer, %{metadata: %{"tier" => "pro"}})
+  """
+  @spec update_customer(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
+  def update_customer(%Customer{} = customer, attrs) when is_map(attrs) do
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.update(:customer, Customer.changeset(customer, attrs))
+      |> Ecto.Multi.run(:event, fn _repo, %{customer: updated} ->
+        Events.record(%{
+          type: "customer.updated",
+          subject_type: "Customer",
+          subject_id: updated.id,
+          data: %{changes: Map.take(attrs, [:metadata, :name, :email, "metadata", "name", "email"])}
+        })
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, %{customer: customer}} -> {:ok, customer}
+      {:error, :customer, changeset, _changes} -> {:error, changeset}
+      {:error, :event, reason, _changes} -> {:error, reason}
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Data operations (D2-08)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Fully replaces the `data` jsonb column on a billing record (D2-08).
+
+  Used by webhook reconcile paths that receive the whole object (e.g.
+  `customer.updated`). Applies optimistic locking via `lock_version`.
+
+  ## Examples
+
+      {:ok, updated} = Accrue.Billing.put_data(customer, %{"balance" => 0})
+  """
+  @spec put_data(Ecto.Schema.t(), map()) :: {:ok, Ecto.Schema.t()} | {:error, term()}
+  def put_data(%{__struct__: _schema} = record, new_data) when is_map(new_data) do
+    record
+    |> Ecto.Changeset.change(data: new_data)
+    |> Ecto.Changeset.optimistic_lock(:lock_version)
+    |> Repo.update()
+  end
+
+  @doc """
+  Shallow-merges `partial_data` into the existing `data` column (D2-08).
+
+  Used when a partial event carries only a delta. Applies optimistic
+  locking via `lock_version`.
+
+  ## Examples
+
+      {:ok, patched} = Accrue.Billing.patch_data(customer, %{"balance" => 100})
+  """
+  @spec patch_data(Ecto.Schema.t(), map()) :: {:ok, Ecto.Schema.t()} | {:error, term()}
+  def patch_data(%{__struct__: _schema} = record, partial_data) when is_map(partial_data) do
+    merged = Map.merge(record.data || %{}, partial_data)
+    put_data(record, merged)
+  end
+
+  # ---------------------------------------------------------------------------
   # Internals
   # ---------------------------------------------------------------------------
 
