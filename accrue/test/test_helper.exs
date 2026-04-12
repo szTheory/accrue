@@ -6,4 +6,17 @@ Accrue.MoxSetup.define_mocks()
 {:ok, _} = Accrue.TestRepo.start_link(pool: Ecto.Adapters.SQL.Sandbox)
 Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 
+# Start Oban in :manual testing mode against Accrue.TestRepo so Plan 05's
+# mailer tests can use Oban.Testing helpers (assert_enqueued, perform_job,
+# etc.) without running real queues. Host applications start their own Oban
+# in production — Accrue never starts Oban itself (D-27).
+{:ok, _} =
+  Oban.start_link(
+    repo: Accrue.TestRepo,
+    testing: :manual,
+    queues: false,
+    plugins: false,
+    notifier: Oban.Notifiers.PG
+  )
+
 ExUnit.start()

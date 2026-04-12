@@ -1,0 +1,9 @@
+Hi <%= @customer_name %>,
+
+We received your payment of <%= @amount %> for invoice <%= @invoice_number %>.
+
+View your receipt: <%= @receipt_url %>
+
+If you have questions, just reply to this email.
+
+— The <%= Application.get_env(:accrue, :business_name, "Accrue") %> team
