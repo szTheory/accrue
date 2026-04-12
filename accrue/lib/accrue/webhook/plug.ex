@@ -13,11 +13,11 @@ defmodule Accrue.Webhook.Plug do
 
   Signature failures raise `Accrue.SignatureError`, rescued to HTTP 400.
 
-  ## Plan 04 integration point
+  ## Transactional pipeline
 
-  The `send_resp(200, ...)` at the end of `do_call/2` is temporary.
-  Plan 04 will replace it with `Accrue.Webhook.Ingest.run/4` which
-  does the transactional persist + Oban enqueue + respond.
+  After verification, `Accrue.Webhook.Ingest.run/4` atomically persists the
+  webhook event, enqueues an Oban dispatch job, and records an accrue_events
+  ledger entry -- all in a single `Ecto.Multi` transaction (D2-24).
   """
 
   @behaviour Plug
@@ -58,17 +58,10 @@ defmodule Accrue.Webhook.Plug do
 
     secrets = Accrue.Config.webhook_signing_secrets(processor)
     stripe_event = Signature.verify!(raw_body, sig_header, secrets)
-    event = Accrue.Webhook.Event.from_stripe(stripe_event, processor)
 
-    # Store verified artifacts in conn.private for Plan 04's Ingest module.
-    # Temporary 200 response until Plan 04 wires persist + enqueue.
-    conn
-    |> put_private(:accrue_verified_event, stripe_event)
-    |> put_private(:accrue_event, event)
-    |> put_private(:accrue_raw_body, raw_body)
-    |> put_private(:accrue_processor, processor)
-    |> send_resp(200, Jason.encode!(%{ok: true}))
-    |> halt()
+    # Transactional persist + Oban enqueue (D2-24, Plan 04).
+    # Event projection happens inside DispatchWorker from the persisted row.
+    Accrue.Webhook.Ingest.run(conn, processor, stripe_event, raw_body)
   end
 
   @doc false

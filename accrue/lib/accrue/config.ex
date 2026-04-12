@@ -118,6 +118,30 @@ defmodule Accrue.Config do
         "Map of processor atom to signing secret(s). Each value is a string " <>
           "or list of strings for rotation (D2-05). Example: " <>
           "`%{stripe: [\"whsec_old\", \"whsec_new\"]}`."
+    ],
+
+    # --- Webhook retention (Plan 04, D2-34) --------------------------------
+    succeeded_retention_days: [
+      type: {:or, [:pos_integer, {:in, [:infinity]}]},
+      default: 14,
+      doc:
+        "Number of days to retain `:succeeded` webhook events before the " <>
+          "Pruner deletes them. Set to `:infinity` to disable pruning. Default: 14."
+    ],
+    dead_retention_days: [
+      type: {:or, [:pos_integer, {:in, [:infinity]}]},
+      default: 90,
+      doc:
+        "Number of days to retain `:dead` webhook events before the " <>
+          "Pruner deletes them. Set to `:infinity` to disable pruning. Default: 90."
+    ],
+    webhook_handlers: [
+      type: {:list, :atom},
+      default: [],
+      doc:
+        "List of modules implementing `Accrue.Webhook.Handler` behaviour. " <>
+          "Called sequentially after the default handler on each webhook event (D2-31). " <>
+          "Example: `[MyApp.BillingHandler, MyApp.AnalyticsHandler]`."
     ]
   ]
 
@@ -228,6 +252,24 @@ defmodule Accrue.Config do
           message: "no webhook signing secrets configured for processor #{inspect(processor)}"
     end
   end
+
+  @doc """
+  Returns the number of days to retain `:succeeded` webhook events.
+  """
+  @spec succeeded_retention_days() :: pos_integer() | :infinity
+  def succeeded_retention_days, do: get!(:succeeded_retention_days)
+
+  @doc """
+  Returns the number of days to retain `:dead` webhook events.
+  """
+  @spec dead_retention_days() :: pos_integer() | :infinity
+  def dead_retention_days, do: get!(:dead_retention_days)
+
+  @doc """
+  Returns the list of user-registered webhook handler modules (D2-31).
+  """
+  @spec webhook_handlers() :: [module()]
+  def webhook_handlers, do: get!(:webhook_handlers)
 
   # --- internals --------------------------------------------------------
 

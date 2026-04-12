@@ -1,5 +1,5 @@
 defmodule Accrue.Webhook.PlugTest do
-  use ExUnit.Case, async: true
+  use Accrue.RepoCase
 
   @moduledoc """
   Integration tests for the webhook plug pipeline:
@@ -8,6 +8,10 @@ defmodule Accrue.Webhook.PlugTest do
   Tests use LatticeStripe.Webhook.generate_test_signature/3 to produce
   valid Stripe-Signature headers and verify behavior end-to-end through
   a test Plug.Router.
+
+  Note: Since Plan 04, the Plug routes through Accrue.Webhook.Ingest
+  which performs DB writes, so these tests require RepoCase for the
+  Ecto sandbox.
   """
 
   # --- Test router that mimics a host app's webhook pipeline ---------------
@@ -139,7 +143,7 @@ defmodule Accrue.Webhook.PlugTest do
 
   # --- Test 4: Raw body is populated in assigns (T-2-02) ------------------
 
-  test "POST to webhook route has conn.assigns[:raw_body] populated" do
+  test "POST to webhook route has conn.assigns[:raw_body] populated and persists event" do
     sig = LatticeStripe.Webhook.generate_test_signature(@valid_event_payload, @test_secret)
 
     conn =
@@ -150,12 +154,14 @@ defmodule Accrue.Webhook.PlugTest do
 
     assert conn.status == 200
 
-    # The verified event should be in private assigns
-    assert %LatticeStripe.Event{} = conn.private[:accrue_verified_event]
-    assert conn.private[:accrue_processor] == :stripe
-
-    # Raw body should have been captured (as iolist chunks)
-    assert conn.private[:accrue_raw_body] == @valid_event_payload
+    # Since Plan 04, the Plug delegates to Ingest which persists the event.
+    # Verify the webhook event was persisted with correct data.
+    events = Accrue.TestRepo.all(Accrue.Webhook.WebhookEvent)
+    assert length(events) == 1
+    [event] = events
+    assert event.processor == "stripe"
+    assert event.processor_event_id == "evt_test_123"
+    assert event.type == "customer.created"
   end
 
   # --- Test 5: Non-webhook route does NOT have raw_body (WH-01 scoping) ---
