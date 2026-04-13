@@ -2,15 +2,7 @@
 
 ## Overview
 
-Accrue is built in a strictly topological sequence dictated by research: foundations first (value types, behaviours, Fake processor, error hierarchy, event ledger), then schemas and webhook plumbing, then the core subscription lifecycle once lattice_stripe 0.3 Billing lands upstream, then advanced billing + webhook hardening, then Connect, then email/PDF rendering, then the Admin LiveView UI, then installer and testing polish, then release machinery. The Fake Processor is **primary test surface** from day one — not a test afterthought — and the Money value type lands in Phase 1 so no schema is ever built with a bare-integer amount. The single sequencing cliff is external: lattice_stripe 0.3 must add Subscription/Invoice/Price/Product/Meter coverage before Phase 3 can begin. Phases 1 and 2 proceed immediately in parallel with that upstream work, against the Fake processor.
-
-## External Dependency: Phase 0 — lattice_stripe 0.3 Billing
-
-**Status:** External, tracked. Not executed inside this roadmap.
-**Scope:** Add Subscription, Invoice, Price, Product, BillingMeter, and MeterEvent resources to `lattice_stripe` (sibling library) as a 0.3.0 release.
-**Blocks:** Phase 3 and beyond (anything needing real Stripe Billing calls).
-**Does NOT block:** Phase 1 (Foundations) and Phase 2 (Schemas + Webhook Plumbing), which run against the Fake processor. **Phase 1 can start immediately and in parallel with lattice_stripe 0.3 work.**
-**Fallback:** If 0.3 slips, Accrue can ship in-tree `%LatticeStripe.Request{}` fallback modules inside `Accrue.Processor.Stripe` to be upstreamed later.
+Accrue is built in a strictly topological sequence dictated by research: foundations first (value types, behaviours, Fake processor, error hierarchy, event ledger), then schemas and webhook plumbing, then the core subscription lifecycle, then advanced billing + webhook hardening, then Connect, then email/PDF rendering, then the Admin LiveView UI, then installer and testing polish, then release machinery. The Fake Processor is **primary test surface** from day one — not a test afterthought — and the Money value type lands in Phase 1 so no schema is ever built with a bare-integer amount.
 
 ## Phases
 
@@ -18,9 +10,9 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
 - Integer phases (1–9): Planned milestone work
 - Decimal phases (e.g. 3.1): Urgent insertions
 
-- [ ] **Phase 1: Foundations** — Money, behaviours, Fake processor, error hierarchy, event ledger, brand primitives (can start in parallel with external Phase 0)
+- [ ] **Phase 1: Foundations** — Money, behaviours, Fake processor, error hierarchy, event ledger, brand primitives
 - [ ] **Phase 2: Schemas + Webhook Plumbing** — polymorphic Customer, all Billing schemas, scoped raw-body plug, signature verify, Oban dispatch, DB idempotency
-- [ ] **Phase 3: Core Subscription Lifecycle** — subscribe/swap/cancel/resume/pause/trial, invoice state machine, charges, PI/SI, payment methods, refunds (requires lattice_stripe 0.3)
+- [ ] **Phase 3: Core Subscription Lifecycle** — subscribe/swap/cancel/resume/pause/trial, invoice state machine, charges, PI/SI, payment methods, refunds
 - [ ] **Phase 4: Advanced Billing + Webhook Hardening** — metered, schedules, coupons, checkout/portal, DLQ/replay, out-of-order, event ledger query API, ops telemetry
 - [ ] **Phase 5: Connect** — connected accounts, destination charges, separate charges + transfers, multi-endpoint webhooks with per-account secret routing
 - [ ] **Phase 6: Email + PDF** — 13+ transactional emails via Mailer behaviour, ChromicPDF adapter, shared HEEx templates, MJML responsive layouts
@@ -32,7 +24,7 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
 
 ### Phase 1: Foundations
 **Goal**: A Phoenix developer can depend on `accrue` and get the Money value type, error hierarchy, processor behaviour, Fake processor, and an append-only event ledger — enough primitives to unit-test everything downstream against the Fake processor without touching Stripe.
-**Depends on**: Nothing (first phase; runs in parallel with external Phase 0)
+**Depends on**: Nothing (first phase)
 **Requirements**: FND-01, FND-02, FND-03, FND-04, FND-05, FND-06, FND-07, PROC-01, PROC-03, PROC-07, EVT-01, EVT-02, EVT-03, EVT-07, EVT-08, AUTH-01, AUTH-02, MAIL-01, PDF-01, OBS-01, OBS-06, OSS-11, TEST-01
 **Success Criteria** (what must be TRUE):
   1. A developer can add `accrue` as a path dep and call `Accrue.Money.new(1000, :usd)` and have it reject `Accrue.Money.new(100, :jpy) * 100` bare-integer math — zero-decimal currencies round-trip correctly and mixed-currency arithmetic raises.
@@ -50,7 +42,7 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
 **UI hint**: no (headless foundations only; brand CSS variables land in `accrue/priv/static/brand.css` for downstream consumers but no LiveView)
 
 ### Phase 2: Schemas + Webhook Plumbing
-**Goal**: All Billing schemas exist as polymorphic Ecto modules with `data` jsonb + deep-merge metadata, the `use Accrue.Billable` macro makes any host schema billable, and a scoped raw-body webhook pipeline verifies signatures, deduplicates on `UNIQUE(processor_event_id)`, and enqueues Oban jobs transactionally — all driven end-to-end through the Fake processor without any lattice_stripe 0.3 dependency.
+**Goal**: All Billing schemas exist as polymorphic Ecto modules with `data` jsonb + deep-merge metadata, the `use Accrue.Billable` macro makes any host schema billable, and a scoped raw-body webhook pipeline verifies signatures, deduplicates on `UNIQUE(processor_event_id)`, and enqueues Oban jobs transactionally — all driven end-to-end through the Fake processor without any lattice_stripe Billing dependency.
 **Depends on**: Phase 1
 **Requirements**: BILL-01, BILL-02, PROC-04, PROC-06, WH-01, WH-02, WH-03, WH-04, WH-05, WH-06, WH-07, WH-10, WH-11, WH-12, WH-14, EVT-04, TEST-09
 **Success Criteria** (what must be TRUE):
@@ -71,7 +63,7 @@ Plans:
 
 ### Phase 3: Core Subscription Lifecycle
 **Goal**: A full Stripe subscription can be created, swapped (with explicit proration), paused, resumed, canceled-at-period-end, canceled-now, and trial-managed end-to-end against real Stripe via `lattice_stripe` 0.3 — with invoice state machine, charge/PaymentIntent/SetupIntent tagged returns for 3DS/SCA, payment method management with fingerprint dedup, and fee-aware refunds.
-**Depends on**: Phase 2, **external Phase 0** (lattice_stripe 0.3 Billing)
+**Depends on**: Phase 2
 **Requirements**: PROC-02, BILL-03, BILL-04, BILL-05, BILL-06, BILL-07, BILL-08, BILL-09, BILL-10, BILL-17, BILL-18, BILL-19, BILL-20, BILL-21, BILL-22, BILL-23, BILL-24, BILL-25, BILL-26, WH-09, TEST-08
 **Success Criteria** (what must be TRUE):
   1. A developer can call `MyApp.Billing.subscribe(user, price_id)` and observe a `trialing → active` transition, then call `swap_plan(subscription, new_price, proration: :create_prorations)` and see the correct prorated line items — with the `:proration` option **always explicit**, never inherited from a Stripe default.
@@ -94,6 +86,7 @@ Plans:
   4. `Accrue.Events.timeline_for(subject)` returns the full append-only history for any subject, `state_as_of(subject, ts)` replays state at a past timestamp using upcasters for older `schema_version` entries, and `bucket_by/3` aggregates events by day/week/month for analytics.
   5. A developer can create a Stripe Checkout Session via `Accrue.Checkout.Session.create/2` and a Customer Portal Session with a sane default portal config that prevents "cancel without dunning" footguns — both return URLs that round-trip through Stripe test mode.
   6. A coupon or promotion code applied at subscription, invoice, or Checkout level produces the correct discounted total and a `coupon_applied` event in the ledger.
+**Residual lattice_stripe gaps:** BillingMeter/MeterEvent (blocks BILL-11 metered billing) and BillingPortal.Session (blocks CHKT-02 Customer Portal) are not in lattice_stripe 1.0 — decision at Phase 4 planning: upstream contribution vs in-tree %LatticeStripe.Request{} fallback. Upstream work is in-flight in a parallel lattice_stripe session targeting 1.1 release.
 **Plans**: TBD
 **UI hint**: no
 
@@ -167,13 +160,13 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. Phase 3 blocks on external Phase 0 (lattice_stripe 0.3) landing.
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations | 0/TBD | Not started | - |
 | 2. Schemas + Webhook Plumbing | 0/6 | Planned | - |
-| 3. Core Subscription Lifecycle | 0/TBD | Blocked on lattice_stripe 0.3 | - |
+| 3. Core Subscription Lifecycle | 0/TBD | Not started | - |
 | 4. Advanced Billing + Webhook Hardening | 0/TBD | Not started | - |
 | 5. Connect | 0/TBD | Not started | - |
 | 6. Email + PDF | 0/TBD | Not started | - |
