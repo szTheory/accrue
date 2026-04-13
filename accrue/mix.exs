@@ -45,7 +45,7 @@ defmodule Accrue.MixProject do
       {:ecto_sql, "~> 3.13"},
       {:postgrex, "~> 0.22"},
       {:ex_money, "~> 5.24"},
-      {:lattice_stripe, "~> 0.2"},
+      {:lattice_stripe, "~> 1.0"},
       {:oban, "~> 2.21"},
       {:swoosh, "~> 1.25"},
       {:phoenix_swoosh, "~> 1.2"},
