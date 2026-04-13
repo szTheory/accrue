@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 context gathered
-last_updated: "2026-04-12T04:13:15.340Z"
-last_activity: 2026-04-12 -- Phase 02 execution started
+last_updated: "2026-04-13T18:20:00.000Z"
+last_activity: 2026-04-13 -- Completed quick task 260413-jri: bump lattice_stripe to ~> 1.0, Phase 3 unblocked
 progress:
   total_phases: 9
   completed_phases: 1
@@ -59,7 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 
 Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affecting current work:
 
-- [Roadmap]: 9-phase topological structure; Phase 1 can start in parallel with external Phase 0 (lattice_stripe 0.3)
+- [Roadmap]: 9-phase topological structure; topological execution 1→9
 - [Roadmap]: Fake Processor is primary test surface from Phase 1, not a test-layer afterthought
 - [Roadmap]: Money value type lands in Phase 1 so no schema is built with bare-integer amounts
 - [Roadmap]: Gift cards (BILL-086, MAIL-gift) deferred to v2, not in v1 scope
@@ -71,9 +71,15 @@ None yet.
 
 ### Blockers/Concerns
 
-- **External Phase 0 (lattice_stripe 0.3 Billing):** Phase 3 onward requires lattice_stripe to add Subscription/Invoice/Price/Product/Meter resources. Phases 1 and 2 can proceed immediately in parallel against the Fake processor. Decision point at Phase 2→3 transition: upstream contribution (preferred) vs in-tree fallback `%LatticeStripe.Request{}` modules.
 - **Release Please v4 monorepo output naming:** verify via dry-run before Phase 9 release work.
 - **ChromicPDF on minimal Alpine containers:** needs real-world container testing in Phase 6; PDF.Null adapter is the escape hatch.
+- **lattice_stripe 1.1 (BillingMeter/MeterEvent/BillingPortal.Session):** Required for Phase 4 requirements BILL-11 (metered billing) and CHKT-02 (Customer Portal). Upstream work is in-flight in a parallel session targeting 1.1 release. Does NOT block Phase 3 or the rest of Phase 4.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260413-jri | Bump lattice_stripe to ~> 1.0 and unblock Phase 3 | 2026-04-13 | 52bec8e | [260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p](./quick/260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p/) |
 
 ## Session Continuity
 
