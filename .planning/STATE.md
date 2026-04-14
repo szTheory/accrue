@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-04-14T18:04:39.590Z"
+status: verifying
+stopped_at: Completed 03-08-PLAN.md
+last_updated: "2026-04-14T18:14:23.038Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 20
-  completed_plans: 19
-  percent: 95
+  completed_plans: 20
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 Phase: 03 (core-subscription-lifecycle) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░] 0%
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P05 | 12m | 2 tasks | 5 files |
 | Phase 03 P06 | 25m | 3 tasks | 10 files |
 | Phase 03-core-subscription-lifecycle P07 | 12m | 3 tasks | 12 files |
+| Phase 03 P08 | 15m | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 03]: DefaultHandler ships dual entry points: handle/1 (raw map for Fake.synthesize_event) + handle_event/3 (Dispatch worker) sharing one dispatch/4
 - [Phase 03]: DetectExpiringCards dedup via events table fragment (?->>'threshold')::int — no new dedup column on payment_methods
 - [Phase 03]: LiveView on_mount hook for operation_id deferred to accrue_admin — LiveView is hard dep only there
+- [Phase 03-core-subscription-lifecycle]: Plan 08 factories insert Customer rows directly via changeset (not Billing.create_customer which takes a billable struct), matching existing Phase 04/05/06 test setup pattern
+- [Phase 03-core-subscription-lifecycle]: Plan 08 stub event schemas emit via top-level for-loop in schemas.ex file; Code.ensure_loaded!/1 required in tests before function_exported? check
 
 ### Pending Todos
 
@@ -114,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T18:04:28.345Z
-Stopped at: Completed 03-07-PLAN.md
+Last session: 2026-04-14T18:14:16.279Z
+Stopped at: Completed 03-08-PLAN.md
 Resume file: None
