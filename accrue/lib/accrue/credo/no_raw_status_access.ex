@@ -39,7 +39,7 @@ defmodule Accrue.Credo.NoRawStatusAccess do
 
   @stripe_statuses ~w(trialing active past_due canceled unpaid incomplete incomplete_expired paused)a
 
-  @exempt_module_prefixes ["Accrue.Billing.Subscription"]
+  @exempt_module_prefixes ["Accrue.Billing.Subscription", "Accrue.Billing.Query"]
 
   @impl true
   def run(%SourceFile{filename: filename} = source_file, params) do
