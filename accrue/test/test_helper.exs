@@ -29,4 +29,12 @@ Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
     notifier: Oban.Notifiers.PG
   )
 
+# Exclude live-Stripe and slow tags by default. Opt in via:
+#
+#     mix test --only live_stripe   # or `mix test.live`
+#     mix test --only slow
+#
+# See `accrue/test/live_stripe/` and `guides/testing-live-stripe.md`.
+ExUnit.configure(exclude: [:live_stripe, :slow])
+
 ExUnit.start()

@@ -90,7 +90,12 @@ defmodule Accrue.MixProject do
         "credo --strict",
         "compile --warnings-as-errors",
         "test"
-      ]
+      ],
+      # Opt-in live-Stripe fidelity suite. Gated on the `:live_stripe` tag,
+      # which is excluded by default in `test/test_helper.exs`. Individual
+      # test modules in `test/live_stripe/` are expected to skip cleanly in
+      # `setup_all` when `STRIPE_TEST_SECRET_KEY` is unset.
+      "test.live": ["test --only live_stripe"]
     ]
   end
 
