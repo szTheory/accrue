@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch: {}
+  schedule:
+    # Daily 06:00 UTC — runs the advisory live-stripe job only, not the
+    # default test matrix. See the `live-stripe` job below and
+    # `guides/testing-live-stripe.md`.
+    - cron: '0 6 * * *'
 
 jobs:
   test:
@@ -125,3 +131,70 @@ jobs:
 
       - name: Run Dialyzer
         run: cd accrue && mix dialyzer --format github
+
+  # ---------------------------------------------------------------------
+  # Advisory live-Stripe fidelity job (quick task 260414-l9q).
+  #
+  # Runs ONLY on manual workflow_dispatch and on the 06:00 UTC cron.
+  # Never runs on push or pull_request. `continue-on-error: true` makes
+  # it advisory so Stripe API flakes do not block main CI.
+  #
+  # Requires STRIPE_TEST_SECRET_KEY to be configured as a repository
+  # secret. Individual tests skip cleanly in setup_all when the secret
+  # is absent.
+  #
+  # See guides/testing-live-stripe.md for details.
+  # ---------------------------------------------------------------------
+  live-stripe:
+    name: Live Stripe (advisory)
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    continue-on-error: true
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+      ACCRUE_LIVE_BASIC_PRICE: ${{ secrets.ACCRUE_LIVE_BASIC_PRICE }}
+      ACCRUE_LIVE_PRO_PRICE: ${{ secrets.ACCRUE_LIVE_PRO_PRICE }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+
+      - name: Install deps
+        run: cd accrue && mix deps.get
+
+      - name: Compile
+        run: cd accrue && mix compile
+
+      - name: Create + migrate test DB
+        run: |
+          cd accrue
+          mix ecto.create
+          mix ecto.migrate
+
+      - name: Run live-Stripe suite
+        run: cd accrue && mix test.live
