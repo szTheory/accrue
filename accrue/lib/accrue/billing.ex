@@ -22,11 +22,92 @@ defmodule Accrue.Billing do
   """
 
   alias Accrue.Billing.Customer
+
+  alias Accrue.Billing.{
+    ChargeActions,
+    InvoiceActions,
+    PaymentMethodActions,
+    RefundActions,
+    SubscriptionActions
+  }
+
   alias Accrue.Events
   alias Accrue.Processor
   alias Accrue.Repo
 
   import Ecto.Query, only: [from: 2]
+
+  # ---------------------------------------------------------------------------
+  # Phase 3 write-surface facade (D3-03, D3-58)
+  #
+  # Every Phase 3 public function is declared here via `defdelegate`, pointing
+  # at a per-surface action module. Wave 2 plans (04/05/06) implement the real
+  # logic in those action modules and MUST NOT touch this file — that's how
+  # three parallel plans can run without colliding on billing.ex.
+  #
+  # `defdelegate` is resolved at runtime, so these compile even though the
+  # target modules are empty stubs at Plan 03-01 time. Calling any of these
+  # before Wave 2 lands will raise `UndefinedFunctionError` — that's fine,
+  # those calls only exist in Wave 2 tests.
+  # ---------------------------------------------------------------------------
+
+  # ── Subscription surface (Plan 04) ────────────────────────────────
+  defdelegate subscribe(user, price_id_or_opts \\ [], opts \\ []), to: SubscriptionActions
+  defdelegate subscribe!(user, price_id_or_opts \\ [], opts \\ []), to: SubscriptionActions
+  defdelegate get_subscription(id, opts \\ []), to: SubscriptionActions
+  defdelegate get_subscription!(id, opts \\ []), to: SubscriptionActions
+  defdelegate swap_plan(sub, new_price_id, opts), to: SubscriptionActions
+  defdelegate swap_plan!(sub, new_price_id, opts), to: SubscriptionActions
+  defdelegate cancel(sub, opts \\ []), to: SubscriptionActions
+  defdelegate cancel!(sub, opts \\ []), to: SubscriptionActions
+  defdelegate cancel_at_period_end(sub, opts \\ []), to: SubscriptionActions
+  defdelegate cancel_at_period_end!(sub, opts \\ []), to: SubscriptionActions
+  defdelegate resume(sub, opts \\ []), to: SubscriptionActions
+  defdelegate resume!(sub, opts \\ []), to: SubscriptionActions
+  defdelegate pause(sub, opts \\ []), to: SubscriptionActions
+  defdelegate pause!(sub, opts \\ []), to: SubscriptionActions
+  defdelegate unpause(sub, opts \\ []), to: SubscriptionActions
+  defdelegate unpause!(sub, opts \\ []), to: SubscriptionActions
+  defdelegate update_quantity(sub, quantity, opts \\ []), to: SubscriptionActions
+  defdelegate update_quantity!(sub, quantity, opts \\ []), to: SubscriptionActions
+  defdelegate preview_upcoming_invoice(sub_or_customer, opts \\ []), to: SubscriptionActions
+  defdelegate preview_upcoming_invoice!(sub_or_customer, opts \\ []), to: SubscriptionActions
+
+  # ── Invoice surface (Plan 05) ─────────────────────────────────────
+  defdelegate finalize_invoice(invoice, opts \\ []), to: InvoiceActions
+  defdelegate finalize_invoice!(invoice, opts \\ []), to: InvoiceActions
+  defdelegate void_invoice(invoice, opts \\ []), to: InvoiceActions
+  defdelegate void_invoice!(invoice, opts \\ []), to: InvoiceActions
+  defdelegate pay_invoice(invoice, opts \\ []), to: InvoiceActions
+  defdelegate pay_invoice!(invoice, opts \\ []), to: InvoiceActions
+  defdelegate mark_uncollectible(invoice, opts \\ []), to: InvoiceActions
+  defdelegate mark_uncollectible!(invoice, opts \\ []), to: InvoiceActions
+  defdelegate send_invoice(invoice, opts \\ []), to: InvoiceActions
+  defdelegate send_invoice!(invoice, opts \\ []), to: InvoiceActions
+
+  # ── Charge / PaymentIntent / SetupIntent surface (Plan 06) ────────
+  defdelegate charge(customer, amount_or_opts, opts \\ []), to: ChargeActions
+  defdelegate charge!(customer, amount_or_opts, opts \\ []), to: ChargeActions
+  defdelegate create_payment_intent(customer, opts \\ []), to: ChargeActions
+  defdelegate create_payment_intent!(customer, opts \\ []), to: ChargeActions
+  defdelegate create_setup_intent(customer, opts \\ []), to: ChargeActions
+  defdelegate create_setup_intent!(customer, opts \\ []), to: ChargeActions
+
+  # ── PaymentMethod surface (Plan 06) ───────────────────────────────
+  defdelegate attach_payment_method(customer, pm_id_or_opts, opts \\ []),
+    to: PaymentMethodActions
+
+  defdelegate attach_payment_method!(customer, pm_id_or_opts, opts \\ []),
+    to: PaymentMethodActions
+
+  defdelegate detach_payment_method(payment_method, opts \\ []), to: PaymentMethodActions
+  defdelegate detach_payment_method!(payment_method, opts \\ []), to: PaymentMethodActions
+  defdelegate set_default_payment_method(customer, pm_id, opts \\ []), to: PaymentMethodActions
+  defdelegate set_default_payment_method!(customer, pm_id, opts \\ []), to: PaymentMethodActions
+
+  # ── Refund surface (Plan 06) ──────────────────────────────────────
+  defdelegate create_refund(charge, opts \\ []), to: RefundActions
+  defdelegate create_refund!(charge, opts \\ []), to: RefundActions
 
   # ---------------------------------------------------------------------------
   # Customer — lazy fetch-or-create (D2-06)
