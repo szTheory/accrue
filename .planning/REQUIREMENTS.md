@@ -41,7 +41,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **BILL-10**: `preview_upcoming_invoice/2` for proration preview UX before swap commits
 - [ ] **BILL-11**: Pause/resume with `pause_behavior` option
 - [ ] **BILL-12**: Multi-item subscriptions (SubscriptionItem)
-- [ ] **BILL-13**: Metered billing via Stripe BillingMeters + MeterEvents
+- [x] **BILL-13**: Metered billing via Stripe BillingMeters + MeterEvents
 - [ ] **BILL-14**: Free-tier / comped subscriptions (no PaymentMethod required)
 - [ ] **BILL-15**: Dunning / grace period handling with `past_due` → `unpaid` transitions
 - [ ] **BILL-16**: Subscription Schedules for multi-phase intro pricing
@@ -320,7 +320,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-10 | Phase 3 | Complete |
 | BILL-11 | Phase 4 | Pending |
 | BILL-12 | Phase 4 | Pending |
-| BILL-13 | Phase 4 | Pending |
+| BILL-13 | Phase 4 | Complete |
 | BILL-14 | Phase 4 | Pending |
 | BILL-15 | Phase 4 | Pending |
 | BILL-16 | Phase 4 | Pending |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-04-14T21:21:38.403Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-04-14T21:35:52.272Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 28
-  completed_plans: 21
-  percent: 75
+  completed_plans: 22
+  percent: 79
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 04 (advanced-billing-webhook-hardening) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-core-subscription-lifecycle P07 | 12m | 3 tasks | 12 files |
 | Phase 03 P08 | 15m | 3 tasks | 16 files |
 | Phase 04 P01 | 22m | 3 tasks | 10 files |
+| Phase 04-advanced-billing-webhook-hardening P02 | 25m | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 04]: Phase 4 migration timestamps shifted 120xxx→130xxx due to Phase 3 collision
 - [Phase 04]: discount_minor column already existed from Phase 3 — Phase 4 adds only total_discount_amounts
 - [Phase 04]: Config @schema doc strings must avoid 'LatticeStripe' substring — facade lockdown test scans all lib/ files
+- [Phase 04]: Phase 04 P02: report_usage/3 pre-checks identifier outside Repo.transact to avoid in_failed_sql_transaction on unique index trip
+- [Phase 04]: Phase 04 P02: meter webhook reducer lives inline in DefaultHandler (matches Phase 3 shape, no webhook/handlers/ subdir)
 
 ### Pending Todos
 
@@ -122,6 +125,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T21:21:31.411Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-04-14T21:35:52.166Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
