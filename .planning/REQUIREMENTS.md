@@ -55,8 +55,8 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **BILL-24**: Expiring-card warnings surfaced via telemetry + events
 - [x] **BILL-25**: Default-payment-method management per customer
 - [x] **BILL-26**: `Accrue.Billing.Refund` with fee-aware schema (`stripe_fee_refunded_amount`, `merchant_loss_amount`)
-- [ ] **BILL-27**: `Accrue.Billing.Coupon` + `Accrue.Billing.PromotionCode` with customer-facing apply flow
-- [ ] **BILL-28**: Discount application at subscription, invoice, and checkout-session level
+- [x] **BILL-27**: `Accrue.Billing.Coupon` + `Accrue.Billing.PromotionCode` with customer-facing apply flow
+- [x] **BILL-28**: Discount application at subscription, invoice, and checkout-session level
 
 ### Checkout + Portal
 
@@ -334,8 +334,8 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-24 | Phase 3 | Complete |
 | BILL-25 | Phase 3 | Complete |
 | BILL-26 | Phase 3 | Complete |
-| BILL-27 | Phase 4 | Pending |
-| BILL-28 | Phase 4 | Pending |
+| BILL-27 | Phase 4 | Complete |
+| BILL-28 | Phase 4 | Complete |
 | CHKT-01 | Phase 4 | Pending |
 | CHKT-02 | Phase 4 | Pending |
 | CHKT-03 | Phase 4 | Pending |
