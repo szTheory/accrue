@@ -97,7 +97,7 @@ Plans:
   6. A coupon or promotion code applied at subscription, invoice, or Checkout level produces the correct discounted total and a `coupon_applied` event in the ledger.
 **Plans**: 8 plans
 Plans:
-- [ ] 04-01-PLAN.md — Wave 1: lattice_stripe 1.1 bump + Accrue.Config extensions (:dunning, :webhook_endpoints, DLQ keys) + 6 schema/alter migrations (accrue_meter_events, accrue_subscription_schedules, accrue_promotion_codes, subscription dunning/pause cols, invoice discount cols, events type index)
+- [x] 04-01-PLAN.md — Wave 1: lattice_stripe 1.1 bump + Accrue.Config extensions (:dunning, :webhook_endpoints, DLQ keys) + 6 schema/alter migrations (accrue_meter_events, accrue_subscription_schedules, accrue_promotion_codes, subscription dunning/pause cols, invoice discount cols, events type index)
 - [ ] 04-02-PLAN.md — Wave 2: Metered billing (BILL-13) — MeterEvent schema + report_usage/3 outbox pattern + Fake/Stripe processor + ReconcilerJob + billing.meter.error_report_triggered webhook
 - [ ] 04-03-PLAN.md — Wave 3: Advanced subscription surface (BILL-11 pause_behavior, BILL-12 multi-item, BILL-14 comp, BILL-16 SubscriptionSchedule) — schema + actions + webhook handlers
 - [ ] 04-04-PLAN.md — Wave 4: Dunning (BILL-15) — pure Dunning policy module + DunningSweeper Oban cron + dunning_exhaustion telemetry diff on webhook path

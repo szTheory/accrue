@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 03-08-PLAN.md
-last_updated: "2026-04-14T18:14:23.038Z"
+status: executing
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-04-14T21:21:38.403Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 3
-  total_plans: 20
-  completed_plans: 20
-  percent: 100
+  total_plans: 28
+  completed_plans: 21
+  percent: 75
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 03 — core-subscription-lifecycle
+**Current focus:** Phase 04 — advanced-billing-webhook-hardening
 
 ## Current Position
 
-Phase: 03 (core-subscription-lifecycle) — EXECUTING
-Plan: 8 of 8
-Status: Phase complete — ready for verification
-Last activity: 2026-04-14 - Completed quick task 260414-l9q: Automate Phase 3 human verification items
+Phase: 04 (advanced-billing-webhook-hardening) — EXECUTING
+Plan: 2 of 8
+Status: Ready to execute
+Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P06 | 25m | 3 tasks | 10 files |
 | Phase 03-core-subscription-lifecycle P07 | 12m | 3 tasks | 12 files |
 | Phase 03 P08 | 15m | 3 tasks | 16 files |
+| Phase 04 P01 | 22m | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 03]: LiveView on_mount hook for operation_id deferred to accrue_admin — LiveView is hard dep only there
 - [Phase 03-core-subscription-lifecycle]: Plan 08 factories insert Customer rows directly via changeset (not Billing.create_customer which takes a billable struct), matching existing Phase 04/05/06 test setup pattern
 - [Phase 03-core-subscription-lifecycle]: Plan 08 stub event schemas emit via top-level for-loop in schemas.ex file; Code.ensure_loaded!/1 required in tests before function_exported? check
+- [Phase 04]: Phase 4 migration timestamps shifted 120xxx→130xxx due to Phase 3 collision
+- [Phase 04]: discount_minor column already existed from Phase 3 — Phase 4 adds only total_discount_amounts
+- [Phase 04]: Config @schema doc strings must avoid 'LatticeStripe' substring — facade lockdown test scans all lib/ files
 
 ### Pending Todos
 
@@ -118,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T18:14:16.279Z
-Stopped at: Completed 03-08-PLAN.md
+Last session: 2026-04-14T21:21:31.411Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
