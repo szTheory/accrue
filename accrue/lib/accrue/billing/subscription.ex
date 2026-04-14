@@ -177,8 +177,21 @@ defmodule Accrue.Billing.Subscription do
   """
   @spec pending_intent(%__MODULE__{} | map()) :: map() | nil
   def pending_intent(%__MODULE__{data: data}) when is_map(data) do
-    get_in(data, ["latest_invoice", "payment_intent"])
+    # WR-02: dual-key lookup. Fake adapter returns atom-keyed maps,
+    # Stripe adapter returns string-keyed maps. Normalize here rather
+    # than forcing callers to know which shape they have.
+    fetch_key(data, [:latest_invoice, "latest_invoice"])
+    |> case do
+      %{} = inv -> fetch_key(inv, [:payment_intent, "payment_intent"])
+      _ -> nil
+    end
   end
 
   def pending_intent(_), do: nil
+
+  defp fetch_key(map, keys) when is_map(map) do
+    Enum.find_value(keys, fn k -> Map.get(map, k) end)
+  end
+
+  defp fetch_key(_, _), do: nil
 end

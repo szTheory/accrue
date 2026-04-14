@@ -23,8 +23,9 @@ defmodule Accrue.Billing.IntentResult do
   key shapes.
   """
 
+  alias Accrue.Billing.Charge
+  alias Accrue.Billing.Invoice
   alias Accrue.Billing.Subscription
-  alias Accrue.Billing.SubscriptionItem
 
   @type ok_value :: map() | struct()
   @type t ::
@@ -44,6 +45,31 @@ defmodule Accrue.Billing.IntentResult do
 
   def wrap({:ok, %Subscription{} = sub} = ok) do
     case sub_pending_intent(sub) do
+      %{} = pi ->
+        if requires_action?(pi), do: {:ok, :requires_action, pi}, else: ok
+
+      _ ->
+        ok
+    end
+  end
+
+  # WR-02: Invoice and Charge structs carry their canonical Stripe
+  # payload in `data`. Peek for an embedded `latest_invoice.payment_intent`
+  # (invoice) or `payment_intent` (charge) with requires_action and
+  # surface it to the caller — D3-07 `pay_invoice/2` needs this.
+  def wrap({:ok, %Invoice{data: data}} = ok) when is_map(data) do
+    case get_nested(data, [:payment_intent]) ||
+           get_nested(data, [:latest_invoice, :payment_intent]) do
+      %{} = pi ->
+        if requires_action?(pi), do: {:ok, :requires_action, pi}, else: ok
+
+      _ ->
+        ok
+    end
+  end
+
+  def wrap({:ok, %Charge{data: data}} = ok) when is_map(data) do
+    case get_nested(data, [:payment_intent]) do
       %{} = pi ->
         if requires_action?(pi), do: {:ok, :requires_action, pi}, else: ok
 
@@ -135,7 +161,4 @@ defmodule Accrue.Billing.IntentResult do
   end
 
   defp get_nested(_, _), do: nil
-
-  # Appease the compiler (unused alias is a warning-as-error)
-  _ = SubscriptionItem
 end

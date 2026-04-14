@@ -161,7 +161,12 @@ defmodule Accrue.Billing.ChargeActions do
           | {:error, term()}
   def create_payment_intent(params, opts \\ []) when is_map(params) do
     op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
-    idem_key = Idempotency.key(:create_payment_intent, op_id, op_id)
+    # WR-01: Pre-generate a deterministic subject_uuid (D3-60/61) —
+    # previously the idempotency key was keyed on (op_id, op_id), which
+    # collapsed two different PaymentIntents in the same operation to
+    # the same Stripe key.
+    subject_uuid = Idempotency.subject_uuid(:create_payment_intent, op_id)
+    idem_key = Idempotency.key(:create_payment_intent, subject_uuid, op_id)
 
     Processor.__impl__().create_payment_intent(
       params,
