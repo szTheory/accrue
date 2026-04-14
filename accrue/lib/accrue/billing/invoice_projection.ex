@@ -36,7 +36,7 @@ defmodule Accrue.Billing.InvoiceProjection do
       end
 
     invoice_attrs = %{
-      stripe_id: SubscriptionProjection.get(stripe_inv, :id),
+      processor_id: SubscriptionProjection.get(stripe_inv, :id),
       status: parse_status(SubscriptionProjection.get(stripe_inv, :status)),
       subtotal_minor: SubscriptionProjection.get(stripe_inv, :subtotal),
       tax_minor: SubscriptionProjection.get(stripe_inv, :tax),

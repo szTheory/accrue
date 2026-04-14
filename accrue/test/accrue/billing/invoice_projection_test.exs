@@ -26,6 +26,7 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
         })
 
       {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(inv)
+      assert attrs.processor_id == inv["id"]
       assert attrs.status == :open
       assert attrs.subtotal_minor == 1500
       assert attrs.total_minor == 1500
