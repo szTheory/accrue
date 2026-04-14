@@ -22,6 +22,8 @@ defmodule Accrue.Billing.Coupon do
     field :processor_id, :string
     field :name, :string
     field :amount_off_cents, :integer
+    field :amount_off_minor, :integer
+    field :redeem_by, :utc_datetime_usec
     field :percent_off, :decimal
     field :currency, :string
     field :duration, :string
@@ -37,7 +39,8 @@ defmodule Accrue.Billing.Coupon do
   end
 
   @cast_fields ~w[
-    processor processor_id name amount_off_cents percent_off
+    processor processor_id name amount_off_cents amount_off_minor
+    redeem_by percent_off
     currency duration duration_in_months max_redemptions
     times_redeemed valid metadata data lock_version
   ]a

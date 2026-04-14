@@ -24,6 +24,13 @@ defmodule Accrue.Billing.Customer do
   All writes use `Ecto.Changeset.optimistic_lock/2` on `lock_version`
   to prevent torn writes when a user update and webhook reconcile race
   on the same customer (D2-09).
+
+  ## Phase 3 additions
+
+    * `default_payment_method_id` — FK to accrue_payment_methods with
+      `ON DELETE SET NULL`. Set via `set_default_payment_method/2`
+      (Plan 06), which asserts attachment before updating.
+    * `last_stripe_event_ts` / `last_stripe_event_id` — webhook watermark
   """
 
   use Ecto.Schema
@@ -42,9 +49,13 @@ defmodule Accrue.Billing.Customer do
     field :processor_id, :string
     field :name, :string
     field :email, :string
+    field :last_stripe_event_ts, :utc_datetime_usec
+    field :last_stripe_event_id, :string
     field :metadata, :map, default: %{}
     field :data, :map, default: %{}
     field :lock_version, :integer, default: 1
+
+    belongs_to :default_payment_method, Accrue.Billing.PaymentMethod, type: :binary_id
 
     has_many :payment_methods, Accrue.Billing.PaymentMethod
     has_many :subscriptions, Accrue.Billing.Subscription
@@ -56,7 +67,9 @@ defmodule Accrue.Billing.Customer do
 
   @cast_fields ~w[
     owner_type owner_id processor processor_id
-    name email metadata data lock_version
+    name email default_payment_method_id
+    last_stripe_event_ts last_stripe_event_id
+    metadata data lock_version
   ]a
 
   @required_fields ~w[owner_type owner_id processor]a
@@ -74,6 +87,7 @@ defmodule Accrue.Billing.Customer do
     |> validate_required(@required_fields)
     |> Metadata.validate_metadata(:metadata)
     |> optimistic_lock(:lock_version)
+    |> foreign_key_constraint(:default_payment_method_id)
     |> unique_constraint(:owner_id,
       name: :accrue_customers_owner_type_owner_id_processor_index
     )

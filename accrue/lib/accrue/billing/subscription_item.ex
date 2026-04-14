@@ -3,9 +3,8 @@ defmodule Accrue.Billing.SubscriptionItem do
   Ecto schema for the `accrue_subscription_items` table.
 
   Represents a single line item within a subscription (e.g. a specific
-  price/plan and quantity). Maps to Stripe `si_xxx`.
-
-  Full lifecycle changesets arrive in Phase 3.
+  price/plan and quantity). Maps to Stripe `si_xxx`. Phase 3 adds the
+  processor plan/product refs and per-item period bounds per D3-31.
   """
 
   use Ecto.Schema
@@ -23,7 +22,13 @@ defmodule Accrue.Billing.SubscriptionItem do
     field :processor, :string
     field :processor_id, :string
     field :price_id, :string
+    field :processor_plan_id, :string
+    field :processor_product_id, :string
     field :quantity, :integer, default: 1
+    field :current_period_start, :utc_datetime_usec
+    field :current_period_end, :utc_datetime_usec
+    field :last_stripe_event_ts, :utc_datetime_usec
+    field :last_stripe_event_id, :string
     field :metadata, :map, default: %{}
     field :data, :map, default: %{}
     field :lock_version, :integer, default: 1
@@ -32,7 +37,10 @@ defmodule Accrue.Billing.SubscriptionItem do
   end
 
   @cast_fields ~w[
-    subscription_id processor processor_id price_id quantity
+    subscription_id processor processor_id price_id
+    processor_plan_id processor_product_id quantity
+    current_period_start current_period_end
+    last_stripe_event_ts last_stripe_event_id
     metadata data lock_version
   ]a
 
