@@ -142,6 +142,33 @@ defmodule Accrue.Config do
         "List of modules implementing `Accrue.Webhook.Handler` behaviour. " <>
           "Called sequentially after the default handler on each webhook event (D2-31). " <>
           "Example: `[MyApp.BillingHandler, MyApp.AnalyticsHandler]`."
+    ],
+
+    # --- Phase 3 subscription lifecycle ----------------------------------
+    expiring_card_thresholds: [
+      type: {:custom, __MODULE__, :validate_descending, []},
+      default: [30, 7, 1],
+      doc:
+        "Strictly-descending list of day thresholds at which the expiring-card " <>
+          "reminder email fires ahead of a stored card's expiration (D3-11). " <>
+          "Default: `[30, 7, 1]` — 30, 7, and 1 days out."
+    ],
+    idempotency_mode: [
+      type: {:in, [:warn, :strict]},
+      default: :warn,
+      doc:
+        "How `Accrue.Actor.current_operation_id!/0` behaves when the process " <>
+          "dict has no operation_id (D3-63). `:strict` raises `Accrue.ConfigError`; " <>
+          "`:warn` (the default) generates a random UUID and logs a warning. " <>
+          "Set to `:strict` in production to ensure every outbound processor " <>
+          "call carries a deterministic idempotency key."
+    ],
+    succeeded_refund_retention_days: [
+      type: :pos_integer,
+      default: 90,
+      doc:
+        "Number of days to retain `:succeeded` refund records before pruning " <>
+          "(D3-34). Default: 90."
     ]
   ]
 
@@ -276,6 +303,41 @@ defmodule Accrue.Config do
   """
   @spec stripe_api_version() :: String.t()
   def stripe_api_version, do: get!(:stripe_api_version)
+
+  # --- custom validators (referenced by @schema) -----------------------
+
+  @doc """
+  NimbleOptions `:custom` validator for `:expiring_card_thresholds`.
+
+  Accepts a non-empty list of positive integers that is strictly
+  descending (each element strictly less than the previous). Returns
+  `{:ok, list}` on success, `{:error, message}` on failure.
+  """
+  @spec validate_descending(term()) :: {:ok, [pos_integer()]} | {:error, String.t()}
+  def validate_descending(list) when is_list(list) and list != [] do
+    cond do
+      not Enum.all?(list, &(is_integer(&1) and &1 > 0)) ->
+        {:error,
+         "expected a list of positive integers, got: #{inspect(list)}"}
+
+      not strictly_descending?(list) ->
+        {:error,
+         "expected a strictly descending list of positive integers, got: #{inspect(list)}"}
+
+      true ->
+        {:ok, list}
+    end
+  end
+
+  def validate_descending(other) do
+    {:error, "expected a non-empty list of positive integers, got: #{inspect(other)}"}
+  end
+
+  defp strictly_descending?([_]), do: true
+
+  defp strictly_descending?([a, b | rest]) when a > b, do: strictly_descending?([b | rest])
+
+  defp strictly_descending?(_), do: false
 
   # --- internals --------------------------------------------------------
 

@@ -93,6 +93,15 @@ defmodule Accrue.Processor.Fake do
   end
 
   @doc """
+  Alias of `current_time/0` — the canonical name used by `Accrue.Clock`
+  when the runtime env is `:test` (D3-86). Kept as a thin wrapper so
+  callers don't have to remember to pass a server argument, and so the
+  grep pattern `Fake.now` is stable across the codebase.
+  """
+  @spec now() :: DateTime.t()
+  def now, do: current_time(__MODULE__)
+
+  @doc """
   Overrides one behaviour callback with a custom function for the lifetime
   of the GenServer (until `reset/0`). Intended for per-test stubbing.
   """

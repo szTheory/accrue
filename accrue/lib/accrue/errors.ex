@@ -102,3 +102,89 @@ defmodule Accrue.ConfigError do
   def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
   def message(%__MODULE__{key: key}), do: "missing accrue config key: #{inspect(key)}"
 end
+
+defmodule Accrue.Error.MultiItemSubscription do
+  @moduledoc """
+  Raised when a Phase 3 convenience call (e.g., `update_quantity/3`) is
+  made against a subscription that has more than one `SubscriptionItem`.
+  Multi-item subscriptions are a Phase 4 concern; Phase 3 enforces the
+  single-item invariant and points callers at the Phase 4 surface.
+  """
+  defexception [:subscription_id, :item_count, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{subscription_id: sub_id, item_count: count}) do
+    "subscription #{inspect(sub_id)} has #{count} items; " <>
+      "use Accrue.Billing.update_items/3 (Phase 4) for multi-item subscriptions"
+  end
+end
+
+defmodule Accrue.Error.InvalidState do
+  @moduledoc """
+  Raised when a state-machine transition is attempted from an illegal
+  source state (e.g., `pay_invoice/2` on a `:void` invoice, `resume/2`
+  on an `:active` subscription).
+  """
+  defexception [:current, :attempted, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{current: current, attempted: attempted}) do
+    "invalid state transition: cannot #{inspect(attempted)} from #{inspect(current)}"
+  end
+end
+
+defmodule Accrue.Error.NotAttached do
+  @moduledoc """
+  Raised when a payment method is referenced for a customer it is not
+  attached to (e.g., `set_default_payment_method/3` with a `pm_id` that
+  belongs to a different customer).
+  """
+  defexception [:customer_id, :payment_method_id, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{customer_id: cus_id, payment_method_id: pm_id}) do
+    "payment method #{inspect(pm_id)} is not attached to customer #{inspect(cus_id)}"
+  end
+end
+
+defmodule Accrue.Error.NoDefaultPaymentMethod do
+  @moduledoc """
+  Raised when a charge or subscription call requires a default payment
+  method and the customer has none set. Callers should surface a
+  user-facing "add a payment method" prompt.
+  """
+  defexception [:customer_id, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{customer_id: cus_id}) do
+    "customer #{inspect(cus_id)} has no default payment method"
+  end
+end
+
+defmodule Accrue.ActionRequiredError do
+  @moduledoc """
+  Raised when a Stripe PaymentIntent or SetupIntent transitions to
+  `requires_action` (SCA / 3DS). The `:payment_intent` field carries the
+  full PaymentIntent payload so callers can extract `client_secret` and
+  drive the Stripe.js confirmation flow on the frontend.
+
+  This is a distinct exception from `Accrue.CardError` because it is NOT
+  a failure — the charge is still recoverable, it just needs the
+  customer to complete an authentication step.
+  """
+  defexception [:payment_intent, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{}),
+    do: "Stripe requires customer action (SCA/3DS); inspect :payment_intent"
+end

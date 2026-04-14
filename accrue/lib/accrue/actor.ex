@@ -98,6 +98,46 @@ defmodule Accrue.Actor do
   end
 
   @doc """
+  Raising variant of `current_operation_id/0`.
+
+  Behaviour depends on `:idempotency_mode` (D3-63):
+
+    * `:strict` — raises `Accrue.ConfigError` with a message pointing at
+      `Accrue.Plug.PutOperationId` or the `:operation_id` call option.
+    * Any other value (default `:warn`) — generates a random UUID via
+      `Ecto.UUID.generate/0`, logs a `Logger.warning/1`, and returns it.
+      The generated value is NOT written back to the process dict so
+      the warning fires on every call until the caller wires a real ID.
+  """
+  @spec current_operation_id!() :: String.t()
+  def current_operation_id! do
+    case Process.get(:accrue_operation_id) do
+      nil ->
+        case Accrue.Config.get!(:idempotency_mode) do
+          :strict ->
+            raise Accrue.ConfigError,
+              key: :idempotency_mode,
+              message:
+                "no operation_id in process dict; wire Accrue.Plug.PutOperationId or pass opts[:operation_id]"
+
+          _ ->
+            id = Ecto.UUID.generate()
+            require Logger
+
+            Logger.warning(
+              "accrue: no operation_id — generated random #{id}; " <>
+                "wire Accrue.Plug.PutOperationId for deterministic idempotency keys"
+            )
+
+            id
+        end
+
+      id ->
+        id
+    end
+  end
+
+  @doc """
   Returns the fixed actor-type enum. Useful for downstream validation.
   """
   @spec types() :: [actor_type()]
