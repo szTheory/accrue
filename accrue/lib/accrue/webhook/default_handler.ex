@@ -163,7 +163,61 @@ defmodule Accrue.Webhook.DefaultHandler do
     reduce_payment_method(action, evt_id, evt_ts, obj)
   end
 
+  # Phase 4 Plan 02 — metered billing error report (BILL-13, Pitfall 5).
+  defp dispatch("v1.billing.meter.error_report_triggered", evt_id, _evt_ts, obj) do
+    reduce_meter_error_report(evt_id, obj)
+  end
+
+  defp dispatch("billing.meter.error_report_triggered", evt_id, _evt_ts, obj) do
+    reduce_meter_error_report(evt_id, obj)
+  end
+
   defp dispatch(_type, _evt_id, _evt_ts, _obj), do: {:ok, :ignored}
+
+  # ---------------------------------------------------------------------
+  # Meter error report reducer (Phase 4 Plan 02, BILL-13)
+  # ---------------------------------------------------------------------
+
+  defp reduce_meter_error_report(evt_id, obj) do
+    identifier = extract_meter_identifier(obj)
+
+    case Accrue.Billing.MeterEvents.mark_failed_by_identifier(identifier, obj) do
+      {:ok, row} ->
+        :telemetry.execute(
+          [:accrue, :ops, :meter_reporting_failed],
+          %{count: 1},
+          %{
+            meter_event_id: row.id,
+            event_name: row.event_name,
+            source: :webhook,
+            webhook_event_id: evt_id
+          }
+        )
+
+        {:ok, row}
+
+      {:error, :not_found} ->
+        Logger.warning(
+          "meter error report for unknown identifier: #{inspect(identifier)} " <>
+            "(event #{inspect(evt_id)})"
+        )
+
+        {:ok, :ignored}
+    end
+  end
+
+  defp extract_meter_identifier(obj) do
+    case get(obj, :identifier) do
+      nil ->
+        case get(obj, :reason) do
+          %{} = reason -> get(reason, :identifier)
+          _ -> nil
+        end
+
+      id when is_binary(id) ->
+        id
+    end
+  end
 
   # ---------------------------------------------------------------------
   # Subscription reducer

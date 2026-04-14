@@ -7,8 +7,8 @@ defmodule Accrue.Billing.MeterEvent do
 
     * `pending` — inserted inside `Repo.transact/2`, committed before
       Stripe is ever called.
-    * `reported` — set after a successful
-      `LatticeStripe.Billing.MeterEvent.create/3` (or Fake equivalent).
+    * `reported` — set after a successful processor call via the
+      `Accrue.Processor.report_meter_event/1` callback.
       `reported_at` is stamped.
     * `failed` — set either synchronously (when the first Stripe call
       returns `{:error, _}`) or asynchronously (when Stripe emits a
