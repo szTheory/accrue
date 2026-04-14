@@ -22,6 +22,8 @@ defmodule Accrue.Processor.Fake.State do
           charges: %{optional(id()) => map()},
           refunds: %{optional(id()) => map()},
           meter_events: %{optional(id()) => map()},
+          coupons: %{optional(id()) => map()},
+          promotion_codes: %{optional(id()) => map()},
           counters: %{
             customer: non_neg_integer(),
             subscription: non_neg_integer(),
@@ -33,6 +35,8 @@ defmodule Accrue.Processor.Fake.State do
             payment_method: non_neg_integer(),
             charge: non_neg_integer(),
             refund: non_neg_integer(),
+            coupon: non_neg_integer(),
+            promotion_code: non_neg_integer(),
             event: non_neg_integer()
           },
           clock: DateTime.t(),
@@ -54,6 +58,8 @@ defmodule Accrue.Processor.Fake.State do
             charges: %{},
             refunds: %{},
             meter_events: %{},
+            coupons: %{},
+            promotion_codes: %{},
             counters: %{
               customer: 0,
               subscription: 0,
@@ -65,6 +71,8 @@ defmodule Accrue.Processor.Fake.State do
               payment_method: 0,
               charge: 0,
               refund: 0,
+              coupon: 0,
+              promotion_code: 0,
               event: 0
             },
             clock: @epoch,

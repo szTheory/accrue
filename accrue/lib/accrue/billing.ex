@@ -25,6 +25,7 @@ defmodule Accrue.Billing do
 
   alias Accrue.Billing.{
     ChargeActions,
+    CouponActions,
     InvoiceActions,
     MeterEventActions,
     PaymentMethodActions,
@@ -140,6 +141,14 @@ defmodule Accrue.Billing do
   # ── Metered billing surface (Phase 4 Plan 02, BILL-13) ────────────
   defdelegate report_usage(customer, event_name, opts \\ []), to: MeterEventActions
   defdelegate report_usage!(customer, event_name, opts \\ []), to: MeterEventActions
+
+  # ── Coupons + promotion codes (Phase 4 Plan 05, BILL-27/28) ───────
+  defdelegate create_coupon(params, opts \\ []), to: CouponActions
+  defdelegate create_coupon!(params, opts \\ []), to: CouponActions
+  defdelegate create_promotion_code(params, opts \\ []), to: CouponActions
+  defdelegate create_promotion_code!(params, opts \\ []), to: CouponActions
+  defdelegate apply_promotion_code(sub, code, opts \\ []), to: CouponActions
+  defdelegate apply_promotion_code!(sub, code, opts \\ []), to: CouponActions
 
   # ---------------------------------------------------------------------------
   # Customer — lazy fetch-or-create (D2-06)

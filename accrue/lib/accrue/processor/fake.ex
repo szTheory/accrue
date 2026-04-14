@@ -75,6 +75,8 @@ defmodule Accrue.Processor.Fake do
   @meter_event_prefix "mev_fake_"
   @subscription_item_prefix "si_fake_"
   @subscription_schedule_prefix "sub_sched_fake_"
+  @coupon_prefix "coupon_fake_"
+  @promotion_code_prefix "promo_fake_"
 
   # ---------------------------------------------------------------------------
   # Public API — lifecycle
@@ -477,6 +479,30 @@ defmodule Accrue.Processor.Fake do
   @impl Accrue.Processor
   def subscription_schedule_fetch(id, opts \\ []) when is_binary(id) and is_list(opts) do
     GenServer.call(__MODULE__, {:subscription_schedule_fetch, id, opts})
+  end
+
+  # ---------------------------------------------------------------------------
+  # Behaviour callbacks — coupons + promotion codes (Phase 4 Plan 05)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def coupon_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:coupon_create, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def coupon_retrieve(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:coupon_retrieve, id, opts})
+  end
+
+  @impl Accrue.Processor
+  def promotion_code_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:promotion_code_create, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def promotion_code_retrieve(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:promotion_code_retrieve, id, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -1186,6 +1212,99 @@ defmodule Accrue.Processor.Fake do
   def handle_call({:subscription_schedule_fetch, id, opts}, _from, state) do
     with_script_or_stub(state, :subscription_schedule_fetch, [id, opts], fn state ->
       lookup(state.subscription_schedules, id, state)
+    end)
+  end
+
+  # --- coupons + promotion codes (Phase 4 Plan 05, BILL-27) ---
+
+  def handle_call({:coupon_create, params, opts}, _from, state) do
+    with_script_or_stub(state, :coupon_create, [params, opts], fn state ->
+      idem_key = Keyword.get(opts, :idempotency_key)
+
+      case idempotency_hit(state, idem_key) do
+        {:hit, cached} ->
+          {cached, state}
+
+        :miss ->
+          counter = (state.counters[:coupon] || 0) + 1
+          counters = Map.put(state.counters, :coupon, counter)
+          state = %{state | counters: counters}
+
+          # Honor caller-supplied id (Stripe allows custom coupon ids).
+          id =
+            params[:id] || params["id"] ||
+              @coupon_prefix <> pad5(counter)
+
+          coupon =
+            params
+            |> atomize()
+            |> Map.put(:id, id)
+            |> Map.put(:object, "coupon")
+            |> Map.put(:created, DateTime.to_unix(state.clock))
+            |> Map.put_new(:valid, true)
+            |> Map.put_new(:times_redeemed, 0)
+
+          result = {:ok, coupon}
+          state = %{state | coupons: Map.put(state.coupons, id, coupon)}
+          state = cache_idempotency(state, idem_key, result)
+          {result, state}
+      end
+    end)
+  end
+
+  def handle_call({:coupon_retrieve, id, opts}, _from, state) do
+    with_script_or_stub(state, :coupon_retrieve, [id, opts], fn state ->
+      lookup(state.coupons, id, state)
+    end)
+  end
+
+  def handle_call({:promotion_code_create, params, opts}, _from, state) do
+    with_script_or_stub(state, :promotion_code_create, [params, opts], fn state ->
+      idem_key = Keyword.get(opts, :idempotency_key)
+
+      case idempotency_hit(state, idem_key) do
+        {:hit, cached} ->
+          {cached, state}
+
+        :miss ->
+          counter = (state.counters[:promotion_code] || 0) + 1
+          counters = Map.put(state.counters, :promotion_code, counter)
+          state = %{state | counters: counters}
+          id = @promotion_code_prefix <> pad5(counter)
+
+          coupon_ref = params[:coupon] || params["coupon"]
+
+          coupon_obj =
+            case coupon_ref do
+              nil -> nil
+              ref when is_binary(ref) -> Map.get(state.coupons, ref) || %{id: ref, object: "coupon"}
+              %{} = m -> m
+            end
+
+          code = params[:code] || params["code"]
+
+          promo =
+            params
+            |> atomize()
+            |> Map.put(:id, id)
+            |> Map.put(:object, "promotion_code")
+            |> Map.put(:code, code)
+            |> Map.put(:coupon, coupon_obj)
+            |> Map.put(:created, DateTime.to_unix(state.clock))
+            |> Map.put_new(:active, true)
+            |> Map.put_new(:times_redeemed, 0)
+
+          result = {:ok, promo}
+          state = %{state | promotion_codes: Map.put(state.promotion_codes, id, promo)}
+          state = cache_idempotency(state, idem_key, result)
+          {result, state}
+      end
+    end)
+  end
+
+  def handle_call({:promotion_code_retrieve, id, opts}, _from, state) do
+    with_script_or_stub(state, :promotion_code_retrieve, [id, opts], fn state ->
+      lookup(state.promotion_codes, id, state)
     end)
   end
 

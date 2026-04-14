@@ -179,6 +179,15 @@ defmodule Accrue.Processor do
   @callback subscription_schedule_fetch(id(), opts()) :: result()
 
   # ---------------------------------------------------------------------------
+  # Coupons + Promotion Codes (Phase 4 Plan 05, BILL-27)
+  # ---------------------------------------------------------------------------
+
+  @callback coupon_create(params(), opts()) :: result()
+  @callback coupon_retrieve(id(), opts()) :: result()
+  @callback promotion_code_create(params(), opts()) :: result()
+  @callback promotion_code_retrieve(id(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
   # Phase 1 facade dispatch
   # ---------------------------------------------------------------------------
 

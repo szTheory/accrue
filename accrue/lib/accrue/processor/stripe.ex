@@ -637,6 +637,48 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
+  # Coupons + Promotion Codes (Phase 4 Plan 05, BILL-27)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def coupon_create(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:coupon_create, subject_of(params, "coupon"), opts)
+
+    client
+    |> LatticeStripe.Coupon.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def coupon_retrieve(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.Coupon.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def promotion_code_create(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:promotion_code_create, subject_of(params, "promo"), opts)
+
+    client
+    |> LatticeStripe.PromotionCode.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def promotion_code_retrieve(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.PromotionCode.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
   # fetch/2 — generic refetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
 

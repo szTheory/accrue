@@ -285,6 +285,51 @@ defmodule Accrue.Test.StripeFixtures do
     deep_merge(base, overrides)
   end
 
+  @spec coupon_created(map()) :: map()
+  def coupon_created(overrides \\ %{}) do
+    base = %{
+      "id" => "coupon_test_" <> rand(),
+      "object" => "coupon",
+      "percent_off" => 25,
+      "duration" => "once",
+      "valid" => true,
+      "times_redeemed" => 0,
+      "created" => DateTime.to_unix(DateTime.utc_now()),
+      "metadata" => %{}
+    }
+
+    deep_merge(base, overrides)
+  end
+
+  @spec promotion_code_created(map()) :: map()
+  def promotion_code_created(overrides \\ %{}) do
+    base = %{
+      "id" => "promo_test_" <> rand(),
+      "object" => "promotion_code",
+      "code" => "SAVE10",
+      "active" => true,
+      "times_redeemed" => 0,
+      "max_redemptions" => nil,
+      "expires_at" => nil,
+      "coupon" => coupon_created(),
+      "created" => DateTime.to_unix(DateTime.utc_now()),
+      "metadata" => %{}
+    }
+
+    deep_merge(base, overrides)
+  end
+
+  @spec invoice_with_discounts(map()) :: map()
+  def invoice_with_discounts(overrides \\ %{}) do
+    discount_line = %{
+      "amount" => 500,
+      "discount" => "di_test_" <> rand()
+    }
+
+    invoice(%{"total_discount_amounts" => [discount_line], "discount" => %{"amount_off" => 500}})
+    |> deep_merge(overrides)
+  end
+
   @spec webhook_event(String.t(), map(), map()) :: map()
   def webhook_event(type, object_payload, overrides \\ %{})
       when is_binary(type) and is_map(object_payload) do
