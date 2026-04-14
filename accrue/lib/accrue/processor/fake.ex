@@ -583,7 +583,8 @@ defmodule Accrue.Processor.Fake do
     with_script_or_stub(state, :update_subscription, [id, params, opts], fn state ->
       case Map.fetch(state.subscriptions, id) do
         {:ok, existing} ->
-          updated = Map.merge(existing, params)
+          updated = apply_subscription_update(existing, params, id)
+
           {{:ok, updated},
            %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
 
@@ -699,13 +700,57 @@ defmodule Accrue.Processor.Fake do
 
   def handle_call({:create_invoice_preview, params, opts}, _from, state) do
     with_script_or_stub(state, :create_invoice_preview, [params, opts], fn state ->
+      customer = params[:customer] || params["customer"]
+      subscription = params[:subscription] || params["subscription"]
+
+      sub_details =
+        params[:subscription_details] || params["subscription_details"] || %{}
+
+      items = sub_details[:items] || sub_details["items"] || []
+
+      lines =
+        Enum.map(items, fn item ->
+          price = item[:price] || item["price"]
+
+          price_id =
+            cond do
+              is_binary(price) -> price
+              is_map(price) -> price[:id] || price["id"]
+              true -> nil
+            end
+
+          %{
+            id: "il_fake_" <> Integer.to_string(:erlang.phash2(price_id, 1_000_000)),
+            object: "line_item",
+            description: "Preview line for #{price_id}",
+            amount: 1000,
+            currency: "usd",
+            quantity: item[:quantity] || item["quantity"] || 1,
+            period: %{
+              start: DateTime.to_unix(state.clock),
+              end: DateTime.to_unix(DateTime.add(state.clock, 30 * 86_400, :second))
+            },
+            proration: false,
+            price: %{id: price_id, product: "prod_fake_#{price_id}"}
+          }
+        end)
+
+      subtotal = Enum.reduce(lines, 0, &(&1.amount + &2))
+
       preview = %{
         object: "invoice",
         id: nil,
-        customer: params[:customer] || params["customer"],
-        subtotal: 0,
-        total: 0,
-        lines: %{data: []},
+        customer: customer,
+        subscription: subscription,
+        currency: "usd",
+        subtotal: subtotal,
+        total: subtotal,
+        amount_due: subtotal,
+        starting_balance: 0,
+        period_start: DateTime.to_unix(state.clock),
+        period_end: DateTime.to_unix(DateTime.add(state.clock, 30 * 86_400, :second)),
+        subscription_proration_date: DateTime.to_unix(state.clock),
+        lines: %{object: "list", data: lines},
         created: state.clock
       }
 
@@ -1004,11 +1049,98 @@ defmodule Accrue.Processor.Fake do
 
   # --- fixture builders (kept inside lib/ to avoid test/support dep) ---
 
+  # Applies a subscription update map to the stored atom-keyed sub, with
+  # special-case handling for the `items` param (which arrives as a flat
+  # list of item patches like `[%{id: si_id, price: "price_pro"}]` and
+  # must merge into the nested `items.data` list).
+  defp apply_subscription_update(existing, params, sub_id) do
+    {item_patches, other_params} = Map.pop(params, :items)
+    {item_patches_str, other_params} = Map.pop(other_params, "items")
+
+    patches = item_patches || item_patches_str
+
+    merged = Map.merge(existing, other_params)
+
+    case patches do
+      nil ->
+        merged
+
+      list when is_list(list) ->
+        existing_items =
+          get_in(existing, [:items, :data]) || get_in(existing, ["items", "data"]) || []
+
+        new_data =
+          Enum.reduce(list, existing_items, fn patch, acc ->
+            apply_item_patch(acc, patch, sub_id, length(acc) + 1)
+          end)
+
+        Map.put(merged, :items, %{object: "list", data: new_data})
+    end
+  end
+
+  defp apply_item_patch(items, patch, sub_id, next_idx) do
+    patch_id = patch[:id] || patch["id"]
+
+    if patch_id do
+      {updated_list, matched?} =
+        Enum.map_reduce(items, false, fn item, acc ->
+          item_id = item[:id] || item["id"]
+
+          if item_id == patch_id do
+            {merge_item(item, patch), true}
+          else
+            {item, acc}
+          end
+        end)
+
+      if matched?,
+        do: updated_list,
+        else: items ++ [build_subscription_item(patch, sub_id, next_idx)]
+    else
+      items ++ [build_subscription_item(patch, sub_id, next_idx)]
+    end
+  end
+
+  defp merge_item(item, patch) do
+    new_price = patch[:price] || patch["price"]
+
+    updated_price =
+      case new_price do
+        nil -> item[:price] || item["price"]
+        p when is_binary(p) -> %{id: p, product: "prod_fake_" <> p}
+        %{} = p -> p
+      end
+
+    item
+    |> Map.merge(Map.drop(patch, [:price, "price"]))
+    |> Map.put(:price, updated_price)
+  end
+
   defp build_subscription(state, id, params) do
-    trial_end = params[:trial_end] || params["trial_end"]
-    status = if trial_end, do: :trialing, else: :active
+    trial_end_raw = params[:trial_end] || params["trial_end"]
+    status = if trial_end_raw, do: :trialing, else: :active
     customer = params[:customer] || params["customer"]
-    items = params[:items] || params["items"] || []
+    raw_items = params[:items] || params["items"] || []
+
+    items =
+      raw_items
+      |> Enum.with_index(1)
+      |> Enum.map(fn {item, idx} -> build_subscription_item(item, id, idx) end)
+
+    trial_start =
+      case trial_end_raw do
+        nil -> nil
+        _ -> DateTime.to_unix(state.clock)
+      end
+
+    trial_end =
+      case trial_end_raw do
+        nil -> nil
+        "now" -> DateTime.to_unix(state.clock)
+        n when is_integer(n) -> n
+        %DateTime{} = dt -> DateTime.to_unix(dt)
+        _ -> nil
+      end
 
     %{
       id: id,
@@ -1016,13 +1148,34 @@ defmodule Accrue.Processor.Fake do
       customer: customer,
       status: status,
       created: state.clock,
+      trial_start: trial_start,
       trial_end: trial_end,
       cancel_at_period_end: false,
       pause_collection: nil,
       current_period_start: DateTime.to_unix(state.clock),
       current_period_end: DateTime.to_unix(DateTime.add(state.clock, 30 * 86_400, :second)),
       items: %{object: "list", data: items},
-      latest_invoice: nil
+      latest_invoice: nil,
+      metadata: params[:metadata] || params["metadata"] || %{}
+    }
+  end
+
+  defp build_subscription_item(item, sub_id, idx) when is_map(item) do
+    price = item[:price] || item["price"]
+
+    price_map =
+      case price do
+        p when is_binary(p) -> %{id: p, product: "prod_fake_" <> p}
+        %{} = p -> p
+        nil -> %{id: nil, product: nil}
+      end
+
+    %{
+      id: item[:id] || item["id"] || sub_id <> "_item_" <> Integer.to_string(idx),
+      object: "subscription_item",
+      price: price_map,
+      quantity: item[:quantity] || item["quantity"] || 1,
+      metadata: item[:metadata] || item["metadata"] || %{}
     }
   end
 

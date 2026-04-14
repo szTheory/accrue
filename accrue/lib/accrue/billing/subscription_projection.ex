@@ -41,6 +41,14 @@ defmodule Accrue.Billing.SubscriptionProjection do
   def unix_to_dt(%DateTime{} = dt), do: dt
   def unix_to_dt(0), do: nil
   def unix_to_dt(n) when is_integer(n), do: DateTime.from_unix!(n)
+  # Fake adapter may echo back the literal "now" trial_end param; treat as Clock.utc_now.
+  def unix_to_dt("now"), do: Accrue.Clock.utc_now()
+  def unix_to_dt(str) when is_binary(str) do
+    case DateTime.from_iso8601(str) do
+      {:ok, dt, _} -> dt
+      _ -> nil
+    end
+  end
 
   defp parse_status(nil), do: :incomplete
 

@@ -86,6 +86,33 @@ defmodule Accrue.Repo do
     do: repo().transaction(multi_or_fun, opts)
 
   @doc """
+  Delegates to `c:Ecto.Repo.preload/3`. Used by Phase 3 Billing context
+  to hydrate associations after processor mutations.
+  """
+  @spec preload(struct() | [struct()], atom() | list(), keyword()) ::
+          struct() | [struct()]
+  def preload(struct_or_list, preloads, opts \\ []),
+    do: repo().preload(struct_or_list, preloads, opts)
+
+  @doc """
+  Delegates to `c:Ecto.Repo.insert!/2`. Raising variant used inside
+  `transact/2` blocks where the happy path is mandatory and failures
+  must abort the whole transaction via exception.
+  """
+  @spec insert!(Ecto.Changeset.t() | struct(), keyword()) :: struct()
+  def insert!(changeset_or_struct, opts \\ []),
+    do: repo().insert!(changeset_or_struct, opts)
+
+  @doc """
+  Delegates to `c:Ecto.Repo.update!/2`. Raising variant. Does NOT apply
+  the `45A01` SQLSTATE translation — reserved for the non-raising
+  `update/2` path since only test/boot code updates events directly.
+  """
+  @spec update!(Ecto.Changeset.t(), keyword()) :: struct()
+  def update!(changeset, opts \\ []),
+    do: repo().update!(changeset, opts)
+
+  @doc """
   Returns the configured host Repo module. Raises `Accrue.ConfigError`
   when `:repo` is not configured (prevents runtime `UndefinedFunctionError`
   with confusing stacktraces).
