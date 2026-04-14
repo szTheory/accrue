@@ -83,6 +83,14 @@ defmodule Accrue.Webhook.DefaultHandler do
   # Phase 3 event families — dispatch from Accrue.Webhook.Event struct
   # ---------------------------------------------------------------------
 
+  def handle_event(type, %Accrue.Webhook.Event{object_id: nil}, _ctx) when is_binary(type) do
+    # WR-10: Guard against nil object_id — the downstream reducer would
+    # call Processor.fetch/2 with nil and crash in the Stripe adapter
+    # with FunctionClauseError. Emit telemetry and short-circuit.
+    :telemetry.execute([:accrue, :webhooks, :missing_object_id], %{}, %{type: type})
+    :ok
+  end
+
   def handle_event(type, %Accrue.Webhook.Event{} = event, _ctx) when is_binary(type) do
     case dispatch(type, event.processor_event_id, event.created_at, %{"id" => event.object_id}) do
       {:ok, _} -> :ok
@@ -168,10 +176,23 @@ defmodule Accrue.Webhook.DefaultHandler do
       with {:ok, canonical} <- Processor.__impl__().fetch(:subscription, stripe_id),
            {:ok, attrs} <- SubscriptionProjection.decompose(canonical),
            attrs <- stamp_watermark(attrs, evt_ts, evt_id),
-           {:ok, updated} <- upsert_subscription(row, canonical, attrs),
-           {:ok, _} <- upsert_subscription_items(updated, canonical),
-           {:ok, _} <- record_event(subscription_event_type(action), "Subscription", updated.id, evt_id) do
-        {:ok, updated}
+           {:ok, upsert_result} <- upsert_subscription(row, canonical, attrs) do
+        case upsert_result do
+          :deferred ->
+            {:ok, :deferred}
+
+          %Subscription{} = updated ->
+            with {:ok, _} <- upsert_subscription_items(updated, canonical),
+                 {:ok, _} <-
+                   record_event(
+                     subscription_event_type(action),
+                     "Subscription",
+                     updated.id,
+                     evt_id
+                   ) do
+              {:ok, updated}
+            end
+        end
       end
     end)
   end
@@ -180,12 +201,27 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp subscription_event_type(action), do: "subscription." <> action
 
   defp upsert_subscription(nil, canonical, attrs) do
+    # CR-03: Tolerate webhook-first-for-unknown-customer. Return
+    # :deferred so Oban doesn't retry-loop into DLQ — a later customer
+    # event will create the row and a later subscription event will
+    # project it.
     customer_stripe_id = get(canonical, :customer)
-    customer = Repo.get_by!(Customer, processor_id: customer_stripe_id)
 
-    %Subscription{customer_id: customer.id, processor: processor_name()}
-    |> Subscription.changeset(attrs)
-    |> Repo.insert()
+    case customer_stripe_id && Repo.get_by(Customer, processor_id: customer_stripe_id) do
+      %Customer{} = customer ->
+        %Subscription{customer_id: customer.id, processor: processor_name()}
+        |> Subscription.changeset(attrs)
+        |> Repo.insert()
+
+      _ ->
+        :telemetry.execute(
+          [:accrue, :webhooks, :orphan_subscription],
+          %{},
+          %{customer_stripe_id: customer_stripe_id}
+        )
+
+        {:ok, :deferred}
+    end
   end
 
   defp upsert_subscription(row, _canonical, attrs) do
@@ -249,21 +285,40 @@ defmodule Accrue.Webhook.DefaultHandler do
            {:ok, %{invoice_attrs: attrs, item_attrs: item_attrs}} <-
              InvoiceProjection.decompose(canonical),
            attrs <- stamp_watermark(attrs, evt_ts, evt_id),
-           {:ok, updated} <- upsert_invoice(row, canonical, attrs),
-           {:ok, _} <- upsert_invoice_items(updated, item_attrs),
-           {:ok, _} <- record_event("invoice." <> action, "Invoice", updated.id, evt_id) do
-        {:ok, updated}
+           {:ok, upsert_result} <- upsert_invoice(row, canonical, attrs) do
+        case upsert_result do
+          :deferred ->
+            {:ok, :deferred}
+
+          %Invoice{} = updated ->
+            with {:ok, _} <- upsert_invoice_items(updated, item_attrs),
+                 {:ok, _} <- record_event("invoice." <> action, "Invoice", updated.id, evt_id) do
+              {:ok, updated}
+            end
+        end
       end
     end)
   end
 
   defp upsert_invoice(nil, canonical, attrs) do
+    # CR-03: Tolerate webhook-first-for-unknown-customer.
     customer_stripe_id = get(canonical, :customer)
-    customer = Repo.get_by!(Customer, processor_id: customer_stripe_id)
 
-    %Invoice{customer_id: customer.id, processor: processor_name()}
-    |> Invoice.force_status_changeset(attrs)
-    |> Repo.insert()
+    case customer_stripe_id && Repo.get_by(Customer, processor_id: customer_stripe_id) do
+      %Customer{} = customer ->
+        %Invoice{customer_id: customer.id, processor: processor_name()}
+        |> Invoice.force_status_changeset(attrs)
+        |> Repo.insert()
+
+      _ ->
+        :telemetry.execute(
+          [:accrue, :webhooks, :orphan_invoice],
+          %{},
+          %{customer_stripe_id: customer_stripe_id}
+        )
+
+        {:ok, :deferred}
+    end
   end
 
   defp upsert_invoice(row, _canonical, attrs) do
@@ -302,9 +357,16 @@ defmodule Accrue.Webhook.DefaultHandler do
 
     reduce_row(:charge, stripe_id, evt_ts, evt_id, fn row ->
       with {:ok, canonical} <- Processor.__impl__().fetch(:charge, stripe_id),
-           {:ok, updated} <- upsert_charge(row, canonical, evt_ts, evt_id),
-           {:ok, _} <- record_event("charge." <> action, "Charge", updated.id, evt_id) do
-        {:ok, updated}
+           {:ok, upsert_result} <- upsert_charge(row, canonical, evt_ts, evt_id) do
+        case upsert_result do
+          :deferred ->
+            {:ok, :deferred}
+
+          %Charge{} = updated ->
+            with {:ok, _} <- record_event("charge." <> action, "Charge", updated.id, evt_id) do
+              {:ok, updated}
+            end
+        end
       end
     end)
   end
@@ -326,18 +388,32 @@ defmodule Accrue.Webhook.DefaultHandler do
 
     case row do
       nil ->
+        # CR-03: Tolerate webhook-first-for-unknown-customer — return
+        # :deferred rather than raise Ecto.NoResultsError inside the
+        # enclosing Repo.transact.
         customer_stripe_id = SubscriptionProjection.get(canonical, :customer)
-        customer = Repo.get_by!(Customer, processor_id: customer_stripe_id)
 
-        %Charge{customer_id: customer.id, processor: processor_name()}
-        |> Charge.changeset(
-          Map.merge(attrs, %{
-            processor_id: SubscriptionProjection.get(canonical, :id),
-            amount_cents: SubscriptionProjection.get(canonical, :amount),
-            currency: SubscriptionProjection.get(canonical, :currency) || "usd"
-          })
-        )
-        |> Repo.insert()
+        case customer_stripe_id && Repo.get_by(Customer, processor_id: customer_stripe_id) do
+          %Customer{} = customer ->
+            %Charge{customer_id: customer.id, processor: processor_name()}
+            |> Charge.changeset(
+              Map.merge(attrs, %{
+                processor_id: SubscriptionProjection.get(canonical, :id),
+                amount_cents: SubscriptionProjection.get(canonical, :amount),
+                currency: SubscriptionProjection.get(canonical, :currency) || "usd"
+              })
+            )
+            |> Repo.insert()
+
+          _ ->
+            :telemetry.execute(
+              [:accrue, :webhooks, :orphan_charge],
+              %{},
+              %{customer_stripe_id: customer_stripe_id}
+            )
+
+            {:ok, :deferred}
+        end
 
       existing ->
         existing
@@ -355,10 +431,20 @@ defmodule Accrue.Webhook.DefaultHandler do
 
     reduce_row(:refund, stripe_id, evt_ts, evt_id, fn row ->
       with {:ok, canonical} <- Processor.__impl__().fetch(:refund, stripe_id),
-           {:ok, updated} <- upsert_refund(row, canonical, evt_ts, evt_id),
-           event_type <- refund_event_type(updated, action),
-           {:ok, _} <- record_event(event_type, "Refund", updated.id, evt_id) do
-        {:ok, updated}
+           {:ok, upsert_result} <- upsert_refund(row, canonical, evt_ts, evt_id) do
+        case upsert_result do
+          # CR-03: parent charge not yet projected locally — skip event
+          # recording and let a later event refetch canonical state.
+          :deferred ->
+            {:ok, :deferred}
+
+          %Refund{} = updated ->
+            event_type = refund_event_type(updated, action)
+
+            with {:ok, _} <- record_event(event_type, "Refund", updated.id, evt_id) do
+              {:ok, updated}
+            end
+        end
       end
     end)
   end
@@ -390,7 +476,10 @@ defmodule Accrue.Webhook.DefaultHandler do
     {stripe_fee_refunded, merchant_loss, settled_at} =
       case {fee, fee_refunded} do
         {f, fr} when is_integer(f) and is_integer(fr) ->
-          {fr, f - fr, Accrue.Clock.utc_now()}
+          # WR-03: Clamp merchant_loss at 0 — fee_refunded can exceed
+          # fee in fee-adjustment scenarios, which would otherwise
+          # violate the (migration-enforced) non-negative invariant.
+          {fr, max(0, f - fr), Accrue.Clock.utc_now()}
 
         _ ->
           {nil, nil, nil}
@@ -419,17 +508,37 @@ defmodule Accrue.Webhook.DefaultHandler do
 
     case row do
       nil ->
-        charge = Repo.get_by!(Charge, processor_id: charge_stripe_id)
+        # CR-03: Out-of-order `charge.refund.updated` can arrive before
+        # the parent charge has been projected locally (D3-50). Rather
+        # than crash with Ecto.NoResultsError inside Repo.transact and
+        # let Oban retry-loop into DLQ, tolerate the missing parent:
+        # emit telemetry and return :deferred so the enclosing reducer
+        # commits cleanly. The refund will be picked up on the next
+        # event (which refetches canonical state).
+        case charge_stripe_id && Repo.get_by(Charge, processor_id: charge_stripe_id) do
+          %Charge{} = charge ->
+            %Refund{charge_id: charge.id}
+            |> Refund.changeset(
+              Map.merge(attrs, %{
+                stripe_id: SubscriptionProjection.get(canonical, :id),
+                amount_minor: SubscriptionProjection.get(canonical, :amount),
+                currency: SubscriptionProjection.get(canonical, :currency) || "usd"
+              })
+            )
+            |> Repo.insert()
 
-        %Refund{charge_id: charge.id}
-        |> Refund.changeset(
-          Map.merge(attrs, %{
-            stripe_id: SubscriptionProjection.get(canonical, :id),
-            amount_minor: SubscriptionProjection.get(canonical, :amount),
-            currency: SubscriptionProjection.get(canonical, :currency) || "usd"
-          })
-        )
-        |> Repo.insert()
+          _ ->
+            :telemetry.execute(
+              [:accrue, :webhooks, :orphan_refund],
+              %{},
+              %{
+                refund_stripe_id: SubscriptionProjection.get(canonical, :id),
+                charge_stripe_id: charge_stripe_id
+              }
+            )
+
+            {:ok, :deferred}
+        end
 
       existing ->
         existing
