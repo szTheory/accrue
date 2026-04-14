@@ -20,6 +20,12 @@ defmodule Accrue.MixProject do
     ]
   end
 
+  # Custom CLI aliases must declare their preferred env explicitly —
+  # `mix test.live` and `mix test.all` both run in :test.
+  def cli do
+    [preferred_envs: ["test.live": :test, "test.all": :test]]
+  end
+
   # Configuration for the OTP application.
   #
   # Plan 01-06 wires `Accrue.Application` as the OTP entry point (FND-05).

@@ -16,3 +16,8 @@ cover/
 # Editor / OS noise
 .DS_Store
 *~
+
+# Local `act` secret files for live-Stripe CI replay (quick task 260414-l9q).
+# The committed template lives at `accrue/.secrets.example`.
+.secrets
+accrue/.secrets
