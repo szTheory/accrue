@@ -535,7 +535,16 @@ defmodule Accrue.Processor.Stripe do
 
   @spec stripe_opts(atom(), String.t(), keyword()) :: keyword()
   defp stripe_opts(op, subject_id, opts) do
-    idem_key = compute_idempotency_key(op, subject_id, opts)
+    # CR-01: Preserve an explicit caller-supplied idempotency key (from
+    # the billing context, computed via Accrue.Processor.Idempotency.key/4
+    # with the D3-60/61 deterministic subject_uuid). Only compute our own
+    # as a fallback when the caller didn't supply one (e.g. direct adapter
+    # use outside the billing context). The SHA256 seed for the
+    # fallback is still based on (op, subject_id, operation_id) for
+    # parity with PROC-02.
+    idem_key =
+      Keyword.get(opts, :idempotency_key) ||
+        compute_idempotency_key(op, subject_id, opts)
 
     opts
     |> Keyword.put(:idempotency_key, idem_key)
