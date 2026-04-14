@@ -75,7 +75,9 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
            Map.get(charge_bt, "fee_refunded") || Map.get(charge_bt, :fee_refunded) do
       attrs = %{
         stripe_fee_refunded_amount_minor: fr,
-        merchant_loss_amount_minor: fee - fr,
+        # WR-03: clamp at 0 — fee_refunded can exceed fee in
+        # fee-adjustment scenarios. BILL-26 requires non-negative.
+        merchant_loss_amount_minor: max(0, fee - fr),
         fees_settled_at: Accrue.Clock.utc_now()
       }
 

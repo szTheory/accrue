@@ -43,10 +43,29 @@ defmodule Accrue.Billing.RefundActions do
   @spec create_refund(Charge.t(), keyword()) ::
           {:ok, Refund.t()} | {:error, term()}
   def create_refund(%Charge{} = charge, opts \\ []) do
+    # WR-05: Validate :amount shape and currency match against the
+    # parent charge. A typo or integer literal would otherwise raise
+    # CaseClauseError with an opaque stacktrace; fail loud with a
+    # typed error instead.
     amount_minor =
       case Keyword.get(opts, :amount) do
-        nil -> charge.amount_cents
-        %Money{amount_minor: n} -> n
+        nil ->
+          charge.amount_cents
+
+        %Money{currency: cur, amount_minor: n} ->
+          charge_currency = charge_currency_atom(charge)
+
+          if cur == charge_currency do
+            n
+          else
+            raise ArgumentError,
+                  ":amount currency #{inspect(cur)} does not match charge currency " <>
+                    "#{inspect(charge_currency)}"
+          end
+
+        other ->
+          raise ArgumentError,
+                ":amount must be a %Accrue.Money{} or nil; got #{inspect(other)}"
       end
 
     op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
@@ -116,7 +135,9 @@ defmodule Accrue.Billing.RefundActions do
     {stripe_fee_refunded, merchant_loss, settled_at} =
       case {fee, fee_refunded} do
         {f, fr} when is_integer(f) and is_integer(fr) ->
-          {fr, f - fr, Accrue.Clock.utc_now()}
+          # WR-03: clamp at 0 — Stripe's fee_refunded can exceed fee in
+          # fee-adjustment scenarios. BILL-26 requires non-negative.
+          {fr, max(0, f - fr), Accrue.Clock.utc_now()}
 
         _ ->
           {nil, nil, nil}
@@ -124,9 +145,21 @@ defmodule Accrue.Billing.RefundActions do
 
     status =
       case get_field(stripe_refund, :status) do
-        s when is_atom(s) and not is_nil(s) -> s
-        s when is_binary(s) -> String.to_existing_atom(s)
-        _ -> :pending
+        s when is_atom(s) and not is_nil(s) ->
+          s
+
+        s when is_binary(s) ->
+          # WR-04: mirror the DefaultHandler rescue pattern — an
+          # unknown status string should not crash; fall back to
+          # :pending and let the later webhook drive convergence.
+          try do
+            String.to_existing_atom(s)
+          rescue
+            ArgumentError -> :pending
+          end
+
+        _ ->
+          :pending
       end
 
     currency =
@@ -164,6 +197,19 @@ defmodule Accrue.Billing.RefundActions do
       data: data
     })
   end
+
+  # WR-05 helper: safely coerce charge.currency ("usd") to atom (:usd)
+  # for comparison against %Money{currency: :usd}. Uses to_existing_atom
+  # since the charge was persisted with a known currency code.
+  defp charge_currency_atom(%Charge{currency: currency}) when is_binary(currency) do
+    try do
+      String.to_existing_atom(currency)
+    rescue
+      ArgumentError -> String.to_atom(currency)
+    end
+  end
+
+  defp charge_currency_atom(_), do: nil
 
   defp get_field(%{} = m, key) when is_atom(key) do
     Map.get(m, key) || Map.get(m, Atom.to_string(key))
