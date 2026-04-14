@@ -95,6 +95,48 @@ defmodule Accrue.Repo do
     do: repo().preload(struct_or_list, preloads, opts)
 
   @doc """
+  Delegates to `c:Ecto.Repo.get/3`. Returns the row or `nil`.
+  """
+  @spec get(Ecto.Queryable.t(), term(), keyword()) :: struct() | nil
+  def get(queryable, id, opts \\ []), do: repo().get(queryable, id, opts)
+
+  @doc """
+  Delegates to `c:Ecto.Repo.get_by/3`. Returns the row or `nil`.
+  """
+  @spec get_by(Ecto.Queryable.t(), keyword() | map(), keyword()) :: struct() | nil
+  def get_by(queryable, clauses, opts \\ []),
+    do: repo().get_by(queryable, clauses, opts)
+
+  @doc """
+  Delegates to `c:Ecto.Repo.get_by!/3`. Raises when the row is missing.
+  """
+  @spec get_by!(Ecto.Queryable.t(), keyword() | map(), keyword()) :: struct()
+  def get_by!(queryable, clauses, opts \\ []),
+    do: repo().get_by!(queryable, clauses, opts)
+
+  @doc """
+  Delegates to `c:Ecto.Repo.delete/2`. Returns `{:ok, struct}` or
+  `{:error, changeset}`.
+  """
+  @spec delete(Ecto.Schema.t() | Ecto.Changeset.t(), keyword()) ::
+          {:ok, struct()} | {:error, Ecto.Changeset.t()}
+  def delete(schema_or_changeset, opts \\ []),
+    do: repo().delete(schema_or_changeset, opts)
+
+  @doc """
+  Delegates to `c:Ecto.Repo.aggregate/4`. Used by concurrency tests and
+  the billing query layer for count/sum over queryables.
+  """
+  @spec aggregate(Ecto.Queryable.t(), atom(), atom() | nil, keyword()) :: term()
+  def aggregate(queryable, aggregate, field \\ nil, opts \\ [])
+
+  def aggregate(queryable, aggregate, nil, opts),
+    do: repo().aggregate(queryable, aggregate, opts)
+
+  def aggregate(queryable, aggregate, field, opts),
+    do: repo().aggregate(queryable, aggregate, field, opts)
+
+  @doc """
   Delegates to `c:Ecto.Repo.insert!/2`. Raising variant used inside
   `transact/2` blocks where the happy path is mandatory and failures
   must abort the whole transaction via exception.
