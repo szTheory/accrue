@@ -29,10 +29,25 @@ defmodule Accrue.Billing.InvoiceProjection do
 
     discount = SubscriptionProjection.get(stripe_inv, :discount)
 
+    total_discount_amounts =
+      case SubscriptionProjection.get(stripe_inv, :total_discount_amounts) do
+        nil -> []
+        list when is_list(list) -> list
+        _ -> []
+      end
+
     discount_minor =
-      case discount do
-        %{} = d -> SubscriptionProjection.get(d, :amount_off)
-        _ -> nil
+      cond do
+        total_discount_amounts != [] ->
+          Enum.reduce(total_discount_amounts, 0, fn d, acc ->
+            acc + (SubscriptionProjection.get(d, :amount) || 0)
+          end)
+
+        match?(%{}, discount) ->
+          SubscriptionProjection.get(discount, :amount_off)
+
+        true ->
+          nil
       end
 
     invoice_attrs = %{
@@ -41,6 +56,13 @@ defmodule Accrue.Billing.InvoiceProjection do
       subtotal_minor: SubscriptionProjection.get(stripe_inv, :subtotal),
       tax_minor: SubscriptionProjection.get(stripe_inv, :tax),
       discount_minor: discount_minor,
+      # Wrap in a map because the `:total_discount_amounts` Ecto field
+      # is `:map` (jsonb) which rejects top-level arrays. Mirror
+      # Stripe's own list-object shape (`%{"object": "list",
+      # "data": [...]}`) for admin-LV ergonomics.
+      total_discount_amounts: %{
+        "data" => SubscriptionProjection.to_string_keys(total_discount_amounts)
+      },
       total_minor: SubscriptionProjection.get(stripe_inv, :total),
       amount_due_minor: SubscriptionProjection.get(stripe_inv, :amount_due),
       amount_paid_minor: SubscriptionProjection.get(stripe_inv, :amount_paid),

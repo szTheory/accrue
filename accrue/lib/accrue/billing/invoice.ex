@@ -56,6 +56,7 @@ defmodule Accrue.Billing.Invoice do
     field :subtotal_minor, :integer
     field :tax_minor, :integer
     field :discount_minor, :integer
+    field :total_discount_amounts, :map, default: %{}
     field :total_minor, :integer
     field :amount_due_minor, :integer
     field :amount_paid_minor, :integer
@@ -82,7 +83,7 @@ defmodule Accrue.Billing.Invoice do
   @cast_fields ~w[
     customer_id subscription_id processor processor_id
     status total_cents currency due_date paid_at
-    subtotal_minor tax_minor discount_minor total_minor
+    subtotal_minor tax_minor discount_minor total_discount_amounts total_minor
     amount_due_minor amount_paid_minor amount_remaining_minor
     number hosted_url pdf_url period_start period_end
     collection_method billing_reason finalized_at voided_at
@@ -125,6 +126,20 @@ defmodule Accrue.Billing.Invoice do
     |> optimistic_lock(:lock_version)
     |> foreign_key_constraint(:customer_id)
     |> foreign_key_constraint(:subscription_id)
+  end
+
+  @doc """
+  Phase 4 Plan 05 (BILL-28) — webhook-path discount denormalization.
+  Mirrors Stripe's `discount_minor` + `total_discount_amounts` into
+  local columns. Stripe is canonical (D2-29) — no local math, no
+  `validate_number` guard. Callers pass nil-safe attrs so the cast
+  preserves existing values when the webhook doesn't carry them.
+  """
+  @spec force_discount_changeset(%__MODULE__{} | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
+  def force_discount_changeset(invoice_or_changeset, attrs \\ %{}) do
+    invoice_or_changeset
+    |> cast(attrs, [:discount_minor, :total_discount_amounts])
+    |> optimistic_lock(:lock_version)
   end
 
   defp validate_transition(%Ecto.Changeset{changes: %{status: new}} = cs) do

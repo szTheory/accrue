@@ -25,10 +25,20 @@ defmodule Accrue.Billing.SubscriptionProjection do
        trial_end: unix_to_dt(get(stripe_sub, :trial_end)),
        canceled_at: unix_to_dt(get(stripe_sub, :canceled_at)),
        ended_at: unix_to_dt(get(stripe_sub, :ended_at)),
+       discount_id: parse_discount_id(get(stripe_sub, :discount)),
        data: normalize_data(stripe_sub),
        metadata: get(stripe_sub, :metadata) || %{}
      }}
   end
+
+  # Phase 4 Plan 05 (BILL-28) — project Stripe's nested `discount`
+  # object down to just the discount id for the local `discount_id`
+  # column. Supports both the string form (`"di_..."`) and the nested
+  # `%{id: ...}` shape.
+  defp parse_discount_id(nil), do: nil
+  defp parse_discount_id(s) when is_binary(s), do: s
+  defp parse_discount_id(%{} = m), do: get(m, :id)
+  defp parse_discount_id(_), do: nil
 
   # Expose helpers so SubscriptionActions can reuse them.
   @doc false
