@@ -31,14 +31,14 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 
 - [ ] **BILL-01**: Polymorphic `Accrue.Billing.Customer` with `owner_type`/`owner_id`, `data` jsonb, default-management, metadata deep-merge
 - [ ] **BILL-02**: `use Accrue.Billable` macro — any host schema (User, Organization, Team) becomes billable
-- [ ] **BILL-03**: `Accrue.Billing.Subscription` create/retrieve/swap/cancel/resume/pause
+- [x] **BILL-03**: `Accrue.Billing.Subscription` create/retrieve/swap/cancel/resume/pause
 - [x] **BILL-04**: Subscription state machine: trialing → active → past_due → incomplete/incomplete_expired → unpaid/paused → canceled
 - [x] **BILL-05**: Three canonical predicates: `active?/1`, `canceling?/1`, `canceled?/1` (never expose raw `status`)
-- [ ] **BILL-06**: Trial support with `trial_end` (`:now` or unix timestamp), `trial_will_end` webhook handling
+- [x] **BILL-06**: Trial support with `trial_end` (`:now` or unix timestamp), `trial_will_end` webhook handling
 - [x] **BILL-07**: `cancel_at_period_end` with grace period tracking (status stays `active` until period ends)
-- [ ] **BILL-08**: Immediate cancel with optional final-invoice handling
-- [ ] **BILL-09**: Plan swap with **explicit** `:proration` option (never silently inherits Stripe's default)
-- [ ] **BILL-10**: `preview_upcoming_invoice/2` for proration preview UX before swap commits
+- [x] **BILL-08**: Immediate cancel with optional final-invoice handling
+- [x] **BILL-09**: Plan swap with **explicit** `:proration` option (never silently inherits Stripe's default)
+- [x] **BILL-10**: `preview_upcoming_invoice/2` for proration preview UX before swap commits
 - [ ] **BILL-11**: Pause/resume with `pause_behavior` option
 - [ ] **BILL-12**: Multi-item subscriptions (SubscriptionItem)
 - [ ] **BILL-13**: Metered billing via Stripe BillingMeters + MeterEvents
@@ -310,14 +310,14 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | PROC-07 | Phase 1 | Pending |
 | BILL-01 | Phase 2 | Pending |
 | BILL-02 | Phase 2 | Pending |
-| BILL-03 | Phase 3 | Pending |
+| BILL-03 | Phase 3 | Complete |
 | BILL-04 | Phase 3 | Complete |
 | BILL-05 | Phase 3 | Complete |
-| BILL-06 | Phase 3 | Pending |
+| BILL-06 | Phase 3 | Complete |
 | BILL-07 | Phase 3 | Complete |
-| BILL-08 | Phase 3 | Pending |
-| BILL-09 | Phase 3 | Pending |
-| BILL-10 | Phase 3 | Pending |
+| BILL-08 | Phase 3 | Complete |
+| BILL-09 | Phase 3 | Complete |
+| BILL-10 | Phase 3 | Complete |
 | BILL-11 | Phase 4 | Pending |
 | BILL-12 | Phase 4 | Pending |
 | BILL-13 | Phase 4 | Pending |

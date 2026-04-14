@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-04-14T17:10:15.024Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-04-14T17:27:00.717Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 20
-  completed_plans: 15
-  percent: 75
+  completed_plans: 16
+  percent: 80
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 03 (core-subscription-lifecycle) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-core-subscription-lifecycle P01 | 9m | 4 tasks | 18 files |
 | Phase 03 P02 | 10m | 3 tasks | 18 files |
 | Phase 03 P03 | 25m | 3 tasks | 7 files |
+| Phase 03-core-subscription-lifecycle P04 | 35m | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 03]: advance/2 vs advance_subscription/2 split preserves Phase 1 clock-only API while adding subscription-aware trial crossing
 - [Phase 03]: Fake new resources use atom-keyed Stripe-shape maps consistent with Phase 1 + LatticeStripe struct translation pattern
 - [Phase 03]: create_charge routes through PaymentIntent.create because lattice_stripe 1.0 removes direct Charge.create per Stripe 2026-03-25.dahlia
+- [Phase 03-core-subscription-lifecycle]: NimbleOptions nil defaults require {:or, [:type, nil]} union — bare :string/:pos_integer types fail validate with default: nil
+- [Phase 03-core-subscription-lifecycle]: Accrue.Billing.subscribe/3 accepts both billable struct AND %Customer{} directly — tests need manual customer seeding; host-app callers use lazy fetch
+- [Phase 03-core-subscription-lifecycle]: Fake gains build_subscription_item/apply_subscription_update/merge_item helpers so flat item patches round-trip through Stripe-shape items.data nesting
 
 ### Pending Todos
 
@@ -94,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T17:10:15.021Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-04-14T17:26:47.817Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
