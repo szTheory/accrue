@@ -57,7 +57,9 @@ defmodule Accrue.Webhook.DefaultHandler do
     Refund,
     Subscription,
     SubscriptionItem,
-    SubscriptionProjection
+    SubscriptionProjection,
+    SubscriptionSchedule,
+    SubscriptionScheduleProjection
   }
 
   # ---------------------------------------------------------------------
@@ -137,6 +139,11 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp dispatch("customer.subscription." <> action, evt_id, evt_ts, obj)
        when action in ~w(created updated trial_will_end deleted paused resumed) do
     reduce_subscription(action, evt_id, evt_ts, obj)
+  end
+
+  defp dispatch("subscription_schedule." <> action, evt_id, evt_ts, obj)
+       when action in ~w(created updated released completed canceled expiring) do
+    reduce_subscription_schedule(action, evt_id, evt_ts, obj)
   end
 
   defp dispatch("invoice." <> action, evt_id, evt_ts, obj)
@@ -330,6 +337,70 @@ defmodule Accrue.Webhook.DefaultHandler do
       nil -> %SubscriptionItem{} |> SubscriptionItem.changeset(attrs) |> Repo.insert()
       existing -> existing |> SubscriptionItem.changeset(attrs) |> Repo.update()
     end
+  end
+
+  # ---------------------------------------------------------------------
+  # SubscriptionSchedule reducer (Phase 4 Plan 03, BILL-16)
+  # ---------------------------------------------------------------------
+
+  defp reduce_subscription_schedule(action, evt_id, evt_ts, obj) do
+    stripe_id = get(obj, :id)
+
+    reduce_row(:subscription_schedule, stripe_id, evt_ts, evt_id, fn row ->
+      with {:ok, canonical} <-
+             Processor.__impl__().subscription_schedule_fetch(stripe_id),
+           {:ok, attrs} <- SubscriptionScheduleProjection.decompose(canonical),
+           attrs <- stamp_watermark(attrs, evt_ts, evt_id),
+           {:ok, upsert_result} <- upsert_subscription_schedule(row, canonical, attrs) do
+        case upsert_result do
+          :deferred ->
+            {:ok, :deferred}
+
+          %SubscriptionSchedule{} = updated ->
+            with {:ok, _} <-
+                   record_event(
+                     schedule_event_type(action),
+                     "SubscriptionSchedule",
+                     updated.id,
+                     evt_id
+                   ) do
+              {:ok, updated}
+            end
+        end
+      end
+    end)
+  end
+
+  defp schedule_event_type(action), do: "subscription_schedule." <> action
+
+  defp upsert_subscription_schedule(nil, canonical, attrs) do
+    # CR-03: Tolerate webhook-first-for-unknown-customer (Pitfall 4). A
+    # subscription_schedule.updated can legitimately arrive before the
+    # .created event when Stripe reorders deliveries — return :deferred
+    # so Oban doesn't retry-loop into DLQ.
+    customer_stripe_id = get(canonical, :customer)
+
+    case customer_stripe_id && Repo.get_by(Customer, processor_id: customer_stripe_id) do
+      %Customer{} = customer ->
+        %SubscriptionSchedule{customer_id: customer.id, processor: processor_name()}
+        |> SubscriptionSchedule.force_status_changeset(attrs)
+        |> Repo.insert()
+
+      _ ->
+        :telemetry.execute(
+          [:accrue, :webhooks, :orphan_subscription_schedule],
+          %{},
+          %{customer_stripe_id: customer_stripe_id}
+        )
+
+        {:ok, :deferred}
+    end
+  end
+
+  defp upsert_subscription_schedule(row, _canonical, attrs) do
+    row
+    |> SubscriptionSchedule.force_status_changeset(attrs)
+    |> Repo.update()
   end
 
   # ---------------------------------------------------------------------
@@ -714,6 +785,7 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   defp load_row(:subscription, id), do: Repo.get_by(Subscription, processor_id: id)
+  defp load_row(:subscription_schedule, id), do: Repo.get_by(SubscriptionSchedule, processor_id: id)
   defp load_row(:invoice, id), do: Repo.get_by(Invoice, processor_id: id)
   defp load_row(:charge, id), do: Repo.get_by(Charge, processor_id: id)
   defp load_row(:refund, id), do: Repo.get_by(Refund, stripe_id: id)

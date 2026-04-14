@@ -30,7 +30,8 @@ defmodule Accrue.Billing do
     PaymentMethodActions,
     RefundActions,
     SubscriptionActions,
-    SubscriptionItems
+    SubscriptionItems,
+    SubscriptionScheduleActions
   }
 
   alias Accrue.Events
@@ -85,6 +86,20 @@ defmodule Accrue.Billing do
   defdelegate remove_item!(item, opts \\ []), to: SubscriptionItems
   defdelegate update_item_quantity(item, quantity, opts \\ []), to: SubscriptionItems
   defdelegate update_item_quantity!(item, quantity, opts \\ []), to: SubscriptionItems
+
+  # ── SubscriptionSchedule surface (Phase 4 Plan 03, BILL-16) ───────
+  defdelegate subscribe_via_schedule(billable, phases, opts \\ []),
+    to: SubscriptionScheduleActions
+
+  defdelegate subscribe_via_schedule!(billable, phases, opts \\ []),
+    to: SubscriptionScheduleActions
+
+  defdelegate update_schedule(sched, params, opts \\ []), to: SubscriptionScheduleActions
+  defdelegate update_schedule!(sched, params, opts \\ []), to: SubscriptionScheduleActions
+  defdelegate release_schedule(sched, opts \\ []), to: SubscriptionScheduleActions
+  defdelegate release_schedule!(sched, opts \\ []), to: SubscriptionScheduleActions
+  defdelegate cancel_schedule(sched, opts \\ []), to: SubscriptionScheduleActions
+  defdelegate cancel_schedule!(sched, opts \\ []), to: SubscriptionScheduleActions
 
   # ── Invoice surface (Plan 05) ─────────────────────────────────────
   defdelegate finalize_invoice(invoice, opts \\ []), to: InvoiceActions

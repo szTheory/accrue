@@ -247,6 +247,44 @@ defmodule Accrue.Test.StripeFixtures do
     deep_merge(base, overrides)
   end
 
+  @spec subscription_schedule(map()) :: map()
+  def subscription_schedule(overrides \\ %{}) do
+    now = DateTime.utc_now()
+    sched_id = "sub_sched_test_" <> rand()
+    customer_id = "cus_test_" <> rand()
+
+    phase_a_start = DateTime.to_unix(now)
+    phase_a_end = DateTime.to_unix(DateTime.add(now, 30, :day))
+    phase_b_end = DateTime.to_unix(DateTime.add(now, 60, :day))
+
+    base = %{
+      "id" => sched_id,
+      "object" => "subscription_schedule",
+      "customer" => customer_id,
+      "status" => "not_started",
+      "end_behavior" => "release",
+      "phases" => [
+        %{
+          "start_date" => phase_a_start,
+          "end_date" => phase_a_end,
+          "items" => [%{"price" => "price_intro", "quantity" => 1}]
+        },
+        %{
+          "start_date" => phase_a_end,
+          "end_date" => phase_b_end,
+          "items" => [%{"price" => "price_regular", "quantity" => 1}]
+        }
+      ],
+      "current_phase" => nil,
+      "released_at" => nil,
+      "canceled_at" => nil,
+      "created" => DateTime.to_unix(now),
+      "metadata" => %{}
+    }
+
+    deep_merge(base, overrides)
+  end
+
   @spec webhook_event(String.t(), map(), map()) :: map()
   def webhook_event(type, object_payload, overrides \\ %{})
       when is_binary(type) and is_map(object_payload) do

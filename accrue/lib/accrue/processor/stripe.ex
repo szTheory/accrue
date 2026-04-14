@@ -642,6 +642,7 @@ defmodule Accrue.Processor.Stripe do
 
   @impl Accrue.Processor
   def fetch(:subscription, id), do: retrieve_subscription(id, [])
+  def fetch(:subscription_schedule, id), do: subscription_schedule_fetch(id, [])
   def fetch(:invoice, id), do: retrieve_invoice(id, [])
   def fetch(:charge, id), do: retrieve_charge(id, [])
   def fetch(:refund, id), do: retrieve_refund(id, [])
