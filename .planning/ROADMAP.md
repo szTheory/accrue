@@ -95,8 +95,16 @@ Plans:
   4. `Accrue.Events.timeline_for(subject)` returns the full append-only history for any subject, `state_as_of(subject, ts)` replays state at a past timestamp using upcasters for older `schema_version` entries, and `bucket_by/3` aggregates events by day/week/month for analytics.
   5. A developer can create a Stripe Checkout Session via `Accrue.Checkout.Session.create/2` and a Customer Portal Session with a sane default portal config that prevents "cancel without dunning" footguns — both return URLs that round-trip through Stripe test mode.
   6. A coupon or promotion code applied at subscription, invoice, or Checkout level produces the correct discounted total and a `coupon_applied` event in the ledger.
-**Residual lattice_stripe gaps:** BillingMeter/MeterEvent (blocks BILL-11 metered billing) and BillingPortal.Session (blocks CHKT-02 Customer Portal) are not in lattice_stripe 1.0 — decision at Phase 4 planning: upstream contribution vs in-tree %LatticeStripe.Request{} fallback. Upstream work is in-flight in a parallel lattice_stripe session targeting 1.1 release.
-**Plans**: TBD
+**Plans**: 8 plans
+Plans:
+- [ ] 04-01-PLAN.md — Wave 1: lattice_stripe 1.1 bump + Accrue.Config extensions (:dunning, :webhook_endpoints, DLQ keys) + 6 schema/alter migrations (accrue_meter_events, accrue_subscription_schedules, accrue_promotion_codes, subscription dunning/pause cols, invoice discount cols, events type index)
+- [ ] 04-02-PLAN.md — Wave 2: Metered billing (BILL-13) — MeterEvent schema + report_usage/3 outbox pattern + Fake/Stripe processor + ReconcilerJob + billing.meter.error_report_triggered webhook
+- [ ] 04-03-PLAN.md — Wave 3: Advanced subscription surface (BILL-11 pause_behavior, BILL-12 multi-item, BILL-14 comp, BILL-16 SubscriptionSchedule) — schema + actions + webhook handlers
+- [ ] 04-04-PLAN.md — Wave 4: Dunning (BILL-15) — pure Dunning policy module + DunningSweeper Oban cron + dunning_exhaustion telemetry diff on webhook path
+- [ ] 04-05-PLAN.md — Wave 5: Coupons & PromotionCodes (BILL-27, BILL-28) — PromotionCode schema + apply_promotion_code + invoice discount denormalization via force_discount_changeset
+- [ ] 04-06-PLAN.md — Wave 6: Webhook hardening (WH-08, WH-13, EVT-05, EVT-06, EVT-10) — Accrue.Webhooks.DLQ library + Mix tasks + Pruner + multi-endpoint plug + Events query API + UpcasterRegistry
+- [ ] 04-07-PLAN.md — Wave 7: Checkout + Portal (CHKT-01..06) — Accrue.Checkout + Accrue.BillingPortal contexts + LineItem helper + reconcile/1 + Inspect URL mask + portal config checklist guide
+- [ ] 04-08-PLAN.md — Wave 8: Observability (OBS-03, OBS-04, OBS-05) — Accrue.Telemetry.Ops emit helper + Accrue.Telemetry.Metrics default recipe + guides/telemetry.md span naming guide
 **UI hint**: no
 
 ### Phase 5: Connect
