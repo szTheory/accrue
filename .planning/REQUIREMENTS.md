@@ -20,7 +20,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 ### Processor
 
 - [ ] **PROC-01**: `Accrue.Processor` behaviour with callbacks for every Stripe operation Accrue needs
-- [ ] **PROC-02**: `Accrue.Processor.Stripe` first-party adapter delegating to lattice_stripe 0.3
+- [x] **PROC-02**: `Accrue.Processor.Stripe` first-party adapter delegating to lattice_stripe 0.3
 - [ ] **PROC-03**: `Accrue.Processor.Fake` in-memory ETS adapter — primary test surface (deterministic IDs, test clock, scriptable responses, event-trigger API)
 - [ ] **PROC-04**: Deterministic idempotency keys derived from `{operation, subject_id, canonical_params}` with retry-safe reuse
 - [ ] **PROC-05**: Stripe Connect context (Stripe-Account header) threaded through every processor call
@@ -302,7 +302,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | FND-06 | Phase 1 | Pending |
 | FND-07 | Phase 1 | Pending |
 | PROC-01 | Phase 1 | Pending |
-| PROC-02 | Phase 3 | Pending |
+| PROC-02 | Phase 3 | Complete |
 | PROC-03 | Phase 1 | Pending |
 | PROC-04 | Phase 2 | Pending |
 | PROC-05 | Phase 5 | Pending |

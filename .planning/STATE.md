@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-04-14T16:56:24.392Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-04-14T17:10:15.024Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 20
-  completed_plans: 14
-  percent: 70
+  completed_plans: 15
+  percent: 75
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 03 (core-subscription-lifecycle) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 03-core-subscription-lifecycle P01 | 9m | 4 tasks | 18 files |
 | Phase 03 P02 | 10m | 3 tasks | 18 files |
+| Phase 03 P03 | 25m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 03]: Invoice.changeset/2 @required_fields is empty — state-machine changeset operates on bare structs; processor enforcement lives at Customer level
 - [Phase 03]: Accrue.Billing.Query exempt from NoRawStatusAccess: canonical query wrapper, same role as Subscription module for predicates
 - [Phase 03]: Invoice rollup columns use bigint not integer: annual enterprise totals and multi-year Subscription Schedule previews can exceed 2^31
+- [Phase 03]: advance/2 vs advance_subscription/2 split preserves Phase 1 clock-only API while adding subscription-aware trial crossing
+- [Phase 03]: Fake new resources use atom-keyed Stripe-shape maps consistent with Phase 1 + LatticeStripe struct translation pattern
+- [Phase 03]: create_charge routes through PaymentIntent.create because lattice_stripe 1.0 removes direct Charge.create per Stripe 2026-03-25.dahlia
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T16:56:16.519Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-04-14T17:10:15.021Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None

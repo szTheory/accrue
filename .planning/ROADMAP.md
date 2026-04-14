@@ -76,7 +76,7 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Wave 1: Clock, Actor operation_id, Config, Phase 3 Error types, Credo NoRawStatusAccess check, BillingCase, StripeFixtures
 - [x] 03-02-PLAN.md — Wave 1: Phase 3 migrations + Ecto schemas (Subscription/Invoice/InvoiceItem/Charge/Refund/PaymentMethod/Customer/Coupon/UpcomingInvoice) + Billing.Query fragments
-- [ ] 03-03-PLAN.md — Wave 1: Processor behaviour extension + Fake (transition/advance/synth) + Stripe adapter lattice_stripe delegation + Idempotency module
+- [x] 03-03-PLAN.md — Wave 1: Processor behaviour extension + Fake (transition/advance/synth) + Stripe adapter lattice_stripe delegation + Idempotency module
 - [ ] 03-04-PLAN.md — Wave 2: Accrue.Billing subscribe/swap_plan/cancel/cancel_at_period_end/resume/pause/unpause/update_quantity/preview_upcoming_invoice/trial_end normalizer + intent_result wrapping
 - [ ] 03-05-PLAN.md — Wave 2: Invoice workflow (finalize/void/pay/mark_uncollectible/send_invoice) + InvoiceProjection decomposer
 - [ ] 03-06-PLAN.md — Wave 2: Charge/PaymentIntent/SetupIntent + PaymentMethod fingerprint dedup + set_default_payment_method + Refund fee math
