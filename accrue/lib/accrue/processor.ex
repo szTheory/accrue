@@ -161,6 +161,24 @@ defmodule Accrue.Processor do
               {:ok, map()} | {:error, Exception.t() | term()}
 
   # ---------------------------------------------------------------------------
+  # Subscription items (Phase 4 Plan 03, BILL-12)
+  # ---------------------------------------------------------------------------
+
+  @callback subscription_item_create(params(), opts()) :: result()
+  @callback subscription_item_update(id(), params(), opts()) :: result()
+  @callback subscription_item_delete(id(), params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # Subscription schedules (Phase 4 Plan 03, BILL-16)
+  # ---------------------------------------------------------------------------
+
+  @callback subscription_schedule_create(params(), opts()) :: result()
+  @callback subscription_schedule_update(id(), params(), opts()) :: result()
+  @callback subscription_schedule_release(id(), opts()) :: result()
+  @callback subscription_schedule_cancel(id(), opts()) :: result()
+  @callback subscription_schedule_fetch(id(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
   # Phase 1 facade dispatch
   # ---------------------------------------------------------------------------
 

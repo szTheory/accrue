@@ -73,6 +73,8 @@ defmodule Accrue.Processor.Fake do
   @refund_prefix "re_fake_"
   @event_prefix "evt_fake_"
   @meter_event_prefix "mev_fake_"
+  @subscription_item_prefix "si_fake_"
+  @subscription_schedule_prefix "sub_sched_fake_"
 
   # ---------------------------------------------------------------------------
   # Public API — lifecycle
@@ -424,6 +426,57 @@ defmodule Accrue.Processor.Fake do
 
   def meter_events_for(stripe_customer_id) when is_binary(stripe_customer_id) do
     GenServer.call(__MODULE__, {:meter_events_for, stripe_customer_id})
+  end
+
+  # ---------------------------------------------------------------------------
+  # Behaviour callbacks — subscription items (Phase 4 Plan 03, BILL-12)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def subscription_item_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_item_create, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def subscription_item_update(id, params, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_item_update, id, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def subscription_item_delete(id, params, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_item_delete, id, params, opts})
+  end
+
+  # ---------------------------------------------------------------------------
+  # Behaviour callbacks — subscription schedules (Phase 4 Plan 03, BILL-16)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def subscription_schedule_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_schedule_create, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_update(id, params, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_schedule_update, id, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_release(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_schedule_release, id, opts})
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_cancel(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_schedule_cancel, id, opts})
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_fetch(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:subscription_schedule_fetch, id, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -1012,6 +1065,129 @@ defmodule Accrue.Processor.Fake do
     {:reply, Map.get(state.meter_events, stripe_customer_id, []), state}
   end
 
+  # --- subscription items (Phase 4 Plan 03, BILL-12) ---
+
+  def handle_call({:subscription_item_create, params, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_item_create, [params, opts], fn state ->
+      counter = (state.counters[:subscription_item] || 0) + 1
+      counters = Map.put(state.counters, :subscription_item, counter)
+      state = %{state | counters: counters}
+      id = @subscription_item_prefix <> pad5(counter)
+
+      price = params[:price] || params["price"]
+      quantity = params[:quantity] || params["quantity"] || 1
+
+      item = %{
+        id: id,
+        object: "subscription_item",
+        subscription: params[:subscription] || params["subscription"],
+        price: %{id: price, product: "prod_fake_" <> to_string(price)},
+        quantity: quantity
+      }
+
+      {{:ok, item}, %{state | subscription_items: Map.put(state.subscription_items, id, item)}}
+    end)
+  end
+
+  def handle_call({:subscription_item_update, id, params, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_item_update, [id, params, opts], fn state ->
+      case Map.fetch(state.subscription_items, id) do
+        {:ok, existing} ->
+          updated = Map.merge(existing, atomize(params))
+
+          {{:ok, updated},
+           %{state | subscription_items: Map.put(state.subscription_items, id, updated)}}
+
+        :error ->
+          # Tolerate items created by build_subscription (not in the
+          # subscription_items map). Return a synthesized result that
+          # echoes the patch so the caller's local update succeeds.
+          synthesized = %{id: id, object: "subscription_item"} |> Map.merge(atomize(params))
+          {{:ok, synthesized}, state}
+      end
+    end)
+  end
+
+  def handle_call({:subscription_item_delete, id, params, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_item_delete, [id, params, opts], fn state ->
+      items = Map.delete(state.subscription_items, id)
+      result = %{id: id, object: "subscription_item", deleted: true}
+      {{:ok, result}, %{state | subscription_items: items}}
+    end)
+  end
+
+  # --- subscription schedules (Phase 4 Plan 03, BILL-16) ---
+
+  def handle_call({:subscription_schedule_create, params, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_schedule_create, [params, opts], fn state ->
+      counter = (state.counters[:subscription_schedule] || 0) + 1
+      counters = Map.put(state.counters, :subscription_schedule, counter)
+      state = %{state | counters: counters}
+      id = @subscription_schedule_prefix <> pad5(counter)
+      sched = build_subscription_schedule(state, id, params)
+
+      {{:ok, sched},
+       %{state | subscription_schedules: Map.put(state.subscription_schedules, id, sched)}}
+    end)
+  end
+
+  def handle_call({:subscription_schedule_update, id, params, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_schedule_update, [id, params, opts], fn state ->
+      case Map.fetch(state.subscription_schedules, id) do
+        {:ok, existing} ->
+          updated = Map.merge(existing, atomize(params))
+
+          {{:ok, updated},
+           %{state | subscription_schedules: Map.put(state.subscription_schedules, id, updated)}}
+
+        :error ->
+          {{:error, resource_missing(id)}, state}
+      end
+    end)
+  end
+
+  def handle_call({:subscription_schedule_release, id, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_schedule_release, [id, opts], fn state ->
+      case Map.fetch(state.subscription_schedules, id) do
+        {:ok, existing} ->
+          updated =
+            existing
+            |> Map.put(:status, "released")
+            |> Map.put(:released_at, DateTime.to_unix(state.clock))
+
+          {{:ok, updated},
+           %{state | subscription_schedules: Map.put(state.subscription_schedules, id, updated)}}
+
+        :error ->
+          {{:error, resource_missing(id)}, state}
+      end
+    end)
+  end
+
+  def handle_call({:subscription_schedule_cancel, id, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_schedule_cancel, [id, opts], fn state ->
+      case Map.fetch(state.subscription_schedules, id) do
+        {:ok, existing} ->
+          updated =
+            existing
+            |> Map.put(:status, "canceled")
+            |> Map.put(:canceled_at, DateTime.to_unix(state.clock))
+
+          {{:ok, updated},
+           %{state | subscription_schedules: Map.put(state.subscription_schedules, id, updated)}}
+
+        :error ->
+          {{:error, resource_missing(id)}, state}
+      end
+    end)
+  end
+
+  def handle_call({:subscription_schedule_fetch, id, opts}, _from, state) do
+    with_script_or_stub(state, :subscription_schedule_fetch, [id, opts], fn state ->
+      lookup(state.subscription_schedules, id, state)
+    end)
+  end
+
   # ---------------------------------------------------------------------------
   # Internals
   # ---------------------------------------------------------------------------
@@ -1354,6 +1530,37 @@ defmodule Accrue.Processor.Fake do
         net: (params[:amount] || params["amount"] || 0) - 30
       }
     }
+  end
+
+  defp build_subscription_schedule(state, id, params) do
+    phases = params[:phases] || params["phases"] || []
+    customer = params[:customer] || params["customer"]
+
+    %{
+      id: id,
+      object: "subscription_schedule",
+      customer: customer,
+      status: "not_started",
+      phases: phases,
+      current_phase: nil,
+      created: DateTime.to_unix(state.clock),
+      end_behavior: params[:end_behavior] || params["end_behavior"] || "release",
+      released_at: nil,
+      canceled_at: nil,
+      metadata: params[:metadata] || params["metadata"] || %{}
+    }
+  end
+
+  defp atomize(map) when is_map(map) do
+    Map.new(map, fn
+      {k, v} when is_atom(k) -> {k, v}
+      {k, v} when is_binary(k) ->
+        try do
+          {String.to_existing_atom(k), v}
+        rescue
+          ArgumentError -> {k, v}
+        end
+    end)
   end
 
   defp build_refund(state, id, params) do

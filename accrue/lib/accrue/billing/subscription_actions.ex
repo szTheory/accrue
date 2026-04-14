@@ -81,6 +81,8 @@ defmodule Accrue.Billing.SubscriptionActions do
       }
       |> put_if(:trial_end, trial_end)
       |> maybe_put_default_pm(opts)
+      |> maybe_put_coupon(opts)
+      |> maybe_put_collection_method(opts)
 
     result =
       Repo.transact(fn ->
@@ -484,7 +486,16 @@ defmodule Accrue.Billing.SubscriptionActions do
       type: {:in, [:void, :mark_uncollectible, :keep_as_draft]},
       default: :void
     ],
+    pause_behavior: [
+      type: {:or, [{:in, ["mark_uncollectible", "keep_as_draft", "void"]}, nil]},
+      default: nil
+    ],
     resumes_at: [type: :any, default: nil],
+    operation_id: [type: {:or, [:string, nil]}, default: nil]
+  ]
+
+  @comp_schema [
+    coupon_id: [type: :string, default: "accrue_comp_100_forever"],
     operation_id: [type: {:or, [:string, nil]}, default: nil]
   ]
 
@@ -492,7 +503,23 @@ defmodule Accrue.Billing.SubscriptionActions do
   def pause(sub, opts \\ [])
 
   def pause(%Subscription{} = sub, opts) do
-    {:ok, v} = NimbleOptions.validate(opts, @pause_schema)
+    v = NimbleOptions.validate!(opts, @pause_schema)
+
+    # BILL-11: if the new string :pause_behavior option is supplied,
+    # it takes precedence over the legacy :behavior atom. Otherwise
+    # derive the string form from the atom for persistence into the
+    # new accrue_subscriptions.pause_behavior column.
+    behavior_atom =
+      case v[:pause_behavior] do
+        nil -> v[:behavior]
+        "void" -> :void
+        "mark_uncollectible" -> :mark_uncollectible
+        "keep_as_draft" -> :keep_as_draft
+      end
+
+    behavior_string =
+      v[:pause_behavior] || Atom.to_string(behavior_atom)
+
     op_id = v[:operation_id] || Actor.current_operation_id!()
     idem_key = Idempotency.key(:pause_subscription, sub.id, op_id)
 
@@ -506,7 +533,7 @@ defmodule Accrue.Billing.SubscriptionActions do
       with {:ok, stripe_sub} <-
              Processor.__impl__().pause_subscription_collection(
                sub.processor_id,
-               v[:behavior],
+               behavior_atom,
                params,
                idempotency_key: idem_key
              ),
@@ -514,17 +541,82 @@ defmodule Accrue.Billing.SubscriptionActions do
            # Fake may store pause_collection atom-keyed; SubscriptionProjection
            # handles that, but we also force it locally to be safe.
            merged <-
-             Map.put(attrs, :pause_collection, %{
-               "behavior" => Atom.to_string(v[:behavior])
-             }),
+             attrs
+             |> Map.put(:pause_collection, %{"behavior" => behavior_string})
+             |> Map.put(:pause_behavior, behavior_string)
+             |> Map.put(:paused_at, Accrue.Clock.utc_now()),
            {:ok, updated} <- update_subscription_row(sub, merged),
            {:ok, _} <-
              record_event("subscription.paused", updated, %{
-               behavior: Atom.to_string(v[:behavior])
+               behavior: behavior_string
              }) do
         {:ok, Repo.preload(updated, :subscription_items, force: true)}
       end
     end)
+  end
+
+  # ---------------------------------------------------------------------
+  # comp_subscription/2..3 (BILL-14)
+  # ---------------------------------------------------------------------
+
+  @doc """
+  Creates a free-tier ("comped") subscription with a 100%-off coupon
+  applied. Skips the payment_method guard since there is nothing to
+  charge.
+
+  The coupon referenced by `coupon_id` must exist in the processor's
+  dashboard. Defaults to `"accrue_comp_100_forever"`; host apps create
+  this once via `Accrue.Billing.create_coupon/2` (landed in 04-05) or
+  the Stripe Dashboard.
+  """
+  @spec comp_subscription(term(), term(), keyword()) ::
+          {:ok, Subscription.t()} | {:error, term()}
+  def comp_subscription(billable, price_spec, opts \\ [])
+
+  def comp_subscription(%Customer{} = customer, price_spec, opts) do
+    v = NimbleOptions.validate!(opts, @comp_schema)
+
+    result =
+      subscribe(
+        customer,
+        price_spec,
+        coupon: v[:coupon_id],
+        skip_payment_method_check: true,
+        collection_method: "send_invoice",
+        operation_id: v[:operation_id]
+      )
+
+    case result do
+      {:ok, %Subscription{} = sub} ->
+        _ =
+          Events.record(%{
+            type: "subscription.comped",
+            subject_type: "Subscription",
+            subject_id: sub.id,
+            data: %{coupon_id: v[:coupon_id]}
+          })
+
+        {:ok, sub}
+
+      other ->
+        other
+    end
+  end
+
+  def comp_subscription(billable, price_spec, opts) do
+    with {:ok, customer} <- Accrue.Billing.customer(billable) do
+      comp_subscription(customer, price_spec, opts)
+    end
+  end
+
+  @doc "Raising variant of `comp_subscription/3`."
+  @spec comp_subscription!(term(), term(), keyword()) :: Subscription.t()
+  def comp_subscription!(billable, price_spec, opts \\ []) do
+    case comp_subscription(billable, price_spec, opts) do
+      {:ok, %Subscription{} = sub} -> sub
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "comp_subscription!/3 failed: #{inspect(other)}"
+    end
   end
 
   @spec pause!(Subscription.t(), keyword()) :: Subscription.t()
@@ -620,6 +712,20 @@ defmodule Accrue.Billing.SubscriptionActions do
     end
   end
 
+  defp maybe_put_coupon(params, opts) do
+    case Keyword.get(opts, :coupon) do
+      nil -> params
+      id when is_binary(id) -> Map.put(params, :discounts, [%{coupon: id}])
+    end
+  end
+
+  defp maybe_put_collection_method(params, opts) do
+    case Keyword.get(opts, :collection_method) do
+      nil -> params
+      m when is_binary(m) -> Map.put(params, :collection_method, m)
+    end
+  end
+
   defp maybe_put_quantity(item, nil), do: item
   defp maybe_put_quantity(item, qty), do: Map.put(item, :quantity, qty)
 
@@ -639,8 +745,12 @@ defmodule Accrue.Billing.SubscriptionActions do
       :invoice_now,
       :prorate,
       :behavior,
+      :pause_behavior,
       :resumes_at,
-      :preload
+      :preload,
+      :coupon,
+      :collection_method,
+      :skip_payment_method_check
     ])
   end
 

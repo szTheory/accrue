@@ -29,7 +29,8 @@ defmodule Accrue.Billing do
     MeterEventActions,
     PaymentMethodActions,
     RefundActions,
-    SubscriptionActions
+    SubscriptionActions,
+    SubscriptionItems
   }
 
   alias Accrue.Events
@@ -73,6 +74,17 @@ defmodule Accrue.Billing do
   defdelegate update_quantity!(sub, quantity, opts \\ []), to: SubscriptionActions
   defdelegate preview_upcoming_invoice(sub_or_customer, opts \\ []), to: SubscriptionActions
   defdelegate preview_upcoming_invoice!(sub_or_customer, opts \\ []), to: SubscriptionActions
+
+  # ── Advanced subscription surface (Phase 4 Plan 03) ───────────────
+  defdelegate comp_subscription(billable, price_spec, opts \\ []), to: SubscriptionActions
+  defdelegate comp_subscription!(billable, price_spec, opts \\ []), to: SubscriptionActions
+
+  defdelegate add_item(sub, price_id, opts \\ []), to: SubscriptionItems
+  defdelegate add_item!(sub, price_id, opts \\ []), to: SubscriptionItems
+  defdelegate remove_item(item, opts \\ []), to: SubscriptionItems
+  defdelegate remove_item!(item, opts \\ []), to: SubscriptionItems
+  defdelegate update_item_quantity(item, quantity, opts \\ []), to: SubscriptionItems
+  defdelegate update_item_quantity!(item, quantity, opts \\ []), to: SubscriptionItems
 
   # ── Invoice surface (Plan 05) ─────────────────────────────────────
   defdelegate finalize_invoice(invoice, opts \\ []), to: InvoiceActions

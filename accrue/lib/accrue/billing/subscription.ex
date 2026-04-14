@@ -50,6 +50,11 @@ defmodule Accrue.Billing.Subscription do
     field :status, Ecto.Enum, values: @statuses
     field :cancel_at_period_end, :boolean, default: false
     field :pause_collection, :map
+    field :paused_at, :utc_datetime_usec
+    field :pause_behavior, :string
+    field :past_due_since, :utc_datetime_usec
+    field :dunning_sweep_attempted_at, :utc_datetime_usec
+    field :discount_id, :string
     field :current_period_start, :utc_datetime_usec
     field :current_period_end, :utc_datetime_usec
     field :trial_start, :utc_datetime_usec
@@ -71,6 +76,7 @@ defmodule Accrue.Billing.Subscription do
   @cast_fields ~w[
     customer_id processor processor_id status
     cancel_at_period_end pause_collection
+    paused_at pause_behavior past_due_since dunning_sweep_attempted_at discount_id
     current_period_start current_period_end
     trial_start trial_end cancel_at canceled_at ended_at
     last_stripe_event_ts last_stripe_event_id
@@ -78,6 +84,20 @@ defmodule Accrue.Billing.Subscription do
   ]a
 
   @required_fields ~w[customer_id processor]a
+
+  @doc """
+  Webhook-path changeset (D3-17). Skips user-path validation guards so
+  out-of-order webhook events can settle arbitrary state without the
+  state-machine check failing on an otherwise-valid transition.
+  """
+  @spec force_status_changeset(%__MODULE__{} | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
+  def force_status_changeset(subscription_or_changeset, attrs \\ %{}) do
+    subscription_or_changeset
+    |> cast(attrs, @cast_fields)
+    |> Metadata.validate_metadata(:metadata)
+    |> optimistic_lock(:lock_version)
+    |> foreign_key_constraint(:customer_id)
+  end
 
   @doc "Canonical list of subscription statuses (D3-03, Stripe's 8 values)."
   @spec statuses() :: [atom()]

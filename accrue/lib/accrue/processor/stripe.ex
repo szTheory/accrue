@@ -547,6 +547,96 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
+  # Subscription items (Phase 4 Plan 03, BILL-12)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def subscription_item_create(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:subscription_item_create, subject_of(params, "si"), opts)
+
+    client
+    |> LatticeStripe.SubscriptionItem.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def subscription_item_update(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:subscription_item_update, id, opts)
+
+    client
+    |> LatticeStripe.SubscriptionItem.update(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def subscription_item_delete(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:subscription_item_delete, id, opts)
+
+    client
+    |> LatticeStripe.SubscriptionItem.delete(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
+  # Subscription schedules (Phase 4 Plan 03, BILL-16)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def subscription_schedule_create(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:subscription_schedule_create, subject_of(params, "sub_sched"), opts)
+
+    client
+    |> LatticeStripe.SubscriptionSchedule.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_update(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:subscription_schedule_update, id, opts)
+
+    client
+    |> LatticeStripe.SubscriptionSchedule.update(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_release(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:subscription_schedule_release, id, opts)
+
+    client
+    |> LatticeStripe.SubscriptionSchedule.release(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_cancel(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:subscription_schedule_cancel, id, opts)
+
+    client
+    |> LatticeStripe.SubscriptionSchedule.cancel(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def subscription_schedule_fetch(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.SubscriptionSchedule.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
   # fetch/2 — generic refetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
 

@@ -13,6 +13,8 @@ defmodule Accrue.Processor.Fake.State do
   @type t :: %__MODULE__{
           customers: %{optional(id()) => map()},
           subscriptions: %{optional(id()) => map()},
+          subscription_items: %{optional(id()) => map()},
+          subscription_schedules: %{optional(id()) => map()},
           invoices: %{optional(id()) => map()},
           payment_intents: %{optional(id()) => map()},
           setup_intents: %{optional(id()) => map()},
@@ -23,6 +25,8 @@ defmodule Accrue.Processor.Fake.State do
           counters: %{
             customer: non_neg_integer(),
             subscription: non_neg_integer(),
+            subscription_item: non_neg_integer(),
+            subscription_schedule: non_neg_integer(),
             invoice: non_neg_integer(),
             payment_intent: non_neg_integer(),
             setup_intent: non_neg_integer(),
@@ -41,6 +45,8 @@ defmodule Accrue.Processor.Fake.State do
 
   defstruct customers: %{},
             subscriptions: %{},
+            subscription_items: %{},
+            subscription_schedules: %{},
             invoices: %{},
             payment_intents: %{},
             setup_intents: %{},
@@ -51,6 +57,8 @@ defmodule Accrue.Processor.Fake.State do
             counters: %{
               customer: 0,
               subscription: 0,
+              subscription_item: 0,
+              subscription_schedule: 0,
               invoice: 0,
               payment_intent: 0,
               setup_intent: 0,
