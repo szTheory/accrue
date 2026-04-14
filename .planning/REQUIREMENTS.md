@@ -39,12 +39,12 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **BILL-08**: Immediate cancel with optional final-invoice handling
 - [x] **BILL-09**: Plan swap with **explicit** `:proration` option (never silently inherits Stripe's default)
 - [x] **BILL-10**: `preview_upcoming_invoice/2` for proration preview UX before swap commits
-- [ ] **BILL-11**: Pause/resume with `pause_behavior` option
-- [ ] **BILL-12**: Multi-item subscriptions (SubscriptionItem)
+- [x] **BILL-11**: Pause/resume with `pause_behavior` option
+- [x] **BILL-12**: Multi-item subscriptions (SubscriptionItem)
 - [x] **BILL-13**: Metered billing via Stripe BillingMeters + MeterEvents
-- [ ] **BILL-14**: Free-tier / comped subscriptions (no PaymentMethod required)
+- [x] **BILL-14**: Free-tier / comped subscriptions (no PaymentMethod required)
 - [ ] **BILL-15**: Dunning / grace period handling with `past_due` → `unpaid` transitions
-- [ ] **BILL-16**: Subscription Schedules for multi-phase intro pricing
+- [x] **BILL-16**: Subscription Schedules for multi-phase intro pricing
 - [x] **BILL-17**: `Accrue.Billing.Invoice` state machine (draft → open → paid | void | uncollectible)
 - [x] **BILL-18**: Invoice line items, discounts, tax
 - [x] **BILL-19**: `finalize/2`, `void/2`, `mark_uncollectible/2`, `pay/3`, `send/2` workflow actions
@@ -318,12 +318,12 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-08 | Phase 3 | Complete |
 | BILL-09 | Phase 3 | Complete |
 | BILL-10 | Phase 3 | Complete |
-| BILL-11 | Phase 4 | Pending |
-| BILL-12 | Phase 4 | Pending |
+| BILL-11 | Phase 4 | Complete |
+| BILL-12 | Phase 4 | Complete |
 | BILL-13 | Phase 4 | Complete |
-| BILL-14 | Phase 4 | Pending |
+| BILL-14 | Phase 4 | Complete |
 | BILL-15 | Phase 4 | Pending |
-| BILL-16 | Phase 4 | Pending |
+| BILL-16 | Phase 4 | Complete |
 | BILL-17 | Phase 3 | Complete |
 | BILL-18 | Phase 3 | Complete |
 | BILL-19 | Phase 3 | Complete |

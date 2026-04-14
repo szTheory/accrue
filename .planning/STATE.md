@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-04-14T21:35:52.272Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-04-14T21:50:22.036Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 28
-  completed_plans: 22
-  percent: 79
+  completed_plans: 23
+  percent: 82
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 04 (advanced-billing-webhook-hardening) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P08 | 15m | 3 tasks | 16 files |
 | Phase 04 P01 | 22m | 3 tasks | 10 files |
 | Phase 04-advanced-billing-webhook-hardening P02 | 25m | 3 tasks | 15 files |
+| Phase 04 P03 | 30m | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 04]: Config @schema doc strings must avoid 'LatticeStripe' substring — facade lockdown test scans all lib/ files
 - [Phase 04]: Phase 04 P02: report_usage/3 pre-checks identifier outside Repo.transact to avoid in_failed_sql_transaction on unique index trip
 - [Phase 04]: Phase 04 P02: meter webhook reducer lives inline in DefaultHandler (matches Phase 3 shape, no webhook/handlers/ subdir)
+- [Phase 04]: Phase 04 P03: pause/2 accepts both legacy :behavior atom and new :pause_behavior string; string takes precedence and goes through allowlist validation
+- [Phase 04]: Phase 04 P03: comp_subscription/3 delegates to subscribe/3 via new :coupon/:collection_method/:skip_payment_method_check forwarded options rather than duplicating the subscribe path
+- [Phase 04]: Phase 04 P03: SubscriptionSchedule webhook reducer uses dedicated subscription_schedule_fetch callback with fetch/2 dispatch clause for reducer ergonomics; out-of-order tolerance via :deferred orphan pattern matching Phase 3 shapes
 
 ### Pending Todos
 
@@ -125,6 +129,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T21:35:52.166Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-04-14T21:50:12.912Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None
