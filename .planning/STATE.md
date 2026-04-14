@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-06-PLAN.md
-last_updated: "2026-04-14T17:48:59.937Z"
+stopped_at: Completed 03-07-PLAN.md
+last_updated: "2026-04-14T18:04:39.590Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 20
-  completed_plans: 18
-  percent: 90
+  completed_plans: 19
+  percent: 95
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 03 (core-subscription-lifecycle) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-core-subscription-lifecycle P04 | 35m | 3 tasks | 12 files |
 | Phase 03 P05 | 12m | 2 tasks | 5 files |
 | Phase 03 P06 | 25m | 3 tasks | 10 files |
+| Phase 03-core-subscription-lifecycle P07 | 12m | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,11 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 03]: set_default_payment_method asserts pm.customer_id==customer.id BEFORE any processor call; raises Accrue.Error.NotAttached — not a tuple return
 - [Phase 03]: create_refund returns uniform {:ok, %Refund{}} — fee settlement state is a property (fees_settled?) not a tagged-return branch (D3-47)
 - [Phase 03]: Accrue.Repo facade gains get/get_by/get_by!/delete/aggregate delegations for Plan 06 — D-10 host-owns-Repo preserved as pure pass-throughs
+- [Phase 03]: DefaultHandler uses Processor.__impl__().fetch(type, id) not a facade Processor.fetch/2 — facade has only @callback
+- [Phase 03]: Webhook reducer load_row/2 dispatches per type — subscription/invoice/charge/PM use processor_id, refund uses stripe_id
+- [Phase 03]: DefaultHandler ships dual entry points: handle/1 (raw map for Fake.synthesize_event) + handle_event/3 (Dispatch worker) sharing one dispatch/4
+- [Phase 03]: DetectExpiringCards dedup via events table fragment (?->>'threshold')::int — no new dedup column on payment_methods
+- [Phase 03]: LiveView on_mount hook for operation_id deferred to accrue_admin — LiveView is hard dep only there
 
 ### Pending Todos
 
@@ -108,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T17:48:47.030Z
-Stopped at: Completed 03-06-PLAN.md
+Last session: 2026-04-14T18:04:28.345Z
+Stopped at: Completed 03-07-PLAN.md
 Resume file: None

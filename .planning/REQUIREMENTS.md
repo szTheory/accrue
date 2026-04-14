@@ -52,7 +52,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **BILL-21**: `Accrue.Billing.PaymentIntent` with tagged `{:ok, :requires_action, intent}` return for 3DS/SCA
 - [x] **BILL-22**: `Accrue.Billing.SetupIntent` for off-session card-on-file
 - [x] **BILL-23**: `Accrue.Billing.PaymentMethod` with fingerprint-based dedup
-- [ ] **BILL-24**: Expiring-card warnings surfaced via telemetry + events
+- [x] **BILL-24**: Expiring-card warnings surfaced via telemetry + events
 - [x] **BILL-25**: Default-payment-method management per customer
 - [x] **BILL-26**: `Accrue.Billing.Refund` with fee-aware schema (`stripe_fee_refunded_amount`, `merchant_loss_amount`)
 - [ ] **BILL-27**: `Accrue.Billing.Coupon` + `Accrue.Billing.PromotionCode` with customer-facing apply flow
@@ -91,7 +91,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **WH-06**: User handler behaviour with pattern-matchable event types
 - [ ] **WH-07**: Default handler for built-in state reconciliation (subscription/invoice/charge updates)
 - [ ] **WH-08**: Replay tooling (requeue individual or bulk DLQ'd events)
-- [ ] **WH-09**: Out-of-order delivery resolution (resolve state from newest event by Stripe `created`)
+- [x] **WH-09**: Out-of-order delivery resolution (resolve state from newest event by Stripe `created`)
 - [ ] **WH-10**: Handler re-fetches current object instead of trusting snapshot payload
 - [ ] **WH-11**: Configurable DLQ retention, default 90 days, pruned via Oban cron
 - [ ] **WH-12**: Webhook pipeline p99 latency <100ms (verify → persist → enqueue → 200)
@@ -331,7 +331,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-21 | Phase 3 | Complete |
 | BILL-22 | Phase 3 | Complete |
 | BILL-23 | Phase 3 | Complete |
-| BILL-24 | Phase 3 | Pending |
+| BILL-24 | Phase 3 | Complete |
 | BILL-25 | Phase 3 | Complete |
 | BILL-26 | Phase 3 | Complete |
 | BILL-27 | Phase 4 | Pending |
@@ -361,7 +361,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | WH-06 | Phase 2 | Pending |
 | WH-07 | Phase 2 | Pending |
 | WH-08 | Phase 4 | Pending |
-| WH-09 | Phase 3 | Pending |
+| WH-09 | Phase 3 | Complete |
 | WH-10 | Phase 2 | Pending |
 | WH-11 | Phase 2 | Pending |
 | WH-12 | Phase 2 | Pending |

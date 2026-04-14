@@ -80,7 +80,7 @@ Plans:
 - [x] 03-04-PLAN.md — Wave 2: Accrue.Billing subscribe/swap_plan/cancel/cancel_at_period_end/resume/pause/unpause/update_quantity/preview_upcoming_invoice/trial_end normalizer + intent_result wrapping
 - [x] 03-05-PLAN.md — Wave 2: Invoice workflow (finalize/void/pay/mark_uncollectible/send_invoice) + InvoiceProjection decomposer
 - [x] 03-06-PLAN.md — Wave 2: Charge/PaymentIntent/SetupIntent + PaymentMethod fingerprint dedup + set_default_payment_method + Refund fee math
-- [ ] 03-07-PLAN.md — Wave 3: Webhook DefaultHandler Phase 3 reducers (skip-stale + refetch + out-of-order) + operation_id plug/LiveView/Oban middleware + reconciler jobs + DetectExpiringCards
+- [x] 03-07-PLAN.md — Wave 3: Webhook DefaultHandler Phase 3 reducers (skip-stale + refetch + out-of-order) + operation_id plug/LiveView/Oban middleware + reconciler jobs + DetectExpiringCards
 - [ ] 03-08-PLAN.md — Wave 3: Nine test factories + 24-event schema registry + Upcaster behaviour + property tests + VALIDATION.md population
 **UI hint**: no
 
