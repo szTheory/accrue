@@ -1,3 +1,7 @@
+# Start the Credo application so custom check tests can use
+# Credo.Test.Case (Credo.Service.SourceFileAST is required by to_source_file/1).
+{:ok, _} = Application.ensure_all_started(:credo)
+
 Accrue.MoxSetup.define_mocks()
 
 # Configure webhook signing secrets for test fixtures (Plan 06).
