@@ -43,7 +43,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **BILL-12**: Multi-item subscriptions (SubscriptionItem)
 - [x] **BILL-13**: Metered billing via Stripe BillingMeters + MeterEvents
 - [x] **BILL-14**: Free-tier / comped subscriptions (no PaymentMethod required)
-- [ ] **BILL-15**: Dunning / grace period handling with `past_due` → `unpaid` transitions
+- [x] **BILL-15**: Dunning / grace period handling with `past_due` → `unpaid` transitions
 - [x] **BILL-16**: Subscription Schedules for multi-phase intro pricing
 - [x] **BILL-17**: `Accrue.Billing.Invoice` state machine (draft → open → paid | void | uncollectible)
 - [x] **BILL-18**: Invoice line items, discounts, tax
@@ -322,7 +322,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-12 | Phase 4 | Complete |
 | BILL-13 | Phase 4 | Complete |
 | BILL-14 | Phase 4 | Complete |
-| BILL-15 | Phase 4 | Pending |
+| BILL-15 | Phase 4 | Complete |
 | BILL-16 | Phase 4 | Complete |
 | BILL-17 | Phase 3 | Complete |
 | BILL-18 | Phase 3 | Complete |
