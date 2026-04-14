@@ -147,33 +147,35 @@ defmodule Accrue.Billing.InvoiceActions do
   end
 
   defp upsert_items(%Invoice{} = invoice, item_attrs_list) when is_list(item_attrs_list) do
-    Enum.each(item_attrs_list, fn attrs ->
+    # WR-09: reduce_while + non-bang variants so changeset errors
+    # propagate into the enclosing Repo.transact with-chain.
+    Enum.reduce_while(item_attrs_list, {:ok, []}, fn attrs, {:ok, acc} ->
       attrs = Map.put(attrs, :invoice_id, invoice.id)
-      upsert_item(attrs)
-    end)
 
-    {:ok, :upserted}
+      case upsert_item(attrs) do
+        {:ok, item} -> {:cont, {:ok, [item | acc]}}
+        {:error, _} = err -> {:halt, err}
+      end
+    end)
   end
 
   defp upsert_item(%{stripe_id: nil} = attrs) do
     %InvoiceItem{}
     |> InvoiceItem.changeset(attrs)
-    |> Repo.insert!()
+    |> Repo.insert()
   end
 
   defp upsert_item(%{stripe_id: sid} = attrs) when is_binary(sid) do
-    case Repo.one(
-           from_query(sid)
-         ) do
+    case Repo.one(from_query(sid)) do
       nil ->
         %InvoiceItem{}
         |> InvoiceItem.changeset(attrs)
-        |> Repo.insert!()
+        |> Repo.insert()
 
       existing ->
         existing
         |> InvoiceItem.changeset(attrs)
-        |> Repo.update!()
+        |> Repo.update()
     end
   end
 

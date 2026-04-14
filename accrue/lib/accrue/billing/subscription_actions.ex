@@ -670,11 +670,15 @@ defmodule Accrue.Billing.SubscriptionActions do
         list when is_list(list) -> list
       end
 
-    Enum.each(items, fn si ->
-      upsert_item(sub, si)
+    # WR-09: use reduce_while so a bad changeset propagates as
+    # {:error, changeset} rather than escaping Repo.transact via
+    # Ecto.InvalidChangesetError from Repo.insert!/update!.
+    Enum.reduce_while(items, {:ok, []}, fn si, {:ok, acc} ->
+      case upsert_item(sub, si) do
+        {:ok, item} -> {:cont, {:ok, [item | acc]}}
+        {:error, _} = err -> {:halt, err}
+      end
     end)
-
-    {:ok, :upserted}
   end
 
   defp upsert_item(sub, si) when is_map(si) do
@@ -694,16 +698,18 @@ defmodule Accrue.Billing.SubscriptionActions do
       metadata: SubscriptionProjection.get(si, :metadata) || %{}
     }
 
+    # WR-09: non-bang variants so Ecto.InvalidChangesetError no longer
+    # bypasses the enclosing with-chain.
     case Repo.one(from(i in SubscriptionItem, where: i.processor_id == ^stripe_id)) do
       nil ->
         %SubscriptionItem{}
         |> SubscriptionItem.changeset(attrs)
-        |> Repo.insert!()
+        |> Repo.insert()
 
       existing ->
         existing
         |> SubscriptionItem.changeset(attrs)
-        |> Repo.update!()
+        |> Repo.update()
     end
   end
 

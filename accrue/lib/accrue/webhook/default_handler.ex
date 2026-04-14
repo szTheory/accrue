@@ -240,8 +240,13 @@ defmodule Accrue.Webhook.DefaultHandler do
         list when is_list(list) -> list
       end
 
-    Enum.each(items, fn si -> upsert_subscription_item(sub, si) end)
-    {:ok, :upserted}
+    # WR-09: reduce_while + non-bang variants.
+    Enum.reduce_while(items, {:ok, []}, fn si, {:ok, acc} ->
+      case upsert_subscription_item(sub, si) do
+        {:ok, item} -> {:cont, {:ok, [item | acc]}}
+        {:error, _} = err -> {:halt, err}
+      end
+    end)
   end
 
   defp upsert_subscription_item(sub, si) when is_map(si) do
@@ -268,8 +273,8 @@ defmodule Accrue.Webhook.DefaultHandler do
     import Ecto.Query, only: [from: 2]
 
     case Repo.one(from i in SubscriptionItem, where: i.processor_id == ^stripe_id) do
-      nil -> %SubscriptionItem{} |> SubscriptionItem.changeset(attrs) |> Repo.insert!()
-      existing -> existing |> SubscriptionItem.changeset(attrs) |> Repo.update!()
+      nil -> %SubscriptionItem{} |> SubscriptionItem.changeset(attrs) |> Repo.insert()
+      existing -> existing |> SubscriptionItem.changeset(attrs) |> Repo.update()
     end
   end
 
@@ -330,22 +335,29 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp upsert_invoice_items(%Invoice{} = invoice, item_attrs_list) when is_list(item_attrs_list) do
     import Ecto.Query, only: [from: 2]
 
-    Enum.each(item_attrs_list, fn attrs ->
+    # WR-09: reduce_while + non-bang variants so changeset errors
+    # propagate rather than escaping Repo.transact via
+    # Ecto.InvalidChangesetError.
+    Enum.reduce_while(item_attrs_list, {:ok, []}, fn attrs, {:ok, acc} ->
       attrs = Map.put(attrs, :invoice_id, invoice.id)
 
-      case attrs[:stripe_id] do
-        nil ->
-          %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert!()
+      result =
+        case attrs[:stripe_id] do
+          nil ->
+            %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert()
 
-        sid when is_binary(sid) ->
-          case Repo.one(from i in InvoiceItem, where: i.stripe_id == ^sid) do
-            nil -> %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert!()
-            existing -> existing |> InvoiceItem.changeset(attrs) |> Repo.update!()
-          end
+          sid when is_binary(sid) ->
+            case Repo.one(from i in InvoiceItem, where: i.stripe_id == ^sid) do
+              nil -> %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert()
+              existing -> existing |> InvoiceItem.changeset(attrs) |> Repo.update()
+            end
+        end
+
+      case result do
+        {:ok, item} -> {:cont, {:ok, [item | acc]}}
+        {:error, _} = err -> {:halt, err}
       end
     end)
-
-    {:ok, :upserted}
   end
 
   # ---------------------------------------------------------------------
