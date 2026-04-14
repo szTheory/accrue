@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-04-14T16:45:09.835Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-04-14T16:56:24.392Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 20
-  completed_plans: 13
-  percent: 65
+  completed_plans: 14
+  percent: 70
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 03 (core-subscription-lifecycle) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 03-core-subscription-lifecycle P01 | 9m | 4 tasks | 18 files |
+| Phase 03 P02 | 10m | 3 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Roadmap]: DLQ retention default 90 days (WH-11); installer idempotent from day one (INST-07)
 - [Phase 03-core-subscription-lifecycle]: defdelegate is compile-checked in modern Elixir — action modules need declarative stubs, not empty bodies
 - [Phase 03-core-subscription-lifecycle]: NoRawStatusAccess Credo check scoped to Subscription-shaped code (stripe status atoms) to avoid false positives on WebhookEvent.status
+- [Phase 03]: Invoice.changeset/2 @required_fields is empty — state-machine changeset operates on bare structs; processor enforcement lives at Customer level
+- [Phase 03]: Accrue.Billing.Query exempt from NoRawStatusAccess: canonical query wrapper, same role as Subscription module for predicates
+- [Phase 03]: Invoice rollup columns use bigint not integer: annual enterprise totals and multi-year Subscription Schedule previews can exceed 2^31
 
 ### Pending Todos
 
@@ -86,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T16:45:09.833Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-04-14T16:56:16.519Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None

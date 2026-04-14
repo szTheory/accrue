@@ -32,10 +32,10 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **BILL-01**: Polymorphic `Accrue.Billing.Customer` with `owner_type`/`owner_id`, `data` jsonb, default-management, metadata deep-merge
 - [ ] **BILL-02**: `use Accrue.Billable` macro — any host schema (User, Organization, Team) becomes billable
 - [ ] **BILL-03**: `Accrue.Billing.Subscription` create/retrieve/swap/cancel/resume/pause
-- [ ] **BILL-04**: Subscription state machine: trialing → active → past_due → incomplete/incomplete_expired → unpaid/paused → canceled
+- [x] **BILL-04**: Subscription state machine: trialing → active → past_due → incomplete/incomplete_expired → unpaid/paused → canceled
 - [x] **BILL-05**: Three canonical predicates: `active?/1`, `canceling?/1`, `canceled?/1` (never expose raw `status`)
 - [ ] **BILL-06**: Trial support with `trial_end` (`:now` or unix timestamp), `trial_will_end` webhook handling
-- [ ] **BILL-07**: `cancel_at_period_end` with grace period tracking (status stays `active` until period ends)
+- [x] **BILL-07**: `cancel_at_period_end` with grace period tracking (status stays `active` until period ends)
 - [ ] **BILL-08**: Immediate cancel with optional final-invoice handling
 - [ ] **BILL-09**: Plan swap with **explicit** `:proration` option (never silently inherits Stripe's default)
 - [ ] **BILL-10**: `preview_upcoming_invoice/2` for proration preview UX before swap commits
@@ -45,16 +45,16 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **BILL-14**: Free-tier / comped subscriptions (no PaymentMethod required)
 - [ ] **BILL-15**: Dunning / grace period handling with `past_due` → `unpaid` transitions
 - [ ] **BILL-16**: Subscription Schedules for multi-phase intro pricing
-- [ ] **BILL-17**: `Accrue.Billing.Invoice` state machine (draft → open → paid | void | uncollectible)
-- [ ] **BILL-18**: Invoice line items, discounts, tax
+- [x] **BILL-17**: `Accrue.Billing.Invoice` state machine (draft → open → paid | void | uncollectible)
+- [x] **BILL-18**: Invoice line items, discounts, tax
 - [ ] **BILL-19**: `finalize/2`, `void/2`, `mark_uncollectible/2`, `pay/3`, `send/2` workflow actions
 - [ ] **BILL-20**: `Accrue.Billing.Charge` wrapper with idempotency
 - [ ] **BILL-21**: `Accrue.Billing.PaymentIntent` with tagged `{:ok, :requires_action, intent}` return for 3DS/SCA
 - [ ] **BILL-22**: `Accrue.Billing.SetupIntent` for off-session card-on-file
-- [ ] **BILL-23**: `Accrue.Billing.PaymentMethod` with fingerprint-based dedup
+- [x] **BILL-23**: `Accrue.Billing.PaymentMethod` with fingerprint-based dedup
 - [ ] **BILL-24**: Expiring-card warnings surfaced via telemetry + events
-- [ ] **BILL-25**: Default-payment-method management per customer
-- [ ] **BILL-26**: `Accrue.Billing.Refund` with fee-aware schema (`stripe_fee_refunded_amount`, `merchant_loss_amount`)
+- [x] **BILL-25**: Default-payment-method management per customer
+- [x] **BILL-26**: `Accrue.Billing.Refund` with fee-aware schema (`stripe_fee_refunded_amount`, `merchant_loss_amount`)
 - [ ] **BILL-27**: `Accrue.Billing.Coupon` + `Accrue.Billing.PromotionCode` with customer-facing apply flow
 - [ ] **BILL-28**: Discount application at subscription, invoice, and checkout-session level
 
@@ -311,10 +311,10 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-01 | Phase 2 | Pending |
 | BILL-02 | Phase 2 | Pending |
 | BILL-03 | Phase 3 | Pending |
-| BILL-04 | Phase 3 | Pending |
+| BILL-04 | Phase 3 | Complete |
 | BILL-05 | Phase 3 | Complete |
 | BILL-06 | Phase 3 | Pending |
-| BILL-07 | Phase 3 | Pending |
+| BILL-07 | Phase 3 | Complete |
 | BILL-08 | Phase 3 | Pending |
 | BILL-09 | Phase 3 | Pending |
 | BILL-10 | Phase 3 | Pending |
@@ -324,16 +324,16 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-14 | Phase 4 | Pending |
 | BILL-15 | Phase 4 | Pending |
 | BILL-16 | Phase 4 | Pending |
-| BILL-17 | Phase 3 | Pending |
-| BILL-18 | Phase 3 | Pending |
+| BILL-17 | Phase 3 | Complete |
+| BILL-18 | Phase 3 | Complete |
 | BILL-19 | Phase 3 | Pending |
 | BILL-20 | Phase 3 | Pending |
 | BILL-21 | Phase 3 | Pending |
 | BILL-22 | Phase 3 | Pending |
-| BILL-23 | Phase 3 | Pending |
+| BILL-23 | Phase 3 | Complete |
 | BILL-24 | Phase 3 | Pending |
-| BILL-25 | Phase 3 | Pending |
-| BILL-26 | Phase 3 | Pending |
+| BILL-25 | Phase 3 | Complete |
+| BILL-26 | Phase 3 | Complete |
 | BILL-27 | Phase 4 | Pending |
 | BILL-28 | Phase 4 | Pending |
 | CHKT-01 | Phase 4 | Pending |
