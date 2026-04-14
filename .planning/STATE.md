@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-04-14T17:27:00.717Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-04-14T17:36:07.503Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 20
-  completed_plans: 16
-  percent: 80
+  completed_plans: 17
+  percent: 85
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 03 (core-subscription-lifecycle) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P02 | 10m | 3 tasks | 18 files |
 | Phase 03 P03 | 25m | 3 tasks | 7 files |
 | Phase 03-core-subscription-lifecycle P04 | 35m | 3 tasks | 12 files |
+| Phase 03 P05 | 12m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 03-core-subscription-lifecycle]: NimbleOptions nil defaults require {:or, [:type, nil]} union — bare :string/:pos_integer types fail validate with default: nil
 - [Phase 03-core-subscription-lifecycle]: Accrue.Billing.subscribe/3 accepts both billable struct AND %Customer{} directly — tests need manual customer seeding; host-app callers use lazy fetch
 - [Phase 03-core-subscription-lifecycle]: Fake gains build_subscription_item/apply_subscription_update/merge_item helpers so flat item patches round-trip through Stripe-shape items.data nesting
+- [Phase 03]: InvoiceProjection emits :processor_id (not :stripe_id) for parent invoice; only InvoiceItem uses :stripe_id (D3-15)
+- [Phase 03]: InvoiceProjection delegates field lookup to SubscriptionProjection.get/2 for dual-key (atom/string) support — no duplication
+- [Phase 03]: run_action/4 is the single D3-18 workflow shape for all 5 invoice actions; only pay_invoice wraps via IntentResult
 
 ### Pending Todos
 
@@ -98,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T17:26:47.817Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-04-14T17:35:59.003Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None

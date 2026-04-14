@@ -47,7 +47,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **BILL-16**: Subscription Schedules for multi-phase intro pricing
 - [x] **BILL-17**: `Accrue.Billing.Invoice` state machine (draft → open → paid | void | uncollectible)
 - [x] **BILL-18**: Invoice line items, discounts, tax
-- [ ] **BILL-19**: `finalize/2`, `void/2`, `mark_uncollectible/2`, `pay/3`, `send/2` workflow actions
+- [x] **BILL-19**: `finalize/2`, `void/2`, `mark_uncollectible/2`, `pay/3`, `send/2` workflow actions
 - [ ] **BILL-20**: `Accrue.Billing.Charge` wrapper with idempotency
 - [ ] **BILL-21**: `Accrue.Billing.PaymentIntent` with tagged `{:ok, :requires_action, intent}` return for 3DS/SCA
 - [ ] **BILL-22**: `Accrue.Billing.SetupIntent` for off-session card-on-file
@@ -326,7 +326,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-16 | Phase 4 | Pending |
 | BILL-17 | Phase 3 | Complete |
 | BILL-18 | Phase 3 | Complete |
-| BILL-19 | Phase 3 | Pending |
+| BILL-19 | Phase 3 | Complete |
 | BILL-20 | Phase 3 | Pending |
 | BILL-21 | Phase 3 | Pending |
 | BILL-22 | Phase 3 | Pending |
