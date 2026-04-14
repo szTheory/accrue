@@ -244,6 +244,7 @@ defmodule Accrue.Webhook.DefaultHandler do
 
           %Subscription{} = updated ->
             with {:ok, _} <- upsert_subscription_items(updated, canonical),
+                 :ok <- maybe_emit_dunning_exhaustion(row, updated),
                  {:ok, _} <-
                    record_event(
                      subscription_event_type(action),
@@ -256,6 +257,42 @@ defmodule Accrue.Webhook.DefaultHandler do
         end
       end
     end)
+  end
+
+  # Phase 4 Plan 04 — BILL-15 / D4-02. Emits terminal-action telemetry
+  # when Stripe echoes a transition out of :past_due into :unpaid or
+  # :canceled. Runs inside the enclosing Repo.transact/2 so the write
+  # and the signal are atomic (idempotent under webhook replay because
+  # dedup at the dispatch layer short-circuits before the reducer body).
+  defp maybe_emit_dunning_exhaustion(nil, _updated), do: :ok
+
+  defp maybe_emit_dunning_exhaustion(%Subscription{} = row, %Subscription{} = updated) do
+    with true <- Subscription.dunning_sweepable?(row),
+         to_status when not is_nil(to_status) <-
+           Subscription.dunning_exhausted_status(updated) do
+      :telemetry.execute(
+        [:accrue, :ops, :dunning_exhaustion],
+        %{count: 1},
+        %{
+          subscription_id: updated.id,
+          from_status: :past_due,
+          to_status: to_status,
+          source: dunning_source(row.dunning_sweep_attempted_at)
+        }
+      )
+    end
+
+    :ok
+  end
+
+  defp dunning_source(nil), do: :stripe_native
+
+  defp dunning_source(%DateTime{} = attempted_at) do
+    if DateTime.diff(DateTime.utc_now(), attempted_at, :second) < 300 do
+      :accrue_sweeper
+    else
+      :stripe_native
+    end
   end
 
   defp subscription_event_type("trial_will_end"), do: "subscription.trial_ended"
@@ -422,6 +459,7 @@ defmodule Accrue.Webhook.DefaultHandler do
 
           %Invoice{} = updated ->
             with {:ok, _} <- upsert_invoice_items(updated, item_attrs),
+                 :ok <- maybe_bump_past_due_since(action, canonical),
                  {:ok, _} <- record_event("invoice." <> action, "Invoice", updated.id, evt_id) do
               {:ok, updated}
             end
@@ -429,6 +467,33 @@ defmodule Accrue.Webhook.DefaultHandler do
       end
     end)
   end
+
+  # Phase 4 Plan 04 — BILL-15 / D4-02. On invoice.payment_failed, bump
+  # the linked subscription's past_due_since from Stripe's
+  # next_payment_attempt so the grace window is measured from Stripe's
+  # last retry attempt. Never clears past_due_since (a nil attempt
+  # means Stripe has stopped retrying — the grace window still runs).
+  defp maybe_bump_past_due_since("payment_failed", canonical) do
+    with sub_stripe_id when is_binary(sub_stripe_id) <- get(canonical, :subscription),
+         %Subscription{} = sub <- Repo.get_by(Subscription, processor_id: sub_stripe_id),
+         attempt_unix when is_integer(attempt_unix) <- get(canonical, :next_payment_attempt) do
+      past_due_since =
+        attempt_unix
+        |> DateTime.from_unix!()
+        |> Map.put(:microsecond, {0, 6})
+
+      case sub
+           |> Subscription.force_status_changeset(%{past_due_since: past_due_since})
+           |> Repo.update() do
+        {:ok, _} -> :ok
+        {:error, _} = err -> err
+      end
+    else
+      _ -> :ok
+    end
+  end
+
+  defp maybe_bump_past_due_since(_action, _canonical), do: :ok
 
   defp upsert_invoice(nil, canonical, attrs) do
     # CR-03: Tolerate webhook-first-for-unknown-customer.

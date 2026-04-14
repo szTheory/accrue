@@ -207,6 +207,21 @@ defmodule Accrue.Billing.Subscription do
   def dunning_sweepable?(_), do: false
 
   @doc """
+  Returns the dunning-terminal status atom (`:unpaid` or `:canceled`)
+  if the subscription has reached a dunning-exhaustion state. Returns
+  `nil` otherwise.
+
+  Used by the `customer.subscription.updated` webhook reducer (BILL-15,
+  D4-02) to detect terminal transitions without raw `.status` access.
+  """
+  @spec dunning_exhausted_status(%__MODULE__{} | map()) :: :unpaid | :canceled | nil
+  def dunning_exhausted_status(%__MODULE__{status: :unpaid}), do: :unpaid
+  def dunning_exhausted_status(%__MODULE__{status: :canceled}), do: :canceled
+  def dunning_exhausted_status(%{status: :unpaid}), do: :unpaid
+  def dunning_exhausted_status(%{status: :canceled}), do: :canceled
+  def dunning_exhausted_status(_), do: nil
+
+  @doc """
   Extracts a pre-hydrated PaymentIntent from `data.latest_invoice.payment_intent`,
   used by Plan 04 `subscribe/3` to surface SCA/3DS action-required to the caller.
   """
