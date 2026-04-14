@@ -344,7 +344,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   @cancel_schema [
     invoice_now: [type: :boolean, default: false],
     prorate: [type: :boolean, default: false],
-    operation_id: [type: :string, default: nil]
+    operation_id: [type: {:or, [:string, nil]}, default: nil]
   ]
 
   @spec cancel(Subscription.t(), keyword()) ::
@@ -485,7 +485,7 @@ defmodule Accrue.Billing.SubscriptionActions do
       default: :void
     ],
     resumes_at: [type: :any, default: nil],
-    operation_id: [type: :string, default: nil]
+    operation_id: [type: {:or, [:string, nil]}, default: nil]
   ]
 
   @spec pause(Subscription.t(), keyword()) :: {:ok, Subscription.t()} | {:error, term()}
