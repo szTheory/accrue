@@ -3,7 +3,7 @@ phase: 3
 slug: core-subscription-lifecycle
 status: draft
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-14
 revised: 2026-04-14
 ---
@@ -78,7 +78,7 @@ revised: 2026-04-14
 - [x] `accrue/test/support/fake_processor.ex` — extend from Phase 2 with subscription/invoice/refund fakes (Plan 03 Task 2)
 - [x] `accrue/test/support/stripe_fixtures.ex` — canned Stripe payloads (Plan 01 Task 3)
 - [x] `accrue/test/support/billing_case.ex` — test case template with Repo sandbox + fake processor (Plan 01 Task 3)
-- [ ] Property test module for money/proration math (`accrue/test/accrue/billing/properties/proration_test.exs`) (Plan 08 Task 3 — requires Plan 04 Money API landed first)
+- [x] Property test module for money/proration math (`accrue/test/accrue/billing/properties/proration_test.exs`) (Plan 08 Task 3 — requires Plan 04 Money API landed first)
 
 Three of four Wave 0 items land in Plan 01 (Wave 1). The fourth (property tests) lands in Plan 08 (Wave 3) because it depends on Plan 04's `Accrue.Money` arithmetic surface and `Accrue.Processor.Idempotency.key/3,4`. Plan 08 ordering is correct — property tests logically belong at the end of the phase as the "lock in the invariants" pass.
 
