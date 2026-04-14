@@ -67,7 +67,10 @@ defmodule Accrue.Billing.InvoiceProjection do
       voided_at:
         unix_dt(SubscriptionProjection.get(stripe_inv, :voided_at)) ||
           unix_dt(SubscriptionProjection.get(status_transitions, :voided_at)),
-      data: stripe_inv,
+      # WR-11: string-normalize so Fake (atom-keyed) and Stripe
+      # (string-keyed) paths persist the same shape. Avoids drift on
+      # reload where a second decompose/1 sees a different key shape.
+      data: SubscriptionProjection.to_string_keys(stripe_inv),
       metadata: SubscriptionProjection.get(stripe_inv, :metadata) || %{}
     }
 

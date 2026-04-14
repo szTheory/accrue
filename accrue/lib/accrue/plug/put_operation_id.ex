@@ -41,12 +41,31 @@ defmodule Accrue.Plug.PutOperationId do
   def call(conn, _opts) do
     id =
       conn.assigns[:request_id] ||
-        conn |> get_req_header("x-request-id") |> List.first() ||
+        conn |> get_req_header("x-request-id") |> List.first() |> sanitize_header_id() ||
         "http-" <> random_id()
 
     Accrue.Actor.put_operation_id(id)
     conn
   end
+
+  # WR-07: sanitize attacker-controlled x-request-id header. The plug
+  # doc acknowledges the value is untrusted, but the SHA256 input +
+  # Oban pdict + accrue_events.data.operation_id + Stripe idempotency
+  # key all benefit from length + charset bounds. Invalid → drop to
+  # the random fallback.
+  defp sanitize_header_id(nil), do: nil
+
+  defp sanitize_header_id(id) when is_binary(id) do
+    sanitized = String.replace(id, ~r/[^a-zA-Z0-9_\-]/, "")
+
+    if byte_size(sanitized) in 1..128 do
+      "untrusted-" <> sanitized
+    else
+      nil
+    end
+  end
+
+  defp sanitize_header_id(_), do: nil
 
   defp random_id do
     8

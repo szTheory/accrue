@@ -75,17 +75,26 @@ defmodule Accrue.Billing.SubscriptionProjection do
     |> to_string_keys()
   end
 
-  defp to_string_keys(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+  @doc """
+  Recursively converts atom-keyed maps to string-keyed maps and
+  DateTimes to ISO8601 strings so the result is jsonb round-trip safe.
 
-  defp to_string_keys(%{__struct__: _} = struct),
+  Public so `Accrue.Billing.InvoiceProjection` can reuse the same
+  normalization (WR-11) rather than storing atom-keyed data and
+  getting shape drift on reload.
+  """
+  @spec to_string_keys(term()) :: term()
+  def to_string_keys(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+
+  def to_string_keys(%{__struct__: _} = struct),
     do: struct |> Map.from_struct() |> to_string_keys()
 
-  defp to_string_keys(map) when is_map(map) do
+  def to_string_keys(map) when is_map(map) do
     for {k, v} <- map, into: %{} do
       {to_string(k), to_string_keys(v)}
     end
   end
 
-  defp to_string_keys(list) when is_list(list), do: Enum.map(list, &to_string_keys/1)
-  defp to_string_keys(other), do: other
+  def to_string_keys(list) when is_list(list), do: Enum.map(list, &to_string_keys/1)
+  def to_string_keys(other), do: other
 end
