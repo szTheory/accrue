@@ -72,7 +72,16 @@ Plans:
   4. A refund against a Stripe charge surfaces both `stripe_fee_refunded_amount` and `merchant_loss_amount` on the `Accrue.Billing.Refund` record — the asymmetric fee loss is visible, not silently swallowed.
   5. Two webhook events for the same subscription delivered out of order result in Accrue resolving state from the newest event by Stripe `created` timestamp, with the handler re-fetching the current Stripe object rather than trusting either payload snapshot.
   6. `preview_upcoming_invoice/2` returns a prorated line-item preview before `swap_plan/3` commits, enabling user-facing "you will be charged $X on Y" UX.
-**Plans**: TBD
+**Plans**: 8 plans
+Plans:
+- [x] 03-01-PLAN.md — Wave 1: Clock, Actor operation_id, Config, Phase 3 Error types, Credo NoRawStatusAccess check, BillingCase, StripeFixtures
+- [ ] 03-02-PLAN.md — Wave 1: Phase 3 migrations + Ecto schemas (Subscription/Invoice/InvoiceItem/Charge/Refund/PaymentMethod/Customer/Coupon/UpcomingInvoice) + Billing.Query fragments
+- [ ] 03-03-PLAN.md — Wave 1: Processor behaviour extension + Fake (transition/advance/synth) + Stripe adapter lattice_stripe delegation + Idempotency module
+- [ ] 03-04-PLAN.md — Wave 2: Accrue.Billing subscribe/swap_plan/cancel/cancel_at_period_end/resume/pause/unpause/update_quantity/preview_upcoming_invoice/trial_end normalizer + intent_result wrapping
+- [ ] 03-05-PLAN.md — Wave 2: Invoice workflow (finalize/void/pay/mark_uncollectible/send_invoice) + InvoiceProjection decomposer
+- [ ] 03-06-PLAN.md — Wave 2: Charge/PaymentIntent/SetupIntent + PaymentMethod fingerprint dedup + set_default_payment_method + Refund fee math
+- [ ] 03-07-PLAN.md — Wave 3: Webhook DefaultHandler Phase 3 reducers (skip-stale + refetch + out-of-order) + operation_id plug/LiveView/Oban middleware + reconciler jobs + DetectExpiringCards
+- [ ] 03-08-PLAN.md — Wave 3: Nine test factories + 24-event schema registry + Upcaster behaviour + property tests + VALIDATION.md population
 **UI hint**: no
 
 ### Phase 4: Advanced Billing + Webhook Hardening

@@ -33,7 +33,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **BILL-02**: `use Accrue.Billable` macro — any host schema (User, Organization, Team) becomes billable
 - [ ] **BILL-03**: `Accrue.Billing.Subscription` create/retrieve/swap/cancel/resume/pause
 - [ ] **BILL-04**: Subscription state machine: trialing → active → past_due → incomplete/incomplete_expired → unpaid/paused → canceled
-- [ ] **BILL-05**: Three canonical predicates: `active?/1`, `canceling?/1`, `canceled?/1` (never expose raw `status`)
+- [x] **BILL-05**: Three canonical predicates: `active?/1`, `canceling?/1`, `canceled?/1` (never expose raw `status`)
 - [ ] **BILL-06**: Trial support with `trial_end` (`:now` or unix timestamp), `trial_will_end` webhook handling
 - [ ] **BILL-07**: `cancel_at_period_end` with grace period tracking (status stays `active` until period ends)
 - [ ] **BILL-08**: Immediate cancel with optional final-invoice handling
@@ -218,7 +218,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **TEST-05**: `assert_pdf_rendered/1` assertion helper
 - [ ] **TEST-06**: `assert_event_recorded/1` assertion helper
 - [ ] **TEST-07**: Mock adapters (`Accrue.Auth.Mock`, `Accrue.Mailer.Test`, `Accrue.PDF.Test`)
-- [ ] **TEST-08**: Test fixtures for common subscription states
+- [x] **TEST-08**: Test fixtures for common subscription states
 - [ ] **TEST-09**: Oban.Testing integration for async assertions
 - [ ] **TEST-10**: Testing guide as marketing asset (shows the Fake Processor story is a differentiator)
 
@@ -312,7 +312,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-02 | Phase 2 | Pending |
 | BILL-03 | Phase 3 | Pending |
 | BILL-04 | Phase 3 | Pending |
-| BILL-05 | Phase 3 | Pending |
+| BILL-05 | Phase 3 | Complete |
 | BILL-06 | Phase 3 | Pending |
 | BILL-07 | Phase 3 | Pending |
 | BILL-08 | Phase 3 | Pending |
@@ -464,7 +464,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | TEST-05 | Phase 8 | Pending |
 | TEST-06 | Phase 8 | Pending |
 | TEST-07 | Phase 8 | Pending |
-| TEST-08 | Phase 3 | Pending |
+| TEST-08 | Phase 3 | Complete |
 | TEST-09 | Phase 2 | Pending |
 | TEST-10 | Phase 8 | Pending |
 | OSS-01 | Phase 9 | Pending |
