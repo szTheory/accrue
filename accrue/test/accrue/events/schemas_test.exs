@@ -28,6 +28,7 @@ defmodule Accrue.Events.SchemasTest do
 
   test "every registered module implements schema_version/0 == 1" do
     for {_type, mod} <- Schemas.all() do
+      Code.ensure_loaded!(mod)
       assert function_exported?(mod, :schema_version, 0)
       assert mod.schema_version() == 1
     end
@@ -49,6 +50,7 @@ defmodule Accrue.Events.SchemasTest do
 
   test "Upcaster behaviour is implemented via upcast/1 on every schema" do
     for {_type, mod} <- Schemas.all() do
+      Code.ensure_loaded!(mod)
       assert function_exported?(mod, :upcast, 1)
       assert {:ok, %{}} = mod.upcast(%{})
     end
