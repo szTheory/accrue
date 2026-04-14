@@ -829,25 +829,15 @@ No blocking dependencies.
 | A10 | lattice_stripe 1.0 `Subscription.pause_collection/5` wraps the `update` endpoint (it's a convenience, not a separate Stripe API) | Key APIs: Subscription | [VERIFIED via grep of source — confirmed at line 332 of subscription.ex, builds pause_collection map and calls through to update] — LOW risk. |
 | A11 | Phase 2's `Accrue.Webhook.DefaultHandler` exposes a pluggable per-event reducer interface Phase 3 can extend | Integration Points | [ASSUMED from `<code_context>` in CONTEXT.md which says "Phase 3 extends with per-event reducers"] — MEDIUM risk. Planner should read Phase 2 DefaultHandler source first to confirm the extension shape. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does Phase 2's `Accrue.Webhook.DefaultHandler` already expose a per-event reducer / dispatch table that Phase 3 can extend, or does Phase 3 need to refactor it?**
-   - What we know: Phase 2 context says DefaultHandler handles "subscription/invoice/charge updates" at a skeleton level. Phase 3 adds the full 24-event taxonomy handlers.
-   - What's unclear: Whether the extension is additive (new clauses) or requires restructuring.
-   - Recommendation: First task in Wave 1 reads `accrue/lib/accrue/webhook/default_handler.ex` and documents the extension shape. If refactoring needed, do it in a dedicated task before the per-event handlers.
+1. **DefaultHandler extension shape — RESOLVED.** Phase 2's `Accrue.Webhook.DefaultHandler` already exposes a `handle_event/2` callback with pattern-matched clauses. Phase 3 extends additively with new `handle_event/2` clauses dispatching on event `type` — no refactor needed. Plan 07 Task 1 adds the 24 new clauses in-place. The Phase 2 skeleton (`customer.subscription.created/updated/deleted`, `invoice.created/paid`, `charge.succeeded/refunded` stubs) is kept; Phase 3 clauses add skip-stale + refetch-canonical bodies and the additional event types (trial_will_end, marked_uncollectible, refund.updated, payment_method.card_automatically_updated, etc.).
 
-2. **`Accrue.LiveView.on_mount :accrue_operation` — hard dep or conditional compile?**
-   - What we know: CLAUDE.md says core `accrue` must work for headless/worker-only apps. LiveView is a hard dep only in `accrue_admin`.
-   - What's unclear: Whether `on_mount` hook can live in `accrue` core via `Code.ensure_loaded?(Phoenix.LiveView)` conditional compile (Phase 1's Sigra pattern), or must move to `accrue_admin`.
-   - Recommendation: Planner should use Phase 1's conditional-compile pattern (D-28 from Phase 1). If LiveView absent, module either doesn't compile or exports no-op stubs. Alternative: move the `on_mount` hook to `accrue_admin` and ship only `Accrue.Plug.PutOperationId` in core for HTTP controllers — LiveView users pick it up via `accrue_admin` anyway.
+2. **LiveView on_mount in core — RESOLVED: MOVE OUT OF CORE.** CLAUDE.md forbids `:phoenix_live_view` as a hard dep in `accrue/` core (LiveView is a hard dep only in `accrue_admin/`). Shipping `Accrue.LiveView.on_mount` in core would either force a hard dep or bloat the core with `Code.ensure_loaded?` guards for a feature that every LiveView user picks up through `accrue_admin` anyway. **Decision:** `Accrue.LiveView` is REMOVED from Phase 3 core scope. Plan 07 ships only `Accrue.Plug.PutOperationId` (HTTP path) and `Accrue.Oban.Middleware.put/1` (worker path). LiveView integration is deferred to `accrue_admin` (out of scope for Phase 3). Plan 07 Task 2 must drop `accrue/lib/accrue/live_view.ex` from `files_modified`, remove the LiveView code block, and remove references to `Accrue.LiveView.on_mount/4` from success criteria.
 
-3. **Should `Accrue.Credo.NoRawStatusAccess` ship in `accrue` (runtime dep on credo) or in a separate dev-only module?**
-   - What we know: CLAUDE.md lists credo as dev-only (`runtime: false`).
-   - What's unclear: Whether custom Credo checks can be dev-only or must compile unconditionally.
-   - Recommendation: Put the check in `accrue/lib/accrue/credo/` with `@moduledoc "Compiled only when :credo is loaded"` and `Code.ensure_loaded?(Credo.Check)` guard. Follows D-28 conditional-compile precedent.
+3. **Credo NoRawStatusAccess dev-only — RESOLVED.** Ship the check at `accrue/lib/accrue/credo/no_raw_status_access.ex` but guard it with `Mix.env() != :prod` conditional compile (or `Code.ensure_loaded?(Credo.Check)` at module level). The file compiles only in `:dev`/`:test`, matching CLAUDE.md's `credo` dev-only dep. This follows the D-28 conditional-compile precedent from Phase 1.
 
-4. **`Accrue.Jobs.*` vs `Accrue.Workers.*` naming** (noted as Claude's discretion in CONTEXT.md D-86 follow-on).
-   - Recommendation: Planner picks `Accrue.Jobs.*` to match CONTEXT.md's references (`Accrue.Jobs.ReconcileRefundFees` etc.).
+4. **Jobs vs Workers naming — RESOLVED.** Use `Accrue.Jobs.*` (matches Oban convention in the Elixir ecosystem and aligns with CONTEXT.md references `Accrue.Jobs.ReconcileRefundFees`, `Accrue.Jobs.ReconcileChargeFees`, `Accrue.Jobs.DetectExpiringCards`). Plan 07 already uses this naming.
 
 ## Sources
 
