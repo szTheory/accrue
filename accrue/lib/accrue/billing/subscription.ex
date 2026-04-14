@@ -192,6 +192,21 @@ defmodule Accrue.Billing.Subscription do
   def paused?(_), do: false
 
   @doc """
+  True if the subscription is in the narrow `:past_due` retry window
+  where the D4-02 dunning sweeper is allowed to ask the processor
+  facade to move it to a terminal action.
+
+  Strictly `:past_due` — does NOT include `:unpaid`. An `:unpaid`
+  subscription has already reached its terminal state (whether via
+  Stripe-native termination or a prior sweep) and must not be swept
+  again (BILL-15).
+  """
+  @spec dunning_sweepable?(%__MODULE__{} | map()) :: boolean()
+  def dunning_sweepable?(%__MODULE__{status: :past_due}), do: true
+  def dunning_sweepable?(%{status: :past_due}), do: true
+  def dunning_sweepable?(_), do: false
+
+  @doc """
   Extracts a pre-hydrated PaymentIntent from `data.latest_invoice.payment_intent`,
   used by Plan 04 `subscribe/3` to surface SCA/3DS action-required to the caller.
   """
