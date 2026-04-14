@@ -184,8 +184,8 @@ defmodule Accrue.Config do
         "Dunning grace-period overlay config (D4-02). `:mode` is " <>
           "`:stripe_smart_retries` or `:disabled`; `:terminal_action` is " <>
           "`:unpaid` or `:canceled`; `:grace_days` adds N days past Stripe's " <>
-          "last retry before Accrue calls " <>
-          "`LatticeStripe.Subscription.update(id, status: terminal_action)`."
+          "last retry before Accrue asks the processor facade to move the " <>
+          "subscription to the terminal action."
     ],
     webhook_endpoints: [
       type: :keyword_list,
