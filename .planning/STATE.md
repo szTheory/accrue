@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-05-PLAN.md
-last_updated: "2026-04-14T17:36:07.503Z"
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-04-14T17:48:59.937Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 20
-  completed_plans: 17
-  percent: 85
+  completed_plans: 18
+  percent: 90
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 03 (core-subscription-lifecycle) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P03 | 25m | 3 tasks | 7 files |
 | Phase 03-core-subscription-lifecycle P04 | 35m | 3 tasks | 12 files |
 | Phase 03 P05 | 12m | 2 tasks | 5 files |
+| Phase 03 P06 | 25m | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,11 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 03]: InvoiceProjection emits :processor_id (not :stripe_id) for parent invoice; only InvoiceItem uses :stripe_id (D3-15)
 - [Phase 03]: InvoiceProjection delegates field lookup to SubscriptionProjection.get/2 for dual-key (atom/string) support — no duplication
 - [Phase 03]: run_action/4 is the single D3-18 workflow shape for all 5 invoice actions; only pay_invoice wraps via IntentResult
+- [Phase 03]: charge/3 calls Processor.create_charge OUTSIDE Repo.transact so SCA 3DS responses never persist a half-baked Charge row — IntentResult.wrap branches before any DB insert
+- [Phase 03]: Fingerprint dedup uses application-level SELECT then rescue Ecto.ConstraintError for concurrent race via partial unique index backstop
+- [Phase 03]: set_default_payment_method asserts pm.customer_id==customer.id BEFORE any processor call; raises Accrue.Error.NotAttached — not a tuple return
+- [Phase 03]: create_refund returns uniform {:ok, %Refund{}} — fee settlement state is a property (fees_settled?) not a tagged-return branch (D3-47)
+- [Phase 03]: Accrue.Repo facade gains get/get_by/get_by!/delete/aggregate delegations for Plan 06 — D-10 host-owns-Repo preserved as pure pass-throughs
 
 ### Pending Todos
 
@@ -102,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T17:35:59.003Z
-Stopped at: Completed 03-05-PLAN.md
+Last session: 2026-04-14T17:48:47.030Z
+Stopped at: Completed 03-06-PLAN.md
 Resume file: None

@@ -48,9 +48,9 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **BILL-17**: `Accrue.Billing.Invoice` state machine (draft → open → paid | void | uncollectible)
 - [x] **BILL-18**: Invoice line items, discounts, tax
 - [x] **BILL-19**: `finalize/2`, `void/2`, `mark_uncollectible/2`, `pay/3`, `send/2` workflow actions
-- [ ] **BILL-20**: `Accrue.Billing.Charge` wrapper with idempotency
-- [ ] **BILL-21**: `Accrue.Billing.PaymentIntent` with tagged `{:ok, :requires_action, intent}` return for 3DS/SCA
-- [ ] **BILL-22**: `Accrue.Billing.SetupIntent` for off-session card-on-file
+- [x] **BILL-20**: `Accrue.Billing.Charge` wrapper with idempotency
+- [x] **BILL-21**: `Accrue.Billing.PaymentIntent` with tagged `{:ok, :requires_action, intent}` return for 3DS/SCA
+- [x] **BILL-22**: `Accrue.Billing.SetupIntent` for off-session card-on-file
 - [x] **BILL-23**: `Accrue.Billing.PaymentMethod` with fingerprint-based dedup
 - [ ] **BILL-24**: Expiring-card warnings surfaced via telemetry + events
 - [x] **BILL-25**: Default-payment-method management per customer
@@ -327,9 +327,9 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-17 | Phase 3 | Complete |
 | BILL-18 | Phase 3 | Complete |
 | BILL-19 | Phase 3 | Complete |
-| BILL-20 | Phase 3 | Pending |
-| BILL-21 | Phase 3 | Pending |
-| BILL-22 | Phase 3 | Pending |
+| BILL-20 | Phase 3 | Complete |
+| BILL-21 | Phase 3 | Complete |
+| BILL-22 | Phase 3 | Complete |
 | BILL-23 | Phase 3 | Complete |
 | BILL-24 | Phase 3 | Pending |
 | BILL-25 | Phase 3 | Complete |
