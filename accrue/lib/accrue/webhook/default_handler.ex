@@ -1,30 +1,70 @@
 defmodule Accrue.Webhook.DefaultHandler do
   @moduledoc """
-  Non-disableable default handler for built-in state reconciliation (D2-30, WH-07).
+  Non-disableable default handler for built-in state reconciliation
+  (D2-30, WH-07, WH-09, WH-10).
 
   Runs first in the dispatch chain before any user-registered handlers.
   Cannot be removed or reordered by configuration.
 
-  ## Phase 2 scope
+  ## Phase 3 scope (Plan 07)
 
-  Only `customer.*` events are handled. Subscription and invoice
-  reconciliation lands in Phase 3.
+  Extends the Phase 2 customer skeleton with the full Phase 3 event
+  family covering subscription, invoice, charge, refund, and payment
+  method reconcilation. Each reducer:
 
-  ## Re-fetch policy (WH-10)
+    1. Derives `evt_ts` from the raw event `created` unix timestamp.
+    2. Loads the local row by processor id.
+    3. **Skip-stale (WH-09):** if `row.last_stripe_event_ts != nil`
+       and `evt_ts` is strictly less than it, emit
+       `[:accrue, :webhooks, :stale_event]` telemetry and return
+       `{:ok, :stale}` **without** calling the processor. Ties
+       (`:eq`) proceed per D3-49.
+    4. **Refetch canonical (WH-10):** always call
+       `Accrue.Processor.fetch/2` to pull the current object —
+       never trust the payload snapshot.
+    5. Project via the appropriate `*Projection.decompose/1` (or
+       schema-specific upsert) and write via the webhook-path
+       changeset (`Invoice.force_status_changeset/2` where a legal
+       transition bypass is required).
+    6. Stamp `last_stripe_event_ts` / `last_stripe_event_id` on the
+       row so the next out-of-order event can skip.
+    7. Record an `accrue_events` row in the same `Repo.transact/1`.
 
-  Handlers do NOT trust the webhook payload snapshot. Instead, they
-  call `Accrue.Processor.retrieve_customer/2` to get the canonical
-  current state from the processor. This prevents stale-snapshot bugs
-  when events arrive out of order.
+  ## Entry points
+
+    * `handle/1` — accepts the raw event map (both string- and
+      atom-keyed shapes). Used by `Accrue.Processor.Fake.synthesize_event/3`
+      for in-process test dispatch.
+    * `handle_event/3` — the `Accrue.Webhook.Handler` behaviour entry
+      point invoked by `Accrue.Webhook.DispatchWorker`. Dispatches
+      via the existing `%Accrue.Webhook.Event{}` struct (object_id +
+      created_at + type) to the shared reducer.
   """
 
   use Accrue.Webhook.Handler
 
   require Logger
 
+  alias Accrue.{Events, Processor, Repo}
+
+  alias Accrue.Billing.{
+    Charge,
+    Customer,
+    Invoice,
+    InvoiceItem,
+    InvoiceProjection,
+    PaymentMethod,
+    Refund,
+    Subscription,
+    SubscriptionItem,
+    SubscriptionProjection
+  }
+
+  # ---------------------------------------------------------------------
+  # Phase 2 customer path (preserved)
+  # ---------------------------------------------------------------------
+
   def handle_event("customer.created", event, _ctx) do
-    # WH-10: Re-fetch current state from processor, don't trust snapshot.
-    # Phase 2 scope: log + no-op since Billing context upsert is Phase 3.
     Logger.debug("DefaultHandler: customer.created for #{event.object_id}")
     :ok
   end
@@ -39,7 +79,503 @@ defmodule Accrue.Webhook.DefaultHandler do
     :ok
   end
 
+  # ---------------------------------------------------------------------
+  # Phase 3 event families — dispatch from Accrue.Webhook.Event struct
+  # ---------------------------------------------------------------------
+
+  def handle_event(type, %Accrue.Webhook.Event{} = event, _ctx) when is_binary(type) do
+    case dispatch(type, event.processor_event_id, event.created_at, %{"id" => event.object_id}) do
+      {:ok, _} -> :ok
+      other -> other
+    end
+  end
+
   # Fallthrough for all other event types (D2-28).
-  # Must be explicit because defoverridable replaces the injected catch-all.
   def handle_event(_type, _event, _ctx), do: :ok
+
+  # ---------------------------------------------------------------------
+  # `handle/1` — raw event map entry point (Fake.synthesize_event path)
+  # ---------------------------------------------------------------------
+
+  @doc """
+  Reduces a raw event map (atom- or string-keyed) through the Phase 3
+  reducer chain. Returns `{:ok, row}` on success, `{:ok, :stale}` if
+  the event is older than `row.last_stripe_event_ts`, or `{:ok, :ignored}`
+  if the type is not a Phase 3 family.
+  """
+  @spec handle(map()) :: {:ok, struct() | :stale | :ignored} | {:error, term()}
+  def handle(event) when is_map(event) do
+    type = get(event, :type)
+    evt_id = get(event, :id)
+    created = get(event, :created)
+    obj = get(event, :data) |> get(:object) || %{}
+
+    evt_ts =
+      case created do
+        n when is_integer(n) -> DateTime.from_unix!(n)
+        %DateTime{} = dt -> dt
+        _ -> nil
+      end
+
+    dispatch(type, evt_id, evt_ts, obj)
+  end
+
+  def handle(_), do: {:ok, :ignored}
+
+  # ---------------------------------------------------------------------
+  # Dispatch — one clause per Phase 3 event family
+  # ---------------------------------------------------------------------
+
+  defp dispatch("customer.subscription." <> action, evt_id, evt_ts, obj)
+       when action in ~w(created updated trial_will_end deleted paused resumed) do
+    reduce_subscription(action, evt_id, evt_ts, obj)
+  end
+
+  defp dispatch("invoice." <> action, evt_id, evt_ts, obj)
+       when action in ~w(created finalized paid payment_failed voided marked_uncollectible sent) do
+    reduce_invoice(action, evt_id, evt_ts, obj)
+  end
+
+  defp dispatch("charge.refund.updated", evt_id, evt_ts, obj) do
+    reduce_refund("updated", evt_id, evt_ts, obj)
+  end
+
+  defp dispatch("refund." <> action, evt_id, evt_ts, obj)
+       when action in ~w(created updated) do
+    reduce_refund(action, evt_id, evt_ts, obj)
+  end
+
+  defp dispatch("charge." <> action, evt_id, evt_ts, obj)
+       when action in ~w(succeeded failed updated refunded) do
+    reduce_charge(action, evt_id, evt_ts, obj)
+  end
+
+  defp dispatch("payment_method." <> action, evt_id, evt_ts, obj)
+       when action in ~w(attached detached updated card_automatically_updated) do
+    reduce_payment_method(action, evt_id, evt_ts, obj)
+  end
+
+  defp dispatch(_type, _evt_id, _evt_ts, _obj), do: {:ok, :ignored}
+
+  # ---------------------------------------------------------------------
+  # Subscription reducer
+  # ---------------------------------------------------------------------
+
+  defp reduce_subscription(action, evt_id, evt_ts, obj) do
+    stripe_id = get(obj, :id)
+
+    reduce_row(:subscription, stripe_id, evt_ts, evt_id, fn row ->
+      with {:ok, canonical} <- Processor.__impl__().fetch(:subscription, stripe_id),
+           {:ok, attrs} <- SubscriptionProjection.decompose(canonical),
+           attrs <- stamp_watermark(attrs, evt_ts, evt_id),
+           {:ok, updated} <- upsert_subscription(row, canonical, attrs),
+           {:ok, _} <- upsert_subscription_items(updated, canonical),
+           {:ok, _} <- record_event(subscription_event_type(action), "Subscription", updated.id, evt_id) do
+        {:ok, updated}
+      end
+    end)
+  end
+
+  defp subscription_event_type("trial_will_end"), do: "subscription.trial_ended"
+  defp subscription_event_type(action), do: "subscription." <> action
+
+  defp upsert_subscription(nil, canonical, attrs) do
+    customer_stripe_id = get(canonical, :customer)
+    customer = Repo.get_by!(Customer, processor_id: customer_stripe_id)
+
+    %Subscription{customer_id: customer.id, processor: processor_name()}
+    |> Subscription.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp upsert_subscription(row, _canonical, attrs) do
+    row
+    |> Subscription.changeset(attrs)
+    |> Repo.update()
+  end
+
+  defp upsert_subscription_items(%Subscription{} = sub, canonical) do
+    items =
+      canonical
+      |> SubscriptionProjection.get(:items)
+      |> case do
+        nil -> []
+        %{} = m -> SubscriptionProjection.get(m, :data) || []
+        list when is_list(list) -> list
+      end
+
+    Enum.each(items, fn si -> upsert_subscription_item(sub, si) end)
+    {:ok, :upserted}
+  end
+
+  defp upsert_subscription_item(sub, si) when is_map(si) do
+    stripe_id = SubscriptionProjection.get(si, :id)
+    price = SubscriptionProjection.get(si, :price) || %{}
+
+    price_id =
+      case price do
+        s when is_binary(s) -> s
+        %{} = m -> SubscriptionProjection.get(m, :id)
+        _ -> nil
+      end
+
+    attrs = %{
+      subscription_id: sub.id,
+      processor: processor_name(),
+      processor_id: stripe_id,
+      price_id: price_id,
+      processor_plan_id: price_id,
+      processor_product_id: SubscriptionProjection.get(price, :product),
+      quantity: SubscriptionProjection.get(si, :quantity) || 1
+    }
+
+    import Ecto.Query, only: [from: 2]
+
+    case Repo.one(from i in SubscriptionItem, where: i.processor_id == ^stripe_id) do
+      nil -> %SubscriptionItem{} |> SubscriptionItem.changeset(attrs) |> Repo.insert!()
+      existing -> existing |> SubscriptionItem.changeset(attrs) |> Repo.update!()
+    end
+  end
+
+  # ---------------------------------------------------------------------
+  # Invoice reducer
+  # ---------------------------------------------------------------------
+
+  defp reduce_invoice(action, evt_id, evt_ts, obj) do
+    stripe_id = get(obj, :id)
+
+    reduce_row(:invoice, stripe_id, evt_ts, evt_id, fn row ->
+      with {:ok, canonical} <- Processor.__impl__().fetch(:invoice, stripe_id),
+           {:ok, %{invoice_attrs: attrs, item_attrs: item_attrs}} <-
+             InvoiceProjection.decompose(canonical),
+           attrs <- stamp_watermark(attrs, evt_ts, evt_id),
+           {:ok, updated} <- upsert_invoice(row, canonical, attrs),
+           {:ok, _} <- upsert_invoice_items(updated, item_attrs),
+           {:ok, _} <- record_event("invoice." <> action, "Invoice", updated.id, evt_id) do
+        {:ok, updated}
+      end
+    end)
+  end
+
+  defp upsert_invoice(nil, canonical, attrs) do
+    customer_stripe_id = get(canonical, :customer)
+    customer = Repo.get_by!(Customer, processor_id: customer_stripe_id)
+
+    %Invoice{customer_id: customer.id, processor: processor_name()}
+    |> Invoice.force_status_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp upsert_invoice(row, _canonical, attrs) do
+    row
+    |> Invoice.force_status_changeset(attrs)
+    |> Repo.update()
+  end
+
+  defp upsert_invoice_items(%Invoice{} = invoice, item_attrs_list) when is_list(item_attrs_list) do
+    import Ecto.Query, only: [from: 2]
+
+    Enum.each(item_attrs_list, fn attrs ->
+      attrs = Map.put(attrs, :invoice_id, invoice.id)
+
+      case attrs[:stripe_id] do
+        nil ->
+          %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert!()
+
+        sid when is_binary(sid) ->
+          case Repo.one(from i in InvoiceItem, where: i.stripe_id == ^sid) do
+            nil -> %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert!()
+            existing -> existing |> InvoiceItem.changeset(attrs) |> Repo.update!()
+          end
+      end
+    end)
+
+    {:ok, :upserted}
+  end
+
+  # ---------------------------------------------------------------------
+  # Charge reducer
+  # ---------------------------------------------------------------------
+
+  defp reduce_charge(action, evt_id, evt_ts, obj) do
+    stripe_id = get(obj, :id)
+
+    reduce_row(:charge, stripe_id, evt_ts, evt_id, fn row ->
+      with {:ok, canonical} <- Processor.__impl__().fetch(:charge, stripe_id),
+           {:ok, updated} <- upsert_charge(row, canonical, evt_ts, evt_id),
+           {:ok, _} <- record_event("charge." <> action, "Charge", updated.id, evt_id) do
+        {:ok, updated}
+      end
+    end)
+  end
+
+  defp upsert_charge(row, canonical, evt_ts, evt_id) do
+    bt = SubscriptionProjection.get(canonical, :balance_transaction) || %{}
+    fee = SubscriptionProjection.get(bt, :fee)
+    fee_currency = SubscriptionProjection.get(bt, :currency) || "usd"
+    status = canonical |> SubscriptionProjection.get(:status) |> to_string_or_nil()
+
+    attrs = %{
+      stripe_fee_amount_minor: fee,
+      stripe_fee_currency: fee_currency,
+      fees_settled_at: if(is_integer(fee), do: Accrue.Clock.utc_now(), else: nil),
+      status: status,
+      last_stripe_event_ts: evt_ts,
+      last_stripe_event_id: evt_id
+    }
+
+    case row do
+      nil ->
+        customer_stripe_id = SubscriptionProjection.get(canonical, :customer)
+        customer = Repo.get_by!(Customer, processor_id: customer_stripe_id)
+
+        %Charge{customer_id: customer.id, processor: processor_name()}
+        |> Charge.changeset(
+          Map.merge(attrs, %{
+            processor_id: SubscriptionProjection.get(canonical, :id),
+            amount_cents: SubscriptionProjection.get(canonical, :amount),
+            currency: SubscriptionProjection.get(canonical, :currency) || "usd"
+          })
+        )
+        |> Repo.insert()
+
+      existing ->
+        existing
+        |> Charge.changeset(attrs)
+        |> Repo.update()
+    end
+  end
+
+  # ---------------------------------------------------------------------
+  # Refund reducer
+  # ---------------------------------------------------------------------
+
+  defp reduce_refund(action, evt_id, evt_ts, obj) do
+    stripe_id = get(obj, :id)
+
+    reduce_row(:refund, stripe_id, evt_ts, evt_id, fn row ->
+      with {:ok, canonical} <- Processor.__impl__().fetch(:refund, stripe_id),
+           {:ok, updated} <- upsert_refund(row, canonical, evt_ts, evt_id),
+           event_type <- refund_event_type(updated, action),
+           {:ok, _} <- record_event(event_type, "Refund", updated.id, evt_id) do
+        {:ok, updated}
+      end
+    end)
+  end
+
+  defp refund_event_type(updated, _action) do
+    if Refund.fees_settled?(updated), do: "refund.fees_settled", else: "refund.updated"
+  end
+
+  defp upsert_refund(row, canonical, evt_ts, evt_id) do
+    charge_ref = SubscriptionProjection.get(canonical, :charge)
+
+    {charge_stripe_id, charge_bt} =
+      case charge_ref do
+        s when is_binary(s) ->
+          {s, SubscriptionProjection.get(canonical, :balance_transaction) || %{}}
+
+        %{} = nested ->
+          {SubscriptionProjection.get(nested, :id),
+           SubscriptionProjection.get(nested, :balance_transaction) ||
+             SubscriptionProjection.get(canonical, :balance_transaction) || %{}}
+
+        _ ->
+          {nil, SubscriptionProjection.get(canonical, :balance_transaction) || %{}}
+      end
+
+    fee = SubscriptionProjection.get(charge_bt, :fee)
+    fee_refunded = SubscriptionProjection.get(charge_bt, :fee_refunded)
+
+    {stripe_fee_refunded, merchant_loss, settled_at} =
+      case {fee, fee_refunded} do
+        {f, fr} when is_integer(f) and is_integer(fr) ->
+          {fr, f - fr, Accrue.Clock.utc_now()}
+
+        _ ->
+          {nil, nil, nil}
+      end
+
+    status_atom =
+      case SubscriptionProjection.get(canonical, :status) do
+        nil -> :pending
+        a when is_atom(a) -> a
+        s when is_binary(s) ->
+          try do
+            String.to_existing_atom(s)
+          rescue
+            ArgumentError -> :pending
+          end
+      end
+
+    attrs = %{
+      stripe_fee_refunded_amount_minor: stripe_fee_refunded,
+      merchant_loss_amount_minor: merchant_loss,
+      fees_settled_at: settled_at,
+      status: status_atom,
+      last_stripe_event_ts: evt_ts,
+      last_stripe_event_id: evt_id
+    }
+
+    case row do
+      nil ->
+        charge = Repo.get_by!(Charge, processor_id: charge_stripe_id)
+
+        %Refund{charge_id: charge.id}
+        |> Refund.changeset(
+          Map.merge(attrs, %{
+            stripe_id: SubscriptionProjection.get(canonical, :id),
+            amount_minor: SubscriptionProjection.get(canonical, :amount),
+            currency: SubscriptionProjection.get(canonical, :currency) || "usd"
+          })
+        )
+        |> Repo.insert()
+
+      existing ->
+        existing
+        |> Refund.changeset(attrs)
+        |> Repo.update()
+    end
+  end
+
+  # ---------------------------------------------------------------------
+  # Payment method reducer
+  # ---------------------------------------------------------------------
+
+  defp reduce_payment_method(action, evt_id, evt_ts, obj) do
+    stripe_id = get(obj, :id)
+
+    reduce_row(:payment_method, stripe_id, evt_ts, evt_id, fn row ->
+      with {:ok, canonical} <- Processor.__impl__().fetch(:payment_method, stripe_id),
+           {:ok, updated} <- upsert_payment_method(row, canonical, evt_ts, evt_id),
+           {:ok, _} <- record_event(pm_event_type(action), "PaymentMethod", updated.id, evt_id) do
+        {:ok, updated}
+      end
+    end)
+  end
+
+  defp pm_event_type("attached"), do: "payment_method.attached"
+  defp pm_event_type("detached"), do: "payment_method.detached"
+  defp pm_event_type("updated"), do: "payment_method.updated"
+  defp pm_event_type("card_automatically_updated"), do: "payment_method.auto_updated"
+
+  defp upsert_payment_method(row, canonical, evt_ts, evt_id) do
+    card = SubscriptionProjection.get(canonical, :card) || %{}
+
+    attrs = %{
+      fingerprint: SubscriptionProjection.get(card, :fingerprint),
+      exp_month: SubscriptionProjection.get(card, :exp_month),
+      exp_year: SubscriptionProjection.get(card, :exp_year),
+      card_exp_month: SubscriptionProjection.get(card, :exp_month),
+      card_exp_year: SubscriptionProjection.get(card, :exp_year),
+      card_brand: SubscriptionProjection.get(card, :brand),
+      card_last4: SubscriptionProjection.get(card, :last4),
+      last_stripe_event_ts: evt_ts,
+      last_stripe_event_id: evt_id
+    }
+
+    case row do
+      nil ->
+        customer_stripe_id = SubscriptionProjection.get(canonical, :customer)
+        customer_id =
+          case customer_stripe_id do
+            nil -> nil
+            sid ->
+              case Repo.get_by(Customer, processor_id: sid) do
+                nil -> nil
+                c -> c.id
+              end
+          end
+
+        %PaymentMethod{customer_id: customer_id, processor: processor_name()}
+        |> PaymentMethod.changeset(
+          Map.merge(attrs, %{
+            processor_id: SubscriptionProjection.get(canonical, :id),
+            type: SubscriptionProjection.get(canonical, :type) || "card"
+          })
+        )
+        |> Repo.insert()
+
+      existing ->
+        existing
+        |> PaymentMethod.changeset(attrs)
+        |> Repo.update()
+    end
+  end
+
+  # ---------------------------------------------------------------------
+  # Skip-stale gate + shared reduce_row wrapper
+  # ---------------------------------------------------------------------
+
+  defp reduce_row(object_type, stripe_id, evt_ts, evt_id, fun) do
+    Repo.transact(fn ->
+      row = load_row(object_type, stripe_id)
+
+      case check_stale(row, evt_ts) do
+        :stale ->
+          :telemetry.execute(
+            [:accrue, :webhooks, :stale_event],
+            %{},
+            %{object_type: object_type, stripe_id: stripe_id, event_id: evt_id}
+          )
+
+          {:ok, :stale}
+
+        :ok ->
+          fun.(row)
+      end
+    end)
+  end
+
+  defp check_stale(nil, _evt_ts), do: :ok
+  defp check_stale(%{last_stripe_event_ts: nil}, _evt_ts), do: :ok
+  defp check_stale(_row, nil), do: :ok
+
+  defp check_stale(%{last_stripe_event_ts: last}, evt_ts) do
+    case DateTime.compare(evt_ts, last) do
+      :lt -> :stale
+      _ -> :ok
+    end
+  end
+
+  defp load_row(:subscription, id), do: Repo.get_by(Subscription, processor_id: id)
+  defp load_row(:invoice, id), do: Repo.get_by(Invoice, processor_id: id)
+  defp load_row(:charge, id), do: Repo.get_by(Charge, processor_id: id)
+  defp load_row(:refund, id), do: Repo.get_by(Refund, stripe_id: id)
+  defp load_row(:payment_method, id), do: Repo.get_by(PaymentMethod, processor_id: id)
+
+  defp stamp_watermark(attrs, evt_ts, evt_id) do
+    Map.merge(attrs, %{last_stripe_event_ts: evt_ts, last_stripe_event_id: evt_id})
+  end
+
+  defp record_event(type, subject_type, subject_id, stripe_event_id)
+       when is_binary(type) and is_binary(subject_type) do
+    Events.record(%{
+      type: type,
+      subject_type: subject_type,
+      subject_id: subject_id,
+      data: %{source: "webhook", stripe_event_id: stripe_event_id}
+    })
+  end
+
+  defp processor_name do
+    case Processor.__impl__() do
+      Accrue.Processor.Fake -> "fake"
+      Accrue.Processor.Stripe -> "stripe"
+      other -> other |> Module.split() |> List.last() |> String.downcase()
+    end
+  end
+
+  # Dual atom/string key lookup — handles both Fake (atom) and Stripe
+  # (string) shapes without forcing callers to normalize.
+  defp get(%{} = map, key) when is_atom(key) do
+    Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  end
+
+  defp get(_, _), do: nil
+
+  defp to_string_or_nil(nil), do: nil
+  defp to_string_or_nil(v) when is_atom(v), do: Atom.to_string(v)
+  defp to_string_or_nil(v) when is_binary(v), do: v
+  defp to_string_or_nil(_), do: nil
 end

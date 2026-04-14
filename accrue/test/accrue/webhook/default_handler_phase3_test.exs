@@ -7,7 +7,7 @@ defmodule Accrue.Webhook.DefaultHandlerPhase3Test do
   """
   use Accrue.BillingCase, async: false
 
-  alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Refund, Subscription}
+  alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Refund}
   alias Accrue.Webhook.DefaultHandler
 
   setup do
@@ -28,7 +28,7 @@ defmodule Accrue.Webhook.DefaultHandlerPhase3Test do
   test "customer.subscription.updated refetches and updates row", %{customer: cus} do
     {:ok, sub} = Accrue.Billing.subscribe(cus, "price_basic")
     # Transition in Fake directly so the refetch sees a new status.
-    :ok = Fake.transition(sub.processor_id, :active, synthesize_webhooks: false)
+    {:ok, _} = Fake.transition(sub.processor_id, :active, synthesize_webhooks: false)
 
     event =
       StripeFixtures.webhook_event(
