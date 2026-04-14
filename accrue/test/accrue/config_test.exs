@@ -134,6 +134,119 @@ defmodule Accrue.ConfigTest do
     end
   end
 
+  describe "Phase 4 config — dunning defaults (D4-02)" do
+    setup do
+      Application.delete_env(:accrue, :dunning)
+      :ok
+    end
+
+    test ":dunning defaults match D4-02" do
+      dunning = Config.get!(:dunning)
+      assert dunning[:mode] == :stripe_smart_retries
+      assert dunning[:grace_days] == 14
+      assert dunning[:terminal_action] == :unpaid
+      assert dunning[:telemetry_prefix] == [:accrue, :ops]
+    end
+
+    test "Config.dunning/0 helper returns the defaults" do
+      assert Config.dunning()[:grace_days] == 14
+    end
+  end
+
+  describe "Phase 4 config — DLQ + retention defaults (D4-04)" do
+    setup do
+      for key <- [
+            :dead_retention_days,
+            :succeeded_retention_days,
+            :dlq_replay_batch_size,
+            :dlq_replay_stagger_ms,
+            :dlq_replay_max_rows,
+            :webhook_endpoints
+          ] do
+        Application.delete_env(:accrue, key)
+      end
+
+      :ok
+    end
+
+    test "retention defaults" do
+      assert Config.get!(:dead_retention_days) == 90
+      assert Config.get!(:succeeded_retention_days) == 14
+    end
+
+    test "DLQ replay defaults" do
+      assert Config.get!(:dlq_replay_batch_size) == 100
+      assert Config.get!(:dlq_replay_stagger_ms) == 1_000
+      assert Config.get!(:dlq_replay_max_rows) == 10_000
+    end
+
+    test "Phase 4 helper functions" do
+      assert Config.dlq_replay_batch_size() == 100
+      assert Config.dlq_replay_stagger_ms() == 1_000
+      assert Config.dlq_replay_max_rows() == 10_000
+      assert Config.webhook_endpoints() == []
+    end
+
+    test "webhook_endpoints default is []" do
+      assert Config.get!(:webhook_endpoints) == []
+    end
+  end
+
+  describe "Phase 4 config — NimbleOptions validation" do
+    test "dead_retention_days accepts :infinity" do
+      opts =
+        Config.validate!(
+          repo: SomeApp.Repo,
+          dead_retention_days: :infinity
+        )
+
+      assert opts[:dead_retention_days] == :infinity
+    end
+
+    test "succeeded_retention_days accepts :infinity" do
+      opts =
+        Config.validate!(
+          repo: SomeApp.Repo,
+          succeeded_retention_days: :infinity
+        )
+
+      assert opts[:succeeded_retention_days] == :infinity
+    end
+
+    test "dead_retention_days rejects negative integers" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(repo: SomeApp.Repo, dead_retention_days: -1)
+      end
+    end
+
+    test "dlq_replay_max_rows rejects 0" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(repo: SomeApp.Repo, dlq_replay_max_rows: 0)
+      end
+    end
+
+    test "dlq_replay_stagger_ms accepts 0 (non_neg_integer)" do
+      opts = Config.validate!(repo: SomeApp.Repo, dlq_replay_stagger_ms: 0)
+      assert opts[:dlq_replay_stagger_ms] == 0
+    end
+
+    test "dunning accepts a keyword list override" do
+      opts =
+        Config.validate!(
+          repo: SomeApp.Repo,
+          dunning: [
+            mode: :disabled,
+            grace_days: 30,
+            terminal_action: :canceled,
+            telemetry_prefix: [:myapp, :billing]
+          ]
+        )
+
+      assert opts[:dunning][:mode] == :disabled
+      assert opts[:dunning][:grace_days] == 30
+    end
+  end
+
   describe "moduledoc" do
     test "contains NimbleOptions-generated docs" do
       {:docs_v1, _, _, _, %{"en" => doc}, _, _} = Code.fetch_docs(Accrue.Config)

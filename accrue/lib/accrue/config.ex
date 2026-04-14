@@ -169,6 +169,50 @@ defmodule Accrue.Config do
       doc:
         "Number of days to retain `:succeeded` refund records before pruning " <>
           "(D3-34). Default: 90."
+    ],
+
+    # --- Phase 4: advanced billing + webhook hardening -------------------
+    dunning: [
+      type: :keyword_list,
+      default: [
+        mode: :stripe_smart_retries,
+        grace_days: 14,
+        terminal_action: :unpaid,
+        telemetry_prefix: [:accrue, :ops]
+      ],
+      doc:
+        "Dunning grace-period overlay config (D4-02). `:mode` is " <>
+          "`:stripe_smart_retries` or `:disabled`; `:terminal_action` is " <>
+          "`:unpaid` or `:canceled`; `:grace_days` adds N days past Stripe's " <>
+          "last retry before Accrue calls " <>
+          "`LatticeStripe.Subscription.update(id, status: terminal_action)`."
+    ],
+    webhook_endpoints: [
+      type: :keyword_list,
+      default: [],
+      doc:
+        "Map of endpoint name to `[secret:, mode:]` for multi-endpoint " <>
+          "webhooks (WH-13). Example: `[primary: [secret: \"whsec_...\"], " <>
+          "connect: [secret: \"whsec_...\", mode: :connect]]`."
+    ],
+    dlq_replay_batch_size: [
+      type: :pos_integer,
+      default: 100,
+      doc: "Number of rows per chunk in `Accrue.Webhooks.DLQ.requeue_where/2` bulk replay (D4-04)."
+    ],
+    dlq_replay_stagger_ms: [
+      type: :non_neg_integer,
+      default: 1_000,
+      doc:
+        "Milliseconds to sleep between chunks during DLQ bulk replay " <>
+          "(protects downstream). Default: 1_000 (D4-04)."
+    ],
+    dlq_replay_max_rows: [
+      type: :pos_integer,
+      default: 10_000,
+      doc:
+        "Hard cap on bulk replay. Returns `{:error, :replay_too_large}` " <>
+          "unless `force: true` is passed. Default: 10_000 (D4-04)."
     ]
   ]
 
@@ -303,6 +347,38 @@ defmodule Accrue.Config do
   """
   @spec stripe_api_version() :: String.t()
   def stripe_api_version, do: get!(:stripe_api_version)
+
+  # --- Phase 4 helpers --------------------------------------------------
+
+  @doc """
+  Returns the dunning grace-period overlay config (D4-02).
+  """
+  @spec dunning() :: keyword()
+  def dunning, do: get!(:dunning)
+
+  @doc """
+  Returns the multi-endpoint webhook config (WH-13).
+  """
+  @spec webhook_endpoints() :: keyword()
+  def webhook_endpoints, do: get!(:webhook_endpoints)
+
+  @doc """
+  Returns the DLQ bulk-replay chunk size (D4-04).
+  """
+  @spec dlq_replay_batch_size() :: pos_integer()
+  def dlq_replay_batch_size, do: get!(:dlq_replay_batch_size)
+
+  @doc """
+  Returns the DLQ bulk-replay inter-chunk stagger in milliseconds (D4-04).
+  """
+  @spec dlq_replay_stagger_ms() :: non_neg_integer()
+  def dlq_replay_stagger_ms, do: get!(:dlq_replay_stagger_ms)
+
+  @doc """
+  Returns the hard cap on DLQ bulk-replay rows (D4-04).
+  """
+  @spec dlq_replay_max_rows() :: pos_integer()
+  def dlq_replay_max_rows, do: get!(:dlq_replay_max_rows)
 
   # --- custom validators (referenced by @schema) -----------------------
 
