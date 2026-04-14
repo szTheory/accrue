@@ -4,51 +4,53 @@ defmodule Accrue.Processor do
   facade so every caller looks like `Accrue.Processor.create_customer(...)`
   regardless of which adapter is wired.
 
-  ## Phase 1 callback surface
+  ## Callback surface
 
-  Phase 1 defines only the customer callbacks needed to prove the Fake's
-  shape and exercise the facade:
+  Phase 1 shipped the customer callbacks (`create_customer/2`,
+  `retrieve_customer/2`, `update_customer/3`). Phase 3 (this plan, 03-03)
+  grows the behaviour to the full Stripe Billing surface needed by Wave 2
+  billing context functions:
 
-  - `create_customer/2`
-  - `retrieve_customer/2`
-  - `update_customer/3`
+  - **Subscription** — `create_subscription/2`, `retrieve_subscription/2`,
+    `update_subscription/3`, `cancel_subscription/2`,
+    `cancel_subscription/3`, `resume_subscription/2`,
+    `pause_subscription_collection/4`
+  - **Invoice** — `create_invoice/2`, `retrieve_invoice/2`,
+    `update_invoice/3`, `finalize_invoice/2`, `void_invoice/2`,
+    `pay_invoice/2`, `send_invoice/2`, `mark_uncollectible_invoice/2`,
+    `create_invoice_preview/2`
+  - **PaymentIntent** — `create_payment_intent/2`,
+    `retrieve_payment_intent/2`, `confirm_payment_intent/3`
+  - **SetupIntent** — `create_setup_intent/2`, `retrieve_setup_intent/2`,
+    `confirm_setup_intent/3`
+  - **PaymentMethod** — `create_payment_method/2`,
+    `retrieve_payment_method/2`, `attach_payment_method/3`,
+    `detach_payment_method/2`, `list_payment_methods/2`,
+    `update_payment_method/3`, `set_default_payment_method/3`
+  - **Charge** — `create_charge/2`, `retrieve_charge/2`, `list_charges/2`
+  - **Refund** — `create_refund/2`, `retrieve_refund/2`
+  - **Generic fetch** — `fetch/2` routes `(object_type_atom, id)` to the
+    right `retrieve_*` for the webhook DefaultHandler refetch path
+    (D3-48 step 3).
 
-  Phase 3 grows this behaviour to the full Stripe Billing surface:
-
-      # Phase 3 additions (not yet implemented)
-      # @callback create_subscription/2
-      # @callback retrieve_subscription/2
-      # @callback cancel_subscription/3
-      # @callback create_payment_intent/2
-      # @callback confirm_payment_intent/3
-      # @callback create_payment_method/2
-      # @callback attach_payment_method/3
-      # @callback detach_payment_method/2
-      # @callback create_invoice/2
-      # @callback retrieve_invoice/2
-      # @callback finalize_invoice/2
-
-  `Accrue.Processor.Fake` is shaped to accommodate these from day one via
-  per-resource counters (`cus_fake_`, `sub_fake_`, `in_fake_`, `pi_fake_`,
-  `pm_fake_`) so Phase 3 grows the callback list without schema churn.
+  All adapters return plain maps (`{:ok, map}`) or
+  `{:error, Accrue.Error.t()}`; Billing context functions wrap the
+  3DS/SCA branches into the `intent_result` union where applicable
+  (D3-06..D3-12).
 
   ## Runtime dispatch
 
-  The public `create_customer/2`, `retrieve_customer/2`, and
-  `update_customer/3` functions resolve the concrete adapter at call time
-  via `Application.get_env(:accrue, :processor, Accrue.Processor.Fake)`.
-  The default is the Fake — production deploys flip it to
-  `Accrue.Processor.Stripe` in `config/runtime.exs`.
+  The Phase 1 customer functions resolve the concrete adapter at call
+  time via `Application.get_env(:accrue, :processor, Accrue.Processor.Fake)`.
+  The Phase 3 callbacks are called directly on the adapter module by
+  Billing context functions; adapter resolution is via `__impl__/0`.
 
   ## Telemetry
 
-  Each public call is wrapped in `Accrue.Telemetry.span/3` emitting
-  `[:accrue, :processor, :customer, :<action>, :start | :stop | :exception]`
-  per OBS-01 (D-17). Metadata includes `:adapter` (the resolved module),
-  `:operation`, and the merged `Accrue.Actor.current/0`. **Raw params and
-  return values are NEVER auto-injected into metadata** — the Stripe adapter
-  must not shove PII or raw processor errors into telemetry payloads
-  (T-OBS-01 mitigation).
+  Each public Phase 1 call is wrapped in `Accrue.Telemetry.span/3`.
+  Phase 3 callbacks are telemetered inside the Billing context (Wave 2)
+  so the instrumentation sees the full business op name, not just the
+  processor leg.
   """
 
   alias Accrue.Telemetry
@@ -58,9 +60,102 @@ defmodule Accrue.Processor do
   @type opts :: keyword()
   @type result :: {:ok, map()} | {:error, Exception.t()}
 
+  @typedoc """
+  3DS/SCA-aware return type for intent-carrying ops (D3-06). Billing
+  context functions use this; the processor behaviour returns plain
+  `{:ok, map()}` and lets the context decide when to tag.
+  """
+  @type intent_result(ok) ::
+          {:ok, ok}
+          | {:ok, :requires_action, map()}
+          | {:error, Accrue.Error.t()}
+
+  # ---------------------------------------------------------------------------
+  # Customer (Phase 1)
+  # ---------------------------------------------------------------------------
+
   @callback create_customer(params(), opts()) :: result()
   @callback retrieve_customer(id(), opts()) :: result()
   @callback update_customer(id(), params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # Subscription (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @callback create_subscription(params(), opts()) :: result()
+  @callback retrieve_subscription(id(), opts()) :: result()
+  @callback update_subscription(id(), params(), opts()) :: result()
+  @callback cancel_subscription(id(), opts()) :: result()
+  @callback cancel_subscription(id(), params(), opts()) :: result()
+  @callback resume_subscription(id(), opts()) :: result()
+  @callback pause_subscription_collection(id(), atom(), params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # Invoice (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @callback create_invoice(params(), opts()) :: result()
+  @callback retrieve_invoice(id(), opts()) :: result()
+  @callback update_invoice(id(), params(), opts()) :: result()
+  @callback finalize_invoice(id(), opts()) :: result()
+  @callback void_invoice(id(), opts()) :: result()
+  @callback pay_invoice(id(), opts()) :: result()
+  @callback send_invoice(id(), opts()) :: result()
+  @callback mark_uncollectible_invoice(id(), opts()) :: result()
+  @callback create_invoice_preview(params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # PaymentIntent (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @callback create_payment_intent(params(), opts()) :: result()
+  @callback retrieve_payment_intent(id(), opts()) :: result()
+  @callback confirm_payment_intent(id(), params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # SetupIntent (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @callback create_setup_intent(params(), opts()) :: result()
+  @callback retrieve_setup_intent(id(), opts()) :: result()
+  @callback confirm_setup_intent(id(), params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # PaymentMethod (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @callback create_payment_method(params(), opts()) :: result()
+  @callback retrieve_payment_method(id(), opts()) :: result()
+  @callback attach_payment_method(id(), params(), opts()) :: result()
+  @callback detach_payment_method(id(), opts()) :: result()
+  @callback list_payment_methods(params(), opts()) :: result()
+  @callback update_payment_method(id(), params(), opts()) :: result()
+  @callback set_default_payment_method(id(), params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # Charge (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @callback create_charge(params(), opts()) :: result()
+  @callback retrieve_charge(id(), opts()) :: result()
+  @callback list_charges(params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # Refund (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @callback create_refund(params(), opts()) :: result()
+  @callback retrieve_refund(id(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # Generic refetch (Phase 3, D3-48)
+  # ---------------------------------------------------------------------------
+
+  @callback fetch(atom(), id()) :: result()
+
+  # ---------------------------------------------------------------------------
+  # Phase 1 facade dispatch
+  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a customer through the configured processor adapter.
