@@ -154,6 +154,13 @@ defmodule Accrue.Processor do
   @callback fetch(atom(), id()) :: result()
 
   # ---------------------------------------------------------------------------
+  # Meter event (Phase 4 Plan 02, BILL-13)
+  # ---------------------------------------------------------------------------
+
+  @callback report_meter_event(Accrue.Billing.MeterEvent.t()) ::
+              {:ok, map()} | {:error, Exception.t() | term()}
+
+  # ---------------------------------------------------------------------------
   # Phase 1 facade dispatch
   # ---------------------------------------------------------------------------
 

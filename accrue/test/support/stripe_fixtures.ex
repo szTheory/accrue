@@ -206,6 +206,47 @@ defmodule Accrue.Test.StripeFixtures do
     deep_merge(base, overrides)
   end
 
+  @spec meter_event_created(map()) :: map()
+  def meter_event_created(overrides \\ %{}) do
+    now = DateTime.utc_now()
+
+    base = %{
+      "id" => "mev_test_" <> rand(),
+      "object" => "billing.meter_event",
+      "event_name" => "api_call",
+      "identifier" => "mev_ident_" <> rand(),
+      "payload" => %{
+        "stripe_customer_id" => "cus_test_" <> rand(),
+        "value" => "1"
+      },
+      "timestamp" => DateTime.to_unix(now),
+      "created" => DateTime.to_unix(now),
+      "livemode" => false
+    }
+
+    deep_merge(base, overrides)
+  end
+
+  @spec meter_event_error_report_triggered(map()) :: map()
+  def meter_event_error_report_triggered(overrides \\ %{}) do
+    now = DateTime.utc_now()
+
+    base = %{
+      "id" => "mere_test_" <> rand(),
+      "object" => "billing.meter.error_report",
+      "meter" => "mtr_test_" <> rand(),
+      "identifier" => "mev_ident_" <> rand(),
+      "reason" => %{
+        "error_code" => "meter_event_customer_not_found",
+        "error_message" => "customer not found"
+      },
+      "validation_start" => DateTime.to_unix(now),
+      "validation_end" => DateTime.to_unix(now)
+    }
+
+    deep_merge(base, overrides)
+  end
+
   @spec webhook_event(String.t(), map(), map()) :: map()
   def webhook_event(type, object_payload, overrides \\ %{})
       when is_binary(type) and is_map(object_payload) do

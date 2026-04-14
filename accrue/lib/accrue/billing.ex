@@ -26,6 +26,7 @@ defmodule Accrue.Billing do
   alias Accrue.Billing.{
     ChargeActions,
     InvoiceActions,
+    MeterEventActions,
     PaymentMethodActions,
     RefundActions,
     SubscriptionActions
@@ -108,6 +109,10 @@ defmodule Accrue.Billing do
   # ── Refund surface (Plan 06) ──────────────────────────────────────
   defdelegate create_refund(charge, opts \\ []), to: RefundActions
   defdelegate create_refund!(charge, opts \\ []), to: RefundActions
+
+  # ── Metered billing surface (Phase 4 Plan 02, BILL-13) ────────────
+  defdelegate report_usage(customer, event_name, opts \\ []), to: MeterEventActions
+  defdelegate report_usage!(customer, event_name, opts \\ []), to: MeterEventActions
 
   # ---------------------------------------------------------------------------
   # Customer — lazy fetch-or-create (D2-06)

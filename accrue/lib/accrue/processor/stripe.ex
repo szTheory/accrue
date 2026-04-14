@@ -516,6 +516,37 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
+  # Meter event (Phase 4 Plan 02, BILL-13, D4-03)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def report_meter_event(%Accrue.Billing.MeterEvent{} = row) do
+    # Stripe requires the payload `value` as a STRING (Pitfall 7) and
+    # params keys as strings on the wire. Stripe's body-level
+    # `identifier` + HTTP `idempotency_key` form two-layer dedup.
+    params = %{
+      "event_name" => row.event_name,
+      "payload" => %{
+        "stripe_customer_id" => row.stripe_customer_id,
+        "value" => to_string(row.value)
+      },
+      "identifier" => row.identifier,
+      "timestamp" => DateTime.to_unix(row.occurred_at, :second)
+    }
+
+    stripe_opts = [
+      idempotency_key: row.identifier,
+      stripe_version: resolve_api_version([])
+    ]
+
+    client = build_client!([])
+
+    client
+    |> LatticeStripe.Billing.MeterEvent.create(params, stripe_opts)
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
   # fetch/2 — generic refetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
 

@@ -72,6 +72,7 @@ defmodule Accrue.Processor.Fake do
   @charge_prefix "ch_fake_"
   @refund_prefix "re_fake_"
   @event_prefix "evt_fake_"
+  @meter_event_prefix "mev_fake_"
 
   # ---------------------------------------------------------------------------
   # Public API — lifecycle
@@ -401,6 +402,28 @@ defmodule Accrue.Processor.Fake do
   @impl Accrue.Processor
   def retrieve_refund(id, opts \\ []) when is_binary(id) and is_list(opts) do
     GenServer.call(__MODULE__, {:retrieve_refund, id, opts})
+  end
+
+  # ---------------------------------------------------------------------------
+  # Behaviour callbacks — meter event (Phase 4 Plan 02, BILL-13)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def report_meter_event(%Accrue.Billing.MeterEvent{} = row) do
+    GenServer.call(__MODULE__, {:report_meter_event, row})
+  end
+
+  @doc """
+  Returns the Fake-stored meter events for the given customer (by
+  `processor_id`) in insertion order. Test helper only — the Fake never
+  exposes meter events through the behaviour (Stripe doesn't either).
+  """
+  @spec meter_events_for(Accrue.Billing.Customer.t() | String.t()) :: [map()]
+  def meter_events_for(%Accrue.Billing.Customer{processor_id: pid}),
+    do: meter_events_for(pid)
+
+  def meter_events_for(stripe_customer_id) when is_binary(stripe_customer_id) do
+    GenServer.call(__MODULE__, {:meter_events_for, stripe_customer_id})
   end
 
   # ---------------------------------------------------------------------------
@@ -953,6 +976,40 @@ defmodule Accrue.Processor.Fake do
     with_script_or_stub(state, :retrieve_refund, [id, opts], fn state ->
       lookup(state.refunds, id, state)
     end)
+  end
+
+  # --- meter event ---
+
+  def handle_call({:report_meter_event, row}, _from, state) do
+    with_script_or_stub(state, :report_meter_event, [row], fn state ->
+      stripe_event = %{
+        id: @meter_event_prefix <> row.identifier,
+        object: "billing.meter_event",
+        event_name: row.event_name,
+        payload: %{
+          stripe_customer_id: row.stripe_customer_id,
+          value: to_string(row.value)
+        },
+        identifier: row.identifier,
+        timestamp: DateTime.to_unix(row.occurred_at),
+        created: DateTime.to_unix(state.clock),
+        livemode: false
+      }
+
+      existing = Map.get(state.meter_events, row.stripe_customer_id, [])
+
+      state = %{
+        state
+        | meter_events:
+            Map.put(state.meter_events, row.stripe_customer_id, existing ++ [stripe_event])
+      }
+
+      {{:ok, stripe_event}, state}
+    end)
+  end
+
+  def handle_call({:meter_events_for, stripe_customer_id}, _from, state) do
+    {:reply, Map.get(state.meter_events, stripe_customer_id, []), state}
   end
 
   # ---------------------------------------------------------------------------

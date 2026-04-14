@@ -19,6 +19,7 @@ defmodule Accrue.Processor.Fake.State do
           payment_methods: %{optional(id()) => map()},
           charges: %{optional(id()) => map()},
           refunds: %{optional(id()) => map()},
+          meter_events: %{optional(id()) => map()},
           counters: %{
             customer: non_neg_integer(),
             subscription: non_neg_integer(),
@@ -46,6 +47,7 @@ defmodule Accrue.Processor.Fake.State do
             payment_methods: %{},
             charges: %{},
             refunds: %{},
+            meter_events: %{},
             counters: %{
               customer: 0,
               subscription: 0,
