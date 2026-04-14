@@ -66,4 +66,22 @@ defmodule Accrue.Billing.Query do
   def paused(query \\ Subscription) do
     from s in query, where: s.status == :paused or not is_nil(s.pause_collection)
   end
+
+  @doc """
+  Subscriptions eligible for a BILL-15 dunning sweep tick: strictly
+  `:past_due`, with `past_due_since` older than the grace window, and
+  with no prior `dunning_sweep_attempted_at` stamp (D4-02).
+  """
+  @spec dunning_sweep_candidates(pos_integer(), Ecto.Queryable.t()) :: Ecto.Query.t()
+  def dunning_sweep_candidates(grace_days, query \\ Subscription)
+      when is_integer(grace_days) and grace_days > 0 do
+    cutoff = DateTime.add(Accrue.Clock.utc_now(), -grace_days * 86_400, :second)
+
+    from s in query,
+      where:
+        s.status == :past_due and
+          not is_nil(s.past_due_since) and
+          s.past_due_since < ^cutoff and
+          is_nil(s.dunning_sweep_attempted_at)
+  end
 end
