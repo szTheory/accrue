@@ -118,6 +118,462 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
+  # Subscription (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_subscription(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    params = ensure_expand(params, ["latest_invoice.payment_intent"])
+    stripe_opts = stripe_opts(:create_subscription, subject_of(params, "sub"), opts)
+
+    client
+    |> LatticeStripe.Subscription.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_subscription(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts_no_idem(opts)
+
+    client
+    |> LatticeStripe.Subscription.retrieve(id, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def update_subscription(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    params = ensure_expand(params, ["latest_invoice.payment_intent"])
+    stripe_opts = stripe_opts(:update_subscription, id, opts)
+
+    client
+    |> LatticeStripe.Subscription.update(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def cancel_subscription(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:cancel_subscription, id, opts)
+
+    client
+    |> LatticeStripe.Subscription.cancel(id, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def cancel_subscription(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:cancel_subscription, id, opts)
+
+    client
+    |> LatticeStripe.Subscription.cancel(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def resume_subscription(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:resume_subscription, id, opts)
+
+    client
+    |> LatticeStripe.Subscription.resume(id, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def pause_subscription_collection(id, behavior, params, opts)
+      when is_binary(id) and is_atom(behavior) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:pause_subscription_collection, id, opts)
+
+    client
+    |> LatticeStripe.Subscription.pause_collection(
+      id,
+      behavior,
+      stringify_keys(params),
+      stripe_opts
+    )
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
+  # Invoice (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_invoice(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:create_invoice, subject_of(params, "inv"), opts)
+
+    client
+    |> LatticeStripe.Invoice.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_invoice(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.Invoice.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def update_invoice(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:update_invoice, id, opts)
+
+    client
+    |> LatticeStripe.Invoice.update(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def finalize_invoice(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:finalize_invoice, id, opts)
+
+    client
+    |> LatticeStripe.Invoice.finalize(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def void_invoice(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:void_invoice, id, opts)
+
+    client
+    |> LatticeStripe.Invoice.void(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def pay_invoice(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:pay_invoice, id, opts)
+
+    client
+    |> LatticeStripe.Invoice.pay(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def send_invoice(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:send_invoice, id, opts)
+
+    client
+    |> LatticeStripe.Invoice.send_invoice(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def mark_uncollectible_invoice(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:mark_uncollectible_invoice, id, opts)
+
+    client
+    |> LatticeStripe.Invoice.mark_uncollectible(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def create_invoice_preview(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.Invoice.create_preview(stringify_keys(params), stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
+  # PaymentIntent (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_payment_intent(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:create_payment_intent, subject_of(params, "pi"), opts)
+
+    client
+    |> LatticeStripe.PaymentIntent.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_payment_intent(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.PaymentIntent.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def confirm_payment_intent(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:confirm_payment_intent, id, opts)
+
+    client
+    |> LatticeStripe.PaymentIntent.confirm(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
+  # SetupIntent (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_setup_intent(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:create_setup_intent, subject_of(params, "si"), opts)
+
+    client
+    |> LatticeStripe.SetupIntent.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_setup_intent(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.SetupIntent.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def confirm_setup_intent(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:confirm_setup_intent, id, opts)
+
+    client
+    |> LatticeStripe.SetupIntent.confirm(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
+  # PaymentMethod (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_payment_method(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:create_payment_method, subject_of(params, "pm"), opts)
+
+    client
+    |> LatticeStripe.PaymentMethod.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_payment_method(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.PaymentMethod.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def attach_payment_method(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:attach_payment_method, id, opts)
+
+    client
+    |> LatticeStripe.PaymentMethod.attach(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def detach_payment_method(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:detach_payment_method, id, opts)
+
+    client
+    |> LatticeStripe.PaymentMethod.detach(id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def list_payment_methods(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.PaymentMethod.list(stringify_keys(params), stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def update_payment_method(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:update_payment_method, id, opts)
+
+    client
+    |> LatticeStripe.PaymentMethod.update(id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def set_default_payment_method(customer_id, params, opts)
+      when is_binary(customer_id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:set_default_payment_method, customer_id, opts)
+
+    client
+    |> LatticeStripe.Customer.update(customer_id, stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
+  # Charge (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_charge(params, opts) when is_map(params) and is_list(opts) do
+    # Note: Stripe no longer supports direct charge creation for new
+    # integrations — PaymentIntents is the recommended path. This
+    # delegation exists for legacy callers that still drive Charges
+    # directly. lattice_stripe 1.0 does not expose LatticeStripe.Charge.create
+    # so we route through PaymentIntent.create with confirmation_method: :automatic
+    # and immediate confirm.
+    params = ensure_expand(params, ["balance_transaction"])
+    stripe_opts = stripe_opts(:create_charge, subject_of(params, "ch"), opts)
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.PaymentIntent.create(
+      stringify_keys(Map.put(params, :confirm, true)),
+      stripe_opts
+    )
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_charge(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.Charge.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def list_charges(_params, _opts) do
+    # lattice_stripe 1.0 does not expose LatticeStripe.Charge.list — the
+    # canonical list surface is PaymentIntent.list. Return a typed error
+    # so Wave 2 callers fail loudly rather than silently missing data.
+    {:error,
+     %Accrue.APIError{
+       code: "unsupported_operation",
+       http_status: 501,
+       message:
+         "LatticeStripe.Charge.list/3 is not available in lattice_stripe ~> 1.0; " <>
+           "use Accrue.Processor.list_payment_intents/2 (Phase 4)."
+     }}
+  end
+
+  # ---------------------------------------------------------------------------
+  # Refund (Phase 3)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_refund(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+
+    params =
+      ensure_expand(params, [
+        "balance_transaction",
+        "charge.balance_transaction"
+      ])
+
+    stripe_opts = stripe_opts(:create_refund, subject_of(params, "re"), opts)
+
+    client
+    |> LatticeStripe.Refund.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_refund(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.Refund.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
+  # fetch/2 — generic refetch dispatch (D3-48)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def fetch(:subscription, id), do: retrieve_subscription(id, [])
+  def fetch(:invoice, id), do: retrieve_invoice(id, [])
+  def fetch(:charge, id), do: retrieve_charge(id, [])
+  def fetch(:refund, id), do: retrieve_refund(id, [])
+  def fetch(:payment_method, id), do: retrieve_payment_method(id, [])
+  def fetch(:customer, id), do: retrieve_customer(id, [])
+  def fetch(:payment_intent, id), do: retrieve_payment_intent(id, [])
+  def fetch(:setup_intent, id), do: retrieve_setup_intent(id, [])
+
+  # ---------------------------------------------------------------------------
+  # Phase 3 helpers
+  # ---------------------------------------------------------------------------
+
+  @spec stripe_opts(atom(), String.t(), keyword()) :: keyword()
+  defp stripe_opts(op, subject_id, opts) do
+    idem_key = compute_idempotency_key(op, subject_id, opts)
+
+    opts
+    |> Keyword.put(:idempotency_key, idem_key)
+    |> Keyword.put(:stripe_version, resolve_api_version(opts))
+  end
+
+  @spec stripe_opts_no_idem(keyword()) :: keyword()
+  defp stripe_opts_no_idem(opts) do
+    Keyword.put(opts, :stripe_version, resolve_api_version(opts))
+  end
+
+  @spec subject_of(map(), String.t()) :: String.t()
+  defp subject_of(params, fallback_prefix) do
+    params[:customer] || params["customer"] ||
+      params[:charge] || params["charge"] ||
+      params[:subscription] || params["subscription"] ||
+      "#{fallback_prefix}_new"
+  end
+
+  @spec ensure_expand(map(), [String.t()]) :: map()
+  defp ensure_expand(params, paths) do
+    existing =
+      Map.get(params, :expand) || Map.get(params, "expand") || []
+
+    expand = Enum.uniq(existing ++ paths)
+
+    params
+    |> Map.delete("expand")
+    |> Map.put(:expand, expand)
+  end
+
+  @spec translate_resource({:ok, struct() | map()} | {:error, term()}) ::
+          {:ok, map()} | {:error, Exception.t()}
+  defp translate_resource({:ok, %_{} = result}), do: {:ok, Map.from_struct(result)}
+  defp translate_resource({:ok, result}) when is_map(result), do: {:ok, result}
+  defp translate_resource({:error, raw}), do: {:error, ErrorMapper.to_accrue_error(raw)}
+
+  # ---------------------------------------------------------------------------
   # Idempotency keys (D2-11, D2-12, PROC-04)
   # ---------------------------------------------------------------------------
 
