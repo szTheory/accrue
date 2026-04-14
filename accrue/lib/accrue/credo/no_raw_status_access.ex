@@ -63,10 +63,17 @@ defmodule Accrue.Credo.NoRawStatusAccess do
 
   # Test files under `test/` are exempt — tests construct Stripe status
   # payloads and assert on them directly; predicates don't apply.
+  #
+  # WR-06: tightened to `test/**` only. The previous `contains?("/test/")`
+  # matcher inadvertently exempted production modules like
+  # `lib/accrue/test/factory.ex` and `lib/accrue/test/generators.ex`.
   defp exempt_file?(nil), do: false
 
   defp exempt_file?(filename) when is_binary(filename) do
-    String.contains?(filename, "/test/") or String.starts_with?(filename, "test/")
+    String.starts_with?(filename, "test/") or
+      String.contains?(filename, "/test/accrue/") or
+      String.contains?(filename, "/test/support/") or
+      Path.basename(Path.dirname(filename)) == "test"
   end
 
   # Track defmodule nesting so we can exempt Accrue.Billing.Subscription.
@@ -120,6 +127,45 @@ defmodule Accrue.Credo.NoRawStatusAccess do
        )
        when lhs in @stripe_statuses do
     issue_for(issue_meta, line_of(meta), "== on .status")
+  end
+
+  # WR-06: `sub.status != :active | :trialing | ...` — same shape as
+  # `==` but for the inequality operator.
+  defp check_node(
+         {:!=, meta, [{{:., _, [_, :status]}, _, _}, rhs]},
+         issue_meta
+       )
+       when rhs in @stripe_statuses do
+    issue_for(issue_meta, line_of(meta), "!= on .status")
+  end
+
+  defp check_node(
+         {:!=, meta, [lhs, {{:., _, [_, :status]}, _, _}]},
+         issue_meta
+       )
+       when lhs in @stripe_statuses do
+    issue_for(issue_meta, line_of(meta), "!= on .status")
+  end
+
+  # WR-06: string-status equality (e.g. `charge.status == "succeeded"`).
+  # Charge.status is `:string`, not an enum; the same BILL-05 invariant
+  # applies — use a predicate, not a raw comparison.
+  @string_statuses ~w(trialing active past_due canceled unpaid incomplete incomplete_expired paused succeeded failed pending)
+
+  defp check_node(
+         {:==, meta, [{{:., _, [_, :status]}, _, _}, rhs]},
+         issue_meta
+       )
+       when is_binary(rhs) and rhs in @string_statuses do
+    issue_for(issue_meta, line_of(meta), "== on .status (string)")
+  end
+
+  defp check_node(
+         {:==, meta, [lhs, {{:., _, [_, :status]}, _, _}]},
+         issue_meta
+       )
+       when is_binary(lhs) and lhs in @string_statuses do
+    issue_for(issue_meta, line_of(meta), "== on .status (string)")
   end
 
   # sub.status in [:active, :trialing, ...] — flag only if any element of

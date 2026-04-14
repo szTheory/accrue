@@ -208,43 +208,44 @@ defmodule Accrue.Billing do
 
     params = build_processor_params(billable)
 
-    multi =
-      Ecto.Multi.new()
-      |> Ecto.Multi.run(:processor, fn _repo, _changes ->
-        Processor.create_customer(params)
-      end)
-      |> Ecto.Multi.insert(:customer, fn %{processor: processor_result} ->
-        Customer.changeset(%Customer{}, %{
-          owner_type: billable_type,
-          owner_id: owner_id,
-          processor: processor_name,
-          processor_id: Map.get(processor_result, :id),
-          name: Map.get(processor_result, :name),
-          email: Map.get(processor_result, :email),
-          metadata: Map.get(processor_result, :metadata, %{}),
-          data: Map.drop(processor_result, [:address, :phone, :shipping, "address", "phone", "shipping"])
-        })
-      end)
-      |> Ecto.Multi.run(:event, fn _repo, %{customer: customer} ->
-        Events.record(%{
-          type: "customer.created",
-          subject_type: "Customer",
-          subject_id: customer.id,
-          data: %{
-            owner_type: billable_type,
-            owner_id: owner_id,
-            processor: processor_name,
-            processor_id: customer.processor_id
-          }
-        })
-      end)
-
-    case Repo.transaction(multi) do
-      {:ok, %{customer: customer}} -> {:ok, customer}
-      {:error, :processor, reason, _changes} -> {:error, reason}
-      {:error, :customer, changeset, _changes} -> {:error, changeset}
-      {:error, :event, reason, _changes} -> {:error, reason}
-    end
+    # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
+    Repo.transact(fn ->
+      with {:ok, processor_result} <- Processor.create_customer(params),
+           customer_attrs = %{
+             owner_type: billable_type,
+             owner_id: owner_id,
+             processor: processor_name,
+             processor_id: Map.get(processor_result, :id),
+             name: Map.get(processor_result, :name),
+             email: Map.get(processor_result, :email),
+             metadata: Map.get(processor_result, :metadata, %{}),
+             data:
+               Map.drop(processor_result, [
+                 :address,
+                 :phone,
+                 :shipping,
+                 "address",
+                 "phone",
+                 "shipping"
+               ])
+           },
+           {:ok, customer} <-
+             %Customer{} |> Customer.changeset(customer_attrs) |> Repo.insert(),
+           {:ok, _event} <-
+             Events.record(%{
+               type: "customer.created",
+               subject_type: "Customer",
+               subject_id: customer.id,
+               data: %{
+                 owner_type: billable_type,
+                 owner_id: owner_id,
+                 processor: processor_name,
+                 processor_id: customer.processor_id
+               }
+             }) do
+        {:ok, customer}
+      end
+    end)
   end
 
   @doc """
@@ -277,23 +278,21 @@ defmodule Accrue.Billing do
   """
   @spec update_customer(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
   def update_customer(%Customer{} = customer, attrs) when is_map(attrs) do
-    multi =
-      Ecto.Multi.new()
-      |> Ecto.Multi.update(:customer, Customer.changeset(customer, attrs))
-      |> Ecto.Multi.run(:event, fn _repo, %{customer: updated} ->
-        Events.record(%{
-          type: "customer.updated",
-          subject_type: "Customer",
-          subject_id: updated.id,
-          data: %{changes: Map.take(attrs, [:metadata, :name, :email, "metadata", "name", "email"])}
-        })
-      end)
-
-    case Repo.transaction(multi) do
-      {:ok, %{customer: customer}} -> {:ok, customer}
-      {:error, :customer, changeset, _changes} -> {:error, changeset}
-      {:error, :event, reason, _changes} -> {:error, reason}
-    end
+    # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
+    Repo.transact(fn ->
+      with {:ok, updated} <- customer |> Customer.changeset(attrs) |> Repo.update(),
+           {:ok, _event} <-
+             Events.record(%{
+               type: "customer.updated",
+               subject_type: "Customer",
+               subject_id: updated.id,
+               data: %{
+                 changes: Map.take(attrs, [:metadata, :name, :email, "metadata", "name", "email"])
+               }
+             }) do
+        {:ok, updated}
+      end
+    end)
   end
 
   # ---------------------------------------------------------------------------
