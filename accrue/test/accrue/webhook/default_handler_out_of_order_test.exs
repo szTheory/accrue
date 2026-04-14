@@ -82,4 +82,46 @@ defmodule Accrue.Webhook.DefaultHandlerOutOfOrderTest do
     updated = Repo.get!(Subscription, sub.id)
     assert updated.last_stripe_event_id == "evt_b"
   end
+
+  test "reverse-order delivery: older processes first, newer wins and advances watermark",
+       %{sub: sub} do
+    # Quick task 260414-l9q: Phase 3 HUMAN-UAT Item 2 — the "newer wins by
+    # Stripe created timestamp" leg in the reverse-order direction (older
+    # event arrives first with no prior watermark, newer event arrives
+    # second and correctly supersedes).
+    #
+    # The previously-existing "older event is skipped" test covers the
+    # forward direction (newer already watermarked, older arrives late).
+    # Together the two tests prove the full resolve-by-created invariant.
+
+    base_ts = DateTime.truncate(Accrue.Clock.utc_now(), :second)
+    older_ts = DateTime.add(base_ts, -600, :second)
+    newer_ts = DateTime.add(base_ts, 600, :second)
+
+    # Leg 1: older event arrives first with no watermark set. Must
+    # process successfully and advance watermark to the older event.
+    older_event =
+      StripeFixtures.webhook_event(
+        "customer.subscription.updated",
+        StripeFixtures.subscription_created(%{"id" => sub.processor_id}),
+        %{"id" => "evt_older_reverse", "created" => DateTime.to_unix(older_ts)}
+      )
+
+    assert {:ok, %Subscription{} = after_older} = DefaultHandler.handle(older_event)
+    assert after_older.last_stripe_event_id == "evt_older_reverse"
+    assert DateTime.compare(after_older.last_stripe_event_ts, older_ts) == :eq
+
+    # Leg 2: newer event arrives second. Must process (strict `:lt`
+    # comparison means strictly-greater passes) and advance watermark.
+    newer_event =
+      StripeFixtures.webhook_event(
+        "customer.subscription.updated",
+        StripeFixtures.subscription_created(%{"id" => sub.processor_id}),
+        %{"id" => "evt_newer_reverse", "created" => DateTime.to_unix(newer_ts)}
+      )
+
+    assert {:ok, %Subscription{} = after_newer} = DefaultHandler.handle(newer_event)
+    assert after_newer.last_stripe_event_id == "evt_newer_reverse"
+    assert DateTime.compare(after_newer.last_stripe_event_ts, newer_ts) == :eq
+  end
 end
