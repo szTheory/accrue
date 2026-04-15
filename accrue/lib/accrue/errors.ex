@@ -188,3 +188,22 @@ defmodule Accrue.ActionRequiredError do
   def message(%__MODULE__{}),
     do: "Stripe requires customer action (SCA/3DS); inspect :payment_intent"
 end
+
+defmodule Accrue.Error.PdfDisabled do
+  @moduledoc """
+  Raised / returned when the configured PDF adapter is `Accrue.PDF.Null`
+  (D6-06). Expected and terminal — callers MUST pattern-match and fall
+  through to a non-PDF path (e.g., link to `hosted_invoice_url` instead
+  of attaching a rendered binary). Oban workers MUST NOT treat this as
+  a transient retry; it is a stable adapter configuration, not a
+  failure.
+  """
+
+  defexception [:reason, :docs_url, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{}),
+    do: "PDF rendering disabled on this Accrue instance (Accrue.PDF.Null configured)"
+end
