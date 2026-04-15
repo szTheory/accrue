@@ -170,7 +170,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **ADMIN-17**: Webhook replay: one-click requeue individual; DLQ bulk requeue
 - [x] **ADMIN-18**: Activity feed sourced from `accrue_events`
 - [x] **ADMIN-19**: Connect: connected accounts list + detail + capability inspector
-- [ ] **ADMIN-20**: Connect: platform fee configuration UI
+- [x] **ADMIN-20**: Connect: platform fee configuration UI
 - [x] **ADMIN-21**: Step-up auth / re-auth prompt for destructive actions (refund, manual cancel)
 - [x] **ADMIN-22**: Admin action audit logging to `accrue_events` with `actor_type: :admin`
 - [x] **ADMIN-23**: Admin actions linked causally to webhook-driven events (`caused_by_event_id`)
@@ -428,7 +428,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-17 | Phase 7 | Complete |
 | ADMIN-18 | Phase 7 | Complete |
 | ADMIN-19 | Phase 7 | Complete |
-| ADMIN-20 | Phase 7 | Pending |
+| ADMIN-20 | Phase 7 | Complete |
 | ADMIN-21 | Phase 7 | Complete |
 | ADMIN-22 | Phase 7 | Complete |
 | ADMIN-23 | Phase 7 | Complete |

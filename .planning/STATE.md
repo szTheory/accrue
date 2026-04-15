@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-07-PLAN.md
-last_updated: "2026-04-15T18:47:30.742Z"
+stopped_at: Completed 07-12-PLAN.md
+last_updated: "2026-04-15T19:02:18.027Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 54
-  completed_plans: 52
-  percent: 96
+  completed_plans: 53
+  percent: 98
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 07 (admin-ui-accrue-admin) — EXECUTING
-Plan: 11 of 12
+Plan: 12 of 12
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -93,6 +93,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-admin-ui-accrue-admin P05 | 13m | 2 tasks | 13 files |
 | Phase 07 P06 | 54 | 1 tasks | 9 files |
 | Phase 07-admin-ui-accrue-admin P07 | 13m | 2 tasks | 12 files |
+| Phase 07 P12 | 14m | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -224,6 +225,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 07]: Used existing Oban job history as webhook attempt visibility instead of inventing a parallel retry table.
 - [Phase 07]: Replay UI remains a thin wrapper over Accrue.Webhooks.DLQ with admin audit rows added at the LiveView boundary.
 - [Phase 07]: Global activity feed reads directly from accrue_events so scoped and all-events views share the same append-only ledger.
+- [Phase 07]: Connect account override state is stored only in accrue_connect_accounts.data["platform_fee_override"], while the global default remains read-only from Accrue.Config.
+- [Phase 07]: Override validation and preview both run through Accrue.Connect.platform_fee/2 so percent and clamp semantics stay aligned with the existing repo primitive.
+- [Phase 07]: Promotion codes ship as their own list/detail route pair and sidebar entry instead of hiding under coupon detail only.
 
 ### Pending Todos
 
@@ -244,6 +248,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T18:47:30.736Z
-Stopped at: Completed 07-07-PLAN.md
+Last session: 2026-04-15T19:02:17.773Z
+Stopped at: Completed 07-12-PLAN.md
 Resume file: None
