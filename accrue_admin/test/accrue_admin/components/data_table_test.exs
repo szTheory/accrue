@@ -132,7 +132,8 @@ defmodule AccrueAdmin.DataTableTest do
       {:ok,
        socket
        |> Phoenix.Component.assign(:table_params, Map.get(session, "params", %{}))
-       |> Phoenix.Component.assign(:path, "/admin/fixtures")}
+       |> Phoenix.Component.assign(:path, "/admin/fixtures")
+       |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))}
     end
 
     @impl true
@@ -146,10 +147,16 @@ defmodule AccrueAdmin.DataTableTest do
         params={@table_params}
         limit={2}
         dom_limit={4}
+        poll_interval_ms={@poll_interval_ms}
         columns={[
           %{id: :label, label: "Label"},
           %{id: :status, label: "Status"},
           %{label: "Summary", render: &"#{&1.label} / #{&1.category}"}
+        ]}
+        card_title={& &1.label}
+        card_fields={[
+          %{id: :status, label: "Status"},
+          %{id: :category, label: "Category"}
         ]}
         filter_fields={[
           %{id: :q, label: "Search"},
@@ -219,5 +226,50 @@ defmodule AccrueAdmin.DataTableTest do
     assert pagination_call[:filter] == %{status: "open"}
     assert is_binary(pagination_call[:cursor])
     assert {:ok, {~U[2026-04-15 17:00:04Z], "row-4"}} = Cursor.decode(pagination_call[:cursor])
+  end
+
+  test "renders card mode markup and supports visible-row bulk selection", %{conn: conn} do
+    {:ok, view, html} =
+      live_isolated(conn, TableLive,
+        session: %{"params" => %{"status" => "open"}}
+      )
+
+    assert html =~ ~s(data-role="card-list")
+    assert html =~ "Category"
+    assert html =~ "alpha"
+
+    html = render_click(element(view, "[data-role='toggle-all']"))
+    assert html =~ ~s(data-role="selected-count">2 selected<)
+
+    html =
+      render_click(
+        element(view, ~s([data-role="card-list"] [data-role="toggle-row"][data-row-id="row-5"]))
+      )
+    assert html =~ ~s(data-role="selected-count">1 selected<)
+  end
+
+  test "polls for newer rows and only reloads them when explicitly requested", %{conn: conn} do
+    {:ok, view, _html} =
+      live_isolated(conn, TableLive,
+        session: %{"params" => %{"status" => "open"}, "poll_interval_ms" => 15}
+      )
+
+    FixtureStore.put_rows([
+      %{id: "row-7", label: "Brand new open", status: "open", category: "sigma", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:07Z]},
+      %{id: "row-6", label: "Another new open", status: "open", category: "tau", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:06Z]}
+      | FixtureStore.rows()
+    ])
+
+    Process.sleep(60)
+    html = render(view)
+
+    assert html =~ "2 new rows - click to load"
+    assert FixtureStore.count_calls() != []
+
+    html = render_click(element(view, "[data-role='load-newer']"))
+
+    assert html =~ "Brand new open"
+    assert html =~ "Another new open"
+    refute html =~ "2 new rows - click to load"
   end
 end

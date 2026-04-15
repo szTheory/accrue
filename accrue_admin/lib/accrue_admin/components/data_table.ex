@@ -12,27 +12,42 @@ defmodule AccrueAdmin.Components.DataTable do
   def update(assigns, socket) do
     params = Map.get(assigns, :params, %{})
     params_signature = signature(params)
+    action = Map.get(assigns, :action, :sync)
 
     socket =
       socket
       |> assign(assigns)
       |> assign_new(:selected_ids, fn -> MapSet.new() end)
       |> assign_new(:filter_fields, fn -> [] end)
+      |> assign_new(:card_fields, fn -> [] end)
+      |> assign_new(:card_title, fn -> nil end)
       |> assign_new(:empty_title, fn -> "No rows found" end)
       |> assign_new(:empty_copy, fn -> "Adjust the filters or wait for new activity." end)
       |> assign_new(:cursor_field, fn -> :inserted_at end)
       |> assign_new(:row_id, fn -> :id end)
+      |> assign_new(:selectable, fn -> true end)
+      |> assign_new(:enable_polling, fn -> true end)
+      |> assign_new(:poll_interval_ms, fn -> 5_000 end)
+      |> assign_new(:newer_count, fn -> 0 end)
       |> assign(:limit, normalize_positive(Map.get(assigns, :limit, @default_limit), @default_limit))
       |> assign(
         :dom_limit,
         normalize_positive(Map.get(assigns, :dom_limit, @default_dom_limit), @default_dom_limit)
       )
 
-    if socket.assigns[:params_signature] != params_signature do
-      {:ok, reload(socket, params, reset_selection?: false, params_signature: params_signature)}
-    else
-      {:ok, socket}
-    end
+    socket =
+      cond do
+        action == :poll ->
+          poll_newer(socket)
+
+        socket.assigns[:params_signature] != params_signature ->
+          reload(socket, params, reset_selection?: false, params_signature: params_signature)
+
+        true ->
+          socket
+      end
+
+    {:ok, maybe_schedule_poll(socket)}
   end
 
   @impl true
@@ -56,6 +71,30 @@ defmodule AccrueAdmin.Components.DataTable do
     end
   end
 
+  def handle_event("toggle-row", %{"id" => row_id}, socket) do
+    {:noreply, assign(socket, :selected_ids, toggle_id(socket.assigns.selected_ids, row_id))}
+  end
+
+  def handle_event("toggle-all", _params, socket) do
+    visible_ids = visible_row_ids(socket)
+
+    selected_ids =
+      if all_visible_selected?(socket) do
+        Enum.reduce(visible_ids, socket.assigns.selected_ids, &MapSet.delete(&2, &1))
+      else
+        Enum.reduce(visible_ids, socket.assigns.selected_ids, &MapSet.put(&2, &1))
+      end
+
+    {:noreply, assign(socket, :selected_ids, selected_ids)}
+  end
+
+  def handle_event("load-newer", _params, socket) do
+    {:noreply,
+     socket
+     |> reload(socket.assigns.params, reset_selection?: false, params_signature: socket.assigns.params_signature)
+     |> assign(:newer_count, 0)}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -74,24 +113,101 @@ defmodule AccrueAdmin.Components.DataTable do
         </form>
       </header>
 
+      <div
+        :if={@newer_count > 0}
+        class="ax-card ax-data-table-poll-banner"
+        data-role="poll-banner"
+        data-poll-ms={@poll_interval_ms}
+      >
+        <p class="ax-body"><%= "#{@newer_count} new rows - click to load" %></p>
+        <button
+          type="button"
+          phx-click="load-newer"
+          phx-target={@myself}
+          class="ax-button ax-button-secondary"
+          data-role="load-newer"
+        >
+          Load newer rows
+        </button>
+      </div>
+
       <div :if={Enum.empty?(@rows)} class="ax-card ax-data-table-empty" data-role="empty-state">
         <p class="ax-heading"><%= @empty_title %></p>
         <p class="ax-body"><%= @empty_copy %></p>
+      </div>
+
+      <div :if={!Enum.empty?(@rows) and @selectable} class="ax-data-table-selection" data-role="selection-bar">
+        <p class="ax-body" data-role="selected-count"><%= "#{MapSet.size(@selected_ids)} selected" %></p>
+        <button
+          type="button"
+          phx-click="toggle-all"
+          phx-target={@myself}
+          class="ax-button ax-button-ghost"
+          data-role="toggle-all"
+        >
+          <%= if all_visible_selected?(assigns), do: "Clear visible", else: "Select visible" %>
+        </button>
       </div>
 
       <div :if={!Enum.empty?(@rows)} class="ax-card ax-data-table-shell">
         <table class="ax-data-table-grid">
           <thead>
             <tr>
+              <th :if={@selectable} scope="col" class="ax-label">Select</th>
               <th :for={column <- @columns} scope="col" class="ax-label"><%= column_label(column) %></th>
             </tr>
           </thead>
           <tbody>
             <tr :for={row <- @rows} id={row_dom_id(@id, row, @row_id)} data-row-id={row_identity(row, @row_id)}>
+              <td :if={@selectable}>
+                <button
+                  type="button"
+                  phx-click="toggle-row"
+                  phx-value-id={row_identity(row, @row_id)}
+                  phx-target={@myself}
+                  class="ax-button ax-button-ghost"
+                  data-role="toggle-row"
+                  data-row-id={row_identity(row, @row_id)}
+                  aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
+                >
+                  <%= if selected?(@selected_ids, row_identity(row, @row_id)), do: "Selected", else: "Select" %>
+                </button>
+              </td>
               <td :for={column <- @columns}><%= cell_value(column, row) %></td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div :if={!Enum.empty?(@rows)} class="ax-data-table-cards" data-role="card-list">
+        <article :for={row <- @rows} class="ax-card ax-data-table-card" data-row-id={row_identity(row, @row_id)}>
+          <header class="ax-data-table-card-header">
+            <div>
+              <p class="ax-eyebrow">Row</p>
+              <p class="ax-heading"><%= card_title(@card_title, row, @columns) %></p>
+            </div>
+            <button
+              :if={@selectable}
+              type="button"
+              phx-click="toggle-row"
+              phx-value-id={row_identity(row, @row_id)}
+              phx-target={@myself}
+              class="ax-button ax-button-ghost"
+              data-role="toggle-row"
+              data-row-id={row_identity(row, @row_id)}
+              aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
+            >
+              <%= if selected?(@selected_ids, row_identity(row, @row_id)), do: "Selected", else: "Select" %>
+            </button>
+          </header>
+
+          <dl class="ax-data-table-card-fields">
+            <div :for={field <- card_fields(@card_fields, @columns)} class="ax-data-table-card-field">
+              <dt class="ax-label"><%= column_label(field) %></dt>
+              <dd class="ax-body"><%= cell_value(field, row) %></dd>
+            </div>
+          </dl>
+        </article>
       </div>
 
       <footer :if={!Enum.empty?(@rows)} class="ax-data-table-footer">
@@ -156,10 +272,12 @@ defmodule AccrueAdmin.Components.DataTable do
 
     socket
     |> assign(:params_signature, Keyword.fetch!(opts, :params_signature))
+    |> assign(:params, params)
     |> assign(:filter, filter)
     |> assign(:filter_params, filter_params)
     |> assign(:rows, rows)
     |> assign(:next_cursor, next_cursor)
+    |> assign(:newer_count, 0)
     |> maybe_reset_selection(opts)
     |> prune_selected_ids()
   end
@@ -173,12 +291,58 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp prune_selected_ids(socket) do
-    visible_ids =
-      socket.assigns.rows
-      |> Enum.map(&row_identity(&1, socket.assigns.row_id))
-      |> MapSet.new()
+    assign(socket, :selected_ids, MapSet.intersection(socket.assigns.selected_ids, MapSet.new(visible_row_ids(socket))))
+  end
 
-    assign(socket, :selected_ids, MapSet.intersection(socket.assigns.selected_ids, visible_ids))
+  defp visible_row_ids(source) do
+    assigns = extract_assigns(source)
+    Enum.map(assigns.rows, &row_identity(&1, assigns.row_id))
+  end
+
+  defp all_visible_selected?(source) do
+    assigns = extract_assigns(source)
+    ids = visible_row_ids(assigns)
+    ids != [] and Enum.all?(ids, &MapSet.member?(assigns.selected_ids, &1))
+  end
+
+  defp selected?(selected_ids, row_id), do: MapSet.member?(selected_ids, to_string(row_id))
+
+  defp toggle_id(selected_ids, row_id) do
+    row_id = to_string(row_id)
+
+    if MapSet.member?(selected_ids, row_id) do
+      MapSet.delete(selected_ids, row_id)
+    else
+      MapSet.put(selected_ids, row_id)
+    end
+  end
+
+  defp poll_newer(socket) do
+    count =
+      case top_cursor(socket) do
+        nil -> 0
+        cursor -> socket.assigns.query_module.count_newer_than(filter: socket.assigns.filter, cursor: cursor)
+      end
+
+    assign(socket, :newer_count, count)
+  end
+
+  defp top_cursor(socket) do
+    case socket.assigns.rows do
+      [row | _rest] ->
+        AccrueAdmin.Queries.Cursor.encode(Map.fetch!(row, socket.assigns.cursor_field), row_identity(row, socket.assigns.row_id))
+
+      [] ->
+        nil
+    end
+  end
+
+  defp maybe_schedule_poll(socket) do
+    if connected?(socket) and socket.assigns.enable_polling and socket.assigns.poll_interval_ms > 0 do
+      Phoenix.LiveView.send_update_after(self(), __MODULE__, [id: socket.assigns.id, action: :poll], socket.assigns.poll_interval_ms)
+    end
+
+    socket
   end
 
   defp normalize_positive(value, _fallback) when is_integer(value) and value > 0, do: value
@@ -222,10 +386,21 @@ defmodule AccrueAdmin.Components.DataTable do
     end
   end
 
-  defp row_identity(row, row_id) when is_function(row_id, 1), do: row_id.(row)
-  defp row_identity(row, row_id), do: Map.fetch!(row, row_id)
+  defp row_identity(row, row_id) when is_function(row_id, 1), do: row_id.(row) |> to_string()
+  defp row_identity(row, row_id), do: Map.fetch!(row, row_id) |> to_string()
 
   defp row_dom_id(table_id, row, row_id), do: "#{table_id}-row-#{row_identity(row, row_id)}"
+
+  defp card_fields([], columns), do: columns
+  defp card_fields(card_fields, _columns), do: card_fields
+
+  defp card_title(nil, row, [first_column | _rest]), do: cell_value(first_column, row)
+  defp card_title(nil, row, _columns), do: row_identity(row, :id)
+  defp card_title(card_title, row, _columns) when is_function(card_title, 1), do: card_title.(row)
+  defp card_title(card_title, row, _columns), do: cell_value(card_title, row)
+
+  defp extract_assigns(%{assigns: assigns}), do: assigns
+  defp extract_assigns(assigns), do: assigns
 
   defp humanize(nil), do: "Column"
 
