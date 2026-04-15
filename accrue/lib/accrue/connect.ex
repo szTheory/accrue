@@ -22,7 +22,7 @@ defmodule Accrue.Connect do
   requirement).
   """
 
-  alias Accrue.Connect.{Account, AccountLink, LoginLink, Projection}
+  alias Accrue.Connect.{Account, AccountLink, LoginLink, PlatformFee, Projection}
   alias Accrue.Processor
   alias Accrue.Repo
 
@@ -424,6 +424,41 @@ defmodule Accrue.Connect do
         err
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Platform fee (D5-04, CONN-06) — pure Money math, caller-inject semantics
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Computes a platform fee as a pure `Accrue.Money` value.
+
+  **Caller-inject semantics.** This helper returns the computed fee; it
+  does NOT auto-apply the value to any charge or transfer. Callers thread
+  the result into `application_fee_amount:` on their own charge/transfer
+  calls (Plan 05-05) so the fee line is always auditable at the call site.
+
+  See `Accrue.Connect.PlatformFee` for the full computation order and
+  clamp semantics. Defaults come from the `:platform_fee` sub-key of the
+  `:connect` config (`Accrue.Config.get!(:connect)`), which ships with
+  Stripe's standard 2.9% baseline and no fixed/min/max.
+
+  ## Examples
+
+      iex> {:ok, fee} = Accrue.Connect.platform_fee(
+      ...>   Accrue.Money.new(10_000, :usd),
+      ...>   percent: Decimal.new("2.9"),
+      ...>   fixed: Accrue.Money.new(30, :usd)
+      ...> )
+      iex> fee
+      %Accrue.Money{amount_minor: 320, currency: :usd}
+  """
+  @spec platform_fee(Accrue.Money.t(), keyword()) ::
+          {:ok, Accrue.Money.t()} | {:error, Exception.t()}
+  defdelegate platform_fee(gross, opts \\ []), to: PlatformFee, as: :compute
+
+  @doc "Bang variant of `platform_fee/2`. Raises on validation failure."
+  @spec platform_fee!(Accrue.Money.t(), keyword()) :: Accrue.Money.t()
+  defdelegate platform_fee!(gross, opts \\ []), to: PlatformFee, as: :compute!
 
   # ---------------------------------------------------------------------------
   # Internals
