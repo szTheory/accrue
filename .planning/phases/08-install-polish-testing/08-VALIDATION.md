@@ -29,7 +29,7 @@ created: 2026-04-15
 
 - **After every task commit:** Run `cd accrue && mix test test/accrue/test test/accrue/config_test.exs test/accrue/telemetry_test.exs`
 - **After every plan wave:** Run `cd accrue && mix test.all` plus targeted `cd accrue_admin && mix test test/accrue_admin/router_test.exs` when installer/admin mount behavior changes
-- **Before `$gsd-verify-work`:** Run fresh Phoenix install smoke, `cd accrue && mix test.all`, `cd accrue_admin && mix test`, and compile checks for with/without OTel and Sigra
+- **Before `$gsd-verify-work`:** Run fresh Phoenix install smoke that asserts Stripe test-mode runtime config readiness and redacted output, `cd accrue && mix test.all`, `cd accrue_admin && mix test`, and compile checks for with/without OTel and Sigra
 - **Max feedback latency:** 120 seconds for targeted tests, full suite before wave completion
 
 ---
@@ -40,6 +40,7 @@ created: 2026-04-15
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 08-01-01 | 01 | 0 | INST-01..10 | T-08-01 / T-08-02 | Installer dry-run, idempotency, no-clobber, safe report | integration | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs` | no W0 | pending |
 | 08-01-02 | 01 | 0 | INST-08 | T-08-01 | Handler generator never overwrites edited files | integration | `cd accrue && mix test test/mix/tasks/accrue_gen_handler_test.exs` | no W0 | pending |
+| 08-01-10 | 01 | 0 | INST-09, INST-10 | T-08-02 / T-08-06 | Stripe test-mode readiness contract covers processor config, env-var snippets, test-key reporting, and redaction | integration/smoke | `cd accrue && mix test --only install_stripe_test_mode test/mix/tasks/accrue_install_test.exs` | no W0 tag | pending |
 | 08-01-03 | 01 | 0 | TEST-02 | N/A | Fake clock drives lifecycle without sleeps | integration | `cd accrue && mix test test/accrue/test/clock_test.exs` | no W0 | pending |
 | 08-01-04 | 01 | 0 | TEST-03 | T-08-03 | Synthetic webhooks use normal verification/handler path | integration | `cd accrue && mix test test/accrue/test/webhooks_test.exs` | no W0 | pending |
 | 08-01-05 | 01 | 0 | TEST-06 | N/A | Event assertions inspect persisted ledger rows | integration | `cd accrue && mix test test/accrue/test/event_assertions_test.exs` | no W0 | pending |
@@ -48,9 +49,9 @@ created: 2026-04-15
 | 08-01-08 | 01 | 0 | OBS-02 | T-08-04 | Every public Billing function is spanned or explicitly audited | unit/audit | `cd accrue && mix test test/accrue/telemetry/billing_span_coverage_test.exs` | no W0 | pending |
 | 08-01-09 | 01 | 0 | AUTH-05 | T-08-05 | Community auth docs contain required adapters and callbacks | docs/unit | `cd accrue && mix test test/accrue/docs/community_auth_test.exs` | no W0 | pending |
 | 08-02-01 | 02 | 1 | INST-01, INST-05 | T-08-01 / T-08-02 | Installer dependency and required flags parse strictly | integration | `cd accrue && mix test --only install_options test/mix/tasks/accrue_install_test.exs` | W0 tag | pending |
-| 08-02-02 | 02 | 1 | INST-01, INST-02, INST-07, INST-09, INST-10 | T-08-01 / T-08-02 | Generated files are fingerprinted and config validation/docs fail loud | integration | `cd accrue && mix test --only install_templates test/mix/tasks/accrue_install_test.exs` | W0 tag | pending |
+| 08-02-02 | 02 | 1 | INST-01, INST-02, INST-07, INST-09, INST-10 | T-08-01 / T-08-02 / T-08-06 | Generated files are fingerprinted; config validation/docs fail loud; Stripe test-mode runtime snippets use env vars and redact secrets | integration | `cd accrue && mix test --only install_templates test/mix/tasks/accrue_install_test.exs && mix test --only install_stripe_test_mode test/mix/tasks/accrue_install_test.exs` | W0 tag | pending |
 | 08-03-01 | 03 | 2 | INST-03, INST-04, INST-06, AUTH-04, AUTH-05 | T-08-03 / T-08-05 | Router/webhook/admin/auth/test-support/Oban patch builders are explicit, reviewable, and protected | integration | `cd accrue && mix test --only install_patches test/mix/tasks/accrue_install_test.exs test/accrue/install/sigra_detection_test.exs` | W0 tag | pending |
-| 08-03-02 | 03 | 2 | INST-01..10 | T-08-01 / T-08-02 | Installer entrypoint orchestrates Options, Project, Templates, Fingerprints, Patches, config docs/validation, and final reporting | integration | `cd accrue && mix test --only install_orchestration test/mix/tasks/accrue_install_test.exs test/accrue/install/sigra_detection_test.exs` | W0 tag | pending |
+| 08-03-02 | 03 | 2 | INST-01..10 | T-08-01 / T-08-02 / T-08-06 | Installer entrypoint orchestrates Options, Project, Templates, Fingerprints, Patches, config docs/validation, Stripe readiness reporting, and final redacted reporting | integration | `cd accrue && mix test --only install_orchestration test/mix/tasks/accrue_install_test.exs test/accrue/install/sigra_detection_test.exs && mix test --only install_stripe_test_mode test/mix/tasks/accrue_install_test.exs` | W0 tag | pending |
 | 08-03-03 | 03 | 2 | INST-08 | T-08-01 | Handler generator creates handler scaffolds without clobbering edited files | integration | `cd accrue && mix test test/mix/tasks/accrue_gen_handler_test.exs` | W0 | pending |
 | 08-04-01 | 04 | 2 | TEST-07 | N/A | Public facade imports setup helpers without EventAssertions before Plan 08-05 | unit | `cd accrue && mix test --only facade_core test/accrue/test/facade_test.exs` | W0 tag | pending |
 | 08-04-02 | 04 | 2 | TEST-02, TEST-03, TEST-07 | N/A | Clock and webhook helpers wrap Fake Processor behavior and facade exposes action helpers | integration | `cd accrue && mix test test/accrue/test/clock_test.exs test/accrue/test/webhooks_test.exs && mix test --only facade_actions test/accrue/test/facade_test.exs` | W0 tag | pending |
@@ -69,7 +70,8 @@ created: 2026-04-15
 ## Wave 0 Requirements
 
 - [ ] `accrue/test/mix/tasks/accrue_install_test.exs` — stubs for INST-01..10
-- [ ] `accrue/test/mix/tasks/accrue_install_test.exs` — task-addressable tags `:install_options`, `:install_templates`, `:install_patches`, and `:install_orchestration`
+- [ ] `accrue/test/mix/tasks/accrue_install_test.exs` — task-addressable tags `:install_options`, `:install_templates`, `:install_patches`, `:install_stripe_test_mode`, and `:install_orchestration`
+- [ ] `accrue/test/mix/tasks/accrue_install_test.exs` — Stripe test-mode readiness assertions for `config :accrue, :processor, Accrue.Processor.Stripe`, `System.fetch_env!("STRIPE_SECRET_KEY")`, `System.get_env("STRIPE_WEBHOOK_SECRET")`, test-key validation/reporting, and no raw `sk_test_` / `whsec_` output
 - [ ] `accrue/test/mix/tasks/accrue_gen_handler_test.exs` — stubs for INST-08
 - [ ] `accrue/test/accrue/install/sigra_detection_test.exs` — stubs for AUTH-04 and AUTH-05
 - [ ] `accrue/test/accrue/install/sigra_detection_test.exs` — task-addressable tags `:install_patches` and `:install_orchestration`
@@ -82,7 +84,7 @@ created: 2026-04-15
 - [ ] `accrue/test/accrue/telemetry/billing_span_coverage_test.exs` — stubs for OBS-02 Billing span coverage
 - [ ] `accrue/test/accrue/docs/testing_guide_test.exs` — stubs for TEST-10
 - [ ] `accrue/test/accrue/docs/community_auth_test.exs` — stubs for AUTH-05
-- [ ] Fresh Phoenix fixture/sandbox helper for install smoke
+- [ ] Fresh Phoenix fixture/sandbox helper for install smoke, including a contract that generated `config/runtime.exs` has the Stripe test-mode configuration path and captured installer output redacts raw fixture secrets
 
 ---
 
@@ -90,7 +92,7 @@ created: 2026-04-15
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Fresh Phoenix app subjective install DX under 30 seconds | Phase 8 goal | Wall-clock and prompt clarity require human smoke once automation passes | Create a new `phx.new` app, point deps at local Accrue packages, run `mix accrue.install --dry-run`, then `mix accrue.install --yes`, and confirm report, generated files, and app boot |
+| Fresh Phoenix app subjective install DX under 30 seconds | Phase 8 goal | Wall-clock and prompt clarity require human smoke once automation passes | Create a new `phx.new` app, point deps at local Accrue packages, set `STRIPE_SECRET_KEY=sk_test_...` and `STRIPE_WEBHOOK_SECRET=whsec_...`, run `mix accrue.install --dry-run`, then `mix accrue.install --yes`, and confirm report, generated files, app boot, Stripe test-mode readiness status, and no raw secret values in output |
 | Reviewable diff clarity for nonstandard router/application shapes | INST-03, INST-07 | Edge cases vary by host app structure | Run installer against a host app with multiple routers/repos and verify skipped/manual snippets are exact and non-destructive |
 
 ---
@@ -104,6 +106,7 @@ created: 2026-04-15
 | T-08-03 | Webhook raw body captured globally | Patch route-scoped webhook pipeline only; manual snippets must show route-scoped raw-body capture |
 | T-08-04 | OTel trace PII leakage | Allowlist attributes and tests rejecting raw payloads, emails, addresses, API keys, signing secrets, and metadata blobs |
 | T-08-05 | Admin mounted without auth | Use `AccrueAdmin.Router.accrue_admin/2` and include host protection notes instead of generating unprotected admin code |
+| T-08-06 | Stripe test-mode secrets leaked during readiness reporting | Runtime snippets use env-var reads only; installer reports env-var names/status and redacts `sk_test_`, `sk_live_`, and `whsec_` values |
 
 ---
 
