@@ -47,13 +47,20 @@ created: 2026-04-15
 | 08-01-07 | 01 | 0 | OBS-02 | T-08-04 | OTel attributes are allowlisted and optional dependency compiles both ways | unit/compile | `cd accrue && mix test test/accrue/telemetry/otel_test.exs` | no W0 | pending |
 | 08-01-08 | 01 | 0 | OBS-02 | T-08-04 | Every public Billing function is spanned or explicitly audited | unit/audit | `cd accrue && mix test test/accrue/telemetry/billing_span_coverage_test.exs` | no W0 | pending |
 | 08-01-09 | 01 | 0 | AUTH-05 | T-08-05 | Community auth docs contain required adapters and callbacks | docs/unit | `cd accrue && mix test test/accrue/docs/community_auth_test.exs` | no W0 | pending |
-| 08-02-01 | 02 | 1 | INST-01, INST-02, INST-05, INST-07, INST-09, INST-10 | T-08-01 / T-08-02 | Generated files are fingerprinted and config validation fails loud | integration | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs` | W0 | pending |
-| 08-03-01 | 03 | 1 | INST-03, INST-04, INST-06, AUTH-04, AUTH-05 | T-08-03 / T-08-05 | Router/webhook/admin/auth wiring is explicit, reviewable, and protected | integration | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/accrue/install/sigra_detection_test.exs` | no W0 | pending |
-| 08-03-02 | 03 | 2 | INST-01..10 | T-08-01 / T-08-02 | Installer entrypoint orchestrates Options, Project, Templates, Fingerprints, Patches, config docs/validation, and final reporting | integration | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/accrue/install/sigra_detection_test.exs` | W0 | pending |
-| 08-04-01 | 04 | 2 | TEST-02, TEST-03, TEST-07 | N/A | Clock and event helpers wrap Fake Processor behavior | integration | `cd accrue && mix test test/accrue/test/clock_test.exs test/accrue/test/webhooks_test.exs test/accrue/test/facade_test.exs` | W0 | pending |
-| 08-05-01 | 05 | 2 | TEST-04, TEST-05, TEST-06 | N/A | Assertions fail with observed evidence and matcher details | unit/integration | `cd accrue && mix test test/accrue/test/mailer_assertions_test.exs test/accrue/test/pdf_assertions_test.exs test/accrue/test/event_assertions_test.exs` | partial | pending |
-| 08-06-01 | 06 | 3 | OBS-02 | T-08-04 | OTel bridge records only sanitized business attributes and compiles with/without OTel | unit/compile | `cd accrue && mix test test/accrue/telemetry/otel_test.exs test/accrue/telemetry/billing_span_coverage_test.exs && MIX_ENV=test ACCRUE_OTEL_MATRIX=without_opentelemetry mix compile --warnings-as-errors --force && MIX_ENV=test ACCRUE_OTEL_MATRIX=with_opentelemetry mix compile --warnings-as-errors --force` | W0 | pending |
-| 08-07-01 | 07 | 3 | TEST-10, AUTH-05 | N/A | Testing guide and auth adapter guide content is executable | docs/integration | `cd accrue && mix test test/accrue/docs/testing_guide_test.exs test/accrue/docs/community_auth_test.exs` | no W0 | pending |
+| 08-02-01 | 02 | 1 | INST-01, INST-05 | T-08-01 / T-08-02 | Installer dependency and required flags parse strictly | integration | `cd accrue && mix test --only install_options test/mix/tasks/accrue_install_test.exs` | W0 tag | pending |
+| 08-02-02 | 02 | 1 | INST-01, INST-02, INST-07, INST-09, INST-10 | T-08-01 / T-08-02 | Generated files are fingerprinted and config validation/docs fail loud | integration | `cd accrue && mix test --only install_templates test/mix/tasks/accrue_install_test.exs` | W0 tag | pending |
+| 08-03-01 | 03 | 2 | INST-03, INST-04, INST-06, AUTH-04, AUTH-05 | T-08-03 / T-08-05 | Router/webhook/admin/auth/test-support/Oban patch builders are explicit, reviewable, and protected | integration | `cd accrue && mix test --only install_patches test/mix/tasks/accrue_install_test.exs test/accrue/install/sigra_detection_test.exs` | W0 tag | pending |
+| 08-03-02 | 03 | 2 | INST-01..10 | T-08-01 / T-08-02 | Installer entrypoint orchestrates Options, Project, Templates, Fingerprints, Patches, config docs/validation, and final reporting | integration | `cd accrue && mix test --only install_orchestration test/mix/tasks/accrue_install_test.exs test/accrue/install/sigra_detection_test.exs` | W0 tag | pending |
+| 08-03-03 | 03 | 2 | INST-08 | T-08-01 | Handler generator creates handler scaffolds without clobbering edited files | integration | `cd accrue && mix test test/mix/tasks/accrue_gen_handler_test.exs` | W0 | pending |
+| 08-04-01 | 04 | 2 | TEST-07 | N/A | Public facade imports setup helpers without EventAssertions before Plan 08-05 | unit | `cd accrue && mix test --only facade_core test/accrue/test/facade_test.exs` | W0 tag | pending |
+| 08-04-02 | 04 | 2 | TEST-02, TEST-03, TEST-07 | N/A | Clock and webhook helpers wrap Fake Processor behavior and facade exposes action helpers | integration | `cd accrue && mix test test/accrue/test/clock_test.exs test/accrue/test/webhooks_test.exs && mix test --only facade_actions test/accrue/test/facade_test.exs` | W0 tag | pending |
+| 08-05-01 | 05 | 3 | TEST-06, TEST-07 | N/A | Event assertions fail with observed evidence and are imported by the facade | unit/integration | `cd accrue && mix test test/accrue/test/event_assertions_test.exs && mix test --only facade_side_effects test/accrue/test/facade_test.exs` | W0 tag | pending |
+| 08-05-02 | 05 | 3 | TEST-04, TEST-05, TEST-07 | N/A | Mail/PDF assertions support shared matcher semantics and facade remains green | unit/integration | `cd accrue && mix test test/accrue/test/mailer_assertions_test.exs test/accrue/test/pdf_assertions_test.exs test/accrue/test/facade_test.exs` | W0 | pending |
+| 08-06-01 | 06 | 2 | OBS-02 | T-08-04 | OTel adapter records only sanitized business attributes | unit | `cd accrue && mix test test/accrue/telemetry/otel_test.exs` | W0 | pending |
+| 08-06-02 | 06 | 2 | OBS-02 | T-08-04 | Existing telemetry span path routes through OTel without replacing telemetry | unit | `cd accrue && mix test test/accrue/telemetry/otel_test.exs test/accrue/telemetry_test.exs` | W0 | pending |
+| 08-06-03 | 06 | 2 | OBS-02 | T-08-04 | Every public Billing function is spanned or explicitly audited | unit/audit | `cd accrue && mix test test/accrue/telemetry/billing_span_coverage_test.exs test/accrue/telemetry/otel_test.exs` | W0 | pending |
+| 08-07-01 | 07 | 4 | TEST-10, AUTH-05 | N/A | Testing guide content is executable | docs/integration | `cd accrue && mix test test/accrue/docs/testing_guide_test.exs` | W0 | pending |
+| 08-07-02 | 07 | 4 | AUTH-05, INST-10 | N/A | Auth adapter guide content is executable and wired into ExDoc | docs/integration | `cd accrue && mix test test/accrue/docs/community_auth_test.exs && mix docs --warnings-as-errors` | W0 | pending |
 
 *Status: pending, green, red, flaky.*
 
@@ -62,12 +69,15 @@ created: 2026-04-15
 ## Wave 0 Requirements
 
 - [ ] `accrue/test/mix/tasks/accrue_install_test.exs` — stubs for INST-01..10
+- [ ] `accrue/test/mix/tasks/accrue_install_test.exs` — task-addressable tags `:install_options`, `:install_templates`, `:install_patches`, and `:install_orchestration`
 - [ ] `accrue/test/mix/tasks/accrue_gen_handler_test.exs` — stubs for INST-08
 - [ ] `accrue/test/accrue/install/sigra_detection_test.exs` — stubs for AUTH-04 and AUTH-05
+- [ ] `accrue/test/accrue/install/sigra_detection_test.exs` — task-addressable tags `:install_patches` and `:install_orchestration`
 - [ ] `accrue/test/accrue/test/clock_test.exs` — stubs for TEST-02
 - [ ] `accrue/test/accrue/test/webhooks_test.exs` — stubs for TEST-03
 - [ ] `accrue/test/accrue/test/event_assertions_test.exs` — stubs for TEST-06
 - [ ] `accrue/test/accrue/test/facade_test.exs` — stubs for TEST-07
+- [ ] `accrue/test/accrue/test/facade_test.exs` — task-addressable tags `:facade_core`, `:facade_actions`, and `:facade_side_effects`
 - [ ] `accrue/test/accrue/telemetry/otel_test.exs` — stubs for OBS-02
 - [ ] `accrue/test/accrue/telemetry/billing_span_coverage_test.exs` — stubs for OBS-02 Billing span coverage
 - [ ] `accrue/test/accrue/docs/testing_guide_test.exs` — stubs for TEST-10
