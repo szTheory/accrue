@@ -416,6 +416,156 @@ button {
   box-shadow: var(--ax-shadow-sm);
 }
 
+.ax-field,
+.ax-dropdown-panel,
+.ax-tabs {
+  display: grid;
+  gap: var(--ax-space-sm);
+}
+
+.ax-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ax-field-control {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-base);
+  color: var(--ax-primary);
+  box-sizing: border-box;
+}
+
+.ax-field-control:focus-visible,
+.ax-select-control:focus-visible {
+  border-color: var(--ax-focus-ring);
+  outline: none;
+}
+
+.ax-field-control-error {
+  border-color: var(--ax-warning);
+}
+
+.ax-field-help,
+.ax-field-error,
+.ax-dropdown-item-description {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.ax-field-help,
+.ax-dropdown-item-description {
+  color: var(--ax-muted);
+}
+
+.ax-field-error {
+  color: var(--ax-warning);
+}
+
+.ax-select-control {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ax-muted) 50%),
+    linear-gradient(135deg, var(--ax-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.1rem) calc(50% - 0.15rem),
+    calc(100% - 0.8rem) calc(50% - 0.15rem);
+  background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+  background-repeat: no-repeat;
+}
+
+.ax-dropdown {
+  position: relative;
+  width: fit-content;
+}
+
+.ax-dropdown-trigger {
+  list-style: none;
+  cursor: pointer;
+}
+
+.ax-dropdown-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.ax-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 15rem;
+  padding: var(--ax-space-sm);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+  box-shadow: var(--ax-shadow-sm);
+  z-index: 20;
+}
+
+.ax-dropdown-item {
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.75rem;
+  border-radius: var(--ax-radius-sm);
+  color: var(--ax-primary);
+}
+
+.ax-dropdown-item:hover,
+.ax-dropdown-item:focus-visible {
+  background: color-mix(in srgb, var(--ax-accent) 10%, var(--ax-elevated));
+  outline: none;
+}
+
+.ax-dropdown-item-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ax-dropdown-item-danger .ax-dropdown-item-label {
+  color: var(--ax-primary);
+}
+
+.ax-tabs {
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.ax-tab,
+.ax-tab-count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+}
+
+.ax-tab {
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid transparent;
+  color: var(--ax-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.ax-tab-active {
+  border-bottom-color: var(--ax-accent);
+  color: var(--ax-primary);
+}
+
+.ax-tab-count {
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ax-accent) 12%, var(--ax-elevated));
+  color: var(--ax-accent);
+}
+
 .ax-kpi-grid {
   display: grid;
 }

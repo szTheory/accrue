@@ -6,6 +6,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
   import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.{Breadcrumbs, Button, FlashGroup, StatusBadge}
+  alias AccrueAdmin.Components.{DropdownMenu, Input, Select, Tabs}
 
   describe "Breadcrumbs" do
     test "renders linked ancestors and current page" do
@@ -93,6 +94,80 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert paid =~ "Paid"
       assert warning =~ "ax-status-badge-amber"
       assert failed =~ "ax-status-badge-ink"
+    end
+  end
+
+  describe "Input" do
+    test "renders help text and validation state" do
+      html =
+        render_component(&Input.input/1, %{
+          id: "invoice-search",
+          name: "invoice_search",
+          label: "Invoice search",
+          value: "INV-0001",
+          help_text: "Search by invoice number or customer email",
+          errors: ["must be at least 3 characters"]
+        })
+
+      assert html =~ ~s(for="invoice-search")
+      assert html =~ ~s(aria-invalid="true")
+      assert html =~ "Search by invoice number or customer email"
+      assert html =~ "must be at least 3 characters"
+    end
+  end
+
+  describe "Select" do
+    test "renders prompt and selected option" do
+      html =
+        render_component(&Select.select/1, %{
+          id: "status-filter",
+          name: "status",
+          label: "Status",
+          prompt: "All statuses",
+          value: "past_due",
+          options: [{"Active", "active"}, {"Past due", "past_due"}]
+        })
+
+      assert html =~ "All statuses"
+      assert html =~ ~s(value="past_due" selected)
+      assert html =~ "Past due"
+    end
+  end
+
+  describe "DropdownMenu" do
+    test "renders accessible text actions instead of icon-only affordances" do
+      html =
+        render_component(&DropdownMenu.dropdown_menu/1, %{
+          label: "Invoice actions",
+          items: [
+            %{label: "Open PDF", href: "/billing/invoices/in_123/pdf", description: "Preview the live invoice PDF"},
+            %{label: "Void invoice", href: "/billing/invoices/in_123/void", description: "Stop further collection", danger: true}
+          ]
+        })
+
+      assert html =~ ~s(<details)
+      assert html =~ ~s(role="menu")
+      assert html =~ "Invoice actions"
+      assert html =~ "Preview the live invoice PDF"
+      assert html =~ "ax-dropdown-item-danger"
+    end
+  end
+
+  describe "Tabs" do
+    test "renders link tabs with active detail-page state" do
+      html =
+        render_component(&Tabs.tabs/1, %{
+          active: "events",
+          tabs: [
+            %{id: "overview", label: "Overview", href: "/billing/customers/cus_123"},
+            %{id: "events", label: "Events", href: "/billing/customers/cus_123/events", count: 12}
+          ]
+        })
+
+      assert html =~ "Overview"
+      assert html =~ ~s(aria-current="page")
+      assert html =~ "ax-tab-active"
+      assert html =~ ">12<"
     end
   end
 end
