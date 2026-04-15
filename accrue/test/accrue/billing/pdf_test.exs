@@ -110,6 +110,7 @@ defmodule Accrue.Billing.PdfTest do
     end
 
     test "Accrue.Billing.render_invoice_pdf/2 defdelegates", %{inv: inv} do
+      Code.ensure_loaded!(Accrue.Billing)
       assert function_exported?(Accrue.Billing, :render_invoice_pdf, 2)
       assert {:ok, "%PDF-TEST"} = Billing.render_invoice_pdf(inv)
     end
@@ -151,6 +152,7 @@ defmodule Accrue.Billing.PdfTest do
     end
 
     test "Accrue.Billing.store_invoice_pdf/2 defdelegates", %{inv: inv} do
+      Code.ensure_loaded!(Accrue.Billing)
       assert function_exported?(Accrue.Billing, :store_invoice_pdf, 2)
       assert {:ok, _} = Billing.store_invoice_pdf(inv)
     end
@@ -167,6 +169,7 @@ defmodule Accrue.Billing.PdfTest do
     end
 
     test "Accrue.Billing.fetch_invoice_pdf/1 defdelegates", %{inv: inv} do
+      Code.ensure_loaded!(Accrue.Billing)
       assert function_exported?(Accrue.Billing, :fetch_invoice_pdf, 1)
       assert {:error, :not_configured} = Billing.fetch_invoice_pdf(inv)
     end

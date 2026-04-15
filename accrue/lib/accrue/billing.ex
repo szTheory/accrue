@@ -138,6 +138,11 @@ defmodule Accrue.Billing do
   defdelegate create_refund(charge, opts \\ []), to: RefundActions
   defdelegate create_refund!(charge, opts \\ []), to: RefundActions
 
+  # ── Invoice PDF surface (Phase 6 Plan 06, D6-04) ──────────────────
+  defdelegate render_invoice_pdf(invoice_or_id, opts \\ []), to: Accrue.Invoices
+  defdelegate store_invoice_pdf(invoice_or_id, opts \\ []), to: Accrue.Invoices
+  defdelegate fetch_invoice_pdf(invoice_or_id), to: Accrue.Invoices
+
   # ── Metered billing surface (Phase 4 Plan 02, BILL-13) ────────────
   defdelegate report_usage(customer, event_name, opts \\ []), to: MeterEventActions
   defdelegate report_usage!(customer, event_name, opts \\ []), to: MeterEventActions
