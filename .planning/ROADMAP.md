@@ -187,7 +187,7 @@ Plans:
   4. `assert_email_sent(:receipt, to: user.email)`, `assert_pdf_rendered(invoice)`, and `assert_event_recorded(subject, type: :subscription_created)` are all available as test assertion helpers and fail clearly with a useful message when the assertion is not met.
   5. When `sigra` is present in deps, `mix accrue.install` auto-detects it and wires `Accrue.Integrations.Sigra` as the auth adapter without any user config; when absent, the install falls back to `Accrue.Auth.Default` with a clear prod-safety warning.
   6. OpenTelemetry span helpers wrap every Billing context function when `:opentelemetry` is present, with span attributes containing `customer_id`, `subscription_id`, `event_type`, `processor` — and the library compiles cleanly with `--warnings-as-errors` in both `with_opentelemetry` and `without_opentelemetry` CI matrix entries.
-**Plans**: 7 plans
+**Plans**: 9 plans
 Plans:
 - [x] 08-01-PLAN.md — Wave 0 validation tests for installer, handler generator, public test helpers, OTel, and testing guide
 - [x] 08-02-PLAN.md — Wave 1 installer core: Igniter dependency, strict flags, project discovery, generated templates, fingerprints, config validation/docs
@@ -196,6 +196,8 @@ Plans:
 - [x] 08-05-PLAN.md — Wave 3 email, PDF, and event assertion helpers with matcher diagnostics
 - [x] 08-06-PLAN.md — Wave 2 optional OpenTelemetry span bridge with allowlisted sanitized attributes
 - [x] 08-07-PLAN.md — Wave 4 Fake-first testing guide, community auth adapter guide, and ExDoc extras wiring
+- [ ] 08-08-PLAN.md — Wave 5 gap closure: installer test-support mailer config uses behavior-layer `:mailer`
+- [ ] 08-09-PLAN.md — Wave 5 gap closure: add production-guarded `Accrue.Auth.Mock`
 **UI hint**: no
 
 ### Phase 9: Release
