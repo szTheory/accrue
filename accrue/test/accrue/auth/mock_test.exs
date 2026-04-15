@@ -9,6 +9,8 @@ defmodule Accrue.Auth.MockTest do
     end
 
     test "exports the auth mock helper and behaviour functions" do
+      Code.ensure_loaded!(Accrue.Auth.Mock)
+
       assert function_exported?(Accrue.Auth.Mock, :put_current_user, 1)
       assert function_exported?(Accrue.Auth.Mock, :clear_current_user, 0)
       assert function_exported?(Accrue.Auth.Mock, :current_user, 1)
