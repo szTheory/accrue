@@ -61,12 +61,6 @@ defmodule Accrue.Credo.NoRawStatusAccess do
     end
   end
 
-  # Test files under `test/` are exempt — tests construct Stripe status
-  # payloads and assert on them directly; predicates don't apply.
-  #
-  # WR-06: tightened to `test/**` only. The previous `contains?("/test/")`
-  # matcher inadvertently exempted production modules like
-  # `lib/accrue/test/factory.ex` and `lib/accrue/test/generators.ex`.
   defp exempt_file?(nil), do: false
 
   defp exempt_file?(filename) when is_binary(filename) do
@@ -76,7 +70,6 @@ defmodule Accrue.Credo.NoRawStatusAccess do
       Path.basename(Path.dirname(filename)) == "test"
   end
 
-  # Track defmodule nesting so we can exempt Accrue.Billing.Subscription.
   defp pre_traverse(
          {:defmodule, _meta, [{:__aliases__, _, name_parts}, _body]} = node,
          {issues, stack},
@@ -111,7 +104,6 @@ defmodule Accrue.Credo.NoRawStatusAccess do
     end)
   end
 
-  # sub.status == :active | :trialing | ...
   defp check_node(
          {:==, meta, [{{:., _, [_, :status]}, _, _}, rhs]},
          issue_meta
@@ -120,7 +112,6 @@ defmodule Accrue.Credo.NoRawStatusAccess do
     issue_for(issue_meta, line_of(meta), "== on .status")
   end
 
-  # :active | :trialing | ... == sub.status
   defp check_node(
          {:==, meta, [lhs, {{:., _, [_, :status]}, _, _}]},
          issue_meta
@@ -129,8 +120,6 @@ defmodule Accrue.Credo.NoRawStatusAccess do
     issue_for(issue_meta, line_of(meta), "== on .status")
   end
 
-  # WR-06: `sub.status != :active | :trialing | ...` — same shape as
-  # `==` but for the inequality operator.
   defp check_node(
          {:!=, meta, [{{:., _, [_, :status]}, _, _}, rhs]},
          issue_meta
@@ -147,9 +136,6 @@ defmodule Accrue.Credo.NoRawStatusAccess do
     issue_for(issue_meta, line_of(meta), "!= on .status")
   end
 
-  # WR-06: string-status equality (e.g. `charge.status == "succeeded"`).
-  # Charge.status is `:string`, not an enum; the same BILL-05 invariant
-  # applies — use a predicate, not a raw comparison.
   @string_statuses ~w(trialing active past_due canceled unpaid incomplete incomplete_expired paused succeeded failed pending)
 
   defp check_node(
@@ -168,8 +154,6 @@ defmodule Accrue.Credo.NoRawStatusAccess do
     issue_for(issue_meta, line_of(meta), "== on .status (string)")
   end
 
-  # sub.status in [:active, :trialing, ...] — flag only if any element of
-  # the RHS list is a Stripe status atom.
   defp check_node(
          {:in, meta, [{{:., _, [_, :status]}, _, _}, rhs]},
          issue_meta

@@ -40,7 +40,8 @@ defmodule Accrue.MixProject do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "credo_checks"]
+  defp elixirc_paths(:test), do: ["lib", "credo_checks", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
