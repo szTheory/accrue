@@ -28,7 +28,7 @@ defmodule Accrue.Webhook.DispatchWorker do
     queue: :accrue_webhooks,
     max_attempts: 25
 
-  alias Accrue.Webhook.{WebhookEvent, Event, DefaultHandler}
+  alias Accrue.Webhook.{WebhookEvent, Event, DefaultHandler, ConnectHandler}
 
   require Logger
 
@@ -48,13 +48,28 @@ defmodule Accrue.Webhook.DispatchWorker do
       |> repo.update!()
 
     event = Event.from_webhook_event(row)
-    ctx = %{attempt: attempt, max_attempts: max_attempts, webhook_event_id: id}
+
+    ctx = %{
+      attempt: attempt,
+      max_attempts: max_attempts,
+      webhook_event_id: id,
+      endpoint: row.endpoint
+    }
 
     # Push actor context (D2-12)
     Accrue.Actor.put_current(%{type: :webhook, id: row.processor_event_id})
 
-    # D2-30: Default handler first (non-disableable), then user handlers
-    default_result = safe_handle(DefaultHandler, event, ctx)
+    # D2-30 + D5-01: Default handler first (non-disableable), branched by
+    # `row.endpoint`. Connect-scoped events route to `ConnectHandler`;
+    # everything else routes to the platform `DefaultHandler`. The
+    # user-handler loop below is endpoint-agnostic.
+    default_handler =
+      case row.endpoint do
+        :connect -> ConnectHandler
+        _ -> DefaultHandler
+      end
+
+    default_result = safe_handle(default_handler, event, ctx)
 
     _user_results =
       Accrue.Config.webhook_handlers()

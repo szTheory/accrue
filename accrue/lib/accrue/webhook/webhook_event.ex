@@ -34,6 +34,7 @@ defmodule Accrue.Webhook.WebhookEvent do
   @foreign_key_type :binary_id
 
   @statuses [:received, :processing, :succeeded, :failed, :dead, :replayed]
+  @endpoints [:default, :connect]
 
   schema "accrue_webhook_events" do
     field :processor, :string
@@ -41,6 +42,7 @@ defmodule Accrue.Webhook.WebhookEvent do
     field :type, :string
     field :livemode, :boolean, default: false
     field :status, Ecto.Enum, values: @statuses, default: :received
+    field :endpoint, Ecto.Enum, values: @endpoints, default: :default
     field :raw_body, :binary, redact: true
     field :received_at, :utc_datetime_usec
     field :processed_at, :utc_datetime_usec
@@ -55,7 +57,7 @@ defmodule Accrue.Webhook.WebhookEvent do
   @spec statuses() :: [atom()]
   def statuses, do: @statuses
 
-  @ingest_fields ~w[processor processor_event_id type livemode raw_body received_at data]a
+  @ingest_fields ~w[processor processor_event_id type livemode endpoint raw_body received_at data]a
   @ingest_required ~w[processor processor_event_id type]a
 
   @doc """

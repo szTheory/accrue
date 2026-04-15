@@ -33,10 +33,23 @@ defmodule Accrue.Webhook.Ingest do
 
   Called by `Accrue.Webhook.Plug` after signature verification succeeds.
   Returns the `Plug.Conn` with a 200 (success or duplicate) or 500 (failure).
+
+  ## Endpoint
+
+  Phase 5 (05-01, D5-01): the optional `endpoint` argument is persisted on
+  the `accrue_webhook_events` row so `Accrue.Webhook.DispatchWorker` can
+  branch on it and route `:connect`-scoped events to
+  `Accrue.Webhook.ConnectHandler`. Accepts either the atom `:connect` (which
+  persists as `:connect`) or any other value (persists as `:default`) so
+  existing Phase 2-4 multi-endpoint configs using names like `:primary` or
+  `:unconfigured` continue to land in the default lane without needing a
+  schema migration per endpoint name.
   """
-  @spec run(Plug.Conn.t(), atom(), LatticeStripe.Event.t(), binary()) :: Plug.Conn.t()
-  def run(conn, processor, stripe_event, raw_body) do
+  @spec run(Plug.Conn.t(), atom(), LatticeStripe.Event.t(), binary(), atom() | nil) ::
+          Plug.Conn.t()
+  def run(conn, processor, stripe_event, raw_body, endpoint \\ nil) do
     processor_str = to_string(processor)
+    endpoint_atom = normalize_endpoint(endpoint)
 
     multi =
       Ecto.Multi.new()
@@ -67,6 +80,7 @@ defmodule Accrue.Webhook.Ingest do
                 type: stripe_event.type,
                 livemode: stripe_event.livemode,
                 status: :received,
+                endpoint: endpoint_atom,
                 raw_body: raw_body,
                 received_at: DateTime.utc_now(),
                 data: Map.from_struct(stripe_event)
@@ -126,4 +140,13 @@ defmodule Accrue.Webhook.Ingest do
         conn |> send_resp(500, Jason.encode!(%{ok: false})) |> halt()
     end
   end
+
+  # D5-01: Only `:connect` maps to the Connect-scoped endpoint lane; every
+  # other endpoint name (`nil`, `:primary`, `:default`, `:unconfigured`,
+  # custom names) persists as `:default`. Keeps the schema enum minimal
+  # and preserves Phase 2-4 single-endpoint semantics for callers that
+  # still use `run/4`.
+  @spec normalize_endpoint(atom() | nil) :: :default | :connect
+  defp normalize_endpoint(:connect), do: :connect
+  defp normalize_endpoint(_), do: :default
 end

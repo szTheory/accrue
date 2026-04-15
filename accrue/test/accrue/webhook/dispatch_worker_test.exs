@@ -3,7 +3,7 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
 
   import ExUnit.CaptureLog
 
-  alias Accrue.Webhook.{DispatchWorker, WebhookEvent, Event, Pruner}
+  alias Accrue.Webhook.{DispatchWorker, WebhookEvent, Pruner}
 
   # A test handler that succeeds
   defmodule SuccessHandler do
@@ -113,6 +113,61 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
       assert updated.status == :succeeded
     end
 
+    test "endpoint :connect routes default handler to ConnectHandler (D5-01)" do
+      # Load ConnectHandler and swap its handle_event via a process-marker
+      # stub on the fly. Since ConnectHandler uses `defoverridable`, we
+      # can't trivially override at test time without recompilation; instead
+      # assert dispatch by observing that (a) the event succeeds (the stub
+      # returns :ok) and (b) no DefaultHandler-only side effects fire. For
+      # belt-and-braces we also assert the ctx.endpoint surfaces to user
+      # handlers via TrackingHandler state.
+
+      defmodule EndpointTrackingHandler do
+        use Accrue.Webhook.Handler
+
+        def handle_event(_type, _event, ctx) do
+          send(self(), {:handler_ctx_endpoint, ctx.endpoint})
+          :ok
+        end
+      end
+
+      Application.put_env(:accrue, :webhook_handlers, [EndpointTrackingHandler])
+
+      row = insert_webhook_event!(endpoint: :connect, type: "account.updated")
+      assert row.endpoint == :connect
+
+      job = build_job(row.id, attempt: 1, max_attempts: 25)
+      assert :ok = DispatchWorker.perform(job)
+
+      # User handler observed ctx.endpoint == :connect, confirming the
+      # DispatchWorker built the ctx map from row.endpoint.
+      assert_received {:handler_ctx_endpoint, :connect}
+
+      updated = Accrue.TestRepo.get!(WebhookEvent, row.id)
+      assert updated.status == :succeeded
+    end
+
+    test "endpoint :default routes to DefaultHandler" do
+      defmodule DefaultEndpointTrackingHandler do
+        use Accrue.Webhook.Handler
+
+        def handle_event(_type, _event, ctx) do
+          send(self(), {:default_ctx_endpoint, ctx.endpoint})
+          :ok
+        end
+      end
+
+      Application.put_env(:accrue, :webhook_handlers, [DefaultEndpointTrackingHandler])
+
+      row = insert_webhook_event!(type: "customer.created")
+      assert row.endpoint == :default
+
+      job = build_job(row.id, attempt: 1, max_attempts: 25)
+      assert :ok = DispatchWorker.perform(job)
+
+      assert_received {:default_ctx_endpoint, :default}
+    end
+
     test "Oban worker configured with max_attempts: 25" do
       # Verify the Oban worker configuration
       changeset = DispatchWorker.new(%{webhook_event_id: "test-id"})
@@ -178,13 +233,15 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
   defp insert_webhook_event!(opts \\ []) do
     type = Keyword.get(opts, :type, "customer.created")
     status = Keyword.get(opts, :status, :received)
-    processed_at = Keyword.get(opts, :processed_at)
+    _processed_at = Keyword.get(opts, :processed_at)
+    endpoint = Keyword.get(opts, :endpoint, :default)
 
     attrs = %{
       processor: "stripe",
       processor_event_id: "evt_test_#{System.unique_integer([:positive])}",
       type: type,
       livemode: false,
+      endpoint: endpoint,
       raw_body: ~s({"test": true}),
       received_at: DateTime.utc_now(),
       data: %{

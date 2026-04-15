@@ -62,7 +62,8 @@ defmodule Accrue.Webhook.Plug do
 
     # Transactional persist + Oban enqueue (D2-24, Plan 04).
     # Event projection happens inside DispatchWorker from the persisted row.
-    Accrue.Webhook.Ingest.run(conn, processor, stripe_event, raw_body)
+    # D5-01: thread `endpoint` through so DispatchWorker can branch on it.
+    Accrue.Webhook.Ingest.run(conn, processor, stripe_event, raw_body, endpoint)
   end
 
   # Endpoint-aware secret resolution (WH-13).
