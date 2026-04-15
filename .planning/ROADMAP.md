@@ -163,7 +163,7 @@ Plans:
 **Plans**: 12 plans
 Plans:
 - [x] 07-01-PLAN.md — Wave 1 foundation: package runtime, router macro, package-owned assets, and admin test harness
-- [ ] 07-02-PLAN.md — Wave 2 theme and shell foundation: root layout ordering, light/dark/system theming, branding/CSP plugs, and responsive app shell
+- [x] 07-02-PLAN.md — Wave 2 theme and shell foundation: root layout ordering, light/dark/system theming, branding/CSP plugs, and responsive app shell
 - [ ] 07-03-PLAN.md — Wave 2 query/index foundation: admin indexes, cursor pagination, and billing/account `AccrueAdmin.Queries.*` modules
 - [ ] 07-04-PLAN.md — Wave 2 auth/step-up/audit seam: mount-time auth, Sigra bridge completion, admin step-up flow, and event causality support
 - [ ] 07-05-PLAN.md — Wave 5 dashboard/customers/subscriptions slice with audited admin actions

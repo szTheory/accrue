@@ -152,11 +152,11 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 ### Admin UI (accrue_admin package)
 
 - [ ] **ADMIN-01**: Phoenix LiveView dashboard with KPIs (MRR, active subs, recent charges, webhook health)
-- [ ] **ADMIN-02**: Mobile-first responsive layout (usable from phone)
-- [ ] **ADMIN-03**: Light + dark mode with consistent contrast across components
-- [ ] **ADMIN-04**: Brand palette theme (Ink/Slate/Fog/Paper + Moss/Cobalt/Amber); Amber reserved for warning/grace states
+- [x] **ADMIN-02**: Mobile-first responsive layout (usable from phone)
+- [x] **ADMIN-03**: Light + dark mode with consistent contrast across components
+- [x] **ADMIN-04**: Brand palette theme (Ink/Slate/Fog/Paper + Moss/Cobalt/Amber); Amber reserved for warning/grace states
 - [ ] **ADMIN-05**: Breadcrumbs + flash notifications
-- [ ] **ADMIN-06**: Brandable: logo, accent color, app name via runtime config
+- [x] **ADMIN-06**: Brandable: logo, accent color, app name via runtime config
 - [ ] **ADMIN-07**: Customer list + search + filter
 - [ ] **ADMIN-08**: Customer detail page with tabs (subscriptions, invoices, charges, payment methods, events, metadata)
 - [ ] **ADMIN-09**: Subscription list + detail with timeline from events ledger
@@ -410,11 +410,11 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | PDF-10 | Phase 6 | Complete |
 | PDF-11 | Phase 6 | Complete |
 | ADMIN-01 | Phase 7 | Pending |
-| ADMIN-02 | Phase 7 | Pending |
-| ADMIN-03 | Phase 7 | Pending |
-| ADMIN-04 | Phase 7 | Pending |
+| ADMIN-02 | Phase 7 | Complete |
+| ADMIN-03 | Phase 7 | Complete |
+| ADMIN-04 | Phase 7 | Complete |
 | ADMIN-05 | Phase 7 | Pending |
-| ADMIN-06 | Phase 7 | Pending |
+| ADMIN-06 | Phase 7 | Complete |
 | ADMIN-07 | Phase 7 | Pending |
 | ADMIN-08 | Phase 7 | Pending |
 | ADMIN-09 | Phase 7 | Pending |
