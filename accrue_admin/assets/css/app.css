@@ -240,6 +240,164 @@ button {
   padding: 1.25rem;
 }
 
+.ax-breadcrumbs-list,
+.ax-flash-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-sm);
+}
+
+.ax-breadcrumbs-list {
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ax-breadcrumbs-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+}
+
+.ax-breadcrumbs-link,
+.ax-breadcrumbs-current,
+.ax-breadcrumbs-separator {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.ax-breadcrumbs-link,
+.ax-breadcrumbs-separator {
+  color: var(--ax-muted);
+}
+
+.ax-breadcrumbs-current {
+  color: var(--ax-primary);
+  font-weight: 600;
+}
+
+.ax-flash-group {
+  display: grid;
+}
+
+.ax-flash {
+  display: grid;
+  gap: var(--ax-space-xs);
+  padding: var(--ax-space-md);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+}
+
+.ax-flash-info {
+  border-color: color-mix(in srgb, var(--ax-accent) 40%, var(--ax-border));
+}
+
+.ax-flash-success {
+  border-color: color-mix(in srgb, var(--ax-success) 45%, var(--ax-border));
+}
+
+.ax-flash-warning {
+  border-color: color-mix(in srgb, var(--ax-warning) 55%, var(--ax-border));
+}
+
+.ax-flash-error {
+  border-color: color-mix(in srgb, var(--ax-primary) 55%, var(--ax-border));
+}
+
+.ax-button,
+.ax-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ax-space-sm);
+  width: fit-content;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ax-button {
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  transition:
+    border-color var(--ax-theme-transition),
+    background var(--ax-theme-transition),
+    color var(--ax-theme-transition),
+    transform var(--ax-theme-transition);
+}
+
+.ax-button:hover,
+.ax-button:focus-visible {
+  border-color: var(--ax-focus-ring);
+  outline: none;
+}
+
+.ax-button[aria-disabled="true"],
+.ax-button:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.ax-button-primary {
+  background: var(--ax-accent);
+  color: var(--ax-accent-contrast);
+}
+
+.ax-button-secondary {
+  border-color: var(--ax-border);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+}
+
+.ax-button-ghost {
+  color: var(--ax-accent);
+}
+
+.ax-button-danger {
+  background: var(--ax-primary);
+  color: var(--ax-base);
+}
+
+.ax-status-badge {
+  padding: 0.4rem 0.7rem;
+}
+
+.ax-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.ax-status-badge-moss {
+  background: color-mix(in srgb, var(--ax-success) 14%, var(--ax-elevated));
+  color: var(--ax-success);
+}
+
+.ax-status-badge-cobalt {
+  background: color-mix(in srgb, var(--ax-accent) 14%, var(--ax-elevated));
+  color: var(--ax-accent);
+}
+
+.ax-status-badge-amber {
+  background: color-mix(in srgb, var(--ax-warning) 18%, var(--ax-elevated));
+  color: var(--ax-warning);
+}
+
+.ax-status-badge-slate {
+  background: color-mix(in srgb, var(--ax-border) 50%, var(--ax-elevated));
+  color: var(--ax-muted);
+}
+
+.ax-status-badge-ink {
+  background: color-mix(in srgb, var(--ax-primary) 10%, var(--ax-elevated));
+  color: var(--ax-primary);
+}
+
 .ax-page {
   display: grid;
   gap: var(--ax-space-xl);
