@@ -62,9 +62,19 @@ defmodule Accrue.Workers.Mailer do
     # this safe against untrusted input.
     atomized = atomize_known_keys(enriched)
 
+    recipient = atomized[:to] || enriched["to"]
+
+    if is_nil(recipient) or recipient == "" do
+      {:cancel, :missing_recipient}
+    else
+      deliver_email(type, template_mod, atomized, recipient)
+    end
+  end
+
+  defp deliver_email(type, template_mod, atomized, recipient) do
     email =
       Swoosh.Email.new()
-      |> Swoosh.Email.to(atomized[:to] || enriched["to"])
+      |> Swoosh.Email.to(recipient)
       |> Swoosh.Email.from(
         {Accrue.Config.branding(:from_name), Accrue.Config.branding(:from_email)}
       )
@@ -269,10 +279,15 @@ defmodule Accrue.Workers.Mailer do
 
     {resolved_locale, resolved_tz} = safe_locale_timezone(locale, timezone)
 
+    to =
+      Map.get(assigns, :to) || Map.get(assigns, "to") ||
+        (customer && Map.get(customer, :email))
+
     assigns
     |> Map.put(:locale, resolved_locale)
     |> Map.put(:timezone, resolved_tz)
     |> Map.put(:customer, customer)
+    |> Map.put(:to, to)
   end
 
   # Hydrate the Customer struct from the DB via `assigns[:customer_id]`.
