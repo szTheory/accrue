@@ -1,0 +1,76 @@
+<%#
+  Shared REFERENCE MJML shell for Accrue transactional emails.
+
+  mjml_eex does not support HEEx-style layout slots (no <%%= yield %>),
+  so per-type email templates in accrue/priv/accrue/templates/emails/
+  COPY this scaffold and replace the BODY BLOCK marker with their
+  type-specific MJML content (receipt, dunning, invoice notification,
+  etc.). This file is the single source of truth for:
+
+    * the branding-driven <mj-head> + <mj-attributes> defaults
+    * the header band with logo or business_name fallback
+    * the footer block showing business_name + support_email +
+      conditional company_address
+    * the D6-07 "no opt-out link" rule — transactional emails do
+      NOT render an opt-out/manage-preferences block
+
+  Required assigns:
+    @subject       — email subject (for <mj-title>)
+    @preview       — short preview text (for <mj-preview>)
+    @context       — %Accrue.Invoices.RenderContext{} with :branding
+    @inner_content — pre-rendered MJML body fragment (interpolated raw)
+%>
+<mjml>
+  <mj-head>
+    <mj-title><%= @subject %></mj-title>
+    <mj-preview><%= @preview %></mj-preview>
+    <mj-attributes>
+      <mj-all font-family="<%= @context.branding[:font_stack] || "Helvetica, Arial, sans-serif" %>" />
+      <mj-text color="#111827" font-size="14px" line-height="1.5" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#ffffff">
+    <mj-section background-color="#ffffff" padding="24px 24px 8px 24px">
+      <mj-column>
+        <%= if @context.branding[:logo_url] do %>
+          <mj-image
+            src="<%= @context.branding[:logo_url] %>"
+            alt="<%= @context.branding[:business_name] %>"
+            align="left"
+            width="180px"
+          />
+        <% else %>
+          <mj-text font-size="20px" font-weight="700" color="#111827">
+            <%= @context.branding[:business_name] %>
+          </mj-text>
+        <% end %>
+      </mj-column>
+    </mj-section>
+
+    <%# ============ BODY BLOCK — replaced per email type ============ %>
+    <mj-section background-color="#ffffff" padding="0 24px">
+      <mj-column>
+        <mj-raw><%= @inner_content %></mj-raw>
+      </mj-column>
+    </mj-section>
+    <%# ============ /BODY BLOCK ===================================== %>
+
+    <mj-section background-color="#ffffff" padding="24px">
+      <mj-column>
+        <mj-divider border-color="#E5E7EB" border-width="1px" />
+        <mj-text font-size="12px" color="#6B7280" align="center">
+          <%= @context.branding[:business_name] %> &middot;
+          <a href="mailto:<%= @context.branding[:support_email] %>"
+             style="color: #6B7280; text-decoration: underline;">
+            <%= @context.branding[:support_email] %>
+          </a>
+        </mj-text>
+        <%= if @context.branding[:company_address] do %>
+          <mj-text font-size="12px" color="#6B7280" align="center">
+            <%= @context.branding[:company_address] %>
+          </mj-text>
+        <% end %>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

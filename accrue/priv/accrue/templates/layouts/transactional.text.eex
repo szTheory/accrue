@@ -1,0 +1,20 @@
+<%#
+  Shared plain-text layout for Accrue transactional emails.
+
+  Rendered via EEx.eval_file from the per-type .text.eex template or
+  from an `Accrue.Mailer` text-body helper. Assigns mirror the MJML
+  shell: @context (with frozen branding) + @inner (pre-rendered
+  plain-text body block).
+
+  D6-07 — NO opt-out line. Transactional emails only.
+%>
+<%= @context.branding[:business_name] %>
+========================================
+
+<%= @inner %>
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>
