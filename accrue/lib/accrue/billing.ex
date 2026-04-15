@@ -56,104 +56,380 @@ defmodule Accrue.Billing do
   # ---------------------------------------------------------------------------
 
   # ── Subscription surface (Plan 04) ────────────────────────────────
-  defdelegate subscribe(user, price_id_or_opts \\ [], opts \\ []), to: SubscriptionActions
-  defdelegate subscribe!(user, price_id_or_opts \\ [], opts \\ []), to: SubscriptionActions
-  defdelegate get_subscription(id, opts \\ []), to: SubscriptionActions
-  defdelegate get_subscription!(id, opts \\ []), to: SubscriptionActions
-  defdelegate swap_plan(sub, new_price_id, opts), to: SubscriptionActions
-  defdelegate swap_plan!(sub, new_price_id, opts), to: SubscriptionActions
-  defdelegate cancel(sub, opts \\ []), to: SubscriptionActions
-  defdelegate cancel!(sub, opts \\ []), to: SubscriptionActions
-  defdelegate cancel_at_period_end(sub, opts \\ []), to: SubscriptionActions
-  defdelegate cancel_at_period_end!(sub, opts \\ []), to: SubscriptionActions
-  defdelegate resume(sub, opts \\ []), to: SubscriptionActions
-  defdelegate resume!(sub, opts \\ []), to: SubscriptionActions
-  defdelegate pause(sub, opts \\ []), to: SubscriptionActions
-  defdelegate pause!(sub, opts \\ []), to: SubscriptionActions
-  defdelegate unpause(sub, opts \\ []), to: SubscriptionActions
-  defdelegate unpause!(sub, opts \\ []), to: SubscriptionActions
-  defdelegate update_quantity(sub, quantity, opts \\ []), to: SubscriptionActions
-  defdelegate update_quantity!(sub, quantity, opts \\ []), to: SubscriptionActions
-  defdelegate preview_upcoming_invoice(sub_or_customer, opts \\ []), to: SubscriptionActions
-  defdelegate preview_upcoming_invoice!(sub_or_customer, opts \\ []), to: SubscriptionActions
+  def subscribe(user, price_id_or_opts \\ [], opts \\ []) do
+    span_billing(:subscription, :create, user, opts, fn ->
+      SubscriptionActions.subscribe(user, price_id_or_opts, opts)
+    end)
+  end
+
+  def subscribe!(user, price_id_or_opts \\ [], opts \\ []) do
+    span_billing(:subscription, :create, user, opts, fn ->
+      SubscriptionActions.subscribe!(user, price_id_or_opts, opts)
+    end)
+  end
+
+  def get_subscription(id, opts \\ []) do
+    span_billing(:subscription, :get, %{subscription_id: id}, opts, fn ->
+      SubscriptionActions.get_subscription(id, opts)
+    end)
+  end
+
+  def get_subscription!(id, opts \\ []) do
+    span_billing(:subscription, :get, %{subscription_id: id}, opts, fn ->
+      SubscriptionActions.get_subscription!(id, opts)
+    end)
+  end
+
+  def swap_plan(sub, new_price_id, opts) do
+    span_billing(:subscription, :swap_plan, sub, opts, fn ->
+      SubscriptionActions.swap_plan(sub, new_price_id, opts)
+    end)
+  end
+
+  def swap_plan!(sub, new_price_id, opts) do
+    span_billing(:subscription, :swap_plan, sub, opts, fn ->
+      SubscriptionActions.swap_plan!(sub, new_price_id, opts)
+    end)
+  end
+
+  def cancel(sub, opts \\ []),
+    do: span_subscription(:cancel, sub, opts, &SubscriptionActions.cancel/2)
+
+  def cancel!(sub, opts \\ []),
+    do: span_subscription(:cancel, sub, opts, &SubscriptionActions.cancel!/2)
+
+  def cancel_at_period_end(sub, opts \\ []),
+    do:
+      span_subscription(
+        :cancel_at_period_end,
+        sub,
+        opts,
+        &SubscriptionActions.cancel_at_period_end/2
+      )
+
+  def cancel_at_period_end!(sub, opts \\ []),
+    do:
+      span_subscription(
+        :cancel_at_period_end,
+        sub,
+        opts,
+        &SubscriptionActions.cancel_at_period_end!/2
+      )
+
+  def resume(sub, opts \\ []),
+    do: span_subscription(:resume, sub, opts, &SubscriptionActions.resume/2)
+
+  def resume!(sub, opts \\ []),
+    do: span_subscription(:resume, sub, opts, &SubscriptionActions.resume!/2)
+
+  def pause(sub, opts \\ []),
+    do: span_subscription(:pause, sub, opts, &SubscriptionActions.pause/2)
+
+  def pause!(sub, opts \\ []),
+    do: span_subscription(:pause, sub, opts, &SubscriptionActions.pause!/2)
+
+  def unpause(sub, opts \\ []),
+    do: span_subscription(:unpause, sub, opts, &SubscriptionActions.unpause/2)
+
+  def unpause!(sub, opts \\ []),
+    do: span_subscription(:unpause, sub, opts, &SubscriptionActions.unpause!/2)
+
+  def update_quantity(sub, quantity, opts \\ []) do
+    span_billing(:subscription, :update_quantity, sub, opts, fn ->
+      SubscriptionActions.update_quantity(sub, quantity, opts)
+    end)
+  end
+
+  def update_quantity!(sub, quantity, opts \\ []) do
+    span_billing(:subscription, :update_quantity, sub, opts, fn ->
+      SubscriptionActions.update_quantity!(sub, quantity, opts)
+    end)
+  end
+
+  def preview_upcoming_invoice(sub_or_customer, opts \\ []) do
+    span_billing(:invoice, :preview_upcoming, sub_or_customer, opts, fn ->
+      SubscriptionActions.preview_upcoming_invoice(sub_or_customer, opts)
+    end)
+  end
+
+  def preview_upcoming_invoice!(sub_or_customer, opts \\ []) do
+    span_billing(:invoice, :preview_upcoming, sub_or_customer, opts, fn ->
+      SubscriptionActions.preview_upcoming_invoice!(sub_or_customer, opts)
+    end)
+  end
 
   # ── Advanced subscription surface (Phase 4 Plan 03) ───────────────
-  defdelegate comp_subscription(billable, price_spec, opts \\ []), to: SubscriptionActions
-  defdelegate comp_subscription!(billable, price_spec, opts \\ []), to: SubscriptionActions
+  def comp_subscription(billable, price_spec, opts \\ []) do
+    span_billing(:subscription, :comp, billable, opts, fn ->
+      SubscriptionActions.comp_subscription(billable, price_spec, opts)
+    end)
+  end
 
-  defdelegate add_item(sub, price_id, opts \\ []), to: SubscriptionItems
-  defdelegate add_item!(sub, price_id, opts \\ []), to: SubscriptionItems
-  defdelegate remove_item(item, opts \\ []), to: SubscriptionItems
-  defdelegate remove_item!(item, opts \\ []), to: SubscriptionItems
-  defdelegate update_item_quantity(item, quantity, opts \\ []), to: SubscriptionItems
-  defdelegate update_item_quantity!(item, quantity, opts \\ []), to: SubscriptionItems
+  def comp_subscription!(billable, price_spec, opts \\ []) do
+    span_billing(:subscription, :comp, billable, opts, fn ->
+      SubscriptionActions.comp_subscription!(billable, price_spec, opts)
+    end)
+  end
+
+  def add_item(sub, price_id, opts \\ []) do
+    span_billing(:subscription_item, :add, sub, opts, fn ->
+      SubscriptionItems.add_item(sub, price_id, opts)
+    end)
+  end
+
+  def add_item!(sub, price_id, opts \\ []) do
+    span_billing(:subscription_item, :add, sub, opts, fn ->
+      SubscriptionItems.add_item!(sub, price_id, opts)
+    end)
+  end
+
+  def remove_item(item, opts \\ []),
+    do: span_subscription_item(:remove, item, opts, &SubscriptionItems.remove_item/2)
+
+  def remove_item!(item, opts \\ []),
+    do: span_subscription_item(:remove, item, opts, &SubscriptionItems.remove_item!/2)
+
+  def update_item_quantity(item, quantity, opts \\ []) do
+    span_billing(:subscription_item, :update_quantity, item, opts, fn ->
+      SubscriptionItems.update_item_quantity(item, quantity, opts)
+    end)
+  end
+
+  def update_item_quantity!(item, quantity, opts \\ []) do
+    span_billing(:subscription_item, :update_quantity, item, opts, fn ->
+      SubscriptionItems.update_item_quantity!(item, quantity, opts)
+    end)
+  end
 
   # ── SubscriptionSchedule surface (Phase 4 Plan 03, BILL-16) ───────
-  defdelegate subscribe_via_schedule(billable, phases, opts \\ []),
-    to: SubscriptionScheduleActions
+  def subscribe_via_schedule(billable, phases, opts \\ []) do
+    span_billing(:subscription_schedule, :create, billable, opts, fn ->
+      SubscriptionScheduleActions.subscribe_via_schedule(billable, phases, opts)
+    end)
+  end
 
-  defdelegate subscribe_via_schedule!(billable, phases, opts \\ []),
-    to: SubscriptionScheduleActions
+  def subscribe_via_schedule!(billable, phases, opts \\ []) do
+    span_billing(:subscription_schedule, :create, billable, opts, fn ->
+      SubscriptionScheduleActions.subscribe_via_schedule!(billable, phases, opts)
+    end)
+  end
 
-  defdelegate update_schedule(sched, params, opts \\ []), to: SubscriptionScheduleActions
-  defdelegate update_schedule!(sched, params, opts \\ []), to: SubscriptionScheduleActions
-  defdelegate release_schedule(sched, opts \\ []), to: SubscriptionScheduleActions
-  defdelegate release_schedule!(sched, opts \\ []), to: SubscriptionScheduleActions
-  defdelegate cancel_schedule(sched, opts \\ []), to: SubscriptionScheduleActions
-  defdelegate cancel_schedule!(sched, opts \\ []), to: SubscriptionScheduleActions
+  def update_schedule(sched, params, opts \\ []) do
+    span_billing(:subscription_schedule, :update, sched, opts, fn ->
+      SubscriptionScheduleActions.update_schedule(sched, params, opts)
+    end)
+  end
+
+  def update_schedule!(sched, params, opts \\ []) do
+    span_billing(:subscription_schedule, :update, sched, opts, fn ->
+      SubscriptionScheduleActions.update_schedule!(sched, params, opts)
+    end)
+  end
+
+  def release_schedule(sched, opts \\ []),
+    do: span_schedule(:release, sched, opts, &SubscriptionScheduleActions.release_schedule/2)
+
+  def release_schedule!(sched, opts \\ []),
+    do: span_schedule(:release, sched, opts, &SubscriptionScheduleActions.release_schedule!/2)
+
+  def cancel_schedule(sched, opts \\ []),
+    do: span_schedule(:cancel, sched, opts, &SubscriptionScheduleActions.cancel_schedule/2)
+
+  def cancel_schedule!(sched, opts \\ []),
+    do: span_schedule(:cancel, sched, opts, &SubscriptionScheduleActions.cancel_schedule!/2)
 
   # ── Invoice surface (Plan 05) ─────────────────────────────────────
-  defdelegate finalize_invoice(invoice, opts \\ []), to: InvoiceActions
-  defdelegate finalize_invoice!(invoice, opts \\ []), to: InvoiceActions
-  defdelegate void_invoice(invoice, opts \\ []), to: InvoiceActions
-  defdelegate void_invoice!(invoice, opts \\ []), to: InvoiceActions
-  defdelegate pay_invoice(invoice, opts \\ []), to: InvoiceActions
-  defdelegate pay_invoice!(invoice, opts \\ []), to: InvoiceActions
-  defdelegate mark_uncollectible(invoice, opts \\ []), to: InvoiceActions
-  defdelegate mark_uncollectible!(invoice, opts \\ []), to: InvoiceActions
-  defdelegate send_invoice(invoice, opts \\ []), to: InvoiceActions
-  defdelegate send_invoice!(invoice, opts \\ []), to: InvoiceActions
+  def finalize_invoice(invoice, opts \\ []),
+    do: span_invoice(:finalize, invoice, opts, &InvoiceActions.finalize_invoice/2)
+
+  def finalize_invoice!(invoice, opts \\ []),
+    do: span_invoice(:finalize, invoice, opts, &InvoiceActions.finalize_invoice!/2)
+
+  def void_invoice(invoice, opts \\ []),
+    do: span_invoice(:void, invoice, opts, &InvoiceActions.void_invoice/2)
+
+  def void_invoice!(invoice, opts \\ []),
+    do: span_invoice(:void, invoice, opts, &InvoiceActions.void_invoice!/2)
+
+  def pay_invoice(invoice, opts \\ []),
+    do: span_invoice(:pay, invoice, opts, &InvoiceActions.pay_invoice/2)
+
+  def pay_invoice!(invoice, opts \\ []),
+    do: span_invoice(:pay, invoice, opts, &InvoiceActions.pay_invoice!/2)
+
+  def mark_uncollectible(invoice, opts \\ []),
+    do: span_invoice(:mark_uncollectible, invoice, opts, &InvoiceActions.mark_uncollectible/2)
+
+  def mark_uncollectible!(invoice, opts \\ []),
+    do: span_invoice(:mark_uncollectible, invoice, opts, &InvoiceActions.mark_uncollectible!/2)
+
+  def send_invoice(invoice, opts \\ []),
+    do: span_invoice(:send, invoice, opts, &InvoiceActions.send_invoice/2)
+
+  def send_invoice!(invoice, opts \\ []),
+    do: span_invoice(:send, invoice, opts, &InvoiceActions.send_invoice!/2)
 
   # ── Charge / PaymentIntent / SetupIntent surface (Plan 06) ────────
-  defdelegate charge(customer, amount_or_opts, opts \\ []), to: ChargeActions
-  defdelegate charge!(customer, amount_or_opts, opts \\ []), to: ChargeActions
-  defdelegate create_payment_intent(customer, opts \\ []), to: ChargeActions
-  defdelegate create_payment_intent!(customer, opts \\ []), to: ChargeActions
-  defdelegate create_setup_intent(customer, opts \\ []), to: ChargeActions
-  defdelegate create_setup_intent!(customer, opts \\ []), to: ChargeActions
+  def charge(customer, amount_or_opts, opts \\ []) do
+    span_billing(:charge, :create, customer, opts, fn ->
+      ChargeActions.charge(customer, amount_or_opts, opts)
+    end)
+  end
+
+  def charge!(customer, amount_or_opts, opts \\ []) do
+    span_billing(:charge, :create, customer, opts, fn ->
+      ChargeActions.charge!(customer, amount_or_opts, opts)
+    end)
+  end
+
+  def create_payment_intent(customer, opts \\ []) do
+    span_billing(:payment_intent, :create, customer, opts, fn ->
+      ChargeActions.create_payment_intent(customer, opts)
+    end)
+  end
+
+  def create_payment_intent!(customer, opts \\ []) do
+    span_billing(:payment_intent, :create, customer, opts, fn ->
+      ChargeActions.create_payment_intent!(customer, opts)
+    end)
+  end
+
+  def create_setup_intent(customer, opts \\ []) do
+    span_billing(:setup_intent, :create, customer, opts, fn ->
+      ChargeActions.create_setup_intent(customer, opts)
+    end)
+  end
+
+  def create_setup_intent!(customer, opts \\ []) do
+    span_billing(:setup_intent, :create, customer, opts, fn ->
+      ChargeActions.create_setup_intent!(customer, opts)
+    end)
+  end
 
   # ── PaymentMethod surface (Plan 06) ───────────────────────────────
-  defdelegate attach_payment_method(customer, pm_id_or_opts, opts \\ []),
-    to: PaymentMethodActions
+  def attach_payment_method(customer, pm_id_or_opts, opts \\ []) do
+    span_billing(:payment_method, :attach, customer, opts, fn ->
+      PaymentMethodActions.attach_payment_method(customer, pm_id_or_opts, opts)
+    end)
+  end
 
-  defdelegate attach_payment_method!(customer, pm_id_or_opts, opts \\ []),
-    to: PaymentMethodActions
+  def attach_payment_method!(customer, pm_id_or_opts, opts \\ []) do
+    span_billing(:payment_method, :attach, customer, opts, fn ->
+      PaymentMethodActions.attach_payment_method!(customer, pm_id_or_opts, opts)
+    end)
+  end
 
-  defdelegate detach_payment_method(payment_method, opts \\ []), to: PaymentMethodActions
-  defdelegate detach_payment_method!(payment_method, opts \\ []), to: PaymentMethodActions
-  defdelegate set_default_payment_method(customer, pm_id, opts \\ []), to: PaymentMethodActions
-  defdelegate set_default_payment_method!(customer, pm_id, opts \\ []), to: PaymentMethodActions
+  def detach_payment_method(payment_method, opts \\ []),
+    do:
+      span_billing(:payment_method, :detach, payment_method, opts, fn ->
+        PaymentMethodActions.detach_payment_method(payment_method, opts)
+      end)
+
+  def detach_payment_method!(payment_method, opts \\ []),
+    do:
+      span_billing(:payment_method, :detach, payment_method, opts, fn ->
+        PaymentMethodActions.detach_payment_method!(payment_method, opts)
+      end)
+
+  def set_default_payment_method(customer, pm_id, opts \\ []) do
+    span_billing(:payment_method, :set_default, customer, opts, fn ->
+      PaymentMethodActions.set_default_payment_method(customer, pm_id, opts)
+    end)
+  end
+
+  def set_default_payment_method!(customer, pm_id, opts \\ []) do
+    span_billing(:payment_method, :set_default, customer, opts, fn ->
+      PaymentMethodActions.set_default_payment_method!(customer, pm_id, opts)
+    end)
+  end
 
   # ── Refund surface (Plan 06) ──────────────────────────────────────
-  defdelegate create_refund(charge, opts \\ []), to: RefundActions
-  defdelegate create_refund!(charge, opts \\ []), to: RefundActions
+  def create_refund(charge, opts \\ []),
+    do:
+      span_billing(:refund, :create, charge, opts, fn ->
+        RefundActions.create_refund(charge, opts)
+      end)
+
+  def create_refund!(charge, opts \\ []),
+    do:
+      span_billing(:refund, :create, charge, opts, fn ->
+        RefundActions.create_refund!(charge, opts)
+      end)
 
   # ── Invoice PDF surface (Phase 6 Plan 06, D6-04) ──────────────────
-  defdelegate render_invoice_pdf(invoice_or_id, opts \\ []), to: Accrue.Invoices
-  defdelegate store_invoice_pdf(invoice_or_id, opts \\ []), to: Accrue.Invoices
-  defdelegate fetch_invoice_pdf(invoice_or_id), to: Accrue.Invoices
+  def render_invoice_pdf(invoice_or_id, opts \\ []),
+    do: span_invoice(:render_pdf, invoice_or_id, opts, &Accrue.Invoices.render_invoice_pdf/2)
+
+  def store_invoice_pdf(invoice_or_id, opts \\ []),
+    do: span_invoice(:store_pdf, invoice_or_id, opts, &Accrue.Invoices.store_invoice_pdf/2)
+
+  def fetch_invoice_pdf(invoice_or_id),
+    do:
+      span_invoice(:fetch_pdf, invoice_or_id, [], fn invoice, _opts ->
+        Accrue.Invoices.fetch_invoice_pdf(invoice)
+      end)
 
   # ── Metered billing surface (Phase 4 Plan 02, BILL-13) ────────────
-  defdelegate report_usage(customer, event_name, opts \\ []), to: MeterEventActions
-  defdelegate report_usage!(customer, event_name, opts \\ []), to: MeterEventActions
+  def report_usage(customer, event_name, opts \\ []) do
+    span_billing(
+      :meter_event,
+      :report_usage,
+      customer,
+      Keyword.put(opts, :event_type, event_name),
+      fn ->
+        MeterEventActions.report_usage(customer, event_name, opts)
+      end
+    )
+  end
+
+  def report_usage!(customer, event_name, opts \\ []) do
+    span_billing(
+      :meter_event,
+      :report_usage,
+      customer,
+      Keyword.put(opts, :event_type, event_name),
+      fn ->
+        MeterEventActions.report_usage!(customer, event_name, opts)
+      end
+    )
+  end
 
   # ── Coupons + promotion codes (Phase 4 Plan 05, BILL-27/28) ───────
-  defdelegate create_coupon(params, opts \\ []), to: CouponActions
-  defdelegate create_coupon!(params, opts \\ []), to: CouponActions
-  defdelegate create_promotion_code(params, opts \\ []), to: CouponActions
-  defdelegate create_promotion_code!(params, opts \\ []), to: CouponActions
-  defdelegate apply_promotion_code(sub, code, opts \\ []), to: CouponActions
-  defdelegate apply_promotion_code!(sub, code, opts \\ []), to: CouponActions
+  def create_coupon(params, opts \\ []),
+    do:
+      span_billing(:coupon, :create, params, opts, fn ->
+        CouponActions.create_coupon(params, opts)
+      end)
+
+  def create_coupon!(params, opts \\ []),
+    do:
+      span_billing(:coupon, :create, params, opts, fn ->
+        CouponActions.create_coupon!(params, opts)
+      end)
+
+  def create_promotion_code(params, opts \\ []),
+    do:
+      span_billing(:promotion_code, :create, params, opts, fn ->
+        CouponActions.create_promotion_code(params, opts)
+      end)
+
+  def create_promotion_code!(params, opts \\ []),
+    do:
+      span_billing(:promotion_code, :create, params, opts, fn ->
+        CouponActions.create_promotion_code!(params, opts)
+      end)
+
+  def apply_promotion_code(sub, code, opts \\ []) do
+    span_billing(:promotion_code, :apply, sub, opts, fn ->
+      CouponActions.apply_promotion_code(sub, code, opts)
+    end)
+  end
+
+  def apply_promotion_code!(sub, code, opts \\ []) do
+    span_billing(:promotion_code, :apply, sub, opts, fn ->
+      CouponActions.apply_promotion_code!(sub, code, opts)
+    end)
+  end
 
   # ---------------------------------------------------------------------------
   # Customer — lazy fetch-or-create (D2-06)
@@ -173,34 +449,36 @@ defmodule Accrue.Billing do
   """
   @spec customer(struct()) :: {:ok, Customer.t()} | {:error, term()}
   def customer(%{__struct__: mod, id: id} = billable) do
-    billable_type = mod.__accrue__(:billable_type)
-    owner_id = to_string(id)
+    span_billing(:customer, :get_or_create, billable, [], fn ->
+      billable_type = mod.__accrue__(:billable_type)
+      owner_id = to_string(id)
 
-    case fetch_customer(billable_type, owner_id) do
-      %Customer{} = existing ->
-        {:ok, existing}
+      case fetch_customer(billable_type, owner_id) do
+        %Customer{} = existing ->
+          {:ok, existing}
 
-      nil ->
-        case create_customer(billable) do
-          {:ok, customer} ->
-            {:ok, customer}
+        nil ->
+          case create_customer(billable) do
+            {:ok, customer} ->
+              {:ok, customer}
 
-          {:error, %Ecto.Changeset{} = cs} ->
-            # Unique constraint race -- another process created the customer
-            # between our SELECT and INSERT. Retry the fetch.
-            if cs.errors[:owner_id] do
-              case fetch_customer(billable_type, owner_id) do
-                %Customer{} = existing -> {:ok, existing}
-                nil -> {:error, cs}
+            {:error, %Ecto.Changeset{} = cs} ->
+              # Unique constraint race -- another process created the customer
+              # between our SELECT and INSERT. Retry the fetch.
+              if cs.errors[:owner_id] do
+                case fetch_customer(billable_type, owner_id) do
+                  %Customer{} = existing -> {:ok, existing}
+                  nil -> {:error, cs}
+                end
+              else
+                {:error, cs}
               end
-            else
-              {:error, cs}
-            end
 
-          {:error, reason} ->
-            {:error, reason}
-        end
-    end
+            {:error, reason} ->
+              {:error, reason}
+          end
+      end
+    end)
   end
 
   defp fetch_customer(billable_type, owner_id) do
@@ -219,10 +497,12 @@ defmodule Accrue.Billing do
   """
   @spec customer!(struct()) :: Customer.t()
   def customer!(billable) do
-    case customer(billable) do
-      {:ok, customer} -> customer
-      {:error, reason} -> raise "Failed to fetch or create customer: #{inspect(reason)}"
-    end
+    span_billing(:customer, :get_or_create, billable, [], fn ->
+      case customer(billable) do
+        {:ok, customer} -> customer
+        {:error, reason} -> raise "Failed to fetch or create customer: #{inspect(reason)}"
+      end
+    end)
   end
 
   # ---------------------------------------------------------------------------
@@ -248,49 +528,51 @@ defmodule Accrue.Billing do
   """
   @spec create_customer(struct()) :: {:ok, Customer.t()} | {:error, term()}
   def create_customer(%{__struct__: mod, id: id} = billable) do
-    billable_type = mod.__accrue__(:billable_type)
-    owner_id = to_string(id)
-    processor_name = processor_name()
+    span_billing(:customer, :create, billable, [], fn ->
+      billable_type = mod.__accrue__(:billable_type)
+      owner_id = to_string(id)
+      processor_name = processor_name()
 
-    params = build_processor_params(billable)
+      params = build_processor_params(billable)
 
-    # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
-    Repo.transact(fn ->
-      with {:ok, processor_result} <- Processor.create_customer(params),
-           customer_attrs = %{
-             owner_type: billable_type,
-             owner_id: owner_id,
-             processor: processor_name,
-             processor_id: Map.get(processor_result, :id),
-             name: Map.get(processor_result, :name),
-             email: Map.get(processor_result, :email),
-             metadata: Map.get(processor_result, :metadata, %{}),
-             data:
-               Map.drop(processor_result, [
-                 :address,
-                 :phone,
-                 :shipping,
-                 "address",
-                 "phone",
-                 "shipping"
-               ])
-           },
-           {:ok, customer} <-
-             %Customer{} |> Customer.changeset(customer_attrs) |> Repo.insert(),
-           {:ok, _event} <-
-             Events.record(%{
-               type: "customer.created",
-               subject_type: "Customer",
-               subject_id: customer.id,
-               data: %{
-                 owner_type: billable_type,
-                 owner_id: owner_id,
-                 processor: processor_name,
-                 processor_id: customer.processor_id
-               }
-             }) do
-        {:ok, customer}
-      end
+      # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
+      Repo.transact(fn ->
+        with {:ok, processor_result} <- Processor.create_customer(params),
+             customer_attrs = %{
+               owner_type: billable_type,
+               owner_id: owner_id,
+               processor: processor_name,
+               processor_id: Map.get(processor_result, :id),
+               name: Map.get(processor_result, :name),
+               email: Map.get(processor_result, :email),
+               metadata: Map.get(processor_result, :metadata, %{}),
+               data:
+                 Map.drop(processor_result, [
+                   :address,
+                   :phone,
+                   :shipping,
+                   "address",
+                   "phone",
+                   "shipping"
+                 ])
+             },
+             {:ok, customer} <-
+               %Customer{} |> Customer.changeset(customer_attrs) |> Repo.insert(),
+             {:ok, _event} <-
+               Events.record(%{
+                 type: "customer.created",
+                 subject_type: "Customer",
+                 subject_id: customer.id,
+                 data: %{
+                   owner_type: billable_type,
+                   owner_id: owner_id,
+                   processor: processor_name,
+                   processor_id: customer.processor_id
+                 }
+               }) do
+          {:ok, customer}
+        end
+      end)
     end)
   end
 
@@ -300,10 +582,12 @@ defmodule Accrue.Billing do
   """
   @spec create_customer!(struct()) :: Customer.t()
   def create_customer!(billable) do
-    case create_customer(billable) do
-      {:ok, customer} -> customer
-      {:error, reason} -> raise "Failed to create customer: #{inspect(reason)}"
-    end
+    span_billing(:customer, :create, billable, [], fn ->
+      case create_customer(billable) do
+        {:ok, customer} -> customer
+        {:error, reason} -> raise "Failed to create customer: #{inspect(reason)}"
+      end
+    end)
   end
 
   # ---------------------------------------------------------------------------
@@ -324,20 +608,23 @@ defmodule Accrue.Billing do
   """
   @spec update_customer(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
   def update_customer(%Customer{} = customer, attrs) when is_map(attrs) do
-    # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
-    Repo.transact(fn ->
-      with {:ok, updated} <- customer |> Customer.changeset(attrs) |> Repo.update(),
-           {:ok, _event} <-
-             Events.record(%{
-               type: "customer.updated",
-               subject_type: "Customer",
-               subject_id: updated.id,
-               data: %{
-                 changes: Map.take(attrs, [:metadata, :name, :email, "metadata", "name", "email"])
-               }
-             }) do
-        {:ok, updated}
-      end
+    span_billing(:customer, :update, customer, [], fn ->
+      # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
+      Repo.transact(fn ->
+        with {:ok, updated} <- customer |> Customer.changeset(attrs) |> Repo.update(),
+             {:ok, _event} <-
+               Events.record(%{
+                 type: "customer.updated",
+                 subject_type: "Customer",
+                 subject_id: updated.id,
+                 data: %{
+                   changes:
+                     Map.take(attrs, [:metadata, :name, :email, "metadata", "name", "email"])
+                 }
+               }) do
+          {:ok, updated}
+        end
+      end)
     end)
   end
 
@@ -357,10 +644,12 @@ defmodule Accrue.Billing do
   """
   @spec put_data(Ecto.Schema.t(), map()) :: {:ok, Ecto.Schema.t()} | {:error, term()}
   def put_data(%{__struct__: _schema} = record, new_data) when is_map(new_data) do
-    record
-    |> Ecto.Changeset.change(data: new_data)
-    |> Ecto.Changeset.optimistic_lock(:lock_version)
-    |> Repo.update()
+    span_billing(:record, :put_data, record, [], fn ->
+      record
+      |> Ecto.Changeset.change(data: new_data)
+      |> Ecto.Changeset.optimistic_lock(:lock_version)
+      |> Repo.update()
+    end)
   end
 
   @doc """
@@ -375,8 +664,85 @@ defmodule Accrue.Billing do
   """
   @spec patch_data(Ecto.Schema.t(), map()) :: {:ok, Ecto.Schema.t()} | {:error, term()}
   def patch_data(%{__struct__: _schema} = record, partial_data) when is_map(partial_data) do
-    merged = Map.merge(record.data || %{}, partial_data)
-    put_data(record, merged)
+    span_billing(:record, :patch_data, record, [], fn ->
+      merged = Map.merge(record.data || %{}, partial_data)
+      put_data(record, merged)
+    end)
+  end
+
+  defp span_subscription(action, sub, opts, delegate) do
+    span_billing(:subscription, action, sub, opts, fn -> delegate.(sub, opts) end)
+  end
+
+  defp span_subscription_item(action, item, opts, delegate) do
+    span_billing(:subscription_item, action, item, opts, fn -> delegate.(item, opts) end)
+  end
+
+  defp span_schedule(action, sched, opts, delegate) do
+    span_billing(:subscription_schedule, action, sched, opts, fn -> delegate.(sched, opts) end)
+  end
+
+  defp span_invoice(action, invoice, opts, delegate) do
+    span_billing(:invoice, action, invoice, opts, fn -> delegate.(invoice, opts) end)
+  end
+
+  defp span_billing(resource, action, subject, opts, fun) do
+    Accrue.Telemetry.span(
+      [:accrue, :billing, resource, action],
+      billing_metadata(resource, action, subject, opts),
+      fun
+    )
+  end
+
+  defp billing_metadata(resource, action, subject, opts) do
+    %{}
+    |> put_metadata(:processor, safe_processor_name())
+    |> put_metadata(:operation, "#{resource}.#{action}")
+    |> put_metadata(:customer_id, metadata_value(:customer_id, subject, opts))
+    |> put_metadata(:subscription_id, metadata_value(:subscription_id, subject, opts))
+    |> put_metadata(:invoice_id, metadata_value(:invoice_id, subject, opts))
+    |> put_metadata(:event_type, keyword_value(opts, :event_type))
+  end
+
+  defp metadata_value(field, subject, opts) do
+    subject_value(subject, field) || keyword_value(opts, field)
+  end
+
+  defp subject_value(%Customer{id: id}, :customer_id), do: id
+  defp subject_value(%{customer_id: id}, :customer_id), do: id
+  defp subject_value(%{"customer_id" => id}, :customer_id), do: id
+  defp subject_value(%{subscription_id: id}, :subscription_id), do: id
+  defp subject_value(%{"subscription_id" => id}, :subscription_id), do: id
+  defp subject_value(%{invoice_id: id}, :invoice_id), do: id
+  defp subject_value(%{"invoice_id" => id}, :invoice_id), do: id
+
+  defp subject_value(%{__struct__: module, id: id}, field) do
+    module
+    |> Module.split()
+    |> List.last()
+    |> Macro.underscore()
+    |> case do
+      "subscription" when field == :subscription_id -> id
+      "invoice" when field == :invoice_id -> id
+      _ -> nil
+    end
+  end
+
+  defp subject_value(_, _), do: nil
+
+  defp keyword_value(opts, key) when is_list(opts), do: Keyword.get(opts, key)
+  defp keyword_value(_, _), do: nil
+
+  defp put_metadata(metadata, _key, nil), do: metadata
+  defp put_metadata(metadata, _key, ""), do: metadata
+  defp put_metadata(metadata, key, value), do: Map.put(metadata, key, to_string(value))
+
+  defp safe_processor_name do
+    processor_name()
+  rescue
+    _ -> nil
+  catch
+    _, _ -> nil
   end
 
   # ---------------------------------------------------------------------------
