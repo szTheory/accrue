@@ -17,7 +17,7 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
 - [ ] **Phase 5: Connect** — connected accounts, destination charges, separate charges + transfers, multi-endpoint webhooks with per-account secret routing
 - [ ] **Phase 6: Email + PDF** — 13+ transactional emails via Mailer behaviour, ChromicPDF adapter, shared HEEx templates, MJML responsive layouts
 - [ ] **Phase 7: Admin UI (accrue_admin)** — LiveView dashboard, customer/subscription/invoice pages, webhook inspector with one-click replay, Sigra auth adapter
-- [ ] **Phase 8: Install + Polish + Testing** — `mix accrue.install` idempotent generator, test helpers (advance_clock, trigger_event, assert_email_sent, assert_pdf_rendered), OTel span helpers
+- [x] **Phase 8: Install + Polish + Testing** — `mix accrue.install` idempotent generator, test helpers (advance_clock, trigger_event, assert_email_sent, assert_pdf_rendered), OTel span helpers
 - [ ] **Phase 9: Release** — CI matrix (format, warnings-as-errors, Credo strict, Dialyzer, docs), Release Please, ExDoc guides, SECURITY.md, same-day v1.0 publish of accrue + accrue_admin
 
 ## Phase Details
@@ -197,7 +197,7 @@ Plans:
 - [x] 08-06-PLAN.md — Wave 2 optional OpenTelemetry span bridge with allowlisted sanitized attributes
 - [x] 08-07-PLAN.md — Wave 4 Fake-first testing guide, community auth adapter guide, and ExDoc extras wiring
 - [x] 08-08-PLAN.md — Wave 5 gap closure: installer test-support mailer config uses behavior-layer `:mailer`
-- [ ] 08-09-PLAN.md — Wave 5 gap closure: add production-guarded `Accrue.Auth.Mock`
+- [x] 08-09-PLAN.md — Wave 5 gap closure: add production-guarded `Accrue.Auth.Mock`
 **UI hint**: no
 
 ### Phase 9: Release

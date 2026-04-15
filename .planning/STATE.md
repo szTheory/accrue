@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 08-08-PLAN.md
-last_updated: "2026-04-15T22:58:50.080Z"
+status: verifying
+stopped_at: Completed 08-09-PLAN.md
+last_updated: "2026-04-15T23:03:57.767Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 63
-  completed_plans: 62
-  percent: 98
+  completed_plans: 63
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 ## Current Position
 
-Phase: 08 (install-polish-testing) — EXECUTING
+Phase: 08 (install-polish-testing) — VERIFYING
 Plan: 9 of 9
-Status: Ready to execute 08-09
+Status: Phase complete — ready for verification
 Last activity: 2026-04-15
 
-Progress: [██████████] 62/63 planned plans complete (98% overall; Phase 08 in progress)
+Progress: [██████████] 63/63 planned plans complete (100% overall; Phase 08 ready for verification)
 
 ## Performance Metrics
 
@@ -103,6 +103,7 @@ Progress: [██████████] 62/63 planned plans complete (98% ove
 | Phase 08-install-polish-testing P05 | 7min | 2 tasks | 4 files |
 | Phase 08-install-polish-testing P07 | 6min | 2 tasks | 5 files |
 | Phase 08-install-polish-testing P08 | 3min | 2 tasks | 3 files |
+| Phase 08-install-polish-testing P09 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -263,6 +264,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 08-install-polish-testing]: Plan 08-07: ExDoc skip_undefined_reference_warnings_on is scoped to lib/ API docs so guide pages still fail on broken references.
 - [Phase 08-install-polish-testing]: Installer test support configures Accrue.Mailer.Test under :mailer because Accrue.Mailer.impl/0 reads Application.get_env(:accrue, :mailer, Accrue.Mailer.Default).
 - [Phase 08-install-polish-testing]: Plan 08-08 left the unrelated :mailer_adapter configuration surface untouched; only the generated Accrue.Mailer.Test behavior snippet changed.
+- [Phase 08-install-polish-testing]: Accrue.Auth.Mock is a named opt-in test adapter, not wired into default or installer fallback auth config.
+- [Phase 08-install-polish-testing]: Accrue.Auth.Mock stores current users in process-local state and refuses :prod with Accrue.ConfigError.
 
 ### Pending Todos
 
@@ -283,6 +286,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T22:58:50.076Z
-Stopped at: Completed 08-08-PLAN.md
+Last session: 2026-04-15T23:03:57.763Z
+Stopped at: Completed 08-09-PLAN.md
 Resume file: None
