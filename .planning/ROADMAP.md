@@ -195,7 +195,7 @@ Plans:
 - [x] 08-04-PLAN.md — Wave 2 public `Accrue.Test` facade with deterministic clock and webhook action helpers
 - [x] 08-05-PLAN.md — Wave 3 email, PDF, and event assertion helpers with matcher diagnostics
 - [x] 08-06-PLAN.md — Wave 2 optional OpenTelemetry span bridge with allowlisted sanitized attributes
-- [ ] 08-07-PLAN.md — Wave 4 Fake-first testing guide, community auth adapter guide, and ExDoc extras wiring
+- [x] 08-07-PLAN.md — Wave 4 Fake-first testing guide, community auth adapter guide, and ExDoc extras wiring
 **UI hint**: no
 
 ### Phase 9: Release

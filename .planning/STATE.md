@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 08-05-PLAN.md
-last_updated: "2026-04-15T22:20:37.236Z"
+status: verifying
+stopped_at: Completed 08-07-PLAN.md
+last_updated: "2026-04-15T22:28:38.998Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 61
-  completed_plans: 60
-  percent: 98
+  completed_plans: 61
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 ## Current Position
 
-Phase: 08 (install-polish-testing) — EXECUTING
+Phase: 08 (install-polish-testing) — VERIFYING
 Plan: 7 of 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-15
 
-Progress: [██████████] 60/61 planned plans complete (98% overall; Phase 08 plan 07 remains)
+Progress: [██████████] 61/61 planned plans complete (100% overall; Phase 08 complete)
 
 ## Performance Metrics
 
@@ -101,6 +101,7 @@ Progress: [██████████] 60/61 planned plans complete (98% ove
 | Phase 08-install-polish-testing P04 | 3min | 2 tasks | 4 files |
 | Phase 08-install-polish-testing P06 | 8min | 3 tasks | 3 files |
 | Phase 08-install-polish-testing P05 | 7min | 2 tasks | 4 files |
+| Phase 08-install-polish-testing P07 | 6min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -256,6 +257,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 08-install-polish-testing]: Side-effect assertion failures summarize observed evidence without dumping raw event data payloads.
 - [Phase 08-install-polish-testing]: Mail/PDF assertions retain process-local capture as default and document owner/global modes without introducing global state.
 - [Phase 08-install-polish-testing]: PDF matcher predicates prefer normalized render data and fall back to raw HTML for compatibility.
+- [Phase 08-install-polish-testing]: Plan 08-07: Testing guide opens with a host-app Fake-first DataCase scenario before helper reference material.
+- [Phase 08-install-polish-testing]: Plan 08-07: Auth adapter docs use host-owned MyApp.Auth.* examples and document Accrue.Auth.Default as dev/test only with prod fail-closed behavior.
+- [Phase 08-install-polish-testing]: Plan 08-07: ExDoc skip_undefined_reference_warnings_on is scoped to lib/ API docs so guide pages still fail on broken references.
 
 ### Pending Todos
 
@@ -276,6 +280,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T22:20:37.232Z
-Stopped at: Completed 08-05-PLAN.md
+Last session: 2026-04-15T22:28:38.994Z
+Stopped at: Completed 08-07-PLAN.md
 Resume file: None
