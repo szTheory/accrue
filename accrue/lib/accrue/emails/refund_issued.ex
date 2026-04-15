@@ -13,10 +13,10 @@ defmodule Accrue.Emails.RefundIssued do
     mjml_template: "../../../priv/accrue/templates/emails/refund_issued.mjml.eex"
 
   @spec subject(map()) :: String.t()
-  def subject(%{context: %{charge: %{id: id}}}) when is_binary(id),
-    do: "Refund issued for charge #{id}"
+  def subject(%{context: %{refund: %{formatted_amount: amt}}}) when is_binary(amt),
+    do: "Refund issued: #{amt}"
 
-  def subject(%{context: %{branding: b}}),
+  def subject(%{context: %{branding: b}}) when is_list(b) or is_map(b),
     do: "Refund issued by #{b[:business_name]}"
 
   def subject(_), do: "Refund issued"
