@@ -138,7 +138,15 @@ Plans:
   3. All 13+ email types (`receipt`, `payment_failed`, `trial_ending`, `trial_ended`, `invoice_finalized`, `invoice_paid`, `invoice_payment_failed`, `subscription_canceled`, `subscription_paused`, `subscription_resumed`, `refund_issued`, `coupon_applied`, plus multipart variants) render correctly in both plain-text and HTML multipart and pass MJML responsive rendering in Outlook + Gmail + Apple Mail.
   4. `Accrue.PDF.Null` adapter returns a graceful documented error in Chrome-hostile deploy environments (e.g. minimal Alpine containers without Chromium), enabling hosts to opt out of PDF rendering without breaking the library.
   5. Currency amounts and dates in all emails and PDFs are formatted using CLDR-backed localization with correct timezone threading from the render context.
-**Plans**: TBD
+**Plans**: 7 plans
+Plans:
+- [ ] 06-01-PLAN.md — Wave 1: :branding NimbleOptions schema + helpers + preferred_locale/timezone migration + flat-key deprecation shim
+- [ ] 06-02-PLAN.md — Wave 1: Accrue.Error.PdfDisabled + Accrue.PDF.Null + Accrue.Storage behaviour + Null adapter + guides/pdf.md stub
+- [ ] 06-03-PLAN.md — Wave 2: HtmlBridge spike + RenderContext + Render module + Styles + Components + Layouts + shared transactional layouts
+- [ ] 06-04-PLAN.md — Wave 3: Accrue.Mailer.Test + Accrue.Test.MailerAssertions + Accrue.Test.PdfAssertions + Workers.Mailer 13-type catalogue + enrich ladder
+- [ ] 06-05-PLAN.md — Wave 4: 8 non-invoice email type modules (receipt, payment_failed, trial_ending, trial_ended, subscription_canceled, subscription_paused, subscription_resumed, card_expiring_soon) + multipart coverage test
+- [ ] 06-06-PLAN.md — Wave 4: Accrue.Invoices facade + Billing delegates + 5 invoice-bearing email types (invoice_finalized, invoice_paid, invoice_payment_failed, refund_issued, coupon_applied) + Fixtures module
+- [ ] 06-07-PLAN.md — Wave 5: Worker PDF attachment branch + webhook dispatch wiring + mix accrue.mail.preview + boot guards + email/branding guides + VALIDATION sign-off
 **UI hint**: yes (email HEEx templates, PDF layout, branding theme — template/rendering work, not LiveView)
 
 ### Phase 7: Admin UI (accrue_admin)

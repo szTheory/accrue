@@ -966,32 +966,22 @@ Phase 6 touches transactional emails and PDFs containing PII (customer email, in
 | A8 | The "13+" email types count card_expiring_soon (Phase 3) toward the catalogue rather than as a separate item | Email Type Catalogue | Naming only; planner confirms wave composition. |
 | A9 | Rendering a `%Phoenix.LiveView.Rendered{}` (from a function component call outside of a live view mount) via `Phoenix.HTML.Safe.to_iodata/1` yields valid HTML for email embedding | Pattern 1 | Low-medium — this is the load-bearing bridge. Validate first task in Wave 2 with a unit test: call component, render, byte-check against expected markup. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact HEEx → HTML-string bridge API**
-   - What we know: HEEx function components return `%Phoenix.LiveView.Rendered{}` which implements `Phoenix.HTML.Safe`, so `Phoenix.HTML.Safe.to_iodata/1` should produce iodata. `Phoenix.HTML.safe_to_string/1` is the canonical one-shot.
-   - What's unclear: Whether this works outside a LiveView process without mounting; whether `Phoenix.Component.to_form/1`-style helpers assume a socket context.
-   - Recommendation: First Wave-2 task is a 20-LoC spike in `test/accrue/emails/html_bridge_test.exs` that asserts the call round-trips a trivial `<.foo/>` component with atoms + strings. 10 minutes, unblocks the rest of the wave.
+   - RESOLVED: Use `Phoenix.HTML.Safe.to_iodata/1` on the `%Phoenix.LiveView.Rendered{}` returned by a function component call, then `IO.iodata_to_binary/1`. Validated by a 20-LoC spike as the **first task of Wave 2** in `test/accrue/emails/html_bridge_test.exs` — round-trip a trivial `<.foo/>` component with atoms + strings. If the spike fails, the whole phase architecture rebalances and Wave 3+ gates on the re-decision.
 
-2. **How to plumb the `Accrue.Storage` behaviour through `Accrue.Billing.render_invoice_pdf/2` without adding dead code**
-   - What we know: D6-04 says `Null` is the only v1.0 adapter and `store_invoice_pdf/1` no-ops.
-   - What's unclear: Whether `fetch_invoice_pdf/1` should live on the Storage behaviour (v1.0 returns `{:error, :not_configured}`) or on `Accrue.Billing` delegating to adapter. Former is cleaner; latter makes v1.1 `Filesystem` easier to wire.
-   - Recommendation: Behaviour-layer. Define `@callback put/3`, `@callback get/1`, `@callback delete/1` on `Accrue.Storage`; `Null` returns `{:error, :not_configured}` for `get`. `Accrue.Billing.fetch_invoice_pdf/1` delegates to `Application.get_env(:accrue, :storage_adapter, Accrue.Storage.Null)`.
+2. **How to plumb `Accrue.Storage` through `Accrue.Billing.render_invoice_pdf/2` without dead code**
+   - RESOLVED: Behaviour-layer. Define `@callback put/3`, `@callback get/1`, `@callback delete/1` on `Accrue.Storage`; `Accrue.Storage.Null` returns `{:error, :not_configured}` from `get/1`. `Accrue.Billing.fetch_invoice_pdf/1` delegates to `Application.get_env(:accrue, :storage_adapter, Accrue.Storage.Null)`. Keeps v1.1 `Filesystem`/`S3` adapters drop-in.
 
-3. **Do we ship a `Accrue.Mail.*` module namespace for per-email "Oban job wrapper" modules, or fold that into `Accrue.Workers.Mailer`?**
-   - What we know: D6-04 mentions `Accrue.Mail.InvoiceFinalized` as the job that renders + attaches PDF.
-   - What's unclear: Whether every email type gets its own worker module, or whether `Accrue.Workers.Mailer` stays the single worker and dispatches internally.
-   - Recommendation: **Single worker.** Phase 1 already has `Accrue.Workers.Mailer` and adding 13 more workers multiplies Oban queue plumbing. Handle the `invoice_finalized` + `invoice_paid` PDF-attachment branch inline via a `needs_pdf?(type)` predicate in `perform/1`. The D6-04 reference to `Accrue.Mail.InvoiceFinalized` is a naming convention, not a module boundary.
+3. **`Accrue.Mail.*` per-email worker namespace or single `Accrue.Workers.Mailer`?**
+   - RESOLVED: **Single worker.** `Accrue.Workers.Mailer` stays the sole Oban worker and dispatches internally via a `needs_pdf?(type)` predicate in `perform/1` for `invoice_finalized` + `invoice_paid`. D6-04's `Accrue.Mail.InvoiceFinalized` reference is a naming convention, not a module boundary. Avoids multiplying Oban queue plumbing 13×.
 
-4. **Is `Accrue.Invoices.RenderContext` a struct or a map?**
-   - What we know: Both work for `Phoenix.Component` assigns.
-   - What's unclear: Whether the type safety + dialyzer value of a struct outweighs the flexibility cost when passing through Oban worker enrichment.
-   - Recommendation: **Struct in the render layer, plain map when crossing Oban JSON boundary.** `Accrue.Invoices.Render.build_assigns/2` returns a struct; `Accrue.Workers.Mailer.perform/1` passes a map (JSON-safe IDs only) to the worker, and the worker rehydrates into a struct at render time.
+4. **`Accrue.Invoices.RenderContext` as struct or map?**
+   - RESOLVED: **Struct in the render layer, plain map when crossing Oban JSON boundary.** `Accrue.Invoices.Render.build_assigns/2` returns a struct; `Accrue.Workers.Mailer.perform/1` enqueues a map (JSON-safe IDs only); worker rehydrates to struct at render time.
 
-5. **Does Phase 6 touch `accrue_admin` at all, or strictly the `accrue` package?**
-   - What we know: D6-08 says Phase 6 ships `mix accrue.mail.preview` (in `accrue` package); Phase 7 adds the LiveView preview route (in `accrue_admin` package).
-   - What's unclear: Whether the `AccrueAdmin.EmailPreviewLive` scaffold can be sketched in Phase 6 or must wait.
-   - Recommendation: **Strictly `accrue` in Phase 6.** Keep the handoff clean. Fixture module (`Accrue.Emails.Fixtures`) lives in `accrue/lib` so `accrue_admin` can `import` it in Phase 7.
+5. **Does Phase 6 touch `accrue_admin` at all?**
+   - RESOLVED: **Strictly `accrue` in Phase 6.** `mix accrue.mail.preview` ships in the `accrue` package; `Accrue.Emails.Fixtures` lives in `accrue/lib` so `accrue_admin` can import it in Phase 7. No `AccrueAdmin.EmailPreviewLive` scaffold in this phase.
 
 ## Sources
 
