@@ -199,9 +199,14 @@ defmodule Accrue.Workers.Mailer do
         (email.text_body || "") <>
           "\n\nView your invoice online: " <> url
 
+      safe_url =
+        url
+        |> Phoenix.HTML.html_escape()
+        |> Phoenix.HTML.safe_to_string()
+
       new_html =
         (email.html_body || "") <>
-          ~s(<p><a href="#{url}">View your invoice online</a></p>)
+          ~s(<p><a href="#{safe_url}">View your invoice online</a></p>)
 
       email
       |> Swoosh.Email.text_body(new_text)
