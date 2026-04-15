@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 08-09-PLAN.md
-last_updated: "2026-04-15T23:03:57.767Z"
+status: ready_for_next_phase
+stopped_at: Phase 08 verification automated and passed
+last_updated: "2026-04-15T23:20:28Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 08 — install-polish-testing
+**Current focus:** Phase 09 — release
 
 ## Current Position
 
-Phase: 08 (install-polish-testing) — VERIFYING
-Plan: 9 of 9
-Status: Phase complete — ready for verification
+Phase: 09 (release) — READY TO PLAN
+Plan: 0 of TBD
+Status: Phase 08 verified passed; ready to plan Phase 09
 Last activity: 2026-04-15
 
-Progress: [██████████] 63/63 planned plans complete (100% overall; Phase 08 ready for verification)
+Progress: [██████████] 63/63 planned plans complete (100% overall; Phase 08 verified complete)
 
 ## Performance Metrics
 
