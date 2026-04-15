@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 08-04-PLAN.md
-last_updated: "2026-04-15T22:00:48.689Z"
+stopped_at: Completed 08-06-PLAN.md
+last_updated: "2026-04-15T22:11:15.904Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 61
-  completed_plans: 58
-  percent: 95
+  completed_plans: 59
+  percent: 97
 ---
 
 # Project State
@@ -30,7 +30,7 @@ Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
-Progress: [████████████████████] 54/54 planned plans complete (100% of planned work through Phase 07)
+Progress: [██████████] 59/61 planned plans complete (97% overall; Phase 08 plans 05 and 07 remain)
 
 ## Performance Metrics
 
@@ -99,6 +99,7 @@ Progress: [████████████████████] 54/54 p
 | Phase 08-install-polish-testing P02 | 6min | 2 tasks | 11 files |
 | Phase 08-install-polish-testing P03 | 7min | 3 tasks | 5 files |
 | Phase 08-install-polish-testing P04 | 3min | 2 tasks | 4 files |
+| Phase 08-install-polish-testing P06 | 8min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -247,6 +248,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 08-install-polish-testing]: Accrue.Test imports only existing MailerAssertions and PdfAssertions in Plan 08-04; EventAssertions remains owned by Plan 08-05.
 - [Phase 08-install-polish-testing]: Clock advancement converts readable and keyword durations to Fake seconds and uses advance_subscription/2 only when a subject carries processor_id or stripe_id.
 - [Phase 08-install-polish-testing]: trigger_event/2 persists synthetic events through Accrue.Webhook.Ingest and invokes DefaultHandler, then annotates the webhook row with normal-path metadata for contract visibility.
+- [Phase 08-install-polish-testing]: Plan 08-06 uses the Wave 0 RED tests from 08-01 as the TDD red gate; this plan contributes GREEN implementation commits.
+- [Phase 08-install-polish-testing]: OTel spans are nested inside the existing :telemetry.span/3 work function so Elixir telemetry handlers remain the stable event surface.
+- [Phase 08-install-polish-testing]: Billing context instrumentation is explicit at public call sites and uses private helpers only for repeated sanitized metadata assembly.
 
 ### Pending Todos
 
@@ -267,6 +271,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T22:00:48.686Z
-Stopped at: Completed 08-04-PLAN.md
+Last session: 2026-04-15T22:11:15.901Z
+Stopped at: Completed 08-06-PLAN.md
 Resume file: None
