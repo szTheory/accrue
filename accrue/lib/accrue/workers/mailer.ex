@@ -78,6 +78,7 @@ defmodule Accrue.Workers.Mailer do
       |> Swoosh.Email.from(
         {Accrue.Config.branding(:from_name), Accrue.Config.branding(:from_email)}
       )
+      |> maybe_reply_to(Accrue.Config.branding(:reply_to_email))
       |> Swoosh.Email.subject(template_mod.subject(atomized))
       |> Swoosh.Email.html_body(template_mod.render(atomized))
       |> Swoosh.Email.text_body(template_mod.render_text(atomized))
@@ -130,6 +131,15 @@ defmodule Accrue.Workers.Mailer do
   """
   @spec template_for(atom()) :: module()
   def template_for(type) when is_atom(type), do: default_template(type)
+
+  # Apply branding.reply_to_email when configured. No-op on nil so hosts
+  # that don't set it fall through cleanly.
+  defp maybe_reply_to(email, nil), do: email
+
+  defp maybe_reply_to(email, reply_to) when is_binary(reply_to) and reply_to != "",
+    do: Swoosh.Email.reply_to(email, reply_to)
+
+  defp maybe_reply_to(email, _), do: email
 
   # Types that carry an invoice PDF attachment (D6-04).
   defp needs_pdf?(:invoice_finalized), do: true
