@@ -162,9 +162,9 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **ADMIN-09**: Subscription list + detail with timeline from events ledger
 - [x] **ADMIN-10**: Subscription admin actions (cancel, pause/resume, swap plan, comp) with confirmation + audit
 - [x] **ADMIN-11**: Invoice list + detail (line items, status, PDF preview, download)
-- [ ] **ADMIN-12**: Invoice admin actions (void, mark uncollectible, manual pay)
+- [x] **ADMIN-12**: Invoice admin actions (void, mark uncollectible, manual pay)
 - [x] **ADMIN-13**: Charge list + detail with fee breakdown (Stripe fee, platform fee, net)
-- [ ] **ADMIN-14**: Refund admin action with fee-aware UI surfacing `merchant_loss_amount`
+- [x] **ADMIN-14**: Refund admin action with fee-aware UI surfacing `merchant_loss_amount`
 - [x] **ADMIN-15**: Coupon + PromotionCode management UI
 - [x] **ADMIN-16**: Webhook event inspector: list, filter by status/type, raw payload viewer, attempt history, signature verification status
 - [x] **ADMIN-17**: Webhook replay: one-click requeue individual; DLQ bulk requeue
@@ -420,9 +420,9 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-09 | Phase 7 | Complete |
 | ADMIN-10 | Phase 7 | Complete |
 | ADMIN-11 | Phase 7 | Complete |
-| ADMIN-12 | Phase 7 | Pending |
+| ADMIN-12 | Phase 7 | Complete |
 | ADMIN-13 | Phase 7 | Complete |
-| ADMIN-14 | Phase 7 | Pending |
+| ADMIN-14 | Phase 7 | Complete |
 | ADMIN-15 | Phase 7 | Complete |
 | ADMIN-16 | Phase 7 | Complete |
 | ADMIN-17 | Phase 7 | Complete |

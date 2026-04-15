@@ -167,7 +167,7 @@ Plans:
 - [x] 07-03-PLAN.md — Wave 2 query/index foundation: admin indexes, cursor pagination, and billing/account `AccrueAdmin.Queries.*` modules
 - [x] 07-04-PLAN.md — Wave 2 auth/step-up/audit seam: mount-time auth, Sigra bridge completion, admin step-up flow, and event causality support
 - [x] 07-05-PLAN.md — Wave 5 dashboard/customers/subscriptions slice with audited admin actions
-- [ ] 07-06-PLAN.md — Wave 5 invoices/charges/refunds slice with PDF visibility and fee-aware destructive actions
+- [x] 07-06-PLAN.md — Wave 5 invoices/charges/refunds slice with PDF visibility and fee-aware destructive actions
 - [ ] 07-07-PLAN.md — Wave 5 ops slice: webhook/event queries, webhook inspector, replay/DLQ tooling, and global activity feed
 - [ ] 07-08-PLAN.md — Wave 6 dev surfaces, docs, asset-build CI, and final admin package polish
 - [x] 07-09-PLAN.md — Wave 3 navigation/input primitives: breadcrumbs, flash, buttons, tabs, selects, and status badges
