@@ -1,0 +1,89 @@
+name: AccrueAdmin Browser UAT
+
+on:
+  pull_request:
+    paths:
+      - "accrue/**"
+      - "accrue_admin/**"
+      - ".github/workflows/accrue_admin_browser.yml"
+  push:
+    branches: [main]
+    paths:
+      - "accrue/**"
+      - "accrue_admin/**"
+      - ".github/workflows/accrue_admin_browser.yml"
+  workflow_dispatch: {}
+
+jobs:
+  browser-uat:
+    name: Browser UAT
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_ADMIN_E2E_PORT: 4017
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.0"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Install Elixir deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Compile admin package
+        run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Install browser deps
+        run: cd accrue_admin && npm ci
+
+      - name: Install Chromium
+        run: cd accrue_admin && npx playwright install --with-deps chromium
+
+      - name: Run browser UAT
+        run: cd accrue_admin && npm run e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accrue-admin-playwright-report
+          path: accrue_admin/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accrue-admin-playwright-traces
+          path: accrue_admin/test-results
+          if-no-files-found: ignore

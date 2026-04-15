@@ -63,6 +63,29 @@ That task only touches:
 
 No host Tailwind config edits or host JavaScript bootstrap changes are required.
 
+## Browser UAT
+
+Phase 7 operator verification is automated with Playwright specs under `e2e/`. The suite starts a local test Phoenix endpoint, seeds deterministic billing data, and runs the dashboard, webhook replay, bulk DLQ replay, and step-up refund flows in desktop and mobile Chromium profiles.
+
+Run it locally with:
+
+```bash
+cd accrue_admin
+npm ci
+npx playwright install chromium
+npm run e2e
+```
+
+CI runs the same suite in `.github/workflows/accrue_admin_browser.yml` with Postgres and uploads Playwright traces on failure.
+
+To replay the GitHub Actions job locally with `act`:
+
+```bash
+act workflow_dispatch \
+  -W .github/workflows/accrue_admin_browser.yml \
+  -j browser-uat
+```
+
 ## Dev-Only Surfaces
 
 Outside prod builds, a floating dev toolbar links to:

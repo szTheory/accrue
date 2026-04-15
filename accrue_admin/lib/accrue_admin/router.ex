@@ -42,11 +42,11 @@ defmodule AccrueAdmin.Router do
       end
 
       scope mount_path, as: :accrue_admin do
-        pipe_through(:accrue_admin_browser)
-
         get("/assets/brand-#{AccrueAdmin.Assets.brand_hash()}", AccrueAdmin.Assets, :brand)
         get("/assets/css-#{AccrueAdmin.Assets.css_hash()}", AccrueAdmin.Assets, :css)
         get("/assets/js-#{AccrueAdmin.Assets.js_hash()}", AccrueAdmin.Assets, :js)
+
+        pipe_through(:accrue_admin_browser)
 
         live_session :accrue_admin,
           root_layout: {AccrueAdmin.Layouts, :root},

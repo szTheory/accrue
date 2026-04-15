@@ -1,6 +1,7 @@
 Application.put_env(:accrue, :env, :test)
 Application.put_env(:accrue, :auth_adapter, Accrue.Auth.Default)
 Application.put_env(:accrue, :repo, AccrueAdmin.TestRepo)
+Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
 Application.put_env(:accrue_admin, :cursor_secret, "accrue-admin-test-cursor-secret")
 
 Application.put_env(:accrue, :branding,

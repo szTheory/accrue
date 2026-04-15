@@ -7,7 +7,16 @@ defmodule AccrueAdmin.Layouts do
 
   attr(:inner_content, :any, required: true)
   attr(:page_title, :string, default: "Billing")
-  attr(:brand, :map, default: %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"})
+
+  attr(:brand, :map,
+    default: %{
+      app_name: "Billing",
+      logo_url: nil,
+      accent_hex: "#5D79F6",
+      accent_contrast_hex: "#FAFBFC"
+    }
+  )
+
   attr(:theme, :string, default: "system")
   attr(:csp_nonce, :string, default: nil)
   attr(:brand_css_path, :string, default: nil)
@@ -26,6 +35,7 @@ defmodule AccrueAdmin.Layouts do
     <html lang="en" class="accrue-admin" data-theme={@theme}>
       <head>
         <meta charset="utf-8" />
+        <meta name="csrf-token" content={Plug.CSRFProtection.get_csrf_token()} />
         <script nonce={@csp_nonce}><%= Phoenix.HTML.raw(@anti_fouc_script) %></script>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title><%= @page_title %></title>

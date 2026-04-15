@@ -3,6 +3,8 @@ defmodule AccrueAdmin.TestRouter do
 
   import AccrueAdmin.Router
 
+  forward("/__e2e__", AccrueAdmin.E2E.Plug)
+
   accrue_admin("/billing", session_keys: [:admin_token], allow_live_reload: true)
 end
 
