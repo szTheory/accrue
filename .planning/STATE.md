@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-06-PLAN.md
-last_updated: "2026-04-15T18:33:12.364Z"
+stopped_at: Completed 07-07-PLAN.md
+last_updated: "2026-04-15T18:47:30.742Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 54
-  completed_plans: 51
-  percent: 94
+  completed_plans: 52
+  percent: 96
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 07 (admin-ui-accrue-admin) — EXECUTING
-Plan: 10 of 12
+Plan: 11 of 12
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -92,6 +92,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07 P11 | 8m | 2 tasks | 4 files |
 | Phase 07-admin-ui-accrue-admin P05 | 13m | 2 tasks | 13 files |
 | Phase 07 P06 | 54 | 1 tasks | 9 files |
+| Phase 07-admin-ui-accrue-admin P07 | 13m | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -220,6 +221,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 07]: Invoice and refund admin actions remain on existing billing facade APIs and Phase 6 PDF helpers rather than introducing admin-only billing pathways.
 - [Phase 07]: Destructive billing actions in the admin UI require StepUp freshness and emit admin-scoped audit events for causality.
 - [Phase 07]: Charge detail computes fee breakdowns from persisted billing fields already denormalized in the billing schema.
+- [Phase 07]: Used existing Oban job history as webhook attempt visibility instead of inventing a parallel retry table.
+- [Phase 07]: Replay UI remains a thin wrapper over Accrue.Webhooks.DLQ with admin audit rows added at the LiveView boundary.
+- [Phase 07]: Global activity feed reads directly from accrue_events so scoped and all-events views share the same append-only ledger.
 
 ### Pending Todos
 
@@ -240,6 +244,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T18:33:12.361Z
-Stopped at: Completed 07-06-PLAN.md
+Last session: 2026-04-15T18:47:30.736Z
+Stopped at: Completed 07-07-PLAN.md
 Resume file: None
