@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-05-PLAN.md — 8 non-invoice email types
-last_updated: "2026-04-15T11:50:11.065Z"
+stopped_at: Completed 06-06-PLAN.md — invoice emails + PDF facade + fixtures
+last_updated: "2026-04-15T12:02:12.086Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 42
-  completed_plans: 40
-  percent: 95
+  completed_plans: 41
+  percent: 98
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 06 (email-pdf) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -80,6 +80,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-email-pdf P03 | 10min | 3 tasks | 15 files |
 | Phase 06-email-pdf P04 | 10m | 3 tasks | 11 files |
 | Phase 06-email-pdf P05 | 8m | 3 tasks | 33 files |
+| Phase 06-email-pdf P06 | ~8m | 3 tasks | 26 files |
 
 ## Accumulated Context
 
@@ -177,6 +178,10 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 06-email-pdf]: Phase 6 P05: 8 non-invoice email modules are ~40 LOC each (half the ~80 LOC target) because per-type prose lives in templates; modules are pure subject/1 + render_text/1 boilerplate
 - [Phase 06-email-pdf]: Phase 6 P05: MAIL-15 multipart coverage guard uses public Accrue.Workers.Mailer.resolve_template/1 fall-through — no need to promote private default_template/1
 - [Phase 06-email-pdf]: Phase 6 P05: Accrue.Emails.Receipt (MAIL-03 canonical) coexists with legacy Accrue.Emails.PaymentSucceeded — both registered in dispatch table, downstream dispatches by atom
+- [Phase 06-email-pdf]: Phase 6 P06: Accrue.Invoices lazy-render PDF facade — Process.whereis(ChromicPDF) safety net surfaces missing supervisor child as {:error, :chromic_pdf_not_started} before touching Render.build_assigns (Pitfall 4); safe_build_assigns wraps rescue for Ecto.NoResultsError + other exceptions as T-06-06-08 mitigation
+- [Phase 06-email-pdf]: Phase 6 P06: RefundIssued + CouponApplied skip shared invoice components (invoice_header/line_items/totals) deliberately — refunds and coupons are distinct flows; embedding would force misleading invoice-shaped render. Only invoice_finalized + invoice_paid embed the full component stack
+- [Phase 06-email-pdf]: Phase 6 P06: InvoicePaymentFailed CTA routes to ctx.invoice.hosted_invoice_url (Stripe-hosted pay page) not host-supplied update_pm_url — MAIL-09 requires a payable surface, not a payment-method edit surface
+- [Phase 06-email-pdf]: Phase 6 P06: Accrue.Emails.Fixtures lives in lib/ (not test/support/) with static 'April 15, 2026' formatted_issued_at — zero DateTime.utc_now or Repo calls, deterministic output enforceable by test
 
 ### Pending Todos
 
@@ -197,6 +202,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T11:50:02.943Z
-Stopped at: Completed 06-05-PLAN.md — 8 non-invoice email types
+Last session: 2026-04-15T12:01:56.971Z
+Stopped at: Completed 06-06-PLAN.md — invoice emails + PDF facade + fixtures
 Resume file: None

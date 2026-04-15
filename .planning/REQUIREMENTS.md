@@ -119,13 +119,13 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **MAIL-04**: Email: `payment_failed` with retry guidance
 - [x] **MAIL-05**: Email: `trial_ending` (3 days before, from `trial_will_end` webhook)
 - [x] **MAIL-06**: Email: `trial_ended`
-- [ ] **MAIL-07**: Email: `invoice_finalized` (optional attachment of PDF)
-- [ ] **MAIL-08**: Email: `invoice_paid`
-- [ ] **MAIL-09**: Email: `invoice_payment_failed` with payment action required link
+- [x] **MAIL-07**: Email: `invoice_finalized` (optional attachment of PDF)
+- [x] **MAIL-08**: Email: `invoice_paid`
+- [x] **MAIL-09**: Email: `invoice_payment_failed` with payment action required link
 - [x] **MAIL-10**: Email: `subscription_canceled`
 - [x] **MAIL-11**: Email: `subscription_paused` / `subscription_resumed`
-- [ ] **MAIL-12**: Email: `refund_issued` with fee breakdown
-- [ ] **MAIL-13**: Email: `coupon_applied`
+- [x] **MAIL-12**: Email: `refund_issued` with fee breakdown
+- [x] **MAIL-13**: Email: `coupon_applied`
 - [x] **MAIL-14**: HEEx templates shared between email HTML body and invoice PDF (single source of truth)
 - [x] **MAIL-15**: Plain-text AND HTML multipart mandatory (not optional)
 - [x] **MAIL-16**: Single-point branding config: logo, colors, from-name, from-address
@@ -138,14 +138,14 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 ### PDF
 
 - [ ] **PDF-01**: `Accrue.PDF` behaviour with `render/2` callback
-- [ ] **PDF-02**: `Accrue.PDF.ChromicPDF` default adapter
+- [x] **PDF-02**: `Accrue.PDF.ChromicPDF` default adapter
 - [x] **PDF-03**: `Accrue.PDF.Test` adapter for assertion-based testing
 - [x] **PDF-04**: `Accrue.PDF.Null` adapter for Chrome-hostile deploys (fails gracefully with documented error)
 - [x] **PDF-05**: Invoice PDF template shared HEEx with email HTML body
 - [x] **PDF-06**: Branded PDF with logo, colors, tagline inheriting from Mailer branding config
-- [ ] **PDF-07**: PDF download route helper
+- [x] **PDF-07**: PDF download route helper
 - [ ] **PDF-08**: PDF attachment on email helpers
-- [ ] **PDF-09**: Async PDF render via Oban with cache
+- [x] **PDF-09**: Async PDF render via Oban with cache
 - [x] **PDF-10**: Timezone and locale threading through render context
 - [x] **PDF-11**: Gotenberg sidecar documented as custom adapter path
 
@@ -383,13 +383,13 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | MAIL-04 | Phase 6 | Complete |
 | MAIL-05 | Phase 6 | Complete |
 | MAIL-06 | Phase 6 | Complete |
-| MAIL-07 | Phase 6 | Pending |
-| MAIL-08 | Phase 6 | Pending |
-| MAIL-09 | Phase 6 | Pending |
+| MAIL-07 | Phase 6 | Complete |
+| MAIL-08 | Phase 6 | Complete |
+| MAIL-09 | Phase 6 | Complete |
 | MAIL-10 | Phase 6 | Complete |
 | MAIL-11 | Phase 6 | Complete |
-| MAIL-12 | Phase 6 | Pending |
-| MAIL-13 | Phase 6 | Pending |
+| MAIL-12 | Phase 6 | Complete |
+| MAIL-13 | Phase 6 | Complete |
 | MAIL-14 | Phase 6 | Complete |
 | MAIL-15 | Phase 6 | Complete |
 | MAIL-16 | Phase 6 | Complete |
@@ -399,14 +399,14 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | MAIL-20 | Phase 6 | Complete |
 | MAIL-21 | Phase 6 | Complete |
 | PDF-01 | Phase 1 | Pending |
-| PDF-02 | Phase 6 | Pending |
+| PDF-02 | Phase 6 | Complete |
 | PDF-03 | Phase 6 | Complete |
 | PDF-04 | Phase 6 | Complete |
 | PDF-05 | Phase 6 | Complete |
 | PDF-06 | Phase 6 | Complete |
-| PDF-07 | Phase 6 | Pending |
+| PDF-07 | Phase 6 | Complete |
 | PDF-08 | Phase 6 | Pending |
-| PDF-09 | Phase 6 | Pending |
+| PDF-09 | Phase 6 | Complete |
 | PDF-10 | Phase 6 | Complete |
 | PDF-11 | Phase 6 | Complete |
 | ADMIN-01 | Phase 7 | Pending |

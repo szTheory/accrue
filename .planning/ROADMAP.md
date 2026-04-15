@@ -145,7 +145,7 @@ Plans:
 - [x] 06-03-PLAN.md — Wave 2: HtmlBridge spike + RenderContext + Render module + Styles + Components + Layouts + shared transactional layouts
 - [x] 06-04-PLAN.md — Wave 3: Accrue.Mailer.Test + Accrue.Test.MailerAssertions + Accrue.Test.PdfAssertions + Workers.Mailer 13-type catalogue + enrich ladder
 - [x] 06-05-PLAN.md — Wave 4: 8 non-invoice email type modules (receipt, payment_failed, trial_ending, trial_ended, subscription_canceled, subscription_paused, subscription_resumed, card_expiring_soon) + multipart coverage test
-- [ ] 06-06-PLAN.md — Wave 4: Accrue.Invoices facade + Billing delegates + 5 invoice-bearing email types (invoice_finalized, invoice_paid, invoice_payment_failed, refund_issued, coupon_applied) + Fixtures module
+- [x] 06-06-PLAN.md — Wave 4: Accrue.Invoices facade + Billing delegates + 5 invoice-bearing email types (invoice_finalized, invoice_paid, invoice_payment_failed, refund_issued, coupon_applied) + Fixtures module
 - [ ] 06-07-PLAN.md — Wave 5: Worker PDF attachment branch + webhook dispatch wiring + mix accrue.mail.preview + boot guards + email/branding guides + VALIDATION sign-off
 **UI hint**: yes (email HEEx templates, PDF layout, branding theme — template/rendering work, not LiveView)
 
