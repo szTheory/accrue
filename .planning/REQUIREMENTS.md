@@ -128,12 +128,12 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **MAIL-13**: Email: `coupon_applied`
 - [ ] **MAIL-14**: HEEx templates shared between email HTML body and invoice PDF (single source of truth)
 - [ ] **MAIL-15**: Plain-text AND HTML multipart mandatory (not optional)
-- [ ] **MAIL-16**: Single-point branding config: logo, colors, from-name, from-address
+- [x] **MAIL-16**: Single-point branding config: logo, colors, from-name, from-address
 - [ ] **MAIL-17**: Per-template override for full customization
 - [ ] **MAIL-18**: MJML support via `mjml_eex` for responsive templates rendering across email clients
 - [ ] **MAIL-19**: Outlook MSO conditional block compatibility
 - [ ] **MAIL-20**: Async email sending via Oban
-- [ ] **MAIL-21**: Localization support via CLDR (currency formatting, date formatting)
+- [x] **MAIL-21**: Localization support via CLDR (currency formatting, date formatting)
 
 ### PDF
 
@@ -142,11 +142,11 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **PDF-03**: `Accrue.PDF.Test` adapter for assertion-based testing
 - [ ] **PDF-04**: `Accrue.PDF.Null` adapter for Chrome-hostile deploys (fails gracefully with documented error)
 - [ ] **PDF-05**: Invoice PDF template shared HEEx with email HTML body
-- [ ] **PDF-06**: Branded PDF with logo, colors, tagline inheriting from Mailer branding config
+- [x] **PDF-06**: Branded PDF with logo, colors, tagline inheriting from Mailer branding config
 - [ ] **PDF-07**: PDF download route helper
 - [ ] **PDF-08**: PDF attachment on email helpers
 - [ ] **PDF-09**: Async PDF render via Oban with cache
-- [ ] **PDF-10**: Timezone and locale threading through render context
+- [x] **PDF-10**: Timezone and locale threading through render context
 - [ ] **PDF-11**: Gotenberg sidecar documented as custom adapter path
 
 ### Admin UI (accrue_admin package)
@@ -392,22 +392,22 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | MAIL-13 | Phase 6 | Pending |
 | MAIL-14 | Phase 6 | Pending |
 | MAIL-15 | Phase 6 | Pending |
-| MAIL-16 | Phase 6 | Pending |
+| MAIL-16 | Phase 6 | Complete |
 | MAIL-17 | Phase 6 | Pending |
 | MAIL-18 | Phase 6 | Pending |
 | MAIL-19 | Phase 6 | Pending |
 | MAIL-20 | Phase 6 | Pending |
-| MAIL-21 | Phase 6 | Pending |
+| MAIL-21 | Phase 6 | Complete |
 | PDF-01 | Phase 1 | Pending |
 | PDF-02 | Phase 6 | Pending |
 | PDF-03 | Phase 6 | Pending |
 | PDF-04 | Phase 6 | Pending |
 | PDF-05 | Phase 6 | Pending |
-| PDF-06 | Phase 6 | Pending |
+| PDF-06 | Phase 6 | Complete |
 | PDF-07 | Phase 6 | Pending |
 | PDF-08 | Phase 6 | Pending |
 | PDF-09 | Phase 6 | Pending |
-| PDF-10 | Phase 6 | Pending |
+| PDF-10 | Phase 6 | Complete |
 | PDF-11 | Phase 6 | Pending |
 | ADMIN-01 | Phase 7 | Pending |
 | ADMIN-02 | Phase 7 | Pending |

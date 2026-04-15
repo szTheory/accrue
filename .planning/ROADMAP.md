@@ -140,7 +140,7 @@ Plans:
   5. Currency amounts and dates in all emails and PDFs are formatted using CLDR-backed localization with correct timezone threading from the render context.
 **Plans**: 7 plans
 Plans:
-- [ ] 06-01-PLAN.md — Wave 1: :branding NimbleOptions schema + helpers + preferred_locale/timezone migration + flat-key deprecation shim
+- [x] 06-01-PLAN.md — Wave 1: :branding NimbleOptions schema + helpers + preferred_locale/timezone migration + flat-key deprecation shim
 - [ ] 06-02-PLAN.md — Wave 1: Accrue.Error.PdfDisabled + Accrue.PDF.Null + Accrue.Storage behaviour + Null adapter + guides/pdf.md stub
 - [ ] 06-03-PLAN.md — Wave 2: HtmlBridge spike + RenderContext + Render module + Styles + Components + Layouts + shared transactional layouts
 - [ ] 06-04-PLAN.md — Wave 3: Accrue.Mailer.Test + Accrue.Test.MailerAssertions + Accrue.Test.PdfAssertions + Workers.Mailer 13-type catalogue + enrich ladder

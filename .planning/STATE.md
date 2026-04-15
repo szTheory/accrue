@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 05-07-PLAN.md — Phase 5 Connect shippable, nyquist signed off
-last_updated: "2026-04-15T05:03:59.352Z"
+status: executing
+stopped_at: Completed 06-01-PLAN.md — config + schema foundation landed
+last_updated: "2026-04-15T11:01:17.839Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 5
-  total_plans: 35
-  completed_plans: 35
-  percent: 100
+  total_plans: 42
+  completed_plans: 36
+  percent: 86
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 05 — connect
+**Current focus:** Phase 06 — email-pdf
 
 ## Current Position
 
-Phase: 05 (connect) — EXECUTING
-Plan: 7 of 7
-Status: Phase complete — ready for verification
+Phase: 06 (email-pdf) — EXECUTING
+Plan: 2 of 7
+Status: Ready to execute
 Last activity: 2026-04-15
 
 Progress: [░░░░░░░░░░] 0%
@@ -75,6 +75,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-connect P05 | 20min | 1 tasks | 6 files |
 | Phase 05 P06 | 15min | 1 tasks | 3 files |
 | Phase 05-connect P07 | 45min | 1 tasks | 6 files |
+| Phase 06-email-pdf P01 | 6min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -152,6 +153,10 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 05]: Plan 06: Payload beyond event.object_id loaded from persisted accrue_webhook_events.data via ctx.webhook_event_id
 - [Phase 05-connect]: Plan 07: Pitfall 5 boot warning is Logger.warning (non-fatal) — dev/test fixtures legitimately reuse webhook secrets
 - [Phase 05-connect]: Plan 07: live_stripe suite guards against sk_live_ keys via setup_all prefix check (T-05-07-03 spoofing mitigation)
+- [Phase 06-email-pdf]: Phase 06 P01: Nested :branding schema uses NimbleOptions keys: sub-schema with required: true on inner :from_email/:support_email — outer default: [] still validates because NimbleOptions enforces nested required when outer default materializes
+- [Phase 06-email-pdf]: Phase 06 P01: branding/0 reads raw env + merges schema defaults via merge_with_defaults/1; validate_at_boot!/0 still runs full NimbleOptions validation at supervisor start
+- [Phase 06-email-pdf]: Phase 06 P01: warn_deprecated_branding/0 uses :persistent_term dedupe (one warn per BEAM boot); log message contains key NAMES only, never flat-key values (T-06-01-02 mitigation)
+- [Phase 06-email-pdf]: Phase 06 P01: preferred_locale/preferred_timezone columns are raw string(35)/string(64); no validate_inclusion — library cannot know host CLDR compile-time set (D6-03)
 
 ### Pending Todos
 
@@ -172,6 +177,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T05:03:59.349Z
-Stopped at: Completed 05-07-PLAN.md — Phase 5 Connect shippable, nyquist signed off
+Last session: 2026-04-15T11:01:06.310Z
+Stopped at: Completed 06-01-PLAN.md — config + schema foundation landed
 Resume file: None
