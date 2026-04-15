@@ -1,0 +1,3 @@
+# Plan 06-07 D6-08: local email/PDF preview output from
+# `mix accrue.mail.preview`. Developer-local artifact — never commit.
+.accrue/
