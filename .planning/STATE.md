@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 08-07-PLAN.md
-last_updated: "2026-04-15T22:55:15.640Z"
-last_activity: 2026-04-15 -- Phase 08 planning complete
+stopped_at: Completed 08-08-PLAN.md
+last_updated: "2026-04-15T22:58:50.080Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 63
-  completed_plans: 61
-  percent: 97
+  completed_plans: 62
+  percent: 98
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 ## Current Position
 
-Phase: 08 (install-polish-testing) — VERIFYING
-Plan: 7 of 7
-Status: Ready to execute
-Last activity: 2026-04-15 -- Phase 08 planning complete
+Phase: 08 (install-polish-testing) — EXECUTING
+Plan: 9 of 9
+Status: Ready to execute 08-09
+Last activity: 2026-04-15
 
-Progress: [██████████] 61/61 planned plans complete (100% overall; Phase 08 complete)
+Progress: [██████████] 62/63 planned plans complete (98% overall; Phase 08 in progress)
 
 ## Performance Metrics
 
@@ -102,6 +102,7 @@ Progress: [██████████] 61/61 planned plans complete (100% ov
 | Phase 08-install-polish-testing P06 | 8min | 3 tasks | 3 files |
 | Phase 08-install-polish-testing P05 | 7min | 2 tasks | 4 files |
 | Phase 08-install-polish-testing P07 | 6min | 2 tasks | 5 files |
+| Phase 08-install-polish-testing P08 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -260,6 +261,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 08-install-polish-testing]: Plan 08-07: Testing guide opens with a host-app Fake-first DataCase scenario before helper reference material.
 - [Phase 08-install-polish-testing]: Plan 08-07: Auth adapter docs use host-owned MyApp.Auth.* examples and document Accrue.Auth.Default as dev/test only with prod fail-closed behavior.
 - [Phase 08-install-polish-testing]: Plan 08-07: ExDoc skip_undefined_reference_warnings_on is scoped to lib/ API docs so guide pages still fail on broken references.
+- [Phase 08-install-polish-testing]: Installer test support configures Accrue.Mailer.Test under :mailer because Accrue.Mailer.impl/0 reads Application.get_env(:accrue, :mailer, Accrue.Mailer.Default).
+- [Phase 08-install-polish-testing]: Plan 08-08 left the unrelated :mailer_adapter configuration surface untouched; only the generated Accrue.Mailer.Test behavior snippet changed.
 
 ### Pending Todos
 
@@ -280,6 +283,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T22:28:38.994Z
-Stopped at: Completed 08-07-PLAN.md
+Last session: 2026-04-15T22:58:50.076Z
+Stopped at: Completed 08-08-PLAN.md
 Resume file: None

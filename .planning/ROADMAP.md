@@ -196,7 +196,7 @@ Plans:
 - [x] 08-05-PLAN.md — Wave 3 email, PDF, and event assertion helpers with matcher diagnostics
 - [x] 08-06-PLAN.md — Wave 2 optional OpenTelemetry span bridge with allowlisted sanitized attributes
 - [x] 08-07-PLAN.md — Wave 4 Fake-first testing guide, community auth adapter guide, and ExDoc extras wiring
-- [ ] 08-08-PLAN.md — Wave 5 gap closure: installer test-support mailer config uses behavior-layer `:mailer`
+- [x] 08-08-PLAN.md — Wave 5 gap closure: installer test-support mailer config uses behavior-layer `:mailer`
 - [ ] 08-09-PLAN.md — Wave 5 gap closure: add production-guarded `Accrue.Auth.Mock`
 **UI hint**: no
 
