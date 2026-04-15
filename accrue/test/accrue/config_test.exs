@@ -3,9 +3,18 @@ defmodule Accrue.ConfigTest do
 
   alias Accrue.Config
 
+  # Phase 6 (D6-02): nested :branding has two required inner keys
+  # (:from_email + :support_email). Any direct `Config.validate!/1`
+  # call site must supply them or NimbleOptions raises at the nested
+  # schema level. This helper keeps Phase 1-4 test intent untouched
+  # while satisfying the Phase 6 schema contract.
+  @test_branding [from_email: "noreply@example.test", support_email: "support@example.test"]
+
+  defp with_branding(opts), do: Keyword.put_new(opts, :branding, @test_branding)
+
   describe "validate!/1" do
     test "happy path with required :repo" do
-      opts = Config.validate!(repo: SomeApp.Repo)
+      opts = Config.validate!(with_branding(repo: SomeApp.Repo))
       assert opts[:repo] == SomeApp.Repo
       assert opts[:processor] == Accrue.Processor.Fake
       assert opts[:default_currency] == :usd
@@ -196,8 +205,10 @@ defmodule Accrue.ConfigTest do
     test "dead_retention_days accepts :infinity" do
       opts =
         Config.validate!(
-          repo: SomeApp.Repo,
-          dead_retention_days: :infinity
+          with_branding(
+            repo: SomeApp.Repo,
+            dead_retention_days: :infinity
+          )
         )
 
       assert opts[:dead_retention_days] == :infinity
@@ -206,8 +217,10 @@ defmodule Accrue.ConfigTest do
     test "succeeded_retention_days accepts :infinity" do
       opts =
         Config.validate!(
-          repo: SomeApp.Repo,
-          succeeded_retention_days: :infinity
+          with_branding(
+            repo: SomeApp.Repo,
+            succeeded_retention_days: :infinity
+          )
         )
 
       assert opts[:succeeded_retention_days] == :infinity
@@ -215,31 +228,33 @@ defmodule Accrue.ConfigTest do
 
     test "dead_retention_days rejects negative integers" do
       assert_raise NimbleOptions.ValidationError, fn ->
-        Config.validate!(repo: SomeApp.Repo, dead_retention_days: -1)
+        Config.validate!(with_branding(repo: SomeApp.Repo, dead_retention_days: -1))
       end
     end
 
     test "dlq_replay_max_rows rejects 0" do
       assert_raise NimbleOptions.ValidationError, fn ->
-        Config.validate!(repo: SomeApp.Repo, dlq_replay_max_rows: 0)
+        Config.validate!(with_branding(repo: SomeApp.Repo, dlq_replay_max_rows: 0))
       end
     end
 
     test "dlq_replay_stagger_ms accepts 0 (non_neg_integer)" do
-      opts = Config.validate!(repo: SomeApp.Repo, dlq_replay_stagger_ms: 0)
+      opts = Config.validate!(with_branding(repo: SomeApp.Repo, dlq_replay_stagger_ms: 0))
       assert opts[:dlq_replay_stagger_ms] == 0
     end
 
     test "dunning accepts a keyword list override" do
       opts =
         Config.validate!(
-          repo: SomeApp.Repo,
-          dunning: [
-            mode: :disabled,
-            grace_days: 30,
-            terminal_action: :canceled,
-            telemetry_prefix: [:myapp, :billing]
-          ]
+          with_branding(
+            repo: SomeApp.Repo,
+            dunning: [
+              mode: :disabled,
+              grace_days: 30,
+              terminal_action: :canceled,
+              telemetry_prefix: [:myapp, :billing]
+            ]
+          )
         )
 
       assert opts[:dunning][:mode] == :disabled

@@ -16,3 +16,9 @@ config :accrue, Accrue.TestRepo,
 
 config :accrue, ecto_repos: [Accrue.TestRepo]
 config :accrue, :repo, Accrue.TestRepo
+
+# Phase 6 (D6-02): seed nested :branding with the two required keys so
+# existing Phase 1-5 tests continue to validate_at_boot!/0 cleanly.
+config :accrue, :branding,
+  from_email: "noreply@example.test",
+  support_email: "support@example.test"

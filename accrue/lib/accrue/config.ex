@@ -4,7 +4,8 @@ defmodule Accrue.Config do
     repo: [
       type: :atom,
       required: true,
-      doc: "Host `Ecto.Repo` module that Accrue writes to (event ledger, webhook events, billing tables)."
+      doc:
+        "Host `Ecto.Repo` module that Accrue writes to (event ledger, webhook events, billing tables)."
     ],
     processor: [
       type: :atom,
@@ -198,7 +199,8 @@ defmodule Accrue.Config do
     dlq_replay_batch_size: [
       type: :pos_integer,
       default: 100,
-      doc: "Number of rows per chunk in `Accrue.Webhooks.DLQ.requeue_where/2` bulk replay (D4-04)."
+      doc:
+        "Number of rows per chunk in `Accrue.Webhooks.DLQ.requeue_where/2` bulk replay (D4-04)."
     ],
     dlq_replay_stagger_ms: [
       type: :non_neg_integer,
@@ -213,6 +215,42 @@ defmodule Accrue.Config do
       doc:
         "Hard cap on bulk replay. Returns `{:error, :replay_too_large}` " <>
           "unless `force: true` is passed. Default: 10_000 (D4-04)."
+    ],
+
+    # --- Phase 6: Branding (D6-02) ----------------------------------------
+    branding: [
+      type: :keyword_list,
+      required: false,
+      default: [],
+      keys: [
+        business_name: [type: :string, default: "Accrue"],
+        from_name: [type: :string, default: "Accrue"],
+        from_email: [type: :string, required: true],
+        support_email: [type: :string, required: true],
+        reply_to_email: [type: {:or, [:string, nil]}, default: nil],
+        logo_url: [type: {:or, [:string, nil]}, default: nil],
+        logo_dark_url: [type: {:or, [:string, nil]}, default: nil],
+        accent_color: [
+          type: {:custom, __MODULE__, :validate_hex, []},
+          default: "#1F6FEB"
+        ],
+        secondary_color: [
+          type: {:custom, __MODULE__, :validate_hex, []},
+          default: "#6B7280"
+        ],
+        font_stack: [
+          type: :string,
+          default: ~s(-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif)
+        ],
+        company_address: [type: {:or, [:string, nil]}, default: nil],
+        support_url: [type: {:or, [:string, nil]}, default: nil],
+        social_links: [type: :keyword_list, default: []],
+        list_unsubscribe_url: [type: {:or, [:string, nil]}, default: nil]
+      ],
+      doc:
+        "Branding config (D6-02). Single source of truth for email + PDF brand. " <>
+          "`:from_email` and `:support_email` are required for any real deploy. " <>
+          "See guides/branding.md."
     ],
 
     # --- Phase 5: Connect (D5-01, D5-04) ---------------------------------
@@ -338,8 +376,12 @@ defmodule Accrue.Config do
     secrets_map = get!(:webhook_signing_secrets)
 
     case Map.fetch(secrets_map, processor) do
-      {:ok, secrets} when is_list(secrets) and secrets != [] -> secrets
-      {:ok, secret} when is_binary(secret) and secret != "" -> secret
+      {:ok, secrets} when is_list(secrets) and secrets != [] ->
+        secrets
+
+      {:ok, secret} when is_binary(secret) and secret != "" ->
+        secret
+
       _ ->
         raise Accrue.ConfigError,
           key: :webhook_signing_secrets,
@@ -378,6 +420,98 @@ defmodule Accrue.Config do
   """
   @spec dunning() :: keyword()
   def dunning, do: get!(:dunning)
+
+  @doc """
+  Returns the branding config keyword list (D6-02).
+
+  Falls back to building a keyword list from the one-minor deprecated
+  flat branding keys (`:business_name`, `:logo_url`, `:from_email`,
+  `:from_name`, `:support_email`, `:business_address`) when the nested
+  `:branding` key is unset or empty. Nested `:branding` always takes
+  precedence. The flat-key shim is removed before v1.0 — see
+  `Accrue.Application.warn_deprecated_branding/0` for the boot-time
+  Logger.warning.
+  """
+  @spec branding() :: keyword()
+  def branding do
+    raw = get!(:branding)
+
+    cond do
+      is_list(raw) and raw == [] ->
+        branding_from_flat_keys()
+
+      is_list(raw) ->
+        merge_with_defaults(raw)
+    end
+  end
+
+  # Merge a partially-populated user branding keyword list with the
+  # schema defaults so `branding/1` can `Keyword.fetch!` any valid key.
+  # Mirrors the shape NimbleOptions would return after validation but
+  # without re-running the (expensive) full schema validator on every
+  # call site.
+  defp merge_with_defaults(user_kw) do
+    Enum.reduce(branding_defaults(), user_kw, fn {k, default}, acc ->
+      case Keyword.fetch(acc, k) do
+        :error -> Keyword.put(acc, k, default)
+        {:ok, _} -> acc
+      end
+    end)
+  end
+
+  @doc """
+  Returns a single branding key (D6-02). Raises if the key is unknown.
+  """
+  @spec branding(atom()) :: term()
+  def branding(key) when is_atom(key), do: Keyword.fetch!(branding(), key)
+
+  @doc """
+  Returns the list of one-minor-deprecated flat branding keys (D6-02).
+  Consumed by `Accrue.Application.warn_deprecated_branding/0` and by the
+  internal flat-key shim in `branding/0`.
+  """
+  @spec deprecated_flat_branding_keys() :: [atom()]
+  def deprecated_flat_branding_keys do
+    [:business_name, :logo_url, :from_email, :from_name, :support_email, :business_address]
+  end
+
+  # Build a branding keyword list from the deprecated top-level flat keys.
+  # Only keys the host has actually set are copied; remaining slots come
+  # from the nested :branding schema defaults.
+  defp branding_from_flat_keys do
+    flat = deprecated_flat_branding_keys()
+    any_set? = Enum.any?(flat, fn k -> Application.get_env(:accrue, k) != nil end)
+
+    if any_set? do
+      base = branding_defaults()
+
+      Enum.reduce(flat, base, fn key, acc ->
+        case Application.get_env(:accrue, key) do
+          nil ->
+            acc
+
+          value ->
+            target_key = flat_key_to_nested(key)
+            Keyword.put(acc, target_key, value)
+        end
+      end)
+    else
+      branding_defaults()
+    end
+  end
+
+  defp flat_key_to_nested(:business_address), do: :company_address
+  defp flat_key_to_nested(other), do: other
+
+  defp branding_defaults do
+    # Pull the nested :branding schema's inner :keys list and extract
+    # `{atom, default}` pairs so the shim returns a fully-populated kw
+    # list with the same shape the validated schema would yield.
+    @schema
+    |> Keyword.fetch!(:branding)
+    |> Keyword.fetch!(:keys)
+    |> Enum.map(fn {k, spec} -> {k, Keyword.get(spec, :default)} end)
+  end
 
   @doc """
   Returns the Connect config keyword list (D5-01, D5-04).
@@ -426,8 +560,7 @@ defmodule Accrue.Config do
   def validate_descending(list) when is_list(list) and list != [] do
     cond do
       not Enum.all?(list, &(is_integer(&1) and &1 > 0)) ->
-        {:error,
-         "expected a list of positive integers, got: #{inspect(list)}"}
+        {:error, "expected a list of positive integers, got: #{inspect(list)}"}
 
       not strictly_descending?(list) ->
         {:error,
@@ -440,6 +573,24 @@ defmodule Accrue.Config do
 
   def validate_descending(other) do
     {:error, "expected a non-empty list of positive integers, got: #{inspect(other)}"}
+  end
+
+  @doc """
+  NimbleOptions `:custom` validator for `:branding.accent_color` /
+  `:branding.secondary_color` (D6-02). Accepts `#rgb`, `#rrggbb`, and
+  `#rrggbbaa` hex color strings; rejects anything else.
+  """
+  @spec validate_hex(term()) :: {:ok, String.t()} | {:error, String.t()}
+  def validate_hex("#" <> rest = full) when byte_size(rest) in [3, 6, 8] do
+    if rest =~ ~r/\A[0-9a-fA-F]+\z/ do
+      {:ok, full}
+    else
+      {:error, "expected a hex color (#rgb, #rrggbb, or #rrggbbaa), got: #{inspect(full)}"}
+    end
+  end
+
+  def validate_hex(other) do
+    {:error, "expected a hex color string (#rgb, #rrggbb, or #rrggbbaa), got: #{inspect(other)}"}
   end
 
   defp strictly_descending?([_]), do: true
