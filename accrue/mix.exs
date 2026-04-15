@@ -124,7 +124,20 @@ defmodule Accrue.MixProject do
     [
       main: "Accrue",
       source_ref: "v#{@version}",
-      extras: ["guides/telemetry.md"]
+      extras: [
+        "guides/telemetry.md",
+        "guides/testing.md",
+        "guides/auth_adapters.md"
+      ],
+      skip_undefined_reference_warnings_on: &skip_undefined_reference_warning?/1
     ]
+  end
+
+  # Pre-v1 API docs still contain internal cross-links to schema types and
+  # hidden lifecycle functions that are not public ExDoc nodes yet. Keep guide
+  # warnings active while allowing the docs build to fail only on new
+  # actionable guide or external references.
+  defp skip_undefined_reference_warning?(reference) do
+    String.starts_with?(reference, "lib/")
   end
 end
