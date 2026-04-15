@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-03-PLAN.md — rendering core (HtmlBridge + Components + Layouts)
-last_updated: "2026-04-15T11:24:45.341Z"
+stopped_at: Completed 06-04-PLAN.md — test + dispatch infrastructure
+last_updated: "2026-04-15T11:37:39.732Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 42
-  completed_plans: 38
-  percent: 90
+  completed_plans: 39
+  percent: 93
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 06 (email-pdf) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -78,6 +78,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-email-pdf P01 | 6min | 3 tasks | 9 files |
 | Phase 06-email-pdf P02 | 10min | 3 tasks | 10 files |
 | Phase 06-email-pdf P03 | 10min | 3 tasks | 15 files |
+| Phase 06-email-pdf P04 | 10m | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -169,6 +170,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 06-email-pdf]: Phase 6 P03: RenderContext.branding is frozen exactly once in Render.build_assigns/2 — Pitfall 8 enforced by single Accrue.Config.branding() call site in render.ex, proven by put_env mutation regression test
 - [Phase 06-email-pdf]: Phase 6 P03: Layouts.print_shell ships print-safe CSS (body margin 0 + page-break-inside avoid) but NO CSS paper-size rules — ChromicPDF adapter options carry paper size (Pitfall 6); prefer_css_page_size must stay disabled in Plan 06-06
 - [Phase 06-email-pdf]: Phase 6 P03: Shared transactional.{mjml,text}.eex layouts ship as REFERENCE scaffolds (mjml_eex has no HEEx slot equivalent) — per-type email templates COPY the scaffold; BODY BLOCK markers are intentional extension points, not stubs
+- [Phase 06-email-pdf]: Accrue.Mailer.Test sidesteps Oban entirely — async-safe intent-tuple adapter (D6-05)
+- [Phase 06-email-pdf]: MFA override rung forwards [type | args] so one chooser can handle many types
+- [Phase 06-email-pdf]: enrich/2 Customer hydration is best-effort (try/rescue/catch → nil) — Pitfall 5 no-raise trumps fail-loud
 
 ### Pending Todos
 
@@ -189,6 +193,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T11:24:28.292Z
-Stopped at: Completed 06-03-PLAN.md — rendering core (HtmlBridge + Components + Layouts)
+Last session: 2026-04-15T11:37:29.095Z
+Stopped at: Completed 06-04-PLAN.md — test + dispatch infrastructure
 Resume file: None

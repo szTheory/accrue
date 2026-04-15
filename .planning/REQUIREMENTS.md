@@ -114,7 +114,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 ### Email
 
 - [ ] **MAIL-01**: `Accrue.Mailer` behaviour wrapping Swoosh (host configures Swoosh adapter)
-- [ ] **MAIL-02**: `Mailer.Test` adapter for `assert_email_sent/1` helper
+- [x] **MAIL-02**: `Mailer.Test` adapter for `assert_email_sent/1` helper
 - [ ] **MAIL-03**: Email: `receipt` (payment succeeded)
 - [ ] **MAIL-04**: Email: `payment_failed` with retry guidance
 - [ ] **MAIL-05**: Email: `trial_ending` (3 days before, from `trial_will_end` webhook)
@@ -129,17 +129,17 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **MAIL-14**: HEEx templates shared between email HTML body and invoice PDF (single source of truth)
 - [ ] **MAIL-15**: Plain-text AND HTML multipart mandatory (not optional)
 - [x] **MAIL-16**: Single-point branding config: logo, colors, from-name, from-address
-- [ ] **MAIL-17**: Per-template override for full customization
+- [x] **MAIL-17**: Per-template override for full customization
 - [x] **MAIL-18**: MJML support via `mjml_eex` for responsive templates rendering across email clients
 - [x] **MAIL-19**: Outlook MSO conditional block compatibility
-- [ ] **MAIL-20**: Async email sending via Oban
+- [x] **MAIL-20**: Async email sending via Oban
 - [x] **MAIL-21**: Localization support via CLDR (currency formatting, date formatting)
 
 ### PDF
 
 - [ ] **PDF-01**: `Accrue.PDF` behaviour with `render/2` callback
 - [ ] **PDF-02**: `Accrue.PDF.ChromicPDF` default adapter
-- [ ] **PDF-03**: `Accrue.PDF.Test` adapter for assertion-based testing
+- [x] **PDF-03**: `Accrue.PDF.Test` adapter for assertion-based testing
 - [x] **PDF-04**: `Accrue.PDF.Null` adapter for Chrome-hostile deploys (fails gracefully with documented error)
 - [x] **PDF-05**: Invoice PDF template shared HEEx with email HTML body
 - [x] **PDF-06**: Branded PDF with logo, colors, tagline inheriting from Mailer branding config
@@ -378,7 +378,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | EVT-09 | Phase 7 | Pending |
 | EVT-10 | Phase 4 | Complete |
 | MAIL-01 | Phase 1 | Pending |
-| MAIL-02 | Phase 6 | Pending |
+| MAIL-02 | Phase 6 | Complete |
 | MAIL-03 | Phase 6 | Pending |
 | MAIL-04 | Phase 6 | Pending |
 | MAIL-05 | Phase 6 | Pending |
@@ -393,14 +393,14 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | MAIL-14 | Phase 6 | Complete |
 | MAIL-15 | Phase 6 | Pending |
 | MAIL-16 | Phase 6 | Complete |
-| MAIL-17 | Phase 6 | Pending |
+| MAIL-17 | Phase 6 | Complete |
 | MAIL-18 | Phase 6 | Complete |
 | MAIL-19 | Phase 6 | Complete |
-| MAIL-20 | Phase 6 | Pending |
+| MAIL-20 | Phase 6 | Complete |
 | MAIL-21 | Phase 6 | Complete |
 | PDF-01 | Phase 1 | Pending |
 | PDF-02 | Phase 6 | Pending |
-| PDF-03 | Phase 6 | Pending |
+| PDF-03 | Phase 6 | Complete |
 | PDF-04 | Phase 6 | Complete |
 | PDF-05 | Phase 6 | Complete |
 | PDF-06 | Phase 6 | Complete |
