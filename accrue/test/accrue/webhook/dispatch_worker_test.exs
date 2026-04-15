@@ -133,7 +133,11 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
 
       Application.put_env(:accrue, :webhook_handlers, [EndpointTrackingHandler])
 
-      row = insert_webhook_event!(endpoint: :connect, type: "account.updated")
+      # Use an event type that hits the ConnectHandler catch-all
+      # (returns :ok without any processor round-trip) so this test
+      # exercises only dispatch routing, not reducer logic. The real
+      # reducer coverage lives in connect_handler_test.exs (Plan 05-06).
+      row = insert_webhook_event!(endpoint: :connect, type: "account.external_account.created")
       assert row.endpoint == :connect
 
       job = build_job(row.id, attempt: 1, max_attempts: 25)
