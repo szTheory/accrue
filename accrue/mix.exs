@@ -117,7 +117,7 @@ defmodule Accrue.MixProject do
     [
       main: "Accrue",
       source_ref: "v#{@version}",
-      extras: []
+      extras: ["guides/telemetry.md"]
     ]
   end
 end
