@@ -31,13 +31,17 @@ defmodule AccrueAdmin.LiveCase do
     quote do
       import Phoenix.LiveViewTest
       import Plug.Conn
-      import Phoenix.ConnTest, only: [build_conn: 0, build_conn: 2]
+      import Phoenix.ConnTest
 
       @endpoint AccrueAdmin.TestEndpoint
     end
   end
 
   setup _tags do
+    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(AccrueAdmin.TestRepo, shared: true)
+
+    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end
