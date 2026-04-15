@@ -19,7 +19,15 @@ defmodule Accrue.CardError do
   > ⚠️ `processor_error` may contain raw processor payload and MUST NOT be
   > logged verbatim. Mitigates T-FND-05.
   """
-  defexception [:message, :code, :decline_code, :param, :http_status, :request_id, :processor_error]
+  defexception [
+    :message,
+    :code,
+    :decline_code,
+    :param,
+    :http_status,
+    :request_id,
+    :processor_error
+  ]
 
   @impl true
   def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
