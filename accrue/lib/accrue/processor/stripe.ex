@@ -741,6 +741,33 @@ defmodule Accrue.Processor.Stripe do
     |> translate_resource()
   end
 
+  # ---------------------------------------------------------------------------
+  # Connect — Transfers (Phase 5 Plan 05, CONN-05)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_transfer(params, opts) when is_map(params) and is_list(opts) do
+    # Pitfall 2: Transfers are PLATFORM-authority — the platform moves
+    # funds from its own balance to a connected account's balance. The
+    # `Stripe-Account` header MUST NOT be set regardless of any
+    # `Accrue.Connect.with_account/2` scope the caller may be inside.
+    client = build_platform_client!(opts)
+    stripe_opts = stripe_opts(:create_transfer, subject_of(params, "tr"), opts)
+
+    client
+    |> LatticeStripe.Transfer.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def retrieve_transfer(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_platform_client!(opts)
+
+    client
+    |> LatticeStripe.Transfer.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
   # Builds a LatticeStripe client with `stripe_account: nil` unconditionally,
   # bypassing the `resolve_stripe_account/1` precedence chain. Used for
   # platform-scoped Connect calls (Account Links, Login Links) where any

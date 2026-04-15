@@ -384,7 +384,7 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_charge(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_charge, params, opts})
+    GenServer.call(__MODULE__, {:create_charge, params, thread_scope(opts)})
   end
 
   @impl Accrue.Processor
@@ -575,12 +575,15 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_transfer(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_transfer, params, opts})
+    # Transfers are platform-authority calls — force :platform scope so
+    # a `Accrue.Connect.with_account/2` wrapper from a calling test does
+    # not inadvertently tag the transfer as connected-account-scoped.
+    GenServer.call(__MODULE__, {:create_transfer, params, Keyword.put(opts, :stripe_account, nil)})
   end
 
   @impl Accrue.Processor
   def retrieve_transfer(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_transfer, id, opts})
+    GenServer.call(__MODULE__, {:retrieve_transfer, id, Keyword.put(opts, :stripe_account, nil)})
   end
 
   # ---------------------------------------------------------------------------
@@ -614,6 +617,27 @@ defmodule Accrue.Processor.Fake do
   @spec subscriptions_on(String.t() | :platform) :: [map()]
   def subscriptions_on(scope) when is_binary(scope) or scope == :platform do
     GenServer.call(__MODULE__, {:resources_on, :subscriptions, scope})
+  end
+
+  @doc """
+  Returns all stored transfers filtered by scope. Transfers are always
+  platform-scoped (the platform is the party initiating the transfer),
+  but the filter parameter is accepted for API symmetry with the other
+  `*_on/1` helpers.
+  """
+  @spec transfers_on(String.t() | :platform) :: [map()]
+  def transfers_on(scope) when is_binary(scope) or scope == :platform do
+    GenServer.call(__MODULE__, {:resources_on, :transfers, scope})
+  end
+
+  @doc """
+  Returns the number of times `callback` has been invoked against this
+  Fake since the last `reset/0`. Used by Phase 5 Plan 05 tests to
+  count distinct processor calls through `separate_charge_and_transfer`.
+  """
+  @spec call_count(atom()) :: non_neg_integer()
+  def call_count(callback) when is_atom(callback) do
+    GenServer.call(__MODULE__, {:call_count, callback})
   end
 
   # ---------------------------------------------------------------------------
@@ -1130,7 +1154,7 @@ defmodule Accrue.Processor.Fake do
     with_script_or_stub(state, :create_charge, [params, opts], fn state ->
       state = bump(state, :charge)
       id = id_for(:charge, state.counters.charge)
-      charge = build_charge(state, id, params)
+      charge = build_charge(state, id, params, opts)
       {{:ok, charge}, %{state | charges: Map.put(state.charges, id, charge)}}
     end)
   end
@@ -1635,8 +1659,8 @@ defmodule Accrue.Processor.Fake do
   def handle_call({:create_transfer, params, opts}, _from, state) do
     with_script_or_stub(state, :create_transfer, [params, opts], fn state ->
       atom_params = atomize(params)
-      counter = (state.counters[:connect_account] || 0) + 1
-      counters = Map.put(state.counters, :connect_account, counter)
+      counter = (state.counters[:transfer] || 0) + 1
+      counters = Map.put(state.counters, :transfer, counter)
       state = %{state | counters: counters}
       id = "tr_fake_" <> pad5(counter)
 
@@ -1645,16 +1669,27 @@ defmodule Accrue.Processor.Fake do
         |> Map.put(:id, id)
         |> Map.put(:object, "transfer")
         |> Map.put(:created, DateTime.to_unix(state.clock))
+        |> Map.put(:_accrue_scope, resolve_scope(opts))
 
-      {{:ok, transfer}, state}
+      {{:ok, transfer}, %{state | transfers: Map.put(state.transfers, id, transfer)}}
     end)
   end
 
   def handle_call({:retrieve_transfer, id, opts}, _from, state) do
     with_script_or_stub(state, :retrieve_transfer, [id, opts], fn state ->
-      transfer = %{id: id, object: "transfer", created: DateTime.to_unix(state.clock)}
-      {{:ok, transfer}, state}
+      case Map.fetch(state.transfers, id) do
+        {:ok, transfer} ->
+          {{:ok, transfer}, state}
+
+        :error ->
+          transfer = %{id: id, object: "transfer", created: DateTime.to_unix(state.clock)}
+          {{:ok, transfer}, state}
+      end
     end)
+  end
+
+  def handle_call({:call_count, op}, _from, state) do
+    {:reply, Map.get(state.call_counts, op, 0), state}
   end
 
   def handle_call(:accounts_list, _from, state) do
@@ -1667,6 +1702,7 @@ defmodule Accrue.Processor.Fake do
         :customers -> state.customers
         :charges -> state.charges
         :subscriptions -> state.subscriptions
+        :transfers -> state.transfers
       end
 
     scope_value =
@@ -1713,9 +1749,21 @@ defmodule Accrue.Processor.Fake do
   # `charges_on/1` helpers can distinguish "never scoped" from
   # "scoped to acct_X".
   defp resolve_scope(opts) when is_list(opts) do
-    Keyword.get(opts, :stripe_account) ||
-      Process.get(:accrue_connected_account_id) ||
-      :platform
+    cond do
+      # An explicit key in opts wins, including a literal `nil` which
+      # means "force platform scope regardless of any inherited pdict".
+      # Plan 05-05 `destination_charge/2` relies on this to guarantee
+      # platform authority for `transfer_data`-shaped charges even when
+      # the caller is inside `Accrue.Connect.with_account/2`.
+      Keyword.has_key?(opts, :stripe_account) ->
+        Keyword.get(opts, :stripe_account) || :platform
+
+      (id = Process.get(:accrue_connected_account_id)) ->
+        id
+
+      true ->
+        :platform
+    end
   end
 
   # Deep-merges nested atom-keyed maps (capabilities, settings, etc.)
@@ -1731,6 +1779,8 @@ defmodule Accrue.Processor.Fake do
   end
 
   defp with_script_or_stub(state, op, args, fun) do
+    state = bump_call_count(state, op)
+
     case Map.fetch(state.scripts, op) do
       {:ok, scripted_result} ->
         state = %{state | scripts: Map.delete(state.scripts, op)}
@@ -1746,6 +1796,10 @@ defmodule Accrue.Processor.Fake do
             {:reply, result, state}
         end
     end
+  end
+
+  defp bump_call_count(%State{call_counts: counts} = state, op) do
+    %{state | call_counts: Map.update(counts, op, 1, &(&1 + 1))}
   end
 
   defp lookup(map, id, state) do
@@ -2050,8 +2104,11 @@ defmodule Accrue.Processor.Fake do
     }
   end
 
-  defp build_charge(state, id, params) do
-    %{
+  defp build_charge(state, id, params, opts) do
+    transfer_data = params[:transfer_data] || params["transfer_data"]
+    application_fee_amount = params[:application_fee_amount] || params["application_fee_amount"]
+
+    base = %{
       id: id,
       object: "charge",
       amount: params[:amount] || params["amount"] || 0,
@@ -2066,9 +2123,17 @@ defmodule Accrue.Processor.Fake do
         fee: 30,
         fee_details: [%{type: "stripe_fee", amount: 30, currency: "usd"}],
         net: (params[:amount] || params["amount"] || 0) - 30
-      }
+      },
+      _accrue_scope: resolve_scope(opts)
     }
+
+    base
+    |> maybe_put(:transfer_data, transfer_data)
+    |> maybe_put(:application_fee_amount, application_fee_amount)
   end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   defp build_subscription_schedule(state, id, params) do
     phases = params[:phases] || params["phases"] || []

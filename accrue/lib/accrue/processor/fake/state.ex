@@ -27,6 +27,8 @@ defmodule Accrue.Processor.Fake.State do
           checkout_sessions: %{optional(id()) => map()},
           billing_portal_sessions: %{optional(id()) => map()},
           connect_accounts: %{optional(id()) => map()},
+          transfers: %{optional(id()) => map()},
+          call_counts: %{optional(atom()) => non_neg_integer()},
           counters: %{
             customer: non_neg_integer(),
             subscription: non_neg_integer(),
@@ -37,6 +39,7 @@ defmodule Accrue.Processor.Fake.State do
             setup_intent: non_neg_integer(),
             payment_method: non_neg_integer(),
             charge: non_neg_integer(),
+            transfer: non_neg_integer(),
             refund: non_neg_integer(),
             coupon: non_neg_integer(),
             promotion_code: non_neg_integer(),
@@ -69,6 +72,8 @@ defmodule Accrue.Processor.Fake.State do
             checkout_sessions: %{},
             billing_portal_sessions: %{},
             connect_accounts: %{},
+            transfers: %{},
+            call_counts: %{},
             counters: %{
               customer: 0,
               subscription: 0,
@@ -79,6 +84,7 @@ defmodule Accrue.Processor.Fake.State do
               setup_intent: 0,
               payment_method: 0,
               charge: 0,
+              transfer: 0,
               refund: 0,
               coupon: 0,
               promotion_code: 0,

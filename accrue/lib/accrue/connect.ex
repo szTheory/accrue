@@ -22,7 +22,9 @@ defmodule Accrue.Connect do
   requirement).
   """
 
+  alias Accrue.Billing.Charge
   alias Accrue.Connect.{Account, AccountLink, LoginLink, PlatformFee, Projection}
+  alias Accrue.Money
   alias Accrue.Processor
   alias Accrue.Repo
 
@@ -459,6 +461,447 @@ defmodule Accrue.Connect do
   @doc "Bang variant of `platform_fee/2`. Raises on validation failure."
   @spec platform_fee!(Accrue.Money.t(), keyword()) :: Accrue.Money.t()
   defdelegate platform_fee!(gross, opts \\ []), to: PlatformFee, as: :compute!
+
+  # ---------------------------------------------------------------------------
+  # Destination charges (D5-03, CONN-04)
+  # ---------------------------------------------------------------------------
+
+  @destination_charge_schema [
+    amount: [type: {:struct, Money}, required: true],
+    destination: [type: :any, required: true],
+    customer: [type: :any, required: true],
+    application_fee_amount: [type: {:or, [{:struct, Money}, nil]}, default: nil],
+    description: [type: {:or, [:string, nil]}, default: nil],
+    metadata: [type: {:or, [{:map, :any, :any}, nil]}, default: nil],
+    statement_descriptor: [type: {:or, [:string, nil]}, default: nil],
+    payment_method: [type: {:or, [:string, nil]}, default: nil]
+  ]
+
+  @separate_charge_schema [
+    amount: [type: {:struct, Money}, required: true],
+    customer: [type: :any, required: true],
+    destination: [type: :any, required: true],
+    transfer_amount: [type: {:struct, Money}, required: true],
+    description: [type: {:or, [:string, nil]}, default: nil],
+    metadata: [type: {:or, [{:map, :any, :any}, nil]}, default: nil],
+    payment_method: [type: {:or, [:string, nil]}, default: nil]
+  ]
+
+  @transfer_schema [
+    amount: [type: {:struct, Money}, required: true],
+    destination: [type: :any, required: true],
+    description: [type: {:or, [:string, nil]}, default: nil],
+    metadata: [type: {:or, [{:map, :any, :any}, nil]}, default: nil],
+    source_transaction: [type: {:or, [:string, nil]}, default: nil]
+  ]
+
+  @doc """
+  Creates a Stripe Connect **destination charge** (D5-03, CONN-04).
+
+  A destination charge is a single platform-scoped charge whose
+  `transfer_data.destination` points at a connected account. Stripe
+  handles the platform-to-connected-account settlement on your behalf;
+  you do not need to issue a separate `Transfer`. An optional
+  `:application_fee_amount` (pre-computed via
+  `Accrue.Connect.platform_fee/2`) is forwarded to Stripe verbatim.
+
+  **This call is always PLATFORM-scoped.** The `Stripe-Account` header
+  is explicitly unset regardless of any `with_account/2` scope the
+  caller may be inside — Pitfall 2 would otherwise cause Stripe to 400.
+
+  ## Required parameters
+
+    * `:amount` — `%Accrue.Money{}` gross charge amount
+    * `:destination` — `%Accrue.Connect.Account{}` struct or
+      `"acct_..."` binary
+    * `:customer` — `%Accrue.Billing.Customer{}` struct
+
+  ## Optional parameters
+
+    * `:application_fee_amount` — `%Accrue.Money{}` platform fee.
+      Compute via `Accrue.Connect.platform_fee/2` and pass through —
+      fees are caller-injected per D5-04 (never auto-applied).
+    * `:description`, `:metadata`, `:statement_descriptor`
+    * `:payment_method` — processor payment method id
+
+  Returns `{:ok, %Accrue.Billing.Charge{}}` on success. The local
+  charge row is persisted and bundled with the resolved destination
+  account via the charge's `data` jsonb field.
+
+  ## Examples
+
+      {:ok, fee} = Accrue.Connect.platform_fee(Accrue.Money.new(10_000, :usd))
+
+      {:ok, %Accrue.Billing.Charge{} = charge} =
+        Accrue.Connect.destination_charge(
+          %{
+            amount: Accrue.Money.new(10_000, :usd),
+            destination: connected_account,
+            customer: customer
+          },
+          application_fee_amount: fee,
+          payment_method: "pm_..."
+        )
+  """
+  @spec destination_charge(map() | keyword(), keyword()) ::
+          {:ok, Charge.t()} | {:error, term()}
+  def destination_charge(params, opts \\ [])
+
+  def destination_charge(params, opts) when is_list(params),
+    do: destination_charge(Map.new(params), opts)
+
+  def destination_charge(params, opts) when is_map(params) and is_list(opts) do
+    merged = params |> Map.to_list() |> Keyword.merge(opts)
+
+    with {:ok, validated} <- NimbleOptions.validate(merged, @destination_charge_schema),
+         {:ok, acct_id} <- require_account_id(validated[:destination]),
+         {:ok, customer_id, customer_struct} <- resolve_customer(validated[:customer]) do
+      %Money{} = gross = validated[:amount]
+      fee = validated[:application_fee_amount]
+
+      stripe_params =
+        %{
+          amount: gross.amount_minor,
+          currency: Atom.to_string(gross.currency),
+          customer: customer_id,
+          transfer_data: %{destination: acct_id}
+        }
+        |> put_if_present(:application_fee_amount, fee_minor(fee))
+        |> put_if_present(:description, validated[:description])
+        |> put_if_present(:metadata, validated[:metadata])
+        |> put_if_present(:statement_descriptor, validated[:statement_descriptor])
+        |> put_if_present(:payment_method, validated[:payment_method])
+        |> Map.put(:confirm, true)
+
+      # Pitfall 2: force platform scope unconditionally.
+      request_opts = Keyword.put([], :stripe_account, nil)
+
+      Accrue.Telemetry.span(
+        [:accrue, :connect, :destination_charge],
+        %{destination: acct_id, amount_minor: gross.amount_minor, currency: gross.currency},
+        fn ->
+          case Processor.__impl__().create_charge(stripe_params, request_opts) do
+            {:ok, stripe_ch} ->
+              with {:ok, charge_row} <- persist_charge(stripe_ch, customer_struct, gross),
+                   _ = record_connect_event("connect.destination_charge", charge_row, acct_id) do
+                {:ok, charge_row}
+              end
+
+            {:error, _} = err ->
+              err
+          end
+        end
+      )
+    end
+  end
+
+  @doc "Bang variant of `destination_charge/2`. Raises on failure."
+  @spec destination_charge!(map() | keyword(), keyword()) :: Charge.t()
+  def destination_charge!(params, opts \\ []) do
+    case destination_charge(params, opts) do
+      {:ok, charge} -> charge
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "Accrue.Connect.destination_charge/2 failed: #{inspect(other)}"
+    end
+  end
+
+  @doc """
+  Creates a **separate charge and transfer** flow (D5-03, CONN-05).
+
+  Two distinct API calls:
+
+    1. `Processor.create_charge/2` on the PLATFORM (no `Stripe-Account`
+       header, no `transfer_data`). Charges the customer against the
+       platform balance.
+    2. `Processor.create_transfer/2` to the connected account,
+       `source_transaction` linked to the charge above, moving a
+       caller-specified amount from the platform balance to the
+       connected-account balance.
+
+  Use this flow when the platform needs explicit control over the
+  transfer step — e.g. delayed transfers, split destinations, or
+  transfers that are not a fixed percentage of the gross.
+
+  Returns `{:ok, %{charge: %Charge{}, transfer: map()}}` on success.
+
+  If the transfer step fails after the charge succeeded, returns
+  `{:error, {:transfer_failed, %Charge{}, error}}` so callers can
+  reconcile — the charge row is persisted but no transfer exists.
+
+  ## Required parameters
+
+    * `:amount` — `%Money{}` gross charge amount
+    * `:customer` — `%Accrue.Billing.Customer{}` struct
+    * `:destination` — connected account
+    * `:transfer_amount` — `%Money{}` amount to forward (platform keeps
+      the difference as its fee; Accrue does NOT compute this for you —
+      D5-04 caller-inject semantics)
+  """
+  @spec separate_charge_and_transfer(map() | keyword(), keyword()) ::
+          {:ok, %{charge: Charge.t(), transfer: map()}}
+          | {:error, term()}
+  def separate_charge_and_transfer(params, opts \\ [])
+
+  def separate_charge_and_transfer(params, opts) when is_list(params),
+    do: separate_charge_and_transfer(Map.new(params), opts)
+
+  def separate_charge_and_transfer(params, opts) when is_map(params) and is_list(opts) do
+    merged = params |> Map.to_list() |> Keyword.merge(opts)
+
+    with {:ok, validated} <- NimbleOptions.validate(merged, @separate_charge_schema),
+         {:ok, acct_id} <- require_account_id(validated[:destination]),
+         {:ok, customer_id, customer_struct} <- resolve_customer(validated[:customer]) do
+      %Money{} = gross = validated[:amount]
+      %Money{} = xfer = validated[:transfer_amount]
+
+      charge_params =
+        %{
+          amount: gross.amount_minor,
+          currency: Atom.to_string(gross.currency),
+          customer: customer_id,
+          confirm: true
+        }
+        |> put_if_present(:description, validated[:description])
+        |> put_if_present(:metadata, validated[:metadata])
+        |> put_if_present(:payment_method, validated[:payment_method])
+
+      platform_opts = [stripe_account: nil]
+
+      Accrue.Telemetry.span(
+        [:accrue, :connect, :separate_charge_and_transfer],
+        %{destination: acct_id, amount_minor: gross.amount_minor, transfer_minor: xfer.amount_minor},
+        fn ->
+          with {:ok, stripe_ch} <- Processor.__impl__().create_charge(charge_params, platform_opts),
+               {:ok, charge_row} <- persist_charge(stripe_ch, customer_struct, gross) do
+            transfer_params = %{
+              amount: xfer.amount_minor,
+              currency: Atom.to_string(xfer.currency),
+              destination: acct_id,
+              source_transaction: charge_row.processor_id
+            }
+
+            case Processor.__impl__().create_transfer(transfer_params, platform_opts) do
+              {:ok, transfer} ->
+                _ = record_connect_event("connect.separate_charge_transfer", charge_row, acct_id)
+                {:ok, %{charge: charge_row, transfer: transfer}}
+
+              {:error, err} ->
+                {:error, {:transfer_failed, charge_row, err}}
+            end
+          end
+        end
+      )
+    end
+  end
+
+  @doc "Bang variant of `separate_charge_and_transfer/2`. Raises on failure."
+  @spec separate_charge_and_transfer!(map() | keyword(), keyword()) ::
+          %{charge: Charge.t(), transfer: map()}
+  def separate_charge_and_transfer!(params, opts \\ []) do
+    case separate_charge_and_transfer(params, opts) do
+      {:ok, result} ->
+        result
+
+      {:error, err} when is_exception(err) ->
+        raise err
+
+      {:error, other} ->
+        raise "Accrue.Connect.separate_charge_and_transfer/2 failed: #{inspect(other)}"
+    end
+  end
+
+  @doc """
+  Creates a standalone **Transfer** from the platform balance to a
+  connected account (D5-03, CONN-05).
+
+  This is the bare Transfers API — a thin wrapper over
+  `Processor.create_transfer/2`. Use when you need to manually move
+  funds outside a charge flow (e.g. revenue share payouts from an
+  accumulated platform balance).
+
+  Phase 5 does NOT ship a dedicated `accrue_connect_transfers` schema
+  (D5-05 events-ledger-only). Each successful call appends a
+  `connect.transfer` row to `accrue_events` via `Accrue.Events.record/1`.
+
+  Returns `{:ok, map()}` (the bare processor response).
+
+  ## Required parameters
+
+    * `:amount` — `%Money{}`
+    * `:destination` — connected account
+  """
+  @spec transfer(map() | keyword(), keyword()) :: {:ok, map()} | {:error, term()}
+  def transfer(params, opts \\ [])
+
+  def transfer(params, opts) when is_list(params), do: transfer(Map.new(params), opts)
+
+  def transfer(params, opts) when is_map(params) and is_list(opts) do
+    merged = params |> Map.to_list() |> Keyword.merge(opts)
+
+    with {:ok, validated} <- NimbleOptions.validate(merged, @transfer_schema),
+         {:ok, acct_id} <- require_account_id(validated[:destination]) do
+      %Money{} = amount = validated[:amount]
+
+      stripe_params =
+        %{
+          amount: amount.amount_minor,
+          currency: Atom.to_string(amount.currency),
+          destination: acct_id
+        }
+        |> put_if_present(:description, validated[:description])
+        |> put_if_present(:metadata, validated[:metadata])
+        |> put_if_present(:source_transaction, validated[:source_transaction])
+
+      platform_opts = [stripe_account: nil]
+
+      Accrue.Telemetry.span(
+        [:accrue, :connect, :transfer],
+        %{destination: acct_id, amount_minor: amount.amount_minor, currency: amount.currency},
+        fn ->
+          case Processor.__impl__().create_transfer(stripe_params, platform_opts) do
+            {:ok, transfer} ->
+              _ =
+                Accrue.Events.record(%{
+                  type: "connect.transfer",
+                  subject_type: "Accrue.Connect.Transfer",
+                  subject_id: transfer[:id] || transfer["id"] || acct_id,
+                  data: %{
+                    "destination" => acct_id,
+                    "amount_minor" => amount.amount_minor,
+                    "currency" => Atom.to_string(amount.currency)
+                  }
+                })
+
+              {:ok, transfer}
+
+            {:error, _} = err ->
+              err
+          end
+        end
+      )
+    end
+  end
+
+  @doc "Bang variant of `transfer/2`. Raises on failure."
+  @spec transfer!(map() | keyword(), keyword()) :: map()
+  def transfer!(params, opts \\ []) do
+    case transfer(params, opts) do
+      {:ok, t} -> t
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "Accrue.Connect.transfer/2 failed: #{inspect(other)}"
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Internals — Plan 05-05 charges / transfers
+  # ---------------------------------------------------------------------------
+
+  defp resolve_customer(%Accrue.Billing.Customer{processor_id: pid} = c)
+       when is_binary(pid),
+       do: {:ok, pid, c}
+
+  defp resolve_customer(id) when is_binary(id), do: {:ok, id, nil}
+
+  defp resolve_customer(other) do
+    {:error,
+     %Accrue.ConfigError{
+       key: :customer,
+       message:
+         "expected %Accrue.Billing.Customer{} or a binary processor_id, got: " <> inspect(other)
+     }}
+  end
+
+  defp fee_minor(nil), do: nil
+  defp fee_minor(%Money{amount_minor: m}), do: m
+
+  defp put_if_present(map, _key, nil), do: map
+  defp put_if_present(map, key, value), do: Map.put(map, key, value)
+
+  defp persist_charge(stripe_ch, nil, %Money{} = _amount) do
+    # Caller passed a bare customer id string; we cannot persist a local
+    # row without a %Customer{} (the FK is on customer_id). Return the
+    # raw stripe shape wrapped as an error so the caller notices.
+    {:error,
+     %Accrue.ConfigError{
+       key: :customer,
+       message:
+         "Accrue.Connect charge helpers require a %Accrue.Billing.Customer{} struct " <>
+           "to persist the local projection (got raw id; stripe_charge=#{inspect(stripe_ch[:id] || stripe_ch["id"])})"
+     }}
+  end
+
+  defp persist_charge(stripe_ch, %Accrue.Billing.Customer{} = customer, %Money{} = amount) do
+    bt = get_field(stripe_ch, :balance_transaction) || %{}
+    fee_minor = get_field(bt, :fee)
+    fees_settled_at = if is_integer(fee_minor), do: Accrue.Clock.utc_now(), else: nil
+
+    status =
+      case get_field(stripe_ch, :status) do
+        s when is_atom(s) and not is_nil(s) -> Atom.to_string(s)
+        s when is_binary(s) -> s
+        _ -> nil
+      end
+
+    attrs = %{
+      customer_id: customer.id,
+      processor: processor_name(),
+      processor_id: get_field(stripe_ch, :id),
+      amount_cents: amount.amount_minor,
+      currency: Atom.to_string(amount.currency),
+      status: status,
+      stripe_fee_amount_minor: fee_minor,
+      stripe_fee_currency: Atom.to_string(amount.currency),
+      fees_settled_at: fees_settled_at,
+      data: stringify_charge(stripe_ch),
+      metadata: get_field(stripe_ch, :metadata) || %{}
+    }
+
+    %Charge{}
+    |> Charge.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp record_connect_event(type, %Charge{} = charge, destination) do
+    Accrue.Events.record(%{
+      type: type,
+      subject_type: "Accrue.Billing.Charge",
+      subject_id: charge.id,
+      data: %{
+        "charge_id" => charge.id,
+        "processor_id" => charge.processor_id,
+        "destination" => destination
+      }
+    })
+  end
+
+  defp processor_name do
+    case Processor.__impl__() do
+      Accrue.Processor.Fake -> "fake"
+      Accrue.Processor.Stripe -> "stripe"
+      other -> other |> Module.split() |> List.last() |> String.downcase()
+    end
+  end
+
+  defp get_field(%{} = m, key) when is_atom(key) do
+    Map.get(m, key) || Map.get(m, Atom.to_string(key))
+  end
+
+  defp get_field(_, _), do: nil
+
+  defp stringify_charge(value) when is_map(value) and not is_struct(value) do
+    for {k, v} <- value, into: %{} do
+      key = if is_atom(k), do: Atom.to_string(k), else: k
+      {key, stringify_charge(v)}
+    end
+  end
+
+  defp stringify_charge(value) when is_list(value), do: Enum.map(value, &stringify_charge/1)
+  defp stringify_charge(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+
+  defp stringify_charge(value) when is_atom(value) and not is_nil(value) and not is_boolean(value),
+    do: Atom.to_string(value)
+
+  defp stringify_charge(value), do: value
 
   # ---------------------------------------------------------------------------
   # Internals
