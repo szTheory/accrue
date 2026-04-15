@@ -29,29 +29,22 @@ defmodule Accrue.Webhook.Pruner do
 
   use Oban.Worker, queue: :accrue_maintenance
 
-  alias Accrue.Webhook.WebhookEvent
-
-  import Ecto.Query
-
   @impl Oban.Worker
   def perform(_job) do
-    repo = Accrue.Repo.repo()
     succeeded_days = Accrue.Config.succeeded_retention_days()
     dead_days = Accrue.Config.dead_retention_days()
 
-    unless succeeded_days == :infinity do
-      cutoff = DateTime.utc_now() |> DateTime.add(-succeeded_days * 86_400, :second)
+    {:ok, dead_deleted} = Accrue.Webhooks.DLQ.prune(dead_days)
+    {:ok, succeeded_deleted} = Accrue.Webhooks.DLQ.prune_succeeded(succeeded_days)
 
-      from(w in WebhookEvent, where: w.status == :succeeded and w.inserted_at < ^cutoff)
-      |> repo.delete_all()
-    end
-
-    unless dead_days == :infinity do
-      cutoff = DateTime.utc_now() |> DateTime.add(-dead_days * 86_400, :second)
-
-      from(w in WebhookEvent, where: w.status == :dead and w.inserted_at < ^cutoff)
-      |> repo.delete_all()
-    end
+    :telemetry.execute(
+      [:accrue, :ops, :webhook_dlq, :prune],
+      %{dead_deleted: dead_deleted, succeeded_deleted: succeeded_deleted},
+      %{
+        dead_retention_days: dead_days,
+        succeeded_retention_days: succeeded_days
+      }
+    )
 
     :ok
   end
