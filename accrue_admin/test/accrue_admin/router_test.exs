@@ -18,7 +18,11 @@ defmodule AccrueAdmin.RouterTest do
     assert "/billing/assets/js-#{AccrueAdmin.Assets.js_hash()}" in paths
     assert "/billing/assets/brand-#{AccrueAdmin.Assets.brand_hash()}" in paths
     assert "/billing" in paths
-    assert "/billing/dev/live" in paths
+    assert "/billing/dev/clock" in paths
+    assert "/billing/dev/email-preview" in paths
+    assert "/billing/dev/webhook-fixtures" in paths
+    assert "/billing/dev/components" in paths
+    assert "/billing/dev/fake-inspect" in paths
   end
 
   test "session callback only forwards explicit host session keys" do
@@ -47,7 +51,7 @@ defmodule AccrueAdmin.RouterTest do
 
   test "prod-like compilation omits dev routes" do
     prod_paths = Enum.map(ProdLikeRouter.__routes__(), & &1.path)
-    refute "/ops/dev/live" in prod_paths
+    refute "/ops/dev/clock" in prod_paths
     assert "/ops" in prod_paths
   end
 

@@ -73,7 +73,7 @@ defmodule AccrueAdmin.PageLive do
             Matching records will appear here as customers subscribe, invoices are issued,
             and webhooks arrive. Clear filters or come back after the next billing event.
           </p>
-          <a href={@admin_mount_path <> "/dev/live"} class="ax-link">Review webhook failures</a>
+          <a href={@admin_mount_path <> "/webhooks"} class="ax-link">Review webhook failures</a>
         </section>
       </section>
     </AppShell.app_shell>

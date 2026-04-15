@@ -28,8 +28,32 @@ defmodule AccrueAdmin.Components.AppShell do
           <%= render_slot(@inner_block) %>
         </main>
       </div>
+
+      <.dev_toolbar current_path={@current_path} mount_path={@mount_path} />
     </div>
     """
+  end
+
+  if Mix.env() != :prod do
+    attr :current_path, :string, required: true
+    attr :mount_path, :string, required: true
+
+    defp dev_toolbar(assigns) do
+      ~H"""
+      <AccrueAdmin.Components.DevToolbar.dev_toolbar
+        :if={AccrueAdmin.Components.DevToolbar.visible?()}
+        current_path={@current_path}
+        mount_path={@mount_path}
+      />
+      """
+    end
+  else
+    attr :current_path, :string, required: true
+    attr :mount_path, :string, required: true
+
+    defp dev_toolbar(assigns) do
+      ~H""
+    end
   end
 
   defp nav_items(mount_path) do

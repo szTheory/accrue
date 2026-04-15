@@ -72,7 +72,11 @@ defmodule AccrueAdmin.Router do
           live("/webhooks/:id", AccrueAdmin.Live.WebhookLive, :show)
 
           if dev_routes? do
-            live("/dev/live", AccrueAdmin.PageLive, :dev)
+            live("/dev/clock", AccrueAdmin.Dev.ClockLive, :index)
+            live("/dev/email-preview", AccrueAdmin.Dev.EmailPreviewLive, :index)
+            live("/dev/webhook-fixtures", AccrueAdmin.Dev.WebhookFixtureLive, :index)
+            live("/dev/components", AccrueAdmin.Dev.ComponentKitchenLive, :index)
+            live("/dev/fake-inspect", AccrueAdmin.Dev.FakeInspectLive, :index)
           end
         end
       end
