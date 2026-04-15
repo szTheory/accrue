@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 06-06-PLAN.md — invoice emails + PDF facade + fixtures
-last_updated: "2026-04-15T12:02:12.086Z"
+status: verifying
+stopped_at: Completed 06-07-PLAN.md — Phase 6 ready for verification
+last_updated: "2026-04-15T12:23:21.492Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 42
-  completed_plans: 41
-  percent: 98
+  completed_plans: 42
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 Phase: 06 (email-pdf) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-15
 
 Progress: [░░░░░░░░░░] 0%
@@ -81,6 +81,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-email-pdf P04 | 10m | 3 tasks | 11 files |
 | Phase 06-email-pdf P05 | 8m | 3 tasks | 33 files |
 | Phase 06-email-pdf P06 | ~8m | 3 tasks | 26 files |
+| Phase 06-email-pdf P07 | 30m | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -182,6 +183,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 06-email-pdf]: Phase 6 P06: RefundIssued + CouponApplied skip shared invoice components (invoice_header/line_items/totals) deliberately — refunds and coupons are distinct flows; embedding would force misleading invoice-shaped render. Only invoice_finalized + invoice_paid embed the full component stack
 - [Phase 06-email-pdf]: Phase 6 P06: InvoicePaymentFailed CTA routes to ctx.invoice.hosted_invoice_url (Stripe-hosted pay page) not host-supplied update_pm_url — MAIL-09 requires a payable surface, not a payment-method edit surface
 - [Phase 06-email-pdf]: Phase 6 P06: Accrue.Emails.Fixtures lives in lib/ (not test/support/) with static 'April 15, 2026' formatted_issued_at — zero DateTime.utc_now or Repo calls, deterministic output enforceable by test
+- [Phase 06-email-pdf]: Webhook reducers dispatch mailer AFTER Repo.transact returns — rollbacks never leak ghost emails
+- [Phase 06-email-pdf]: mix accrue.mail.preview uses Mix.Task.run(loadpaths) not app.start — fixtures are pure data, no repo needed
 
 ### Pending Todos
 
@@ -202,6 +205,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T12:01:56.971Z
-Stopped at: Completed 06-06-PLAN.md — invoice emails + PDF facade + fixtures
+Last session: 2026-04-15T12:23:21.489Z
+Stopped at: Completed 06-07-PLAN.md — Phase 6 ready for verification
 Resume file: None

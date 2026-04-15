@@ -144,7 +144,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **PDF-05**: Invoice PDF template shared HEEx with email HTML body
 - [x] **PDF-06**: Branded PDF with logo, colors, tagline inheriting from Mailer branding config
 - [x] **PDF-07**: PDF download route helper
-- [ ] **PDF-08**: PDF attachment on email helpers
+- [x] **PDF-08**: PDF attachment on email helpers
 - [x] **PDF-09**: Async PDF render via Oban with cache
 - [x] **PDF-10**: Timezone and locale threading through render context
 - [x] **PDF-11**: Gotenberg sidecar documented as custom adapter path
@@ -405,7 +405,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | PDF-05 | Phase 6 | Complete |
 | PDF-06 | Phase 6 | Complete |
 | PDF-07 | Phase 6 | Complete |
-| PDF-08 | Phase 6 | Pending |
+| PDF-08 | Phase 6 | Complete |
 | PDF-09 | Phase 6 | Complete |
 | PDF-10 | Phase 6 | Complete |
 | PDF-11 | Phase 6 | Complete |
