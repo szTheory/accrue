@@ -319,6 +319,56 @@ defmodule Accrue.Test.StripeFixtures do
     deep_merge(base, overrides)
   end
 
+  @spec checkout_session_completed(map()) :: map()
+  def checkout_session_completed(overrides \\ %{}) do
+    now = DateTime.utc_now()
+
+    base = %{
+      "id" => "cs_test_" <> rand(),
+      "object" => "checkout.session",
+      "mode" => "subscription",
+      "ui_mode" => "hosted",
+      "status" => "complete",
+      "payment_status" => "paid",
+      "customer" => "cus_test_" <> rand(),
+      "subscription" => "sub_test_" <> rand(),
+      "payment_intent" => nil,
+      "amount_total" => 1000,
+      "currency" => "usd",
+      "url" => "https://checkout.stripe.com/c/pay/cs_test_" <> rand(),
+      "client_secret" => nil,
+      "created" => DateTime.to_unix(now),
+      "expires_at" => DateTime.to_unix(DateTime.add(now, 24 * 3600, :second)),
+      "metadata" => %{}
+    }
+
+    deep_merge(base, overrides)
+  end
+
+  @spec checkout_session_expired(map()) :: map()
+  def checkout_session_expired(overrides \\ %{}) do
+    checkout_session_completed(%{"status" => "expired", "payment_status" => "unpaid"})
+    |> deep_merge(overrides)
+  end
+
+  @spec billing_portal_session(map()) :: map()
+  def billing_portal_session(overrides \\ %{}) do
+    base = %{
+      "id" => "bps_test_" <> rand(),
+      "object" => "billing_portal.session",
+      "customer" => "cus_test_" <> rand(),
+      "url" => "https://billing.stripe.com/p/session/test_" <> rand(),
+      "return_url" => "https://example.com/account",
+      "configuration" => nil,
+      "flow" => nil,
+      "locale" => nil,
+      "livemode" => false,
+      "created" => DateTime.to_unix(DateTime.utc_now())
+    }
+
+    deep_merge(base, overrides)
+  end
+
   @spec invoice_with_discounts(map()) :: map()
   def invoice_with_discounts(overrides \\ %{}) do
     discount_line = %{
