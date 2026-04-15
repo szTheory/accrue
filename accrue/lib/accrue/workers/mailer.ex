@@ -66,8 +66,7 @@ defmodule Accrue.Workers.Mailer do
       Swoosh.Email.new()
       |> Swoosh.Email.to(atomized[:to] || enriched["to"])
       |> Swoosh.Email.from(
-        {Application.get_env(:accrue, :from_name, "Accrue"),
-         Application.get_env(:accrue, :from_email, "noreply@example.com")}
+        {Accrue.Config.branding(:from_name), Accrue.Config.branding(:from_email)}
       )
       |> Swoosh.Email.subject(template_mod.subject(atomized))
       |> Swoosh.Email.html_body(template_mod.render(atomized))
