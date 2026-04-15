@@ -34,10 +34,11 @@ defmodule Accrue.Webhook.Plug do
   @impl true
   def call(conn, opts) do
     processor = Keyword.fetch!(opts, :processor)
+    endpoint = Keyword.get(opts, :endpoint)
 
-    :telemetry.span([:accrue, :webhook, :receive], %{processor: processor}, fn ->
-      result = do_call(conn, processor)
-      {result, %{processor: processor}}
+    :telemetry.span([:accrue, :webhook, :receive], %{processor: processor, endpoint: endpoint}, fn ->
+      result = do_call(conn, processor, endpoint)
+      {result, %{processor: processor, endpoint: endpoint}}
     end)
   rescue
     e in Accrue.SignatureError ->
@@ -48,7 +49,7 @@ defmodule Accrue.Webhook.Plug do
       |> halt()
   end
 
-  defp do_call(conn, processor) do
+  defp do_call(conn, processor, endpoint) do
     raw_body = flatten_raw_body(conn)
     sig_header = get_req_header(conn, "stripe-signature") |> List.first()
 
@@ -56,12 +57,40 @@ defmodule Accrue.Webhook.Plug do
       raise Accrue.SignatureError, reason: "missing stripe-signature header"
     end
 
-    secrets = Accrue.Config.webhook_signing_secrets(processor)
+    secrets = resolve_secrets!(endpoint, processor)
     stripe_event = Signature.verify!(raw_body, sig_header, secrets)
 
     # Transactional persist + Oban enqueue (D2-24, Plan 04).
     # Event projection happens inside DispatchWorker from the persisted row.
     Accrue.Webhook.Ingest.run(conn, processor, stripe_event, raw_body)
+  end
+
+  # Endpoint-aware secret resolution (WH-13).
+  #
+  # Multi-endpoint mode: when `endpoint:` is passed via the plug init opts,
+  # look up `[:webhook_endpoints, endpoint, :secret]` from `Accrue.Config`.
+  # If the endpoint is missing, raise `Accrue.SignatureError` (rescued to 400)
+  # — fail closed, never bypass verification (T-04-06-01).
+  #
+  # Legacy mode (Phase 2 callers): when no `endpoint:` is set, fall back to
+  # `Accrue.Config.webhook_signing_secrets/1` keyed by processor atom.
+  defp resolve_secrets!(nil, processor), do: Accrue.Config.webhook_signing_secrets(processor)
+
+  defp resolve_secrets!(endpoint, _processor) when is_atom(endpoint) do
+    endpoints = Accrue.Config.webhook_endpoints()
+
+    case Keyword.get(endpoints, endpoint) do
+      nil ->
+        raise Accrue.SignatureError,
+          reason: "no webhook_endpoints config for endpoint #{inspect(endpoint)}"
+
+      cfg when is_list(cfg) ->
+        case Keyword.fetch(cfg, :secret) do
+          {:ok, secret} when is_binary(secret) and secret != "" -> secret
+          {:ok, secrets} when is_list(secrets) and secrets != [] -> secrets
+          _ -> raise Accrue.SignatureError, reason: "no :secret in webhook_endpoints[#{inspect(endpoint)}]"
+        end
+    end
   end
 
   @doc false

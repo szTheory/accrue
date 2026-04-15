@@ -39,9 +39,10 @@ defmodule Accrue.Events do
 
   alias Accrue.Actor
   alias Accrue.Events.Event
+  alias Accrue.Events.UpcasterRegistry
   alias Accrue.Telemetry
 
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
 
   @type attrs :: %{
           optional(:type) => String.t(),
@@ -217,4 +218,149 @@ defmodule Accrue.Events do
   defp reraise_if_immutable(%Postgrex.Error{} = err, stacktrace) do
     reraise err, stacktrace
   end
+
+  # --- Query API (EVT-06 / EVT-10 / Plan 04-06) -------------------------
+
+  @doc """
+  Returns events scoped to a single subject, ordered by `inserted_at`
+  ascending. Each row is routed through the upcaster chain to the
+  current schema version before returning (Pitfall 10).
+
+  ## Options
+
+    * `:limit` — max rows to return (default `1_000`)
+  """
+  @spec timeline_for(String.t(), String.t(), keyword()) :: [Event.t()]
+  def timeline_for(subject_type, subject_id, opts \\ [])
+      when is_binary(subject_type) and is_binary(subject_id) and is_list(opts) do
+    limit = Keyword.get(opts, :limit, 1_000)
+
+    from(e in Event,
+      where: e.subject_type == ^subject_type and e.subject_id == ^subject_id,
+      order_by: [asc: e.inserted_at, asc: e.id],
+      limit: ^limit
+    )
+    |> Accrue.Repo.all()
+    |> Enum.map(&upcast_to_current/1)
+  end
+
+  @doc """
+  Reconstructs the projected `state` map for a subject as of a past
+  timestamp by folding all events with `inserted_at <= ts`.
+
+  Returns a map with `:state`, `:event_count`, and `:last_event_at`.
+
+  Each row is routed through the upcaster chain BEFORE folding (Pitfall 10).
+  """
+  @spec state_as_of(String.t(), String.t(), DateTime.t()) :: %{
+          state: map(),
+          event_count: non_neg_integer(),
+          last_event_at: DateTime.t() | nil
+        }
+  def state_as_of(subject_type, subject_id, %DateTime{} = ts)
+      when is_binary(subject_type) and is_binary(subject_id) do
+    events =
+      from(e in Event,
+        where:
+          e.subject_type == ^subject_type and e.subject_id == ^subject_id and
+            e.inserted_at <= ^ts,
+        order_by: [asc: e.inserted_at, asc: e.id]
+      )
+      |> Accrue.Repo.all()
+      |> Enum.map(&upcast_to_current/1)
+
+    {state, last_at} =
+      Enum.reduce(events, {%{}, nil}, fn e, {acc, _} ->
+        {Map.merge(acc, e.data || %{}), e.inserted_at}
+      end)
+
+    %{state: state, event_count: length(events), last_event_at: last_at}
+  end
+
+  @doc """
+  Buckets events by date_trunc'd `inserted_at` for the given filter.
+
+  Returns a list of `{bucket_datetime, count}` tuples ordered by bucket.
+
+  ## Filters
+
+    * `:type` — single string or list of strings
+    * `:since` / `:until` — DateTime bounds
+    * `:subject_type` — string
+
+  ## Bucket sizes
+
+    * `:day`, `:week`, `:month`
+  """
+  @spec bucket_by(keyword(), :day | :week | :month) :: [{DateTime.t(), non_neg_integer()}]
+  def bucket_by(filter, bucket) when is_list(filter) and bucket in [:day, :week, :month] do
+    base = bucket_query(filter)
+
+    case bucket do
+      :day ->
+        from(e in base,
+          group_by: fragment("date_trunc('day', ?)", e.inserted_at),
+          order_by: fragment("date_trunc('day', ?)", e.inserted_at),
+          select: {fragment("date_trunc('day', ?)", e.inserted_at), count(e.id)}
+        )
+
+      :week ->
+        from(e in base,
+          group_by: fragment("date_trunc('week', ?)", e.inserted_at),
+          order_by: fragment("date_trunc('week', ?)", e.inserted_at),
+          select: {fragment("date_trunc('week', ?)", e.inserted_at), count(e.id)}
+        )
+
+      :month ->
+        from(e in base,
+          group_by: fragment("date_trunc('month', ?)", e.inserted_at),
+          order_by: fragment("date_trunc('month', ?)", e.inserted_at),
+          select: {fragment("date_trunc('month', ?)", e.inserted_at), count(e.id)}
+        )
+    end
+    |> Accrue.Repo.all()
+  end
+
+  defp bucket_query(filter) do
+    Enum.reduce(filter, from(e in Event), fn
+      {:type, types}, q when is_list(types) -> where(q, [e], e.type in ^types)
+      {:type, t}, q when is_binary(t) -> where(q, [e], e.type == ^t)
+      {:subject_type, st}, q when is_binary(st) -> where(q, [e], e.subject_type == ^st)
+      {:since, %DateTime{} = ts}, q -> where(q, [e], e.inserted_at >= ^ts)
+      {:until, %DateTime{} = ts}, q -> where(q, [e], e.inserted_at <= ^ts)
+    end)
+  end
+
+  defp upcast_to_current(%Event{} = event) do
+    current = current_schema_version(event.type)
+    from = event.schema_version || 1
+
+    case UpcasterRegistry.chain(event.type, from, current) do
+      {:ok, modules} ->
+        data =
+          Enum.reduce(modules, event.data || %{}, fn mod, acc ->
+            case mod.upcast(acc) do
+              {:ok, upcasted} -> upcasted
+              {:error, reason} -> raise "upcaster #{inspect(mod)} failed: #{inspect(reason)}"
+            end
+          end)
+
+        %{event | data: data, schema_version: current}
+
+      {:error, {:unknown_schema_version, v}} ->
+        :telemetry.execute(
+          [:accrue, :ops, :events_upcast_failed],
+          %{count: 1},
+          %{event_id: event.id, type: event.type, schema_version: v}
+        )
+
+        raise ArgumentError,
+              "unknown schema_version #{inspect(v)} for event type #{inspect(event.type)}"
+    end
+  end
+
+  # Returns the current in-app schema version for an event type. Phase 3
+  # ships everything at version 1; future schemas can return 2+ as their
+  # payloads evolve. Defaults to 1 for unknown types.
+  defp current_schema_version(_type), do: 1
 end
