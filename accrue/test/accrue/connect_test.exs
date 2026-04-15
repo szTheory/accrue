@@ -161,6 +161,138 @@ defmodule Accrue.ConnectTest do
     end
   end
 
+  describe "create_account_link/2 (CONN-02)" do
+    alias Accrue.Connect.AccountLink
+
+    test "rejects missing :return_url with a NimbleOptions error" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      assert {:error, %NimbleOptions.ValidationError{}} =
+               Connect.create_account_link(acct, refresh_url: "https://ex.test/refresh")
+    end
+
+    test "rejects missing :refresh_url with a NimbleOptions error" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      assert {:error, %NimbleOptions.ValidationError{}} =
+               Connect.create_account_link(acct, return_url: "https://ex.test/return")
+    end
+
+    test "rejects a bogus :type value" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      assert {:error, %NimbleOptions.ValidationError{}} =
+               Connect.create_account_link(acct,
+                 return_url: "https://ex.test/return",
+                 refresh_url: "https://ex.test/refresh",
+                 type: "not_a_real_type"
+               )
+    end
+
+    test "returns an %AccountLink{} struct with expires_at populated" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      assert {:ok, %AccountLink{} = link} =
+               Connect.create_account_link(acct,
+                 return_url: "https://ex.test/return",
+                 refresh_url: "https://ex.test/refresh"
+               )
+
+      assert is_binary(link.url)
+      assert %DateTime{} = link.expires_at
+      assert %DateTime{} = link.created
+      assert link.object == "account_link"
+    end
+
+    test "accepts a bare stripe_account_id binary as the first arg" do
+      {:ok, acct} = Connect.create_account(%{type: :express})
+
+      assert {:ok, %AccountLink{}} =
+               Connect.create_account_link(acct.stripe_account_id,
+                 return_url: "https://ex.test/return",
+                 refresh_url: "https://ex.test/refresh"
+               )
+    end
+
+    test "Inspect output on the returned struct masks the url" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      {:ok, link} =
+        Connect.create_account_link(acct,
+          return_url: "https://ex.test/return",
+          refresh_url: "https://ex.test/refresh"
+        )
+
+      output = Kernel.inspect(link)
+      assert output =~ "url: \"<redacted>\""
+      refute output =~ link.url
+    end
+
+    test "bang variant raises on failure" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Connect.create_account_link!(acct, [])
+      end
+    end
+  end
+
+  describe "create_login_link/2 (CONN-07)" do
+    alias Accrue.Connect.LoginLink
+
+    test "returns a %LoginLink{} struct for an Express account" do
+      {:ok, acct} = Connect.create_account(%{type: :express})
+
+      assert {:ok, %LoginLink{} = link} = Connect.create_login_link(acct)
+      assert is_binary(link.url)
+      assert %DateTime{} = link.created
+      assert link.object == "login_link"
+    end
+
+    test "rejects a Standard account with an APIError" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      assert {:error, %Accrue.APIError{code: "invalid_request_error"} = err} =
+               Connect.create_login_link(acct)
+
+      assert err.message =~ "Express"
+      assert err.message =~ "standard"
+    end
+
+    test "rejects a Custom account with an APIError" do
+      {:ok, acct} = Connect.create_account(%{type: :custom})
+
+      assert {:error, %Accrue.APIError{code: "invalid_request_error"} = err} =
+               Connect.create_login_link(acct)
+
+      assert err.message =~ "Express"
+      assert err.message =~ "custom"
+    end
+
+    test "accepts a bare stripe_account_id binary as the first arg" do
+      {:ok, acct} = Connect.create_account(%{type: :express})
+
+      assert {:ok, %LoginLink{}} = Connect.create_login_link(acct.stripe_account_id)
+    end
+
+    test "Inspect output on the returned struct masks the url" do
+      {:ok, acct} = Connect.create_account(%{type: :express})
+      {:ok, link} = Connect.create_login_link(acct)
+
+      output = Kernel.inspect(link)
+      assert output =~ "url: \"<redacted>\""
+      refute output =~ link.url
+    end
+
+    test "bang variant raises on non-Express account" do
+      {:ok, acct} = Connect.create_account(%{type: :standard})
+
+      assert_raise Accrue.APIError, fn ->
+        Connect.create_login_link!(acct)
+      end
+    end
+  end
+
   describe "CONN-11 dual-scope Fake keyspace" do
     test "same create_customer call lands in distinct scopes depending on with_account" do
       # Platform-scope call

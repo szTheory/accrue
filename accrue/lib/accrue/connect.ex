@@ -22,13 +22,20 @@ defmodule Accrue.Connect do
   requirement).
   """
 
-  alias Accrue.Connect.{Account, Projection}
+  alias Accrue.Connect.{Account, AccountLink, LoginLink, Projection}
   alias Accrue.Processor
   alias Accrue.Repo
 
   import Ecto.Query, only: [from: 2]
 
   @pdict_key :accrue_connected_account_id
+
+  @account_link_schema [
+    return_url: [type: :string, required: true],
+    refresh_url: [type: :string, required: true],
+    type: [type: {:in, ["account_onboarding", "account_update"]}, default: "account_onboarding"],
+    collect: [type: {:in, ["currently_due", "eventually_due"]}, default: "currently_due"]
+  ]
 
   @create_schema [
     type: [
@@ -292,6 +299,129 @@ defmodule Accrue.Connect do
       {:ok, acct} -> acct
       {:error, err} when is_exception(err) -> raise err
       {:error, other} -> raise "Accrue.Connect.fetch_account/2 failed: #{inspect(other)}"
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Account Link + Login Link (D5-06, CONN-02, CONN-07)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Creates a Stripe Connect Account Link for hosted onboarding or
+  account-update flows.
+
+  Accepts either an `%Account{}` struct, a bare `"acct_..."` binary,
+  or a map with an `:account` key. `:return_url` and `:refresh_url`
+  are required per `@account_link_schema`.
+
+  Returns `{:ok, %Accrue.Connect.AccountLink{}}` on success. The
+  returned struct masks its `:url` field in `Inspect` output — treat
+  the URL as a short-lived bearer credential and redirect the user
+  immediately.
+
+  ## Options
+
+  - `:return_url` (required) — where Stripe redirects on completion
+  - `:refresh_url` (required) — where Stripe redirects if the link expires
+  - `:type` — `"account_onboarding"` (default) or `"account_update"`
+  - `:collect` — `"currently_due"` (default) or `"eventually_due"`
+  """
+  @spec create_account_link(Account.t() | String.t(), keyword()) ::
+          {:ok, AccountLink.t()} | {:error, term()}
+  def create_account_link(account, opts \\ []) when is_list(opts) do
+    with {:ok, acct_id} <- require_account_id(account),
+         {:ok, validated} <- NimbleOptions.validate(opts, @account_link_schema) do
+      params = %{
+        account: acct_id,
+        return_url: validated[:return_url],
+        refresh_url: validated[:refresh_url],
+        type: validated[:type],
+        collect: validated[:collect]
+      }
+
+      case Processor.__impl__().create_account_link(params, []) do
+        {:ok, stripe} -> {:ok, AccountLink.from_stripe(stripe)}
+        {:error, err} -> {:error, err}
+      end
+    end
+  end
+
+  @doc "Bang variant of `create_account_link/2`. Raises on failure."
+  @spec create_account_link!(Account.t() | String.t(), keyword()) :: AccountLink.t()
+  def create_account_link!(account, opts \\ []) do
+    case create_account_link(account, opts) do
+      {:ok, link} -> link
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "Accrue.Connect.create_account_link/2 failed: #{inspect(other)}"
+    end
+  end
+
+  @doc """
+  Creates a Stripe Express dashboard Login Link for a connected account.
+
+  **Only Express accounts are supported.** Standard and Custom
+  accounts are rejected locally before reaching the processor to
+  avoid leaking "acct_X is Standard" via a Stripe 400 error payload
+  (T-05-03-02). The local row is consulted first; on a miss the
+  account is retrieved from the processor.
+
+  Returns `{:ok, %Accrue.Connect.LoginLink{}}` on success. The
+  returned struct masks its `:url` field in `Inspect` output — treat
+  the URL as a short-lived bearer credential and redirect the user
+  immediately.
+  """
+  @spec create_login_link(Account.t() | String.t(), keyword()) ::
+          {:ok, LoginLink.t()} | {:error, term()}
+  def create_login_link(account, opts \\ []) when is_list(opts) do
+    with {:ok, acct_id} <- require_account_id(account),
+         {:ok, _row} <- require_express(acct_id) do
+      case Processor.__impl__().create_login_link(acct_id, []) do
+        {:ok, stripe} -> {:ok, LoginLink.from_stripe(stripe)}
+        {:error, err} -> {:error, err}
+      end
+    end
+  end
+
+  @doc "Bang variant of `create_login_link/2`. Raises on failure."
+  @spec create_login_link!(Account.t() | String.t(), keyword()) :: LoginLink.t()
+  def create_login_link!(account, opts \\ []) do
+    case create_login_link(account, opts) do
+      {:ok, link} -> link
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "Accrue.Connect.create_login_link/2 failed: #{inspect(other)}"
+    end
+  end
+
+  defp require_account_id(%Account{stripe_account_id: id}) when is_binary(id), do: {:ok, id}
+  defp require_account_id(id) when is_binary(id), do: {:ok, id}
+
+  defp require_account_id(other) do
+    {:error,
+     %Accrue.ConfigError{
+       key: :account,
+       message:
+         "expected %Accrue.Connect.Account{} or a binary stripe_account_id, got: " <>
+           inspect(other)
+     }}
+  end
+
+  defp require_express(acct_id) when is_binary(acct_id) do
+    case fetch_account(acct_id) do
+      {:ok, %Account{type: "express"} = row} ->
+        {:ok, row}
+
+      {:ok, %Account{type: type}} ->
+        {:error,
+         %Accrue.APIError{
+           code: "invalid_request_error",
+           http_status: 400,
+           message:
+             "Accrue.Connect.create_login_link/2 is only supported for Express " <>
+               "connected accounts; got type=#{inspect(type)} for #{acct_id}"
+         }}
+
+      {:error, _} = err ->
+        err
     end
   end
 

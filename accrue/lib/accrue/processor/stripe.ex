@@ -712,6 +712,68 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
+  # Connect — Account Links + Login Links (Phase 5 Plan 03, D5-06)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_account_link(params, opts) when is_map(params) and is_list(opts) do
+    # Pitfall 2: Account Links are PLATFORM-scoped — the platform
+    # creates them on behalf of a connected account. The Stripe-Account
+    # header MUST NOT be set regardless of the caller's
+    # `Accrue.Connect.with_account/2` scope. `build_platform_client!/1`
+    # bypasses `resolve_stripe_account/1` entirely to guarantee nil.
+    client = build_platform_client!(opts)
+    stripe_opts = stripe_opts_no_idem(opts)
+
+    client
+    |> LatticeStripe.AccountLink.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def create_login_link(acct_id, opts) when is_binary(acct_id) and is_list(opts) do
+    # Pitfall 2: Login Links are also PLATFORM-scoped.
+    client = build_platform_client!(opts)
+    stripe_opts = stripe_opts_no_idem(opts)
+
+    client
+    |> LatticeStripe.LoginLink.create(acct_id, %{}, stripe_opts)
+    |> translate_resource()
+  end
+
+  # Builds a LatticeStripe client with `stripe_account: nil` unconditionally,
+  # bypassing the `resolve_stripe_account/1` precedence chain. Used for
+  # platform-scoped Connect calls (Account Links, Login Links) where any
+  # inherited `Accrue.Connect.with_account/2` scope would cause Stripe to
+  # 400 — the `Stripe-Account` header is forbidden on these endpoints.
+  @spec build_platform_client!(keyword()) :: LatticeStripe.Client.t()
+  defp build_platform_client!(opts) do
+    key =
+      case Application.get_env(:accrue, :stripe_secret_key) do
+        nil ->
+          raise Accrue.ConfigError,
+            key: :stripe_secret_key,
+            message:
+              "Set config :accrue, :stripe_secret_key in runtime.exs before using " <>
+                "Accrue.Processor.Stripe"
+
+        "" ->
+          raise Accrue.ConfigError,
+            key: :stripe_secret_key,
+            message: "config :accrue, :stripe_secret_key is empty; set it in runtime.exs"
+
+        value when is_binary(value) ->
+          value
+      end
+
+    LatticeStripe.Client.new!(
+      api_key: key,
+      api_version: resolve_api_version(opts),
+      stripe_account: nil
+    )
+  end
+
+  # ---------------------------------------------------------------------------
   # fetch/2 — generic refetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
 

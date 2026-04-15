@@ -25,9 +25,9 @@ defmodule Accrue.Connect.AccountLink do
 
   @doc """
   Projects a raw processor response (atom- or string-keyed map, or a
-  `%LatticeStripe.AccountLink{}` struct unwrapped to map form) into a
-  tightly-typed `t()`. Unix integer timestamps are converted to
-  `DateTime` via `DateTime.from_unix!/1`.
+  bare processor struct unwrapped to map form) into a tightly-typed
+  `t()`. Unix integer timestamps are converted to `DateTime` via
+  `DateTime.from_unix!/1`.
   """
   @spec from_stripe(map() | struct()) :: t()
   def from_stripe(%_{} = struct), do: from_stripe(Map.from_struct(struct))
