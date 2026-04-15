@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-04-15T17:02:44.049Z"
+stopped_at: Completed 07-03-PLAN.md
+last_updated: "2026-04-15T17:15:34.301Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 54
-  completed_plans: 44
-  percent: 81
+  completed_plans: 45
+  percent: 83
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 07 (admin-ui-accrue-admin) — EXECUTING
-Plan: 3 of 12
+Plan: 4 of 12
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -85,6 +85,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-email-pdf P07 | 30m | 3 tasks | 15 files |
 | Phase 07-admin-ui-accrue-admin P01 | 8m | 2 tasks | 21 files |
 | Phase 07-admin-ui-accrue-admin P02 | 8m | 1 tasks | 21 files |
+| Phase 07 P03 | 9m | 1 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -194,6 +195,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 07-admin-ui-accrue-admin]: Brand values continue to flow from Accrue.Config.branding/0; the admin package only derives display-safe app name, logo URL, and accent contrast.
 - [Phase 07-admin-ui-accrue-admin]: The shell ships as semantic CSS plus a private Tailwind preset/config pair so later admin components can reuse tokens without depending on host tooling.
 - [Phase 07-admin-ui-accrue-admin]: Theme persistence lives in the accrue_theme cookie with system as the only fallback for invalid client input in both Plug and browser paths.
+- [Phase 07]: Admin list queries return explicit row maps instead of whole schemas so metadata/data blobs do not bleed into list rendering by default.
+- [Phase 07]: The admin package now boots its own sandboxed test repo against accrue migrations so list-query behavior is verified against real schema and index state.
+- [Phase 07]: Cursor tampering fails closed to first-page semantics via HMAC-signed opaque tokens, preserving cursor pagination without offset fallback.
 
 ### Pending Todos
 
@@ -214,6 +218,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T17:02:44.044Z
-Stopped at: Completed 07-02-PLAN.md
+Last session: 2026-04-15T17:15:26.510Z
+Stopped at: Completed 07-03-PLAN.md
 Resume file: None

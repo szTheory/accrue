@@ -157,19 +157,19 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **ADMIN-04**: Brand palette theme (Ink/Slate/Fog/Paper + Moss/Cobalt/Amber); Amber reserved for warning/grace states
 - [ ] **ADMIN-05**: Breadcrumbs + flash notifications
 - [x] **ADMIN-06**: Brandable: logo, accent color, app name via runtime config
-- [ ] **ADMIN-07**: Customer list + search + filter
+- [x] **ADMIN-07**: Customer list + search + filter
 - [ ] **ADMIN-08**: Customer detail page with tabs (subscriptions, invoices, charges, payment methods, events, metadata)
-- [ ] **ADMIN-09**: Subscription list + detail with timeline from events ledger
+- [x] **ADMIN-09**: Subscription list + detail with timeline from events ledger
 - [ ] **ADMIN-10**: Subscription admin actions (cancel, pause/resume, swap plan, comp) with confirmation + audit
-- [ ] **ADMIN-11**: Invoice list + detail (line items, status, PDF preview, download)
+- [x] **ADMIN-11**: Invoice list + detail (line items, status, PDF preview, download)
 - [ ] **ADMIN-12**: Invoice admin actions (void, mark uncollectible, manual pay)
-- [ ] **ADMIN-13**: Charge list + detail with fee breakdown (Stripe fee, platform fee, net)
+- [x] **ADMIN-13**: Charge list + detail with fee breakdown (Stripe fee, platform fee, net)
 - [ ] **ADMIN-14**: Refund admin action with fee-aware UI surfacing `merchant_loss_amount`
-- [ ] **ADMIN-15**: Coupon + PromotionCode management UI
+- [x] **ADMIN-15**: Coupon + PromotionCode management UI
 - [ ] **ADMIN-16**: Webhook event inspector: list, filter by status/type, raw payload viewer, attempt history, signature verification status
 - [ ] **ADMIN-17**: Webhook replay: one-click requeue individual; DLQ bulk requeue
 - [ ] **ADMIN-18**: Activity feed sourced from `accrue_events`
-- [ ] **ADMIN-19**: Connect: connected accounts list + detail + capability inspector
+- [x] **ADMIN-19**: Connect: connected accounts list + detail + capability inspector
 - [ ] **ADMIN-20**: Connect: platform fee configuration UI
 - [ ] **ADMIN-21**: Step-up auth / re-auth prompt for destructive actions (refund, manual cancel)
 - [ ] **ADMIN-22**: Admin action audit logging to `accrue_events` with `actor_type: :admin`
@@ -415,19 +415,19 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-04 | Phase 7 | Complete |
 | ADMIN-05 | Phase 7 | Pending |
 | ADMIN-06 | Phase 7 | Complete |
-| ADMIN-07 | Phase 7 | Pending |
+| ADMIN-07 | Phase 7 | Complete |
 | ADMIN-08 | Phase 7 | Pending |
-| ADMIN-09 | Phase 7 | Pending |
+| ADMIN-09 | Phase 7 | Complete |
 | ADMIN-10 | Phase 7 | Pending |
-| ADMIN-11 | Phase 7 | Pending |
+| ADMIN-11 | Phase 7 | Complete |
 | ADMIN-12 | Phase 7 | Pending |
-| ADMIN-13 | Phase 7 | Pending |
+| ADMIN-13 | Phase 7 | Complete |
 | ADMIN-14 | Phase 7 | Pending |
-| ADMIN-15 | Phase 7 | Pending |
+| ADMIN-15 | Phase 7 | Complete |
 | ADMIN-16 | Phase 7 | Pending |
 | ADMIN-17 | Phase 7 | Pending |
 | ADMIN-18 | Phase 7 | Pending |
-| ADMIN-19 | Phase 7 | Pending |
+| ADMIN-19 | Phase 7 | Complete |
 | ADMIN-20 | Phase 7 | Pending |
 | ADMIN-21 | Phase 7 | Pending |
 | ADMIN-22 | Phase 7 | Pending |
