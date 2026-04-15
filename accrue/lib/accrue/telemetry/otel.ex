@@ -54,6 +54,8 @@ defmodule Accrue.Telemetry.OTel do
   """
   @spec span(event_name(), map(), (-> result)) :: result when result: var
   if Code.ensure_loaded?(OpenTelemetry.Tracer) do
+    require OpenTelemetry.Tracer
+
     def span(event, metadata \\ %{}, fun)
         when is_list(event) and is_map(metadata) and is_function(fun, 0) do
       name = span_name(event)

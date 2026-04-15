@@ -56,9 +56,10 @@ defmodule Accrue.Telemetry do
   def span(event, metadata \\ %{}, fun)
       when is_list(event) and is_map(metadata) and is_function(fun, 0) do
     base_metadata = maybe_put_actor(metadata)
+    otel_event = event_without_span_suffix(event)
 
     :telemetry.span(event, base_metadata, fn ->
-      result = fun.()
+      result = Accrue.Telemetry.OTel.span(otel_event, base_metadata, fn -> fun.() end)
       {result, base_metadata}
     end)
   end
@@ -96,6 +97,13 @@ defmodule Accrue.Telemetry do
     case Accrue.Actor.current() do
       nil -> metadata
       actor -> Map.put_new(metadata, :actor, actor)
+    end
+  end
+
+  defp event_without_span_suffix(event) do
+    case List.last(event) do
+      suffix when suffix in [:start, :stop, :exception] -> Enum.drop(event, -1)
+      _ -> event
     end
   end
 end
