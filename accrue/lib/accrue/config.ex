@@ -32,6 +32,14 @@ defmodule Accrue.Config do
       default: Accrue.Auth.Default,
       doc: "Auth adapter implementing `Accrue.Auth` behaviour."
     ],
+    storage_adapter: [
+      type: :atom,
+      default: Accrue.Storage.Null,
+      doc:
+        "Storage adapter implementing `Accrue.Storage` behaviour. v1.0 ships " <>
+          "`Accrue.Storage.Null` only; hosts supply a custom adapter (e.g., S3) to enable " <>
+          "persisted asset storage. `Accrue.Storage.Filesystem` ships in v1.1 (D6-04)."
+    ],
 
     # --- Stripe (runtime only — NEVER compile_env) -----------------------
     stripe_secret_key: [
