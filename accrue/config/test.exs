@@ -3,6 +3,12 @@ import Config
 # Swoosh test mailbox — enables Swoosh.TestAssertions.assert_email_sent/1 (Plan 05 Task 1).
 config :accrue, Accrue.Mailer.Swoosh, adapter: Swoosh.Adapters.Test
 
+# D6-05: default test-env mailer adapter sidesteps Oban and sends
+# `{:accrue_email_delivered, type, assigns}` to the calling test pid.
+# Tests that need a rendered %Swoosh.Email{} body can override per-test
+# via `Application.put_env/3` back to `Accrue.Mailer.Default`.
+config :accrue, :mailer, Accrue.Mailer.Test
+
 # Accrue.TestRepo — lives in test/support only (never in lib/ — D-10). Plan 03 uses this
 # as the Repo for event-ledger integration tests. Sandbox wiring so parallel tests work.
 config :accrue, Accrue.TestRepo,
