@@ -1,0 +1,49 @@
+name: AccrueAdmin Assets
+
+on:
+  pull_request:
+    paths:
+      - "accrue_admin/assets/**"
+      - "accrue_admin/lib/**/*.ex"
+      - "accrue_admin/lib/**/*.heex"
+      - "accrue_admin/priv/static/**"
+      - "accrue_admin/guides/admin_ui.md"
+      - ".github/workflows/accrue_admin_assets.yml"
+  push:
+    branches: [main]
+    paths:
+      - "accrue_admin/assets/**"
+      - "accrue_admin/lib/**/*.ex"
+      - "accrue_admin/lib/**/*.heex"
+      - "accrue_admin/priv/static/**"
+      - "accrue_admin/guides/admin_ui.md"
+      - ".github/workflows/accrue_admin_assets.yml"
+  workflow_dispatch: {}
+
+jobs:
+  asset-freshness:
+    name: Asset freshness
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.0"
+
+      - name: Install deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Rebuild package assets
+        run: cd accrue_admin && mix accrue_admin.assets.build
+
+      - name: Ensure committed bundle is fresh
+        run: git diff --exit-code -- accrue_admin/priv/static/accrue_admin.css accrue_admin/priv/static/accrue_admin.js
+
+      - name: Verify guide mentions mount path and asset task
+        run: |
+          rg -q 'accrue_admin "/billing"' accrue_admin/guides/admin_ui.md
+          rg -q 'accrue_admin.assets.build' accrue_admin/guides/admin_ui.md
