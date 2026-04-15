@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-05-PLAN.md (BILL-27/BILL-28 coupons + discounts)
-last_updated: "2026-04-14T22:23:09.206Z"
-last_activity: 2026-04-14
+stopped_at: Completed 04-06-PLAN.md (WH-08/WH-13/EVT-05/EVT-06/EVT-10)
+last_updated: "2026-04-15T01:39:01.332Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 3
   total_plans: 28
-  completed_plans: 25
-  percent: 89
+  completed_plans: 26
+  percent: 93
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 04 (advanced-billing-webhook-hardening) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
-Last activity: 2026-04-14
+Last activity: 2026-04-15
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -65,6 +65,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04 P03 | 30m | 2 tasks | 16 files |
 | Phase 04-advanced-billing-webhook-hardening P04 | 35m | 3 tasks | 8 files |
 | Phase 04-advanced-billing-webhook-hardening P05 | 30m | 2 tasks | 16 files |
+| Phase 04-advanced-billing-webhook-hardening P06 | 30m | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,10 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P05: total_discount_amounts stored wrapped as %{data: [...]} because Ecto :map rejects top-level arrays at the jsonb boundary
 - [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P05: apply_promotion_code/3 validates :active, :expires_at, :max_redemptions OUTSIDE Repo.transact so crafted/expired inputs never touch Stripe (T-04-05-02)
 - [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P05: coupon persistence uses SELECT+insert/update instead of on_conflict: :replace_all_except so the Phase 3 schema/DB drift could not resurface
+- [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P06: DLQ uses plain error atoms (no Accrue.Error umbrella struct exists in codebase)
+- [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P06: bucket_by/2 uses literal date_trunc strings per :day/:week/:month — parameterized fragments break Postgres GROUP BY equivalence detection
+- [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P06: Webhook plug multi-endpoint mode is opt-in via :endpoint init opt — preserves Phase 2 :processor-only callers untouched
+- [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P06: Sandbox txn forces Postgres now() to be identical for all rows — query API tests use Ecto.Changeset.change with explicit inserted_at instead of record/1
 
 ### Pending Todos
 
@@ -136,6 +141,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T22:23:09.203Z
-Stopped at: Completed 04-05-PLAN.md (BILL-27/BILL-28 coupons + discounts)
+Last session: 2026-04-15T01:38:50.916Z
+Stopped at: Completed 04-06-PLAN.md (WH-08/WH-13/EVT-05/EVT-06/EVT-10)
 Resume file: None

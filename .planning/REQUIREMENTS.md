@@ -90,12 +90,12 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **WH-05**: Dead-letter queue after N attempts (default 25)
 - [ ] **WH-06**: User handler behaviour with pattern-matchable event types
 - [ ] **WH-07**: Default handler for built-in state reconciliation (subscription/invoice/charge updates)
-- [ ] **WH-08**: Replay tooling (requeue individual or bulk DLQ'd events)
+- [x] **WH-08**: Replay tooling (requeue individual or bulk DLQ'd events)
 - [x] **WH-09**: Out-of-order delivery resolution (resolve state from newest event by Stripe `created`)
 - [ ] **WH-10**: Handler re-fetches current object instead of trusting snapshot payload
 - [ ] **WH-11**: Configurable DLQ retention, default 90 days, pruned via Oban cron
 - [ ] **WH-12**: Webhook pipeline p99 latency <100ms (verify → persist → enqueue → 200)
-- [ ] **WH-13**: Multi-endpoint webhook support with Connect-variant secret
+- [x] **WH-13**: Multi-endpoint webhook support with Connect-variant secret
 - [ ] **WH-14**: Webhook event type constants module (or dependency on lattice_stripe's)
 
 ### Event Ledger
@@ -104,12 +104,12 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **EVT-02**: Schema: id, type, schema_version, actor_type (NOT NULL enum), actor_id, subject_type, subject_id, data jsonb, trace_id, idempotency_key, inserted_at
 - [ ] **EVT-03**: `Accrue.Events.record/1` helper with Ecto.Multi support for transactional writes alongside state mutations
 - [ ] **EVT-04**: Every Billing context function that mutates state emits a corresponding event in the same transaction
-- [ ] **EVT-05**: `Accrue.Events.Upcaster` pattern for schema_version evolution with `upcast/1` callback
-- [ ] **EVT-06**: Query API: `timeline_for/2`, `state_as_of/3`, `bucket_by/3` for analytics
+- [x] **EVT-05**: `Accrue.Events.Upcaster` pattern for schema_version evolution with `upcast/1` callback
+- [x] **EVT-06**: Query API: `timeline_for/2`, `state_as_of/3`, `bucket_by/3` for analytics
 - [ ] **EVT-07**: OpenTelemetry `trace_id` correlation captured on every event write
 - [ ] **EVT-08**: Actor context enum: `user | system | webhook | oban | admin` with required actor_type
 - [ ] **EVT-09**: `Accrue.Integrations.Sigra` bridges Accrue events to `Sigra.Audit` when present
-- [ ] **EVT-10**: Analytics helper: bucket events by month/week/day with type filters
+- [x] **EVT-10**: Analytics helper: bucket events by month/week/day with type filters
 
 ### Email
 
@@ -360,23 +360,23 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | WH-05 | Phase 2 | Pending |
 | WH-06 | Phase 2 | Pending |
 | WH-07 | Phase 2 | Pending |
-| WH-08 | Phase 4 | Pending |
+| WH-08 | Phase 4 | Complete |
 | WH-09 | Phase 3 | Complete |
 | WH-10 | Phase 2 | Pending |
 | WH-11 | Phase 2 | Pending |
 | WH-12 | Phase 2 | Pending |
-| WH-13 | Phase 4 | Pending |
+| WH-13 | Phase 4 | Complete |
 | WH-14 | Phase 2 | Pending |
 | EVT-01 | Phase 1 | Pending |
 | EVT-02 | Phase 1 | Pending |
 | EVT-03 | Phase 1 | Pending |
 | EVT-04 | Phase 2 | Pending |
-| EVT-05 | Phase 4 | Pending |
-| EVT-06 | Phase 4 | Pending |
+| EVT-05 | Phase 4 | Complete |
+| EVT-06 | Phase 4 | Complete |
 | EVT-07 | Phase 1 | Pending |
 | EVT-08 | Phase 1 | Pending |
 | EVT-09 | Phase 7 | Pending |
-| EVT-10 | Phase 4 | Pending |
+| EVT-10 | Phase 4 | Complete |
 | MAIL-01 | Phase 1 | Pending |
 | MAIL-02 | Phase 6 | Pending |
 | MAIL-03 | Phase 6 | Pending |
