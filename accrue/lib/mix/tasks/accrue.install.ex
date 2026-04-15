@@ -27,10 +27,12 @@ defmodule Mix.Tasks.Accrue.Install do
 
     opts = Accrue.Install.Options.parse!(argv)
     project = Accrue.Install.Project.discover!(opts)
-    Accrue.Install.Templates.validate_planned_config!(project)
+    validate_planned_config!(project)
 
     print_intro(opts)
-    report("config docs: #{String.split(Accrue.Install.Templates.config_docs(), "\n") |> hd()}")
+    print_orchestration(project)
+    report("config docs: #{String.split(config_docs(), "\n") |> hd()}")
+    print_auth_guidance(project)
     report(Accrue.Install.Templates.stripe_test_mode_readiness())
 
     results =
@@ -71,6 +73,32 @@ defmodule Mix.Tasks.Accrue.Install do
     if opts.dry_run do
       report("dry-run: no files changed")
     end
+  end
+
+  defp print_orchestration(project) do
+    report("Project: #{inspect(project.__struct__)}")
+    report("Templates: #{inspect(Accrue.Install.Templates)}")
+    report("Fingerprints: #{inspect(Accrue.Install.Fingerprints)}")
+    report("Patches: #{inspect(Accrue.Install.Patches)}")
+
+    report(
+      "Stripe test-mode readiness uses STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET with " <>
+        "sk_test_ / sk_live_ / whsec_ redaction"
+    )
+
+    if project.manual? do
+      report("manual: project shape requires snippet review")
+    end
+  end
+
+  defp print_auth_guidance(%{has_sigra?: true}) do
+    report("Sigra detected: config :accrue, :auth_adapter, Accrue.Integrations.Sigra")
+    report("Fallback/community path: Accrue.Auth.Default or a community auth adapter")
+  end
+
+  defp print_auth_guidance(_project) do
+    report("Auth fallback: Accrue.Auth.Default with prod-safety warning")
+    report("Community auth adapters can implement Accrue.Auth")
   end
 
   defp install(project, opts) do
@@ -130,5 +158,31 @@ defmodule Mix.Tasks.Accrue.Install do
     report("manual: #{manual}")
   end
 
-  defp report(message), do: IO.puts(message)
+  defp validate_planned_config!(project) do
+    Accrue.Config.validate!(
+      repo: project.repo || Module.concat([project.app_module, Repo]),
+      processor: Accrue.Processor.Stripe,
+      auth_adapter:
+        if(project.has_sigra?, do: Accrue.Integrations.Sigra, else: Accrue.Auth.Default),
+      stripe_secret_key: "sk_test_install_validation",
+      branding: [
+        from_email: "billing@example.com",
+        support_email: "support@example.com"
+      ]
+    )
+  end
+
+  defp config_docs do
+    NimbleOptions.docs(Accrue.Config.schema())
+  end
+
+  defp redact(message) do
+    message
+    |> to_string()
+    |> String.replace(~r/sk_(test|live)_[A-Za-z0-9_=-]+/, "sk_\\1_[REDACTED]")
+    |> String.replace(~r/whsec_[A-Za-z0-9_=-]+/, "whsec_[REDACTED]")
+    |> String.replace(~r/([A-Z0-9_]*(?:SECRET|KEY)[A-Z0-9_]*=)[^\s,}]+/, "\\1[REDACTED]")
+  end
+
+  defp report(message), do: IO.puts(redact(message))
 end
