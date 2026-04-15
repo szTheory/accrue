@@ -1,0 +1,12 @@
+defmodule <%= @billing_handler %> do
+  @moduledoc """
+  Host-owned Accrue webhook side-effect handler.
+  """
+
+  use Accrue.Webhook.Handler
+
+  def handle_event("invoice.payment_failed", event, _ctx) do
+    _ = event
+    :ok
+  end
+end

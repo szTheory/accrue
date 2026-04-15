@@ -1,0 +1,7 @@
+import Config
+
+config :accrue, :processor, Accrue.Processor.Stripe
+config :accrue, :stripe_secret_key, System.fetch_env!("STRIPE_SECRET_KEY")
+config :accrue, :webhook_signing_secrets, %{
+  stripe: System.get_env("STRIPE_WEBHOOK_SECRET")
+}
