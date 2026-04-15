@@ -119,6 +119,15 @@ defmodule Mix.Tasks.Accrue.InstallTest do
            )
 
     assert InstallFixture.assert_contains!(app, "test/support/accrue_case.ex", "use Accrue.Test")
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "test/support/accrue_case.ex",
+             "config :accrue, :mailer, Accrue.Mailer.Test"
+           )
+
+    InstallFixture.refute_contains!(app, "test/support/accrue_case.ex", "config :accrue, :mailer_adapter, Accrue.Mailer.Test")
+
     assert output =~ "Oban"
   end
 
