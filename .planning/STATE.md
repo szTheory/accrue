@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-05-PLAN.md
-last_updated: "2026-04-15T04:36:00.147Z"
+stopped_at: Completed 05-06-PLAN.md
+last_updated: "2026-04-15T04:46:57.468Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 35
-  completed_plans: 33
-  percent: 94
+  completed_plans: 34
+  percent: 97
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 05 (connect) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -73,6 +73,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05 P03 | 9min | 2 tasks | 7 files |
 | Phase 05-connect P04 | 10min | 1 tasks | 4 files |
 | Phase 05-connect P05 | 20min | 1 tasks | 6 files |
+| Phase 05 P06 | 15min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -146,6 +147,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 05-connect]: Phase 05 P04: Use %Accrue.ConfigError{} for platform_fee validation errors (no Accrue.Error umbrella exists). All percent math in minor-unit integers via Decimal.mult→div 100→round :half_even→to_integer — currency-exponent-agnostic because minor units are integer across all currencies. Final max(result, 0) belt-and-suspenders clamp protects against pathological negative :fixed.
 - [Phase 05-connect]: Phase 05 P05: Explicit stripe_account: nil opt as Fake-side platform sentinel — Keyword.has_key?/2 short-circuit in resolve_scope/1 beats the || fall-through that would otherwise leak pdict onto platform-authority calls
 - [Phase 05-connect]: Phase 05 P05: separate_charge_and_transfer/2 returns {:error, {:transfer_failed, charge, err}} reconciliation tuple on partial failure (D5-05 events-ledger principle; charge persists, caller reconciles)
+- [Phase 05]: Plan 06: Refetch-canonical (Connect.retrieve_account/2) as Pitfall 3 mitigation — no watermark column added
+- [Phase 05]: Plan 06: Payload beyond event.object_id loaded from persisted accrue_webhook_events.data via ctx.webhook_event_id
 
 ### Pending Todos
 
@@ -166,6 +169,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T04:36:00.143Z
-Stopped at: Completed 05-05-PLAN.md
+Last session: 2026-04-15T04:46:57.465Z
+Stopped at: Completed 05-06-PLAN.md
 Resume file: None
