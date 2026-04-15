@@ -14,6 +14,7 @@ defmodule Accrue.Install.Project do
             migrations_path: nil,
             has_accrue_admin?: false,
             has_sigra?: false,
+            has_oban?: false,
             billable: nil,
             manual?: false
 
@@ -51,8 +52,9 @@ defmodule Accrue.Install.Project do
       runtime_config_path: runtime_config_path,
       mix_path: mix_path,
       migrations_path: migrations_path,
-      has_accrue_admin?: dependency?(mix, :accrue_admin),
-      has_sigra?: dependency?(mix, :sigra),
+      has_accrue_admin?: enabled?(opts.admin, dependency?(mix, :accrue_admin)),
+      has_sigra?: enabled?(opts.sigra, dependency?(mix, :sigra)),
+      has_oban?: dependency?(mix, :oban),
       billable: opts.billable || detect_billable(root),
       manual?: manual?
     }
@@ -113,6 +115,10 @@ defmodule Accrue.Install.Project do
   defp dependency?(mix, dep) when is_atom(dep) do
     mix =~ ":#{dep}" or mix =~ "{#{inspect(dep)},"
   end
+
+  defp enabled?(true, _detected?), do: true
+  defp enabled?(false, _detected?), do: false
+  defp enabled?(:auto, detected?), do: detected?
 
   defp detect_billable(root) do
     root

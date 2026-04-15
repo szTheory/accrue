@@ -36,6 +36,7 @@ defmodule Mix.Tasks.Accrue.Install do
     results =
       if opts.dry_run or opts.manual or project.manual? do
         report("manual: review generated snippets before applying")
+        print_manual_snippets(project, opts)
         []
       else
         install(project, opts)
@@ -87,25 +88,36 @@ defmodule Mix.Tasks.Accrue.Install do
         {status, path, reason}
       end)
 
-    config_result = patch_config(project)
-    [config_result | template_results]
+    patch_results =
+      project
+      |> Accrue.Install.Patches.apply(opts)
+      |> Enum.map(&report_patch_result/1)
+
+    template_results ++ patch_results
   end
 
-  defp patch_config(project) do
-    path = project.config_path
-    adapter = if project.has_sigra?, do: "Accrue.Integrations.Sigra", else: "Accrue.Auth.Default"
-    snippet = "\nconfig :accrue, :auth_adapter, #{adapter}\n"
-    content = if File.exists?(path), do: File.read!(path), else: "import Config\n"
-
-    if content =~ "config :accrue, :auth_adapter" do
-      report("skipped: #{Path.relative_to_cwd(path)} already configured")
-      {:skipped, path, "already configured"}
-    else
-      File.mkdir_p!(Path.dirname(path))
-      File.write!(path, content <> snippet)
-      report("changed: #{Path.relative_to_cwd(path)} auth_adapter")
-      {:changed, path, "auth_adapter"}
+  defp print_manual_snippets(project, opts) do
+    for {name, snippet} <- Accrue.Install.Patches.manual_snippets(project, opts) do
+      report("#{name}:")
+      report(snippet)
     end
+  end
+
+  defp report_patch_result({status, path, reason}) when status in [:changed, :skipped] do
+    report("#{status}: #{Path.relative_to_cwd(path)} #{reason}")
+    {status, path, reason}
+  end
+
+  defp report_patch_result({:manual, nil, reason, snippet}) do
+    report("manual: #{reason}")
+    report(snippet)
+    {:manual, nil, reason}
+  end
+
+  defp report_patch_result({:manual, path, reason, snippet}) do
+    report("manual: #{Path.relative_to_cwd(path)} #{reason}")
+    report(snippet)
+    {:manual, path, reason}
   end
 
   defp print_summary(results, opts, project) do
