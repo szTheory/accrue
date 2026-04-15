@@ -172,7 +172,7 @@ Plans:
 - [ ] 07-08-PLAN.md — Wave 6 dev surfaces, docs, asset-build CI, and final admin package polish
 - [x] 07-09-PLAN.md — Wave 3 navigation/input primitives: breadcrumbs, flash, buttons, tabs, selects, and status badges
 - [x] 07-10-PLAN.md — Wave 3 display/formatting primitives: filter chips, detail drawer, KPIs, timeline, JSON viewer, and money formatter
-- [ ] 07-11-PLAN.md — Wave 4 shared DataTable primitive: card mode, bulk select, cursor pagination, and poll banner
+- [x] 07-11-PLAN.md — Wave 4 shared DataTable primitive: card mode, bulk select, cursor pagination, and poll banner
 - [ ] 07-12-PLAN.md — Wave 5 coupon/promotion-code management and Connect account configuration, including platform-fee overrides
 **UI hint**: yes
 

@@ -166,9 +166,9 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **ADMIN-13**: Charge list + detail with fee breakdown (Stripe fee, platform fee, net)
 - [ ] **ADMIN-14**: Refund admin action with fee-aware UI surfacing `merchant_loss_amount`
 - [x] **ADMIN-15**: Coupon + PromotionCode management UI
-- [ ] **ADMIN-16**: Webhook event inspector: list, filter by status/type, raw payload viewer, attempt history, signature verification status
-- [ ] **ADMIN-17**: Webhook replay: one-click requeue individual; DLQ bulk requeue
-- [ ] **ADMIN-18**: Activity feed sourced from `accrue_events`
+- [x] **ADMIN-16**: Webhook event inspector: list, filter by status/type, raw payload viewer, attempt history, signature verification status
+- [x] **ADMIN-17**: Webhook replay: one-click requeue individual; DLQ bulk requeue
+- [x] **ADMIN-18**: Activity feed sourced from `accrue_events`
 - [x] **ADMIN-19**: Connect: connected accounts list + detail + capability inspector
 - [ ] **ADMIN-20**: Connect: platform fee configuration UI
 - [x] **ADMIN-21**: Step-up auth / re-auth prompt for destructive actions (refund, manual cancel)
@@ -424,9 +424,9 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-13 | Phase 7 | Complete |
 | ADMIN-14 | Phase 7 | Pending |
 | ADMIN-15 | Phase 7 | Complete |
-| ADMIN-16 | Phase 7 | Pending |
-| ADMIN-17 | Phase 7 | Pending |
-| ADMIN-18 | Phase 7 | Pending |
+| ADMIN-16 | Phase 7 | Complete |
+| ADMIN-17 | Phase 7 | Complete |
+| ADMIN-18 | Phase 7 | Complete |
 | ADMIN-19 | Phase 7 | Complete |
 | ADMIN-20 | Phase 7 | Pending |
 | ADMIN-21 | Phase 7 | Complete |
