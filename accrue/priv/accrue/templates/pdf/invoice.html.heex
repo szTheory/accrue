@@ -1,0 +1,16 @@
+<%!--
+  Reference PDF template for invoice rendering. The compiled path is
+  Accrue.Invoices.Layouts.print_shell/1, which assembles the four
+  shared components (invoice_header, line_items, totals, footer)
+  against a RenderContext.
+
+  Hosts that want to customize the PDF layout should define a custom
+  Phoenix.Component module (e.g., MyApp.Accrue.Components) and wire it
+  into a custom Accrue.PDF adapter, NOT edit this file in-place — this
+  file is shipped from the library and will be overwritten on upgrade.
+
+  Paper size + margins are passed to ChromicPDF via the adapter :size /
+  :paper_width / :margin_* options — do NOT add an @page CSS block here
+  (Pitfall 6).
+--%>
+<.print_shell context={@context} />
