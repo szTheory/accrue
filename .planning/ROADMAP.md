@@ -125,7 +125,7 @@ Plans:
 - [x] 05-04-PLAN.md — Wave 1: platform_fee/2 pure Money helper + NimbleOptions config + StreamData property tests across JPY/USD/KWD
 - [x] 05-05-PLAN.md — Wave 2: destination_charge/2 + separate_charge_and_transfer/2 + transfer/2 + telemetry spans + force_platform header safety
 - [x] 05-06-PLAN.md — Wave 2: Accrue.Webhook.ConnectHandler full reducer set (account.*, capability.*, payout.*, person.*) + out-of-order seeding + ops telemetry
-- [ ] 05-07-PLAN.md — Wave 3: dual-scope integration test + live_stripe Connect suite + guides/connect.md + boot-time secret-collision warning + VALIDATION nyquist sign-off
+- [x] 05-07-PLAN.md — Wave 3: dual-scope integration test + live_stripe Connect suite + guides/connect.md + boot-time secret-collision warning + VALIDATION nyquist sign-off
 **UI hint**: no
 
 ### Phase 6: Email + PDF
