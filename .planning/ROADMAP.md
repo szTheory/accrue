@@ -103,7 +103,7 @@ Plans:
 - [x] 04-04-PLAN.md — Wave 4: Dunning (BILL-15) — pure Dunning policy module + DunningSweeper Oban cron + dunning_exhaustion telemetry diff on webhook path
 - [x] 04-05-PLAN.md — Wave 5: Coupons & PromotionCodes (BILL-27, BILL-28) — PromotionCode schema + apply_promotion_code + invoice discount denormalization via force_discount_changeset
 - [x] 04-06-PLAN.md — Wave 6: Webhook hardening (WH-08, WH-13, EVT-05, EVT-06, EVT-10) — Accrue.Webhooks.DLQ library + Mix tasks + Pruner + multi-endpoint plug + Events query API + UpcasterRegistry
-- [ ] 04-07-PLAN.md — Wave 7: Checkout + Portal (CHKT-01..06) — Accrue.Checkout + Accrue.BillingPortal contexts + LineItem helper + reconcile/1 + Inspect URL mask + portal config checklist guide
+- [x] 04-07-PLAN.md — Wave 7: Checkout + Portal (CHKT-01..06) — Accrue.Checkout + Accrue.BillingPortal contexts + LineItem helper + reconcile/1 + Inspect URL mask + portal config checklist guide
 - [ ] 04-08-PLAN.md — Wave 8: Observability (OBS-03, OBS-04, OBS-05) — Accrue.Telemetry.Ops emit helper + Accrue.Telemetry.Metrics default recipe + guides/telemetry.md span naming guide
 **UI hint**: no
 

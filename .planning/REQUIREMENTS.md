@@ -60,12 +60,12 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 
 ### Checkout + Portal
 
-- [ ] **CHKT-01**: `Accrue.Checkout.Session` create/retrieve helpers with sensible defaults
-- [ ] **CHKT-02**: Embedded and hosted Checkout modes
-- [ ] **CHKT-03**: Line-item helpers for Checkout
-- [ ] **CHKT-04**: `Accrue.BillingPortal.Session` create helper
-- [ ] **CHKT-05**: Portal configuration helper with sane defaults (defends against "cancel without dunning")
-- [ ] **CHKT-06**: Checkout success/cancel URL routing with state reconciliation
+- [x] **CHKT-01**: `Accrue.Checkout.Session` create/retrieve helpers with sensible defaults
+- [x] **CHKT-02**: Embedded and hosted Checkout modes
+- [x] **CHKT-03**: Line-item helpers for Checkout
+- [x] **CHKT-04**: `Accrue.BillingPortal.Session` create helper
+- [x] **CHKT-05**: Portal configuration helper with sane defaults (defends against "cancel without dunning")
+- [x] **CHKT-06**: Checkout success/cancel URL routing with state reconciliation
 
 ### Connect (Marketplaces)
 
@@ -336,12 +336,12 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | BILL-26 | Phase 3 | Complete |
 | BILL-27 | Phase 4 | Complete |
 | BILL-28 | Phase 4 | Complete |
-| CHKT-01 | Phase 4 | Pending |
-| CHKT-02 | Phase 4 | Pending |
-| CHKT-03 | Phase 4 | Pending |
-| CHKT-04 | Phase 4 | Pending |
-| CHKT-05 | Phase 4 | Pending |
-| CHKT-06 | Phase 4 | Pending |
+| CHKT-01 | Phase 4 | Complete |
+| CHKT-02 | Phase 4 | Complete |
+| CHKT-03 | Phase 4 | Complete |
+| CHKT-04 | Phase 4 | Complete |
+| CHKT-05 | Phase 4 | Complete |
+| CHKT-06 | Phase 4 | Complete |
 | CONN-01 | Phase 5 | Pending |
 | CONN-02 | Phase 5 | Pending |
 | CONN-03 | Phase 5 | Pending |
