@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-01-PLAN.md — config + schema foundation landed
-last_updated: "2026-04-15T11:01:17.839Z"
+stopped_at: Completed 06-02-PLAN.md — PDF.Null + Storage scaffold + guides/pdf.md
+last_updated: "2026-04-15T11:09:00.144Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 42
-  completed_plans: 36
-  percent: 86
+  completed_plans: 37
+  percent: 88
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 06 (email-pdf) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -76,6 +76,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05 P06 | 15min | 1 tasks | 3 files |
 | Phase 05-connect P07 | 45min | 1 tasks | 6 files |
 | Phase 06-email-pdf P01 | 6min | 3 tasks | 9 files |
+| Phase 06-email-pdf P02 | 10min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -157,6 +158,10 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 06-email-pdf]: Phase 06 P01: branding/0 reads raw env + merges schema defaults via merge_with_defaults/1; validate_at_boot!/0 still runs full NimbleOptions validation at supervisor start
 - [Phase 06-email-pdf]: Phase 06 P01: warn_deprecated_branding/0 uses :persistent_term dedupe (one warn per BEAM boot); log message contains key NAMES only, never flat-key values (T-06-01-02 mitigation)
 - [Phase 06-email-pdf]: Phase 06 P01: preferred_locale/preferred_timezone columns are raw string(35)/string(64); no validate_inclusion — library cannot know host CLDR compile-time set (D6-03)
+- [Phase 06-email-pdf]: Phase 6 P02: Accrue.Error.PdfDisabled co-located in errors.ex per taxonomy precedent; no new lib/accrue/error/ directory
+- [Phase 06-email-pdf]: Phase 6 P02: PdfDisabled docs_url constant is byte-identical to {#null-adapter} anchor in guides/pdf.md — single source of truth, grep-guardable in CI
+- [Phase 06-email-pdf]: Phase 6 P02: :storage_adapter registered in Accrue.Config NimbleOptions schema alongside :pdf_adapter/:auth_adapter with default Accrue.Storage.Null
+- [Phase 06-email-pdf]: Phase 6 P02: Storage telemetry metadata is {adapter, key, bytes} where bytes is byte_size/1 scalar — raw binary never enters span metadata (T-06-02-02)
 
 ### Pending Todos
 
@@ -177,6 +182,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T11:01:06.310Z
-Stopped at: Completed 06-01-PLAN.md — config + schema foundation landed
+Last session: 2026-04-15T11:08:51.160Z
+Stopped at: Completed 06-02-PLAN.md — PDF.Null + Storage scaffold + guides/pdf.md
 Resume file: None

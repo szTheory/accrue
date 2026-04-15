@@ -140,14 +140,14 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **PDF-01**: `Accrue.PDF` behaviour with `render/2` callback
 - [ ] **PDF-02**: `Accrue.PDF.ChromicPDF` default adapter
 - [ ] **PDF-03**: `Accrue.PDF.Test` adapter for assertion-based testing
-- [ ] **PDF-04**: `Accrue.PDF.Null` adapter for Chrome-hostile deploys (fails gracefully with documented error)
+- [x] **PDF-04**: `Accrue.PDF.Null` adapter for Chrome-hostile deploys (fails gracefully with documented error)
 - [ ] **PDF-05**: Invoice PDF template shared HEEx with email HTML body
 - [x] **PDF-06**: Branded PDF with logo, colors, tagline inheriting from Mailer branding config
 - [ ] **PDF-07**: PDF download route helper
 - [ ] **PDF-08**: PDF attachment on email helpers
 - [ ] **PDF-09**: Async PDF render via Oban with cache
 - [x] **PDF-10**: Timezone and locale threading through render context
-- [ ] **PDF-11**: Gotenberg sidecar documented as custom adapter path
+- [x] **PDF-11**: Gotenberg sidecar documented as custom adapter path
 
 ### Admin UI (accrue_admin package)
 
@@ -401,14 +401,14 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | PDF-01 | Phase 1 | Pending |
 | PDF-02 | Phase 6 | Pending |
 | PDF-03 | Phase 6 | Pending |
-| PDF-04 | Phase 6 | Pending |
+| PDF-04 | Phase 6 | Complete |
 | PDF-05 | Phase 6 | Pending |
 | PDF-06 | Phase 6 | Complete |
 | PDF-07 | Phase 6 | Pending |
 | PDF-08 | Phase 6 | Pending |
 | PDF-09 | Phase 6 | Pending |
 | PDF-10 | Phase 6 | Complete |
-| PDF-11 | Phase 6 | Pending |
+| PDF-11 | Phase 6 | Complete |
 | ADMIN-01 | Phase 7 | Pending |
 | ADMIN-02 | Phase 7 | Pending |
 | ADMIN-03 | Phase 7 | Pending |
