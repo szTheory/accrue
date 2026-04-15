@@ -11,9 +11,11 @@ defmodule Accrue.Test.MailerAssertionsTest do
     end
 
     test "flunks when no message within default timeout" do
-      assert_raise ExUnit.AssertionError, ~r/no email of type :receipt delivered within 100ms/, fn ->
-        assert_email_sent(:receipt)
-      end
+      assert_raise ExUnit.AssertionError,
+                   ~r/no email of type :receipt delivered within 100ms/,
+                   fn ->
+                     assert_email_sent(:receipt)
+                   end
     end
 
     test "matches :to on atom key" do

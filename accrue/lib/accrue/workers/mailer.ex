@@ -6,18 +6,49 @@ defmodule Accrue.Workers.Mailer do
 
   1. `Accrue.Mailer.Default.deliver/2` enqueues a job with string-keyed
      `%{"type" => "...", "assigns" => %{...}}` args (Oban-safe scalars only).
-  2. `perform/1` rehydrates the assigns (Phase 1: pass-through; Phase 2+
-     loads Customer/Invoice from the DB by id), resolves the template
-     module (honoring `:email_overrides`), builds a `%Swoosh.Email{}`, and
+  2. `perform/1` rehydrates the assigns (locale/timezone/customer hydration
+     via `enrich/2`), resolves the template module (honoring `:email_overrides`
+     rung 2 MFA and rung 3 atom), builds a `%Swoosh.Email{}`, and
      delivers via `Accrue.Mailer.Swoosh`.
 
   ## Queue
 
   Host applications MUST configure an Oban queue named `:accrue_mailers`.
   Recommended concurrency: 20.
+
+  ## Pitfall 7 defense
+
+  `unique: [period: 60, fields: [:args, :worker]]` prevents double-dispatch
+  when both a Billing action AND a webhook reducer try to enqueue the same
+  email within 60s. DO NOT TOUCH this option — it's the only guard against
+  the action+webhook duplication pitfall.
   """
 
-  use Oban.Worker, queue: :accrue_mailers, max_attempts: 5, unique: [period: 60, fields: [:args, :worker]]
+  use Oban.Worker,
+    queue: :accrue_mailers,
+    max_attempts: 5,
+    unique: [period: 60, fields: [:args, :worker]]
+
+  # Phase 6 Plans 05 + 06 create these modules; listing them here silences
+  # `mix compile --warnings-as-errors` on the forward references in
+  # `default_template/1`. When Plans 05/06 land, this attribute becomes a
+  # no-op (safe to leave in place).
+  @compile {:no_warn_undefined,
+            [
+              Accrue.Emails.Receipt,
+              Accrue.Emails.PaymentFailed,
+              Accrue.Emails.TrialEnding,
+              Accrue.Emails.TrialEnded,
+              Accrue.Emails.InvoiceFinalized,
+              Accrue.Emails.InvoicePaid,
+              Accrue.Emails.InvoicePaymentFailed,
+              Accrue.Emails.SubscriptionCanceled,
+              Accrue.Emails.SubscriptionPaused,
+              Accrue.Emails.SubscriptionResumed,
+              Accrue.Emails.RefundIssued,
+              Accrue.Emails.CouponApplied,
+              Accrue.Emails.CardExpiringSoon
+            ]}
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"type" => type_str, "assigns" => assigns}}) do
@@ -50,35 +81,165 @@ defmodule Accrue.Workers.Mailer do
 
   @doc """
   Resolves the template module for an email type. Honors `:email_overrides`
-  (D-23 rung 3) so hosts can swap one template module without replacing the
-  entire mailer pipeline.
+  (Pay-style ladder D-23):
+
+    * Rung 2 (MFA): `{Mod, :fun, args}` calls `Mod.fun(type, *args)` at
+      runtime, letting hosts pick a template dynamically based on request-
+      time context. The type atom is prepended to `args` as the first
+      argument so MFA callbacks receive it.
+    * Rung 3 (atom): `YourModule` replaces the default template module.
+    * No override: falls through to `default_template/1`.
   """
   @spec resolve_template(atom()) :: module()
   def resolve_template(type) when is_atom(type) do
     overrides = Application.get_env(:accrue, :email_overrides, [])
 
     case Keyword.fetch(overrides, type) do
-      {:ok, mod} when is_atom(mod) -> mod
-      :error -> default_template(type)
+      {:ok, {mod, fun, args}}
+      when is_atom(mod) and is_atom(fun) and is_list(args) ->
+        apply(mod, fun, [type | args])
+
+      {:ok, mod} when is_atom(mod) and not is_nil(mod) ->
+        mod
+
+      :error ->
+        default_template(type)
     end
   end
 
+  # Full 13-type catalogue + :payment_succeeded legacy alias (Phase 6 MAIL-03..13).
+  # Ordered by frequency: receipt → payment_failed → invoice_* etc. so the
+  # most-common types match earliest in the pattern-match chain.
+  defp default_template(:receipt), do: Accrue.Emails.Receipt
+  defp default_template(:payment_failed), do: Accrue.Emails.PaymentFailed
+  defp default_template(:trial_ending), do: Accrue.Emails.TrialEnding
+  defp default_template(:trial_ended), do: Accrue.Emails.TrialEnded
+  defp default_template(:invoice_finalized), do: Accrue.Emails.InvoiceFinalized
+  defp default_template(:invoice_paid), do: Accrue.Emails.InvoicePaid
+  defp default_template(:invoice_payment_failed), do: Accrue.Emails.InvoicePaymentFailed
+  defp default_template(:subscription_canceled), do: Accrue.Emails.SubscriptionCanceled
+  defp default_template(:subscription_paused), do: Accrue.Emails.SubscriptionPaused
+  defp default_template(:subscription_resumed), do: Accrue.Emails.SubscriptionResumed
+  defp default_template(:refund_issued), do: Accrue.Emails.RefundIssued
+  defp default_template(:coupon_applied), do: Accrue.Emails.CouponApplied
+  defp default_template(:card_expiring_soon), do: Accrue.Emails.CardExpiringSoon
   defp default_template(:payment_succeeded), do: Accrue.Emails.PaymentSucceeded
 
-  defp default_template(type) do
-    raise ArgumentError,
-          "no default template for email type #{inspect(type)}; Phase 6 ships the full catalog. " <>
-            "Set config :accrue, :email_overrides, [#{type}: YourModule]."
+  @doc """
+  Enriches raw Oban-arg assigns with locale, timezone, and (optionally)
+  the hydrated `Accrue.Billing.Customer` struct (D6-03 precedence ladder).
+
+  Precedence for locale:
+
+    1. `assigns[:locale]` / `assigns["locale"]`
+    2. `customer.preferred_locale` (hydrated via `assigns[:customer_id]`)
+    3. `Accrue.Config.default_locale/0`
+    4. Hardcoded `"en"` fallback
+
+  Same ladder for timezone (swap `preferred_timezone` +
+  `Accrue.Config.default_timezone/0` + `"Etc/UTC"`).
+
+  Unknown locales/zones emit `[:accrue, :email, :locale_fallback]` /
+  `[:accrue, :email, :timezone_fallback]` telemetry with
+  `%{requested: value}` metadata (no PII) and fall back to `"en"` /
+  `"Etc/UTC"`. `enrich/2` NEVER raises — pitfall 5 defense.
+  """
+  @spec enrich(atom(), map()) :: map()
+  def enrich(_type, assigns) when is_map(assigns) do
+    customer = maybe_load_customer(assigns)
+
+    locale =
+      Map.get(assigns, :locale) || Map.get(assigns, "locale") ||
+        (customer && customer.preferred_locale) ||
+        safe_config(:default_locale, "en")
+
+    timezone =
+      Map.get(assigns, :timezone) || Map.get(assigns, "timezone") ||
+        (customer && customer.preferred_timezone) ||
+        safe_config(:default_timezone, "Etc/UTC")
+
+    {resolved_locale, resolved_tz} = safe_locale_timezone(locale, timezone)
+
+    assigns
+    |> Map.put(:locale, resolved_locale)
+    |> Map.put(:timezone, resolved_tz)
+    |> Map.put(:customer, customer)
   end
 
-  # Phase 1: pass-through. Phase 2+ rehydrates Customer/Invoice from the DB
-  # by id so the worker always operates on the latest DB state.
-  defp enrich(_type, assigns) when is_map(assigns), do: assigns
+  # Hydrate the Customer struct from the DB via `assigns[:customer_id]`.
+  # Returns nil on any failure (missing id, bad id, DB error, schema
+  # mismatch) — enrich/2 then proceeds with application-default locale/TZ.
+  # Keeping this best-effort means enrich/2 stays total (T-06-04-03).
+  defp maybe_load_customer(assigns) do
+    customer_id = Map.get(assigns, :customer_id) || Map.get(assigns, "customer_id")
+
+    if is_binary(customer_id) and customer_id != "" do
+      try do
+        Accrue.Repo.get(Accrue.Billing.Customer, customer_id)
+      rescue
+        _ -> nil
+      catch
+        _, _ -> nil
+      end
+    else
+      nil
+    end
+  end
+
+  # Read an Accrue.Config key tolerantly. If the key is not in the schema
+  # (older host app, misconfig) return the hard default rather than let
+  # `Accrue.ConfigError` escape into enrich/2 — pitfall 5 no-raise rule.
+  defp safe_config(key, fallback) do
+    try do
+      Accrue.Config.get!(key) || fallback
+    rescue
+      _ -> fallback
+    end
+  end
+
+  # Validates a locale + timezone pair and returns a safe substitute on
+  # failure. Emits telemetry on every fallback path so SREs can catch
+  # silent locale drift. Metadata is `%{requested: value}` only — no
+  # customer_id, email, or amount leaks through.
+  defp safe_locale_timezone(locale, timezone) do
+    resolved_locale =
+      try do
+        _ = Cldr.Locale.new!(to_string(locale), Accrue.Config.cldr_backend())
+        to_string(locale)
+      rescue
+        _ ->
+          :telemetry.execute(
+            [:accrue, :email, :locale_fallback],
+            %{count: 1},
+            %{requested: locale}
+          )
+
+          "en"
+      end
+
+    resolved_tz =
+      try do
+        _ = DateTime.shift_zone!(DateTime.utc_now(), to_string(timezone))
+        to_string(timezone)
+      rescue
+        _ ->
+          :telemetry.execute(
+            [:accrue, :email, :timezone_fallback],
+            %{count: 1},
+            %{requested: timezone}
+          )
+
+          "Etc/UTC"
+      end
+
+    {resolved_locale, resolved_tz}
+  end
 
   # Converts string keys to atoms ONLY when the atom already exists in the
   # VM (via `String.to_existing_atom/1`). Unknown strings are dropped from
   # the atom-keyed view but preserved in the original map — safe against
-  # atom-table exhaustion for untrusted input.
+  # atom-table exhaustion for untrusted input. DO NOT replace with
+  # `String.to_atom/1`.
   defp atomize_known_keys(map) when is_map(map) do
     Enum.reduce(map, %{}, fn
       {k, v}, acc when is_atom(k) ->

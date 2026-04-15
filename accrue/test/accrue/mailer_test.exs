@@ -31,11 +31,22 @@ defmodule Accrue.MailerTest do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Accrue.TestRepo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
 
+    # Phase 6 Plan 04 flipped the test-env default mailer to
+    # Accrue.Mailer.Test (D6-05). This module specifically tests the
+    # Default adapter (Oban enqueue + only_scalars! + Swoosh rendering),
+    # so it restores Default for the duration of the test.
+    prior_mailer = Application.get_env(:accrue, :mailer)
+    Application.put_env(:accrue, :mailer, Accrue.Mailer.Default)
+
     # Reset transient env between tests.
     prior_emails = Application.get_env(:accrue, :emails, [])
     prior_overrides = Application.get_env(:accrue, :email_overrides, [])
 
     on_exit(fn ->
+      if prior_mailer,
+        do: Application.put_env(:accrue, :mailer, prior_mailer),
+        else: Application.delete_env(:accrue, :mailer)
+
       Application.put_env(:accrue, :emails, prior_emails)
       Application.put_env(:accrue, :email_overrides, prior_overrides)
     end)

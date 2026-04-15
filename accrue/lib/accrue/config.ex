@@ -261,6 +261,31 @@ defmodule Accrue.Config do
           "See guides/branding.md."
     ],
 
+    # --- Phase 6: enrich/2 precedence ladder defaults (D6-03) ------------
+    default_locale: [
+      type: :string,
+      default: "en",
+      doc:
+        "Application-wide default locale for email + PDF rendering. " <>
+          "Third rung of the D6-03 precedence ladder (after assigns[:locale] " <>
+          "and customer.preferred_locale). Bad locales fall back to \"en\"."
+    ],
+    default_timezone: [
+      type: :string,
+      default: "Etc/UTC",
+      doc:
+        "Application-wide default IANA timezone for datetime rendering. " <>
+          "Third rung of the D6-03 precedence ladder (after assigns[:timezone] " <>
+          "and customer.preferred_timezone). Bad zones fall back to \"Etc/UTC\"."
+    ],
+    cldr_backend: [
+      type: :atom,
+      default: Accrue.Cldr,
+      doc:
+        "Cldr backend module used by `Accrue.Workers.Mailer.enrich/2` " <>
+          "to validate locale strings (D6-03). Defaults to `Accrue.Cldr`."
+    ],
+
     # --- Phase 5: Connect (D5-01, D5-04) ---------------------------------
     connect: [
       type: :keyword_list,
@@ -554,6 +579,25 @@ defmodule Accrue.Config do
   """
   @spec dlq_replay_max_rows() :: pos_integer()
   def dlq_replay_max_rows, do: get!(:dlq_replay_max_rows)
+
+  @doc """
+  Returns the application default locale string (D6-03).
+  """
+  @spec default_locale() :: String.t()
+  def default_locale, do: get!(:default_locale)
+
+  @doc """
+  Returns the application default IANA timezone string (D6-03).
+  """
+  @spec default_timezone() :: String.t()
+  def default_timezone, do: get!(:default_timezone)
+
+  @doc """
+  Returns the configured Cldr backend module used by
+  `Accrue.Workers.Mailer.enrich/2` to validate locale strings (D6-03).
+  """
+  @spec cldr_backend() :: module()
+  def cldr_backend, do: get!(:cldr_backend)
 
   # --- custom validators (referenced by @schema) -----------------------
 
