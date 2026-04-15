@@ -475,6 +475,11 @@ defmodule Accrue.Config do
 
       is_list(raw) ->
         merge_with_defaults(raw)
+
+      true ->
+        raise Accrue.ConfigError,
+          key: :branding,
+          message: "expected :branding to be a keyword list, got: #{inspect(raw)}"
     end
   end
 
