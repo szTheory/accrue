@@ -20,3 +20,19 @@ caused by current task changes).
 Both predate Phase 5 (verified via git blame to commit 8a2a70e,
 Phase 04 P07). Fix should land in a follow-up quick task, not
 as a Phase 5 deviation.
+
+## Pre-existing dialyzer failures (not caused by Phase 05)
+
+3. **`lib/mix/tasks/accrue.webhooks.replay.ex:84,101,110,112`** —
+   `unknown_function Mix.raise/1` and `Mix.shell/0`. Verified
+   pre-existing via `git stash && mix dialyzer` baseline comparison
+   on 2026-04-14 during Plan 07 execution.
+
+4. **`lib/accrue/connect.ex:71,125,146,...`** — 20+ `unknown_type`
+   warnings on existing `@spec` declarations. Not introduced by
+   Plan 07; Plan 07 did not modify `lib/accrue/connect.ex`. These
+   are from Plans 02-05 and should be addressed as a Phase 5
+   cleanup quick task referencing the `lattice_stripe` struct types.
+
+Both confirmed pre-existing by stashing Plan 07 changes and re-running
+`mix dialyzer` — the same warnings appear with identical line numbers.
