@@ -138,10 +138,12 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     refute Map.has_key?(hd(rows), :data)
     refute Map.has_key?(hd(rows), :metadata)
 
+    top_cursor = AccrueAdmin.Queries.Cursor.encode(hd(rows).inserted_at, hd(rows).id)
+
     assert Customers.count_newer_than(
-             cursor: next_cursor,
+             cursor: top_cursor,
              filter: Customers.decode_filter(%{"q" => "example.com"})
-           ) == 1
+           ) == 0
 
     {invalid_rows, _cursor} =
       Customers.list(limit: 1, cursor: "bad-cursor", filter: Customers.decode_filter(%{}))

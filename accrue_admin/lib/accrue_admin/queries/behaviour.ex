@@ -68,7 +68,10 @@ defmodule AccrueAdmin.Queries.Behaviour do
 
     next_cursor =
       case next_row do
-        [row | _rest] -> Cursor.encode(Map.fetch!(row, field), Map.fetch!(row, :id))
+        [_row | _rest] when page_rows != [] ->
+          last_row = List.last(page_rows)
+          Cursor.encode(Map.fetch!(last_row, field), Map.fetch!(last_row, :id))
+
         [] -> nil
       end
 
