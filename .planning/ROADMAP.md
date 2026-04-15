@@ -142,7 +142,7 @@ Plans:
 Plans:
 - [x] 06-01-PLAN.md — Wave 1: :branding NimbleOptions schema + helpers + preferred_locale/timezone migration + flat-key deprecation shim
 - [x] 06-02-PLAN.md — Wave 1: Accrue.Error.PdfDisabled + Accrue.PDF.Null + Accrue.Storage behaviour + Null adapter + guides/pdf.md stub
-- [ ] 06-03-PLAN.md — Wave 2: HtmlBridge spike + RenderContext + Render module + Styles + Components + Layouts + shared transactional layouts
+- [x] 06-03-PLAN.md — Wave 2: HtmlBridge spike + RenderContext + Render module + Styles + Components + Layouts + shared transactional layouts
 - [ ] 06-04-PLAN.md — Wave 3: Accrue.Mailer.Test + Accrue.Test.MailerAssertions + Accrue.Test.PdfAssertions + Workers.Mailer 13-type catalogue + enrich ladder
 - [ ] 06-05-PLAN.md — Wave 4: 8 non-invoice email type modules (receipt, payment_failed, trial_ending, trial_ended, subscription_canceled, subscription_paused, subscription_resumed, card_expiring_soon) + multipart coverage test
 - [ ] 06-06-PLAN.md — Wave 4: Accrue.Invoices facade + Billing delegates + 5 invoice-bearing email types (invoice_finalized, invoice_paid, invoice_payment_failed, refund_issued, coupon_applied) + Fixtures module

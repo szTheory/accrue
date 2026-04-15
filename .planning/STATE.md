@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-02-PLAN.md — PDF.Null + Storage scaffold + guides/pdf.md
-last_updated: "2026-04-15T11:09:00.144Z"
+stopped_at: Completed 06-03-PLAN.md — rendering core (HtmlBridge + Components + Layouts)
+last_updated: "2026-04-15T11:24:45.341Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 42
-  completed_plans: 37
-  percent: 88
+  completed_plans: 38
+  percent: 90
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 06 (email-pdf) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -77,6 +77,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-connect P07 | 45min | 1 tasks | 6 files |
 | Phase 06-email-pdf P01 | 6min | 3 tasks | 9 files |
 | Phase 06-email-pdf P02 | 10min | 3 tasks | 10 files |
+| Phase 06-email-pdf P03 | 10min | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -162,6 +163,12 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 06-email-pdf]: Phase 6 P02: PdfDisabled docs_url constant is byte-identical to {#null-adapter} anchor in guides/pdf.md — single source of truth, grep-guardable in CI
 - [Phase 06-email-pdf]: Phase 6 P02: :storage_adapter registered in Accrue.Config NimbleOptions schema alongside :pdf_adapter/:auth_adapter with default Accrue.Storage.Null
 - [Phase 06-email-pdf]: Phase 6 P02: Storage telemetry metadata is {adapter, key, bytes} where bytes is byte_size/1 scalar — raw binary never enters span metadata (T-06-02-02)
+- [Phase 06-email-pdf]: Phase 6 P03: phoenix_live_view ~> 1.1 added as non-optional runtime dep — Phoenix.Component + ~H sigil live in lib/accrue/invoices/components.ex and layouts.ex, so compile-time availability is mandatory; spike confirms no LiveView socket/mount machinery runs at library call time
+- [Phase 06-email-pdf]: Phase 6 P03: HtmlBridge canonical call path is component |> apply([assigns]) |> Phoenix.HTML.Safe.to_iodata() |> IO.iodata_to_binary() — verified via 5-test spike; Research [ASSUMED A1/A9] now VERIFIED
+- [Phase 06-email-pdf]: Phase 6 P03: format_money/3 never raises — try/rescue → locale_fallback telemetry → en retry → format_money_failed telemetry → raw fallback binary; StreamData property covers 180 iterations across currency × locale matrix without failure
+- [Phase 06-email-pdf]: Phase 6 P03: RenderContext.branding is frozen exactly once in Render.build_assigns/2 — Pitfall 8 enforced by single Accrue.Config.branding() call site in render.ex, proven by put_env mutation regression test
+- [Phase 06-email-pdf]: Phase 6 P03: Layouts.print_shell ships print-safe CSS (body margin 0 + page-break-inside avoid) but NO CSS paper-size rules — ChromicPDF adapter options carry paper size (Pitfall 6); prefer_css_page_size must stay disabled in Plan 06-06
+- [Phase 06-email-pdf]: Phase 6 P03: Shared transactional.{mjml,text}.eex layouts ship as REFERENCE scaffolds (mjml_eex has no HEEx slot equivalent) — per-type email templates COPY the scaffold; BODY BLOCK markers are intentional extension points, not stubs
 
 ### Pending Todos
 
@@ -182,6 +189,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T11:08:51.160Z
-Stopped at: Completed 06-02-PLAN.md — PDF.Null + Storage scaffold + guides/pdf.md
+Last session: 2026-04-15T11:24:28.292Z
+Stopped at: Completed 06-03-PLAN.md — rendering core (HtmlBridge + Components + Layouts)
 Resume file: None
