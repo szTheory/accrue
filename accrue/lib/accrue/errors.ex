@@ -197,6 +197,27 @@ defmodule Accrue.ActionRequiredError do
     do: "Stripe requires customer action (SCA/3DS); inspect :payment_intent"
 end
 
+defmodule Accrue.PDF.RenderFailed do
+  @moduledoc """
+  Raised from `Accrue.Workers.Mailer.perform/1` when
+  `Accrue.Billing.render_invoice_pdf/2` returns a non-terminal
+  `{:error, reason}` (i.e., not `%Accrue.Error.PdfDisabled{}` and not
+  `:chromic_pdf_not_started`). Raising this exception lets Oban backoff
+  handle transient render failures — the mailer job is retried per its
+  `max_attempts` setting.
+
+  Terminal errors (Null adapter + missing ChromicPDF supervisor child)
+  are NOT wrapped in this exception — they route to the hosted-invoice
+  URL fallback per D6-04.
+  """
+
+  defexception [:reason, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+  def message(%__MODULE__{reason: r}), do: "PDF render failed: #{inspect(r)}"
+end
+
 defmodule Accrue.Error.PdfDisabled do
   @moduledoc """
   Raised / returned when the configured PDF adapter is `Accrue.PDF.Null`

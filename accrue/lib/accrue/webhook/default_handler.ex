@@ -138,7 +138,9 @@ defmodule Accrue.Webhook.DefaultHandler do
 
   defp dispatch("customer.subscription." <> action, evt_id, evt_ts, obj)
        when action in ~w(created updated trial_will_end deleted paused resumed) do
-    reduce_subscription(action, evt_id, evt_ts, obj)
+    result = reduce_subscription(action, evt_id, evt_ts, obj)
+    maybe_dispatch_subscription_email(action, result, obj)
+    result
   end
 
   defp dispatch("subscription_schedule." <> action, evt_id, evt_ts, obj)
@@ -148,21 +150,29 @@ defmodule Accrue.Webhook.DefaultHandler do
 
   defp dispatch("invoice." <> action, evt_id, evt_ts, obj)
        when action in ~w(created finalized paid payment_failed voided marked_uncollectible sent) do
-    reduce_invoice(action, evt_id, evt_ts, obj)
+    result = reduce_invoice(action, evt_id, evt_ts, obj)
+    maybe_dispatch_invoice_email(action, result, obj)
+    result
   end
 
   defp dispatch("charge.refund.updated", evt_id, evt_ts, obj) do
-    reduce_refund("updated", evt_id, evt_ts, obj)
+    result = reduce_refund("updated", evt_id, evt_ts, obj)
+    maybe_dispatch_refund_email(result, obj)
+    result
   end
 
   defp dispatch("refund." <> action, evt_id, evt_ts, obj)
        when action in ~w(created updated) do
-    reduce_refund(action, evt_id, evt_ts, obj)
+    result = reduce_refund(action, evt_id, evt_ts, obj)
+    maybe_dispatch_refund_email(result, obj)
+    result
   end
 
   defp dispatch("charge." <> action, evt_id, evt_ts, obj)
        when action in ~w(succeeded failed updated refunded) do
-    reduce_charge(action, evt_id, evt_ts, obj)
+    result = reduce_charge(action, evt_id, evt_ts, obj)
+    maybe_dispatch_charge_email(action, result, obj)
+    result
   end
 
   defp dispatch("payment_method." <> action, evt_id, evt_ts, obj)
@@ -978,4 +988,188 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp to_string_or_nil(v) when is_atom(v), do: Atom.to_string(v)
   defp to_string_or_nil(v) when is_binary(v), do: v
   defp to_string_or_nil(_), do: nil
+
+  # ---------------------------------------------------------------------
+  # Plan 06-07: Mailer dispatch after state reconciliation (Pitfall 7)
+  #
+  # Reducers are the SINGLE dispatch point for state-change emails in
+  # the Email Type Catalogue. Action modules (Billing.*) do NOT call
+  # `Accrue.Mailer.deliver/2` for these types — the single exceptions
+  # are `:card_expiring_soon` (cron in Accrue.Jobs.DetectExpiringCards)
+  # and `:coupon_applied` (Accrue.Billing.CouponActions). This file
+  # dispatches everything else.
+  #
+  # Dispatch happens OUTSIDE the Repo.transact/1 wrapper so a rollback
+  # never enqueues a ghost email. Scalar-only assigns (IDs + URLs) per
+  # D-27 / Plan 06-04 `only_scalars!/1`.
+  # ---------------------------------------------------------------------
+
+  defp maybe_dispatch_charge_email("succeeded", {:ok, %Charge{} = charge}, obj) do
+    customer_id = charge_customer_id(charge, obj)
+    do_dispatch(:receipt, charge.id, customer_id, obj)
+  end
+
+  defp maybe_dispatch_charge_email("failed", {:ok, %Charge{} = charge}, obj) do
+    customer_id = charge_customer_id(charge, obj)
+    do_dispatch(:payment_failed, charge.id, customer_id, obj)
+  end
+
+  defp maybe_dispatch_charge_email("refunded", {:ok, %Charge{} = charge}, obj) do
+    customer_id = charge_customer_id(charge, obj)
+    do_dispatch(:refund_issued, charge.id, customer_id, obj)
+  end
+
+  defp maybe_dispatch_charge_email(_action, _result, _obj), do: :ok
+
+  defp maybe_dispatch_refund_email({:ok, %Refund{} = refund}, obj) do
+    charge_id = get(obj, :charge)
+    customer_id = refund_customer_id(refund)
+
+    assigns = %{
+      refund_id: refund.id,
+      charge_id: charge_id_or_nil(charge_id),
+      customer_id: customer_id
+    }
+
+    safe_deliver(:refund_issued, assigns)
+  end
+
+  defp maybe_dispatch_refund_email(_result, _obj), do: :ok
+
+  defp maybe_dispatch_invoice_email("finalized", {:ok, %Invoice{} = invoice}, obj) do
+    do_dispatch_invoice(:invoice_finalized, invoice, obj)
+  end
+
+  defp maybe_dispatch_invoice_email("paid", {:ok, %Invoice{} = invoice}, obj) do
+    do_dispatch_invoice(:invoice_paid, invoice, obj)
+  end
+
+  defp maybe_dispatch_invoice_email("payment_failed", {:ok, %Invoice{} = invoice}, obj) do
+    do_dispatch_invoice(:invoice_payment_failed, invoice, obj)
+  end
+
+  defp maybe_dispatch_invoice_email(_action, _result, _obj), do: :ok
+
+  defp do_dispatch_invoice(type, %Invoice{} = invoice, obj) do
+    hosted_url = get(obj, :hosted_invoice_url)
+    invoice_number = get(obj, :number)
+    customer_id = invoice_customer_id(invoice)
+
+    assigns =
+      %{
+        invoice_id: invoice.id,
+        customer_id: customer_id,
+        invoice_number: invoice_number,
+        hosted_invoice_url: hosted_url
+      }
+      |> drop_nils()
+
+    safe_deliver(type, assigns)
+  end
+
+  defp maybe_dispatch_subscription_email("trial_will_end", {:ok, %Subscription{} = sub}, _obj) do
+    safe_deliver(:trial_ending, %{
+      subscription_id: sub.id,
+      customer_id: sub.customer_id
+    })
+  end
+
+  defp maybe_dispatch_subscription_email("deleted", {:ok, %Subscription{} = sub}, _obj) do
+    safe_deliver(:subscription_canceled, %{
+      subscription_id: sub.id,
+      customer_id: sub.customer_id
+    })
+  end
+
+  defp maybe_dispatch_subscription_email("updated", {:ok, %Subscription{} = sub}, obj) do
+    # pause_collection set ⇒ :subscription_paused
+    # pause_collection cleared (nil) + status resumed from paused ⇒ :subscription_resumed
+    case get(obj, :pause_collection) do
+      %{} ->
+        safe_deliver(:subscription_paused, %{
+          subscription_id: sub.id,
+          customer_id: sub.customer_id
+        })
+
+      nil ->
+        if sub.status == :active do
+          safe_deliver(:subscription_resumed, %{
+            subscription_id: sub.id,
+            customer_id: sub.customer_id
+          })
+        else
+          :ok
+        end
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp maybe_dispatch_subscription_email(_action, _result, _obj), do: :ok
+
+  # ---------------------------------------------------------------------
+  # Dispatch helpers
+  # ---------------------------------------------------------------------
+
+  defp do_dispatch(type, subject_id_key, customer_id, _obj) do
+    assigns =
+      %{
+        type_subject_id(type) => subject_id_key,
+        customer_id: customer_id
+      }
+      |> drop_nils()
+
+    safe_deliver(type, assigns)
+  end
+
+  defp type_subject_id(:receipt), do: :charge_id
+  defp type_subject_id(:payment_failed), do: :charge_id
+  defp type_subject_id(:refund_issued), do: :charge_id
+
+  # Wraps the mailer deliver in a try/rescue so dispatch failures don't
+  # rollback state reconciliation. Emits telemetry per T-06-07-08.
+  defp safe_deliver(type, assigns) do
+    Accrue.Mailer.deliver(type, assigns)
+  rescue
+    e ->
+      :telemetry.execute(
+        [:accrue, :mailer, :dispatch_failed],
+        %{count: 1},
+        %{type: type, reason: inspect(e)}
+      )
+
+      :ok
+  catch
+    kind, reason ->
+      :telemetry.execute(
+        [:accrue, :mailer, :dispatch_failed],
+        %{count: 1},
+        %{type: type, reason: inspect({kind, reason})}
+      )
+
+      :ok
+  end
+
+  defp drop_nils(map) when is_map(map) do
+    for {k, v} <- map, not is_nil(v), into: %{}, do: {k, v}
+  end
+
+  defp charge_id_or_nil(id) when is_binary(id), do: id
+  defp charge_id_or_nil(_), do: nil
+
+  defp charge_customer_id(%Charge{customer_id: cid}, _obj) when not is_nil(cid), do: cid
+  defp charge_customer_id(_charge, obj), do: get(obj, :customer)
+
+  defp invoice_customer_id(%Invoice{customer_id: cid}) when not is_nil(cid), do: cid
+  defp invoice_customer_id(_), do: nil
+
+  defp refund_customer_id(%Refund{charge_id: charge_id}) when is_binary(charge_id) do
+    case Repo.get(Charge, charge_id) do
+      %Charge{customer_id: cid} -> cid
+      _ -> nil
+    end
+  end
+
+  defp refund_customer_id(_), do: nil
 end

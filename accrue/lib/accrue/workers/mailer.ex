@@ -73,6 +73,13 @@ defmodule Accrue.Workers.Mailer do
       |> Swoosh.Email.html_body(template_mod.render(atomized))
       |> Swoosh.Email.text_body(template_mod.render_text(atomized))
 
+    email =
+      if needs_pdf?(type) do
+        maybe_attach_pdf(email, atomized, type)
+      else
+        email
+      end
+
     case Accrue.Mailer.Swoosh.deliver(email) do
       {:ok, _} = ok -> ok
       {:error, _} = err -> err
@@ -104,6 +111,104 @@ defmodule Accrue.Workers.Mailer do
 
       :error ->
         default_template(type)
+    end
+  end
+
+  @doc """
+  Public accessor for the default template module for a given email
+  type. Used by `mix accrue.mail.preview` (D6-08) and by tests. Honors
+  the full 13-type catalogue plus the `:payment_succeeded` legacy alias.
+  """
+  @spec template_for(atom()) :: module()
+  def template_for(type) when is_atom(type), do: default_template(type)
+
+  # Types that carry an invoice PDF attachment (D6-04).
+  defp needs_pdf?(:invoice_finalized), do: true
+  defp needs_pdf?(:invoice_paid), do: true
+  defp needs_pdf?(_), do: false
+
+  # Builds a PDF via Accrue.Billing.render_invoice_pdf/2 and either
+  # attaches it to the email, falls through to a hosted_invoice_url
+  # note (D6-04 terminal errors), or re-raises Accrue.PDF.RenderFailed
+  # so Oban backoff retries transient render errors (T-06-07-01).
+  defp maybe_attach_pdf(email, assigns, type) do
+    invoice_id =
+      assigns[:invoice_id] ||
+        case assigns[:invoice] do
+          %{id: id} -> id
+          %{"id" => id} -> id
+          _ -> nil
+        end
+
+    case safe_render_invoice_pdf(invoice_id, assigns) do
+      {:ok, binary} ->
+        filename =
+          "invoice-#{assigns[:invoice_number] || invoice_id || "unknown"}.pdf"
+
+        Swoosh.Email.attachment(
+          email,
+          Swoosh.Attachment.new({:data, binary},
+            filename: filename,
+            content_type: "application/pdf"
+          )
+        )
+
+      {:error, %Accrue.Error.PdfDisabled{}} ->
+        append_hosted_url_note(email, assigns, type)
+
+      {:error, :chromic_pdf_not_started} ->
+        :telemetry.execute(
+          [:accrue, :ops, :pdf_adapter_unavailable],
+          %{count: 1},
+          %{type: type}
+        )
+
+        append_hosted_url_note(email, assigns, type)
+
+      {:error, reason} ->
+        raise Accrue.PDF.RenderFailed, reason: reason
+    end
+  end
+
+  # Missing invoice_id is treated as a terminal config error, not a
+  # transient — surface via PdfDisabled so the fallback path kicks in.
+  defp safe_render_invoice_pdf(nil, _assigns) do
+    {:error,
+     %Accrue.Error.PdfDisabled{
+       reason: :missing_invoice_id,
+       message: "cannot render invoice PDF without assigns[:invoice_id]"
+     }}
+  end
+
+  defp safe_render_invoice_pdf(invoice_id, assigns) do
+    Accrue.Billing.render_invoice_pdf(invoice_id,
+      locale: assigns[:locale],
+      timezone: assigns[:timezone]
+    )
+  end
+
+  defp append_hosted_url_note(email, assigns, _type) do
+    url =
+      case assigns[:invoice] do
+        %{hosted_invoice_url: u} when is_binary(u) and u != "" -> u
+        %{"hosted_invoice_url" => u} when is_binary(u) and u != "" -> u
+        _ -> assigns[:hosted_invoice_url]
+      end
+
+    if is_binary(url) and url != "" do
+      new_text =
+        (email.text_body || "") <>
+          "\n\nView your invoice online: " <> url
+
+      new_html =
+        (email.html_body || "") <>
+          ~s(<p><a href="#{url}">View your invoice online</a></p>)
+
+      email
+      |> Swoosh.Email.text_body(new_text)
+      |> Swoosh.Email.html_body(new_html)
+    else
+      email
     end
   end
 
