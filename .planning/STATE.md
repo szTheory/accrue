@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 08-06-PLAN.md
-last_updated: "2026-04-15T22:11:15.904Z"
+stopped_at: Completed 08-05-PLAN.md
+last_updated: "2026-04-15T22:20:37.236Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 61
-  completed_plans: 59
-  percent: 97
+  completed_plans: 60
+  percent: 98
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 08 (install-polish-testing) — EXECUTING
-Plan: 5 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
-Progress: [██████████] 59/61 planned plans complete (97% overall; Phase 08 plans 05 and 07 remain)
+Progress: [██████████] 60/61 planned plans complete (98% overall; Phase 08 plan 07 remains)
 
 ## Performance Metrics
 
@@ -100,6 +100,7 @@ Progress: [██████████] 59/61 planned plans complete (97% ove
 | Phase 08-install-polish-testing P03 | 7min | 3 tasks | 5 files |
 | Phase 08-install-polish-testing P04 | 3min | 2 tasks | 4 files |
 | Phase 08-install-polish-testing P06 | 8min | 3 tasks | 3 files |
+| Phase 08-install-polish-testing P05 | 7min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -251,6 +252,10 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 08-install-polish-testing]: Plan 08-06 uses the Wave 0 RED tests from 08-01 as the TDD red gate; this plan contributes GREEN implementation commits.
 - [Phase 08-install-polish-testing]: OTel spans are nested inside the existing :telemetry.span/3 work function so Elixir telemetry handlers remain the stable event surface.
 - [Phase 08-install-polish-testing]: Billing context instrumentation is explicit at public call sites and uses private helpers only for repeated sanitized metadata assembly.
+- [Phase 08-install-polish-testing]: Event assertions read sandbox-visible accrue_events rows and return the matched Event struct.
+- [Phase 08-install-polish-testing]: Side-effect assertion failures summarize observed evidence without dumping raw event data payloads.
+- [Phase 08-install-polish-testing]: Mail/PDF assertions retain process-local capture as default and document owner/global modes without introducing global state.
+- [Phase 08-install-polish-testing]: PDF matcher predicates prefer normalized render data and fall back to raw HTML for compatibility.
 
 ### Pending Todos
 
@@ -271,6 +276,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T22:11:15.901Z
-Stopped at: Completed 08-06-PLAN.md
+Last session: 2026-04-15T22:20:37.232Z
+Stopped at: Completed 08-05-PLAN.md
 Resume file: None

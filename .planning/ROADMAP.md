@@ -193,7 +193,7 @@ Plans:
 - [x] 08-02-PLAN.md — Wave 1 installer core: Igniter dependency, strict flags, project discovery, generated templates, fingerprints, config validation/docs
 - [x] 08-03-PLAN.md — Wave 2 host wiring: route-scoped webhook pipeline, admin mount, Sigra/default auth, test-support/Oban snippets, and `mix accrue.gen.handler`
 - [x] 08-04-PLAN.md — Wave 2 public `Accrue.Test` facade with deterministic clock and webhook action helpers
-- [ ] 08-05-PLAN.md — Wave 3 email, PDF, and event assertion helpers with matcher diagnostics
+- [x] 08-05-PLAN.md — Wave 3 email, PDF, and event assertion helpers with matcher diagnostics
 - [x] 08-06-PLAN.md — Wave 2 optional OpenTelemetry span bridge with allowlisted sanitized attributes
 - [ ] 08-07-PLAN.md — Wave 4 Fake-first testing guide, community auth adapter guide, and ExDoc extras wiring
 **UI hint**: no
