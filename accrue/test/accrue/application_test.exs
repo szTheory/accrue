@@ -40,9 +40,26 @@ defmodule Accrue.ApplicationTest do
       # trip the test (same pattern as Plan 05's PDF facade-lockdown test).
       code = Regex.replace(~r/@moduledoc\s+"""[\s\S]*?"""/m, source, "@moduledoc false")
 
-      refute code =~ "ChromicPDF"
-      refute code =~ "Oban.start"
-      refute code =~ "Finch"
+      # Plan 06-07 (Pitfall 3) introduced `Process.whereis(ChromicPDF)`
+      # as a READ for the boot-time warning — Accrue still does NOT
+      # start ChromicPDF. The intent of this check is "no start / no
+      # child_spec"; a whereis read is permitted.
+      # Strip @doc comments (single-line # and @doc blocks) before
+      # scanning — Plan 06-07's boot warnings reference `{ChromicPDF, ...}`
+      # in documentation strings showing host apps what to add to
+      # their own supervision trees. Those references are guidance,
+      # not child-spec code.
+      stripped =
+        code
+        |> (&Regex.replace(~r/@doc\s+"""[\s\S]*?"""/m, &1, "@doc false")).()
+        |> (&Regex.replace(~r/Logger\.warning\(\s*"""[\s\S]*?"""\s*\)/m, &1, "Logger.warning(:stripped)")).()
+        |> (&Regex.replace(~r/^\s*#.*$/m, &1, "")).()
+
+      refute stripped =~ "ChromicPDF.start"
+      refute stripped =~ "ChromicPDF.child_spec"
+      refute stripped =~ ~r/\{ChromicPDF\s*,/
+      refute stripped =~ "Oban.start"
+      refute stripped =~ "Finch"
     end
   end
 

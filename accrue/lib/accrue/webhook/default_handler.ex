@@ -1092,7 +1092,7 @@ defmodule Accrue.Webhook.DefaultHandler do
         })
 
       nil ->
-        if sub.status == :active do
+        if Subscription.active?(sub) do
           safe_deliver(:subscription_resumed, %{
             subscription_id: sub.id,
             customer_id: sub.customer_id

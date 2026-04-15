@@ -15,6 +15,24 @@ defmodule Accrue.Workers.MailerDispatchTest do
   use ExUnit.Case, async: false
   use Accrue.Test.MailerAssertions
 
+  setup do
+    # Other test modules flip :mailer to Accrue.Mailer.Default for their
+    # duration via `Application.put_env`. Since we rely on the test
+    # adapter capturing the intent tuple synchronously in the calling
+    # pid's mailbox, force it explicitly per-test and restore on exit.
+    original = Application.get_env(:accrue, :mailer)
+    Application.put_env(:accrue, :mailer, Accrue.Mailer.Test)
+
+    on_exit(fn ->
+      case original do
+        nil -> Application.delete_env(:accrue, :mailer)
+        v -> Application.put_env(:accrue, :mailer, v)
+      end
+    end)
+
+    :ok
+  end
+
   @catalogue [
     :receipt,
     :payment_failed,

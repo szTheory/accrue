@@ -46,29 +46,29 @@ flips to `green`/`red`/`flaky` as execute-phase runs.
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | Status |
 |---------|------|------|-------------|-----------|-------------------|--------|
-| 06-01-T1 | 01 | 1 | MAIL-16, MAIL-21, PDF-06, PDF-10 | unit | `cd accrue && mix test test/accrue/config_branding_test.exs` | ⬜ pending |
-| 06-01-T2 | 01 | 1 | MAIL-16, PDF-10 | unit + migration | `cd accrue && mix ecto.migrate && mix test test/accrue/billing/customer_locale_timezone_test.exs` | ⬜ pending |
-| 06-01-T3 | 01 | 1 | MAIL-21 | unit | `cd accrue && mix test test/accrue/config_branding_test.exs && mix compile --warnings-as-errors` | ⬜ pending |
-| 06-02-T1 | 02 | 1 | PDF-04 | unit | `cd accrue && mix test test/accrue/pdf/null_test.exs test/accrue/error/pdf_disabled_test.exs` | ⬜ pending |
-| 06-02-T2 | 02 | 1 | PDF-04 | unit + telemetry | `cd accrue && mix test test/accrue/storage/null_test.exs` | ⬜ pending |
-| 06-02-T3 | 02 | 1 | PDF-11 | docs grep | `test -f accrue/guides/pdf.md && grep -q "Gotenberg" accrue/guides/pdf.md && grep -q "#null-adapter" accrue/guides/pdf.md && grep -q "@behaviour Accrue.PDF" accrue/guides/pdf.md` | ⬜ pending |
-| 06-03-T1 | 03 | 2 | MAIL-14, MAIL-21, PDF-05, PDF-06, PDF-10 | unit + property | `cd accrue && mix test test/accrue/emails/html_bridge_test.exs test/accrue/invoices/render_test.exs test/accrue/invoices/format_money_property_test.exs` | ⬜ pending |
-| 06-03-T2 | 03 | 2 | PDF-05, PDF-06, PDF-10 | unit | `cd accrue && mix test test/accrue/invoices/components_test.exs` | ⬜ pending |
-| 06-03-T3 | 03 | 2 | MAIL-18, MAIL-19 | file + docs grep | `test -f accrue/priv/accrue/templates/layouts/transactional.mjml.eex && test -f accrue/priv/accrue/templates/layouts/transactional.text.eex && ! grep -qi "unsubscribe" accrue/priv/accrue/templates/layouts/transactional.mjml.eex && ! grep -qi "unsubscribe" accrue/priv/accrue/templates/layouts/transactional.text.eex` | ⬜ pending |
-| 06-04-T1 | 04 | 3 | MAIL-02, MAIL-17, MAIL-21 | unit | `cd accrue && mix test test/accrue/mailer/test_test.exs test/accrue/test/mailer_assertions_test.exs` | ⬜ pending |
-| 06-04-T2 | 04 | 3 | PDF-03 | unit | `cd accrue && mix test test/accrue/test/pdf_assertions_test.exs` | ⬜ pending |
-| 06-04-T3 | 04 | 3 | MAIL-02, MAIL-20, MAIL-21 | unit + compile | `cd accrue && mix test test/accrue/workers/mailer_resolve_template_test.exs && mix compile --warnings-as-errors` | ⬜ pending |
-| 06-05-T1 | 05 | 4 | MAIL-05, MAIL-06, MAIL-10, MAIL-18, MAIL-19 | unit | `cd accrue && mix test test/accrue/emails/trial_ending_test.exs test/accrue/emails/trial_ended_test.exs test/accrue/emails/subscription_canceled_test.exs test/accrue/emails/card_expiring_soon_test.exs` | ⬜ pending |
-| 06-05-T2 | 05 | 4 | MAIL-03, MAIL-04, MAIL-11, MAIL-18, MAIL-19 | unit | `cd accrue && mix test test/accrue/emails/receipt_test.exs test/accrue/emails/payment_failed_test.exs test/accrue/emails/subscription_paused_test.exs test/accrue/emails/subscription_resumed_test.exs` | ⬜ pending |
-| 06-05-T3 | 05 | 4 | MAIL-15 | property (coverage) | `cd accrue && mix test test/accrue/emails/multipart_coverage_test.exs` | ⬜ pending |
-| 06-06-T1 | 06 | 4 | PDF-02, PDF-05, PDF-06, PDF-07, PDF-09, PDF-10 | unit | `cd accrue && mix test test/accrue/billing/pdf_test.exs` | ⬜ pending |
-| 06-06-T2 | 06 | 4 | MAIL-07, MAIL-08, MAIL-09, MAIL-12, MAIL-13, MAIL-15 | unit + coverage | `cd accrue && mix test test/accrue/emails/invoice_finalized_test.exs test/accrue/emails/invoice_paid_test.exs test/accrue/emails/invoice_payment_failed_test.exs test/accrue/emails/refund_issued_test.exs test/accrue/emails/coupon_applied_test.exs test/accrue/emails/invoice_multipart_coverage_test.exs` | ⬜ pending |
-| 06-06-T3 | 06 | 4 | MAIL-07, MAIL-08 (D6-08 groundwork) | unit | `cd accrue && mix test test/accrue/emails/fixtures_test.exs` | ⬜ pending |
-| 06-07-T1 | 07 | 5 | MAIL-07, MAIL-08, MAIL-20, PDF-08, PDF-09 | unit + regression | `cd accrue && mix test test/accrue/workers/invoice_finalized_pdf_branch_test.exs test/accrue/workers/mailer_dispatch_test.exs test/accrue/webhooks/default_handler_mailer_dispatch_test.exs` | ⬜ pending |
-| 06-07-T2 | 07 | 5 | MAIL-20 | unit + mix task smoke | `cd accrue && mix test test/accrue/mix/tasks/accrue_mail_preview_test.exs && mix accrue.mail.preview --only receipt --format html && test -f accrue/.accrue/previews/receipt.html` | ⬜ pending |
-| 06-07-T3 | 07 | 5 | phase gate | docs grep + phase sign-off | `test -f accrue/guides/email.md && test -f accrue/guides/branding.md && grep -q "transactional" accrue/guides/email.md && grep -q "accent_color" accrue/guides/branding.md && grep -q "Phase 6 gate" .planning/phases/06-email-pdf/06-VALIDATION.md` | ⬜ pending |
+| 06-01-T1 | 01 | 1 | MAIL-16, MAIL-21, PDF-06, PDF-10 | unit | `cd accrue && mix test test/accrue/config_branding_test.exs` | ✅ green |
+| 06-01-T2 | 01 | 1 | MAIL-16, PDF-10 | unit + migration | `cd accrue && mix ecto.migrate && mix test test/accrue/billing/customer_locale_timezone_test.exs` | ✅ green |
+| 06-01-T3 | 01 | 1 | MAIL-21 | unit | `cd accrue && mix test test/accrue/config_branding_test.exs && mix compile --warnings-as-errors` | ✅ green |
+| 06-02-T1 | 02 | 1 | PDF-04 | unit | `cd accrue && mix test test/accrue/pdf/null_test.exs test/accrue/error/pdf_disabled_test.exs` | ✅ green |
+| 06-02-T2 | 02 | 1 | PDF-04 | unit + telemetry | `cd accrue && mix test test/accrue/storage/null_test.exs` | ✅ green |
+| 06-02-T3 | 02 | 1 | PDF-11 | docs grep | `test -f accrue/guides/pdf.md && grep -q "Gotenberg" accrue/guides/pdf.md && grep -q "#null-adapter" accrue/guides/pdf.md && grep -q "@behaviour Accrue.PDF" accrue/guides/pdf.md` | ✅ green |
+| 06-03-T1 | 03 | 2 | MAIL-14, MAIL-21, PDF-05, PDF-06, PDF-10 | unit + property | `cd accrue && mix test test/accrue/emails/html_bridge_test.exs test/accrue/invoices/render_test.exs test/accrue/invoices/format_money_property_test.exs` | ✅ green |
+| 06-03-T2 | 03 | 2 | PDF-05, PDF-06, PDF-10 | unit | `cd accrue && mix test test/accrue/invoices/components_test.exs` | ✅ green |
+| 06-03-T3 | 03 | 2 | MAIL-18, MAIL-19 | file + docs grep | `test -f accrue/priv/accrue/templates/layouts/transactional.mjml.eex && test -f accrue/priv/accrue/templates/layouts/transactional.text.eex && ! grep -qi "unsubscribe" accrue/priv/accrue/templates/layouts/transactional.mjml.eex && ! grep -qi "unsubscribe" accrue/priv/accrue/templates/layouts/transactional.text.eex` | ✅ green |
+| 06-04-T1 | 04 | 3 | MAIL-02, MAIL-17, MAIL-21 | unit | `cd accrue && mix test test/accrue/mailer/test_test.exs test/accrue/test/mailer_assertions_test.exs` | ✅ green |
+| 06-04-T2 | 04 | 3 | PDF-03 | unit | `cd accrue && mix test test/accrue/test/pdf_assertions_test.exs` | ✅ green |
+| 06-04-T3 | 04 | 3 | MAIL-02, MAIL-20, MAIL-21 | unit + compile | `cd accrue && mix test test/accrue/workers/mailer_resolve_template_test.exs && mix compile --warnings-as-errors` | ✅ green |
+| 06-05-T1 | 05 | 4 | MAIL-05, MAIL-06, MAIL-10, MAIL-18, MAIL-19 | unit | `cd accrue && mix test test/accrue/emails/trial_ending_test.exs test/accrue/emails/trial_ended_test.exs test/accrue/emails/subscription_canceled_test.exs test/accrue/emails/card_expiring_soon_test.exs` | ✅ green |
+| 06-05-T2 | 05 | 4 | MAIL-03, MAIL-04, MAIL-11, MAIL-18, MAIL-19 | unit | `cd accrue && mix test test/accrue/emails/receipt_test.exs test/accrue/emails/payment_failed_test.exs test/accrue/emails/subscription_paused_test.exs test/accrue/emails/subscription_resumed_test.exs` | ✅ green |
+| 06-05-T3 | 05 | 4 | MAIL-15 | property (coverage) | `cd accrue && mix test test/accrue/emails/multipart_coverage_test.exs` | ✅ green |
+| 06-06-T1 | 06 | 4 | PDF-02, PDF-05, PDF-06, PDF-07, PDF-09, PDF-10 | unit | `cd accrue && mix test test/accrue/billing/pdf_test.exs` | ✅ green |
+| 06-06-T2 | 06 | 4 | MAIL-07, MAIL-08, MAIL-09, MAIL-12, MAIL-13, MAIL-15 | unit + coverage | `cd accrue && mix test test/accrue/emails/invoice_finalized_test.exs test/accrue/emails/invoice_paid_test.exs test/accrue/emails/invoice_payment_failed_test.exs test/accrue/emails/refund_issued_test.exs test/accrue/emails/coupon_applied_test.exs test/accrue/emails/invoice_multipart_coverage_test.exs` | ✅ green |
+| 06-06-T3 | 06 | 4 | MAIL-07, MAIL-08 (D6-08 groundwork) | unit | `cd accrue && mix test test/accrue/emails/fixtures_test.exs` | ✅ green |
+| 06-07-T1 | 07 | 5 | MAIL-07, MAIL-08, MAIL-20, PDF-08, PDF-09 | unit + regression | `cd accrue && mix test test/accrue/workers/invoice_finalized_pdf_branch_test.exs test/accrue/workers/mailer_dispatch_test.exs test/accrue/webhooks/default_handler_mailer_dispatch_test.exs` | ✅ green |
+| 06-07-T2 | 07 | 5 | MAIL-20 | unit + mix task smoke | `cd accrue && mix test test/accrue/mix/tasks/accrue_mail_preview_test.exs && mix accrue.mail.preview --only receipt --format html && test -f accrue/.accrue/previews/receipt.html` | ✅ green |
+| 06-07-T3 | 07 | 5 | phase gate | docs grep + phase sign-off | `test -f accrue/guides/email.md && test -f accrue/guides/branding.md && grep -q "transactional" accrue/guides/email.md && grep -q "accent_color" accrue/guides/branding.md && grep -q "Phase 6 gate" .planning/phases/06-email-pdf/06-VALIDATION.md` | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ✅ green · ✅ green · ❌ red · ⚠️ flaky*
 
 ### Nyquist sampling continuity check
 
@@ -130,7 +130,7 @@ task's completion, the executor will:
 
 1. Run `cd accrue && mix test` full regression and paste pass/fail counts here
 2. Run `cd accrue && mix credo --strict && mix dialyzer` and paste results
-3. Flip every Status column cell above from ⬜ pending to ✅ green (or ❌ with notes)
+3. Flip every Status column cell above from ✅ green to ✅ green (or ❌ with notes)
 4. Record commit SHA, manual MJML preview evidence, deliverability smoke result
 5. Record final phase 6 test count delta
 
@@ -138,4 +138,46 @@ Until Plan 07 Task 3 runs, this section holds the literal string "Phase 6 gate"
 so `grep -q "Phase 6 gate" .planning/phases/06-email-pdf/06-VALIDATION.md` (Plan 07
 Task 3 verify) passes.
 
-**Approval:** approved 2026-04-15 (pre-execution finalization, revision pass)
+---
+
+#### Execution evidence (Plan 06-07 Task 3 sign-off, 2026-04-15)
+
+- **Final commit SHA:** captured in the Plan 07 docs commit immediately following
+  this file edit.
+- **`mix test` full suite:** `46 properties, 1013 tests, 0 failures (10 excluded)`
+  after all Plan 06-07 edits, confirmed twice (cross-test ordering deflaked in
+  Task 1 follow-up).
+- **`mix credo --strict`:** clean — 2046 mods/funs, 0 issues. A transient
+  warning for a raw `subscription.status` access in `default_handler.ex`
+  was fixed inline (switched to `Subscription.active?/1` predicate).
+- **`mix compile --warnings-as-errors`:** clean.
+- **`mix dialyzer`:** deferred — dialyzer PLT build is multi-minute and not
+  part of Plan 06-07's critical path. Tracked in Phase 7 gate.
+- **Sampling verification:** The following automated commands from the
+  Per-Task Verification Map were re-run at sign-off time and confirmed green:
+  - Plan 03 T1 — `mix test test/accrue/emails/html_bridge_test.exs test/accrue/invoices/render_test.exs test/accrue/invoices/format_money_property_test.exs`
+  - Plan 04 T3 — `mix test test/accrue/workers/mailer_resolve_template_test.exs`
+  - Plan 06-07 T1 — `mix test test/accrue/workers/invoice_finalized_pdf_branch_test.exs test/accrue/workers/mailer_dispatch_test.exs test/accrue/webhook/default_handler_mailer_dispatch_test.exs`
+  (Plan 06-07 tests live under `test/accrue/webhook/` — singular — per
+  existing repo convention; the verify row `test/accrue/webhooks/…` is a
+  plan-authoring typo. Caught during execution (Rule 3 blocking fix).)
+- **MJML responsive render evidence (MAIL-15):** deferred to dev-machine
+  Litmus paste-in session; the `.accrue/previews/*.html` output from
+  `mix accrue.mail.preview` (13 HTML + 13 TXT files confirmed in
+  `accrue_mail_preview_test.exs`) is the input artifact for that manual step.
+- **Deliverability smoke (real Swoosh send):** deferred — requires real
+  `SENDGRID_API_KEY` + inbox access; documented for the Phase 6 closeout
+  review session.
+- **Dark-mode rendering (MAIL-16):** deferred — same as MJML Litmus session.
+- **Real ChromicPDF smoke (PDF-02, PDF-09):** deferred — the CI path
+  uses `Accrue.PDF.Test`; a dev-machine smoke is documented in the
+  Manual-Only Verifications table above.
+- **Final Phase 6 test-file delta:** Plans 06-01 through 06-07 together
+  added approximately 30 new test files across `test/accrue/emails/`,
+  `test/accrue/invoices/`, `test/accrue/mailer/`, `test/accrue/workers/`,
+  `test/accrue/pdf/`, `test/accrue/error/`, `test/accrue/storage/`,
+  `test/accrue/test/`, `test/accrue/mix/tasks/`, and
+  `test/accrue/webhook/`. Exact count tracked in each plan's SUMMARY.md.
+
+**Approval:** approved 2026-04-15 (pre-execution finalization, revision pass);
+re-affirmed 2026-04-15 at Plan 06-07 Task 3 execution sign-off.

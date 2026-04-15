@@ -23,6 +23,20 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
   alias Accrue.Billing.{Charge, Invoice}
 
   setup do
+    # Force Accrue.Mailer.Test adapter per-test: other test modules
+    # flip :mailer to Accrue.Mailer.Default for their scope via
+    # Application.put_env and race with this test (async: false is
+    # not a cross-module lock).
+    original_mailer = Application.get_env(:accrue, :mailer)
+    Application.put_env(:accrue, :mailer, Accrue.Mailer.Test)
+
+    on_exit(fn ->
+      case original_mailer do
+        nil -> Application.delete_env(:accrue, :mailer)
+        v -> Application.put_env(:accrue, :mailer, v)
+      end
+    end)
+
     {:ok, customer} =
       %Customer{}
       |> Customer.changeset(%{
