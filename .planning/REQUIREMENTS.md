@@ -204,9 +204,9 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 
 - [ ] **OBS-01**: `:telemetry` events for every public entry point with `:start`/`:stop`/`:exception`
 - [ ] **OBS-02**: OpenTelemetry span helpers for every Billing context function (optional-compiled, gated on `:opentelemetry` presence)
-- [ ] **OBS-03**: High-signal ops event stream (`[:accrue, :ops, :revenue_loss | :webhook_dlq | :dunning_exhaustion | :incomplete_expired]`) separated from low-signal firehose
-- [ ] **OBS-04**: Structured trace/span naming conventions documented in a guide
-- [ ] **OBS-05**: Default `Telemetry.Metrics` recipe for SRE teams
+- [x] **OBS-03**: High-signal ops event stream (`[:accrue, :ops, :revenue_loss | :webhook_dlq | :dunning_exhaustion | :incomplete_expired]`) separated from low-signal firehose
+- [x] **OBS-04**: Structured trace/span naming conventions documented in a guide
+- [x] **OBS-05**: Default `Telemetry.Metrics` recipe for SRE teams
 - [ ] **OBS-06**: Stripe error mapping to structured `Accrue.Error` with metadata preserved
 
 ### Testing
@@ -453,9 +453,9 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | INST-10 | Phase 8 | Pending |
 | OBS-01 | Phase 1 | Pending |
 | OBS-02 | Phase 8 | Pending |
-| OBS-03 | Phase 4 | Pending |
-| OBS-04 | Phase 4 | Pending |
-| OBS-05 | Phase 4 | Pending |
+| OBS-03 | Phase 4 | Complete |
+| OBS-04 | Phase 4 | Complete |
+| OBS-05 | Phase 4 | Complete |
 | OBS-06 | Phase 1 | Pending |
 | TEST-01 | Phase 1 | Pending |
 | TEST-02 | Phase 8 | Pending |
