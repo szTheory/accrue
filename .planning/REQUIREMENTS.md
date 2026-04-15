@@ -184,26 +184,26 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **AUTH-01**: `Accrue.Auth` behaviour (`current_user/1`, `require_admin_plug/0`, `user_schema/0`, `log_audit/2`, `actor_id/1`)
 - [ ] **AUTH-02**: `Accrue.Auth.Default` fallback adapter (dev-only; fails closed in prod)
 - [x] **AUTH-03**: `Accrue.Integrations.Sigra` first-party adapter, conditionally compiled via `Code.ensure_loaded?(Sigra)`
-- [ ] **AUTH-04**: `mix accrue.install` auto-detects sigra in deps and auto-wires adapter config
-- [ ] **AUTH-05**: Documentation for community adapters (`Accrue.Integrations.PhxGenAuth`, `.Pow`, `.Assent` patterns)
+- [x] **AUTH-04**: `mix accrue.install` auto-detects sigra in deps and auto-wires adapter config
+- [x] **AUTH-05**: Documentation for community adapters (`Accrue.Integrations.PhxGenAuth`, `.Pow`, `.Assent` patterns)
 
 ### Install + Generator
 
-- [ ] **INST-01**: `mix accrue.install` generates migrations (customers, subscriptions, invoices, charges, payment_methods, refunds, webhook_events, events + trigger)
-- [ ] **INST-02**: Generates `MyApp.Billing` context facade stub
-- [ ] **INST-03**: Injects router mounts and webhook endpoint scaffold
-- [ ] **INST-04**: Injects accrue_admin routes if package is in deps
-- [ ] **INST-05**: Billable schema prompt/detection
-- [ ] **INST-06**: Sigra auto-detection and auth wiring
-- [ ] **INST-07**: **Idempotent re-run** — detects existing files, offers diff/review, never clobbers user edits
-- [ ] **INST-08**: `mix accrue.gen.handler` for webhook handler scaffolding
-- [ ] **INST-09**: NimbleOptions validation at install time
-- [ ] **INST-10**: Config doc generation
+- [x] **INST-01**: `mix accrue.install` generates migrations (customers, subscriptions, invoices, charges, payment_methods, refunds, webhook_events, events + trigger)
+- [x] **INST-02**: Generates `MyApp.Billing` context facade stub
+- [x] **INST-03**: Injects router mounts and webhook endpoint scaffold
+- [x] **INST-04**: Injects accrue_admin routes if package is in deps
+- [x] **INST-05**: Billable schema prompt/detection
+- [x] **INST-06**: Sigra auto-detection and auth wiring
+- [x] **INST-07**: **Idempotent re-run** — detects existing files, offers diff/review, never clobbers user edits
+- [x] **INST-08**: `mix accrue.gen.handler` for webhook handler scaffolding
+- [x] **INST-09**: NimbleOptions validation at install time
+- [x] **INST-10**: Config doc generation
 
 ### Observability
 
 - [ ] **OBS-01**: `:telemetry` events for every public entry point with `:start`/`:stop`/`:exception`
-- [ ] **OBS-02**: OpenTelemetry span helpers for every Billing context function (optional-compiled, gated on `:opentelemetry` presence)
+- [x] **OBS-02**: OpenTelemetry span helpers for every Billing context function (optional-compiled, gated on `:opentelemetry` presence)
 - [x] **OBS-03**: High-signal ops event stream (`[:accrue, :ops, :revenue_loss | :webhook_dlq | :dunning_exhaustion | :incomplete_expired]`) separated from low-signal firehose
 - [x] **OBS-04**: Structured trace/span naming conventions documented in a guide
 - [x] **OBS-05**: Default `Telemetry.Metrics` recipe for SRE teams
@@ -212,15 +212,15 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 ### Testing
 
 - [ ] **TEST-01**: Fake Processor as primary test surface (Phase 1 foundation, not afterthought)
-- [ ] **TEST-02**: `Accrue.Test.advance_clock/2` — drives both Fake and Stripe test-clock API in integration env
-- [ ] **TEST-03**: `Accrue.Test.trigger_event/2` — synthetic webhook event injection
-- [ ] **TEST-04**: `assert_email_sent/1` assertion helper
-- [ ] **TEST-05**: `assert_pdf_rendered/1` assertion helper
-- [ ] **TEST-06**: `assert_event_recorded/1` assertion helper
-- [ ] **TEST-07**: Mock adapters (`Accrue.Auth.Mock`, `Accrue.Mailer.Test`, `Accrue.PDF.Test`)
+- [x] **TEST-02**: `Accrue.Test.advance_clock/2` — drives both Fake and Stripe test-clock API in integration env
+- [x] **TEST-03**: `Accrue.Test.trigger_event/2` — synthetic webhook event injection
+- [x] **TEST-04**: `assert_email_sent/1` assertion helper
+- [x] **TEST-05**: `assert_pdf_rendered/1` assertion helper
+- [x] **TEST-06**: `assert_event_recorded/1` assertion helper
+- [x] **TEST-07**: Mock adapters (`Accrue.Auth.Mock`, `Accrue.Mailer.Test`, `Accrue.PDF.Test`)
 - [x] **TEST-08**: Test fixtures for common subscription states
 - [ ] **TEST-09**: Oban.Testing integration for async assertions
-- [ ] **TEST-10**: Testing guide as marketing asset (shows the Fake Processor story is a differentiator)
+- [x] **TEST-10**: Testing guide as marketing asset (shows the Fake Processor story is a differentiator)
 
 ### OSS Hygiene + Release
 
@@ -439,34 +439,34 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 7 | Complete |
-| AUTH-04 | Phase 8 | Pending |
-| AUTH-05 | Phase 8 | Pending |
-| INST-01 | Phase 8 | Pending |
-| INST-02 | Phase 8 | Pending |
-| INST-03 | Phase 8 | Pending |
-| INST-04 | Phase 8 | Pending |
-| INST-05 | Phase 8 | Pending |
-| INST-06 | Phase 8 | Pending |
-| INST-07 | Phase 8 | Pending |
-| INST-08 | Phase 8 | Pending |
-| INST-09 | Phase 8 | Pending |
-| INST-10 | Phase 8 | Pending |
+| AUTH-04 | Phase 8 | Complete |
+| AUTH-05 | Phase 8 | Complete |
+| INST-01 | Phase 8 | Complete |
+| INST-02 | Phase 8 | Complete |
+| INST-03 | Phase 8 | Complete |
+| INST-04 | Phase 8 | Complete |
+| INST-05 | Phase 8 | Complete |
+| INST-06 | Phase 8 | Complete |
+| INST-07 | Phase 8 | Complete |
+| INST-08 | Phase 8 | Complete |
+| INST-09 | Phase 8 | Complete |
+| INST-10 | Phase 8 | Complete |
 | OBS-01 | Phase 1 | Pending |
-| OBS-02 | Phase 8 | Pending |
+| OBS-02 | Phase 8 | Complete |
 | OBS-03 | Phase 4 | Complete |
 | OBS-04 | Phase 4 | Complete |
 | OBS-05 | Phase 4 | Complete |
 | OBS-06 | Phase 1 | Pending |
 | TEST-01 | Phase 1 | Pending |
-| TEST-02 | Phase 8 | Pending |
-| TEST-03 | Phase 8 | Pending |
-| TEST-04 | Phase 8 | Pending |
-| TEST-05 | Phase 8 | Pending |
-| TEST-06 | Phase 8 | Pending |
-| TEST-07 | Phase 8 | Pending |
+| TEST-02 | Phase 8 | Complete |
+| TEST-03 | Phase 8 | Complete |
+| TEST-04 | Phase 8 | Complete |
+| TEST-05 | Phase 8 | Complete |
+| TEST-06 | Phase 8 | Complete |
+| TEST-07 | Phase 8 | Complete |
 | TEST-08 | Phase 3 | Complete |
 | TEST-09 | Phase 2 | Pending |
-| TEST-10 | Phase 8 | Pending |
+| TEST-10 | Phase 8 | Complete |
 | OSS-01 | Phase 9 | Pending |
 | OSS-02 | Phase 9 | Pending |
 | OSS-03 | Phase 9 | Pending |

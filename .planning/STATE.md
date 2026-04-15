@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 08 ready to execute
-last_updated: "2026-04-15T21:17:31.329Z"
-last_activity: 2026-04-15 -- Phase 08 planning complete
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-15T21:35:12.147Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 61
-  completed_plans: 54
-  percent: 89
+  completed_plans: 55
+  percent: 90
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 
 ## Current Position
 
-Phase: 08 (install-polish-testing) — NOT STARTED
-Plan: 0 of 7
+Phase: 08 (install-polish-testing) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-04-15 -- Phase 08 planning complete
+Last activity: 2026-04-15
 
 Progress: [████████████████████] 54/54 planned plans complete (100% of planned work through Phase 07)
 
@@ -95,6 +95,7 @@ Progress: [████████████████████] 54/54 p
 | Phase 07-admin-ui-accrue-admin P07 | 13m | 2 tasks | 12 files |
 | Phase 07 P12 | 14m | 2 tasks | 14 files |
 | Phase 07-admin-ui-accrue-admin P08 | 16m | 2 tasks | 21 files |
+| Phase 08-install-polish-testing P01 | 10min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -231,6 +232,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 07]: Promotion codes ship as their own list/detail route pair and sidebar entry instead of hiding under coupon detail only.
 - [Phase 07-admin-ui-accrue-admin]: Dev tooling now compiles only outside prod and only exposes controls when Accrue.Processor.Fake is active.
 - [Phase 07-admin-ui-accrue-admin]: AccrueAdmin asset maintenance is package-local through mix accrue_admin.assets.build plus a CI drift check.
+- [Phase 08-install-polish-testing]: Wave 0 installer contracts invoke future Mix task modules directly inside fixture directories to avoid unresolved fixture dependency failures before implementation exists.
+- [Phase 08-install-polish-testing]: Facade and event assertion contracts use runtime compilation probes so missing macro modules fail as test failures rather than file-level compile blockers.
+- [Phase 08-install-polish-testing]: OTel compile-matrix contract is executable in ExUnit using exact shell command strings from Phase 08 validation.
 
 ### Pending Todos
 
@@ -251,6 +255,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T20:10:04.173Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-install-polish-testing/08-CONTEXT.md
+Last session: 2026-04-15T21:35:12.144Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: None

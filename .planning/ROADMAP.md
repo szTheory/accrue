@@ -189,7 +189,7 @@ Plans:
   6. OpenTelemetry span helpers wrap every Billing context function when `:opentelemetry` is present, with span attributes containing `customer_id`, `subscription_id`, `event_type`, `processor` — and the library compiles cleanly with `--warnings-as-errors` in both `with_opentelemetry` and `without_opentelemetry` CI matrix entries.
 **Plans**: 7 plans
 Plans:
-- [ ] 08-01-PLAN.md — Wave 0 validation tests for installer, handler generator, public test helpers, OTel, and testing guide
+- [x] 08-01-PLAN.md — Wave 0 validation tests for installer, handler generator, public test helpers, OTel, and testing guide
 - [ ] 08-02-PLAN.md — Wave 1 installer core: Igniter dependency, strict flags, project discovery, generated templates, fingerprints, config validation/docs
 - [ ] 08-03-PLAN.md — Wave 2 host wiring: route-scoped webhook pipeline, admin mount, Sigra/default auth, test-support/Oban snippets, and `mix accrue.gen.handler`
 - [ ] 08-04-PLAN.md — Wave 2 public `Accrue.Test` facade with deterministic clock and webhook action helpers
