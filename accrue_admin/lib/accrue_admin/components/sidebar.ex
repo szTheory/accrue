@@ -36,7 +36,7 @@ defmodule AccrueAdmin.Components.Sidebar do
   end
 
   defp nav_class(item, current_path) do
-    if item.href == current_path do
+    if current_path == item.href or String.starts_with?(current_path, item.href <> "/") do
       "ax-sidebar-link ax-sidebar-link-active"
     else
       "ax-sidebar-link"

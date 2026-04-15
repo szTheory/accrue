@@ -42,6 +42,14 @@ defmodule AccrueAdmin.LiveCase do
 
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
 
+    case Accrue.Processor.Fake.start_link([]) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
+
+    :ok = Accrue.Processor.Fake.reset()
+    :ok = Accrue.Actor.put_operation_id("admin-test-" <> Ecto.UUID.generate())
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

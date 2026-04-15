@@ -52,7 +52,11 @@ defmodule AccrueAdmin.Router do
           root_layout: {AccrueAdmin.Layouts, :root},
           on_mount: on_mount,
           session: {AccrueAdmin.Router, :__session__, [session_keys, mount_path]} do
-          live("/", AccrueAdmin.PageLive, :index)
+          live("/", AccrueAdmin.Live.DashboardLive, :index)
+          live("/customers", AccrueAdmin.Live.CustomersLive, :index)
+          live("/customers/:id", AccrueAdmin.Live.CustomerLive, :show)
+          live("/subscriptions", AccrueAdmin.PageLive, :index)
+          live("/subscriptions/:id", AccrueAdmin.PageLive, :index)
 
           if dev_routes? do
             live("/dev/live", AccrueAdmin.PageLive, :dev)
