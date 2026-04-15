@@ -170,6 +170,12 @@ defmodule Accrue.Webhook.DefaultHandler do
     reduce_payment_method(action, evt_id, evt_ts, obj)
   end
 
+  # Phase 4 Plan 07 — Checkout session lifecycle (CHKT-06).
+  defp dispatch("checkout.session." <> action, evt_id, evt_ts, obj)
+       when action in ~w(completed expired async_payment_succeeded async_payment_failed) do
+    reduce_checkout_session(action, evt_id, evt_ts, obj)
+  end
+
   # Phase 4 Plan 02 — metered billing error report (BILL-13, Pitfall 5).
   defp dispatch("v1.billing.meter.error_report_triggered", evt_id, _evt_ts, obj) do
     reduce_meter_error_report(evt_id, obj)
@@ -180,6 +186,88 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   defp dispatch(_type, _evt_id, _evt_ts, _obj), do: {:ok, :ignored}
+
+  # ---------------------------------------------------------------------
+  # Checkout session reducer (Phase 4 Plan 07, CHKT-06)
+  # ---------------------------------------------------------------------
+
+  defp reduce_checkout_session(action, evt_id, _evt_ts, obj) do
+    Repo.transact(fn ->
+      session_id = get(obj, :id)
+      customer_stripe_id = get(obj, :customer)
+      subscription_stripe_id = get(obj, :subscription)
+
+      with :ok <- maybe_link_subscription(action, customer_stripe_id, subscription_stripe_id),
+           {:ok, _} <-
+             record_event(
+               "checkout.session." <> action,
+               "CheckoutSession",
+               session_id || "unknown",
+               evt_id
+             ) do
+        {:ok, %{session_id: session_id, action: action}}
+      else
+        {:deferred, reason} ->
+          :telemetry.execute(
+            [:accrue, :webhooks, :orphan_checkout_session],
+            %{},
+            %{
+              session_id: session_id,
+              customer_stripe_id: customer_stripe_id,
+              reason: reason
+            }
+          )
+
+          {:ok, :deferred}
+
+        {:error, _} = err ->
+          err
+      end
+    end)
+  end
+
+  defp maybe_link_subscription("completed", customer_stripe_id, subscription_stripe_id)
+       when is_binary(customer_stripe_id) and is_binary(subscription_stripe_id) do
+    case Repo.get_by(Customer, processor_id: customer_stripe_id) do
+      %Customer{} = customer ->
+        case Processor.__impl__().fetch(:subscription, subscription_stripe_id) do
+          {:ok, canonical} ->
+            link_subscription_to_customer(customer, canonical, subscription_stripe_id)
+
+          {:error, _} ->
+            {:deferred, :subscription_fetch_failed}
+        end
+
+      _ ->
+        {:deferred, :unknown_customer}
+    end
+  end
+
+  defp maybe_link_subscription(_action, _customer_id, _sub_id), do: :ok
+
+  defp link_subscription_to_customer(customer, canonical, sub_id) do
+    {:ok, attrs} = SubscriptionProjection.decompose(canonical)
+
+    case Repo.get_by(Subscription, processor_id: sub_id) do
+      nil ->
+        %Subscription{customer_id: customer.id, processor: processor_name()}
+        |> Subscription.force_status_changeset(attrs)
+        |> Repo.insert()
+        |> case do
+          {:ok, _} -> :ok
+          {:error, _} = err -> err
+        end
+
+      %Subscription{} = existing ->
+        existing
+        |> Subscription.force_status_changeset(attrs)
+        |> Repo.update()
+        |> case do
+          {:ok, _} -> :ok
+          {:error, _} = err -> err
+        end
+    end
+  end
 
   # ---------------------------------------------------------------------
   # Meter error report reducer (Phase 4 Plan 02, BILL-13)

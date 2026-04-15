@@ -679,6 +679,39 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
+  # Checkout + Customer Portal (Phase 4 Plan 07, CHKT-01..06)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def checkout_session_create(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:checkout_session_create, subject_of(params, "cs"), opts)
+
+    client
+    |> LatticeStripe.Checkout.Session.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def checkout_session_fetch(id, opts) when is_binary(id) and is_list(opts) do
+    client = build_client!(opts)
+
+    client
+    |> LatticeStripe.Checkout.Session.retrieve(id, stripe_opts_no_idem(opts))
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def portal_session_create(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:portal_session_create, subject_of(params, "bps"), opts)
+
+    client
+    |> LatticeStripe.BillingPortal.Session.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  # ---------------------------------------------------------------------------
   # fetch/2 — generic refetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
 
@@ -692,6 +725,7 @@ defmodule Accrue.Processor.Stripe do
   def fetch(:customer, id), do: retrieve_customer(id, [])
   def fetch(:payment_intent, id), do: retrieve_payment_intent(id, [])
   def fetch(:setup_intent, id), do: retrieve_setup_intent(id, [])
+  def fetch(:checkout_session, id), do: checkout_session_fetch(id, [])
 
   # ---------------------------------------------------------------------------
   # Phase 3 helpers

@@ -188,6 +188,14 @@ defmodule Accrue.Processor do
   @callback promotion_code_retrieve(id(), opts()) :: result()
 
   # ---------------------------------------------------------------------------
+  # Checkout + Customer Portal (Phase 4 Plan 07, CHKT-01..06)
+  # ---------------------------------------------------------------------------
+
+  @callback checkout_session_create(params(), opts()) :: result()
+  @callback checkout_session_fetch(id(), opts()) :: result()
+  @callback portal_session_create(params(), opts()) :: result()
+
+  # ---------------------------------------------------------------------------
   # Phase 1 facade dispatch
   # ---------------------------------------------------------------------------
 

@@ -77,6 +77,8 @@ defmodule Accrue.Processor.Fake do
   @subscription_schedule_prefix "sub_sched_fake_"
   @coupon_prefix "coupon_fake_"
   @promotion_code_prefix "promo_fake_"
+  @checkout_session_prefix "cs_fake_"
+  @billing_portal_session_prefix "bps_fake_"
 
   # ---------------------------------------------------------------------------
   # Public API — lifecycle
@@ -506,6 +508,25 @@ defmodule Accrue.Processor.Fake do
   end
 
   # ---------------------------------------------------------------------------
+  # Behaviour callbacks — checkout + portal (Phase 4 Plan 07)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def checkout_session_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:checkout_session_create, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def checkout_session_fetch(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:checkout_session_fetch, id, opts})
+  end
+
+  @impl Accrue.Processor
+  def portal_session_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:portal_session_create, params, opts})
+  end
+
+  # ---------------------------------------------------------------------------
   # Behaviour callbacks — fetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
 
@@ -519,6 +540,7 @@ defmodule Accrue.Processor.Fake do
   def fetch(:customer, id), do: retrieve_customer(id, [])
   def fetch(:payment_intent, id), do: retrieve_payment_intent(id, [])
   def fetch(:setup_intent, id), do: retrieve_setup_intent(id, [])
+  def fetch(:checkout_session, id), do: checkout_session_fetch(id, [])
 
   # ---------------------------------------------------------------------------
   # GenServer
@@ -1305,6 +1327,92 @@ defmodule Accrue.Processor.Fake do
   def handle_call({:promotion_code_retrieve, id, opts}, _from, state) do
     with_script_or_stub(state, :promotion_code_retrieve, [id, opts], fn state ->
       lookup(state.promotion_codes, id, state)
+    end)
+  end
+
+  # --- checkout sessions + portal sessions (Phase 4 Plan 07, CHKT-01..06) ---
+
+  def handle_call({:checkout_session_create, params, opts}, _from, state) do
+    with_script_or_stub(state, :checkout_session_create, [params, opts], fn state ->
+      counter = (state.counters[:checkout_session] || 0) + 1
+      counters = Map.put(state.counters, :checkout_session, counter)
+      state = %{state | counters: counters}
+      id = @checkout_session_prefix <> pad5(counter)
+
+      atom_params = atomize(params)
+      ui_mode = atom_params[:ui_mode] || "hosted"
+      mode = atom_params[:mode] || "subscription"
+
+      url =
+        if ui_mode == "embedded",
+          do: nil,
+          else: "https://checkout.stripe.test/c/pay/" <> id
+
+      client_secret =
+        if ui_mode == "embedded",
+          do: id <> "_secret_" <> pad5(counter),
+          else: nil
+
+      session =
+        atom_params
+        |> Map.put(:id, id)
+        |> Map.put(:object, "checkout.session")
+        |> Map.put(:mode, mode)
+        |> Map.put(:ui_mode, ui_mode)
+        |> Map.put(:url, url)
+        |> Map.put(:client_secret, client_secret)
+        |> Map.put(:status, "open")
+        |> Map.put(:payment_status, "unpaid")
+        |> Map.put(:created, DateTime.to_unix(state.clock))
+        |> Map.put_new(:customer, nil)
+        |> Map.put_new(:subscription, nil)
+        |> Map.put_new(:payment_intent, nil)
+        |> Map.put_new(:amount_total, nil)
+        |> Map.put_new(:currency, "usd")
+        |> Map.put_new(:metadata, %{})
+
+      result = {:ok, session}
+      state = %{state | checkout_sessions: Map.put(state.checkout_sessions, id, session)}
+      {result, state}
+    end)
+  end
+
+  def handle_call({:checkout_session_fetch, id, opts}, _from, state) do
+    with_script_or_stub(state, :checkout_session_fetch, [id, opts], fn state ->
+      lookup(state.checkout_sessions, id, state)
+    end)
+  end
+
+  def handle_call({:portal_session_create, params, opts}, _from, state) do
+    with_script_or_stub(state, :portal_session_create, [params, opts], fn state ->
+      counter = (state.counters[:billing_portal_session] || 0) + 1
+      counters = Map.put(state.counters, :billing_portal_session, counter)
+      state = %{state | counters: counters}
+      id = @billing_portal_session_prefix <> pad5(counter)
+
+      atom_params = atomize(params)
+
+      session =
+        atom_params
+        |> Map.put(:id, id)
+        |> Map.put(:object, "billing_portal.session")
+        |> Map.put(:url, "https://billing.stripe.test/p/session/" <> id)
+        |> Map.put(:created, DateTime.to_unix(state.clock))
+        |> Map.put_new(:customer, nil)
+        |> Map.put_new(:return_url, nil)
+        |> Map.put_new(:configuration, nil)
+        |> Map.put_new(:flow, nil)
+        |> Map.put_new(:locale, nil)
+        |> Map.put_new(:livemode, false)
+
+      result = {:ok, session}
+
+      state = %{
+        state
+        | billing_portal_sessions: Map.put(state.billing_portal_sessions, id, session)
+      }
+
+      {result, state}
     end)
   end
 
