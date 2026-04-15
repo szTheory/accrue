@@ -69,6 +69,11 @@ defmodule Accrue.MixProject do
       # Phoenix.Router.forward/3 when Phoenix is loaded, but the webhook
       # plug works without Phoenix (plain Plug.Router).
       {:phoenix, "~> 1.8", optional: true},
+      # Phase 6 Plan 03: Phoenix.Component + ~H sigil for the shared invoice
+      # component library (`Accrue.Invoices.Components`) used by both email
+      # (via HtmlBridge + <mj-raw>) and PDF (via Layouts.print_shell). Loaded
+      # for compile + runtime because the components live in lib/, not test/.
+      {:phoenix_live_view, "~> 1.1"},
       #
       # NOTE on :sigra — not yet published to Hex. Per D-41 the
       # Accrue.Integrations.Sigra adapter is conditionally compiled via
