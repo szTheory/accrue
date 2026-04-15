@@ -175,8 +175,8 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **ADMIN-22**: Admin action audit logging to `accrue_events` with `actor_type: :admin`
 - [ ] **ADMIN-23**: Admin actions linked causally to webhook-driven events (`caused_by_event_id`)
 - [ ] **ADMIN-24**: Dev-only test-clock advance UI (compile-time env gate, not runtime config)
-- [ ] **ADMIN-25**: `accrue_admin.router` macro for mounting (`accrue_admin "/billing"`)
-- [ ] **ADMIN-26**: `on_mount` hook for auth enforcement (not just `handle_event`)
+- [x] **ADMIN-25**: `accrue_admin.router` macro for mounting (`accrue_admin "/billing"`)
+- [x] **ADMIN-26**: `on_mount` hook for auth enforcement (not just `handle_event`)
 - [ ] **ADMIN-27**: Shared LiveView component library (tables, timelines, detail cards, money formatter)
 
 ### Auth Integration
@@ -433,8 +433,8 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-22 | Phase 7 | Pending |
 | ADMIN-23 | Phase 7 | Pending |
 | ADMIN-24 | Phase 7 | Pending |
-| ADMIN-25 | Phase 7 | Pending |
-| ADMIN-26 | Phase 7 | Pending |
+| ADMIN-25 | Phase 7 | Complete |
+| ADMIN-26 | Phase 7 | Complete |
 | ADMIN-27 | Phase 7 | Pending |
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
