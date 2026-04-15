@@ -39,6 +39,7 @@ defmodule AccrueAdmin.Components.AppShell do
       %{label: "Subscriptions", href: mount_path <> "/subscriptions", eyebrow: "Lifecycle"},
       %{label: "Invoices", href: mount_path <> "/invoices", eyebrow: "Collections"},
       %{label: "Charges", href: mount_path <> "/charges", eyebrow: "Payments"},
+      %{label: "Events", href: mount_path <> "/events", eyebrow: "Ledger"},
       %{label: "Coupons", href: mount_path <> "/coupons", eyebrow: "Discounts"},
       %{label: "Connect", href: mount_path <> "/connect", eyebrow: "Payouts"},
       %{label: "Webhooks", href: mount_path <> "/webhooks", eyebrow: "Operations"}

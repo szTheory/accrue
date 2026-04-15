@@ -26,6 +26,16 @@ end
 
 {:ok, _} = repo.start_link(pool: Ecto.Adapters.SQL.Sandbox)
 Ecto.Adapters.SQL.Sandbox.mode(repo, :manual)
+
+{:ok, _} =
+  Oban.start_link(
+    repo: repo,
+    testing: :manual,
+    queues: false,
+    plugins: false,
+    notifier: Oban.Notifiers.PG
+  )
+
 {:ok, _} = AccrueAdmin.TestEndpoint.start_link()
 
 ExUnit.start()
