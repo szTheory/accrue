@@ -43,24 +43,26 @@ defmodule Accrue.Billing.Customer do
   @foreign_key_type :binary_id
 
   schema "accrue_customers" do
-    field :owner_type, :string
-    field :owner_id, :string
-    field :processor, :string
-    field :processor_id, :string
-    field :name, :string
-    field :email, :string
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
-    field :metadata, :map, default: %{}
-    field :data, :map, default: %{}
-    field :lock_version, :integer, default: 1
+    field(:owner_type, :string)
+    field(:owner_id, :string)
+    field(:processor, :string)
+    field(:processor_id, :string)
+    field(:name, :string)
+    field(:email, :string)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
+    field(:metadata, :map, default: %{})
+    field(:preferred_locale, :string)
+    field(:preferred_timezone, :string)
+    field(:data, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
-    belongs_to :default_payment_method, Accrue.Billing.PaymentMethod, type: :binary_id
+    belongs_to(:default_payment_method, Accrue.Billing.PaymentMethod, type: :binary_id)
 
-    has_many :payment_methods, Accrue.Billing.PaymentMethod
-    has_many :subscriptions, Accrue.Billing.Subscription
-    has_many :charges, Accrue.Billing.Charge
-    has_many :invoices, Accrue.Billing.Invoice
+    has_many(:payment_methods, Accrue.Billing.PaymentMethod)
+    has_many(:subscriptions, Accrue.Billing.Subscription)
+    has_many(:charges, Accrue.Billing.Charge)
+    has_many(:invoices, Accrue.Billing.Invoice)
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -69,6 +71,7 @@ defmodule Accrue.Billing.Customer do
     owner_type owner_id processor processor_id
     name email default_payment_method_id
     last_stripe_event_ts last_stripe_event_id
+    preferred_locale preferred_timezone
     metadata data lock_version
   ]a
 
