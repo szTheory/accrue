@@ -79,6 +79,7 @@ defmodule Accrue.Processor.Fake do
   @promotion_code_prefix "promo_fake_"
   @checkout_session_prefix "cs_fake_"
   @billing_portal_session_prefix "bps_fake_"
+  @connect_account_prefix "acct_fake_"
 
   # ---------------------------------------------------------------------------
   # Public API — lifecycle
@@ -189,7 +190,7 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_customer(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_customer, params, opts})
+    GenServer.call(__MODULE__, {:create_customer, params, thread_scope(opts)})
   end
 
   @impl Accrue.Processor
@@ -527,6 +528,95 @@ defmodule Accrue.Processor.Fake do
   end
 
   # ---------------------------------------------------------------------------
+  # Behaviour callbacks — Connect (Phase 5 Plan 02, CONN-01/03/08/09/11)
+  # ---------------------------------------------------------------------------
+
+  @impl Accrue.Processor
+  def create_account(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:create_account, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def retrieve_account(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:retrieve_account, id, opts})
+  end
+
+  @impl Accrue.Processor
+  def update_account(id, params, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:update_account, id, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def delete_account(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:delete_account, id, opts})
+  end
+
+  @impl Accrue.Processor
+  def reject_account(id, params, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:reject_account, id, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def list_accounts(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:list_accounts, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def create_account_link(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:create_account_link, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def create_login_link(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:create_login_link, id, opts})
+  end
+
+  @impl Accrue.Processor
+  def create_transfer(params, opts \\ []) when is_map(params) and is_list(opts) do
+    GenServer.call(__MODULE__, {:create_transfer, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def retrieve_transfer(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    GenServer.call(__MODULE__, {:retrieve_transfer, id, opts})
+  end
+
+  # ---------------------------------------------------------------------------
+  # Test helpers — scope inspection
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Returns all stored connect accounts (always platform-scoped — connected
+  accounts are never themselves nested under another connected account).
+  """
+  @spec accounts() :: [map()]
+  def accounts do
+    GenServer.call(__MODULE__, :accounts_list)
+  end
+
+  @doc """
+  Returns all customers stored under `scope`. Scope is either a
+  binary `"acct_..."` (connected account) or the `:platform` atom
+  (no `with_account/2` wrapper).
+  """
+  @spec customers_on(String.t() | :platform) :: [map()]
+  def customers_on(scope) when is_binary(scope) or scope == :platform do
+    GenServer.call(__MODULE__, {:resources_on, :customers, scope})
+  end
+
+  @spec charges_on(String.t() | :platform) :: [map()]
+  def charges_on(scope) when is_binary(scope) or scope == :platform do
+    GenServer.call(__MODULE__, {:resources_on, :charges, scope})
+  end
+
+  @spec subscriptions_on(String.t() | :platform) :: [map()]
+  def subscriptions_on(scope) when is_binary(scope) or scope == :platform do
+    GenServer.call(__MODULE__, {:resources_on, :subscriptions, scope})
+  end
+
+  # ---------------------------------------------------------------------------
   # Behaviour callbacks — fetch dispatch (D3-48)
   # ---------------------------------------------------------------------------
 
@@ -655,6 +745,7 @@ defmodule Accrue.Processor.Fake do
             |> Map.put(:id, id)
             |> Map.put(:object, "customer")
             |> Map.put(:created, state.clock)
+            |> Map.put(:_accrue_scope, resolve_scope(opts))
 
           result = {:ok, customer}
           state = %{state | customers: Map.put(state.customers, id, customer)}
@@ -1416,9 +1507,228 @@ defmodule Accrue.Processor.Fake do
     end)
   end
 
+  # --- Connect (Phase 5 Plan 02) ---
+
+  def handle_call({:create_account, params, opts}, _from, state) do
+    with_script_or_stub(state, :create_account, [params, opts], fn state ->
+      counter = (state.counters[:connect_account] || 0) + 1
+      counters = Map.put(state.counters, :connect_account, counter)
+      state = %{state | counters: counters}
+      id = @connect_account_prefix <> pad5(counter)
+
+      atom_params = atomize(params)
+      type = atom_params[:type] || "standard"
+
+      type_str = if is_atom(type), do: Atom.to_string(type), else: type
+
+      account =
+        atom_params
+        |> Map.put(:id, id)
+        |> Map.put(:object, "account")
+        |> Map.put(:type, type_str)
+        |> Map.put_new(:charges_enabled, false)
+        |> Map.put_new(:payouts_enabled, false)
+        |> Map.put_new(:details_submitted, false)
+        |> Map.put_new(:capabilities, %{})
+        |> Map.put_new(:requirements, %{})
+        |> Map.put_new(:country, atom_params[:country] || "US")
+        |> Map.put_new(:email, atom_params[:email])
+        |> Map.put(:created, DateTime.to_unix(state.clock))
+        |> Map.put_new(:metadata, %{})
+
+      state = %{state | connect_accounts: Map.put(state.connect_accounts, id, account)}
+      {{:ok, account}, state}
+    end)
+  end
+
+  def handle_call({:retrieve_account, id, opts}, _from, state) do
+    with_script_or_stub(state, :retrieve_account, [id, opts], fn state ->
+      lookup(state.connect_accounts, id, state)
+    end)
+  end
+
+  def handle_call({:update_account, id, params, opts}, _from, state) do
+    with_script_or_stub(state, :update_account, [id, params, opts], fn state ->
+      case Map.fetch(state.connect_accounts, id) do
+        {:ok, existing} ->
+          # Deep-merge the nested `capabilities` and `settings` maps
+          # (CONN-08/09) so tests can round-trip partial patches.
+          updated = deep_merge_account(existing, atomize(params))
+
+          {{:ok, updated},
+           %{state | connect_accounts: Map.put(state.connect_accounts, id, updated)}}
+
+        :error ->
+          {{:error, resource_missing(id)}, state}
+      end
+    end)
+  end
+
+  def handle_call({:delete_account, id, opts}, _from, state) do
+    with_script_or_stub(state, :delete_account, [id, opts], fn state ->
+      case Map.fetch(state.connect_accounts, id) do
+        {:ok, _existing} ->
+          deleted = %{id: id, object: "account", deleted: true}
+          # Keep the stored account around so retrieve_account still
+          # returns it for tombstone tests; hosts track deauthorization
+          # via the local row's `deauthorized_at` column.
+          {{:ok, deleted}, state}
+
+        :error ->
+          {{:error, resource_missing(id)}, state}
+      end
+    end)
+  end
+
+  def handle_call({:reject_account, id, params, opts}, _from, state) do
+    with_script_or_stub(state, :reject_account, [id, params, opts], fn state ->
+      case Map.fetch(state.connect_accounts, id) do
+        {:ok, existing} ->
+          reason = params[:reason] || params["reason"]
+          updated = Map.put(existing, :requirements, %{disabled_reason: "rejected.#{reason}"})
+
+          {{:ok, updated},
+           %{state | connect_accounts: Map.put(state.connect_accounts, id, updated)}}
+
+        :error ->
+          {{:error, resource_missing(id)}, state}
+      end
+    end)
+  end
+
+  def handle_call({:list_accounts, _params, opts}, _from, state) do
+    with_script_or_stub(state, :list_accounts, [opts], fn state ->
+      data = Map.values(state.connect_accounts)
+      {{:ok, %{object: "list", data: data, has_more: false}}, state}
+    end)
+  end
+
+  def handle_call({:create_account_link, params, opts}, _from, state) do
+    with_script_or_stub(state, :create_account_link, [params, opts], fn state ->
+      atom_params = atomize(params)
+      acct = atom_params[:account]
+
+      link = %{
+        object: "account_link",
+        account: acct,
+        url: "https://connect.stripe.test/setup/" <> to_string(acct),
+        created: DateTime.to_unix(state.clock),
+        expires_at: DateTime.to_unix(DateTime.add(state.clock, 300, :second))
+      }
+
+      {{:ok, link}, state}
+    end)
+  end
+
+  def handle_call({:create_login_link, id, opts}, _from, state) do
+    with_script_or_stub(state, :create_login_link, [id, opts], fn state ->
+      link = %{
+        object: "login_link",
+        created: DateTime.to_unix(state.clock),
+        url: "https://connect.stripe.test/express/" <> id
+      }
+
+      {{:ok, link}, state}
+    end)
+  end
+
+  def handle_call({:create_transfer, params, opts}, _from, state) do
+    with_script_or_stub(state, :create_transfer, [params, opts], fn state ->
+      atom_params = atomize(params)
+      counter = (state.counters[:connect_account] || 0) + 1
+      counters = Map.put(state.counters, :connect_account, counter)
+      state = %{state | counters: counters}
+      id = "tr_fake_" <> pad5(counter)
+
+      transfer =
+        atom_params
+        |> Map.put(:id, id)
+        |> Map.put(:object, "transfer")
+        |> Map.put(:created, DateTime.to_unix(state.clock))
+
+      {{:ok, transfer}, state}
+    end)
+  end
+
+  def handle_call({:retrieve_transfer, id, opts}, _from, state) do
+    with_script_or_stub(state, :retrieve_transfer, [id, opts], fn state ->
+      transfer = %{id: id, object: "transfer", created: DateTime.to_unix(state.clock)}
+      {{:ok, transfer}, state}
+    end)
+  end
+
+  def handle_call(:accounts_list, _from, state) do
+    {:reply, Map.values(state.connect_accounts), state}
+  end
+
+  def handle_call({:resources_on, bucket, scope}, _from, state) do
+    map =
+      case bucket do
+        :customers -> state.customers
+        :charges -> state.charges
+        :subscriptions -> state.subscriptions
+      end
+
+    scope_value =
+      case scope do
+        :platform -> :platform
+        bin when is_binary(bin) -> bin
+      end
+
+    result =
+      map
+      |> Map.values()
+      |> Enum.filter(fn resource ->
+        tag = resource[:_accrue_scope] || resource["_accrue_scope"] || :platform
+        tag == scope_value
+      end)
+
+    {:reply, result, state}
+  end
+
   # ---------------------------------------------------------------------------
   # Internals
   # ---------------------------------------------------------------------------
+
+  # Reads the current `:accrue_connected_account_id` pdict value on the
+  # caller process and threads it into opts as `:stripe_account`, so the
+  # GenServer-side handle_call can resolve scope without sharing pdict
+  # with the caller process. No-op if already explicitly set in opts.
+  defp thread_scope(opts) when is_list(opts) do
+    if Keyword.has_key?(opts, :stripe_account) do
+      opts
+    else
+      case Process.get(:accrue_connected_account_id) do
+        nil -> opts
+        id -> Keyword.put(opts, :stripe_account, id)
+      end
+    end
+  end
+
+  # Resolves the connected-account scope for a new resource:
+  # `opts[:stripe_account]` overrides, then the pdict (D5-01), else
+  # `:platform` sentinel. This mirrors
+  # `Accrue.Processor.Stripe.resolve_stripe_account/1` but falls back
+  # to the `:platform` atom so the Fake's `customers_on/1` and
+  # `charges_on/1` helpers can distinguish "never scoped" from
+  # "scoped to acct_X".
+  defp resolve_scope(opts) when is_list(opts) do
+    Keyword.get(opts, :stripe_account) ||
+      Process.get(:accrue_connected_account_id) ||
+      :platform
+  end
+
+  # Deep-merges nested atom-keyed maps (capabilities, settings, etc.)
+  # so CONN-08/09 update_account round-trips preserve keys that were
+  # already present in the existing account payload.
+  defp deep_merge_account(left, right) when is_map(left) and is_map(right) do
+    Map.merge(left, right, fn _k, l, r ->
+      cond do
+        is_map(l) and is_map(r) -> deep_merge_account(l, r)
+        true -> r
+      end
+    end)
+  end
 
   defp with_script_or_stub(state, op, args, fun) do
     case Map.fetch(state.scripts, op) do

@@ -26,6 +26,7 @@ defmodule Accrue.Processor.Fake.State do
           promotion_codes: %{optional(id()) => map()},
           checkout_sessions: %{optional(id()) => map()},
           billing_portal_sessions: %{optional(id()) => map()},
+          connect_accounts: %{optional(id()) => map()},
           counters: %{
             customer: non_neg_integer(),
             subscription: non_neg_integer(),
@@ -41,6 +42,7 @@ defmodule Accrue.Processor.Fake.State do
             promotion_code: non_neg_integer(),
             checkout_session: non_neg_integer(),
             billing_portal_session: non_neg_integer(),
+            connect_account: non_neg_integer(),
             event: non_neg_integer()
           },
           clock: DateTime.t(),
@@ -66,6 +68,7 @@ defmodule Accrue.Processor.Fake.State do
             promotion_codes: %{},
             checkout_sessions: %{},
             billing_portal_sessions: %{},
+            connect_accounts: %{},
             counters: %{
               customer: 0,
               subscription: 0,
@@ -81,6 +84,7 @@ defmodule Accrue.Processor.Fake.State do
               promotion_code: 0,
               checkout_session: 0,
               billing_portal_session: 0,
+              connect_account: 0,
               event: 0
             },
             clock: @epoch,
