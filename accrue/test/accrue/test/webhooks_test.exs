@@ -36,7 +36,7 @@ defmodule Accrue.Test.WebhooksTest do
              from(w in WebhookEvent,
                where:
                  w.id == ^row.id and w.type == "invoice.payment_failed" and
-                   w.status in [:received, :processed]
+                   w.status in [:received, :succeeded]
              )
            )
 
