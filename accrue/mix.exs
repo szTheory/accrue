@@ -63,6 +63,7 @@ defmodule Accrue.MixProject do
       {:jason, "~> 1.4"},
       {:decimal, "~> 2.0"},
       {:plug, "~> 1.16"},
+      {:igniter, "~> 0.7.9", runtime: false},
 
       # Optional deps — conditionally compiled; see CLAUDE.md §Conditional Compilation.
       #
