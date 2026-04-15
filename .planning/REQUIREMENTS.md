@@ -155,7 +155,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **ADMIN-02**: Mobile-first responsive layout (usable from phone)
 - [x] **ADMIN-03**: Light + dark mode with consistent contrast across components
 - [x] **ADMIN-04**: Brand palette theme (Ink/Slate/Fog/Paper + Moss/Cobalt/Amber); Amber reserved for warning/grace states
-- [ ] **ADMIN-05**: Breadcrumbs + flash notifications
+- [x] **ADMIN-05**: Breadcrumbs + flash notifications
 - [x] **ADMIN-06**: Brandable: logo, accent color, app name via runtime config
 - [x] **ADMIN-07**: Customer list + search + filter
 - [ ] **ADMIN-08**: Customer detail page with tabs (subscriptions, invoices, charges, payment methods, events, metadata)
@@ -177,7 +177,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **ADMIN-24**: Dev-only test-clock advance UI (compile-time env gate, not runtime config)
 - [x] **ADMIN-25**: `accrue_admin.router` macro for mounting (`accrue_admin "/billing"`)
 - [x] **ADMIN-26**: `on_mount` hook for auth enforcement (not just `handle_event`)
-- [ ] **ADMIN-27**: Shared LiveView component library (tables, timelines, detail cards, money formatter)
+- [x] **ADMIN-27**: Shared LiveView component library (tables, timelines, detail cards, money formatter)
 
 ### Auth Integration
 
@@ -413,7 +413,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-02 | Phase 7 | Complete |
 | ADMIN-03 | Phase 7 | Complete |
 | ADMIN-04 | Phase 7 | Complete |
-| ADMIN-05 | Phase 7 | Pending |
+| ADMIN-05 | Phase 7 | Complete |
 | ADMIN-06 | Phase 7 | Complete |
 | ADMIN-07 | Phase 7 | Complete |
 | ADMIN-08 | Phase 7 | Pending |
@@ -435,7 +435,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-24 | Phase 7 | Pending |
 | ADMIN-25 | Phase 7 | Complete |
 | ADMIN-26 | Phase 7 | Complete |
-| ADMIN-27 | Phase 7 | Pending |
+| ADMIN-27 | Phase 7 | Complete |
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 7 | Complete |

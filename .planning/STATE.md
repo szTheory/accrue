@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-04-PLAN.md
-last_updated: "2026-04-15T17:29:32.717Z"
+stopped_at: Completed 07-09-PLAN.md
+last_updated: "2026-04-15T17:39:53.582Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 54
-  completed_plans: 46
-  percent: 85
+  completed_plans: 47
+  percent: 87
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 07 (admin-ui-accrue-admin) — EXECUTING
-Plan: 5 of 12
+Plan: 6 of 12
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -87,6 +87,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-admin-ui-accrue-admin P02 | 8m | 1 tasks | 21 files |
 | Phase 07 P03 | 9m | 1 tasks | 16 files |
 | Phase 07-admin-ui-accrue-admin P04 | 9m | 2 tasks | 17 files |
+| Phase 07 P09 | 9m | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -202,6 +203,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 07-admin-ui-accrue-admin]: Step-up verification delegates to optional Accrue.Auth callbacks, with dev/test auto-approval and prod fail-closed behavior preserved in Accrue.Auth.Default.
 - [Phase 07-admin-ui-accrue-admin]: Step-up audit rows use a separate admin.step_up.* stream on Accrue.Events so verification outcomes are durable without polluting domain event types.
 - [Phase 07-admin-ui-accrue-admin]: Causal linkage uses both caused_by_event_id and caused_by_webhook_event_id so admin actions and webhook-derived follow-ons stay first-class without overloading one column.
+- [Phase 07]: Shared admin controls stay as pure function components with explicit attrs and escaped text rendering rather than host-coupled helpers.
+- [Phase 07]: Status badges map fixed billing states onto the locked Moss, Cobalt, Amber, Slate, and Ink semantics instead of caller-defined colors.
+- [Phase 07]: Dropdown menus use native disclosure plus text labels so later pages inherit accessible actions without icon-only affordances.
 
 ### Pending Todos
 
@@ -222,6 +226,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T17:29:32.713Z
-Stopped at: Completed 07-04-PLAN.md
+Last session: 2026-04-15T17:39:53.579Z
+Stopped at: Completed 07-09-PLAN.md
 Resume file: None
