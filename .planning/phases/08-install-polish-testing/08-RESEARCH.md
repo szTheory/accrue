@@ -425,16 +425,16 @@ assert_event_recorded user,
 | A3 | Regex patching failure warning signs include multi-router/multi-endpoint host apps. | Common Pitfalls | Planner should validate against generated phx.new and one nonstandard app. |
 | A4 | Generated file fingerprints can be implemented as comments/metadata. | Common Pitfalls | Planner may choose a sidecar manifest instead. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `:igniter` be a regular runtime-false dependency or generated-code-only dev dependency?**
    - What we know: `mix accrue.install` runs from the published Accrue dependency in a host app, so the task's dependency must be available to that host compile/runtime environment. [VERIFIED: Mix task model in codebase]
-   - What's unclear: Whether Accrue wants to expose Igniter as a transitive dependency to all users. [ASSUMED]
+   - RESOLVED: Use `{:igniter, "~> 0.7.9", runtime: false}` in `accrue/mix.exs`, not a dev-only dependency, because the published `mix accrue.install` task must be executable from a host app that depends on Accrue. `runtime: false` keeps Igniter out of the started application while still making the Mix task's patching dependency available at compile/task time. [VERIFIED: Hex API] [VERIFIED: Mix task model in codebase]
    - Recommendation: Add `{:igniter, "~> 0.7.9", runtime: false}` to `accrue/mix.exs`; document it as installer-only. [VERIFIED: Hex API]
 
 2. **How much router/application patching should be automatic for nonstandard Phoenix apps?**
    - What we know: D8-09 allows default patching only through safe diff/review and `--manual` snippets otherwise. [VERIFIED: 08-CONTEXT.md]
-   - What's unclear: The exact complexity threshold for falling back to manual mode. [ASSUMED]
+   - RESOLVED: Auto-patch only fresh `phx.new`-shaped and simple single-router/single-endpoint/single-Repo apps where Igniter/source-aware patchers can place route-scoped webhook, admin, config, test-support, and Oban snippets without ambiguity. For multi-router, multi-endpoint, multi-Repo, custom Plug parser, or unrecognized application supervision shapes, produce exact manual snippets and mark those items as skipped/manual in the final report. [VERIFIED: 08-CONTEXT.md] [ASSUMED: nonstandard shape thresholds]
    - Recommendation: Auto-patch fresh `phx.new` shape and simple routers; otherwise produce exact snippets and a skipped report. [ASSUMED]
 
 ## Environment Availability
