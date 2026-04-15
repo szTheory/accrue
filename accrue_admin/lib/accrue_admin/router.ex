@@ -65,6 +65,8 @@ defmodule AccrueAdmin.Router do
           live("/coupons/:id", AccrueAdmin.Live.CouponLive, :show)
           live("/promotion-codes", AccrueAdmin.Live.PromotionCodesLive, :index)
           live("/promotion-codes/:id", AccrueAdmin.Live.PromotionCodeLive, :show)
+          live("/connect", AccrueAdmin.Live.ConnectAccountsLive, :index)
+          live("/connect/:id", AccrueAdmin.Live.ConnectAccountLive, :show)
           live("/events", AccrueAdmin.Live.EventsLive, :index)
           live("/webhooks", AccrueAdmin.Live.WebhooksLive, :index)
           live("/webhooks/:id", AccrueAdmin.Live.WebhookLive, :show)
