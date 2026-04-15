@@ -108,7 +108,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **EVT-06**: Query API: `timeline_for/2`, `state_as_of/3`, `bucket_by/3` for analytics
 - [ ] **EVT-07**: OpenTelemetry `trace_id` correlation captured on every event write
 - [ ] **EVT-08**: Actor context enum: `user | system | webhook | oban | admin` with required actor_type
-- [ ] **EVT-09**: `Accrue.Integrations.Sigra` bridges Accrue events to `Sigra.Audit` when present
+- [x] **EVT-09**: `Accrue.Integrations.Sigra` bridges Accrue events to `Sigra.Audit` when present
 - [x] **EVT-10**: Analytics helper: bucket events by month/week/day with type filters
 
 ### Email
@@ -171,9 +171,9 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **ADMIN-18**: Activity feed sourced from `accrue_events`
 - [x] **ADMIN-19**: Connect: connected accounts list + detail + capability inspector
 - [ ] **ADMIN-20**: Connect: platform fee configuration UI
-- [ ] **ADMIN-21**: Step-up auth / re-auth prompt for destructive actions (refund, manual cancel)
-- [ ] **ADMIN-22**: Admin action audit logging to `accrue_events` with `actor_type: :admin`
-- [ ] **ADMIN-23**: Admin actions linked causally to webhook-driven events (`caused_by_event_id`)
+- [x] **ADMIN-21**: Step-up auth / re-auth prompt for destructive actions (refund, manual cancel)
+- [x] **ADMIN-22**: Admin action audit logging to `accrue_events` with `actor_type: :admin`
+- [x] **ADMIN-23**: Admin actions linked causally to webhook-driven events (`caused_by_event_id`)
 - [ ] **ADMIN-24**: Dev-only test-clock advance UI (compile-time env gate, not runtime config)
 - [x] **ADMIN-25**: `accrue_admin.router` macro for mounting (`accrue_admin "/billing"`)
 - [x] **ADMIN-26**: `on_mount` hook for auth enforcement (not just `handle_event`)
@@ -183,7 +183,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 
 - [ ] **AUTH-01**: `Accrue.Auth` behaviour (`current_user/1`, `require_admin_plug/0`, `user_schema/0`, `log_audit/2`, `actor_id/1`)
 - [ ] **AUTH-02**: `Accrue.Auth.Default` fallback adapter (dev-only; fails closed in prod)
-- [ ] **AUTH-03**: `Accrue.Integrations.Sigra` first-party adapter, conditionally compiled via `Code.ensure_loaded?(Sigra)`
+- [x] **AUTH-03**: `Accrue.Integrations.Sigra` first-party adapter, conditionally compiled via `Code.ensure_loaded?(Sigra)`
 - [ ] **AUTH-04**: `mix accrue.install` auto-detects sigra in deps and auto-wires adapter config
 - [ ] **AUTH-05**: Documentation for community adapters (`Accrue.Integrations.PhxGenAuth`, `.Pow`, `.Assent` patterns)
 
@@ -375,7 +375,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | EVT-06 | Phase 4 | Complete |
 | EVT-07 | Phase 1 | Pending |
 | EVT-08 | Phase 1 | Pending |
-| EVT-09 | Phase 7 | Pending |
+| EVT-09 | Phase 7 | Complete |
 | EVT-10 | Phase 4 | Complete |
 | MAIL-01 | Phase 1 | Pending |
 | MAIL-02 | Phase 6 | Complete |
@@ -429,16 +429,16 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | ADMIN-18 | Phase 7 | Pending |
 | ADMIN-19 | Phase 7 | Complete |
 | ADMIN-20 | Phase 7 | Pending |
-| ADMIN-21 | Phase 7 | Pending |
-| ADMIN-22 | Phase 7 | Pending |
-| ADMIN-23 | Phase 7 | Pending |
+| ADMIN-21 | Phase 7 | Complete |
+| ADMIN-22 | Phase 7 | Complete |
+| ADMIN-23 | Phase 7 | Complete |
 | ADMIN-24 | Phase 7 | Pending |
 | ADMIN-25 | Phase 7 | Complete |
 | ADMIN-26 | Phase 7 | Complete |
 | ADMIN-27 | Phase 7 | Pending |
 | AUTH-01 | Phase 1 | Pending |
 | AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 7 | Pending |
+| AUTH-03 | Phase 7 | Complete |
 | AUTH-04 | Phase 8 | Pending |
 | AUTH-05 | Phase 8 | Pending |
 | INST-01 | Phase 8 | Pending |
