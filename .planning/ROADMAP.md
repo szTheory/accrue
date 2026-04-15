@@ -122,7 +122,7 @@ Plans:
 - [x] 05-01-PLAN.md — Wave 0: webhook endpoint persistence gap + PROC-05 Stripe-Account threading (resolve_stripe_account + build_client + Processor behaviour + Config :connect + Oban middleware)
 - [x] 05-02-PLAN.md — Wave 1: accrue_connect_accounts migration + Account schema/projection/predicates + Accrue.Connect facade (with_account/CRUD) + PutConnectedAccount plug + Fake Connect lifecycle with account-scoped ETS
 - [x] 05-03-PLAN.md — Wave 1: AccountLink + LoginLink credential structs with Inspect masking + create_account_link/create_login_link facade + Stripe adapter delegations
-- [ ] 05-04-PLAN.md — Wave 1: platform_fee/2 pure Money helper + NimbleOptions config + StreamData property tests across JPY/USD/KWD
+- [x] 05-04-PLAN.md — Wave 1: platform_fee/2 pure Money helper + NimbleOptions config + StreamData property tests across JPY/USD/KWD
 - [ ] 05-05-PLAN.md — Wave 2: destination_charge/2 + separate_charge_and_transfer/2 + transfer/2 + telemetry spans + force_platform header safety
 - [ ] 05-06-PLAN.md — Wave 2: Accrue.Webhook.ConnectHandler full reducer set (account.*, capability.*, payout.*, person.*) + out-of-order seeding + ops telemetry
 - [ ] 05-07-PLAN.md — Wave 3: dual-scope integration test + live_stripe Connect suite + guides/connect.md + boot-time secret-collision warning + VALIDATION nyquist sign-off
