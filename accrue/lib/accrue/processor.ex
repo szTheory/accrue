@@ -196,6 +196,48 @@ defmodule Accrue.Processor do
   @callback portal_session_create(params(), opts()) :: result()
 
   # ---------------------------------------------------------------------------
+  # Connect (Phase 5)
+  #
+  # Connected Accounts + account links + login links + platform transfers
+  # (CONN-01..CONN-11). Adapter resolution threads `stripe_account` through
+  # `Accrue.Processor.Stripe.resolve_stripe_account/1` → `build_client!/1`,
+  # which mirrors the D2-14 pdict pattern for `:stripe_api_version`. These
+  # callbacks are used by the Plan 05-03 Connect context modules
+  # (`Accrue.Connect.Account`, `Accrue.Connect.AccountLink`,
+  # `Accrue.Connect.LoginLink`, `Accrue.Connect.Transfer`).
+  # ---------------------------------------------------------------------------
+
+  @callback create_account(params(), opts()) :: result()
+  @callback retrieve_account(id(), opts()) :: result()
+  @callback update_account(id(), params(), opts()) :: result()
+  @callback delete_account(id(), opts()) :: result()
+  @callback reject_account(id(), params(), opts()) :: result()
+  @callback list_accounts(params(), opts()) :: result()
+
+  @callback create_account_link(params(), opts()) :: result()
+  @callback create_login_link(id(), opts()) :: result()
+
+  @callback create_transfer(params(), opts()) :: result()
+  @callback retrieve_transfer(id(), opts()) :: result()
+
+  # Phase 5 Connect callbacks are declared optional at the behaviour level
+  # so Plan 05-01 can land the contract surface without forcing adapter
+  # implementations in the same commit. Plans 05-02/05-03 add the real
+  # `Accrue.Processor.Fake` + `Accrue.Processor.Stripe` bodies; once both
+  # adapters implement the full surface, this `@optional_callbacks`
+  # declaration can be removed to re-enable strict behaviour checks.
+  @optional_callbacks create_account: 2,
+                      retrieve_account: 2,
+                      update_account: 3,
+                      delete_account: 2,
+                      reject_account: 3,
+                      list_accounts: 2,
+                      create_account_link: 2,
+                      create_login_link: 2,
+                      create_transfer: 2,
+                      retrieve_transfer: 2
+
+  # ---------------------------------------------------------------------------
   # Phase 1 facade dispatch
   # ---------------------------------------------------------------------------
 

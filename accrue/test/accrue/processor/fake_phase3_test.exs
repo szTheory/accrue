@@ -342,8 +342,18 @@ defmodule Accrue.Processor.FakePhase3Test do
   end
 
   describe "behaviour compliance" do
-    test "Fake exports every Accrue.Processor callback" do
-      for {name, arity} <- Accrue.Processor.behaviour_info(:callbacks) do
+    test "Fake exports every required Accrue.Processor callback" do
+      # Phase 5 Plan 01 declared Connect callbacks as `@optional_callbacks`
+      # pending adapter implementations in Plan 05-02/05-03. Filter them
+      # out here so this Phase 3 strictness check still enforces the full
+      # Phase 1-4 surface without tripping on the intentional Connect gap.
+      optional = Accrue.Processor.behaviour_info(:optional_callbacks)
+
+      required =
+        Accrue.Processor.behaviour_info(:callbacks)
+        |> Enum.reject(fn callback -> callback in optional end)
+
+      for {name, arity} <- required do
         assert function_exported?(Accrue.Processor.Fake, name, arity),
                "Fake missing callback #{name}/#{arity}"
       end

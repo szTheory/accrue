@@ -213,6 +213,29 @@ defmodule Accrue.Config do
       doc:
         "Hard cap on bulk replay. Returns `{:error, :replay_too_large}` " <>
           "unless `force: true` is passed. Default: 10_000 (D4-04)."
+    ],
+
+    # --- Phase 5: Connect (D5-01, D5-04) ---------------------------------
+    connect: [
+      type: :keyword_list,
+      default: [
+        default_stripe_account: nil,
+        platform_fee: [
+          percent: Decimal.new("2.9"),
+          fixed: nil,
+          min: nil,
+          max: nil
+        ]
+      ],
+      doc:
+        "Stripe Connect configuration. `:default_stripe_account` is the " <>
+          "fallback connected account id used when no per-call override " <>
+          "or pdict scope is active (three-level precedence chain). " <>
+          "`:platform_fee` configures the default flat-rate fee consumed " <>
+          "by `Accrue.Connect.platform_fee/2`: `:percent` is a `Decimal` " <>
+          "percentage (e.g. `Decimal.new(\"2.9\")` for 2.9%), `:fixed` is " <>
+          "an `Accrue.Money` fee in minor units added after the percentage, " <>
+          "and `:min`/`:max` optionally clamp the result (D5-04)."
     ]
   ]
 
@@ -355,6 +378,16 @@ defmodule Accrue.Config do
   """
   @spec dunning() :: keyword()
   def dunning, do: get!(:dunning)
+
+  @doc """
+  Returns the Connect config keyword list (D5-01, D5-04).
+
+  Shape: `[default_stripe_account: String.t() | nil,
+            platform_fee: [percent: Decimal.t(), fixed: Accrue.Money.t() | nil,
+                           min: Accrue.Money.t() | nil, max: Accrue.Money.t() | nil]]`.
+  """
+  @spec connect() :: keyword()
+  def connect, do: get!(:connect)
 
   @doc """
   Returns the multi-endpoint webhook config (WH-13).

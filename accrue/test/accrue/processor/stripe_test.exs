@@ -147,6 +147,68 @@ defmodule Accrue.Processor.StripeTest do
     end
   end
 
+  describe "resolve_stripe_account/1 (D5-01 three-level precedence)" do
+    setup do
+      prior_pdict = Process.get(:accrue_connected_account_id)
+      prior_cfg = Application.get_env(:accrue, :connect)
+
+      on_exit(fn ->
+        if prior_pdict do
+          Process.put(:accrue_connected_account_id, prior_pdict)
+        else
+          Process.delete(:accrue_connected_account_id)
+        end
+
+        if prior_cfg do
+          Application.put_env(:accrue, :connect, prior_cfg)
+        else
+          Application.delete_env(:accrue, :connect)
+        end
+      end)
+
+      # Start each test with a clean slate.
+      Process.delete(:accrue_connected_account_id)
+      Application.delete_env(:accrue, :connect)
+      :ok
+    end
+
+    test "returns nil when no override, pdict, or config is set (platform-scoped default)" do
+      assert Accrue.Processor.Stripe.resolve_stripe_account([]) == nil
+    end
+
+    test "level 1: opts[:stripe_account] wins over pdict and config" do
+      Process.put(:accrue_connected_account_id, "acct_pdict")
+
+      Application.put_env(:accrue, :connect,
+        default_stripe_account: "acct_config",
+        platform_fee: [percent: Decimal.new("2.9"), fixed: nil, min: nil, max: nil]
+      )
+
+      assert Accrue.Processor.Stripe.resolve_stripe_account(stripe_account: "acct_opts") ==
+               "acct_opts"
+    end
+
+    test "level 2: pdict wins over config when opts has no override" do
+      Process.put(:accrue_connected_account_id, "acct_pdict")
+
+      Application.put_env(:accrue, :connect,
+        default_stripe_account: "acct_config",
+        platform_fee: [percent: Decimal.new("2.9"), fixed: nil, min: nil, max: nil]
+      )
+
+      assert Accrue.Processor.Stripe.resolve_stripe_account([]) == "acct_pdict"
+    end
+
+    test "level 3: config :default_stripe_account is the fallback when no override and no pdict" do
+      Application.put_env(:accrue, :connect,
+        default_stripe_account: "acct_config",
+        platform_fee: [percent: Decimal.new("2.9"), fixed: nil, min: nil, max: nil]
+      )
+
+      assert Accrue.Processor.Stripe.resolve_stripe_account([]) == "acct_config"
+    end
+  end
+
   describe "facade lockdown — lattice_stripe is isolated" do
     test "LatticeStripe module references only appear inside Accrue.Processor.Stripe.* files" do
       # Match the capitalized module name LatticeStripe (with word boundaries)

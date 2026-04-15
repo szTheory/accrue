@@ -27,10 +27,34 @@ defmodule Accrue.Oban.Middleware do
   @doc """
   Stamps the current process with a deterministic operation_id derived
   from the Oban job id and attempt number. Returns `:ok`.
+
+  ## Connect account propagation (D5-01)
+
+  If the Oban job args include a `"stripe_account"` key, the connected
+  account id is restored into the process dictionary under
+  `:accrue_connected_account_id` so downstream `Accrue.Processor.Stripe`
+  calls pick it up via `resolve_stripe_account/1`'s precedence chain.
+  This mirrors the api-version pdict pattern from D2-14 and keeps
+  Connect context stable across the enqueue → perform boundary.
+
+  The middleware only READS `stripe_account` from trusted enqueue-time
+  args (never from webhook payloads); Oban stores args in jsonb which
+  is trusted DB state, not external input.
   """
-  @spec put(%{id: any(), attempt: integer()}) :: :ok
-  def put(%{id: id, attempt: attempt}) do
+  @spec put(%{id: any(), attempt: integer(), args: map()} | %{id: any(), attempt: integer()}) ::
+          :ok
+  def put(%{id: id, attempt: attempt} = job) do
     Accrue.Actor.put_operation_id("oban-#{id}-#{attempt}")
+    maybe_restore_stripe_account(Map.get(job, :args))
     :ok
   end
+
+  @spec maybe_restore_stripe_account(map() | nil) :: :ok
+  defp maybe_restore_stripe_account(%{"stripe_account" => acct})
+       when is_binary(acct) and acct != "" do
+    Process.put(:accrue_connected_account_id, acct)
+    :ok
+  end
+
+  defp maybe_restore_stripe_account(_args), do: :ok
 end

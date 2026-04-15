@@ -824,6 +824,25 @@ defmodule Accrue.Processor.Stripe do
       Accrue.Config.stripe_api_version()
   end
 
+  @doc """
+  Resolves the Stripe-Account header using three-level precedence (D5-01):
+
+    1. `opts[:stripe_account]` (explicit per-call override)
+    2. `Process.get(:accrue_connected_account_id)` (via `Accrue.Connect.with_account/2`
+       — scoped pdict key; the `Accrue.Connect` module itself lands in Plan 05-02)
+    3. `Accrue.Config.connect/0` `[:default_stripe_account]` (config fallback)
+
+  Returns `nil` when no connected-account context is set, which preserves
+  platform-scoped behavior: `lattice_stripe` omits the `Stripe-Account`
+  header when the client is built with `stripe_account: nil`.
+  """
+  @spec resolve_stripe_account(keyword()) :: String.t() | nil
+  def resolve_stripe_account(opts \\ []) when is_list(opts) do
+    Keyword.get(opts, :stripe_account) ||
+      Process.get(:accrue_connected_account_id) ||
+      Keyword.get(Accrue.Config.connect(), :default_stripe_account)
+  end
+
   # ---------------------------------------------------------------------------
   # Internals
   # ---------------------------------------------------------------------------
@@ -849,8 +868,13 @@ defmodule Accrue.Processor.Stripe do
       end
 
     api_version = resolve_api_version(opts)
+    stripe_account = resolve_stripe_account(opts)
 
-    LatticeStripe.Client.new!(api_key: key, api_version: api_version)
+    LatticeStripe.Client.new!(
+      api_key: key,
+      api_version: api_version,
+      stripe_account: stripe_account
+    )
   end
 
   defp random_seed_with_warning(op, subject_id) do
