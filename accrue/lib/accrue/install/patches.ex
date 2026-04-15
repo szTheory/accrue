@@ -132,7 +132,7 @@ defmodule Accrue.Install.Patches do
 
     # Add to config/test.exs:
     config :accrue, :processor, Accrue.Processor.Fake
-    config :accrue, :mailer_adapter, Accrue.Mailer.Test
+    config :accrue, :mailer, Accrue.Mailer.Test
     config :accrue, :pdf_adapter, Accrue.PDF.Test
     """
   end
