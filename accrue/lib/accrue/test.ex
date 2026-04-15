@@ -11,6 +11,7 @@ defmodule Accrue.Test do
       import Accrue.Test
       import Accrue.Test.MailerAssertions
       import Accrue.Test.PdfAssertions
+      import Accrue.Test.EventAssertions
     end
   end
 
