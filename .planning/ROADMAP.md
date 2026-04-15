@@ -117,7 +117,15 @@ Plans:
   3. Every processor call taking a connected-account context threads `Stripe-Account` through `lattice_stripe` without leaking platform-scoped secrets; platform-scoped and connected-account-scoped calls are both reachable via the same API with explicit context.
   4. A webhook arriving at a Connect-variant endpoint is verified against the Connect-variant secret (not the platform secret) and routed to the correct handler; a platform-level webhook is verified against the platform secret.
   5. An Express dashboard login link can be generated and clicked through to Stripe's dashboard for a connected account.
-**Plans**: TBD
+**Plans**: 7 plans
+Plans:
+- [x] 05-01-PLAN.md — Wave 0: webhook endpoint persistence gap + PROC-05 Stripe-Account threading (resolve_stripe_account + build_client + Processor behaviour + Config :connect + Oban middleware)
+- [ ] 05-02-PLAN.md — Wave 1: accrue_connect_accounts migration + Account schema/projection/predicates + Accrue.Connect facade (with_account/CRUD) + PutConnectedAccount plug + Fake Connect lifecycle with account-scoped ETS
+- [ ] 05-03-PLAN.md — Wave 1: AccountLink + LoginLink credential structs with Inspect masking + create_account_link/create_login_link facade + Stripe adapter delegations
+- [ ] 05-04-PLAN.md — Wave 1: platform_fee/2 pure Money helper + NimbleOptions config + StreamData property tests across JPY/USD/KWD
+- [ ] 05-05-PLAN.md — Wave 2: destination_charge/2 + separate_charge_and_transfer/2 + transfer/2 + telemetry spans + force_platform header safety
+- [ ] 05-06-PLAN.md — Wave 2: Accrue.Webhook.ConnectHandler full reducer set (account.*, capability.*, payout.*, person.*) + out-of-order seeding + ops telemetry
+- [ ] 05-07-PLAN.md — Wave 3: dual-scope integration test + live_stripe Connect suite + guides/connect.md + boot-time secret-collision warning + VALIDATION nyquist sign-off
 **UI hint**: no
 
 ### Phase 6: Email + PDF
@@ -185,7 +193,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. Schemas + Webhook Plumbing | 0/6 | Planned | - |
 | 3. Core Subscription Lifecycle | 0/TBD | Not started | - |
 | 4. Advanced Billing + Webhook Hardening | 0/TBD | Not started | - |
-| 5. Connect | 0/TBD | Not started | - |
+| 5. Connect | 1/7 | In Progress|  |
 | 6. Email + PDF | 0/TBD | Not started | - |
 | 7. Admin UI (accrue_admin) | 0/TBD | Not started | - |
 | 8. Install + Polish + Testing | 0/TBD | Not started | - |

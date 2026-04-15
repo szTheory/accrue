@@ -23,7 +23,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **PROC-02**: `Accrue.Processor.Stripe` first-party adapter delegating to lattice_stripe 0.3
 - [ ] **PROC-03**: `Accrue.Processor.Fake` in-memory ETS adapter — primary test surface (deterministic IDs, test clock, scriptable responses, event-trigger API)
 - [ ] **PROC-04**: Deterministic idempotency keys derived from `{operation, subject_id, canonical_params}` with retry-safe reuse
-- [ ] **PROC-05**: Stripe Connect context (Stripe-Account header) threaded through every processor call
+- [x] **PROC-05**: Stripe Connect context (Stripe-Account header) threaded through every processor call
 - [ ] **PROC-06**: Per-request API version override
 - [ ] **PROC-07**: Stripe error mapping to `Accrue.Error` hierarchy
 
@@ -78,7 +78,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **CONN-07**: Express dashboard login link
 - [ ] **CONN-08**: Payout schedule configuration
 - [ ] **CONN-09**: Capability management
-- [ ] **CONN-10**: Per-account webhook secret routing
+- [x] **CONN-10**: Per-account webhook secret routing
 - [ ] **CONN-11**: Platform-scoped and connected-account-scoped API calls
 
 ### Webhooks
@@ -305,7 +305,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | PROC-02 | Phase 3 | Complete |
 | PROC-03 | Phase 1 | Pending |
 | PROC-04 | Phase 2 | Pending |
-| PROC-05 | Phase 5 | Pending |
+| PROC-05 | Phase 5 | Complete |
 | PROC-06 | Phase 2 | Pending |
 | PROC-07 | Phase 1 | Pending |
 | BILL-01 | Phase 2 | Pending |
@@ -351,7 +351,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | CONN-07 | Phase 5 | Pending |
 | CONN-08 | Phase 5 | Pending |
 | CONN-09 | Phase 5 | Pending |
-| CONN-10 | Phase 5 | Pending |
+| CONN-10 | Phase 5 | Complete |
 | CONN-11 | Phase 5 | Pending |
 | WH-01 | Phase 2 | Pending |
 | WH-02 | Phase 2 | Pending |

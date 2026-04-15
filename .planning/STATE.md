@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 5 context gathered
-last_updated: "2026-04-15T02:39:14.891Z"
+status: executing
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-04-15T03:52:29.926Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 28
-  completed_plans: 28
-  percent: 100
+  total_plans: 35
+  completed_plans: 29
+  percent: 83
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 04 — advanced-billing-webhook-hardening
+**Current focus:** Phase 05 — connect
 
 ## Current Position
 
-Phase: 04 (advanced-billing-webhook-hardening) — EXECUTING
-Plan: 8 of 8
-Status: Phase complete — ready for verification
+Phase: 05 (connect) — EXECUTING
+Plan: 2 of 7
+Status: Ready to execute
 Last activity: 2026-04-15
 
 Progress: [░░░░░░░░░░] 0%
@@ -68,6 +68,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-advanced-billing-webhook-hardening P06 | 30m | 2 tasks | 13 files |
 | Phase 04-advanced-billing-webhook-hardening P07 | 8m | 2 tasks | 15 files |
 | Phase 04-advanced-billing-webhook-hardening P08 | 4m | 2 tasks | 6 files |
+| Phase 05-connect P01 | 10m | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,10 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P07: BillingPortal.Configuration deferred to processor 1.2 — install-time Dashboard checklist (guides/portal_configuration_checklist.md) is canonical; :configuration option already accepts bpc_* for additive future support
 - [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P08: Ops emit helper uses Accrue.Actor.current_operation_id/0 (Accrue.Context module does not exist; Actor is canonical pdict facade per D2-12)
 - [Phase 04-advanced-billing-webhook-hardening]: Phase 04 P08: Telemetry.Metrics conditional-compile sentinel raises clear install message instead of returning [] — silent empty default would mask missing optional dep
+- [Phase 05-connect]: Phase 05 P01: Endpoint name collapse — only :connect persists as :connect; :primary/:unconfigured/nil/custom collapse to :default so schema enum stays minimal
+- [Phase 05-connect]: Phase 05 P01: Connect @callback clauses declared @optional_callbacks — Plans 05-02/05-03 add adapter bodies then remove the optional declaration
+- [Phase 05-connect]: Phase 05 P01: resolve_stripe_account/1 reads Process.get(:accrue_connected_account_id) directly to avoid compile-time circular dep on Accrue.Connect (lands in Plan 05-02)
+- [Phase 05-connect]: Phase 05 P01: Accrue.Config.connect/0 helper added mirroring dunning/0 — resolver uses Keyword.get not nested get/1 because Config module lacks nested lookup
 
 ### Pending Todos
 
@@ -148,6 +153,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T02:39:14.878Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-connect/05-CONTEXT.md
+Last session: 2026-04-15T03:52:29.923Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None
