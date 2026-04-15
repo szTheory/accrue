@@ -5,8 +5,18 @@ defmodule <%= @billing_handler %> do
 
   use Accrue.Webhook.Handler
 
-  def handle_event("invoice.payment_failed", event, _ctx) do
+  @impl Accrue.Webhook.Handler
+  def handle_event(type, event, ctx) do
+    # Add custom side effects for the events your app cares about.
+    # Example:
+    #
+    #   if type == "invoice.payment_failed" do
+    #     MyApp.BillingNotifications.deliver_payment_failed(event, ctx)
+    #   end
+    _ = type
     _ = event
+    _ = ctx
+
     :ok
   end
 end
