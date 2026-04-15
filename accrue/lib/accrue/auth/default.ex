@@ -113,4 +113,25 @@ defmodule Accrue.Auth.Default do
   end
 
   def actor_id(_), do: nil
+
+  @impl Accrue.Auth
+  def step_up_challenge(_user, _action) do
+    case Application.get_env(:accrue, :env, Mix.env()) do
+      env when env in [:dev, :test] ->
+        %{kind: :auto, provider: :default, message: "Auto-approved in #{env}"}
+
+      _ ->
+        raise Accrue.Auth.StepUpUnconfigured,
+          message:
+            "Accrue.Auth.Default step-up is dev/test only; configure a real :auth_adapter for production admin actions."
+    end
+  end
+
+  @impl Accrue.Auth
+  def verify_step_up(_user, _params, _action) do
+    case Application.get_env(:accrue, :env, Mix.env()) do
+      env when env in [:dev, :test] -> :ok
+      _ -> {:error, :step_up_not_configured}
+    end
+  end
 end

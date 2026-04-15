@@ -54,7 +54,9 @@ defmodule Accrue.Events do
           optional(:actor_id) => String.t() | nil,
           optional(:data) => map(),
           optional(:trace_id) => String.t() | nil,
-          optional(:idempotency_key) => String.t() | nil
+          optional(:idempotency_key) => String.t() | nil,
+          optional(:caused_by_event_id) => integer() | nil,
+          optional(:caused_by_webhook_event_id) => Ecto.UUID.t() | nil
         }
 
   @doc """
@@ -191,7 +193,7 @@ defmodule Accrue.Events do
   end
 
   defp fetch_by_idempotency_key(key) do
-    query = from e in Event, where: e.idempotency_key == ^key, limit: 1
+    query = from(e in Event, where: e.idempotency_key == ^key, limit: 1)
 
     case Accrue.Repo.one(query) do
       nil -> {:error, :idempotency_lookup_failed}
@@ -209,7 +211,10 @@ defmodule Accrue.Events do
             stacktrace
   end
 
-  defp reraise_if_immutable(%Postgrex.Error{postgres: %{code: :accrue_event_immutable} = pg}, stacktrace) do
+  defp reraise_if_immutable(
+         %Postgrex.Error{postgres: %{code: :accrue_event_immutable} = pg},
+         stacktrace
+       ) do
     reraise Accrue.EventLedgerImmutableError,
             [message: pg[:message], pg_code: "45A01"],
             stacktrace

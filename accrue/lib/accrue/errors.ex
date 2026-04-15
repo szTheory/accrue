@@ -111,6 +111,18 @@ defmodule Accrue.ConfigError do
   def message(%__MODULE__{key: key}), do: "missing accrue config key: #{inspect(key)}"
 end
 
+defmodule Accrue.Auth.StepUpUnconfigured do
+  @moduledoc """
+  Raised when a destructive admin action requires step-up verification but
+  the configured auth adapter does not implement the optional callbacks.
+  """
+  defexception [:message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+  def message(_), do: "admin step-up auth is not configured"
+end
+
 defmodule Accrue.Error.MultiItemSubscription do
   @moduledoc """
   Raised when a Phase 3 convenience call (e.g., `update_quantity/3`) is

@@ -29,6 +29,10 @@ defmodule Accrue.Auth do
   - `actor_id/1` — extract the canonical actor id string from a user
     struct/map. Used by `Accrue.Events.record/1` when auto-stamping
     actor context.
+  - `step_up_challenge/2` — optional destructive-action challenge hook
+    for admin step-up flows.
+  - `verify_step_up/3` — optional destructive-action verification hook
+    paired with `step_up_challenge/2`.
   """
 
   @type conn :: Plug.Conn.t() | map()
@@ -39,6 +43,10 @@ defmodule Accrue.Auth do
   @callback user_schema() :: module() | nil
   @callback log_audit(user(), map()) :: :ok
   @callback actor_id(user()) :: String.t() | nil
+  @callback step_up_challenge(user(), map()) :: map()
+  @callback verify_step_up(user(), map(), map()) :: :ok | {:error, term()}
+
+  @optional_callbacks step_up_challenge: 2, verify_step_up: 3
 
   @doc "Delegates to the configured adapter's `current_user/1`."
   @spec current_user(conn()) :: user() | nil
@@ -60,6 +68,58 @@ defmodule Accrue.Auth do
   @spec actor_id(user()) :: String.t() | nil
   def actor_id(user), do: impl().actor_id(user)
 
+  @doc """
+  Returns whether `user` should be treated as an admin.
+
+  Adapters may expose a dedicated `admin?/1` helper; otherwise Accrue
+  falls back to conservative host-shape heuristics (`role`, `is_admin`,
+  `admin`).
+  """
+  @spec admin?(user() | nil) :: boolean()
+  def admin?(nil), do: false
+
+  def admin?(user) when is_map(user) do
+    adapter = impl()
+
+    cond do
+      function_exported?(adapter, :admin?, 1) ->
+        adapter.admin?(user)
+
+      true ->
+        admin_fallback?(user)
+    end
+  end
+
+  def admin?(_), do: false
+
+  @doc "Delegates to the configured adapter's optional `step_up_challenge/2`."
+  @spec step_up_challenge(user(), map()) :: map()
+  def step_up_challenge(user, action), do: step_up_adapter().step_up_challenge(user, action)
+
+  @doc "Delegates to the configured adapter's optional `verify_step_up/3`."
+  @spec verify_step_up(user(), map(), map()) :: :ok | {:error, term()}
+  def verify_step_up(user, params, action),
+    do: step_up_adapter().verify_step_up(user, params, action)
+
   @doc false
   def impl, do: Application.get_env(:accrue, :auth_adapter, Accrue.Auth.Default)
+
+  defp step_up_adapter do
+    adapter = impl()
+
+    if function_exported?(adapter, :step_up_challenge, 2) and
+         function_exported?(adapter, :verify_step_up, 3) do
+      adapter
+    else
+      Accrue.Auth.Default
+    end
+  end
+
+  defp admin_fallback?(user) do
+    role = Map.get(user, :role) || Map.get(user, "role")
+    is_admin = Map.get(user, :is_admin) || Map.get(user, "is_admin")
+    admin = Map.get(user, :admin) || Map.get(user, "admin")
+
+    role in [:admin, "admin"] or is_admin in [true, "true"] or admin in [true, "true"]
+  end
 end

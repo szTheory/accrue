@@ -27,26 +27,31 @@ defmodule Accrue.Events.Event do
           data: map(),
           trace_id: String.t() | nil,
           idempotency_key: String.t() | nil,
+          caused_by_event_id: integer() | nil,
+          caused_by_webhook_event_id: Ecto.UUID.t() | nil,
           inserted_at: DateTime.t() | nil
         }
 
   @primary_key {:id, :id, autogenerate: true}
   schema "accrue_events" do
-    field :type, :string
-    field :schema_version, :integer, default: 1
-    field :actor_type, :string
-    field :actor_id, :string
-    field :subject_type, :string
-    field :subject_id, :string
-    field :data, :map, default: %{}
-    field :trace_id, :string
-    field :idempotency_key, :string
-    field :inserted_at, :utc_datetime_usec, read_after_writes: true
+    field(:type, :string)
+    field(:schema_version, :integer, default: 1)
+    field(:actor_type, :string)
+    field(:actor_id, :string)
+    field(:subject_type, :string)
+    field(:subject_id, :string)
+    field(:data, :map, default: %{})
+    field(:trace_id, :string)
+    field(:idempotency_key, :string)
+    field(:caused_by_event_id, :integer)
+    field(:caused_by_webhook_event_id, Ecto.UUID)
+    field(:inserted_at, :utc_datetime_usec, read_after_writes: true)
   end
 
   @cast_fields ~w[
     type schema_version actor_type actor_id
     subject_type subject_id data trace_id idempotency_key
+    caused_by_event_id caused_by_webhook_event_id
   ]a
 
   @required_fields ~w[type actor_type subject_type subject_id]a

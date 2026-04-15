@@ -13,7 +13,19 @@ Application.put_env(:accrue, :webhook_signing_secrets, %{
 # Start Accrue.TestRepo once for the whole test run. Individual tests
 # that need a DB connection check it out via Accrue.RepoCase's setup
 # block (Ecto.Adapters.SQL.Sandbox.start_owner!/2). Plan 03 Wave 2.
+case Accrue.TestRepo.__adapter__().storage_up(Accrue.TestRepo.config()) do
+  :ok -> :ok
+  {:error, :already_up} -> :ok
+end
+
 {:ok, _} = Accrue.TestRepo.start_link(pool: Ecto.Adapters.SQL.Sandbox)
+Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, {:shared, self()})
+
+{:ok, _, _} =
+  Ecto.Migrator.with_repo(Accrue.TestRepo, fn repo ->
+    Ecto.Migrator.run(repo, "priv/repo/migrations", :up, all: true, log: false)
+  end)
+
 Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 
 # Start Oban in :manual testing mode against Accrue.TestRepo so Plan 05's
