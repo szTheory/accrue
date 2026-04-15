@@ -1,0 +1,15 @@
+<%= @context.branding[:business_name] %>
+========================================
+
+Your <%= @context.branding[:business_name] %> trial is ending soon<%= if assigns[:days_until_end] do %> — <%= @days_until_end %> days remaining<% end %>.
+
+To keep your subscription active, add a payment method before
+your trial ends.<%= if assigns[:cta_url] do %>
+
+Add payment method: <%= @cta_url %><% end %>
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>

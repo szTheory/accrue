@@ -1,0 +1,15 @@
+<%= @context.branding[:business_name] %>
+========================================
+
+Your <%= assigns[:brand] || "card" %> card ending in <%= assigns[:last4] || "****" %>
+on file at <%= @context.branding[:business_name] %> expires <%= assigns[:exp_month] %>/<%= assigns[:exp_year] %>.
+
+Update your payment method to avoid any interruption.<%= if assigns[:update_pm_url] do %>
+
+Update payment method: <%= @update_pm_url %><% end %>
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>
