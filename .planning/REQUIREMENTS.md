@@ -115,19 +115,19 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 
 - [ ] **MAIL-01**: `Accrue.Mailer` behaviour wrapping Swoosh (host configures Swoosh adapter)
 - [x] **MAIL-02**: `Mailer.Test` adapter for `assert_email_sent/1` helper
-- [ ] **MAIL-03**: Email: `receipt` (payment succeeded)
-- [ ] **MAIL-04**: Email: `payment_failed` with retry guidance
-- [ ] **MAIL-05**: Email: `trial_ending` (3 days before, from `trial_will_end` webhook)
-- [ ] **MAIL-06**: Email: `trial_ended`
+- [x] **MAIL-03**: Email: `receipt` (payment succeeded)
+- [x] **MAIL-04**: Email: `payment_failed` with retry guidance
+- [x] **MAIL-05**: Email: `trial_ending` (3 days before, from `trial_will_end` webhook)
+- [x] **MAIL-06**: Email: `trial_ended`
 - [ ] **MAIL-07**: Email: `invoice_finalized` (optional attachment of PDF)
 - [ ] **MAIL-08**: Email: `invoice_paid`
 - [ ] **MAIL-09**: Email: `invoice_payment_failed` with payment action required link
-- [ ] **MAIL-10**: Email: `subscription_canceled`
-- [ ] **MAIL-11**: Email: `subscription_paused` / `subscription_resumed`
+- [x] **MAIL-10**: Email: `subscription_canceled`
+- [x] **MAIL-11**: Email: `subscription_paused` / `subscription_resumed`
 - [ ] **MAIL-12**: Email: `refund_issued` with fee breakdown
 - [ ] **MAIL-13**: Email: `coupon_applied`
 - [x] **MAIL-14**: HEEx templates shared between email HTML body and invoice PDF (single source of truth)
-- [ ] **MAIL-15**: Plain-text AND HTML multipart mandatory (not optional)
+- [x] **MAIL-15**: Plain-text AND HTML multipart mandatory (not optional)
 - [x] **MAIL-16**: Single-point branding config: logo, colors, from-name, from-address
 - [x] **MAIL-17**: Per-template override for full customization
 - [x] **MAIL-18**: MJML support via `mjml_eex` for responsive templates rendering across email clients
@@ -379,19 +379,19 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | EVT-10 | Phase 4 | Complete |
 | MAIL-01 | Phase 1 | Pending |
 | MAIL-02 | Phase 6 | Complete |
-| MAIL-03 | Phase 6 | Pending |
-| MAIL-04 | Phase 6 | Pending |
-| MAIL-05 | Phase 6 | Pending |
-| MAIL-06 | Phase 6 | Pending |
+| MAIL-03 | Phase 6 | Complete |
+| MAIL-04 | Phase 6 | Complete |
+| MAIL-05 | Phase 6 | Complete |
+| MAIL-06 | Phase 6 | Complete |
 | MAIL-07 | Phase 6 | Pending |
 | MAIL-08 | Phase 6 | Pending |
 | MAIL-09 | Phase 6 | Pending |
-| MAIL-10 | Phase 6 | Pending |
-| MAIL-11 | Phase 6 | Pending |
+| MAIL-10 | Phase 6 | Complete |
+| MAIL-11 | Phase 6 | Complete |
 | MAIL-12 | Phase 6 | Pending |
 | MAIL-13 | Phase 6 | Pending |
 | MAIL-14 | Phase 6 | Complete |
-| MAIL-15 | Phase 6 | Pending |
+| MAIL-15 | Phase 6 | Complete |
 | MAIL-16 | Phase 6 | Complete |
 | MAIL-17 | Phase 6 | Complete |
 | MAIL-18 | Phase 6 | Complete |

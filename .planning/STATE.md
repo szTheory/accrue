@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-04-PLAN.md — test + dispatch infrastructure
-last_updated: "2026-04-15T11:37:39.732Z"
+stopped_at: Completed 06-05-PLAN.md — 8 non-invoice email types
+last_updated: "2026-04-15T11:50:11.065Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 42
-  completed_plans: 39
-  percent: 93
+  completed_plans: 40
+  percent: 95
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 06 (email-pdf) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -79,6 +79,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-email-pdf P02 | 10min | 3 tasks | 10 files |
 | Phase 06-email-pdf P03 | 10min | 3 tasks | 15 files |
 | Phase 06-email-pdf P04 | 10m | 3 tasks | 11 files |
+| Phase 06-email-pdf P05 | 8m | 3 tasks | 33 files |
 
 ## Accumulated Context
 
@@ -173,6 +174,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 06-email-pdf]: Accrue.Mailer.Test sidesteps Oban entirely — async-safe intent-tuple adapter (D6-05)
 - [Phase 06-email-pdf]: MFA override rung forwards [type | args] so one chooser can handle many types
 - [Phase 06-email-pdf]: enrich/2 Customer hydration is best-effort (try/rescue/catch → nil) — Pitfall 5 no-raise trumps fail-loud
+- [Phase 06-email-pdf]: Phase 6 P05: 8 non-invoice email modules are ~40 LOC each (half the ~80 LOC target) because per-type prose lives in templates; modules are pure subject/1 + render_text/1 boilerplate
+- [Phase 06-email-pdf]: Phase 6 P05: MAIL-15 multipart coverage guard uses public Accrue.Workers.Mailer.resolve_template/1 fall-through — no need to promote private default_template/1
+- [Phase 06-email-pdf]: Phase 6 P05: Accrue.Emails.Receipt (MAIL-03 canonical) coexists with legacy Accrue.Emails.PaymentSucceeded — both registered in dispatch table, downstream dispatches by atom
 
 ### Pending Todos
 
@@ -193,6 +197,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T11:37:29.095Z
-Stopped at: Completed 06-04-PLAN.md — test + dispatch infrastructure
+Last session: 2026-04-15T11:50:02.943Z
+Stopped at: Completed 06-05-PLAN.md — 8 non-invoice email types
 Resume file: None
