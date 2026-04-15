@@ -1,0 +1,324 @@
+defmodule Mix.Tasks.Accrue.InstallTest do
+  use ExUnit.Case, async: false
+
+  import ExUnit.CaptureIO
+
+  alias Accrue.Test.InstallFixture
+
+  setup do
+    Mix.shell(Mix.Shell.Process)
+    on_exit(fn -> Mix.shell(Mix.Shell.IO) end)
+    :ok
+  end
+
+  @tag :install_options
+  test "adds Igniter dependency and documents required non-interactive flags" do
+    app = InstallFixture.tmp_app!(:options)
+    InstallFixture.write_mix_project!(app, ["{:phoenix, \"~> 1.8\"}"])
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    output = run_install(app, ["--dry-run", "--non-interactive", "--manual"])
+
+    assert output =~ "{:igniter, \"~> 0.7.9\", runtime: false}"
+    assert output =~ "--dry-run"
+    assert output =~ "--yes"
+    assert output =~ "--non-interactive"
+    assert output =~ "--manual"
+    assert output =~ "--force"
+  end
+
+  @tag :install_templates
+  test "generates fingerprinted Billing facade, handler, migrations, config docs, and runtime snippets" do
+    app = InstallFixture.tmp_app!(:templates)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    run_install(app, ["--yes"])
+
+    assert InstallFixture.read!(app, "lib/my_app/billing.ex") =~ "# accrue:generated"
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "lib/my_app/billing.ex",
+             "defmodule MyApp.Billing"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "lib/my_app/billing_handler.ex",
+             "defmodule MyApp.BillingHandler"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/config.exs",
+             "config :accrue, :auth_adapter, Accrue.Auth.Default"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "config :accrue, :processor, Accrue.Processor.Stripe"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "System.fetch_env!(\"STRIPE_SECRET_KEY\")"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "System.get_env(\"STRIPE_WEBHOOK_SECRET\")"
+           )
+  end
+
+  @tag :install_patches
+  test "patches router with webhook, admin, auth, test support, and Oban snippets when dependencies are present" do
+    app = InstallFixture.tmp_app!(:patches)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}",
+      "{:accrue_admin, path: \"../accrue_admin\"}",
+      "{:sigra, \"~> 0.1\"}",
+      "{:oban, \"~> 2.21\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    output = run_install(app, ["--yes"])
+
+    assert output =~ "/webhooks/stripe"
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "lib/my_app_web/router.ex",
+             "accrue_webhook \"/stripe\", :stripe"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "lib/my_app_web/router.ex",
+             "accrue_admin \"/billing\""
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/config.exs",
+             "config :accrue, :auth_adapter, Accrue.Integrations.Sigra"
+           )
+
+    assert InstallFixture.assert_contains!(app, "test/support/accrue_case.ex", "use Accrue.Test")
+    assert output =~ "Oban"
+  end
+
+  @tag :install_patches
+  test "does not mount admin or Sigra auth when optional dependencies are absent" do
+    app = InstallFixture.tmp_app!(:fallback_patches)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    run_install(app, ["--yes"])
+
+    InstallFixture.refute_contains!(app, "lib/my_app_web/router.ex", "accrue_admin \"/billing\"")
+    InstallFixture.refute_contains!(app, "config/config.exs", "Accrue.Integrations.Sigra")
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/config.exs",
+             "config :accrue, :auth_adapter, Accrue.Auth.Default"
+           )
+  end
+
+  @tag :install_stripe_test_mode
+  test "fresh fixture app gets Stripe test-mode runtime readiness without leaking raw secrets" do
+    app = InstallFixture.tmp_app!(:stripe_test_mode)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    output =
+      with_env(
+        %{
+          "STRIPE_SECRET_KEY" => "sk_test_fixture_123",
+          "STRIPE_WEBHOOK_SECRET" => "whsec_fixture_123"
+        },
+        fn ->
+          run_install(app, ["--dry-run", "--yes"])
+        end
+      )
+
+    assert output =~ "Stripe test-mode"
+    assert output =~ "STRIPE_SECRET_KEY"
+    assert output =~ "STRIPE_WEBHOOK_SECRET"
+    refute output =~ "sk_test_fixture_123"
+    refute output =~ "whsec_fixture_123"
+
+    run_install(app, ["--yes"])
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "config :accrue, :processor, Accrue.Processor.Stripe"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "System.fetch_env!(\"STRIPE_SECRET_KEY\")"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/runtime.exs",
+             "System.get_env(\"STRIPE_WEBHOOK_SECRET\")"
+           )
+
+    InstallFixture.refute_contains!(app, "config/runtime.exs", "sk_test_fixture_123")
+    InstallFixture.refute_contains!(app, "config/runtime.exs", "whsec_fixture_123")
+  end
+
+  @tag :install_stripe_test_mode
+  test "Stripe readiness accepts sk_test keys and rejects or masks live and missing keys" do
+    app = InstallFixture.tmp_app!(:stripe_readiness)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    test_output =
+      with_env(%{"STRIPE_SECRET_KEY" => "sk_test_fixture_123"}, fn ->
+        run_install(app, ["--dry-run", "--yes"])
+      end)
+
+    assert test_output =~ "sk_test_"
+    refute test_output =~ "sk_test_fixture_123"
+
+    live_output =
+      with_env(%{"STRIPE_SECRET_KEY" => "sk_live_fixture_123"}, fn ->
+        run_install(app, ["--dry-run", "--yes"])
+      end)
+
+    assert live_output =~ "STRIPE_SECRET_KEY"
+    refute live_output =~ "sk_live_fixture_123"
+    assert live_output =~ "test-mode"
+
+    missing_output =
+      with_env(%{"STRIPE_SECRET_KEY" => nil}, fn -> run_install(app, ["--dry-run", "--yes"]) end)
+
+    assert missing_output =~ "STRIPE_SECRET_KEY"
+    assert missing_output =~ "missing"
+  end
+
+  @tag :install_orchestration
+  test "full installer entrypoint reports changed, skipped, manual follow-up, and redacted readiness" do
+    app = InstallFixture.tmp_app!(:orchestration)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    output =
+      with_env(
+        %{
+          "STRIPE_SECRET_KEY" => "sk_test_fixture_123",
+          "STRIPE_WEBHOOK_SECRET" => "whsec_fixture_123"
+        },
+        fn ->
+          run_install(app, ["--yes", "--billable", "MyApp.Accounts.User"])
+        end
+      )
+
+    assert output =~ "changed"
+    assert output =~ "skipped"
+    assert output =~ "manual"
+    assert output =~ "STRIPE_SECRET_KEY"
+    assert output =~ "STRIPE_WEBHOOK_SECRET"
+    refute output =~ "sk_test_fixture_123"
+    refute output =~ "whsec_fixture_123"
+  end
+
+  @tag :install_templates
+  test "re-run updates pristine fingerprinted files and skips user-edited files even with --force" do
+    app = InstallFixture.tmp_app!(:fingerprints)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    run_install(app, ["--yes"])
+    pristine = InstallFixture.read!(app, "lib/my_app/billing.ex")
+    assert pristine =~ "# accrue:generated"
+
+    run_install(app, ["--yes"])
+    assert InstallFixture.read!(app, "lib/my_app/billing.ex") =~ "# accrue:generated"
+
+    InstallFixture.write!(app, "lib/my_app/billing.ex", pristine <> "\n# user-edited\n")
+    output = run_install(app, ["--yes", "--force"])
+
+    assert output =~ "skipped"
+    assert output =~ "user-edited"
+    assert InstallFixture.assert_contains!(app, "lib/my_app/billing.ex", "# user-edited")
+  end
+
+  defp run_install(app, argv) do
+    Mix.Task.clear()
+
+    capture_io(fn ->
+      File.cd!(app, fn ->
+        apply(Mix.Tasks.Accrue.Install, :run, [argv])
+      end)
+    end)
+  end
+
+  defp with_env(env, fun) do
+    previous = Map.new(env, fn {key, _value} -> {key, System.get_env(key)} end)
+
+    Enum.each(env, fn
+      {key, nil} -> System.delete_env(key)
+      {key, value} -> System.put_env(key, value)
+    end)
+
+    try do
+      fun.()
+    after
+      Enum.each(previous, fn
+        {key, nil} -> System.delete_env(key)
+        {key, value} -> System.put_env(key, value)
+      end)
+    end
+  end
+end
