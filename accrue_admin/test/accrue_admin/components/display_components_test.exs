@@ -5,7 +5,9 @@ defmodule AccrueAdmin.DisplayComponentsTest do
 
   import Phoenix.LiveViewTest
 
-  alias AccrueAdmin.Components.{DetailDrawer, FilterChipBar, KpiCard, Timeline}
+  alias Accrue.Money
+  alias AccrueAdmin.Components.{DetailDrawer, FilterChipBar, JsonViewer, KpiCard}
+  alias AccrueAdmin.Components.{MoneyFormatter, Timeline}
 
   describe "FilterChipBar" do
     test "renders active server-driven filter chips and clear links" do
@@ -111,6 +113,72 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "Inspect details"
       assert html =~ "Moved to DLQ"
       assert html =~ "Next retry requires manual action"
+    end
+  end
+
+  describe "JsonViewer" do
+    test "renders tree, raw, and copy surfaces with escaped structured payloads" do
+      html =
+        render_component(&JsonViewer.json_viewer/1, %{
+          id: "payload",
+          active_tab: "copy",
+          payload: %{
+            "id" => "evt_123",
+            "nested" => [%{"kind" => "charge.succeeded"}],
+            "script" => "<script>alert(1)</script>"
+          }
+        })
+
+      assert html =~ "Payload"
+      assert html =~ "Tree"
+      assert html =~ "Raw"
+      assert html =~ "Copy"
+      assert html =~ "Copy payload"
+      assert html =~ ~s(phx-hook="Clipboard")
+      assert html =~ "&lt;script&gt;alert(1)&lt;/script&gt;"
+      refute html =~ "<script>alert(1)</script>"
+    end
+
+    test "normalizes structs to explicit type markers instead of dumping fields" do
+      html =
+        render_component(&JsonViewer.json_viewer/1, %{
+          id: "payload",
+          active_tab: "raw",
+          payload: %Money{amount_minor: 1200, currency: :usd}
+        })
+
+      assert html =~ "__struct__"
+      assert html =~ "Accrue.Money"
+      refute html =~ "amount_minor"
+    end
+  end
+
+  describe "MoneyFormatter" do
+    test "formats minor-unit amounts using the explicit locale" do
+      expected = Accrue.Invoices.Render.format_money(123_456, :usd, "en")
+
+      html =
+        render_component(&MoneyFormatter.money_formatter/1, %{
+          amount_minor: 123_456,
+          currency: :usd,
+          locale: "en"
+        })
+
+      assert html =~ expected
+      assert html =~ ~s(data-locale="en")
+    end
+
+    test "falls back to customer preferred locale when explicit locale is absent" do
+      expected = Accrue.Invoices.Render.format_money(1_000, :eur, "fr")
+
+      html =
+        render_component(&MoneyFormatter.money_formatter/1, %{
+          money: Money.new(1_000, :eur),
+          customer: %{preferred_locale: "fr"}
+        })
+
+      assert html =~ expected
+      assert html =~ ~s(data-locale="fr")
     end
   end
 end

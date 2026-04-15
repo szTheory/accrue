@@ -1,3 +1,4 @@
+import { initClipboardControls } from "./hooks/clipboard";
 import { initThemeControls } from "./hooks/accrue_theme";
 
 function ready(callback) {
@@ -9,5 +10,6 @@ function ready(callback) {
 }
 
 ready(() => {
+  initClipboardControls();
   initThemeControls();
 });
