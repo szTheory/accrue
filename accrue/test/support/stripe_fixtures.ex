@@ -394,6 +394,148 @@ defmodule Accrue.Test.StripeFixtures do
     deep_merge(base, overrides)
   end
 
+  # --- Phase 5 Connect fixtures --------------------------------------
+
+  @doc """
+  Returns an atom-keyed Stripe-shape connected account map, matching
+  the shape `Accrue.Processor.Fake.create_account/2` emits.
+
+  Accepts either a preset atom (`:standard_fully_onboarded`,
+  `:express_fully_onboarded`, `:custom_partial`) or a free-form
+  `overrides` map.
+  """
+  @spec connect_account_fixture(map() | atom()) :: map()
+  def connect_account_fixture(overrides \\ %{})
+
+  def connect_account_fixture(:standard_fully_onboarded) do
+    connect_account_fixture(%{
+      type: "standard",
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true
+    })
+  end
+
+  def connect_account_fixture(:express_fully_onboarded) do
+    connect_account_fixture(%{
+      type: "express",
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true
+    })
+  end
+
+  def connect_account_fixture(:custom_partial) do
+    connect_account_fixture(%{
+      type: "custom",
+      charges_enabled: false,
+      payouts_enabled: false,
+      details_submitted: false,
+      requirements: %{currently_due: ["tos_acceptance.date", "tos_acceptance.ip"]}
+    })
+  end
+
+  def connect_account_fixture(overrides) when is_map(overrides) do
+    base = %{
+      id: "acct_test_" <> rand(),
+      object: "account",
+      type: "standard",
+      country: "US",
+      email: "owner+" <> rand() <> "@example.com",
+      charges_enabled: false,
+      details_submitted: false,
+      payouts_enabled: false,
+      capabilities: %{},
+      requirements: %{},
+      created: DateTime.to_unix(DateTime.utc_now()),
+      metadata: %{}
+    }
+
+    Map.merge(base, overrides)
+  end
+
+  @doc "Returns an `account.updated` webhook event wrapping `account_object`."
+  @spec account_updated_event(map()) :: map()
+  def account_updated_event(account_object \\ connect_account_fixture()) do
+    webhook_event("account.updated", stringify_keys(account_object))
+  end
+
+  @doc "Returns an `account.application.authorized` webhook event."
+  @spec account_application_authorized_event(map()) :: map()
+  def account_application_authorized_event(account_object \\ connect_account_fixture()) do
+    webhook_event("account.application.authorized", stringify_keys(account_object))
+  end
+
+  @doc "Returns an `account.application.deauthorized` webhook event."
+  @spec account_application_deauthorized_event(map()) :: map()
+  def account_application_deauthorized_event(account_object \\ connect_account_fixture()) do
+    webhook_event("account.application.deauthorized", stringify_keys(account_object))
+  end
+
+  @doc "Returns a `capability.updated` webhook event."
+  @spec capability_updated_event(map()) :: map()
+  def capability_updated_event(overrides \\ %{}) do
+    capability =
+      Map.merge(
+        %{
+          "id" => "card_payments",
+          "object" => "capability",
+          "account" => "acct_test_" <> rand(),
+          "status" => "active",
+          "requested" => true,
+          "requested_at" => DateTime.to_unix(DateTime.utc_now())
+        },
+        overrides
+      )
+
+    webhook_event("capability.updated", capability)
+  end
+
+  @doc "Returns a `payout.created` webhook event."
+  @spec payout_created_event(map()) :: map()
+  def payout_created_event(overrides \\ %{}) do
+    webhook_event("payout.created", payout_fixture(overrides))
+  end
+
+  @doc "Returns a `payout.paid` webhook event."
+  @spec payout_paid_event(map()) :: map()
+  def payout_paid_event(overrides \\ %{}) do
+    webhook_event("payout.paid", payout_fixture(Map.merge(%{"status" => "paid"}, overrides)))
+  end
+
+  @doc "Returns a `payout.failed` webhook event."
+  @spec payout_failed_event(map()) :: map()
+  def payout_failed_event(overrides \\ %{}) do
+    webhook_event(
+      "payout.failed",
+      payout_fixture(Map.merge(%{"status" => "failed", "failure_code" => "account_closed"}, overrides))
+    )
+  end
+
+  defp payout_fixture(overrides) do
+    base = %{
+      "id" => "po_test_" <> rand(),
+      "object" => "payout",
+      "amount" => 1000,
+      "currency" => "usd",
+      "status" => "pending",
+      "created" => DateTime.to_unix(DateTime.utc_now()),
+      "arrival_date" => DateTime.to_unix(DateTime.add(DateTime.utc_now(), 2 * 86_400, :second)),
+      "type" => "bank_account"
+    }
+
+    Map.merge(base, overrides)
+  end
+
+  defp stringify_keys(map) when is_map(map) do
+    for {k, v} <- map, into: %{} do
+      {to_string(k), stringify_keys(v)}
+    end
+  end
+
+  defp stringify_keys(list) when is_list(list), do: Enum.map(list, &stringify_keys/1)
+  defp stringify_keys(other), do: other
+
   # --- helpers -------------------------------------------------------
 
   defp rand do
