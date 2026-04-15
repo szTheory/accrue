@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-04-15T03:52:29.926Z"
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-04-15T04:08:16.877Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 35
-  completed_plans: 29
-  percent: 83
+  completed_plans: 30
+  percent: 86
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 05 (connect) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-advanced-billing-webhook-hardening P07 | 8m | 2 tasks | 15 files |
 | Phase 04-advanced-billing-webhook-hardening P08 | 4m | 2 tasks | 6 files |
 | Phase 05-connect P01 | 10m | 2 tasks | 13 files |
+| Phase 05-connect P02 | 18m | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,10 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 05-connect]: Phase 05 P01: Connect @callback clauses declared @optional_callbacks — Plans 05-02/05-03 add adapter bodies then remove the optional declaration
 - [Phase 05-connect]: Phase 05 P01: resolve_stripe_account/1 reads Process.get(:accrue_connected_account_id) directly to avoid compile-time circular dep on Accrue.Connect (lands in Plan 05-02)
 - [Phase 05-connect]: Phase 05 P01: Accrue.Config.connect/0 helper added mirroring dunning/0 — resolver uses Keyword.get not nested get/1 because Config module lacks nested lookup
+- [Phase 05-connect]: Phase 05 P02: owner_id column as :string (not :binary_id) to match accrue_customers polymorphic-owner precedent (D2-01/02)
+- [Phase 05-connect]: Phase 05 P02: Fake scope keyspace via per-resource _accrue_scope stamp, not state-shape refactor — back-compat automatic for Phase 1-4 tests
+- [Phase 05-connect]: Phase 05 P02: Caller-side pdict→opts threading pattern for Fake — GenServer runs on separate process, client-side API must read pdict and thread into opts before GenServer.call
+- [Phase 05-connect]: Phase 05 P02: delete_account/2 soft-deletes via force_status_changeset deauthorized_at (D5-05 audit trail)
 
 ### Pending Todos
 
@@ -153,6 +158,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T03:52:29.923Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-04-15T04:08:06.609Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
