@@ -61,6 +61,8 @@ defmodule AccrueAdmin.Router do
           live("/invoices/:id", AccrueAdmin.Live.InvoiceLive, :show)
           live("/charges", AccrueAdmin.Live.ChargesLive, :index)
           live("/charges/:id", AccrueAdmin.Live.ChargeLive, :show)
+          live("/webhooks", AccrueAdmin.Live.WebhooksLive, :index)
+          live("/webhooks/:id", AccrueAdmin.Live.WebhookLive, :show)
 
           if dev_routes? do
             live("/dev/live", AccrueAdmin.PageLive, :dev)

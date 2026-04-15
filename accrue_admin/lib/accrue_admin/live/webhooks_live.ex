@@ -1,0 +1,343 @@
+defmodule AccrueAdmin.Live.WebhooksLive do
+  @moduledoc false
+
+  use Phoenix.LiveView
+
+  import Ecto.Query
+
+  alias Accrue.{Auth, Events}
+  alias Accrue.Repo
+  alias Accrue.Webhook.WebhookEvent
+  alias Accrue.Webhooks.DLQ
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
+  alias AccrueAdmin.Queries.Webhooks
+
+  @impl true
+  def mount(_params, session, socket) do
+    admin = Map.get(session, "accrue_admin", %{})
+
+    {:ok,
+     socket
+     |> assign_shell(admin)
+     |> assign(:params, %{})
+     |> assign(:table_path, admin_path(admin, "/webhooks"))
+     |> assign(:summary, webhook_summary())
+     |> assign(:flashes, [])
+     |> assign(:pending_bulk_replay, nil)}
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign(:params, params)
+     |> assign(:summary, webhook_summary())}
+  end
+
+  @impl true
+  def handle_event("prepare_bulk_replay", _params, socket) do
+    filter = dlq_filter(socket.assigns.params)
+    count = DLQ.count(filter)
+
+    if count == 0 do
+      {:noreply,
+       push_flash(
+         socket,
+         :warning,
+         "No failed or dead-lettered webhook rows match the current filters."
+       )}
+    else
+      {:noreply, assign(socket, :pending_bulk_replay, %{count: count, filter: filter})}
+    end
+  end
+
+  def handle_event("cancel_bulk_replay", _params, socket) do
+    {:noreply, assign(socket, :pending_bulk_replay, nil)}
+  end
+
+  def handle_event("confirm_bulk_replay", _params, socket) do
+    %{count: count, filter: filter} = socket.assigns.pending_bulk_replay
+
+    case DLQ.requeue_where(filter) do
+      {:ok, result} ->
+        socket =
+          socket
+          |> record_bulk_replay(filter, count, result)
+          |> assign(:pending_bulk_replay, nil)
+          |> assign(:summary, webhook_summary())
+          |> push_flash(
+            :info,
+            "Bulk replay requested for #{result.requeued} webhook rows."
+          )
+
+        {:noreply, socket}
+
+      {:error, reason} ->
+        {:noreply, push_flash(socket, :error, inspect(reason))}
+    end
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <AppShell.app_shell
+      brand={@brand}
+      current_path={@current_path}
+      mount_path={@admin_mount_path}
+      page_title={@page_title}
+      theme={@theme}
+    >
+      <section class="ax-page">
+        <header class="ax-page-header">
+          <Breadcrumbs.breadcrumbs
+            items={[
+              %{label: "Dashboard", href: @admin_mount_path},
+              %{label: "Webhooks"}
+            ]}
+          />
+          <p class="ax-eyebrow">Webhook operations</p>
+          <h2 class="ax-display">Replay, inspect, and trace webhook delivery</h2>
+          <p class="ax-body ax-page-copy">
+            Operators can filter inbound webhook rows, jump into forensic payload detail, and
+            bulk requeue the current dead-letter slice without adding a second replay system.
+          </p>
+        </header>
+
+        <FlashGroup.flash_group flashes={@flashes} />
+
+        <section class="ax-kpi-grid" aria-label="Webhook summary">
+          <KpiCard.kpi_card label="Received" value={Integer.to_string(@summary.received_count)}>
+            <:meta>Total persisted webhook rows</:meta>
+          </KpiCard.kpi_card>
+
+          <KpiCard.kpi_card
+            label="Blocked"
+            value={Integer.to_string(@summary.blocked_count)}
+            delta={Integer.to_string(@summary.dead_count) <> " dead-lettered"}
+            delta_tone="amber"
+          >
+            <:meta>Rows waiting on operator replay or investigation</:meta>
+          </KpiCard.kpi_card>
+
+          <KpiCard.kpi_card
+            label="Replayed"
+            value={Integer.to_string(@summary.replayed_count)}
+            delta={Integer.to_string(@summary.livemode_count) <> " live mode"}
+            delta_tone="cobalt"
+          >
+            <:meta>Replay cycles recorded through the shared DLQ primitives</:meta>
+          </KpiCard.kpi_card>
+        </section>
+
+        <section class="ax-card">
+          <header class="ax-page-header">
+            <p class="ax-eyebrow">DLQ bulk replay</p>
+            <h3 class="ax-heading">Requeue the filtered dead-letter slice</h3>
+            <p class="ax-body">
+              Bulk replay respects the existing DLQ caps and records one admin audit event for the
+              whole intent.
+            </p>
+          </header>
+
+          <button
+            type="button"
+            phx-click="prepare_bulk_replay"
+            class="ax-button ax-button-secondary"
+            data-role="prepare-bulk-replay"
+          >
+            Replay filtered DLQ rows
+          </button>
+
+          <section :if={@pending_bulk_replay} class="ax-card" data-role="bulk-replay-confirm">
+            <p class="ax-label">Confirm bulk replay</p>
+            <p class="ax-body">
+              Replay <%= @pending_bulk_replay.count %> failed or dead webhook rows with the current
+              filters?
+            </p>
+            <div class="ax-page-header">
+              <button
+                type="button"
+                phx-click="confirm_bulk_replay"
+                class="ax-button ax-button-primary"
+                data-role="confirm-bulk-replay"
+              >
+                Confirm bulk replay
+              </button>
+              <button
+                type="button"
+                phx-click="cancel_bulk_replay"
+                class="ax-button ax-button-ghost"
+              >
+                Cancel
+              </button>
+            </div>
+          </section>
+        </section>
+
+        <.live_component
+          module={DataTable}
+          id="webhooks"
+          query_module={Webhooks}
+          path={@table_path}
+          params={@params}
+          columns={[
+            %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path)},
+            %{id: :type, label: "Type"},
+            %{label: "Status", render: &status_summary/1},
+            %{label: "Endpoint", render: &endpoint_summary/1},
+            %{label: "Received", render: &received_summary/1}
+          ]}
+          card_title={&card_title/1}
+          card_fields={[
+            %{id: :type, label: "Type"},
+            %{label: "Status", render: &status_summary/1},
+            %{label: "Endpoint", render: &endpoint_summary/1},
+            %{label: "Received", render: &received_summary/1}
+          ]}
+          filter_fields={[
+            %{
+              id: :status,
+              label: "Status",
+              type: :select,
+              options:
+                Enum.map(WebhookEvent.statuses(), fn status ->
+                  {Atom.to_string(status), humanize(status)}
+                end)
+            },
+            %{id: :type, label: "Type"},
+            %{
+              id: :livemode,
+              label: "Live mode",
+              type: :select,
+              options: [{"true", "Live"}, {"false", "Test"}]
+            }
+          ]}
+          empty_title="No webhook rows matched"
+          empty_copy="Adjust the DLQ filters or wait for the next inbound webhook."
+        />
+      </section>
+    </AppShell.app_shell>
+    """
+  end
+
+  defp assign_shell(socket, admin) do
+    socket
+    |> assign(:page_title, "Webhooks")
+    |> assign(:brand, admin["brand"] || default_brand())
+    |> assign(:theme, admin["theme"] || "system")
+    |> assign(:csp_nonce, admin["csp_nonce"])
+    |> assign(:brand_css_path, admin["brand_css_path"])
+    |> assign(:assets_css_path, admin["assets_css_path"])
+    |> assign(:assets_js_path, admin["assets_js_path"])
+    |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
+    |> assign(:current_path, admin_path(admin, "/webhooks"))
+  end
+
+  defp webhook_summary do
+    %{
+      received_count: Repo.aggregate(WebhookEvent, :count, :id),
+      blocked_count:
+        WebhookEvent
+        |> where([event], event.status in [:failed, :dead])
+        |> Repo.aggregate(:count, :id),
+      dead_count:
+        WebhookEvent
+        |> where([event], event.status == :dead)
+        |> Repo.aggregate(:count, :id),
+      replayed_count:
+        WebhookEvent
+        |> where([event], event.status == :replayed)
+        |> Repo.aggregate(:count, :id),
+      livemode_count:
+        WebhookEvent
+        |> where([event], event.livemode == true)
+        |> Repo.aggregate(:count, :id)
+    }
+  end
+
+  defp record_bulk_replay(socket, filter, count, result) do
+    current_admin = socket.assigns.current_admin
+
+    {:ok, _event} =
+      Events.record(%{
+        type: "admin.webhook.bulk_replay.completed",
+        subject_type: "WebhookBatch",
+        subject_id: "filtered",
+        actor_type: "admin",
+        actor_id: Auth.actor_id(current_admin),
+        data: %{
+          "count" => count,
+          "requeued" => result.requeued,
+          "skipped" => result.skipped,
+          "filter" =>
+            Enum.into(filter, %{}, fn {key, value} ->
+              {to_string(key), normalize_filter_value(value)}
+            end)
+        }
+      })
+
+    :ok =
+      Auth.log_audit(current_admin, %{
+        type: "admin.webhook.bulk_replay.completed",
+        count: count,
+        source: :accrue_admin
+      })
+
+    socket
+  end
+
+  defp dlq_filter(params) do
+    decoded = Webhooks.decode_filter(params)
+
+    Enum.reduce(decoded, [], fn
+      {:status, status}, acc when status in [:failed, :dead] -> [{:status, status} | acc]
+      {:type, type}, acc -> [{:type, type} | acc]
+      {:livemode, livemode}, acc -> [{:livemode, livemode} | acc]
+      {_key, _value}, acc -> acc
+    end)
+    |> Enum.reverse()
+  end
+
+  defp normalize_filter_value(value) when is_atom(value), do: Atom.to_string(value)
+  defp normalize_filter_value(value), do: value
+
+  defp push_flash(socket, kind, message) do
+    assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
+  end
+
+  defp webhook_link(row, mount_path) do
+    label = row.processor_event_id || row.id
+    safe_link("#{mount_path}/webhooks/#{row.id}", label)
+  end
+
+  defp safe_link(href, label) do
+    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
+  end
+
+  defp status_summary(row), do: humanize(row.status)
+  defp endpoint_summary(row), do: "#{humanize(row.endpoint)} · #{mode_label(row.livemode)}"
+  defp received_summary(row), do: format_datetime(row.received_at)
+  defp card_title(row), do: row.processor_event_id || row.id
+
+  defp mode_label(true), do: "live"
+  defp mode_label(false), do: "test"
+
+  defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
+
+  defp humanize(value) when is_binary(value) do
+    value
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map_join(" ", &String.capitalize/1)
+  end
+
+  defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+  defp format_datetime(_value), do: "Unknown"
+
+  defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  defp default_brand do
+    %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
+  end
+end
