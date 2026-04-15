@@ -1,0 +1,47 @@
+<mjml>
+  <mj-head>
+    <mj-title>Payment failed</mj-title>
+    <mj-preview><%= assigns[:preview] || "Action required: payment failed" %></mj-preview>
+    <mj-attributes>
+      <mj-all font-family="<%= @context.branding[:font_stack] || "Helvetica, Arial, sans-serif" %>" />
+      <mj-text color="#111827" font-size="14px" line-height="1.5" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#ffffff">
+    <mj-section background-color="#ffffff" padding="24px 24px 8px 24px">
+      <mj-column>
+        <%= if @context.branding[:logo_url] do %>
+          <mj-image src="<%= @context.branding[:logo_url] %>" alt="<%= @context.branding[:business_name] %>" align="left" width="180px" />
+        <% else %>
+          <mj-text font-size="20px" font-weight="700" color="#111827">
+            <%= @context.branding[:business_name] %>
+          </mj-text>
+        <% end %>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0 24px">
+      <mj-column>
+        <mj-text font-size="20px" font-weight="700">Payment failed</mj-text>
+        <mj-text>
+          Hi <%= @context.customer[:name] || "there" %>, your payment of
+          <strong><%= @context.formatted_total %></strong> for invoice
+          <strong><%= @context.invoice[:number] %></strong> could not be
+          processed. To keep your subscription active, please update your
+          payment method. We'll automatically retry once you do.
+        </mj-text>
+        <%= if assigns[:update_pm_url] do %>
+          <mj-button background-color="#1F6FEB" color="#FFFFFF" href="<%= @update_pm_url %>">
+            Update payment method
+          </mj-button>
+        <% end %>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0 24px 24px 24px">
+      <mj-column>
+        <mj-raw><%= Accrue.Emails.HtmlBridge.render(&Accrue.Invoices.Components.footer/1, %{context: @context}) %></mj-raw>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

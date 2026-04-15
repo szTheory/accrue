@@ -1,0 +1,14 @@
+<%= @context.branding[:business_name] %>
+========================================
+
+Your <%= @context.branding[:business_name] %> subscription is now paused.
+<%= if assigns[:pause_behavior] do %>
+Behavior while paused: <%= @pause_behavior %>.
+<% end %>
+You won't be charged again until the subscription is resumed.
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>

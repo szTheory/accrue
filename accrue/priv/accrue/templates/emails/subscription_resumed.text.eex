@@ -1,0 +1,12 @@
+<%= @context.branding[:business_name] %>
+========================================
+
+Your <%= @context.branding[:business_name] %> subscription has resumed.
+
+Normal billing will continue on the next cycle.
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>

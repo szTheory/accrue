@@ -1,0 +1,16 @@
+<%= @context.branding[:business_name] %>
+========================================
+
+Your payment of <%= @context.formatted_total %> for <%= @context.invoice[:number] %>
+could not be processed.
+
+To keep your subscription active, please update your payment method.
+We'll automatically retry the charge once you do.<%= if assigns[:update_pm_url] do %>
+
+Update payment method: <%= @update_pm_url %><% end %>
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>
