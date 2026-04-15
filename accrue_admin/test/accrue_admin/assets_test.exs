@@ -4,9 +4,11 @@ defmodule AccrueAdmin.AssetsTest do
   import Plug.Conn
 
   test "hashes reflect committed bundle contents" do
+    brand = File.read!(Application.app_dir(:accrue, "priv/static/brand.css"))
     css = File.read!(Application.app_dir(:accrue_admin, "priv/static/accrue_admin.css"))
     js = File.read!(Application.app_dir(:accrue_admin, "priv/static/accrue_admin.js"))
 
+    assert AccrueAdmin.Assets.brand_hash() == md5(brand)
     assert AccrueAdmin.Assets.css_hash() == md5(css)
     assert AccrueAdmin.Assets.js_hash() == md5(js)
   end

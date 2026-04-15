@@ -16,6 +16,7 @@ defmodule AccrueAdmin.RouterTest do
 
     assert "/billing/assets/css-#{AccrueAdmin.Assets.css_hash()}" in paths
     assert "/billing/assets/js-#{AccrueAdmin.Assets.js_hash()}" in paths
+    assert "/billing/assets/brand-#{AccrueAdmin.Assets.brand_hash()}" in paths
     assert "/billing" in paths
     assert "/billing/dev/live" in paths
   end
@@ -28,16 +29,20 @@ defmodule AccrueAdmin.RouterTest do
         "ignored" => "secret"
       })
 
-    session = AccrueAdmin.Router.__session__(conn, [:admin_token], "/billing")
+    session =
+      conn
+      |> AccrueAdmin.CSPPlug.call([])
+      |> AccrueAdmin.BrandPlug.call([])
+      |> AccrueAdmin.Router.__session__([:admin_token], "/billing")
 
     assert session["admin_token"] == "token-123"
     refute Map.has_key?(session, "ignored")
 
-    assert session["accrue_admin"] == %{
-             "assets_css_path" => AccrueAdmin.Assets.hashed_path(:css, "/billing"),
-             "assets_js_path" => AccrueAdmin.Assets.hashed_path(:js, "/billing"),
-             "mount_path" => "/billing"
-           }
+    assert session["accrue_admin"]["brand_css_path"] == AccrueAdmin.Assets.hashed_path(:brand, "/billing")
+    assert session["accrue_admin"]["assets_css_path"] == AccrueAdmin.Assets.hashed_path(:css, "/billing")
+    assert session["accrue_admin"]["assets_js_path"] == AccrueAdmin.Assets.hashed_path(:js, "/billing")
+    assert session["accrue_admin"]["mount_path"] == "/billing"
+    assert session["accrue_admin"]["theme"] == "system"
   end
 
   test "prod-like compilation omits dev routes" do

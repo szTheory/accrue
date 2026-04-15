@@ -44,6 +44,7 @@ defmodule AccrueAdmin.Router do
       scope mount_path, as: :accrue_admin do
         pipe_through(:accrue_admin_browser)
 
+        get("/assets/brand-#{AccrueAdmin.Assets.brand_hash()}", AccrueAdmin.Assets, :brand)
         get("/assets/css-#{AccrueAdmin.Assets.css_hash()}", AccrueAdmin.Assets, :css)
         get("/assets/js-#{AccrueAdmin.Assets.js_hash()}", AccrueAdmin.Assets, :js)
 
@@ -72,9 +73,13 @@ defmodule AccrueAdmin.Router do
 
     Map.merge(host_session, %{
       "accrue_admin" => %{
+        "brand_css_path" => AccrueAdmin.Assets.hashed_path(:brand, mount_path),
         "assets_css_path" => AccrueAdmin.Assets.hashed_path(:css, mount_path),
         "assets_js_path" => AccrueAdmin.Assets.hashed_path(:js, mount_path),
-        "mount_path" => AccrueAdmin.Assets.normalize_mount_path(mount_path)
+        "mount_path" => AccrueAdmin.Assets.normalize_mount_path(mount_path),
+        "brand" => conn.assigns[:accrue_admin_brand],
+        "theme" => conn.assigns[:accrue_admin_theme] || "system",
+        "csp_nonce" => conn.assigns[:accrue_admin_csp_nonce]
       }
     })
   end

@@ -1,0 +1,62 @@
+:root {
+  --ax-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ax-font-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+  --ax-space-xs: 0.25rem;
+  --ax-space-sm: 0.5rem;
+  --ax-space-md: 1rem;
+  --ax-space-lg: 1.5rem;
+  --ax-space-xl: 2rem;
+  --ax-space-2xl: 3rem;
+  --ax-radius-sm: 0.75rem;
+  --ax-radius-md: 1rem;
+  --ax-radius-lg: 1.5rem;
+  --ax-shadow-sm: 0 16px 40px rgba(17, 20, 24, 0.06);
+  --ax-shadow-lg: 0 24px 60px rgba(17, 20, 24, 0.12);
+  --ax-theme-transition: 180ms ease;
+  --ax-base: var(--accrue-paper);
+  --ax-elevated: #ffffff;
+  --ax-sunken: #f1f5f8;
+  --ax-primary: var(--accrue-ink);
+  --ax-muted: #5d6a73;
+  --ax-subtle: var(--accrue-slate);
+  --ax-border: rgba(36, 48, 59, 0.12);
+  --ax-border-strong: rgba(36, 48, 59, 0.24);
+  --ax-success: var(--accrue-moss);
+  --ax-warning: var(--accrue-amber);
+  --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, white);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --ax-base: #0f1318;
+  --ax-elevated: #171d24;
+  --ax-sunken: #0b1015;
+  --ax-primary: #f4f7fa;
+  --ax-muted: #a8b2bc;
+  --ax-subtle: #d7dde3;
+  --ax-border: rgba(233, 238, 242, 0.12);
+  --ax-border-strong: rgba(233, 238, 242, 0.2);
+  --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, black);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    --ax-base: #0f1318;
+    --ax-elevated: #171d24;
+    --ax-sunken: #0b1015;
+    --ax-primary: #f4f7fa;
+    --ax-muted: #a8b2bc;
+    --ax-subtle: #d7dde3;
+    --ax-border: rgba(233, 238, 242, 0.12);
+    --ax-border-strong: rgba(233, 238, 242, 0.2);
+    --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, black);
+    color-scheme: dark;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ax-theme-transition: 0ms linear;
+  }
+}
