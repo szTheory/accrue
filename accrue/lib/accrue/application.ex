@@ -34,10 +34,43 @@ defmodule Accrue.Application do
     :ok = Accrue.Config.validate_at_boot!()
     :ok = Accrue.Auth.Default.boot_check!()
     :ok = warn_on_secret_collision()
+    :ok = warn_deprecated_branding()
 
     children = []
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Accrue.Supervisor)
+  end
+
+  @doc false
+  # Phase 6 (D6-02): emit a boot-time warning when any of the six deprecated
+  # flat branding keys are set AND the nested `:branding` config key is
+  # empty. The flat keys are the one-minor deprecation shim; they are
+  # removed before v1.0. `:persistent_term` dedupe ensures the warning fires
+  # at most once per BEAM boot — Oban sweepers and friends cannot spam.
+  #
+  # Threat note (T-06-01-02): the log message includes only key NAMES, never
+  # values — from_email / support_email values never leak into log output.
+  @spec warn_deprecated_branding() :: :ok
+  def warn_deprecated_branding do
+    key = :accrue_deprecated_branding_warned?
+    flat = Accrue.Config.deprecated_flat_branding_keys()
+    any_flat_set? = Enum.any?(flat, fn k -> Application.get_env(:accrue, k) != nil end)
+    nested_empty? = Application.get_env(:accrue, :branding, []) == []
+
+    if any_flat_set? and nested_empty? and :persistent_term.get(key, false) == false do
+      :persistent_term.put(key, true)
+
+      affected =
+        Enum.filter(flat, fn k -> Application.get_env(:accrue, k) != nil end)
+
+      Logger.warning("""
+      [Accrue] Flat branding keys are DEPRECATED (removed before v1.0).
+      Migrate to the nested :branding keyword list. See guides/branding.md.
+      Affected keys: #{inspect(affected)}
+      """)
+    end
+
+    :ok
   end
 
   @doc false
