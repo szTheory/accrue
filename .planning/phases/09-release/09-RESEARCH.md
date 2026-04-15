@@ -377,23 +377,26 @@ cd accrue && mix hex.publish --yes
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | A file-system-aware dependency helper in `accrue_admin/mix.exs` is a viable way to keep local path development while publishing a Hex-safe dependency declaration. [ASSUMED] | Summary / Open Questions | Medium: if invalid, the plan needs a different publish-time rewrite strategy. |
+| A1 | `accrue_admin` needs an explicit publish-mode switch rather than a file-system-only dependency helper, because GitHub Actions publish jobs run from a monorepo checkout where `../accrue` exists. [VERIFIED: plan-checker feedback][VERIFIED: repo grep] | Resolved Release Decisions | Low: execution can verify with `ACCRUE_ADMIN_HEX_RELEASE=1 mix hex.build` / `mix hex.publish --dry-run`. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **How will `accrue_admin` express its dependency on `accrue` at publish time?**
    - What we know: current source uses `path: "../accrue"`, and Release Please's Elixir updater only rewrites version strings. [VERIFIED: repo grep][VERIFIED: https://raw.githubusercontent.com/googleapis/release-please/main/src/updaters/elixir/elixir-mix-exs.ts]
-   - What's unclear: whether the repo wants a permanent dual-mode dependency helper in source or a release-time rewrite strategy. [ASSUMED]
-   - Recommendation: make this the first planning decision and require a dry-run package inspection before merge. [VERIFIED: local mix help hex.publish]
+   - Resolution: use a permanent dual-mode dependency helper with an explicit publish switch, not a directory-existence heuristic. `accrue_admin/mix.exs` should call `accrue_dep()` and return `{:accrue, "~> #{@version}"}` when `System.get_env("ACCRUE_ADMIN_HEX_RELEASE") == "1"`, otherwise return `{:accrue, path: "../accrue"}` for monorepo development. The publish workflow must set `ACCRUE_ADMIN_HEX_RELEASE: "1"` for admin package dry-run/build/publish steps. [VERIFIED: plan-checker feedback][VERIFIED: local mix help hex.publish]
+   - Verification: require `cd accrue_admin && ACCRUE_ADMIN_HEX_RELEASE=1 mix hex.publish --dry-run` and a grep check proving the top-level deps list has only `accrue_dep()`, not a literal top-level `{:accrue, path: "../accrue"}` tuple. [VERIFIED: local mix help hex.publish]
 
 2. **Will the team require broader advisory scanning beyond `mix hex.audit`?**
    - What we know: `mix hex.audit` currently checks retired packages only. [VERIFIED: local mix help hex.audit]
-   - What's unclear: whether the locked requirement intentionally limits scope or simply used the narrower task name. [ASSUMED]
-   - Recommendation: keep `mix hex.audit` as the required gate and optionally add Dependabot or `mix_audit` as non-blocking follow-up work. [VERIFIED: local mix help hex.audit][VERIFIED: Hex API package mix_audit]
+   - Resolution: keep `mix hex.audit` as the required Phase 9 release gate because it is the locked requirement. Do not claim it is vulnerability scanning. Broader advisory scanning can be captured as follow-up/backlog work rather than blocking Phase 9. [VERIFIED: local mix help hex.audit][VERIFIED: Hex API package mix_audit]
 
 3. **What contact channel will go into Contributor Covenant and `SECURITY.md`?**
    - What we know: both templates require real reporting/contact details. [CITED: https://www.contributor-covenant.org/version/2/1/code_of_conduct/][CITED: https://docs.github.com/en/code-security/getting-started/adding-a-security-policy-to-your-repository]
-   - What's unclear: maintainer email, response SLA, and whether GitHub private vulnerability reporting will be enabled. [ASSUMED]
+   - Resolution: use concrete placeholder project addresses `maintainers@accrue.dev` for conduct/contribution contact and `security@accrue.dev` for vulnerability reports, with the final release checkpoint explicitly asking the maintainer to approve or replace them before public publish. [ASSUMED: project-owned domain/contact pending final release approval]
+
+4. **How does the first public release become `v1.0.0` instead of a pre-1.0 bump?**
+   - What we know: the current package versions are `0.1.0`, while the phase goal requires same-day `v1.0.0` releases for both packages. [VERIFIED: repo grep][VERIFIED: .planning/ROADMAP.md]
+   - Resolution: plan the first-public release as an explicit bootstrap release. Seed `.release-please-manifest.json` from the current `0.1.0` state, then require the triggering Conventional Commit or manual release PR instructions to include a documented `Release-As: 1.0.0` footer for both package paths, and require the final release PR to show `@version "1.0.0"` plus `accrue` and `accrue_admin` GitHub release tags for `v1.0.0` before publishing. If Release Please cannot produce both path releases from that bootstrap path during dry-run review, the runbook must fall back to a manual release PR that sets both package versions and changelogs to `1.0.0` before invoking publish. [CITED: https://github.com/googleapis/release-please-action][VERIFIED: plan-checker feedback]
    - Recommendation: collect those values before doc-writing plans start so the files do not ship with placeholders. [CITED: https://www.contributor-covenant.org/version/2/1/code_of_conduct/]
 
 ## Environment Availability

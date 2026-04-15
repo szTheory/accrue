@@ -19,8 +19,8 @@ created: 2026-04-15
 |----------|-------|
 | **Framework** | ExUnit + package-local Mix tasks + GitHub Actions workflow validation |
 | **Config file** | `accrue/mix.exs`, `accrue_admin/mix.exs`, `.github/workflows/*.yml`, `release-please-config.json`, `.release-please-manifest.json` |
-| **Quick run command** | `cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix docs --warnings-as-errors && mix hex.audit` |
-| **Full suite command** | `cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer && mix docs --warnings-as-errors && mix hex.audit` plus equivalent `accrue_admin` compile/test/docs checks and workflow lint/smoke checks |
+| **Quick run command** | `cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix docs --warnings-as-errors && mix hex.audit` or `cd accrue_admin && mix format --check-formatted && mix compile --warnings-as-errors && mix docs --warnings-as-errors && mix hex.audit` for package-local docs/audit work |
+| **Full suite command** | `cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer --format github && mix docs --warnings-as-errors && mix hex.audit` plus `cd accrue_admin && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer --format github && mix docs --warnings-as-errors && mix hex.audit`, then workflow lint/smoke checks |
 | **Estimated runtime** | ~20-45 minutes for full CI-equivalent suite, depending on Dialyzer PLT cache |
 
 ---
@@ -38,12 +38,12 @@ created: 2026-04-15
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 09-01-01 | 01 | 1 | OSS-02, OSS-03, OSS-04, OSS-05, OSS-06 | T-09-CI | CI does not skip required package/matrix checks | workflow smoke | `rg -n "mix format --check-formatted|mix compile --warnings-as-errors|mix test --warnings-as-errors|mix credo --strict|mix dialyzer|mix docs --warnings-as-errors|mix hex.audit|opentelemetry|sigra" .github/workflows/ci.yml` | partial | pending |
+| 09-01-01 | 01 | 1 | OSS-02, OSS-03, OSS-04, OSS-05, OSS-06 | T-09-CI | CI does not skip required package/matrix checks for either package, including admin Dialyzer and retired-package audit | workflow smoke | `rg -n "cd accrue && mix format --check-formatted|cd accrue && mix compile --warnings-as-errors|cd accrue && mix test --warnings-as-errors|cd accrue && mix credo --strict|cd accrue && mix dialyzer --format github|cd accrue && mix docs --warnings-as-errors|cd accrue && mix hex.audit|cd accrue_admin && mix format --check-formatted|cd accrue_admin && mix compile --warnings-as-errors|cd accrue_admin && mix test --warnings-as-errors|cd accrue_admin && mix credo --strict|cd accrue_admin && mix dialyzer --format github|cd accrue_admin && mix docs --warnings-as-errors|cd accrue_admin && mix hex.audit|opentelemetry|sigra" .github/workflows/ci.yml` | partial | pending |
 | 09-02-01 | 02 | 1 | OSS-07, OSS-08 | T-09-REL | Release PR automation uses least-privilege permissions and path-scoped package config | workflow smoke | `test -f release-please-config.json && test -f .release-please-manifest.json && rg -n "googleapis/release-please-action@v4|release-type|path" .github/workflows/release-please.yml release-please-config.json` | missing | pending |
 | 09-02-02 | 02 | 1 | OSS-09, OSS-10 | T-09-HEX | Hex publish requires `HEX_API_KEY`, publishes `accrue` before `accrue_admin`, and documents same-day ordering | dry run + docs smoke | `rg -n "HEX_API_KEY|mix hex.publish --yes|accrue_admin|accrue" .github/workflows/publish-hex.yml && rg -n "same-day|runbook|1.0.0" -g "*.md"` | missing | pending |
 | 09-03-01 | 03 | 1 | OSS-01, OSS-12, OSS-13, OSS-14 | T-09-COMMUNITY | Public repo files avoid secrets and provide disclosure/reporting paths | docs smoke | `test -f CONTRIBUTING.md && test -f CODE_OF_CONDUCT.md && test -f SECURITY.md && rg -n "Conventional Commits|Contributor Covenant|supported versions|report" CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md` | missing | pending |
 | 09-04-01 | 04 | 1 | OSS-15, OSS-16, OSS-17, OSS-18 | T-09-DOCS | Docs build cleanly and expose quickstart, guide set, API stability, deprecation policy, and `llms.txt` | docs build | `cd accrue && mix docs --warnings-as-errors && test -f doc/llms.txt` | partial | pending |
-| 09-04-02 | 04 | 1 | OSS-16, OSS-17, OSS-18 | T-09-DOCS | Admin package has README, guide, docs config, and generated `llms.txt` | docs build | `cd accrue_admin && mix docs --warnings-as-errors && test -f doc/llms.txt` | missing | pending |
+| 09-04-02 | 04 | 1 | OSS-16, OSS-17, OSS-18 | T-09-DOCS | Admin package has README, guide, docs config, generated `llms.txt`, and release-grade verification hooks for Dialyzer and retired-package audit | docs build | `cd accrue_admin && mix docs --warnings-as-errors && mix dialyzer --format github && mix hex.audit && test -f doc/llms.txt` | missing | pending |
 
 *Status: pending, green, red, flaky*
 
@@ -59,6 +59,7 @@ created: 2026-04-15
 - [ ] `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md` — release-managed changelogs.
 - [ ] `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` — repo health files.
 - [ ] `accrue_admin/mix.exs` docs config — admin ExDoc output and `llms.txt`.
+- [ ] `accrue_admin/mix.exs` Dialyxir dependency and `dialyzer: [plt_local_path: "priv/plts"]` config.
 - [ ] `with_opentelemetry` CI matrix coverage.
 
 ---

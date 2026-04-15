@@ -76,18 +76,18 @@ Output: automated verification results and a human checkpoint for secret availab
     - accrue/mix.exs
     - accrue_admin/mix.exs
   </read_first>
-  <action>Run the first half of the Phase 9 dry-run verification sequence after Plans 09-01 through 09-05 complete so failures isolate quickly. Execute the core package release gate `cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer && mix docs --warnings-as-errors && mix hex.audit`. Execute the admin package release gate `cd accrue_admin && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix docs --warnings-as-errors`. Confirm both packages generated `doc/llms.txt`, and confirm root release-policy files exist before moving to Hex dry runs. Record any failures in the summary instead of silently continuing.</action>
+  <action>Run the first half of the Phase 9 dry-run verification sequence after Plans 09-01 through 09-05 complete so failures isolate quickly. Execute the core package release gate `cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer --format github && mix docs --warnings-as-errors && mix hex.audit`. Execute the admin package release gate `cd accrue_admin && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer --format github && mix docs --warnings-as-errors && mix hex.audit`. Confirm both packages generated `doc/llms.txt`, and confirm root release-policy files exist before moving to Hex dry runs. Record any failures in the summary instead of silently continuing.</action>
   <acceptance_criteria>
     - `cd accrue && mix docs --warnings-as-errors && test -f doc/llms.txt` exits 0.
-    - `cd accrue_admin && mix docs --warnings-as-errors && test -f doc/llms.txt` exits 0.
+    - `cd accrue_admin && mix dialyzer --format github && mix docs --warnings-as-errors && mix hex.audit && test -f doc/llms.txt` exits 0.
     - `test -f CONTRIBUTING.md && test -f CODE_OF_CONDUCT.md && test -f SECURITY.md` exits 0.
   </acceptance_criteria>
   <verify>
-    <automated>cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer && mix docs --warnings-as-errors && mix hex.audit && test -f doc/llms.txt</automated>
-    <automated>cd accrue_admin && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix docs --warnings-as-errors && test -f doc/llms.txt</automated>
+    <automated>cd accrue && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer --format github && mix docs --warnings-as-errors && mix hex.audit && test -f doc/llms.txt</automated>
+    <automated>cd accrue_admin && mix format --check-formatted && mix compile --warnings-as-errors && mix test --warnings-as-errors && mix credo --strict && mix dialyzer --format github && mix docs --warnings-as-errors && mix hex.audit && test -f doc/llms.txt</automated>
     <automated>test -f CONTRIBUTING.md && test -f CODE_OF_CONDUCT.md && test -f SECURITY.md</automated>
   </verify>
-  <done>Both packages pass the release gate and docs generation, root release-policy files exist, and any failures are captured explicitly before Hex dry runs begin.</done>
+  <done>Both packages pass the full release gate including Dialyzer and retired-package checks, root release-policy files exist, and any failures are captured explicitly before Hex dry runs begin.</done>
 </task>
 
 <task type="auto">
