@@ -10,6 +10,7 @@ defmodule AccrueAdmin.MixProject do
       version: @version,
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
       package: package(),
       description: "Admin LiveView UI for Accrue billing.",
@@ -19,8 +20,16 @@ defmodule AccrueAdmin.MixProject do
 
   def application do
     [
+      mod: {AccrueAdmin.Application, []},
       extra_applications: [:logger]
     ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_env), do: ["lib"]
+
+  def cli do
+    [preferred_envs: [test: :test]]
   end
 
   defp deps do
@@ -40,7 +49,7 @@ defmodule AccrueAdmin.MixProject do
     [
       licenses: ["MIT"],
       links: %{},
-      files: ~w(lib mix.exs README* LICENSE* CHANGELOG*)
+      files: ~w(lib config priv/static mix.exs README* LICENSE* CHANGELOG*)
     ]
   end
 end

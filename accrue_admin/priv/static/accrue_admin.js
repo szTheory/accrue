@@ -1,0 +1,1 @@
+window.AccrueAdmin = window.AccrueAdmin || {};

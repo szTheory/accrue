@@ -1,0 +1,15 @@
+.accrue-admin {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.accrue-admin-shell {
+  margin: 0;
+  background: #fafbfc;
+  color: #111418;
+}
+
+.accrue-admin h1 {
+  margin: 0;
+  padding: 2rem;
+}
