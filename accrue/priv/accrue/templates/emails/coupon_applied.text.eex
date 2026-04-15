@@ -1,0 +1,16 @@
+<%= @context.branding[:business_name] %>
+========================================
+
+Discount applied
+
+<%= cond do %><% @context.coupon[:percent_off] -> %>We've applied <%= @context.coupon[:percent_off] %>% off via coupon <%= @context.coupon[:name] %>.<% @context.coupon[:formatted_amount_off] -> %>We've applied <%= @context.coupon[:formatted_amount_off] %> off via coupon <%= @context.coupon[:name] %>.<% true -> %>We've applied coupon <%= @context.coupon[:name] %>.<% end %>
+<%= if @context[:promotion_code] do %>
+Promotion code: <%= @context.promotion_code[:code] %>
+<% end %>
+The discount will appear on your next invoice.
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>

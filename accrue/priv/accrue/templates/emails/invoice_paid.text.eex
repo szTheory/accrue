@@ -1,0 +1,13 @@
+<%= @context.branding[:business_name] %>
+========================================
+
+Payment received for <%= @context.invoice[:number] %>
+
+Thanks — we received your payment of <%= @context.formatted_total %>
+for invoice <%= @context.invoice[:number] %>.
+
+--
+<%= @context.branding[:business_name] %>
+Questions? <%= @context.branding[:support_email] %>
+<%= if @context.branding[:company_address] do %><%= @context.branding[:company_address] %>
+<% end %>
