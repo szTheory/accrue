@@ -25,7 +25,8 @@ defmodule Accrue.Test.Clock do
   @spec advance(term(), duration()) :: {:ok, term()} | {:error, term()}
   def advance(subject, duration)
 
-  def advance(duration, opts) when is_list(opts) do
+  def advance(duration, opts)
+      when (is_binary(duration) or is_integer(duration) or is_list(duration)) and is_list(opts) do
     do_advance(nil, duration, opts)
   end
 

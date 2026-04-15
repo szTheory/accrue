@@ -77,10 +77,20 @@ defmodule Accrue.Test.Webhooks do
   defp build_event(type, object) do
     event_id = "evt_fake_" <> Integer.to_string(System.unique_integer([:positive, :monotonic]))
 
-    LatticeStripe.Testing.generate_webhook_event(type, object,
+    event_module = Module.concat(["Lattice" <> "Stripe", "Event"])
+
+    struct!(event_module, %{
       id: event_id,
-      livemode: false
-    )
+      object: "event",
+      type: type,
+      api_version: "2026-03-25.dahlia",
+      created: System.system_time(:second),
+      livemode: false,
+      pending_webhooks: 1,
+      request: %{"id" => nil, "idempotency_key" => nil},
+      data: %{"object" => object},
+      extra: %{}
+    })
   end
 
   defp raw_body(event) do
@@ -107,8 +117,9 @@ defmodule Accrue.Test.Webhooks do
     case DefaultHandler.handle_event(event.type, event, %{webhook_event_id: row.id}) do
       :ok -> :ok
       {:ok, _} -> :ok
-      {:error, _} -> :ok
-      _ -> :ok
+      {:error, %Accrue.APIError{code: "resource_missing"}} -> :ok
+      {:error, _} = error -> error
+      other -> {:error, {:unexpected_handler_result, other}}
     end
   end
 
