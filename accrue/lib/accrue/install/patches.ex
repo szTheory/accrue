@@ -131,9 +131,9 @@ defmodule Accrue.Install.Patches do
     end
 
     # Add to config/test.exs:
-    config :accrue, :processor, Accrue.Processor.Fake
-    config :accrue, :mailer, Accrue.Mailer.Test
-    config :accrue, :pdf_adapter, Accrue.PDF.Test
+    #   config :accrue, :processor, Accrue.Processor.Fake
+    #   config :accrue, :mailer, Accrue.Mailer.Test
+    #   config :accrue, :pdf_adapter, Accrue.PDF.Test
     """
   end
 
@@ -189,11 +189,11 @@ defmodule Accrue.Install.Patches do
     {:manual, nil, "router missing", snippet}
   end
 
-  defp patch_admin(_project, _opts, %{path: path, snippet: snippet}) do
+  defp patch_admin(_project, opts, %{path: path, snippet: snippet}) do
     content = File.read!(path)
 
     cond do
-      content =~ ~s(accrue_admin "/billing") ->
+      content =~ ~s(accrue_admin "#{opts.admin_mount}") ->
         {:skipped, path, "admin mount already configured"}
 
       true ->

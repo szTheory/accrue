@@ -104,6 +104,9 @@ jobs:
       - name: Run facade lockdown via compile_matrix script
         run: bash scripts/ci/compile_matrix.sh
 
+      - name: Run installer UAT automation
+        run: cd accrue && mix test test/mix/tasks/accrue_install_uat_test.exs --warnings-as-errors
+
       - name: Run tests
         run: cd accrue && mix test --warnings-as-errors
 
