@@ -70,12 +70,12 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 ### Connect (Marketplaces)
 
 - [x] **CONN-01**: Connected account onboarding (Standard/Express/Custom)
-- [ ] **CONN-02**: Account Link generation for onboarding/update flows
+- [x] **CONN-02**: Account Link generation for onboarding/update flows
 - [x] **CONN-03**: Account status sync (capabilities, `charges_enabled`, `details_submitted`, `payouts_enabled`)
 - [ ] **CONN-04**: Destination charges
 - [ ] **CONN-05**: Separate charges + transfers flow
 - [ ] **CONN-06**: Platform fee computation helper
-- [ ] **CONN-07**: Express dashboard login link
+- [x] **CONN-07**: Express dashboard login link
 - [x] **CONN-08**: Payout schedule configuration
 - [x] **CONN-09**: Capability management
 - [x] **CONN-10**: Per-account webhook secret routing
@@ -343,12 +343,12 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | CHKT-05 | Phase 4 | Complete |
 | CHKT-06 | Phase 4 | Complete |
 | CONN-01 | Phase 5 | Complete |
-| CONN-02 | Phase 5 | Pending |
+| CONN-02 | Phase 5 | Complete |
 | CONN-03 | Phase 5 | Complete |
 | CONN-04 | Phase 5 | Pending |
 | CONN-05 | Phase 5 | Pending |
 | CONN-06 | Phase 5 | Pending |
-| CONN-07 | Phase 5 | Pending |
+| CONN-07 | Phase 5 | Complete |
 | CONN-08 | Phase 5 | Complete |
 | CONN-09 | Phase 5 | Complete |
 | CONN-10 | Phase 5 | Complete |
