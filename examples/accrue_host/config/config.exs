@@ -79,3 +79,7 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+# prod-safety: Accrue.Auth.Default is dev/test friendly and fails closed in prod.
+# Replace with a host or community auth adapter before production.
+config :accrue, :auth_adapter, Accrue.Auth.Default

@@ -1,6 +1,8 @@
 defmodule AccrueHostWeb.Router do
   use AccrueHostWeb, :router
 
+  import AccrueAdmin.Router
+  import Accrue.Router
   import AccrueHostWeb.UserAuth
 
   pipeline :browser do
@@ -64,4 +66,22 @@ defmodule AccrueHostWeb.Router do
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
   end
+
+  pipeline :accrue_webhook_raw_body do
+    plug Plug.Parsers,
+      parsers: [:json],
+      pass: ["*/*"],
+      json_decoder: Jason,
+      body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []},
+      length: 1_000_000
+  end
+
+  scope "/webhooks" do
+    pipe_through :accrue_webhook_raw_body
+    accrue_webhook("/stripe", :stripe)
+  end
+
+  # Protect this mount with AccrueAdmin.AuthHook via accrue_admin/2.
+  # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
+  accrue_admin("/billing")
 end
