@@ -271,8 +271,7 @@ defmodule Mix.Tasks.Accrue.InstallTest do
         end
       )
 
-    assert output =~ "changed"
-    assert output =~ "skipped"
+    assert output =~ "created"
     assert output =~ "manual"
     assert output =~ "STRIPE_SECRET_KEY"
     assert output =~ "STRIPE_WEBHOOK_SECRET"
@@ -308,8 +307,7 @@ defmodule Mix.Tasks.Accrue.InstallTest do
   end
 
   @tag :install_conflicts
-  @tag skip: "Phase 12 plan 03 activates this installer contract"
-  test "reserves no-clobber summary taxonomy and write-conflicts artifact contract" do
+  test "enforces no-clobber summary taxonomy and write-conflicts artifact contract" do
     app = InstallFixture.tmp_app!(:conflict_contract)
 
     InstallFixture.write_mix_project!(app, [
@@ -321,6 +319,11 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     InstallFixture.write_config!(app)
 
     run_install(app, ["--yes"])
+    billing_pristine = InstallFixture.read!(app, "lib/my_app/billing.ex")
+
+    InstallFixture.write!(app, "lib/my_app/billing.ex", billing_pristine <> "\n# host edit\n")
+    InstallFixture.write!(app, "config/runtime.exs", "# unmarked host file\n")
+    InstallFixture.write!(app, "test/support/accrue_case.ex", "defmodule AccrueCase do\nend\n")
     output = run_install(app, ["--yes", "--force", "--write-conflicts"])
 
     assert output =~ "created"
@@ -333,16 +336,46 @@ defmodule Mix.Tasks.Accrue.InstallTest do
 
     refute output =~ "overwrote user-edited"
 
-    assert File.exists?(Path.join(app, ".accrue/conflicts/lib/my_app/billing.ex.new"))
-    assert File.exists?(Path.join(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet"))
+    assert File.exists?(Path.join(app, ".accrue/conflicts/templates/lib/my_app/billing.ex.new"))
 
-    rendered_replacement = InstallFixture.read!(app, ".accrue/conflicts/lib/my_app/billing.ex.new")
-    manual_snippet = InstallFixture.read!(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet")
+    assert File.exists?(
+             Path.join(app, ".accrue/conflicts/patches/test/support/accrue_case.ex.snippet")
+           )
+
+    rendered_replacement =
+      InstallFixture.read!(app, ".accrue/conflicts/templates/lib/my_app/billing.ex.new")
+
+    manual_snippet =
+      InstallFixture.read!(app, ".accrue/conflicts/patches/test/support/accrue_case.ex.snippet")
 
     assert rendered_replacement =~ "target: lib/my_app/billing.ex"
     assert rendered_replacement =~ "reason: skipped user-edited"
-    assert manual_snippet =~ "target: lib/my_app_web/router.ex"
-    assert manual_snippet =~ "reason: manual"
+    assert rendered_replacement =~ "# accrue:generated"
+    assert manual_snippet =~ "target: test/support/accrue_case.ex"
+    assert manual_snippet =~ "reason: test support exists"
+    assert manual_snippet =~ "use Accrue.Test"
+  end
+
+  @tag :install_templates
+  test "unmarked files stay skipped exists unless --force is present" do
+    app = InstallFixture.tmp_app!(:unmarked_force)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+    InstallFixture.write!(app, "config/runtime.exs", "# host-owned runtime\n")
+
+    skipped_output = run_install(app, ["--yes"])
+    assert skipped_output =~ "skipped exists: config/runtime.exs"
+    assert InstallFixture.read!(app, "config/runtime.exs") == "# host-owned runtime\n"
+
+    forced_output = run_install(app, ["--yes", "--force"])
+    assert forced_output =~ "changed (overwrote unmarked): config/runtime.exs"
+    assert InstallFixture.read!(app, "config/runtime.exs") =~ "# accrue:generated"
   end
 
   defp run_install(app, argv) do

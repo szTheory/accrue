@@ -34,7 +34,7 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
 
     assert duration_ms < @install_budget_ms
     assert output =~ "Stripe test-mode"
-    assert output =~ "changed"
+    assert output =~ "created"
     assert output =~ "STRIPE_SECRET_KEY"
     assert output =~ "STRIPE_WEBHOOK_SECRET"
     refute output =~ "sk_test_fixture_123"
@@ -131,9 +131,15 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
   end
 
   @tag :install_uat
-  @tag skip: "Phase 12 plan 03 activates this installer contract"
-  test "reserves host-visible conflict artifacts and categorized installer summary output" do
+  test "writes host-visible conflict artifacts and categorized installer summary output" do
     app = phoenix_fixture!(:conflict_uat_contract)
+
+    run_install(app, ["--yes"])
+
+    billing_pristine = InstallFixture.read!(app, "lib/my_app/billing.ex")
+    InstallFixture.write!(app, "lib/my_app/billing.ex", billing_pristine <> "\n# host edit\n")
+    InstallFixture.write!(app, "config/runtime.exs", "# host runtime\n")
+    InstallFixture.write!(app, "test/support/accrue_case.ex", "defmodule AccrueCase do\nend\n")
 
     output = run_install(app, ["--yes", "--force", "--write-conflicts"])
 
@@ -147,20 +153,26 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
     assert output =~ ".accrue/conflicts/"
 
     conflict_root = Path.join(app, ".accrue/conflicts")
-    assert File.exists?(Path.join(conflict_root, "lib/my_app/billing.ex.new"))
-    assert File.exists?(Path.join(conflict_root, "lib/my_app_web/router.ex.snippet"))
+    assert File.exists?(Path.join(conflict_root, "templates/lib/my_app/billing.ex.new"))
+    assert File.exists?(Path.join(conflict_root, "patches/test/support/accrue_case.ex.snippet"))
 
-    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app/billing.ex.new") =~
+    assert InstallFixture.read!(app, ".accrue/conflicts/templates/lib/my_app/billing.ex.new") =~
              "target: lib/my_app/billing.ex"
 
-    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app/billing.ex.new") =~
+    assert InstallFixture.read!(app, ".accrue/conflicts/templates/lib/my_app/billing.ex.new") =~
              "reason: skipped user-edited"
 
-    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet") =~
-             "target: lib/my_app_web/router.ex"
+    assert InstallFixture.read!(
+             app,
+             ".accrue/conflicts/patches/test/support/accrue_case.ex.snippet"
+           ) =~
+             "target: test/support/accrue_case.ex"
 
-    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet") =~
-             "reason: manual"
+    assert InstallFixture.read!(
+             app,
+             ".accrue/conflicts/patches/test/support/accrue_case.ex.snippet"
+           ) =~
+             "reason: test support exists"
   end
 
   defp phoenix_fixture!(name) do
