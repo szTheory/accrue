@@ -193,6 +193,61 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
     refute output =~ "ACCRUE-DX-"
   end
 
+  @tag :install_uat
+  test "host-style router passes --check when browser and auth pipelines live outside the webhook scope" do
+    app = phoenix_fixture!(:preflight_host_router_shape)
+
+    InstallFixture.write!(app, "lib/my_app_web/router.ex", """
+    defmodule MyAppWeb.Router do
+      use MyAppWeb, :router
+
+      import AccrueAdmin.Router
+      import Accrue.Router
+      import MyAppWeb.UserAuth
+
+      pipeline :browser do
+        plug(:accepts, ["html"])
+        plug(:fetch_session)
+        plug(:protect_from_forgery)
+        plug(:fetch_current_scope_for_user)
+      end
+
+      scope "/", MyAppWeb do
+        pipe_through([:browser, :require_authenticated_user])
+        get("/", PageController, :home)
+      end
+
+      pipeline :accrue_webhook_raw_body do
+        plug(Plug.Parsers,
+          parsers: [:json],
+          pass: ["*/*"],
+          json_decoder: Jason,
+          body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}
+        )
+      end
+
+      scope "/webhooks" do
+        pipe_through(:accrue_webhook_raw_body)
+        accrue_webhook "/webhooks/stripe", :stripe
+      end
+
+      accrue_admin "/billing", session_keys: [:user_token], allow_live_reload: false
+    end
+    """)
+
+    InstallFixture.write!(app, "config/config.exs", """
+    import Config
+    config :my_app, Oban, queues: [accrue_webhooks: 10, accrue_mailers: 20]
+    config :accrue, :auth_adapter, MyApp.Auth
+    """)
+
+    output = run_install(app, ["--check", "--yes", "--webhook-path", "/webhooks/stripe"])
+
+    assert output =~ "check: passed"
+    assert output =~ "check status: passed"
+    refute output =~ "ACCRUE-DX-WEBHOOK-PIPELINE"
+  end
+
   defp phoenix_fixture!(name) do
     app = InstallFixture.tmp_app!(name)
 

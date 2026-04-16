@@ -439,6 +439,67 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     assert output =~ "ACCRUE-DX-WEBHOOK-PIPELINE"
   end
 
+  @tag :install_check
+  test "--check ignores unrelated browser and auth pipelines when the webhook scope is isolated" do
+    app = InstallFixture.tmp_app!(:check_valid_webhook_scope)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}",
+      "{:accrue_admin, path: \"../accrue_admin\"}",
+      "{:oban, \"~> 2.21\"}"
+    ])
+
+    InstallFixture.write_router!(app, """
+    defmodule MyAppWeb.Router do
+      use MyAppWeb, :router
+
+      import AccrueAdmin.Router
+      import Accrue.Router
+      import MyAppWeb.UserAuth
+
+      pipeline :browser do
+        plug(:accepts, ["html"])
+        plug(:fetch_session)
+        plug(:protect_from_forgery)
+        plug(:fetch_current_scope_for_user)
+      end
+
+      scope "/", MyAppWeb do
+        pipe_through([:browser, :require_authenticated_user])
+        get("/", PageController, :home)
+      end
+
+      pipeline :accrue_webhook_raw_body do
+        plug(Plug.Parsers,
+          parsers: [:json],
+          pass: ["*/*"],
+          json_decoder: Jason,
+          body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}
+        )
+      end
+
+      scope "/webhooks" do
+        pipe_through(:accrue_webhook_raw_body)
+        accrue_webhook "/webhooks/stripe", :stripe
+      end
+
+      accrue_admin "/billing", session_keys: [:user_token], allow_live_reload: false
+    end
+    """)
+
+    InstallFixture.write_config!(app, """
+    import Config
+    config :my_app, Oban, queues: [accrue_webhooks: 10, accrue_mailers: 20]
+    config :accrue, :auth_adapter, MyApp.Auth
+    """)
+
+    output = run_install(app, ["--check", "--yes", "--webhook-path", "/webhooks/stripe"])
+
+    assert output =~ "check: passed"
+    refute output =~ "ACCRUE-DX-WEBHOOK-PIPELINE"
+  end
+
   defp run_install(app, argv) do
     Mix.Task.clear()
 
