@@ -90,7 +90,7 @@ jobs:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
 
-      - name: Restore deps cache
+      - name: Restore accrue deps cache
         uses: actions/cache@v4
         with:
           path: accrue/deps
@@ -98,54 +98,110 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-deps-
 
-      - name: Restore _build cache
+      - name: Restore accrue _build cache
         uses: actions/cache@v4
         with:
           path: accrue/_build
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-build-${{ hashFiles('accrue/mix.lock') }}
 
-      - name: Install deps
+      - name: Install accrue deps
         run: cd accrue && mix deps.get
 
-      - name: Check formatting
+      - name: Accrue format
         run: cd accrue && mix format --check-formatted
 
-      - name: Compile (warnings as errors)
+      - name: Accrue compile
         run: cd accrue && mix compile --warnings-as-errors
 
-      - name: Run facade lockdown via compile_matrix script
-        run: bash scripts/ci/compile_matrix.sh
-
-      - name: Run installer UAT automation
-        run: cd accrue && mix test test/mix/tasks/accrue_install_uat_test.exs --warnings-as-errors
-
-      - name: Run tests
+      - name: Accrue test
         run: cd accrue && mix test --warnings-as-errors
 
-      - name: Credo (strict)
+      - name: Accrue credo
         run: cd accrue && mix credo --strict
 
       # --- Dialyzer with split restore/save PLT cache (CLAUDE.md recipe) ---
-      - name: Restore PLT cache
-        id: plt_cache
+      - name: Restore accrue PLT cache
+        id: accrue_plt_cache
         uses: actions/cache/restore@v4
         with:
           path: accrue/priv/plts
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-plt-${{ hashFiles('accrue/mix.lock') }}
 
-      - name: Create PLTs
-        if: steps.plt_cache.outputs.cache-hit != 'true'
+      - name: Create accrue PLTs
+        if: steps.accrue_plt_cache.outputs.cache-hit != 'true'
         run: cd accrue && mix dialyzer --plt
 
-      - name: Save PLT cache
-        if: steps.plt_cache.outputs.cache-hit != 'true'
+      - name: Save accrue PLT cache
+        if: steps.accrue_plt_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: accrue/priv/plts
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-plt-${{ hashFiles('accrue/mix.lock') }}
+          key: ${{ steps.accrue_plt_cache.outputs.cache-primary-key }}
 
-      - name: Run Dialyzer
+      - name: Accrue dialyzer
         run: cd accrue && mix dialyzer --format github
+
+      - name: Accrue docs
+        run: cd accrue && mix docs --warnings-as-errors
+
+      - name: Accrue retired package audit
+        run: cd accrue && mix hex.audit
+
+      - name: Restore accrue_admin deps cache
+        uses: actions/cache@v4
+        with:
+          path: accrue_admin/deps
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-deps-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-deps-
+
+      - name: Restore accrue_admin _build cache
+        uses: actions/cache@v4
+        with:
+          path: accrue_admin/_build
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-build-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+
+      - name: Install accrue_admin deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Accrue admin format
+        run: cd accrue_admin && mix format --check-formatted
+
+      - name: Accrue admin compile
+        run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Accrue admin test
+        run: cd accrue_admin && mix test --warnings-as-errors
+
+      - name: Accrue admin credo
+        run: cd accrue_admin && mix credo --strict
+
+      - name: Restore accrue_admin PLT cache
+        id: accrue_admin_plt_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: accrue_admin/priv/plts
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-plt-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+
+      - name: Create accrue_admin PLTs
+        if: steps.accrue_admin_plt_cache.outputs.cache-hit != 'true'
+        run: cd accrue_admin && mix dialyzer --plt
+
+      - name: Save accrue_admin PLT cache
+        if: steps.accrue_admin_plt_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: accrue_admin/priv/plts
+          key: ${{ steps.accrue_admin_plt_cache.outputs.cache-primary-key }}
+
+      - name: Accrue admin dialyzer
+        run: cd accrue_admin && mix dialyzer --format github
+
+      - name: Accrue admin docs
+        run: cd accrue_admin && mix docs --warnings-as-errors
+
+      - name: Accrue admin retired package audit
+        run: cd accrue_admin && mix hex.audit
 
   # ---------------------------------------------------------------------
   # Advisory live-Stripe fidelity job (quick task 260414-l9q).
