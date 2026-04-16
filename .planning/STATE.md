@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 09-03-accrue-release-docs-PLAN.md
-last_updated: "2026-04-16T00:14:56.097Z"
+stopped_at: Completed 09-04-accrue-guides-extensions-PLAN.md
+last_updated: "2026-04-16T00:18:57.876Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 9
   completed_phases: 8
   total_plans: 69
-  completed_plans: 66
-  percent: 96
+  completed_plans: 67
+  percent: 97
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 09 (release) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -107,6 +107,7 @@ Progress: [██████████] 63/63 planned plans complete (100% ov
 | Phase 09-release P01 | 10m | 2 tasks | 1 files |
 | Phase 09-release P02 | 5m | 2 tasks | 5 files |
 | Phase 09 P03 | 2m | 2 tasks | 9 files |
+| Phase 09-release P04 | 5m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -276,6 +277,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 09-release]: Bootstrap the first public release with Release-As: 1.0.0 instructions and review gates instead of a permanent config override.
 - [Phase 09-release]: Make README.md the ExDoc main page for accrue so Hex and HexDocs share one entry surface.
 - [Phase 09-release]: Load ExDoc guide extras through Path.wildcard("guides/*.md") and keep future-guide links on GitHub URLs until those guide files land locally.
+- [Phase 09-release]: Keep release guides anchored on public behaviours and config keys so docs do not imply support for private internals.
+- [Phase 09-release]: Use placeholder-only snippets and explicit secret-handling warnings in extension and webhook docs.
 
 ### Pending Todos
 
@@ -296,6 +299,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T00:14:56.094Z
-Stopped at: Completed 09-03-accrue-release-docs-PLAN.md
+Last session: 2026-04-16T00:18:57.873Z
+Stopped at: Completed 09-04-accrue-guides-extensions-PLAN.md
 Resume file: None
