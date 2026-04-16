@@ -315,6 +315,9 @@ jobs:
       - name: Run host integration gate
         run: bash scripts/ci/accrue_host_uat.sh
 
+      - name: Run host Hex smoke
+        run: bash scripts/ci/accrue_host_hex_smoke.sh
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7

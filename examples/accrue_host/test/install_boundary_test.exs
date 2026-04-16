@@ -7,7 +7,8 @@ defmodule AccrueHost.InstallBoundaryTest do
   @handler_path Path.join(@host_root, "lib/accrue_host/billing_handler.ex")
   @router_path Path.join(@host_root, "lib/accrue_host_web/router.ex")
   @runtime_path Path.join(@host_root, "config/runtime.exs")
-  @admin_mount ~S|accrue_admin("/billing", session_keys: [:user_token], allow_live_reload: false)|
+  @webhook_route ~r/accrue_webhook\s*\(?\s*"\/stripe",\s*:stripe\s*\)?/
+  @admin_mount ~r/accrue_admin\s*\(?\s*"\/billing",\s*session_keys:\s*\[:user_token\],\s*allow_live_reload:\s*false\s*\)?/
 
   test "installer-generated billing facade stays at the public boundary" do
     billing = File.read!(@billing_path)
@@ -34,11 +35,11 @@ defmodule AccrueHost.InstallBoundaryTest do
     assert router =~ "pipeline :accrue_webhook_raw_body do"
     assert router =~ "body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}"
     assert router =~ ~s(scope "/webhooks" do)
-    assert router =~ ~S|accrue_webhook("/stripe", :stripe)|
+    assert router =~ @webhook_route
     assert router =~ @admin_mount
     assert count_occurrences(router, "pipeline :accrue_webhook_raw_body do") == 1
-    assert count_occurrences(router, ~S|accrue_webhook("/stripe", :stripe)|) == 1
-    assert count_occurrences(router, @admin_mount) == 1
+    assert count_regex_occurrences(router, @webhook_route) == 1
+    assert count_regex_occurrences(router, @admin_mount) == 1
   end
 
   test "runtime config keeps fake-backed defaults instead of live-only setup" do
@@ -54,5 +55,11 @@ defmodule AccrueHost.InstallBoundaryTest do
     |> String.split(needle)
     |> length()
     |> Kernel.-(1)
+  end
+
+  defp count_regex_occurrences(content, pattern) do
+    pattern
+    |> Regex.scan(content)
+    |> length()
   end
 end
