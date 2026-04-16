@@ -19,6 +19,8 @@ Accrue v1.0 Initial Release is shipped as public Hex packages:
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface. Phase history and requirements are archived in `.planning/milestones/`.
 
+v1.1 Phases 10 and 11 are complete: the minimal Phoenix host app now proves the real install, signed-in billing, webhook, and admin replay paths, and CI now treats the Fake-backed host browser/user flow as a mandatory release gate.
+
 ## Current Milestone: v1.1 Stabilization + Adoption
 
 **Goal:** Make Accrue trustworthy from a real user’s point of view by proving the libraries work inside a realistic minimal Phoenix app, then use that app to drive CI, docs, adoption, and polish.
@@ -37,12 +39,15 @@ The v1.0 milestone delivered the full billing library, companion admin UI, insta
 
 v1.0 Initial Release shipped and validated on 2026-04-16. Detailed requirement outcomes are archived in `.planning/milestones/v1.0-REQUIREMENTS.md`.
 
+Validated in Phase 10: the minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths.
+Validated in Phase 11: CI runs the host-app integration and browser flows as a release gate.
+
 ### Active
 
 v1.1 focuses on stabilization and adoption:
 
-- [ ] Minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths.
-- [ ] CI runs the host-app integration and browser flows as a release gate.
+- [x] Minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths.
+- [x] CI runs the host-app integration and browser flows as a release gate.
 - [ ] Installer, docs, and diagnostics are hardened from the host-app experience.
 - [ ] Adoption assets make the project easier to evaluate and try.
 - [ ] Quality hardening and expansion discovery identify the next product bets without blocking stabilization.
@@ -231,4 +236,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after starting v1.1 milestone*
+*Last updated: 2026-04-16 after completing Phase 11*
