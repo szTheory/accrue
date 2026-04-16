@@ -225,11 +225,11 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 ### OSS Hygiene + Release
 
 - [ ] **OSS-01**: Monorepo with sibling mix projects, per-package `CHANGELOG.md`, shared `.github/workflows/`
-- [ ] **OSS-02**: GitHub Actions CI: `mix format --check-formatted`, `mix compile --warnings-as-errors`, `mix test --warnings-as-errors`, `mix credo --strict`, `mix dialyzer`, `mix docs --warnings-as-errors`, `mix hex.audit`
-- [ ] **OSS-03**: Elixir/OTP version matrix in CI
-- [ ] **OSS-04**: Dialyzer PLT caching with OS × OTP × Elixir × mix.lock key
-- [ ] **OSS-05**: CI matrix includes `with_sigra` and `without_sigra` to exercise conditional compilation
-- [ ] **OSS-06**: CI matrix includes `with_opentelemetry` and `without_opentelemetry`
+- [x] **OSS-02**: GitHub Actions CI: `mix format --check-formatted`, `mix compile --warnings-as-errors`, `mix test --warnings-as-errors`, `mix credo --strict`, `mix dialyzer`, `mix docs --warnings-as-errors`, `mix hex.audit`
+- [x] **OSS-03**: Elixir/OTP version matrix in CI
+- [x] **OSS-04**: Dialyzer PLT caching with OS × OTP × Elixir × mix.lock key
+- [x] **OSS-05**: CI matrix includes `with_sigra` and `without_sigra` to exercise conditional compilation
+- [x] **OSS-06**: CI matrix includes `with_opentelemetry` and `without_opentelemetry`
 - [ ] **OSS-07**: Release Please + Conventional Commits for automated version bumps + CHANGELOG
 - [ ] **OSS-08**: Per-package Release Please configs (accrue + accrue_admin independent)
 - [ ] **OSS-09**: Hex publishing workflow with API token secret
@@ -468,11 +468,11 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | TEST-09 | Phase 2 | Pending |
 | TEST-10 | Phase 8 | Complete |
 | OSS-01 | Phase 9 | Pending |
-| OSS-02 | Phase 9 | Pending |
-| OSS-03 | Phase 9 | Pending |
-| OSS-04 | Phase 9 | Pending |
-| OSS-05 | Phase 9 | Pending |
-| OSS-06 | Phase 9 | Pending |
+| OSS-02 | Phase 9 | Complete |
+| OSS-03 | Phase 9 | Complete |
+| OSS-04 | Phase 9 | Complete |
+| OSS-05 | Phase 9 | Complete |
+| OSS-06 | Phase 9 | Complete |
 | OSS-07 | Phase 9 | Pending |
 | OSS-08 | Phase 9 | Pending |
 | OSS-09 | Phase 9 | Pending |
