@@ -130,6 +130,39 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
     assert count_occurrences(router, ~s(accrue_admin "/ops/billing")) == 1
   end
 
+  @tag :install_uat
+  @tag skip: "Phase 12 plan 03 activates this installer contract"
+  test "reserves host-visible conflict artifacts and categorized installer summary output" do
+    app = phoenix_fixture!(:conflict_uat_contract)
+
+    output = run_install(app, ["--yes", "--force", "--write-conflicts"])
+
+    assert output =~ "created"
+    assert output =~ "updated pristine"
+    assert output =~ "skipped user-edited"
+    assert output =~ "skipped exists"
+    assert output =~ "manual"
+    assert output =~ "conflict artifact"
+    assert output =~ "--write-conflicts"
+    assert output =~ ".accrue/conflicts/"
+
+    conflict_root = Path.join(app, ".accrue/conflicts")
+    assert File.exists?(Path.join(conflict_root, "lib/my_app/billing.ex.new"))
+    assert File.exists?(Path.join(conflict_root, "lib/my_app_web/router.ex.snippet"))
+
+    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app/billing.ex.new") =~
+             "target: lib/my_app/billing.ex"
+
+    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app/billing.ex.new") =~
+             "reason: skipped user-edited"
+
+    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet") =~
+             "target: lib/my_app_web/router.ex"
+
+    assert InstallFixture.read!(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet") =~
+             "reason: manual"
+  end
+
   defp phoenix_fixture!(name) do
     app = InstallFixture.tmp_app!(name)
 

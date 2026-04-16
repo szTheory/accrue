@@ -307,6 +307,44 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     assert InstallFixture.assert_contains!(app, "lib/my_app/billing.ex", "# user-edited")
   end
 
+  @tag :install_conflicts
+  @tag skip: "Phase 12 plan 03 activates this installer contract"
+  test "reserves no-clobber summary taxonomy and write-conflicts artifact contract" do
+    app = InstallFixture.tmp_app!(:conflict_contract)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    run_install(app, ["--yes"])
+    output = run_install(app, ["--yes", "--force", "--write-conflicts"])
+
+    assert output =~ "created"
+    assert output =~ "updated pristine"
+    assert output =~ "skipped user-edited"
+    assert output =~ "skipped exists"
+    assert output =~ "manual"
+    assert output =~ "conflict artifact"
+    assert output =~ "--write-conflicts"
+
+    refute output =~ "overwrote user-edited"
+
+    assert File.exists?(Path.join(app, ".accrue/conflicts/lib/my_app/billing.ex.new"))
+    assert File.exists?(Path.join(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet"))
+
+    rendered_replacement = InstallFixture.read!(app, ".accrue/conflicts/lib/my_app/billing.ex.new")
+    manual_snippet = InstallFixture.read!(app, ".accrue/conflicts/lib/my_app_web/router.ex.snippet")
+
+    assert rendered_replacement =~ "target: lib/my_app/billing.ex"
+    assert rendered_replacement =~ "reason: skipped user-edited"
+    assert manual_snippet =~ "target: lib/my_app_web/router.ex"
+    assert manual_snippet =~ "reason: manual"
+  end
+
   defp run_install(app, argv) do
     Mix.Task.clear()
 
