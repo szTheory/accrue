@@ -101,7 +101,15 @@ Plans:
 3. Quickstart and troubleshooting docs follow the host-app path without skipped setup steps.
 4. The host app validates both path-dependency development and Hex-style dependency modes.
 5. Package docs retain correct version snippets, source links, and internal HexDocs guide links.
-**Plans:** TBD
+**Plans:** 8 plans
+- [ ] 12-01-PLAN.md — Create the docs and package-doc verification scaffolds.
+- [ ] 12-02-PLAN.md — Create the installer conflict and Hex smoke validation scaffolds.
+- [ ] 12-03-PLAN.md — Implement installer rerun safety, conflict artifacts, and categorized summaries.
+- [ ] 12-04-PLAN.md — Add host-facing billing read helpers and remove UI coupling to private billing tables.
+- [ ] 12-05-PLAN.md — Introduce the shared setup-diagnostic taxonomy across installer, boot, and runtime checks.
+- [ ] 12-06-PLAN.md — Rewrite host-first docs around the First Hour and troubleshooting path.
+- [ ] 12-07-PLAN.md — Make package metadata verification strict and version-correct.
+- [ ] 12-08-PLAN.md — Add host dependency-mode switching and activate Hex smoke in CI.
 **UI hint:** no
 
 ### Phase 13: Adoption Assets

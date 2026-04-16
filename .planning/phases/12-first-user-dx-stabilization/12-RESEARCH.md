@@ -359,17 +359,15 @@ Phoenix says generated auth code lives in your application and becomes your resp
 
 All claims in this research were verified or cited — no user confirmation needed.
 
-## Open Questions
+## Resolved Planning Decisions
 
-1. **Should the user-facing preflight command be `mix accrue.install --check`, `mix accrue.doctor`, or both?**
-   - What we know: The locked decision allows any entrypoint as long as installer and runtime diagnostics share one taxonomy. [VERIFIED: CONTEXT.md]
-   - What's unclear: Which command shape will be easiest for first users to discover without duplicating implementation. [VERIFIED: CONTEXT.md]
-   - Recommendation: Implement one shared diagnostic service first, then expose `--check`; add a `mix accrue.doctor` alias only if docs/readability still feel weak. [VERIFIED: codebase grep]
+1. **Selected preflight command shape: `mix accrue.install --check`**
+   - Resolution: Use `mix accrue.install --check` as the sole Phase 12 preflight entrypoint because it reuses the existing installer discovery/orchestration surface and keeps D-06 on one diagnostic taxonomy. `mix accrue.doctor` is explicitly deferred unless later user demand justifies an alias. [VERIFIED: CONTEXT.md][VERIFIED: codebase grep]
+   - Why this closes the question: The installer already owns project discovery and host-file inspection, so `--check` adds no second command surface or duplicate router/config locator. [VERIFIED: codebase grep]
 
-2. **Does the generated host billing facade need new read helpers in this phase?**
-   - What we know: Current generated `AccrueHost.Billing` only exposes `subscribe`, `swap_plan`, `cancel`, and `customer_for`, while the context allows adding host-facing read helpers if example UI/tests still reach into private schemas. [VERIFIED: codebase grep][VERIFIED: CONTEXT.md]
-   - What's unclear: Whether planned docs/examples can stay entirely on current public helpers once rewritten. [VERIFIED: codebase grep]
-   - Recommendation: Audit Phase 12 docs/examples first; add only the smallest read helpers needed to remove private schema teaching. [VERIFIED: CONTEXT.md]
+2. **Host billing read helpers are required in Phase 12**
+   - Resolution: Keep Plan 04. The current generated facade exposes only `subscribe`, `swap_plan`, `cancel`, and `customer_for`, while `examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex` still imports `Ecto.Query`, aliases `Accrue.Billing.Customer`, `Accrue.Billing.Subscription`, and `AccrueHost.Repo`, and performs direct private-schema reads. A host-facing read helper is therefore needed to satisfy D-21 through D-23 and DX-05. [VERIFIED: codebase grep][VERIFIED: CONTEXT.md]
+   - Why this closes the question: The private-coupling surface exists in committed host code today, so the phase needs a facade read helper to remove that teaching from the public integration path rather than merely documenting around it. [VERIFIED: codebase grep]
 
 ## Environment Availability
 
@@ -407,10 +405,10 @@ All claims in this research were verified or cited — no user confirmation need
 | DX-01 | Installer rerun stays idempotent and preserves host ownership | unit + host proof | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/mix/tasks/accrue_install_uat_test.exs` | ✅ |
 | DX-02 | Setup failures produce actionable diagnostics | unit + host proof | `cd accrue && mix test test/accrue/auth_test.exs test/accrue/config_test.exs test/accrue/webhook/plug_test.exs` | ✅ partial |
 | DX-03 | First Hour docs follow host setup path | docs test | `cd accrue && mix test test/accrue/docs/*.exs` | ✅ partial |
-| DX-04 | Troubleshooting docs map symptom/code/fix/verify | docs test | `cd accrue && mix test test/accrue/docs/*.exs` | ❌ Wave 0 |
+| DX-04 | Troubleshooting docs map symptom/code/fix/verify | docs test | `cd accrue && mix test test/accrue/docs/*.exs` | ❌ Wave 1 scaffold |
 | DX-05 | Public host-facing API is the documented boundary | host proof | `cd examples/accrue_host && MIX_ENV=test mix test test/install_boundary_test.exs test/accrue_host/billing_facade_test.exs` | ✅ |
-| DX-06 | Version snippets, source links, and guide links stay correct | script + docs test | `bash scripts/ci/verify_package_docs.sh` | ❌ Wave 0 |
-| DX-07 | Host app passes path mode and Hex mode smoke | integration | `bash scripts/ci/accrue_host_uat.sh` and `bash scripts/ci/accrue_host_hex_smoke.sh` | path ✅ / Hex ❌ Wave 0 |
+| DX-06 | Version snippets, source links, and guide links stay correct | script + docs test | `bash scripts/ci/verify_package_docs.sh` | ❌ Wave 1 scaffold |
+| DX-07 | Host app passes path mode and Hex mode smoke | integration | `bash scripts/ci/accrue_host_uat.sh` and `bash scripts/ci/accrue_host_hex_smoke.sh` | path ✅ / Hex ❌ Wave 1 scaffold |
 
 ### Sampling Rate
 
@@ -418,7 +416,7 @@ All claims in this research were verified or cited — no user confirmation need
 - **Per wave merge:** `bash scripts/ci/accrue_host_uat.sh` [VERIFIED: codebase grep]
 - **Phase gate:** Full suite green, metadata verifier green, and Hex smoke green before `/gsd-verify-work`. [VERIFIED: codebase grep]
 
-### Wave 0 Gaps
+### Wave 1 Scaffold Gaps
 
 - [ ] `accrue/test/accrue/docs/first_hour_guide_test.exs` — asserts the host-path order, public API mentions, and no private-module teaching for DX-03/DX-05. [VERIFIED: codebase grep]
 - [ ] `accrue/test/accrue/docs/troubleshooting_guide_test.exs` — asserts stable diagnostic code anchors, columns, and symptom coverage for DX-04. [VERIFIED: codebase grep]

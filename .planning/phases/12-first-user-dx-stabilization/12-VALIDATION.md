@@ -3,7 +3,7 @@ phase: 12
 slug: first-user-dx-stabilization
 status: draft
 nyquist_compliant: false
-wave_0_complete: false
+wave_1_scaffolds_complete: false
 created: 2026-04-16
 ---
 
@@ -21,7 +21,7 @@ created: 2026-04-16
 | **Config file** | `accrue/test/test_helper.exs`, `accrue_admin/test/test_helper.exs`, `examples/accrue_host/test/test_helper.exs` |
 | **Quick run command** | `cd examples/accrue_host && MIX_ENV=test mix test --warnings-as-errors test/install_boundary_test.exs test/accrue_host_web/webhook_ingest_test.exs` |
 | **Full suite command** | `bash scripts/ci/accrue_host_uat.sh` plus `cd accrue && mix test.all` and `cd accrue_admin && mix test --warnings-as-errors` |
-| **Estimated runtime** | To be measured during Wave 0 |
+| **Estimated runtime** | To be measured during Wave 1 scaffold execution |
 
 ---
 
@@ -30,7 +30,7 @@ created: 2026-04-16
 - **After every task commit:** Run `cd examples/accrue_host && MIX_ENV=test mix test --warnings-as-errors test/install_boundary_test.exs test/accrue_host_web/webhook_ingest_test.exs`
 - **After every plan wave:** Run `bash scripts/ci/accrue_host_uat.sh`
 - **Before `$gsd-verify-work`:** Full suite, package docs verifier, and Hex smoke must be green
-- **Max feedback latency:** To be established by Wave 0 timing
+- **Max feedback latency:** To be established by Wave 1 scaffold timing
 
 ---
 
@@ -38,20 +38,24 @@ created: 2026-04-16
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 12-01-01 | 01 | 0 | DX-03/DX-05 | T-12-docs-api | Public docs avoid private-module teaching | docs test | `cd accrue && mix test test/accrue/docs/first_hour_guide_test.exs` | No - W0 | pending |
-| 12-01-02 | 01 | 0 | DX-04 | T-12-diagnostics | Troubleshooting has stable diagnostic codes and safe fix paths | docs test | `cd accrue && mix test test/accrue/docs/troubleshooting_guide_test.exs` | No - W0 | pending |
-| 12-01-03 | 01 | 0 | DX-06 | T-12-docs-drift | Package docs do not publish stale versions or broken guide links | script + docs test | `bash scripts/ci/verify_package_docs.sh` | No - W0 | pending |
-| 12-01-04 | 01 | 0 | DX-07 | T-12-deps | Hex-style dependency validation does not require a second committed host app | integration | `bash scripts/ci/accrue_host_hex_smoke.sh` | No - W0 | pending |
-| 12-02-01 | 02 | 1 | DX-01 | T-12-clobber | Installer reruns preserve user-owned files and emit conflict artifacts | unit + host proof | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/mix/tasks/accrue_install_uat_test.exs` | Partial | pending |
-| 12-03-01 | 03 | 1 | DX-02 | T-12-secrets | Diagnostics name keys and fixes without leaking secrets | unit + host proof | `cd accrue && mix test test/accrue/auth_test.exs test/accrue/config_test.exs test/accrue/webhook/plug_test.exs` | Partial | pending |
-| 12-04-01 | 04 | 2 | DX-03/DX-04/DX-05/DX-06 | T-12-docs-api | Quickstart and troubleshooting docs follow host-app order and public APIs | docs + script | `cd accrue && mix test test/accrue/docs/*.exs && bash scripts/ci/verify_package_docs.sh` | Partial | pending |
-| 12-05-01 | 05 | 2 | DX-07 | T-12-deps | Host app validates path dependency and Hex-style dependency modes | integration | `bash scripts/ci/accrue_host_uat.sh && bash scripts/ci/accrue_host_hex_smoke.sh` | Path yes / Hex no - W0 | pending |
+| 12-01-01 | 01 | 1 | DX-03/DX-05 | T-12-docs-api | Public docs avoid private-module teaching | docs test | `cd accrue && mix test test/accrue/docs/first_hour_guide_test.exs` | No - Wave 1 scaffold | pending |
+| 12-01-02 | 01 | 1 | DX-04 | T-12-diagnostics | Troubleshooting has stable diagnostic codes and safe fix paths | docs test | `cd accrue && mix test test/accrue/docs/troubleshooting_guide_test.exs` | No - Wave 1 scaffold | pending |
+| 12-01-03 | 01 | 1 | DX-06 | T-12-docs-drift | Package docs do not publish stale versions or broken guide links | script + docs test | `bash scripts/ci/verify_package_docs.sh` | No - Wave 1 scaffold | pending |
+| 12-02-01 | 02 | 1 | DX-07 | T-12-deps | Hex-style dependency validation does not require a second committed host app | integration | `bash scripts/ci/accrue_host_hex_smoke.sh` | No - Wave 1 scaffold | pending |
+| 12-02-02 | 02 | 1 | DX-01 | T-12-clobber | Installer reruns reserve exact conflict-artifact and summary contracts before implementation | unit + host proof | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/mix/tasks/accrue_install_uat_test.exs` | Partial - Wave 1 scaffold | pending |
+| 12-03-01 | 03 | 2 | DX-01 | T-12-clobber | Installer reruns preserve user-owned files and emit conflict artifacts | unit + host proof | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/mix/tasks/accrue_install_uat_test.exs` | Yes after plan 03 | pending |
+| 12-04-01 | 04 | 2 | DX-05 | T-12-docs-api | Host UI reads billing state through the generated facade instead of private tables | host proof | `cd examples/accrue_host && MIX_ENV=test mix test --warnings-as-errors test/accrue_host/billing_facade_test.exs test/accrue_host_web/subscription_flow_test.exs` | Yes after plan 04 | pending |
+| 12-05-01 | 05 | 3 | DX-02 | T-12-secrets | Boot and runtime diagnostics share one redacted setup-diagnostic contract | unit + host proof | `cd accrue && mix test test/accrue/config_test.exs test/accrue/auth_test.exs test/accrue/webhook/plug_test.exs` | Yes after plan 05 task 1 | pending |
+| 12-05-02 | 05 | 3 | DX-02 | T-12-secrets | Installer `--check` emits the same diagnostic codes for router, raw-body, admin-mount, and auth wiring mistakes | installer test | `cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/mix/tasks/accrue_install_uat_test.exs` | Yes after plan 05 task 2 | pending |
+| 12-06-01 | 06 | 4 | DX-03/DX-04/DX-05 | T-12-docs-api | First Hour and troubleshooting docs follow the host-app order and public API boundary | docs test | `cd accrue && mix test test/accrue/docs/first_hour_guide_test.exs test/accrue/docs/troubleshooting_guide_test.exs` | Yes after plan 06 | pending |
+| 12-07-01 | 07 | 5 | DX-06 | T-12-docs-drift | Package metadata, source refs, and guide links remain strict and version-correct | script + docs test | `bash scripts/ci/verify_package_docs.sh && cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs` | Yes after plan 07 | pending |
+| 12-08-01 | 08 | 3 | DX-07 | T-12-deps | Host app validates both path dependency and Hex-style dependency modes | integration | `bash scripts/ci/accrue_host_uat.sh && bash scripts/ci/accrue_host_hex_smoke.sh` | Path yes / Hex yes after plan 08 | pending |
 
 *Status: pending, green, red, flaky*
 
 ---
 
-## Wave 0 Requirements
+## Wave 1 Scaffold Requirements
 
 - [ ] `accrue/test/accrue/docs/first_hour_guide_test.exs` - asserts host-path order, public API mentions, and no private-module teaching for DX-03/DX-05.
 - [ ] `accrue/test/accrue/docs/troubleshooting_guide_test.exs` - asserts stable diagnostic code anchors, columns, and symptom coverage for DX-04.
@@ -71,9 +75,9 @@ created: 2026-04-16
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
+- [ ] All tasks have `<automated>` verify or Wave 1 scaffold dependencies
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all missing references
+- [ ] Wave 1 scaffolds cover all missing references
 - [ ] No watch-mode flags
 - [ ] Feedback latency measured and acceptable
 - [ ] `nyquist_compliant: true` set in frontmatter
