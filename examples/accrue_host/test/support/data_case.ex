@@ -24,6 +24,7 @@ defmodule AccrueHost.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import AccrueHost.DataCase
+      use Accrue.Test
     end
   end
 

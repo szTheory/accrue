@@ -23,6 +23,7 @@ defmodule AccrueHostWeb.ConnCase do
       @endpoint AccrueHostWeb.Endpoint
 
       use AccrueHostWeb, :verified_routes
+      use Accrue.Test
 
       # Import conveniences for testing with connections
       import Plug.Conn

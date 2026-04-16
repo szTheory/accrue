@@ -7,6 +7,9 @@
 # General application configuration
 import Config
 
+config :ex_cldr, default_backend: Accrue.Cldr
+config :ex_money, default_cldr_backend: Accrue.Cldr
+
 config :accrue_host, :scopes,
   user: [
     default: true,
