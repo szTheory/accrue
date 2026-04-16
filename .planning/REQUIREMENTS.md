@@ -224,7 +224,7 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 
 ### OSS Hygiene + Release
 
-- [ ] **OSS-01**: Monorepo with sibling mix projects, per-package `CHANGELOG.md`, shared `.github/workflows/`
+- [x] **OSS-01**: Monorepo with sibling mix projects, per-package `CHANGELOG.md`, shared `.github/workflows/`
 - [x] **OSS-02**: GitHub Actions CI: `mix format --check-formatted`, `mix compile --warnings-as-errors`, `mix test --warnings-as-errors`, `mix credo --strict`, `mix dialyzer`, `mix docs --warnings-as-errors`, `mix hex.audit`
 - [x] **OSS-03**: Elixir/OTP version matrix in CI
 - [x] **OSS-04**: Dialyzer PLT caching with OS × OTP × Elixir × mix.lock key
@@ -238,10 +238,10 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [ ] **OSS-12**: `CONTRIBUTING.md` — PRs welcome, conventional commits, no CLA
 - [ ] **OSS-13**: `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1
 - [ ] **OSS-14**: `SECURITY.md` with vulnerability disclosure process
-- [ ] **OSS-15**: Public API facade documentation with stability guarantees and deprecation policy
-- [ ] **OSS-16**: ExDoc guides: quickstart (30s install), configuration, testing, Sigra integration, custom processors, custom PDF adapter, brand customization, admin UI setup, webhook gotchas field guide, upgrade guide
-- [ ] **OSS-17**: README with 30-second quickstart
-- [ ] **OSS-18**: llms.txt auto-generated via ExDoc for AI-friendly reference
+- [x] **OSS-15**: Public API facade documentation with stability guarantees and deprecation policy
+- [x] **OSS-16**: ExDoc guides: quickstart (30s install), configuration, testing, Sigra integration, custom processors, custom PDF adapter, brand customization, admin UI setup, webhook gotchas field guide, upgrade guide
+- [x] **OSS-17**: README with 30-second quickstart
+- [x] **OSS-18**: llms.txt auto-generated via ExDoc for AI-friendly reference
 
 ## v2 Requirements
 
@@ -467,7 +467,7 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | TEST-08 | Phase 3 | Complete |
 | TEST-09 | Phase 2 | Pending |
 | TEST-10 | Phase 8 | Complete |
-| OSS-01 | Phase 9 | Pending |
+| OSS-01 | Phase 9 | Complete |
 | OSS-02 | Phase 9 | Complete |
 | OSS-03 | Phase 9 | Complete |
 | OSS-04 | Phase 9 | Complete |
@@ -481,10 +481,10 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | OSS-12 | Phase 9 | Pending |
 | OSS-13 | Phase 9 | Pending |
 | OSS-14 | Phase 9 | Pending |
-| OSS-15 | Phase 9 | Pending |
-| OSS-16 | Phase 9 | Pending |
-| OSS-17 | Phase 9 | Pending |
-| OSS-18 | Phase 9 | Pending |
+| OSS-15 | Phase 9 | Complete |
+| OSS-16 | Phase 9 | Complete |
+| OSS-17 | Phase 9 | Complete |
+| OSS-18 | Phase 9 | Complete |
 
 **Coverage:**
 - v1 requirements: 191 total (FND 7, PROC 7, BILL 28, CHKT 6, CONN 11, WH 14, EVT 10, MAIL 21, PDF 11, ADMIN 27, AUTH 5, INST 10, OBS 6, TEST 10, OSS 18)

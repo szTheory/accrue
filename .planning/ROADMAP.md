@@ -210,7 +210,7 @@ Plans:
   3. A new user following the 30-second README quickstart goes from `mix new` to a working billing context with Stripe test mode in under 30 seconds (or has a clear error message explaining what's missing).
   4. Every ExDoc guide exists and is linked from the package README: quickstart, configuration, testing guide (as differentiator), Sigra integration, custom processors, custom PDF adapter, brand customization, admin UI setup, webhook gotchas field guide, upgrade guide. `llms.txt` is auto-generated for AI-friendly reference.
   5. `LICENSE` (MIT), `CONTRIBUTING.md` (no CLA, Conventional Commits), `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), and `SECURITY.md` (vulnerability disclosure process) all exist at the monorepo root, and the public-API facade is documented with a stability guarantee and deprecation policy.
-**Plans**: TBD
+**Plans**: 6 plans
 **UI hint**: no
 
 ## Progress
@@ -228,7 +228,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Email + PDF | 0/TBD | Not started | - |
 | 7. Admin UI (accrue_admin) | 0/TBD | Not started | - |
 | 8. Install + Polish + Testing | 0/TBD | Not started | - |
-| 9. Release | 0/TBD | Not started | - |
+| 9. Release | 3/6 | In Progress |  |
 
 ## Parallelization Notes
 
