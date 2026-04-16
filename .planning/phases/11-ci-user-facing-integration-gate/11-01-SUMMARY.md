@@ -101,5 +101,5 @@ None - no external service configuration required.
 
 ## Self-Check: PASSED
 
-- Summary file exists at `.planning/phases/11-ci-user-facing-integration-gate/11-ci-user-facing-integration-gate-01-SUMMARY.md`
+- Summary file exists at `.planning/phases/11-ci-user-facing-integration-gate/11-01-SUMMARY.md`
 - Task commits `47d902f` and `af0d519` are present in git history
