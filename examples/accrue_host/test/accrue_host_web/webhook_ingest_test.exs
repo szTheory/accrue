@@ -1,5 +1,5 @@
 defmodule AccrueHostWeb.WebhookIngestTest do
-  use AccrueHostWeb.ConnCase, async: false
+  use AccrueHost.HostFlowProofCase, async: false
 
   import Ecto.Query
 

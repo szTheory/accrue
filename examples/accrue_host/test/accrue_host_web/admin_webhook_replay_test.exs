@@ -1,5 +1,5 @@
 defmodule AccrueHostWeb.AdminWebhookReplayTest do
-  use AccrueHostWeb.ConnCase, async: false
+  use AccrueHost.HostFlowProofCase, async: false
 
   @moduletag :phase10
 
