@@ -13,9 +13,9 @@ Requirements for the v1.1 stabilization milestone. The milestone proves Accrue f
 - [x] **HOST-02**: The host app uses the public installer and package APIs rather than private shortcuts or hand-wired internals.
 - [x] **HOST-03**: The host app has at least one realistic billable schema and generated `MyApp.Billing` facade.
 - [x] **HOST-04**: The host app mounts the scoped webhook endpoint and verifies signed Fake/Stripe-shaped webhook payloads end to end.
-- [ ] **HOST-05**: The host app mounts `accrue_admin` behind a realistic auth/session boundary.
+- [x] **HOST-05**: The host app mounts `accrue_admin` behind a realistic auth/session boundary.
 - [x] **HOST-06**: A user-facing checkout/subscription flow works through the host app against the Fake processor without network access.
-- [ ] **HOST-07**: An admin-facing flow can inspect billing state, view webhook/event history, and perform at least one audited admin action.
+- [x] **HOST-07**: An admin-facing flow can inspect billing state, view webhook/event history, and perform at least one audited admin action.
 - [x] **HOST-08**: The host app can be rebuilt from a clean checkout with documented commands and no hidden local state.
 
 ### CI Integration Gate
@@ -93,9 +93,9 @@ Deferred until after v1.1 unless pulled into a later milestone:
 | HOST-02 | Phase 10 | Complete |
 | HOST-03 | Phase 10 | Complete |
 | HOST-04 | Phase 10 | Complete |
-| HOST-05 | Phase 10 | Pending |
+| HOST-05 | Phase 10 | Complete |
 | HOST-06 | Phase 10 | Complete |
-| HOST-07 | Phase 10 | Pending |
+| HOST-07 | Phase 10 | Complete |
 | HOST-08 | Phase 10 | Complete |
 | CI-01 | Phase 11 | Pending |
 | CI-02 | Phase 11 | Pending |
