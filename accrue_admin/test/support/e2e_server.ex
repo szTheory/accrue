@@ -53,7 +53,7 @@ defmodule AccrueAdmin.E2E.Server do
       {:error, :already_up} -> :ok
     end
 
-    migrations_path = Path.expand("../../accrue/priv/repo/migrations", __DIR__)
+    migrations_path = Path.expand("../../../accrue/priv/repo/migrations", __DIR__)
 
     {:ok, _, _} =
       Ecto.Migrator.with_repo(TestRepo, fn repo ->
