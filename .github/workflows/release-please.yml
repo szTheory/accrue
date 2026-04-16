@@ -153,7 +153,7 @@ jobs:
   publish-accrue-admin:
     name: Publish accrue_admin
     needs: [release, publish-accrue]
-    if: ${{ needs.release.outputs.accrue_admin_release_created == 'true' && (needs.release.outputs.accrue_release_created != 'true' || needs.publish-accrue.result == 'success') }}
+    if: ${{ always() && needs.release.outputs.accrue_admin_release_created == 'true' && (needs.release.outputs.accrue_release_created != 'true' || needs.publish-accrue.result == 'success') }}
     runs-on: ubuntu-24.04
     env:
       ACCRUE_ADMIN_HEX_RELEASE: "1"
