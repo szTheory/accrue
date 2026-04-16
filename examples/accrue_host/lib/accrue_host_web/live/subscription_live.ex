@@ -1,13 +1,9 @@
 defmodule AccrueHostWeb.SubscriptionLive do
   use AccrueHostWeb, :live_view
 
-  import Ecto.Query
-
-  alias Accrue.Billing.Customer
   alias Accrue.Billing.Subscription
   alias AccrueHost.Billing
   alias AccrueHost.Billing.Plans
-  alias AccrueHost.Repo
 
   @empty_state_heading "No billing activity yet"
   @empty_state_body "Billing records appear after a user starts a subscription or a webhook is processed. Start a subscription or review the webhook feed."
@@ -174,8 +170,8 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp load_state(socket) do
-    customer = fetch_customer(socket.assigns.current_scope.user.id)
-    subscription = current_subscription(customer)
+    {:ok, %{customer: customer, subscription: subscription}} =
+      Billing.billing_state_for(socket.assigns.current_scope.user)
 
     socket
     |> assign(:plans, Plans.all())
@@ -204,22 +200,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp operation_id(_params, prefix), do: "#{prefix}:#{Ecto.UUID.generate()}"
-
-  defp fetch_customer(user_id) do
-    from(customer in Customer,
-      where: customer.owner_type == "User" and customer.owner_id == ^user_id,
-      preload: [:subscriptions]
-    )
-    |> Repo.one()
-  end
-
-  defp current_subscription(nil), do: nil
-
-  defp current_subscription(%Customer{subscriptions: subscriptions}) do
-    subscriptions
-    |> Enum.sort_by(&DateTime.to_unix(&1.inserted_at, :microsecond), :desc)
-    |> List.first()
-  end
 
   defp active_plan_id(nil), do: nil
 
