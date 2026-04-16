@@ -48,5 +48,5 @@ jobs:
 
       - name: Verify guide mentions mount path and asset task
         run: |
-          rg -q 'accrue_admin "/billing"' accrue_admin/guides/admin_ui.md
-          rg -q 'accrue_admin.assets.build' accrue_admin/guides/admin_ui.md
+          grep -q 'accrue_admin "/billing"' accrue_admin/guides/admin_ui.md
+          grep -q 'accrue_admin.assets.build' accrue_admin/guides/admin_ui.md
