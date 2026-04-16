@@ -175,6 +175,24 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
              "reason: test support exists"
   end
 
+  @tag :install_uat
+  test "generated host wiring passes installer --check with shared diagnostics disabled" do
+    app = phoenix_fixture!(:preflight_pass)
+
+    run_install(app, ["--yes"])
+    InstallFixture.write!(app, "config/config.exs", """
+    import Config
+    config :my_app, Oban, queues: [accrue_webhooks: 10, accrue_mailers: 20]
+    config :accrue, :auth_adapter, MyApp.Auth
+    """)
+
+    output = run_install(app, ["--check", "--yes"])
+
+    assert output =~ "check: passed"
+    assert output =~ "check status: passed"
+    refute output =~ "ACCRUE-DX-"
+  end
+
   defp phoenix_fixture!(name) do
     app = InstallFixture.tmp_app!(name)
 

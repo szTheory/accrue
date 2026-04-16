@@ -11,6 +11,7 @@ defmodule Mix.Tasks.Accrue.Install do
     * `--admin-mount /billing`
     * `--admin` / `--no-admin`
     * `--sigra` / `--no-sigra`
+    * `--check`
     * `--dry-run`
     * `--yes`
     * `--non-interactive`
@@ -36,12 +37,17 @@ defmodule Mix.Tasks.Accrue.Install do
     report(Accrue.Install.Templates.stripe_test_mode_readiness())
 
     results =
-      if opts.dry_run or opts.manual or project.manual? do
-        report("manual: review generated snippets before applying")
-        print_manual_snippets(project, opts)
-        []
-      else
-        install(project, opts)
+      cond do
+        opts.check ->
+          run_check(project, opts)
+
+        opts.dry_run or opts.manual or project.manual? ->
+          report("manual: review generated snippets before applying")
+          print_manual_snippets(project, opts)
+          []
+
+        true ->
+          install(project, opts)
       end
 
     print_summary(results, opts, project)
@@ -64,7 +70,7 @@ defmodule Mix.Tasks.Accrue.Install do
     report("Accrue installer")
     report("dependency: {:igniter, \"~> 0.7.9\", runtime: false}")
 
-    report("flags: --dry-run --yes --non-interactive --manual --force --write-conflicts")
+    report("flags: --check --dry-run --yes --non-interactive --manual --force --write-conflicts")
 
     report("billing_context: #{opts.billing_context}")
     report("webhook_path: #{opts.webhook_path}")
@@ -72,6 +78,10 @@ defmodule Mix.Tasks.Accrue.Install do
 
     if opts.dry_run do
       report("dry-run: no files changed")
+    end
+
+    if opts.check do
+      report("check: installer preflight mode")
     end
   end
 
@@ -130,6 +140,21 @@ defmodule Mix.Tasks.Accrue.Install do
     end
   end
 
+  defp run_check(project, opts) do
+    findings = preflight_findings(project, opts)
+
+    if findings == [] do
+      report("check: passed")
+      [{:check_ok, "shared diagnostic preflight passed"}]
+    else
+      Enum.map(findings, fn diagnostic ->
+        report("check failed: #{diagnostic.code}")
+        report(Accrue.SetupDiagnostic.format(diagnostic))
+        {:diagnostic, diagnostic}
+      end)
+    end
+  end
+
   defp report_template_result({status, path, reason}) when status in [:changed, :skipped] do
     label = template_label(status, reason)
     report("#{label}: #{Path.relative_to_cwd(path)}")
@@ -169,36 +194,54 @@ defmodule Mix.Tasks.Accrue.Install do
   end
 
   defp print_summary(results, opts, project) do
-    summary =
-      Enum.reduce(results, default_summary(opts, project), fn
-        {:changed, _path, "created"}, acc ->
-          Map.update!(acc, :created, &(&1 + 1))
+    if opts.check do
+      issue_count =
+        Enum.count(results, fn
+          {:diagnostic, _diagnostic} -> true
+          _ -> false
+        end)
 
-        {:changed, _path, "updated pristine"}, acc ->
-          Map.update!(acc, :updated_pristine, &(&1 + 1))
+      passed_count =
+        Enum.count(results, fn
+          {:check_ok, _reason} -> true
+          _ -> false
+        end)
 
-        {:skipped, _path, "user-edited"}, acc ->
-          Map.update!(acc, :skipped_user_edited, &(&1 + 1))
+      report("check passed: #{passed_count}")
+      report("check issues: #{issue_count}")
+      report("check status: #{if(issue_count == 0, do: "passed", else: "failed")}")
+    else
+      summary =
+        Enum.reduce(results, default_summary(opts, project), fn
+          {:changed, _path, "created"}, acc ->
+            Map.update!(acc, :created, &(&1 + 1))
 
-        {:skipped, _path, "exists"}, acc ->
-          Map.update!(acc, :skipped_exists, &(&1 + 1))
+          {:changed, _path, "updated pristine"}, acc ->
+            Map.update!(acc, :updated_pristine, &(&1 + 1))
 
-        {:manual, _path, _reason}, acc ->
-          Map.update!(acc, :manual, &(&1 + 1))
+          {:skipped, _path, "user-edited"}, acc ->
+            Map.update!(acc, :skipped_user_edited, &(&1 + 1))
 
-        {:conflict_artifact, _path, _reason}, acc ->
-          Map.update!(acc, :conflict_artifact, &(&1 + 1))
+          {:skipped, _path, "exists"}, acc ->
+            Map.update!(acc, :skipped_exists, &(&1 + 1))
 
-        _other, acc ->
-          acc
-      end)
+          {:manual, _path, _reason}, acc ->
+            Map.update!(acc, :manual, &(&1 + 1))
 
-    report("created: #{summary.created}")
-    report("updated pristine: #{summary.updated_pristine}")
-    report("skipped user-edited: #{summary.skipped_user_edited}")
-    report("skipped exists: #{summary.skipped_exists}")
-    report("manual: #{summary.manual}")
-    report("conflict artifact: #{summary.conflict_artifact}")
+          {:conflict_artifact, _path, _reason}, acc ->
+            Map.update!(acc, :conflict_artifact, &(&1 + 1))
+
+          _other, acc ->
+            acc
+        end)
+
+      report("created: #{summary.created}")
+      report("updated pristine: #{summary.updated_pristine}")
+      report("skipped user-edited: #{summary.skipped_user_edited}")
+      report("skipped exists: #{summary.skipped_exists}")
+      report("manual: #{summary.manual}")
+      report("conflict artifact: #{summary.conflict_artifact}")
+    end
   end
 
   defp default_summary(opts, project) do
@@ -238,6 +281,116 @@ defmodule Mix.Tasks.Accrue.Install do
 
   defp config_docs do
     NimbleOptions.docs(Accrue.Config.schema())
+  end
+
+  defp preflight_findings(project, opts) do
+    router = read_file(project.router_path)
+    config = read_file(project.config_path)
+    runtime_config = read_file(project.runtime_config_path)
+    webhook_path = opts.webhook_path
+    admin_mount = opts.admin_mount
+
+    []
+    |> maybe_add(not webhook_route_present?(router, webhook_path), fn ->
+      Accrue.SetupDiagnostic.webhook_route_missing(
+        details: ~s(expected accrue_webhook "#{webhook_path}", :stripe in #{project.router_path})
+      )
+    end)
+    |> maybe_add(
+      webhook_route_present?(router, webhook_path) and not raw_body_reader_present?(router),
+      fn ->
+        Accrue.SetupDiagnostic.webhook_raw_body(
+          details:
+            "missing body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []} in router"
+        )
+      end
+    )
+    |> maybe_add(
+      webhook_route_present?(router, webhook_path) and webhook_pipeline_misused?(router),
+      fn ->
+        Accrue.SetupDiagnostic.webhook_pipeline(
+          details:
+            "webhook route appears to share browser/auth pipeline concerns like protect_from_forgery or require_authenticated_user"
+        )
+      end
+    )
+    |> maybe_add(
+      project.has_accrue_admin? and not admin_mount_present?(router, admin_mount),
+      fn ->
+        Accrue.SetupDiagnostic.admin_mount_missing(
+          details: ~s(expected accrue_admin "#{admin_mount}" in #{project.router_path})
+        )
+      end
+    )
+    |> maybe_add(
+      project.has_accrue_admin? and default_or_missing_auth_adapter?(config),
+      fn ->
+        Accrue.SetupDiagnostic.auth_adapter(
+          details: "config/config.exs is missing a host auth adapter or still uses Accrue.Auth.Default"
+        )
+      end
+    )
+    |> maybe_add(project.has_oban? and not oban_config_present?(config, runtime_config, project), fn ->
+      Accrue.SetupDiagnostic.oban_not_configured(
+        details:
+          "No `config :#{project.app || :my_app}, Oban` or `config :accrue, Oban` block was found"
+      )
+    end)
+  end
+
+  defp maybe_add(findings, true, builder), do: findings ++ [builder.()]
+  defp maybe_add(findings, false, _builder), do: findings
+
+  defp read_file(nil), do: ""
+  defp read_file(path), do: if(File.exists?(path), do: File.read!(path), else: "")
+
+  defp webhook_route_present?(router, webhook_path) do
+    {scope_path, endpoint_path} = webhook_scope(webhook_path)
+    escaped_full = Regex.escape(webhook_path)
+    escaped_scope = Regex.escape(scope_path)
+    escaped_endpoint = Regex.escape(endpoint_path)
+
+    Regex.match?(~r/accrue_webhook(?:\s+|\()\"#{escaped_full}\",\s*:stripe\)?/, router) or
+      (Regex.match?(~r/scope\s+\"#{escaped_scope}\"/, router) and
+         Regex.match?(~r/accrue_webhook(?:\s+|\()\"#{escaped_endpoint}\",\s*:stripe\)?/, router))
+  end
+
+  defp raw_body_reader_present?(router) do
+    router =~ "body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}"
+  end
+
+  defp webhook_pipeline_misused?(router) do
+    Regex.match?(~r/accrue_webhook[^\n]+/, router) and
+      (router =~ "protect_from_forgery" or router =~ "require_authenticated_user" or
+         router =~ "fetch_current_scope_for_user" or router =~ "pipe_through([:browser")
+  end
+
+  defp admin_mount_present?(router, admin_mount) do
+    escaped_mount = Regex.escape(admin_mount)
+    Regex.match?(~r/accrue_admin(?:\s+|\()\"#{escaped_mount}\"/, router)
+  end
+
+  defp default_or_missing_auth_adapter?(config) do
+    not String.contains?(config, "config :accrue, :auth_adapter") or
+      String.contains?(config, "config :accrue, :auth_adapter, Accrue.Auth.Default")
+  end
+
+  defp oban_config_present?(config, runtime_config, project) do
+    app = project.app || :my_app
+    marker = "config :#{app}, Oban"
+    config =~ marker or runtime_config =~ marker or config =~ "config :accrue, Oban" or
+      runtime_config =~ "config :accrue, Oban"
+  end
+
+  defp webhook_scope(path) do
+    normalized = "/" <> String.trim_leading(path || "/webhooks/stripe", "/")
+    parts = String.split(String.trim_leading(normalized, "/"), "/", trim: true)
+
+    case parts do
+      [] -> {"/webhooks", "/stripe"}
+      [only] -> {"/webhooks", "/" <> only}
+      _ -> {"/" <> Enum.join(Enum.drop(parts, -1), "/"), "/" <> List.last(parts)}
+    end
   end
 
   defp redact(message) do

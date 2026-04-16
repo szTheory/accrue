@@ -26,6 +26,7 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     assert output =~ "--non-interactive"
     assert output =~ "--manual"
     assert output =~ "--force"
+    assert output =~ "--check"
   end
 
   @tag :install_templates
@@ -376,6 +377,66 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     forced_output = run_install(app, ["--yes", "--force"])
     assert forced_output =~ "changed (overwrote unmarked): config/runtime.exs"
     assert InstallFixture.read!(app, "config/runtime.exs") =~ "# accrue:generated"
+  end
+
+  @tag :install_check
+  test "--check reports shared diagnostics for missing webhook route admin mount auth and Oban wiring" do
+    app = InstallFixture.tmp_app!(:check_missing_wiring)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}",
+      "{:accrue_admin, path: \"../accrue_admin\"}",
+      "{:oban, \"~> 2.21\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    output = run_install(app, ["--check", "--yes"])
+
+    assert output =~ "check: installer preflight mode"
+    assert output =~ "ACCRUE-DX-WEBHOOK-ROUTE-MISSING"
+    assert output =~ "ACCRUE-DX-ADMIN-MOUNT-MISSING"
+    assert output =~ "ACCRUE-DX-AUTH-ADAPTER"
+    assert output =~ "ACCRUE-DX-OBAN-NOT-CONFIGURED"
+    assert output =~ "/guides/troubleshooting.html#accrue-dx-webhook-route-missing"
+  end
+
+  @tag :install_check
+  test "--check reports raw body and pipeline diagnostics for browser-mounted webhooks" do
+    app = InstallFixture.tmp_app!(:check_bad_webhook_pipeline)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app, """
+    defmodule MyAppWeb.Router do
+      use MyAppWeb, :router
+
+      import Accrue.Router
+
+      pipeline :browser do
+        plug :accepts, [\"html\"]
+        plug :fetch_session
+        plug :protect_from_forgery
+      end
+
+      scope \"/webhooks\", MyAppWeb do
+        pipe_through [:browser, :require_authenticated_user]
+        accrue_webhook \"/stripe\", :stripe
+      end
+    end
+    """)
+
+    InstallFixture.write_config!(app, "import Config\nconfig :accrue, :auth_adapter, MyApp.Auth\n")
+
+    output = run_install(app, ["--check", "--yes"])
+
+    assert output =~ "ACCRUE-DX-WEBHOOK-RAW-BODY"
+    assert output =~ "ACCRUE-DX-WEBHOOK-PIPELINE"
   end
 
   defp run_install(app, argv) do
