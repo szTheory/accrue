@@ -28,11 +28,19 @@ defmodule MyAppWeb.Router do
 end
 ```
 
-Run `mix deps.get`, configure the host billing app, and continue with the package guide for route session options, branding, and auth details.
+Run `mix deps.get`, configure the host billing app, and continue with the package guide on HexDocs for route session options, branding, and auth details:
+
+- <https://hexdocs.pm/accrue_admin/admin_ui.html>
 
 ## Host setup
 
-`accrue_admin` expects the host app to provide browser session state and an `Accrue.Auth` adapter that can resolve an admin-capable operator. The full router mount, branding config, and auth expectations live in the [admin UI guide](guides/admin_ui.md).
+`accrue_admin` expects the host app to provide browser session state and an `Accrue.Auth` adapter that can resolve an admin-capable operator. The full router mount, branding config, and auth expectations live in the admin UI guide on HexDocs:
+
+- <https://hexdocs.pm/accrue_admin/admin_ui.html>
+
+The first-time host setup path for the core package lives in the Accrue First Hour guide:
+
+- <https://hexdocs.pm/accrue/first_hour.html>
 
 Published `accrue_admin` releases resolve `accrue ~> 0.1.2`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
 
@@ -60,7 +68,7 @@ npm run e2e
 
 ## Guides
 
-- [Admin UI integration guide](guides/admin_ui.md)
+- [Admin UI integration guide](https://hexdocs.pm/accrue_admin/admin_ui.html)
 
 ## Project policies
 

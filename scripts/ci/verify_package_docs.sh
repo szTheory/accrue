@@ -2,23 +2,57 @@
 
 set -euo pipefail
 
-echo "Phase 12 plan 07 activates package-doc drift checks"
+ROOT_DIR=$(
+  cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd
+)
 
-# Target files reserved for the real package-doc drift checks in plan 07:
-# - accrue/mix.exs
-# - accrue_admin/mix.exs
-# - accrue/README.md
-# - accrue_admin/README.md
-#
-# Planned checks:
-# - parse @version from accrue/mix.exs and accrue_admin/mix.exs
-# - compare README install snippets against those version values
-# - verify docs.source_ref remains accrue-v#{@version} and accrue_admin-v#{@version}
-# - verify relative ExDoc guide links point at guides/first_hour.md,
-#   guides/troubleshooting.md, guides/webhooks.md, and guides/admin_ui.md
-# - verify package README links use https://hexdocs.pm/accrue and
-#   https://hexdocs.pm/accrue_admin
-# - keep README, HexDocs, source_ref, and guides/ invariants locked to
-#   published package metadata without printing secrets or env-var values
+fail() {
+  echo "package docs verification failed: $*" >&2
+  exit 1
+}
 
-exit 0
+extract_version() {
+  local file=$1
+  local version
+
+  version=$(sed -n 's/^  @version "\([^"]*\)"/\1/p' "$file" | head -n 1)
+  [[ -n "$version" ]] || fail "could not parse @version from $file"
+  printf '%s\n' "$version"
+}
+
+require_fixed() {
+  local file=$1
+  local needle=$2
+
+  grep -Fq "$needle" "$file" || fail "$file is missing: $needle"
+}
+
+require_regex() {
+  local file=$1
+  local pattern=$2
+
+  grep -Eq "$pattern" "$file" || fail "$file does not match: $pattern"
+}
+
+accrue_version=$(extract_version "$ROOT_DIR/accrue/mix.exs")
+accrue_admin_version=$(extract_version "$ROOT_DIR/accrue_admin/mix.exs")
+
+[[ "$accrue_version" == "$accrue_admin_version" ]] || fail "package versions diverged"
+
+require_fixed "$ROOT_DIR/accrue/mix.exs" 'source_ref: "accrue-v#{@version}"'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'source_ref: "accrue_admin-v#{@version}"'
+
+require_fixed "$ROOT_DIR/accrue/README.md" "{:accrue, \"~> $accrue_version\"}"
+require_fixed "$ROOT_DIR/accrue_admin/README.md" "{:accrue_admin, \"~> $accrue_admin_version\"}"
+require_fixed "$ROOT_DIR/accrue_admin/README.md" "accrue ~> $accrue_version"
+
+require_fixed "$ROOT_DIR/accrue/README.md" '[First Hour](guides/first_hour.md)'
+require_fixed "$ROOT_DIR/accrue/README.md" '[Troubleshooting](guides/troubleshooting.md)'
+require_fixed "$ROOT_DIR/accrue/README.md" '[Webhooks](guides/webhooks.md)'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'extras: ["README.md", "guides/admin_ui.md"]'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras: [Guides: ["guides/admin_ui.md"]]'
+
+require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
+require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/first_hour\.html)?'
+
+echo "package docs verified for accrue $accrue_version and accrue_admin $accrue_admin_version"
