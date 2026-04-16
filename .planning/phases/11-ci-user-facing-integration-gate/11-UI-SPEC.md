@@ -89,6 +89,7 @@ Browser assertions must use these exact visible strings where they already exist
 
 | Area | Contract |
 |------|----------|
+| Primary visual hierarchy | The host billing view's first focal point is the current subscription or empty billing state, followed by the primary `Start subscription` action and then supporting projection/event context. The admin detail flow's first focal point is the selected webhook/event identity and status, followed by replay controls and audit/event evidence. |
 | Required flow coverage | One blocking browser path must cover signed-in host user billing entry, empty state, plan start, cancellation confirmation, admin entry, webhook detail, replay action, and resulting audit/event evidence. |
 | Viewport coverage | Required blocking project: Chromium desktop at `1280x900`. Reuse existing `accrue_admin` multi-project coverage if already present, but Phase 11 must not block on inventing new mobile-only host assertions. |
 | Artifact retention | On browser failure, upload Playwright HTML report, Playwright trace output, failure screenshots, and host Phoenix server log. Retain artifacts only on failure to keep the required gate legible. |
@@ -120,4 +121,4 @@ Browser assertions must use these exact visible strings where they already exist
 - [ ] Dimension 5 Spacing: PASS
 - [ ] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-04-16
