@@ -360,9 +360,76 @@ defmodule Mix.Tasks.Accrue.Install do
   end
 
   defp webhook_pipeline_misused?(router) do
-    Regex.match?(~r/accrue_webhook[^\n]+/, router) and
-      (router =~ "protect_from_forgery" or router =~ "require_authenticated_user" or
-         router =~ "fetch_current_scope_for_user" or router =~ "pipe_through([:browser")
+    router
+    |> webhook_route_contexts()
+    |> Enum.any?(&webhook_context_misused?/1)
+  end
+
+  defp webhook_route_contexts(router) do
+    scope_blocks =
+      Regex.scan(~r/scope\b.*?\bdo\b.*?\bend\b/s, router, capture: :first)
+      |> List.flatten()
+
+    matched_scopes =
+      Enum.filter(scope_blocks, fn scope_block ->
+        String.contains?(scope_block, "accrue_webhook")
+      end)
+
+    case matched_scopes do
+      [] ->
+        standalone_webhook_contexts(router)
+
+      scopes ->
+        Enum.map(scopes, &scope_context/1)
+    end
+  end
+
+  defp standalone_webhook_contexts(router) do
+    router
+    |> String.split("\n")
+    |> Enum.with_index()
+    |> Enum.flat_map(fn {line, index} ->
+      if String.contains?(line, "accrue_webhook") do
+        [%{scope: line, pipelines: preceding_pipe_throughs(router, index)}]
+      else
+        []
+      end
+    end)
+  end
+
+  defp scope_context(scope_block) do
+    %{
+      scope: scope_block,
+      pipelines: Regex.scan(~r/pipe_through(?:\s+|\()(.*?)(?:\)|$)/, scope_block, capture: :all_but_first)
+    }
+  end
+
+  defp preceding_pipe_throughs(router, index) do
+    router
+    |> String.split("\n")
+    |> Enum.take(index)
+    |> Enum.reverse()
+    |> Enum.take_while(&(String.trim(&1) == "" or String.contains?(&1, "pipe_through")))
+    |> Enum.filter(&String.contains?(&1, "pipe_through"))
+    |> Enum.map(fn line ->
+      case Regex.run(~r/pipe_through(?:\s+|\()(.*?)(?:\)|$)/, line, capture: :all_but_first) do
+        [pipelines] -> pipelines
+        _ -> line
+      end
+    end)
+  end
+
+  defp webhook_context_misused?(%{scope: scope, pipelines: pipelines}) do
+    pipeline_text = Enum.join(List.flatten(pipelines), "\n")
+
+    not String.contains?(pipeline_text, ":accrue_webhook_raw_body") and
+      (pipeline_text =~ ":browser" or
+         pipeline_text =~ "require_authenticated_user" or
+         pipeline_text =~ "fetch_current_scope_for_user" or
+         scope =~ ~r/pipe_through.*:browser/ or
+         scope =~ ~r/pipe_through.*require_authenticated_user/ or
+         scope =~ ~r/pipe_through.*fetch_current_scope_for_user/ or
+         scope =~ "protect_from_forgery")
   end
 
   defp admin_mount_present?(router, admin_mount) do
