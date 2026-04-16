@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
-- 🚧 **v1.1 Stabilization + Adoption** — Phases 10-15. Prove Accrue in a realistic minimal Phoenix host app, wire that proof into CI, then use it to harden first-user DX, docs, adoption assets, quality, and expansion planning.
+- 🚧 **v1.1 Stabilization + Adoption** — Phases 10-15 plus gap-closure inserts. Prove Accrue in a realistic minimal Phoenix host app, wire that proof into CI, then use it to harden first-user DX, docs, adoption assets, quality, and expansion planning.
 
 ## Phases
 
@@ -26,6 +26,7 @@
 
 - [x] **Phase 10: Host App Dogfood Harness** — canonical minimal Phoenix app that installs and uses `accrue` + `accrue_admin` through public APIs. (completed 2026-04-16)
 - [x] **Phase 11: CI User-Facing Integration Gate** — mandatory CI workflows for host-app setup, Fake-backed E2E, browser UAT artifacts, and warning/error annotation sweeps. (completed 2026-04-16)
+- [ ] **Phase 11.1: Hermetic Host Flow Proofs** — gap-closure phase that makes focused host-flow proof files self-isolating outside the canonical UAT wrapper.
 - [ ] **Phase 12: First-User DX Stabilization** — installer/docs/error polish driven by dogfood failures and first-hour user setup paths.
 - [ ] **Phase 13: Adoption Assets** — maintained example/demo path, tutorial docs, README positioning, and repository issue templates.
 - [ ] **Phase 14: Quality Hardening** — security, performance, compatibility, accessibility, responsive admin checks, and release-gate clarity.
@@ -73,10 +74,26 @@ Plans:
 - [x] 11-03-PLAN.md — Wire the ordered CI workflow and advisory live-Stripe policy into the main release gate.
 **UI hint:** yes (browser UAT artifacts)
 
+### Phase 11.1: Hermetic Host Flow Proofs
+
+**Goal:** Close the v1.1 audit gap by making focused host-flow proof files deterministic and self-isolating when run directly, without relying on `scripts/ci/accrue_host_uat.sh` to reset shared database state first.
+**Depends on:** Phase 10 and Phase 11
+**Requirements:** HOST-08, CI-02, CI-03
+**Gap Closure:** Closes v1.1 milestone audit gaps `INT-001` and `FLOW-001`.
+**Success Criteria** (what must be TRUE):
+1. The focused subscription, webhook ingest, and admin replay proof files can run together repeatedly against a migrated test database without deterministic processor-id collisions.
+2. The direct focused command and the canonical `scripts/ci/accrue_host_uat.sh` wrapper both pass, so local ad hoc proof runs and CI release-gate runs agree.
+3. Test fixture data uses unique or cleaned-up identifiers where needed while preserving realistic Fake-backed billing, signed webhook, and admin replay evidence.
+4. The milestone audit can be rerun without reporting host-flow proof hermeticity as a partial integration or flow gap.
+**Plans:** TBD
+Plans:
+- [ ] TBD — Make host-flow proof fixtures hermetic and verify direct focused reruns.
+**UI hint:** no
+
 ### Phase 12: First-User DX Stabilization
 
 **Goal:** The first-hour experience for a Phoenix developer is tightened using failures and friction discovered by the host app: installer behavior, setup errors, docs, diagnostics, and public API clarity.
-**Depends on:** Phase 10
+**Depends on:** Phase 10 and Phase 11.1
 **Requirements:** DX-01, DX-02, DX-03, DX-04, DX-05, DX-06, DX-07
 **Success Criteria** (what must be TRUE):
 1. Re-running the installer against the host app is idempotent and does not clobber user-owned files.
@@ -144,6 +161,7 @@ Plans:
 | 9. Release | v1.0 | 6/6 | Complete | 2026-04-16 |
 | 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete    | 2026-04-16 |
 | 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete    | 2026-04-16 |
+| 11.1. Hermetic Host Flow Proofs | v1.1 | 0/TBD | Planned | - |
 | 12. First-User DX Stabilization | v1.1 | 0/TBD | Planned | - |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
 | 14. Quality Hardening | v1.1 | 0/TBD | Planned | - |
@@ -151,7 +169,7 @@ Plans:
 
 ## Parallelization Notes
 
-Phase 10 is the foundation for v1.1 and should run first. Phase 11 depends on Phase 10. Phase 12 can begin once the first host-app path exists. Phase 13 depends on the stabilized host-app story from Phases 10 and 12. Phase 14 can run in parallel with adoption work after CI exists. Phase 15 can run late or in parallel once the host-app experience clarifies real expansion pressure.
+Phase 10 is the foundation for v1.1 and should run first. Phase 11 depends on Phase 10. Phase 11.1 closes the audit-discovered host-flow hermeticity gap before broader DX work continues. Phase 12 can begin once the first host-app path exists and Phase 11.1 has removed the test-state ambiguity. Phase 13 depends on the stabilized host-app story from Phases 10, 11.1, and 12. Phase 14 can run in parallel with adoption work after CI exists. Phase 15 can run late or in parallel once the host-app experience clarifies real expansion pressure.
 
 ---
 

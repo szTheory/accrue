@@ -96,10 +96,10 @@ Deferred until after v1.1 unless pulled into a later milestone:
 | HOST-05 | Phase 10 | Complete |
 | HOST-06 | Phase 10 | Complete |
 | HOST-07 | Phase 10 | Complete |
-| HOST-08 | Phase 10 | Complete |
+| HOST-08 | Phase 10 + Phase 11.1 gap closure | Pending gap closure |
 | CI-01 | Phase 11 | Complete |
-| CI-02 | Phase 11 | Complete |
-| CI-03 | Phase 11 | Complete |
+| CI-02 | Phase 11 + Phase 11.1 gap closure | Pending gap closure |
+| CI-03 | Phase 11 + Phase 11.1 gap closure | Pending gap closure |
 | CI-04 | Phase 11 | Complete |
 | CI-05 | Phase 11 | Complete |
 | CI-06 | Phase 11 | Complete |
@@ -132,7 +132,8 @@ Deferred until after v1.1 unless pulled into a later milestone:
 - v1.1 requirements: 38 total
 - Mapped to phases: 38
 - Unmapped: 0
+- Gap closure pending: 3 affected requirements (HOST-08, CI-02, CI-03) mapped to Phase 11.1
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after milestone initialization*
+*Last updated: 2026-04-16 after v1.1 milestone gap planning*
