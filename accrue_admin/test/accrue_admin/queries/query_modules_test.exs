@@ -157,10 +157,34 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     {rows, _cursor} =
       Subscriptions.list(filter: Subscriptions.decode_filter(%{"status" => "active"}))
 
-    assert [
-             %{customer_id: ^customer_new_id, status: :active},
-             %{status: :trialing}
-           ] = rows
+    assert Enum.take(rows, 2) == [
+             %{
+               customer_id: customer_new_id,
+               customer_email: "bravo@example.com",
+               customer_name: "Bravo",
+               processor_id: "sub_new",
+               status: :active,
+               cancel_at_period_end: false,
+               current_period_end: nil,
+               ended_at: nil,
+               trial_end: nil,
+               id: Enum.at(rows, 0).id,
+               inserted_at: Enum.at(rows, 0).inserted_at
+             },
+             %{
+               customer_email: "alpha@example.com",
+               customer_name: "Alpha",
+               processor_id: "sub_old",
+               status: :trialing,
+               cancel_at_period_end: false,
+               current_period_end: nil,
+               ended_at: nil,
+               trial_end: nil,
+               customer_id: Enum.at(rows, 1).customer_id,
+               id: Enum.at(rows, 1).id,
+               inserted_at: Enum.at(rows, 1).inserted_at
+             }
+           ]
   end
 
   test "invoice queries map real schema fields and search by invoice number", %{
@@ -176,7 +200,8 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
   test "charge queries surface fee settlement filters" do
     {rows, _cursor} = Charges.list(filter: Charges.decode_filter(%{"fees_settled" => "true"}))
 
-    assert [%{processor_id: "ch_new", stripe_fee_amount_minor: 99}] = rows
+    assert hd(rows).processor_id == "ch_new"
+    assert hd(rows).stripe_fee_amount_minor == 99
   end
 
   test "coupon and promotion code queries respect valid/active flags", %{coupon_new: coupon_new} do

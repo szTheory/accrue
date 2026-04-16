@@ -39,9 +39,7 @@ defmodule Accrue.Webhook.CheckoutSessionCompletedTest do
 
     event = StripeFixtures.webhook_event("checkout.session.completed", payload)
 
-    assert {:ok, result} = DefaultHandler.handle(event)
-    # Result should report the session id we linked, or :ok / a struct.
-    refute match?({:error, _}, {:ok, result})
+    assert {:ok, _result} = DefaultHandler.handle(event)
 
     # The local subscription row should still exist + be findable.
     assert %Subscription{} = Repo.get_by(Subscription, processor_id: sub.processor_id)

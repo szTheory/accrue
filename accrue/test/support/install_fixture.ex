@@ -81,6 +81,26 @@ defmodule Accrue.Test.InstallFixture do
     path
   end
 
+  def cd_preserving_code_path!(root, fun) when is_function(fun, 0) do
+    original_path = :code.get_path()
+
+    try do
+      File.cd!(root, fun)
+    after
+      restore_code_path(original_path)
+    end
+  end
+
+  defp restore_code_path(original_path) do
+    current_path = :code.get_path()
+
+    Enum.each(current_path -- original_path, &:code.del_path/1)
+
+    original_path
+    |> Enum.reverse()
+    |> Enum.each(&:code.add_patha/1)
+  end
+
   def default_router do
     """
     defmodule MyAppWeb.Router do

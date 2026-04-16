@@ -121,7 +121,8 @@ defmodule Accrue.Billing.SubscriptionScheduleActions do
   end
 
   @spec update_schedule!(SubscriptionSchedule.t(), map(), keyword()) :: SubscriptionSchedule.t()
-  def update_schedule!(sched, params, opts \\ []), do: unwrap!(update_schedule(sched, params, opts))
+  def update_schedule!(sched, params, opts \\ []),
+    do: unwrap!(update_schedule(sched, params, opts))
 
   # ---------------------------------------------------------------------
   # release_schedule/2

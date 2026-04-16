@@ -16,20 +16,22 @@ defmodule Accrue.Billing.InvoiceItem do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "accrue_invoice_items" do
-    belongs_to :invoice, Accrue.Billing.Invoice
+  @type t :: %__MODULE__{}
 
-    field :stripe_id, :string
-    field :description, :string
-    field :amount_minor, :integer
-    field :currency, :string
-    field :quantity, :integer, default: 1
-    field :period_start, :utc_datetime_usec
-    field :period_end, :utc_datetime_usec
-    field :proration, :boolean, default: false
-    field :price_ref, :string
-    field :subscription_item_ref, :string
-    field :data, :map, default: %{}
+  schema "accrue_invoice_items" do
+    belongs_to(:invoice, Accrue.Billing.Invoice)
+
+    field(:stripe_id, :string)
+    field(:description, :string)
+    field(:amount_minor, :integer)
+    field(:currency, :string)
+    field(:quantity, :integer, default: 1)
+    field(:period_start, :utc_datetime_usec)
+    field(:period_end, :utc_datetime_usec)
+    field(:proration, :boolean, default: false)
+    field(:price_ref, :string)
+    field(:subscription_item_ref, :string)
+    field(:data, :map, default: %{})
 
     timestamps(type: :utc_datetime_usec)
   end

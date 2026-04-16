@@ -72,7 +72,8 @@ defmodule AccrueAdmin.Queries.Behaviour do
           last_row = List.last(page_rows)
           Cursor.encode(Map.fetch!(last_row, field), Map.fetch!(last_row, :id))
 
-        [] -> nil
+        [] ->
+          nil
       end
 
     {page_rows, next_cursor}

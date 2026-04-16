@@ -17,23 +17,25 @@ defmodule Accrue.Billing.Coupon do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   schema "accrue_coupons" do
-    field :processor, :string
-    field :processor_id, :string
-    field :name, :string
-    field :amount_off_cents, :integer
-    field :amount_off_minor, :integer
-    field :redeem_by, :utc_datetime_usec
-    field :percent_off, :decimal
-    field :currency, :string
-    field :duration, :string
-    field :duration_in_months, :integer
-    field :max_redemptions, :integer
-    field :times_redeemed, :integer, default: 0
-    field :valid, :boolean, default: true
-    field :metadata, :map, default: %{}
-    field :data, :map, default: %{}
-    field :lock_version, :integer, default: 1
+    field(:processor, :string)
+    field(:processor_id, :string)
+    field(:name, :string)
+    field(:amount_off_cents, :integer)
+    field(:amount_off_minor, :integer)
+    field(:redeem_by, :utc_datetime_usec)
+    field(:percent_off, :decimal)
+    field(:currency, :string)
+    field(:duration, :string)
+    field(:duration_in_months, :integer)
+    field(:max_redemptions, :integer)
+    field(:times_redeemed, :integer, default: 0)
+    field(:valid, :boolean, default: true)
+    field(:metadata, :map, default: %{})
+    field(:data, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
     timestamps(type: :utc_datetime_usec)
   end

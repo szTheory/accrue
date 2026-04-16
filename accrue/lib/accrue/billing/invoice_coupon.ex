@@ -15,11 +15,13 @@ defmodule Accrue.Billing.InvoiceCoupon do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "accrue_invoice_coupons" do
-    belongs_to :invoice, Accrue.Billing.Invoice
-    belongs_to :coupon, Accrue.Billing.Coupon
+  @type t :: %__MODULE__{}
 
-    field :amount_off_minor, :integer
+  schema "accrue_invoice_coupons" do
+    belongs_to(:invoice, Accrue.Billing.Invoice)
+    belongs_to(:coupon, Accrue.Billing.Coupon)
+
+    field(:amount_off_minor, :integer)
 
     timestamps(type: :utc_datetime_usec, updated_at: false)
   end

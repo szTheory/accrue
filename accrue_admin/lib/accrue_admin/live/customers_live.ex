@@ -136,13 +136,12 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   defp customer_link(row, mount_path) do
     label =
-      row.name || row.email || row.processor_id || row.id
-      |> Phoenix.HTML.html_escape()
-      |> Phoenix.HTML.safe_to_string()
+      row.name || row.email || row.processor_id ||
+        row.id
+        |> Phoenix.HTML.html_escape()
+        |> Phoenix.HTML.safe_to_string()
 
-    Phoenix.HTML.raw(
-      ~s(<a href="#{mount_path}/customers/#{row.id}" class="ax-link">#{label}</a>)
-    )
+    Phoenix.HTML.raw(~s(<a href="#{mount_path}/customers/#{row.id}" class="ax-link">#{label}</a>))
   end
 
   defp default_payment_method_label(%{default_payment_method_id: nil}), do: "Missing"

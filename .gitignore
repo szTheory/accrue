@@ -9,9 +9,15 @@ deps/
 # Dialyzer PLTs
 priv/plts/*.plt
 priv/plts/*.plt.hash
+**/priv/plts/
 
 # Coverage
 cover/
+
+# Generated release verification outputs
+**/doc/
+*.tar
+erl_crash.dump
 
 # JavaScript browser-test artifacts
 node_modules/

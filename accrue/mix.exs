@@ -16,6 +16,9 @@ defmodule Accrue.MixProject do
       package: package(),
       description: "Billing state, modeled clearly.",
       source_url: @source_url,
+      dialyzer: [
+        plt_add_apps: [:mix, :ex_unit, :credo]
+      ],
       docs: docs()
     ]
   end
@@ -116,7 +119,7 @@ defmodule Accrue.MixProject do
     [
       licenses: ["MIT"],
       links: %{},
-      files: ~w(lib mix.exs README* LICENSE* CHANGELOG*)
+      files: ~w(lib priv guides mix.exs README* LICENSE* CHANGELOG*)
     ]
   end
 

@@ -32,7 +32,10 @@ defmodule Accrue.Webhook.DefaultHandlerOutOfOrderTest do
 
     {:ok, _} =
       sub
-      |> Subscription.changeset(%{last_stripe_event_ts: newer_ts, last_stripe_event_id: "evt_new"})
+      |> Subscription.changeset(%{
+        last_stripe_event_ts: newer_ts,
+        last_stripe_event_id: "evt_new"
+      })
       |> Repo.update()
 
     test_pid = self()

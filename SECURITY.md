@@ -13,7 +13,9 @@ can validate and coordinate a fix before disclosure.
 
 ## Reporting a Vulnerability
 
-Email security@accrue.dev with:
+Open a private GitHub security advisory on the repository, or contact the
+maintainer through the GitHub identity `szTheory` if advisory access is not
+available. Include:
 
 - a description of the issue
 - affected package and version

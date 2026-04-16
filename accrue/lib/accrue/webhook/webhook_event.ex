@@ -33,20 +33,22 @@ defmodule Accrue.Webhook.WebhookEvent do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   @statuses [:received, :processing, :succeeded, :failed, :dead, :replayed]
   @endpoints [:default, :connect]
 
   schema "accrue_webhook_events" do
-    field :processor, :string
-    field :processor_event_id, :string
-    field :type, :string
-    field :livemode, :boolean, default: false
-    field :status, Ecto.Enum, values: @statuses, default: :received
-    field :endpoint, Ecto.Enum, values: @endpoints, default: :default
-    field :raw_body, :binary, redact: true
-    field :received_at, :utc_datetime_usec
-    field :processed_at, :utc_datetime_usec
-    field :data, :map, default: %{}
+    field(:processor, :string)
+    field(:processor_event_id, :string)
+    field(:type, :string)
+    field(:livemode, :boolean, default: false)
+    field(:status, Ecto.Enum, values: @statuses, default: :received)
+    field(:endpoint, Ecto.Enum, values: @endpoints, default: :default)
+    field(:raw_body, :binary, redact: true)
+    field(:received_at, :utc_datetime_usec)
+    field(:processed_at, :utc_datetime_usec)
+    field(:data, :map, default: %{})
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -108,10 +110,7 @@ defimpl Inspect, for: Accrue.Webhook.WebhookEvent do
 
     concat([
       "#Accrue.Webhook.WebhookEvent<",
-      Inspect.Map.inspect(
-        Map.from_struct(sanitized),
-        opts
-      ),
+      to_doc(Map.from_struct(sanitized), opts),
       ">"
     ])
   end

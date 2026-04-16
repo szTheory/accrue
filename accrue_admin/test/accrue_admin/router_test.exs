@@ -42,9 +42,15 @@ defmodule AccrueAdmin.RouterTest do
     assert session["admin_token"] == "token-123"
     refute Map.has_key?(session, "ignored")
 
-    assert session["accrue_admin"]["brand_css_path"] == AccrueAdmin.Assets.hashed_path(:brand, "/billing")
-    assert session["accrue_admin"]["assets_css_path"] == AccrueAdmin.Assets.hashed_path(:css, "/billing")
-    assert session["accrue_admin"]["assets_js_path"] == AccrueAdmin.Assets.hashed_path(:js, "/billing")
+    assert session["accrue_admin"]["brand_css_path"] ==
+             AccrueAdmin.Assets.hashed_path(:brand, "/billing")
+
+    assert session["accrue_admin"]["assets_css_path"] ==
+             AccrueAdmin.Assets.hashed_path(:css, "/billing")
+
+    assert session["accrue_admin"]["assets_js_path"] ==
+             AccrueAdmin.Assets.hashed_path(:js, "/billing")
+
     assert session["accrue_admin"]["mount_path"] == "/billing"
     assert session["accrue_admin"]["theme"] == "system"
   end

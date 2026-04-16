@@ -31,7 +31,9 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
     %{subscription: paused_subscription} = Factory.active_subscription(%{owner_id: "sub-paused"})
-    {:ok, _paused_processor} = Fake.pause_subscription_collection(paused_subscription.processor_id, :void, %{}, [])
+
+    {:ok, _paused_processor} =
+      Fake.pause_subscription_collection(paused_subscription.processor_id, :void, %{}, [])
 
     %{subscription: active_subscription} = Factory.active_subscription(%{owner_id: "sub-active"})
     {:ok, _canceling_subscription} = Billing.cancel_at_period_end(active_subscription)

@@ -42,33 +42,35 @@ defmodule Accrue.Billing.Subscription do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   schema "accrue_subscriptions" do
-    belongs_to :customer, Accrue.Billing.Customer
+    belongs_to(:customer, Accrue.Billing.Customer)
 
-    field :processor, :string
-    field :processor_id, :string
-    field :status, Ecto.Enum, values: @statuses
-    field :cancel_at_period_end, :boolean, default: false
-    field :pause_collection, :map
-    field :paused_at, :utc_datetime_usec
-    field :pause_behavior, :string
-    field :past_due_since, :utc_datetime_usec
-    field :dunning_sweep_attempted_at, :utc_datetime_usec
-    field :discount_id, :string
-    field :current_period_start, :utc_datetime_usec
-    field :current_period_end, :utc_datetime_usec
-    field :trial_start, :utc_datetime_usec
-    field :trial_end, :utc_datetime_usec
-    field :cancel_at, :utc_datetime_usec
-    field :canceled_at, :utc_datetime_usec
-    field :ended_at, :utc_datetime_usec
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
-    field :metadata, :map, default: %{}
-    field :data, :map, default: %{}
-    field :lock_version, :integer, default: 1
+    field(:processor, :string)
+    field(:processor_id, :string)
+    field(:status, Ecto.Enum, values: @statuses)
+    field(:cancel_at_period_end, :boolean, default: false)
+    field(:pause_collection, :map)
+    field(:paused_at, :utc_datetime_usec)
+    field(:pause_behavior, :string)
+    field(:past_due_since, :utc_datetime_usec)
+    field(:dunning_sweep_attempted_at, :utc_datetime_usec)
+    field(:discount_id, :string)
+    field(:current_period_start, :utc_datetime_usec)
+    field(:current_period_end, :utc_datetime_usec)
+    field(:trial_start, :utc_datetime_usec)
+    field(:trial_end, :utc_datetime_usec)
+    field(:cancel_at, :utc_datetime_usec)
+    field(:canceled_at, :utc_datetime_usec)
+    field(:ended_at, :utc_datetime_usec)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
+    field(:metadata, :map, default: %{})
+    field(:data, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
-    has_many :subscription_items, Accrue.Billing.SubscriptionItem
+    has_many(:subscription_items, Accrue.Billing.SubscriptionItem)
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -242,6 +244,4 @@ defmodule Accrue.Billing.Subscription do
   defp fetch_key(map, keys) when is_map(map) do
     Enum.find_value(keys, fn k -> Map.get(map, k) end)
   end
-
-  defp fetch_key(_, _), do: nil
 end

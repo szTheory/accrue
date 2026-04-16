@@ -8,8 +8,8 @@ if Mix.env() != :prod do
       Application.get_env(:accrue, :processor, Accrue.Processor.Fake) == Accrue.Processor.Fake
     end
 
-    attr :current_path, :string, required: true
-    attr :mount_path, :string, required: true
+    attr(:current_path, :string, required: true)
+    attr(:mount_path, :string, required: true)
 
     def dev_toolbar(assigns) do
       assigns = assign(assigns, :items, items(assigns.mount_path))

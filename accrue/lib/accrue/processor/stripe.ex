@@ -589,7 +589,9 @@ defmodule Accrue.Processor.Stripe do
   @impl Accrue.Processor
   def subscription_schedule_create(params, opts) when is_map(params) and is_list(opts) do
     client = build_client!(opts)
-    stripe_opts = stripe_opts(:subscription_schedule_create, subject_of(params, "sub_sched"), opts)
+
+    stripe_opts =
+      stripe_opts(:subscription_schedule_create, subject_of(params, "sub_sched"), opts)
 
     client
     |> LatticeStripe.SubscriptionSchedule.create(stringify_keys(params), stripe_opts)
@@ -866,7 +868,6 @@ defmodule Accrue.Processor.Stripe do
   @spec translate_resource({:ok, struct() | map()} | {:error, term()}) ::
           {:ok, map()} | {:error, Exception.t()}
   defp translate_resource({:ok, %_{} = result}), do: {:ok, Map.from_struct(result)}
-  defp translate_resource({:ok, result}) when is_map(result), do: {:ok, result}
   defp translate_resource({:error, raw}), do: {:error, ErrorMapper.to_accrue_error(raw)}
 
   # ---------------------------------------------------------------------------

@@ -72,9 +72,7 @@ defmodule Mix.Tasks.Accrue.Mail.Preview do
       end
     end)
 
-    Mix.shell().info(
-      "Rendered #{length(types)} email preview(s) to #{@preview_dir}/"
-    )
+    Mix.shell().info("Rendered #{length(types)} email preview(s) to #{@preview_dir}/")
   end
 
   defp parse_only(nil), do: Map.keys(Fixtures.all())

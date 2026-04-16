@@ -85,7 +85,7 @@ defmodule Accrue.Events.ImmutabilityTest do
 
       count =
         Accrue.TestRepo.one(
-          from e in Event, where: e.idempotency_key == ^key, select: count(e.id)
+          from(e in Event, where: e.idempotency_key == ^key, select: count(e.id))
         )
 
       assert count == 1

@@ -56,6 +56,6 @@ Use runtime-only secrets for Stripe credentials, keep webhook signing secrets ou
 
 ## Project policies
 
-- [Contributing guide](../CONTRIBUTING.md)
-- [Code of Conduct](../CODE_OF_CONDUCT.md)
-- [Security policy](../SECURITY.md)
+- [Contributing guide](https://github.com/jon/accrue/blob/main/CONTRIBUTING.md)
+- [Code of Conduct](https://github.com/jon/accrue/blob/main/CODE_OF_CONDUCT.md)
+- [Security policy](https://github.com/jon/accrue/blob/main/SECURITY.md)

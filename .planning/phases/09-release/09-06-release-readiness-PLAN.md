@@ -126,19 +126,19 @@ Output: automated verification results and a human checkpoint for secret availab
     - .github/workflows/release-please.yml
     - .github/workflows/publish-hex.yml
   </read_first>
-  <action>Present the final human checkpoint after the automated dry run passes. Ask the user to confirm that the GitHub repository secrets `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` are configured, that the contact addresses `maintainers@accrue.dev` and `security@accrue.dev` are acceptable for public release or have been replaced with the final addresses, and that they want to proceed with the same-day v1.0.0 release order documented in `RELEASING.md`. Do not attempt a real publish in this plan.</action>
+  <action>Present the final human checkpoint after the automated dry run passes. Ask the user to confirm that the GitHub repository secrets `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` are configured, that the GitHub-based maintainer and private security reporting paths are acceptable for public release, and that they want to proceed with the same-day v1.0.0 release order documented in `RELEASING.md`. Do not attempt a real publish in this plan.</action>
   <acceptance_criteria>
-    - The checkpoint instructions mention `RELEASE_PLEASE_TOKEN`, `HEX_API_KEY`, `maintainers@accrue.dev`, `security@accrue.dev`, and `RELEASING.md`.
+    - The checkpoint instructions mention `RELEASE_PLEASE_TOKEN`, `HEX_API_KEY`, `szTheory`, GitHub private security advisories, and `RELEASING.md`.
     - The resume signal is exactly `approved` or a concrete issue list from the user.
   </acceptance_criteria>
   <verify>
-    <automated>rg -n "RELEASE_PLEASE_TOKEN|HEX_API_KEY|maintainers@accrue.dev|security@accrue.dev|same-day|accrue then accrue_admin" RELEASING.md SECURITY.md CODE_OF_CONDUCT.md .github/workflows/release-please.yml .github/workflows/publish-hex.yml</automated>
+    <automated>rg -n "RELEASE_PLEASE_TOKEN|HEX_API_KEY|szTheory|private GitHub security advisory|same-day|accrue then accrue_admin" RELEASING.md SECURITY.md CODE_OF_CONDUCT.md .github/workflows/release-please.yml .github/workflows/publish-hex.yml</automated>
   </verify>
   <what-built>Automated local release-readiness verification, publish-mode dry-run package builds, workflow smoke checks, and the same-day release runbook.</what-built>
   <how-to-verify>
     1. Open `RELEASING.md` and confirm the same-day publish order is `accrue` then `accrue_admin`.
     2. Confirm the repository secrets `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` exist in GitHub Actions settings.
-    3. Confirm the public contact addresses in `CODE_OF_CONDUCT.md` and `SECURITY.md` are final.
+    3. Confirm the GitHub-based public contact paths in `CODE_OF_CONDUCT.md` and `SECURITY.md` are final.
     4. Reply `approved` to continue to release execution, or reply with the exact issue list.
   </how-to-verify>
   <resume-signal>Type `approved` or provide the exact issue list.</resume-signal>

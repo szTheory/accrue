@@ -669,9 +669,14 @@ defmodule Accrue.Connect do
 
       Accrue.Telemetry.span(
         [:accrue, :connect, :separate_charge_and_transfer],
-        %{destination: acct_id, amount_minor: gross.amount_minor, transfer_minor: xfer.amount_minor},
+        %{
+          destination: acct_id,
+          amount_minor: gross.amount_minor,
+          transfer_minor: xfer.amount_minor
+        },
         fn ->
-          with {:ok, stripe_ch} <- Processor.__impl__().create_charge(charge_params, platform_opts),
+          with {:ok, stripe_ch} <-
+                 Processor.__impl__().create_charge(charge_params, platform_opts),
                {:ok, charge_row} <- persist_charge(stripe_ch, customer_struct, gross) do
             transfer_params = %{
               amount: xfer.amount_minor,
@@ -898,8 +903,9 @@ defmodule Accrue.Connect do
   defp stringify_charge(value) when is_list(value), do: Enum.map(value, &stringify_charge/1)
   defp stringify_charge(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
 
-  defp stringify_charge(value) when is_atom(value) and not is_nil(value) and not is_boolean(value),
-    do: Atom.to_string(value)
+  defp stringify_charge(value)
+       when is_atom(value) and not is_nil(value) and not is_boolean(value),
+       do: Atom.to_string(value)
 
   defp stringify_charge(value), do: value
 
@@ -926,7 +932,8 @@ defmodule Accrue.Connect do
         {:error,
          %Accrue.ConfigError{
            key: :type,
-           message: "Accrue.Connect.create_account/2 invalid params: " <> Exception.message(nimble_err)
+           message:
+             "Accrue.Connect.create_account/2 invalid params: " <> Exception.message(nimble_err)
          }}
     end
   end

@@ -30,8 +30,11 @@ defmodule AccrueAdmin.CustomersLiveTest do
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
-    %{customer: customer} = Factory.customer(%{owner_type: "Team", owner_id: "team_001", email: "captain@example.com"})
-    %{customer: other_customer} = Factory.customer(%{owner_type: "User", owner_id: "user_002", email: "other@example.com"})
+    %{customer: customer} =
+      Factory.customer(%{owner_type: "Team", owner_id: "team_001", email: "captain@example.com"})
+
+    %{customer: other_customer} =
+      Factory.customer(%{owner_type: "User", owner_id: "user_002", email: "other@example.com"})
 
     payment_method =
       TestRepo.insert!(
@@ -48,7 +51,10 @@ defmodule AccrueAdmin.CustomersLiveTest do
       )
 
     customer
-    |> Customer.changeset(%{default_payment_method_id: payment_method.id, name: "Captain Customer"})
+    |> Customer.changeset(%{
+      default_payment_method_id: payment_method.id,
+      name: "Captain Customer"
+    })
     |> TestRepo.update!()
 
     other_customer
@@ -61,7 +67,11 @@ defmodule AccrueAdmin.CustomersLiveTest do
   test "filters customer rows through the shared query layer", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/customers?q=Captain&owner_type=Team&has_default_payment_method=true")
+    assert {:ok, _view, html} =
+             live(
+               conn,
+               "/billing/customers?q=Captain&owner_type=Team&has_default_payment_method=true"
+             )
 
     assert html =~ "Searchable customer projections"
     assert html =~ "Captain Customer"

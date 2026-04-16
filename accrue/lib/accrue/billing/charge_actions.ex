@@ -236,8 +236,10 @@ defmodule Accrue.Billing.ChargeActions do
   defp resolve_customer(%Customer{} = c), do: {:ok, c}
   defp resolve_customer(billable), do: Accrue.Billing.customer(billable)
 
-  defp default_pm_processor_id(%Customer{default_payment_method: %PaymentMethod{processor_id: id}}),
-    do: id
+  defp default_pm_processor_id(%Customer{
+         default_payment_method: %PaymentMethod{processor_id: id}
+       }),
+       do: id
 
   defp default_pm_processor_id(_), do: nil
 
@@ -337,7 +339,9 @@ defmodule Accrue.Billing.ChargeActions do
 
   defp stringify(value) when is_list(value), do: Enum.map(value, &stringify/1)
   defp stringify(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+
   defp stringify(value) when is_atom(value) and not is_nil(value) and not is_boolean(value),
     do: Atom.to_string(value)
+
   defp stringify(value), do: value
 end

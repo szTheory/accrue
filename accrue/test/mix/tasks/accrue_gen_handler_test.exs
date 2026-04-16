@@ -59,7 +59,7 @@ defmodule Mix.Tasks.Accrue.Gen.HandlerTest do
     Mix.Task.clear()
 
     capture_io(fn ->
-      File.cd!(app, fn ->
+      InstallFixture.cd_preserving_code_path!(app, fn ->
         apply(Mix.Tasks.Accrue.Gen.Handler, :run, [argv])
       end)
     end)

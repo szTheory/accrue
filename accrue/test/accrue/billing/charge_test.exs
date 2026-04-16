@@ -101,9 +101,7 @@ defmodule Accrue.Billing.ChargeTest do
     customer: cus
   } do
     assert {:ok, %Charge{} = charge} =
-             Billing.charge(cus, Accrue.Money.new(10_000, :usd),
-               payment_method: "pm_fake_00001"
-             )
+             Billing.charge(cus, Accrue.Money.new(10_000, :usd), payment_method: "pm_fake_00001")
 
     # Fake.build_charge returns fee: 30
     assert charge.stripe_fee_amount_minor == 30

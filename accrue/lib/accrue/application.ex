@@ -129,6 +129,9 @@ defmodule Accrue.Application do
     key = :accrue_company_address_locale_warned?
 
     cond do
+      safe_mix_env() == :test ->
+        :ok
+
       :persistent_term.get(key, false) ->
         :ok
 

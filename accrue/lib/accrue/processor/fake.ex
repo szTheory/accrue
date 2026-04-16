@@ -99,7 +99,15 @@ defmodule Accrue.Processor.Fake do
   """
   @spec reset() :: :ok
   def reset do
-    GenServer.call(__MODULE__, :reset)
+    ensure_started()
+
+    try do
+      GenServer.call(__MODULE__, :reset)
+    catch
+      :exit, {:noproc, _} ->
+        ensure_started()
+        GenServer.call(__MODULE__, :reset)
+    end
   end
 
   @doc """
@@ -578,7 +586,10 @@ defmodule Accrue.Processor.Fake do
     # Transfers are platform-authority calls — force :platform scope so
     # a `Accrue.Connect.with_account/2` wrapper from a calling test does
     # not inadvertently tag the transfer as connected-account-scoped.
-    GenServer.call(__MODULE__, {:create_transfer, params, Keyword.put(opts, :stripe_account, nil)})
+    GenServer.call(
+      __MODULE__,
+      {:create_transfer, params, Keyword.put(opts, :stripe_account, nil)}
+    )
   end
 
   @impl Accrue.Processor
@@ -660,6 +671,19 @@ defmodule Accrue.Processor.Fake do
   # GenServer
   # ---------------------------------------------------------------------------
 
+  defp ensure_started do
+    case Process.whereis(__MODULE__) do
+      pid when is_pid(pid) ->
+        :ok
+
+      nil ->
+        case start_link([]) do
+          {:ok, _pid} -> :ok
+          {:error, {:already_started, _pid}} -> :ok
+        end
+    end
+  end
+
   @impl GenServer
   def init(:ok), do: {:ok, %State{}}
 
@@ -696,7 +720,11 @@ defmodule Accrue.Processor.Fake do
               cond do
                 DateTime.compare(new_now, trial_end_dt) in [:gt, :eq] ->
                   updated = Map.put(sub, :status, :active)
-                  state = %{state | subscriptions: Map.put(state.subscriptions, stripe_id, updated)}
+
+                  state = %{
+                    state
+                    | subscriptions: Map.put(state.subscriptions, stripe_id, updated)
+                  }
 
                   maybe_synthesize(
                     state,
@@ -825,8 +853,7 @@ defmodule Accrue.Processor.Fake do
         {:ok, existing} ->
           updated = apply_subscription_update(existing, params, id)
 
-          {{:ok, updated},
-           %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
+          {{:ok, updated}, %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -844,8 +871,7 @@ defmodule Accrue.Processor.Fake do
             |> Map.put(:canceled_at, state.clock)
             |> Map.put(:ended_at, state.clock)
 
-          {{:ok, updated},
-           %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
+          {{:ok, updated}, %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -862,8 +888,7 @@ defmodule Accrue.Processor.Fake do
             |> Map.put(:status, :active)
             |> Map.put(:pause_collection, nil)
 
-          {{:ok, updated},
-           %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
+          {{:ok, updated}, %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -877,8 +902,7 @@ defmodule Accrue.Processor.Fake do
         {:ok, existing} ->
           updated = Map.put(existing, :pause_collection, %{behavior: behavior})
 
-          {{:ok, updated},
-           %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
+          {{:ok, updated}, %{state | subscriptions: Map.put(state.subscriptions, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -1053,8 +1077,7 @@ defmodule Accrue.Processor.Fake do
         {:ok, existing} ->
           updated = Map.put(existing, :status, :succeeded)
 
-          {{:ok, updated},
-           %{state | setup_intents: Map.put(state.setup_intents, id, updated)}}
+          {{:ok, updated}, %{state | setup_intents: Map.put(state.setup_intents, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -1084,7 +1107,9 @@ defmodule Accrue.Processor.Fake do
       case Map.fetch(state.payment_methods, id) do
         {:ok, existing} ->
           updated = Map.put(existing, :customer, params[:customer] || params["customer"])
-          {{:ok, updated}, %{state | payment_methods: Map.put(state.payment_methods, id, updated)}}
+
+          {{:ok, updated},
+           %{state | payment_methods: Map.put(state.payment_methods, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -1097,7 +1122,9 @@ defmodule Accrue.Processor.Fake do
       case Map.fetch(state.payment_methods, id) do
         {:ok, existing} ->
           updated = Map.put(existing, :customer, nil)
-          {{:ok, updated}, %{state | payment_methods: Map.put(state.payment_methods, id, updated)}}
+
+          {{:ok, updated},
+           %{state | payment_methods: Map.put(state.payment_methods, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -1123,7 +1150,9 @@ defmodule Accrue.Processor.Fake do
       case Map.fetch(state.payment_methods, id) do
         {:ok, existing} ->
           updated = Map.merge(existing, params)
-          {{:ok, updated}, %{state | payment_methods: Map.put(state.payment_methods, id, updated)}}
+
+          {{:ok, updated},
+           %{state | payment_methods: Map.put(state.payment_methods, id, updated)}}
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -1132,20 +1161,25 @@ defmodule Accrue.Processor.Fake do
   end
 
   def handle_call({:set_default_payment_method, customer_id, params, opts}, _from, state) do
-    with_script_or_stub(state, :set_default_payment_method, [customer_id, params, opts], fn state ->
-      case Map.fetch(state.customers, customer_id) do
-        {:ok, existing} ->
-          pm_id = get_in(params, [:invoice_settings, :default_payment_method])
+    with_script_or_stub(
+      state,
+      :set_default_payment_method,
+      [customer_id, params, opts],
+      fn state ->
+        case Map.fetch(state.customers, customer_id) do
+          {:ok, existing} ->
+            pm_id = get_in(params, [:invoice_settings, :default_payment_method])
 
-          updated =
-            Map.put(existing, :invoice_settings, %{default_payment_method: pm_id})
+            updated =
+              Map.put(existing, :invoice_settings, %{default_payment_method: pm_id})
 
-          {{:ok, updated}, %{state | customers: Map.put(state.customers, customer_id, updated)}}
+            {{:ok, updated}, %{state | customers: Map.put(state.customers, customer_id, updated)}}
 
-        :error ->
-          {{:error, resource_missing(customer_id)}, state}
+          :error ->
+            {{:error, resource_missing(customer_id)}, state}
+        end
       end
-    end)
+    )
   end
 
   # --- charge ---
@@ -1413,9 +1447,14 @@ defmodule Accrue.Processor.Fake do
 
           coupon_obj =
             case coupon_ref do
-              nil -> nil
-              ref when is_binary(ref) -> Map.get(state.coupons, ref) || %{id: ref, object: "coupon"}
-              %{} = m -> m
+              nil ->
+                nil
+
+              ref when is_binary(ref) ->
+                Map.get(state.coupons, ref) || %{id: ref, object: "coupon"}
+
+              %{} = m ->
+                m
             end
 
           code = params[:code] || params["code"]
@@ -1758,7 +1797,7 @@ defmodule Accrue.Processor.Fake do
       Keyword.has_key?(opts, :stripe_account) ->
         Keyword.get(opts, :stripe_account) || :platform
 
-      (id = Process.get(:accrue_connected_account_id)) ->
+      id = Process.get(:accrue_connected_account_id) ->
         id
 
       true ->
@@ -2100,7 +2139,15 @@ defmodule Accrue.Processor.Fake do
       type: params[:type] || params["type"] || "card",
       customer: params[:customer] || params["customer"],
       created: state.clock,
-      card: params[:card] || params["card"] || %{brand: "visa", last4: "4242", exp_month: 12, exp_year: 2030, fingerprint: "fp_fake_" <> Integer.to_string(state.counters.payment_method)}
+      card:
+        params[:card] || params["card"] ||
+          %{
+            brand: "visa",
+            last4: "4242",
+            exp_month: 12,
+            exp_year: 2030,
+            fingerprint: "fp_fake_" <> Integer.to_string(state.counters.payment_method)
+          }
     }
   end
 
@@ -2156,7 +2203,9 @@ defmodule Accrue.Processor.Fake do
 
   defp atomize(map) when is_map(map) do
     Map.new(map, fn
-      {k, v} when is_atom(k) -> {k, v}
+      {k, v} when is_atom(k) ->
+        {k, v}
+
       {k, v} when is_binary(k) ->
         try do
           {String.to_existing_atom(k), v}

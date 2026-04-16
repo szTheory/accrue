@@ -16,22 +16,24 @@ defmodule Accrue.Billing.SubscriptionItem do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "accrue_subscription_items" do
-    belongs_to :subscription, Accrue.Billing.Subscription
+  @type t :: %__MODULE__{}
 
-    field :processor, :string
-    field :processor_id, :string
-    field :price_id, :string
-    field :processor_plan_id, :string
-    field :processor_product_id, :string
-    field :quantity, :integer, default: 1
-    field :current_period_start, :utc_datetime_usec
-    field :current_period_end, :utc_datetime_usec
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
-    field :metadata, :map, default: %{}
-    field :data, :map, default: %{}
-    field :lock_version, :integer, default: 1
+  schema "accrue_subscription_items" do
+    belongs_to(:subscription, Accrue.Billing.Subscription)
+
+    field(:processor, :string)
+    field(:processor_id, :string)
+    field(:price_id, :string)
+    field(:processor_plan_id, :string)
+    field(:processor_product_id, :string)
+    field(:quantity, :integer, default: 1)
+    field(:current_period_start, :utc_datetime_usec)
+    field(:current_period_end, :utc_datetime_usec)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
+    field(:metadata, :map, default: %{})
+    field(:data, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
     timestamps(type: :utc_datetime_usec)
   end

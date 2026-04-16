@@ -91,7 +91,6 @@ defmodule Mix.Tasks.Accrue.Gen.Handler do
       {nil, [module]} -> module
       {_module, [_arg | _]} -> Mix.raise("Use --module or a positional module, not both")
       {_module, []} -> Mix.raise("Invalid handler module")
-      {nil, _many} -> Mix.raise("mix accrue.gen.handler accepts at most one positional module")
     end
   end
 

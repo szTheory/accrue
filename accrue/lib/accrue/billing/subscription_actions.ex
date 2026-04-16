@@ -405,8 +405,7 @@ defmodule Accrue.Billing.SubscriptionActions do
     {stripe_params, local_attrs_patch, mode_payload} =
       case at_dt do
         nil ->
-          {%{cancel_at_period_end: true}, %{cancel_at_period_end: true},
-           %{mode: "at_period_end"}}
+          {%{cancel_at_period_end: true}, %{cancel_at_period_end: true}, %{mode: "at_period_end"}}
 
         %DateTime{} = dt ->
           {%{cancel_at: DateTime.to_unix(dt)}, %{cancel_at: dt},
@@ -794,7 +793,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   defp upsert_item(sub, si) when is_map(si) do
     stripe_id = SubscriptionProjection.get(si, :id)
     price = SubscriptionProjection.get(si, :price) || %{}
-    price_id = SubscriptionProjection.get(price, :id) || price_from_string(price)
+    price_id = SubscriptionProjection.get(price, :id)
 
     attrs = %{
       subscription_id: sub.id,
@@ -822,9 +821,6 @@ defmodule Accrue.Billing.SubscriptionActions do
         |> Repo.update()
     end
   end
-
-  defp price_from_string(price) when is_binary(price), do: price
-  defp price_from_string(_), do: nil
 
   defp stringify(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
   defp stringify(%{__struct__: _} = s), do: s |> Map.from_struct() |> stringify()
@@ -871,8 +867,9 @@ defmodule Accrue.Billing.SubscriptionActions do
       |> String.to_atom()
 
     lines =
-      for line <- (SubscriptionProjection.get(preview, :lines) || %{})
-                  |> then(&(SubscriptionProjection.get(&1, :data) || [])) do
+      for line <-
+            (SubscriptionProjection.get(preview, :lines) || %{})
+            |> then(&(SubscriptionProjection.get(&1, :data) || [])) do
         %UpcomingInvoice.Line{
           description: SubscriptionProjection.get(line, :description),
           amount: Accrue.Money.new(SubscriptionProjection.get(line, :amount) || 0, currency),
@@ -893,8 +890,10 @@ defmodule Accrue.Billing.SubscriptionActions do
          Accrue.Money.new(SubscriptionProjection.get(preview, :amount_due) || 0, currency),
        starting_balance:
          Accrue.Money.new(SubscriptionProjection.get(preview, :starting_balance) || 0, currency),
-       period_start: SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(preview, :period_start)),
-       period_end: SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(preview, :period_end)),
+       period_start:
+         SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(preview, :period_start)),
+       period_end:
+         SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(preview, :period_end)),
        proration_date:
          SubscriptionProjection.unix_to_dt(
            SubscriptionProjection.get(preview, :subscription_proration_date)

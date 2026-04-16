@@ -172,11 +172,46 @@ defmodule AccrueAdmin.DataTableTest do
 
     rows =
       [
-        %{id: "row-5", label: "Newest open", status: "open", category: "alpha", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:05Z]},
-        %{id: "row-4", label: "Older open", status: "open", category: "beta", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:04Z]},
-        %{id: "row-3", label: "Newest closed", status: "closed", category: "gamma", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:03Z]},
-        %{id: "row-2", label: "Archived closed", status: "closed", category: "delta", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:02Z]},
-        %{id: "row-1", label: "Oldest open", status: "open", category: "omega", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:01Z]}
+        %{
+          id: "row-5",
+          label: "Newest open",
+          status: "open",
+          category: "alpha",
+          hidden: "do-not-render",
+          inserted_at: ~U[2026-04-15 17:00:05Z]
+        },
+        %{
+          id: "row-4",
+          label: "Older open",
+          status: "open",
+          category: "beta",
+          hidden: "do-not-render",
+          inserted_at: ~U[2026-04-15 17:00:04Z]
+        },
+        %{
+          id: "row-3",
+          label: "Newest closed",
+          status: "closed",
+          category: "gamma",
+          hidden: "do-not-render",
+          inserted_at: ~U[2026-04-15 17:00:03Z]
+        },
+        %{
+          id: "row-2",
+          label: "Archived closed",
+          status: "closed",
+          category: "delta",
+          hidden: "do-not-render",
+          inserted_at: ~U[2026-04-15 17:00:02Z]
+        },
+        %{
+          id: "row-1",
+          label: "Oldest open",
+          status: "open",
+          category: "omega",
+          hidden: "do-not-render",
+          inserted_at: ~U[2026-04-15 17:00:01Z]
+        }
       ]
 
     FixtureStore.put_rows(rows)
@@ -202,11 +237,11 @@ defmodule AccrueAdmin.DataTableTest do
            end)
   end
 
-  test "loads additional rows via opaque cursor pagination without embedding resource fields", %{conn: conn} do
+  test "loads additional rows via opaque cursor pagination without embedding resource fields", %{
+    conn: conn
+  } do
     {:ok, view, html} =
-      live_isolated(conn, TableLive,
-        session: %{"params" => %{"status" => "open"}}
-      )
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 
     assert html =~ "Newest open"
     assert html =~ "Older open"
@@ -230,9 +265,7 @@ defmodule AccrueAdmin.DataTableTest do
 
   test "renders card mode markup and supports visible-row bulk selection", %{conn: conn} do
     {:ok, view, html} =
-      live_isolated(conn, TableLive,
-        session: %{"params" => %{"status" => "open"}}
-      )
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 
     assert html =~ ~s(data-role="card-list")
     assert html =~ "Category"
@@ -245,6 +278,7 @@ defmodule AccrueAdmin.DataTableTest do
       render_click(
         element(view, ~s([data-role="card-list"] [data-role="toggle-row"][data-row-id="row-5"]))
       )
+
     assert html =~ ~s(data-role="selected-count">1 selected<)
   end
 
@@ -255,8 +289,22 @@ defmodule AccrueAdmin.DataTableTest do
       )
 
     FixtureStore.put_rows([
-      %{id: "row-7", label: "Brand new open", status: "open", category: "sigma", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:07Z]},
-      %{id: "row-6", label: "Another new open", status: "open", category: "tau", hidden: "do-not-render", inserted_at: ~U[2026-04-15 17:00:06Z]}
+      %{
+        id: "row-7",
+        label: "Brand new open",
+        status: "open",
+        category: "sigma",
+        hidden: "do-not-render",
+        inserted_at: ~U[2026-04-15 17:00:07Z]
+      },
+      %{
+        id: "row-6",
+        label: "Another new open",
+        status: "open",
+        category: "tau",
+        hidden: "do-not-render",
+        inserted_at: ~U[2026-04-15 17:00:06Z]
+      }
       | FixtureStore.rows()
     ])
 

@@ -37,7 +37,8 @@ defmodule Accrue.Processor.Stripe.ErrorMapper do
   Plan 06 concern.
   """
 
-  @compile {:no_warn_undefined, [LatticeStripe.Error, LatticeStripe.Webhook.SignatureVerificationError]}
+  @compile {:no_warn_undefined,
+            [LatticeStripe.Error, LatticeStripe.Webhook.SignatureVerificationError]}
 
   @doc """
   Maps an arbitrary term (typically a `%LatticeStripe.Error{}`) to an

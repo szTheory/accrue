@@ -131,6 +131,7 @@ defmodule Accrue.Billing.InvoiceProjection do
   defp price_id_of(%{} = m), do: SubscriptionProjection.get(m, :id)
 
   defp parse_status(nil), do: :draft
+
   defp parse_status(atom) when is_atom(atom) do
     if atom in @valid_statuses, do: atom, else: :draft
   end

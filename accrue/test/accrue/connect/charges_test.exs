@@ -117,10 +117,14 @@ defmodule Accrue.Connect.ChargesTest do
         :telemetry.detach(handler_id)
       end
 
-      assert_received {:telemetry, [:accrue, :connect, :destination_charge, :start], _, meta_start}
+      assert_received {:telemetry, [:accrue, :connect, :destination_charge, :start], _,
+                       meta_start}
+
       assert meta_start.destination == acct.stripe_account_id
 
-      assert_received {:telemetry, [:accrue, :connect, :destination_charge, :stop], measurements_stop, _}
+      assert_received {:telemetry, [:accrue, :connect, :destination_charge, :stop],
+                       measurements_stop, _}
+
       assert is_integer(measurements_stop.duration)
     end
 

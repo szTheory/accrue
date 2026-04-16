@@ -85,7 +85,8 @@ defmodule Accrue.Billing.PromotionCodeTest do
 
   describe "projection.decompose/1" do
     test "extracts processor_id, code, active, max_redemptions, coupon ref" do
-      stripe_promo = StripeFixtures.promotion_code_created(%{"code" => "VIP", "max_redemptions" => 100})
+      stripe_promo =
+        StripeFixtures.promotion_code_created(%{"code" => "VIP", "max_redemptions" => 100})
 
       assert {:ok, attrs, coupon_processor_id} =
                PromotionCodeProjection.decompose(stripe_promo)

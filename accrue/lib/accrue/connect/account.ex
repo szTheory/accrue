@@ -34,21 +34,23 @@ defmodule Accrue.Connect.Account do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   schema "accrue_connect_accounts" do
-    field :stripe_account_id, :string
-    field :owner_type, :string
-    field :owner_id, :string
-    field :type, :string
-    field :country, :string
-    field :email, :string
-    field :charges_enabled, :boolean, default: false
-    field :details_submitted, :boolean, default: false
-    field :payouts_enabled, :boolean, default: false
-    field :capabilities, :map, default: %{}
-    field :requirements, :map, default: %{}
-    field :data, :map, default: %{}
-    field :deauthorized_at, :utc_datetime_usec
-    field :lock_version, :integer, default: 1
+    field(:stripe_account_id, :string)
+    field(:owner_type, :string)
+    field(:owner_id, :string)
+    field(:type, :string)
+    field(:country, :string)
+    field(:email, :string)
+    field(:charges_enabled, :boolean, default: false)
+    field(:details_submitted, :boolean, default: false)
+    field(:payouts_enabled, :boolean, default: false)
+    field(:capabilities, :map, default: %{})
+    field(:requirements, :map, default: %{})
+    field(:data, :map, default: %{})
+    field(:deauthorized_at, :utc_datetime_usec)
+    field(:lock_version, :integer, default: 1)
 
     timestamps(type: :utc_datetime_usec)
   end

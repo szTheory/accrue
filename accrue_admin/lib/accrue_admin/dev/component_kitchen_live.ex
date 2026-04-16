@@ -24,7 +24,10 @@ if Mix.env() != :prod do
          |> assign_shell(admin, "/dev/components", "Component Kitchen")
          |> assign(:available?, true)
          |> assign(:flashes, [
-           %{kind: :info, message: "Previewing shared admin components against the shipped package CSS."}
+           %{
+             kind: :info,
+             message: "Previewing shared admin components against the shipped package CSS."
+           }
          ])}
       else
         {:ok,

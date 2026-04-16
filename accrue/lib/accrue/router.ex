@@ -44,7 +44,7 @@ defmodule Accrue.Router do
   """
   defmacro accrue_webhook(path, processor) do
     quote do
-      forward unquote(path), Accrue.Webhook.Plug, processor: unquote(processor)
+      forward(unquote(path), Accrue.Webhook.Plug, processor: unquote(processor))
     end
   end
 end

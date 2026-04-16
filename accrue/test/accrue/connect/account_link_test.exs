@@ -75,7 +75,11 @@ defmodule Accrue.Connect.AccountLinkTest do
   describe "@enforce_keys" do
     test "rejects construction without :url" do
       assert_raise ArgumentError, fn ->
-        struct!(AccountLink, expires_at: DateTime.utc_now(), created: DateTime.utc_now(), object: "account_link")
+        struct!(AccountLink,
+          expires_at: DateTime.utc_now(),
+          created: DateTime.utc_now(),
+          object: "account_link"
+        )
       end
     end
 

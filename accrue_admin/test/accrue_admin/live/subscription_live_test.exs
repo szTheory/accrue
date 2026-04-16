@@ -42,7 +42,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
-    %{subscription: subscription} = Factory.active_subscription(%{owner_id: "subscription-detail"})
+    %{subscription: subscription} =
+      Factory.active_subscription(%{owner_id: "subscription-detail"})
 
     {:ok, source_event} =
       Events.record(%{
@@ -52,10 +53,15 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
         actor_type: "system"
       })
 
-    {:ok, subscription: Repo.preload(subscription, [:customer, :subscription_items]), source_event: source_event}
+    {:ok,
+     subscription: Repo.preload(subscription, [:customer, :subscription_items]),
+     source_event: source_event}
   end
 
-  test "renders canonical predicate summary and subscription timeline", %{conn: conn, subscription: subscription} do
+  test "renders canonical predicate summary and subscription timeline", %{
+    conn: conn,
+    subscription: subscription
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
@@ -85,7 +91,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     html = render_click(element(view, "[data-role='confirm-action']"))
     assert html =~ "Step-up required"
 
-    html = render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
+    html =
+      render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
+
     assert html =~ "Subscription action recorded."
 
     audit_event =

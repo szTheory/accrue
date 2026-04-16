@@ -53,7 +53,11 @@ defmodule Accrue.ErrorsTest do
   describe "Accrue.CardError" do
     test "message/1 derives from code/decline_code when :message is nil" do
       err =
-        Accrue.CardError.exception(code: "card_declined", decline_code: "generic", param: "number")
+        Accrue.CardError.exception(
+          code: "card_declined",
+          decline_code: "generic",
+          param: "number"
+        )
 
       assert Exception.message(err) =~ "card_declined"
       assert Exception.message(err) =~ "generic"

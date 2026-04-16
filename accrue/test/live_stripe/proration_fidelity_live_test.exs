@@ -195,7 +195,10 @@ defmodule Accrue.LiveStripe.ProrationFidelityLiveTest do
   end
 
   defp atomize_top_level(m) when is_map(m) do
-    Map.new(m, fn {k, v} when is_binary(k) -> {String.to_atom(k), v}; kv -> kv end)
+    Map.new(m, fn
+      {k, v} when is_binary(k) -> {String.to_atom(k), v}
+      kv -> kv
+    end)
   end
 
   defp normalize_lines(%Accrue.Billing.UpcomingInvoice{lines: lines}) do

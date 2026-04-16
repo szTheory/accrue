@@ -13,7 +13,11 @@ defmodule AccrueAdmin.Components.Input do
   attr(:placeholder, :string, default: nil)
   attr(:help_text, :string, default: nil)
   attr(:errors, :list, default: [])
-  attr(:rest, :global, include: ~w(autocomplete disabled inputmode maxlength minlength pattern phx-debounce phx-hook phx-target required step))
+
+  attr(:rest, :global,
+    include:
+      ~w(autocomplete disabled inputmode maxlength minlength pattern phx-debounce phx-hook phx-target required step)
+  )
 
   def input(assigns) do
     assigns = assign(assigns, :has_errors, assigns.errors != [])

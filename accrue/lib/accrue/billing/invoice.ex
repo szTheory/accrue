@@ -39,43 +39,45 @@ defmodule Accrue.Billing.Invoice do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "accrue_invoices" do
-    belongs_to :customer, Accrue.Billing.Customer
-    belongs_to :subscription, Accrue.Billing.Subscription
-    has_many :items, Accrue.Billing.InvoiceItem
+  @type t :: %__MODULE__{}
 
-    field :processor, :string
-    field :processor_id, :string
-    field :status, Ecto.Enum, values: @statuses, default: :draft
-    field :total_cents, :integer
-    field :currency, :string
-    field :due_date, :utc_datetime_usec
-    field :paid_at, :utc_datetime_usec
+  schema "accrue_invoices" do
+    belongs_to(:customer, Accrue.Billing.Customer)
+    belongs_to(:subscription, Accrue.Billing.Subscription)
+    has_many(:items, Accrue.Billing.InvoiceItem)
+
+    field(:processor, :string)
+    field(:processor_id, :string)
+    field(:status, Ecto.Enum, values: @statuses, default: :draft)
+    field(:total_cents, :integer)
+    field(:currency, :string)
+    field(:due_date, :utc_datetime_usec)
+    field(:paid_at, :utc_datetime_usec)
 
     # D3-14 rollup columns
-    field :subtotal_minor, :integer
-    field :tax_minor, :integer
-    field :discount_minor, :integer
-    field :total_discount_amounts, :map, default: %{}
-    field :total_minor, :integer
-    field :amount_due_minor, :integer
-    field :amount_paid_minor, :integer
-    field :amount_remaining_minor, :integer
-    field :number, :string
-    field :hosted_url, :string
-    field :pdf_url, :string
-    field :period_start, :utc_datetime_usec
-    field :period_end, :utc_datetime_usec
-    field :collection_method, :string
-    field :billing_reason, :string
-    field :finalized_at, :utc_datetime_usec
-    field :voided_at, :utc_datetime_usec
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
+    field(:subtotal_minor, :integer)
+    field(:tax_minor, :integer)
+    field(:discount_minor, :integer)
+    field(:total_discount_amounts, :map, default: %{})
+    field(:total_minor, :integer)
+    field(:amount_due_minor, :integer)
+    field(:amount_paid_minor, :integer)
+    field(:amount_remaining_minor, :integer)
+    field(:number, :string)
+    field(:hosted_url, :string)
+    field(:pdf_url, :string)
+    field(:period_start, :utc_datetime_usec)
+    field(:period_end, :utc_datetime_usec)
+    field(:collection_method, :string)
+    field(:billing_reason, :string)
+    field(:finalized_at, :utc_datetime_usec)
+    field(:voided_at, :utc_datetime_usec)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
 
-    field :metadata, :map, default: %{}
-    field :data, :map, default: %{}
-    field :lock_version, :integer, default: 1
+    field(:metadata, :map, default: %{})
+    field(:data, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
     timestamps(type: :utc_datetime_usec)
   end

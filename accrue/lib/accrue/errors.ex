@@ -1,3 +1,8 @@
+defmodule Accrue.Error do
+  @moduledoc false
+  @type t :: Exception.t()
+end
+
 defmodule Accrue.APIError do
   @moduledoc """
   Raised when a processor call fails for a reason that is neither a card
@@ -8,6 +13,7 @@ defmodule Accrue.APIError do
   > logged verbatim — downstream logging sanitizer in Plan 06. Mitigates
   > T-FND-05.
   """
+  @type t :: %__MODULE__{}
   defexception [:message, :code, :http_status, :request_id, :processor_error]
 end
 
@@ -19,6 +25,7 @@ defmodule Accrue.CardError do
   > ⚠️ `processor_error` may contain raw processor payload and MUST NOT be
   > logged verbatim. Mitigates T-FND-05.
   """
+  @type t :: %__MODULE__{}
   defexception [
     :message,
     :code,
@@ -45,6 +52,7 @@ defmodule Accrue.RateLimitError do
   Raised when the processor returns a rate-limit response (HTTP 429). The
   `retry_after` field carries the server's suggested backoff in seconds.
   """
+  @type t :: %__MODULE__{}
   defexception [:message, :retry_after, :http_status, :request_id, :processor_error]
 
   @impl true
@@ -60,6 +68,7 @@ defmodule Accrue.IdempotencyError do
   `%Accrue.IdempotencyError{}` to surface a user-facing "this request was
   already processed" message.
   """
+  @type t :: %__MODULE__{}
   defexception [:message, :idempotency_key, :processor_error]
 
   @impl true
@@ -77,6 +86,7 @@ defmodule Accrue.DecodeError do
   unexpected shape). The `payload` field holds the raw binary for
   debugging — treat as sensitive; do not log verbatim.
   """
+  @type t :: %__MODULE__{}
   defexception [:message, :payload]
 
   @impl true
@@ -91,6 +101,7 @@ defmodule Accrue.SignatureError do
   or an attacker, and neither is recoverable at the call site. The webhook
   plug translates this raise into an HTTP 400.
   """
+  @type t :: %__MODULE__{}
   defexception [:message, :reason]
 
   @impl true
@@ -104,6 +115,7 @@ defmodule Accrue.ConfigError do
   Raised when `Accrue.Config` validation fails, or when a key is looked up
   that is neither set at runtime nor has a schema default.
   """
+  @type t :: %__MODULE__{}
   defexception [:message, :key]
 
   @impl true
@@ -116,6 +128,7 @@ defmodule Accrue.Auth.StepUpUnconfigured do
   Raised when a destructive admin action requires step-up verification but
   the configured auth adapter does not implement the optional callbacks.
   """
+  @type t :: %__MODULE__{}
   defexception [:message]
 
   @impl true
@@ -130,6 +143,7 @@ defmodule Accrue.Error.MultiItemSubscription do
   Multi-item subscriptions are a Phase 4 concern; Phase 3 enforces the
   single-item invariant and points callers at the Phase 4 surface.
   """
+  @type t :: %__MODULE__{}
   defexception [:subscription_id, :item_count, :message]
 
   @impl true
@@ -147,6 +161,7 @@ defmodule Accrue.Error.InvalidState do
   source state (e.g., `pay_invoice/2` on a `:void` invoice, `resume/2`
   on an `:active` subscription).
   """
+  @type t :: %__MODULE__{}
   defexception [:current, :attempted, :message]
 
   @impl true
@@ -163,6 +178,7 @@ defmodule Accrue.Error.NotAttached do
   attached to (e.g., `set_default_payment_method/3` with a `pm_id` that
   belongs to a different customer).
   """
+  @type t :: %__MODULE__{}
   defexception [:customer_id, :payment_method_id, :message]
 
   @impl true
@@ -179,6 +195,7 @@ defmodule Accrue.Error.NoDefaultPaymentMethod do
   method and the customer has none set. Callers should surface a
   user-facing "add a payment method" prompt.
   """
+  @type t :: %__MODULE__{}
   defexception [:customer_id, :message]
 
   @impl true
@@ -200,6 +217,7 @@ defmodule Accrue.ActionRequiredError do
   a failure — the charge is still recoverable, it just needs the
   customer to complete an authentication step.
   """
+  @type t :: %__MODULE__{}
   defexception [:payment_intent, :message]
 
   @impl true
@@ -223,6 +241,7 @@ defmodule Accrue.PDF.RenderFailed do
   URL fallback per D6-04.
   """
 
+  @type t :: %__MODULE__{}
   defexception [:reason, :message]
 
   @impl true
@@ -240,6 +259,7 @@ defmodule Accrue.Error.PdfDisabled do
   failure.
   """
 
+  @type t :: %__MODULE__{}
   defexception [:reason, :docs_url, :message]
 
   @impl true

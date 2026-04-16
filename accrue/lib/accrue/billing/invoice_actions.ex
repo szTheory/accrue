@@ -76,7 +76,8 @@ defmodule Accrue.Billing.InvoiceActions do
   # --- bang variants ---
 
   @spec finalize_invoice!(Invoice.t(), keyword()) :: Invoice.t()
-  def finalize_invoice!(inv, opts \\ []), do: bang!(finalize_invoice(inv, opts), "finalize_invoice!/2")
+  def finalize_invoice!(inv, opts \\ []),
+    do: bang!(finalize_invoice(inv, opts), "finalize_invoice!/2")
 
   @spec void_invoice!(Invoice.t(), keyword()) :: Invoice.t()
   def void_invoice!(inv, opts \\ []), do: bang!(void_invoice(inv, opts), "void_invoice!/2")
@@ -198,6 +199,5 @@ defmodule Accrue.Billing.InvoiceActions do
   end
 
   defp tag({:ok, _}), do: :ok
-  defp tag({:ok, :requires_action, _}), do: :requires_action
   defp tag(_), do: :error
 end

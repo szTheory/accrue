@@ -37,7 +37,10 @@ defmodule AccrueAdmin.CustomerLiveTest do
       Factory.customer(%{email: "detail@example.com", metadata: %{"segment" => "enterprise"}})
 
     {:ok, subscription} = Billing.subscribe(customer, "price_basic")
-    {:ok, _stripe_subscription} = Fake.transition(subscription.processor_id, :active, synthesize_webhooks: false)
+
+    {:ok, _stripe_subscription} =
+      Fake.transition(subscription.processor_id, :active, synthesize_webhooks: false)
+
     subscription = TestRepo.get!(Accrue.Billing.Subscription, subscription.id)
 
     payment_method =
@@ -91,8 +94,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
       })
     )
 
-    {:ok,
-     _event} =
+    {:ok, _event} =
       Events.record(%{
         type: "customer.updated",
         subject_type: "Customer",
@@ -104,7 +106,10 @@ defmodule AccrueAdmin.CustomerLiveTest do
     {:ok, customer: customer}
   end
 
-  test "renders customer tabs for subscriptions, events, and metadata", %{conn: conn, customer: customer} do
+  test "renders customer tabs for subscriptions, events, and metadata", %{
+    conn: conn,
+    customer: customer
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
@@ -115,7 +120,9 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert {:ok, _view, events_html} = live(conn, "/billing/customers/#{customer.id}?tab=events")
     assert events_html =~ "customer.updated"
 
-    assert {:ok, _view, metadata_html} = live(conn, "/billing/customers/#{customer.id}?tab=metadata")
+    assert {:ok, _view, metadata_html} =
+             live(conn, "/billing/customers/#{customer.id}?tab=metadata")
+
     assert metadata_html =~ "enterprise"
     assert metadata_html =~ "preferred_timezone"
   end

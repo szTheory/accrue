@@ -135,8 +135,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     }
   end
 
-  defp subscription_link(row, mount_path), do: safe_link("#{mount_path}/subscriptions/#{row.id}", row.processor_id || row.id)
-  defp customer_link(row, mount_path), do: safe_link("#{mount_path}/customers/#{row.customer_id}", customer_label(row))
+  defp subscription_link(row, mount_path),
+    do: safe_link("#{mount_path}/subscriptions/#{row.id}", row.processor_id || row.id)
+
+  defp customer_link(row, mount_path),
+    do: safe_link("#{mount_path}/customers/#{row.customer_id}", customer_label(row))
 
   defp safe_link(href, label) do
     escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()

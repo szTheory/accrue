@@ -10,12 +10,16 @@ if Mix.env() != :prod do
       "invoice.payment_failed" => %{
         "id" => "evt_fixture_failed",
         "type" => "invoice.payment_failed",
-        "data" => %{"object" => %{"id" => "in_fixture", "customer" => "cus_fixture", "status" => "open"}}
+        "data" => %{
+          "object" => %{"id" => "in_fixture", "customer" => "cus_fixture", "status" => "open"}
+        }
       },
       "customer.subscription.updated" => %{
         "id" => "evt_fixture_subscription",
         "type" => "customer.subscription.updated",
-        "data" => %{"object" => %{"id" => "sub_fixture", "status" => "active", "trial_end" => 1_775_203_200}}
+        "data" => %{
+          "object" => %{"id" => "sub_fixture", "status" => "active", "trial_end" => 1_775_203_200}
+        }
       }
     }
 

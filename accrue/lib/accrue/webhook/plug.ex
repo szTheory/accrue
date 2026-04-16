@@ -36,10 +36,14 @@ defmodule Accrue.Webhook.Plug do
     processor = Keyword.fetch!(opts, :processor)
     endpoint = Keyword.get(opts, :endpoint)
 
-    :telemetry.span([:accrue, :webhook, :receive], %{processor: processor, endpoint: endpoint}, fn ->
-      result = do_call(conn, processor, endpoint)
-      {result, %{processor: processor, endpoint: endpoint}}
-    end)
+    :telemetry.span(
+      [:accrue, :webhook, :receive],
+      %{processor: processor, endpoint: endpoint},
+      fn ->
+        result = do_call(conn, processor, endpoint)
+        {result, %{processor: processor, endpoint: endpoint}}
+      end
+    )
   rescue
     e in Accrue.SignatureError ->
       Logger.warning("Webhook signature verification failed: #{e.reason}")
@@ -87,9 +91,15 @@ defmodule Accrue.Webhook.Plug do
 
       cfg when is_list(cfg) ->
         case Keyword.fetch(cfg, :secret) do
-          {:ok, secret} when is_binary(secret) and secret != "" -> secret
-          {:ok, secrets} when is_list(secrets) and secrets != [] -> secrets
-          _ -> raise Accrue.SignatureError, reason: "no :secret in webhook_endpoints[#{inspect(endpoint)}]"
+          {:ok, secret} when is_binary(secret) and secret != "" ->
+            secret
+
+          {:ok, secrets} when is_list(secrets) and secrets != [] ->
+            secrets
+
+          _ ->
+            raise Accrue.SignatureError,
+              reason: "no :secret in webhook_endpoints[#{inspect(endpoint)}]"
         end
     end
   end

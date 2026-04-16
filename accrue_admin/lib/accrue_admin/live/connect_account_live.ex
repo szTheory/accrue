@@ -526,7 +526,6 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   end
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
 
   defp normalize_string(nil), do: nil
 

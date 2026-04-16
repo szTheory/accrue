@@ -54,6 +54,7 @@ defmodule AccrueAdmin.Assets do
   @spec hashed_path(kind(), String.t()) :: String.t()
   def hashed_path(kind, mount_path) when kind in [:brand, :css, :js] and is_binary(mount_path) do
     normalized_mount = normalize_mount_path(mount_path)
+
     suffix =
       case kind do
         :brand -> "brand-#{@brand_hash}"

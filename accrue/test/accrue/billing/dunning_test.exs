@@ -85,8 +85,10 @@ defmodule Accrue.Billing.DunningTest do
 
   describe "property: grace window" do
     property "past_due older than grace_days with nil sweep_attempted yields {:sweep, _}" do
-      check all grace_days <- integer(1..365),
-                extra_days <- integer(1..30) do
+      check all(
+              grace_days <- integer(1..365),
+              extra_days <- integer(1..30)
+            ) do
         past_due_since = days_ago(grace_days + extra_days)
 
         s =
@@ -103,8 +105,10 @@ defmodule Accrue.Billing.DunningTest do
     end
 
     property "past_due younger than grace_days always yields :hold" do
-      check all grace_days <- integer(2..365),
-                inside_days <- integer(0..(grace_days - 1)) do
+      check all(
+              grace_days <- integer(2..365),
+              inside_days <- integer(0..(grace_days - 1))
+            ) do
         past_due_since = days_ago(inside_days)
 
         s =

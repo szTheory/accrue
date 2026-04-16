@@ -81,7 +81,7 @@ defmodule Accrue.Repo do
   a function. Used by `Accrue.Billing` for multi-step atomic writes.
   """
   @spec transaction(Ecto.Multi.t() | (-> any()), keyword()) ::
-          {:ok, any()} | {:error, any()}
+          {:ok, any()} | {:error, any()} | {:error, Ecto.Multi.name(), any(), map()}
   def transaction(multi_or_fun, opts \\ []),
     do: repo().transaction(multi_or_fun, opts)
 

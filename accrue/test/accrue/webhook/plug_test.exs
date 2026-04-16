@@ -20,16 +20,17 @@ defmodule Accrue.Webhook.PlugTest do
     @moduledoc false
     use Plug.Router
 
-    plug Plug.Parsers,
+    plug(Plug.Parsers,
       parsers: [:json],
       pass: ["*/*"],
       json_decoder: Jason,
       body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}
+    )
 
-    plug :match
-    plug :dispatch
+    plug(:match)
+    plug(:dispatch)
 
-    forward "/webhooks/stripe", to: Accrue.Webhook.Plug, init_opts: [processor: :stripe]
+    forward("/webhooks/stripe", to: Accrue.Webhook.Plug, init_opts: [processor: :stripe])
 
     match _ do
       send_resp(conn, 404, "not found")
@@ -41,13 +42,14 @@ defmodule Accrue.Webhook.PlugTest do
     @moduledoc false
     use Plug.Router
 
-    plug Plug.Parsers,
+    plug(Plug.Parsers,
       parsers: [:json],
       pass: ["*/*"],
       json_decoder: Jason
+    )
 
-    plug :match
-    plug :dispatch
+    plug(:match)
+    plug(:dispatch)
 
     get "/api/hello" do
       raw = conn.assigns[:raw_body]
@@ -80,6 +82,7 @@ defmodule Accrue.Webhook.PlugTest do
                        })
 
   setup do
+    Code.ensure_loaded!(Plug.Crypto)
     # Configure webhook signing secrets for the :stripe processor
     Application.put_env(:accrue, :webhook_signing_secrets, %{stripe: [@test_secret]})
 

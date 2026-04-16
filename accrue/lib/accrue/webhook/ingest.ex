@@ -51,94 +51,93 @@ defmodule Accrue.Webhook.Ingest do
     processor_str = to_string(processor)
     endpoint_atom = normalize_endpoint(endpoint)
 
-    multi =
-      Ecto.Multi.new()
-      |> Ecto.Multi.run(:persist, fn repo, _changes ->
-        # Check for existing event first (dedup via UNIQUE constraint).
-        # With binary_id autogenerate, on_conflict: :nothing + returning: true
-        # returns the changeset struct (not nil id) because Ecto generates
-        # the UUID client-side. So we use an explicit check-then-insert pattern.
-        import Ecto.Query
+    result =
+      Accrue.Repo.transact(fn repo ->
+        case persist_event(repo, processor_str, stripe_event, raw_body, endpoint_atom) do
+          {:ok, {:duplicate, _} = duplicate} ->
+            {:ok, duplicate}
 
-        existing =
-          repo.one(
-            from(w in WebhookEvent,
-              where: w.processor == ^processor_str and w.processor_event_id == ^stripe_event.id,
-              limit: 1
-            )
-          )
-
-        case existing do
-          %WebhookEvent{} ->
-            {:ok, {:duplicate, existing}}
-
-          nil ->
-            changeset =
-              WebhookEvent.ingest_changeset(%{
-                processor: processor_str,
-                processor_event_id: stripe_event.id,
-                type: stripe_event.type,
-                livemode: stripe_event.livemode,
-                status: :received,
-                endpoint: endpoint_atom,
-                raw_body: raw_body,
-                received_at: DateTime.utc_now(),
-                data: Map.from_struct(stripe_event)
-              })
-
-            case repo.insert(changeset,
-                   on_conflict: :nothing,
-                   conflict_target: [:processor, :processor_event_id]
-                 ) do
-              {:ok, row} -> {:ok, {:new, row}}
-              {:error, _} = err -> err
+          {:ok, {:new, row} = persisted} ->
+            with {:ok, _job} <- repo.insert(DispatchWorker.new(%{webhook_event_id: row.id})),
+                 {:ok, _event} <- record_received_event(processor_str, stripe_event, row) do
+              {:ok, persisted}
+            else
+              {:error, reason} -> {:error, reason}
             end
-        end
-      end)
-      |> Ecto.Multi.run(:maybe_enqueue, fn repo, %{persist: result} ->
-        case result do
-          {:new, row} ->
-            # Use repo.insert to ensure the Oban job is created within the
-            # same transaction, not via Oban's configured repo which may
-            # differ in a multi-database setup (WR-06).
-            job_changeset = DispatchWorker.new(%{webhook_event_id: row.id})
-            repo.insert(job_changeset)
 
-          {:duplicate, _} ->
-            {:ok, :skipped}
-        end
-      end)
-      |> Ecto.Multi.run(:maybe_ledger, fn _repo, %{persist: result} ->
-        case result do
-          {:new, row} ->
-            Events.record(%{
-              type: "webhook.received",
-              subject_type: "WebhookEvent",
-              subject_id: to_string(row.id),
-              actor_type: "webhook",
-              data: %{
-                processor: processor_str,
-                event_id: stripe_event.id,
-                event_type: stripe_event.type
-              }
-            })
-
-          {:duplicate, _} ->
-            {:ok, :skipped}
+          {:error, reason} ->
+            {:error, reason}
         end
       end)
 
-    case Accrue.Repo.transaction(multi) do
-      {:ok, %{persist: {:new, _}}} ->
+    case result do
+      {:ok, {:new, _}} ->
         conn |> send_resp(200, Jason.encode!(%{ok: true})) |> halt()
 
-      {:ok, %{persist: {:duplicate, _}}} ->
+      {:ok, {:duplicate, _}} ->
         conn |> send_resp(200, Jason.encode!(%{ok: true})) |> halt()
 
-      {:error, _step, reason, _changes} ->
+      {:error, reason} ->
         Logger.error("Webhook ingest failed: #{inspect(reason, limit: 200)}")
         conn |> send_resp(500, Jason.encode!(%{ok: false})) |> halt()
     end
+  end
+
+  defp persist_event(repo, processor_str, stripe_event, raw_body, endpoint_atom) do
+    # Check for existing event first (dedup via UNIQUE constraint).
+    # With binary_id autogenerate, on_conflict: :nothing + returning: true
+    # returns the changeset struct (not nil id) because Ecto generates
+    # the UUID client-side. So we use an explicit check-then-insert pattern.
+    import Ecto.Query
+
+    existing =
+      repo.one(
+        from(w in WebhookEvent,
+          where: w.processor == ^processor_str and w.processor_event_id == ^stripe_event.id,
+          limit: 1
+        )
+      )
+
+    case existing do
+      %WebhookEvent{} ->
+        {:ok, {:duplicate, existing}}
+
+      nil ->
+        changeset =
+          WebhookEvent.ingest_changeset(%{
+            processor: processor_str,
+            processor_event_id: stripe_event.id,
+            type: stripe_event.type,
+            livemode: stripe_event.livemode,
+            status: :received,
+            endpoint: endpoint_atom,
+            raw_body: raw_body,
+            received_at: DateTime.utc_now(),
+            data: Map.from_struct(stripe_event)
+          })
+
+        case repo.insert(changeset,
+               on_conflict: :nothing,
+               conflict_target: [:processor, :processor_event_id]
+             ) do
+          {:ok, row} -> {:ok, {:new, row}}
+          {:error, _} = err -> err
+        end
+    end
+  end
+
+  defp record_received_event(processor_str, stripe_event, %WebhookEvent{} = row) do
+    Events.record(%{
+      type: "webhook.received",
+      subject_type: "WebhookEvent",
+      subject_id: to_string(row.id),
+      actor_type: "webhook",
+      data: %{
+        processor: processor_str,
+        event_id: stripe_event.id,
+        event_type: stripe_event.type
+      }
+    })
   end
 
   # D5-01: Only `:connect` maps to the Connect-scoped endpoint lane; every

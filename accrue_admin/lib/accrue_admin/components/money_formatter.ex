@@ -27,7 +27,11 @@ defmodule AccrueAdmin.Components.MoneyFormatter do
 
   defp formatted_money(assigns) do
     with {:ok, amount_minor, currency} <- resolve_money(assigns) do
-      Render.format_money(amount_minor, currency, resolved_locale(assigns.locale, assigns.customer))
+      Render.format_money(
+        amount_minor,
+        currency,
+        resolved_locale(assigns.locale, assigns.customer)
+      )
     else
       _ -> "--"
     end
@@ -66,6 +70,8 @@ defmodule AccrueAdmin.Components.MoneyFormatter do
       Accrue.Config.default_locale()
   end
 
-  defp customer_locale(%{preferred_locale: locale}) when is_binary(locale) and locale != "", do: locale
+  defp customer_locale(%{preferred_locale: locale}) when is_binary(locale) and locale != "",
+    do: locale
+
   defp customer_locale(_customer), do: nil
 end

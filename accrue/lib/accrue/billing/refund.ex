@@ -23,22 +23,24 @@ defmodule Accrue.Billing.Refund do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "accrue_refunds" do
-    belongs_to :charge, Accrue.Billing.Charge
+  @type t :: %__MODULE__{}
 
-    field :stripe_id, :string
-    field :amount_minor, :integer
-    field :currency, :string
-    field :reason, :string
-    field :status, Ecto.Enum, values: @statuses, default: :pending
-    field :stripe_fee_refunded_amount_minor, :integer
-    field :merchant_loss_amount_minor, :integer
-    field :fees_settled_at, :utc_datetime_usec
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
-    field :data, :map, default: %{}
-    field :metadata, :map, default: %{}
-    field :lock_version, :integer, default: 1
+  schema "accrue_refunds" do
+    belongs_to(:charge, Accrue.Billing.Charge)
+
+    field(:stripe_id, :string)
+    field(:amount_minor, :integer)
+    field(:currency, :string)
+    field(:reason, :string)
+    field(:status, Ecto.Enum, values: @statuses, default: :pending)
+    field(:stripe_fee_refunded_amount_minor, :integer)
+    field(:merchant_loss_amount_minor, :integer)
+    field(:fees_settled_at, :utc_datetime_usec)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
+    field(:data, :map, default: %{})
+    field(:metadata, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
     timestamps(type: :utc_datetime_usec)
   end

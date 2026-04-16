@@ -92,8 +92,7 @@ defmodule Accrue.Webhook.Handlers.BillingMeterErrorReportTest do
       :telemetry.detach("test-meter-webhook")
     end
 
-    assert_received {:fail, %{count: 1},
-                     %{source: :webhook, webhook_event_id: "evt_test_mere_1"}}
+    assert_received {:fail, %{count: 1}, %{source: :webhook, webhook_event_id: "evt_test_mere_1"}}
   end
 
   test "unknown identifier is acknowledged without raising" do

@@ -49,8 +49,7 @@ defmodule Accrue.TelemetryTest do
 
       assert_received {:telemetry, [:accrue, :test, :thing, :do, :start], _, %{bar: 2}}
 
-      assert_received {:telemetry, [:accrue, :test, :thing, :do, :exception], _,
-                       %{bar: 2} = meta}
+      assert_received {:telemetry, [:accrue, :test, :thing, :do, :exception], _, %{bar: 2} = meta}
 
       assert meta[:kind] == :error
     end

@@ -151,8 +151,7 @@ defmodule Accrue.Connect.PlatformFee do
         {:error,
          %ConfigError{
            key: :percent,
-           message:
-             "platform_fee :percent must be a %Decimal{}; got: " <> inspect(other)
+           message: "platform_fee :percent must be a %Decimal{}; got: " <> inspect(other)
          }}
 
       :error ->

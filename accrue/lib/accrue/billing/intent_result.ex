@@ -128,8 +128,6 @@ defmodule Accrue.Billing.IntentResult do
       object_of(m) in ["payment_intent", "setup_intent"]
   end
 
-  defp has_intent_shape?(_), do: false
-
   defp status_of(%{} = m) do
     case Map.get(m, :status) || Map.get(m, "status") do
       nil -> nil
@@ -148,8 +146,6 @@ defmodule Accrue.Billing.IntentResult do
     end
   end
 
-  defp get_nested(_map, []), do: nil
-
   defp get_nested(map, [k | rest]) when is_map(map) do
     val = Map.get(map, k) || Map.get(map, to_string(k))
 
@@ -159,6 +155,4 @@ defmodule Accrue.Billing.IntentResult do
       _ -> nil
     end
   end
-
-  defp get_nested(_, _), do: nil
 end

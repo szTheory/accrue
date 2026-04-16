@@ -142,8 +142,6 @@ defmodule Accrue.BillingPortal.Session do
   defp get(%{} = map, key) when is_atom(key) do
     Map.get(map, key) || Map.get(map, Atom.to_string(key))
   end
-
-  defp get(_, _), do: nil
 end
 
 defimpl Inspect, for: Accrue.BillingPortal.Session do

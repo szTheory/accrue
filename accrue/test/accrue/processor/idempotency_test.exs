@@ -28,7 +28,8 @@ defmodule Accrue.Processor.IdempotencyTest do
       key = Stripe.compute_idempotency_key(:create_customer, "user_1", operation_id: "op_123")
 
       assert String.starts_with?(key, "accr_")
-      assert String.length(key) == 27  # "accr_" (5) + 22 chars
+      # "accr_" (5) + 22 chars
+      assert String.length(key) == 27
     end
 
     test "same inputs produce same key (deterministic)" do
@@ -57,7 +58,10 @@ defmodule Accrue.Processor.IdempotencyTest do
       key1 = Stripe.compute_idempotency_key(:create_customer, "user_1", [])
 
       # Same as explicit operation_id
-      key2 = Stripe.compute_idempotency_key(:create_customer, "user_1", operation_id: "webhook_evt_123")
+      key2 =
+        Stripe.compute_idempotency_key(:create_customer, "user_1",
+          operation_id: "webhook_evt_123"
+        )
 
       assert key1 == key2
     after

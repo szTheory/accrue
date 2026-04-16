@@ -186,7 +186,7 @@ defmodule AccrueAdmin.StepUpTest do
     events =
       AccrueAdmin.TestRepo.all(
         from(e in Event,
-          where: e.type == "admin.step_up.ok"
+          where: e.type == "admin.step_up.ok" and e.caused_by_event_id == ^source_event.id
         )
       )
 

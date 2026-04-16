@@ -508,7 +508,9 @@ defmodule Accrue.Test.StripeFixtures do
   def payout_failed_event(overrides \\ %{}) do
     webhook_event(
       "payout.failed",
-      payout_fixture(Map.merge(%{"status" => "failed", "failure_code" => "account_closed"}, overrides))
+      payout_fixture(
+        Map.merge(%{"status" => "failed", "failure_code" => "account_closed"}, overrides)
+      )
     )
   end
 

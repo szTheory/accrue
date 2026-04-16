@@ -127,11 +127,15 @@ defmodule Accrue.BillableTest do
 
           # Verify they exist inside the transaction
           assert Accrue.TestRepo.one(
-                   from(c in Customer, where: c.owner_id == ^owner_id and c.owner_type == "TestUser")
+                   from(c in Customer,
+                     where: c.owner_id == ^owner_id and c.owner_type == "TestUser"
+                   )
                  )
 
           assert Accrue.TestRepo.one(
-                   from(e in Event, where: e.subject_id == ^customer.id and e.type == "customer.created")
+                   from(e in Event,
+                     where: e.subject_id == ^customer.id and e.type == "customer.created"
+                   )
                  )
 
           Accrue.TestRepo.rollback(:test_rollback)
@@ -144,9 +148,7 @@ defmodule Accrue.BillableTest do
                from(c in Customer, where: c.owner_id == ^owner_id and c.owner_type == "TestUser")
              ) == []
 
-      assert Accrue.TestRepo.all(
-               from(e in Event, where: e.type == "customer.created")
-             ) == []
+      assert Accrue.TestRepo.all(from(e in Event, where: e.type == "customer.created")) == []
     end
   end
 end

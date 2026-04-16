@@ -42,6 +42,7 @@ defmodule Accrue.Emails.CouponAppliedTest do
     html = CouponApplied.render(fixture())
     assert html =~ "10"
     assert html =~ "WELCOME10"
+
     assert String.downcase(html) =~ "discount" or String.downcase(html) =~ "coupon" or
              String.downcase(html) =~ "off"
   end

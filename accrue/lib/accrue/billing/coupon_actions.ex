@@ -116,7 +116,8 @@ defmodule Accrue.Billing.CouponActions do
                params,
                Keyword.put(opts, :idempotency_key, idem_key)
              ),
-           {:ok, attrs, coupon_processor_id} <- PromotionCodeProjection.decompose(processor_result),
+           {:ok, attrs, coupon_processor_id} <-
+             PromotionCodeProjection.decompose(processor_result),
            {:ok, coupon_id} <- resolve_coupon_fk(coupon_processor_id),
            row_attrs <-
              attrs
@@ -316,6 +317,7 @@ defmodule Accrue.Billing.CouponActions do
   defp normalize_percent(%Decimal{} = d), do: d
   defp normalize_percent(n) when is_integer(n), do: Decimal.new(n)
   defp normalize_percent(n) when is_float(n), do: Decimal.from_float(n)
+
   defp normalize_percent(s) when is_binary(s) do
     case Decimal.parse(s) do
       {d, ""} -> d

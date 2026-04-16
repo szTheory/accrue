@@ -31,16 +31,16 @@ defmodule Accrue.Billing.MeterEvent do
   @foreign_key_type :binary_id
 
   schema "accrue_meter_events" do
-    belongs_to :customer, Accrue.Billing.Customer, type: :binary_id
-    field :stripe_customer_id, :string
-    field :event_name, :string
-    field :value, :integer
-    field :identifier, :string
-    field :occurred_at, :utc_datetime_usec
-    field :reported_at, :utc_datetime_usec
-    field :stripe_status, :string, default: "pending"
-    field :stripe_error, :map
-    field :operation_id, :string
+    belongs_to(:customer, Accrue.Billing.Customer, type: :binary_id)
+    field(:stripe_customer_id, :string)
+    field(:event_name, :string)
+    field(:value, :integer)
+    field(:identifier, :string)
+    field(:occurred_at, :utc_datetime_usec)
+    field(:reported_at, :utc_datetime_usec)
+    field(:stripe_status, :string, default: "pending")
+    field(:stripe_error, :map)
+    field(:operation_id, :string)
 
     timestamps(type: :utc_datetime_usec)
   end

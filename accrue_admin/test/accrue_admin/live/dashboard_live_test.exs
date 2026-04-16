@@ -58,8 +58,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
       |> Ecto.Changeset.put_change(:status, :dead)
     )
 
-    {:ok,
-     _event} =
+    {:ok, _event} =
       Events.record(%{
         type: "customer.updated",
         subject_type: "Customer",

@@ -88,8 +88,11 @@ defmodule Accrue.Billing.Metadata do
       end)
 
     if has_nested do
-      add_error(changeset, field,
-        "must be a flat map with string keys and string values (no nested maps)")
+      add_error(
+        changeset,
+        field,
+        "must be a flat map with string keys and string values (no nested maps)"
+      )
     else
       changeset
     end
@@ -113,7 +116,9 @@ defmodule Accrue.Billing.Metadata do
       |> Enum.filter(&(is_binary(&1) and String.length(&1) > @max_key_length))
 
     if long_keys != [] do
-      add_error(changeset, field,
+      add_error(
+        changeset,
+        field,
         "keys must be at most #{@max_key_length} characters (violations: #{inspect(long_keys)})",
         validation: :metadata_key_length
       )
@@ -131,7 +136,9 @@ defmodule Accrue.Billing.Metadata do
       |> Enum.map(fn {key, _} -> key end)
 
     if long_values != [] do
-      add_error(changeset, field,
+      add_error(
+        changeset,
+        field,
         "values must be at most #{@max_value_length} characters (violations: #{inspect(long_values)})",
         validation: :metadata_value_length
       )

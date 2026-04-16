@@ -9,8 +9,10 @@ defmodule Accrue.MoneyPropertyTest do
   @currencies [:usd, :jpy, :kwd, :gbp, :eur]
 
   property "new/2 round-trips any integer + known currency (P3)" do
-    check all int <- integer(-10_000_000..10_000_000),
-              currency <- member_of(@currencies) do
+    check all(
+            int <- integer(-10_000_000..10_000_000),
+            currency <- member_of(@currencies)
+          ) do
       money = M.new(int, currency)
       assert money.amount_minor == int
       assert money.currency == currency
@@ -18,9 +20,11 @@ defmodule Accrue.MoneyPropertyTest do
   end
 
   property "add/2 on same-currency sums minor units exactly (P1)" do
-    check all a <- integer(-1_000_000..1_000_000),
-              b <- integer(-1_000_000..1_000_000),
-              currency <- member_of(@currencies) do
+    check all(
+            a <- integer(-1_000_000..1_000_000),
+            b <- integer(-1_000_000..1_000_000),
+            currency <- member_of(@currencies)
+          ) do
       m1 = M.new(a, currency)
       m2 = M.new(b, currency)
       result = M.add(m1, m2)
@@ -30,12 +34,14 @@ defmodule Accrue.MoneyPropertyTest do
   end
 
   property "add/2 across different currencies always raises (P2)" do
-    check all a <- integer(-1_000_000..1_000_000),
-              b <- integer(-1_000_000..1_000_000),
-              {c1, c2} <-
-                bind(member_of(@currencies), fn c1 ->
-                  bind(member_of(@currencies -- [c1]), fn c2 -> constant({c1, c2}) end)
-                end) do
+    check all(
+            a <- integer(-1_000_000..1_000_000),
+            b <- integer(-1_000_000..1_000_000),
+            {c1, c2} <-
+              bind(member_of(@currencies), fn c1 ->
+                bind(member_of(@currencies -- [c1]), fn c2 -> constant({c1, c2}) end)
+              end)
+          ) do
       m1 = M.new(a, c1)
       m2 = M.new(b, c2)
       assert_raise MismatchedCurrencyError, fn -> M.add(m1, m2) end
@@ -43,13 +49,13 @@ defmodule Accrue.MoneyPropertyTest do
   end
 
   property "new/2 rejects floats (P4)" do
-    check all f <- float() do
+    check all(f <- float()) do
       assert_raise ArgumentError, fn -> M.new(f, :usd) end
     end
   end
 
   property "new/2 rejects Decimals (P4)" do
-    check all int <- integer(-1_000_000..1_000_000) do
+    check all(int <- integer(-1_000_000..1_000_000)) do
       decimal = Decimal.new(int)
       assert_raise ArgumentError, fn -> M.new(decimal, :usd) end
     end
@@ -70,8 +76,10 @@ defmodule Accrue.MoneyPropertyTest do
   end
 
   property "money_field/1 round-trip via Ecto changeset preserves amount+currency (P5)" do
-    check all int <- integer(-10_000_000..10_000_000),
-              currency <- member_of([:usd, :jpy, :kwd]) do
+    check all(
+            int <- integer(-10_000_000..10_000_000),
+            currency <- member_of([:usd, :jpy, :kwd])
+          ) do
       attrs = %{price_amount_minor: int, price_currency: Atom.to_string(currency)}
 
       changeset =

@@ -83,6 +83,7 @@ defmodule Accrue.Billing.Charge3DSTest do
     # IntentResult.wrap passes through the processor map, so either atom
     # or string key shape is possible — tolerate both per intent_result.ex:107.
     assert (returned_pi[:id] || returned_pi["id"]) == "pi_fake_3ds_requires_action"
+
     assert (returned_pi[:client_secret] || returned_pi["client_secret"]) ==
              "pi_fake_3ds_requires_action_secret"
 

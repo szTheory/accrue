@@ -54,8 +54,9 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
     cutoff = DateTime.add(Accrue.Clock.utc_now(), -86_400, :second)
 
     query =
-      from r in Refund,
+      from(r in Refund,
         where: is_nil(r.fees_settled_at) and r.inserted_at < ^cutoff
+      )
 
     query
     |> Repo.all()
@@ -107,8 +108,12 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
 
   defp extract_charge_balance_transaction(canonical) do
     case Map.get(canonical, "charge") || Map.get(canonical, :charge) do
-      %{} = m -> Map.get(m, "balance_transaction") || Map.get(m, :balance_transaction) || %{}
-      _ -> Map.get(canonical, "balance_transaction") || Map.get(canonical, :balance_transaction) || %{}
+      %{} = m ->
+        Map.get(m, "balance_transaction") || Map.get(m, :balance_transaction) || %{}
+
+      _ ->
+        Map.get(canonical, "balance_transaction") || Map.get(canonical, :balance_transaction) ||
+          %{}
     end
   end
 end

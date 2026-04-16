@@ -58,11 +58,10 @@ defmodule Accrue.Telemetry.OTel do
         when is_list(event) and is_map(metadata) and is_function(fun, 0) do
       name = span_name(event)
       attrs = sanitize_attributes(metadata)
+      tracer = :opentelemetry.get_application_tracer(__MODULE__)
 
-      :otel_tracer.with_span(:otel_tracer.current_tracer(), name, %{}, fn ->
+      :otel_tracer.with_span(tracer, name, %{attributes: attrs}, fn _span_ctx ->
         try do
-          :otel_span.set_attributes(:otel_tracer.current_span_ctx(), attrs)
-
           fun.()
           |> tap(&set_result_status/1)
         rescue
@@ -116,7 +115,8 @@ defmodule Accrue.Telemetry.OTel do
   defp sanitize_value(value), do: inspect(value)
 
   if Code.ensure_loaded?(:otel_tracer) and Code.ensure_loaded?(:otel_span) do
-    defp set_result_status(:ok), do: :otel_span.set_status(:otel_tracer.current_span_ctx(), :ok, "")
+    defp set_result_status(:ok),
+      do: :otel_span.set_status(:otel_tracer.current_span_ctx(), :ok, "")
 
     defp set_result_status({:ok, _}),
       do: :otel_span.set_status(:otel_tracer.current_span_ctx(), :ok, "")

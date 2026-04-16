@@ -24,9 +24,6 @@ defmodule Mix.Tasks.Accrue.Webhooks.Prune do
     case Accrue.Webhook.Pruner.perform(%Oban.Job{}) do
       :ok ->
         Mix.shell().info("Webhook event retention sweep complete.")
-
-      other ->
-        Mix.raise("Pruner returned unexpected result: #{inspect(other)}")
     end
   end
 end

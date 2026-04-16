@@ -22,22 +22,24 @@ defmodule Accrue.Billing.PromotionCode do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   schema "accrue_promotion_codes" do
-    field :processor, :string, default: "stripe"
-    field :processor_id, :string
-    field :code, :string
+    field(:processor, :string, default: "stripe")
+    field(:processor_id, :string)
+    field(:code, :string)
 
-    belongs_to :coupon, Accrue.Billing.Coupon, type: :binary_id
+    belongs_to(:coupon, Accrue.Billing.Coupon, type: :binary_id)
 
-    field :active, :boolean, default: true
-    field :max_redemptions, :integer
-    field :times_redeemed, :integer, default: 0
-    field :expires_at, :utc_datetime_usec
-    field :data, :map, default: %{}
-    field :metadata, :map, default: %{}
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
-    field :lock_version, :integer, default: 1
+    field(:active, :boolean, default: true)
+    field(:max_redemptions, :integer)
+    field(:times_redeemed, :integer, default: 0)
+    field(:expires_at, :utc_datetime_usec)
+    field(:data, :map, default: %{})
+    field(:metadata, :map, default: %{})
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
+    field(:lock_version, :integer, default: 1)
 
     timestamps(type: :utc_datetime_usec)
   end

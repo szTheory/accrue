@@ -102,7 +102,11 @@ if Mix.env() != :prod do
     end
 
     defp assign_clock(socket) do
-      assign(socket, :clock_label, Fake.current_time() |> Calendar.strftime("%b %d, %Y %H:%M:%S UTC"))
+      assign(
+        socket,
+        :clock_label,
+        Fake.current_time() |> Calendar.strftime("%b %d, %Y %H:%M:%S UTC")
+      )
       |> assign(:advance_options, @advance_options)
     end
 

@@ -16,7 +16,7 @@ defmodule AccrueAdmin.MixProject do
       description: "Admin LiveView UI for Accrue billing.",
       source_url: @source_url,
       docs: docs(),
-      dialyzer: [plt_local_path: "priv/plts", ignore_warnings: ".dialyzer_ignore.exs"]
+      dialyzer: [plt_local_path: "priv/plts", plt_add_apps: [:mix]]
     ]
   end
 

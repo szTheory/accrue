@@ -66,9 +66,7 @@ defmodule Accrue.Billing.EventsTransactionTest do
       {:ok, customer} = Billing.create_customer(user)
 
       event =
-        Accrue.TestRepo.one!(
-          from(e in Event, where: e.type == "customer.created", limit: 1)
-        )
+        Accrue.TestRepo.one!(from(e in Event, where: e.type == "customer.created", limit: 1))
 
       assert event.subject_id == customer.id
     end
@@ -95,9 +93,7 @@ defmodule Accrue.Billing.EventsTransactionTest do
           # Both should exist within the transaction
           assert Accrue.Repo.repo().get(Customer, customer.id)
 
-          assert Accrue.Repo.repo().one(
-                   from(e in Event, where: e.subject_id == ^customer.id)
-                 )
+          assert Accrue.Repo.repo().one(from(e in Event, where: e.subject_id == ^customer.id))
 
           Accrue.Repo.repo().rollback(:test_rollback)
         end)

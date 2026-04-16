@@ -116,10 +116,8 @@ defmodule Accrue.Test.Webhooks do
 
     case DefaultHandler.handle_event(event.type, event, %{webhook_event_id: row.id}) do
       :ok -> :ok
-      {:ok, _} -> :ok
       {:error, %Accrue.APIError{code: "resource_missing"}} -> :ok
       {:error, _} = error -> error
-      other -> {:error, {:unexpected_handler_result, other}}
     end
   end
 

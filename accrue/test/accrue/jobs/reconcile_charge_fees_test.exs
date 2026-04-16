@@ -52,7 +52,7 @@ defmodule Accrue.Jobs.ReconcileChargeFeesTest do
 
     :ok = ReconcileChargeFees.sweep()
 
-    reloaded = Repo.one!(from c in Charge, where: c.id == ^charge.id)
+    reloaded = Repo.one!(from(c in Charge, where: c.id == ^charge.id))
     assert reloaded.stripe_fee_amount_minor == 320
     assert reloaded.fees_settled_at
   end
@@ -71,7 +71,7 @@ defmodule Accrue.Jobs.ReconcileChargeFeesTest do
     :ok = ReconcileChargeFees.sweep()
 
     import Ecto.Query
-    reloaded = Repo.one!(from c in Charge, where: c.id == ^charge.id)
+    reloaded = Repo.one!(from(c in Charge, where: c.id == ^charge.id))
     refute reloaded.fees_settled_at
   end
 end

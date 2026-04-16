@@ -40,6 +40,8 @@ defmodule AccrueAdmin.ChargeLiveTest do
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
+    TestRepo.delete_all(from(refund in Refund, where: like(refund.stripe_id, "re_fake_%")))
+
     customer =
       insert_customer(%{
         name: "Charge Detail",
@@ -64,7 +66,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
       })
 
     insert_refund(charge, %{
-      stripe_id: "re_seeded",
+      stripe_id: "re_seeded_" <> Integer.to_string(System.unique_integer([:positive])),
       amount_minor: 2_500,
       currency: "usd",
       status: :succeeded,

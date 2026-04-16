@@ -26,8 +26,10 @@ defmodule Accrue.Billing.SubscriptionScheduleProjection do
        current_phase_index: compute_current_phase_index(phases, current_phase),
        phases_count: length(phases),
        next_phase_at: compute_next_phase_at(phases, current_phase),
-       released_at: SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(schedule, :released_at)),
-       canceled_at: SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(schedule, :canceled_at)),
+       released_at:
+         SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(schedule, :released_at)),
+       canceled_at:
+         SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(schedule, :canceled_at)),
        data: SubscriptionProjection.to_string_keys(schedule),
        metadata: SubscriptionProjection.get(schedule, :metadata) || %{}
      }}
@@ -58,8 +60,11 @@ defmodule Accrue.Billing.SubscriptionScheduleProjection do
   defp compute_next_phase_at(phases, nil) do
     # Not yet started — next phase is the first one.
     case phases do
-      [first | _] -> SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(first, :start_date))
-      _ -> nil
+      [first | _] ->
+        SubscriptionProjection.unix_to_dt(SubscriptionProjection.get(first, :start_date))
+
+      _ ->
+        nil
     end
   end
 

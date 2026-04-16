@@ -6,6 +6,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   alias Accrue.{Actor, Auth, Billing, Events}
   alias Accrue.Billing.Subscription
   alias Accrue.Repo
+
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
@@ -16,6 +17,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     StepUpAuthModal,
     Timeline
   }
+
   alias AccrueAdmin.StepUp
 
   @destructive_actions ~w(cancel_now comp_subscription)
@@ -39,7 +41,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          |> assign_shell(admin)
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
-          |> assign(:timeline_events, timeline_events(subscription.id))
+         |> assign(:timeline_events, timeline_events(subscription.id))
          |> assign(:proration_options, @proration_options)
          |> assign(:flashes, [])
          |> assign(:pending_action, nil)}
@@ -63,7 +65,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         {:noreply, push_flash(socket, :warning, "Select an action before confirming.")}
 
       %{type: type} = action when type in @destructive_actions ->
-        case StepUp.require_fresh(socket, step_up_action(action), &execute_pending_action(&1, action)) do
+        case StepUp.require_fresh(
+               socket,
+               step_up_action(action),
+               &execute_pending_action(&1, action)
+             ) do
           {:ok, socket} -> {:noreply, socket}
           {:challenge, socket} -> {:noreply, socket}
           {:error, reason, socket} -> {:noreply, push_flash(socket, :error, inspect(reason))}
@@ -226,7 +232,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     """
   end
 
-  attr :events, :list, required: true
+  attr(:events, :list, required: true)
 
   defp source_event_select(assigns) do
     ~H"""
@@ -264,7 +270,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
-  defp timeline_events(subscription_id), do: Events.timeline_for("Subscription", subscription_id, limit: 25)
+  defp timeline_events(subscription_id),
+    do: Events.timeline_for("Subscription", subscription_id, limit: 25)
 
   defp timeline_items(events) do
     Enum.map(events, fn event ->
@@ -280,7 +287,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp tone(%{actor_type: "admin"}), do: :cobalt
-  defp tone(%{type: type}) when type in ["subscription.paused", "subscription.canceled"], do: :amber
+
+  defp tone(%{type: type}) when type in ["subscription.paused", "subscription.canceled"],
+    do: :amber
+
   defp tone(_event), do: :slate
 
   defp predicate_summary(subscription) do
@@ -319,7 +329,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     }
   end
 
-  defp selected_source_event(%{"source_event_id" => event_id}, events) when event_id not in [nil, ""] do
+  defp selected_source_event(%{"source_event_id" => event_id}, events)
+       when event_id not in [nil, ""] do
     Enum.find(events, fn event -> Integer.to_string(event.id) == event_id end)
   end
 
@@ -348,7 +359,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         socket
         |> record_admin_audit(action, subscription.id, new_subscription.id)
         |> refresh_subscription(subscription.id)
-        |> push_flash(:info, "Comp replacement created: #{new_subscription.processor_id || new_subscription.id}")
+        |> push_flash(
+          :info,
+          "Comp replacement created: #{new_subscription.processor_id || new_subscription.id}"
+        )
 
       {:ok, %Subscription{} = updated_subscription} ->
         socket
@@ -373,7 +387,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     Billing.cancel_at_period_end(subscription, operation_id: operation_id)
   end
 
-  defp execute_action(subscription, _customer, %{type: "pause", pause_behavior: behavior}, operation_id) do
+  defp execute_action(
+         subscription,
+         _customer,
+         %{type: "pause", pause_behavior: behavior},
+         operation_id
+       ) do
     Billing.pause(subscription, pause_behavior: behavior, operation_id: operation_id)
   end
 
@@ -385,11 +404,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
-  defp execute_action(_subscription, _customer, %{type: "swap_plan", new_price_id: nil}, _operation_id) do
+  defp execute_action(
+         _subscription,
+         _customer,
+         %{type: "swap_plan", new_price_id: nil},
+         _operation_id
+       ) do
     {:error, :missing_new_price_id}
   end
 
-  defp execute_action(subscription, _customer, %{type: "swap_plan", new_price_id: new_price_id, proration: proration}, operation_id) do
+  defp execute_action(
+         subscription,
+         _customer,
+         %{type: "swap_plan", new_price_id: new_price_id, proration: proration},
+         operation_id
+       ) do
     Billing.swap_plan(subscription, new_price_id,
       proration: String.to_existing_atom(proration),
       operation_id: operation_id
@@ -398,18 +427,29 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     ArgumentError -> {:error, :invalid_proration}
   end
 
-  defp execute_action(_subscription, _customer, %{type: "comp_subscription", new_price_id: nil}, _operation_id) do
+  defp execute_action(
+         _subscription,
+         _customer,
+         %{type: "comp_subscription", new_price_id: nil},
+         _operation_id
+       ) do
     {:error, :missing_new_price_id}
   end
 
-  defp execute_action(_subscription, customer, %{type: "comp_subscription", new_price_id: new_price_id}, operation_id) do
+  defp execute_action(
+         _subscription,
+         customer,
+         %{type: "comp_subscription", new_price_id: new_price_id},
+         operation_id
+       ) do
     case Billing.comp_subscription(customer, new_price_id, operation_id: operation_id) do
       {:ok, %Subscription{} = new_subscription} -> {:ok, {:comped, new_subscription}}
       other -> other
     end
   end
 
-  defp execute_action(_subscription, _customer, %{type: other}, _operation_id), do: {:error, {:unsupported_action, other}}
+  defp execute_action(_subscription, _customer, %{type: other}, _operation_id),
+    do: {:error, {:unsupported_action, other}}
 
   defp with_admin_context(user, fun) do
     operation_id = "admin-ui-" <> Ecto.UUID.generate()
@@ -476,7 +516,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       "pause_collection" => subscription.pause_collection,
       "current_period_start" => subscription.current_period_start,
       "current_period_end" => subscription.current_period_end,
-      "subscription_items" => Enum.map(subscription.subscription_items || [], &Map.take(&1, [:id, :price_id, :quantity, :processor_id]))
+      "subscription_items" =>
+        Enum.map(
+          subscription.subscription_items || [],
+          &Map.take(&1, [:id, :price_id, :quantity, :processor_id])
+        )
     }
   end
 

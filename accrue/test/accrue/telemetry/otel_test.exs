@@ -66,6 +66,7 @@ defmodule Accrue.Telemetry.OTelTest do
     refute Map.has_key?(attrs, "card")
   end
 
+  @tag :compile_matrix
   test "compiles warning-free with and without OpenTelemetry optional dependency" do
     assert_compile_matrix!(@without_cmd)
     assert_compile_matrix!(@with_cmd)
@@ -87,16 +88,25 @@ defmodule Accrue.Telemetry.OTelTest do
       |> Enum.drop_while(&String.contains?(&1, "="))
 
     {executable, executable_args} = List.pop_at(args, 0)
-    previous = Map.new(env, fn {key, _value} -> {key, System.get_env(key)} end)
+
+    build_root =
+      Path.join(System.tmp_dir!(), "accrue-otel-matrix-#{System.unique_integer([:positive])}")
 
     try do
-      Enum.each(env, fn {key, value} -> System.put_env(key, value) end)
-      assert {_, 0} = System.cmd(executable, executable_args, stderr_to_stdout: true)
+      File.mkdir_p!(build_root)
+
+      env =
+        env
+        |> Map.put("MIX_BUILD_ROOT", build_root)
+        |> Enum.to_list()
+
+      assert {_, 0} =
+               System.cmd(executable, executable_args,
+                 stderr_to_stdout: true,
+                 env: env
+               )
     after
-      Enum.each(previous, fn
-        {key, nil} -> System.delete_env(key)
-        {key, value} -> System.put_env(key, value)
-      end)
+      File.rm_rf!(build_root)
     end
   end
 end

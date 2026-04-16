@@ -142,7 +142,6 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp expires_summary(_promotion_code), do: "No expiry"
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

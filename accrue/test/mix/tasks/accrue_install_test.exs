@@ -126,7 +126,11 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              "config :accrue, :mailer, Accrue.Mailer.Test"
            )
 
-    InstallFixture.refute_contains!(app, "test/support/accrue_case.ex", "config :accrue, :mailer_adapter, Accrue.Mailer.Test")
+    InstallFixture.refute_contains!(
+      app,
+      "test/support/accrue_case.ex",
+      "config :accrue, :mailer_adapter, Accrue.Mailer.Test"
+    )
 
     assert output =~ "Oban"
   end
@@ -307,7 +311,7 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     Mix.Task.clear()
 
     capture_io(fn ->
-      File.cd!(app, fn ->
+      InstallFixture.cd_preserving_code_path!(app, fn ->
         apply(Mix.Tasks.Accrue.Install, :run, [argv])
       end)
     end)

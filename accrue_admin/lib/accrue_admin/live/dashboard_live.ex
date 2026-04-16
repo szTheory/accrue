@@ -128,8 +128,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
     %{
       customer_count: Repo.aggregate(Customer, :count, :id),
-      active_subscription_count:
-        Subscription |> Query.active() |> Repo.aggregate(:count, :id),
+      active_subscription_count: Subscription |> Query.active() |> Repo.aggregate(:count, :id),
       canceling_subscription_count:
         Subscription |> Query.canceling() |> Repo.aggregate(:count, :id),
       open_invoice_count:
@@ -148,7 +147,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
         |> Repo.aggregate(:count, :id),
       events_last_day_count:
         Event
-        |> where([event], event.inserted_at >= ^DateTime.add(DateTime.utc_now(), -86_400, :second))
+        |> where(
+          [event],
+          event.inserted_at >= ^DateTime.add(DateTime.utc_now(), -86_400, :second)
+        )
         |> Repo.aggregate(:count, :id)
     }
   end

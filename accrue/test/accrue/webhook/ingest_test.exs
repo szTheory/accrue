@@ -72,9 +72,7 @@ defmodule Accrue.Webhook.IngestTest do
 
       # Verify accrue_events ledger entry
       ledger_events =
-        Accrue.TestRepo.all(
-          from(e in Accrue.Events.Event, where: e.type == "webhook.received")
-        )
+        Accrue.TestRepo.all(from(e in Accrue.Events.Event, where: e.type == "webhook.received"))
 
       assert length(ledger_events) == 1
 
@@ -116,7 +114,8 @@ defmodule Accrue.Webhook.IngestTest do
 
       conn = Plug.Test.conn(:post, "/webhook/stripe")
 
-      {elapsed_us, result_conn} = :timer.tc(fn -> Ingest.run(conn, @processor, stripe_event, body) end)
+      {elapsed_us, result_conn} =
+        :timer.tc(fn -> Ingest.run(conn, @processor, stripe_event, body) end)
 
       assert result_conn.status == 200
       # Allow generous margin for CI: 500ms (target is <100ms in prod)
@@ -131,5 +130,4 @@ defmodule Accrue.Webhook.IngestTest do
     |> Jason.decode!()
     |> LatticeStripe.Event.from_map()
   end
-
 end

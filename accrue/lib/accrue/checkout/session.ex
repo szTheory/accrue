@@ -173,8 +173,6 @@ defmodule Accrue.Checkout.Session do
     Map.get(map, key) || Map.get(map, Atom.to_string(key))
   end
 
-  defp get(_, _), do: nil
-
   defp to_string_or_nil(nil), do: nil
   defp to_string_or_nil(v) when is_atom(v), do: Atom.to_string(v)
   defp to_string_or_nil(v) when is_binary(v), do: v

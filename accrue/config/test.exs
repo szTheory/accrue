@@ -28,3 +28,10 @@ config :accrue, :repo, Accrue.TestRepo
 config :accrue, :branding,
   from_email: "noreply@example.test",
   support_email: "support@example.test"
+
+# The SDK defaults to the OTLP exporter, but this package does not depend on
+# `:opentelemetry_exporter`. Disable exporters in test so `ensure_all_started/1`
+# and targeted OTel tests stay warning-free under `--warnings-as-errors`.
+config :opentelemetry,
+  traces_exporter: :none,
+  metrics_exporter: :none

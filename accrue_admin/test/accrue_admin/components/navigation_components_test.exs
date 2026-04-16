@@ -140,8 +140,17 @@ defmodule AccrueAdmin.NavigationComponentsTest do
         render_component(&DropdownMenu.dropdown_menu/1, %{
           label: "Invoice actions",
           items: [
-            %{label: "Open PDF", href: "/billing/invoices/in_123/pdf", description: "Preview the live invoice PDF"},
-            %{label: "Void invoice", href: "/billing/invoices/in_123/void", description: "Stop further collection", danger: true}
+            %{
+              label: "Open PDF",
+              href: "/billing/invoices/in_123/pdf",
+              description: "Preview the live invoice PDF"
+            },
+            %{
+              label: "Void invoice",
+              href: "/billing/invoices/in_123/void",
+              description: "Stop further collection",
+              danger: true
+            }
           ]
         })
 

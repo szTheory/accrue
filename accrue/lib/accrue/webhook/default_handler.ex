@@ -468,7 +468,7 @@ defmodule Accrue.Webhook.DefaultHandler do
 
     import Ecto.Query, only: [from: 2]
 
-    case Repo.one(from i in SubscriptionItem, where: i.processor_id == ^stripe_id) do
+    case Repo.one(from(i in SubscriptionItem, where: i.processor_id == ^stripe_id)) do
       nil -> %SubscriptionItem{} |> SubscriptionItem.changeset(attrs) |> Repo.insert()
       existing -> existing |> SubscriptionItem.changeset(attrs) |> Repo.update()
     end
@@ -620,7 +620,8 @@ defmodule Accrue.Webhook.DefaultHandler do
     |> Repo.update()
   end
 
-  defp upsert_invoice_items(%Invoice{} = invoice, item_attrs_list) when is_list(item_attrs_list) do
+  defp upsert_invoice_items(%Invoice{} = invoice, item_attrs_list)
+       when is_list(item_attrs_list) do
     import Ecto.Query, only: [from: 2]
 
     # WR-09: reduce_while + non-bang variants so changeset errors
@@ -635,7 +636,7 @@ defmodule Accrue.Webhook.DefaultHandler do
             %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert()
 
           sid when is_binary(sid) ->
-            case Repo.one(from i in InvoiceItem, where: i.stripe_id == ^sid) do
+            case Repo.one(from(i in InvoiceItem, where: i.stripe_id == ^sid)) do
               nil -> %InvoiceItem{} |> InvoiceItem.changeset(attrs) |> Repo.insert()
               existing -> existing |> InvoiceItem.changeset(attrs) |> Repo.update()
             end
@@ -787,8 +788,12 @@ defmodule Accrue.Webhook.DefaultHandler do
 
     status_atom =
       case SubscriptionProjection.get(canonical, :status) do
-        nil -> :pending
-        a when is_atom(a) -> a
+        nil ->
+          :pending
+
+        a when is_atom(a) ->
+          a
+
         s when is_binary(s) ->
           try do
             String.to_existing_atom(s)
@@ -886,9 +891,12 @@ defmodule Accrue.Webhook.DefaultHandler do
     case row do
       nil ->
         customer_stripe_id = SubscriptionProjection.get(canonical, :customer)
+
         customer_id =
           case customer_stripe_id do
-            nil -> nil
+            nil ->
+              nil
+
             sid ->
               case Repo.get_by(Customer, processor_id: sid) do
                 nil -> nil
@@ -948,7 +956,10 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   defp load_row(:subscription, id), do: Repo.get_by(Subscription, processor_id: id)
-  defp load_row(:subscription_schedule, id), do: Repo.get_by(SubscriptionSchedule, processor_id: id)
+
+  defp load_row(:subscription_schedule, id),
+    do: Repo.get_by(SubscriptionSchedule, processor_id: id)
+
   defp load_row(:invoice, id), do: Repo.get_by(Invoice, processor_id: id)
   defp load_row(:charge, id), do: Repo.get_by(Charge, processor_id: id)
   defp load_row(:refund, id), do: Repo.get_by(Refund, stripe_id: id)

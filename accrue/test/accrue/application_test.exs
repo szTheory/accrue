@@ -52,7 +52,11 @@ defmodule Accrue.ApplicationTest do
       stripped =
         code
         |> (&Regex.replace(~r/@doc\s+"""[\s\S]*?"""/m, &1, "@doc false")).()
-        |> (&Regex.replace(~r/Logger\.warning\(\s*"""[\s\S]*?"""\s*\)/m, &1, "Logger.warning(:stripped)")).()
+        |> (&Regex.replace(
+              ~r/Logger\.warning\(\s*"""[\s\S]*?"""\s*\)/m,
+              &1,
+              "Logger.warning(:stripped)"
+            )).()
         |> (&Regex.replace(~r/^\s*#.*$/m, &1, "")).()
 
       refute stripped =~ "ChromicPDF.start"

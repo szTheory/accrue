@@ -50,7 +50,9 @@ defmodule Mix.Tasks.Accrue.Webhooks.Replay do
         bulk_replay(opts)
 
       _ ->
-        Mix.raise("Usage: mix accrue.webhooks.replay [<event_id>] [--since DATE --type T --dry-run --all-dead --yes --force]")
+        Mix.raise(
+          "Usage: mix accrue.webhooks.replay [<event_id>] [--since DATE --type T --dry-run --all-dead --yes --force]"
+        )
     end
   end
 
@@ -66,6 +68,7 @@ defmodule Mix.Tasks.Accrue.Webhooks.Replay do
 
   defp bulk_replay(opts) do
     filter = build_filter(opts)
+
     replay_opts = [
       dry_run: opts[:dry_run] || false,
       force: opts[:force] || false
@@ -79,9 +82,6 @@ defmodule Mix.Tasks.Accrue.Webhooks.Replay do
 
       {:error, :replay_too_large} ->
         Mix.raise("Replay exceeds dlq_replay_max_rows. Re-run with --force to override.")
-
-      {:error, reason} ->
-        Mix.raise("Replay failed: #{inspect(reason)}")
     end
   end
 
@@ -107,7 +107,9 @@ defmodule Mix.Tasks.Accrue.Webhooks.Replay do
       count = Accrue.Webhooks.DLQ.count(filter)
 
       if count > 10 do
-        response = Mix.shell().prompt("This will requeue #{count} dead-lettered events. Continue? [y/N]")
+        response =
+          Mix.shell().prompt("This will requeue #{count} dead-lettered events. Continue? [y/N]")
+
         unless String.trim(response) in ["y", "Y", "yes", "YES"] do
           Mix.raise("Aborted by user.")
         end

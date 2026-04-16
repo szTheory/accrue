@@ -37,22 +37,28 @@ defmodule Accrue.Property.MoneyPropertyTest do
   defp three_decimal_currency_gen, do: StreamData.member_of(@three_decimal_currencies)
 
   defp any_currency_gen do
-    StreamData.member_of(@two_decimal_currencies ++ @zero_decimal_currencies ++ @three_decimal_currencies)
+    StreamData.member_of(
+      @two_decimal_currencies ++ @zero_decimal_currencies ++ @three_decimal_currencies
+    )
   end
 
   # --- properties ---
 
   property "constructor accepts any integer amount for any valid currency" do
-    check all amount <- amount_gen(),
-              currency <- any_currency_gen() do
+    check all(
+            amount <- amount_gen(),
+            currency <- any_currency_gen()
+          ) do
       money = Money.new(amount, currency)
       assert %Money{amount_minor: ^amount, currency: ^currency} = money
     end
   end
 
   property "zero-decimal currencies round-trip through new/2" do
-    check all amount <- positive_amount_gen(),
-              currency <- zero_decimal_currency_gen() do
+    check all(
+            amount <- positive_amount_gen(),
+            currency <- zero_decimal_currency_gen()
+          ) do
       money = Money.new(amount, currency)
       assert money.amount_minor == amount
       assert money.currency == currency
@@ -60,8 +66,10 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "three-decimal currencies round-trip through new/2" do
-    check all amount <- positive_amount_gen(),
-              currency <- three_decimal_currency_gen() do
+    check all(
+            amount <- positive_amount_gen(),
+            currency <- three_decimal_currency_gen()
+          ) do
       money = Money.new(amount, currency)
       assert money.amount_minor == amount
       assert money.currency == currency
@@ -69,9 +77,11 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "same-currency addition is commutative" do
-    check all a <- amount_gen(),
-              b <- amount_gen(),
-              currency <- two_decimal_currency_gen() do
+    check all(
+            a <- amount_gen(),
+            b <- amount_gen(),
+            currency <- two_decimal_currency_gen()
+          ) do
       ma = Money.new(a, currency)
       mb = Money.new(b, currency)
       assert Money.add(ma, mb) == Money.add(mb, ma)
@@ -79,10 +89,12 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "same-currency addition is associative" do
-    check all a <- amount_gen(),
-              b <- amount_gen(),
-              c <- amount_gen(),
-              currency <- two_decimal_currency_gen() do
+    check all(
+            a <- amount_gen(),
+            b <- amount_gen(),
+            c <- amount_gen(),
+            currency <- two_decimal_currency_gen()
+          ) do
       ma = Money.new(a, currency)
       mb = Money.new(b, currency)
       mc = Money.new(c, currency)
@@ -94,8 +106,10 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "adding zero is identity" do
-    check all amount <- amount_gen(),
-              currency <- any_currency_gen() do
+    check all(
+            amount <- amount_gen(),
+            currency <- any_currency_gen()
+          ) do
       money = Money.new(amount, currency)
       zero = Money.new(0, currency)
       assert Money.add(money, zero) == money
@@ -104,8 +118,10 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "subtract self yields zero" do
-    check all amount <- amount_gen(),
-              currency <- any_currency_gen() do
+    check all(
+            amount <- amount_gen(),
+            currency <- any_currency_gen()
+          ) do
       money = Money.new(amount, currency)
       result = Money.subtract(money, money)
       assert result.amount_minor == 0
@@ -114,9 +130,11 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "add then subtract roundtrips to original" do
-    check all a <- amount_gen(),
-              b <- amount_gen(),
-              currency <- two_decimal_currency_gen() do
+    check all(
+            a <- amount_gen(),
+            b <- amount_gen(),
+            currency <- two_decimal_currency_gen()
+          ) do
       ma = Money.new(a, currency)
       mb = Money.new(b, currency)
       assert Money.subtract(Money.add(ma, mb), mb) == ma
@@ -124,8 +142,10 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "cross-currency addition raises MismatchedCurrencyError" do
-    check all a <- positive_amount_gen(),
-              b <- positive_amount_gen() do
+    check all(
+            a <- positive_amount_gen(),
+            b <- positive_amount_gen()
+          ) do
       usd = Money.new(a, :usd)
       eur = Money.new(b, :eur)
 
@@ -134,8 +154,10 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "cross-currency subtraction raises MismatchedCurrencyError" do
-    check all a <- positive_amount_gen(),
-              b <- positive_amount_gen() do
+    check all(
+            a <- positive_amount_gen(),
+            b <- positive_amount_gen()
+          ) do
       jpy = Money.new(a, :jpy)
       gbp = Money.new(b, :gbp)
 
@@ -144,8 +166,10 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "from_decimal roundtrips for two-decimal currencies" do
-    check all cents <- StreamData.integer(0..999_999),
-              currency <- two_decimal_currency_gen() do
+    check all(
+            cents <- StreamData.integer(0..999_999),
+            currency <- two_decimal_currency_gen()
+          ) do
       # Build a Decimal from cents: e.g. 1050 cents -> "10.50"
       decimal = Decimal.div(Decimal.new(cents), Decimal.new(100))
       money = Money.from_decimal(decimal, currency)
@@ -158,8 +182,10 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "from_decimal roundtrips for zero-decimal currencies" do
-    check all amount <- StreamData.integer(0..999_999),
-              currency <- zero_decimal_currency_gen() do
+    check all(
+            amount <- StreamData.integer(0..999_999),
+            currency <- zero_decimal_currency_gen()
+          ) do
       decimal = Decimal.new(amount)
       money = Money.from_decimal(decimal, currency)
       assert money.amount_minor == amount
@@ -167,18 +193,22 @@ defmodule Accrue.Property.MoneyPropertyTest do
   end
 
   property "equal?/2 is reflexive" do
-    check all amount <- amount_gen(),
-              currency <- any_currency_gen() do
+    check all(
+            amount <- amount_gen(),
+            currency <- any_currency_gen()
+          ) do
       money = Money.new(amount, currency)
       assert Money.equal?(money, money)
     end
   end
 
   property "equal?/2 detects different amounts" do
-    check all a <- amount_gen(),
-              b <- amount_gen(),
-              a != b,
-              currency <- any_currency_gen() do
+    check all(
+            a <- amount_gen(),
+            b <- amount_gen(),
+            a != b,
+            currency <- any_currency_gen()
+          ) do
       ma = Money.new(a, currency)
       mb = Money.new(b, currency)
       refute Money.equal?(ma, mb)

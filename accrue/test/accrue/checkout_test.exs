@@ -9,7 +9,6 @@ defmodule Accrue.CheckoutTest do
 
   alias Accrue.Checkout
   alias Accrue.Checkout.{LineItem, Session}
-  alias Accrue.Processor.Fake
 
   setup do
     {:ok, customer} =
@@ -174,6 +173,4 @@ defmodule Accrue.CheckoutTest do
       refute output =~ session.client_secret
     end
   end
-
-  defp _suppress_unused_alias_warning, do: Fake
 end

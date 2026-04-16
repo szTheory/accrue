@@ -68,7 +68,7 @@ defmodule Accrue.Jobs.ReconcileRefundFeesTest do
 
     # Backdate inserted_at so the 24h cutoff includes this row.
     import Ecto.Query
-    Repo.one(from r in Refund, where: r.id == ^refund.id)
+    Repo.one(from(r in Refund, where: r.id == ^refund.id))
 
     Accrue.TestRepo.update_all(
       from(r in Refund, where: r.id == ^refund.id),
@@ -77,7 +77,7 @@ defmodule Accrue.Jobs.ReconcileRefundFeesTest do
 
     :ok = ReconcileRefundFees.sweep()
 
-    reloaded = Repo.one!(from r in Refund, where: r.id == ^refund.id)
+    reloaded = Repo.one!(from(r in Refund, where: r.id == ^refund.id))
     assert reloaded.stripe_fee_refunded_amount_minor == 250
     assert reloaded.merchant_loss_amount_minor == 70
     assert reloaded.fees_settled_at
@@ -97,7 +97,7 @@ defmodule Accrue.Jobs.ReconcileRefundFeesTest do
     :ok = ReconcileRefundFees.sweep()
 
     import Ecto.Query
-    reloaded = Repo.one!(from r in Refund, where: r.id == ^refund.id)
+    reloaded = Repo.one!(from(r in Refund, where: r.id == ^refund.id))
     refute reloaded.fees_settled_at
   end
 end

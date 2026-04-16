@@ -47,6 +47,6 @@ Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 #     mix test --only slow
 #
 # See `accrue/test/live_stripe/` and `guides/testing-live-stripe.md`.
-ExUnit.configure(exclude: [:live_stripe, :slow])
+ExUnit.configure(exclude: [:live_stripe, :slow, :compile_matrix])
 
 ExUnit.start()

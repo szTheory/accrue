@@ -105,9 +105,7 @@ defmodule Accrue.Webhooks.DLQ do
              |> WebhookEvent.status_changeset(:received)
              |> Repo.update(),
            {:ok, _job} <-
-             Oban.insert(
-               Accrue.Webhook.DispatchWorker.new(%{"webhook_event_id" => updated.id})
-             ),
+             Oban.insert(Accrue.Webhook.DispatchWorker.new(%{"webhook_event_id" => updated.id})),
            {:ok, _ev} <-
              Events.record(%{
                type: "webhook.replay_requested",

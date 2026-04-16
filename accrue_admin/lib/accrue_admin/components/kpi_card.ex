@@ -39,6 +39,9 @@ defmodule AccrueAdmin.Components.KpiCard do
   end
 
   defp normalize_tone(tone) when tone in ["moss", "cobalt", "amber", "slate", "ink"], do: tone
-  defp normalize_tone(tone) when tone in [:moss, :cobalt, :amber, :slate, :ink], do: Atom.to_string(tone)
+
+  defp normalize_tone(tone) when tone in [:moss, :cobalt, :amber, :slate, :ink],
+    do: Atom.to_string(tone)
+
   defp normalize_tone(_tone), do: "slate"
 end

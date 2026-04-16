@@ -13,14 +13,13 @@ if Mix.env() != :prod do
 
       if fake_processor?() do
         fixtures = Fixtures.all()
-        selected = if Map.has_key?(fixtures, :receipt), do: :receipt, else: fixtures |> Map.keys() |> List.first()
 
         {:ok,
          socket
          |> assign_shell(admin, "/dev/email-preview", "Email Preview")
          |> assign(:available?, true)
          |> assign(:fixtures, fixtures)
-         |> assign_fixture(selected)}
+         |> assign_fixture(:receipt)}
       else
         {:ok,
          socket
@@ -101,6 +100,7 @@ if Mix.env() != :prod do
 
     defp assign_fixture(socket, key) do
       fixture = Map.fetch!(socket.assigns.fixtures, key)
+
       display_fixture =
         fixture
         |> Map.update!(:context, fn context ->
@@ -131,7 +131,8 @@ if Mix.env() != :prod do
       |> assign(:current_path, (admin["mount_path"] || "/billing") <> path)
     end
 
-    defp humanize(name), do: name |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
+    defp humanize(name),
+      do: name |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 
     defp fake_processor? do
       Application.get_env(:accrue, :processor, Accrue.Processor.Fake) == Accrue.Processor.Fake

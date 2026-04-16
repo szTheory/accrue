@@ -19,25 +19,27 @@ defmodule Accrue.Billing.Charge do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "accrue_charges" do
-    belongs_to :customer, Accrue.Billing.Customer
-    belongs_to :subscription, Accrue.Billing.Subscription
-    belongs_to :payment_method, Accrue.Billing.PaymentMethod
-    has_many :refunds, Accrue.Billing.Refund
+  @type t :: %__MODULE__{}
 
-    field :processor, :string
-    field :processor_id, :string
-    field :amount_cents, :integer
-    field :currency, :string
-    field :status, :string
-    field :stripe_fee_amount_minor, :integer
-    field :stripe_fee_currency, :string
-    field :fees_settled_at, :utc_datetime_usec
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
-    field :metadata, :map, default: %{}
-    field :data, :map, default: %{}
-    field :lock_version, :integer, default: 1
+  schema "accrue_charges" do
+    belongs_to(:customer, Accrue.Billing.Customer)
+    belongs_to(:subscription, Accrue.Billing.Subscription)
+    belongs_to(:payment_method, Accrue.Billing.PaymentMethod)
+    has_many(:refunds, Accrue.Billing.Refund)
+
+    field(:processor, :string)
+    field(:processor_id, :string)
+    field(:amount_cents, :integer)
+    field(:currency, :string)
+    field(:status, :string)
+    field(:stripe_fee_amount_minor, :integer)
+    field(:stripe_fee_currency, :string)
+    field(:fees_settled_at, :utc_datetime_usec)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
+    field(:metadata, :map, default: %{})
+    field(:data, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
     timestamps(type: :utc_datetime_usec)
   end

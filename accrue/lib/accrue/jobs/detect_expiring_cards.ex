@@ -43,8 +43,9 @@ defmodule Accrue.Jobs.DetectExpiringCards do
     now = Clock.utc_now()
 
     query =
-      from p in PaymentMethod,
+      from(p in PaymentMethod,
         where: not is_nil(p.exp_month) and not is_nil(p.exp_year)
+      )
 
     pms = Repo.all(query)
 
@@ -62,9 +63,10 @@ defmodule Accrue.Jobs.DetectExpiringCards do
     if days_until == threshold and not already_warned?(pm.id, threshold) do
       is_default_pm =
         Repo.one(
-          from c in Customer,
+          from(c in Customer,
             where: c.default_payment_method_id == ^pm.id,
             select: count(c.id)
+          )
         ) > 0
 
       _ =
@@ -91,13 +93,14 @@ defmodule Accrue.Jobs.DetectExpiringCards do
     one_year_ago = DateTime.add(Clock.utc_now(), -365 * 86_400, :second)
 
     query =
-      from e in "accrue_events",
+      from(e in "accrue_events",
         where:
           e.subject_id == ^pm_id and
             e.type == "card.expiring_soon" and
             fragment("(?->>'threshold')::int = ?", e.data, ^threshold) and
             e.inserted_at > ^one_year_ago,
         select: count()
+      )
 
     Repo.one(query) > 0
   end

@@ -44,7 +44,10 @@ defmodule AccrueAdmin.ThemeTest do
 
     assert session["admin_token"] == "token-123"
     assert session["accrue_admin"]["theme"] == "dark"
-    assert session["accrue_admin"]["brand_css_path"] == AccrueAdmin.Assets.hashed_path(:brand, "/billing")
+
+    assert session["accrue_admin"]["brand_css_path"] ==
+             AccrueAdmin.Assets.hashed_path(:brand, "/billing")
+
     assert session["accrue_admin"]["csp_nonce"] == conn.assigns.accrue_admin_csp_nonce
     assert session["accrue_admin"]["brand"].app_name == "Accrue Ops"
   end

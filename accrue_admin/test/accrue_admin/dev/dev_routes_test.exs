@@ -31,7 +31,9 @@ defmodule AccrueAdmin.DevRoutesTest do
     refute Enum.any?(prod_paths, &String.starts_with?(&1, "/ops/dev/"))
   end
 
-  test "dev pages refuse to render their tooling when the configured processor is not fake", %{conn: conn} do
+  test "dev pages refuse to render their tooling when the configured processor is not fake", %{
+    conn: conn
+  } do
     Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 

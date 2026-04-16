@@ -41,8 +41,17 @@ defmodule Accrue.Oban.Middleware do
   args (never from webhook payloads); Oban stores args in jsonb which
   is trusted DB state, not external input.
   """
-  @spec put(%{id: any(), attempt: integer(), args: map()} | %{id: any(), attempt: integer()}) ::
-          :ok
+  @type job_like ::
+          Oban.Job.t()
+          | %{required(:id) => any(), required(:attempt) => integer(), optional(:args) => map()}
+
+  @spec put(job_like()) :: :ok
+  def put(%Oban.Job{id: id, attempt: attempt, args: args}) do
+    Accrue.Actor.put_operation_id("oban-#{id}-#{attempt}")
+    maybe_restore_stripe_account(args)
+    :ok
+  end
+
   def put(%{id: id, attempt: attempt} = job) do
     Accrue.Actor.put_operation_id("oban-#{id}-#{attempt}")
     maybe_restore_stripe_account(Map.get(job, :args))

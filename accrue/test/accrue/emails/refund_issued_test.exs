@@ -58,6 +58,7 @@ defmodule Accrue.Emails.RefundIssuedTest do
     refute text =~ ~r/<html|<body/i
     assert text =~ "$10.00"
     assert text =~ "$0.30"
+
     assert String.downcase(text) =~ "merchant_loss" or
              String.downcase(text) =~ "merchant loss"
 

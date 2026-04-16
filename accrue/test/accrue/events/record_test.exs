@@ -49,9 +49,7 @@ defmodule Accrue.Events.RecordTest do
 
     test "caller-supplied actor_type/actor_id override anything" do
       assert {:ok, event} =
-               Events.record(
-                 Map.merge(@valid_attrs, %{actor_type: "oban", actor_id: "job_7"})
-               )
+               Events.record(Map.merge(@valid_attrs, %{actor_type: "oban", actor_id: "job_7"}))
 
       assert event.actor_type == "oban"
       assert event.actor_id == "job_7"
@@ -129,9 +127,10 @@ defmodule Accrue.Events.RecordTest do
 
       count =
         Accrue.TestRepo.one(
-          from e in Event,
+          from(e in Event,
             where: e.idempotency_key == ^key,
             select: count(e.id)
+          )
         )
 
       assert count == 1

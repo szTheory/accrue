@@ -42,6 +42,8 @@ defmodule Accrue.Billing.Customer do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   schema "accrue_customers" do
     field(:owner_type, :string)
     field(:owner_id, :string)

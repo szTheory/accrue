@@ -24,27 +24,29 @@ defmodule Accrue.Billing.PaymentMethod do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   schema "accrue_payment_methods" do
-    belongs_to :customer, Accrue.Billing.Customer
+    belongs_to(:customer, Accrue.Billing.Customer)
 
-    field :processor, :string
-    field :processor_id, :string
-    field :type, :string
-    field :is_default, :boolean, default: false
-    field :fingerprint, :string
-    field :card_brand, :string
-    field :card_last4, :string
-    field :card_exp_month, :integer
-    field :card_exp_year, :integer
-    field :exp_month, :integer
-    field :exp_year, :integer
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
-    field :metadata, :map, default: %{}
-    field :data, :map, default: %{}
-    field :lock_version, :integer, default: 1
+    field(:processor, :string)
+    field(:processor_id, :string)
+    field(:type, :string)
+    field(:is_default, :boolean, default: false)
+    field(:fingerprint, :string)
+    field(:card_brand, :string)
+    field(:card_last4, :string)
+    field(:card_exp_month, :integer)
+    field(:card_exp_year, :integer)
+    field(:exp_month, :integer)
+    field(:exp_year, :integer)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
+    field(:metadata, :map, default: %{})
+    field(:data, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
 
-    field :existing?, :boolean, virtual: true, default: false
+    field(:existing?, :boolean, virtual: true, default: false)
 
     timestamps(type: :utc_datetime_usec)
   end

@@ -14,9 +14,11 @@ defmodule Accrue.Billing.Properties.ProrationTest do
   alias Accrue.Money.MismatchedCurrencyError
 
   property "Money.add preserves currency and sums minor units" do
-    check all a <- integer(0..1_000_000),
-              b <- integer(0..1_000_000),
-              cur <- member_of([:usd, :eur, :gbp, :jpy]) do
+    check all(
+            a <- integer(0..1_000_000),
+            b <- integer(0..1_000_000),
+            cur <- member_of([:usd, :eur, :gbp, :jpy])
+          ) do
       m1 = Money.new(a, cur)
       m2 = Money.new(b, cur)
       sum = Money.add(m1, m2)
@@ -26,9 +28,11 @@ defmodule Accrue.Billing.Properties.ProrationTest do
   end
 
   property "Money.subtract preserves currency and subtracts minor units" do
-    check all a <- integer(0..1_000_000),
-              b <- integer(0..1_000_000),
-              cur <- member_of([:usd, :eur, :gbp, :jpy]) do
+    check all(
+            a <- integer(0..1_000_000),
+            b <- integer(0..1_000_000),
+            cur <- member_of([:usd, :eur, :gbp, :jpy])
+          ) do
       m1 = Money.new(a, cur)
       m2 = Money.new(b, cur)
       diff = Money.subtract(m1, m2)
@@ -38,8 +42,10 @@ defmodule Accrue.Billing.Properties.ProrationTest do
   end
 
   property "mixed-currency Money.add raises MismatchedCurrencyError (D-04)" do
-    check all a <- integer(0..1_000_000),
-              b <- integer(0..1_000_000) do
+    check all(
+            a <- integer(0..1_000_000),
+            b <- integer(0..1_000_000)
+          ) do
       m1 = Money.new(a, :usd)
       m2 = Money.new(b, :eur)
 
@@ -50,8 +56,10 @@ defmodule Accrue.Billing.Properties.ProrationTest do
   end
 
   property "mixed-currency Money.subtract raises MismatchedCurrencyError (D-04)" do
-    check all a <- integer(0..1_000_000),
-              b <- integer(0..1_000_000) do
+    check all(
+            a <- integer(0..1_000_000),
+            b <- integer(0..1_000_000)
+          ) do
       m1 = Money.new(a, :usd)
       m2 = Money.new(b, :jpy)
 
@@ -62,7 +70,7 @@ defmodule Accrue.Billing.Properties.ProrationTest do
   end
 
   property "zero-decimal currencies (JPY) accept arbitrary integer amounts" do
-    check all n <- integer(1..1000) do
+    check all(n <- integer(1..1000)) do
       m = Money.new(n, :jpy)
       assert m.currency == :jpy
       assert m.amount_minor == n
@@ -70,24 +78,30 @@ defmodule Accrue.Billing.Properties.ProrationTest do
   end
 
   property "Money.new/2 rejects float amounts (no float money math)" do
-    check all n <- float(min: 0.1, max: 100.0),
-              cur <- member_of([:usd, :eur]) do
+    check all(
+            n <- float(min: 0.1, max: 100.0),
+            cur <- member_of([:usd, :eur])
+          ) do
       assert_raise ArgumentError, fn -> Money.new(n, cur) end
     end
   end
 
   property "Money.equal?/2 is reflexive" do
-    check all a <- integer(0..1_000_000),
-              cur <- member_of([:usd, :eur, :gbp, :jpy]) do
+    check all(
+            a <- integer(0..1_000_000),
+            cur <- member_of([:usd, :eur, :gbp, :jpy])
+          ) do
       m = Money.new(a, cur)
       assert Money.equal?(m, m)
     end
   end
 
   property "Money addition is commutative within a currency" do
-    check all a <- integer(0..1_000_000),
-              b <- integer(0..1_000_000),
-              cur <- member_of([:usd, :eur, :gbp, :jpy]) do
+    check all(
+            a <- integer(0..1_000_000),
+            b <- integer(0..1_000_000),
+            cur <- member_of([:usd, :eur, :gbp, :jpy])
+          ) do
       m1 = Money.new(a, cur)
       m2 = Money.new(b, cur)
       assert Money.equal?(Money.add(m1, m2), Money.add(m2, m1))

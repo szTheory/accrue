@@ -8,28 +8,32 @@ defmodule Accrue.Webhook.MultiEndpointTest do
     @moduledoc false
     use Plug.Router
 
-    plug Plug.Parsers,
+    plug(Plug.Parsers,
       parsers: [:json],
       pass: ["*/*"],
       json_decoder: Jason,
       body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}
+    )
 
-    plug :match
-    plug :dispatch
+    plug(:match)
+    plug(:dispatch)
 
     # Order matters: more specific prefixes must be declared first
     # (Plug.Router matches in declaration order).
-    forward "/webhooks/stripe/connect",
+    forward("/webhooks/stripe/connect",
       to: Accrue.Webhook.Plug,
       init_opts: [endpoint: :connect, processor: :stripe]
+    )
 
-    forward "/webhooks/stripe/missing",
+    forward("/webhooks/stripe/missing",
       to: Accrue.Webhook.Plug,
       init_opts: [endpoint: :unconfigured, processor: :stripe]
+    )
 
-    forward "/webhooks/stripe",
+    forward("/webhooks/stripe",
       to: Accrue.Webhook.Plug,
       init_opts: [endpoint: :primary, processor: :stripe]
+    )
 
     match _ do
       send_resp(conn, 404, "not found")
@@ -40,13 +44,14 @@ defmodule Accrue.Webhook.MultiEndpointTest do
     @moduledoc false
     use Plug.Router
 
-    plug Plug.Parsers,
+    plug(Plug.Parsers,
       parsers: [:json],
       pass: ["*/*"],
       json_decoder: Jason
+    )
 
-    plug :match
-    plug :dispatch
+    plug(:match)
+    plug(:dispatch)
 
     get "/api/hello" do
       send_resp(conn, 200, Jason.encode!(%{raw_body_present: conn.assigns[:raw_body] != nil}))
@@ -67,6 +72,8 @@ defmodule Accrue.Webhook.MultiEndpointTest do
            })
 
   setup do
+    Code.ensure_loaded!(Plug.Crypto)
+
     Application.put_env(:accrue, :webhook_endpoints,
       primary: [secret: @primary_secret],
       connect: [secret: @connect_secret, mode: :connect]
@@ -92,14 +99,16 @@ defmodule Accrue.Webhook.MultiEndpointTest do
   end
 
   test "connect endpoint accepts signature signed with connect secret" do
-    payload = Jason.encode!(%{
-      "id" => "evt_multi_endpoint_connect",
-      "object" => "event",
-      "type" => "customer.created",
-      "created" => 1_700_000_000,
-      "livemode" => false,
-      "data" => %{"object" => %{"id" => "cus_multi_2", "object" => "customer"}}
-    })
+    payload =
+      Jason.encode!(%{
+        "id" => "evt_multi_endpoint_connect",
+        "object" => "event",
+        "type" => "customer.created",
+        "created" => 1_700_000_000,
+        "livemode" => false,
+        "data" => %{"object" => %{"id" => "cus_multi_2", "object" => "customer"}}
+      })
+
     sig = LatticeStripe.Webhook.generate_test_signature(payload, @connect_secret)
 
     conn =

@@ -184,7 +184,11 @@ defmodule Accrue.Webhook.ConnectHandlerTest do
       account = seed_account_via_connect!()
 
       event = build_event("account.application.deauthorized", account.stripe_account_id)
-      row = insert_webhook_row!("account.application.deauthorized", %{"id" => account.stripe_account_id})
+
+      row =
+        insert_webhook_row!("account.application.deauthorized", %{
+          "id" => account.stripe_account_id
+        })
 
       assert :ok =
                ConnectHandler.handle_event(event.type, event, %{webhook_event_id: row.id})
@@ -201,7 +205,11 @@ defmodule Accrue.Webhook.ConnectHandlerTest do
       account = seed_account_via_connect!()
 
       event = build_event("account.application.deauthorized", account.stripe_account_id)
-      row = insert_webhook_row!("account.application.deauthorized", %{"id" => account.stripe_account_id})
+
+      row =
+        insert_webhook_row!("account.application.deauthorized", %{
+          "id" => account.stripe_account_id
+        })
 
       assert :ok =
                ConnectHandler.handle_event(event.type, event, %{webhook_event_id: row.id})
@@ -219,7 +227,11 @@ defmodule Accrue.Webhook.ConnectHandlerTest do
       {1, _} = Accrue.TestRepo.delete_all(from(a in Account, where: a.id == ^account.id))
 
       event = build_event("account.application.deauthorized", account.stripe_account_id)
-      row = insert_webhook_row!("account.application.deauthorized", %{"id" => account.stripe_account_id})
+
+      row =
+        insert_webhook_row!("account.application.deauthorized", %{
+          "id" => account.stripe_account_id
+        })
 
       assert :ok =
                ConnectHandler.handle_event(event.type, event, %{webhook_event_id: row.id})
@@ -317,7 +329,8 @@ defmodule Accrue.Webhook.ConnectHandlerTest do
 
       row = insert_webhook_row!("payout.created", payload)
 
-      before_snapshot = Accrue.TestRepo.get_by!(Account, stripe_account_id: account.stripe_account_id)
+      before_snapshot =
+        Accrue.TestRepo.get_by!(Account, stripe_account_id: account.stripe_account_id)
 
       assert :ok =
                ConnectHandler.handle_event(
@@ -326,13 +339,16 @@ defmodule Accrue.Webhook.ConnectHandlerTest do
                  %{webhook_event_id: row.id}
                )
 
-      after_snapshot = Accrue.TestRepo.get_by!(Account, stripe_account_id: account.stripe_account_id)
+      after_snapshot =
+        Accrue.TestRepo.get_by!(Account, stripe_account_id: account.stripe_account_id)
+
       assert before_snapshot.updated_at == after_snapshot.updated_at
 
       events =
         Accrue.TestRepo.all(
           from(e in LedgerEvent,
-            where: e.type == "connect.payout.created" and e.subject_id == ^account.stripe_account_id
+            where:
+              e.type == "connect.payout.created" and e.subject_id == ^account.stripe_account_id
           )
         )
 
@@ -381,12 +397,18 @@ defmodule Accrue.Webhook.ConnectHandlerTest do
       event = build_event("person.created", "person_fake")
 
       before_count =
-        Accrue.TestRepo.aggregate(from(e in LedgerEvent, where: like(e.type, "connect.person.%")), :count)
+        Accrue.TestRepo.aggregate(
+          from(e in LedgerEvent, where: like(e.type, "connect.person.%")),
+          :count
+        )
 
       assert :ok = ConnectHandler.handle_event(event.type, event, %{webhook_event_id: nil})
 
       after_count =
-        Accrue.TestRepo.aggregate(from(e in LedgerEvent, where: like(e.type, "connect.person.%")), :count)
+        Accrue.TestRepo.aggregate(
+          from(e in LedgerEvent, where: like(e.type, "connect.person.%")),
+          :count
+        )
 
       assert before_count == after_count
     end

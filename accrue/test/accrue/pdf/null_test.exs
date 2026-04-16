@@ -20,12 +20,20 @@ defmodule Accrue.PDF.NullTest do
     end
 
     test "logs at :debug level only (not :info / :warning)" do
-      log =
-        capture_log([level: :debug], fn ->
-          Null.render("<html/>", [])
-        end)
+      original_level = Logger.level()
 
-      assert log =~ "Accrue.PDF.Null"
+      try do
+        Logger.configure(level: :debug)
+
+        log =
+          capture_log([level: :debug], fn ->
+            Null.render("<html/>", [])
+          end)
+
+        assert log =~ "Accrue.PDF.Null"
+      after
+        Logger.configure(level: original_level)
+      end
     end
 
     test "does not emit at :info level" do

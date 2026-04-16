@@ -29,7 +29,10 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
       |> assign_new(:newer_count, fn -> 0 end)
-      |> assign(:limit, normalize_positive(Map.get(assigns, :limit, @default_limit), @default_limit))
+      |> assign(
+        :limit,
+        normalize_positive(Map.get(assigns, :limit, @default_limit), @default_limit)
+      )
       |> assign(
         :dom_limit,
         normalize_positive(Map.get(assigns, :dom_limit, @default_dom_limit), @default_dom_limit)
@@ -55,7 +58,12 @@ defmodule AccrueAdmin.Components.DataTable do
     if is_nil(socket.assigns.next_cursor) do
       {:noreply, socket}
     else
-      query_opts = [filter: socket.assigns.filter, cursor: socket.assigns.next_cursor, limit: socket.assigns.limit]
+      query_opts = [
+        filter: socket.assigns.filter,
+        cursor: socket.assigns.next_cursor,
+        limit: socket.assigns.limit
+      ]
+
       {rows, next_cursor} = socket.assigns.query_module.list(query_opts)
 
       merged_rows =
@@ -91,7 +99,10 @@ defmodule AccrueAdmin.Components.DataTable do
   def handle_event("load-newer", _params, socket) do
     {:noreply,
      socket
-     |> reload(socket.assigns.params, reset_selection?: false, params_signature: socket.assigns.params_signature)
+     |> reload(socket.assigns.params,
+       reset_selection?: false,
+       params_signature: socket.assigns.params_signature
+     )
      |> assign(:newer_count, 0)}
   end
 
@@ -227,9 +238,9 @@ defmodule AccrueAdmin.Components.DataTable do
     """
   end
 
-  attr :field, :map, required: true
-  attr :id, :string, required: true
-  attr :value, :any, default: nil
+  attr(:field, :map, required: true)
+  attr(:id, :string, required: true)
+  attr(:value, :any, default: nil)
 
   defp filter_input(%{field: %{type: :select} = field} = assigns) do
     assigns = assign(assigns, :options, Map.get(field, :options, []))
@@ -268,7 +279,13 @@ defmodule AccrueAdmin.Components.DataTable do
     filter = socket.assigns.query_module.decode_filter(params)
     filter_params = socket.assigns.query_module.encode_filter(filter) |> stringify_map()
     cursor = Map.get(params, "cursor") || Map.get(params, :cursor)
-    {rows, next_cursor} = socket.assigns.query_module.list(filter: filter, cursor: cursor, limit: socket.assigns.limit)
+
+    {rows, next_cursor} =
+      socket.assigns.query_module.list(
+        filter: filter,
+        cursor: cursor,
+        limit: socket.assigns.limit
+      )
 
     socket
     |> assign(:params_signature, Keyword.fetch!(opts, :params_signature))
@@ -291,7 +308,11 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp prune_selected_ids(socket) do
-    assign(socket, :selected_ids, MapSet.intersection(socket.assigns.selected_ids, MapSet.new(visible_row_ids(socket))))
+    assign(
+      socket,
+      :selected_ids,
+      MapSet.intersection(socket.assigns.selected_ids, MapSet.new(visible_row_ids(socket)))
+    )
   end
 
   defp visible_row_ids(source) do
@@ -320,8 +341,14 @@ defmodule AccrueAdmin.Components.DataTable do
   defp poll_newer(socket) do
     count =
       case top_cursor(socket) do
-        nil -> 0
-        cursor -> socket.assigns.query_module.count_newer_than(filter: socket.assigns.filter, cursor: cursor)
+        nil ->
+          0
+
+        cursor ->
+          socket.assigns.query_module.count_newer_than(
+            filter: socket.assigns.filter,
+            cursor: cursor
+          )
       end
 
     assign(socket, :newer_count, count)
@@ -330,7 +357,10 @@ defmodule AccrueAdmin.Components.DataTable do
   defp top_cursor(socket) do
     case socket.assigns.rows do
       [row | _rest] ->
-        AccrueAdmin.Queries.Cursor.encode(Map.fetch!(row, socket.assigns.cursor_field), row_identity(row, socket.assigns.row_id))
+        AccrueAdmin.Queries.Cursor.encode(
+          Map.fetch!(row, socket.assigns.cursor_field),
+          row_identity(row, socket.assigns.row_id)
+        )
 
       [] ->
         nil
@@ -338,8 +368,14 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp maybe_schedule_poll(socket) do
-    if connected?(socket) and socket.assigns.enable_polling and socket.assigns.poll_interval_ms > 0 do
-      Phoenix.LiveView.send_update_after(self(), __MODULE__, [id: socket.assigns.id, action: :poll], socket.assigns.poll_interval_ms)
+    if connected?(socket) and socket.assigns.enable_polling and
+         socket.assigns.poll_interval_ms > 0 do
+      Phoenix.LiveView.send_update_after(
+        self(),
+        __MODULE__,
+        [id: socket.assigns.id, action: :poll],
+        socket.assigns.poll_interval_ms
+      )
     end
 
     socket
@@ -370,7 +406,10 @@ defmodule AccrueAdmin.Components.DataTable do
   defp option_value(option), do: option
 
   defp option_label({_value, label}), do: label
-  defp option_label(option) when is_map(option), do: Map.get(option, :label, Map.get(option, :value))
+
+  defp option_label(option) when is_map(option),
+    do: Map.get(option, :label, Map.get(option, :value))
+
   defp option_label(option), do: option
 
   defp option_selected?(value, option), do: to_string(value) == to_string(option_value(option))

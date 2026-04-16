@@ -15,8 +15,20 @@ defmodule AccrueAdmin.DisplayComponentsTest do
         render_component(&FilterChipBar.filter_chip_bar/1, %{
           label: "Webhook filters",
           items: [
-            %{id: :status, label: "Status", value: "DLQ", remove_href: "/billing/webhooks?status=", tone: :amber},
-            %{id: :provider, label: "Provider", value: "stripe", remove_href: "/billing/webhooks?provider=", tone: :cobalt},
+            %{
+              id: :status,
+              label: "Status",
+              value: "DLQ",
+              remove_href: "/billing/webhooks?status=",
+              tone: :amber
+            },
+            %{
+              id: :provider,
+              label: "Provider",
+              value: "stripe",
+              remove_href: "/billing/webhooks?provider=",
+              tone: :cobalt
+            },
             %{id: :ignored, label: "Ignored", value: "x", active: false}
           ]
         })

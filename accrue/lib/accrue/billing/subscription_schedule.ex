@@ -23,24 +23,26 @@ defmodule Accrue.Billing.SubscriptionSchedule do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  @type t :: %__MODULE__{}
+
   @statuses ~w[not_started active completed released canceled]
 
   schema "accrue_subscription_schedules" do
-    field :processor, :string, default: "stripe"
-    field :processor_id, :string
-    belongs_to :customer, Accrue.Billing.Customer
-    belongs_to :subscription, Accrue.Billing.Subscription
-    field :status, :string
-    field :current_phase_index, :integer
-    field :phases_count, :integer
-    field :next_phase_at, :utc_datetime_usec
-    field :released_at, :utc_datetime_usec
-    field :canceled_at, :utc_datetime_usec
-    field :data, :map, default: %{}
-    field :metadata, :map, default: %{}
-    field :lock_version, :integer, default: 1
-    field :last_stripe_event_ts, :utc_datetime_usec
-    field :last_stripe_event_id, :string
+    field(:processor, :string, default: "stripe")
+    field(:processor_id, :string)
+    belongs_to(:customer, Accrue.Billing.Customer)
+    belongs_to(:subscription, Accrue.Billing.Subscription)
+    field(:status, :string)
+    field(:current_phase_index, :integer)
+    field(:phases_count, :integer)
+    field(:next_phase_at, :utc_datetime_usec)
+    field(:released_at, :utc_datetime_usec)
+    field(:canceled_at, :utc_datetime_usec)
+    field(:data, :map, default: %{})
+    field(:metadata, :map, default: %{})
+    field(:lock_version, :integer, default: 1)
+    field(:last_stripe_event_ts, :utc_datetime_usec)
+    field(:last_stripe_event_id, :string)
 
     timestamps(type: :utc_datetime_usec)
   end

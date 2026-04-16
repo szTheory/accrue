@@ -193,10 +193,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
     :erlang.float_to_binary(dollars, decimals: 2) <> " " <> code
   end
 
-  defp format_minor(_amount_minor, _currency), do: "--"
-
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

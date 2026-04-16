@@ -97,6 +97,9 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   end
 
   @impl true
+  def handle_info({:pdf_rendered, _html, _opts}, socket), do: {:noreply, socket}
+
+  @impl true
   def render(assigns) do
     ~H"""
     <AppShell.app_shell

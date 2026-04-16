@@ -79,7 +79,7 @@ defmodule Accrue.ConnectTest do
     test "accepts :type in both atom and string form" do
       for type <- [:standard, "standard", :express, "express", :custom, "custom"] do
         assert {:ok, %Account{} = acct} = Connect.create_account(%{type: type})
-        assert acct.type == (if is_atom(type), do: Atom.to_string(type), else: type)
+        assert acct.type == if(is_atom(type), do: Atom.to_string(type), else: type)
         assert is_binary(acct.stripe_account_id)
         assert String.starts_with?(acct.stripe_account_id, "acct_fake_")
       end

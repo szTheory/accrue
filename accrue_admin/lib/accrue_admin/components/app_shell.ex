@@ -35,8 +35,8 @@ defmodule AccrueAdmin.Components.AppShell do
   end
 
   if Mix.env() != :prod do
-    attr :current_path, :string, required: true
-    attr :mount_path, :string, required: true
+    attr(:current_path, :string, required: true)
+    attr(:mount_path, :string, required: true)
 
     defp dev_toolbar(assigns) do
       ~H"""
@@ -48,8 +48,8 @@ defmodule AccrueAdmin.Components.AppShell do
       """
     end
   else
-    attr :current_path, :string, required: true
-    attr :mount_path, :string, required: true
+    attr(:current_path, :string, required: true)
+    attr(:mount_path, :string, required: true)
 
     defp dev_toolbar(assigns) do
       ~H""

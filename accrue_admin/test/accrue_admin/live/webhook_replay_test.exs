@@ -39,19 +39,21 @@ defmodule AccrueAdmin.WebhookReplayTest do
         status: :dead
       })
 
-    insert_webhook(%{
-      processor_event_id: "evt_bulk_1",
-      type: "invoice.payment_failed",
-      status: :dead
-    })
+    bulk_one =
+      insert_webhook(%{
+        processor_event_id: "evt_bulk_1",
+        type: "invoice.payment_failed",
+        status: :dead
+      })
 
-    insert_webhook(%{
-      processor_event_id: "evt_bulk_2",
-      type: "invoice.payment_failed",
-      status: :failed
-    })
+    bulk_two =
+      insert_webhook(%{
+        processor_event_id: "evt_bulk_2",
+        type: "invoice.payment_failed",
+        status: :failed
+      })
 
-    {:ok, webhook: webhook}
+    {:ok, webhook: webhook, bulk_webhooks: [webhook, bulk_one, bulk_two]}
   end
 
   test "single replay requeues the webhook and records admin audit linkage", %{
@@ -81,26 +83,40 @@ defmodule AccrueAdmin.WebhookReplayTest do
     assert audit_event.caused_by_webhook_event_id == webhook.id
   end
 
-  test "bulk replay confirms once and records one admin audit event", %{conn: conn} do
+  test "bulk replay confirms once and records one admin audit event", %{
+    conn: conn,
+    bulk_webhooks: bulk_webhooks
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, _html} = live(conn, "/billing/webhooks?type=invoice.payment_failed")
+
+    audit_count_before =
+      TestRepo.aggregate(
+        from(event in Event, where: event.type == "admin.webhook.bulk_replay.completed"),
+        :count,
+        :id
+      )
 
     _ = render_click(element(view, "[data-role='prepare-bulk-replay']"))
     html = render_click(element(view, "[data-role='confirm-bulk-replay']"))
     assert html =~ "Bulk replay requested"
 
-    audit_events =
-      TestRepo.all(
-        from(event in Event,
-          where: event.type == "admin.webhook.bulk_replay.completed"
-        )
+    audit_count_after =
+      TestRepo.aggregate(
+        from(event in Event, where: event.type == "admin.webhook.bulk_replay.completed"),
+        :count,
+        :id
       )
 
-    assert length(audit_events) == 1
+    assert audit_count_after == audit_count_before + 1
+
+    webhook_ids = Enum.map(bulk_webhooks, & &1.id)
 
     blocked_count =
-      from(webhook in WebhookEvent, where: webhook.status in [:failed, :dead])
+      from(webhook in WebhookEvent,
+        where: webhook.id in ^webhook_ids and webhook.status in [:failed, :dead]
+      )
       |> TestRepo.aggregate(:count, :id)
 
     assert blocked_count == 0

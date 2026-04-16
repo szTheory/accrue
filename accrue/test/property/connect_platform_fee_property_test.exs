@@ -79,10 +79,12 @@ defmodule Accrue.Property.ConnectPlatformFeePropertyTest do
   # --- properties ------------------------------------------------------------
 
   property "fee <= gross when min <= gross and no fixed (VALIDATION row 18)" do
-    check all currency <- currency_gen(),
-              gross <- gross_money_gen(currency),
-              percent <- percent_gen(),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            gross <- gross_money_gen(currency),
+            percent <- percent_gen(),
+            max_runs: 200
+          ) do
       assert {:ok, %Money{amount_minor: fee_minor, currency: ^currency}} =
                PlatformFee.compute(gross, percent: percent)
 
@@ -92,38 +94,46 @@ defmodule Accrue.Property.ConnectPlatformFeePropertyTest do
   end
 
   property "zero gross → zero fee regardless of opts (VALIDATION row 20)" do
-    check all currency <- currency_gen(),
-              opts <- opts_gen(currency),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            opts <- opts_gen(currency),
+            max_runs: 200
+          ) do
       zero = Money.new(0, currency)
       assert PlatformFee.compute(zero, opts) == {:ok, zero}
     end
   end
 
   property "currency is preserved" do
-    check all currency <- currency_gen(),
-              gross <- gross_money_gen(currency),
-              opts <- opts_gen(currency),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            gross <- gross_money_gen(currency),
+            opts <- opts_gen(currency),
+            max_runs: 200
+          ) do
       assert {:ok, %Money{currency: ^currency}} = PlatformFee.compute(gross, opts)
     end
   end
 
   property "fee is non-negative" do
-    check all currency <- currency_gen(),
-              gross <- gross_money_gen(currency),
-              opts <- opts_gen(currency),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            gross <- gross_money_gen(currency),
+            opts <- opts_gen(currency),
+            max_runs: 200
+          ) do
       assert {:ok, %Money{amount_minor: fee_minor}} = PlatformFee.compute(gross, opts)
       assert fee_minor >= 0
     end
   end
 
   property "compute/2 is deterministic (same inputs → same output)" do
-    check all currency <- currency_gen(),
-              gross <- gross_money_gen(currency),
-              opts <- opts_gen(currency),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            gross <- gross_money_gen(currency),
+            opts <- opts_gen(currency),
+            max_runs: 200
+          ) do
       assert PlatformFee.compute(gross, opts) == PlatformFee.compute(gross, opts)
     end
   end
@@ -134,11 +144,13 @@ defmodule Accrue.Property.ConnectPlatformFeePropertyTest do
     # the [min, max] range is a no-op. Uses a flat percent of 100 so
     # the "re-fee" on the computed fee lands identical absent clamps,
     # making any clamp idempotency regression immediately visible.
-    check all currency <- currency_gen(),
-              gross <- gross_money_gen(currency),
-              min_minor <- StreamData.integer(0..1_000),
-              max_minor <- StreamData.integer(1_000..10_000_000),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            gross <- gross_money_gen(currency),
+            min_minor <- StreamData.integer(0..1_000),
+            max_minor <- StreamData.integer(1_000..10_000_000),
+            max_runs: 200
+          ) do
       opts = [
         percent: Decimal.new("100"),
         min: Money.new(min_minor, currency),
@@ -152,11 +164,13 @@ defmodule Accrue.Property.ConnectPlatformFeePropertyTest do
   end
 
   property "min clamp is a floor (fee >= min when gross > 0)" do
-    check all currency <- currency_gen(),
-              gross_minor <- StreamData.integer(1..10_000_000),
-              min_minor <- StreamData.integer(0..10_000),
-              percent <- percent_gen(),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            gross_minor <- StreamData.integer(1..10_000_000),
+            min_minor <- StreamData.integer(0..10_000),
+            percent <- percent_gen(),
+            max_runs: 200
+          ) do
       gross = Money.new(gross_minor, currency)
 
       assert {:ok, %Money{amount_minor: fee_minor}} =
@@ -170,11 +184,13 @@ defmodule Accrue.Property.ConnectPlatformFeePropertyTest do
   end
 
   property "max clamp is a ceiling (fee <= max)" do
-    check all currency <- currency_gen(),
-              gross <- gross_money_gen(currency),
-              max_minor <- StreamData.integer(0..10_000_000),
-              percent <- percent_gen(),
-              max_runs: 200 do
+    check all(
+            currency <- currency_gen(),
+            gross <- gross_money_gen(currency),
+            max_minor <- StreamData.integer(0..10_000_000),
+            percent <- percent_gen(),
+            max_runs: 200
+          ) do
       assert {:ok, %Money{amount_minor: fee_minor}} =
                PlatformFee.compute(gross,
                  percent: percent,

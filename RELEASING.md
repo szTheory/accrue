@@ -1,6 +1,6 @@
 # Releasing Accrue
 
-This runbook is for the same-day public `1.0.0` release of `accrue` and `accrue_admin`, then for later recovery runs when a manual publish is necessary.
+This runbook is for the same-day public `1.0.0` release of `accrue` and `accrue_admin`, then for later recovery runs when a manual publish is necessary. The release order is `accrue` then `accrue_admin`.
 
 ## Same-day `1.0.0` bootstrap
 
@@ -20,6 +20,20 @@ This runbook is for the same-day public `1.0.0` release of `accrue` and `accrue_
 - `accrue` publishes before `accrue_admin`.
 - `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` exist only as GitHub Actions secrets.
 - Secrets are never checked into docs, commit messages, config files, or echoed in workflow logs.
+
+## Minimum secret setup
+
+Create both secrets in GitHub before the first release run:
+
+1. Open the repository on GitHub.
+2. Go to **Settings** -> **Secrets and variables** -> **Actions**.
+3. Add `RELEASE_PLEASE_TOKEN` as a GitHub token that can create release pull requests, push release tags, create GitHub releases, and write pull-request comments for this repository.
+4. Add `HEX_API_KEY` as a Hex.pm API key that can publish the `accrue` and `accrue_admin` packages.
+5. Never paste either value into workflow files, docs, commit messages, terminal transcripts, issues, or pull requests.
+
+For the first anonymous maintainer release, use the GitHub identity `szTheory`
+and the noreply commit email already configured in this checkout:
+`szTheory@users.noreply.github.com`.
 
 ## Automated path
 

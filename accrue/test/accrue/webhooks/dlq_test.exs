@@ -8,19 +8,21 @@ defmodule Accrue.Webhooks.DLQTest do
     test "for a :dead webhook event inserts a fresh dispatch job and resets status to :received" do
       row = insert_event!(status: :dead)
 
-      events = capture_telemetry([:accrue, :ops, :webhook_dlq, :replay], fn ->
-        assert {:ok, updated} = DLQ.requeue(row.id)
-        assert updated.id == row.id
-        assert updated.status == :received
-      end)
+      events =
+        capture_telemetry([:accrue, :ops, :webhook_dlq, :replay], fn ->
+          assert {:ok, updated} = DLQ.requeue(row.id)
+          assert updated.id == row.id
+          assert updated.status == :received
+        end)
 
       assert length(events) >= 1
 
       # Ledger row recorded
       ledger =
         Accrue.TestRepo.all(
-          from e in Accrue.Events.Event,
+          from(e in Accrue.Events.Event,
             where: e.type == "webhook.replay_requested" and e.subject_id == ^row.id
+          )
         )
 
       assert length(ledger) == 1

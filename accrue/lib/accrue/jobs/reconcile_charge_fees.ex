@@ -31,8 +31,9 @@ defmodule Accrue.Jobs.ReconcileChargeFees do
     cutoff = DateTime.add(Accrue.Clock.utc_now(), -86_400, :second)
 
     query =
-      from c in Charge,
+      from(c in Charge,
         where: is_nil(c.fees_settled_at) and c.inserted_at < ^cutoff
+      )
 
     query
     |> Repo.all()
@@ -44,7 +45,9 @@ defmodule Accrue.Jobs.ReconcileChargeFees do
   defp reconcile(%Charge{processor_id: sid} = row) when is_binary(sid) do
     with {:ok, canonical} <-
            Processor.__impl__().retrieve_charge(sid, expand: ["balance_transaction"]),
-         bt <- Map.get(canonical, "balance_transaction") || Map.get(canonical, :balance_transaction) || %{},
+         bt <-
+           Map.get(canonical, "balance_transaction") || Map.get(canonical, :balance_transaction) ||
+             %{},
          fee when is_integer(fee) <- Map.get(bt, "fee") || Map.get(bt, :fee) do
       currency = Map.get(bt, "currency") || Map.get(bt, :currency) || "usd"
 

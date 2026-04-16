@@ -25,6 +25,7 @@ defmodule Accrue.Events.QueryAPITest do
       events = Events.timeline_for("Subscription", sid)
 
       assert length(events) == 3
+
       assert Enum.map(events, & &1.type) ==
                ["subscription.created", "subscription.updated", "subscription.canceled"]
     end
@@ -51,7 +52,14 @@ defmodule Accrue.Events.QueryAPITest do
     test "returns folded state as of a past timestamp", %{subject_id: sid, base_ts: t0} do
       e1 = insert_event!("subscription.created", sid, %{"status" => "trialing"}, t0)
       cutoff = DateTime.add(t0, 1, :second)
-      _e2 = insert_event!("subscription.updated", sid, %{"status" => "active"}, DateTime.add(t0, 5, :second))
+
+      _e2 =
+        insert_event!(
+          "subscription.updated",
+          sid,
+          %{"status" => "active"},
+          DateTime.add(t0, 5, :second)
+        )
 
       result = Events.state_as_of("Subscription", sid, cutoff)
 
@@ -62,7 +70,14 @@ defmodule Accrue.Events.QueryAPITest do
 
     test "folds multiple events into combined state", %{subject_id: sid, base_ts: t0} do
       insert_event!("subscription.created", sid, %{"status" => "trialing", "qty" => 1}, t0)
-      insert_event!("subscription.updated", sid, %{"status" => "active"}, DateTime.add(t0, 1, :second))
+
+      insert_event!(
+        "subscription.updated",
+        sid,
+        %{"status" => "active"},
+        DateTime.add(t0, 1, :second)
+      )
+
       insert_event!("subscription.updated", sid, %{"qty" => 5}, DateTime.add(t0, 2, :second))
 
       result = Events.state_as_of("Subscription", sid, DateTime.add(t0, 10, :second))

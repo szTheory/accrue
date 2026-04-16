@@ -40,17 +40,10 @@ defmodule Accrue.PDF.ChromicPDF do
     chromic_opts = translate_opts(html, opts)
     source = ChromicPDF.Template.source_and_options(chromic_opts)
 
-    result =
-      if opts[:archival] do
-        ChromicPDF.print_to_pdfa(source)
-      else
-        ChromicPDF.print_to_pdf(source)
-      end
-
-    case result do
-      {:ok, _} = ok -> ok
-      {:error, _} = err -> err
-      other -> {:ok, other}
+    if opts[:archival] do
+      ChromicPDF.print_to_pdfa(source)
+    else
+      ChromicPDF.print_to_pdf(source)
     end
   rescue
     e -> {:error, e}

@@ -8,6 +8,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias Accrue.Billing.{Charge, Customer, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Repo
+
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
@@ -177,10 +178,22 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp tab_counts(customer) do
     %{
-      subscriptions: Subscription |> where([sub], sub.customer_id == ^customer.id) |> Repo.aggregate(:count, :id),
-      invoices: Invoice |> where([invoice], invoice.customer_id == ^customer.id) |> Repo.aggregate(:count, :id),
-      charges: Charge |> where([charge], charge.customer_id == ^customer.id) |> Repo.aggregate(:count, :id),
-      payment_methods: PaymentMethod |> where([pm], pm.customer_id == ^customer.id) |> Repo.aggregate(:count, :id),
+      subscriptions:
+        Subscription
+        |> where([sub], sub.customer_id == ^customer.id)
+        |> Repo.aggregate(:count, :id),
+      invoices:
+        Invoice
+        |> where([invoice], invoice.customer_id == ^customer.id)
+        |> Repo.aggregate(:count, :id),
+      charges:
+        Charge
+        |> where([charge], charge.customer_id == ^customer.id)
+        |> Repo.aggregate(:count, :id),
+      payment_methods:
+        PaymentMethod
+        |> where([pm], pm.customer_id == ^customer.id)
+        |> Repo.aggregate(:count, :id),
       events: length(Events.timeline_for("Customer", customer.id, limit: 25)),
       metadata: map_size(customer.metadata || %{})
     }
@@ -263,7 +276,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
     )
   end
 
-  defp customer_label(customer), do: customer.name || customer.email || customer.processor_id || customer.id
+  defp customer_label(customer),
+    do: customer.name || customer.email || customer.processor_id || customer.id
 
   defp expiry(payment_method) do
     month = payment_method.exp_month || payment_method.card_exp_month

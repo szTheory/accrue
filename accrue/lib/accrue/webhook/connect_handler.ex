@@ -453,5 +453,4 @@ defmodule Accrue.Webhook.ConnectHandler do
   defp normalize_result(:ok), do: :ok
   defp normalize_result({:ok, _}), do: :ok
   defp normalize_result({:error, _} = err), do: err
-  defp normalize_result(other), do: {:error, {:unexpected_reducer_return, other}}
 end

@@ -10,7 +10,11 @@ defmodule AccrueAdmin.Components.Button do
   attr(:href, :string, default: nil)
   attr(:disabled, :boolean, default: false)
   attr(:class, :string, default: nil)
-  attr(:rest, :global, include: ~w(method name value form phx-click phx-submit phx-value-id aria-label))
+
+  attr(:rest, :global,
+    include: ~w(method name value form phx-click phx-submit phx-value-id aria-label)
+  )
+
   slot(:inner_block, required: true)
 
   def button(assigns) do

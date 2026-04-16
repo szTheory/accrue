@@ -126,9 +126,10 @@ defmodule Accrue.Jobs.DunningSweeperTest do
       # Audit event recorded.
       event =
         Repo.one!(
-          from e in "accrue_events",
+          from(e in "accrue_events",
             where: e.type == "dunning.terminal_action_requested",
             select: %{type: e.type, subject_id: e.subject_id}
+          )
         )
 
       assert event.type == "dunning.terminal_action_requested"
