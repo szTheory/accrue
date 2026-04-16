@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 12-first-user-dx-stabilization-10-PLAN.md
-last_updated: "2026-04-16T23:09:59.972Z"
-last_activity: 2026-04-16 -- Phase 12 planning complete
+stopped_at: Completed 12-11-PLAN.md
+last_updated: "2026-04-16T23:14:00.624Z"
+last_activity: 2026-04-16
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 22
-  completed_plans: 21
-  percent: 95
+  completed_plans: 22
+  percent: 100
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 12 (first-user-dx-stabilization) — EXECUTING
-Plan: 3 of 10
+Plan: 2 of 11
 Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 12 planning complete
+Last activity: 2026-04-16
 
 Progress: 1/6 v1.1 phases complete
 
@@ -135,6 +135,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 12 P07 | 4m | 1 tasks | 3 files |
 | Phase 12-first-user-dx-stabilization P09 | 5m | 2 tasks | 5 files |
 | Phase 12-first-user-dx-stabilization P10 | 17m | 2 tasks | 6 files |
+| Phase 12 P11 | 16m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -361,6 +362,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12]: Guide contracts now assert the exact :webhook_signing_secrets runtime config snippet in both published setup guides.
 - [Phase 12]: verify_package_docs.sh now checks both guides for plural webhook_signing_secrets and rejects standalone singular webhook_signing_secret drift.
 - [Phase 12]: The package-doc verifier supports ROOT_DIR override so ExUnit can exercise shell-script drift failures against isolated temp fixtures.
+- [Phase 12]: The troubleshooting docs contract keeps explicit authoritative lists of diagnostic codes and anchors so drift fails ExUnit immediately.
+- [Phase 12]: Every emitted setup-diagnostic docs anchor now requires a full troubleshooting section, not just a matrix row.
 
 ### Pending Todos
 
@@ -386,6 +389,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:50:26.061Z
-Stopped at: Completed 12-first-user-dx-stabilization-10-PLAN.md
+Last session: 2026-04-16T23:14:00.169Z
+Stopped at: Completed 12-11-PLAN.md
 Resume file: None

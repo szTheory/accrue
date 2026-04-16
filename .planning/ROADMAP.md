@@ -101,7 +101,7 @@ Plans:
 3. Quickstart and troubleshooting docs follow the host-app path without skipped setup steps.
 4. The host app validates both path-dependency development and Hex-style dependency modes.
 5. Package docs retain correct version snippets, source links, and internal HexDocs guide links.
-**Plans:** 10/11 plans complete
+**Plans:** 11/11 plans complete
 - [x] 12-01-PLAN.md — Create the docs and package-doc verification scaffolds.
 - [x] 12-02-PLAN.md — Create the installer conflict and Hex smoke validation scaffolds.
 - [x] 12-03-PLAN.md — Implement installer rerun safety, conflict artifacts, and categorized summaries.
@@ -112,7 +112,7 @@ Plans:
 - [x] 12-08-PLAN.md — Add host dependency-mode switching and activate Hex smoke in CI.
 - [x] 12-09-PLAN.md — Gap closure: make installer preflight scope-aware and stop swallowing migration inspection failures.
 - [x] 12-10-PLAN.md — Gap closure: fix `:webhook_signing_secrets` docs drift and extend docs/package verification for the config key.
-- [ ] 12-11-PLAN.md — Gap closure: finish troubleshooting deep links and lock the full diagnostic-anchor contract.
+- [x] 12-11-PLAN.md — Gap closure: finish troubleshooting deep links and lock the full diagnostic-anchor contract.
 **UI hint:** no
 
 ### Phase 13: Adoption Assets
@@ -173,7 +173,7 @@ Plans:
 | 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete    | 2026-04-16 |
 | 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete    | 2026-04-16 |
 | 11.1. Hermetic Host Flow Proofs | v1.1 | 1/1 | Complete    | 2026-04-16 |
-| 12. First-User DX Stabilization | v1.1 | 10/10 | Complete   | 2026-04-16 |
+| 12. First-User DX Stabilization | v1.1 | 11/11 | Complete   | 2026-04-16 |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
 | 14. Quality Hardening | v1.1 | 0/TBD | Planned | - |
 | 15. Expansion Discovery | v1.1 | 0/TBD | Planned | - |
