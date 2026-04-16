@@ -500,6 +500,54 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     refute output =~ "ACCRUE-DX-WEBHOOK-PIPELINE"
   end
 
+  @tag :install_check
+  test "--check accepts a host auth adapter configured in runtime.exs" do
+    app = InstallFixture.tmp_app!(:check_runtime_auth_adapter)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}",
+      "{:accrue_admin, path: \"../accrue_admin\"}"
+    ])
+
+    InstallFixture.write_router!(app, """
+    defmodule MyAppWeb.Router do
+      use MyAppWeb, :router
+
+      import AccrueAdmin.Router
+      import Accrue.Router
+
+      pipeline :accrue_webhook_raw_body do
+        plug(Plug.Parsers,
+          parsers: [:json],
+          pass: ["*/*"],
+          json_decoder: Jason,
+          body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}
+        )
+      end
+
+      scope "/webhooks" do
+        pipe_through(:accrue_webhook_raw_body)
+        accrue_webhook "/webhooks/stripe", :stripe
+      end
+
+      accrue_admin "/billing", session_keys: [:user_token], allow_live_reload: false
+    end
+    """)
+
+    InstallFixture.write_config!(app, "import Config\nconfig :accrue, :auth_adapter, Accrue.Auth.Default\n")
+
+    InstallFixture.write!(app, "config/runtime.exs", """
+    import Config
+    config :accrue, :auth_adapter, MyApp.Auth
+    """)
+
+    output = run_install(app, ["--check", "--yes", "--webhook-path", "/webhooks/stripe"])
+
+    assert output =~ "check: passed"
+    refute output =~ "ACCRUE-DX-AUTH-ADAPTER"
+  end
+
   defp run_install(app, argv) do
     Mix.Task.clear()
 

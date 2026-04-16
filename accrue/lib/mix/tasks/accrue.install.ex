@@ -323,7 +323,7 @@ defmodule Mix.Tasks.Accrue.Install do
       end
     )
     |> maybe_add(
-      project.has_accrue_admin? and default_or_missing_auth_adapter?(config),
+      project.has_accrue_admin? and default_or_missing_auth_adapter?(config, runtime_config),
       fn ->
         Accrue.SetupDiagnostic.auth_adapter(
           details: "config/config.exs is missing a host auth adapter or still uses Accrue.Auth.Default"
@@ -437,9 +437,16 @@ defmodule Mix.Tasks.Accrue.Install do
     Regex.match?(~r/accrue_admin(?:\s+|\()\"#{escaped_mount}\"/, router)
   end
 
-  defp default_or_missing_auth_adapter?(config) do
-    not String.contains?(config, "config :accrue, :auth_adapter") or
-      String.contains?(config, "config :accrue, :auth_adapter, Accrue.Auth.Default")
+  defp default_or_missing_auth_adapter?(config, runtime_config) do
+    sources = [config, runtime_config]
+
+    explicit_host_adapter? =
+      Enum.any?(sources, fn source ->
+        String.contains?(source, "config :accrue, :auth_adapter") and
+          not String.contains?(source, "config :accrue, :auth_adapter, Accrue.Auth.Default")
+      end)
+
+    not explicit_host_adapter?
   end
 
   defp oban_config_present?(config, runtime_config, project) do
