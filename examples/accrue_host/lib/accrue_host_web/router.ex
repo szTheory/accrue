@@ -46,6 +46,7 @@ defmodule AccrueHostWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{AccrueHostWeb.UserAuth, :require_authenticated}] do
+      live("/app/billing", SubscriptionLive, :show)
       live("/users/settings", UserLive.Settings, :edit)
       live("/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email)
     end
@@ -84,5 +85,5 @@ defmodule AccrueHostWeb.Router do
 
   # Protect this mount with AccrueAdmin.AuthHook via accrue_admin/2.
   # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
-  accrue_admin("/billing")
+  accrue_admin("/billing", allow_live_reload: false)
 end
