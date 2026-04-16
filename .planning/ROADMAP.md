@@ -85,9 +85,9 @@ Plans:
 2. The direct focused command and the canonical `scripts/ci/accrue_host_uat.sh` wrapper both pass, so local ad hoc proof runs and CI release-gate runs agree.
 3. Test fixture data uses unique or cleaned-up identifiers where needed while preserving realistic Fake-backed billing, signed webhook, and admin replay evidence.
 4. The milestone audit can be rerun without reporting host-flow proof hermeticity as a partial integration or flow gap.
-**Plans:** TBD
+**Plans:** 1 plan
 Plans:
-- [ ] TBD — Make host-flow proof fixtures hermetic and verify direct focused reruns.
+- [ ] 11.1-01-PLAN.md — Make focused host-flow proofs hermetic and verify wrapper/direct rerun agreement.
 **UI hint:** no
 
 ### Phase 12: First-User DX Stabilization
