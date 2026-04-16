@@ -30,7 +30,7 @@ Requirements for the v1.1 stabilization milestone. The milestone proves Accrue f
 ### First-User DX
 
 - [x] **DX-01**: Installer output and generated files are validated against the host app and remain idempotent on rerun.
-- [ ] **DX-02**: Setup failures for missing config, migrations, Oban, webhook secrets, auth, and admin mounts produce actionable errors.
+- [x] **DX-02**: Setup failures for missing config, migrations, Oban, webhook secrets, auth, and admin mounts produce actionable errors.
 - [x] **DX-03**: Quickstart docs are updated from the host-app path and avoid hand-wavy or skipped setup steps.
 - [x] **DX-04**: Troubleshooting docs cover the most likely first-hour failures discovered by dogfooding.
 - [x] **DX-05**: Public APIs used by the host app are documented and avoid requiring private module knowledge.
@@ -104,7 +104,7 @@ Deferred until after v1.1 unless pulled into a later milestone:
 | CI-05 | Phase 11 | Complete |
 | CI-06 | Phase 11 | Complete |
 | DX-01 | Phase 12 | Complete |
-| DX-02 | Phase 12 | Pending |
+| DX-02 | Phase 12 | Complete |
 | DX-03 | Phase 12 | Complete |
 | DX-04 | Phase 12 | Complete |
 | DX-05 | Phase 12 | Complete |
