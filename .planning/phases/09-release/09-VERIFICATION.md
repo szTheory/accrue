@@ -117,7 +117,7 @@ No orphaned Phase 9 requirements were found. All IDs claimed by plan frontmatter
 
 No repo-side gaps were found against the Phase 09 roadmap contract or the plan frontmatter must-haves.
 
-The only remaining release work is external setup and execution outside the repository: configure `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` in GitHub Actions, ensure local/CI Hex authentication is available, and perform the real `accrue` then `accrue_admin` publish sequence on GitHub/Hex. Per the verification request, those are treated as external release operations rather than code/artifact gaps, so Phase 09 is marked `passed`.
+The external release work is also complete as of 2026-04-16. `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` were configured, Release Please opened and merged PR #3 for `accrue` 0.1.2 and PR #4 for `accrue_admin` 0.1.2, and both packages published successfully to Hex. Main CI, Browser UAT, and Release Please completed successfully after both merges. Annotation sweeps found no warnings or errors, only the expected Browser UAT notice. Published HexDocs for both packages were checked after the docs hotfix and now show `~> 0.1.2` snippets with internal guide links.
 
 ---
 

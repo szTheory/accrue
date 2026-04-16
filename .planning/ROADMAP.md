@@ -10,15 +10,15 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
 - Integer phases (1–9): Planned milestone work
 - Decimal phases (e.g. 3.1): Urgent insertions
 
-- [ ] **Phase 1: Foundations** — Money, behaviours, Fake processor, error hierarchy, event ledger, brand primitives
-- [ ] **Phase 2: Schemas + Webhook Plumbing** — polymorphic Customer, all Billing schemas, scoped raw-body plug, signature verify, Oban dispatch, DB idempotency
-- [ ] **Phase 3: Core Subscription Lifecycle** — subscribe/swap/cancel/resume/pause/trial, invoice state machine, charges, PI/SI, payment methods, refunds
-- [ ] **Phase 4: Advanced Billing + Webhook Hardening** — metered, schedules, coupons, checkout/portal, DLQ/replay, out-of-order, event ledger query API, ops telemetry
-- [ ] **Phase 5: Connect** — connected accounts, destination charges, separate charges + transfers, multi-endpoint webhooks with per-account secret routing
-- [ ] **Phase 6: Email + PDF** — 13+ transactional emails via Mailer behaviour, ChromicPDF adapter, shared HEEx templates, MJML responsive layouts
-- [ ] **Phase 7: Admin UI (accrue_admin)** — LiveView dashboard, customer/subscription/invoice pages, webhook inspector with one-click replay, Sigra auth adapter
+- [x] **Phase 1: Foundations** — Money, behaviours, Fake processor, error hierarchy, event ledger, brand primitives
+- [x] **Phase 2: Schemas + Webhook Plumbing** — polymorphic Customer, all Billing schemas, scoped raw-body plug, signature verify, Oban dispatch, DB idempotency
+- [x] **Phase 3: Core Subscription Lifecycle** — subscribe/swap/cancel/resume/pause/trial, invoice state machine, charges, PI/SI, payment methods, refunds
+- [x] **Phase 4: Advanced Billing + Webhook Hardening** — metered, schedules, coupons, checkout/portal, DLQ/replay, out-of-order, event ledger query API, ops telemetry
+- [x] **Phase 5: Connect** — connected accounts, destination charges, separate charges + transfers, multi-endpoint webhooks with per-account secret routing
+- [x] **Phase 6: Email + PDF** — 13+ transactional emails via Mailer behaviour, ChromicPDF adapter, shared HEEx templates, MJML responsive layouts
+- [x] **Phase 7: Admin UI (accrue_admin)** — LiveView dashboard, customer/subscription/invoice pages, webhook inspector with one-click replay, Sigra auth adapter
 - [x] **Phase 8: Install + Polish + Testing** — `mix accrue.install` idempotent generator, test helpers (advance_clock, trigger_event, assert_email_sent, assert_pdf_rendered), OTel span helpers
-- [x] **Phase 9: Release** — CI matrix (format, warnings-as-errors, Credo strict, Dialyzer, docs), Release Please, ExDoc guides, SECURITY.md, same-day v1.0 publish of accrue + accrue_admin (completed 2026-04-16)
+- [x] **Phase 9: Release** — CI matrix (format, warnings-as-errors, Credo strict, Dialyzer, docs), Release Please, ExDoc guides, SECURITY.md, and first public Hex releases of accrue + accrue_admin (completed 2026-04-16; published 0.1.2)
 
 ## Phase Details
 
@@ -220,14 +220,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations | 0/TBD | Not started | - |
-| 2. Schemas + Webhook Plumbing | 0/6 | Planned | - |
-| 3. Core Subscription Lifecycle | 0/TBD | Not started | - |
-| 4. Advanced Billing + Webhook Hardening | 0/TBD | Not started | - |
-| 5. Connect | 1/7 | In Progress|  |
-| 6. Email + PDF | 0/TBD | Not started | - |
-| 7. Admin UI (accrue_admin) | 0/TBD | Not started | - |
-| 8. Install + Polish + Testing | 0/TBD | Not started | - |
+| 1. Foundations | 6/6 | Complete | 2026-04-11 |
+| 2. Schemas + Webhook Plumbing | 6/6 | Complete | 2026-04-12 |
+| 3. Core Subscription Lifecycle | 8/8 | Complete | 2026-04-14 |
+| 4. Advanced Billing + Webhook Hardening | 8/8 | Complete | 2026-04-14 |
+| 5. Connect | 7/7 | Complete | 2026-04-14 |
+| 6. Email + PDF | 7/7 | Complete | 2026-04-15 |
+| 7. Admin UI (accrue_admin) | 12/12 | Complete | 2026-04-15 |
+| 8. Install + Polish + Testing | 9/9 | Complete | 2026-04-15 |
 | 9. Release | 6/6 | Complete    | 2026-04-16 |
 
 ## Parallelization Notes

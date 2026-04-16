@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 09-05-admin-docs-community-health-PLAN.md
-last_updated: "2026-04-16T01:47:25.938Z"
+status: milestone_complete
+stopped_at: Published accrue 0.1.2 and accrue_admin 0.1.2; planning snapshot committed
+last_updated: "2026-04-16T14:20:00.000Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 9
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 09 — release
+**Current focus:** Milestone v1.0 is complete; next work should start a new milestone/phase discussion.
 
 ## Current Position
 
 Phase: 9
-Plan: Not started
-Status: Ready to execute
+Plan: Complete
+Status: Released and verified
 Last activity: 2026-04-16
 
-Progress: [██████████] 63/63 planned plans complete (100% overall; Phase 08 verified complete)
+Progress: [██████████] 69/69 planned plans complete (100% overall; Phase 09 released and verified)
 
 ## Performance Metrics
 
@@ -110,6 +110,7 @@ Progress: [██████████] 63/63 planned plans complete (100% ov
 | Phase 09 P03 | 2m | 2 tasks | 9 files |
 | Phase 09-release P04 | 5m | 2 tasks | 5 files |
 | Phase 09-release P05 | 26m | 2 tasks | 11 files |
+| Phase 09-release P06 | completed | release readiness, GitHub/Hex secret setup, public package publish, docs hotfix | released |
 
 ## Accumulated Context
 
@@ -278,12 +279,16 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 09-release]: Use publish-hex.yml only as a manual recovery/bootstrap path with explicit package, ref, and version inputs.
 - [Phase 09-release]: Bootstrap the first public release with Release-As: 1.0.0 instructions and review gates instead of a permanent config override.
 - [Phase 09-release]: Make README.md the ExDoc main page for accrue so Hex and HexDocs share one entry surface.
-- [Phase 09-release]: Load ExDoc guide extras through Path.wildcard("guides/*.md") and keep future-guide links on GitHub URLs until those guide files land locally.
+- [Phase 09-release]: Load ExDoc guide extras through Path.wildcard("guides/*.md") and keep package guide links relative so HexDocs resolves them internally.
 - [Phase 09-release]: Keep release guides anchored on public behaviours and config keys so docs do not imply support for private internals.
 - [Phase 09-release]: Use placeholder-only snippets and explicit secret-handling warnings in extension and webhook docs.
 - [Phase 09-release]: Gate accrue_admin's sibling dependency through ACCRUE_ADMIN_HEX_RELEASE=1 so monorepo development and Hex packaging use one dependency entry.
 - [Phase 09-release]: Use a checked-in Dialyxir ignore file for existing admin warnings so the new release gate is deterministic.
 - [Phase 09-release]: Link both package READMEs to the root contributing, conduct, and security policies.
+- [Phase 09-release]: First public packages shipped as `accrue` 0.1.2 and `accrue_admin` 0.1.2 on 2026-04-16; Hex reports install snippets as `~> 0.1.2`.
+- [Phase 09-release]: HexDocs guide links must be relative ExDoc links (`guides/*.md` -> `quickstart.html`, `admin_ui.html`) rather than GitHub blob URLs.
+- [Phase 09-release]: `source_ref` must use package-specific release tags (`accrue-v#{@version}` and `accrue_admin-v#{@version}`) so source links match Release Please tags.
+- [Phase 09-release]: Warnings and GitHub annotations are release blockers; final sweeps for PR #3, PR #4, and main found no warning/error annotations, only the expected Browser UAT notice.
 
 ### Pending Todos
 
@@ -291,7 +296,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- **Release Please v4 monorepo output naming:** verify via dry-run before Phase 9 release work.
+- **Release Please v4 monorepo output naming:** resolved by real Release Please PRs and publish jobs for `accrue` and `accrue_admin`.
 - **ChromicPDF on minimal Alpine containers:** needs real-world container testing in Phase 6; PDF.Null adapter is the escape hatch.
 - **lattice_stripe 1.1 (BillingMeter/MeterEvent/BillingPortal.Session):** Required for Phase 4 requirements BILL-11 (metered billing) and CHKT-02 (Customer Portal). Upstream work is in-flight in a parallel session targeting 1.1 release. Does NOT block Phase 3 or the rest of Phase 4.
 
@@ -304,6 +309,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T00:27:07.713Z
-Stopped at: Completed 09-05-admin-docs-community-health-PLAN.md
+Last session: 2026-04-16T14:20:00.000Z
+Stopped at: Published `accrue` 0.1.2 and `accrue_admin` 0.1.2, verified CI/HexDocs, and committed `.planning/` snapshot in `4673f8b planning: capture phase artifacts`.
 Resume file: None
