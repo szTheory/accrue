@@ -24,7 +24,7 @@
 
 ### 🚧 v1.1 Stabilization + Adoption
 
-- [x] **Phase 10: Host App Dogfood Harness** — canonical minimal Phoenix app that installs and uses `accrue` + `accrue_admin` through public APIs. (completed 2026-04-16)
+- [ ] **Phase 10: Host App Dogfood Harness** — canonical minimal Phoenix app that installs and uses `accrue` + `accrue_admin` through public APIs. (plans complete; human UAT pending)
 - [ ] **Phase 11: CI User-Facing Integration Gate** — mandatory CI workflows for host-app setup, Fake-backed E2E, browser UAT artifacts, and warning/error annotation sweeps.
 - [ ] **Phase 12: First-User DX Stabilization** — installer/docs/error polish driven by dogfood failures and first-hour user setup paths.
 - [ ] **Phase 13: Adoption Assets** — maintained example/demo path, tutorial docs, README positioning, and repository issue templates.
@@ -138,7 +138,7 @@ Plans:
 | 7. Admin UI (accrue_admin) | v1.0 | 12/12 | Complete | 2026-04-15 |
 | 8. Install + Polish + Testing | v1.0 | 9/9 | Complete | 2026-04-15 |
 | 9. Release | v1.0 | 6/6 | Complete | 2026-04-16 |
-| 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete   | 2026-04-16 |
+| 10. Host App Dogfood Harness | v1.1 | 7/7 | Human UAT | - |
 | 11. CI User-Facing Integration Gate | v1.1 | 0/TBD | Planned | - |
 | 12. First-User DX Stabilization | v1.1 | 0/TBD | Planned | - |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
