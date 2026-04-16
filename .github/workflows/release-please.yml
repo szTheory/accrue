@@ -20,14 +20,14 @@ jobs:
     name: Release Please
     runs-on: ubuntu-24.04
     outputs:
-      accrue_release_created: ${{ steps.release.outputs['accrue--release_created'] }}
-      accrue_tag_name: ${{ steps.release.outputs['accrue--tag_name'] }}
-      accrue_version: ${{ steps.release.outputs['accrue--version'] }}
-      accrue_sha: ${{ steps.release.outputs['accrue--sha'] }}
-      accrue_admin_release_created: ${{ steps.release.outputs['accrue_admin--release_created'] }}
-      accrue_admin_tag_name: ${{ steps.release.outputs['accrue_admin--tag_name'] }}
-      accrue_admin_version: ${{ steps.release.outputs['accrue_admin--version'] }}
-      accrue_admin_sha: ${{ steps.release.outputs['accrue_admin--sha'] }}
+      accrue_release_created: ${{ steps.release.outputs.accrue_release_created }}
+      accrue_tag_name: ${{ steps.release.outputs.accrue_tag_name }}
+      accrue_version: ${{ steps.release.outputs.accrue_version }}
+      accrue_sha: ${{ steps.release.outputs.accrue_sha }}
+      accrue_admin_release_created: ${{ steps.release.outputs.accrue_admin_release_created }}
+      accrue_admin_tag_name: ${{ steps.release.outputs.accrue_admin_tag_name }}
+      accrue_admin_version: ${{ steps.release.outputs.accrue_admin_version }}
+      accrue_admin_sha: ${{ steps.release.outputs.accrue_admin_sha }}
     steps:
       - name: Bootstrap reminder
         if: ${{ github.event_name == 'workflow_dispatch' }}
