@@ -14,7 +14,9 @@ defmodule AccrueAdmin.MixProject do
       deps: deps(),
       package: package(),
       description: "Admin LiveView UI for Accrue billing.",
-      source_url: @source_url
+      source_url: @source_url,
+      docs: docs(),
+      dialyzer: [plt_local_path: "priv/plts", ignore_warnings: ".dialyzer_ignore.exs"]
     ]
   end
 
@@ -34,16 +36,15 @@ defmodule AccrueAdmin.MixProject do
 
   defp deps do
     [
-      # Dev monorepo path; at publish time this flips to "~> 1.0" per D-43.
-      # Do NOT add both forms now.
-      {:accrue, path: "../accrue"},
+      accrue_dep(),
       {:phoenix, "~> 1.8"},
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.2"},
       {:plug_cowboy, "~> 2.7", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:ex_doc, "~> 0.40", only: :dev, runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -51,7 +52,24 @@ defmodule AccrueAdmin.MixProject do
     [
       licenses: ["MIT"],
       links: %{},
-      files: ~w(lib config priv/static mix.exs README* LICENSE* CHANGELOG*)
+      files: ~w(lib config guides priv/static mix.exs README* LICENSE* CHANGELOG*)
     ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_ref: "v#{@version}",
+      extras: ["README.md", "guides/admin_ui.md"],
+      groups_for_extras: [Guides: ["guides/admin_ui.md"]]
+    ]
+  end
+
+  defp accrue_dep do
+    if System.get_env("ACCRUE_ADMIN_HEX_RELEASE") == "1" do
+      {:accrue, "~> #{@version}"}
+    else
+      {:accrue, path: "../accrue"}
+    end
   end
 end

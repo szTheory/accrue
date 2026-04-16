@@ -2,6 +2,8 @@
 
 `accrue_admin` mounts a package-scoped LiveView billing UI inside a host Phoenix app. The package owns its own router macro, private static bundle, and non-prod inspection tools.
 
+Start with the package quickstart in [`README.md`](../README.md), then return here for the host wiring and release checks. Published `accrue_admin` releases depend on `accrue ~> 1.0.0`, while monorepo development keeps the local sibling dependency shape by default.
+
 ## Host Setup
 
 Add the package to your router and mount it where operators expect billing controls:
@@ -30,7 +32,7 @@ end
 
 ## Branding
 
-The package reads its brand chrome from `Accrue.Config.branding/0` via `AccrueAdmin.BrandPlug`. Configure the host app's billing identity once and the admin shell inherits it:
+The package reads its brand chrome from `Accrue.Config.branding/0` through the package branding plug. Configure the host app's billing identity once and the admin shell inherits it:
 
 ```elixir
 config :accrue,
@@ -45,7 +47,7 @@ config :accrue,
 
 ## Auth Expectations
 
-The mount macro wires `AccrueAdmin.AuthHook` into the LiveSession by default. `Accrue.Auth.current_user/1` must return an admin-capable user for the forwarded session keys, and the host app remains responsible for browser-session setup before the admin routes mount.
+The mount macro wires the package auth hook into the LiveSession by default. `Accrue.Auth.current_user/1` must return an admin-capable user for the forwarded session keys, and the host app remains responsible for browser-session setup before the admin routes mount.
 
 ## Private Asset Bundle
 
@@ -62,6 +64,29 @@ That task only touches:
 - `priv/static/accrue_admin.js`
 
 No host Tailwind config edits or host JavaScript bootstrap changes are required.
+
+## Release Verification
+
+CI and local publish dry runs must force the Hex-safe sibling dependency shape:
+
+```bash
+cd accrue_admin
+export ACCRUE_ADMIN_HEX_RELEASE=1
+```
+
+Use this release gate before shipping or validating publish automation:
+
+```bash
+mix format --check-formatted
+mix compile --warnings-as-errors
+mix test --warnings-as-errors
+mix credo --strict
+mix docs --warnings-as-errors
+mix dialyzer --format github
+mix hex.audit
+mix hex.build
+mix hex.publish --dry-run
+```
 
 ## Browser UAT
 

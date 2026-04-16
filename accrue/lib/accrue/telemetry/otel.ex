@@ -7,7 +7,7 @@ defmodule Accrue.Telemetry.OTel do
   executes the passed function unchanged and emits no compiler warnings.
   """
 
-  @compile {:no_warn_undefined, [OpenTelemetry.Tracer]}
+  @compile {:no_warn_undefined, [:otel_tracer, :otel_span]}
 
   @allowed_attributes %{
     :processor => "accrue.processor",
@@ -53,26 +53,29 @@ defmodule Accrue.Telemetry.OTel do
   Wraps `fun` in an OpenTelemetry span when the optional dependency is loaded.
   """
   @spec span(event_name(), map(), (-> result)) :: result when result: var
-  if Code.ensure_loaded?(OpenTelemetry.Tracer) do
-    require OpenTelemetry.Tracer
-
+  if Code.ensure_loaded?(:otel_tracer) and Code.ensure_loaded?(:otel_span) do
     def span(event, metadata \\ %{}, fun)
         when is_list(event) and is_map(metadata) and is_function(fun, 0) do
       name = span_name(event)
       attrs = sanitize_attributes(metadata)
 
-      OpenTelemetry.Tracer.with_span name do
+      :otel_tracer.with_span(:otel_tracer.current_tracer(), name, %{}, fn ->
         try do
-          OpenTelemetry.Tracer.set_attributes(attrs)
+          :otel_span.set_attributes(:otel_tracer.current_span_ctx(), attrs)
 
           fun.()
           |> tap(&set_result_status/1)
         rescue
           exception ->
-            OpenTelemetry.Tracer.set_status(:error, Exception.message(exception))
+            :otel_span.set_status(
+              :otel_tracer.current_span_ctx(),
+              :error,
+              Exception.message(exception)
+            )
+
             reraise exception, __STACKTRACE__
         end
-      end
+      end)
     end
   else
     def span(_event, _metadata \\ %{}, fun) when is_function(fun, 0), do: fun.()
@@ -112,12 +115,14 @@ defmodule Accrue.Telemetry.OTel do
   defp sanitize_value(value) when is_boolean(value), do: value
   defp sanitize_value(value), do: inspect(value)
 
-  if Code.ensure_loaded?(OpenTelemetry.Tracer) do
-    defp set_result_status(:ok), do: OpenTelemetry.Tracer.set_status(:ok, "")
-    defp set_result_status({:ok, _}), do: OpenTelemetry.Tracer.set_status(:ok, "")
+  if Code.ensure_loaded?(:otel_tracer) and Code.ensure_loaded?(:otel_span) do
+    defp set_result_status(:ok), do: :otel_span.set_status(:otel_tracer.current_span_ctx(), :ok, "")
+
+    defp set_result_status({:ok, _}),
+      do: :otel_span.set_status(:otel_tracer.current_span_ctx(), :ok, "")
 
     defp set_result_status({:error, reason}),
-      do: OpenTelemetry.Tracer.set_status(:error, inspect(reason))
+      do: :otel_span.set_status(:otel_tracer.current_span_ctx(), :error, inspect(reason))
 
     defp set_result_status(_result), do: :ok
   end
