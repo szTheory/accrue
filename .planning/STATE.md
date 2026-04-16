@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-04-16T16:30:22.583Z"
+stopped_at: Completed 10-host-app-dogfood-harness-02-PLAN.md
+last_updated: "2026-04-16T16:33:21.935Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 7
-  completed_plans: 1
-  percent: 14
+  completed_plans: 2
+  percent: 29
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 10 (host-app-dogfood-harness) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -112,6 +112,7 @@ Progress: 0/6 v1.1 phases complete
 | Phase 09-release P05 | 26m | 2 tasks | 11 files |
 | Phase 09-release P06 | completed | release readiness, GitHub/Hex secret setup, public package publish, docs hotfix | released |
 | Phase 10 P01 | 14m | 1 tasks | 47 files |
+| Phase 10 P02 | 2min | 1 tasks | 27 files |
 
 ## Accumulated Context
 
@@ -292,6 +293,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 09-release]: Warnings and GitHub annotations are release blockers; final sweeps for PR #3, PR #4, and main found no warning/error annotations, only the expected Browser UAT notice.
 - [Phase 10]: Kept examples/accrue_host generator-first and patched only host-owned Accrue boundaries for path deps and runtime/test config.
 - [Phase 10]: Pinned the host app to Accrue.Processor.Fake with an env-driven webhook secret default so local dogfood flows avoid hidden machine-local secrets.
+- [Phase 10]: Kept the Phoenix 1.8 phx.gen.auth output intact in examples/accrue_host, including Scope and live_session wiring, so later host flows build on a standard auth boundary.
+- [Phase 10]: Pinned the host Accounts.User billable type to "User" while adding Accrue.Billable so auth and billing share one host-owned schema boundary.
 
 ### Pending Todos
 
@@ -317,6 +320,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T16:30:22.579Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-04-16T16:33:21.931Z
+Stopped at: Completed 10-host-app-dogfood-harness-02-PLAN.md
 Resume file: None
