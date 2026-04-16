@@ -1,0 +1,77 @@
+name: Publish Hex Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish. Run accrue before accrue_admin when recovering a same-day release.'
+        required: true
+        type: choice
+        options:
+          - accrue
+          - accrue_admin
+      tag:
+        description: 'Reviewed git tag or commit ref to publish from.'
+        required: true
+        type: string
+      release_version:
+        description: 'Expected package version at the selected ref.'
+        required: true
+        type: string
+
+jobs:
+  publish-accrue:
+    name: Publish accrue recovery
+    if: ${{ inputs.package == 'accrue' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+      - name: Verify accrue release version
+        run: rg -n "@version \"${{ inputs.release_version }}\"" accrue/mix.exs
+      - name: Install accrue deps
+        run: cd accrue && mix deps.get
+      - name: Dry run accrue Hex publish
+        run: cd accrue && mix hex.publish --dry-run
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+      - name: Publish accrue to Hex
+        run: cd accrue && mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+
+  publish-accrue-admin:
+    name: Publish accrue_admin recovery
+    if: ${{ inputs.package == 'accrue_admin' }}
+    runs-on: ubuntu-24.04
+    env:
+      ACCRUE_ADMIN_HEX_RELEASE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+      - name: Verify accrue_admin release version
+        run: rg -n "@version \"${{ inputs.release_version }}\"" accrue_admin/mix.exs
+      - name: Install accrue_admin deps
+        run: cd accrue_admin && mix deps.get
+      - name: Dry run accrue_admin Hex publish
+        run: cd accrue_admin && mix hex.publish --dry-run
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_ADMIN_HEX_RELEASE: ${{ env.ACCRUE_ADMIN_HEX_RELEASE }}
+      - name: Publish accrue_admin to Hex
+        run: cd accrue_admin && mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_ADMIN_HEX_RELEASE: ${{ env.ACCRUE_ADMIN_HEX_RELEASE }}
