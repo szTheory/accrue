@@ -44,7 +44,13 @@
 3. A Fake-backed user-facing flow creates or updates realistic billing state through checkout/subscription APIs.
 4. The host app mounts a scoped webhook endpoint and processes signed Fake/Stripe-shaped webhook payloads through the normal ingest path.
 5. `accrue_admin` is mounted behind a realistic auth/session boundary and can inspect state plus perform one audited admin action.
-**Plans:** TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 10-01-PLAN.md — Scaffold the Phoenix host app, host-owned test harness, and Wave 0 proof files.
+- [ ] 10-02-PLAN.md — Run the public installer, keep generated wiring intact, and prove the host billable facade boundary.
+- [ ] 10-03-PLAN.md — Build the signed-in Fake-backed subscription flow through `AccrueHost.Billing`.
+- [ ] 10-04-PLAN.md — Prove signed webhook ingest and idempotent normal-path dispatch at `/webhooks/stripe`.
+- [ ] 10-05-PLAN.md — Protect `/billing`, prove audited replay, and document clean-checkout commands.
 **UI hint:** yes (host app and admin browser flows)
 
 ### Phase 11: CI User-Facing Integration Gate
