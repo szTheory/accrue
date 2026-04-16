@@ -171,7 +171,7 @@ defmodule Accrue.Install.Patches do
     {_scope_path, endpoint_path} = webhook_scope(opts.webhook_path)
 
     cond do
-      content =~ ~s(accrue_webhook "#{endpoint_path}", :stripe) ->
+      webhook_route_present?(content, endpoint_path) ->
         {:skipped, path, "webhook route already configured"}
 
       true ->
@@ -193,7 +193,7 @@ defmodule Accrue.Install.Patches do
     content = File.read!(path)
 
     cond do
-      content =~ ~s(accrue_admin "#{opts.admin_mount}") ->
+      admin_mount_present?(content, opts.admin_mount) ->
         {:skipped, path, "admin mount already configured"}
 
       true ->
@@ -258,6 +258,16 @@ defmodule Accrue.Install.Patches do
   defp insert_before_final_end(content, snippet) do
     replacement = "\n" <> String.trim_trailing(snippet) <> "\nend"
     Regex.replace(~r/\nend\s*$/s, content, replacement, global: false)
+  end
+
+  defp webhook_route_present?(content, endpoint_path) do
+    escaped_path = Regex.escape(endpoint_path)
+    Regex.match?(~r/accrue_webhook(?:\s+|\()\"#{escaped_path}\",\s*:stripe\)?/, content)
+  end
+
+  defp admin_mount_present?(content, mount_path) do
+    escaped_path = Regex.escape(mount_path)
+    Regex.match?(~r/accrue_admin(?:\s+|\()\"#{escaped_path}\"\)?/, content)
   end
 
   defp webhook_scope(path) do

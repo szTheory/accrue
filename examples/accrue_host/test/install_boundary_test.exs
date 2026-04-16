@@ -35,6 +35,9 @@ defmodule AccrueHost.InstallBoundaryTest do
     assert router =~ ~s(scope "/webhooks" do)
     assert router =~ ~S|accrue_webhook("/stripe", :stripe)|
     assert router =~ ~S|accrue_admin("/billing")|
+    assert count_occurrences(router, "pipeline :accrue_webhook_raw_body do") == 1
+    assert count_occurrences(router, ~S|accrue_webhook("/stripe", :stripe)|) == 1
+    assert count_occurrences(router, ~S|accrue_admin("/billing")|) == 1
   end
 
   test "runtime config keeps fake-backed defaults instead of live-only setup" do
@@ -43,5 +46,12 @@ defmodule AccrueHost.InstallBoundaryTest do
     assert runtime =~ "config :accrue, :processor, Accrue.Processor.Fake"
     assert runtime =~ ~S|System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")|
     refute runtime =~ "config :accrue, :processor, Accrue.Processor.Stripe"
+  end
+
+  defp count_occurrences(content, needle) do
+    content
+    |> String.split(needle)
+    |> length()
+    |> Kernel.-(1)
   end
 end
