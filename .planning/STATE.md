@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 12-09-PLAN.md
-last_updated: "2026-04-16T22:46:39.276Z"
+stopped_at: Completed 12-first-user-dx-stabilization-10-PLAN.md
+last_updated: "2026-04-16T22:50:26.065Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 21
-  completed_plans: 20
-  percent: 95
+  completed_plans: 21
+  percent: 100
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 12 (first-user-dx-stabilization) — EXECUTING
-Plan: 2 of 10
+Plan: 3 of 10
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -134,6 +134,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 12-first-user-dx-stabilization P06 | 4m | 2 tasks | 10 files |
 | Phase 12 P07 | 4m | 1 tasks | 3 files |
 | Phase 12-first-user-dx-stabilization P09 | 5m | 2 tasks | 5 files |
+| Phase 12-first-user-dx-stabilization P10 | 17m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -357,6 +358,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12-first-user-dx-stabilization]: Webhook preflight now inspects the mounted webhook scope instead of scanning the whole router for browser/auth strings.
 - [Phase 12-first-user-dx-stabilization]: Migration inspection now maps expected lookup failures to ACCRUE-DX-MIGRATIONS-PENDING while leaving unexpected exceptions unsuppressed.
 - [Phase 12-first-user-dx-stabilization]: Installer --check accepts host auth adapters declared in config/runtime.exs, matching the example host app.
+- [Phase 12]: Guide contracts now assert the exact :webhook_signing_secrets runtime config snippet in both published setup guides.
+- [Phase 12]: verify_package_docs.sh now checks both guides for plural webhook_signing_secrets and rejects standalone singular webhook_signing_secret drift.
+- [Phase 12]: The package-doc verifier supports ROOT_DIR override so ExUnit can exercise shell-script drift failures against isolated temp fixtures.
 
 ### Pending Todos
 
@@ -382,6 +386,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:46:39.273Z
-Stopped at: Completed 12-09-PLAN.md
+Last session: 2026-04-16T22:50:26.061Z
+Stopped at: Completed 12-first-user-dx-stabilization-10-PLAN.md
 Resume file: None
