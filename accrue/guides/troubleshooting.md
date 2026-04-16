@@ -128,3 +128,184 @@ Create a dedicated raw-body parser pipeline and mount `/webhooks/stripe` there.
 ```bash
 mix test test/accrue_host_web/webhook_ingest_test.exs
 ```
+
+## `ACCRUE-DX-OBAN-NOT-SUPERVISED` {#accrue-dx-oban-not-supervised}
+
+### What happened
+
+The host app has valid `Oban` config, but the supervision tree never starts an
+Oban supervisor.
+
+### Why Accrue cares
+
+Accrue persists signed webhook events before handing follow-up work to Oban. If
+Oban is not supervised, `accrue_webhook "/stripe", :stripe` can accept the
+request but dispatch, retry, and replay work will not run.
+
+### Fix
+
+Start Oban from the host application supervisor with the same config you keep in
+`config/runtime.exs` or the environment-specific config file:
+
+```elixir
+children = [
+  MyApp.Repo,
+  {Oban, Application.fetch_env!(:my_app, Oban)}
+]
+```
+
+Keep the queue config host-owned and make sure the app boots the supervisor in
+every environment where webhooks or async mailers should run.
+
+### How to verify
+
+```bash
+mix accrue.install --check
+mix test test/accrue_host_web/webhook_ingest_test.exs
+```
+
+## `ACCRUE-DX-WEBHOOK-ROUTE-MISSING` {#accrue-dx-webhook-route-missing}
+
+### What happened
+
+The host router does not expose the Stripe webhook endpoint Accrue expects.
+
+### Why Accrue cares
+
+Webhook signing secrets and handlers do nothing if Phoenix never mounts the
+route. Signed processor events will never reach the host boundary without the
+`accrue_webhook "/stripe", :stripe` route.
+
+### Fix
+
+Import `Accrue.Router` in the host router and mount the webhook macro inside a
+dedicated webhook scope:
+
+```elixir
+scope "/webhooks", MyAppWeb do
+  pipe_through [:accrue_webhooks]
+
+  accrue_webhook "/stripe", :stripe
+end
+```
+
+Keep the scope narrow and separate from the authenticated browser routes.
+
+### How to verify
+
+```bash
+mix phx.routes | rg '/webhooks/stripe'
+mix accrue.install --check
+```
+
+## `ACCRUE-DX-WEBHOOK-PIPELINE` {#accrue-dx-webhook-pipeline}
+
+### What happened
+
+The Stripe webhook route is mounted behind the wrong Phoenix pipeline.
+
+### Why Accrue cares
+
+Webhook requests must arrive on a raw-body-aware path. Running the route through
+the `browser` pipeline, CSRF protection, or an auth pipeline can reject the
+request or mutate it before signature verification runs.
+
+### Fix
+
+Move the webhook route into a dedicated pipeline that only handles the raw body
+and JSON parsing needed for signed webhook requests:
+
+```elixir
+pipeline :accrue_webhooks do
+  plug :accepts, ["json"]
+
+  plug Plug.Parsers,
+    parsers: [:json],
+    pass: ["application/json"],
+    json_decoder: Phoenix.json_library(),
+    body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}
+end
+
+scope "/webhooks", MyAppWeb do
+  pipe_through [:accrue_webhooks]
+
+  accrue_webhook "/stripe", :stripe
+end
+```
+
+Do not reuse the `browser` pipeline here. Keep CSRF and session auth on the
+browser side, and keep the webhook path on its own auth-free pipeline.
+
+### How to verify
+
+```bash
+mix accrue.install --check
+mix test test/accrue_host_web/webhook_ingest_test.exs
+```
+
+## `ACCRUE-DX-AUTH-ADAPTER` {#accrue-dx-auth-adapter}
+
+### What happened
+
+Accrue could not resolve a real host auth adapter for the mounted admin UI.
+
+### Why Accrue cares
+
+The admin UI is intentionally host-owned at the auth boundary. `/billing` must
+use the same session and authorization rules as the rest of the host app, not a
+package-owned fallback.
+
+### Fix
+
+Point Accrue at the host adapter and keep the admin mount inside the
+authenticated browser scope:
+
+```elixir
+config :accrue, :auth_adapter, MyApp.Auth
+```
+
+Then forward the session keys your auth layer uses when mounting the admin UI.
+If the route is already mounted, confirm it sits behind your host auth pipeline
+instead of a public scope.
+
+### How to verify
+
+```bash
+mix accrue.install --check
+mix test test/accrue_host_web/admin_mount_test.exs
+```
+
+## `ACCRUE-DX-ADMIN-MOUNT-MISSING` {#accrue-dx-admin-mount-missing}
+
+### What happened
+
+The host router never mounted the Accrue admin routes.
+
+### Why Accrue cares
+
+Without the `accrue_admin "/billing"` mount, first users cannot inspect billing
+state, replay webhook failures, or confirm the protected admin UI is wired the
+same way as the host app.
+
+### Fix
+
+Import `AccrueAdmin.Router` and mount the admin UI inside the authenticated
+browser scope:
+
+```elixir
+scope "/", MyAppWeb do
+  pipe_through [:browser, :require_authenticated_user]
+
+  accrue_admin "/billing"
+end
+```
+
+Keep the mount on the host-controlled browser side and do not expose it on the
+webhook or public API scopes.
+
+### How to verify
+
+```bash
+mix accrue.install --check
+mix test test/accrue_host_web/admin_mount_test.exs
+```
