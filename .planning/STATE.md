@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
-status: executing
-stopped_at: Completed 11-ci-user-facing-integration-gate-02-PLAN.md
-last_updated: "2026-04-16T19:01:30.684Z"
+status: verifying
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-04-16T19:05:26.518Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 10
-  completed_plans: 9
-  percent: 90
+  completed_plans: 10
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 Phase: 11 (ci-user-facing-integration-gate) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-16
 
 Progress: 1/6 v1.1 phases complete
@@ -121,6 +121,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 10-host-app-dogfood-harness P07 | 7min | 3 tasks | 13 files |
 | Phase 11 P01 | 12m | 2 tasks | 4 files |
 | Phase 11-ci-user-facing-integration-gate P02 | 5m | 2 tasks | 2 files |
+| Phase 11 P03 | 5m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -318,6 +319,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 11]: Host browser specs must read ACCRUE_HOST_E2E_FIXTURE at runtime so playwright list-mode discovery works before fixture seeding.
 - [Phase 11]: The host UAT shell script now owns fixture seeding, Phoenix browser boot, and host-local Playwright execution so browser failures retain a concrete server-log path.
 - [Phase 11]: Annotation blocking now comes from a fail-closed sweep over the current workflow run using normalized release-facing job selectors and read-only GitHub API queries.
+- [Phase 11]: The canonical PR and main release gate now lives in ci.yml, with legacy host and admin asset workflows demoted to workflow_dispatch-only to avoid duplicate required checks.
+- [Phase 11]: Host browser artifacts upload only on failure, and the shell gate now accepts ACCRUE_HOST_BROWSER_LOG so GitHub Actions can reliably collect the Phoenix server log.
 
 ### Pending Todos
 
@@ -343,6 +346,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T19:01:30.680Z
-Stopped at: Completed 11-ci-user-facing-integration-gate-02-PLAN.md
+Last session: 2026-04-16T19:05:26.515Z
+Stopped at: Completed 11-03-PLAN.md
 Resume file: None

@@ -25,7 +25,7 @@
 ### 🚧 v1.1 Stabilization + Adoption
 
 - [x] **Phase 10: Host App Dogfood Harness** — canonical minimal Phoenix app that installs and uses `accrue` + `accrue_admin` through public APIs. (completed 2026-04-16)
-- [ ] **Phase 11: CI User-Facing Integration Gate** — mandatory CI workflows for host-app setup, Fake-backed E2E, browser UAT artifacts, and warning/error annotation sweeps.
+- [x] **Phase 11: CI User-Facing Integration Gate** — mandatory CI workflows for host-app setup, Fake-backed E2E, browser UAT artifacts, and warning/error annotation sweeps. (completed 2026-04-16)
 - [ ] **Phase 12: First-User DX Stabilization** — installer/docs/error polish driven by dogfood failures and first-hour user setup paths.
 - [ ] **Phase 13: Adoption Assets** — maintained example/demo path, tutorial docs, README positioning, and repository issue templates.
 - [ ] **Phase 14: Quality Hardening** — security, performance, compatibility, accessibility, responsive admin checks, and release-gate clarity.
@@ -66,11 +66,11 @@ Plans:
 3. Package-local tests and host-app user-facing flows run in a clear order so failures point at the right layer.
 4. Browser failures publish enough artifacts to debug without rerunning locally where practical.
 5. Live Stripe remains opt-in/advisory while Fake-backed user-facing flows are mandatory.
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 11-01-PLAN.md — Create the host Playwright browser contract and retained artifact surface.
 - [x] 11-02-PLAN.md — Promote the host UAT shell gate and add annotation-blocking automation.
-- [ ] 11-03-PLAN.md — Wire the ordered CI workflow and advisory live-Stripe policy into the main release gate.
+- [x] 11-03-PLAN.md — Wire the ordered CI workflow and advisory live-Stripe policy into the main release gate.
 **UI hint:** yes (browser UAT artifacts)
 
 ### Phase 12: First-User DX Stabilization
@@ -143,7 +143,7 @@ Plans:
 | 8. Install + Polish + Testing | v1.0 | 9/9 | Complete | 2026-04-15 |
 | 9. Release | v1.0 | 6/6 | Complete | 2026-04-16 |
 | 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete    | 2026-04-16 |
-| 11. CI User-Facing Integration Gate | v1.1 | 2/3 | In Progress|  |
+| 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete   | 2026-04-16 |
 | 12. First-User DX Stabilization | v1.1 | 0/TBD | Planned | - |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
 | 14. Quality Hardening | v1.1 | 0/TBD | Planned | - |
