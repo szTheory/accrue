@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-04-16T21:57:13.065Z"
+stopped_at: Completed 12-first-user-dx-stabilization-03-PLAN.md
+last_updated: "2026-04-16T22:01:20.627Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 19
-  completed_plans: 13
-  percent: 68
+  completed_plans: 14
+  percent: 74
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 12 (first-user-dx-stabilization) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -127,6 +127,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 11.1-hermetic-host-flow-proofs P01 | 15m | 3 tasks | 5 files |
 | Phase 12 P01 | 2m | 3 tasks | 4 files |
 | Phase 12-first-user-dx-stabilization P02 | 2min | 2 tasks | 3 files |
+| Phase 12-first-user-dx-stabilization P03 | 4m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -333,6 +334,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12]: Package-doc verification now has a stable repo-level shell entrypoint wrapped by ExUnit for later strict drift enforcement.
 - [Phase 12]: Plan 12-02 keeps Hex validation on the single canonical examples/accrue_host app via a scaffold script with ACCRUE_HOST_HEX_RELEASE=1 reserved for later activation.
 - [Phase 12]: Plan 12-02 reserves installer rerun taxonomy and .accrue/conflicts/ artifact contracts with skipped tests in the existing installer test modules so plan 12-03 can activate them in place.
+- [Phase 12-first-user-dx-stabilization]: Template writes now emit optional sidecars only for skipped stamped-edited or skipped-unmarked files, while --force remains allowed only for unmarked files.
+- [Phase 12-first-user-dx-stabilization]: Patch-side manual fallbacks write snippets under .accrue/conflicts/patches/<relative-path>.snippet and report the artifact as a separate summary category.
 
 ### Pending Todos
 
@@ -358,6 +361,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T21:57:13.059Z
-Stopped at: Completed 12-02-PLAN.md
+Last session: 2026-04-16T22:01:11.655Z
+Stopped at: Completed 12-first-user-dx-stabilization-03-PLAN.md
 Resume file: None
