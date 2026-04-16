@@ -66,12 +66,12 @@ Why: with "Immediately" selected the customer is refunded prorated
 charges and loses access on the spot. With `at_period_end` the
 customer keeps access through the period they already paid for, the
 subscription transitions to `cancel_at_period_end: true`, and
-`Accrue.Billing.subscription_canceling?/1` returns true so the host
+`Accrue.Billing.Subscription.canceling?/1` returns true so the host
 app can trigger any "we're sorry to see you go" mailers, retention
 campaigns, or win-back flows during the grace period.
 
 This is also the only setting that makes
-`Accrue.Billing.uncancel/2` (BILL-08) useful — you can't un-cancel a
+reversing a scheduled cancellation useful — you can't undo a
 subscription that has already been hard-deleted.
 
 ## Verifying the checklist

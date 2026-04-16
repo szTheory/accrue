@@ -94,8 +94,8 @@ Phase 1 exposed six flat branding keys directly on `:accrue`:
 - `:accent_color`
 
 These are DEPRECATED and will be removed before v1.0. Migrate to the
-nested `:branding` keyword list. Accrue emits a boot-time warning
-(`Accrue.Application.warn_deprecated_branding/0`) listing every
+nested `:branding` keyword list. Accrue emits a boot-time branding warning
+listing every
 affected flat key.
 
 ### Migration example

@@ -374,8 +374,8 @@ Two mitigations:
 
 1. Accrue emits a `Logger.warning/1` at application boot if any
    `:connect`-tagged endpoint secret is byte-identical to any
-   non-Connect endpoint secret. See
-   `Accrue.Application.warn_on_secret_collision/0`.
+   non-Connect endpoint secret. The application boot check warns when
+   that collision is detected.
 2. Name your env vars distinctly:
    `STRIPE_WEBHOOK_SECRET` for `:primary`, and
    `STRIPE_CONNECT_WEBHOOK_SECRET` for `:connect`. Treat them as

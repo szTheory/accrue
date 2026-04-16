@@ -122,13 +122,10 @@ defmodule Accrue.MixProject do
 
   defp docs do
     [
-      main: "Accrue",
+      main: "readme",
       source_ref: "v#{@version}",
-      extras: [
-        "guides/telemetry.md",
-        "guides/testing.md",
-        "guides/auth_adapters.md"
-      ],
+      extras: ["README.md" | Path.wildcard("guides/*.md")],
+      groups_for_extras: [Guides: Path.wildcard("guides/*.md")],
       skip_undefined_reference_warnings_on: &skip_undefined_reference_warning?/1
     ]
   end
@@ -138,6 +135,6 @@ defmodule Accrue.MixProject do
   # warnings active while allowing the docs build to fail only on new
   # actionable guide or external references.
   defp skip_undefined_reference_warning?(reference) do
-    String.starts_with?(reference, "lib/")
+    is_binary(reference) and String.starts_with?(reference, "lib/")
   end
 end

@@ -63,7 +63,7 @@ Full 13-type catalogue (Phase 6 MAIL-03 through MAIL-13):
 | `:subscription_paused` | `customer.subscription.updated` (paused) | no | `customer_id`, `subscription_id` |
 | `:subscription_resumed` | `customer.subscription.updated` (resumed) | no | `customer_id`, `subscription_id` |
 | `:refund_issued` | `charge.refunded` | no | `customer_id`, `refund_id`, `charge_id` |
-| `:coupon_applied` | `Accrue.Billing.apply_coupon/3` (action) | no | `customer_id`, `coupon_id` |
+| `:coupon_applied` | coupon or promotion-code apply action | no | `customer_id`, `coupon_id` |
 | `:card_expiring_soon` | cron (`Accrue.Jobs.DetectExpiringCards`) | no | `customer_id`, `payment_method_id` |
 
 **Scalar-only assigns** (D-27): pass IDs, not `%Ecto.Schema{}` structs.
