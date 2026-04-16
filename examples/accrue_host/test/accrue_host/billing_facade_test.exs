@@ -32,6 +32,7 @@ defmodule AccrueHost.BillingFacadeTest do
     assert {:cancel, 1} in exports
     assert {:cancel, 2} in exports
     assert {:customer_for, 1} in exports
+    assert {:billing_state_for, 1} in exports
   end
 
   test "customer_for/1 round-trips through Accrue.Billing.customer/1", %{user: user} do
@@ -62,6 +63,31 @@ defmodule AccrueHost.BillingFacadeTest do
     assert customer.owner_id == user.id
   end
 
+  test "billing_state_for/1 returns nil state before the first subscription", %{user: user} do
+    assert {:ok, %{customer: nil, subscription: nil}} = Billing.billing_state_for(user)
+  end
+
+  test "billing_state_for/1 returns the fake-backed customer and latest subscription", %{
+    user: user
+  } do
+    assert {:ok, %Subscription{} = first_subscription} =
+             Billing.subscribe(user, "price_basic", trial_end: {:days, 14})
+
+    assert {:ok, %Subscription{} = latest_subscription} =
+             Billing.subscribe(user, "price_basic", trial_end: {:days, 14})
+
+    assert {:ok, %{customer: %Customer{} = customer, subscription: %Subscription{} = subscription}} =
+             Billing.billing_state_for(user)
+
+    assert customer.owner_type == "User"
+    assert customer.owner_id == user.id
+    assert customer.processor == "fake"
+    assert subscription.id == latest_subscription.id
+    refute subscription.id == first_subscription.id
+    assert subscription.customer_id == customer.id
+    assert subscription.processor == "fake"
+  end
+
   test "generated facade source stays thin and explicit" do
     billing_source = File.read!(Path.join(@host_root, "lib/accrue_host/billing.ex"))
 
@@ -74,6 +100,8 @@ defmodule AccrueHost.BillingFacadeTest do
     assert billing_source =~ "Billing.cancel(subscription, opts)"
     assert billing_source =~ "def customer_for(billable) do"
     assert billing_source =~ "Billing.customer(billable)"
+    assert billing_source =~ "def billing_state_for(billable) do"
+    assert billing_source =~ "{:ok, %{customer: customer, subscription: subscription}}"
   end
 
   test "subscribe/3 proof path creates customer state without direct fixture inserts", %{

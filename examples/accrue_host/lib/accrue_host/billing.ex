@@ -7,7 +7,12 @@ defmodule AccrueHost.Billing do
   Keep host policy hooks here and leave processor normalization to Accrue.
   """
 
+  import Ecto.Query, only: [from: 2]
+
   alias Accrue.Billing
+  alias Accrue.Billing.Customer
+  alias Accrue.Billing.Subscription
+  alias AccrueHost.Repo
 
   # Host policy hook: authorize who may subscribe this billable.
   def subscribe(billable, price_id, opts \\ []) do
@@ -27,5 +32,36 @@ defmodule AccrueHost.Billing do
   # Host policy hook: preload or scope billable ownership if needed.
   def customer_for(billable) do
     Billing.customer(billable)
+  end
+
+  # Host policy hook: expose current billing state without teaching UI code
+  # about direct Accrue schema/Repo access.
+  def billing_state_for(billable) do
+    customer = find_customer(billable)
+    subscription = current_subscription(customer)
+
+    {:ok, %{customer: customer, subscription: subscription}}
+  end
+
+  defp find_customer(%{__struct__: mod, id: id}) do
+    billable_type = mod.__accrue__(:billable_type)
+    owner_id = to_string(id)
+
+    from(customer in Customer,
+      where: customer.owner_type == ^billable_type and customer.owner_id == ^owner_id,
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  defp current_subscription(nil), do: nil
+
+  defp current_subscription(%Customer{id: customer_id}) do
+    from(subscription in Subscription,
+      where: subscription.customer_id == ^customer_id,
+      order_by: [desc: subscription.inserted_at],
+      limit: 1
+    )
+    |> Repo.one()
   end
 end
