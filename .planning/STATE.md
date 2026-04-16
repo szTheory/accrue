@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 12-first-user-dx-stabilization-05-PLAN.md
-last_updated: "2026-04-16T22:10:56.125Z"
+stopped_at: Completed 12-first-user-dx-stabilization-08-PLAN.md
+last_updated: "2026-04-16T22:15:57.905Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 19
-  completed_plans: 16
-  percent: 84
+  completed_plans: 17
+  percent: 89
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 12 (first-user-dx-stabilization) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -130,6 +130,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 12-first-user-dx-stabilization P03 | 4m | 2 tasks | 6 files |
 | Phase 12-first-user-dx-stabilization P04 | 2min | 2 tasks | 3 files |
 | Phase 12-first-user-dx-stabilization P05 | 5m | 2 tasks | 13 files |
+| Phase 12-first-user-dx-stabilization P08 | 5m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -342,6 +343,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12-first-user-dx-stabilization]: Phase 12 P04: Generated host facades may hide internal Accrue table lookups as long as the public integration story stays on host-owned Billing helpers.
 - [Phase 12-first-user-dx-stabilization]: Accrue.ConfigError now wraps Accrue.SetupDiagnostic for stable code-driven setup failures.
 - [Phase 12-first-user-dx-stabilization]: mix accrue.install --check reuses installer discovery and reports the same diagnostics used by boot/runtime paths.
+- [Phase 12-first-user-dx-stabilization]: The canonical host app remains path-first and switches to Hex deps only when ACCRUE_HOST_HEX_RELEASE=1.
+- [Phase 12-first-user-dx-stabilization]: Hex dependency versions are parsed from sibling package @version declarations to avoid stale hardcoded strings.
+- [Phase 12-first-user-dx-stabilization]: The host router keeps macro syntax compatible with the published installer so Hex smoke validates the released package surface.
 
 ### Pending Todos
 
@@ -367,6 +371,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:10:56.122Z
-Stopped at: Completed 12-first-user-dx-stabilization-05-PLAN.md
+Last session: 2026-04-16T22:15:57.901Z
+Stopped at: Completed 12-first-user-dx-stabilization-08-PLAN.md
 Resume file: None
