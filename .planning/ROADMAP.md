@@ -44,13 +44,13 @@
 3. A Fake-backed user-facing flow creates or updates realistic billing state through checkout/subscription APIs.
 4. The host app mounts a scoped webhook endpoint and processes signed Fake/Stripe-shaped webhook payloads through the normal ingest path.
 5. `accrue_admin` is mounted behind a realistic auth/session boundary and can inspect state plus perform one audited admin action.
-**Plans:** 4/7 plans executed
+**Plans:** 5/7 plans executed
 Plans:
 - [x] 10-01-PLAN.md — Scaffold the Phoenix host app core and host-owned config foundation.
 - [x] 10-02-PLAN.md — Generate the host-owned auth/session scaffold for later signed-in flows.
 - [x] 10-03-PLAN.md — Add host test support and all Wave 0 proof files.
 - [x] 10-04-PLAN.md — Run the public installer, keep generated wiring intact, and prove the host billable facade boundary.
-- [ ] 10-05-PLAN.md — Build the signed-in Fake-backed subscription flow through `AccrueHost.Billing`.
+- [x] 10-05-PLAN.md — Build the signed-in Fake-backed subscription flow through `AccrueHost.Billing`.
 - [ ] 10-06-PLAN.md — Prove signed webhook ingest and idempotent normal-path dispatch at `/webhooks/stripe`.
 - [ ] 10-07-PLAN.md — Protect `/billing`, prove audited replay, and document clean-checkout commands.
 **UI hint:** yes (host app and admin browser flows)
@@ -138,7 +138,7 @@ Plans:
 | 7. Admin UI (accrue_admin) | v1.0 | 12/12 | Complete | 2026-04-15 |
 | 8. Install + Polish + Testing | v1.0 | 9/9 | Complete | 2026-04-15 |
 | 9. Release | v1.0 | 6/6 | Complete | 2026-04-16 |
-| 10. Host App Dogfood Harness | v1.1 | 4/7 | In Progress|  |
+| 10. Host App Dogfood Harness | v1.1 | 5/7 | In Progress|  |
 | 11. CI User-Facing Integration Gate | v1.1 | 0/TBD | Planned | - |
 | 12. First-User DX Stabilization | v1.1 | 0/TBD | Planned | - |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |

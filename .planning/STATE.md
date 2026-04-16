@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 10-host-app-dogfood-harness-04-PLAN.md
-last_updated: "2026-04-16T16:45:04.464Z"
+stopped_at: Completed 10-host-app-dogfood-harness-05-PLAN.md
+last_updated: "2026-04-16T16:50:26.937Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 7
-  completed_plans: 4
-  percent: 57
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 10 (host-app-dogfood-harness) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -115,6 +115,7 @@ Progress: 0/6 v1.1 phases complete
 | Phase 10 P02 | 2min | 1 tasks | 27 files |
 | Phase 10-host-app-dogfood-harness P03 | 5min | 2 tasks | 11 files |
 | Phase 10-host-app-dogfood-harness P04 | 6min | 2 tasks | 28 files |
+| Phase 10-host-app-dogfood-harness P05 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -301,6 +302,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 10-host-app-dogfood-harness]: Make the host app's DataCase, ConnCase, and AccrueCase all import the public Accrue.Test facade so later billing, webhook, and admin proofs stay host-owned while exercising public test helpers.
 - [Phase 10-host-app-dogfood-harness]: Host-app install proofs now assert committed generated files and singular router mounts rather than relying on temporary installer fixtures.
 - [Phase 10-host-app-dogfood-harness]: Installer router patch detection now treats both bare and parenthesized macro calls as already-installed state, keeping mix accrue.install idempotent on formatted Phoenix routers.
+- [Phase 10-host-app-dogfood-harness]: Keep the signed-in billing page as a small host-owned LiveView that reads persisted state directly but routes all mutations through AccrueHost.Billing.
+- [Phase 10-host-app-dogfood-harness]: Use deterministic price_basic and price_pro ids from a dedicated host plan module so the Fake-backed proof stays stable and grepable.
+- [Phase 10-host-app-dogfood-harness]: Disable accrue_admin live-reload routes at the host mount to keep the example app warning-clean under mix compile --warnings-as-errors.
 
 ### Pending Todos
 
@@ -326,6 +330,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T16:45:04.461Z
-Stopped at: Completed 10-host-app-dogfood-harness-04-PLAN.md
+Last session: 2026-04-16T16:50:26.934Z
+Stopped at: Completed 10-host-app-dogfood-harness-05-PLAN.md
 Resume file: None
