@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: milestone_archived
-stopped_at: Archived v1.0 milestone; next step is `$gsd-new-milestone`
-last_updated: "2026-04-16T14:50:00.000Z"
+milestone: v1.1
+milestone_name: Stabilization + Adoption
+status: defining_requirements
+stopped_at: Started v1.1 milestone scope; defining requirements and roadmap
+last_updated: "2026-04-16T15:05:00.000Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 9
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Planning the next milestone. Run `$gsd-new-milestone` to define fresh requirements and roadmap.
+**Current focus:** Milestone v1.1 — Stabilization + Adoption.
 
 ## Current Position
 
-Phase: 9
-Plan: Complete
-Status: Archived and ready for next milestone
-Last activity: 2026-04-16
+Phase: Not started
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-16 — Milestone v1.1 started
 
-Progress: [██████████] 69/69 planned plans complete (100% overall; v1.0 archived)
+Progress: v1.1 requirements and roadmap in progress
 
 ## Performance Metrics
 

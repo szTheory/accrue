@@ -19,9 +19,17 @@ Accrue v1.0 Initial Release is shipped as public Hex packages:
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface. Phase history and requirements are archived in `.planning/milestones/`.
 
-## Next Milestone Goals
+## Current Milestone: v1.1 Stabilization + Adoption
 
-Not defined yet. Start the next cycle with `$gsd-new-milestone`, which will create fresh requirements and a new roadmap section.
+**Goal:** Make Accrue trustworthy from a real user’s point of view by proving the libraries work inside a realistic minimal Phoenix app, then use that app to drive CI, docs, adoption, and polish.
+
+**Target features:**
+- Realistic minimal Phoenix host app that installs and uses `accrue` and `accrue_admin` like an actual user would.
+- CI integration and browser/user-facing flows that fail on installer, routing, billing, admin UI, docs, and packaging regressions.
+- First-user DX stabilization: setup clarity, actionable errors, troubleshooting, idempotent installer behavior, and realistic examples.
+- Adoption assets: example app, tutorial path, public onboarding docs, and repository templates that help new users evaluate and report issues.
+- Quality hardening: security/audit pass, performance checks for webhook/admin paths, compatibility confidence, and release warning discipline.
+- Expansion discovery for tax, revenue exports, additional processors, and org/multi-tenant flows, captured as future-ready decisions rather than rushed scope.
 
 ## Requirements
 
@@ -31,7 +39,15 @@ v1.0 Initial Release shipped and validated on 2026-04-16. Detailed requirement o
 
 ### Active
 
-No active requirements are defined for the next milestone yet. The checked list below is retained as the validated v1.0 scope summary until the next milestone rewrites this section.
+v1.1 focuses on stabilization and adoption:
+
+- [ ] Minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths.
+- [ ] CI runs the host-app integration and browser flows as a release gate.
+- [ ] Installer, docs, and diagnostics are hardened from the host-app experience.
+- [ ] Adoption assets make the project easier to evaluate and try.
+- [ ] Quality hardening and expansion discovery identify the next product bets without blocking stabilization.
+
+### Validated v1.0 Scope Summary
 
 **Core billing domain**
 - [x] Polymorphic `Accrue.Billing.Customer` — any host schema (User, Org, Team) can be billable via `use Accrue.Billable`
@@ -215,4 +231,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after v1.0 milestone*
+*Last updated: 2026-04-16 after starting v1.1 milestone*
