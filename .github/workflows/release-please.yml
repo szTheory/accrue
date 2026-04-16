@@ -56,6 +56,8 @@ jobs:
         with:
           otp-version: '27.0'
           elixir-version: '1.18.0'
+      - name: Install Hex
+        run: mix local.hex --force
       - name: Install accrue deps
         run: cd accrue && mix deps.get
       - name: Verify accrue release version
@@ -85,6 +87,8 @@ jobs:
         with:
           otp-version: '27.0'
           elixir-version: '1.18.0'
+      - name: Install Hex
+        run: mix local.hex --force
       - name: Install accrue_admin deps
         run: cd accrue_admin && mix deps.get
       - name: Verify accrue_admin release version

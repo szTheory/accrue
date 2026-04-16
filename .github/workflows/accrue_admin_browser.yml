@@ -50,6 +50,9 @@ jobs:
           otp-version: "27.0"
           elixir-version: "1.18.0"
 
+      - name: Install Hex
+        run: mix local.hex --force
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:

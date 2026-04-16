@@ -90,6 +90,9 @@ jobs:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
 
+      - name: Install Hex
+        run: mix local.hex --force
+
       - name: Restore accrue deps cache
         uses: actions/cache@v4
         with:
@@ -97,12 +100,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-deps-${{ hashFiles('accrue/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-deps-
-
-      - name: Restore accrue _build cache
-        uses: actions/cache@v4
-        with:
-          path: accrue/_build
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-build-${{ hashFiles('accrue/mix.lock') }}
 
       - name: Install accrue deps
         run: cd accrue && mix deps.get
@@ -154,12 +151,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-deps-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-deps-
-
-      - name: Restore accrue_admin _build cache
-        uses: actions/cache@v4
-        with:
-          path: accrue_admin/_build
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-build-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
 
       - name: Install accrue_admin deps
         run: cd accrue_admin && mix deps.get
@@ -254,6 +245,9 @@ jobs:
         with:
           otp-version: '27.0'
           elixir-version: '1.18.0'
+
+      - name: Install Hex
+        run: mix local.hex --force
 
       - name: Install deps
         run: cd accrue && mix deps.get

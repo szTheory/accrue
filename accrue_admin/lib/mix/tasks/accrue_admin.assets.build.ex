@@ -34,6 +34,7 @@ defmodule Mix.Tasks.AccrueAdmin.Assets.Build do
       {_, status} =
         System.cmd(command, args,
           cd: Keyword.fetch!(opts, :cd),
+          env: [{"BROWSERSLIST_IGNORE_OLD_DATA", "1"}],
           stderr_to_stdout: true,
           into: IO.stream(:stdio, :line)
         )
