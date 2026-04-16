@@ -79,12 +79,20 @@ defmodule AccrueHost.BillingFacadeTest do
   test "subscribe/3 proof path creates customer state without direct fixture inserts", %{
     user: user
   } do
-    assert Repo.aggregate(from(c in Customer), :count) == 0
+    customer_count =
+      fn ->
+        Repo.aggregate(
+          from(c in Customer, where: c.owner_type == "User" and c.owner_id == ^user.id),
+          :count
+        )
+      end
+
+    assert customer_count.() == 0
 
     assert {:ok, %Subscription{} = subscription} =
              Billing.subscribe(user, "price_basic", trial_end: {:days, 14})
 
-    assert Repo.aggregate(from(c in Customer), :count) == 1
+    assert customer_count.() == 1
     assert Repo.get!(Subscription, subscription.id).customer_id == subscription.customer_id
   end
 end
