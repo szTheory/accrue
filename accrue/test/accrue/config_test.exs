@@ -139,6 +139,28 @@ defmodule Accrue.ConfigTest do
 
       assert error.diagnostic.code == "ACCRUE-DX-MIGRATIONS-PENDING"
     end
+
+    test "migration lookup failures raise shared diagnostic instead of returning :ok" do
+      error =
+        assert_raise Accrue.ConfigError, fn ->
+          Config.ensure_migrations_current!(fn ->
+            raise DBConnection.ConnectionError,
+              message: "migration lookup failed for STRIPE_SECRET_KEY=sk_test_hidden"
+          end)
+        end
+
+      assert error.diagnostic.code == "ACCRUE-DX-MIGRATIONS-PENDING"
+      assert Exception.message(error) =~ "ACCRUE-DX-MIGRATIONS-PENDING"
+      refute Exception.message(error) =~ "sk_test_hidden"
+    end
+
+    test "unexpected migration lookup exceptions are not suppressed" do
+      assert_raise RuntimeError, "unexpected migration lookup failure", fn ->
+        Config.ensure_migrations_current!(fn ->
+          raise "unexpected migration lookup failure"
+        end)
+      end
+    end
   end
 
   describe "schema/0" do
