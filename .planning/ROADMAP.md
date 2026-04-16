@@ -173,7 +173,7 @@ Plans:
 | 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete    | 2026-04-16 |
 | 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete    | 2026-04-16 |
 | 11.1. Hermetic Host Flow Proofs | v1.1 | 1/1 | Complete    | 2026-04-16 |
-| 12. First-User DX Stabilization | v1.1 | 11/11 | Complete   | 2026-04-16 |
+| 12. First-User DX Stabilization | v1.1 | 11/11 | Complete    | 2026-04-16 |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
 | 14. Quality Hardening | v1.1 | 0/TBD | Planned | - |
 | 15. Expansion Discovery | v1.1 | 0/TBD | Planned | - |
