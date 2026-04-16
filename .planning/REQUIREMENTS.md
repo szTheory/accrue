@@ -31,10 +31,10 @@ Requirements for the v1.1 stabilization milestone. The milestone proves Accrue f
 
 - [ ] **DX-01**: Installer output and generated files are validated against the host app and remain idempotent on rerun.
 - [ ] **DX-02**: Setup failures for missing config, migrations, Oban, webhook secrets, auth, and admin mounts produce actionable errors.
-- [ ] **DX-03**: Quickstart docs are updated from the host-app path and avoid hand-wavy or skipped setup steps.
-- [ ] **DX-04**: Troubleshooting docs cover the most likely first-hour failures discovered by dogfooding.
-- [ ] **DX-05**: Public APIs used by the host app are documented and avoid requiring private module knowledge.
-- [ ] **DX-06**: Package version snippets, source links, and HexDocs guide links remain correct for both packages.
+- [x] **DX-03**: Quickstart docs are updated from the host-app path and avoid hand-wavy or skipped setup steps.
+- [x] **DX-04**: Troubleshooting docs cover the most likely first-hour failures discovered by dogfooding.
+- [x] **DX-05**: Public APIs used by the host app are documented and avoid requiring private module knowledge.
+- [x] **DX-06**: Package version snippets, source links, and HexDocs guide links remain correct for both packages.
 - [ ] **DX-07**: Host-app setup supports both path-dependency development and Hex-style dependency validation.
 
 ### Adoption Assets
@@ -105,10 +105,10 @@ Deferred until after v1.1 unless pulled into a later milestone:
 | CI-06 | Phase 11 | Complete |
 | DX-01 | Phase 12 | Pending |
 | DX-02 | Phase 12 | Pending |
-| DX-03 | Phase 12 | Pending |
-| DX-04 | Phase 12 | Pending |
-| DX-05 | Phase 12 | Pending |
-| DX-06 | Phase 12 | Pending |
+| DX-03 | Phase 12 | Complete |
+| DX-04 | Phase 12 | Complete |
+| DX-05 | Phase 12 | Complete |
+| DX-06 | Phase 12 | Complete |
 | DX-07 | Phase 12 | Pending |
 | ADOPT-01 | Phase 13 | Pending |
 | ADOPT-02 | Phase 13 | Pending |
