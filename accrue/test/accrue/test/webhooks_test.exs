@@ -54,4 +54,13 @@ defmodule Accrue.Test.WebhooksTest do
     assert row.data["normal_path"] == true or row.data[:normal_path] == true
     refute row.data["not bypass"] == false
   end
+
+  test "inspect redacts raw webhook bodies" do
+    event = %WebhookEvent{raw_body: ~s({"secret":true})}
+
+    output = inspect(event)
+
+    refute output =~ "raw_body"
+    refute output =~ "secret"
+  end
 end

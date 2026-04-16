@@ -45,7 +45,7 @@ test.describe("Phase 7 browser UAT", () => {
       await expect
         .poll(() => page.evaluate(() => window.localStorage.getItem("accrue_theme")))
         .toBe("dark");
-      await expect(page.locator("[data-theme-target='dark']")).toHaveClass(/ax-theme-button-active/);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     }
 
     await page.reload();

@@ -49,7 +49,7 @@ jobs:
             opentelemetry: 'off'
             continue-on-error: false
           # Forward-compat smoke test (OTP 28).
-          - elixir: '1.18.0'
+          - elixir: '1.18.4'
             otp: '28.0'
             sigra: 'off'
             opentelemetry: 'off'

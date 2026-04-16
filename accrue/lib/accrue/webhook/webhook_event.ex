@@ -99,19 +99,3 @@ defmodule Accrue.Webhook.WebhookEvent do
 
   defp maybe_set_processed_at(changeset, _status), do: changeset
 end
-
-# Implement Inspect protocol to exclude raw_body from output (T-2-04a)
-defimpl Inspect, for: Accrue.Webhook.WebhookEvent do
-  import Inspect.Algebra
-
-  def inspect(%Accrue.Webhook.WebhookEvent{} = event, opts) do
-    # Replace raw_body with a redacted marker
-    sanitized = %{event | raw_body: "<<redacted>>"}
-
-    concat([
-      "#Accrue.Webhook.WebhookEvent<",
-      to_doc(Map.from_struct(sanitized), opts),
-      ">"
-    ])
-  end
-end
