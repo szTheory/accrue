@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 09-01-ci-release-gate-PLAN.md
-last_updated: "2026-04-16T00:05:11.637Z"
+stopped_at: Completed 09-02-release-please-hex-automation-PLAN.md
+last_updated: "2026-04-16T00:09:51.297Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 9
   completed_phases: 8
   total_plans: 69
-  completed_plans: 64
-  percent: 93
+  completed_plans: 65
+  percent: 94
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 09 (release) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -105,6 +105,7 @@ Progress: [██████████] 63/63 planned plans complete (100% ov
 | Phase 08-install-polish-testing P08 | 3min | 2 tasks | 3 files |
 | Phase 08-install-polish-testing P09 | 3min | 2 tasks | 3 files |
 | Phase 09-release P01 | 10m | 2 tasks | 1 files |
+| Phase 09-release P02 | 5m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -269,6 +270,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 08-install-polish-testing]: Accrue.Auth.Mock stores current users in process-local state and refuses :prod with Accrue.ConfigError.
 - [Phase 09-release]: Keep one shared GitHub Actions release gate and run both packages explicitly in that workflow.
 - [Phase 09-release]: Model conditional compilation as concrete Sigra and OpenTelemetry matrix cells in CI.
+- [Phase 09-release]: Keep automated Hex publishing inside the release-please workflow so publish jobs trust only same-workflow outputs.
+- [Phase 09-release]: Use publish-hex.yml only as a manual recovery/bootstrap path with explicit package, ref, and version inputs.
+- [Phase 09-release]: Bootstrap the first public release with Release-As: 1.0.0 instructions and review gates instead of a permanent config override.
 
 ### Pending Todos
 
@@ -289,6 +293,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T00:05:11.634Z
-Stopped at: Completed 09-01-ci-release-gate-PLAN.md
+Last session: 2026-04-16T00:09:51.293Z
+Stopped at: Completed 09-02-release-please-hex-automation-PLAN.md
 Resume file: None

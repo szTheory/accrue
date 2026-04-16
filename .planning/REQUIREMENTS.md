@@ -230,10 +230,10 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **OSS-04**: Dialyzer PLT caching with OS × OTP × Elixir × mix.lock key
 - [x] **OSS-05**: CI matrix includes `with_sigra` and `without_sigra` to exercise conditional compilation
 - [x] **OSS-06**: CI matrix includes `with_opentelemetry` and `without_opentelemetry`
-- [ ] **OSS-07**: Release Please + Conventional Commits for automated version bumps + CHANGELOG
-- [ ] **OSS-08**: Per-package Release Please configs (accrue + accrue_admin independent)
-- [ ] **OSS-09**: Hex publishing workflow with API token secret
-- [ ] **OSS-10**: Same-day v1.0 release of accrue + accrue_admin (release runbook documented)
+- [x] **OSS-07**: Release Please + Conventional Commits for automated version bumps + CHANGELOG
+- [x] **OSS-08**: Per-package Release Please configs (accrue + accrue_admin independent)
+- [x] **OSS-09**: Hex publishing workflow with API token secret
+- [x] **OSS-10**: Same-day v1.0 release of accrue + accrue_admin (release runbook documented)
 - [ ] **OSS-11**: MIT `LICENSE` file at monorepo root, per-package copies as needed
 - [ ] **OSS-12**: `CONTRIBUTING.md` — PRs welcome, conventional commits, no CLA
 - [ ] **OSS-13**: `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1
@@ -473,10 +473,10 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | OSS-04 | Phase 9 | Complete |
 | OSS-05 | Phase 9 | Complete |
 | OSS-06 | Phase 9 | Complete |
-| OSS-07 | Phase 9 | Pending |
-| OSS-08 | Phase 9 | Pending |
-| OSS-09 | Phase 9 | Pending |
-| OSS-10 | Phase 9 | Pending |
+| OSS-07 | Phase 9 | Complete |
+| OSS-08 | Phase 9 | Complete |
+| OSS-09 | Phase 9 | Complete |
+| OSS-10 | Phase 9 | Complete |
 | OSS-11 | Phase 1 | Pending |
 | OSS-12 | Phase 9 | Pending |
 | OSS-13 | Phase 9 | Pending |
