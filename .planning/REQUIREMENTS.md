@@ -25,7 +25,7 @@ Requirements for the v1.1 stabilization milestone. The milestone proves Accrue f
 - [ ] **CI-03**: CI exercises both package-local tests and host-app user-facing flows in a clear release-gate order.
 - [x] **CI-04**: CI publishes useful artifacts for failed host-app browser runs, including screenshots or traces where practical.
 - [ ] **CI-05**: CI keeps live Stripe checks opt-in/advisory while making Fake-backed user-facing flows mandatory.
-- [ ] **CI-06**: CI annotation sweeps remain warning/error blockers for release-facing jobs.
+- [x] **CI-06**: CI annotation sweeps remain warning/error blockers for release-facing jobs.
 
 ### First-User DX
 
@@ -102,7 +102,7 @@ Deferred until after v1.1 unless pulled into a later milestone:
 | CI-03 | Phase 11 | Pending |
 | CI-04 | Phase 11 | Complete |
 | CI-05 | Phase 11 | Pending |
-| CI-06 | Phase 11 | Pending |
+| CI-06 | Phase 11 | Complete |
 | DX-01 | Phase 12 | Pending |
 | DX-02 | Phase 12 | Pending |
 | DX-03 | Phase 12 | Pending |
