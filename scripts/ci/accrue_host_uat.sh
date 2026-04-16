@@ -136,22 +136,21 @@ if [ "${ACCRUE_HOST_SKIP_BROWSER:-}" = "1" ]; then
   echo ""
   echo "--- browser smoke skipped (ACCRUE_HOST_SKIP_BROWSER=1) ---"
 else
-  if ! NODE_PATH="$repo_root/accrue_admin/node_modules" node -e "require('@playwright/test')" >/dev/null 2>&1; then
-    echo "Playwright is not installed. Run: cd accrue_admin && npm ci && npx playwright install chromium"
-    exit 1
-  fi
-
   echo ""
-  echo "--- headless browser billing/admin smoke ---"
+  echo "--- playwright browser billing/admin smoke ---"
   fixture_file="$(mktemp)"
   browser_log_file="$(mktemp)"
+  browser_failed=0
 
   cleanup_browser() {
     if [ -n "${browser_server_pid:-}" ] && kill -0 "$browser_server_pid" >/dev/null 2>&1; then
       kill "$browser_server_pid" >/dev/null 2>&1 || true
       wait "$browser_server_pid" >/dev/null 2>&1 || true
     fi
-    rm -f "$fixture_file" "$browser_log_file"
+    rm -f "$fixture_file"
+    if [ "$browser_failed" != "1" ]; then
+      rm -f "$browser_log_file"
+    fi
   }
   trap cleanup_browser EXIT
 
@@ -160,12 +159,20 @@ else
   MIX_ENV=test mix ecto.migrate --quiet
   ACCRUE_HOST_E2E_FIXTURE="$fixture_file" MIX_ENV=test mix run "$repo_root/scripts/ci/accrue_host_seed_e2e.exs"
 
+  (
+    cd "$host_dir"
+    npm ci
+    npm run e2e:install
+  )
+
   PORT="$browser_port" PHX_SERVER=true MIX_ENV=test mix phx.server >"$browser_log_file" 2>&1 &
   browser_server_pid=$!
 
   for _ in $(seq 1 30); do
     if ! kill -0 "$browser_server_pid" >/dev/null 2>&1; then
       echo "Phoenix browser-smoke server exited early"
+      browser_failed=1
+      echo "Phoenix browser-smoke server log: $browser_log_file"
       cat "$browser_log_file"
       exit 1
     fi
@@ -177,14 +184,29 @@ else
     sleep 1
   done
 
-  ACCRUE_HOST_BASE_URL="http://127.0.0.1:${browser_port}" \
-    ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
-    NODE_PATH="$repo_root/accrue_admin/node_modules" \
-    node "$repo_root/scripts/ci/accrue_host_browser_smoke.cjs" || {
-      echo "Phoenix browser-smoke server log:"
+  if ! curl --fail --silent --show-error "http://127.0.0.1:${browser_port}/" >/dev/null; then
+    echo "Phoenix browser-smoke server did not become ready"
+    browser_failed=1
+    echo "Phoenix browser-smoke server log: $browser_log_file"
+    cat "$browser_log_file"
+    exit 1
+  fi
+
+  (
+    cd "$host_dir"
+    CI= \
+      ACCRUE_HOST_BROWSER_PORT="$browser_port" \
+      ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
+      npm run e2e
+  ) || {
+      browser_failed=1
+      echo "Phoenix browser-smoke server log: $browser_log_file"
       cat "$browser_log_file"
       exit 1
     }
+
+  cleanup_browser
+  trap - EXIT
 fi
 
 echo ""
