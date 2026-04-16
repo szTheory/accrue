@@ -140,7 +140,7 @@ jobs:
       - name: Install accrue deps
         run: cd accrue && mix deps.get
       - name: Verify accrue release version
-        run: rg -n "@version \"${{ needs.release.outputs.accrue_version }}\"" accrue/mix.exs
+        run: grep -n "@version \"${{ needs.release.outputs.accrue_version }}\"" accrue/mix.exs
       - name: Dry run accrue Hex publish
         run: cd accrue && mix hex.publish --dry-run
         env:
@@ -171,7 +171,7 @@ jobs:
       - name: Install accrue_admin deps
         run: cd accrue_admin && mix deps.get
       - name: Verify accrue_admin release version
-        run: rg -n "@version \"${{ needs.release.outputs.accrue_admin_version }}\"" accrue_admin/mix.exs
+        run: grep -n "@version \"${{ needs.release.outputs.accrue_admin_version }}\"" accrue_admin/mix.exs
       - name: Dry run accrue_admin Hex publish
         run: cd accrue_admin && mix hex.publish --dry-run
         env:

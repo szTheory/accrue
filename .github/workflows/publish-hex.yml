@@ -36,7 +36,7 @@ jobs:
       - name: Install Hex
         run: mix local.hex --force
       - name: Verify accrue release version
-        run: rg -n "@version \"${{ inputs.release_version }}\"" accrue/mix.exs
+        run: grep -n "@version \"${{ inputs.release_version }}\"" accrue/mix.exs
       - name: Install accrue deps
         run: cd accrue && mix deps.get
       - name: Dry run accrue Hex publish
@@ -66,7 +66,7 @@ jobs:
       - name: Install Hex
         run: mix local.hex --force
       - name: Verify accrue_admin release version
-        run: rg -n "@version \"${{ inputs.release_version }}\"" accrue_admin/mix.exs
+        run: grep -n "@version \"${{ inputs.release_version }}\"" accrue_admin/mix.exs
       - name: Install accrue_admin deps
         run: cd accrue_admin && mix deps.get
       - name: Dry run accrue_admin Hex publish
