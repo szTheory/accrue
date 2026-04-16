@@ -42,7 +42,7 @@ jobs:
       ACCRUE_ADMIN_E2E_PORT: 4017
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
@@ -54,7 +54,7 @@ jobs:
         run: mix local.hex --force
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
@@ -77,7 +77,7 @@ jobs:
 
       - name: Upload Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: accrue-admin-playwright-report
           path: accrue_admin/playwright-report
@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload Playwright traces
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: accrue-admin-playwright-traces
           path: accrue_admin/test-results

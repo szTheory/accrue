@@ -33,7 +33,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           echo "Bootstrap reminder: carry Release-As: 1.0.0 for accrue and accrue_admin before the first public publish." >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run Release Please
         id: release
         uses: googleapis/release-please-action@v4
@@ -48,7 +48,7 @@ jobs:
     if: ${{ needs.release.outputs.accrue_release_created == 'true' }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.release.outputs.accrue_sha }}
       - name: Set up BEAM
@@ -79,7 +79,7 @@ jobs:
     env:
       ACCRUE_ADMIN_HEX_RELEASE: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.release.outputs.accrue_admin_sha }}
       - name: Set up BEAM

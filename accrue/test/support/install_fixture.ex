@@ -70,7 +70,7 @@ defmodule Accrue.Test.InstallFixture do
 
   def refute_contains!(root, relative_path, rejected) do
     content = read!(root, relative_path)
-    refute content =~ rejected
+    assert not String.contains?(content, rejected)
     content
   end
 

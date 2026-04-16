@@ -82,7 +82,7 @@ jobs:
     continue-on-error: ${{ matrix.continue-on-error }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
@@ -94,7 +94,7 @@ jobs:
         run: mix local.hex --force
 
       - name: Restore accrue deps cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: accrue/deps
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-deps-${{ hashFiles('accrue/mix.lock') }}
@@ -119,7 +119,7 @@ jobs:
       # --- Dialyzer with split restore/save PLT cache (CLAUDE.md recipe) ---
       - name: Restore accrue PLT cache
         id: accrue_plt_cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: accrue/priv/plts
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-plt-${{ hashFiles('accrue/mix.lock') }}
@@ -130,7 +130,7 @@ jobs:
 
       - name: Save accrue PLT cache
         if: steps.accrue_plt_cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: accrue/priv/plts
           key: ${{ steps.accrue_plt_cache.outputs.cache-primary-key }}
@@ -145,7 +145,7 @@ jobs:
         run: cd accrue && mix hex.audit
 
       - name: Restore accrue_admin deps cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: accrue_admin/deps
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-deps-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
@@ -169,7 +169,7 @@ jobs:
 
       - name: Restore accrue_admin PLT cache
         id: accrue_admin_plt_cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: accrue_admin/priv/plts
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-plt-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
@@ -180,7 +180,7 @@ jobs:
 
       - name: Save accrue_admin PLT cache
         if: steps.accrue_admin_plt_cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: accrue_admin/priv/plts
           key: ${{ steps.accrue_admin_plt_cache.outputs.cache-primary-key }}
@@ -238,7 +238,7 @@ jobs:
       ACCRUE_LIVE_PRO_PRICE: ${{ secrets.ACCRUE_LIVE_PRO_PRICE }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up BEAM
         uses: erlef/setup-beam@v1

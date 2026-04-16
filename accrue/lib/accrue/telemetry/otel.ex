@@ -26,26 +26,29 @@ defmodule Accrue.Telemetry.OTel do
     "accrue.status" => "accrue.status"
   }
 
-  @prohibited_keys MapSet.new([
-                     :email,
-                     :address,
-                     :raw_body,
-                     :payload,
-                     :metadata,
-                     :api_key,
-                     :webhook_secret,
-                     :stripe_secret_key,
-                     :card,
-                     "email",
-                     "address",
-                     "raw_body",
-                     "payload",
-                     "metadata",
-                     "api_key",
-                     "webhook_secret",
-                     "stripe_secret_key",
-                     "card"
-                   ])
+  @prohibited_keys Map.new(
+                     [
+                       :email,
+                       :address,
+                       :raw_body,
+                       :payload,
+                       :metadata,
+                       :api_key,
+                       :webhook_secret,
+                       :stripe_secret_key,
+                       :card,
+                       "email",
+                       "address",
+                       "raw_body",
+                       "payload",
+                       "metadata",
+                       "api_key",
+                       "webhook_secret",
+                       "stripe_secret_key",
+                       "card"
+                     ],
+                     &{&1, true}
+                   )
 
   @type event_name :: [atom()]
 
@@ -96,7 +99,7 @@ defmodule Accrue.Telemetry.OTel do
   @spec sanitize_attributes(map()) :: map()
   def sanitize_attributes(metadata) when is_map(metadata) do
     Enum.reduce(metadata, %{}, fn {key, value}, attrs ->
-      if MapSet.member?(@prohibited_keys, key) do
+      if Map.has_key?(@prohibited_keys, key) do
         attrs
       else
         case Map.fetch(@allowed_attributes, key) do
