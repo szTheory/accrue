@@ -1,26 +1,11 @@
 name: Accrue Host UAT
 
 on:
-  pull_request:
-    paths:
-      - "accrue/**"
-      - "accrue_admin/**"
-      - "examples/accrue_host/**"
-      - "scripts/ci/accrue_host_*"
-      - ".github/workflows/accrue_host_uat.yml"
-  push:
-    branches: [main]
-    paths:
-      - "accrue/**"
-      - "accrue_admin/**"
-      - "examples/accrue_host/**"
-      - "scripts/ci/accrue_host_*"
-      - ".github/workflows/accrue_host_uat.yml"
   workflow_dispatch: {}
 
 jobs:
   host-uat:
-    name: Host app UAT
+    name: Host app UAT (manual only)
     runs-on: ubuntu-24.04
 
     services:

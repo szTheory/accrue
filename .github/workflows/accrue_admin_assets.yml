@@ -1,28 +1,11 @@
 name: AccrueAdmin Assets
 
 on:
-  pull_request:
-    paths:
-      - "accrue_admin/assets/**"
-      - "accrue_admin/lib/**/*.ex"
-      - "accrue_admin/lib/**/*.heex"
-      - "accrue_admin/priv/static/**"
-      - "accrue_admin/guides/admin_ui.md"
-      - ".github/workflows/accrue_admin_assets.yml"
-  push:
-    branches: [main]
-    paths:
-      - "accrue_admin/assets/**"
-      - "accrue_admin/lib/**/*.ex"
-      - "accrue_admin/lib/**/*.heex"
-      - "accrue_admin/priv/static/**"
-      - "accrue_admin/guides/admin_ui.md"
-      - ".github/workflows/accrue_admin_assets.yml"
   workflow_dispatch: {}
 
 jobs:
   asset-freshness:
-    name: Asset freshness
+    name: Asset freshness (manual only)
     runs-on: ubuntu-24.04
 
     steps:

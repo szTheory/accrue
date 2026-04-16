@@ -139,7 +139,7 @@ else
   echo ""
   echo "--- playwright browser billing/admin smoke ---"
   fixture_file="$(mktemp)"
-  browser_log_file="$(mktemp)"
+  browser_log_file="${ACCRUE_HOST_BROWSER_LOG:-$(mktemp)}"
   browser_failed=0
 
   cleanup_browser() {
@@ -148,7 +148,7 @@ else
       wait "$browser_server_pid" >/dev/null 2>&1 || true
     fi
     rm -f "$fixture_file"
-    if [ "$browser_failed" != "1" ]; then
+    if [ -z "${ACCRUE_HOST_BROWSER_LOG:-}" ] && [ "$browser_failed" != "1" ]; then
       rm -f "$browser_log_file"
     fi
   }

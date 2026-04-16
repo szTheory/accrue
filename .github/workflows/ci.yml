@@ -12,6 +12,11 @@ on:
     # `guides/testing-live-stripe.md`.
     - cron: '0 6 * * *'
 
+permissions:
+  actions: read
+  checks: read
+  contents: read
+
 jobs:
   release-gate:
     name: Release gate (elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})
@@ -205,6 +210,146 @@ jobs:
 
       - name: Accrue admin retired package audit
         run: cd accrue_admin && mix hex.audit
+
+  admin-drift-docs:
+    name: Admin drift and docs
+    needs: [release-gate]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+
+      - name: Install Hex
+        run: mix local.hex --force
+
+      - name: Install deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Rebuild package assets
+        run: cd accrue_admin && mix accrue_admin.assets.build
+
+      - name: Ensure committed bundle is fresh
+        run: git diff --exit-code -- accrue_admin/priv/static/accrue_admin.css accrue_admin/priv/static/accrue_admin.js
+
+      - name: Verify guide mentions mount path and asset task
+        run: |
+          grep -q 'accrue_admin "/billing"' accrue_admin/guides/admin_ui.md
+          grep -q 'accrue_admin.assets.build' accrue_admin/guides/admin_ui.md
+
+  host-integration:
+    name: Host integration
+    needs: [admin-drift-docs]
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_HOST_PORT: 4100
+      ACCRUE_HOST_BROWSER_PORT: 4101
+      ACCRUE_HOST_BROWSER_LOG: ${{ github.workspace }}/accrue-host-server.log
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+
+      - name: Install Hex
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: examples/accrue_host/package-lock.json
+
+      - name: Restore host deps cache
+        uses: actions/cache@v5
+        with:
+          path: examples/accrue_host/deps
+          key: ${{ runner.os }}-otp27-elixir118-accrue-host-deps-${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp27-elixir118-accrue-host-deps-
+
+      - name: Install host deps
+        run: cd examples/accrue_host && mix deps.get
+
+      - name: Install browser deps
+        run: cd examples/accrue_host && npm ci
+
+      - name: Install Chromium
+        run: cd examples/accrue_host && npm run e2e:install
+
+      - name: Run host integration gate
+        run: bash scripts/ci/accrue_host_uat.sh
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accrue-host-playwright-report
+          path: examples/accrue_host/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accrue-host-playwright-traces
+          path: examples/accrue_host/test-results
+          if-no-files-found: ignore
+
+      - name: Upload host server log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accrue-host-server-log
+          path: ${{ github.workspace }}/accrue-host-server.log
+          if-no-files-found: ignore
+
+  annotation-sweep:
+    name: Annotation sweep
+    needs: [release-gate, admin-drift-docs, host-integration]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Sweep release-facing annotations
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/annotation_sweep.sh release-gate admin-drift-docs host-integration
 
   # ---------------------------------------------------------------------
   # Advisory live-Stripe fidelity job (quick task 260414-l9q).
