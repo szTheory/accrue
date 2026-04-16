@@ -17,6 +17,10 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
   test "billing admin can inspect customer/subscription, webhook history, and replay a single webhook row",
        %{conn: conn} do
+    replay_suffix = Integer.to_string(System.unique_integer([:positive]))
+    processor_event_id = "evt_host_replay_" <> replay_suffix
+    invoice_id = "in_host_replay_" <> replay_suffix
+
     admin_user =
       AccrueHost.AccountsFixtures.user_fixture()
       |> Ecto.Changeset.change(billing_admin: true)
@@ -44,16 +48,16 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     webhook =
       insert_webhook(%{
-        processor_event_id: "evt_host_replay",
+        processor_event_id: processor_event_id,
         type: "invoice.payment_failed",
         status: :dead,
         raw_body:
           Jason.encode!(%{
-            "id" => "evt_host_replay",
+            "id" => processor_event_id,
             "type" => "invoice.payment_failed",
             "data" => %{
               "object" => %{
-                "id" => "in_host_replay",
+                "id" => invoice_id,
                 "object" => "invoice",
                 "customer" => customer.processor_id,
                 "subscription" => subscription.processor_id
@@ -61,11 +65,11 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
             }
           }),
         data: %{
-          "id" => "evt_host_replay",
+          "id" => processor_event_id,
           "type" => "invoice.payment_failed",
           "data" => %{
             "object" => %{
-              "id" => "in_host_replay",
+              "id" => invoice_id,
               "customer" => customer.processor_id,
               "subscription" => subscription.processor_id
             }
