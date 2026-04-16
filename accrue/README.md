@@ -40,15 +40,15 @@ Breaking changes for that facade layer follow the deprecation cycle documented i
 
 ## Guides
 
-- [Quickstart](https://github.com/jon/accrue/blob/main/accrue/guides/quickstart.md)
-- [Configuration](https://github.com/jon/accrue/blob/main/accrue/guides/configuration.md)
-- [Testing](https://github.com/jon/accrue/blob/main/accrue/guides/testing.md)
-- [Sigra integration](https://github.com/jon/accrue/blob/main/accrue/guides/sigra_integration.md)
-- [Custom processors](https://github.com/jon/accrue/blob/main/accrue/guides/custom_processors.md)
-- [Custom PDF adapter](https://github.com/jon/accrue/blob/main/accrue/guides/custom_pdf_adapter.md)
-- [Branding](https://github.com/jon/accrue/blob/main/accrue/guides/branding.md)
-- [Webhook gotchas](https://github.com/jon/accrue/blob/main/accrue/guides/webhook_gotchas.md)
-- [Upgrade](https://github.com/jon/accrue/blob/main/accrue/guides/upgrade.md)
+- [Quickstart](https://github.com/szTheory/accrue/blob/main/accrue/guides/quickstart.md)
+- [Configuration](https://github.com/szTheory/accrue/blob/main/accrue/guides/configuration.md)
+- [Testing](https://github.com/szTheory/accrue/blob/main/accrue/guides/testing.md)
+- [Sigra integration](https://github.com/szTheory/accrue/blob/main/accrue/guides/sigra_integration.md)
+- [Custom processors](https://github.com/szTheory/accrue/blob/main/accrue/guides/custom_processors.md)
+- [Custom PDF adapter](https://github.com/szTheory/accrue/blob/main/accrue/guides/custom_pdf_adapter.md)
+- [Branding](https://github.com/szTheory/accrue/blob/main/accrue/guides/branding.md)
+- [Webhook gotchas](https://github.com/szTheory/accrue/blob/main/accrue/guides/webhook_gotchas.md)
+- [Upgrade](https://github.com/szTheory/accrue/blob/main/accrue/guides/upgrade.md)
 
 ## Security
 
@@ -56,6 +56,6 @@ Use runtime-only secrets for Stripe credentials, keep webhook signing secrets ou
 
 ## Project policies
 
-- [Contributing guide](https://github.com/jon/accrue/blob/main/CONTRIBUTING.md)
-- [Code of Conduct](https://github.com/jon/accrue/blob/main/CODE_OF_CONDUCT.md)
-- [Security policy](https://github.com/jon/accrue/blob/main/SECURITY.md)
+- [Contributing guide](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md)
+- [Code of Conduct](https://github.com/szTheory/accrue/blob/main/CODE_OF_CONDUCT.md)
+- [Security policy](https://github.com/szTheory/accrue/blob/main/SECURITY.md)

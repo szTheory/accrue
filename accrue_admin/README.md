@@ -64,6 +64,6 @@ npm run e2e
 
 ## Project policies
 
-- [Contributing guide](https://github.com/jon/accrue/blob/main/CONTRIBUTING.md)
-- [Code of Conduct](https://github.com/jon/accrue/blob/main/CODE_OF_CONDUCT.md)
-- [Security policy](https://github.com/jon/accrue/blob/main/SECURITY.md)
+- [Contributing guide](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md)
+- [Code of Conduct](https://github.com/szTheory/accrue/blob/main/CODE_OF_CONDUCT.md)
+- [Security policy](https://github.com/szTheory/accrue/blob/main/SECURITY.md)
