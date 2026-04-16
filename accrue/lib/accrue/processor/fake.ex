@@ -99,15 +99,7 @@ defmodule Accrue.Processor.Fake do
   """
   @spec reset() :: :ok
   def reset do
-    ensure_started()
-
-    try do
-      GenServer.call(__MODULE__, :reset)
-    catch
-      :exit, {:noproc, _} ->
-        ensure_started()
-        GenServer.call(__MODULE__, :reset)
-    end
+    call(:reset)
   end
 
   @doc """
@@ -119,7 +111,11 @@ defmodule Accrue.Processor.Fake do
   GenServer.
   """
   @spec advance(GenServer.server(), integer()) :: :ok
-  def advance(server \\ __MODULE__, seconds) when is_integer(seconds) do
+  def advance(server \\ __MODULE__, seconds)
+
+  def advance(__MODULE__, seconds) when is_integer(seconds), do: call({:advance, seconds})
+
+  def advance(server, seconds) when is_integer(seconds) do
     GenServer.call(server, {:advance, seconds})
   end
 
@@ -139,14 +135,18 @@ defmodule Accrue.Processor.Fake do
   @spec advance_subscription(String.t() | nil, keyword()) :: :ok
   def advance_subscription(stripe_id, opts)
       when (is_binary(stripe_id) or is_nil(stripe_id)) and is_list(opts) do
-    GenServer.call(__MODULE__, {:advance_subscription, stripe_id, opts})
+    call({:advance_subscription, stripe_id, opts})
   end
 
   @doc """
   Returns the current in-memory clock value.
   """
   @spec current_time(GenServer.server()) :: DateTime.t()
-  def current_time(server \\ __MODULE__) do
+  def current_time(server \\ __MODULE__)
+
+  def current_time(__MODULE__), do: call(:current_time)
+
+  def current_time(server) do
     GenServer.call(server, :current_time)
   end
 
@@ -165,7 +165,7 @@ defmodule Accrue.Processor.Fake do
   """
   @spec stub(atom(), (... -> term())) :: :ok
   def stub(callback, fun) when is_atom(callback) and is_function(fun) do
-    GenServer.call(__MODULE__, {:stub, callback, fun})
+    call({:stub, callback, fun})
   end
 
   @doc """
@@ -177,7 +177,7 @@ defmodule Accrue.Processor.Fake do
   """
   @spec scripted_response(atom(), {:ok, map()} | {:error, Exception.t()}) :: :ok
   def scripted_response(op, result) when is_atom(op) do
-    GenServer.call(__MODULE__, {:script, op, result})
+    call({:script, op, result})
   end
 
   @doc """
@@ -189,7 +189,7 @@ defmodule Accrue.Processor.Fake do
           {:ok, map()} | {:error, Accrue.APIError.t()}
   def transition(stripe_id, new_status, opts \\ [])
       when is_binary(stripe_id) and is_atom(new_status) and is_list(opts) do
-    GenServer.call(__MODULE__, {:transition, stripe_id, new_status, opts})
+    call({:transition, stripe_id, new_status, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -198,18 +198,18 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_customer(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_customer, params, thread_scope(opts)})
+    call({:create_customer, params, thread_scope(opts)})
   end
 
   @impl Accrue.Processor
   def retrieve_customer(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_customer, id, opts})
+    call({:retrieve_customer, id, opts})
   end
 
   @impl Accrue.Processor
   def update_customer(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:update_customer, id, params, opts})
+    call({:update_customer, id, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -218,40 +218,40 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_subscription(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_subscription, params, opts})
+    call({:create_subscription, params, opts})
   end
 
   @impl Accrue.Processor
   def retrieve_subscription(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_subscription, id, opts})
+    call({:retrieve_subscription, id, opts})
   end
 
   @impl Accrue.Processor
   def update_subscription(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:update_subscription, id, params, opts})
+    call({:update_subscription, id, params, opts})
   end
 
   @impl Accrue.Processor
   def cancel_subscription(id, opts) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:cancel_subscription, id, %{}, opts})
+    call({:cancel_subscription, id, %{}, opts})
   end
 
   @impl Accrue.Processor
   def cancel_subscription(id, params, opts)
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:cancel_subscription, id, params, opts})
+    call({:cancel_subscription, id, params, opts})
   end
 
   @impl Accrue.Processor
   def resume_subscription(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:resume_subscription, id, opts})
+    call({:resume_subscription, id, opts})
   end
 
   @impl Accrue.Processor
   def pause_subscription_collection(id, behavior, params, opts)
       when is_binary(id) and is_atom(behavior) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:pause_subscription_collection, id, behavior, params, opts})
+    call({:pause_subscription_collection, id, behavior, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -260,48 +260,48 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_invoice(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_invoice, params, opts})
+    call({:create_invoice, params, opts})
   end
 
   @impl Accrue.Processor
   def retrieve_invoice(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_invoice, id, opts})
+    call({:retrieve_invoice, id, opts})
   end
 
   @impl Accrue.Processor
   def update_invoice(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:update_invoice, id, params, opts})
+    call({:update_invoice, id, params, opts})
   end
 
   @impl Accrue.Processor
   def finalize_invoice(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:invoice_action, :finalize, id, opts})
+    call({:invoice_action, :finalize, id, opts})
   end
 
   @impl Accrue.Processor
   def void_invoice(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:invoice_action, :void, id, opts})
+    call({:invoice_action, :void, id, opts})
   end
 
   @impl Accrue.Processor
   def pay_invoice(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:invoice_action, :pay, id, opts})
+    call({:invoice_action, :pay, id, opts})
   end
 
   @impl Accrue.Processor
   def send_invoice(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:invoice_action, :send, id, opts})
+    call({:invoice_action, :send, id, opts})
   end
 
   @impl Accrue.Processor
   def mark_uncollectible_invoice(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:invoice_action, :mark_uncollectible, id, opts})
+    call({:invoice_action, :mark_uncollectible, id, opts})
   end
 
   @impl Accrue.Processor
   def create_invoice_preview(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_invoice_preview, params, opts})
+    call({:create_invoice_preview, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -310,18 +310,18 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_payment_intent(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_payment_intent, params, opts})
+    call({:create_payment_intent, params, opts})
   end
 
   @impl Accrue.Processor
   def retrieve_payment_intent(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_payment_intent, id, opts})
+    call({:retrieve_payment_intent, id, opts})
   end
 
   @impl Accrue.Processor
   def confirm_payment_intent(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:confirm_payment_intent, id, params, opts})
+    call({:confirm_payment_intent, id, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -330,18 +330,18 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_setup_intent(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_setup_intent, params, opts})
+    call({:create_setup_intent, params, opts})
   end
 
   @impl Accrue.Processor
   def retrieve_setup_intent(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_setup_intent, id, opts})
+    call({:retrieve_setup_intent, id, opts})
   end
 
   @impl Accrue.Processor
   def confirm_setup_intent(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:confirm_setup_intent, id, params, opts})
+    call({:confirm_setup_intent, id, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -350,40 +350,40 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_payment_method(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_payment_method, params, opts})
+    call({:create_payment_method, params, opts})
   end
 
   @impl Accrue.Processor
   def retrieve_payment_method(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_payment_method, id, opts})
+    call({:retrieve_payment_method, id, opts})
   end
 
   @impl Accrue.Processor
   def attach_payment_method(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:attach_payment_method, id, params, opts})
+    call({:attach_payment_method, id, params, opts})
   end
 
   @impl Accrue.Processor
   def detach_payment_method(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:detach_payment_method, id, opts})
+    call({:detach_payment_method, id, opts})
   end
 
   @impl Accrue.Processor
   def list_payment_methods(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:list_payment_methods, params, opts})
+    call({:list_payment_methods, params, opts})
   end
 
   @impl Accrue.Processor
   def update_payment_method(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:update_payment_method, id, params, opts})
+    call({:update_payment_method, id, params, opts})
   end
 
   @impl Accrue.Processor
   def set_default_payment_method(customer_id, params, opts \\ [])
       when is_binary(customer_id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:set_default_payment_method, customer_id, params, opts})
+    call({:set_default_payment_method, customer_id, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -392,17 +392,17 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_charge(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_charge, params, thread_scope(opts)})
+    call({:create_charge, params, thread_scope(opts)})
   end
 
   @impl Accrue.Processor
   def retrieve_charge(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_charge, id, opts})
+    call({:retrieve_charge, id, opts})
   end
 
   @impl Accrue.Processor
   def list_charges(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:list_charges, params, opts})
+    call({:list_charges, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -411,12 +411,12 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_refund(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_refund, params, opts})
+    call({:create_refund, params, opts})
   end
 
   @impl Accrue.Processor
   def retrieve_refund(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_refund, id, opts})
+    call({:retrieve_refund, id, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -425,7 +425,7 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def report_meter_event(%Accrue.Billing.MeterEvent{} = row) do
-    GenServer.call(__MODULE__, {:report_meter_event, row})
+    call({:report_meter_event, row})
   end
 
   @doc """
@@ -438,7 +438,7 @@ defmodule Accrue.Processor.Fake do
     do: meter_events_for(pid)
 
   def meter_events_for(stripe_customer_id) when is_binary(stripe_customer_id) do
-    GenServer.call(__MODULE__, {:meter_events_for, stripe_customer_id})
+    call({:meter_events_for, stripe_customer_id})
   end
 
   # ---------------------------------------------------------------------------
@@ -447,19 +447,19 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def subscription_item_create(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_item_create, params, opts})
+    call({:subscription_item_create, params, opts})
   end
 
   @impl Accrue.Processor
   def subscription_item_update(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_item_update, id, params, opts})
+    call({:subscription_item_update, id, params, opts})
   end
 
   @impl Accrue.Processor
   def subscription_item_delete(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_item_delete, id, params, opts})
+    call({:subscription_item_delete, id, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -468,28 +468,28 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def subscription_schedule_create(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_schedule_create, params, opts})
+    call({:subscription_schedule_create, params, opts})
   end
 
   @impl Accrue.Processor
   def subscription_schedule_update(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_schedule_update, id, params, opts})
+    call({:subscription_schedule_update, id, params, opts})
   end
 
   @impl Accrue.Processor
   def subscription_schedule_release(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_schedule_release, id, opts})
+    call({:subscription_schedule_release, id, opts})
   end
 
   @impl Accrue.Processor
   def subscription_schedule_cancel(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_schedule_cancel, id, opts})
+    call({:subscription_schedule_cancel, id, opts})
   end
 
   @impl Accrue.Processor
   def subscription_schedule_fetch(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:subscription_schedule_fetch, id, opts})
+    call({:subscription_schedule_fetch, id, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -498,22 +498,22 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def coupon_create(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:coupon_create, params, opts})
+    call({:coupon_create, params, opts})
   end
 
   @impl Accrue.Processor
   def coupon_retrieve(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:coupon_retrieve, id, opts})
+    call({:coupon_retrieve, id, opts})
   end
 
   @impl Accrue.Processor
   def promotion_code_create(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:promotion_code_create, params, opts})
+    call({:promotion_code_create, params, opts})
   end
 
   @impl Accrue.Processor
   def promotion_code_retrieve(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:promotion_code_retrieve, id, opts})
+    call({:promotion_code_retrieve, id, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -522,17 +522,17 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def checkout_session_create(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:checkout_session_create, params, opts})
+    call({:checkout_session_create, params, opts})
   end
 
   @impl Accrue.Processor
   def checkout_session_fetch(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:checkout_session_fetch, id, opts})
+    call({:checkout_session_fetch, id, opts})
   end
 
   @impl Accrue.Processor
   def portal_session_create(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:portal_session_create, params, opts})
+    call({:portal_session_create, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -541,44 +541,44 @@ defmodule Accrue.Processor.Fake do
 
   @impl Accrue.Processor
   def create_account(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_account, params, opts})
+    call({:create_account, params, opts})
   end
 
   @impl Accrue.Processor
   def retrieve_account(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_account, id, opts})
+    call({:retrieve_account, id, opts})
   end
 
   @impl Accrue.Processor
   def update_account(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:update_account, id, params, opts})
+    call({:update_account, id, params, opts})
   end
 
   @impl Accrue.Processor
   def delete_account(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:delete_account, id, opts})
+    call({:delete_account, id, opts})
   end
 
   @impl Accrue.Processor
   def reject_account(id, params, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:reject_account, id, params, opts})
+    call({:reject_account, id, params, opts})
   end
 
   @impl Accrue.Processor
   def list_accounts(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:list_accounts, params, opts})
+    call({:list_accounts, params, opts})
   end
 
   @impl Accrue.Processor
   def create_account_link(params, opts \\ []) when is_map(params) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_account_link, params, opts})
+    call({:create_account_link, params, opts})
   end
 
   @impl Accrue.Processor
   def create_login_link(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:create_login_link, id, opts})
+    call({:create_login_link, id, opts})
   end
 
   @impl Accrue.Processor
@@ -586,15 +586,12 @@ defmodule Accrue.Processor.Fake do
     # Transfers are platform-authority calls — force :platform scope so
     # a `Accrue.Connect.with_account/2` wrapper from a calling test does
     # not inadvertently tag the transfer as connected-account-scoped.
-    GenServer.call(
-      __MODULE__,
-      {:create_transfer, params, Keyword.put(opts, :stripe_account, nil)}
-    )
+    call({:create_transfer, params, Keyword.put(opts, :stripe_account, nil)})
   end
 
   @impl Accrue.Processor
   def retrieve_transfer(id, opts \\ []) when is_binary(id) and is_list(opts) do
-    GenServer.call(__MODULE__, {:retrieve_transfer, id, Keyword.put(opts, :stripe_account, nil)})
+    call({:retrieve_transfer, id, Keyword.put(opts, :stripe_account, nil)})
   end
 
   # ---------------------------------------------------------------------------
@@ -607,7 +604,7 @@ defmodule Accrue.Processor.Fake do
   """
   @spec accounts() :: [map()]
   def accounts do
-    GenServer.call(__MODULE__, :accounts_list)
+    call(:accounts_list)
   end
 
   @doc """
@@ -617,17 +614,17 @@ defmodule Accrue.Processor.Fake do
   """
   @spec customers_on(String.t() | :platform) :: [map()]
   def customers_on(scope) when is_binary(scope) or scope == :platform do
-    GenServer.call(__MODULE__, {:resources_on, :customers, scope})
+    call({:resources_on, :customers, scope})
   end
 
   @spec charges_on(String.t() | :platform) :: [map()]
   def charges_on(scope) when is_binary(scope) or scope == :platform do
-    GenServer.call(__MODULE__, {:resources_on, :charges, scope})
+    call({:resources_on, :charges, scope})
   end
 
   @spec subscriptions_on(String.t() | :platform) :: [map()]
   def subscriptions_on(scope) when is_binary(scope) or scope == :platform do
-    GenServer.call(__MODULE__, {:resources_on, :subscriptions, scope})
+    call({:resources_on, :subscriptions, scope})
   end
 
   @doc """
@@ -638,7 +635,7 @@ defmodule Accrue.Processor.Fake do
   """
   @spec transfers_on(String.t() | :platform) :: [map()]
   def transfers_on(scope) when is_binary(scope) or scope == :platform do
-    GenServer.call(__MODULE__, {:resources_on, :transfers, scope})
+    call({:resources_on, :transfers, scope})
   end
 
   @doc """
@@ -648,7 +645,7 @@ defmodule Accrue.Processor.Fake do
   """
   @spec call_count(atom()) :: non_neg_integer()
   def call_count(callback) when is_atom(callback) do
-    GenServer.call(__MODULE__, {:call_count, callback})
+    call({:call_count, callback})
   end
 
   # ---------------------------------------------------------------------------
@@ -670,6 +667,18 @@ defmodule Accrue.Processor.Fake do
   # ---------------------------------------------------------------------------
   # GenServer
   # ---------------------------------------------------------------------------
+
+  defp call(message) do
+    ensure_started()
+
+    try do
+      GenServer.call(__MODULE__, message)
+    catch
+      :exit, {:noproc, _} ->
+        ensure_started()
+        GenServer.call(__MODULE__, message)
+    end
+  end
 
   defp ensure_started do
     case Process.whereis(__MODULE__) do

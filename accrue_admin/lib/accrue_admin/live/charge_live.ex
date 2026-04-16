@@ -457,7 +457,9 @@ defmodule AccrueAdmin.Live.ChargeLive do
   defp tone(%{actor_type: "admin"}), do: :cobalt
 
   defp tone(%{type: type})
-       when type in ["charge.refunded", "refund.created", "refund.fees_settled"], do: :amber
+       when type in ["charge.refunded", "refund.created", "refund.fees_settled"] do
+    :amber
+  end
 
   defp tone(%{status: "succeeded"}), do: :moss
   defp tone(_event), do: :slate

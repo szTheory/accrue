@@ -121,7 +121,7 @@ jobs:
         id: accrue_plt_cache
         uses: actions/cache/restore@v5
         with:
-          path: accrue/priv/plts
+          path: accrue/_build/test/*.plt*
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-plt-${{ hashFiles('accrue/mix.lock') }}
 
       - name: Create accrue PLTs
@@ -132,7 +132,7 @@ jobs:
         if: steps.accrue_plt_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
         with:
-          path: accrue/priv/plts
+          path: accrue/_build/test/*.plt*
           key: ${{ steps.accrue_plt_cache.outputs.cache-primary-key }}
 
       - name: Accrue dialyzer
@@ -171,7 +171,7 @@ jobs:
         id: accrue_admin_plt_cache
         uses: actions/cache/restore@v5
         with:
-          path: accrue_admin/priv/plts
+          path: accrue_admin/_build/test/*.plt*
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-admin-plt-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
 
       - name: Create accrue_admin PLTs
@@ -182,7 +182,7 @@ jobs:
         if: steps.accrue_admin_plt_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
         with:
-          path: accrue_admin/priv/plts
+          path: accrue_admin/_build/test/*.plt*
           key: ${{ steps.accrue_admin_plt_cache.outputs.cache-primary-key }}
 
       - name: Accrue admin dialyzer
