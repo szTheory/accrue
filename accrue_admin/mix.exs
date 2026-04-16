@@ -59,7 +59,7 @@ defmodule AccrueAdmin.MixProject do
   defp docs do
     [
       main: "readme",
-      source_ref: "v#{@version}",
+      source_ref: "accrue_admin-v#{@version}",
       extras: ["README.md", "guides/admin_ui.md"],
       groups_for_extras: [Guides: ["guides/admin_ui.md"]]
     ]

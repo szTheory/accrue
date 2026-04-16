@@ -127,7 +127,7 @@ defmodule Accrue.MixProject do
   defp docs do
     [
       main: "readme",
-      source_ref: "v#{@version}",
+      source_ref: "accrue-v#{@version}",
       extras: ["README.md" | Path.wildcard("guides/*.md")],
       groups_for_extras: [Guides: Path.wildcard("guides/*.md")],
       skip_undefined_reference_warnings_on: &skip_undefined_reference_warning?/1

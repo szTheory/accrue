@@ -9,7 +9,7 @@ Add Accrue to `deps/0`, point it at the Stripe processor, then run the installer
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 1.0.0"}
+    {:accrue, "~> 0.1.2"}
   ]
 end
 ```
@@ -25,7 +25,7 @@ mix accrue.install
 
 From there, configure your runtime Stripe secrets, mount the generated routes, and call your host billing facade for checkout, subscriptions, invoices, and customer self-service.
 
-## What ships in v1.0.0
+## What ships
 
 - Billing facades for customers, subscriptions, invoices, charges, refunds, coupons, promotion codes, and metered usage.
 - Checkout, billing portal, and Connect helpers on top of the Stripe-backed processor contract.
@@ -34,21 +34,21 @@ From there, configure your runtime Stripe secrets, mount the generated routes, a
 
 ## Public API stability
 
-The supported v1.x surface is the public facade layer under `Accrue.Billing`, `Accrue.Checkout`, `Accrue.BillingPortal`, `Accrue.Connect`, `Accrue.Events`, and `Accrue.Test`.
+The supported public surface is the facade layer under `Accrue.Billing`, `Accrue.Checkout`, `Accrue.BillingPortal`, `Accrue.Connect`, `Accrue.Events`, and `Accrue.Test`.
 
 Breaking changes for that facade layer follow the deprecation cycle documented in `guides/upgrade.md`. Accrue deprecates public APIs before removal instead of silently changing behavior in place.
 
 ## Guides
 
-- [Quickstart](https://github.com/szTheory/accrue/blob/main/accrue/guides/quickstart.md)
-- [Configuration](https://github.com/szTheory/accrue/blob/main/accrue/guides/configuration.md)
-- [Testing](https://github.com/szTheory/accrue/blob/main/accrue/guides/testing.md)
-- [Sigra integration](https://github.com/szTheory/accrue/blob/main/accrue/guides/sigra_integration.md)
-- [Custom processors](https://github.com/szTheory/accrue/blob/main/accrue/guides/custom_processors.md)
-- [Custom PDF adapter](https://github.com/szTheory/accrue/blob/main/accrue/guides/custom_pdf_adapter.md)
-- [Branding](https://github.com/szTheory/accrue/blob/main/accrue/guides/branding.md)
-- [Webhook gotchas](https://github.com/szTheory/accrue/blob/main/accrue/guides/webhook_gotchas.md)
-- [Upgrade](https://github.com/szTheory/accrue/blob/main/accrue/guides/upgrade.md)
+- [Quickstart](guides/quickstart.md)
+- [Configuration](guides/configuration.md)
+- [Testing](guides/testing.md)
+- [Sigra integration](guides/sigra_integration.md)
+- [Custom processors](guides/custom_processors.md)
+- [Custom PDF adapter](guides/custom_pdf_adapter.md)
+- [Branding](guides/branding.md)
+- [Webhook gotchas](guides/webhook_gotchas.md)
+- [Upgrade](guides/upgrade.md)
 
 ## Security
 

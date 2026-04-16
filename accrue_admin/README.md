@@ -9,7 +9,7 @@ Add `accrue_admin` to your host application and mount the package router where o
 ```elixir
 defp deps do
   [
-    {:accrue_admin, "~> 1.0.0"}
+    {:accrue_admin, "~> 0.1.2"}
   ]
 end
 ```
@@ -34,7 +34,7 @@ Run `mix deps.get`, configure the host billing app, and continue with the packag
 
 `accrue_admin` expects the host app to provide browser session state and an `Accrue.Auth` adapter that can resolve an admin-capable operator. The full router mount, branding config, and auth expectations live in the [admin UI guide](guides/admin_ui.md).
 
-Published `accrue_admin` releases resolve `accrue ~> 1.0.0`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
+Published `accrue_admin` releases resolve `accrue ~> 0.1.2`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
 
 ## Assets
 
