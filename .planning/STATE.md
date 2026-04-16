@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
-status: executing
-stopped_at: Completed 12-first-user-dx-stabilization-06-PLAN.md
-last_updated: "2026-04-16T22:21:15.947Z"
+status: verifying
+stopped_at: Completed 12-07-PLAN.md
+last_updated: "2026-04-16T22:24:15.002Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 19
-  completed_plans: 18
-  percent: 95
+  completed_plans: 19
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 Phase: 12 (first-user-dx-stabilization) — EXECUTING
 Plan: 8 of 8
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-16
 
 Progress: 1/6 v1.1 phases complete
@@ -132,6 +132,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 12-first-user-dx-stabilization P05 | 5m | 2 tasks | 13 files |
 | Phase 12-first-user-dx-stabilization P08 | 5m | 2 tasks | 5 files |
 | Phase 12-first-user-dx-stabilization P06 | 4m | 2 tasks | 10 files |
+| Phase 12 P07 | 4m | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -350,6 +351,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12-first-user-dx-stabilization]: README now routes first-time users into First Hour and Troubleshooting instead of carrying a monolithic quickstart.
 - [Phase 12-first-user-dx-stabilization]: Public docs teach only host-owned boundaries: MyApp.Billing, use Accrue.Webhook.Handler, AccrueAdmin.Router.accrue_admin/2, Accrue.Auth, and Accrue.ConfigError.
 - [Phase 12-first-user-dx-stabilization]: Troubleshooting guidance is anchored to stable ACCRUE-DX codes with exact verification commands.
+- [Phase 12]: Package-doc verification now parses versions from mix.exs and enforces source_ref plus HexDocs link correctness.
+- [Phase 12]: Package README links should use HexDocs URLs while ExDoc extras remain validated through guide-path metadata.
 
 ### Pending Todos
 
@@ -375,6 +378,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:21:15.941Z
-Stopped at: Completed 12-first-user-dx-stabilization-06-PLAN.md
+Last session: 2026-04-16T22:24:14.998Z
+Stopped at: Completed 12-07-PLAN.md
 Resume file: None

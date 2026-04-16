@@ -27,7 +27,7 @@
 - [x] **Phase 10: Host App Dogfood Harness** — canonical minimal Phoenix app that installs and uses `accrue` + `accrue_admin` through public APIs. (completed 2026-04-16)
 - [x] **Phase 11: CI User-Facing Integration Gate** — mandatory CI workflows for host-app setup, Fake-backed E2E, browser UAT artifacts, and warning/error annotation sweeps. (completed 2026-04-16)
 - [x] **Phase 11.1: Hermetic Host Flow Proofs** — gap-closure phase that makes focused host-flow proof files self-isolating outside the canonical UAT wrapper. (completed 2026-04-16)
-- [ ] **Phase 12: First-User DX Stabilization** — installer/docs/error polish driven by dogfood failures and first-hour user setup paths.
+- [x] **Phase 12: First-User DX Stabilization** — installer/docs/error polish driven by dogfood failures and first-hour user setup paths. (completed 2026-04-16)
 - [ ] **Phase 13: Adoption Assets** — maintained example/demo path, tutorial docs, README positioning, and repository issue templates.
 - [ ] **Phase 14: Quality Hardening** — security, performance, compatibility, accessibility, responsive admin checks, and release-gate clarity.
 - [ ] **Phase 15: Expansion Discovery** — evaluate tax, revenue exports, additional processors, and org/multi-tenant billing as future roadmap candidates.
@@ -101,14 +101,14 @@ Plans:
 3. Quickstart and troubleshooting docs follow the host-app path without skipped setup steps.
 4. The host app validates both path-dependency development and Hex-style dependency modes.
 5. Package docs retain correct version snippets, source links, and internal HexDocs guide links.
-**Plans:** 7/8 plans executed
+**Plans:** 8/8 plans complete
 - [x] 12-01-PLAN.md — Create the docs and package-doc verification scaffolds.
 - [x] 12-02-PLAN.md — Create the installer conflict and Hex smoke validation scaffolds.
 - [x] 12-03-PLAN.md — Implement installer rerun safety, conflict artifacts, and categorized summaries.
 - [x] 12-04-PLAN.md — Add host-facing billing read helpers and remove UI coupling to private billing tables.
 - [x] 12-05-PLAN.md — Introduce the shared setup-diagnostic taxonomy across installer, boot, and runtime checks.
 - [x] 12-06-PLAN.md — Rewrite host-first docs around the First Hour and troubleshooting path.
-- [ ] 12-07-PLAN.md — Make package metadata verification strict and version-correct.
+- [x] 12-07-PLAN.md — Make package metadata verification strict and version-correct.
 - [x] 12-08-PLAN.md — Add host dependency-mode switching and activate Hex smoke in CI.
 **UI hint:** no
 
@@ -170,7 +170,7 @@ Plans:
 | 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete    | 2026-04-16 |
 | 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete    | 2026-04-16 |
 | 11.1. Hermetic Host Flow Proofs | v1.1 | 1/1 | Complete    | 2026-04-16 |
-| 12. First-User DX Stabilization | v1.1 | 7/8 | In Progress|  |
+| 12. First-User DX Stabilization | v1.1 | 8/8 | Complete   | 2026-04-16 |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
 | 14. Quality Hardening | v1.1 | 0/TBD | Planned | - |
 | 15. Expansion Discovery | v1.1 | 0/TBD | Planned | - |
