@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "separate-pull-requests": true,
+  "include-component-in-tag": true,
+  "packages": {
+    "accrue": {
+      "release-type": "elixir",
+      "package-name": "accrue",
+      "changelog-path": "accrue/CHANGELOG.md",
+      "include-component-in-tag": true
+    },
+    "accrue_admin": {
+      "release-type": "elixir",
+      "package-name": "accrue_admin",
+      "changelog-path": "accrue_admin/CHANGELOG.md",
+      "include-component-in-tag": true
+    }
+  }
+}

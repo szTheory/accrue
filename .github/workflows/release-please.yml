@@ -1,0 +1,101 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bootstrap_release_as:
+        description: 'Bootstrap note: use Release-As: 1.0.0 for both package paths before the first public publish.'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release Please
+    runs-on: ubuntu-24.04
+    outputs:
+      accrue_release_created: ${{ steps.release.outputs['accrue--release_created'] }}
+      accrue_tag_name: ${{ steps.release.outputs['accrue--tag_name'] }}
+      accrue_version: ${{ steps.release.outputs['accrue--version'] }}
+      accrue_sha: ${{ steps.release.outputs['accrue--sha'] }}
+      accrue_admin_release_created: ${{ steps.release.outputs['accrue_admin--release_created'] }}
+      accrue_admin_tag_name: ${{ steps.release.outputs['accrue_admin--tag_name'] }}
+      accrue_admin_version: ${{ steps.release.outputs['accrue_admin--version'] }}
+      accrue_admin_sha: ${{ steps.release.outputs['accrue_admin--sha'] }}
+    steps:
+      - name: Bootstrap reminder
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "Bootstrap reminder: carry Release-As: 1.0.0 for accrue and accrue_admin before the first public publish." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@v4
+      - name: Run Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish-accrue:
+    name: Publish accrue
+    needs: release
+    if: ${{ needs.release.outputs.accrue_release_created == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.accrue_sha }}
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+      - name: Install accrue deps
+        run: cd accrue && mix deps.get
+      - name: Verify accrue release version
+        run: rg -n "@version \"${{ needs.release.outputs.accrue_version }}\"" accrue/mix.exs
+      - name: Dry run accrue Hex publish
+        run: cd accrue && mix hex.publish --dry-run
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+      - name: Publish accrue to Hex
+        run: cd accrue && mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+
+  publish-accrue-admin:
+    name: Publish accrue_admin
+    needs: [release, publish-accrue]
+    if: ${{ needs.release.outputs.accrue_admin_release_created == 'true' && (needs.release.outputs.accrue_release_created != 'true' || needs.publish-accrue.result == 'success') }}
+    runs-on: ubuntu-24.04
+    env:
+      ACCRUE_ADMIN_HEX_RELEASE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.accrue_admin_sha }}
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+      - name: Install accrue_admin deps
+        run: cd accrue_admin && mix deps.get
+      - name: Verify accrue_admin release version
+        run: rg -n "@version \"${{ needs.release.outputs.accrue_admin_version }}\"" accrue_admin/mix.exs
+      - name: Dry run accrue_admin Hex publish
+        run: cd accrue_admin && mix hex.publish --dry-run
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_ADMIN_HEX_RELEASE: ${{ env.ACCRUE_ADMIN_HEX_RELEASE }}
+      - name: Publish accrue_admin to Hex
+        run: cd accrue_admin && mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_ADMIN_HEX_RELEASE: ${{ env.ACCRUE_ADMIN_HEX_RELEASE }}
