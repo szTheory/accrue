@@ -21,9 +21,9 @@ Requirements for the v1.1 stabilization milestone. The milestone proves Accrue f
 ### CI Integration Gate
 
 - [ ] **CI-01**: GitHub Actions runs the host app setup and integration suite on pull requests and pushes to `main`.
-- [ ] **CI-02**: CI fails on host-app compile warnings, test failures, browser failures, docs-link drift, and generated artifact drift.
+- [x] **CI-02**: CI fails on host-app compile warnings, test failures, browser failures, docs-link drift, and generated artifact drift.
 - [ ] **CI-03**: CI exercises both package-local tests and host-app user-facing flows in a clear release-gate order.
-- [ ] **CI-04**: CI publishes useful artifacts for failed host-app browser runs, including screenshots or traces where practical.
+- [x] **CI-04**: CI publishes useful artifacts for failed host-app browser runs, including screenshots or traces where practical.
 - [ ] **CI-05**: CI keeps live Stripe checks opt-in/advisory while making Fake-backed user-facing flows mandatory.
 - [ ] **CI-06**: CI annotation sweeps remain warning/error blockers for release-facing jobs.
 
@@ -98,9 +98,9 @@ Deferred until after v1.1 unless pulled into a later milestone:
 | HOST-07 | Phase 10 | Complete |
 | HOST-08 | Phase 10 | Complete |
 | CI-01 | Phase 11 | Pending |
-| CI-02 | Phase 11 | Pending |
+| CI-02 | Phase 11 | Complete |
 | CI-03 | Phase 11 | Pending |
-| CI-04 | Phase 11 | Pending |
+| CI-04 | Phase 11 | Complete |
 | CI-05 | Phase 11 | Pending |
 | CI-06 | Phase 11 | Pending |
 | DX-01 | Phase 12 | Pending |

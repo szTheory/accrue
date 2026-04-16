@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
-status: ready
-stopped_at: Completed 10-host-app-dogfood-harness-07-PLAN.md
-last_updated: "2026-04-16T18:10:50.741Z"
+status: executing
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-04-16T18:55:55.923Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 10
+  completed_plans: 8
+  percent: 80
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Ready to plan
+Phase: 11 (ci-user-facing-integration-gate) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-16
 
 Progress: 1/6 v1.1 phases complete
@@ -119,6 +119,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 10-host-app-dogfood-harness P05 | 5min | 2 tasks | 5 files |
 | Phase 10-host-app-dogfood-harness P06 | 9min | 2 tasks | 3 files |
 | Phase 10-host-app-dogfood-harness P07 | 7min | 3 tasks | 13 files |
+| Phase 11 P01 | 12m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -312,6 +313,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 10]: Prove /webhooks/stripe with a signed customer.subscription.created payload against the host router, then execute the persisted dispatch job to verify normal handler flow and replay idempotence.
 - [Phase 10-host-app-dogfood-harness]: Use the host app's existing Phoenix session token as the only admin-session bridge into accrue_admin.
 - [Phase 10-host-app-dogfood-harness]: Treat clean-checkout and dev boot failures as implementation bugs, not README caveats, so the documented host path remains executable.
+- [Phase 11]: Host browser Playwright config boots the real test-mode Phoenix server on ACCRUE_HOST_BROWSER_PORT rather than sharing the admin runner.
+- [Phase 11]: Host browser specs must read ACCRUE_HOST_E2E_FIXTURE at runtime so playwright list-mode discovery works before fixture seeding.
 
 ### Pending Todos
 
@@ -337,6 +340,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T17:08:35.232Z
-Stopped at: Completed 10-host-app-dogfood-harness-07-PLAN.md
+Last session: 2026-04-16T18:55:55.920Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
