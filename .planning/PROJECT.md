@@ -10,105 +10,118 @@ Tagline: *"Billing state, modeled clearly."*
 
 **A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one** — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
+## Current State
+
+Accrue v1.0 Initial Release is shipped as public Hex packages:
+
+- `accrue` 0.1.2
+- `accrue_admin` 0.1.2
+
+The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface. Phase history and requirements are archived in `.planning/milestones/`.
+
+## Next Milestone Goals
+
+Not defined yet. Start the next cycle with `$gsd-new-milestone`, which will create fresh requirements and a new roadmap section.
+
 ## Requirements
 
 ### Validated
 
-(None yet — greenfield project, nothing shipped)
+v1.0 Initial Release shipped and validated on 2026-04-16. Detailed requirement outcomes are archived in `.planning/milestones/v1.0-REQUIREMENTS.md`.
 
 ### Active
 
-> All Active requirements are hypotheses until shipped and validated. Detailed requirements get elaborated in `REQUIREMENTS.md`; this list is the shape of v1.0 scope at the project level.
+No active requirements are defined for the next milestone yet. The checked list below is retained as the validated v1.0 scope summary until the next milestone rewrites this section.
 
 **Core billing domain**
-- [ ] Polymorphic `Accrue.Billing.Customer` — any host schema (User, Org, Team) can be billable via `use Accrue.Billable`
-- [ ] `Accrue.Billing.Subscription` with full lifecycle (trials, proration, pause/resume, swap, cancel-at-period-end, immediate cancel, dunning, grace periods)
-- [ ] `Accrue.Billing.Invoice` with draft/open/paid/void/uncollectible state machine, line items, discounts, tax
-- [ ] `Accrue.Billing.Charge` / `PaymentIntent` / `SetupIntent` wrappers with async-state handling (requires_action, 3DS/SCA)
-- [ ] `Accrue.Billing.PaymentMethod` with default-management, fingerprinting
-- [ ] `Accrue.Billing.Refund` with Stripe fee awareness (gotcha #14)
-- [ ] `Accrue.Billing.Coupon` / `PromotionCode` / gift card redemption
-- [ ] Free-tier / trial / comped subscription support (no PaymentMethod required)
-- [ ] Multi-currency (including zero-decimal currency safety — JPY/KRW etc)
-- [ ] Subscription Schedules for multi-phase billing
-- [ ] Customer Portal Session + Checkout Session helpers
-- [ ] Stripe Connect (Standard/Express/Custom) support for marketplaces: destination charges, separate charges + transfers, platform onboarding
+- [x] Polymorphic `Accrue.Billing.Customer` — any host schema (User, Org, Team) can be billable via `use Accrue.Billable`
+- [x] `Accrue.Billing.Subscription` with full lifecycle (trials, proration, pause/resume, swap, cancel-at-period-end, immediate cancel, dunning, grace periods)
+- [x] `Accrue.Billing.Invoice` with draft/open/paid/void/uncollectible state machine, line items, discounts, tax
+- [x] `Accrue.Billing.Charge` / `PaymentIntent` / `SetupIntent` wrappers with async-state handling (requires_action, 3DS/SCA)
+- [x] `Accrue.Billing.PaymentMethod` with default-management, fingerprinting
+- [x] `Accrue.Billing.Refund` with Stripe fee awareness (gotcha #14)
+- [x] `Accrue.Billing.Coupon` / `PromotionCode` / gift card redemption
+- [x] Free-tier / trial / comped subscription support (no PaymentMethod required)
+- [x] Multi-currency (including zero-decimal currency safety — JPY/KRW etc)
+- [x] Subscription Schedules for multi-phase billing
+- [x] Customer Portal Session + Checkout Session helpers
+- [x] Stripe Connect (Standard/Express/Custom) support for marketplaces: destination charges, separate charges + transfers, platform onboarding
 
 **Processor abstraction**
-- [ ] Stripe processor (via `lattice_stripe` dep)
-- [ ] Fake processor for test-first development (no Stripe API calls, test clock, time advancement, event triggering)
-- [ ] `Accrue.Processor` behaviour designed so future adapters (Paddle, Lemon Squeezy, Braintree) can implement it without false-parity abstraction over processor-specific capabilities
+- [x] Stripe processor (via `lattice_stripe` dep)
+- [x] Fake processor for test-first development (no Stripe API calls, test clock, time advancement, event triggering)
+- [x] `Accrue.Processor` behaviour designed so future adapters (Paddle, Lemon Squeezy, Braintree) can implement it without false-parity abstraction over processor-specific capabilities
 
 **Webhooks**
-- [ ] Raw-body capture Plug (mandatory before `Plug.Parsers`)
-- [ ] Signature verification
-- [ ] DB idempotency via `accrue_webhook_events` table with `UNIQUE(processor_event_id)`
-- [ ] Oban-backed async dispatch with exponential backoff retry, dead-letter after N attempts
-- [ ] User handler contract with pattern-matchable event types
-- [ ] Replay tooling (requeue failed / dead-lettered events)
+- [x] Raw-body capture Plug (mandatory before `Plug.Parsers`)
+- [x] Signature verification
+- [x] DB idempotency via `accrue_webhook_events` table with `UNIQUE(processor_event_id)`
+- [x] Oban-backed async dispatch with exponential backoff retry, dead-letter after N attempts
+- [x] User handler contract with pattern-matchable event types
+- [x] Replay tooling (requeue failed / dead-lettered events)
 
 **Event ledger**
-- [ ] Append-only `accrue_events` table, immutable at the Postgres role/trigger level
-- [ ] Transactional event recording alongside state mutations (atomicity guarantee)
-- [ ] `schema_version` inside `data` jsonb + upcaster pattern for evolution
-- [ ] OpenTelemetry `trace_id` correlation per event
-- [ ] Query API: timeline for subject, replay/rewind state as-of, analytics bucketing
-- [ ] Bridge to `Sigra.Audit` when sigra adapter is active
+- [x] Append-only `accrue_events` table, immutable at the Postgres role/trigger level
+- [x] Transactional event recording alongside state mutations (atomicity guarantee)
+- [x] `schema_version` inside `data` jsonb + upcaster pattern for evolution
+- [x] OpenTelemetry `trace_id` correlation per event
+- [x] Query API: timeline for subject, replay/rewind state as-of, analytics bucketing
+- [x] Bridge to `Sigra.Audit` when sigra adapter is active
 
 **Email**
-- [ ] Swoosh-based transactional email via `Accrue.Mailer` facade (behaviour-wrapped so library doesn't leak Swoosh to users)
-- [ ] Full email type set: receipt, payment_succeeded, payment_failed, trial_ending, trial_ended, invoice_finalized, invoice_paid, invoice_payment_failed, subscription_canceled, subscription_paused, subscription_resumed, refund_issued, coupon_applied, gift_sent, gift_redeemed
-- [ ] HEEx templates that work in plain-text AND HTML, rendering consistently across major email clients
-- [ ] Single-point branding config (logo, colors, from-name, from-address) for 80% case
-- [ ] Per-template override for full customization
-- [ ] MJML support via `mjml_eex` for responsive templates
+- [x] Swoosh-based transactional email via `Accrue.Mailer` facade (behaviour-wrapped so library doesn't leak Swoosh to users)
+- [x] Full email type set: receipt, payment_succeeded, payment_failed, trial_ending, trial_ended, invoice_finalized, invoice_paid, invoice_payment_failed, subscription_canceled, subscription_paused, subscription_resumed, refund_issued, coupon_applied, gift_sent, gift_redeemed
+- [x] HEEx templates that work in plain-text AND HTML, rendering consistently across major email clients
+- [x] Single-point branding config (logo, colors, from-name, from-address) for 80% case
+- [x] Per-template override for full customization
+- [x] MJML support via `mjml_eex` for responsive templates
 
 **PDF**
-- [ ] `Accrue.PDF` behaviour with `Accrue.PDF.ChromicPDF` default adapter, `Accrue.PDF.Test` for assertion-based testing, documented path for custom adapters (Gotenberg sidecar, external services)
-- [ ] Branded invoice PDFs from the same HEEx template that drives the email HTML body (single source of truth)
-- [ ] Attachment and download paths for generated PDFs
+- [x] `Accrue.PDF` behaviour with `Accrue.PDF.ChromicPDF` default adapter, `Accrue.PDF.Test` for assertion-based testing, documented path for custom adapters (Gotenberg sidecar, external services)
+- [x] Branded invoice PDFs from the same HEEx template that drives the email HTML body (single source of truth)
+- [x] Attachment and download paths for generated PDFs
 
 **Admin UI (companion package `accrue_admin`)**
-- [ ] Phoenix LiveView dashboard: customers, subscriptions, invoices, charges, coupons, webhook events
-- [ ] Mobile-first responsive layout
-- [ ] Light + dark mode
-- [ ] Default theme follows Accrue brand palette (Ink / Slate / Fog / Paper foundation + Moss / Cobalt / Amber accents)
-- [ ] Branding customization (logo, accent color, app name) for internal-tool style
-- [ ] Webhook event inspector with raw payload, status, retry history, one-click replay, dead-letter bulk requeue
-- [ ] Activity feed sourced from `accrue_events`
-- [ ] Auth protection via `Accrue.Auth` adapter (Sigra-auto-wired when present)
-- [ ] Released same day as `accrue` v1.0, from the same monorepo
+- [x] Phoenix LiveView dashboard: customers, subscriptions, invoices, charges, coupons, webhook events
+- [x] Mobile-first responsive layout
+- [x] Light + dark mode
+- [x] Default theme follows Accrue brand palette (Ink / Slate / Fog / Paper foundation + Moss / Cobalt / Amber accents)
+- [x] Branding customization (logo, accent color, app name) for internal-tool style
+- [x] Webhook event inspector with raw payload, status, retry history, one-click replay, dead-letter bulk requeue
+- [x] Activity feed sourced from `accrue_events`
+- [x] Auth protection via `Accrue.Auth` adapter (Sigra-auto-wired when present)
+- [x] Released same day as `accrue` v1.0, from the same monorepo
 
 **Auth integration**
-- [ ] `Accrue.Auth` behaviour (current_user, require_admin_plug, user_schema, log_audit, actor_id)
-- [ ] `Accrue.Auth.Default` fallback adapter
-- [ ] `Accrue.Integrations.Sigra` first-party adapter, conditionally compiled, auto-detected by installer
-- [ ] Documented path for community adapters (`Accrue.Integrations.PhxGenAuth`, `.Pow`, `.Assent`)
+- [x] `Accrue.Auth` behaviour (current_user, require_admin_plug, user_schema, log_audit, actor_id)
+- [x] `Accrue.Auth.Default` fallback adapter
+- [x] `Accrue.Integrations.Sigra` first-party adapter, conditionally compiled, auto-detected by installer
+- [x] Documented path for community adapters (`Accrue.Integrations.PhxGenAuth`, `.Pow`, `.Assent`)
 
 **Install + DX**
-- [ ] `mix accrue.install` task that generates migrations, `MyApp.Billing` context, router mounts, admin LiveView routes; detects sigra and auto-wires auth; uses configurable billable schema
-- [ ] Discoverable, intuitive configuration with NimbleOptions-backed validation and doc generation
-- [ ] `Accrue.Billing` context facade hides lattice_stripe from the user-facing API
+- [x] `mix accrue.install` task that generates migrations, `MyApp.Billing` context, router mounts, admin LiveView routes; detects sigra and auto-wires auth; uses configurable billable schema
+- [x] Discoverable, intuitive configuration with NimbleOptions-backed validation and doc generation
+- [x] `Accrue.Billing` context facade hides lattice_stripe from the user-facing API
 
 **Observability**
-- [ ] First-class `:telemetry` events with consistent `[:accrue, :domain, :action, :start|:stop|:exception]` naming
-- [ ] OpenTelemetry span helpers with business-meaningful attributes (customer_id, subscription_id, event_type, processor)
-- [ ] High-signal ops events for SRE/on-call (revenue-loss, webhook DLQ, dunning exhaustion) with low-signal firehose available separately
-- [ ] Structured, pattern-matchable error hierarchy (`Accrue.Error` → `Accrue.CardError`, `.RateLimitError`, etc.)
+- [x] First-class `:telemetry` events with consistent `[:accrue, :domain, :action, :start|:stop|:exception]` naming
+- [x] OpenTelemetry span helpers with business-meaningful attributes (customer_id, subscription_id, event_type, processor)
+- [x] High-signal ops events for SRE/on-call (revenue-loss, webhook DLQ, dunning exhaustion) with low-signal firehose available separately
+- [x] Structured, pattern-matchable error hierarchy (`Accrue.Error` → `Accrue.CardError`, `.RateLimitError`, etc.)
 
 **Testing**
-- [ ] Fake Processor as the primary test surface — not an afterthought
-- [ ] Test helpers: time advancement, event triggering, state inspection, `assert_email_sent`, `assert_pdf_rendered`
-- [ ] Mock adapters for `Accrue.Auth`, `Accrue.Mailer`, `Accrue.PDF` so host apps can test billing flows without hitting Stripe / Chrome / real SMTP
+- [x] Fake Processor as the primary test surface — not an afterthought
+- [x] Test helpers: time advancement, event triggering, state inspection, `assert_email_sent`, `assert_pdf_rendered`
+- [x] Mock adapters for `Accrue.Auth`, `Accrue.Mailer`, `Accrue.PDF` so host apps can test billing flows without hitting Stripe / Chrome / real SMTP
 
 **OSS hygiene and release**
-- [ ] Monorepo with sibling mix projects (`accrue/`, `accrue_admin/`), each published independently to Hex
-- [ ] GitHub Actions CI: Elixir/OTP matrix, `mix format --check-formatted`, `mix compile --warnings-as-errors`, `mix test --warnings-as-errors`, `mix credo --strict`, `mix dialyzer`, `mix docs --warnings-as-errors`, `mix hex.audit`
-- [ ] Release Please + Conventional Commits for automated version bumps + CHANGELOG
-- [ ] ExDoc with guides: quickstart, configuration, testing, Sigra integration, custom processors, custom PDF adapter, brand customization, admin UI setup, upgrade guide
-- [ ] MIT license, single-root `LICENSE` file, no CLA
-- [ ] `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md` for vulnerability disclosure
-- [ ] Semantic versioning with documented deprecation policy; minimize breaking changes through v1.x via stable public API facade
+- [x] Monorepo with sibling mix projects (`accrue/`, `accrue_admin/`), each published independently to Hex
+- [x] GitHub Actions CI: Elixir/OTP matrix, `mix format --check-formatted`, `mix compile --warnings-as-errors`, `mix test --warnings-as-errors`, `mix credo --strict`, `mix dialyzer`, `mix docs --warnings-as-errors`, `mix hex.audit`
+- [x] Release Please + Conventional Commits for automated version bumps + CHANGELOG
+- [x] ExDoc with guides: quickstart, configuration, testing, Sigra integration, custom processors, custom PDF adapter, brand customization, admin UI setup, upgrade guide
+- [x] MIT license, single-root `LICENSE` file, no CLA
+- [x] `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md` for vulnerability disclosure
+- [x] Semantic versioning with documented deprecation policy; minimize breaking changes through v1.x via stable public API facade
 
 ### Out of Scope
 
@@ -170,19 +183,19 @@ Tagline: *"Billing state, modeled clearly."*
 
 | Decision | Rationale | Outcome |
 |---|---|---|
-| Stripe-only for v1.0 (processor behaviour designed for future adapters) | False multi-processor parity was Laravel Cashier's most-cited regret; lessons learned dominate breadth | — Pending |
-| Polymorphic billable (`owner_type`/`owner_id`) + `use Accrue.Billable` macro | Pay v2→v3 migration pain; future sigra org support flows through with zero schema churn | — Pending |
-| PostgreSQL 14+ only | 7 load-bearing PG features have no clean fallback; ~0% of serious Phoenix apps use MySQL/SQLite in production | — Pending |
-| Hybrid lib + `mix accrue.install` generator | Matches sigra's pattern, upgrade-safe, best install DX; Phoenix community already knows this shape via phx.gen.auth | — Pending |
-| Admin UI as companion `accrue_admin` package (monorepo, same-day release) | Core stays LiveView-free for headless users; `phoenix_live_dashboard` / `oban_web` pattern is idiomatic | — Pending |
-| Swoosh (wrapped behind `Accrue.Mailer` facade) | Phoenix default since 1.6, larger adapter catalog, better test ergonomics, ecosystem alignment | — Pending |
-| PDF via `Accrue.PDF` behaviour + `ChromicPDF` default | Seam pays for itself on the testing story alone (no Chrome in tests); escape hatch for Chrome-hostile deploys comes free | — Pending |
-| Oban-backed async webhook dispatch (Oban required dep) | Retries survive deploys, DB idempotency at layer boundary, Oban is THE Elixir job standard, already needed for async email | — Pending |
-| `Accrue.Auth` behaviour + `Accrue.Integrations.Sigra` adapter | Centralizes 15+ integration points to one dispatch, matches Plug/Ecto/Swoosh idiom, path for community adapters | — Pending |
-| Append-only `accrue_events` table + Sigra.Audit bridge (NOT Commanded) | Matches Stripe's mental model (mutable state + events), ~150 LOC vs ~600+ for CQRS, transactional atomicity via Postgres | — Pending |
-| MIT license, no CLA, single LICENSE file | Matches Elixir ecosystem norm; future commercial path via services not dual-license | — Pending |
-| Context name `MyApp.Billing` | Industry-standard term, matches Stripe product naming, covers subs + one-time + refunds cleanly | — Pending |
-| Build complete, ship v1.0 (no MVP-iterate cadence) | User explicit: won't have real users until fully usable; avoids Pay-style v2→v3 migration pain for early adopters | — Pending |
+| Stripe-only for v1.0 (processor behaviour designed for future adapters) | False multi-processor parity was Laravel Cashier's most-cited regret; lessons learned dominate breadth | ✓ Good |
+| Polymorphic billable (`owner_type`/`owner_id`) + `use Accrue.Billable` macro | Pay v2→v3 migration pain; future sigra org support flows through with zero schema churn | ✓ Good |
+| PostgreSQL 14+ only | 7 load-bearing PG features have no clean fallback; ~0% of serious Phoenix apps use MySQL/SQLite in production | ✓ Good |
+| Hybrid lib + `mix accrue.install` generator | Matches sigra's pattern, upgrade-safe, best install DX; Phoenix community already knows this shape via phx.gen.auth | ✓ Good |
+| Admin UI as companion `accrue_admin` package (monorepo, same-day release) | Core stays LiveView-free for headless users; `phoenix_live_dashboard` / `oban_web` pattern is idiomatic | ✓ Good |
+| Swoosh (wrapped behind `Accrue.Mailer` facade) | Phoenix default since 1.6, larger adapter catalog, better test ergonomics, ecosystem alignment | ✓ Good |
+| PDF via `Accrue.PDF` behaviour + `ChromicPDF` default | Seam pays for itself on the testing story alone (no Chrome in tests); escape hatch for Chrome-hostile deploys comes free | ✓ Good |
+| Oban-backed async webhook dispatch (Oban required dep) | Retries survive deploys, DB idempotency at layer boundary, Oban is THE Elixir job standard, already needed for async email | ✓ Good |
+| `Accrue.Auth` behaviour + `Accrue.Integrations.Sigra` adapter | Centralizes 15+ integration points to one dispatch, matches Plug/Ecto/Swoosh idiom, path for community adapters | ✓ Good |
+| Append-only `accrue_events` table + Sigra.Audit bridge (NOT Commanded) | Matches Stripe's mental model (mutable state + events), ~150 LOC vs ~600+ for CQRS, transactional atomicity via Postgres | ✓ Good |
+| MIT license, no CLA, single LICENSE file | Matches Elixir ecosystem norm; future commercial path via services not dual-license | ✓ Good |
+| Context name `MyApp.Billing` | Industry-standard term, matches Stripe product naming, covers subs + one-time + refunds cleanly | ✓ Good |
+| Build complete, ship v1.0 (no MVP-iterate cadence) | User explicit: won't have real users until fully usable; avoids Pay-style v2→v3 migration pain for early adopters | ✓ Good |
 
 ## Evolution
 
@@ -202,4 +215,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 after initialization*
+*Last updated: 2026-04-16 after v1.0 milestone*

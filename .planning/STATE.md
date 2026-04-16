@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone_complete
-stopped_at: Published accrue 0.1.2 and accrue_admin 0.1.2; planning snapshot committed
-last_updated: "2026-04-16T14:20:00.000Z"
+status: milestone_archived
+stopped_at: Archived v1.0 milestone; next step is `$gsd-new-milestone`
+last_updated: "2026-04-16T14:50:00.000Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 9
@@ -18,19 +18,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-11)
+See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Milestone v1.0 is complete; next work should start a new milestone/phase discussion.
+**Current focus:** Planning the next milestone. Run `$gsd-new-milestone` to define fresh requirements and roadmap.
 
 ## Current Position
 
 Phase: 9
 Plan: Complete
-Status: Released and verified
+Status: Archived and ready for next milestone
 Last activity: 2026-04-16
 
-Progress: [██████████] 69/69 planned plans complete (100% overall; Phase 09 released and verified)
+Progress: [██████████] 69/69 planned plans complete (100% overall; v1.0 archived)
 
 ## Performance Metrics
 
@@ -296,9 +296,14 @@ None yet.
 
 ### Blockers/Concerns
 
-- **Release Please v4 monorepo output naming:** resolved by real Release Please PRs and publish jobs for `accrue` and `accrue_admin`.
-- **ChromicPDF on minimal Alpine containers:** needs real-world container testing in Phase 6; PDF.Null adapter is the escape hatch.
-- **lattice_stripe 1.1 (BillingMeter/MeterEvent/BillingPortal.Session):** Required for Phase 4 requirements BILL-11 (metered billing) and CHKT-02 (Customer Portal). Upstream work is in-flight in a parallel session targeting 1.1 release. Does NOT block Phase 3 or the rest of Phase 4.
+None for the closed v1.0 milestone. New concerns should be captured during `$gsd-new-milestone`.
+
+### Archive Locations
+
+- Milestone summary: `.planning/MILESTONES.md`
+- Roadmap archive: `.planning/milestones/v1.0-ROADMAP.md`
+- Requirements archive: `.planning/milestones/v1.0-REQUIREMENTS.md`
+- Phase execution history: `.planning/milestones/v1.0-phases/`
 
 ### Quick Tasks Completed
 
@@ -309,6 +314,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T14:20:00.000Z
-Stopped at: Published `accrue` 0.1.2 and `accrue_admin` 0.1.2, verified CI/HexDocs, and committed `.planning/` snapshot in `4673f8b planning: capture phase artifacts`.
+Last session: 2026-04-16T14:50:00.000Z
+Stopped at: v1.0 milestone archived; live roadmap collapsed; requirements archived for next milestone reset.
 Resume file: None
