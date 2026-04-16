@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 12-first-user-dx-stabilization-03-PLAN.md
-last_updated: "2026-04-16T22:01:20.627Z"
+stopped_at: Completed 12-first-user-dx-stabilization-04-PLAN.md
+last_updated: "2026-04-16T22:04:50.540Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 19
-  completed_plans: 14
-  percent: 74
+  completed_plans: 15
+  percent: 79
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 12 (first-user-dx-stabilization) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -128,6 +128,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 12 P01 | 2m | 3 tasks | 4 files |
 | Phase 12-first-user-dx-stabilization P02 | 2min | 2 tasks | 3 files |
 | Phase 12-first-user-dx-stabilization P03 | 4m | 2 tasks | 6 files |
+| Phase 12-first-user-dx-stabilization P04 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -336,6 +337,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12]: Plan 12-02 reserves installer rerun taxonomy and .accrue/conflicts/ artifact contracts with skipped tests in the existing installer test modules so plan 12-03 can activate them in place.
 - [Phase 12-first-user-dx-stabilization]: Template writes now emit optional sidecars only for skipped stamped-edited or skipped-unmarked files, while --force remains allowed only for unmarked files.
 - [Phase 12-first-user-dx-stabilization]: Patch-side manual fallbacks write snippets under .accrue/conflicts/patches/<relative-path>.snippet and report the artifact as a separate summary category.
+- [Phase 12-first-user-dx-stabilization]: Phase 12 P04: Host UI reads current billing state through AccrueHost.Billing.billing_state_for/1 instead of direct Repo and schema queries.
+- [Phase 12-first-user-dx-stabilization]: Phase 12 P04: Generated host facades may hide internal Accrue table lookups as long as the public integration story stays on host-owned Billing helpers.
 
 ### Pending Todos
 
@@ -361,6 +364,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:01:11.655Z
-Stopped at: Completed 12-first-user-dx-stabilization-03-PLAN.md
+Last session: 2026-04-16T22:04:50.536Z
+Stopped at: Completed 12-first-user-dx-stabilization-04-PLAN.md
 Resume file: None
