@@ -66,6 +66,7 @@ defmodule Accrue.MixProject do
       {:jason, "~> 1.4"},
       {:decimal, "~> 2.0"},
       {:plug, "~> 1.16"},
+      {:plug_crypto, "~> 2.1"},
       {:igniter, "~> 0.7.9", runtime: false},
 
       # Optional deps — conditionally compiled; see CLAUDE.md §Conditional Compilation.
@@ -93,7 +94,7 @@ defmodule Accrue.MixProject do
       # Dev / test
       {:mox, "~> 1.2", only: :test},
       {:stream_data, "~> 1.3", only: [:dev, :test]},
-      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]

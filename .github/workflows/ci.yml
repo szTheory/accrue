@@ -139,7 +139,7 @@ jobs:
         run: cd accrue && mix dialyzer --format github
 
       - name: Accrue docs
-        run: cd accrue && mix docs --warnings-as-errors
+        run: cd accrue && MIX_ENV=dev mix docs --warnings-as-errors
 
       - name: Accrue retired package audit
         run: cd accrue && mix hex.audit
@@ -189,7 +189,7 @@ jobs:
         run: cd accrue_admin && mix dialyzer --format github
 
       - name: Accrue admin docs
-        run: cd accrue_admin && mix docs --warnings-as-errors
+        run: cd accrue_admin && MIX_ENV=dev mix docs --warnings-as-errors
 
       - name: Accrue admin retired package audit
         run: cd accrue_admin && mix hex.audit
