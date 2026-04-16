@@ -91,8 +91,7 @@ defmodule AccrueHost.HostFlowProofCase do
   defp delete_proof_jobs! do
     Repo.delete_all(
       from(job in Oban.Job,
-        where: job.worker == "Accrue.Webhook.DispatchWorker",
-        where: job.state == "discarded"
+        where: job.worker == "Accrue.Webhook.DispatchWorker"
       )
     )
   end
