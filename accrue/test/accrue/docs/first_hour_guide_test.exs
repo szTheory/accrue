@@ -2,7 +2,6 @@ defmodule Accrue.Docs.FirstHourGuideTest do
   use ExUnit.Case, async: true
 
   @guide "guides/first_hour.md"
-  @skip_reason "Phase 12 plan 06 activates this contract after the guide lands"
   @ordered_steps [
     "mix deps.get",
     "mix accrue.install",
@@ -32,7 +31,6 @@ defmodule Accrue.Docs.FirstHourGuideTest do
     "worker internals"
   ]
 
-  @tag skip: @skip_reason
   test "first hour guide preserves the Phoenix-order host boundary contract" do
     guide = File.read!(@guide)
 
@@ -49,7 +47,7 @@ defmodule Accrue.Docs.FirstHourGuideTest do
 
   defp assert_order!(guide, [first | rest]) do
     Enum.reduce(rest, index_of(guide, first), fn step, previous_index ->
-      current_index = index_of(guide, step)
+      current_index = index_of(guide, step, previous_index + 1)
       assert current_index
       assert previous_index
       assert previous_index < current_index
@@ -57,8 +55,10 @@ defmodule Accrue.Docs.FirstHourGuideTest do
     end)
   end
 
-  defp index_of(binary, pattern) do
-    case :binary.match(binary, pattern) do
+  defp index_of(binary, pattern, offset \\ 0) do
+    length = byte_size(binary) - offset
+
+    case :binary.match(binary, pattern, [{:scope, {offset, length}}]) do
       {index, _length} -> index
       :nomatch -> nil
     end

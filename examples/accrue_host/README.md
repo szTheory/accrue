@@ -6,18 +6,27 @@ This example is the Phase 10 host-app dogfood harness for `accrue` and `accrue_a
 
 PostgreSQL 14+ must already be running before you execute setup or boot commands. By default the app connects to `localhost:5432`. Override that with `PGHOST`, `PGUSER`, and `PGPASSWORD` if your local database uses different values.
 
-## Rebuild From A Clean Checkout
+## First Hour Path
 
 From `examples/accrue_host`:
 
 ```bash
 mix deps.get
-mix accrue.install --yes --billable AccrueHost.Accounts.User --billing-context AccrueHost.Billing --admin-mount /billing --webhook-path /webhooks/stripe
+mix accrue.install --billable AccrueHost.Accounts.User --billing-context AccrueHost.Billing --admin-mount /billing --webhook-path /webhooks/stripe
 mix ecto.create
 mix ecto.migrate
-mix test
+mix test test/accrue_host/billing_facade_test.exs
+mix test test/accrue_host_web/webhook_ingest_test.exs
+mix test test/accrue_host_web/admin_mount_test.exs
 mix phx.server
 ```
+
+The package docs mirror this order:
+
+- `../../accrue/guides/first_hour.md`
+- `../../accrue/guides/troubleshooting.md`
+- `../../accrue/guides/webhooks.md`
+- `../../accrue_admin/guides/admin_ui.md`
 
 For a CI-equivalent local check from the repository root:
 

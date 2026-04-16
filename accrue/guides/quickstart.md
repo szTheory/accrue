@@ -1,58 +1,27 @@
 # Quickstart
 
-## Install
+Use this page as the index into the host-first setup docs.
 
-Add Accrue to your host app and fetch dependencies:
+## Start with First Hour
 
-```elixir
-defp deps do
-  [
-    {:accrue, "~> 1.0.0"}
-  ]
-end
-```
+The canonical setup walkthrough lives in [First Hour](first_hour.md). It follows
+the Phoenix host-app order proved in `examples/accrue_host`:
 
-```bash
-mix deps.get
-```
+- deps and `mix deps.get`
+- `mix accrue.install`
+- `config/runtime.exs`
+- migrations and Oban
+- `/webhooks/stripe`
+- `accrue_admin "/billing"`
+- first Fake-backed subscription
+- focused host tests
 
-## Configure Stripe
+## Focused guides
 
-Set the processor at config time and keep secrets in `config/runtime.exs`:
-
-```elixir
-config :accrue, :processor, Accrue.Processor.Stripe
-```
-
-```elixir
-config :accrue,
-  stripe_secret_key: System.fetch_env!("STRIPE_SECRET_KEY"),
-  webhook_signing_secret: System.fetch_env!("STRIPE_WEBHOOK_SIGNING_SECRET")
-```
-
-Use placeholder env vars in development and never commit live keys or webhook secrets.
-
-## Run the installer
-
-Run the installer from the host app:
-
-```bash
-mix accrue.install
-```
-
-The installer wires the generated billing facade, router mounts, and starter config around your host application.
-
-## First subscription
-
-With the generated billing facade in place, create a first subscription through the host boundary:
-
-```elixir
-user = MyApp.Accounts.get_user!(user_id)
-
-{:ok, subscription} =
-  MyApp.Billing.subscribe(user, "price_basic_monthly",
-    payment_method: "pm_card_visa"
-  )
-```
-
-From there you can preview upcoming invoices, open checkout, receive webhooks, and assert the flow locally with `Accrue.Test`.
+- [Troubleshooting](troubleshooting.md) for setup diagnostics and exact verify
+  commands.
+- [Webhooks](webhooks.md) for the public `use Accrue.Webhook.Handler` boundary,
+  raw-body placement, signatures, and replay.
+- [Testing](testing.md) for `use Accrue.Test` and Fake-backed host proofs.
+- [Upgrade](upgrade.md) for generated-file ownership and installer rerun
+  behavior.

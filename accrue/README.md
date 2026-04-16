@@ -2,9 +2,19 @@
 
 Billing state, modeled clearly.
 
-## Quickstart
+Accrue is the billing library. Your Phoenix app owns the generated `MyApp.Billing`
+facade, router mounts, runtime config, and auth/session boundary.
 
-Add Accrue to `deps/0`, configure the Stripe processor, then run the installer:
+## Start Here
+
+- [First Hour](guides/first_hour.md)
+- [Troubleshooting](guides/troubleshooting.md)
+- [Webhooks](guides/webhooks.md)
+- [Upgrade](guides/upgrade.md)
+
+## Install
+
+Add Accrue to `deps/0` and fetch dependencies:
 
 ```elixir
 defp deps do
@@ -14,16 +24,15 @@ defp deps do
 end
 ```
 
-```elixir
-config :accrue, :processor, Accrue.Processor.Stripe
-```
-
 ```bash
 mix deps.get
 mix accrue.install
 ```
 
-From there, configure your runtime Stripe secrets, mount the generated routes, and call your host billing facade for checkout, subscriptions, invoices, and customer self-service.
+Then follow the [First Hour guide](guides/first_hour.md) for the Phoenix-order
+host setup path: runtime config, migrations, Oban, signed webhook ingest,
+`accrue_admin "/billing"`, a first Fake-backed subscription, and focused host
+tests.
 
 ## What ships
 
@@ -34,20 +43,28 @@ From there, configure your runtime Stripe secrets, mount the generated routes, a
 
 ## Public API stability
 
-The supported public surface is the facade layer under `Accrue.Billing`, `Accrue.Checkout`, `Accrue.BillingPortal`, `Accrue.Connect`, `Accrue.Events`, and `Accrue.Test`.
+The supported public setup surface for first-time integration is:
+
+- your generated `MyApp.Billing`
+- `use Accrue.Webhook.Handler`
+- `use Accrue.Test`
+- `AccrueAdmin.Router.accrue_admin/2`
+- `Accrue.ConfigError` for setup failures
 
 Breaking changes for that facade layer follow the deprecation cycle documented in `guides/upgrade.md`. Accrue deprecates public APIs before removal instead of silently changing behavior in place.
 
 ## Guides
 
 - [Quickstart](guides/quickstart.md)
+- [First Hour](guides/first_hour.md)
+- [Troubleshooting](guides/troubleshooting.md)
 - [Configuration](guides/configuration.md)
 - [Testing](guides/testing.md)
 - [Sigra integration](guides/sigra_integration.md)
 - [Custom processors](guides/custom_processors.md)
 - [Custom PDF adapter](guides/custom_pdf_adapter.md)
 - [Branding](guides/branding.md)
-- [Webhook gotchas](guides/webhook_gotchas.md)
+- [Webhooks](guides/webhooks.md)
 - [Upgrade](guides/upgrade.md)
 
 ## Security
