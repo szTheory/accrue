@@ -105,21 +105,20 @@ defmodule Mix.Tasks.Accrue.Install do
     template_results =
       project
       |> Accrue.Install.Templates.render_all(opts)
-      |> Enum.map(fn {path, content} ->
-        {status, reason} =
-          Accrue.Install.Fingerprints.write(path, content,
-            force: opts.force,
-            dry_run: opts.dry_run
-          )
-
-        report("#{status}: #{Path.relative_to_cwd(path)} #{reason}")
-        {status, path, reason}
+      |> Enum.flat_map(fn {path, content} ->
+        path
+        |> Accrue.Install.Fingerprints.write(content,
+          force: opts.force,
+          dry_run: opts.dry_run,
+          write_conflicts: opts.write_conflicts
+        )
+        |> report_template_result()
       end)
 
     patch_results =
       project
       |> Accrue.Install.Patches.apply(opts)
-      |> Enum.map(&report_patch_result/1)
+      |> Enum.flat_map(&report_patch_result/1)
 
     template_results ++ patch_results
   end
@@ -131,32 +130,97 @@ defmodule Mix.Tasks.Accrue.Install do
     end
   end
 
+  defp report_template_result({status, path, reason}) when status in [:changed, :skipped] do
+    label = template_label(status, reason)
+    report("#{label}: #{Path.relative_to_cwd(path)}")
+    [{status, path, reason}]
+  end
+
+  defp report_template_result({:skipped, path, reason, artifact_path}) do
+    label = template_label(:skipped, reason)
+    report("#{label}: #{Path.relative_to_cwd(path)}")
+    report("conflict artifact: #{Path.relative_to_cwd(artifact_path)}")
+    [{:skipped, path, reason}, {:conflict_artifact, artifact_path, reason}]
+  end
+
   defp report_patch_result({status, path, reason}) when status in [:changed, :skipped] do
-    report("#{status}: #{Path.relative_to_cwd(path)} #{reason}")
-    {status, path, reason}
+    label = patch_label(status, reason)
+    report("#{label}: #{Path.relative_to_cwd(path)}")
+    [{status, path, reason}]
   end
 
   defp report_patch_result({:manual, nil, reason, snippet}) do
     report("manual: #{reason}")
     report(snippet)
-    {:manual, nil, reason}
+    [{:manual, nil, reason}]
   end
 
   defp report_patch_result({:manual, path, reason, snippet}) do
     report("manual: #{Path.relative_to_cwd(path)} #{reason}")
     report(snippet)
-    {:manual, path, reason}
+    [{:manual, path, reason}]
+  end
+
+  defp report_patch_result({:manual, path, reason, snippet, artifact_path}) do
+    report("manual: #{Path.relative_to_cwd(path)} #{reason}")
+    report("conflict artifact: #{Path.relative_to_cwd(artifact_path)}")
+    report(snippet)
+    [{:manual, path, reason}, {:conflict_artifact, artifact_path, reason}]
   end
 
   defp print_summary(results, opts, project) do
-    changed = Enum.count(results, &match?({:changed, _, _}, &1))
-    skipped = Enum.count(results, &match?({:skipped, _, _}, &1))
-    manual = if opts.manual or opts.dry_run or project.manual?, do: 1, else: 0
+    summary =
+      Enum.reduce(results, default_summary(opts, project), fn
+        {:changed, _path, "created"}, acc ->
+          Map.update!(acc, :created, &(&1 + 1))
 
-    report("changed: #{changed}")
-    report("skipped: #{skipped}")
-    report("manual: #{manual}")
+        {:changed, _path, "updated pristine"}, acc ->
+          Map.update!(acc, :updated_pristine, &(&1 + 1))
+
+        {:skipped, _path, "user-edited"}, acc ->
+          Map.update!(acc, :skipped_user_edited, &(&1 + 1))
+
+        {:skipped, _path, "exists"}, acc ->
+          Map.update!(acc, :skipped_exists, &(&1 + 1))
+
+        {:manual, _path, _reason}, acc ->
+          Map.update!(acc, :manual, &(&1 + 1))
+
+        {:conflict_artifact, _path, _reason}, acc ->
+          Map.update!(acc, :conflict_artifact, &(&1 + 1))
+
+        _other, acc ->
+          acc
+      end)
+
+    report("created: #{summary.created}")
+    report("updated pristine: #{summary.updated_pristine}")
+    report("skipped user-edited: #{summary.skipped_user_edited}")
+    report("skipped exists: #{summary.skipped_exists}")
+    report("manual: #{summary.manual}")
+    report("conflict artifact: #{summary.conflict_artifact}")
   end
+
+  defp default_summary(opts, project) do
+    %{
+      created: 0,
+      updated_pristine: 0,
+      skipped_user_edited: 0,
+      skipped_exists: 0,
+      manual: if(opts.manual or opts.dry_run or project.manual?, do: 1, else: 0),
+      conflict_artifact: 0
+    }
+  end
+
+  defp template_label(:changed, "created"), do: "created"
+  defp template_label(:changed, "updated pristine"), do: "updated pristine"
+  defp template_label(:changed, reason), do: "changed (#{reason})"
+  defp template_label(:skipped, "user-edited"), do: "skipped user-edited"
+  defp template_label(:skipped, "exists"), do: "skipped exists"
+  defp template_label(:skipped, reason), do: "skipped (#{reason})"
+
+  defp patch_label(:changed, _reason), do: "created"
+  defp patch_label(:skipped, reason) when is_binary(reason), do: "skipped exists"
 
   defp validate_planned_config!(project) do
     Accrue.Config.validate!(

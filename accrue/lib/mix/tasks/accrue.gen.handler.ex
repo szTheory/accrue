@@ -63,7 +63,7 @@ defmodule Mix.Tasks.Accrue.Gen.Handler do
         report("skipped: never overwrite user-edited handler #{path}")
 
       true ->
-        {status, reason} =
+        {status, _written_path, reason} =
           Accrue.Install.Fingerprints.write(path, content,
             force: opts[:force] || false,
             dry_run: opts[:dry_run] || false

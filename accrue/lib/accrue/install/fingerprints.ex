@@ -3,8 +3,14 @@ defmodule Accrue.Install.Fingerprints do
   No-clobber primitives for Accrue-generated host files.
   """
 
+  @type write_result ::
+          {:changed, Path.t(), String.t()}
+          | {:skipped, Path.t(), String.t()}
+          | {:skipped, Path.t(), String.t(), Path.t()}
+
   @marker "# accrue:generated"
   @fingerprint_prefix "# accrue:fingerprint:"
+  @conflict_root ".accrue/conflicts"
 
   @doc false
   def marker, do: @marker
@@ -41,33 +47,69 @@ defmodule Accrue.Install.Fingerprints do
   @doc """
   Writes new files and updates pristine generated files; skips user-edited files.
   """
-  @spec write(Path.t(), String.t(), keyword()) :: {:changed | :skipped, String.t()}
+  @spec write(Path.t(), String.t(), keyword()) :: write_result()
   def write(path, content, opts \\ []) when is_binary(content) do
     stamped = stamp(content)
 
     cond do
       Keyword.get(opts, :dry_run, false) ->
-        {:skipped, "dry-run"}
+        {:skipped, path, "dry-run"}
 
       not File.exists?(path) ->
         do_write(path, stamped)
-        {:changed, "created"}
+        {:changed, path, "created"}
 
       pristine?(path) ->
         do_write(path, stamped)
-        {:changed, "updated pristine"}
+        {:changed, path, "updated pristine"}
 
       user_edited?(path) ->
-        {:skipped, "user-edited"}
+        skipped_with_conflict(path, "user-edited", stamped, opts)
 
       Keyword.get(opts, :force, false) ->
         do_write(path, stamped)
-        {:changed, "overwrote unmarked"}
+        {:changed, path, "overwrote unmarked"}
 
       true ->
-        {:skipped, "exists"}
+        skipped_with_conflict(path, "exists", stamped, opts)
     end
   end
+
+  @doc """
+  Writes a template replacement artifact under `.accrue/conflicts/templates/`.
+  """
+  @spec write_template_conflict(Path.t(), String.t(), String.t()) :: Path.t()
+  def write_template_conflict(path, reason, content)
+      when is_binary(path) and is_binary(reason) and is_binary(content) do
+    artifact_path = template_conflict_path(path)
+    artifact_body = conflict_body(path, reason, content)
+
+    File.mkdir_p!(Path.dirname(artifact_path))
+    File.write!(artifact_path, artifact_body)
+    artifact_path
+  end
+
+  @doc """
+  Writes a patch snippet artifact under `.accrue/conflicts/patches/`.
+  """
+  @spec write_patch_conflict(Path.t(), String.t(), String.t()) :: Path.t()
+  def write_patch_conflict(path, reason, snippet)
+      when is_binary(path) and is_binary(reason) and is_binary(snippet) do
+    artifact_path = patch_conflict_path(path)
+    artifact_body = conflict_body(path, reason, snippet)
+
+    File.mkdir_p!(Path.dirname(artifact_path))
+    File.write!(artifact_path, artifact_body)
+    artifact_path
+  end
+
+  @doc false
+  def template_conflict_path(path) when is_binary(path),
+    do: conflict_path("templates", path, ".new")
+
+  @doc false
+  def patch_conflict_path(path) when is_binary(path),
+    do: conflict_path("patches", path, ".snippet")
 
   @doc """
   Redacts Stripe/API secret material before installer report output.
@@ -82,6 +124,33 @@ defmodule Accrue.Install.Fingerprints do
   end
 
   defp generated?(content), do: content =~ @marker
+
+  defp skipped_with_conflict(path, reason, content, opts) do
+    if Keyword.get(opts, :write_conflicts, false) do
+      artifact_path = write_template_conflict(path, "skipped #{reason}", content)
+      {:skipped, path, reason, artifact_path}
+    else
+      {:skipped, path, reason}
+    end
+  end
+
+  defp conflict_path(kind, path, extension) do
+    relative_path = Path.relative_to_cwd(path)
+    Path.join([@conflict_root, kind, relative_path <> extension])
+  end
+
+  defp conflict_body(path, reason, content) do
+    relative_path = Path.relative_to_cwd(path)
+
+    [
+      "target: #{relative_path}",
+      "reason: #{reason}",
+      "",
+      ensure_trailing_newline(content)
+    ]
+    |> Enum.join("\n")
+    |> ensure_trailing_newline()
+  end
 
   defp pristine_content?(content) do
     with [_, saved] <-

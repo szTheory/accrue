@@ -69,7 +69,11 @@ defmodule Accrue.Install.Patches do
   def apply(project, opts) do
     project
     |> build(opts)
-    |> Enum.map(fn patch -> patch.apply.(project, opts, patch) end)
+    |> Enum.map(fn patch ->
+      project
+      |> patch.apply.(opts, patch)
+      |> maybe_write_conflict(opts)
+    end)
   end
 
   def router_snippet(opts) do
@@ -237,6 +241,18 @@ defmodule Accrue.Install.Patches do
   defp manual_only(_project, _opts, %{snippet: snippet}) do
     {:manual, nil, "Oban queue wiring", snippet}
   end
+
+  defp maybe_write_conflict({:manual, path, reason, snippet}, opts)
+       when is_binary(path) and is_binary(snippet) do
+    if opts.write_conflicts do
+      artifact_path = Accrue.Install.Fingerprints.write_patch_conflict(path, reason, snippet)
+      {:manual, path, reason, snippet, artifact_path}
+    else
+      {:manual, path, reason, snippet}
+    end
+  end
+
+  defp maybe_write_conflict(result, _opts), do: result
 
   defp ensure_import(content, module) do
     import_line = "  import #{module}\n"
