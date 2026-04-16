@@ -107,6 +107,40 @@ defmodule Accrue.ConfigTest do
     end
   end
 
+  describe "setup diagnostics" do
+    test "missing webhook signing secret raises shared diagnostic" do
+      Application.put_env(:accrue, :webhook_signing_secrets, %{})
+
+      error =
+        assert_raise Accrue.ConfigError, fn ->
+          Config.webhook_signing_secrets(:stripe)
+        end
+
+      assert error.diagnostic.code == "ACCRUE-DX-WEBHOOK-SECRET-MISSING"
+      assert Exception.message(error) =~ "/guides/troubleshooting.html#accrue-dx-webhook-secret-missing"
+    after
+      Application.put_env(:accrue, :webhook_signing_secrets, %{stripe: ["whsec_test_secret"]})
+    end
+
+    test "missing Oban config raises shared diagnostic" do
+      error =
+        assert_raise Accrue.ConfigError, fn ->
+          Config.ensure_oban_configured!(nil)
+        end
+
+      assert error.diagnostic.code == "ACCRUE-DX-OBAN-NOT-CONFIGURED"
+    end
+
+    test "pending migrations raise shared diagnostic" do
+      error =
+        assert_raise Accrue.ConfigError, fn ->
+          Config.ensure_migrations_current!([{:down, 20_260_416_000_000, "pending"}])
+        end
+
+      assert error.diagnostic.code == "ACCRUE-DX-MIGRATIONS-PENDING"
+    end
+  end
+
   describe "schema/0" do
     test "returns a keyword list with every Phase 1 key" do
       schema = Config.schema()

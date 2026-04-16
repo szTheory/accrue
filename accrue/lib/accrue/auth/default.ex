@@ -52,19 +52,14 @@ defmodule Accrue.Auth.Default do
   @spec do_boot_check!(:dev | :test | :prod | atom()) :: :ok
   def do_boot_check!(:prod) do
     if Application.get_env(:accrue, :auth_adapter, __MODULE__) == __MODULE__ do
+      diagnostic =
+        Accrue.SetupDiagnostic.auth_adapter(
+          details: "configured auth adapter: #{inspect(__MODULE__)}"
+        )
+
       raise Accrue.ConfigError,
         key: :auth_adapter,
-        message: """
-        Accrue.Auth.Default is dev-only and refuses to run in :prod.
-
-        Configure a real auth adapter:
-
-            config :accrue, :auth_adapter, MyApp.Auth
-            # or, once :sigra is in deps:
-            config :accrue, :auth_adapter, Accrue.Integrations.Sigra
-
-        See guides/auth.md for the required behaviour surface.
-        """
+        diagnostic: diagnostic
     end
 
     :ok
@@ -92,11 +87,13 @@ defmodule Accrue.Auth.Default do
         fn conn, _opts -> conn end
 
       _ ->
+        diagnostic =
+          Accrue.SetupDiagnostic.auth_adapter(
+            details: "require_admin_plug/0 called with #{inspect(__MODULE__)} outside dev/test"
+          )
+
         fn _conn, _opts ->
-          raise Accrue.ConfigError,
-            key: :auth_adapter,
-            message:
-              "Accrue.Auth.Default.require_admin_plug is dev-only; configure a real :auth_adapter."
+          raise Accrue.ConfigError, key: :auth_adapter, diagnostic: diagnostic
         end
     end
   end

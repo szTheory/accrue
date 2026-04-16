@@ -391,6 +391,7 @@ defmodule Accrue.Config do
       |> Keyword.take(known_keys)
 
     _ = NimbleOptions.validate!(opts, @schema)
+    _ = maybe_validate_boot_setup!(opts)
     :ok
   end
 
@@ -416,9 +417,86 @@ defmodule Accrue.Config do
         secret
 
       _ ->
-        raise Accrue.ConfigError,
-          key: :webhook_signing_secrets,
-          message: "no webhook signing secrets configured for processor #{inspect(processor)}"
+        diagnostic =
+          Accrue.SetupDiagnostic.webhook_secret_missing(
+            details: "processor=#{inspect(processor)} signing secret missing"
+          )
+
+        raise Accrue.ConfigError, key: :webhook_signing_secrets, diagnostic: diagnostic
+    end
+  end
+
+  @doc false
+  @spec ensure_oban_configured!(keyword() | nil) :: :ok
+  def ensure_oban_configured!(oban_config \\ Application.get_env(:accrue, Oban)) do
+    queues =
+      case oban_config do
+        opts when is_list(opts) -> Keyword.get(opts, :queues, [])
+        _ -> nil
+      end
+
+    cond do
+      not is_list(oban_config) ->
+        raise_oban_not_configured!("missing `config :accrue, Oban, ...`")
+
+      not queue_present?(queues, :accrue_webhooks) ->
+        raise_oban_not_configured!("missing `:accrue_webhooks` queue")
+
+      not queue_present?(queues, :accrue_mailers) ->
+        raise_oban_not_configured!("missing `:accrue_mailers` queue")
+
+      true ->
+        :ok
+    end
+  end
+
+  @doc false
+  @spec ensure_oban_supervised!((-> pid() | nil)) :: :ok
+  def ensure_oban_supervised!(resolver \\ fn -> Process.whereis(Oban) end) when is_function(resolver, 0) do
+    if resolver.() do
+      :ok
+    else
+      diagnostic =
+        Accrue.SetupDiagnostic.oban_not_supervised(details: "No running Oban process found")
+
+      raise Accrue.ConfigError, key: Oban, diagnostic: diagnostic
+    end
+  end
+
+  @doc false
+  @spec ensure_migrations_current!(list() | nil) :: :ok
+  def ensure_migrations_current!(migrations \\ nil)
+
+  def ensure_migrations_current!(migrations) when is_list(migrations) do
+    pending =
+      Enum.filter(migrations, fn
+        {:up, _, _} -> false
+        {:up, _, _, _} -> false
+        %{status: :up} -> false
+        _ -> true
+      end)
+
+    if pending == [] do
+      :ok
+    else
+      diagnostic =
+        Accrue.SetupDiagnostic.migrations_pending(
+          details: "pending=#{inspect(Enum.take(pending, 3))}"
+        )
+
+      raise Accrue.ConfigError, key: :repo, diagnostic: diagnostic
+    end
+  end
+
+  def ensure_migrations_current!(nil) do
+    repo = Accrue.Repo.repo()
+
+    try do
+      repo
+      |> Ecto.Migrator.migrations()
+      |> ensure_migrations_current!()
+    rescue
+      _ -> :ok
     end
   end
 
@@ -603,6 +681,29 @@ defmodule Accrue.Config do
   """
   @spec cldr_backend() :: module()
   def cldr_backend, do: get!(:cldr_backend)
+
+  defp maybe_validate_boot_setup!(opts) do
+    _ = Keyword.fetch!(opts, :repo)
+    _ = ensure_migrations_current!()
+
+    if Keyword.get(opts, :processor, Accrue.Processor.Fake) == Accrue.Processor.Stripe do
+      _ = webhook_signing_secrets(:stripe)
+    end
+
+    :ok
+  end
+
+  defp queue_present?(queues, queue_name) do
+    Enum.any?(queues, fn
+      {^queue_name, _value} -> true
+      _ -> false
+    end)
+  end
+
+  defp raise_oban_not_configured!(details) do
+    diagnostic = Accrue.SetupDiagnostic.oban_not_configured(details: details)
+    raise Accrue.ConfigError, key: Oban, diagnostic: diagnostic
+  end
 
   # --- custom validators (referenced by @schema) -----------------------
 

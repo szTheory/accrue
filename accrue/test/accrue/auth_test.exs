@@ -47,9 +47,9 @@ defmodule Accrue.AuthTest do
 
     test ":prod raises Accrue.ConfigError when :auth_adapter is still Default" do
       # Default adapter is the Plan 01 default — no env tampering needed.
-      assert_raise Accrue.ConfigError, ~r/dev-only and refuses to run in :prod/, fn ->
-        Accrue.Auth.Default.do_boot_check!(:prod)
-      end
+      error = assert_raise Accrue.ConfigError, fn -> Accrue.Auth.Default.do_boot_check!(:prod) end
+      assert error.diagnostic.code == "ACCRUE-DX-AUTH-ADAPTER"
+      assert Exception.message(error) =~ "/guides/troubleshooting.html#accrue-dx-auth-adapter"
     end
 
     test ":prod returns :ok when a custom :auth_adapter is configured" do
@@ -69,6 +69,22 @@ defmodule Accrue.AuthTest do
       plug = Accrue.Auth.Default.require_admin_plug()
       conn = %{halted: false}
       assert plug.(conn, []) == conn
+    end
+
+    test "fails closed with a shared diagnostic outside dev/test" do
+      prior = Application.get_env(:accrue, :env)
+
+      try do
+        Application.put_env(:accrue, :env, :prod)
+        plug = Accrue.Auth.Default.require_admin_plug()
+
+        error = assert_raise Accrue.ConfigError, fn -> plug.(%{}, []) end
+        assert error.diagnostic.code == "ACCRUE-DX-AUTH-ADAPTER"
+      after
+        if is_nil(prior),
+          do: Application.delete_env(:accrue, :env),
+          else: Application.put_env(:accrue, :env, prior)
+      end
     end
   end
 

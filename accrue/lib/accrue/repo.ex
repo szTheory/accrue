@@ -163,10 +163,14 @@ defmodule Accrue.Repo do
   def repo do
     case Application.get_env(:accrue, :repo) do
       nil ->
+        diagnostic =
+          Accrue.SetupDiagnostic.repo_config(
+            details: "Expected config :accrue, :repo, MyApp.Repo"
+          )
+
         raise Accrue.ConfigError,
           key: :repo,
-          message:
-            "config :accrue, :repo, MyApp.Repo is required — Accrue does not ship a Repo (D-10)"
+          diagnostic: diagnostic
 
       mod when is_atom(mod) ->
         mod

@@ -51,6 +51,13 @@ defmodule Accrue.Webhook.Plug do
       conn
       |> send_resp(400, Jason.encode!(%{error: "signature_verification_failed"}))
       |> halt()
+
+    e in Accrue.ConfigError ->
+      Logger.error("Webhook setup error:\n" <> Exception.message(e))
+
+      conn
+      |> send_resp(500, Jason.encode!(%{error: "internal_server_error"}))
+      |> halt()
   end
 
   defp do_call(conn, processor, endpoint) do
@@ -107,7 +114,15 @@ defmodule Accrue.Webhook.Plug do
   @doc false
   def flatten_raw_body(conn) do
     case conn.assigns[:raw_body] do
-      nil -> ""
+      nil ->
+        diagnostic =
+          Accrue.SetupDiagnostic.webhook_raw_body(
+            details:
+              "Expected conn.assigns[:raw_body]; configure body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}"
+          )
+
+        raise Accrue.ConfigError, key: :webhook_signing_secrets, diagnostic: diagnostic
+
       chunks when is_list(chunks) -> chunks |> Enum.reverse() |> IO.iodata_to_binary()
       binary when is_binary(binary) -> binary
     end

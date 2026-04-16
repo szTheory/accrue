@@ -116,10 +116,13 @@ defmodule Accrue.ConfigError do
   that is neither set at runtime nor has a schema default.
   """
   @type t :: %__MODULE__{}
-  defexception [:message, :key]
+  defexception [:message, :key, :diagnostic]
 
   @impl true
   def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+  def message(%__MODULE__{diagnostic: %Accrue.SetupDiagnostic{} = diagnostic}),
+    do: Accrue.SetupDiagnostic.format(diagnostic)
+
   def message(%__MODULE__{key: key}), do: "missing accrue config key: #{inspect(key)}"
 end
 

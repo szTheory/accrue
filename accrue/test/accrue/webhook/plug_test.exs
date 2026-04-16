@@ -1,6 +1,8 @@
 defmodule Accrue.Webhook.PlugTest do
   use Accrue.RepoCase
 
+  import ExUnit.CaptureLog
+
   @moduledoc """
   Integration tests for the webhook plug pipeline:
   CachingBodyReader + Signature verification + Plug dispatch.
@@ -55,6 +57,26 @@ defmodule Accrue.Webhook.PlugTest do
       raw = conn.assigns[:raw_body]
       send_resp(conn, 200, Jason.encode!(%{raw_body_present: raw != nil}))
     end
+
+    match _ do
+      send_resp(conn, 404, "not found")
+    end
+  end
+
+  defmodule TestWebhookRouterWithoutRawBody do
+    @moduledoc false
+    use Plug.Router
+
+    plug(Plug.Parsers,
+      parsers: [:json],
+      pass: ["*/*"],
+      json_decoder: Jason
+    )
+
+    plug(:match)
+    plug(:dispatch)
+
+    forward("/webhooks/stripe", to: Accrue.Webhook.Plug, init_opts: [processor: :stripe])
 
     match _ do
       send_resp(conn, 404, "not found")
@@ -188,5 +210,25 @@ defmodule Accrue.Webhook.PlugTest do
 
     assert conn.status == 400
     assert %{"error" => "signature_verification_failed"} = Jason.decode!(conn.resp_body)
+  end
+
+  test "missing raw body reader returns generic 500 and logs shared diagnostic" do
+    sig = LatticeStripe.Webhook.generate_test_signature(@valid_event_payload, @test_secret)
+
+    log =
+      capture_log(fn ->
+        conn =
+          Plug.Test.conn(:post, "/webhooks/stripe", @valid_event_payload)
+          |> Plug.Conn.put_req_header("content-type", "application/json")
+          |> Plug.Conn.put_req_header("stripe-signature", sig)
+          |> TestWebhookRouterWithoutRawBody.call(TestWebhookRouterWithoutRawBody.init([]))
+
+        assert conn.status == 500
+        assert %{"error" => "internal_server_error"} = Jason.decode!(conn.resp_body)
+      end)
+
+    assert log =~ "ACCRUE-DX-WEBHOOK-RAW-BODY"
+    assert log =~ "/guides/troubleshooting.html#accrue-dx-webhook-raw-body"
+    refute log =~ @test_secret
   end
 end
