@@ -4,7 +4,7 @@ Billing state, modeled clearly.
 
 ## Quickstart
 
-Add Accrue to `deps/0`, point it at the Stripe processor, then run the installer:
+Add Accrue to `deps/0`, configure the Stripe processor, then run the installer:
 
 ```elixir
 defp deps do

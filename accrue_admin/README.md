@@ -28,7 +28,7 @@ defmodule MyAppWeb.Router do
 end
 ```
 
-Run `mix deps.get`, configure the host billing app, and continue with the package guide for route session options, branding, and auth integration details.
+Run `mix deps.get`, configure the host billing app, and continue with the package guide for route session options, branding, and auth details.
 
 ## Host setup
 
