@@ -18,7 +18,13 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
     "accrue-dx-repo-config",
     "accrue-dx-migrations-pending",
     "accrue-dx-oban-not-configured",
-    "accrue-dx-webhook-raw-body"
+    "accrue-dx-oban-not-supervised",
+    "accrue-dx-webhook-secret-missing",
+    "accrue-dx-webhook-route-missing",
+    "accrue-dx-webhook-raw-body",
+    "accrue-dx-webhook-pipeline",
+    "accrue-dx-auth-adapter",
+    "accrue-dx-admin-mount-missing"
   ]
   @matrix_columns [
     "What happened",
