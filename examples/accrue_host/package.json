@@ -1,0 +1,11 @@
+{
+  "name": "accrue-host-e2e",
+  "private": true,
+  "scripts": {
+    "e2e": "env -u NO_COLOR playwright test",
+    "e2e:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}
