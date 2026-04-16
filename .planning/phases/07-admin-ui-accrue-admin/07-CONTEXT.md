@@ -78,9 +78,9 @@ All decisions below are locked. Downstream research/planning must not relitigate
 
 **Rationale:** Three hard constraints collapse the decision: (1) mobile tab-left-open must not drain battery, (2) filters must be deep-linkable and multi-admin-safe, (3) `accrue_events` is append-only with millions of rows — `OFFSET` is a sequential scan. PubSub auto-insert loses on all three (battery drain, phantom rows in filtered views, thundering herd). Polling is a one-line variant of the cold-load query path (`WHERE (inserted_at, id) > ?`), so there's a single code path to maintain. The banner decouples notification from insertion — user stays in control of DOM growth. `stream(:rows, [], reset: true, limit: -500)` caps DOM at 500 rows for hours-long sessions.
 
-**The `Accrue.Admin.Query.Cursor` module** is the only cursor type in the codebase — opaque base64-encoded `(inserted_at, id)` tuple. Round-trips via `decode/encode`, used by every per-resource query helper.
+**The `AccrueAdmin.Queries.Cursor` module** is the only cursor type in the codebase — opaque base64-encoded `(inserted_at, id)` tuple. Round-trips via `decode/encode`, used by every per-resource query helper.
 
-**Per-resource query helper behaviour (`Accrue.Admin.Query.Behaviour`):**
+**Per-resource query helper behaviour (`AccrueAdmin.Queries.Behaviour`):**
 ```
 @callback list(opts :: keyword()) :: {[row], next_cursor :: binary() | nil}
 @callback count_newer_than(opts :: keyword()) :: non_neg_integer()

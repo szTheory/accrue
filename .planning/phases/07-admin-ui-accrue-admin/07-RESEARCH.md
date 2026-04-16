@@ -73,9 +73,9 @@ All decisions below are locked. Downstream research/planning must not relitigate
 
 **Rationale:** Three hard constraints collapse the decision: (1) mobile tab-left-open must not drain battery, (2) filters must be deep-linkable and multi-admin-safe, (3) `accrue_events` is append-only with millions of rows — `OFFSET` is a sequential scan. PubSub auto-insert loses on all three (battery drain, phantom rows in filtered views, thundering herd). Polling is a one-line variant of the cold-load query path (`WHERE (inserted_at, id) > ?`), so there's a single code path to maintain. The banner decouples notification from insertion — user stays in control of DOM growth. `stream(:rows, [], reset: true, limit: -500)` caps DOM at 500 rows for hours-long sessions.
 
-**The `Accrue.Admin.Query.Cursor` module** is the only cursor type in the codebase — opaque base64-encoded `(inserted_at, id)` tuple. Round-trips via `decode/encode`, used by every per-resource query helper.
+**The `AccrueAdmin.Queries.Cursor` module** is the only cursor type in the codebase — opaque base64-encoded `(inserted_at, id)` tuple. Round-trips via `decode/encode`, used by every per-resource query helper.
 
-**Per-resource query helper behaviour (`Accrue.Admin.Query.Behaviour`):**
+**Per-resource query helper behaviour (`AccrueAdmin.Queries.Behaviour`):**
 ```
 @callback list(opts :: keyword()) :: {[row], next_cursor :: binary() | nil}
 @callback count_newer_than(opts :: keyword()) :: non_neg_integer()
@@ -256,7 +256,7 @@ None — discussion stayed within phase scope. User's direction ("research deepl
 | ADMIN-04 | Brand palette theme | Reuse `accrue/priv/static/brand.css`, add semantic aliases and runtime accent override. |
 | ADMIN-05 | Breadcrumbs + flash | First-party component inventory includes both. |
 | ADMIN-06 | Branding config | Keep brand config in `Accrue.Config`; no DB-backed admin editing in v1.0. |
-| ADMIN-07 | Customer list/search/filter | Add `AccrueAdmin.Query.Customers`; use local `accrue_customers` with explicit search indexes. |
+| ADMIN-07 | Customer list/search/filter | Add `AccrueAdmin.Queries.Customers`; use local `accrue_customers` with explicit search indexes. |
 | ADMIN-08 | Customer detail tabs | Use local customer-centric queries plus `Accrue.Events.timeline_for/3`. |
 | ADMIN-09 | Subscription list/detail | Use `accrue_subscriptions` plus `Accrue.Billing.Query` predicates for status-safe filtering. |
 | ADMIN-10 | Subscription actions | Route through `Accrue.Billing.*` actions and wrap destructive ones with step-up and audit writes. |
@@ -359,7 +359,7 @@ Host Router
         -> live_session(on_mount auth)
           -> Layout/AppShell
             -> DataTable/DetailDrawer/CommandPalette components
-              -> AccrueAdmin.Query.* modules
+              -> AccrueAdmin.Queries.* modules
                 -> Accrue.Repo facade
                   -> accrue_* tables / accrue_events / accrue_webhook_events
                     -> optional action callouts to Accrue.Billing / Accrue.Webhooks.DLQ / Accrue.PDF
@@ -376,7 +376,7 @@ accrue_admin/
 ├── lib/accrue_admin/auth_hook.ex             # `on_mount` authz and current-admin assigns
 ├── lib/accrue_admin/brand_plug.ex            # brand + theme assigns
 ├── lib/accrue_admin/csp_plug.ex              # nonce extraction helpers
-├── lib/accrue_admin/query/                   # cursor, behaviour, per-resource query modules
+├── lib/accrue_admin/queries/                 # cursor, behaviour, per-resource query modules
 ├── lib/accrue_admin/components/              # function components + stateful LiveComponents
 ├── lib/accrue_admin/live/                    # dashboard, list/detail LiveViews, action modals
 ├── lib/accrue_admin/dev/                     # compile-gated dev LiveViews and toolbar
@@ -387,7 +387,7 @@ accrue_admin/
 ```
 
 Recommended layout notes:
-- Keep query modules under `AccrueAdmin.Query.*`, not `Accrue.Admin.Query.*`, to match the package namespace already used by `AccrueAdmin`. [VERIFIED: codebase grep]
+- Keep query modules under the single `AccrueAdmin.Queries.*` namespace to match the package namespace already used by `AccrueAdmin`. [VERIFIED: codebase grep]
 - Keep all business mutations in `Accrue.*`; `accrue_admin` should add orchestration only for session/auth/UI state. [VERIFIED: codebase grep]
 
 ### Pattern 1: Mountable Admin Macro With Its Own `live_session`
@@ -421,7 +421,7 @@ Source: [Phoenix LiveView `on_mount` + `live_session`](https://hexdocs.pm/phoeni
 **When to use:** For every list/detail admin surface; avoid embedding `Ecto.Query` in LiveViews.
 **Example:**
 ```elixir
-defmodule AccrueAdmin.Query.Webhooks do
+defmodule AccrueAdmin.Queries.Webhooks do
   import Ecto.Query
 
   alias Accrue.Repo
@@ -460,7 +460,7 @@ Source: repo action boundaries in [Accrue.Auth](/Users/jon/projects/accrue/accru
 
 ### Anti-Patterns to Avoid
 
-- **LiveView-embedded SQL:** Keep filtering and cursor logic in `AccrueAdmin.Query.*`; otherwise every list page forks the same bugs. [VERIFIED: codebase grep]
+- **LiveView-embedded SQL:** Keep filtering and cursor logic in `AccrueAdmin.Queries.*`; otherwise every list page forks the same bugs. [VERIFIED: codebase grep]
 - **Processor-backed list pages:** `Accrue.Connect.list_accounts/1` is processor pass-through and should not be the default admin list source. [VERIFIED: codebase grep]
 - **Literal copy of D7-04 index names:** Several context indexes target columns that do not exist yet; translating intent is mandatory. [VERIFIED: codebase grep]
 - **Host asset pipeline coupling:** Do not require host `tailwind.config.js`, `app.js`, or layout edits. [CITED: https://hexdocs.pm/oban_web/installation.html]
@@ -552,27 +552,24 @@ Source: https://hexdocs.pm/oban_web/installation.html
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
 | A1 | The D7-04 index list should be treated as intent, not literal migration text, because several referenced columns/statuses do not exist yet. | Summary / Common Pitfalls | Planner could generate invalid migrations or block the phase in Wave 0. |
-| A2 | `EVT-09` for admin causality requires a new event-ledger FK field because current `Accrue.Events.Event` and `Accrue.Events.record/1` expose no causal columns. | Summary / Open Questions | Admin actions and webhook-derived event linkage would have no schema support. |
-| A3 | `Accrue.Admin.Query.*` in context should be normalized to `AccrueAdmin.Query.*` to match the package namespace. | Architecture Patterns | Planner could produce the wrong module tree and leak inconsistent naming into the public API. |
+| A2 | `EVT-09` for admin causality requires explicit event-ledger linkage fields because current `Accrue.Events.Event` and `Accrue.Events.record/1` expose no causal columns. | Summary / Resolved Decisions | Admin actions and webhook-derived event linkage would have no schema support. |
+| A3 | The package should standardize on `accrue_admin/lib/accrue_admin/queries/*.ex` and `AccrueAdmin.Queries.*`. | Architecture Patterns | Planner could produce the wrong module tree and leak inconsistent naming into the public API. |
 | A4 | Adding `step_up_challenge/2` and `verify_step_up/3` as `@optional_callbacks` is the least-breaking way to extend `Accrue.Auth`. | Common Pitfalls / Open Questions | Existing adapters could break or Phase 7 could need a broader auth-contract migration. |
 | A5 | Poll-driven “new rows” banners will be acceptable for admin freshness without scoped PubSub in v1.0. | Architecture Patterns | If false, planners may need extra Wave 0 work for live detail subscriptions or higher-frequency refresh. |
 
-## Open Questions
+## Resolved Decisions
 
-1. **Should causal linkage use `caused_by_event_id`, `caused_by_webhook_event_id`, or both?**
-   What we know: the locked context uses both names, but the current event schema exposes neither. [VERIFIED: codebase grep]
-   What's unclear: whether admin actions need event-to-event linkage, event-to-webhook linkage, or a pair of columns. [VERIFIED: codebase grep]
-   Recommendation: make this a Wave 0 schema decision before any action/audit plan is written.
+1. **Causal linkage uses both `caused_by_event_id` and `caused_by_webhook_event_id`.**
+   Decision: add both nullable linkage fields in Phase 7. `caused_by_event_id` is the self-referential `accrue_events` FK for admin action chains and event-to-event causality. `caused_by_webhook_event_id` is the FK to `accrue_webhook_events` for webhook-derived billing/admin events. [VERIFIED: locked context + codebase grep]
+   Reasoning: the locked context and webhook inspector need direct webhook-to-event linkage, while ADMIN-22/23 also require event-to-event causality for operator-triggered actions. A single column would force awkward overload semantics.
 
-2. **Should customer list/search join the host user schema by default?**
-   What we know: `Accrue.Auth.user_schema/0` exists, but Accrue customer rows already store `name` and `email`. [VERIFIED: codebase grep]
-   What's unclear: whether v1.0 wants generic cross-app compatibility or richer host-specific previews. [VERIFIED: codebase grep]
-   Recommendation: default to `accrue_customers` only in v1.0 and treat host-schema joins as optional enrichments.
+2. **Customer search defaults to `accrue_customers` only; no host user-schema join by default.**
+   Decision: customer list/detail surfaces query local customer fields (`name`, `email`, `processor_id`, locale/timezone, payment-method linkage) and treat host-schema enrichments as optional future additions. [VERIFIED: codebase grep]
+   Reasoning: this preserves package portability and avoids making Phase 7 depend on arbitrary host schemas or auth adapters.
 
-3. **Is Phase 7 expected to ship writable Connect platform-fee configuration?**
-   What we know: ADMIN-20 asks for a platform-fee configuration UI, but the locked context is heavier on read surfaces than on connect-form workflows. [VERIFIED: requirements grep]
-   What's unclear: whether the existing Connect abstractions are complete enough for a safe write UI in this phase. [VERIFIED: codebase grep]
-   Recommendation: planners should isolate ADMIN-20 as a late-wave item and descoped read-only fallback if missing primitives surface.
+3. **ADMIN-20 ships a writable per-account override UI, not a global settings editor.**
+   Decision: Phase 7 keeps the global platform-fee policy read-only from `Accrue.Config`, and ships a writable per-account override stored in `accrue_connect_accounts.data["platform_fee_override"]`, validated and previewed through `Accrue.Connect.PlatformFee`, with a minimal `Accrue.Connect` helper to persist the override. [VERIFIED: requirements grep] [VERIFIED: codebase grep]
+   Reasoning: this is conservative and executable with current repo primitives. It satisfies ADMIN-20 without inventing a new settings subsystem or fictional table.
 
 ## Environment Availability
 
@@ -611,7 +608,7 @@ Source: https://hexdocs.pm/oban_web/installation.html
 | ADMIN-26 | Non-admin users are rejected in `on_mount` before page render | integration | `cd accrue_admin && mix test test/accrue_admin/live/auth_hook_test.exs` | ❌ Wave 0 |
 | ADMIN-02 | Mobile card-mode table and drawer navigation remain usable | LiveView integration | `cd accrue_admin && mix test test/accrue_admin/live/responsive_navigation_test.exs` | ❌ Wave 0 |
 | ADMIN-03 | Light/dark/system theme persistence and anti-FOUC ordering | component + integration | `cd accrue_admin && mix test test/accrue_admin/theme_test.exs` | ❌ Wave 0 |
-| ADMIN-07 | Customer filters/search/cursor pagination | query + LiveView integration | `cd accrue_admin && mix test test/accrue_admin/query/customers_test.exs` | ❌ Wave 0 |
+| ADMIN-07 | Customer filters/search/cursor pagination | query + LiveView integration | `cd accrue_admin && mix test test/accrue_admin/queries/customers_test.exs` | ❌ Wave 0 |
 | ADMIN-16 | Webhook inspector shows payload, status, attempts, and masking | LiveView integration | `cd accrue_admin && mix test test/accrue_admin/live/webhooks_live_test.exs` | ❌ Wave 0 |
 | ADMIN-17 | Replay and bulk replay call `Accrue.Webhooks.DLQ` correctly | integration | `cd accrue_admin && mix test test/accrue_admin/live/webhook_replay_test.exs` | ❌ Wave 0 |
 | ADMIN-21 | Step-up prompt gates destructive actions and grants grace window | integration | `cd accrue_admin && mix test test/accrue_admin/live/step_up_test.exs` | ❌ Wave 0 |
@@ -630,7 +627,7 @@ Source: https://hexdocs.pm/oban_web/installation.html
 - [ ] `accrue_admin/test/support/data_case.ex` — query-layer helpers and errors-on convenience
 - [ ] `accrue_admin/test/accrue_admin/router_test.exs` — macro mount, asset route, CSP/session wiring
 - [ ] `accrue_admin/test/accrue_admin/components/*_test.exs` — component render coverage for `DataTable`, drawers, badges, flashes
-- [ ] `accrue_admin/test/accrue_admin/query/*_test.exs` — cursor/filter logic per resource
+- [ ] `accrue_admin/test/accrue_admin/queries/*_test.exs` — cursor/filter logic per resource
 - [ ] `accrue_admin/test/accrue_admin/live/*_test.exs` — page-level auth/theme/action/dev-route coverage
 - [ ] `accrue_admin/test/accrue_admin/prod_compile_test.exs` or CI smoke step — dev-surface compile gate verification
 
