@@ -24,6 +24,7 @@ config :accrue_host, AccrueHostWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
 config :accrue, :processor, Accrue.Processor.Fake
+config :accrue, :auth_adapter, AccrueHost.Auth
 
 config :accrue, :webhook_signing_secrets, %{
   stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")

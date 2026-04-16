@@ -7,6 +7,7 @@ defmodule AccrueHost.Accounts.User do
   @foreign_key_type :binary_id
   schema "users" do
     field :email, :string
+    field :billing_admin, :boolean, default: false
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
