@@ -66,7 +66,7 @@ Plans:
 3. Package-local tests and host-app user-facing flows run in a clear order so failures point at the right layer.
 4. Browser failures publish enough artifacts to debug without rerunning locally where practical.
 5. Live Stripe remains opt-in/advisory while Fake-backed user-facing flows are mandatory.
-**Plans:** 2/3 plans executed
+**Plans:** 3 plans
 Plans:
 - [x] 11-01-PLAN.md — Create the host Playwright browser contract and retained artifact surface.
 - [x] 11-02-PLAN.md — Promote the host UAT shell gate and add annotation-blocking automation.
