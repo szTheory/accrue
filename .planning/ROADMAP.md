@@ -143,7 +143,7 @@ Plans:
 | 8. Install + Polish + Testing | v1.0 | 9/9 | Complete | 2026-04-15 |
 | 9. Release | v1.0 | 6/6 | Complete | 2026-04-16 |
 | 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete    | 2026-04-16 |
-| 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete   | 2026-04-16 |
+| 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete    | 2026-04-16 |
 | 12. First-User DX Stabilization | v1.1 | 0/TBD | Planned | - |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
 | 14. Quality Hardening | v1.1 | 0/TBD | Planned | - |
