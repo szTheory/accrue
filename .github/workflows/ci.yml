@@ -13,8 +13,8 @@ on:
     - cron: '0 6 * * *'
 
 jobs:
-  test:
-    name: Test (elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }})
+  release-gate:
+    name: Release gate (elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})
     runs-on: ubuntu-24.04
 
     services:
@@ -40,16 +40,19 @@ jobs:
           - elixir: '1.17.3'
             otp: '27.0'
             sigra: 'off'
+            opentelemetry: 'off'
             continue-on-error: false
           # Primary dev target.
           - elixir: '1.18.0'
             otp: '27.0'
             sigra: 'off'
+            opentelemetry: 'off'
             continue-on-error: false
           # Forward-compat smoke test (OTP 28).
           - elixir: '1.18.0'
             otp: '28.0'
             sigra: 'off'
+            opentelemetry: 'off'
             continue-on-error: false
           # with_sigra cell. Currently allowed to fail because :sigra is
           # not yet published to Hex (see Plan 01-01 Summary Deviation 1).
@@ -58,7 +61,14 @@ jobs:
           - elixir: '1.18.0'
             otp: '27.0'
             sigra: 'on'
+            opentelemetry: 'off'
             continue-on-error: true
+          # with_opentelemetry cell.
+          - elixir: '1.18.0'
+            otp: '27.0'
+            sigra: 'off'
+            opentelemetry: 'on'
+            continue-on-error: false
 
     env:
       MIX_ENV: test
@@ -66,6 +76,8 @@ jobs:
       PGPASSWORD: postgres
       PGHOST: localhost
       ACCRUE_CI_SIGRA: ${{ matrix.sigra == 'on' && '1' || '' }}
+      ACCRUE_CI_OPENTELEMETRY: ${{ matrix.opentelemetry == 'on' && '1' || '' }}
+      ACCRUE_OTEL_MATRIX: ${{ matrix.opentelemetry == 'on' && 'with_opentelemetry' || 'without_opentelemetry' }}
 
     continue-on-error: ${{ matrix.continue-on-error }}
 
@@ -82,15 +94,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: accrue/deps
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-deps-${{ hashFiles('accrue/mix.lock') }}
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-deps-${{ hashFiles('accrue/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-deps-
+            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-deps-
 
       - name: Restore _build cache
         uses: actions/cache@v4
         with:
           path: accrue/_build
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-build-${{ hashFiles('accrue/mix.lock') }}
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-build-${{ hashFiles('accrue/mix.lock') }}
 
       - name: Install deps
         run: cd accrue && mix deps.get
@@ -119,7 +131,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: accrue/priv/plts
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-plt-${{ hashFiles('accrue/mix.lock') }}
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-plt-${{ hashFiles('accrue/mix.lock') }}
 
       - name: Create PLTs
         if: steps.plt_cache.outputs.cache-hit != 'true'
@@ -130,7 +142,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: accrue/priv/plts
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-plt-${{ hashFiles('accrue/mix.lock') }}
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-plt-${{ hashFiles('accrue/mix.lock') }}
 
       - name: Run Dialyzer
         run: cd accrue && mix dialyzer --format github
