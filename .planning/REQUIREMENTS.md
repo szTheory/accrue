@@ -235,9 +235,9 @@ Requirements for the first public release (v1.0). Accrue ships complete — no M
 - [x] **OSS-09**: Hex publishing workflow with API token secret
 - [x] **OSS-10**: Same-day v1.0 release of accrue + accrue_admin (release runbook documented)
 - [ ] **OSS-11**: MIT `LICENSE` file at monorepo root, per-package copies as needed
-- [ ] **OSS-12**: `CONTRIBUTING.md` — PRs welcome, conventional commits, no CLA
-- [ ] **OSS-13**: `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1
-- [ ] **OSS-14**: `SECURITY.md` with vulnerability disclosure process
+- [x] **OSS-12**: `CONTRIBUTING.md` — PRs welcome, conventional commits, no CLA
+- [x] **OSS-13**: `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1
+- [x] **OSS-14**: `SECURITY.md` with vulnerability disclosure process
 - [x] **OSS-15**: Public API facade documentation with stability guarantees and deprecation policy
 - [x] **OSS-16**: ExDoc guides: quickstart (30s install), configuration, testing, Sigra integration, custom processors, custom PDF adapter, brand customization, admin UI setup, webhook gotchas field guide, upgrade guide
 - [x] **OSS-17**: README with 30-second quickstart
@@ -478,9 +478,9 @@ Which phases cover which requirements. Every v1 requirement maps to exactly one 
 | OSS-09 | Phase 9 | Complete |
 | OSS-10 | Phase 9 | Complete |
 | OSS-11 | Phase 1 | Pending |
-| OSS-12 | Phase 9 | Pending |
-| OSS-13 | Phase 9 | Pending |
-| OSS-14 | Phase 9 | Pending |
+| OSS-12 | Phase 9 | Complete |
+| OSS-13 | Phase 9 | Complete |
+| OSS-14 | Phase 9 | Complete |
 | OSS-15 | Phase 9 | Complete |
 | OSS-16 | Phase 9 | Complete |
 | OSS-17 | Phase 9 | Complete |

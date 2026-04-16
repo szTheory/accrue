@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 09-04-accrue-guides-extensions-PLAN.md
-last_updated: "2026-04-16T00:18:57.876Z"
+stopped_at: Completed 09-05-admin-docs-community-health-PLAN.md
+last_updated: "2026-04-16T00:27:07.719Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 9
   completed_phases: 8
   total_plans: 69
-  completed_plans: 67
-  percent: 97
+  completed_plans: 68
+  percent: 99
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-11)
 ## Current Position
 
 Phase: 09 (release) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -108,6 +108,7 @@ Progress: [██████████] 63/63 planned plans complete (100% ov
 | Phase 09-release P02 | 5m | 2 tasks | 5 files |
 | Phase 09 P03 | 2m | 2 tasks | 9 files |
 | Phase 09-release P04 | 5m | 2 tasks | 5 files |
+| Phase 09-release P05 | 26m | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -279,6 +280,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 09-release]: Load ExDoc guide extras through Path.wildcard("guides/*.md") and keep future-guide links on GitHub URLs until those guide files land locally.
 - [Phase 09-release]: Keep release guides anchored on public behaviours and config keys so docs do not imply support for private internals.
 - [Phase 09-release]: Use placeholder-only snippets and explicit secret-handling warnings in extension and webhook docs.
+- [Phase 09-release]: Gate accrue_admin's sibling dependency through ACCRUE_ADMIN_HEX_RELEASE=1 so monorepo development and Hex packaging use one dependency entry.
+- [Phase 09-release]: Use a checked-in Dialyxir ignore file for existing admin warnings so the new release gate is deterministic.
+- [Phase 09-release]: Link both package READMEs to the root contributing, conduct, and security policies.
 
 ### Pending Todos
 
@@ -299,6 +303,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T00:18:57.873Z
-Stopped at: Completed 09-04-accrue-guides-extensions-PLAN.md
+Last session: 2026-04-16T00:27:07.713Z
+Stopped at: Completed 09-05-admin-docs-community-health-PLAN.md
 Resume file: None
