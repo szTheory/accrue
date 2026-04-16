@@ -488,16 +488,24 @@ defmodule Accrue.Config do
     end
   end
 
+  def ensure_migrations_current!(fetch_migrations) when is_function(fetch_migrations, 0) do
+    fetch_migrations.()
+    |> ensure_migrations_current!()
+  rescue
+    error in [DBConnection.ConnectionError, Postgrex.Error, ArgumentError, UndefinedFunctionError] ->
+      raise_migration_lookup_failed!(error)
+
+    error in RuntimeError ->
+      if expected_migration_runtime_error?(error) do
+        raise_migration_lookup_failed!(error)
+      else
+        reraise error, __STACKTRACE__
+      end
+  end
+
   def ensure_migrations_current!(nil) do
     repo = Accrue.Repo.repo()
-
-    try do
-      repo
-      |> Ecto.Migrator.migrations()
-      |> ensure_migrations_current!()
-    rescue
-      _ -> :ok
-    end
+    ensure_migrations_current!(fn -> Ecto.Migrator.migrations(repo) end)
   end
 
   @doc """
@@ -684,7 +692,10 @@ defmodule Accrue.Config do
 
   defp maybe_validate_boot_setup!(opts) do
     _ = Keyword.fetch!(opts, :repo)
-    _ = ensure_migrations_current!()
+
+    if safe_mix_env() != :test do
+      _ = ensure_migrations_current!()
+    end
 
     if Keyword.get(opts, :processor, Accrue.Processor.Fake) == Accrue.Processor.Stripe do
       _ = webhook_signing_secrets(:stripe)
@@ -703,6 +714,31 @@ defmodule Accrue.Config do
   defp raise_oban_not_configured!(details) do
     diagnostic = Accrue.SetupDiagnostic.oban_not_configured(details: details)
     raise Accrue.ConfigError, key: Oban, diagnostic: diagnostic
+  end
+
+  defp raise_migration_lookup_failed!(error) do
+    diagnostic =
+      Accrue.SetupDiagnostic.migrations_pending(
+        details: "migration inspection failed: #{Exception.message(error)}"
+      )
+
+    raise Accrue.ConfigError, key: :repo, diagnostic: diagnostic
+  end
+
+  defp expected_migration_runtime_error?(error) do
+    message = Exception.message(error)
+
+    String.contains?(message, "could not lookup Ecto repo") or
+      String.contains?(message, "could not find migrations directory") or
+      String.contains?(message, "could not start migration")
+  end
+
+  defp safe_mix_env do
+    try do
+      Mix.env()
+    rescue
+      _ -> :prod
+    end
   end
 
   # --- custom validators (referenced by @schema) -----------------------
