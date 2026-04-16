@@ -20,7 +20,9 @@ defmodule Accrue.Docs.FirstHourGuideTest do
     "use Accrue.Webhook.Handler",
     "use Accrue.Test",
     "AccrueAdmin.Router.accrue_admin/2",
-    "Accrue.ConfigError"
+    "Accrue.ConfigError",
+    "config :accrue, :webhook_signing_secrets, %{",
+    ~s|stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")|
   ]
   @forbidden_surfaces [
     "Accrue.Billing.Customer",
@@ -43,6 +45,8 @@ defmodule Accrue.Docs.FirstHourGuideTest do
     Enum.each(@forbidden_surfaces, fn surface ->
       refute guide =~ surface
     end)
+
+    refute guide =~ "webhook_signing_secret"
   end
 
   defp assert_order!(guide, [first | rest]) do

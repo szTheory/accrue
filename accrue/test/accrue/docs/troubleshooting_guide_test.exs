@@ -32,6 +32,11 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
     "mix test test/accrue_host_web/admin_mount_test.exs",
     "mix accrue.install --check"
   ]
+  @required_webhook_fix [
+    "ACCRUE-DX-WEBHOOK-SECRET-MISSING",
+    "config :accrue, :webhook_signing_secrets, %{",
+    ~s|stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")|
+  ]
 
   test "troubleshooting guide reserves stable codes, anchors, and verification surface" do
     guide = File.read!(@guide)
@@ -51,5 +56,11 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
     Enum.each(@verification_commands, fn command ->
       assert guide =~ command
     end)
+
+    Enum.each(@required_webhook_fix, fn snippet ->
+      assert guide =~ snippet
+    end)
+
+    refute guide =~ "webhook_signing_secret"
   end
 end
