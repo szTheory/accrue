@@ -12,7 +12,7 @@ Requirements for the v1.1 stabilization milestone. The milestone proves Accrue f
 - [x] **HOST-01**: A minimal Phoenix host app exists in the repository as the canonical dogfood app for `accrue` and `accrue_admin`.
 - [x] **HOST-02**: The host app uses the public installer and package APIs rather than private shortcuts or hand-wired internals.
 - [x] **HOST-03**: The host app has at least one realistic billable schema and generated `MyApp.Billing` facade.
-- [ ] **HOST-04**: The host app mounts the scoped webhook endpoint and verifies signed Fake/Stripe-shaped webhook payloads end to end.
+- [x] **HOST-04**: The host app mounts the scoped webhook endpoint and verifies signed Fake/Stripe-shaped webhook payloads end to end.
 - [ ] **HOST-05**: The host app mounts `accrue_admin` behind a realistic auth/session boundary.
 - [x] **HOST-06**: A user-facing checkout/subscription flow works through the host app against the Fake processor without network access.
 - [ ] **HOST-07**: An admin-facing flow can inspect billing state, view webhook/event history, and perform at least one audited admin action.
@@ -92,7 +92,7 @@ Deferred until after v1.1 unless pulled into a later milestone:
 | HOST-01 | Phase 10 | Complete |
 | HOST-02 | Phase 10 | Complete |
 | HOST-03 | Phase 10 | Complete |
-| HOST-04 | Phase 10 | Pending |
+| HOST-04 | Phase 10 | Complete |
 | HOST-05 | Phase 10 | Pending |
 | HOST-06 | Phase 10 | Complete |
 | HOST-07 | Phase 10 | Pending |

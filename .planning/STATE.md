@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 10-host-app-dogfood-harness-05-PLAN.md
-last_updated: "2026-04-16T16:50:26.937Z"
+stopped_at: Completed 10-host-app-dogfood-harness-06-PLAN.md
+last_updated: "2026-04-16T16:55:47.933Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 7
-  completed_plans: 5
-  percent: 71
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 10 (host-app-dogfood-harness) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -116,6 +116,7 @@ Progress: 0/6 v1.1 phases complete
 | Phase 10-host-app-dogfood-harness P03 | 5min | 2 tasks | 11 files |
 | Phase 10-host-app-dogfood-harness P04 | 6min | 2 tasks | 28 files |
 | Phase 10-host-app-dogfood-harness P05 | 5min | 2 tasks | 5 files |
+| Phase 10-host-app-dogfood-harness P06 | 9min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -305,6 +306,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 10-host-app-dogfood-harness]: Keep the signed-in billing page as a small host-owned LiveView that reads persisted state directly but routes all mutations through AccrueHost.Billing.
 - [Phase 10-host-app-dogfood-harness]: Use deterministic price_basic and price_pro ids from a dedicated host plan module so the Fake-backed proof stays stable and grepable.
 - [Phase 10-host-app-dogfood-harness]: Disable accrue_admin live-reload routes at the host mount to keep the example app warning-clean under mix compile --warnings-as-errors.
+- [Phase 10]: Register AccrueHost.BillingHandler in host test config and record host.webhook.handled ledger rows as the host-side webhook evidence surface.
+- [Phase 10]: Prove /webhooks/stripe with a signed customer.subscription.created payload against the host router, then execute the persisted dispatch job to verify normal handler flow and replay idempotence.
 
 ### Pending Todos
 
@@ -330,6 +333,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T16:50:26.934Z
-Stopped at: Completed 10-host-app-dogfood-harness-05-PLAN.md
+Last session: 2026-04-16T16:55:47.930Z
+Stopped at: Completed 10-host-app-dogfood-harness-06-PLAN.md
 Resume file: None
