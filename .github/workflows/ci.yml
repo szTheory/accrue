@@ -126,7 +126,13 @@ jobs:
 
       - name: Create accrue PLTs
         if: steps.accrue_plt_cache.outputs.cache-hit != 'true'
-        run: cd accrue && mix dialyzer --plt --quiet
+        run: |
+          set +e
+          cd accrue
+          output=$(mix dialyzer --plt --quiet 2>&1)
+          status=$?
+          printf '%s\n' "$output" | grep -Ev '^xmerl_ucs\.erl:[0-9]+:[0-9]+: Warning: missing specification for function ' || true
+          exit "$status"
 
       - name: Save accrue PLT cache
         if: steps.accrue_plt_cache.outputs.cache-hit != 'true'
@@ -176,7 +182,13 @@ jobs:
 
       - name: Create accrue_admin PLTs
         if: steps.accrue_admin_plt_cache.outputs.cache-hit != 'true'
-        run: cd accrue_admin && mix dialyzer --plt --quiet
+        run: |
+          set +e
+          cd accrue_admin
+          output=$(mix dialyzer --plt --quiet 2>&1)
+          status=$?
+          printf '%s\n' "$output" | grep -Ev '^xmerl_ucs\.erl:[0-9]+:[0-9]+: Warning: missing specification for function ' || true
+          exit "$status"
 
       - name: Save accrue_admin PLT cache
         if: steps.accrue_admin_plt_cache.outputs.cache-hit != 'true'
