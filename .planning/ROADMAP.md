@@ -26,7 +26,7 @@
 
 - [x] **Phase 10: Host App Dogfood Harness** — canonical minimal Phoenix app that installs and uses `accrue` + `accrue_admin` through public APIs. (completed 2026-04-16)
 - [x] **Phase 11: CI User-Facing Integration Gate** — mandatory CI workflows for host-app setup, Fake-backed E2E, browser UAT artifacts, and warning/error annotation sweeps. (completed 2026-04-16)
-- [ ] **Phase 11.1: Hermetic Host Flow Proofs** — gap-closure phase that makes focused host-flow proof files self-isolating outside the canonical UAT wrapper.
+- [x] **Phase 11.1: Hermetic Host Flow Proofs** — gap-closure phase that makes focused host-flow proof files self-isolating outside the canonical UAT wrapper. (completed 2026-04-16)
 - [ ] **Phase 12: First-User DX Stabilization** — installer/docs/error polish driven by dogfood failures and first-hour user setup paths.
 - [ ] **Phase 13: Adoption Assets** — maintained example/demo path, tutorial docs, README positioning, and repository issue templates.
 - [ ] **Phase 14: Quality Hardening** — security, performance, compatibility, accessibility, responsive admin checks, and release-gate clarity.
@@ -85,9 +85,9 @@ Plans:
 2. The direct focused command and the canonical `scripts/ci/accrue_host_uat.sh` wrapper both pass, so local ad hoc proof runs and CI release-gate runs agree.
 3. Test fixture data uses unique or cleaned-up identifiers where needed while preserving realistic Fake-backed billing, signed webhook, and admin replay evidence.
 4. The milestone audit can be rerun without reporting host-flow proof hermeticity as a partial integration or flow gap.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 11.1-01-PLAN.md — Make focused host-flow proofs hermetic and verify wrapper/direct rerun agreement.
+- [x] 11.1-01-PLAN.md — Make focused host-flow proofs hermetic and verify wrapper/direct rerun agreement.
 **UI hint:** no
 
 ### Phase 12: First-User DX Stabilization
@@ -161,7 +161,7 @@ Plans:
 | 9. Release | v1.0 | 6/6 | Complete | 2026-04-16 |
 | 10. Host App Dogfood Harness | v1.1 | 7/7 | Complete    | 2026-04-16 |
 | 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete    | 2026-04-16 |
-| 11.1. Hermetic Host Flow Proofs | v1.1 | 0/TBD | Planned | - |
+| 11.1. Hermetic Host Flow Proofs | v1.1 | 1/1 | Complete   | 2026-04-16 |
 | 12. First-User DX Stabilization | v1.1 | 0/TBD | Planned | - |
 | 13. Adoption Assets | v1.1 | 0/TBD | Planned | - |
 | 14. Quality Hardening | v1.1 | 0/TBD | Planned | - |

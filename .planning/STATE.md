@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: verifying
-stopped_at: Completed 11-03-PLAN.md
-last_updated: "2026-04-16T19:14:23.188Z"
+stopped_at: Completed 11.1-01-PLAN.md
+last_updated: "2026-04-16T20:46:10.913Z"
 last_activity: 2026-04-16
 progress:
-  total_phases: 6
-  completed_phases: 2
-  total_plans: 10
-  completed_plans: 10
+  total_phases: 7
+  completed_phases: 3
+  total_plans: 11
+  completed_plans: 11
   percent: 100
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 11 — ci-user-facing-integration-gate
+**Current focus:** Phase 11.1 — hermetic-host-flow-proofs
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
+Phase: 11.1 (hermetic-host-flow-proofs) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-04-16
 
@@ -123,6 +123,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 11 P01 | 12m | 2 tasks | 4 files |
 | Phase 11-ci-user-facing-integration-gate P02 | 5m | 2 tasks | 2 files |
 | Phase 11 P03 | 5m | 2 tasks | 5 files |
+| Phase 11.1-hermetic-host-flow-proofs P01 | 15m | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -322,6 +323,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 11]: Annotation blocking now comes from a fail-closed sweep over the current workflow run using normalized release-facing job selectors and read-only GitHub API queries.
 - [Phase 11]: The canonical PR and main release gate now lives in ci.yml, with legacy host and admin asset workflows demoted to workflow_dispatch-only to avoid duplicate required checks.
 - [Phase 11]: Host browser artifacts upload only on failure, and the shell gate now accepts ACCRUE_HOST_BROWSER_LOG so GitHub Actions can reliably collect the Phoenix server log.
+- [Phase 11.1]: Focused host proofs now own Fake reset, operation id seeding, and proof-scoped cleanup instead of depending on wrapper-only database resets.
+- [Phase 11.1]: Host replay fixtures use evt_host_replay_/in_host_replay_ prefixes plus unique_integer suffixes so reruns stay realistic without collisions.
+- [Phase 11.1]: Host proof cleanup deletes all Accrue.Webhook.DispatchWorker jobs because browser replay leaves both discarded and available jobs for the same host webhook.
 
 ### Pending Todos
 
@@ -347,6 +351,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T19:05:26.515Z
-Stopped at: Completed 11-03-PLAN.md
+Last session: 2026-04-16T20:46:10.910Z
+Stopped at: Completed 11.1-01-PLAN.md
 Resume file: None
