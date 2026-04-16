@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Completed 12-first-user-dx-stabilization-08-PLAN.md
-last_updated: "2026-04-16T22:15:57.905Z"
+stopped_at: Completed 12-first-user-dx-stabilization-06-PLAN.md
+last_updated: "2026-04-16T22:21:15.947Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 19
-  completed_plans: 17
-  percent: 89
+  completed_plans: 18
+  percent: 95
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 ## Current Position
 
 Phase: 12 (first-user-dx-stabilization) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -131,6 +131,7 @@ Progress: 1/6 v1.1 phases complete
 | Phase 12-first-user-dx-stabilization P04 | 2min | 2 tasks | 3 files |
 | Phase 12-first-user-dx-stabilization P05 | 5m | 2 tasks | 13 files |
 | Phase 12-first-user-dx-stabilization P08 | 5m | 2 tasks | 5 files |
+| Phase 12-first-user-dx-stabilization P06 | 4m | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -346,6 +347,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12-first-user-dx-stabilization]: The canonical host app remains path-first and switches to Hex deps only when ACCRUE_HOST_HEX_RELEASE=1.
 - [Phase 12-first-user-dx-stabilization]: Hex dependency versions are parsed from sibling package @version declarations to avoid stale hardcoded strings.
 - [Phase 12-first-user-dx-stabilization]: The host router keeps macro syntax compatible with the published installer so Hex smoke validates the released package surface.
+- [Phase 12-first-user-dx-stabilization]: README now routes first-time users into First Hour and Troubleshooting instead of carrying a monolithic quickstart.
+- [Phase 12-first-user-dx-stabilization]: Public docs teach only host-owned boundaries: MyApp.Billing, use Accrue.Webhook.Handler, AccrueAdmin.Router.accrue_admin/2, Accrue.Auth, and Accrue.ConfigError.
+- [Phase 12-first-user-dx-stabilization]: Troubleshooting guidance is anchored to stable ACCRUE-DX codes with exact verification commands.
 
 ### Pending Todos
 
@@ -371,6 +375,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:15:57.901Z
-Stopped at: Completed 12-first-user-dx-stabilization-08-PLAN.md
+Last session: 2026-04-16T22:21:15.941Z
+Stopped at: Completed 12-first-user-dx-stabilization-06-PLAN.md
 Resume file: None
