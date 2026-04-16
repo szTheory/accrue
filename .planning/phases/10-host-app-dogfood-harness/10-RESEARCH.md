@@ -392,17 +392,15 @@ webServer: {
 
 All claims in this research were verified or cited in this session — no user confirmation needed. [VERIFIED: research artifact review]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Where should optional Playwright live for the host app?**
-   - What we know: The repo already has a working Playwright pattern in [`accrue_admin/playwright.config.js`](/Users/jon/projects/accrue/accrue_admin/playwright.config.js) and [`accrue_admin/e2e/phase7-uat.spec.js`](/Users/jon/projects/accrue/accrue_admin/e2e/phase7-uat.spec.js). [VERIFIED: repo grep]
-   - What's unclear: Whether Phase 10 wants browser UAT colocated under `examples/accrue_host` or temporarily reused from the existing admin workspace. [VERIFIED: 10-CONTEXT.md]
-   - Recommendation: Prefer host-app-local Playwright files if browser UAT is added in Phase 10, because the capability belongs to the host app and Phase 11 can promote it directly into CI. [VERIFIED: repo grep]
+1. **Optional Playwright location**
+   - Decision: If Phase 10 includes browser automation, keep it host-app-local at `examples/accrue_host/playwright.config.js` and `examples/accrue_host/e2e/`, reusing the existing `accrue_admin` `webServer` pattern rather than sharing one workspace-level Playwright harness. [VERIFIED: repo grep][CITED: https://playwright.dev/docs/test-webserver]
+   - Why: The capability belongs to the host app, keeps artifacts and startup commands colocated with the dogfood surface, and lets Phase 11 promote the same files into CI without redesign. [VERIFIED: 10-CONTEXT.md]
 
-2. **Should generated Phoenix assets be committed or regenerated in docs?**
-   - What we know: The phase allows discretion here, and `phx.new` produces assets plus related toolchain files by default. [VERIFIED: 10-CONTEXT.md][VERIFIED: local Phoenix scaffold probe]
-   - What's unclear: Whether the repo wants the example app to be fully committed and immediately runnable without first regenerating assets locally. [VERIFIED: 10-CONTEXT.md]
-   - Recommendation: Commit the generated app and its current assets for determinism, but document the exact generator/setup commands so rebuild-from-clean is still provable. [CITED: https://hexdocs.pm/phoenix/Mix.Tasks.Phx.New.html]
+2. **Generated/static asset commit policy**
+   - Decision: Commit the generated Phoenix app, including the default static assets and related toolchain files that `mix phx.new` emits under `examples/accrue_host`, while also documenting the exact generator and setup commands used to rebuild it from a clean checkout. [VERIFIED: local Phoenix scaffold probe][CITED: https://hexdocs.pm/phoenix/Mix.Tasks.Phx.New.html]
+   - Why: Phase 10 is proving a deterministic, user-visible host app per D-01/D-02, so the checked-in example must be runnable without a separate regeneration step or hidden asset bootstrap assumptions. [VERIFIED: 10-CONTEXT.md]
 
 ## Environment Availability
 
