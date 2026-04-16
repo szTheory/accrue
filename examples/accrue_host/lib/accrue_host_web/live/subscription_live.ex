@@ -24,10 +24,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   @impl true
-  def handle_event("start_subscription", %{"plan" => plan_id}, socket) do
+  def handle_event("start_subscription", %{"plan" => plan_id} = params, socket) do
     user = socket.assigns.current_scope.user
 
-    case Billing.subscribe(user, plan_id, []) do
+    case Billing.subscribe(user, plan_id, operation_id: operation_id(params, "subscribe")) do
       {:ok, _subscription} ->
         {:noreply,
          socket
@@ -48,10 +48,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
     {:noreply, assign(socket, :confirm_cancel, false)}
   end
 
-  def handle_event("confirm_cancel", _params, socket) do
+  def handle_event("confirm_cancel", params, socket) do
     case socket.assigns.subscription do
       %Subscription{} = subscription ->
-        case Billing.cancel(subscription, []) do
+        case Billing.cancel(subscription, operation_id: operation_id(params, "cancel")) do
           {:ok, _updated_subscription} ->
             {:noreply,
              socket
@@ -115,7 +115,12 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 <%= if @confirm_cancel do %>
                   <p style={warning_copy_style()}>{@cancel_copy}</p>
                   <div style={action_row_style()}>
-                    <button type="button" phx-click="confirm_cancel" style={destructive_button_style()}>
+                    <button
+                      type="button"
+                      phx-click="confirm_cancel"
+                      phx-value-operation_id={@cancel_operation_id}
+                      style={destructive_button_style()}
+                    >
                       Confirm cancellation
                     </button>
                     <button type="button" phx-click="dismiss_cancel" style={secondary_button_style()}>
@@ -152,8 +157,11 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 type="button"
                 phx-click="start_subscription"
                 phx-value-plan={plan.id}
+                phx-value-operation_id={Map.fetch!(@plan_operation_ids, plan.id)}
                 style={primary_button_style(plan.id == active_plan_id(@subscription))}
-                disabled={plan.id == active_plan_id(@subscription) && !Subscription.canceled?(@subscription)}
+                disabled={
+                  plan.id == active_plan_id(@subscription) && !Subscription.canceled?(@subscription)
+                }
               >
                 Start subscription
               </button>
@@ -171,6 +179,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
     socket
     |> assign(:plans, Plans.all())
+    |> assign_action_operation_ids()
     |> assign(:empty_state_heading, @empty_state_heading)
     |> assign(:empty_state_body, @empty_state_body)
     |> assign(:cancel_copy, @cancel_copy)
@@ -178,6 +187,23 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign(:subscription, subscription)
     |> assign(:subscription_plan_label, plan_label(subscription))
   end
+
+  defp assign_action_operation_ids(socket) do
+    plan_operation_ids =
+      Plans.all()
+      |> Map.new(fn plan -> {plan.id, "subscribe:#{plan.id}:#{Ecto.UUID.generate()}"} end)
+
+    socket
+    |> assign(:plan_operation_ids, plan_operation_ids)
+    |> assign(:cancel_operation_id, "cancel:#{Ecto.UUID.generate()}")
+  end
+
+  defp operation_id(%{"operation_id" => operation_id}, _prefix)
+       when is_binary(operation_id) and operation_id != "" do
+    operation_id
+  end
+
+  defp operation_id(_params, prefix), do: "#{prefix}:#{Ecto.UUID.generate()}"
 
   defp fetch_customer(user_id) do
     from(customer in Customer,
@@ -196,7 +222,9 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp active_plan_id(nil), do: nil
-  defp active_plan_id(subscription), do: plan_id_from_data(subscription) || plan_id_from_customer(subscription)
+
+  defp active_plan_id(subscription),
+    do: plan_id_from_data(subscription) || plan_id_from_customer(subscription)
 
   defp plan_id_from_data(%Subscription{data: data}) when is_map(data) do
     data
@@ -240,7 +268,9 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp humanize_status(nil), do: "Unknown"
-  defp humanize_status(status), do: status |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
+
+  defp humanize_status(status),
+    do: status |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 
   defp page_style do
     "background:#FAFBFC;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;padding:32px 0;"

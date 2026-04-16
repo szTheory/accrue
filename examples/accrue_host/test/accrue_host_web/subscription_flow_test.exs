@@ -2,6 +2,7 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
   use AccrueHostWeb.ConnCase, async: false
 
   import Ecto.Query
+  import ExUnit.CaptureLog
   import Phoenix.LiveViewTest
 
   alias Accrue.Billing
@@ -35,9 +36,14 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     assert html =~ "Start subscription"
     assert html =~ "price_basic"
 
-    view
-    |> element("[data-plan-id='price_basic'] button", "Start subscription")
-    |> render_click()
+    start_log =
+      capture_log(fn ->
+        view
+        |> element("[data-plan-id='price_basic'] button", "Start subscription")
+        |> render_click()
+      end)
+
+    refute start_log =~ "no operation_id"
 
     customer =
       Repo.one!(
@@ -65,9 +71,14 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
 
     assert render(view) =~ "Cancel subscription: Confirm cancellation before ending access."
 
-    view
-    |> element("button", "Confirm cancellation")
-    |> render_click()
+    cancel_log =
+      capture_log(fn ->
+        view
+        |> element("button", "Confirm cancellation")
+        |> render_click()
+      end)
+
+    refute cancel_log =~ "no operation_id"
 
     {:ok, canceled_subscription} = Billing.get_subscription(started_subscription.id)
 

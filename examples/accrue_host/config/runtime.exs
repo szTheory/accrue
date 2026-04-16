@@ -26,8 +26,15 @@ config :accrue_host, AccrueHostWeb.Endpoint,
 config :accrue, :processor, Accrue.Processor.Fake
 config :accrue, :auth_adapter, AccrueHost.Auth
 
+webhook_secret =
+  if config_env() == :prod do
+    System.fetch_env!("STRIPE_WEBHOOK_SECRET")
+  else
+    System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")
+  end
+
 config :accrue, :webhook_signing_secrets, %{
-  stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")
+  stripe: webhook_secret
 }
 
 if config_env() == :prod do
