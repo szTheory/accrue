@@ -15,9 +15,6 @@ permissions:
   issues: write
   pull-requests: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 jobs:
   release:
     name: Release Please
@@ -37,13 +34,92 @@ jobs:
         run: |
           echo "Bootstrap reminder: carry Release-As: 1.0.0 for accrue and accrue_admin before the first public publish." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Run Release Please
         id: release
-        uses: googleapis/release-please-action@v4
-        with:
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          NPM_CONFIG_LOGLEVEL: error
+          RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          repo="${GITHUB_REPOSITORY}"
+          target_branch="${GITHUB_REF_NAME}"
+          release_please="npx --yes release-please@17.6.0"
+
+          release_exists() {
+            gh release view "$1" --repo "$repo" >/dev/null 2>&1
+          }
+
+          write_release_outputs() {
+            local output_prefix="$1"
+            local manifest_path="$2"
+            local before_release="$3"
+            local version tag_name after_release tag_sha
+
+            version="$(jq -r --arg path "$manifest_path" '.[$path] // empty' .release-please-manifest.json)"
+            tag_name="${manifest_path}-v${version}"
+
+            if [ -n "$version" ] && release_exists "$tag_name"; then
+              after_release="true"
+            else
+              after_release="false"
+            fi
+
+            if [ "$before_release" = "false" ] && [ "$after_release" = "true" ]; then
+              git fetch --force --tags origin "refs/tags/$tag_name:refs/tags/$tag_name"
+              tag_sha="$(git rev-list -n 1 "$tag_name")"
+              {
+                echo "${output_prefix}_release_created=true"
+                echo "${output_prefix}_tag_name=$tag_name"
+                echo "${output_prefix}_version=$version"
+                echo "${output_prefix}_sha=$tag_sha"
+              } >> "$GITHUB_OUTPUT"
+            else
+              {
+                echo "${output_prefix}_release_created=false"
+                echo "${output_prefix}_tag_name=$tag_name"
+                echo "${output_prefix}_version=$version"
+                echo "${output_prefix}_sha="
+              } >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          accrue_version="$(jq -r '.accrue // empty' .release-please-manifest.json)"
+          accrue_admin_version="$(jq -r '.accrue_admin // empty' .release-please-manifest.json)"
+          accrue_tag="accrue-v${accrue_version}"
+          accrue_admin_tag="accrue_admin-v${accrue_admin_version}"
+
+          if [ -n "$accrue_version" ] && release_exists "$accrue_tag"; then
+            accrue_release_before="true"
+          else
+            accrue_release_before="false"
+          fi
+
+          if [ -n "$accrue_admin_version" ] && release_exists "$accrue_admin_tag"; then
+            accrue_admin_release_before="true"
+          else
+            accrue_admin_release_before="false"
+          fi
+
+          $release_please github-release \
+            --repo-url "$repo" \
+            --target-branch "$target_branch" \
+            --config-file release-please-config.json \
+            --manifest-file .release-please-manifest.json \
+            --token "$RELEASE_PLEASE_TOKEN"
+
+          write_release_outputs "accrue" "accrue" "$accrue_release_before"
+          write_release_outputs "accrue_admin" "accrue_admin" "$accrue_admin_release_before"
+
+          $release_please release-pr \
+            --repo-url "$repo" \
+            --target-branch "$target_branch" \
+            --config-file release-please-config.json \
+            --manifest-file .release-please-manifest.json \
+            --token "$RELEASE_PLEASE_TOKEN"
 
   publish-accrue:
     name: Publish accrue
