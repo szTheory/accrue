@@ -27,6 +27,15 @@ config :accrue_host,
   ecto_repos: [AccrueHost.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
+config :accrue_host, Oban,
+  repo: AccrueHost.Repo,
+  queues: [
+    accrue_webhooks: 10,
+    accrue_mailers: 20,
+    accrue_pdf: 5
+  ],
+  plugins: [{Oban.Plugins.Pruner, max_age: 60 * 60 * 24}]
+
 # Configure the endpoint
 config :accrue_host, AccrueHostWeb.Endpoint,
   url: [host: "localhost"],

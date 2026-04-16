@@ -27,6 +27,11 @@ config :accrue,
     support_email: "support@example.test"
   ]
 
+config :accrue_host, Oban,
+  repo: AccrueHost.Repo,
+  queues: false,
+  plugins: false
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :accrue_host, AccrueHostWeb.Endpoint,

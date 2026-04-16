@@ -10,6 +10,7 @@ defmodule AccrueHost.Application do
     children = [
       AccrueHostWeb.Telemetry,
       AccrueHost.Repo,
+      {Oban, Application.fetch_env!(:accrue_host, Oban)},
       {DNSCluster, query: Application.get_env(:accrue_host, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AccrueHost.PubSub},
       # Start a worker by calling: AccrueHost.Worker.start_link(arg)
