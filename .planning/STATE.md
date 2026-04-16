@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilization + Adoption
 status: executing
-stopped_at: Phase 10 UI-SPEC approved
-last_updated: "2026-04-16T16:25:08.641Z"
-last_activity: 2026-04-16 -- Phase 10 planning complete
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-04-16T16:30:22.583Z"
+last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 7
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 14
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Milestone v1.1 — Stabilization + Adoption.
+**Current focus:** Phase 10 — host-app-dogfood-harness
 
 ## Current Position
 
-Phase: 10
-Plan: Not started
+Phase: 10 (host-app-dogfood-harness) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 10 planning complete
+Last activity: 2026-04-16
 
 Progress: 0/6 v1.1 phases complete
 
@@ -111,6 +111,7 @@ Progress: 0/6 v1.1 phases complete
 | Phase 09-release P04 | 5m | 2 tasks | 5 files |
 | Phase 09-release P05 | 26m | 2 tasks | 11 files |
 | Phase 09-release P06 | completed | release readiness, GitHub/Hex secret setup, public package publish, docs hotfix | released |
+| Phase 10 P01 | 14m | 1 tasks | 47 files |
 
 ## Accumulated Context
 
@@ -289,6 +290,8 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 09-release]: HexDocs guide links must be relative ExDoc links (`guides/*.md` -> `quickstart.html`, `admin_ui.html`) rather than GitHub blob URLs.
 - [Phase 09-release]: `source_ref` must use package-specific release tags (`accrue-v#{@version}` and `accrue_admin-v#{@version}`) so source links match Release Please tags.
 - [Phase 09-release]: Warnings and GitHub annotations are release blockers; final sweeps for PR #3, PR #4, and main found no warning/error annotations, only the expected Browser UAT notice.
+- [Phase 10]: Kept examples/accrue_host generator-first and patched only host-owned Accrue boundaries for path deps and runtime/test config.
+- [Phase 10]: Pinned the host app to Accrue.Processor.Fake with an env-driven webhook secret default so local dogfood flows avoid hidden machine-local secrets.
 
 ### Pending Todos
 
@@ -314,6 +317,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-16T15:42:58.594Z
-Stopped at: Phase 10 UI-SPEC approved
-Resume file: .planning/phases/10-host-app-dogfood-harness/10-UI-SPEC.md
+Last session: 2026-04-16T16:30:22.579Z
+Stopped at: Completed 10-01-PLAN.md
+Resume file: None

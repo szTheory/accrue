@@ -9,7 +9,7 @@ Requirements for the v1.1 stabilization milestone. The milestone proves Accrue f
 
 ### Host App Dogfood
 
-- [ ] **HOST-01**: A minimal Phoenix host app exists in the repository as the canonical dogfood app for `accrue` and `accrue_admin`.
+- [x] **HOST-01**: A minimal Phoenix host app exists in the repository as the canonical dogfood app for `accrue` and `accrue_admin`.
 - [ ] **HOST-02**: The host app uses the public installer and package APIs rather than private shortcuts or hand-wired internals.
 - [ ] **HOST-03**: The host app has at least one realistic billable schema and generated `MyApp.Billing` facade.
 - [ ] **HOST-04**: The host app mounts the scoped webhook endpoint and verifies signed Fake/Stripe-shaped webhook payloads end to end.
@@ -89,7 +89,7 @@ Deferred until after v1.1 unless pulled into a later milestone:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HOST-01 | Phase 10 | Pending |
+| HOST-01 | Phase 10 | Complete |
 | HOST-02 | Phase 10 | Pending |
 | HOST-03 | Phase 10 | Pending |
 | HOST-04 | Phase 10 | Pending |
