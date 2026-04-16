@@ -194,7 +194,7 @@ else
 
   (
     cd "$host_dir"
-    CI= \
+    ACCRUE_HOST_REUSE_SERVER=1 \
       ACCRUE_HOST_BROWSER_PORT="$browser_port" \
       ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
       npm run e2e

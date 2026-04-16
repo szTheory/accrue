@@ -48,7 +48,7 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: accrue_admin/package-lock.json
+          cache-dependency-path: examples/accrue_host/package-lock.json
 
       - name: Restore host deps cache
         uses: actions/cache@v4
@@ -59,10 +59,10 @@ jobs:
             ${{ runner.os }}-otp27-elixir118-accrue-host-deps-
 
       - name: Install browser deps
-        run: cd accrue_admin && npm ci
+        run: cd examples/accrue_host && npm ci
 
       - name: Install Chromium
-        run: cd accrue_admin && npx playwright install --with-deps chromium
+        run: cd examples/accrue_host && npm run e2e:install
 
       - name: Run host UAT
         run: bash scripts/ci/accrue_host_uat.sh

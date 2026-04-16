@@ -21,7 +21,7 @@ module.exports = defineConfig({
   webServer: {
     command: `PORT=${port} PHX_SERVER=true MIX_ENV=test mix phx.server`,
     url: `${baseURL}/`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: process.env.ACCRUE_HOST_REUSE_SERVER === "1" || !process.env.CI,
     timeout: 120_000
   },
   projects: [

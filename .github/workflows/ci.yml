@@ -20,6 +20,7 @@ permissions:
 jobs:
   release-gate:
     name: Release gate (elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
 
     services:
@@ -213,6 +214,7 @@ jobs:
 
   admin-drift-docs:
     name: Admin drift and docs
+    if: github.event_name != 'schedule'
     needs: [release-gate]
     runs-on: ubuntu-24.04
 
@@ -244,6 +246,7 @@ jobs:
 
   host-integration:
     name: Host integration
+    if: github.event_name != 'schedule'
     needs: [admin-drift-docs]
     runs-on: ubuntu-24.04
 
@@ -338,6 +341,7 @@ jobs:
 
   annotation-sweep:
     name: Annotation sweep
+    if: github.event_name != 'schedule'
     needs: [release-gate, admin-drift-docs, host-integration]
     runs-on: ubuntu-24.04
 
