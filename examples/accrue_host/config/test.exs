@@ -20,6 +20,8 @@ config :accrue,
   env: :test,
   repo: AccrueHost.Repo,
   processor: Accrue.Processor.Fake,
+  webhook_handlers: [AccrueHost.BillingHandler],
+  webhook_signing_secrets: %{stripe: "whsec_test_host"},
   branding: [
     from_email: "noreply@example.test",
     support_email: "support@example.test"
