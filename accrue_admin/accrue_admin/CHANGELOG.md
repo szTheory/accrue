@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/szTheory/accrue/compare/accrue_admin-v0.1.1...accrue_admin-v0.1.2) (2026-04-16)
+
+
+### Bug Fixes
+
+* correct hexdocs package readmes ([066483d](https://github.com/szTheory/accrue/commit/066483d236b415579a178827a4cdd45bfb5911f9))
+
 ## [0.1.1](https://github.com/szTheory/accrue/compare/accrue_admin-v0.1.0...accrue_admin-v0.1.1) (2026-04-16)
 
 
