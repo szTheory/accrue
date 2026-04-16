@@ -19,6 +19,12 @@ mix test
 mix phx.server
 ```
 
+For a CI-equivalent local check from the repository root:
+
+```bash
+bash scripts/ci/accrue_host_uat.sh
+```
+
 ## Local Defaults
 
 - The default local setup uses `Accrue.Processor.Fake`, so the host proof path does not require live Stripe network access.

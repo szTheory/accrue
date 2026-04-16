@@ -36,6 +36,7 @@ config :accrue_host, Oban,
 # you can enable the server option below.
 config :accrue_host, AccrueHostWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
+  check_origin: false,
   secret_key_base: "eOS25suUgAkyXpcFF1hfjqAUQ9/hauf6AN83BzyrjnJin+b7+q0dgZUq8AxG9PgY",
   server: false
 

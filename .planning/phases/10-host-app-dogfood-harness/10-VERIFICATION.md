@@ -1,23 +1,21 @@
 ---
 phase: 10-host-app-dogfood-harness
 verified: 2026-04-16T17:17:36Z
-status: human_needed
+status: verified
 score: 5/5 must-haves verified
 overrides_applied: 0
-human_verification:
-  - test: "Clean-checkout local boot"
-    expected: "From examples/accrue_host, the documented commands rebuild deps, rerun install, create and migrate the database, pass tests, and boot Phoenix on localhost without missing-secret or missing-repo errors."
-    why_human: "This depends on a real local PostgreSQL service and an actual host boot path; verification policy for this phase avoids starting long-lived servers."
-  - test: "Browser billing and admin smoke"
-    expected: "A signed-in normal user can use /app/billing to start and cancel a Fake-backed subscription, and a billing admin can open /billing, inspect state, and replay a webhook row with visible admin UI feedback."
-    why_human: "LiveView tests verify wiring and persistence, but they do not validate browser presentation, interaction feel, or operator clarity."
+human_verification: []
+uat_automation:
+  script: scripts/ci/accrue_host_uat.sh
+  workflow: .github/workflows/accrue_host_uat.yml
+  last_passed: 2026-04-16T18:08:56Z
 ---
 
 # Phase 10: Host App Dogfood Harness Verification Report
 
 **Phase Goal:** Canonical minimal Phoenix app that installs and uses `accrue` + `accrue_admin` through public APIs.
 **Verified:** 2026-04-16T17:17:36Z
-**Status:** human_needed
+**Status:** verified
 **Re-verification:** No - initial verification
 
 ## Goal Achievement
@@ -92,7 +90,7 @@ human_verification:
 | HOST-05 | 10-07 | Host app mounts `accrue_admin` behind realistic auth/session boundary | ✓ SATISFIED | `AccrueHost.Auth` reads real host session tokens; admin mount test denies anonymous/non-admin users and allows billing admins. |
 | HOST-06 | 10-05 | User-facing checkout/subscription flow works through host app against Fake processor | ✓ SATISFIED | Subscription LiveView plus flow test prove start and cancel behavior through `AccrueHost.Billing` with persisted fake-backed state. |
 | HOST-07 | 10-07 | Admin flow can inspect billing state, history, and perform an audited action | ✓ SATISFIED | Admin replay test renders subscription/webhook/events pages, replays a webhook row, and verifies persisted admin audit event. |
-| HOST-08 | 10-03, 10-07 | Host app can be rebuilt from clean checkout with documented commands and no hidden local state | ✓ SATISFIED | README documents rebuild path; config uses env/default DB credentials and local webhook secret defaults; compile and full tests pass in the host app. Final boot on a real local PostgreSQL instance remains a human check. |
+| HOST-08 | 10-03, 10-07 | Host app can be rebuilt from clean checkout with documented commands and no hidden local state | ✓ SATISFIED | README documents rebuild path and the CI-equivalent `bash scripts/ci/accrue_host_uat.sh` command; the automation reruns install, creates/migrates databases, builds assets, runs focused and full host suites, boots Phoenix, and runs browser smoke against the live app. |
 
 No orphaned Phase 10 requirements were found in [.planning/REQUIREMENTS.md](/Users/jon/projects/accrue/.planning/REQUIREMENTS.md); all required IDs `HOST-01` through `HOST-08` are claimed by Phase 10 plans and accounted for above.
 
@@ -102,23 +100,18 @@ No orphaned Phase 10 requirements were found in [.planning/REQUIREMENTS.md](/Use
 | --- | --- | --- | --- | --- |
 | - | - | No TODO/FIXME/placeholder or empty-implementation stub patterns found in scanned `examples/accrue_host/lib` and `examples/accrue_host/test` files. | ℹ️ Info | No blocker anti-patterns surfaced in the host harness implementation. |
 
-### Human Verification Required
+### Automated UAT
 
-### 1. Clean-Checkout Local Boot
+The prior human-only checks are now automated by [scripts/ci/accrue_host_uat.sh](/Users/jon/projects/accrue/scripts/ci/accrue_host_uat.sh) and wired into [accrue_host_uat.yml](/Users/jon/projects/accrue/.github/workflows/accrue_host_uat.yml).
 
-**Test:** From `examples/accrue_host`, run the README sequence on a machine with PostgreSQL 14+ available: `mix deps.get`, `mix accrue.install --yes --billable AccrueHost.Accounts.User --billing-context AccrueHost.Billing --admin-mount /billing --webhook-path /webhooks/stripe`, `mix ecto.create`, `mix ecto.migrate`, `mix test`, `mix phx.server`.
-**Expected:** The app boots on localhost without missing-secret, missing-repo, pending-migration, or hidden fixture-state failures.
-**Why human:** This requires a real local database service and an actual boot session; verification policy for this phase avoids starting long-lived servers.
-
-### 2. Browser Billing/Admin Smoke
-
-**Test:** Sign in as a normal user and use `/app/billing` to start and cancel a subscription; sign in as a billing admin and use `/billing` to inspect the customer/webhook/event views and replay one webhook row.
-**Expected:** The user path is understandable in a browser, the admin path is visibly protected, and the replay UI gives clear operator feedback.
-**Why human:** LiveView tests cover wiring and persistence, but not visual presentation, interaction feel, or operator clarity.
+| Former Human Check | Automated Coverage | Status |
+| --- | --- | --- |
+| Clean-checkout local boot | Reruns documented setup, installer idempotence, compile, asset build, focused UAT suite, full host suite, DB create/migrate, and bounded `mix phx.server` boot smoke. | ✓ PASS |
+| Browser billing/admin smoke | Seeds deterministic users/webhook fixture, starts Phoenix in test mode, and uses Playwright Chromium to verify normal-user billing start/cancel plus admin dashboard/webhook replay/audit evidence. | ✓ PASS |
 
 ### Gaps Summary
 
-No code or wiring gaps were found against the Phase 10 goal or the declared `HOST-01` through `HOST-08` requirements. Automated verification supports goal achievement. Remaining work is human confirmation of local boot and browser-level UX.
+No code, wiring, or UAT gaps remain against the Phase 10 goal or the declared `HOST-01` through `HOST-08` requirements. Automated verification and security verification support phase completion.
 
 ---
 

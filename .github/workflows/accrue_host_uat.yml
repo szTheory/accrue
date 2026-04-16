@@ -1,0 +1,83 @@
+name: Accrue Host UAT
+
+on:
+  pull_request:
+    paths:
+      - "accrue/**"
+      - "accrue_admin/**"
+      - "examples/accrue_host/**"
+      - "scripts/ci/accrue_host_*"
+      - ".github/workflows/accrue_host_uat.yml"
+  push:
+    branches: [main]
+    paths:
+      - "accrue/**"
+      - "accrue_admin/**"
+      - "examples/accrue_host/**"
+      - "scripts/ci/accrue_host_*"
+      - ".github/workflows/accrue_host_uat.yml"
+  workflow_dispatch: {}
+
+jobs:
+  host-uat:
+    name: Host app UAT
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_HOST_PORT: 4100
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.0"
+
+      - name: Install Hex
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Restore host deps cache
+        uses: actions/cache@v4
+        with:
+          path: examples/accrue_host/deps
+          key: ${{ runner.os }}-otp27-elixir118-accrue-host-deps-${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp27-elixir118-accrue-host-deps-
+
+      - name: Install browser deps
+        run: cd accrue_admin && npm ci
+
+      - name: Install Chromium
+        run: cd accrue_admin && npx playwright install --with-deps chromium
+
+      - name: Run host UAT
+        run: bash scripts/ci/accrue_host_uat.sh
