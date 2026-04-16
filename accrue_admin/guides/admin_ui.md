@@ -2,7 +2,7 @@
 
 `accrue_admin` mounts a package-scoped LiveView billing UI inside a host Phoenix app. The package owns its own router macro, private static bundle, and non-prod inspection tools.
 
-Start with the package quickstart in [`README.md`](../README.md), then return here for the host wiring and release checks. Published `accrue_admin` releases depend on `accrue ~> 1.0.0`, while monorepo development keeps the local sibling dependency shape by default.
+Start with the package quickstart in [`README.md`](../README.md), then return here for the host wiring and release checks. Published `accrue_admin` releases depend on `accrue ~> 0.1.2`, while monorepo development keeps the local sibling dependency shape by default.
 
 ## Host Setup
 
@@ -47,7 +47,14 @@ config :accrue,
 
 ## Auth Expectations
 
-The mount macro wires the package auth hook into the LiveSession by default. `Accrue.Auth.current_user/1` must return an admin-capable user for the forwarded session keys, and the host app remains responsible for browser-session setup before the admin routes mount.
+The mount macro wires the package auth hook into the LiveSession by default.
+`Accrue.Auth` must be able to resolve the current operator from the forwarded
+session data, and `session_keys: [:user_token]` is the supported host boundary
+for the standard Phoenix auth flow.
+
+The host app remains responsible for browser-session setup before the admin
+routes mount. Keep `accrue_admin "/billing"` inside the authenticated browser
+scope so `/billing` inherits the same auth boundary as the rest of the app.
 
 ## Private Asset Bundle
 

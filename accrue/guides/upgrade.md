@@ -5,9 +5,30 @@ published billing facade, package changelogs, and documented guides. Do not
 assume silent compatibility with undocumented internals, private modules, or
 copy-pasted implementation details from the repository.
 
-## v1.0.0 baseline
+## Generated code is host-owned
 
-`v1.0.0` is the first public baseline for the release surface documented in the
+`mix accrue.install` generates host-facing files such as `MyApp.Billing`,
+router mounts, and starter config snippets. Those generated code paths are
+host-owned after generation.
+
+Installer reruns only update pristine generated files that still match the
+Accrue fingerprint marker. If you changed a generated file, Accrue treats it as
+user-edited and leaves it alone on rerun.
+
+## Installer rerun behavior
+
+- pristine generated files are safe to update in place
+- user-edited generated files are skipped
+- unmarked existing files are skipped unless you opt into a narrow overwrite
+- `--write-conflicts` writes sidecars under `.accrue/conflicts/` instead of
+  patching live app files blindly
+
+That contract is meant to keep upgrades predictable: generated code is
+host-owned, and installer reruns do not erase local policy edits.
+
+## v0.1.2 baseline
+
+`v0.1.2` is the current public baseline for the release surface documented in the
 README, ExDoc API pages, and package guides. Upgrade planning should start from
 that boundary, not from internal modules or earlier pre-release commits.
 
@@ -27,8 +48,10 @@ documents the replacement, and removes the deprecated path only in a later
 release after that warning window.
 
 That rule applies to documented public surface area. It does not extend a
-compatibility promise to undocumented internals, private modules, or generated
-snippets that callers modified in their own host app.
+compatibility promise to undocumented internals or private modules. For
+generated code, the stability contract is the rerun behavior above: pristine
+generated files may be refreshed, while user-edited generated files stay
+skipped.
 
 ## Release Please and changelog flow
 
@@ -50,6 +73,7 @@ or in the public guides, do not assume it is part of the supported contract.
 Validate the upgrade in the consuming app, not only in the library checkout:
 
 ```bash
+mix accrue.install --check
 mix compile --warnings-as-errors
 mix test --warnings-as-errors
 mix docs --warnings-as-errors

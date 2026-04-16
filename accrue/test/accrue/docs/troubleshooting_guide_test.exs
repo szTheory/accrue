@@ -2,7 +2,6 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
   use ExUnit.Case, async: true
 
   @guide "guides/troubleshooting.md"
-  @skip_reason "Phase 12 plan 06 activates this contract after the troubleshooting guide lands"
   @diagnostic_codes [
     "ACCRUE-DX-REPO-CONFIG",
     "ACCRUE-DX-MIGRATIONS-PENDING",
@@ -30,10 +29,10 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
   @verification_commands [
     "mix ecto.migrate",
     "mix test test/accrue_host_web/webhook_ingest_test.exs",
-    "mix test test/accrue_host_web/admin_mount_test.exs"
+    "mix test test/accrue_host_web/admin_mount_test.exs",
+    "mix accrue.install --check"
   ]
 
-  @tag skip: @skip_reason
   test "troubleshooting guide reserves stable codes, anchors, and verification surface" do
     guide = File.read!(@guide)
 
