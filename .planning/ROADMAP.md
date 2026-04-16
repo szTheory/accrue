@@ -18,7 +18,7 @@ Accrue is built in a strictly topological sequence dictated by research: foundat
 - [ ] **Phase 6: Email + PDF** — 13+ transactional emails via Mailer behaviour, ChromicPDF adapter, shared HEEx templates, MJML responsive layouts
 - [ ] **Phase 7: Admin UI (accrue_admin)** — LiveView dashboard, customer/subscription/invoice pages, webhook inspector with one-click replay, Sigra auth adapter
 - [x] **Phase 8: Install + Polish + Testing** — `mix accrue.install` idempotent generator, test helpers (advance_clock, trigger_event, assert_email_sent, assert_pdf_rendered), OTel span helpers
-- [ ] **Phase 9: Release** — CI matrix (format, warnings-as-errors, Credo strict, Dialyzer, docs), Release Please, ExDoc guides, SECURITY.md, same-day v1.0 publish of accrue + accrue_admin
+- [x] **Phase 9: Release** — CI matrix (format, warnings-as-errors, Credo strict, Dialyzer, docs), Release Please, ExDoc guides, SECURITY.md, same-day v1.0 publish of accrue + accrue_admin (completed 2026-04-16)
 
 ## Phase Details
 
@@ -228,7 +228,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Email + PDF | 0/TBD | Not started | - |
 | 7. Admin UI (accrue_admin) | 0/TBD | Not started | - |
 | 8. Install + Polish + Testing | 0/TBD | Not started | - |
-| 9. Release | 3/6 | In Progress |  |
+| 9. Release | 6/6 | Complete    | 2026-04-16 |
 
 ## Parallelization Notes
 
