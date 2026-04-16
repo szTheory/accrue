@@ -40,9 +40,11 @@ import Config
 
 config :accrue, :processor, Accrue.Processor.Fake
 
-config :accrue,
-  repo: MyApp.Repo,
-  webhook_signing_secret: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")
+config :accrue, repo: MyApp.Repo
+
+config :accrue, :webhook_signing_secrets, %{
+  stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")
+}
 ```
 
 The local first-hour path uses the Fake processor so you can prove the host

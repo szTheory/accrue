@@ -10,7 +10,7 @@ diagnostic code.
 | `ACCRUE-DX-MIGRATIONS-PENDING` | Accrue tables are missing or behind the installed package version. | The billing facade and webhook pipeline expect the schema to exist before the app handles requests. | Run the generated migrations in the host app. | Run `mix ecto.migrate`. |
 | `ACCRUE-DX-OBAN-NOT-CONFIGURED` | `Oban` config is missing. | Webhook follow-up work, replay, and async jobs cannot be scheduled without Oban config. | Add `config :my_app, Oban, ...` and keep it environment-specific. | Boot the app and run `mix accrue.install --check`. |
 | `ACCRUE-DX-OBAN-NOT-SUPERVISED` | `Oban` is configured but not started with the app. | Signed webhook ingest can persist the event, but dispatch and replay will stall. | Add `{Oban, Application.fetch_env!(:my_app, Oban)}` to your supervision tree. | Start the app, then run `mix test test/accrue_host_web/webhook_ingest_test.exs`. |
-| `ACCRUE-DX-WEBHOOK-SECRET-MISSING` | The webhook signing secret is absent from runtime config. | Accrue refuses to treat unsigned or unverifiable webhook traffic as trusted billing input. | Set `webhook_signing_secret` in `config/runtime.exs` with an environment variable or local dev default. | Restart the app and rerun `mix accrue.install --check`. |
+| `ACCRUE-DX-WEBHOOK-SECRET-MISSING` | The webhook signing secret is absent from runtime config. | Accrue refuses to treat unsigned or unverifiable webhook traffic as trusted billing input. | Set `config :accrue, :webhook_signing_secrets, %{stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")}` in `config/runtime.exs`. | Restart the app and rerun `mix accrue.install --check`. |
 | `ACCRUE-DX-WEBHOOK-ROUTE-MISSING` | The `/webhooks/stripe` route was not mounted. | Accrue cannot receive signed processor events if the route does not exist. | Import `Accrue.Router` and add `accrue_webhook "/stripe", :stripe` inside a webhook scope. | Run `mix phx.routes | rg '/webhooks/stripe'`. |
 | `ACCRUE-DX-WEBHOOK-RAW-BODY` | The webhook route is mounted without the raw-body reader. | Signature verification depends on the exact request body bytes before parsing. | Add a dedicated pipeline using `body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}`. | Run `mix test test/accrue_host_web/webhook_ingest_test.exs`. |
 | `ACCRUE-DX-WEBHOOK-PIPELINE` | The webhook route is behind the wrong Phoenix pipeline. | Browser, CSRF, or auth plugs can alter the request path before webhook verification runs. | Mount `/webhooks/stripe` in a dedicated scope that only uses the raw-body parser pipeline. | Post the signed proof path and rerun `mix test test/accrue_host_web/webhook_ingest_test.exs`. |
@@ -74,6 +74,33 @@ Webhook replay and follow-up jobs need Oban queues to exist before they can run.
 
 Add your host app's `Oban` config and keep it checked into the same app that
 owns the router and billing facade.
+
+### How to verify
+
+```bash
+mix accrue.install --check
+```
+
+## `ACCRUE-DX-WEBHOOK-SECRET-MISSING` {#accrue-dx-webhook-secret-missing}
+
+### What happened
+
+Accrue could not find a signing secret for the Stripe webhook endpoint.
+
+### Why Accrue cares
+
+Webhook signature verification only works when the runtime config exposes the
+secrets map keyed by processor.
+
+### Fix
+
+Set the runtime config to the exact key Accrue reads:
+
+```elixir
+config :accrue, :webhook_signing_secrets, %{
+  stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")
+}
+```
 
 ### How to verify
 

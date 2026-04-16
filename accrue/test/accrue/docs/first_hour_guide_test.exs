@@ -46,7 +46,7 @@ defmodule Accrue.Docs.FirstHourGuideTest do
       refute guide =~ surface
     end)
 
-    refute guide =~ "webhook_signing_secret"
+    refute guide =~ ~r/webhook_signing_secret(?!s)/
   end
 
   defp assert_order!(guide, [first | rest]) do

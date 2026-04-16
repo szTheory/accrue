@@ -61,6 +61,6 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
       assert guide =~ snippet
     end)
 
-    refute guide =~ "webhook_signing_secret"
+    refute guide =~ ~r/webhook_signing_secret(?!s)/
   end
 end
