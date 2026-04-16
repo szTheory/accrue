@@ -61,3 +61,9 @@ npm run e2e
 ## Guides
 
 - [Admin UI integration guide](guides/admin_ui.md)
+
+## Project policies
+
+- [Contributing guide](../CONTRIBUTING.md)
+- [Code of Conduct](../CODE_OF_CONDUCT.md)
+- [Security policy](../SECURITY.md)

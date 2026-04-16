@@ -53,3 +53,9 @@ Breaking changes for that facade layer follow the deprecation cycle documented i
 ## Security
 
 Use runtime-only secrets for Stripe credentials, keep webhook signing secrets out of source control, and review the repository `SECURITY.md` before production rollout or vulnerability reporting.
+
+## Project policies
+
+- [Contributing guide](../CONTRIBUTING.md)
+- [Code of Conduct](../CODE_OF_CONDUCT.md)
+- [Security policy](../SECURITY.md)
