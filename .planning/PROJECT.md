@@ -19,7 +19,7 @@ Accrue v1.0 Initial Release is shipped as public Hex packages:
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface. Phase history and requirements are archived in `.planning/milestones/`.
 
-v1.1 Phases 10 and 11 are complete: the minimal Phoenix host app now proves the real install, signed-in billing, webhook, and admin replay paths, and CI now treats the Fake-backed host browser/user flow as a mandatory release gate.
+v1.1 Phases 10, 11, and 11.1 are complete: the minimal Phoenix host app now proves the real install, signed-in billing, webhook, and admin replay paths; CI treats the Fake-backed host browser/user flow as a mandatory release gate; and the focused host-flow proof files can be rerun directly on a migrated test database without wrapper-only cleanup assumptions.
 
 ## Current Milestone: v1.1 Stabilization + Adoption
 
@@ -41,6 +41,7 @@ v1.0 Initial Release shipped and validated on 2026-04-16. Detailed requirement o
 
 Validated in Phase 10: the minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths.
 Validated in Phase 11: CI runs the host-app integration and browser flows as a release gate.
+Validated in Phase 11.1: focused host-flow proofs are hermetic when run directly after the canonical host UAT wrapper.
 
 ### Active
 
