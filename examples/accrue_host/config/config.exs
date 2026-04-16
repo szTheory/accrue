@@ -10,6 +10,13 @@ import Config
 config :ex_cldr, default_backend: Accrue.Cldr
 config :ex_money, default_cldr_backend: Accrue.Cldr
 
+config :accrue,
+  repo: AccrueHost.Repo,
+  branding: [
+    from_email: "noreply@example.test",
+    support_email: "support@example.test"
+  ]
+
 config :accrue_host, :scopes,
   user: [
     default: true,

@@ -7,6 +7,7 @@ defmodule AccrueHost.InstallBoundaryTest do
   @handler_path Path.join(@host_root, "lib/accrue_host/billing_handler.ex")
   @router_path Path.join(@host_root, "lib/accrue_host_web/router.ex")
   @runtime_path Path.join(@host_root, "config/runtime.exs")
+  @admin_mount ~S|accrue_admin("/billing", session_keys: [:user_token], allow_live_reload: false)|
 
   test "installer-generated billing facade stays at the public boundary" do
     billing = File.read!(@billing_path)
@@ -34,10 +35,10 @@ defmodule AccrueHost.InstallBoundaryTest do
     assert router =~ "body_reader: {Accrue.Webhook.CachingBodyReader, :read_body, []}"
     assert router =~ ~s(scope "/webhooks" do)
     assert router =~ ~S|accrue_webhook("/stripe", :stripe)|
-    assert router =~ ~S|accrue_admin("/billing")|
+    assert router =~ @admin_mount
     assert count_occurrences(router, "pipeline :accrue_webhook_raw_body do") == 1
     assert count_occurrences(router, ~S|accrue_webhook("/stripe", :stripe)|) == 1
-    assert count_occurrences(router, ~S|accrue_admin("/billing")|) == 1
+    assert count_occurrences(router, @admin_mount) == 1
   end
 
   test "runtime config keeps fake-backed defaults instead of live-only setup" do

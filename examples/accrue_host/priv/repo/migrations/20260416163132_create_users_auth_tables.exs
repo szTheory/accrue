@@ -7,6 +7,7 @@ defmodule AccrueHost.Repo.Migrations.CreateUsersAuthTables do
     create table(:users, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :email, :citext, null: false
+      add :billing_admin, :boolean, default: false, null: false
       add :hashed_password, :string
       add :confirmed_at, :utc_datetime
 
