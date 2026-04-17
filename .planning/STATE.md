@@ -5,9 +5,9 @@ milestone_name: Tax + Organization Billing
 current_phase: null
 current_phase_name: null
 current_plan: Not started
-status: defining_requirements
-stopped_at: Milestone v1.3 started
-last_updated: "2026-04-17T16:45:00.000Z"
+status: ready_to_plan_phase
+stopped_at: Roadmap created for v1.3
+last_updated: "2026-04-17T17:05:00.000Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
@@ -33,8 +33,8 @@ Plan: —
 **Current Phase:** Not started
 **Current Phase Name:** —
 **Current Plan:** —
-**Status:** Defining requirements
-**Stopped At:** Milestone v1.3 started
+**Status:** Ready to plan Phase 18
+**Stopped At:** Roadmap created for v1.3
 **Resume File:** None
 **Last Activity:** 2026-04-17 — Milestone v1.3 started
 
@@ -45,11 +45,11 @@ Plan: —
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 18. Stripe Tax Core | Pending | Define tax enablement and projection work |
-| 19. Tax Location and Rollout Safety | Pending | Define location validation and legacy recurring-item migration work |
-| 20. Organization Billing With Sigra | Pending | Define Sigra-first org billing and tenant-boundary proof |
-| 21. Admin and Host UX Proof | Pending | Define browser/admin proof for tax and org billing states |
-| 22. Finance Handoff and Milestone Verification | Pending | Define Stripe-native finance handoff and closure verification |
+| 18. Stripe Tax Core | Pending | Tax enablement and projection work |
+| 19. Tax Location and Rollout Safety | Pending | Location validation and legacy recurring-item migration work |
+| 20. Organization Billing With Sigra | Pending | Sigra-first org billing and tenant-boundary proof |
+| 21. Admin and Host UX Proof | Pending | Browser/admin proof for tax and org billing states |
+| 22. Finance Handoff and Milestone Verification | Pending | Stripe-native finance handoff and closure verification |
 
 ## Current Planning Artifacts
 
@@ -71,6 +71,7 @@ Plan: —
 - Finance work must not become a revenue-recognition engine; v1.3 should document Stripe Revenue Recognition, Sigma scheduled queries, and Data Pipeline handoff points.
 - Preserve `tax rollout correctness`, `cross-tenant billing leakage`, and `wrong-audience finance exports` as explicit milestone risks.
 - Official second processor adapter remains a planted seed outside v1.3.
+- v1.3 phases are ordered tax core -> tax rollout safety -> org billing -> host/admin proof -> finance handoff and verification.
 
 ## Next Action
 
