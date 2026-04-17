@@ -28,6 +28,8 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 
 The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust: `examples/accrue_host` is the canonical local demo/tutorial path, the repository and package docs are host-first, mature OSS support assets are in place, trust evidence is checked in and executable, and expansion discovery ranked Stripe Tax, organization billing, and finance handoff as the next expansion candidates.
 
+Phase 18 of v1.3 is complete: subscription and checkout flows now accept a flat `automatic_tax` option, Stripe/Fake processors preserve deterministic automatic-tax behavior, and subscription/invoice projections expose narrow local tax observability.
+
 ## Current Milestone: v1.3 Tax + Organization Billing
 
 **Goal:** Let Phoenix SaaS teams bill organizations with Stripe Tax enabled, preserve tenant boundaries through Sigra or equivalent host-owned scopes, and hand finance workflows to Stripe-native reporting without Accrue owning accounting semantics.
@@ -83,7 +85,7 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 
 ### Active
 
-- [ ] **TAX-01**: Developer can enable Stripe Tax for new subscription and checkout flows through Accrue's public billing API.
+- [x] **TAX-01**: Developer can enable Stripe Tax for new subscription and checkout flows through Accrue's public billing API. Validated in Phase 18: Stripe Tax Core.
 - [ ] **TAX-02**: Developer can collect and validate customer tax location before creating tax-enabled recurring payments.
 - [ ] **TAX-03**: User/admin can identify and recover from missing or invalid tax location states without silent tax rollout failure.
 - [ ] **TAX-04**: Existing recurring subscriptions have explicit migration guidance before automatic tax rollout.
@@ -277,6 +279,7 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - `Official second processor adapter` remains a recommendation-only planted seed because Accrue is still Stripe-first and host-owned, and future work must avoid a `processor-boundary downgrade`.
 - Any future tax milestone must preserve `tax rollout correctness` by requiring `customer location` capture plus `legacy recurring-item migration` planning before maintainers schedule implementation.
 - v1.3 planning resolves the Phase 16 backlog tradeoff by implementing Stripe Tax and Sigra-first org billing together, while keeping finance work to Stripe Revenue Recognition, Sigma, and Data Pipeline handoff documentation.
+- Phase 18 validated the first Stripe Tax slice: public subscription and checkout tax enablement, Stripe/Fake adapter parity, and narrow local automatic-tax observability. Phase 19 still owns tax-location validation, invalid-location recovery, and legacy recurring-item rollout safety.
 
 ## Evolution
 
@@ -296,4 +299,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after starting v1.3 Tax + Organization Billing*
+*Last updated: 2026-04-17 after completing Phase 18 Stripe Tax Core*
