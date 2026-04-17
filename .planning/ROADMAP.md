@@ -39,7 +39,13 @@
 3. Subscription, invoice, and checkout projections preserve relevant automatic-tax status and tax amount data from processor payloads without requiring 1:1 Stripe column parity.
 4. Focused unit and integration tests prove tax-enabled and tax-disabled flows remain backward-compatible for existing non-tax users.
 
-**Plans:** TBD by `$gsd-plan-phase 18`
+**Plans:** 4 plans
+
+Plans:
+- [ ] `18-01-PLAN.md` — Add the subscription automatic-tax public contract and regression coverage.
+- [ ] `18-02-PLAN.md` — Keep Stripe and Fake automatic-tax payloads in parity and prove it in adapter tests.
+- [ ] `18-03-PLAN.md` — Persist and project narrow automatic-tax observability for subscriptions and invoices.
+- [ ] `18-04-PLAN.md` — Add checkout automatic-tax input/projection support and focused checkout tests.
 
 ### Phase 19: Tax Location and Rollout Safety
 

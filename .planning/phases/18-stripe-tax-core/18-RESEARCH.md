@@ -247,17 +247,17 @@ invoice_attrs = %{
 
 All claims in this research were verified or cited — no user confirmation needed.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **What exact public option name should Accrue standardize on?**
-   - What we know: The repo currently favors flat keyword options on billing actions and `NimbleOptions`-validated keyword/map inputs on checkout. [VERIFIED: codebase grep]
-   - What's unclear: Whether the most legible public contract is `automatic_tax: true`, `tax: true`, or another boolean/nested shape. [VERIFIED: codebase grep]
-   - Recommendation: Plan Phase 18 around a single boolean option with a name that reads clearly in both `subscribe/3` and `create_session/1`; document the exact choice in PLAN.md before implementation. [VERIFIED: codebase grep]
+1. **Resolved: what exact public option name should Accrue standardize on?**
+   - Decision: Phase 18 standardizes on `automatic_tax: true | false` for both `Accrue.Billing.subscribe/3` and `Accrue.Checkout.Session.create/1`. [VERIFIED: codebase grep]
+   - Why: The repo already favors flat keyword options on billing actions and `NimbleOptions`-validated flat inputs on checkout; `automatic_tax` matches Stripe terminology without leaking nested Stripe request maps into the public API. [VERIFIED: codebase grep] [CITED: https://docs.stripe.com/tax/set-up]
+   - Plan alignment: `18-01-PLAN.md` and `18-04-PLAN.md` both require a boolean-only `automatic_tax` option and explicitly reject caller-supplied nested Stripe maps. [VERIFIED: codebase grep]
 
-2. **Which automatic-tax fields deserve first-class DB columns in Phase 18?**
-   - What we know: `Invoice` already has `tax_minor`; `Subscription` has no automatic-tax columns; raw payloads already land in `data`. [VERIFIED: codebase grep]
-   - What's unclear: Whether Phase 18 should add only enabled/status observability or also a narrow tax-liability field. [VERIFIED: codebase grep]
-   - Recommendation: Keep the plan minimal: derive `enabled` and any immediately needed `status` field, keep everything else in `data`, and leave richer invalid-location UX to Phase 19. [VERIFIED: /Users/jon/projects/accrue/.planning/ROADMAP.md] [CITED: https://docs.stripe.com/billing/taxes/collect-taxes]
+2. **Resolved: which automatic-tax fields deserve first-class DB columns in Phase 18?**
+   - Decision: Phase 18 adds only `automatic_tax` and `automatic_tax_status` columns to `accrue_subscriptions` and `accrue_invoices`, while continuing to use existing invoice `tax_minor` plus raw `data` for forward-compatible tax amount detail. [VERIFIED: codebase grep]
+   - Why: This preserves enabled/status observability without locking Accrue to a 1:1 Stripe tax schema, and it keeps richer invalid-location UX and rollout handling in Phase 19 where the roadmap already places it. [VERIFIED: /Users/jon/projects/accrue/.planning/ROADMAP.md] [CITED: https://docs.stripe.com/billing/taxes/collect-taxes]
+   - Plan alignment: `18-03-PLAN.md` creates the migration and projection work around exactly those columns, while checkout continues to project `amount_tax` from the returned session struct without adding a checkout table in Phase 18. [VERIFIED: codebase grep]
 
 ## Environment Availability
 

@@ -41,7 +41,7 @@ created: 2026-04-17
 | 18-01-01 | 01 | 1 | TAX-01 | T-18-01 | Public callers can only provide tax enablement intent, not trusted tax totals | integration | `cd accrue && mix test test/accrue/billing/subscription_test.exs` | yes | pending |
 | 18-01-02 | 01 | 1 | TAX-01 | T-18-01 | Existing subscription callers without tax options remain backward-compatible | integration | `cd accrue && mix test test/accrue/billing/subscription_test.exs` | yes | pending |
 | 18-02-01 | 02 | 1 | TAX-01 | T-18-02 | Fake emits deterministic enabled/disabled automatic-tax state without leaking Stripe-only implementation into tests | unit | `cd accrue && mix test test/accrue/processor/fake_test.exs` | yes | pending |
-| 18-03-01 | 03 | 2 | TAX-01 | T-18-03 | Subscription and invoice projections preserve automatic-tax observability while retaining raw payload data | unit | `cd accrue && mix test test/accrue/billing/invoice_projection_test.exs` | yes | pending |
+| 18-03-01 | 03 | 3 | TAX-01 | T-18-03 | Subscription and invoice projections preserve automatic-tax observability while retaining raw payload data | unit | `cd accrue && mix test test/accrue/billing/invoice_projection_test.exs` | yes | pending |
 | 18-04-01 | 04 | 2 | TAX-01 | T-18-01 | Checkout callers can enable automatic tax and observe returned session tax fields | integration | `cd accrue && mix test test/accrue/checkout_test.exs` | yes | pending |
 
 *Status: pending, green, red, flaky*
