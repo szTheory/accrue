@@ -19,6 +19,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
     File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
     File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
+    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
 
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
@@ -27,6 +28,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
 
     drifted_readme =
       tmp_dir

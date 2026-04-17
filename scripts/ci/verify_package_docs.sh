@@ -43,6 +43,19 @@ require_absent_regex() {
   fi
 }
 
+require_any_fixed() {
+  local file=$1
+  shift
+
+  for needle in "$@"; do
+    if grep -Fq "$needle" "$file"; then
+      return 0
+    fi
+  done
+
+  fail "$file is missing all of: $*"
+}
+
 accrue_version=$(extract_version "$ROOT_DIR/accrue/mix.exs")
 accrue_admin_version=$(extract_version "$ROOT_DIR/accrue_admin/mix.exs")
 
@@ -58,11 +71,37 @@ require_fixed "$ROOT_DIR/accrue_admin/README.md" "accrue ~> $accrue_version"
 require_fixed "$ROOT_DIR/accrue/README.md" '[First Hour](guides/first_hour.md)'
 require_fixed "$ROOT_DIR/accrue/README.md" '[Troubleshooting](guides/troubleshooting.md)'
 require_fixed "$ROOT_DIR/accrue/README.md" '[Webhooks](guides/webhooks.md)'
+require_fixed "$ROOT_DIR/accrue/README.md" "examples/accrue_host"
+require_fixed "$ROOT_DIR/accrue/README.md" "mix verify"
+require_fixed "$ROOT_DIR/accrue/README.md" "mix verify.full"
+require_fixed "$ROOT_DIR/accrue/README.md" "bash scripts/ci/accrue_host_uat.sh"
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'extras: ["README.md", "guides/admin_ui.md"]'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras: [Guides: ["guides/admin_ui.md"]]'
 
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/first_hour\.html)?'
+
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## First run"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Seeded history"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Verification modes"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "mix setup"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "mix phx.server"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "/webhooks/stripe"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "/billing"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "mix verify"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "mix verify.full"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "bash scripts/ci/accrue_host_uat.sh"
+
+require_any_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "## 1. First run" "## First run"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "Seeded history"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "mix verify"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "mix verify.full"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "/webhooks/stripe"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "/billing"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "customer.subscription.created"
+
+require_fixed "$ROOT_DIR/scripts/ci/accrue_host_uat.sh" "mix verify.full"
+require_fixed "$ROOT_DIR/scripts/ci/accrue_host_uat.sh" "bash scripts/ci/accrue_host_uat.sh"
 
 for guide in \
   "$ROOT_DIR/accrue/guides/first_hour.md" \
@@ -73,3 +112,4 @@ for guide in \
 done
 
 echo "package docs verified for accrue $accrue_version and accrue_admin $accrue_admin_version"
+echo "fixed invariants checked: First run, Seeded history, mix verify, mix verify.full"

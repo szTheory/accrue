@@ -36,7 +36,6 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
     on_exit(fn -> File.rm_rf(tmp_dir) end)
 
     for relative_path <- [
-          "examples/accrue_host/demo/command_manifest.exs",
           "examples/accrue_host/README.md",
           "accrue/guides/first_hour.md",
           "accrue/README.md",
@@ -52,7 +51,7 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
     |> String.replace("Seeded history", "Seeded replay")
     |> then(&File.write!(broken_guide_path, &1))
 
-    manifest = load_manifest_from(tmp_dir)
+    manifest = command_manifest()
     host_readme = File.read!(Path.join(tmp_dir, "examples/accrue_host/README.md"))
     guide = File.read!(broken_guide_path)
 
@@ -77,13 +76,6 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
       "mix verify.full",
       "bash scripts/ci/accrue_host_uat.sh"
     ]
-  end
-
-  defp load_manifest_from(root_dir) do
-    root_dir
-    |> Path.join("examples/accrue_host/demo/command_manifest.exs")
-    |> load_manifest_module()
-    |> apply(:manifest, [])
   end
 
   defp copy_fixture!(relative_path, tmp_dir) do
