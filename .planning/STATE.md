@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Adoption + Trust
-current_phase: 16
-current_phase_name: expansion-discovery
+current_phase: 17
+current_phase_name: milestone-closure-cleanup
 current_plan: Not started
-status: completed
-stopped_at: Completed 16-03-PLAN.md
-last_updated: "2026-04-17T14:49:02.499Z"
+status: ready_to_execute
+stopped_at: Planned Phase 17
+last_updated: "2026-04-17T15:19:19.994Z"
 last_activity: 2026-04-17
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
-  total_plans: 12
+  total_plans: 13
   completed_plans: 12
-  percent: 100
+  percent: 92
 ---
 
 # Project State
@@ -24,17 +24,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 16 — expansion-discovery
+**Current focus:** Phase 17 — milestone-closure-cleanup
 
 ## Current Position
 
-Phase: 16 (expansion-discovery) — COMPLETE
-Plan: 3 of 3
-**Current Phase:** 16
-**Current Phase Name:** expansion-discovery
+Phase: 17 (milestone-closure-cleanup) — PLANNED
+Plan: 0 of 1
+**Current Phase:** 17
+**Current Phase Name:** milestone-closure-cleanup
 **Current Plan:** Not started
-**Status:** Milestone complete
-**Stopped At:** Completed 16-03-PLAN.md
+**Status:** Ready to execute
+**Stopped At:** Planned Phase 17
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
@@ -49,6 +49,7 @@ Plan: 3 of 3
 | 14. Adoption Front Door | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 15. Trust Hardening | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 16. Expansion Discovery | Complete | 3/3 plans complete; ranking-contract gap closed 2026-04-17 |
+| 17. Milestone Closure Cleanup | Ready to execute | 0/1 plans complete; planned 2026-04-17 |
 
 ## Current Planning Artifacts
 
@@ -63,6 +64,7 @@ Plan: 3 of 3
 - `.planning/phases/16-expansion-discovery/16-01-SUMMARY.md` — canonical expansion recommendation and docs-contract execution summary.
 - `.planning/phases/16-expansion-discovery/16-02-SUMMARY.md` — verification report and durable planning-record execution summary.
 - `.planning/phases/16-expansion-discovery/16-03-SUMMARY.md` — DISC-05 ranking-contract gap closure summary.
+- `.planning/phases/17-milestone-closure-cleanup/17-01-PLAN.md` — planned v1.2 milestone closure cleanup.
 - `.planning/STATE-ARCHIVE.md` — archived pre-cleanup state history and legacy metrics.
 
 ## Recent Decisions
