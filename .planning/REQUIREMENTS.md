@@ -16,7 +16,7 @@ Requirements for the v1.3 Tax + Organization Billing milestone. Each maps to exa
 
 ### Organization Billing
 
-- [ ] **ORG-01**: Host app can make an organization billable using Accrue's existing `Accrue.Billable` ownership model.
+- [x] **ORG-01**: Host app can make an organization billable using Accrue's existing `Accrue.Billable` ownership model.
 - [ ] **ORG-02**: Sigra-backed host flow can bill the active organization while preserving membership and admin scope boundaries.
 - [ ] **ORG-03**: Org admins cannot access or mutate another organization's billing state through public, admin, webhook replay, or export paths.
 
@@ -68,7 +68,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TAX-02 | Phase 19 | Complete |
 | TAX-03 | Phase 19 | Complete |
 | TAX-04 | Phase 19 | Complete |
-| ORG-01 | Phase 20 | Pending |
+| ORG-01 | Phase 20 | Complete |
 | ORG-02 | Phase 20 | Pending |
 | ORG-03 | Phase 20 | Pending |
 | FIN-01 | Phase 22 | Pending |
