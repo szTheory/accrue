@@ -39,6 +39,27 @@ defmodule Accrue.Billing.SubscriptionTest do
     assert hd(sub.subscription_items).quantity == 5
   end
 
+  test "subscribe/3 persists enabled automatic_tax intent", %{customer: cus} do
+    assert {:ok, sub} = Billing.subscribe(cus, "price_basic", automatic_tax: true)
+
+    assert get_in(sub.data, ["automatic_tax", "enabled"]) == true or
+             get_in(sub.data, [:automatic_tax, :enabled]) == true
+  end
+
+  test "subscribe/3 persists disabled automatic_tax intent when explicit", %{customer: cus} do
+    assert {:ok, sub} = Billing.subscribe(cus, "price_basic", automatic_tax: false)
+
+    assert get_in(sub.data, ["automatic_tax", "enabled"]) == false or
+             get_in(sub.data, [:automatic_tax, :enabled]) == false
+  end
+
+  test "subscribe/2 remains backward-compatible without automatic_tax option", %{customer: cus} do
+    assert {:ok, sub} = Billing.subscribe(cus, "price_basic")
+
+    assert get_in(sub.data, ["automatic_tax", "enabled"]) == false or
+             get_in(sub.data, [:automatic_tax, :enabled]) == false
+  end
+
   test "subscribe/2 with list raises ArgumentError", %{customer: cus} do
     assert_raise ArgumentError, ~r/single price_id/, fn ->
       Billing.subscribe(cus, ["price_a", "price_b"])
