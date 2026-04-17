@@ -84,6 +84,38 @@ defmodule Accrue.CheckoutTest do
                  success_url: "https://example.com/s"
                })
     end
+
+    test "projects enabled automatic tax state and amount_tax", %{customer: customer} do
+      assert {:ok, %Session{} = session} =
+               Session.create(%{
+                 customer: customer,
+                 mode: :subscription,
+                 ui_mode: :hosted,
+                 automatic_tax: true,
+                 line_items: [LineItem.from_price("price_basic_monthly", 1)],
+                 success_url: "https://example.com/success",
+                 cancel_url: "https://example.com/cancel"
+               })
+
+      assert session.automatic_tax == true
+      assert session.amount_tax == 100
+    end
+
+    test "projects disabled automatic tax state and zero amount_tax", %{customer: customer} do
+      assert {:ok, %Session{} = session} =
+               Session.create(%{
+                 customer: customer,
+                 mode: :subscription,
+                 ui_mode: :hosted,
+                 automatic_tax: false,
+                 line_items: [LineItem.from_price("price_basic_monthly", 1)],
+                 success_url: "https://example.com/success",
+                 cancel_url: "https://example.com/cancel"
+               })
+
+      assert session.automatic_tax == false
+      assert session.amount_tax == 0
+    end
   end
 
   describe "Accrue.Checkout.LineItem" do
