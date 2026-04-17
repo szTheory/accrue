@@ -59,6 +59,7 @@ defmodule Accrue.Billing.Subscription do
     field(:discount_id, :string)
     field(:automatic_tax, :boolean, default: false)
     field(:automatic_tax_status, :string)
+    field(:automatic_tax_disabled_reason, :string)
     field(:current_period_start, :utc_datetime_usec)
     field(:current_period_end, :utc_datetime_usec)
     field(:trial_start, :utc_datetime_usec)
@@ -81,7 +82,7 @@ defmodule Accrue.Billing.Subscription do
     customer_id processor processor_id status
     cancel_at_period_end pause_collection
     paused_at pause_behavior past_due_since dunning_sweep_attempted_at discount_id
-    automatic_tax automatic_tax_status
+    automatic_tax automatic_tax_status automatic_tax_disabled_reason
     current_period_start current_period_end
     trial_start trial_end cancel_at canceled_at ended_at
     last_stripe_event_ts last_stripe_event_id
