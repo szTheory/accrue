@@ -80,6 +80,7 @@ defmodule Accrue.Billing.SubscriptionActions do
         expand: ["latest_invoice.payment_intent"]
       }
       |> put_if(:trial_end, trial_end)
+      |> maybe_put_automatic_tax(opts)
       |> maybe_put_default_pm(opts)
       |> maybe_put_coupon(opts)
       |> maybe_put_collection_method(opts)
@@ -711,6 +712,11 @@ defmodule Accrue.Billing.SubscriptionActions do
     end
   end
 
+  defp maybe_put_automatic_tax(params, opts) do
+    enabled = Keyword.get(opts, :automatic_tax, false)
+    Map.put(params, :automatic_tax, %{enabled: enabled})
+  end
+
   defp maybe_put_coupon(params, opts) do
     case Keyword.get(opts, :coupon) do
       nil -> params
@@ -731,6 +737,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   defp sanitize_opts(opts) do
     Keyword.drop(opts, [
       :trial_end,
+      :automatic_tax,
       :operation_id,
       :default_payment_method,
       :new_price_id,
