@@ -61,7 +61,8 @@ defmodule AccrueAdmin.Components.DataTable do
       query_opts = [
         filter: socket.assigns.filter,
         cursor: socket.assigns.next_cursor,
-        limit: socket.assigns.limit
+        limit: socket.assigns.limit,
+        owner_scope: Map.get(socket.assigns, :current_owner_scope)
       ]
 
       {rows, next_cursor} = socket.assigns.query_module.list(query_opts)
@@ -280,11 +281,12 @@ defmodule AccrueAdmin.Components.DataTable do
     filter_params = socket.assigns.query_module.encode_filter(filter) |> stringify_map()
     cursor = Map.get(params, "cursor") || Map.get(params, :cursor)
 
-    {rows, next_cursor} =
+      {rows, next_cursor} =
       socket.assigns.query_module.list(
         filter: filter,
         cursor: cursor,
-        limit: socket.assigns.limit
+        limit: socket.assigns.limit,
+        owner_scope: Map.get(socket.assigns, :current_owner_scope)
       )
 
     socket
@@ -347,7 +349,8 @@ defmodule AccrueAdmin.Components.DataTable do
         cursor ->
           socket.assigns.query_module.count_newer_than(
             filter: socket.assigns.filter,
-            cursor: cursor
+            cursor: cursor,
+            owner_scope: Map.get(socket.assigns, :current_owner_scope)
           )
       end
 

@@ -125,7 +125,7 @@ defmodule AccrueAdmin.Queries.Events do
           SELECT 1
           FROM accrue_customers customers
           WHERE ? = 'Customer'
-            AND customers.id = ?
+            AND customers.id::text = ?
             AND customers.owner_type = 'Organization'
             AND customers.owner_id = ?
         )
@@ -134,7 +134,7 @@ defmodule AccrueAdmin.Queries.Events do
           FROM accrue_subscriptions subscriptions
           JOIN accrue_customers customers ON customers.id = subscriptions.customer_id
           WHERE ? = 'Subscription'
-            AND subscriptions.id = ?
+            AND subscriptions.id::text = ?
             AND customers.owner_type = 'Organization'
             AND customers.owner_id = ?
         )
@@ -143,7 +143,7 @@ defmodule AccrueAdmin.Queries.Events do
           FROM accrue_invoices invoices
           JOIN accrue_customers customers ON customers.id = invoices.customer_id
           WHERE ? = 'Invoice'
-            AND invoices.id = ?
+            AND invoices.id::text = ?
             AND customers.owner_type = 'Organization'
             AND customers.owner_id = ?
         )

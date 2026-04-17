@@ -1,6 +1,7 @@
 defmodule AccrueAdmin.EventsLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
+  alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
@@ -37,13 +38,28 @@ defmodule AccrueAdmin.EventsLiveTest do
         status: :dead
       })
 
+    in_scope_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    out_scope_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    in_scope_invoice = insert_invoice(in_scope_customer, %{processor_id: "in_scope_invoice"})
+    out_scope_invoice = insert_invoice(out_scope_customer, %{processor_id: "out_scope_invoice"})
+
     {:ok, _} =
       Events.record(%{
-        type: "invoice.payment_failed",
+        type: "invoice.payment_failed.in_scope",
         subject_type: "Invoice",
-        subject_id: "in_123",
-        actor_type: "webhook",
-        actor_id: "evt_123",
+        subject_id: in_scope_invoice.id,
+        actor_type: "admin",
+        actor_id: "admin_1",
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    {:ok, _} =
+      Events.record(%{
+        type: "invoice.payment_failed.out_of_scope",
+        subject_type: "Invoice",
+        subject_id: out_scope_invoice.id,
+        actor_type: "admin",
+        actor_id: "admin_1",
         caused_by_webhook_event_id: webhook.id
       })
 
@@ -57,22 +73,69 @@ defmodule AccrueAdmin.EventsLiveTest do
         caused_by_webhook_event_id: webhook.id
       })
 
-    {:ok, webhook_id: webhook.id}
+    {:ok, webhook_id: webhook.id, in_scope_invoice: in_scope_invoice, out_scope_invoice: out_scope_invoice}
   end
 
-  test "renders the global activity feed and filters by webhook source", %{
+  test "renders the active-organization event feed without out-of-scope rows", %{
     conn: conn,
-    webhook_id: webhook_id
+    webhook_id: webhook_id,
+    in_scope_invoice: in_scope_invoice,
+    out_scope_invoice: out_scope_invoice
   } do
-    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    conn =
+      Phoenix.ConnTest.init_test_session(conn,
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
 
     assert {:ok, _view, html} =
-             live(conn, "/billing/events?source_webhook_event_id=#{webhook_id}&actor_type=admin")
+             live(
+               conn,
+               "/billing/events?org=allowed-org&source_webhook_event_id=#{webhook_id}&actor_type=admin"
+             )
 
-    assert html =~ "Append-only billing and admin activity"
-    assert html =~ "admin.webhook.replay.completed"
-    refute html =~ "invoice.payment_failed"
+    assert html =~ "Billing activity for the active organization"
+    assert html =~ "invoice.payment_failed.in_scope"
+    assert html =~ in_scope_invoice.id
+    refute html =~ "invoice.payment_failed.out_of_scope"
+    refute html =~ out_scope_invoice.id
     assert html =~ webhook_id
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_invoice(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      currency: "usd",
+      status: :open,
+      collection_method: "charge_automatically",
+      metadata: %{},
+      data: %{},
+      lock_version: 1,
+      processor_id: "in_" <> Integer.to_string(System.unique_integer([:positive]))
+    }
+
+    %Invoice{}
+    |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
   end
 
   defp insert_webhook(attrs) do

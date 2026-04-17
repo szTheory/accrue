@@ -7,6 +7,7 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   alias Accrue.Events.Event
   alias Accrue.Repo
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
   alias AccrueAdmin.Queries.Events
 
@@ -19,12 +20,15 @@ defmodule AccrueAdmin.Live.EventsLive do
      |> assign_shell(admin)
      |> assign(:params, %{})
      |> assign(:table_path, admin_path(admin, "/events"))
-     |> assign(:summary, event_summary())}
+     |> assign(:summary, event_summary(socket.assigns.current_owner_scope))}
   end
 
   @impl true
   def handle_params(params, _uri, socket) do
-    {:noreply, socket |> assign(:params, params) |> assign(:summary, event_summary())}
+    {:noreply,
+     socket
+     |> assign(:params, params)
+     |> assign(:summary, event_summary(socket.assigns.current_owner_scope))}
   end
 
   @impl true
@@ -45,11 +49,10 @@ defmodule AccrueAdmin.Live.EventsLive do
               %{label: "Events"}
             ]}
           />
-          <p class="ax-eyebrow">Global activity feed</p>
-          <h2 class="ax-display">Append-only billing and admin activity</h2>
+          <p class="ax-eyebrow"><%= activity_feed_eyebrow(@current_owner_scope) %></p>
+          <h2 class="ax-display"><%= activity_feed_heading(@current_owner_scope) %></h2>
           <p class="ax-body ax-page-copy">
-            This complements the scoped subject timelines with one operations-wide ledger view over
-            `accrue_events`.
+            <%= activity_feed_copy(@current_owner_scope) %>
           </p>
         </header>
 
@@ -81,6 +84,7 @@ defmodule AccrueAdmin.Live.EventsLive do
           module={DataTable}
           id="events"
           query_module={Events}
+          current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
           columns={[
@@ -125,28 +129,94 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> assign(:current_path, admin_path(admin, "/events"))
   end
 
-  defp event_summary do
+  defp event_summary(owner_scope) do
     day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
+    base_query = scoped_events_query(owner_scope)
 
     %{
-      total_count: Repo.aggregate(Event, :count, :id),
+      total_count: Repo.aggregate(base_query, :count, :id),
       webhook_linked_count:
-        Event
+        base_query
         |> where([event], not is_nil(event.caused_by_webhook_event_id))
         |> Repo.aggregate(:count, :id),
       admin_count:
-        Event
+        base_query
         |> where([event], event.actor_type == "admin")
         |> Repo.aggregate(:count, :id),
       last_day_count:
-        Event
+        base_query
         |> where([event], event.inserted_at >= ^day_ago)
         |> Repo.aggregate(:count, :id),
       unique_subject_types:
-        Event
+        base_query
         |> select([event], count(fragment("distinct ?", event.subject_type)))
         |> Repo.one()
     }
+  end
+
+  defp scoped_events_query(nil), do: Event
+  defp scoped_events_query(%OwnerScope{mode: :global}), do: Event
+
+  defp scoped_events_query(%OwnerScope{mode: :organization, organization_id: organization_id}) do
+    where(
+      Event,
+      [event],
+      fragment(
+        """
+        EXISTS (
+          SELECT 1
+          FROM accrue_customers customers
+          WHERE ? = 'Customer'
+            AND customers.id::text = ?
+            AND customers.owner_type = 'Organization'
+            AND customers.owner_id = ?
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM accrue_subscriptions subscriptions
+          JOIN accrue_customers customers ON customers.id = subscriptions.customer_id
+          WHERE ? = 'Subscription'
+            AND subscriptions.id::text = ?
+            AND customers.owner_type = 'Organization'
+            AND customers.owner_id = ?
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM accrue_invoices invoices
+          JOIN accrue_customers customers ON customers.id = invoices.customer_id
+          WHERE ? = 'Invoice'
+            AND invoices.id::text = ?
+            AND customers.owner_type = 'Organization'
+            AND customers.owner_id = ?
+        )
+        """,
+        event.subject_type,
+        event.subject_id,
+        ^organization_id,
+        event.subject_type,
+        event.subject_id,
+        ^organization_id,
+        event.subject_type,
+        event.subject_id,
+        ^organization_id
+      )
+    )
+  end
+
+  defp activity_feed_eyebrow(%OwnerScope{mode: :organization}), do: "Organization activity feed"
+  defp activity_feed_eyebrow(_owner_scope), do: "Global activity feed"
+
+  defp activity_feed_heading(%OwnerScope{mode: :organization}),
+    do: "Billing activity for the active organization"
+
+  defp activity_feed_heading(_owner_scope), do: "Append-only billing and admin activity"
+
+  defp activity_feed_copy(%OwnerScope{mode: :organization}) do
+    "This feed stays scoped to the active organization so linked webhook and admin activity can't reveal other billing owners."
+  end
+
+  defp activity_feed_copy(_owner_scope) do
+    "This complements the scoped subject timelines with one operations-wide ledger view over `accrue_events`."
   end
 
   defp subject_summary(row), do: "#{row.subject_type} #{row.subject_id}"
