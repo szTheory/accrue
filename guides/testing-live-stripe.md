@@ -50,6 +50,39 @@ tag themselves `:skip` at module load time and produce a clean
 
 Use Stripe test-mode credentials only. Set `STRIPE_TEST_SECRET_KEY`, not a live-mode key. This guide is for provider-parity checks in Stripe test mode. Do not paste webhook secrets, customer data, or PII into copied logs, screenshots, traces, or shared test notes.
 
+## Tax-location parity checks
+
+Use Stripe test mode when you need to confirm that Accrue's tax-location
+contract still matches Stripe's current behavior. Do not use live-mode
+customers, copied production addresses, or dashboard exports for this check.
+
+Run one good-path and one bad-path exercise:
+
+1. Create or choose a Stripe test-mode customer with placeholder data only.
+2. Update the customer tax location through the Accrue path your host app
+   exposes.
+3. Confirm the valid placeholder address succeeds without copying the address
+   into notes or logs.
+4. Confirm an intentionally invalid placeholder address fails with the stable
+   `customer_tax_location_invalid` repair signal.
+
+Keep the notes narrow: record only whether the valid address succeeded, whether
+the invalid address produced `customer_tax_location_invalid`, and which host
+path you used. Do not paste customer ids, raw Stripe payloads, or address PII
+into tickets or chat.
+
+Stripe Tax rollout also needs explicit migration work. Enabling Stripe Tax or
+automatic collection does not retroactively update existing subscriptions,
+invoices, payment links, or previously created customer addresses. Existing
+recurring objects need deliberate updates before you rely on automatic tax.
+
+The same caveat applies to existing Checkout customers. Checkout-collected
+addresses do not overwrite an attached Stripe Customer unless the Session sets
+the literal `customer_update[address]=auto` or
+`customer_update[shipping]=auto` flags. Without those flags, Checkout can
+collect an address for the current session while the stored Stripe Customer
+keeps the old address, and later tax-enabled invoices can still fail.
+
 ## Running via `act` (local GitHub Actions replay)
 
 `act` lets you run the `live-stripe` CI job locally in Docker. This

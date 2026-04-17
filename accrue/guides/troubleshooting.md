@@ -309,3 +309,60 @@ webhook or public API scopes.
 mix accrue.install --check
 mix test test/accrue_host_web/admin_mount_test.exs
 ```
+
+## Stripe Tax rollout and invalid-location recovery
+
+Stripe Tax rollout needs explicit migration work for existing recurring objects.
+Enabling Stripe Tax or automatic collection does not retroactively update
+existing subscriptions, invoices, payment links, or previously created customer
+addresses. Update those recurring objects deliberately before you expect tax to
+calculate correctly.
+
+For existing Checkout customers, collected Checkout addresses do not overwrite
+the attached Stripe Customer unless the Checkout Session sets the literal
+`customer_update[address]=auto` or `customer_update[shipping]=auto` flags.
+Without those flags, Checkout can collect a fresh address for the session while
+the stored Stripe Customer keeps the old or incomplete location.
+
+### Stable error: `customer_tax_location_invalid`
+
+When Accrue rejects a tax-location repair with
+`customer_tax_location_invalid`, treat it as the supported public recovery
+signal. Do not copy raw Stripe errors, customer addresses, or dashboard payloads
+into logs or support notes.
+
+Recommended recovery order:
+
+1. Update the customer tax location through Accrue's public billing path.
+2. Retry invoice finalization if the failing object is a draft invoice awaiting
+   a valid location.
+3. If you cannot collect a valid location yet, explicitly disable automatic tax
+   for the affected recurring subscription or invoice instead of leaving the
+   rollout half-enabled.
+
+Use placeholder values only in notes and tickets. The goal is to confirm the
+stable code and the recurring object that needs repair, not to copy tax address
+PII around the team.
+
+### Recurring invalid-location states
+
+Stripe can surface two related recurring states after rollout:
+
+- `requires_location_inputs`: recurring automatic tax was disabled because the
+  customer no longer has a valid tax location.
+- `finalization_requires_location_inputs`: invoice finalization needs a valid
+  customer location before tax can be applied.
+
+Treat these as local repair signals, not as reasons to inspect raw processor
+payloads. The supported operator flow stays the same:
+
+1. Repair the customer tax location through Accrue.
+2. Retry finalization when the invoice is waiting on location input.
+3. Explicitly disable automatic tax on the affected recurring object if the
+   customer will remain without a taxable address for now.
+
+For live provider-parity checks that exercise a valid and invalid customer
+location in Stripe test mode, follow
+[`guides/testing-live-stripe.md`](../../guides/testing-live-stripe.md). Keep
+real customer data, copied dashboard payloads, and raw addresses out of notes,
+screenshots, and shared logs.
