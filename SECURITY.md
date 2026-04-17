@@ -35,4 +35,5 @@ committed to the repository or printed in CI logs.
 Keep Stripe API keys, signing secrets, and release credentials in runtime
 environment variables or the CI secret store. Sanitize examples, screenshots,
 and copied terminal output before sharing them in issues, pull requests, docs,
-or chat.
+or chat. Do not share customer data or PII in public reports, retained browser
+artifacts, or support requests.

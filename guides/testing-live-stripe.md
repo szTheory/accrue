@@ -48,7 +48,7 @@ mix test.live
 tag themselves `:skip` at module load time and produce a clean
 "0 tests, X skipped" report — no errors.
 
-Use Stripe test-mode credentials only. Set `STRIPE_TEST_SECRET_KEY`, not a live-mode key. This guide is for provider-parity checks in Stripe test mode.
+Use Stripe test-mode credentials only. Set `STRIPE_TEST_SECRET_KEY`, not a live-mode key. This guide is for provider-parity checks in Stripe test mode. Do not paste webhook secrets, customer data, or PII into copied logs, screenshots, traces, or shared test notes.
 
 ## Running via `act` (local GitHub Actions replay)
 
@@ -59,7 +59,8 @@ real GitHub Actions runner.
 1. Install `act`: https://github.com/nektos/act
 2. Copy the secrets template: `cp accrue/.secrets.example .secrets`
 3. Populate `.secrets` with your real Stripe test-mode key. **Do NOT
-   commit this file** — it is excluded in `.gitignore`.
+   commit this file** — it is excluded in `.gitignore`. Keep customer
+   data and PII out of the file and out of any copied terminal output.
 4. Run:
 
    ```bash
@@ -102,4 +103,4 @@ be updated to mirror Stripe's new shape**, not a signal that the live
 test is broken. Update the Fake first, then re-run the live test to
 confirm.
 
-For real host apps, signed webhook verification and runtime secrets still remain required on the app boundary. Use environment variables or GitHub secrets only, and keep real credentials out of shell history and logs.
+For real host apps, signed webhook verification and runtime secrets still remain required on the app boundary. Use environment variables or GitHub secrets only, and keep real credentials, customer data, and PII out of shell history, logs, screenshots, traces, and issue reports.

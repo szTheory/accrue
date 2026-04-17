@@ -10,6 +10,8 @@ This runbook is for the same-day public `1.0.0` release of `accrue` and `accrue_
 
 Fake is the canonical front door and required deterministic gate. Stripe-backed lanes exist to catch provider drift and app-specific integration risk, not to replace Fake or to block ordinary package releases.
 
+The required deterministic gate includes package verification, host integration, generated drift/docs drift, the checked-in security/trust artifact at `.planning/phases/15-trust-hardening/15-TRUST-REVIEW.md`, seeded performance smoke, compatibility floor/target checks, and browser accessibility/responsive checks.
+
 For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/testing-live-stripe.md).
 
 ## Same-day `1.0.0` bootstrap
@@ -29,10 +31,11 @@ For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/
 - Both package release PRs update the correct package-local `CHANGELOG.md`.
 - `accrue` publishes before `accrue_admin`.
 - `Canonical local demo: Fake` remains the required deterministic gate before release.
+- The required deterministic gate still includes `security/trust artifact`, `seeded performance smoke`, `compatibility floor/target checks`, and `browser accessibility/responsive checks`.
 - `Provider parity: Stripe test mode` stays optional/manual and out of the required release lane.
 - `Advisory/manual: live Stripe` stays advisory/manual before shipping your app, not a package release blocker.
 - `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` exist only as GitHub Actions secrets.
-- Secrets are never checked into docs, commit messages, config files, or echoed in workflow logs.
+- Secrets are never checked into docs, commit messages, config files, or echoed in workflow logs, and public docs must not ask for webhook secrets, customer data, or PII.
 
 ## Minimum secret setup
 
@@ -74,6 +77,16 @@ bash ../scripts/ci/verify_package_docs.sh
 
 That `Canonical local demo: Fake` lane is the required deterministic gate for release readiness because it stays credential-free and reproducible.
 
+Required deterministic gate checklist:
+
+- package verification
+- host integration
+- generated drift/docs drift
+- security/trust artifact
+- seeded performance smoke
+- compatibility floor/target checks
+- browser accessibility/responsive checks
+
 If you need provider fidelity coverage, run `Provider parity: Stripe test mode` separately. It is optional/manual, uses Stripe test-mode secrets through environment variables or GitHub secrets, and exists to prove provider-specific behavior that Fake cannot:
 
 - hosted Checkout behavior
@@ -81,7 +94,7 @@ If you need provider fidelity coverage, run `Provider parity: Stripe test mode` 
 - SCA/3DS branches
 - Stripe response-shape drift
 
-Keep provider-backed checks out of the required release lane. In real integrations, signed webhook verification and runtime secrets remain required; this runbook does not make raw-body verification optional. Follow the public webhook guidance in `accrue/guides/webhooks.md` and the provider-parity detail guide at [guides/testing-live-stripe.md](guides/testing-live-stripe.md).
+Keep provider-backed checks out of the required release lane. In real integrations, signed webhook verification and runtime secrets remain required; this runbook does not make raw-body verification optional. Follow the public webhook guidance in `accrue/guides/webhooks.md` and the provider-parity detail guide at [guides/testing-live-stripe.md](guides/testing-live-stripe.md). Never paste webhook secrets, customer data, or PII into release docs, issue reports, or retained artifacts.
 
 `Advisory/manual: live Stripe` is the last lane. Use it for final host-app confidence before shipping your app, after the Fake gate and any Stripe test-mode parity checks. It is advisory/manual before shipping your app, not a required Accrue release blocker.
 

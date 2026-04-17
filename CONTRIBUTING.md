@@ -64,6 +64,8 @@ mix hex.publish --dry-run
 
 For provider-parity checks against Stripe test mode, follow the setup in [`guides/testing-live-stripe.md`](guides/testing-live-stripe.md). That lane is advisory/manual, not part of the required deterministic release gate, and it exists to catch provider-parity drift rather than replace Fake. Please keep real credentials out of shell history and logs.
 
+The required deterministic release gate still includes the checked-in trust review artifact, generated drift/docs drift, seeded performance smoke, compatibility floor/target checks, and browser accessibility/responsive checks. Keep webhook secrets, customer data, and PII out of docs, issue templates, screenshots, traces, and copied terminal output.
+
 ## No CLA
 
 Accrue does not require a Contributor License Agreement at this time. By submitting a contribution, you confirm that you have the right to license your work under the repository's MIT license.

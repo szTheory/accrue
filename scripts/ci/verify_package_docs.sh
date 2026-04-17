@@ -109,8 +109,18 @@ require_fixed "$ROOT_DIR/RELEASING.md" "Canonical local demo: Fake"
 require_fixed "$ROOT_DIR/RELEASING.md" "Provider parity: Stripe test mode"
 require_fixed "$ROOT_DIR/RELEASING.md" "Advisory/manual: live Stripe"
 require_fixed "$ROOT_DIR/RELEASING.md" "required deterministic gate"
+require_fixed "$ROOT_DIR/RELEASING.md" "security/trust artifact"
+require_fixed "$ROOT_DIR/RELEASING.md" "seeded performance smoke"
+require_fixed "$ROOT_DIR/RELEASING.md" "compatibility floor/target checks"
+require_fixed "$ROOT_DIR/RELEASING.md" "browser accessibility/responsive checks"
 require_fixed "$ROOT_DIR/RELEASING.md" "provider-parity checks"
 require_fixed "$ROOT_DIR/RELEASING.md" "advisory/manual before shipping your app"
+require_fixed "$ROOT_DIR/RELEASING.md" "15-TRUST-REVIEW.md"
+require_fixed "$ROOT_DIR/RELEASING.md" "HEX_API_KEY"
+require_fixed "$ROOT_DIR/RELEASING.md" "RELEASE_PLEASE_TOKEN"
+require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "STRIPE_TEST_SECRET_KEY"
+require_fixed "$ROOT_DIR/examples/accrue_host/playwright.config.js" 'trace: "retain-on-failure"'
+require_fixed "$ROOT_DIR/examples/accrue_host/playwright.config.js" 'screenshot: "only-on-failure"'
 
 for guide in \
   "$ROOT_DIR/accrue/guides/first_hour.md" \
@@ -121,4 +131,4 @@ for guide in \
 done
 
 echo "package docs verified for accrue $accrue_version and accrue_admin $accrue_admin_version"
-echo "fixed invariants checked: README.md, RELEASING.md, First run, Seeded history, mix verify, mix verify.full"
+echo "fixed invariants checked: README.md, RELEASING.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"

@@ -17,6 +17,9 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "RELEASING.md"
     assert output =~ "First run"
     assert output =~ "15-TRUST-REVIEW.md"
+    assert output =~ "STRIPE_TEST_SECRET_KEY"
+    assert output =~ "retain-on-failure"
+    assert output =~ "only-on-failure"
   end
 
   test "package docs verifier rejects missing canonical verification labels" do
@@ -38,6 +41,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
+    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
     copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
 
     drifted_readme =
@@ -78,6 +83,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
+    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
     copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
 
     drifted_releasing =
@@ -118,8 +125,16 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
+    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
     copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
-    File.write!(Path.join(tmp_dir, "RELEASING.md"), "# Releasing Accrue\n")
+    drifted_releasing =
+      tmp_dir
+      |> Path.join("RELEASING.md")
+      |> File.read!()
+      |> String.replace("15-TRUST-REVIEW.md", "trust-review.md")
+
+    File.write!(Path.join(tmp_dir, "RELEASING.md"), drifted_releasing)
 
     {output, status} =
       System.cmd("bash", [@script_path],
@@ -129,6 +144,47 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     assert status != 0
     assert output =~ "15-TRUST-REVIEW.md"
+  end
+
+  test "package docs verifier rejects drift in retained artifact policy" do
+    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
+    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
+    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
+
+    copy_fixture!("README.md", tmp_dir)
+    copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("accrue/mix.exs", tmp_dir)
+    copy_fixture!("accrue/README.md", tmp_dir)
+    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
+    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
+    copy_fixture!("accrue_admin/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
+    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
+    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+
+    drifted_config =
+      tmp_dir
+      |> Path.join("examples/accrue_host/playwright.config.js")
+      |> File.read!()
+      |> String.replace(~s(trace: "retain-on-failure"), ~s(trace: "on"))
+
+    File.write!(Path.join(tmp_dir, "examples/accrue_host/playwright.config.js"), drifted_config)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "retain-on-failure"
   end
 
   defp copy_fixture!(relative_path, tmp_dir) do
