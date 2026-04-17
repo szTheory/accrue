@@ -18,8 +18,23 @@ defmodule AccrueAdmin.Live.CustomersLive do
      socket
      |> assign_shell(admin)
      |> assign(:params, %{})
-     |> assign(:table_path, admin_path(admin, "/customers"))
-     |> assign(:summary, customer_summary())}
+     |> assign(
+       :current_path,
+       scoped_path(
+         admin["mount_path"] || "/billing",
+         "/customers",
+         socket.assigns.current_owner_scope
+       )
+     )
+     |> assign(
+       :table_path,
+       scoped_path(
+         admin["mount_path"] || "/billing",
+         "/customers",
+         socket.assigns.current_owner_scope
+       )
+     )
+     |> assign(:summary, customer_summary(socket.assigns.current_owner_scope))}
   end
 
   @impl true
@@ -41,7 +56,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
+              %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
               %{label: "Customers"}
             ]}
           />
@@ -122,19 +137,31 @@ defmodule AccrueAdmin.Live.CustomersLive do
     |> assign(:current_path, admin_path(admin, "/customers"))
   end
 
-  defp customer_summary do
+  defp customer_summary(owner_scope) do
+    customers = scoped_customers(owner_scope)
+
     %{
-      customer_count: Repo.aggregate(Customer, :count, :id),
+      customer_count: Repo.aggregate(customers, :count, :id),
       with_default_payment_method_count:
-        Customer
+        customers
         |> where([customer], not is_nil(customer.default_payment_method_id))
         |> Repo.aggregate(:count, :id),
       owner_type_count:
-        Customer
+        customers
         |> select([customer], count(fragment("distinct ?", customer.owner_type)))
         |> Repo.one()
     }
   end
+
+  defp scoped_customers(%{mode: :organization, organization_id: organization_id}) do
+    Customer
+    |> where(
+      [customer],
+      customer.owner_type == "Organization" and customer.owner_id == ^organization_id
+    )
+  end
+
+  defp scoped_customers(_owner_scope), do: Customer
 
   defp customer_link(row, mount_path, owner_scope) do
     label =

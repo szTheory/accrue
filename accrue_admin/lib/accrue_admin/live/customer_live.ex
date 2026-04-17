@@ -32,12 +32,18 @@ defmodule AccrueAdmin.Live.CustomerLive do
         {:ok,
          socket
          |> put_flash(:error, @owner_access_denied)
-         |> redirect(to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers"))}
+         |> redirect(
+           to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers")
+         )}
 
       {:ok, customer} ->
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(
+           :current_path,
+           scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers")
+         )
          |> assign(:customer, customer)
          |> assign(:params, %{})
          |> assign(:tab, "subscriptions")
@@ -69,8 +75,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Customers", href: @admin_mount_path <> "/customers"},
+              %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
+              %{
+                label: "Customers",
+                href: scoped_mount_path(@admin_mount_path, "/customers", @current_owner_scope)
+              },
               %{label: customer_label(@customer)}
             ]}
           />
@@ -114,14 +123,17 @@ defmodule AccrueAdmin.Live.CustomerLive do
           </KpiCard.kpi_card>
         </section>
 
-        <Tabs.tabs tabs={tabs(@customer, @admin_mount_path, @tab_counts)} active={@tab} />
+        <Tabs.tabs tabs={tabs(@customer, @admin_mount_path, @tab_counts, @current_owner_scope)} active={@tab} />
 
         <%= case @tab do %>
           <% "subscriptions" -> %>
             <section class="ax-card">
               <h3 class="ax-heading">Subscriptions</h3>
               <div :for={subscription <- subscriptions(@customer)} class="ax-list-row">
-                <a href={@admin_mount_path <> "/subscriptions/" <> subscription.id} class="ax-link">
+                <a
+                  href={scoped_mount_path(@admin_mount_path, "/subscriptions/" <> subscription.id, @current_owner_scope)}
+                  class="ax-link"
+                >
                   <%= subscription.processor_id %>
                 </a>
                 <span class="ax-body"><%= predicate_summary(subscription) %></span>
@@ -213,12 +225,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
     }
   end
 
-  defp tabs(customer, mount_path, counts) do
+  defp tabs(customer, mount_path, counts, owner_scope) do
     Enum.map(@tabs, fn tab ->
       %{
         id: tab,
         label: humanize(tab),
-        href: "#{mount_path}/customers/#{customer.id}?tab=#{tab}",
+        href:
+          scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
+            "tab" => tab
+          }),
         count: Map.get(counts, String.to_existing_atom(tab))
       }
     end)
@@ -369,6 +384,24 @@ defmodule AccrueAdmin.Live.CustomerLive do
   end
 
   defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
+
+  defp scoped_mount_path(mount_path, suffix, owner_scope, params \\ %{})
+
+  defp scoped_mount_path(
+         mount_path,
+         suffix,
+         %{mode: :organization, organization_slug: slug},
+         params
+       )
+       when is_binary(slug) do
+    mount_path <> suffix <> "?" <> URI.encode_query(Map.put(params, "org", slug))
+  end
+
+  defp scoped_mount_path(mount_path, suffix, _owner_scope, params) when map_size(params) > 0 do
+    mount_path <> suffix <> "?" <> URI.encode_query(params)
+  end
+
+  defp scoped_mount_path(mount_path, suffix, _owner_scope, _params), do: mount_path <> suffix
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

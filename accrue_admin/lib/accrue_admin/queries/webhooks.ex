@@ -27,21 +27,10 @@ defmodule AccrueAdmin.Queries.Webhooks do
     |> filter_query(filter)
     |> Behaviour.apply_cursor(@time_field, cursor)
     |> order_by([event], desc: event.received_at, desc: event.id)
-    |> limit(^Enum.max([limit + 1, 2]))
-    |> select([event], %{
-      id: event.id,
-      processor: event.processor,
-      processor_event_id: event.processor_event_id,
-      type: event.type,
-      status: event.status,
-      endpoint: event.endpoint,
-      livemode: event.livemode,
-      received_at: event.received_at,
-      processed_at: event.processed_at,
-      inserted_at: event.inserted_at
-    })
     |> Repo.all()
     |> scope_rows(owner_scope)
+    |> Enum.take(Enum.max([limit + 1, 2]))
+    |> Enum.map(&row_projection/1)
     |> Behaviour.paginate(limit, @time_field)
   end
 
@@ -99,10 +88,36 @@ defmodule AccrueAdmin.Queries.Webhooks do
     |> Enum.count(fn webhook -> webhook.status in [:failed, :dead] end)
   end
 
+  def count(owner_scope, filter \\ %{}) when is_map(filter) do
+    WebhookEvent
+    |> filter_query(filter)
+    |> Repo.all()
+    |> scope_rows(owner_scope)
+    |> length()
+  end
+
+  defp row_projection(event) do
+    %{
+      id: event.id,
+      processor: event.processor,
+      processor_event_id: event.processor_event_id,
+      type: event.type,
+      status: event.status,
+      endpoint: event.endpoint,
+      livemode: event.livemode,
+      received_at: event.received_at,
+      processed_at: event.processed_at,
+      inserted_at: event.inserted_at
+    }
+  end
+
   defp filter_query(query, filter) do
     Enum.reduce(filter, query, fn
       {:type, type}, query ->
         where(query, [event], event.type == ^type)
+
+      {:status, statuses}, query when is_list(statuses) ->
+        where(query, [event], event.status in ^statuses)
 
       {:status, status}, query ->
         where(query, [event], event.status == ^status)
@@ -169,7 +184,9 @@ defmodule AccrueAdmin.Queries.Webhooks do
   end
 
   defp ownership_matches(%WebhookEvent{} = webhook) do
-    ([invoice_match(webhook)] ++ [subscription_match(webhook)] ++ [customer_match(webhook)] ++
+    ([invoice_match(webhook)] ++
+       [subscription_match(webhook)] ++
+       [customer_match(webhook)] ++
        event_matches(webhook))
     |> List.flatten()
     |> Enum.reject(&is_nil/1)
@@ -201,7 +218,9 @@ defmodule AccrueAdmin.Queries.Webhooks do
       Subscription
       |> where([subscription], subscription.processor_id == ^object_id)
       |> maybe_match_binary_id(object_id)
-      |> join(:inner, [subscription], customer in Customer, on: customer.id == subscription.customer_id)
+      |> join(:inner, [subscription], customer in Customer,
+        on: customer.id == subscription.customer_id
+      )
       |> select([_subscription, customer], %{
         owner_id: customer.owner_id,
         source: :subscription,

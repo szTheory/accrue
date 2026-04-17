@@ -46,6 +46,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         {:ok,
          socket
          |> assign_shell(admin)
+         |> assign(
+           :current_path,
+           scoped_admin_path(admin, socket.assigns.current_owner_scope, "/subscriptions")
+         )
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
          |> assign(:timeline_events, timeline_events(subscription.id))
@@ -108,8 +112,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Subscriptions", href: @admin_mount_path <> "/subscriptions"},
+              %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
+              %{
+                label: "Subscriptions",
+                href: scoped_mount_path(@admin_mount_path, "/subscriptions", @current_owner_scope)
+              },
               %{label: @subscription.processor_id || @subscription.id}
             ]}
           />
@@ -574,6 +581,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
+
+  defp scoped_mount_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
+       when is_binary(slug) do
+    mount_path <> suffix <> "?org=" <> URI.encode_www_form(slug)
+  end
+
+  defp scoped_mount_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

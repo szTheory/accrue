@@ -3,6 +3,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   use Phoenix.LiveView
 
+  import Ecto.Query
+
   alias Accrue.Billing.{Query, Subscription}
   alias Accrue.Repo
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
@@ -16,8 +18,23 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
      socket
      |> assign_shell(admin)
      |> assign(:params, %{})
-     |> assign(:table_path, admin_path(admin, "/subscriptions"))
-     |> assign(:summary, subscription_summary())}
+     |> assign(
+       :current_path,
+       scoped_path(
+         admin["mount_path"] || "/billing",
+         "/subscriptions",
+         socket.assigns.current_owner_scope
+       )
+     )
+     |> assign(
+       :table_path,
+       scoped_path(
+         admin["mount_path"] || "/billing",
+         "/subscriptions",
+         socket.assigns.current_owner_scope
+       )
+     )
+     |> assign(:summary, subscription_summary(socket.assigns.current_owner_scope))}
   end
 
   @impl true
@@ -39,7 +56,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
+              %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
               %{label: "Subscriptions"}
             ]}
           />
@@ -131,14 +148,27 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     |> assign(:current_path, admin_path(admin, "/subscriptions"))
   end
 
-  defp subscription_summary do
+  defp subscription_summary(owner_scope) do
+    subscriptions = scoped_subscriptions(owner_scope)
+
     %{
-      active_count: Subscription |> Query.active() |> Repo.aggregate(:count, :id),
-      canceling_count: Subscription |> Query.canceling() |> Repo.aggregate(:count, :id),
-      paused_count: Subscription |> Query.paused() |> Repo.aggregate(:count, :id),
-      past_due_count: Subscription |> Query.past_due() |> Repo.aggregate(:count, :id)
+      active_count: subscriptions |> Query.active() |> Repo.aggregate(:count, :id),
+      canceling_count: subscriptions |> Query.canceling() |> Repo.aggregate(:count, :id),
+      paused_count: subscriptions |> Query.paused() |> Repo.aggregate(:count, :id),
+      past_due_count: subscriptions |> Query.past_due() |> Repo.aggregate(:count, :id)
     }
   end
+
+  defp scoped_subscriptions(%{mode: :organization, organization_id: organization_id}) do
+    Subscription
+    |> join(:inner, [subscription], customer in assoc(subscription, :customer))
+    |> where(
+      [_subscription, customer],
+      customer.owner_type == "Organization" and customer.owner_id == ^organization_id
+    )
+  end
+
+  defp scoped_subscriptions(_owner_scope), do: Subscription
 
   defp subscription_link(row, mount_path, owner_scope),
     do:

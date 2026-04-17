@@ -15,7 +15,8 @@ defmodule AccrueAdmin.Components.AppShell do
   slot(:inner_block, required: true)
 
   def app_shell(assigns) do
-    assigns = assign(assigns, :nav_items, nav_items(assigns.mount_path))
+    assigns =
+      assign(assigns, :nav_items, nav_items(assigns.mount_path, org_slug(assigns.current_path)))
 
     ~H"""
     <div class="ax-shell" data-mount-path={@mount_path}>
@@ -56,18 +57,54 @@ defmodule AccrueAdmin.Components.AppShell do
     end
   end
 
-  defp nav_items(mount_path) do
+  defp nav_items(mount_path, org_slug) do
     [
-      %{label: "Dashboard", href: mount_path, eyebrow: "Overview"},
-      %{label: "Customers", href: mount_path <> "/customers", eyebrow: "Billing data"},
-      %{label: "Subscriptions", href: mount_path <> "/subscriptions", eyebrow: "Lifecycle"},
-      %{label: "Invoices", href: mount_path <> "/invoices", eyebrow: "Collections"},
-      %{label: "Charges", href: mount_path <> "/charges", eyebrow: "Payments"},
-      %{label: "Events", href: mount_path <> "/events", eyebrow: "Ledger"},
-      %{label: "Coupons", href: mount_path <> "/coupons", eyebrow: "Discounts"},
-      %{label: "Promotion codes", href: mount_path <> "/promotion-codes", eyebrow: "Codes"},
-      %{label: "Connect", href: mount_path <> "/connect", eyebrow: "Payouts"},
-      %{label: "Webhooks", href: mount_path <> "/webhooks", eyebrow: "Operations"}
+      %{label: "Dashboard", href: nav_href(mount_path, "", org_slug), eyebrow: "Overview"},
+      %{
+        label: "Customers",
+        href: nav_href(mount_path, "/customers", org_slug),
+        eyebrow: "Billing data"
+      },
+      %{
+        label: "Subscriptions",
+        href: nav_href(mount_path, "/subscriptions", org_slug),
+        eyebrow: "Lifecycle"
+      },
+      %{
+        label: "Invoices",
+        href: nav_href(mount_path, "/invoices", org_slug),
+        eyebrow: "Collections"
+      },
+      %{label: "Charges", href: nav_href(mount_path, "/charges", org_slug), eyebrow: "Payments"},
+      %{label: "Events", href: nav_href(mount_path, "/events", org_slug), eyebrow: "Ledger"},
+      %{label: "Coupons", href: nav_href(mount_path, "/coupons", org_slug), eyebrow: "Discounts"},
+      %{
+        label: "Promotion codes",
+        href: nav_href(mount_path, "/promotion-codes", org_slug),
+        eyebrow: "Codes"
+      },
+      %{label: "Connect", href: nav_href(mount_path, "/connect", org_slug), eyebrow: "Payouts"},
+      %{
+        label: "Webhooks",
+        href: nav_href(mount_path, "/webhooks", org_slug),
+        eyebrow: "Operations"
+      }
     ]
   end
+
+  defp org_slug(current_path) do
+    current_path
+    |> URI.parse()
+    |> Map.get(:query)
+    |> case do
+      nil -> nil
+      query -> query |> URI.decode_query() |> Map.get("org")
+    end
+  end
+
+  defp nav_href(mount_path, suffix, slug) when is_binary(slug) and slug != "" do
+    mount_path <> suffix <> "?org=" <> URI.encode_www_form(slug)
+  end
+
+  defp nav_href(mount_path, suffix, _slug), do: mount_path <> suffix
 end

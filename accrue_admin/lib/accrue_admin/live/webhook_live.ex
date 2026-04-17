@@ -110,8 +110,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Webhooks", href: @admin_mount_path <> "/webhooks"},
+              %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope, %{})},
+              %{label: "Webhooks", href: scoped_mount_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{})},
               %{label: breadcrumb_label(assigns)}
             ]}
           />
@@ -211,7 +211,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
             <Timeline.timeline
               label="Derived events"
               empty_label="No derived event rows linked to this webhook yet"
-              items={derived_event_timeline(@derived_events, @admin_mount_path)}
+              items={derived_event_timeline(@derived_events, @admin_mount_path, @current_owner_scope)}
             />
           </article>
         </section>
@@ -226,10 +226,14 @@ defmodule AccrueAdmin.Live.WebhookLive do
             <p class="ax-body">Endpoint: <%= humanize(@webhook.endpoint) %></p>
             <p class="ax-body">Processed: <%= format_datetime(@webhook.processed_at) %></p>
             <p class="ax-body">
-              Global feed:
+              Activity feed:
               <a
                 class="ax-link"
-                href={@admin_mount_path <> "/events?source_webhook_event_id=" <> @webhook.id}
+                href={
+                  scoped_mount_path(@admin_mount_path, "/events", @current_owner_scope, %{
+                    "source_webhook_event_id" => @webhook.id
+                  })
+                }
               >
                 View linked activity
               </a>
@@ -258,12 +262,24 @@ defmodule AccrueAdmin.Live.WebhookLive do
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
-    |> assign(:current_path, admin_path(admin, "/webhooks"))
+    |> assign(
+      :current_path,
+      scoped_admin_path(admin, socket.assigns.current_owner_scope, "/webhooks")
+    )
   end
 
   defp assign_webhook(socket, webhook) do
     socket
     |> assign(:webhook, webhook)
+    |> assign(
+      :current_path,
+      scoped_mount_path(
+        socket.assigns.admin_mount_path,
+        "/webhooks",
+        socket.assigns.current_owner_scope,
+        %{}
+      )
+    )
     |> assign(:attempt_history, attempt_history(webhook.id))
     |> assign(:derived_events, derived_events(webhook.id))
     |> assign(:replay_state, :allowed)
@@ -369,7 +385,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
     end
   end
 
-  defp derived_event_timeline(events, mount_path) do
+  defp derived_event_timeline(events, mount_path, owner_scope) do
     Enum.map(events, fn event ->
       %{
         title: event.type,
@@ -377,14 +393,34 @@ defmodule AccrueAdmin.Live.WebhookLive do
         body: "#{event.subject_type} #{event.subject_id}",
         status: event.actor_type,
         tone: if(event.actor_type == "admin", do: :cobalt, else: :slate),
-        meta: "event ##{event.id} · #{events_path(mount_path, event.caused_by_webhook_event_id)}"
+        meta:
+          "event ##{event.id} · #{events_path(mount_path, event.caused_by_webhook_event_id, owner_scope)}"
       }
     end)
   end
 
-  defp events_path(mount_path, webhook_id) do
-    "linked in " <> mount_path <> "/events?source_webhook_event_id=" <> webhook_id
+  defp events_path(mount_path, webhook_id, owner_scope) do
+    "linked in " <>
+      scoped_mount_path(mount_path, "/events", owner_scope, %{
+        "source_webhook_event_id" => webhook_id
+      })
   end
+
+  defp scoped_mount_path(
+         mount_path,
+         suffix,
+         %{mode: :organization, organization_slug: slug},
+         params
+       )
+       when is_binary(slug) do
+    mount_path <> suffix <> "?" <> URI.encode_query(Map.put(params, "org", slug))
+  end
+
+  defp scoped_mount_path(mount_path, suffix, _owner_scope, params) when map_size(params) > 0 do
+    mount_path <> suffix <> "?" <> URI.encode_query(params)
+  end
+
+  defp scoped_mount_path(mount_path, suffix, _owner_scope, _params), do: mount_path <> suffix
 
   defp payload_for(%WebhookEvent{raw_body: raw_body, data: data}) do
     decode_raw_body(raw_body) || data || %{}

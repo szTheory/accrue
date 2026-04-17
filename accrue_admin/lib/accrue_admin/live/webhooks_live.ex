@@ -3,10 +3,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   use Phoenix.LiveView
 
-  import Ecto.Query
-
   alias Accrue.{Auth, Events}
-  alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
   alias Accrue.Webhooks.DLQ
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
@@ -23,8 +20,23 @@ defmodule AccrueAdmin.Live.WebhooksLive do
      socket
      |> assign_shell(admin)
      |> assign(:params, %{})
-     |> assign(:table_path, admin_path(admin, "/webhooks"))
-     |> assign(:summary, webhook_summary())
+     |> assign(
+       :current_path,
+       scoped_path(
+         admin["mount_path"] || "/billing",
+         "/webhooks",
+         socket.assigns.current_owner_scope
+       )
+     )
+     |> assign(
+       :table_path,
+       scoped_path(
+         admin["mount_path"] || "/billing",
+         "/webhooks",
+         socket.assigns.current_owner_scope
+       )
+     )
+     |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
      |> assign(:flashes, [])
      |> assign(:pending_bulk_replay, nil)}
   end
@@ -34,7 +46,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     {:noreply,
      socket
      |> assign(:params, params)
-     |> assign(:summary, webhook_summary())}
+     |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))}
   end
 
   @impl true
@@ -78,7 +90,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               socket
               |> record_bulk_replay(filter, count, result)
               |> assign(:pending_bulk_replay, nil)
-              |> assign(:summary, webhook_summary())
+              |> assign(:summary, webhook_summary(socket.assigns.current_owner_scope))
               |> push_flash(:info, bulk_replay_success(socket.assigns.current_owner_scope))
 
             {:noreply, socket}
@@ -127,7 +139,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
+              %{label: "Dashboard", href: scoped_path(@admin_mount_path, "", @current_owner_scope)},
               %{label: "Webhooks"}
             ]}
           />
@@ -216,7 +228,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           path={@table_path}
           params={@params}
           columns={[
-            %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path)},
+            %{label: "Webhook", render: &webhook_link(&1, @admin_mount_path, @current_owner_scope)},
             %{id: :type, label: "Type"},
             %{label: "Status", render: &status_summary/1},
             %{label: "Endpoint", render: &endpoint_summary/1},
@@ -268,25 +280,13 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     |> assign(:current_path, admin_path(admin, "/webhooks"))
   end
 
-  defp webhook_summary do
+  defp webhook_summary(owner_scope) do
     %{
-      received_count: Repo.aggregate(WebhookEvent, :count, :id),
-      blocked_count:
-        WebhookEvent
-        |> where([event], event.status in [:failed, :dead])
-        |> Repo.aggregate(:count, :id),
-      dead_count:
-        WebhookEvent
-        |> where([event], event.status == :dead)
-        |> Repo.aggregate(:count, :id),
-      replayed_count:
-        WebhookEvent
-        |> where([event], event.status == :replayed)
-        |> Repo.aggregate(:count, :id),
-      livemode_count:
-        WebhookEvent
-        |> where([event], event.livemode == true)
-        |> Repo.aggregate(:count, :id)
+      received_count: Webhooks.count(owner_scope),
+      blocked_count: Webhooks.count(owner_scope, %{status: [:failed, :dead]}),
+      dead_count: Webhooks.count(owner_scope, %{status: :dead}),
+      replayed_count: Webhooks.count(owner_scope, %{status: :replayed}),
+      livemode_count: Webhooks.count(owner_scope, %{livemode: true})
     }
   end
 
@@ -347,9 +347,9 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
   end
 
-  defp webhook_link(row, mount_path) do
+  defp webhook_link(row, mount_path, owner_scope) do
     label = row.processor_event_id || row.id
-    safe_link("#{mount_path}/webhooks/#{row.id}", label)
+    safe_link(scoped_path(mount_path, "/webhooks/#{row.id}", owner_scope), label)
   end
 
   defp safe_link(href, label) do
@@ -378,6 +378,13 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  defp scoped_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
+       when is_binary(slug) do
+    mount_path <> suffix <> "?org=" <> URI.encode_www_form(slug)
+  end
+
+  defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
