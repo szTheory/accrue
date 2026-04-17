@@ -92,6 +92,7 @@ defmodule Accrue.Billing.SubscriptionActions do
                  stripe_params,
                  [idempotency_key: idem_key] ++ sanitize_opts(opts)
                ),
+             :ok <- ensure_valid_tax_location(stripe_sub, opts),
              {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
              {:ok, sub} <- insert_subscription(customer.id, attrs),
              {:ok, _items} <- upsert_items(sub, stripe_sub),
@@ -715,6 +716,26 @@ defmodule Accrue.Billing.SubscriptionActions do
   defp maybe_put_automatic_tax(params, opts) do
     enabled = Keyword.get(opts, :automatic_tax, false)
     Map.put(params, :automatic_tax, %{enabled: enabled})
+  end
+
+  defp ensure_valid_tax_location(stripe_sub, opts) do
+    if Keyword.get(opts, :automatic_tax, false) and tax_location_invalid?(stripe_sub) do
+      {:error,
+       %Accrue.APIError{
+         code: "customer_tax_location_invalid",
+         http_status: 400,
+         message: "Please update customer address or shipping before enabling automatic tax."
+       }}
+    else
+      :ok
+    end
+  end
+
+  defp tax_location_invalid?(stripe_sub) when is_map(stripe_sub) do
+    automatic_tax = SubscriptionProjection.get(stripe_sub, :automatic_tax) || %{}
+
+    SubscriptionProjection.get(automatic_tax, :status) == "requires_location_inputs" or
+      SubscriptionProjection.get(automatic_tax, :disabled_reason) == "requires_location_inputs"
   end
 
   defp maybe_put_coupon(params, opts) do

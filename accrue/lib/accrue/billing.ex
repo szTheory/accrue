@@ -590,6 +590,56 @@ defmodule Accrue.Billing do
     end)
   end
 
+  @doc """
+  Updates a processor-backed customer's tax location with immediate validation.
+
+  This public path is distinct from `update_customer/2`, which remains a
+  local-only row update for non-processor customer maintenance.
+  """
+  @spec update_customer_tax_location(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
+  def update_customer_tax_location(%Customer{} = customer, attrs) when is_map(attrs) do
+    span_billing(:customer, :tax_location_update, customer, [], fn ->
+      Repo.transact(fn ->
+        with {:ok, processor_result} <-
+               Processor.update_customer(
+                 customer.processor_id,
+                 processor_tax_location_attrs(attrs),
+                 []
+               ),
+             customer_attrs = customer_projection_attrs(processor_result),
+             {:ok, updated} <-
+               customer |> Customer.changeset(customer_attrs) |> Repo.update(),
+             {:ok, _event} <-
+               Events.record(%{
+                 type: "customer.tax_location_updated",
+                 subject_type: "Customer",
+                 subject_id: updated.id,
+                 data: %{
+                   processor: updated.processor,
+                   processor_id: updated.processor_id,
+                   validate_location: "immediately",
+                   changed_fields: tax_location_field_names(attrs)
+                 }
+               }) do
+          {:ok, updated}
+        end
+      end)
+    end)
+  end
+
+  @doc """
+  Raising variant of `update_customer_tax_location/2`.
+  """
+  @spec update_customer_tax_location!(%Customer{}, map()) :: Customer.t()
+  def update_customer_tax_location!(%Customer{} = customer, attrs) when is_map(attrs) do
+    span_billing(:customer, :tax_location_update, customer, [], fn ->
+      case update_customer_tax_location(customer, attrs) do
+        {:ok, updated} -> updated
+        {:error, reason} -> raise "Failed to update customer tax location: #{inspect(reason)}"
+      end
+    end)
+  end
+
   # ---------------------------------------------------------------------------
   # Customer — update (D2-07, D2-09)
   # ---------------------------------------------------------------------------
@@ -667,6 +717,51 @@ defmodule Accrue.Billing do
     span_billing(:record, :patch_data, record, [], fn ->
       merged = Map.merge(record.data || %{}, partial_data)
       put_data(record, merged)
+    end)
+  end
+
+  defp customer_projection_attrs(processor_result) when is_map(processor_result) do
+    %{
+      name: Map.get(processor_result, :name),
+      email: Map.get(processor_result, :email),
+      metadata: Map.get(processor_result, :metadata, %{}),
+      data: sanitize_customer_data(processor_result)
+    }
+  end
+
+  defp sanitize_customer_data(processor_result) when is_map(processor_result) do
+    Map.drop(processor_result, [
+      :address,
+      :shipping,
+      :phone,
+      :tax,
+      "address",
+      "shipping",
+      "phone",
+      "tax"
+    ])
+  end
+
+  defp processor_tax_location_attrs(attrs) when is_map(attrs) do
+    attrs
+    |> Map.drop(["tax"])
+    |> Map.delete(:tax)
+    |> Map.put(:tax, immediate_tax_validation(Map.get(attrs, :tax) || Map.get(attrs, "tax")))
+  end
+
+  defp immediate_tax_validation(nil), do: %{validate_location: "immediately"}
+
+  defp immediate_tax_validation(%{} = tax_attrs) do
+    tax_attrs
+    |> Map.drop(["validate_location"])
+    |> Map.delete(:validate_location)
+    |> Map.put(:validate_location, "immediately")
+  end
+
+  defp tax_location_field_names(attrs) when is_map(attrs) do
+    [:address, :shipping, :phone, :tax]
+    |> Enum.filter(fn key ->
+      Map.has_key?(attrs, key) or Map.has_key?(attrs, Atom.to_string(key))
     end)
   end
 
