@@ -6,6 +6,7 @@ defmodule AccrueHost.BillingFacadeTest do
 
   alias Accrue.Billing.Customer
   alias Accrue.Billing.Subscription
+  alias AccrueHost.Accounts.Organization
   alias AccrueHost.Accounts.User
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Billing
@@ -15,12 +16,25 @@ defmodule AccrueHost.BillingFacadeTest do
 
   setup do
     user = AccountsFixtures.user_fixture()
-    %{user: user}
+    organization = AccountsFixtures.organization_fixture(%{owner: user})
+    owner_membership =
+      AccountsFixtures.organization_membership_fixture(%{
+        organization: organization,
+        user: user,
+        role: :owner
+      })
+
+    %{user: user, organization: organization, owner_membership: owner_membership}
   end
 
   test "host user schema is the billable boundary" do
     assert User.__accrue__(:billable_type) == "User"
     assert function_exported?(User, :customer, 1)
+  end
+
+  test "host organization schema is the billable boundary" do
+    assert Organization.__accrue__(:billable_type) == "Organization"
+    assert function_exported?(Organization, :customer, 1)
   end
 
   test "generated facade exports the expected public functions" do
@@ -66,6 +80,42 @@ defmodule AccrueHost.BillingFacadeTest do
 
   test "billing_state_for/1 returns nil state before the first subscription", %{user: user} do
     assert {:ok, %{customer: nil, subscription: nil}} = Billing.billing_state_for(user)
+  end
+
+  test "customer_for/1 accepts a Sigra-backed organization fixture", %{organization: organization} do
+    assert {:ok, %Customer{} = customer} = Billing.customer_for(organization)
+
+    assert customer.owner_type == "Organization"
+    assert customer.owner_id == organization.id
+    assert customer.processor == "fake"
+  end
+
+  test "billing_state_for/1 accepts a Sigra-backed organization fixture", %{
+    organization: organization
+  } do
+    assert {:ok, %{customer: nil, subscription: nil}} = Billing.billing_state_for(organization)
+
+    assert {:ok, %Subscription{} = latest_subscription} =
+             Billing.subscribe(organization, "price_basic", trial_end: {:days, 14})
+
+    assert {:ok,
+            %{customer: %Customer{} = customer, subscription: %Subscription{} = subscription}} =
+             Billing.billing_state_for(organization)
+
+    assert customer.owner_type == "Organization"
+    assert customer.owner_id == organization.id
+    assert subscription.id == latest_subscription.id
+    assert subscription.customer_id == customer.id
+  end
+
+  test "fixtures create Sigra role memberships for downstream organization coverage" do
+    owner_membership = AccountsFixtures.organization_membership_fixture(%{role: :owner})
+    admin_membership = AccountsFixtures.organization_membership_fixture(%{role: :admin})
+    member_membership = AccountsFixtures.organization_membership_fixture(%{role: :member})
+
+    assert owner_membership.role == :owner
+    assert admin_membership.role == :admin
+    assert member_membership.role == :member
   end
 
   test "billing_state_for/1 returns the fake-backed customer and latest subscription", %{

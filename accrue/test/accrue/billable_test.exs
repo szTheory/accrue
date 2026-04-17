@@ -90,6 +90,15 @@ defmodule Accrue.BillableTest do
       assert fetched.id == created.id
       assert fetched.processor_id == created.processor_id
     end
+
+    test "organization billables preserve the existing owner contract" do
+      organization = %TestOrg{id: Ecto.UUID.generate()}
+
+      assert {:ok, %Customer{} = customer} = Billing.customer(organization)
+      assert customer.owner_type == "Organization"
+      assert customer.owner_id == to_string(organization.id)
+      assert customer.processor == "fake"
+    end
   end
 
   # -----------------------------------------------------------------------
