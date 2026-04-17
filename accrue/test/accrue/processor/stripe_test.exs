@@ -70,6 +70,39 @@ defmodule Accrue.Processor.StripeTest do
              } = ErrorMapper.to_accrue_error(raw)
     end
 
+    test "maps customer_tax_location_invalid to a stable sanitized APIError" do
+      raw = %LatticeStripe.Error{
+        type: :invalid_request_error,
+        code: "customer_tax_location_invalid",
+        message: "Tax location is invalid.",
+        status: 400,
+        request_id: "req_tax",
+        param: "address[country]",
+        raw_body: %{
+          "error" => %{
+            "message" => "Tax location is invalid.",
+            "request_log_url" => "https://dashboard.stripe.com/logs/req_tax",
+            "address" => %{"line1" => "123 Test St", "postal_code" => "10001"}
+          }
+        }
+      }
+
+      assert %Accrue.APIError{
+               code: "customer_tax_location_invalid",
+               http_status: 400,
+               request_id: "req_tax",
+               message: message,
+               processor_error: %{
+                 request_id: "req_tax",
+                 status: 400,
+                 type: :invalid_request_error,
+                 code: "customer_tax_location_invalid"
+               }
+             } = ErrorMapper.to_accrue_error(raw)
+
+      assert message =~ "update customer address or shipping"
+    end
+
     test "maps :authentication_error to %Accrue.APIError{}" do
       raw = %LatticeStripe.Error{
         type: :authentication_error,
@@ -156,6 +189,23 @@ defmodule Accrue.Processor.StripeTest do
                outgoing_request_shape(%{"automatic_tax" => %{enabled: true}})
     end
 
+    test "preserves nested customer tax-location params on customer update requests" do
+      params = %{
+        address: %{line1: "27 Fredrick Ave", postal_code: "97712", country: "US"},
+        shipping: %{address: %{line1: "27 Fredrick Ave", country: "US"}},
+        tax: %{validate_location: "immediately", ip_address: "203.0.113.10"}
+      }
+
+      assert %{
+               "address" => %{line1: "27 Fredrick Ave", postal_code: "97712", country: "US"},
+               "shipping" => %{address: %{line1: "27 Fredrick Ave", country: "US"}},
+               "tax" => %{
+                 validate_location: "immediately",
+                 ip_address: "203.0.113.10"
+               }
+             } = outgoing_request_shape(params)
+    end
+
     test "routes subscription and checkout creation through stringify_keys(params)" do
       source = File.read!("lib/accrue/processor/stripe.ex")
 
@@ -164,6 +214,13 @@ defmodule Accrue.Processor.StripeTest do
 
       assert source =~
                "|> LatticeStripe.Checkout.Session.create(stringify_keys(params), stripe_opts)"
+    end
+
+    test "routes customer updates through stringify_keys(params) so validate_location reaches Stripe" do
+      source = File.read!("lib/accrue/processor/stripe.ex")
+
+      assert source =~
+               "|> LatticeStripe.Customer.update(id, stringify_keys(params), stripe_opts)"
     end
   end
 

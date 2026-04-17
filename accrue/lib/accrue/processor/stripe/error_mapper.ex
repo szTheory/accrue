@@ -95,6 +95,23 @@ defmodule Accrue.Processor.Stripe.ErrorMapper do
     }
   end
 
+  def to_accrue_error(
+        %LatticeStripe.Error{
+          type: :invalid_request_error,
+          code: "customer_tax_location_invalid"
+        } = raw
+      ) do
+    %Accrue.APIError{
+      message:
+        "Stripe could not validate the customer tax location. " <>
+          "Please update customer address or shipping before enabling automatic tax.",
+      code: "customer_tax_location_invalid",
+      http_status: raw.status,
+      request_id: raw.request_id,
+      processor_error: sanitize_customer_tax_location_error(raw)
+    }
+  end
+
   def to_accrue_error(%LatticeStripe.Error{type: type} = raw)
       when type in [
              :invalid_request_error,
@@ -135,4 +152,13 @@ defmodule Accrue.Processor.Stripe.ErrorMapper do
 
   defp retry_after_from(%LatticeStripe.Error{raw_body: %{"retry_after" => v}}), do: v
   defp retry_after_from(_), do: nil
+
+  defp sanitize_customer_tax_location_error(%LatticeStripe.Error{} = raw) do
+    %{
+      request_id: raw.request_id,
+      status: raw.status,
+      type: raw.type,
+      code: raw.code
+    }
+  end
 end
