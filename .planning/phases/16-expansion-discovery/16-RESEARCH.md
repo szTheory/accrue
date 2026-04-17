@@ -266,22 +266,22 @@ end
 |---|-------|---------|---------------|
 | A1 | Revenue/export is lower immediate user value than tax and org billing for the next milestone. [ASSUMED] | Ranked Recommendation | Milestone ordering could overfit the current maintainer view instead of actual adopter demand. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What finance workflow should Accrue optimize first: manual CSV export, scheduled report delivery, warehouse sync, or accounting-system handoff?**
    - What we know: Stripe already supports all four shapes to different degrees. [CITED: https://docs.stripe.com/revenue-recognition/api] [CITED: https://docs.stripe.com/stripe-data/export-customizations] [CITED: https://docs.stripe.com/sigma/scheduled-queries]
-   - What's unclear: Which of those shapes Accrue adopters actually need from the library itself.
-   - Recommendation: Capture expected consumers in Phase 16 output and treat any first implementation as a thin handoff layer, not a local accounting engine.
+   - Outcome: Optimize first for host-authorized scheduled report delivery backed by Stripe-native reporting surfaces, with manual CSV remaining an operator fallback and warehouse or accounting handoff treated as downstream consumers rather than first-class Accrue product surface.
+   - Why this resolves the question: It matches the backlog recommendation to start with a thin handoff layer instead of inventing a local accounting engine or broad export subsystem.
 
 2. **When Sigra ships organizations, should Accrue support both user-billed and org-billed ownership in the same host app?**
    - What we know: The current model can represent either through `owner_type`/`owner_id`. [VERIFIED: accrue/lib/accrue/billing/customer.ex] [VERIFIED: accrue/lib/accrue/billable.ex]
-   - What's unclear: Whether the public host facade should treat mixed ownership as first-class from day one.
-   - Recommendation: Decide this before planning ORG implementation work; it changes query scoping, admin UX, and documentation.
+   - Outcome: Yes at the model level, but not as a first-class mixed-ownership UX requirement for the first org-billing milestone. The planning baseline is that Accrue keeps the polymorphic ownership model, while the initial org milestone can scope its public host flows to one active billing owner path at a time.
+   - Why this resolves the question: It preserves the existing schema flexibility without forcing Phase 16 to recommend broader org UX or tenancy scope than the current host-owned boundary can safely support.
 
 3. **If second-processor demand appears, should official support live in core or a separate package?**
    - What we know: Ecosystem precedent favors separation and provider-specific packages. [CITED: https://laravel.com/docs/12.x/billing] [CITED: https://laravel.com/docs/11.x/cashier-paddle]
-   - What's unclear: Whether Accrue wants to own a family of provider packages or only document the host-owned adapter path.
-   - Recommendation: Lock this decision before any adapter implementation starts.
+   - Outcome: Official support should live outside core, either as a separate package or a host-owned adapter, while `accrue` remains Stripe-first and keeps only the documented custom-processor extension point.
+   - Why this resolves the question: It removes ambiguity before any future adapter work and aligns the planted-seed recommendation with both repo history and external precedent.
 
 ## Validation Architecture
 
