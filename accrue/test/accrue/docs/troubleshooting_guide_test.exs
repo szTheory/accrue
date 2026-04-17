@@ -43,6 +43,16 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
     "config :accrue, :webhook_signing_secrets, %{",
     ~s|stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")|
   ]
+  @tax_rollout_recovery_phrases [
+    "customer_tax_location_invalid",
+    "finalization_requires_location_inputs",
+    "requires_location_inputs",
+    "guides/testing-live-stripe.md",
+    "does not retroactively update",
+    "payment links",
+    "customer_update[address]=auto",
+    "customer_update[shipping]=auto"
+  ]
 
   test "troubleshooting guide reserves stable codes, anchors, and verification surface" do
     guide = File.read!(@guide)
@@ -68,5 +78,13 @@ defmodule Accrue.Docs.TroubleshootingGuideTest do
     end)
 
     refute guide =~ ~r/webhook_signing_secret(?!s)/
+  end
+
+  test "troubleshooting guide covers tax rollout recovery and live parity references" do
+    guide = File.read!(@guide)
+
+    Enum.each(@tax_rollout_recovery_phrases, fn phrase ->
+      assert guide =~ phrase
+    end)
   end
 end
