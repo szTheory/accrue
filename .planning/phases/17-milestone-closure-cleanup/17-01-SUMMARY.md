@@ -42,7 +42,7 @@ key-decisions:
 patterns-established:
   - "When docs define trust-lane semantics, keep a prose contract in ExUnit and fixed-string/forbidden-string checks in verify_package_docs.sh."
   - "Shared test databases require fixture identity in delete predicates before disabling immutable ledger triggers."
-requirements-completed: [audit-tech-debt]
+requirements-completed: []
 duration: 46min
 completed: 2026-04-17
 ---
