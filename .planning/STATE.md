@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 13-canonical-demo-tutorial-03-PLAN.md
-last_updated: "2026-04-17T01:58:08.280Z"
+stopped_at: Phase 14 context gathered
+last_updated: "2026-04-17T02:45:55.606Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 4
@@ -402,6 +402,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T01:58:08.277Z
-Stopped at: Completed 13-canonical-demo-tutorial-03-PLAN.md
-Resume file: None
+Last session: 2026-04-17T02:45:55.602Z
+Stopped at: Phase 14 context gathered
+Resume file: .planning/phases/14-adoption-front-door/14-CONTEXT.md
