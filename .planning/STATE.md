@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Tax + Organization Billing
-current_phase: 19
-current_phase_name: Tax Location and Rollout Safety
-current_plan: "05"
+current_phase: 20
+current_phase_name: Organization Billing With Sigra
+current_plan: TBD
 status: ready_to_plan
-stopped_at: Completed 19-05 rollout-safety and invalid-location recovery guidance
-last_updated: "2026-04-17T18:37:00Z"
+stopped_at: Phase 19 verified and complete; ready to plan Phase 20
+last_updated: "2026-04-17T18:49:29Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
+  total_plans: 0
+  completed_plans: 0
+  percent: 40
 ---
 
 # Project State
@@ -28,20 +28,20 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 19
-Plan: 05
-**Current Phase:** 19
-**Current Phase Name:** Tax Location and Rollout Safety
-**Current Plan:** 05
+Phase: 20
+Plan: TBD
+**Current Phase:** 20
+**Current Phase Name:** Organization Billing With Sigra
+**Current Plan:** TBD
 **Status:** Ready to Plan
-**Stopped At:** Completed 19-05 rollout-safety and invalid-location recovery guidance
+**Stopped At:** Phase 19 verified and complete; ready to plan Phase 20
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
 
 **Milestone:** v1.3 Tax + Organization Billing
-**Progress:** [██████████] 100%
+**Progress:** [████------] 40%
 
 | Phase | Status | Notes |
 |-------|--------|-------|
