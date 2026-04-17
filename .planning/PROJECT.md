@@ -12,10 +12,16 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-Accrue v1.2 Adoption + Trust is shipped. The public Hex packages remain:
+Accrue **v1.3 Tax + Organization Billing** is shipped (2026-04-17). The public Hex packages remain:
 
 - `accrue` 0.1.2
 - `accrue_admin` 0.1.2
+
+v1.3 adds Stripe Tax orchestration, customer tax-location validation and recovery, Sigra-first organization billing with row-scoped admin and webhook replay contracts, host/admin UX proof (`examples/accrue_host` + CI `host-integration`), and **Stripe-native finance handoff** documentation (`accrue/guides/finance-handoff.md`) without Accrue owning accounting semantics.
+
+Milestone history, roadmap, requirements, and audit artifacts: `.planning/milestones/v1.3-ROADMAP.md`, `v1.3-REQUIREMENTS.md`, `v1.3-MILESTONE-AUDIT.md`.
+
+**Next:** v1.4 scope is intentionally open — run `/gsd-new-milestone` when ready (see `.planning/REQUIREMENTS.md` placeholder).
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface.
 
@@ -28,23 +34,18 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 
 The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust: `examples/accrue_host` is the canonical local demo/tutorial path, the repository and package docs are host-first, mature OSS support assets are in place, trust evidence is checked in and executable, and expansion discovery ranked Stripe Tax, organization billing, and finance handoff as the next expansion candidates.
 
-Phase 18 of v1.3 is complete: subscription and checkout flows now accept a flat `automatic_tax` option, Stripe/Fake processors preserve deterministic automatic-tax behavior, and subscription/invoice projections expose narrow local tax observability.
-
-Phase 19 of v1.3 is complete: tax-location updates now go through a public Accrue path with immediate validation, invalid-location and finalization-failure states are projected locally and surfaced in admin/host flows, and rollout docs warn explicitly that Stripe Tax enablement is not retroactive for existing recurring objects.
-
-## Current Milestone: v1.3 Tax + Organization Billing
+## Last Shipped Milestone: v1.3 Tax + Organization Billing
 
 **Goal:** Let Phoenix SaaS teams bill organizations with Stripe Tax enabled, preserve tenant boundaries through Sigra or equivalent host-owned scopes, and hand finance workflows to Stripe-native reporting without Accrue owning accounting semantics.
 
-**Target features:**
-- Stripe Tax orchestration for subscriptions, checkout, invoices, customer tax-location validation, invalid-location recovery, and existing recurring-item rollout guidance.
-- Organization billing through the existing `Accrue.Billable` `owner_type`/`owner_id` model, with Sigra-first host integration proof and row-scoped tenant safeguards.
-- Host/admin demo coverage for user-owned and organization-owned billing, tax state visibility, webhook/admin replay boundaries, and cross-tenant denial paths.
-- Stripe-native finance handoff documentation for Revenue Recognition, Sigma scheduled queries, and Data Pipeline, explicitly excluding Accrue-owned accounting logic.
+**Delivered:**
 
-Milestone history and requirements are archived in `.planning/milestones/`.
+- Stripe Tax on subscriptions and checkout with Fake-backed regression coverage and narrow local tax observability.
+- Public tax-location updates, invalid-location recovery, finalization-failure surfacing, and rollout-safety documentation.
+- Sigra-first org billing proof, owner-scoped admin queries, webhook replay ambiguity handling, and cross-tenant denial UX.
+- VERIFY-01 executable proof (host tests + Playwright + README/CI contract) plus finance handoff guide and doc contract test (Phase 22).
 
-## Last Shipped Milestone: v1.2 Adoption + Trust
+## Earlier milestone: v1.2 Adoption + Trust
 
 **Goal:** Make Accrue feel ready for a new Phoenix team to evaluate, integrate, and trust by polishing the canonical demo/onboarding path, adding mature-library quality signals, and deciding the next expansion bet without partially implementing it.
 
@@ -55,14 +56,15 @@ Milestone history and requirements are archived in `.planning/milestones/`.
 - Trust hardening bundle covering webhook/auth/admin security, seeded performance smoke checks, compatibility, accessibility/responsive browser checks, secret/PII log review, and required-vs-advisory release-gate boundaries.
 - Expansion discovery for tax, revenue/export, additional processors, and organization/multi-tenant billing captured as ranked future recommendations only.
 
-## Next Milestone Goals
+## Next Milestone Goals (v1.4 — TBD)
 
-v1.3 is active and combines the idiomatic expansion path chosen after v1.2 discovery:
+Pick up ranked expansion candidates only after `/gsd-new-milestone` locks requirements. Likely themes from prior discovery:
 
-- Implement Stripe Tax support first because it deepens the existing Stripe-first billing model without changing processor strategy.
-- Bring organization billing forward now that local Sigra has shipped organizations, memberships, active organization scope, org-aware admin, impersonation, and audit/export foundations.
-- Keep finance work as Stripe-native handoff and documentation, not a custom revenue-recognition or GAAP accounting engine.
-- Preserve `tax rollout correctness`, `cross-tenant billing leakage`, and `wrong-audience finance exports` as explicit milestone risks.
+- **FIN-03 / FIN-04** — Host-owned finance exports and accounting-boundary work (only if deliberately scoped).
+- **PROC-08** — Second processor adapter behind the Stripe-first boundary.
+- **ORG-04** — Broader non-Sigra tenancy recipes.
+
+Continue to treat `tax rollout correctness`, `cross-tenant billing leakage`, and `wrong-audience finance exports` as release risks regardless of milestone.
 
 ## Requirements
 
@@ -85,18 +87,18 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - ✓ Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release — v1.2
 - ✓ Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API — v1.2
 
-### Active
+### Active (v1.4 placeholder)
 
-- [x] **TAX-01**: Developer can enable Stripe Tax for new subscription and checkout flows through Accrue's public billing API. Validated in Phase 18: Stripe Tax Core.
-- [x] **TAX-02**: Developer can collect and validate customer tax location before creating tax-enabled recurring payments. Validated in Phase 19: Tax Location and Rollout Safety.
-- [x] **TAX-03**: User/admin can identify and recover from missing or invalid tax location states without silent tax rollout failure. Validated in Phase 19: Tax Location and Rollout Safety.
-- [x] **TAX-04**: Existing recurring subscriptions have explicit migration guidance before automatic tax rollout. Validated in Phase 19: Tax Location and Rollout Safety.
-- [ ] **ORG-01**: Host app can make an organization billable using Accrue's existing `Accrue.Billable` ownership model.
-- [ ] **ORG-02**: Sigra-backed host flow can bill the active organization while preserving membership and admin scope boundaries.
-- [ ] **ORG-03**: Org admins cannot access or mutate another organization's billing state through public, admin, webhook replay, or export paths.
-- [ ] **FIN-01**: Developer has documented Stripe-native finance handoff paths for Revenue Recognition, Sigma, and Data Pipeline.
-- [ ] **FIN-02**: Finance handoff docs identify supported data boundaries and explicitly exclude Accrue-owned accounting/revenue-recognition logic.
-- [ ] **VERIFY-01**: Fake-backed tests, host integration tests, and browser/admin checks prove tax, org billing, and finance-boundary behavior.
+No validated v1.4 requirements yet — see `.planning/REQUIREMENTS.md`.
+
+### Validated v1.3 (archived)
+
+v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `.planning/milestones/v1.3-REQUIREMENTS.md`.
+
+- ✓ TAX-01 through TAX-04 — Phases 18–19
+- ✓ ORG-01 through ORG-03 — Phase 20
+- ✓ VERIFY-01 — Phases 21–22 (executable proof + finance handoff narrative)
+- ✓ FIN-01 and FIN-02 — Phase 22 (`accrue/guides/finance-handoff.md`)
 
 ### Validated v1.0 Scope Summary
 

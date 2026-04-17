@@ -30,12 +30,15 @@ at the start of that job.
 | 6 | Host org billing switcher + headings | Playwright org switching | Same as row 5 (`verify01-org-switching.spec.js`) |
 | 7 | Mounted admin: Active organization + Billing signals | Playwright | `examples/accrue_host/e2e/verify01-admin-mounted.spec.js` |
 | 8 | Tax & ownership card copy | ExUnit (canonical; mounted pixel parity optional) | `accrue_admin/test/accrue_admin/live/customer_live_test.exs` |
+| 9 | Finance-boundary narrative (VERIFY-01 doc half) | ExUnit doc contract + published guide | `accrue/guides/finance-handoff.md`, `mix test test/accrue/finance_handoff_doc_test.exs` (Phase 22) |
+
+The **VERIFY-01** requirement spans Phase 21 (executable) and Phase 22 (finance handoff docs + milestone traceability).
 
 ## Summary
 
 | outcome | count |
 |---------|------:|
-| automated in CI | 8 |
+| automated in CI / ExUnit | 9 |
 | manual blocking | 0 |
 
 ## Advisory (non-blocking)

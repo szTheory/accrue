@@ -1,20 +1,20 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Tax + Organization Billing
-current_phase: 20
-current_phase_name: Organization Billing With Sigra
-current_plan: 20-06
+milestone: v1.4
+milestone_name: Next (TBD)
+current_phase: null
+current_phase_name: null
+current_plan: null
 status: ready_to_plan
-stopped_at: Completed 20-06; phase 20 is complete and phase 21 planning is next
-last_updated: "2026-04-17T20:35:49Z"
+stopped_at: v1.3 shipped and archived 2026-04-17. Run /gsd-new-milestone to define v1.4.
+last_updated: "2026-04-17T23:59:00Z"
 last_activity: 2026-04-17
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -24,42 +24,37 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** v1.3 Tax + Organization Billing
+**Current focus:** v1.4 — **milestone not started** (define with `/gsd-new-milestone`)
 
 ## Current Position
 
-Phase: 20
-Plan: 20-06
-**Current Phase:** 20
-**Current Phase Name:** Organization Billing With Sigra
-**Current Plan:** 20-06
-**Status:** Ready to Plan
-**Stopped At:** Completed 20-06; phase 20 is complete and phase 21 planning is next
-**Resume File:** `.planning/ROADMAP.md`
+Phase: *(none — v1.4 unplanned)*  
+Plan: *(none)*  
+**Current Phase Name:** —  
+**Status:** Ready to plan next milestone  
+**Stopped At:** v1.3 Tax + Organization Billing **shipped** 2026-04-17 (Phases 18–22; git tag `v1.3`).  
+**Resume File:** `.planning/REQUIREMENTS.md` (v1.4 placeholder) and `.planning/ROADMAP.md`  
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
 
-**Milestone:** v1.3 Tax + Organization Billing
-**Progress:** [██████████] 100%
+**Milestone:** v1.3 Tax + Organization Billing — **COMPLETE** (archived)
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 18. Stripe Tax Core | Complete | `18-01` through `18-04` shipped; TAX-01 is complete |
-| 19. Tax Location and Rollout Safety | Complete | `19-01` shipped sanitized processor tax-location validation; `19-02` shipped the public tax-location billing facade and focused TAX-02 coverage; `19-03` shipped local rollback observability and invoice failure reconciliation; `19-04` shipped admin tax-risk visibility plus the host repair path; `19-05` shipped rollout-safety and live Stripe recovery guidance for TAX-04 |
-| 20. Organization Billing With Sigra | Complete | `20-01` shipped Sigra dependency wiring, concrete organization schemas, and ORG-01 billing proof; `20-02` shipped Sigra-hydrated active-org billing on `/app/billing`; `20-03` shipped admin owner-scope session threading and host mount proof; `20-04` shipped owner-aware admin query loaders and webhook ambiguity proof; `20-05` shipped denial redirects plus owner-scoped event feeds; `20-06` finished webhook denial, ambiguity handling, and host-mounted replay proof |
-| 21. Admin and Host UX Proof | Pending | Browser/admin proof for tax and org billing states |
-| 22. Finance Handoff and Milestone Verification | Pending | Stripe-native finance handoff and closure verification |
+| 18. Stripe Tax Core | Complete | Shipped 2026-04-17 |
+| 19. Tax Location and Rollout Safety | Complete | Shipped 2026-04-17 |
+| 20. Organization Billing With Sigra | Complete | Shipped 2026-04-17 |
+| 21. Admin and Host UX Proof | Complete | VERIFY-01 CI-backed; see `21-UAT.md` manifest |
+| 22. Finance Handoff and Milestone Verification | Complete | `accrue/guides/finance-handoff.md` + milestone archives |
 
 ## Current Planning Artifacts
 
 - `.planning/PROJECT.md` — active v1.3 milestone goals and project context.
 - `.planning/REQUIREMENTS.md` — active v1.3 requirements.
 - `.planning/ROADMAP.md` — active v1.3 phase roadmap.
-- `.planning/milestones/v1.2-ROADMAP.md` — archived v1.2 roadmap details.
-- `.planning/milestones/v1.2-REQUIREMENTS.md` — archived v1.2 requirements.
-- `.planning/milestones/v1.2-MILESTONE-AUDIT.md` — archived v1.2 milestone audit.
-- `.planning/STATE-ARCHIVE.md` — archived pre-cleanup state history and legacy metrics.
+- `.planning/phases/21-admin-and-host-ux-proof/21-UAT.md` — VERIFY-01 **CI automation manifest** (Phase 21 executable half).
+- `.planning/milestones/v1.3-REQUIREMENTS.md` — closed v1.3 requirements snapshot.
 
 ## Recent Decisions
 
@@ -88,7 +83,7 @@ Plan: 20-06
 - Organization fixtures create orgs through Sigra with `Scope.for_user/1`, and owner membership creation is treated as idempotent because Sigra inserts the initial owner row atomically.
 - The host billing page now resolves the active organization through `Sigra.Scope.Hydration` and clears stale active-org pointers fail-closed.
 - Host billing mutations now derive ownership from `current_scope.active_organization` only and ignore browser-supplied organization ids.
-- The admin package now forwards a fixed owner-scope session contract (`active_organization_id`, `active_organization_slug`, `admin_organization_ids`) alongside host-specified session keys.
+- The admin package now forwards a fixed owner-scope session contract (`active_organization_id`, `active_organization_slug`, `admin_organization_ids`, `active_organization_name`) alongside host-specified session keys.
 - Owner scope now resolves once during `AccrueAdmin.AuthHook.on_mount/4`, and downstream admin work should read `current_owner_scope` instead of re-parsing session state.
 - Admin query modules now enforce ORG-03 row proof directly: customer, subscription, and invoice loaders join back to organization-owned customer rows before returning data.
 - Webhook loaders now distinguish `{:ok, row}`, `:not_found`, and `{:ambiguous, proof_context}`, and scoped bulk replay counts derive from those proofed loaders instead of global DLQ totals.
@@ -98,4 +93,23 @@ Plan: 20-06
 
 ## Next Action
 
-Plan phase 21 so browser/admin verification can build on the completed ORG-03 organization-billing proof.
+1. **`/gsd-new-milestone`** — define v1.4 goals, requirements, and roadmap phases.
+2. Optional: **`/gsd-pr-branch`** when working on a **feature branch** with interleaved `.planning/phases/` commits so PRs stay code-reviewable (see **Repo hygiene** below). On `main` with local WIP, commit or stash before branching.
+
+## Deferred Items
+
+Items acknowledged at **v1.3 milestone close** (2026-04-17) from `gsd-tools audit-open` and quick-task hygiene:
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | `260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p` | deferred — restore or delete quick-task dir |
+| quick_task | `260414-l9q-automate-phase-3-human-verification-item` | deferred — restore or delete quick-task dir |
+| tooling | GSD `audit-open` Phase 21 UAT line | acknowledged — VERIFY-01 is **CI-backed**; see `21-UAT.md` |
+
+## Repo hygiene
+
+`/gsd-pr-branch` rebuilds a review-friendly branch by cherry-picking **non**-`.planning/phases/**` commits. Use it from a **feature branch** that is **ahead of `main`**. It does not replace normal git hygiene on `main` (commit WIP, or branch before large planning dumps).
+
+## Session Continuity
+
+v1.3 closed: Phase 22 plans `22-01`–`22-02` executed; `v1.3` git tag; milestones `v1.3-*` written; active `REQUIREMENTS.md` reset to v1.4 placeholder.

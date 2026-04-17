@@ -1,5 +1,32 @@
 # Milestones
 
+## v1.3 Tax + Organization Billing (Shipped: 2026-04-17)
+
+**Phases completed:** 5 phases (18–22), 23 plans
+
+**Key accomplishments:**
+
+- Stripe Tax core with automatic-tax projections, checkout parity, and Fake-backed regression coverage.
+- Customer tax-location capture/validation, invalid-location recovery, finalization-failure surfacing, and rollout-safety documentation (including non-retroactive Stripe Tax enablement).
+- Sigra-first organization billing in `examples/accrue_host` with active-organization scope, row-scoped admin queries, webhook replay proof, and cross-org denial UX.
+- Admin/host UX proof: BillingPresentation, money-index signals, tenant chrome, Tax & ownership card, README VERIFY-01 + CI `host-integration` contract.
+- Finance handoff guide (`accrue/guides/finance-handoff.md`) for Stripe Revenue Recognition, Sigma, Data Pipeline, audit-ledger positioning, and explicit non-accounting boundaries; doc contract test.
+
+**Verification:**
+
+- Milestone audit: [`milestones/v1.3-MILESTONE-AUDIT.md`](milestones/v1.3-MILESTONE-AUDIT.md) (passed; see STATE.md for acknowledged `audit-open` carry-forward).
+- VERIFY-01: CI-backed host integration + `mix verify.full`; Phase 22 doc test for finance guide.
+
+**Known deferred items at close:** see `.planning/STATE.md` § Deferred Items (quick-task stubs; GSD audit tooling flag on Phase 21 UAT).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.3-ROADMAP.md`](milestones/v1.3-ROADMAP.md)
+- Requirements: [`milestones/v1.3-REQUIREMENTS.md`](milestones/v1.3-REQUIREMENTS.md)
+- Audit: [`milestones/v1.3-MILESTONE-AUDIT.md`](milestones/v1.3-MILESTONE-AUDIT.md)
+
+---
+
 ## v1.2 Adoption + Trust (Shipped: 2026-04-17)
 
 **Phases completed:** 5 phases, 13 plans, 26 tasks
