@@ -2,19 +2,6 @@ defmodule Accrue.Docs.FirstHourGuideTest do
   use ExUnit.Case, async: true
 
   @guide "guides/first_hour.md"
-  @ordered_steps [
-    "mix deps.get",
-    "mix accrue.install",
-    "config/runtime.exs",
-    "mix ecto.migrate",
-    "Oban",
-    "/webhooks/stripe",
-    ~s|accrue_admin "/billing"|,
-    "MyApp.Billing.subscribe",
-    "customer.subscription.created",
-    "/billing",
-    "mix test"
-  ]
   @public_surfaces [
     "MyApp.Billing",
     "use Accrue.Webhook.Handler",
@@ -33,10 +20,25 @@ defmodule Accrue.Docs.FirstHourGuideTest do
     "worker internals"
   ]
 
-  test "first hour guide preserves the Phoenix-order host boundary contract" do
+  test "first hour guide preserves the manifest-backed host boundary contract" do
     guide = File.read!(@guide)
+    manifest = command_manifest()
+    first_run = manifest.first_run
+    seeded_history = manifest.seeded_history
+    command_labels = command_labels()
 
-    assert_order!(guide, @ordered_steps)
+    assert_order!(
+      guide,
+      [
+        first_run.label,
+        "MyApp.Billing.subscribe",
+        hd(manifest.story_artifacts),
+        Enum.at(manifest.story_artifacts, 2),
+        Enum.at(command_labels, 1),
+        seeded_history.label,
+        Enum.at(command_labels, 2)
+      ]
+    )
 
     Enum.each(@public_surfaces, fn surface ->
       assert guide =~ surface
@@ -46,7 +48,20 @@ defmodule Accrue.Docs.FirstHourGuideTest do
       refute guide =~ surface
     end)
 
+    assert guide =~ "First run"
+    assert guide =~ "Seeded history"
+    assert guide =~ "mix verify.full"
     refute guide =~ ~r/webhook_signing_secret(?!s)/
+  end
+
+  defp command_manifest do
+    Code.require_file(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    AccrueHost.Demo.CommandManifest.manifest()
+  end
+
+  defp command_labels do
+    Code.require_file(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    AccrueHost.Demo.CommandManifest.command_labels()
   end
 
   defp assert_order!(guide, [first | rest]) do
