@@ -8,6 +8,7 @@ defmodule AccrueAdmin.Router do
 
   @default_on_mount [{AccrueAdmin.AuthHook, :ensure_admin}]
   @default_session_keys []
+  @owner_scope_session_keys AccrueAdmin.OwnerScope.session_keys()
 
   @doc """
   Mounts the admin package at `path`.
@@ -86,8 +87,10 @@ defmodule AccrueAdmin.Router do
   @spec __session__(Plug.Conn.t(), [atom() | String.t()], String.t()) :: map()
   def __session__(conn, session_keys, mount_path)
       when is_list(session_keys) and is_binary(mount_path) do
+    threaded_keys = Enum.uniq(session_keys ++ @owner_scope_session_keys)
+
     host_session =
-      Map.new(session_keys, fn key ->
+      Map.new(threaded_keys, fn key ->
         string_key = to_string(key)
         {string_key, get_session(conn, key)}
       end)
