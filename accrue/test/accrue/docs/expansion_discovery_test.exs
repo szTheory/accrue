@@ -18,14 +18,17 @@ defmodule Accrue.Docs.ExpansionDiscoveryTest do
     assert recommendation =~ "### Verification Runs"
     assert recommendation =~ "## Sign-Off"
 
-    assert recommendation =~ "Stripe Tax support"
-    assert recommendation =~ "Organization / multi-tenant billing"
-    assert recommendation =~ "Revenue recognition / exports"
-    assert recommendation =~ "Official second processor adapter"
+    ranked_section =
+      recommendation
+      |> String.split("## Ranked Recommendation")
+      |> Enum.at(1)
+      |> String.split("## Migration Path Notes")
+      |> List.first()
 
-    assert recommendation =~ "Next milestone"
-    assert recommendation =~ "Backlog"
-    assert recommendation =~ "Planted seed"
+    assert ranked_section =~ "| 1 | Stripe Tax support | Next milestone |"
+    assert ranked_section =~ "| 2 | Organization / multi-tenant billing | Backlog |"
+    assert ranked_section =~ "| 3 | Revenue recognition / exports | Backlog |"
+    assert ranked_section =~ "| 4 | Official second processor adapter | Planted seed |"
   end
 
   test "checked-in expansion recommendation preserves required decision language" do
