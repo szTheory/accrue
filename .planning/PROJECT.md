@@ -26,7 +26,7 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 - CI runs a Fake-backed host integration gate with Playwright browser coverage, retained failure artifacts, Hex-mode smoke validation, and warning/error annotation sweeps.
 - First-user DX is hardened through installer no-clobber reruns, conflict sidecars, shared setup diagnostics, host-first docs, troubleshooting anchors, and package-doc verification.
 
-Phase 16 of v1.2 is complete: the expansion recommendation ranks Stripe Tax support as the next milestone candidate, keeps organization billing and revenue/export work in backlog, preserves official second processor work as a planted seed, and locks the recommendation with an exact ranked candidate-to-outcome docs contract.
+Phase 17 of v1.2 is complete and verified: milestone cleanup closed the remaining audit tech debt, aligned canonical-demo bookkeeping, narrowed browser fixture cleanup to fixture-owned rows, and refreshed release/contributor trust-lane docs. The expansion recommendation still ranks Stripe Tax support as the next milestone candidate, keeps organization billing and revenue/export work in backlog, and preserves official second processor work as a planted seed.
 
 Milestone history and requirements are archived in `.planning/milestones/`.
 
@@ -233,12 +233,13 @@ v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
 | Make Fake-backed host browser flow mandatory and live Stripe advisory | Deterministic CI should block regressions while live Stripe remains useful but non-deterministic | ✓ Good |
 | Move host UI reads through generated `MyApp.Billing` facade | First-user docs should teach host-owned public boundaries, not private Accrue table queries | ✓ Good |
 | Treat adoption, quality, and expansion as next-milestone candidates after stabilization | The v1.1 audit validated HOST/CI/DX scope; remaining ADOPT/QUAL/DISC ideas need fresh prioritization instead of automatic carryover | ✓ Good |
-| v1.2 focuses on Adoption + Trust before large feature expansion | The biggest remaining gap is confidence for new users evaluating a billing library, not another core billing primitive; polish should stop once it hits diminishing returns and expansion should be decided deliberately | — Pending |
+| v1.2 focuses on Adoption + Trust before large feature expansion | The biggest remaining gap is confidence for new users evaluating a billing library, not another core billing primitive; polish should stop once it hits diminishing returns and expansion should be decided deliberately | ✓ Good |
 | Keep v1.2 expansion to discovery only | Tax, revenue exports, processors, and org billing are likely next-level features, but partial implementation would distract from onboarding and trust hardening | ✓ Good |
 | Record the Phase 16 ranking as recommendation-only planning guidance | `Stripe Tax support` is the recommended `Next milestone`; `Organization / multi-tenant billing` and `Revenue recognition / exports` remain `Backlog`; `Official second processor adapter` remains a `Planted seed`, and no v1.2 billing API, schema, or processor-abstraction implementation is implied | ✓ Good |
 
 ## Current Milestone Notes
 
+- Phase 17 verified that v1.2 has no remaining requirement, integration, flow, or cleanup gaps before milestone archival.
 - Phase 16 recorded a recommendation, not a feature delivery: `Stripe Tax support` is the recommended next implementation milestone because it deepens the current Stripe-first path without promising any v1.2 schema, API, or processor changes.
 - `Organization / multi-tenant billing` remains a recommendation-only backlog candidate until host-owned org semantics, row-scoped tenancy checks, and `cross-tenant billing leakage` protections are explicit.
 - `Revenue recognition / exports` remains a recommendation-only backlog candidate until host-authorized export audiences, storage, and delivery rules are explicit, preserving the `wrong-audience finance exports` boundary.
@@ -263,4 +264,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after Phase 16 completion*
+*Last updated: 2026-04-17 after Phase 17 completion*
