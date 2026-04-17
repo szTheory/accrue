@@ -109,11 +109,12 @@ Plans:
 
 **Requirements:** DISC-01, DISC-02, DISC-03, DISC-04, DISC-05
 
-**Plans:** 2/2 plans complete
+**Plans:** 2/3 plans complete
 
 Plans:
 - [x] 16-01-PLAN.md — Create the canonical expansion recommendation artifact and its docs contract.
 - [x] 16-02-PLAN.md — Verify the recommendation artifact and persist the ranking outcome in planning records.
+- [ ] 16-03-PLAN.md — Close the ranking-contract verification gap for DISC-05.
 
 **Success criteria:**
 1. Tax, revenue/export, additional processor, and org/multi-tenant options each have a decision-quality recommendation.
@@ -143,7 +144,7 @@ Plans:
 | 13. Canonical Demo + Tutorial | v1.2 | 3/3 | Complete   | 2026-04-17 |
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 15. Trust Hardening | v1.2 | 3/3 | Complete    | 2026-04-17 |
-| 16. Expansion Discovery | v1.2 | 2/2 | Gaps Found | — |
+| 16. Expansion Discovery | v1.2 | 2/3 | Gaps Found | — |
 
 ---
 

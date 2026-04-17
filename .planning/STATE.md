@@ -4,17 +4,17 @@ milestone: v1.2
 milestone_name: Adoption + Trust
 current_phase: 16
 current_phase_name: expansion-discovery
-current_plan: 2
-status: verifying
-stopped_at: Phase 16 verification found ranking-contract gap
+current_plan: 3
+status: ready_to_execute
+stopped_at: Gap-closure plan 16-03 ready to execute
 last_updated: "2026-04-17T15:12:00.000Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 11
+  total_plans: 12
   completed_plans: 11
-  percent: 91
+  percent: 92
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 ## Current Position
 
 Phase: 16 (expansion-discovery) — GAPS FOUND
-Plan: 2 of 2
+Plan: 3 of 3
 **Current Phase:** 16
 **Current Phase Name:** expansion-discovery
-**Current Plan:** 2
-**Status:** Verification gaps found — gap closure required
-**Stopped At:** Phase 16 verification found ranking-contract gap
+**Current Plan:** 3
+**Status:** Ready to execute gap-closure plan
+**Stopped At:** Gap-closure plan 16-03 ready to execute
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
@@ -48,7 +48,7 @@ Plan: 2 of 2
 | 13. Canonical Demo + Tutorial | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 14. Adoption Front Door | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 15. Trust Hardening | Complete | 3/3 plans complete; verified 2026-04-17 |
-| 16. Expansion Discovery | Gaps Found | 2/2 plans complete; verification found ranking-contract gap in `accrue/test/accrue/docs/expansion_discovery_test.exs` |
+| 16. Expansion Discovery | Gaps Found | 2/3 plans complete; gap-closure plan `16-03-PLAN.md` is ready to execute |
 
 ## Current Planning Artifacts
 
@@ -62,6 +62,7 @@ Plan: 2 of 2
 - `.planning/phases/15-trust-hardening/15-CONTEXT.md` — Phase 15 context and planning inputs.
 - `.planning/phases/16-expansion-discovery/16-01-SUMMARY.md` — canonical expansion recommendation and docs-contract execution summary.
 - `.planning/phases/16-expansion-discovery/16-02-SUMMARY.md` — verification report and durable planning-record execution summary.
+- `.planning/phases/16-expansion-discovery/16-03-PLAN.md` — gap-closure plan for the DISC-05 ranking contract.
 - `.planning/STATE-ARCHIVE.md` — archived pre-cleanup state history and legacy metrics.
 
 ## Recent Decisions
