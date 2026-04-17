@@ -4,24 +4,6 @@ verified: 2026-04-17T14:33:21Z
 status: passed
 score: 6/6 must-haves verified
 overrides_applied: 0
-re_verification:
-  previous_status: gaps_found
-  previous_score: 5/6 must-haves verified
-  gaps_closed:
-    - "Checked-in docs contract and validation evidence now verify the exact ranked candidate-to-outcome mapping."
-  gaps_remaining: []
-  regressions:
-    - "The prior verification marked the docs contract as fully protective, but `accrue/test/accrue/docs/expansion_discovery_test.exs` only checks candidate names and ranking keywords independently."
-gaps:
-  - truth: "Checked-in docs contract and validation evidence reliably verify the exact ranked candidate-to-outcome mapping."
-    status: passed
-    reason: "The ExUnit docs contract now scopes assertions to the `## Ranked Recommendation` section and binds all four ranked candidates to their exact outcome rows, so malformed, reordered, or mismatched ranked rows fail the automated proof for DISC-05."
-    artifacts:
-      - path: "accrue/test/accrue/docs/expansion_discovery_test.exs"
-        evidence: "The test extracts `ranked_section` and asserts the exact rows for Stripe Tax support, Organization / multi-tenant billing, Revenue recognition / exports, and Official second processor adapter."
-      - path: ".planning/phases/16-expansion-discovery/16-VALIDATION.md"
-        evidence: "DISC-05 points at the same ExUnit command and describes the stronger ranking contract as exact candidate-to-outcome verification."
-    missing: []
 ---
 
 # Phase 16: Expansion Discovery Verification Report
@@ -101,7 +83,7 @@ gaps:
 | `accrue/test/accrue/docs/expansion_discovery_test.exs` | 21 | Keyword-only assertion for ranked recommendation | ✓ CLOSED | Replaced with scoped `ranked_section` exact row assertions for every candidate-to-outcome mapping. |
 | `.planning/phases/16-expansion-discovery/16-VALIDATION.md` | 45 | DISC-05 relies on weak upstream proof | ✓ CLOSED | DISC-05 now references the stronger ranking contract and the same ExUnit command. |
 
-### Gaps Summary
+### Closure Summary
 
 Phase 16's recommendation artifact and the durable planning records achieve the discovery goal: the options are evaluated, ranked, and carried into roadmap, requirements, and project context without implying v1.2 implementation. The previously blocking docs-contract gap is now closed: the checked-in test verifies the exact ranked mapping that the phase relies on for durable proof.
 
