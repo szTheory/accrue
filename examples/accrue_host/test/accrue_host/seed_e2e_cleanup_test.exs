@@ -54,6 +54,12 @@ defmodule AccrueHost.SeedE2ECleanupTest do
     refute Repo.get(WebhookEvent, fixture_webhook_id)
 
     refute Repo.exists?(
+             from(job in Oban.Job,
+               where: fragment("?->>'webhook_event_id'", job.args) == ^fixture_webhook_id
+             )
+           )
+
+    refute Repo.exists?(
              from(event in Event,
                where:
                  event.caused_by_webhook_event_id == ^fixture_webhook_id or
@@ -63,6 +69,8 @@ defmodule AccrueHost.SeedE2ECleanupTest do
            )
 
     assert Repo.get!(WebhookEvent, unrelated.webhook.id).processor_event_id == "evt_unrelated_replay"
+
+    assert Repo.get!(Oban.Job, unrelated.job.id).args["webhook_event_id"] == unrelated.webhook.id
 
     assert Repo.get!(Event, unrelated.payment_failed.id).actor_id == "evt_unrelated_invoice"
     assert Repo.get!(Event, unrelated.payment_failed.id).subject_id == unrelated.subscription.id
@@ -181,9 +189,24 @@ defmodule AccrueHost.SeedE2ECleanupTest do
         caused_by_webhook_event_id: webhook.id
       })
 
+    job =
+      Repo.insert!(%Oban.Job{
+        state: "discarded",
+        queue: "accrue_webhooks",
+        worker: "Accrue.Webhook.DispatchWorker",
+        args: %{"webhook_event_id" => webhook.id},
+        errors: [%{"attempt" => 3, "error" => "unrelated processor timeout"}],
+        attempt: 3,
+        max_attempts: 25,
+        inserted_at: ~U[2026-04-15 10:01:00.000000Z],
+        attempted_at: ~U[2026-04-15 10:02:00.000000Z],
+        discarded_at: ~U[2026-04-15 10:03:00.000000Z]
+      })
+
     %{
       subscription: subscription,
       webhook: webhook,
+      job: job,
       payment_failed: payment_failed,
       replay_completed: replay_completed
     }

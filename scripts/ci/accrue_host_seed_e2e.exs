@@ -104,11 +104,14 @@ defmodule AccrueHostSeedE2E do
         )
       )
 
+    fixture_webhook_id_strings = Enum.map(fixture_webhook_ids, &to_string/1)
+
     Repo.delete_all(
       from(job in Oban.Job,
         where:
           job.worker == "Accrue.Webhook.DispatchWorker" and
-            job.queue == "accrue_webhooks"
+            job.queue == "accrue_webhooks" and
+            fragment("?->>'webhook_event_id'", job.args) in ^fixture_webhook_id_strings
       )
     )
 
