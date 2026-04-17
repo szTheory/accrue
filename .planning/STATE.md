@@ -4,17 +4,17 @@ milestone: v1.2
 milestone_name: Adoption + Trust
 current_phase: 17
 current_phase_name: milestone-closure-cleanup
-current_plan: Not started
-status: ready_to_execute
-stopped_at: Planned Phase 17
-last_updated: "2026-04-17T15:19:19.994Z"
+current_plan: 1
+status: verifying
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-04-17T15:28:38.597Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
-  percent: 92
+  completed_plans: 13
+  percent: 100
 ---
 
 # Project State
@@ -28,13 +28,13 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 17 (milestone-closure-cleanup) — PLANNED
-Plan: 0 of 1
+Phase: 17 (milestone-closure-cleanup) — READY FOR VERIFICATION
+Plan: 1 of 1
 **Current Phase:** 17
 **Current Phase Name:** milestone-closure-cleanup
-**Current Plan:** Not started
-**Status:** Ready to execute
-**Stopped At:** Planned Phase 17
+**Current Plan:** 1
+**Status:** Phase complete — ready for verification
+**Stopped At:** Completed 17-01-PLAN.md
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
@@ -49,7 +49,7 @@ Plan: 0 of 1
 | 14. Adoption Front Door | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 15. Trust Hardening | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 16. Expansion Discovery | Complete | 3/3 plans complete; ranking-contract gap closed 2026-04-17 |
-| 17. Milestone Closure Cleanup | Ready to execute | 0/1 plans complete; planned 2026-04-17 |
+| 17. Milestone Closure Cleanup | Complete | 1/1 plans complete; cleanup verified 2026-04-17 |
 
 ## Current Planning Artifacts
 
@@ -65,6 +65,7 @@ Plan: 0 of 1
 - `.planning/phases/16-expansion-discovery/16-02-SUMMARY.md` — verification report and durable planning-record execution summary.
 - `.planning/phases/16-expansion-discovery/16-03-SUMMARY.md` — DISC-05 ranking-contract gap closure summary.
 - `.planning/phases/17-milestone-closure-cleanup/17-01-PLAN.md` — planned v1.2 milestone closure cleanup.
+- `.planning/phases/17-milestone-closure-cleanup/17-01-SUMMARY.md` — milestone bookkeeping, host seed cleanup, and trust-lane docs cleanup execution summary.
 - `.planning/STATE-ARCHIVE.md` — archived pre-cleanup state history and legacy metrics.
 
 ## Recent Decisions
@@ -84,7 +85,10 @@ Plan: 0 of 1
 - Closed the Phase 16 ranking-contract gap: the docs contract now asserts exact candidate-to-outcome mappings.
 - Persist the Phase 16 ranking as recommendation-only planning guidance and avoid any v1.2 implementation implication.
 - Carry tax rollout correctness, cross-tenant, export-audience, and processor-boundary risks into durable planning records.
+- Browser seed cleanup now deletes only fixture-owned events keyed by actor_id, webhook ids, and subscription ids.
+- The host browser seed script exposes `AccrueHostSeedE2E.run!/1` so the regression test executes the real cleanup path.
+- Release and contributor docs now reference only `release-gate`, `host-integration`, `live-stripe`, and `examples/accrue_host`.
 
 ## Next Action
 
-Run milestone verification or complete the v1.2 milestone.
+Complete the v1.2 milestone.

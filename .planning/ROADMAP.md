@@ -40,7 +40,7 @@
 - [x] Phase 14: Adoption Front Door — align repository/package docs, issue templates, release guidance, and public support positioning. (completed 2026-04-17)
 - [x] Phase 15: Trust Hardening — add security, performance, compatibility, accessibility/responsive, secret/PII, and release-gate confidence checks. (completed 2026-04-17)
 - [x] Phase 16: Expansion Discovery — evaluate and rank tax, revenue/export, additional processor, and org/multi-tenant billing options for the next implementation milestone. (completed 2026-04-17)
-- [ ] Phase 17: Milestone Closure Cleanup — close v1.2 audit tech debt before archival without adding product scope.
+- [x] Phase 17: Milestone Closure Cleanup — close v1.2 audit tech debt before archival without adding product scope. (completed 2026-04-17)
 
 </details>
 
@@ -133,10 +133,10 @@ Plans:
 
 **Gap Closure:** Closes tech debt from `.planning/v1.2-MILESTONE-AUDIT.md`.
 
-**Plans:** 0/1 plans complete
+**Plans:** 1/1 plans complete
 
 Planned work:
-- [ ] 17-01-PLAN.md — Align milestone bookkeeping, narrow browser fixture cleanup, and fix stale release/contributor docs references.
+- [x] 17-01-PLAN.md — Align milestone bookkeeping, narrow browser fixture cleanup, and fix stale release/contributor docs references.
 
 **Success criteria:**
 1. ROADMAP and PROJECT bookkeeping agree that Phase 13 and the canonical demo outcome are complete.
@@ -165,7 +165,7 @@ Planned work:
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 15. Trust Hardening | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 16. Expansion Discovery | v1.2 | 3/3 | Complete    | 2026-04-17 |
-| 17. Milestone Closure Cleanup | v1.2 | 0/1 | Planned | — |
+| 17. Milestone Closure Cleanup | v1.2 | 1/1 | Complete   | 2026-04-17 |
 
 ---
 
