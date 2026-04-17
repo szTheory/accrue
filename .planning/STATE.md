@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Adoption + Trust
+milestone: v1.0
+milestone_name: milestone
 status: planning
-stopped_at: Phase 14 complete; next phase is 15 trust-hardening
-last_updated: "2026-04-17T08:20:41.397Z"
+stopped_at: Phase 15 context gathered
+last_updated: "2026-04-17T08:29:34.448Z"
 last_activity: 2026-04-17 -- Phase 14 completed and verified
 progress:
   total_phases: 4
@@ -414,6 +414,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T08:13:04.374Z
-Stopped at: Completed 14-03-PLAN.md
-Resume file: None
+Last session: 2026-04-17T08:29:34.443Z
+Stopped at: Phase 15 context gathered
+Resume file: .planning/phases/15-trust-hardening/15-CONTEXT.md
