@@ -226,12 +226,14 @@ refute releasing =~ "Stripe test mode is required for every release"
 
 All material claims in this research were verified in this session against the local codebase or local environment. [VERIFIED: codebase grep][VERIFIED: local command]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Which exact event linkage should the narrowed seed cleanup use for `accrue_events` deletes?**
-   - What we know: broad type-based deletion is unsafe, and the fixture creates a known webhook row plus a known replay-visible event path. [VERIFIED: codebase grep][CITED: scripts/ci/accrue_host_seed_e2e.exs]
-   - What's unclear: whether the cleanest query should key off `caused_by_webhook_event_id`, `actor_id`, explicit subject IDs, or a combination. [VERIFIED: codebase grep]
-   - Recommendation: decide this in planning after reading the `Accrue.Events.Event` schema fields touched by the fixture and pick the narrowest predicate that still survives reruns. [VERIFIED: codebase grep]
+1. **Resolved event-linkage for the narrowed `accrue_events` cleanup delete**
+   - The delete must establish fixture ownership first, then optionally apply any secondary type narrowing. Do not rely on event type alone. [RESOLVED: checker decision]
+   - Use the combination of predicates `event.actor_id in ["evt_host_browser_replay", "evt_host_browser_first_run"]`, `event.caused_by_webhook_event_id in ^fixture_webhook_ids`, and `event.subject_type == "Subscription" and event.subject_id in ^fixture_subscription_ids` as the source-of-truth ownership boundary for `accrue_events`. [RESOLVED: checker decision][CITED: accrue/lib/accrue/events/event.ex]
+   - `processor_event_id` is the source of truth for selecting fixture webhook rows: `evt_host_browser_replay` and `evt_host_browser_first_run`. [RESOLVED: checker decision][CITED: scripts/ci/accrue_host_seed_e2e.exs]
+   - `subscription.processor_id == "sub_host_browser_replay"` together with customer ownership derived from the seeded emails is the source of truth for fixture subscription IDs. [RESOLVED: checker decision][CITED: scripts/ci/accrue_host_seed_e2e.exs]
+   - A type filter may remain only as a secondary narrowing condition after fixture ownership is established. [RESOLVED: checker decision]
 
 ## Environment Availability
 
