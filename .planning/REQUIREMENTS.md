@@ -36,11 +36,11 @@ Requirements for v1.2 focus on adoption, trust, and decision-quality expansion p
 
 ### Expansion Discovery
 
-- [ ] **DISC-01**: Tax support options are evaluated and captured as a future milestone recommendation.
-- [ ] **DISC-02**: Revenue recognition and export options are evaluated and captured as a future milestone recommendation.
-- [ ] **DISC-03**: Additional processor adapter candidates are evaluated without weakening the existing Stripe-first abstraction.
-- [ ] **DISC-04**: Organization and multi-tenant billing flows are evaluated against Sigra and host-owned schema constraints.
-- [ ] **DISC-05**: Expansion candidates are ranked into a recommended next implementation milestone, backlog, or planted seed.
+- [x] **DISC-01**: Tax support options are evaluated and captured as a future milestone recommendation.
+- [x] **DISC-02**: Revenue recognition and export options are evaluated and captured as a future milestone recommendation.
+- [x] **DISC-03**: Additional processor adapter candidates are evaluated without weakening the existing Stripe-first abstraction.
+- [x] **DISC-04**: Organization and multi-tenant billing flows are evaluated against Sigra and host-owned schema constraints.
+- [x] **DISC-05**: Expansion candidates are ranked into a recommended next implementation milestone, backlog, or planted seed.
 
 ## Future Requirements
 
@@ -89,11 +89,11 @@ Which phases cover which requirements. Updated during phase execution.
 | TRUST-04 | Phase 15 | Complete |
 | TRUST-05 | Phase 15 | Complete |
 | TRUST-06 | Phase 15 | Complete |
-| DISC-01 | Phase 16 | Pending |
-| DISC-02 | Phase 16 | Pending |
-| DISC-03 | Phase 16 | Pending |
-| DISC-04 | Phase 16 | Pending |
-| DISC-05 | Phase 16 | Pending |
+| DISC-01 | Phase 16 | Complete |
+| DISC-02 | Phase 16 | Complete |
+| DISC-03 | Phase 16 | Complete |
+| DISC-04 | Phase 16 | Complete |
+| DISC-05 | Phase 16 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 23 total
