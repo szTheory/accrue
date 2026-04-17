@@ -147,6 +147,26 @@ defmodule Accrue.Processor.StripeTest do
     end
   end
 
+  describe "automatic tax passthrough" do
+    test "preserves normalized automatic_tax maps for subscription requests" do
+      assert %{"automatic_tax" => %{"enabled" => true}} =
+               outgoing_request_shape(%{automatic_tax: %{"enabled" => true}})
+
+      assert %{"automatic_tax" => %{enabled: true}} =
+               outgoing_request_shape(%{"automatic_tax" => %{enabled: true}})
+    end
+
+    test "routes subscription and checkout creation through stringify_keys(params)" do
+      source = File.read!("lib/accrue/processor/stripe.ex")
+
+      assert source =~
+               "|> LatticeStripe.Subscription.create(stringify_keys(params), stripe_opts)"
+
+      assert source =~
+               "|> LatticeStripe.Checkout.Session.create(stringify_keys(params), stripe_opts)"
+    end
+  end
+
   describe "resolve_stripe_account/1 (D5-01 three-level precedence)" do
     setup do
       prior_pdict = Process.get(:accrue_connected_account_id)
@@ -238,5 +258,12 @@ defmodule Accrue.Processor.StripeTest do
              "LatticeStripe may only be referenced inside Accrue.Processor.Stripe. " <>
                "Found in: #{inspect(files)}"
     end
+  end
+
+  defp outgoing_request_shape(params) do
+    Map.new(params, fn
+      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
+      {k, v} -> {k, v}
+    end)
   end
 end
