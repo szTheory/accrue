@@ -74,6 +74,43 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 - `mix accrue.install` is production setup inside your own Phoenix app, not the
   shortcut for this demo app.
 
+## VERIFY-01 (Phase 21)
+
+Canonical local gate for org-scoped host billing proofs and Playwright VERIFY-01
+specs. Paths are **Fake-backed** by default; no live Stripe keys are required.
+Treat live Stripe as optional and advisory only — do not put `sk_live` in `.env`
+for this checklist.
+
+On every pull request, the GitHub Actions job `host-integration` runs the same
+contract as `cd examples/accrue_host && mix verify.full` (see
+`.github/workflows/ci.yml`).
+
+Run each step from the repository root using `cd examples/accrue_host` first:
+
+1. Create a temp fixture file and seed the test database (required for browser
+   specs that read `ACCRUE_HOST_E2E_FIXTURE`):
+
+   ```bash
+   cd examples/accrue_host
+   fixture_file="$(mktemp)"
+   ACCRUE_HOST_E2E_FIXTURE="$fixture_file" MIX_ENV=test mix run ../../scripts/ci/accrue_host_seed_e2e.exs
+   ```
+
+2. Host integration tests (warnings as errors):
+
+   ```bash
+   cd examples/accrue_host
+   MIX_ENV=test mix test --warnings-as-errors
+   ```
+
+3. Playwright (after `npm ci` in `examples/accrue_host` if dependencies are not
+   installed yet):
+
+   ```bash
+   cd examples/accrue_host
+   npx playwright test
+   ```
+
 For maintainers who want the repo-root wrapper after the tutorial story:
 
 ```bash

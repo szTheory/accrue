@@ -348,6 +348,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: VERIFY-01 README contract (shift-left)
+        run: bash scripts/ci/verify_verify01_readme_contract.sh
+
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:

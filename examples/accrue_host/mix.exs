@@ -264,6 +264,8 @@ defmodule AccrueHost.MixProject do
       MIX_ENV=test mix ecto.migrate --quiet
       ACCRUE_HOST_E2E_FIXTURE="$fixture_file" MIX_ENV=test mix run "$repo_root/scripts/ci/accrue_host_seed_e2e.exs"
 
+      bash "$repo_root/scripts/ci/verify_e2e_fixture_jq.sh" "$fixture_file"
+
       npm ci
       npm run e2e:install
 
