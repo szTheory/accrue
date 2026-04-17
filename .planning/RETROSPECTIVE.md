@@ -99,12 +99,61 @@
 
 ---
 
+## Milestone: v1.2 — Adoption + Trust
+
+**Shipped:** 2026-04-17  
+**Phases:** 5 | **Plans:** 13 | **Tasks:** 26
+
+### What Was Built
+
+- Canonical local demo and tutorial path around `examples/accrue_host`, with manifest-backed command parity and host-local `mix verify` / `mix verify.full`.
+- Host-first adoption front door: root README, package docs, issue templates, release guidance, and provider-parity documentation.
+- Trust hardening bundle: checked-in trust review, leakage contracts, seeded webhook/admin smoke checks, desktop/mobile Playwright trust flow, and CI support matrix/trust wiring.
+- Expansion discovery record that ranks Stripe Tax as the next milestone candidate, keeps org billing and revenue/export in backlog, and preserves a second processor as a planted seed.
+- Milestone closure cleanup that aligned planning records, narrowed host browser fixture cleanup to fixture-owned rows, refreshed stale trust-lane docs, and added phase security verification.
+
+### What Worked
+
+- Treating the host app as the canonical demo kept docs, UAT, CI, and release guidance anchored to one executable path.
+- Docs contracts plus `verify_package_docs.sh` caught stale release wording and made trust-lane semantics enforceable.
+- The milestone audit was useful even when it found only tech debt; it produced a small Phase 17 cleanup instead of letting bookkeeping drift enter the archive.
+- Code review and security verification caught the remaining broad Oban job cleanup risk before the milestone closed.
+
+### What Was Inefficient
+
+- The first milestone audit returned `tech_debt` instead of `passed`, so milestone close needed an extra cleanup phase and re-verification cycle.
+- Some GSD closeout tooling is conservative about literal gap strings; the verification report needed wording normalization after the gap was closed.
+- `audit-open` produced no human-readable report in this runtime, so closeout relied on current-milestone UAT/security/verification checks plus direct artifact inspection.
+
+### Patterns Established
+
+- Use docs contracts for release-lane language, not just prose review.
+- Keep provider-backed Stripe checks advisory while Fake-backed host proof remains the deterministic release blocker.
+- Scope destructive demo seed cleanup by fixture identity across events, webhooks, subscriptions, and Oban jobs.
+- Preserve expansion decisions as recommendation-only planning artifacts until a new milestone turns one into active requirements.
+
+### Key Lessons
+
+1. Milestone audits should be run early enough that non-critical tech debt can become a planned cleanup phase before archival.
+2. Security gates are valuable even for docs/demo cleanup phases because destructive fixture cleanup crosses a real trust boundary.
+3. Recommendation-only discovery needs exact docs contracts so future planning does not accidentally imply implementation scope.
+4. The canonical demo should remain the first integration proof for new release-gate changes.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: one concentrated v1.2 closeout sequence across execution, code review, verification, security, and milestone archival.
+- Notable: the highest-signal checks were host UAT, docs verifier, code review, phase security audit, and milestone audit.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.2 | concentrated closeout | 5 | Adoption and trust work became executable through the canonical host demo, docs contracts, and security/audit closeout gates. |
 | v1.1 | multiple | 4 | Real host-app dogfood became the canonical user-facing integration and CI release gate. |
 | v1.0 | multiple | 9 | Full greenfield build through public Hex release; planning archive introduced at close. |
 
@@ -112,6 +161,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.2 | Host UAT, Playwright trust flow, docs verifier, release guidance tests, trust/security review artifacts | 23/23 audited requirements plus Phase 17 cleanup verification | Canonical demo/tutorial contracts, issue templates, trust review, expansion recommendation, security verification. |
 | v1.1 | Host ExUnit, Playwright, shell UAT, docs verifier, Hex smoke | 21/21 audited scoped requirements | Host app, Playwright gate, setup diagnostics, conflict sidecars, package-doc verifier. |
 | v1.0 | CI matrix plus package-local suites | Not tracked | Fake processor, test adapters, installer snippets, and docs-first release checks. |
 
@@ -120,3 +170,4 @@
 1. Warnings-as-errors should remain a release blocker.
 2. Planning state needs to be updated at release boundaries, not just phase boundaries.
 3. User-facing host-app proof catches integration gaps that package-local tests miss.
+4. Docs and security contracts are worth writing for release-process wording, not only runtime code.
