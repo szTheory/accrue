@@ -6,8 +6,8 @@ current_phase: 20
 current_phase_name: Organization Billing With Sigra
 current_plan: TBD
 status: ready_to_plan
-stopped_at: Phase 19 verified and complete; ready to plan Phase 20
-last_updated: "2026-04-17T18:49:29Z"
+stopped_at: Phase 20 UI-SPEC approved; ready to plan Phase 20
+last_updated: "2026-04-17T19:18:04Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
@@ -34,8 +34,8 @@ Plan: TBD
 **Current Phase Name:** Organization Billing With Sigra
 **Current Plan:** TBD
 **Status:** Ready to Plan
-**Stopped At:** Phase 19 verified and complete; ready to plan Phase 20
-**Resume File:** None
+**Stopped At:** Phase 20 UI-SPEC approved; ready to plan Phase 20
+**Resume File:** `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
