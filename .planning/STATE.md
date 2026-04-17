@@ -24,17 +24,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 17 — milestone-closure-cleanup
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 17 (milestone-closure-cleanup) — COMPLETE
-Plan: 1 of 1
+Phase: None — between milestones
+Plan: Not started
 **Current Phase:** 17
 **Current Phase Name:** milestone-closure-cleanup
 **Current Plan:** Not started
-**Status:** v1.2 milestone complete
-**Stopped At:** Completed 17-01-PLAN.md
+**Status:** Ready for next milestone
+**Stopped At:** Completed v1.2 milestone archival
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
@@ -53,8 +53,10 @@ Plan: 1 of 1
 
 ## Current Planning Artifacts
 
-- `.planning/ROADMAP.md` — active v1.2 roadmap.
-- `.planning/REQUIREMENTS.md` — active v1.2 requirements.
+- `.planning/ROADMAP.md` — milestone summary roadmap; v1.2 details archived.
+- `.planning/milestones/v1.2-ROADMAP.md` — archived v1.2 roadmap details.
+- `.planning/milestones/v1.2-REQUIREMENTS.md` — archived v1.2 requirements.
+- `.planning/milestones/v1.2-MILESTONE-AUDIT.md` — archived v1.2 milestone audit.
 - `.planning/phases/13-canonical-demo-tutorial/` — completed v1.2 phase artifacts.
 - `.planning/phases/14-adoption-front-door/` — completed v1.2 phase artifacts.
 - `.planning/phases/15-trust-hardening/15-01-SUMMARY.md` — trust review and leakage-contract execution summary.
@@ -91,4 +93,4 @@ Plan: 1 of 1
 
 ## Next Action
 
-Complete the v1.2 milestone.
+Start the next milestone.
