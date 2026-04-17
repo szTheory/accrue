@@ -1,5 +1,27 @@
 # Milestones
 
+## v1.2 Adoption + Trust (Shipped: 2026-04-17)
+
+**Phases completed:** 5 phases, 13 plans, 26 tasks
+
+**Key accomplishments:**
+
+- Manifest-backed demo modes with host-local `mix verify` and `mix verify.full`, plus a repo-root wrapper that now delegates to the same full gate
+- Manifest-backed tutorial parity tests plus a narrow shell verifier for command labels, links, anchors, and package versions
+- A Fake-first host tutorial, mirrored First Hour guide, and compact package README that now teach one coherent subscription, webhook, admin-inspection, and proof flow
+- Root repository front door with a proof-backed package map, stable public setup boundaries, and downstream admin positioning
+- Structured GitHub issue intake with no-secrets warnings, private security routing, and public-boundary support taxonomy
+- Release guidance that locks Fake as the required deterministic lane while Stripe test mode and live Stripe stay separate provider-parity and advisory checks
+- Checked-in trust review plus executable leakage and release-language contracts for trust evidence, secret-safe docs, and failure-only retained artifacts
+- Seeded webhook latency smoke in `mix verify` plus desktop/mobile admin trust coverage with blocking Axe and responsiveness checks
+- CI now encodes the support floor, primary target, advisory cells, and Phase 15 host trust artifact policy inside the existing workflow
+- Ranked Phase 16 expansion decisions with a checked-in recommendation artifact, ExUnit docs contract, and artifact-first validation map
+- Phase 16 verification evidence plus durable roadmap, requirements, and project guidance for the ranked Stripe Tax, org billing, revenue/export, and second-processor recommendations
+- Exact ranked candidate-to-outcome docs contract for the Phase 16 expansion recommendation
+- Canonical-demo bookkeeping is closed, host browser seed cleanup is fixture-scoped, and release/contributor docs now track the current trust lanes only
+
+---
+
 ## v1.1 Stabilization + Adoption (Shipped: 2026-04-17)
 
 **Delivered:** Real host-app proof, CI integration gate, hermetic host-flow tests, and first-user DX/docs stabilization for the published Accrue packages.

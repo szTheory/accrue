@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
 - ✅ **v1.1 Stabilization + Adoption** — Phases 10-12 plus 11.1 shipped on 2026-04-17. Proved Accrue in a realistic Phoenix host app, promoted that proof into CI, closed host-flow hermeticity gaps, and hardened first-user DX/docs. Full archive: [`milestones/v1.1-ROADMAP.md`](milestones/v1.1-ROADMAP.md).
-- 🚧 **v1.2 Adoption + Trust** — Active. Make Accrue ready for new Phoenix teams to evaluate and trust through a canonical local demo, host-first onboarding docs, mature OSS adoption assets, a trust hardening bundle, and expansion discovery only.
+- ✅ **v1.2 Adoption + Trust** — Phases 13-17 shipped on 2026-04-17. Polished the canonical local demo/tutorial, adoption front door, trust evidence, expansion recommendation, and final milestone cleanup. Full archive: [`milestones/v1.2-ROADMAP.md`](milestones/v1.2-ROADMAP.md).
 
 ## Phases
 
@@ -33,116 +33,16 @@
 
 </details>
 
-<details open>
-<summary>📋 v1.2 Adoption + Trust (Phases 13-17) — PLANNED</summary>
+<details>
+<summary>✅ v1.2 Adoption + Trust (Phases 13-17) — SHIPPED 2026-04-17</summary>
 
-- [x] Phase 13: Canonical Demo + Tutorial — make `examples/accrue_host` the polished local demo and tutorial proof path. (completed 2026-04-17)
-- [x] Phase 14: Adoption Front Door — align repository/package docs, issue templates, release guidance, and public support positioning. (completed 2026-04-17)
-- [x] Phase 15: Trust Hardening — add security, performance, compatibility, accessibility/responsive, secret/PII, and release-gate confidence checks. (completed 2026-04-17)
-- [x] Phase 16: Expansion Discovery — evaluate and rank tax, revenue/export, additional processor, and org/multi-tenant billing options for the next implementation milestone. (completed 2026-04-17)
-- [x] Phase 17: Milestone Closure Cleanup — close v1.2 audit tech debt before archival without adding product scope. (completed 2026-04-17)
+- [x] Phase 13: Canonical Demo + Tutorial (3/3 plans) — completed 2026-04-17
+- [x] Phase 14: Adoption Front Door (3/3 plans) — completed 2026-04-17
+- [x] Phase 15: Trust Hardening (3/3 plans) — completed 2026-04-17
+- [x] Phase 16: Expansion Discovery (3/3 plans) — completed 2026-04-17
+- [x] Phase 17: Milestone Closure Cleanup (1/1 plan) — completed 2026-04-17
 
 </details>
-
-## Phase Details
-
-### Phase 13: Canonical Demo + Tutorial
-
-**Goal:** Make `examples/accrue_host` the canonical local evaluation path for Accrue and document it as a tutorial from clone through first subscription and admin inspection.
-
-**Requirements:** DEMO-01, DEMO-02, DEMO-03, DEMO-04, DEMO-05, DEMO-06, ADOPT-02
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 13-01-PLAN.md - Establish the host-local command manifest and `mix verify` / `mix verify.full` contract.
-- [x] 13-02-PLAN.md - Add manifest-backed docs parity tests and narrow shell drift checks.
-- [x] 13-03-PLAN.md - Rewrite the host README and First Hour guide around `First run` and `Seeded history`.
-
-**Success criteria:**
-1. A new user can run the local host demo from documented prerequisites and commands without live Stripe credentials.
-2. The demo proves a Fake-backed subscription, signed webhook ingest, admin inspection/replay, and focused host tests.
-3. A single CI-equivalent local command verifies the canonical demo path.
-4. Tutorial commands and demo README commands are checked for drift before release.
-
-### Phase 14: Adoption Front Door
-
-**Goal:** Make the public repository, package docs, and support surfaces explain what Accrue is, where to start, what is stable, and how to ask for help.
-
-**Requirements:** ADOPT-01, ADOPT-02, ADOPT-03, ADOPT-04, ADOPT-05, ADOPT-06
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 14-01-PLAN.md — Create the repository front door and align package landing pages with docs contracts.
-- [x] 14-02-PLAN.md — Add structured issue forms with no-secrets support intake coverage.
-- [x] 14-03-PLAN.md — Clarify release/provider-parity guidance and extend the docs drift verifier.
-
-**Success criteria:**
-1. The repository root has a clear front door for Accrue, `accrue_admin`, the local demo, docs, and production hardening.
-2. Package docs and README paths align around the host-first tutorial and public integration boundaries.
-3. Issue templates cover bug reports, integration problems, documentation gaps, and feature requests.
-4. Release guidance clearly explains Fake, Stripe test mode, live Stripe, and required vs advisory checks.
-
-### Phase 15: Trust Hardening
-
-**Goal:** Add the quality evidence a billing-library adopter expects before trusting Accrue in a real Phoenix app.
-
-**Requirements:** TRUST-01, TRUST-02, TRUST-03, TRUST-04, TRUST-05, TRUST-06
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 15-01-PLAN.md — Create the checked-in trust review, leakage checks, and trust-gate release wording.
-- [x] 15-02-PLAN.md — Add seeded performance smoke checks and desktop/mobile browser trust coverage to the canonical host flow.
-- [x] 15-03-PLAN.md — Extend the existing CI matrix and host integration lane for compatibility and trust-gate wiring.
-
-**Success criteria:**
-1. Security review artifacts cover webhook, auth, admin, replay, and generated-host boundaries.
-2. Seeded smoke checks cover webhook ingest latency and admin page responsiveness.
-3. Compatibility checks cover supported Elixir, OTP, Phoenix, and LiveView combinations.
-4. Browser checks cover accessibility and responsive behavior for the demo/admin flows.
-5. Public errors, logs, docs, and retained artifacts are reviewed for secrets and PII leakage.
-
-### Phase 16: Expansion Discovery
-
-**Goal:** Decide which mature-library expansion should come next without weakening the current Stripe-first, host-owned architecture.
-
-**Requirements:** DISC-01, DISC-02, DISC-03, DISC-04, DISC-05
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 16-01-PLAN.md — Create the canonical expansion recommendation artifact and its docs contract.
-- [x] 16-02-PLAN.md — Verify the recommendation artifact and persist the ranking outcome in planning records.
-- [x] 16-03-PLAN.md — Close the ranking-contract verification gap for DISC-05.
-
-**Success criteria:**
-1. Tax, revenue/export, additional processor, and org/multi-tenant options each have a decision-quality recommendation.
-2. Recommendations identify likely user value, architecture impact, risk, and prerequisites.
-3. Expansion candidates are ranked into next milestone, backlog, or planted seed.
-4. No core billing API, schema, or processor abstraction changes are made unless needed to document a future migration path.
-
-**Recommendation outcome:** The checked-in Phase 16 recommendation ranks `Stripe Tax support` as the recommendation for the `Next milestone`, keeps `Organization / multi-tenant billing` and `Revenue recognition / exports` in `Backlog`, and preserves `Official second processor adapter` as a `Planted seed`. These entries are planning outputs and ranked recommendation guidance only; no implementation, schema, API, or processor-abstraction change is implied for v1.2.
-
-### Phase 17: Milestone Closure Cleanup
-
-**Goal:** Close the non-critical tech-debt items recorded by the v1.2 milestone audit so the milestone can be archived without stale planning or trust-lane cleanup risks.
-
-**Requirements:** None — audit tech debt cleanup only; all v1.2 product/adoption/trust/discovery requirements remain satisfied.
-
-**Gap Closure:** Closes tech debt from `.planning/v1.2-MILESTONE-AUDIT.md`.
-
-**Plans:** 1/1 plans complete
-
-Planned work:
-- [x] 17-01-PLAN.md — Align milestone bookkeeping, narrow browser fixture cleanup, and fix stale release/contributor docs references.
-
-**Success criteria:**
-1. ROADMAP and PROJECT bookkeeping agree that Phase 13 and the canonical demo outcome are complete.
-2. Browser E2E fixture cleanup only removes fixture-owned webhook/payment-failed rows and preserves unrelated shared test DB history.
-3. Release/provider-parity/contributor docs no longer reference stale Phase 9 gates, non-existent primary CI jobs, or the wrong browser trust lane path.
-4. Focused docs and host trust checks prove the cleanup does not regress v1.2 audit coverage.
 
 ## Progress
 

@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-Accrue v1.1 Stabilization + Adoption is shipped. The public Hex packages remain:
+Accrue v1.2 Adoption + Trust is shipped. The public Hex packages remain:
 
 - `accrue` 0.1.2
 - `accrue_admin` 0.1.2
@@ -26,20 +26,29 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 - CI runs a Fake-backed host integration gate with Playwright browser coverage, retained failure artifacts, Hex-mode smoke validation, and warning/error annotation sweeps.
 - First-user DX is hardened through installer no-clobber reruns, conflict sidecars, shared setup diagnostics, host-first docs, troubleshooting anchors, and package-doc verification.
 
-Phase 17 of v1.2 is complete and verified: milestone cleanup closed the remaining audit tech debt, aligned canonical-demo bookkeeping, narrowed browser fixture cleanup to fixture-owned rows, and refreshed release/contributor trust-lane docs. The expansion recommendation still ranks Stripe Tax support as the next milestone candidate, keeps organization billing and revenue/export work in backlog, and preserves official second processor work as a planted seed.
+The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust: `examples/accrue_host` is the canonical local demo/tutorial path, the repository and package docs are host-first, mature OSS support assets are in place, trust evidence is checked in and executable, and expansion discovery recommends Stripe Tax support as the next implementation milestone candidate.
 
 Milestone history and requirements are archived in `.planning/milestones/`.
 
-## Current Milestone: v1.2 Adoption + Trust
+## Last Shipped Milestone: v1.2 Adoption + Trust
 
 **Goal:** Make Accrue feel ready for a new Phoenix team to evaluate, integrate, and trust by polishing the canonical demo/onboarding path, adding mature-library quality signals, and deciding the next expansion bet without partially implementing it.
 
-**Target features:**
+**Delivered:**
 - Canonical local demo path built around `examples/accrue_host`, with documented setup, seeded Fake-backed billing/admin flow, and CI-equivalent verification.
 - Host-first tutorial and public docs front door that connect install, first subscription, signed webhook ingest, admin inspection/replay, troubleshooting, production hardening, and package support policy.
 - Mature OSS adoption assets: repository README, issue templates, release guidance, and clear Fake vs Stripe test vs live Stripe positioning.
 - Trust hardening bundle covering webhook/auth/admin security, seeded performance smoke checks, compatibility, accessibility/responsive browser checks, secret/PII log review, and required-vs-advisory release-gate boundaries.
 - Expansion discovery for tax, revenue/export, additional processors, and organization/multi-tenant billing captured as ranked future recommendations only.
+
+## Next Milestone Goals
+
+No active milestone is defined yet. `$gsd-new-milestone` should start from the v1.2 expansion recommendation:
+
+- Recommended next implementation candidate: `Stripe Tax support`.
+- Backlog candidates: `Organization / multi-tenant billing` and `Revenue recognition / exports`.
+- Planted seed: `Official second processor adapter`.
+- Any tax milestone must preserve `tax rollout correctness` with explicit customer-location capture and legacy recurring-item migration planning before implementation.
 
 ## Requirements
 
@@ -54,15 +63,17 @@ v1.1 Stabilization + Adoption shipped and validated on 2026-04-17. Detailed requ
 - ✓ Focused host-flow proofs are hermetic when run directly after the canonical host UAT wrapper — v1.1
 - ✓ Installer, docs, diagnostics, package metadata, and dependency-mode checks are hardened from the host-app experience — v1.1
 
+v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement outcomes are archived in `.planning/milestones/v1.2-REQUIREMENTS.md`.
+
+- ✓ Phoenix developers can clone the repository, run the canonical local demo, create a Fake-backed subscription, inspect/replay billing state in admin, and run the focused proof suite without hidden state — v1.2
+- ✓ New users can follow a host-first tutorial and docs front door that explains integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices — v1.2
+- ✓ Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice — v1.2
+- ✓ Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release — v1.2
+- ✓ Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API — v1.2
+
 ### Active
 
-v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
-
-- [x] Phoenix developers can clone the repository, run the canonical local demo, create a Fake-backed subscription, inspect/replay billing state in admin, and run the focused proof suite without hidden state.
-- [x] New users can follow a host-first tutorial and docs front door that explains the correct integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices. Validated in Phase 14: Adoption Front Door.
-- [x] Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice. Validated in Phase 14: Adoption Front Door.
-- [x] Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release. Validated in Phase 15: Trust Hardening.
-- [x] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API. Validated in Phase 16: Expansion Discovery.
+No active requirements are defined. The next active requirement set should be created by `$gsd-new-milestone`.
 
 ### Validated v1.0 Scope Summary
 
@@ -264,4 +275,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after Phase 17 completion*
+*Last updated: 2026-04-17 after v1.2 milestone*
