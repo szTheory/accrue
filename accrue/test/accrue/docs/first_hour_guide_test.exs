@@ -84,7 +84,9 @@ defmodule Accrue.Docs.FirstHourGuideTest do
     end)
   end
 
-  defp index_of(binary, pattern, offset \\ 0) when offset <= byte_size(binary) do
+  defp index_of(binary, pattern, offset \\ 0)
+
+  defp index_of(binary, pattern, offset) when offset <= byte_size(binary) do
     length = byte_size(binary) - offset
 
     case :binary.match(binary, pattern, [{:scope, {offset, length}}]) do
