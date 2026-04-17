@@ -26,11 +26,10 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
       |> Ecto.Changeset.change(billing_admin: true)
       |> Repo.update!()
 
-    customer_user =
-      AccrueHost.AccountsFixtures.user_fixture(%{email: "billing-history@example.com"})
+    organization = AccrueHost.AccountsFixtures.organization_fixture(%{owner: admin_user})
 
     assert {:ok, %Subscription{} = subscription} =
-             Billing.subscribe(customer_user, "price_basic", trial_end: {:days, 14})
+             Billing.subscribe(organization, "price_basic", trial_end: {:days, 14})
 
     {:ok, _fake_subscription} =
       Fake.transition(subscription.processor_id, :active, synthesize_webhooks: false)
@@ -38,7 +37,8 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     customer =
       Repo.one!(
         from(customer in Customer,
-          where: customer.owner_type == "User" and customer.owner_id == ^customer_user.id
+          where:
+            customer.owner_type == "Organization" and customer.owner_id == ^organization.id
         )
       )
 
@@ -89,19 +89,18 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     insert_attempt_job(webhook.id)
 
-    organization = AccrueHost.AccountsFixtures.organization_fixture(%{owner: admin_user})
-
     conn =
       conn
       |> log_in_user(admin_user, active_organization_id: organization.id)
       |> Plug.Conn.put_session(:active_organization_slug, organization.slug)
       |> Plug.Conn.put_session(:admin_organization_ids, [organization.id])
+      |> fetch_flash()
 
     assert {:ok, _subscription_view, subscription_html} =
              live(conn, "/billing/subscriptions/#{subscription.id}?org=#{organization.slug}")
 
     assert subscription_html =~ subscription.id
-    assert subscription_html =~ customer_user.email
+    assert subscription_html =~ organization.name
     assert subscription_html =~ "price_basic"
     assert subscription_html =~ "active"
 
@@ -203,12 +202,14 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
       |> log_in_user(admin_user, active_organization_id: allowed_org.id)
       |> Plug.Conn.put_session(:active_organization_slug, allowed_org.slug)
       |> Plug.Conn.put_session(:admin_organization_ids, [allowed_org.id])
+      |> fetch_flash()
 
-    assert {:error, {:redirect, %{to: "/billing/webhooks?org=" <> _slug, flash: flash_token}}} =
+    assert {:error,
+            {:redirect,
+             %{to: "/billing/webhooks?org=" <> _slug, flash: %{"error" => denial_copy}}}} =
              live(conn, "/billing/webhooks/#{outsider_webhook.id}?org=#{allowed_org.slug}")
 
-    assert %{"error" => "You don't have access to billing for this organization."} =
-             Phoenix.LiveView.Utils.verify_flash(AccrueHostWeb.Endpoint, flash_token)
+    assert denial_copy == "You don't have access to billing for this organization."
 
     assert {:ok, _view, ambiguous_html} =
              live(conn, "/billing/webhooks/#{ambiguous_webhook.id}?org=#{allowed_org.slug}")

@@ -49,6 +49,7 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
       |> log_in_user(admin_user, active_organization_id: allowed_org.id)
       |> Plug.Conn.put_session(:active_organization_slug, allowed_org.slug)
       |> Plug.Conn.put_session(:admin_organization_ids, [allowed_org.id])
+      |> fetch_flash()
 
     assert_denied_redirect(
       live(conn, "/billing/customers/#{outsider_customer.id}?org=#{allowed_org.slug}"),
@@ -67,10 +68,10 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
   end
 
   defp assert_denied_redirect(result, expected_path) do
-    assert {:error, {:redirect, %{to: ^expected_path, flash: flash_token}}} = result
-
-    assert %{"error" => "You don't have access to billing for this organization."} =
-             Phoenix.LiveView.Utils.verify_flash(AccrueHostWeb.Endpoint, flash_token)
+    assert {:error,
+            {:redirect,
+             %{to: ^expected_path, flash: %{"error" => "You don't have access to billing for this organization."}}}} =
+             result
   end
 
   defp insert_webhook(attrs) do
@@ -86,8 +87,8 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
       data: %{}
     }
 
-    %Accrue.Webhook.WebhookEvent{}
-    |> Accrue.Webhook.WebhookEvent.ingest_changeset(Map.merge(defaults, attrs))
+    Map.merge(defaults, attrs)
+    |> Accrue.Webhook.WebhookEvent.ingest_changeset()
     |> Repo.insert!()
     |> then(fn webhook ->
       webhook
