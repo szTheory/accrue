@@ -18,7 +18,10 @@ defmodule AccrueHost.Accounts.Scope do
 
   alias AccrueHost.Accounts.User
 
-  defstruct user: nil
+  defstruct user: nil,
+            active_organization: nil,
+            membership: nil,
+            impersonating_from: nil
 
   @doc """
   Creates a scope for the given user.
@@ -30,4 +33,14 @@ defmodule AccrueHost.Accounts.Scope do
   end
 
   def for_user(nil), do: nil
+
+  def new(%User{} = user) do
+    %__MODULE__{user: user}
+  end
+
+  def new(nil), do: nil
+
+  def put_active_organization(%__MODULE__{} = scope, organization, membership) do
+    %__MODULE__{scope | active_organization: organization, membership: membership}
+  end
 end

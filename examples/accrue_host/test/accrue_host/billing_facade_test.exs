@@ -17,14 +17,7 @@ defmodule AccrueHost.BillingFacadeTest do
   setup do
     user = AccountsFixtures.user_fixture()
     organization = AccountsFixtures.organization_fixture(%{owner: user})
-    owner_membership =
-      AccountsFixtures.organization_membership_fixture(%{
-        organization: organization,
-        user: user,
-        role: :owner
-      })
-
-    %{user: user, organization: organization, owner_membership: owner_membership}
+    %{user: user, organization: organization}
   end
 
   test "host user schema is the billable boundary" do

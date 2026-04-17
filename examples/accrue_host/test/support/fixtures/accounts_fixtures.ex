@@ -7,11 +7,12 @@ defmodule AccrueHost.AccountsFixtures do
   import Ecto.Query
 
   alias AccrueHost.Accounts
-  alias AccrueHost.Accounts.Organization
   alias AccrueHost.Accounts.OrganizationMembership
   alias AccrueHost.Accounts.Scope
   alias AccrueHost.Organizations
   alias AccrueHost.Repo
+
+  @organization_roles [:owner, :admin, :member]
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
@@ -65,14 +66,14 @@ defmodule AccrueHost.AccountsFixtures do
   end
 
   def organization_fixture(attrs \\ %{}) do
-    owner = Map.get(attrs, :owner, user_fixture())
+    owner = Map.get_lazy(attrs, :owner, &user_fixture/0)
 
     organization_attrs =
       attrs
       |> Map.delete(:owner)
       |> valid_organization_attributes()
 
-    {:ok, organization} = Organizations.create_organization(owner, organization_attrs)
+    {:ok, organization} = Organizations.create_organization(Scope.for_user(owner), organization_attrs)
     organization
   end
 
@@ -80,6 +81,10 @@ defmodule AccrueHost.AccountsFixtures do
     organization = Map.get_lazy(attrs, :organization, &organization_fixture/0)
     user = Map.get_lazy(attrs, :user, &user_fixture/0)
     role = Map.get(attrs, :role, :member)
+
+    unless role in @organization_roles do
+      raise ArgumentError, "expected role to be one of #{inspect(@organization_roles)}, got: #{inspect(role)}"
+    end
 
     attrs =
       attrs
@@ -89,17 +94,26 @@ defmodule AccrueHost.AccountsFixtures do
       |> Map.put(:user_id, user.id)
       |> Map.put(:role, role)
 
-    {:ok, membership} =
-      %OrganizationMembership{}
-      |> OrganizationMembership.changeset(attrs)
-      |> Repo.insert()
+    case Repo.get_by(OrganizationMembership,
+           organization_id: organization.id,
+           user_id: user.id
+         ) do
+      %OrganizationMembership{} = membership ->
+        membership
 
-    membership
+      nil ->
+        {:ok, membership} =
+          %OrganizationMembership{}
+          |> OrganizationMembership.changeset(attrs)
+          |> Repo.insert()
+
+        membership
+    end
   end
 
   def active_organization_scope_fixture(attrs \\ %{}) do
-    owner = Map.get(attrs, :owner, user_fixture())
-    organization = Map.get(attrs, :organization, organization_fixture(%{owner: owner}))
+    owner = Map.get_lazy(attrs, :owner, &user_fixture/0)
+    organization = Map.get_lazy(attrs, :organization, fn -> organization_fixture(%{owner: owner}) end)
     role = Map.get(attrs, :role, :owner)
 
     membership =

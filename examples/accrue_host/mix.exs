@@ -64,6 +64,7 @@ defmodule AccrueHost.MixProject do
       {:telemetry_poller, "~> 1.0"},
       accrue_dep(),
       accrue_admin_dep(),
+      sigra_dep(),
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
@@ -87,11 +88,21 @@ defmodule AccrueHost.MixProject do
     end
   end
 
+  defp sigra_dep do
+    if hex_release?() do
+      {:sigra, "~> #{sigra_version()}"}
+    else
+      {:sigra, path: "../../../sigra"}
+    end
+  end
+
   defp hex_release?, do: System.get_env("ACCRUE_HOST_HEX_RELEASE") == "1"
 
   defp accrue_version, do: sibling_package_version!("../../accrue/mix.exs")
 
   defp accrue_admin_version, do: sibling_package_version!("../../accrue_admin/mix.exs")
+
+  defp sigra_version, do: sibling_package_version!("../../../sigra/mix.exs")
 
   defp sibling_package_version!(relative_path) do
     relative_path
