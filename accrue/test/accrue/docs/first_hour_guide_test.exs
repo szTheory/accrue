@@ -55,13 +55,18 @@ defmodule Accrue.Docs.FirstHourGuideTest do
   end
 
   defp command_manifest do
-    Code.require_file(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
-    AccrueHost.Demo.CommandManifest.manifest()
+    module = load_manifest_module(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    apply(module, :manifest, [])
   end
 
   defp command_labels do
-    Code.require_file(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
-    AccrueHost.Demo.CommandManifest.command_labels()
+    module = load_manifest_module(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    apply(module, :command_labels, [])
+  end
+
+  defp load_manifest_module(path) do
+    Code.require_file(path)
+    AccrueHost.Demo.CommandManifest
   end
 
   defp assert_order!(guide, [first | rest]) do

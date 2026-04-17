@@ -50,7 +50,7 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
     broken_guide_path
     |> File.read!()
     |> String.replace("Seeded history", "Seeded replay")
-    |> File.write!(broken_guide_path)
+    |> then(&File.write!(broken_guide_path, &1))
 
     manifest = load_manifest_from(tmp_dir)
     host_readme = File.read!(Path.join(tmp_dir, "examples/accrue_host/README.md"))
@@ -65,8 +65,8 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
   end
 
   defp command_manifest do
-    Code.require_file(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
-    AccrueHost.Demo.CommandManifest.manifest()
+    module = load_manifest_module(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    apply(module, :manifest, [])
   end
 
   defp locked_labels(manifest) do
@@ -80,23 +80,21 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
   end
 
   defp load_manifest_from(root_dir) do
-    module = Module.concat([AccrueHost, Demo, TmpCommandManifest, System.unique_integer([:positive])])
-
-    [{manifest, _binding}] =
-      Code.eval_file(
-        Path.join(root_dir, "examples/accrue_host/demo/command_manifest.exs"),
-        [],
-        file: "command_manifest.exs",
-        module: module
-      )
-
-    manifest
+    root_dir
+    |> Path.join("examples/accrue_host/demo/command_manifest.exs")
+    |> load_manifest_module()
+    |> apply(:manifest, [])
   end
 
   defp copy_fixture!(relative_path, tmp_dir) do
     destination = Path.join(tmp_dir, relative_path)
     File.mkdir_p!(Path.dirname(destination))
     File.cp!(Path.expand("../../../../" <> relative_path, __DIR__), destination)
+  end
+
+  defp load_manifest_module(path) do
+    Code.require_file(path)
+    AccrueHost.Demo.CommandManifest
   end
 
   defp assert_order!(binary, [first | rest]) do

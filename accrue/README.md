@@ -32,7 +32,13 @@ mix accrue.install
 Then follow the [First Hour guide](guides/first_hour.md) for the Phoenix-order
 host setup path: runtime config, migrations, Oban, signed webhook ingest,
 `accrue_admin "/billing"`, a first Fake-backed subscription, and focused host
-tests.
+tests in `examples/accrue_host`.
+
+The canonical local verification labels are:
+
+- `mix verify` for the focused tutorial proof suite
+- `mix verify.full` for the CI-equivalent local gate
+- `bash scripts/ci/accrue_host_uat.sh` for the repo-root wrapper around that full gate
 
 ## What ships
 

@@ -6,29 +6,51 @@ This example is the Phase 10 host-app dogfood harness for `accrue` and `accrue_a
 
 PostgreSQL 14+ must already be running before you execute setup or boot commands. By default the app connects to `localhost:5432`. Override that with `PGHOST`, `PGUSER`, and `PGPASSWORD` if your local database uses different values.
 
-## First Hour Path
+## First run
 
-From `examples/accrue_host`:
+From the repository root:
 
 ```bash
-mix deps.get
-mix accrue.install --billable AccrueHost.Accounts.User --billing-context AccrueHost.Billing --admin-mount /billing --webhook-path /webhooks/stripe
-mix ecto.create
-mix ecto.migrate
-mix test test/accrue_host/billing_facade_test.exs
-mix test test/accrue_host_web/webhook_ingest_test.exs
-mix test test/accrue_host_web/admin_mount_test.exs
+cd examples/accrue_host
+mix setup
 mix phx.server
 ```
 
-The package docs mirror this order:
+Then follow the public host path the example proves:
+
+- Start one Fake-backed subscription through `AccrueHost.Billing` or the mounted billing UI.
+- Post one signed `/webhooks/stripe` event.
+- Inspect the resulting billing state and replay visibility at `/billing`.
+- Run `mix verify` once you have walked through the story yourself.
+
+The package docs mirror the same `First run` order:
 
 - `../../accrue/guides/first_hour.md`
 - `../../accrue/guides/troubleshooting.md`
 - `../../accrue/guides/webhooks.md`
 - `../../accrue_admin/guides/admin_ui.md`
 
-For a CI-equivalent local check from the repository root:
+## Seeded history
+
+Use this only for deterministic replay/history evaluation and browser smoke, not as the first teaching path:
+
+```bash
+cd examples/accrue_host
+mix setup
+mix verify.full
+```
+
+`Seeded history` exists for evaluation states that are awkward to create during a short walkthrough, such as replay-ready webhook history for browser smoke.
+
+## Verification modes
+
+- `mix verify` is the focused tutorial proof suite.
+- `mix verify.full` is the CI-equivalent local gate.
+- `bash scripts/ci/accrue_host_uat.sh` is the thin repo-root wrapper around the same full contract.
+- `bash scripts/ci/accrue_host_hex_smoke.sh` is Hex smoke, not part of `First run`.
+- `mix accrue.install` remains the production setup step inside a real host app, not the demo shortcut.
+
+For the maintainer-facing repo-root wrapper:
 
 ```bash
 bash scripts/ci/accrue_host_uat.sh

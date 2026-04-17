@@ -4,7 +4,21 @@ This guide follows the same host-owned path proved in
 `examples/accrue_host`. The app owns `MyApp.Billing`, routing, auth, and
 runtime configuration. Accrue owns the billing engine behind that boundary.
 
-## 1. Add the dependency
+## 1. First run
+
+From the repository root, the canonical demo path starts in the checked-in host app:
+
+```bash
+cd examples/accrue_host
+mix setup
+mix phx.server
+```
+
+Walk the story in this order: create one Fake-backed subscription through
+`MyApp.Billing`, post one signed `customer.subscription.created` event through
+`/webhooks/stripe`, inspect `/billing`, then run `mix verify`.
+
+## 2. Add the dependency
 
 ```elixir
 defp deps do
@@ -165,13 +179,26 @@ mix phx.server
 Visit `/billing` and confirm the mounted admin UI reflects the subscription you
 created through `MyApp.Billing.subscribe/3`.
 
-## 11. Run focused tests
+## 11. Run focused verification
 
 ```bash
-mix test test/accrue_host/billing_facade_test.exs
-mix test test/accrue_host_web/webhook_ingest_test.exs
-mix test test/accrue_host_web/admin_mount_test.exs
+mix verify
 ```
 
 Those proofs cover the host billing facade, signed webhook ingest, and mounted
 admin boundary in the same order you configured them.
+
+## 12. Seeded history
+
+`Seeded history` is the secondary evaluation path for deterministic replay and
+browser coverage. It is not the public teaching path.
+
+```bash
+cd examples/accrue_host
+mix setup
+mix verify.full
+```
+
+Use `mix verify.full` when you want the CI-equivalent local gate. Keep
+`bash scripts/ci/accrue_host_uat.sh` as the repo-root wrapper around that same
+contract rather than a replacement for the guided `First run` story.
