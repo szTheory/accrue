@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Queries.Customers do
 
   alias Accrue.Billing.Customer
   alias Accrue.Repo
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
 
   @time_field :inserted_at
@@ -18,8 +19,10 @@ defmodule AccrueAdmin.Queries.Customers do
     filter = Keyword.get(opts, :filter, %{})
     limit = Behaviour.normalize_limit(opts)
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Customer
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.apply_cursor(@time_field, cursor)
     |> order_by([customer], desc: customer.inserted_at, desc: customer.id)
@@ -45,11 +48,24 @@ defmodule AccrueAdmin.Queries.Customers do
   def count_newer_than(opts \\ []) do
     filter = Keyword.get(opts, :filter, %{})
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Customer
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.count_newer(@time_field, cursor)
     |> Repo.aggregate(:count)
+  end
+
+  def detail(id, owner_scope) when is_binary(id) do
+    Customer
+    |> scope_query(owner_scope)
+    |> where([customer], customer.id == ^id)
+    |> Repo.one()
+    |> case do
+      nil -> :not_found
+      customer -> {:ok, customer}
+    end
   end
 
   @impl true
@@ -96,5 +112,16 @@ defmodule AccrueAdmin.Queries.Customers do
       {_unknown, _value}, query ->
         query
     end)
+  end
+
+  defp scope_query(query, nil), do: query
+  defp scope_query(query, %OwnerScope{mode: :global}), do: query
+
+  defp scope_query(query, %OwnerScope{mode: :organization, organization_id: organization_id}) do
+    where(
+      query,
+      [customer],
+      customer.owner_type == "Organization" and customer.owner_id == ^organization_id
+    )
   end
 end

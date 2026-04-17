@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Queries.Subscriptions do
   alias Accrue.Billing
   alias Accrue.Billing.{Customer, Subscription}
   alias Accrue.Repo
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
 
   @time_field :inserted_at
@@ -19,11 +20,13 @@ defmodule AccrueAdmin.Queries.Subscriptions do
     filter = Keyword.get(opts, :filter, %{})
     limit = Behaviour.normalize_limit(opts)
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Subscription
     |> join(:inner, [subscription], customer in Customer,
       on: customer.id == subscription.customer_id
     )
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.apply_cursor(@time_field, cursor)
     |> order_by([subscription, _customer], desc: subscription.inserted_at, desc: subscription.id)
@@ -49,14 +52,34 @@ defmodule AccrueAdmin.Queries.Subscriptions do
   def count_newer_than(opts \\ []) do
     filter = Keyword.get(opts, :filter, %{})
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Subscription
     |> join(:inner, [subscription], customer in Customer,
       on: customer.id == subscription.customer_id
     )
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.count_newer(@time_field, cursor)
     |> Repo.aggregate(:count)
+  end
+
+  def detail(id, owner_scope) when is_binary(id) do
+    Subscription
+    |> join(:inner, [subscription], customer in Customer,
+      on: customer.id == subscription.customer_id
+    )
+    |> scope_query(owner_scope)
+    |> where([subscription, _customer], subscription.id == ^id)
+    |> select([subscription, _customer], subscription)
+    |> Repo.one()
+    |> case do
+      nil ->
+        :not_found
+
+      subscription ->
+        {:ok, Repo.preload(subscription, [:customer, :subscription_items])}
+    end
   end
 
   @impl true
@@ -114,5 +137,16 @@ defmodule AccrueAdmin.Queries.Subscriptions do
     )
   rescue
     ArgumentError -> query
+  end
+
+  defp scope_query(query, nil), do: query
+  defp scope_query(query, %OwnerScope{mode: :global}), do: query
+
+  defp scope_query(query, %OwnerScope{mode: :organization, organization_id: organization_id}) do
+    where(
+      query,
+      [_subscription, customer],
+      customer.owner_type == "Organization" and customer.owner_id == ^organization_id
+    )
   end
 end

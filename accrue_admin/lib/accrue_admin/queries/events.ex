@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Queries.Events do
 
   alias Accrue.Events.Event
   alias Accrue.Repo
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
 
   @time_field :inserted_at
@@ -18,8 +19,10 @@ defmodule AccrueAdmin.Queries.Events do
     filter = Keyword.get(opts, :filter, %{})
     limit = Behaviour.normalize_limit(opts)
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Event
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.apply_cursor(@time_field, cursor)
     |> order_by([event], desc: event.inserted_at, desc: event.id)
@@ -43,8 +46,10 @@ defmodule AccrueAdmin.Queries.Events do
   def count_newer_than(opts \\ []) do
     filter = Keyword.get(opts, :filter, %{})
     cursor = Behaviour.decode_cursor(opts)
+    owner_scope = Keyword.get(opts, :owner_scope)
 
     Event
+    |> scope_query(owner_scope)
     |> filter_query(filter)
     |> Behaviour.count_newer(@time_field, cursor)
     |> Repo.aggregate(:count)
@@ -105,5 +110,54 @@ defmodule AccrueAdmin.Queries.Events do
       {_unknown, _value}, query ->
         query
     end)
+  end
+
+  defp scope_query(query, nil), do: query
+  defp scope_query(query, %OwnerScope{mode: :global}), do: query
+
+  defp scope_query(query, %OwnerScope{mode: :organization, organization_id: organization_id}) do
+    where(
+      query,
+      [event],
+      fragment(
+        """
+        EXISTS (
+          SELECT 1
+          FROM accrue_customers customers
+          WHERE ? = 'Customer'
+            AND customers.id = ?
+            AND customers.owner_type = 'Organization'
+            AND customers.owner_id = ?
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM accrue_subscriptions subscriptions
+          JOIN accrue_customers customers ON customers.id = subscriptions.customer_id
+          WHERE ? = 'Subscription'
+            AND subscriptions.id = ?
+            AND customers.owner_type = 'Organization'
+            AND customers.owner_id = ?
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM accrue_invoices invoices
+          JOIN accrue_customers customers ON customers.id = invoices.customer_id
+          WHERE ? = 'Invoice'
+            AND invoices.id = ?
+            AND customers.owner_type = 'Organization'
+            AND customers.owner_id = ?
+        )
+        """,
+        event.subject_type,
+        event.subject_id,
+        ^organization_id,
+        event.subject_type,
+        event.subject_id,
+        ^organization_id,
+        event.subject_type,
+        event.subject_id,
+        ^organization_id
+      )
+    )
   end
 end
