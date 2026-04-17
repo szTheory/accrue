@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 14 context gathered
-last_updated: "2026-04-17T03:18:59.413Z"
-last_activity: 2026-04-17 -- Phase 14 planning complete
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-04-17T08:05:22.850Z"
+last_activity: 2026-04-17
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 6
-  completed_plans: 3
-  percent: 50
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** Phase 13 — canonical-demo-tutorial
+**Current focus:** Phase 14 — adoption-front-door
 
 ## Current Position
 
-Phase: 13 (canonical-demo-tutorial) — EXECUTING
-Plan: 3 of 3
+Phase: 14 (adoption-front-door) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-04-17 -- Phase 14 planning complete
+Last activity: 2026-04-17
 
 Progress: v1.2 planned (0/4 phases complete)
 
@@ -140,6 +140,7 @@ Progress: v1.2 planned (0/4 phases complete)
 | Phase 13-canonical-demo-tutorial P01 | 26m | 3 tasks | 7 files |
 | Phase 13-canonical-demo-tutorial P02 | 3min | 2 tasks | 7 files |
 | Phase 13-canonical-demo-tutorial P03 | 2min | 3 tasks | 3 files |
+| Phase 14 P01 | 2min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -377,6 +378,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 13]: The checked-in host README is the canonical executable path; the package guide mirrors it and the package README stays compact.
 - [Phase 13]: The first-run story remains Fake-backed and credential-free while still teaching the real /webhooks/stripe and mounted /billing surfaces.
 - [Phase 13]: Verification guidance now distinguishes mix verify, mix verify.full, the repo-root wrapper, Hex smoke, and production setup in one consistent order.
+- [Phase 14]: The root README stays a route map and proof strip, not a second tutorial.
+- [Phase 14]: accrue_admin stays downstream of core billing and signed-webhook setup.
+- [Phase 14]: The stable first-time setup surface is repeated across the front door and package docs using only public host-owned boundaries.
 
 ### Pending Todos
 
@@ -402,6 +406,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T02:45:55.602Z
-Stopped at: Phase 14 context gathered
-Resume file: .planning/phases/14-adoption-front-door/14-CONTEXT.md
+Last session: 2026-04-17T08:05:14.580Z
+Stopped at: Completed 14-01-PLAN.md
+Resume file: None

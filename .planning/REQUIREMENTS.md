@@ -18,12 +18,12 @@ Requirements for v1.2 focus on adoption, trust, and decision-quality expansion p
 
 ### Adoption Front Door
 
-- [ ] **ADOPT-01**: User lands on a root repository README that explains Accrue, the two packages, the local demo, docs, and production-hardening path.
+- [x] **ADOPT-01**: User lands on a root repository README that explains Accrue, the two packages, the local demo, docs, and production-hardening path.
 - [x] **ADOPT-02**: User can follow a tutorial from install through first subscription, signed webhook ingest, admin inspection/replay, and focused host tests.
 - [ ] **ADOPT-03**: User can choose between Fake, Stripe test mode, and live Stripe flows using clear release and docs guidance.
 - [ ] **ADOPT-04**: User can find issue templates for bug reports, integration problems, documentation gaps, and feature requests.
-- [ ] **ADOPT-05**: User can identify supported public APIs and generated host-owned boundaries without relying on private modules.
-- [ ] **ADOPT-06**: User-facing docs preserve Accrue's established brand voice and avoid claims not proven by the host app.
+- [x] **ADOPT-05**: User can identify supported public APIs and generated host-owned boundaries without relying on private modules.
+- [x] **ADOPT-06**: User-facing docs preserve Accrue's established brand voice and avoid claims not proven by the host app.
 
 ### Trust Hardening
 
@@ -77,12 +77,12 @@ Which phases cover which requirements. Updated during phase execution.
 | DEMO-04 | Phase 13 | Complete |
 | DEMO-05 | Phase 13 | Complete |
 | DEMO-06 | Phase 13 | Complete |
-| ADOPT-01 | Phase 14 | Pending |
+| ADOPT-01 | Phase 14 | Complete |
 | ADOPT-02 | Phase 13 + Phase 14 | Complete |
 | ADOPT-03 | Phase 14 | Pending |
 | ADOPT-04 | Phase 14 | Pending |
-| ADOPT-05 | Phase 14 | Pending |
-| ADOPT-06 | Phase 14 | Pending |
+| ADOPT-05 | Phase 14 | Complete |
+| ADOPT-06 | Phase 14 | Complete |
 | TRUST-01 | Phase 15 | Pending |
 | TRUST-02 | Phase 15 | Pending |
 | TRUST-03 | Phase 15 | Pending |
