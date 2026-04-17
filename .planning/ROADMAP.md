@@ -70,11 +70,11 @@ Plans:
 
 **Requirements:** ADOPT-01, ADOPT-02, ADOPT-03, ADOPT-04, ADOPT-05, ADOPT-06
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 14-01-PLAN.md — Create the repository front door and align package landing pages with docs contracts.
-- [ ] 14-02-PLAN.md — Add structured issue forms with no-secrets support intake coverage.
+- [x] 14-01-PLAN.md — Create the repository front door and align package landing pages with docs contracts.
+- [x] 14-02-PLAN.md — Add structured issue forms with no-secrets support intake coverage.
 - [ ] 14-03-PLAN.md — Clarify release/provider-parity guidance and extend the docs drift verifier.
 
 **Success criteria:**
@@ -126,7 +126,7 @@ Plans:
 | 11.1. Hermetic Host Flow Proofs | v1.1 | 1/1 | Complete | 2026-04-16 |
 | 12. First-User DX Stabilization | v1.1 | 11/11 | Complete | 2026-04-16 |
 | 13. Canonical Demo + Tutorial | v1.2 | 3/3 | Complete   | 2026-04-17 |
-| 14. Adoption Front Door | v1.2 | 1/3 | In Progress|  |
+| 14. Adoption Front Door | v1.2 | 2/3 | In Progress|  |
 | 15. Trust Hardening | v1.2 | 0/? | Planned | — |
 | 16. Expansion Discovery | v1.2 | 0/? | Planned | — |
 
