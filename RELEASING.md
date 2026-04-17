@@ -16,7 +16,7 @@ For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/
 
 ## Same-day `1.0.0` bootstrap
 
-1. Confirm CI is green on `main`, especially the Phase 9 release gate for both packages.
+1. Confirm CI is green on `main`, especially the `release-gate` workflow and the required deterministic gate for both packages.
 2. Trigger or merge release PRs that explicitly carry `Release-As: 1.0.0` for both package paths. The first bootstrap should use Conventional Commits plus the `Release-As: 1.0.0` trailer for both `accrue` and `accrue_admin`.
 3. Review both release PR diffs and confirm each package shows `@version "1.0.0"` in its `mix.exs` and the package-local changelog update in `accrue/CHANGELOG.md` or `accrue_admin/CHANGELOG.md`.
 4. Merge the reviewed release PRs and let `.github/workflows/release-please.yml` publish `accrue`.

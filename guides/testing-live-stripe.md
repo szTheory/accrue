@@ -83,7 +83,8 @@ real GitHub Actions runner.
 
 The `live-stripe` job also runs daily at 06:00 UTC via the workflow's
 `schedule:` trigger. Failures are surfaced as annotated job summaries
-and can be monitored alongside the primary `test` job.
+and can be monitored alongside the `release-gate` and `host-integration`
+results in the workflow summary.
 
 ## Philosophy
 

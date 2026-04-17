@@ -12,7 +12,7 @@ Install the supported toolchain first:
 - Elixir 1.17+
 - OTP 27+
 - PostgreSQL 14+
-- Node.js for browser UAT in `accrue_admin`
+- Node.js for browser UAT in `examples/accrue_host`
 
 Then bootstrap both packages:
 

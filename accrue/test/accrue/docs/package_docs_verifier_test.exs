@@ -18,6 +18,9 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "First run"
     assert output =~ "15-TRUST-REVIEW.md"
     assert output =~ "STRIPE_TEST_SECRET_KEY"
+    assert output =~ "CONTRIBUTING.md"
+    assert output =~ "release-gate"
+    assert output =~ "host-integration"
     assert output =~ "retain-on-failure"
     assert output =~ "only-on-failure"
   end
@@ -34,6 +37,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     copy_fixture!("README.md", tmp_dir)
     copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("CONTRIBUTING.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
@@ -76,6 +80,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     copy_fixture!("README.md", tmp_dir)
     copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("CONTRIBUTING.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
@@ -106,6 +111,62 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "provider-parity checks"
   end
 
+  test "package docs verifier rejects stale workflow and contributor wording" do
+    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
+    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
+    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
+
+    copy_fixture!("README.md", tmp_dir)
+    copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("CONTRIBUTING.md", tmp_dir)
+    copy_fixture!("accrue/mix.exs", tmp_dir)
+    copy_fixture!("accrue/README.md", tmp_dir)
+    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
+    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
+    copy_fixture!("accrue_admin/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
+    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
+    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+
+    drifted_guide =
+      tmp_dir
+      |> Path.join("guides/testing-live-stripe.md")
+      |> File.read!()
+      |> String.replace(
+        "`release-gate` and `host-integration`\nresults in the workflow summary",
+        "`release-gate` results in the workflow summary and can be monitored alongside the primary `test` job"
+      )
+
+    File.write!(Path.join(tmp_dir, "guides/testing-live-stripe.md"), drifted_guide)
+
+    drifted_contributing =
+      tmp_dir
+      |> Path.join("CONTRIBUTING.md")
+      |> File.read!()
+      |> String.replace(
+        "Node.js for browser UAT in `examples/accrue_host`",
+        "Node.js for browser UAT in `accrue_admin`"
+      )
+
+    File.write!(Path.join(tmp_dir, "CONTRIBUTING.md"), drifted_contributing)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "host-integration"
+  end
+
   test "package docs verifier rejects missing trust review invariant" do
     tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
 
@@ -118,6 +179,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     copy_fixture!("README.md", tmp_dir)
     copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("CONTRIBUTING.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
@@ -158,6 +220,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     copy_fixture!("README.md", tmp_dir)
     copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("CONTRIBUTING.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)

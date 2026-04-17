@@ -118,7 +118,13 @@ require_fixed "$ROOT_DIR/RELEASING.md" "advisory/manual before shipping your app
 require_fixed "$ROOT_DIR/RELEASING.md" "15-TRUST-REVIEW.md"
 require_fixed "$ROOT_DIR/RELEASING.md" "HEX_API_KEY"
 require_fixed "$ROOT_DIR/RELEASING.md" "RELEASE_PLEASE_TOKEN"
+require_fixed "$ROOT_DIR/RELEASING.md" "release-gate"
 require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "STRIPE_TEST_SECRET_KEY"
+require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "host-integration"
+require_fixed "$ROOT_DIR/CONTRIBUTING.md" 'Node.js for browser UAT in `examples/accrue_host`'
+require_absent_regex "$ROOT_DIR/RELEASING.md" 'Phase 9 release gate'
+require_absent_regex "$ROOT_DIR/guides/testing-live-stripe.md" 'primary `test` job'
+require_absent_regex "$ROOT_DIR/CONTRIBUTING.md" 'Node\.js for browser UAT in `accrue_admin`'
 require_fixed "$ROOT_DIR/examples/accrue_host/playwright.config.js" 'trace: "retain-on-failure"'
 require_fixed "$ROOT_DIR/examples/accrue_host/playwright.config.js" 'screenshot: "only-on-failure"'
 
@@ -131,4 +137,4 @@ for guide in \
 done
 
 echo "package docs verified for accrue $accrue_version and accrue_admin $accrue_admin_version"
-echo "fixed invariants checked: README.md, RELEASING.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"
+echo "fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"
