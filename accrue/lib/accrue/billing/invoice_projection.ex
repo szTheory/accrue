@@ -26,6 +26,7 @@ defmodule Accrue.Billing.InvoiceProjection do
   def decompose(stripe_inv) when is_map(stripe_inv) do
     currency = SubscriptionProjection.get(stripe_inv, :currency)
     status_transitions = SubscriptionProjection.get(stripe_inv, :status_transitions) || %{}
+
     automatic_tax =
       stripe_inv
       |> SubscriptionProjection.get(:automatic_tax)
