@@ -30,6 +30,7 @@ defmodule Accrue.Checkout.Session do
     :object,
     :mode,
     :ui_mode,
+    :automatic_tax,
     :url,
     :client_secret,
     :status,
@@ -38,6 +39,7 @@ defmodule Accrue.Checkout.Session do
     :subscription,
     :payment_intent,
     :amount_total,
+    :amount_tax,
     :currency,
     :expires_at,
     :metadata,
@@ -59,6 +61,7 @@ defmodule Accrue.Checkout.Session do
     return_url: [type: {:or, [:string, nil]}, default: nil],
     metadata: [type: {:or, [{:map, :any, :any}, nil]}, default: nil],
     client_reference_id: [type: {:or, [:string, nil]}, default: nil],
+    automatic_tax: [type: :boolean, default: false],
     operation_id: [type: {:or, [:string, nil]}, default: nil]
   ]
 
@@ -118,6 +121,7 @@ defmodule Accrue.Checkout.Session do
       object: get(stripe, :object) || "checkout.session",
       mode: to_string_or_nil(get(stripe, :mode)),
       ui_mode: to_string_or_nil(get(stripe, :ui_mode)),
+      automatic_tax: automatic_tax_enabled(stripe),
       url: get(stripe, :url),
       client_secret: get(stripe, :client_secret),
       status: to_string_or_nil(get(stripe, :status)),
@@ -126,6 +130,7 @@ defmodule Accrue.Checkout.Session do
       subscription: get(stripe, :subscription),
       payment_intent: get(stripe, :payment_intent),
       amount_total: get(stripe, :amount_total),
+      amount_tax: amount_tax(stripe),
       currency: to_string_or_nil(get(stripe, :currency)),
       expires_at: get(stripe, :expires_at),
       metadata: get(stripe, :metadata) || %{},
@@ -146,7 +151,8 @@ defmodule Accrue.Checkout.Session do
     base =
       %{
         "mode" => Atom.to_string(opts[:mode]),
-        "ui_mode" => Atom.to_string(opts[:ui_mode])
+        "ui_mode" => Atom.to_string(opts[:ui_mode]),
+        "automatic_tax" => %{"enabled" => opts[:automatic_tax]}
       }
       |> put_unless_nil("customer", customer_id)
       |> put_unless_nil("success_url", opts[:success_url])
@@ -171,6 +177,24 @@ defmodule Accrue.Checkout.Session do
 
   defp get(%{} = map, key) when is_atom(key) do
     Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  end
+
+  defp automatic_tax_enabled(stripe) do
+    stripe
+    |> get(:automatic_tax)
+    |> case do
+      nil -> false
+      automatic_tax -> get(automatic_tax, :enabled) || false
+    end
+  end
+
+  defp amount_tax(stripe) do
+    stripe
+    |> get(:total_details)
+    |> case do
+      nil -> nil
+      total_details -> get(total_details, :amount_tax)
+    end
   end
 
   defp to_string_or_nil(nil), do: nil
