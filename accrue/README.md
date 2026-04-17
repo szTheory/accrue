@@ -12,6 +12,15 @@ facade, router mounts, runtime config, and auth/session boundary.
 - [Webhooks](guides/webhooks.md)
 - [Upgrade](guides/upgrade.md)
 
+The compact adoption path is:
+
+1. Install `accrue` in your Phoenix app.
+2. Follow the [First Hour](guides/first_hour.md) guide for runtime config,
+   migrations, Oban, `use Accrue.Webhook.Handler`, and
+   `accrue_admin "/billing"`.
+3. Compare that setup with the checked-in
+   [`examples/accrue_host`](../examples/accrue_host) demo path.
+
 ## Install
 
 Add Accrue to `deps/0` and fetch dependencies:
@@ -29,12 +38,11 @@ mix deps.get
 mix accrue.install
 ```
 
-Then follow the [First Hour guide](guides/first_hour.md) for the Phoenix-order
-host setup path: runtime config, migrations, Oban, signed webhook ingest,
-`accrue_admin "/billing"`, a first Fake-backed subscription, and focused host
-tests in `examples/accrue_host`.
+Use the [First Hour](guides/first_hour.md) guide for the full tutorial story.
+Keep the checked-in `examples/accrue_host` app nearby when you want the
+canonical local demo path and command parity.
 
-The canonical local verification labels are:
+The canonical verification labels are:
 
 - `mix verify` for the focused tutorial proof suite
 - `mix verify.full` for the CI-equivalent local gate
