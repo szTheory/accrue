@@ -77,29 +77,43 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
     test "projects automatic tax state and tax amount from string-keyed payloads" do
       inv =
         StripeFixtures.invoice(%{
-          "automatic_tax" => %{"enabled" => true, "status" => "complete"},
+          "automatic_tax" => %{
+            "enabled" => true,
+            "status" => "complete",
+            "disabled_reason" => nil
+          },
           "tax" => nil,
-          "total_details" => %{"amount_tax" => 175}
+          "total_details" => %{"amount_tax" => 175},
+          "last_finalization_error" => nil
         })
 
       {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(inv)
       assert attrs.automatic_tax == true
       assert attrs.automatic_tax_status == "complete"
+      assert attrs.automatic_tax_disabled_reason == nil
       assert attrs.tax_minor == 175
+      assert attrs.last_finalization_error_code == nil
     end
 
     test "falls back to 0 when automatic tax is enabled but no tax amount is present" do
       inv =
         StripeFixtures.invoice(%{
-          "automatic_tax" => %{"enabled" => true, "status" => "requires_location_inputs"},
+          "automatic_tax" => %{
+            "enabled" => false,
+            "status" => "requires_location_inputs",
+            "disabled_reason" => "finalization_requires_location_inputs"
+          },
           "tax" => nil,
-          "total_details" => %{}
+          "total_details" => %{"amount_tax" => 0},
+          "last_finalization_error" => %{"code" => "customer_tax_location_invalid"}
         })
 
       {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(inv)
-      assert attrs.automatic_tax == true
+      assert attrs.automatic_tax == false
       assert attrs.automatic_tax_status == "requires_location_inputs"
+      assert attrs.automatic_tax_disabled_reason == "finalization_requires_location_inputs"
       assert attrs.tax_minor == 0
+      assert attrs.last_finalization_error_code == "customer_tax_location_invalid"
     end
 
     test "nil status defaults to :draft" do
@@ -170,6 +184,33 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
       assert attrs.automatic_tax == true
       assert attrs.automatic_tax_status == "complete"
       assert attrs.tax_minor == 225
+    end
+
+    test "projects finalization failure fields from atom-keyed payloads" do
+      fake_inv = %{
+        id: "in_fake_00003",
+        object: "invoice",
+        status: :open,
+        amount_due: 2500,
+        amount_paid: 0,
+        amount_remaining: 2500,
+        currency: "usd",
+        automatic_tax: %{
+          enabled: false,
+          status: "requires_location_inputs",
+          disabled_reason: "finalization_requires_location_inputs"
+        },
+        tax: nil,
+        total_details: %{},
+        last_finalization_error: %{code: "customer_tax_location_invalid"},
+        lines: %{object: "list", data: []}
+      }
+
+      {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(fake_inv)
+      assert attrs.automatic_tax == false
+      assert attrs.automatic_tax_status == "requires_location_inputs"
+      assert attrs.automatic_tax_disabled_reason == "finalization_requires_location_inputs"
+      assert attrs.last_finalization_error_code == "customer_tax_location_invalid"
     end
   end
 end

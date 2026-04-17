@@ -149,7 +149,7 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   defp dispatch("invoice." <> action, evt_id, evt_ts, obj)
-       when action in ~w(created finalized paid payment_failed voided marked_uncollectible sent) do
+       when action in ~w(created updated finalized finalization_failed paid payment_failed voided marked_uncollectible sent) do
     result = reduce_invoice(action, evt_id, evt_ts, obj)
     maybe_dispatch_invoice_email(action, result, obj)
     result

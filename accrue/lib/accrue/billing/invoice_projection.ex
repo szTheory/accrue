@@ -62,6 +62,8 @@ defmodule Accrue.Billing.InvoiceProjection do
       tax_minor: tax_minor(stripe_inv, automatic_tax.enabled),
       automatic_tax: automatic_tax.enabled,
       automatic_tax_status: automatic_tax.status,
+      automatic_tax_disabled_reason: automatic_tax.disabled_reason,
+      last_finalization_error_code: last_finalization_error_code(stripe_inv),
       discount_minor: discount_minor,
       # Wrap in a map because the `:total_discount_amounts` Ecto field
       # is `:map` (jsonb) which rejects top-level arrays. Mirror
@@ -167,6 +169,13 @@ defmodule Accrue.Billing.InvoiceProjection do
 
       true ->
         nil
+    end
+  end
+
+  defp last_finalization_error_code(stripe_inv) do
+    case SubscriptionProjection.get(stripe_inv, :last_finalization_error) do
+      %{} = error -> SubscriptionProjection.get(error, :code)
+      _ -> nil
     end
   end
 

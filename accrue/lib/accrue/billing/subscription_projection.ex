@@ -23,6 +23,7 @@ defmodule Accrue.Billing.SubscriptionProjection do
        pause_collection: parse_pause_collection(get(stripe_sub, :pause_collection)),
        automatic_tax: automatic_tax.enabled,
        automatic_tax_status: automatic_tax.status,
+       automatic_tax_disabled_reason: automatic_tax.disabled_reason,
        current_period_start: unix_to_dt(get(stripe_sub, :current_period_start)),
        current_period_end: unix_to_dt(get(stripe_sub, :current_period_end)),
        trial_start: unix_to_dt(get(stripe_sub, :trial_start)),
@@ -66,16 +67,17 @@ defmodule Accrue.Billing.SubscriptionProjection do
   end
 
   @doc false
-  def automatic_tax_fields(nil), do: %{enabled: false, status: nil}
+  def automatic_tax_fields(nil), do: %{enabled: false, status: nil, disabled_reason: nil}
 
   def automatic_tax_fields(%{} = automatic_tax) do
     %{
       enabled: get(automatic_tax, :enabled) || false,
-      status: get(automatic_tax, :status)
+      status: get(automatic_tax, :status),
+      disabled_reason: get(automatic_tax, :disabled_reason)
     }
   end
 
-  def automatic_tax_fields(_), do: %{enabled: false, status: nil}
+  def automatic_tax_fields(_), do: %{enabled: false, status: nil, disabled_reason: nil}
 
   defp parse_status(nil), do: :incomplete
 
