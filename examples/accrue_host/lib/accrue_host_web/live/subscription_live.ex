@@ -1,6 +1,7 @@
 defmodule AccrueHostWeb.SubscriptionLive do
   use AccrueHostWeb, :live_view
 
+  alias Accrue.APIError
   alias Accrue.Billing.Subscription
   alias AccrueHost.Billing
   alias AccrueHost.Billing.Plans
@@ -9,6 +10,8 @@ defmodule AccrueHostWeb.SubscriptionLive do
   @empty_state_body "Billing records appear after a user starts a subscription or a webhook is processed. Start a subscription or review the webhook feed."
   @error_copy "We couldn't complete that billing action. Check auth, migrations, webhook signing, or processor setup, then try again."
   @cancel_copy "Cancel subscription: Confirm cancellation before ending access."
+  @tax_location_repair_copy "Please update customer address or shipping before enabling automatic tax."
+  @tax_location_success_copy "Tax location saved. Start the subscription again when you're ready."
 
   @impl true
   def mount(_params, _session, socket) do
@@ -23,16 +26,53 @@ defmodule AccrueHostWeb.SubscriptionLive do
   def handle_event("start_subscription", %{"plan" => plan_id} = params, socket) do
     user = socket.assigns.current_scope.user
 
-    case Billing.subscribe(user, plan_id, operation_id: operation_id(params, "subscribe")) do
+    case Billing.subscribe(user, plan_id,
+           automatic_tax: true,
+           operation_id: operation_id(params, "subscribe")
+         ) do
       {:ok, _subscription} ->
         {:noreply,
          socket
          |> put_flash(:info, "Subscription started.")
          |> assign(:confirm_cancel, false)
+         |> assign(:tax_location_error, nil)
          |> load_state()}
+
+      {:error, %APIError{code: "customer_tax_location_invalid"}} ->
+        {:noreply,
+         socket
+         |> assign(:tax_location_error, @tax_location_repair_copy)
+         |> put_flash(:error, @tax_location_repair_copy)}
 
       {:error, _reason} ->
         {:noreply, put_flash(socket, :error, @error_copy)}
+    end
+  end
+
+  def handle_event("update_tax_location", %{"tax_location" => params}, socket) do
+    user = socket.assigns.current_scope.user
+
+    case Billing.update_customer_tax_location(user, tax_location_attrs(params)) do
+      {:ok, _customer} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, @tax_location_success_copy)
+         |> assign(:tax_location_error, nil)
+         |> assign(:tax_location_form, tax_location_defaults(params))
+         |> load_state()}
+
+      {:error, %APIError{code: "customer_tax_location_invalid"}} ->
+        {:noreply,
+         socket
+         |> assign(:tax_location_error, @tax_location_repair_copy)
+         |> assign(:tax_location_form, tax_location_defaults(params))
+         |> put_flash(:error, @tax_location_repair_copy)}
+
+      {:error, _reason} ->
+        {:noreply,
+         socket
+         |> assign(:tax_location_form, tax_location_defaults(params))
+         |> put_flash(:error, @error_copy)}
     end
   end
 
@@ -137,6 +177,91 @@ defmodule AccrueHostWeb.SubscriptionLive do
             </section>
           <% end %>
 
+          <section style={card_style()}>
+            <div style={section_header_style()}>
+              <div>
+                <p style={eyebrow_style()}>Tax location</p>
+                <h2 style={section_heading_style()}>Repair automatic tax input</h2>
+                <p style={muted_body_style()}>
+                  Save the customer billing address before starting a tax-enabled subscription.
+                </p>
+                <p style={muted_body_style()}>
+                  {@tax_location_repair_copy}
+                </p>
+              </div>
+            </div>
+
+            <p :if={@tax_location_error} style={warning_copy_style()}>
+              {@tax_location_error}
+            </p>
+
+            <p :if={tax_location_status(@subscription)} style={muted_body_style()}>
+              {tax_location_status(@subscription)}
+            </p>
+
+            <.form
+              for={%{}}
+              as={:tax_location}
+              id="tax-location-form"
+              phx-submit="update_tax_location"
+              style={tax_location_form_style()}
+            >
+              <label style={field_label_style()}>
+                Street address
+                <input
+                  type="text"
+                  name="tax_location[line1]"
+                  value={@tax_location_form.line1}
+                  style={input_style()}
+                />
+              </label>
+
+              <label style={field_label_style()}>
+                City
+                <input
+                  type="text"
+                  name="tax_location[city]"
+                  value={@tax_location_form.city}
+                  style={input_style()}
+                />
+              </label>
+
+              <label style={field_label_style()}>
+                State
+                <input
+                  type="text"
+                  name="tax_location[state]"
+                  value={@tax_location_form.state}
+                  style={input_style()}
+                />
+              </label>
+
+              <label style={field_label_style()}>
+                Postal code
+                <input
+                  type="text"
+                  name="tax_location[postal_code]"
+                  value={@tax_location_form.postal_code}
+                  style={input_style()}
+                />
+              </label>
+
+              <label style={field_label_style()}>
+                Country
+                <input
+                  type="text"
+                  name="tax_location[country]"
+                  value={@tax_location_form.country}
+                  style={input_style()}
+                />
+              </label>
+
+              <button type="submit" style={secondary_button_style()}>
+                Save tax location
+              </button>
+            </.form>
+          </section>
+
           <section style={plans_grid_style()}>
             <article :for={plan <- @plans} data-plan-id={plan.id} style={card_style()}>
               <div style={plan_header_style()}>
@@ -179,6 +304,9 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign(:empty_state_heading, @empty_state_heading)
     |> assign(:empty_state_body, @empty_state_body)
     |> assign(:cancel_copy, @cancel_copy)
+    |> assign(:tax_location_repair_copy, @tax_location_repair_copy)
+    |> assign_new(:tax_location_error, fn -> nil end)
+    |> assign_new(:tax_location_form, fn -> empty_tax_location_form() end)
     |> assign(:customer, customer)
     |> assign(:subscription, subscription)
     |> assign(:subscription_plan_label, plan_label(subscription))
@@ -252,6 +380,49 @@ defmodule AccrueHostWeb.SubscriptionLive do
   defp humanize_status(status),
     do: status |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 
+  defp tax_location_status(%Subscription{automatic_tax_disabled_reason: reason})
+       when is_binary(reason) and reason != "" do
+    "Automatic tax is currently disabled: #{humanize_reason(reason)}."
+  end
+
+  defp tax_location_status(_subscription), do: nil
+
+  defp tax_location_attrs(params) when is_map(params) do
+    %{
+      address: %{
+        line1: blank_to_nil(params["line1"]),
+        city: blank_to_nil(params["city"]),
+        state: blank_to_nil(params["state"]),
+        postal_code: blank_to_nil(params["postal_code"]),
+        country: blank_to_nil(params["country"])
+      }
+    }
+  end
+
+  defp tax_location_defaults(params) when is_map(params) do
+    %{
+      line1: params["line1"] || "",
+      city: params["city"] || "",
+      state: params["state"] || "",
+      postal_code: params["postal_code"] || "",
+      country: params["country"] || ""
+    }
+  end
+
+  defp empty_tax_location_form do
+    %{line1: "", city: "", state: "", postal_code: "", country: "US"}
+  end
+
+  defp humanize_reason(value) do
+    value
+    |> String.replace("_", " ")
+    |> String.split()
+    |> Enum.map_join(" ", &String.capitalize/1)
+  end
+
+  defp blank_to_nil(value) when value in [nil, ""], do: nil
+  defp blank_to_nil(value), do: value
+
   defp page_style do
     "background:#FAFBFC;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;padding:32px 0;"
   end
@@ -300,8 +471,16 @@ defmodule AccrueHostWeb.SubscriptionLive do
     "display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:0;"
   end
 
+  defp tax_location_form_style do
+    "display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end;"
+  end
+
   defp label_style do
     "margin:0 0 4px;color:#5F6B76;font-size:14px;font-weight:600;line-height:1.4;"
+  end
+
+  defp field_label_style do
+    "display:flex;flex-direction:column;gap:6px;margin:0;color:#24303B;font-size:14px;font-weight:600;line-height:1.4;"
   end
 
   defp value_style do
@@ -318,6 +497,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
   defp link_style do
     "color:#2644C5;font-size:14px;font-weight:600;line-height:1.4;text-decoration:none;padding:8px 0;"
+  end
+
+  defp input_style do
+    "border:1px solid #D3DCE4;border-radius:8px;padding:10px 12px;color:#111418;font-size:16px;line-height:1.4;background:#FFFFFF;"
   end
 
   defp code_style do

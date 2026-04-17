@@ -33,6 +33,7 @@ defmodule AccrueHost.BillingFacadeTest do
     assert {:cancel, 2} in exports
     assert {:customer_for, 1} in exports
     assert {:billing_state_for, 1} in exports
+    assert {:update_customer_tax_location, 2} in exports
   end
 
   test "customer_for/1 round-trips through Accrue.Billing.customer/1", %{user: user} do
@@ -76,7 +77,8 @@ defmodule AccrueHost.BillingFacadeTest do
     assert {:ok, %Subscription{} = latest_subscription} =
              Billing.subscribe(user, "price_basic", trial_end: {:days, 14})
 
-    assert {:ok, %{customer: %Customer{} = customer, subscription: %Subscription{} = subscription}} =
+    assert {:ok,
+            %{customer: %Customer{} = customer, subscription: %Subscription{} = subscription}} =
              Billing.billing_state_for(user)
 
     assert customer.owner_type == "User"
@@ -86,6 +88,25 @@ defmodule AccrueHost.BillingFacadeTest do
     refute subscription.id == first_subscription.id
     assert subscription.customer_id == customer.id
     assert subscription.processor == "fake"
+  end
+
+  test "update_customer_tax_location/2 delegates to Accrue.Billing.update_customer_tax_location/2",
+       %{user: user} do
+    assert {:ok, customer} = Billing.customer_for(user)
+
+    assert {:ok, updated} =
+             Billing.update_customer_tax_location(user, %{
+               address: %{
+                 line1: "27 Fredrick Ave",
+                 city: "Albany",
+                 state: "NY",
+                 postal_code: "12207",
+                 country: "US"
+               }
+             })
+
+    assert updated.id == customer.id
+    refute Map.has_key?(updated.data || %{}, "address")
   end
 
   test "generated facade source stays thin and explicit" do
@@ -102,6 +123,11 @@ defmodule AccrueHost.BillingFacadeTest do
     assert billing_source =~ "Billing.customer(billable)"
     assert billing_source =~ "def billing_state_for(billable) do"
     assert billing_source =~ "{:ok, %{customer: customer, subscription: subscription}}"
+
+    assert billing_source =~
+             "def update_customer_tax_location(billable, attrs) when is_map(attrs) do"
+
+    assert billing_source =~ "Billing.update_customer_tax_location(customer, attrs)"
   end
 
   test "subscribe/3 proof path creates customer state without direct fixture inserts", %{

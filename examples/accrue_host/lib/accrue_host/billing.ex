@@ -43,6 +43,14 @@ defmodule AccrueHost.Billing do
     {:ok, %{customer: customer, subscription: subscription}}
   end
 
+  # Host policy hook: collect location repair input through the public
+  # Accrue tax-location API instead of teaching the UI about processor details.
+  def update_customer_tax_location(billable, attrs) when is_map(attrs) do
+    with {:ok, customer} <- customer_for(billable) do
+      Billing.update_customer_tax_location(customer, attrs)
+    end
+  end
+
   defp find_customer(%{__struct__: mod, id: id}) do
     billable_type = mod.__accrue__(:billable_type)
     owner_id = to_string(id)
