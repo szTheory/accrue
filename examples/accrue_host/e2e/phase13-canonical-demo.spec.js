@@ -77,12 +77,76 @@ async function assertNoSeriousAccessibilityViolations(page, label) {
 }
 
 async function captureState(page, testInfo, name) {
-  const screenshotDir = path.join(process.cwd(), "test-results", "phase13-screenshots");
+  const screenshotDir = path.join(process.cwd(), "test-results", "phase15-trust", testInfo.project.name);
   const screenshotPath = path.join(screenshotDir, `${name}.png`);
 
   fs.mkdirSync(screenshotDir, { recursive: true });
   await page.screenshot({ path: screenshotPath, fullPage: true });
-  await testInfo.attach(name, { path: screenshotPath, contentType: "image/png" });
+  await testInfo.attach(`${testInfo.project.name}-${name}`, { path: screenshotPath, contentType: "image/png" });
+}
+
+async function expectVisibleInViewport(locator, label) {
+  await expect(locator, `${label} should be visible`).toBeVisible();
+
+  const box = await locator.boundingBox();
+  expect(box, `${label} should have a bounding box`).not.toBeNull();
+
+  if (!box) {
+    return;
+  }
+
+  const viewport = locator.page().viewportSize();
+  expect(viewport, `${label} should have a viewport`).not.toBeNull();
+
+  if (!viewport) {
+    return;
+  }
+
+  expect(box.x, `${label} should not be clipped on the left`).toBeGreaterThanOrEqual(0);
+  expect(box.y, `${label} should not be clipped above the viewport`).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width, `${label} should fit within the viewport width`).toBeLessThanOrEqual(
+    viewport.width
+  );
+  expect(box.y + box.height, `${label} should fit within the viewport height`).toBeLessThanOrEqual(
+    viewport.height
+  );
+}
+
+async function expectNoHorizontalOverflow(page, label) {
+  const overflow = await page.evaluate(() => ({
+    documentWidth: document.documentElement.scrollWidth,
+    viewportWidth: window.innerWidth
+  }));
+
+  expect(
+    overflow.documentWidth,
+    `${label} should not hide text or actions behind horizontal overflow`
+  ).toBeLessThanOrEqual(overflow.viewportWidth + 1);
+}
+
+async function assertResponsiveState(page, label, checks) {
+  await expectNoHorizontalOverflow(page, label);
+
+  for (const check of checks) {
+    await expectVisibleInViewport(check.locator, check.label);
+  }
+}
+
+async function measureVisibleTransition(page, label, action, visibleLocator) {
+  const budget_ms = 1500;
+  const startedAt = Date.now();
+
+  await action();
+  await expect(visibleLocator).toBeVisible();
+
+  const elapsed_ms = Date.now() - startedAt;
+
+  expect(
+    elapsed_ms,
+    `release-blocking ${label} transition exceeded ${budget_ms}ms`
+  ).toBeLessThanOrEqual(budget_ms);
+
+  return elapsed_ms;
 }
 
 async function postSignedWebhook(page, fixture) {
@@ -111,7 +175,7 @@ async function postSignedWebhook(page, fixture) {
   expect(JSON.parse(response.body)).toEqual({ ok: true });
 }
 
-test("canonical first-run and admin replay walkthrough stays release-blocking", async ({
+test("@phase15-trust canonical first-run and admin replay walkthrough stays release-blocking", async ({
   page,
   context
 }, testInfo) => {
@@ -129,6 +193,16 @@ test("canonical first-run and admin replay walkthrough stays release-blocking", 
   await waitForLiveView(page);
   await expect(page.getByText("No billing activity yet")).toBeVisible();
   await assertNoSeriousAccessibilityViolations(page, "first-run billing empty state");
+  await assertResponsiveState(page, "first-run billing empty state", [
+    {
+      locator: page.locator("[data-plan-id='price_basic'] button", { hasText: "Start subscription" }),
+      label: "primary action"
+    },
+    {
+      locator: page.getByText("No billing activity yet"),
+      label: "empty state copy"
+    }
+  ]);
   await captureState(page, testInfo, "first-run-billing-empty");
 
   await page.locator("[data-plan-id='price_basic'] button", { hasText: "Start subscription" }).click();
@@ -145,27 +219,85 @@ test("canonical first-run and admin replay walkthrough stays release-blocking", 
   await expect(page.getByRole("heading", { name: "Current subscription" })).toBeVisible();
   await expect(page.getByText("Basic (price_basic)")).toBeVisible();
   await postSignedWebhook(page, fixture);
+  await assertResponsiveState(page, "first-run subscription started state", [
+    {
+      locator: page.getByRole("heading", { name: "Current subscription" }),
+      label: "subscription started heading"
+    },
+    {
+      locator: page.getByText("Basic (price_basic)"),
+      label: "subscription started details"
+    }
+  ]);
   await captureState(page, testInfo, "first-run-subscription-started");
 
   await context.clearCookies();
   await login(page, fixture, fixture.admin_email);
 
-  await page.goto("/billing");
-  await expect(page.getByText("Local billing projections at a glance")).toBeVisible();
+  const billingElapsedMs = await measureVisibleTransition(
+    page,
+    "/billing admin dashboard",
+    () => page.goto("/billing"),
+    page.getByText("Local billing projections at a glance")
+  );
+
+  expect(billingElapsedMs).toBeGreaterThanOrEqual(0);
   await assertNoSeriousAccessibilityViolations(page, "admin dashboard");
+  await assertResponsiveState(page, "admin dashboard", [
+    {
+      locator: page.getByText("Local billing projections at a glance"),
+      label: "admin dashboard summary"
+    },
+    {
+      locator: page.getByRole("link", { name: /Webhooks/i }).first(),
+      label: "admin navigation"
+    }
+  ]);
   await captureState(page, testInfo, "admin-dashboard");
 
-  await page.goto(`/billing/webhooks/${fixture.webhook_id}`);
+  const webhookElapsedMs = await measureVisibleTransition(
+    page,
+    "/billing/webhooks/:id detail",
+    () => page.goto(`/billing/webhooks/${fixture.webhook_id}`),
+    page.getByRole("heading", { name: "invoice.payment_failed" })
+  );
+
+  expect(webhookElapsedMs).toBeGreaterThanOrEqual(0);
   await expect(page).toHaveURL(new RegExp(`/billing/webhooks/${fixture.webhook_id}$`));
-  await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
   await assertNoSeriousAccessibilityViolations(page, "webhook replay detail");
+  await assertResponsiveState(page, "webhook replay detail", [
+    {
+      locator: page.getByRole("heading", { name: "invoice.payment_failed" }),
+      label: "webhook detail heading"
+    },
+    {
+      locator: page.locator("[data-role='replay-single']"),
+      label: "replay control"
+    }
+  ]);
   await captureState(page, testInfo, "admin-webhook-detail");
 
   await page.locator("[data-role='replay-single']").click();
   await expect(page.getByText("Webhook replay requested.")).toBeVisible();
 
-  await page.goto(`/billing/events?source_webhook_event_id=${fixture.webhook_id}&actor_type=admin`);
-  await expect(page.getByRole("cell", { name: "admin.webhook.replay.completed" })).toBeVisible();
+  const auditElapsedMs = await measureVisibleTransition(
+    page,
+    "admin replay audit",
+    () => page.goto(`/billing/events?source_webhook_event_id=${fixture.webhook_id}&actor_type=admin`),
+    page.getByRole("cell", { name: "admin.webhook.replay.completed" })
+  );
+
+  expect(auditElapsedMs).toBeGreaterThanOrEqual(0);
   await assertNoSeriousAccessibilityViolations(page, "admin replay audit event");
+  await assertResponsiveState(page, "admin replay audit event", [
+    {
+      locator: page.getByRole("cell", { name: "admin.webhook.replay.completed" }),
+      label: "replay audit row"
+    },
+    {
+      locator: page.getByText("Append-only billing and admin activity"),
+      label: "audit heading"
+    }
+  ]);
   await captureState(page, testInfo, "admin-replay-audit");
 });
