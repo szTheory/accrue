@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready for `$gsd-discuss-phase 13`
-stopped_at: Phase 13 context gathered
-last_updated: "2026-04-17T01:03:45.256Z"
+stopped_at: Phase 13 UI-SPEC approved
+last_updated: "2026-04-17T01:21:34.921Z"
 last_activity: 2026-04-17 — Milestone v1.2 Adoption + Trust started
 progress:
   total_phases: 4
@@ -389,6 +389,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T01:03:45.251Z
-Stopped at: Phase 13 context gathered
-Resume file: .planning/phases/13-canonical-demo-tutorial/13-CONTEXT.md
+Last session: 2026-04-17T01:21:34.915Z
+Stopped at: Phase 13 UI-SPEC approved
+Resume file: .planning/phases/13-canonical-demo-tutorial/13-UI-SPEC.md
