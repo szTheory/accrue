@@ -59,7 +59,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         {:noreply, push_flash(socket, :warning, "Select an invoice action before confirming.")}
 
       %{type: type} = action when type in @destructive_actions ->
-        case StepUp.require_fresh(socket, step_up_action(action), &execute_action(&1, action)) do
+        case StepUp.require_fresh(
+               socket,
+               step_up_action(action, socket.assigns.invoice),
+               &execute_action(&1, action)
+             ) do
           {:ok, socket} -> {:noreply, socket}
           {:challenge, socket} -> {:noreply, socket}
           {:error, reason, socket} -> {:noreply, push_flash(socket, :error, inspect(reason))}
@@ -385,11 +389,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   defp selected_source_event(_params, _events), do: nil
 
-  defp step_up_action(action) do
+  defp step_up_action(action, invoice) do
     %{
       type: "invoice." <> action.type,
       subject_type: "Invoice",
-      subject_id: action.source_event_id || "pending",
+      subject_id: invoice.id,
       caused_by_event_id: action.source_event_id,
       caused_by_webhook_event_id: action.source_webhook_event_id
     }

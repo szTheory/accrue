@@ -87,7 +87,8 @@ defmodule Accrue.Billing.SubscriptionActions do
 
     result =
       Repo.transact(fn ->
-        with {:ok, stripe_sub} <-
+        with :ok <- ensure_customer_tax_location(customer, opts),
+             {:ok, stripe_sub} <-
                Processor.__impl__().create_subscription(
                  stripe_params,
                  [idempotency_key: idem_key] ++ sanitize_opts(opts)
@@ -716,6 +717,21 @@ defmodule Accrue.Billing.SubscriptionActions do
   defp maybe_put_automatic_tax(params, opts) do
     enabled = Keyword.get(opts, :automatic_tax, false)
     Map.put(params, :automatic_tax, %{enabled: enabled})
+  end
+
+  defp ensure_customer_tax_location(%Customer{} = customer, opts) do
+    if Keyword.get(opts, :automatic_tax, false) do
+      case Processor.update_customer(
+             customer.processor_id,
+             %{tax: %{validate_location: "immediately"}},
+             sanitize_opts(opts)
+           ) do
+        {:ok, _customer} -> :ok
+        {:error, reason} -> {:error, reason}
+      end
+    else
+      :ok
+    end
   end
 
   defp ensure_valid_tax_location(stripe_sub, opts) do

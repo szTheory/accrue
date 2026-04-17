@@ -33,14 +33,25 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     def step_up_challenge(_user, _action), do: %{kind: :totp, message: "Verify admin action"}
 
     @impl Accrue.Auth
-    def verify_step_up(_user, %{"code" => "123456"}, _action), do: :ok
+    def verify_step_up(_user, %{"code" => "123456"}, action) do
+      case Application.get_env(:accrue_admin, :expected_step_up_subject_id) do
+        nil -> :ok
+        expected when action.subject_id == expected -> :ok
+        _expected -> {:error, :wrong_subject_id}
+      end
+    end
+
     def verify_step_up(_user, _params, _action), do: {:error, :invalid_code}
   end
 
   setup do
     prior = Application.get_env(:accrue, :auth_adapter)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
-    on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, prior)
+      Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
+    end)
 
     %{subscription: subscription} =
       Factory.active_subscription(%{owner_id: "subscription-detail"})
@@ -87,6 +98,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     source_event: source_event
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, subscription.id)
 
     {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 

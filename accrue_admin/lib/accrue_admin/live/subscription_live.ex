@@ -67,7 +67,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       %{type: type} = action when type in @destructive_actions ->
         case StepUp.require_fresh(
                socket,
-               step_up_action(action),
+               step_up_action(action, socket.assigns.subscription),
                &execute_pending_action(&1, action)
              ) do
           {:ok, socket} -> {:noreply, socket}
@@ -349,11 +349,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp selected_source_event(_params, _events), do: nil
 
-  defp step_up_action(action) do
+  defp step_up_action(action, subscription) do
     %{
       type: action.type,
       subject_type: "Subscription",
-      subject_id: action.source_event_id || "pending",
+      subject_id: subscription.id,
       caused_by_event_id: action.source_event_id,
       caused_by_webhook_event_id: action.source_webhook_event_id
     }

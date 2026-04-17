@@ -6,6 +6,7 @@ defmodule Accrue.Billing.TaxLocationTest do
   alias Accrue.Billing.Customer
   alias Accrue.Events.Event
   alias Accrue.Processor
+  alias Accrue.Processor.Fake
 
   @repair_message "Please update customer address or shipping before enabling automatic tax."
 
@@ -89,7 +90,8 @@ defmodule Accrue.Billing.TaxLocationTest do
              Billing.subscribe(customer, "price_basic", automatic_tax: true)
 
     assert error.code == "customer_tax_location_invalid"
-    assert error.message == @repair_message
+    assert error.message =~ @repair_message
+    assert Fake.subscriptions_on(:platform) == []
   end
 
   defp insert_customer!(attrs, processor_attrs \\ %{}) do

@@ -32,7 +32,14 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     def step_up_challenge(_user, _action), do: %{kind: :totp, message: "Verify invoice action"}
 
     @impl Accrue.Auth
-    def verify_step_up(_user, %{"code" => "123456"}, _action), do: :ok
+    def verify_step_up(_user, %{"code" => "123456"}, action) do
+      case Application.get_env(:accrue_admin, :expected_step_up_subject_id) do
+        nil -> :ok
+        expected when action.subject_id == expected -> :ok
+        _expected -> {:error, :wrong_subject_id}
+      end
+    end
+
     def verify_step_up(_user, _params, _action), do: {:error, :invalid_code}
   end
 
@@ -45,6 +52,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     on_exit(fn ->
       Application.put_env(:accrue, :auth_adapter, prior_auth)
+      Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
 
       if prior_pdf do
         Application.put_env(:accrue, :pdf_adapter, prior_pdf)
@@ -121,6 +129,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     source_event: source_event
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    Application.put_env(:accrue_admin, :expected_step_up_subject_id, invoice.id)
 
     {:ok, view, _html} = live(conn, "/billing/invoices/#{invoice.id}")
 
