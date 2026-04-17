@@ -10,6 +10,10 @@ defmodule Accrue.Docs.ReleaseGuidanceTest do
 
     assert releasing =~ "Canonical local demo: Fake"
     assert releasing =~ "required deterministic gate"
+    assert releasing =~ "security/trust artifact"
+    assert releasing =~ "seeded performance smoke"
+    assert releasing =~ "compatibility floor/target checks"
+    assert releasing =~ "browser accessibility/responsive checks"
     assert releasing =~ "Provider parity: Stripe test mode"
     assert releasing =~ "provider-parity checks"
     assert releasing =~ "Advisory/manual: live Stripe"
@@ -39,6 +43,7 @@ defmodule Accrue.Docs.ReleaseGuidanceTest do
 
     assert contributing =~ "guides/testing-live-stripe.md"
     assert contributing =~ "provider-parity"
+    assert contributing =~ "required deterministic release gate"
     assert contributing =~ "keep real credentials out of shell history and logs"
   end
 end
