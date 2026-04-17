@@ -27,12 +27,12 @@ Requirements for v1.2 focus on adoption, trust, and decision-quality expansion p
 
 ### Trust Hardening
 
-- [ ] **TRUST-01**: Maintainer has a security review artifact for webhook, auth, admin, replay, and generated-host boundaries.
+- [x] **TRUST-01**: Maintainer has a security review artifact for webhook, auth, admin, replay, and generated-host boundaries.
 - [ ] **TRUST-02**: Maintainer can run seeded performance smoke checks for webhook ingest latency and admin page responsiveness.
 - [ ] **TRUST-03**: Maintainer can verify supported Elixir, OTP, Phoenix, and LiveView compatibility at the package or host-app level.
 - [ ] **TRUST-04**: User-facing admin flows used by the demo have accessibility and responsive-browser checks.
-- [ ] **TRUST-05**: Public errors, logs, docs, and retained artifacts are reviewed for Stripe secrets, webhook secrets, tokens, and PII leakage.
-- [ ] **TRUST-06**: Release-gate docs clearly distinguish required blockers from advisory checks such as live Stripe validation.
+- [x] **TRUST-05**: Public errors, logs, docs, and retained artifacts are reviewed for Stripe secrets, webhook secrets, tokens, and PII leakage.
+- [x] **TRUST-06**: Release-gate docs clearly distinguish required blockers from advisory checks such as live Stripe validation.
 
 ### Expansion Discovery
 
@@ -83,12 +83,12 @@ Which phases cover which requirements. Updated during phase execution.
 | ADOPT-04 | Phase 14 | Complete |
 | ADOPT-05 | Phase 14 | Complete |
 | ADOPT-06 | Phase 14 | Complete |
-| TRUST-01 | Phase 15 | Pending |
+| TRUST-01 | Phase 15 | Complete |
 | TRUST-02 | Phase 15 | Pending |
 | TRUST-03 | Phase 15 | Pending |
 | TRUST-04 | Phase 15 | Pending |
-| TRUST-05 | Phase 15 | Pending |
-| TRUST-06 | Phase 15 | Pending |
+| TRUST-05 | Phase 15 | Complete |
+| TRUST-06 | Phase 15 | Complete |
 | DISC-01 | Phase 16 | Pending |
 | DISC-02 | Phase 16 | Pending |
 | DISC-03 | Phase 16 | Pending |

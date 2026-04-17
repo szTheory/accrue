@@ -89,10 +89,10 @@ Plans:
 
 **Requirements:** TRUST-01, TRUST-02, TRUST-03, TRUST-04, TRUST-05, TRUST-06
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 15-01-PLAN.md — Create the checked-in trust review, leakage checks, and trust-gate release wording.
+- [x] 15-01-PLAN.md — Create the checked-in trust review, leakage checks, and trust-gate release wording.
 - [ ] 15-02-PLAN.md — Add seeded performance smoke checks and desktop/mobile browser trust coverage to the canonical host flow.
 - [ ] 15-03-PLAN.md — Extend the existing CI matrix and host integration lane for compatibility and trust-gate wiring.
 
@@ -134,7 +134,7 @@ Plans:
 | 12. First-User DX Stabilization | v1.1 | 11/11 | Complete | 2026-04-16 |
 | 13. Canonical Demo + Tutorial | v1.2 | 3/3 | Complete   | 2026-04-17 |
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
-| 15. Trust Hardening | v1.2 | 0/? | Planned | — |
+| 15. Trust Hardening | v1.2 | 1/3 | In Progress|  |
 | 16. Expansion Discovery | v1.2 | 0/? | Planned | — |
 
 ---
