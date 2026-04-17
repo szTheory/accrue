@@ -62,7 +62,7 @@ v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
 - [x] New users can follow a host-first tutorial and docs front door that explains the correct integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices. Validated in Phase 14: Adoption Front Door.
 - [x] Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice. Validated in Phase 14: Adoption Front Door.
 - [x] Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release. Validated in Phase 15: Trust Hardening.
-- [x] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API. Validated in Phase 16: Expansion Discovery.
+- [ ] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API. Phase 16 produced the recommendation, but verification is pending a stronger ranking-contract proof.
 
 ### Validated v1.0 Scope Summary
 

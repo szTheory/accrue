@@ -40,7 +40,7 @@ Requirements for v1.2 focus on adoption, trust, and decision-quality expansion p
 - [x] **DISC-02**: Revenue recognition and export options are evaluated and captured as a future milestone recommendation.
 - [x] **DISC-03**: Additional processor adapter candidates are evaluated without weakening the existing Stripe-first abstraction.
 - [x] **DISC-04**: Organization and multi-tenant billing flows are evaluated against Sigra and host-owned schema constraints.
-- [x] **DISC-05**: Expansion candidates are ranked into a recommended next implementation milestone, backlog, or planted seed.
+- [ ] **DISC-05**: Expansion candidates are ranked into a recommended next implementation milestone, backlog, or planted seed.
 
 ## Future Requirements
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during phase execution.
 | DISC-02 | Phase 16 | Complete |
 | DISC-03 | Phase 16 | Complete |
 | DISC-04 | Phase 16 | Complete |
-| DISC-05 | Phase 16 | Complete |
+| DISC-05 | Phase 16 | Gaps Found |
 
 **Coverage:**
 - v1.2 requirements: 23 total
@@ -102,4 +102,4 @@ Which phases cover which requirements. Updated during phase execution.
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after v1.2 milestone start*
+*Last updated: 2026-04-17 after Phase 16 verification found ranking-contract gap*

@@ -143,7 +143,7 @@ Plans:
 | 13. Canonical Demo + Tutorial | v1.2 | 3/3 | Complete   | 2026-04-17 |
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 15. Trust Hardening | v1.2 | 3/3 | Complete    | 2026-04-17 |
-| 16. Expansion Discovery | v1.2 | 2/2 | Complete   | 2026-04-17 |
+| 16. Expansion Discovery | v1.2 | 2/2 | Gaps Found | — |
 
 ---
 

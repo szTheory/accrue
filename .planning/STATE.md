@@ -6,15 +6,15 @@ current_phase: 16
 current_phase_name: expansion-discovery
 current_plan: 2
 status: verifying
-stopped_at: Completed 16-02-PLAN.md
+stopped_at: Phase 16 verification found ranking-contract gap
 last_updated: "2026-04-17T15:12:00.000Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 4
-  completed_phases: 4
+  completed_phases: 3
   total_plans: 11
   completed_plans: 11
-  percent: 100
+  percent: 91
 ---
 
 # Project State
@@ -28,13 +28,13 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 16 (expansion-discovery) — COMPLETE
+Phase: 16 (expansion-discovery) — GAPS FOUND
 Plan: 2 of 2
 **Current Phase:** 16
 **Current Phase Name:** expansion-discovery
 **Current Plan:** 2
-**Status:** Phase complete — ready for verification
-**Stopped At:** Completed 16-02-PLAN.md
+**Status:** Verification gaps found — gap closure required
+**Stopped At:** Phase 16 verification found ranking-contract gap
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
@@ -48,7 +48,7 @@ Plan: 2 of 2
 | 13. Canonical Demo + Tutorial | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 14. Adoption Front Door | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 15. Trust Hardening | Complete | 3/3 plans complete; verified 2026-04-17 |
-| 16. Expansion Discovery | Complete | 2/2 plans complete; summaries in `.planning/phases/16-expansion-discovery/16-01-SUMMARY.md` and `.planning/phases/16-expansion-discovery/16-02-SUMMARY.md` |
+| 16. Expansion Discovery | Gaps Found | 2/2 plans complete; verification found ranking-contract gap in `accrue/test/accrue/docs/expansion_discovery_test.exs` |
 
 ## Current Planning Artifacts
 
@@ -78,9 +78,10 @@ Plan: 2 of 2
 - Responsive trust coverage treats mobile admin overflow as a product bug to fix, not an exception to accept.
 - Keep Stripe Tax as the next milestone candidate and leave org billing plus revenue/export in backlog until prerequisites are explicit.
 - Treat official second processor work as a planted seed around the custom processor seam to preserve the Stripe-first host-owned boundary.
+- Close the Phase 16 ranking-contract gap before marking the milestone complete: the docs contract must assert exact candidate-to-outcome mappings.
 - Persist the Phase 16 ranking as recommendation-only planning guidance and avoid any v1.2 implementation implication.
 - Carry tax rollout correctness, cross-tenant, export-audience, and processor-boundary risks into durable planning records.
 
 ## Next Action
 
-Run milestone verification or completion flow for v1.2 now that all 11 plans are complete.
+Close the Phase 16 ranking-contract gap before milestone verification or completion.
