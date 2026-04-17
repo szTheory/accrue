@@ -18,9 +18,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     Timeline
   }
 
+  alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.StepUp
 
   @destructive_actions ~w(cancel_now comp_subscription)
+  @owner_access_denied "You don't have access to billing for this organization."
   @proration_options [
     %{value: "create_prorations", label: "Create prorations"},
     %{value: "none", label: "No proration"},
@@ -31,11 +33,16 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   def mount(%{"id" => subscription_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case load_subscription(subscription_id) do
-      nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/subscriptions"))}
+    case Subscriptions.detail(subscription_id, socket.assigns.current_owner_scope) do
+      :not_found ->
+        {:ok,
+         socket
+         |> put_flash(:error, @owner_access_denied)
+         |> redirect(
+           to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/subscriptions")
+         )}
 
-      subscription ->
+      {:ok, subscription} ->
         {:ok,
          socket
          |> assign_shell(admin)
@@ -560,6 +567,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  defp scoped_admin_path(admin, %{mode: :organization, organization_slug: slug}, suffix)
+       when is_binary(slug) do
+    admin_path(admin, suffix) <> "?org=" <> URI.encode_www_form(slug)
+  end
+
+  defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

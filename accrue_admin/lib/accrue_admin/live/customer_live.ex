@@ -5,9 +5,10 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Charge, Customer, Invoice, PaymentMethod, Subscription}
+  alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Repo
+  alias AccrueAdmin.Queries.Customers
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -20,16 +21,20 @@ defmodule AccrueAdmin.Live.CustomerLive do
   }
 
   @tabs ~w(subscriptions invoices charges payment_methods events metadata)
+  @owner_access_denied "You don't have access to billing for this organization."
 
   @impl true
   def mount(%{"id" => customer_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case Repo.get(Customer, customer_id) do
-      nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/customers"))}
+    case Customers.detail(customer_id, socket.assigns.current_owner_scope) do
+      :not_found ->
+        {:ok,
+         socket
+         |> put_flash(:error, @owner_access_denied)
+         |> redirect(to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers"))}
 
-      customer ->
+      {:ok, customer} ->
         {:ok,
          socket
          |> assign_shell(admin)
@@ -357,6 +362,13 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  defp scoped_admin_path(admin, %{mode: :organization, organization_slug: slug}, suffix)
+       when is_binary(slug) do
+    admin_path(admin, suffix) <> "?org=" <> URI.encode_www_form(slug)
+  end
+
+  defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

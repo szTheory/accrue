@@ -5,7 +5,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   alias Accrue.Billing.{Query, Subscription}
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
   alias AccrueAdmin.Queries.Subscriptions
 
   @impl true
@@ -50,6 +50,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             states without requiring raw status checks in the UI.
           </p>
         </header>
+
+        <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
         <section class="ax-kpi-grid" aria-label="Subscription summary">
           <KpiCard.kpi_card label="Active" value={Integer.to_string(@summary.active_count)}>
@@ -165,6 +167,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp card_title(row), do: row.processor_id || row.id
+
+  defp flash_messages(flash) do
+    Enum.flat_map([:error, :info], fn kind ->
+      case Phoenix.Flash.get(flash, kind) do
+        nil -> []
+        message -> [%{kind: kind, message: message}]
+      end
+    end)
+  end
+
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 
   defp default_brand do

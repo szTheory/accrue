@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   alias Accrue.Billing.Customer
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
   alias AccrueAdmin.Queries.Customers
 
   @impl true
@@ -52,6 +52,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
             projections only.
           </p>
         </header>
+
+        <FlashGroup.flash_group flashes={flash_messages(@flash)} />
 
         <section class="ax-kpi-grid" aria-label="Customer summary">
           <KpiCard.kpi_card label="Customers" value={Integer.to_string(@summary.customer_count)}>
@@ -148,6 +150,15 @@ defmodule AccrueAdmin.Live.CustomersLive do
   defp default_payment_method_label(%{default_payment_method_id: id}), do: "On file (#{id})"
 
   defp card_title(row), do: row.name || row.email || row.processor_id || row.id
+
+  defp flash_messages(flash) do
+    Enum.flat_map([:error, :info], fn kind ->
+      case Phoenix.Flash.get(flash, kind) do
+        nil -> []
+        message -> [%{kind: kind, message: message}]
+      end
+    end)
+  end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

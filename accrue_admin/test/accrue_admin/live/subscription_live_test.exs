@@ -150,6 +150,39 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert :not_found = Subscriptions.detail(denied_subscription.id, owner_scope)
   end
 
+  test "out-of-scope subscription route redirects with denial flash before rendering detail", %{
+    conn: conn
+  } do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_subscription = insert_subscription(allowed_customer)
+    denied_subscription = insert_subscription(denied_customer)
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, allowed_html} =
+             live(conn, "/billing/subscriptions/#{allowed_subscription.id}?org=allowed-org")
+
+    assert allowed_html =~ allowed_subscription.processor_id
+
+    assert {:error,
+            {:redirect, %{to: "/billing/subscriptions?org=allowed-org", flash: flash_token}}} =
+             redirect =
+             live(conn, "/billing/subscriptions/#{denied_subscription.id}?org=allowed-org")
+
+    assert %{"error" => "You don't have access to billing for this organization."} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
+    assert redirect
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",
