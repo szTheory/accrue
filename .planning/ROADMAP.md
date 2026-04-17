@@ -51,6 +51,13 @@
 
 **Requirements:** DEMO-01, DEMO-02, DEMO-03, DEMO-04, DEMO-05, DEMO-06, ADOPT-02
 
+**Plans:** 1/3 plans executed
+
+Plans:
+- [x] 13-01-PLAN.md - Establish the host-local command manifest and `mix verify` / `mix verify.full` contract.
+- [ ] 13-02-PLAN.md - Add manifest-backed docs parity tests and narrow shell drift checks.
+- [ ] 13-03-PLAN.md - Rewrite the host README and First Hour guide around `First run` and `Seeded history`.
+
 **Success criteria:**
 1. A new user can run the local host demo from documented prerequisites and commands without live Stripe credentials.
 2. The demo proves a Fake-backed subscription, signed webhook ingest, admin inspection/replay, and focused host tests.
@@ -111,7 +118,7 @@
 | 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete | 2026-04-16 |
 | 11.1. Hermetic Host Flow Proofs | v1.1 | 1/1 | Complete | 2026-04-16 |
 | 12. First-User DX Stabilization | v1.1 | 11/11 | Complete | 2026-04-16 |
-| 13. Canonical Demo + Tutorial | v1.2 | 0/? | Planned | — |
+| 13. Canonical Demo + Tutorial | v1.2 | 1/3 | In Progress|  |
 | 14. Adoption Front Door | v1.2 | 0/? | Planned | — |
 | 15. Trust Hardening | v1.2 | 0/? | Planned | — |
 | 16. Expansion Discovery | v1.2 | 0/? | Planned | — |

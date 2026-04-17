@@ -12,9 +12,9 @@ Requirements for v1.2 focus on adoption, trust, and decision-quality expansion p
 - [ ] **DEMO-01**: User can clone the repository and run `examples/accrue_host` as the canonical local demo with documented prerequisites and commands.
 - [ ] **DEMO-02**: User can seed or create a Fake-backed subscription in the demo without live Stripe credentials.
 - [ ] **DEMO-03**: User can inspect billing state and replay a webhook/admin action through the mounted admin UI in the demo.
-- [ ] **DEMO-04**: User can run a single CI-equivalent local command that verifies the demo setup and focused host proofs.
-- [ ] **DEMO-05**: User can understand which demo commands are for local evaluation, CI validation, Hex-style smoke validation, and production setup.
-- [ ] **DEMO-06**: Maintainer can detect drift between the demo path and documented tutorial commands before release.
+- [x] **DEMO-04**: User can run a single CI-equivalent local command that verifies the demo setup and focused host proofs.
+- [x] **DEMO-05**: User can understand which demo commands are for local evaluation, CI validation, Hex-style smoke validation, and production setup.
+- [x] **DEMO-06**: Maintainer can detect drift between the demo path and documented tutorial commands before release.
 
 ### Adoption Front Door
 
@@ -74,9 +74,9 @@ Which phases cover which requirements. Updated during phase execution.
 | DEMO-01 | Phase 13 | Pending |
 | DEMO-02 | Phase 13 | Pending |
 | DEMO-03 | Phase 13 | Pending |
-| DEMO-04 | Phase 13 | Pending |
-| DEMO-05 | Phase 13 | Pending |
-| DEMO-06 | Phase 13 | Pending |
+| DEMO-04 | Phase 13 | Complete |
+| DEMO-05 | Phase 13 | Complete |
+| DEMO-06 | Phase 13 | Complete |
 | ADOPT-01 | Phase 14 | Pending |
 | ADOPT-02 | Phase 13 + Phase 14 | Pending |
 | ADOPT-03 | Phase 14 | Pending |

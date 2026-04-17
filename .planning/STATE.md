@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready for `$gsd-discuss-phase 13`
-stopped_at: Phase 13 UI-SPEC approved
-last_updated: "2026-04-17T01:21:34.921Z"
-last_activity: 2026-04-17 — Milestone v1.2 Adoption + Trust started
+status: executing
+stopped_at: Completed 13-canonical-demo-tutorial-01-PLAN.md
+last_updated: "2026-04-17T01:49:10.777Z"
+last_activity: 2026-04-17
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -20,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** v1.2 Adoption + Trust
+**Current focus:** Phase 13 — canonical-demo-tutorial
 
 ## Current Position
 
-Phase: 13 Canonical Demo + Tutorial
-Plan: Not started
-Status: Ready for `$gsd-discuss-phase 13`
-Last activity: 2026-04-17 — Milestone v1.2 Adoption + Trust started
+Phase: 13 (canonical-demo-tutorial) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-17
 
 Progress: v1.2 planned (0/4 phases complete)
 
@@ -136,6 +137,7 @@ Progress: v1.2 planned (0/4 phases complete)
 | Phase 12-first-user-dx-stabilization P09 | 5m | 2 tasks | 5 files |
 | Phase 12-first-user-dx-stabilization P10 | 17m | 2 tasks | 6 files |
 | Phase 12 P11 | 16m | 2 tasks | 2 files |
+| Phase 13-canonical-demo-tutorial P01 | 26m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -364,6 +366,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 12]: The package-doc verifier supports ROOT_DIR override so ExUnit can exercise shell-script drift failures against isolated temp fixtures.
 - [Phase 12]: The troubleshooting docs contract keeps explicit authoritative lists of diagnostic codes and anchors so drift fails ExUnit immediately.
 - [Phase 12]: Every emitted setup-diagnostic docs anchor now requires a full troubleshooting section, not just a matrix row.
+- [Phase 13-canonical-demo-tutorial]: The canonical host verification contract now lives in package-local Mix aliases, with the repo-root wrapper reduced to delegation and env passthrough.
+- [Phase 13-canonical-demo-tutorial]: The shared demo command manifest stores exact mode labels, command labels, and story artifacts as Elixir data for downstream docs parity checks.
+- [Phase 13-canonical-demo-tutorial]: Accrue's boot-time migration check now uses Ecto.Migrator.with_repo/2 so dev boot verification can inspect migrations before the host repo supervisor is started.
 
 ### Pending Todos
 
@@ -389,6 +394,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T01:21:34.915Z
-Stopped at: Phase 13 UI-SPEC approved
-Resume file: .planning/phases/13-canonical-demo-tutorial/13-UI-SPEC.md
+Last session: 2026-04-17T01:49:10.774Z
+Stopped at: Completed 13-canonical-demo-tutorial-01-PLAN.md
+Resume file: None
