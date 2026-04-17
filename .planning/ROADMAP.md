@@ -34,12 +34,13 @@
 </details>
 
 <details open>
-<summary>📋 v1.2 Adoption + Trust (Phases 13-16) — PLANNED</summary>
+<summary>📋 v1.2 Adoption + Trust (Phases 13-17) — PLANNED</summary>
 
-- [ ] Phase 13: Canonical Demo + Tutorial — make `examples/accrue_host` the polished local demo and tutorial proof path.
+- [x] Phase 13: Canonical Demo + Tutorial — make `examples/accrue_host` the polished local demo and tutorial proof path. (completed 2026-04-17)
 - [x] Phase 14: Adoption Front Door — align repository/package docs, issue templates, release guidance, and public support positioning. (completed 2026-04-17)
 - [x] Phase 15: Trust Hardening — add security, performance, compatibility, accessibility/responsive, secret/PII, and release-gate confidence checks. (completed 2026-04-17)
 - [x] Phase 16: Expansion Discovery — evaluate and rank tax, revenue/export, additional processor, and org/multi-tenant billing options for the next implementation milestone. (completed 2026-04-17)
+- [ ] Phase 17: Milestone Closure Cleanup — close v1.2 audit tech debt before archival without adding product scope.
 
 </details>
 
@@ -124,6 +125,25 @@ Plans:
 
 **Recommendation outcome:** The checked-in Phase 16 recommendation ranks `Stripe Tax support` as the recommendation for the `Next milestone`, keeps `Organization / multi-tenant billing` and `Revenue recognition / exports` in `Backlog`, and preserves `Official second processor adapter` as a `Planted seed`. These entries are planning outputs and ranked recommendation guidance only; no implementation, schema, API, or processor-abstraction change is implied for v1.2.
 
+### Phase 17: Milestone Closure Cleanup
+
+**Goal:** Close the non-critical tech-debt items recorded by the v1.2 milestone audit so the milestone can be archived without stale planning or trust-lane cleanup risks.
+
+**Requirements:** None — audit tech debt cleanup only; all v1.2 product/adoption/trust/discovery requirements remain satisfied.
+
+**Gap Closure:** Closes tech debt from `.planning/v1.2-MILESTONE-AUDIT.md`.
+
+**Plans:** 0/1 plans complete
+
+Planned work:
+- [ ] 17-01-PLAN.md — Align milestone bookkeeping, narrow browser fixture cleanup, and fix stale release/contributor docs references.
+
+**Success criteria:**
+1. ROADMAP and PROJECT bookkeeping agree that Phase 13 and the canonical demo outcome are complete.
+2. Browser E2E fixture cleanup only removes fixture-owned webhook/payment-failed rows and preserves unrelated shared test DB history.
+3. Release/provider-parity/contributor docs no longer reference stale Phase 9 gates, non-existent primary CI jobs, or the wrong browser trust lane path.
+4. Focused docs and host trust checks prove the cleanup does not regress v1.2 audit coverage.
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -145,6 +165,7 @@ Plans:
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 15. Trust Hardening | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 16. Expansion Discovery | v1.2 | 3/3 | Complete    | 2026-04-17 |
+| 17. Milestone Closure Cleanup | v1.2 | 0/1 | Planned | — |
 
 ---
 

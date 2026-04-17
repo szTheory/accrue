@@ -69,6 +69,8 @@ Deferred until after v1.2 unless a blocker emerges during planning:
 
 Which phases cover which requirements. Updated during phase execution.
 
+Phase 17 is a milestone-audit cleanup phase only. It does not add or reset v1.2 product requirements because the latest audit found 23/23 requirements satisfied and no requirement, integration, or flow gaps.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DEMO-01 | Phase 13 | Complete |
@@ -102,4 +104,4 @@ Which phases cover which requirements. Updated during phase execution.
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after Phase 16 ranking-contract gap closure*
+*Last updated: 2026-04-17 after Phase 17 audit-cleanup planning*
