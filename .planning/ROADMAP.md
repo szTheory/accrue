@@ -38,7 +38,7 @@
 
 - [ ] Phase 13: Canonical Demo + Tutorial — make `examples/accrue_host` the polished local demo and tutorial proof path.
 - [x] Phase 14: Adoption Front Door — align repository/package docs, issue templates, release guidance, and public support positioning. (completed 2026-04-17)
-- [ ] Phase 15: Trust Hardening — add security, performance, compatibility, accessibility/responsive, secret/PII, and release-gate confidence checks.
+- [x] Phase 15: Trust Hardening — add security, performance, compatibility, accessibility/responsive, secret/PII, and release-gate confidence checks. (completed 2026-04-17)
 - [ ] Phase 16: Expansion Discovery — evaluate and rank tax, revenue/export, additional processor, and org/multi-tenant billing options for the next implementation milestone.
 
 </details>
@@ -134,7 +134,7 @@ Plans:
 | 12. First-User DX Stabilization | v1.1 | 11/11 | Complete | 2026-04-16 |
 | 13. Canonical Demo + Tutorial | v1.2 | 3/3 | Complete   | 2026-04-17 |
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
-| 15. Trust Hardening | v1.2 | 3/3 | Complete   | 2026-04-17 |
+| 15. Trust Hardening | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 16. Expansion Discovery | v1.2 | 0/? | Planned | — |
 
 ---
