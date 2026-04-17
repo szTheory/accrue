@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 13-canonical-demo-tutorial-01-PLAN.md
-last_updated: "2026-04-17T01:49:10.777Z"
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-04-17T01:54:57.819Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 ## Current Position
 
 Phase: 13 (canonical-demo-tutorial) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-17
 
@@ -138,6 +138,7 @@ Progress: v1.2 planned (0/4 phases complete)
 | Phase 12-first-user-dx-stabilization P10 | 17m | 2 tasks | 6 files |
 | Phase 12 P11 | 16m | 2 tasks | 2 files |
 | Phase 13-canonical-demo-tutorial P01 | 26m | 3 tasks | 7 files |
+| Phase 13-canonical-demo-tutorial P02 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -369,6 +370,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 13-canonical-demo-tutorial]: The canonical host verification contract now lives in package-local Mix aliases, with the repo-root wrapper reduced to delegation and env passthrough.
 - [Phase 13-canonical-demo-tutorial]: The shared demo command manifest stores exact mode labels, command labels, and story artifacts as Elixir data for downstream docs parity checks.
 - [Phase 13-canonical-demo-tutorial]: Accrue's boot-time migration check now uses Ecto.Migrator.with_repo/2 so dev boot verification can inspect migrations before the host repo supervisor is started.
+- [Phase 13]: ExUnit owns tutorial order/boundary semantics while verify_package_docs.sh stays limited to fixed invariants.
+- [Phase 13]: Canonical demo labels are read from examples/accrue_host/demo/command_manifest.exs instead of duplicated test constants.
+- [Phase 13]: Package docs verifier temp-tree coverage now includes the host README so release drift can be reproduced under ROOT_DIR.
 
 ### Pending Todos
 
@@ -394,6 +398,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T01:49:10.774Z
-Stopped at: Completed 13-canonical-demo-tutorial-01-PLAN.md
+Last session: 2026-04-17T01:54:57.815Z
+Stopped at: Completed 13-02-PLAN.md
 Resume file: None
