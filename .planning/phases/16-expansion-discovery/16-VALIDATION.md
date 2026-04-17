@@ -42,7 +42,7 @@ Per-phase validation contract for feedback sampling during execution.
 | 16-01-02 | 01 | 1 | DISC-02 | T-16-02 | Revenue/export recommendation keeps wrong-audience finance exports constrained through Stripe-owned reporting, Revenue Recognition, Sigma, Data Pipeline, and host-authorized export delivery. | docs contract | `rg -n "Revenue Recognition|Sigma|Data Pipeline|wrong-audience finance exports|host-authorized export delivery|Backlog" .planning/phases/16-expansion-discovery/16-EXPANSION-RECOMMENDATION.md` | yes | green |
 | 16-01-03 | 01 | 1 | DISC-03 | T-16-04 | Processor recommendation preserves the Stripe-first boundary, keeps custom processor guidance, and records processor-boundary downgrade risks before any official adapter work. | docs contract | `rg -n "Official second processor adapter|custom processor|Stripe-first|processor-boundary downgrade|Planted seed" .planning/phases/16-expansion-discovery/16-EXPANSION-RECOMMENDATION.md` | yes | green |
 | 16-01-04 | 01 | 1 | DISC-04 | T-16-03 | Org billing recommendation respects Sigra, host-owned tenancy, owner_type, owner_id, and cross-tenant billing leakage constraints before any row-scoped org work. | docs contract | `rg -n "Organization / multi-tenant billing|Sigra|owner_type|owner_id|cross-tenant billing leakage|Backlog" .planning/phases/16-expansion-discovery/16-EXPANSION-RECOMMENDATION.md` | yes | green |
-| 16-01-05 | 01 | 1 | DISC-05 | T-16-01,T-16-02,T-16-03,T-16-04 | Candidate ranking assigns Stripe Tax, Revenue Recognition, org billing, and processor work to Next milestone, Backlog, or Planted seed with explicit risk and prerequisite language. | docs contract | `cd accrue && mix test test/accrue/docs/expansion_discovery_test.exs --trace` | yes | green |
+| 16-01-05 | 01 | 1 | DISC-05 | T-16-01,T-16-02,T-16-03,T-16-04 | Stronger ranking contract proves the exact ranked candidate-to-outcome mapping: Stripe Tax support -> Next milestone, Organization / multi-tenant billing -> Backlog, Revenue recognition / exports -> Backlog, and Official second processor adapter -> Planted seed. | docs contract | `cd accrue && mix test test/accrue/docs/expansion_discovery_test.exs --trace` | yes | green |
 
 *Status values: pending, green, red, flaky*
 
@@ -52,6 +52,7 @@ Per-phase validation contract for feedback sampling during execution.
 
 - [x] Added `accrue/test/accrue/docs/expansion_discovery_test.exs` as the narrow ExUnit docs contract for the checked-in recommendation artifact.
 - [x] Added `.planning/phases/16-expansion-discovery/16-EXPANSION-RECOMMENDATION.md` as the canonical Phase 16 decision artifact with ranked outcomes and security language.
+- [x] Strengthened the DISC-05 docs contract so exact ranked candidate-to-outcome rows, not loose keyword presence, prove the outcome.
 
 ---
 
