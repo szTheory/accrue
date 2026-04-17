@@ -261,7 +261,10 @@ jobs:
     # host-integration proves Phoenix 1.8 / LiveView 1.1 by running the seeded host app
     # pinned in examples/accrue_host/mix.exs and accrue_admin/mix.exs. Keep this as the
     # single host-level proof instead of creating a second compatibility matrix.
-    name: Host integration
+    # Required deterministic gate for TRUST-02 and TRUST-04:
+    # trust review, seeded performance smoke, and browser accessibility/responsive checks
+    # stay in this lane, and high-severity trust findings cannot be accepted here.
+    name: Host integration (required deterministic gate)
     if: github.event_name != 'schedule'
     needs: [admin-drift-docs]
     runs-on: ubuntu-24.04
@@ -329,12 +332,14 @@ jobs:
         run: cd examples/accrue_host && npm run e2e:install
 
       - name: Run host integration gate
+        # Canonical trust lane: seeded performance smoke + browser accessibility/responsive checks.
         run: bash scripts/ci/accrue_host_uat.sh
 
       - name: Run host Hex smoke
         run: bash scripts/ci/accrue_host_hex_smoke.sh
 
       - name: Upload Playwright report
+        # Heavy debugging artifact stays failure-only.
         if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -343,6 +348,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload Playwright traces
+        # Heavy debugging artifact stays failure-only.
         if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -350,15 +356,16 @@ jobs:
           path: examples/accrue_host/test-results
           if-no-files-found: ignore
 
-      - name: Upload Phase 13 walkthrough screenshots
+      - name: Upload Phase 15 trust screenshots
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: accrue-host-phase13-screenshots
-          path: examples/accrue_host/test-results/phase13-screenshots
+          name: accrue-host-phase15-screenshots
+          path: examples/accrue_host/test-results/phase15-trust
           if-no-files-found: ignore
 
       - name: Upload host server log
+        # Heavy debugging artifact stays failure-only.
         if: failure()
         uses: actions/upload-artifact@v7
         with:
