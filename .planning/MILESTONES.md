@@ -20,6 +20,24 @@
 - Exact ranked candidate-to-outcome docs contract for the Phase 16 expansion recommendation
 - Canonical-demo bookkeeping is closed, host browser seed cleanup is fixture-scoped, and release/contributor docs now track the current trust lanes only
 
+**Verification:**
+
+- Milestone audit: 23/23 requirements, 4/4 pre-cleanup phases, 23/23 integrations, 6/6 flows; non-critical tech debt closed by Phase 17.
+- Phase 17 verification: 5/5 must-haves passed after traceability cleanup.
+- Security audit: 5/5 Phase 17 threats closed; `threats_open: 0`.
+
+**Deferred / carry-forward:**
+
+- Recommended next implementation candidate: Stripe Tax support.
+- Backlog candidates: Organization / multi-tenant billing and Revenue recognition / exports.
+- Planted seed: Official second processor adapter.
+
+**Archives:**
+
+- Roadmap archive: [`milestones/v1.2-ROADMAP.md`](milestones/v1.2-ROADMAP.md)
+- Requirements archive: [`milestones/v1.2-REQUIREMENTS.md`](milestones/v1.2-REQUIREMENTS.md)
+- Audit archive: [`milestones/v1.2-MILESTONE-AUDIT.md`](milestones/v1.2-MILESTONE-AUDIT.md)
+
 ---
 
 ## v1.1 Stabilization + Adoption (Shipped: 2026-04-17)
