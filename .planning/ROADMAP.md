@@ -70,6 +70,13 @@ Plans:
 
 **Requirements:** ADOPT-01, ADOPT-02, ADOPT-03, ADOPT-04, ADOPT-05, ADOPT-06
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Create the repository front door and align package landing pages with docs contracts.
+- [ ] 14-02-PLAN.md — Add structured issue forms with no-secrets support intake coverage.
+- [ ] 14-03-PLAN.md — Clarify release/provider-parity guidance and extend the docs drift verifier.
+
 **Success criteria:**
 1. The repository root has a clear front door for Accrue, `accrue_admin`, the local demo, docs, and production hardening.
 2. Package docs and README paths align around the host-first tutorial and public integration boundaries.

@@ -30,7 +30,7 @@
 | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | test | batch | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | exact |
 | `accrue/test/accrue/docs/first_hour_guide_test.exs` | test | transform | `accrue/test/accrue/docs/first_hour_guide_test.exs` | exact |
 | `accrue/test/accrue/docs/canonical_demo_contract_test.exs` | test | transform | `accrue/test/accrue/docs/canonical_demo_contract_test.exs` | exact |
-| `accrue/test/accrue/docs/root_readme_contract_test.exs` | test | transform | `accrue/test/accrue/docs/canonical_demo_contract_test.exs` | role-match |
+| `accrue/test/accrue/docs/root_readme_test.exs` | test | transform | `accrue/test/accrue/docs/canonical_demo_contract_test.exs` | role-match |
 
 ## Pattern Assignments
 

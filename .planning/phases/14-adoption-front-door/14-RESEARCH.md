@@ -349,12 +349,12 @@ Source: repo docs and public behaviour. [VERIFIED: repo files]
 | A2 | Asking for “full config” or “full logs” is the main path by which issue templates would encourage unsafe disclosures. | Common Pitfalls | Medium; wording might need adjustment if the project wants stricter or looser intake. |
 | A3 | Accrue should avoid surfacing Stripe Sandboxes in Phase 14 copy even though Stripe now documents them, because the locked decisions emphasize Fake, Stripe test mode, and live Stripe. | State of the Art | Low; this is mainly a scoping choice. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the root README link directly to GitHub security-advisory creation, or only to `SECURITY.md`?**
    - What we know: GitHub chooser `contact_links` can send users to an external/private URL, and `SECURITY.md` already defines the private route. [CITED: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository] [VERIFIED: SECURITY.md]
    - What's unclear: Whether the repo has security-advisory UI enabled and stable for all maintainers. [ASSUMED]
-   - Recommendation: Link issue-template contact routing to `SECURITY.md` unless advisory-creation URL access is verified during implementation. [VERIFIED: SECURITY.md]
+   - RESOLVED: Link issue-template contact routing to `SECURITY.md`, not directly to GitHub security-advisory creation. `SECURITY.md` is the stable source of truth for private vulnerability reporting and can mention advisory access if/when that repo setting is verified. [VERIFIED: SECURITY.md]
 
 ## Environment Availability
 
@@ -387,12 +387,12 @@ Source: repo docs and public behaviour. [VERIFIED: repo files]
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| ADOPT-01 | Root README routes to demo, package docs, admin package, support, and hardening docs | unit/docs contract | `cd accrue && mix test test/accrue/docs/root_readme_test.exs` | ❌ Wave 0 |
+| ADOPT-01 | Root README routes to demo, package docs, admin package, support, and hardening docs | unit/docs contract | `cd accrue && mix test test/accrue/docs/root_readme_test.exs` | ❌ planned in 14-01 task 1 |
 | ADOPT-02 | Existing tutorial ownership stays canonical | unit/docs contract | `cd accrue && mix test test/accrue/docs/canonical_demo_contract_test.exs test/accrue/docs/first_hour_guide_test.exs` | ✅ |
-| ADOPT-03 | Fake vs test vs live labels stay explicit across docs/release guidance | unit/docs contract + shell verifier | `cd accrue && mix test test/accrue/docs/root_readme_test.exs test/accrue/docs/release_guidance_test.exs` | ❌ Wave 0 |
-| ADOPT-04 | Four issue forms and chooser config exist with blank issues disabled | unit/file-shape test | `cd accrue && mix test test/accrue/docs/issue_templates_test.exs` | ❌ Wave 0 |
+| ADOPT-03 | Fake vs test vs live labels stay explicit across docs/release guidance | unit/docs contract + shell verifier | `cd accrue && mix test test/accrue/docs/root_readme_test.exs test/accrue/docs/release_guidance_test.exs` | ❌ planned in 14-01 task 1 and 14-03 task 1 |
+| ADOPT-04 | Four issue forms and chooser config exist with blank issues disabled | unit/file-shape test | `cd accrue && mix test test/accrue/docs/issue_templates_test.exs` | ❌ planned in 14-02 task 1 |
 | ADOPT-05 | Public API boundary wording stays on supported surfaces | unit/docs contract | `cd accrue && mix test test/accrue/docs/root_readme_test.exs test/accrue/docs/first_hour_guide_test.exs` | ❌ / ✅ mixed |
-| ADOPT-06 | Brand voice avoids unsupported maturity claims | unit/docs content test | `cd accrue && mix test test/accrue/docs/root_readme_test.exs test/accrue/docs/release_guidance_test.exs` | ❌ Wave 0 |
+| ADOPT-06 | Brand voice avoids unsupported maturity claims | unit/docs content test | `cd accrue && mix test test/accrue/docs/root_readme_test.exs test/accrue/docs/release_guidance_test.exs` | ❌ planned in 14-01 task 1 and 14-03 task 1 |
 
 ### Sampling Rate
 
@@ -400,12 +400,12 @@ Source: repo docs and public behaviour. [VERIFIED: repo files]
 - **Per wave merge:** `cd accrue && mix test --warnings-as-errors`
 - **Phase gate:** Full suite green plus a grep/smoke check that `.github/ISSUE_TEMPLATE/config.yml` disables blank issues. [VERIFIED: repo files] [CITED: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository]
 
-### Wave 0 Gaps
+### Same-Task Test-First Gaps
 
-- [ ] `accrue/test/accrue/docs/root_readme_test.exs` — covers ADOPT-01, ADOPT-03, ADOPT-05, ADOPT-06
-- [ ] `accrue/test/accrue/docs/issue_templates_test.exs` — covers ADOPT-04 and no-secrets intake rules
-- [ ] `accrue/test/accrue/docs/release_guidance_test.exs` — covers ADOPT-03 and required/advisory wording in `RELEASING.md` / `guides/testing-live-stripe.md`
-- [ ] Extend `scripts/ci/verify_package_docs.sh` — add root README and release-guidance invariants
+- [ ] `accrue/test/accrue/docs/root_readme_test.exs` — covers ADOPT-01, ADOPT-03, ADOPT-05, ADOPT-06; planned before README edits in 14-01 task 1
+- [ ] `accrue/test/accrue/docs/issue_templates_test.exs` — covers ADOPT-04 and no-secrets intake rules; planned before issue-form edits in 14-02 task 1
+- [ ] `accrue/test/accrue/docs/release_guidance_test.exs` — covers ADOPT-03 and required/advisory wording in `RELEASING.md` / `guides/testing-live-stripe.md`; planned before release-doc edits in 14-03 task 1
+- [ ] Extend `scripts/ci/verify_package_docs.sh` — add root README and release-guidance invariants; planned in 14-03 after the root README exists
 
 ## Security Domain
 

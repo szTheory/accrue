@@ -3,7 +3,7 @@ phase: 14
 slug: adoption-front-door
 status: draft
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-17
 ---
 
@@ -38,22 +38,21 @@ created: 2026-04-17
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 14-01-01 | 01 | 1 | ADOPT-01, ADOPT-05, ADOPT-06 | T-14-01 / T-14-03 | Root README routes users without asking for secrets or teaching private APIs | docs contract | `cd accrue && mix test test/accrue/docs/root_readme_test.exs` | ❌ W0 | ⬜ pending |
-| 14-01-02 | 01 | 1 | ADOPT-02, ADOPT-05 | T-14-03 | Package/docs links preserve the host-first tutorial and public facade boundaries | docs contract | `cd accrue && mix test test/accrue/docs/package_docs_verifier_test.exs test/accrue/docs/first_hour_guide_test.exs` | ✅ | ⬜ pending |
-| 14-02-01 | 02 | 1 | ADOPT-04 | T-14-01 | Issue forms warn against secrets, production payloads, customer data, and PII | file-shape test | `cd accrue && mix test test/accrue/docs/issue_templates_test.exs` | ❌ W0 | ⬜ pending |
-| 14-03-01 | 03 | 2 | ADOPT-03, ADOPT-06 | T-14-02 / T-14-04 | Release docs distinguish required Fake gates from provider-parity and advisory/manual Stripe checks | docs contract | `cd accrue && mix test test/accrue/docs/release_guidance_test.exs` | ❌ W0 | ⬜ pending |
-| 14-03-02 | 03 | 2 | ADOPT-01, ADOPT-03, ADOPT-05 | T-14-03 / T-14-04 | Shell verifier guards front-door links, mode labels, and public-boundary copy | shell verifier | `bash scripts/ci/verify_package_docs.sh` | ✅ | ⬜ pending |
+| 14-01-01 | 01 | 1 | ADOPT-01, ADOPT-02, ADOPT-05, ADOPT-06 | T-14-01 / T-14-03 / T-14-04 | Root README and package landing pages route users into the host-first tutorial, keep public boundaries copy-paste safe, and preserve Fake/test/live labels | docs contract | `cd accrue && mix test test/accrue/docs/root_readme_test.exs test/accrue/docs/package_docs_verifier_test.exs test/accrue/docs/first_hour_guide_test.exs test/accrue/docs/canonical_demo_contract_test.exs` | planned in same task | ⬜ pending |
+| 14-02-01 | 02 | 1 | ADOPT-04, ADOPT-05 | T-14-01 / T-14-03 | Issue forms warn against secrets, production payloads, customer data, and PII while steering reporters to supported public surfaces | file-shape test | `cd accrue && mix test test/accrue/docs/issue_templates_test.exs` | planned in same task | ⬜ pending |
+| 14-03-01 | 03 | 2 | ADOPT-01, ADOPT-03, ADOPT-05, ADOPT-06 | T-14-02 / T-14-03 / T-14-04 | Release docs distinguish required Fake gates from provider-parity and advisory/manual Stripe checks, and the shell verifier locks those labels in place | docs contract + shell verifier | `cd accrue && mix test test/accrue/docs/release_guidance_test.exs test/accrue/docs/package_docs_verifier_test.exs && bash ../scripts/ci/verify_package_docs.sh` | planned in same task | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
 ---
 
-## Wave 0 Requirements
+## Task-Boundary Verification
 
-- [ ] `accrue/test/accrue/docs/root_readme_test.exs` - stubs for ADOPT-01, ADOPT-03, ADOPT-05, ADOPT-06
-- [ ] `accrue/test/accrue/docs/issue_templates_test.exs` - stubs for ADOPT-04 and no-secrets intake rules
-- [ ] `accrue/test/accrue/docs/release_guidance_test.exs` - stubs for ADOPT-03 and required/advisory wording
-- [ ] `scripts/ci/verify_package_docs.sh` - root README and release-guidance invariants
+Existing infrastructure covers the phase. Each plan now uses a same-task unit where any new docs contract or verifier update is created and then satisfied by the implementation within that task before the task verify runs:
+
+- Plan `14-01` creates the root README/docs contracts and the aligned README surfaces in one task, then runs the full focused docs command.
+- Plan `14-02` creates the issue-template contract and the chooser/forms in one task, then runs the issue-template suite.
+- Plan `14-03` creates the release-guidance contract, updates release/support docs, extends the shell verifier, and then runs both the focused ExUnit command and shell verifier.
 
 ---
 
@@ -78,9 +77,10 @@ created: 2026-04-17
 
 ## Validation Sign-Off
 
-- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] All tasks have `<automated>` verify or same-task test-first dependencies
+- [x] Every task verify is satisfiable at that task boundary
 - [x] Sampling continuity: no 3 consecutive tasks without automated verify
-- [x] Wave 0 covers all MISSING references
+- [x] Same-task units cover all previously missing contract files
 - [x] No watch-mode flags
 - [x] Feedback latency < 60s for focused docs checks
 - [x] `nyquist_compliant: true` set in frontmatter
