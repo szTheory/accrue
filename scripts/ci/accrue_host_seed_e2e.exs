@@ -2,14 +2,18 @@ alias Accrue.Billing.Customer
 alias Accrue.Billing.Subscription
 alias Accrue.Billing.SubscriptionItem
 alias Accrue.Events
+alias Accrue.Events.Event
 alias Accrue.Webhook.WebhookEvent
 alias AccrueHost.Accounts
 alias AccrueHost.Accounts.User
 alias AccrueHost.Repo
 
+import Ecto.Query
+
 password = "hello world!"
 fixture_path = System.fetch_env!("ACCRUE_HOST_E2E_FIXTURE")
 webhook_secret = "whsec_test_host"
+seeded_emails = ["host-user@example.test", "host-admin@example.test", "billing-history@example.test"]
 
 create_user = fn email, admin? ->
   user =
@@ -35,6 +39,85 @@ create_user = fn email, admin? ->
   |> Ecto.Changeset.change(billing_admin: admin?)
   |> Repo.update!()
 end
+
+previous_owner_ids =
+  Repo.all(
+    from(user in User,
+      where: user.email in ^seeded_emails,
+      select: user.id
+    )
+  )
+
+cleanup_customer_ids =
+  Repo.all(
+    from(customer in Customer,
+      where: customer.owner_type == "User" and customer.owner_id in ^previous_owner_ids,
+      select: customer.id
+    )
+  )
+
+Repo.delete_all(
+  from(job in Oban.Job,
+    where:
+      job.worker == "Accrue.Webhook.DispatchWorker" and
+        job.queue == "accrue_webhooks"
+  )
+)
+
+Repo.query!("ALTER TABLE accrue_events DISABLE TRIGGER accrue_events_immutable_trigger")
+
+try do
+  Repo.delete_all(
+    from(event in Event,
+      where:
+        event.type in ["invoice.payment_failed", "admin.webhook.replay.completed"] and
+          event.subject_type in ["Subscription", "WebhookEvent"]
+    )
+  )
+after
+  Repo.query!("ALTER TABLE accrue_events ENABLE TRIGGER accrue_events_immutable_trigger")
+end
+
+Repo.delete_all(
+  from(webhook in WebhookEvent,
+    where: webhook.processor_event_id in ["evt_host_browser_replay", "evt_host_browser_first_run"]
+  )
+)
+
+Repo.delete_all(
+  from(item in SubscriptionItem,
+    where:
+      item.processor_id == "si_host_browser_replay" or
+        item.subscription_id in subquery(
+          from(subscription in Subscription,
+            where: subscription.customer_id in ^cleanup_customer_ids,
+            select: subscription.id
+          )
+        )
+  )
+)
+
+Repo.delete_all(
+  from(subscription in Subscription,
+    where:
+      subscription.processor_id == "sub_host_browser_replay" or
+        subscription.customer_id in ^cleanup_customer_ids
+  )
+)
+
+Repo.delete_all(
+  from(customer in Customer,
+    where:
+      customer.processor_id == "cus_host_browser_replay" or
+        customer.id in ^cleanup_customer_ids
+  )
+)
+
+Repo.delete_all(
+  from(user in User,
+    where: user.email in ^seeded_emails
+  )
+)
 
 normal_user = create_user.("host-user@example.test", false)
 admin_user = create_user.("host-admin@example.test", true)

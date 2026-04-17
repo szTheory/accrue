@@ -1,4 +1,5 @@
 // @ts-check
+const path = require("node:path");
 const { defineConfig, devices } = require("@playwright/test");
 
 const port = process.env.ACCRUE_HOST_BROWSER_PORT || "4101";
@@ -6,6 +7,7 @@ const baseURL = `http://127.0.0.1:${port}`;
 
 module.exports = defineConfig({
   testDir: "./e2e",
+  globalSetup: path.join(__dirname, "e2e/global-setup.js"),
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: false,
@@ -21,7 +23,7 @@ module.exports = defineConfig({
   webServer: {
     command: `PORT=${port} PHX_SERVER=true MIX_ENV=test mix phx.server`,
     url: `${baseURL}/`,
-    reuseExistingServer: process.env.ACCRUE_HOST_REUSE_SERVER === "1" || !process.env.CI,
+    reuseExistingServer: process.env.ACCRUE_HOST_REUSE_SERVER === "1",
     timeout: 120_000
   },
   projects: [

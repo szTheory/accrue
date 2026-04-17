@@ -28,6 +28,8 @@ button {
   display: grid;
   min-height: 100vh;
   grid-template-columns: 1fr;
+  min-width: 0;
+  width: 100%;
 }
 
 .ax-dev-toolbar,
@@ -117,6 +119,7 @@ button {
 .ax-shell-main {
   flex-direction: column;
   min-width: 0;
+  width: 100%;
 }
 
 .ax-sidebar-brand {
@@ -164,6 +167,7 @@ button {
 .ax-kpi-value {
   font-size: 1.75rem;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .ax-sidebar-nav {
@@ -236,6 +240,7 @@ button {
   margin: 0;
   font-size: 1rem;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .ax-topbar {
@@ -243,12 +248,14 @@ button {
   top: 0;
   z-index: 10;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
   padding: 1rem 1.25rem;
   min-height: 3.5rem;
   border-bottom: 1px solid var(--ax-border);
   background: color-mix(in srgb, var(--ax-base) 88%, transparent);
   backdrop-filter: blur(18px);
+  box-sizing: border-box;
 }
 
 .ax-topbar-actions {
@@ -300,6 +307,9 @@ button {
 
 .ax-shell-content {
   padding: 1.25rem;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .ax-breadcrumbs-list,
@@ -798,12 +808,14 @@ button {
 .ax-page {
   display: grid;
   gap: var(--ax-space-xl);
+  min-width: 0;
 }
 
 .ax-page-header {
   display: grid;
   gap: var(--ax-space-sm);
   max-width: 52rem;
+  min-width: 0;
 }
 
 .ax-card {
@@ -965,6 +977,7 @@ button {
 
 .ax-kpi-grid {
   display: grid;
+  min-width: 0;
 }
 
 .ax-kpi-card {
