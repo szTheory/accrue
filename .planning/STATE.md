@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 14-02-PLAN.md
-last_updated: "2026-04-17T08:09:09.958Z"
+status: verifying
+stopped_at: Completed 14-03-PLAN.md
+last_updated: "2026-04-17T08:13:04.378Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 83
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 Phase: 14 (adoption-front-door) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-17
 
 Progress: v1.2 planned (0/4 phases complete)
@@ -142,6 +142,7 @@ Progress: v1.2 planned (0/4 phases complete)
 | Phase 13-canonical-demo-tutorial P03 | 2min | 3 tasks | 3 files |
 | Phase 14 P01 | 2min | 1 tasks | 4 files |
 | Phase 14 P02 | 2min | 1 tasks | 6 files |
+| Phase 14 P03 | 6min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -384,6 +385,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 14]: The stable first-time setup surface is repeated across the front door and package docs using only public host-owned boundaries.
 - [Phase 14]: Public issue intake is limited to four focused forms with blank issues disabled and private security routing.
 - [Phase 14]: Issue forms require identical no-secrets wording and steer reporters to supported public surfaces instead of private modules.
+- [Phase 14]: Release docs treat Fake as the required deterministic lane, Stripe test mode as provider parity, and live Stripe as advisory/manual before shipping a host app.
+- [Phase 14]: ExUnit owns the release/support semantics while the shell verifier only locks fixed strings in README and RELEASING.
+- [Phase 14]: The summary uses the standard filename 14-03-SUMMARY.md because the plan output block contained a nonstandard path.
 
 ### Pending Todos
 
@@ -409,6 +413,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T08:09:09.696Z
-Stopped at: Completed 14-02-PLAN.md
+Last session: 2026-04-17T08:13:04.374Z
+Stopped at: Completed 14-03-PLAN.md
 Resume file: None
