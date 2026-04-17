@@ -89,17 +89,25 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     insert_attempt_job(webhook.id)
 
-    conn = log_in_user(conn, admin_user)
+    organization = AccrueHost.AccountsFixtures.organization_fixture(%{owner: admin_user})
+
+    conn =
+      conn
+      |> log_in_user(admin_user, active_organization_id: organization.id)
+      |> Plug.Conn.put_session(:active_organization_slug, organization.slug)
+      |> Plug.Conn.put_session(:admin_organization_ids, [organization.id])
 
     assert {:ok, _subscription_view, subscription_html} =
-             live(conn, "/billing/subscriptions/#{subscription.id}")
+             live(conn, "/billing/subscriptions/#{subscription.id}?org=#{organization.slug}")
 
     assert subscription_html =~ subscription.id
     assert subscription_html =~ customer_user.email
     assert subscription_html =~ "price_basic"
     assert subscription_html =~ "active"
 
-    assert {:ok, _webhook_view, webhook_html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert {:ok, _webhook_view, webhook_html} =
+             live(conn, "/billing/webhooks/#{webhook.id}?org=#{organization.slug}")
+
     assert webhook_html =~ webhook.processor_event_id
     assert webhook_html =~ "invoice.payment_failed"
     assert webhook_html =~ "Attempt 3/25"
@@ -111,10 +119,13 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert events_html =~ "invoice.payment_failed"
     assert events_html =~ "activity"
 
-    {:ok, replay_view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    {:ok, replay_view, _html} = live(conn, "/billing/webhooks/#{webhook.id}?org=#{organization.slug}")
 
     replay_html = render_click(element(replay_view, "[data-role='replay-single']"))
-    assert replay_html =~ "Webhook replay requested."
+    assert replay_html =~ "Replay webhook for the active organization?"
+
+    replay_html = render_click(element(replay_view, "[data-role='confirm-replay']"))
+    assert replay_html =~ "Replay requested for the active organization."
 
     updated = Repo.get!(WebhookEvent, webhook.id)
     assert updated.status == :received
@@ -136,6 +147,88 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert audit_event.actor_type == "admin"
     assert audit_event.actor_id == admin_user.id
     assert audit_event.caused_by_webhook_event_id == webhook.id
+  end
+
+  test "ambiguous or out-of-scope webhook replay blocks single and bulk replay without success audits",
+       %{conn: conn} do
+    admin_user =
+      AccrueHost.AccountsFixtures.user_fixture()
+      |> Ecto.Changeset.change(billing_admin: true)
+      |> Repo.update!()
+
+    allowed_org = AccrueHost.AccountsFixtures.organization_fixture(%{owner: admin_user})
+    outsider_org = AccrueHost.AccountsFixtures.organization_fixture()
+
+    assert {:ok, %Subscription{} = outsider_subscription} =
+             Billing.subscribe(outsider_org, "price_basic", trial_end: {:days, 14})
+
+    outsider_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_host_out_scope",
+        type: "invoice.payment_failed",
+        status: :dead,
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_host_out_scope",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => outsider_subscription.processor_id}}
+          }),
+        data: %{
+          "id" => "evt_host_out_scope",
+          "type" => "invoice.payment_failed",
+          "data" => %{"object" => %{"id" => outsider_subscription.processor_id}}
+        }
+      })
+
+    ambiguous_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_host_ambiguous",
+        type: "invoice.payment_failed",
+        status: :dead,
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_host_ambiguous",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => "in_unknown"}}
+          }),
+        data: %{
+          "id" => "evt_host_ambiguous",
+          "type" => "invoice.payment_failed",
+          "data" => %{"object" => %{"id" => "in_unknown"}}
+        }
+      })
+
+    conn =
+      conn
+      |> log_in_user(admin_user, active_organization_id: allowed_org.id)
+      |> Plug.Conn.put_session(:active_organization_slug, allowed_org.slug)
+      |> Plug.Conn.put_session(:admin_organization_ids, [allowed_org.id])
+
+    assert {:error, {:redirect, %{to: "/billing/webhooks?org=" <> _slug, flash: flash_token}}} =
+             live(conn, "/billing/webhooks/#{outsider_webhook.id}?org=#{allowed_org.slug}")
+
+    assert %{"error" => "You don't have access to billing for this organization."} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueHostWeb.Endpoint, flash_token)
+
+    assert {:ok, _view, ambiguous_html} =
+             live(conn, "/billing/webhooks/#{ambiguous_webhook.id}?org=#{allowed_org.slug}")
+
+    assert ambiguous_html =~
+             "Ownership couldn&#39;t be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
+
+    {:ok, bulk_view, _html} =
+      live(conn, "/billing/webhooks?status=dead&type=invoice.payment_failed&org=#{allowed_org.slug}")
+
+    bulk_html = render_click(element(bulk_view, "[data-role='prepare-bulk-replay']"))
+    assert bulk_html =~ "No failed or dead-lettered webhook rows match the current filters."
+
+    assert Repo.aggregate(
+             from(event in Event,
+               where: event.type == "admin.webhook.replay.completed"
+             ),
+             :count,
+             :id
+           ) == 0
   end
 
   defp insert_webhook(attrs) do
