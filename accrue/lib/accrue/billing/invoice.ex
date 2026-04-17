@@ -57,6 +57,8 @@ defmodule Accrue.Billing.Invoice do
     # D3-14 rollup columns
     field(:subtotal_minor, :integer)
     field(:tax_minor, :integer)
+    field(:automatic_tax, :boolean, default: false)
+    field(:automatic_tax_status, :string)
     field(:discount_minor, :integer)
     field(:total_discount_amounts, :map, default: %{})
     field(:total_minor, :integer)
@@ -85,7 +87,7 @@ defmodule Accrue.Billing.Invoice do
   @cast_fields ~w[
     customer_id subscription_id processor processor_id
     status total_cents currency due_date paid_at
-    subtotal_minor tax_minor discount_minor total_discount_amounts total_minor
+    subtotal_minor tax_minor automatic_tax automatic_tax_status discount_minor total_discount_amounts total_minor
     amount_due_minor amount_paid_minor amount_remaining_minor
     number hosted_url pdf_url period_start period_end
     collection_method billing_reason finalized_at voided_at
