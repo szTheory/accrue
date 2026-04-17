@@ -39,7 +39,7 @@
 - [ ] Phase 13: Canonical Demo + Tutorial — make `examples/accrue_host` the polished local demo and tutorial proof path.
 - [x] Phase 14: Adoption Front Door — align repository/package docs, issue templates, release guidance, and public support positioning. (completed 2026-04-17)
 - [x] Phase 15: Trust Hardening — add security, performance, compatibility, accessibility/responsive, secret/PII, and release-gate confidence checks. (completed 2026-04-17)
-- [ ] Phase 16: Expansion Discovery — evaluate and rank tax, revenue/export, additional processor, and org/multi-tenant billing options for the next implementation milestone.
+- [x] Phase 16: Expansion Discovery — evaluate and rank tax, revenue/export, additional processor, and org/multi-tenant billing options for the next implementation milestone. (completed 2026-04-17)
 
 </details>
 
@@ -109,12 +109,12 @@ Plans:
 
 **Requirements:** DISC-01, DISC-02, DISC-03, DISC-04, DISC-05
 
-**Plans:** 2/3 plans complete
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 16-01-PLAN.md — Create the canonical expansion recommendation artifact and its docs contract.
 - [x] 16-02-PLAN.md — Verify the recommendation artifact and persist the ranking outcome in planning records.
-- [ ] 16-03-PLAN.md — Close the ranking-contract verification gap for DISC-05.
+- [x] 16-03-PLAN.md — Close the ranking-contract verification gap for DISC-05.
 
 **Success criteria:**
 1. Tax, revenue/export, additional processor, and org/multi-tenant options each have a decision-quality recommendation.
@@ -144,7 +144,7 @@ Plans:
 | 13. Canonical Demo + Tutorial | v1.2 | 3/3 | Complete   | 2026-04-17 |
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 15. Trust Hardening | v1.2 | 3/3 | Complete    | 2026-04-17 |
-| 16. Expansion Discovery | v1.2 | 2/3 | Gaps Found | — |
+| 16. Expansion Discovery | v1.2 | 3/3 | Complete   | 2026-04-17 |
 
 ---
 
