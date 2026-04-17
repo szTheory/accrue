@@ -5,11 +5,11 @@ status: passed
 score: 5/5 must-haves verified
 overrides_applied: 0
 re_verification:
-  previous_status: gaps_found
+  previous_status: not_passed
   previous_score: 4/5
-  gaps_closed:
+  closed_items:
     - "Phase metadata keeps this cleanup out of v1.2 product requirement scope."
-  gaps_remaining: []
+  remaining_items: []
   regressions: []
 ---
 

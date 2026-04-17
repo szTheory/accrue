@@ -165,7 +165,7 @@ Planned work:
 | 14. Adoption Front Door | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 15. Trust Hardening | v1.2 | 3/3 | Complete    | 2026-04-17 |
 | 16. Expansion Discovery | v1.2 | 3/3 | Complete    | 2026-04-17 |
-| 17. Milestone Closure Cleanup | v1.2 | 1/1 | Complete   | 2026-04-17 |
+| 17. Milestone Closure Cleanup | v1.2 | 1/1 | Complete    | 2026-04-17 |
 
 ---
 
