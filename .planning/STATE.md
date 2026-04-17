@@ -4,17 +4,17 @@ milestone: v1.3
 milestone_name: Tax + Organization Billing
 current_phase: 20
 current_phase_name: Organization Billing With Sigra
-current_plan: 20-05
+current_plan: 20-06
 status: ready_to_execute
-stopped_at: Completed 20-04; ready to execute 20-05
-last_updated: "2026-04-17T20:17:28Z"
+stopped_at: Completed 20-05; ready to execute 20-06
+last_updated: "2026-04-17T20:25:32Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 6
-  completed_plans: 4
-  percent: 60
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -32,22 +32,22 @@ Phase: 20
 Plan: 20-05
 **Current Phase:** 20
 **Current Phase Name:** Organization Billing With Sigra
-**Current Plan:** 20-05
+**Current Plan:** 20-06
 **Status:** Ready to Execute
-**Stopped At:** Completed 20-04; ready to execute 20-05
-**Resume File:** `.planning/phases/20-organization-billing-with-sigra/20-05-PLAN.md`
+**Stopped At:** Completed 20-05; ready to execute 20-06
+**Resume File:** `.planning/phases/20-organization-billing-with-sigra/20-06-PLAN.md`
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
 
 **Milestone:** v1.3 Tax + Organization Billing
-**Progress:** [██████----] 60%
+**Progress:** [████████--] 83%
 
 | Phase | Status | Notes |
 |-------|--------|-------|
 | 18. Stripe Tax Core | Complete | `18-01` through `18-04` shipped; TAX-01 is complete |
 | 19. Tax Location and Rollout Safety | Complete | `19-01` shipped sanitized processor tax-location validation; `19-02` shipped the public tax-location billing facade and focused TAX-02 coverage; `19-03` shipped local rollback observability and invoice failure reconciliation; `19-04` shipped admin tax-risk visibility plus the host repair path; `19-05` shipped rollout-safety and live Stripe recovery guidance for TAX-04 |
-| 20. Organization Billing With Sigra | In progress | `20-01` shipped Sigra dependency wiring, concrete organization schemas, and ORG-01 billing proof; `20-02` shipped Sigra-hydrated active-org billing on `/app/billing`; `20-03` shipped admin owner-scope session threading and host mount proof; `20-04` shipped owner-aware admin query loaders and webhook ambiguity proof; `20-05` is next |
+| 20. Organization Billing With Sigra | In progress | `20-01` shipped Sigra dependency wiring, concrete organization schemas, and ORG-01 billing proof; `20-02` shipped Sigra-hydrated active-org billing on `/app/billing`; `20-03` shipped admin owner-scope session threading and host mount proof; `20-04` shipped owner-aware admin query loaders and webhook ambiguity proof; `20-05` shipped denial redirects plus owner-scoped event feeds; `20-06` is next |
 | 21. Admin and Host UX Proof | Pending | Browser/admin proof for tax and org billing states |
 | 22. Finance Handoff and Milestone Verification | Pending | Stripe-native finance handoff and closure verification |
 
@@ -92,7 +92,9 @@ Plan: 20-05
 - Owner scope now resolves once during `AccrueAdmin.AuthHook.on_mount/4`, and downstream admin work should read `current_owner_scope` instead of re-parsing session state.
 - Admin query modules now enforce ORG-03 row proof directly: customer, subscription, and invoice loaders join back to organization-owned customer rows before returning data.
 - Webhook loaders now distinguish `{:ok, row}`, `:not_found`, and `{:ambiguous, proof_context}`, and scoped bulk replay counts derive from those proofed loaders instead of global DLQ totals.
+- Customer and subscription detail routes now treat out-of-scope owner-aware loader misses as redirects to the scoped index with the exact denial flash copy.
+- Shared admin list queries now receive `current_owner_scope`, and event-feed owner proof compares billing UUIDs as text so active-organization event pages fail closed instead of leaking or crashing.
 
 ## Next Action
 
-Execute `20-05-PLAN.md` to apply owner-aware loader results to admin LiveView denial copy and redirects.
+Execute `20-06-PLAN.md` to finish webhook ambiguity handling and end-to-end host-mounted denial proof.
