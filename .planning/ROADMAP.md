@@ -61,7 +61,14 @@ Plans:
 3. Invoice finalization failure or automatic-tax invalid-location states are visible in local projections, admin surfaces, or troubleshooting docs.
 4. Existing subscription rollout docs explain that enabling Stripe Tax/configuring automatic collection does not update existing subscriptions, invoices, or payment links automatically.
 
-**Plans:** TBD by `$gsd-plan-phase 19`
+**Plans:** 5 plans
+
+Plans:
+- [ ] `19-01-PLAN.md` — Add processor-side tax-location validation, safe error mapping, and deterministic Fake invalid-location behavior.
+- [ ] `19-02-PLAN.md` — Add the public `Accrue.Billing.update_customer_tax_location/2` path and focused TAX-02 billing coverage.
+- [ ] `19-03-PLAN.md` — Persist and reconcile disabled-reason / finalization-failure state for recurring invalid-location rollout issues.
+- [ ] `19-04-PLAN.md` — Surface local tax-risk state in admin detail views and the canonical host billing flow.
+- [ ] `19-05-PLAN.md` — Add rollout-safety and invalid-location recovery guidance to troubleshooting and live Stripe docs.
 
 ### Phase 20: Organization Billing With Sigra
 
@@ -136,7 +143,7 @@ Plans:
 | 16. Expansion Discovery | v1.2 | 3/3 | Complete | 2026-04-17 |
 | 17. Milestone Closure Cleanup | v1.2 | 1/1 | Complete | 2026-04-17 |
 | 18. Stripe Tax Core | v1.3 | 4/4 | Complete | 2026-04-17 |
-| 19. Tax Location and Rollout Safety | v1.3 | 0/0 | Pending | |
+| 19. Tax Location and Rollout Safety | v1.3 | 0/5 | Pending | |
 | 20. Organization Billing With Sigra | v1.3 | 0/0 | Pending | |
 | 21. Admin and Host UX Proof | v1.3 | 0/0 | Pending | |
 | 22. Finance Handoff and Milestone Verification | v1.3 | 0/0 | Pending | |
