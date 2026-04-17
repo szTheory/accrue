@@ -6,12 +6,17 @@ defmodule AccrueHostWeb.SubscriptionLive do
   alias AccrueHost.Billing
   alias AccrueHost.Billing.Plans
 
-  @empty_state_heading "No billing activity yet"
-  @empty_state_body "Billing records appear after a user starts a subscription or a webhook is processed. Start a subscription or review the webhook feed."
-  @error_copy "We couldn't complete that billing action. Check auth, migrations, webhook signing, or processor setup, then try again."
-  @cancel_copy "Cancel subscription: Confirm cancellation before ending access."
+  @active_organization_label "Active organization"
+  @active_organization_helper "Billing actions apply to the active organization only."
+  @empty_state_heading "No organization billing activity yet"
+  @empty_state_body "Billing records appear after an organization starts a subscription or a webhook is processed. Start the organization subscription or review webhook activity for this organization."
+  @error_copy "We couldn't complete that billing action for the active organization. Check organization access, billing setup, or webhook processing, then try again."
+  @cancel_copy "Cancel organization subscription: Confirm cancellation before ending organization access."
   @tax_location_repair_copy "Please update customer address or shipping before enabling automatic tax."
   @tax_location_success_copy "Tax location saved. Start the subscription again when you're ready."
+  @member_denial_copy "Billing is managed by organization admins. You can review the current billing state, but you can't change it."
+  @no_active_organization_copy "Select an active organization before managing billing."
+  @start_subscription_copy "Start organization subscription"
 
   @impl true
   def mount(_params, _session, socket) do
@@ -24,9 +29,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
   @impl true
   def handle_event("start_subscription", %{"plan" => plan_id} = params, socket) do
-    user = socket.assigns.current_scope.user
-
-    case Billing.subscribe(user, plan_id,
+    case Billing.subscribe_active_organization(socket.assigns.current_scope, plan_id,
            automatic_tax: true,
            operation_id: operation_id(params, "subscribe")
          ) do
@@ -40,9 +43,15 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
       {:error, %APIError{code: "customer_tax_location_invalid"}} ->
         {:noreply,
-         socket
+        socket
          |> assign(:tax_location_error, @tax_location_repair_copy)
          |> put_flash(:error, @tax_location_repair_copy)}
+
+      {:error, :no_active_organization} ->
+        {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
+
+      {:error, :forbidden} ->
+        {:noreply, put_flash(socket, :error, @member_denial_copy)}
 
       {:error, _reason} ->
         {:noreply, put_flash(socket, :error, @error_copy)}
@@ -50,9 +59,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   def handle_event("update_tax_location", %{"tax_location" => params}, socket) do
-    user = socket.assigns.current_scope.user
-
-    case Billing.update_customer_tax_location(user, tax_location_attrs(params)) do
+    case Billing.update_active_organization_tax_location(
+           socket.assigns.current_scope,
+           tax_location_attrs(params)
+         ) do
       {:ok, _customer} ->
         {:noreply,
          socket
@@ -68,6 +78,18 @@ defmodule AccrueHostWeb.SubscriptionLive do
          |> assign(:tax_location_form, tax_location_defaults(params))
          |> put_flash(:error, @tax_location_repair_copy)}
 
+      {:error, :no_active_organization} ->
+        {:noreply,
+         socket
+         |> assign(:tax_location_form, tax_location_defaults(params))
+         |> put_flash(:error, @no_active_organization_copy)}
+
+      {:error, :forbidden} ->
+        {:noreply,
+         socket
+         |> assign(:tax_location_form, tax_location_defaults(params))
+         |> put_flash(:error, @member_denial_copy)}
+
       {:error, _reason} ->
         {:noreply,
          socket
@@ -77,7 +99,11 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   def handle_event("request_cancel", _params, socket) do
-    {:noreply, assign(socket, :confirm_cancel, true)}
+    if billing_locked?(socket.assigns.access_state) do
+      {:noreply, put_flash(socket, :error, access_message(socket.assigns.access_state))}
+    else
+      {:noreply, assign(socket, :confirm_cancel, true)}
+    end
   end
 
   def handle_event("dismiss_cancel", _params, socket) do
@@ -87,13 +113,23 @@ defmodule AccrueHostWeb.SubscriptionLive do
   def handle_event("confirm_cancel", params, socket) do
     case socket.assigns.subscription do
       %Subscription{} = subscription ->
-        case Billing.cancel(subscription, operation_id: operation_id(params, "cancel")) do
+        case Billing.cancel_active_organization(
+               socket.assigns.current_scope,
+               subscription,
+               operation_id: operation_id(params, "cancel")
+             ) do
           {:ok, _updated_subscription} ->
             {:noreply,
              socket
              |> put_flash(:info, "Subscription canceled.")
              |> assign(:confirm_cancel, false)
              |> load_state()}
+
+          {:error, :no_active_organization} ->
+            {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
+
+          {:error, :forbidden} ->
+            {:noreply, put_flash(socket, :error, @member_denial_copy)}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, @error_copy)}
@@ -115,11 +151,25 @@ defmodule AccrueHostWeb.SubscriptionLive do
               <p style={eyebrow_style()}>Account billing</p>
               <h1 style={heading_style()}>Choose a plan</h1>
               <p style={body_style()}>
-                Start a Fake-backed subscription from the signed-in host app.
+                Billing for the signed-in host follows the active organization only.
               </p>
             </div>
             <.link navigate={~p"/"} style={link_style()}>Back home</.link>
           </div>
+
+          <section style={card_style()}>
+            <div style={section_header_style()}>
+              <div>
+                <p style={label_style()}>{@active_organization_label}</p>
+                <h2 style={section_heading_style()}>{active_organization_name(@current_scope)}</h2>
+                <p style={muted_body_style()}>{@active_organization_helper}</p>
+              </div>
+            </div>
+
+            <p :if={@access_message} style={warning_copy_style()}>
+              {@access_message}
+            </p>
+          </section>
 
           <%= if @subscription do %>
             <section style={card_style()}>
@@ -127,7 +177,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 <div>
                   <h2 style={section_heading_style()}>Current subscription</h2>
                   <p style={muted_body_style()}>
-                    State persists through <code style={code_style()}>AccrueHost.Billing</code>.
+                    Organization billing state is resolved through <code style={code_style()}>AccrueHost.Billing</code>.
                   </p>
                 </div>
               </div>
@@ -156,16 +206,27 @@ defmodule AccrueHostWeb.SubscriptionLive do
                       phx-click="confirm_cancel"
                       phx-value-operation_id={@cancel_operation_id}
                       style={destructive_button_style()}
+                      disabled={@billing_locked?}
                     >
                       Confirm cancellation
                     </button>
-                    <button type="button" phx-click="dismiss_cancel" style={secondary_button_style()}>
+                    <button
+                      type="button"
+                      phx-click="dismiss_cancel"
+                      style={secondary_button_style()}
+                      disabled={@billing_locked?}
+                    >
                       Keep subscription
                     </button>
                   </div>
                 <% else %>
-                  <button type="button" phx-click="request_cancel" style={secondary_button_style()}>
-                    Cancel subscription
+                  <button
+                    type="button"
+                    phx-click="request_cancel"
+                    style={secondary_button_style()}
+                    disabled={@billing_locked?}
+                  >
+                    Cancel organization subscription
                   </button>
                 <% end %>
               </div>
@@ -183,7 +244,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 <p style={eyebrow_style()}>Tax location</p>
                 <h2 style={section_heading_style()}>Repair automatic tax input</h2>
                 <p style={muted_body_style()}>
-                  Save the customer billing address before starting a tax-enabled subscription.
+                  Save the customer billing address before starting a tax-enabled organization subscription.
                 </p>
                 <p style={muted_body_style()}>
                   {@tax_location_repair_copy}
@@ -206,6 +267,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
               phx-submit="update_tax_location"
               style={tax_location_form_style()}
             >
+              <input type="hidden" name="organization_id" value="ignored-client-org" />
               <label style={field_label_style()}>
                 Street address
                 <input
@@ -256,7 +318,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 />
               </label>
 
-              <button type="submit" style={secondary_button_style()}>
+              <button type="submit" style={secondary_button_style()} disabled={@billing_locked?}>
                 Save tax location
               </button>
             </.form>
@@ -281,10 +343,11 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 phx-value-operation_id={Map.fetch!(@plan_operation_ids, plan.id)}
                 style={primary_button_style(plan.id == active_plan_id(@subscription))}
                 disabled={
-                  plan.id == active_plan_id(@subscription) && !Subscription.canceled?(@subscription)
+                  @billing_locked? ||
+                    (plan.id == active_plan_id(@subscription) && !Subscription.canceled?(@subscription))
                 }
               >
-                Start subscription
+                {@start_subscription_copy}
               </button>
             </article>
           </section>
@@ -295,16 +358,27 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp load_state(socket) do
-    {:ok, %{customer: customer, subscription: subscription}} =
-      Billing.billing_state_for(socket.assigns.current_scope.user)
+    access_state = access_state(socket.assigns.current_scope)
+
+    {customer, subscription} =
+      case Billing.billing_state_for_scope(socket.assigns.current_scope) do
+        {:ok, %{customer: customer, subscription: subscription}} -> {customer, subscription}
+        {:error, :no_active_organization} -> {nil, nil}
+      end
 
     socket
     |> assign(:plans, Plans.all())
     |> assign_action_operation_ids()
+    |> assign(:active_organization_label, @active_organization_label)
+    |> assign(:active_organization_helper, @active_organization_helper)
+    |> assign(:start_subscription_copy, @start_subscription_copy)
     |> assign(:empty_state_heading, @empty_state_heading)
     |> assign(:empty_state_body, @empty_state_body)
     |> assign(:cancel_copy, @cancel_copy)
     |> assign(:tax_location_repair_copy, @tax_location_repair_copy)
+    |> assign(:access_state, access_state)
+    |> assign(:access_message, access_message(access_state))
+    |> assign(:billing_locked?, billing_locked?(access_state))
     |> assign_new(:tax_location_error, fn -> nil end)
     |> assign_new(:tax_location_form, fn -> empty_tax_location_form() end)
     |> assign(:customer, customer)
@@ -328,6 +402,20 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp operation_id(_params, prefix), do: "#{prefix}:#{Ecto.UUID.generate()}"
+
+  defp access_state(%{active_organization: nil}), do: :no_active_organization
+  defp access_state(%{membership: %{role: role}}) when role in [:owner, :admin], do: :admin
+  defp access_state(%{active_organization: _organization}), do: :member
+
+  defp access_message(:admin), do: nil
+  defp access_message(:member), do: @member_denial_copy
+  defp access_message(:no_active_organization), do: @no_active_organization_copy
+
+  defp billing_locked?(:admin), do: false
+  defp billing_locked?(_state), do: true
+
+  defp active_organization_name(%{active_organization: %{name: name}}), do: name
+  defp active_organization_name(_scope), do: "No active organization selected"
 
   defp active_plan_id(nil), do: nil
 

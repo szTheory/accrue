@@ -6,6 +6,7 @@ defmodule AccrueHostWeb.UserAuth do
 
   alias AccrueHost.Accounts
   alias AccrueHost.Accounts.Scope
+  alias AccrueHost.Organizations
 
   # Make the remember me cookie valid for 14 days. This should match
   # the session validity setting in UserToken.
@@ -67,8 +68,10 @@ defmodule AccrueHostWeb.UserAuth do
   def fetch_current_scope_for_user(conn, _opts) do
     with {token, conn} <- ensure_user_token(conn),
          {user, token_inserted_at} <- Accounts.get_user_by_session_token(token) do
+      {conn, current_scope} = load_current_scope(conn, user)
+
       conn
-      |> assign(:current_scope, Scope.for_user(user))
+      |> assign(:current_scope, current_scope)
       |> maybe_reissue_user_session_token(user, token_inserted_at)
     else
       nil -> assign(conn, :current_scope, Scope.for_user(nil))
@@ -252,8 +255,57 @@ defmodule AccrueHostWeb.UserAuth do
           Accounts.get_user_by_session_token(user_token)
         end || {nil, nil}
 
-      Scope.for_user(user)
+      scope = Scope.for_user(user)
+
+      case hydrate_scope(scope, sigra_session_from_session(session)) do
+        {:ok, hydrated_scope, _sigra_session} -> hydrated_scope
+        {:error, fallback_scope, _sigra_session} -> fallback_scope
+      end
     end)
+  end
+
+  defp load_current_scope(conn, user) do
+    scope = Scope.for_user(user)
+
+    case hydrate_scope(scope, sigra_session_for_conn(conn)) do
+      {:ok, hydrated_scope, sigra_session} ->
+        {conn |> put_private(:sigra_session, sigra_session), hydrated_scope}
+
+      {:error, fallback_scope, sigra_session} ->
+        {conn |> delete_session(:active_organization_id) |> put_private(:sigra_session, sigra_session),
+         fallback_scope}
+    end
+  end
+
+  defp hydrate_scope(nil, _sigra_session), do: {:ok, nil, nil}
+
+  defp hydrate_scope(scope, %Sigra.Session{} = sigra_session) do
+    org_config = Organizations.__sigra_org_config__()
+
+    case Sigra.Scope.Hydration.hydrate(scope, org_config, sigra_session) do
+      {:ok, hydrated_scope} ->
+        {:ok, hydrated_scope, sigra_session}
+
+      {:error, _reason} ->
+        cleared_scope = Scope.put_active_organization(scope, nil, nil)
+        {:error, cleared_scope, %{sigra_session | active_organization_id: nil}}
+    end
+  end
+
+  defp sigra_session_for_conn(conn) do
+    conn
+    |> get_session(:active_organization_id)
+    |> build_sigra_session()
+  end
+
+  defp sigra_session_from_session(session) when is_map(session) do
+    session
+    |> Map.get("active_organization_id", Map.get(session, :active_organization_id))
+    |> build_sigra_session()
+  end
+
+  defp build_sigra_session(active_organization_id) do
+    %Sigra.Session{active_organization_id: active_organization_id}
   end
 
   @doc "Returns the path to redirect to after log in."

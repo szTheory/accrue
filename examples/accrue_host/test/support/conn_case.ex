@@ -70,11 +70,18 @@ defmodule AccrueHostWeb.ConnCase do
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user_token, token)
+    |> maybe_put_active_organization_id(opts[:active_organization_id])
   end
 
   defp maybe_set_token_authenticated_at(_token, nil), do: nil
 
   defp maybe_set_token_authenticated_at(token, authenticated_at) do
     AccrueHost.AccountsFixtures.override_token_authenticated_at(token, authenticated_at)
+  end
+
+  defp maybe_put_active_organization_id(conn, nil), do: conn
+
+  defp maybe_put_active_organization_id(conn, active_organization_id) do
+    Plug.Conn.put_session(conn, :active_organization_id, active_organization_id)
   end
 end

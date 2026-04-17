@@ -12,7 +12,10 @@ defmodule AccrueHost.Billing do
   alias Accrue.Billing
   alias Accrue.Billing.Customer
   alias Accrue.Billing.Subscription
+  alias AccrueHost.Accounts.Scope
   alias AccrueHost.Repo
+
+  @admin_roles [:owner, :admin]
 
   # Host policy hook: authorize who may subscribe this billable.
   def subscribe(billable, price_id, opts \\ []) do
@@ -50,6 +53,62 @@ defmodule AccrueHost.Billing do
       Billing.update_customer_tax_location(customer, attrs)
     end
   end
+
+  def organization_from_scope!(%Scope{} = scope) do
+    case organization_from_scope(scope) do
+      {:ok, organization} -> organization
+      {:error, :no_active_organization} -> raise ArgumentError, "scope has no active organization"
+    end
+  end
+
+  def customer_for_scope(%Scope{} = scope) do
+    with {:ok, organization} <- organization_from_scope(scope) do
+      customer_for(organization)
+    end
+  end
+
+  def billing_state_for_scope(%Scope{} = scope) do
+    with {:ok, organization} <- organization_from_scope(scope) do
+      billing_state_for(organization)
+    end
+  end
+
+  def subscribe_active_organization(%Scope{} = scope, price_id, opts \\ []) do
+    with {:ok, organization} <- organization_from_scope(scope),
+         :ok <- authorize_billing_mutation(scope) do
+      subscribe(organization, price_id, opts)
+    end
+  end
+
+  def update_active_organization_tax_location(%Scope{} = scope, attrs) when is_map(attrs) do
+    with {:ok, organization} <- organization_from_scope(scope),
+         :ok <- authorize_billing_mutation(scope) do
+      update_customer_tax_location(organization, attrs)
+    end
+  end
+
+  def cancel_active_organization(%Scope{} = scope, %Subscription{} = subscription, opts \\ []) do
+    with {:ok, %{subscription: %Subscription{id: current_id}}} <- billing_state_for_scope(scope),
+         :ok <- authorize_billing_mutation(scope),
+         true <- current_id == subscription.id do
+      cancel(subscription, opts)
+    else
+      false -> {:error, :forbidden}
+      {:ok, %{subscription: nil}} -> {:error, :forbidden}
+      {:error, _reason} = error -> error
+    end
+  end
+
+  defp organization_from_scope(%Scope{active_organization: nil}), do: {:error, :no_active_organization}
+  defp organization_from_scope(%Scope{active_organization: organization}), do: {:ok, organization}
+
+  defp authorize_billing_mutation(%Scope{active_organization: nil}), do: {:error, :no_active_organization}
+
+  defp authorize_billing_mutation(%Scope{membership: %{role: role}})
+       when role in @admin_roles,
+       do: :ok
+
+  defp authorize_billing_mutation(%Scope{}), do: {:error, :forbidden}
 
   defp find_customer(%{__struct__: mod, id: id}) do
     billable_type = mod.__accrue__(:billable_type)

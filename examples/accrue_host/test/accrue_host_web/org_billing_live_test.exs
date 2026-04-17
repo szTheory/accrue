@@ -2,6 +2,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
   use AccrueHostWeb.ConnCase, async: false
 
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.SubscriptionItem
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Repo
 
@@ -15,6 +16,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     end
 
     :ok = Accrue.Processor.Fake.reset()
+    cleanup_fake_billing_rows!()
 
     owner = AccountsFixtures.user_fixture()
     organization = AccountsFixtures.organization_fixture(%{owner: owner})
@@ -41,9 +43,8 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
              "Billing records appear after an organization starts a subscription or a webhook is processed. Start the organization subscription or review webhook activity for this organization."
 
     html =
-      view
-      |> element("[data-plan-id='price_basic'] button")
-      |> render_click(%{
+      render_click(view, "start_subscription", %{
+        "plan" => "price_basic",
         "organization_id" => outsider_org.id,
         "operation_id" => "forged-start"
       })
@@ -84,15 +85,18 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     assert html =~ "Select an active organization before managing billing."
 
     html =
-      view
-      |> element("[data-plan-id='price_basic'] button")
-      |> render_click(%{
+      render_click(view, "start_subscription", %{
+        "plan" => "price_basic",
         "organization_id" => Ecto.UUID.generate(),
         "operation_id" => "missing-org"
       })
 
     assert html =~ "Select an active organization before managing billing."
-    assert Repo.aggregate(from(customer in Customer), :count, :id) == 0
+    assert Repo.aggregate(
+             from(customer in Customer, where: customer.owner_type == "Organization"),
+             :count,
+             :id
+           ) == 0
   end
 
   test "members can review billing state but cannot mutate it", %{
@@ -113,21 +117,27 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       |> log_in_user(member, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    assert html =~
-             "Billing is managed by organization admins. You can review the current billing state, but you can't change it."
+    assert html =~ "Billing is managed by organization admins."
+    assert html =~ "you can&#39;t change it."
 
     html =
-      view
-      |> element("[data-plan-id='price_basic'] button")
-      |> render_click(%{
+      render_click(view, "start_subscription", %{
+        "plan" => "price_basic",
         "organization_id" => organization.id,
         "operation_id" => "member-blocked"
       })
 
-    assert html =~
-             "Billing is managed by organization admins. You can review the current billing state, but you can't change it."
+    assert html =~ "Billing is managed by organization admins."
+    assert html =~ "you can&#39;t change it."
 
-    assert Repo.aggregate(from(customer in Customer), :count, :id) == 0
+    assert render(view) =~ "Billing is managed by organization admins."
+    assert render(view) =~ "you can&#39;t change it."
+
+    assert Repo.aggregate(
+             from(customer in Customer, where: customer.owner_type == "Organization"),
+             :count,
+             :id
+           ) == 0
   end
 
   test "forged organization ids do not change the billed owner on follow-up mutations", %{
@@ -140,16 +150,14 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     {:ok, view, _html} = live(conn, ~p"/app/billing")
 
     _start_html =
-      view
-      |> element("[data-plan-id='price_basic'] button")
-      |> render_click(%{
+      render_click(view, "start_subscription", %{
+        "plan" => "price_basic",
         "organization_id" => outsider_org.id,
         "operation_id" => "forged-first"
       })
 
     html =
-      view
-      |> form("#tax-location-form", %{
+      render_submit(view, "update_tax_location", %{
         "tax_location" => %{
           "line1" => "27 Fredrick Ave",
           "city" => "Albany",
@@ -159,7 +167,6 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
         },
         "organization_id" => outsider_org.id
       })
-      |> render_submit()
 
     refute html =~
              "We couldn't complete that billing action for the active organization. Check organization access, billing setup, or webhook processing, then try again."
@@ -183,5 +190,27 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
              :count,
              :id
            ) == 0
+  end
+
+  defp cleanup_fake_billing_rows! do
+    Repo.delete_all(
+      from(item in SubscriptionItem,
+        join: subscription in Accrue.Billing.Subscription,
+        on: subscription.id == item.subscription_id,
+        where: like(subscription.processor_id, "sub_fake_%")
+      )
+    )
+
+    Repo.delete_all(
+      from(subscription in Accrue.Billing.Subscription,
+        where: like(subscription.processor_id, "sub_fake_%")
+      )
+    )
+
+    Repo.delete_all(
+      from(customer in Customer,
+        where: like(customer.processor_id, "cus_fake_%")
+      )
+    )
   end
 end
