@@ -26,6 +26,8 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 - CI runs a Fake-backed host integration gate with Playwright browser coverage, retained failure artifacts, Hex-mode smoke validation, and warning/error annotation sweeps.
 - First-user DX is hardened through installer no-clobber reruns, conflict sidecars, shared setup diagnostics, host-first docs, troubleshooting anchors, and package-doc verification.
 
+Phase 14 of v1.2 is complete: the repository front door, package landing pages, issue templates, release guidance, and package-doc drift checks now give new adopters a clear starting point, support path, and Fake/test/live Stripe validation model.
+
 Milestone history and requirements are archived in `.planning/milestones/`.
 
 ## Current Milestone: v1.2 Adoption + Trust
@@ -57,8 +59,8 @@ v1.1 Stabilization + Adoption shipped and validated on 2026-04-17. Detailed requ
 v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
 
 - [ ] Phoenix developers can clone the repository, run the canonical local demo, create a Fake-backed subscription, inspect/replay billing state in admin, and run the focused proof suite without hidden state.
-- [ ] New users can follow a host-first tutorial and docs front door that explains the correct integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices.
-- [ ] Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice.
+- [x] New users can follow a host-first tutorial and docs front door that explains the correct integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices. Validated in Phase 14: Adoption Front Door.
+- [x] Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice. Validated in Phase 14: Adoption Front Door.
 - [ ] Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release.
 - [ ] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API.
 
