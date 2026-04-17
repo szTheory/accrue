@@ -149,6 +149,7 @@ defmodule AccrueHost.MixProject do
       "test/accrue_host/billing_facade_test.exs",
       "test/accrue_host_web/subscription_flow_test.exs",
       "test/accrue_host_web/webhook_ingest_test.exs",
+      "test/accrue_host_web/trust_smoke_test.exs",
       "test/accrue_host_web/admin_webhook_replay_test.exs",
       "test/accrue_host_web/admin_mount_test.exs"
     ]

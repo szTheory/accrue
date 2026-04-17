@@ -21,15 +21,22 @@ defmodule AccrueHostWeb.TrustSmokeTest do
     payload = signed_subscription_payload(subscription.processor_id, processor_event_id)
     signature = LatticeStripe.Webhook.generate_test_signature(payload, @webhook_secret)
 
+    # Measure only the request path: verify signature -> persist webhook row -> enqueue Oban job.
     {elapsed_us, conn} = :timer.tc(fn -> post_webhook(payload, signature) end)
     elapsed_ms = System.convert_time_unit(elapsed_us, :microsecond, :millisecond)
 
     assert conn.status == 200
     assert %{"ok" => true} = Jason.decode!(conn.resp_body)
     assert Repo.aggregate(WebhookEvent, :count) == 1
+    assert Repo.aggregate(Oban.Job, :count) == 1
+
+    webhook = Repo.get_by!(WebhookEvent, processor_event_id: processor_event_id)
+
+    assert webhook.type == "customer.subscription.created"
+    assert webhook.status == :received
 
     assert elapsed_ms <= budget_ms,
-           "release-blocking webhook ingest smoke failed: #{elapsed_ms}ms exceeded #{budget_ms}ms"
+           "release-blocking webhook ingest smoke failed: #{elapsed_ms}ms exceeded #{budget_ms}ms on verify signature -> persist webhook row -> enqueue Oban job"
   end
 
   defp post_webhook(payload, signature) do
