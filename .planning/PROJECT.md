@@ -28,13 +28,16 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 
 Milestone history and requirements are archived in `.planning/milestones/`.
 
-## Next Milestone Goals
+## Current Milestone: v1.2 Adoption + Trust
 
-The next milestone is not defined yet. Candidate themes to validate through `$gsd-new-milestone`:
+**Goal:** Make Accrue feel ready for a new Phoenix team to evaluate, integrate, and trust by polishing the canonical demo/onboarding path, adding mature-library quality signals, and deciding the next expansion bet without partially implementing it.
 
-- Adoption assets: maintained example/demo path, tutorial docs, README positioning, issue templates, and release guidance.
-- Quality hardening: security, performance, compatibility, accessibility/responsive admin checks, and clearer release-gate boundaries.
-- Expansion discovery: tax, revenue exports, additional processors, and organization/multi-tenant billing decisions.
+**Target features:**
+- Canonical local demo path built around `examples/accrue_host`, with documented setup, seeded Fake-backed billing/admin flow, and CI-equivalent verification.
+- Host-first tutorial and public docs front door that connect install, first subscription, signed webhook ingest, admin inspection/replay, troubleshooting, production hardening, and package support policy.
+- Mature OSS adoption assets: repository README, issue templates, release guidance, and clear Fake vs Stripe test vs live Stripe positioning.
+- Trust hardening bundle covering webhook/auth/admin security, seeded performance smoke checks, compatibility, accessibility/responsive browser checks, secret/PII log review, and required-vs-advisory release-gate boundaries.
+- Expansion discovery for tax, revenue/export, additional processors, and organization/multi-tenant billing captured as ranked future recommendations only.
 
 ## Requirements
 
@@ -51,7 +54,13 @@ v1.1 Stabilization + Adoption shipped and validated on 2026-04-17. Detailed requ
 
 ### Active
 
-Next active requirements are intentionally unset until `$gsd-new-milestone` defines the next milestone. Candidate areas are adoption assets, quality hardening, and expansion discovery.
+v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
+
+- [ ] Phoenix developers can clone the repository, run the canonical local demo, create a Fake-backed subscription, inspect/replay billing state in admin, and run the focused proof suite without hidden state.
+- [ ] New users can follow a host-first tutorial and docs front door that explains the correct integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices.
+- [ ] Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice.
+- [ ] Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release.
+- [ ] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API.
 
 ### Validated v1.0 Scope Summary
 
@@ -221,7 +230,9 @@ Next active requirements are intentionally unset until `$gsd-new-milestone` defi
 | Dogfood through a real Phoenix host app before broader adoption work | Real install, auth, webhook, admin, and clean-checkout paths exposed integration gaps that package-local tests could not catch | ✓ Good |
 | Make Fake-backed host browser flow mandatory and live Stripe advisory | Deterministic CI should block regressions while live Stripe remains useful but non-deterministic | ✓ Good |
 | Move host UI reads through generated `MyApp.Billing` facade | First-user docs should teach host-owned public boundaries, not private Accrue table queries | ✓ Good |
-| Treat adoption, quality, and expansion as next-milestone candidates after stabilization | The v1.1 audit validated HOST/CI/DX scope; remaining ADOPT/QUAL/DISC ideas need fresh prioritization instead of automatic carryover | — Pending |
+| Treat adoption, quality, and expansion as next-milestone candidates after stabilization | The v1.1 audit validated HOST/CI/DX scope; remaining ADOPT/QUAL/DISC ideas need fresh prioritization instead of automatic carryover | ✓ Good |
+| v1.2 focuses on Adoption + Trust before large feature expansion | The biggest remaining gap is confidence for new users evaluating a billing library, not another core billing primitive; polish should stop once it hits diminishing returns and expansion should be decided deliberately | — Pending |
+| Keep v1.2 expansion to discovery only | Tax, revenue exports, processors, and org billing are likely next-level features, but partial implementation would distract from onboarding and trust hardening | — Pending |
 
 ## Evolution
 
@@ -241,4 +252,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after v1.1 milestone completion*
+*Last updated: 2026-04-17 after v1.2 milestone start*

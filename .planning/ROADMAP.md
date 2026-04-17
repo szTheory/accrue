@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
 - ✅ **v1.1 Stabilization + Adoption** — Phases 10-12 plus 11.1 shipped on 2026-04-17. Proved Accrue in a realistic Phoenix host app, promoted that proof into CI, closed host-flow hermeticity gaps, and hardened first-user DX/docs. Full archive: [`milestones/v1.1-ROADMAP.md`](milestones/v1.1-ROADMAP.md).
-- 📋 **Next Milestone** — Not defined yet. Candidate carry-forward themes: adoption assets, quality hardening, and expansion discovery.
+- 📋 **v1.2 Adoption + Trust** — Planned next. Make Accrue ready for new Phoenix teams to evaluate and trust through a canonical local demo, host-first onboarding docs, mature OSS adoption assets, a trust hardening bundle, and expansion discovery only.
 
 ## Phases
 
@@ -33,13 +33,66 @@
 
 </details>
 
-### 📋 Next Milestone Candidates
+<details open>
+<summary>📋 v1.2 Adoption + Trust (Phases 13-16) — PLANNED</summary>
 
-These were originally sketched in the v1.1 planning pass and should be revalidated by `$gsd-new-milestone` before execution:
+- [ ] Phase 13: Canonical Demo + Tutorial — make `examples/accrue_host` the polished local demo and tutorial proof path.
+- [ ] Phase 14: Adoption Front Door — align repository/package docs, issue templates, release guidance, and public support positioning.
+- [ ] Phase 15: Trust Hardening — add security, performance, compatibility, accessibility/responsive, secret/PII, and release-gate confidence checks.
+- [ ] Phase 16: Expansion Discovery — evaluate and rank tax, revenue/export, additional processor, and org/multi-tenant billing options for the next implementation milestone.
 
-- **Adoption Assets** — maintained example/demo path, tutorial docs, README positioning, repository issue templates, and release guidance.
-- **Quality Hardening** — focused security, performance, compatibility, accessibility/responsive checks, and release-gate clarity.
-- **Expansion Discovery** — tax, revenue exports, additional processors, and organization/multi-tenant billing decisions captured without premature implementation.
+</details>
+
+## Phase Details
+
+### Phase 13: Canonical Demo + Tutorial
+
+**Goal:** Make `examples/accrue_host` the canonical local evaluation path for Accrue and document it as a tutorial from clone through first subscription and admin inspection.
+
+**Requirements:** DEMO-01, DEMO-02, DEMO-03, DEMO-04, DEMO-05, DEMO-06, ADOPT-02
+
+**Success criteria:**
+1. A new user can run the local host demo from documented prerequisites and commands without live Stripe credentials.
+2. The demo proves a Fake-backed subscription, signed webhook ingest, admin inspection/replay, and focused host tests.
+3. A single CI-equivalent local command verifies the canonical demo path.
+4. Tutorial commands and demo README commands are checked for drift before release.
+
+### Phase 14: Adoption Front Door
+
+**Goal:** Make the public repository, package docs, and support surfaces explain what Accrue is, where to start, what is stable, and how to ask for help.
+
+**Requirements:** ADOPT-01, ADOPT-02, ADOPT-03, ADOPT-04, ADOPT-05, ADOPT-06
+
+**Success criteria:**
+1. The repository root has a clear front door for Accrue, `accrue_admin`, the local demo, docs, and production hardening.
+2. Package docs and README paths align around the host-first tutorial and public integration boundaries.
+3. Issue templates cover bug reports, integration problems, documentation gaps, and feature requests.
+4. Release guidance clearly explains Fake, Stripe test mode, live Stripe, and required vs advisory checks.
+
+### Phase 15: Trust Hardening
+
+**Goal:** Add the quality evidence a billing-library adopter expects before trusting Accrue in a real Phoenix app.
+
+**Requirements:** TRUST-01, TRUST-02, TRUST-03, TRUST-04, TRUST-05, TRUST-06
+
+**Success criteria:**
+1. Security review artifacts cover webhook, auth, admin, replay, and generated-host boundaries.
+2. Seeded smoke checks cover webhook ingest latency and admin page responsiveness.
+3. Compatibility checks cover supported Elixir, OTP, Phoenix, and LiveView combinations.
+4. Browser checks cover accessibility and responsive behavior for the demo/admin flows.
+5. Public errors, logs, docs, and retained artifacts are reviewed for secrets and PII leakage.
+
+### Phase 16: Expansion Discovery
+
+**Goal:** Decide which mature-library expansion should come next without weakening the current Stripe-first, host-owned architecture.
+
+**Requirements:** DISC-01, DISC-02, DISC-03, DISC-04, DISC-05
+
+**Success criteria:**
+1. Tax, revenue/export, additional processor, and org/multi-tenant options each have a decision-quality recommendation.
+2. Recommendations identify likely user value, architecture impact, risk, and prerequisites.
+3. Expansion candidates are ranked into next milestone, backlog, or planted seed.
+4. No core billing API, schema, or processor abstraction changes are made unless needed to document a future migration path.
 
 ## Progress
 
@@ -58,6 +111,10 @@ These were originally sketched in the v1.1 planning pass and should be revalidat
 | 11. CI User-Facing Integration Gate | v1.1 | 3/3 | Complete | 2026-04-16 |
 | 11.1. Hermetic Host Flow Proofs | v1.1 | 1/1 | Complete | 2026-04-16 |
 | 12. First-User DX Stabilization | v1.1 | 11/11 | Complete | 2026-04-16 |
+| 13. Canonical Demo + Tutorial | v1.2 | 0/? | Planned | — |
+| 14. Adoption Front Door | v1.2 | 0/? | Planned | — |
+| 15. Trust Hardening | v1.2 | 0/? | Planned | — |
+| 16. Expansion Discovery | v1.2 | 0/? | Planned | — |
 
 ---
 
