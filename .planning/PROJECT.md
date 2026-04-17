@@ -26,7 +26,17 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 - CI runs a Fake-backed host integration gate with Playwright browser coverage, retained failure artifacts, Hex-mode smoke validation, and warning/error annotation sweeps.
 - First-user DX is hardened through installer no-clobber reruns, conflict sidecars, shared setup diagnostics, host-first docs, troubleshooting anchors, and package-doc verification.
 
-The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust: `examples/accrue_host` is the canonical local demo/tutorial path, the repository and package docs are host-first, mature OSS support assets are in place, trust evidence is checked in and executable, and expansion discovery recommends Stripe Tax support as the next implementation milestone candidate.
+The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust: `examples/accrue_host` is the canonical local demo/tutorial path, the repository and package docs are host-first, mature OSS support assets are in place, trust evidence is checked in and executable, and expansion discovery ranked Stripe Tax, organization billing, and finance handoff as the next expansion candidates.
+
+## Current Milestone: v1.3 Tax + Organization Billing
+
+**Goal:** Let Phoenix SaaS teams bill organizations with Stripe Tax enabled, preserve tenant boundaries through Sigra or equivalent host-owned scopes, and hand finance workflows to Stripe-native reporting without Accrue owning accounting semantics.
+
+**Target features:**
+- Stripe Tax orchestration for subscriptions, checkout, invoices, customer tax-location validation, invalid-location recovery, and existing recurring-item rollout guidance.
+- Organization billing through the existing `Accrue.Billable` `owner_type`/`owner_id` model, with Sigra-first host integration proof and row-scoped tenant safeguards.
+- Host/admin demo coverage for user-owned and organization-owned billing, tax state visibility, webhook/admin replay boundaries, and cross-tenant denial paths.
+- Stripe-native finance handoff documentation for Revenue Recognition, Sigma scheduled queries, and Data Pipeline, explicitly excluding Accrue-owned accounting logic.
 
 Milestone history and requirements are archived in `.planning/milestones/`.
 
@@ -43,12 +53,12 @@ Milestone history and requirements are archived in `.planning/milestones/`.
 
 ## Next Milestone Goals
 
-No active milestone is defined yet. `$gsd-new-milestone` should start from the v1.2 expansion recommendation:
+v1.3 is active and combines the idiomatic expansion path chosen after v1.2 discovery:
 
-- Recommended next implementation candidate: `Stripe Tax support`.
-- Backlog candidates: `Organization / multi-tenant billing` and `Revenue recognition / exports`.
-- Planted seed: `Official second processor adapter`.
-- Any tax milestone must preserve `tax rollout correctness` with explicit customer-location capture and legacy recurring-item migration planning before implementation.
+- Implement Stripe Tax support first because it deepens the existing Stripe-first billing model without changing processor strategy.
+- Bring organization billing forward now that local Sigra has shipped organizations, memberships, active organization scope, org-aware admin, impersonation, and audit/export foundations.
+- Keep finance work as Stripe-native handoff and documentation, not a custom revenue-recognition or GAAP accounting engine.
+- Preserve `tax rollout correctness`, `cross-tenant billing leakage`, and `wrong-audience finance exports` as explicit milestone risks.
 
 ## Requirements
 
@@ -73,7 +83,16 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 
 ### Active
 
-No active requirements are defined. The next active requirement set should be created by `$gsd-new-milestone`.
+- [ ] **TAX-01**: Developer can enable Stripe Tax for new subscription and checkout flows through Accrue's public billing API.
+- [ ] **TAX-02**: Developer can collect and validate customer tax location before creating tax-enabled recurring payments.
+- [ ] **TAX-03**: User/admin can identify and recover from missing or invalid tax location states without silent tax rollout failure.
+- [ ] **TAX-04**: Existing recurring subscriptions have explicit migration guidance before automatic tax rollout.
+- [ ] **ORG-01**: Host app can make an organization billable using Accrue's existing `Accrue.Billable` ownership model.
+- [ ] **ORG-02**: Sigra-backed host flow can bill the active organization while preserving membership and admin scope boundaries.
+- [ ] **ORG-03**: Org admins cannot access or mutate another organization's billing state through public, admin, webhook replay, or export paths.
+- [ ] **FIN-01**: Developer has documented Stripe-native finance handoff paths for Revenue Recognition, Sigma, and Data Pipeline.
+- [ ] **FIN-02**: Finance handoff docs identify supported data boundaries and explicitly exclude Accrue-owned accounting/revenue-recognition logic.
+- [ ] **VERIFY-01**: Fake-backed tests, host integration tests, and browser/admin checks prove tax, org billing, and finance-boundary behavior.
 
 ### Validated v1.0 Scope Summary
 
@@ -193,7 +212,7 @@ No active requirements are defined. The next active requirement set should be cr
 
 **Sibling projects** (same author: Jon):
 - **`lattice_stripe`** (`/Users/jon/projects/lattice_stripe`, v0.2.0, Stripe API `2026-03-25.dahlia`) — thin Elixir wrapper over the Stripe SDK. Covers Tier 1–2 (payments, customers, payment methods, refunds, checkout, webhooks, errors, telemetry). Accrue depends on it directly. **Gap:** no Billing (Subscription/Product/Price/Invoice/Meter) coverage yet — Accrue will need lattice_stripe to add these, or build them upstream as lattice_stripe contributions. Also lacks v2 include support, Connect context helpers, and event type constants.
-- **`sigra`** (`/Users/jon/projects/sigra`, v0.1.0) — authentication library for Phoenix 1.8+, "Devise with lessons learned." Hybrid lib + generator pattern (security-critical code in lib, schemas/contexts/routes generated into host). Organizations/multi-tenancy planned for future milestone. Admin UI milestone in progress. Accrue's `Accrue.Integrations.Sigra` adapter plugs into it; multi-tenancy will flow through naturally once sigra ships orgs (Accrue's polymorphic billable already supports `owner_type = Team`).
+- **`sigra`** (`/Users/jon/projects/sigra`, v0.1.0) — authentication library for Phoenix 1.8+, "Devise with lessons learned." Hybrid lib + generator pattern (security-critical code in lib, schemas/contexts/routes generated into host). Local Sigra now ships logical multi-tenancy through organizations, memberships, invitations, active organization scope/session hydration, tenant-aware audit columns, org-aware admin, impersonation, and audit/export surfaces. Accrue's `Accrue.Integrations.Sigra` adapter plugs into it, and v1.3 should use Sigra-first examples while keeping generic host-owned billables supported.
 
 **Brand** (from `prompts/accrue brand book.md`):
 - Positioning: Elixir-native, framework-integrated, not a fintech. Calm, measured, technically precise.
@@ -247,6 +266,7 @@ No active requirements are defined. The next active requirement set should be cr
 | v1.2 focuses on Adoption + Trust before large feature expansion | The biggest remaining gap is confidence for new users evaluating a billing library, not another core billing primitive; polish should stop once it hits diminishing returns and expansion should be decided deliberately | ✓ Good |
 | Keep v1.2 expansion to discovery only | Tax, revenue exports, processors, and org billing are likely next-level features, but partial implementation would distract from onboarding and trust hardening | ✓ Good |
 | Record the Phase 16 ranking as recommendation-only planning guidance | `Stripe Tax support` is the recommended `Next milestone`; `Organization / multi-tenant billing` and `Revenue recognition / exports` remain `Backlog`; `Official second processor adapter` remains a `Planted seed`, and no v1.2 billing API, schema, or processor-abstraction implementation is implied | ✓ Good |
+| v1.3 combines Stripe Tax with Sigra-first organization billing and finance handoff | Stripe Tax is still the safest first expansion; Sigra org support is now concrete enough for host-proofed org billing; finance should stay Stripe-native before Accrue owns accounting semantics | — Pending |
 
 ## Current Milestone Notes
 
@@ -256,6 +276,7 @@ No active requirements are defined. The next active requirement set should be cr
 - `Revenue recognition / exports` remains a recommendation-only backlog candidate until host-authorized export audiences, storage, and delivery rules are explicit, preserving the `wrong-audience finance exports` boundary.
 - `Official second processor adapter` remains a recommendation-only planted seed because Accrue is still Stripe-first and host-owned, and future work must avoid a `processor-boundary downgrade`.
 - Any future tax milestone must preserve `tax rollout correctness` by requiring `customer location` capture plus `legacy recurring-item migration` planning before maintainers schedule implementation.
+- v1.3 planning resolves the Phase 16 backlog tradeoff by implementing Stripe Tax and Sigra-first org billing together, while keeping finance work to Stripe Revenue Recognition, Sigma, and Data Pipeline handoff documentation.
 
 ## Evolution
 
@@ -275,4 +296,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after v1.2 milestone*
+*Last updated: 2026-04-17 after starting v1.3 Tax + Organization Billing*
