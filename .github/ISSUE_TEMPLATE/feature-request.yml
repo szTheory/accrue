@@ -1,0 +1,42 @@
+name: Feature request
+description: Request a new Accrue capability by describing the user problem.
+title: "[Feature]: "
+labels:
+  - feature-request
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste API keys, webhook secrets, production payloads, customer data, or PII.
+
+        Keep requests anchored to supported public surfaces such as `MyApp.Billing`, `Accrue.Webhook.Handler`, `/billing`, or `Accrue.Auth`, and explain why this belongs in Accrue rather than only in host-app code.
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      description: How are you handling this today in the host app?
+    validations:
+      required: true
+  - type: textarea
+    id: surface
+    attributes:
+      label: Affected public API surface
+      description: Which supported Accrue surface should change?
+      placeholder: MyApp.Billing, Accrue.Webhook.Handler, /billing, Accrue.Auth
+    validations:
+      required: true
+  - type: textarea
+    id: why_accrue
+    attributes:
+      label: Why does this belong in Accrue?
+      description: Explain why this should live in Accrue rather than staying as host-app code.
+    validations:
+      required: true

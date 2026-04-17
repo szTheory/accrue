@@ -1,0 +1,65 @@
+name: Bug report
+description: Report a confirmed or likely defect in accrue or accrue_admin.
+title: "[Bug]: "
+labels:
+  - bug
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste API keys, webhook secrets, production payloads, customer data, or PII.
+
+        Keep examples sanitized. Anchor reports to supported public surfaces such as `MyApp.Billing`, `/billing`, `Accrue.Webhook.Handler`, and `Accrue.Auth`.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which public package surface appears broken?
+      options:
+        - accrue
+        - accrue_admin
+        - examples/accrue_host
+    validations:
+      required: true
+  - type: textarea
+    id: surface
+    attributes:
+      label: Affected public surface
+      description: Name the public API, route, or mount point involved.
+      placeholder: MyApp.Billing.subscribe/3, /webhooks/stripe, /billing, Accrue.Webhook.Handler, Accrue.Auth
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the defect with sanitized reproduction details only.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Share the smallest host-owned setup that reproduces the issue.
+      placeholder: |
+        1. Install through First Hour
+        2. Call MyApp.Billing...
+        3. Post the signed webhook proof path
+        4. Open /billing
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics or guide followed
+      description: Link the doc or troubleshooting section you used before opening this bug.
+      placeholder: accrue/guides/first_hour.md or accrue/guides/troubleshooting.md
+    validations:
+      required: true

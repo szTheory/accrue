@@ -1,0 +1,46 @@
+name: Documentation gap
+description: Report missing, stale, wrong, or unclear docs.
+title: "[Docs]: "
+labels:
+  - documentation
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste API keys, webhook secrets, production payloads, customer data, or PII.
+
+        Point to the doc path that is wrong or missing, such as `accrue/guides/first_hour.md`, `accrue/guides/troubleshooting.md`, `README.md`, or `RELEASING.md`.
+  - type: input
+    id: doc_path
+    attributes:
+      label: Doc path or page
+      description: Which file or published page is wrong, stale, or missing?
+      placeholder: accrue/guides/first_hour.md
+    validations:
+      required: true
+  - type: dropdown
+    id: gap_type
+    attributes:
+      label: What kind of docs problem is this?
+      options:
+        - Missing content
+        - Wrong content
+        - Stale content
+        - Unclear content
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or missing?
+      description: Explain the gap and the public surface it affects.
+      placeholder: First Hour, Troubleshooting, MyApp.Billing, /webhooks/stripe, /billing
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should the docs say instead?
+    validations:
+      required: true

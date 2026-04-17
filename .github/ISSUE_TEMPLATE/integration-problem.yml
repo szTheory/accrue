@@ -1,0 +1,52 @@
+name: Integration problem
+description: Report a first-time setup or public-boundary integration blocker.
+title: "[Integration]: "
+labels:
+  - integration
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste API keys, webhook secrets, production payloads, customer data, or PII.
+
+        Start with `accrue/guides/first_hour.md` and `accrue/guides/troubleshooting.md`, then describe the supported surface that is blocked: `MyApp.Billing`, `/webhooks/stripe`, `/billing`, `Accrue.Webhook.Handler`, or `Accrue.Auth`.
+  - type: textarea
+    id: blocked_surface
+    attributes:
+      label: Blocked public surface
+      description: Which supported setup surface is blocked?
+      placeholder: MyApp.Billing, /webhooks/stripe, /billing, Accrue.Webhook.Handler, Accrue.Auth
+    validations:
+      required: true
+  - type: textarea
+    id: host_boundary
+    attributes:
+      label: Host-owned boundary
+      description: Which generated or host-owned file is involved?
+      placeholder: MyApp.Billing, router mount, runtime config, auth adapter, webhook route
+    validations:
+      required: true
+  - type: textarea
+    id: blocker
+    attributes:
+      label: What is blocking you?
+      description: Explain the setup problem with sanitized details only.
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What did you already try?
+      description: Cite the exact guide, troubleshooting code, or public command you followed.
+      placeholder: First Hour, Troubleshooting, mix accrue.install --check, mix verify
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Local environment
+      description: Share versions and environment details relevant to the blocker.
+      placeholder: Elixir 1.17+, OTP 27+, Phoenix 1.8+, PostgreSQL 14+
+    validations:
+      required: true

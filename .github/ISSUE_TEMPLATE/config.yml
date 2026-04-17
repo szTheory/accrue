@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security report
+    url: https://github.com/szTheory/accrue/blob/main/SECURITY.md
+    about: Report vulnerabilities privately. Do not open a public issue for unpatched security problems.
+  - name: Contributor and release process
+    url: https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md
+    about: Use the contribution guide for contributor workflow, release checks, and local validation expectations.
