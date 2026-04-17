@@ -18,7 +18,7 @@
 - Decimal phases are reserved for urgent insertions.
 
 - [x] **Phase 18: Stripe Tax Core** — Add tax enablement options to billing actions, processor/Fake support, automatic-tax projections, and focused tests. Completed 2026-04-17.
-- [ ] **Phase 19: Tax Location and Rollout Safety** — Add customer tax-location capture/update/validation paths, invalid-location recovery behavior, docs, and migration guidance for existing subscriptions.
+- [x] **Phase 19: Tax Location and Rollout Safety** — Add customer tax-location capture/update/validation paths, invalid-location recovery behavior, docs, and migration guidance for existing subscriptions. Completed 2026-04-17.
 - [ ] **Phase 20: Organization Billing With Sigra** — Add Sigra-first org billing proof using active organization scope, memberships, org admin boundaries, and row-scoped billable ownership.
 - [ ] **Phase 21: Admin and Host UX Proof** — Surface org-owned billing/tax states in the host/admin demo with browser coverage for user billing, org billing, tax-invalid states, and webhook/admin replay boundaries.
 - [ ] **Phase 22: Finance Handoff and Milestone Verification** — Add finance handoff docs for Stripe Revenue Recognition, Sigma scheduled queries, Data Pipeline, tax evidence, and event-ledger boundaries; run end-to-end verification and archive the milestone.
@@ -68,7 +68,7 @@ Plans:
 - [x] `19-02-PLAN.md` — Add the public `Accrue.Billing.update_customer_tax_location/2` path and focused TAX-02 billing coverage.
 - [x] `19-03-PLAN.md` — Persist and reconcile disabled-reason / finalization-failure state for recurring invalid-location rollout issues.
 - [x] `19-04-PLAN.md` — Surface local tax-risk state in admin detail views and the canonical host billing flow.
-- [ ] `19-05-PLAN.md` — Add rollout-safety and invalid-location recovery guidance to troubleshooting and live Stripe docs.
+- [x] `19-05-PLAN.md` — Add rollout-safety and invalid-location recovery guidance to troubleshooting and live Stripe docs.
 
 ### Phase 20: Organization Billing With Sigra
 
@@ -143,7 +143,7 @@ Plans:
 | 16. Expansion Discovery | v1.2 | 3/3 | Complete | 2026-04-17 |
 | 17. Milestone Closure Cleanup | v1.2 | 1/1 | Complete | 2026-04-17 |
 | 18. Stripe Tax Core | v1.3 | 4/4 | Complete | 2026-04-17 |
-| 19. Tax Location and Rollout Safety | v1.3 | 4/5 | In Progress | |
+| 19. Tax Location and Rollout Safety | v1.3 | 5/5 | Complete | 2026-04-17 |
 | 20. Organization Billing With Sigra | v1.3 | 0/0 | Pending | |
 | 21. Admin and Host UX Proof | v1.3 | 0/0 | Pending | |
 | 22. Finance Handoff and Milestone Verification | v1.3 | 0/0 | Pending | |

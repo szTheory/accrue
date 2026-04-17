@@ -5,16 +5,16 @@ milestone_name: Tax + Organization Billing
 current_phase: 19
 current_phase_name: Tax Location and Rollout Safety
 current_plan: "05"
-status: ready_to_execute
-stopped_at: Completed 19-04 admin tax-risk visibility and host tax-location repair flow
-last_updated: "2026-04-17T18:30:17Z"
+status: ready_to_plan
+stopped_at: Completed 19-05 rollout-safety and invalid-location recovery guidance
+last_updated: "2026-04-17T18:37:00Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -33,20 +33,20 @@ Plan: 05
 **Current Phase:** 19
 **Current Phase Name:** Tax Location and Rollout Safety
 **Current Plan:** 05
-**Status:** Ready to Execute
-**Stopped At:** Completed 19-04 admin tax-risk visibility and host tax-location repair flow
+**Status:** Ready to Plan
+**Stopped At:** Completed 19-05 rollout-safety and invalid-location recovery guidance
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
 
 **Milestone:** v1.3 Tax + Organization Billing
-**Progress:** [████████░░] 80%
+**Progress:** [██████████] 100%
 
 | Phase | Status | Notes |
 |-------|--------|-------|
 | 18. Stripe Tax Core | Complete | `18-01` through `18-04` shipped; TAX-01 is complete |
-| 19. Tax Location and Rollout Safety | In Progress | `19-01` shipped sanitized processor tax-location validation; `19-02` shipped the public tax-location billing facade and focused TAX-02 coverage; `19-03` shipped local rollback observability and invoice failure reconciliation; `19-04` shipped admin tax-risk visibility plus the host repair path |
+| 19. Tax Location and Rollout Safety | Complete | `19-01` shipped sanitized processor tax-location validation; `19-02` shipped the public tax-location billing facade and focused TAX-02 coverage; `19-03` shipped local rollback observability and invoice failure reconciliation; `19-04` shipped admin tax-risk visibility plus the host repair path; `19-05` shipped rollout-safety and live Stripe recovery guidance for TAX-04 |
 | 20. Organization Billing With Sigra | Pending | Sigra-first org billing and tenant-boundary proof |
 | 21. Admin and Host UX Proof | Pending | Browser/admin proof for tax and org billing states |
 | 22. Finance Handoff and Milestone Verification | Pending | Stripe-native finance handoff and closure verification |
@@ -82,7 +82,8 @@ Plan: 05
 - `invoice.updated` and `invoice.finalization_failed` now flow through the canonical invoice reducer so finalization error codes reconcile locally without storing raw provider messages.
 - Admin tax-risk panels now render only local projected disabled reasons and finalization codes, without provider fetches or raw payload copy.
 - The canonical host repair path must stay inside `AccrueHost.Billing` wrappers over public Accrue APIs.
+- Tax rollout docs must explicitly warn that existing subscriptions, invoices, payment links, and pre-existing Checkout customers require deliberate migration settings before automatic tax rollout is safe.
 
 ## Next Action
 
-Execute Phase 19 Plan 05: add rollout-safety and invalid-location recovery guidance to troubleshooting and live Stripe docs.
+Plan Phase 20: Organization Billing With Sigra.
