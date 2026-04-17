@@ -21,7 +21,7 @@ defmodule AccrueAdmin.ThemeTest do
     assert conn.assigns.accrue_admin_brand.app_name == "Accrue Ops"
     assert conn.assigns.accrue_admin_brand.logo_url == "https://example.test/logo.svg"
     assert conn.assigns.accrue_admin_brand.accent_hex == "#5D79F6"
-    assert conn.assigns.accrue_admin_brand.accent_contrast_hex == "#FAFBFC"
+    assert conn.assigns.accrue_admin_brand.accent_contrast_hex == "#FFFFFF"
   end
 
   test "router session includes theme, brand, nonce, and brand stylesheet path" do
@@ -62,7 +62,7 @@ defmodule AccrueAdmin.ThemeTest do
           app_name: "Accrue Ops",
           logo_url: nil,
           accent_hex: "#5D79F6",
-          accent_contrast_hex: "#FAFBFC"
+          accent_contrast_hex: "#FFFFFF"
         },
         brand_css_path: "/billing/assets/brand.css",
         assets_css_path: "/billing/assets/app.css",

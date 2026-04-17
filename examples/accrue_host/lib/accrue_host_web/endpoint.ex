@@ -40,9 +40,10 @@ defmodule AccrueHostWeb.Endpoint do
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
-    pass: ["*/*"],
-    json_decoder: Phoenix.json_library()
+    # JSON is parsed in route-scoped pipelines so webhook routes can preserve
+    # byte-exact raw bodies for signature verification.
+    parsers: [:urlencoded, :multipart],
+    pass: ["*/*"]
 
   plug Plug.MethodOverride
   plug Plug.Head

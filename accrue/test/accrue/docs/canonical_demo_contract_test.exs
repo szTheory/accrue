@@ -16,9 +16,31 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
     assert_order!(host_readme, [manifest.first_run.label, manifest.seeded_history.label])
     assert_order!(guide, [manifest.first_run.label, manifest.seeded_history.label])
 
+    assert_order!(host_readme, [
+      "First run",
+      "cd examples/accrue_host",
+      "mix setup",
+      "mix phx.server",
+      "AccrueHost.Billing",
+      "/webhooks/stripe",
+      "customer.subscription.created",
+      "/billing",
+      "mix verify",
+      "Seeded history",
+      "mix verify.full"
+    ])
+
     Enum.each(locked_labels(manifest), fn label ->
       assert host_readme =~ label
       assert guide =~ label
+    end)
+
+    first_run_section = before_label!(host_readme, manifest.seeded_history.label)
+    refute first_run_section =~ "mix verify.full"
+    refute first_run_section =~ "bash scripts/ci/accrue_host_uat.sh"
+
+    Enum.each(["PGHOST", "PGPORT", "PGUSER", "PGPASSWORD"], fn variable ->
+      assert host_readme =~ variable
     end)
 
     assert package_readme =~ "examples/accrue_host"
@@ -102,6 +124,11 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
       assert previous_index < current_index
       {needle, current_index}
     end)
+  end
+
+  defp before_label!(binary, label) do
+    index = index_of(binary, label) || flunk("expected to find #{inspect(label)}")
+    binary_part(binary, 0, index)
   end
 
   defp index_of(binary, pattern, offset \\ 0)

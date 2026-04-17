@@ -9,8 +9,8 @@ result in the mounted admin UI, then run the focused proof command.
 
 - PostgreSQL 14+ must already be running.
 - By default the app connects to `localhost:5432`.
-- Override `PGHOST`, `PGUSER`, or `PGPASSWORD` if your local database uses
-  different values.
+- Override `PGHOST`, `PGPORT`, `PGUSER`, or `PGPASSWORD` if your local database
+  uses different values.
 
 The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live

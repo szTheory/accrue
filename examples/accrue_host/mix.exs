@@ -266,11 +266,21 @@ defmodule AccrueHost.MixProject do
         fi
 
         if curl --fail --silent --show-error "http://127.0.0.1:${browser_port}/" >/dev/null; then
+          set +e
           ACCRUE_HOST_REUSE_SERVER=1 \
             ACCRUE_HOST_BROWSER_PORT="$browser_port" \
             ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
             npm run e2e
-          exit 0
+          e2e_status=$?
+          set -e
+
+          if [ "$e2e_status" -ne 0 ]; then
+            browser_failed=1
+            echo "Phoenix browser-smoke server log: $browser_log_file"
+            cat "$browser_log_file"
+          fi
+
+          exit "$e2e_status"
         fi
 
         sleep 1

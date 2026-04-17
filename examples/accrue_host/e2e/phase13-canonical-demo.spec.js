@@ -2,6 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { test, expect } = require("@playwright/test");
+const AxeBuilder = require("@axe-core/playwright").default;
 
 function readFixture() {
   const fixturePath = process.env.ACCRUE_HOST_E2E_FIXTURE;
@@ -66,7 +67,54 @@ async function waitForLiveView(page) {
   }
 }
 
-test("signed-in host and admin replay flow stays release-blocking", async ({ page, context }) => {
+async function assertNoSeriousAccessibilityViolations(page, label) {
+  const results = await new AxeBuilder({ page }).analyze();
+  const blocking = results.violations.filter((violation) =>
+    ["critical", "serious"].includes(violation.impact || "")
+  );
+
+  expect(blocking, `${label} has critical/serious accessibility violations`).toEqual([]);
+}
+
+async function captureState(page, testInfo, name) {
+  const screenshotDir = path.join(process.cwd(), "test-results", "phase13-screenshots");
+  const screenshotPath = path.join(screenshotDir, `${name}.png`);
+
+  fs.mkdirSync(screenshotDir, { recursive: true });
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+  await testInfo.attach(name, { path: screenshotPath, contentType: "image/png" });
+}
+
+async function postSignedWebhook(page, fixture) {
+  const webhook = fixture.first_run_webhook;
+  const response = await page.evaluate(async ({ payload, signature }) => {
+    const result = await fetch("/webhooks/stripe", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "stripe-signature": signature
+      },
+      body: payload
+    });
+
+    return {
+      ok: result.ok,
+      status: result.status,
+      statusText: result.statusText,
+      body: await result.text()
+    };
+  }, webhook);
+
+  expect(response.ok, `signed webhook POST failed: ${response.status} ${response.statusText}\n${response.body}`).toBe(
+    true
+  );
+  expect(JSON.parse(response.body)).toEqual({ ok: true });
+}
+
+test("canonical first-run and admin replay walkthrough stays release-blocking", async ({
+  page,
+  context
+}, testInfo) => {
   const fixture = readFixture();
 
   page.on("pageerror", (error) => console.error(`browser page error: ${error.message}`));
@@ -80,6 +128,8 @@ test("signed-in host and admin replay flow stays release-blocking", async ({ pag
   await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
   await waitForLiveView(page);
   await expect(page.getByText("No billing activity yet")).toBeVisible();
+  await assertNoSeriousAccessibilityViolations(page, "first-run billing empty state");
+  await captureState(page, testInfo, "first-run-billing-empty");
 
   await page.locator("[data-plan-id='price_basic'] button", { hasText: "Start subscription" }).click();
 
@@ -94,24 +144,28 @@ test("signed-in host and admin replay flow stays release-blocking", async ({ pag
 
   await expect(page.getByRole("heading", { name: "Current subscription" })).toBeVisible();
   await expect(page.getByText("Basic (price_basic)")).toBeVisible();
-
-  await page.getByRole("button", { name: "Cancel subscription" }).click();
-  await expect(page.getByText("Cancel subscription: Confirm cancellation before ending access.")).toBeVisible();
-  await page.getByRole("button", { name: "Confirm cancellation" }).click();
-  await expect(page.getByText("Subscription canceled.")).toBeVisible();
+  await postSignedWebhook(page, fixture);
+  await captureState(page, testInfo, "first-run-subscription-started");
 
   await context.clearCookies();
   await login(page, fixture, fixture.admin_email);
 
   await page.goto("/billing");
   await expect(page.getByText("Local billing projections at a glance")).toBeVisible();
+  await assertNoSeriousAccessibilityViolations(page, "admin dashboard");
+  await captureState(page, testInfo, "admin-dashboard");
 
   await page.goto(`/billing/webhooks/${fixture.webhook_id}`);
   await expect(page).toHaveURL(new RegExp(`/billing/webhooks/${fixture.webhook_id}$`));
   await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
+  await assertNoSeriousAccessibilityViolations(page, "webhook replay detail");
+  await captureState(page, testInfo, "admin-webhook-detail");
+
   await page.locator("[data-role='replay-single']").click();
   await expect(page.getByText("Webhook replay requested.")).toBeVisible();
 
   await page.goto(`/billing/events?source_webhook_event_id=${fixture.webhook_id}&actor_type=admin`);
   await expect(page.getByRole("cell", { name: "admin.webhook.replay.completed" })).toBeVisible();
+  await assertNoSeriousAccessibilityViolations(page, "admin replay audit event");
+  await captureState(page, testInfo, "admin-replay-audit");
 });

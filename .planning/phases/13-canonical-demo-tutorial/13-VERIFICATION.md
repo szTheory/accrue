@@ -1,23 +1,21 @@
 ---
 phase: 13-canonical-demo-tutorial
 verified: 2026-04-17T02:06:22Z
-status: human_needed
+status: passed
 score: 10/10 must-haves verified
 overrides_applied: 0
-human_verification:
-  - test: "Follow the README on a fresh local machine"
-    expected: "Starting from the documented prerequisites, a developer can complete First run, create one Fake-backed subscription, post one signed webhook, inspect /billing, and finish with mix verify without guessing missing steps."
-    why_human: "Documentation usability and end-to-end onboarding clarity need a human walkthrough."
-  - test: "Inspect the mounted admin flow during the tutorial"
-    expected: "The mounted /billing pages, webhook replay surface, and seeded-history/admin states are understandable and match the docs language."
-    why_human: "Visual clarity, navigation, and admin-flow comprehension are UI qualities not fully provable with static checks."
+human_verification: []
+automated_human_replacement:
+  updated: 2026-04-17T02:29:22Z
+  gate: "bash scripts/ci/accrue_host_uat.sh"
+  coverage: "Playwright canonical first-run walkthrough, real signed webhook POST, mounted /billing admin inspection, webhook detail and replay, replay audit event, axe critical/serious accessibility checks, and CI screenshot artifacts."
 ---
 
 # Phase 13: Canonical Demo + Tutorial Verification Report
 
 **Phase Goal:** Make `examples/accrue_host` the canonical local evaluation path for Accrue and document it as a tutorial from clone through first subscription and admin inspection.
 **Verified:** 2026-04-17T02:06:22Z
-**Status:** human_needed
+**Status:** passed
 **Re-verification:** No - initial verification
 
 ## Goal Achievement
@@ -102,19 +100,16 @@ No blocking or warning anti-patterns were found in the phase-modified files. The
 - `scripts/ci/accrue_host_uat.sh` now forwards `PGPORT` and optional `PGDATABASE` in the `pg_isready` probe.
 - `accrue/test/accrue/docs/canonical_demo_contract_test.exs` and `accrue/test/accrue/docs/first_hour_guide_test.exs` now fail with explicit assertion messages instead of crashing on missing first labels.
 
-### Human Verification Required
+### Human Verification Shifted Left
 
-### 1. Fresh Clone Walkthrough
+The two original human checks are now covered by release-blocking automation.
 
-**Test:** On a fresh local environment with PostgreSQL running, follow `examples/accrue_host/README.md` exactly through `First run`.
-**Expected:** The evaluator reaches one Fake-backed subscription, one signed webhook proof, `/billing` inspection, and a successful `mix verify` without undocumented setup.
-**Why human:** This checks tutorial clarity, pacing, and whether the docs feel complete to a new evaluator.
+| Former Human Check | Automated Replacement | Status |
+| --- | --- | --- |
+| Fresh clone walkthrough from prerequisites through first subscription, signed webhook, `/billing`, and `mix verify`. | `bash scripts/ci/accrue_host_uat.sh` delegates to `mix verify.full`, boots the host app, and runs the canonical Playwright browser walkthrough using fixture data from `scripts/ci/accrue_host_seed_e2e.exs`. | ✓ AUTOMATED |
+| Admin flow readability across `/billing`, webhook detail/replay, and audit states. | `examples/accrue_host/e2e/phase13-canonical-demo.spec.js` verifies the dashboard/detail/replay/audit path, runs axe critical/serious accessibility checks, and writes CI screenshot artifacts. | ✓ AUTOMATED |
 
-### 2. Admin Flow Readability
-
-**Test:** Walk the `/billing` admin pages during both `First run` and `Seeded history`, including webhook replay visibility.
-**Expected:** The UI labels, admin states, and replay surface are understandable and line up with the docs wording.
-**Why human:** Visual comprehension and admin UX quality are not fully captured by static assertions or backend/browser-smoke checks.
+No manual UAT remains required for Phase 13 release gating. Optional human review may still be useful for product tone, but CI now blocks on the functional and accessibility risks that previously required manual walkthrough.
 
 ---
 

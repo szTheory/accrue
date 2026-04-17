@@ -22,7 +22,10 @@
   --ax-border: rgba(36, 48, 59, 0.12);
   --ax-border-strong: rgba(36, 48, 59, 0.24);
   --ax-success: var(--accrue-moss);
+  --ax-success-readable: #2f6b4f;
   --ax-warning: var(--accrue-amber);
+  --ax-warning-readable: #7a4b00;
+  --ax-accent-readable: #174ea6;
   --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, white);
   color-scheme: light;
 }
@@ -36,6 +39,9 @@
   --ax-subtle: #d7dde3;
   --ax-border: rgba(233, 238, 242, 0.12);
   --ax-border-strong: rgba(233, 238, 242, 0.2);
+  --ax-success-readable: #8ed6ac;
+  --ax-warning-readable: #f0c36a;
+  --ax-accent-readable: #9bb5ff;
   --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, black);
   color-scheme: dark;
 }
@@ -50,6 +56,9 @@
     --ax-subtle: #d7dde3;
     --ax-border: rgba(233, 238, 242, 0.12);
     --ax-border-strong: rgba(233, 238, 242, 0.2);
+    --ax-success-readable: #8ed6ac;
+    --ax-warning-readable: #f0c36a;
+    --ax-accent-readable: #9bb5ff;
     --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, black);
     color-scheme: dark;
   }

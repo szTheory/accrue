@@ -9,6 +9,7 @@ alias AccrueHost.Repo
 
 password = "hello world!"
 fixture_path = System.fetch_env!("ACCRUE_HOST_E2E_FIXTURE")
+webhook_secret = "whsec_test_host"
 
 create_user = fn email, admin? ->
   user =
@@ -117,6 +118,24 @@ webhook =
   |> Ecto.Changeset.change(%{status: :dead})
   |> Repo.update!()
 
+first_run_webhook_payload =
+  Jason.encode!(%{
+    "id" => "evt_host_browser_first_run",
+    "object" => "event",
+    "type" => "customer.subscription.created",
+    "created" => 1_712_880_000,
+    "livemode" => false,
+    "data" => %{
+      "object" => %{
+        "id" => subscription.processor_id,
+        "object" => "subscription"
+      }
+    }
+  })
+
+first_run_webhook_signature =
+  LatticeStripe.Webhook.generate_test_signature(first_run_webhook_payload, webhook_secret)
+
 {:ok, _event} =
   Events.record(%{
     type: "invoice.payment_failed",
@@ -145,7 +164,12 @@ fixture = %{
   normal_email: normal_user.email,
   admin_email: admin_user.email,
   webhook_id: webhook.id,
-  subscription_id: subscription.id
+  subscription_id: subscription.id,
+  first_run_webhook: %{
+    processor_event_id: "evt_host_browser_first_run",
+    payload: first_run_webhook_payload,
+    signature: first_run_webhook_signature
+  }
 }
 
 File.mkdir_p!(Path.dirname(fixture_path))

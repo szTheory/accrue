@@ -9,7 +9,8 @@
 #   bash scripts/ci/accrue_host_uat.sh
 #
 # Environment:
-#   PGHOST / PGUSER / PGPASSWORD  Postgres connection used by the host app
+#   PGHOST / PGPORT / PGUSER / PGPASSWORD / PGDATABASE
+#                                  Postgres connection used by the host app
 #   ACCRUE_HOST_PORT              Port for the bounded dev boot smoke (default: 4100)
 #   ACCRUE_HOST_SKIP_DEV_BOOT     Set to 1 to skip the bounded phx.server smoke
 #   ACCRUE_HOST_SKIP_BROWSER      Set to 1 to skip the headless browser smoke

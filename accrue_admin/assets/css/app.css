@@ -438,17 +438,17 @@ button {
 }
 
 .ax-kpi-delta-moss {
-  color: var(--ax-success);
+  color: var(--ax-success-readable);
   background: color-mix(in srgb, var(--ax-success) 16%, transparent);
 }
 
 .ax-kpi-delta-cobalt {
-  color: var(--ax-accent);
+  color: var(--ax-accent-readable);
   background: color-mix(in srgb, var(--ax-accent) 16%, transparent);
 }
 
 .ax-kpi-delta-amber {
-  color: var(--ax-warning);
+  color: var(--ax-warning-readable);
   background: color-mix(in srgb, var(--ax-warning) 16%, transparent);
 }
 
@@ -751,7 +751,7 @@ button {
 }
 
 .ax-button-ghost {
-  color: var(--ax-accent);
+  color: var(--ax-accent-readable);
 }
 
 .ax-button-danger {
@@ -772,17 +772,17 @@ button {
 
 .ax-status-badge-moss {
   background: color-mix(in srgb, var(--ax-success) 14%, var(--ax-elevated));
-  color: var(--ax-success);
+  color: var(--ax-success-readable);
 }
 
 .ax-status-badge-cobalt {
   background: color-mix(in srgb, var(--ax-accent) 14%, var(--ax-elevated));
-  color: var(--ax-accent);
+  color: var(--ax-accent-readable);
 }
 
 .ax-status-badge-amber {
   background: color-mix(in srgb, var(--ax-warning) 18%, var(--ax-elevated));
-  color: var(--ax-warning);
+  color: var(--ax-warning-readable);
 }
 
 .ax-status-badge-slate {
@@ -960,7 +960,7 @@ button {
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--ax-accent) 12%, var(--ax-elevated));
-  color: var(--ax-accent);
+  color: var(--ax-accent-readable);
 }
 
 .ax-kpi-grid {
@@ -979,7 +979,7 @@ button {
 
 .ax-link {
   width: fit-content;
-  color: var(--ax-accent);
+  color: var(--ax-accent-readable);
   font-weight: 600;
 }
 

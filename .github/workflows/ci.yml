@@ -334,6 +334,14 @@ jobs:
           path: examples/accrue_host/test-results
           if-no-files-found: ignore
 
+      - name: Upload Phase 13 walkthrough screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accrue-host-phase13-screenshots
+          path: examples/accrue_host/test-results/phase13-screenshots
+          if-no-files-found: ignore
+
       - name: Upload host server log
         if: failure()
         uses: actions/upload-artifact@v7

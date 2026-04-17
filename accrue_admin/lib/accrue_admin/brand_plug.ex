@@ -51,7 +51,7 @@ defmodule AccrueAdmin.BrandPlug do
   defp present_or(value, _fallback), do: value
 
   defp pick_contrast(hex) do
-    if relative_luminance(hex) > 0.45, do: "#111418", else: "#FAFBFC"
+    if relative_luminance(hex) > 0.45, do: "#111418", else: "#FFFFFF"
   end
 
   defp relative_luminance("#" <> hex) do

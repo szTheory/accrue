@@ -265,7 +265,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp eyebrow_style do
-    "margin:0 0 8px;color:#5D79F6;font-size:14px;font-weight:600;line-height:1.4;"
+    "margin:0 0 8px;color:#2644C5;font-size:14px;font-weight:600;line-height:1.4;"
   end
 
   defp heading_style do
@@ -317,7 +317,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp link_style do
-    "color:#5D79F6;font-size:14px;font-weight:600;line-height:1.4;text-decoration:none;padding:8px 0;"
+    "color:#2644C5;font-size:14px;font-weight:600;line-height:1.4;text-decoration:none;padding:8px 0;"
   end
 
   defp code_style do
@@ -325,7 +325,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp pill_style(true) do
-    "background:#EEF2FF;color:#5D79F6;border-radius:8px;padding:4px 8px;font-size:14px;font-weight:600;line-height:1.4;"
+    "background:#EEF2FF;color:#2644C5;border-radius:8px;padding:4px 8px;font-size:14px;font-weight:600;line-height:1.4;"
   end
 
   defp pill_style(false) do
@@ -349,7 +349,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   defp primary_button_style(false) do
-    "background:#5D79F6;color:#FFFFFF;border:none;border-radius:8px;padding:12px 16px;font-size:16px;font-weight:600;line-height:1.5;cursor:pointer;"
+    "background:#2644C5;color:#FFFFFF;border:none;border-radius:8px;padding:12px 16px;font-size:16px;font-weight:600;line-height:1.5;cursor:pointer;"
   end
 
   defp secondary_button_style do

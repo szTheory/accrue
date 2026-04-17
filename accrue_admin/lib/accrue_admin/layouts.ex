@@ -13,7 +13,7 @@ defmodule AccrueAdmin.Layouts do
       app_name: "Billing",
       logo_url: nil,
       accent_hex: "#5D79F6",
-      accent_contrast_hex: "#FAFBFC"
+      accent_contrast_hex: "#FFFFFF"
     }
   )
 
@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Layouts do
     """
     :root {
       --ax-accent: #{brand[:accent_hex] || "#5D79F6"};
-      --ax-accent-contrast: #{brand[:accent_contrast_hex] || "#FAFBFC"};
+      --ax-accent-contrast: #{brand[:accent_contrast_hex] || "#FFFFFF"};
     }
     """
   end
