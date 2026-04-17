@@ -5,9 +5,14 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
   test "package docs verifier succeeds" do
     {output, status} = System.cmd("bash", [@script_path], stderr_to_stdout: true)
+    accrue_version = extract_version!("accrue/mix.exs")
+    accrue_admin_version = extract_version!("accrue_admin/mix.exs")
 
     assert status == 0
-    assert output =~ "package docs verified for accrue 0.1.2 and accrue_admin 0.1.2"
+
+    assert output =~
+             "package docs verified for accrue #{accrue_version} and accrue_admin #{accrue_admin_version}"
+
     assert output =~ "README.md"
     assert output =~ "RELEASING.md"
     assert output =~ "First run"
@@ -97,5 +102,18 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     destination = Path.join(tmp_dir, relative_path)
     File.mkdir_p!(Path.dirname(destination))
     File.cp!(Path.expand("../../../../" <> relative_path, __DIR__), destination)
+  end
+
+  defp extract_version!(relative_path) do
+    "../../../../#{relative_path}"
+    |> Path.expand(__DIR__)
+    |> File.read!()
+    |> then(fn content ->
+      Regex.run(~r/@version "([^"]+)"/, content, capture: :all_but_first)
+    end)
+    |> case do
+      [version] -> version
+      _ -> flunk("could not parse @version from #{relative_path}")
+    end
   end
 end
