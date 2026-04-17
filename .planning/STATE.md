@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Tax + Organization Billing
-current_phase: 18
-current_phase_name: Stripe Tax Core
-current_plan: "04"
-status: executing
-stopped_at: Completed 18-04-PLAN.md
-last_updated: "2026-04-17T17:09:23Z"
+current_phase: 19
+current_phase_name: Tax Location and Rollout Safety
+current_plan: "01"
+status: planning
+stopped_at: Completed 18-03-PLAN.md
+last_updated: "2026-04-17T17:12:53Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_phases: 1
+  total_plans: 0
+  completed_plans: 0
+  percent: 20
 ---
 
 # Project State
@@ -29,24 +29,24 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 ## Current Position
 
 Phase: 18
-Plan: 04
-**Current Phase:** 18
-**Current Phase Name:** Stripe Tax Core
-**Current Plan:** 04
-**Status:** Executing
-**Stopped At:** Completed 18-04-PLAN.md
+Plan: 01
+**Current Phase:** 19
+**Current Phase Name:** Tax Location and Rollout Safety
+**Current Plan:** 01
+**Status:** Planning
+**Stopped At:** Completed 18-03-PLAN.md
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
 
 **Milestone:** v1.3 Tax + Organization Billing
-**Progress:** [███████░░░] 75%
+**Progress:** [██░░░░░░░░] 20%
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 18. Stripe Tax Core | In Progress | `18-01-PLAN.md`, `18-02-PLAN.md`, and `18-04-PLAN.md` complete; remaining plan 18-03 |
-| 19. Tax Location and Rollout Safety | Pending | Location validation and legacy recurring-item migration work |
+| 18. Stripe Tax Core | Complete | `18-01` through `18-04` shipped; TAX-01 is complete |
+| 19. Tax Location and Rollout Safety | Next Up | Location validation and legacy recurring-item migration work |
 | 20. Organization Billing With Sigra | Pending | Sigra-first org billing and tenant-boundary proof |
 | 21. Admin and Host UX Proof | Pending | Browser/admin proof for tax and org billing states |
 | 22. Finance Handoff and Milestone Verification | Pending | Stripe-native finance handoff and closure verification |
@@ -72,7 +72,9 @@ Plan: 04
 - Preserve `tax rollout correctness`, `cross-tenant billing leakage`, and `wrong-audience finance exports` as explicit milestone risks.
 - Official second processor adapter remains a planted seed outside v1.3.
 - v1.3 phases are ordered tax core -> tax rollout safety -> org billing -> host/admin proof -> finance handoff and verification.
+- Phase 18 stores only narrow automatic-tax observability fields on billing rows; full provider tax payloads remain in `data`.
+- Invoice tax projection trusts only canonical processor tax fields (`tax` and `total_details.amount_tax`) and defaults to `0` only for enabled automatic-tax payloads with no amount yet.
 
 ## Next Action
 
-Continue Phase 18: remaining work is `18-03-PLAN.md`.
+Plan Phase 19: tax location validation, invalid-location recovery, and rollout safety guidance.

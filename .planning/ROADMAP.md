@@ -17,7 +17,7 @@
 - Integer phases continue from prior milestone work.
 - Decimal phases are reserved for urgent insertions.
 
-- [ ] **Phase 18: Stripe Tax Core** — Add tax enablement options to billing actions, processor/Fake support, automatic-tax projections, and focused tests. In progress: `18-01-PLAN.md`, `18-02-PLAN.md`, and `18-04-PLAN.md` complete.
+- [x] **Phase 18: Stripe Tax Core** — Add tax enablement options to billing actions, processor/Fake support, automatic-tax projections, and focused tests. Completed 2026-04-17.
 - [ ] **Phase 19: Tax Location and Rollout Safety** — Add customer tax-location capture/update/validation paths, invalid-location recovery behavior, docs, and migration guidance for existing subscriptions.
 - [ ] **Phase 20: Organization Billing With Sigra** — Add Sigra-first org billing proof using active organization scope, memberships, org admin boundaries, and row-scoped billable ownership.
 - [ ] **Phase 21: Admin and Host UX Proof** — Surface org-owned billing/tax states in the host/admin demo with browser coverage for user billing, org billing, tax-invalid states, and webhook/admin replay boundaries.
@@ -44,7 +44,7 @@
 Plans:
 - [x] `18-01-PLAN.md` — Add the subscription automatic-tax public contract and regression coverage.
 - [x] `18-02-PLAN.md` — Keep Stripe and Fake automatic-tax payloads in parity and prove it in adapter tests.
-- [ ] `18-03-PLAN.md` — Persist and project narrow automatic-tax observability for subscriptions and invoices.
+- [x] `18-03-PLAN.md` — Persist and project narrow automatic-tax observability for subscriptions and invoices.
 - [x] `18-04-PLAN.md` — Add checkout automatic-tax input/projection support and focused checkout tests.
 
 ### Phase 19: Tax Location and Rollout Safety
@@ -135,7 +135,7 @@ Plans:
 | 15. Trust Hardening | v1.2 | 3/3 | Complete | 2026-04-17 |
 | 16. Expansion Discovery | v1.2 | 3/3 | Complete | 2026-04-17 |
 | 17. Milestone Closure Cleanup | v1.2 | 1/1 | Complete | 2026-04-17 |
-| 18. Stripe Tax Core | v1.3 | 3/4 | In Progress | 2026-04-17 |
+| 18. Stripe Tax Core | v1.3 | 4/4 | Complete | 2026-04-17 |
 | 19. Tax Location and Rollout Safety | v1.3 | 0/0 | Pending | |
 | 20. Organization Billing With Sigra | v1.3 | 0/0 | Pending | |
 | 21. Admin and Host UX Proof | v1.3 | 0/0 | Pending | |
