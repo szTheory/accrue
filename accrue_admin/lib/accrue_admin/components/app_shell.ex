@@ -12,6 +12,7 @@ defmodule AccrueAdmin.Components.AppShell do
   attr(:mount_path, :string, required: true)
   attr(:page_title, :string, required: true)
   attr(:theme, :string, default: "system")
+  attr(:active_organization_name, :any, default: nil)
   slot(:inner_block, required: true)
 
   def app_shell(assigns) do
@@ -23,6 +24,11 @@ defmodule AccrueAdmin.Components.AppShell do
       <Sidebar.sidebar brand={@brand} current_path={@current_path} items={@nav_items} />
 
       <div class="ax-shell-main">
+        <div :if={@active_organization_name} class="ax-active-org-banner" role="status">
+          <span class="ax-label">Active organization</span>
+          <span class="ax-active-org-name"><%= @active_organization_name %></span>
+        </div>
+
         <Topbar.topbar brand={@brand} page_title={@page_title} theme={@theme} />
 
         <main class="ax-shell-content" id="main-content">

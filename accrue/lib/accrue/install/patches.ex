@@ -286,8 +286,8 @@ defmodule Accrue.Install.Patches do
     Regex.match?(~r/accrue_admin(?:\s+|\()\"#{escaped_path}\"\)?/, content)
   end
 
-  defp webhook_scope(path) do
-    normalized = "/" <> (path || "/webhooks/stripe" |> String.trim_leading("/"))
+  defp webhook_scope(path) when is_binary(path) do
+    normalized = "/" <> String.trim_leading(path, "/")
     parts = normalized |> String.trim_leading("/") |> String.split("/", trim: true)
 
     case parts do

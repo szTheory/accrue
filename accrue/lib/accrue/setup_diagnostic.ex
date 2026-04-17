@@ -25,12 +25,6 @@ defmodule Accrue.SetupDiagnostic do
   @auth_adapter_anchor "/guides/troubleshooting.html#accrue-dx-auth-adapter"
   @admin_mount_missing_anchor "/guides/troubleshooting.html#accrue-dx-admin-mount-missing"
 
-  @secret_patterns [
-    {~r/sk_(test|live)_[A-Za-z0-9_=-]+/, "sk_\\1_[REDACTED]"},
-    {~r/whsec_[A-Za-z0-9_=-]+/, "whsec_[REDACTED]"},
-    {~r/([A-Z0-9_]*(?:SECRET|KEY)[A-Z0-9_]*=)[^\s,}]+/, "\\1[REDACTED]"}
-  ]
-
   @impl true
   def message(diagnostic), do: format(diagnostic)
 
@@ -162,9 +156,19 @@ defmodule Accrue.SetupDiagnostic do
   def redact(value) do
     value = stringify(value)
 
-    Enum.reduce(@secret_patterns, value, fn {pattern, replacement}, acc ->
+    Enum.reduce(secret_patterns(), value, fn {pattern, replacement}, acc ->
       String.replace(acc, pattern, replacement)
     end)
+  end
+
+  # Regex literals cannot live in module attributes on all OTP/Elixir pairs (OTP 28
+  # rejects injecting the compiled #Reference into escaped attribute storage).
+  defp secret_patterns do
+    [
+      {~r/sk_(test|live)_[A-Za-z0-9_=-]+/, "sk_\\1_[REDACTED]"},
+      {~r/whsec_[A-Za-z0-9_=-]+/, "whsec_[REDACTED]"},
+      {~r/([A-Z0-9_]*(?:SECRET|KEY)[A-Z0-9_]*=)[^\s,}]+/, "\\1[REDACTED]"}
+    ]
   end
 
   defp build(code, summary, fix, docs_path, details) do

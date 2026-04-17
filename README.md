@@ -9,6 +9,7 @@ Start one Fake-backed subscription. Post one signed webhook. Inspect and replay 
 ## Start here
 
 - [Canonical local demo: Fake](examples/accrue_host/README.md) for the checked-in host app and the shortest path to a first subscription, signed webhook, admin inspection, and focused proof run.
+- [Visual walkthrough (Fake screenshots)](examples/accrue_host/README.md#visual-walkthrough-fake-backed) for full-page PNGs of host + mounted admin via Playwright (`npm run e2e:visuals` in `examples/accrue_host`).
 - [Package tutorial](accrue/guides/first_hour.md) for the same host-first story in package-facing terms.
 - [Core package landing page](accrue/README.md) for install, guide index, and public setup boundaries.
 - [Admin package landing page](accrue_admin/README.md) for the downstream admin mount, auth/session, and asset path.

@@ -5,7 +5,10 @@ defmodule Accrue.Docs.TrustLeakageTest do
   @contributing_path Path.expand("../../../../CONTRIBUTING.md", __DIR__)
   @releasing_path Path.expand("../../../../RELEASING.md", __DIR__)
   @live_stripe_path Path.expand("../../../../guides/testing-live-stripe.md", __DIR__)
-  @playwright_config_path Path.expand("../../../../examples/accrue_host/playwright.config.js", __DIR__)
+  @playwright_config_path Path.expand(
+                            "../../../../examples/accrue_host/playwright.config.js",
+                            __DIR__
+                          )
 
   test "public docs keep explicit no-secrets guidance" do
     for path <- [@security_path, @contributing_path, @releasing_path, @live_stripe_path] do

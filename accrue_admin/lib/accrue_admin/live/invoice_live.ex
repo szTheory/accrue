@@ -15,10 +15,11 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     MoneyFormatter,
     StatusBadge,
     StepUpAuthModal,
+    TaxOwnershipCard,
     Timeline
   }
 
-  alias AccrueAdmin.StepUp
+  alias AccrueAdmin.{StepUp, TaxOwnershipRow}
 
   @destructive_actions ~w(void mark_uncollectible)
 
@@ -111,6 +112,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">
@@ -153,6 +155,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             <:meta>PDF preview stays on the Phase 6 invoice render path</:meta>
           </KpiCard.kpi_card>
         </section>
+
+        <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_invoice(@invoice, @customer)} />
 
         <section class="ax-grid ax-grid-2">
           <article class="ax-card">

@@ -30,6 +30,8 @@ defmodule AccrueAdmin.Queries.Charges do
       customer_id: charge.customer_id,
       customer_name: customer.name,
       customer_email: customer.email,
+      owner_type: customer.owner_type,
+      owner_id: customer.owner_id,
       subscription_id: charge.subscription_id,
       payment_method_id: charge.payment_method_id,
       processor_id: charge.processor_id,

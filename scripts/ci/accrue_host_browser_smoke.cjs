@@ -99,7 +99,13 @@ async function run() {
     await page.goto(`${baseURL}/billing/webhooks/${fixture.webhook_id}`);
     await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
     await page.locator("[data-role='replay-single']").click();
-    await expect(page.getByText("Webhook replay requested.")).toBeVisible();
+    await expect(page.locator("[data-role='confirm-replay']")).toBeVisible();
+    await page.locator("[data-role='confirm-replay']").click();
+    await expect(
+      page
+        .getByText("Replay requested for the active organization.")
+        .or(page.getByText("Webhook replay requested."))
+    ).toBeVisible();
 
     await page.goto(`${baseURL}/billing/events?source_webhook_event_id=${fixture.webhook_id}&actor_type=admin`);
     await expect(page.getByRole("cell", { name: "admin.webhook.replay.completed" })).toBeVisible();

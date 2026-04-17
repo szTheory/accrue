@@ -68,9 +68,11 @@ defmodule Accrue.Repo.Migrations.Phase3SchemaUpgrades do
 
     create table(:accrue_invoice_items, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :invoice_id,
           references(:accrue_invoices, type: :binary_id, on_delete: :delete_all),
           null: false
+
       add :stripe_id, :string, null: true
       add :description, :text, null: true
       add :amount_minor, :bigint, null: false
@@ -97,12 +99,15 @@ defmodule Accrue.Repo.Migrations.Phase3SchemaUpgrades do
 
     create table(:accrue_invoice_coupons, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :invoice_id,
           references(:accrue_invoices, type: :binary_id, on_delete: :delete_all),
           null: false
+
       add :coupon_id,
           references(:accrue_coupons, type: :binary_id, on_delete: :restrict),
           null: false
+
       add :amount_off_minor, :bigint, null: false
 
       timestamps(type: :utc_datetime_usec, updated_at: false)
@@ -125,9 +130,11 @@ defmodule Accrue.Repo.Migrations.Phase3SchemaUpgrades do
 
     create table(:accrue_refunds, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :charge_id,
           references(:accrue_charges, type: :binary_id, on_delete: :restrict),
           null: false
+
       add :stripe_id, :string, null: true
       add :amount_minor, :bigint, null: false
       add :currency, :string, null: false
@@ -177,6 +184,7 @@ defmodule Accrue.Repo.Migrations.Phase3SchemaUpgrades do
       add :default_payment_method_id,
           references(:accrue_payment_methods, type: :binary_id, on_delete: :nilify_all),
           null: true
+
       add :last_stripe_event_ts, :utc_datetime_usec, null: true
       add :last_stripe_event_id, :string, null: true
     end

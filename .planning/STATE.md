@@ -1,20 +1,20 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.4
-milestone_name: Next (TBD)
-current_phase: null
-current_phase_name: null
+milestone_name: Ecosystem stability + demo visuals
+current_phase: 23
+current_phase_name: Ecosystem stability + demo visuals
 current_plan: null
-status: ready_to_plan
-stopped_at: v1.3 shipped and archived 2026-04-17. Run /gsd-new-milestone to define v1.4.
-last_updated: "2026-04-17T23:59:00Z"
+status: idle
+stopped_at: v1.4 Phase 23 complete (STAB-01, UX-DEMO-01); choose next milestone when ready.
+last_updated: "2026-04-17T19:20:00Z"
 last_activity: 2026-04-17
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 1
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -24,35 +24,37 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
-**Current focus:** v1.4 — **milestone not started** (define with `/gsd-new-milestone`)
+**Current focus:** v1.4 — **Ecosystem stability + demo visuals** (Phase 23) — **complete** (2026-04-17)
 
 ## Current Position
 
-Phase: *(none — v1.4 unplanned)*  
-Plan: *(none)*  
-**Current Phase Name:** —  
-**Status:** Ready to plan next milestone  
-**Stopped At:** v1.3 Tax + Organization Billing **shipped** 2026-04-17 (Phases 18–22; git tag `v1.3`).  
-**Resume File:** `.planning/REQUIREMENTS.md` (v1.4 placeholder) and `.planning/ROADMAP.md`  
+Phase: **23** (Ecosystem stability + demo visuals)  
+Plan: *`23-01-PLAN.md` + `23-02-PLAN.md` executed*  
+**Current Phase Name:** Ecosystem stability + demo visuals  
+**Status:** Complete  
+**Stopped At:** STAB-01 + UX-DEMO-01 delivered; committed admin static bundle + host verify + `e2e:visuals` green.  
+**Resume File:** `.planning/phases/23-ecosystem-stability-and-demo-visuals/`  
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
+
+**Milestone:** v1.4 Ecosystem stability + demo visuals — **COMPLETE** (2026-04-17)
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| 23. Ecosystem stability + demo visuals | Complete | STAB-01, UX-DEMO-01 |
 
 **Milestone:** v1.3 Tax + Organization Billing — **COMPLETE** (archived)
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 18. Stripe Tax Core | Complete | Shipped 2026-04-17 |
-| 19. Tax Location and Rollout Safety | Complete | Shipped 2026-04-17 |
-| 20. Organization Billing With Sigra | Complete | Shipped 2026-04-17 |
-| 21. Admin and Host UX Proof | Complete | VERIFY-01 CI-backed; see `21-UAT.md` manifest |
-| 22. Finance Handoff and Milestone Verification | Complete | `accrue/guides/finance-handoff.md` + milestone archives |
+| 18–22 | Complete | See `.planning/milestones/v1.3-ROADMAP.md` |
 
 ## Current Planning Artifacts
 
-- `.planning/PROJECT.md` — active v1.3 milestone goals and project context.
-- `.planning/REQUIREMENTS.md` — active v1.3 requirements.
-- `.planning/ROADMAP.md` — active v1.3 phase roadmap.
+- `.planning/PROJECT.md` — active v1.4 milestone goals and project context.
+- `.planning/REQUIREMENTS.md` — active v1.4 requirements (STAB-01, UX-DEMO-01).
+- `.planning/ROADMAP.md` — active roadmap including Phase 23.
 - `.planning/phases/21-admin-and-host-ux-proof/21-UAT.md` — VERIFY-01 **CI automation manifest** (Phase 21 executable half).
 - `.planning/milestones/v1.3-REQUIREMENTS.md` — closed v1.3 requirements snapshot.
 
@@ -90,11 +92,12 @@ Plan: *(none)*
 - Customer and subscription detail routes now treat out-of-scope owner-aware loader misses as redirects to the scoped index with the exact denial flash copy.
 - Shared admin list queries now receive `current_owner_scope`, and event-feed owner proof compares billing UUIDs as text so active-organization event pages fail closed instead of leaking or crashing.
 - Webhook detail and replay now consume owner-aware proof outcomes directly, re-check replay authorization at action time, and emit replay-success audits only for in-scope organization rows.
+- v1.4: committed `accrue_admin` `priv/static/accrue_admin.js` must be real esbuild output (Phoenix + LiveView). A placeholder line parsed as `generated` + invalid `by` in the browser and broke admin `phx-click` until the bundle was rebuilt and committed; `mix verify.full` browser gate now runs `mix accrue_admin.assets.build` + `mix deps.compile accrue_admin --force` before Playwright.
 
 ## Next Action
 
-1. **`/gsd-new-milestone`** — define v1.4 goals, requirements, and roadmap phases.
-2. Optional: **`/gsd-pr-branch`** when working on a **feature branch** with interleaved `.planning/phases/` commits so PRs stay code-reviewable (see **Repo hygiene** below). On `main` with local WIP, commit or stash before branching.
+1. **Plan the next milestone** (post–v1.4) in `PROJECT.md` / `ROADMAP.md` when priorities are set.
+2. Optional: **`/gsd-pr-branch`** on a feature branch if planning commits should stay out of a code-only PR (see **Repo hygiene**).
 
 ## Deferred Items
 

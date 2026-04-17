@@ -65,7 +65,15 @@ test.describe("Phase 7 browser UAT", () => {
     await login(page, `/billing/webhooks/${data.single_webhook_id}`);
     await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();
     await page.getByRole("button", { name: "Replay webhook" }).click();
-    await expect(page.getByText("Webhook replay requested.")).toBeVisible();
+    await expect(page.getByText("Replay webhook for the active organization?")).toBeVisible({
+      timeout: 15_000
+    });
+    await page.locator("[data-role='confirm-replay']").click();
+    await expect(
+      page
+        .getByText("Replay requested for the active organization.")
+        .or(page.getByText("Webhook replay requested."))
+    ).toBeVisible({ timeout: 15_000 });
 
     await reset(request);
     await seed(request, "operator-flows");
@@ -74,10 +82,14 @@ test.describe("Phase 7 browser UAT", () => {
     await expect(page.getByText("Replay, inspect, and trace webhook delivery")).toBeVisible();
     await page.locator("[data-role='prepare-bulk-replay']").click();
     await expect(page.locator("[data-role='bulk-replay-confirm']")).toContainText(
-      "Replay 1 failed or dead webhook rows"
+      "Replay 1 failed or dead webhook rows for the active organization?"
     );
     await page.locator("[data-role='confirm-bulk-replay']").click();
-    await expect(page.getByText("Bulk replay requested for 1 webhook rows.")).toBeVisible();
+    await expect(
+      page
+        .getByText("Replay requested for the active organization.")
+        .or(page.getByText("Bulk replay requested"))
+    ).toBeVisible({ timeout: 15_000 });
 
     const countsResponse = await request.get("/__e2e__/counts");
     const counts = await countsResponse.json();

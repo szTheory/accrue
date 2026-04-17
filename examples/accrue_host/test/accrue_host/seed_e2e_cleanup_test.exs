@@ -19,7 +19,9 @@ defmodule AccrueHost.SeedE2ECleanupTest do
   @moduletag :phase17
 
   test "deletes fixture-owned replay rows on rerun and preserves unrelated invoice.payment_failed and admin.webhook.replay.completed rows" do
-    fixture_file = Path.join(System.tmp_dir!(), "accrue-host-seed-#{System.unique_integer([:positive])}.json")
+    fixture_file =
+      Path.join(System.tmp_dir!(), "accrue-host-seed-#{System.unique_integer([:positive])}.json")
+
     on_exit(fn -> File.rm(fixture_file) end)
 
     first_fixture = AccrueHostSeedE2E.run!(fixture_file)
@@ -68,7 +70,8 @@ defmodule AccrueHost.SeedE2ECleanupTest do
              )
            )
 
-    assert Repo.get!(WebhookEvent, unrelated.webhook.id).processor_event_id == "evt_unrelated_replay"
+    assert Repo.get!(WebhookEvent, unrelated.webhook.id).processor_event_id ==
+             "evt_unrelated_replay"
 
     assert Repo.get!(Oban.Job, unrelated.job.id).args["webhook_event_id"] == unrelated.webhook.id
 
@@ -76,6 +79,7 @@ defmodule AccrueHost.SeedE2ECleanupTest do
     assert Repo.get!(Event, unrelated.payment_failed.id).subject_id == unrelated.subscription.id
 
     assert Repo.get!(Event, unrelated.replay_completed.id).actor_id == "admin-user-42"
+
     assert Repo.get!(Event, unrelated.replay_completed.id).caused_by_webhook_event_id ==
              unrelated.webhook.id
 

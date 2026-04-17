@@ -117,7 +117,9 @@ defmodule Accrue.ConfigTest do
         end
 
       assert error.diagnostic.code == "ACCRUE-DX-WEBHOOK-SECRET-MISSING"
-      assert Exception.message(error) =~ "/guides/troubleshooting.html#accrue-dx-webhook-secret-missing"
+
+      assert Exception.message(error) =~
+               "/guides/troubleshooting.html#accrue-dx-webhook-secret-missing"
     after
       Application.put_env(:accrue, :webhook_signing_secrets, %{stripe: ["whsec_test_secret"]})
     end

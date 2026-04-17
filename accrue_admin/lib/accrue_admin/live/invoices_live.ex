@@ -7,6 +7,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   alias Accrue.Billing.Invoice
   alias Accrue.Repo
+  alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
   alias AccrueAdmin.Queries.Invoices
 
@@ -36,6 +37,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">
@@ -81,6 +83,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           columns={[
             %{label: "Invoice", render: &invoice_link(&1, @admin_mount_path)},
             %{label: "Customer", render: &customer_link(&1, @admin_mount_path)},
+            %{label: "Billing signals", render: &billing_signals_cell/1},
             %{label: "Status", render: &status_summary/1},
             %{label: "Balance", render: &balance_summary/1},
             %{id: :collection_method, label: "Collection"}
@@ -88,6 +91,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           card_title={&card_title/1}
           card_fields={[
             %{label: "Customer", render: &customer_label/1},
+            %{label: "Billing signals", render: &billing_signals_cell/1},
             %{label: "Status", render: &status_summary/1},
             %{label: "Balance", render: &balance_summary/1},
             %{id: :collection_method, label: "Collection"}
@@ -151,6 +155,17 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     Invoice
     |> where([invoice], invoice.status == ^status)
     |> Repo.aggregate(:count, :id)
+  end
+
+  defp billing_signals_cell(row) do
+    ownership = BillingPresentation.ownership_label(row)
+    tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
+    escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+    Phoenix.HTML.raw(
+      "<span class=\"ax-chip ax-text-12\">#{escaped_o}</span> <span class=\"ax-chip ax-text-12\">#{escaped_t}</span>"
+    )
   end
 
   defp invoice_link(row, mount_path) do

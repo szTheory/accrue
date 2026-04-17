@@ -19,7 +19,9 @@ defmodule AccrueHostWeb.AdminMountTest do
     assert {:error, {:redirect, %{to: "/"}}} = live(conn, "/billing")
   end
 
-  test "signed-in billing admins can mount /billing with forwarded owner scope session", %{conn: conn} do
+  test "signed-in billing admins can mount /billing with forwarded owner scope session", %{
+    conn: conn
+  } do
     user =
       AccrueHost.AccountsFixtures.user_fixture()
       |> Ecto.Changeset.change(billing_admin: true)
@@ -31,6 +33,7 @@ defmodule AccrueHostWeb.AdminMountTest do
       conn
       |> log_in_user(user, active_organization_id: organization.id)
       |> Plug.Conn.put_session(:active_organization_slug, organization.slug)
+      |> Plug.Conn.put_session(:active_organization_name, organization.name)
       |> Plug.Conn.put_session(:admin_organization_ids, [organization.id])
 
     user_token = get_session(conn, :user_token)
@@ -50,6 +53,7 @@ defmodule AccrueHostWeb.AdminMountTest do
     assert accrue_admin_session["user_token"] == user_token
     assert accrue_admin_session["active_organization_id"] == organization.id
     assert accrue_admin_session["active_organization_slug"] == organization.slug
+    assert accrue_admin_session["active_organization_name"] == organization.name
     assert accrue_admin_session["admin_organization_ids"] == [organization.id]
 
     assert socket.assigns.current_owner_scope.mode == :global
@@ -68,12 +72,19 @@ defmodule AccrueHostWeb.AdminMountTest do
       |> log_in_user(user)
       |> Plug.Conn.put_session(:active_organization_id, allowed_org.id)
       |> Plug.Conn.put_session(:active_organization_slug, allowed_org.slug)
+      |> Plug.Conn.put_session(:active_organization_name, allowed_org.name)
       |> Plug.Conn.put_session(:admin_organization_ids, [allowed_org.id])
 
     session =
       AccrueAdmin.Router.__session__(
         conn,
-        [:user_token, :active_organization_id, :active_organization_slug, :admin_organization_ids],
+        [
+          :user_token,
+          :active_organization_id,
+          :active_organization_slug,
+          :active_organization_name,
+          :admin_organization_ids
+        ],
         "/billing"
       )
 
@@ -81,6 +92,7 @@ defmodule AccrueHostWeb.AdminMountTest do
     assert owner_scope.mode == :organization
     assert owner_scope.organization_id == allowed_org.id
     assert owner_scope.organization_slug == allowed_org.slug
+    assert owner_scope.organization_display_name == allowed_org.name
     assert owner_scope.platform_admin? == false
 
     assert {:error, :not_found} = OwnerScope.resolve(session, %{"org" => outsider_org.slug})

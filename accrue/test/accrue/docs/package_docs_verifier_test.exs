@@ -26,7 +26,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   end
 
   test "package docs verifier rejects missing canonical verification labels" do
-    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
@@ -69,7 +70,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   end
 
   test "package docs verifier rejects missing release guidance invariants" do
-    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
@@ -112,7 +114,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   end
 
   test "package docs verifier rejects stale workflow and contributor wording" do
-    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
@@ -168,7 +171,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   end
 
   test "package docs verifier rejects missing trust review invariant" do
-    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
@@ -190,6 +194,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
     copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
     copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+
     drifted_releasing =
       tmp_dir
       |> Path.join("RELEASING.md")
@@ -209,7 +214,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   end
 
   test "package docs verifier rejects drift in retained artifact policy" do
-    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)

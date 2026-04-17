@@ -41,8 +41,17 @@ defmodule Mix.Tasks.AccrueAdmin.Assets.BuildTest do
     prior = Application.get_env(:accrue_admin, :accrue_admin_assets_build_runner)
     Application.put_env(:accrue_admin, :accrue_admin_assets_build_runner, FakeRunner)
 
+    root = File.cwd!()
+    js_path = Path.join(root, "priv/static/accrue_admin.js")
+    css_path = Path.join(root, "priv/static/accrue_admin.css")
+    prior_js = File.read!(js_path)
+    prior_css = File.read!(css_path)
+
     on_exit(fn ->
       Mix.Task.reenable("accrue_admin.assets.build")
+
+      File.write!(js_path, prior_js)
+      File.write!(css_path, prior_css)
 
       if prior do
         Application.put_env(:accrue_admin, :accrue_admin_assets_build_runner, prior)

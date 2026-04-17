@@ -1,10 +1,15 @@
 defmodule AccrueHostWeb.SubscriptionLive do
   use AccrueHostWeb, :live_view
 
+  import Ecto.Query
+  import Phoenix.Controller, only: [get_csrf_token: 0]
+
   alias Accrue.APIError
   alias Accrue.Billing.Subscription
+  alias AccrueHost.Accounts.{Organization, OrganizationMembership}
   alias AccrueHost.Billing
   alias AccrueHost.Billing.Plans
+  alias AccrueHost.Repo
 
   @active_organization_label "Active organization"
   @active_organization_helper "Billing actions apply to the active organization only."
@@ -43,7 +48,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
       {:error, %APIError{code: "customer_tax_location_invalid"}} ->
         {:noreply,
-        socket
+         socket
          |> assign(:tax_location_error, @tax_location_repair_copy)
          |> put_flash(:error, @tax_location_repair_copy)}
 
@@ -166,6 +171,27 @@ defmodule AccrueHostWeb.SubscriptionLive do
               </div>
             </div>
 
+            <div
+              :if={@switchable_organizations != []}
+              style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;"
+              data-testid="organization-switcher"
+            >
+              <p style={label_style()}>Switch organization</p>
+              <%= for org <- @switchable_organizations do %>
+                <form action={~p"/app/organization-scope"} method="post" style="display:inline;">
+                  <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                  <input type="hidden" name="organization_slug" value={org.slug} />
+                  <button
+                    type="submit"
+                    style={secondary_button_style()}
+                    data-organization-slug={org.slug}
+                  >
+                    {org.name}
+                  </button>
+                </form>
+              <% end %>
+            </div>
+
             <p :if={@access_message} style={warning_copy_style()}>
               {@access_message}
             </p>
@@ -252,9 +278,15 @@ defmodule AccrueHostWeb.SubscriptionLive do
               </div>
             </div>
 
-            <p :if={@tax_location_error} style={warning_copy_style()}>
-              {@tax_location_error}
-            </p>
+            <div :if={@tax_location_error} style="display:flex;flex-direction:column;gap:8px;">
+              <h3 style={section_heading_style()} data-testid="e2e-tax-invalid-headline">
+                Tax location needs attention
+              </h3>
+              <p style={muted_body_style()} data-testid="e2e-tax-invalid-body">
+                Update the customer tax location before tax-enabled charges can proceed.
+              </p>
+              <p style={warning_copy_style()}>{@tax_location_error}</p>
+            </div>
 
             <p :if={tax_location_status(@subscription)} style={muted_body_style()}>
               {tax_location_status(@subscription)}
@@ -344,7 +376,8 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 style={primary_button_style(plan.id == active_plan_id(@subscription))}
                 disabled={
                   @billing_locked? ||
-                    (plan.id == active_plan_id(@subscription) && !Subscription.canceled?(@subscription))
+                    (plan.id == active_plan_id(@subscription) &&
+                       !Subscription.canceled?(@subscription))
                 }
               >
                 {@start_subscription_copy}
@@ -357,6 +390,19 @@ defmodule AccrueHostWeb.SubscriptionLive do
     """
   end
 
+  defp list_switchable_organizations(nil), do: []
+
+  defp list_switchable_organizations(user_id) do
+    from(o in Organization,
+      join: m in OrganizationMembership,
+      on: m.organization_id == o.id,
+      where: m.user_id == ^user_id and is_nil(o.deleted_at),
+      select: %{id: o.id, name: o.name, slug: o.slug},
+      order_by: o.slug
+    )
+    |> Repo.all()
+  end
+
   defp load_state(socket) do
     access_state = access_state(socket.assigns.current_scope)
 
@@ -366,9 +412,12 @@ defmodule AccrueHostWeb.SubscriptionLive do
         {:error, :no_active_organization} -> {nil, nil}
       end
 
+    user = socket.assigns.current_scope.user
+
     socket
     |> assign(:plans, Plans.all())
     |> assign_action_operation_ids()
+    |> assign(:switchable_organizations, list_switchable_organizations(user && user.id))
     |> assign(:active_organization_label, @active_organization_label)
     |> assign(:active_organization_helper, @active_organization_helper)
     |> assign(:start_subscription_copy, @start_subscription_copy)

@@ -15,8 +15,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     KpiCard,
     StatusBadge,
     StepUpAuthModal,
+    TaxOwnershipCard,
     Timeline
   }
+
+  alias AccrueAdmin.TaxOwnershipRow
 
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.StepUp
@@ -107,6 +110,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">
@@ -147,6 +151,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <:meta>Ledger events already stored locally</:meta>
           </KpiCard.kpi_card>
         </section>
+
+        <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_subscription(@subscription, @customer)} />
 
         <section class="ax-grid ax-grid-2">
           <article class="ax-card">

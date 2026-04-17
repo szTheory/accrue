@@ -73,7 +73,9 @@ defmodule AccrueHost.AccountsFixtures do
       |> Map.delete(:owner)
       |> valid_organization_attributes()
 
-    {:ok, organization} = Organizations.create_organization(Scope.for_user(owner), organization_attrs)
+    {:ok, organization} =
+      Organizations.create_organization(Scope.for_user(owner), organization_attrs)
+
     organization
   end
 
@@ -83,7 +85,8 @@ defmodule AccrueHost.AccountsFixtures do
     role = Map.get(attrs, :role, :member)
 
     unless role in @organization_roles do
-      raise ArgumentError, "expected role to be one of #{inspect(@organization_roles)}, got: #{inspect(role)}"
+      raise ArgumentError,
+            "expected role to be one of #{inspect(@organization_roles)}, got: #{inspect(role)}"
     end
 
     attrs =
@@ -113,7 +116,10 @@ defmodule AccrueHost.AccountsFixtures do
 
   def active_organization_scope_fixture(attrs \\ %{}) do
     owner = Map.get_lazy(attrs, :owner, &user_fixture/0)
-    organization = Map.get_lazy(attrs, :organization, fn -> organization_fixture(%{owner: owner}) end)
+
+    organization =
+      Map.get_lazy(attrs, :organization, fn -> organization_fixture(%{owner: owner}) end)
+
     role = Map.get(attrs, :role, :owner)
 
     membership =

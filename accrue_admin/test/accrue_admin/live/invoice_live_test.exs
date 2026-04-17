@@ -120,6 +120,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
 
+    assert html =~ "Tax &amp; ownership"
     assert html =~ "Base plan"
     assert html =~ "Open PDF"
     assert html =~ "Automatic tax disabled reason: Finalization Requires Location Inputs."

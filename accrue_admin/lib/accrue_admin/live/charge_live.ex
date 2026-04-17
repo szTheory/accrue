@@ -16,10 +16,11 @@ defmodule AccrueAdmin.Live.ChargeLive do
     MoneyFormatter,
     StatusBadge,
     StepUpAuthModal,
+    TaxOwnershipCard,
     Timeline
   }
 
-  alias AccrueAdmin.StepUp
+  alias AccrueAdmin.{StepUp, TaxOwnershipRow}
 
   @impl true
   def mount(%{"id" => charge_id}, session, socket) do
@@ -86,6 +87,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">
@@ -128,6 +130,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
             <:meta>Fee-aware refund review</:meta>
           </KpiCard.kpi_card>
         </section>
+
+        <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_charge(@customer)} />
 
         <section class="ax-grid ax-grid-2">
           <article class="ax-card">

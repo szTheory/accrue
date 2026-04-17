@@ -84,6 +84,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
+    assert html =~ "Tax &amp; ownership"
     assert html =~ "Canonical predicates"
     assert html =~ "active"
     assert html =~ "invoice.payment_failed"

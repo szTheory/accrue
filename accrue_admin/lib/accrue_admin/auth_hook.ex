@@ -21,7 +21,11 @@ defmodule AccrueAdmin.AuthHook do
          |> assign(:step_up_pending, false)
          |> assign(:step_up_challenge, nil)
          |> assign(:step_up_error, nil)
-         |> assign(:step_up_verified_at, nil)}
+         |> assign(:step_up_verified_at, nil)
+         |> assign(
+           :active_organization_name,
+           OwnerScope.active_organization_banner_name(owner_scope)
+         )}
 
       {:error, _reason} ->
         {:halt, redirect(socket, to: "/")}

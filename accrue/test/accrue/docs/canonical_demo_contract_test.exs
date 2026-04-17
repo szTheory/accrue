@@ -52,7 +52,8 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
   end
 
   test "parity contract reports exact doc drift in a copied fixture tree" do
-    tmp_dir = Path.join(System.tmp_dir!(), "accrue-canonical-demo-#{System.unique_integer([:positive])}")
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-canonical-demo-#{System.unique_integer([:positive])}")
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
@@ -86,7 +87,11 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
   end
 
   defp command_manifest do
-    module = load_manifest_module(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    module =
+      load_manifest_module(
+        Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__)
+      )
+
     apply(module, :manifest, [])
   end
 

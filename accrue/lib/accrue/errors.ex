@@ -120,6 +120,7 @@ defmodule Accrue.ConfigError do
 
   @impl true
   def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
   def message(%__MODULE__{diagnostic: %Accrue.SetupDiagnostic{} = diagnostic}),
     do: Accrue.SetupDiagnostic.format(diagnostic)
 

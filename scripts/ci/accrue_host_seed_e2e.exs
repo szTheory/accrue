@@ -6,7 +6,9 @@ defmodule AccrueHostSeedE2E do
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueHost.Accounts
+  alias AccrueHost.Accounts.Scope
   alias AccrueHost.Accounts.User
+  alias AccrueHost.Organizations
   alias AccrueHost.Repo
 
   import Ecto.Query
@@ -14,6 +16,7 @@ defmodule AccrueHostSeedE2E do
   @password "hello world!"
   @webhook_secret "whsec_test_host"
   @seeded_emails ["host-user@example.test", "host-admin@example.test", "billing-history@example.test"]
+  @fixture_org_customer_emails ["admin-e2e-alpha-customer@example.test"]
   @fixture_processor_event_ids ["evt_host_browser_replay", "evt_host_browser_first_run"]
   @fixture_customer_processor_ids ["cus_host_browser_replay"]
   @fixture_subscription_processor_ids ["sub_host_browser_replay"]
@@ -25,6 +28,32 @@ defmodule AccrueHostSeedE2E do
     normal_user = create_user!("host-user@example.test", false)
     admin_user = create_user!("host-admin@example.test", true)
     history_user = create_user!("billing-history@example.test", false)
+
+    {:ok, host_org_alpha} =
+      Organizations.create_organization(Scope.for_user(normal_user), %{
+        name: "Host E2E Alpha Org",
+        slug: "host-e2e-alpha"
+      })
+
+    {:ok, host_org_beta} =
+      Organizations.create_organization(Scope.for_user(normal_user), %{
+        name: "Host E2E Beta Org",
+        slug: "host-e2e-beta"
+      })
+
+    {:ok, admin_org_alpha} =
+      Organizations.create_organization(Scope.for_user(admin_user), %{
+        name: "Admin E2E Alpha Org",
+        slug: "accrue-e2e-alpha"
+      })
+
+    {:ok, admin_org_beta} =
+      Organizations.create_organization(Scope.for_user(admin_user), %{
+        name: "Admin E2E Beta Org",
+        slug: "accrue-e2e-beta"
+      })
+
+    admin_denial_customer = insert_org_customer!(admin_org_alpha)
 
     customer = insert_fixture_customer!(history_user)
     subscription = insert_fixture_subscription!(customer)
@@ -62,7 +91,15 @@ defmodule AccrueHostSeedE2E do
       admin_email: admin_user.email,
       webhook_id: webhook.id,
       subscription_id: subscription.id,
-      first_run_webhook: first_run_webhook
+      first_run_webhook: first_run_webhook,
+      org_alpha_slug: host_org_alpha.slug,
+      org_beta_slug: host_org_beta.slug,
+      org_alpha_name: host_org_alpha.name,
+      org_beta_name: host_org_beta.name,
+      tax_invalid_customer_hint: "tax_invalid_e2e_hint",
+      admin_org_alpha_slug: admin_org_alpha.slug,
+      admin_org_beta_slug: admin_org_beta.slug,
+      admin_denial_customer_id: admin_denial_customer.id
     }
 
     write_fixture!(fixture_path, fixture)
@@ -70,6 +107,42 @@ defmodule AccrueHostSeedE2E do
   end
 
   defp cleanup_fixture_footprint! do
+    # Playwright / host browser runs persist Organization-billed Fake subscriptions as
+    # `sub_fake_%` rows. They are outside the fixture `processor_id` contract; if left
+    # behind, the next run's Fake id allocation can collide with PG and crash LiveView
+    # (unique index on processor + processor_id).
+    fake_browser_subscription_ids =
+      Repo.all(
+        from(s in Subscription,
+          where: s.processor == "fake" and fragment("? LIKE 'sub_fake%'", s.processor_id),
+          select: s.id
+        )
+      )
+
+    unless fake_browser_subscription_ids == [] do
+      Repo.query!("ALTER TABLE accrue_events DISABLE TRIGGER accrue_events_immutable_trigger")
+
+      try do
+        Repo.delete_all(
+          from(event in Event,
+            where: event.subject_type == "Subscription" and event.subject_id in ^fake_browser_subscription_ids
+          )
+        )
+      after
+        Repo.query!("ALTER TABLE accrue_events ENABLE TRIGGER accrue_events_immutable_trigger")
+      end
+
+      Repo.delete_all(
+        from(item in SubscriptionItem,
+          join: sub in Subscription,
+          on: sub.id == item.subscription_id,
+          where: sub.id in ^fake_browser_subscription_ids
+        )
+      )
+
+      Repo.delete_all(from(sub in Subscription, where: sub.id in ^fake_browser_subscription_ids))
+    end
+
     previous_owner_ids =
       Repo.all(
         from(user in User,
@@ -162,6 +235,12 @@ defmodule AccrueHostSeedE2E do
     )
 
     Repo.delete_all(
+      from(customer in Customer,
+        where: customer.email in ^@fixture_org_customer_emails
+      )
+    )
+
+    Repo.delete_all(
       from(user in User,
         where: user.email in ^@seeded_emails
       )
@@ -191,6 +270,18 @@ defmodule AccrueHostSeedE2E do
     |> User.confirm_changeset()
     |> Ecto.Changeset.change(billing_admin: admin?)
     |> Repo.update!()
+  end
+
+  defp insert_org_customer!(organization) do
+    %Customer{}
+    |> Customer.changeset(%{
+      owner_type: "Organization",
+      owner_id: to_string(organization.id),
+      processor: "fake",
+      processor_id: "cus_host_org_" <> String.replace(to_string(organization.id), "-", ""),
+      email: "admin-e2e-alpha-customer@example.test"
+    })
+    |> Repo.insert!()
   end
 
   defp insert_fixture_customer!(history_user) do

@@ -124,6 +124,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
     assert html =~ "Detail Customer"
+    assert html =~ "Tax &amp; ownership"
     assert html =~ "Subscriptions"
     assert html =~ "locale en"
     assert html =~ "Tax risk"
@@ -164,12 +165,15 @@ defmodule AccrueAdmin.CustomerLiveTest do
         admin_token: "admin",
         active_organization_id: "org_allowed",
         active_organization_slug: "allowed-org",
+        active_organization_name: "Allowed Org",
         admin_organization_ids: ["org_allowed"]
       )
 
     assert {:ok, _view, allowed_html} =
              live(conn, "/billing/customers/#{allowed_customer.id}?org=allowed-org")
 
+    assert allowed_html =~ "Active organization"
+    assert allowed_html =~ "Allowed Org"
     assert allowed_html =~ allowed_customer.id
 
     assert {:error, {:redirect, %{to: "/billing/customers?org=allowed-org", flash: flash_token}}} =
@@ -204,6 +208,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
       current_admin: %{id: "admin_1", role: :admin},
       organization_id: organization_id,
       organization_slug: "allowed-org",
+      organization_display_name: "Allowed Org",
       platform_admin?: false,
       admin_org_ids: [organization_id],
       active_organization_id: organization_id,

@@ -54,7 +54,9 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     :ok
   end
 
-  test "filters webhook rows and renders organization-scoped bulk replay confirmation", %{conn: conn} do
+  test "filters webhook rows and renders organization-scoped bulk replay confirmation", %{
+    conn: conn
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, html} =
@@ -104,7 +106,10 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     owner_scope = organization_owner_scope("org_allowed")
 
-    assert Webhooks.bulk_replay_count(owner_scope, %{status: :dead, type: "invoice.payment_failed"}) ==
+    assert Webhooks.bulk_replay_count(owner_scope, %{
+             status: :dead,
+             type: "invoice.payment_failed"
+           }) ==
              1
   end
 

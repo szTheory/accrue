@@ -266,6 +266,9 @@ defmodule AccrueHost.MixProject do
 
       bash "$repo_root/scripts/ci/verify_e2e_fixture_jq.sh" "$fixture_file"
 
+      (cd "$repo_root/accrue_admin" && mix accrue_admin.assets.build)
+      mix deps.compile accrue_admin --force
+
       npm ci
       npm run e2e:install
 

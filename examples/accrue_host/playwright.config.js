@@ -34,6 +34,12 @@ module.exports = defineConfig({
     {
       name: "chromium-mobile",
       use: { ...devices["Pixel 5"] }
+    },
+    // CI can run `npx playwright test --project=chromium-mobile-tagged` for @mobile-only checks.
+    {
+      name: "chromium-mobile-tagged",
+      grep: /@mobile/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
     }
   ],
   outputDir: "test-results"

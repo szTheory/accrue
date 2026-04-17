@@ -326,16 +326,20 @@ defmodule Mix.Tasks.Accrue.Install do
       project.has_accrue_admin? and default_or_missing_auth_adapter?(config, runtime_config),
       fn ->
         Accrue.SetupDiagnostic.auth_adapter(
-          details: "config/config.exs is missing a host auth adapter or still uses Accrue.Auth.Default"
+          details:
+            "config/config.exs is missing a host auth adapter or still uses Accrue.Auth.Default"
         )
       end
     )
-    |> maybe_add(project.has_oban? and not oban_config_present?(config, runtime_config, project), fn ->
-      Accrue.SetupDiagnostic.oban_not_configured(
-        details:
-          "No `config :#{project.app || :my_app}, Oban` or `config :accrue, Oban` block was found"
-      )
-    end)
+    |> maybe_add(
+      project.has_oban? and not oban_config_present?(config, runtime_config, project),
+      fn ->
+        Accrue.SetupDiagnostic.oban_not_configured(
+          details:
+            "No `config :#{project.app || :my_app}, Oban` or `config :accrue, Oban` block was found"
+        )
+      end
+    )
   end
 
   defp maybe_add(findings, true, builder), do: findings ++ [builder.()]
@@ -400,7 +404,8 @@ defmodule Mix.Tasks.Accrue.Install do
   defp scope_context(scope_block) do
     %{
       scope: scope_block,
-      pipelines: Regex.scan(~r/pipe_through(?:\s+|\()(.*?)(?:\)|$)/, scope_block, capture: :all_but_first)
+      pipelines:
+        Regex.scan(~r/pipe_through(?:\s+|\()(.*?)(?:\)|$)/, scope_block, capture: :all_but_first)
     }
   end
 
@@ -452,12 +457,13 @@ defmodule Mix.Tasks.Accrue.Install do
   defp oban_config_present?(config, runtime_config, project) do
     app = project.app || :my_app
     marker = "config :#{app}, Oban"
+
     config =~ marker or runtime_config =~ marker or config =~ "config :accrue, Oban" or
       runtime_config =~ "config :accrue, Oban"
   end
 
-  defp webhook_scope(path) do
-    normalized = "/" <> String.trim_leading(path || "/webhooks/stripe", "/")
+  defp webhook_scope(path) when is_binary(path) do
+    normalized = "/" <> String.trim_leading(path, "/")
     parts = String.split(String.trim_leading(normalized, "/"), "/", trim: true)
 
     case parts do

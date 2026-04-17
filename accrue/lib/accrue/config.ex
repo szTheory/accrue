@@ -452,7 +452,8 @@ defmodule Accrue.Config do
 
   @doc false
   @spec ensure_oban_supervised!((-> pid() | nil)) :: :ok
-  def ensure_oban_supervised!(resolver \\ fn -> Process.whereis(Oban) end) when is_function(resolver, 0) do
+  def ensure_oban_supervised!(resolver \\ fn -> Process.whereis(Oban) end)
+      when is_function(resolver, 0) do
     if resolver.() do
       :ok
     else
@@ -464,7 +465,7 @@ defmodule Accrue.Config do
   end
 
   @doc false
-  @spec ensure_migrations_current!(list() | nil) :: :ok
+  @spec ensure_migrations_current!(list() | nil | (-> term())) :: :ok
   def ensure_migrations_current!(migrations \\ nil)
 
   def ensure_migrations_current!(migrations) when is_list(migrations) do

@@ -4,9 +4,12 @@ defmodule AccrueHostWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 
+  import Ecto.Query
+
   alias AccrueHost.Accounts
-  alias AccrueHost.Accounts.Scope
+  alias AccrueHost.Accounts.{Organization, OrganizationMembership, Scope, User}
   alias AccrueHost.Organizations
+  alias AccrueHost.Repo
 
   # Make the remember me cookie valid for 14 days. This should match
   # the session validity setting in UserToken.
@@ -119,6 +122,7 @@ defmodule AccrueHostWeb.UserAuth do
     |> renew_session(user)
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params, remember_me)
+    |> maybe_assign_default_organization_scope(user)
   end
 
   # Do not renew session if the user is already logged in
@@ -170,6 +174,51 @@ defmodule AccrueHostWeb.UserAuth do
     |> put_session(:user_token, token)
     |> put_session(:live_socket_id, user_session_topic(token))
   end
+
+  defp maybe_assign_default_organization_scope(conn, %User{} = user) do
+    if is_nil(get_session(conn, :active_organization_id)) do
+      assign_default_organization_scope(conn, user)
+    else
+      conn
+    end
+  end
+
+  defp maybe_assign_default_organization_scope(conn, _), do: conn
+
+  defp assign_default_organization_scope(conn, %User{} = user) do
+    orgs =
+      from(o in Organization,
+        join: m in OrganizationMembership,
+        on: m.organization_id == o.id,
+        where: m.user_id == ^user.id and is_nil(o.deleted_at),
+        select: %{id: o.id, slug: o.slug, name: o.name},
+        order_by: o.slug
+      )
+      |> Repo.all()
+
+    case orgs do
+      [] ->
+        conn
+
+      orgs ->
+        # Deterministic default: last slug so `?org=` tests can target the sibling org
+        # (e.g. admin denial uses beta scope against an alpha-owned customer row).
+        default_org = List.last(orgs)
+        ids = Enum.map(orgs, & &1.id)
+
+        conn
+        |> put_session(:active_organization_id, default_org.id)
+        |> put_session(:active_organization_slug, default_org.slug)
+        |> put_session(:active_organization_name, Map.get(default_org, :name))
+        |> maybe_put_admin_organization_ids(user, ids)
+    end
+  end
+
+  defp maybe_put_admin_organization_ids(conn, %User{billing_admin: true}, ids) do
+    put_session(conn, :admin_organization_ids, ids)
+  end
+
+  defp maybe_put_admin_organization_ids(conn, _user, _ids), do: conn
 
   @doc """
   Disconnects existing sockets for the given tokens.
@@ -272,8 +321,9 @@ defmodule AccrueHostWeb.UserAuth do
         {conn |> put_private(:sigra_session, sigra_session), hydrated_scope}
 
       {:error, fallback_scope, sigra_session} ->
-        {conn |> delete_session(:active_organization_id) |> put_private(:sigra_session, sigra_session),
-         fallback_scope}
+        {conn
+         |> delete_session(:active_organization_id)
+         |> put_private(:sigra_session, sigra_session), fallback_scope}
     end
   end
 

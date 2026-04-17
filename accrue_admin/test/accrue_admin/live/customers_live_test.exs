@@ -76,6 +76,8 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert html =~ "Searchable customer projections"
     assert html =~ "Captain Customer"
     assert html =~ "On file"
+    assert html =~ "Billing signals"
+    assert html =~ "Off"
     refute html =~ "Other Customer"
     assert html =~ "/billing/customers/"
   end

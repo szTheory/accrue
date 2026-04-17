@@ -838,7 +838,8 @@ defmodule Accrue.Processor.Fake do
         {:ok, existing} ->
           updated = Map.merge(existing, params)
 
-          if requires_immediate_tax_location_validation?(params) and invalid_tax_location?(updated) do
+          if requires_immediate_tax_location_validation?(params) and
+               invalid_tax_location?(updated) do
             {{:error, customer_tax_location_invalid_error()}, state}
           else
             {{:ok, updated}, %{state | customers: Map.put(state.customers, id, updated)}}

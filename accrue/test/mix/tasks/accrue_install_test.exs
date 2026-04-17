@@ -431,7 +431,10 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     end
     """)
 
-    InstallFixture.write_config!(app, "import Config\nconfig :accrue, :auth_adapter, MyApp.Auth\n")
+    InstallFixture.write_config!(
+      app,
+      "import Config\nconfig :accrue, :auth_adapter, MyApp.Auth\n"
+    )
 
     output = run_install(app, ["--check", "--yes"])
 
@@ -535,7 +538,10 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     end
     """)
 
-    InstallFixture.write_config!(app, "import Config\nconfig :accrue, :auth_adapter, Accrue.Auth.Default\n")
+    InstallFixture.write_config!(
+      app,
+      "import Config\nconfig :accrue, :auth_adapter, Accrue.Auth.Default\n"
+    )
 
     InstallFixture.write!(app, "config/runtime.exs", """
     import Config

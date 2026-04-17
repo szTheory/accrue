@@ -168,6 +168,10 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
                current_period_end: nil,
                ended_at: nil,
                trial_end: nil,
+               owner_id: Enum.at(rows, 0).owner_id,
+               owner_type: "User",
+               automatic_tax: false,
+               automatic_tax_disabled_reason: nil,
                id: Enum.at(rows, 0).id,
                inserted_at: Enum.at(rows, 0).inserted_at
              },
@@ -180,6 +184,10 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
                current_period_end: nil,
                ended_at: nil,
                trial_end: nil,
+               owner_id: Enum.at(rows, 1).owner_id,
+               owner_type: "User",
+               automatic_tax: false,
+               automatic_tax_disabled_reason: nil,
                customer_id: Enum.at(rows, 1).customer_id,
                id: Enum.at(rows, 1).id,
                inserted_at: Enum.at(rows, 1).inserted_at

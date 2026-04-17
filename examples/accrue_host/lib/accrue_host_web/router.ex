@@ -44,6 +44,8 @@ defmodule AccrueHostWeb.Router do
   scope "/", AccrueHostWeb do
     pipe_through([:browser, :require_authenticated_user])
 
+    post("/app/organization-scope", OrganizationScopeController, :update)
+
     live_session :require_authenticated_user,
       on_mount: [{AccrueHostWeb.UserAuth, :require_authenticated}] do
       live("/app/billing", SubscriptionLive, :show)
@@ -80,10 +82,10 @@ defmodule AccrueHostWeb.Router do
 
   scope "/webhooks" do
     pipe_through(:accrue_webhook_raw_body)
-    accrue_webhook "/stripe", :stripe
+    accrue_webhook("/stripe", :stripe)
   end
 
   # Protect this mount with AccrueAdmin.AuthHook via accrue_admin/2.
   # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
-  accrue_admin "/billing", session_keys: [:user_token], allow_live_reload: false
+  accrue_admin("/billing", session_keys: [:user_token], allow_live_reload: false)
 end

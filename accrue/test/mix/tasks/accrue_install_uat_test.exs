@@ -180,6 +180,7 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
     app = phoenix_fixture!(:preflight_pass)
 
     run_install(app, ["--yes"])
+
     InstallFixture.write!(app, "config/config.exs", """
     import Config
     config :my_app, Oban, queues: [accrue_webhooks: 10, accrue_mailers: 20]

@@ -171,6 +171,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
             "data" => %{"object" => %{"id" => "in_unknown"}}
           })
       })
+
     in_scope_webhook_id = in_scope_webhook.id
 
     owner_scope = organization_owner_scope("org_allowed")
@@ -182,7 +183,9 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert proof_context.webhook_id == ambiguous_webhook.id
   end
 
-  test "out-of-scope webhook route redirects with denial flash before rendering detail", %{conn: conn} do
+  test "out-of-scope webhook route redirects with denial flash before rendering detail", %{
+    conn: conn
+  } do
     allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
     denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
 
@@ -260,7 +263,8 @@ defmodule AccrueAdmin.WebhookLiveTest do
         admin_organization_ids: ["org_allowed"]
       )
 
-    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{ambiguous_webhook.id}?org=allowed-org")
+    assert {:ok, _view, html} =
+             live(conn, "/billing/webhooks/#{ambiguous_webhook.id}?org=allowed-org")
 
     assert html =~
              "Ownership couldn&#39;t be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."

@@ -73,7 +73,10 @@ defmodule AccrueAdmin.EventsLiveTest do
         caused_by_webhook_event_id: webhook.id
       })
 
-    {:ok, webhook_id: webhook.id, in_scope_invoice: in_scope_invoice, out_scope_invoice: out_scope_invoice}
+    {:ok,
+     webhook_id: webhook.id,
+     in_scope_invoice: in_scope_invoice,
+     out_scope_invoice: out_scope_invoice}
   end
 
   test "renders the active-organization event feed without out-of-scope rows", %{

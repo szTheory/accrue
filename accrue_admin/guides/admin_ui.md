@@ -58,7 +58,7 @@ scope so `/billing` inherits the same auth boundary as the rest of the app.
 
 ## Private Asset Bundle
 
-The package serves its own committed bundle from `priv/static/`. Rebuild it locally with:
+The package serves its own committed bundle from `priv/static/`. The JavaScript bundle must be **valid ES module output** (not a placeholder): it includes Phoenix + LiveView so admin `phx-click` interactions work in the browser. Rebuild it locally with:
 
 ```bash
 cd accrue_admin

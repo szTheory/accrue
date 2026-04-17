@@ -123,8 +123,11 @@ defmodule Accrue.Webhook.Plug do
 
         raise Accrue.ConfigError, key: :webhook_signing_secrets, diagnostic: diagnostic
 
-      chunks when is_list(chunks) -> chunks |> Enum.reverse() |> IO.iodata_to_binary()
-      binary when is_binary(binary) -> binary
+      chunks when is_list(chunks) ->
+        chunks |> Enum.reverse() |> IO.iodata_to_binary()
+
+      binary when is_binary(binary) ->
+        binary
     end
   end
 end

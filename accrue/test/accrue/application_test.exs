@@ -26,9 +26,11 @@ defmodule Accrue.ApplicationTest do
 
   describe "boot-time auth refusal (T-FND-07 integration)" do
     test "Accrue.Auth.Default.do_boot_check!(:prod) raises when adapter is default" do
-      assert_raise Accrue.ConfigError, ~r/dev-only and refuses to run in :prod/, fn ->
-        Accrue.Auth.Default.do_boot_check!(:prod)
-      end
+      assert_raise Accrue.ConfigError,
+                   ~r/ACCRUE-DX-AUTH-ADAPTER|default Accrue auth adapter/,
+                   fn ->
+                     Accrue.Auth.Default.do_boot_check!(:prod)
+                   end
     end
   end
 

@@ -7,6 +7,7 @@ defmodule AccrueHost.BillingFacadeTest do
   alias Accrue.Billing.Customer
   alias Accrue.Billing.Subscription
   alias AccrueHost.Accounts.Organization
+  alias AccrueHost.Accounts.Scope
   alias AccrueHost.Accounts.User
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Billing
@@ -99,6 +100,39 @@ defmodule AccrueHost.BillingFacadeTest do
     assert customer.owner_id == organization.id
     assert subscription.id == latest_subscription.id
     assert subscription.customer_id == customer.id
+  end
+
+  test "scope-scoped facade returns no_active_organization without an active organization", %{
+    user: user
+  } do
+    scope = Scope.for_user(user)
+
+    assert {:error, :no_active_organization} = Billing.customer_for_scope(scope)
+    assert {:error, :no_active_organization} = Billing.billing_state_for_scope(scope)
+
+    assert {:error, :no_active_organization} =
+             Billing.subscribe_active_organization(scope, "price_basic", trial_end: {:days, 14})
+  end
+
+  test "cancel_active_organization/2 forbids cancelling a subscription owned by another organization" do
+    user = AccountsFixtures.user_fixture()
+    org_a = AccountsFixtures.organization_fixture(%{owner: user})
+    org_b = AccountsFixtures.organization_fixture(%{owner: user})
+
+    membership_a =
+      AccountsFixtures.organization_membership_fixture(%{
+        organization: org_a,
+        user: user,
+        role: :owner
+      })
+
+    scope_on_a = Scope.put_active_organization(Scope.for_user(user), org_a, membership_a)
+
+    assert {:ok, other_org_subscription} =
+             Billing.subscribe(org_b, "price_basic", trial_end: {:days, 14})
+
+    assert {:error, :forbidden} =
+             Billing.cancel_active_organization(scope_on_a, other_org_subscription)
   end
 
   test "fixtures create Sigra role memberships for downstream organization coverage" do

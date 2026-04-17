@@ -7,6 +7,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
 
   alias Accrue.Billing.{Query, Subscription}
   alias Accrue.Repo
+  alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
   alias AccrueAdmin.Queries.Subscriptions
 
@@ -51,6 +52,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">
@@ -101,12 +103,14 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               render: &subscription_link(&1, @admin_mount_path, @current_owner_scope)
             },
             %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
+            %{label: "Billing signals", render: &billing_signals_cell/1},
             %{label: "Lifecycle", render: &lifecycle_summary/1},
             %{id: :current_period_end, label: "Current period end"}
           ]}
           card_title={&card_title/1}
           card_fields={[
             %{label: "Customer", render: &customer_label/1},
+            %{label: "Billing signals", render: &billing_signals_cell/1},
             %{label: "Lifecycle", render: &lifecycle_summary/1},
             %{id: :current_period_end, label: "Current period end"}
           ]}
@@ -169,6 +173,17 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp scoped_subscriptions(_owner_scope), do: Subscription
+
+  defp billing_signals_cell(row) do
+    ownership = BillingPresentation.ownership_label(row)
+    tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
+    escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+    Phoenix.HTML.raw(
+      "<span class=\"ax-chip ax-text-12\">#{escaped_o}</span> <span class=\"ax-chip ax-text-12\">#{escaped_t}</span>"
+    )
+  end
 
   defp subscription_link(row, mount_path, owner_scope),
     do:

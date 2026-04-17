@@ -15,8 +15,10 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
 
     create table(:accrue_payment_methods, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :customer_id, references(:accrue_customers, type: :binary_id, on_delete: :delete_all),
         null: false
+
       add :processor, :string, null: false
       add :processor_id, :string
       add :type, :string
@@ -37,16 +39,18 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_payment_methods, [:processor_id])
 
     create unique_index(:accrue_payment_methods, [:processor, :processor_id],
-      where: "processor_id IS NOT NULL",
-      name: :accrue_payment_methods_processor_processor_id_index
-    )
+             where: "processor_id IS NOT NULL",
+             name: :accrue_payment_methods_processor_processor_id_index
+           )
 
     # --- Subscriptions ---
 
     create table(:accrue_subscriptions, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :customer_id, references(:accrue_customers, type: :binary_id, on_delete: :delete_all),
         null: false
+
       add :processor, :string, null: false
       add :processor_id, :string
       add :status, :string
@@ -68,17 +72,19 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_subscriptions, [:processor_id])
 
     create unique_index(:accrue_subscriptions, [:processor, :processor_id],
-      where: "processor_id IS NOT NULL",
-      name: :accrue_subscriptions_processor_processor_id_index
-    )
+             where: "processor_id IS NOT NULL",
+             name: :accrue_subscriptions_processor_processor_id_index
+           )
 
     # --- Subscription Items ---
 
     create table(:accrue_subscription_items, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :subscription_id,
           references(:accrue_subscriptions, type: :binary_id, on_delete: :delete_all),
-        null: false
+          null: false
+
       add :processor, :string, null: false
       add :processor_id, :string
       add :price_id, :string
@@ -94,19 +100,24 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_subscription_items, [:processor_id])
 
     create unique_index(:accrue_subscription_items, [:processor, :processor_id],
-      where: "processor_id IS NOT NULL",
-      name: :accrue_subscription_items_processor_processor_id_index
-    )
+             where: "processor_id IS NOT NULL",
+             name: :accrue_subscription_items_processor_processor_id_index
+           )
 
     # --- Charges ---
 
     create table(:accrue_charges, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :customer_id, references(:accrue_customers, type: :binary_id, on_delete: :delete_all),
         null: false
-      add :subscription_id, references(:accrue_subscriptions, type: :binary_id, on_delete: :nilify_all)
+
+      add :subscription_id,
+          references(:accrue_subscriptions, type: :binary_id, on_delete: :nilify_all)
+
       add :payment_method_id,
           references(:accrue_payment_methods, type: :binary_id, on_delete: :nilify_all)
+
       add :processor, :string, null: false
       add :processor_id, :string
       add :amount_cents, :integer
@@ -124,17 +135,21 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_charges, [:processor_id])
 
     create unique_index(:accrue_charges, [:processor, :processor_id],
-      where: "processor_id IS NOT NULL",
-      name: :accrue_charges_processor_processor_id_index
-    )
+             where: "processor_id IS NOT NULL",
+             name: :accrue_charges_processor_processor_id_index
+           )
 
     # --- Invoices ---
 
     create table(:accrue_invoices, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+
       add :customer_id, references(:accrue_customers, type: :binary_id, on_delete: :delete_all),
         null: false
-      add :subscription_id, references(:accrue_subscriptions, type: :binary_id, on_delete: :nilify_all)
+
+      add :subscription_id,
+          references(:accrue_subscriptions, type: :binary_id, on_delete: :nilify_all)
+
       add :processor, :string, null: false
       add :processor_id, :string
       add :status, :string
@@ -154,9 +169,9 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_invoices, [:processor_id])
 
     create unique_index(:accrue_invoices, [:processor, :processor_id],
-      where: "processor_id IS NOT NULL",
-      name: :accrue_invoices_processor_processor_id_index
-    )
+             where: "processor_id IS NOT NULL",
+             name: :accrue_invoices_processor_processor_id_index
+           )
 
     # --- Coupons ---
 
@@ -183,8 +198,8 @@ defmodule Accrue.Repo.Migrations.CreateAccrueBillingSchemas do
     create index(:accrue_coupons, [:processor_id])
 
     create unique_index(:accrue_coupons, [:processor, :processor_id],
-      where: "processor_id IS NOT NULL",
-      name: :accrue_coupons_processor_processor_id_index
-    )
+             where: "processor_id IS NOT NULL",
+             name: :accrue_coupons_processor_processor_id_index
+           )
   end
 end

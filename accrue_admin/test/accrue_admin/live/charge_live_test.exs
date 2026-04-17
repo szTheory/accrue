@@ -90,6 +90,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/charges/#{charge.id}")
 
+    assert html =~ "Tax &amp; ownership"
     assert html =~ "Platform fee"
     assert html =~ "merchant loss"
     assert html =~ "fee refunded"

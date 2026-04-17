@@ -20,6 +20,7 @@ defmodule AccrueAdmin.PageLive do
       |> assign(:assets_js_path, admin["assets_js_path"])
       |> assign(:admin_mount_path, admin["mount_path"])
       |> assign(:current_path, admin["mount_path"])
+      |> assign(:active_organization_name, nil)
 
     {:ok, socket}
   end
@@ -33,6 +34,7 @@ defmodule AccrueAdmin.PageLive do
       mount_path={@admin_mount_path}
       page_title="Billing"
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">

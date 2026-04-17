@@ -1,7 +1,10 @@
 defmodule Accrue.Docs.TrustReviewTest do
   use ExUnit.Case, async: true
 
-  @trust_review_path Path.expand("../../../../.planning/phases/15-trust-hardening/15-TRUST-REVIEW.md", __DIR__)
+  @trust_review_path Path.expand(
+                       "../../../../.planning/phases/15-trust-hardening/15-TRUST-REVIEW.md",
+                       __DIR__
+                     )
 
   test "checked-in trust review exists and covers required boundaries" do
     review = File.read!(@trust_review_path)

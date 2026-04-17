@@ -7,6 +7,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
 
   alias Accrue.Billing.Customer
   alias Accrue.Repo
+  alias AccrueAdmin.BillingPresentation
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
   alias AccrueAdmin.Queries.Customers
 
@@ -51,6 +52,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">
@@ -97,6 +99,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
             %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
             %{id: :owner_type, label: "Owner type"},
             %{id: :owner_id, label: "Owner id"},
+            %{label: "Billing signals", render: &billing_signals_cell/1},
             %{id: :processor_id, label: "Processor id"},
             %{label: "Default PM", render: &default_payment_method_label/1}
           ]}
@@ -104,6 +107,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
           card_fields={[
             %{id: :owner_type, label: "Owner type"},
             %{id: :owner_id, label: "Owner id"},
+            %{label: "Billing signals", render: &billing_signals_cell/1},
             %{label: "Default PM", render: &default_payment_method_label/1}
           ]}
           filter_fields={[
@@ -162,6 +166,17 @@ defmodule AccrueAdmin.Live.CustomersLive do
   end
 
   defp scoped_customers(_owner_scope), do: Customer
+
+  defp billing_signals_cell(row) do
+    ownership = BillingPresentation.ownership_label(row)
+    tax = BillingPresentation.tax_health_label(BillingPresentation.tax_health(row))
+    escaped_o = ownership |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+    Phoenix.HTML.raw(
+      "<span class=\"ax-chip ax-text-12\">#{escaped_o}</span> <span class=\"ax-chip ax-text-12\">#{escaped_t}</span>"
+    )
+  end
 
   defp customer_link(row, mount_path, owner_scope) do
     label =

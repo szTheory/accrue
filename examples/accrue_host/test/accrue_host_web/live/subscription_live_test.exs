@@ -4,6 +4,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
   alias Accrue.Billing.Customer
   alias Accrue.Billing.SubscriptionItem
   alias AccrueHost.AccountsFixtures
+  alias AccrueHost.Billing
   alias AccrueHost.Repo
 
   import Ecto.Query
@@ -90,6 +91,22 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
 
     assert html =~ "Please update customer address or shipping before enabling automatic tax."
     refute html =~ "We couldn't complete that billing action."
+  end
+
+  test "organization billing copy references AccrueHost.Billing", %{
+    conn: conn,
+    organization: organization,
+    user: user
+  } do
+    assert {:ok, _} = Billing.subscribe(organization, "price_basic", trial_end: {:days, 14})
+
+    {:ok, _view, html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live(~p"/app/billing")
+
+    assert html =~ "Organization billing state"
+    assert html =~ "AccrueHost.Billing"
   end
 
   defp cleanup_fake_billing_rows! do

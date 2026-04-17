@@ -21,7 +21,7 @@ v1.3 adds Stripe Tax orchestration, customer tax-location validation and recover
 
 Milestone history, roadmap, requirements, and audit artifacts: `.planning/milestones/v1.3-ROADMAP.md`, `v1.3-REQUIREMENTS.md`, `v1.3-MILESTONE-AUDIT.md`.
 
-**Next:** v1.4 scope is intentionally open — run `/gsd-new-milestone` when ready (see `.planning/REQUIREMENTS.md` placeholder).
+**Last completed milestone:** **v1.4 Ecosystem stability + demo visuals** (2026-04-17) — see `.planning/REQUIREMENTS.md` and Phase 23 in `.planning/ROADMAP.md`. Next milestone TBD in roadmap.
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface.
 
@@ -56,13 +56,17 @@ The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust
 - Trust hardening bundle covering webhook/auth/admin security, seeded performance smoke checks, compatibility, accessibility/responsive browser checks, secret/PII log review, and required-vs-advisory release-gate boundaries.
 - Expansion discovery for tax, revenue/export, additional processors, and organization/multi-tenant billing captured as ranked future recommendations only.
 
-## Next Milestone Goals (v1.4 — TBD)
+## Shipped: v1.4 Ecosystem stability + demo visuals (2026-04-17)
 
-Pick up ranked expansion candidates only after `/gsd-new-milestone` locks requirements. Likely themes from prior discovery:
+**Goal:** Stay current on published **`lattice_stripe`** within `~> 1.1`, and make the Fake-backed **host + mounted admin** walkthrough trivial to **see** (screenshots + CI artifacts).
 
-- **FIN-03 / FIN-04** — Host-owned finance exports and accounting-boundary work (only if deliberately scoped).
-- **PROC-08** — Second processor adapter behind the Stripe-first boundary.
-- **ORG-04** — Broader non-Sigra tenancy recipes.
+**Delivered:**
+
+- `lattice_stripe` lockfiles refreshed across `accrue`, `accrue_admin`, and `examples/accrue_host` (latest on Hex at time of work: **1.1.0**).
+- Visual walkthrough docs, `npm run e2e:visuals`, and CI artifact pointers; Playwright trust lane green on desktop + mobile.
+- Committed **`accrue_admin` `priv/static` JS/CSS** is a real esbuild bundle so mounted admin LiveView works in the browser; `mix verify.full` rebuilds admin assets before Playwright.
+
+**Explicitly deferred:** **PROC-08** (second processor), FIN-03 product exports, ORG-04 recipes — revisit in a later milestone.
 
 Continue to treat `tax rollout correctness`, `cross-tenant billing leakage`, and `wrong-audience finance exports` as release risks regardless of milestone.
 
@@ -87,9 +91,10 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - ✓ Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release — v1.2
 - ✓ Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API — v1.2
 
-### Active (v1.4 placeholder)
+### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
-No validated v1.4 requirements yet — see `.planning/REQUIREMENTS.md`.
+- [x] **STAB-01** — Latest published `lattice_stripe` compatible with `~> 1.1` across monorepo lockfiles; gates green.
+- [x] **UX-DEMO-01** — Visual walkthrough docs + optional `npm run e2e:visuals` for the Phase 15 trust Playwright path.
 
 ### Validated v1.3 (archived)
 

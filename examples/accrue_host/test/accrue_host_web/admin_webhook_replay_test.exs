@@ -37,8 +37,7 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     customer =
       Repo.one!(
         from(customer in Customer,
-          where:
-            customer.owner_type == "Organization" and customer.owner_id == ^organization.id
+          where: customer.owner_type == "Organization" and customer.owner_id == ^organization.id
         )
       )
 
@@ -118,7 +117,8 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert events_html =~ "invoice.payment_failed"
     assert events_html =~ "activity"
 
-    {:ok, replay_view, _html} = live(conn, "/billing/webhooks/#{webhook.id}?org=#{organization.slug}")
+    {:ok, replay_view, _html} =
+      live(conn, "/billing/webhooks/#{webhook.id}?org=#{organization.slug}")
 
     replay_html = render_click(element(replay_view, "[data-role='replay-single']"))
     assert replay_html =~ "Replay webhook for the active organization?"
@@ -218,7 +218,10 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
              "Ownership couldn&#39;t be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
 
     {:ok, bulk_view, _html} =
-      live(conn, "/billing/webhooks?status=dead&type=invoice.payment_failed&org=#{allowed_org.slug}")
+      live(
+        conn,
+        "/billing/webhooks?status=dead&type=invoice.payment_failed&org=#{allowed_org.slug}"
+      )
 
     bulk_html = render_click(element(bulk_view, "[data-role='prepare-bulk-replay']"))
     assert bulk_html =~ "No failed or dead-lettered webhook rows match the current filters."

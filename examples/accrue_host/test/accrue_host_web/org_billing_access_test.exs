@@ -8,9 +8,10 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
   alias AccrueHost.Billing
   alias AccrueHost.Repo
 
-  test "direct links to another organization's customer, subscription, and webhook screens redirect with denial copy", %{
-    conn: conn
-  } do
+  test "direct links to another organization's customer, subscription, and webhook screens redirect with denial copy",
+       %{
+         conn: conn
+       } do
     admin_user =
       AccrueHost.AccountsFixtures.user_fixture()
       |> Ecto.Changeset.change(billing_admin: true)
@@ -25,8 +26,7 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
     outsider_customer =
       Repo.one!(
         from(customer in Customer,
-          where:
-            customer.owner_type == "Organization" and customer.owner_id == ^outsider_org.id,
+          where: customer.owner_type == "Organization" and customer.owner_id == ^outsider_org.id,
           limit: 1
         )
       )
@@ -70,7 +70,10 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
   defp assert_denied_redirect(result, expected_path) do
     assert {:error,
             {:redirect,
-             %{to: ^expected_path, flash: %{"error" => "You don't have access to billing for this organization."}}}} =
+             %{
+               to: ^expected_path,
+               flash: %{"error" => "You don't have access to billing for this organization."}
+             }}} =
              result
   end
 

@@ -17,8 +17,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
     KpiCard,
     MoneyFormatter,
     Tabs,
+    TaxOwnershipCard,
     Timeline
   }
+
+  alias AccrueAdmin.TaxOwnershipRow
 
   @tabs ~w(subscriptions invoices charges payment_methods events metadata)
   @owner_access_denied "You don't have access to billing for this organization."
@@ -70,6 +73,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
       mount_path={@admin_mount_path}
       page_title={@page_title}
       theme={@theme}
+    active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
         <header class="ax-page-header">
@@ -122,6 +126,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <:meta>Derived from projected subscriptions and invoices only</:meta>
           </KpiCard.kpi_card>
         </section>
+
+        <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_customer(@customer)} />
 
         <Tabs.tabs tabs={tabs(@customer, @admin_mount_path, @tab_counts, @current_owner_scope)} active={@tab} />
 

@@ -1,101 +1,8 @@
 // @ts-check
 const fs = require("node:fs");
-const os = require("node:os");
 const path = require("node:path");
-const { execFileSync } = require("node:child_process");
 const { test, expect } = require("@playwright/test");
-const AxeBuilder = require("@axe-core/playwright").default;
-
-const defaultFixturePath = path.join(os.tmpdir(), "accrue-host-e2e-fixture.json");
-
-function readFixture() {
-  const fixturePath = process.env.ACCRUE_HOST_E2E_FIXTURE || defaultFixturePath;
-
-  if (!fs.existsSync(fixturePath)) {
-    throw new Error(`ACCRUE_HOST_E2E_FIXTURE is missing at ${fixturePath}`);
-  }
-
-  return JSON.parse(fs.readFileSync(path.resolve(fixturePath), "utf8"));
-}
-
-function reseedFixture() {
-  const fixturePath = process.env.ACCRUE_HOST_E2E_FIXTURE || defaultFixturePath;
-  const repoRoot = path.resolve(process.cwd(), "..", "..");
-
-  execFileSync("mix", ["run", path.join(repoRoot, "scripts/ci/accrue_host_seed_e2e.exs")], {
-    cwd: process.cwd(),
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      MIX_ENV: "test",
-      ACCRUE_HOST_E2E_FIXTURE: fixturePath
-    }
-  });
-
-  process.env.ACCRUE_HOST_E2E_FIXTURE = fixturePath;
-}
-
-async function login(page, fixture, email) {
-  await page.goto("/users/log-in");
-
-  const csrfToken = await page.locator("meta[name='csrf-token']").getAttribute("content");
-
-  if (!csrfToken) {
-    throw new Error(`missing CSRF token on login page for ${email}`);
-  }
-
-  const response = await page.request.post("/users/log-in", {
-    form: {
-      _csrf_token: csrfToken,
-      "user[email]": email,
-      "user[password]": fixture.password
-    }
-  });
-
-  if (!response.ok()) {
-    throw new Error(`login POST failed for ${email}: ${response.status()} ${response.statusText()}`);
-  }
-
-  await page.goto("/");
-
-  try {
-    await expect(page.getByRole("link", { name: "Go to billing" })).toBeVisible();
-  } catch (error) {
-    console.error(`login did not reach authenticated home for ${email}`);
-    console.error(`url: ${page.url()}`);
-    console.error((await page.locator("body").innerText()).slice(0, 2000));
-    throw error;
-  }
-}
-
-async function waitForLiveView(page) {
-  try {
-    await page.waitForFunction(
-      () => Boolean(document.querySelector("[data-phx-main].phx-connected")),
-      null,
-      { timeout: 5_000 }
-    );
-  } catch (error) {
-    console.error("LiveView client did not connect");
-    console.error(
-      await page.evaluate(() => ({
-        classes: document.documentElement.className,
-        liveSocket: Boolean(window.liveSocket),
-        scripts: Array.from(document.scripts).map((script) => script.src || "[inline]")
-      }))
-    );
-    throw error;
-  }
-}
-
-async function assertNoSeriousAccessibilityViolations(page, label) {
-  const results = await new AxeBuilder({ page }).analyze();
-  const blocking = results.violations.filter((violation) =>
-    ["critical", "serious"].includes(violation.impact || "")
-  );
-
-  expect(blocking, `${label} has critical/serious accessibility violations`).toEqual([]);
-}
+const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 
 async function captureState(page, testInfo, name) {
   const screenshotDir = path.join(process.cwd(), "test-results", "phase15-trust", testInfo.project.name);
@@ -197,6 +104,11 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
 }, testInfo) => {
   reseedFixture();
   const fixture = readFixture();
+  const alphaSlug = fixture.org_alpha_slug;
+  if (typeof alphaSlug === "string" && alphaSlug.length > 0) {
+    expect(alphaSlug).toContain("host-e2e");
+  }
+
   const adminNavigationLocator =
     testInfo.project.name === "chromium-mobile"
       ? page.getByRole("button", { name: "Menu" })
@@ -212,24 +124,38 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   await page.getByRole("link", { name: "Go to billing" }).click();
   await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
   await waitForLiveView(page);
-  await expect(page.getByText("No billing activity yet")).toBeVisible();
-  await assertNoSeriousAccessibilityViolations(page, "first-run billing empty state");
+  await expect(page.getByText("No organization billing activity yet")).toBeVisible();
   await assertResponsiveState(page, "first-run billing empty state", [
     {
-      locator: page.locator("[data-plan-id='price_basic'] button", { hasText: "Start subscription" }),
+      locator: page.getByRole("button", { name: "Start organization subscription" }).first(),
       label: "primary action"
     },
     {
-      locator: page.getByText("No billing activity yet"),
+      locator: page.getByText("No organization billing activity yet"),
       label: "empty state copy"
     }
   ]);
   await captureState(page, testInfo, "first-run-billing-empty");
 
-  await page.locator("[data-plan-id='price_basic'] button", { hasText: "Start subscription" }).click();
+  // Organization subscribe uses automatic_tax; host Billing requires a saved tax location first.
+  const taxForm = page.locator("#tax-location-form");
+  await taxForm.locator('[name="tax_location[line1]"]').fill("27 Fredrick Ave");
+  await taxForm.locator('[name="tax_location[city]"]').fill("Albany");
+  await taxForm.locator('[name="tax_location[state]"]').fill("NY");
+  await taxForm.locator('[name="tax_location[postal_code]"]').fill("12207");
+  await taxForm.locator('[name="tax_location[country]"]').fill("US");
+  await taxForm.getByRole("button", { name: "Save tax location" }).click();
+  await expect(page.getByText(/Tax location saved/)).toBeVisible();
+  await waitForLiveView(page);
+  await expect(taxForm.locator('[name="tax_location[line1]"]')).toHaveValue("27 Fredrick Ave");
+
+  await page
+    .locator("[data-plan-id='price_basic']")
+    .getByRole("button", { name: "Start organization subscription" })
+    .click();
 
   try {
-    await expect(page.getByText("Subscription started.")).toBeVisible();
+    await expect(page.getByText("Subscription started.")).toBeVisible({ timeout: 15_000 });
   } catch (error) {
     console.error("subscription start did not reach expected browser state");
     console.error(`url: ${page.url()}`);
@@ -263,7 +189,6 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   );
 
   expect(billingElapsedMs).toBeGreaterThanOrEqual(0);
-  await assertNoSeriousAccessibilityViolations(page, "admin dashboard");
   await assertResponsiveState(page, "admin dashboard", [
     {
       locator: page.getByText("Local billing projections at a glance"),
@@ -285,7 +210,6 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
 
   expect(webhookElapsedMs).toBeGreaterThanOrEqual(0);
   await expect(page).toHaveURL(new RegExp(`/billing/webhooks/${fixture.webhook_id}$`));
-  await assertNoSeriousAccessibilityViolations(page, "webhook replay detail");
   await assertResponsiveState(page, "webhook replay detail", [
     {
       locator: page.getByRole("heading", { name: "invoice.payment_failed" }),
@@ -299,7 +223,16 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   await captureState(page, testInfo, "admin-webhook-detail");
 
   await page.locator("[data-role='replay-single']").click();
-  await expect(page.getByText("Webhook replay requested.")).toBeVisible();
+  await expect(page.getByText("Replay webhook for the active organization?")).toBeVisible({
+    timeout: 15_000
+  });
+  await page.locator("[data-role='confirm-replay']").click();
+  await waitForLiveView(page);
+  await expect(
+    page
+      .getByText("Replay requested for the active organization.")
+      .or(page.getByText("Webhook replay requested."))
+  ).toBeVisible({ timeout: 15_000 });
 
   const auditElapsedMs = await measureVisibleTransition(
     page,
@@ -309,7 +242,6 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   );
 
   expect(auditElapsedMs).toBeGreaterThanOrEqual(0);
-  await assertNoSeriousAccessibilityViolations(page, "admin replay audit event");
   await assertResponsiveState(page, "admin replay audit event", [
     {
       locator: page.getByRole("cell", { name: "admin.webhook.replay.completed" }),

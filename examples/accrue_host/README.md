@@ -117,6 +117,43 @@ For maintainers who want the repo-root wrapper after the tutorial story:
 bash scripts/ci/accrue_host_uat.sh
 ```
 
+## Visual walkthrough (Fake-backed)
+
+To **see** the mounted admin + host billing story as full-page screenshots (no live
+Stripe), use the release-blocking **`@phase15-trust`** Playwright spec. It seeds the
+same Fake fixture as the rest of the browser suite (scrubs prior `sub_fake_%` host rows
+so Fake ids cannot collide), saves a tax location, then writes PNGs under:
+
+`examples/accrue_host/test-results/phase15-trust/<project>/`  
+(for example `chromium-desktop/` and `chromium-mobile/`).
+
+The repo ships a real **`accrue_admin` `priv/static` bundle** (Phoenix + LiveView client). If you change admin JavaScript or CSS sources, rebuild with `cd accrue_admin && mix accrue_admin.assets.build` and commit the updated `priv/static` files.
+
+**One command (after `npm ci` and `npm run e2e:install`):**
+
+```bash
+cd examples/accrue_host
+npm run e2e:visuals
+```
+
+Equivalent manual invocation:
+
+```bash
+cd examples/accrue_host
+npx playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust
+```
+
+**HTML report (optional):** run a normal `npx playwright test` locally, then open the
+generated report (Playwright default: `npx playwright show-report` from this
+directory when the HTML reporter produced `playwright-report/`).
+
+**On CI:** every `host-integration` run uploads artifact **`accrue-host-phase15-screenshots`**
+(`examples/accrue_host/test-results/phase15-trust`, upload step `if: always()` in
+`.github/workflows/ci.yml`). Download it from the GitHub Actions run summary.
+
+**Video:** not enabled in CI (size/noise). For local screen recordings, use Playwright’s
+`video` option in a headed debug session only — see Playwright docs.
+
 ## What this app proves
 
 - Host-owned auth and session state gate the mounted admin UI at `/billing`.

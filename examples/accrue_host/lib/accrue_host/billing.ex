@@ -99,10 +99,13 @@ defmodule AccrueHost.Billing do
     end
   end
 
-  defp organization_from_scope(%Scope{active_organization: nil}), do: {:error, :no_active_organization}
+  defp organization_from_scope(%Scope{active_organization: nil}),
+    do: {:error, :no_active_organization}
+
   defp organization_from_scope(%Scope{active_organization: organization}), do: {:ok, organization}
 
-  defp authorize_billing_mutation(%Scope{active_organization: nil}), do: {:error, :no_active_organization}
+  defp authorize_billing_mutation(%Scope{active_organization: nil}),
+    do: {:error, :no_active_organization}
 
   defp authorize_billing_mutation(%Scope{membership: %{role: role}})
        when role in @admin_roles,

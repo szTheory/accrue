@@ -39,6 +39,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     assert html =~ organization.name
     assert html =~ "Billing actions apply to the active organization only."
     assert html =~ "No organization billing activity yet"
+
     assert html =~
              "Billing records appear after an organization starts a subscription or a webhook is processed. Start the organization subscription or review webhook activity for this organization."
 
@@ -92,6 +93,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       })
 
     assert html =~ "Select an active organization before managing billing."
+
     assert Repo.aggregate(
              from(customer in Customer, where: customer.owner_type == "Organization"),
              :count,

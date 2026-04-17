@@ -39,7 +39,7 @@ created: 2026-04-17
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 20-W0-ORG-01 | TBD | 0 | ORG-01 | T-20-01 / — | Organization billable round-trips through `owner_type: "Organization"` and `owner_id` without core Accrue billing schema changes. | unit/integration | `cd accrue && mix test test/accrue/billable_test.exs --warnings-as-errors` | yes | pending |
-| 20-W0-ORG-02 | TBD | 0 | ORG-02 | T-20-02 | Active organization scope and membership drive canonical host billing; client-selected org IDs are ignored or rejected. | integration/LiveView | `cd examples/accrue_host && MIX_ENV=test mix test --warnings-as-errors test/accrue_host/billing_facade_test.exs test/accrue_host_web/org_billing_live_test.exs` | no, Wave 0 creates it | pending |
+| 20-W0-ORG-02 | TBD | 0 | ORG-02 | T-20-02 | Local Sigra source at `/Users/jon/projects/sigra` hydrates active organization scope and membership for canonical host billing; client-selected org IDs are ignored or rejected. | integration/LiveView | `cd examples/accrue_host && MIX_ENV=test mix test --warnings-as-errors test/accrue_host/billing_facade_test.exs test/accrue_host_web/org_billing_live_test.exs` | no, Wave 0 creates it | pending |
 | 20-W0-ORG-03 | TBD | 0 | ORG-03 | T-20-03 / T-20-04 | Cross-org host/admin/replay access fails server-side before billing mutation or row disclosure. | integration/LiveView | `cd examples/accrue_host && MIX_ENV=test mix test --warnings-as-errors test/accrue_host_web/org_billing_access_test.exs test/accrue_host_web/admin_webhook_replay_test.exs` | no, Wave 0 creates it | pending |
 
 ---
@@ -49,7 +49,7 @@ created: 2026-04-17
 - [ ] `examples/accrue_host/test/accrue_host_web/org_billing_live_test.exs` - host active-org happy-path proof for ORG-02.
 - [ ] `examples/accrue_host/test/accrue_host_web/org_billing_access_test.exs` - cross-org denial coverage for host/admin entry points under ORG-03.
 - [ ] `accrue_admin` owner-scope tests for customer/subscription/invoice/webhook detail loaders.
-- [ ] Sigra-backed host fixtures or a minimal Sigra test double, because no local Sigra fixture layer exists yet.
+- [ ] Sigra-backed host fixtures using the resolved local Sigra path dependency at `/Users/jon/projects/sigra`; do not use a minimal Sigra test double.
 - [ ] `cd examples/accrue_host && MIX_ENV=test mix ecto.migrate` after host organization/membership migrations are added.
 
 ---
@@ -58,7 +58,7 @@ created: 2026-04-17
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Concrete Sigra package/API source confirmation | ORG-02 | The local repo has only an Accrue Sigra auth adapter scaffold; no local or Hex Sigra org API was verified during research. | Before execution locks Sigra module names, confirm the dependency source and active-organization/membership APIs or keep the host proof behind a local Sigra-compatible test seam. |
+| Local Sigra dependency path remains available | ORG-02 | Sigra is resolved as a sibling local source at `/Users/jon/projects/sigra`, not a Hex package, so execution depends on that checkout being present. | Before executing Plan 20-01, verify `/Users/jon/projects/sigra/lib/sigra/organizations.ex`, `/Users/jon/projects/sigra/lib/sigra/scope/hydration.ex`, and `/Users/jon/projects/sigra/lib/sigra/plug/put_active_organization.ex` exist. If any are missing, block execution rather than falling back to a test double. |
 
 ---
 

@@ -55,12 +55,20 @@ defmodule Accrue.Docs.FirstHourGuideTest do
   end
 
   defp command_manifest do
-    module = load_manifest_module(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    module =
+      load_manifest_module(
+        Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__)
+      )
+
     apply(module, :manifest, [])
   end
 
   defp command_labels do
-    module = load_manifest_module(Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__))
+    module =
+      load_manifest_module(
+        Path.expand("../../../../examples/accrue_host/demo/command_manifest.exs", __DIR__)
+      )
+
     apply(module, :command_labels, [])
   end
 
