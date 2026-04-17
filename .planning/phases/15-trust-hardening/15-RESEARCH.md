@@ -348,17 +348,17 @@ expect(blocking).toEqual([]);
 |---|-------|---------|---------------|
 | A1 | Smoke timing variance warning will mainly come from warm/cold setup differences. | Common Pitfalls | Low; thresholds may need tuning, but the plan still centers on narrow path timing. [ASSUMED] |
 
-## Open Questions
+## Resolved Questions
 
 1. **What exact local budgets should block TRUST-02?**
-   - What we know: The project-level webhook path budget is `<100ms p99`, and the context wants conservative smoke thresholds rather than benchmark precision. [VERIFIED: CLAUDE.md] [VERIFIED: 15-CONTEXT.md]
-   - What's unclear: The exact deterministic threshold that stays stable on GitHub runners and common maintainer laptops. [VERIFIED: 15-CONTEXT.md]
-   - Recommendation: Plan a short calibration task that records seeded timings locally and in CI, then lock a budget with headroom rather than choosing numbers in advance. [VERIFIED: 15-CONTEXT.md]
+   - Decision: Lock the webhook request-path smoke gate at `budget_ms = 100` for the exact `verify signature -> persist webhook row -> enqueue Oban job -> return 200` segment, because the project performance contract already sets `<100ms p99` for that path and D-04/D-05 require the smoke check to measure that same narrow path rather than a looser benchmark proxy. [VERIFIED: CLAUDE.md] [VERIFIED: 15-CONTEXT.md]
+   - Decision: Move admin responsiveness timing into the host Playwright flow and gate each seeded admin transition (`/billing`, `/billing/webhooks/:id`, replay-audit view) at `budget_ms = 1500` measured from navigation start until the target action or state becomes visible. This is a smoke budget for browser-visible readiness, not a server p99 target. It is intentionally looser than the webhook budget because it includes browser, LiveView connect, and DOM readiness while remaining tight enough to catch obvious regressions in the seeded local/CI path. [VERIFIED: 15-CONTEXT.md] [VERIFIED: repo files]
+   - Planning consequence: ExUnit owns webhook latency proof; the browser harness owns admin responsiveness proof; both surfaces keep timing output compact and deterministic. [VERIFIED: 15-CONTEXT.md]
 
 2. **Should compatibility proof stop at the existing BEAM matrix, or add a host-level LiveView floor cell?**
-   - What we know: Public support is Phoenix `1.8+` and LiveView `1.0+`, while the current repo matrix already covers Elixir/OTP cells and host integration on the primary target. [VERIFIED: CLAUDE.md] [VERIFIED: repo files]
-   - What's unclear: Whether a separate host cell for the lowest supported LiveView combination is necessary for this phase or better deferred to later support expansion work. [VERIFIED: repo files]
-   - Recommendation: Keep Phase 15 focused on one explicit floor/target compatibility story unless a gap appears during implementation. [VERIFIED: 15-CONTEXT.md]
+   - Decision: Do not add a second compatibility matrix or a separate lowest-LiveView host lane in Phase 15. Keep one BEAM matrix in `.github/workflows/ci.yml` for Elixir/OTP floor, primary target, and forward-compat smoke, and make the existing `host-integration` job the explicit Phoenix/LiveView proof path. [VERIFIED: repo files] [VERIFIED: 15-CONTEXT.md]
+   - Compatibility proof path: the release-gate matrix proves the supported BEAM floor and target cells, while `host-integration` compiles and runs the seeded Phoenix/LiveView host app pinned to `{:phoenix, "~> 1.8.5"}` and `{:phoenix_live_view, "~> 1.1.0"}` in [`examples/accrue_host/mix.exs`](/Users/jon/projects/accrue/examples/accrue_host/mix.exs) and the admin package pinned to `{:phoenix, "~> 1.8"}` and `{:phoenix_live_view, "~> 1.1"}` in [`accrue_admin/mix.exs`](/Users/jon/projects/accrue/accrue_admin/mix.exs). That is the concrete Phoenix/LiveView compatibility evidence for this phase. [VERIFIED: repo files]
+   - Rationale: the public support contract remains Phoenix `1.8+` / LiveView `1.0+`, but the current repo's checked-in proof is at the maintained 1.8/1.1 target line. Adding extra host cells would create a second compatibility system without changing the actual shipped dependency constraints. [VERIFIED: CLAUDE.md] [VERIFIED: repo files]
 
 ## Environment Availability
 
