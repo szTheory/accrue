@@ -1,8 +1,11 @@
 defmodule AccrueAdmin.WebhookLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
+  alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -75,6 +78,59 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
   end
 
+  test "webhook loader distinguishes in-scope, out-of-scope, and ambiguous ownership" do
+    in_scope_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    out_scope_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+
+    in_scope_invoice = insert_invoice(in_scope_customer, %{processor_id: "in_scope_invoice"})
+    out_scope_invoice = insert_invoice(out_scope_customer, %{processor_id: "out_scope_invoice"})
+
+    in_scope_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_in_scope",
+        data: %{"object" => %{"id" => in_scope_invoice.processor_id}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_in_scope",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => in_scope_invoice.processor_id}}
+          })
+      })
+
+    out_scope_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_out_scope",
+        data: %{"object" => %{"id" => out_scope_invoice.processor_id}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_out_scope",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => out_scope_invoice.processor_id}}
+          })
+      })
+
+    ambiguous_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_ambiguous",
+        data: %{"object" => %{"id" => "in_unknown"}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_ambiguous",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => "in_unknown"}}
+          })
+      })
+    in_scope_webhook_id = in_scope_webhook.id
+
+    owner_scope = organization_owner_scope("org_allowed")
+
+    assert {:ok, %{id: ^in_scope_webhook_id}} = Webhooks.detail(in_scope_webhook.id, owner_scope)
+    assert :not_found = Webhooks.detail(out_scope_webhook.id, owner_scope)
+
+    assert {:ambiguous, proof_context} = Webhooks.detail(ambiguous_webhook.id, owner_scope)
+    assert proof_context.webhook_id == ambiguous_webhook.id
+  end
+
   defp insert_webhook(attrs) do
     defaults = %{
       processor: "stripe",
@@ -99,6 +155,53 @@ defmodule AccrueAdmin.WebhookLiveTest do
       })
       |> TestRepo.update!()
     end)
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_invoice(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      currency: "usd",
+      status: :open,
+      collection_method: "charge_automatically",
+      metadata: %{},
+      data: %{},
+      lock_version: 1,
+      processor_id: "in_" <> Integer.to_string(System.unique_integer([:positive]))
+    }
+
+    %Invoice{}
+    |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 
   defp insert_attempt_job(webhook_id) do

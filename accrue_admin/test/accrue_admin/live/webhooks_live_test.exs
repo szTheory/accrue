@@ -1,7 +1,10 @@
 defmodule AccrueAdmin.WebhooksLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
+  alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -63,6 +66,45 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     assert html =~ "1 failed or dead webhook rows"
   end
 
+  test "scoped bulk replay counts ignore rows outside the active organization" do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+
+    allowed_invoice = insert_invoice(allowed_customer, %{processor_id: "in_scope_bulk"})
+    denied_invoice = insert_invoice(denied_customer, %{processor_id: "out_scope_bulk"})
+
+    insert_webhook(%{
+      processor_event_id: "evt_scope_bulk",
+      status: :dead,
+      type: "invoice.payment_failed",
+      data: %{"object" => %{"id" => allowed_invoice.processor_id}},
+      raw_body:
+        Jason.encode!(%{
+          "id" => "evt_scope_bulk",
+          "type" => "invoice.payment_failed",
+          "data" => %{"object" => %{"id" => allowed_invoice.processor_id}}
+        })
+    })
+
+    insert_webhook(%{
+      processor_event_id: "evt_out_scope_bulk",
+      status: :dead,
+      type: "invoice.payment_failed",
+      data: %{"object" => %{"id" => denied_invoice.processor_id}},
+      raw_body:
+        Jason.encode!(%{
+          "id" => "evt_out_scope_bulk",
+          "type" => "invoice.payment_failed",
+          "data" => %{"object" => %{"id" => denied_invoice.processor_id}}
+        })
+    })
+
+    owner_scope = organization_owner_scope("org_allowed")
+
+    assert Webhooks.bulk_replay_count(owner_scope, %{status: :dead, type: "invoice.payment_failed"}) ==
+             1
+  end
+
   defp insert_webhook(attrs) do
     defaults = %{
       processor: "stripe",
@@ -92,5 +134,52 @@ defmodule AccrueAdmin.WebhooksLiveTest do
       })
       |> TestRepo.update!()
     end)
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_invoice(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "stripe",
+      currency: "usd",
+      status: :open,
+      collection_method: "charge_automatically",
+      metadata: %{},
+      data: %{},
+      lock_version: 1,
+      processor_id: "in_" <> Integer.to_string(System.unique_integer([:positive]))
+    }
+
+    %Invoice{}
+    |> Invoice.force_status_changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 end

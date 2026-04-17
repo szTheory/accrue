@@ -1,11 +1,13 @@
 defmodule AccrueAdmin.SubscriptionLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Billing.Subscription
+  alias Accrue.Billing.{Customer, Subscription}
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Repo
   alias Accrue.Test.Factory
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.TestRepo
 
   import Ecto.Query
@@ -131,5 +133,61 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     canceled = TestRepo.get!(Subscription, subscription.id)
     assert Accrue.Billing.Subscription.canceled?(canceled)
+  end
+
+  test "subscription loader denies rows outside the active organization" do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_subscription = insert_subscription(allowed_customer)
+    denied_subscription = insert_subscription(denied_customer)
+    allowed_subscription_id = allowed_subscription.id
+
+    owner_scope = organization_owner_scope("org_allowed")
+
+    assert {:ok, %{id: ^allowed_subscription_id}} =
+             Subscriptions.detail(allowed_subscription.id, owner_scope)
+
+    assert :not_found = Subscriptions.detail(denied_subscription.id, owner_scope)
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "fake",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      preferred_locale: "en",
+      metadata: %{},
+      data: %{}
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_subscription(customer) do
+    %Subscription{}
+    |> Subscription.changeset(%{
+      customer_id: customer.id,
+      processor: "fake",
+      processor_id: "sub_" <> Integer.to_string(System.unique_integer([:positive])),
+      status: :active,
+      currency: "usd"
+    })
+    |> TestRepo.insert!()
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 end

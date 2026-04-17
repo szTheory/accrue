@@ -5,6 +5,8 @@ defmodule AccrueAdmin.InvoiceLiveTest do
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Processor.Fake
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Invoices
   alias AccrueAdmin.TestRepo
 
   import Ecto.Query
@@ -170,6 +172,19 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert TestRepo.get!(Invoice, invoice.id).status == :void
   end
 
+  test "invoice loader denies rows outside the active organization" do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_invoice = insert_invoice(allowed_customer, %{status: :open, number: "INV-ORG-1"})
+    denied_invoice = insert_invoice(denied_customer, %{status: :open, number: "INV-ORG-2"})
+    allowed_invoice_id = allowed_invoice.id
+
+    owner_scope = organization_owner_scope("org_allowed")
+
+    assert {:ok, %{id: ^allowed_invoice_id}} = Invoices.detail(allowed_invoice.id, owner_scope)
+    assert :not_found = Invoices.detail(denied_invoice.id, owner_scope)
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",
@@ -212,5 +227,18 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     %InvoiceItem{}
     |> InvoiceItem.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 end

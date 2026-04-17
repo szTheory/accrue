@@ -6,6 +6,8 @@ defmodule AccrueAdmin.CustomerLiveTest do
   alias Accrue.Events
   alias Accrue.Processor.Fake
   alias Accrue.Test.Factory
+  alias AccrueAdmin.OwnerScope
+  alias AccrueAdmin.Queries.Customers
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -137,5 +139,45 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
     assert metadata_html =~ "enterprise"
     assert metadata_html =~ "preferred_timezone"
+  end
+
+  test "customer loader denies rows outside the active organization" do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    allowed_customer_id = allowed_customer.id
+
+    owner_scope = organization_owner_scope("org_allowed")
+
+    assert {:ok, %{id: ^allowed_customer_id}} = Customers.detail(allowed_customer.id, owner_scope)
+    assert :not_found = Customers.detail(denied_customer.id, owner_scope)
+  end
+
+  defp insert_customer(attrs) do
+    defaults = %{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "stripe",
+      processor_id: "cus_" <> Integer.to_string(System.unique_integer([:positive])),
+      metadata: %{},
+      data: %{},
+      preferred_locale: "en"
+    }
+
+    %Customer{}
+    |> Customer.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp organization_owner_scope(organization_id) do
+    %OwnerScope{
+      mode: :organization,
+      current_admin: %{id: "admin_1", role: :admin},
+      organization_id: organization_id,
+      organization_slug: "allowed-org",
+      platform_admin?: false,
+      admin_org_ids: [organization_id],
+      active_organization_id: organization_id,
+      active_organization_slug: "allowed-org"
+    }
   end
 end
