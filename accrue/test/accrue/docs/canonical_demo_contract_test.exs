@@ -90,16 +90,21 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
   end
 
   defp assert_order!(binary, [first | rest]) do
-    Enum.reduce(rest, index_of(binary, first), fn needle, previous_index ->
-      current_index = index_of(binary, needle, previous_index + 1)
-      assert previous_index
-      assert current_index
+    previous_index =
+      index_of(binary, first) ||
+        flunk("expected to find #{inspect(first)} in document")
+
+    Enum.reduce(rest, {first, previous_index}, fn needle, {previous_needle, previous_index} ->
+      current_index =
+        index_of(binary, needle, previous_index + 1) ||
+          flunk("expected to find #{inspect(needle)} after #{inspect(previous_needle)}")
+
       assert previous_index < current_index
-      current_index
+      {needle, current_index}
     end)
   end
 
-  defp index_of(binary, pattern, offset \\ 0) do
+  defp index_of(binary, pattern, offset \\ 0) when offset <= byte_size(binary) do
     length = byte_size(binary) - offset
 
     case :binary.match(binary, pattern, [{:scope, {offset, length}}]) do
@@ -107,4 +112,6 @@ defmodule Accrue.Docs.CanonicalDemoContractTest do
       :nomatch -> nil
     end
   end
+
+  defp index_of(_binary, _pattern, _offset), do: nil
 end

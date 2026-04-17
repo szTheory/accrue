@@ -70,16 +70,21 @@ defmodule Accrue.Docs.FirstHourGuideTest do
   end
 
   defp assert_order!(guide, [first | rest]) do
-    Enum.reduce(rest, index_of(guide, first), fn step, previous_index ->
-      current_index = index_of(guide, step, previous_index + 1)
-      assert current_index
-      assert previous_index
+    previous_index =
+      index_of(guide, first) ||
+        flunk("expected to find #{inspect(first)} in document")
+
+    Enum.reduce(rest, {first, previous_index}, fn step, {previous_step, previous_index} ->
+      current_index =
+        index_of(guide, step, previous_index + 1) ||
+          flunk("expected to find #{inspect(step)} after #{inspect(previous_step)}")
+
       assert previous_index < current_index
-      current_index
+      {step, current_index}
     end)
   end
 
-  defp index_of(binary, pattern, offset \\ 0) do
+  defp index_of(binary, pattern, offset \\ 0) when offset <= byte_size(binary) do
     length = byte_size(binary) - offset
 
     case :binary.match(binary, pattern, [{:scope, {offset, length}}]) do
@@ -87,4 +92,6 @@ defmodule Accrue.Docs.FirstHourGuideTest do
       :nomatch -> nil
     end
   end
+
+  defp index_of(_binary, _pattern, _offset), do: nil
 end
