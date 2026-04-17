@@ -124,3 +124,9 @@ live webhook forwarding is useful when validating local endpoint wiring and sign
 - Hiding webhook setup means nobody knows whether raw body capture, signature verification, and dispatch are actually wired.
 - Failing to assert side effects misses the behaviors customers notice: emails, PDFs, jobs, and event ledger rows.
 - Raw payloads, metadata blobs, card data, emails beyond variables such as `user.email`, API keys, and signing secrets do not belong in test logs or telemetry attributes.
+
+## Finance handoff (Stripe RR, Sigma, Data Pipeline)
+
+For **Stripe-native finance and reporting** — what Accrue stores vs Stripe, when to
+use Revenue Recognition vs Sigma vs Data Pipeline, and explicit **non-accounting**
+boundaries — see [Finance handoff](finance-handoff.md).

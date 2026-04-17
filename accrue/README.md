@@ -14,6 +14,7 @@ and the canonical local proof path.
 - [Troubleshooting](guides/troubleshooting.md)
 - [Webhooks](guides/webhooks.md)
 - [Testing](guides/testing.md)
+- [Finance handoff](guides/finance-handoff.md) (Stripe RR, Sigma, Data Pipeline)
 - [Upgrade](guides/upgrade.md)
 - [Canonical local demo](../examples/accrue_host/README.md)
 
@@ -85,6 +86,7 @@ worker internals, and demo-only helpers are not first-time integration APIs.
 - [Troubleshooting](guides/troubleshooting.md)
 - [Configuration](guides/configuration.md)
 - [Testing](guides/testing.md)
+- [Finance handoff](guides/finance-handoff.md)
 - [Sigra integration](guides/sigra_integration.md)
 - [Custom processors](guides/custom_processors.md)
 - [Custom PDF adapter](guides/custom_pdf_adapter.md)
