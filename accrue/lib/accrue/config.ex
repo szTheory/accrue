@@ -505,7 +505,15 @@ defmodule Accrue.Config do
 
   def ensure_migrations_current!(nil) do
     repo = Accrue.Repo.repo()
-    ensure_migrations_current!(fn -> Ecto.Migrator.migrations(repo) end)
+
+    ensure_migrations_current!(fn ->
+      {:ok, migrations, _apps} =
+        Ecto.Migrator.with_repo(repo, fn started_repo ->
+          Ecto.Migrator.migrations(started_repo)
+        end)
+
+      migrations
+    end)
   end
 
   @doc """

@@ -285,6 +285,11 @@ defmodule AccrueHost.MixProject do
   end
 
   defp bash_command(script) do
-    "cmd bash -lc " <> inspect(script)
+    escaped =
+      script
+      |> String.trim()
+      |> String.replace("'", ~s('"'"'))
+
+    "cmd bash -lc '#{escaped}'"
   end
 end
