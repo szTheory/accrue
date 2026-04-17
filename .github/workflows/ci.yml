@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   release-gate:
-    name: Release gate (elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})
+    name: Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
 
@@ -42,38 +42,49 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Floor — minimum supported (CLAUDE.md §CI Matrix).
+          # Floor — minimum supported compatibility cell.
+          # Required deterministic gate: high-severity trust findings block release here.
           - elixir: '1.17.3'
             otp: '27.0'
             sigra: 'off'
             opentelemetry: 'off'
+            compatibility: 'Floor'
+            support: 'required'
             continue-on-error: false
-          # Primary dev target.
+          # Primary dev target compatibility cell.
+          # Required deterministic gate: high-severity trust findings block release here.
           - elixir: '1.18.0'
             otp: '27.0'
             sigra: 'off'
             opentelemetry: 'off'
+            compatibility: 'Primary dev target'
+            support: 'required'
             continue-on-error: false
-          # Forward-compat smoke test (OTP 28).
+          # Forward-compat smoke compatibility cell (still required while within the documented support contract).
+          # Required deterministic gate: high-severity trust findings block release here.
           - elixir: '1.18.4'
             otp: '28.0'
             sigra: 'off'
             opentelemetry: 'off'
+            compatibility: 'Forward-compat smoke'
+            support: 'required'
             continue-on-error: false
-          # with_sigra cell. Currently allowed to fail because :sigra is
-          # not yet published to Hex (see Plan 01-01 Summary Deviation 1).
-          # Once :sigra publishes, flip continue-on-error to false and
-          # this becomes a hard gate on Phase 1 Success Criterion #5.
+          # Advisory compatibility cell: unpublished optional :sigra integration.
+          # Advisory cells stay visibly non-blocking through matrix continue-on-error.
           - elixir: '1.18.0'
             otp: '27.0'
             sigra: 'on'
             opentelemetry: 'off'
+            compatibility: 'Primary dev target'
+            support: 'advisory'
             continue-on-error: true
-          # with_opentelemetry cell.
+          # Required compatibility cell: optional OpenTelemetry integration is supported and stays blocking.
           - elixir: '1.18.0'
             otp: '27.0'
             sigra: 'off'
             opentelemetry: 'on'
+            compatibility: 'Primary dev target'
+            support: 'required'
             continue-on-error: false
 
     env:
@@ -85,6 +96,7 @@ jobs:
       ACCRUE_CI_OPENTELEMETRY: ${{ matrix.opentelemetry == 'on' && '1' || '' }}
       ACCRUE_OTEL_MATRIX: ${{ matrix.opentelemetry == 'on' && 'with_opentelemetry' || 'without_opentelemetry' }}
 
+    # Required cells remain release-blocking; only clearly labeled advisory cells may use continue-on-error.
     continue-on-error: ${{ matrix.continue-on-error }}
 
     steps:
@@ -245,6 +257,10 @@ jobs:
           grep -q 'accrue_admin.assets.build' accrue_admin/guides/admin_ui.md
 
   host-integration:
+    # Phoenix/LiveView compatibility proof for Phase 15:
+    # host-integration proves Phoenix 1.8 / LiveView 1.1 by running the seeded host app
+    # pinned in examples/accrue_host/mix.exs and accrue_admin/mix.exs. Keep this as the
+    # single host-level proof instead of creating a second compatibility matrix.
     name: Host integration
     if: github.event_name != 'schedule'
     needs: [admin-drift-docs]
