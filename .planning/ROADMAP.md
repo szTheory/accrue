@@ -89,6 +89,13 @@ Plans:
 
 **Requirements:** TRUST-01, TRUST-02, TRUST-03, TRUST-04, TRUST-05, TRUST-06
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Create the checked-in trust review, leakage checks, and trust-gate release wording.
+- [ ] 15-02-PLAN.md — Add seeded performance smoke checks and desktop/mobile browser trust coverage to the canonical host flow.
+- [ ] 15-03-PLAN.md — Extend the existing CI matrix and host integration lane for compatibility and trust-gate wiring.
+
 **Success criteria:**
 1. Security review artifacts cover webhook, auth, admin, replay, and generated-host boundaries.
 2. Seeded smoke checks cover webhook ingest latency and admin page responsiveness.
