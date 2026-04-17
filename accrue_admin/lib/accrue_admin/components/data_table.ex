@@ -58,12 +58,13 @@ defmodule AccrueAdmin.Components.DataTable do
     if is_nil(socket.assigns.next_cursor) do
       {:noreply, socket}
     else
-      query_opts = [
-        filter: socket.assigns.filter,
-        cursor: socket.assigns.next_cursor,
-        limit: socket.assigns.limit,
-        owner_scope: Map.get(socket.assigns, :current_owner_scope)
-      ]
+      query_opts =
+        query_opts(
+          socket.assigns.filter,
+          socket.assigns.next_cursor,
+          socket.assigns.limit,
+          Map.get(socket.assigns, :current_owner_scope)
+        )
 
       {rows, next_cursor} = socket.assigns.query_module.list(query_opts)
 
@@ -281,12 +282,14 @@ defmodule AccrueAdmin.Components.DataTable do
     filter_params = socket.assigns.query_module.encode_filter(filter) |> stringify_map()
     cursor = Map.get(params, "cursor") || Map.get(params, :cursor)
 
-      {rows, next_cursor} =
+    {rows, next_cursor} =
       socket.assigns.query_module.list(
-        filter: filter,
-        cursor: cursor,
-        limit: socket.assigns.limit,
-        owner_scope: Map.get(socket.assigns, :current_owner_scope)
+        query_opts(
+          filter,
+          cursor,
+          socket.assigns.limit,
+          Map.get(socket.assigns, :current_owner_scope)
+        )
       )
 
     socket
@@ -348,9 +351,13 @@ defmodule AccrueAdmin.Components.DataTable do
 
         cursor ->
           socket.assigns.query_module.count_newer_than(
-            filter: socket.assigns.filter,
-            cursor: cursor,
-            owner_scope: Map.get(socket.assigns, :current_owner_scope)
+            query_opts(
+              socket.assigns.filter,
+              cursor,
+              nil,
+              Map.get(socket.assigns, :current_owner_scope)
+            )
+            |> Keyword.delete(:limit)
           )
       end
 
@@ -386,6 +393,14 @@ defmodule AccrueAdmin.Components.DataTable do
 
   defp normalize_positive(value, _fallback) when is_integer(value) and value > 0, do: value
   defp normalize_positive(_value, fallback), do: fallback
+
+  defp query_opts(filter, cursor, limit, nil) do
+    [filter: filter, cursor: cursor, limit: limit]
+  end
+
+  defp query_opts(filter, cursor, limit, owner_scope) do
+    [filter: filter, cursor: cursor, limit: limit, owner_scope: owner_scope]
+  end
 
   defp stringify_map(map) do
     Map.new(map, fn {key, value} -> {to_string(key), stringify_value(value)} end)

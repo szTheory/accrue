@@ -18,6 +18,9 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     conn: conn,
     user: user
   } do
+    organization = AccrueHost.AccountsFixtures.organization_fixture(%{owner: user})
+    conn = log_in_user(conn, user, active_organization_id: organization.id)
+
     home_conn = get(conn, ~p"/")
     home_html = html_response(home_conn, 200)
 
@@ -26,14 +29,15 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
 
     assert Repo.one(
              from(customer in Customer,
-               where: customer.owner_type == "User" and customer.owner_id == ^user.id
+               where:
+                 customer.owner_type == "Organization" and customer.owner_id == ^organization.id
              )
            ) == nil
 
     {:ok, view, html} = live(conn, ~p"/app/billing")
 
-    assert html =~ "No billing activity yet"
-    assert html =~ "Start subscription"
+    assert html =~ "Active organization"
+    assert html =~ "Start organization subscription"
     assert html =~ "price_basic"
 
     view
@@ -53,7 +57,7 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     start_log =
       capture_log(fn ->
         view
-        |> element("[data-plan-id='price_basic'] button", "Start subscription")
+        |> element("[data-plan-id='price_basic'] button", "Start organization subscription")
         |> render_click()
       end)
 
@@ -62,7 +66,7 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     customer =
       Repo.one!(
         from(customer in Customer,
-          where: customer.owner_type == "User" and customer.owner_id == ^user.id
+          where: customer.owner_type == "Organization" and customer.owner_id == ^organization.id
         )
       )
 
@@ -80,10 +84,11 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     assert render(view) =~ "price_basic"
 
     view
-    |> element("button", "Cancel subscription")
+    |> element("button", "Cancel organization subscription")
     |> render_click()
 
-    assert render(view) =~ "Cancel subscription: Confirm cancellation before ending access."
+    assert render(view) =~
+             "Cancel organization subscription: Confirm cancellation before ending organization access."
 
     cancel_log =
       capture_log(fn ->

@@ -79,7 +79,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
           path={@table_path}
           params={@params}
           columns={[
-            %{label: "Customer", render: &customer_link(&1, @admin_mount_path)},
+            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
             %{id: :owner_type, label: "Owner type"},
             %{id: :owner_id, label: "Owner id"},
             %{id: :processor_id, label: "Processor id"},
@@ -136,14 +136,13 @@ defmodule AccrueAdmin.Live.CustomersLive do
     }
   end
 
-  defp customer_link(row, mount_path) do
+  defp customer_link(row, mount_path, owner_scope) do
     label =
-      row.name || row.email || row.processor_id ||
-        row.id
-        |> Phoenix.HTML.html_escape()
-        |> Phoenix.HTML.safe_to_string()
+      row.name || row.email || row.processor_id || row.id
 
-    Phoenix.HTML.raw(~s(<a href="#{mount_path}/customers/#{row.id}" class="ax-link">#{label}</a>))
+    href = scoped_path(mount_path, "/customers/#{row.id}", owner_scope)
+    escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
   end
 
   defp default_payment_method_label(%{default_payment_method_id: nil}), do: "Missing"
@@ -161,6 +160,13 @@ defmodule AccrueAdmin.Live.CustomersLive do
   end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  defp scoped_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
+       when is_binary(slug) do
+    mount_path <> suffix <> "?org=" <> URI.encode_www_form(slug)
+  end
+
+  defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

@@ -19,17 +19,19 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     cleanup_fake_billing_rows!()
 
     user = AccountsFixtures.user_fixture()
+    organization = AccountsFixtures.organization_fixture(%{owner: user})
 
-    %{user: user}
+    %{user: user, organization: organization}
   end
 
   test "repairs tax location through the host facade and starts a tax-enabled subscription", %{
     conn: conn,
+    organization: organization,
     user: user
   } do
     {:ok, view, html} =
       conn
-      |> log_in_user(user)
+      |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
     assert html =~ "Repair automatic tax input"
@@ -53,7 +55,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     customer =
       Repo.one!(
         from(customer in Customer,
-          where: customer.owner_type == "User" and customer.owner_id == ^user.id,
+          where: customer.owner_type == "Organization" and customer.owner_id == ^organization.id,
           limit: 1
         )
       )
@@ -71,11 +73,12 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
 
   test "shows stable repair guidance when automatic tax starts without a valid location", %{
     conn: conn,
+    organization: organization,
     user: user
   } do
     {:ok, view, html} =
       conn
-      |> log_in_user(user)
+      |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
     assert html =~ "Please update customer address or shipping before enabling automatic tax."

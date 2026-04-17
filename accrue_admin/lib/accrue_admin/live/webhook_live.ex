@@ -16,6 +16,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
   @owner_access_denied "You don't have access to billing for this organization."
   @ambiguous_replay_blocked "Ownership couldn't be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
   @replay_success "Replay requested for the active organization."
+  @global_replay_success "Webhook replay requested."
   @replay_blocked "Replay is blocked because this webhook isn't linked to a billable row in the active organization."
 
   @impl true
@@ -27,7 +28,9 @@ defmodule AccrueAdmin.Live.WebhookLive do
         {:ok,
          socket
          |> put_flash(:error, @owner_access_denied)
-         |> redirect(to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/webhooks"))}
+         |> redirect(
+           to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/webhooks")
+         )}
 
       {:ok, webhook} ->
         {:ok,
@@ -72,7 +75,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
         |> record_single_replay(replayed)
         |> assign_webhook(Repo.get(WebhookEvent, replayed.id))
         |> assign(:pending_replay, false)
-        |> push_flash(:info, @replay_success)
+        |> push_flash(:info, replay_success(socket.assigns.current_owner_scope))
 
       {:noreply, socket}
     else
@@ -283,6 +286,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
   defp ambiguous_replay_blocked, do: @ambiguous_replay_blocked
   defp single_replay_confirmation, do: "Replay webhook for the active organization?"
+  defp replay_success(%{mode: :organization}), do: @replay_success
+  defp replay_success(_owner_scope), do: @global_replay_success
 
   defp attempt_history(webhook_id) do
     from(job in Oban.Job,

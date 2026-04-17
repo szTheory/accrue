@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   alias AccrueAdmin.Queries.Webhooks
 
   @bulk_replay_success "Replay requested for the active organization."
+  @global_bulk_replay_success "Bulk replay requested"
 
   @impl true
   def mount(_params, session, socket) do
@@ -65,7 +66,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
         {:noreply,
          socket
          |> assign(:pending_bulk_replay, nil)
-         |> push_flash(:warning, "Replay is blocked because this webhook isn't linked to a billable row in the active organization.")}
+         |> push_flash(
+           :warning,
+           "Replay is blocked because this webhook isn't linked to a billable row in the active organization."
+         )}
 
       ids ->
         case replay_scoped_rows(ids) do
@@ -75,7 +79,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               |> record_bulk_replay(filter, count, result)
               |> assign(:pending_bulk_replay, nil)
               |> assign(:summary, webhook_summary())
-              |> push_flash(:info, @bulk_replay_success)
+              |> push_flash(:info, bulk_replay_success(socket.assigns.current_owner_scope))
 
             {:noreply, socket}
 
@@ -299,7 +303,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
         data: %{
           "count" => count,
           "requeued" => result.requeued,
-          "skipped" => result.skipped,
+          "skipped" => Map.get(result, :skipped, 0),
           "filter" =>
             Enum.into(filter, %{}, fn {key, value} ->
               {to_string(key), normalize_filter_value(value)}
@@ -335,6 +339,9 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   defp bulk_replay_confirmation(count) do
     "Replay #{count} failed or dead webhook rows for the active organization?"
   end
+
+  defp bulk_replay_success(%{mode: :organization}), do: @bulk_replay_success
+  defp bulk_replay_success(_owner_scope), do: @global_bulk_replay_success
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])

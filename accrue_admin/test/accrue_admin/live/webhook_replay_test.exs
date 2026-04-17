@@ -64,7 +64,8 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
     {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
-    html = render_click(element(view, "[data-role='replay-single']"))
+    _ = render_click(element(view, "[data-role='replay-single']"))
+    html = render_click(element(view, "[data-role='confirm-replay']"))
     assert html =~ "Webhook replay requested."
 
     updated = TestRepo.get!(WebhookEvent, webhook.id)

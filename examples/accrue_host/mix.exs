@@ -162,7 +162,9 @@ defmodule AccrueHost.MixProject do
       "test/accrue_host_web/webhook_ingest_test.exs",
       "test/accrue_host_web/trust_smoke_test.exs",
       "test/accrue_host_web/admin_webhook_replay_test.exs",
-      "test/accrue_host_web/admin_mount_test.exs"
+      "test/accrue_host_web/admin_mount_test.exs",
+      "test/accrue_host_web/org_billing_access_test.exs",
+      "test/accrue_host_web/org_billing_live_test.exs"
     ]
 
     quoted_files = Enum.join(test_files, " ")

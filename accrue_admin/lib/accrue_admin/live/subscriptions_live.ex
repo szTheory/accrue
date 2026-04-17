@@ -79,8 +79,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
           path={@table_path}
           params={@params}
           columns={[
-            %{label: "Subscription", render: &subscription_link(&1, @admin_mount_path)},
-            %{label: "Customer", render: &customer_link(&1, @admin_mount_path)},
+            %{
+              label: "Subscription",
+              render: &subscription_link(&1, @admin_mount_path, @current_owner_scope)
+            },
+            %{label: "Customer", render: &customer_link(&1, @admin_mount_path, @current_owner_scope)},
             %{label: "Lifecycle", render: &lifecycle_summary/1},
             %{id: :current_period_end, label: "Current period end"}
           ]}
@@ -137,11 +140,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
     }
   end
 
-  defp subscription_link(row, mount_path),
-    do: safe_link("#{mount_path}/subscriptions/#{row.id}", row.processor_id || row.id)
+  defp subscription_link(row, mount_path, owner_scope),
+    do:
+      safe_link(
+        scoped_path(mount_path, "/subscriptions/#{row.id}", owner_scope),
+        row.processor_id || row.id
+      )
 
-  defp customer_link(row, mount_path),
-    do: safe_link("#{mount_path}/customers/#{row.customer_id}", customer_label(row))
+  defp customer_link(row, mount_path, owner_scope),
+    do:
+      safe_link(
+        scoped_path(mount_path, "/customers/#{row.customer_id}", owner_scope),
+        customer_label(row)
+      )
 
   defp safe_link(href, label) do
     escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
@@ -178,6 +189,13 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  defp scoped_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
+       when is_binary(slug) do
+    mount_path <> suffix <> "?org=" <> URI.encode_www_form(slug)
+  end
+
+  defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
