@@ -51,21 +51,72 @@
 
 ---
 
+## Milestone: v1.1 — Stabilization + Adoption
+
+**Shipped:** 2026-04-17  
+**Phases:** 4 | **Plans:** 22 | **Tasks:** 42
+
+### What Was Built
+
+- A realistic Phoenix host app that installs `accrue` and `accrue_admin` through public APIs and proves signed-in billing, webhook ingest, admin auth, and audited replay.
+- A canonical CI integration gate that runs the host UAT shell flow, Playwright browser proof, Hex dependency smoke, failure artifact upload, and annotation sweep.
+- Hermetic focused host-flow proof files that can run directly after the canonical wrapper without deterministic processor-id collisions.
+- First-user DX hardening: installer rerun safety, conflict artifacts, shared setup diagnostics, migration/webhook/auth/admin checks, host-first docs, and package-doc verification.
+
+### What Worked
+
+- The host app exposed real integration assumptions quickly: Oban supervision, admin session forwarding, clean-checkout migration order, and dev boot config all became executable contracts.
+- Moving browser proof into host-local Playwright made the release gate easier to debug and decoupled it from the admin package's tooling.
+- The milestone audit caught a real hermeticity issue, and the decimal gap-closure phase kept the fix scoped without renumbering the roadmap.
+- Docs contracts and shell verifiers turned first-user guidance into CI-enforced behavior instead of prose drift.
+
+### What Was Inefficient
+
+- The milestone scope drifted: adoption, quality, and expansion work were listed under v1.1 but the auditable shipped slice was HOST/CI/DX.
+- Generated milestone accomplishments were too noisy and needed manual editing before archive.
+- `gsd-tools audit-open` failed with a tool bug at close, so the artifact audit gate could not produce its normal report.
+- Phase 11.1 validation metadata lagged behind verification even though the implementation passed.
+
+### Patterns Established
+
+- Use the canonical host app as the user-facing contract for install, docs, CI, Hex dependency mode, and admin integration.
+- Keep live Stripe advisory and Fake-backed host flows mandatory.
+- Treat `MyApp.Billing` as the public host boundary for both writes and reads.
+- Use decimal phases for audit gap closure when a small inserted fix is needed between completed phases.
+
+### Key Lessons
+
+1. Roadmap milestone boundaries need to be corrected before archive when planned follow-on work becomes next-milestone material.
+2. Requirement traceability should be updated as soon as a gap-closure phase verifies, not left for milestone audit cleanup.
+3. Playwright artifacts and server logs are worth the setup cost for user-facing host flows.
+4. Validation metadata needs the same closeout discipline as verification reports.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: one rapid stabilization chain across host, CI, gap closure, and docs/DX.
+- Notable: the most valuable checks were full host UAT, wrapper/direct rerun agreement, docs drift verification, and the milestone integration audit.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.1 | multiple | 4 | Real host-app dogfood became the canonical user-facing integration and CI release gate. |
 | v1.0 | multiple | 9 | Full greenfield build through public Hex release; planning archive introduced at close. |
 
 ### Cumulative Quality
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.1 | Host ExUnit, Playwright, shell UAT, docs verifier, Hex smoke | 21/21 audited scoped requirements | Host app, Playwright gate, setup diagnostics, conflict sidecars, package-doc verifier. |
 | v1.0 | CI matrix plus package-local suites | Not tracked | Fake processor, test adapters, installer snippets, and docs-first release checks. |
 
 ### Top Lessons (Verified Across Milestones)
 
 1. Warnings-as-errors should remain a release blocker.
 2. Planning state needs to be updated at release boundaries, not just phase boundaries.
+3. User-facing host-app proof catches integration gaps that package-local tests miss.

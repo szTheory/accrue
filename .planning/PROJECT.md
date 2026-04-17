@@ -12,26 +12,29 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-Accrue v1.0 Initial Release is shipped as public Hex packages:
+Accrue v1.1 Stabilization + Adoption is shipped. The public Hex packages remain:
 
 - `accrue` 0.1.2
 - `accrue_admin` 0.1.2
 
-The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface. Phase history and requirements are archived in `.planning/milestones/`.
+The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface.
 
-v1.1 Phases 10, 11, and 11.1 are complete: the minimal Phoenix host app now proves the real install, signed-in billing, webhook, and admin replay paths; CI treats the Fake-backed host browser/user flow as a mandatory release gate; and the focused host-flow proof files can be rerun directly on a migrated test database without wrapper-only cleanup assumptions.
+The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 
-## Current Milestone: v1.1 Stabilization + Adoption
+- `examples/accrue_host` is a realistic host app that installs and uses `accrue` and `accrue_admin` through public APIs.
+- The host app proves signed-in billing, signed webhook ingest, admin inspection/replay, audit evidence, clean-checkout rebuild, and local boot paths.
+- CI runs a Fake-backed host integration gate with Playwright browser coverage, retained failure artifacts, Hex-mode smoke validation, and warning/error annotation sweeps.
+- First-user DX is hardened through installer no-clobber reruns, conflict sidecars, shared setup diagnostics, host-first docs, troubleshooting anchors, and package-doc verification.
 
-**Goal:** Make Accrue trustworthy from a real user’s point of view by proving the libraries work inside a realistic minimal Phoenix app, then use that app to drive CI, docs, adoption, and polish.
+Milestone history and requirements are archived in `.planning/milestones/`.
 
-**Target features:**
-- Realistic minimal Phoenix host app that installs and uses `accrue` and `accrue_admin` like an actual user would.
-- CI integration and browser/user-facing flows that fail on installer, routing, billing, admin UI, docs, and packaging regressions.
-- First-user DX stabilization: setup clarity, actionable errors, troubleshooting, idempotent installer behavior, and realistic examples.
-- Adoption assets: example app, tutorial path, public onboarding docs, and repository templates that help new users evaluate and report issues.
-- Quality hardening: security/audit pass, performance checks for webhook/admin paths, compatibility confidence, and release warning discipline.
-- Expansion discovery for tax, revenue exports, additional processors, and org/multi-tenant flows, captured as future-ready decisions rather than rushed scope.
+## Next Milestone Goals
+
+The next milestone is not defined yet. Candidate themes to validate through `$gsd-new-milestone`:
+
+- Adoption assets: maintained example/demo path, tutorial docs, README positioning, issue templates, and release guidance.
+- Quality hardening: security, performance, compatibility, accessibility/responsive admin checks, and clearer release-gate boundaries.
+- Expansion discovery: tax, revenue exports, additional processors, and organization/multi-tenant billing decisions.
 
 ## Requirements
 
@@ -39,19 +42,16 @@ v1.1 Phases 10, 11, and 11.1 are complete: the minimal Phoenix host app now prov
 
 v1.0 Initial Release shipped and validated on 2026-04-16. Detailed requirement outcomes are archived in `.planning/milestones/v1.0-REQUIREMENTS.md`.
 
-Validated in Phase 10: the minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths.
-Validated in Phase 11: CI runs the host-app integration and browser flows as a release gate.
-Validated in Phase 11.1: focused host-flow proofs are hermetic when run directly after the canonical host UAT wrapper.
+v1.1 Stabilization + Adoption shipped and validated on 2026-04-17. Detailed requirement outcomes are archived in `.planning/milestones/v1.1-REQUIREMENTS.md`.
+
+- ✓ Minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths — v1.1
+- ✓ CI runs the host-app integration and browser flows as a release gate — v1.1
+- ✓ Focused host-flow proofs are hermetic when run directly after the canonical host UAT wrapper — v1.1
+- ✓ Installer, docs, diagnostics, package metadata, and dependency-mode checks are hardened from the host-app experience — v1.1
 
 ### Active
 
-v1.1 focuses on stabilization and adoption:
-
-- [x] Minimal host-app dogfood harness exercises the real install and user-facing billing/admin paths.
-- [x] CI runs the host-app integration and browser flows as a release gate.
-- [ ] Installer, docs, and diagnostics are hardened from the host-app experience.
-- [ ] Adoption assets make the project easier to evaluate and try.
-- [ ] Quality hardening and expansion discovery identify the next product bets without blocking stabilization.
+Next active requirements are intentionally unset until `$gsd-new-milestone` defines the next milestone. Candidate areas are adoption assets, quality hardening, and expansion discovery.
 
 ### Validated v1.0 Scope Summary
 
@@ -218,6 +218,10 @@ v1.1 focuses on stabilization and adoption:
 | MIT license, no CLA, single LICENSE file | Matches Elixir ecosystem norm; future commercial path via services not dual-license | ✓ Good |
 | Context name `MyApp.Billing` | Industry-standard term, matches Stripe product naming, covers subs + one-time + refunds cleanly | ✓ Good |
 | Build complete, ship v1.0 (no MVP-iterate cadence) | User explicit: won't have real users until fully usable; avoids Pay-style v2→v3 migration pain for early adopters | ✓ Good |
+| Dogfood through a real Phoenix host app before broader adoption work | Real install, auth, webhook, admin, and clean-checkout paths exposed integration gaps that package-local tests could not catch | ✓ Good |
+| Make Fake-backed host browser flow mandatory and live Stripe advisory | Deterministic CI should block regressions while live Stripe remains useful but non-deterministic | ✓ Good |
+| Move host UI reads through generated `MyApp.Billing` facade | First-user docs should teach host-owned public boundaries, not private Accrue table queries | ✓ Good |
+| Treat adoption, quality, and expansion as next-milestone candidates after stabilization | The v1.1 audit validated HOST/CI/DX scope; remaining ADOPT/QUAL/DISC ideas need fresh prioritization instead of automatic carryover | — Pending |
 
 ## Evolution
 
@@ -237,4 +241,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after completing Phase 11*
+*Last updated: 2026-04-17 after v1.1 milestone completion*
