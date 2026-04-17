@@ -10,7 +10,7 @@ Requirements for the v1.3 Tax + Organization Billing milestone. Each maps to exa
 ### Stripe Tax
 
 - [x] **TAX-01**: Developer can enable Stripe Tax for new subscription and checkout flows through Accrue's public billing API.
-- [ ] **TAX-02**: Developer can collect and validate customer tax location before creating tax-enabled recurring payments.
+- [x] **TAX-02**: Developer can collect and validate customer tax location before creating tax-enabled recurring payments.
 - [ ] **TAX-03**: User or admin can identify and recover from missing or invalid tax location states without silent tax rollout failure.
 - [ ] **TAX-04**: Existing recurring subscriptions have explicit migration guidance before automatic tax rollout.
 
@@ -65,7 +65,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TAX-01 | Phase 18 | Complete |
-| TAX-02 | Phase 19 | Pending |
+| TAX-02 | Phase 19 | Complete |
 | TAX-03 | Phase 19 | Pending |
 | TAX-04 | Phase 19 | Pending |
 | ORG-01 | Phase 20 | Pending |
@@ -82,4 +82,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after 18-03 execution update*
+*Last updated: 2026-04-17 after 19-02 execution update*
