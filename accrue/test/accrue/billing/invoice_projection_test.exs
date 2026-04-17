@@ -74,6 +74,34 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
       assert attrs.data == inv
     end
 
+    test "projects automatic tax state and tax amount from string-keyed payloads" do
+      inv =
+        StripeFixtures.invoice(%{
+          "automatic_tax" => %{"enabled" => true, "status" => "complete"},
+          "tax" => nil,
+          "total_details" => %{"amount_tax" => 175}
+        })
+
+      {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(inv)
+      assert attrs.automatic_tax == true
+      assert attrs.automatic_tax_status == "complete"
+      assert attrs.tax_minor == 175
+    end
+
+    test "falls back to 0 when automatic tax is enabled but no tax amount is present" do
+      inv =
+        StripeFixtures.invoice(%{
+          "automatic_tax" => %{"enabled" => true, "status" => "requires_location_inputs"},
+          "tax" => nil,
+          "total_details" => %{}
+        })
+
+      {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(inv)
+      assert attrs.automatic_tax == true
+      assert attrs.automatic_tax_status == "requires_location_inputs"
+      assert attrs.tax_minor == 0
+    end
+
     test "nil status defaults to :draft" do
       inv = StripeFixtures.invoice() |> Map.put("status", nil)
       {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(inv)
@@ -116,9 +144,32 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
       assert attrs.status == :draft
       assert attrs.amount_due_minor == 2000
       assert attrs.currency == "usd"
+      assert attrs.automatic_tax == false
+      assert attrs.automatic_tax_status == nil
       assert length(items) == 1
       assert hd(items).amount_minor == 2000
       assert hd(items).price_ref == "price_pro"
+    end
+
+    test "prefers atom-keyed total_details.amount_tax when tax field is absent" do
+      fake_inv = %{
+        id: "in_fake_00002",
+        object: "invoice",
+        status: :open,
+        amount_due: 2000,
+        amount_paid: 0,
+        amount_remaining: 2000,
+        currency: "usd",
+        automatic_tax: %{enabled: true, status: "complete"},
+        tax: nil,
+        total_details: %{amount_tax: 225},
+        lines: %{object: "list", data: []}
+      }
+
+      {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(fake_inv)
+      assert attrs.automatic_tax == true
+      assert attrs.automatic_tax_status == "complete"
+      assert attrs.tax_minor == 225
     end
   end
 end

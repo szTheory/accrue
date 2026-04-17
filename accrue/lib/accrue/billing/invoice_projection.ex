@@ -26,6 +26,10 @@ defmodule Accrue.Billing.InvoiceProjection do
   def decompose(stripe_inv) when is_map(stripe_inv) do
     currency = SubscriptionProjection.get(stripe_inv, :currency)
     status_transitions = SubscriptionProjection.get(stripe_inv, :status_transitions) || %{}
+    automatic_tax =
+      stripe_inv
+      |> SubscriptionProjection.get(:automatic_tax)
+      |> SubscriptionProjection.automatic_tax_fields()
 
     discount = SubscriptionProjection.get(stripe_inv, :discount)
 
@@ -54,7 +58,9 @@ defmodule Accrue.Billing.InvoiceProjection do
       processor_id: SubscriptionProjection.get(stripe_inv, :id),
       status: parse_status(SubscriptionProjection.get(stripe_inv, :status)),
       subtotal_minor: SubscriptionProjection.get(stripe_inv, :subtotal),
-      tax_minor: SubscriptionProjection.get(stripe_inv, :tax),
+      tax_minor: tax_minor(stripe_inv, automatic_tax.enabled),
+      automatic_tax: automatic_tax.enabled,
+      automatic_tax_status: automatic_tax.status,
       discount_minor: discount_minor,
       # Wrap in a map because the `:total_discount_amounts` Ecto field
       # is `:map` (jsonb) which rejects top-level arrays. Mirror
@@ -142,6 +148,24 @@ defmodule Accrue.Billing.InvoiceProjection do
       if atom in @valid_statuses, do: atom, else: :draft
     rescue
       ArgumentError -> :draft
+    end
+  end
+
+  defp tax_minor(stripe_inv, automatic_tax_enabled?) do
+    total_details = SubscriptionProjection.get(stripe_inv, :total_details) || %{}
+
+    cond do
+      not is_nil(SubscriptionProjection.get(stripe_inv, :tax)) ->
+        SubscriptionProjection.get(stripe_inv, :tax)
+
+      not is_nil(SubscriptionProjection.get(total_details, :amount_tax)) ->
+        SubscriptionProjection.get(total_details, :amount_tax)
+
+      automatic_tax_enabled? ->
+        0
+
+      true ->
+        nil
     end
   end
 

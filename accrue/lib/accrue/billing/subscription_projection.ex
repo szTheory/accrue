@@ -13,12 +13,16 @@ defmodule Accrue.Billing.SubscriptionProjection do
 
   @spec decompose(map()) :: {:ok, map()}
   def decompose(stripe_sub) when is_map(stripe_sub) do
+    automatic_tax = automatic_tax_fields(get(stripe_sub, :automatic_tax))
+
     {:ok,
      %{
        processor_id: get(stripe_sub, :id),
        status: parse_status(get(stripe_sub, :status)),
        cancel_at_period_end: get(stripe_sub, :cancel_at_period_end) || false,
        pause_collection: parse_pause_collection(get(stripe_sub, :pause_collection)),
+       automatic_tax: automatic_tax.enabled,
+       automatic_tax_status: automatic_tax.status,
        current_period_start: unix_to_dt(get(stripe_sub, :current_period_start)),
        current_period_end: unix_to_dt(get(stripe_sub, :current_period_end)),
        trial_start: unix_to_dt(get(stripe_sub, :trial_start)),
@@ -60,6 +64,18 @@ defmodule Accrue.Billing.SubscriptionProjection do
       _ -> nil
     end
   end
+
+  @doc false
+  def automatic_tax_fields(nil), do: %{enabled: false, status: nil}
+
+  def automatic_tax_fields(%{} = automatic_tax) do
+    %{
+      enabled: get(automatic_tax, :enabled) || false,
+      status: get(automatic_tax, :status)
+    }
+  end
+
+  def automatic_tax_fields(_), do: %{enabled: false, status: nil}
 
   defp parse_status(nil), do: :incomplete
 
