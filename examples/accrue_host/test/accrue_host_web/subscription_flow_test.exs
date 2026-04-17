@@ -36,6 +36,20 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     assert html =~ "Start subscription"
     assert html =~ "price_basic"
 
+    view
+    |> form("#tax-location-form", %{
+      "tax_location" => %{
+        "line1" => "27 Fredrick Ave",
+        "city" => "Albany",
+        "state" => "NY",
+        "postal_code" => "12207",
+        "country" => "US"
+      }
+    })
+    |> render_submit()
+
+    assert render(view) =~ "Tax location saved."
+
     start_log =
       capture_log(fn ->
         view

@@ -9,15 +9,31 @@ defmodule Accrue.Billing.SubscriptionTest do
 
   alias Accrue.Billing
   alias Accrue.Billing.Customer
+  alias Accrue.Processor.Fake
 
   setup do
+    {:ok, processor_customer} =
+      Fake.create_customer(
+        %{
+          email: "sub-test@example.com",
+          address: %{
+            line1: "27 Fredrick Ave",
+            city: "Albany",
+            state: "NY",
+            postal_code: "12207",
+            country: "US"
+          }
+        },
+        []
+      )
+
     {:ok, customer} =
       %Customer{}
       |> Customer.changeset(%{
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
         processor: "fake",
-        processor_id: "cus_fake_test",
+        processor_id: processor_customer.id,
         email: "sub-test@example.com"
       })
       |> Repo.insert()
