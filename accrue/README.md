@@ -3,14 +3,19 @@
 Billing state, modeled clearly.
 
 Accrue is the billing library. Your Phoenix app owns the generated `MyApp.Billing`
-facade, router mounts, runtime config, and auth/session boundary.
+facade, router mounts, runtime config, and auth/session boundary. Start with the
+host-first [First Hour](guides/first_hour.md) guide, then keep the checked-in
+[`examples/accrue_host`](../examples/accrue_host) demo nearby for command parity
+and the canonical local proof path.
 
 ## Start Here
 
 - [First Hour](guides/first_hour.md)
 - [Troubleshooting](guides/troubleshooting.md)
 - [Webhooks](guides/webhooks.md)
+- [Testing](guides/testing.md)
 - [Upgrade](guides/upgrade.md)
+- [Canonical local demo](../examples/accrue_host/README.md)
 
 The compact adoption path is:
 
@@ -63,9 +68,15 @@ The supported public setup surface for first-time integration is:
 - `use Accrue.Webhook.Handler`
 - `use Accrue.Test`
 - `AccrueAdmin.Router.accrue_admin/2`
+- `Accrue.Auth`
 - `Accrue.ConfigError` for setup failures
 
 Breaking changes for that facade layer follow the deprecation cycle documented in `guides/upgrade.md`. Accrue deprecates public APIs before removal instead of silently changing behavior in place.
+
+Generated files are host-owned after install. Accrue may refresh pristine
+stamped files on installer reruns, but user-edited generated files are not
+silently managed. Internal schemas, webhook/event structs, reducer modules,
+worker internals, and demo-only helpers are not first-time integration APIs.
 
 ## Guides
 

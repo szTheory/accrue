@@ -4,6 +4,11 @@ LiveView admin UI for Accrue billing operations.
 
 ## Quickstart
 
+`accrue_admin` stays downstream of the core billing setup. Start with the
+checked-in Fake-backed demo or the Accrue First Hour guide, get the core
+billing facade and signed webhook path working, then mount the admin UI for
+operators.
+
 Add `accrue_admin` to your host application and mount the package router where operators manage billing:
 
 ```elixir
@@ -28,7 +33,9 @@ defmodule MyAppWeb.Router do
 end
 ```
 
-Run `mix deps.get`, configure the host billing app, and continue with the package guide on HexDocs for route session options, branding, and auth details:
+Run `mix deps.get`, finish the core billing and signed-webhook path, and then
+continue with the package guide on HexDocs for route session options, branding,
+and auth details:
 
 - <https://hexdocs.pm/accrue_admin/admin_ui.html>
 
@@ -41,6 +48,10 @@ Run `mix deps.get`, configure the host billing app, and continue with the packag
 The first-time host setup path for the core package lives in the Accrue First Hour guide:
 
 - <https://hexdocs.pm/accrue/first_hour.html>
+
+The canonical local demo path lives in the checked-in host app:
+
+- `examples/accrue_host/README.md`
 
 Published `accrue_admin` releases resolve `accrue ~> 0.1.2`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
 
