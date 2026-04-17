@@ -5,16 +5,16 @@ milestone_name: Adoption + Trust
 current_phase: 16
 current_phase_name: expansion-discovery
 current_plan: 2
-status: ready_to_execute
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-04-17T14:25:48.537Z"
+status: verifying
+stopped_at: Completed 16-02-PLAN.md
+last_updated: "2026-04-17T15:12:00.000Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -28,27 +28,27 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 16 (expansion-discovery) — READY TO EXECUTE
+Phase: 16 (expansion-discovery) — COMPLETE
 Plan: 2 of 2
 **Current Phase:** 16
 **Current Phase Name:** expansion-discovery
 **Current Plan:** 2
-**Status:** Ready to execute
-**Stopped At:** Completed 16-01-PLAN.md
+**Status:** Phase complete — ready for verification
+**Stopped At:** Completed 16-02-PLAN.md
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
 
 **Milestone:** v1.2 Adoption + Trust
-**Progress:** [█████████░] 91%
+**Progress:** [██████████] 100%
 
 | Phase | Status | Notes |
 |-------|--------|-------|
 | 13. Canonical Demo + Tutorial | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 14. Adoption Front Door | Complete | 3/3 plans complete; verified 2026-04-17 |
 | 15. Trust Hardening | Complete | 3/3 plans complete; verified 2026-04-17 |
-| 16. Expansion Discovery | In Progress | Plan 16-01 complete; summary in `.planning/phases/16-expansion-discovery/16-01-SUMMARY.md` |
+| 16. Expansion Discovery | Complete | 2/2 plans complete; summaries in `.planning/phases/16-expansion-discovery/16-01-SUMMARY.md` and `.planning/phases/16-expansion-discovery/16-02-SUMMARY.md` |
 
 ## Current Planning Artifacts
 
@@ -61,6 +61,7 @@ Plan: 2 of 2
 - `.planning/phases/15-trust-hardening/15-03-SUMMARY.md` — compatibility matrix and trust-gate CI execution summary.
 - `.planning/phases/15-trust-hardening/15-CONTEXT.md` — Phase 15 context and planning inputs.
 - `.planning/phases/16-expansion-discovery/16-01-SUMMARY.md` — canonical expansion recommendation and docs-contract execution summary.
+- `.planning/phases/16-expansion-discovery/16-02-SUMMARY.md` — verification report and durable planning-record execution summary.
 - `.planning/STATE-ARCHIVE.md` — archived pre-cleanup state history and legacy metrics.
 
 ## Recent Decisions
@@ -77,7 +78,9 @@ Plan: 2 of 2
 - Responsive trust coverage treats mobile admin overflow as a product bug to fix, not an exception to accept.
 - Keep Stripe Tax as the next milestone candidate and leave org billing plus revenue/export in backlog until prerequisites are explicit.
 - Treat official second processor work as a planted seed around the custom processor seam to preserve the Stripe-first host-owned boundary.
+- Persist the Phase 16 ranking as recommendation-only planning guidance and avoid any v1.2 implementation implication.
+- Carry tax rollout correctness, cross-tenant, export-audience, and processor-boundary risks into durable planning records.
 
 ## Next Action
 
-Execute Plan 16-02 to verify the recommendation artifact and persist the ranking outcome in planning records.
+Run milestone verification or completion flow for v1.2 now that all 11 plans are complete.
