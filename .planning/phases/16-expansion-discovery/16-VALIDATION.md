@@ -1,10 +1,11 @@
 ---
 phase: 16
 slug: expansion-discovery
-status: draft
+status: verified
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-17
+verified: 2026-04-17
 ---
 
 # Phase 16 - Validation Strategy
@@ -74,3 +75,17 @@ Per-phase validation contract for feedback sampling during execution.
 - [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** aligned 2026-04-17
+
+---
+
+## Validation Audit 2026-04-17
+
+| Metric | Count |
+|--------|-------|
+| Requirements audited | 5 |
+| Automated checks verified | 5 |
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+All DISC-01 through DISC-05 requirements have automated docs-contract coverage. No new test files were required.
