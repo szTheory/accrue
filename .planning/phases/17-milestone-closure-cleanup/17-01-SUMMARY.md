@@ -72,6 +72,7 @@ Each task was committed atomically:
 1. **Task 1: Close the Phase 13 and canonical-demo bookkeeping drift** - `dcb5222` (`docs`)
 2. **Task 2: Narrow browser seed cleanup to fixture-owned rows and add a preservation regression test** - `2d16854` (`test`), `80d019b` (`feat`)
 3. **Task 3: Remove stale release and contributor references, then lock them with docs contracts** - `75139a1` (`docs`)
+4. **Code review fix: Scope Oban dispatch job cleanup to fixture-owned webhooks** - `946e21d` (`fix`)
 
 **Plan metadata:** pending
 
@@ -105,10 +106,18 @@ Each task was committed atomically:
 - **Verification:** `cd accrue && mix test test/accrue/docs/release_guidance_test.exs test/accrue/docs/package_docs_verifier_test.exs --trace`
 - **Committed in:** `75139a1` (part of Task 3 commit)
 
+**2. [Code Review - Warning] Scoped Oban dispatch job cleanup to fixture-owned webhooks**
+- **Found during:** Required phase code review
+- **Issue:** The cleanup deleted all `Accrue.Webhook.DispatchWorker` jobs in `accrue_webhooks`, not just jobs tied to the browser seed fixture.
+- **Fix:** Added a `webhook_event_id` JSONB predicate keyed to fixture webhook ids and extended the regression test to prove an unrelated dispatch job survives rerun cleanup.
+- **Files modified:** `scripts/ci/accrue_host_seed_e2e.exs`, `examples/accrue_host/test/accrue_host/seed_e2e_cleanup_test.exs`
+- **Verification:** `cd examples/accrue_host && MIX_ENV=test mix test test/accrue_host/seed_e2e_cleanup_test.exs --trace`
+- **Committed in:** `946e21d`
+
 ---
 
-**Total deviations:** 1 auto-fixed (1 bug)
-**Impact on plan:** The fix stayed inside the new docs-contract coverage and did not expand feature scope.
+**Total deviations:** 2 auto-fixed (2 bugs)
+**Impact on plan:** Both fixes stayed inside the cleanup and regression-contract scope.
 
 ## Issues Encountered
 

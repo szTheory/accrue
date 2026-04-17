@@ -1,6 +1,6 @@
 ---
 phase: 17-milestone-closure-cleanup
-reviewed: 2026-04-17T15:30:24Z
+reviewed: 2026-04-17T15:32:35Z
 depth: standard
 files_reviewed: 8
 files_reviewed_list:
@@ -14,53 +14,33 @@ files_reviewed_list:
   - scripts/ci/verify_package_docs.sh
 findings:
   critical: 0
-  warning: 1
+  warning: 0
   info: 0
-  total: 1
-status: issues_found
+  total: 0
+status: clean
 ---
 
 # Phase 17: Code Review Report
 
-**Reviewed:** 2026-04-17T15:30:24Z
+**Reviewed:** 2026-04-17T15:32:35Z
 **Depth:** standard
 **Files Reviewed:** 8
-**Status:** issues_found
+**Status:** clean
 
 ## Summary
 
-Reviewed the phase-scoped docs, verifier coverage, and the new host seed cleanup flow. The docs/test updates are consistent, but the seed cleanup script now deletes every `Accrue.Webhook.DispatchWorker` job in the `accrue_webhooks` queue instead of only removing fixture-owned jobs. That broad delete can erase unrelated queued or failed webhook work in the example host app.
+Reviewed the scoped documentation, shell verifier, and Elixir tests/scripts at standard depth after the review-fix pass. The release-lane wording is now internally consistent across the docs, the verifier assertions match the documented invariants, and the seed cleanup logic is narrowly scoped to fixture-owned records while preserving unrelated replay history.
 
-## Warnings
+Targeted verification also passed:
 
-### WR-01: Seed cleanup deletes unrelated webhook jobs
+- `bash scripts/ci/verify_package_docs.sh`
+- `mix test test/accrue/docs/package_docs_verifier_test.exs test/accrue/docs/release_guidance_test.exs`
+- `mix test test/accrue_host/seed_e2e_cleanup_test.exs`
 
-**File:** `scripts/ci/accrue_host_seed_e2e.exs:107`
-**Issue:** `cleanup_fixture_footprint!/0` runs `Repo.delete_all` against all `Oban.Job` rows for worker `Accrue.Webhook.DispatchWorker` in queue `accrue_webhooks`. On any rerun, that removes unrelated webhook dispatch jobs created by other tests or by a locally running example app, which makes the cleanup routine broader than the fixture footprint it is supposed to prune.
-**Fix:**
-```elixir
-fixture_webhook_ids =
-  Repo.all(
-    from(webhook in WebhookEvent,
-      where: webhook.processor_event_id in ^@fixture_processor_event_ids,
-      select: webhook.id
-    )
-  )
-
-Repo.delete_all(
-  from(job in Oban.Job,
-    where:
-      job.worker == "Accrue.Webhook.DispatchWorker" and
-        job.queue == "accrue_webhooks" and
-        fragment("?->>'webhook_event_id' = ANY(?)", job.args, ^Enum.map(fixture_webhook_ids, &to_string/1))
-  )
-)
-```
-
-Also add a regression assertion in [seed_e2e_cleanup_test.exs](/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host/seed_e2e_cleanup_test.exs) that inserts an unrelated `Oban.Job` and verifies it survives `run!/1`.
+All reviewed files meet quality standards. No issues found.
 
 ---
 
-_Reviewed: 2026-04-17T15:30:24Z_
+_Reviewed: 2026-04-17T15:32:35Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
