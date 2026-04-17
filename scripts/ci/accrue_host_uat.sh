@@ -25,7 +25,11 @@ echo "=== Accrue host UAT — repo root: $repo_root ==="
 
 if command -v pg_isready >/dev/null 2>&1; then
   echo "--- checking Postgres availability ---"
-  pg_isready -h "${PGHOST:-localhost}" -U "${PGUSER:-postgres}"
+  pg_isready \
+    -h "${PGHOST:-localhost}" \
+    -p "${PGPORT:-5432}" \
+    -U "${PGUSER:-postgres}" \
+    ${PGDATABASE:+-d "$PGDATABASE"}
 fi
 
 export ACCRUE_HOST_PORT="$port"
