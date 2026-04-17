@@ -2,6 +2,16 @@
 
 This runbook is for the same-day public `1.0.0` release of `accrue` and `accrue_admin`, then for later recovery runs when a manual publish is necessary. The release order is `accrue` then `accrue_admin`.
 
+## Release verification lanes
+
+- `Canonical local demo: Fake` is the required deterministic gate for docs and release readiness. This is the normal release lane.
+- `Provider parity: Stripe test mode` is for optional/manual provider-parity checks. Use it to prove hosted Checkout behavior, signed Stripe webhook delivery, SCA/3DS branches, and response-shape fidelity that Fake does not cover.
+- `Advisory/manual: live Stripe` is for final app-level confidence before shipping your app. It is not required for clone-to-evaluate, standard CI, or normal Accrue releases.
+
+Fake is the canonical front door and required deterministic gate. Stripe-backed lanes exist to catch provider drift and app-specific integration risk, not to replace Fake or to block ordinary package releases.
+
+For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/testing-live-stripe.md).
+
 ## Same-day `1.0.0` bootstrap
 
 1. Confirm CI is green on `main`, especially the Phase 9 release gate for both packages.
@@ -18,6 +28,9 @@ This runbook is for the same-day public `1.0.0` release of `accrue` and `accrue_
 - Both package release PRs show `@version "1.0.0"` before any bootstrap publish is allowed to run.
 - Both package release PRs update the correct package-local `CHANGELOG.md`.
 - `accrue` publishes before `accrue_admin`.
+- `Canonical local demo: Fake` remains the required deterministic gate before release.
+- `Provider parity: Stripe test mode` stays optional/manual and out of the required release lane.
+- `Advisory/manual: live Stripe` stays advisory/manual before shipping your app, not a package release blocker.
 - `RELEASE_PLEASE_TOKEN` and `HEX_API_KEY` exist only as GitHub Actions secrets.
 - Secrets are never checked into docs, commit messages, config files, or echoed in workflow logs.
 
@@ -48,6 +61,29 @@ The standard path is `.github/workflows/release-please.yml`:
 - `accrue_admin` dry-run and publish steps export `ACCRUE_ADMIN_HEX_RELEASE=1`.
 
 This automation does not publish from `pull_request`, `pull_request_target`, or ordinary branch pushes.
+
+## Verification before publishing
+
+Run the required deterministic gate first:
+
+```bash
+cd accrue
+mix test --warnings-as-errors
+bash ../scripts/ci/verify_package_docs.sh
+```
+
+That `Canonical local demo: Fake` lane is the required deterministic gate for release readiness because it stays credential-free and reproducible.
+
+If you need provider fidelity coverage, run `Provider parity: Stripe test mode` separately. It is optional/manual, uses Stripe test-mode secrets through environment variables or GitHub secrets, and exists to prove provider-specific behavior that Fake cannot:
+
+- hosted Checkout behavior
+- signed Stripe webhook delivery and signature fidelity
+- SCA/3DS branches
+- Stripe response-shape drift
+
+Keep provider-backed checks out of the required release lane. In real integrations, signed webhook verification and runtime secrets remain required; this runbook does not make raw-body verification optional. Follow the public webhook guidance in `accrue/guides/webhooks.md` and the provider-parity detail guide at [guides/testing-live-stripe.md](guides/testing-live-stripe.md).
+
+`Advisory/manual: live Stripe` is the last lane. Use it for final host-app confidence before shipping your app, after the Fake gate and any Stripe test-mode parity checks. It is advisory/manual before shipping your app, not a required Accrue release blocker.
 
 ## Manual fallback
 

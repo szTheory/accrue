@@ -17,6 +17,8 @@ This guide covers layer (2). Most contributors never need to run it;
 it executes automatically on a daily GitHub Actions schedule and can
 be triggered on demand via the Actions tab.
 
+This lane uses Stripe test mode and should be treated as `provider-parity checks`, not as the canonical local demo or the required release lane.
+
 ## What the live-Stripe suite covers
 
 See `accrue/test/live_stripe/`. Current modules:
@@ -45,6 +47,8 @@ mix test.live
 `mix test --only live_stripe`. Without the env vars set, the tests
 tag themselves `:skip` at module load time and produce a clean
 "0 tests, X skipped" report — no errors.
+
+Use Stripe test-mode credentials only. Set `STRIPE_TEST_SECRET_KEY`, not a live-mode key. This guide is for provider-parity checks in Stripe test mode.
 
 ## Running via `act` (local GitHub Actions replay)
 
@@ -90,8 +94,12 @@ canary for when Stripe ships a new API version or subtly changes a
 response shape — the kind of change that would pass every Fake test
 but break real integrations.
 
+That is why this guide belongs in the `provider-parity checks` lane. It proves Stripe-backed behavior that Fake cannot, but it does not replace Fake and it does not become the required deterministic gate.
+
 If a live-Stripe test starts failing while the corresponding Fake
 test stays green, that is a signal that **the Fake processor needs to
 be updated to mirror Stripe's new shape**, not a signal that the live
 test is broken. Update the Fake first, then re-run the live test to
 confirm.
+
+For real host apps, signed webhook verification and runtime secrets still remain required on the app boundary. Use environment variables or GitHub secrets only, and keep real credentials out of shell history and logs.

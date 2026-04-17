@@ -77,6 +77,9 @@ require_fixed "$ROOT_DIR/accrue/README.md" "mix verify.full"
 require_fixed "$ROOT_DIR/accrue/README.md" "bash scripts/ci/accrue_host_uat.sh"
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'extras: ["README.md", "guides/admin_ui.md"]'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras: [Guides: ["guides/admin_ui.md"]]'
+require_fixed "$ROOT_DIR/README.md" "Canonical local demo: Fake"
+require_fixed "$ROOT_DIR/README.md" "Provider parity: Stripe test mode"
+require_fixed "$ROOT_DIR/README.md" "Advisory/manual: live Stripe"
 
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/first_hour\.html)?'
@@ -102,6 +105,12 @@ require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "customer.subscription.cre
 
 require_fixed "$ROOT_DIR/scripts/ci/accrue_host_uat.sh" "mix verify.full"
 require_fixed "$ROOT_DIR/scripts/ci/accrue_host_uat.sh" "bash scripts/ci/accrue_host_uat.sh"
+require_fixed "$ROOT_DIR/RELEASING.md" "Canonical local demo: Fake"
+require_fixed "$ROOT_DIR/RELEASING.md" "Provider parity: Stripe test mode"
+require_fixed "$ROOT_DIR/RELEASING.md" "Advisory/manual: live Stripe"
+require_fixed "$ROOT_DIR/RELEASING.md" "required deterministic gate"
+require_fixed "$ROOT_DIR/RELEASING.md" "provider-parity checks"
+require_fixed "$ROOT_DIR/RELEASING.md" "advisory/manual before shipping your app"
 
 for guide in \
   "$ROOT_DIR/accrue/guides/first_hour.md" \
@@ -112,4 +121,4 @@ for guide in \
 done
 
 echo "package docs verified for accrue $accrue_version and accrue_admin $accrue_admin_version"
-echo "fixed invariants checked: First run, Seeded history, mix verify, mix verify.full"
+echo "fixed invariants checked: README.md, RELEASING.md, First run, Seeded history, mix verify, mix verify.full"

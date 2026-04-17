@@ -8,6 +8,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     assert status == 0
     assert output =~ "package docs verified for accrue 0.1.2 and accrue_admin 0.1.2"
+    assert output =~ "README.md"
+    assert output =~ "RELEASING.md"
     assert output =~ "First run"
   end
 
@@ -21,6 +23,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
     File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
 
+    copy_fixture!("README.md", tmp_dir)
+    copy_fixture!("RELEASING.md", tmp_dir)
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
@@ -47,6 +51,46 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert status != 0
     assert output =~ "examples/accrue_host/README.md"
     assert output =~ "mix verify.full"
+  end
+
+  test "package docs verifier rejects missing release guidance invariants" do
+    tmp_dir = Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
+    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
+    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
+
+    copy_fixture!("README.md", tmp_dir)
+    copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("accrue/mix.exs", tmp_dir)
+    copy_fixture!("accrue/README.md", tmp_dir)
+    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
+    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
+    copy_fixture!("accrue_admin/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+
+    drifted_releasing =
+      tmp_dir
+      |> Path.join("RELEASING.md")
+      |> File.read!()
+      |> String.replace("provider-parity checks", "optional checks")
+
+    File.write!(Path.join(tmp_dir, "RELEASING.md"), drifted_releasing)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "RELEASING.md"
+    assert output =~ "provider-parity checks"
   end
 
   defp copy_fixture!(relative_path, tmp_dir) do

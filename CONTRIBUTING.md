@@ -62,7 +62,7 @@ mix hex.build
 mix hex.publish --dry-run
 ```
 
-For live Stripe fidelity coverage, follow the setup in [`guides/testing-live-stripe.md`](guides/testing-live-stripe.md) and keep real credentials out of shell history and logs.
+For provider-parity checks against Stripe test mode, follow the setup in [`guides/testing-live-stripe.md`](guides/testing-live-stripe.md). That lane is advisory/manual, not part of the required deterministic release gate, and it exists to catch provider-parity drift rather than replace Fake. Please keep real credentials out of shell history and logs.
 
 ## No CLA
 
