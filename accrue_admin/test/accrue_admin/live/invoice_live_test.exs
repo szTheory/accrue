@@ -82,7 +82,13 @@ defmodule AccrueAdmin.InvoiceLiveTest do
         automatic_tax_disabled_reason: "finalization_requires_location_inputs",
         last_finalization_error_code: "customer_tax_location_invalid",
         hosted_url: "https://example.test/hosted-invoice",
-        pdf_url: "https://example.test/invoice.pdf"
+        pdf_url: "https://example.test/invoice.pdf",
+        data: %{
+          "customer_address" => %{"line1" => "123 Private Lane"},
+          "last_finalization_error" => %{
+            "message" => "Raw provider message with address 123 Private Lane"
+          }
+        }
       })
 
     insert_invoice_item(invoice, %{
@@ -117,6 +123,8 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ "Automatic tax disabled reason: Finalization Requires Location Inputs."
     assert html =~ "Finalization failure code: customer_tax_location_invalid."
     assert html =~ "Repair the customer tax location, then retry finalization from Accrue."
+    refute html =~ "Invoice payload"
+    refute html =~ "123 Private Lane"
 
     html = render_click(element(view, "button", "Open PDF"))
     assert html =~ "Open rendered PDF"

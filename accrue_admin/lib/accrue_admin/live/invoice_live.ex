@@ -11,7 +11,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     AppShell,
     Breadcrumbs,
     FlashGroup,
-    JsonViewer,
     KpiCard,
     MoneyFormatter,
     StatusBadge,
@@ -312,8 +311,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           />
         </section>
 
-        <JsonViewer.json_viewer id="invoice-data" label="Invoice payload" payload={invoice_payload(@invoice, @line_items)} />
-
         <StepUpAuthModal.step_up_auth_modal
           pending={@step_up_pending}
           challenge={@step_up_challenge}
@@ -500,35 +497,6 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   defp tone(%{type: "invoice.paid"}), do: :moss
   defp tone(_event), do: :slate
-
-  defp invoice_payload(invoice, line_items) do
-    %{
-      "invoice" => %{
-        "processor_id" => invoice.processor_id,
-        "status" => invoice.status,
-        "number" => invoice.number,
-        "automatic_tax_disabled_reason" => invoice.automatic_tax_disabled_reason,
-        "last_finalization_error_code" => invoice.last_finalization_error_code,
-        "collection_method" => invoice.collection_method,
-        "hosted_url" => invoice.hosted_url,
-        "pdf_url" => invoice.pdf_url,
-        "data" => invoice.data || %{},
-        "metadata" => invoice.metadata || %{}
-      },
-      "line_items" =>
-        Enum.map(line_items, fn item ->
-          %{
-            "id" => item.id,
-            "stripe_id" => item.stripe_id,
-            "description" => item.description,
-            "amount_minor" => item.amount_minor,
-            "quantity" => item.quantity,
-            "currency" => item.currency,
-            "proration" => item.proration
-          }
-        end)
-    }
-  end
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
