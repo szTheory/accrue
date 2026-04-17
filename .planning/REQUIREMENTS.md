@@ -9,9 +9,9 @@ Requirements for v1.2 focus on adoption, trust, and decision-quality expansion p
 
 ### Canonical Demo
 
-- [ ] **DEMO-01**: User can clone the repository and run `examples/accrue_host` as the canonical local demo with documented prerequisites and commands.
-- [ ] **DEMO-02**: User can seed or create a Fake-backed subscription in the demo without live Stripe credentials.
-- [ ] **DEMO-03**: User can inspect billing state and replay a webhook/admin action through the mounted admin UI in the demo.
+- [x] **DEMO-01**: User can clone the repository and run `examples/accrue_host` as the canonical local demo with documented prerequisites and commands.
+- [x] **DEMO-02**: User can seed or create a Fake-backed subscription in the demo without live Stripe credentials.
+- [x] **DEMO-03**: User can inspect billing state and replay a webhook/admin action through the mounted admin UI in the demo.
 - [x] **DEMO-04**: User can run a single CI-equivalent local command that verifies the demo setup and focused host proofs.
 - [x] **DEMO-05**: User can understand which demo commands are for local evaluation, CI validation, Hex-style smoke validation, and production setup.
 - [x] **DEMO-06**: Maintainer can detect drift between the demo path and documented tutorial commands before release.
@@ -19,7 +19,7 @@ Requirements for v1.2 focus on adoption, trust, and decision-quality expansion p
 ### Adoption Front Door
 
 - [ ] **ADOPT-01**: User lands on a root repository README that explains Accrue, the two packages, the local demo, docs, and production-hardening path.
-- [ ] **ADOPT-02**: User can follow a tutorial from install through first subscription, signed webhook ingest, admin inspection/replay, and focused host tests.
+- [x] **ADOPT-02**: User can follow a tutorial from install through first subscription, signed webhook ingest, admin inspection/replay, and focused host tests.
 - [ ] **ADOPT-03**: User can choose between Fake, Stripe test mode, and live Stripe flows using clear release and docs guidance.
 - [ ] **ADOPT-04**: User can find issue templates for bug reports, integration problems, documentation gaps, and feature requests.
 - [ ] **ADOPT-05**: User can identify supported public APIs and generated host-owned boundaries without relying on private modules.
@@ -71,14 +71,14 @@ Which phases cover which requirements. Updated during phase execution.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEMO-01 | Phase 13 | Pending |
-| DEMO-02 | Phase 13 | Pending |
-| DEMO-03 | Phase 13 | Pending |
+| DEMO-01 | Phase 13 | Complete |
+| DEMO-02 | Phase 13 | Complete |
+| DEMO-03 | Phase 13 | Complete |
 | DEMO-04 | Phase 13 | Complete |
 | DEMO-05 | Phase 13 | Complete |
 | DEMO-06 | Phase 13 | Complete |
 | ADOPT-01 | Phase 14 | Pending |
-| ADOPT-02 | Phase 13 + Phase 14 | Pending |
+| ADOPT-02 | Phase 13 + Phase 14 | Complete |
 | ADOPT-03 | Phase 14 | Pending |
 | ADOPT-04 | Phase 14 | Pending |
 | ADOPT-05 | Phase 14 | Pending |

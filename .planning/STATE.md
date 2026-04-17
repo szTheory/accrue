@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-04-17T01:54:57.819Z"
+status: verifying
+stopped_at: Completed 13-canonical-demo-tutorial-03-PLAN.md
+last_updated: "2026-04-17T01:58:08.280Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 67
+  completed_plans: 3
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 Phase: 13 (canonical-demo-tutorial) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-17
 
 Progress: v1.2 planned (0/4 phases complete)
@@ -139,6 +139,7 @@ Progress: v1.2 planned (0/4 phases complete)
 | Phase 12 P11 | 16m | 2 tasks | 2 files |
 | Phase 13-canonical-demo-tutorial P01 | 26m | 3 tasks | 7 files |
 | Phase 13-canonical-demo-tutorial P02 | 3min | 2 tasks | 7 files |
+| Phase 13-canonical-demo-tutorial P03 | 2min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -373,6 +374,9 @@ Full decision log lives in PROJECT.md Key Decisions table. Recent decisions affe
 - [Phase 13]: ExUnit owns tutorial order/boundary semantics while verify_package_docs.sh stays limited to fixed invariants.
 - [Phase 13]: Canonical demo labels are read from examples/accrue_host/demo/command_manifest.exs instead of duplicated test constants.
 - [Phase 13]: Package docs verifier temp-tree coverage now includes the host README so release drift can be reproduced under ROOT_DIR.
+- [Phase 13]: The checked-in host README is the canonical executable path; the package guide mirrors it and the package README stays compact.
+- [Phase 13]: The first-run story remains Fake-backed and credential-free while still teaching the real /webhooks/stripe and mounted /billing surfaces.
+- [Phase 13]: Verification guidance now distinguishes mix verify, mix verify.full, the repo-root wrapper, Hex smoke, and production setup in one consistent order.
 
 ### Pending Todos
 
@@ -398,6 +402,6 @@ None for the closed v1.0 milestone. New concerns should be captured during `$gsd
 
 ## Session Continuity
 
-Last session: 2026-04-17T01:54:57.815Z
-Stopped at: Completed 13-02-PLAN.md
+Last session: 2026-04-17T01:58:08.277Z
+Stopped at: Completed 13-canonical-demo-tutorial-03-PLAN.md
 Resume file: None
