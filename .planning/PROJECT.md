@@ -26,7 +26,7 @@ The v1.1 milestone proved the packages from a real Phoenix user's point of view:
 - CI runs a Fake-backed host integration gate with Playwright browser coverage, retained failure artifacts, Hex-mode smoke validation, and warning/error annotation sweeps.
 - First-user DX is hardened through installer no-clobber reruns, conflict sidecars, shared setup diagnostics, host-first docs, troubleshooting anchors, and package-doc verification.
 
-Phase 15 of v1.2 is complete: the trust review, deterministic trust gates, host performance smoke, responsive/accessibility browser proof, compatibility matrix labels, and secret/PII leakage checks now give adopters concrete evidence for evaluating Accrue in a real Phoenix app.
+Phase 16 of v1.2 is complete: the expansion recommendation ranks Stripe Tax support as the next milestone candidate, keeps organization billing and revenue/export work in backlog, preserves official second processor work as a planted seed, and locks the recommendation with an exact ranked candidate-to-outcome docs contract.
 
 Milestone history and requirements are archived in `.planning/milestones/`.
 
@@ -62,7 +62,7 @@ v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
 - [x] New users can follow a host-first tutorial and docs front door that explains the correct integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices. Validated in Phase 14: Adoption Front Door.
 - [x] Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice. Validated in Phase 14: Adoption Front Door.
 - [x] Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release. Validated in Phase 15: Trust Hardening.
-- [ ] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API. Phase 16 produced the recommendation, but verification is pending a stronger ranking-contract proof.
+- [x] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API. Validated in Phase 16: Expansion Discovery.
 
 ### Validated v1.0 Scope Summary
 
@@ -263,4 +263,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after v1.2 milestone start*
+*Last updated: 2026-04-17 after Phase 16 completion*
