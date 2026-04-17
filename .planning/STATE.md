@@ -6,15 +6,15 @@ current_phase: 19
 current_phase_name: Tax Location and Rollout Safety
 current_plan: "02"
 status: ready_to_execute
-stopped_at: Completed 19-01 processor tax-location validation and Fake rollback contract
-last_updated: "2026-04-17T18:08:19Z"
+stopped_at: Completed 19-03 recurring tax rollback reconciliation and invoice failure webhook coverage
+last_updated: "2026-04-17T18:13:31Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -34,19 +34,19 @@ Plan: 01
 **Current Phase Name:** Tax Location and Rollout Safety
 **Current Plan:** 02
 **Status:** Ready to Execute
-**Stopped At:** Completed 19-01 processor tax-location validation and Fake rollback contract
+**Stopped At:** Completed 19-03 recurring tax rollback reconciliation and invoice failure webhook coverage
 **Resume File:** None
 **Last Activity:** 2026-04-17
 
 ## Milestone Progress
 
 **Milestone:** v1.3 Tax + Organization Billing
-**Progress:** [██░░░░░░░░] 20%
+**Progress:** [████░░░░░░] 40%
 
 | Phase | Status | Notes |
 |-------|--------|-------|
 | 18. Stripe Tax Core | Complete | `18-01` through `18-04` shipped; TAX-01 is complete |
-| 19. Tax Location and Rollout Safety | In Progress | `19-01` shipped sanitized processor tax-location validation and deterministic Fake rollback state |
+| 19. Tax Location and Rollout Safety | In Progress | `19-01` shipped sanitized processor tax-location validation; `19-03` shipped local rollback observability and invoice failure reconciliation |
 | 20. Organization Billing With Sigra | Pending | Sigra-first org billing and tenant-boundary proof |
 | 21. Admin and Host UX Proof | Pending | Browser/admin proof for tax and org billing states |
 | 22. Finance Handoff and Milestone Verification | Pending | Stripe-native finance handoff and closure verification |
@@ -76,6 +76,8 @@ Plan: 01
 - Invoice tax projection trusts only canonical processor tax fields (`tax` and `total_details.amount_tax`) and defaults to `0` only for enabled automatic-tax payloads with no amount yet.
 - Stripe `customer_tax_location_invalid` now maps to a stable `%Accrue.APIError{}` with sanitized processor metadata only.
 - Fake invalid-location coverage now distinguishes immediate customer validation failures from recurring automatic-tax rollback payloads.
+- Recurring invalid-location rollback now persists `automatic_tax_disabled_reason` on local subscription and invoice rows instead of leaving the cause hidden in provider payloads.
+- `invoice.updated` and `invoice.finalization_failed` now flow through the canonical invoice reducer so finalization error codes reconcile locally without storing raw provider messages.
 
 ## Next Action
 
