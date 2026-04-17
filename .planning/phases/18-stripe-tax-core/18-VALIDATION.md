@@ -20,6 +20,7 @@ created: 2026-04-17
 | **Framework** | ExUnit + Ecto SQL Sandbox + Fake processor |
 | **Config file** | `accrue/test/test_helper.exs` |
 | **Quick run command** | `cd accrue && mix test test/accrue/billing/invoice_projection_test.exs test/accrue/billing/subscription_projection_tax_test.exs test/accrue/billing/subscription_test.exs test/accrue/checkout_test.exs test/accrue/processor/fake_test.exs test/accrue/processor/stripe_test.exs` |
+| **CI gate** | `.github/workflows/ci.yml` job `phase18-tax-gate` |
 | **Full suite command** | `cd accrue && mix test` |
 | **Estimated runtime** | ~1 second targeted, ~120 seconds full suite |
 
@@ -29,7 +30,7 @@ created: 2026-04-17
 
 - **After every task commit:** Run the task-scoped ExUnit file listed in the verification map below.
 - **After every plan wave:** Run `cd accrue && mix test test/accrue/billing/invoice_projection_test.exs test/accrue/billing/subscription_projection_tax_test.exs test/accrue/billing/subscription_test.exs test/accrue/checkout_test.exs test/accrue/processor/fake_test.exs test/accrue/processor/stripe_test.exs`
-- **Before `$gsd-verify-work`:** Full suite must be green
+- **Before `$gsd-verify-work`:** Phase 18 targeted suite must be green locally and in CI through `phase18-tax-gate`; full-suite coverage remains enforced by the general `release-gate`.
 - **Max feedback latency:** 120 seconds
 
 ---
@@ -63,9 +64,9 @@ created: 2026-04-17
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Optional live Stripe parity for automatic-tax request shape | TAX-01 | Required phase validation is Fake-backed; live Stripe calls depend on account configuration and tax registrations | Run any existing live Stripe check only after ExUnit is green; compare request/response tax fields against Fake shape without making live Stripe parity a release blocker |
+No manual-only verification remains for Phase 18.
+
+Optional live Stripe provider parity is advisory because it depends on account-level Stripe configuration and tax registrations. The repository already runs the `live-stripe` workflow only on `workflow_dispatch` and the daily schedule with `continue-on-error: true`, so it is not a Phase 18 release blocker or human sign-off requirement.
 
 ---
 
@@ -77,5 +78,6 @@ created: 2026-04-17
 - [x] No watch-mode flags
 - [x] Feedback latency < 120s
 - [x] `nyquist_compliant: true` set in frontmatter
+- [x] Required deterministic Phase 18 gate shifted left into CI as `phase18-tax-gate`
 
-**Approval:** verified 2026-04-17 after targeted run `cd accrue && mix test test/accrue/billing/invoice_projection_test.exs test/accrue/billing/subscription_projection_tax_test.exs test/accrue/billing/subscription_test.exs test/accrue/checkout_test.exs test/accrue/processor/fake_test.exs test/accrue/processor/stripe_test.exs` returned `74 tests, 0 failures`.
+**Approval:** verified 2026-04-17 after targeted run `cd accrue && mix test test/accrue/billing/invoice_projection_test.exs test/accrue/billing/subscription_projection_tax_test.exs test/accrue/billing/subscription_test.exs test/accrue/checkout_test.exs test/accrue/processor/fake_test.exs test/accrue/processor/stripe_test.exs` returned `74 tests, 0 failures`. No manual Phase 18 verification remains.

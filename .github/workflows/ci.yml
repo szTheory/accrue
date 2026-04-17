@@ -224,6 +224,58 @@ jobs:
       - name: Accrue admin retired package audit
         run: cd accrue_admin && mix hex.audit
 
+  phase18-tax-gate:
+    name: Phase 18 Stripe Tax gate
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+
+      - name: Install Hex
+        run: mix local.hex --force
+
+      - name: Restore accrue deps cache
+        uses: actions/cache@v5
+        with:
+          path: accrue/deps
+          key: ${{ runner.os }}-otp27-elixir118-phase18-tax-deps-${{ hashFiles('accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp27-elixir118-phase18-tax-deps-
+
+      - name: Install accrue deps
+        run: cd accrue && mix deps.get
+
+      - name: Run Phase 18 Stripe Tax gate
+        run: cd accrue && mix test test/accrue/billing/invoice_projection_test.exs test/accrue/billing/subscription_projection_tax_test.exs test/accrue/billing/subscription_test.exs test/accrue/checkout_test.exs test/accrue/processor/fake_test.exs test/accrue/processor/stripe_test.exs
+
   admin-drift-docs:
     name: Admin drift and docs
     if: github.event_name != 'schedule'
@@ -376,7 +428,7 @@ jobs:
   annotation-sweep:
     name: Annotation sweep
     if: github.event_name != 'schedule'
-    needs: [release-gate, admin-drift-docs, host-integration]
+    needs: [release-gate, phase18-tax-gate, admin-drift-docs, host-integration]
     runs-on: ubuntu-24.04
 
     steps:
@@ -387,7 +439,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           GH_TOKEN: ${{ github.token }}
-        run: bash scripts/ci/annotation_sweep.sh release-gate admin-drift-docs host-integration
+        run: bash scripts/ci/annotation_sweep.sh release-gate phase18-tax-gate admin-drift-docs host-integration
 
   # ---------------------------------------------------------------------
   # Advisory live-Stripe fidelity job (quick task 260414-l9q).
