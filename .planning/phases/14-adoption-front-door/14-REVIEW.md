@@ -1,6 +1,6 @@
 ---
 phase: 14-adoption-front-door
-reviewed: 2026-04-17T08:15:26Z
+reviewed: 2026-04-17T08:17:29Z
 depth: standard
 files_reviewed: 16
 files_reviewed_list:
@@ -22,44 +22,32 @@ files_reviewed_list:
   - scripts/ci/verify_package_docs.sh
 findings:
   critical: 0
-  warning: 1
+  warning: 0
   info: 0
-  total: 1
-status: issues_found
+  total: 0
+status: clean
 ---
 
 # Phase 14: Code Review Report
 
-**Reviewed:** 2026-04-17T08:15:26Z
+**Reviewed:** 2026-04-17T08:17:29Z
 **Depth:** standard
 **Files Reviewed:** 16
-**Status:** issues_found
+**Status:** clean
 
 ## Summary
 
-Reviewed the front-door docs, issue templates, release guidance, and the ExUnit/shell checks that enforce those contracts. The docs themselves are consistent about public boundaries, secret handling, and the Fake vs Stripe verification lanes.
+Re-reviewed the Phase 14 front-door docs, issue templates, docs verifier script, and the focused docs coverage tests after the version-pinning warning fix. The scoped files are internally consistent with the current package versions, preserve the intended public-boundary guidance, and do not introduce correctness or security issues in the reviewed surface.
 
-One test is release-fragile: it hard-codes the current package version instead of deriving it from `mix.exs`, so the docs contract suite will fail on the next version bump even when the verifier script and docs are correct.
+Validation also passed on the executable checks used to guard this area:
 
-## Warnings
+- `bash scripts/ci/verify_package_docs.sh`
+- `mix test test/accrue/docs/issue_templates_test.exs test/accrue/docs/package_docs_verifier_test.exs test/accrue/docs/release_guidance_test.exs test/accrue/docs/root_readme_test.exs`
 
-### WR-01: Docs verifier test is pinned to one package version
-
-**File:** `accrue/test/accrue/docs/package_docs_verifier_test.exs:10`
-**Issue:** The success assertion requires the exact string `package docs verified for accrue 0.1.2 and accrue_admin 0.1.2`. The verifier script intentionally prints the current package versions from `accrue/mix.exs` and `accrue_admin/mix.exs` ([`scripts/ci/verify_package_docs.sh:59`](/Users/jon/projects/accrue/scripts/ci/verify_package_docs.sh:59), [`scripts/ci/verify_package_docs.sh:123`](/Users/jon/projects/accrue/scripts/ci/verify_package_docs.sh:123)). As soon as either package version changes, this test starts failing even if the script behavior is still correct. That creates avoidable release churn, especially because the same review set documents an upcoming `1.0.0` bootstrap in [`RELEASING.md:15`](/Users/jon/projects/accrue/RELEASING.md:15).
-**Fix:**
-```elixir
-expected_accrue = extract_version!("../../../../accrue/mix.exs")
-expected_admin = extract_version!("../../../../accrue_admin/mix.exs")
-
-assert output =~
-         "package docs verified for accrue #{expected_accrue} and accrue_admin #{expected_admin}"
-```
-
-Alternatively, assert only on the stable prefix and verify the versions with a regex.
+All reviewed files meet quality standards. No issues found.
 
 ---
 
-_Reviewed: 2026-04-17T08:15:26Z_
+_Reviewed: 2026-04-17T08:17:29Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
