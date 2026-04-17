@@ -798,20 +798,27 @@ defmodule Accrue.Processor.Fake do
           {cached, state}
 
         :miss ->
-          state = bump(state, :customer)
-          id = id_for(:customer, state.counters.customer)
+          if requires_immediate_tax_location_validation?(params) and
+               invalid_tax_location?(params) do
+            result = {:error, customer_tax_location_invalid_error()}
+            state = cache_idempotency(state, idem_key, result)
+            {result, state}
+          else
+            state = bump(state, :customer)
+            id = id_for(:customer, state.counters.customer)
 
-          customer =
-            params
-            |> Map.put(:id, id)
-            |> Map.put(:object, "customer")
-            |> Map.put(:created, state.clock)
-            |> Map.put(:_accrue_scope, resolve_scope(opts))
+            customer =
+              params
+              |> Map.put(:id, id)
+              |> Map.put(:object, "customer")
+              |> Map.put(:created, state.clock)
+              |> Map.put(:_accrue_scope, resolve_scope(opts))
 
-          result = {:ok, customer}
-          state = %{state | customers: Map.put(state.customers, id, customer)}
-          state = cache_idempotency(state, idem_key, result)
-          {result, state}
+            result = {:ok, customer}
+            state = %{state | customers: Map.put(state.customers, id, customer)}
+            state = cache_idempotency(state, idem_key, result)
+            {result, state}
+          end
       end
     end)
   end
@@ -830,7 +837,12 @@ defmodule Accrue.Processor.Fake do
       case Map.fetch(state.customers, id) do
         {:ok, existing} ->
           updated = Map.merge(existing, params)
-          {{:ok, updated}, %{state | customers: Map.put(state.customers, id, updated)}}
+
+          if requires_immediate_tax_location_validation?(params) and invalid_tax_location?(updated) do
+            {{:error, customer_tax_location_invalid_error()}, state}
+          else
+            {{:ok, updated}, %{state | customers: Map.put(state.customers, id, updated)}}
+          end
 
         :error ->
           {{:error, resource_missing(id)}, state}
@@ -975,6 +987,7 @@ defmodule Accrue.Processor.Fake do
     with_script_or_stub(state, :create_invoice_preview, [params, opts], fn state ->
       customer = params[:customer] || params["customer"]
       subscription = params[:subscription] || params["subscription"]
+      automatic_tax = invoice_preview_automatic_tax_payload(params, customer, state.customers)
 
       sub_details =
         params[:subscription_details] || params["subscription_details"] || %{}
@@ -1020,6 +1033,7 @@ defmodule Accrue.Processor.Fake do
         total: subtotal,
         amount_due: subtotal,
         starting_balance: 0,
+        automatic_tax: automatic_tax,
         period_start: DateTime.to_unix(state.clock),
         period_end: DateTime.to_unix(DateTime.add(state.clock, 30 * 86_400, :second)),
         subscription_proration_date: DateTime.to_unix(state.clock),
@@ -1998,7 +2012,7 @@ defmodule Accrue.Processor.Fake do
     status = if trial_end_raw, do: :trialing, else: :active
     customer = params[:customer] || params["customer"]
     raw_items = params[:items] || params["items"] || []
-    automatic_tax = automatic_tax_payload(params)
+    automatic_tax = subscription_automatic_tax_payload(params, customer, state.customers)
 
     items =
       raw_items
@@ -2061,11 +2075,13 @@ defmodule Accrue.Processor.Fake do
   defp build_invoice(state, id, params) do
     amount_due = params[:amount_due] || params["amount_due"] || 0
     amount_tax = invoice_amount_tax(params, amount_due)
+    customer = params[:customer] || params["customer"]
+    automatic_tax = invoice_automatic_tax_payload(params, customer, state.customers)
 
     %{
       id: id,
       object: "invoice",
-      customer: params[:customer] || params["customer"],
+      customer: customer,
       subscription: params[:subscription] || params["subscription"],
       status: :draft,
       amount_due: amount_due,
@@ -2074,9 +2090,10 @@ defmodule Accrue.Processor.Fake do
       currency: params[:currency] || params["currency"] || "usd",
       created: state.clock,
       lines: %{object: "list", data: []},
-      automatic_tax: automatic_tax_payload(params),
+      automatic_tax: automatic_tax,
       tax: invoice_tax_field(params, amount_tax),
-      total_details: %{amount_tax: amount_tax}
+      total_details: %{amount_tax: amount_tax},
+      last_finalization_error: last_finalization_error(automatic_tax)
     }
   end
 
@@ -2112,6 +2129,38 @@ defmodule Accrue.Processor.Fake do
     %{enabled: enabled?, status: if(enabled?, do: "complete", else: nil)}
   end
 
+  defp invoice_preview_automatic_tax_payload(params, customer_id, customers) do
+    if automatic_tax_enabled?(params) and customer_tax_location_invalid?(customer_id, customers) do
+      %{enabled: true, status: "requires_location_inputs"}
+    else
+      automatic_tax_payload(params)
+    end
+  end
+
+  defp subscription_automatic_tax_payload(params, customer_id, customers) do
+    if automatic_tax_enabled?(params) and customer_tax_location_invalid?(customer_id, customers) do
+      %{
+        enabled: false,
+        status: "requires_location_inputs",
+        disabled_reason: "requires_location_inputs"
+      }
+    else
+      automatic_tax_payload(params)
+    end
+  end
+
+  defp invoice_automatic_tax_payload(params, customer_id, customers) do
+    if automatic_tax_enabled?(params) and customer_tax_location_invalid?(customer_id, customers) do
+      %{
+        enabled: false,
+        status: "requires_location_inputs",
+        disabled_reason: "finalization_requires_location_inputs"
+      }
+    else
+      automatic_tax_payload(params)
+    end
+  end
+
   defp automatic_tax_enabled?(params) do
     case params[:automatic_tax] || params["automatic_tax"] do
       %{enabled: enabled?} -> enabled?
@@ -2142,6 +2191,63 @@ defmodule Accrue.Processor.Fake do
       quantity = item[:quantity] || item["quantity"] || 1
       total + quantity * 1000
     end)
+  end
+
+  defp customer_tax_location_invalid?(nil, _customers), do: false
+
+  defp customer_tax_location_invalid?(customer_id, customers) when is_binary(customer_id) do
+    case Map.fetch(customers, customer_id) do
+      {:ok, customer} -> invalid_tax_location?(customer)
+      :error -> false
+    end
+  end
+
+  defp requires_immediate_tax_location_validation?(params) do
+    case params[:tax] || params["tax"] do
+      %{validate_location: "immediately"} -> true
+      %{"validate_location" => "immediately"} -> true
+      _ -> false
+    end
+  end
+
+  defp invalid_tax_location?(params) when is_map(params) do
+    case tax_location_source(params) do
+      nil -> true
+      location -> Enum.any?([:line1, :postal_code, :country], &blank_field?(location, &1))
+    end
+  end
+
+  defp tax_location_source(params) do
+    shipping = params[:shipping] || params["shipping"]
+
+    cond do
+      is_map(shipping) and is_map(shipping[:address]) -> shipping[:address]
+      is_map(shipping) and is_map(shipping["address"]) -> shipping["address"]
+      is_map(params[:address]) -> params[:address]
+      is_map(params["address"]) -> params["address"]
+      true -> nil
+    end
+  end
+
+  defp blank_field?(location, key) do
+    value = location[key] || location[Atom.to_string(key)]
+    is_nil(value) or value == ""
+  end
+
+  defp last_finalization_error(%{disabled_reason: "finalization_requires_location_inputs"}) do
+    %{code: "customer_tax_location_invalid"}
+  end
+
+  defp last_finalization_error(_), do: nil
+
+  defp customer_tax_location_invalid_error do
+    %Accrue.APIError{
+      code: "customer_tax_location_invalid",
+      http_status: 400,
+      message:
+        "Fake could not validate the customer tax location. " <>
+          "Please update customer address or shipping before enabling automatic tax."
+    }
   end
 
   defp build_payment_intent(state, id, params) do

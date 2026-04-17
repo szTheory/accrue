@@ -69,6 +69,24 @@ defmodule Accrue.Processor.FakeTest do
       assert {:error, %Accrue.APIError{code: "resource_missing"}} =
                Processor.update_customer("cus_missing", %{name: "X"}, [])
     end
+
+    test "returns customer_tax_location_invalid for immediate validation with insufficient location" do
+      {:ok, %{id: id}} = Processor.create_customer(%{email: "a@b"}, [])
+
+      assert {:error, %Accrue.APIError{} = error} =
+               Processor.update_customer(
+                 id,
+                 %{
+                   address: %{line1: "27 Fredrick Ave", country: "US"},
+                   tax: %{validate_location: "immediately", ip_address: "203.0.113.10"}
+                 },
+                 []
+               )
+
+      assert error.code == "customer_tax_location_invalid"
+      assert error.http_status == 400
+      assert error.message =~ "update customer address or shipping"
+    end
   end
 
   describe "test clock" do
@@ -106,6 +124,30 @@ defmodule Accrue.Processor.FakeTest do
   end
 
   describe "automatic tax payloads" do
+    test "subscription creation emits disabled_reason when stored customer lacks required location inputs" do
+      {:ok, %{id: customer_id}} =
+        Processor.create_customer(
+          %{email: "a@b", address: %{line1: "27 Fredrick Ave", country: "US"}},
+          []
+        )
+
+      assert {:ok, subscription} =
+               Fake.create_subscription(
+                 %{
+                   customer: customer_id,
+                   items: [%{price: "price_basic"}],
+                   automatic_tax: %{enabled: true}
+                 },
+                 []
+               )
+
+      assert subscription.automatic_tax == %{
+               enabled: false,
+               status: "requires_location_inputs",
+               disabled_reason: "requires_location_inputs"
+             }
+    end
+
     test "subscription creation exposes enabled automatic_tax state" do
       assert {:ok, subscription} =
                Fake.create_subscription(
@@ -164,6 +206,52 @@ defmodule Accrue.Processor.FakeTest do
       assert invoice.automatic_tax == %{enabled: false, status: nil}
       assert invoice.tax == nil
       assert invoice.total_details == %{amount_tax: 0}
+    end
+
+    test "invoice creation emits recurring disabled-reason payloads for invalid customer location" do
+      {:ok, %{id: customer_id}} =
+        Processor.create_customer(
+          %{email: "a@b", address: %{line1: "27 Fredrick Ave", country: "US"}},
+          []
+        )
+
+      assert {:ok, invoice} =
+               Fake.create_invoice(
+                 %{
+                   customer: customer_id,
+                   amount_due: 2_500,
+                   automatic_tax: %{enabled: true}
+                 },
+                 []
+               )
+
+      assert invoice.automatic_tax == %{
+               enabled: false,
+               status: "requires_location_inputs",
+               disabled_reason: "finalization_requires_location_inputs"
+             }
+
+      assert invoice.last_finalization_error == %{code: "customer_tax_location_invalid"}
+    end
+
+    test "invoice preview exposes requires_location_inputs status for invalid customer location" do
+      {:ok, %{id: customer_id}} =
+        Processor.create_customer(
+          %{email: "a@b", address: %{line1: "27 Fredrick Ave", country: "US"}},
+          []
+        )
+
+      assert {:ok, preview} =
+               Fake.create_invoice_preview(
+                 %{
+                   customer: customer_id,
+                   automatic_tax: %{enabled: true},
+                   subscription_details: %{items: [%{price: "price_basic"}]}
+                 },
+                 []
+               )
+
+      assert preview.automatic_tax == %{enabled: true, status: "requires_location_inputs"}
     end
 
     test "checkout creation emits deterministic tax fields when automatic tax is enabled" do
