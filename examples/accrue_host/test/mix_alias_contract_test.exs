@@ -11,6 +11,7 @@ defmodule AccrueHost.MixAliasContractTest do
     assert source =~ "test/accrue_host/billing_facade_test.exs"
     assert source =~ "test/accrue_host_web/subscription_flow_test.exs"
     assert source =~ "test/accrue_host_web/webhook_ingest_test.exs"
+    assert source =~ "test/accrue_host_web/trust_smoke_test.exs"
     assert source =~ "test/accrue_host_web/admin_webhook_replay_test.exs"
     assert source =~ "test/accrue_host_web/admin_mount_test.exs"
   end
