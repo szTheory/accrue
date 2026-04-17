@@ -19,7 +19,7 @@
 
 - [x] **Phase 18: Stripe Tax Core** — Add tax enablement options to billing actions, processor/Fake support, automatic-tax projections, and focused tests. Completed 2026-04-17.
 - [x] **Phase 19: Tax Location and Rollout Safety** — Add customer tax-location capture/update/validation paths, invalid-location recovery behavior, docs, and migration guidance for existing subscriptions. Completed 2026-04-17.
-- [ ] **Phase 20: Organization Billing With Sigra** — Add Sigra-first org billing proof using active organization scope, memberships, org admin boundaries, and row-scoped billable ownership. In progress: `20-01` and `20-02` shipped 2026-04-17.
+- [ ] **Phase 20: Organization Billing With Sigra** — Add Sigra-first org billing proof using active organization scope, memberships, org admin boundaries, and row-scoped billable ownership. In progress: `20-01`, `20-02`, and `20-03` shipped 2026-04-17.
 - [ ] **Phase 21: Admin and Host UX Proof** — Surface org-owned billing/tax states in the host/admin demo with browser coverage for user billing, org billing, tax-invalid states, and webhook/admin replay boundaries.
 - [ ] **Phase 22: Finance Handoff and Milestone Verification** — Add finance handoff docs for Stripe Revenue Recognition, Sigma scheduled queries, Data Pipeline, tax evidence, and event-ledger boundaries; run end-to-end verification and archive the milestone.
 
@@ -89,7 +89,7 @@ Plans:
 Plans:
 - [x] `20-01-PLAN.md` — Add the local Sigra dependency, Sigra host wrapper, billable organization schemas, and the blocking host schema migration.
 - [x] `20-02-PLAN.md` — Hydrate host scope with Sigra and route `/app/billing` through server-derived active-organization billing wrappers.
-- [ ] `20-03-PLAN.md` — Thread owner scope through the host-mounted admin session and prove it with `admin_mount_test.exs`.
+- [x] `20-03-PLAN.md` — Thread owner scope through the host-mounted admin session and prove it with `admin_mount_test.exs`.
 - [ ] `20-04-PLAN.md` — Convert admin query modules to owner-aware customer, subscription, invoice, webhook, and event loaders.
 - [ ] `20-05-PLAN.md` — Apply exact cross-org denial presentation to customer, subscription, and event admin LiveViews.
 - [ ] `20-06-PLAN.md` — Finish webhook detail/bulk replay ambiguity handling and lock host-mounted denial proof end to end.
@@ -152,7 +152,7 @@ Plans:
 | 17. Milestone Closure Cleanup | v1.2 | 1/1 | Complete | 2026-04-17 |
 | 18. Stripe Tax Core | v1.3 | 4/4 | Complete | 2026-04-17 |
 | 19. Tax Location and Rollout Safety | v1.3 | 5/5 | Complete | 2026-04-17 |
-| 20. Organization Billing With Sigra | v1.3 | 2/6 | In Progress | |
+| 20. Organization Billing With Sigra | v1.3 | 3/6 | In Progress | |
 | 21. Admin and Host UX Proof | v1.3 | 0/0 | Pending | |
 | 22. Finance Handoff and Milestone Verification | v1.3 | 0/0 | Pending | |
 
