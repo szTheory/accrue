@@ -57,7 +57,7 @@ Each task was committed atomically:
 
 1. **Task 1: Add the repository front door contracts and align the package landing pages** - `94460ca` (`docs`)
 
-**Plan metadata:** pending
+**Plan metadata:** complete
 
 ## Files Created/Modified
 
@@ -91,5 +91,5 @@ None - no external service configuration required.
 
 ## Self-Check: PASSED
 
-- Verified `.planning/phases/14-adoption-front-door/14-adoption-front-door-01-SUMMARY.md` exists.
+- Verified `.planning/phases/14-adoption-front-door/14-01-SUMMARY.md` exists.
 - Verified task commit `94460ca` exists in git history.
