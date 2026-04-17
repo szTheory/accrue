@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
 - ✅ **v1.1 Stabilization + Adoption** — Phases 10-12 plus 11.1 shipped on 2026-04-17. Proved Accrue in a realistic Phoenix host app, promoted that proof into CI, closed host-flow hermeticity gaps, and hardened first-user DX/docs. Full archive: [`milestones/v1.1-ROADMAP.md`](milestones/v1.1-ROADMAP.md).
-- 📋 **v1.2 Adoption + Trust** — Planned next. Make Accrue ready for new Phoenix teams to evaluate and trust through a canonical local demo, host-first onboarding docs, mature OSS adoption assets, a trust hardening bundle, and expansion discovery only.
+- 🚧 **v1.2 Adoption + Trust** — Active. Make Accrue ready for new Phoenix teams to evaluate and trust through a canonical local demo, host-first onboarding docs, mature OSS adoption assets, a trust hardening bundle, and expansion discovery only.
 
 ## Phases
 

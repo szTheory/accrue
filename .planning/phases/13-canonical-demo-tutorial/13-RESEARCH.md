@@ -308,12 +308,12 @@ npx playwright test
 | A1 | A small repo-readable manifest should live at `examples/accrue_host/demo/command_manifest.exs` and be consumed by tests rather than by shell directly. | Recommended Project Structure | Low; the exact file path/format is discretionary, but planners need one concrete default. |
 | A2 | A new docs test module under `accrue/test/accrue/docs/canonical_demo_*_test.exs` is the cleanest home for manifest parity assertions. | Recommended Project Structure | Low; any equivalent ExUnit location works if it stays package-owned and release-gated. |
 
-## Open Questions
+## Resolved Questions
 
 1. **Should Phase 13 repair the current dev-boot smoke failure or narrow the full gate until it is repaired?**
+   - Decision: Repair the failing dev-boot/full-gate path in Wave 0 before `mix verify.full` becomes the canonical local contract. Do not narrow the advertised full gate for Phase 13. [RESOLVED: revision iteration 1]
    - What we know: `bash scripts/ci/accrue_host_uat.sh` currently passes installer, focused tests, and full test suite, then fails during bounded `mix phx.server` with `ACCRUE-DX-MIGRATIONS-PENDING`. [VERIFIED: local run]
-   - What's unclear: Whether this is an intended failure mode exposed by newer config validation, or an incidental regression outside the demo/tutorial repackaging work. [VERIFIED: local run]
-   - Recommendation: Treat this as a Wave 0 planning decision and require either a boot-smoke fix or a documented/full-gate redesign before `mix verify.full` is declared canonical. [VERIFIED: local run]
+   - Why this resolution: D-12 and DEMO-04 require a CI-equivalent local command, and narrowing the gate would weaken the canonical proof path exactly where the phase is supposed to increase trust. The Wave 0 plan therefore fixes or reconciles the dev-boot smoke path first, then keeps the root wrapper delegating to the repaired host-local full contract. [VERIFIED: 13-CONTEXT.md] [VERIFIED: local run]
 
 ## Environment Availability
 

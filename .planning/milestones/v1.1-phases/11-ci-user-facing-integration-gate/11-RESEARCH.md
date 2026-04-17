@@ -333,17 +333,15 @@ module.exports = defineConfig({
 | A1 | A final post-job annotation sweep may still be needed after direct job failures are tightened. [ASSUMED] | Phase Requirements / Common Pitfalls | Medium: planner may overbuild the sweep if current failing surfaces are already sufficient. |
 | A2 | Expected non-blocking Browser UAT notices, if any remain, should be handled through a tiny explicit allowlist rather than removed entirely. [ASSUMED] | Common Pitfalls | Medium: policy may differ from project intent once the new gate is in place. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 11 fully replace `accrue_host_uat.yml`, or keep it as a fast-path duplicate after `ci.yml` absorbs the blocking gate?**
-   - What we know: The current separate workflow duplicates release-facing host work and cannot participate in an in-workflow `needs` chain. [VERIFIED: repo grep]
-   - What's unclear: Whether the project wants one canonical gate only or also a narrower path-filtered convenience workflow. [ASSUMED]
-   - Recommendation: Make `ci.yml` the only required gate first; keep any auxiliary workflow non-required and clearly labeled convenience/debug. [VERIFIED: repo grep]
+   - Resolution: The mandatory release-facing host gate is folded into `.github/workflows/ci.yml` as the canonical PR and `main` blocker. Any remaining `.github/workflows/accrue_host_uat.yml` role is manual-only or advisory, not a second required release gate. [VERIFIED: .planning/phases/11-ci-user-facing-integration-gate/11-03-PLAN.md]
+   - Why: Plan 11-03 makes `host-integration` depend on `release-gate` inside `ci.yml`, preserves `live-stripe` as advisory, and explicitly removes or demotes the duplicate host-only workflow so branch protection points at one canonical gate. [VERIFIED: .planning/phases/11-ci-user-facing-integration-gate/11-03-PLAN.md]
 
 2. **Where should host Playwright live?**
-   - What we know: The repo already has Playwright dependencies under `accrue_admin/`, while the host example has no `package.json` yet. [VERIFIED: repo grep]
-   - What's unclear: Whether the project prefers a package-local Playwright dependency under `examples/accrue_host/` or a shared root/tooling location. [ASSUMED]
-   - Recommendation: Prefer `examples/accrue_host/package.json` unless the planner finds a strong monorepo reason to centralize JS tooling, because the browser gate is specific to the host app. [VERIFIED: repo grep]
+   - Resolution: Host Playwright tooling is localized under `examples/accrue_host/` with its own `package.json`, `package-lock.json`, `playwright.config.js`, and `e2e/phase11-host-gate.spec.js`, borrowing patterns from `accrue_admin` rather than sharing its runner or `node_modules` path. [VERIFIED: .planning/phases/11-ci-user-facing-integration-gate/11-01-PLAN.md]
+   - Why: Plan 11-01 creates a host-local Playwright manifest and config, and Plan 11-02 updates `scripts/ci/accrue_host_uat.sh` to run `cd examples/accrue_host && npm ci && npm run e2e` without depending on `accrue_admin/node_modules` or a shared browser harness. [VERIFIED: .planning/phases/11-ci-user-facing-integration-gate/11-01-PLAN.md][VERIFIED: .planning/phases/11-ci-user-facing-integration-gate/11-02-PLAN.md]
 
 ## Environment Availability
 
