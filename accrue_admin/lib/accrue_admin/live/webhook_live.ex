@@ -13,36 +13,80 @@ defmodule AccrueAdmin.Live.WebhookLive do
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FlashGroup, JsonViewer, KpiCard, Timeline}
   alias AccrueAdmin.Queries.Webhooks
 
+  @owner_access_denied "You don't have access to billing for this organization."
+  @ambiguous_replay_blocked "Ownership couldn't be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
+  @replay_success "Replay requested for the active organization."
+  @replay_blocked "Replay is blocked because this webhook isn't linked to a billable row in the active organization."
+
   @impl true
   def mount(%{"id" => webhook_id}, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
 
-    case Webhooks.detail(webhook_id) do
-      nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/webhooks"))}
+    case Webhooks.detail(webhook_id, socket.assigns.current_owner_scope) do
+      :not_found ->
+        {:ok,
+         socket
+         |> put_flash(:error, @owner_access_denied)
+         |> redirect(to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/webhooks"))}
 
-      webhook ->
+      {:ok, webhook} ->
         {:ok,
          socket
          |> assign_shell(admin)
          |> assign_webhook(webhook)
-         |> assign(:flashes, [])}
+         |> assign(:flashes, [])
+         |> assign(:pending_replay, false)
+         |> assign(:replay_state, :allowed)}
+
+      {:ambiguous, proof_context} ->
+        {:ok,
+         socket
+         |> assign_shell(admin)
+         |> assign(:webhook, nil)
+         |> assign(:attempt_history, [])
+         |> assign(:derived_events, [])
+         |> assign(:flashes, [])
+         |> assign(:pending_replay, false)
+         |> assign(:replay_state, {:ambiguous, proof_context})}
     end
   end
 
   @impl true
-  def handle_event("replay", _params, socket) do
-    webhook = socket.assigns.webhook
+  def handle_event("prepare_replay", _params, %{assigns: %{replay_state: :allowed}} = socket) do
+    {:noreply, assign(socket, :pending_replay, true)}
+  end
 
-    case DLQ.requeue(webhook.id) do
-      {:ok, replayed} ->
-        socket =
-          socket
-          |> record_single_replay(replayed)
-          |> assign_webhook(Repo.get(WebhookEvent, replayed.id))
-          |> push_flash(:info, "Webhook replay requested.")
+  def handle_event("prepare_replay", _params, socket) do
+    {:noreply, push_flash(socket, :warning, @replay_blocked)}
+  end
 
-        {:noreply, socket}
+  def handle_event("cancel_replay", _params, socket) do
+    {:noreply, assign(socket, :pending_replay, false)}
+  end
+
+  def handle_event("confirm_replay", _params, %{assigns: %{webhook: webhook}} = socket) do
+    with {:ok, ^webhook} <- Webhooks.detail(webhook.id, socket.assigns.current_owner_scope),
+         {:ok, replayed} <- DLQ.requeue(webhook.id) do
+      socket =
+        socket
+        |> record_single_replay(replayed)
+        |> assign_webhook(Repo.get(WebhookEvent, replayed.id))
+        |> assign(:pending_replay, false)
+        |> push_flash(:info, @replay_success)
+
+      {:noreply, socket}
+    else
+      :not_found ->
+        {:noreply,
+         socket
+         |> assign(:pending_replay, false)
+         |> push_flash(:warning, @replay_blocked)}
+
+      {:ambiguous, _proof_context} ->
+        {:noreply,
+         socket
+         |> assign(:pending_replay, false)
+         |> push_flash(:warning, @replay_blocked)}
 
       {:error, reason} ->
         {:noreply, push_flash(socket, :error, inspect(reason))}
@@ -65,12 +109,12 @@ defmodule AccrueAdmin.Live.WebhookLive do
             items={[
               %{label: "Dashboard", href: @admin_mount_path},
               %{label: "Webhooks", href: @admin_mount_path <> "/webhooks"},
-              %{label: @webhook.processor_event_id || @webhook.id}
+              %{label: breadcrumb_label(assigns)}
             ]}
           />
           <p class="ax-eyebrow">Webhook inspector</p>
-          <h2 class="ax-display"><%= @webhook.type %></h2>
-          <p class="ax-body ax-page-copy">
+          <h2 class="ax-display"><%= webhook_heading(assigns) %></h2>
+          <p :if={@webhook} class="ax-body ax-page-copy">
             <%= @webhook.processor_event_id %> · <%= humanize(@webhook.status) %> · received
             <%= format_datetime(@webhook.received_at) %>
           </p>
@@ -78,7 +122,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-kpi-grid" aria-label="Webhook summary">
+        <section :if={@webhook} class="ax-kpi-grid" aria-label="Webhook summary">
           <KpiCard.kpi_card label="Verification" value={verification_summary(@webhook)}>
             <:meta>Signature verification passed before the row was persisted</:meta>
           </KpiCard.kpi_card>
@@ -100,25 +144,48 @@ defmodule AccrueAdmin.Live.WebhookLive do
         <section class="ax-card">
           <header class="ax-page-header">
             <p class="ax-eyebrow">Replay</p>
-            <h3 class="ax-heading">Requeue this webhook row</h3>
-            <p class="ax-body">
-              Single replay calls the existing DLQ primitive directly and records an admin audit
-              event for the operator action.
-            </p>
+            <h3 class="ax-heading"><%= replay_heading(assigns) %></h3>
+            <p class="ax-body"><%= replay_copy(assigns) %></p>
           </header>
 
           <button
+            :if={@webhook}
             type="button"
-            phx-click="replay"
+            phx-click="prepare_replay"
             class="ax-button ax-button-secondary"
             data-role="replay-single"
             disabled={@webhook.status not in [:failed, :dead]}
           >
             Replay webhook
           </button>
+
+          <p :if={match?({:ambiguous, _}, @replay_state)} class="ax-body" data-role="replay-blocked-copy">
+            <%= ambiguous_replay_blocked() %>
+          </p>
+
+          <section :if={@pending_replay} class="ax-page" data-role="replay-confirm">
+            <p class="ax-label"><%= single_replay_confirmation() %></p>
+            <div class="ax-page-header">
+              <button
+                type="button"
+                phx-click="confirm_replay"
+                class="ax-button ax-button-primary"
+                data-role="confirm-replay"
+              >
+                Confirm replay
+              </button>
+              <button
+                type="button"
+                phx-click="cancel_replay"
+                class="ax-button ax-button-ghost"
+              >
+                Cancel
+              </button>
+            </div>
+          </section>
         </section>
 
-        <section class="ax-grid ax-grid-2">
+        <section :if={@webhook} class="ax-grid ax-grid-2">
           <article class="ax-card">
             <header class="ax-page-header">
               <p class="ax-eyebrow">Attempt history</p>
@@ -146,7 +213,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
           </article>
         </section>
 
-        <section class="ax-card">
+        <section :if={@webhook} class="ax-card">
           <header class="ax-page-header">
             <p class="ax-eyebrow">Forensic payload</p>
             <h3 class="ax-heading">Stored raw payload and metadata</h3>
@@ -167,7 +234,12 @@ defmodule AccrueAdmin.Live.WebhookLive do
           </div>
         </section>
 
-        <JsonViewer.json_viewer id="webhook-payload" label="Webhook payload" payload={payload_for(@webhook)} />
+        <JsonViewer.json_viewer
+          :if={@webhook}
+          id="webhook-payload"
+          label="Webhook payload"
+          payload={payload_for(@webhook)}
+        />
       </section>
     </AppShell.app_shell>
     """
@@ -191,7 +263,26 @@ defmodule AccrueAdmin.Live.WebhookLive do
     |> assign(:webhook, webhook)
     |> assign(:attempt_history, attempt_history(webhook.id))
     |> assign(:derived_events, derived_events(webhook.id))
+    |> assign(:replay_state, :allowed)
   end
+
+  defp webhook_heading(%{webhook: nil}), do: "Webhook replay is unavailable"
+  defp webhook_heading(%{webhook: webhook}), do: webhook.type
+
+  defp breadcrumb_label(%{webhook: nil}), do: "Replay unavailable"
+  defp breadcrumb_label(%{webhook: webhook}), do: webhook.processor_event_id || webhook.id
+
+  defp replay_heading(%{webhook: nil}), do: "Replay is unavailable"
+  defp replay_heading(%{webhook: _webhook}), do: "Requeue this webhook row"
+
+  defp replay_copy(%{webhook: nil}), do: @ambiguous_replay_blocked
+
+  defp replay_copy(%{webhook: _webhook}) do
+    "Single replay calls the existing DLQ primitive directly and records an admin audit event for the operator action."
+  end
+
+  defp ambiguous_replay_blocked, do: @ambiguous_replay_blocked
+  defp single_replay_confirmation, do: "Replay webhook for the active organization?"
 
   defp attempt_history(webhook_id) do
     from(job in Oban.Job,
@@ -340,6 +431,14 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp format_datetime(_value), do: "Unknown"
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  defp scoped_admin_path(admin, %_{organization_slug: nil}, suffix), do: admin_path(admin, suffix)
+
+  defp scoped_admin_path(admin, %{organization_slug: slug}, suffix) when is_binary(slug) do
+    admin_path(admin, suffix) <> "?org=" <> slug
+  end
+
+  defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

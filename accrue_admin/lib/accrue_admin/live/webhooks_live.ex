@@ -12,6 +12,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
   alias AccrueAdmin.Queries.Webhooks
 
+  @bulk_replay_success "Replay requested for the active organization."
+
   @impl true
   def mount(_params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
@@ -37,7 +39,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   @impl true
   def handle_event("prepare_bulk_replay", _params, socket) do
     filter = dlq_filter(socket.assigns.params)
-    count = DLQ.count(filter)
+    count = Webhooks.bulk_replay_count(socket.assigns.current_owner_scope, Map.new(filter))
 
     if count == 0 do
       {:noreply,
@@ -58,23 +60,53 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   def handle_event("confirm_bulk_replay", _params, socket) do
     %{count: count, filter: filter} = socket.assigns.pending_bulk_replay
 
-    case DLQ.requeue_where(filter) do
-      {:ok, result} ->
-        socket =
-          socket
-          |> record_bulk_replay(filter, count, result)
-          |> assign(:pending_bulk_replay, nil)
-          |> assign(:summary, webhook_summary())
-          |> push_flash(
-            :info,
-            "Bulk replay requested for #{result.requeued} webhook rows."
-          )
+    case replay_scope(socket.assigns.current_owner_scope, filter) do
+      [] ->
+        {:noreply,
+         socket
+         |> assign(:pending_bulk_replay, nil)
+         |> push_flash(:warning, "Replay is blocked because this webhook isn't linked to a billable row in the active organization.")}
 
-        {:noreply, socket}
+      ids ->
+        case replay_scoped_rows(ids) do
+          {:ok, result} ->
+            socket =
+              socket
+              |> record_bulk_replay(filter, count, result)
+              |> assign(:pending_bulk_replay, nil)
+              |> assign(:summary, webhook_summary())
+              |> push_flash(:info, @bulk_replay_success)
 
-      {:error, reason} ->
-        {:noreply, push_flash(socket, :error, inspect(reason))}
+            {:noreply, socket}
+
+          {:error, reason} ->
+            {:noreply, push_flash(socket, :error, inspect(reason))}
+        end
     end
+  end
+
+  defp replay_scoped_rows(ids) do
+    Enum.reduce_while(ids, {:ok, %{requeued: 0}}, fn id, {:ok, acc} ->
+      case DLQ.requeue(id) do
+        {:ok, _row} -> {:cont, {:ok, %{requeued: acc.requeued + 1}}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+
+  defp replay_scope(nil, filter) do
+    filter
+    |> DLQ.list()
+    |> Enum.map(& &1.id)
+  end
+
+  defp replay_scope(owner_scope, filter) do
+    filter
+    |> DLQ.list()
+    |> Enum.map(& &1.id)
+    |> Enum.filter(fn id ->
+      match?({:ok, _}, Webhooks.detail(id, owner_scope))
+    end)
   end
 
   @impl true
@@ -151,8 +183,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           <section :if={@pending_bulk_replay} class="ax-card" data-role="bulk-replay-confirm">
             <p class="ax-label">Confirm bulk replay</p>
             <p class="ax-body">
-              Replay <%= @pending_bulk_replay.count %> failed or dead webhook rows with the current
-              filters?
+              <%= bulk_replay_confirmation(@pending_bulk_replay.count) %>
             </p>
             <div class="ax-page-header">
               <button
@@ -300,6 +331,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp normalize_filter_value(value) when is_atom(value), do: Atom.to_string(value)
   defp normalize_filter_value(value), do: value
+
+  defp bulk_replay_confirmation(count) do
+    "Replay #{count} failed or dead webhook rows for the active organization?"
+  end
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])

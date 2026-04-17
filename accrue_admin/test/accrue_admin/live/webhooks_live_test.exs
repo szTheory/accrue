@@ -1,7 +1,10 @@
 defmodule AccrueAdmin.WebhooksLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
+  import Ecto.Query
+
   alias Accrue.Billing.{Customer, Invoice}
+  alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Webhooks
@@ -51,7 +54,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
     :ok
   end
 
-  test "filters webhook rows and renders bulk replay confirmation", %{conn: conn} do
+  test "filters webhook rows and renders organization-scoped bulk replay confirmation", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     {:ok, view, html} =
@@ -63,7 +66,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     html = render_click(element(view, "[data-role='prepare-bulk-replay']"))
     assert html =~ "Confirm bulk replay"
-    assert html =~ "1 failed or dead webhook rows"
+    assert html =~ "Replay 1 failed or dead webhook rows for the active organization?"
   end
 
   test "scoped bulk replay counts ignore rows outside the active organization" do
@@ -103,6 +106,48 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     assert Webhooks.bulk_replay_count(owner_scope, %{status: :dead, type: "invoice.payment_failed"}) ==
              1
+  end
+
+  test "blocked bulk replay does not emit replay-success audit events", %{conn: conn} do
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+    denied_invoice = insert_invoice(denied_customer, %{processor_id: "out_scope_bulk_blocked"})
+
+    denied_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_out_scope_only",
+        status: :dead,
+        type: "invoice.payment_failed",
+        data: %{"object" => %{"id" => denied_invoice.processor_id}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_out_scope_only",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => denied_invoice.processor_id}}
+          })
+      })
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    {:ok, view, _html} =
+      live(conn, "/billing/webhooks?status=dead&type=invoice.payment_failed&org=allowed-org")
+
+    html = render_click(element(view, "[data-role='prepare-bulk-replay']"))
+    assert html =~ "No failed or dead-lettered webhook rows match the current filters."
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where:
+                 event.type == "admin.webhook.replay.completed" and
+                   event.subject_id == ^denied_webhook.id
+             )
+           )
   end
 
   defp insert_webhook(attrs) do

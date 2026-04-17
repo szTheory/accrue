@@ -1,8 +1,11 @@
 defmodule AccrueAdmin.WebhookLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
+  import Ecto.Query
+
   alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events
+  alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Webhooks
@@ -33,6 +36,9 @@ defmodule AccrueAdmin.WebhookLiveTest do
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
+    customer = insert_customer(%{processor_id: "cus_123"})
+    invoice = insert_invoice(customer, %{processor_id: "in_123"})
+
     webhook =
       insert_webhook(%{
         processor_event_id: "evt_detail",
@@ -52,7 +58,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
       Events.record(%{
         type: "invoice.payment_failed",
         subject_type: "Invoice",
-        subject_id: "in_123",
+        subject_id: invoice.id,
         actor_type: "webhook",
         actor_id: webhook.processor_event_id,
         caused_by_webhook_event_id: webhook.id
@@ -76,6 +82,51 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "invoice.payment_failed"
     assert html =~ "cus_123"
     assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
+  end
+
+  test "in-scope replay uses the exact confirmation and success copy", %{conn: conn} do
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    invoice = insert_invoice(customer, %{processor_id: "in_scope_detail"})
+
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_scope_confirm",
+        status: :dead,
+        data: %{"object" => %{"id" => invoice.processor_id}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_scope_confirm",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => invoice.processor_id}}
+          })
+      })
+
+    {:ok, _event} =
+      Events.record(%{
+        type: "invoice.payment_failed",
+        subject_type: "Invoice",
+        subject_id: invoice.id,
+        actor_type: "webhook",
+        actor_id: webhook.processor_event_id,
+        caused_by_webhook_event_id: webhook.id
+      })
+
+    {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}?org=allowed-org")
+
+    html = render_click(element(view, "[data-role='replay-single']"))
+    assert html =~ "Replay webhook for the active organization?"
+
+    html = render_click(element(view, "[data-role='confirm-replay']"))
+    assert html =~ "Replay requested for the active organization."
   end
 
   test "webhook loader distinguishes in-scope, out-of-scope, and ambiguous ownership" do
@@ -129,6 +180,102 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     assert {:ambiguous, proof_context} = Webhooks.detail(ambiguous_webhook.id, owner_scope)
     assert proof_context.webhook_id == ambiguous_webhook.id
+  end
+
+  test "out-of-scope webhook route redirects with denial flash before rendering detail", %{conn: conn} do
+    allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
+    denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
+
+    allowed_invoice = insert_invoice(allowed_customer, %{processor_id: "in_scope_redirect"})
+    denied_invoice = insert_invoice(denied_customer, %{processor_id: "out_scope_redirect"})
+
+    allowed_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_scope_redirect",
+        data: %{"object" => %{"id" => allowed_invoice.processor_id}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_scope_redirect",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => allowed_invoice.processor_id}}
+          })
+      })
+
+    denied_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_denied_redirect",
+        data: %{"object" => %{"id" => denied_invoice.processor_id}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_denied_redirect",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => denied_invoice.processor_id}}
+          })
+      })
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, allowed_html} =
+             live(conn, "/billing/webhooks/#{allowed_webhook.id}?org=allowed-org")
+
+    assert allowed_html =~ allowed_webhook.processor_event_id
+
+    assert {:error, {:redirect, %{to: "/billing/webhooks?org=allowed-org", flash: flash_token}}} =
+             redirect =
+             live(conn, "/billing/webhooks/#{denied_webhook.id}?org=allowed-org")
+
+    assert %{"error" => "You don't have access to billing for this organization."} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
+    assert redirect
+  end
+
+  test "ambiguous ownership renders blocked copy and no replay action", %{conn: conn} do
+    ambiguous_webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_ambiguous_route",
+        status: :dead,
+        data: %{"object" => %{"id" => "in_unknown"}},
+        raw_body:
+          Jason.encode!(%{
+            "id" => "evt_ambiguous_route",
+            "type" => "invoice.payment_failed",
+            "data" => %{"object" => %{"id" => "in_unknown"}}
+          })
+      })
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: "org_allowed",
+        active_organization_slug: "allowed-org",
+        admin_organization_ids: ["org_allowed"]
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{ambiguous_webhook.id}?org=allowed-org")
+
+    assert html =~
+             "Ownership couldn&#39;t be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
+
+    refute html =~ "evt_ambiguous_route"
+    refute html =~ "Replay webhook for the active organization?"
+    refute html =~ "data-role=\"replay-single\""
+
+    refute TestRepo.exists?(
+             from(event in Event,
+               where:
+                 event.type == "admin.webhook.replay.completed" and
+                   event.subject_id == ^ambiguous_webhook.id
+             )
+           )
   end
 
   defp insert_webhook(attrs) do
