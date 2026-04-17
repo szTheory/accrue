@@ -62,7 +62,7 @@ v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
 - [x] New users can follow a host-first tutorial and docs front door that explains the correct integration order, supported public APIs, production hardening, and Fake/test/live Stripe choices. Validated in Phase 14: Adoption Front Door.
 - [x] Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice. Validated in Phase 14: Adoption Front Door.
 - [x] Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release. Validated in Phase 15: Trust Hardening.
-- [ ] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API.
+- [x] Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API. Validated in Phase 16: Expansion Discovery.
 
 ### Validated v1.0 Scope Summary
 
@@ -234,7 +234,16 @@ v1.2 active requirements are defined in `.planning/REQUIREMENTS.md`.
 | Move host UI reads through generated `MyApp.Billing` facade | First-user docs should teach host-owned public boundaries, not private Accrue table queries | ✓ Good |
 | Treat adoption, quality, and expansion as next-milestone candidates after stabilization | The v1.1 audit validated HOST/CI/DX scope; remaining ADOPT/QUAL/DISC ideas need fresh prioritization instead of automatic carryover | ✓ Good |
 | v1.2 focuses on Adoption + Trust before large feature expansion | The biggest remaining gap is confidence for new users evaluating a billing library, not another core billing primitive; polish should stop once it hits diminishing returns and expansion should be decided deliberately | — Pending |
-| Keep v1.2 expansion to discovery only | Tax, revenue exports, processors, and org billing are likely next-level features, but partial implementation would distract from onboarding and trust hardening | — Pending |
+| Keep v1.2 expansion to discovery only | Tax, revenue exports, processors, and org billing are likely next-level features, but partial implementation would distract from onboarding and trust hardening | ✓ Good |
+| Record the Phase 16 ranking as recommendation-only planning guidance | `Stripe Tax support` is the recommended `Next milestone`; `Organization / multi-tenant billing` and `Revenue recognition / exports` remain `Backlog`; `Official second processor adapter` remains a `Planted seed`, and no v1.2 billing API, schema, or processor-abstraction implementation is implied | ✓ Good |
+
+## Current Milestone Notes
+
+- Phase 16 recorded a recommendation, not a feature delivery: `Stripe Tax support` is the recommended next implementation milestone because it deepens the current Stripe-first path without promising any v1.2 schema, API, or processor changes.
+- `Organization / multi-tenant billing` remains a recommendation-only backlog candidate until host-owned org semantics, row-scoped tenancy checks, and `cross-tenant billing leakage` protections are explicit.
+- `Revenue recognition / exports` remains a recommendation-only backlog candidate until host-authorized export audiences, storage, and delivery rules are explicit, preserving the `wrong-audience finance exports` boundary.
+- `Official second processor adapter` remains a recommendation-only planted seed because Accrue is still Stripe-first and host-owned, and future work must avoid a `processor-boundary downgrade`.
+- Any future tax milestone must preserve `tax rollout correctness` by requiring `customer location` capture plus `legacy recurring-item migration` planning before maintainers schedule implementation.
 
 ## Evolution
 

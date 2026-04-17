@@ -48,10 +48,10 @@ Deferred until after v1.2 unless a blocker emerges during planning:
 
 ### Product Expansion
 
-- **TAX-01**: First-party tax calculation or Stripe Tax orchestration.
-- **REV-01**: Revenue recognition exports or accounting-system handoff.
-- **PROC-08**: First-party non-Stripe processor adapter.
-- **ORG-01**: Organization-first billing flows once Sigra organization support is ready.
+- **TAX-01**: Recommendation-only next milestone candidate for `Stripe Tax support`, preserving `tax rollout correctness` with explicit `customer location` capture and `legacy recurring-item migration` prerequisites before any future implementation plan.
+- **REV-01**: Recommendation-only backlog candidate for `Revenue recognition / exports`, pending host-authorized export audiences, delivery rules, and downstream finance consumer decisions.
+- **PROC-08**: Recommendation-only planted seed for an `Official second processor adapter`, preserved behind the current Stripe-first custom-processor boundary with no v1.2 implementation promise.
+- **ORG-01**: Recommendation-only backlog candidate for `Organization / multi-tenant billing` once Sigra organization support or an equivalent host-owned org model is ready with row-scoped tenancy prerequisites.
 - **HOST-09**: Hosted public demo environment, if local example adoption proves useful.
 
 ## Out of Scope

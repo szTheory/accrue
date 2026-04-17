@@ -109,17 +109,19 @@ Plans:
 
 **Requirements:** DISC-01, DISC-02, DISC-03, DISC-04, DISC-05
 
-**Plans:** 1/2 plans executed
+**Plans:** 2 plans
 
 Plans:
-- [x] 16-01-PLAN.md - Create the canonical expansion recommendation artifact and its docs contract.
-- [ ] 16-02-PLAN.md - Verify the recommendation artifact and persist the ranking outcome in planning records.
+- [x] 16-01-PLAN.md — Create the canonical expansion recommendation artifact and its docs contract.
+- [ ] 16-02-PLAN.md — Verify the recommendation artifact and persist the ranking outcome in planning records.
 
 **Success criteria:**
 1. Tax, revenue/export, additional processor, and org/multi-tenant options each have a decision-quality recommendation.
 2. Recommendations identify likely user value, architecture impact, risk, and prerequisites.
 3. Expansion candidates are ranked into next milestone, backlog, or planted seed.
 4. No core billing API, schema, or processor abstraction changes are made unless needed to document a future migration path.
+
+**Recommendation outcome:** The checked-in Phase 16 recommendation ranks `Stripe Tax support` as the recommendation for the `Next milestone`, keeps `Organization / multi-tenant billing` and `Revenue recognition / exports` in `Backlog`, and preserves `Official second processor adapter` as a `Planted seed`. These entries are planning outputs and ranked recommendation guidance only; no implementation, schema, API, or processor-abstraction change is implied for v1.2.
 
 ## Progress
 
