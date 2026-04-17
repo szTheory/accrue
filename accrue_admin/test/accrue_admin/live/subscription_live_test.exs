@@ -45,6 +45,11 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     %{subscription: subscription} =
       Factory.active_subscription(%{owner_id: "subscription-detail"})
 
+    subscription =
+      subscription
+      |> Subscription.changeset(%{automatic_tax_disabled_reason: "requires_location_inputs"})
+      |> TestRepo.update!()
+
     {:ok, source_event} =
       Events.record(%{
         type: "invoice.payment_failed",
@@ -69,6 +74,11 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Canonical predicates"
     assert html =~ "active"
     assert html =~ "invoice.payment_failed"
+    assert html =~ "Automatic tax is currently disabled"
+    assert html =~ "Local reason: Requires Location Inputs."
+
+    assert html =~
+             "Update the customer tax location in the host app, then retry recurring tax on this subscription."
   end
 
   test "cancel now requires step-up and records admin audit linkage", %{

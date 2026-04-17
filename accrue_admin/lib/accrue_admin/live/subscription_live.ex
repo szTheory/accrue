@@ -136,6 +136,19 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <section class="ax-grid ax-grid-2">
           <article class="ax-card">
+            <section
+              :if={present?(@subscription.automatic_tax_disabled_reason)}
+              class="ax-card"
+              data-role="tax-risk-panel"
+            >
+              <p class="ax-eyebrow">Tax risk</p>
+              <h3 class="ax-heading">Automatic tax is currently disabled</h3>
+              <p class="ax-body">
+                Local reason: <%= humanize(@subscription.automatic_tax_disabled_reason) %>.
+                Update the customer tax location in the host app, then retry recurring tax on this subscription.
+              </p>
+            </section>
+
             <header class="ax-page-header">
               <p class="ax-eyebrow">Admin actions</p>
               <h3 class="ax-heading">Confirmed billing changes</h3>
@@ -497,6 +510,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
   end
 
+  defp present?(value) when value in [nil, ""], do: false
+  defp present?(_value), do: true
+
   defp confirm_copy(action) do
     source =
       if action.source_event_id do
@@ -512,6 +528,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     %{
       "processor_id" => subscription.processor_id,
       "status" => subscription.status,
+      "automatic_tax_disabled_reason" => subscription.automatic_tax_disabled_reason,
       "cancel_at_period_end" => subscription.cancel_at_period_end,
       "pause_collection" => subscription.pause_collection,
       "current_period_start" => subscription.current_period_start,

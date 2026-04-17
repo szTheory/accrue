@@ -153,6 +153,24 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
         <section class="ax-grid ax-grid-2">
           <article class="ax-card">
+            <section
+              :if={tax_failure_visible?(@invoice)}
+              class="ax-card"
+              data-role="tax-risk-panel"
+            >
+              <p class="ax-eyebrow">Tax risk</p>
+              <h3 class="ax-heading">Invoice finalization needs tax-location recovery</h3>
+              <p :if={present?(@invoice.automatic_tax_disabled_reason)} class="ax-body">
+                Automatic tax disabled reason: <%= humanize(@invoice.automatic_tax_disabled_reason) %>.
+              </p>
+              <p :if={present?(@invoice.last_finalization_error_code)} class="ax-body">
+                Finalization failure code: <%= @invoice.last_finalization_error_code %>.
+              </p>
+              <p class="ax-body">
+                This view reflects local invoice state only. Repair the customer tax location, then retry finalization from Accrue.
+              </p>
+            </section>
+
             <header class="ax-page-header">
               <p class="ax-eyebrow">Admin actions</p>
               <h3 class="ax-heading">Invoice workflow controls</h3>
@@ -485,6 +503,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         "processor_id" => invoice.processor_id,
         "status" => invoice.status,
         "number" => invoice.number,
+        "automatic_tax_disabled_reason" => invoice.automatic_tax_disabled_reason,
+        "last_finalization_error_code" => invoice.last_finalization_error_code,
         "collection_method" => invoice.collection_method,
         "hosted_url" => invoice.hosted_url,
         "pdf_url" => invoice.pdf_url,
@@ -509,6 +529,14 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
   end
+
+  defp tax_failure_visible?(invoice) do
+    present?(invoice.automatic_tax_disabled_reason) or
+      present?(invoice.last_finalization_error_code)
+  end
+
+  defp present?(value) when value in [nil, ""], do: false
+  defp present?(_value), do: true
 
   defp confirm_copy(action) do
     source =

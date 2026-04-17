@@ -71,6 +71,8 @@ defmodule AccrueAdmin.InvoiceLiveTest do
         amount_paid_minor: 0,
         amount_remaining_minor: 9_900,
         total_minor: 9_900,
+        automatic_tax_disabled_reason: "finalization_requires_location_inputs",
+        last_finalization_error_code: "customer_tax_location_invalid",
         hosted_url: "https://example.test/hosted-invoice",
         pdf_url: "https://example.test/invoice.pdf"
       })
@@ -104,6 +106,9 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     assert html =~ "Base plan"
     assert html =~ "Open PDF"
+    assert html =~ "Automatic tax disabled reason: Finalization Requires Location Inputs."
+    assert html =~ "Finalization failure code: customer_tax_location_invalid."
+    assert html =~ "Repair the customer tax location, then retry finalization from Accrue."
 
     html = render_click(element(view, "button", "Open PDF"))
     assert html =~ "Open rendered PDF"

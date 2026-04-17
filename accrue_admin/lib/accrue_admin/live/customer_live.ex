@@ -98,6 +98,15 @@ defmodule AccrueAdmin.Live.CustomerLive do
           >
             <:meta>Charges and invoices tied to this customer</:meta>
           </KpiCard.kpi_card>
+
+          <KpiCard.kpi_card
+            label="Tax risk"
+            value={tax_risk_summary(@customer).headline}
+            delta={tax_risk_summary(@customer).detail}
+            delta_tone={tax_risk_summary(@customer).tone}
+          >
+            <:meta>Derived from projected subscriptions and invoices only</:meta>
+          </KpiCard.kpi_card>
         </section>
 
         <Tabs.tabs tabs={tabs(@customer, @admin_mount_path, @tab_counts)} active={@tab} />
@@ -237,6 +246,59 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> order_by([payment_method], desc: payment_method.inserted_at, desc: payment_method.id)
     |> Repo.all()
   end
+
+  defp tax_risk_summary(customer) do
+    subscriptions =
+      Subscription
+      |> where([sub], sub.customer_id == ^customer.id)
+      |> Repo.all()
+
+    invoices =
+      Invoice
+      |> where([invoice], invoice.customer_id == ^customer.id)
+      |> Repo.all()
+
+    subscription_risks =
+      Enum.filter(subscriptions, &present?(&1.automatic_tax_disabled_reason))
+
+    invoice_risks =
+      Enum.filter(
+        invoices,
+        &(present?(&1.automatic_tax_disabled_reason) or present?(&1.last_finalization_error_code))
+      )
+
+    cond do
+      subscription_risks == [] and invoice_risks == [] ->
+        %{
+          headline: "No local tax risk",
+          detail: "No disabled recurring tax or finalization failures",
+          tone: "moss"
+        }
+
+      true ->
+        %{
+          headline: "Tax risk detected",
+          detail: tax_risk_detail(subscription_risks, invoice_risks),
+          tone: "amber"
+        }
+    end
+  end
+
+  defp tax_risk_detail(subscription_risks, invoice_risks) do
+    [
+      count_label(length(subscription_risks), "subscription"),
+      count_label(length(invoice_risks), "invoice")
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" · ")
+  end
+
+  defp count_label(0, _label), do: nil
+  defp count_label(1, label), do: "1 #{label} needs attention"
+  defp count_label(count, label), do: "#{count} #{label}s need attention"
+
+  defp present?(value) when value in [nil, ""], do: false
+  defp present?(_value), do: true
 
   defp timeline_items(customer) do
     customer

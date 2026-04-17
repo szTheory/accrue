@@ -41,7 +41,13 @@ defmodule AccrueAdmin.CustomerLiveTest do
     {:ok, _stripe_subscription} =
       Fake.transition(subscription.processor_id, :active, synthesize_webhooks: false)
 
-    subscription = TestRepo.get!(Accrue.Billing.Subscription, subscription.id)
+    subscription =
+      subscription.id
+      |> then(&TestRepo.get!(Accrue.Billing.Subscription, &1))
+      |> Accrue.Billing.Subscription.changeset(%{
+        automatic_tax_disabled_reason: "requires_location_inputs"
+      })
+      |> TestRepo.update!()
 
     payment_method =
       TestRepo.insert!(
@@ -77,7 +83,9 @@ defmodule AccrueAdmin.CustomerLiveTest do
         status: :open,
         currency: "usd",
         amount_remaining_minor: 7_500,
-        number: "INV-001"
+        number: "INV-001",
+        automatic_tax_disabled_reason: "finalization_requires_location_inputs",
+        last_finalization_error_code: "customer_tax_location_invalid"
       })
     )
 
@@ -116,6 +124,10 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ "Detail Customer"
     assert html =~ "Subscriptions"
     assert html =~ "locale en"
+    assert html =~ "Tax risk"
+    assert html =~ "Tax risk detected"
+    assert html =~ "1 subscription needs attention"
+    assert html =~ "1 invoice needs attention"
 
     assert {:ok, _view, events_html} = live(conn, "/billing/customers/#{customer.id}?tab=events")
     assert events_html =~ "customer.updated"
