@@ -1505,6 +1505,8 @@ defmodule Accrue.Processor.Fake do
       atom_params = atomize(params)
       ui_mode = atom_params[:ui_mode] || "hosted"
       mode = atom_params[:mode] || "subscription"
+      automatic_tax = automatic_tax_payload(params)
+      amount_tax = checkout_amount_tax(atom_params)
 
       url =
         if ui_mode == "embedded",
@@ -1527,6 +1529,8 @@ defmodule Accrue.Processor.Fake do
         |> Map.put(:status, "open")
         |> Map.put(:payment_status, "unpaid")
         |> Map.put(:created, DateTime.to_unix(state.clock))
+        |> Map.put(:automatic_tax, automatic_tax)
+        |> Map.put(:total_details, %{amount_tax: amount_tax})
         |> Map.put_new(:customer, nil)
         |> Map.put_new(:subscription, nil)
         |> Map.put_new(:payment_intent, nil)
@@ -1994,6 +1998,7 @@ defmodule Accrue.Processor.Fake do
     status = if trial_end_raw, do: :trialing, else: :active
     customer = params[:customer] || params["customer"]
     raw_items = params[:items] || params["items"] || []
+    automatic_tax = automatic_tax_payload(params)
 
     items =
       raw_items
@@ -2029,6 +2034,7 @@ defmodule Accrue.Processor.Fake do
       current_period_end: DateTime.to_unix(DateTime.add(state.clock, 30 * 86_400, :second)),
       items: %{object: "list", data: items},
       latest_invoice: nil,
+      automatic_tax: automatic_tax,
       metadata: params[:metadata] || params["metadata"] || %{}
     }
   end
@@ -2053,18 +2059,24 @@ defmodule Accrue.Processor.Fake do
   end
 
   defp build_invoice(state, id, params) do
+    amount_due = params[:amount_due] || params["amount_due"] || 0
+    amount_tax = invoice_amount_tax(params, amount_due)
+
     %{
       id: id,
       object: "invoice",
       customer: params[:customer] || params["customer"],
       subscription: params[:subscription] || params["subscription"],
       status: :draft,
-      amount_due: params[:amount_due] || params["amount_due"] || 0,
+      amount_due: amount_due,
       amount_paid: 0,
-      amount_remaining: params[:amount_due] || params["amount_due"] || 0,
+      amount_remaining: amount_due,
       currency: params[:currency] || params["currency"] || "usd",
       created: state.clock,
-      lines: %{object: "list", data: []}
+      lines: %{object: "list", data: []},
+      automatic_tax: automatic_tax_payload(params),
+      tax: invoice_tax_field(params, amount_tax),
+      total_details: %{amount_tax: amount_tax}
     }
   end
 
@@ -2093,6 +2105,43 @@ defmodule Accrue.Processor.Fake do
 
   defp apply_invoice_action(inv, :mark_uncollectible, _clock) do
     Map.put(inv, :status, :uncollectible)
+  end
+
+  defp automatic_tax_payload(params) do
+    enabled? = automatic_tax_enabled?(params)
+    %{enabled: enabled?, status: if(enabled?, do: "complete", else: nil)}
+  end
+
+  defp automatic_tax_enabled?(params) do
+    case params[:automatic_tax] || params["automatic_tax"] do
+      %{enabled: enabled?} -> enabled?
+      %{"enabled" => enabled?} -> enabled?
+      _ -> false
+    end
+  end
+
+  defp invoice_amount_tax(params, amount_due) do
+    if automatic_tax_enabled?(params), do: max(div(amount_due, 10), 0), else: 0
+  end
+
+  defp invoice_tax_field(params, amount_tax) do
+    if automatic_tax_enabled?(params), do: amount_tax, else: nil
+  end
+
+  defp checkout_amount_tax(params) do
+    base_amount =
+      params[:amount_total] ||
+        params["amount_total"] ||
+        checkout_line_items_amount(params[:line_items] || params["line_items"] || [])
+
+    if automatic_tax_enabled?(params), do: max(div(base_amount, 10), 0), else: 0
+  end
+
+  defp checkout_line_items_amount(line_items) when is_list(line_items) do
+    Enum.reduce(line_items, 0, fn item, total ->
+      quantity = item[:quantity] || item["quantity"] || 1
+      total + quantity * 1000
+    end)
   end
 
   defp build_payment_intent(state, id, params) do

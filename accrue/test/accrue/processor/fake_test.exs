@@ -104,4 +104,96 @@ defmodule Accrue.Processor.FakeTest do
       assert DateTime.compare(customer.created, ~U[2026-01-02 00:00:00Z]) == :eq
     end
   end
+
+  describe "automatic tax payloads" do
+    test "subscription creation exposes enabled automatic_tax state" do
+      assert {:ok, subscription} =
+               Fake.create_subscription(
+                 %{
+                   customer: "cus_fake_00001",
+                   items: [%{price: "price_basic"}],
+                   automatic_tax: %{enabled: true}
+                 },
+                 []
+               )
+
+      assert subscription.automatic_tax == %{enabled: true, status: "complete"}
+    end
+
+    test "subscription creation exposes disabled automatic_tax state from string keys" do
+      assert {:ok, subscription} =
+               Fake.create_subscription(
+                 %{
+                   "customer" => "cus_fake_00001",
+                   "items" => [%{"price" => "price_basic"}],
+                   "automatic_tax" => %{"enabled" => false}
+                 },
+                 []
+               )
+
+      assert subscription.automatic_tax == %{enabled: false, status: nil}
+    end
+
+    test "invoice creation emits deterministic tax fields when automatic tax is enabled" do
+      assert {:ok, invoice} =
+               Fake.create_invoice(
+                 %{
+                   customer: "cus_fake_00001",
+                   amount_due: 2_500,
+                   automatic_tax: %{enabled: true}
+                 },
+                 []
+               )
+
+      assert invoice.automatic_tax == %{enabled: true, status: "complete"}
+      assert invoice.tax == 250
+      assert invoice.total_details == %{amount_tax: 250}
+    end
+
+    test "invoice creation emits zero or nil tax fields when automatic tax is disabled" do
+      assert {:ok, invoice} =
+               Fake.create_invoice(
+                 %{
+                   customer: "cus_fake_00001",
+                   amount_due: 2_500,
+                   automatic_tax: %{enabled: false}
+                 },
+                 []
+               )
+
+      assert invoice.automatic_tax == %{enabled: false, status: nil}
+      assert invoice.tax == nil
+      assert invoice.total_details == %{amount_tax: 0}
+    end
+
+    test "checkout creation emits deterministic tax fields when automatic tax is enabled" do
+      assert {:ok, session} =
+               Fake.checkout_session_create(
+                 %{
+                   mode: "subscription",
+                   line_items: [%{price: "price_basic", quantity: 2}],
+                   automatic_tax: %{enabled: true}
+                 },
+                 []
+               )
+
+      assert session.automatic_tax == %{enabled: true, status: "complete"}
+      assert session.total_details == %{amount_tax: 200}
+    end
+
+    test "checkout creation emits zero tax fields when automatic tax is disabled" do
+      assert {:ok, session} =
+               Fake.checkout_session_create(
+                 %{
+                   "mode" => "subscription",
+                   "line_items" => [%{"price" => "price_basic", "quantity" => 2}],
+                   "automatic_tax" => %{"enabled" => false}
+                 },
+                 []
+               )
+
+      assert session.automatic_tax == %{enabled: false, status: nil}
+      assert session.total_details == %{amount_tax: 0}
+    end
+  end
 end
