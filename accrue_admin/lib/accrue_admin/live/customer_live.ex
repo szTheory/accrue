@@ -293,20 +293,18 @@ defmodule AccrueAdmin.Live.CustomerLive do
         &(present?(&1.automatic_tax_disabled_reason) or present?(&1.last_finalization_error_code))
       )
 
-    cond do
-      subscription_risks == [] and invoice_risks == [] ->
-        %{
-          headline: "No local tax risk",
-          detail: "No disabled recurring tax or finalization failures",
-          tone: "moss"
-        }
-
-      true ->
-        %{
-          headline: "Tax risk detected",
-          detail: tax_risk_detail(subscription_risks, invoice_risks),
-          tone: "amber"
-        }
+    if subscription_risks == [] and invoice_risks == [] do
+      %{
+        headline: "No local tax risk",
+        detail: "No disabled recurring tax or finalization failures",
+        tone: "moss"
+      }
+    else
+      %{
+        headline: "Tax risk detected",
+        detail: tax_risk_detail(subscription_risks, invoice_risks),
+        tone: "amber"
+      }
     end
   end
 

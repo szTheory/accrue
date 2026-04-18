@@ -7,8 +7,8 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   alias Accrue.Events.Event
   alias Accrue.Repo
-  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
+  alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Events
 
   @impl true

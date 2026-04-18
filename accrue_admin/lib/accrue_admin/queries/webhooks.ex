@@ -8,8 +8,8 @@ defmodule AccrueAdmin.Queries.Webhooks do
   import Ecto.Query
 
   alias Accrue.Billing.{Customer, Invoice, Subscription}
-  alias Accrue.Repo
   alias Accrue.Events.Event
+  alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Behaviour
