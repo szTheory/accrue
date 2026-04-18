@@ -89,10 +89,19 @@ defmodule AccrueHost.MixProject do
   end
 
   defp sigra_dep do
-    if hex_release?() do
-      {:sigra, "~> #{sigra_version()}"}
+    # Sigra is not on Hex yet. Default to the public GitHub repo so CI and fresh clones
+    # resolve without a sibling checkout. To point at a local Sigra working tree:
+    #   export ACCRUE_SIGRA_PATH=../../../sigra
+    # (path is relative to this `mix.exs` unless absolute).
+    path =
+      System.get_env("ACCRUE_SIGRA_PATH")
+      |> to_string()
+      |> String.trim()
+
+    if path == "" do
+      {:sigra, github: "szTheory/sigra"}
     else
-      {:sigra, path: "../../../sigra"}
+      {:sigra, path: Path.expand(path, __DIR__)}
     end
   end
 
@@ -101,8 +110,6 @@ defmodule AccrueHost.MixProject do
   defp accrue_version, do: sibling_package_version!("../../accrue/mix.exs")
 
   defp accrue_admin_version, do: sibling_package_version!("../../accrue_admin/mix.exs")
-
-  defp sigra_version, do: sibling_package_version!("../../../sigra/mix.exs")
 
   defp sibling_package_version!(relative_path) do
     relative_path

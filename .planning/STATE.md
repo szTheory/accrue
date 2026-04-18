@@ -81,7 +81,7 @@ Plan: *`23-01-PLAN.md` + `23-02-PLAN.md` executed*
 - The canonical host repair path must stay inside `AccrueHost.Billing` wrappers over public Accrue APIs.
 - Tax rollout docs must explicitly warn that existing subscriptions, invoices, payment links, and pre-existing Checkout customers require deliberate migration settings before automatic tax rollout is safe.
 - Organization billing stays on Accrue's existing `owner_type` and `owner_id` contract; the example host now proves organization ownership without core billing schema changes.
-- The example host resolves Sigra from `../../../sigra` by path unless `ACCRUE_HOST_HEX_RELEASE=1` selects the versioned Hex dependency branch.
+- The example host resolves Sigra from GitHub (`szTheory/sigra`) by default; optional `ACCRUE_SIGRA_PATH` points at a local checkout. `ACCRUE_HOST_HEX_RELEASE=1` still selects Hex-pinned `accrue` / `accrue_admin` for the smoke script.
 - Organization fixtures create orgs through Sigra with `Scope.for_user/1`, and owner membership creation is treated as idempotent because Sigra inserts the initial owner row atomically.
 - The host billing page now resolves the active organization through `Sigra.Scope.Hydration` and clears stale active-org pointers fail-closed.
 - Host billing mutations now derive ownership from `current_scope.active_organization` only and ignore browser-supplied organization ids.

@@ -16,6 +16,12 @@ The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live
 Stripe credentials.
 
+**Sigra:** the example host depends on Sigra (not on Hex yet). `mix deps.get`
+pulls it from [szTheory/sigra](https://github.com/szTheory/sigra) by default so
+CI and fresh clones work. To compile against a sibling checkout instead, set
+`ACCRUE_SIGRA_PATH=../../../sigra` (relative to this directory) before
+`mix deps.get`.
+
 ## First run
 
 From the repository root:
