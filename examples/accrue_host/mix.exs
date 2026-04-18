@@ -293,10 +293,7 @@ defmodule AccrueHost.MixProject do
 
         if curl --fail --silent --show-error "http://127.0.0.1:${browser_port}/" >/dev/null; then
           set +e
-          ACCRUE_HOST_REUSE_SERVER=1 \
-            ACCRUE_HOST_BROWSER_PORT="$browser_port" \
-            ACCRUE_HOST_E2E_FIXTURE="$fixture_file" \
-            npm run e2e
+          ACCRUE_HOST_REUSE_SERVER=1 ACCRUE_HOST_BROWSER_PORT="$browser_port" ACCRUE_HOST_E2E_FIXTURE="$fixture_file" npm run e2e
           e2e_status=$?
           set -e
 
