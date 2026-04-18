@@ -103,6 +103,19 @@ defmodule Accrue.Processor.Fake do
   end
 
   @doc """
+  Full reset like `reset/0`, but preserves Connect account rows and the
+  `:connect_account` counter.
+
+  `Accrue.BillingCase` uses this in `setup/1` so async billing tests do not
+  wipe in-memory Connect state while `Accrue.ConnectCase` (or other modules)
+  are mid-flight on the shared named Fake GenServer.
+  """
+  @spec reset_preserve_connect() :: :ok
+  def reset_preserve_connect do
+    call(:reset_preserve_connect)
+  end
+
+  @doc """
   Advances the in-memory clock by `seconds` seconds. Existing Phase 1
   API — preserved for tests that only need to push the clock without
   any subscription-aware webhook synthesis.
@@ -699,6 +712,15 @@ defmodule Accrue.Processor.Fake do
   @impl GenServer
   def handle_call(:reset, _from, _state) do
     {:reply, :ok, %State{}}
+  end
+
+  def handle_call(:reset_preserve_connect, _from, state) do
+    preserved_accounts = state.connect_accounts
+    preserved_counter = Map.get(state.counters, :connect_account, 0)
+    fresh = %State{}
+    counters = Map.put(fresh.counters, :connect_account, preserved_counter)
+
+    {:reply, :ok, %{fresh | connect_accounts: preserved_accounts, counters: counters}}
   end
 
   def handle_call({:advance, seconds}, _from, %State{clock: clock} = state) do

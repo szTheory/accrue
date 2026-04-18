@@ -113,6 +113,22 @@ defmodule Accrue.Processor.FakeTest do
       # Clock restored
       assert %DateTime{year: 2026, month: 1, day: 1, hour: 0} = Fake.current_time()
     end
+
+    test "reset_preserve_connect/0 clears customers but keeps connect accounts" do
+      assert {:ok, connect} =
+               Fake.create_account(
+                 %{type: "standard", country: "US", email: "owner@example.com"},
+                 []
+               )
+
+      assert {:ok, %{id: "cus_fake_00001"}} = Processor.create_customer(%{email: "a@b"}, [])
+      :ok = Fake.reset_preserve_connect()
+
+      assert {:ok, _} = Fake.retrieve_account(connect.id, [])
+
+      assert {:error, %Accrue.APIError{code: "resource_missing"}} =
+               Processor.retrieve_customer("cus_fake_00001", [])
+    end
   end
 
   describe "created timestamps" do

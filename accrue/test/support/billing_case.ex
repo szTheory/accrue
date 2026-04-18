@@ -58,7 +58,7 @@ defmodule Accrue.BillingCase do
       {:error, {:already_started, _}} -> :ok
     end
 
-    :ok = Accrue.Processor.Fake.reset()
+    :ok = Accrue.Processor.Fake.reset_preserve_connect()
 
     prior_env = Application.get_env(:accrue, :env)
     Application.put_env(:accrue, :env, :test)
