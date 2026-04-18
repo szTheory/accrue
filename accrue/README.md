@@ -5,7 +5,7 @@ Billing state, modeled clearly.
 Accrue is the billing library. Your Phoenix app owns the generated `MyApp.Billing`
 facade, router mounts, runtime config, and auth/session boundary. Start with the
 host-first [First Hour](guides/first_hour.md) guide, then keep the checked-in
-[`examples/accrue_host`](../examples/accrue_host) demo nearby for command parity
+[`examples/accrue_host`](https://github.com/szTheory/accrue/tree/main/examples/accrue_host) demo nearby for command parity
 and the canonical local proof path.
 
 ## Start Here
@@ -16,7 +16,7 @@ and the canonical local proof path.
 - [Testing](guides/testing.md)
 - [Finance handoff](guides/finance-handoff.md) (Stripe RR, Sigma, Data Pipeline)
 - [Upgrade](guides/upgrade.md)
-- [Canonical local demo](../examples/accrue_host/README.md)
+- [Canonical local demo](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md)
 
 The compact adoption path is:
 
@@ -25,7 +25,7 @@ The compact adoption path is:
    migrations, Oban, `use Accrue.Webhook.Handler`, and
    `accrue_admin "/billing"`.
 3. Compare that setup with the checked-in
-   [`examples/accrue_host`](../examples/accrue_host) demo path.
+   [`examples/accrue_host`](https://github.com/szTheory/accrue/tree/main/examples/accrue_host) demo path.
 
 ## Install
 

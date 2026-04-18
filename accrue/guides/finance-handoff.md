@@ -122,6 +122,6 @@ product teams do not accidentally leak cross-tenant financial detail.
 ## See also
 
 - [Testing](testing.md) — Fake vs Stripe test vs live Stripe lanes.
-- [Testing live Stripe](../../guides/testing-live-stripe.md) — advisory live-mode
+- [Testing live Stripe](https://github.com/szTheory/accrue/blob/main/guides/testing-live-stripe.md) — advisory live-mode
   checks at repository root (`guides/` vs package `accrue/guides/`).
 - [Troubleshooting](troubleshooting.md) — tax-location and rollout recovery.

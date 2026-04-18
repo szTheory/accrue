@@ -363,6 +363,6 @@ payloads. The supported operator flow stays the same:
 
 For live provider-parity checks that exercise a valid and invalid customer
 location in Stripe test mode, follow
-[`guides/testing-live-stripe.md`](../../guides/testing-live-stripe.md). Keep
+[`guides/testing-live-stripe.md`](https://github.com/szTheory/accrue/blob/main/guides/testing-live-stripe.md). Keep
 real customer data, copied dashboard payloads, and raw addresses out of notes,
 screenshots, and shared logs.
