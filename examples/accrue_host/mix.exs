@@ -162,167 +162,33 @@ defmodule AccrueHost.MixProject do
   end
 
   defp verify_command do
-    test_files = [
-      "test/install_boundary_test.exs",
-      "test/accrue_host/billing_facade_test.exs",
-      "test/accrue_host_web/subscription_flow_test.exs",
-      "test/accrue_host_web/webhook_ingest_test.exs",
-      "test/accrue_host_web/trust_smoke_test.exs",
-      "test/accrue_host_web/admin_webhook_replay_test.exs",
-      "test/accrue_host_web/admin_mount_test.exs",
-      "test/accrue_host_web/org_billing_access_test.exs",
-      "test/accrue_host_web/org_billing_live_test.exs"
-    ]
-
-    quoted_files = Enum.join(test_files, " ")
-
-    bash_command("""
-      MIX_ENV=test mix ecto.drop --quiet || true
-      MIX_ENV=test mix ecto.create --quiet
-      MIX_ENV=test mix ecto.migrate --quiet
-      MIX_ENV=test mix test --warnings-as-errors #{quoted_files}
-    """)
+    cmd_run_script("accrue_host_verify_test_bounded.sh")
   end
 
   defp verify_regression_command do
-    bash_command("""
-      MIX_ENV=test mix test --warnings-as-errors
-    """)
+    cmd_run_script("accrue_host_verify_test_full.sh")
   end
 
   defp verify_dev_boot_command do
-    bash_command("""
-      if [ "${ACCRUE_HOST_SKIP_DEV_BOOT:-}" = "1" ]; then
-        echo "--- dev boot smoke skipped (ACCRUE_HOST_SKIP_DEV_BOOT=1) ---"
-        exit 0
-      fi
-
-      port="${ACCRUE_HOST_PORT:-4100}"
-      log_file="$(mktemp)"
-
-      cleanup() {
-        if [ -n "${server_pid:-}" ] && kill -0 "$server_pid" >/dev/null 2>&1; then
-          kill "$server_pid" >/dev/null 2>&1 || true
-          wait "$server_pid" >/dev/null 2>&1 || true
-        fi
-
-        rm -f "$log_file"
-      }
-
-      trap cleanup EXIT
-
-      MIX_ENV=dev mix ecto.create --quiet
-      MIX_ENV=dev mix ecto.migrate --quiet
-
-      PORT="$port" MIX_ENV=dev mix phx.server >"$log_file" 2>&1 &
-      server_pid=$!
-
-      for _ in $(seq 1 30); do
-        if ! kill -0 "$server_pid" >/dev/null 2>&1; then
-          echo "Phoenix server exited early"
-          cat "$log_file"
-          exit 1
-        fi
-
-        if curl --fail --silent --show-error "http://127.0.0.1:${port}/" >/dev/null; then
-          echo "Phoenix boot smoke passed on http://127.0.0.1:${port}/"
-          exit 0
-        fi
-
-        sleep 1
-      done
-
-      echo "Phoenix server did not become ready"
-      cat "$log_file"
-      exit 1
-    """)
+    cmd_run_script("accrue_host_verify_dev_boot.sh")
   end
 
   defp verify_browser_command do
-    bash_command("""
-      if [ "${ACCRUE_HOST_SKIP_BROWSER:-}" = "1" ]; then
-        echo "--- browser smoke skipped (ACCRUE_HOST_SKIP_BROWSER=1) ---"
-        exit 0
-      fi
-
-      repo_root="$(cd ../.. && pwd)"
-      browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
-      fixture_file="$(mktemp)"
-      browser_log_file="${ACCRUE_HOST_BROWSER_LOG:-$(mktemp)}"
-      browser_failed=0
-
-      cleanup() {
-        if [ -n "${browser_server_pid:-}" ] && kill -0 "$browser_server_pid" >/dev/null 2>&1; then
-          kill "$browser_server_pid" >/dev/null 2>&1 || true
-          wait "$browser_server_pid" >/dev/null 2>&1 || true
-        fi
-
-        rm -f "$fixture_file"
-
-        if [ -z "${ACCRUE_HOST_BROWSER_LOG:-}" ] && [ "$browser_failed" != "1" ]; then
-          rm -f "$browser_log_file"
-        fi
-      }
-
-      trap cleanup EXIT
-
-      MIX_ENV=test mix ecto.drop --quiet || true
-      MIX_ENV=test mix ecto.create --quiet
-      MIX_ENV=test mix ecto.migrate --quiet
-      ACCRUE_HOST_E2E_FIXTURE="$fixture_file" MIX_ENV=test mix run "$repo_root/scripts/ci/accrue_host_seed_e2e.exs"
-
-      bash "$repo_root/scripts/ci/verify_e2e_fixture_jq.sh" "$fixture_file"
-
-      (cd "$repo_root/accrue_admin" && mix accrue_admin.assets.build)
-      mix deps.compile accrue_admin --force
-
-      npm ci
-      npm run e2e:install
-
-      PORT="$browser_port" PHX_SERVER=true MIX_ENV=test mix phx.server >"$browser_log_file" 2>&1 &
-      browser_server_pid=$!
-
-      for _ in $(seq 1 30); do
-        if ! kill -0 "$browser_server_pid" >/dev/null 2>&1; then
-          echo "Phoenix browser-smoke server exited early"
-          browser_failed=1
-          echo "Phoenix browser-smoke server log: $browser_log_file"
-          cat "$browser_log_file"
-          exit 1
-        fi
-
-        if curl --fail --silent --show-error "http://127.0.0.1:${browser_port}/" >/dev/null; then
-          set +e
-          ACCRUE_HOST_REUSE_SERVER=1 ACCRUE_HOST_BROWSER_PORT="$browser_port" ACCRUE_HOST_E2E_FIXTURE="$fixture_file" npm run e2e
-          e2e_status=$?
-          set -e
-
-          if [ "$e2e_status" -ne 0 ]; then
-            browser_failed=1
-            echo "Phoenix browser-smoke server log: $browser_log_file"
-            cat "$browser_log_file"
-          fi
-
-          exit "$e2e_status"
-        fi
-
-        sleep 1
-      done
-
-      echo "Phoenix browser-smoke server did not become ready"
-      browser_failed=1
-      echo "Phoenix browser-smoke server log: $browser_log_file"
-      cat "$browser_log_file"
-      exit 1
-    """)
+    cmd_run_script("accrue_host_verify_browser.sh")
   end
 
-  defp bash_command(script) do
-    escaped =
-      script
-      |> String.trim()
-      |> String.replace("'", ~s('"'"'))
+  # `mix cmd bash -lc '…multiline…'` is unsafe in aliases: `OptionParser.split/1` strips the
+  # outer single quotes, then `mix cmd` joins argv with spaces, so `System.shell/1` ends up
+  # running unquoted shell metacharacters through `/bin/sh -c` (breaks on `$(…)` / `if`).
+  # Run repo-checked-in scripts instead, with a single-quoted absolute path for `mix cmd`.
+  defp cmd_run_script(name) when is_binary(name) do
+    path = Path.expand(Path.join("..", Path.join("..", Path.join("scripts/ci", name))), __DIR__)
 
-    "cmd bash -lc '#{escaped}'"
+    unless File.exists?(path) do
+      Mix.raise("missing host verify script #{path} (expected scripts/ci/#{name})")
+    end
+
+    quoted = "'" <> String.replace(path, "'", "'\"'\"'") <> "'"
+    "cmd bash #{quoted}"
   end
 end
