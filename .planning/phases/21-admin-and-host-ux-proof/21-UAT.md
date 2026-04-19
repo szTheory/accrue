@@ -43,5 +43,5 @@ The **VERIFY-01** requirement spans Phase 21 (executable) and Phase 22 (finance 
 
 ## Advisory (non-blocking)
 
-- Live Stripe: `live-stripe` job in `.github/workflows/ci.yml` (manual/cron only); see `guides/testing-live-stripe.md`.
+- Stripe test-mode parity: workflow job id `live-stripe` in `.github/workflows/ci.yml` (manual/cron only; display name **Stripe test-mode parity**); see `guides/testing-live-stripe.md`.
 - Subjective / marketing screenshots: optional local headed Playwright only (`21-VALIDATION.md` Manual-Only table).
