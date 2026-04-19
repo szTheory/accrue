@@ -517,9 +517,16 @@ defmodule AccrueHostWeb.SubscriptionLive do
   defp humanize_status(status),
     do: status |> Atom.to_string() |> String.replace("_", " ") |> String.capitalize()
 
-  defp tax_location_status(%Subscription{automatic_tax_disabled_reason: reason})
-       when is_binary(reason) and reason != "" do
-    "Automatic tax is currently disabled: #{humanize_reason(reason)}."
+  defp tax_location_status(%Subscription{} = subscription) do
+    # Map.get keeps this LiveView compiling against older published `accrue`
+    # (Hex smoke) where `Subscription` may not yet expose this field.
+    case Map.get(subscription, :automatic_tax_disabled_reason) do
+      reason when is_binary(reason) and reason != "" ->
+        "Automatic tax is currently disabled: #{humanize_reason(reason)}."
+
+      _ ->
+        nil
+    end
   end
 
   defp tax_location_status(_subscription), do: nil
