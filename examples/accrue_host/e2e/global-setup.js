@@ -35,10 +35,19 @@ module.exports = async () => {
 
   ensureDatabase();
   runMix(["ecto.migrate", "--quiet"], { MIX_ENV: "test" });
-  runMix(["run", path.join(repoRoot, "scripts/ci/accrue_host_seed_e2e.exs")], {
-    MIX_ENV: "test",
-    ACCRUE_HOST_E2E_FIXTURE: fixturePath
-  });
+
+  if (process.env.ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED === "1") {
+    if (!fs.existsSync(fixturePath)) {
+      throw new Error(
+        `ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1 but fixture is missing at ${fixturePath}`
+      );
+    }
+  } else {
+    runMix(["run", path.join(repoRoot, "scripts/ci/accrue_host_seed_e2e.exs")], {
+      MIX_ENV: "test",
+      ACCRUE_HOST_E2E_FIXTURE: fixturePath
+    });
+  }
 
   process.env.ACCRUE_HOST_E2E_FIXTURE = fixturePath;
 };

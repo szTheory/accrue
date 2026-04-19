@@ -458,7 +458,9 @@ jobs:
   # See guides/testing-live-stripe.md for details.
   # ---------------------------------------------------------------------
   live-stripe:
-    name: Live Stripe (advisory)
+    # Job id stays `live-stripe` for `act -j live-stripe` compatibility; display
+    # name reflects Stripe *test mode* keys (`STRIPE_TEST_SECRET_KEY`), not live mode.
+    name: Stripe test-mode parity (advisory)
     runs-on: ubuntu-24.04
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     continue-on-error: true

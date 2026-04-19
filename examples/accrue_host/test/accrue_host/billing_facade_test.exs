@@ -1,4 +1,11 @@
 defmodule AccrueHost.BillingFacadeTest do
+  @moduledoc """
+  Host-owned `AccrueHost.Billing` facade proofs, including **user-as-billable**
+  (`owner_type == "User"`) Fake-backed subscriptions — the B2C-shaped API path
+  complementary to org-first `/app/billing` LiveView coverage.
+
+  See `docs/adoption-proof-matrix.md` for how this maps to VERIFY-01 vs Playwright.
+  """
   use AccrueHost.AccrueCase, async: false
 
   @moduletag :phase10

@@ -8,6 +8,7 @@ defmodule AccrueHostSeedE2E do
   alias AccrueHost.Accounts
   alias AccrueHost.Accounts.Scope
   alias AccrueHost.Accounts.User
+  alias AccrueHost.Accounts.UserToken
   alias AccrueHost.Organizations
   alias AccrueHost.Repo
 
@@ -237,6 +238,14 @@ defmodule AccrueHostSeedE2E do
     Repo.delete_all(
       from(customer in Customer,
         where: customer.email in ^@fixture_org_customer_emails
+      )
+    )
+
+    Repo.delete_all(
+      from(t in UserToken,
+        join: u in User,
+        on: t.user_id == u.id,
+        where: u.email in ^@seeded_emails
       )
     )
 

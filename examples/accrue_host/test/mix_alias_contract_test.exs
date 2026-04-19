@@ -46,6 +46,7 @@ defmodule AccrueHost.MixAliasContractTest do
 
     assert dev_boot =~ "ACCRUE_HOST_SKIP_DEV_BOOT"
     assert browser =~ "ACCRUE_HOST_SKIP_BROWSER"
+    assert browser =~ "ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED"
     assert dev_boot =~ "ACCRUE_HOST_PORT"
     assert browser =~ "ACCRUE_HOST_BROWSER_PORT"
   end

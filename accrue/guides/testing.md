@@ -105,6 +105,14 @@ Use the Fake Processor for normal test coverage, then keep a small provider-pari
 - `assert_pdf_rendered/1` matches captured PDF renders by invoice id, contents, options, or predicate.
 - `assert_event_recorded/1` and `assert_event_recorded/2` query the event ledger visible to the test sandbox.
 
+## Host VERIFY-01 vs provider parity
+
+The canonical **Phoenix + mounted admin + browser** proof for adopters lives in
+`examples/accrue_host` (`mix verify.full`, job `host-integration`). That gate is
+Fake-backed. For how it sits next to Stripe test-mode canaries, see
+`examples/accrue_host/docs/adoption-proof-matrix.md` and
+`guides/testing-live-stripe.md`.
+
 ## External-provider appendix
 
 Use real Stripe test mode only for parity checks that the Fake Processor cannot prove. Keep those tests tagged and skipped unless `STRIPE_TEST_SECRET_KEY` and the matching webhook secret are present. Never make real Stripe sandbox calls by default in the main unit or context suite.

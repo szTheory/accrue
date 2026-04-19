@@ -26,6 +26,7 @@ require_substring "cd examples/accrue_host" "examples/accrue_host cwd instructio
 require_substring "host-integration" "GitHub Actions job name for PR CI"
 require_substring "mix verify.full" "canonical verify.full gate"
 require_substring ".github/workflows/ci.yml" "CI workflow pointer"
+require_substring "docs/adoption-proof-matrix.md" "adoption proof matrix doc link"
 
 # Negative: VERIFY-01 section must not advise storing sk_live without explicit negation.
 if awk '

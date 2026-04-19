@@ -1,5 +1,9 @@
 # Testing Against Live Stripe
 
+The GitHub Actions job id is `live-stripe` for historical reasons; it runs
+against **Stripe test mode** (`STRIPE_TEST_SECRET_KEY`), not live-mode production
+keys.
+
 Accrue ships two layers of test coverage for every Stripe-facing
 behaviour that a human would otherwise need to validate manually:
 

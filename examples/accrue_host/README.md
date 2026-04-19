@@ -123,6 +123,15 @@ For maintainers who want the repo-root wrapper after the tutorial story:
 bash scripts/ci/accrue_host_uat.sh
 ```
 
+## Adoption realism & proof matrix
+
+For **what is proven where** (Fake CI vs Stripe test-mode advisory vs B2C-shaped API
+tests vs org-first LiveView), see
+[`docs/adoption-proof-matrix.md`](docs/adoption-proof-matrix.md).
+
+For a **human screen-recording checklist** (evaluators / stakeholders), see
+[`docs/evaluator-walkthrough-script.md`](docs/evaluator-walkthrough-script.md).
+
 ## Visual walkthrough (Fake-backed)
 
 To **see** the mounted admin + host billing story as full-page screenshots (no live
@@ -157,8 +166,9 @@ directory when the HTML reporter produced `playwright-report/`).
 (`examples/accrue_host/test-results/phase15-trust`, upload step `if: always()` in
 `.github/workflows/ci.yml`). Download it from the GitHub Actions run summary.
 
-**Video:** not enabled in CI (size/noise). For local screen recordings, use Playwright’s
-`video` option in a headed debug session only — see Playwright docs.
+**Video:** not enabled in CI (size/noise). For a scripted evaluator capture path,
+see [`docs/evaluator-walkthrough-script.md`](docs/evaluator-walkthrough-script.md).
+For ad-hoc debug recordings, use Playwright’s `video` option in a headed session only.
 
 ## What this app proves
 
