@@ -211,7 +211,8 @@ defmodule AccrueHost.BillingFacadeTest do
     assert billing_source =~
              "def update_customer_tax_location(billable, attrs) when is_map(attrs) do"
 
-    assert billing_source =~ "Billing.update_customer_tax_location(customer, attrs)"
+    assert billing_source =~ ":update_customer_tax_location"
+    assert billing_source =~ "apply(Billing, :update_customer_tax_location, [customer, attrs])"
   end
 
   test "subscribe/3 proof path creates customer state without direct fixture inserts", %{

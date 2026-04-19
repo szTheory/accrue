@@ -87,5 +87,5 @@ defmodule AccrueHostWeb.Router do
 
   # Protect this mount with AccrueAdmin.AuthHook via accrue_admin/2.
   # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
-  accrue_admin "/billing", session_keys: [:user_token], allow_live_reload: false
+  accrue_admin("/billing", session_keys: [:user_token], allow_live_reload: false)
 end
