@@ -40,8 +40,14 @@ ACCRUE_HOST_E2E_FIXTURE="$fixture_file" MIX_ENV=test mix run "$repo_root/scripts
 
 bash "$repo_root/scripts/ci/verify_e2e_fixture_jq.sh" "$fixture_file"
 
-(cd "$repo_root/accrue_admin" && mix accrue_admin.assets.build)
-mix deps.compile accrue_admin --force
+# `accrue_admin` is a path dep of the host, but CI only runs `mix deps.get` from the host app.
+# Building assets requires a standalone Mix project cwd with its own `deps/` tree.
+(
+  cd "$repo_root/accrue_admin"
+  mix deps.get --quiet
+  mix accrue_admin.assets.build
+)
+MIX_ENV=test mix deps.compile accrue_admin --force
 
 npm ci
 npm run e2e:install
