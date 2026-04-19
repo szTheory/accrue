@@ -208,8 +208,7 @@ defmodule Accrue.Config do
     dlq_replay_batch_size: [
       type: :pos_integer,
       default: 100,
-      doc:
-        "Number of rows per chunk in `Accrue.Webhooks.DLQ.requeue_where/2` bulk replay."
+      doc: "Number of rows per chunk in `Accrue.Webhooks.DLQ.requeue_where/2` bulk replay."
     ],
     dlq_replay_stagger_ms: [
       type: :non_neg_integer,
