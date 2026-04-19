@@ -211,3 +211,15 @@
 2. Planning state needs to be updated at release boundaries, not just phase boundaries.
 3. User-facing host-app proof catches integration gaps that package-local tests miss.
 4. Docs and security contracts are worth writing for release-process wording, not only runtime code.
+
+---
+
+## Documentation polish (2026-04-18)
+
+Shipped a pass removing internal delivery traceability codes (`T-…`, `D…`,
+`OBS-…`, `CHKT-…`, etc.) from `accrue` Hex-facing guides, `@moduledoc` /
+`@doc` strings, `Accrue.Config` NimbleOptions docs, representative tests, and
+related comments so public docs read as product documentation rather than
+planning appendices. Follow-up: deeper editorial pass on remaining `lib/`
+section comments and any straggling requirement shorthand if it resurfaces in
+ExDoc output.

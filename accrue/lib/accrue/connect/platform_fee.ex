@@ -1,6 +1,6 @@
 defmodule Accrue.Connect.PlatformFee do
   @moduledoc """
-  Pure `Accrue.Money` math for platform fee computation (D5-04, CONN-06).
+  Pure `Accrue.Money` math for platform fee computation.
 
   **Caller-inject semantics.** This helper computes the platform fee amount
   as a value. It does NOT auto-apply to charges or transfers. Callers thread

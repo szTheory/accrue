@@ -267,7 +267,7 @@ defmodule Accrue.ConfigBrandingTest do
       refute log =~ "DEPRECATED"
     end
 
-    test "log message does not leak flat key values (T-06-01-02)" do
+    test "log message does not leak flat key values" do
       Application.put_env(:accrue, :from_email, "secret-value@example.test")
 
       log =

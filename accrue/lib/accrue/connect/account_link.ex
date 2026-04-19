@@ -1,13 +1,13 @@
 defmodule Accrue.Connect.AccountLink do
   @moduledoc """
-  Onboarding/update bearer credential for a connected account (D5-06).
+  Onboarding/update bearer credential for a connected account.
 
   The `:url` field is a single-use short-lived (~5 minute) bearer
   credential that authorizes the recipient to complete Stripe's hosted
   onboarding flow for the connected account. Any leak via Logger, APM,
   crash dumps, or telemetry handlers is a takeover vector — Inspect
-  masks `:url` as `<redacted>` just like Phase 4
-  `Accrue.BillingPortal.Session` (T-05-03-01).
+  masks `:url` as `<redacted>` the same way as
+  `Accrue.BillingPortal.Session`.
 
   Create-only resource: Stripe exposes no retrieve/update/delete/list
   endpoint for AccountLinks — build a new one each time.
@@ -55,9 +55,7 @@ end
 defimpl Inspect, for: Accrue.Connect.AccountLink do
   import Inspect.Algebra
 
-  # T-05-03-01: `:url` is a single-use short-lived bearer credential.
-  # Mask in Inspect output the same way Phase 4 masks
-  # `Accrue.BillingPortal.Session.url`.
+  # `:url` is a single-use short-lived bearer credential — mask in Inspect.
   def inspect(%Accrue.Connect.AccountLink{} = link, opts) do
     fields = [
       url: if(link.url, do: "<redacted>", else: nil),

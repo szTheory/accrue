@@ -9,10 +9,8 @@ defmodule Accrue do
   webhooks, admin UI, and telemetry — without the migration pain and design
   regrets earlier libraries accumulated.
 
-  See the project vision document (`.planning/PROJECT.md`) for the full scope
-  and requirements shape. This module is intentionally a namespace anchor at
-  Wave 0; the public API surfaces (`Accrue.Billing`, `Accrue.Events`,
-  `Accrue.Mailer`, `Accrue.PDF`, `Accrue.Auth`, `Accrue.Processor`) are
-  introduced across the remaining Phase 1 plans.
+  Public APIs live on modules such as `Accrue.Billing`, `Accrue.Events`,
+  `Accrue.Mailer`, `Accrue.PDF`, `Accrue.Auth`, and `Accrue.Processor`.
+  Start with `guides/quickstart.md` and the ExDoc-generated guides list.
   """
 end

@@ -1,19 +1,18 @@
 defmodule Accrue.Processor.Fake do
   @moduledoc """
-  Deterministic in-memory processor adapter (D-19, D-20, D3-60).
+  Deterministic in-memory `Accrue.Processor` adapter for tests and demos.
 
-  The Fake is Accrue's **primary test surface** (TEST-01). It implements
+  The Fake is Accrue's **primary test surface**. It implements
   the `Accrue.Processor` behaviour entirely in-process with a GenServer +
   struct state:
 
   - **Deterministic ids** per resource with 5-digit zero-padded counters:
     `cus_fake_00001`, `sub_fake_00001`, `in_fake_00001`, `pi_fake_00001`,
-    `si_fake_00001`, `pm_fake_00001`, `ch_fake_00001`, `re_fake_00001`
-    (D-20).
+    `si_fake_00001`, `pm_fake_00001`, `ch_fake_00001`, `re_fake_00001`.
   - **Test clock** — all timestamps derive from an in-memory clock that
     starts at `Accrue.Processor.Fake.State.epoch/0` and moves only via
     `advance/2` (or `advance_subscription/2` for subscription-aware
-    clock crossing). Matches Stripe's test-clock API (D-19).
+    clock crossing), mirroring Stripe test-clock semantics.
   - **Clean reset** — `reset/0` zeros all counters, clears state, and
     restores the clock to the epoch. Call in `setup` blocks.
   - **Scripted responses** — `scripted_response/2` programs a one-shot
@@ -25,7 +24,7 @@ defmodule Accrue.Processor.Fake do
   - **Trial crossing** — `advance_subscription/2` advances the clock and,
     if the crossing period includes `trial_end - 3d` or `trial_end`,
     synthesizes `customer.subscription.trial_will_end` or
-    `customer.subscription.updated` (status→active) events (D3-82).
+    `customer.subscription.updated` (status→active) events.
 
   ## Startup
 

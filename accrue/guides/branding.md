@@ -2,10 +2,10 @@
 
 Accrue's branding config drives visual customization of transactional
 emails and invoice PDFs. This guide covers the full schema, migration
-from Phase 1 flat keys, and the logo strategy across HTTPS vs PDF
+from legacy flat top-level keys, and the logo strategy across HTTPS vs PDF
 rendering contexts.
 
-Phase 6 shipping schema — v1.0.
+Use the nested `:branding` keyword list (see below); it is the supported schema.
 
 ## Quickstart
 
@@ -84,7 +84,7 @@ the mailer assigns pipeline.
 
 ## Deprecated flat keys
 
-Phase 1 exposed six flat branding keys directly on `:accrue`:
+Older setups exposed six flat branding keys directly on `:accrue`:
 
 - `:from_name`
 - `:from_email`
@@ -93,15 +93,13 @@ Phase 1 exposed six flat branding keys directly on `:accrue`:
 - `:logo_url`
 - `:accent_color`
 
-These are DEPRECATED and will be removed before v1.0. Migrate to the
-nested `:branding` keyword list. Accrue emits a boot-time branding warning
-listing every
-affected flat key.
+These are deprecated: migrate to the nested `:branding` keyword list.
+Accrue emits a boot-time branding warning listing every affected flat key.
 
 ### Migration example
 
 ```elixir
-# Before (Phase 1 — DEPRECATED)
+# Before (legacy flat keys — deprecated)
 config :accrue,
   from_name: "Acme Billing",
   from_email: "billing@acme.example",
@@ -110,7 +108,7 @@ config :accrue,
   logo_url: "https://cdn.acme.example/logo.png",
   accent_color: "#1F6FEB"
 
-# After (Phase 6 — RECOMMENDED)
+# After (nested `:branding` — recommended)
 config :accrue, :branding,
   business_name: "Acme Corp",
   from_name: "Acme Billing",
@@ -120,15 +118,12 @@ config :accrue, :branding,
   accent_color: "#1F6FEB"
 ```
 
-The deprecated flat keys continue to work for one minor release —
-they are removed in the v1.0 release. Do not rely on them in new
-code.
+Do not rely on flat keys in new code; nested `:branding` is the
+long-term shape Accrue documents and validates.
 
 ## Connect note
 
-Stripe Connect platform branding always wins over per-connected-
-account overrides in v1.0 (D6-02). Phase 5 Connect plans do not
-introduce per-account branding customization — that lands in v1.1.
-Platforms that need per-account branding should implement a rung-3
-atom override that dispatches on the Connect account ID at render
-time.
+Stripe Connect platform branding always wins over per-connected-account
+overrides today. Accrue does not ship first-class per-account branding;
+use a rung-3 template override (see `guides/email.md`) that dispatches on
+the Connect account id at render time if you need it.

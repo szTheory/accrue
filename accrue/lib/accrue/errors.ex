@@ -10,8 +10,7 @@ defmodule Accrue.APIError do
   on `%Accrue.APIError{}` in retry logic.
 
   > ⚠️ `processor_error` may contain raw processor payload and MUST NOT be
-  > logged verbatim — downstream logging sanitizer in Plan 06. Mitigates
-  > T-FND-05.
+  > logged verbatim — treat it as sensitive and scrub before logging.
   """
   @type t :: %__MODULE__{}
   defexception [:message, :code, :http_status, :request_id, :processor_error]
@@ -23,7 +22,7 @@ defmodule Accrue.CardError do
   funds, etc.). Mirrors Stripe's card-error shape 1:1.
 
   > ⚠️ `processor_error` may contain raw processor payload and MUST NOT be
-  > logged verbatim. Mitigates T-FND-05.
+  > logged verbatim — treat it as sensitive and scrub before logging.
   """
   @type t :: %__MODULE__{}
   defexception [
@@ -96,7 +95,7 @@ end
 
 defmodule Accrue.SignatureError do
   @moduledoc """
-  Raised when a webhook signature fails verification. Per D-08, this is
+  Raised when a webhook signature fails verification. This is
   NEVER returned as a tuple — a bad signature is either a misconfiguration
   or an attacker, and neither is recoverable at the call site. The webhook
   plug translates this raise into an HTTP 400.
@@ -142,10 +141,10 @@ end
 
 defmodule Accrue.Error.MultiItemSubscription do
   @moduledoc """
-  Raised when a Phase 3 convenience call (e.g., `update_quantity/3`) is
+  Raised when a legacy convenience call (e.g., `update_quantity/3`) is
   made against a subscription that has more than one `SubscriptionItem`.
-  Multi-item subscriptions are a Phase 4 concern; Phase 3 enforces the
-  single-item invariant and points callers at the Phase 4 surface.
+  Multi-item subscriptions require `Accrue.Billing.update_items/3`; the
+  convenience helpers enforce a single-item invariant.
   """
   @type t :: %__MODULE__{}
   defexception [:subscription_id, :item_count, :message]
@@ -155,7 +154,7 @@ defmodule Accrue.Error.MultiItemSubscription do
 
   def message(%__MODULE__{subscription_id: sub_id, item_count: count}) do
     "subscription #{inspect(sub_id)} has #{count} items; " <>
-      "use Accrue.Billing.update_items/3 (Phase 4) for multi-item subscriptions"
+      "use Accrue.Billing.update_items/3 for multi-item subscriptions"
   end
 end
 
@@ -242,7 +241,7 @@ defmodule Accrue.PDF.RenderFailed do
 
   Terminal errors (Null adapter + missing ChromicPDF supervisor child)
   are NOT wrapped in this exception — they route to the hosted-invoice
-  URL fallback per D6-04.
+  URL fallback instead of attaching a PDF.
   """
 
   @type t :: %__MODULE__{}
@@ -255,8 +254,8 @@ end
 
 defmodule Accrue.Error.PdfDisabled do
   @moduledoc """
-  Raised / returned when the configured PDF adapter is `Accrue.PDF.Null`
-  (D6-06). Expected and terminal — callers MUST pattern-match and fall
+  Raised / returned when the configured PDF adapter is `Accrue.PDF.Null`.
+  Expected and terminal — callers MUST pattern-match and fall
   through to a non-PDF path (e.g., link to `hosted_invoice_url` instead
   of attaching a rendered binary). Oban workers MUST NOT treat this as
   a transient retry; it is a stable adapter configuration, not a

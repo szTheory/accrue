@@ -45,7 +45,7 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Plan 06-07 / Pitfall 3: emit a boot-time warning when the configured
+  # Pitfall guard: emit a boot-time warning when the configured
   # PDF adapter is `Accrue.PDF.ChromicPDF` but the host app has NOT
   # started a ChromicPDF supervisor child. Accrue does not start
   # ChromicPDF itself (D-33). The mailer worker's PDF attachment branch
@@ -88,7 +88,7 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Plan 06-07 / Pitfall 4: emit a boot-time warning when the
+  # Pitfall guard: emit a boot-time warning when the
   # `:accrue_mailers` Oban queue is configured with a concurrency
   # greater than the declared ChromicPDF pool size. Without this guard
   # the mailer queue can starve the PDF pool and back-pressure the
@@ -118,12 +118,11 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Plan 06-07 / D6-07: emit a boot-time warning when the customer base
-  # includes EU/CA locales but `:branding[:company_address]` is unset.
-  # Transactional exemptions under CAN-SPAM/CASL require a physical
-  # postal address for EU/CA senders. The query samples grouped counts
-  # only — no customer_id, email, or name leaks into the log
-  # (T-06-07-05).
+  # Emit a boot-time warning when the customer base includes EU/CA locales
+  # but `:branding[:company_address]` is unset. Transactional exemptions under
+  # CAN-SPAM/CASL require a physical postal address for EU/CA senders. The
+  # query samples grouped counts only — no customer_id, email, or name leaks
+  # into the log.
   @spec warn_company_address_locale_mismatch() :: :ok
   def warn_company_address_locale_mismatch do
     key = :accrue_company_address_locale_warned?
@@ -152,7 +151,7 @@ defmodule Accrue.Application do
               exemptions under CAN-SPAM/CASL/GDPR require a physical
               postal address in transactional emails. Set
               `config :accrue, :branding, company_address: "..."`.
-              See guides/email.md D6-07.
+              See guides/email.md.
               """)
             end
 
@@ -228,14 +227,13 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Phase 6 (D6-02): emit a boot-time warning when any of the six deprecated
-  # flat branding keys are set AND the nested `:branding` config key is
-  # empty. The flat keys are the one-minor deprecation shim; they are
-  # removed before v1.0. `:persistent_term` dedupe ensures the warning fires
-  # at most once per BEAM boot — Oban sweepers and friends cannot spam.
+  # Emit a boot-time warning when any of the six deprecated flat branding keys
+  # are set AND the nested `:branding` config key is empty. The flat keys are
+  # a deprecation shim; migrate to nested `:branding`. `:persistent_term`
+  # dedupe ensures the warning fires at most once per BEAM boot.
   #
-  # Threat note (T-06-01-02): the log message includes only key NAMES, never
-  # values — from_email / support_email values never leak into log output.
+  # The log message includes only key names, never values — email values never
+  # leak into log output.
   @spec warn_deprecated_branding() :: :ok
   def warn_deprecated_branding do
     key = :accrue_deprecated_branding_warned?
@@ -250,7 +248,7 @@ defmodule Accrue.Application do
         Enum.filter(flat, fn k -> Application.get_env(:accrue, k) != nil end)
 
       Logger.warning("""
-      [Accrue] Flat branding keys are DEPRECATED (removed before v1.0).
+      [Accrue] Flat branding keys are DEPRECATED.
       Migrate to the nested :branding keyword list. See guides/branding.md.
       Affected keys: #{inspect(affected)}
       """)

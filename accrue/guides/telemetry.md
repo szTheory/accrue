@@ -2,8 +2,8 @@
 
 Accrue emits `:telemetry` events for every public entry point. This guide
 documents the conventions, the high-signal `[:accrue, :ops, :*]` namespace,
-the OpenTelemetry span naming rules (OBS-04), and the default
-`Telemetry.Metrics` recipe (OBS-05).
+the OpenTelemetry span naming rules, and the default
+`Telemetry.Metrics` recipe.
 
 If you only read one section: jump to **Using the default metrics recipe**
 below — that's the four-line host wiring snippet that gets you ~15 production
@@ -46,11 +46,11 @@ they correspond to — they are idempotent under webhook replay via the
 
 Every ops event also carries an automatically-merged `operation_id` field
 in metadata, sourced from `Accrue.Actor.current_operation_id/0` (the same
-seed used for processor idempotency keys, D2-12). This lets you correlate
+seed used for processor idempotency keys). This lets you correlate
 ops events with the originating webhook, Oban job, or admin action across
 service boundaries.
 
-## Span naming conventions (OpenTelemetry, OBS-04)
+## Span naming conventions (OpenTelemetry)
 
 Accrue's OpenTelemetry span helpers (gated on the `:opentelemetry` optional
 dep) wrap every Billing context function with consistent naming:
@@ -117,7 +117,7 @@ The rule of thumb: **attach PII-free identifiers ONLY**. If an attribute
 could be reversed into a person, don't attach it. This is a host
 responsibility too — Accrue cannot inspect your custom span attributes for
 PII at runtime, so code review and the grep-able allowlist above are the
-enforcement mechanism (T-04-08-01, T-04-08-05).
+enforcement mechanism.
 
 ## Using the default metrics recipe
 
@@ -166,7 +166,7 @@ pipeline, and ops namespace. Distributions and percentile summaries beyond
 these are host choice — Accrue doesn't prescribe binning strategies because
 appropriate buckets depend heavily on your traffic shape and SLO targets.
 
-### Cardinality discipline (T-04-08-03)
+### Cardinality discipline
 
 The default metric definitions only attach low-cardinality `tags` (`:status`,
 `:source`, `:type`, `:stripe_status`). Customer IDs, subscription IDs, and
@@ -203,7 +203,7 @@ Accrue.Telemetry.Ops.emit(
 ```
 
 The `[:accrue, :ops]` prefix is hardcoded — callers cannot inject events
-outside the namespace via this helper (T-04-08-02). If you need to emit
+outside the namespace via this helper. If you need to emit
 under `[:accrue, :*]` for the firehose, use `Accrue.Telemetry.span/3`
 instead.
 

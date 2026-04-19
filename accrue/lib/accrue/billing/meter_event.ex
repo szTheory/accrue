@@ -1,7 +1,7 @@
 defmodule Accrue.Billing.MeterEvent do
   @moduledoc """
   Ecto schema for `accrue_meter_events` — the metered billing audit
-  ledger and transactional outbox (D4-03).
+  ledger and transactional outbox.
 
   One row per `Accrue.Billing.report_usage/3` call. Lifecycle:
 
@@ -18,7 +18,7 @@ defmodule Accrue.Billing.MeterEvent do
   `stripe_status = 'failed'` gives ops a free DLQ view.
 
   Only derived error shapes are stored in `stripe_error :map` — never
-  the raw Stripe payload (threat model T-04-02-03).
+  the raw Stripe payload.
   """
 
   use Ecto.Schema

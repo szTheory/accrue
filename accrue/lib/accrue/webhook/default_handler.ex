@@ -1,27 +1,25 @@
 defmodule Accrue.Webhook.DefaultHandler do
   @moduledoc """
-  Non-disableable default handler for built-in state reconciliation
-  (D2-30, WH-07, WH-09, WH-10).
+  Non-disableable default handler for built-in state reconciliation.
 
   Runs first in the dispatch chain before any user-registered handlers.
   Cannot be removed or reordered by configuration.
 
-  ## Phase 3 scope (Plan 07)
+  ## Behaviour
 
-  Extends the Phase 2 customer skeleton with the full Phase 3 event
-  family covering subscription, invoice, charge, refund, and payment
-  method reconcilation. Each reducer:
+  Reconciles Stripe webhook families covering subscription, invoice, charge,
+  refund, and payment method state. Each reducer:
 
     1. Derives `evt_ts` from the raw event `created` unix timestamp.
     2. Loads the local row by processor id.
-    3. **Skip-stale (WH-09):** if `row.last_stripe_event_ts != nil`
+    3. **Skip stale:** if `row.last_stripe_event_ts != nil`
        and `evt_ts` is strictly less than it, emit
        `[:accrue, :webhooks, :stale_event]` telemetry and return
-       `{:ok, :stale}` **without** calling the processor. Ties
-       (`:eq`) proceed per D3-49.
-    4. **Refetch canonical (WH-10):** always call
+       `{:ok, :stale}` **without** calling the processor. Timestamp ties
+       (`:eq`) still proceed.
+    4. **Refetch canonical:** always call
        `Accrue.Processor.fetch/2` to pull the current object —
-       never trust the payload snapshot.
+       never trust the payload snapshot alone.
     5. Project via the appropriate `*Projection.decompose/1` (or
        schema-specific upsert) and write via the webhook-path
        changeset (`Invoice.force_status_changeset/2` where a legal
@@ -108,10 +106,10 @@ defmodule Accrue.Webhook.DefaultHandler do
   # ---------------------------------------------------------------------
 
   @doc """
-  Reduces a raw event map (atom- or string-keyed) through the Phase 3
+  Reduces a raw event map (atom- or string-keyed) through the built-in
   reducer chain. Returns `{:ok, row}` on success, `{:ok, :stale}` if
   the event is older than `row.last_stripe_event_ts`, or `{:ok, :ignored}`
-  if the type is not a Phase 3 family.
+  if the type has no dedicated reducer.
   """
   @spec handle(map()) :: {:ok, struct() | :stale | :ignored} | {:error, term()}
   def handle(event) when is_map(event) do
@@ -1139,7 +1137,7 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp type_subject_id(:refund_issued), do: :charge_id
 
   # Wraps the mailer deliver in a try/rescue so dispatch failures don't
-  # rollback state reconciliation. Emits telemetry per T-06-07-08.
+  # rollback state reconciliation. Emits telemetry on dispatch failure.
   defp safe_deliver(type, assigns) do
     Accrue.Mailer.deliver(type, assigns)
   rescue

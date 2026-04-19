@@ -3,7 +3,7 @@
 Accrue's transactional email pipeline — semantic API, override ladder,
 async dispatch via Oban, localization, testing, and regulatory context.
 
-This guide documents Phase 6 (Email + PDF) as shipped in v1.0.
+This guide documents the email + PDF pipeline as shipped today.
 
 ## Quickstart
 
@@ -33,8 +33,7 @@ config :accrue, Accrue.Mailer.Swoosh,
 ```
 
 The host application's supervision tree is responsible for starting
-Oban, ChromicPDF, and the Swoosh adapter — Accrue does not start them
-itself (D-33, D-42).
+Oban, ChromicPDF, and the Swoosh adapter — Accrue does not start them.
 
 ## Semantic API
 
@@ -48,7 +47,7 @@ Accrue.Mailer.deliver(:receipt, %{
 })
 ```
 
-Full 13-type catalogue (Phase 6 MAIL-03 through MAIL-13):
+Full catalogue of supported transactional types:
 
 | Type atom | Trigger | PDF attached | Required assigns |
 |-----------|---------|--------------|------------------|
@@ -66,7 +65,7 @@ Full 13-type catalogue (Phase 6 MAIL-03 through MAIL-13):
 | `:coupon_applied` | coupon or promotion-code apply action | no | `customer_id`, `coupon_id` |
 | `:card_expiring_soon` | cron (`Accrue.Jobs.DetectExpiringCards`) | no | `customer_id`, `payment_method_id` |
 
-**Scalar-only assigns** (D-27): pass IDs, not `%Ecto.Schema{}` structs.
+**Scalar-only assigns:** pass IDs, not `%Ecto.Schema{}` structs.
 The worker rehydrates entities at delivery time. `Accrue.Mailer.Default`
 raises `ArgumentError` on non-scalar values to fail loud at the call
 site.
@@ -74,7 +73,7 @@ site.
 ## Override ladder
 
 Accrue follows a Pay-inspired three-rung override ladder for template
-customization (D-23):
+customization:
 
 ### Rung 1 — per-type kill switch
 
@@ -204,7 +203,7 @@ this invariant is violated.
 ## Localization
 
 Email rendering honors `customer.preferred_locale` and
-`customer.preferred_timezone` via the D6-03 precedence ladder:
+`customer.preferred_timezone` via this precedence order:
 
 1. `assigns[:locale]` / `assigns[:timezone]` explicit override
 2. `customer.preferred_locale` / `customer.preferred_timezone`
@@ -221,7 +220,7 @@ Override the CLDR backend via `config :accrue, :cldr_backend, MyApp.Cldr`.
 
 ## mix accrue.mail.preview
 
-Render every email type with canned fixtures (D6-08):
+Render every email type with canned fixtures:
 
 ```bash
 # Render all 13 types as HTML + TXT

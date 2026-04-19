@@ -10,7 +10,7 @@ defmodule Accrue.Billing.SubscriptionPauseResumeTest do
       three Stripe-supported values and persisted to the new column.
     * `paused_at` is stamped from the Fake clock at pause time.
     * Invalid `:pause_behavior` values are rejected at NimbleOptions
-      validation time (T-04-03-01).
+      validation time.
     * `comp_subscription/3` creates a subscription with the 100%-off
       coupon and skips the payment_method check (BILL-14, T-04-03-02).
   """

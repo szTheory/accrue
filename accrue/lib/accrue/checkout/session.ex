@@ -1,11 +1,11 @@
 defmodule Accrue.Checkout.Session do
   @moduledoc """
-  Stripe Checkout Session wrapper (CHKT-01/02).
+  Stripe Checkout Session wrapper.
 
   Wraps the processor-level `checkout_session_create/2` and
   `checkout_session_fetch/2` callbacks, projects the raw Stripe
   payload into a tightly-typed struct, and masks the embedded-mode
-  `:client_secret` field in `Inspect` output (T-04-07-08) — anyone
+  `:client_secret` field in `Inspect` output — anyone
   holding a `client_secret` can mount the embedded checkout flow on
   the customer's behalf until the session expires.
 
@@ -206,9 +206,8 @@ end
 defimpl Inspect, for: Accrue.Checkout.Session do
   import Inspect.Algebra
 
-  # T-04-07-08: client_secret is the embedded-mode bearer credential
-  # that authorizes mounting Stripe.js Elements on behalf of the
-  # customer. Mask it the same way Phase 2 masks WebhookEvent.raw_body.
+  # client_secret is the embedded-mode bearer credential that authorizes
+  # mounting Stripe.js Elements on behalf of the customer — mask like other secrets.
   def inspect(%Accrue.Checkout.Session{} = session, opts) do
     fields = [
       id: session.id,

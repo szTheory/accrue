@@ -1,16 +1,16 @@
 defmodule Accrue.BillingPortal.Session do
   @moduledoc """
-  Stripe Customer Billing Portal session wrapper (CHKT-04/05/06).
+  Stripe Customer Billing Portal session wrapper.
 
   Wraps the processor-level `portal_session_create/2` callback,
   projects the response into a tightly-typed struct, and **masks the
-  `:url` field in `Inspect` output** (T-04-07-01) — the portal URL is
+  `:url` field in `Inspect` output** — the portal URL is
   a single-use, short-lived (~5 minute) authenticated bearer
   credential that impersonates the customer in the Stripe portal.
   Any leak via Logger, APM, crash dumps, or telemetry handlers is an
   account-takeover vector within the TTL window.
 
-  ## Configuration (CHKT-05)
+  ## Configuration
 
   Programmatic `BillingPortal.Configuration` support is deferred to a
   future processor release. For now, host apps configure portal
@@ -147,11 +147,11 @@ end
 defimpl Inspect, for: Accrue.BillingPortal.Session do
   import Inspect.Algebra
 
-  # T-04-07-01: `:url` is a single-use, short-lived (~5 min) bearer
+  # `:url` is a single-use, short-lived (~5 min) bearer
   # credential that impersonates the customer in the portal until it
   # expires. Any leak via Logger / APM / crash dumps / telemetry
   # handlers is an account-takeover vector. Mask it in Inspect output
-  # the same way Phase 2 masks WebhookEvent.raw_body.
+  # the same way other sensitive structs mask raw payloads.
   def inspect(%Accrue.BillingPortal.Session{} = session, opts) do
     fields = [
       id: session.id,

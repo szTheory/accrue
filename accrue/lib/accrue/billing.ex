@@ -3,22 +3,22 @@ defmodule Accrue.Billing do
   Primary context module for Accrue billing operations.
 
   All write operations for billable entities live here, following
-  Phoenix context conventions (D2-05). Host schemas gain access to
+  conventional Phoenix context boundaries. Host schemas gain access to
   these operations via `use Accrue.Billable`, which injects a
   convenience `customer/1` that delegates here.
 
   ## Customer lifecycle
 
-    * `customer/1` — lazy fetch-or-create (D2-06). First call
+    * `customer/1` — lazy fetch-or-create. First call
       auto-creates an `accrue_customers` row via the configured
       processor; subsequent calls return the cached row.
     * `create_customer/1` — explicit create, always hits the processor.
-    * `customer!/1` and `create_customer!/1` — raising variants per
-      Phase 1 D-05 dual API pattern.
+    * `customer!/1` and `create_customer!/1` — raising variants following
+      the same `{:ok, _} | {:error, _}` vs `!` naming convention as the rest
+      of Accrue.
 
   All writes use `Ecto.Multi` to ensure the customer row and the
-  corresponding `accrue_events` entry are committed atomically
-  (EVT-04 invariant).
+  corresponding `accrue_events` entry are committed atomically.
   """
 
   alias Accrue.Billing.Customer

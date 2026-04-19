@@ -9,7 +9,7 @@ defmodule Accrue.Invoices.Render do
 
     1. Loads the invoice (+ preloads items + customer) if given an id.
     2. Freezes `Accrue.Config.branding/0` into the struct ONCE (Pitfall 8).
-    3. Resolves locale and timezone via the D6-03 precedence ladder:
+    3. Resolves locale and timezone via the configured precedence ladder:
        `opts > customer column > "en" / "Etc/UTC"`.
     4. Pre-computes every `formatted_*` string via `format_money/3` and
        `format_datetime/3` so templates never call CLDR directly.
@@ -248,7 +248,7 @@ defmodule Accrue.Invoices.Render do
 
   defp load_customer(_), do: nil
 
-  # Precedence ladder (D6-03): opts > customer column > "en"
+  # Precedence ladder: opts > customer column > "en"
   defp resolve_locale(opts, customer) do
     Keyword.get(opts, :locale) ||
       maybe_field(customer, :preferred_locale) ||
@@ -276,7 +276,7 @@ defmodule Accrue.Invoices.Render do
 
   defp currency_atom(bin) when is_binary(bin) do
     # Use to_existing_atom only — never create new atoms from untrusted
-    # input (T-06-03-03 atom-table DoS).
+    # input (guard against oversized atom tables).
     try do
       String.to_existing_atom(String.downcase(bin))
     rescue

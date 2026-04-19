@@ -64,7 +64,7 @@ defmodule Accrue.TelemetryTest do
       assert meta.actor.id == "evt_123"
     end
 
-    test "does not auto-include raw fun args in metadata (T-OBS-01)" do
+    test "does not auto-include raw fun args in metadata" do
       T.span([:accrue, :test, :thing, :do], %{safe: true}, fn ->
         _secret = "not-in-metadata"
         :ok

@@ -60,7 +60,7 @@ defmodule Accrue.Connect.LoginLinkTest do
     end
   end
 
-  describe "Inspect masking (T-05-03-01)" do
+  describe "Inspect masking" do
     test "inspect output contains <redacted> in the :url field" do
       link = %LoginLink{
         url: @url,

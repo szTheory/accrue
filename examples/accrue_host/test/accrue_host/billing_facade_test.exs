@@ -174,23 +174,27 @@ defmodule AccrueHost.BillingFacadeTest do
     assert subscription.processor == "fake"
   end
 
-  test "update_customer_tax_location/2 delegates to Accrue.Billing.update_customer_tax_location/2",
-       %{user: user} do
+  test "update_customer_tax_location/2 delegates to Accrue.Billing when available", %{user: user} do
     assert {:ok, customer} = Billing.customer_for(user)
 
-    assert {:ok, updated} =
-             Billing.update_customer_tax_location(user, %{
-               address: %{
-                 line1: "27 Fredrick Ave",
-                 city: "Albany",
-                 state: "NY",
-                 postal_code: "12207",
-                 country: "US"
-               }
-             })
+    attrs = %{
+      address: %{
+        line1: "27 Fredrick Ave",
+        city: "Albany",
+        state: "NY",
+        postal_code: "12207",
+        country: "US"
+      }
+    }
 
-    assert updated.id == customer.id
-    refute Map.has_key?(updated.data || %{}, "address")
+    if function_exported?(Accrue.Billing, :update_customer_tax_location, 2) do
+      assert {:ok, updated} = Billing.update_customer_tax_location(user, attrs)
+      assert updated.id == customer.id
+      refute Map.has_key?(updated.data || %{}, "address")
+    else
+      assert Billing.update_customer_tax_location(user, attrs) ==
+               {:error, :tax_location_update_requires_newer_accrue}
+    end
   end
 
   test "generated facade source stays thin and explicit" do
@@ -211,7 +215,8 @@ defmodule AccrueHost.BillingFacadeTest do
     assert billing_source =~
              "def update_customer_tax_location(billable, attrs) when is_map(attrs) do"
 
-    assert billing_source =~ "Billing.update_customer_tax_location(customer, attrs)"
+    assert billing_source =~ ":update_customer_tax_location"
+    assert billing_source =~ "apply(Billing, :update_customer_tax_location, [customer, attrs])"
   end
 
   test "subscribe/3 proof path creates customer state without direct fixture inserts", %{

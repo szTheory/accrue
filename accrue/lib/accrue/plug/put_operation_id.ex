@@ -1,6 +1,6 @@
 defmodule Accrue.Plug.PutOperationId do
   @moduledoc """
-  Sets `Accrue.Actor` operation_id from `conn.assigns[:request_id]` (D3-63).
+  Sets `Accrue.Actor` operation_id from `conn.assigns[:request_id]`.
 
   Run AFTER `Plug.RequestId` in the host endpoint pipeline so that the
   request_id assign is populated:
@@ -25,7 +25,7 @@ defmodule Accrue.Plug.PutOperationId do
   ## Security
 
   The `x-request-id` header is untrusted attacker input. It is used
-  ONLY as the idempotency seed (T-03-07-05) — never for authorization.
+  ONLY as the idempotency seed — never for authorization.
   An attacker pinning a value at worst causes their own retries to
   converge to the same Stripe call, which is correct.
   """

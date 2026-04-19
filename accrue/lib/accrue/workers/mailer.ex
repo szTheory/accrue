@@ -141,15 +141,15 @@ defmodule Accrue.Workers.Mailer do
 
   defp maybe_reply_to(email, _), do: email
 
-  # Types that carry an invoice PDF attachment (D6-04).
+  # Types that carry an invoice PDF attachment.
   defp needs_pdf?(:invoice_finalized), do: true
   defp needs_pdf?(:invoice_paid), do: true
   defp needs_pdf?(_), do: false
 
   # Builds a PDF via Accrue.Billing.render_invoice_pdf/2 and either
   # attaches it to the email, falls through to a hosted_invoice_url
-  # note (D6-04 terminal errors), or re-raises Accrue.PDF.RenderFailed
-  # so Oban backoff retries transient render errors (T-06-07-01).
+  # note (terminal PDF errors), or re-raises Accrue.PDF.RenderFailed
+  # so Oban backoff retries transient render errors.
   defp maybe_attach_pdf(email, assigns, type) do
     invoice_id =
       assigns[:invoice_id] ||
@@ -303,7 +303,7 @@ defmodule Accrue.Workers.Mailer do
   # Hydrate the Customer struct from the DB via `assigns[:customer_id]`.
   # Returns nil on any failure (missing id, bad id, DB error, schema
   # mismatch) — enrich/2 then proceeds with application-default locale/TZ.
-  # Keeping this best-effort means enrich/2 stays total (T-06-04-03).
+  # Keeping this best-effort means enrich/2 stays total.
   defp maybe_load_customer(assigns) do
     customer_id = Map.get(assigns, :customer_id) || Map.get(assigns, "customer_id")
 

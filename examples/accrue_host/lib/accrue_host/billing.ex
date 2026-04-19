@@ -50,7 +50,13 @@ defmodule AccrueHost.Billing do
   # Accrue tax-location API instead of teaching the UI about processor details.
   def update_customer_tax_location(billable, attrs) when is_map(attrs) do
     with {:ok, customer} <- customer_for(billable) do
-      Billing.update_customer_tax_location(customer, attrs)
+      # `apply/3` avoids compile-time coupling to Billing APIs that land after the
+      # last Hex publish (host Hex smoke compiles against released `accrue`).
+      if function_exported?(Billing, :update_customer_tax_location, 2) do
+        apply(Billing, :update_customer_tax_location, [customer, attrs])
+      else
+        {:error, :tax_location_update_requires_newer_accrue}
+      end
     end
   end
 
