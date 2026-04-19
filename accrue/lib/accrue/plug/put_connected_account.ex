@@ -1,10 +1,10 @@
 defmodule Accrue.Plug.PutConnectedAccount do
   @moduledoc """
   Stashes a per-request Connect `stripe_account` id into the process
-  dictionary (D5-01, CONN-11).
+  dictionary for the lifetime of the request.
 
   The scope value is resolved from a compile-time MFA tuple — never
-  from a raw HTTP header or query parameter (T-05-02-01). The configured
+  from a raw HTTP header or query parameter. The configured
   tenancy function receives the `%Plug.Conn{}` as its last argument so
   the host app can read `conn.assigns`, session data, or subdomain to
   decide which connected account the request operates on.

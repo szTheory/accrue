@@ -1,6 +1,6 @@
 defmodule Accrue.Checkout do
   @moduledoc """
-  Checkout context (CHKT-01..06).
+  Stripe Checkout integration facade.
 
   Thin facade over `Accrue.Checkout.Session.create/1`,
   `Accrue.Checkout.Session.retrieve/1`, and the success-URL
@@ -8,7 +8,7 @@ defmodule Accrue.Checkout do
 
   Host apps wire `reconcile/1` into their success URL controller —
   Accrue takes a `checkout_session_id` from the URL, refetches the
-  session from the processor (D2-29 — processor is canonical), and
+  session from the processor (processor response is canonical), and
   mirrors the linked `customer`, `subscription`, and `payment_intent`
   references into local rows via the webhook-path force changesets.
 

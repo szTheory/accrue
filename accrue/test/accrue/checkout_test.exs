@@ -189,7 +189,7 @@ defmodule Accrue.CheckoutTest do
     end
   end
 
-  describe "Inspect masking on Session.client_secret (T-04-07-08)" do
+  describe "Inspect masking on Session.client_secret" do
     test "client_secret is replaced with a redacted marker", %{customer: customer} do
       {:ok, session} =
         Session.create(%{

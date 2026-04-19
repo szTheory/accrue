@@ -31,11 +31,9 @@ defmodule Accrue.MixProject do
 
   # Configuration for the OTP application.
   #
-  # Plan 01-06 wires `Accrue.Application` as the OTP entry point (FND-05).
-  # The application runs two boot-time validations (config schema + Auth
-  # refuse-to-boot) and then starts an empty supervisor — Accrue is a
-  # library, so Repo/Oban/ChromicPDF/Finch remain host-owned (D-33, D-42,
-  # Pitfall #4).
+  # `Accrue.Application` runs boot-time validations (config schema + auth)
+  # and starts an empty supervisor — Accrue is a library, so Repo/Oban/
+  # ChromicPDF/Finch remain host-owned.
   def application do
     [
       extra_applications: [:logger],
@@ -50,7 +48,7 @@ defmodule Accrue.MixProject do
   defp deps do
     [
       # Core required deps — versions locked per CLAUDE.md §Technology Stack and
-      # re-verified in .planning/phases/01-foundations/01-RESEARCH.md (2026-04-11).
+      # re-verified against the project stack documentation.
       {:ecto, "~> 3.13"},
       {:ecto_sql, "~> 3.13"},
       {:postgrex, "~> 0.22"},
@@ -75,19 +73,18 @@ defmodule Accrue.MixProject do
       # Phoenix.Router.forward/3 when Phoenix is loaded, but the webhook
       # plug works without Phoenix (plain Plug.Router).
       {:phoenix, "~> 1.8", optional: true},
-      # Phase 6 Plan 03: Phoenix.Component + ~H sigil for the shared invoice
+      # Phoenix.Component + ~H sigil for the shared invoice
       # component library (`Accrue.Invoices.Components`) used by both email
       # (via HtmlBridge + <mj-raw>) and PDF (via Layouts.print_shell). Loaded
       # for compile + runtime because the components live in lib/, not test/.
       {:phoenix_live_view, "~> 1.1"},
       #
-      # NOTE on :sigra — not yet published to Hex. Per D-41 the
+      # NOTE on :sigra — optional integration; when not published to Hex the
       # Accrue.Integrations.Sigra adapter is conditionally compiled via
       # `Code.ensure_loaded?/1` + `@compile {:no_warn_undefined, _}` guards, so
       # Accrue does not need to declare :sigra in deps for the detection
       # pattern to work. Once :sigra publishes, this list should grow a
-      # `{:sigra, "~> 0.1", optional: true}` line. Tracked as a Wave-0
-      # deviation (Rule 3) in 01-01-bootstrap-SUMMARY.md.
+      # `{:sigra, "~> 0.1", optional: true}` line.
       {:opentelemetry, "~> 1.7", optional: true},
       {:telemetry_metrics, "~> 1.1", optional: true},
 

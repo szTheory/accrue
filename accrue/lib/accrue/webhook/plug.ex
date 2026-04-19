@@ -1,6 +1,6 @@
 defmodule Accrue.Webhook.Plug do
   @moduledoc """
-  Core webhook ingestion plug (D2-26).
+  Core webhook ingestion plug.
 
   Processes incoming webhook requests by:
 
@@ -17,7 +17,7 @@ defmodule Accrue.Webhook.Plug do
 
   After verification, `Accrue.Webhook.Ingest.run/4` atomically persists the
   webhook event, enqueues an Oban dispatch job, and records an accrue_events
-  ledger entry -- all in a single `Ecto.Multi` transaction (D2-24).
+  ledger entry -- all in a single `Ecto.Multi` transaction.
   """
 
   @behaviour Plug
@@ -71,20 +71,20 @@ defmodule Accrue.Webhook.Plug do
     secrets = resolve_secrets!(endpoint, processor)
     stripe_event = Signature.verify!(raw_body, sig_header, secrets)
 
-    # Transactional persist + Oban enqueue (D2-24, Plan 04).
+    # Transactional persist + Oban enqueue.
     # Event projection happens inside DispatchWorker from the persisted row.
-    # D5-01: thread `endpoint` through so DispatchWorker can branch on it.
+    # Thread `endpoint` through so DispatchWorker can branch on it.
     Accrue.Webhook.Ingest.run(conn, processor, stripe_event, raw_body, endpoint)
   end
 
-  # Endpoint-aware secret resolution (WH-13).
+  # Endpoint-aware secret resolution.
   #
   # Multi-endpoint mode: when `endpoint:` is passed via the plug init opts,
   # look up `[:webhook_endpoints, endpoint, :secret]` from `Accrue.Config`.
   # If the endpoint is missing, raise `Accrue.SignatureError` (rescued to 400)
-  # — fail closed, never bypass verification (T-04-06-01).
+  # — fail closed, never bypass verification.
   #
-  # Legacy mode (Phase 2 callers): when no `endpoint:` is set, fall back to
+  # Legacy mode: when no `endpoint:` is set, fall back to
   # `Accrue.Config.webhook_signing_secrets/1` keyed by processor atom.
   defp resolve_secrets!(nil, processor), do: Accrue.Config.webhook_signing_secrets(processor)
 

@@ -1,25 +1,23 @@
 defmodule Accrue.Connect do
   @moduledoc """
-  Phase 5 Connect domain facade (D5-01..D5-06).
+  Stripe Connect domain facade.
 
   Wraps the `Accrue.Processor` Connect callbacks with:
 
-    * `with_account/2` — pdict-scoped block that threads a
+    * `with_account/2` — process-dictionary scoped block that threads a
       `stripe_account` id through every nested processor call via the
-      `:accrue_connected_account_id` key. This is the same key the
-      Plan 05-01 `Accrue.Processor.Stripe.resolve_stripe_account/1`
-      precedence chain reads, and the Plan 05-01 Oban middleware
-      restores across the enqueue → perform boundary.
+      `:accrue_connected_account_id` key. This is the same key
+      `Accrue.Processor.Stripe.resolve_stripe_account/1` reads, and the
+      bundled Oban middleware restores it across the enqueue → perform boundary.
     * `create_account/2..list_accounts/1` dual bang/tuple facade
       (mirrors `Accrue.BillingPortal.Session`).
     * Local projection upsert via `Accrue.Connect.Projection.decompose/1`
       + `Accrue.Connect.Account.changeset/2`, wrapped in a single
       `Accrue.Repo.transact/1` block with `Accrue.Events.record_multi/3`
-      so the state mutation + audit row commit atomically (D-14).
+      so the state mutation + audit row commit atomically.
 
   Soft-delete semantics: `delete_account/2` tombstones the local row
-  via `deauthorized_at` rather than hard-deleting it (D5-05 audit
-  requirement).
+  via `deauthorized_at` rather than hard-deleting it (audit-friendly).
   """
 
   alias Accrue.Billing.Charge
@@ -55,7 +53,7 @@ defmodule Accrue.Connect do
   ]
 
   # ---------------------------------------------------------------------------
-  # Scope helpers (pdict writer side of the D5-01 precedence chain)
+  # Scope helpers (pdict writer side of the connected-account precedence chain)
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -96,7 +94,7 @@ defmodule Accrue.Connect do
   @doc """
   Writes the connected-account scope to the process dictionary without
   restoring afterwards. Used by `Accrue.Plug.PutConnectedAccount` and
-  the Plan 05-01 Oban middleware, where the scope lifetime matches the
+  the bundled Oban middleware, where the scope lifetime matches the
   request/job lifetime rather than a lexical block.
   """
   @spec put_account_id(String.t() | nil) :: :ok
@@ -120,7 +118,7 @@ defmodule Accrue.Connect do
   @doc """
   Normalizes a caller-supplied account reference to a bare stripe account
   id string. Accepts `%Account{}`, a binary, or `nil` (returns `nil` —
-  caller-side auth is out of scope; see T-05-02-02 in the plan threat model).
+  caller-side authorization is the host's responsibility).
   """
   @spec resolve_account_id(Account.t() | String.t() | nil) :: String.t() | nil
   def resolve_account_id(%Account{stripe_account_id: id}), do: id
@@ -202,7 +200,7 @@ defmodule Accrue.Connect do
   @doc """
   Updates a connected account through the processor. Nested params
   (`capabilities:`, `settings: %{payouts: %{schedule: ...}}`) are
-  forwarded verbatim (CONN-08/09).
+  forwarded verbatim to Stripe.
   """
   @spec update_account(String.t(), map(), keyword()) ::
           {:ok, Account.t()} | {:error, term()}
@@ -226,7 +224,7 @@ defmodule Accrue.Connect do
 
   @doc """
   Deletes a connected account through the processor and tombstones the
-  local row via `deauthorized_at` (soft delete per D5-05 — audit trail
+  local row via `deauthorized_at` (soft delete — audit trail
   is never hard-deleted).
   """
   @spec delete_account(String.t(), keyword()) ::
@@ -305,7 +303,7 @@ defmodule Accrue.Connect do
   end
 
   # ---------------------------------------------------------------------------
-  # Account Link + Login Link (D5-06, CONN-02, CONN-07)
+  # Account Link + Login Link
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -363,8 +361,8 @@ defmodule Accrue.Connect do
 
   **Only Express accounts are supported.** Standard and Custom
   accounts are rejected locally before reaching the processor to
-  avoid leaking "acct_X is Standard" via a Stripe 400 error payload
-  (T-05-03-02). The local row is consulted first; on a miss the
+  avoid leaking "acct_X is Standard" via a Stripe 400 error payload.
+  The local row is consulted first; on a miss the
   account is retrieved from the processor.
 
   Returns `{:ok, %Accrue.Connect.LoginLink{}}` on success. The
@@ -428,7 +426,7 @@ defmodule Accrue.Connect do
   end
 
   # ---------------------------------------------------------------------------
-  # Platform fee (D5-04, CONN-06) — pure Money math, caller-inject semantics
+  # Platform fee — pure Money math, caller-inject semantics
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -437,7 +435,7 @@ defmodule Accrue.Connect do
   **Caller-inject semantics.** This helper returns the computed fee; it
   does NOT auto-apply the value to any charge or transfer. Callers thread
   the result into `application_fee_amount:` on their own charge/transfer
-  calls (Plan 05-05) so the fee line is always auditable at the call site.
+  calls so the fee line is always auditable at the call site.
 
   See `Accrue.Connect.PlatformFee` for the full computation order and
   clamp semantics. Defaults come from the `:platform_fee` sub-key of the
@@ -463,7 +461,7 @@ defmodule Accrue.Connect do
   defdelegate platform_fee!(gross, opts \\ []), to: PlatformFee, as: :compute!
 
   # ---------------------------------------------------------------------------
-  # Destination charges (D5-03, CONN-04)
+  # Destination charges
   # ---------------------------------------------------------------------------
 
   @destination_charge_schema [
@@ -496,7 +494,7 @@ defmodule Accrue.Connect do
   ]
 
   @doc """
-  Creates a Stripe Connect **destination charge** (D5-03, CONN-04).
+  Creates a Stripe Connect **destination charge**.
 
   A destination charge is a single platform-scoped charge whose
   `transfer_data.destination` points at a connected account. Stripe
@@ -520,7 +518,7 @@ defmodule Accrue.Connect do
 
     * `:application_fee_amount` — `%Accrue.Money{}` platform fee.
       Compute via `Accrue.Connect.platform_fee/2` and pass through —
-      fees are caller-injected per D5-04 (never auto-applied).
+      fees are caller-injected (never auto-applied).
     * `:description`, `:metadata`, `:statement_descriptor`
     * `:payment_method` — processor payment method id
 
@@ -606,7 +604,7 @@ defmodule Accrue.Connect do
   end
 
   @doc """
-  Creates a **separate charge and transfer** flow (D5-03, CONN-05).
+  Creates a **separate charge and transfer** flow.
 
   Two distinct API calls:
 
@@ -635,7 +633,7 @@ defmodule Accrue.Connect do
     * `:destination` — connected account
     * `:transfer_amount` — `%Money{}` amount to forward (platform keeps
       the difference as its fee; Accrue does NOT compute this for you —
-      D5-04 caller-inject semantics)
+      caller-inject semantics)
   """
   @spec separate_charge_and_transfer(map() | keyword(), keyword()) ::
           {:ok, %{charge: Charge.t(), transfer: map()}}
@@ -717,15 +715,15 @@ defmodule Accrue.Connect do
 
   @doc """
   Creates a standalone **Transfer** from the platform balance to a
-  connected account (D5-03, CONN-05).
+  connected account.
 
   This is the bare Transfers API — a thin wrapper over
   `Processor.create_transfer/2`. Use when you need to manually move
   funds outside a charge flow (e.g. revenue share payouts from an
   accumulated platform balance).
 
-  Phase 5 does NOT ship a dedicated `accrue_connect_transfers` schema
-  (D5-05 events-ledger-only). Each successful call appends a
+  Accrue does not ship a dedicated `accrue_connect_transfers` table;
+  each successful call appends a
   `connect.transfer` row to `accrue_events` via `Accrue.Events.record/1`.
 
   Returns `{:ok, map()}` (the bare processor response).
@@ -798,7 +796,7 @@ defmodule Accrue.Connect do
   end
 
   # ---------------------------------------------------------------------------
-  # Internals — Plan 05-05 charges / transfers
+  # Internals — charges / transfers
   # ---------------------------------------------------------------------------
 
   defp resolve_customer(%Accrue.Billing.Customer{processor_id: pid} = c)

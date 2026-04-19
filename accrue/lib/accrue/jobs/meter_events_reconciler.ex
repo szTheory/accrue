@@ -1,6 +1,6 @@
 defmodule Accrue.Jobs.MeterEventsReconciler do
   @moduledoc """
-  Phase 4 Plan 02 — metered billing outbox reconciler (BILL-13, D4-03).
+  Metered billing outbox reconciler.
 
   Scans `accrue_meter_events` for rows stuck in `stripe_status = "pending"`
   more than 60 seconds and retries the Stripe call. Closes the "row
@@ -27,7 +27,7 @@ defmodule Accrue.Jobs.MeterEventsReconciler do
 
   On Stripe error the row flips to `failed` — the reconciler does NOT
   keep retrying the same row in the same tick, avoiding the
-  "stuck row infinite retry" footgun (T-04-02-06). Failures emit
+  "stuck row infinite retry" footgun. Failures emit
   `[:accrue, :ops, :meter_reporting_failed]` with `source: :reconciler`
   so ops can distinguish inline vs deferred failures.
   """

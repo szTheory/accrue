@@ -37,7 +37,7 @@ adapter: Gotenberg sidecar** below.
 
 ## ChromicPDF setup
 
-Accrue does **not** start ChromicPDF itself (D-33). The host app owns
+Accrue does **not** start ChromicPDF itself. The host app owns
 the supervision tree and supervises the pool. Pick the right shape for
 the environment:
 
@@ -71,7 +71,7 @@ Chromium sessions. If Accrue's `accrue_mailers` Oban queue concurrency
 exceeds that cap, workers will block on `:poolboy` checkouts and
 silently balloon job runtimes.
 
-**Rule (D6-04):** the `accrue_mailers` queue concurrency MUST be less
+**Rule:** the `accrue_mailers` queue concurrency MUST be less
 than or equal to the ChromicPDF `session_pool[:size]`. Start at
 `session_pool[:size]: 3` and `accrue_mailers: 3`; scale both together.
 
@@ -98,8 +98,8 @@ fall back to the Stripe-hosted invoice URL path described below.
 
 ## `Accrue.PDF.Null` graceful degradation {#null-adapter}
 
-`Accrue.PDF.Null` is the escape hatch for Chrome-hostile deploys
-(D6-06). It implements `@behaviour Accrue.PDF` but never renders:
+`Accrue.PDF.Null` is the escape hatch for Chrome-hostile deploys.
+It implements `@behaviour Accrue.PDF` but never renders:
 
 ```elixir
 iex> Accrue.PDF.render("<html/>", [])
@@ -270,4 +270,4 @@ embedding overhead. That is the recommended default for v1.0.
 - `Accrue.PDF.ChromicPDF` — production adapter
 - `Accrue.PDF.Null` — disabled adapter
 - `Accrue.Error.PdfDisabled` — tagged error returned by `Null`
-- `Accrue.Storage` — storage behaviour for persisted PDFs (D6-04)
+- `Accrue.Storage` — storage behaviour for persisted PDFs

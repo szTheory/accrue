@@ -38,7 +38,7 @@ defmodule Accrue.Config do
       doc:
         "Storage adapter implementing `Accrue.Storage` behaviour. v1.0 ships " <>
           "`Accrue.Storage.Null` only; hosts supply a custom adapter (e.g., S3) to enable " <>
-          "persisted asset storage. `Accrue.Storage.Filesystem` ships in v1.1 (D6-04)."
+          "persisted asset storage. `Accrue.Storage.Filesystem` ships in v1.1."
     ],
 
     # --- Stripe (runtime only — NEVER compile_env) -----------------------
@@ -55,34 +55,35 @@ defmodule Accrue.Config do
       doc: "Stripe API version pinned by the `:lattice_stripe` wrapper."
     ],
 
-    # --- Email pipeline (Plan 05 reads these) ----------------------------
+    # --- Email pipeline ----------------------------------------------------
     emails: [
       type: :keyword_list,
       default: [],
       doc:
-        "Per-email-type switches (D-25). Keys are email type atoms; values are `boolean` or `{Mod, :fun, args}` MFA callbacks."
+        "Per-email-type switches. Keys are email type atoms; values are `boolean` or `{Mod, :fun, args}` MFA callbacks."
     ],
     email_overrides: [
       type: :keyword_list,
       default: [],
       doc:
-        "Per-email-type template module overrides (D-23 rung 3). Keys are email type atoms; values are module names."
+        "Per-email-type template module overrides (third rung of the override ladder; see `guides/email.md`). " <>
+          "Keys are email type atoms; values are module names."
     ],
     attach_invoice_pdf: [
       type: :boolean,
       default: true,
-      doc: "Auto-attach invoice PDF to the receipt email (D-39)."
+      doc: "Auto-attach invoice PDF to the receipt email."
     ],
 
-    # --- Event ledger (Plan 03/06 read this) -----------------------------
+    # --- Event ledger ------------------------------------------------------
     enforce_immutability: [
       type: :boolean,
       default: false,
       doc:
-        "When true, `Accrue.Application` boot raises if the current PG role has UPDATE/DELETE on `accrue_events` (D-10)."
+        "When true, `Accrue.Application` boot raises if the current PG role has UPDATE/DELETE on `accrue_events`."
     ],
 
-    # --- Brand config (Plan 05 reads these for email defaults — D-24) ----
+    # --- Brand config (flat keys; prefer nested :branding) ---------------
     business_name: [
       type: :string,
       default: "Accrue",
@@ -119,17 +120,17 @@ defmodule Accrue.Config do
       doc: "Default currency when one is not explicitly supplied."
     ],
 
-    # --- Webhook pipeline (Plan 03 reads these) ----------------------------
+    # --- Webhook pipeline --------------------------------------------------
     webhook_signing_secrets: [
       type: :any,
       default: %{},
       doc:
         "Map of processor atom to signing secret(s). Each value is a string " <>
-          "or list of strings for rotation (D2-05). Example: " <>
+          "or list of strings for rotation. Example: " <>
           "`%{stripe: [\"whsec_old\", \"whsec_new\"]}`."
     ],
 
-    # --- Webhook retention (Plan 04, D2-34) --------------------------------
+    # --- Webhook retention -------------------------------------------------
     succeeded_retention_days: [
       type: {:or, [:pos_integer, {:in, [:infinity]}]},
       default: 14,
@@ -149,17 +150,17 @@ defmodule Accrue.Config do
       default: [],
       doc:
         "List of modules implementing `Accrue.Webhook.Handler` behaviour. " <>
-          "Called sequentially after the default handler on each webhook event (D2-31). " <>
+          "Called sequentially after the default handler on each webhook event. " <>
           "Example: `[MyApp.BillingHandler, MyApp.AnalyticsHandler]`."
     ],
 
-    # --- Phase 3 subscription lifecycle ----------------------------------
+    # --- Subscription lifecycle --------------------------------------------
     expiring_card_thresholds: [
       type: {:custom, __MODULE__, :validate_descending, []},
       default: [30, 7, 1],
       doc:
         "Strictly-descending list of day thresholds at which the expiring-card " <>
-          "reminder email fires ahead of a stored card's expiration (D3-11). " <>
+          "reminder email fires ahead of a stored card's expiration. " <>
           "Default: `[30, 7, 1]` — 30, 7, and 1 days out."
     ],
     idempotency_mode: [
@@ -167,7 +168,7 @@ defmodule Accrue.Config do
       default: :warn,
       doc:
         "How `Accrue.Actor.current_operation_id!/0` behaves when the process " <>
-          "dict has no operation_id (D3-63). `:strict` raises `Accrue.ConfigError`; " <>
+          "dict has no operation_id. `:strict` raises `Accrue.ConfigError`; " <>
           "`:warn` (the default) generates a random UUID and logs a warning. " <>
           "Set to `:strict` in production to ensure every outbound processor " <>
           "call carries a deterministic idempotency key."
@@ -177,10 +178,10 @@ defmodule Accrue.Config do
       default: 90,
       doc:
         "Number of days to retain `:succeeded` refund records before pruning " <>
-          "(D3-34). Default: 90."
+          "Default: 90."
     ],
 
-    # --- Phase 4: advanced billing + webhook hardening -------------------
+    # --- Dunning + multi-endpoint webhooks + DLQ replay -------------------
     dunning: [
       type: :keyword_list,
       default: [
@@ -190,7 +191,7 @@ defmodule Accrue.Config do
         telemetry_prefix: [:accrue, :ops]
       ],
       doc:
-        "Dunning grace-period overlay config (D4-02). `:mode` is " <>
+        "Dunning grace-period overlay config. `:mode` is " <>
           "`:stripe_smart_retries` or `:disabled`; `:terminal_action` is " <>
           "`:unpaid` or `:canceled`; `:grace_days` adds N days past Stripe's " <>
           "last retry before Accrue asks the processor facade to move the " <>
@@ -201,31 +202,31 @@ defmodule Accrue.Config do
       default: [],
       doc:
         "Map of endpoint name to `[secret:, mode:]` for multi-endpoint " <>
-          "webhooks (WH-13). Example: `[primary: [secret: \"whsec_...\"], " <>
+          "webhooks. Example: `[primary: [secret: \"whsec_...\"], " <>
           "connect: [secret: \"whsec_...\", mode: :connect]]`."
     ],
     dlq_replay_batch_size: [
       type: :pos_integer,
       default: 100,
       doc:
-        "Number of rows per chunk in `Accrue.Webhooks.DLQ.requeue_where/2` bulk replay (D4-04)."
+        "Number of rows per chunk in `Accrue.Webhooks.DLQ.requeue_where/2` bulk replay."
     ],
     dlq_replay_stagger_ms: [
       type: :non_neg_integer,
       default: 1_000,
       doc:
         "Milliseconds to sleep between chunks during DLQ bulk replay " <>
-          "(protects downstream). Default: 1_000 (D4-04)."
+          "(protects downstream). Default: 1_000."
     ],
     dlq_replay_max_rows: [
       type: :pos_integer,
       default: 10_000,
       doc:
         "Hard cap on bulk replay. Returns `{:error, :replay_too_large}` " <>
-          "unless `force: true` is passed. Default: 10_000 (D4-04)."
+          "unless `force: true` is passed. Default: 10_000."
     ],
 
-    # --- Phase 6: Branding (D6-02) ----------------------------------------
+    # --- Branding ----------------------------------------------------------
     branding: [
       type: :keyword_list,
       required: false,
@@ -256,18 +257,18 @@ defmodule Accrue.Config do
         list_unsubscribe_url: [type: {:or, [:string, nil]}, default: nil]
       ],
       doc:
-        "Branding config (D6-02). Single source of truth for email + PDF brand. " <>
+        "Branding config. Single source of truth for email + PDF brand. " <>
           "`:from_email` and `:support_email` are required for any real deploy. " <>
           "See guides/branding.md."
     ],
 
-    # --- Phase 6: enrich/2 precedence ladder defaults (D6-03) ------------
+    # --- Locale / timezone defaults (enrich/2 precedence) ----------------
     default_locale: [
       type: :string,
       default: "en",
       doc:
         "Application-wide default locale for email + PDF rendering. " <>
-          "Third rung of the D6-03 precedence ladder (after assigns[:locale] " <>
+          "Third rung of the locale precedence ladder (after assigns[:locale] " <>
           "and customer.preferred_locale). Bad locales fall back to \"en\"."
     ],
     default_timezone: [
@@ -275,7 +276,7 @@ defmodule Accrue.Config do
       default: "Etc/UTC",
       doc:
         "Application-wide default IANA timezone for datetime rendering. " <>
-          "Third rung of the D6-03 precedence ladder (after assigns[:timezone] " <>
+          "Third rung of the timezone precedence ladder (after assigns[:timezone] " <>
           "and customer.preferred_timezone). Bad zones fall back to \"Etc/UTC\"."
     ],
     cldr_backend: [
@@ -283,10 +284,10 @@ defmodule Accrue.Config do
       default: Accrue.Cldr,
       doc:
         "Cldr backend module used by `Accrue.Workers.Mailer.enrich/2` " <>
-          "to validate locale strings (D6-03). Defaults to `Accrue.Cldr`."
+          "to validate locale strings. Defaults to `Accrue.Cldr`."
     ],
 
-    # --- Phase 5: Connect (D5-01, D5-04) ---------------------------------
+    # --- Stripe Connect ----------------------------------------------------
     connect: [
       type: :keyword_list,
       default: [
@@ -306,17 +307,17 @@ defmodule Accrue.Config do
           "by `Accrue.Connect.platform_fee/2`: `:percent` is a `Decimal` " <>
           "percentage (e.g. `Decimal.new(\"2.9\")` for 2.9%), `:fixed` is " <>
           "an `Accrue.Money` fee in minor units added after the percentage, " <>
-          "and `:min`/`:max` optionally clamp the result (D5-04)."
+          "and `:min`/`:max` optionally clamp the result."
     ]
   ]
 
   @moduledoc """
   Runtime configuration schema for Accrue, backed by `NimbleOptions`.
 
-  This module is the **single source of truth** for every Phase 1 config
-  key. Downstream plans (03/04/05/06) READ via `get!/1` or
-  `Application.get_env/3` but never edit this schema. Plan 02 intentionally
-  front-loads the full keyset so Wave 2 plans never collide on this file.
+  This module is the **single source of truth** for supported `:accrue`
+  application keys. Host code reads validated values via `get!/1` or
+  `Application.get_env/3`; extend behaviour through adapters, not by editing
+  this schema from application code.
 
   ## Compile-time vs runtime
 
@@ -334,7 +335,7 @@ defmodule Accrue.Config do
   """
 
   @doc """
-  Validates a keyword list against the Phase 1 schema and returns the
+  Validates a keyword list against the Accrue config schema and returns the
   normalized form. Raises `NimbleOptions.ValidationError` on failure.
   """
   @spec validate!(keyword()) :: keyword()
@@ -362,8 +363,8 @@ defmodule Accrue.Config do
   end
 
   @doc """
-  Returns the NimbleOptions schema keyword list. Used by Plan 06's
-  `validate_at_boot!/0` to iterate keys.
+  Returns the NimbleOptions schema keyword list. Used by boot-time
+  validation to iterate keys.
   """
   @spec schema() :: keyword()
   def schema, do: @schema
@@ -530,35 +531,32 @@ defmodule Accrue.Config do
   def dead_retention_days, do: get!(:dead_retention_days)
 
   @doc """
-  Returns the list of user-registered webhook handler modules (D2-31).
+  Returns the list of user-registered webhook handler modules.
   """
   @spec webhook_handlers() :: [module()]
   def webhook_handlers, do: get!(:webhook_handlers)
 
   @doc """
-  Returns the configured Stripe API version string (D2-14).
+  Returns the configured Stripe API version string.
   """
   @spec stripe_api_version() :: String.t()
   def stripe_api_version, do: get!(:stripe_api_version)
 
-  # --- Phase 4 helpers --------------------------------------------------
-
   @doc """
-  Returns the dunning grace-period overlay config (D4-02).
+  Returns the dunning grace-period overlay config.
   """
   @spec dunning() :: keyword()
   def dunning, do: get!(:dunning)
 
   @doc """
-  Returns the branding config keyword list (D6-02).
+  Returns the branding config keyword list.
 
-  Falls back to building a keyword list from the one-minor deprecated
-  flat branding keys (`:business_name`, `:logo_url`, `:from_email`,
+  Falls back to building a keyword list from deprecated top-level flat
+  branding keys (`:business_name`, `:logo_url`, `:from_email`,
   `:from_name`, `:support_email`, `:business_address`) when the nested
   `:branding` key is unset or empty. Nested `:branding` always takes
-  precedence. The flat-key shim is removed before v1.0 — see
-  `Accrue.Application.warn_deprecated_branding/0` for the boot-time
-  Logger.warning.
+  precedence. See `Accrue.Application.warn_deprecated_branding/0` for the
+  boot-time `Logger.warning` when flat keys are still in use.
   """
   @spec branding() :: keyword()
   def branding do
@@ -593,13 +591,13 @@ defmodule Accrue.Config do
   end
 
   @doc """
-  Returns a single branding key (D6-02). Raises if the key is unknown.
+  Returns a single branding key. Raises if the key is unknown.
   """
   @spec branding(atom()) :: term()
   def branding(key) when is_atom(key), do: Keyword.fetch!(branding(), key)
 
   @doc """
-  Returns the list of one-minor-deprecated flat branding keys (D6-02).
+  Returns the list of deprecated flat branding keys.
   Consumed by `Accrue.Application.warn_deprecated_branding/0` and by the
   internal flat-key shim in `branding/0`.
   """
@@ -647,7 +645,7 @@ defmodule Accrue.Config do
   end
 
   @doc """
-  Returns the Connect config keyword list (D5-01, D5-04).
+  Returns the Connect config keyword list.
 
   Shape: `[default_stripe_account: String.t() | nil,
             platform_fee: [percent: Decimal.t(), fixed: Accrue.Money.t() | nil,
@@ -657,44 +655,44 @@ defmodule Accrue.Config do
   def connect, do: get!(:connect)
 
   @doc """
-  Returns the multi-endpoint webhook config (WH-13).
+  Returns the multi-endpoint webhook config.
   """
   @spec webhook_endpoints() :: keyword()
   def webhook_endpoints, do: get!(:webhook_endpoints)
 
   @doc """
-  Returns the DLQ bulk-replay chunk size (D4-04).
+  Returns the DLQ bulk-replay chunk size.
   """
   @spec dlq_replay_batch_size() :: pos_integer()
   def dlq_replay_batch_size, do: get!(:dlq_replay_batch_size)
 
   @doc """
-  Returns the DLQ bulk-replay inter-chunk stagger in milliseconds (D4-04).
+  Returns the DLQ bulk-replay inter-chunk stagger in milliseconds.
   """
   @spec dlq_replay_stagger_ms() :: non_neg_integer()
   def dlq_replay_stagger_ms, do: get!(:dlq_replay_stagger_ms)
 
   @doc """
-  Returns the hard cap on DLQ bulk-replay rows (D4-04).
+  Returns the hard cap on DLQ bulk-replay rows.
   """
   @spec dlq_replay_max_rows() :: pos_integer()
   def dlq_replay_max_rows, do: get!(:dlq_replay_max_rows)
 
   @doc """
-  Returns the application default locale string (D6-03).
+  Returns the application default locale string.
   """
   @spec default_locale() :: String.t()
   def default_locale, do: get!(:default_locale)
 
   @doc """
-  Returns the application default IANA timezone string (D6-03).
+  Returns the application default IANA timezone string.
   """
   @spec default_timezone() :: String.t()
   def default_timezone, do: get!(:default_timezone)
 
   @doc """
   Returns the configured Cldr backend module used by
-  `Accrue.Workers.Mailer.enrich/2` to validate locale strings (D6-03).
+  `Accrue.Workers.Mailer.enrich/2` to validate locale strings.
   """
   @spec cldr_backend() :: module()
   def cldr_backend, do: get!(:cldr_backend)
@@ -780,7 +778,7 @@ defmodule Accrue.Config do
 
   @doc """
   NimbleOptions `:custom` validator for `:branding.accent_color` /
-  `:branding.secondary_color` (D6-02). Accepts `#rgb`, `#rrggbb`, and
+  `:branding.secondary_color`. Accepts `#rgb`, `#rrggbb`, and
   `#rrggbbaa` hex color strings; rejects anything else.
   """
   @spec validate_hex(term()) :: {:ok, String.t()} | {:error, String.t()}

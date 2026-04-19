@@ -64,7 +64,7 @@ defmodule Accrue.Connect.ChargesTest do
       end)
 
       # The new charge must be tagged :platform scope, NOT
-      # "acct_override_scope" — Pitfall 2 guard (T-05-05-01).
+      # "acct_override_scope" — Pitfall 2 guard.
       platform_charges = Fake.charges_on(:platform)
       scoped_charges = Fake.charges_on("acct_override_scope")
 
@@ -205,7 +205,7 @@ defmodule Accrue.Connect.ChargesTest do
                })
 
       # Charge row is persisted even though the transfer failed, so the
-      # caller can reconcile. (T-05-05-03 mitigation.)
+      # caller can reconcile.
       assert Repo.get(Charge, charge.id)
     end
 

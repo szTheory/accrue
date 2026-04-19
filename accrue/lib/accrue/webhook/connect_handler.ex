@@ -1,6 +1,6 @@
 defmodule Accrue.Webhook.ConnectHandler do
   @moduledoc """
-  Webhook handler for events arriving on the `:connect` endpoint (D5-01, D5-05).
+  Webhook handler for events arriving on the `:connect` endpoint.
 
   Stripe Connect platforms receive two distinct webhook streams:
 
@@ -14,14 +14,13 @@ defmodule Accrue.Webhook.ConnectHandler do
 
   The `Accrue.Webhook.DispatchWorker` reads `row.endpoint` from the
   persisted `accrue_webhook_events` row and selects the handler module at
-  dispatch time (Plan 05-01). This module implements the D5-05 reducer
-  set on top of that plumbing.
+  dispatch time. This module implements the Connect-specific reducers.
 
   ## Reducer shape
 
   Every reducer runs inside `Accrue.Repo.transact/1` with an
   `Accrue.Events.record/1` call appended so the state mutation and audit
-  row commit atomically (EVT-04). For events whose payload is needed
+  row commit atomically. For events whose payload is needed
   beyond the `%Accrue.Webhook.Event{}` struct's `object_id`, the raw
   `accrue_webhook_events.data` jsonb row is refetched via
   `ctx.webhook_event_id` — the handler never trusts the lean Event
@@ -46,11 +45,11 @@ defmodule Accrue.Webhook.ConnectHandler do
   functional no-op — rather than clobbering later events with older
   snapshot data (Pitfall 3).
 
-  ## Deauthorization tombstoning (D5-05)
+  ## Deauthorization tombstoning
 
   `account.application.deauthorized` NEVER hard-deletes the local row.
   It stamps `deauthorized_at` via `force_status_changeset/2` so the row
-  survives for audit (T-05-06-02), and emits an ops telemetry event
+  survives for audit, and emits an ops telemetry event
   `[:accrue, :ops, :connect_account_deauthorized]` via
   `Accrue.Telemetry.Ops`.
 

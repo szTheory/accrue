@@ -1,6 +1,6 @@
 defmodule Accrue.Storage do
   @moduledoc """
-  Behaviour + facade for pluggable PDF / asset storage (D6-04).
+  Behaviour + facade for pluggable PDF / asset storage.
 
   v1.0 ships `Accrue.Storage.Null` only — all three callbacks are
   no-ops: `put/3` echoes the key back, `get/1` and `delete/1` return
@@ -9,20 +9,19 @@ defmodule Accrue.Storage do
   adapter implementing the three callbacks below and set
   `config :accrue, :storage_adapter, MyApp.Storage.S3`.
 
-  ## Telemetry (D6-04)
+  ## Telemetry
 
   `[:accrue, :storage, :put | :get | :delete, :start | :stop | :exception]`
   is emitted via `Accrue.Telemetry.span/3` with metadata
   `%{adapter: module, key: binary, bytes: non_neg_integer}` for `put`
   (bytes omitted on get/delete). Raw binary bodies are NEVER placed in
-  metadata — `:bytes` is a scalar `byte_size/1` of the payload only
-  (T-06-02-02 mitigation).
+  metadata — `:bytes` is a scalar `byte_size/1` of the payload only.
 
   ## Key scheme
 
   Keys are library-derived binaries (e.g., `"invoices/<id>.pdf"`) —
   never user input in v1.0. The future `Filesystem` adapter (v1.1) MUST
-  add a path-normalization guard against traversal (T-06-02-03).
+  add a path-normalization guard against traversal.
   """
 
   @type key :: String.t()

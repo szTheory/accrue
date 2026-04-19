@@ -59,7 +59,7 @@ defmodule Accrue.LiveStripe.ConnectTest do
         {:ok, skip: true}
 
       not String.starts_with?(secret, "sk_test_") ->
-        # Spoofing guard (T-05-07-03): refuse to run live_stripe tests
+        # Spoofing guard: refuse to run live_stripe tests
         # against a production key. Stripe prefixes live keys with
         # `sk_live_` — abort loudly rather than accidentally charging
         # a real account.

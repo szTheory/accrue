@@ -70,7 +70,7 @@ defmodule Accrue.BillingPortalTest do
     end
   end
 
-  describe "Inspect masking on Session.url (T-04-07-01)" do
+  describe "Inspect masking on Session.url" do
     test "url is replaced with a redacted marker", %{customer: customer} do
       {:ok, session} =
         Session.create(%{
@@ -85,7 +85,7 @@ defmodule Accrue.BillingPortalTest do
     end
   end
 
-  describe "Portal configuration checklist guide (CHKT-05)" do
+  describe "Portal configuration checklist guide" do
     test "guide file exists and documents the three required Dashboard toggles" do
       path = Path.join([File.cwd!(), "guides", "portal_configuration_checklist.md"])
       assert File.exists?(path)

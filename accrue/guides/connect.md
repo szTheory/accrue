@@ -7,7 +7,7 @@ computing platform fees, rendering Express dashboard login links, and
 receiving Connect webhooks on a dedicated endpoint.
 
 This guide walks through the full public API in the order a platform
-builder will encounter it, and calls out the Phase 5 footguns that
+builder will encounter it, and calls out the Connect footguns that
 will silently cost you money if ignored (Pitfalls section).
 
 > **Tagline:** one process dictionary key, one changeset module, one
@@ -189,8 +189,8 @@ The block's prior pdict value is restored (or cleared) in an `after`
 clause — nested `with_account/2` calls save and restore cleanly, and
 exceptions never leak scope across test boundaries.
 
-CONN-11 guarantees: the exact same `Accrue.Billing.*` call must work
-inside and outside `with_account/2`. The Phase 5 dual-scope test
+Accrue guarantees the exact same `Accrue.Billing.*` call works
+inside and outside `with_account/2`. The dual-scope test
 (`test/accrue/connect/dual_scope_test.exs`) proves this contract by
 calling `create_customer/1` in both scopes and asserting the Fake
 processor's keyspaces are isolated.
@@ -226,7 +226,7 @@ always auditable.
 ### Config schema
 
 ```elixir
-# Source: D5-04 — extends Accrue.Config with :connect key
+# `:connect` extends `Accrue.Config` (platform fee defaults, etc.)
 config :accrue,
   connect: [
     default_stripe_account: nil,
@@ -322,7 +322,7 @@ STRIPE_TEST_SECRET_KEY=sk_test_... mix test --only live_stripe
 
 The suite is excluded from default `mix test` runs via
 `test/test_helper.exs`. It refuses to run against keys that don't
-start with `sk_test_` (T-05-07-03 spoofing guard).
+start with `sk_test_` (spoofing guard against production keys).
 
 ---
 
@@ -341,7 +341,7 @@ platform scope regardless of any surrounding `with_account/2` block.
 ### Pitfall 2 — Silent scope leak across async boundaries
 
 The process dictionary does not survive `Task.async`, GenServer
-dispatch, or Oban job enqueue. Plan 01's Oban middleware re-reads
+dispatch, or Oban job enqueue. Accrue's Oban middleware re-reads
 `:accrue_connected_account_id` at enqueue time and restores it at
 perform time — use `Accrue.Workers.ConnectAwareWorker` or enqueue
 through a helper that threads the scope through job args.
@@ -401,10 +401,9 @@ refresh from Stripe on demand.
 
 ## References
 
-- Phase 5 RESEARCH: `.planning/phases/05-connect/05-RESEARCH.md`
-- D5-01 (pdict scope) — `Accrue.Connect.with_account/2`
-- D5-02 (hybrid projection) — `Accrue.Connect.Account` schema
-- D5-03 (destination vs separate) — `destination_charge/2`, `separate_charge_and_transfer/2`
-- D5-04 (platform fee) — `Accrue.Connect.PlatformFee`
-- D5-05 (audit soft-delete) — `delete_account/2` tombstones via `deauthorized_at`
-- D5-06 (LoginLink/AccountLink) — `Accrue.Connect.LoginLink`, `Accrue.Connect.AccountLink`
+- **Process-scoped Connect** — `Accrue.Connect.with_account/2`
+- **Local account projection** — `Accrue.Connect.Account` schema
+- **Destination vs separate charges** — `destination_charge/2`, `separate_charge_and_transfer/2`
+- **Platform fee math** — `Accrue.Connect.PlatformFee`
+- **Audit-friendly deletes** — `delete_account/2` tombstones via `deauthorized_at`
+- **Onboarding and Express login** — `Accrue.Connect.AccountLink`, `Accrue.Connect.LoginLink`

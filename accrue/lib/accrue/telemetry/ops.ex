@@ -1,13 +1,13 @@
 defmodule Accrue.Telemetry.Ops do
   @moduledoc """
-  Ops-grade telemetry emit helper (OBS-03 / D4-02 / D4-04).
+  Ops-grade telemetry emit helper.
 
   High-signal events go under `[:accrue, :ops, :*]`. SREs subscribe to this
   namespace for alertable conditions. The firehose `[:accrue, :*]` namespace
   contains every public entry point (via `Accrue.Telemetry.span/3`) and is
   too noisy for paging.
 
-  ## Canonical ops events in Phase 4
+  ## Canonical ops events
 
       [:accrue, :ops, :revenue_loss]
       [:accrue, :ops, :dunning_exhaustion]
@@ -18,11 +18,11 @@ defmodule Accrue.Telemetry.Ops do
       [:accrue, :ops, :webhook_dlq, :replay]
       [:accrue, :ops, :webhook_dlq, :prune]
 
-  ## Threat mitigations
+  ## Integrity notes
 
-    * **T-04-08-02 (Tampering)** — the `[:accrue, :ops]` prefix is hardcoded.
+    * **Tampering** — the `[:accrue, :ops]` prefix is hardcoded.
       Callers cannot inject events outside the namespace via this helper.
-    * **T-04-08-04 (Repudiation)** — `operation_id` is auto-merged from
+    * **Correlation** — `operation_id` is auto-merged from
       `Accrue.Actor.current_operation_id/0` via `Map.put_new_lazy/3` when the
       caller does not supply one explicitly.
 

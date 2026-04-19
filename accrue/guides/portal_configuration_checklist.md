@@ -1,4 +1,4 @@
-# Customer Portal Configuration Checklist (CHKT-05)
+# Customer Portal Configuration Checklist
 
 This guide documents the three Stripe Dashboard toggles every Accrue
 host app **must** enable on its Customer Billing Portal configuration
@@ -14,8 +14,8 @@ that bypasses every dunning workflow Accrue offers
 (`Accrue.Billing.Dunning`, `[:accrue, :ops, :dunning_exhaustion]`,
 grace periods, retain-offer flows, and so on).
 
-Pitfall 6 of the Phase 4 research is exactly this: the portal's
-defaults erase the entire revenue-recovery surface unless three
+The portal's out-of-the-box defaults erase much of the revenue-recovery
+surface unless three
 specific toggles are flipped in the Stripe Dashboard. Flipping them is
 free, takes 30 seconds, and is a one-time per-mode (test + live)
 action.
@@ -110,5 +110,4 @@ Dashboard checklist above is the source of truth.
 - `Accrue.BillingPortal.Session` — wrapper module
 - `Accrue.Billing.Dunning` — the revenue-recovery surface that these
   toggles protect
-- Phase 4 Plan 07 PLAN/SUMMARY — full requirement traceability
-  (CHKT-04, CHKT-05, CHKT-06)
+- Stripe Dashboard — **Settings → Billing → Customer portal** (test and live)

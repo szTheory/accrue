@@ -1,7 +1,7 @@
 if Code.ensure_loaded?(Telemetry.Metrics) do
   defmodule Accrue.Telemetry.Metrics do
     @moduledoc """
-    Default `Telemetry.Metrics` recipe for SRE teams (OBS-05).
+    Default `Telemetry.Metrics` recipe for SRE teams.
 
     This module is conditionally compiled — it is only available when the
     optional `:telemetry_metrics` dependency is present.
@@ -30,7 +30,7 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
     Distributions and percentile summaries beyond the defaults below are
     host-choice — Accrue does not prescribe binning strategies.
 
-    ## Cardinality discipline (T-04-08-03)
+    ## Cardinality discipline
 
     Tags on the default counters are restricted to low-cardinality fields
     (`:status`, `:source`, `:type`, `:stripe_status`). Customer ID,

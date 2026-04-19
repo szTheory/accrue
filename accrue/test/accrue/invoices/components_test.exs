@@ -8,7 +8,7 @@ defmodule Accrue.Invoices.ComponentsTest do
       socket
     * stamps inline `style=` attributes on structural elements
       (Pitfall 2)
-    * HTML-escapes user-controlled input (T-06-03-01)
+    * HTML-escapes user-controlled input
     * respects the D6-07 transactional footer rule (no unsubscribe)
 
   Asserts `print_shell/1`:

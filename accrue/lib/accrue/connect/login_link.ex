@@ -1,16 +1,16 @@
 defmodule Accrue.Connect.LoginLink do
   @moduledoc """
-  Express dashboard return credential for a connected account (D5-06).
+  Express dashboard return credential for a connected account.
 
   The `:url` field is a single-use, short-lived bearer credential that
   logs the Express connected account owner into their Stripe Express
   dashboard. **Login Links are only valid for `type: "express"`
   connected accounts** — calling Stripe with a Standard or Custom
   account returns HTTP 400. `Accrue.Connect.create_login_link/2` fails
-  fast locally before reaching the processor (T-05-03-02).
+  fast locally before reaching the processor.
 
   As with `Accrue.Connect.AccountLink`, the `:url` field is masked in
-  Inspect output (T-05-03-01). Create-only resource.
+  Inspect output. Create-only resource.
   """
 
   @enforce_keys [:url, :created]
@@ -51,7 +51,7 @@ end
 defimpl Inspect, for: Accrue.Connect.LoginLink do
   import Inspect.Algebra
 
-  # T-05-03-01: `:url` is a single-use short-lived bearer credential.
+  # `:url` is a single-use short-lived bearer credential.
   def inspect(%Accrue.Connect.LoginLink{} = link, opts) do
     fields = [
       url: if(link.url, do: "<redacted>", else: nil),

@@ -1,9 +1,9 @@
 defmodule Accrue.Billing.CouponActions do
   @moduledoc """
-  Phase 4 Plan 05 coupon + promotion-code write surface (BILL-27, BILL-28).
+  Coupon and promotion-code write surface.
 
   Thin wrappers around the processor's coupon + promotion-code
-  endpoints. Per D4-01 / Claude's Discretion: the local
+  endpoints. The local
   `accrue_coupons` + `accrue_promotion_codes` tables are a thin
   projection — the processor is canonical and Accrue mirrors only the
   fields the admin LiveView needs.
@@ -21,8 +21,8 @@ defmodule Accrue.Billing.CouponActions do
       `Processor.update_subscription(sub_id, %{coupon: coupon_id})`.
       Records a `"coupon.applied"` event on success.
 
-  All public functions follow the dual-API `foo/n` + `foo!/n` pattern
-  (D-05). Processor calls run inside `Repo.transact/2` here because
+  All public functions follow the dual-API `foo/n` + `foo!/n` pattern.
+  Processor calls run inside `Repo.transact/2` here because
   coupon create is not SCA-capable — there's no asynchronous 3DS leg
   to keep outside the transaction.
   """
@@ -167,8 +167,7 @@ defmodule Accrue.Billing.CouponActions do
 
   Returns `{:ok, %Subscription{}}` on success. On validation failure
   returns `{:error, :not_found | :inactive | :expired |
-  :max_redemptions_reached}` BEFORE making any processor call
-  (T-04-05-02 mitigation).
+  :max_redemptions_reached}` before making any processor call.
 
   A `"coupon.applied"` event is recorded inside the same
   `Repo.transact/2` as the processor call on success.
