@@ -147,12 +147,51 @@
 
 ---
 
+## Milestone: v1.5 — Adoption proof hardening
+
+**Shipped:** 2026-04-18  
+**Phases:** 1 | **Plans:** inline (documentation-only)
+
+### What Was Built
+
+- Adoption proof matrix tying Fake VERIFY-01, bounded/full ExUnit, Playwright, and advisory Stripe test-mode parity.
+- Evaluator screen-recording checklist linked from the host README alongside VERIFY-01 contract enforcement.
+- CI job display naming and guide cross-links so contributors distinguish Fake gates from Stripe test-mode parity.
+
+### What Worked
+
+- README and shell contracts (`verify_verify01_readme_contract.sh`) already existed; v1.5 extended them with narrative glue for evaluators.
+- Keeping the `live-stripe` job id stable while clarifying display copy avoided `act` and docs churn.
+
+### What Was Inefficient
+
+- `audit-open` reported Phase 21 as a UAT gap despite a fully automated VERIFY-01 manifest with zero manual scenarios.
+- Two indexed quick tasks pointed at missing artifacts; closeout required explicit deferral rather than silent ignore.
+
+### Patterns Established
+
+- Treat adoption proof as a **matrix** artifact: one table maps archetypes to test lanes (ExUnit vs Playwright vs advisory Stripe).
+
+### Key Lessons
+
+1. Closeout tooling that keys off filenames should special-case **retired-to-automation** UAT manifests to avoid false open counts.
+2. When `gsd-sdk query` is unavailable, milestone archival stays manual but should still follow the safety commit before `git rm` on requirements.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: short documentation milestone after v1.4.
+- Notable: highest leverage was cross-linking existing gates, not adding new CI topology.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.5 | short | 1 | Adoption proof documented as a matrix tying existing Fake, host, Playwright, and advisory Stripe lanes. |
 | v1.2 | concentrated closeout | 5 | Adoption and trust work became executable through the canonical host demo, docs contracts, and security/audit closeout gates. |
 | v1.1 | multiple | 4 | Real host-app dogfood became the canonical user-facing integration and CI release gate. |
 | v1.0 | multiple | 9 | Full greenfield build through public Hex release; planning archive introduced at close. |
@@ -161,6 +200,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.5 | Existing VERIFY-01 contracts + docs guide tests; no new CI topology | PROOF-01..03 (3/3) archived | Adoption proof matrix, evaluator walkthrough script, guide + CI naming clarity. |
 | v1.2 | Host UAT, Playwright trust flow, docs verifier, release guidance tests, trust/security review artifacts | 23/23 audited requirements plus Phase 17 cleanup verification | Canonical demo/tutorial contracts, issue templates, trust review, expansion recommendation, security verification. |
 | v1.1 | Host ExUnit, Playwright, shell UAT, docs verifier, Hex smoke | 21/21 audited scoped requirements | Host app, Playwright gate, setup diagnostics, conflict sidecars, package-doc verifier. |
 | v1.0 | CI matrix plus package-local suites | Not tracked | Fake processor, test adapters, installer snippets, and docs-first release checks. |

@@ -21,7 +21,7 @@ v1.3 adds Stripe Tax orchestration, customer tax-location validation and recover
 
 Milestone history, roadmap, requirements, and audit artifacts: `.planning/milestones/v1.3-ROADMAP.md`, `v1.3-REQUIREMENTS.md`, `v1.3-MILESTONE-AUDIT.md`.
 
-**Last completed milestone:** **v1.4 Ecosystem stability + demo visuals** (2026-04-17) — see `.planning/REQUIREMENTS.md` and Phase 23 in `.planning/ROADMAP.md`. Next milestone TBD in roadmap.
+**Last shipped planning milestone:** **v1.5 Adoption proof hardening** (2026-04-18) — documentation tying VERIFY-01, Fake CI, Stripe test-mode parity, and evaluator walkthroughs; archived to `.planning/milestones/v1.5-ROADMAP.md` and `v1.5-REQUIREMENTS.md`. Next milestone: run `/gsd-new-milestone` (fresh `.planning/REQUIREMENTS.md`).
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface.
 
@@ -55,6 +55,17 @@ The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust
 - Mature OSS adoption assets: repository README, issue templates, release guidance, and clear Fake vs Stripe test vs live Stripe positioning.
 - Trust hardening bundle covering webhook/auth/admin security, seeded performance smoke checks, compatibility, accessibility/responsive browser checks, secret/PII log review, and required-vs-advisory release-gate boundaries.
 - Expansion discovery for tax, revenue/export, additional processors, and organization/multi-tenant billing captured as ranked future recommendations only.
+
+## Shipped: v1.5 Adoption proof hardening (2026-04-18)
+
+**Goal:** Make VERIFY-01 + Fake CI + Stripe test-mode parity discoverable for evaluators; ship an evaluator screen-recording checklist; document B2C-shaped API vs org-first LiveView coverage.
+
+**Delivered:**
+
+- `examples/accrue_host/docs/adoption-proof-matrix.md` and `evaluator-walkthrough-script.md`, linked from the host README and enforced by `verify_verify01_readme_contract.sh`.
+- `accrue/guides/testing.md` cross-links the matrix and `guides/testing-live-stripe.md`; live-Stripe guide states job id vs Stripe mode.
+- GitHub Actions `live-stripe` job **display name** now reads **Stripe test-mode parity (advisory)** (job id unchanged for `act` compatibility).
+- `AccrueHost.BillingFacadeTest` module doc references the adoption matrix (PROOF-02 traceability).
 
 ## Shipped: v1.4 Ecosystem stability + demo visuals (2026-04-17)
 
@@ -90,6 +101,12 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - ✓ Maintainers and adopters have mature OSS support assets, including issue templates and release guidance aligned with the established Accrue voice — v1.2
 - ✓ Security, performance, compatibility, accessibility/responsive behavior, and secret/PII safety have explicit checks or review artifacts before the next release — v1.2
 - ✓ Tax, revenue/export, additional processor, and organization/multi-tenant billing expansion options are researched and ranked for the next implementation milestone without changing the current billing API — v1.2
+
+### Validated v1.5 (archived in `.planning/milestones/v1.5-REQUIREMENTS.md`; milestone closed 2026-04-18)
+
+- [x] **PROOF-01** — VERIFY-01 / Fake CI cross-linked with Stripe test-mode parity lane; CI + guide naming clarity.
+- [x] **PROOF-02** — Host adoption proof matrix documents archetype coverage (including user billable ExUnit vs org-first LiveView).
+- [x] **PROOF-03** — Evaluator screen-recording checklist doc linked from host README.
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -309,4 +326,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after completing Phase 18 Stripe Tax Core*
+*Last updated: 2026-04-18 after archiving v1.5 milestone (requirements archived; fresh requirements follow `/gsd-new-milestone`)*

@@ -1,5 +1,39 @@
 # Milestones
 
+## v1.5 Adoption proof hardening (Shipped: 2026-04-18)
+
+**Phases completed:** 1 phase (24), documentation-only execution
+
+**Key accomplishments:**
+
+- Host adoption proof matrix (`examples/accrue_host/docs/adoption-proof-matrix.md`) tying Fake VERIFY-01, bounded/full ExUnit, Playwright, and advisory Stripe test-mode parity.
+- Evaluator screen-recording checklist (`evaluator-walkthrough-script.md`) linked from the host README.
+- README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; `accrue/guides/testing.md` and `guides/testing-live-stripe.md` cross-linked for contributor clarity.
+
+**Verification:** `verify_verify01_readme_contract.sh` + existing `mix test` for `accrue` docs guide tests.
+
+**Known deferred items at close:** 3 (see `.planning/STATE.md` § Deferred Items — `audit-open` carry-forward).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md)
+- Requirements: [`milestones/v1.5-REQUIREMENTS.md`](milestones/v1.5-REQUIREMENTS.md)
+
+---
+
+## v1.4 Ecosystem stability + demo visuals (Shipped: 2026-04-17)
+
+**Phases completed:** 1 phase (23), 2 plans
+
+**Key accomplishments:**
+
+- `lattice_stripe` lockfile refresh across monorepo packages on latest 1.1.x.
+- Visual walkthrough (`e2e:visuals`), CI screenshot artifact documentation, committed real `accrue_admin` esbuild static bundle for mounted LiveView.
+
+**Archives:** v1.4 requirements captured historically in git; see `PROJECT.md` Shipped v1.4 section.
+
+---
+
 ## v1.3 Tax + Organization Billing (Shipped: 2026-04-17)
 
 **Phases completed:** 5 phases (18–22), 23 plans
