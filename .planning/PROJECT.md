@@ -21,7 +21,21 @@ v1.3 adds Stripe Tax orchestration, customer tax-location validation and recover
 
 Milestone history, roadmap, requirements, and audit artifacts: `.planning/milestones/v1.3-ROADMAP.md`, `v1.3-REQUIREMENTS.md`, `v1.3-MILESTONE-AUDIT.md`.
 
-**Last shipped planning milestone:** **v1.5 Adoption proof hardening** (2026-04-18) — documentation tying VERIFY-01, Fake CI, Stripe test-mode parity, and evaluator walkthroughs; archived to `.planning/milestones/v1.5-ROADMAP.md` and `v1.5-REQUIREMENTS.md`. Next milestone: run `/gsd-new-milestone` (fresh `.planning/REQUIREMENTS.md`).
+**Last shipped planning milestone:** **v1.5 Adoption proof hardening** (2026-04-18) — documentation tying VERIFY-01, Fake CI, Stripe test-mode parity, and evaluator walkthroughs; archived to `.planning/milestones/v1.5-ROADMAP.md` and `v1.5-REQUIREMENTS.md`.
+
+**Active planning milestone:** **v1.6 Admin UI / UX polish** — see `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, and `.planning/ADMIN-UX-BASELINE-AUDIT.md`. Scope is **`accrue_admin` first** (operator LiveView + `ax-*` CSS), with **host Playwright** only where mounted admin or billing chrome must be proven; no new billing domain features or processor work in this milestone.
+
+## Current Milestone: v1.6 Admin UI / UX polish
+
+**Goal:** Bring the companion admin (and evaluator-visible mounted paths) to a **consistent, accessible, mobile-credible** bar: hierarchy and tokens match the Phase 20/21 UI contracts where they apply, high-traffic copy is predictable, and CI catches regressions on narrow viewports and critical a11y rules—without introducing a new third-party component kit.
+
+**Target features:**
+
+- **Inventory** — Route and LiveView matrix vs `ax-*` usage; gaps vs `20-UI-SPEC.md` / `21-UI-SPEC.md` and dev **component kitchen** coverage.
+- **Visual hierarchy** — List/detail/webhook flows use shared spacing, type, and card patterns; drift from tokens (`theme.css` / `app.css`) is removed or documented.
+- **Microcopy** — Extend locked-string discipline (or a small registry module) to high-traffic admin empty/error/confirm paths beyond org/tax proof strings.
+- **Accessibility** — Focus order, labels, tables, step-up modal, and light/dark contrast on operator-critical paths; tests where they earn their keep (LiveView + targeted Playwright on mounted admin).
+- **Mobile** — Tables, sidebars, and primary actions behave on narrow widths; expand `@mobile` / `chromium-mobile` coverage for the worst admin surfaces, aligned with Phase 21 D-01 strategy.
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface.
 
@@ -326,4 +340,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after archiving v1.5 milestone (requirements archived; fresh requirements follow `/gsd-new-milestone`)*
+*Last updated: 2026-04-20 after opening v1.6 Admin UI / UX polish (requirements + roadmap + baseline audit)*

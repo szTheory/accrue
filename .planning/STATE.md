@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
+milestone: v1.6
+milestone_name: Admin UI / UX polish
 current_phase: null
 current_phase_name: null
 current_plan: null
-status: idle
-stopped_at: v1.5 milestone archived 2026-04-18; use /gsd-new-milestone for next requirements and roadmap slice.
-last_updated: "2026-04-18T23:59:00Z"
-last_activity: 2026-04-18
+status: roadmap_defined
+stopped_at: null
+last_updated: "2026-04-20T12:00:00Z"
+last_activity: 2026-04-20
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,21 +21,30 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-18)
+See: `.planning/PROJECT.md` (updated 2026-04-20)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** **Planning next milestone** — run `/gsd-new-milestone` (v1.5 archived; no active `.planning/REQUIREMENTS.md` until then).
+**Current focus:** **v1.6 Admin UI / UX polish** — requirements and roadmap defined; execution starts with `/gsd-discuss-phase 25` or `/gsd-plan-phase 25`.
 
 ## Current Position
 
-Phase: —  
+Phase: Not started (next: **25 — Admin UX inventory**)  
 Plan: —  
-**Status:** Idle between milestones  
-**Stopped At:** v1.5 archived; deferred items recorded under § Deferred Items.  
-**Last Activity:** 2026-04-18
+**Status:** Roadmap defined — awaiting phase kickoff  
+**Last Activity:** 2026-04-20 — v1.6 planning artifacts written (`REQUIREMENTS.md`, `ROADMAP.md`, `ADMIN-UX-BASELINE-AUDIT.md`)
 
 ## Milestone Progress
+
+**Milestone:** v1.6 Admin UI / UX polish — **ACTIVE**
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| 25. Admin UX inventory | Pending | INV-01..03 |
+| 26. Hierarchy and pattern alignment | Pending | UX-01..04 |
+| 27. Microcopy and operator strings | Pending | COPY-01..03 |
+| 28. Accessibility hardening | Pending | A11Y-01..04 |
+| 29. Mobile parity and CI | Pending | MOB-01..03 |
 
 **Milestone:** v1.5 Adoption proof hardening — **ARCHIVED** (2026-04-18)
 
@@ -43,18 +52,16 @@ Plan: —
 |-------|--------|-------|
 | 24. Adoption proof hardening | Archived | PROOF-01..03 — see `.planning/milestones/v1.5-ROADMAP.md` |
 
-**Milestone:** v1.4 Ecosystem stability + demo visuals — **COMPLETE** (archived in PROJECT.md)
-
 ## Current Planning Artifacts
 
-- `.planning/PROJECT.md` — shipped milestone narrative + validated requirements index.
-- `.planning/ROADMAP.md` — milestone list; Phase 24 collapsed under shipped v1.5 details.
-- `.planning/milestones/v1.5-ROADMAP.md` / `v1.5-REQUIREMENTS.md` — v1.5 archive.
-- `examples/accrue_host/docs/adoption-proof-matrix.md` — proof coverage map.
+- `.planning/PROJECT.md` — includes **Current Milestone: v1.6**
+- `.planning/REQUIREMENTS.md` — REQ-IDs for v1.6
+- `.planning/ROADMAP.md` — Phases 25–29
+- `.planning/ADMIN-UX-BASELINE-AUDIT.md` — read-only audit vs UI-SPECs and Playwright
 
 ## Deferred Items
 
-Items acknowledged and deferred at milestone close on 2026-04-18 (`audit-open`):
+Prior milestone carry-forward (unchanged where still relevant):
 
 | Category | Item | Status |
 |----------|------|--------|
@@ -62,8 +69,9 @@ Items acknowledged and deferred at milestone close on 2026-04-18 (`audit-open`):
 | quick_task | `260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p` | missing |
 | quick_task | `260414-l9q-automate-phase-3-human-verification-item` | missing |
 
+v1.6 may close **admin-related** gaps (e.g. mobile/a11y on mounted admin); VERIFY-01 UAT automation remains valid cross-milestone work unless superseded.
+
 ## Recent Decisions
 
-- v1.5 prioritizes **confidence documentation** over new product scope: evaluators should see one matrix tying VERIFY-01, Fake CI, and Stripe test-mode parity together.
-- The `live-stripe` workflow job id remains stable; UI display name now reads **Stripe test-mode parity** to reduce “live keys” confusion.
-- B2C-shaped billing proof stays in **ExUnit facade tests** for this repo; org-first `/app/billing` LiveView remains the browser teaching path until a future milestone adds a dedicated B2C LiveView.
+- **v1.6 scope is admin UX + a11y + mobile polish**, not PROC-08, FIN-03, or new Stripe billing primitives — confirmed from the Admin UI landscape plan (2026-04-20).
+- Phase numbering **continues from 25** (after shipped Phase 24).
