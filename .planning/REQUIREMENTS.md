@@ -35,9 +35,9 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 
 ### Mobile (MOB)
 
-- [ ] **MOB-01**: **No horizontal overflow** on representative admin flows at mobile viewport (same class of assertion as `phase13-canonical-demo.spec.js` `expectNoHorizontalOverflow` where admin is in scope).
-- [ ] **MOB-02**: **Primary navigation** remains reachable on narrow width (sidebar / menu pattern documented and tested on mounted admin).
-- [ ] **MOB-03**: **`@mobile` or `chromium-mobile`** CI coverage includes at least one **admin-heavy** flow beyond the placeholder `mobile-tag-holder.spec.js` (e.g. index scroll, open detail, or webhook list).
+- [x] **MOB-01**: **No horizontal overflow** on representative admin flows at mobile viewport (same class of assertion as `phase13-canonical-demo.spec.js` `expectNoHorizontalOverflow` where admin is in scope).
+- [x] **MOB-02**: **Primary navigation** remains reachable on narrow width (sidebar / menu pattern documented and tested on mounted admin).
+- [x] **MOB-03**: **`@mobile` or `chromium-mobile`** CI coverage includes at least one **admin-heavy** flow beyond the placeholder `mobile-tag-holder.spec.js` (e.g. index scroll, open detail, or webhook list).
 
 ## Future (not v1.6)
 
@@ -70,9 +70,9 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 | A11Y-02 | Phase 28 | Complete |
 | A11Y-03 | Phase 28 | Complete |
 | A11Y-04 | Phase 28 | Complete |
-| MOB-01 | Phase 29 | Pending |
-| MOB-02 | Phase 29 | Pending |
-| MOB-03 | Phase 29 | Pending |
+| MOB-01 | Phase 29 | Complete |
+| MOB-02 | Phase 29 | Complete |
+| MOB-03 | Phase 29 | Complete |
 
 **Coverage:** v1.6 requirements: **18** total — mapped to phases **18** — unmapped **0**.
 
