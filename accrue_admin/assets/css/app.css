@@ -1174,6 +1174,22 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 }
 
+@media (max-width: 1023.98px) {
+  html.accrue-admin.ax-shell-nav-open .ax-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(18rem, 85vw);
+    height: 100vh;
+    max-height: 100dvh;
+    z-index: 40;
+    overflow-y: auto;
+    margin: 0;
+    box-sizing: border-box;
+  }
+}
+
 .ax-visually-hidden {
   position: absolute;
   width: 1px;
