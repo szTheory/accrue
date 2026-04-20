@@ -127,7 +127,7 @@
 
 **Canonical refs:** `.planning/REQUIREMENTS.md`; `examples/accrue_host` Playwright config and VERIFY-01 docs as referenced in plans.
 
-**Plans:** TBD
+**Plans:** 3 plans (29-01..29-03) ready to execute
 
 ## Prior milestone snapshot (v1.4)
 
@@ -171,7 +171,7 @@
 | 26. Hierarchy and pattern alignment | v1.6 | 0/? | Planned | — |
 | 27. Microcopy and operator strings | v1.6 | 0/? | Planned | — |
 | 28. Accessibility hardening | v1.6 | 3/3 | Complete | 2026-04-20 |
-| 29. Mobile parity and CI | v1.6 | 0/? | Planned | — |
+| 29. Mobile parity and CI | v1.6 | 0/3 | Ready to execute | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
