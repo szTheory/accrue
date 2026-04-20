@@ -33,4 +33,4 @@ completed: 2026-04-20
 
 - [x] `accrue/mix.lock`, `accrue_admin/mix.lock`, and `examples/accrue_host/mix.lock` all record `lattice_stripe` `1.1.0` for `~> 1.1`.
 - [x] Compile smoke (`accrue`): PASS.
-- [ ] Full `mix test` in `accrue/` (2026-04-20): **6 failures** in `Accrue.Docs.PackageDocsVerifierTest` — verifier exits `package versions diverged` because `accrue/mix.exs` `@version "0.2.0"` and `accrue_admin/mix.exs` `@version "0.3.0"` disagree. Unrelated to `lattice_stripe` lockfiles; align package versions in a dedicated release/docs task if you need a green full suite.
+- **Full `mix test` (`accrue/`, 2026-04-20):** 6 failures in `Accrue.Docs.PackageDocsVerifierTest` — script exits `package versions diverged` (`accrue` `@version "0.2.0"` vs `accrue_admin` `"0.3.0"`). Unrelated to `lattice_stripe` locks; align versions in a release task if you need a green full suite.
