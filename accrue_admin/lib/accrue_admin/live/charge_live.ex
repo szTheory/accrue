@@ -20,6 +20,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
     Timeline
   }
 
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.{StepUp, TaxOwnershipRow}
 
   @impl true
@@ -59,7 +60,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
     action = socket.assigns.pending_refund
 
     if is_nil(action) do
-      {:noreply, push_flash(socket, :warning, "Prepare a refund before confirming.")}
+      {:noreply, push_flash(socket, :warning, Copy.charge_prepare_refund_warning())}
     else
       case StepUp.require_fresh(socket, step_up_action(action), &execute_refund(&1, action)) do
         {:ok, socket} -> {:noreply, socket}
@@ -366,7 +367,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
         socket
         |> record_admin_audit(action, refund.id)
         |> refresh_charge(socket.assigns.charge.id)
-        |> push_flash(:info, "Refund created with fee-aware fields from the billing facade.")
+        |> push_flash(:info, Copy.charge_refund_created_info())
 
       {:error, reason} ->
         push_flash(socket, :error, inspect(reason))
