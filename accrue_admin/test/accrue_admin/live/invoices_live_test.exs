@@ -2,6 +2,7 @@ defmodule AccrueAdmin.InvoicesLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Billing.{Customer, Invoice, Subscription}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -63,6 +64,16 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ "/billing/invoices/"
     assert html =~ "ax-chip ax-label"
     refute html =~ "ax-text-12"
+  end
+
+  test "renders Copy-backed empty index when search excludes all invoices", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/invoices?q=___accrue_empty_fixture___")
+
+    assert html =~ Copy.invoices_index_empty_title()
+    assert html =~ Copy.invoices_index_empty_copy()
   end
 
   defp insert_customer(attrs) do
