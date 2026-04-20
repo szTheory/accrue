@@ -4,6 +4,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
   alias Accrue.Billing.{Charge, Customer, Refund, Subscription}
   alias Accrue.Events
   alias Accrue.Events.Event
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   import Ecto.Query
@@ -126,7 +127,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
     html =
       render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
 
-    assert html =~ "Refund created with fee-aware fields"
+    assert html =~ Copy.charge_refund_created_info()
 
     audit_event =
       TestRepo.one!(
