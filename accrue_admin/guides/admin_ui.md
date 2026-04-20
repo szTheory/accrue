@@ -12,6 +12,10 @@ Start with the package quickstart in [`README.md`](../README.md), then return he
 - **Motion:** light CSS transitions on shells, drawers, and modals; honor `prefers-reduced-motion`; reach for LiveView `JS` only when CSS cannot carry the interaction.
 - **Responsive:** keep the mounted shell usable on small viewports first; avoid wide horizontal scroll for primary tables unless unavoidable—prefer column discipline and secondary detail surfaces.
 
+## Theming and exceptions
+
+Semantic color and spacing tokens for the mounted admin UI live in [`assets/css/theme.css`](../assets/css/theme.css) and are composed in [`assets/css/app.css`](../assets/css/app.css). If you introduce a **non-token color literal** (for example a one-off hex in HEEx or a fallback brand map in Elixir) during hierarchy or polish work, add a row to the phase registry at [`.planning/phases/26-hierarchy-and-pattern-alignment/26-theme-exceptions.md`](../../.planning/phases/26-hierarchy-and-pattern-alignment/26-theme-exceptions.md) so reviewers can see the exception without spelunking git history.
+
 ## Host Setup
 
 Add the package to your router and mount it where operators expect billing controls:

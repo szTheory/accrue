@@ -11,4 +11,4 @@
 
 | Location | Selector / region | Rationale | Link |
 |----------|-------------------|-----------|------|
-| — | — | *No exceptions yet.* | — |
+| `accrue_admin/lib/accrue_admin/live/*_live.ex` (`default_brand/0`) | `accent_hex` / `accent_contrast_hex` map literals | Package fallback when session omits brand; matches historical admin accent until host `Accrue.Config.branding/0` supplies values — **Phase 26 UX-04** inventory | — |

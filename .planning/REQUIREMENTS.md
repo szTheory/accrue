@@ -15,10 +15,10 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 
 ### Hierarchy and patterns (UX)
 
-- [ ] **UX-01**: Money-relevant **index** LiveViews (`customers`, `subscriptions`, `invoices`, `charges`) use consistent **list row structure**, signal placement, and spacing per Phase 21 list-signal rules where tax/ownership signals exist.
-- [ ] **UX-02**: **Detail** pages use `ax-page` / `ax-card` / KPI/grid patterns consistently; no ad hoc nested cards that contradict Phase 20 nesting rules.
-- [ ] **UX-03**: **Webhook** list and detail surfaces use the same typographic and density rhythm as other admin lists (no orphan custom scales).
-- [ ] **UX-04**: **Theme tokens** (`theme.css` / semantic variables) are the default for new polish; introducing ad hoc hex colors in touched templates requires a documented exception in phase notes.
+- [x] **UX-01**: Money-relevant **index** LiveViews (`customers`, `subscriptions`, `invoices`, `charges`) use consistent **list row structure**, signal placement, and spacing per Phase 21 list-signal rules where tax/ownership signals exist.
+- [x] **UX-02**: **Detail** pages use `ax-page` / `ax-card` / KPI/grid patterns consistently; no ad hoc nested cards that contradict Phase 20 nesting rules.
+- [x] **UX-03**: **Webhook** list and detail surfaces use the same typographic and density rhythm as other admin lists (no orphan custom scales).
+- [x] **UX-04**: **Theme tokens** (`theme.css` / semantic variables) are the default for new polish; introducing ad hoc hex colors in touched templates requires a documented exception in phase notes.
 
 ### Microcopy (COPY)
 
@@ -59,10 +59,10 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 | INV-01 | Phase 25 | Complete |
 | INV-02 | Phase 25 | Complete |
 | INV-03 | Phase 25 | Complete |
-| UX-01 | Phase 26 | Pending |
-| UX-02 | Phase 26 | Pending |
-| UX-03 | Phase 26 | Pending |
-| UX-04 | Phase 26 | Pending |
+| UX-01 | Phase 26 | Complete |
+| UX-02 | Phase 26 | Complete |
+| UX-03 | Phase 26 | Complete |
+| UX-04 | Phase 26 | Complete |
 | COPY-01 | Phase 27 | Pending |
 | COPY-02 | Phase 27 | Pending |
 | COPY-03 | Phase 27 | Pending |
