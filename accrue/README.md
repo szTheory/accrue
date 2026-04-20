@@ -34,7 +34,7 @@ Add Accrue to `deps/0` and fetch dependencies:
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 0.1.2"}
+    {:accrue, "~> 0.2.0"}
   ]
 end
 ```

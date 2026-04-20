@@ -391,6 +391,10 @@ jobs:
         run: bash scripts/ci/accrue_host_uat.sh
 
       - name: Run host Hex smoke
+        # Release Please PRs bump the example to the next Hex version before it is published;
+        # path-based host integration above already validates the branch. Hex smoke runs on
+        # merge to main (and other PRs) against the published package.
+        if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
         run: bash scripts/ci/accrue_host_hex_smoke.sh
 
       - name: Upload Playwright report

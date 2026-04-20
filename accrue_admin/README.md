@@ -14,7 +14,7 @@ Add `accrue_admin` to your host application and mount the package router where o
 ```elixir
 defp deps do
   [
-    {:accrue_admin, "~> 0.1.2"}
+    {:accrue_admin, "~> 0.2.0"}
   ]
 end
 ```
@@ -53,7 +53,7 @@ The canonical local demo path lives in the checked-in host app:
 
 - `examples/accrue_host/README.md`
 
-Published `accrue_admin` releases resolve `accrue ~> 0.1.2`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
+Published `accrue_admin` releases resolve `accrue ~> 0.2.0`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
 
 ## Assets
 
