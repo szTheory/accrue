@@ -7,10 +7,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   alias Accrue.Webhook.WebhookEvent
   alias Accrue.Webhooks.DLQ
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
-
-  @bulk_replay_success "Replay requested for the active organization."
-  @global_bulk_replay_success "Bulk replay requested"
 
   @impl true
   def mount(_params, session, socket) do
@@ -55,12 +53,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     count = Webhooks.bulk_replay_count(socket.assigns.current_owner_scope, Map.new(filter))
 
     if count == 0 do
-      {:noreply,
-       push_flash(
-         socket,
-         :warning,
-         "No failed or dead-lettered webhook rows match the current filters."
-       )}
+      {:noreply, push_flash(socket, :warning, Copy.webhooks_bulk_no_rows_warning())}
     else
       {:noreply, assign(socket, :pending_bulk_replay, %{count: count, filter: filter})}
     end
@@ -78,10 +71,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
         {:noreply,
          socket
          |> assign(:pending_bulk_replay, nil)
-         |> push_flash(
-           :warning,
-           "Replay is blocked because this webhook isn't linked to a billable row in the active organization."
-         )}
+         |> push_flash(:warning, Copy.Locked.replay_blocked())}
 
       ids ->
         case replay_scoped_rows(ids) do
@@ -260,8 +250,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               options: [{"true", "Live"}, {"false", "Test"}]
             }
           ]}
-          empty_title="No webhook rows matched"
-          empty_copy="Adjust the DLQ filters or wait for the next inbound webhook."
+          empty_title={Copy.webhooks_index_empty_title()}
+          empty_copy={Copy.webhooks_index_empty_copy()}
         />
       </section>
     </AppShell.app_shell>
@@ -337,12 +327,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   defp normalize_filter_value(value) when is_atom(value), do: Atom.to_string(value)
   defp normalize_filter_value(value), do: value
 
-  defp bulk_replay_confirmation(count) do
-    "Replay #{count} failed or dead webhook rows for the active organization?"
-  end
+  defp bulk_replay_confirmation(count), do: Copy.webhooks_bulk_replay_confirm_question(count)
 
-  defp bulk_replay_success(%{mode: :organization}), do: @bulk_replay_success
-  defp bulk_replay_success(_owner_scope), do: @global_bulk_replay_success
+  defp bulk_replay_success(%{mode: :organization}), do: Copy.Locked.bulk_replay_success_organization()
+  defp bulk_replay_success(_owner_scope), do: Copy.Locked.bulk_replay_success_global()
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])

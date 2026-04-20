@@ -57,4 +57,16 @@ defmodule AccrueAdmin.Copy do
   def customer_detail_no_subscriptions, do: "No subscriptions for this customer yet."
 
   def customer_detail_no_invoices, do: "No invoices for this customer yet."
+
+  def webhooks_index_empty_title, do: "No webhook deliveries for this organization yet"
+
+  def webhooks_index_empty_copy,
+    do:
+      "Stripe events appear here after they are recorded for this organization. If you expected deliveries, check filters or confirm your endpoint is receiving traffic."
+
+  def webhooks_bulk_replay_confirm_question(count),
+    do: "Replay #{count} failed or dead webhook rows for the active organization?"
+
+  def webhooks_bulk_no_rows_warning,
+    do: "No failed or dead-lettered webhook rows match the current filters."
 end
