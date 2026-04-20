@@ -54,6 +54,20 @@
 
 **Next step:** `/gsd-discuss-phase 25` or `/gsd-plan-phase 25`.
 
+### Phase 25: Admin UX inventory
+
+**Goal:** Baseline map of routes, components, and spec alignment across `accrue_admin`.
+
+**Depends on:** Phase 24 complete (v1.5 shipped).
+
+**Requirements:** INV-01, INV-02, INV-03
+
+**Success criteria:**
+
+1. Maintainer-facing **route matrix** (INV-01), **component coverage** notes (INV-02), and **spec alignment** table (INV-03) exist as phase artifacts—matrix + gap list checked into `.planning/phases/25-admin-ux-inventory/`.
+
+**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
+
 ## Prior milestone snapshot (v1.4)
 
 **Milestone goal:** Keep the Stripe client dependency current on published Hex within the `~> 1.1` contract, and make the existing host + mounted admin **visual** story trivial to reproduce locally and inspect from CI.
