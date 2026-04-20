@@ -2,7 +2,15 @@
 
 `accrue_admin` mounts a package-scoped LiveView billing UI inside a host Phoenix app. The package owns its own router macro, private static bundle, and non-prod inspection tools.
 
-Start with the package quickstart in [`README.md`](../README.md), then return here for the host wiring and release checks. Published `accrue_admin` releases depend on `accrue ~> 0.1.2`, while monorepo development keeps the local sibling dependency shape by default.
+Start with the package quickstart in [`README.md`](../README.md), then return here for the host wiring and release checks. Published `accrue_admin` releases depend on the matching `accrue` minor (see Hex for the current `~>` range), while monorepo development keeps the local sibling dependency shape by default.
+
+## UI stack and polish direction
+
+- **Build:** Tailwind CSS v3 compiles [`assets/css/app.css`](../assets/css/app.css) into `priv/static/accrue_admin.css` via `mix accrue_admin.assets.build`. [`assets/tailwind.config.js`](../assets/tailwind.config.js) scans `lib/**/*.{ex,heex}`; [`assets/tailwind_preset.js`](../assets/tailwind_preset.js) maps CSS variables to Tailwind theme colors so utilities stay on the same tokens as `ax-*` rules.
+- **Authoring:** Prefer **`ax-*` classes** in `app.css` / `theme.css` for layout, surfaces, and reusable blocks. Add **Tailwind utilities in HEEx** when they reduce duplication (spacing, responsive tweaks) without fighting the preset.
+- **Principles:** least surprise for billing operators; clear hierarchy (context → KPIs → primary work area); visible focus states; explicit empty, loading, and error states on lists; microcopy that matches host and Stripe language (subscription, invoice, webhook) unless the screen is intentionally abstracted.
+- **Motion:** light CSS transitions on shells, drawers, and modals; honor `prefers-reduced-motion`; reach for LiveView `JS` only when CSS cannot carry the interaction.
+- **Responsive:** keep the mounted shell usable on small viewports first; avoid wide horizontal scroll for primary tables unless unavoidable—prefer column discipline and secondary detail surfaces.
 
 ## Host Setup
 

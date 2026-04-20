@@ -9,6 +9,8 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 ## Start here
 
 - [First Hour](guides/first_hour.md) — one sitting from deps to a working billing slice.
+- [Troubleshooting](guides/troubleshooting.md) — when something already wired misbehaves.
+- [Webhooks](guides/webhooks.md) — signing, retries, and operational notes.
 - [Quickstart](guides/quickstart.md) — smallest possible skim.
 - [Demo app README](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) — command parity with Accrue’s CI host gate.
 - [Release notes](guides/release-notes.md) and [Upgrade](guides/upgrade.md) — what changed, in plain language, then the formal contract.
@@ -21,7 +23,7 @@ In `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 0.2.0"}
+    {:accrue, "~> 0.3.0"}
   ]
 end
 ```

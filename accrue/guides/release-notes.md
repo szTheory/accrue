@@ -12,6 +12,10 @@ This page is the **story** of what shipped—not a commit list. For every line i
 
 ## accrue
 
+### 0.3.0
+
+**Monorepo lockstep with `accrue_admin`.** Core and admin packages share the same `@version` again so package-doc verification and CI stay green; no billing API changes in this bump.
+
 ### 0.2.0
 
 **Stripe Tax–ready billing, calmer installs, stronger CI trust.**
@@ -35,6 +39,10 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 ## accrue_admin
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
+
+### 0.3.0
+
+Lockstep with **accrue 0.3.0** (version alignment release).
 
 ### 0.2.0
 

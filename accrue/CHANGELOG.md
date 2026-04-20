@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/szTheory/accrue/compare/accrue-v0.2.0...accrue-v0.3.0) (2026-04-20)
+
+### Bug Fixes
+
+* **monorepo:** align `accrue` package version with `accrue_admin` for `verify_package_docs` / CI lockstep
+
 ## [0.2.0](https://github.com/szTheory/accrue/compare/accrue-v0.1.2...accrue-v0.2.0) (2026-04-19)
 
 
