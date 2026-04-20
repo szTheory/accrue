@@ -9,7 +9,7 @@
 |---------|-------------------------|--------------|-----------------|
 | Dashboard | `21-UI-SPEC.md` — Interaction #1 (KPI context); `20-UI-SPEC.md` — Accessibility | Partial | C-06, C-08 |
 | Money indexes | `21-UI-SPEC.md` — Interaction #1; Copywriting (empty index, tenant chrome) | Partial | C-01, C-02 |
-| Detail pages | `20-UI-SPEC.md` — Customer / Subscription detail; `21-UI-SPEC.md` — Interaction #2 | Partial | C-03, C-04, C-05 |
+| Detail pages | `20-UI-SPEC.md` — Customer / Subscription detail; `21-UI-SPEC.md` — Interaction #2 | Partial | C-03, C-04, C-05; **26-02** (single `ax-page` on money details) |
 | Webhooks | `20-UI-SPEC.md` — Webhook detail + ambiguous ownership | Aligned | C-04, C-05 |
 | Step-up | `20-UI-SPEC.md` — Interaction rules (staged confirm); subscription detail staging | Aligned | C-07 |
 
@@ -23,9 +23,9 @@
 | C-04 | `20-UI-SPEC.md` — `### Webhook detail and bulk replay` | Aligned | `admin`, `webhooks` | `accrue_admin/test/accrue_admin/live/webhook_live_test.exs`, `accrue_admin/test/accrue_admin/live/webhook_replay_test.exs`; `examples/accrue_host/e2e/phase13-canonical-demo.spec.js` | maintainer | — |
 | C-05 | `20-UI-SPEC.md` — `### Ambiguous ownership behavior` | Aligned | `admin`, `webhooks` | `accrue_admin/test/accrue_admin/live/webhook_live_test.exs` | maintainer | — |
 | C-06 | `21-UI-SPEC.md` — `## Interaction Contract` — §3 `?org=` preservation | Partial | `admin`, `host-mount` | `examples/accrue_host/e2e/verify01-admin-mounted.spec.js`, `verify01-admin-denial.spec.js` | maintainer | Not every `push_patch` / `link` path has an automated guard — **Phase 26** hierarchy + link audit |
-| C-07 | `20-UI-SPEC.md` — `## Admin Owner-Scoped Contract` — `### Subscription detail` (staged confirmations) | Aligned | `admin`, `step-up` | `accrue_admin/test/accrue_admin/live/subscription_live_test.exs` | maintainer | — |
+| C-07 | `20-UI-SPEC.md` — `## Admin Owner-Scoped Contract` — `### Subscription detail` (staged confirmations) | Aligned | `admin`, `step-up` | `accrue_admin/lib/accrue_admin/live/subscription_live.ex` (2026-04-20 **26-02** nested `ax-page` removed); `accrue_admin/test/accrue_admin/live/subscription_live_test.exs` | maintainer | — |
 | C-08 | `20-UI-SPEC.md` — `## Accessibility and Responsive Contract` | Partial | `admin`, `@mobile` | `accrue_admin/test/accrue_admin/live/dashboard_live_test.exs` (smoke); no dedicated a11y suite in package | maintainer | Screen-reader / focus-trap proofs — **Phase 28** |
-| C-09 | `20-UI-SPEC.md` — `### Customer detail` | Partial | `admin` | `accrue_admin/test/accrue_admin/live/customer_live_test.exs` | maintainer | Tax ownership card lacks isolated component tests — tighten with Phase 26 layout work if needed |
+| C-09 | `20-UI-SPEC.md` — `### Customer detail` | Partial | `admin` | `accrue_admin/lib/accrue_admin/live/customer_live.ex`; `accrue_admin/test/accrue_admin/live/customer_live_test.exs` (2026-04-20 **26-02** single-`ax-page` regression) | maintainer | Tax ownership card still lacks isolated component tests — optional follow-up |
 | C-10 | `21-UI-SPEC.md` — `## Interaction Contract` — §4 Playwright desktop/mobile matrix | Partial | `admin`, `ci` | `examples/accrue_host/e2e/phase13-canonical-demo.spec.js` | maintainer | Full desktop matrix + `@mobile` tagging per `21-CONTEXT.md` — **Phase 29** |
 | C-11 | `20-UI-SPEC.md` — `## Visual Constraints` | N/A | `library` | `—` (inherits Phoenix theme tokens; no separate automated gate) | maintainer | N/A — tracked qualitatively in design reviews |
 
