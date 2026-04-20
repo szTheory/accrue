@@ -61,6 +61,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ "Collections and invoice review"
     assert html =~ "INV-0002"
     assert html =~ "/billing/invoices/"
+    assert html =~ "ax-chip ax-label"
+    refute html =~ "ax-text-12"
   end
 
   defp insert_customer(attrs) do
