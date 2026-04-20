@@ -1,6 +1,9 @@
 # AccrueAdmin
 
-LiveView admin UI for Accrue billing operations.
+LiveView admin UI for Accrue billing operations. Versioning tracks the
+**[`accrue`](https://hexdocs.pm/accrue/)** package—use the same `~>` range for
+both. For a plain-language history of releases (instead of only GitHub release
+bullets), see **[Accrue release notes](https://hexdocs.pm/accrue/release-notes.html)**.
 
 ## Quickstart
 
