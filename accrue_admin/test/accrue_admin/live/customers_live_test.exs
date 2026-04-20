@@ -80,5 +80,8 @@ defmodule AccrueAdmin.CustomersLiveTest do
     assert html =~ "Off"
     refute html =~ "Other Customer"
     assert html =~ "/billing/customers/"
+    # UX-01: billing signal chips use label scale (no 12px utility on touched chips)
+    assert html =~ "ax-chip ax-label"
+    refute html =~ "ax-text-12"
   end
 end
