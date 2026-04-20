@@ -282,6 +282,16 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ ~s(data-role="selected-count">1 selected<)
   end
 
+  test "renders default empty state copy from AccrueAdmin.Copy when no rows match", %{conn: conn} do
+    FixtureStore.put_rows([])
+
+    assert {:ok, _view, html} =
+             live_isolated(conn, TableLive, session: %{"params" => %{}})
+
+    assert html =~ "Nothing in this list yet"
+    assert html =~ "Billing records appear here when they match this view"
+  end
+
   test "polls for newer rows and only reloads them when explicitly requested", %{conn: conn} do
     {:ok, view, _html} =
       live_isolated(conn, TableLive,

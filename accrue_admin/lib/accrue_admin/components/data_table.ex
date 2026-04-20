@@ -5,6 +5,8 @@ defmodule AccrueAdmin.Components.DataTable do
 
   use Phoenix.LiveComponent
 
+  alias AccrueAdmin.Copy
+
   @default_limit 25
   @default_dom_limit 100
 
@@ -21,8 +23,8 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:filter_fields, fn -> [] end)
       |> assign_new(:card_fields, fn -> [] end)
       |> assign_new(:card_title, fn -> nil end)
-      |> assign_new(:empty_title, fn -> "No rows found" end)
-      |> assign_new(:empty_copy, fn -> "Adjust the filters or wait for new activity." end)
+      |> assign_new(:empty_title, fn -> Copy.data_table_default_empty_title() end)
+      |> assign_new(:empty_copy, fn -> Copy.data_table_default_empty_copy() end)
       |> assign_new(:cursor_field, fn -> :inserted_at end)
       |> assign_new(:row_id, fn -> :id end)
       |> assign_new(:selectable, fn -> true end)
