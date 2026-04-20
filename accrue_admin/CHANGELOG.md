@@ -1,11 +1,5 @@
 # Changelog
 
-## [0.3.0](https://github.com/szTheory/accrue/compare/accrue_admin-v0.2.0...accrue_admin-v0.3.0) (2026-04-20)
-
-### Bug Fixes
-
-* **monorepo:** keep `accrue_admin` `@version` lockstep with `accrue` for package docs / CI
-
 ## [0.2.0](https://github.com/szTheory/accrue/compare/accrue_admin-v0.1.2...accrue_admin-v0.2.0) (2026-04-19)
 
 
