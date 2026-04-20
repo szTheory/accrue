@@ -99,7 +99,7 @@
 
 **Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
 
-**Plans:** TBD
+**Plans:** `27-01-PLAN.md`, `27-02-PLAN.md`, `27-03-PLAN.md`
 
 ### Phase 28: Accessibility hardening
 
