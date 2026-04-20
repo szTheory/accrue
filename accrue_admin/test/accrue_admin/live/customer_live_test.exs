@@ -6,6 +6,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
   alias Accrue.Events
   alias Accrue.Processor.Fake
   alias Accrue.Test.Factory
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Customers
   alias AccrueAdmin.TestRepo
@@ -182,10 +183,21 @@ defmodule AccrueAdmin.CustomerLiveTest do
              redirect =
              live(conn, "/billing/customers/#{denied_customer.id}?org=allowed-org")
 
-    assert %{"error" => "You don't have access to billing for this organization."} =
-             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+    assert %{"error" => denied} = Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+    assert denied == Copy.Locked.owner_access_denied()
 
     assert redirect
+  end
+
+  test "shows Copy-backed empty invoices line when customer has no invoices", %{conn: conn} do
+    %{customer: bare_customer} = Factory.customer(%{email: "bare-invoices@example.com"})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers/#{bare_customer.id}?tab=invoices")
+
+    assert html =~ "No invoices for this customer yet."
+    assert html =~ Copy.customer_detail_no_invoices()
   end
 
   defp insert_customer(attrs) do

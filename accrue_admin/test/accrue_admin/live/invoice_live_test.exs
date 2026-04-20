@@ -7,6 +7,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
   alias Accrue.Processor.Fake
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Invoices
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   import Ecto.Query
@@ -135,6 +136,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     html = render_click(element(view, "button", "Open PDF"))
     assert html =~ "Open rendered PDF"
     assert html =~ "Download rendered PDF"
+    assert html =~ Copy.invoice_pdf_open_info()
   end
 
   test "void invoice requires step-up and records admin invoice audit rows", %{
@@ -161,7 +163,7 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     html =
       render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
 
-    assert html =~ "Invoice action recorded."
+    assert html =~ Copy.invoice_action_recorded_info()
 
     audit_event =
       TestRepo.one!(

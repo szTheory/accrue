@@ -6,6 +6,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   alias Accrue.Events.Event
   alias Accrue.Repo
   alias Accrue.Test.Factory
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.TestRepo
@@ -122,7 +123,7 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     html =
       render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
 
-    assert html =~ "Subscription action recorded."
+    assert html =~ Copy.subscription_action_recorded_info()
 
     audit_event =
       TestRepo.one!(
@@ -181,8 +182,8 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              redirect =
              live(conn, "/billing/subscriptions/#{denied_subscription.id}?org=allowed-org")
 
-    assert %{"error" => "You don't have access to billing for this organization."} =
-             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+    assert %{"error" => denied} = Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+    assert denied == Copy.Locked.owner_access_denied()
 
     assert redirect
   end
