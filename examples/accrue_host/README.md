@@ -151,6 +151,15 @@ cd examples/accrue_host
 npm run e2e:visuals
 ```
 
+**Playwright video (local, larger artifacts):** records a `.webm` per test under `test-results/` (still gitignored). Use when you want motion for a demo clip instead of still PNGs only:
+
+```bash
+cd examples/accrue_host
+npm run e2e:visuals:video
+```
+
+(`ACCRUE_HOST_PLAYWRIGHT_VIDEO=1` is set by that script; CI does not enable it.)
+
 Equivalent manual invocation:
 
 ```bash
@@ -164,7 +173,11 @@ directory when the HTML reporter produced `playwright-report/`).
 
 **On CI:** every `host-integration` run uploads artifact **`accrue-host-phase15-screenshots`**
 (`examples/accrue_host/test-results/phase15-trust`, upload step `if: always()` in
-`.github/workflows/ci.yml`). Download it from the GitHub Actions run summary.
+`.github/workflows/ci.yml`). Download it from the GitHub Actions run summary, or with the GitHub CLI (after `gh auth login`) once you have a run `RUN_ID` from the **host-integration** job:
+
+```bash
+gh run download RUN_ID --repo szTheory/accrue -n accrue-host-phase15-screenshots -D /path/to/output-dir
+```
 
 **Video:** not enabled in CI (size/noise). For a scripted evaluator capture path,
 see [`docs/evaluator-walkthrough-script.md`](docs/evaluator-walkthrough-script.md).

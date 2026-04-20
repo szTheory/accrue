@@ -18,7 +18,8 @@ module.exports = defineConfig({
   use: {
     baseURL,
     trace: "retain-on-failure",
-    screenshot: "only-on-failure"
+    screenshot: "only-on-failure",
+    ...(process.env.ACCRUE_HOST_PLAYWRIGHT_VIDEO === "1" ? { video: "on" } : {})
   },
   webServer: {
     command: `PORT=${port} PHX_SERVER=true MIX_ENV=test mix phx.server`,

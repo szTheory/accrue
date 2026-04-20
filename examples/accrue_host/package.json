@@ -4,7 +4,8 @@
   "scripts": {
     "e2e": "env -u NO_COLOR playwright test",
     "e2e:install": "playwright install chromium",
-    "e2e:visuals": "env -u NO_COLOR playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust"
+    "e2e:visuals": "env -u NO_COLOR playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust",
+    "e2e:visuals:video": "ACCRUE_HOST_PLAYWRIGHT_VIDEO=1 env -u NO_COLOR playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.1",
