@@ -1,37 +1,18 @@
 # Accrue
 
-**Billing state, modeled clearly.**
+Billing state, modeled clearly.
 
-Accrue helps you ship **real subscription billing** in a **Phoenix** app without rebuilding the same Stripe-shaped domain for the tenth time. You keep ownership of auth, routes, and product code; Accrue gives you a clear billing layer—customers, subscriptions, invoices, coupons, checkout, webhooks, PDFs, email, and tests that run against a **Fake** Stripe stand-in so CI stays fast and boring.
+Accrue is a Phoenix-era billing library: subscriptions, invoices, checkout, webhooks, and the rest of the Stripe-shaped surface as plain Elixir—not a pile of controllers you fork forever. You keep auth, routes, and product code; Accrue models money and lifecycle and ships a Fake processor so tests and CI stay offline.
 
----
+If you ship a SaaS on Elixir and want documentation you can hand to a teammate, plus a straight path from “runs on my laptop” to “looks like how we run in prod,” you are in the right place.
 
-## Who this is for
+## Start here
 
-You are building (or already run) a **B2B or B2C SaaS** on Elixir/Phoenix and want:
-
-- something that feels **maintained and intentional**, not a pile of copy-pasted controllers
-- **HexDocs and guides** you can send a teammate without a sales call
-- a path from **“hello world”** to **production-shaped** setup that does not hide the sharp edges (webhooks, secrets, Connect)
-
-If that is you, you are in the right place.
-
----
-
-## Where to go next (pick one)
-
-| If you want to… | Start here |
-|-----------------|------------|
-| **Get running in one sitting** | [First Hour](guides/first_hour.md) |
-| **Skim the smallest path** | [Quickstart](guides/quickstart.md) |
-| **Understand what changed between versions** | [Release notes (plain language)](guides/release-notes.md) → then [Upgrade](guides/upgrade.md) |
-| **Configure Stripe, PDFs, email, branding** | [Configuration](guides/configuration.md), [Webhooks](guides/webhooks.md), [Branding](guides/branding.md) |
-| **Prove it locally the same way CI does** | Checked-in demo app [`examples/accrue_host`](https://github.com/szTheory/accrue/tree/main/examples/accrue_host) and its [README](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) |
-| **Read API and guide HTML** | [HexDocs: accrue](https://hexdocs.pm/accrue/) (generated from this README + `guides/`) |
-
-The **guides** are the long-form source of truth. This README is the map.
-
----
+- [First Hour](guides/first_hour.md) — one sitting from deps to a working billing slice.
+- [Quickstart](guides/quickstart.md) — smallest possible skim.
+- [Demo app README](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) — command parity with Accrue’s CI host gate.
+- [Release notes](guides/release-notes.md) and [Upgrade](guides/upgrade.md) — what changed, in plain language, then the formal contract.
+- [HexDocs](https://hexdocs.pm/accrue/) — every guide and API page together; use the Guides section as the full index.
 
 ## Install
 
@@ -52,53 +33,31 @@ mix deps.get
 mix accrue.install
 ```
 
-Use **[First Hour](guides/first_hour.md)** for the full narrative (Oban, migrations, `use Accrue.Webhook.Handler`, mounting **`accrue_admin`**). The demo app above is useful when you want command-for-command parity with maintainers.
+After install, pick up the walkthrough from **Start here** (First Hour) above—no need to duplicate those steps here.
 
-**Quick verification** (optional, from the host app):
+Optional checks from the host app:
 
-- `mix verify` — shorter “tutorial proof” suite  
-- `mix verify.full` — closer to what CI runs  
-- From the **repo root**: `bash scripts/ci/accrue_host_uat.sh` — full host integration gate used in CI  
-
----
+- `mix verify` — short “tutorial proof” suite
+- `mix verify.full` — closer to what CI runs
+- From the repo root: `bash scripts/ci/accrue_host_uat.sh` — full host integration gate
 
 ## What you get
 
-- **Billing** — customers, subscriptions, invoices, charges, refunds, coupons, promotion codes, metered usage.  
-- **Money paths** — Checkout, billing portal, Connect helpers; all behind a **processor contract** (Stripe in production, Fake in test).  
-- **Operations** — Webhook ingest, async handling, replay, append-only style history, telemetry.  
-- **Product polish** — Transactional email, invoice PDFs, installer tasks, and tests that do not need live Stripe.
+- Billing domain: customers, subscriptions, invoices, charges, refunds, coupons, promotion codes, metered usage.
+- Money paths: Checkout, billing portal, Connect helpers behind one processor contract (Stripe in production, Fake in test).
+- Operations: webhook ingest, async dispatch, replay, event history, telemetry.
+- Product polish: transactional email, invoice PDFs, installer tasks.
 
-**Admin UI** ships as the sibling Hex package **`accrue_admin`** (same version family as `accrue`). Install both when you want the LiveView dashboard.
+The LiveView dashboard ships as the sibling Hex package `accrue_admin`; pin it to the same version family as `accrue` when you add the operator UI.
 
----
+## Stability
 
-## Public surface (stability)
+Your supported integration surface—generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `AccrueAdmin.Router`, `Accrue.Auth`, `Accrue.ConfigError`—is spelled out in [Upgrade](guides/upgrade.md). Breaking changes there go through deprecation, not silent reshuffles. Internal schemas, workers, and demo helpers are not that contract.
 
-The supported “first integration” surface is documented in **[Upgrade](guides/upgrade.md)** and includes your generated **`MyApp.Billing`**, **`use Accrue.Webhook.Handler`**, **`use Accrue.Test`**, **`AccrueAdmin.Router`**, **`Accrue.Auth`**, and **`Accrue.ConfigError`**. Breaking changes there go through deprecation, not silent reshuffles.
+Generated files are yours after install. Accrue only refreshes pristine stamped copies on installer reruns; it does not stomp files you have edited.
 
-Everything else—internal schemas, workers, demo-only helpers—is subject to change. Generated files are **yours** after install; Accrue will not silently overwrite your edits.
+## Community
 
----
+[Contributing](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md) · [Code of Conduct](https://github.com/szTheory/accrue/blob/main/CODE_OF_CONDUCT.md) · [Security](https://github.com/szTheory/accrue/blob/main/SECURITY.md)
 
-## Guides (full list)
-
-**Getting productive:** [Quickstart](guides/quickstart.md) · [First Hour](guides/first_hour.md) · [Troubleshooting](guides/troubleshooting.md) · [Testing](guides/testing.md) · [Upgrade](guides/upgrade.md) · [Release notes](guides/release-notes.md)
-
-**Running in production:** [Configuration](guides/configuration.md) · [Webhooks](guides/webhooks.md) · [Webhook gotchas](guides/webhook_gotchas.md) · [Telemetry](guides/telemetry.md) · [Security (repo)](https://github.com/szTheory/accrue/blob/main/SECURITY.md)
-
-**Stripe-shaped features:** [Connect](guides/connect.md) · [Checkout / portal checklist](guides/portal_configuration_checklist.md) · [Email](guides/email.md) · [PDF](guides/pdf.md) · [Branding](guides/branding.md)
-
-**Auth and customization:** [Auth adapters](guides/auth_adapters.md) · [Sigra](guides/sigra_integration.md) · [Custom processors](guides/custom_processors.md) · [Custom PDF adapter](guides/custom_pdf_adapter.md)
-
-**Finance / ops:** [Finance handoff](guides/finance-handoff.md)
-
----
-
-## Community and policies
-
-- [Contributing](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md)  
-- [Code of Conduct](https://github.com/szTheory/accrue/blob/main/CODE_OF_CONDUCT.md)  
-- [Security](https://github.com/szTheory/accrue/blob/main/SECURITY.md)  
-
-Use **runtime-only** secrets for Stripe; never commit webhook signing secrets. When you are ready to report a vulnerability, follow **SECURITY.md**.
+Keep Stripe credentials and webhook signing secrets in runtime configuration, not in the repo. Use Security for vulnerability reports.
