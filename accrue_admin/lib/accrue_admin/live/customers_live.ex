@@ -174,7 +174,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
     escaped_t = tax |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
 
     Phoenix.HTML.raw(
-      ~s(<span class="ax-chip ax-text-12">#{escaped_o}</span> <span class="ax-chip ax-text-12">#{escaped_t}</span>)
+      ~s(<span class="ax-chip ax-label">#{escaped_o}</span> <span class="ax-chip ax-label">#{escaped_t}</span>)
     )
   end
 
