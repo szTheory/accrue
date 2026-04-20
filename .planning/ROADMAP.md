@@ -70,6 +70,65 @@
 
 **Plans:** `25-01-PLAN.md`, `25-02-PLAN.md`, `25-03-PLAN.md` (3/3 complete, 2026-04-20)
 
+### Phase 26: Hierarchy and pattern alignment
+
+**Goal:** `ax-*` / token consistency on touched surfaces across money indexes, detail pages, and webhooks.
+
+**Depends on:** Phase 25 complete (inventory baseline).
+
+**Requirements:** UX-01, UX-02, UX-03, UX-04
+
+**Success criteria:**
+
+1. LiveViews updated for UX-01..03; ExUnit/HTML assertions on structure where specified in plans.
+2. Theme tokens remain default on touched surfaces (UX-04); ad hoc hex documented if unavoidable.
+
+**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`; phase 25 inventory artifacts under `.planning/phases/25-admin-ux-inventory/`
+
+**Plans:** TBD
+
+### Phase 27: Microcopy and operator strings
+
+**Goal:** Plain-language admin copy + stable test literals.
+
+**Depends on:** Phase 26 (hierarchy alignment reduces churn before copy pass).
+
+**Requirements:** COPY-01, COPY-02, COPY-03
+
+**Success criteria:** Copy pass merged; grep or module doc for literals per REQUIREMENTS.
+
+**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
+
+**Plans:** TBD
+
+### Phase 28: Accessibility hardening
+
+**Goal:** Focus, tables, contrast; optional axe on mounted admin.
+
+**Depends on:** Phase 27 (stable strings and structure).
+
+**Requirements:** A11Y-01, A11Y-02, A11Y-03, A11Y-04
+
+**Success criteria:** Documented checks + at least one automated gate or ADR per REQUIREMENTS.
+
+**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
+
+**Plans:** TBD
+
+### Phase 29: Mobile parity and CI
+
+**Goal:** Overflow, nav, expanded `@mobile` admin coverage in CI.
+
+**Depends on:** Phase 28 where layout/focus fixes affect mobile.
+
+**Requirements:** MOB-01, MOB-02, MOB-03
+
+**Success criteria:** Playwright green on mobile project for in-scope flows.
+
+**Canonical refs:** `.planning/REQUIREMENTS.md`; `examples/accrue_host` Playwright config and VERIFY-01 docs as referenced in plans.
+
+**Plans:** TBD
+
 ## Prior milestone snapshot (v1.4)
 
 **Milestone goal:** Keep the Stripe client dependency current on published Hex within the `~> 1.1` contract, and make the existing host + mounted admin **visual** story trivial to reproduce locally and inspect from CI.
