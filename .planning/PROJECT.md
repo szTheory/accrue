@@ -31,7 +31,7 @@ Milestone history, roadmap, requirements, and audit artifacts: `.planning/milest
 
 **Target features:**
 
-- **Inventory** — Route and LiveView matrix vs `ax-*` usage; gaps vs `20-UI-SPEC.md` / `21-UI-SPEC.md` and dev **component kitchen** coverage.
+- **Inventory** — *(Phase 25, 2026-04-20)* Route matrix, component kitchen vs production coverage, and 20/21 UI-SPEC alignment tables: `.planning/phases/25-admin-ux-inventory/` (`25-INV-01..03`, verification).
 - **Visual hierarchy** — List/detail/webhook flows use shared spacing, type, and card patterns; drift from tokens (`theme.css` / `app.css`) is removed or documented.
 - **Microcopy** — Extend locked-string discipline (or a small registry module) to high-traffic admin empty/error/confirm paths beyond org/tax proof strings.
 - **Accessibility** — Focus order, labels, tables, step-up modal, and light/dark contrast on operator-critical paths; tests where they earn their keep (LiveView + targeted Playwright on mounted admin).
@@ -340,4 +340,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-20 after opening v1.6 Admin UI / UX polish (requirements + roadmap + baseline audit)*
+*Last updated: 2026-04-20 — Phase 25 inventory executed; next work Phase 26+ in ROADMAP.*
