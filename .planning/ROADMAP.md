@@ -45,7 +45,7 @@
 | # | Phase | Goal | Requirements | Success criteria (summary) |
 |---|-------|------|--------------|---------------------------|
 | 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment across `accrue_admin`. | INV-01..03 | Matrix + gap list checked into phase artifacts (complete 2026-04-20). |
-| 26 | Hierarchy and pattern alignment | `ax-*` / token consistency on touched surfaces | UX-01..04 | LiveViews updated + ExUnit/HTML assertions on structure |
+| 26 | Hierarchy and pattern alignment | 4/4 | Complete    | 2026-04-20 |
 | 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals | COPY-01..03 | Copy pass merged; grep or module doc for literals |
 | 28 | Accessibility hardening | Focus, tables, contrast, optional axe on mounted admin | A11Y-01..04 | Documented checks + at least one automated gate or ADR |
 | 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows |
@@ -85,7 +85,7 @@
 
 **Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`; phase 25 inventory artifacts under `.planning/phases/25-admin-ux-inventory/`
 
-**Plans:** TBD
+**Plans:** 4/4 plans complete
 
 ### Phase 27: Microcopy and operator strings
 
