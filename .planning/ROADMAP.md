@@ -45,14 +45,14 @@
 | # | Phase | Goal | Requirements | Success criteria (summary) |
 |---|-------|------|--------------|---------------------------|
 | 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment across `accrue_admin`. | INV-01..03 | Matrix + gap list checked into phase artifacts (complete 2026-04-20). |
-| 26 | Hierarchy and pattern alignment | 4/4 | Complete    | 2026-04-20 |
-| 27 | Microcopy and operator strings | 3/3 | Complete    | 2026-04-20 |
-| 28 | Accessibility hardening | 0/3 | Complete    | 2026-04-20 |
+| 26 | Hierarchy and pattern alignment | `ax-*` / token consistency on touched surfaces across money indexes, detail pages, and webhooks. | UX-01..04 | LiveViews + HTML assertions per plans; theme tokens on touched surfaces (complete 2026-04-20). |
+| 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals. | COPY-01..03 | Copy pass merged; literals traceable per REQUIREMENTS (complete 2026-04-20). |
+| 28 | Accessibility hardening | Focus, tables, contrast; optional axe on mounted admin. | A11Y-01..04 | Step-up focus, table captions, VERIFY-01 axe + verification doc (complete 2026-04-20). |
 | 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows |
 
 **Depends on:** Phase 24 complete (v1.5 shipped).
 
-**Next step:** `/gsd-discuss-phase 26` or `/gsd-plan-phase 26` (Phase 25 complete).
+**Next step:** `/gsd-discuss-phase 29` or `/gsd-plan-phase 29` (Phase 28 complete).
 
 ### Phase 25: Admin UX inventory
 
