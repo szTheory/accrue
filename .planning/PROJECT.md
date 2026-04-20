@@ -32,7 +32,7 @@ Milestone history, roadmap, requirements, and audit artifacts: `.planning/milest
 **Target features:**
 
 - **Inventory** — *(Phase 25, 2026-04-20)* Route matrix, component kitchen vs production coverage, and 20/21 UI-SPEC alignment tables: `.planning/phases/25-admin-ux-inventory/` (`25-INV-01..03`, verification).
-- **Visual hierarchy** — List/detail/webhook flows use shared spacing, type, and card patterns; drift from tokens (`theme.css` / `app.css`) is removed or documented.
+- **Visual hierarchy** — *(Phase 26, 2026-04-20)* List/detail/webhook flows aligned to Phase 20/21 contracts (`26-VERIFICATION.md`); token drift documented in `26-theme-exceptions.md` where literals remain (`default_brand/0` fallbacks).
 - **Microcopy** — Extend locked-string discipline (or a small registry module) to high-traffic admin empty/error/confirm paths beyond org/tax proof strings.
 - **Accessibility** — Focus order, labels, tables, step-up modal, and light/dark contrast on operator-critical paths; tests where they earn their keep (LiveView + targeted Playwright on mounted admin).
 - **Mobile** — Tables, sidebars, and primary actions behave on narrow widths; expand `@mobile` / `chromium-mobile` coverage for the worst admin surfaces, aligned with Phase 21 D-01 strategy.
