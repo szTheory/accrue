@@ -1,8 +1,9 @@
 # Phase 25 — Admin UX inventory
 
-**Status:** Context gathered — implement INV deliverables per `25-CONTEXT.md`.  
+**Status:** INV deliverables complete — matrices ready for Phases 26–29.  
 **INV-01:** complete (route matrix)  
-**INV-02:** complete (component coverage)
+**INV-02:** complete (component coverage)  
+**INV-03:** complete (spec alignment)
 
 ## Read order
 
