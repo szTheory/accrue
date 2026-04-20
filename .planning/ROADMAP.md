@@ -44,7 +44,7 @@
 
 | # | Phase | Goal | Requirements | Success criteria (summary) |
 |---|-------|------|--------------|---------------------------|
-| 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment | INV-01..03 | Matrix + gap list checked into phase artifact |
+| 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment across `accrue_admin`. | INV-01..03 | Matrix + gap list checked into phase artifacts (complete 2026-04-20). |
 | 26 | Hierarchy and pattern alignment | `ax-*` / token consistency on touched surfaces | UX-01..04 | LiveViews updated + ExUnit/HTML assertions on structure |
 | 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals | COPY-01..03 | Copy pass merged; grep or module doc for literals |
 | 28 | Accessibility hardening | Focus, tables, contrast, optional axe on mounted admin | A11Y-01..04 | Documented checks + at least one automated gate or ADR |
@@ -52,7 +52,7 @@
 
 **Depends on:** Phase 24 complete (v1.5 shipped).
 
-**Next step:** `/gsd-discuss-phase 25` or `/gsd-plan-phase 25`.
+**Next step:** `/gsd-discuss-phase 26` or `/gsd-plan-phase 26` (Phase 25 complete).
 
 ### Phase 25: Admin UX inventory
 
@@ -67,6 +67,8 @@
 1. Maintainer-facing **route matrix** (INV-01), **component coverage** notes (INV-02), and **spec alignment** table (INV-03) exist as phase artifacts—matrix + gap list checked into `.planning/phases/25-admin-ux-inventory/`.
 
 **Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
+
+**Plans:** `25-01-PLAN.md`, `25-02-PLAN.md`, `25-03-PLAN.md` (3/3 complete, 2026-04-20)
 
 ## Prior milestone snapshot (v1.4)
 
@@ -106,7 +108,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 25. Admin UX inventory | v1.6 | 0/? | Planned | — |
+| 25. Admin UX inventory | v1.6 | 3/3 | Complete | 2026-04-20 |
 | 26. Hierarchy and pattern alignment | v1.6 | 0/? | Planned | — |
 | 27. Microcopy and operator strings | v1.6 | 0/? | Planned | — |
 | 28. Accessibility hardening | v1.6 | 0/? | Planned | — |
