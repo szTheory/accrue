@@ -77,6 +77,10 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
 
+    # UX-03: one page shell; KPI band matches invoice-style ax-kpi-grid
+    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
+    assert html =~ "ax-kpi-grid"
+
     assert html =~ "Signature verification passed"
     assert html =~ "Attempt 3/25"
     assert html =~ "invoice.payment_failed"

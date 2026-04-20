@@ -355,12 +355,25 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp safe_link(href, label) do
     escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
+    Phoenix.HTML.raw(~s(<span class="ax-body"><a href="#{href}" class="ax-link">#{escaped}</a></span>))
   end
 
-  defp status_summary(row), do: humanize(row.status)
-  defp endpoint_summary(row), do: "#{humanize(row.endpoint)} · #{mode_label(row.livemode)}"
-  defp received_summary(row), do: format_datetime(row.received_at)
+  defp status_summary(row) do
+    text = humanize(row.status) |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    Phoenix.HTML.raw(~s(<span class="ax-body">#{text}</span>))
+  end
+
+  defp endpoint_summary(row) do
+    text = "#{humanize(row.endpoint)} · #{mode_label(row.livemode)}"
+    escaped = text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
+  end
+
+  defp received_summary(row) do
+    text = format_datetime(row.received_at)
+    escaped = text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+    Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
+  end
   defp card_title(row), do: row.processor_event_id || row.id
 
   defp mode_label(true), do: "live"

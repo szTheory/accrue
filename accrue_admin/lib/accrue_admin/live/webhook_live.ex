@@ -167,7 +167,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
             <%= ambiguous_replay_blocked() %>
           </p>
 
-          <section :if={@pending_replay} class="ax-page" data-role="replay-confirm">
+          <section :if={@pending_replay} class="ax-stack-xl" data-role="replay-confirm">
             <p class="ax-label"><%= single_replay_confirmation() %></p>
             <div class="ax-page-header">
               <button
@@ -223,7 +223,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
             <h3 class="ax-heading">Stored raw payload and metadata</h3>
           </header>
 
-          <div class="ax-page">
+          <div class="ax-stack-xl">
             <p class="ax-body">Endpoint: <%= humanize(@webhook.endpoint) %></p>
             <p class="ax-body">Processed: <%= format_datetime(@webhook.processed_at) %></p>
             <p class="ax-body">
