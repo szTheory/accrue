@@ -13,14 +13,27 @@ export function setThemePreference(theme) {
   return value;
 }
 
-export function initThemeControls() {
-  document.querySelectorAll("[data-theme-target]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const activeTheme = setThemePreference(button.dataset.themeTarget);
-
-      document.querySelectorAll("[data-theme-target]").forEach((candidate) => {
-        candidate.classList.toggle("ax-theme-button-active", candidate.dataset.themeTarget === activeTheme);
-      });
-    });
+function syncThemeButtonActiveState(activeTheme) {
+  document.querySelectorAll("[data-theme-target]").forEach((candidate) => {
+    candidate.classList.toggle("ax-theme-button-active", candidate.dataset.themeTarget === activeTheme);
   });
+}
+
+/**
+ * Delegated click handler so theme controls keep working after LiveView
+ * replaces the topbar markup (per-button listeners would be lost).
+ */
+function onThemeTargetClick(event) {
+  const button = event.target.closest("[data-theme-target]");
+  if (!button) return;
+
+  const raw = button.dataset.themeTarget;
+  const activeTheme = setThemePreference(raw);
+  syncThemeButtonActiveState(activeTheme);
+}
+
+export function initThemeControls() {
+  document.addEventListener("click", onThemeTargetClick, true);
+  const initial = document.documentElement.dataset.theme;
+  if (initial) syncThemeButtonActiveState(sanitizeTheme(initial));
 }

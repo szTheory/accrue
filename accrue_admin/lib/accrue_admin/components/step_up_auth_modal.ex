@@ -1,9 +1,15 @@
 defmodule AccrueAdmin.Components.StepUpAuthModal do
   @moduledoc """
   Shared modal rendered when a destructive admin action requires fresh auth.
+
+  Host layouts may register an optional tab-cycle hook (reserved name in phase
+  CONTEXT) when a full focus trap is required; this component does not import
+  Alpine.js or other client-side trap libraries.
   """
 
   use Phoenix.Component
+
+  alias AccrueAdmin.Copy
 
   attr(:pending, :boolean, required: true)
   attr(:challenge, :map, default: nil)
@@ -11,7 +17,15 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
 
   def step_up_auth_modal(assigns) do
     ~H"""
-    <section :if={@pending} class="ax-card ax-step-up-modal" role="dialog" aria-labelledby="step-up-title">
+    <section
+      :if={@pending}
+      id="accrue-admin-step-up-dialog"
+      class="ax-card ax-step-up-modal"
+      role="dialog"
+      aria-labelledby="step-up-title"
+      phx-mounted={Phoenix.LiveView.JS.push_focus() |> Phoenix.LiveView.JS.focus_first(to: "#accrue-admin-step-up-dialog")}
+      phx-remove={Phoenix.LiveView.JS.pop_focus()}
+    >
       <header class="ax-page-header">
         <p class="ax-eyebrow">Sensitive action</p>
         <h2 id="step-up-title" class="ax-heading">Step-up required</h2>
@@ -31,7 +45,11 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
           placeholder={input_placeholder(@challenge)}
         />
 
-        <button type="submit" class="ax-link">Verify</button>
+        <button type="button" phx-click="step_up_dismiss" class="ax-button ax-button-ghost">
+          Cancel
+        </button>
+
+        <button type="submit" class="ax-link"><%= Copy.step_up_submit_label() %></button>
       </form>
     </section>
     """

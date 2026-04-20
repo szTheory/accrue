@@ -77,6 +77,14 @@ defmodule AccrueAdmin.Live.ChargeLive do
     end
   end
 
+  def handle_event("step_up_escape", _params, socket) do
+    {:noreply, dismiss_step_up_if_pending(socket)}
+  end
+
+  def handle_event("step_up_dismiss", _params, socket) do
+    {:noreply, dismiss_step_up_if_pending(socket)}
+  end
+
   @impl true
   def render(assigns) do
     assigns = assign(assigns, :breakdown, fee_breakdown(assigns.charge))
@@ -90,7 +98,11 @@ defmodule AccrueAdmin.Live.ChargeLive do
       theme={@theme}
     active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
+      <section
+        class="ax-page"
+        phx-window-keydown="step_up_escape"
+        phx-key="escape"
+      >
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
@@ -342,6 +354,14 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
       _ ->
         {:error, "Refund amount must be a whole number in minor units."}
+    end
+  end
+
+  defp dismiss_step_up_if_pending(socket) do
+    if socket.assigns[:step_up_pending] do
+      StepUp.dismiss_challenge(socket)
+    else
+      socket
     end
   end
 

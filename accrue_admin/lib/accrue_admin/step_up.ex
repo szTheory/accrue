@@ -5,6 +5,11 @@ defmodule AccrueAdmin.StepUp do
   The service keeps a per-LiveView grace window in assigns, delegates the
   actual challenge/verification work to `Accrue.Auth`, and records
   `admin.step_up.*` audit rows through the core event ledger.
+
+  Escape and explicit cancel dismissals (`dismiss_challenge/1`) clear a pending
+  challenge without running the deferred continuation and **without** emitting
+  new `Events.record/1` rows — only successful or denied verification outcomes
+  are audited.
   """
 
   import Phoenix.Component, only: [assign: 3]
@@ -75,6 +80,19 @@ defmodule AccrueAdmin.StepUp do
          socket
          |> assign(:step_up_error, humanize_error(reason))
          |> assign(:step_up_pending, true)}
+    end
+  end
+
+  @doc """
+  Clears a pending step-up without invoking the stored continuation and without
+  writing audit events. Used for operator cancel / Escape flows.
+  """
+  @spec dismiss_challenge(Phoenix.LiveView.Socket.t()) :: Phoenix.LiveView.Socket.t()
+  def dismiss_challenge(socket) do
+    if socket.assigns[:step_up_pending] do
+      clear_pending(socket)
+    else
+      socket
     end
   end
 

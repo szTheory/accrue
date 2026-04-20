@@ -32,7 +32,7 @@ defmodule AccrueAdmin.Layouts do
 
     ~H"""
     <!DOCTYPE html>
-    <html lang="en" class="accrue-admin" data-theme={@theme}>
+    <html lang="en" class="accrue-admin">
       <head>
         <meta charset="utf-8" />
         <meta name="csrf-token" content={Plug.CSRFProtection.get_csrf_token()} />

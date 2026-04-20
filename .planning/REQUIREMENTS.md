@@ -28,10 +28,10 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 
 ### Accessibility (A11Y)
 
-- [ ] **A11Y-01**: **Step-up** and other modal flows have correct **focus** behavior (trap or documented Phoenix behavior) and visible **focus rings** on interactive elements in both themes.
-- [ ] **A11Y-02**: **Data tables** expose headers or roles such that screen-reader navigation is credible on at least one representative index per family (customers, webhooks).
-- [ ] **A11Y-03**: **Color contrast** for text and critical controls meets WCAG AA for **light and dark** admin themes on representative pages (documented spot-check or automated rule where feasible).
-- [ ] **A11Y-04**: At least one **automated a11y check** (e.g. `@axe-core/playwright` or equivalent) runs on a **mounted admin** path in CI, or a written exception explains why not yet.
+- [x] **A11Y-01**: **Step-up** and other modal flows have correct **focus** behavior (trap or documented Phoenix behavior) and visible **focus rings** on interactive elements in both themes.
+- [x] **A11Y-02**: **Data tables** expose headers or roles such that screen-reader navigation is credible on at least one representative index per family (customers, webhooks).
+- [x] **A11Y-03**: **Color contrast** for text and critical controls meets WCAG AA for **light and dark** admin themes on representative pages (documented spot-check or automated rule where feasible).
+- [x] **A11Y-04**: At least one **automated a11y check** (e.g. `@axe-core/playwright` or equivalent) runs on a **mounted admin** path in CI, or a written exception explains why not yet.
 
 ### Mobile (MOB)
 
@@ -66,10 +66,10 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 | COPY-01 | Phase 27 | Complete |
 | COPY-02 | Phase 27 | Complete |
 | COPY-03 | Phase 27 | Complete |
-| A11Y-01 | Phase 28 | Pending |
-| A11Y-02 | Phase 28 | Pending |
-| A11Y-03 | Phase 28 | Pending |
-| A11Y-04 | Phase 28 | Pending |
+| A11Y-01 | Phase 28 | Complete |
+| A11Y-02 | Phase 28 | Complete |
+| A11Y-03 | Phase 28 | Complete |
+| A11Y-04 | Phase 28 | Complete |
 | MOB-01 | Phase 29 | Pending |
 | MOB-02 | Phase 29 | Pending |
 | MOB-03 | Phase 29 | Pending |

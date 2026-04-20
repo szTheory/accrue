@@ -8,6 +8,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
   alias AccrueAdmin.TestRepo
 
   import Ecto.Query
+  import Phoenix.LiveViewTest
 
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
@@ -150,6 +151,62 @@ defmodule AccrueAdmin.ChargeLiveTest do
       )
 
     assert refund.amount_minor == 4_000
+  end
+
+  test "step-up modal shows Verify identity and dismiss clears challenge", %{
+    conn: conn,
+    charge: charge,
+    source_event: source_event
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, view, _html} = live(conn, "/billing/charges/#{charge.id}")
+
+    _ =
+      render_submit(
+        element(view, "[data-role='refund-form']"),
+        %{
+          "amount_minor" => "4000",
+          "reason" => "requested_by_customer",
+          "source_event_id" => Integer.to_string(source_event.id)
+        }
+      )
+
+    _ = render_click(element(view, "[data-role='confirm-refund']"))
+
+    html = render(view)
+    assert html =~ Copy.step_up_submit_label()
+    assert html =~ ~s(id="accrue-admin-step-up-dialog")
+
+    html = render_click(element(view, "button[phx-click='step_up_dismiss']"))
+    refute html =~ ~s(id="accrue-admin-step-up-dialog")
+    refute html =~ ~s(id="step-up-title")
+  end
+
+  test "step-up Escape clears pending challenge", %{
+    conn: conn,
+    charge: charge,
+    source_event: source_event
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, view, _html} = live(conn, "/billing/charges/#{charge.id}")
+
+    _ =
+      render_submit(
+        element(view, "[data-role='refund-form']"),
+        %{
+          "amount_minor" => "4000",
+          "reason" => "requested_by_customer",
+          "source_event_id" => Integer.to_string(source_event.id)
+        }
+      )
+
+    _ = render_click(element(view, "[data-role='confirm-refund']"))
+    assert render(view) =~ "Step-up required"
+
+    html = view |> element("section.ax-page") |> render_keydown(%{"key" => "Escape"})
+    refute html =~ ~s(id="accrue-admin-step-up-dialog")
   end
 
   defp insert_customer(attrs) do

@@ -93,6 +93,14 @@ defmodule AccrueAdmin.StepUpTest do
       end
     end
 
+    def handle_event("step_up_dismiss", _params, socket) do
+      {:noreply, StepUp.dismiss_challenge(socket)}
+    end
+
+    def handle_event("step_up_escape", _params, socket) do
+      {:noreply, StepUp.dismiss_challenge(socket)}
+    end
+
     @impl true
     def render(assigns) do
       ~H"""
@@ -221,5 +229,27 @@ defmodule AccrueAdmin.StepUpTest do
       )
 
     assert denied.caused_by_webhook_event_id == webhook.id
+  end
+
+  test "dismiss_challenge clears pending step-up without running continuation", %{
+    conn: conn,
+    source_event: source_event,
+    webhook: webhook
+  } do
+    {:ok, view, _html} =
+      live_isolated(conn, TestLive,
+        session: %{
+          "current_admin" => %{id: "admin_1", role: :admin},
+          "action_type" => "refund.issue",
+          "source_event_id" => source_event.id,
+          "source_webhook_event_id" => webhook.id
+        }
+      )
+
+    assert render_click(element(view, "button")) =~ "Step-up required"
+    assert render_click(element(view, "button[phx-click='step_up_dismiss']")) =~
+             ~s(data-role="executed">0<)
+
+    refute render(view) =~ "Step-up required"
   end
 end

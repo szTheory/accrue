@@ -133,7 +133,8 @@ defmodule AccrueAdmin.DataTableTest do
        socket
        |> Phoenix.Component.assign(:table_params, Map.get(session, "params", %{}))
        |> Phoenix.Component.assign(:path, "/admin/fixtures")
-       |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))}
+       |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))
+       |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))}
     end
 
     @impl true
@@ -162,6 +163,7 @@ defmodule AccrueAdmin.DataTableTest do
           %{id: :q, label: "Search"},
           %{id: :status, label: "Status", type: :select, options: [{"open", "Open"}, {"closed", "Closed"}]}
         ]}
+        table_caption={@table_caption}
       />
       """
     end
@@ -216,6 +218,17 @@ defmodule AccrueAdmin.DataTableTest do
 
     FixtureStore.put_rows(rows)
     :ok
+  end
+
+  test "optional table_caption renders visually hidden caption on desktop grid", %{conn: conn} do
+    assert {:ok, _view, html} =
+             live_isolated(conn, TableLive,
+               session: %{"params" => %{"status" => "open"}, "table_caption" => "Fixture table title"}
+             )
+
+    assert html =~ ~s(<caption)
+    assert html =~ "Fixture table title"
+    assert html =~ "ax-visually-hidden"
   end
 
   test "renders from the shared query contract and round-trips URL filters", %{conn: conn} do

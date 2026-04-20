@@ -252,6 +252,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           ]}
           empty_title={Copy.webhooks_index_empty_title()}
           empty_copy={Copy.webhooks_index_empty_copy()}
+          table_caption={Copy.webhooks_index_table_caption()}
         />
       </section>
     </AppShell.app_shell>

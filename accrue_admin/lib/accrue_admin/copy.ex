@@ -69,4 +69,10 @@ defmodule AccrueAdmin.Copy do
 
   def webhooks_bulk_no_rows_warning,
     do: "No failed or dead-lettered webhook rows match the current filters."
+
+  def step_up_submit_label, do: "Verify identity"
+
+  def customers_index_table_caption, do: "Searchable customer projections"
+
+  def webhooks_index_table_caption, do: "Replay, inspect, and trace webhook delivery"
 end

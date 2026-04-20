@@ -13,7 +13,7 @@ Accrue intentionally splits proof into a **deterministic Fake-first lane** (bloc
 | Org-first billing LiveView (tax location, subscribe, cancel) | `subscription_flow_test.exs` | Bounded `mix verify` slice |
 | User-as-billable **API** (B2C-shaped host facade) | `billing_facade_test.exs` (`Billing.subscribe(user, …)`, `owner_type == "User"`) | Bounded `mix verify` slice |
 | Org access / denial, admin mount, webhooks | `org_billing_*`, `admin_*`, `webhook_ingest_test.exs` | Bounded + full suites |
-| Mounted admin + trust / responsiveness | Playwright `@phase15-trust` + per-verify01 specs | `e2e/` |
+| Mounted admin + trust / responsiveness + a11y (axe) | Playwright `@phase15-trust`, per-verify01 specs, `e2e/verify01-admin-a11y.spec.js` | `e2e/` |
 | Visual screenshots (maintainers / evaluators) | `npm run e2e:visuals`, CI artifact `accrue-host-phase15-screenshots` | README VERIFY-01 + visuals section |
 
 **Caveat:** `/app/billing` LiveView in this host is **organization-scoped** (active org, `subscribe_active_organization/3`). User-level billing is proven at the **generated `AccrueHost.Billing` facade + `Accrue.Billing`** layer in ExUnit — a realistic B2C SaaS would expose its own LiveViews or controllers on top of the same APIs.

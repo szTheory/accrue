@@ -34,7 +34,7 @@ Milestone history, roadmap, requirements, and audit artifacts: `.planning/milest
 - **Inventory** — *(Phase 25, 2026-04-20)* Route matrix, component kitchen vs production coverage, and 20/21 UI-SPEC alignment tables: `.planning/phases/25-admin-ux-inventory/` (`25-INV-01..03`, verification).
 - **Visual hierarchy** — *(Phase 26, 2026-04-20)* List/detail/webhook flows aligned to Phase 20/21 contracts (`26-VERIFICATION.md`); token drift documented in `26-theme-exceptions.md` where literals remain (`default_brand/0` fallbacks).
 - **Microcopy** — Extend locked-string discipline (or a small registry module) to high-traffic admin empty/error/confirm paths beyond org/tax proof strings.
-- **Accessibility** — Focus order, labels, tables, step-up modal, and light/dark contrast on operator-critical paths; tests where they earn their keep (LiveView + targeted Playwright on mounted admin).
+- **Accessibility** — *(Phase 28, 2026-04-20)* Step-up focus and Escape/Cancel dismissals, machine-readable table captions on customers/webhooks, VERIFY-01 Playwright + axe (serious/critical) on mounted customers index; manual contrast follow-ups in `28-VERIFICATION.md`.
 - **Mobile** — Tables, sidebars, and primary actions behave on narrow widths; expand `@mobile` / `chromium-mobile` coverage for the worst admin surfaces, aligned with Phase 21 D-01 strategy.
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface.
@@ -340,4 +340,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-20 — Phase 26 hierarchy/pattern alignment complete (UX-01..04); next work Phase 27 in ROADMAP.*
+*Last updated: 2026-04-20 — Phase 28 accessibility hardening complete (A11Y-01..04); next work Phase 29 (mobile parity and CI) in ROADMAP.*

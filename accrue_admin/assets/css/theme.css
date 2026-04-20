@@ -1,6 +1,9 @@
 /* Phase 26 UX-04: semantic tokens live in this file; intentional non-token colors in
    LiveView fallbacks are registered in `.planning/phases/26-hierarchy-and-pattern-alignment/26-theme-exceptions.md`. */
-:root {
+/* Bind semantic tokens to the same element that carries `data-theme` (see Layouts.root).
+   Defining these only on `:root` can lose against host `:root` ordering; `html.accrue-admin`
+   scopes Accrue admin surfaces deterministically. */
+html.accrue-admin {
   --ax-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --ax-font-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
   --ax-space-xs: 0.25rem;
@@ -32,7 +35,7 @@
   color-scheme: light;
 }
 
-:root[data-theme="dark"] {
+html.accrue-admin[data-theme="dark"] {
   --ax-base: #0f1318;
   --ax-elevated: #171d24;
   --ax-sunken: #0b1015;
@@ -49,7 +52,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="system"] {
+  html.accrue-admin[data-theme="system"] {
     --ax-base: #0f1318;
     --ax-elevated: #171d24;
     --ax-sunken: #0b1015;
@@ -67,7 +70,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  html.accrue-admin {
     --ax-theme-transition: 0ms linear;
   }
 }

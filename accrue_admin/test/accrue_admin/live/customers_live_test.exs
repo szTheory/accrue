@@ -75,6 +75,8 @@ defmodule AccrueAdmin.CustomersLiveTest do
              )
 
     assert html =~ "Searchable customer projections"
+    assert html =~ ~s(<caption)
+    assert html =~ Copy.customers_index_table_caption()
     assert html =~ "Captain Customer"
     assert html =~ "On file"
     assert html =~ "Billing signals"

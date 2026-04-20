@@ -70,6 +70,8 @@ for _ in $(seq 1 30); do
     # While `mix phx.server` is already bound to the same DB, that concurrent re-seed can race
     # auth inserts (e.g. users_tokens unique on context+token). CI seeds once above; skip the
     # redundant global-setup seed when the fixture path is already populated.
+    # Full Playwright suite (blocking PR gate via host-integration). Includes
+    # mounted-admin axe checks: e2e/verify01-admin-a11y.spec.js (light + dark).
     ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED=1 \
       ACCRUE_HOST_REUSE_SERVER=1 ACCRUE_HOST_BROWSER_PORT="$browser_port" ACCRUE_HOST_E2E_FIXTURE="$fixture_file" npm run e2e
     e2e_status=$?

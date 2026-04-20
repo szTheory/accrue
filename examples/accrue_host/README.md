@@ -89,7 +89,10 @@ for this checklist.
 
 On every pull request, the GitHub Actions job `host-integration` runs the same
 contract as `cd examples/accrue_host && mix verify.full` (see
-`.github/workflows/ci.yml`).
+`.github/workflows/ci.yml`). That browser lane runs the **full** Playwright suite,
+including **`e2e/verify01-admin-a11y.spec.js`** (Phase 28: `@axe-core/playwright`,
+serious + critical violations, forced light then dark on desktop; mobile projects
+skip this file). Focused local run after the usual seed + server: `npm run e2e:a11y`.
 
 Run each step from the repository root using `cd examples/accrue_host` first:
 

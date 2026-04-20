@@ -99,6 +99,7 @@ button {
   padding: var(--ax-space-xl);
   border-right: 1px solid var(--ax-border);
   background: color-mix(in srgb, var(--ax-elevated) 92%, var(--ax-sunken));
+  color: var(--ax-primary);
 }
 
 .ax-sidebar-brand,
@@ -130,6 +131,7 @@ button {
   padding: var(--ax-space-sm) var(--ax-space-lg);
   border-bottom: 1px solid var(--ax-border);
   background: color-mix(in srgb, var(--ax-accent) 12%, var(--ax-elevated));
+  color: var(--ax-primary);
 }
 
 .ax-active-org-name {
@@ -208,6 +210,12 @@ button {
   padding: 0.875rem 1rem;
   border-radius: var(--ax-radius-md);
   background: transparent;
+  color: var(--ax-primary);
+  text-decoration: none;
+}
+
+.ax-sidebar-link:visited {
+  color: var(--ax-primary);
 }
 
 .ax-sidebar-link:hover,
@@ -225,6 +233,40 @@ button {
 .ax-sidebar-link-active {
   background: color-mix(in srgb, var(--ax-accent) 12%, var(--ax-elevated));
   border-color: color-mix(in srgb, var(--ax-accent) 48%, var(--ax-border));
+}
+
+.ax-sidebar-link-active .ax-sidebar-link-meta {
+  color: var(--ax-accent-readable);
+}
+
+/* Dark + system@dark: pin readable nav labels on the sidebar chrome. */
+html.accrue-admin[data-theme="dark"] .ax-sidebar,
+html.accrue-admin[data-theme="dark"] .ax-sidebar-link,
+html.accrue-admin[data-theme="dark"] .ax-sidebar-link:visited,
+html.accrue-admin[data-theme="dark"] .ax-sidebar-link-label {
+  color: #f4f7fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.accrue-admin[data-theme="system"] .ax-sidebar,
+  html.accrue-admin[data-theme="system"] .ax-sidebar-link,
+  html.accrue-admin[data-theme="system"] .ax-sidebar-link:visited,
+  html.accrue-admin[data-theme="system"] .ax-sidebar-link-label {
+    color: #f4f7fa;
+  }
+}
+
+/* Active nav pill: pin dark surface (mix must not pick up a stale light --ax-elevated). */
+html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
+  background-color: #1f283d !important;
+  border-color: color-mix(in srgb, var(--ax-accent) 48%, var(--ax-border)) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.accrue-admin[data-theme="system"] .ax-sidebar-link.ax-sidebar-link-active {
+    background-color: #1f283d !important;
+    border-color: color-mix(in srgb, var(--ax-accent) 48%, var(--ax-border)) !important;
+  }
 }
 
 .ax-sidebar-link-meta,
@@ -310,10 +352,11 @@ button {
   padding: 0 0.875rem;
 }
 
-.ax-theme-button-active {
-  background: var(--ax-accent);
+.ax-theme-button.ax-theme-button-active {
+  background: var(--ax-elevated);
   border-color: var(--ax-accent);
-  color: var(--ax-accent-contrast);
+  color: var(--ax-primary);
+  box-shadow: inset 0 0 0 1px var(--ax-accent);
 }
 
 .ax-topbar-brand-chip {
@@ -786,7 +829,9 @@ button {
 }
 
 .ax-button-ghost {
-  color: var(--ax-accent-readable);
+  border-color: var(--ax-border);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
 }
 
 .ax-button-danger {
@@ -861,6 +906,26 @@ button {
   border-radius: var(--ax-radius-lg);
   background: var(--ax-elevated);
   box-shadow: var(--ax-shadow-sm);
+}
+
+/* Data table: one layout at a time — cards below lg, grid table from lg (avoids duplicate DOM in a11y scans). */
+.ax-data-table-shell {
+  display: none;
+}
+
+.ax-data-table-cards {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+@media (min-width: 1024px) {
+  .ax-data-table-shell {
+    display: block;
+  }
+
+  .ax-data-table-cards {
+    display: none;
+  }
 }
 
 .ax-field,
@@ -1030,8 +1095,33 @@ button {
 
 .ax-link {
   width: fit-content;
-  color: var(--ax-accent-readable);
+  color: var(--ax-primary);
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ax-accent) 55%, transparent);
+  text-underline-offset: 0.15em;
+}
+
+.ax-data-table-shell .ax-link {
+  color: var(--ax-accent-readable);
+}
+
+html.accrue-admin[data-theme="dark"] .ax-card.ax-data-table-shell {
+  background-color: #171d24 !important;
+}
+
+html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
+  color: #f4f7fa !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.accrue-admin[data-theme="system"] .ax-card.ax-data-table-shell {
+    background-color: #171d24 !important;
+  }
+
+  html.accrue-admin[data-theme="system"] .ax-data-table-shell .ax-link {
+    color: #f4f7fa !important;
+  }
 }
 
 .ax-skip-link {
@@ -1082,4 +1172,16 @@ button {
   .ax-shell-content {
     padding: 2rem;
   }
+}
+
+.ax-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

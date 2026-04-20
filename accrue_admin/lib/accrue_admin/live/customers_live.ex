@@ -123,6 +123,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
           ]}
           empty_title={Copy.customers_index_empty_title()}
           empty_copy={Copy.customers_index_empty_copy()}
+          table_caption={Copy.customers_index_table_caption()}
         />
       </section>
     </AppShell.app_shell>
