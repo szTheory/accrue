@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Admin UI / UX polish
-status: planning
-last_updated: "2026-04-20T17:09:36.718Z"
+status: ready_to_plan
+last_updated: "2026-04-20T18:41:56.417Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 13
-  completed_plans: 10
-  percent: 77
+  completed_plans: 13
+  percent: 80
 ---
 
 # Project State
@@ -21,11 +21,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-20)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase --phase — 27
+**Current focus:** Phase 29 — Mobile parity and CI
 
 ## Current Position
 
-Phase: 28
+Phase: 29
 Plan: Not started
 **Status:** Ready to plan
 **Last Activity:** 2026-04-20
@@ -39,7 +39,7 @@ Plan: Not started
 | 25. Admin UX inventory | Complete (2026-04-20) | INV-01..03 + `25-VERIFICATION.md`; see phase `README.md` |
 | 26. Hierarchy and pattern alignment | Pending | UX-01..04 |
 | 27. Microcopy and operator strings | Pending | COPY-01..03 |
-| 28. Accessibility hardening | Pending | A11Y-01..04 |
+| 28. Accessibility hardening | Complete (2026-04-20) | A11Y-01..04 + `28-VERIFICATION.md` |
 | 29. Mobile parity and CI | Pending | MOB-01..03 |
 
 **Milestone:** v1.5 Adoption proof hardening — **ARCHIVED** (2026-04-18)
@@ -74,6 +74,4 @@ v1.6 may close **admin-related** gaps (e.g. mobile/a11y on mounted admin); VERIF
 - Phase numbering **continues from 25** (after shipped Phase 24).
 - **Phase 25 inventory policy (2026-04-20):** split `25-INV-0{1,2,3}.md` + phase `README`; router / `mix phx.routes` canonical for INV-01 (baseline audit §1 is non-authoritative); scoped “blocking” component gaps tied to 20/21 UI-SPEC surfaces; two-level spec alignment (clause rows + surface rollup); optional route artifacts deferred until a `mix` task exists.
 
-**Next phase:** 26 (hierarchy and pattern alignment) — discuss or plan before execute.
-
-**Planned Phase:** 28 (Accessibility hardening) — 3 plans — 2026-04-20T17:09:36.700Z
+**Next phase:** 29 (mobile parity and CI) — discuss or plan before execute.

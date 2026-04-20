@@ -6,6 +6,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
   alias Accrue.Billing.{Customer, Invoice}
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Webhooks
   alias AccrueAdmin.TestRepo
@@ -63,6 +64,8 @@ defmodule AccrueAdmin.WebhooksLiveTest do
       live(conn, "/billing/webhooks?status=dead&type=invoice.payment_failed&livemode=true")
 
     assert html =~ "Replay, inspect, and trace webhook delivery"
+    assert html =~ ~s(<caption)
+    assert html =~ Copy.webhooks_index_table_caption()
     # UX-03: table cells use ax-body like money index DataTable rhythm
     assert html =~ "ax-body"
     refute html =~ "ax-text-12"

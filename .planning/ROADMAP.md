@@ -47,7 +47,7 @@
 | 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment across `accrue_admin`. | INV-01..03 | Matrix + gap list checked into phase artifacts (complete 2026-04-20). |
 | 26 | Hierarchy and pattern alignment | 4/4 | Complete    | 2026-04-20 |
 | 27 | Microcopy and operator strings | 3/3 | Complete    | 2026-04-20 |
-| 28 | Accessibility hardening | Focus, tables, contrast, optional axe on mounted admin | A11Y-01..04 | Documented checks + at least one automated gate or ADR |
+| 28 | Accessibility hardening | 0/3 | Complete    | 2026-04-20 |
 | 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows |
 
 **Depends on:** Phase 24 complete (v1.5 shipped).
@@ -113,7 +113,7 @@
 
 **Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
 
-**Plans:** TBD
+**Plans:** 3/3 plans complete (2026-04-20)
 
 ### Phase 29: Mobile parity and CI
 
@@ -170,7 +170,7 @@
 | 25. Admin UX inventory | v1.6 | 3/3 | Complete | 2026-04-20 |
 | 26. Hierarchy and pattern alignment | v1.6 | 0/? | Planned | — |
 | 27. Microcopy and operator strings | v1.6 | 0/? | Planned | — |
-| 28. Accessibility hardening | v1.6 | 0/? | Planned | — |
+| 28. Accessibility hardening | v1.6 | 3/3 | Complete | 2026-04-20 |
 | 29. Mobile parity and CI | v1.6 | 0/? | Planned | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.

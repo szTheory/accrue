@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "e2e": "env -u NO_COLOR playwright test",
+    "e2e:a11y": "env -u NO_COLOR playwright test e2e/verify01-admin-a11y.spec.js",
     "e2e:install": "playwright install chromium",
     "e2e:visuals": "ACCRUE_HOST_PLAYWRIGHT_VIDEO=1 env -u NO_COLOR playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust",
     "e2e:visuals:png-only": "ACCRUE_HOST_PLAYWRIGHT_VIDEO=0 env -u NO_COLOR playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust",

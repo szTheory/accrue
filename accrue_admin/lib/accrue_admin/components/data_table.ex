@@ -19,6 +19,7 @@ defmodule AccrueAdmin.Components.DataTable do
     socket =
       socket
       |> assign(assigns)
+      |> assign(:table_caption, Map.get(assigns, :table_caption))
       |> assign_new(:selected_ids, fn -> MapSet.new() end)
       |> assign_new(:filter_fields, fn -> [] end)
       |> assign_new(:card_fields, fn -> [] end)
@@ -166,6 +167,7 @@ defmodule AccrueAdmin.Components.DataTable do
 
       <div :if={!Enum.empty?(@rows)} class="ax-card ax-data-table-shell">
         <table class="ax-data-table-grid">
+          <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
           <thead>
             <tr>
               <th :if={@selectable} scope="col" class="ax-label">Select</th>
