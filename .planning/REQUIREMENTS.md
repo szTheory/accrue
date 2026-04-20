@@ -9,9 +9,9 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 
 ### Inventory (INV)
 
-- [ ] **INV-01**: Maintainer-facing **route matrix** documents every shipping `live` path in `AccrueAdmin.Router` (including dev-only routes when `allow_live_reload`) and maps each to its LiveView module.
-- [ ] **INV-02**: **Component coverage** notes which `AccrueAdmin.Components.*` primitives appear in `ComponentKitchenLive` vs production LiveViews; gaps that block visual regression are listed.
-- [ ] **INV-03**: **Spec alignment table** states, per major surface (dashboard, money indexes, detail pages, webhooks, step-up), which rules from `20-UI-SPEC.md` and `21-UI-SPEC.md` apply and whether the current implementation is aligned, partial, or N/A.
+- [x] **INV-01**: Maintainer-facing **route matrix** documents every shipping `live` path in `AccrueAdmin.Router` (including dev-only routes when `allow_live_reload`) and maps each to its LiveView module.
+- [x] **INV-02**: **Component coverage** notes which `AccrueAdmin.Components.*` primitives appear in `ComponentKitchenLive` vs production LiveViews; gaps that block visual regression are listed.
+- [x] **INV-03**: **Spec alignment table** states, per major surface (dashboard, money indexes, detail pages, webhooks, step-up), which rules from `20-UI-SPEC.md` and `21-UI-SPEC.md` apply and whether the current implementation is aligned, partial, or N/A.
 
 ### Hierarchy and patterns (UX)
 
@@ -56,9 +56,9 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INV-01 | Phase 25 | Pending |
-| INV-02 | Phase 25 | Pending |
-| INV-03 | Phase 25 | Pending |
+| INV-01 | Phase 25 | Complete |
+| INV-02 | Phase 25 | Complete |
+| INV-03 | Phase 25 | Complete |
 | UX-01 | Phase 26 | Pending |
 | UX-02 | Phase 26 | Pending |
 | UX-03 | Phase 26 | Pending |
