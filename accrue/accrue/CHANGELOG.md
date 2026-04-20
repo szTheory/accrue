@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/szTheory/accrue/compare/accrue-v0.3.0...accrue-v0.3.1) (2026-04-20)
+
+
+### Miscellaneous Chores
+
+* **accrue:** Synchronize accrue-monorepo versions
+
 ## [0.3.0](https://github.com/szTheory/accrue/compare/accrue-v0.2.0...accrue-v0.3.0) (2026-04-20)
 
 
