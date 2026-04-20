@@ -3,6 +3,7 @@ defmodule AccrueAdmin.CustomersLiveTest do
 
   alias Accrue.Billing.{Customer, PaymentMethod}
   alias Accrue.Test.Factory
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -83,5 +84,15 @@ defmodule AccrueAdmin.CustomersLiveTest do
     # UX-01: billing signal chips use label scale (no 12px utility on touched chips)
     assert html =~ "ax-chip ax-label"
     refute html =~ "ax-text-12"
+  end
+
+  test "renders Copy-backed empty index when search excludes all customers", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers?q=___accrue_empty_fixture___")
+
+    assert html =~ "No customers for this organization yet"
+    assert html =~ Copy.customers_index_empty_copy()
   end
 end

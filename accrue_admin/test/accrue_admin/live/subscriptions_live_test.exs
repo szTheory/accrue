@@ -4,6 +4,7 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
   alias Accrue.Billing
   alias Accrue.Processor.Fake
   alias Accrue.Test.Factory
+  alias AccrueAdmin.Copy
 
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
@@ -50,5 +51,15 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "cancel at period end"
     assert html =~ "/billing/subscriptions/"
     assert html =~ "ax-chip ax-label"
+  end
+
+  test "renders Copy-backed empty index when search excludes all subscriptions", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/subscriptions?q=___accrue_empty_fixture___")
+
+    assert html =~ Copy.subscriptions_index_empty_title()
+    assert html =~ Copy.subscriptions_index_empty_copy()
   end
 end
