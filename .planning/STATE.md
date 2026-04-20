@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Admin UI / UX polish
-status: planning
-last_updated: "2026-04-20T19:03:55.986Z"
+status: milestone_complete
+last_updated: "2026-04-20T19:35:29.466Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 13
+  completed_phases: 5
+  total_plans: 16
   completed_plans: 13
   percent: 100
 ---
@@ -21,13 +21,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-20)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 29 — Mobile parity and CI
+**Current focus:** Phase 29 — mobile-parity-and-ci
 
 ## Current Position
 
 Phase: 29
 Plan: Not started
-**Status:** Ready to plan
+**Status:** Milestone complete
 **Last Activity:** 2026-04-20
 
 ## Milestone Progress
@@ -75,3 +75,5 @@ v1.6 may close **admin-related** gaps (e.g. mobile/a11y on mounted admin); VERIF
 - **Phase 25 inventory policy (2026-04-20):** split `25-INV-0{1,2,3}.md` + phase `README`; router / `mix phx.routes` canonical for INV-01 (baseline audit §1 is non-authoritative); scoped “blocking” component gaps tied to 20/21 UI-SPEC surfaces; two-level spec alignment (clause rows + surface rollup); optional route artifacts deferred until a `mix` task exists.
 
 **Next phase:** 29 (mobile parity and CI) — discuss or plan before execute.
+
+**Planned Phase:** 29 (Mobile parity and CI) — 3 plans — 2026-04-20T19:22:09.694Z

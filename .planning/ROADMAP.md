@@ -48,11 +48,11 @@
 | 26 | Hierarchy and pattern alignment | `ax-*` / token consistency on touched surfaces across money indexes, detail pages, and webhooks. | UX-01..04 | LiveViews + HTML assertions per plans; theme tokens on touched surfaces (complete 2026-04-20). |
 | 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals. | COPY-01..03 | Copy pass merged; literals traceable per REQUIREMENTS (complete 2026-04-20). |
 | 28 | Accessibility hardening | Focus, tables, contrast; optional axe on mounted admin. | A11Y-01..04 | Step-up focus, table captions, VERIFY-01 axe + verification doc (complete 2026-04-20). |
-| 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows |
+| 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows (complete 2026-04-20). |
 
 **Depends on:** Phase 24 complete (v1.5 shipped).
 
-**Next step:** `/gsd-discuss-phase 29` or `/gsd-plan-phase 29` (Phase 28 complete).
+**Next step:** `/gsd-progress` — Phase 29 shipped; reconcile v1.6 progress table with remaining milestone work.
 
 ### Phase 25: Admin UX inventory
 
@@ -127,7 +127,7 @@
 
 **Canonical refs:** `.planning/REQUIREMENTS.md`; `examples/accrue_host` Playwright config and VERIFY-01 docs as referenced in plans.
 
-**Plans:** 3 plans (29-01..29-03) ready to execute
+**Plans:** 3/3 plans complete
 
 ## Prior milestone snapshot (v1.4)
 
@@ -171,7 +171,7 @@
 | 26. Hierarchy and pattern alignment | v1.6 | 0/? | Planned | — |
 | 27. Microcopy and operator strings | v1.6 | 0/? | Planned | — |
 | 28. Accessibility hardening | v1.6 | 3/3 | Complete | 2026-04-20 |
-| 29. Mobile parity and CI | v1.6 | 0/3 | Ready to execute | — |
+| 29. Mobile parity and CI | v1.6 | 3/3 | Complete | 2026-04-20 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

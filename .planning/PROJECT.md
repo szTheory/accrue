@@ -340,4 +340,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-20 — Phase 28 accessibility hardening complete (A11Y-01..04); next work Phase 29 (mobile parity and CI) in ROADMAP.*
+*Last updated: 2026-04-20 — Phase 29 mobile parity and CI complete (MOB-01..03); v1.6 milestone status in ROADMAP / REQUIREMENTS.*
