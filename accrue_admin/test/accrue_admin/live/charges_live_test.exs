@@ -59,6 +59,8 @@ defmodule AccrueAdmin.ChargesLiveTest do
     assert html =~ "Payment and refund review"
     assert html =~ "Succeeded"
     assert html =~ "/billing/charges/"
+    assert html =~ "ax-chip ax-label"
+    refute html =~ "ax-text-12"
   end
 
   defp insert_customer(attrs) do
