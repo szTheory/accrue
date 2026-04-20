@@ -2,6 +2,7 @@ import { Socket } from "../../deps/phoenix/priv/static/phoenix.mjs";
 import { LiveSocket } from "../../deps/phoenix_live_view/priv/static/phoenix_live_view.esm.js";
 import { initClipboardControls } from "./hooks/clipboard";
 import { initThemeControls } from "./hooks/accrue_theme";
+import { initShellNav } from "./hooks/accrue_shell_nav";
 
 function ready(callback) {
   if (document.readyState === "loading") {
@@ -14,6 +15,7 @@ function ready(callback) {
 ready(() => {
   initClipboardControls();
   initThemeControls();
+  initShellNav();
 });
 
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
