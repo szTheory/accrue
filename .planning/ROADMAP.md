@@ -8,6 +8,7 @@
 - ✅ **v1.3 Tax + Organization Billing** — Phases 18-22 shipped on 2026-04-17. Stripe Tax, Sigra-first organization billing, admin/host UX proof, and Stripe-native finance handoff documentation. Full archive: [`milestones/v1.3-ROADMAP.md`](milestones/v1.3-ROADMAP.md).
 - ✅ **v1.4 Ecosystem stability + demo visuals** — Phase 23 shipped 2026-04-17. `lattice_stripe` lockfiles verified on latest 1.1.x; Fake-backed Playwright screenshot walkthrough documented and scripted; admin `priv/static` bundle fixed for browser LiveView. **PROC-08 deferred.**
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
+- ○ **v1.6 Admin UI / UX polish** — Phases **25–29** (in planning). Companion admin (`accrue_admin`) hierarchy, microcopy, accessibility, and mobile CI; host Playwright where mounted admin must be proven. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
 
 ## Phases
 
@@ -37,9 +38,21 @@
 
 </details>
 
-### Next milestone
+### v1.6 Admin UI / UX polish (Phases 25–29)
 
-No active phases. Start the next planning cycle with `/gsd-new-milestone` (fresh requirements and roadmap).
+**Milestone goal:** Operator-facing admin matches Phase **20/21 UI-SPEC** intent across money indexes, detail pages, and webhooks; microcopy is consistent; **a11y** and **mobile** regressions are caught by tests where ROI is highest—without new third-party UI kits.
+
+| # | Phase | Goal | Requirements | Success criteria (summary) |
+|---|-------|------|--------------|---------------------------|
+| 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment | INV-01..03 | Matrix + gap list checked into phase artifact |
+| 26 | Hierarchy and pattern alignment | `ax-*` / token consistency on touched surfaces | UX-01..04 | LiveViews updated + ExUnit/HTML assertions on structure |
+| 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals | COPY-01..03 | Copy pass merged; grep or module doc for literals |
+| 28 | Accessibility hardening | Focus, tables, contrast, optional axe on mounted admin | A11Y-01..04 | Documented checks + at least one automated gate or ADR |
+| 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows |
+
+**Depends on:** Phase 24 complete (v1.5 shipped).
+
+**Next step:** `/gsd-discuss-phase 25` or `/gsd-plan-phase 25`.
 
 ## Prior milestone snapshot (v1.4)
 
@@ -74,6 +87,16 @@ No active phases. Start the next planning cycle with `/gsd-new-milestone` (fresh
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 24. Adoption proof hardening | v1.5 | inline | Complete | 2026-04-18 |
+
+**v1.6 (active)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 25. Admin UX inventory | v1.6 | 0/? | Planned | — |
+| 26. Hierarchy and pattern alignment | v1.6 | 0/? | Planned | — |
+| 27. Microcopy and operator strings | v1.6 | 0/? | Planned | — |
+| 28. Accessibility hardening | v1.6 | 0/? | Planned | — |
+| 29. Mobile parity and CI | v1.6 | 0/? | Planned | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
