@@ -59,6 +59,7 @@ The standard path is `.github/workflows/release-please.yml`:
 
 - Release Please runs only on pushes to `main` and manual `workflow_dispatch`.
 - `release-please-config.json` uses **one combined release PR** for `accrue` and `accrue_admin` (`separate-pull-requests: false`) so versions and `scripts/ci/verify_package_docs.sh` stay aligned.
+- Authoritative package changelogs are only `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md` (the paths wired in `release-please-config.json`); do not add duplicate changelogs under nested directories such as `accrue/accrue/` or `accrue_admin/accrue_admin/`.
 - Automated publish is gated by same-workflow outputs:
   - `needs.release.outputs.accrue_release_created`
   - `needs.release.outputs.accrue_admin_release_created`
