@@ -8,6 +8,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
   alias Accrue.Billing.Invoice
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
   alias AccrueAdmin.Queries.Invoices
 
@@ -121,8 +122,8 @@ defmodule AccrueAdmin.Live.InvoicesLive do
               ]
             }
           ]}
-          empty_title="No invoices matched"
-          empty_copy="Adjust the invoice filters or wait for the next billing cycle."
+          empty_title={Copy.invoices_index_empty_title()}
+          empty_copy={Copy.invoices_index_empty_copy()}
         />
       </section>
     </AppShell.app_shell>

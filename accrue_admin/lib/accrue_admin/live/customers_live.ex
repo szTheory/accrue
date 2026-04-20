@@ -8,6 +8,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
   alias Accrue.Billing.Customer
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
   alias AccrueAdmin.Queries.Customers
 
@@ -120,8 +121,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
               options: [{"true", "On file"}, {"false", "Missing"}]
             }
           ]}
-          empty_title="No customers matched"
-          empty_copy="Adjust the customer filters or wait for the next local billing sync."
+          empty_title={Copy.customers_index_empty_title()}
+          empty_copy={Copy.customers_index_empty_copy()}
         />
       </section>
     </AppShell.app_shell>

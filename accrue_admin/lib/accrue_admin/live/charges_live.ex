@@ -8,6 +8,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
   alias Accrue.Billing.Charge
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
   alias AccrueAdmin.Queries.Charges
 
@@ -107,8 +108,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
               options: [{"true", "Yes"}, {"false", "No"}]
             }
           ]}
-          empty_title="No charges matched"
-          empty_copy="Adjust the payment filters or wait for more processor activity."
+          empty_title={Copy.charges_index_empty_title()}
+          empty_copy={Copy.charges_index_empty_copy()}
         />
       </section>
     </AppShell.app_shell>
