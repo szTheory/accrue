@@ -11,13 +11,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
   alias Accrue.Webhook.WebhookEvent
   alias Accrue.Webhooks.DLQ
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FlashGroup, JsonViewer, KpiCard, Timeline}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
-
-  @owner_access_denied "You don't have access to billing for this organization."
-  @ambiguous_replay_blocked "Ownership couldn't be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
-  @replay_success "Replay requested for the active organization."
-  @global_replay_success "Webhook replay requested."
-  @replay_blocked "Replay is blocked because this webhook isn't linked to a billable row in the active organization."
 
   @impl true
   def mount(%{"id" => webhook_id}, session, socket) do
@@ -27,7 +22,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
       :not_found ->
         {:ok,
          socket
-         |> put_flash(:error, @owner_access_denied)
+         |> put_flash(:error, Copy.Locked.owner_access_denied())
          |> redirect(
            to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/webhooks")
          )}
@@ -60,7 +55,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
   end
 
   def handle_event("prepare_replay", _params, socket) do
-    {:noreply, push_flash(socket, :warning, @replay_blocked)}
+    {:noreply, push_flash(socket, :warning, Copy.Locked.replay_blocked())}
   end
 
   def handle_event("cancel_replay", _params, socket) do
@@ -83,13 +78,13 @@ defmodule AccrueAdmin.Live.WebhookLive do
         {:noreply,
          socket
          |> assign(:pending_replay, false)
-         |> push_flash(:warning, @replay_blocked)}
+         |> push_flash(:warning, Copy.Locked.replay_blocked())}
 
       {:ambiguous, _proof_context} ->
         {:noreply,
          socket
          |> assign(:pending_replay, false)
-         |> push_flash(:warning, @replay_blocked)}
+         |> push_flash(:warning, Copy.Locked.replay_blocked())}
 
       {:error, reason} ->
         {:noreply, push_flash(socket, :error, inspect(reason))}
@@ -295,16 +290,16 @@ defmodule AccrueAdmin.Live.WebhookLive do
   defp replay_heading(%{webhook: nil}), do: "Replay is unavailable"
   defp replay_heading(%{webhook: _webhook}), do: "Requeue this webhook row"
 
-  defp replay_copy(%{webhook: nil}), do: @ambiguous_replay_blocked
+  defp replay_copy(%{webhook: nil}), do: Copy.Locked.ambiguous_replay_blocked()
 
   defp replay_copy(%{webhook: _webhook}) do
     "Single replay calls the existing DLQ primitive directly and records an admin audit event for the operator action."
   end
 
-  defp ambiguous_replay_blocked, do: @ambiguous_replay_blocked
-  defp single_replay_confirmation, do: "Replay webhook for the active organization?"
-  defp replay_success(%{mode: :organization}), do: @replay_success
-  defp replay_success(_owner_scope), do: @global_replay_success
+  defp ambiguous_replay_blocked, do: Copy.Locked.ambiguous_replay_blocked()
+  defp single_replay_confirmation, do: Copy.Locked.single_replay_confirmation()
+  defp replay_success(%{mode: :organization}), do: Copy.Locked.replay_success_organization()
+  defp replay_success(_owner_scope), do: Copy.Locked.replay_success_global_webhook()
 
   defp attempt_history(webhook_id) do
     from(job in Oban.Job,
