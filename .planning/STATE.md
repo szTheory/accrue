@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Admin UI / UX polish
 status: planning
-last_updated: "2026-04-20T15:09:33.908Z"
+last_updated: "2026-04-20T15:22:49.534Z"
 last_activity: 2026-04-20 — Phase 26 discuss-phase; see .planning/phases/26-hierarchy-and-pattern-alignment/26-CONTEXT.md
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
+  total_plans: 7
   completed_plans: 3
-  percent: 100
+  percent: 43
 ---
 
 # Project State
@@ -75,3 +75,5 @@ v1.6 may close **admin-related** gaps (e.g. mobile/a11y on mounted admin); VERIF
 - **Phase 25 inventory policy (2026-04-20):** split `25-INV-0{1,2,3}.md` + phase `README`; router / `mix phx.routes` canonical for INV-01 (baseline audit §1 is non-authoritative); scoped “blocking” component gaps tied to 20/21 UI-SPEC surfaces; two-level spec alignment (clause rows + surface rollup); optional route artifacts deferred until a `mix` task exists.
 
 **Next phase:** 26 (hierarchy and pattern alignment) — discuss or plan before execute.
+
+**Planned Phase:** 26 (Hierarchy and pattern alignment) — 4 plans — 2026-04-20T15:22:49.527Z
