@@ -114,6 +114,23 @@ jobs:
           write_release_outputs "accrue" "accrue" "$accrue_release_before"
           write_release_outputs "accrue_admin" "accrue_admin" "$accrue_admin_release_before"
 
+          # Release Please sometimes creates only the core GitHub Release when both
+          # packages bump in one merge; accrue_admin would never publish. When manifest
+          # versions match (lockstep), still publish admin from this push SHA.
+          accrue_created="$(grep '^accrue_release_created=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          accrue_admin_created="$(grep '^accrue_admin_release_created=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          if [ "$accrue_created" = "true" ] && [ "$accrue_admin_created" != "true" ]; then
+            if [ -n "$accrue_version" ] && [ -n "$accrue_admin_version" ] && [ "$accrue_version" = "$accrue_admin_version" ]; then
+              {
+                echo "accrue_admin_release_created=true"
+                echo "accrue_admin_tag_name=${accrue_admin_tag}"
+                echo "accrue_admin_version=${accrue_admin_version}"
+                echo "accrue_admin_sha=${GITHUB_SHA}"
+              } >> "$GITHUB_OUTPUT"
+              echo "Applied lockstep accrue_admin publish fallback (missing admin GitHub Release detection)." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
           $release_please release-pr \
             --repo-url "$repo" \
             --target-branch "$target_branch" \
