@@ -120,6 +120,9 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
 
+    # UX-02: single ax-page on invoice detail
+    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
+
     assert html =~ "Tax &amp; ownership"
     assert html =~ "Base plan"
     assert html =~ "Open PDF"

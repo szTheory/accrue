@@ -175,7 +175,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <p class="ax-body">Choose an optional source event, then stage and confirm an action.</p>
             </header>
 
-            <div class="ax-page">
+            <div class="ax-stack-xl">
               <form phx-submit="prepare_action" data-role="cancel-now-form">
                 <input type="hidden" name="action_type" value="cancel_now" />
                 <.source_event_select events={@timeline_events} />
