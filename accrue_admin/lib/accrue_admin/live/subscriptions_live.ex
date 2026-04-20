@@ -8,6 +8,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   alias Accrue.Billing.{Query, Subscription}
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
   alias AccrueAdmin.Queries.Subscriptions
 
@@ -131,8 +132,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             },
             %{id: :customer_id, label: "Customer id"}
           ]}
-          empty_title="No subscriptions matched"
-          empty_copy="Adjust the subscription filters or wait for new billing activity."
+          empty_title={Copy.subscriptions_index_empty_title()}
+          empty_copy={Copy.subscriptions_index_empty_copy()}
         />
       </section>
     </AppShell.app_shell>
