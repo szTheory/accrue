@@ -1,6 +1,6 @@
 # INV-03 — Spec alignment
 
-**Snapshot:** 2026-04-20 @ 47005ee  
+**Snapshot:** 2026-04-20 @ 052a784  
 **Production method:** Manual mapping from `20-UI-SPEC.md` / `21-UI-SPEC.md` headings to existing `accrue_admin` LiveView tests, `examples/accrue_host/e2e` specs, and `25-INV-01` / `25-INV-02` inventories.
 
 ## Surface rollup (secondary index)
