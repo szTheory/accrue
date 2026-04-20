@@ -54,7 +54,7 @@ completed: 2026-04-20
 2. **Task 2** — `8d7ada1` feat(27-01): delegate DataTable empty defaults to Copy
 3. **Task 3** — `0e3b1df` feat(27-01): wire money index LiveViews to AccrueAdmin.Copy
 4. **Task 4** — `99245df` test(27-01): assert Copy-backed money index empty states
-5. **Task 5** — (this commit) docs: INV-03 C-01 evidence for Phase 27 plan 01
+5. **Task 5** — INV-03 C-01 row updated with Phase 27 plan `27-01` evidence (committed with this SUMMARY)
 
 ## Verification
 

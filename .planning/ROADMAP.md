@@ -46,7 +46,7 @@
 |---|-------|------|--------------|---------------------------|
 | 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment across `accrue_admin`. | INV-01..03 | Matrix + gap list checked into phase artifacts (complete 2026-04-20). |
 | 26 | Hierarchy and pattern alignment | 4/4 | Complete    | 2026-04-20 |
-| 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals | COPY-01..03 | Copy pass merged; grep or module doc for literals |
+| 27 | Microcopy and operator strings | 3/3 | Complete    | 2026-04-20 |
 | 28 | Accessibility hardening | Focus, tables, contrast, optional axe on mounted admin | A11Y-01..04 | Documented checks + at least one automated gate or ADR |
 | 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows |
 
@@ -99,7 +99,7 @@
 
 **Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
 
-**Plans:** `27-01-PLAN.md`, `27-02-PLAN.md`, `27-03-PLAN.md`
+**Plans:** 3/3 plans complete
 
 ### Phase 28: Accessibility hardening
 
