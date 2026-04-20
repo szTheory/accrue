@@ -35,4 +35,26 @@ defmodule AccrueAdmin.Copy do
   def charges_index_empty_copy,
     do:
       "Charges appear when payments are recorded for this organization. If you expected charges, adjust filters or confirm organization scope."
+
+  def subscription_select_action_warning, do: "Select an action before confirming."
+
+  def subscription_action_recorded_info, do: "Subscription action recorded."
+
+  def invoice_select_action_warning, do: "Select an invoice action before confirming."
+
+  def invoice_pdf_open_info, do: "Open PDF now uses the shared invoice render path."
+
+  def invoice_action_recorded_info, do: "Invoice action recorded."
+
+  def payment_processor_action_warning(payment_intent),
+    do: "Processor requires action: " <> inspect(payment_intent)
+
+  def charge_prepare_refund_warning, do: "Prepare a refund before confirming."
+
+  def charge_refund_created_info,
+    do: "Refund created with fee-aware fields from the billing facade."
+
+  def customer_detail_no_subscriptions, do: "No subscriptions for this customer yet."
+
+  def customer_detail_no_invoices, do: "No invoices for this customer yet."
 end
