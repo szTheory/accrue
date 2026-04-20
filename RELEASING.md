@@ -65,6 +65,7 @@ The standard path is `.github/workflows/release-please.yml`:
 - `accrue` publishes first.
 - `accrue_admin` publishes only after the `accrue` publish job succeeds when both packages release together.
 - `accrue_admin` dry-run and publish steps export `ACCRUE_ADMIN_HEX_RELEASE=1`.
+- If Release Please creates the **core** GitHub Release but not the admin one in the same run, the workflow **lockstep fallback** still publishes `accrue_admin` when both manifest versions match (same push SHA).
 
 This automation does not publish from `pull_request`, `pull_request_target`, or ordinary branch pushes.
 

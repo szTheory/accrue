@@ -1,35 +1,41 @@
 # Accrue
 
-Billing state, modeled clearly.
+**Billing state, modeled clearly.**
 
-Accrue is the billing library. Your Phoenix app owns the generated `MyApp.Billing`
-facade, router mounts, runtime config, and auth/session boundary. Start with the
-host-first [First Hour](guides/first_hour.md) guide, then keep the checked-in
-[`examples/accrue_host`](https://github.com/szTheory/accrue/tree/main/examples/accrue_host) demo nearby for command parity
-and the canonical local proof path.
+Accrue helps you ship **real subscription billing** in a **Phoenix** app without rebuilding the same Stripe-shaped domain for the tenth time. You keep ownership of auth, routes, and product code; Accrue gives you a clear billing layer—customers, subscriptions, invoices, coupons, checkout, webhooks, PDFs, email, and tests that run against a **Fake** Stripe stand-in so CI stays fast and boring.
 
-## Start Here
+---
 
-- [First Hour](guides/first_hour.md)
-- [Troubleshooting](guides/troubleshooting.md)
-- [Webhooks](guides/webhooks.md)
-- [Testing](guides/testing.md)
-- [Finance handoff](guides/finance-handoff.md) (Stripe RR, Sigma, Data Pipeline)
-- [Upgrade](guides/upgrade.md)
-- [Canonical local demo](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md)
+## Who this is for
 
-The compact adoption path is:
+You are building (or already run) a **B2B or B2C SaaS** on Elixir/Phoenix and want:
 
-1. Install `accrue` in your Phoenix app.
-2. Follow the [First Hour](guides/first_hour.md) guide for runtime config,
-   migrations, Oban, `use Accrue.Webhook.Handler`, and
-   `accrue_admin "/billing"`.
-3. Compare that setup with the checked-in
-   [`examples/accrue_host`](https://github.com/szTheory/accrue/tree/main/examples/accrue_host) demo path.
+- something that feels **maintained and intentional**, not a pile of copy-pasted controllers
+- **HexDocs and guides** you can send a teammate without a sales call
+- a path from **“hello world”** to **production-shaped** setup that does not hide the sharp edges (webhooks, secrets, Connect)
+
+If that is you, you are in the right place.
+
+---
+
+## Where to go next (pick one)
+
+| If you want to… | Start here |
+|-----------------|------------|
+| **Get running in one sitting** | [First Hour](guides/first_hour.md) |
+| **Skim the smallest path** | [Quickstart](guides/quickstart.md) |
+| **Understand what changed between versions** | [Release notes (plain language)](guides/release-notes.md) → then [Upgrade](guides/upgrade.md) |
+| **Configure Stripe, PDFs, email, branding** | [Configuration](guides/configuration.md), [Webhooks](guides/webhooks.md), [Branding](guides/branding.md) |
+| **Prove it locally the same way CI does** | Checked-in demo app [`examples/accrue_host`](https://github.com/szTheory/accrue/tree/main/examples/accrue_host) and its [README](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) |
+| **Read API and guide HTML** | [HexDocs: accrue](https://hexdocs.pm/accrue/) (generated from this README + `guides/`) |
+
+The **guides** are the long-form source of truth. This README is the map.
+
+---
 
 ## Install
 
-Add Accrue to `deps/0` and fetch dependencies:
+In `mix.exs`:
 
 ```elixir
 defp deps do
@@ -39,67 +45,60 @@ defp deps do
 end
 ```
 
+Then:
+
 ```bash
 mix deps.get
 mix accrue.install
 ```
 
-Use the [First Hour](guides/first_hour.md) guide for the full tutorial story.
-Keep the checked-in `examples/accrue_host` app nearby when you want the
-canonical local demo path and command parity.
+Use **[First Hour](guides/first_hour.md)** for the full narrative (Oban, migrations, `use Accrue.Webhook.Handler`, mounting **`accrue_admin`**). The demo app above is useful when you want command-for-command parity with maintainers.
 
-The canonical verification labels are:
+**Quick verification** (optional, from the host app):
 
-- `mix verify` for the focused tutorial proof suite
-- `mix verify.full` for the CI-equivalent local gate
-- `bash scripts/ci/accrue_host_uat.sh` for the repo-root wrapper around that full gate
+- `mix verify` — shorter “tutorial proof” suite  
+- `mix verify.full` — closer to what CI runs  
+- From the **repo root**: `bash scripts/ci/accrue_host_uat.sh` — full host integration gate used in CI  
 
-## What ships
+---
 
-- Billing facades for customers, subscriptions, invoices, charges, refunds, coupons, promotion codes, and metered usage.
-- Checkout, billing portal, and Connect helpers on top of the Stripe-backed processor contract.
-- Webhook ingest, async dispatch, replay tooling, event-ledger history, and operational telemetry.
-- Transactional email, invoice PDF rendering, installer tasks, and a Fake-first test surface.
+## What you get
 
-## Public API stability
+- **Billing** — customers, subscriptions, invoices, charges, refunds, coupons, promotion codes, metered usage.  
+- **Money paths** — Checkout, billing portal, Connect helpers; all behind a **processor contract** (Stripe in production, Fake in test).  
+- **Operations** — Webhook ingest, async handling, replay, append-only style history, telemetry.  
+- **Product polish** — Transactional email, invoice PDFs, installer tasks, and tests that do not need live Stripe.
 
-The supported public setup surface for first-time integration is:
+**Admin UI** ships as the sibling Hex package **`accrue_admin`** (same version family as `accrue`). Install both when you want the LiveView dashboard.
 
-- your generated `MyApp.Billing`
-- `use Accrue.Webhook.Handler`
-- `use Accrue.Test`
-- `AccrueAdmin.Router.accrue_admin/2`
-- `Accrue.Auth`
-- `Accrue.ConfigError` for setup failures
+---
 
-Breaking changes for that facade layer follow the deprecation cycle documented in `guides/upgrade.md`. Accrue deprecates public APIs before removal instead of silently changing behavior in place.
+## Public surface (stability)
 
-Generated files are host-owned after install. Accrue may refresh pristine
-stamped files on installer reruns, but user-edited generated files are not
-silently managed. Internal schemas, webhook/event structs, reducer modules,
-worker internals, and demo-only helpers are not first-time integration APIs.
+The supported “first integration” surface is documented in **[Upgrade](guides/upgrade.md)** and includes your generated **`MyApp.Billing`**, **`use Accrue.Webhook.Handler`**, **`use Accrue.Test`**, **`AccrueAdmin.Router`**, **`Accrue.Auth`**, and **`Accrue.ConfigError`**. Breaking changes there go through deprecation, not silent reshuffles.
 
-## Guides
+Everything else—internal schemas, workers, demo-only helpers—is subject to change. Generated files are **yours** after install; Accrue will not silently overwrite your edits.
 
-- [Quickstart](guides/quickstart.md)
-- [First Hour](guides/first_hour.md)
-- [Troubleshooting](guides/troubleshooting.md)
-- [Configuration](guides/configuration.md)
-- [Testing](guides/testing.md)
-- [Finance handoff](guides/finance-handoff.md)
-- [Sigra integration](guides/sigra_integration.md)
-- [Custom processors](guides/custom_processors.md)
-- [Custom PDF adapter](guides/custom_pdf_adapter.md)
-- [Branding](guides/branding.md)
-- [Webhooks](guides/webhooks.md)
-- [Upgrade](guides/upgrade.md)
+---
 
-## Security
+## Guides (full list)
 
-Use runtime-only secrets for Stripe credentials, keep webhook signing secrets out of source control, and review the repository `SECURITY.md` before production rollout or vulnerability reporting.
+**Getting productive:** [Quickstart](guides/quickstart.md) · [First Hour](guides/first_hour.md) · [Troubleshooting](guides/troubleshooting.md) · [Testing](guides/testing.md) · [Upgrade](guides/upgrade.md) · [Release notes](guides/release-notes.md)
 
-## Project policies
+**Running in production:** [Configuration](guides/configuration.md) · [Webhooks](guides/webhooks.md) · [Webhook gotchas](guides/webhook_gotchas.md) · [Telemetry](guides/telemetry.md) · [Security (repo)](https://github.com/szTheory/accrue/blob/main/SECURITY.md)
 
-- [Contributing guide](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md)
-- [Code of Conduct](https://github.com/szTheory/accrue/blob/main/CODE_OF_CONDUCT.md)
-- [Security policy](https://github.com/szTheory/accrue/blob/main/SECURITY.md)
+**Stripe-shaped features:** [Connect](guides/connect.md) · [Checkout / portal checklist](guides/portal_configuration_checklist.md) · [Email](guides/email.md) · [PDF](guides/pdf.md) · [Branding](guides/branding.md)
+
+**Auth and customization:** [Auth adapters](guides/auth_adapters.md) · [Sigra](guides/sigra_integration.md) · [Custom processors](guides/custom_processors.md) · [Custom PDF adapter](guides/custom_pdf_adapter.md)
+
+**Finance / ops:** [Finance handoff](guides/finance-handoff.md)
+
+---
+
+## Community and policies
+
+- [Contributing](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md)  
+- [Code of Conduct](https://github.com/szTheory/accrue/blob/main/CODE_OF_CONDUCT.md)  
+- [Security](https://github.com/szTheory/accrue/blob/main/SECURITY.md)  
+
+Use **runtime-only** secrets for Stripe; never commit webhook signing secrets. When you are ready to report a vulnerability, follow **SECURITY.md**.

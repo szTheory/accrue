@@ -1,5 +1,7 @@
 # Upgrade Guide
 
+For a **readable, version-by-version story** of what shipped (before you read every changelog bullet), see **[Release notes (plain language)](release-notes.md)**.
+
 This guide defines the public upgrade contract for Accrue consumers. Follow the
 published billing facade, package changelogs, and documented guides. Do not
 assume silent compatibility with undocumented internals, private modules, or
