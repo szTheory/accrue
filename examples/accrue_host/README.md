@@ -94,6 +94,30 @@ including **`e2e/verify01-admin-a11y.spec.js`** (Phase 28: `@axe-core/playwright
 serious + critical violations, forced light then dark on desktop; mobile projects
 skip this file). Focused local run after the usual seed + server: `npm run e2e:a11y`.
 
+### Mounted admin — mobile shell
+
+When Accrue Admin is mounted under `/billing`, treat the **App shell** as the single
+scroll owner on narrow viewports: primary content scrolls inside **`.ax-shell-main`**
+so it does not fight the host page chrome.
+
+- **Narrow width:** primary destinations (Dashboard, Customers, Subscriptions, …)
+  live behind the **Menu** control (`getByRole("button", { name: "Menu" })`) until the
+  drawer opens. Do not rely on **hover-only** primary navigation for mobile layout
+  proofs.
+- **`?org=`:** shell `nav_href` links preserve the active organization the same way as
+  desktop; keep org query params coherent when deep-linking customer routes.
+- **Touch targets:** dense tables on Pixel-class viewports may need
+  `scrollIntoViewIfNeeded` before clicks in Playwright so hit targets are reachable.
+- **Host embedding cautions:** watch for **double chrome** (host nav + admin topbar),
+  **`overflow: hidden`** on host wrappers clipping the LiveView tree, and **z-index**
+  stacking that can hide the mobile drawer behind host overlays (patterns from
+  Filament/ActiveAdmin-style mounts).
+
+Automated checks for this contract live in **`e2e/verify01-admin-mobile.spec.js`**,
+which runs substantive assertions on **`chromium-mobile`** only. The
+**`chromium-mobile-tagged`** project is for tag discovery, not responsive layout
+parity.
+
 Run each step from the repository root using `cd examples/accrue_host` first:
 
 1. Create a temp fixture file and seed the test database (required for browser
