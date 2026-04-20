@@ -19,6 +19,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     Timeline
   }
 
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.{StepUp, TaxOwnershipRow}
 
   @destructive_actions ~w(void mark_uncollectible)
@@ -56,7 +57,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   def handle_event("confirm_action", _params, socket) do
     case socket.assigns.pending_action do
       nil ->
-        {:noreply, push_flash(socket, :warning, "Select an invoice action before confirming.")}
+        {:noreply, push_flash(socket, :warning, Copy.invoice_select_action_warning())}
 
       %{type: type} = action when type in @destructive_actions ->
         case StepUp.require_fresh(
@@ -93,7 +94,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
          socket
          |> assign(:generated_pdf_href, href)
          |> assign(:generated_pdf_filename, filename)
-         |> push_flash(:info, "Open PDF now uses the shared invoice render path.")}
+         |> push_flash(:info, Copy.invoice_pdf_open_info())}
 
       {:error, reason} ->
         {:noreply, push_flash(socket, :error, "Could not render PDF: #{inspect(reason)}")}
@@ -411,10 +412,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         socket
         |> record_admin_audit(action, invoice.id)
         |> refresh_invoice(invoice.id)
-        |> push_flash(:info, "Invoice action recorded.")
+        |> push_flash(:info, Copy.invoice_action_recorded_info())
 
       {:ok, :requires_action, payment_intent} ->
-        push_flash(socket, :warning, "Processor requires action: #{inspect(payment_intent)}")
+        push_flash(socket, :warning, Copy.payment_processor_action_warning(payment_intent))
 
       {:error, reason} ->
         push_flash(socket, :error, inspect(reason))
