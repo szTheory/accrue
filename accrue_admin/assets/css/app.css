@@ -836,6 +836,19 @@ button {
   min-width: 0;
 }
 
+/* Detail stacks inside cards (UX-02) — not page shells; avoids nested ax-page */
+.ax-stack-xl {
+  display: grid;
+  gap: var(--ax-space-xl);
+  min-width: 0;
+}
+
+.ax-stack-sm {
+  display: grid;
+  gap: var(--ax-space-md);
+  min-width: 0;
+}
+
 .ax-page-header {
   display: grid;
   gap: var(--ax-space-sm);

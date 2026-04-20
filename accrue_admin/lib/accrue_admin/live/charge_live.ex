@@ -140,7 +140,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
               <h3 class="ax-heading">Processor and platform fees</h3>
             </header>
 
-            <div class="ax-page">
+            <div class="ax-stack-xl">
               <div class="ax-list-row">
                 <span class="ax-body">Charge amount</span>
                 <MoneyFormatter.money_formatter amount_minor={@charge.amount_cents} currency={@charge.currency} customer={@customer} />
@@ -170,7 +170,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
               </p>
             </header>
 
-            <form phx-submit="prepare_refund" class="ax-page" data-role="refund-form">
+            <form phx-submit="prepare_refund" class="ax-stack-xl" data-role="refund-form">
               <label class="ax-label" for="refund-amount-minor">Amount in minor units</label>
               <input
                 id="refund-amount-minor"
@@ -216,7 +216,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
                 <span :if={refund.reason}> · <%= refund.reason %></span>
               </p>
             </div>
-            <div class="ax-page">
+            <div class="ax-stack-sm">
               <MoneyFormatter.money_formatter amount_minor={refund.amount_minor} currency={refund.currency || @charge.currency} customer={@customer} />
               <p class="ax-body">
                 fee refunded

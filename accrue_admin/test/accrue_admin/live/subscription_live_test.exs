@@ -84,6 +84,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
+    # UX-02: one outer ax-page only (Regex counts HEEx class="ax-page" occurrences in rendered HTML)
+    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
+
     assert html =~ "Tax &amp; ownership"
     assert html =~ "Canonical predicates"
     assert html =~ "active"

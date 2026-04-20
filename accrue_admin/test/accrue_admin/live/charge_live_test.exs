@@ -90,6 +90,9 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/charges/#{charge.id}")
 
+    # UX-02: single ax-page on charge detail
+    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
+
     assert html =~ "Tax &amp; ownership"
     assert html =~ "Platform fee"
     assert html =~ "merchant loss"

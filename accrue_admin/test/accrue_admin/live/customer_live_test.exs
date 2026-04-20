@@ -123,6 +123,8 @@ defmodule AccrueAdmin.CustomerLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
+    # UX-02: single ax-page shell on customer detail
+    assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
     assert html =~ "Detail Customer"
     assert html =~ "Tax &amp; ownership"
     assert html =~ "Subscriptions"

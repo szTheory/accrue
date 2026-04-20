@@ -184,7 +184,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               <p class="ax-body">Actions run through the existing billing facade and record admin audit rows.</p>
             </header>
 
-            <div class="ax-page">
+            <div class="ax-stack-xl">
               <form phx-submit="prepare_action" data-role="finalize-form">
                 <input type="hidden" name="action_type" value="finalize" />
                 <.source_event_select events={@timeline_events} />
@@ -229,7 +229,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               <p class="ax-body">Open PDF reuses `Accrue.Billing.render_invoice_pdf/2` and never invents a new storage path.</p>
             </header>
 
-            <div class="ax-page">
+            <div class="ax-stack-xl">
               <button phx-click="open_pdf" class="ax-button ax-button-primary">Open PDF</button>
 
               <a
@@ -252,7 +252,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                 Hosted invoice
               </a>
 
-              <div :if={@generated_pdf_href} class="ax-page" data-role="generated-pdf-links">
+              <div :if={@generated_pdf_href} class="ax-stack-sm" data-role="generated-pdf-links">
                 <a
                   href={@generated_pdf_href}
                   target="_blank"
