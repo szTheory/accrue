@@ -49,5 +49,6 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "Lifecycle-safe subscription search"
     assert html =~ "cancel at period end"
     assert html =~ "/billing/subscriptions/"
+    assert html =~ "ax-chip ax-label"
   end
 end
