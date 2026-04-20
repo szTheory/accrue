@@ -22,9 +22,9 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 
 ### Microcopy (COPY)
 
-- [ ] **COPY-01**: High-traffic **empty states** on admin indexes (where not already spec-locked) use plain-language headings and bodies consistent with Phase 20 tone (no raw processor jargon in primary chrome).
-- [ ] **COPY-02**: **Error / flash / destructive confirm** strings on touched operator flows are reviewed for consistency with existing locked strings (org/tax/replay) and updated in one pass per phase where changed.
-- [ ] **COPY-03**: Either a **small copy module** or documented **grep list** exists so Playwright and LiveView tests can target stable literals (no parallel divergent strings).
+- [x] **COPY-01**: High-traffic **empty states** on admin indexes (where not already spec-locked) use plain-language headings and bodies consistent with Phase 20 tone (no raw processor jargon in primary chrome).
+- [x] **COPY-02**: **Error / flash / destructive confirm** strings on touched operator flows are reviewed for consistency with existing locked strings (org/tax/replay) and updated in one pass per phase where changed.
+- [x] **COPY-03**: Either a **small copy module** or documented **grep list** exists so Playwright and LiveView tests can target stable literals (no parallel divergent strings).
 
 ### Accessibility (A11Y)
 
@@ -63,9 +63,9 @@ Operator-facing scope is primarily **`accrue_admin`**; **`examples/accrue_host`*
 | UX-02 | Phase 26 | Complete |
 | UX-03 | Phase 26 | Complete |
 | UX-04 | Phase 26 | Complete |
-| COPY-01 | Phase 27 | Pending |
-| COPY-02 | Phase 27 | Pending |
-| COPY-03 | Phase 27 | Pending |
+| COPY-01 | Phase 27 | Complete |
+| COPY-02 | Phase 27 | Complete |
+| COPY-03 | Phase 27 | Complete |
 | A11Y-01 | Phase 28 | Pending |
 | A11Y-02 | Phase 28 | Pending |
 | A11Y-03 | Phase 28 | Pending |
