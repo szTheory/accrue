@@ -1,0 +1,63 @@
+# Queues GitHub auto-merge (merge commit) for Release Please PRs so maintainers
+# do not need to click merge manually after CI goes green.
+#
+# Triggers:
+#   - pull_request on main from same-repo heads named release-please--*
+#   - workflow_dispatch with a PR number (any PR you want merged when green)
+#
+# Repo settings that must be enabled for this to take effect:
+#   - Settings → General → Allow auto-merge
+#   - Branch rules must not require human review (or use a bot/PAT that can approve),
+#     otherwise auto-merge stays blocked until review.
+name: Release PR automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to queue for merge when green (merge commit)'
+        required: true
+        type: string
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-pr-automation-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  cancel-in-progress: false
+
+jobs:
+  queue-merge-when-green:
+    name: Queue merge when checks pass
+    runs-on: ubuntu-24.04
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.draft == false &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        startsWith(github.head_ref, 'release-please--')
+      )
+    steps:
+      - name: Resolve PR number
+        id: pr
+        env:
+          DISPATCH_PR: ${{ github.event.inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "number=${DISPATCH_PR}" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Enable auto-merge (merge commit)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh pr merge "${{ steps.pr.outputs.number }}" --merge --auto --repo "${{ github.repository }}"

@@ -17,9 +17,9 @@ For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/
 ## Same-day `1.0.0` bootstrap
 
 1. Confirm CI is green on `main`, especially the `release-gate` workflow and the required deterministic gate for both packages.
-2. Trigger or merge release PRs that explicitly carry `Release-As: 1.0.0` for both package paths. The first bootstrap should use Conventional Commits plus the `Release-As: 1.0.0` trailer for both `accrue` and `accrue_admin`.
-3. Review both release PR diffs and confirm each package shows `@version "1.0.0"` in its `mix.exs` and the package-local changelog update in `accrue/CHANGELOG.md` or `accrue_admin/CHANGELOG.md`.
-4. Merge the reviewed release PRs and let `.github/workflows/release-please.yml` publish `accrue`.
+2. Trigger or merge the **combined** Release Please PR that explicitly carries `Release-As: 1.0.0` for both package paths when needed. The first bootstrap should use Conventional Commits plus the `Release-As: 1.0.0` trailer for both `accrue` and `accrue_admin`.
+3. Review the release PR diff and confirm each package shows `@version "1.0.0"` in its `mix.exs` and the package-local changelog updates in `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md`.
+4. Merge the reviewed release PR (or rely on `.github/workflows/release-pr-automation.yml` to queue **auto-merge** after CI passes) and let `.github/workflows/release-please.yml` publish `accrue`.
 5. Confirm Hex package availability for `accrue` before proceeding.
 6. Let `.github/workflows/release-please.yml` publish `accrue_admin` with `ACCRUE_ADMIN_HEX_RELEASE=1`.
 7. Verify HexDocs for both packages and confirm `llms.txt` is present in generated docs output.
@@ -27,8 +27,8 @@ For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/
 
 ## Release PR review checklist
 
-- Both package release PRs show `@version "1.0.0"` before any bootstrap publish is allowed to run.
-- Both package release PRs update the correct package-local `CHANGELOG.md`.
+- The combined release PR shows `@version "1.0.0"` in **both** `accrue/mix.exs` and `accrue_admin/mix.exs` before any bootstrap publish is allowed to run.
+- The same PR updates both package-local `CHANGELOG.md` files.
 - `accrue` publishes before `accrue_admin`.
 - `Canonical local demo: Fake` remains the required deterministic gate before release.
 - The required deterministic gate still includes `security/trust artifact`, `seeded performance smoke`, `compatibility floor/target checks`, and `browser accessibility/responsive checks`.
@@ -53,9 +53,12 @@ and the noreply commit email already configured in this checkout:
 
 ## Automated path
 
+### Release Please + Hex
+
 The standard path is `.github/workflows/release-please.yml`:
 
 - Release Please runs only on pushes to `main` and manual `workflow_dispatch`.
+- `release-please-config.json` uses **one combined release PR** for `accrue` and `accrue_admin` (`separate-pull-requests: false`) so versions and `scripts/ci/verify_package_docs.sh` stay aligned.
 - Automated publish is gated by same-workflow outputs:
   - `needs.release.outputs.accrue_release_created`
   - `needs.release.outputs.accrue_admin_release_created`
@@ -64,6 +67,14 @@ The standard path is `.github/workflows/release-please.yml`:
 - `accrue_admin` dry-run and publish steps export `ACCRUE_ADMIN_HEX_RELEASE=1`.
 
 This automation does not publish from `pull_request`, `pull_request_target`, or ordinary branch pushes.
+
+### Auto-merge when CI is green
+
+`.github/workflows/release-pr-automation.yml` runs on Release Please PR events (branch name `release-please--*`) and calls `gh pr merge --merge --auto` so GitHub merges the PR automatically once required checks pass.
+
+Enable **Allow auto-merge** under repository **Settings → General**. If branch protection requires approving reviews, either keep a human approval step or configure the repository/org so the automation account can satisfy those rules (for example **Allow GitHub Actions to create and approve pull requests** on the ruleset, or merge manually / use `scripts/ci/gh_merge_release_pr.sh`).
+
+You can also run the workflow manually (**Actions → Release PR automation → Run workflow**) and enter any PR number to queue the same merge-when-green behavior.
 
 ## Verification before publishing
 
@@ -100,7 +111,7 @@ Keep provider-backed checks out of the required release lane. In real integratio
 
 ## Manual fallback
 
-If Release Please dry-run cannot produce both `1.0.0` release PRs, use the manual fallback only after creating and reviewing a manual release PR that sets both package versions and both package changelogs to `1.0.0`.
+If Release Please dry-run cannot produce a combined `1.0.0` release PR, use the manual fallback only after creating and reviewing a manual release PR that sets both package versions and both package changelogs to `1.0.0`.
 
 Use `.github/workflows/publish-hex.yml` only as a manual fallback or recovery path:
 

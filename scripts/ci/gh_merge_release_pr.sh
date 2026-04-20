@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Merge a Release Please PR using the GitHub CLI after checks finish.
 #
+# Prefer CI-driven automation when possible: `.github/workflows/release-pr-automation.yml`
+# queues `gh pr merge --merge --auto` on Release Please PRs (and offers workflow_dispatch).
+#
 # Usage:
 #   scripts/ci/gh_merge_release_pr.sh 7
 #   scripts/ci/gh_merge_release_pr.sh
