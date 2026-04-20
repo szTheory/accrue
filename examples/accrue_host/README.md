@@ -134,37 +134,45 @@ For a **human screen-recording checklist** (evaluators / stakeholders), see
 
 ## Visual walkthrough (Fake-backed)
 
-To **see** the mounted admin + host billing story as full-page screenshots (no live
-Stripe), use the release-blocking **`@phase15-trust`** Playwright spec. It seeds the
-same Fake fixture as the rest of the browser suite (scrubs prior `sub_fake_%` host rows
-so Fake ids cannot collide), saves a tax location, then writes PNGs under:
+To **see** the mounted admin + host billing story (no live Stripe), use the
+release-blocking **`@phase15-trust`** Playwright spec. It uses the same Fake-backed
+fixture as the rest of the browser suite (scrubs prior `sub_fake_%` host rows so Fake
+ids cannot collide): org billing on the host app, then mounted **admin** at `/billing`
+(webhook detail, replay, audit).
 
-`examples/accrue_host/test-results/phase15-trust/<project>/`  
-(for example `chromium-desktop/` and `chromium-mobile/`).
+**Artifacts (local, gitignored under `test-results/`):**
+
+- **PNG stills (full page):** `examples/accrue_host/test-results/phase15-trust/<project>/`
+  (e.g. `chromium-desktop/`, `chromium-mobile/`).
+- **Session videos (Playwright `.webm`):** `npm run e2e:visuals` records one clip per
+  browser project. After each run, the walkthrough is also copied to a stable path:
+  `examples/accrue_host/test-results/phase15-trust-videos/<project>/admin-billing-walkthrough.webm`
+  so you do not have to hunt Playwright’s hashed `test-results/.../video.webm` folders.
 
 The repo ships a real **`accrue_admin` `priv/static` bundle** (Phoenix + LiveView client). If you change admin JavaScript or CSS sources, rebuild with `cd accrue_admin && mix accrue_admin.assets.build` and commit the updated `priv/static` files.
 
-**One command (after `npm ci` and `npm run e2e:install`):**
+**One command (after `npm ci` and `npm run e2e:install`):** screenshots **and** video (1280×720 encode; mobile uses the Pixel 5 viewport from the project).
 
 ```bash
 cd examples/accrue_host
 npm run e2e:visuals
 ```
 
-**Playwright video (local, larger artifacts):** records a `.webm` per test under `test-results/` (still gitignored). Use when you want motion for a demo clip instead of still PNGs only:
+**PNG only (faster, no `.webm`):**
 
 ```bash
 cd examples/accrue_host
-npm run e2e:visuals:video
+npm run e2e:visuals:png-only
 ```
 
-(`ACCRUE_HOST_PLAYWRIGHT_VIDEO=1` is set by that script; CI does not enable it.)
+CI and `npm run e2e` / `mix verify.full` do **not** set `ACCRUE_HOST_PLAYWRIGHT_VIDEO`, so
+they stay screenshot/trace-only unless you opt in.
 
-Equivalent manual invocation:
+Equivalent manual invocation (with video):
 
 ```bash
 cd examples/accrue_host
-npx playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust
+ACCRUE_HOST_PLAYWRIGHT_VIDEO=1 npx playwright test e2e/phase13-canonical-demo.spec.js --grep @phase15-trust
 ```
 
 **HTML report (optional):** run a normal `npx playwright test` locally, then open the
@@ -179,9 +187,9 @@ directory when the HTML reporter produced `playwright-report/`).
 gh run download RUN_ID --repo szTheory/accrue -n accrue-host-phase15-screenshots -D /path/to/output-dir
 ```
 
-**Video:** not enabled in CI (size/noise). For a scripted evaluator capture path,
-see [`docs/evaluator-walkthrough-script.md`](docs/evaluator-walkthrough-script.md).
-For ad-hoc debug recordings, use Playwright’s `video` option in a headed session only.
+**Video on CI:** workflows still upload **PNGs** only (`accrue-host-phase15-screenshots`).
+For a human screen-recording checklist (OBS / QuickTime), see
+[`docs/evaluator-walkthrough-script.md`](docs/evaluator-walkthrough-script.md).
 
 ## What this app proves
 

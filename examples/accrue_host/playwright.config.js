@@ -5,6 +5,12 @@ const { defineConfig, devices } = require("@playwright/test");
 const port = process.env.ACCRUE_HOST_BROWSER_PORT || "4101";
 const baseURL = `http://127.0.0.1:${port}`;
 
+/** Full-session recordings for maintainer demos (`npm run e2e:visuals`). CI leaves this unset. */
+const trustWalkthroughVideo =
+  process.env.ACCRUE_HOST_PLAYWRIGHT_VIDEO === "1"
+    ? { video: { mode: "on", size: { width: 1280, height: 720 } } }
+    : {};
+
 module.exports = defineConfig({
   testDir: "./e2e",
   globalSetup: path.join(__dirname, "e2e/global-setup.js"),
@@ -18,8 +24,7 @@ module.exports = defineConfig({
   use: {
     baseURL,
     trace: "retain-on-failure",
-    screenshot: "only-on-failure",
-    ...(process.env.ACCRUE_HOST_PLAYWRIGHT_VIDEO === "1" ? { video: "on" } : {})
+    screenshot: "only-on-failure"
   },
   webServer: {
     command: `PORT=${port} PHX_SERVER=true MIX_ENV=test mix phx.server`,
@@ -30,17 +35,25 @@ module.exports = defineConfig({
   projects: [
     {
       name: "chromium-desktop",
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
+      use: {
+        ...devices["Desktop Chrome"],
+        ...trustWalkthroughVideo,
+        viewport: { width: 1280, height: 900 }
+      }
     },
     {
       name: "chromium-mobile",
-      use: { ...devices["Pixel 5"] }
+      use: { ...devices["Pixel 5"], ...trustWalkthroughVideo }
     },
     // CI can run `npx playwright test --project=chromium-mobile-tagged` for @mobile-only checks.
     {
       name: "chromium-mobile-tagged",
       grep: /@mobile/,
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } }
+      use: {
+        ...devices["Desktop Chrome"],
+        ...trustWalkthroughVideo,
+        viewport: { width: 1280, height: 900 }
+      }
     }
   ],
   outputDir: "test-results"

@@ -253,4 +253,17 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
     }
   ]);
   await captureState(page, testInfo, "admin-replay-audit");
+
+  if (process.env.ACCRUE_HOST_PLAYWRIGHT_VIDEO === "1") {
+    const recording = page.video();
+
+    if (recording) {
+      const destDir = path.join(process.cwd(), "test-results", "phase15-trust-videos", testInfo.project.name);
+      const dest = path.join(destDir, "admin-billing-walkthrough.webm");
+      fs.mkdirSync(destDir, { recursive: true });
+      // Playwright only finalizes `.webm` after the context closes; `saveAs` waits for that.
+      await context.close();
+      await recording.saveAs(dest);
+    }
+  }
 });
