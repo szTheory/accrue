@@ -9,7 +9,7 @@ progress:
   total_phases: 5
   completed_phases: 5
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 16
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-20)
 ## Current Position
 
 Phase: 29
-Plan: Not started
+Plan: 29-03 (complete)
 **Status:** Milestone complete
 **Last Activity:** 2026-04-20
 
@@ -40,7 +40,7 @@ Plan: Not started
 | 26. Hierarchy and pattern alignment | Pending | UX-01..04 |
 | 27. Microcopy and operator strings | Pending | COPY-01..03 |
 | 28. Accessibility hardening | Complete (2026-04-20) | A11Y-01..04 + `28-VERIFICATION.md` |
-| 29. Mobile parity and CI | Pending | MOB-01..03 |
+| 29. Mobile parity and CI | Complete (2026-04-20) | MOB-01..03 + `29-VERIFICATION.md` |
 
 **Milestone:** v1.5 Adoption proof hardening — **ARCHIVED** (2026-04-18)
 
@@ -74,6 +74,5 @@ v1.6 may close **admin-related** gaps (e.g. mobile/a11y on mounted admin); VERIF
 - Phase numbering **continues from 25** (after shipped Phase 24).
 - **Phase 25 inventory policy (2026-04-20):** split `25-INV-0{1,2,3}.md` + phase `README`; router / `mix phx.routes` canonical for INV-01 (baseline audit §1 is non-authoritative); scoped “blocking” component gaps tied to 20/21 UI-SPEC surfaces; two-level spec alignment (clause rows + surface rollup); optional route artifacts deferred until a `mix` task exists.
 
-**Next phase:** 29 (mobile parity and CI) — discuss or plan before execute.
+**Next phase:** See `.planning/ROADMAP.md` — v1.6 may still list phases 26–27 pending until executed.
 
-**Planned Phase:** 29 (Mobile parity and CI) — 3 plans — 2026-04-20T19:22:09.694Z
