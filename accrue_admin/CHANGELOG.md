@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Host-visible copy (accrue_admin)
+
+- Webhook replay confirmations, bulk DLQ prompts, and related operator strings now live in `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Locked` (Phase 27). Hosts that snapshot admin flash or HEEx literals should diff package tests when upgrading.
+
 ## [0.2.0](https://github.com/szTheory/accrue/compare/accrue_admin-v0.1.2...accrue_admin-v0.2.0) (2026-04-19)
 
 

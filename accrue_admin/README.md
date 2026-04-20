@@ -42,6 +42,14 @@ and auth details:
 
 - <https://hexdocs.pm/accrue_admin/admin_ui.html>
 
+## Operator copy (tiers)
+
+Contributors should treat operator-facing strings in three tiers (Phase 27 CONTEXT D-03):
+
+- **Tier A — Host contract:** production `accrue_admin` LiveView copy on mounted routes lives in `AccrueAdmin.Copy` (and verbatim legal/replay gates in `AccrueAdmin.Copy.Locked`). Treat changes as host-visible: follow semver and call them out under `### Host-visible copy (accrue_admin)` in this package `CHANGELOG.md`.
+- **Tier B — Library demo:** `ComponentKitchenLive` and fixture-heavy previews are non-contract; safe for marketing or instructional tone.
+- **Tier C — Dev-only:** routes behind dev flags may use placeholder copy but must not imply safety or compliance the library does not provide.
+
 ## Host setup
 
 `accrue_admin` expects the host app to provide browser session state and an `Accrue.Auth` adapter that can resolve an admin-capable operator. The full router mount, branding config, and auth expectations live in the admin UI guide on HexDocs:
