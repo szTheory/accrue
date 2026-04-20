@@ -8,6 +8,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Repo
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
 
   alias AccrueAdmin.Components.{
@@ -24,7 +25,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias AccrueAdmin.TaxOwnershipRow
 
   @tabs ~w(subscriptions invoices charges payment_methods events metadata)
-  @owner_access_denied "You don't have access to billing for this organization."
 
   @impl true
   def mount(%{"id" => customer_id}, session, socket) do
@@ -34,7 +34,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
       :not_found ->
         {:ok,
          socket
-         |> put_flash(:error, @owner_access_denied)
+         |> put_flash(:error, Copy.Locked.owner_access_denied())
          |> redirect(
            to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers")
          )}
@@ -144,7 +144,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                 </a>
                 <span class="ax-body"><%= predicate_summary(subscription) %></span>
               </div>
-              <p :if={subscriptions(@customer) == []} class="ax-body">No subscriptions for this customer.</p>
+              <p :if={subscriptions(@customer) == []} class="ax-body"><%= Copy.customer_detail_no_subscriptions() %></p>
             </section>
 
           <% "invoices" -> %>
@@ -154,7 +154,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                 <span class="ax-body"><%= invoice.number || invoice.processor_id || invoice.id %></span>
                 <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
               </div>
-              <p :if={invoices(@customer) == []} class="ax-body">No invoices projected yet.</p>
+              <p :if={invoices(@customer) == []} class="ax-body"><%= Copy.customer_detail_no_invoices() %></p>
             </section>
 
           <% "charges" -> %>

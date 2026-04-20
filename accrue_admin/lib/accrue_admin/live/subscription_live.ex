@@ -21,11 +21,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   alias AccrueAdmin.TaxOwnershipRow
 
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.StepUp
 
   @destructive_actions ~w(cancel_now comp_subscription)
-  @owner_access_denied "You don't have access to billing for this organization."
   @proration_options [
     %{value: "create_prorations", label: "Create prorations"},
     %{value: "none", label: "No proration"},
@@ -40,7 +40,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       :not_found ->
         {:ok,
          socket
-         |> put_flash(:error, @owner_access_denied)
+         |> put_flash(:error, Copy.Locked.owner_access_denied())
          |> redirect(
            to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/subscriptions")
          )}
@@ -76,7 +76,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
     case pending_action do
       nil ->
-        {:noreply, push_flash(socket, :warning, "Select an action before confirming.")}
+        {:noreply, push_flash(socket, :warning, Copy.subscription_select_action_warning())}
 
       %{type: type} = action when type in @destructive_actions ->
         case StepUp.require_fresh(
@@ -401,10 +401,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         socket
         |> record_admin_audit(action, updated_subscription.id, updated_subscription.id)
         |> refresh_subscription(updated_subscription.id)
-        |> push_flash(:info, "Subscription action recorded.")
+        |> push_flash(:info, Copy.subscription_action_recorded_info())
 
       {:ok, :requires_action, payment_intent} ->
-        push_flash(socket, :warning, "Processor requires action: #{inspect(payment_intent)}")
+        push_flash(socket, :warning, Copy.payment_processor_action_warning(payment_intent))
 
       {:error, reason} ->
         push_flash(socket, :error, inspect(reason))
