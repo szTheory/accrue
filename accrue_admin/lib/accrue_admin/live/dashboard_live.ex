@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
   alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, KpiCard, Timeline}
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(_params, session, socket) do
@@ -47,7 +48,12 @@ defmodule AccrueAdmin.Live.DashboardLive do
         </header>
 
         <section class="ax-kpi-grid" aria-label="Billing KPI summary">
-          <KpiCard.kpi_card label="Customers" value={Integer.to_string(@stats.customer_count)}>
+          <KpiCard.kpi_card
+            label="Customers"
+            value={Integer.to_string(@stats.customer_count)}
+            href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}
+            aria_label="Open customers list"
+          >
             <:meta>Total local customer records</:meta>
           </KpiCard.kpi_card>
 
@@ -56,6 +62,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
             value={Integer.to_string(@stats.active_subscription_count)}
             delta={Integer.to_string(@stats.canceling_subscription_count) <> " canceling"}
             delta_tone="amber"
+            href={ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)}
+            aria_label="Open subscriptions list"
           >
             <:meta>Canonical active + trialing predicates</:meta>
           </KpiCard.kpi_card>
@@ -65,6 +73,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
             value={format_minor(@stats.open_invoice_balance_minor, "usd")}
             delta={Integer.to_string(@stats.open_invoice_count) <> " open invoices"}
             delta_tone="cobalt"
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)}
+            aria_label="Open invoices list"
           >
             <:meta>Remaining amount due from local invoice projections</:meta>
           </KpiCard.kpi_card>
@@ -74,6 +84,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
             value={Integer.to_string(@stats.blocked_webhook_count)}
             delta={Integer.to_string(@stats.events_last_day_count) <> " events in 24h"}
             delta_tone={if(@stats.blocked_webhook_count > 0, do: "amber", else: "moss")}
+            href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}
+            aria_label="Open webhooks list"
           >
             <:meta>Failed + dead webhook rows waiting for operator attention</:meta>
           </KpiCard.kpi_card>
