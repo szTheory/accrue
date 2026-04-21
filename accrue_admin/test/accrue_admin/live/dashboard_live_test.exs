@@ -82,5 +82,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ "Webhook backlog"
     assert html =~ "invoice.payment_failed"
     assert html =~ "customer.updated"
+
+    assert html =~ ~s(href="/billing/customers")
+    assert html =~ ~s(href="/billing/subscriptions")
+    assert html =~ ~s(href="/billing/invoices")
+    assert html =~ ~s(href="/billing/webhooks")
+    assert html =~ "Open customers list"
+    assert html =~ "Open webhooks list"
   end
 end
