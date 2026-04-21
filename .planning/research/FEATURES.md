@@ -1,61 +1,33 @@
-# Feature Research
+# Features Research
 
-**Domain:** OSS billing library adoption + internal operator admin  
-**Researched:** 2026-04-21  
-**Confidence:** HIGH
+**Domain:** ORG-04 — broader non-Sigra tenancy recipes
+**Researched:** 2026-04-21
+**Confidence:** MEDIUM–HIGH (product direction from archived v1.3 requirements)
 
-## Feature Landscape
+## Table stakes (must ship for ORG-04 to count)
 
-### Table Stakes (Adoption / DX)
+| Capability | Notes |
+|------------|--------|
+| **Single “spine” doc** | One host-facing entry (new guide or clearly linked chapter) that states: billable = host Ecto schema + `use Accrue.Billable`; active org (if any) is **host** responsibility before Accrue APIs run. |
+| **phx.gen.auth-shaped path** | Documented checklist: session → `current_user` → billable struct or org membership → `Accrue.Billing` calls; admin routes still behind `Accrue.Auth` adapter. |
+| **Pow-shaped path** | Same checklist with Pow session/user conventions; call out version/community maintenance expectations honestly. |
+| **Custom org model path** | Narrative + anti-patterns: `owner_type`/`owner_id` integrity, no cross-org admin reads, webhook replay actor scope (ties to **ORG-03**). |
+| **Proof alignment** | Adoption proof matrix (or VERIFY-01 contract) gains at least one **archetype row** for non-Sigra org billing, with merge-blocking vs advisory stance matching existing CI policy. |
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Two-hop path from repo root to “run VERIFY-01” | Evaluators abandon after ~2 clicks of confusion | LOW | Root README + `examples/accrue_host/README.md` must agree with CI script names. |
-| Single “proof matrix” story | Maintainers need one map: ExUnit vs Playwright vs advisory Stripe | LOW | Extend v1.5 matrix pattern; avoid parallel contradictory tables. |
-| Safe `mix accrue.install` reruns | Real users re-run generators after upgrades | MEDIUM | Document + test no-clobber semantics already directionally required for Phoenix installers. |
-| CI labels distinguish blocking vs advisory | Trust in CI output | LOW | Job **display names** already tuned in v1.5—do not regress semantics when editing workflows. |
+## Differentiators (nice, if time allows)
 
-### Differentiators (Operator admin)
+- Minimal excerpt or **optional** host fixture path (e.g. documented branch or `examples/` note) for one non-Sigra archetype — only if it does not duplicate `examples/accrue_host` Sigra-first story confusingly.
+- Cross-links from `sigra_integration.md` (“if you are not on Sigra, see …”).
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Coherent **admin home / dashboard** | Operators see health at a glance without dropping into Stripe | MEDIUM | Bounded counts / recent failures; must not invent accounting or revenue semantics. |
-| One improved **cross-entity drill** | Reduces tab churn (e.g. customer → subscription → invoice) | MEDIUM | Stays inside existing LiveView stack; respects row-scope / org lessons from v1.3. |
+## Anti-features (explicitly not ORG-04)
 
-### Anti-Features
+| Anti-feature | Reason |
+|--------------|--------|
+| Accrue-owned org / membership tables | Host owns tenancy; Accrue stays polymorphic billable reference. |
+| Official Pow/phx.gen.auth generators inside Accrue | Maintenance burden; recipes + pointers suffice. |
+| FIN-03 exports / PROC-08 | Milestone non-goals. |
 
-| Feature | Why Problematic | Alternative |
-|---------|-----------------|---------------|
-| Full “BI dashboard” in Accrue | Wrong layer; duplicates Stripe Sigma / exports | Thin KPI + links to existing admin indexes + external Stripe docs. |
-| Rewriting all guides in one phase | High churn, broken anchors | Incremental edits with contract tests / scripts already in repo. |
+## Dependencies on existing shipped work
 
-## Feature Dependencies
-
-```
-ADOPT doc graph (clear links)
-    └──enforces──> VERIFY-01 scripts + README contracts
-
-OPS dashboard (home)
-    └──requires──> consistent nav model (OPS-03)
-    └──enhances──> drill flow (OPS-02)
-```
-
-## MVP Definition (v1.7)
-
-### Launch With
-
-- [ ] ADOPT: doc discoverability + matrix cross-links (this milestone’s ADOPT reqs)  
-- [ ] ADOPT: installer + host README / CI clarity  
-- [ ] OPS: admin home + one drill improvement + `AccrueAdmin.Copy` for new literals  
-
-### Defer
-
-- Second processor, finance exports, org recipes → explicit backlog / future milestones  
-
-## Sources
-
-- Pay / Cashier mental model: “install generator + dashboard” as adoption anchor  
-- Accrue `.planning/milestones/v1.6-REQUIREMENTS.md` — operator UX baseline  
-
----
-*Feature research for: Accrue v1.7*
+- **ORG-01..03**, **ORG-02** Sigra-first proof — recipes must not weaken row-level admin/query contracts.
+- **VERIFY-01** / Phase 33 CI language — new proof rows must reuse existing verifier patterns.

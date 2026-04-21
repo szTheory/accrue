@@ -1,36 +1,36 @@
 # Architecture Research
 
-**Domain:** Adding adoption surfaces + admin operator flows to existing Accrue monorepo  
-**Researched:** 2026-04-21  
+**Domain:** ORG-04 integration with existing Accrue architecture
+**Researched:** 2026-04-21
 **Confidence:** HIGH
 
-## Existing Architecture (do not regress)
+## Existing architecture (do not redesign)
 
-- **Packages:** `accrue/` (core, LiveView-free), `accrue_admin/` (LiveView dashboard), `examples/accrue_host` (proof host).  
-- **Proof pipeline:** Fake-backed ExUnit + Playwright VERIFY-01; optional advisory `live-stripe` / `mix test.live`.  
-- **Admin UI:** `AccrueAdmin.Router`, `ax-*` layout/components, `AccrueAdmin.Copy`, theme tokens in CSS.  
-- **Auth / tenancy:** Host-owned billables; Sigra-first patterns in host example for org scope—admin queries must stay row-scoped.
+| Layer | Responsibility |
+|-------|----------------|
+| **Host app** | Chooses billable schema(s) (`User`, `Organization`, …), implements org resolution from session, wires `MyApp.Billing` facade. |
+| **`Accrue.Billable`** | Host schema concern — `owner_type` / `owner_id` on `Accrue.Billing.Customer` (and related) stays the polymorphic join. |
+| **`Accrue.Auth` behaviour** | Admin + actor id for audit; Sigra adapter is one implementation; phx.gen.auth / Pow adapters are **host-owned** modules implementing the same contract. |
+| **`accrue_admin`** | Queries scoped by configured auth adapter + host conventions; org isolation is **host + adapter** obligation. |
 
-## Integration Points for v1.7
+## Integration flow (conceptual)
 
-| Area | Integration | New vs modified |
-|------|-------------|-----------------|
-| Admin **home** | Likely root LiveView or dashboard module under `accrue_admin` | Modified / extended routes |
-| **Navigation** | Router + layout sidebar | Modified labels/order only where required by OPS reqs |
-| **Docs** | `guides/`, package READMEs, `examples/accrue_host/docs/` | Modified cross-links; may add short “start here” sections |
-| **CI** | `.github/workflows/ci.yml`, verify shell scripts | Modified comments + doc references; avoid changing job IDs if `act` / docs depend on them |
+1. Request arrives (LiveView / controller).
+2. Host identifies **actor** (user) and optional **active organization** (membership, role).
+3. Host resolves **billable** Ecto struct the subscription is attached to (user-as-customer vs org-as-customer).
+4. Host calls `MyApp.Billing.*` (public facade) with that struct; Accrue persists Stripe customer linkage on `Accrue.Billing.Customer` for that billable.
+5. Admin and webhooks use same ownership columns — recipes must show where accidental cross-tenant reads creep in (preload scope, default_scopes).
 
-## Suggested Build Order (maps to phases)
+## Suggested build order (for roadmap phases)
 
-1. **Doc graph + discoverability** — lowers confusion before code churn.  
-2. **Installer + README / CI contracts** — keeps proof reproducible while docs move.  
-3. **Operator home + drill + nav** — user-visible admin improvements last so links in docs stay valid through earlier phases.  
-4. **Summary surfaces + Copy tests** — finalize literals and a11y-sensitive labels once routes stable.
+1. **Doc spine + phx.gen.auth** — lowest ambiguity, largest adopter overlap with Phoenix defaults.
+2. **Pow + custom org** — higher variance; document boundaries and “bring your own” scope helpers.
+3. **Proof/matrix** — encode archetype so CI/docs drift is caught.
 
-## Sources
+## New vs modified components
 
-- `.planning/PROJECT.md` — monorepo + security constraints  
-- Phase 20/21 UI-SPEC paths under `.planning/phases/` (archived with v1.6 work)  
-
----
-*Architecture research for: Accrue v1.7*
+| New / modified | What |
+|----------------|------|
+| **Guides + host README cross-links** | Primary delivery vehicle. |
+| **Optional** verifier / matrix scripts | If new anchors are promised merge-blocking. |
+| **No** new Accrue core tables for ORG-04 | Unless a gap is discovered during implementation — treat as scope change, not default. |
