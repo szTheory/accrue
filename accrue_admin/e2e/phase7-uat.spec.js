@@ -1,4 +1,10 @@
 const { test, expect } = require("@playwright/test");
+const {
+  DASHBOARD_BREADCRUMB_HOME,
+  DASHBOARD_DISPLAY_HEADLINE,
+  DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL,
+  DASHBOARD_KPI_WEBHOOK_BACKLOG_LABEL
+} = require("../../examples/accrue_host/e2e/support/copy_dashboard.js");
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -28,11 +34,11 @@ test.describe("Phase 7 browser UAT", () => {
     await seed(request, "dashboard");
     await login(page);
 
-    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
-    await expect(page.getByText("Local billing projections at a glance")).toBeVisible();
-    await expect(page.getByText("Open invoice balance")).toBeVisible();
+    await expect(page.getByRole("heading", { name: DASHBOARD_BREADCRUMB_HOME })).toBeVisible();
+    await expect(page.getByText(DASHBOARD_DISPLAY_HEADLINE)).toBeVisible();
+    await expect(page.getByText(DASHBOARD_KPI_OPEN_INVOICE_BALANCE_LABEL)).toBeVisible();
     await expect(page.getByText("$42.50")).toBeVisible();
-    await expect(page.getByText("Webhook backlog")).toBeVisible();
+    await expect(page.getByText(DASHBOARD_KPI_WEBHOOK_BACKLOG_LABEL)).toBeVisible();
     await expect(page.getByText("invoice.payment_failed")).toBeVisible();
 
     if (isMobile) {
