@@ -87,4 +87,68 @@ defmodule AccrueAdmin.Copy do
   def customers_index_table_caption, do: "Searchable customer projections"
 
   def webhooks_index_table_caption, do: "Replay, inspect, and trace webhook delivery"
+
+  # --- Operator dashboard (DashboardLive) — Phase 35, OPS-05
+
+  def dashboard_breadcrumb_home, do: "Dashboard"
+
+  def dashboard_chrome_eyebrow, do: "Billing health"
+
+  def dashboard_display_headline, do: "Local billing projections at a glance"
+
+  def dashboard_page_copy_primary,
+    do:
+      "Dashboard KPIs are sourced from `accrue_*` tables, the event ledger, and webhook projections already stored locally."
+
+  def dashboard_kpi_section_aria_label, do: "Billing KPI summary"
+
+  def dashboard_activity_section_aria_label, do: "Dashboard activity"
+
+  def dashboard_kpi_customers_label, do: "Customers"
+
+  def dashboard_kpi_active_subscriptions_label, do: "Active subscriptions"
+
+  def dashboard_kpi_open_invoice_balance_label, do: "Open invoice balance"
+
+  def dashboard_kpi_webhook_backlog_label, do: "Webhook backlog"
+
+  def dashboard_kpi_customers_meta, do: "Total local customer records"
+
+  def dashboard_kpi_active_subscriptions_meta, do: "Canonical active + trialing predicates"
+
+  def dashboard_kpi_open_invoice_balance_meta,
+    do: "Remaining amount due from local invoice projections"
+
+  def dashboard_kpi_webhook_backlog_meta,
+    do: "Failed + dead webhook rows waiting for operator attention"
+
+  def dashboard_kpi_customers_aria_label, do: "Open customers list"
+
+  def dashboard_kpi_subscriptions_aria_label, do: "Open subscriptions list"
+
+  def dashboard_kpi_invoices_aria_label, do: "Open invoices list"
+
+  def dashboard_kpi_webhooks_aria_label, do: "Open webhooks list"
+
+  def dashboard_kpi_active_subscriptions_canceling_suffix, do: " canceling"
+
+  def dashboard_kpi_open_invoice_delta_suffix, do: " open invoices"
+
+  def dashboard_kpi_webhook_events_suffix, do: " events in 24h"
+
+  def dashboard_activity_event_ledger_eyebrow, do: "Event ledger"
+
+  def dashboard_activity_recent_local_heading, do: "Recent local activity"
+
+  def dashboard_activity_webhook_health_eyebrow, do: "Webhook health"
+
+  def dashboard_activity_projection_pipeline_heading, do: "Projection pipeline"
+
+  def dashboard_timeline_events_label, do: "Recent event ledger rows"
+
+  def dashboard_timeline_events_empty, do: "No local events recorded yet"
+
+  def dashboard_timeline_webhooks_label, do: "Recent webhook processing rows"
+
+  def dashboard_timeline_webhooks_empty, do: "No webhook rows recorded yet"
 end
