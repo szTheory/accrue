@@ -12,6 +12,7 @@ if (!fixturePath) {
 }
 
 const fixture = JSON.parse(fs.readFileSync(path.resolve(fixturePath), "utf8"));
+const { DASHBOARD_DISPLAY_HEADLINE } = require("../../examples/accrue_host/e2e/support/copy_dashboard.js");
 
 async function login(page, email) {
   await page.goto(`${baseURL}/users/log-in`);
@@ -94,7 +95,7 @@ async function run() {
     await login(page, fixture.admin_email);
 
     await page.goto(`${baseURL}/billing`);
-    await expect(page.getByText("Local billing projections at a glance")).toBeVisible();
+    await expect(page.getByText(DASHBOARD_DISPLAY_HEADLINE)).toBeVisible();
 
     await page.goto(`${baseURL}/billing/webhooks/${fixture.webhook_id}`);
     await expect(page.getByRole("heading", { name: "invoice.payment_failed" })).toBeVisible();

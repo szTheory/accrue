@@ -4,6 +4,7 @@ const path = require("node:path");
 const { test, expect } = require("@playwright/test");
 const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 const { expectNoHorizontalOverflow, expectVisibleInViewport } = require("./support/overflow.js");
+const { DASHBOARD_DISPLAY_HEADLINE } = require("./support/copy_dashboard.js");
 
 async function captureState(page, testInfo, name) {
   const screenshotDir = path.join(process.cwd(), "test-results", "phase15-trust", testInfo.project.name);
@@ -152,13 +153,13 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
     page,
     "/billing admin dashboard",
     () => page.goto("/billing"),
-    page.getByText("Local billing projections at a glance")
+    page.getByText(DASHBOARD_DISPLAY_HEADLINE)
   );
 
   expect(billingElapsedMs).toBeGreaterThanOrEqual(0);
   await assertResponsiveState(page, "admin dashboard", [
     {
-      locator: page.getByText("Local billing projections at a glance"),
+      locator: page.getByText(DASHBOARD_DISPLAY_HEADLINE),
       label: "admin dashboard summary"
     },
     {
