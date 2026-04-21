@@ -150,6 +150,9 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 
 See `.planning/REQUIREMENTS.md` for checkboxes and REQ-IDs. Theme: **ORG-04** — non-Sigra org billing recipes, host integration depth, VERIFY/adoption-proof alignment; **PROC-08** and **FIN-03** not in this milestone.
 
+- [x] **ORG-05** — Single non-Sigra doc spine for session → billable + ORG-03 checklist (`accrue/guides/organization_billing.md` + cross-links). **Validated in Phase 37.**
+- [x] **ORG-06** — phx.gen.auth-oriented checklist in that spine (Accrue.Auth, Accrue.Billable, host billing facade). **Validated in Phase 37.**
+
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
 - [x] **STAB-01** — Latest published `lattice_stripe` compatible with `~> 1.1` across monorepo lockfiles; gates green.
@@ -377,4 +380,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 — **v1.8** milestone started (`/gsd-new-milestone`); **ORG-04** in active requirements.*
+*Last updated: 2026-04-21 — Phase **37** complete (non-Sigra org billing doc spine); **ORG-05** / **ORG-06** validated; v1.8 continues with phases **38–39**.*
