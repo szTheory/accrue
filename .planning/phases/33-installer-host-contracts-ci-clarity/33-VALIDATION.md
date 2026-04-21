@@ -1,7 +1,7 @@
 ---
 phase: 33
 slug: installer-host-contracts-ci-clarity
-status: draft
+status: verified
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-04-21
@@ -20,7 +20,7 @@ created: 2026-04-21
 | **Framework** | Bash doc-contract scripts + ExUnit (`accrue` app) |
 | **Config file** | `scripts/ci/verify_package_docs.sh`, `scripts/ci/verify_verify01_readme_contract.sh` |
 | **Quick run command** | `bash scripts/ci/verify_package_docs.sh` |
-| **Full suite command** | `bash scripts/ci/verify_package_docs.sh && bash scripts/ci/verify_verify01_readme_contract.sh && cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/accrue/docs/first_hour_guide_test.exs --warnings-as-errors` |
+| **Full suite command** | `bash scripts/ci/verify_package_docs.sh && bash scripts/ci/verify_verify01_readme_contract.sh && cd accrue && mix test test/mix/tasks/accrue_install_test.exs test/accrue/docs/first_hour_guide_test.exs test/accrue/docs/phase_33_ci_advisory_contract_test.exs --warnings-as-errors` |
 | **Estimated runtime** | ~30–120 seconds |
 
 ---
@@ -37,9 +37,9 @@ created: 2026-04-21
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 33-01-01 | 01 | 1 | ADOPT-04 | T-doc-01 | No misleading installer semantics | bash + exunit | `bash scripts/ci/verify_package_docs.sh && cd accrue && mix test test/accrue/docs/first_hour_guide_test.exs --warnings-as-errors` | ✅ | ⬜ pending |
-| 33-02-01 | 02 | 2 | ADOPT-05 | T-doc-02 | Doc gates catch anchor drift | bash | `bash scripts/ci/verify_package_docs.sh` | ✅ | ⬜ pending |
-| 33-03-01 | 03 | 2 | ADOPT-06 | T-ci-01 | Job ids stable; advisory lane labeled | bash + grep | `bash scripts/ci/verify_package_docs.sh` (plus plan acceptance greps) | ✅ | ⬜ pending |
+| 33-01-01 | 01 | 1 | ADOPT-04 | T-doc-01 | No misleading installer semantics | bash + exunit | `bash scripts/ci/verify_package_docs.sh && cd accrue && mix test test/accrue/docs/first_hour_guide_test.exs --warnings-as-errors` | ✅ | ✅ green |
+| 33-02-01 | 02 | 2 | ADOPT-05 | T-doc-02 | Doc gates catch anchor drift | bash | `bash scripts/ci/verify_package_docs.sh` | ✅ | ✅ green |
+| 33-03-01 | 03 | 1 | ADOPT-06 | T-ci-01 | Job ids stable; advisory lane labeled | bash + exunit | `bash scripts/ci/verify_package_docs.sh && cd accrue && mix test test/accrue/docs/phase_33_ci_advisory_contract_test.exs --warnings-as-errors` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -55,17 +55,29 @@ Existing infrastructure covers requirements — no new Wave 0 framework install.
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| GitHub Actions UI clarity | ADOPT-06 | UI outside repo | Open `.github/workflows/ci.yml` in GitHub’s workflow editor; confirm `jobs.*` keys for `release-gate`, `host-integration`, `live-stripe` match docs. |
+| GitHub Actions UI clarity | ADOPT-06 | UI outside repo | Optional spot-check: open `.github/workflows/ci.yml` in GitHub’s workflow editor; confirm `jobs.*` keys for `release-gate`, `host-integration`, `live-stripe` match docs (ExUnit contract covers file contents). |
 | Installer rerun on real host | ADOPT-04 | Full Phoenix app shape varies | In `examples/accrue_host`, run `mix accrue.install --yes` twice; confirm no duplicate router mounts; compare to `upgrade.md` text. |
+
+---
+
+## Validation Audit 2026-04-21
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 1 |
+| Resolved | 1 |
+| Escalated | 0 |
+
+Gap closed: ADOPT-06 had only ad-hoc grep during execute — added `accrue/test/accrue/docs/phase_33_ci_advisory_contract_test.exs` to lock repo-root `ci.yml` + `README.md` contract in CI.
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` or documented manual steps
-- [ ] Sampling continuity: doc script after each doc-touching wave
-- [ ] Wave 0 N/A
-- [ ] No watch-mode flags
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` or documented manual steps
+- [x] Sampling continuity: doc script after each doc-touching wave
+- [x] Wave 0 N/A
+- [x] No watch-mode flags
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending execution green
+**Approval:** verified 2026-04-21
