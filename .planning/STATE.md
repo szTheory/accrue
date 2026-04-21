@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Org billing recipes & host integration depth
-status: active
-last_updated: "2026-04-21T20:00:00.000Z"
-last_activity: 2026-04-21
+status: completed
+last_updated: "2026-04-21T22:51:39.910Z"
+last_activity: 2026-04-21 — Phase 37 discuss-phase (research subagents + `37-CONTEXT.md` / `37-DISCUSSION-LOG.md`)
 progress:
-  total_phases: 3
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
@@ -64,3 +63,5 @@ Plan: —
 - Phase numbering continues from **37** (no `--reset-phase-numbers`).
 
 **Last completed phase (prior milestone):** 36 — 2026-04-21.
+
+**Planned Phase:** 37 (Org billing recipes — doc spine + phx.gen.auth) — 3 plans — 2026-04-21T22:51:39.901Z
