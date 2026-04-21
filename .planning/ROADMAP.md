@@ -9,13 +9,13 @@
 - ✅ **v1.4 Ecosystem stability + demo visuals** — Phase 23 shipped 2026-04-17. `lattice_stripe` lockfiles verified on latest 1.1.x; Fake-backed Playwright screenshot walkthrough documented and scripted; admin `priv/static` bundle fixed for browser LiveView. **PROC-08 deferred.**
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
 - ✅ **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–31**: core admin polish shipped **2026-04-20**; post-ship Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
-- ○ **v1.7 Adoption DX + operator admin depth** — Phases **32–35** (requirements: `.planning/REQUIREMENTS.md`; research: `.planning/research/SUMMARY.md`). **In progress** — planning initialized 2026-04-21.
+- ○ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** (requirements: `.planning/REQUIREMENTS.md`; research: `.planning/research/SUMMARY.md`). **In progress** — planning initialized 2026-04-21; Phase **36** added 2026-04-21 via `/gsd-plan-milestone-gaps` (audit corpus + adoption integration hardening).
 
 ## Phases
 
-### v1.7 Adoption DX + operator admin depth (Phases 32–35) — ACTIVE
+### v1.7 Adoption DX + operator admin depth (Phases 32–36) — ACTIVE
 
-**Milestone goal:** Tighten **VERIFY-01** and adoption **doc/CI** discoverability without changing merge-blocking semantics, then ship **operator admin** home + drill + nav improvements using existing **UI-SPEC** and **`AccrueAdmin.Copy`** discipline.
+**Milestone goal:** Tighten **VERIFY-01** and adoption **doc/CI** discoverability without changing merge-blocking semantics, then ship **operator admin** home + drill + nav improvements using existing **UI-SPEC** and **`AccrueAdmin.Copy`** discipline, then close **milestone-audit** traceability and integration notes without reopening satisfied ADOPT behavior.
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -23,6 +23,7 @@
 | 33 | Installer, host contracts + CI clarity | **Complete** (2026-04-21) — installer rerun docs + CI/advisory clarity | ADOPT-04..06 |
 | 34 | Operator home, drill flow + nav model | Credible admin home; one smoother cross-entity flow; nav labels/order match operator model + matrix updates if needed. | OPS-01..03 |
 | 35 | Summary surfaces + test literal hygiene | Token-safe KPI/summary rows; new literals via `AccrueAdmin.Copy`; tests updated. | OPS-04..05 |
+| 36 | Audit corpus + adoption integration hardening | Backfill **3-source** plan traceability on Phases 32–33; document verifier ownership / dual README–guide contracts; forward-coupling notes for OPS + Copy; optional `.planning` / full-suite test tiering guidance. | ADOPT evidence + audit `gaps.integration` (see Phase 36) |
 
 ### Phase 32: Adoption discoverability + doc graph
 
@@ -78,6 +79,23 @@
 
 1. New summary/KPI UI uses theme tokens or documented exceptions per UX-04 precedent.
 2. New operator-visible strings route through `AccrueAdmin.Copy` (or established SSOT); Playwright/LiveView tests updated accordingly.
+
+### Phase 36: Audit corpus + adoption integration hardening
+
+**Goal:** Satisfy `/gsd-audit-milestone` items that are **process and integration** shaped: complete the **three-source** matrix for shipped Phases **32–33** (`requirements-completed` YAML on plan summaries), reduce contributor confusion when **central verify scripts** span multiple ADOPT requirements, keep **root README**, `verify_verify01_readme_contract.sh`, and **guides** dual-green, and document **forward coupling** so Phases **34–35** land without surprising doc or Copy regressions.
+
+**Depends on:** Phases **32–33** complete (functional ADOPT satisfied).
+
+**Requirements:** Evidence and integration closure for **ADOPT-01..06** (see `.planning/v1.7-MILESTONE-AUDIT.md`); does **not** replace Phase 32/33 as owners of functional ADOPT delivery.
+
+**Success criteria:**
+
+1. Every completed **32-**\* / **33-**\* plan `*-SUMMARY.md` that lacked it includes a `requirements-completed` YAML block consistent with executed plans and `*-VERIFICATION.md`.
+2. `CONTRIBUTING.md` or `scripts/ci/README.md` (or equivalent) maps **ADOPT** requirements to **which verifier / ExUnit file** owns them; mega-script failures print identifiable **REQ** or **check** labels where practical.
+3. Dual-contract maintenance (root README ↔ VERIFY-01 contract script ↔ host/guides) is documented so editorial changes do not silently break only one gate.
+4. Forward-coupling note exists for **OPS-03..OPS-05** (route matrix, `AccrueAdmin.Copy`, Playwright) so operator phases do not fork SSOT.
+
+**Gap closure:** Closes `gaps.integration` + tech-debt rows from [`v1.7-MILESTONE-AUDIT.md`](v1.7-MILESTONE-AUDIT.md) (2026-04-21).
 
 <details>
 <summary>✅ v1.6 Admin UI / UX polish (Phases 25–29) — SHIPPED 2026-04-20</summary>
@@ -193,10 +211,11 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 32. Adoption discoverability + doc graph | v1.7 | — | Not started | — |
-| 33. Installer, host contracts + CI clarity | v1.7 | — | Not started | — |
+| 32. Adoption discoverability + doc graph | v1.7 | — | Complete | 2026-04-21 |
+| 33. Installer, host contracts + CI clarity | v1.7 | — | Complete | 2026-04-21 |
 | 34. Operator home, drill flow + nav model | v1.7 | — | Not started | — |
 | 35. Summary surfaces + test literal hygiene | v1.7 | — | Not started | — |
+| 36. Audit corpus + adoption integration hardening | v1.7 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

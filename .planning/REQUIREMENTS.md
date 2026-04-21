@@ -56,6 +56,10 @@ Scope is **documentation, host example, CI discoverability, `mix accrue.install`
 
 **Coverage:** v1.7 requirements: **11** total — mapped to phases: **11** — unmapped: **0**
 
+### Milestone audit follow-up (Phase 36)
+
+Phase **36** closes items recorded in [`v1.7-MILESTONE-AUDIT.md`](v1.7-MILESTONE-AUDIT.md): **3-source** `requirements-completed` YAML on Phase **32–33** plan summaries, contributor-facing **verifier ownership** / **dual-contract** documentation (README, `verify_verify01_readme_contract.sh`, guides), **forward-coupling** notes for **OPS-03..OPS-05** (route matrix, `AccrueAdmin.Copy`, Playwright), and optional **test tiering** guidance when `.planning/` corpus or full `mix test` noise is orthogonal to product gates. **ADOPT** functional acceptance remains owned by Phases **32–33**; checkboxes above are not reopened by Phase 36.
+
 ---
 *Requirements defined: 2026-04-21*  
-*Last updated: 2026-04-21 after `/gsd-new-milestone` roadmap creation*
+*Last updated: 2026-04-21 after `/gsd-plan-milestone-gaps` (Phase 36 + materialized 34–35 directories)*
