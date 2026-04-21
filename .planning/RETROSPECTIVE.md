@@ -229,13 +229,46 @@
 
 ---
 
+## Milestone: v1.6 — audit gap closure (post-ship)
+
+**Closed (planning):** 2026-04-21  
+**Phases:** 2 | **Plans:** 5
+
+### What Was Built
+
+- Strict audit corpus: COPY-01..03 mapped in `27-VERIFICATION.md`; `requirements-completed` YAML on Phase **26** / **29** summaries (Phase **30**).
+- Advisory integration: VERIFY-01 README/CI contract + `e2e:mobile`, step-up modal Copy SSOT, fixture Playwright + workflow + admin README alignment with host VERIFY-01 (Phase **31**).
+- Canonical **passed** milestone audit under `.planning/milestones/v1.6-MILESTONE-AUDIT.md` (superseded root audit removed).
+
+### What Worked
+
+- Keeping post-ship work as numbered phases (**30–31**) preserved traceability without re-versioning Hex packages.
+- Re-acknowledging the same three `audit-open` items at line close matched prior v1.6 ship policy: document carry-forward instead of pretending tooling is clean.
+
+### What Was Inefficient
+
+- `gsd-sdk query milestone.complete` still returned `version required for phases archive` on this install; closeout remained manual for archive moves and git steps.
+
+### Key Lessons
+
+1. When a git tag already exists for a shipped slice, treat post-ship planning closure as **documentation + audit state**, not a duplicate tag.
+2. Refresh milestone audit YAML to **passed** immediately after remediation merges so `gaps_found` does not linger as a false signal.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: short verification + integration passes tied to audit bullets.
+- Notable: highest leverage was tightening README/shell contracts and Copy SSOT on operator chrome evaluators can see.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
-| v1.6 | short | 5 | Admin inventory → hierarchy → copy → a11y → mobile, all scoped to `accrue_admin` + existing VERIFY-01 host proofs. |
+| v1.6 | short | 7 | Admin inventory → hierarchy → copy → a11y → mobile (25–29), then audit corpus + advisory integration closure (30–31) without new Hex tag. |
 | v1.5 | short | 1 | Adoption proof documented as a matrix tying existing Fake, host, Playwright, and advisory Stripe lanes. |
 | v1.2 | concentrated closeout | 5 | Adoption and trust work became executable through the canonical host demo, docs contracts, and security/audit closeout gates. |
 | v1.1 | multiple | 4 | Real host-app dogfood became the canonical user-facing integration and CI release gate. |

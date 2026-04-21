@@ -8,8 +8,7 @@
 - ✅ **v1.3 Tax + Organization Billing** — Phases 18-22 shipped on 2026-04-17. Stripe Tax, Sigra-first organization billing, admin/host UX proof, and Stripe-native finance handoff documentation. Full archive: [`milestones/v1.3-ROADMAP.md`](milestones/v1.3-ROADMAP.md).
 - ✅ **v1.4 Ecosystem stability + demo visuals** — Phase 23 shipped 2026-04-17. `lattice_stripe` lockfiles verified on latest 1.1.x; Fake-backed Playwright screenshot walkthrough documented and scripted; admin `priv/static` bundle fixed for browser LiveView. **PROC-08 deferred.**
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
-- ✅ **v1.6 Admin UI / UX polish** — Phases 25–29 shipped 2026-04-20. Inventory, hierarchy/tokens, microcopy, a11y gates, and mobile CI for `accrue_admin` + mounted VERIFY-01 paths. Full archive: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md).
-- ✅ **v1.6 audit gap closure (post-ship)** — Phases 30–31 complete 2026-04-21. Closes findings from [`v1.6-MILESTONE-AUDIT.md`](v1.6-MILESTONE-AUDIT.md) (COPY verification corpus, 26/29 SUMMARY traceability, advisory integration alignment).
+- ✅ **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–31**: core admin polish shipped **2026-04-20**; post-ship Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
 - ○ **Next milestone** — Run `/gsd-new-milestone` to define requirements and phased roadmap.
 
 ## Phases
@@ -27,7 +26,7 @@
 | 28 | Accessibility hardening | Focus, tables, contrast; axe on mounted admin. | A11Y-01..04 |
 | 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 |
 
-**Depends on:** Phase 24 complete (v1.5 shipped). **Archives:** [`v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md).
+**Depends on:** Phase 24 complete (v1.5 shipped). **Archives:** [`v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
 
 </details>
 
@@ -41,7 +40,7 @@
 | 30 | Audit corpus closure — **complete** (2026-04-21) | `COPY-01..03` mapped in `27-VERIFICATION.md`; `requirements-completed` YAML on `26-*-SUMMARY.md` and `29-*-SUMMARY.md` where missing. | COPY-01..03; evidence backfill for UX-01..04 + MOB-01..03 (Phase 26/29 implementation unchanged) |
 | 31 | Advisory integration alignment — **complete** (2026-04-21) | VERIFY-01 mobile contract + `e2e:mobile`; step-up modal Copy SSOT; fixture Playwright + docs aligned to host VERIFY-01 as merge-blocking path. | INV-01, INV-03, UX-01, MOB-01, MOB-03, A11Y-03, COPY-02, COPY-03 |
 
-**Depends on:** v1.6 Phases 25–29 complete (shipped). **Requirements archive:** [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md). **Audit:** [`v1.6-MILESTONE-AUDIT.md`](v1.6-MILESTONE-AUDIT.md).
+**Depends on:** v1.6 Phases 25–29 complete (shipped). **Requirements archive:** [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md). **Audit:** [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
 
 **Gap closure:** Phases created by `/gsd-plan-milestone-gaps` (2026-04-20).
 
@@ -117,12 +116,12 @@
 | 28. Accessibility hardening | v1.6 | 3/3 | Complete | 2026-04-20 |
 | 29. Mobile parity and CI | v1.6 | 3/3 | Complete | 2026-04-20 |
 
-**v1.6 audit gap closure (open)**
+**v1.6 post-ship (complete)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 30. Audit corpus closure | v1.6 (post-ship) | 2/2 | Complete | 2026-04-21 |
-| 31. Advisory integration alignment | v1.6 (post-ship) | 0/0 | Open | — |
+| 31. Advisory integration alignment | v1.6 (post-ship) | 3/3 | Complete | 2026-04-21 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

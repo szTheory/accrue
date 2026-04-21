@@ -21,9 +21,9 @@ v1.3 adds Stripe Tax orchestration, customer tax-location validation and recover
 
 Milestone history, roadmap, requirements, and audit artifacts: `.planning/milestones/v1.3-ROADMAP.md`, `v1.3-REQUIREMENTS.md`, `v1.3-MILESTONE-AUDIT.md`.
 
-**Last shipped planning milestone:** **v1.6 Admin UI / UX polish** (2026-04-20) — inventory, hierarchy/tokens, microcopy, accessibility gates, and mobile CI for companion admin and mounted VERIFY-01 paths; archived to `.planning/milestones/v1.6-ROADMAP.md` and `v1.6-REQUIREMENTS.md`.
+**Last closed planning milestone:** **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–29** shipped **2026-04-20**; Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: `.planning/milestones/v1.6-ROADMAP.md`, `v1.6-REQUIREMENTS.md`, `v1.6-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.6`** unchanged (planning-only post-ship slice).
 
-**Planning:** **v1.6 audit gap closure** (post-ship) continues in `.planning/ROADMAP.md` — Phase **30** (audit corpus) completed 2026-04-21; Phase **31** remains. A fresh product milestone still starts with `/gsd-new-milestone`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Next:** Run `/gsd-new-milestone` for a fresh requirements + roadmap cycle. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.6 Admin UI / UX polish (2026-04-20)
 
@@ -318,6 +318,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | Record the Phase 16 ranking as recommendation-only planning guidance | `Stripe Tax support` is the recommended `Next milestone`; `Organization / multi-tenant billing` and `Revenue recognition / exports` remain `Backlog`; `Official second processor adapter` remains a `Planted seed`, and no v1.2 billing API, schema, or processor-abstraction implementation is implied | ✓ Good |
 | v1.3 combines Stripe Tax with Sigra-first organization billing and finance handoff | Stripe Tax is still the safest first expansion; Sigra org support is now concrete enough for host-proofed org billing; finance should stay Stripe-native before Accrue owns accounting semantics | ✓ Good |
 | v1.6 closes admin UX polish without new billing primitives | Operator trust (a11y, mobile, copy) advances adoption without PROC-08/FIN-03 scope creep | ✓ Good |
+| Post-ship Phases 30–31 close audit corpus + advisory integration without Hex release churn | Keeps evaluator-facing proof contracts aligned while preserving existing `v1.6` tag semantics | ✓ Good |
 
 ## Current Milestone Notes
 
@@ -331,6 +332,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - Phase 18 validated the first Stripe Tax slice: public subscription and checkout tax enablement, Stripe/Fake adapter parity, and narrow local automatic-tax observability.
 - Phase 19 validated tax-location capture/update, immediate invalid-location error handling, recurring tax-risk projection/admin visibility, host repair flow, and legacy recurring-item rollout safety guidance.
 - v1.6 (Phases 25–29) archived 2026-04-20: admin inventory, visual hierarchy, microcopy registry, a11y gates, and mobile CI without PROC-08/FIN-03/product-schema changes.
+- v1.6 planning line closed 2026-04-21: Phases **30–31** remediated milestone audit gaps (verification corpus, SUMMARY traceability) and advisory VERIFY-01 / Copy / Playwright integration notes; audit status **passed** in `milestones/v1.6-MILESTONE-AUDIT.md`.
 
 ## Evolution
 
@@ -350,4 +352,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after Phase 30 audit corpus closure (v1.6 post-ship gap work).*
+*Last updated: 2026-04-21 after `/gsd-complete-milestone` — v1.6 planning line (Phases 25–31) closed; audit **passed**; `v1.6` git tag unchanged.*
