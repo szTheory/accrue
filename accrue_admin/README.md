@@ -79,6 +79,8 @@ No host Tailwind config or JavaScript bootstrap changes are required.
 
 ## Browser UAT
 
+**VERIFY-01** in [`examples/accrue_host/README.md`](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) is the **merge-blocking** path for mounted admin browser proofs on the real example host. The commands below are fast package smoke against the admin fixture endpoint only.
+
 The browser regression suite lives under `e2e/` and runs against the package's test Phoenix endpoint:
 
 ```bash
