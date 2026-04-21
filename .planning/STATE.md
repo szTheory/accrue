@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Org billing recipes & host integration depth
-status: defining_requirements
+status: active
 last_updated: "2026-04-21T12:00:00.000Z"
 last_activity: 2026-04-21
 progress:
