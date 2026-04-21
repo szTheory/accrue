@@ -3,6 +3,7 @@ phase: 26-hierarchy-and-pattern-alignment
 plan: "04"
 status: complete
 completed: "2026-04-20"
+requirements-completed: [UX-04]
 ---
 
 # Plan 26-04 Summary — UX-04 theme token discipline
