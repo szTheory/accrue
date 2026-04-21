@@ -214,7 +214,7 @@
 | 32. Adoption discoverability + doc graph | v1.7 | — | Complete | 2026-04-21 |
 | 33. Installer, host contracts + CI clarity | v1.7 | — | Complete | 2026-04-21 |
 | 34. Operator home, drill flow + nav model | v1.7 | 3/3 | Complete | 2026-04-21 |
-| 35. Summary surfaces + test literal hygiene | v1.7 | — | Not started | — |
+| 35. Summary surfaces + test literal hygiene | v1.7 | 2/2 | Complete | 2026-04-21 |
 | 36. Audit corpus + adoption integration hardening | v1.7 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
