@@ -7,7 +7,7 @@ ROOT_DIR=${ROOT_DIR:-$(
 )}
 
 fail() {
-  echo "package docs verification failed: $*" >&2
+  echo "[verify_package_docs] package docs verification failed: $*" >&2
   exit 1
 }
 
