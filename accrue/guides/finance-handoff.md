@@ -8,6 +8,8 @@ Accrue models **billing state** (subscriptions, invoices, payments, tax-location
 health, and an append-only audit trail). It does **not** implement GAAP revenue
 recognition, deferred revenue schedules, or general-ledger postings.
 
+For **which host row** owns the Stripe Customer (user vs organization) and how session maps to billable, see [Organization billing (session → billable)](organization_billing.md).
+
 ## Stripe Revenue Recognition (Stripe RR)
 
 Use [Stripe Revenue Recognition](https://docs.stripe.com/revenue-recognition) when
