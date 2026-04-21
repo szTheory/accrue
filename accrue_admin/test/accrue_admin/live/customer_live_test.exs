@@ -11,6 +11,8 @@ defmodule AccrueAdmin.CustomerLiveTest do
   alias AccrueAdmin.Queries.Customers
   alias AccrueAdmin.TestRepo
 
+  import Ecto.Query
+
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
 
@@ -187,6 +189,28 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert denied == Copy.Locked.owner_access_denied()
 
     assert redirect
+  end
+
+  test "invoices tab links invoice identifiers to scoped invoice detail", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    invoice =
+      TestRepo.one!(
+        from(i in Invoice,
+          where: i.customer_id == ^customer.id,
+          order_by: [desc: i.id],
+          limit: 1,
+          select: i
+        )
+      )
+
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=invoices")
+
+    assert html =~ ~s(href="/billing/invoices/#{invoice.id}")
+    assert html =~ "INV-001"
   end
 
   test "shows Copy-backed empty invoices line when customer has no invoices", %{conn: conn} do
