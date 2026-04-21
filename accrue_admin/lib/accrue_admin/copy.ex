@@ -72,6 +72,18 @@ defmodule AccrueAdmin.Copy do
 
   def step_up_submit_label, do: "Verify identity"
 
+  @doc "Step-up modal eyebrow label."
+  def step_up_eyebrow, do: "Sensitive action"
+
+  @doc "Step-up modal title."
+  def step_up_title, do: "Step-up required"
+
+  @doc "Default challenge body when none is supplied."
+  def step_up_default_challenge_message, do: "Confirm your identity to continue."
+
+  @doc "Step-up dismiss control label."
+  def step_up_cancel_label, do: "Cancel"
+
   def customers_index_table_caption, do: "Searchable customer projections"
 
   def webhooks_index_table_caption, do: "Replay, inspect, and trace webhook delivery"
