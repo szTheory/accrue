@@ -9,9 +9,9 @@ Scope is **documentation, host example, CI discoverability, `mix accrue.install`
 
 ### Adoption & proof (ADOPT)
 
-- [ ] **ADOPT-01**: A new contributor can reach **VERIFY-01** run instructions (host README or linked canonical doc) from the **repository root README** within **two** navigational hops (link → link → runnable command section).
-- [ ] **ADOPT-02**: `examples/accrue_host/README.md` keeps a **single authoritative** subsection for Fake-first verification, Playwright entry points, and pointers to the **adoption proof matrix** and evaluator walkthrough where those artifacts exist.
-- [ ] **ADOPT-03**: `accrue` / top-level guides relevant to host onboarding **cross-link** the adoption matrix, testing guide, and host tutorial paths so they do not contradict each other on **which** command is the merge-blocking proof.
+- [x] **ADOPT-01**: A new contributor can reach **VERIFY-01** run instructions (host README or linked canonical doc) from the **repository root README** within **two** navigational hops (link → link → runnable command section).
+- [x] **ADOPT-02**: `examples/accrue_host/README.md` keeps a **single authoritative** subsection for Fake-first verification, Playwright entry points, and pointers to the **adoption proof matrix** and evaluator walkthrough where those artifacts exist.
+- [x] **ADOPT-03**: `accrue` / top-level guides relevant to host onboarding **cross-link** the adoption matrix, testing guide, and host tutorial paths so they do not contradict each other on **which** command is the merge-blocking proof.
 - [ ] **ADOPT-04**: `mix accrue.install` **rerun** behavior (no-clobber, conflict sidecars, or documented limitations) matches **documented** behavior in install guide or troubleshooting anchors; gaps are either fixed or explicitly called out with a tracking note in phase artifacts.
 - [ ] **ADOPT-05**: **Broken doc anchors** or renamed scripts introduced by v1.7 doc moves are caught by **existing** doc contract tests / verify scripts where applicable, or a phase note lists **manual** verification steps if no automated hook exists yet.
 - [ ] **ADOPT-06**: `.github/workflows/ci.yml` (and related docs) keep **unambiguous** language that **Fake / VERIFY-01** lanes are merge-blocking while **Stripe test-mode parity** lanes remain **advisory** — without changing documented job **ids** consumers rely on (`act`, guides).
@@ -42,9 +42,9 @@ Scope is **documentation, host example, CI discoverability, `mix accrue.install`
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ADOPT-01 | Phase 32 | Pending |
-| ADOPT-02 | Phase 32 | Pending |
-| ADOPT-03 | Phase 32 | Pending |
+| ADOPT-01 | Phase 32 | Complete |
+| ADOPT-02 | Phase 32 | Complete |
+| ADOPT-03 | Phase 32 | Complete |
 | ADOPT-04 | Phase 33 | Pending |
 | ADOPT-05 | Phase 33 | Pending |
 | ADOPT-06 | Phase 33 | Pending |
