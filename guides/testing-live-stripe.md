@@ -21,7 +21,7 @@ This guide covers layer (2). Most contributors never need to run it;
 it executes automatically on a daily GitHub Actions schedule and can
 be triggered on demand via the Actions tab.
 
-This lane uses Stripe test mode and should be treated as `provider-parity checks`, not as the canonical local demo or the required release lane. The `live-stripe` GitHub Actions job is **not** the PR merge-blocking lane; that contract is documented under [Proof and verification](examples/accrue_host/README.md#proof-and-verification) in the host demo README.
+This lane uses Stripe test mode and should be treated as `provider-parity checks`, not as the canonical local demo or the required release lane. The `live-stripe` GitHub Actions job is **not** the PR merge-blocking lane; that contract is documented under [Proof and verification](examples/accrue_host/README.md#proof-and-verification) in the host demo README. On pull requests, merge-blocking proof is job id `host-integration`; `live-stripe` stays advisory (manual/cron only).
 
 ## What the live-Stripe suite covers
 
