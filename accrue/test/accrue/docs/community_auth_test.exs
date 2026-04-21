@@ -30,6 +30,13 @@ defmodule Accrue.Docs.CommunityAuthTest do
     end
   end
 
+  test "community auth guide links the non-Sigra organization billing spine near the top" do
+    guide = File.read!(@guide)
+
+    assert guide =~ "Choosing an adapter"
+    assert guide =~ "organization_billing.md"
+  end
+
   test "community auth guide keeps release docs out of scope" do
     guide = File.read!(@guide)
 
