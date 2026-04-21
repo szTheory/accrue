@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias Accrue.Repo
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
+  alias AccrueAdmin.ScopedPath
 
   alias AccrueAdmin.Components.{
     AppShell,
@@ -151,7 +152,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <section class="ax-card">
               <h3 class="ax-heading">Invoices</h3>
               <div :for={invoice <- invoices(@customer)} class="ax-list-row">
-                <span class="ax-body"><%= invoice.number || invoice.processor_id || invoice.id %></span>
+                <a
+                  href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}
+                  class="ax-link"
+                >
+                  <%= invoice.number || invoice.processor_id || invoice.id %>
+                </a>
                 <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
               </div>
               <p :if={invoices(@customer) == []} class="ax-body"><%= Copy.customer_detail_no_invoices() %></p>
