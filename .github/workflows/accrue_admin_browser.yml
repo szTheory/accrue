@@ -1,3 +1,5 @@
+# Fast accrue_admin fixture smoke. Merge-blocking mounted admin browser proofs
+# are examples/accrue_host VERIFY-01 Playwright under host-integration (merge-blocking CI path).
 name: AccrueAdmin Browser UAT
 
 on:
