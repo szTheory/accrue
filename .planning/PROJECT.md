@@ -21,21 +21,21 @@ v1.3 adds Stripe Tax orchestration, customer tax-location validation and recover
 
 Milestone history, roadmap, requirements, and audit artifacts: `.planning/milestones/v1.3-ROADMAP.md`, `v1.3-REQUIREMENTS.md`, `v1.3-MILESTONE-AUDIT.md`.
 
-**Last shipped planning milestone:** **v1.5 Adoption proof hardening** (2026-04-18) — documentation tying VERIFY-01, Fake CI, Stripe test-mode parity, and evaluator walkthroughs; archived to `.planning/milestones/v1.5-ROADMAP.md` and `v1.5-REQUIREMENTS.md`.
+**Last shipped planning milestone:** **v1.6 Admin UI / UX polish** (2026-04-20) — inventory, hierarchy/tokens, microcopy, accessibility gates, and mobile CI for companion admin and mounted VERIFY-01 paths; archived to `.planning/milestones/v1.6-ROADMAP.md` and `v1.6-REQUIREMENTS.md`.
 
-**Active planning milestone:** **v1.6 Admin UI / UX polish** — see `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, and `.planning/ADMIN-UX-BASELINE-AUDIT.md`. Scope is **`accrue_admin` first** (operator LiveView + `ax-*` CSS), with **host Playwright** only where mounted admin or billing chrome must be proven; no new billing domain features or processor work in this milestone.
+**Planning:** The next milestone starts with `/gsd-new-milestone` (fresh `.planning/REQUIREMENTS.md` and phased roadmap). Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
-## Current Milestone: v1.6 Admin UI / UX polish
+## Shipped: v1.6 Admin UI / UX polish (2026-04-20)
 
-**Goal:** Bring the companion admin (and evaluator-visible mounted paths) to a **consistent, accessible, mobile-credible** bar: hierarchy and tokens match the Phase 20/21 UI contracts where they apply, high-traffic copy is predictable, and CI catches regressions on narrow viewports and critical a11y rules—without introducing a new third-party component kit.
+**Goal:** Bring the companion admin (and evaluator-visible mounted paths) to a **consistent, accessible, mobile-credible** bar aligned to Phase 20/21 UI-SPEC contracts—without new billing domain scope or third-party UI kits.
 
-**Target features:**
+**Delivered:**
 
-- **Inventory** — *(Phase 25, 2026-04-20)* Route matrix, component kitchen vs production coverage, and 20/21 UI-SPEC alignment tables: `.planning/phases/25-admin-ux-inventory/` (`25-INV-01..03`, verification).
-- **Visual hierarchy** — *(Phase 26, 2026-04-20)* List/detail/webhook flows aligned to Phase 20/21 contracts (`26-VERIFICATION.md`); token drift documented in `26-theme-exceptions.md` where literals remain (`default_brand/0` fallbacks).
-- **Microcopy** — Extend locked-string discipline (or a small registry module) to high-traffic admin empty/error/confirm paths beyond org/tax proof strings.
-- **Accessibility** — *(Phase 28, 2026-04-20)* Step-up focus and Escape/Cancel dismissals, machine-readable table captions on customers/webhooks, VERIFY-01 Playwright + axe (serious/critical) on mounted customers index; manual contrast follow-ups in `28-VERIFICATION.md`.
-- **Mobile** — Tables, sidebars, and primary actions behave on narrow widths; expand `@mobile` / `chromium-mobile` coverage for the worst admin surfaces, aligned with Phase 21 D-01 strategy.
+- Phase **25** — Route matrix, component coverage notes, and UI-SPEC alignment artifacts under `.planning/phases/25-admin-ux-inventory/`.
+- Phase **26** — `ax-*` hierarchy on money indexes, detail pages, and webhooks; theme token discipline with documented exceptions.
+- Phase **27** — Operator microcopy pass and `AccrueAdmin.Copy` for stable literals in tests.
+- Phase **28** — Focus, captions, contrast verification, and mounted-admin axe in VERIFY-01.
+- Phase **29** — Mobile Playwright coverage and README mobile shell guidance for mounted admin.
 
 The v1.0 milestone delivered the full billing library, companion admin UI, installer/test DX, release automation, docs, and OSS policy surface.
 
@@ -121,6 +121,14 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - [x] **PROOF-01** — VERIFY-01 / Fake CI cross-linked with Stripe test-mode parity lane; CI + guide naming clarity.
 - [x] **PROOF-02** — Host adoption proof matrix documents archetype coverage (including user billable ExUnit vs org-first LiveView).
 - [x] **PROOF-03** — Evaluator screen-recording checklist doc linked from host README.
+
+### Validated v1.6 (archived in `.planning/milestones/v1.6-REQUIREMENTS.md`; milestone closed 2026-04-20)
+
+- [x] **INV-01..03** — Admin route matrix, component coverage vs kitchen, Phase 20/21 spec alignment (Phase 25).
+- [x] **UX-01..04** — List/detail/webhook hierarchy and theme token discipline (Phase 26).
+- [x] **COPY-01..03** — Operator microcopy and stable literals via `AccrueAdmin.Copy` (Phase 27).
+- [x] **A11Y-01..04** — Focus, tables, contrast verification, mounted-admin axe in CI (Phase 28).
+- [x] **MOB-01..03** — Mobile overflow/nav and admin-heavy `@mobile` / `chromium-mobile` coverage (Phase 29).
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -308,7 +316,8 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.2 focuses on Adoption + Trust before large feature expansion | The biggest remaining gap is confidence for new users evaluating a billing library, not another core billing primitive; polish should stop once it hits diminishing returns and expansion should be decided deliberately | ✓ Good |
 | Keep v1.2 expansion to discovery only | Tax, revenue exports, processors, and org billing are likely next-level features, but partial implementation would distract from onboarding and trust hardening | ✓ Good |
 | Record the Phase 16 ranking as recommendation-only planning guidance | `Stripe Tax support` is the recommended `Next milestone`; `Organization / multi-tenant billing` and `Revenue recognition / exports` remain `Backlog`; `Official second processor adapter` remains a `Planted seed`, and no v1.2 billing API, schema, or processor-abstraction implementation is implied | ✓ Good |
-| v1.3 combines Stripe Tax with Sigra-first organization billing and finance handoff | Stripe Tax is still the safest first expansion; Sigra org support is now concrete enough for host-proofed org billing; finance should stay Stripe-native before Accrue owns accounting semantics | — Pending |
+| v1.3 combines Stripe Tax with Sigra-first organization billing and finance handoff | Stripe Tax is still the safest first expansion; Sigra org support is now concrete enough for host-proofed org billing; finance should stay Stripe-native before Accrue owns accounting semantics | ✓ Good |
+| v1.6 closes admin UX polish without new billing primitives | Operator trust (a11y, mobile, copy) advances adoption without PROC-08/FIN-03 scope creep | ✓ Good |
 
 ## Current Milestone Notes
 
@@ -321,6 +330,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - v1.3 planning resolves the Phase 16 backlog tradeoff by implementing Stripe Tax and Sigra-first org billing together, while keeping finance work to Stripe Revenue Recognition, Sigma, and Data Pipeline handoff documentation.
 - Phase 18 validated the first Stripe Tax slice: public subscription and checkout tax enablement, Stripe/Fake adapter parity, and narrow local automatic-tax observability.
 - Phase 19 validated tax-location capture/update, immediate invalid-location error handling, recurring tax-risk projection/admin visibility, host repair flow, and legacy recurring-item rollout safety guidance.
+- v1.6 (Phases 25–29) archived 2026-04-20: admin inventory, visual hierarchy, microcopy registry, a11y gates, and mobile CI without PROC-08/FIN-03/product-schema changes.
 
 ## Evolution
 
@@ -340,4 +350,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-20 — Phase 29 mobile parity and CI complete (MOB-01..03); v1.6 milestone status in ROADMAP / REQUIREMENTS.*
+*Last updated: 2026-04-20 after v1.6 milestone archival (fresh REQUIREMENTS.md follows `/gsd-new-milestone`).*

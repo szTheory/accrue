@@ -1,5 +1,28 @@
 # Milestones
 
+## v1.6 Admin UI / UX polish (Shipped: 2026-04-20)
+
+**Phases completed:** 5 phases (25–29), 16 plans
+
+**Key accomplishments:**
+
+- Maintainer route matrix, component coverage vs `ComponentKitchenLive`, and Phase 20/21 UI-SPEC alignment tables checked into `.planning/phases/25-admin-ux-inventory/` (INV-01..03).
+- Money indexes, detail pages, and webhook surfaces aligned to `ax-*` hierarchy and typography; theme tokens default with documented exceptions (UX-01..04).
+- Plain-language empty/error/confirm copy plus `AccrueAdmin.Copy` module for stable Playwright and LiveView literals (COPY-01..03).
+- Step-up focus, table captions on customers/webhooks, VERIFY-01 axe (serious/critical) on mounted admin, and verification notes for contrast (A11Y-01..04).
+- Mobile overflow/nav assertions, `verify01-admin-mobile.spec.js`, and README **Mounted admin — mobile shell** documentation for VERIFY-01 (MOB-01..03).
+
+**Verification:** Phase `25-VERIFICATION.md`, `26-VERIFICATION.md`, `28-VERIFICATION.md`, `29-VERIFICATION.md`; host Playwright mobile + desktop gates per existing CI.
+
+**Known deferred items at close:** 3 (see `.planning/STATE.md` § Deferred Items — `audit-open` at milestone close, acknowledged under yolo workflow).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md)
+- Requirements: [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md)
+
+---
+
 ## v1.5 Adoption proof hardening (Shipped: 2026-04-18)
 
 **Phases completed:** 1 phase (24), documentation-only execution

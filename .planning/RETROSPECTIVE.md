@@ -185,12 +185,57 @@
 
 ---
 
+## Milestone: v1.6 — Admin UI / UX polish
+
+**Shipped:** 2026-04-20  
+**Phases:** 5 | **Plans:** 16
+
+### What Was Built
+
+- Maintainer-facing inventory: route matrix, component kitchen vs production coverage, and Phase 20/21 UI-SPEC alignment tables (Phase 25).
+- Visual hierarchy and token discipline across money indexes, detail pages, and webhooks, with documented theme exceptions (Phase 26).
+- Operator microcopy pass and `AccrueAdmin.Copy` for stable Playwright and ExUnit literals (Phase 27).
+- Accessibility hardening: step-up focus, table captions, contrast verification notes, and `@axe-core/playwright` on mounted customers index in VERIFY-01 (Phase 28).
+- Mobile parity: overflow/nav checks, dedicated admin mobile Playwright spec, and README guidance for mounted admin on narrow viewports (Phase 29).
+
+### What Worked
+
+- Anchoring polish to existing Phase 20/21 UI-SPEC contracts avoided speculative redesign.
+- Splitting inventory (25) before hierarchy (26) reduced churn before copy and a11y passes.
+- Reusing VERIFY-01 and host Playwright for mounted-admin proofs kept CI semantics stable.
+
+### What Was Inefficient
+
+- `gsd-sdk query milestone.complete` failed in this environment (`version required for phases archive`), so archival steps were completed manually.
+- `gsd-sdk summary-extract` returned no usable one-liners for automated accomplishment harvesting.
+- `audit-open` still flags Phase 21 UAT metadata and missing quick-task stubs across milestone boundaries.
+
+### Patterns Established
+
+- Small copy module (`AccrueAdmin.Copy`) as the default way to keep operator strings and tests aligned.
+- Theme exception registry / markdown appendix for unavoidable literals alongside UX-04 discipline.
+
+### Key Lessons
+
+1. Close planning state (`STATE.md` progress tables) when the roadmap table and disk status disagree, before running milestone workflows.
+2. Keep milestone-close tooling (`milestone.complete`) verified on the installed `gsd-sdk` version before relying on it in CI or local close scripts.
+3. Document mobile shell behavior (scroll owner, menu nav, org query param) in the host README alongside Playwright project names.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: concentrated planning + verification passes across five short phases.
+- Notable: highest leverage was tightening gates on surfaces evaluators already see (admin + VERIFY-01), not expanding CI topology.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.6 | short | 5 | Admin inventory → hierarchy → copy → a11y → mobile, all scoped to `accrue_admin` + existing VERIFY-01 host proofs. |
 | v1.5 | short | 1 | Adoption proof documented as a matrix tying existing Fake, host, Playwright, and advisory Stripe lanes. |
 | v1.2 | concentrated closeout | 5 | Adoption and trust work became executable through the canonical host demo, docs contracts, and security/audit closeout gates. |
 | v1.1 | multiple | 4 | Real host-app dogfood became the canonical user-facing integration and CI release gate. |
@@ -200,6 +245,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.6 | VERIFY-01 Playwright (desktop + mobile), ExUnit/HTML assertions on touched LiveViews, axe on mounted customers index | INV/COPY/UX/A11Y/MOB (18/18) archived | `AccrueAdmin.Copy`, mobile admin spec, README mobile shell section, verification markdown per phase. |
 | v1.5 | Existing VERIFY-01 contracts + docs guide tests; no new CI topology | PROOF-01..03 (3/3) archived | Adoption proof matrix, evaluator walkthrough script, guide + CI naming clarity. |
 | v1.2 | Host UAT, Playwright trust flow, docs verifier, release guidance tests, trust/security review artifacts | 23/23 audited requirements plus Phase 17 cleanup verification | Canonical demo/tutorial contracts, issue templates, trust review, expansion recommendation, security verification. |
 | v1.1 | Host ExUnit, Playwright, shell UAT, docs verifier, Hex smoke | 21/21 audited scoped requirements | Host app, Playwright gate, setup diagnostics, conflict sidecars, package-doc verifier. |

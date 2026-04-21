@@ -8,9 +8,27 @@
 - ✅ **v1.3 Tax + Organization Billing** — Phases 18-22 shipped on 2026-04-17. Stripe Tax, Sigra-first organization billing, admin/host UX proof, and Stripe-native finance handoff documentation. Full archive: [`milestones/v1.3-ROADMAP.md`](milestones/v1.3-ROADMAP.md).
 - ✅ **v1.4 Ecosystem stability + demo visuals** — Phase 23 shipped 2026-04-17. `lattice_stripe` lockfiles verified on latest 1.1.x; Fake-backed Playwright screenshot walkthrough documented and scripted; admin `priv/static` bundle fixed for browser LiveView. **PROC-08 deferred.**
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
-- ○ **v1.6 Admin UI / UX polish** — Phases **25–29** (in planning). Companion admin (`accrue_admin`) hierarchy, microcopy, accessibility, and mobile CI; host Playwright where mounted admin must be proven. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.6 Admin UI / UX polish** — Phases 25–29 shipped 2026-04-20. Inventory, hierarchy/tokens, microcopy, a11y gates, and mobile CI for `accrue_admin` + mounted VERIFY-01 paths. Full archive: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md).
+- ○ **Next milestone** — Run `/gsd-new-milestone` to define requirements and phased roadmap.
 
 ## Phases
+
+<details>
+<summary>✅ v1.6 Admin UI / UX polish (Phases 25–29) — SHIPPED 2026-04-20</summary>
+
+**Milestone goal:** Operator-facing admin matches Phase **20/21 UI-SPEC** intent across money indexes, detail pages, and webhooks; microcopy is consistent; **a11y** and **mobile** regressions are caught by tests where ROI is highest—without new third-party UI kits.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment across `accrue_admin`. | INV-01..03 |
+| 26 | Hierarchy and pattern alignment | `ax-*` / token consistency on touched surfaces across money indexes, detail pages, and webhooks. | UX-01..04 |
+| 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals. | COPY-01..03 |
+| 28 | Accessibility hardening | Focus, tables, contrast; axe on mounted admin. | A11Y-01..04 |
+| 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 |
+
+**Depends on:** Phase 24 complete (v1.5 shipped). **Archives:** [`v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md).
+
+</details>
 
 <details>
 <summary>✅ v1.5 Adoption proof hardening (Phase 24) — SHIPPED 2026-04-18</summary>
@@ -37,97 +55,6 @@
 **Plans:** (executed inline — planning-only phase)
 
 </details>
-
-### v1.6 Admin UI / UX polish (Phases 25–29)
-
-**Milestone goal:** Operator-facing admin matches Phase **20/21 UI-SPEC** intent across money indexes, detail pages, and webhooks; microcopy is consistent; **a11y** and **mobile** regressions are caught by tests where ROI is highest—without new third-party UI kits.
-
-| # | Phase | Goal | Requirements | Success criteria (summary) |
-|---|-------|------|--------------|---------------------------|
-| 25 | Admin UX inventory | Baseline map of routes, components, and spec alignment across `accrue_admin`. | INV-01..03 | Matrix + gap list checked into phase artifacts (complete 2026-04-20). |
-| 26 | Hierarchy and pattern alignment | `ax-*` / token consistency on touched surfaces across money indexes, detail pages, and webhooks. | UX-01..04 | LiveViews + HTML assertions per plans; theme tokens on touched surfaces (complete 2026-04-20). |
-| 27 | Microcopy and operator strings | Plain-language admin copy + stable test literals. | COPY-01..03 | Copy pass merged; literals traceable per REQUIREMENTS (complete 2026-04-20). |
-| 28 | Accessibility hardening | Focus, tables, contrast; optional axe on mounted admin. | A11Y-01..04 | Step-up focus, table captions, VERIFY-01 axe + verification doc (complete 2026-04-20). |
-| 29 | Mobile parity and CI | Overflow, nav, expanded `@mobile` admin coverage | MOB-01..03 | Playwright green on mobile project for in-scope flows (complete 2026-04-20). |
-
-**Depends on:** Phase 24 complete (v1.5 shipped).
-
-**Next step:** `/gsd-progress` — Phase 29 shipped; reconcile v1.6 progress table with remaining milestone work.
-
-### Phase 25: Admin UX inventory
-
-**Goal:** Baseline map of routes, components, and spec alignment across `accrue_admin`.
-
-**Depends on:** Phase 24 complete (v1.5 shipped).
-
-**Requirements:** INV-01, INV-02, INV-03
-
-**Success criteria:**
-
-1. Maintainer-facing **route matrix** (INV-01), **component coverage** notes (INV-02), and **spec alignment** table (INV-03) exist as phase artifacts—matrix + gap list checked into `.planning/phases/25-admin-ux-inventory/`.
-
-**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
-
-**Plans:** `25-01-PLAN.md`, `25-02-PLAN.md`, `25-03-PLAN.md` (3/3 complete, 2026-04-20)
-
-### Phase 26: Hierarchy and pattern alignment
-
-**Goal:** `ax-*` / token consistency on touched surfaces across money indexes, detail pages, and webhooks.
-
-**Depends on:** Phase 25 complete (inventory baseline).
-
-**Requirements:** UX-01, UX-02, UX-03, UX-04
-
-**Success criteria:**
-
-1. LiveViews updated for UX-01..03; ExUnit/HTML assertions on structure where specified in plans.
-2. Theme tokens remain default on touched surfaces (UX-04); ad hoc hex documented if unavoidable.
-
-**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`; phase 25 inventory artifacts under `.planning/phases/25-admin-ux-inventory/`
-
-**Plans:** 4/4 plans complete
-
-### Phase 27: Microcopy and operator strings
-
-**Goal:** Plain-language admin copy + stable test literals.
-
-**Depends on:** Phase 26 (hierarchy alignment reduces churn before copy pass).
-
-**Requirements:** COPY-01, COPY-02, COPY-03
-
-**Success criteria:** Copy pass merged; grep or module doc for literals per REQUIREMENTS.
-
-**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/20-organization-billing-with-sigra/20-UI-SPEC.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
-
-**Plans:** 3/3 plans complete
-
-### Phase 28: Accessibility hardening
-
-**Goal:** Focus, tables, contrast; optional axe on mounted admin.
-
-**Depends on:** Phase 27 (stable strings and structure).
-
-**Requirements:** A11Y-01, A11Y-02, A11Y-03, A11Y-04
-
-**Success criteria:** Documented checks + at least one automated gate or ADR per REQUIREMENTS.
-
-**Canonical refs:** `.planning/REQUIREMENTS.md`; `.planning/phases/21-admin-and-host-ux-proof/21-UI-SPEC.md`
-
-**Plans:** 3/3 plans complete (2026-04-20)
-
-### Phase 29: Mobile parity and CI
-
-**Goal:** Overflow, nav, expanded `@mobile` admin coverage in CI.
-
-**Depends on:** Phase 28 where layout/focus fixes affect mobile.
-
-**Requirements:** MOB-01, MOB-02, MOB-03
-
-**Success criteria:** Playwright green on mobile project for in-scope flows.
-
-**Canonical refs:** `.planning/REQUIREMENTS.md`; `examples/accrue_host` Playwright config and VERIFY-01 docs as referenced in plans.
-
-**Plans:** 3/3 plans complete
 
 ## Prior milestone snapshot (v1.4)
 
@@ -163,13 +90,13 @@
 |-------|-----------|----------------|--------|-----------|
 | 24. Adoption proof hardening | v1.5 | inline | Complete | 2026-04-18 |
 
-**v1.6 (active)**
+**v1.6 (complete)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 25. Admin UX inventory | v1.6 | 3/3 | Complete | 2026-04-20 |
-| 26. Hierarchy and pattern alignment | v1.6 | 0/? | Planned | — |
-| 27. Microcopy and operator strings | v1.6 | 0/? | Planned | — |
+| 26. Hierarchy and pattern alignment | v1.6 | 4/4 | Complete | 2026-04-20 |
+| 27. Microcopy and operator strings | v1.6 | 3/3 | Complete | 2026-04-20 |
 | 28. Accessibility hardening | v1.6 | 3/3 | Complete | 2026-04-20 |
 | 29. Mobile parity and CI | v1.6 | 3/3 | Complete | 2026-04-20 |
 
