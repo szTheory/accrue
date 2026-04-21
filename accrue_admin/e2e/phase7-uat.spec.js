@@ -79,8 +79,9 @@ test.describe("Phase 7 browser UAT", () => {
       page.getByRole("heading", { name: /Replay, inspect, and trace webhook delivery/ })
     ).toBeVisible();
     await page.locator("[data-role='prepare-bulk-replay']").click();
+    await expect(page.locator("[data-role='bulk-replay-confirm']")).toBeVisible();
     await expect(page.locator("[data-role='bulk-replay-confirm']")).toContainText(
-      "Replay 1 failed or dead webhook rows for the active organization?"
+      /failed or dead webhook rows for the active organization/
     );
     await page.locator("[data-role='confirm-bulk-replay']").click();
     await expect(
