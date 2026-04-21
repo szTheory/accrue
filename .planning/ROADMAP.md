@@ -9,9 +9,75 @@
 - ✅ **v1.4 Ecosystem stability + demo visuals** — Phase 23 shipped 2026-04-17. `lattice_stripe` lockfiles verified on latest 1.1.x; Fake-backed Playwright screenshot walkthrough documented and scripted; admin `priv/static` bundle fixed for browser LiveView. **PROC-08 deferred.**
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
 - ✅ **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–31**: core admin polish shipped **2026-04-20**; post-ship Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
-- ○ **Next milestone** — Run `/gsd-new-milestone` to define requirements and phased roadmap.
+- ○ **v1.7 Adoption DX + operator admin depth** — Phases **32–35** (requirements: `.planning/REQUIREMENTS.md`; research: `.planning/research/SUMMARY.md`). **In progress** — planning initialized 2026-04-21.
 
 ## Phases
+
+### v1.7 Adoption DX + operator admin depth (Phases 32–35) — ACTIVE
+
+**Milestone goal:** Tighten **VERIFY-01** and adoption **doc/CI** discoverability without changing merge-blocking semantics, then ship **operator admin** home + drill + nav improvements using existing **UI-SPEC** and **`AccrueAdmin.Copy`** discipline.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 32 | Adoption discoverability + doc graph | Root → VERIFY-01 path ≤2 hops; host README authoritative proof subsection; guide cross-links consistent. | ADOPT-01..03 |
+| 33 | Installer, host contracts + CI clarity | `mix accrue.install` reruns documented/tested; doc/script drift caught or explicitly listed; CI blocking vs advisory language preserved (job ids stable). | ADOPT-04..06 |
+| 34 | Operator home, drill flow + nav model | Credible admin home; one smoother cross-entity flow; nav labels/order match operator model + matrix updates if needed. | OPS-01..03 |
+| 35 | Summary surfaces + test literal hygiene | Token-safe KPI/summary rows; new literals via `AccrueAdmin.Copy`; tests updated. | OPS-04..05 |
+
+**Phase 32: Adoption discoverability + doc graph**
+
+**Goal:** Evaluators and contributors never hit contradictory “how do I run proof?” instructions.
+
+**Depends on:** v1.6 complete (Phase 31)
+
+**Requirements:** ADOPT-01, ADOPT-02, ADOPT-03
+
+**Success criteria:**
+
+1. Repository root README links into a canonical path that surfaces VERIFY-01 / `mix verify` / Playwright commands within two hops.
+2. Host README contains one coherent subsection tying Fake-first runs, Playwright, and adoption matrix / walkthrough links.
+3. Cross-links among guides and host docs do not assert different “primary” proof commands for the same lane.
+
+**Phase 33: Installer, host contracts + CI clarity**
+
+**Goal:** Install reruns and automation hooks stay honest while CI remains interpretable.
+
+**Depends on:** Phase 32
+
+**Requirements:** ADOPT-04, ADOPT-05, ADOPT-06
+
+**Success criteria:**
+
+1. Documented `mix accrue.install` rerun semantics match observed behavior or documented exceptions are filed in phase notes.
+2. Doc contract tests / verify scripts pass; any gap has an explicit manual verification checklist in phase verification.
+3. Workflow + guide text still identifies merge-blocking Fake lanes vs advisory Stripe test-mode lanes without renaming stable job ids referenced elsewhere.
+
+**Phase 34: Operator home, drill flow + nav model**
+
+**Goal:** Operators see value on first open and can complete one common drill with less friction.
+
+**Depends on:** Phase 33
+
+**Requirements:** OPS-01, OPS-02, OPS-03
+
+**Success criteria:**
+
+1. Default admin entry shows a bounded home/dashboard-style surface using existing layout primitives.
+2. At least one specified cross-entity drill (named in PLAN) reduces dead ends or preserves context vs baseline.
+3. Nav labels and ordering are updated and reflected in maintainer route inventory if tables drift.
+
+**Phase 35: Summary surfaces + test literal hygiene**
+
+**Goal:** New polish is token-safe and test-stable.
+
+**Depends on:** Phase 34
+
+**Requirements:** OPS-04, OPS-05
+
+**Success criteria:**
+
+1. New summary/KPI UI uses theme tokens or documented exceptions per UX-04 precedent.
+2. New operator-visible strings route through `AccrueAdmin.Copy` (or established SSOT); Playwright/LiveView tests updated accordingly.
 
 <details>
 <summary>✅ v1.6 Admin UI / UX polish (Phases 25–29) — SHIPPED 2026-04-20</summary>
@@ -122,6 +188,15 @@
 |-------|-----------|----------------|--------|-----------|
 | 30. Audit corpus closure | v1.6 (post-ship) | 2/2 | Complete | 2026-04-21 |
 | 31. Advisory integration alignment | v1.6 (post-ship) | 3/3 | Complete | 2026-04-21 |
+
+**v1.7 (active)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 32. Adoption discoverability + doc graph | v1.7 | 0/? | Not started | — |
+| 33. Installer, host contracts + CI clarity | v1.7 | 0/? | Not started | — |
+| 34. Operator home, drill flow + nav model | v1.7 | 0/? | Not started | — |
+| 35. Summary surfaces + test literal hygiene | v1.7 | 0/? | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
