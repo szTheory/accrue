@@ -179,3 +179,14 @@ other evaluation setup that should not become public integration guidance.
   from the checked-in host demo.
 - `mix accrue.install` remains the production setup command for your own host
   app.
+
+## 4. Rerunning mix accrue.install
+
+Reruns refresh **pristine** generated files that still match the Accrue
+fingerprint marker; **user-edited** generated files are skipped so local policy
+changes are preserved. Unmarked existing files stay skipped unless you opt into
+a narrow overwrite, and `--write-conflicts` writes reviewable artifacts under
+`.accrue/conflicts/` instead of patching live files blindly — the same contract
+as the upgrade guide. See
+[Upgrade guide — Installer rerun behavior](upgrade.md#installer-rerun-behavior)
+for the full installer rerun semantics.

@@ -40,6 +40,8 @@ defmodule Accrue.Docs.FirstHourGuideTest do
       ]
     )
 
+    assert guide =~ "upgrade.md#installer-rerun-behavior"
+
     Enum.each(@public_surfaces, fn surface ->
       assert guide =~ surface
     end)
