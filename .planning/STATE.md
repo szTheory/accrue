@@ -7,10 +7,10 @@ last_updated: "2026-04-21T21:43:28.498Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 9
-  percent: 67
+  completed_plans: 11
+  percent: 83
 ---
 
 # Project State
@@ -21,7 +21,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 35 — summary-surfaces-test-literal-hygiene
+**Current focus:** Phase 36 — audit-corpus-adoption-integration-hardening
 
 ## Current Position
 
@@ -40,7 +40,7 @@ Plan: Not started
 | 32. Adoption discoverability + doc graph | Complete (2026-04-21) | ADOPT-01..03 — `32-VERIFICATION.md` |
 | 33. Installer, host contracts + CI clarity | Complete (2026-04-21) | ADOPT-04..06 — `33-VERIFICATION.md` |
 | 34. Operator home, drill flow + nav model | Complete (2026-04-21) | OPS-01..03 — `34-VERIFICATION.md` |
-| 35. Summary surfaces + test literal hygiene | Not started | OPS-04..05 |
+| 35. Summary surfaces + test literal hygiene | Complete (2026-04-21) | OPS-04..05 — `35-VERIFICATION.md` |
 
 **Milestone:** v1.6 Admin UI / UX polish + audit closure — **ARCHIVED** (see `.planning/milestones/v1.6-ROADMAP.md`)
 
@@ -56,6 +56,7 @@ Plan: Not started
 - `.planning/phases/32-adoption-discoverability-doc-graph/32-VERIFICATION.md` — Phase 32 verification (passed)
 - `.planning/phases/33-installer-host-contracts-ci-clarity/33-VERIFICATION.md` — Phase 33 verification (passed)
 - `.planning/phases/34-operator-home-drill-flow-nav-model/34-VERIFICATION.md` — Phase 34 verification (passed)
+- `.planning/phases/35-summary-surfaces-test-literal-hygiene/35-VERIFICATION.md` — Phase 35 verification (passed)
 
 ## Deferred Items
 
@@ -74,4 +75,4 @@ Prior milestone carry-forward (unchanged where still relevant):
 
 **Next milestone:** — (v1.7 active)
 
-**Planned Phase:** 35 (Summary surfaces + test literal hygiene) — 2 plans — 2026-04-21T21:41:57.041Z
+**Planned Phase:** 36 (Audit corpus + adoption integration hardening) — not started — 2026-04-21
