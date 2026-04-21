@@ -8,6 +8,10 @@ config :accrue, :auth_adapter, MyApp.Auth.PhxGenAuth
 
 An adapter implements `Accrue.Auth` so Accrue Admin, audit logging, and destructive-action step-up checks can read host auth state without knowing how the host signs users in.
 
+## Choosing an adapter (Sigra is optional)
+
+Accrue stays **auth-agnostic**: you always implement or configure an `Accrue.Auth` adapter for your host. **Sigra is optional**—when `:sigra` is already a dependency, you may use `Accrue.Integrations.Sigra` and follow [Sigra integration](sigra_integration.md). Otherwise, implement `Accrue.Auth` yourself (see the PhxGenAuth, Pow, and Assent sections below). For the **non-Sigra**, organization-shaped billing path from session to billable row, start with **[Organization billing (session → billable)](organization_billing.md)**.
+
 ## Required callbacks
 
 - `current_user/1` reads the signed-in user from a `%Plug.Conn{}` or compatible map and returns the user struct/map or `nil`.
