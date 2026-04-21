@@ -9,7 +9,7 @@
 - ✅ **v1.4 Ecosystem stability + demo visuals** — Phase 23 shipped 2026-04-17. `lattice_stripe` lockfiles verified on latest 1.1.x; Fake-backed Playwright screenshot walkthrough documented and scripted; admin `priv/static` bundle fixed for browser LiveView. **PROC-08 deferred.**
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
 - ✅ **v1.6 Admin UI / UX polish** — Phases 25–29 shipped 2026-04-20. Inventory, hierarchy/tokens, microcopy, a11y gates, and mobile CI for `accrue_admin` + mounted VERIFY-01 paths. Full archive: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md).
-- ○ **v1.6 audit gap closure (post-ship)** — Phases 30–31. Closes findings from [`v1.6-MILESTONE-AUDIT.md`](v1.6-MILESTONE-AUDIT.md) (COPY verification corpus, 26/29 SUMMARY traceability, advisory integration alignment).
+- ✅ **v1.6 audit gap closure (post-ship)** — Phases 30–31 complete 2026-04-21. Closes findings from [`v1.6-MILESTONE-AUDIT.md`](v1.6-MILESTONE-AUDIT.md) (COPY verification corpus, 26/29 SUMMARY traceability, advisory integration alignment).
 - ○ **Next milestone** — Run `/gsd-new-milestone` to define requirements and phased roadmap.
 
 ## Phases
@@ -32,14 +32,14 @@
 </details>
 
 <details>
-<summary>○ v1.6 audit gap closure (Phases 30–31)</summary>
+<summary>✅ v1.6 audit gap closure (Phases 30–31) — complete 2026-04-21</summary>
 
 **Milestone goal:** Clear `/gsd-audit-milestone` gaps for shipped v1.6: restore strict COPY requirement evidence in phase verification, backfill `requirements-completed` on Phase 26/29 plan summaries, then address advisory integration notes (CI scripts, Copy SSOT, Playwright matrix consistency).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 30 | Audit corpus closure — **complete** (2026-04-21) | `COPY-01..03` mapped in `27-VERIFICATION.md`; `requirements-completed` YAML on `26-*-SUMMARY.md` and `29-*-SUMMARY.md` where missing. | COPY-01..03; evidence backfill for UX-01..04 + MOB-01..03 (Phase 26/29 implementation unchanged) |
-| 31 | Advisory integration alignment | Resolve minor integration findings from the v1.6 audit (README VERIFY contract, npm scripts, admin/host Playwright + Copy SSOT, snapshot/reseed/axe scope docs). | Related: INV-01, INV-03, UX-01, MOB-01, MOB-03, A11Y-03, A11Y-04, COPY-01..03 (as touched by alignment work) |
+| 31 | Advisory integration alignment — **complete** (2026-04-21) | VERIFY-01 mobile contract + `e2e:mobile`; step-up modal Copy SSOT; fixture Playwright + docs aligned to host VERIFY-01 as merge-blocking path. | INV-01, INV-03, UX-01, MOB-01, MOB-03, A11Y-03, COPY-02, COPY-03 |
 
 **Depends on:** v1.6 Phases 25–29 complete (shipped). **Requirements archive:** [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md). **Audit:** [`v1.6-MILESTONE-AUDIT.md`](v1.6-MILESTONE-AUDIT.md).
 
