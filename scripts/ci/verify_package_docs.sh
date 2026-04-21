@@ -107,6 +107,8 @@ require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "mix verify.full"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "/webhooks/stripe"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "/billing"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "customer.subscription.created"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "upgrade.md#installer-rerun-behavior"
+require_fixed "$ROOT_DIR/accrue/guides/troubleshooting.md" "mix accrue.install --check"
 
 require_fixed "$ROOT_DIR/scripts/ci/accrue_host_uat.sh" "mix verify.full"
 require_fixed "$ROOT_DIR/scripts/ci/accrue_host_uat.sh" "bash scripts/ci/accrue_host_uat.sh"
