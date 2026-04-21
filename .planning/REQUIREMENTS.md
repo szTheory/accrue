@@ -21,8 +21,8 @@ Scope is **documentation, host example, CI discoverability, `mix accrue.install`
 - [x] **OPS-01**: Operators landing on the **default admin entry** see a **credible home** surface: bounded “signal” summaries (e.g. recent failures, counts, or links to indexes) that reuse **Phase 20/21** card / grid patterns — **no** new accounting semantics or Stripe objects beyond existing admin queries.
 - [x] **OPS-02**: At least **one** cross-entity operator flow is measurably smoother (clearer navigation, fewer dead ends, or preserved context) — scoped in phase plan to a concrete pair (e.g. customer ↔ subscription ↔ invoice) without new billing APIs.
 - [x] **OPS-03**: Primary **admin navigation labels and ordering** match an operator mental model (billing nouns, not internal module names); changes are reflected in route matrix or inventory appendix if maintainer-facing tables drift.
-- [ ] **OPS-04**: New or expanded **summary / KPI** rows use **theme tokens** and `ax-*` layout primitives; any **exception** colors are documented in phase notes per v1.6 **UX-04** discipline.
-- [ ] **OPS-05**: New user-visible admin strings introduced by v1.7 go through **`AccrueAdmin.Copy`** (or existing copy SSOT) so **Playwright** and LiveView tests do not rely on duplicate divergent literals.
+- [x] **OPS-04**: New or expanded **summary / KPI** rows use **theme tokens** and `ax-*` layout primitives; any **exception** colors are documented in phase notes per v1.6 **UX-04** discipline.
+- [x] **OPS-05**: New user-visible admin strings introduced by v1.7 go through **`AccrueAdmin.Copy`** (or existing copy SSOT) so **Playwright** and LiveView tests do not rely on duplicate divergent literals.
 
 ## Future (not v1.7)
 
@@ -51,8 +51,8 @@ Scope is **documentation, host example, CI discoverability, `mix accrue.install`
 | OPS-01 | Phase 34 | Complete |
 | OPS-02 | Phase 34 | Complete |
 | OPS-03 | Phase 34 | Complete |
-| OPS-04 | Phase 35 | Pending |
-| OPS-05 | Phase 35 | Pending |
+| OPS-04 | Phase 35 | Complete |
+| OPS-05 | Phase 35 | Complete |
 
 **Coverage:** v1.7 requirements: **11** total — mapped to phases: **11** — unmapped: **0**
 
