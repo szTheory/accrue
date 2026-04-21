@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
   alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, KpiCard, Timeline}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
 
   @impl true
@@ -38,82 +39,90 @@ defmodule AccrueAdmin.Live.DashboardLive do
     >
       <section class="ax-page">
         <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs items={[%{label: "Dashboard"}]} />
-          <p class="ax-eyebrow">Billing health</p>
-          <h2 class="ax-display">Local billing projections at a glance</h2>
+          <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
+          <p class="ax-eyebrow"><%= Copy.dashboard_chrome_eyebrow() %></p>
+          <h2 class="ax-display"><%= Copy.dashboard_display_headline() %></h2>
           <p class="ax-body ax-page-copy">
-            Dashboard KPIs are sourced from `accrue_*` tables, the event ledger, and webhook
-            projections already stored locally.
+            <%= Copy.dashboard_page_copy_primary() %>
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Billing KPI summary">
+        <section class="ax-kpi-grid" aria-label={Copy.dashboard_kpi_section_aria_label()}>
           <KpiCard.kpi_card
-            label="Customers"
+            label={Copy.dashboard_kpi_customers_label()}
             value={Integer.to_string(@stats.customer_count)}
             href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}
-            aria_label="Open customers list"
+            aria_label={Copy.dashboard_kpi_customers_aria_label()}
           >
-            <:meta>Total local customer records</:meta>
+            <:meta><%= Copy.dashboard_kpi_customers_meta() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Active subscriptions"
+            label={Copy.dashboard_kpi_active_subscriptions_label()}
             value={Integer.to_string(@stats.active_subscription_count)}
-            delta={Integer.to_string(@stats.canceling_subscription_count) <> " canceling"}
+            delta={
+              Integer.to_string(@stats.canceling_subscription_count) <>
+                Copy.dashboard_kpi_active_subscriptions_canceling_suffix()
+            }
             delta_tone="amber"
             href={ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)}
-            aria_label="Open subscriptions list"
+            aria_label={Copy.dashboard_kpi_subscriptions_aria_label()}
           >
-            <:meta>Canonical active + trialing predicates</:meta>
+            <:meta><%= Copy.dashboard_kpi_active_subscriptions_meta() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Open invoice balance"
+            label={Copy.dashboard_kpi_open_invoice_balance_label()}
             value={format_minor(@stats.open_invoice_balance_minor, "usd")}
-            delta={Integer.to_string(@stats.open_invoice_count) <> " open invoices"}
+            delta={
+              Integer.to_string(@stats.open_invoice_count) <>
+                Copy.dashboard_kpi_open_invoice_delta_suffix()
+            }
             delta_tone="cobalt"
             href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)}
-            aria_label="Open invoices list"
+            aria_label={Copy.dashboard_kpi_invoices_aria_label()}
           >
-            <:meta>Remaining amount due from local invoice projections</:meta>
+            <:meta><%= Copy.dashboard_kpi_open_invoice_balance_meta() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Webhook backlog"
+            label={Copy.dashboard_kpi_webhook_backlog_label()}
             value={Integer.to_string(@stats.blocked_webhook_count)}
-            delta={Integer.to_string(@stats.events_last_day_count) <> " events in 24h"}
+            delta={
+              Integer.to_string(@stats.events_last_day_count) <>
+                Copy.dashboard_kpi_webhook_events_suffix()
+            }
             delta_tone={if(@stats.blocked_webhook_count > 0, do: "amber", else: "moss")}
             href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}
-            aria_label="Open webhooks list"
+            aria_label={Copy.dashboard_kpi_webhooks_aria_label()}
           >
-            <:meta>Failed + dead webhook rows waiting for operator attention</:meta>
+            <:meta><%= Copy.dashboard_kpi_webhook_backlog_meta() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
-        <section class="ax-grid ax-grid-2" aria-label="Dashboard activity">
+        <section class="ax-grid ax-grid-2" aria-label={Copy.dashboard_activity_section_aria_label()}>
           <article class="ax-card">
             <header class="ax-page-header">
-              <p class="ax-eyebrow">Event ledger</p>
-              <h3 class="ax-heading">Recent local activity</h3>
+              <p class="ax-eyebrow"><%= Copy.dashboard_activity_event_ledger_eyebrow() %></p>
+              <h3 class="ax-heading"><%= Copy.dashboard_activity_recent_local_heading() %></h3>
             </header>
 
             <Timeline.timeline
-              label="Recent event ledger rows"
-              empty_label="No local events recorded yet"
+              label={Copy.dashboard_timeline_events_label()}
+              empty_label={Copy.dashboard_timeline_events_empty()}
               items={@recent_events}
             />
           </article>
 
           <article class="ax-card">
             <header class="ax-page-header">
-              <p class="ax-eyebrow">Webhook health</p>
-              <h3 class="ax-heading">Projection pipeline</h3>
+              <p class="ax-eyebrow"><%= Copy.dashboard_activity_webhook_health_eyebrow() %></p>
+              <h3 class="ax-heading"><%= Copy.dashboard_activity_projection_pipeline_heading() %></h3>
             </header>
 
             <Timeline.timeline
-              label="Recent webhook processing rows"
-              empty_label="No webhook rows recorded yet"
+              label={Copy.dashboard_timeline_webhooks_label()}
+              empty_label={Copy.dashboard_timeline_webhooks_empty()}
               items={@webhook_health}
             />
           </article>
@@ -125,7 +134,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Dashboard")
+    |> assign(:page_title, Copy.dashboard_breadcrumb_home())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
