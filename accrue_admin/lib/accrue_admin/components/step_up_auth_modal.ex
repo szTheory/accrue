@@ -27,10 +27,10 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
       phx-remove={Phoenix.LiveView.JS.pop_focus()}
     >
       <header class="ax-page-header">
-        <p class="ax-eyebrow">Sensitive action</p>
-        <h2 id="step-up-title" class="ax-heading">Step-up required</h2>
+        <p class="ax-eyebrow"><%= Copy.step_up_eyebrow() %></p>
+        <h2 id="step-up-title" class="ax-heading"><%= Copy.step_up_title() %></h2>
         <p class="ax-body">
-          <%= Map.get(@challenge || %{}, :message) || "Confirm your identity to continue." %>
+          <%= Map.get(@challenge || %{}, :message) || Copy.step_up_default_challenge_message() %>
         </p>
       </header>
 
@@ -46,7 +46,7 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
         />
 
         <button type="button" phx-click="step_up_dismiss" class="ax-button ax-button-ghost">
-          Cancel
+          <%= Copy.step_up_cancel_label() %>
         </button>
 
         <button type="submit" class="ax-link"><%= Copy.step_up_submit_label() %></button>
