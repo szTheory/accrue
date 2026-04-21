@@ -8,6 +8,10 @@ This guide stays at the documented adapter boundary. It does not require
 private Sigra internals, and it does not promise behavior outside the
 published `Accrue.Auth` callbacks.
 
+### Not using Sigra?
+
+This walkthrough assumes **Sigra is already chosen** and you are wiring Accrue to the published adapter. If you are on the **community auth** path instead, read [Auth adapters](auth_adapters.md) first for the `Accrue.Auth` contract and supported patterns. For **organization-shaped billing** without Sigra, use [Organization billing (session → billable)](organization_billing.md) as the mainline from session to billable row. Do not reference `Accrue.Integrations.Sigra` in host code or config unless the `:sigra` dependency is present and compiled.
+
 ## Add the dependency
 
 Add Sigra to the host app the same way you would for any normal Phoenix
