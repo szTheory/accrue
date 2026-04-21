@@ -140,3 +140,9 @@ live webhook forwarding is useful when validating local endpoint wiring and sign
 For **Stripe-native finance and reporting** — what Accrue stores vs Stripe, when to
 use Revenue Recognition vs Sigma vs Data Pipeline, and explicit **non-accounting**
 boundaries — see [Finance handoff](finance-handoff.md).
+
+## Adoption documentation contracts (dual README gates)
+
+Editorial changes to adoption-facing docs routinely touch **two** merge-adjacent bash gates: `scripts/ci/verify_package_docs.sh` (package READMEs, guides, root `README.md`, `RELEASING.md`, contributor strings, host paths) and `scripts/ci/verify_verify01_readme_contract.sh` (deep **VERIFY-01** prose and Playwright pointers in **`examples/accrue_host/README.md`**). The repo root `README.md` is the short proof path into the host; the host README is the long-form VERIFY-01 contract—both must stay consistent with **`accrue/guides/testing.md`**, **`accrue/guides/first_hour.md`**, and **`guides/testing-live-stripe.md`** where those files repeat merge-blocking language, or one gate can pass while the other fails.
+
+- Before expanding **operator UI** work that falls under Phases **34–35** scope (nav, summaries, Copy, Playwright), read `.planning/phases/36-audit-corpus-adoption-integration-hardening/36-FORWARD-COUPLING-OPS-34-35.md` so route matrix, UX-04 token discipline, and Copy/Playwright SSOT constraints stay synchronized across code and docs.
