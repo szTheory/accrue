@@ -47,7 +47,7 @@ completed: 2026-04-21
 
 ## Task commits
 
-1. **33-01-01** — (see git log)
+1. **33-01-01** — `1cf684c` (docs)
 
 ## Self-Check: PASSED
 
