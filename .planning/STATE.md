@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Org billing recipes & host integration depth
-status: completed
-last_updated: "2026-04-21T22:51:39.910Z"
-last_activity: 2026-04-21 — Phase 37 discuss-phase (research subagents + `37-CONTEXT.md` / `37-DISCUSSION-LOG.md`)
+status: active
+last_updated: "2026-04-21T23:55:00.000Z"
+last_activity: 2026-04-21 — Phase 37 executed (doc spine + installer/README discoverability)
 progress:
-  total_phases: 1
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
@@ -24,13 +24,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 ## Current Position
 
-Phase: **37** — context gathered (`37-CONTEXT.md`)
+Phase: **38** — next in v1.8 (Pow + custom org boundaries)
 
 Plan: —
 
-**Status:** Phase 37 discussion complete — ready for `/gsd-plan-phase 37`
+**Status:** Phase **37** complete — non-Sigra org billing doc spine shipped; v1.8 continues with phases **38–39**.
 
-**Last Activity:** 2026-04-21 — Phase 37 discuss-phase (research subagents + `37-CONTEXT.md` / `37-DISCUSSION-LOG.md`)
+**Last Activity:** 2026-04-21 — Phase 37 execution + verification (`37-VERIFICATION.md`)
 
 ## Milestone Progress
 
@@ -62,6 +62,4 @@ Plan: —
 - **v1.8** prioritizes **ORG-04**; **PROC-08** and **FIN-03** remain out of scope.
 - Phase numbering continues from **37** (no `--reset-phase-numbers`).
 
-**Last completed phase (prior milestone):** 36 — 2026-04-21.
-
-**Planned Phase:** 37 (Org billing recipes — doc spine + phx.gen.auth) — 3 plans — 2026-04-21T22:51:39.901Z
+**Last completed phase (v1.8):** **37** — 2026-04-21 (3/3 plans). **Prior milestone capstone:** 36 — 2026-04-21.
