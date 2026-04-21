@@ -93,6 +93,9 @@ contract as `cd examples/accrue_host && mix verify.full` (see
 including **`e2e/verify01-admin-a11y.spec.js`** (Phase 28: `@axe-core/playwright`,
 serious + critical violations, forced light then dark on desktop; mobile projects
 skip this file). Focused local run after the usual seed + server: `npm run e2e:a11y`.
+For the mobile shell lane on **`chromium-mobile`**, **`npm run e2e:mobile`** runs **`e2e/verify01-admin-mobile.spec.js`** after the same seed + server setup.
+
+The `npm run e2e:*` scripts use **`env -u NO_COLOR`** (POSIX-oriented); Windows contributors may run `npx playwright test …` directly when `env -u` is awkward.
 
 ### Mounted admin — mobile shell
 
