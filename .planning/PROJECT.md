@@ -10,6 +10,17 @@ Tagline: *"Billing state, modeled clearly."*
 
 **A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one** — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
+## Current Milestone: v1.7 Adoption DX + operator admin depth
+
+**Goal:** Tighten the **first-run and proof story** (installer, `examples/accrue_host`, guides, CI / adoption matrices, VERIFY-01) while extending **`accrue_admin`** with **operator-focused flows** and light **summary / dashboard** surfaces—**without** new core billing primitives, new processors, or finance/accounting scope.
+
+**Target features:**
+
+- **Adoption / DX** — `mix accrue.install` ergonomics and reruns, host example + README contracts, package and host guides, adoption / testing matrix discoverability, VERIFY-01 narrative and merge-blocking semantics preserved (Fake-first).
+- **Admin / UX** — New or refined **operator flows** (navigation, key index/detail patterns), optional **dashboard-style** LiveView summaries where they fit Phase 20/21 UI-SPEC hierarchy (no new third-party UI kit), continued **Copy / a11y / mobile** alignment with the v1.6 baseline.
+
+**Key context:** Builds on **v1.6** (Phases 25–31) and `.planning/ADMIN-UX-BASELINE-AUDIT.md` (read-only). Roadmap phases continue from **32**. **PROC-08**, **FIN-03**, and **ORG-04**-class work stay deferred unless pulled into a later milestone explicitly.
+
 ## Current State
 
 Accrue **v1.3 Tax + Organization Billing** is shipped (2026-04-17). The public Hex packages remain:
@@ -23,7 +34,7 @@ Milestone history, roadmap, requirements, and audit artifacts: `.planning/milest
 
 **Last closed planning milestone:** **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–29** shipped **2026-04-20**; Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: `.planning/milestones/v1.6-ROADMAP.md`, `v1.6-REQUIREMENTS.md`, `v1.6-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.6`** unchanged (planning-only post-ship slice).
 
-**Next:** Run `/gsd-new-milestone` for a fresh requirements + roadmap cycle. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Next:** **v1.7** requirements and roadmap are active in `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` (phases from **32**). Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.6 Admin UI / UX polish (2026-04-20)
 
@@ -319,6 +330,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.3 combines Stripe Tax with Sigra-first organization billing and finance handoff | Stripe Tax is still the safest first expansion; Sigra org support is now concrete enough for host-proofed org billing; finance should stay Stripe-native before Accrue owns accounting semantics | ✓ Good |
 | v1.6 closes admin UX polish without new billing primitives | Operator trust (a11y, mobile, copy) advances adoption without PROC-08/FIN-03 scope creep | ✓ Good |
 | Post-ship Phases 30–31 close audit corpus + advisory integration without Hex release churn | Keeps evaluator-facing proof contracts aligned while preserving existing `v1.6` tag semantics | ✓ Good |
+| v1.7 combines adoption/DX with operator admin depth without billing primitive expansion | After v1.6 polish, the highest leverage is clearer VERIFY-01 + install/docs matrices plus intentional admin entry flows—not PROC/FIN/ORG scope creep | Active |
 
 ## Current Milestone Notes
 
@@ -352,4 +364,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after `/gsd-complete-milestone` — v1.6 planning line (Phases 25–31) closed; audit **passed**; `v1.6` git tag unchanged.*
+*Last updated: 2026-04-21 after `/gsd-new-milestone` — **v1.7** Adoption DX + operator admin depth started (requirements + roadmap in `.planning/`).*
