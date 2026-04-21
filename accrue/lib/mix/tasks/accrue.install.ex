@@ -109,6 +109,8 @@ defmodule Mix.Tasks.Accrue.Install do
   defp print_auth_guidance(_project) do
     report("Auth fallback: Accrue.Auth.Default with prod-safety warning")
     report("Community auth adapters can implement Accrue.Auth")
+    report("Non-Sigra org billing walkthrough: guides/organization_billing.md")
+    report("Accrue.Auth adapter reference: guides/auth_adapters.md")
   end
 
   defp install(project, opts) do
