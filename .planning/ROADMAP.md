@@ -21,7 +21,7 @@
 |---|-------|------|--------------|
 | 32 | Adoption discoverability + doc graph | **Complete** (2026-04-21) — VERIFY-01 / doc graph | ADOPT-01..03 |
 | 33 | Installer, host contracts + CI clarity | **Complete** (2026-04-21) — installer rerun docs + CI/advisory clarity | ADOPT-04..06 |
-| 34 | 3/3 | Complete    | 2026-04-21 |
+| 34 | Operator home, drill flow + nav model | **Complete** (2026-04-21) — scoped home KPIs; customer→invoice drill; `AccrueAdmin.Nav` + README routes | OPS-01..03 |
 | 35 | Summary surfaces + test literal hygiene | Token-safe KPI/summary rows; new literals via `AccrueAdmin.Copy`; tests updated. | OPS-04..05 |
 | 36 | Audit corpus + adoption integration hardening | Backfill **3-source** plan traceability on Phases 32–33; document verifier ownership / dual README–guide contracts; forward-coupling notes for OPS + Copy; optional `.planning` / full-suite test tiering guidance. | ADOPT evidence + audit `gaps.integration` (see Phase 36) |
 
@@ -213,7 +213,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 32. Adoption discoverability + doc graph | v1.7 | — | Complete | 2026-04-21 |
 | 33. Installer, host contracts + CI clarity | v1.7 | — | Complete | 2026-04-21 |
-| 34. Operator home, drill flow + nav model | v1.7 | — | Not started | — |
+| 34. Operator home, drill flow + nav model | v1.7 | 3/3 | Complete | 2026-04-21 |
 | 35. Summary surfaces + test literal hygiene | v1.7 | — | Not started | — |
 | 36. Audit corpus + adoption integration hardening | v1.7 | — | Not started | — |
 
