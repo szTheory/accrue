@@ -66,6 +66,10 @@ For provider-parity checks against Stripe test mode, follow the setup in [`guide
 
 The required deterministic release gate still includes the checked-in trust review artifact, generated drift/docs drift, seeded performance smoke, compatibility floor/target checks, and browser accessibility/responsive checks. Keep webhook secrets, customer data, and PII out of docs, issue templates, screenshots, traces, and copied terminal output.
 
+## Adoption (ADOPT) CI contracts
+
+v1.7 adoption requirements (ADOPT-01–ADOPT-06) are enforced mostly through documentation gates in `scripts/ci/`. When `verify_package_docs` or VERIFY-01 checks fail in CI, open [scripts/ci/README.md](scripts/ci/README.md) for the requirement → script → ExUnit map so you edit the owning files first instead of silencing unrelated prose.
+
 ## No CLA
 
 Accrue does not require a Contributor License Agreement at this time. By submitting a contribution, you confirm that you have the right to license your work under the repository's MIT license.

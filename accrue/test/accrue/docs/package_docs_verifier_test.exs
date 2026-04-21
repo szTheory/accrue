@@ -66,6 +66,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       )
 
     assert status != 0
+    assert output =~ "[verify_package_docs]"
     assert output =~ "examples/accrue_host/README.md"
     assert output =~ "mix verify.full"
   end
@@ -111,6 +112,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       )
 
     assert status != 0
+    assert output =~ "[verify_package_docs]"
     assert output =~ "RELEASING.md"
     assert output =~ "provider-parity checks"
   end
@@ -170,7 +172,10 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       )
 
     assert status != 0
-    assert output =~ "host-integration"
+    assert output =~ "[verify_package_docs]"
+
+    assert output =~ "host-integration" or output =~ "CONTRIBUTING.md",
+           "expected live-stripe drift or CONTRIBUTING UAT wording to fail the verifier"
   end
 
   test "package docs verifier rejects missing trust review invariant" do
