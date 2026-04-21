@@ -1,6 +1,9 @@
 defmodule AccrueAdmin.Components.KpiCard do
   @moduledoc """
   Shared KPI card for dashboard and detail-page summary rows.
+
+  When `href` is set, the root becomes an anchor for full-card navigation. Linked cards
+  should set `aria_label` to a short description for screen readers.
   """
 
   use Phoenix.Component
@@ -11,30 +14,48 @@ defmodule AccrueAdmin.Components.KpiCard do
   attr(:delta_tone, :string, default: "slate")
   attr(:trend, :string, default: nil)
   attr(:class, :string, default: nil)
+  attr(:href, :string, default: nil)
+  attr(:aria_label, :string, default: nil)
   slot(:meta)
   slot(:sparkline)
 
   def kpi_card(assigns) do
     ~H"""
-    <article class={["ax-card ax-kpi-card", @class]}>
-      <header class="ax-kpi-card-header">
-        <p class="ax-label"><%= @label %></p>
-        <p :if={@trend} class="ax-body ax-kpi-trend"><%= @trend %></p>
-      </header>
+    <%= if @href do %>
+      <a
+        href={@href}
+        class={["ax-card ax-kpi-card ax-kpi-card--linked", @class]}
+        aria-label={@aria_label}
+      >
+        <.kpi_inner {assigns} />
+      </a>
+    <% else %>
+      <article class={["ax-card ax-kpi-card", @class]}>
+        <.kpi_inner {assigns} />
+      </article>
+    <% end %>
+    """
+  end
 
-      <p class="ax-kpi-value"><%= @value %></p>
+  defp kpi_inner(assigns) do
+    ~H"""
+    <header class="ax-kpi-card-header">
+      <p class="ax-label"><%= @label %></p>
+      <p :if={@trend} class="ax-body ax-kpi-trend"><%= @trend %></p>
+    </header>
 
-      <div class="ax-kpi-card-footer">
-        <span :if={@delta} class={["ax-kpi-delta", "ax-kpi-delta-" <> normalize_tone(@delta_tone)]}>
-          <%= @delta %>
-        </span>
-        <%= render_slot(@meta) %>
-      </div>
+    <p class="ax-kpi-value"><%= @value %></p>
 
-      <div :if={@sparkline != []} class="ax-kpi-sparkline">
-        <%= render_slot(@sparkline) %>
-      </div>
-    </article>
+    <div class="ax-kpi-card-footer">
+      <span :if={@delta} class={["ax-kpi-delta", "ax-kpi-delta-" <> normalize_tone(@delta_tone)]}>
+        <%= @delta %>
+      </span>
+      <%= render_slot(@meta) %>
+    </div>
+
+    <div :if={@sparkline != []} class="ax-kpi-sparkline">
+      <%= render_slot(@sparkline) %>
+    </div>
     """
   end
 

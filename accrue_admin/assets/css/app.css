@@ -417,6 +417,17 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   padding: var(--ax-space-lg);
 }
 
+a.ax-kpi-card--linked {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+a.ax-kpi-card--linked:focus-visible {
+  border-color: var(--ax-focus-ring);
+  outline: none;
+}
+
 .ax-filter-chip-header,
 .ax-json-viewer-header,
 .ax-detail-drawer-header,
