@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Adoption DX + operator admin depth
-status: roadmap_ready
-last_updated: "2026-04-21T23:59:59.000Z"
-last_activity: 2026-04-21
+status: Ready to build — `/gsd-discuss-phase 32` or `/gsd-plan-phase 32`
+last_updated: "2026-04-21T20:12:59.023Z"
+last_activity: 2026-04-21 — Milestone v1.7 initialized (`/gsd-new-milestone`)
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
