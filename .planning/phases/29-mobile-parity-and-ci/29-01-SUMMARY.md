@@ -2,6 +2,7 @@
 phase: 29-mobile-parity-and-ci
 plan: "01"
 status: complete
+requirements-completed: [MOB-01]
 ---
 
 ## Outcome
