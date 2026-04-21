@@ -23,6 +23,23 @@
 
 ---
 
+## v1.6 audit gap closure — post-ship (Closed: 2026-04-21)
+
+**Phases completed:** 2 phases (30–31), 5 plans (2 + 3)
+
+**Key accomplishments:**
+
+- **Phase 30 — Audit corpus:** COPY-01..03 requirement coverage table added to `27-VERIFICATION.md`; `requirements-completed` YAML backfilled on all Phase **26** and **29** plan summaries for strict 3-source traceability.
+- **Phase 31 — Advisory integration:** VERIFY-01 README/CI contract enforces mobile spec anchors and `npm run e2e:mobile`; step-up modal operator chrome uses `AccrueAdmin.Copy`; fixture Playwright + `accrue_admin` browser workflow + README align on host VERIFY-01 as the merge-blocking mounted-admin path.
+
+**Verification:** Phase summaries `30-01`, `30-02`, `31-01`..`31-03`; milestone audit refreshed to **passed** in [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
+
+**Known deferred items at planning line close:** 3 (`audit-open` 2026-04-21 — same carry-forward class as v1.6 ship: Phase 21 UAT metadata + two missing quick-task stubs; acknowledged per `/gsd-complete-milestone`, see `.planning/STATE.md` § Deferred Items).
+
+**Git tag:** Existing **`v1.6`** tag unchanged (no duplicate tag); this slice is planning/audit closure only.
+
+---
+
 ## v1.5 Adoption proof hardening (Shipped: 2026-04-18)
 
 **Phases completed:** 1 phase (24), documentation-only execution

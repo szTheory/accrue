@@ -7,7 +7,7 @@
 
 ## Objective
 
-Close `/gsd-audit-milestone` **3-source** gaps documented in `.planning/v1.6-MILESTONE-AUDIT.md`:
+Close `/gsd-audit-milestone` **3-source** gaps documented in `.planning/milestones/v1.6-MILESTONE-AUDIT.md` (historical gap list in audit body):
 
 1. **COPY-01..03** appear in **no** phase `*-VERIFICATION.md` body today; Phase 27 work is real (summaries already carry `requirements-completed`) but verification corpus lacks REQ-ID rows → **orphan** status.
 2. **26-*-SUMMARY.md** and **29-*-SUMMARY.md** omit `requirements-completed` in YAML frontmatter → partial traceability vs **28-* / 27-* / 25-*** pattern.
@@ -16,7 +16,7 @@ Close `/gsd-audit-milestone` **3-source** gaps documented in `.planning/v1.6-MIL
 
 | Artifact | Role |
 |----------|------|
-| `.planning/v1.6-MILESTONE-AUDIT.md` | Gap list, 3-source matrix (lines ~126–134) |
+| `.planning/milestones/v1.6-MILESTONE-AUDIT.md` | Gap list + final passed record |
 | `.planning/milestones/v1.6-REQUIREMENTS.md` | COPY-01..03 definitions; traceability table |
 | `.planning/phases/27-microcopy-and-operator-strings/27-VERIFICATION.md` | Target file for new COPY coverage section |
 | `.planning/phases/27-microcopy-and-operator-strings/27-0{1,2,3}-PLAN.md` | Plan-level `requirements:` for mapping text |

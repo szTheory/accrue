@@ -70,7 +70,7 @@ _None — `todo.match-phase` returned no matches._
 
 ### Audit and requirements (scope authority)
 
-- `.planning/v1.6-MILESTONE-AUDIT.md` — Advisory integration findings (README contract asymmetry, npm scripts, Copy partiality, Playwright duplication, reseed/axe/mobile notes).
+- `.planning/milestones/v1.6-MILESTONE-AUDIT.md` — Advisory integration findings (README contract asymmetry, npm scripts, Copy partiality, Playwright duplication, reseed/axe/mobile notes); superseded root audit removed at planning line close.
 - `.planning/ROADMAP.md` — Phase 31 goal row (v1.6 audit gap closure milestone).
 - `.planning/milestones/v1.6-REQUIREMENTS.md` — INV/COPY/UX/A11Y/MOB IDs referenced by alignment work (root `.planning/REQUIREMENTS.md` absent until `/gsd-new-milestone`).
 
