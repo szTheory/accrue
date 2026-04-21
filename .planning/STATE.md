@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Adoption DX + operator admin depth
 status: milestone_complete
-last_updated: "2026-04-21T22:04:14.845Z"
+last_updated: "2026-04-21T23:30:00.000Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 6
@@ -61,6 +61,8 @@ Plan: 36-03 (complete)
 - `.planning/phases/36-audit-corpus-adoption-integration-hardening/36-VERIFICATION.md` — Phase 36 verification (passed)
 
 ## Deferred Items
+
+**`audit-open` at v1.7 milestone audit refresh (2026-04-21):** two quick-task stubs below remain **missing** on disk; acknowledged here (option **[A]** from pre-close workflow) — not v1.7 deliverables. Re-run `node "$HOME/.cursor/get-shit-done/bin/gsd-tools.cjs" audit-open` after cleanup.
 
 Prior milestone carry-forward (unchanged where still relevant):
 
