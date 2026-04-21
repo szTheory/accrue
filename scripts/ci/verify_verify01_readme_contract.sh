@@ -28,6 +28,8 @@ require_substring "mix verify.full" "canonical verify.full gate"
 require_substring ".github/workflows/ci.yml" "CI workflow pointer"
 require_substring "docs/adoption-proof-matrix.md" "adoption proof matrix doc link"
 require_substring "e2e/verify01-admin-a11y.spec.js" "mounted admin axe gate spec path"
+require_substring "e2e/verify01-admin-mobile.spec.js" "mobile VERIFY-01 spec path"
+require_substring "### Mounted admin — mobile shell" "VERIFY-01 mobile shell subsection heading"
 
 # Negative: VERIFY-01 section must not advise storing sk_live without explicit negation.
 if awk '
