@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Adoption DX + operator admin depth
-status: ready_to_plan
-last_updated: "2026-04-21T21:43:28.498Z"
+status: milestone_complete
+last_updated: "2026-04-21T22:04:14.845Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 11
+  total_plans: 14
   completed_plans: 11
   percent: 83
 ---
@@ -21,13 +21,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 36 — audit-corpus-adoption-integration-hardening
+**Current focus:** Phase --phase — 36
 
 ## Current Position
 
 Phase: 36
 Plan: Not started
-**Status:** Ready to plan
+**Status:** Milestone complete
 
 **Last Activity:** 2026-04-21
 
@@ -75,4 +75,4 @@ Prior milestone carry-forward (unchanged where still relevant):
 
 **Next milestone:** — (v1.7 active)
 
-**Planned Phase:** 36 (Audit corpus + adoption integration hardening) — not started — 2026-04-21
+**Planned Phase:** 36 (audit-corpus-adoption-integration-hardening) — 3 plans — 2026-04-21T21:56:30.332Z
