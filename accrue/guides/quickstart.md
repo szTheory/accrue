@@ -18,6 +18,7 @@ the Phoenix host-app order proved in `examples/accrue_host`:
 
 ## Focused guides
 
+- [Organization billing (non-Sigra)](organization_billing.md) — session→billable org path when the Stripe Customer should follow an organization, not only the signed-in user.
 - [Troubleshooting](troubleshooting.md) for setup diagnostics and exact verify
   commands.
 - [Webhooks](webhooks.md) for the public `use Accrue.Webhook.Handler` boundary,
