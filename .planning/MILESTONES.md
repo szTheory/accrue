@@ -1,5 +1,32 @@
 # Milestones
 
+## v1.7 Adoption DX + operator admin depth (Shipped: 2026-04-21)
+
+**Phases completed:** 5 phases (32–36), **14** plans
+
+**Key accomplishments:**
+
+- **Phase 32–33 (ADOPT):** VERIFY-01 reachable within two hops from the repo root; host README single authoritative Fake-first subsection; guides cross-linked; installer rerun semantics + doc anchors enforced by verifiers; CI/docs keep merge-blocking vs advisory Stripe lanes without renaming job ids.
+- **Phase 34 (OPS-01..03):** Operator home KPIs with deep links; customer→invoice drill and invoice breadcrumbs; `AccrueAdmin.Nav` labels/order aligned with README **Admin routes** inventory.
+- **Phase 35 (OPS-04..05):** Dashboard surfaces stay on `ax-*` / tokens; operator-visible strings centralized in `AccrueAdmin.Copy` with Playwright + ExUnit alignment (`copy_dashboard.js` where needed).
+- **Phase 36:** Three-source traceability for Phase 32–33 plans; `scripts/ci/README.md` maps ADOPT-01..06 to owning verifiers + `[verify_package_docs]` stderr prefix; dual-contract notes in `accrue/guides/testing.md`; forward-coupling doc for OPS-03..05.
+
+**Verification:** `32-VERIFICATION.md` through `36-VERIFICATION.md` (all **passed**).
+
+**Milestone audit:** [`milestones/v1.7-MILESTONE-AUDIT.md`](milestones/v1.7-MILESTONE-AUDIT.md) — **passed** (refreshed 2026-04-21).
+
+**Known deferred items at close:** same **audit-open** carry-forward as prior closes (2 missing quick-task stubs + Phase 21 UAT metadata); see `.planning/STATE.md` § Deferred Items.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.7-ROADMAP.md`](milestones/v1.7-ROADMAP.md)
+- Requirements: [`milestones/v1.7-REQUIREMENTS.md`](milestones/v1.7-REQUIREMENTS.md)
+- Audit: [`milestones/v1.7-MILESTONE-AUDIT.md`](milestones/v1.7-MILESTONE-AUDIT.md)
+
+**Git tag:** `v1.7`
+
+---
+
 ## v1.6 Admin UI / UX polish (Shipped: 2026-04-20)
 
 **Phases completed:** 5 phases (25–29), 16 plans

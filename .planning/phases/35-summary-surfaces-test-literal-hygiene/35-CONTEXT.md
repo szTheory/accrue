@@ -2,7 +2,7 @@
 
 **Gathered:** 2026-04-21  
 **Status:** Ready for planning  
-**Source:** `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md` (OPS-04..05), v1.6 **UX-04** / **Copy** precedent
+**Source:** `.planning/ROADMAP.md`, [`milestones/v1.7-REQUIREMENTS.md`](../../milestones/v1.7-REQUIREMENTS.md) (OPS-04..05), v1.6 **UX-04** / **Copy** precedent
 
 <domain>
 

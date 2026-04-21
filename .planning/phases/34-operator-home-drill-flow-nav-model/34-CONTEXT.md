@@ -2,7 +2,7 @@
 
 **Gathered:** 2026-04-21  
 **Status:** Ready for planning  
-**Source:** `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md` (OPS-01..03), [`v1.7-MILESTONE-AUDIT.md`](../../v1.7-MILESTONE-AUDIT.md)
+**Source:** `.planning/ROADMAP.md`, [`milestones/v1.7-REQUIREMENTS.md`](../../milestones/v1.7-REQUIREMENTS.md) (OPS-01..03), [`v1.7-MILESTONE-AUDIT.md`](../../milestones/v1.7-MILESTONE-AUDIT.md)
 
 <domain>
 
