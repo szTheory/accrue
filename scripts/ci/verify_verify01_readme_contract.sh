@@ -31,6 +31,14 @@ require_substring "e2e/verify01-admin-a11y.spec.js" "mounted admin axe gate spec
 require_substring "e2e/verify01-admin-mobile.spec.js" "mobile VERIFY-01 spec path"
 require_substring "### Mounted admin — mobile shell" "VERIFY-01 mobile shell subsection heading"
 
+while IFS= read -r spec_path; do
+  [[ -z "${spec_path}" ]] && continue
+  if [[ ! -f "${repo_root}/examples/accrue_host/${spec_path}" ]]; then
+    echo "verify_verify01_readme_contract: README references missing spec file: ${spec_path}" >&2
+    exit 1
+  fi
+done < <(grep -oE 'e2e/verify01-[a-zA-Z0-9_-]+\.spec\.js' "${readme}" | sort -u)
+
 # Negative: VERIFY-01 section must not advise storing sk_live without explicit negation.
 if awk '
   /^## VERIFY-01/ { in_block = 1; next }
