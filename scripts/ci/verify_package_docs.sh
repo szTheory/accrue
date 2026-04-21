@@ -80,6 +80,10 @@ require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras: [Guides: ["gu
 require_fixed "$ROOT_DIR/README.md" "Canonical local demo: Fake"
 require_fixed "$ROOT_DIR/README.md" "Provider parity: Stripe test mode"
 require_fixed "$ROOT_DIR/README.md" "Advisory/manual: live Stripe"
+require_fixed "$ROOT_DIR/README.md" "## Proof path (VERIFY-01)"
+require_fixed "$ROOT_DIR/README.md" "proof-and-verification"
+require_fixed "$ROOT_DIR/README.md" "Pull requests are merge-blocked on GitHub Actions job \`host-integration\`"
+require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Pull requests are merge-blocked on GitHub Actions job \`host-integration\`"
 
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/first_hour\.html)?'
