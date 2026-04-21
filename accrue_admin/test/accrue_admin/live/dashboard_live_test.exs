@@ -5,6 +5,7 @@ defmodule AccrueAdmin.DashboardLiveTest do
   alias Accrue.Events
   alias Accrue.Test.Factory
   alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -75,11 +76,12 @@ defmodule AccrueAdmin.DashboardLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing")
 
-    assert html =~ "Local billing projections at a glance"
-    assert html =~ "Customers"
-    assert html =~ "Open invoice balance"
+    assert html =~ Copy.dashboard_display_headline()
+    assert html =~ Copy.dashboard_kpi_customers_label()
+    assert html =~ Copy.dashboard_kpi_active_subscriptions_label()
+    assert html =~ Copy.dashboard_kpi_open_invoice_balance_label()
     assert html =~ "$42.50"
-    assert html =~ "Webhook backlog"
+    assert html =~ Copy.dashboard_kpi_webhook_backlog_label()
     assert html =~ "invoice.payment_failed"
     assert html =~ "customer.updated"
 
@@ -87,7 +89,9 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/subscriptions")
     assert html =~ ~s(href="/billing/invoices")
     assert html =~ ~s(href="/billing/webhooks")
-    assert html =~ "Open customers list"
-    assert html =~ "Open webhooks list"
+    assert html =~ Copy.dashboard_kpi_customers_aria_label()
+    assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
+    assert html =~ Copy.dashboard_kpi_invoices_aria_label()
+    assert html =~ Copy.dashboard_kpi_webhooks_aria_label()
   end
 end

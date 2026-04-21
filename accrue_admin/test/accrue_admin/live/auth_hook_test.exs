@@ -1,6 +1,8 @@
 defmodule AccrueAdmin.AuthHookTest do
   use AccrueAdmin.LiveCase, async: false
 
+  alias AccrueAdmin.Copy
+
   defmodule AuthAdapter do
     @behaviour Accrue.Auth
 
@@ -33,7 +35,7 @@ defmodule AccrueAdmin.AuthHookTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing")
-    assert html =~ "Local billing projections at a glance"
+    assert html =~ Copy.dashboard_display_headline()
   end
 
   test "non-admin sessions are redirected before render", %{conn: conn} do
