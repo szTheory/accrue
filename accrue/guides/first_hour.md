@@ -149,7 +149,9 @@ mix verify
 
 `mix verify` is the focused tutorial proof suite. `mix verify.full` is the
 CI-equivalent local gate that adds compile, assets, dev boot, regression, and
-browser smoke after the first-run story is already clear.
+browser smoke after the first-run story is already clear. For the authoritative
+merge-blocking command matrix, VERIFY-01, and Playwright entry points, see
+[Proof and verification in the host demo README](../../examples/accrue_host/README.md#proof-and-verification).
 
 ## 2. Seeded history
 

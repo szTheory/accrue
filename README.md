@@ -6,6 +6,12 @@ Accrue is an open-source billing library for Elixir, Ecto, and Phoenix. Your app
 
 Start one Fake-backed subscription. Post one signed webhook. Inspect and replay the result in admin. Run the focused proof suite.
 
+## Proof path (VERIFY-01)
+
+Fake-first evaluation runs from **`examples/accrue_host`** (no live Stripe keys). Pull requests are merge-blocked on GitHub Actions job `host-integration`, which runs the same contract as `cd examples/accrue_host && mix verify.full`; use `mix verify` for a faster bounded Fake slice that is not CI-complete.
+
+[Merge-blocking proof, VERIFY-01 commands, and Playwright entry points](examples/accrue_host/README.md#proof-and-verification).
+
 ## Start here
 
 - [Canonical local demo: Fake](examples/accrue_host/README.md) for the checked-in host app and the shortest path to a first subscription, signed webhook, admin inspection, and focused proof run.

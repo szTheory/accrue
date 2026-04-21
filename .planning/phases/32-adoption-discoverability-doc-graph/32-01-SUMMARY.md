@@ -55,7 +55,7 @@ completed: 2026-04-21
 
 ## Task commits
 
-1. **32-01-01** — (pending commit hash in body after commit)
+1. **32-01-01** — `2cb742f` (docs)
 
 ## Self-check: PASSED
 

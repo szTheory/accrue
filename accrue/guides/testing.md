@@ -1,5 +1,7 @@
 # Testing Accrue Billing Flows
 
+Pull requests are merge-blocked on GitHub Actions job `host-integration`, which runs the same contract as `cd examples/accrue_host && mix verify.full`; use `mix verify` for a faster bounded Fake slice that is not CI-complete. [Runnable VERIFY-01 commands and Playwright entry points](../../examples/accrue_host/README.md#proof-and-verification).
+
 ## Fake-first Phoenix scenario
 
 Start billing tests in the host app, not inside Accrue internals. This example belongs in a Phoenix `DataCase` and runs against the Fake Processor, test mailer, test PDF adapter, Oban test mode, and the normal webhook reducer path.
