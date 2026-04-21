@@ -3,6 +3,7 @@ phase: 26-hierarchy-and-pattern-alignment
 plan: "02"
 status: complete
 completed: "2026-04-20"
+requirements-completed: [UX-02]
 ---
 
 # Plan 26-02 Summary — UX-02 money detail hierarchy
