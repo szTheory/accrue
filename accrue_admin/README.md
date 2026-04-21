@@ -90,6 +90,43 @@ npx playwright install chromium
 npm run e2e
 ```
 
+## Admin routes
+
+Source of truth for paths is `AccrueAdmin.Router.accrue_admin/2`.
+
+Shipping `live/3` routes (relative to the mount path), in monotonic router order:
+
+| Order | Nav label | Path | LiveView module |
+| --- | --- | --- | --- |
+| 1 | Home | `/` | `AccrueAdmin.Live.DashboardLive` |
+| 2 | Customers | `/customers` | `AccrueAdmin.Live.CustomersLive` |
+| 3 | — | `/customers/:id` | `AccrueAdmin.Live.CustomerLive` |
+| 4 | Subscriptions | `/subscriptions` | `AccrueAdmin.Live.SubscriptionsLive` |
+| 5 | — | `/subscriptions/:id` | `AccrueAdmin.Live.SubscriptionLive` |
+| 6 | Invoices | `/invoices` | `AccrueAdmin.Live.InvoicesLive` |
+| 7 | — | `/invoices/:id` | `AccrueAdmin.Live.InvoiceLive` |
+| 8 | Charges | `/charges` | `AccrueAdmin.Live.ChargesLive` |
+| 9 | — | `/charges/:id` | `AccrueAdmin.Live.ChargeLive` |
+| 10 | Coupons | `/coupons` | `AccrueAdmin.Live.CouponsLive` |
+| 11 | — | `/coupons/:id` | `AccrueAdmin.Live.CouponLive` |
+| 12 | Promotion codes | `/promotion-codes` | `AccrueAdmin.Live.PromotionCodesLive` |
+| 13 | — | `/promotion-codes/:id` | `AccrueAdmin.Live.PromotionCodeLive` |
+| 14 | Connect | `/connect` | `AccrueAdmin.Live.ConnectAccountsLive` |
+| 15 | — | `/connect/:id` | `AccrueAdmin.Live.ConnectAccountLive` |
+| 16 | Event log | `/events` | `AccrueAdmin.Live.EventsLive` |
+| 17 | Webhooks | `/webhooks` | `AccrueAdmin.Live.WebhooksLive` |
+| 18 | — | `/webhooks/:id` | `AccrueAdmin.Live.WebhookLive` |
+
+### Dev-only (`allow_live_reload: true`)
+
+| Path | LiveView module |
+| --- | --- |
+| `/dev/clock` | `AccrueAdmin.Dev.ClockLive` |
+| `/dev/email-preview` | `AccrueAdmin.Dev.EmailPreviewLive` |
+| `/dev/webhook-fixtures` | `AccrueAdmin.Dev.WebhookFixtureLive` |
+| `/dev/components` | `AccrueAdmin.Dev.ComponentKitchenLive` |
+| `/dev/fake-inspect` | `AccrueAdmin.Dev.FakeInspectLive` |
+
 ## Guides
 
 - [Admin UI integration guide](https://hexdocs.pm/accrue_admin/admin_ui.html)
