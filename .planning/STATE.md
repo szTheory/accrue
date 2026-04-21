@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Org billing recipes & host integration depth
 status: active
-last_updated: "2026-04-21T12:00:00.000Z"
+last_updated: "2026-04-21T20:00:00.000Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 3
@@ -25,13 +25,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 ## Current Position
 
-Phase: Not started (roadmap defined — use `/gsd-discuss-phase 37` or `/gsd-plan-phase 37`)
+Phase: **37** — context gathered (`37-CONTEXT.md`)
 
 Plan: —
 
-**Status:** Milestone initialized — ready to execute Phase 37
+**Status:** Phase 37 discussion complete — ready for `/gsd-plan-phase 37`
 
-**Last Activity:** 2026-04-21 — Milestone v1.8 started (`/gsd-new-milestone`)
+**Last Activity:** 2026-04-21 — Phase 37 discuss-phase (research subagents + `37-CONTEXT.md` / `37-DISCUSSION-LOG.md`)
 
 ## Milestone Progress
 
