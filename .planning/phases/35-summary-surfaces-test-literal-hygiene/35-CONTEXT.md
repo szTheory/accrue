@@ -20,6 +20,6 @@ Depends on **Phase 34** (nav and drill baseline so new summaries sit in a cohere
 
 - `../../REQUIREMENTS.md` — OPS-04, OPS-05.
 - `accrue_admin` — `AccrueAdmin.Copy`, KPI/summary components (e.g. `KpiCard` pattern), scoped CSS root `html.accrue-admin`.
-- `.planning/phases/26-hierarchy-and-pattern-alignment/26-theme-exceptions.md` (or successor) — token exception registry.
+- Token exception discipline — see v1.6 hierarchy phase notes in git history or any restored `26-theme-exceptions.md`; otherwise document new exceptions in this phase’s `*-PLAN.md` / notes.
 
 </canonical_refs>
