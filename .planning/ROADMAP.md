@@ -24,7 +24,7 @@
 | 34 | Operator home, drill flow + nav model | Credible admin home; one smoother cross-entity flow; nav labels/order match operator model + matrix updates if needed. | OPS-01..03 |
 | 35 | Summary surfaces + test literal hygiene | Token-safe KPI/summary rows; new literals via `AccrueAdmin.Copy`; tests updated. | OPS-04..05 |
 
-**Phase 32: Adoption discoverability + doc graph**
+### Phase 32: Adoption discoverability + doc graph
 
 **Goal:** Evaluators and contributors never hit contradictory “how do I run proof?” instructions.
 
@@ -38,7 +38,7 @@
 2. Host README contains one coherent subsection tying Fake-first runs, Playwright, and adoption matrix / walkthrough links.
 3. Cross-links among guides and host docs do not assert different “primary” proof commands for the same lane.
 
-**Phase 33: Installer, host contracts + CI clarity**
+### Phase 33: Installer, host contracts + CI clarity
 
 **Goal:** Install reruns and automation hooks stay honest while CI remains interpretable.
 
@@ -52,7 +52,7 @@
 2. Doc contract tests / verify scripts pass; any gap has an explicit manual verification checklist in phase verification.
 3. Workflow + guide text still identifies merge-blocking Fake lanes vs advisory Stripe test-mode lanes without renaming stable job ids referenced elsewhere.
 
-**Phase 34: Operator home, drill flow + nav model**
+### Phase 34: Operator home, drill flow + nav model
 
 **Goal:** Operators see value on first open and can complete one common drill with less friction.
 
@@ -66,7 +66,7 @@
 2. At least one specified cross-entity drill (named in PLAN) reduces dead ends or preserves context vs baseline.
 3. Nav labels and ordering are updated and reflected in maintainer route inventory if tables drift.
 
-**Phase 35: Summary surfaces + test literal hygiene**
+### Phase 35: Summary surfaces + test literal hygiene
 
 **Goal:** New polish is token-safe and test-stable.
 
