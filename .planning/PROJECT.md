@@ -345,6 +345,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - Phase 19 validated tax-location capture/update, immediate invalid-location error handling, recurring tax-risk projection/admin visibility, host repair flow, and legacy recurring-item rollout safety guidance.
 - v1.6 (Phases 25–29) archived 2026-04-20: admin inventory, visual hierarchy, microcopy registry, a11y gates, and mobile CI without PROC-08/FIN-03/product-schema changes.
 - v1.6 planning line closed 2026-04-21: Phases **30–31** remediated milestone audit gaps (verification corpus, SUMMARY traceability) and advisory VERIFY-01 / Copy / Playwright integration notes; audit status **passed** in `milestones/v1.6-MILESTONE-AUDIT.md`.
+- v1.7 opened 2026-04-21: **ADOPT** + **OPS** requirements (`.planning/REQUIREMENTS.md`) and **Phases 32–35** roadmap; research summarized in `.planning/research/SUMMARY.md`.
 
 ## Evolution
 

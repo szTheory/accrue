@@ -193,10 +193,10 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 32. Adoption discoverability + doc graph | v1.7 | 0/? | Not started | — |
-| 33. Installer, host contracts + CI clarity | v1.7 | 0/? | Not started | — |
-| 34. Operator home, drill flow + nav model | v1.7 | 0/? | Not started | — |
-| 35. Summary surfaces + test literal hygiene | v1.7 | 0/? | Not started | — |
+| 32. Adoption discoverability + doc graph | v1.7 | — | Not started | — |
+| 33. Installer, host contracts + CI clarity | v1.7 | — | Not started | — |
+| 34. Operator home, drill flow + nav model | v1.7 | — | Not started | — |
+| 35. Summary surfaces + test literal hygiene | v1.7 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
