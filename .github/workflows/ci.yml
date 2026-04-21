@@ -1,5 +1,13 @@
 name: CI
 
+# Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
+# `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `host-integration`,
+# `annotation-sweep`, `live-stripe`.
+# Merge-blocking on pull_request: `release-gate`, `phase18-tax-gate`,
+# `admin-drift-docs`, `host-integration`, `annotation-sweep`.
+# Advisory: `live-stripe` (Stripe test-mode parity) runs on `workflow_dispatch` and
+# `schedule` only — not merge-blocking for PRs.
+
 on:
   push:
     branches: [main]
