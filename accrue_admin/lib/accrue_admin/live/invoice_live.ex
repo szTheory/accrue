@@ -20,6 +20,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.{StepUp, TaxOwnershipRow}
 
   @destructive_actions ~w(void mark_uncollectible)
@@ -131,8 +132,12 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Invoices", href: @admin_mount_path <> "/invoices"},
+              %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
+              %{label: "Invoices", href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
+              %{
+                label: customer_label(@customer),
+                href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
+              },
               %{label: invoice_label(@invoice)}
             ]}
           />
