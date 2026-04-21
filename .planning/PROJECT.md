@@ -10,33 +10,27 @@ Tagline: *"Billing state, modeled clearly."*
 
 **A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one** — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
-## Current Milestone: v1.7 Adoption DX + operator admin depth
+## Current milestone
 
-**Goal:** Tighten the **first-run and proof story** (installer, `examples/accrue_host`, guides, CI / adoption matrices, VERIFY-01) while extending **`accrue_admin`** with **operator-focused flows** and light **summary / dashboard** surfaces—**without** new core billing primitives, new processors, or finance/accounting scope.
+**v1.7 Adoption DX + operator admin depth** is **archived** (2026-04-21). Full slice: `.planning/milestones/v1.7-ROADMAP.md`, `v1.7-REQUIREMENTS.md`, `v1.7-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.7`** marks this planning close.
 
-**Target features:**
+### Next milestone goals
 
-- **Adoption / DX** — `mix accrue.install` ergonomics and reruns, host example + README contracts, package and host guides, adoption / testing matrix discoverability, VERIFY-01 narrative and merge-blocking semantics preserved (Fake-first).
-- **Admin / UX** — New or refined **operator flows** (navigation, key index/detail patterns), optional **dashboard-style** LiveView summaries where they fit Phase 20/21 UI-SPEC hierarchy (no new third-party UI kit), continued **Copy / a11y / mobile** alignment with the v1.6 baseline.
-
-**Key context:** Builds on **v1.6** (Phases 25–31) and `.planning/ADMIN-UX-BASELINE-AUDIT.md` (read-only). Roadmap phases continue from **32**. **PROC-08**, **FIN-03**, and **ORG-04**-class work stay deferred unless pulled into a later milestone explicitly.
+Run **`/gsd-new-milestone`** to author the next internal milestone: fresh `.planning/REQUIREMENTS.md`, updated `.planning/ROADMAP.md`, and optional `.planning/research/`. **PROC-08**, **FIN-03**, and **ORG-04** stay out of scope until explicitly prioritized.
 
 ## Current State
 
-Accrue **v1.3 Tax + Organization Billing** is shipped (2026-04-17). The public Hex packages remain:
+Public Hex packages (unchanged by this planning milestone): **`accrue` 0.1.2**, **`accrue_admin` 0.1.2**.
 
-- `accrue` 0.1.2
-- `accrue_admin` 0.1.2
+**Last closed planning milestone:** **v1.7** — Phases **32–36** (2026-04-21). Prior capability through **v1.6** and **v1.3** (tax, org billing, host VERIFY-01, admin polish) remains as documented in `.planning/milestones/` and the **Shipped** sections below.
 
-v1.3 adds Stripe Tax orchestration, customer tax-location validation and recovery, Sigra-first organization billing with row-scoped admin and webhook replay contracts, host/admin UX proof (`examples/accrue_host` + CI `host-integration`), and **Stripe-native finance handoff** documentation (`accrue/guides/finance-handoff.md`) without Accrue owning accounting semantics.
+**Next:** No root `.planning/REQUIREMENTS.md` until **`/gsd-new-milestone`**. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
-Milestone history, roadmap, requirements, and audit artifacts: `.planning/milestones/v1.3-ROADMAP.md`, `v1.3-REQUIREMENTS.md`, `v1.3-MILESTONE-AUDIT.md`.
+## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
-**Last closed planning milestone:** **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–29** shipped **2026-04-20**; Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: `.planning/milestones/v1.6-ROADMAP.md`, `v1.6-REQUIREMENTS.md`, `v1.6-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.6`** unchanged (planning-only post-ship slice).
+**Goal:** Clearer evaluator **VERIFY-01** / adoption doc paths; honest **installer + CI** semantics; **operator-first** admin entry, drill, and nav; **token-safe** dashboard surfaces with **`AccrueAdmin.Copy`** SSOT; **audit corpus** + verifier ownership + dual-contract documentation.
 
-**Next:** **v1.7** requirements and roadmap are active in `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` (phases from **32**). Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
-
-**v1.7 progress:** Phases **32–36** complete (2026-04-21). **Phase 36 — adoption integration hardening:** three-source traceability matrix for Phases 32–33 (`36-TRACEABILITY-MATRIX.md`); contributor `scripts/ci/README.md` map for ADOPT-01..06 + `[verify_package_docs]` stderr prefix; dual-contract notes in `accrue/guides/testing.md` and forward-coupling doc for OPS-03..05 (`36-FORWARD-COUPLING-OPS-34-35.md`). Evidence: `.planning/phases/36-audit-corpus-adoption-integration-hardening/36-VERIFICATION.md`. **Phase 35 — OPS-04..05:** Dashboard operator copy is centralized in `AccrueAdmin.Copy` (`dashboard_*` functions); `DashboardLive` HEEx, ExUnit, host mount tests, Playwright, and CI smoke assert the same strings via `Copy` or `examples/accrue_host/e2e/support/copy_dashboard.js`. Evidence: `.planning/phases/35-summary-surfaces-test-literal-hygiene/35-VERIFICATION.md`. **Phase 33 — ADOPT-04..06:** First Hour links to installer rerun contract in `upgrade.md`; `verify_package_docs.sh` pins the anchor and troubleshooting `mix accrue.install --check`; CI workflow comments + README + `guides/testing-live-stripe.md` keep stable job ids with explicit merge-blocking (`host-integration`) vs advisory (`live-stripe`) framing. Evidence: `.planning/phases/33-installer-host-contracts-ci-clarity/33-VERIFICATION.md`. **Phase 34 — OPS-01..03:** operator home KPIs deep-link via `AccrueAdmin.ScopedPath` and linked `KpiCard`; customer→invoice drill removes dead-end rows; invoice breadcrumbs include a scoped customer crumb; sidebar labels/order live in `AccrueAdmin.Nav` with README **Admin routes** inventory. Evidence: `.planning/phases/34-operator-home-drill-flow-nav-model/34-VERIFICATION.md`.
+**Delivered (high level):** Phases **32–33** (ADOPT-01..06), **34** (OPS-01..03), **35** (OPS-04..05), **36** (integration hardening + forward-coupling). Evidence lives under `.planning/phases/32-*` … `36-*` and milestone archives.
 
 ## Shipped: v1.6 Admin UI / UX polish (2026-04-20)
 
@@ -142,6 +136,13 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - [x] **COPY-01..03** — Operator microcopy and stable literals via `AccrueAdmin.Copy` (Phase 27).
 - [x] **A11Y-01..04** — Focus, tables, contrast verification, mounted-admin axe in CI (Phase 28).
 - [x] **MOB-01..03** — Mobile overflow/nav and admin-heavy `@mobile` / `chromium-mobile` coverage (Phase 29).
+
+### Validated v1.7 (archived in `.planning/milestones/v1.7-REQUIREMENTS.md`; milestone closed 2026-04-21)
+
+- [x] **ADOPT-01..03** — Root README → VERIFY-01 within two hops; host README single proof subsection; guide cross-links (Phase 32).
+- [x] **ADOPT-04..06** — Installer rerun docs + anchors; doc contract coverage; merge-blocking vs advisory CI language (Phase 33).
+- [x] **OPS-01..03** — Operator home KPIs; customer→invoice drill; `AccrueAdmin.Nav` + README route inventory (Phase 34).
+- [x] **OPS-04..05** — Dashboard `ax-*` / token discipline; operator strings via `AccrueAdmin.Copy` + aligned Playwright (Phase 35).
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -332,7 +333,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.3 combines Stripe Tax with Sigra-first organization billing and finance handoff | Stripe Tax is still the safest first expansion; Sigra org support is now concrete enough for host-proofed org billing; finance should stay Stripe-native before Accrue owns accounting semantics | ✓ Good |
 | v1.6 closes admin UX polish without new billing primitives | Operator trust (a11y, mobile, copy) advances adoption without PROC-08/FIN-03 scope creep | ✓ Good |
 | Post-ship Phases 30–31 close audit corpus + advisory integration without Hex release churn | Keeps evaluator-facing proof contracts aligned while preserving existing `v1.6` tag semantics | ✓ Good |
-| v1.7 combines adoption/DX with operator admin depth without billing primitive expansion | After v1.6 polish, the highest leverage is clearer VERIFY-01 + install/docs matrices plus intentional admin entry flows—not PROC/FIN/ORG scope creep | Active |
+| v1.7 combines adoption/DX with operator admin depth without billing primitive expansion | After v1.6 polish, the highest leverage is clearer VERIFY-01 + install/docs matrices plus intentional admin entry flows—not PROC/FIN/ORG scope creep | ✓ Good |
 
 ## Current Milestone Notes
 
@@ -347,7 +348,8 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - Phase 19 validated tax-location capture/update, immediate invalid-location error handling, recurring tax-risk projection/admin visibility, host repair flow, and legacy recurring-item rollout safety guidance.
 - v1.6 (Phases 25–29) archived 2026-04-20: admin inventory, visual hierarchy, microcopy registry, a11y gates, and mobile CI without PROC-08/FIN-03/product-schema changes.
 - v1.6 planning line closed 2026-04-21: Phases **30–31** remediated milestone audit gaps (verification corpus, SUMMARY traceability) and advisory VERIFY-01 / Copy / Playwright integration notes; audit status **passed** in `milestones/v1.6-MILESTONE-AUDIT.md`.
-- v1.7 opened 2026-04-21: **ADOPT** + **OPS** requirements (`.planning/REQUIREMENTS.md`) and **Phases 32–35** roadmap; research summarized in `.planning/research/SUMMARY.md`.
+- v1.7 opened 2026-04-21: **ADOPT** + **OPS** requirements and **Phases 32–36** roadmap; research summarized in `.planning/research/SUMMARY.md`.
+- v1.7 archived 2026-04-21: requirements + roadmap + milestone audit under `.planning/milestones/v1.7-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.7`**.
 
 ## Evolution
 
@@ -367,4 +369,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 — **v1.7** Phase 36 (audit corpus + adoption integration hardening) verified complete; roadmap milestone slice closed.*
+*Last updated: 2026-04-21 — **v1.7** milestone archived (`/gsd-complete-milestone`); next requirements via `/gsd-new-milestone`.*

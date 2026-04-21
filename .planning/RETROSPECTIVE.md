@@ -262,12 +262,55 @@
 
 ---
 
+## Milestone: v1.7 — Adoption DX + operator admin depth
+
+**Shipped:** 2026-04-21  
+**Phases:** 5 | **Plans:** 14
+
+### What Was Built
+
+- Adoption **doc graph** and VERIFY-01 discoverability (root README, host README, guides) without changing merge-blocking CI semantics.
+- **Installer + CI clarity:** rerun contracts, doc verifiers, stable job ids with explicit Fake vs advisory Stripe framing.
+- **Operator admin:** home KPIs, customer→invoice drill, nav model + README route inventory.
+- **Dashboard copy SSOT** via `AccrueAdmin.Copy` and aligned Playwright/ExUnit literals.
+- **Audit corpus:** traceability matrix for shipped 32–33 plans, contributor verifier map, dual-contract documentation, OPS forward-coupling note.
+
+### What Worked
+
+- Splitting **functional ADOPT** (32–33) from **process/integration** closure (36) kept verification honest without reopening satisfied requirements.
+- Centralizing dashboard strings in **Copy** early avoided another Playwright vs HEEx drift cycle.
+- Refreshing **milestone audit YAML to `passed`** after Phase 35–36 landed removed a false `gaps_found` signal for closeout.
+
+### What Was Inefficient
+
+- **VALIDATION.md** front matter for Phases 35–36 stayed `draft` while **VERIFICATION.md** carried the real gate — planning metadata lagged implementation.
+- **`gsd-sdk query milestone.complete`** unavailable on this install; archive + git steps stayed manual.
+
+### Patterns Established
+
+- Treat **`scripts/ci/README.md`** as the contributor-facing map from **REQ ids** to owning verifiers when one bash script pins many strings.
+- Document **dual README gates** (package doc verifier vs host VERIFY-01 contract) wherever editorial changes could green one and red the other.
+
+### Key Lessons
+
+1. Close **audit YAML** the same day as the last verification file so milestone automation and humans see the same story.
+2. For presentation-layer milestones, **Copy + Playwright** contracts are as load-bearing as domain code for regressions.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: concentrated adoption + admin polish passes with a short audit-remediation tail.
+- Notable: highest leverage was **routing evaluators to one proof story** and **making maintainer-facing CI intent legible**.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.7 | short | 5 | VERIFY-01/doc graph + installer CI clarity (32–33), operator home/drill/nav (34), Copy SSOT dashboard (35), audit corpus + verifier map (36). |
 | v1.6 | short | 7 | Admin inventory → hierarchy → copy → a11y → mobile (25–29), then audit corpus + advisory integration closure (30–31) without new Hex tag. |
 | v1.5 | short | 1 | Adoption proof documented as a matrix tying existing Fake, host, Playwright, and advisory Stripe lanes. |
 | v1.2 | concentrated closeout | 5 | Adoption and trust work became executable through the canonical host demo, docs contracts, and security/audit closeout gates. |
@@ -278,6 +321,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.7 | Doc contract scripts, targeted ExUnit, VERIFY-01 Playwright lanes touching dashboard copy | ADOPT + OPS (11/11) archived | `scripts/ci/README.md` ADOPT map, dual-contract `testing.md` section, `36-FORWARD-COUPLING-OPS-34-35.md`, dashboard `Copy` + `copy_dashboard.js`. |
 | v1.6 | VERIFY-01 Playwright (desktop + mobile), ExUnit/HTML assertions on touched LiveViews, axe on mounted customers index | INV/COPY/UX/A11Y/MOB (18/18) archived | `AccrueAdmin.Copy`, mobile admin spec, README mobile shell section, verification markdown per phase. |
 | v1.5 | Existing VERIFY-01 contracts + docs guide tests; no new CI topology | PROOF-01..03 (3/3) archived | Adoption proof matrix, evaluator walkthrough script, guide + CI naming clarity. |
 | v1.2 | Host UAT, Playwright trust flow, docs verifier, release guidance tests, trust/security review artifacts | 23/23 audited requirements plus Phase 17 cleanup verification | Canonical demo/tutorial contracts, issue templates, trust review, expansion recommendation, security verification. |

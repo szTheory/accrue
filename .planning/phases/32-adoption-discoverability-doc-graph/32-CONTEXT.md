@@ -65,7 +65,7 @@ Success is measured by ROADMAP criteria: root → runnable VERIFY-01 instruction
 ### Planning & requirements
 
 - `.planning/ROADMAP.md` — Phase 32 goal, success criteria, dependencies.
-- `.planning/REQUIREMENTS.md` — ADOPT-01, ADOPT-02, ADOPT-03 wording and traceability.
+- `.planning/milestones/v1.7-REQUIREMENTS.md` — ADOPT-01, ADOPT-02, ADOPT-03 wording and traceability.
 - `.planning/PROJECT.md` — v1.7 milestone intent; VERIFY-01 / Fake-first positioning.
 
 ### Docs to edit or align
