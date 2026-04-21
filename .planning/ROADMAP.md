@@ -9,11 +9,11 @@
 - ✅ **v1.4 Ecosystem stability + demo visuals** — Phase 23 shipped 2026-04-17. `lattice_stripe` lockfiles verified on latest 1.1.x; Fake-backed Playwright screenshot walkthrough documented and scripted; admin `priv/static` bundle fixed for browser LiveView. **PROC-08 deferred.**
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
 - ✅ **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–31**: core admin polish shipped **2026-04-20**; post-ship Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
-- ○ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** (requirements: `.planning/REQUIREMENTS.md`; research: `.planning/research/SUMMARY.md`). **In progress** — planning initialized 2026-04-21; Phase **36** added 2026-04-21 via `/gsd-plan-milestone-gaps` (audit corpus + adoption integration hardening).
+- ✅ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** complete **2026-04-21** (requirements: `.planning/REQUIREMENTS.md`; research: `.planning/research/SUMMARY.md`). Shipped adoption doc gates, operator home/drill/nav, summary surfaces + literal hygiene, and audit-corpus / integration-hardening closure (Phase 36).
 
 ## Phases
 
-### v1.7 Adoption DX + operator admin depth (Phases 32–36) — ACTIVE
+### v1.7 Adoption DX + operator admin depth (Phases 32–36) — COMPLETE (2026-04-21)
 
 **Milestone goal:** Tighten **VERIFY-01** and adoption **doc/CI** discoverability without changing merge-blocking semantics, then ship **operator admin** home + drill + nav improvements using existing **UI-SPEC** and **`AccrueAdmin.Copy`** discipline, then close **milestone-audit** traceability and integration notes without reopening satisfied ADOPT behavior.
 
@@ -22,8 +22,8 @@
 | 32 | Adoption discoverability + doc graph | **Complete** (2026-04-21) — VERIFY-01 / doc graph | ADOPT-01..03 |
 | 33 | Installer, host contracts + CI clarity | **Complete** (2026-04-21) — installer rerun docs + CI/advisory clarity | ADOPT-04..06 |
 | 34 | Operator home, drill flow + nav model | **Complete** (2026-04-21) — scoped home KPIs; customer→invoice drill; `AccrueAdmin.Nav` + README routes | OPS-01..03 |
-| 35 | 2/2 | Complete    | 2026-04-21 |
-| 36 | 3/3 | Complete    | 2026-04-21 |
+| 35 | Summary surfaces + test literal hygiene | **Complete** (2026-04-21) — dashboard copy SSOT; Playwright/LiveView literal alignment | OPS-04..05 |
+| 36 | Audit corpus + adoption integration hardening | **Complete** (2026-04-21) — 32/33 traceability matrix; ADOPT CI map; dual-contract + OPS forward coupling | ADOPT-01..06, OPS-03..05 |
 
 ### Phase 32: Adoption discoverability + doc graph
 
@@ -215,7 +215,7 @@
 | 33. Installer, host contracts + CI clarity | v1.7 | — | Complete | 2026-04-21 |
 | 34. Operator home, drill flow + nav model | v1.7 | 3/3 | Complete | 2026-04-21 |
 | 35. Summary surfaces + test literal hygiene | v1.7 | 2/2 | Complete | 2026-04-21 |
-| 36. Audit corpus + adoption integration hardening | v1.7 | — | Not started | — |
+| 36. Audit corpus + adoption integration hardening | v1.7 | 3/3 | Complete | 2026-04-21 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
