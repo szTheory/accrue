@@ -36,6 +36,8 @@ Milestone history, roadmap, requirements, and audit artifacts: `.planning/milest
 
 **Next:** **v1.7** requirements and roadmap are active in `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` (phases from **32**). Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
+**v1.7 progress:** Phase **33** complete (2026-04-21) — **ADOPT-04..06**: First Hour links to installer rerun contract in `upgrade.md`; `verify_package_docs.sh` pins the anchor and troubleshooting `mix accrue.install --check`; CI workflow comments + README + `guides/testing-live-stripe.md` keep stable job ids with explicit merge-blocking (`host-integration`) vs advisory (`live-stripe`) framing. Evidence: `.planning/phases/33-installer-host-contracts-ci-clarity/33-VERIFICATION.md`.
+
 ## Shipped: v1.6 Admin UI / UX polish (2026-04-20)
 
 **Goal:** Bring the companion admin (and evaluator-visible mounted paths) to a **consistent, accessible, mobile-credible** bar aligned to Phase 20/21 UI-SPEC contracts—without new billing domain scope or third-party UI kits.
@@ -365,4 +367,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after `/gsd-new-milestone` — **v1.7** Adoption DX + operator admin depth started (requirements + roadmap in `.planning/`).*
+*Last updated: 2026-04-21 — **v1.7** Phase 33 (installer + CI clarity) verified complete; focus advances to Phase 34.*

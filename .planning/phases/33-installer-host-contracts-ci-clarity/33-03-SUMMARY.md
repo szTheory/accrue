@@ -50,7 +50,7 @@ completed: 2026-04-21
 
 ## Task commits
 
-1. **33-03-01** — (hash after commit)
+1. **33-03-01** — `5308abb` (docs)
 
 ## Self-Check: PASSED
 
