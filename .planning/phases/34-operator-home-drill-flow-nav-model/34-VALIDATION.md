@@ -25,7 +25,15 @@ created: 2026-04-21
 
 ## Wave 0
 
-Planning materialized; **no plans executed yet.** Set `nyquist_compliant: true` and `wave_0_complete: true` once `34-VALIDATION.md` maps every plan task to an automated or explicit manual check.
+Plans materialized (`34-01`..`34-03`). Update per-wave checks as execution completes.
+
+| Plan | Wave | Automated checks |
+|------|------|------------------|
+| 34-01 | 1 | `mix test test/accrue_admin/scoped_path_test.exs`, `navigation_components_test.exs`, `mix accrue_admin.assets.build`, `mix compile --warnings-as-errors` |
+| 34-02 | 2 (after 01) | `mix test` (package scope as in plan), `mix compile --warnings-as-errors` |
+| 34-03 | 1 | `mix test test/accrue_admin/nav_test.exs`, `navigation_components_test.exs` |
+
+Set `nyquist_compliant: true` and `wave_0_complete: true` after all plan tasks have a mapped check and summaries exist.
 
 ---
 
