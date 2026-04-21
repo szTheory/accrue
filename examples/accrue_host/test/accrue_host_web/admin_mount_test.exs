@@ -3,6 +3,7 @@ defmodule AccrueHostWeb.AdminMountTest do
 
   @moduletag :phase10
 
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueHost.Repo
 
@@ -45,7 +46,7 @@ defmodule AccrueHostWeb.AdminMountTest do
              AccrueHost.Auth.current_user(%{"user_token" => user_token})
 
     assert {:ok, view, html} = live(conn, "/billing")
-    assert html =~ "Local billing projections at a glance"
+    assert html =~ Copy.dashboard_display_headline()
 
     socket = live_socket(view)
     accrue_admin_session = socket.assigns.accrue_admin_session
