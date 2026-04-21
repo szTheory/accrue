@@ -23,7 +23,7 @@ In `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 0.2.0"}
+    {:accrue, "~> 0.3.0"}
   ]
 end
 ```

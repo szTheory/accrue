@@ -29,7 +29,7 @@ require_substring ".github/workflows/ci.yml" "CI workflow pointer"
 require_substring "docs/adoption-proof-matrix.md" "adoption proof matrix doc link"
 require_substring "e2e/verify01-admin-a11y.spec.js" "mounted admin axe gate spec path"
 require_substring "e2e/verify01-admin-mobile.spec.js" "mobile VERIFY-01 spec path"
-require_substring "### Mounted admin — mobile shell" "VERIFY-01 mobile shell subsection heading"
+require_substring "Mounted admin — mobile shell" "VERIFY-01 mobile shell subsection heading"
 
 while IFS= read -r spec_path; do
   [[ -z "${spec_path}" ]] && continue
@@ -41,7 +41,7 @@ done < <(grep -oE 'e2e/verify01-[a-zA-Z0-9_-]+\.spec\.js' "${readme}" | sort -u)
 
 # Negative: VERIFY-01 section must not advise storing sk_live without explicit negation.
 if awk '
-  /^## VERIFY-01/ { in_block = 1; next }
+  /^#{2,3} VERIFY-01/ { in_block = 1; next }
   in_block && /^## / { exit 0 }
   in_block && /sk_live/ {
     line = $0

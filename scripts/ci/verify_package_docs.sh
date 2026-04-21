@@ -86,7 +86,8 @@ require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/fi
 
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## First run"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Seeded history"
-require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Verification modes"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Proof and verification"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "### Verification modes"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "mix setup"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "mix phx.server"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "/webhooks/stripe"

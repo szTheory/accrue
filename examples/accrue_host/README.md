@@ -66,7 +66,11 @@ Use this when you want replay-ready webhook history, browser coverage, or other
 pre-seeded admin states that would be awkward to create in a short walkthrough.
 Keep cancellation and other secondary proofs here instead of in the main story.
 
-## Verification modes
+## Proof and verification
+
+Pull requests are merge-blocked on GitHub Actions job `host-integration`, which runs the same contract as `cd examples/accrue_host && mix verify.full`; use `mix verify` for a faster bounded Fake slice that is not CI-complete.
+
+### Verification modes
 
 - `mix verify` is the focused local proof suite for installer boundary,
   Fake-backed subscription flow, signed `/webhooks/stripe` ingest, mounted
@@ -80,16 +84,14 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 - `mix accrue.install` is production setup inside your own Phoenix app, not the
   shortcut for this demo app.
 
-## VERIFY-01 (Phase 21)
+### VERIFY-01 (Phase 21)
 
 Canonical local gate for org-scoped host billing proofs and Playwright VERIFY-01
 specs. Paths are **Fake-backed** by default; no live Stripe keys are required.
 Treat live Stripe as optional and advisory only — do not put `sk_live` in `.env`
 for this checklist.
 
-On every pull request, the GitHub Actions job `host-integration` runs the same
-contract as `cd examples/accrue_host && mix verify.full` (see
-`.github/workflows/ci.yml`). That browser lane runs the **full** Playwright suite,
+The VERIFY-01 browser lane under `host-integration` runs the **full** Playwright suite,
 including **`e2e/verify01-admin-a11y.spec.js`** (Phase 28: `@axe-core/playwright`,
 serious + critical violations, forced light then dark on desktop; mobile projects
 skip this file). Focused local run after the usual seed + server: `npm run e2e:a11y`.
@@ -97,7 +99,7 @@ For the mobile shell lane on **`chromium-mobile`**, **`npm run e2e:mobile`** run
 
 The `npm run e2e:*` scripts use **`env -u NO_COLOR`** (POSIX-oriented); Windows contributors may run `npx playwright test …` directly when `env -u` is awkward.
 
-### Mounted admin — mobile shell
+#### Mounted admin — mobile shell
 
 When Accrue Admin is mounted under `/billing`, treat the **App shell** as the single
 scroll owner on narrow viewports: primary content scrolls inside **`.ax-shell-main`**
@@ -165,7 +167,9 @@ For a **human screen-recording checklist** (evaluators / stakeholders), see
 ## Visual walkthrough (Fake-backed)
 
 To **see** the mounted admin + host billing story (no live Stripe), use the
-release-blocking **`@phase15-trust`** Playwright spec. It uses the same Fake-backed
+**`@phase15-trust`** Playwright spec. This lane is **trust/demo visuals only**; it
+does not substitute for the VERIFY-01 merge-blocking checklist under
+[Proof and verification](#proof-and-verification) above. It uses the same Fake-backed
 fixture as the rest of the browser suite (scrubs prior `sub_fake_%` host rows so Fake
 ids cannot collide): org billing on the host app, then mounted **admin** at `/billing`
 (webhook detail, replay, audit).
