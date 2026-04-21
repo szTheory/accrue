@@ -2,14 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Adoption DX + operator admin depth
-status: Ready to build — `/gsd-discuss-phase 32` or `/gsd-plan-phase 32`
-last_updated: "2026-04-21T20:12:59.023Z"
-last_activity: 2026-04-21 — Milestone v1.7 initialized (`/gsd-new-milestone`)
+status: roadmap_ready
+last_updated: "2026-04-21T21:30:00.000Z"
+last_activity: 2026-04-21 — Phase 32 discuss complete; 32-CONTEXT.md captured (research-backed).
 progress:
-  total_phases: 5
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -24,11 +25,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 ## Current Position
 
-Phase: Not started (roadmap defined; begin Phase 32)
+Phase: **32** — Adoption discoverability + doc graph — **context gathered** (see `.planning/phases/32-adoption-discoverability-doc-graph/32-CONTEXT.md`)
 Plan: —
-**Status:** Ready to build — `/gsd-discuss-phase 32` or `/gsd-plan-phase 32`
+**Status:** Ready for planning — `/gsd-plan-phase 32`
 
-**Last Activity:** 2026-04-21 — Milestone v1.7 initialized (`/gsd-new-milestone`)
+**Last Activity:** 2026-04-21 — `/gsd-discuss-phase 32` (all gray areas; parallel research; CONTEXT + DISCUSSION-LOG committed)
 
 ## Milestone Progress
 
@@ -36,7 +37,7 @@ Plan: —
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 32. Adoption discoverability + doc graph | Not started | ADOPT-01..03 |
+| 32. Adoption discoverability + doc graph | Context gathered | ADOPT-01..03 — `32-CONTEXT.md` |
 | 33. Installer, host contracts + CI clarity | Not started | ADOPT-04..06 |
 | 34. Operator home, drill flow + nav model | Not started | OPS-01..03 |
 | 35. Summary surfaces + test literal hygiene | Not started | OPS-04..05 |
@@ -51,6 +52,7 @@ Plan: —
 - `.planning/research/` — v1.7 milestone research (`SUMMARY.md` + dimensions)
 - `.planning/milestones/v1.6-*` — prior milestone archives
 - `.planning/ADMIN-UX-BASELINE-AUDIT.md` — read-only baseline for admin work
+- `.planning/phases/32-adoption-discoverability-doc-graph/32-CONTEXT.md` — Phase 32 implementation decisions (ADOPT-01..03)
 
 ## Deferred Items
 
@@ -69,4 +71,4 @@ Prior milestone carry-forward (unchanged where still relevant):
 
 **Next milestone:** — (v1.7 active)
 
-**Planned Phase:** **32** — Adoption discoverability + doc graph (`/gsd-discuss-phase 32` or `/gsd-plan-phase 32`)
+**Planned Phase:** **32** — Adoption discoverability + doc graph — next: `/gsd-plan-phase 32`
