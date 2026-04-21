@@ -38,7 +38,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 30 | Audit corpus closure | `COPY-01..03` mapped in `27-VERIFICATION.md`; `requirements-completed` YAML on `26-*-SUMMARY.md` and `29-*-SUMMARY.md` where missing. | COPY-01..03; evidence backfill for UX-01..04 + MOB-01..03 (Phase 26/29 implementation unchanged) |
+| 30 | Audit corpus closure — **complete** (2026-04-21) | `COPY-01..03` mapped in `27-VERIFICATION.md`; `requirements-completed` YAML on `26-*-SUMMARY.md` and `29-*-SUMMARY.md` where missing. | COPY-01..03; evidence backfill for UX-01..04 + MOB-01..03 (Phase 26/29 implementation unchanged) |
 | 31 | Advisory integration alignment | Resolve minor integration findings from the v1.6 audit (README VERIFY contract, npm scripts, admin/host Playwright + Copy SSOT, snapshot/reseed/axe scope docs). | Related: INV-01, INV-03, UX-01, MOB-01, MOB-03, A11Y-03, A11Y-04, COPY-01..03 (as touched by alignment work) |
 
 **Depends on:** v1.6 Phases 25–29 complete (shipped). **Requirements archive:** [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md). **Audit:** [`v1.6-MILESTONE-AUDIT.md`](v1.6-MILESTONE-AUDIT.md).
@@ -121,7 +121,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 30. Audit corpus closure | v1.6 (post-ship) | 0/0 | Open | — |
+| 30. Audit corpus closure | v1.6 (post-ship) | 2/2 | Complete | 2026-04-21 |
 | 31. Advisory integration alignment | v1.6 (post-ship) | 0/0 | Open | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.

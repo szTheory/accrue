@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: v1.6 Admin UI / UX polish **archived** (2026-04-20)
-last_updated: "2026-04-21T03:35:29.146Z"
-last_activity: 2026-04-20
+status: ready_to_plan
+last_updated: "2026-04-21T12:37:14.443Z"
+last_activity: 2026-04-21
 progress:
   total_phases: 15
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 43
-  completed_plans: 41
-  percent: 95
+  completed_plans: 43
+  percent: 100
 ---
 
 # Project State
@@ -21,13 +21,15 @@ See: `.planning/PROJECT.md` (updated 2026-04-20)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning next milestone (`/gsd-new-milestone`)
+**Current focus:** Phase 31 — advisory integration alignment (`/gsd-plan-phase 31`)
 
 ## Current Position
 
-**Status:** v1.6 Admin UI / UX polish **archived** (2026-04-20)
+Phase: 31
+Plan: Not started
+**Status:** Ready to plan
 
-**Last Activity:** 2026-04-20
+**Last Activity:** 2026-04-21
 
 ## Milestone Progress
 
@@ -82,4 +84,4 @@ Items acknowledged at **v1.6** milestone close (`audit-open`, config mode yolo �
 
 **Next milestone:** `/gsd-new-milestone`
 
-**Planned Phase:** 30 (Audit corpus closure) — 2 plans — 2026-04-21T03:35:29.133Z
+**Planned Phase:** 31 (Advisory integration alignment) — not started — 2026-04-21

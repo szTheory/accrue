@@ -23,7 +23,7 @@ Milestone history, roadmap, requirements, and audit artifacts: `.planning/milest
 
 **Last shipped planning milestone:** **v1.6 Admin UI / UX polish** (2026-04-20) — inventory, hierarchy/tokens, microcopy, accessibility gates, and mobile CI for companion admin and mounted VERIFY-01 paths; archived to `.planning/milestones/v1.6-ROADMAP.md` and `v1.6-REQUIREMENTS.md`.
 
-**Planning:** The next milestone starts with `/gsd-new-milestone` (fresh `.planning/REQUIREMENTS.md` and phased roadmap). Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Planning:** **v1.6 audit gap closure** (post-ship) continues in `.planning/ROADMAP.md` — Phase **30** (audit corpus) completed 2026-04-21; Phase **31** remains. A fresh product milestone still starts with `/gsd-new-milestone`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.6 Admin UI / UX polish (2026-04-20)
 
@@ -350,4 +350,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-20 after v1.6 milestone archival (fresh REQUIREMENTS.md follows `/gsd-new-milestone`).*
+*Last updated: 2026-04-21 after Phase 30 audit corpus closure (v1.6 post-ship gap work).*
