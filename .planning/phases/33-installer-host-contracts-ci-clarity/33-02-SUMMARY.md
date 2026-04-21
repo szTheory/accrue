@@ -47,7 +47,7 @@ completed: 2026-04-21
 
 ## Task commits
 
-1. **33-02-01** — (hash after commit)
+1. **33-02-01** — `328d5ff` (ci)
 
 ## Self-Check: PASSED
 

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Adoption DX + operator admin depth
 status: ready_to_plan
-last_updated: "2026-04-21T21:30:00.000Z"
-last_activity: 2026-04-21 — Phase 32 executed (`/gsd-execute-phase 32`)
+last_updated: "2026-04-21T21:45:00.000Z"
+last_activity: 2026-04-21
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 3
+  completed_phases: 2
+  total_plans: 6
   completed_plans: 3
-  percent: 20
+  percent: 40
 ---
 
 # Project State
@@ -21,11 +21,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.7** — Phase **33** (next)
+**Current focus:** Phase **34** — Operator home, drill flow + nav model
 
 ## Current Position
 
-Phase: 33
+Phase: 34
 Plan: Not started
 **Status:** Ready to plan
 
@@ -38,7 +38,7 @@ Plan: Not started
 | Phase | Status | Notes |
 |-------|--------|-------|
 | 32. Adoption discoverability + doc graph | Complete (2026-04-21) | ADOPT-01..03 — `32-VERIFICATION.md` |
-| 33. Installer, host contracts + CI clarity | Not started | ADOPT-04..06 |
+| 33. Installer, host contracts + CI clarity | Complete (2026-04-21) | ADOPT-04..06 — `33-VERIFICATION.md` |
 | 34. Operator home, drill flow + nav model | Not started | OPS-01..03 |
 | 35. Summary surfaces + test literal hygiene | Not started | OPS-04..05 |
 
@@ -54,6 +54,7 @@ Plan: Not started
 - `.planning/ADMIN-UX-BASELINE-AUDIT.md` — read-only baseline for admin work
 - `.planning/phases/32-adoption-discoverability-doc-graph/32-CONTEXT.md` — Phase 32 implementation decisions (ADOPT-01..03)
 - `.planning/phases/32-adoption-discoverability-doc-graph/32-VERIFICATION.md` — Phase 32 verification (passed)
+- `.planning/phases/33-installer-host-contracts-ci-clarity/33-VERIFICATION.md` — Phase 33 verification (passed)
 
 ## Deferred Items
 
@@ -72,4 +73,4 @@ Prior milestone carry-forward (unchanged where still relevant):
 
 **Next milestone:** — (v1.7 active)
 
-**Planned Phase:** 33 (Installer, host contracts + CI clarity) — not planned yet
+**Planned Phase:** 34 (Operator home, drill flow + nav model) — next in v1.7

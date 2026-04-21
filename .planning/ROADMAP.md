@@ -19,8 +19,8 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 32 | 3/3 | Complete    | 2026-04-21 |
-| 33 | Installer, host contracts + CI clarity | `mix accrue.install` reruns documented/tested; doc/script drift caught or explicitly listed; CI blocking vs advisory language preserved (job ids stable). | ADOPT-04..06 |
+| 32 | Adoption discoverability + doc graph | **Complete** (2026-04-21) — VERIFY-01 / doc graph | ADOPT-01..03 |
+| 33 | Installer, host contracts + CI clarity | **Complete** (2026-04-21) — installer rerun docs + CI/advisory clarity | ADOPT-04..06 |
 | 34 | Operator home, drill flow + nav model | Credible admin home; one smoother cross-entity flow; nav labels/order match operator model + matrix updates if needed. | OPS-01..03 |
 | 35 | Summary surfaces + test literal hygiene | Token-safe KPI/summary rows; new literals via `AccrueAdmin.Copy`; tests updated. | OPS-04..05 |
 
