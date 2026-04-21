@@ -1,5 +1,13 @@
 # Milestones
 
+## v1.8 Org billing recipes & host integration depth (Planning opened: 2026-04-21)
+
+**Status:** Active — requirements and roadmap in repo root `.planning/`; phases **37–39** on [`.planning/ROADMAP.md`](ROADMAP.md).
+
+**Theme:** Deferred **ORG-04** — non-Sigra tenancy recipes (Pow, phx.gen.auth, custom org) + VERIFY/adoption-proof alignment. **PROC-08** and **FIN-03** remain out of scope.
+
+---
+
 ## v1.7 Adoption DX + operator admin depth (Shipped: 2026-04-21)
 
 **Phases completed:** 5 phases (32–36), **14** plans

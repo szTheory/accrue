@@ -12,19 +12,21 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.7 Adoption DX + operator admin depth** is **archived** (2026-04-21). Full slice: `.planning/milestones/v1.7-ROADMAP.md`, `v1.7-REQUIREMENTS.md`, `v1.7-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.7`** marks this planning close.
+**v1.8 Org billing recipes & host integration depth** — **active** (opened 2026-04-21). Delivers deferred **ORG-04**: broader **non-Sigra** tenancy recipes (Pow, phx.gen.auth, custom org models) on top of the row-scoped **ORG-01..ORG-03** contract, with host-facing docs and VERIFY-01 / adoption-proof alignment. Root `.planning/REQUIREMENTS.md` + `.planning/ROADMAP.md` track this slice.
 
-### Next milestone goals
+**v1.7 Adoption DX + operator admin depth** is **archived** (2026-04-21). Archives: `.planning/milestones/v1.7-ROADMAP.md`, `v1.7-REQUIREMENTS.md`, `v1.7-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.7`**. Phase worktrees **32–36** cleared for v1.8 numbering (**37+**).
 
-Run **`/gsd-new-milestone`** to author the next internal milestone: fresh `.planning/REQUIREMENTS.md`, updated `.planning/ROADMAP.md`, and optional `.planning/research/`. **PROC-08**, **FIN-03**, and **ORG-04** stay out of scope until explicitly prioritized.
+### Non-goals (this milestone)
+
+**PROC-08** (second processor) and **FIN-03** (app-owned finance exports) remain **explicitly out of scope** until a later milestone prioritizes them.
 
 ## Current State
 
-Public Hex packages (unchanged by this planning milestone): **`accrue` 0.1.2**, **`accrue_admin` 0.1.2**.
+Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue_admin` 0.1.2**.
 
-**Last closed planning milestone:** **v1.7** — Phases **32–36** (2026-04-21). Prior capability through **v1.6** and **v1.3** (tax, org billing, host VERIFY-01, admin polish) remains as documented in `.planning/milestones/` and the **Shipped** sections below.
+**Last closed planning milestone:** **v1.7** — Phases **32–36** (2026-04-21). **v1.8** continues phase numbering from **37**. Prior org billing (**ORG-01..03**, Sigra-first **ORG-02**) shipped in **v1.3**; see `.planning/milestones/v1.3-REQUIREMENTS.md`.
 
-**Next:** No root `.planning/REQUIREMENTS.md` until **`/gsd-new-milestone`**. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Now:** `.planning/REQUIREMENTS.md` defines **ORG-04** scope; `.planning/research/` holds v1.8 milestone research. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -98,7 +100,7 @@ The v1.2 milestone made Accrue ready for new Phoenix teams to evaluate and trust
 - Visual walkthrough docs, `npm run e2e:visuals`, and CI artifact pointers; Playwright trust lane green on desktop + mobile.
 - Committed **`accrue_admin` `priv/static` JS/CSS** is a real esbuild bundle so mounted admin LiveView works in the browser; `mix verify.full` rebuilds admin assets before Playwright.
 
-**Explicitly deferred:** **PROC-08** (second processor), FIN-03 product exports, ORG-04 recipes — revisit in a later milestone.
+**Explicitly deferred:** **PROC-08** (second processor), **FIN-03** product exports — revisit in a later milestone. **ORG-04** is **in scope for v1.8** (recipes + host integration depth).
 
 Continue to treat `tax rollout correctness`, `cross-tenant billing leakage`, and `wrong-audience finance exports` as release risks regardless of milestone.
 
@@ -143,6 +145,10 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - [x] **ADOPT-04..06** — Installer rerun docs + anchors; doc contract coverage; merge-blocking vs advisory CI language (Phase 33).
 - [x] **OPS-01..03** — Operator home KPIs; customer→invoice drill; `AccrueAdmin.Nav` + README route inventory (Phase 34).
 - [x] **OPS-04..05** — Dashboard `ax-*` / token discipline; operator strings via `AccrueAdmin.Copy` + aligned Playwright (Phase 35).
+
+### Active (v1.8 — in progress)
+
+See `.planning/REQUIREMENTS.md` for checkboxes and REQ-IDs. Theme: **ORG-04** — non-Sigra org billing recipes, host integration depth, VERIFY/adoption-proof alignment; **PROC-08** and **FIN-03** not in this milestone.
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -334,6 +340,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.6 closes admin UX polish without new billing primitives | Operator trust (a11y, mobile, copy) advances adoption without PROC-08/FIN-03 scope creep | ✓ Good |
 | Post-ship Phases 30–31 close audit corpus + advisory integration without Hex release churn | Keeps evaluator-facing proof contracts aligned while preserving existing `v1.6` tag semantics | ✓ Good |
 | v1.7 combines adoption/DX with operator admin depth without billing primitive expansion | After v1.6 polish, the highest leverage is clearer VERIFY-01 + install/docs matrices plus intentional admin entry flows—not PROC/FIN/ORG scope creep | ✓ Good |
+| v1.8 delivers ORG-04 after Sigra-first org proof | Non-Sigra teams need first-class recipes and proof that **ORG-03** boundaries hold; scope stays docs + host patterns + VERIFY alignment—no PROC-08/FIN-03 | — Pending |
 
 ## Current Milestone Notes
 
@@ -350,6 +357,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - v1.6 planning line closed 2026-04-21: Phases **30–31** remediated milestone audit gaps (verification corpus, SUMMARY traceability) and advisory VERIFY-01 / Copy / Playwright integration notes; audit status **passed** in `milestones/v1.6-MILESTONE-AUDIT.md`.
 - v1.7 opened 2026-04-21: **ADOPT** + **OPS** requirements and **Phases 32–36** roadmap; research summarized in `.planning/research/SUMMARY.md`.
 - v1.7 archived 2026-04-21: requirements + roadmap + milestone audit under `.planning/milestones/v1.7-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.7`**.
+- v1.8 opened 2026-04-21: **ORG-04** (non-Sigra org billing recipes + host integration depth); phases **37+**; **PROC-08** and **FIN-03** remain deferred.
 
 ## Evolution
 
@@ -369,4 +377,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 — **v1.7** milestone archived (`/gsd-complete-milestone`); next requirements via `/gsd-new-milestone`.*
+*Last updated: 2026-04-21 — **v1.8** milestone started (`/gsd-new-milestone`); **ORG-04** in active requirements.*
