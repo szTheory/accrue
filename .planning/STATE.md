@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Metered usage + Fake parity
-status: Defining execution — start with `/gsd-discuss-phase 43` or `/gsd-plan-phase 43`.
-last_updated: "2026-04-22T04:02:58.458Z"
-last_activity: 2026-04-21 — Milestone v1.10 initialized (`REQUIREMENTS.md`, `ROADMAP.md`, `PROJECT.md`).
+status: Phase 43 complete — continue v1.10 with `/gsd-discuss-phase 44` or `/gsd-plan-phase 44`.
+last_updated: "2026-04-22T04:20:00.000Z"
+last_activity: 2026-04-22 — Phase 43 executed (MTR-01..MTR-03).
 progress:
-  total_phases: 1
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
@@ -20,17 +20,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.10** — metered usage reporting with **Fake parity**, reconciler + webhook failure paths, and docs/telemetry alignment (**MTR-01..MTR-08**).
+**Current focus:** **v1.10** — metered usage + Fake parity; **Phase 43** shipped, **Phases 44–45** remaining.
 
 ## Current Position
 
-Phase: **43** — Meter usage happy path + Fake determinism (**not started**)
+Phase: **44** — Meter failures, idempotency, reconciler + webhook (**next**)
 
 Plan: —
 
-**Status:** Defining execution — start with `/gsd-discuss-phase 43` or `/gsd-plan-phase 43`.
+**Status:** Phase **43** complete (2026-04-22). Milestone **v1.10** in progress.
 
-**Last Activity:** 2026-04-21 — Milestone v1.10 initialized (`REQUIREMENTS.md`, `ROADMAP.md`, `PROJECT.md`).
+**Last Activity:** 2026-04-22 — Phase 43 execution: ExDoc for `report_usage/3`, `Accrue.Test.meter_events_for/1`, guide fragment, tests + telemetry smoke.
 
 ## Milestone Progress
 
@@ -58,6 +58,4 @@ Plan: —
 - **v1.10:** Scope locked to **usage metering** + **Fake/Stripe processor parity** + **telemetry/docs** alignment; **PROC-08** / **FIN-03** remain deferred.
 - **`phases.clear` not run** at milestone open — preserves existing `.planning/phases/40-*` … `42-*` trees; phase numbering continues at **43**.
 
-**Next:** `/gsd-discuss-phase 43` or `/gsd-plan-phase 43`.
-
-**Planned Phase:** 43 (Meter usage happy path + Fake determinism) — 3 plans — 2026-04-22T04:02:58.451Z
+**Next:** `/gsd-discuss-phase 44` or `/gsd-plan-phase 44`.
