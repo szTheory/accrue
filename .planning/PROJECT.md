@@ -35,7 +35,7 @@ Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue
 
 **Last shipped planning milestone:** **v1.9** — Phases **40–42** (2026-04-22): telemetry catalog + guide truth (**40**), host metrics parity + cross-domain example (**41**), operator runbooks (**42**, **RUN-01**); archives `.planning/milestones/v1.9-*`; tag **`v1.9`**. Prior: **v1.8** — Phases **37–39**; archives `.planning/milestones/v1.8-*`; tag **`v1.8`**.
 
-**Now:** Execute **v1.10** — `.planning/REQUIREMENTS.md` (**MTR-01..MTR-08**), `.planning/ROADMAP.md` (Phases **43–45**), spike `.planning/research/v1.10-METERING-SPIKE.md`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Now:** **v1.10** — Phases **43–45** executed (2026-04-22); **MTR-07** and **MTR-08** validated via `guides/metering.md`, `guides/telemetry.md` (`#meter-reporting-semantics`), and `guides/operator-runbooks.md` source branches. Remaining **MTR-01..MTR-06** traceability lives in `.planning/REQUIREMENTS.md` (update when those slices are audited closed). Spike: `.planning/research/v1.10-METERING-SPIKE.md`.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -385,6 +385,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - v1.9 opened 2026-04-21: **Observability & operator runbooks** after post–v1.8 prioritization; phases **40–42**; **PROC-08** / **FIN-03** unchanged as non-goals.
 - v1.9 archived 2026-04-22: Phases **40–42** complete; **OBS/RUN/TEL** requirements validated; `.planning/milestones/v1.9-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.9`**.
 - v1.10 opened 2026-04-21: **Metered usage + Fake parity**; phases **43–45**; requirements **MTR-01..MTR-08**; `phases.clear` skipped to preserve **40–42** phase trees.
+- Phase **45** closed **2026-04-22**: docs + telemetry/runbook alignment (**MTR-07**, **MTR-08**) — metering guide, telemetry semantics anchor, runbook branches, optional testing/README cross-links.
 
 ## Evolution
 
@@ -404,4 +405,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after **`/gsd-new-milestone`**: **v1.10** opened (Phases **43–45**, **MTR-01..MTR-08**); `REQUIREMENTS.md` + `ROADMAP.md` + `STATE.md` initialized.*
+*Last updated: 2026-04-22 — Phase **45** complete (**MTR-07**, **MTR-08**); `REQUIREMENTS.md` traceability updated for doc requirements.*

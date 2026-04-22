@@ -21,8 +21,8 @@ Milestone theme: **usage metering** with **deterministic Fake-backed** acceptanc
 
 ### Documentation & operator alignment
 
-- [ ] **MTR-07**: Published guides explain **public** `Accrue.Billing` entry points vs **internal** persistence (`Accrue.Billing.MeterEvent`, outbox) vs **processor** `report_meter_event/1` contracts (per spike “Public entry points” section); cross-link from relevant quickstart/testing docs.
-- [ ] **MTR-08**: `guides/telemetry.md` and, where warranted, `guides/operator-runbooks.md` document `meter_reporting_failed` (and related) ops signals for **sync**, **reconciler**, and **webhook** sources without contradicting v1.9 catalog rows.
+- [x] **MTR-07**: Published guides explain **public** `Accrue.Billing` entry points vs **internal** persistence (`Accrue.Billing.MeterEvent`, outbox) vs **processor** `report_meter_event/1` contracts (per spike “Public entry points” section); cross-link from relevant quickstart/testing docs. *(Validated Phase 45, 2026-04-22.)*
+- [x] **MTR-08**: `guides/telemetry.md` and, where warranted, `guides/operator-runbooks.md` document `meter_reporting_failed` (and related) ops signals for **sync**, **reconciler**, and **webhook** sources without contradicting v1.9 catalog rows. *(Validated Phase 45, 2026-04-22.)*
 
 ## Later milestones (not v1.10)
 
@@ -49,8 +49,8 @@ Milestone theme: **usage metering** with **deterministic Fake-backed** acceptanc
 | MTR-04 | Phase 44 | Pending |
 | MTR-05 | Phase 44 | Pending |
 | MTR-06 | Phase 44 | Pending |
-| MTR-07 | Phase 45 | Pending |
-| MTR-08 | Phase 45 | Pending |
+| MTR-07 | Phase 45 | Complete |
+| MTR-08 | Phase 45 | Complete |
 
 **Coverage:** v1.10 requirements: **8** total · Mapped: **8** · Unmapped: **0**
 
