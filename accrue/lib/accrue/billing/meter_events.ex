@@ -17,6 +17,8 @@ defmodule Accrue.Billing.MeterEvents do
   alias Accrue.Billing.MeterEvent
   alias Accrue.Repo
 
+  @max_ops_error_summary_chars 512
+
   @typedoc """
   Origin of a terminal failure for `meter_reporting_failed` metadata.
 
@@ -141,7 +143,7 @@ defmodule Accrue.Billing.MeterEvents do
       meter_event_id: updated.id,
       event_name: updated.event_name,
       source: source,
-      error: inspect(err)
+      error: ops_error_for_metadata(err, source)
     }
 
     base =
@@ -173,4 +175,36 @@ defmodule Accrue.Billing.MeterEvents do
 
   defp maybe_put_meta(meta, _k, v) when v in [nil, ""], do: meta
   defp maybe_put_meta(meta, k, v), do: Map.put(meta, k, v)
+
+  defp ops_error_for_metadata(err, :webhook), do: inspect(err)
+
+  defp ops_error_for_metadata(err, source) when source in [:sync, :reconciler] do
+    summary =
+      cond do
+        is_binary(err) ->
+          err
+
+        is_exception(err) ->
+          Exception.message(err)
+
+        true ->
+          inspect(err, limit: 25, printable_limit: 256)
+      end
+
+    summary =
+      case summary do
+        s when is_binary(s) and s != "" -> s
+        _ -> inspect(err, limit: 25, printable_limit: 256)
+      end
+
+    truncate_ops_error_summary(summary)
+  end
+
+  defp truncate_ops_error_summary(s) when is_binary(s) do
+    if String.length(s) <= @max_ops_error_summary_chars do
+      s
+    else
+      String.slice(s, 0, @max_ops_error_summary_chars) <> "…"
+    end
+  end
 end
