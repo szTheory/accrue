@@ -27,7 +27,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 46 | 3/3 | Complete    | 2026-04-22 |
-| 47 | Post-release docs & planning continuity | **`RELEASING.md`** truth for routine pre-1.0 releases; **`first_hour`** / verifier alignment; **PROJECT / MILESTONES / STATE** Hex lines. | REL-03, DOC-01, DOC-02, HYG-01 |
+| 47 | 3/3 | Complete    | 2026-04-22 |
 
 **Success criteria (milestone):**
 

@@ -1,10 +1,10 @@
 # Milestones
 
-## v1.11 Public Hex release + post-release continuity (In progress)
+## v1.11 Public Hex release + post-release continuity (Shipped: 2026-04-22)
 
 **Planning opened:** 2026-04-22
 
-**Phases:** **46–47** (see root `.planning/ROADMAP.md`)
+**Phases:** **46–47** (see root `.planning/ROADMAP.md`) — **6** plans total, **Complete 2026-04-22**.
 
 **Theme:** Publish **`accrue`** / **`accrue_admin`** to Hex via Release Please **linked versions**, then align **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning Hex version callouts. **PROC-08** / **FIN-03** remain non-goals.
 

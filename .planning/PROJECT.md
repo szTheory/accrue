@@ -39,7 +39,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.10** — Phases **43–45** (2026-04-22): metering happy path + Fake determinism (**43**), failures + reconciler + webhook (**44**), docs + telemetry/runbook alignment (**45**); archives `.planning/milestones/v1.10-*`; planning git tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
 
-**Now:** **v1.11** active — **Phase 46** complete (2026-04-22): **REL-01** human-gated Release PR automation (`workflow_dispatch` only), **REL-02** manifest ↔ `mix.exs` SSOT script + merge-blocking **`release-manifest-ssot`**, **REL-04** **`46-VERIFICATION.md`** D-12 ship index template. **Phase 47** (post-release docs & planning continuity) is **in progress** — `RELEASING.md`, **`first_hour`**, verifiers, and planning mirrors updated to **0.3.0** / routine-release framing. After Phase **47** closes, use **`/gsd-discuss-phase 48`** or a fresh **`/gsd-new-milestone`** slice for the next implementation theme.
+**Now:** **v1.11** milestone **complete** (2026-04-22): **Phase 46** shipped the Hex release train (**REL-01/02/04**). **Phase 47** closed post-release continuity (**REL-03**, **DOC-01**, **DOC-02**, **HYG-01**) — `RELEASING.md` routine-first runbook, **`first_hour`** `~>` **0.3.0**, **`verify_package_docs`** green, planning mirrors aligned. **Next:** **`/gsd-discuss-phase 48`** or **`/gsd-new-milestone`** for the next implementation slice.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -421,4 +421,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — **v1.11**; **Phase 46** (release train gates + verification template) complete; **Phase 47** next.*
+*Last updated: 2026-04-22 — **v1.11** milestone complete (**Phase 46** Hex train + **Phase 47** post-release docs / planning continuity).*
