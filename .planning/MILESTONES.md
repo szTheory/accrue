@@ -1,5 +1,30 @@
 # Milestones
 
+## v1.10 Metered usage + Fake parity (Shipped: 2026-04-22)
+
+**Phases completed:** 3 phases (43–45), **10** plans
+
+**Key accomplishments:**
+
+- **Phase 43 (MTR-01..MTR-03):** Public `Accrue.Billing.report_usage` NimbleOptions + ExDoc SSOT; `accrue_meter_events` lifecycle semantics; Fake happy-path determinism without private-module assertions for ordinary cases.
+- **Phase 44 (MTR-04..MTR-06):** Guarded `MeterEvents` failure + `meter_reporting_failed` telemetry (`:sync`, `:reconciler`, `:webhook`); idempotent retries on terminal rows; reconciler + webhook meter error coverage aligned to `DefaultHandler`.
+- **Phase 45 (MTR-07..MTR-08):** `guides/metering.md` for public vs internal vs processor boundaries; `guides/telemetry.md` + `guides/operator-runbooks.md` alignment for metering failure sources.
+
+**Theme:** Usage metering provable on **Fake** in CI with stable ops telemetry keys; **PROC-08** / **FIN-03** remain non-goals.
+
+**Milestone audit:** No standalone `v1.10-MILESTONE-AUDIT.md`; closure used **research/v1.10-METERING-SPIKE.md**, per-phase verification, and requirements traceability (8/8 Complete).
+
+**Known deferred items at close:** same **audit-open** carry-forward as prior closes (see `.planning/STATE.md` § Deferred Items).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md)
+- Requirements: [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md)
+
+**Git tag:** `v1.10`
+
+---
+
 ## v1.9 Observability & operator runbooks (Shipped: 2026-04-22)
 
 **Phases completed:** 3 phases (40–42), **8** plans

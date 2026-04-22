@@ -381,12 +381,52 @@
 
 ---
 
+## Milestone: v1.10 — Metered usage + Fake parity
+
+**Shipped:** 2026-04-22  
+**Phases:** 3 | **Plans:** 10
+
+### What Was Built
+
+- **Public metering API** on `Accrue.Billing.report_usage` with documented NimbleOptions, Fake-backed happy path, and `accrue_meter_events` lifecycle semantics (**MTR-01..MTR-03**).
+- **Failure + recovery paths:** guarded meter failure telemetry (`:sync`, `:reconciler`, `:webhook`), idempotent retries on terminal rows, reconciler for stuck `pending`, webhook meter error handling (**MTR-04..MTR-06**).
+- **Operator + host docs:** `guides/metering.md` for API vs persistence vs processor boundaries; `guides/telemetry.md` and `guides/operator-runbooks.md` aligned on `meter_reporting_failed` sources (**MTR-07..MTR-08**).
+
+### What Worked
+
+- Extending the **v1.9** pattern (research spike + per-phase verification + traceability table) kept close scope without a separate `MILESTONE-AUDIT.md`.
+- Centralizing failure telemetry in one choke preserved “emit once” semantics across sync, reconciler, and webhook.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** failed again (`version required for phases archive`); roadmap/requirements archives and `git rm .planning/REQUIREMENTS.md` stayed manual.
+- **`roadmap.analyze`** still did not enumerate current-phase directories in this workspace snapshot, so readiness relied on filesystem checks for `*-SUMMARY.md`.
+
+### Patterns Established
+
+- **Metering guide** as the boundary doc between public `Accrue.Billing`, internal persistence, and processor `report_meter_event/1`.
+- **Fake-first metering ExUnit** as the default proof path before any live-Stripe expansion.
+
+### Key Lessons
+
+1. **Revenue-adjacent async paths** benefit from a **single telemetry choke** tied to row state transitions, not ad-hoc emits per call site.
+2. **Spike + falsifiable MTR IDs** kept metering scope from absorbing PROC-08/FIN-03 work.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three phases (43–45) with concentrated billing + docs + test work.
+- Notable: highest leverage was **deterministic Fake tests** plus **guide alignment** with the v1.9 ops catalog.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.10 | short | 3 | Metering happy path + Fake determinism (43), failure/reconciler/webhook telemetry (44), metering + telemetry/runbook docs (45). |
 | v1.9 | short | 3 | Telemetry catalog + metrics parity + cross-domain example (40–41), operator runbooks + telemetry links (42). |
 | v1.8 | short | 3 | ORG-04 non-Sigra org billing spine (37–38), ORG-09 adoption matrix + `verify_adoption_proof_matrix.sh` + CI README map (39). |
 | v1.7 | short | 5 | VERIFY-01/doc graph + installer CI clarity (32–33), operator home/drill/nav (34), Copy SSOT dashboard (35), audit corpus + verifier map (36). |
@@ -400,6 +440,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.10 | ExUnit on Fake metering flows (happy, sync failure + idempotent retry, reconciler, webhook); guide cross-links | MTR-01..MTR-08 (8/8) archived | `guides/metering.md`, telemetry/runbook rows for `meter_reporting_failed` sources, guarded `MeterEvents` failure path. |
 | v1.9 | `OpsEventContractTest`, `MetricsOpsParityTest`, guide + host wiring docs | OBS/RUN/TEL (6/6) archived | `operator-runbooks.md`, telemetry catalog rows + deep links, cross-domain host example. |
 | v1.8 | Guide ExUnit (`organization_billing_*`), bash `verify_adoption_proof_matrix.sh`, host-integration wiring in CI README | ORG-05..ORG-09 (5/5) archived | Matrix ORG-09 section, root verifier script, contributor map rows for ORG gates. |
 | v1.7 | Doc contract scripts, targeted ExUnit, VERIFY-01 Playwright lanes touching dashboard copy | ADOPT + OPS (11/11) archived | `scripts/ci/README.md` ADOPT map, dual-contract `testing.md` section, `36-FORWARD-COUPLING-OPS-34-35.md`, dashboard `Copy` + `copy_dashboard.js`. |
