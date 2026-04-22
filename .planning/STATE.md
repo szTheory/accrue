@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Metered usage + Fake parity
-status: Milestone **v1.10** opened — requirements + roadmap defined; execution **not started**.
-last_updated: "2026-04-21T12:00:00.000Z"
-last_activity: 2026-04-21 — `/gsd-new-milestone` v1.10 (Phases 43–45).
+status: Defining execution — start with `/gsd-discuss-phase 43` or `/gsd-plan-phase 43`.
+last_updated: "2026-04-22T04:02:58.458Z"
+last_activity: 2026-04-21 — Milestone v1.10 initialized (`REQUIREMENTS.md`, `ROADMAP.md`, `PROJECT.md`).
 progress:
-  total_phases: 3
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -59,3 +59,5 @@ Plan: —
 - **`phases.clear` not run** at milestone open — preserves existing `.planning/phases/40-*` … `42-*` trees; phase numbering continues at **43**.
 
 **Next:** `/gsd-discuss-phase 43` or `/gsd-plan-phase 43`.
+
+**Planned Phase:** 43 (Meter usage happy path + Fake determinism) — 3 plans — 2026-04-22T04:02:58.451Z
