@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.8 Org billing recipes & host integration depth** — **complete** (2026-04-22). Delivered deferred **ORG-04**: broader **non-Sigra** tenancy recipes (Pow, phx.gen.auth, custom org models) on top of the row-scoped **ORG-01..ORG-03** contract, with host-facing docs and VERIFY-01 / adoption-proof alignment (**ORG-09** matrix + `verify_adoption_proof_matrix.sh`). Evidence: `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, phases **37–39**.
+**None (between milestones).** Last shipped: **v1.8 Org billing recipes & host integration depth** (2026-04-22) — archives `.planning/milestones/v1.8-ROADMAP.md`, `v1.8-REQUIREMENTS.md`; git tag **`v1.8`**. Define the next milestone with `/gsd-new-milestone`.
 
 **v1.7 Adoption DX + operator admin depth** is **archived** (2026-04-21). Archives: `.planning/milestones/v1.7-ROADMAP.md`, `v1.7-REQUIREMENTS.md`, `v1.7-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.7`**. Phase worktrees **32–36** cleared for v1.8 numbering (**37+**).
 
@@ -24,9 +24,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue_admin` 0.1.2**.
 
-**Last closed planning milestone:** **v1.8** — Phases **37–39** (2026-04-22), completing **ORG-04** + **ORG-09** adoption-proof alignment. **Prior:** **v1.7** — Phases **32–36** (2026-04-21). Prior org billing (**ORG-01..03**, Sigra-first **ORG-02**) shipped in **v1.3**; see `.planning/milestones/v1.3-REQUIREMENTS.md`.
+**Last closed planning milestone:** **v1.8** — Phases **37–39** (2026-04-22), completing **ORG-04** + **ORG-09** adoption-proof alignment (archived requirements: `.planning/milestones/v1.8-REQUIREMENTS.md`). **Prior:** **v1.7** — Phases **32–36** (2026-04-21). Prior org billing (**ORG-01..03**, Sigra-first **ORG-02**) shipped in **v1.3**; see `.planning/milestones/v1.3-REQUIREMENTS.md`.
 
-**Now:** Pick the next milestone when ready; `.planning/research/` retains v1.8 notes. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Now:** Run `/gsd-new-milestone` for fresh `REQUIREMENTS.md` + roadmap slice; `.planning/research/` retains v1.8 notes. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -146,7 +146,7 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - [x] **OPS-01..03** — Operator home KPIs; customer→invoice drill; `AccrueAdmin.Nav` + README route inventory (Phase 34).
 - [x] **OPS-04..05** — Dashboard `ax-*` / token discipline; operator strings via `AccrueAdmin.Copy` + aligned Playwright (Phase 35).
 
-### Validated v1.8 (`.planning/REQUIREMENTS.md`; milestone closed 2026-04-22)
+### Validated v1.8 (archived in `.planning/milestones/v1.8-REQUIREMENTS.md`; milestone closed 2026-04-22)
 
 Theme: **ORG-04** — non-Sigra org billing recipes, host integration depth, VERIFY/adoption-proof alignment; **PROC-08** and **FIN-03** not in this milestone.
 
@@ -364,7 +364,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - v1.7 opened 2026-04-21: **ADOPT** + **OPS** requirements and **Phases 32–36** roadmap; research summarized in `.planning/research/SUMMARY.md`.
 - v1.7 archived 2026-04-21: requirements + roadmap + milestone audit under `.planning/milestones/v1.7-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.7`**.
 - v1.8 opened 2026-04-21: **ORG-04** (non-Sigra org billing recipes + host integration depth); phases **37+**; **PROC-08** and **FIN-03** remain deferred.
-- v1.8 closed 2026-04-22: Phases **37–39** complete; **ORG-05..ORG-09** validated; adoption matrix + `verify_adoption_proof_matrix.sh` + `scripts/ci/README.md` ORG gates shipped.
+- v1.8 closed 2026-04-22: Phases **37–39** complete; **ORG-05..ORG-09** validated; adoption matrix + `verify_adoption_proof_matrix.sh` + `scripts/ci/README.md` ORG gates shipped; milestone archived under `.planning/milestones/v1.8-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.8`**.
 
 ## Evolution
 
@@ -384,4 +384,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — Phase **39** complete (ORG-09 adoption proof alignment); **v1.8** milestone closed.*
+*Last updated: 2026-04-22 after **v1.8** milestone archival (`/gsd-complete-milestone`) — between milestones; use `/gsd-new-milestone` for requirements.*
