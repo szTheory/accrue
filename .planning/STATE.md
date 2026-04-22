@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Observability & operator runbooks
 status: Phase **41** shipped (**TEL-01**, **OBS-02**, D-18 REQUIREMENTS). Milestone **v1.9** continues through Phase **42**.
-last_updated: "2026-04-22T03:12:31.218Z"
-last_activity: 2026-04-22 — `/gsd-execute-phase 41` completed; see `41-VERIFICATION.md`.
+last_updated: "2026-04-22T12:00:00.000Z"
+last_activity: 2026-04-22 — `/gsd-discuss-phase 42` completed; see `42-CONTEXT.md`.
 progress:
   total_phases: 1
   completed_phases: 0
@@ -30,7 +30,7 @@ Plan: —
 
 **Status:** Phase **41** shipped (**TEL-01**, **OBS-02**, D-18 REQUIREMENTS). Milestone **v1.9** continues through Phase **42**.
 
-**Last Activity:** 2026-04-22 — `/gsd-execute-phase 41` completed; see `41-VERIFICATION.md`.
+**Last Activity:** 2026-04-22 — `/gsd-discuss-phase 42` completed; see `42-CONTEXT.md`.
 
 ## Milestone Progress
 
@@ -40,6 +40,7 @@ Plan: —
 
 ## Current Planning Artifacts
 
+- `.planning/phases/42-operator-runbooks/42-CONTEXT.md` — **Phase 42** implementation decisions (**RUN-01**)
 - `.planning/phases/41-host-metrics-wiring-cross-domain-example/41-VERIFICATION.md` — **Phase 41** verification (**passed**)
 - `.planning/PROJECT.md` — **v1.9** current milestone
 - `.planning/REQUIREMENTS.md` — v1.9 REQ-IDs + traceability
@@ -61,4 +62,4 @@ Plan: —
 - **v1.9** follows post–v1.8 prioritization: **telemetry catalog**, **metrics parity**, **cross-domain examples**, **operator runbooks** before a dedicated **metered billing** milestone (**v1.10+** spike on file).
 - **PROC-08** and **FIN-03** remain **explicit non-goals** for v1.9 (see `REQUIREMENTS.md` Out of scope).
 
-**Next:** `/gsd-discuss-phase 42` (recommended) or `/gsd-plan-phase 42` — operator runbooks (**RUN-01**).
+**Next:** `/gsd-plan-phase 42` — operator runbooks (**RUN-01**); context in `42-CONTEXT.md`.
