@@ -12,7 +12,7 @@
 - ✅ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** shipped **2026-04-21**. VERIFY-01 + doc graph, installer and CI clarity, operator home/drill/nav, dashboard `AccrueAdmin.Copy` SSOT, audit corpus + verifier ownership map. Archives: [`milestones/v1.7-ROADMAP.md`](milestones/v1.7-ROADMAP.md), [`milestones/v1.7-REQUIREMENTS.md`](milestones/v1.7-REQUIREMENTS.md), [`milestones/v1.7-MILESTONE-AUDIT.md`](milestones/v1.7-MILESTONE-AUDIT.md).
 - ✅ **v1.8 Org billing recipes & host integration depth** — Phases **37–39** shipped **2026-04-22**. Delivers deferred **ORG-04**. Archives: [`milestones/v1.8-ROADMAP.md`](milestones/v1.8-ROADMAP.md), [`milestones/v1.8-REQUIREMENTS.md`](milestones/v1.8-REQUIREMENTS.md).
 - ✅ **v1.9 Observability & operator runbooks** — Phases **40–42** shipped **2026-04-22**. Full archive: [`milestones/v1.9-ROADMAP.md`](milestones/v1.9-ROADMAP.md), [`milestones/v1.9-REQUIREMENTS.md`](milestones/v1.9-REQUIREMENTS.md). Gap audit (research): [`research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md).
-- 🚧 **v1.10 Metered usage + Fake parity** — Phases **43–45** (in progress). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md). Spike: [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
+- ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped in planning **2026-04-22** (**MTR-01..MTR-08** complete per `REQUIREMENTS.md` + phase `*-VERIFICATION.md`). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md). Spike: [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md). *(Milestone archive + Hex tag: follow `/gsd-complete-milestone` / release process when ready.)*
 
 ## Phases
 
@@ -266,7 +266,7 @@
 | 41. Host metrics wiring + cross-domain example | v1.9 | 3/3 | Complete | 2026-04-22 |
 | 42. Operator runbooks | v1.9 | 2/2 | Complete | 2026-04-22 |
 
-**v1.10 (in progress)**
+**v1.10 (complete — 2026-04-22)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|

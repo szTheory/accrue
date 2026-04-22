@@ -9,15 +9,15 @@ Milestone theme: **usage metering** with **deterministic Fake-backed** acceptanc
 
 ### Public API & persistence
 
-- [ ] **MTR-01**: Host developer can call `Accrue.Billing.report_usage/3` and `report_usage!/3` with documented NimbleOptions (`:value`, `:timestamp`, `:identifier`, `:operation_id`, `:payload`) against **Fake** without live Stripe credentials.
-- [ ] **MTR-02**: Meter usage writes are observable through `accrue_meter_events` with `pending` / `reported` / `failed` semantics consistent with ExDoc and test helpers.
-- [ ] **MTR-03**: **Fake happy path:** after successful `report_usage`, the meter event row reaches `reported`, processor receives deterministic identifiers, and tests can assert via `meter_events_for/1` (or successor public test surface) without importing private modules.
+- [x] **MTR-01**: Host developer can call `Accrue.Billing.report_usage/3` and `report_usage!/3` with documented NimbleOptions (`:value`, `:timestamp`, `:identifier`, `:operation_id`, `:payload`) against **Fake** without live Stripe credentials. *(Validated Phase 43 — `43-VERIFICATION.md`, 2026-04-22.)*
+- [x] **MTR-02**: Meter usage writes are observable through `accrue_meter_events` with `pending` / `reported` / `failed` semantics consistent with ExDoc and test helpers. *(Validated Phase 43 — `43-VERIFICATION.md`, 2026-04-22.)*
+- [x] **MTR-03**: **Fake happy path:** after successful `report_usage`, the meter event row reaches `reported`, processor receives deterministic identifiers, and tests can assert via `meter_events_for/1` (or successor public test surface) without importing private modules. *(Validated Phase 43 — `43-VERIFICATION.md`, 2026-04-22.)*
 
 ### Reliability, idempotency, and async paths
 
-- [ ] **MTR-04**: **Fake sync failure:** forcing processor `{:error, _}` yields `failed` row and **exactly one** `[:accrue, :ops, :meter_reporting_failed]` with `source: :sync` (or documented actual atom); idempotent retry with the same identifier does **not** duplicate failure telemetry.
-- [ ] **MTR-05**: **Reconciler:** stuck `pending` rows (crash-after-commit story) are picked up by `Accrue.Jobs.MeterEventsReconciler` with success or `source: :reconciler` failure telemetry as documented in `guides/telemetry.md`.
-- [ ] **MTR-06**: **Webhook:** `billing.meter.error_report_triggered` / `v1.billing.meter.error_report_triggered` maps to failed persistence + `source: :webhook` telemetry; extend or add tests where gaps remain vs existing handler coverage.
+- [x] **MTR-04**: **Fake sync failure:** forcing processor `{:error, _}` yields `failed` row and **exactly one** `[:accrue, :ops, :meter_reporting_failed]` with `source: :sync` (or documented actual atom); idempotent retry with the same identifier does **not** duplicate failure telemetry. *(Validated Phase 44 — `44-VERIFICATION.md`, 2026-04-22.)*
+- [x] **MTR-05**: **Reconciler:** stuck `pending` rows (crash-after-commit story) are picked up by `Accrue.Jobs.MeterEventsReconciler` with success or `source: :reconciler` failure telemetry as documented in `guides/telemetry.md`. *(Validated Phase 44 — `44-VERIFICATION.md`, 2026-04-22.)*
+- [x] **MTR-06**: **Webhook:** `billing.meter.error_report_triggered` / `v1.billing.meter.error_report_triggered` maps to failed persistence + `source: :webhook` telemetry; extend or add tests where gaps remain vs existing handler coverage. *(Validated Phase 44 — `44-VERIFICATION.md`, 2026-04-22.)*
 
 ### Documentation & operator alignment
 
@@ -43,16 +43,17 @@ Milestone theme: **usage metering** with **deterministic Fake-backed** acceptanc
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MTR-01 | Phase 43 | Pending |
-| MTR-02 | Phase 43 | Pending |
-| MTR-03 | Phase 43 | Pending |
-| MTR-04 | Phase 44 | Pending |
-| MTR-05 | Phase 44 | Pending |
-| MTR-06 | Phase 44 | Pending |
+| MTR-01 | Phase 43 | Complete |
+| MTR-02 | Phase 43 | Complete |
+| MTR-03 | Phase 43 | Complete |
+| MTR-04 | Phase 44 | Complete |
+| MTR-05 | Phase 44 | Complete |
+| MTR-06 | Phase 44 | Complete |
 | MTR-07 | Phase 45 | Complete |
 | MTR-08 | Phase 45 | Complete |
 
 **Coverage:** v1.10 requirements: **8** total · Mapped: **8** · Unmapped: **0**
 
 ---
-*Requirements defined: 2026-04-21 — `/gsd-new-milestone` after v1.9 archival.*
+*Requirements defined: 2026-04-21 — `/gsd-new-milestone` after v1.9 archival.*  
+*Traceability aligned to phase verification: 2026-04-22 — MTR-01..MTR-08 marked complete per Phases 43–45 `*-VERIFICATION.md`.*
