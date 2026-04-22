@@ -2,6 +2,10 @@
 
 This guide is the **non-Sigra** mainline for **organization-shaped** Stripe billing on Phoenix: you establish identity with `phx.gen.auth` (or equivalent), resolve an **active organization** from the session with **membership checks**, attach **`use Accrue.Billable`** to the org row, and route subscribe/cancel flows through a small host billing facade that accepts **`Organization`** as the billable. It complements the adapter contract in [Auth adapters](auth_adapters.md)—that file stays the `Accrue.Auth` SSOT; here we focus on **session → organization → billable** and **ORG-03** obligations.
 
+## Adoption proof matrix (ORG-09)
+
+For the **blocking vs advisory** map of what merge-blocking CI proves versus optional recipe lanes, read [`examples/accrue_host/docs/adoption-proof-matrix.md`](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/docs/adoption-proof-matrix.md). The **Organization billing proof (ORG-09)** subsection there is the canonical entry point for ORG-09. Merge-blocking drift in that matrix is enforced by **`scripts/ci/verify_adoption_proof_matrix.sh`** (run from the repo root). **Non-Sigra** in this guide still refers to **`Accrue.Auth` / `Accrue.Billable`** contracts and how you wire them—not a promise that the demo host never enables Sigra for convenience.
+
 ## Who this guide is for
 
 Teams shipping **B2B or multi-tenant SaaS** where the Stripe Customer should follow the **organization**, not only the signed-in user. You already run (or plan) `phx.gen.auth`, you own org/membership tables, and you want a single linear checklist instead of piecing together fragments from several guides.
