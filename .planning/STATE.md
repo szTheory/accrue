@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Admin & operator UX
-status: building
-last_updated: "2026-04-22T18:10:00.000Z"
-last_activity: 2026-04-22 — Phase **49** executed (ADM-02 drill + tests + README note).
+status: completed
+last_updated: "2026-04-22T18:54:34.642Z"
+last_activity: 2026-04-22 — Phase **49** executed (`049-01` / `049-02` plans, verification, review).
 progress:
-  total_phases: 3
-  completed_phases: 2
+  total_phases: 1
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
 ---
