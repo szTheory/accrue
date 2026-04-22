@@ -6,6 +6,25 @@ defmodule AccrueAdmin.Copy do
   and related chrome described in `.planning/phases/27-microcopy-and-operator-strings/27-CONTEXT.md`.
   """
 
+  alias AccrueAdmin.Copy.Subscription
+
+  defdelegate subscription_breadcrumb_subscriptions(), to: Subscription
+  defdelegate subscription_detail_eyebrow(), to: Subscription
+  defdelegate subscription_kpi_section_aria_label(), to: Subscription
+  defdelegate subscription_proration_create(), to: Subscription
+  defdelegate subscription_proration_none(), to: Subscription
+  defdelegate subscription_proration_always_invoice(), to: Subscription
+  defdelegate subscription_kpi_status_label(), to: Subscription
+  defdelegate subscription_kpi_canonical_predicates_label(), to: Subscription
+  defdelegate subscription_kpi_timeline_rows_label(), to: Subscription
+  defdelegate subscription_action_cancel_now(), to: Subscription
+  defdelegate subscription_action_cancel_at_period_end(), to: Subscription
+  defdelegate subscription_action_resume(), to: Subscription
+  defdelegate subscription_action_swap_plan(), to: Subscription
+  defdelegate subscription_action_pause_collection(), to: Subscription
+  defdelegate subscription_action_create_comp_replacement(), to: Subscription
+  defdelegate subscription_page_title(), to: Subscription
+
   def data_table_default_empty_title, do: "Nothing in this list yet"
 
   def data_table_default_empty_copy,
