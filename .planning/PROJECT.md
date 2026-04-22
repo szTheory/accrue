@@ -14,7 +14,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ### v1.11 — Public Hex release + post-release continuity
 
-**Goal:** Ship **`accrue`** and **`accrue_admin`** to Hex for the metering + accumulated work since **0.1.2**, using the **Release Please + linked-versions** path, then align first-user docs, verifiers, and planning callouts so **Hex / repo / guides** agree—without **PROC-08** or **FIN-03**.
+**Goal:** Ship **`accrue`** and **`accrue_admin`** to Hex for the metering + accumulated work since the first public **0.1.x** cuts, using the **Release Please + linked-versions** path, then align first-user docs, verifiers, and planning callouts so **Hex / repo / guides** agree—without **PROC-08** or **FIN-03**.
 
 **Target features:**
 
@@ -35,11 +35,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-**Public Hex (last published):** **`accrue` 0.1.2**, **`accrue_admin` 0.1.2** — **v1.11** targets publishing the next linked versions from **`main`** (workspace **`mix.exs`** currently **`0.3.0`**; ship version is whatever Release Please + merge produce).
+**Public Hex (last published):** **`accrue` 0.3.0**, **`accrue_admin` 0.3.0** — aligned with workspace **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version "0.3.0"`** at this commit (Release Please + manifest remain the numeric SSOT for the next bump).
 
 **Last shipped planning milestone:** **v1.10** — Phases **43–45** (2026-04-22): metering happy path + Fake determinism (**43**), failures + reconciler + webhook (**44**), docs + telemetry/runbook alignment (**45**); archives `.planning/milestones/v1.10-*`; planning git tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
 
-**Now:** **v1.11** active — **Phase 46** complete (2026-04-22): **REL-01** human-gated Release PR automation (`workflow_dispatch` only), **REL-02** manifest ↔ `mix.exs` SSOT script + merge-blocking **`release-manifest-ssot`**, **REL-04** **`46-VERIFICATION.md`** D-12 ship index template. Next: **Phase 47** (post-release docs & planning continuity). After Hex is live, use **`/gsd-discuss-phase 48`** or a fresh **`/gsd-new-milestone`** slice for the next implementation theme.
+**Now:** **v1.11** active — **Phase 46** complete (2026-04-22): **REL-01** human-gated Release PR automation (`workflow_dispatch` only), **REL-02** manifest ↔ `mix.exs` SSOT script + merge-blocking **`release-manifest-ssot`**, **REL-04** **`46-VERIFICATION.md`** D-12 ship index template. **Phase 47** (post-release docs & planning continuity) is **in progress** — `RELEASING.md`, **`first_hour`**, verifiers, and planning mirrors updated to **0.3.0** / routine-release framing. After Phase **47** closes, use **`/gsd-discuss-phase 48`** or a fresh **`/gsd-new-milestone`** slice for the next implementation theme.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 

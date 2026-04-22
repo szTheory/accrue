@@ -8,6 +8,8 @@
 
 **Theme:** Publish **`accrue`** / **`accrue_admin`** to Hex via Release Please **linked versions**, then align **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning Hex version callouts. **PROC-08** / **FIN-03** remain non-goals.
 
+**Current public Hex (lockstep):** **`accrue` 0.3.0** and **`accrue_admin` 0.3.0** — mirror **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version`** (not a second SSOT).
+
 **Requirements:** `.planning/REQUIREMENTS.md` (**REL-**, **DOC-**, **HYG-**)
 
 **Next after ship:** `/gsd-discuss-phase 48` or `/gsd-new-milestone` for the next implementation slice.
