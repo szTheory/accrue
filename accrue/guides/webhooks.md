@@ -47,6 +47,7 @@ end
 Invalid signatures should return a generic `400`. Host misconfiguration should
 surface as a generic server failure, with the actionable detail carried by the
 stable diagnostic code and linked fix path in the troubleshooting guide.
+Raw-body ordering and parser placement issues map to **`ACCRUE-DX-WEBHOOK-RAW-BODY`** — see [Troubleshooting — `ACCRUE-DX-WEBHOOK-RAW-BODY`](troubleshooting.md#accrue-dx-webhook-raw-body) for the fix matrix row.
 
 ## Replay
 
