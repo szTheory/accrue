@@ -380,4 +380,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 — Phase **37** complete (non-Sigra org billing doc spine); **ORG-05** / **ORG-06** validated; v1.8 continues with phases **38–39**.*
+*Last updated: 2026-04-21 — Phase **38** complete (Pow ORG-07 + custom org ORG-08 in `organization_billing.md`); **ORG-07** / **ORG-08** validated; v1.8 continues with phase **39**.*

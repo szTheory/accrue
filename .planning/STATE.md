@@ -3,34 +3,34 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Org billing recipes & host integration depth
 status: active
-last_updated: "2026-04-21T23:55:00.000Z"
-last_activity: 2026-04-21 — Phase 37 executed (doc spine + installer/README discoverability)
+last_updated: "2026-04-22T00:20:00.000Z"
+last_activity: 2026-04-22 — Phase 38 execution + verification (`38-VERIFICATION.md`)
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 2
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-21)
+See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.8** — ORG-04 non-Sigra org billing recipes and host integration depth (phases **37+**).
+**Current focus:** **v1.8** — ORG-04 non-Sigra org billing recipes; **phase 39** next (proof alignment / ORG-09).
 
 ## Current Position
 
-Phase: **38** — next in v1.8 (Pow + custom org boundaries)
+Phase: **39** — next in v1.8 (org billing proof alignment)
 
 Plan: —
 
-**Status:** Phase **37** complete — non-Sigra org billing doc spine shipped; v1.8 continues with phases **38–39**.
+**Status:** Phase **38** complete — Pow ORG-07 + custom org ORG-08 docs and contract tests shipped.
 
-**Last Activity:** 2026-04-21 — Phase 37 execution + verification (`37-VERIFICATION.md`)
+**Last Activity:** 2026-04-22 — Phase 38 execution + verification (`38-VERIFICATION.md`)
 
 ## Milestone Progress
 
@@ -62,4 +62,6 @@ Plan: —
 - **v1.8** prioritizes **ORG-04**; **PROC-08** and **FIN-03** remain out of scope.
 - Phase numbering continues from **37** (no `--reset-phase-numbers`).
 
-**Last completed phase (v1.8):** **37** — 2026-04-21 (3/3 plans). **Prior milestone capstone:** 36 — 2026-04-21.
+**Last completed phase (v1.8):** **38** — 2026-04-22 (2/2 plans). **Prior:** 37 — 2026-04-21 (3/3 plans). **Prior milestone capstone:** 36 — 2026-04-21.
+
+**Planned Phase:** 39 (Org billing proof alignment) — ORG-09.
