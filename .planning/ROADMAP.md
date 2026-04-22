@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- **v1.13 Integrator path + secondary admin parity** — Phases **51–53** (active). Golden-path docs + adoption proof alignment; auxiliary admin (**coupons**, **promotion codes**, **Connect**, **events**) **`AccrueAdmin.Copy`** + **`ax-*`** + **VERIFY-01**. Live requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
 - ✅ **v1.12 Admin & operator UX** — Phases **48–50** shipped **2026-04-22**. Post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright on touched routes. Archives: [`milestones/v1.12-ROADMAP.md`](milestones/v1.12-ROADMAP.md), [`milestones/v1.12-REQUIREMENTS.md`](milestones/v1.12-REQUIREMENTS.md).
 - ✅ **v1.11 Public Hex release + post-release continuity** — Phases **46–47** shipped **2026-04-22**. Linked **`accrue`** / **`accrue_admin`** **0.3.0** on Hex; **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning mirrors aligned. Archives: [`milestones/v1.11-ROADMAP.md`](milestones/v1.11-ROADMAP.md), [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md).
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
@@ -17,6 +18,54 @@
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
 ## Phases
+
+<details open>
+<summary>🚧 v1.13 Integrator path + secondary admin parity (Phases 51–53) — ACTIVE</summary>
+
+**Milestone goal:** A net-new Phoenix team **lands successfully on the first try**—README / **First Hour** / quickstart / VERIFY-01 tell one story—and **auxiliary admin** pages no longer feel like second-class operators next to customers/subscriptions/invoices, without **PROC-08**, **FIN-03**, or new UI kits.
+
+**Depends on:** **v1.12** shipped; **Hex `0.3.0`** pair is the published baseline; existing **VERIFY-01** host contract and **Copy export** machinery from **v1.11–v1.12**.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 51 | Integrator golden path & docs | One coherent **clone → install → Fake subscription → proof** narrative; VERIFY-01 / CI lane discoverability from repo root; first-run troubleshooting anchors with stable slugs. | INT-01, INT-02, INT-03 |
+| 52 | Integrator proof + package alignment + auxiliary copy (part 1) | Adoption matrix + evaluator walkthrough stay honest vs touched lanes; **`verify_package_docs`** + ExDoc pins stay aligned; route **coupons** + **promotion codes** operator strings through **`AccrueAdmin.Copy`** + tests. | INT-04, INT-05, AUX-01, AUX-02 |
+| 53 | Auxiliary admin — Connect, events, layout, VERIFY | **Connect** + **events** surfaces meet copy SSOT; **`ax-*` / token** discipline + registered exceptions; **Playwright** + **axe** on all materially touched auxiliary mounted paths. | AUX-03, AUX-04, AUX-05, AUX-06 |
+
+**Success criteria (milestone):**
+
+1. **INT-01..INT-05** and **AUX-01..AUX-06** satisfied with committed docs, **LiveView**, tests, and phase verification notes.
+2. No **PROC-08** / **FIN-03** scope creep; no new third-party UI kits.
+3. **VERIFY-01** policy (**merge-blocking** vs **advisory** lanes) unchanged unless an explicit maintainer decision documents a rename (discouraged).
+
+**Phase 51 — Integrator golden path & docs**
+
+**Goal:** Remove **first-hour contradictions** and document **first-run failure recovery** where hosts actually look.
+
+**Success criteria:**
+
+1. A maintainer can diff-check **INT-01..INT-03** claims against the three doc spines + host README without finding stale commands, wrong env names, or broken anchors introduced by this milestone.
+2. **VERIFY-01** references from the repo root remain within the **two-hop** spirit of **ADOPT-01** (adjust text only if repo IA changed).
+
+**Phase 52 — Integrator proof + package alignment + auxiliary copy (part 1)**
+
+**Goal:** Proof artifacts and Hex-facing docs stay **evidence-true** while **`Coupons*`** and **`PromotionCode*`** pick up **Copy** SSOT.
+
+**Success criteria:**
+
+1. **`verify_package_docs`** + related ExUnit gates green on **`main`** after changes.
+2. **Playwright** / **LiveView** tests do not reintroduce raw operator literals for strings owned by **`AccrueAdmin.Copy`** on touched coupon/promo paths.
+
+**Phase 53 — Auxiliary admin — Connect, events, layout, VERIFY**
+
+**Goal:** Parity for **Connect** and **events** + **VERIFY-01** extension for auxiliary routes.
+
+**Success criteria:**
+
+1. **AUX-03..AUX-06** verified with the same **serious/critical axe** posture as **v1.12** on touched routes.
+2. **Theme exceptions** documented before merge for any unavoidable visual deviation.
+
+</details>
 
 <details>
 <summary>✅ v1.12 Admin & operator UX (Phases 48–50) — SHIPPED 2026-04-22</summary>
