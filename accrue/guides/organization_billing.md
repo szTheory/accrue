@@ -18,7 +18,7 @@ For **which row** owns finance exports and revenue reporting, see [Finance hando
 
 ## ORG-03 boundaries at a glance
 
-Accrue stores billing state, but **cross-tenant isolation** is host-owned. Every host surface falls into one of four path classes: **public**, **admin**, **webhook replay**, and **export**. The full ORG-03 requirement text lives in the repo milestone [v1.3-REQUIREMENTS.md](https://github.com/szTheory/accrue/blob/main/.planning/milestones/v1.3-REQUIREMENTS.md) (ORG-03); Phase **38** / **ORG-07** / **ORG-08** add deeper anti-patterns for Pow, custom org resolution, and replay matrices.
+Accrue stores billing state, but **cross-tenant isolation** is host-owned. Every host surface falls into one of four path classes: **public**, **admin**, **webhook replay**, and **export**. The full ORG-03 requirement text lives in the repo milestone [v1.3-REQUIREMENTS.md](https://github.com/szTheory/accrue/blob/main/.planning/milestones/v1.3-REQUIREMENTS.md) (ORG-03); Phase 38 (**ORG-07**, **ORG-08**) adds deeper anti-patterns for Pow, custom org resolution, and replay matrices.
 
 | Path class | Threat one-liner | Host obligation | Enforce at | Further reading |
 |------------|------------------|------------------|------------|-------------------|

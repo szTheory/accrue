@@ -17,7 +17,10 @@ defmodule Accrue.Docs.OrganizationBillingGuideTest do
           "AccrueHost.Billing",
           "auth_adapters.md",
           "Phase 38",
-          "owner_type"
+          "owner_type",
+          "ORG-07",
+          "MyApp.Auth.Pow",
+          "Pow.Plug.current_user"
         ] do
       assert guide =~ needle, "expected guides/organization_billing.md to include #{inspect(needle)}"
     end
