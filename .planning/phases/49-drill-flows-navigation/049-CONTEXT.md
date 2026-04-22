@@ -38,7 +38,7 @@ Deliver **ADM-02** and **ADM-03** for **v1.12**: make **one** scoped, high-traff
 
 - **D-11:** **Primary proof** of ADM-02 is **`Phoenix.LiveViewTest`** (and direct **`AccrueAdmin.Copy`** unit tests if new strings are unavoidable before Phase **50** — prefer reusing existing keys). Cover: breadcrumb **href** targets, **Related** links, **org** query preservation, and **no-regression** on redirects/flashes.
 - **D-12:** **`examples/accrue_host`**: at least **one** integration-style test that walks the **named concrete routes** through the **mounted** admin router (fixtures as existing host tests do), so wiring mistakes are caught outside `accrue_admin` isolation.
-- **D-13 (Playwright — Phase 48 D-13 carry-forward):** **Do not** add **new** VERIFY-01 **Playwright** scenarios or expand **axe** breadth in Phase **49**. **Exception:** an **existing** merge-blocking spec **breaks** because of DOM/route changes — apply the **smallest** fix (**roles/labels** first; **at most one** stable `data-test-id`** on the touched region** if required).
+- **D-13 (Playwright — Phase 48 D-13 carry-forward):** **Do not** add **new** VERIFY-01 **Playwright** scenarios or expand **axe** breadth in Phase **49**. **Exception:** an **existing** merge-blocking spec **breaks** because of DOM/route changes — apply the **smallest** fix (**roles/labels** first; **at most one** stable `data-test-id` on the touched region if required).
 - **D-14:** Full **ADM-06** Playwright + **axe** pass for **all** v1.12-touched mounted paths remains **Phase 50**.
 
 ### 5 — Ecosystem & architecture principles (non-normative but guides tradeoffs)
