@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Public Hex release + post-release continuity
-status: defining_execution
-last_updated: "2026-04-22T12:00:00.000Z"
-last_activity: 2026-04-22 — v1.11 opened (REL/DOC/HYG requirements; Phases 46–47).
+status: planning
+last_updated: "2026-04-22T15:39:01.467Z"
+last_activity: 2026-04-22 — `/gsd-new-milestone` (release + continuity); **`phases.clear` not run** (retains **40–45** phase trees).
 progress:
   total_phases: 2
   completed_phases: 0
