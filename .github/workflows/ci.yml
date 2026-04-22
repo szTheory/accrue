@@ -359,6 +359,9 @@ jobs:
       - name: VERIFY-01 README contract (shift-left)
         run: bash scripts/ci/verify_verify01_readme_contract.sh
 
+      - name: ORG-09 adoption proof matrix literals
+        run: bash scripts/ci/verify_adoption_proof_matrix.sh
+
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
