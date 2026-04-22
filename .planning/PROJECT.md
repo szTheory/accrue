@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.8 Org billing recipes & host integration depth** — **active** (opened 2026-04-21). Delivers deferred **ORG-04**: broader **non-Sigra** tenancy recipes (Pow, phx.gen.auth, custom org models) on top of the row-scoped **ORG-01..ORG-03** contract, with host-facing docs and VERIFY-01 / adoption-proof alignment. Root `.planning/REQUIREMENTS.md` + `.planning/ROADMAP.md` track this slice.
+**v1.8 Org billing recipes & host integration depth** — **complete** (2026-04-22). Delivered deferred **ORG-04**: broader **non-Sigra** tenancy recipes (Pow, phx.gen.auth, custom org models) on top of the row-scoped **ORG-01..ORG-03** contract, with host-facing docs and VERIFY-01 / adoption-proof alignment (**ORG-09** matrix + `verify_adoption_proof_matrix.sh`). Evidence: `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, phases **37–39**.
 
 **v1.7 Adoption DX + operator admin depth** is **archived** (2026-04-21). Archives: `.planning/milestones/v1.7-ROADMAP.md`, `v1.7-REQUIREMENTS.md`, `v1.7-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.7`**. Phase worktrees **32–36** cleared for v1.8 numbering (**37+**).
 
@@ -24,9 +24,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue_admin` 0.1.2**.
 
-**Last closed planning milestone:** **v1.7** — Phases **32–36** (2026-04-21). **v1.8** continues phase numbering from **37**. Prior org billing (**ORG-01..03**, Sigra-first **ORG-02**) shipped in **v1.3**; see `.planning/milestones/v1.3-REQUIREMENTS.md`.
+**Last closed planning milestone:** **v1.8** — Phases **37–39** (2026-04-22), completing **ORG-04** + **ORG-09** adoption-proof alignment. **Prior:** **v1.7** — Phases **32–36** (2026-04-21). Prior org billing (**ORG-01..03**, Sigra-first **ORG-02**) shipped in **v1.3**; see `.planning/milestones/v1.3-REQUIREMENTS.md`.
 
-**Now:** `.planning/REQUIREMENTS.md` defines **ORG-04** scope; `.planning/research/` holds v1.8 milestone research. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Now:** Pick the next milestone when ready; `.planning/research/` retains v1.8 notes. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -146,12 +146,15 @@ v1.2 Adoption + Trust shipped and validated on 2026-04-17. Detailed requirement 
 - [x] **OPS-01..03** — Operator home KPIs; customer→invoice drill; `AccrueAdmin.Nav` + README route inventory (Phase 34).
 - [x] **OPS-04..05** — Dashboard `ax-*` / token discipline; operator strings via `AccrueAdmin.Copy` + aligned Playwright (Phase 35).
 
-### Active (v1.8 — in progress)
+### Validated v1.8 (`.planning/REQUIREMENTS.md`; milestone closed 2026-04-22)
 
-See `.planning/REQUIREMENTS.md` for checkboxes and REQ-IDs. Theme: **ORG-04** — non-Sigra org billing recipes, host integration depth, VERIFY/adoption-proof alignment; **PROC-08** and **FIN-03** not in this milestone.
+Theme: **ORG-04** — non-Sigra org billing recipes, host integration depth, VERIFY/adoption-proof alignment; **PROC-08** and **FIN-03** not in this milestone.
 
 - [x] **ORG-05** — Single non-Sigra doc spine for session → billable + ORG-03 checklist (`accrue/guides/organization_billing.md` + cross-links). **Validated in Phase 37.**
 - [x] **ORG-06** — phx.gen.auth-oriented checklist in that spine (Accrue.Auth, Accrue.Billable, host billing facade). **Validated in Phase 37.**
+- [x] **ORG-07** — Pow-oriented recipe + honest maintenance notes. **Validated in Phase 38.**
+- [x] **ORG-08** — Custom org model checklist + ORG-03 anti-patterns. **Validated in Phase 38.**
+- [x] **ORG-09** — Adoption proof matrix ORG-09 section, merge-blocking bash verifier, contributor map, guide cross-links + ExUnit. **Validated in Phase 39.**
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -343,7 +346,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.6 closes admin UX polish without new billing primitives | Operator trust (a11y, mobile, copy) advances adoption without PROC-08/FIN-03 scope creep | ✓ Good |
 | Post-ship Phases 30–31 close audit corpus + advisory integration without Hex release churn | Keeps evaluator-facing proof contracts aligned while preserving existing `v1.6` tag semantics | ✓ Good |
 | v1.7 combines adoption/DX with operator admin depth without billing primitive expansion | After v1.6 polish, the highest leverage is clearer VERIFY-01 + install/docs matrices plus intentional admin entry flows—not PROC/FIN/ORG scope creep | ✓ Good |
-| v1.8 delivers ORG-04 after Sigra-first org proof | Non-Sigra teams need first-class recipes and proof that **ORG-03** boundaries hold; scope stays docs + host patterns + VERIFY alignment—no PROC-08/FIN-03 | — Pending |
+| v1.8 delivers ORG-04 after Sigra-first org proof | Non-Sigra teams need first-class recipes and proof that **ORG-03** boundaries hold; scope stays docs + host patterns + VERIFY alignment—no PROC-08/FIN-03 | ✓ Good |
 
 ## Current Milestone Notes
 
@@ -361,6 +364,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - v1.7 opened 2026-04-21: **ADOPT** + **OPS** requirements and **Phases 32–36** roadmap; research summarized in `.planning/research/SUMMARY.md`.
 - v1.7 archived 2026-04-21: requirements + roadmap + milestone audit under `.planning/milestones/v1.7-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.7`**.
 - v1.8 opened 2026-04-21: **ORG-04** (non-Sigra org billing recipes + host integration depth); phases **37+**; **PROC-08** and **FIN-03** remain deferred.
+- v1.8 closed 2026-04-22: Phases **37–39** complete; **ORG-05..ORG-09** validated; adoption matrix + `verify_adoption_proof_matrix.sh` + `scripts/ci/README.md` ORG gates shipped.
 
 ## Evolution
 
@@ -380,4 +384,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 — Phase **38** complete (Pow ORG-07 + custom org ORG-08 in `organization_billing.md`); **ORG-07** / **ORG-08** validated; v1.8 continues with phase **39**.*
+*Last updated: 2026-04-22 — Phase **39** complete (ORG-09 adoption proof alignment); **v1.8** milestone closed.*
