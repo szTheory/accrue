@@ -11,11 +11,16 @@
 - ✅ **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–31**: core admin polish shipped **2026-04-20**; post-ship Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
 - ✅ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** shipped **2026-04-21**. VERIFY-01 + doc graph, installer and CI clarity, operator home/drill/nav, dashboard `AccrueAdmin.Copy` SSOT, audit corpus + verifier ownership map. Archives: [`milestones/v1.7-ROADMAP.md`](milestones/v1.7-ROADMAP.md), [`milestones/v1.7-REQUIREMENTS.md`](milestones/v1.7-REQUIREMENTS.md), [`milestones/v1.7-MILESTONE-AUDIT.md`](milestones/v1.7-MILESTONE-AUDIT.md).
 - ✅ **v1.8 Org billing recipes & host integration depth** — Phases **37–39** shipped **2026-04-22**. Delivers deferred **ORG-04**. Archives: [`milestones/v1.8-ROADMAP.md`](milestones/v1.8-ROADMAP.md), [`milestones/v1.8-REQUIREMENTS.md`](milestones/v1.8-REQUIREMENTS.md).
-- ✅ **v1.9 Observability & operator runbooks** — Phases **40–42** shipped **2026-04-22**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md). Gap audit: [`.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md).
+- ✅ **v1.9 Observability & operator runbooks** — Phases **40–42** shipped **2026-04-22**. Full archive: [`milestones/v1.9-ROADMAP.md`](milestones/v1.9-ROADMAP.md), [`milestones/v1.9-REQUIREMENTS.md`](milestones/v1.9-REQUIREMENTS.md). Gap audit (research): [`research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md).
 
 ## Phases
 
-### v1.9 Observability & operator runbooks (Phases 40–42)
+### Next milestone (planning)
+
+Metered billing / usage metering spike: [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md). Run `/gsd-new-milestone` when ready to open **v1.10+** requirements and roadmap.
+
+<details>
+<summary>✅ v1.9 Observability & operator runbooks (Phases 40–42) — SHIPPED 2026-04-22</summary>
 
 **Milestone goal:** Close the adoption gap between “telemetry exists” and “operators know what to subscribe to, alert on, and do next” — **without** new billing primitives or Stripe Dashboard parity.
 
@@ -32,6 +37,10 @@
 1. No undocumented `[:accrue, :ops, :*]` event from the v1.9 gap audit §1 remains absent from the published catalog (OBS-01 + OBS-04).
 2. A host developer can wire `Accrue.Telemetry.Metrics.defaults/0` with documented parity to ops signals (TEL-01).
 3. Runbook entries exist for each ops class called out in **RUN-01** (RUN-01).
+
+**Archives:** [`milestones/v1.9-ROADMAP.md`](milestones/v1.9-ROADMAP.md), [`milestones/v1.9-REQUIREMENTS.md`](milestones/v1.9-REQUIREMENTS.md).
+
+</details>
 
 <details>
 <summary>✅ v1.8 Org billing recipes & host integration depth (Phases 37–39) — SHIPPED 2026-04-22</summary>
@@ -206,6 +215,14 @@
 | 37. Org billing recipes — doc spine + phx.gen.auth | v1.8 | 3/3 | Complete | 2026-04-21 |
 | 38. Org billing recipes — Pow + custom org boundaries | v1.8 | 2/2 | Complete | 2026-04-22 |
 | 39. Org billing proof alignment | v1.8 | 3/3 | Complete | 2026-04-22 |
+
+**v1.9 (complete — 2026-04-22)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 40. Telemetry catalog + guide truth | v1.9 | 3/3 | Complete | 2026-04-22 |
+| 41. Host metrics wiring + cross-domain example | v1.9 | 3/3 | Complete | 2026-04-22 |
+| 42. Operator runbooks | v1.9 | 2/2 | Complete | 2026-04-22 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

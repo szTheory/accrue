@@ -1,15 +1,32 @@
 # Milestones
 
-## v1.9 Observability & operator runbooks (Planning opened: 2026-04-21)
+## v1.9 Observability & operator runbooks (Shipped: 2026-04-22)
 
-**Status:** planning — execution **Phases 40–42** (see [`.planning/ROADMAP.md`](ROADMAP.md) and [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md)).
+**Phases completed:** 3 phases (40–42), **8** plans
 
-**Theme:** Telemetry event catalog, `Telemetry.Metrics` defaults parity (or documented gaps), cross-domain host examples, operator runbooks. **PROC-08** / **FIN-03** remain non-goals.
+**Key accomplishments:**
+
+- **Phase 40 (OBS-01, OBS-03, OBS-04):** Authoritative `guides/telemetry.md` ops catalog with measurements/metadata; firehose vs ops split; `OpsEventContractTest` anti-drift; `[:accrue, :ops, :webhook_dlq, :dead_lettered]` on exhausted dispatch; gap audit §1 reconciled in guide + research doc.
+- **Phase 41 (OBS-02, TEL-01):** `MetricsOpsParityTest` (or documented omissions) vs ops signals; cross-domain host `Telemetry` example in docs + `examples/accrue_host`.
+- **Phase 42 (RUN-01):** `accrue/guides/operator-runbooks.md` (Oban topology, Stripe verification, D-09 mini-playbooks); `telemetry.md` preface and row-level links to runbooks.
+
+**Theme:** Telemetry discoverability, metrics wiring parity, operator first-response runbooks — **no** new billing primitives. **PROC-08** / **FIN-03** remain non-goals.
 
 **Research:**
 
 - [`.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md)
-- [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md) (input to **v1.10+**, not v1.9 scope)
+- [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md) (input to **v1.10+**)
+
+**Milestone audit:** No standalone `v1.9-MILESTONE-AUDIT.md`; closure used gap-audit research, per-phase verification, and requirements traceability (6/6 Complete).
+
+**Known deferred items at close:** same **audit-open** carry-forward as prior closes (see `.planning/STATE.md` § Deferred Items).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.9-ROADMAP.md`](milestones/v1.9-ROADMAP.md)
+- Requirements: [`milestones/v1.9-REQUIREMENTS.md`](milestones/v1.9-REQUIREMENTS.md)
+
+**Git tag:** `v1.9`
 
 ---
 
