@@ -35,7 +35,7 @@
 2. **`verify_package_docs`** + package docs ExUnit gate pass on **`main`** after release.
 3. Planning docs no longer claim **0.1.2** as “current Hex” once a newer version is published.
 
-**Phase 46 — Release train & Hex publish**
+### Phase 46: Release train & Hex publish
 
 **Goal:** Executable maintainer path from green **`main`** → merged release PR → Hex + tags.
 
@@ -43,7 +43,7 @@
 
 1. **REL-01**, **REL-02**, **REL-04** satisfied with evidence (PR links, tag names, Hex version checks) captured in phase verification.
 
-**Phase 47 — Post-release docs & planning continuity**
+### Phase 47: Post-release docs & planning continuity
 
 **Goal:** Remove evaluator confusion between “what Hex has” and “what the repo says.”
 
