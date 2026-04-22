@@ -49,6 +49,15 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
         <section class="ax-kpi-grid" aria-label={Copy.dashboard_kpi_section_aria_label()}>
           <KpiCard.kpi_card
+            label={Copy.dashboard_meter_reporting_failures_label()}
+            value={Integer.to_string(@stats.failed_meter_event_count)}
+            href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
+            aria_label={Copy.dashboard_meter_reporting_failures_aria_label()}
+          >
+            <:meta><%= Copy.dashboard_meter_reporting_failures_meta() %></:meta>
+          </KpiCard.kpi_card>
+
+          <KpiCard.kpi_card
             label={Copy.dashboard_kpi_customers_label()}
             value={Integer.to_string(@stats.customer_count)}
             href={ScopedPath.build(@admin_mount_path, "/customers", @current_owner_scope)}
