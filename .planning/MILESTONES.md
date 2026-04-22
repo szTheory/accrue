@@ -10,9 +10,16 @@
 
 **Current public Hex (lockstep):** **`accrue` 0.3.0** and **`accrue_admin` 0.3.0** — mirror **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version`** (not a second SSOT).
 
-**Requirements:** `.planning/REQUIREMENTS.md` (**REL-**, **DOC-**, **HYG-**)
+**Requirements:** archived in [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md) (**REL-**, **DOC-**, **HYG-**); all **7/7** complete.
 
 **Next after ship:** `/gsd-discuss-phase 48` or `/gsd-new-milestone` for the next implementation slice.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.11-ROADMAP.md`](milestones/v1.11-ROADMAP.md)
+- Requirements: [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md)
+
+**Git tag:** `v1.11`
 
 ---
 

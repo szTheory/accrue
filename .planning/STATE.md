@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.11
-milestone_name: Public Hex release + post-release continuity
-status: milestone_complete
-last_updated: "2026-04-22T16:21:53.479Z"
+milestone: pending
+milestone_name: Next milestone (undefined)
+status: between_milestones
+last_updated: "2026-04-22T18:00:00.000Z"
 last_activity: 2026-04-22
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 3
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,31 +21,30 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.11** closed — Phases **46–47** complete; choose **Phase 48** or a new milestone.
+**Current focus:** **v1.11** archived — define the next milestone with **`/gsd-new-milestone`** (creates a fresh **`.planning/REQUIREMENTS.md`**) or continue at **Phase 48** after scoping.
 
 ## Current Position
 
-Phase: 47 — COMPLETE
+Phase: — (between milestones)
 
-Plan: 3 of 3 complete
+Plan: —
 
-**Status:** Milestone complete (v1.11)
+**Status:** Between milestones (`v1.11` shipped 2026-04-22)
 
 **Last Activity:** 2026-04-22
 
 ## Milestone Progress
 
-**Active:** **v1.11** — Public Hex release + post-release continuity — **Phases 46–47** (see `.planning/ROADMAP.md`).
+**Shipped:** **v1.11** — Public Hex release + post-release continuity — Phases **46–47** (see `.planning/milestones/v1.11-ROADMAP.md`).
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (lockstep; see **`accrue/mix.exs`** **`@version`**).
 
 ## Current Planning Artifacts
 
-- `.planning/REQUIREMENTS.md` — **REL-**, **DOC-**, **HYG-** requirements for v1.11
-- `.planning/ROADMAP.md` — Phases **46–47** + shipped history
-- `.planning/PROJECT.md` — v1.11 current milestone
-- `.planning/phases/40-*` … `45-*` — prior shipped phase artifacts (preserved)
-- `.planning/phases/46-release-train-hex-publish/46-CONTEXT.md` — Phase **46** implementation decisions (**REL-01/02/04**)
+- **`.planning/REQUIREMENTS.md`** — absent until **`/gsd-new-milestone`**
+- `.planning/ROADMAP.md` — shipped history + **Next milestone** stub
+- `.planning/PROJECT.md` — between-milestone current state
+- `.planning/phases/40-*` … `47-*` — prior shipped phase artifacts (preserved)
 
 ## Deferred Items
 
@@ -57,9 +56,9 @@ Plan: 3 of 3 complete
 
 ## Recent Decisions
 
-- **v1.11:** Scope = **Hex publish** + **post-release continuity** (docs, verifiers, planning version callouts); **PROC-08** / **FIN-03** remain deferred.
-- **`phases.clear` not run** — preserves **v1.9–v1.10** phase directories under `.planning/phases/`; next build phases continue at **46**.
+- **v1.11:** Closed with roadmap + requirements archives under **`.planning/milestones/v1.11-*`** and planning git tag **`v1.11`**.
+- **`phases.clear` not run** — preserves **v1.9–v1.11** phase directories under **`.planning/phases/`**; next build phases continue at **48** when scoped.
 
-**Next:** **`/gsd-discuss-phase 48`** (or **`/gsd-new-milestone`**) — v1.11 Hex + post-release continuity is done.
+**Next:** **`/gsd-new-milestone`** or **`/gsd-discuss-phase 48`**.
 
-**Completed:** Phase **47** (post-release docs & planning continuity) — 2026-04-22 — see **`47-VERIFICATION.md`**.
+**Completed:** Milestone **v1.11** — 2026-04-22 — see **`milestones/v1.11-ROADMAP.md`**.

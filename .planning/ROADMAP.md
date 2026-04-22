@@ -2,7 +2,8 @@
 
 ## Milestones
 
-- 🚧 **v1.11 Public Hex release + post-release continuity** — Phases **46–47** (in progress). Publish linked **`accrue`** / **`accrue_admin`** to Hex; align **`RELEASING.md`**, install snippets, **`verify_package_docs`**, and planning Hex callouts. Requirements: `.planning/REQUIREMENTS.md`.
+- 📋 **Next milestone** — Scope not set; use `/gsd-new-milestone` or `/gsd-discuss-phase 48` when ready.
+- ✅ **v1.11 Public Hex release + post-release continuity** — Phases **46–47** shipped **2026-04-22**. Linked **`accrue`** / **`accrue_admin`** **0.3.0** on Hex; **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning mirrors aligned. Archives: [`milestones/v1.11-ROADMAP.md`](milestones/v1.11-ROADMAP.md), [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md).
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
 - ✅ **v1.1 Stabilization + Adoption** — Phases 10-12 plus 11.1 shipped on 2026-04-17. Proved Accrue in a realistic Phoenix host app, promoted that proof into CI, closed host-flow hermeticity gaps, and hardened first-user DX/docs. Full archive: [`milestones/v1.1-ROADMAP.md`](milestones/v1.1-ROADMAP.md).
 - ✅ **v1.2 Adoption + Trust** — Phases 13-17 shipped on 2026-04-17. Polished the canonical local demo/tutorial, adoption front door, trust evidence, expansion recommendation, and final milestone cleanup. Full archive: [`milestones/v1.2-ROADMAP.md`](milestones/v1.2-ROADMAP.md).
@@ -17,17 +18,17 @@
 
 ## Phases
 
-<details open>
-<summary>🚧 v1.11 Public Hex release + post-release continuity (Phases 46–47)</summary>
+<details>
+<summary>✅ v1.11 Public Hex release + post-release continuity (Phases 46–47) — SHIPPED 2026-04-22</summary>
 
-**Milestone goal:** Ship **`accrue`** and **`accrue_admin`** to **Hex** for metering + accumulated work since **0.1.2** via **Release Please** linked releases, then fix **doc + verifier + planning** drift so published versions are the obvious install baseline.
+**Milestone goal:** Ship **`accrue`** and **`accrue_admin`** to **Hex** for metering + accumulated work since early **0.1.x** public cuts via **Release Please** linked releases, then fix **doc + verifier + planning** drift so published versions are the obvious install baseline.
 
 **Depends on:** v1.10 complete (metering in tree); CI green on **`main`**.
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 46 | 3/3 | Complete    | 2026-04-22 |
-| 47 | 3/3 | Complete    | 2026-04-22 |
+| 46 | Release train & Hex publish | Executable maintainer path from green **`main`** → merged release PR → Hex + tags. | REL-01, REL-02, REL-04 — **Complete 2026-04-22** |
+| 47 | Post-release docs & planning continuity | Remove evaluator confusion between “what Hex has” and “what the repo says.” | REL-03, DOC-01, DOC-02, HYG-01 — **Complete 2026-04-22** |
 
 **Success criteria (milestone):**
 
@@ -35,21 +36,7 @@
 2. **`verify_package_docs`** + package docs ExUnit gate pass on **`main`** after release.
 3. Planning docs no longer claim **0.1.2** as “current Hex” once a newer version is published.
 
-### Phase 46: Release train & Hex publish
-
-**Goal:** Executable maintainer path from green **`main`** → merged release PR → Hex + tags.
-
-**Success criteria:**
-
-1. **REL-01**, **REL-02**, **REL-04** satisfied with evidence (PR links, tag names, Hex version checks) captured in phase verification.
-
-### Phase 47: Post-release docs & planning continuity
-
-**Goal:** Remove evaluator confusion between “what Hex has” and “what the repo says.”
-
-**Success criteria:**
-
-1. **REL-03**, **DOC-01**, **DOC-02**, **HYG-01** satisfied; phase verification references concrete file paths.
+**Archives:** [`milestones/v1.11-ROADMAP.md`](milestones/v1.11-ROADMAP.md), [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md).
 
 </details>
 
@@ -315,6 +302,13 @@
 | 43. Meter usage happy path + Fake determinism | v1.10 | 3/3 | Complete | 2026-04-22 |
 | 44. Meter failures, idempotency, reconciler + webhook | v1.10 | 3/3 | Complete | 2026-04-22 |
 | 45. Docs + telemetry/runbook alignment | v1.10 | 4/4 | Complete | 2026-04-22 |
+
+**v1.11 (complete — 2026-04-22)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 46. Release train & Hex publish | v1.11 | 3/3 | Complete | 2026-04-22 |
+| 47. Post-release docs & planning continuity | v1.11 | 3/3 | Complete | 2026-04-22 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

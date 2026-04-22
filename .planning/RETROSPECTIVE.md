@@ -420,12 +420,55 @@
 
 ---
 
+## Milestone: v1.11 — Public Hex release + post-release continuity
+
+**Shipped:** 2026-04-22  
+**Phases:** 2 | **Plans:** 6
+
+### What Was Built
+
+- Maintainer-gated Release Please merge path (`workflow_dispatch`) with **`RELEASING.md`** aligned to the same contract (**REL-01**).
+- Merge-blocking **`verify_release_manifest_alignment.sh`** + CI job for manifest ↔ **`mix.exs` `@version`** lockstep (**REL-02**).
+- D-12-style **`46-VERIFICATION.md`** index for ship-time tag/Hex evidence (**REL-04**).
+- Routine-first **`RELEASING.md`** with same-day **1.0.0** bootstrap demoted to appendix (**REL-03**).
+- **`first_hour.md`** install fences pinned to **`~> 0.3.0`** with verifier-safe prose (**DOC-01**); **`verify_package_docs`** + ExUnit unchanged as merge-blocking contract (**DOC-02**).
+- **`PROJECT`**, **`MILESTONES`**, **`STATE`** Hex mirrors at **0.3.0** (**HYG-01**).
+
+### What Worked
+
+- Treating doc verifiers and manifest scripts as **release SSOT** caught drift before it reached evaluators.
+- Small phases (**46** release train, **47** continuity) kept operational work separable from feature milestones.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** failed again (`version required for phases archive`); **`v1.11-*`** archives and **`git rm .planning/REQUIREMENTS.md`** were completed manually.
+- Root **`.planning/REQUIREMENTS.md`** lagged with unchecked boxes until milestone close despite phase summaries listing **`requirements-completed`**.
+
+### Patterns Established
+
+- **Human-intent gate** on release PR automation (no silent auto-merge of Release Please branches).
+- **Planning archive + tag** as the durable “shipped” boundary for Hex-adjacent work.
+
+### Key Lessons
+
+1. **Close the requirements file** against plan YAML at the same time as verification — not only at milestone archive.
+2. **Linked-versions monorepos** need one fast **manifest ↔ mix.exs** check on every **`main`** push, not only on release day.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: two short phases focused on automation + docs.
+- Notable: majority of wall-clock is maintainer **Hex + tag** verification, not code churn.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.11 | short | 2 | Release train + manifest SSOT (46), post-release docs + planning mirrors (47). |
 | v1.10 | short | 3 | Metering happy path + Fake determinism (43), failure/reconciler/webhook telemetry (44), metering + telemetry/runbook docs (45). |
 | v1.9 | short | 3 | Telemetry catalog + metrics parity + cross-domain example (40–41), operator runbooks + telemetry links (42). |
 | v1.8 | short | 3 | ORG-04 non-Sigra org billing spine (37–38), ORG-09 adoption matrix + `verify_adoption_proof_matrix.sh` + CI README map (39). |
@@ -440,6 +483,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.11 | `verify_release_manifest_alignment.sh`, `verify_package_docs` + ExUnit, CI release-automation wiring | REL/DOC/HYG (7/7) archived | Maintainer-dispatch release PR workflow, manifest SSOT job, `46-VERIFICATION.md` ship index. |
 | v1.10 | ExUnit on Fake metering flows (happy, sync failure + idempotent retry, reconciler, webhook); guide cross-links | MTR-01..MTR-08 (8/8) archived | `guides/metering.md`, telemetry/runbook rows for `meter_reporting_failed` sources, guarded `MeterEvents` failure path. |
 | v1.9 | `OpsEventContractTest`, `MetricsOpsParityTest`, guide + host wiring docs | OBS/RUN/TEL (6/6) archived | `operator-runbooks.md`, telemetry catalog rows + deep links, cross-domain host example. |
 | v1.8 | Guide ExUnit (`organization_billing_*`), bash `verify_adoption_proof_matrix.sh`, host-integration wiring in CI README | ORG-05..ORG-09 (5/5) archived | Matrix ORG-09 section, root verifier script, contributor map rows for ORG gates. |

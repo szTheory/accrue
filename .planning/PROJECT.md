@@ -12,16 +12,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.11 — Public Hex release + post-release continuity
+**No active milestone** — **v1.11** shipped **2026-04-22**. Open **`/gsd-new-milestone`** to define the next requirement set and roadmap slice, or **`/gsd-discuss-phase 48`** if continuing numbered phases without a fresh milestone wrapper.
 
-**Goal:** Ship **`accrue`** and **`accrue_admin`** to Hex for the metering + accumulated work since the first public **0.1.x** cuts, using the **Release Please + linked-versions** path, then align first-user docs, verifiers, and planning callouts so **Hex / repo / guides** agree—without **PROC-08** or **FIN-03**.
-
-**Target features:**
-
-- Combined release PR, **`accrue` then `accrue_admin`** publish, and tag-level verification per **`RELEASING.md`** and **`release-please-config.json`**.
-- Changelog + **`mix.exs` `@version`** consistency for the shipped SemVer (workspace currently targets **`0.3.0`**; exact number follows Release Please + maintainer choice at ship time).
-- **`RELEASING.md`** (and any conflicting “bootstrap only” wording) accurate for **routine pre-1.0** linked releases.
-- Post-publish continuity: **`verify_package_docs`**, **`first_hour`** / primary install **`~>`** snippets, and **PROJECT / MILESTONES / STATE** Hex lines updated to the published versions.
+**v1.11 — Public Hex release + post-release continuity** is **archived** (2026-04-22). Phases **46–47**; **REL-01..REL-04**, **DOC-01..DOC-02**, **HYG-01** validated. Archives: `.planning/milestones/v1.11-ROADMAP.md`, `v1.11-REQUIREMENTS.md`. Git tag **`v1.11`**.
 
 **v1.10 — Metered usage + Fake parity** is **archived** (2026-04-22). Phases **43–45**; **MTR-01..MTR-08** validated. Archives: `.planning/milestones/v1.10-ROADMAP.md`, `v1.10-REQUIREMENTS.md`. Spike retained: `.planning/research/v1.10-METERING-SPIKE.md`. Git tag **`v1.10`**.
 
@@ -37,9 +30,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** **`accrue` 0.3.0**, **`accrue_admin` 0.3.0** — aligned with workspace **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version "0.3.0"`** at this commit (Release Please + manifest remain the numeric SSOT for the next bump).
 
-**Last shipped planning milestone:** **v1.10** — Phases **43–45** (2026-04-22): metering happy path + Fake determinism (**43**), failures + reconciler + webhook (**44**), docs + telemetry/runbook alignment (**45**); archives `.planning/milestones/v1.10-*`; planning git tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
+**Last shipped planning milestone:** **v1.11** — Phases **46–47** (2026-04-22): Hex release train + manifest SSOT (**46**), post-release docs + planning continuity (**47**); archives `.planning/milestones/v1.11-*`; planning git tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
 
-**Now:** **v1.11** milestone **complete** (2026-04-22): **Phase 46** shipped the Hex release train (**REL-01/02/04**). **Phase 47** closed post-release continuity (**REL-03**, **DOC-01**, **DOC-02**, **HYG-01**) — `RELEASING.md` routine-first runbook, **`first_hour`** `~>` **0.3.0**, **`verify_package_docs`** green, planning mirrors aligned. **Next:** **`/gsd-discuss-phase 48`** or **`/gsd-new-milestone`** for the next implementation slice.
+**Now:** Between milestones — **`/gsd-new-milestone`** (fresh **`.planning/REQUIREMENTS.md`**) or **`/gsd-discuss-phase 48`** once the next slice is chosen.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -182,6 +175,15 @@ Theme: **usage metering** + **Fake parity** + **telemetry/docs** alignment; **PR
 - [x] **MTR-01..MTR-03** — Public `report_usage` API, meter event persistence semantics, Fake happy path. **Validated in Phase 43.**
 - [x] **MTR-04..MTR-06** — Sync failure + idempotent retry telemetry, reconciler recovery, webhook meter error path. **Validated in Phase 44.**
 - [x] **MTR-07..MTR-08** — Metering guide boundaries + telemetry/runbook alignment for `meter_reporting_failed` sources. **Validated in Phase 45.**
+
+### Validated v1.11 (archived in `.planning/milestones/v1.11-REQUIREMENTS.md`; milestone closed 2026-04-22)
+
+Theme: **Hex publish** + **post-release continuity** (docs, verifiers, planning mirrors); **PROC-08** and **FIN-03** not in this milestone.
+
+- [x] **REL-01, REL-02, REL-04** — Maintainer release path, manifest/`mix.exs` SSOT, ship-time tag/Hex evidence. **Validated in Phase 46.**
+- [x] **REL-03** — Routine pre-1.0 linked-release narrative in **`RELEASING.md`**. **Validated in Phase 47.**
+- [x] **DOC-01, DOC-02** — **`first_hour.md`** install pins; **`verify_package_docs`** + ExUnit on **`main`**. **Validated in Phase 47.**
+- [x] **HYG-01** — Planning mirrors (**`PROJECT`**, **`MILESTONES`**, **`STATE`**) match published **0.3.0** pair. **Validated in Phase 47.**
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -402,6 +404,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-22:** `.planning/REQUIREMENTS.md` **MTR-01..MTR-06** checkboxes + traceability table aligned to **Phase 43** / **44** passed verification (was still “Pending” after Phase 45 close).
 - **2026-04-22:** **v1.10** milestone archived (`milestones/v1.10-*`); root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.10`**.
 - **2026-04-22:** **v1.11** opened — **Hex release + post-release continuity**; Phases **46–47**; requirements **REL-01..REL-04**, **DOC-01..DOC-02**, **HYG-01**.
+- **2026-04-22:** **v1.11** archived (`milestones/v1.11-*`); root **`.planning/REQUIREMENTS.md`** removed for next milestone; planning git tag **`v1.11`**.
 
 ## Evolution
 
@@ -421,4 +424,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — **v1.11** milestone complete (**Phase 46** Hex train + **Phase 47** post-release docs / planning continuity).*
+*Last updated: 2026-04-22 — **v1.11** milestone archived (Hex **0.3.0** + post-release continuity); between-milestone planning.*
