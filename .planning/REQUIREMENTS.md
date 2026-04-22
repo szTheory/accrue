@@ -18,7 +18,7 @@
 
 ### Operator runbooks
 
-- [ ] **RUN-01**: Operator can follow an Accrue-maintained **runbook** section (in `guides/telemetry.md` or a linked guide) that maps high-signal ops events (DLQ dead-letter, meter reporting failure, dunning exhaustion, revenue loss, charge failed, incomplete expired, Connect deauth / payout failed) to **first actions** (replay, check Oban, verify Stripe dashboard, customer comms) without duplicating Stripe’s accounting UI.
+- [x] **RUN-01**: Operator can follow an Accrue-maintained **runbook** section (in `guides/telemetry.md` or a linked guide) that maps high-signal ops events (DLQ dead-letter, meter reporting failure, dunning exhaustion, revenue loss, charge failed, incomplete expired, Connect deauth / payout failed) to **first actions** (replay, check Oban, verify Stripe dashboard, customer comms) without duplicating Stripe’s accounting UI.
 
 ## v2 / later (not in v1.9 roadmap)
 
@@ -42,7 +42,7 @@
 | OBS-04 | Phase 40 | Complete |
 | OBS-02 | Phase 41 | Complete |
 | TEL-01 | Phase 41 | Complete |
-| RUN-01 | Phase 42 | Pending |
+| RUN-01 | Phase 42 | Complete |
 
 **Coverage:** v1.9 requirements: **6** total · Mapped: **6** · Unmapped: **0**
 
