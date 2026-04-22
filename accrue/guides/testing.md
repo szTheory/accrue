@@ -95,10 +95,23 @@ Use `Oban.Testing` for queue assertions and `perform_job/2` when the test needs 
 
 Use the Fake Processor for normal test coverage, then keep a small provider-parity suite for behaviors where Stripe itself is the contract: SCA/3DS cards, Stripe test clocks, hosted checkout redirect behavior, and webhook signatures. Tag those tests separately so local development and CI do not depend on network calls by default.
 
+## Usage metering (Fake)
+
+Metered usage flows through `Accrue.Billing.report_usage/3`. With `Accrue.Test.setup_fake_processor/1` in `setup`, the configured processor is Fake so tests stay offline. Accrue inserts an `accrue_meter_events` row that starts `pending` inside the transaction, then moves to `reported` on the happy path after Fake acknowledges the meter event—treat the persisted `%Accrue.Billing.MeterEvent{}` as the primary contract.
+
+Assert in this order: first load the `MeterEvent` row from `Repo` (`stripe_status`, `value`, `identifier`), then use `Accrue.Test.meter_events_for/1` when you need the processor-shaped payload Fake captured.
+
+Call `Accrue.Billing.report_usage/3` with explicit `timestamp:` and an `operation_id:` when you need stable identifiers or idempotent replays; avoid relying on wall-clock alone for golden vectors.
+
+Full NimbleOptions keys, defaults, and semantics follow the deep link to source doc path or HexDocs wording for `Accrue.Billing.report_usage/3` (`lib/accrue/billing.ex`); this guide does not duplicate that full option list.
+
+For failure-path telemetry (`meter_reporting_failed` and related ops notes), see `guides/telemetry.md` while keeping happy-path tests anchored on `accrue_meter_events` rows.
+
 ## Helper reference
 
 - `use Accrue.Test` imports mail, PDF, and event assertions and exposes the public action helpers.
 - `Accrue.Test.setup_fake_processor/1` configures the Fake Processor for the test process.
+- `Accrue.Test.meter_events_for/1` returns Fake-captured meter payloads after `Accrue.Billing.report_usage/3` (Fake-only; see Usage metering section above).
 - `Accrue.Test.setup_mailer_test/1` captures `Accrue.Mailer.Test` deliveries in the current process mailbox.
 - `Accrue.Test.setup_pdf_test/1` captures `Accrue.PDF.Test` renders in the current process mailbox.
 - `Accrue.Test.advance_clock/2` advances Fake time with readable strings, seconds, or keyword durations.
