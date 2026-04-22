@@ -48,11 +48,31 @@ For finance and tax reporting, use **Stripe Dashboard / reporting products** as 
 
 ## Mini-playbook: [:accrue, :ops, :meter_reporting_failed]
 
-1. Read `source` (`:sync`, `:webhook`, `:reconciler`) and `meter_event_id` / `event_name` from metadata.
-2. Inspect `accrue_meter_events` and recent `Accrue.Jobs.MeterEventsReconciler` jobs on `:accrue_meters` ([Oban queue topology](#oban-queue-topology)).
+Always read the **contract** (when the tuple fires and what each `source` means) at [`telemetry.md#meter-reporting-semantics`](telemetry.md#meter-reporting-semantics) before changing alert thresholds—this runbook is **procedure** only.
+
+1. Read `source` (`:sync`, `:webhook`, `:reconciler`) plus `meter_event_id` / `event_name` from metadata (identifiers only—no raw payloads).
+2. Load the matching `accrue_meter_events` row and note `stripe_status`, `stripe_error`, and timestamps so you know whether the failure epoch is already terminal.
+
+### `:sync` (host request path)
+
+1. Correlate with the host request or job that called `Accrue.Billing.report_usage/3` in the same transaction window; inspect logs around `Accrue.Billing.MeterEventActions` for processor errors surfaced synchronously.
+2. Fix configuration or upstream Stripe errors, then retry the host operation with a fresh `operation_id` only when the business case requires a new attempt—idempotent replays should converge on the stored terminal row.
+
+### `:reconciler` (Oban `:accrue_meters`)
+
+1. Inspect Oban jobs for `Accrue.Jobs.MeterEventsReconciler` on `:accrue_meters` ([Oban queue topology](#oban-queue-topology)); confirm the queue is running and not wedged behind retries.
+2. After correcting Stripe meter setup or credentials, allow the reconciler to dequeue; watch `[:accrue, :ops, :meter_reporting_failed]` and default metrics for confirmation.
+
+### `:webhook` (meter error report path)
+
+1. Trace the event through `accrue_webhook_events` into `Accrue.Webhook.DefaultHandler` and the async `Accrue.Webhook.DispatchWorker` path; verify signature + dispatch health before mutating rows ([Oban queue topology](#oban-queue-topology)).
+2. Resolve the upstream Stripe meter error, then replay or wait for the next reconciler pass; confirm the row leaves terminal `failed` only when business logic intentionally clears it.
+
+Shared verification (all sources):
+
 3. Confirm API keys and Stripe meter configuration for the environment (no key material in logs).
 4. Cross-check Stripe usage reporting with [Metered billing](https://stripe.com/docs/billing/subscriptions/usage-based/recording-usage) — operational alignment, not accounting close.
-5. After code or config fix, allow reconciler retry; watch ops counter and host metrics.
+5. After code or config fix, allow reconciler retry where applicable; watch ops counters and host metrics.
 
 ## Mini-playbook: [:accrue, :ops, :revenue_loss]
 
