@@ -370,6 +370,26 @@ defmodule Accrue.Billing do
       end)
 
   # ── Metered billing surface (Phase 4 Plan 02, BILL-13) ────────────
+  @report_usage_doc """
+  `report_usage/3` records a metered usage event for `customer` (a `%Accrue.Billing.Customer{}` or Stripe customer id string) and `event_name`, persisting through the transactional outbox before invoking the configured processor.
+
+  ## Options
+
+  Keys mirror `Accrue.Billing.MeterEventActions`'s `@report_usage_schema` (types and defaults stay in sync there):
+
+  * `:value` — non-negative integer count; default `1`.
+  * `:timestamp` — `%DateTime{}`, Unix seconds as integer, or `nil`. When `nil`, normalization uses the current UTC instant; see `Accrue.Billing.MeterEventActions` for the exact normalization pipeline.
+  * `:identifier` — string or `nil`; default `nil` derives a stable audit-layer identifier from customer, `event_name`, `:value`, the resolved timestamp, and optional `:operation_id` (uniqueness enforced on `accrue_meter_events.identifier`).
+  * `:operation_id` — string or `nil`; when set, it participates in identifier derivation and supports idempotent replays alongside the other fields above.
+  * `:payload` — map of extra dimensions or `nil`; default `nil`. Forwarded to the processor as supplemental context (e.g. `%{"dimension" => "seats"}` in tests).
+
+  Invalid `opts` raise `NimbleOptions.ValidationError` from `NimbleOptions.validate!/2`.
+
+  ## Fake / test mode
+
+  Host apps can configure `Accrue.Processor.Fake` (for example via `Accrue.Test.setup_fake_processor/1`) to exercise this path without outbound network calls.
+  """
+  @doc @report_usage_doc
   def report_usage(customer, event_name, opts \\ []) do
     span_billing(
       :meter_event,
@@ -382,6 +402,16 @@ defmodule Accrue.Billing do
     )
   end
 
+  @report_usage_bang_doc """
+  Bang variant of `report_usage/3` — returns `%Accrue.Billing.MeterEvent{}` or raises on error.
+
+  See `report_usage/3` for the full options reference (`## Options`).
+
+  Raises `NimbleOptions.ValidationError` when `opts` fail validation.
+
+  Raises on `{:error, _}` from the underlying implementation: `Accrue.APIError` (including `resource_missing` / HTTP 404 when a Stripe customer id cannot be resolved) is re-raised when it implements `Exception`; other error tuples become a `RuntimeError` raised by `Accrue.Billing.MeterEventActions.report_usage!/3`.
+  """
+  @doc @report_usage_bang_doc
   def report_usage!(customer, event_name, opts \\ []) do
     span_billing(
       :meter_event,
