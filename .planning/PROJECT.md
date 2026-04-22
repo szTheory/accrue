@@ -34,7 +34,7 @@ Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue
 
 **Last shipped planning milestone:** **v1.8** — Phases **37–39** (2026-04-22), **ORG-04** + **ORG-09** (archives: `.planning/milestones/v1.8-*`; tag **`v1.8`**).
 
-**Now:** `.planning/REQUIREMENTS.md` + **Phases 40–42** in `.planning/ROADMAP.md` define **v1.9**. Gap audit: `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. Metering spike for follow-on: `.planning/research/v1.10-METERING-SPIKE.md`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Now:** `.planning/REQUIREMENTS.md` + **Phases 40–42** in `.planning/ROADMAP.md` define **v1.9**. **Phase 41** (2026-04-22) shipped shared ops inventory + `MetricsOpsParityTest` (**TEL-01**), cross-domain guide + `examples/accrue_host` wiring (**OBS-02**), and traceability cleanup in `REQUIREMENTS.md`. **Phase 42** (**RUN-01** runbooks) remains. Gap audit: `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. Metering spike for follow-on: `.planning/research/v1.10-METERING-SPIKE.md`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -394,4 +394,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after **v1.9** milestone planning (post–v1.8 prioritization + `/gsd-new-milestone` artifacts).*
+*Last updated: 2026-04-22 after **Phase 41** execution (TEL-01 + OBS-02 + REQUIREMENTS D-18).*
