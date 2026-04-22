@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Admin & operator UX
-status: roadmap_ready
-last_updated: "2026-04-22T20:00:00.000Z"
-last_activity: 2026-04-22
+status: Roadmap ready — milestone initialized **2026-04-22**
+last_updated: "2026-04-22T17:24:28.490Z"
+last_activity: 2026-04-22 — `/gsd-new-milestone` closed; **`phases.clear`** not run (preserves **40–47** trees).
 progress:
-  total_phases: 3
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
