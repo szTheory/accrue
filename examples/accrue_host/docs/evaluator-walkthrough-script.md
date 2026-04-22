@@ -7,7 +7,7 @@ Use this as a **checklist** when recording a short demo for stakeholders. It mir
 ## A. Clone and trust gate (optional cold open, ~60s)
 
 1. Show repository root and `examples/accrue_host`.
-2. State that **pull requests** run `host-integration`, equivalent to `mix verify.full` locally — including the full **`npm run e2e`** suite (mounted-admin axe: `e2e/verify01-admin-a11y.spec.js`).
+2. State that **pull requests** run `host-integration`: shift-left `verify_verify01_readme_contract.sh` and `verify_adoption_proof_matrix.sh`, then `accrue_host_uat.sh` → `mix verify.full`, then the full **`npm run e2e`** suite on CI (mounted-admin axe: `e2e/verify01-admin-a11y.spec.js`).
 
 ## B. Local deterministic proof (~3–5 min)
 
