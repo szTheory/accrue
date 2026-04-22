@@ -65,8 +65,12 @@ require_fixed "$ROOT_DIR/accrue/mix.exs" 'source_ref: "accrue-v#{@version}"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'source_ref: "accrue_admin-v#{@version}"'
 
 require_fixed "$ROOT_DIR/accrue/README.md" "{:accrue, \"~> $accrue_version\"}"
+require_fixed "$ROOT_DIR/accrue/README.md" '> **Hex vs `main`:**'
+require_fixed "$ROOT_DIR/accrue/README.md" 'https://hex.pm/packages/accrue'
 require_fixed "$ROOT_DIR/accrue_admin/README.md" "{:accrue_admin, \"~> $accrue_admin_version\"}"
 require_fixed "$ROOT_DIR/accrue_admin/README.md" "accrue ~> $accrue_version"
+require_fixed "$ROOT_DIR/accrue_admin/README.md" '> **Hex vs `main`:**'
+require_fixed "$ROOT_DIR/accrue_admin/README.md" 'https://hex.pm/packages/accrue_admin'
 
 require_fixed "$ROOT_DIR/accrue/README.md" '[First Hour](guides/first_hour.md)'
 require_fixed "$ROOT_DIR/accrue/README.md" '[Troubleshooting](guides/troubleshooting.md)'
@@ -83,6 +87,10 @@ require_fixed "$ROOT_DIR/README.md" "Advisory/manual: live Stripe"
 require_fixed "$ROOT_DIR/README.md" "## Proof path (VERIFY-01)"
 require_fixed "$ROOT_DIR/README.md" "proof-and-verification"
 require_fixed "$ROOT_DIR/README.md" "Pull requests are merge-blocked on GitHub Actions job \`host-integration\`"
+require_fixed "$ROOT_DIR/README.md" 'bash scripts/ci/verify_adoption_proof_matrix.sh'
+require_fixed "$ROOT_DIR/README.md" 'bash scripts/ci/accrue_host_uat.sh'
+require_fixed "$ROOT_DIR/README.md" '> **Hex vs `main`:**'
+require_fixed "$ROOT_DIR/README.md" 'https://hex.pm/packages/accrue'
 require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Pull requests are merge-blocked on GitHub Actions job \`host-integration\`"
 
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
@@ -101,6 +109,9 @@ require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "mix verify.full"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "bash scripts/ci/accrue_host_uat.sh"
 
 require_any_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "## 1. First run" "## First run"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" '> **Hex vs `main`:**'
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "{:accrue, \"~> $accrue_version\"}"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "{:accrue_admin, \"~> $accrue_admin_version\"}"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "Seeded history"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "mix verify"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "mix verify.full"
