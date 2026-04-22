@@ -9,6 +9,7 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 ## Start here
 
 - [Organization billing (non-Sigra)](guides/organization_billing.md) — session→billable org path when the Stripe Customer should follow an organization, not only the signed-in user.
+- [Testing](guides/testing.md) — Fake-first verification posture for host billing flows.
 - [First Hour](guides/first_hour.md) — one sitting from deps to a working billing slice.
 - [Troubleshooting](guides/troubleshooting.md) — when something already wired misbehaves.
 - [Webhooks](guides/webhooks.md) — signing, retries, and operational notes.
