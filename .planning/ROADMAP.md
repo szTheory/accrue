@@ -23,7 +23,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 40 | Telemetry catalog + guide truth | Extend `guides/telemetry.md` (and `Accrue.Telemetry.Ops` docs) so every `[:accrue, :ops, :*]` emit is catalogued; document firehose vs ops split; reconcile against `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. | OBS-01, OBS-03, OBS-04 |
+| 40 | Telemetry catalog + guide truth | Extend `guides/telemetry.md` (and `Accrue.Telemetry.Ops` docs) so every `[:accrue, :ops, :*]` emit is catalogued; document firehose vs ops split; reconcile against `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. **Complete 2026-04-22.** | OBS-01, OBS-03, OBS-04 |
 | 41 | Host metrics wiring + cross-domain example | Close `Telemetry.Metrics.defaults/0` gaps vs ops emits **or** document intentional omissions; add host-copyable cross-domain subscription example. | TEL-01, OBS-02 |
 | 42 | Operator runbooks | Ship runbook section (guide or linked doc): ops event → suggested first action / Stripe host checks / Oban queues — especially DLQ, meters, dunning, revenue-adjacent signals, Connect failures. | RUN-01 |
 
