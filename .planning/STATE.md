@@ -60,6 +60,6 @@ Plan: 3 of 3 (47-01 and 47-02 complete)
 - **v1.11:** Scope = **Hex publish** + **post-release continuity** (docs, verifiers, planning version callouts); **PROC-08** / **FIN-03** remain deferred.
 - **`phases.clear` not run** — preserves **v1.9–v1.10** phase directories under `.planning/phases/`; next build phases continue at **46**.
 
-**Next:** Finish **Phase 47** plans **02–03** (`first_hour` + planning Hex callouts), then phase verification.
+**Next:** Phase **47** implementation commits are complete — run **`/gsd-verify-work 47`** or review **`.planning/phases/47-post-release-docs-planning-continuity/47-VERIFICATION.md`**, then **`gsd-sdk query phase.complete 47`** when satisfied.
 
 **Planned Phase:** 47 (post-release docs & planning continuity) — 3 plans — 2026-04-22T16:19:06.356Z
