@@ -84,6 +84,8 @@ The important boundary is `require_admin_plug/0`: do not rely on hiding links in
 
 Pow apps can read the current user through `Pow.Plug.current_user/1` and use the host role policy for admin checks.
 
+For organization-shaped billing with Pow identity, follow the **Pow-oriented checklist (ORG-07)** in [`organization_billing.md`](organization_billing.md). It walks **active organization** (membership-gated session org), `fetch_current_organization`, and the `MyApp.Auth.Pow` wiring you copy from this section.
+
 ```elixir
 defmodule MyApp.Auth.Pow do
   @behaviour Accrue.Auth
