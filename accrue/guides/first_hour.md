@@ -12,11 +12,13 @@ proof, mounted admin inspection, and a focused verification pass.
 
 ### Install the packages
 
+Pre-1.0 **minor** bumps on Hex may include breaking API changes. **`accrue_admin`** is released in **lockstep** with **`accrue`** for each train; keep the two `~>` pins on the **same three-part version**. Patch releases within that minor are the usual safe upgrade path.
+
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 0.1.2"},
-    {:accrue_admin, "~> 0.1.2"}
+    {:accrue, "~> 0.3.0"},
+    {:accrue_admin, "~> 0.3.0"}
   ]
 end
 ```
@@ -26,7 +28,7 @@ mix deps.get
 mix accrue.install --billable MyApp.Accounts.User --billing-context MyApp.Billing
 ```
 
-The checked-in host example is the canonical local evaluation path:
+The checked-in host example is the canonical local evaluation loop:
 
 ```bash
 cd examples/accrue_host
