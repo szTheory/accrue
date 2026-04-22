@@ -8,11 +8,13 @@ defmodule Accrue.Telemetry do
 
       [:accrue, :domain, :resource, :action, :start | :stop | :exception]
 
-  The domain layer is one of `:billing`, `:events`, `:webhooks`, `:mail`,
-  `:pdf`, `:processor`. Concrete examples:
+  The **second element** is the domain layer. Domains currently passed to
+  `span/3` from `accrue/lib` are `:billing`, `:connect`, `:mailer`, `:pdf`,
+  `:processor`, and `:storage`. Concrete examples:
 
       [:accrue, :billing, :subscription, :create, :start]
-      [:accrue, :mail, :deliver, :payment_succeeded, :stop]
+      [:accrue, :billing, :meter_event, :report_usage, :start]
+      [:accrue, :mailer, :deliver, :payment_succeeded, :stop]
       [:accrue, :pdf, :render, :invoice, :exception]
 
   This mirrors Ecto's `[:ecto, :repo, :query]` and Phoenix's

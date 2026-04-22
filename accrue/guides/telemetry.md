@@ -9,6 +9,13 @@ If you only read one section: jump to **Using the default metrics recipe**
 below — that's the short host wiring snippet that appends `Accrue.Telemetry.Metrics.defaults/0`
 (~20 metric definitions, including every documented ops counter) with minimal glue code.
 
+**Doc contract:** Published Hex docs for `accrue` describe the telemetry
+contracts for that package version. The `main` branch may add or rename
+events before they appear in a Hex release; operators should prefer the
+`guides/telemetry.md` revision that matches the `accrue` version pinned in
+their host `mix.lock` (see [Hex](https://hexdocs.pm/accrue) for the published
+guide snapshot).
+
 ## Namespace split
 
 Accrue divides telemetry into two namespaces:
@@ -41,30 +48,32 @@ typically for paging:
   email fallbacks `[:accrue, :email, :locale_fallback | :timezone_fallback | :format_money_failed]`.
 
 Subscribe in your host `Telemetry` or OpenTelemetry pipeline when you need
-latency percentiles or error rates — keep **on-call** subscriptions on
-`[:accrue, :ops, :*]` above.
+latency percentiles, diagnostics, or high-cardinality dashboards — keep
+**on-call paging** on `[:accrue, :ops, :*]` above. The firehose stays useful
+for tracing and anomaly detection, but its volume is intentionally unsuitable
+for wake-the-oncall thresholds.
 
-## Ops events in v1.0
+## Ops event catalog (`[:accrue, :ops, :*]`)
 
 All ops events fire inside the same `Repo.transact/2` as the state write
 they correspond to — they are idempotent under webhook replay via the
 `accrue_webhook_events` unique-index short-circuit.
 
-| Event | Measurements | Metadata |
-|-------|-------------|----------|
-| `[:accrue, :ops, :revenue_loss]` | `count`, `amount_minor`, `currency` | `subject_type`, `subject_id`, `reason` |
-| `[:accrue, :ops, :dunning_exhaustion]` | `count` | `subscription_id`, `from_status`, `to_status`, `source` (`:accrue_sweeper \| :stripe_native \| :manual`) |
-| `[:accrue, :ops, :incomplete_expired]` | `count` | `subscription_id` |
-| `[:accrue, :ops, :charge_failed]` | `count` | `charge_id`, `customer_id`, `failure_code` |
-| `[:accrue, :ops, :meter_reporting_failed]` | `count` | `meter_event_id`, `event_name`, `source` (`:reconciler \| :webhook \| :sync`) |
-| `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | `count` | `event_id`, `processor_event_id`, `type`, `attempt` |
-| `[:accrue, :ops, :webhook_dlq, :replay]` | `count`, `duration`, `requeued_count`, `skipped_count` | `actor`, `filter`, `dry_run?` |
-| `[:accrue, :ops, :webhook_dlq, :prune]` | `dead_deleted`, `succeeded_deleted`, `duration` | `retention_days` |
-| `[:accrue, :ops, :pdf_adapter_unavailable]` | `count` | `type` (email template key), `operation_id` when set |
-| `[:accrue, :ops, :events_upcast_failed]` | `count` | `event_id`, `type`, `schema_version` |
-| `[:accrue, :ops, :connect_account_deauthorized]` | `count` | `stripe_account_id`, `deauthorized_at` **or** `unresolved: true` |
-| `[:accrue, :ops, :connect_capability_lost]` | `count` | `stripe_account_id`, `capability`, `from`, `to` |
-| `[:accrue, :ops, :connect_payout_failed]` | `count` | `stripe_account_id`, `payout_id`, `amount`, `currency`, `failure_code` |
+| Event | Measurements | Metadata | Primary owner |
+|-------|-------------|----------|---------------|
+| `[:accrue, :ops, :revenue_loss]` | `count`, `amount_minor`, `currency` | `subject_type`, `subject_id`, `reason` | `Accrue.Telemetry.Ops` |
+| `[:accrue, :ops, :dunning_exhaustion]` | `count` | `subscription_id`, `from_status`, `to_status`, `source` (`:accrue_sweeper \| :stripe_native \| :manual`) | `Accrue.Webhook.DefaultHandler` |
+| `[:accrue, :ops, :incomplete_expired]` | `count` | `subscription_id` | `Accrue.Telemetry.Ops` |
+| `[:accrue, :ops, :charge_failed]` | `count` | `charge_id`, `customer_id`, `failure_code` | `Accrue.Telemetry.Ops` |
+| `[:accrue, :ops, :meter_reporting_failed]` | `count` | `meter_event_id`, `event_name`, `source` (`:reconciler \| :webhook \| :sync`) | `Accrue.Webhook.DefaultHandler` / `Accrue.Billing.MeterEventActions` / `Accrue.Jobs.MeterEventsReconciler` |
+| `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | `count` | `event_id`, `processor_event_id`, `type`, `attempt` | `Accrue.Webhook.DispatchWorker` |
+| `[:accrue, :ops, :webhook_dlq, :replay]` | `count`, `duration`, `requeued_count`, `skipped_count` | `actor`, `filter`, `dry_run?` | `Accrue.Webhooks.DLQ` |
+| `[:accrue, :ops, :webhook_dlq, :prune]` | `dead_deleted`, `succeeded_deleted`, `duration` | `retention_days` | `Accrue.Webhook.Pruner` |
+| `[:accrue, :ops, :pdf_adapter_unavailable]` | `count` | `type` (email template key), `operation_id` when set | `Accrue.Workers.Mailer` |
+| `[:accrue, :ops, :events_upcast_failed]` | `count` | `event_id`, `type`, `schema_version` | `Accrue.Events` |
+| `[:accrue, :ops, :connect_account_deauthorized]` | `count` | `stripe_account_id`, `deauthorized_at` **or** `unresolved: true` | `Accrue.Webhook.ConnectHandler` |
+| `[:accrue, :ops, :connect_capability_lost]` | `count` | `stripe_account_id`, `capability`, `from`, `to` | `Accrue.Webhook.ConnectHandler` |
+| `[:accrue, :ops, :connect_payout_failed]` | `count` | `stripe_account_id`, `payout_id`, `amount`, `currency`, `failure_code` | `Accrue.Webhook.ConnectHandler` |
 
 Connect ops rows above are emitted via `Accrue.Telemetry.Ops.emit/3` from
 `Accrue.Webhook.ConnectHandler`. PDF and ledger rows use `:telemetry.execute/3`
@@ -83,6 +92,11 @@ seed used for processor idempotency keys). This lets you correlate
 ops events with the originating webhook, Oban job, or admin action across
 service boundaries.
 
+**Last reconciled with v1.9 gap audit §1:** 2026-04-21 — PR #14.
+The §1 ops inventory in `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md` is
+reflected in the ops catalog table above (including Connect, PDF, ledger,
+and DLQ rows).
+
 ## Span naming conventions (OpenTelemetry)
 
 Accrue's OpenTelemetry span helpers (gated on the `:opentelemetry` optional
@@ -92,16 +106,23 @@ dep) wrap every Billing context function with consistent naming:
 accrue.<domain>.<resource>.<action>
 ```
 
-The domain layer is one of `billing`, `events`, `webhooks`, `mail`, `pdf`,
-`processor`, `checkout`, `billing_portal`. Concrete examples:
+Domains emitted through `Accrue.Telemetry.span/3` today are `:billing`,
+`:connect`, `:mailer`, `:pdf`, `:processor`, and `:storage` (see
+`Accrue.Telemetry` module doc). **Illustrative, non-exhaustive** billing
+examples below — for the enforced billing span inventory, see
+[`test/accrue/telemetry/billing_span_coverage_test.exs`](../test/accrue/telemetry/billing_span_coverage_test.exs).
 
 - `accrue.billing.subscription.create`
 - `accrue.billing.subscription.cancel`
 - `accrue.billing.invoice.finalize`
 - `accrue.billing.charge.refund`
-- `accrue.webhooks.dlq.replay`
-- `accrue.checkout.session.create`
-- `accrue.billing_portal.session.create`
+- `accrue.billing.meter_event.report_usage` — verified billing span from
+  `Accrue.Billing.report_usage/3`; failures surface as the ops signal
+  `[:accrue, :ops, :meter_reporting_failed]` (see ops catalog table).
+- `NOT an OTel span name` — `accrue.webhooks.dlq.replay` is the dotted
+  **OpenTelemetry span name** only when a host maps the **ops** event
+  `[:accrue, :ops, :webhook_dlq, :replay]` (via `Ops.emit/3` / `:telemetry.execute`)
+  into OTel separately. It is **not** produced by `Accrue.Telemetry.span/3`.
 
 This mirrors the `:telemetry` event naming
 (`[:accrue, :billing, :subscription, :create]`) so a single name maps cleanly
