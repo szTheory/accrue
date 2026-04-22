@@ -155,6 +155,38 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert :not_found = Subscriptions.detail(denied_subscription.id, owner_scope)
   end
 
+  test "drill breadcrumbs and related links use ScopedPath with org scope and honest customer_id filters",
+       %{conn: conn} do
+    org_id = Ecto.UUID.generate()
+
+    %{customer: customer, subscription: subscription} =
+      Factory.active_subscription(%{
+        owner_type: "Organization",
+        owner_id: org_id,
+        email: "phase49-drill-admin@example.com"
+      })
+
+    subscription = Repo.preload(subscription, [:customer, :subscription_items])
+
+    conn =
+      conn
+      |> Phoenix.ConnTest.init_test_session(
+        admin_token: "admin",
+        active_organization_id: org_id,
+        active_organization_slug: "phase49-org",
+        admin_organization_ids: [org_id]
+      )
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/subscriptions/#{subscription.id}?org=phase49-org")
+
+    assert html =~ "/customers/#{customer.id}"
+    assert html =~ "org="
+    assert html =~ "customer_id=#{customer.id}"
+    assert html =~ Copy.subscription_drill_related_card_title()
+    assert html =~ "/events"
+  end
+
   test "out-of-scope subscription route redirects with denial flash before rendering detail", %{
     conn: conn
   } do
