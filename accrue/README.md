@@ -20,12 +20,14 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 
 ## Install
 
+> **Hex vs `main`:** The `{:accrue, "~> …"}` line below tracks `accrue/mix.exs` `@version` on the branch you are reading (typically `main` on GitHub). [Hex.pm](https://hex.pm/packages/accrue) publishes that train after release; use [HexDocs](https://hexdocs.pm/accrue/) for API docs matched to the Hex version you resolved.
+
 In `mix.exs`:
 
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 0.3.0"}
+    {:accrue, "~> 0.3.1"}
   ]
 end
 ```

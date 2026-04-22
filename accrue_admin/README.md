@@ -12,12 +12,14 @@ checked-in Fake-backed demo or the Accrue First Hour guide, get the core
 billing facade and signed webhook path working, then mount the admin UI for
 operators.
 
+> **Hex vs `main`:** The `{:accrue_admin, "~> …"}` line below tracks `accrue_admin/mix.exs` `@version` on the branch you are reading (typically `main` on GitHub). [Hex.pm](https://hex.pm/packages/accrue_admin) publishes that train after release; use [HexDocs](https://hexdocs.pm/accrue_admin/) for operator UI docs matched to the Hex version you resolved.
+
 Add `accrue_admin` to your host application and mount the package router where operators manage billing:
 
 ```elixir
 defp deps do
   [
-    {:accrue_admin, "~> 0.3.0"}
+    {:accrue_admin, "~> 0.3.1"}
   ]
 end
 ```
@@ -64,7 +66,7 @@ The canonical local demo path lives in the checked-in host app:
 
 - `examples/accrue_host/README.md`
 
-Published `accrue_admin` releases resolve `accrue ~> 0.3.0`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
+Published `accrue_admin` releases resolve `accrue ~> 0.3.1`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
 
 ## Assets
 

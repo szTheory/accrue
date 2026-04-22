@@ -28,13 +28,15 @@ proof, mounted admin inspection, and a focused verification pass.
 
 ### Install the packages
 
+> **Hex vs `main`:** The version pins below mirror `accrue/mix.exs` and `accrue_admin/mix.exs` `@version` on the branch you are reading (usually `main` on GitHub). [Hex.pm](https://hex.pm/packages/accrue) / [Hex.pm/packages/accrue_admin](https://hex.pm/packages/accrue_admin) reflect what is published; use HexDocs when you need docs tied to the resolved Hex version.
+
 Pre-1.0 **minor** bumps on Hex may include breaking API changes. **`accrue_admin`** is released in **lockstep** with **`accrue`** for each train; keep the two `~>` pins on the **same three-part version**. Patch releases within that minor are the usual safe upgrade path.
 
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 0.3.0"},
-    {:accrue_admin, "~> 0.3.0"}
+    {:accrue, "~> 0.3.1"},
+    {:accrue_admin, "~> 0.3.1"}
   ]
 end
 ```
