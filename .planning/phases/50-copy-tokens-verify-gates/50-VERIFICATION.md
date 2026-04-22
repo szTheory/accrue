@@ -2,6 +2,8 @@
 
 **Status:** Draft — fill inventory URLs after **`50-01`** / **`50-03`** land.
 
+Mounted-path inventory for VERIFY-01 expansion lives at **`examples/accrue_host/docs/verify01-v112-admin-paths.md`** (seeded in plan **`50-01`**).
+
 ## Canonical artifacts
 
 | Artifact | Purpose |

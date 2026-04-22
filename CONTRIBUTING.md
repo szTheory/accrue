@@ -27,6 +27,10 @@ npm ci
 
 Use the package-local READMEs and guides for host-app wiring, browser UAT, and release-oriented docs checks.
 
+## Accrue Admin UI hygiene (v1.12+)
+
+Pull requests that introduce **non-token** color or layout exceptions in `accrue_admin` must add a row to the theme exception register at [`accrue_admin/guides/theme-exceptions.md`](accrue_admin/guides/theme-exceptions.md) so reviewers can track intentional deviations (**D-13** / Phase 50).
+
 ## Conventional Commits
 
 Accrue uses Conventional Commits so Release Please can cut package-local changelogs and version bumps correctly.
