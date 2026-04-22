@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Observability & operator runbooks
-status: defining_requirements
-last_updated: "2026-04-21T00:00:00.000Z"
-last_activity: 2026-04-21
+status: Milestone **v1.9** opened — `REQUIREMENTS.md` + `ROADMAP.md` active; stale v1.8 phase dirs cleared via `gsd-sdk query phases.clear --confirm`.
+last_updated: "2026-04-22T02:01:52.638Z"
+last_activity: 2026-04-21 — Post–v1.8 prioritization plan implemented; gap audit + metering spike notes added under `.planning/research/`.
 progress:
-  total_phases: 3
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
