@@ -40,6 +40,24 @@ defmodule AccrueAdmin.Copy do
 
   def subscription_action_recorded_info, do: "Subscription action recorded."
 
+  # --- Subscription drill (SubscriptionLive) — Phase 49, ADM-02
+
+  def subscription_drill_related_card_title, do: "Related billing"
+
+  def subscription_drill_related_region_aria_label,
+    do: "Related billing links for this subscription's customer"
+
+  def subscription_drill_link_customer, do: "Customer profile"
+
+  def subscription_drill_link_invoices_for_customer,
+    do: "Invoices for this customer (not subscription-filtered)"
+
+  def subscription_drill_link_charges_for_customer,
+    do: "Charges for this customer (not subscription-filtered)"
+
+  def subscription_drill_link_events_index,
+    do: "All billing events (full ledger)"
+
   def invoice_select_action_warning, do: "Select an invoice action before confirming."
 
   def invoice_pdf_open_info, do: "Open PDF now uses the shared invoice render path."
