@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Admin & operator UX
-status: completed
-last_updated: "2026-04-22T18:54:34.642Z"
-last_activity: 2026-04-22 — Phase **49** executed (`049-01` / `049-02` plans, verification, review).
+status: milestone_complete
+last_updated: "2026-04-22T20:02:11.708Z"
+last_activity: 2026-04-22
 progress:
-  total_phases: 1
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,21 +20,21 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.12** — Admin & operator UX — next **Phase 50** (Copy, tokens & VERIFY gates).
+**Current focus:** **v1.12** milestone closed — all phases **48–50** shipped; plan the next public milestone when ready.
 
 ## Current Position
 
-Phase: **50** — Copy, tokens & VERIFY gates (not started)
+Phase: **50** — Copy, tokens & VERIFY gates (**complete**)
 
-Plan: —
+Plan: **50-03** (last) — verification recorded in **`050-VERIFICATION.md`**.
 
-**Status:** Phase **49** complete (**ADM-02**, **ADM-03** slice). Milestone **v1.12** still open until phase **50** ships.
+**Status:** Milestone **v1.12** complete (**ADM-01..ADM-06** slice delivered across phases **48–50**).
 
-**Last Activity:** 2026-04-22 — Phase **49** executed (`049-01` / `049-02` plans, verification, review).
+**Last Activity:** 2026-04-22 — Phase **50** executed (`50-01` / `50-02` / `50-03` plans, verification, review).
 
 ## Milestone Progress
 
-**Active:** **v1.12** — Admin & operator UX — Phases **48–50** (see `.planning/ROADMAP.md`).
+**Shipped:** **v1.12** — Admin & operator UX — Phases **48–50** (see `.planning/ROADMAP.md`).
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (lockstep; see **`accrue/mix.exs`** **`@version`**).
 
@@ -43,7 +43,7 @@ Plan: —
 - **`.planning/REQUIREMENTS.md`** — **v1.12** scope (**ADM-01..ADM-06**)
 - `.planning/ROADMAP.md` — **v1.12** phase table + shipped history
 - `.planning/PROJECT.md` — **v1.12** current milestone
-- `.planning/phases/40-*` … `49-*` — prior shipped phase artifacts + **49** context (preserved)
+- `.planning/phases/40-*` … `50-*` — shipped phase artifacts through **50** (preserved)
 
 ## Deferred Items
 
@@ -59,6 +59,6 @@ Plan: —
 - **Phase 49:** **`049-CONTEXT.md`** — ADM-02 slice **customer → subscription → invoice**; **SubscriptionLive** breadcrumb/related parity; drill-only nav (**D-08**); tests **LiveViewTest-first**, Playwright only **D-13** unblock.
 - **v1.11:** Closed with archives under **`.planning/milestones/v1.11-*`** and planning git tag **`v1.11`**.
 
-**Next:** **`/gsd-discuss-phase 50`** (recommended) or **`/gsd-plan-phase 50`** — resume from **`.planning/REQUIREMENTS.md`** (**ADM-04..ADM-06**).
+**Next:** **`/gsd-progress`** — confirm roadmap + requirements; **`/gsd-new-milestone`** when you are ready to open **v1.13+**.
 
-**Completed:** Milestone **v1.11** — 2026-04-22 — see **`milestones/v1.11-ROADMAP.md`**. Phase **49** — 2026-04-22 — drill flows & navigation.
+**Completed:** Milestone **v1.12** — 2026-04-22 — Phases **48–50** (admin signals, drill/nav, copy + VERIFY gates). Milestone **v1.11** — 2026-04-22 — see **`milestones/v1.11-ROADMAP.md`**.

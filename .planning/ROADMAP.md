@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🚧 **v1.12 Admin & operator UX** — Phases **48–50** (active). Post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright on touched routes. Requirements: **`.planning/REQUIREMENTS.md`** (**ADM-01..ADM-06**).
+- ✅ **v1.12 Admin & operator UX** — Phases **48–50** shipped **2026-04-22**. Post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright on touched routes. Requirements: **`.planning/REQUIREMENTS.md`** (**ADM-01..ADM-06**).
 - ✅ **v1.11 Public Hex release + post-release continuity** — Phases **46–47** shipped **2026-04-22**. Linked **`accrue`** / **`accrue_admin`** **0.3.0** on Hex; **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning mirrors aligned. Archives: [`milestones/v1.11-ROADMAP.md`](milestones/v1.11-ROADMAP.md), [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md).
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
 - ✅ **v1.1 Stabilization + Adoption** — Phases 10-12 plus 11.1 shipped on 2026-04-17. Proved Accrue in a realistic Phoenix host app, promoted that proof into CI, closed host-flow hermeticity gaps, and hardened first-user DX/docs. Full archive: [`milestones/v1.1-ROADMAP.md`](milestones/v1.1-ROADMAP.md).
@@ -18,7 +18,7 @@
 
 ## Phases
 
-### v1.12 Admin & operator UX — Phases 48–50 (active)
+### v1.12 Admin & operator UX — Phases 48–50 (complete — 2026-04-22)
 
 **Milestone goal:** Improve **`accrue_admin`** so operators see **trustworthy billing state** faster—especially signals that matter after **metering (v1.10)**—with **smoother drills and navigation**, while keeping **Phase 20/21** contracts (**`ax-*`**, **`AccrueAdmin.Copy`**, no new UI kits) and **without** **PROC-08** / **FIN-03**.
 
@@ -328,13 +328,13 @@
 | 46. Release train & Hex publish | v1.11 | 3/3 | Complete | 2026-04-22 |
 | 47. Post-release docs & planning continuity | v1.11 | 3/3 | Complete | 2026-04-22 |
 
-**v1.12 (active — opened 2026-04-22)**
+**v1.12 (complete — 2026-04-22)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 48. Admin metering & billing signals | v1.12 | 1/1 | Complete | 2026-04-22 |
 | 49. Drill flows & navigation | v1.12 | 2/2 | Complete | 2026-04-22 |
-| 50. Copy, tokens & VERIFY gates | v1.12 | — | Not started | — |
+| 50. Copy, tokens & VERIFY gates | v1.12 | 3/3 | Complete | 2026-04-22 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

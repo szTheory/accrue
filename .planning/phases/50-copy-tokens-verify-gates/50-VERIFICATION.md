@@ -1,6 +1,6 @@
 # Phase 50 — Verification gate
 
-**Status:** Draft — fill inventory URLs after **`50-01`** / **`50-03`** land.
+**Status:** Active — inventory + export pipeline landed in plans **`50-01`..`50-03`**; extend Playwright row-by-row as VERIFY-01 coverage grows.
 
 Mounted-path inventory for VERIFY-01 expansion lives at **`examples/accrue_host/docs/verify01-v112-admin-paths.md`** (seeded in plan **`50-01`**).
 
