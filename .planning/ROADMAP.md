@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- ✅ **v1.12 Admin & operator UX** — Phases **48–50** shipped **2026-04-22**. Post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright on touched routes. Requirements: **`.planning/REQUIREMENTS.md`** (**ADM-01..ADM-06**).
+- ✅ **v1.12 Admin & operator UX** — Phases **48–50** shipped **2026-04-22**. Post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright on touched routes. Archives: [`milestones/v1.12-ROADMAP.md`](milestones/v1.12-ROADMAP.md), [`milestones/v1.12-REQUIREMENTS.md`](milestones/v1.12-REQUIREMENTS.md).
 - ✅ **v1.11 Public Hex release + post-release continuity** — Phases **46–47** shipped **2026-04-22**. Linked **`accrue`** / **`accrue_admin`** **0.3.0** on Hex; **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning mirrors aligned. Archives: [`milestones/v1.11-ROADMAP.md`](milestones/v1.11-ROADMAP.md), [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md).
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
 - ✅ **v1.1 Stabilization + Adoption** — Phases 10-12 plus 11.1 shipped on 2026-04-17. Proved Accrue in a realistic Phoenix host app, promoted that proof into CI, closed host-flow hermeticity gaps, and hardened first-user DX/docs. Full archive: [`milestones/v1.1-ROADMAP.md`](milestones/v1.1-ROADMAP.md).
@@ -18,7 +18,8 @@
 
 ## Phases
 
-### v1.12 Admin & operator UX — Phases 48–50 (complete — 2026-04-22)
+<details>
+<summary>✅ v1.12 Admin & operator UX (Phases 48–50) — SHIPPED 2026-04-22</summary>
 
 **Milestone goal:** Improve **`accrue_admin`** so operators see **trustworthy billing state** faster—especially signals that matter after **metering (v1.10)**—with **smoother drills and navigation**, while keeping **Phase 20/21** contracts (**`ax-*`**, **`AccrueAdmin.Copy`**, no new UI kits) and **without** **PROC-08** / **FIN-03**.
 
@@ -35,6 +36,10 @@
 1. **ADM-01..ADM-06** satisfied with committed **LiveView** + tests + phase verification notes.
 2. No **PROC-08** / **FIN-03** scope creep; no new third-party UI kits.
 3. **VERIFY-01** policy (**merge-blocking** vs **advisory** lanes) unchanged unless an explicit maintainer decision documents a rename (discouraged).
+
+**Archives:** [`milestones/v1.12-ROADMAP.md`](milestones/v1.12-ROADMAP.md), [`milestones/v1.12-REQUIREMENTS.md`](milestones/v1.12-REQUIREMENTS.md).
+
+</details>
 
 <details>
 <summary>✅ v1.11 Public Hex release + post-release continuity (Phases 46–47) — SHIPPED 2026-04-22</summary>

@@ -12,17 +12,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.12 — Admin & operator UX (complete — 2026-04-22)
+**No active implementation milestone** — **v1.12** planning line is **archived** (2026-04-22). Open the next slice with **`/gsd-new-milestone`** when priorities are set.
 
-**Goal:** Improve **`accrue_admin`** so operators see trustworthy billing state faster—especially signals that matter after **metering (v1.10)**—with smoother drills and navigation, while keeping **Phase 20/21** presentation contracts (**`ax-*`**, **`AccrueAdmin.Copy`**, no third-party UI kits).
-
-**Target features:**
-
-- **Operator-visible billing signals** — credible metering- and failure-adjacent summaries or deep links (aligned to existing telemetry / runbook / webhook narratives) without **PROC-08** or **FIN-03**.
-- **Navigation and drill quality** on high-traffic admin routes (lists, detail chrome, step-up flows) with fewer dead ends; **README / route inventory** stays honest when routes change.
-- **Regression safety** — VERIFY-01 / Playwright (and axe where already required) extended only where this milestone touches mounted admin, preserving merge-blocking vs advisory CI semantics.
-
-**Phases:** **48–50** (see `.planning/ROADMAP.md`). **`phases.clear`** not run — prior phase trees under `.planning/phases/` remain for traceability.
+**v1.12 — Admin & operator UX** is **archived** (2026-04-22). Phases **48–50**; **ADM-01..ADM-06** validated. Archives: `.planning/milestones/v1.12-ROADMAP.md`, `v1.12-REQUIREMENTS.md`. Planning git tag **`v1.12`**.
 
 **v1.11 — Public Hex release + post-release continuity** is **archived** (2026-04-22). Phases **46–47**; **REL-01..REL-04**, **DOC-01..DOC-02**, **HYG-01** validated. Archives: `.planning/milestones/v1.11-ROADMAP.md`, `v1.11-REQUIREMENTS.md`. Git tag **`v1.11`**.
 
@@ -40,9 +32,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** **`accrue` 0.3.0**, **`accrue_admin` 0.3.0** — aligned with workspace **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version "0.3.0"`** at this commit (Release Please + manifest remain the numeric SSOT for the next bump).
 
-**Last shipped planning milestone:** **v1.11** — Phases **46–47** (2026-04-22): Hex release train + manifest SSOT (**46**), post-release docs + planning continuity (**47**); archives `.planning/milestones/v1.11-*`; planning git tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
+**Last shipped planning milestone:** **v1.12** — Phases **48–50** (2026-04-22): post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 gates on touched routes (**ADM-01..ADM-06**); archives `.planning/milestones/v1.12-*`; planning git tag **`v1.12`**. Prior: **v1.11** — Phases **46–47**; archives `.planning/milestones/v1.11-*`; tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**.
 
-**Now:** **v1.12** complete — Phases **48–50** shipped (**ADM-01..ADM-06**). Open the next milestone with **`/gsd-new-milestone`** when priorities are set.
+**Now:** Fresh **`.planning/REQUIREMENTS.md`** after this close — use **`/gsd-new-milestone`** to define **v1.13+** scope when ready.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -195,7 +187,7 @@ Theme: **Hex publish** + **post-release continuity** (docs, verifiers, planning 
 - [x] **DOC-01, DOC-02** — **`first_hour.md`** install pins; **`verify_package_docs`** + ExUnit on **`main`**. **Validated in Phase 47.**
 - [x] **HYG-01** — Planning mirrors (**`PROJECT`**, **`MILESTONES`**, **`STATE`**) match published **0.3.0** pair. **Validated in Phase 47.**
 
-### Validated v1.12 (milestone complete — 2026-04-22)
+### Validated v1.12 (archived in `.planning/milestones/v1.12-REQUIREMENTS.md`; milestone closed 2026-04-22)
 
 Theme: **admin & operator UX** (**ADM-01..ADM-06**); **PROC-08** and **FIN-03** not in this milestone.
 
@@ -428,6 +420,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-22:** **v1.11** archived (`milestones/v1.11-*`); root **`.planning/REQUIREMENTS.md`** removed for next milestone; planning git tag **`v1.11`**.
 - **2026-04-22:** **v1.12** opened — **Admin & operator UX**; Phases **48–50**; requirements **ADM-01..ADM-06**; **`phases.clear`** skipped (preserve **40–47** phase trees).
 - **2026-04-22:** **v1.12** closed — Phases **48–50** complete; **ADM-01..ADM-06** validated; VERIFY-01 copy export + subscriptions axe coverage shipped in **Phase 50**.
+- **2026-04-22:** **v1.12** milestone archived (`milestones/v1.12-*`); root **`.planning/REQUIREMENTS.md`** removed for next milestone; planning git tag **`v1.12`**.
 
 ## Evolution
 
@@ -447,4 +440,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — **v1.12** milestone complete (Phases **48–50**; **ADM-01..ADM-06**).*
+*Last updated: 2026-04-22 — **v1.12** milestone archived (Phases **48–50**; **ADM-01..ADM-06**); root **`.planning/REQUIREMENTS.md`** removed pending **`/gsd-new-milestone`**.*

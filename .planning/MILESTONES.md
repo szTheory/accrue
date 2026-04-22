@@ -1,18 +1,33 @@
 # Milestones
 
-## v1.12 Admin & operator UX (Active — opened 2026-04-22)
+## v1.12 Admin & operator UX (Shipped: 2026-04-22)
 
 **Planning opened:** 2026-04-22
 
-**Phases:** **48–50** (see root `.planning/ROADMAP.md`) — requirements **ADM-01..ADM-06** in **`.planning/REQUIREMENTS.md`**.
+**Phases completed:** 3 phases (48–50), **6** plans
 
-**Theme:** Improve **`accrue_admin`** operator surfaces (post-metering signals, drill/nav quality, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright alignment on touched routes). **PROC-08** / **FIN-03** remain non-goals.
+**Key accomplishments:**
 
-**Public Hex baseline:** **`accrue` / `accrue_admin` 0.3.0`** (unchanged by planning).
+- **Phase 48 (ADM-01):** Dashboard **MeterEvent** terminal-failed KPI with honest **`/events`** deep link and **`AccrueAdmin.Copy`**-backed operator strings.
+- **Phase 49 (ADM-02, ADM-03):** **SubscriptionLive** drill parity (**`ScopedPath`**, related billing card); automated drill href proofs at admin + mounted host; README **router vs sidebar** note.
+- **Phase 50 (ADM-04..ADM-06):** **`AccrueAdmin.Copy.Subscription`** + LiveView migration; **`theme-exceptions.md`** register + contributor checklist; **`mix accrue_admin.export_copy_strings`** with CI **`copy_strings.json`**; VERIFY-01 **subscriptions** axe/spec fed from exported copy.
 
-**Phase directories:** **`phases.clear` not run** — preserves **40–47** trees under **`.planning/phases/`** for traceability.
+**Theme:** Post-metering **admin signals**, **drill/nav** polish, **Copy + token** discipline, **VERIFY-01** gates on touched mounted paths — **no** **PROC-08** / **FIN-03**.
 
-**Next:** **`/gsd-discuss-phase 48`** or **`/gsd-plan-phase 48`**.
+**Milestone audit:** No standalone `v1.12-MILESTONE-AUDIT.md`; closure used per-phase **`*-VERIFICATION.md`** / **`50-VERIFICATION.md`** and requirements traceability (6/6 Complete).
+
+**Known deferred items at close:** same **audit-open** carry-forward as prior closes (see `.planning/STATE.md` § Deferred Items).
+
+**Phase directories:** **`phases.clear` not run** — preserves **40–50** trees under **`.planning/phases/`** for traceability.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.12-ROADMAP.md`](milestones/v1.12-ROADMAP.md)
+- Requirements: [`milestones/v1.12-REQUIREMENTS.md`](milestones/v1.12-REQUIREMENTS.md)
+
+**Git tag:** `v1.12`
+
+**Next after ship:** `/gsd-new-milestone` when priorities for **v1.13+** are set.
 
 ---
 

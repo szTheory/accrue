@@ -420,6 +420,45 @@
 
 ---
 
+## Milestone: v1.12 — Admin & operator UX
+
+**Shipped:** 2026-04-22  
+**Phases:** 3 | **Plans:** 6
+
+### What Was Built
+
+- **Post-metering dashboard signal (ADM-01):** terminal-failed **MeterEvent** KPI on the default admin home with honest **`/events`** navigation and **`AccrueAdmin.Copy`** strings.
+- **Drill/nav polish (ADM-02, ADM-03):** **SubscriptionLive** **`ScopedPath`** breadcrumbs + **Related billing** card; **LiveViewTest** + mounted-host proofs for drill href targets; admin **README** router vs sidebar ordering note.
+- **Copy, tokens, VERIFY (ADM-04..ADM-06):** **`AccrueAdmin.Copy.Subscription`** + **`SubscriptionLive`** migration; checked-in **`theme-exceptions.md`** register + **CONTRIBUTING** contributor bullet; **`mix accrue_admin.export_copy_strings`** artifact wired into VERIFY-01 **subscriptions** Playwright + **axe** coverage.
+
+### What Worked
+
+- Reusing the **v1.11** close pattern (per-phase verification + traceability, no standalone milestone audit file) kept archival unblocked.
+- **Copy-export → JSON → Playwright** closed the classic “duplicate English literal” drift class for one high-traffic admin surface.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** failed again (`version required for phases archive`); **`v1.12-*`** archives and **`git rm .planning/REQUIREMENTS.md`** were completed manually.
+- Root **`.planning/REQUIREMENTS.md`** stayed partially unchecked until close despite **`PROJECT.md`** and plan YAML already asserting completion.
+
+### Patterns Established
+
+- **Meter-adjacent KPIs** reuse aggregate + **Copy** + **ScopedPath** deep links instead of inventing new index pages.
+- **Allowlisted Mix export** of **Copy** strings as the VERIFY-01 anti-drift bridge for browser assertions.
+
+### Key Lessons
+
+1. Checkbox/traceability hygiene should follow **`requirements-completed`** YAML at each phase close, not only at milestone archive.
+2. **Mounted-path inventory** docs pay off when expanding VERIFY-01 without guessing “what changed this milestone.”
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three short phases (**48–50**) focused on admin UX + gates.
+- Notable: majority of merge risk was **test + CI wiring** (export task, generated JSON, axe spec), not LiveView churn.
+
+---
+
 ## Milestone: v1.11 — Public Hex release + post-release continuity
 
 **Shipped:** 2026-04-22  
@@ -468,6 +507,7 @@
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.12 | short | 3 | Post-metering admin KPI (48), subscription drill + README nav honesty (49), Copy.Subscription + theme register + export_copy_strings VERIFY-01 wiring (50). |
 | v1.11 | short | 2 | Release train + manifest SSOT (46), post-release docs + planning mirrors (47). |
 | v1.10 | short | 3 | Metering happy path + Fake determinism (43), failure/reconciler/webhook telemetry (44), metering + telemetry/runbook docs (45). |
 | v1.9 | short | 3 | Telemetry catalog + metrics parity + cross-domain example (40–41), operator runbooks + telemetry links (42). |
@@ -483,6 +523,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.12 | ExUnit on **DashboardLive** + **SubscriptionLive**; host **admin_mount** smoke; VERIFY-01 Playwright + axe using **`e2e/generated/copy_strings.json`** | ADM-01..ADM-06 (6/6) archived | `mix accrue_admin.export_copy_strings`, `Copy.Subscription`, `theme-exceptions.md`, `verify01-v112-admin-paths.md`. |
 | v1.11 | `verify_release_manifest_alignment.sh`, `verify_package_docs` + ExUnit, CI release-automation wiring | REL/DOC/HYG (7/7) archived | Maintainer-dispatch release PR workflow, manifest SSOT job, `46-VERIFICATION.md` ship index. |
 | v1.10 | ExUnit on Fake metering flows (happy, sync failure + idempotent retry, reconciler, webhook); guide cross-links | MTR-01..MTR-08 (8/8) archived | `guides/metering.md`, telemetry/runbook rows for `meter_reporting_failed` sources, guarded `MeterEvents` failure path. |
 | v1.9 | `OpsEventContractTest`, `MetricsOpsParityTest`, guide + host wiring docs | OBS/RUN/TEL (6/6) archived | `operator-runbooks.md`, telemetry catalog rows + deep links, cross-domain host example. |
