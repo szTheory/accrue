@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Observability & operator runbooks
-status: milestone_complete
-last_updated: "2026-04-22T02:50:18.623Z"
-last_activity: 2026-04-22
+status: executing
+last_updated: "2026-04-22T03:00:00.000Z"
+last_activity: 2026-04-22 — Phase 41 executed (TEL-01 + OBS-02 + REQUIREMENTS)
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 3
+  completed_phases: 2
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,17 +20,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase --phase — 41
+**Current focus:** **v1.9** — Phase **42** (operator runbooks / RUN-01) next.
 
 ## Current Position
 
-Phase: 41
+Phase: **42** — Operator runbooks
 
-Plan: Not started
+Plan: —
 
-**Status:** Milestone complete
+**Status:** Phase **41** shipped (**TEL-01**, **OBS-02**, D-18 REQUIREMENTS). Milestone **v1.9** continues through Phase **42**.
 
-**Last Activity:** 2026-04-22
+**Last Activity:** 2026-04-22 — `/gsd-execute-phase 41` completed; see `41-VERIFICATION.md`.
 
 ## Milestone Progress
 
@@ -40,7 +40,7 @@ Plan: Not started
 
 ## Current Planning Artifacts
 
-- `.planning/phases/41-host-metrics-wiring-cross-domain-example/41-CONTEXT.md` — **Phase 41** implementation decisions (resume here for plan/execute)
+- `.planning/phases/41-host-metrics-wiring-cross-domain-example/41-VERIFICATION.md` — **Phase 41** verification (**passed**)
 - `.planning/PROJECT.md` — **v1.9** current milestone
 - `.planning/REQUIREMENTS.md` — v1.9 REQ-IDs + traceability
 - `.planning/ROADMAP.md` — Phases **40–42**
@@ -61,6 +61,4 @@ Plan: Not started
 - **v1.9** follows post–v1.8 prioritization: **telemetry catalog**, **metrics parity**, **cross-domain examples**, **operator runbooks** before a dedicated **metered billing** milestone (**v1.10+** spike on file).
 - **PROC-08** and **FIN-03** remain **explicit non-goals** for v1.9 (see `REQUIREMENTS.md` Out of scope).
 
-**Next:** `/gsd-plan-phase 41`
-
-**Planned Phase:** 41 (Host metrics wiring + cross-domain example) — 3 plans — 2026-04-22T02:49:02.613Z
+**Next:** `/gsd-discuss-phase 42` (recommended) or `/gsd-plan-phase 42` — operator runbooks (**RUN-01**).
