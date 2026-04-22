@@ -122,6 +122,15 @@ defmodule AccrueAdmin.Copy do
   def dashboard_kpi_webhook_backlog_meta,
     do: "Failed + dead webhook rows waiting for operator attention"
 
+  def dashboard_meter_reporting_failures_label, do: "Meter reporting failures"
+
+  def dashboard_meter_reporting_failures_meta,
+    do:
+      "Counts accrue_meter_events rows in stripe_status=\"failed\" (terminal meter reporting failures)."
+
+  def dashboard_meter_reporting_failures_aria_label,
+    do: "Open billing event ledger; events list is not limited to meter rows."
+
   def dashboard_kpi_customers_aria_label, do: "Open customers list"
 
   def dashboard_kpi_subscriptions_aria_label, do: "Open subscriptions list"
