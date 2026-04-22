@@ -6,8 +6,8 @@ the OpenTelemetry span naming rules, and the default
 `Telemetry.Metrics` recipe.
 
 If you only read one section: jump to **Using the default metrics recipe**
-below — that's the four-line host wiring snippet that gets you ~15 production
-metrics with zero glue code.
+below — that's the short host wiring snippet that appends `Accrue.Telemetry.Metrics.defaults/0`
+(~20 metric definitions, including every documented ops counter) with minimal glue code.
 
 ## Namespace split
 
@@ -27,6 +27,23 @@ busy SaaS dispatching webhooks, finalizing invoices, and reporting usage
 events emits hundreds of `[:accrue, :*]` events per second. The ops namespace
 is curated: every event is a real ops signal, not a heartbeat.
 
+### Firehose and diagnostic events (not in `[:accrue, :ops, :*]`)
+
+These are useful for **tracing, dashboards, and anomaly detection**, not
+typically for paging:
+
+- **Billing spans** — `Accrue.Telemetry.span/3` on every public `Accrue.Billing`
+  entry point: `[:accrue, :billing, :<resource>, :<action>, :start | :stop | :exception]`
+  (see `Accrue.Telemetry` module doc).
+- **Webhooks** — `[:accrue, :webhook, :receive]`, handler exceptions, orphan
+  reducers under `[:accrue, :webhooks, :orphan_*]`, `[:accrue, :webhooks, :stale_event]`, etc.
+- **Mail / PDF** — `[:accrue, :mailer, :deliver, …]`, `[:accrue, :pdf, :render, …]`,
+  email fallbacks `[:accrue, :email, :locale_fallback | :timezone_fallback | :format_money_failed]`.
+
+Subscribe in your host `Telemetry` or OpenTelemetry pipeline when you need
+latency percentiles or error rates — keep **on-call** subscriptions on
+`[:accrue, :ops, :*]` above.
+
 ## Ops events in v1.0
 
 All ops events fire inside the same `Repo.transact/2` as the state write
@@ -43,6 +60,22 @@ they correspond to — they are idempotent under webhook replay via the
 | `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | `count` | `event_id`, `processor_event_id`, `type`, `attempt` |
 | `[:accrue, :ops, :webhook_dlq, :replay]` | `count`, `duration`, `requeued_count`, `skipped_count` | `actor`, `filter`, `dry_run?` |
 | `[:accrue, :ops, :webhook_dlq, :prune]` | `dead_deleted`, `succeeded_deleted`, `duration` | `retention_days` |
+| `[:accrue, :ops, :pdf_adapter_unavailable]` | `count` | `type` (email template key), `operation_id` when set |
+| `[:accrue, :ops, :events_upcast_failed]` | `count` | `event_id`, `type`, `schema_version` |
+| `[:accrue, :ops, :connect_account_deauthorized]` | `count` | `stripe_account_id`, `deauthorized_at` **or** `unresolved: true` |
+| `[:accrue, :ops, :connect_capability_lost]` | `count` | `stripe_account_id`, `capability`, `from`, `to` |
+| `[:accrue, :ops, :connect_payout_failed]` | `count` | `stripe_account_id`, `payout_id`, `amount`, `currency`, `failure_code` |
+
+Connect ops rows above are emitted via `Accrue.Telemetry.Ops.emit/3` from
+`Accrue.Webhook.ConnectHandler`. PDF and ledger rows use `:telemetry.execute/3`
+directly with the same `[:accrue, :ops]` prefix — treat them as **first-class
+ops signals** for paging and dashboards.
+
+**Note:** `[:accrue, :ops, :revenue_loss]`, `:incomplete_expired`, and
+`:charge_failed` are part of the supported **host + Accrue** ops vocabulary
+(`Ops.emit/3` and metrics defaults). Prefer `Ops.emit/3` from host billing
+code so `operation_id` merges consistently; search the codebase for concrete
+emit sites when wiring alerts.
 
 Every ops event also carries an automatically-merged `operation_id` field
 in metadata, sourced from `Accrue.Actor.current_operation_id/0` (the same
@@ -161,10 +194,16 @@ defmodule MyApp.Telemetry do
 end
 ```
 
-This wires in ~15 default metrics covering the billing context, webhook
-pipeline, and ops namespace. Distributions and percentile summaries beyond
+This wires in the default metric set covering the billing context, webhook
+pipeline, and full ops namespace (including Connect and PDF ops signals).
+Distributions and percentile summaries beyond
 these are host choice — Accrue doesn't prescribe binning strategies because
 appropriate buckets depend heavily on your traffic shape and SLO targets.
+
+The default recipe includes counters for **every** `[:accrue, :ops, :*]` event
+documented in the table above (including Connect, PDF fallback, and ledger
+upcast failures), so Prometheus-style scrapers stay aligned with the ops
+catalog.
 
 ### Cardinality discipline
 
@@ -206,6 +245,52 @@ The `[:accrue, :ops]` prefix is hardcoded — callers cannot inject events
 outside the namespace via this helper. If you need to emit
 under `[:accrue, :*]` for the firehose, use `Accrue.Telemetry.span/3`
 instead.
+
+## Cross-domain example (non-billing Phoenix code)
+
+A LiveView, Channel, or plain GenServer can attach to Accrue ops events the
+same way as any other `:telemetry` event — no private Accrue modules required:
+
+```elixir
+# e.g. in application.ex after supervisor children start
+:telemetry.attach_many(
+  "my-app-accrue-ops-log",
+  [
+    [:accrue, :ops, :webhook_dlq, :dead_lettered],
+    [:accrue, :ops, :meter_reporting_failed]
+  ],
+  fn event, measurements, metadata, _config ->
+    require Logger
+    Logger.warning("accrue ops #{inspect(event)} count=#{measurements.count} meta=#{inspect(Map.drop(metadata, []))}")
+  end,
+  nil
+)
+```
+
+For structured logs or `Telemetry.Metrics`, use the same event names as in the
+ops table. Correlate with your own `operation_id` if you seed
+`Accrue.Actor` in the same process before calling Accrue.
+
+## Operator runbooks (first actions)
+
+Use this as a **starting point** — adjust for your support model and Stripe
+objects. Prefer Stripe Dashboard / Sigma for finance reporting; Accrue focuses
+on **state + webhooks + replay** in your app.
+
+| Ops event | Suggested first actions |
+|-----------|-------------------------|
+| `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | Inspect `accrue_webhook_events` row; fix handler bug or data; use admin **Replay** or DLQ tools; watch replay telemetry. |
+| `[:accrue, :ops, :webhook_dlq, :replay]` | Validate `requeued_count` vs expectation; if dry-run, follow up with real replay. |
+| `[:accrue, :ops, :meter_reporting_failed]` | Check `source` (`:sync`, `:webhook`, `:reconciler`); inspect `accrue_meter_events`; verify Stripe meter + API keys; retry after fix. |
+| `[:accrue, :ops, :dunning_exhaustion]` | Confirm subscription status transition; notify customer success; verify payment method in Stripe. |
+| `[:accrue, :ops, :revenue_loss]` | Triage `reason` + `subject_*`; fraud vs refund policy; reconcile with Stripe balance transactions. |
+| `[:accrue, :ops, :charge_failed]` | Map `failure_code`; prompt card update or alternative PM; check Radar rules in Stripe if unexpected. |
+| `[:accrue, :ops, :incomplete_expired]` | Incomplete checkout/subscription expired; clean up local rows; marketing follow-up if abandoned cart. |
+| `[:accrue, :ops, :pdf_adapter_unavailable]` | Start ChromicPDF (or switch PDF adapter); emails still send with hosted invoice link fallback. |
+| `[:accrue, :ops, :events_upcast_failed]` | **Data migration issue** — unknown `schema_version` for `type`; deploy compatible upcaster before replaying events. |
+| `[:accrue, :ops, :connect_account_deauthorized]` | Disconnect Connect account in product UI; stop destination charges; audit open Connect transfers. |
+| `[:accrue, :ops, :connect_capability_lost]` | Read `capability` + `to` status; Stripe Connect onboarding / requirements. |
+| `[:accrue, :ops, :connect_payout_failed]` | Use `payout_id` + `failure_code` in Stripe; update bank account or resolve restriction. |
 
 ## See also
 

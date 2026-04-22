@@ -17,6 +17,11 @@ defmodule Accrue.Telemetry.Ops do
       [:accrue, :ops, :webhook_dlq, :dead_lettered]
       [:accrue, :ops, :webhook_dlq, :replay]
       [:accrue, :ops, :webhook_dlq, :prune]
+      [:accrue, :ops, :pdf_adapter_unavailable]
+      [:accrue, :ops, :events_upcast_failed]
+      [:accrue, :ops, :connect_account_deauthorized]
+      [:accrue, :ops, :connect_capability_lost]
+      [:accrue, :ops, :connect_payout_failed]
 
   ## Integrity notes
 

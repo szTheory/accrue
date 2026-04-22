@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-last_updated: "2026-04-22T12:00:00.000Z"
-last_activity: 2026-04-22
+milestone: v1.9
+milestone_name: Observability & operator runbooks
+status: defining_requirements
+last_updated: "2026-04-21T00:00:00.000Z"
+last_activity: 2026-04-21
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -16,36 +16,35 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-22)
+See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.8** archived — define **v1.9+** via `/gsd-new-milestone` (fresh `.planning/REQUIREMENTS.md`).
+**Current focus:** **v1.9** — Observability & operator runbooks (Phases **40–42**).
 
 ## Current Position
 
-Phase: *(none — between milestones)*
+Phase: **Not started** (next: **40** — telemetry catalog + guide truth)
 
-Plan: *(none)*
+Plan: —
 
-**Status:** **v1.8** milestone **archived** (2026-04-22). Git tag **`v1.8`**.
+**Status:** Milestone **v1.9** opened — `REQUIREMENTS.md` + `ROADMAP.md` active; stale v1.8 phase dirs cleared via `gsd-sdk query phases.clear --confirm`.
 
-**Last Activity:** 2026-04-22 — `/gsd-complete-milestone` archival + `REQUIREMENTS.md` removal.
+**Last Activity:** 2026-04-21 — Post–v1.8 prioritization plan implemented; gap audit + metering spike notes added under `.planning/research/`.
 
 ## Milestone Progress
 
-**Last shipped:** v1.8 **Org billing recipes & host integration depth** — **ARCHIVED** (2026-04-22). Phases **37–39**; archives `.planning/milestones/v1.8-*`.
+**Active:** **v1.9** — Observability & operator runbooks — **Phases 40–42** (see `.planning/ROADMAP.md`).
 
-**Prior:** v1.7 Adoption DX + operator admin depth — **ARCHIVED** (2026-04-21). Phase dirs **32–36** cleared via `gsd-sdk query phases.clear --confirm`.
+**Last shipped:** **v1.8** Org billing recipes & host integration depth — **ARCHIVED** (2026-04-22). Phases **37–39**; archives `.planning/milestones/v1.8-*`.
 
 ## Current Planning Artifacts
 
-- `.planning/PROJECT.md` — between milestones; last shipped **v1.8**
-- `.planning/ROADMAP.md` — live roadmap + shipped `<details>` history
-- `.planning/research/` — retained v1.8 research notes
-- `.planning/milestones/v1.8-*` — v1.8 roadmap + requirements archive
-- `.planning/milestones/v1.7-*` — prior milestone archives
-- `.planning/ADMIN-UX-BASELINE-AUDIT.md` — read-only admin baseline
+- `.planning/PROJECT.md` — **v1.9** current milestone
+- `.planning/REQUIREMENTS.md` — v1.9 REQ-IDs + traceability
+- `.planning/ROADMAP.md` — Phases **40–42**
+- `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md` — ops / metrics gap inventory
+- `.planning/research/v1.10-METERING-SPIKE.md` — public API + Fake parity outline for next milestone
 
 ## Deferred Items
 
@@ -57,9 +56,7 @@ Plan: *(none)*
 
 ## Recent Decisions
 
-- **v1.8** prioritizes **ORG-04**; **PROC-08** and **FIN-03** remain out of scope.
-- Phase numbering continues from **37** (no `--reset-phase-numbers`).
+- **v1.9** follows post–v1.8 prioritization: **telemetry catalog**, **metrics parity**, **cross-domain examples**, **operator runbooks** before a dedicated **metered billing** milestone (**v1.10+** spike on file).
+- **PROC-08** and **FIN-03** remain **explicit non-goals** for v1.9 (see `REQUIREMENTS.md` Out of scope).
 
-**Last completed phase (v1.8):** **39** — 2026-04-22 (3/3 plans). **Prior:** 38 — 2026-04-22 (2/2 plans); 37 — 2026-04-21 (3/3 plans). **Prior milestone capstone:** 36 — 2026-04-21.
-
-**Next:** `/gsd-new-milestone` — fresh requirements + next roadmap slice.
+**Next:** `/gsd-discuss-phase 40` or `/gsd-plan-phase 40`
