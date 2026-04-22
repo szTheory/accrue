@@ -20,7 +20,10 @@ defmodule Accrue.Docs.OrganizationBillingGuideTest do
           "owner_type",
           "ORG-07",
           "MyApp.Auth.Pow",
-          "Pow.Plug.current_user"
+          "Pow.Plug.current_user",
+          "ORG-08",
+          "Custom organization model",
+          "Anti-pattern"
         ] do
       assert guide =~ needle, "expected guides/organization_billing.md to include #{inspect(needle)}"
     end
