@@ -5,7 +5,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Customer, Invoice, Query, Subscription}
+  alias Accrue.Billing.{Customer, Invoice, MeterEvent, Query, Subscription}
   alias Accrue.Events.Event
   alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
@@ -166,6 +166,10 @@ defmodule AccrueAdmin.Live.DashboardLive do
       blocked_webhook_count:
         WebhookEvent
         |> where([event], event.status in [:failed, :dead])
+        |> Repo.aggregate(:count, :id),
+      failed_meter_event_count:
+        MeterEvent
+        |> where([m], m.stripe_status == "failed")
         |> Repo.aggregate(:count, :id),
       events_last_day_count:
         Event
