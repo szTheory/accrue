@@ -15,6 +15,16 @@ Evidence columns are summarized from `.planning/phases/32-adoption-discoverabili
 | ADOPT-05 | `verify_package_docs.sh` `require_fixed` / `require_regex` pins (First Hour, troubleshooting, host README, package READMEs) | `package_docs_verifier_test.exs` (fixture drift regressions) | `33-VERIFICATION.md` |
 | ADOPT-06 | `.github/workflows/ci.yml` stable job-id header comments; `README.md` + `guides/testing-live-stripe.md` lane wording | `package_docs_verifier_test.exs` (workflow/contributor drift cases) | `33-VERIFICATION.md` |
 
+## ORG gates (v1.8 org billing proof)
+
+| REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
+|--------|-------------------------------|-------------------------|--------------------------|
+| ORG-09 | `scripts/ci/verify_adoption_proof_matrix.sh`; `examples/accrue_host/docs/adoption-proof-matrix.md` | `accrue/test/accrue/docs/organization_billing_guide_test.exs`; `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` | `.planning/phases/39-org-billing-proof-alignment/39-VERIFICATION.md` |
+
+### Triage: verify_adoption_proof_matrix.sh
+
+- **`verify_adoption_proof_matrix:`** (stderr prefix on failure) — treat as **ORG-09**: missing ORG-09 headings, primary/recipe lane markers, `phx.gen.auth` / `use Accrue.Billable` / `non-Sigra` literals, **ORG-07** / **ORG-08** advisory rows, or the self-referential script path in `adoption-proof-matrix.md`. Fix the matrix doc first; only change needles in the script after an intentional taxonomy edit.
+
 ## When package docs verification fails
 
 Stderr lines from `verify_package_docs.sh` are prefixed with `[verify_package_docs]` so log scrapers and humans can tell this gate apart from other scripts. Use the triage bullets below to map the failing file or substring back to the ADOPT row before editing unrelated docs.
