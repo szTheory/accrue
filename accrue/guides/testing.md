@@ -2,6 +2,16 @@
 
 Pull requests are merge-blocked on GitHub Actions job `host-integration`, which runs the same contract as `cd examples/accrue_host && mix verify.full`; use `mix verify` for a faster bounded Fake slice that is not CI-complete. [Runnable VERIFY-01 commands and Playwright entry points](../../examples/accrue_host/README.md#proof-and-verification).
 
+## Accrue package: automated UAT surrogates
+
+Conversational `/gsd-verify-work` checklists for **library-only** phases are intentionally replaced by ExUnit whenever behavior is observable without a human clicking through a product UI.
+
+- **`accrue/test/accrue/verification/`** — manifest tests that assert migration files + backing suites still exist (prevents silent drift).
+- **`mix verify.uat_phase_04`** — runs the Phase 04 surrogate plus the focused ExUnit files that prove metered billing, dunning, DLQ, multi-endpoint webhooks, checkout/portal, events query API, and telemetry ops/metrics.
+- **`mix verify.uat`** — runs the whole `test/accrue/verification/` tree (add more `*_surrogate_test.exs` modules as new phases gain checklists).
+
+Merge-blocking **`release-gate`** already runs `mix test --warnings-as-errors` for `accrue/`, which includes every surrogate — CI does not need a second duplicate job.
+
 ## Fake-first Phoenix scenario
 
 Start billing tests in the host app, not inside Accrue internals. This example belongs in a Phoenix `DataCase` and runs against the Fake Processor, test mailer, test PDF adapter, Oban test mode, and the normal webhook reducer path.
@@ -105,7 +115,7 @@ Call `Accrue.Billing.report_usage/3` with explicit `timestamp:` and an `operatio
 
 Full NimbleOptions keys, defaults, and semantics follow the deep link to source doc path or HexDocs wording for `Accrue.Billing.report_usage/3` (`lib/accrue/billing.ex`); this guide does not duplicate that full option list.
 
-For failure-path telemetry (`meter_reporting_failed` and related ops notes), see `guides/telemetry.md` while keeping happy-path tests anchored on `accrue_meter_events` rows.
+For failure-path telemetry (`meter_reporting_failed` and related ops notes), see `guides/telemetry.md` while keeping happy-path tests anchored on `accrue_meter_events` rows. For the public API vs internal row vs Fake/Stripe processor map, see `guides/metering.md`.
 
 ## Helper reference
 
