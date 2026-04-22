@@ -38,7 +38,7 @@ defmodule Accrue.Test do
 
   ## Implementation
 
-  Single facade: delegates reads to `Accrue.Processor.Fake` so hosts discover the
+  single facade: delegates reads to `Accrue.Processor.Fake` so hosts discover the
   helper through `Accrue.Test` instead of importing the Fake module directly.
   """
   @spec meter_events_for(Accrue.Billing.Customer.t() | String.t()) :: [map()]
