@@ -392,7 +392,8 @@ defmodule Accrue.Billing do
   retries with the same idempotency inputs, `{:ok, %Accrue.Billing.MeterEvent{}}`
   may be returned when the row already reflects a terminal outcome — inspect
   `stripe_status` and `stripe_error` on the persisted row for the canonical
-  failure details.
+  failure details. See `guides/metering.md` for how public calls, internal rows,
+  and the processor seam relate.
 
   ## Fake / test mode
 
