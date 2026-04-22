@@ -1,4 +1,32 @@
+---
+status: passed
+phase: 46-release-train-hex-publish
+verified: 2026-04-22
+---
+
 # Phase 46 verification
+
+## Automated (implementation / REL-02 script)
+
+| Check | Result |
+|-------|--------|
+| `rg -n 'pull_request' .github/workflows/release-pr-automation.yml` | No matches (dispatch-only REL-01 workflow) |
+| `bash scripts/ci/verify_release_manifest_alignment.sh` | Pass |
+| `rg -n 'release-manifest-ssot' .github/workflows/ci.yml` | Present; `annotation-sweep` lists job in `needs` and `annotation_sweep.sh` args |
+| Plan acceptance greps (`46-0{1,2,3}-PLAN.md` criteria) | Pass at authoring time |
+| `cd accrue && mix test --warnings-as-errors` | **Fails in this workspace** — six `Accrue.Docs.*` tests require missing `.planning` trust/expansion files; one flaky `FactoryTest` DB sandbox checkout. **Unrelated to Phase 46 file edits.** |
+
+## Must-haves (from plans)
+
+- **REL-01:** `release-pr-automation.yml` is **`workflow_dispatch`** only; `RELEASING.md` documents the same maintainer path + partial Hex recovery with FAQ link.
+- **REL-02:** `verify_release_manifest_alignment.sh` enforces manifest ↔ both `mix.exs` `@version` + lockstep; **`release-manifest-ssot`** blocks merge in CI.
+- **REL-04:** D-12 fill-in template below exists for first real train evidence (placeholders retained by design).
+
+## Human verification
+
+Hex publish evidence (`mix hex.info`, live PR URLs) is **maintainer-filled after a real train** — placeholders in the D-12 sections remain until then.
+
+---
 
 This file is the **D-12 evidence index card** for a completed **Phase 46** release train: short links and reproducible command blocks, not log dumps. Fill **`REPLACE_ME_*`** / **`TODO_*`** after the real ship.
 
