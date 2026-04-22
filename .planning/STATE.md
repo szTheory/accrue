@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Observability & operator runbooks
-status: "Phase **41** context gathered — TEL-01/OBS-02 decisions in `41-CONTEXT.md`; implementation not started."
-last_updated: "2026-04-21T12:00:00.000Z"
-last_activity: 2026-04-21 — `/gsd-discuss-phase 41` (accepted research bundle)
+status: planning
+last_updated: "2026-04-22T02:49:02.621Z"
+last_activity: 2026-04-21 — `/gsd-discuss-phase 41` → context + discussion log committed
 progress:
-  total_phases: 3
-  completed_phases: 1
+  total_phases: 1
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
 ---
@@ -62,3 +62,5 @@ Plan: —
 - **PROC-08** and **FIN-03** remain **explicit non-goals** for v1.9 (see `REQUIREMENTS.md` Out of scope).
 
 **Next:** `/gsd-plan-phase 41`
+
+**Planned Phase:** 41 (Host metrics wiring + cross-domain example) — 3 plans — 2026-04-22T02:49:02.613Z
