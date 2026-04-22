@@ -5,6 +5,22 @@ terms. Your Phoenix app owns `MyApp.Billing`, routing, auth, runtime config,
 and verification choices. Accrue owns the billing engine behind those public
 boundaries.
 
+## How to enter this guide
+
+This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the **same** pull request (**D-02**).
+
+### Capsule H — Hex consumer
+
+You already have a Phoenix app. Add Accrue to `mix.exs`, run `mix deps.get`, then `mix accrue.install …` and continue from **§ 1. First run** below (runtime config → migrations → Oban → webhook route → admin mount → subscription + proof).
+
+### Capsule M — Monorepo clone
+
+From the repository root: `cd examples/accrue_host`, run **`mix setup`**, start **`mix phx.server`**, then follow the numbered host README story (subscription → signed webhook → admin → `mix verify`) — the same Fake-backed arc this guide describes in package terms.
+
+### Capsule R — Evaluate / read-only
+
+Shortest read-only path: clone the repo, `cd examples/accrue_host`, run **`mix verify`** or **`mix verify.full`**. For merge-blocking VERIFY-01 detail and Playwright entry points, use [**#proof-and-verification**](../../examples/accrue_host/README.md#proof-and-verification) in the host README when you need more than the bounded proof commands.
+
 ## 1. First run
 
 The first hour should end with one Fake-backed subscription, one signed webhook
