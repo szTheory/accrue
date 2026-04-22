@@ -7,14 +7,14 @@
 
 ### Telemetry catalog & truth
 
-- [ ] **OBS-01**: Developer can use `guides/telemetry.md` as an authoritative **catalog** of every `[:accrue, :ops, :*]` event emitted by `accrue`, including Connect, PDF-mailer fallback, and ledger upcast failures, with measurements and metadata columns aligned to code.
-- [ ] **OBS-03**: Developer can read a concise description of the **firehose** namespace (`Accrue.Telemetry.span/3`, `[:accrue, :billing, …]`, ancillary webhook/mail events) and when to subscribe for diagnostics vs paging.
-- [ ] **OBS-04**: Maintainer can reconcile `guides/telemetry.md` with `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md` such that **no ops event** listed in the audit’s §1 remains undocumented (or is explicitly marked removed with PR reference).
+- [x] **OBS-01**: Developer can use `guides/telemetry.md` as an authoritative **catalog** of every `[:accrue, :ops, :*]` event emitted by `accrue`, including Connect, PDF-mailer fallback, and ledger upcast failures, with measurements and metadata columns aligned to code.
+- [x] **OBS-03**: Developer can read a concise description of the **firehose** namespace (`Accrue.Telemetry.span/3`, `[:accrue, :billing, …]`, ancillary webhook/mail events) and when to subscribe for diagnostics vs paging.
+- [x] **OBS-04**: Maintainer can reconcile `guides/telemetry.md` with `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md` such that **no ops event** listed in the audit’s §1 remains undocumented (or is explicitly marked removed with PR reference).
 
 ### Host wiring & metrics
 
-- [ ] **OBS-02**: Developer can copy a **cross-domain** example from Accrue docs (e.g. host `Telemetry` handler or snippet) showing how a non-billing Phoenix context attaches to **ops** or **billing** telemetry without importing private modules.
-- [ ] **TEL-01**: Developer using `Accrue.Telemetry.Metrics.defaults/0` gets counters (or documented intentional omissions) for **every** ops event in **OBS-01**, per gap closure in the v1.9 audit §2 — or the guide states why a given ops signal is host-only metric with a pattern to add locally.
+- [x] **OBS-02**: Developer can copy a **cross-domain** example from Accrue docs (e.g. host `Telemetry` handler or snippet) showing how a non-billing Phoenix context attaches to **ops** or **billing** telemetry without importing private modules.
+- [x] **TEL-01**: Developer using `Accrue.Telemetry.Metrics.defaults/0` gets counters (or documented intentional omissions) for **every** ops event in **OBS-01**, per gap closure in the v1.9 audit §2 — or the guide states why a given ops signal is host-only metric with a pattern to add locally.
 
 ### Operator runbooks
 
@@ -37,11 +37,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OBS-01 | Phase 40 | Pending |
-| OBS-03 | Phase 40 | Pending |
-| OBS-04 | Phase 40 | Pending |
-| OBS-02 | Phase 41 | Pending |
-| TEL-01 | Phase 41 | Pending |
+| OBS-01 | Phase 40 | Complete |
+| OBS-03 | Phase 40 | Complete |
+| OBS-04 | Phase 40 | Complete |
+| OBS-02 | Phase 41 | Complete |
+| TEL-01 | Phase 41 | Complete |
 | RUN-01 | Phase 42 | Pending |
 
 **Coverage:** v1.9 requirements: **6** total · Mapped: **6** · Unmapped: **0**
