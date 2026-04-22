@@ -19,7 +19,7 @@ For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/
 1. Confirm CI is green on `main`, especially the `release-gate` workflow and the required deterministic gate for both packages.
 2. Trigger or merge the **combined** Release Please PR that explicitly carries `Release-As: 1.0.0` for both package paths when needed. The first bootstrap should use Conventional Commits plus the `Release-As: 1.0.0` trailer for both `accrue` and `accrue_admin`.
 3. Review the release PR diff and confirm each package shows `@version "1.0.0"` in its `mix.exs` and the package-local changelog updates in `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md`.
-4. Merge the reviewed release PR (or rely on `.github/workflows/release-pr-automation.yml` to queue **auto-merge** after CI passes) and let `.github/workflows/release-please.yml` publish `accrue`.
+4. Merge the reviewed release PR manually, **or** after checklist sign-off run **Actions → Release PR automation → Run workflow** and enter the PR number so auto-merge queues **only** via **`workflow_dispatch`** (not on PR open/sync). Then let `.github/workflows/release-please.yml` publish `accrue`. You can use `scripts/ci/gh_merge_release_pr.sh` to discover the Release Please PR number before dispatching.
 5. Confirm Hex package availability for `accrue` before proceeding.
 6. Let `.github/workflows/release-please.yml` publish `accrue_admin` with `ACCRUE_ADMIN_HEX_RELEASE=1`.
 7. Verify HexDocs for both packages and confirm `llms.txt` is present in generated docs output.
@@ -70,13 +70,11 @@ The standard path is `.github/workflows/release-please.yml`:
 
 This automation does not publish from `pull_request`, `pull_request_target`, or ordinary branch pushes.
 
-### Auto-merge when CI is green
+### Optional: queue merge after maintainer review
 
-`.github/workflows/release-pr-automation.yml` runs on Release Please PR events (branch name `release-please--*`) and calls `gh pr merge --merge --auto` so GitHub merges the PR automatically once required checks pass.
+`.github/workflows/release-pr-automation.yml` runs **only** on **`workflow_dispatch`**. After you review the Release Please PR, optionally dispatch it with the PR number so `gh pr merge --merge --auto` queues merge when required checks pass — there is **no** subscription to `pull_request` events.
 
-Enable **Allow auto-merge** under repository **Settings → General**. If branch protection requires approving reviews, either keep a human approval step or configure the repository/org so the automation account can satisfy those rules (for example **Allow GitHub Actions to create and approve pull requests** on the ruleset, or merge manually / use `scripts/ci/gh_merge_release_pr.sh`).
-
-You can also run the workflow manually (**Actions → Release PR automation → Run workflow**) and enter any PR number to queue the same merge-when-green behavior.
+Enable **Allow auto-merge** under repository **Settings → General**. If branch protection requires approving reviews, complete human review first, then dispatch (or merge manually / use `scripts/ci/gh_merge_release_pr.sh`).
 
 ## Verification before publishing
 
@@ -128,3 +126,14 @@ Manual fallback order:
 3. Publish `accrue_admin`.
 
 Each recovery run checks out the explicit ref, verifies the package `@version`, runs `mix hex.publish --dry-run`, then runs `mix hex.publish --yes`. The recovery workflow never references `steps.release.outputs[...]`.
+
+## Partial Hex publish recovery
+
+When the dual publish is not one atomic transaction, prefer the smallest corrective step first:
+
+- **Retry `accrue_admin`** for the **same** version if core `accrue` at **V** is already correct on Hex — token, metadata, or transient CI issues often clear on a focused re-run.
+- **`mix hex.publish --revert`** only for a **clear mistake** on **`accrue`** and **only** inside Hex’s short post-publish window; see [Hex immutability / retire FAQ](https://hex.pm/docs/faq).
+- **Otherwise** use **`mix hex.retire`** on the bad release and ship a **new paired version** forward (new combined release PR), with changelog honesty about what not to use.
+- If **`accrue`** at **V** should not be consumed without admin **V**, document the partial state and follow the retire / forward-fix path rather than leaving a silent half-pair.
+
+See [https://hex.pm/docs/faq](https://hex.pm/docs/faq) for revert windows, retirement, and registry semantics.
