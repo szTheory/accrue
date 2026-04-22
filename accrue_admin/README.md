@@ -94,6 +94,8 @@ npm run e2e
 
 Source of truth for paths is `AccrueAdmin.Router.accrue_admin/2`.
 
+The operator **sidebar** curates navigation for usability; this section lists routes in **router** declaration order, which may differ from sidebar ordering.
+
 Shipping `live/3` routes (relative to the mount path), in monotonic router order:
 
 | Order | Nav label | Path | LiveView module |
