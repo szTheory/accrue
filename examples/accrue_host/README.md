@@ -66,6 +66,10 @@ Use this when you want replay-ready webhook history, browser coverage, or other
 pre-seeded admin states that would be awkward to create in a short walkthrough.
 Keep cancellation and other secondary proofs here instead of in the main story.
 
+## Observability
+
+- **Cross-domain host subscription** (append `Accrue.Telemetry.Metrics.defaults/0`, attach once to `[:accrue, :ops, :webhook_dlq, :dead_lettered]`) is documented in [`../../accrue/guides/telemetry.md`](../../accrue/guides/telemetry.md#cross-domain-host-subscription). The compile-checked mirror in this app is `AccrueHost.AccrueOpsTelemetry`.
+
 ## Proof and verification
 
 Pull requests are merge-blocked on GitHub Actions job `host-integration`, which runs the same contract as `cd examples/accrue_host && mix verify.full`; use `mix verify` for a faster bounded Fake slice that is not CI-complete.
