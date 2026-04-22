@@ -16,7 +16,7 @@ Milestone theme: **ORG-04** — broader **non-Sigra** tenancy recipes (Pow, phx.
 
 ### Verification & adoption proof
 
-- [ ] **ORG-09**: Host adoption proof matrix and/or VERIFY-01 README contract documents **at least one** non-Sigra org billing archetype with the same merge-blocking vs advisory posture as existing lanes; owning verifier or script is named (per v1.7 `scripts/ci/README.md` patterns).
+- [x] **ORG-09**: Host adoption proof matrix and/or VERIFY-01 README contract documents **at least one** non-Sigra org billing archetype with the same merge-blocking vs advisory posture as existing lanes; owning verifier or script is named (per v1.7 `scripts/ci/README.md` patterns). *(Validated in Phase 39: `adoption-proof-matrix.md` ORG-09 section, `verify_adoption_proof_matrix.sh` + `host-integration`, contributor map in `scripts/ci/README.md`, guide + ExUnit.)*
 
 ## Future Requirements
 
@@ -42,7 +42,7 @@ Unchanged from prior milestones unless explicitly reprioritized:
 | ORG-06 | Phase 37 | Complete |
 | ORG-07 | Phase 38 | Complete |
 | ORG-08 | Phase 38 | Complete |
-| ORG-09 | Phase 39 | Pending |
+| ORG-09 | Phase 39 | Complete |
 
 **Coverage:**
 
@@ -52,4 +52,4 @@ Unchanged from prior milestones unless explicitly reprioritized:
 
 ---
 *Requirements defined: 2026-04-21*  
-*Last updated: 2026-04-21 — ORG-07/ORG-08 marked complete after Phase 38*
+*Last updated: 2026-04-22 — ORG-09 marked complete after Phase 39*

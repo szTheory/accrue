@@ -10,11 +10,11 @@
 - ✅ **v1.5 Adoption proof hardening** — Phase 24 shipped 2026-04-18. Adoption proof matrix + evaluator walkthrough script; README VERIFY-01 contract extended; CI job display name clarifies Stripe test mode; cross-links in `accrue/guides/testing.md` and `guides/testing-live-stripe.md`. Full archive: [`milestones/v1.5-ROADMAP.md`](milestones/v1.5-ROADMAP.md).
 - ✅ **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–31**: core admin polish shipped **2026-04-20**; post-ship Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
 - ✅ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** shipped **2026-04-21**. VERIFY-01 + doc graph, installer and CI clarity, operator home/drill/nav, dashboard `AccrueAdmin.Copy` SSOT, audit corpus + verifier ownership map. Archives: [`milestones/v1.7-ROADMAP.md`](milestones/v1.7-ROADMAP.md), [`milestones/v1.7-REQUIREMENTS.md`](milestones/v1.7-REQUIREMENTS.md), [`milestones/v1.7-MILESTONE-AUDIT.md`](milestones/v1.7-MILESTONE-AUDIT.md).
-- 🚧 **v1.8 Org billing recipes & host integration depth** — Phases **37–39** **active** (opened **2026-04-21**). Delivers deferred **ORG-04** (non-Sigra recipes + proof alignment). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.8 Org billing recipes & host integration depth** — Phases **37–39** shipped **2026-04-22**. Delivers deferred **ORG-04** (non-Sigra recipes + proof alignment). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
 
 ## Phases
 
-### v1.8 — Org billing recipes & host integration depth (active)
+### v1.8 — Org billing recipes & host integration depth (complete — 2026-04-22)
 
 **Milestone goal:** Host teams without Sigra can adopt **org-shaped** billing using the same **row-scoped** `Accrue.Billable` + `Accrue.Auth` contracts proven in v1.3, with first-class docs and VERIFY-01 / adoption-proof traceability.
 
@@ -24,7 +24,7 @@
 |---|-------|------|----------------|
 | 37 | Org billing recipes — doc spine + phx.gen.auth | Publish the non-Sigra “session → billable” spine; complete phx.gen.auth-oriented recipe with links from existing auth/Sigra guides. | ORG-05, ORG-06 |
 | 38 | Org billing recipes — Pow + custom org boundaries | Pow-oriented recipe; custom org model checklist + ORG-03 anti-patterns. | ORG-07, ORG-08 |
-| 39 | 3/3 | Complete    | 2026-04-22 |
+| 39 | Org billing proof alignment | Extend adoption proof matrix and/or VERIFY-01 README contract for ≥1 non-Sigra org archetype; name owning verifier/script; preserve merge-blocking vs advisory policy. | ORG-09 |
 
 **Phase 37 — Org billing recipes — doc spine + phx.gen.auth**
 
@@ -176,13 +176,13 @@
 | 35. Summary surfaces + test literal hygiene | v1.7 | 2/2 | Complete | 2026-04-21 |
 | 36. Audit corpus + adoption integration hardening | v1.7 | 3/3 | Complete | 2026-04-21 |
 
-**v1.8 (active — opened 2026-04-21)**
+**v1.8 (complete — 2026-04-22)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 37. Org billing recipes — doc spine + phx.gen.auth | v1.8 | 3/3 | Complete | 2026-04-21 |
 | 38. Org billing recipes — Pow + custom org boundaries | v1.8 | 2/2 | Complete | 2026-04-22 |
-| 39. Org billing proof alignment | v1.8 | — | Not started | — |
+| 39. Org billing proof alignment | v1.8 | 3/3 | Complete | 2026-04-22 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
