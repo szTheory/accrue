@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Observability & operator runbooks
-status: planning
-last_updated: "2026-04-22T02:49:02.621Z"
-last_activity: 2026-04-21 — `/gsd-discuss-phase 41` → context + discussion log committed
+status: milestone_complete
+last_updated: "2026-04-22T02:50:18.623Z"
+last_activity: 2026-04-22
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 0
   completed_plans: 0
 ---
@@ -20,17 +20,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.9** — Observability & operator runbooks — **Phases 41–42** next.
+**Current focus:** Phase --phase — 41
 
 ## Current Position
 
-Phase: **41** — host metrics wiring + cross-domain example (**context ready**, planning next)
+Phase: 41
 
-Plan: —
+Plan: Not started
 
-**Status:** Phase **40** shipped. Phase **41** discuss-phase complete — see `.planning/phases/41-host-metrics-wiring-cross-domain-example/41-CONTEXT.md`.
+**Status:** Milestone complete
 
-**Last Activity:** 2026-04-21 — `/gsd-discuss-phase 41` → context + discussion log committed
+**Last Activity:** 2026-04-22
 
 ## Milestone Progress
 
