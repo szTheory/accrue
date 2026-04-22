@@ -4,7 +4,9 @@ Use this page as the index into the host-first setup docs.
 
 ## Start with First Hour
 
-The canonical setup walkthrough lives in [First Hour](first_hour.md). It follows
+The canonical setup walkthrough lives in [First Hour](first_hour.md). Open that guide and pick a **capsule** (**H** for an existing Hex app, **M** for this monorepo’s `examples/accrue_host`, **R** for read-only `mix verify` / `mix verify.full`) — each joins the same spine; this page stays a hub only.
+
+The walkthrough follows
 the Phoenix host-app order proved in `examples/accrue_host`:
 
 - deps and `mix deps.get`
