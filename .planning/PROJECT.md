@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.12 — Admin & operator UX (active)
+### v1.12 — Admin & operator UX (complete — 2026-04-22)
 
 **Goal:** Improve **`accrue_admin`** so operators see trustworthy billing state faster—especially signals that matter after **metering (v1.10)**—with smoother drills and navigation, while keeping **Phase 20/21** presentation contracts (**`ax-*`**, **`AccrueAdmin.Copy`**, no third-party UI kits).
 
@@ -42,7 +42,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.11** — Phases **46–47** (2026-04-22): Hex release train + manifest SSOT (**46**), post-release docs + planning continuity (**47**); archives `.planning/milestones/v1.11-*`; planning git tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
 
-**Now:** **v1.12** active — admin / operator UX (**Phases 48–50**); **ADM-01** validated in **Phase 48**; **ADM-02..06** remain. Next: **`/gsd-discuss-phase 49`** or **`/gsd-plan-phase 49`**.
+**Now:** **v1.12** complete — Phases **48–50** shipped (**ADM-01..ADM-06**). Open the next milestone with **`/gsd-new-milestone`** when priorities are set.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -195,11 +195,15 @@ Theme: **Hex publish** + **post-release continuity** (docs, verifiers, planning 
 - [x] **DOC-01, DOC-02** — **`first_hour.md`** install pins; **`verify_package_docs`** + ExUnit on **`main`**. **Validated in Phase 47.**
 - [x] **HYG-01** — Planning mirrors (**`PROJECT`**, **`MILESTONES`**, **`STATE`**) match published **0.3.0** pair. **Validated in Phase 47.**
 
-### Validated v1.12 (milestone active — partial as of 2026-04-22)
+### Validated v1.12 (milestone complete — 2026-04-22)
 
 Theme: **admin & operator UX** (**ADM-01..ADM-06**); **PROC-08** and **FIN-03** not in this milestone.
 
 - [x] **ADM-01** — Default admin home shows a **metering-credible** terminal-failed **`MeterEvent`** KPI with honest **`/events`** navigation and **`AccrueAdmin.Copy`** SSOT. **Validated in Phase 48.**
+- [x] **ADM-02, ADM-03** — Scoped **customer → subscription → invoice** drill polish with honest links and LiveView tests; nav structure unchanged (**D-08**). **Validated in Phase 49.**
+- [x] **ADM-04** — **`SubscriptionLive`** operator chrome routed through **`AccrueAdmin.Copy`** / **`Copy.Subscription`**. **Validated in Phase 50.**
+- [x] **ADM-05** — Checked-in **theme exception** register + contributor PR checklist. **Validated in Phase 50.**
+- [x] **ADM-06** — Mounted-path inventory + VERIFY-01 expansion with **Copy-derived** Playwright assertions and **`mix accrue_admin.export_copy_strings`** anti-drift gate. **Validated in Phase 50.**
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -395,7 +399,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.9 prioritizes observability + runbooks before meter milestone | Post–v1.8 plan: telemetry discoverability and ops runbooks maximize adoption ROI; metered billing (v1.10+) follows with Fake parity | ✓ Good |
 | v1.10 delivers metered usage with Fake parity before second processor | Usage reporting, outbox, reconciler, and webhook error paths must be **host-testable** on Fake with stable telemetry keys; PROC-08 stays out of scope | ✓ Good |
 | v1.11 ships Hex before the next feature milestone | Evaluators and hosts need published packages that include metering + accumulated work; release automation and doc verifiers must stay aligned with linked-versions monorepo reality | ✓ Good |
-| v1.12 extends companion admin without billing-primitive expansion | Operators need post-metering admin clarity and smoother drills on Hex **0.3.0**; scope stays presentation + gates—not **PROC-08** / **FIN-03** | — Pending |
+| v1.12 extends companion admin without billing-primitive expansion | Operators need post-metering admin clarity and smoother drills on Hex **0.3.0**; scope stays presentation + gates—not **PROC-08** / **FIN-03** | ✓ Good |
 
 ## Current Milestone Notes
 
@@ -423,6 +427,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-22:** **v1.11** opened — **Hex release + post-release continuity**; Phases **46–47**; requirements **REL-01..REL-04**, **DOC-01..DOC-02**, **HYG-01**.
 - **2026-04-22:** **v1.11** archived (`milestones/v1.11-*`); root **`.planning/REQUIREMENTS.md`** removed for next milestone; planning git tag **`v1.11`**.
 - **2026-04-22:** **v1.12** opened — **Admin & operator UX**; Phases **48–50**; requirements **ADM-01..ADM-06**; **`phases.clear`** skipped (preserve **40–47** phase trees).
+- **2026-04-22:** **v1.12** closed — Phases **48–50** complete; **ADM-01..ADM-06** validated; VERIFY-01 copy export + subscriptions axe coverage shipped in **Phase 50**.
 
 ## Evolution
 
@@ -442,4 +447,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — **v1.12**: Phase **48** complete (**ADM-01**); Phases **49–50** pending.*
+*Last updated: 2026-04-22 — **v1.12** milestone complete (Phases **48–50**; **ADM-01..ADM-06**).*
