@@ -90,7 +90,7 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 
 ## Proof and verification
 
-Pull requests are merge-blocked on GitHub Actions job `host-integration`, which runs the same contract as `cd examples/accrue_host && mix verify.full`; use `mix verify` for a faster bounded Fake slice that is not CI-complete.
+Pull requests are merge-blocked on GitHub Actions job `host-integration`: it runs `bash scripts/ci/verify_verify01_readme_contract.sh` and `bash scripts/ci/verify_adoption_proof_matrix.sh`, then `bash scripts/ci/accrue_host_uat.sh` (which delegates to `cd examples/accrue_host && mix verify.full`), with `bash scripts/ci/accrue_host_hex_smoke.sh` on eligible runs (see `.github/workflows/ci.yml`). Use `mix verify` for a faster bounded Fake slice that is not CI-complete.
 
 ### Verification modes
 
