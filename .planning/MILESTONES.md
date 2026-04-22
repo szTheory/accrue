@@ -1,5 +1,18 @@
 # Milestones
 
+## v1.9 Observability & operator runbooks (Planning opened: 2026-04-21)
+
+**Status:** planning — execution **Phases 40–42** (see [`.planning/ROADMAP.md`](ROADMAP.md) and [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md)).
+
+**Theme:** Telemetry event catalog, `Telemetry.Metrics` defaults parity (or documented gaps), cross-domain host examples, operator runbooks. **PROC-08** / **FIN-03** remain non-goals.
+
+**Research:**
+
+- [`.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md)
+- [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md) (input to **v1.10+**, not v1.9 scope)
+
+---
+
 ## v1.8 Org billing recipes & host integration depth (Shipped: 2026-04-22)
 
 **Phases completed:** 3 phases (37–39), **8** plans

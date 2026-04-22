@@ -11,8 +11,27 @@
 - ✅ **v1.6 Admin UI / UX polish + audit gap closure** — Phases **25–31**: core admin polish shipped **2026-04-20**; post-ship Phases **30–31** closed strict audit corpus + advisory integration alignment **2026-04-21**. Archives: [`milestones/v1.6-ROADMAP.md`](milestones/v1.6-ROADMAP.md), [`milestones/v1.6-REQUIREMENTS.md`](milestones/v1.6-REQUIREMENTS.md), [`milestones/v1.6-MILESTONE-AUDIT.md`](milestones/v1.6-MILESTONE-AUDIT.md).
 - ✅ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** shipped **2026-04-21**. VERIFY-01 + doc graph, installer and CI clarity, operator home/drill/nav, dashboard `AccrueAdmin.Copy` SSOT, audit corpus + verifier ownership map. Archives: [`milestones/v1.7-ROADMAP.md`](milestones/v1.7-ROADMAP.md), [`milestones/v1.7-REQUIREMENTS.md`](milestones/v1.7-REQUIREMENTS.md), [`milestones/v1.7-MILESTONE-AUDIT.md`](milestones/v1.7-MILESTONE-AUDIT.md).
 - ✅ **v1.8 Org billing recipes & host integration depth** — Phases **37–39** shipped **2026-04-22**. Delivers deferred **ORG-04**. Archives: [`milestones/v1.8-ROADMAP.md`](milestones/v1.8-ROADMAP.md), [`milestones/v1.8-REQUIREMENTS.md`](milestones/v1.8-REQUIREMENTS.md).
+- ○ **v1.9 Observability & operator runbooks** — Phases **40–42** (planning opened **2026-04-21**). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md). Gap audit: [`.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md).
 
 ## Phases
+
+### v1.9 Observability & operator runbooks (Phases 40–42)
+
+**Milestone goal:** Close the adoption gap between “telemetry exists” and “operators know what to subscribe to, alert on, and do next” — **without** new billing primitives or Stripe Dashboard parity.
+
+**Depends on:** v1.0+ telemetry stack (`Accrue.Telemetry`, `Accrue.Telemetry.Ops`, optional `Accrue.Telemetry.Metrics`).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 40 | Telemetry catalog + guide truth | Extend `guides/telemetry.md` (and `Accrue.Telemetry.Ops` docs) so every `[:accrue, :ops, :*]` emit is catalogued; document firehose vs ops split; reconcile against `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. | OBS-01, OBS-03, OBS-04 |
+| 41 | Host metrics wiring + cross-domain example | Close `Telemetry.Metrics.defaults/0` gaps vs ops emits **or** document intentional omissions; add host-copyable cross-domain subscription example. | TEL-01, OBS-02 |
+| 42 | Operator runbooks | Ship runbook section (guide or linked doc): ops event → suggested first action / Stripe host checks / Oban queues — especially DLQ, meters, dunning, revenue-adjacent signals, Connect failures. | RUN-01 |
+
+**Success criteria (milestone):**
+
+1. No undocumented `[:accrue, :ops, :*]` event from the v1.9 gap audit §1 remains absent from the published catalog (OBS-01 + OBS-04).
+2. A host developer can wire `Accrue.Telemetry.Metrics.defaults/0` with documented parity to ops signals (TEL-01).
+3. Runbook entries exist for each ops class called out in **RUN-01** (RUN-01).
 
 <details>
 <summary>✅ v1.8 Org billing recipes & host integration depth (Phases 37–39) — SHIPPED 2026-04-22</summary>

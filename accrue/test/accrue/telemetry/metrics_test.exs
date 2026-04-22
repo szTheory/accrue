@@ -4,10 +4,10 @@ defmodule Accrue.Telemetry.MetricsTest do
   alias Accrue.Telemetry.Metrics, as: M
 
   describe "defaults/0" do
-    test "returns a list with at least 14 metric definitions" do
+    test "returns a list with at least 19 metric definitions" do
       defs = M.defaults()
       assert is_list(defs)
-      assert length(defs) >= 14
+      assert length(defs) >= 19
     end
 
     test "every entry is a Telemetry.Metrics struct" do
@@ -39,6 +39,14 @@ defmodule Accrue.Telemetry.MetricsTest do
       assert has_metric?("accrue.ops.revenue_loss.count")
       assert has_metric?("accrue.ops.incomplete_expired.count")
       assert has_metric?("accrue.ops.charge_failed.count")
+    end
+
+    test "includes ops counters for pdf, ledger upcast, and connect signals" do
+      assert has_metric?("accrue.ops.pdf_adapter_unavailable.count")
+      assert has_metric?("accrue.ops.events_upcast_failed.count")
+      assert has_metric?("accrue.ops.connect_account_deauthorized.count")
+      assert has_metric?("accrue.ops.connect_capability_lost.count")
+      assert has_metric?("accrue.ops.connect_payout_failed.count")
     end
   end
 
