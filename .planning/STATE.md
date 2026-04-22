@@ -4,7 +4,7 @@ milestone: v1.11
 milestone_name: Public Hex release + post-release continuity
 status: planning
 last_updated: "2026-04-22T15:39:01.467Z"
-last_activity: 2026-04-22 — `/gsd-new-milestone` (release + continuity); **`phases.clear` not run** (retains **40–45** phase trees).
+last_activity: 2026-04-22 — `/gsd-discuss-phase 46` (context + discussion log; subagent research synthesis).
 progress:
   total_phases: 2
   completed_phases: 0
@@ -28,9 +28,9 @@ Phase: **46** — Release train & Hex publish (not started)
 
 Plan: **—**
 
-**Status:** Milestone initialized — see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md` (Phases **46–47**).
+**Status:** Phase **46** context captured — ready for `/gsd-plan-phase 46`.
 
-**Last Activity:** 2026-04-22 — `/gsd-new-milestone` (release + continuity); **`phases.clear` not run** (retains **40–45** phase trees).
+**Last Activity:** 2026-04-22 — `/gsd-discuss-phase 46` (release train policy locked in `46-CONTEXT.md`).
 
 ## Milestone Progress
 
@@ -44,6 +44,7 @@ Plan: **—**
 - `.planning/ROADMAP.md` — Phases **46–47** + shipped history
 - `.planning/PROJECT.md` — v1.11 current milestone
 - `.planning/phases/40-*` … `45-*` — prior shipped phase artifacts (preserved)
+- `.planning/phases/46-release-train-hex-publish/46-CONTEXT.md` — Phase **46** implementation decisions (**REL-01/02/04**)
 
 ## Deferred Items
 
@@ -58,4 +59,4 @@ Plan: **—**
 - **v1.11:** Scope = **Hex publish** + **post-release continuity** (docs, verifiers, planning version callouts); **PROC-08** / **FIN-03** remain deferred.
 - **`phases.clear` not run** — preserves **v1.9–v1.10** phase directories under `.planning/phases/`; next build phases continue at **46**.
 
-**Next:** `/gsd-discuss-phase 46` (or `/gsd-plan-phase 46`) — release train.
+**Next:** `/gsd-plan-phase 46` — release train (research may reference `46-CONTEXT.md` + canonical refs).
