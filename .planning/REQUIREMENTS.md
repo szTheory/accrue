@@ -9,7 +9,7 @@ Scope is **`accrue_admin` LiveView operator surfaces**, navigation, and **VERIFY
 
 ### Admin & operator surfaces (ADM)
 
-- [ ] **ADM-01**: Operators landing on the **default admin home** (or the phase-scoped entry surface) see at least one **credible metering- or usage-adjacent signal** (counts, recent failures, or deep link into an existing index such as webhooks/meter-related surfaces) consistent with shipped **v1.10** semantics and existing **telemetry / runbook** narratives — **no** new accounting semantics.
+- [x] **ADM-01**: Operators landing on the **default admin home** (or the phase-scoped entry surface) see at least one **credible metering- or usage-adjacent signal** (counts, recent failures, or deep link into an existing index such as webhooks/meter-related surfaces) consistent with shipped **v1.10** semantics and existing **telemetry / runbook** narratives — **no** new accounting semantics.
 - [ ] **ADM-02**: At least **one** high-traffic **list or detail** flow (e.g. customer ↔ subscription ↔ invoice) is measurably smoother: fewer dead ends, clearer next actions, or preserved context — scoped in the phase plan to **concrete LiveView routes**.
 - [ ] **ADM-03**: If this milestone adds or renames **primary admin navigation** entries, **labels and ordering** stay aligned with the operator mental model (**billing nouns**, not internal module names), and maintainer-facing **route matrix / README Admin routes** inventory is updated where it would otherwise drift.
 - [ ] **ADM-04**: All **new or changed user-visible admin strings** introduced in **v1.12** go through **`AccrueAdmin.Copy`** (or an existing copy SSOT module) so **ExUnit** and **Playwright** do not depend on duplicate divergent literals.
@@ -34,7 +34,7 @@ Scope is **`accrue_admin` LiveView operator surfaces**, navigation, and **VERIFY
 
 | Requirement | Phase | Status |
 |---------------|-------|--------|
-| ADM-01 | Phase 48 | Pending |
+| ADM-01 | Phase 48 | Complete |
 | ADM-02 | Phase 49 | Pending |
 | ADM-03 | Phase 49 | Pending |
 | ADM-04 | Phase 50 | Pending |

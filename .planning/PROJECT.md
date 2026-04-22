@@ -42,7 +42,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.11** — Phases **46–47** (2026-04-22): Hex release train + manifest SSOT (**46**), post-release docs + planning continuity (**47**); archives `.planning/milestones/v1.11-*`; planning git tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
 
-**Now:** **v1.12** active — admin / operator UX (**Phases 48–50**); root **`.planning/REQUIREMENTS.md`** defines **ADM-01..ADM-06**. Next: **`/gsd-discuss-phase 48`** or **`/gsd-plan-phase 48`**.
+**Now:** **v1.12** active — admin / operator UX (**Phases 48–50**); **ADM-01** validated in **Phase 48**; **ADM-02..06** remain. Next: **`/gsd-discuss-phase 49`** or **`/gsd-plan-phase 49`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -194,6 +194,12 @@ Theme: **Hex publish** + **post-release continuity** (docs, verifiers, planning 
 - [x] **REL-03** — Routine pre-1.0 linked-release narrative in **`RELEASING.md`**. **Validated in Phase 47.**
 - [x] **DOC-01, DOC-02** — **`first_hour.md`** install pins; **`verify_package_docs`** + ExUnit on **`main`**. **Validated in Phase 47.**
 - [x] **HYG-01** — Planning mirrors (**`PROJECT`**, **`MILESTONES`**, **`STATE`**) match published **0.3.0** pair. **Validated in Phase 47.**
+
+### Validated v1.12 (milestone active — partial as of 2026-04-22)
+
+Theme: **admin & operator UX** (**ADM-01..ADM-06**); **PROC-08** and **FIN-03** not in this milestone.
+
+- [x] **ADM-01** — Default admin home shows a **metering-credible** terminal-failed **`MeterEvent`** KPI with honest **`/events`** navigation and **`AccrueAdmin.Copy`** SSOT. **Validated in Phase 48.**
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -436,4 +442,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — **v1.12** milestone opened (Admin & operator UX; Phases 48–50).*
+*Last updated: 2026-04-22 — **v1.12**: Phase **48** complete (**ADM-01**); Phases **49–50** pending.*

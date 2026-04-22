@@ -332,7 +332,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 48. Admin metering & billing signals | v1.12 | — | Not started | — |
+| 48. Admin metering & billing signals | v1.12 | 1/1 | Complete | 2026-04-22 |
 | 49. Drill flows & navigation | v1.12 | — | Not started | — |
 | 50. Copy, tokens & VERIFY gates | v1.12 | — | Not started | — |
 
