@@ -19,6 +19,11 @@ require_substring() {
   fi
 }
 
+require_substring "## Layering note (local proof vs \`host-integration\`)" "Layer B/C layering heading"
+require_substring "**Layer B (local Fake-backed proof):**" "Layer B label"
+require_substring "**Layer C (merge-blocking \`host-integration\`):**" "Layer C label"
+require_substring "verify_verify01_readme_contract.sh" "VERIFY-01 shift-left script name in matrix"
+require_substring "accrue_host_hex_smoke.sh" "Hex smoke script name in matrix layering note"
 require_substring "## Organization billing proof (ORG-09)" "ORG-09 section heading"
 require_substring "### Primary archetype (merge-blocking)" "primary archetype heading"
 require_substring "### Recipe lanes (advisory by default)" "recipe lanes heading"
