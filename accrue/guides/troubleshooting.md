@@ -4,6 +4,8 @@ Use this matrix when installer checks, boot-time setup validation, webhook
 ingest, or the mounted admin UI reports an `Accrue.ConfigError` with a stable
 diagnostic code.
 
+Section deep links on this page use **lowercase kebab-case** fragments that match the stable **`ACCRUE-DX-*`** code — for example **`ACCRUE-DX-WEBHOOK-RAW-BODY`** → [`#accrue-dx-webhook-raw-body`](#accrue-dx-webhook-raw-body). Use the same fragment when linking from other guides or from **`Accrue.SetupDiagnostic`** output so anchors never drift from the matrix rows.
+
 | Code | What happened | Why Accrue cares | Fix | How to verify |
 | --- | --- | --- | --- | --- |
 | `ACCRUE-DX-REPO-CONFIG` | The host app did not expose a usable Repo to Accrue. | Billing state, webhook ingest, and replay persistence all depend on the host Repo. | Set `config :accrue, repo: MyApp.Repo` and make sure the Repo starts in the supervision tree. | Run `mix accrue.install --check` and `mix ecto.migrate`. |
