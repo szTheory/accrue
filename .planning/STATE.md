@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Observability & operator runbooks
-status: "Phase **40** shipped — ops catalog hardening, OTel doc alignment, `OpsEventContractTest`, `[:accrue, :ops, :webhook_dlq, :dead_lettered]` emit on final webhook failure, gap audit supersession trail."
-last_updated: "2026-04-22T02:39:40.555Z"
-last_activity: 2026-04-22 — `/gsd-execute-phase 40`
+status: "Phase **41** context gathered — TEL-01/OBS-02 decisions in `41-CONTEXT.md`; implementation not started."
+last_updated: "2026-04-21T12:00:00.000Z"
+last_activity: 2026-04-21 — `/gsd-discuss-phase 41` (accepted research bundle)
 progress:
-  total_phases: 1
-  completed_phases: 0
+  total_phases: 3
+  completed_phases: 1
   total_plans: 0
   completed_plans: 0
 ---
@@ -24,13 +24,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 ## Current Position
 
-Phase: **40** complete — next: **41** (host metrics wiring + cross-domain example)
+Phase: **41** — host metrics wiring + cross-domain example (**context ready**, planning next)
 
 Plan: —
 
-**Status:** Phase **40** shipped — ops catalog hardening, OTel doc alignment, `OpsEventContractTest`, `[:accrue, :ops, :webhook_dlq, :dead_lettered]` emit on final webhook failure, gap audit supersession trail.
+**Status:** Phase **40** shipped. Phase **41** discuss-phase complete — see `.planning/phases/41-host-metrics-wiring-cross-domain-example/41-CONTEXT.md`.
 
-**Last Activity:** 2026-04-22 — `/gsd-execute-phase 40`
+**Last Activity:** 2026-04-21 — `/gsd-discuss-phase 41` → context + discussion log committed
 
 ## Milestone Progress
 
@@ -40,6 +40,7 @@ Plan: —
 
 ## Current Planning Artifacts
 
+- `.planning/phases/41-host-metrics-wiring-cross-domain-example/41-CONTEXT.md` — **Phase 41** implementation decisions (resume here for plan/execute)
 - `.planning/PROJECT.md` — **v1.9** current milestone
 - `.planning/REQUIREMENTS.md` — v1.9 REQ-IDs + traceability
 - `.planning/ROADMAP.md` — Phases **40–42**
@@ -56,7 +57,8 @@ Plan: —
 
 ## Recent Decisions
 
+- **Phase 41:** ExUnit **`defaults/0` ↔ ops catalog parity** (shared allowlist with `OpsEventContractTest`); **guide + `accrue_host`** for OBS-02; **ops-first** attach example with optional bounded billing snippet; **`++ Accrue.Telemetry.Metrics.defaults()`** in example host; reconcile **REQUIREMENTS.md** TEL-01 checkbox vs table on phase close.
 - **v1.9** follows post–v1.8 prioritization: **telemetry catalog**, **metrics parity**, **cross-domain examples**, **operator runbooks** before a dedicated **metered billing** milestone (**v1.10+** spike on file).
 - **PROC-08** and **FIN-03** remain **explicit non-goals** for v1.9 (see `REQUIREMENTS.md` Out of scope).
 
-**Next:** `/gsd-discuss-phase 41` or `/gsd-plan-phase 41`
+**Next:** `/gsd-plan-phase 41`
