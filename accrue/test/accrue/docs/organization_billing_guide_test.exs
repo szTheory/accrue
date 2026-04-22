@@ -23,7 +23,11 @@ defmodule Accrue.Docs.OrganizationBillingGuideTest do
           "Pow.Plug.current_user",
           "ORG-08",
           "Custom organization model",
-          "Anti-pattern"
+          "Anti-pattern",
+          "ORG-09",
+          "examples/accrue_host/docs/adoption-proof-matrix.md",
+          "verify_adoption_proof_matrix.sh",
+          "## Adoption proof matrix (ORG-09)"
         ] do
       assert guide =~ needle, "expected guides/organization_billing.md to include #{inspect(needle)}"
     end
