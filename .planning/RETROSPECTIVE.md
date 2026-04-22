@@ -342,12 +342,52 @@
 
 ---
 
+## Milestone: v1.9 — Observability & operator runbooks
+
+**Shipped:** 2026-04-22  
+**Phases:** 3 | **Plans:** 8
+
+### What Was Built
+
+- **`guides/telemetry.md`** as catalog for **`[:accrue, :ops, :*]`** with firehose split, metadata/PII framing, and reconciliation to **`v1.9-TELEMETRY-GAP-AUDIT.md`**; contract test coverage against silent catalog drift; DLQ dead-letter ops emit on exhausted webhook dispatch.
+- **Metrics parity** story: `Accrue.Telemetry.Metrics.defaults/0` aligned or omission-documented vs ops signals; **cross-domain** host `Telemetry` subscription example in package docs + **`examples/accrue_host`**.
+- **`guides/operator-runbooks.md`**: Oban queue topology, Stripe verification pattern, D-09 mini-playbooks; **`telemetry.md`** links for on-call first actions (**RUN-01**).
+
+### What Worked
+
+- Reusing the **v1.8** pattern (requirements traceability + phase verification + research audit doc) avoided blocking close on a separate `MILESTONE-AUDIT.md` artifact.
+- Tight scope (**no billing primitives**) kept telemetry/runbook work shippable without PROC-08/FIN-03 creep.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** failed again (`version required for phases archive`); archival + `git rm .planning/REQUIREMENTS.md` stayed manual.
+- **`roadmap.analyze`** did not enumerate Phases 40–42 in this workspace snapshot, so readiness relied on filesystem checks for `*-SUMMARY.md`.
+
+### Patterns Established
+
+- **Ops catalog + ExUnit contract** as a guardrail for guide drift (`OpsEventContractTest` pattern).
+- **Dedicated operator-runbooks guide** linked from telemetry (preface + per-row deep links) for evaluator and on-call ergonomics.
+
+### Key Lessons
+
+1. **Observability milestones** benefit from a **single research audit** file that the guide must explicitly supersede or reconcile — traceability stays falsifiable.
+2. Treat **metrics defaults** as a **parity checklist** against ops emits, not an implied transitive guarantee.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three short phases (40–42) with concentrated guide + test work.
+- Notable: highest leverage was **one catalog + one runbook** with **test-backed** catalog drift prevention.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.9 | short | 3 | Telemetry catalog + metrics parity + cross-domain example (40–41), operator runbooks + telemetry links (42). |
 | v1.8 | short | 3 | ORG-04 non-Sigra org billing spine (37–38), ORG-09 adoption matrix + `verify_adoption_proof_matrix.sh` + CI README map (39). |
 | v1.7 | short | 5 | VERIFY-01/doc graph + installer CI clarity (32–33), operator home/drill/nav (34), Copy SSOT dashboard (35), audit corpus + verifier map (36). |
 | v1.6 | short | 7 | Admin inventory → hierarchy → copy → a11y → mobile (25–29), then audit corpus + advisory integration closure (30–31) without new Hex tag. |
@@ -360,6 +400,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.9 | `OpsEventContractTest`, `MetricsOpsParityTest`, guide + host wiring docs | OBS/RUN/TEL (6/6) archived | `operator-runbooks.md`, telemetry catalog rows + deep links, cross-domain host example. |
 | v1.8 | Guide ExUnit (`organization_billing_*`), bash `verify_adoption_proof_matrix.sh`, host-integration wiring in CI README | ORG-05..ORG-09 (5/5) archived | Matrix ORG-09 section, root verifier script, contributor map rows for ORG gates. |
 | v1.7 | Doc contract scripts, targeted ExUnit, VERIFY-01 Playwright lanes touching dashboard copy | ADOPT + OPS (11/11) archived | `scripts/ci/README.md` ADOPT map, dual-contract `testing.md` section, `36-FORWARD-COUPLING-OPS-34-35.md`, dashboard `Copy` + `copy_dashboard.js`. |
 | v1.6 | VERIFY-01 Playwright (desktop + mobile), ExUnit/HTML assertions on touched LiveViews, axe on mounted customers index | INV/COPY/UX/A11Y/MOB (18/18) archived | `AccrueAdmin.Copy`, mobile admin spec, README mobile shell section, verification markdown per phase. |

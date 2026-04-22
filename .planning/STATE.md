@@ -1,50 +1,49 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: Observability & operator runbooks
-status: Milestone **v1.9** shipped (**2026-04-22**). Phases **40–42** complete (**RUN-01**).
-last_updated: "2026-04-22T12:00:00.000Z"
-last_activity: 2026-04-22 — Phase **42** operator runbooks (`operator-runbooks.md` + `telemetry.md` links); milestone v1.9 closed.
+milestone: v1.10-planning-open
+milestone_name: Next milestone (not opened)
+status: Milestone **v1.9** archived (**2026-04-22** shipped). Awaiting **`/gsd-new-milestone`** for v1.10+.
+last_updated: "2026-04-21T12:00:00.000Z"
+last_activity: 2026-04-21 — `/gsd-complete-milestone` v1.9 archival; `REQUIREMENTS.md` removed; tag **v1.9**.
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 2
-  completed_plans: 2
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-22)
+See: `.planning/PROJECT.md` (updated 2026-04-21)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.9 shipped** — next planning cycle is open (metering spike: `.planning/research/v1.10-METERING-SPIKE.md`).
+**Current focus:** **v1.10+** planning — run `/gsd-new-milestone`; metering spike: `.planning/research/v1.10-METERING-SPIKE.md`.
 
 ## Current Position
 
-Phase: **42** — Operator runbooks (**complete**)
+Phase: — (next milestone not opened)
 
 Plan: —
 
-**Status:** Milestone **v1.9** complete (telemetry catalog, metrics parity, cross-domain example, operator runbooks).
+**Status:** **v1.9** closed and archived. Fresh requirements start with `/gsd-new-milestone`.
 
-**Last Activity:** 2026-04-22 — `/gsd-execute-phase 42`; guides `accrue/guides/operator-runbooks.md` + `accrue/guides/telemetry.md` updates.
+**Last Activity:** 2026-04-21 — Milestone close: `.planning/milestones/v1.9-ROADMAP.md`, `v1.9-REQUIREMENTS.md`; `MILESTONES.md` + `ROADMAP.md` + `PROJECT.md` updated; `.planning/REQUIREMENTS.md` removed.
 
 ## Milestone Progress
 
-**Shipped:** **v1.9** — Observability & operator runbooks — **Phases 40–42** (see `.planning/ROADMAP.md`).
+**Shipped:** **v1.9** — Observability & operator runbooks — **Phases 40–42** (see `.planning/milestones/v1.9-ROADMAP.md`).
 
 **Last shipped:** **v1.9** (2026-04-22), following **v1.8** (2026-04-22).
 
 ## Current Planning Artifacts
 
-- `.planning/phases/42-operator-runbooks/42-VERIFICATION.md` — **Phase 42** verification (**passed**)
-- `.planning/phases/42-operator-runbooks/42-01-SUMMARY.md`, `42-02-SUMMARY.md` — execution summaries
-- `.planning/PROJECT.md` — milestone narrative (post–v1.9 handoff)
-- `.planning/REQUIREMENTS.md` — v1.9 requirements (all **Complete**)
-- `.planning/ROADMAP.md` — v1.9 milestone marked shipped
+- `.planning/milestones/v1.9-ROADMAP.md`, `.planning/milestones/v1.9-REQUIREMENTS.md` — **v1.9** archive
+- `.planning/PROJECT.md` — handoff narrative
+- `.planning/ROADMAP.md` — next-milestone stub + shipped `<details>`
+- `.planning/MILESTONES.md` — v1.9 shipped entry
 - `.planning/research/v1.10-METERING-SPIKE.md` — follow-on milestone outline
 
 ## Deferred Items
@@ -57,8 +56,7 @@ Plan: —
 
 ## Recent Decisions
 
-- **Phase 42:** **`accrue/guides/operator-runbooks.md`** — Oban default queue topology, Stripe two-layer verification, four D-09 mini-playbooks; **`telemetry.md`** preface + `#oban-queue-topology` hybrid row links (**RUN-01**).
-- **v1.9** milestone closed with catalog (**40**), metrics parity + host example (**41**), operator procedures (**42**).
-- **PROC-08** and **FIN-03** remain **explicit non-goals** until a later milestone (see `REQUIREMENTS.md`).
+- **v1.9 close:** Archives under `.planning/milestones/v1.9-*`; no standalone milestone audit file (same closure pattern as v1.8 — phase verification + research gap audit + requirements table).
+- **PROC-08** and **FIN-03** remain **explicit non-goals** until reprioritized (see archived `v1.9-REQUIREMENTS.md`).
 
-**Next:** Open **v1.10+** milestone planning when ready (`/gsd-new-milestone` or equivalent); metering spike on file at `.planning/research/v1.10-METERING-SPIKE.md`.
+**Next:** `/gsd-new-milestone` when ready to open **v1.10+**.
