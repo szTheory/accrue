@@ -317,23 +317,21 @@ entirely and attach handlers or OTel bridges directly to `:telemetry` events
 instead — the ops catalog tuples still apply. Prefer spans for per-customer
 detail; keep paging on `[:accrue, :ops, :*]`.
 
-## Operator runbooks (first actions)
+For **ordered triage**, default **Oban** queue placement (anchor **`#oban-queue-topology`** in [`operator-runbooks.md`](operator-runbooks.md)), and **expanded Stripe verification**, use **[Operator runbooks](operator-runbooks.md)**. This section keeps a **compact** signal → first-action table as your **starting point** — adjust for your support model and Stripe objects. Prefer Stripe Dashboard / Sigma for finance reporting; Accrue focuses on **state + webhooks + replay** in your app.
 
-Use this as a **starting point** — adjust for your support model and Stripe
-objects. Prefer Stripe Dashboard / Sigma for finance reporting; Accrue focuses
-on **state + webhooks + replay** in your app.
+## Operator runbooks (first actions)
 
 | Ops event | Suggested first actions |
 |-----------|-------------------------|
-| `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | Inspect `accrue_webhook_events` row; fix handler bug or data; use admin **Replay** or DLQ tools; watch replay telemetry. |
+| `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | Inspect `accrue_webhook_events` row; fix handler bug or data; use admin **Replay** or DLQ tools; watch replay telemetry; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
 | `[:accrue, :ops, :webhook_dlq, :replay]` | Validate `requeued_count` vs expectation; if dry-run, follow up with real replay. |
-| `[:accrue, :ops, :meter_reporting_failed]` | Check `source` (`:sync`, `:webhook`, `:reconciler`); inspect `accrue_meter_events`; verify Stripe meter + API keys; retry after fix. |
+| `[:accrue, :ops, :meter_reporting_failed]` | Check `source` (`:sync`, `:webhook`, `:reconciler`); inspect `accrue_meter_events`; verify Stripe meter + API keys; retry after fix; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
 | `[:accrue, :ops, :dunning_exhaustion]` | Confirm subscription status transition; notify customer success; verify payment method in Stripe. |
-| `[:accrue, :ops, :revenue_loss]` | Triage `reason` + `subject_*`; fraud vs refund policy; reconcile with Stripe balance transactions. |
+| `[:accrue, :ops, :revenue_loss]` | Triage `reason` + `subject_*`; fraud vs refund policy; reconcile with Stripe balance transactions; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
 | `[:accrue, :ops, :charge_failed]` | Map `failure_code`; prompt card update or alternative PM; check Radar rules in Stripe if unexpected. |
 | `[:accrue, :ops, :incomplete_expired]` | Incomplete checkout/subscription expired; clean up local rows; marketing follow-up if abandoned cart. |
 | `[:accrue, :ops, :pdf_adapter_unavailable]` | Start ChromicPDF (or switch PDF adapter); emails still send with hosted invoice link fallback. |
-| `[:accrue, :ops, :events_upcast_failed]` | **Data migration issue** — unknown `schema_version` for `type`; deploy compatible upcaster before replaying events. |
+| `[:accrue, :ops, :events_upcast_failed]` | **Data migration issue** — unknown `schema_version` for `type`; deploy compatible upcaster before replaying events; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
 | `[:accrue, :ops, :connect_account_deauthorized]` | Disconnect Connect account in product UI; stop destination charges; audit open Connect transfers. |
 | `[:accrue, :ops, :connect_capability_lost]` | Read `capability` + `to` status; Stripe Connect onboarding / requirements. |
 | `[:accrue, :ops, :connect_payout_failed]` | Use `payout_id` + `failure_code` in Stripe; update bank account or resolve restriction. |
