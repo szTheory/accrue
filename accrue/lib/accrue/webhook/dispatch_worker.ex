@@ -2,9 +2,17 @@ defmodule Accrue.Webhook.DispatchWorker do
   @moduledoc """
   Oban worker for async webhook handler dispatch (D2-27).
 
-  Enqueued by `Accrue.Webhook.Ingest` in the same transaction as the
+  Enqueued by   `Accrue.Webhook.Ingest` in the same transaction as the
   webhook event row. Loads the `WebhookEvent`, projects it to
   `%Accrue.Webhook.Event{}`, and dispatches to the handler chain.
+
+  ## Handler context (`ctx`)
+
+  Besides `attempt`, `max_attempts`, `webhook_event_id`, and `endpoint`, the
+  map includes `:meter_error_object` — the raw Stripe map at
+  `row.data["data"]["object"]` when present (else `%{}`). Meter error
+  handlers read this key so `handle_event/3` can extract usage identifiers
+  without re-parsing the full signing payload.
 
   ## Dispatch order (D2-30)
 
@@ -49,11 +57,18 @@ defmodule Accrue.Webhook.DispatchWorker do
 
     event = Event.from_webhook_event(row)
 
+    meter_error_object =
+      case row.data do
+        %{"data" => %{"object" => %{} = obj}} -> obj
+        _ -> %{}
+      end
+
     ctx = %{
       attempt: attempt,
       max_attempts: max_attempts,
       webhook_event_id: id,
-      endpoint: row.endpoint
+      endpoint: row.endpoint,
+      meter_error_object: meter_error_object
     }
 
     # Push actor context (D2-12)

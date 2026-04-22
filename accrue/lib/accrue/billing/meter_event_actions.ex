@@ -10,9 +10,10 @@ defmodule Accrue.Billing.MeterEventActions do
     2. **Outside** the transaction, calls the configured processor's
        `report_meter_event/1` callback.
     3. On `{:ok, _}` → flips the row to `reported` (and stamps
-       `reported_at`). On `{:error, _}` → flips to `failed`, stores a
-       sanitized error map, and emits
-       `[:accrue, :ops, :meter_reporting_failed]`.
+       `reported_at`). On `{:error, _}` → `Accrue.Billing.MeterEvents`
+       performs a guarded `pending` → `failed` transition and emits
+       `[:accrue, :ops, :meter_reporting_failed]` at most once for that
+       transition (`source: :sync`).
 
   Crashes between step 1 and step 2 leave a durable `pending` row that
   `Accrue.Jobs.MeterEventsReconciler` retries on its next cron tick.
@@ -29,6 +30,7 @@ defmodule Accrue.Billing.MeterEventActions do
   alias Accrue.Actor
   alias Accrue.Billing.Customer
   alias Accrue.Billing.MeterEvent
+  alias Accrue.Billing.MeterEvents
   alias Accrue.Events
   alias Accrue.Processor
   alias Accrue.Repo
@@ -81,20 +83,35 @@ defmodule Accrue.Billing.MeterEventActions do
            insert_pending(customer, event_name, value, ts, identifier, override_op) do
       # Stripe call OUTSIDE Repo.transact/2 — D2-09 / D4-03. Crashes here
       # leave the row in `pending` for the reconciler to retry.
-      case Processor.__impl__().report_meter_event(row) do
-        {:ok, stripe_event} ->
-          row
-          |> MeterEvent.reported_changeset(stripe_event)
-          |> Repo.update()
+      cond do
+        row.stripe_status in ["reported", "failed"] ->
+          {:ok, row}
 
-        {:error, err} ->
-          _ =
-            row
-            |> MeterEvent.failed_changeset(err)
-            |> Repo.update()
+        row.stripe_status == "pending" ->
+          case Processor.__impl__().report_meter_event(row) do
+            {:ok, stripe_event} ->
+              row
+              |> MeterEvent.reported_changeset(stripe_event)
+              |> Repo.update()
 
-          emit_failure_telemetry(row, err, :inline)
-          {:error, err}
+            {:error, err} ->
+              case MeterEvents.mark_failed_with_telemetry(row, err, :sync) do
+                {:ok, :transitioned, _} ->
+                  {:error, err}
+
+                {:ok, :noop, %MeterEvent{stripe_status: "failed"} = r} ->
+                  {:ok, r}
+
+                {:ok, :noop, %MeterEvent{}} ->
+                  {:error, err}
+
+                {:error, :not_found} ->
+                  {:error, err}
+              end
+          end
+
+        true ->
+          {:ok, row}
       end
     end
   end
@@ -217,18 +234,5 @@ defmodule Accrue.Billing.MeterEventActions do
       {:identifier, _} -> true
       _ -> false
     end)
-  end
-
-  defp emit_failure_telemetry(%MeterEvent{} = row, err, source) do
-    :telemetry.execute(
-      [:accrue, :ops, :meter_reporting_failed],
-      %{count: 1},
-      %{
-        meter_event_id: row.id,
-        event_name: row.event_name,
-        source: source,
-        error: inspect(err)
-      }
-    )
   end
 end

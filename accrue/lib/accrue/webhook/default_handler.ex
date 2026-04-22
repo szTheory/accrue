@@ -79,6 +79,28 @@ defmodule Accrue.Webhook.DefaultHandler do
     :ok
   end
 
+  def handle_event("billing.meter.error_report_triggered", %Accrue.Webhook.Event{} = event, ctx) do
+    obj = meter_error_object_from_ctx(ctx)
+
+    case reduce_meter_error_report(event.processor_event_id, obj) do
+      {:ok, _} -> :ok
+      other -> other
+    end
+  end
+
+  def handle_event(
+        "v1.billing.meter.error_report_triggered",
+        %Accrue.Webhook.Event{} = event,
+        ctx
+      ) do
+    obj = meter_error_object_from_ctx(ctx)
+
+    case reduce_meter_error_report(event.processor_event_id, obj) do
+      {:ok, _} -> :ok
+      other -> other
+    end
+  end
+
   # ---------------------------------------------------------------------
   # Phase 3 event families — dispatch from Accrue.Webhook.Event struct
   # ---------------------------------------------------------------------
@@ -284,19 +306,8 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp reduce_meter_error_report(evt_id, obj) do
     identifier = extract_meter_identifier(obj)
 
-    case Accrue.Billing.MeterEvents.mark_failed_by_identifier(identifier, obj) do
+    case Accrue.Billing.MeterEvents.mark_failed_by_identifier(identifier, obj, evt_id) do
       {:ok, row} ->
-        :telemetry.execute(
-          [:accrue, :ops, :meter_reporting_failed],
-          %{count: 1},
-          %{
-            meter_event_id: row.id,
-            event_name: row.event_name,
-            source: :webhook,
-            webhook_event_id: evt_id
-          }
-        )
-
         {:ok, row}
 
       {:error, :not_found} ->
@@ -307,6 +318,12 @@ defmodule Accrue.Webhook.DefaultHandler do
 
         {:ok, :ignored}
     end
+  end
+
+  defp meter_error_object_from_ctx(ctx) when is_map(ctx) do
+    Map.get(ctx, :meter_error_object) ||
+      Map.get(ctx, "meter_error_object") ||
+      %{}
   end
 
   defp extract_meter_identifier(obj) do

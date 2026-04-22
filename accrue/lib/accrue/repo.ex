@@ -115,6 +115,20 @@ defmodule Accrue.Repo do
     do: repo().get_by!(queryable, clauses, opts)
 
   @doc """
+  Delegates to `c:Ecto.Repo.get!/3`. Raises when the row is missing.
+  """
+  @spec get!(Ecto.Queryable.t(), term(), keyword()) :: struct()
+  def get!(queryable, id, opts \\ []), do: repo().get!(queryable, id, opts)
+
+  @doc """
+  Delegates to `c:Ecto.Repo.update_all/3`. Used for guarded atomic updates
+  (for example meter-event `pending` → `failed` transitions).
+  """
+  @spec update_all(Ecto.Queryable.t(), keyword(), keyword()) :: {integer(), nil | [term()]}
+  def update_all(queryable, updates, opts \\ []),
+    do: repo().update_all(queryable, updates, opts)
+
+  @doc """
   Delegates to `c:Ecto.Repo.delete/2`. Returns `{:ok, struct}` or
   `{:error, changeset}`.
   """

@@ -36,6 +36,10 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
     (`:status`, `:source`, `:type`, `:stripe_status`). Customer ID,
     subscription ID, and other unbounded identifiers are NEVER promoted to
     metric tags — those belong on spans, not metrics.
+
+    For `accrue.ops.meter_reporting_failed.count`, tag `:source` is one of
+    `:sync`, `:reconciler`, or `:webhook` (sync request path vs background
+    reconciler vs Stripe webhook meter error report).
     """
     import Telemetry.Metrics
 

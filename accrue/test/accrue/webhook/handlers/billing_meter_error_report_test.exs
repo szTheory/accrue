@@ -95,6 +95,72 @@ defmodule Accrue.Webhook.Handlers.BillingMeterErrorReportTest do
     assert_received {:fail, %{count: 1}, %{source: :webhook, webhook_event_id: "evt_test_mere_1"}}
   end
 
+  test "duplicate delivery does not emit a second meter_reporting_failed", %{row: row} do
+    test_pid = self()
+
+    :telemetry.attach(
+      "test-meter-webhook-dup",
+      [:accrue, :ops, :meter_reporting_failed],
+      fn _evt, meas, meta, _ -> send(test_pid, {:fail, meas, meta}) end,
+      nil
+    )
+
+    try do
+      assert {:ok, %MeterEvent{}} = DefaultHandler.handle(error_event(row.identifier))
+
+      assert {:ok, %MeterEvent{stripe_status: "failed"}} =
+               DefaultHandler.handle(error_event(row.identifier))
+
+      assert_received {:fail, %{count: 1}, %{source: :webhook}}
+      refute_receive {:fail, _, _}, 100
+    after
+      :telemetry.detach("test-meter-webhook-dup")
+    end
+  end
+
+  test "handle_event/3 unversioned type with DispatchWorker-shaped ctx", %{row: row} do
+    evt = %Accrue.Webhook.Event{
+      type: "billing.meter.error_report_triggered",
+      object_id: "mer_test_obj",
+      livemode: false,
+      created_at: DateTime.utc_now(),
+      processor_event_id: "evt_unversioned_meter",
+      processor: :fake
+    }
+
+    ctx = %{
+      meter_error_object: %{
+        "identifier" => row.identifier,
+        "object" => "billing.meter.error_report",
+        "reason" => %{
+          "error_code" => "meter_event_customer_not_found",
+          "error_message" => "customer mapping failed"
+        }
+      }
+    }
+
+    test_pid = self()
+
+    :telemetry.attach(
+      "test-meter-handle-event",
+      [:accrue, :ops, :meter_reporting_failed],
+      fn _evt, meas, meta, _ -> send(test_pid, {:fail, meas, meta}) end,
+      nil
+    )
+
+    try do
+      assert :ok = DefaultHandler.handle_event(evt.type, evt, ctx)
+    after
+      :telemetry.detach("test-meter-handle-event")
+    end
+
+    assert_received {:fail, %{count: 1},
+                     %{source: :webhook, webhook_event_id: "evt_unversioned_meter"}}
+
+    reloaded = Repo.reload!(row)
+    assert reloaded.stripe_status == "failed"
+  end
+
   test "unknown identifier is acknowledged without raising" do
     assert {:ok, :ignored} = DefaultHandler.handle(error_event("mev_ident_does_not_exist"))
   end

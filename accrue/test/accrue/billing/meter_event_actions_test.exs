@@ -110,7 +110,62 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       [row] = Repo.all(MeterEvent)
       assert row.stripe_status == "failed"
       assert row.stripe_error["code"] == "meter_event_rejected"
-      assert_received {:fail, %{count: 1}, %{source: :inline}}
+      assert_received {:fail, %{count: 1}, %{source: :sync}}
+    end
+
+    test "idempotent replay returns {:ok, failed} without duplicate telemetry", %{
+      customer: customer
+    } do
+      err = %Accrue.APIError{code: "meter_event_rejected", http_status: 400, message: "nope"}
+      Fake.scripted_response(:report_meter_event, {:error, err})
+
+      :ok = Accrue.Actor.put_operation_id("op_meter_idem_fail")
+      ts = ~U[2026-04-10 12:00:00.000000Z]
+      opts = [operation_id: "op_meter_idem_fail", timestamp: ts, value: 1]
+
+      test_pid = self()
+
+      :telemetry.attach(
+        "test-meter-fail-idem",
+        [:accrue, :ops, :meter_reporting_failed],
+        fn _evt, meas, meta, _ -> send(test_pid, {:fail, meas, meta}) end,
+        nil
+      )
+
+      try do
+        assert {:error, %Accrue.APIError{}} =
+                 Billing.report_usage(customer, "api_call", opts)
+
+        assert_received {:fail, %{count: 1}, %{source: :sync}}
+
+        assert {:ok, %MeterEvent{stripe_status: "failed"} = row2} =
+                 Billing.report_usage(customer, "api_call", opts)
+
+        assert row2.stripe_error["code"] == "meter_event_rejected"
+
+        refute_receive {:fail, _, _}, 100
+      after
+        :telemetry.detach("test-meter-fail-idem")
+      end
+    end
+
+    test "report_usage!/3 returns failed row on idempotent replay after processor error", %{
+      customer: customer
+    } do
+      err = %Accrue.APIError{code: "meter_event_rejected", http_status: 400, message: "nope"}
+      Fake.scripted_response(:report_meter_event, {:error, err})
+
+      :ok = Accrue.Actor.put_operation_id("op_meter_bang_idem")
+      ts = ~U[2026-04-11 12:00:00.000000Z]
+      opts = [operation_id: "op_meter_bang_idem", timestamp: ts, value: 2]
+
+      assert_raise Accrue.APIError, fn ->
+        Billing.report_usage!(customer, "api_call", opts)
+      end
+
+      row = Billing.report_usage!(customer, "api_call", opts)
+      assert %MeterEvent{stripe_status: "failed"} = row
+      assert row.value == 2
     end
   end
 
@@ -220,8 +275,9 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
 
         assert meta[:event_type] == "api_call"
         assert meas[:duration] >= 0
-        refute_receive {:telemetry, [:accrue, :billing, :meter_event, :report_usage, :exception], _,
-                        _},
+
+        refute_receive {:telemetry, [:accrue, :billing, :meter_event, :report_usage, :exception],
+                        _, _},
                        50
       after
         :telemetry.detach("test-report-usage-telemetry-smoke")

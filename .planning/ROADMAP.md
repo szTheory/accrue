@@ -25,7 +25,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 43 | Meter usage happy path + Fake determinism | Lock the public reporting API + persistence + Fake success story before failure-mode work expands surface area. | MTR-01..MTR-03 — **Complete 2026-04-22** |
-| 44 | Meter failures, idempotency, reconciler + webhook | Sync `{:error, _}` + single `meter_reporting_failed`; reconciler pending recovery; webhook error trigger path + telemetry sources (**MTR-04..MTR-06**). | MTR-04, MTR-05, MTR-06 |
+| 44 | Meter failures, idempotency, reconciler + webhook | Sync/reconciler/webhook failure paths share a guarded `MeterEvents` choke; `DispatchWorker` passes embedded meter object in `ctx`. | MTR-04..MTR-06 — **Complete 2026-04-22** |
 | 45 | Docs + telemetry/runbook alignment | Public vs internal vs processor contracts in guides; `telemetry.md` / operator runbooks for meter ops (**MTR-07..MTR-08**). | MTR-07, MTR-08 |
 
 **Success criteria (milestone):**
@@ -271,7 +271,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 43. Meter usage happy path + Fake determinism | v1.10 | 3/3 | Complete | 2026-04-22 |
-| 44. Meter failures, idempotency, reconciler + webhook | v1.10 | — | Not started | — |
+| 44. Meter failures, idempotency, reconciler + webhook | v1.10 | 3/3 | Complete | 2026-04-22 |
 | 45. Docs + telemetry/runbook alignment | v1.10 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.

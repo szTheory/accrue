@@ -29,14 +29,14 @@ defmodule Accrue.Jobs.MeterEventsReconciler do
   keep retrying the same row in the same tick, avoiding the
   "stuck row infinite retry" footgun. Failures emit
   `[:accrue, :ops, :meter_reporting_failed]` with `source: :reconciler`
-  so ops can distinguish inline vs deferred failures.
+  so ops can distinguish sync request path vs reconciler vs webhook failures.
   """
 
   use Oban.Worker, queue: :accrue_meters, max_attempts: 3
 
   import Ecto.Query
 
-  alias Accrue.Billing.MeterEvent
+  alias Accrue.Billing.{MeterEvent, MeterEvents}
   alias Accrue.Clock
   alias Accrue.Processor
   alias Accrue.Repo
@@ -82,21 +82,8 @@ defmodule Accrue.Jobs.MeterEventsReconciler do
             |> Repo.update()
 
         {:error, err} ->
-          _ =
-            row
-            |> MeterEvent.failed_changeset(err)
-            |> Repo.update()
-
-          :telemetry.execute(
-            [:accrue, :ops, :meter_reporting_failed],
-            %{count: 1},
-            %{
-              meter_event_id: row.id,
-              event_name: row.event_name,
-              source: :reconciler,
-              error: inspect(err)
-            }
-          )
+          _ = MeterEvents.mark_failed_with_telemetry(row, err, :reconciler)
+          :ok
       end
     end
 

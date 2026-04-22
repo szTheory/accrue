@@ -385,6 +385,15 @@ defmodule Accrue.Billing do
 
   Invalid `opts` raise `NimbleOptions.ValidationError` from `NimbleOptions.validate!/2`.
 
+  ## Error tuples vs persisted rows
+
+  `{:error, _}` means this **call** could not advance durable meter state as
+  requested (for example the processor rejected the usage report). After
+  retries with the same idempotency inputs, `{:ok, %Accrue.Billing.MeterEvent{}}`
+  may be returned when the row already reflects a terminal outcome — inspect
+  `stripe_status` and `stripe_error` on the persisted row for the canonical
+  failure details.
+
   ## Fake / test mode
 
   Host apps can configure `Accrue.Processor.Fake` (for example via `Accrue.Test.setup_fake_processor/1`) to exercise this path without outbound network calls.
@@ -409,7 +418,14 @@ defmodule Accrue.Billing do
 
   Raises `NimbleOptions.ValidationError` when `opts` fail validation.
 
-  Raises on `{:error, _}` from the underlying implementation: `Accrue.APIError` (including `resource_missing` / HTTP 404 when a Stripe customer id cannot be resolved) is re-raised when it implements `Exception`; other error tuples become a `RuntimeError` raised by `Accrue.Billing.MeterEventActions.report_usage!/3`.
+  Raises on `{:error, _}` from the underlying implementation when that tuple
+  indicates a true failure for this invocation (for example a missing customer
+  or a processor error that performed the failing attempt). When the non-bang
+  `report_usage/3` would return `{:ok, row}` on an idempotent replay (including
+  a row already in `failed`), this function returns that row without raising.
+  `Accrue.APIError` (including `resource_missing` / HTTP 404) is re-raised when
+  it implements `Exception`; other error tuples become a `RuntimeError` raised by
+  `Accrue.Billing.MeterEventActions.report_usage!/3`.
   """
   @doc @report_usage_bang_doc
   def report_usage!(customer, event_name, opts \\ []) do

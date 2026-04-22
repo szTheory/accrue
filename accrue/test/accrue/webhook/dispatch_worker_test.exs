@@ -3,6 +3,7 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
 
   import ExUnit.CaptureLog
 
+  alias Accrue.Billing.{Customer, MeterEvent}
   alias Accrue.Webhook.{DispatchWorker, WebhookEvent, Pruner}
 
   # A test handler that succeeds
@@ -72,6 +73,69 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
       # DefaultHandler runs without error for customer.created
       updated = Accrue.TestRepo.get!(WebhookEvent, row.id)
       assert updated.status == :succeeded
+    end
+
+    test "meter error webhook marks meter_event failed via ctx meter_error_object" do
+      {:ok, customer} =
+        %Customer{}
+        |> Customer.changeset(%{
+          owner_type: "User",
+          owner_id: Ecto.UUID.generate(),
+          processor: "fake",
+          processor_id: "cus_fake_meter_dispatch_wh",
+          email: "dw@example.com"
+        })
+        |> Accrue.TestRepo.insert()
+
+      ident = "mev_ident_dispatch_wh_#{System.unique_integer([:positive])}"
+
+      {:ok, me} =
+        %{
+          customer_id: customer.id,
+          stripe_customer_id: customer.processor_id,
+          event_name: "api_call",
+          value: 1,
+          identifier: ident,
+          occurred_at: DateTime.utc_now()
+        }
+        |> MeterEvent.pending_changeset()
+        |> Accrue.TestRepo.insert()
+
+      {:ok, me} =
+        me
+        |> MeterEvent.reported_changeset(%{})
+        |> Accrue.TestRepo.update()
+
+      evt_id = "evt_dispatch_meter_#{System.unique_integer([:positive])}"
+
+      data = %{
+        "data" => %{
+          "object" => %{
+            "object" => "billing.meter.error_report",
+            "identifier" => ident,
+            "reason" => %{
+              "error_code" => "meter_event_customer_not_found",
+              "error_message" => "no"
+            }
+          }
+        }
+      }
+
+      row =
+        insert_webhook_event!(
+          type: "billing.meter.error_report_triggered",
+          processor_event_id: evt_id,
+          data: data
+        )
+
+      job = build_job(row.id, attempt: 1, max_attempts: 25)
+      assert :ok = DispatchWorker.perform(job)
+
+      reloaded = Accrue.TestRepo.get!(MeterEvent, me.id)
+      assert reloaded.stripe_status == "failed"
+
+      updated_wh = Accrue.TestRepo.get!(WebhookEvent, row.id)
+      assert updated_wh.status == :succeeded
     end
 
     test "user handler crash does not prevent default handler or other user handlers from running" do
@@ -240,22 +304,29 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
     _processed_at = Keyword.get(opts, :processed_at)
     endpoint = Keyword.get(opts, :endpoint, :default)
 
+    processor_event_id =
+      Keyword.get(opts, :processor_event_id, "evt_test_#{System.unique_integer([:positive])}")
+
+    data =
+      Keyword.get(opts, :data) ||
+        %{
+          "data" => %{
+            "object" => %{
+              "id" => "cus_test_#{System.unique_integer([:positive])}",
+              "object" => "customer"
+            }
+          }
+        }
+
     attrs = %{
       processor: "stripe",
-      processor_event_id: "evt_test_#{System.unique_integer([:positive])}",
+      processor_event_id: processor_event_id,
       type: type,
       livemode: false,
       endpoint: endpoint,
       raw_body: ~s({"test": true}),
       received_at: DateTime.utc_now(),
-      data: %{
-        "data" => %{
-          "object" => %{
-            "id" => "cus_test_#{System.unique_integer([:positive])}",
-            "object" => "customer"
-          }
-        }
-      }
+      data: data
     }
 
     changeset = WebhookEvent.ingest_changeset(attrs)
