@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: pending
-milestone_name: Next milestone (undefined)
-status: between_milestones
-last_updated: "2026-04-22T18:00:00.000Z"
+milestone: v1.12
+milestone_name: Admin & operator UX
+status: roadmap_ready
+last_updated: "2026-04-22T20:00:00.000Z"
 last_activity: 2026-04-22
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,29 +21,29 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.11** archived — define the next milestone with **`/gsd-new-milestone`** (creates a fresh **`.planning/REQUIREMENTS.md`**) or continue at **Phase 48** after scoping.
+**Current focus:** **v1.12** — Admin & operator UX (**Phases 48–50**). Requirements: **`.planning/REQUIREMENTS.md`** (**ADM-01..ADM-06**).
 
 ## Current Position
 
-Phase: — (between milestones)
+Phase: **48** — Admin metering & billing signals (not started)
 
 Plan: —
 
-**Status:** Between milestones (`v1.11` shipped 2026-04-22)
+**Status:** Roadmap ready — milestone initialized **2026-04-22**
 
-**Last Activity:** 2026-04-22
+**Last Activity:** 2026-04-22 — `/gsd-new-milestone` closed; **`phases.clear`** not run (preserves **40–47** trees).
 
 ## Milestone Progress
 
-**Shipped:** **v1.11** — Public Hex release + post-release continuity — Phases **46–47** (see `.planning/milestones/v1.11-ROADMAP.md`).
+**Active:** **v1.12** — Admin & operator UX — Phases **48–50** (see `.planning/ROADMAP.md`).
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (lockstep; see **`accrue/mix.exs`** **`@version`**).
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — absent until **`/gsd-new-milestone`**
-- `.planning/ROADMAP.md` — shipped history + **Next milestone** stub
-- `.planning/PROJECT.md` — between-milestone current state
+- **`.planning/REQUIREMENTS.md`** — **v1.12** scope (**ADM-01..ADM-06**)
+- `.planning/ROADMAP.md` — **v1.12** phase table + shipped history
+- `.planning/PROJECT.md` — **v1.12** current milestone
 - `.planning/phases/40-*` … `47-*` — prior shipped phase artifacts (preserved)
 
 ## Deferred Items
@@ -56,9 +56,9 @@ Plan: —
 
 ## Recent Decisions
 
-- **v1.11:** Closed with roadmap + requirements archives under **`.planning/milestones/v1.11-*`** and planning git tag **`v1.11`**.
-- **`phases.clear` not run** — preserves **v1.9–v1.11** phase directories under **`.planning/phases/`**; next build phases continue at **48** when scoped.
+- **v1.12:** Opened with **ADM-01..ADM-06**; roadmap **48–50**; **`phases.clear`** skipped per repo policy (preserve phase evidence).
+- **v1.11:** Closed with archives under **`.planning/milestones/v1.11-*`** and planning git tag **`v1.11`**.
 
-**Next:** **`/gsd-new-milestone`** or **`/gsd-discuss-phase 48`**.
+**Next:** **`/gsd-discuss-phase 48`** or **`/gsd-plan-phase 48`**.
 
 **Completed:** Milestone **v1.11** — 2026-04-22 — see **`milestones/v1.11-ROADMAP.md`**.

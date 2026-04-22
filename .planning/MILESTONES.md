@@ -1,5 +1,21 @@
 # Milestones
 
+## v1.12 Admin & operator UX (Active — opened 2026-04-22)
+
+**Planning opened:** 2026-04-22
+
+**Phases:** **48–50** (see root `.planning/ROADMAP.md`) — requirements **ADM-01..ADM-06** in **`.planning/REQUIREMENTS.md`**.
+
+**Theme:** Improve **`accrue_admin`** operator surfaces (post-metering signals, drill/nav quality, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright alignment on touched routes). **PROC-08** / **FIN-03** remain non-goals.
+
+**Public Hex baseline:** **`accrue` / `accrue_admin` 0.3.0`** (unchanged by planning).
+
+**Phase directories:** **`phases.clear` not run** — preserves **40–47** trees under **`.planning/phases/`** for traceability.
+
+**Next:** **`/gsd-discuss-phase 48`** or **`/gsd-plan-phase 48`**.
+
+---
+
 ## v1.11 Public Hex release + post-release continuity (Shipped: 2026-04-22)
 
 **Planning opened:** 2026-04-22
