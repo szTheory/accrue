@@ -74,6 +74,14 @@ The required deterministic release gate still includes the checked-in trust revi
 
 v1.7 adoption requirements (ADOPT-01–ADOPT-06) are enforced mostly through documentation gates in `scripts/ci/`. When `verify_package_docs` or VERIFY-01 checks fail in CI, open [scripts/ci/README.md](scripts/ci/README.md) for the requirement → script → ExUnit map so you edit the owning files first instead of silencing unrelated prose.
 
+## Host proof (VERIFY-01)
+
+Host integration proofs sit in **Layer B** and **Layer C** relative to the per-package release gate:
+
+- **Layer A** — `accrue/` and `accrue_admin/` **`mix test`**, Credo, Dialyzer, docs, and related release checks (above).
+- **Layer B** — from the repo root, `cd examples/accrue_host` then **`mix verify`** (fast Fake slice) or **`mix verify.full`** (CI-equivalent host stack). See [examples/accrue_host/README.md#proof-and-verification](examples/accrue_host/README.md#proof-and-verification) for VERIFY-01 detail.
+- **Layer C** — merge-blocking PR job **`host-integration`** is the contract, not “I ran **`mix verify.full`** locally” alone; use [scripts/ci/README.md](scripts/ci/README.md) to map scripts and lanes before you change CI-facing prose.
+
 ## No CLA
 
 Accrue does not require a Contributor License Agreement at this time. By submitting a contribution, you confirm that you have the right to license your work under the repository's MIT license.
