@@ -28,6 +28,32 @@ defmodule Accrue.Test do
   end
 
   @doc """
+  Returns meter events captured by `Accrue.Processor.Fake` for `customer_or_id`
+  (same argument shapes as `Accrue.Processor.Fake.meter_events_for/1`).
+
+  Prefer asserting `%Accrue.Billing.MeterEvent{}` rows via `Ecto.Repo` first; use
+  this helper when processor-shaped payloads matter.
+
+  Raises `ArgumentError` unless `Accrue.Processor.__impl__()` is `Accrue.Processor.Fake`.
+
+  ## Implementation
+
+  Single facade: delegates reads to `Accrue.Processor.Fake` so hosts discover the
+  helper through `Accrue.Test` instead of importing the Fake module directly.
+  """
+  @spec meter_events_for(Accrue.Billing.Customer.t() | String.t()) :: [map()]
+  def meter_events_for(customer_or_id) do
+    adapter = Accrue.Processor.__impl__()
+
+    if adapter != Accrue.Processor.Fake do
+      raise ArgumentError,
+            "meter_events_for/1 requires Accrue.Processor.Fake (got #{inspect(adapter)})"
+    end
+
+    Accrue.Processor.Fake.meter_events_for(customer_or_id)
+  end
+
+  @doc """
   Configures Accrue to capture mail deliveries through `Accrue.Mailer.Test`.
   """
   @spec setup_mailer_test(keyword() | map()) :: :ok | {:ok, keyword()}
