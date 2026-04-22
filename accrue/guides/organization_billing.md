@@ -69,9 +69,37 @@ Copy the **`MyApp.Auth.Pow`** module body from [`auth_adapters.md`](auth_adapter
 
 Pow is **community-maintained**. Pin `pow` (and extensions) deliberately, read upstream changelog on every bump, and **re-verify** Plug ordering and session fetch after upgrades—Pow integrates at the connection layer and regressions often surface as missing assigns rather than compile errors.
 
+## Custom organization model (ORG-08)
+
+**ORG-08** covers hosts that resolve tenancy through **custom signals**—subdomains, headers, alternate session keys, or background jobs—while still anchoring billing on **`Organization`**. Those signals must always collapse to a **membership-verified** org row before any `Accrue.Billing` mutation. Canonical ORG-03 path-class rules remain in [v1.3-REQUIREMENTS.md](https://github.com/szTheory/accrue/blob/main/.planning/milestones/v1.3-REQUIREMENTS.md); the table below maps common mistakes to those classes.
+
+| Anti-pattern | ORG-03 path class | Why it violates | Host obligation |
+|--------------|-------------------|-----------------|-----------------|
+| Trusting `org_id` query params on unauthenticated or partially authenticated routes | public | IDOR and accidental cross-tenant reads | Resolve org only after the session user passes a membership join; never “helpfully” default to the first org |
+| Admin LiveViews that select org solely from `live_action` params | admin | Privilege escalation into another org’s billing UI | Require `on_mount` membership checks tied to session-backed org id; treat params as untrusted hints |
+| Context modules that widen queries when org id is omitted | public | Silent cross-tenant data access | Require first-arg org scope or explicit org id sourced from verified session |
+| Webhook replay handlers that call `Repo.all` without billable filters | webhook replay | Replay tooling lacks browser session—global queries span tenants | Resolve billable from Stripe/event metadata before touching Accrue tables |
+| Export pipelines that join revenue tables without org predicates | export | Reporting leaks into the wrong workspace | Filter exports by org scope and the Stripe customer id tied to that org |
+
+### LiveView admin
+
+Accrue Admin and host operator UIs must inherit **org scope from the verified session** via plugs and **`on_mount`** hooks that re-run membership checks. **`live_action`** may carry intent (e.g., deep links) but must **not** be the only source of truth for which `Organization` is active—pair every param path with the same membership gate you use on HTTP routes.
+
+### Context functions
+
+`MyApp.Billing` / `MyApp.Accounts` functions should accept **org id or a scope struct derived from the verified session** as the first argument (or explicit keyword). Optional-org APIs are a footgun: widening queries when org is `nil` violates **public** and **admin** classes from ORG-03.
+
+### Webhook replay
+
+**Webhook replay** and catch-up jobs run without `current_user`. Tie each branch to processor metadata that pins **customer / billable id** back to a single org before mutating billing rows. Avoid global `Repo.all` “find any open subscription” helpers inside replay workers.
+
+### `Accrue.Auth` actor alignment
+
+Privileged tooling calls `Accrue.Auth.actor_id/1` when writing audit rows. Return the **real acting principal** (human admin id, service account id) — do not substitute a silent superuser string that hides who performed a destructive billing action.
+
 ## User-as-billable (bounded aside)
 
-**User-as-billable** (Cashier-style: `use Accrue.Billable` on **`User`**) is a valid stepping stone for single-tenant or solo apps. Accrue still expects consistent **`owner_type`** / **`owner_id`** on persisted billing rows. If you later move Stripe Customer ownership to an **Organization**, plan a **migration** of customer/subscription ownership—Stripe IDs cannot silently “move” without host data work. **Pow** is covered in **ORG-07** above; **custom organization models** (alternate session keys, subdomains, replay/export matrices) are covered in **ORG-08** below.
+**User-as-billable** (Cashier-style: `use Accrue.Billable` on **`User`**) is a valid stepping stone for single-tenant or solo apps. Accrue still expects consistent **`owner_type`** / **`owner_id`** on persisted billing rows. If you later move Stripe Customer ownership to an **Organization**, plan a **migration** of customer/subscription ownership—Stripe IDs cannot silently “move” without host data work. **Pow** is covered in **ORG-07** above; **custom organization models** (alternate session keys, subdomains, replay/export matrices) are covered in **ORG-08** above.
 
 ## Reference wiring (examples/accrue_host)
 
