@@ -267,30 +267,55 @@ outside the namespace via this helper. If you need to emit
 under `[:accrue, :*]` for the firehose, use `Accrue.Telemetry.span/3`
 instead.
 
-## Cross-domain example (non-billing Phoenix code)
+## Cross-domain host subscription
 
-A LiveView, Channel, or plain GenServer can attach to Accrue ops events the
-same way as any other `:telemetry` event — no private Accrue modules required:
+Phoenix controllers, LiveViews, Channels, and plain processes often need a
+**small, high-signal** Accrue hook without subscribing to the full billing
+firehose. Use the public modules only — `Accrue.Telemetry` (span naming),
+`Accrue.Telemetry.Metrics` (default counters), and `Accrue.Telemetry.Ops`
+(`emit/3` contract) — and the same `:telemetry` APIs you already use elsewhere.
+
+Append `Accrue.Telemetry.Metrics.defaults/0` to your host metric list (see
+**Using the default metrics recipe** above) so scrapers stay aligned with the
+ops catalog. The authoritative tuple list lives in the **Ops event catalog**
+table earlier in this guide — **do not fork** that table into a second
+inventory here.
+
+### Ops attach (webhook DLQ dead-lettered)
+
+This pattern mirrors the checked-in `examples/accrue_host` app: start a tiny
+process once from supervision, call `:telemetry.attach/4` with a stable
+handler id, and detach on shutdown so dev hot reload does not stack duplicate
+handlers.
 
 ```elixir
-# e.g. in application.ex after supervisor children start
-:telemetry.attach_many(
-  "my-app-accrue-ops-log",
-  [
-    [:accrue, :ops, :webhook_dlq, :dead_lettered],
-    [:accrue, :ops, :meter_reporting_failed]
-  ],
-  fn event, measurements, metadata, _config ->
+:telemetry.attach(
+  "accrue-host-ops-dlq-dead-lettered",
+  [:accrue, :ops, :webhook_dlq, :dead_lettered],
+  fn _event, measurements, _metadata, _config ->
     require Logger
-    Logger.warning("accrue ops #{inspect(event)} count=#{measurements.count} meta=#{inspect(Map.drop(metadata, []))}")
+    # Low-cardinality only — never log full metadata maps from billing.
+    Logger.info("accrue ops webhook_dlq dead_lettered count=#{measurements.count}")
   end,
   nil
 )
 ```
 
-For structured logs or `Telemetry.Metrics`, use the same event names as in the
-ops table. Correlate with your own `operation_id` if you seed
-`Accrue.Actor` in the same process before calling Accrue.
+### Optional: billing spans without metric-tag explosions
+
+`Accrue.Telemetry.span/3` on billing entry points emits
+`[:accrue, :billing, :*, :start | :stop | :exception]` — **high cardinality**.
+If you add a handler, subscribe to **`:stop` and `:exception` only** for
+dashboards or logs. **Do not** copy customer IDs, subscription IDs, or other
+unbounded fields into **metric tags**; identifiers belong in traces or
+scrubbed log lines, not Prometheus labels.
+
+### OpenTelemetry–first hosts
+
+Teams standardizing on **OpenTelemetry** may **skip `Telemetry.Metrics`**
+entirely and attach handlers or OTel bridges directly to `:telemetry` events
+instead — the ops catalog tuples still apply. Prefer spans for per-customer
+detail; keep paging on `[:accrue, :ops, :*]`.
 
 ## Operator runbooks (first actions)
 
