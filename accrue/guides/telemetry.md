@@ -75,6 +75,17 @@ they correspond to — they are idempotent under webhook replay via the
 | `[:accrue, :ops, :connect_capability_lost]` | `count` | `stripe_account_id`, `capability`, `from`, `to` | `Accrue.Webhook.ConnectHandler` |
 | `[:accrue, :ops, :connect_payout_failed]` | `count` | `stripe_account_id`, `payout_id`, `amount`, `currency`, `failure_code` | `Accrue.Webhook.ConnectHandler` |
 
+<a id="meter-reporting-semantics"></a>
+## Meter reporting failures: semantics & sources
+
+`[:accrue, :ops, :meter_reporting_failed]` fires on the **first durable** transition of a meter row into terminal **`failed`** (as enforced by `Accrue.Billing.MeterEvents` guarded updates)—**not** once per HTTP retry, Stripe redelivery, webhook replay, or idempotent `report_usage` replay. Treat it as a terminal-epoch signal, not retry noise.
+
+- **`:sync`** — immediate host call path: failures originate in `Accrue.Billing.MeterEventActions` while handling `Accrue.Billing.report_usage/3` inside the same transaction that attempted the processor report.
+- **`:reconciler`** — background reconciliation: `Accrue.Jobs.MeterEventsReconciler` on queue `:accrue_meters` retries stuck `pending` rows and emits this ops tuple when a durable `failed` transition is recorded.
+- **`:webhook`** — Stripe-reported meter errors: `Accrue.Webhook.DefaultHandler` ingests the billing path and `Accrue.Webhook.DispatchWorker` carries the async context when the handler marks the row `failed` with telemetry.
+
+Read this block before tuning Grafana annotations—alert links should point here (tuple + semantics), then [`operator-runbooks.md`](operator-runbooks.md) for ordered triage.
+
 Connect ops rows above are emitted via `Accrue.Telemetry.Ops.emit/3` from
 `Accrue.Webhook.ConnectHandler`. PDF and ledger rows use `:telemetry.execute/3`
 directly with the same `[:accrue, :ops]` prefix — treat them as **first-class
