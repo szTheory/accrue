@@ -1,4 +1,4 @@
-defmodule Accrue.Billing.MeterEventActionsTest do
+defmodule Accrue.Billing.MeterEventsReportUsageTest do
   @moduledoc """
   Phase 4 Plan 02 — BILL-13 metered billing (`report_usage/3`) under the
   Fake processor. Exercises the D4-03 outbox contract: pending insert →
@@ -41,7 +41,7 @@ defmodule Accrue.Billing.MeterEventActionsTest do
       assert {:ok, %MeterEvent{value: 10}} =
                Billing.report_usage(customer, "api_call", value: 10)
 
-      [fake_event] = Fake.meter_events_for(customer)
+      [fake_event] = Accrue.Test.meter_events_for(customer)
       assert fake_event.payload.value == "10"
       assert fake_event.event_name == "api_call"
     end
@@ -159,6 +159,72 @@ defmodule Accrue.Billing.MeterEventActionsTest do
     test "raises on error" do
       assert_raise Accrue.APIError, fn ->
         Billing.report_usage!("cus_fake_nope", "api_call")
+      end
+    end
+  end
+
+  describe "deterministic identifiers (MTR-03)" do
+    test "operation_id + fixed timestamp yield stable identifier and idempotent row", %{
+      customer: customer
+    } do
+      :ok = Accrue.Actor.put_operation_id("op_golden_meter_43")
+
+      # Fixed instant within the 35-day backdating window enforced on usage timestamps.
+      ts = ~U[2026-04-01 03:04:05.000000Z]
+
+      assert {:ok, %MeterEvent{} = row} =
+               Billing.report_usage(customer, "api_call",
+                 operation_id: "op_golden_meter_43",
+                 timestamp: ts,
+                 value: 1
+               )
+
+      assert String.starts_with?(row.identifier, "accrue_mev_op_golden_meter_43_")
+      assert String.contains?(row.identifier, "api_call")
+      assert row.operation_id == "op_golden_meter_43"
+
+      assert {:ok, %MeterEvent{id: id2}} =
+               Billing.report_usage(customer, "api_call",
+                 operation_id: "op_golden_meter_43",
+                 timestamp: ts,
+                 value: 1
+               )
+
+      assert row.id == id2
+    end
+  end
+
+  describe "report_usage billing telemetry (smoke)" do
+    test "emits one meter_event report_usage stop on happy path", %{customer: customer} do
+      test_pid = self()
+
+      :telemetry.attach_many(
+        "test-report-usage-telemetry-smoke",
+        [
+          [:accrue, :billing, :meter_event, :report_usage, :stop]
+        ],
+        fn event, meas, meta, _ ->
+          send(test_pid, {:telemetry, event, meas, meta})
+        end,
+        nil
+      )
+
+      try do
+        assert {:ok, _} =
+                 Billing.report_usage(customer, "api_call",
+                   timestamp: ~U[2026-04-15 00:00:00.000000Z]
+                 )
+
+        assert_receive {:telemetry, [:accrue, :billing, :meter_event, :report_usage, :stop], meas,
+                        meta}
+
+        assert meta[:event_type] == "api_call"
+        assert meas[:duration] >= 0
+        refute_receive {:telemetry, [:accrue, :billing, :meter_event, :report_usage, :exception], _,
+                        _},
+                       50
+      after
+        :telemetry.detach("test-report-usage-telemetry-smoke")
       end
     end
   end
