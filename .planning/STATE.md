@@ -49,13 +49,11 @@ Plan: **39-03** (final) — summaries + verification recorded
 
 ## Deferred Items
 
-**`audit-open` (carry-forward):** two quick-task stubs + Phase 21 UAT metadata — see prior `STATE.md` notes; not v1.8 deliverables unless pulled into scope explicitly.
+**Phase 21 UAT:** metadata row retained for traceability; scenarios are automated / resolved via quick task **260414-l9q** (see `03-HUMAN-UAT.md`).
 
 | Category | Item | Status |
 |----------|------|--------|
 | uat_gap | Phase 21 — `21-UAT.md` | automated |
-| quick_task | `260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p` | missing |
-| quick_task | `260414-l9q-automate-phase-3-human-verification-item` | missing |
 
 ## Recent Decisions
 
