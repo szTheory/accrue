@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.11 Public Hex release + post-release continuity (In progress)
+
+**Planning opened:** 2026-04-22
+
+**Phases:** **46–47** (see root `.planning/ROADMAP.md`)
+
+**Theme:** Publish **`accrue`** / **`accrue_admin`** to Hex via Release Please **linked versions**, then align **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning Hex version callouts. **PROC-08** / **FIN-03** remain non-goals.
+
+**Requirements:** `.planning/REQUIREMENTS.md` (**REL-**, **DOC-**, **HYG-**)
+
+**Next after ship:** `/gsd-discuss-phase 48` or `/gsd-new-milestone` for the next implementation slice.
+
+---
+
 ## v1.10 Metered usage + Fake parity (Shipped: 2026-04-22)
 
 **Phases completed:** 3 phases (43–45), **10** plans

@@ -12,7 +12,16 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**Next:** open **`/gsd-new-milestone`** when **v1.11** (or the next prioritized slice) is ready — fresh `.planning/REQUIREMENTS.md` and roadmap phases after requirements definition.
+### v1.11 — Public Hex release + post-release continuity
+
+**Goal:** Ship **`accrue`** and **`accrue_admin`** to Hex for the metering + accumulated work since **0.1.2**, using the **Release Please + linked-versions** path, then align first-user docs, verifiers, and planning callouts so **Hex / repo / guides** agree—without **PROC-08** or **FIN-03**.
+
+**Target features:**
+
+- Combined release PR, **`accrue` then `accrue_admin`** publish, and tag-level verification per **`RELEASING.md`** and **`release-please-config.json`**.
+- Changelog + **`mix.exs` `@version`** consistency for the shipped SemVer (workspace currently targets **`0.3.0`**; exact number follows Release Please + maintainer choice at ship time).
+- **`RELEASING.md`** (and any conflicting “bootstrap only” wording) accurate for **routine pre-1.0** linked releases.
+- Post-publish continuity: **`verify_package_docs`**, **`first_hour`** / primary install **`~>`** snippets, and **PROJECT / MILESTONES / STATE** Hex lines updated to the published versions.
 
 **v1.10 — Metered usage + Fake parity** is **archived** (2026-04-22). Phases **43–45**; **MTR-01..MTR-08** validated. Archives: `.planning/milestones/v1.10-ROADMAP.md`, `v1.10-REQUIREMENTS.md`. Spike retained: `.planning/research/v1.10-METERING-SPIKE.md`. Git tag **`v1.10`**.
 
@@ -26,11 +35,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue_admin` 0.1.2**.
+**Public Hex (last published):** **`accrue` 0.1.2**, **`accrue_admin` 0.1.2** — **v1.11** targets publishing the next linked versions from **`main`** (workspace **`mix.exs`** currently **`0.3.0`**; ship version is whatever Release Please + merge produce).
 
 **Last shipped planning milestone:** **v1.10** — Phases **43–45** (2026-04-22): metering happy path + Fake determinism (**43**), failures + reconciler + webhook (**44**), docs + telemetry/runbook alignment (**45**); archives `.planning/milestones/v1.10-*`; planning git tag **`v1.10`**. Prior: **v1.9** — Phases **40–42**; archives `.planning/milestones/v1.9-*`; tag **`v1.9`**.
 
-**Now:** Root `.planning/REQUIREMENTS.md` is removed until **`/gsd-new-milestone`** recreates it. **Public Hex** packages remain **`accrue` 0.1.2** / **`accrue_admin` 0.1.2** until maintainers cut a release from this metering work (`RELEASING.md`, Release Please).
+**Now:** **v1.11** active — root **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** (Phases **46–47**) define release + continuity scope. After Hex is live, use **`/gsd-discuss-phase 48`** or a fresh **`/gsd-new-milestone`** slice for the next implementation theme.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -367,6 +376,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.8 delivers ORG-04 after Sigra-first org proof | Non-Sigra teams need first-class recipes and proof that **ORG-03** boundaries hold; scope stays docs + host patterns + VERIFY alignment—no PROC-08/FIN-03 | ✓ Good |
 | v1.9 prioritizes observability + runbooks before meter milestone | Post–v1.8 plan: telemetry discoverability and ops runbooks maximize adoption ROI; metered billing (v1.10+) follows with Fake parity | ✓ Good |
 | v1.10 delivers metered usage with Fake parity before second processor | Usage reporting, outbox, reconciler, and webhook error paths must be **host-testable** on Fake with stable telemetry keys; PROC-08 stays out of scope | ✓ Good |
+| v1.11 ships Hex before the next feature milestone | Evaluators and hosts need published packages that include metering + accumulated work; release automation and doc verifiers must stay aligned with linked-versions monorepo reality | ✓ Good |
 
 ## Current Milestone Notes
 
@@ -391,6 +401,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - Phase **45** closed **2026-04-22**: docs + telemetry/runbook alignment (**MTR-07**, **MTR-08**) — metering guide, telemetry semantics anchor, runbook branches, optional testing/README cross-links.
 - **2026-04-22:** `.planning/REQUIREMENTS.md` **MTR-01..MTR-06** checkboxes + traceability table aligned to **Phase 43** / **44** passed verification (was still “Pending” after Phase 45 close).
 - **2026-04-22:** **v1.10** milestone archived (`milestones/v1.10-*`); root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.10`**.
+- **2026-04-22:** **v1.11** opened — **Hex release + post-release continuity**; Phases **46–47**; requirements **REL-01..REL-04**, **DOC-01..DOC-02**, **HYG-01**.
 
 ## Evolution
 
@@ -410,4 +421,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 after **v1.10** milestone archival — archives under `.planning/milestones/v1.10-*`; fresh requirements await `/gsd-new-milestone`.*
+*Last updated: 2026-04-22 — **v1.11** (Hex release + continuity) opened after **v1.10** archival.*
