@@ -56,6 +56,7 @@ Then walk the public host story in this order:
    `AccrueHost.Billing`.
 2. Post one signed webhook through the real `/webhooks/stripe` endpoint. The
    focused proof suite uses `customer.subscription.created` for this step.
+   If ingest fails, see [`../../accrue/guides/troubleshooting.md`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-raw-body) (**`ACCRUE-DX-WEBHOOK-RAW-BODY`**) and [`../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing) (**`ACCRUE-DX-WEBHOOK-SECRET-MISSING`**) for stable fix paths — VERIFY-01 authority stays under [**#proof-and-verification**](#proof-and-verification).
 3. Visit `/billing` as a billing admin and confirm the mounted admin UI shows
    the billing state, webhook ingest, and replay visibility.
 4. Run the focused proof suite after you have walked the story yourself:
