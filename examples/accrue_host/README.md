@@ -22,6 +22,23 @@ CI and fresh clones work. To compile against a sibling checkout instead, set
 `ACCRUE_SIGRA_PATH=../../../sigra` (relative to this directory) before
 `mix deps.get`.
 
+## How to enter this example
+
+This README is the **host-facing** telling of the same ordered spine as
+[`../../accrue/guides/first_hour.md`](../../accrue/guides/first_hour.md) (deps → install/setup → runtime → migrations → Oban → webhooks → admin → proof). Pick a capsule, then follow **§ First run** below.
+
+### Capsule H — Hex consumer
+
+Integrate Accrue into your **own** Phoenix app: follow package steps in **First Hour** (`mix accrue.install`, `config/runtime.exs`, migrations, Oban, webhook pipeline, admin mount), then use this demo only for proof vocabulary if needed.
+
+### Capsule M — Monorepo clone
+
+You are in the Accrue repo: stay in **`examples/accrue_host`**, run **`mix setup`** and **`mix phx.server`**, then walk the numbered story (subscription → signed `/webhooks/stripe` → `/billing` → `mix verify`) — the canonical Fake-backed loop.
+
+### Capsule R — Evaluate / read-only
+
+Clone once, `cd examples/accrue_host`, run **`mix verify`** or **`mix verify.full`**. For VERIFY-01 / Playwright depth, jump to [**#proof-and-verification**](#proof-and-verification) when the bounded commands are not enough.
+
 ## First run
 
 From the repository root:
