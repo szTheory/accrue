@@ -2,14 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Public Hex release + post-release continuity
-status: planning
-last_updated: "2026-04-22T16:00:00.000Z"
-last_activity: 2026-04-22 — `/gsd-discuss-phase 46` (context + discussion log; subagent research synthesis).
+status: ready_to_execute
+last_updated: "2026-04-22T12:00:00.000Z"
+last_activity: 2026-04-22 — `/gsd-plan-phase 46` (research, validation, 3 plans).
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -24,13 +25,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 ## Current Position
 
-Phase: **46** — Release train & Hex publish (not started)
+Phase: **46** — Release train & Hex publish (planned)
 
-Plan: **—**
+Plan: **01–03** (3)
 
-**Status:** Phase **46** context captured — ready for `/gsd-plan-phase 46`.
+**Status:** Ready to execute — plans authored and verified in-repo.
 
-**Last Activity:** 2026-04-22 — `/gsd-discuss-phase 46` (release train policy locked in `46-CONTEXT.md`).
+**Last Activity:** 2026-04-22 — `/gsd-plan-phase 46` (research, validation, 3 executable plans).
 
 ## Milestone Progress
 
@@ -59,4 +60,4 @@ Plan: **—**
 - **v1.11:** Scope = **Hex publish** + **post-release continuity** (docs, verifiers, planning version callouts); **PROC-08** / **FIN-03** remain deferred.
 - **`phases.clear` not run** — preserves **v1.9–v1.10** phase directories under `.planning/phases/`; next build phases continue at **46**.
 
-**Next:** `/gsd-plan-phase 46` — release train (research may reference `46-CONTEXT.md` + canonical refs).
+**Next:** `/gsd-execute-phase 46` — run plans **01–03** (human-gate workflow, manifest SSOT CI, verification template).
