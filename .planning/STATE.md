@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Org billing recipes & host integration depth
-status: completed
-last_updated: "2026-04-22T00:36:34.886Z"
-last_activity: 2026-04-22 — Phase 38 execution + verification (`38-VERIFICATION.md`)
+status: milestone_complete
+last_updated: "2026-04-22T00:54:19.583Z"
+last_activity: 2026-04-22
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 0
   completed_plans: 0
 ---
@@ -20,17 +20,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.8** — ORG-04 non-Sigra org billing recipes; **phase 39** next (proof alignment / ORG-09).
+**Current focus:** Phase --phase — 39
 
 ## Current Position
 
-Phase: **39** — next in v1.8 (org billing proof alignment)
+Phase: 39
 
-Plan: —
+Plan: Not started
 
-**Status:** Phase **38** complete — Pow ORG-07 + custom org ORG-08 docs and contract tests shipped.
+**Status:** Milestone complete
 
-**Last Activity:** 2026-04-22 — Phase 38 execution + verification (`38-VERIFICATION.md`)
+**Last Activity:** 2026-04-22
 
 ## Milestone Progress
 
@@ -64,4 +64,4 @@ Plan: —
 
 **Last completed phase (v1.8):** **38** — 2026-04-22 (2/2 plans). **Prior:** 37 — 2026-04-21 (3/3 plans). **Prior milestone capstone:** 36 — 2026-04-21.
 
-**Planned Phase:** 39 (Org billing proof alignment) — ORG-09.
+**Planned Phase:** 39 (Org billing proof alignment) — 3 plans — 2026-04-22T00:48:23.106Z

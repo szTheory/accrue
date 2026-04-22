@@ -24,7 +24,7 @@
 |---|-------|------|----------------|
 | 37 | Org billing recipes — doc spine + phx.gen.auth | Publish the non-Sigra “session → billable” spine; complete phx.gen.auth-oriented recipe with links from existing auth/Sigra guides. | ORG-05, ORG-06 |
 | 38 | Org billing recipes — Pow + custom org boundaries | Pow-oriented recipe; custom org model checklist + ORG-03 anti-patterns. | ORG-07, ORG-08 |
-| 39 | Org billing proof alignment | Extend adoption proof matrix and/or VERIFY-01 README contract for ≥1 non-Sigra org archetype; name owning verifier/script; preserve merge-blocking vs advisory policy. | ORG-09 |
+| 39 | 3/3 | Complete    | 2026-04-22 |
 
 **Phase 37 — Org billing recipes — doc spine + phx.gen.auth**
 
