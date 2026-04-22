@@ -1,14 +1,14 @@
-# Queues GitHub auto-merge (merge commit) for Release Please PRs so maintainers
-# do not need to click merge manually after CI goes green.
+# Queues GitHub auto-merge (merge commit) for a release PR **after** explicit maintainer intent.
 #
-# Triggers:
-#   - pull_request on main from same-repo heads named release-please--*
-#   - workflow_dispatch with a PR number (any PR you want merged when green)
+# Billing-adjacent releases require a **human merge** or this **workflow_dispatch** step:
+# a maintainer reviews the Release Please PR, signs the checklist, then runs this workflow
+# with the PR number so `gh pr merge --merge --auto` runs only when they choose.
+#
+# Optional: use `scripts/ci/gh_merge_release_pr.sh` to discover the open Release Please PR number.
 #
 # Repo settings that must be enabled for this to take effect:
 #   - Settings → General → Allow auto-merge
-#   - Branch rules must not require human review (or use a bot/PAT that can approve),
-#     otherwise auto-merge stays blocked until review.
+#   - Branch rules must not block auto-merge indefinitely (or merge manually instead).
 name: Release PR automation
 
 on:
@@ -18,42 +18,26 @@ on:
         description: 'PR number to queue for merge when green (merge commit)'
         required: true
         type: string
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
-    branches: [main]
 
 permissions:
   contents: write
   pull-requests: write
 
 concurrency:
-  group: release-pr-automation-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  group: release-pr-automation-${{ github.event.inputs.pr_number }}
   cancel-in-progress: false
 
 jobs:
   queue-merge-when-green:
     name: Queue merge when checks pass
     runs-on: ubuntu-24.04
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (
-        github.event_name == 'pull_request' &&
-        github.event.pull_request.draft == false &&
-        github.event.pull_request.head.repo.full_name == github.repository &&
-        startsWith(github.head_ref, 'release-please--')
-      )
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Resolve PR number
         id: pr
-        env:
-          DISPATCH_PR: ${{ github.event.inputs.pr_number }}
         run: |
           set -euo pipefail
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "number=${DISPATCH_PR}" >> "$GITHUB_OUTPUT"
-          else
-            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-          fi
+          echo "number=${{ github.event.inputs.pr_number }}" >> "$GITHUB_OUTPUT"
 
       - name: Enable auto-merge (merge commit)
         env:
