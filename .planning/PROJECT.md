@@ -12,7 +12,14 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**Next: v1.10+** — planning not opened in-repo. Spike input: `.planning/research/v1.10-METERING-SPIKE.md`. Run `/gsd-new-milestone` to author fresh **REQUIREMENTS.md** + roadmap slice.
+**v1.10 — Metered usage + Fake parity** — **Phases 43–45** (opened **2026-04-21**).
+
+**Goal:** Ship **usage metering** so hosts can prove **Stripe + Fake** behavior in CI: happy-path `report_usage`, **deterministic** test surfaces, **sync failure** + **idempotent retry** telemetry guarantees, **reconciler** recovery for stuck `pending` rows, **webhook** meter error handling, and **docs/telemetry** that separate **public** `Accrue.Billing` APIs from persistence/processor internals (see `.planning/research/v1.10-METERING-SPIKE.md`).
+
+**Target features:**
+
+- ExUnit (and optional host) acceptance for **MTR-01..MTR-06** aligned to the spike’s four Fake scenarios.
+- **MTR-07..MTR-08** — guides + `telemetry.md` / runbook alignment for `meter_reporting_failed` sources (`:sync`, `:reconciler`, `:webhook`).
 
 **v1.9 — Observability & operator runbooks** is **archived** (2026-04-22). Archives: `.planning/milestones/v1.9-ROADMAP.md`, `v1.9-REQUIREMENTS.md`. Gap audit (research): `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. Git tag **`v1.9`**.
 
@@ -20,7 +27,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ### Non-goals (this milestone)
 
-**PROC-08** (second processor) and **FIN-03** (app-owned finance exports) remain **explicitly out of scope** until a later milestone prioritizes them with written boundaries.
+**PROC-08** (second processor) and **FIN-03** (app-owned finance exports) remain **explicitly out of scope** until a later milestone prioritizes them with written boundaries. **Stripe Dashboard** meter setup UX is host/Stripe documentation, not Accrue UI scope for v1.10 unless a requirement explicitly pulls it in.
 
 ## Current State
 
@@ -28,7 +35,7 @@ Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue
 
 **Last shipped planning milestone:** **v1.9** — Phases **40–42** (2026-04-22): telemetry catalog + guide truth (**40**), host metrics parity + cross-domain example (**41**), operator runbooks (**42**, **RUN-01**); archives `.planning/milestones/v1.9-*`; tag **`v1.9`**. Prior: **v1.8** — Phases **37–39**; archives `.planning/milestones/v1.8-*`; tag **`v1.8`**.
 
-**Now:** Open **v1.10+** via `/gsd-new-milestone` when ready (metering spike: `.planning/research/v1.10-METERING-SPIKE.md`). Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Now:** Execute **v1.10** — `.planning/REQUIREMENTS.md` (**MTR-01..MTR-08**), `.planning/ROADMAP.md` (Phases **43–45**), spike `.planning/research/v1.10-METERING-SPIKE.md`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -356,6 +363,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.7 combines adoption/DX with operator admin depth without billing primitive expansion | After v1.6 polish, the highest leverage is clearer VERIFY-01 + install/docs matrices plus intentional admin entry flows—not PROC/FIN/ORG scope creep | ✓ Good |
 | v1.8 delivers ORG-04 after Sigra-first org proof | Non-Sigra teams need first-class recipes and proof that **ORG-03** boundaries hold; scope stays docs + host patterns + VERIFY alignment—no PROC-08/FIN-03 | ✓ Good |
 | v1.9 prioritizes observability + runbooks before meter milestone | Post–v1.8 plan: telemetry discoverability and ops runbooks maximize adoption ROI; metered billing (v1.10+) follows with Fake parity | ✓ Good |
+| v1.10 delivers metered usage with Fake parity before second processor | Usage reporting, outbox, reconciler, and webhook error paths must be **host-testable** on Fake with stable telemetry keys; PROC-08 stays out of scope | — Pending |
 
 ## Current Milestone Notes
 
@@ -376,6 +384,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - v1.8 closed 2026-04-22: Phases **37–39** complete; **ORG-05..ORG-09** validated; adoption matrix + `verify_adoption_proof_matrix.sh` + `scripts/ci/README.md` ORG gates shipped; milestone archived under `.planning/milestones/v1.8-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.8`**.
 - v1.9 opened 2026-04-21: **Observability & operator runbooks** after post–v1.8 prioritization; phases **40–42**; **PROC-08** / **FIN-03** unchanged as non-goals.
 - v1.9 archived 2026-04-22: Phases **40–42** complete; **OBS/RUN/TEL** requirements validated; `.planning/milestones/v1.9-*`; root `REQUIREMENTS.md` removed for next milestone; git tag **`v1.9`**.
+- v1.10 opened 2026-04-21: **Metered usage + Fake parity**; phases **43–45**; requirements **MTR-01..MTR-08**; `phases.clear` skipped to preserve **40–42** phase trees.
 
 ## Evolution
 
@@ -395,4 +404,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after **`/gsd-complete-milestone`**: **v1.9** archived (`milestones/v1.9-*`), `REQUIREMENTS.md` removed for next cycle; roadmap collapsed; tag **`v1.9`**.*
+*Last updated: 2026-04-21 after **`/gsd-new-milestone`**: **v1.10** opened (Phases **43–45**, **MTR-01..MTR-08**); `REQUIREMENTS.md` + `ROADMAP.md` + `STATE.md` initialized.*

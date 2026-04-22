@@ -12,12 +12,54 @@
 - ✅ **v1.7 Adoption DX + operator admin depth** — Phases **32–36** shipped **2026-04-21**. VERIFY-01 + doc graph, installer and CI clarity, operator home/drill/nav, dashboard `AccrueAdmin.Copy` SSOT, audit corpus + verifier ownership map. Archives: [`milestones/v1.7-ROADMAP.md`](milestones/v1.7-ROADMAP.md), [`milestones/v1.7-REQUIREMENTS.md`](milestones/v1.7-REQUIREMENTS.md), [`milestones/v1.7-MILESTONE-AUDIT.md`](milestones/v1.7-MILESTONE-AUDIT.md).
 - ✅ **v1.8 Org billing recipes & host integration depth** — Phases **37–39** shipped **2026-04-22**. Delivers deferred **ORG-04**. Archives: [`milestones/v1.8-ROADMAP.md`](milestones/v1.8-ROADMAP.md), [`milestones/v1.8-REQUIREMENTS.md`](milestones/v1.8-REQUIREMENTS.md).
 - ✅ **v1.9 Observability & operator runbooks** — Phases **40–42** shipped **2026-04-22**. Full archive: [`milestones/v1.9-ROADMAP.md`](milestones/v1.9-ROADMAP.md), [`milestones/v1.9-REQUIREMENTS.md`](milestones/v1.9-REQUIREMENTS.md). Gap audit (research): [`research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md).
+- 🚧 **v1.10 Metered usage + Fake parity** — Phases **43–45** (in progress). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md). Spike: [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
 ## Phases
 
-### Next milestone (planning)
+### v1.10 Metered usage + Fake parity (Phases 43–45)
 
-Metered billing / usage metering spike: [`.planning/research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md). Run `/gsd-new-milestone` when ready to open **v1.10+** requirements and roadmap.
+**Milestone goal:** Prove **usage metering** end-to-end on **Fake** (and Stripe where already present) with **deterministic tests** for happy path, **sync** failures + idempotent retry telemetry, **reconciler** recovery for stuck `pending` rows, **webhook** meter error reports, and **docs/telemetry** alignment — without **PROC-08** or Stripe Dashboard meter UX ownership.
+
+**Depends on:** v1.9 telemetry catalog + runbooks; spike `.planning/research/v1.10-METERING-SPIKE.md`.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 43 | Meter usage happy path + Fake determinism | Host-callable `report_usage` path, schema/outbox semantics, Fake happy-path acceptance + `meter_events_for`-style assertions (**MTR-01..MTR-03**). | MTR-01, MTR-02, MTR-03 |
+| 44 | Meter failures, idempotency, reconciler + webhook | Sync `{:error, _}` + single `meter_reporting_failed`; reconciler pending recovery; webhook error trigger path + telemetry sources (**MTR-04..MTR-06**). | MTR-04, MTR-05, MTR-06 |
+| 45 | Docs + telemetry/runbook alignment | Public vs internal vs processor contracts in guides; `telemetry.md` / operator runbooks for meter ops (**MTR-07..MTR-08**). | MTR-07, MTR-08 |
+
+**Success criteria (milestone):**
+
+1. ExUnit (minimum) covers the spike’s **happy path**, **sync failure + idempotent retry**, **reconciler**, and **webhook** scenarios with stable telemetry keys/attrs.
+2. `Accrue.Billing.report_usage` remains the **documented public** host entry point; tests do not depend on private modules for ordinary assertions.
+3. `guides/telemetry.md` remains internally consistent for `meter_reporting_failed` (and related) rows across **sync / reconciler / webhook** sources.
+
+**Phase 43 — Meter usage happy path + Fake determinism**
+
+**Goal:** Lock the public reporting API + persistence + Fake success story before failure-mode work expands surface area.
+
+**Success criteria:**
+
+1. **MTR-01..MTR-03** satisfied with committed tests and docs pointers to NimbleOptions and Fake helpers.
+2. No new **PROC-08** processor work; Stripe path may be documented as host-configured but Fake proves CI.
+
+**Phase 44 — Meter failures, idempotency, reconciler + webhook**
+
+**Goal:** Revenue-adjacent failure paths are **observable once**, **recoverable**, and **webhook-consistent** with existing `DefaultHandler` wiring.
+
+**Success criteria:**
+
+1. **MTR-04..MTR-06** satisfied with tests aligned to spike acceptance bullets.
+2. Telemetry events match catalog metadata columns in `guides/telemetry.md` (update if intentionally extended).
+
+**Phase 45 — Docs + telemetry/runbook alignment**
+
+**Goal:** Operators and hosts can navigate metering failures using the same doc stack shipped in v1.9.
+
+**Success criteria:**
+
+1. **MTR-07..MTR-08** satisfied: guide boundary clarity + telemetry/runbook cross-links.
+2. Cross-links from `guides/testing.md` or quickstart only if they reduce evaluator confusion (optional stretch inside phase close).
 
 <details>
 <summary>✅ v1.9 Observability & operator runbooks (Phases 40–42) — SHIPPED 2026-04-22</summary>
@@ -223,6 +265,14 @@ Metered billing / usage metering spike: [`.planning/research/v1.10-METERING-SPIK
 | 40. Telemetry catalog + guide truth | v1.9 | 3/3 | Complete | 2026-04-22 |
 | 41. Host metrics wiring + cross-domain example | v1.9 | 3/3 | Complete | 2026-04-22 |
 | 42. Operator runbooks | v1.9 | 2/2 | Complete | 2026-04-22 |
+
+**v1.10 (in progress)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 43. Meter usage happy path + Fake determinism | v1.10 | — | Not started | — |
+| 44. Meter failures, idempotency, reconciler + webhook | v1.10 | — | Not started | — |
+| 45. Docs + telemetry/runbook alignment | v1.10 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
