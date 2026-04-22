@@ -18,3 +18,12 @@ Mounted-path inventory for VERIFY-01 expansion lives at **`examples/accrue_host/
 - [ ] **`npm run e2e`** (VERIFY-01) green for **chromium** desktop project used in CI.
 
 *Linked from **50-CONTEXT.md** **D-11**.*
+
+## Anti-drift (ADM-04 + ADM-06)
+
+**D-23:** `mix accrue_admin.export_copy_strings` is merge-blocking via
+`scripts/ci/accrue_host_verify_browser.sh` (runs before `npm run e2e` and writes
+`examples/accrue_host/e2e/generated/copy_strings.json`). VERIFY-01 Playwright
+specs must load that JSON (`require` / `readFileSync` from `e2e/generated/`) for
+at least one assertion so operator strings cannot drift silently away from
+`AccrueAdmin.Copy`.
