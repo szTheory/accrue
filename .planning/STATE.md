@@ -2,51 +2,50 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: Observability & operator runbooks
-status: Phase **41** shipped (**TEL-01**, **OBS-02**, D-18 REQUIREMENTS). Milestone **v1.9** continues through Phase **42**.
+status: Milestone **v1.9** shipped (**2026-04-22**). Phases **40–42** complete (**RUN-01**).
 last_updated: "2026-04-22T12:00:00.000Z"
-last_activity: 2026-04-22 — `/gsd-discuss-phase 42` completed; see `42-CONTEXT.md`.
+last_activity: 2026-04-22 — Phase **42** operator runbooks (`operator-runbooks.md` + `telemetry.md` links); milestone v1.9 closed.
 progress:
-  total_phases: 1
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 2
+  completed_plans: 2
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-21)
+See: `.planning/PROJECT.md` (updated 2026-04-22)
 
-**Core value:** A Phoenix developer can install Accrue + accrue_admin and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit and zero breaking-change pain through v1.x.
+**Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.9** — Phase **42** (operator runbooks / RUN-01) next.
+**Current focus:** **v1.9 shipped** — next planning cycle is open (metering spike: `.planning/research/v1.10-METERING-SPIKE.md`).
 
 ## Current Position
 
-Phase: **42** — Operator runbooks
+Phase: **42** — Operator runbooks (**complete**)
 
 Plan: —
 
-**Status:** Phase **41** shipped (**TEL-01**, **OBS-02**, D-18 REQUIREMENTS). Milestone **v1.9** continues through Phase **42**.
+**Status:** Milestone **v1.9** complete (telemetry catalog, metrics parity, cross-domain example, operator runbooks).
 
-**Last Activity:** 2026-04-22 — `/gsd-discuss-phase 42` completed; see `42-CONTEXT.md`.
+**Last Activity:** 2026-04-22 — `/gsd-execute-phase 42`; guides `accrue/guides/operator-runbooks.md` + `accrue/guides/telemetry.md` updates.
 
 ## Milestone Progress
 
-**Active:** **v1.9** — Observability & operator runbooks — **Phases 40–42** (see `.planning/ROADMAP.md`).
+**Shipped:** **v1.9** — Observability & operator runbooks — **Phases 40–42** (see `.planning/ROADMAP.md`).
 
-**Last shipped:** **v1.8** Org billing recipes & host integration depth — **ARCHIVED** (2026-04-22). Phases **37–39**; archives `.planning/milestones/v1.8-*`.
+**Last shipped:** **v1.9** (2026-04-22), following **v1.8** (2026-04-22).
 
 ## Current Planning Artifacts
 
-- `.planning/phases/42-operator-runbooks/42-CONTEXT.md` — **Phase 42** implementation decisions (**RUN-01**)
-- `.planning/phases/41-host-metrics-wiring-cross-domain-example/41-VERIFICATION.md` — **Phase 41** verification (**passed**)
-- `.planning/PROJECT.md` — **v1.9** current milestone
-- `.planning/REQUIREMENTS.md` — v1.9 REQ-IDs + traceability
-- `.planning/ROADMAP.md` — Phases **40–42**
-- `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md` — ops / metrics gap inventory (**§1 superseded** — see guide catalog)
-- `.planning/research/v1.10-METERING-SPIKE.md` — public API + Fake parity outline for next milestone
+- `.planning/phases/42-operator-runbooks/42-VERIFICATION.md` — **Phase 42** verification (**passed**)
+- `.planning/phases/42-operator-runbooks/42-01-SUMMARY.md`, `42-02-SUMMARY.md` — execution summaries
+- `.planning/PROJECT.md` — milestone narrative (post–v1.9 handoff)
+- `.planning/REQUIREMENTS.md` — v1.9 requirements (all **Complete**)
+- `.planning/ROADMAP.md` — v1.9 milestone marked shipped
+- `.planning/research/v1.10-METERING-SPIKE.md` — follow-on milestone outline
 
 ## Deferred Items
 
@@ -58,8 +57,8 @@ Plan: —
 
 ## Recent Decisions
 
-- **Phase 41:** ExUnit **`defaults/0` ↔ ops catalog parity** (shared allowlist with `OpsEventContractTest`); **guide + `accrue_host`** for OBS-02; **ops-first** attach example with optional bounded billing snippet; **`++ Accrue.Telemetry.Metrics.defaults()`** in example host; reconcile **REQUIREMENTS.md** TEL-01 checkbox vs table on phase close.
-- **v1.9** follows post–v1.8 prioritization: **telemetry catalog**, **metrics parity**, **cross-domain examples**, **operator runbooks** before a dedicated **metered billing** milestone (**v1.10+** spike on file).
-- **PROC-08** and **FIN-03** remain **explicit non-goals** for v1.9 (see `REQUIREMENTS.md` Out of scope).
+- **Phase 42:** **`accrue/guides/operator-runbooks.md`** — Oban default queue topology, Stripe two-layer verification, four D-09 mini-playbooks; **`telemetry.md`** preface + `#oban-queue-topology` hybrid row links (**RUN-01**).
+- **v1.9** milestone closed with catalog (**40**), metrics parity + host example (**41**), operator procedures (**42**).
+- **PROC-08** and **FIN-03** remain **explicit non-goals** until a later milestone (see `REQUIREMENTS.md`).
 
-**Next:** `/gsd-plan-phase 42` — operator runbooks (**RUN-01**); context in `42-CONTEXT.md`.
+**Next:** Open **v1.10+** milestone planning when ready (`/gsd-new-milestone` or equivalent); metering spike on file at `.planning/research/v1.10-METERING-SPIKE.md`.

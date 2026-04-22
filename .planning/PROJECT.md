@@ -12,15 +12,15 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.9 — Observability & operator runbooks** (active planning; execution **Phases 40–42**).
+**v1.9 — Observability & operator runbooks** — **shipped 2026-04-22** (Phases **40–42**).
 
-**Goal:** Make Accrue’s telemetry and ops signals **discoverable and actionable** for production Phoenix hosts: an authoritative **event catalog**, **metrics wiring** aligned with `Accrue.Telemetry.Metrics.defaults/0`, **cross-domain subscription** examples, and **operator runbooks** (alert mapping, DLQ / meter / dunning / revenue-adjacent guidance) without rebuilding Stripe Dashboard semantics.
+**Goal (achieved):** Accrue’s telemetry and ops signals are **discoverable and actionable** for production Phoenix hosts: authoritative **event catalog**, **metrics wiring** aligned with `Accrue.Telemetry.Metrics.defaults/0`, **cross-domain subscription** example, and **operator runbooks** (`guides/telemetry.md` + linked `guides/operator-runbooks.md`) without rebuilding Stripe Dashboard semantics.
 
-**Target features:**
+**Delivered:**
 
 - Single-guide **catalog** of `[:accrue, :ops, :*]` (and firehose pointers) with measurements, metadata, and PII rules
 - **Host recipes** for `Telemetry.Metrics` + parity (or documented omissions) vs emitted ops signals
-- **Runbook** anchors for on-call responses tied to Accrue ops events
+- **Runbook** anchors for on-call responses tied to Accrue ops events (compact table + deep procedural guide)
 
 **v1.7 Adoption DX + operator admin depth** is **archived** (2026-04-21). Archives: `.planning/milestones/v1.7-ROADMAP.md`, `v1.7-REQUIREMENTS.md`, `v1.7-MILESTONE-AUDIT.md` (**passed**). Git tag **`v1.7`**.
 
@@ -32,9 +32,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 Public Hex packages (unchanged at milestone open): **`accrue` 0.1.2**, **`accrue_admin` 0.1.2**.
 
-**Last shipped planning milestone:** **v1.8** — Phases **37–39** (2026-04-22), **ORG-04** + **ORG-09** (archives: `.planning/milestones/v1.8-*`; tag **`v1.8`**).
+**Last shipped planning milestone:** **v1.9** — Phases **40–42** (2026-04-22): telemetry catalog + guide truth (**40**), host metrics parity + cross-domain example (**41**), operator runbooks guide + telemetry deep links (**42**, **RUN-01**). Prior: **v1.8** — Phases **37–39** (**ORG-04** + **ORG-09**); archives `.planning/milestones/v1.8-*`; tag **`v1.8`**.
 
-**Now:** `.planning/REQUIREMENTS.md` + **Phases 40–42** in `.planning/ROADMAP.md` define **v1.9**. **Phase 41** (2026-04-22) shipped shared ops inventory + `MetricsOpsParityTest` (**TEL-01**), cross-domain guide + `examples/accrue_host` wiring (**OBS-02**), and traceability cleanup in `REQUIREMENTS.md`. **Phase 42** (**RUN-01** runbooks) remains. Gap audit: `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. Metering spike for follow-on: `.planning/research/v1.10-METERING-SPIKE.md`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
+**Now:** Await **v1.10+** milestone planning (metering spike: `.planning/research/v1.10-METERING-SPIKE.md`). Gap audit (historical): `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md`. Read-only baseline: `.planning/ADMIN-UX-BASELINE-AUDIT.md`.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -163,6 +163,12 @@ Theme: **ORG-04** — non-Sigra org billing recipes, host integration depth, VER
 - [x] **ORG-07** — Pow-oriented recipe + honest maintenance notes. **Validated in Phase 38.**
 - [x] **ORG-08** — Custom org model checklist + ORG-03 anti-patterns. **Validated in Phase 38.**
 - [x] **ORG-09** — Adoption proof matrix ORG-09 section, merge-blocking bash verifier, contributor map, guide cross-links + ExUnit. **Validated in Phase 39.**
+
+### Validated v1.9 (milestone shipped 2026-04-22)
+
+- [x] **OBS-01, OBS-03, OBS-04** — `guides/telemetry.md` ops catalog + firehose split + gap audit reconciliation. **Validated in Phase 40.**
+- [x] **OBS-02, TEL-01** — `MetricsOpsParityTest`, cross-domain host subscription example in guide + `examples/accrue_host`. **Validated in Phase 41.**
+- [x] **RUN-01** — `guides/operator-runbooks.md` (Oban topology, Stripe verification pattern, four mini-playbooks) linked from `guides/telemetry.md`. **Validated in Phase 42.**
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
@@ -394,4 +400,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 after **Phase 41** execution (TEL-01 + OBS-02 + REQUIREMENTS D-18).*
+*Last updated: 2026-04-22 after **Phase 42** execution (RUN-01 operator runbooks + telemetry links); **v1.9** milestone shipped.*
