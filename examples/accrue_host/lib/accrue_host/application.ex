@@ -9,6 +9,7 @@ defmodule AccrueHost.Application do
   def start(_type, _args) do
     children = [
       AccrueHostWeb.Telemetry,
+      {AccrueHost.AccrueOpsTelemetry, []},
       AccrueHost.Repo,
       {Oban, Application.fetch_env!(:accrue_host, Oban)},
       {DNSCluster, query: Application.get_env(:accrue_host, :dns_cluster_query) || :ignore},
