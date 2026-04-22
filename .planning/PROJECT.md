@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**No active implementation milestone** — **v1.12** planning line is **archived** (2026-04-22). Open the next slice with **`/gsd-new-milestone`** when priorities are set.
+**v1.13 — Integrator path + secondary admin parity** (opened **2026-04-22**). Phases **51–53**; requirements **INT-01..INT-05**, **AUX-01..AUX-06** in **`.planning/REQUIREMENTS.md`**. **Goal:** tighten the **first-time integrator golden path** (docs, proof matrix, package-doc verifiers) and promote **auxiliary admin** LiveViews (**coupons**, **promotion codes**, **Connect accounts**, **events**) to the same **`AccrueAdmin.Copy`**, **`ax-*`**, and **VERIFY-01** bar as the money spine—**without** **PROC-08** / **FIN-03** or new third-party UI kits.
 
 **v1.12 — Admin & operator UX** is **archived** (2026-04-22). Phases **48–50**; **ADM-01..ADM-06** validated. Archives: `.planning/milestones/v1.12-ROADMAP.md`, `v1.12-REQUIREMENTS.md`. Planning git tag **`v1.12`**.
 
@@ -34,7 +34,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.12** — Phases **48–50** (2026-04-22): post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 gates on touched routes (**ADM-01..ADM-06**); archives `.planning/milestones/v1.12-*`; planning git tag **`v1.12`**. Prior: **v1.11** — Phases **46–47**; archives `.planning/milestones/v1.11-*`; tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**.
 
-**Now:** Fresh **`.planning/REQUIREMENTS.md`** after this close — use **`/gsd-new-milestone`** to define **v1.13+** scope when ready.
+**Now:** Active **v1.13** — roadmap **51–53**, requirements **`INT-*` / `AUX-*`**; next step **`/gsd-discuss-phase 51`** or **`/gsd-plan-phase 51`**. **`phases.clear`** not run when opening **v1.13** (preserve **1–50** phase trees under **`.planning/phases/`**).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -392,6 +392,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.10 delivers metered usage with Fake parity before second processor | Usage reporting, outbox, reconciler, and webhook error paths must be **host-testable** on Fake with stable telemetry keys; PROC-08 stays out of scope | ✓ Good |
 | v1.11 ships Hex before the next feature milestone | Evaluators and hosts need published packages that include metering + accumulated work; release automation and doc verifiers must stay aligned with linked-versions monorepo reality | ✓ Good |
 | v1.12 extends companion admin without billing-primitive expansion | Operators need post-metering admin clarity and smoother drills on Hex **0.3.0**; scope stays presentation + gates—not **PROC-08** / **FIN-03** | ✓ Good |
+| v1.13 pairs integrator golden-path docs with auxiliary admin parity | First-time hosts still judge the library on README ↔ first_hour ↔ VERIFY-01 coherence; secondary LiveViews must not feel “unshipped” next to customers/subscriptions/invoices | — Pending |
 
 ## Current Milestone Notes
 
@@ -421,6 +422,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-22:** **v1.12** opened — **Admin & operator UX**; Phases **48–50**; requirements **ADM-01..ADM-06**; **`phases.clear`** skipped (preserve **40–47** phase trees).
 - **2026-04-22:** **v1.12** closed — Phases **48–50** complete; **ADM-01..ADM-06** validated; VERIFY-01 copy export + subscriptions axe coverage shipped in **Phase 50**.
 - **2026-04-22:** **v1.12** milestone archived (`milestones/v1.12-*`); root **`.planning/REQUIREMENTS.md`** removed for next milestone; planning git tag **`v1.12`**.
+- **2026-04-22:** **v1.13** opened — **Integrator path + secondary admin parity**; Phases **51–53**; requirements **INT-01..INT-05**, **AUX-01..AUX-06**; **`phases.clear`** skipped (preserve **1–50** phase trees).
 
 ## Evolution
 
@@ -440,4 +442,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — **v1.12** milestone archived (Phases **48–50**; **ADM-01..ADM-06**); root **`.planning/REQUIREMENTS.md`** removed pending **`/gsd-new-milestone`**.*
+*Last updated: 2026-04-22 — **`/gsd-new-milestone`**: opened **v1.13** (Phases **51–53**; **INT-** + **AUX-** requirements; integrator docs + auxiliary admin parity).*

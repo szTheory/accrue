@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
+milestone: v1.13
+milestone_name: Integrator path + secondary admin parity
+status: roadmap_ready
 last_updated: "2026-04-22T23:59:00.000Z"
 last_activity: 2026-04-22
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,30 +20,32 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **Between milestones** — **v1.12** archived 2026-04-22; define **v1.13+** with **`/gsd-new-milestone`** when ready.
+**Current focus:** Milestone **v1.13** — **Integrator path + secondary admin parity** (Phases **51–53**).
 
 ## Current Position
 
-Phase: **—** (no active phase)
+Phase: **51** — Integrator golden path & docs (not started)
 
 Plan: **—**
 
-**Status:** Milestone **v1.12** archived — Phases **48–50**; fresh requirements pending **`/gsd-new-milestone`**.
+**Status:** Roadmap defined — run **`/gsd-discuss-phase 51`** or **`/gsd-plan-phase 51`**.
 
-**Last Activity:** 2026-04-22 — Phase **50** executed (`50-01` / `50-02` / `50-03` plans, verification, review).
+**Last activity:** 2026-04-22 — Milestone **v1.13** initialized (requirements + roadmap).
 
 ## Milestone Progress
 
-**Shipped:** **v1.12** — Admin & operator UX — Phases **48–50** (see `.planning/ROADMAP.md`).
+**Active:** **v1.13** — Integrator path + secondary admin parity — Phases **51–53** (see `.planning/ROADMAP.md`).
+
+**Last shipped (planning):** **v1.12** — Admin & operator UX — Phases **48–50**.
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (lockstep; see **`accrue/mix.exs`** **`@version`**).
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **absent** until **`/gsd-new-milestone`** creates the next file
-- `.planning/ROADMAP.md` — shipped history + collapsed **v1.12** details
-- `.planning/PROJECT.md` — between-milestones pointer + **v1.12** archive references
-- `.planning/phases/40-*` … `50-*` — shipped phase artifacts through **50** (preserved)
+- **`.planning/REQUIREMENTS.md`** — **v1.13** (**INT-** + **AUX-**)
+- `.planning/ROADMAP.md` — **v1.13** active block + shipped history
+- `.planning/PROJECT.md` — **v1.13** current milestone
+- `.planning/phases/01-*` … `50-*` — prior shipped phase trees (**`phases.clear` not run** when opening **v1.13**)
 
 ## Deferred Items
 
@@ -55,11 +57,8 @@ Plan: **—**
 
 ## Recent Decisions
 
-- **v1.12:** Archived 2026-04-22 — **`.planning/milestones/v1.12-*`** + planning git tag **`v1.12`**; root **`REQUIREMENTS.md`** removed for next milestone.
-- **v1.12 (opened):** **ADM-01..ADM-06**; roadmap **48–50**; **`phases.clear`** skipped per repo policy (preserve phase evidence).
-- **Phase 49:** **`049-CONTEXT.md`** — ADM-02 slice **customer → subscription → invoice**; **SubscriptionLive** breadcrumb/related parity; drill-only nav (**D-08**); tests **LiveViewTest-first**, Playwright only **D-13** unblock.
-- **v1.11:** Closed with archives under **`.planning/milestones/v1.11-*`** and planning git tag **`v1.11`**.
+- **2026-04-22:** **`/gsd-new-milestone`** — **v1.13** scope locked to **integrator golden path** + **auxiliary admin** (**coupons**, **promotion codes**, **Connect**, **events**); **PROC-08** / **FIN-03** unchanged as non-goals; domain research skipped (brownfield); **`phases.clear`** skipped to preserve **1–50** evidence trees.
 
-**Next:** **`/gsd-new-milestone`** — author fresh **`.planning/REQUIREMENTS.md`** and the next roadmap slice (**v1.13+**).
+**Next:** **`/gsd-discuss-phase 51`** — gather context for **Integrator golden path & docs** — or **`/gsd-plan-phase 51`** to plan directly.
 
-**Completed:** Milestone **v1.12** — 2026-04-22 — archived (`milestones/v1.12-*`, tag **`v1.12`**). Milestone **v1.11** — 2026-04-22 — see **`milestones/v1.11-ROADMAP.md`**.
+**Completed:** Milestone **v1.12** — 2026-04-22 — archived (`milestones/v1.12-*`, tag **`v1.12`**).
