@@ -115,8 +115,24 @@ defmodule Accrue.Webhook.DispatchWorker do
   defp mark_failed_or_dead(repo, row, attempt, max_attempts) do
     status = if attempt >= max_attempts, do: :dead, else: :failed
 
-    row
-    |> WebhookEvent.status_changeset(status)
-    |> repo.update!()
+    updated =
+      row
+      |> WebhookEvent.status_changeset(status)
+      |> repo.update!()
+
+    if status == :dead do
+      :telemetry.execute(
+        [:accrue, :ops, :webhook_dlq, :dead_lettered],
+        %{count: 1},
+        %{
+          event_id: updated.id,
+          processor_event_id: updated.processor_event_id,
+          type: updated.type,
+          attempt: attempt
+        }
+      )
+    end
+
+    updated
   end
 end
