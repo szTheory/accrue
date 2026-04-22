@@ -46,6 +46,8 @@ bash "$repo_root/scripts/ci/verify_e2e_fixture_jq.sh" "$fixture_file"
   cd "$repo_root/accrue_admin"
   mix deps.get --quiet
   mix accrue_admin.assets.build
+  mkdir -p "$repo_root/examples/accrue_host/e2e/generated"
+  mix accrue_admin.export_copy_strings --out "$repo_root/examples/accrue_host/e2e/generated/copy_strings.json"
 )
 MIX_ENV=test mix deps.compile accrue_admin --force
 

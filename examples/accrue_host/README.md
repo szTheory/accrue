@@ -101,6 +101,13 @@ serious + critical violations, forced light then dark on desktop; mobile project
 skip this file). Focused local run after the usual seed + server: `npm run e2e:a11y`.
 For the mobile shell lane on **`chromium-mobile`**, **`npm run e2e:mobile`** runs **`e2e/verify01-admin-mobile.spec.js`** after the same seed + server setup.
 
+**Copy anti-drift (Phase 50 / D-23):** VERIFY-01 specs read operator strings from
+**`e2e/generated/copy_strings.json`**, produced by
+**`mix accrue_admin.export_copy_strings --out e2e/generated/copy_strings.json`**
+(run from **`accrue_admin/`**; path is relative to the host package checkout). CI
+regenerates this file on every **`accrue_host_verify_browser.sh`** run before
+**`npm run e2e`**; update the Mix task allowlist when adding new keys.
+
 The `npm run e2e:*` scripts use **`env -u NO_COLOR`** (POSIX-oriented); Windows contributors may run `npx playwright test …` directly when `env -u` is awkward.
 
 #### Mounted admin — mobile shell
