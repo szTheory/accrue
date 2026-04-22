@@ -112,6 +112,13 @@ defmodule MyAppWeb.Router do
 end
 ```
 
+> **When this fails**
+>
+> - Raw body / parser order: [Troubleshooting — `ACCRUE-DX-WEBHOOK-RAW-BODY`](troubleshooting.md#accrue-dx-webhook-raw-body)
+> - Missing signing secret: [Troubleshooting — `ACCRUE-DX-WEBHOOK-SECRET-MISSING`](troubleshooting.md#accrue-dx-webhook-secret-missing)
+> - Webhook behind the wrong pipeline: [Troubleshooting — `ACCRUE-DX-WEBHOOK-PIPELINE`](troubleshooting.md#accrue-dx-webhook-pipeline)
+> - **`mix accrue.install`** reruns / conflicts: [Upgrade — installer rerun behavior](upgrade.md#installer-rerun-behavior)
+
 ```elixir
 defmodule MyApp.BillingHandler do
   use Accrue.Webhook.Handler
