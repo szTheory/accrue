@@ -181,7 +181,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 37. Org billing recipes — doc spine + phx.gen.auth | v1.8 | 3/3 | Complete | 2026-04-21 |
-| 38. Org billing recipes — Pow + custom org boundaries | v1.8 | — | Not started | — |
+| 38. Org billing recipes — Pow + custom org boundaries | v1.8 | 2/2 | Complete | 2026-04-22 |
 | 39. Org billing proof alignment | v1.8 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.

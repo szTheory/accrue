@@ -11,8 +11,8 @@ Milestone theme: **ORG-04** — broader **non-Sigra** tenancy recipes (Pow, phx.
 
 - [x] **ORG-05**: Developer can follow a single documented spine (guide or clearly linked doc set) that explains how a **non-Sigra** Phoenix host resolves **session → billable** for org-shaped billing while preserving **ORG-03** boundaries. *(Validated in Phase 37: `guides/organization_billing.md` + cross-links.)*
 - [x] **ORG-06**: Developer can follow a **phx.gen.auth**-oriented recipe (checklist + Accrue touchpoints: `Accrue.Auth`, `Accrue.Billable`, billing facade) without relying on Sigra-specific modules. *(Validated in Phase 37: phx.gen.auth checklist in the same guide.)*
-- [ ] **ORG-07**: Developer can follow a **Pow**-oriented recipe with the same contracts, including honest notes on community maintenance and version variance.
-- [ ] **ORG-08**: Developer can follow a **custom org model** recipe that lists required host obligations (ownership columns, admin query scoping, webhook replay actor alignment) and explicit anti-patterns that would violate **ORG-03**.
+- [x] **ORG-07**: Developer can follow a **Pow**-oriented recipe with the same contracts, including honest notes on community maintenance and version variance. *(Validated in Phase 38: Pow-oriented checklist in `guides/organization_billing.md` + `auth_adapters.md` link + guide tests.)*
+- [x] **ORG-08**: Developer can follow a **custom org model** recipe that lists required host obligations (ownership columns, admin query scoping, webhook replay actor alignment) and explicit anti-patterns that would violate **ORG-03**. *(Validated in Phase 38: ORG-08 section + anti-pattern table in the same guide + tests.)*
 
 ### Verification & adoption proof
 
@@ -40,8 +40,8 @@ Unchanged from prior milestones unless explicitly reprioritized:
 |-------------|-------|--------|
 | ORG-05 | Phase 37 | Complete |
 | ORG-06 | Phase 37 | Complete |
-| ORG-07 | Phase 38 | Pending |
-| ORG-08 | Phase 38 | Pending |
+| ORG-07 | Phase 38 | Complete |
+| ORG-08 | Phase 38 | Complete |
 | ORG-09 | Phase 39 | Pending |
 
 **Coverage:**
@@ -52,4 +52,4 @@ Unchanged from prior milestones unless explicitly reprioritized:
 
 ---
 *Requirements defined: 2026-04-21*  
-*Last updated: 2026-04-21 after `/gsd-new-milestone`*
+*Last updated: 2026-04-21 — ORG-07/ORG-08 marked complete after Phase 38*
