@@ -10,9 +10,9 @@ Milestone theme: **first-time integrator golden path** (host-facing docs, proof 
 
 ## Integrator path (INT)
 
-- [ ] **INT-01**: A net-new Phoenix integrator can follow **one coherent golden path** from canonical repo entry through install, first Fake-backed subscription (or documented equivalent), and **VERIFY-01-class** proof **without contradictory commands or version pins** across **`examples/accrue_host/README.md`**, **`accrue/guides/first_hour.md`**, and **`accrue/guides/quickstart.md`** (plus any explicitly linked host tutorial sections).
-- [ ] **INT-02**: **VERIFY-01** and **merge-blocking vs advisory** verification lanes remain discoverable within the **documented hop budget** from the **repository root** (maintain or improve **v1.7 ADOPT** intent); stable anchors exist for CI job names vs human docs where ambiguity regressed.
-- [ ] **INT-03**: Troubleshooting / **“when it fails first”** docs cover the **highest-frequency first-run classes** (webhook signing / raw body ordering, missing or wrong secrets, **`mix accrue.install`** rerun + conflict sidecars) with **linkable headings** suitable from installer output and host README.
+- [x] **INT-01**: A net-new Phoenix integrator can follow **one coherent golden path** from canonical repo entry through install, first Fake-backed subscription (or documented equivalent), and **VERIFY-01-class** proof **without contradictory commands or version pins** across **`examples/accrue_host/README.md`**, **`accrue/guides/first_hour.md`**, and **`accrue/guides/quickstart.md`** (plus any explicitly linked host tutorial sections).
+- [x] **INT-02**: **VERIFY-01** and **merge-blocking vs advisory** verification lanes remain discoverable within the **documented hop budget** from the **repository root** (maintain or improve **v1.7 ADOPT** intent); stable anchors exist for CI job names vs human docs where ambiguity regressed.
+- [x] **INT-03**: Troubleshooting / **“when it fails first”** docs cover the **highest-frequency first-run classes** (webhook signing / raw body ordering, missing or wrong secrets, **`mix accrue.install`** rerun + conflict sidecars) with **linkable headings** suitable from installer output and host README.
 - [ ] **INT-04**: **`examples/accrue_host/docs/adoption-proof-matrix.md`** (and **`evaluator-walkthrough-script.md`** where impacted) stay **honest and current** relative to the golden path and CI lanes touched by **INT-01..INT-03**; any new or renamed lanes are reflected in **merge-blocking verifier** expectations where applicable.
 - [ ] **INT-05**: **`verify_package_docs`**, package READMEs, and **ExDoc** install snippets remain aligned with the published **Hex `0.3.0`** pair after doc edits (**`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version`** remains numeric SSOT for the next bump).
 
@@ -48,9 +48,9 @@ Milestone theme: **first-time integrator golden path** (host-facing docs, proof 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INT-01 | Phase 51 | Pending |
-| INT-02 | Phase 51 | Pending |
-| INT-03 | Phase 51 | Pending |
+| INT-01 | Phase 51 | Complete |
+| INT-02 | Phase 51 | Complete |
+| INT-03 | Phase 51 | Complete |
 | INT-04 | Phase 52 | Pending |
 | INT-05 | Phase 52 | Pending |
 | AUX-01 | Phase 52 | Pending |
@@ -68,4 +68,4 @@ Milestone theme: **first-time integrator golden path** (host-facing docs, proof 
 
 ---
 *Requirements defined: 2026-04-22*  
-*Last updated: 2026-04-22 after `/gsd-new-milestone`*
+*Last updated: 2026-04-22 after Phase 51 execution*

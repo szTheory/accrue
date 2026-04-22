@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: milestone
-status: Roadmap defined — run **`/gsd-discuss-phase 51`** or **`/gsd-plan-phase 51`**.
-last_updated: "2026-04-22T23:09:32.110Z"
-last_activity: 2026-04-22 — Milestone **v1.13** initialized (requirements + roadmap).
+status: active
+last_updated: "2026-04-22T23:45:00.000Z"
+last_activity: 2026-04-22
 progress:
   total_phases: 35
-  completed_phases: 30
-  total_plans: 90
-  completed_plans: 98
+  completed_phases: 31
+  total_plans: 93
+  completed_plans: 101
   percent: 100
 ---
 
@@ -21,17 +21,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Milestone **v1.13** — **Integrator path + secondary admin parity** (Phases **51–53**).
+**Current focus:** Phase **52** — Integrator proof + package alignment + auxiliary copy (part 1)
 
 ## Current Position
 
-Phase: **51** — Integrator golden path & docs (not started)
+Phase: **52** (next) — Phase **51** shipped **2026-04-22**
 
-Plan: **—**
+Plan: —
 
-**Status:** Roadmap defined — run **`/gsd-discuss-phase 51`** or **`/gsd-plan-phase 51`**.
+**Status:** Phase **51** verified; **v1.13** continues (**52–53** remaining)
 
-**Last activity:** 2026-04-22 — Milestone **v1.13** initialized (requirements + roadmap).
+**Last activity:** 2026-04-22
 
 ## Milestone Progress
 
@@ -60,6 +60,6 @@ Plan: **—**
 
 - **2026-04-22:** **`/gsd-new-milestone`** — **v1.13** scope locked to **integrator golden path** + **auxiliary admin** (**coupons**, **promotion codes**, **Connect**, **events**); **PROC-08** / **FIN-03** unchanged as non-goals; domain research skipped (brownfield); **`phases.clear`** skipped to preserve **1–50** evidence trees.
 
-**Next:** **`/gsd-discuss-phase 51`** — gather context for **Integrator golden path & docs** — or **`/gsd-plan-phase 51`** to plan directly.
+**Next:** **`/gsd-discuss-phase 52`** or **`/gsd-plan-phase 52`** — integrator proof + package alignment + auxiliary copy (part 1).
 
-**Completed:** Milestone **v1.12** — 2026-04-22 — archived (`milestones/v1.12-*`, tag **`v1.12`**).
+**Completed:** Phase **51** (Integrator golden path & docs) — **2026-04-22** — plans **51-01..51-03** + `51-VERIFICATION.md`. Prior: Milestone **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).

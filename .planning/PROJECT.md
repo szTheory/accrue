@@ -34,7 +34,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.12** — Phases **48–50** (2026-04-22): post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 gates on touched routes (**ADM-01..ADM-06**); archives `.planning/milestones/v1.12-*`; planning git tag **`v1.12`**. Prior: **v1.11** — Phases **46–47**; archives `.planning/milestones/v1.11-*`; tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**.
 
-**Now:** Active **v1.13** — roadmap **51–53**, requirements **`INT-*` / `AUX-*`**; next step **`/gsd-discuss-phase 51`** or **`/gsd-plan-phase 51`**. **`phases.clear`** not run when opening **v1.13** (preserve **1–50** phase trees under **`.planning/phases/`**).
+**Now:** Active **v1.13** — Phase **51** shipped (**integrator golden path & docs**); roadmap **52–53** remaining; next step **`/gsd-discuss-phase 52`** or **`/gsd-plan-phase 52`**. **`phases.clear`** not run when opening **v1.13** (preserve **1–50** phase trees under **`.planning/phases/`**).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -196,6 +196,10 @@ Theme: **admin & operator UX** (**ADM-01..ADM-06**); **PROC-08** and **FIN-03** 
 - [x] **ADM-04** — **`SubscriptionLive`** operator chrome routed through **`AccrueAdmin.Copy`** / **`Copy.Subscription`**. **Validated in Phase 50.**
 - [x] **ADM-05** — Checked-in **theme exception** register + contributor PR checklist. **Validated in Phase 50.**
 - [x] **ADM-06** — Mounted-path inventory + VERIFY-01 expansion with **Copy-derived** Playwright assertions and **`mix accrue_admin.export_copy_strings`** anti-drift gate. **Validated in Phase 50.**
+
+### Validated v1.13 (partial — milestone open)
+
+- [x] **INT-01, INT-02, INT-03** — Single integrator spine (**First Hour** ↔ **`examples/accrue_host`**) with H/M/R capsules; repo-root VERIFY-01 discoverability + Layer A/B/C bridge; troubleshooting anchor SSOT + bounded failure callouts. **Validated in Phase 51.**
 
 ### Validated v1.4 (archived here; milestone closed 2026-04-17)
 
