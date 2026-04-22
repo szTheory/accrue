@@ -304,12 +304,51 @@
 
 ---
 
+## Milestone: v1.8 — Org billing recipes & host integration depth
+
+**Shipped:** 2026-04-22  
+**Phases:** 3 | **Plans:** 8
+
+### What Was Built
+
+- Single **`organization_billing.md`** spine for non-Sigra **session → billable** with **ORG-03** boundaries; phx.gen.auth checklist; Pow and custom-org sections with anti-patterns and webhook/admin scoping obligations.
+- Installer + README + quickstart + finance-handoff discoverability for the org billing path; guide ExUnit needles for doc drift.
+- Adoption proof matrix **ORG-09** row for a non-Sigra org archetype; merge-blocking **`verify_adoption_proof_matrix.sh`**; contributor-facing map in **`scripts/ci/README.md`**.
+
+### What Worked
+
+- Treating **ORG-04** as **docs + proof contracts** (no billing schema churn) kept scope aligned with deferred **PROC-08** / **FIN-03** non-goals.
+- Reusing v1.7 patterns (**scripts/ci/README.md** ownership map, VERIFY-01 merge-blocking vs advisory language) made ORG-09 legible to evaluators.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still failed on this install (`version required for phases archive`); archival + `git rm` stayed manual.
+- No standalone **`v1.8-MILESTONE-AUDIT.md`**; closeout leaned on per-phase verification and the requirements traceability table.
+
+### Patterns Established
+
+- Bash verifier at repo root + **accrue** package ExUnit invoking **`System.cmd`** for smoke coverage of matrix paths (Phase 39).
+
+### Key Lessons
+
+1. After **Sigra-first** org proof (**v1.3**), **non-Sigra** teams still need an explicit **recipe + matrix** story—not only generic auth adapter mentions.
+2. Milestone automation should not be assumed available; keep **archive file triple** (roadmap, requirements, milestones index) reproducible by hand.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: focused doc + verifier passes across three short phases.
+- Notable: highest leverage was **one spine doc** plus **one merge-blocking verifier** for evaluator trust.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.8 | short | 3 | ORG-04 non-Sigra org billing spine (37–38), ORG-09 adoption matrix + `verify_adoption_proof_matrix.sh` + CI README map (39). |
 | v1.7 | short | 5 | VERIFY-01/doc graph + installer CI clarity (32–33), operator home/drill/nav (34), Copy SSOT dashboard (35), audit corpus + verifier map (36). |
 | v1.6 | short | 7 | Admin inventory → hierarchy → copy → a11y → mobile (25–29), then audit corpus + advisory integration closure (30–31) without new Hex tag. |
 | v1.5 | short | 1 | Adoption proof documented as a matrix tying existing Fake, host, Playwright, and advisory Stripe lanes. |
@@ -321,6 +360,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.8 | Guide ExUnit (`organization_billing_*`), bash `verify_adoption_proof_matrix.sh`, host-integration wiring in CI README | ORG-05..ORG-09 (5/5) archived | Matrix ORG-09 section, root verifier script, contributor map rows for ORG gates. |
 | v1.7 | Doc contract scripts, targeted ExUnit, VERIFY-01 Playwright lanes touching dashboard copy | ADOPT + OPS (11/11) archived | `scripts/ci/README.md` ADOPT map, dual-contract `testing.md` section, `36-FORWARD-COUPLING-OPS-34-35.md`, dashboard `Copy` + `copy_dashboard.js`. |
 | v1.6 | VERIFY-01 Playwright (desktop + mobile), ExUnit/HTML assertions on touched LiveViews, axe on mounted customers index | INV/COPY/UX/A11Y/MOB (18/18) archived | `AccrueAdmin.Copy`, mobile admin spec, README mobile shell section, verification markdown per phase. |
 | v1.5 | Existing VERIFY-01 contracts + docs guide tests; no new CI topology | PROOF-01..03 (3/3) archived | Adoption proof matrix, evaluator walkthrough script, guide + CI naming clarity. |

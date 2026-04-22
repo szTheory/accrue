@@ -1,10 +1,25 @@
 # Milestones
 
-## v1.8 Org billing recipes & host integration depth (Planning opened: 2026-04-21)
+## v1.8 Org billing recipes & host integration depth (Shipped: 2026-04-22)
 
-**Status:** Active — requirements and roadmap in repo root `.planning/`; phases **37–39** on [`.planning/ROADMAP.md`](ROADMAP.md).
+**Phases completed:** 3 phases (37–39), **8** plans
 
-**Theme:** Deferred **ORG-04** — non-Sigra tenancy recipes (Pow, phx.gen.auth, custom org) + VERIFY/adoption-proof alignment. **PROC-08** and **FIN-03** remain out of scope.
+**Key accomplishments:**
+
+- **Phase 37 (ORG-05, ORG-06):** Single `organization_billing.md` spine for session → billable + ORG-03; phx.gen.auth checklist; installer/README/quickstart/finance-handoff discoverability and guide tests.
+- **Phase 38 (ORG-07, ORG-08):** Pow-oriented recipe with maintenance honesty; custom org obligations, admin scoping, webhook replay alignment, and ORG-03 anti-pattern table.
+- **Phase 39 (ORG-09):** Adoption proof matrix non-Sigra org archetype; merge-blocking `verify_adoption_proof_matrix.sh`; contributor map in `scripts/ci/README.md`; guide + ExUnit gates from `accrue` package.
+
+**Theme:** Deferred **ORG-04** — non-Sigra org billing recipes + VERIFY/adoption-proof alignment. **PROC-08** and **FIN-03** remain out of scope.
+
+**Known deferred items at close:** same **audit-open** carry-forward as prior closes (see `.planning/STATE.md` § Deferred Items).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.8-ROADMAP.md`](milestones/v1.8-ROADMAP.md)
+- Requirements: [`milestones/v1.8-REQUIREMENTS.md`](milestones/v1.8-REQUIREMENTS.md)
+
+**Git tag:** `v1.8`
 
 ---
 
