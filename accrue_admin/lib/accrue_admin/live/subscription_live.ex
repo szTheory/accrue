@@ -22,6 +22,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   alias AccrueAdmin.TaxOwnershipRow
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.Queries.Subscriptions
   alias AccrueAdmin.StepUp
 
@@ -128,10 +129,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
+              %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
               %{
                 label: "Subscriptions",
-                href: scoped_mount_path(@admin_mount_path, "/subscriptions", @current_owner_scope)
+                href: ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)
+              },
+              %{
+                label: customer_label(@customer),
+                href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
               },
               %{label: @subscription.processor_id || @subscription.id}
             ]}
@@ -163,6 +168,50 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <:meta>Ledger events already stored locally</:meta>
           </KpiCard.kpi_card>
         </section>
+
+        <article class="ax-card" data-role="subscription-related-billing">
+          <header class="ax-page-header">
+            <p class="ax-eyebrow"><%= Copy.subscription_drill_related_card_title() %></p>
+            <h3 class="ax-heading"><%= Copy.subscription_drill_related_card_title() %></h3>
+          </header>
+
+          <nav aria-label={Copy.subscription_drill_related_region_aria_label()} class="ax-body">
+            <ul class="ax-stack-md">
+              <li>
+                <a
+                  href={ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)}
+                  class="ax-link"
+                >
+                  <%= Copy.subscription_drill_link_customer() %>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"customer_id" => @customer.id})}
+                  class="ax-link"
+                >
+                  <%= Copy.subscription_drill_link_invoices_for_customer() %>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={ScopedPath.build(@admin_mount_path, "/charges", @current_owner_scope, %{"customer_id" => @customer.id})}
+                  class="ax-link"
+                >
+                  <%= Copy.subscription_drill_link_charges_for_customer() %>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
+                  class="ax-link"
+                >
+                  <%= Copy.subscription_drill_link_events_index() %>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </article>
 
         <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_subscription(@subscription, @customer)} />
 
@@ -608,12 +657,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
 
-  defp scoped_mount_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
-       when is_binary(slug) do
-    mount_path <> suffix <> "?org=" <> URI.encode_www_form(slug)
-  end
-
-  defp scoped_mount_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
+  defp customer_label(customer),
+    do: customer.name || customer.email || customer.processor_id || customer.id
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
