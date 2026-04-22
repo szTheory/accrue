@@ -27,7 +27,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 48 | Admin metering & billing signals | Ship at least one **credible metering- or usage-adjacent** operator signal on the admin entry path with honest links into existing indexes/narratives. | ADM-01 |
-| 49 | 2/2 | Complete    | 2026-04-22 |
+| 49 | Drill flows & navigation | Make **one** scoped high-traffic **list/detail** flow measurably smoother; keep **nav labels/order** and **route inventory** aligned if entries change. | ADM-02, ADM-03 |
 | 50 | Copy, tokens & VERIFY gates | **`AccrueAdmin.Copy`** + **token discipline** for all **v1.12** string/layout churn; **Playwright** + **axe** parity on **all** materially touched mounted-admin paths for the milestone. | ADM-04, ADM-05, ADM-06 |
 
 **Success criteria (milestone):**
@@ -333,7 +333,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 48. Admin metering & billing signals | v1.12 | 1/1 | Complete | 2026-04-22 |
-| 49. Drill flows & navigation | v1.12 | — | Not started | — |
+| 49. Drill flows & navigation | v1.12 | 2/2 | Complete | 2026-04-22 |
 | 50. Copy, tokens & VERIFY gates | v1.12 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
