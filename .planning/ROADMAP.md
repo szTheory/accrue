@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- 🚧 **v1.11 Public Hex release + post-release continuity** — Phases **46–47** (in progress). Publish linked **`accrue`** / **`accrue_admin`** to Hex; align **`RELEASING.md`**, install snippets, **`verify_package_docs`**, and planning Hex callouts. Requirements: `.planning/REQUIREMENTS.md`.
 - ✅ **v1.0 Initial Release** — Phases 1-9 shipped on 2026-04-16. Public Hex packages: `accrue` 0.1.2 and `accrue_admin` 0.1.2. Full archive: [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md).
 - ✅ **v1.1 Stabilization + Adoption** — Phases 10-12 plus 11.1 shipped on 2026-04-17. Proved Accrue in a realistic Phoenix host app, promoted that proof into CI, closed host-flow hermeticity gaps, and hardened first-user DX/docs. Full archive: [`milestones/v1.1-ROADMAP.md`](milestones/v1.1-ROADMAP.md).
 - ✅ **v1.2 Adoption + Trust** — Phases 13-17 shipped on 2026-04-17. Polished the canonical local demo/tutorial, adoption front door, trust evidence, expansion recommendation, and final milestone cleanup. Full archive: [`milestones/v1.2-ROADMAP.md`](milestones/v1.2-ROADMAP.md).
@@ -15,6 +16,42 @@
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
 ## Phases
+
+<details open>
+<summary>🚧 v1.11 Public Hex release + post-release continuity (Phases 46–47)</summary>
+
+**Milestone goal:** Ship **`accrue`** and **`accrue_admin`** to **Hex** for metering + accumulated work since **0.1.2** via **Release Please** linked releases, then fix **doc + verifier + planning** drift so published versions are the obvious install baseline.
+
+**Depends on:** v1.10 complete (metering in tree); CI green on **`main`**.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 46 | Release train & Hex publish | Merge release PR path; **`accrue` then `accrue_admin`** on Hex; tags + version/changelog integrity. | REL-01, REL-02, REL-04 |
+| 47 | Post-release docs & planning continuity | **`RELEASING.md`** truth for routine pre-1.0 releases; **`first_hour`** / verifier alignment; **PROJECT / MILESTONES / STATE** Hex lines. | REL-03, DOC-01, DOC-02, HYG-01 |
+
+**Success criteria (milestone):**
+
+1. Both packages appear on Hex at the **same linked** SemVer with **`accrue` published before `accrue_admin`**.
+2. **`verify_package_docs`** + package docs ExUnit gate pass on **`main`** after release.
+3. Planning docs no longer claim **0.1.2** as “current Hex” once a newer version is published.
+
+**Phase 46 — Release train & Hex publish**
+
+**Goal:** Executable maintainer path from green **`main`** → merged release PR → Hex + tags.
+
+**Success criteria:**
+
+1. **REL-01**, **REL-02**, **REL-04** satisfied with evidence (PR links, tag names, Hex version checks) captured in phase verification.
+
+**Phase 47 — Post-release docs & planning continuity**
+
+**Goal:** Remove evaluator confusion between “what Hex has” and “what the repo says.”
+
+**Success criteria:**
+
+1. **REL-03**, **DOC-01**, **DOC-02**, **HYG-01** satisfied; phase verification references concrete file paths.
+
+</details>
 
 <details>
 <summary>✅ v1.10 Metered usage + Fake parity (Phases 43–45) — SHIPPED 2026-04-22</summary>
