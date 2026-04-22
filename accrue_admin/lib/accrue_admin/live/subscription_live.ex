@@ -27,11 +27,6 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   alias AccrueAdmin.StepUp
 
   @destructive_actions ~w(cancel_now comp_subscription)
-  @proration_options [
-    %{value: "create_prorations", label: "Create prorations"},
-    %{value: "none", label: "No proration"},
-    %{value: "always_invoice", label: "Always invoice"}
-  ]
 
   @impl true
   def mount(%{"id" => subscription_id}, session, socket) do
@@ -57,7 +52,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          |> assign(:subscription, subscription)
          |> assign(:customer, subscription.customer)
          |> assign(:timeline_events, timeline_events(subscription.id))
-         |> assign(:proration_options, @proration_options)
+         |> assign(:proration_options, proration_options())
          |> assign(:flashes, [])
          |> assign(:pending_action, nil)}
     end
@@ -129,9 +124,12 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
               %{
-                label: "Subscriptions",
+                label: Copy.dashboard_breadcrumb_home(),
+                href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
+              },
+              %{
+                label: Copy.subscription_breadcrumb_subscriptions(),
                 href: ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)
               },
               %{
@@ -141,7 +139,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               %{label: @subscription.processor_id || @subscription.id}
             ]}
           />
-          <p class="ax-eyebrow">Subscription detail</p>
+          <p class="ax-eyebrow"><%= Copy.subscription_detail_eyebrow() %></p>
           <h2 class="ax-display"><%= @subscription.processor_id || @subscription.id %></h2>
           <p class="ax-body ax-page-copy">
             <%= @customer.name || @customer.email || @customer.id %> · period ends <%= format_datetime(@subscription.current_period_end) %>
@@ -150,17 +148,17 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-kpi-grid" aria-label="Subscription lifecycle summary">
-          <KpiCard.kpi_card label="Status" value={humanize(@subscription.status)}>
+        <section class="ax-kpi-grid" aria-label={Copy.subscription_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={Copy.subscription_kpi_status_label()} value={humanize(@subscription.status)}>
             <:meta><StatusBadge.status_badge status={@subscription.status} /></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Canonical predicates" value={predicate_summary(@subscription)}>
+          <KpiCard.kpi_card label={Copy.subscription_kpi_canonical_predicates_label()} value={predicate_summary(@subscription)}>
             <:meta>Use `Accrue.Billing.Subscription` predicates, not raw status branching.</:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Timeline rows"
+            label={Copy.subscription_kpi_timeline_rows_label()}
             value={Integer.to_string(length(@timeline_events))}
             delta={current_price_id(@subscription) || "no current price"}
             delta_tone="cobalt"
@@ -240,13 +238,17 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <form phx-submit="prepare_action" data-role="cancel-now-form">
                 <input type="hidden" name="action_type" value="cancel_now" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Cancel now</button>
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= Copy.subscription_action_cancel_now() %>
+                </button>
               </form>
 
               <form phx-submit="prepare_action" data-role="cancel-at-period-end-form">
                 <input type="hidden" name="action_type" value="cancel_at_period_end" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Cancel at period end</button>
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= Copy.subscription_action_cancel_at_period_end() %>
+                </button>
               </form>
 
               <form phx-submit="prepare_action" data-role="pause-form">
@@ -258,13 +260,17 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <option value="keep_as_draft">Keep as draft</option>
                 </select>
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Pause collection</button>
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= Copy.subscription_action_pause_collection() %>
+                </button>
               </form>
 
               <form phx-submit="prepare_action" data-role="resume-form">
                 <input type="hidden" name="action_type" value="resume" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Resume</button>
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= Copy.subscription_action_resume() %>
+                </button>
               </form>
 
               <form phx-submit="prepare_action" data-role="swap-plan-form">
@@ -276,7 +282,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
                 </select>
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Swap plan</button>
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= Copy.subscription_action_swap_plan() %>
+                </button>
               </form>
 
               <form phx-submit="prepare_action" data-role="comp-form">
@@ -284,7 +292,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 <label class="ax-label" for="comp-price-id">Comp price id</label>
                 <input id="comp-price-id" type="text" name="new_price_id" value={current_price_id(@subscription)} class="ax-input" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Create comp replacement</button>
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= Copy.subscription_action_create_comp_replacement() %>
+                </button>
               </form>
             </div>
 
@@ -326,6 +336,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     """
   end
 
+  defp proration_options do
+    [
+      %{value: "create_prorations", label: Copy.subscription_proration_create()},
+      %{value: "none", label: Copy.subscription_proration_none()},
+      %{value: "always_invoice", label: Copy.subscription_proration_always_invoice()}
+    ]
+  end
+
   attr(:events, :list, required: true)
 
   defp source_event_select(assigns) do
@@ -344,7 +362,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Subscription")
+    |> assign(:page_title, Copy.subscription_page_title())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
