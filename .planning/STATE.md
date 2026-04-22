@@ -21,15 +21,15 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase --phase — 47
+**Current focus:** Phase 47 — post-release docs & planning continuity
 
 ## Current Position
 
-Phase: --phase (47) — EXECUTING
+Phase: 47 — EXECUTING
 
-Plan: 1 of --name
+Plan: 3 of 3 (47-01 and 47-02 complete)
 
-**Status:** Executing Phase --phase
+**Status:** Executing Phase 47
 
 **Last Activity:** 2026-04-22
 
@@ -37,7 +37,7 @@ Plan: 1 of --name
 
 **Active:** **v1.11** — Public Hex release + post-release continuity — **Phases 46–47** (see `.planning/ROADMAP.md`).
 
-**Last shipped (public packages on Hex):** **0.1.2** — superseded when **v1.11** release train completes.
+**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (lockstep; see **`accrue/mix.exs`** **`@version`**).
 
 ## Current Planning Artifacts
 
@@ -60,6 +60,6 @@ Plan: 1 of --name
 - **v1.11:** Scope = **Hex publish** + **post-release continuity** (docs, verifiers, planning version callouts); **PROC-08** / **FIN-03** remain deferred.
 - **`phases.clear` not run** — preserves **v1.9–v1.10** phase directories under `.planning/phases/`; next build phases continue at **46**.
 
-**Next:** `/gsd-execute-phase 46` — run plans **01–03** (human-gate workflow, manifest SSOT CI, verification template).
+**Next:** Finish **Phase 47** plans **02–03** (`first_hour` + planning Hex callouts), then phase verification.
 
 **Planned Phase:** 47 (post-release docs & planning continuity) — 3 plans — 2026-04-22T16:19:06.356Z
