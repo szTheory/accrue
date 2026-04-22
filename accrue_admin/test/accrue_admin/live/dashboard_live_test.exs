@@ -1,7 +1,8 @@
 defmodule AccrueAdmin.DashboardLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Billing.Invoice
+  alias Accrue.APIError
+  alias Accrue.Billing.{Invoice, MeterEvent}
   alias Accrue.Events
   alias Accrue.Test.Factory
   alias Accrue.Webhook.WebhookEvent
@@ -68,6 +69,22 @@ defmodule AccrueAdmin.DashboardLiveTest do
         actor_id: "admin_1"
       })
 
+    me =
+      %{
+        customer_id: customer.id,
+        stripe_customer_id: customer.processor_id,
+        event_name: "api_requests",
+        value: 1,
+        identifier: "dashboard_live_test_meter_#{Ecto.UUID.generate()}",
+        occurred_at: DateTime.utc_now() |> DateTime.truncate(:microsecond)
+      }
+      |> MeterEvent.pending_changeset()
+      |> TestRepo.insert!()
+
+    me
+    |> MeterEvent.failed_changeset(%APIError{message: "x", code: "test", http_status: 400})
+    |> TestRepo.update!()
+
     :ok
   end
 
@@ -89,6 +106,14 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ ~s(href="/billing/subscriptions")
     assert html =~ ~s(href="/billing/invoices")
     assert html =~ ~s(href="/billing/webhooks")
+    assert html =~ ~s(href="/billing/events")
+    assert html =~ Copy.dashboard_meter_reporting_failures_label()
+    assert html =~ Copy.dashboard_meter_reporting_failures_aria_label()
+
+    meter_idx = :binary.match(html, Copy.dashboard_meter_reporting_failures_label()) |> elem(0)
+    meter_segment = String.slice(html, meter_idx, 900)
+    assert meter_segment =~ ~s(ax-kpi-value">1</p>)
+
     assert html =~ Copy.dashboard_kpi_customers_aria_label()
     assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
     assert html =~ Copy.dashboard_kpi_invoices_aria_label()
