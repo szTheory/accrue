@@ -39,9 +39,39 @@ Model at least **`Organization`**, **`OrganizationMembership`** (user ↔ org + 
 4. Ensure host **`MyApp.Billing`** functions used for org-shaped subscribe/customer flows take **`Organization`** (or a scope that resolves to one) as the billable argument passed into Accrue.
 5. Set **`config :accrue, :auth_adapter, MyApp.Auth.PhxGenAuth`** — copy the adapter module body from [`guides/auth_adapters.md`](auth_adapters.md); it lists every `Accrue.Auth` callback.
 
+## Pow-oriented checklist (ORG-07)
+
+Pow answers **who is signed in**; it does **not** infer which **organization** is active. Treat `Pow.Plug.current_user/1` as the identity boundary, then run the same **membership-gated** `fetch_current_organization` pattern as the `phx.gen.auth` mainline—never promote a raw session org hint to `current_organization` without a membership join.
+
+### Identity with Pow
+
+Read the signed-in user with **`Pow.Plug.current_user/1`** on the `%Plug.Conn{}` (and LiveView assigns fed by the same pipeline). That value is the **identity** input to your plugs and `on_mount` hooks; every org decision still flows through explicit session + membership checks.
+
+### Active organization and membership
+
+Add **`fetch_current_organization`** as a plug or LiveView `on_mount` that loads an org id from the session **and verifies membership** before assigning `current_organization`. Pow does not infer active org tenancy—if you stash an org id in session, re-validate against your membership table on each request, matching steps 2–4 in **Session → organization → billable** above.
+
+### Billable row and host facade
+
+Attach **`use Accrue.Billable`** to **`MyApp.Accounts.Organization`** for org-shaped billing. Shape **`MyApp.Billing`** so subscribe/cancel/customer helpers accept **`Organization`** (or a scope that resolves to one) when calling `Accrue.Billing`, keeping policy (who may subscribe, cancel, update tax location) in the host module.
+
+### Accrue.Auth configuration
+
+Configure:
+
+```elixir
+config :accrue, :auth_adapter, MyApp.Auth.Pow
+```
+
+Copy the **`MyApp.Auth.Pow`** module body from [`auth_adapters.md`](auth_adapters.md)—that section is the SSOT for `Accrue.Auth` callbacks (`current_user/1`, `require_admin_plug/0`, audit hooks, optional step-up). Accrue Admin and audit paths still call `Accrue.Auth`; Pow is only how **`current_user/1`** is implemented.
+
+### Maintenance and upgrades
+
+Pow is **community-maintained**. Pin `pow` (and extensions) deliberately, read upstream changelog on every bump, and **re-verify** Plug ordering and session fetch after upgrades—Pow integrates at the connection layer and regressions often surface as missing assigns rather than compile errors.
+
 ## User-as-billable (bounded aside)
 
-**User-as-billable** (Cashier-style: `use Accrue.Billable` on **`User`**) is a valid stepping stone for single-tenant or solo apps. Accrue still expects consistent **`owner_type`** / **`owner_id`** on persisted billing rows. If you later move Stripe Customer ownership to an **Organization**, plan a **migration** of customer/subscription ownership—Stripe IDs cannot silently “move” without host data work. Deeper Pow-only or custom-session recipes are intentionally deferred to **Phase 38** with forward links **ORG-07** / **ORG-08**.
+**User-as-billable** (Cashier-style: `use Accrue.Billable` on **`User`**) is a valid stepping stone for single-tenant or solo apps. Accrue still expects consistent **`owner_type`** / **`owner_id`** on persisted billing rows. If you later move Stripe Customer ownership to an **Organization**, plan a **migration** of customer/subscription ownership—Stripe IDs cannot silently “move” without host data work. **Pow** is covered in **ORG-07** above; **custom organization models** (alternate session keys, subdomains, replay/export matrices) are covered in **ORG-08** below.
 
 ## Reference wiring (examples/accrue_host)
 
