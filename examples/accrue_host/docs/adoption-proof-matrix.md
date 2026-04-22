@@ -18,6 +18,23 @@ Accrue intentionally splits proof into a **deterministic Fake-first lane** (bloc
 
 **Caveat:** `/app/billing` LiveView in this host is **organization-scoped** (active org, `subscribe_active_organization/3`). User-level billing is proven at the **generated `AccrueHost.Billing` facade + `Accrue.Billing`** layer in ExUnit — a realistic B2C SaaS would expose its own LiveViews or controllers on top of the same APIs.
 
+## Organization billing proof (ORG-09)
+
+**Non-Sigra** here means the contracts you prove for identity and billable resolution—`Accrue.Auth`, `Accrue.Billable`, and the host billing façade described in the organization billing guide—not a blanket claim that every host in the repo is Sigra-free. The **example `accrue_host`** may still use **Sigra** as a **demo** or **implementation detail** for some flows; read that as host wiring, not as ORG-09 redefining the merge-blocking mainline.
+
+### Primary archetype (merge-blocking)
+
+| Concern | Proof | Where |
+|--------|--------|--------|
+| **non-Sigra** mainline: **`phx.gen.auth`** + membership-gated **`Organization`** with **`use Accrue.Billable`** (ORG-05/ORG-06 alignment) | `scripts/ci/verify_adoption_proof_matrix.sh` (runs in **`host-integration`**) | [`../../../../accrue/guides/organization_billing.md`](../../../../accrue/guides/organization_billing.md) |
+
+### Recipe lanes (advisory by default)
+
+| Concern | Proof | Where |
+|--------|--------|--------|
+| **Pow (ORG-07)** — identity via Pow; same membership-gated org + `use Accrue.Billable` pattern | Advisory checklist + bounded host tests; **not** merge-blocking unless a future phase adds a new gate | Same guide; **ORG-07** row stays **advisory** and does **not** add a parallel VERIFY-01 Playwright lane |
+| **Custom organization (ORG-08)** — tenancy signals (subdomain, headers, jobs) collapse to membership-verified **`Organization`** | Advisory checklist + bounded host tests; **not** merge-blocking unless a future phase adds a new gate | Same guide; **ORG-08** row stays **advisory** and does **not** add a parallel VERIFY-01 Playwright lane |
+
 ## Advisory: Stripe test mode (network)
 
 | Concern | Proof | Where |
