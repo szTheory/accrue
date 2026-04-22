@@ -1,10 +1,10 @@
 name: CI
 
 # Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
-# `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `host-integration`,
-# `annotation-sweep`, `live-stripe`.
-# Merge-blocking on pull_request: `release-gate`, `phase18-tax-gate`,
-# `admin-drift-docs`, `host-integration`, `annotation-sweep`.
+# `release-manifest-ssot`, `release-gate`, `phase18-tax-gate`, `admin-drift-docs`,
+# `host-integration`, `annotation-sweep`, `live-stripe`.
+# Merge-blocking on pull_request: `release-manifest-ssot`, `release-gate`,
+# `phase18-tax-gate`, `admin-drift-docs`, `host-integration`, `annotation-sweep`.
 # Advisory: `live-stripe` (Stripe test-mode parity) runs on `workflow_dispatch` and
 # `schedule` only — not merge-blocking for PRs.
 
@@ -26,6 +26,17 @@ permissions:
   contents: read
 
 jobs:
+  release-manifest-ssot:
+    name: Release manifest SSOT (REL-02)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify Release Please manifest ↔ mix.exs @version
+        run: bash scripts/ci/verify_release_manifest_alignment.sh
+
   release-gate:
     name: Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})
     if: github.event_name != 'schedule'
@@ -446,7 +457,14 @@ jobs:
   annotation-sweep:
     name: Annotation sweep
     if: github.event_name != 'schedule'
-    needs: [release-gate, phase18-tax-gate, admin-drift-docs, host-integration]
+    needs:
+      [
+        release-manifest-ssot,
+        release-gate,
+        phase18-tax-gate,
+        admin-drift-docs,
+        host-integration,
+      ]
     runs-on: ubuntu-24.04
 
     steps:
@@ -457,7 +475,9 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           GH_TOKEN: ${{ github.token }}
-        run: bash scripts/ci/annotation_sweep.sh release-gate phase18-tax-gate admin-drift-docs host-integration
+        run: >-
+          bash scripts/ci/annotation_sweep.sh release-manifest-ssot release-gate
+          phase18-tax-gate admin-drift-docs host-integration
 
   # ---------------------------------------------------------------------
   # Advisory live-Stripe fidelity job (quick task 260414-l9q).
