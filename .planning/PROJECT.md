@@ -16,6 +16,8 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Goal:** Maximize marginal **developer** value: invest where ranked evidence shows Phoenix integrators still stall — **integrator / VERIFY / docs**, **billing**, or **admin/operator** — instead of broad continuity sweeps after **v1.16**. Each phase stays **one sharp bet**; stop when the next increment is polish without removing failure modes.
 
+**Triage SSOT:** [North star + stop rules (FRG-02)](research/v1.17-north-star.md) · [Friction inventory + scoped backlog (FRG-01, FRG-03)](research/v1.17-FRICTION-INVENTORY.md).
+
 **Target features:**
 
 - **Triage** — Ranked friction inventory with sources, explicit deferrals, and a written north star + stop rules (**FRG-01**..**FRG-03**).
