@@ -44,42 +44,41 @@ defmodule AccrueAdmin.Live.CouponsLive do
           <Breadcrumbs.breadcrumbs
             items={[
               %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Coupons"}
+              %{label: AccrueAdmin.Copy.coupon_breadcrumb_coupons()}
             ]}
           />
-          <p class="ax-eyebrow">Discount management</p>
-          <h2 class="ax-display">Coupons backed by local discount projections</h2>
+          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_index_eyebrow() %></p>
+          <h2 class="ax-display"><%= AccrueAdmin.Copy.coupon_index_headline() %></h2>
           <p class="ax-body ax-page-copy">
-            Coupon filters, validity, and redemption counts stay server-side and separate from
-            promotion-code operations.
+            <%= AccrueAdmin.Copy.coupon_index_body_primary() %>
           </p>
           <p class="ax-body">
-            Promotion codes have their own list and detail surface:
-            <a href={@promotion_codes_path} class="ax-link">open promotion codes</a>.
+            <%= AccrueAdmin.Copy.coupon_index_body_link_prefix() %>
+            <a href={@promotion_codes_path} class="ax-link"><%= AccrueAdmin.Copy.coupon_index_promotion_codes_link_text() %></a>.
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Coupon summary">
-          <KpiCard.kpi_card label="Coupons" value={Integer.to_string(@summary.total_count)}>
-            <:meta>All local coupon rows</:meta>
+        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.coupon_index_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_kpi_label_coupons()} value={Integer.to_string(@summary.total_count)}>
+            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_all_local_coupons() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Valid"
+            label={AccrueAdmin.Copy.coupon_kpi_label_valid()}
             value={Integer.to_string(@summary.valid_count)}
-            delta={Integer.to_string(@summary.invalid_count) <> " invalid"}
+            delta={Integer.to_string(@summary.invalid_count) <> AccrueAdmin.Copy.coupon_kpi_invalid_suffix()}
             delta_tone="amber"
           >
-            <:meta>Current validity flag from the local projection</:meta>
+            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_validity_projection() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Promotion codes"
+            label={AccrueAdmin.Copy.coupon_kpi_label_promotion_codes()}
             value={Integer.to_string(@summary.promotion_code_count)}
-            delta={Integer.to_string(@summary.redeemed_count) <> " coupon redemptions"}
+            delta={Integer.to_string(@summary.redeemed_count) <> AccrueAdmin.Copy.coupon_kpi_redemptions_suffix()}
             delta_tone="cobalt"
           >
-            <:meta>Separate child-code surface linked back to coupons</:meta>
+            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_promotion_codes_child() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
@@ -90,30 +89,33 @@ defmodule AccrueAdmin.Live.CouponsLive do
           path={@table_path}
           params={@params}
           columns={[
-            %{label: "Coupon", render: &coupon_link(&1, @admin_mount_path)},
-            %{label: "Discount", render: &discount_summary/1},
-            %{label: "Redemptions", render: &redemption_summary/1},
-            %{label: "Status", render: &status_summary/1},
-            %{label: "Redeem by", render: &redeem_by_summary/1}
+            %{label: AccrueAdmin.Copy.coupon_table_column_coupon(), render: &coupon_link(&1, @admin_mount_path)},
+            %{label: AccrueAdmin.Copy.coupon_table_column_discount(), render: &discount_summary/1},
+            %{label: AccrueAdmin.Copy.coupon_table_column_redemptions(), render: &redemption_summary/1},
+            %{label: AccrueAdmin.Copy.coupon_table_column_status(), render: &status_summary/1},
+            %{label: AccrueAdmin.Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
-            %{label: "Discount", render: &discount_summary/1},
-            %{label: "Redemptions", render: &redemption_summary/1},
-            %{label: "Status", render: &status_summary/1},
-            %{label: "Redeem by", render: &redeem_by_summary/1}
+            %{label: AccrueAdmin.Copy.coupon_table_column_discount(), render: &discount_summary/1},
+            %{label: AccrueAdmin.Copy.coupon_table_column_redemptions(), render: &redemption_summary/1},
+            %{label: AccrueAdmin.Copy.coupon_table_column_status(), render: &status_summary/1},
+            %{label: AccrueAdmin.Copy.coupon_table_column_redeem_by(), render: &redeem_by_summary/1}
           ]}
           filter_fields={[
-            %{id: :q, label: "Search"},
+            %{id: :q, label: AccrueAdmin.Copy.coupon_filter_label_search()},
             %{
               id: :valid,
-              label: "Validity",
+              label: AccrueAdmin.Copy.coupon_filter_label_validity(),
               type: :select,
-              options: [{"true", "Valid"}, {"false", "Invalid"}]
+              options: [
+                {"true", AccrueAdmin.Copy.coupon_filter_option_valid()},
+                {"false", AccrueAdmin.Copy.coupon_filter_option_invalid()}
+              ]
             }
           ]}
-          empty_title="No coupons matched"
-          empty_copy="Adjust the discount filters or wait for the next projection sync."
+          empty_title={AccrueAdmin.Copy.coupon_table_empty_title()}
+          empty_copy={AccrueAdmin.Copy.coupon_table_empty_copy()}
         />
       </section>
     </AppShell.app_shell>
@@ -122,7 +124,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Coupons")
+    |> assign(:page_title, AccrueAdmin.Copy.coupon_page_title_index())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -164,7 +166,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
   defp discount_summary(%{percent_off: %Decimal{} = percent}),
     do: Decimal.to_string(percent, :normal) <> "% off"
 
-  defp discount_summary(_row), do: "Processor-defined"
+  defp discount_summary(_row), do: AccrueAdmin.Copy.coupon_discount_processor_defined()
 
   defp redemption_summary(row) do
     used = row.times_redeemed || 0
@@ -175,11 +177,11 @@ defmodule AccrueAdmin.Live.CouponsLive do
     end
   end
 
-  defp status_summary(%{valid: true}), do: "Valid"
-  defp status_summary(%{valid: false}), do: "Invalid"
+  defp status_summary(%{valid: true}), do: AccrueAdmin.Copy.coupon_status_valid()
+  defp status_summary(%{valid: false}), do: AccrueAdmin.Copy.coupon_status_invalid()
 
   defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
-  defp redeem_by_summary(_row), do: "No expiry"
+  defp redeem_by_summary(_row), do: AccrueAdmin.Copy.coupon_redeem_by_no_expiry()
 
   defp card_title(row), do: coupon_label(row)
 

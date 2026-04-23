@@ -39,35 +39,35 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           <Breadcrumbs.breadcrumbs
             items={[
               %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Promotion codes", href: @admin_mount_path <> "/promotion-codes"},
+              %{label: AccrueAdmin.Copy.promotion_codes_breadcrumb_index(), href: @admin_mount_path <> "/promotion-codes"},
               %{label: @promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
             ]}
           />
-          <p class="ax-eyebrow">Promotion code detail</p>
+          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.promotion_code_detail_eyebrow() %></p>
           <h2 class="ax-display"><%= @promotion_code.code || @promotion_code.processor_id %></h2>
           <p class="ax-body ax-page-copy">
             <%= status_summary(@promotion_code) %> · <%= redemption_summary(@promotion_code) %>
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Promotion code summary">
-          <KpiCard.kpi_card label="Coupon" value={coupon_label(@promotion_code)}>
-            <:meta>Parent discount definition</:meta>
+        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.promotion_code_detail_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_code_kpi_label_coupon()} value={coupon_label(@promotion_code)}>
+            <:meta><%= AccrueAdmin.Copy.promotion_code_kpi_meta_parent_discount() %></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Redemptions" value={Integer.to_string(@promotion_code.times_redeemed || 0)}>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_code_kpi_label_redemptions()} value={Integer.to_string(@promotion_code.times_redeemed || 0)}>
             <:meta><%= max_redemptions_summary(@promotion_code) %></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Expires" value={expires_summary(@promotion_code)}>
-            <:meta>Operator-visible expiry boundary</:meta>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_code_kpi_label_expires()} value={expires_summary(@promotion_code)}>
+            <:meta><%= AccrueAdmin.Copy.promotion_code_kpi_meta_expiry_boundary() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
         <section class="ax-card">
           <header class="ax-page-header">
-            <p class="ax-eyebrow">Parent coupon</p>
-            <h3 class="ax-heading">Navigate back to the discount definition</h3>
+            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.promotion_code_section_parent_coupon_eyebrow() %></p>
+            <h3 class="ax-heading"><%= AccrueAdmin.Copy.promotion_code_section_navigate_heading() %></h3>
           </header>
 
           <p :if={@promotion_code.coupon} class="ax-body">
@@ -77,13 +77,13 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           </p>
 
           <p :if={!@promotion_code.coupon} class="ax-body">
-            No coupon projection is linked to this promotion code.
+            <%= AccrueAdmin.Copy.promotion_code_detail_no_coupon_projection() %>
           </p>
         </section>
 
         <JsonViewer.json_viewer
           id="promotion-code-payload"
-          label="Promotion code payload"
+          label={AccrueAdmin.Copy.promotion_code_json_payload_label()}
           payload={payload(@promotion_code)}
         />
       </section>
@@ -93,7 +93,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Promotion Code")
+    |> assign(:page_title, AccrueAdmin.Copy.promotion_code_page_title_show())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -122,25 +122,25 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp coupon_label(%{coupon: %{processor_id: processor_id}}) when is_binary(processor_id),
     do: processor_id
 
-  defp coupon_label(%{coupon_id: nil}), do: "No coupon linked"
+  defp coupon_label(%{coupon_id: nil}), do: AccrueAdmin.Copy.promotion_codes_coupon_none_label()
   defp coupon_label(%{coupon_id: coupon_id}), do: coupon_id
 
   defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do: "Active · expires " <> format_datetime(expires_at)
+    do: AccrueAdmin.Copy.promotion_codes_status_active_expires_separator() <> format_datetime(expires_at)
 
-  defp status_summary(%{active: true}), do: "Active"
-  defp status_summary(%{active: false}), do: "Inactive"
+  defp status_summary(%{active: true}), do: AccrueAdmin.Copy.promotion_codes_status_active()
+  defp status_summary(%{active: false}), do: AccrueAdmin.Copy.promotion_codes_status_inactive()
 
   defp redemption_summary(%{times_redeemed: used, max_redemptions: nil}), do: "#{used || 0} used"
 
   defp redemption_summary(%{times_redeemed: used, max_redemptions: max}),
     do: "#{used || 0} of #{max}"
 
-  defp max_redemptions_summary(%{max_redemptions: nil}), do: "Unlimited cap"
+  defp max_redemptions_summary(%{max_redemptions: nil}), do: AccrueAdmin.Copy.promotion_code_kpi_meta_unlimited_cap()
   defp max_redemptions_summary(%{max_redemptions: max}), do: "#{max} max"
 
   defp expires_summary(%{expires_at: %DateTime{} = value}), do: format_datetime(value)
-  defp expires_summary(_promotion_code), do: "No expiry"
+  defp expires_summary(_promotion_code), do: AccrueAdmin.Copy.promotion_code_redeem_by_no_expiry()
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 

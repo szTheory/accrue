@@ -42,11 +42,11 @@ defmodule AccrueAdmin.Live.CouponLive do
           <Breadcrumbs.breadcrumbs
             items={[
               %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Coupons", href: @admin_mount_path <> "/coupons"},
+              %{label: AccrueAdmin.Copy.coupon_breadcrumb_coupons(), href: @admin_mount_path <> "/coupons"},
               %{label: coupon_label(@coupon)}
             ]}
           />
-          <p class="ax-eyebrow">Coupon detail</p>
+          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_detail_eyebrow() %></p>
           <h2 class="ax-display"><%= coupon_label(@coupon) %></h2>
           <p class="ax-body ax-page-copy">
             <%= @coupon.processor_id || @coupon.id %> ·
@@ -55,24 +55,24 @@ defmodule AccrueAdmin.Live.CouponLive do
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Coupon summary">
-          <KpiCard.kpi_card label="Redemptions" value={Integer.to_string(@coupon.times_redeemed || 0)}>
+        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.coupon_detail_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_kpi_label_redemptions()} value={Integer.to_string(@coupon.times_redeemed || 0)}>
             <:meta><%= max_redemptions_summary(@coupon) %></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Promotion codes" value={Integer.to_string(length(@promotion_codes))}>
-            <:meta>Explicit child codes linked to this coupon</:meta>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_detail_section_promotion_codes_eyebrow()} value={Integer.to_string(length(@promotion_codes))}>
+            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_promotion_codes_linked() %></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Redeem by" value={redeem_by_summary(@coupon)}>
-            <:meta>Local expiry boundary for operator review</:meta>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_kpi_label_redeem_by()} value={redeem_by_summary(@coupon)}>
+            <:meta><%= AccrueAdmin.Copy.coupon_kpi_meta_redeem_by() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
         <section class="ax-card">
           <header class="ax-page-header">
-            <p class="ax-eyebrow">Promotion codes</p>
-            <h3 class="ax-heading">Codes linked to this coupon</h3>
+            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_detail_section_promotion_codes_eyebrow() %></p>
+            <h3 class="ax-heading"><%= AccrueAdmin.Copy.coupon_detail_section_codes_heading() %></h3>
           </header>
 
           <div :for={promotion_code <- @promotion_codes} class="ax-list-row">
@@ -88,24 +88,24 @@ defmodule AccrueAdmin.Live.CouponLive do
           </div>
 
           <p :if={@promotion_codes == []} class="ax-body">
-            No promotion codes currently reference this coupon.
+            <%= AccrueAdmin.Copy.coupon_detail_promotion_codes_empty() %>
           </p>
         </section>
 
         <section class="ax-card">
           <header class="ax-page-header">
-            <p class="ax-eyebrow">Projection details</p>
-            <h3 class="ax-heading">Coupon metadata and processor mirror</h3>
+            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_detail_section_projection_eyebrow() %></p>
+            <h3 class="ax-heading"><%= AccrueAdmin.Copy.coupon_detail_section_projection_heading() %></h3>
           </header>
 
           <div class="ax-page">
-            <p class="ax-body">Duration: <%= duration_summary(@coupon) %></p>
-            <p class="ax-body">Currency: <%= @coupon.currency || "--" %></p>
-            <p class="ax-body">Processor: <%= @coupon.processor || "--" %></p>
+            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_detail_label_duration() %> <%= duration_summary(@coupon) %></p>
+            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_detail_label_currency() %> <%= @coupon.currency || "--" %></p>
+            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_detail_label_processor() %> <%= @coupon.processor || "--" %></p>
           </div>
         </section>
 
-        <JsonViewer.json_viewer id="coupon-payload" label="Coupon payload" payload={payload(@coupon)} />
+        <JsonViewer.json_viewer id="coupon-payload" label={AccrueAdmin.Copy.coupon_json_payload_label()} payload={payload(@coupon)} />
       </section>
     </AppShell.app_shell>
     """
@@ -113,7 +113,7 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Coupon")
+    |> assign(:page_title, AccrueAdmin.Copy.coupon_page_title_show())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -154,15 +154,15 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp discount_summary(%{percent_off: %Decimal{} = percent}),
     do: Decimal.to_string(percent, :normal) <> "% off"
 
-  defp discount_summary(_coupon), do: "Processor-defined"
+  defp discount_summary(_coupon), do: AccrueAdmin.Copy.coupon_discount_processor_defined()
 
-  defp status_summary(%{valid: true}), do: "Valid"
-  defp status_summary(%{valid: false}), do: "Invalid"
+  defp status_summary(%{valid: true}), do: AccrueAdmin.Copy.coupon_status_valid()
+  defp status_summary(%{valid: false}), do: AccrueAdmin.Copy.coupon_status_invalid()
 
   defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
-  defp redeem_by_summary(_coupon), do: "No expiry"
+  defp redeem_by_summary(_coupon), do: AccrueAdmin.Copy.coupon_redeem_by_no_expiry()
 
-  defp max_redemptions_summary(%{max_redemptions: nil}), do: "Unlimited cap"
+  defp max_redemptions_summary(%{max_redemptions: nil}), do: AccrueAdmin.Copy.coupon_kpi_meta_redemptions_cap()
   defp max_redemptions_summary(%{max_redemptions: max}), do: "#{max} max"
 
   defp duration_summary(%{duration: nil}), do: "One-off"
@@ -177,10 +177,10 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp duration_summary(_coupon), do: "--"
 
   defp promotion_code_status(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do: "Active until " <> format_datetime(expires_at)
+    do: AccrueAdmin.Copy.coupon_promotion_code_status_active_until_prefix() <> format_datetime(expires_at)
 
-  defp promotion_code_status(%{active: true}), do: "Active"
-  defp promotion_code_status(%{active: false}), do: "Inactive"
+  defp promotion_code_status(%{active: true}), do: AccrueAdmin.Copy.coupon_promotion_code_status_active()
+  defp promotion_code_status(%{active: false}), do: AccrueAdmin.Copy.coupon_promotion_code_status_inactive()
 
   defp promotion_code_redemptions(%{times_redeemed: used, max_redemptions: nil}),
     do: "#{used || 0} used"
