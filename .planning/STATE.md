@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.19
-milestone_name: "Release continuity + proof resilience"
-status: roadmap_ready
-last_updated: "2026-04-23T12:00:00.000Z"
-last_activity: "2026-04-23 — /gsd-new-milestone v1.19 (PROJECT, STATE, REQUIREMENTS, ROADMAP; Phase 66 → milestones/v1.18-phases/)"
+milestone_name: Release continuity + proof resilience
+status: Roadmap defined; use **`/gsd-discuss-phase 67`** or **`/gsd-plan-phase 67`** next.
+last_updated: "2026-04-23T21:53:24.330Z"
+last_activity: 2026-04-23 — **`/gsd-new-milestone` v1.19** — **`REQUIREMENTS.md`**, **`ROADMAP.md`**, **`PROJECT.md`**, **`STATE.md`**; **Phase 66** tree at **`.planning/milestones/v1.18-phases/66-onboarding-confidence/`**.
 progress:
-  total_phases: 3
+  total_phases: 9
   completed_phases: 0
-  total_plans: 1
+  total_plans: 0
   completed_plans: 0
 ---
 
