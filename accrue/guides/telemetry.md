@@ -130,6 +130,9 @@ examples below — for the enforced billing span inventory, see
 - `accrue.billing.meter_event.report_usage` — verified billing span from
   `Accrue.Billing.report_usage/3`; failures surface as the ops signal
   `[:accrue, :ops, :meter_reporting_failed]` (see ops catalog table).
+- `accrue.billing.payment_method.list` — `[:accrue, :billing, :payment_method, :list]`
+  from `Accrue.Billing.list_payment_methods/2` (processor-backed read; no extra
+  ops tuple).
 - `NOT an OTel span name` — `accrue.webhooks.dlq.replay` is the dotted
   **OpenTelemetry span name** only when a host maps the **ops** event
   `[:accrue, :ops, :webhook_dlq, :replay]` (via `Ops.emit/3` / `:telemetry.execute`)
