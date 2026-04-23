@@ -55,7 +55,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.16** — Phases **59–61** (**2026-04-23**): **INT-06..INT-09** integrator golden path + adoption proof + root **VERIFY-01** hops + **Hex / `main`** doc SSOT; archives **`.planning/milestones/v1.16-*`**; planning git tag **`v1.16`**. Prior: **v1.15** — Phases **57–58**; archives **`.planning/milestones/v1.15-*`**; tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**.
 
-**Now:** **v1.17** planning active — **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** define Phases **62–65** (**2026-04-23**). **`phases.clear`** removed **43** stale **`phases/*`** trees (milestone archives under **`.planning/milestones/`** unchanged).
+**Now:** **v1.17** planning active — **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** define Phases **62–65** (**2026-04-23**). **`phases.clear`** removed **43** stale **`phases/*`** trees (milestone archives under **`.planning/milestones/`** unchanged). **Phase 63** (**INT-10** / P0 integrator + VERIFY + docs) shipped **2026-04-23** — see **`phases/63-p0-integrator-verify-docs/63-VERIFICATION.md`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -252,7 +252,7 @@ Theme: **friction-led developer readiness** — triage before broad doc sweeps; 
 - [ ] **FRG-01** — Ranked **integrator-facing friction inventory** committed under **`.planning/`** (path recorded in **`.planning/STATE.md`**) with **sources** (e.g. VERIFY lanes, adoption matrix, host README, CI verifiers, maintainer notes) and explicit **P0 / P1 / P2** + **defer** rows.
 - [ ] **FRG-02** — **North star + diminishing-returns stop rules** for **v1.17** documented and cross-linked from this **Current milestone** section (or **`STATE.md`**).
 - [ ] **FRG-03** — **Scoped implementation backlog** for Phases **63–65** authored from **FRG-01**: each row either maps to **INT-10** / **BIL-03** / **ADM-12** work **or** is deferred with written rationale (no hidden scope).
-- [ ] **INT-10** — **P0 integrator / VERIFY / docs closure** — For every **P0** backlog row tagged **integrator**, **VERIFY**, or **docs**, ship the fix (docs, verifiers, tests as needed) **or** downgrade to **P1+** with maintainer rationale in the inventory doc; **`bash scripts/ci/verify_package_docs.sh`** and merge-blocking **`host-integration`** / **VERIFY-01** contracts stay **green** on **`main`** after changes.
+- [x] **INT-10** — **P0 integrator / VERIFY / docs closure** — For every **P0** backlog row tagged **integrator**, **VERIFY**, or **docs**, ship the fix (docs, verifiers, tests as needed) **or** downgrade to **P1+** with maintainer rationale in the inventory doc; **`bash scripts/ci/verify_package_docs.sh`** and merge-blocking **`host-integration`** / **VERIFY-01** contracts stay **green** on **`main`** after changes. **Validated in Phase 63.**
 - [ ] **BIL-03** — **P0 billing closure** — For every **P0** backlog row tagged **billing**, ship the bounded **`Accrue.Billing` / Stripe / Fake** work with regressions + **`guides/telemetry.md`** + **CHANGELOG** alignment **or** certify **no P0 billing rows** with signed rationale (no **PROC-08**).
 - [ ] **ADM-12** — **P0 admin / operator closure** — For every **P0** backlog row tagged **admin**, ship the scoped **LiveView** / **`AccrueAdmin.Copy`** / **VERIFY-01** work **or** certify **no P0 admin rows** with signed rationale.
 
