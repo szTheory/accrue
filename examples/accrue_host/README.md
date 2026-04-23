@@ -37,7 +37,7 @@ You are in the Accrue repo: stay in **`examples/accrue_host`**, run **`mix setup
 
 ### Capsule R — Evaluate / read-only
 
-Clone once, `cd examples/accrue_host`, run **`mix verify`** or **`mix verify.full`**. For VERIFY-01 / Playwright depth, jump to [**#proof-and-verification**](#proof-and-verification) when the bounded commands are not enough.
+Clone once, `cd examples/accrue_host`, run **`mix verify`**. When VERIFY-01 / Playwright depth or the CI-equivalent host stack matters, jump to [**#proof-and-verification**](#proof-and-verification) instead of duplicating those commands here.
 
 ## First run
 
