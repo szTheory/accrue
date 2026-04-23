@@ -21,7 +21,7 @@ Cross-cutting: recommendations below are **one coherent package** — pins, trus
 
 ### 1 — Hex vs `main` and version pins (SSOT)
 
-- **D-01 (`@version` + three-part `~>`):** Treat **`accrue/mix.exs`** and **`accrue_admin/mix.exs`** **`@version`** as the **only** source of truth for dependency pins in integrator-facing fenced blocks. Snippets use **identical three-part pins** on both packages, e.g. `{:accrue, "~> 0.3.1"}` and `{:accrue_admin, "~> 0.3.1"}`, matching **`verify_package_docs.sh`** / **`Accrue.Docs.PackageDocsVerifierTest`** enforcement. This matches **Mix** semantics for pre-1.0 (**minor** is the intentional breaking boundary on Hex) and avoids misleading **`~> 0.3`**-style floors that read “patch-safe” but mean **&lt; 1.0.0** in Elixir.
+- **D-01 (`@version` + three-part `~>`):** Treat **`accrue/mix.exs`** and **`accrue_admin/mix.exs`** **`@version`** as the **only** source of truth for dependency pins in integrator-facing fenced blocks. Snippets use **identical three-part pins** on both packages, e.g. `{:accrue, "~> 0.3.1"}` and `{:accrue_admin, "~> 0.3.1"}`, matching **`verify_package_docs.sh`** / **`Accrue.Docs.PackageDocsVerifierTest`** enforcement. This matches **Mix** semantics for pre-1.0 (**minor** is the intentional breaking boundary on Hex) and avoids misleading **`~> 0.3`**-style floors that read “patch-safe” but in Mix still include any release below 1.0.0, not only the current minor train.
 
 - **D-02 (Hex vs `main` banner):** Keep a **prominent** “Hex vs `main`” explanation wherever copy-paste pins appear (First Hour, package READMEs as already governed). **`main`** may be **ahead of last Hex publish** — never imply they are the same artifact without saying so.
 
