@@ -106,7 +106,12 @@ defmodule AccrueAdmin.Live.InvoiceLive do
          |> push_flash(:info, Copy.invoice_pdf_open_info())}
 
       {:error, reason} ->
-        {:noreply, push_flash(socket, :error, "Could not render PDF: #{inspect(reason)}")}
+        {:noreply,
+         push_flash(
+           socket,
+           :error,
+           Copy.invoice_pdf_render_failed_prefix() <> inspect(reason)
+         )}
     end
   end
 
@@ -132,8 +137,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
-              %{label: "Invoices", href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
+              %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
+              %{label: Copy.invoice_breadcrumb_invoices(), href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
               %{
                 label: customer_label(@customer),
                 href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
@@ -141,36 +146,38 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               %{label: invoice_label(@invoice)}
             ]}
           />
-          <p class="ax-eyebrow">Invoice detail</p>
+          <p class="ax-eyebrow"><%= Copy.invoice_detail_eyebrow() %></p>
           <h2 class="ax-display"><%= invoice_label(@invoice) %></h2>
           <p class="ax-body ax-page-copy">
-            <%= customer_label(@customer) %> · <%= @invoice.processor_id || @invoice.id %> · due <%= format_datetime(@invoice.due_date) %>
+            <%= customer_label(@customer) %> · <%= @invoice.processor_id || @invoice.id %> · <%= Copy.invoice_detail_due_prefix() %><%= format_datetime(@invoice.due_date) %>
           </p>
         </header>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-kpi-grid" aria-label="Invoice summary">
-          <KpiCard.kpi_card label="Status" value={humanize(@invoice.status)}>
+        <section class="ax-kpi-grid" aria-label={Copy.invoice_detail_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={Copy.invoice_kpi_status_label()} value={humanize(@invoice.status)}>
             <:meta><StatusBadge.status_badge status={@invoice.status} /></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Amount due"
+            label={Copy.invoice_kpi_amount_due_label()}
             value={money_text(@invoice.amount_due_minor, @invoice.currency)}
-            delta={money_text(@invoice.amount_paid_minor, @invoice.currency) <> " paid"}
+            delta={money_text(@invoice.amount_paid_minor, @invoice.currency) <> Copy.invoice_kpi_amount_due_delta_suffix()}
             delta_tone="cobalt"
           >
-            <:meta><%= money_text(@invoice.amount_remaining_minor, @invoice.currency) %> remaining</:meta>
+            <:meta>
+              <%= money_text(@invoice.amount_remaining_minor, @invoice.currency) %><%= Copy.invoice_kpi_amount_remaining_meta_suffix() %>
+            </:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Line items"
+            label={Copy.invoice_kpi_line_items_label()}
             value={Integer.to_string(length(@line_items))}
             delta={pdf_summary(@invoice)}
             delta_tone="slate"
           >
-            <:meta>PDF preview stays on the Phase 6 invoice render path</:meta>
+            <:meta><%= Copy.invoice_kpi_line_items_meta() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
@@ -183,72 +190,72 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               class="ax-card"
               data-role="tax-risk-panel"
             >
-              <p class="ax-eyebrow">Tax risk</p>
-              <h3 class="ax-heading">Invoice finalization needs tax-location recovery</h3>
+              <p class="ax-eyebrow"><%= Copy.invoice_tax_risk_eyebrow() %></p>
+              <h3 class="ax-heading"><%= Copy.invoice_tax_risk_heading() %></h3>
               <p :if={present?(@invoice.automatic_tax_disabled_reason)} class="ax-body">
-                Automatic tax disabled reason: <%= humanize(@invoice.automatic_tax_disabled_reason) %>.
+                <%= Copy.invoice_tax_disabled_reason_label() %> <%= humanize(@invoice.automatic_tax_disabled_reason) %>.
               </p>
               <p :if={present?(@invoice.last_finalization_error_code)} class="ax-body">
-                Finalization failure code: <%= @invoice.last_finalization_error_code %>.
+                <%= Copy.invoice_tax_finalization_failure_label() %> <%= @invoice.last_finalization_error_code %>.
               </p>
               <p class="ax-body">
-                This view reflects local invoice state only. Repair the customer tax location, then retry finalization from Accrue.
+                <%= Copy.invoice_tax_recovery_body() %>
               </p>
             </section>
 
             <header class="ax-page-header">
-              <p class="ax-eyebrow">Admin actions</p>
-              <h3 class="ax-heading">Invoice workflow controls</h3>
-              <p class="ax-body">Actions run through the existing billing facade and record admin audit rows.</p>
+              <p class="ax-eyebrow"><%= Copy.invoice_actions_eyebrow() %></p>
+              <h3 class="ax-heading"><%= Copy.invoice_actions_heading() %></h3>
+              <p class="ax-body"><%= Copy.invoice_actions_body() %></p>
             </header>
 
             <div class="ax-stack-xl">
               <form phx-submit="prepare_action" data-role="finalize-form">
                 <input type="hidden" name="action_type" value="finalize" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Finalize invoice</button>
+                <button type="submit" class="ax-button ax-button-secondary"><%= Copy.invoice_action_finalize() %></button>
               </form>
 
               <form phx-submit="prepare_action" data-role="pay-form">
                 <input type="hidden" name="action_type" value="pay" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Manual pay</button>
+                <button type="submit" class="ax-button ax-button-secondary"><%= Copy.invoice_action_manual_pay() %></button>
               </form>
 
               <form phx-submit="prepare_action" data-role="void-form">
                 <input type="hidden" name="action_type" value="void" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Void invoice</button>
+                <button type="submit" class="ax-button ax-button-secondary"><%= Copy.invoice_action_void() %></button>
               </form>
 
               <form phx-submit="prepare_action" data-role="mark-uncollectible-form">
                 <input type="hidden" name="action_type" value="mark_uncollectible" />
                 <.source_event_select events={@timeline_events} />
-                <button type="submit" class="ax-button ax-button-secondary">Mark uncollectible</button>
+                <button type="submit" class="ax-button ax-button-secondary"><%= Copy.invoice_action_mark_uncollectible() %></button>
               </form>
             </div>
 
             <section :if={@pending_action} class="ax-card" data-role="confirm-panel">
-              <p class="ax-label">Confirm action</p>
+              <p class="ax-label"><%= Copy.invoice_confirm_panel_label() %></p>
               <p class="ax-body"><%= confirm_copy(@pending_action) %></p>
               <div class="ax-page-header">
                 <button phx-click="confirm_action" class="ax-button ax-button-primary" data-role="confirm-action">
-                  Confirm <%= humanize(@pending_action.type) %>
+                  <%= Copy.invoice_confirm_action_verb() %> <%= humanize(@pending_action.type) %>
                 </button>
-                <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost">Cancel</button>
+                <button phx-click="cancel_pending_action" class="ax-button ax-button-ghost"><%= Copy.invoice_confirm_cancel() %></button>
               </div>
             </section>
           </article>
 
           <article class="ax-card">
             <header class="ax-page-header">
-              <p class="ax-eyebrow">PDF</p>
-              <h3 class="ax-heading">Preview and download</h3>
-              <p class="ax-body">Open PDF reuses `Accrue.Billing.render_invoice_pdf/2` and never invents a new storage path.</p>
+              <p class="ax-eyebrow"><%= Copy.invoice_pdf_section_eyebrow() %></p>
+              <h3 class="ax-heading"><%= Copy.invoice_pdf_heading() %></h3>
+              <p class="ax-body"><%= Copy.invoice_pdf_body() %></p>
             </header>
 
             <div class="ax-stack-xl">
-              <button phx-click="open_pdf" class="ax-button ax-button-primary">Open PDF</button>
+              <button phx-click="open_pdf" class="ax-button ax-button-primary"><%= Copy.invoice_open_pdf_button() %></button>
 
               <a
                 :if={@invoice.pdf_url}
@@ -257,7 +264,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                 rel="noreferrer"
                 class="ax-link"
               >
-                Processor PDF
+                <%= Copy.invoice_processor_pdf_link() %>
               </a>
 
               <a
@@ -267,7 +274,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                 rel="noreferrer"
                 class="ax-link"
               >
-                Hosted invoice
+                <%= Copy.invoice_hosted_invoice_link() %>
               </a>
 
               <div :if={@generated_pdf_href} class="ax-stack-sm" data-role="generated-pdf-links">
@@ -278,7 +285,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                   class="ax-link"
                   data-role="open-pdf-link"
                 >
-                  Open rendered PDF
+                  <%= Copy.invoice_open_rendered_pdf_link() %>
                 </a>
                 <a
                   href={@generated_pdf_href}
@@ -286,7 +293,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                   class="ax-link"
                   data-role="download-pdf-link"
                 >
-                  Download rendered PDF
+                  <%= Copy.invoice_download_rendered_pdf_link() %>
                 </a>
               </div>
             </div>
@@ -295,18 +302,18 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
         <section class="ax-card">
           <header class="ax-page-header">
-            <p class="ax-eyebrow">Line items</p>
-            <h3 class="ax-heading">Invoice rows</h3>
+            <p class="ax-eyebrow"><%= Copy.invoice_line_items_eyebrow() %></p>
+            <h3 class="ax-heading"><%= Copy.invoice_line_items_heading() %></h3>
           </header>
 
           <div :for={item <- @line_items} class="ax-list-row">
             <div>
               <p class="ax-label"><%= item.description || item.price_ref || item.stripe_id || item.id %></p>
               <p class="ax-body">
-                qty <%= item.quantity || 1 %>
-                <span :if={item.proration}> · proration</span>
+                <%= Copy.invoice_line_item_qty_prefix() %><%= item.quantity || 1 %>
+                <span :if={item.proration}><%= Copy.invoice_line_item_proration_suffix() %></span>
                 <span :if={item.period_start || item.period_end}>
-                  · <%= format_datetime(item.period_start) %> to <%= format_datetime(item.period_end) %>
+                  <%= Copy.invoices_balance_sep() %><%= format_datetime(item.period_start) %><%= Copy.invoice_line_item_period_separator() %><%= format_datetime(item.period_end) %>
                 </span>
               </p>
             </div>
@@ -317,18 +324,18 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             />
           </div>
 
-          <p :if={@line_items == []} class="ax-body">No line items are projected for this invoice yet.</p>
+          <p :if={@line_items == []} class="ax-body"><%= Copy.invoice_line_items_empty() %></p>
         </section>
 
         <section class="ax-card">
           <header class="ax-page-header">
-            <p class="ax-eyebrow">Timeline</p>
-            <h3 class="ax-heading">Invoice events</h3>
+            <p class="ax-eyebrow"><%= Copy.invoice_timeline_eyebrow() %></p>
+            <h3 class="ax-heading"><%= Copy.invoice_timeline_heading() %></h3>
           </header>
 
           <Timeline.timeline
-            label="Invoice events"
-            empty_label="No invoice-scoped events yet"
+            label={Copy.invoice_timeline_label()}
+            empty_label={Copy.invoice_timeline_empty()}
             items={timeline_items(@timeline_events)}
           />
         </section>
@@ -348,10 +355,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp source_event_select(assigns) do
     ~H"""
     <label class="ax-label" for={"invoice-source-event-" <> Integer.to_string(System.unique_integer([:positive]))}>
-      Source event
+      <%= Copy.invoice_source_event_label() %>
     </label>
     <select name="source_event_id" class="ax-select">
-      <option value="">None</option>
+      <option value=""><%= Copy.invoice_source_event_none() %></option>
       <option :for={event <- @events} value={event.id}>
         <%= "#{event.type} ##{event.id}" %>
       </option>
@@ -361,7 +368,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Invoice")
+    |> assign(:page_title, Copy.invoice_page_title_detail())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -543,19 +550,19 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp confirm_copy(action) do
     source =
       if action.source_event_id do
-        " Source event ##{action.source_event_id} will be linked."
+        Copy.invoice_confirm_source_event_suffix(action.source_event_id)
       else
         ""
       end
 
-    "#{humanize(action.type)} will use the existing invoice workflow APIs.#{source}"
+    Copy.invoice_confirm_workflow_message(humanize(action.type), source)
   end
 
   defp pdf_summary(invoice) do
     cond do
-      invoice.pdf_url -> "processor PDF ready"
-      invoice.hosted_url -> "hosted invoice ready"
-      true -> "render on demand"
+      invoice.pdf_url -> Copy.invoice_pdf_summary_processor_ready()
+      invoice.hosted_url -> Copy.invoice_pdf_summary_hosted_ready()
+      true -> Copy.invoice_pdf_summary_render_on_demand()
     end
   end
 
