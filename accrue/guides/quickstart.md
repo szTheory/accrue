@@ -20,6 +20,7 @@ the Phoenix host-app order proved in `examples/accrue_host`:
 
 ## Focused guides
 
+- [Auth adapters](auth_adapters.md) — production **`Accrue.Auth`** wiring; pick an adapter instead of inventing callbacks.
 - [Organization billing (non-Sigra)](organization_billing.md) — session→billable org path when the Stripe Customer should follow an organization, not only the signed-in user.
 - [Troubleshooting](troubleshooting.md) for setup diagnostics and exact verify
   commands.

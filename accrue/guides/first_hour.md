@@ -16,11 +16,15 @@ You already have a Phoenix app. Add Accrue to `mix.exs`, run `mix deps.get`, the
 
 ### Capsule M — Monorepo clone
 
-From the repository root: `cd examples/accrue_host`, run **`mix setup`**, start **`mix phx.server`**, then follow the numbered host README story (subscription → signed webhook → admin → `mix verify`) — the same Fake-backed arc this guide describes in package terms.
+From the repository root: `cd examples/accrue_host`, run **`mix setup`**, start **`mix phx.server`**, then follow the numbered host README story (subscription → signed webhook → admin → `mix verify`) — the same Fake-backed arc this guide describes in package terms. **Sigra** is wired in the checked-in demo for convenience and reproducibility, not because production Accrue apps must use it.
 
 ### Capsule R — Evaluate / read-only
 
 Shortest read-only path: clone the repo, `cd examples/accrue_host`, run **`mix verify`** or **`mix verify.full`**. For merge-blocking VERIFY-01 detail and Playwright entry points, use [**#proof-and-verification**](../../examples/accrue_host/README.md#proof-and-verification) in the host README when you need more than the bounded proof commands.
+
+### Trust boundary (production vs demo)
+
+Production apps integrate billing through host-owned **`Accrue.Auth`**; see [Auth adapters](auth_adapters.md) for adapter choices and wiring contracts. **Sigra** is optional: the demo uses it for deterministic organization billing and CI, not as a blanket production requirement. When you are not on Sigra, follow **Capsule H** and [Organization billing (non-Sigra)](organization_billing.md) for org-scoped Stripe customers. Demo-specific `mix.exs` and setup commands stay in [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md).
 
 ## 1. First run
 

@@ -74,6 +74,14 @@ The required deterministic release gate still includes the checked-in trust revi
 
 v1.7 adoption requirements (ADOPT-01–ADOPT-06) are enforced mostly through documentation gates in `scripts/ci/`. When `verify_package_docs` or VERIFY-01 checks fail in CI, open [scripts/ci/README.md](scripts/ci/README.md) for the requirement → script → ExUnit map so you edit the owning files first instead of silencing unrelated prose.
 
+Before you open a PR that touches **First Hour**, the **root/host README**, **`accrue/guides/quickstart.md`**, or any **`verify_package_docs`** needle, run this **minimum local doc preflight** from the repository root (ordered; fast failures first). It does **not** replace the **`host-integration`** merge-blocking job.
+
+```bash
+bash scripts/ci/verify_package_docs.sh && \
+bash scripts/ci/verify_verify01_readme_contract.sh && \
+bash scripts/ci/verify_adoption_proof_matrix.sh
+```
+
 ## Host proof (VERIFY-01)
 
 Host integration proofs sit in **Layer B** and **Layer C** relative to the per-package release gate:
