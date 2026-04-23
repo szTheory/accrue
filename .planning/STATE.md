@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Integrator + proof continuity
-status: defining_requirements
-last_updated: "2026-04-23T21:30:00.000Z"
-last_activity: 2026-04-23
+status: v1.16 open — **Phases 59–61** defined
+last_updated: "2026-04-23T14:48:23.432Z"
+last_activity: 2026-04-23 — **`/gsd-new-milestone`** (**v1.16**)
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
