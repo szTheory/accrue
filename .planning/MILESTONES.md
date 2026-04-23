@@ -6,7 +6,9 @@
 
 **Theme:** Re-bind **First Hour** / **host README** / **quickstart**, **adoption proof matrix**, repo-root **VERIFY-01** discoverability, and **Hex / `main`** doc SSOT after **v1.15** trust SemVer work — **no** **PROC-08** / **FIN-03**, **no** new billing primitives.
 
-**Next:** **`/gsd-discuss-phase 59`** or **`/gsd-plan-phase 59`**.
+**Workspace vs Hex:** `mix.exs` **`@version`** on the branch you are testing may read **ahead** of **last published** on Hex — see **[`.planning/PROJECT.md`](.planning/PROJECT.md)** § **Current State** for the canonical dual-track wording.
+
+**Next (maintainers):** **`/gsd-execute-phase 61`** when executing remaining phase plans (see **`.planning/STATE.md`**). Published packages: [`accrue` on Hex](https://hex.pm/packages/accrue), [`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin).
 
 ---
 

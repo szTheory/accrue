@@ -47,7 +47,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-**Public Hex (last published):** **`accrue` 0.3.0**, **`accrue_admin` 0.3.0** — workspace **`@version`** may advance on **`main`** ahead of the next publish (**`verify_package_docs`** keeps install snippets honest).
+**Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
+
+**Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** may still read **ahead** until the next ship.
 
 **Last shipped planning milestone:** **v1.15** — Phases **57–58** (**2026-04-23**): **TRT-01..TRT-04** trust/versioning docs + demo **Sigra** clarity + **`verify_package_docs`** alignment; archives **`.planning/milestones/v1.15-*`**; planning git tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**. Prior: **v1.13** — Phases **51–53**; archives **`.planning/milestones/v1.13-*`**; tag **`v1.13`**.
 

@@ -84,6 +84,8 @@ bash scripts/ci/verify_verify01_readme_contract.sh && \
 bash scripts/ci/verify_adoption_proof_matrix.sh
 ```
 
+**Hex-only `mix deps.get` vs `@version` on `main`:** When **`mix.exs` `@version`** bumps on **`main`** ahead of the matching **Hex** publish, **`mix deps.get`** against published **`~>`** pins can fail until the new artifacts ship. Prefer a **`path:`** dependency into this workspace, a **git** ref to the commit you need, or **wait for publish** before expecting Hex to resolve the newer number.
+
 ## Host proof (VERIFY-01)
 
 Host integration proofs sit in **Layer B** and **Layer C** relative to the per-package release gate:
