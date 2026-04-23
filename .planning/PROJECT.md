@@ -12,7 +12,18 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**Next milestone:** use **`/gsd-new-milestone`** to open **v1.14+** with fresh **`.planning/REQUIREMENTS.md`** (the prior file is removed at each milestone boundary).
+### v1.14 — Companion admin + billing depth (**active**)
+
+**Goal:** Improve **operator-facing core `accrue_admin`** (money-primary flows) and ship **one** scoped **`Accrue.Billing` / Stripe** capability expansion with **Fake** coverage and **telemetry/guide** alignment—**before** another integrator/adoption milestone or a release/Hex continuity milestone.
+
+**Target features:**
+
+- **Companion admin (primary):** inventory vs **Copy** / **`ax-*`** / **VERIFY-01** on **core** surfaces; burn-down **P0** gaps on **≥1** money-primary flow; extend **Playwright + axe**; theme-exception + **export_copy_strings** hygiene when Copy modules move.
+- **Billing / Stripe depth (secondary):** one bounded public billing capability (**not** **PROC-08**), with **Fake** regressions and **`guides/telemetry.md`** (+ runbook links as needed) kept truthful.
+
+**Explicitly later:** integrator/adoption golden-path work; release/Hex continuity as a milestone theme.
+
+**Phases:** **54–56** (continued numbering; **`.planning/phases/`** trees **1–53** retained—**`phases.clear`** not run). Requirements: **`.planning/REQUIREMENTS.md`** (**ADM-07..ADM-11**, **BIL-01..BIL-02**).
 
 **v1.13 — Integrator path + secondary admin parity** is **archived** (2026-04-23). Phases **51–53**; **INT-01..INT-05**, **AUX-01..AUX-06** validated. Archives: `.planning/milestones/v1.13-ROADMAP.md`, `v1.13-REQUIREMENTS.md`. Planning git tag **`v1.13`**.
 
@@ -36,7 +47,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.13** — Phases **51–53** (2026-04-22 / **2026-04-23**): integrator golden-path docs + adoption proof / package alignment; auxiliary **Copy** + **`ax-*`** + **VERIFY-01** for coupons, promotion codes, Connect, and events (**INT-01..INT-05**, **AUX-01..AUX-06**); archives `.planning/milestones/v1.13-*`; planning git tag **`v1.13`**. Prior: **v1.12** — Phases **48–50**; archives `.planning/milestones/v1.12-*`; tag **`v1.12`**. Prior: **v1.11** — Phases **46–47**; archives `.planning/milestones/v1.11-*`; tag **`v1.11`**.
 
-**Now:** **v1.13** closed; **`/gsd-new-milestone`** defines the next scope. **`phases.clear`** was not run when opening **v1.13** (phase trees **1–53** remain under **`.planning/phases/`**).
+**Now:** **v1.14** opened (**2026-04-22**); requirements + roadmap live at **`.planning/REQUIREMENTS.md`** / **`.planning/ROADMAP.md`**. **`phases.clear`** not run when opening **v1.14** (phase trees **1–53** retained under **`.planning/phases/`**).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -407,6 +418,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.11 ships Hex before the next feature milestone | Evaluators and hosts need published packages that include metering + accumulated work; release automation and doc verifiers must stay aligned with linked-versions monorepo reality | ✓ Good |
 | v1.12 extends companion admin without billing-primitive expansion | Operators need post-metering admin clarity and smoother drills on Hex **0.3.0**; scope stays presentation + gates—not **PROC-08** / **FIN-03** | ✓ Good |
 | v1.13 pairs integrator golden-path docs with auxiliary admin parity | First-time hosts still judge the library on README ↔ first_hour ↔ VERIFY-01 coherence; secondary LiveViews must not feel “unshipped” next to customers/subscriptions/invoices | ✓ Good |
+| v1.14 sequences core admin parity before integrator/Hex milestones | After auxiliary parity (v1.13), **core** money flows should meet the same Copy/token/VERIFY bar; one billing depth slice ships with Fake + telemetry truth before doc/release milestones return | — Pending |
 
 ## Current Milestone Notes
 
@@ -438,6 +450,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-22:** **v1.12** milestone archived (`milestones/v1.12-*`); root **`.planning/REQUIREMENTS.md`** removed for next milestone; planning git tag **`v1.12`**.
 - **2026-04-22:** **v1.13** opened — **Integrator path + secondary admin parity**; Phases **51–53**; requirements **INT-01..INT-05**, **AUX-01..AUX-06**; **`phases.clear`** skipped (preserve **1–50** phase trees).
 - **2026-04-23:** **v1.13** milestone archived (`milestones/v1.13-*`); root **`.planning/REQUIREMENTS.md`** removed for next milestone; planning git tag **`v1.13`**.
+- **2026-04-22:** **`/gsd-new-milestone`** — **v1.14** opened (**Companion admin + billing depth**); Phases **54–56**; requirements **ADM-07..ADM-11**, **BIL-01..BIL-02**; domain research skipped (brownfield); **`phases.clear`** skipped (preserve **1–53** trees).
 
 ## Evolution
 
@@ -457,4 +470,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 after **`/gsd-complete-milestone`**: archived **v1.13** (Phases **51–53**; **INT-** + **AUX-** requirements; fresh **`REQUIREMENTS.md`** awaits **`/gsd-new-milestone`**).*
+*Last updated: 2026-04-22 after **`/gsd-new-milestone`**: opened **v1.14** (Phases **54–56**; **ADM-** + **BIL-** requirements; **`phases.clear`** skipped).*

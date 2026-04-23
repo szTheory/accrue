@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.14 Companion admin + billing depth (Opened: 2026-04-22)
+
+**Planning opened:** 2026-04-22
+
+**Theme:** **Core `accrue_admin`** parity (**`AccrueAdmin.Copy`**, **`ax-*`/tokens**, **VERIFY-01**) on **money-primary** surfaces (excluding the v1.13 auxiliary set), then **one** scoped **`Accrue.Billing` / Stripe** expansion with **Fake** coverage + **`guides/telemetry.md`** alignment. **Integrator/adoption** and **release/Hex continuity** milestones are **explicitly later**. **PROC-08** / **FIN-03** remain non-goals.
+
+**Phases:** **54–56** (see root `.planning/ROADMAP.md`). Requirements: `.planning/REQUIREMENTS.md` (**ADM-07..ADM-11**, **BIL-01..BIL-02**).
+
+**Phase directories:** **`phases.clear` not run** — preserves **1–53** trees under `.planning/phases/`.
+
+**Status:** **Active** — not shipped.
+
+---
+
 ## v1.13 Integrator path + secondary admin parity (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-22

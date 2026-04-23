@@ -1,52 +1,52 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.13
-milestone_name: Integrator path + secondary admin parity
-status: archived
-last_updated: "2026-04-23T23:59:00.000Z"
-last_activity: 2026-04-23
+milestone: v1.14
+milestone_name: Companion admin + billing depth
+status: defining_requirements
+last_updated: "2026-04-22T12:00:00.000Z"
+last_activity: 2026-04-22
 progress:
-  total_phases: 40
-  completed_phases: 36
-  total_plans: 106
-  completed_plans: 106
-  percent: 100
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-23)
+See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **`/gsd-new-milestone`** — define **v1.14+** requirements and roadmap; root **`.planning/REQUIREMENTS.md`** intentionally absent until then.
+**Current focus:** **v1.14** — core **`accrue_admin`** Copy / token / VERIFY parity, then one **`Accrue.Billing`** / Stripe depth slice (**Fake** + telemetry docs). Integrator/adoption and release/Hex continuity milestones are **explicitly later**.
 
 ## Current Position
 
-Phase: —
+Phase: Not started (roadmap defined — begin Phase 54)
 
 Plan: —
 
-**Status:** **v1.13** archived (**Phases 51–53**); git tag **`v1.13`**; archives under **`.planning/milestones/v1.13-*`**.
+**Status:** Milestone **v1.14** initialized; **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** committed when planning commits land.
 
-**Last activity:** 2026-04-23
+**Last activity:** 2026-04-22 — `/gsd-new-milestone` v1.14
 
 ## Milestone Progress
 
-**Active:** *(none — milestone boundary)*
+**Active:** **v1.14** — Phases **54–56** (see **`.planning/ROADMAP.md`**).
 
-**Last shipped (planning):** **v1.13** — Phases **51–53** (integrator golden path + auxiliary **Copy** / **`ax-*`** / **VERIFY-01** for coupons, promotion codes, Connect, events).
+**Last shipped (planning):** **v1.13** — Phases **51–53** (integrator golden path + auxiliary admin parity). Archives: **`.planning/milestones/v1.13-*`**; tag **`v1.13`**.
 
-**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (lockstep; see **`accrue/mix.exs`** **`@version`**). Coordinate **Release Please** / Hex when the next version is ready.
+**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (see **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version`**).
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — *(absent until **`/gsd-new-milestone`**)*
-- `.planning/ROADMAP.md` — shipped milestone list + **v1.13** collapsed **`<details>`**
-- `.planning/PROJECT.md` — **v1.13** archived; next milestone TBD
-- `.planning/phases/01-*` … `53-*` — shipped phase trees (**`phases.clear` not run** when opening **v1.13**)
+- **`.planning/REQUIREMENTS.md`** — **v1.14** (**ADM-07..ADM-11**, **BIL-01..BIL-02**)
+- **`.planning/ROADMAP.md`** — **v1.14** phase table + shipped milestone history
+- **`.planning/PROJECT.md`** — **v1.14** current milestone block
+- **`.planning/phases/01-*` … `53-*`** — prior milestone evidence (**`phases.clear` not run**)
 
 ## Deferred Items
 
@@ -58,9 +58,9 @@ Plan: —
 
 ## Recent Decisions
 
-- **2026-04-22:** **`/gsd-new-milestone`** — **v1.13** scope locked to **integrator golden path** + **auxiliary admin** (**coupons**, **promotion codes**, **Connect**, **events**); **PROC-08** / **FIN-03** unchanged as non-goals; domain research skipped (brownfield); **`phases.clear`** skipped to preserve **1–50** evidence trees.
-- **2026-04-23:** **`/gsd-complete-milestone` v1.13** — archives **`milestones/v1.13-*`**, **`ROADMAP.md`** / **`PROJECT.md`** / **`MILESTONES.md`** updated, root **`REQUIREMENTS.md`** removed, annotated tag **`v1.13`**.
+- **2026-04-22:** **`/gsd-new-milestone` v1.14** — **Companion admin + billing depth**; **ADM-07..ADM-11**, **BIL-01..BIL-02**; phases **54–56**; brownfield research skipped; **`phases.clear`** skipped (preserve **1–53**).
+- **2026-04-23:** **`/gsd-complete-milestone` v1.13** — archives **`milestones/v1.13-*`**, planning tag **`v1.13`**.
 
-**Next:** **`/gsd-new-milestone`** for **v1.14+** scope; routine **`verify_package_docs`** + VERIFY-01 CI when changing install-facing docs.
+**Next:** **`/gsd-discuss-phase 54`** (or **`/gsd-plan-phase 54`**) for **core admin inventory + first burn-down**.
 
-**Completed:** Milestone **v1.13** — Phases **51–53** (`51-*`, `52-*`, `53-*` summaries + verification). Prior: **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
+**Completed:** Milestone **v1.13** — Phases **51–53**. Prior: **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
