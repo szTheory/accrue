@@ -2,6 +2,7 @@ defmodule AccrueAdmin.PromotionCodesLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Billing.{Coupon, PromotionCode}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -58,7 +59,7 @@ defmodule AccrueAdmin.PromotionCodesLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/promotion-codes?q=BUNDLE&active=true")
 
-    assert html =~ "Promotion codes as a dedicated admin surface"
+    assert html =~ Copy.promotion_codes_index_headline()
     assert html =~ "BUNDLE10"
     assert html =~ "Bundle coupon"
     assert html =~ "/billing/promotion-codes/"

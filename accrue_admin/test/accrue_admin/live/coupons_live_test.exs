@@ -2,6 +2,7 @@ defmodule AccrueAdmin.CouponsLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Billing.{Coupon, PromotionCode}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   defmodule AuthAdapter do
@@ -60,9 +61,9 @@ defmodule AccrueAdmin.CouponsLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/coupons?q=Spring&valid=true")
 
-    assert html =~ "Coupons backed by local discount projections"
+    assert html =~ Copy.coupon_index_headline()
     assert html =~ "Spring 25"
-    assert html =~ "Promotion codes"
+    assert html =~ Copy.coupon_kpi_label_promotion_codes()
     assert html =~ "/billing/coupons/"
     assert html =~ "/billing/promotion-codes"
     refute html =~ "Expired Deal"
