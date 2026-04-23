@@ -2,7 +2,7 @@ defmodule Accrue.Billing.PaymentMethodActions do
   @moduledoc """
   Phase 3 Plan 06 payment method write surface (BILL-23, BILL-25).
 
-  Ships three public entry points, all exposed via `defdelegate` on
+  Ships four public entry points, all exposed via `defdelegate` on
   `Accrue.Billing`:
 
     * `attach_payment_method/3` — attaches a processor-side payment
@@ -19,6 +19,23 @@ defmodule Accrue.Billing.PaymentMethodActions do
       customer.id` (BILL-25, strict attachment check) and raises
       `Accrue.Error.NotAttached` otherwise. Never silently wires a
       foreign PM as a customer default.
+    * `list_payment_methods/2` — read-only listing of processor-side
+      payment methods for the customer's Stripe customer id (Phase 56,
+      BIL-01). Optional keyword filters are validated with
+      `NimbleOptions` before the processor call.
+
+  ## `list_payment_methods/2` options
+
+  | Key | Type | Notes |
+  |-----|------|-------|
+  | `type` | string | Stripe `type` filter (e.g. `\"card\"`). |
+  | `limit` | pos_integer | Page size for Stripe list. |
+  | `starting_after` | string | Pagination cursor. |
+  | `ending_before` | string | Pagination cursor. |
+  | `operation_id` | string | Dropped before the wire; reserved for parity with write paths. |
+
+  Empty `[]` is always valid. Additional host-visible filters can extend
+  this schema in a minor release without changing the arity.
   """
 
   import Ecto.Query, only: [from: 2]
@@ -29,6 +46,14 @@ defmodule Accrue.Billing.PaymentMethodActions do
   alias Accrue.Processor
   alias Accrue.Processor.Idempotency
   alias Accrue.Repo
+
+  @list_payment_methods_opts_schema [
+    type: [type: {:or, [:string, nil]}, default: nil],
+    limit: [type: {:or, [:pos_integer, nil]}, default: nil],
+    starting_after: [type: {:or, [:string, nil]}, default: nil],
+    ending_before: [type: {:or, [:string, nil]}, default: nil],
+    operation_id: [type: {:or, [:string, nil]}, default: nil]
+  ]
 
   # ---------------------------------------------------------------------
   # attach_payment_method/3 (BILL-23)
@@ -234,8 +259,44 @@ defmodule Accrue.Billing.PaymentMethodActions do
   end
 
   # ---------------------------------------------------------------------
+  # list_payment_methods/2 (Phase 56, BIL-01)
+  # ---------------------------------------------------------------------
+
+  @doc """
+  Lists payment methods attached to the customer on the processor (Stripe
+  truth — not a local cache projection).
+  """
+  @spec list_payment_methods(Customer.t(), keyword()) ::
+          {:ok, map()} | {:error, term()}
+  def list_payment_methods(%Customer{} = customer, opts \\ []) when is_list(opts) do
+    validated = NimbleOptions.validate!(opts, @list_payment_methods_opts_schema)
+    params = list_params_for_processor(customer, validated)
+
+    Processor.__impl__().list_payment_methods(params, sanitize_opts(opts))
+  end
+
+  @doc "Raising variant of `list_payment_methods/2`."
+  @spec list_payment_methods!(Customer.t(), keyword()) :: map()
+  def list_payment_methods!(%Customer{} = customer, opts \\ []) when is_list(opts) do
+    case list_payment_methods(customer, opts) do
+      {:ok, body} -> body
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "list_payment_methods!/2 failed: #{inspect(other)}"
+    end
+  end
+
+  # ---------------------------------------------------------------------
   # helpers
   # ---------------------------------------------------------------------
+
+  defp list_params_for_processor(%Customer{} = customer, validated_kw) when is_list(validated_kw) do
+    validated_kw
+    |> Keyword.drop([:operation_id])
+    |> Enum.reduce(%{customer: customer.processor_id}, fn
+      {_k, nil}, acc -> acc
+      {k, v}, acc -> Map.put(acc, k, v)
+    end)
+  end
 
   defp get_card_fingerprint(canonical) do
     case get_field(canonical, :card) do
