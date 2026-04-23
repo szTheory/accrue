@@ -30,11 +30,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-**Public Hex (last published):** **`accrue` 0.3.0**, **`accrue_admin` 0.3.0** — aligned with workspace **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version "0.3.0"`** at this commit (Release Please + manifest remain the numeric SSOT for the next bump).
+**Public Hex (last published):** **`accrue` 0.3.0**, **`accrue_admin` 0.3.0** — workspace **`@version`** may advance on **`main`** ahead of the next publish (**`verify_package_docs`** keeps install snippets honest).
 
 **Last shipped planning milestone:** **v1.12** — Phases **48–50** (2026-04-22): post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 gates on touched routes (**ADM-01..ADM-06**); archives `.planning/milestones/v1.12-*`; planning git tag **`v1.12`**. Prior: **v1.11** — Phases **46–47**; archives `.planning/milestones/v1.11-*`; tag **`v1.11`**. Prior: **v1.10** — Phases **43–45**; archives `.planning/milestones/v1.10-*`; tag **`v1.10`**.
 
-**Now:** Active **v1.13** — Phase **51** shipped (**integrator golden path & docs**); roadmap **52–53** remaining; next step **`/gsd-discuss-phase 52`** or **`/gsd-plan-phase 52`**. **`phases.clear`** not run when opening **v1.13** (preserve **1–50** phase trees under **`.planning/phases/`**).
+**Now:** Active **v1.13** — Phase **52** shipped (**INT-04/05 + coupon/promo Copy**); **Phase 53** next for auxiliary VERIFY breadth (**AUX-03..06**). **`phases.clear`** not run when opening **v1.13** (preserve **1–50** phase trees under **`.planning/phases/`**).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 

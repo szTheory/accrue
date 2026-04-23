@@ -29,7 +29,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
 | 51 | Integrator golden path & docs | One coherent **clone → install → Fake subscription → proof** narrative; VERIFY-01 / CI lane discoverability from repo root; first-run troubleshooting anchors with stable slugs. **Shipped 2026-04-22.** | INT-01, INT-02, INT-03 |
-| 52 | Integrator proof + package alignment + auxiliary copy (part 1) | Adoption matrix + evaluator walkthrough stay honest vs touched lanes; **`verify_package_docs`** + ExDoc pins stay aligned; route **coupons** + **promotion codes** operator strings through **`AccrueAdmin.Copy`** + tests. | INT-04, INT-05, AUX-01, AUX-02 |
+| 52 | 3/3 | Complete    | 2026-04-23 |
 | 53 | Auxiliary admin — Connect, events, layout, VERIFY | **Connect** + **events** surfaces meet copy SSOT; **`ax-*` / token** discipline + registered exceptions; **Playwright** + **axe** on all materially touched auxiliary mounted paths. | AUX-03, AUX-04, AUX-05, AUX-06 |
 
 **Success criteria (milestone):**
