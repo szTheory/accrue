@@ -331,7 +331,9 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp bulk_replay_confirmation(count), do: Copy.webhooks_bulk_replay_confirm_question(count)
 
-  defp bulk_replay_success(%{mode: :organization}), do: Copy.Locked.bulk_replay_success_organization()
+  defp bulk_replay_success(%{mode: :organization}),
+    do: Copy.Locked.bulk_replay_success_organization()
+
   defp bulk_replay_success(_owner_scope), do: Copy.Locked.bulk_replay_success_global()
 
   defp push_flash(socket, kind, message) do
@@ -345,7 +347,10 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
   defp safe_link(href, label) do
     escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
-    Phoenix.HTML.raw(~s(<span class="ax-body"><a href="#{href}" class="ax-link">#{escaped}</a></span>))
+
+    Phoenix.HTML.raw(
+      ~s(<span class="ax-body"><a href="#{href}" class="ax-link">#{escaped}</a></span>)
+    )
   end
 
   defp status_summary(row) do
@@ -364,6 +369,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
     escaped = text |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
     Phoenix.HTML.raw(~s(<span class="ax-body">#{escaped}</span>))
   end
+
   defp card_title(row), do: row.processor_event_id || row.id
 
   defp mode_label(true), do: "live"

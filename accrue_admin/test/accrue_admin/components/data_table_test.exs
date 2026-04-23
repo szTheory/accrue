@@ -223,7 +223,10 @@ defmodule AccrueAdmin.DataTableTest do
   test "optional table_caption renders visually hidden caption on desktop grid", %{conn: conn} do
     assert {:ok, _view, html} =
              live_isolated(conn, TableLive,
-               session: %{"params" => %{"status" => "open"}, "table_caption" => "Fixture table title"}
+               session: %{
+                 "params" => %{"status" => "open"},
+                 "table_caption" => "Fixture table title"
+               }
              )
 
     assert html =~ ~s(<caption)

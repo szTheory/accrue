@@ -131,13 +131,19 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> assign(:current_path, admin_path(admin, "/events"))
   end
 
-  defp billing_events_eyebrow(%OwnerScope{mode: :organization}), do: AccrueAdmin.Copy.billing_events_eyebrow_organization()
+  defp billing_events_eyebrow(%OwnerScope{mode: :organization}),
+    do: AccrueAdmin.Copy.billing_events_eyebrow_organization()
+
   defp billing_events_eyebrow(_owner_scope), do: AccrueAdmin.Copy.billing_events_eyebrow_global()
 
-  defp billing_events_heading(%OwnerScope{mode: :organization}), do: AccrueAdmin.Copy.billing_events_heading_organization()
+  defp billing_events_heading(%OwnerScope{mode: :organization}),
+    do: AccrueAdmin.Copy.billing_events_heading_organization()
+
   defp billing_events_heading(_owner_scope), do: AccrueAdmin.Copy.billing_events_heading_global()
 
-  defp billing_events_copy(%OwnerScope{mode: :organization}), do: AccrueAdmin.Copy.billing_events_copy_organization()
+  defp billing_events_copy(%OwnerScope{mode: :organization}),
+    do: AccrueAdmin.Copy.billing_events_copy_organization()
+
   defp billing_events_copy(_owner_scope), do: AccrueAdmin.Copy.billing_events_copy_global()
 
   defp event_summary(owner_scope) do
@@ -223,7 +229,9 @@ defmodule AccrueAdmin.Live.EventsLive do
     end
   end
 
-  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}), do: AccrueAdmin.Copy.billing_events_webhook_source_direct()
+  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}),
+    do: AccrueAdmin.Copy.billing_events_webhook_source_direct()
+
   defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
 
   defp when_summary(row), do: format_datetime(row.inserted_at)

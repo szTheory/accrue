@@ -198,7 +198,8 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     do: safe_link("#{mount_path}/connect/#{row.id}", row.stripe_account_id || row.id)
 
   defp owner_summary(row),
-    do: "#{row.owner_type || AccrueAdmin.Copy.connect_accounts_row_owner_fallback()} #{row.owner_id || "--"}"
+    do:
+      "#{row.owner_type || AccrueAdmin.Copy.connect_accounts_row_owner_fallback()} #{row.owner_id || "--"}"
 
   defp readiness_summary(row) do
     [
@@ -217,7 +218,9 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   defp override_summary(%{id: id}) do
     case Repo.get(Account, id) do
-      nil -> AccrueAdmin.Copy.connect_accounts_override_default_only()
+      nil ->
+        AccrueAdmin.Copy.connect_accounts_override_default_only()
+
       account ->
         if has_override?(account),
           do: AccrueAdmin.Copy.connect_accounts_override_saved(),

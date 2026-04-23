@@ -47,7 +47,9 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               socket
               |> record_override_update(updated_account, override_payload)
               |> assign_account(updated_account)
-              |> assign(:flashes, [%{kind: :info, message: AccrueAdmin.Copy.connect_account_flash_override_saved()}])
+              |> assign(:flashes, [
+                %{kind: :info, message: AccrueAdmin.Copy.connect_account_flash_override_saved()}
+              ])
 
             {:noreply, socket}
 
@@ -382,9 +384,15 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   end
 
   defp override_field_label("percent"), do: AccrueAdmin.Copy.connect_account_label_percent()
-  defp override_field_label("fixed_cents"), do: AccrueAdmin.Copy.connect_account_label_fixed_minor_units()
-  defp override_field_label("min_cents"), do: AccrueAdmin.Copy.connect_account_label_min_minor_units()
-  defp override_field_label("max_cents"), do: AccrueAdmin.Copy.connect_account_label_max_minor_units()
+
+  defp override_field_label("fixed_cents"),
+    do: AccrueAdmin.Copy.connect_account_label_fixed_minor_units()
+
+  defp override_field_label("min_cents"),
+    do: AccrueAdmin.Copy.connect_account_label_min_minor_units()
+
+  defp override_field_label("max_cents"),
+    do: AccrueAdmin.Copy.connect_account_label_max_minor_units()
 
   defp preview_gross(form) do
     with {amount_minor, ""} <- Integer.parse(form["preview_amount_minor"]),
@@ -494,12 +502,14 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   end
 
   defp owner_summary(account),
-    do: "#{account.owner_type || AccrueAdmin.Copy.connect_accounts_row_owner_fallback()} #{account.owner_id || "--"}"
+    do:
+      "#{account.owner_type || AccrueAdmin.Copy.connect_accounts_row_owner_fallback()} #{account.owner_id || "--"}"
 
   defp account_status(%{deauthorized_at: %DateTime{} = value}),
     do: AccrueAdmin.Copy.connect_account_status_deauthorized_prefix() <> format_datetime(value)
 
-  defp account_status(_account), do: AccrueAdmin.Copy.connect_account_status_active_authorization()
+  defp account_status(_account),
+    do: AccrueAdmin.Copy.connect_account_status_active_authorization()
 
   defp enabled_label(true), do: AccrueAdmin.Copy.connect_account_enabled_label_true()
   defp enabled_label(false), do: AccrueAdmin.Copy.connect_account_enabled_label_false()
@@ -512,7 +522,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     |> Enum.join(", ")
   end
 
-  defp capabilities_summary(_capabilities), do: AccrueAdmin.Copy.connect_account_capabilities_none()
+  defp capabilities_summary(_capabilities),
+    do: AccrueAdmin.Copy.connect_account_capabilities_none()
 
   defp requirements_summary(requirements)
        when is_map(requirements) and map_size(requirements) > 0 do
@@ -524,10 +535,13 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     |> Enum.join(" · ")
   end
 
-  defp requirements_summary(_requirements), do: AccrueAdmin.Copy.connect_account_requirements_none()
+  defp requirements_summary(_requirements),
+    do: AccrueAdmin.Copy.connect_account_requirements_none()
 
   defp requirement_list(list) when is_list(list) and list != [],
-    do: AccrueAdmin.Copy.connect_account_requirements_currently_due_prefix() <> Enum.join(list, ", ")
+    do:
+      AccrueAdmin.Copy.connect_account_requirements_currently_due_prefix() <>
+        Enum.join(list, ", ")
 
   defp requirement_list(_), do: nil
 

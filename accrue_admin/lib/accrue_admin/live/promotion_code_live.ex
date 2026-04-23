@@ -126,7 +126,9 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp coupon_label(%{coupon_id: coupon_id}), do: coupon_id
 
   defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do: AccrueAdmin.Copy.promotion_codes_status_active_expires_separator() <> format_datetime(expires_at)
+    do:
+      AccrueAdmin.Copy.promotion_codes_status_active_expires_separator() <>
+        format_datetime(expires_at)
 
   defp status_summary(%{active: true}), do: AccrueAdmin.Copy.promotion_codes_status_active()
   defp status_summary(%{active: false}), do: AccrueAdmin.Copy.promotion_codes_status_inactive()
@@ -136,7 +138,9 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp redemption_summary(%{times_redeemed: used, max_redemptions: max}),
     do: "#{used || 0} of #{max}"
 
-  defp max_redemptions_summary(%{max_redemptions: nil}), do: AccrueAdmin.Copy.promotion_code_kpi_meta_unlimited_cap()
+  defp max_redemptions_summary(%{max_redemptions: nil}),
+    do: AccrueAdmin.Copy.promotion_code_kpi_meta_unlimited_cap()
+
   defp max_redemptions_summary(%{max_redemptions: max}), do: "#{max} max"
 
   defp expires_summary(%{expires_at: %DateTime{} = value}), do: format_datetime(value)

@@ -247,6 +247,7 @@ defmodule AccrueAdmin.StepUpTest do
       )
 
     assert render_click(element(view, "button")) =~ "Step-up required"
+
     assert render_click(element(view, "button[phx-click='step_up_dismiss']")) =~
              ~s(data-role="executed">0<)
 

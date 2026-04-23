@@ -185,7 +185,9 @@ defmodule AccrueAdmin.CustomerLiveTest do
              redirect =
              live(conn, "/billing/customers/#{denied_customer.id}?org=allowed-org")
 
-    assert %{"error" => denied} = Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+    assert %{"error" => denied} =
+             Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
     assert denied == Copy.Locked.owner_access_denied()
 
     assert redirect

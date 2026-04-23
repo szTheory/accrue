@@ -29,7 +29,8 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupon_kpi_label_promotion_codes, do: "Promotion codes"
 
-  def coupon_kpi_meta_promotion_codes_child, do: "Separate child-code surface linked back to coupons"
+  def coupon_kpi_meta_promotion_codes_child,
+    do: "Separate child-code surface linked back to coupons"
 
   def coupon_kpi_redemptions_suffix, do: " coupon redemptions"
 
@@ -53,7 +54,8 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupon_table_empty_title, do: "No coupons matched"
 
-  def coupon_table_empty_copy, do: "Adjust the discount filters or wait for the next projection sync."
+  def coupon_table_empty_copy,
+    do: "Adjust the discount filters or wait for the next projection sync."
 
   def coupon_page_title_index, do: "Coupons"
 
@@ -67,7 +69,8 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupon_detail_section_codes_heading, do: "Codes linked to this coupon"
 
-  def coupon_detail_promotion_codes_empty, do: "No promotion codes currently reference this coupon."
+  def coupon_detail_promotion_codes_empty,
+    do: "No promotion codes currently reference this coupon."
 
   def coupon_detail_section_projection_eyebrow, do: "Projection details"
 

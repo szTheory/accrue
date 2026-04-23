@@ -63,5 +63,4 @@ defmodule AccrueAdmin.Components.AppShell do
       ~H""
     end
   end
-
 end

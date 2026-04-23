@@ -164,17 +164,22 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
     do:
       safe_link("#{mount_path}/promotion-codes/#{row.id}", row.code || row.processor_id || row.id)
 
-  defp coupon_link(%{coupon_id: nil}, _mount_path), do: AccrueAdmin.Copy.promotion_codes_coupon_none_label()
+  defp coupon_link(%{coupon_id: nil}, _mount_path),
+    do: AccrueAdmin.Copy.promotion_codes_coupon_none_label()
 
   defp coupon_link(row, mount_path),
     do: safe_link("#{mount_path}/coupons/#{row.coupon_id}", coupon_label(row))
 
-  defp coupon_label(%{coupon_name: nil, coupon_id: nil}), do: AccrueAdmin.Copy.promotion_codes_coupon_none_label()
+  defp coupon_label(%{coupon_name: nil, coupon_id: nil}),
+    do: AccrueAdmin.Copy.promotion_codes_coupon_none_label()
+
   defp coupon_label(%{coupon_name: nil, coupon_id: coupon_id}), do: coupon_id
   defp coupon_label(%{coupon_name: coupon_name}), do: coupon_name
 
   defp status_summary(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do: AccrueAdmin.Copy.promotion_codes_status_active_expires_separator() <> format_datetime(expires_at)
+    do:
+      AccrueAdmin.Copy.promotion_codes_status_active_expires_separator() <>
+        format_datetime(expires_at)
 
   defp status_summary(%{active: true}), do: AccrueAdmin.Copy.promotion_codes_status_active()
   defp status_summary(%{active: false}), do: AccrueAdmin.Copy.promotion_codes_status_inactive()

@@ -51,7 +51,8 @@ defmodule AccrueAdmin.Copy.PromotionCode do
 
   def promotion_codes_table_empty_title, do: "No promotion codes matched"
 
-  def promotion_codes_table_empty_copy, do: "Adjust the code filters or wait for the next projection sync."
+  def promotion_codes_table_empty_copy,
+    do: "Adjust the code filters or wait for the next projection sync."
 
   def promotion_codes_page_title_index, do: "Promotion Codes"
 
@@ -73,7 +74,8 @@ defmodule AccrueAdmin.Copy.PromotionCode do
 
   def promotion_code_section_navigate_heading, do: "Navigate back to the discount definition"
 
-  def promotion_code_detail_no_coupon_projection, do: "No coupon projection is linked to this promotion code."
+  def promotion_code_detail_no_coupon_projection,
+    do: "No coupon projection is linked to this promotion code."
 
   def promotion_code_json_payload_label, do: "Promotion code payload"
 

@@ -162,7 +162,9 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp redeem_by_summary(%{redeem_by: %DateTime{} = value}), do: format_datetime(value)
   defp redeem_by_summary(_coupon), do: AccrueAdmin.Copy.coupon_redeem_by_no_expiry()
 
-  defp max_redemptions_summary(%{max_redemptions: nil}), do: AccrueAdmin.Copy.coupon_kpi_meta_redemptions_cap()
+  defp max_redemptions_summary(%{max_redemptions: nil}),
+    do: AccrueAdmin.Copy.coupon_kpi_meta_redemptions_cap()
+
   defp max_redemptions_summary(%{max_redemptions: max}), do: "#{max} max"
 
   defp duration_summary(%{duration: nil}), do: "One-off"
@@ -177,10 +179,15 @@ defmodule AccrueAdmin.Live.CouponLive do
   defp duration_summary(_coupon), do: "--"
 
   defp promotion_code_status(%{active: true, expires_at: %DateTime{} = expires_at}),
-    do: AccrueAdmin.Copy.coupon_promotion_code_status_active_until_prefix() <> format_datetime(expires_at)
+    do:
+      AccrueAdmin.Copy.coupon_promotion_code_status_active_until_prefix() <>
+        format_datetime(expires_at)
 
-  defp promotion_code_status(%{active: true}), do: AccrueAdmin.Copy.coupon_promotion_code_status_active()
-  defp promotion_code_status(%{active: false}), do: AccrueAdmin.Copy.coupon_promotion_code_status_inactive()
+  defp promotion_code_status(%{active: true}),
+    do: AccrueAdmin.Copy.coupon_promotion_code_status_active()
+
+  defp promotion_code_status(%{active: false}),
+    do: AccrueAdmin.Copy.coupon_promotion_code_status_inactive()
 
   defp promotion_code_redemptions(%{times_redeemed: used, max_redemptions: nil}),
     do: "#{used || 0} used"
