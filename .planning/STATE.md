@@ -1,16 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.18
-milestone_name: Onboarding confidence
-status: planning_active
-last_updated: "2026-04-23T00:00:00.000Z"
-last_activity: 2026-04-23
+milestone_name: milestone
+status: **v1.18** — defining execution plans (`/gsd-discuss-phase 66` or `/gsd-plan-phase 66`)
+last_updated: "2026-04-23T21:03:59.149Z"
+last_activity: 2026-04-23 — **`/gsd-new-milestone`** trajectory implementation (**v1.18** opened; **v1.17** phase trees archived)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
