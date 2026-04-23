@@ -577,12 +577,47 @@
 
 ---
 
+## Milestone: v1.15 — Release / trust semantics
+
+**Shipped:** 2026-04-23  
+**Phases:** 2 | **Plans:** 0 (docs-only; no new phase directories)
+
+### What Was Built
+
+- **`accrue/guides/upgrade.md`**: accurate **Hex + `@version`** baseline; **`.planning/` vs SemVer** explanation; link to **`RELEASING.md`** **`1.0.0`** appendix.
+- **`RELEASING.md`** + root **`README.md`**: explicit note that **internal planning milestone labels** are not the Hex major line.
+- **`examples/accrue_host/README.md`**: **Sigra** framed as **demo convenience**; **`Accrue.Auth`** + **First Hour** / **organization billing** pointers.
+- **`accrue/README.md`**: **Stability** ties **`0.x`** to deprecation discipline + maintainer bootstrap pointer.
+- **`scripts/ci/verify_package_docs.sh`**: **extras** string aligned to **`accrue_admin/mix.exs`** (CI drift fix).
+
+### What Worked
+
+- Shipping **forcing function B** as a **thin doc milestone** avoided another multi-phase admin polish cycle.
+- **`audit-open`** pre-close reported **all clear**, so closeout did not stall on tooling noise.
+
+### What Was Inefficient
+
+- **`verify_package_docs`** had drifted from **`mix.exs`** **extras** — caught only because this milestone touched release-adjacent docs.
+
+### Key Lessons
+
+1. When **planning speaks in `v1.x`** but **Hex is `0.x`**, put the disambiguation in **three obvious places**: **upgrade**, **RELEASING**, **root README**.
+2. **Demo dependencies** (Sigra) need a **one-screen disclaimer** so library positioning is not misread as product coupling.
+
+### Cost Observations
+
+- Sessions: single closeout session after doc land.
+- Notable: highest leverage was **wording**, not new APIs.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.15 | single | 2 | Trust docs: upgrade + RELEASING + root README (57); demo Sigra vs Auth + package stability + verifier alignment (58). |
 | v1.14 | short | 3 | Core-admin parity matrix + invoice Copy burn-down (54), VERIFY-01 invoice anchors + theme/copy CI (55), `list_payment_methods` + telemetry/docs (56). |
 | v1.13 | short | 3 | Integrator spine + VERIFY-01 discoverability (51), proof matrix + package docs + coupon/promo Copy (52), Connect/events Copy + auxiliary VERIFY-01 + export allowlist (53). |
 | v1.12 | short | 3 | Post-metering admin KPI (48), subscription drill + README nav honesty (49), Copy.Subscription + theme register + export_copy_strings VERIFY-01 wiring (50). |

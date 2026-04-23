@@ -4,7 +4,7 @@
 
 **Planning opened:** 2026-04-23
 
-**Phases completed:** 2 phases (57–58), docs-only
+**Phases completed:** 2 phases (57–58), docs-only (no new `.planning/phases/57-*` / `58-*` trees)
 
 **Forcing function:** **B** (release / trust semantics — adoption readiness sanity check).
 
@@ -15,11 +15,16 @@
 
 **Theme:** Evaluator **trust** without new billing primitives — **no** **PROC-08** / **FIN-03**.
 
-**Archives:** pending **`/gsd-complete-milestone` v1.15** (requirements live at **`.planning/REQUIREMENTS.md`** until archived).
+**Milestone audit:** No standalone `v1.15-MILESTONE-AUDIT.md`; closure used **`audit-open`** (all clear), **`verify_package_docs`**, package docs ExUnit, and requirements archive (**4/4 Complete**).
 
-**Git tag:** *(pending milestone close)*
+**Archives:**
 
-**Next after ship:** **`/gsd-complete-milestone` v1.15** to archive + tag; then **`/gsd-new-milestone`** for **v1.16+** or pause on external feedback.
+- Roadmap: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md)
+- Requirements: [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md)
+
+**Git tag:** `v1.15`
+
+**Next after ship:** **`/gsd-new-milestone`** when priorities for **v1.16+** are set.
 
 ---
 
