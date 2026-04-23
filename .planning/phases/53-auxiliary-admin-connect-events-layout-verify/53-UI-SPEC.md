@@ -18,7 +18,7 @@ reviewed_at: 2026-04-22
 
 | Item | Contract |
 |------|-----------|
-| In-scope LiveViews | **`ConnectAccountsLive`**, **`ConnectAccountLive`**, **`EventsLive`** — operator-visible English via **`AccrueAdmin.Copy`** (new **`Copy.Connect`** / **`Copy.Event`** modules + **`defdelegate`** from **`AccrueAdmin.Copy`**, mirroring coupon/promo split). |
+| In-scope LiveViews | **`ConnectAccountsLive`**, **`ConnectAccountLive`**, **`EventsLive`** — operator-visible English via **`AccrueAdmin.Copy`** (new **`Copy.Connect`** / **`Copy.BillingEvent`** modules + **`defdelegate`** from **`AccrueAdmin.Copy`**, mirroring coupon/promo split). |
 | Layout / tokens | **`ax-*`** classes and **`--ax-*`** semantic variables on all **v1.13**-touched auxiliary rows per **AUX-05** / **UX-04**; register unavoidable deviations in **`accrue_admin/guides/theme-exceptions.md`**. |
 | VERIFY | **AUX-06**: every materially touched mounted-admin path for **AUX-01..AUX-04** gets or extends **VERIFY-01** coverage — **serious** + **critical** **axe** failures remain merge-blocking; reuse **`e2e/generated/copy_strings.json`** + **`export_copy_strings`** where it reduces drift (**Phase 50 D-18–D-23**). |
 | Out of scope | **PROC-08**, **FIN-03**, new third-party component registries, VERIFY-01 **policy** renames. |
@@ -141,6 +141,6 @@ Icon-only controls (if any) keep **`aria-label`** sourced from **Copy** alongsid
 
 ## Success (UI-facing)
 
-- **Connect** + **events** pages read with the same **copy SSOT** discipline as coupons/promos; grep for new operator phrases resolves to **`AccrueAdmin.Copy`** (or **`Copy.Connect`** / **`Copy.Event`** delegates).
+- **Connect** + **events** pages read with the same **copy SSOT** discipline as coupons/promos; grep for new operator phrases resolves to **`AccrueAdmin.Copy`** (or **`Copy.Connect`** / **`Copy.BillingEvent`** delegates).
 - **axe** posture matches **v1.12** on all materially touched auxiliary routes in scope.
 - **Theme exceptions** file updated for any token bypass, each with rationale + pointer comment in code.
