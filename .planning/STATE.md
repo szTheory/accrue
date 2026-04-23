@@ -24,13 +24,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 ## Current Position
 
-Phase: Not started (roadmap defined — begin Phase 54)
+Phase: **54** — context gathered (`54-CONTEXT.md`); ready for **`/gsd-plan-phase 54`**
 
 Plan: —
 
 **Status:** Milestone **v1.14** initialized; **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** committed when planning commits land.
 
-**Last activity:** 2026-04-22 — `/gsd-new-milestone` v1.14
+**Last activity:** 2026-04-22 — **`/gsd-discuss-phase 54`** (parallel research → **`54-CONTEXT.md`**)
 
 ## Milestone Progress
 
@@ -46,6 +46,7 @@ Plan: —
 - **`.planning/ROADMAP.md`** — **v1.14** phase table + shipped milestone history
 - **`.planning/PROJECT.md`** — **v1.14** current milestone block
 - **`.planning/phases/01-*` … `53-*`** — prior milestone evidence (**`phases.clear` not run**)
+- **`.planning/phases/54-core-admin-inventory-first-burn-down/54-CONTEXT.md`** — Phase **54** implementation decisions (**ADM-07** / **ADM-08**)
 
 ## Deferred Items
 
@@ -59,7 +60,8 @@ Plan: —
 
 - **2026-04-22:** **`/gsd-new-milestone` v1.14** — **Companion admin + billing depth**; **ADM-07..ADM-11**, **BIL-01..BIL-02**; phases **54–56**; brownfield research skipped; **`phases.clear`** skipped (preserve **1–53**).
 - **2026-04-23:** **`/gsd-complete-milestone` v1.13** — archives **`milestones/v1.13-*`**, planning tag **`v1.13`**.
+- **2026-04-22:** **`/gsd-discuss-phase 54`** — **`core-admin-parity.md`** SSOT, **invoices** ADM-08 anchor, router-derived **11** core rows, VERIFY expansion deferred to Phase **55**.
 
-**Next:** **`/gsd-discuss-phase 54`** (or **`/gsd-plan-phase 54`**) for **core admin inventory + first burn-down**.
+**Next:** **`/gsd-plan-phase 54`** for **core admin inventory + first burn-down** (resume: **`54-CONTEXT.md`**).
 
 **Completed:** Milestone **v1.13** — Phases **51–53**. Prior: **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
