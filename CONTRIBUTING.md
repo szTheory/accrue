@@ -74,6 +74,8 @@ The required deterministic release gate still includes the checked-in trust revi
 
 v1.7 adoption requirements (ADOPT-01–ADOPT-06) are enforced mostly through documentation gates in `scripts/ci/`. When `verify_package_docs` or VERIFY-01 checks fail in CI, open [scripts/ci/README.md](scripts/ci/README.md) for the requirement → script → ExUnit map so you edit the owning files first instead of silencing unrelated prose.
 
+**v1.16 integrator + proof (INT-06..INT-09):** Verifier ownership for those rows lives under **`## INT gates (v1.16 integrator + proof continuity)`** in [scripts/ci/README.md](scripts/ci/README.md) — edit that section (not this file) when INT-related merge-blocking checks or owning `VERIFICATION.md` paths change.
+
 Before you open a PR that touches **First Hour**, the **root/host README**, **`accrue/guides/quickstart.md`**, or any **`verify_package_docs`** needle, run this **minimum local doc preflight** from the repository root (ordered; fast failures first). It does **not** replace the **`host-integration`** merge-blocking job.
 
 ```bash
