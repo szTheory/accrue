@@ -6,6 +6,8 @@ defmodule AccrueAdmin.Copy do
   and related chrome described in `.planning/phases/27-microcopy-and-operator-strings/27-CONTEXT.md`.
   """
 
+  alias AccrueAdmin.Copy.Coupon
+  alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
 
   defdelegate subscription_breadcrumb_subscriptions(), to: Subscription
@@ -24,6 +26,104 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_pause_collection(), to: Subscription
   defdelegate subscription_action_create_comp_replacement(), to: Subscription
   defdelegate subscription_page_title(), to: Subscription
+
+  defdelegate coupon_breadcrumb_coupons(), to: Coupon
+  defdelegate coupon_index_eyebrow(), to: Coupon
+  defdelegate coupon_index_headline(), to: Coupon
+  defdelegate coupon_index_body_primary(), to: Coupon
+  defdelegate coupon_index_body_link_prefix(), to: Coupon
+  defdelegate coupon_index_promotion_codes_link_text(), to: Coupon
+  defdelegate coupon_index_kpi_section_aria_label(), to: Coupon
+  defdelegate coupon_kpi_label_coupons(), to: Coupon
+  defdelegate coupon_kpi_meta_all_local_coupons(), to: Coupon
+  defdelegate coupon_kpi_label_valid(), to: Coupon
+  defdelegate coupon_kpi_invalid_suffix(), to: Coupon
+  defdelegate coupon_kpi_meta_validity_projection(), to: Coupon
+  defdelegate coupon_kpi_label_promotion_codes(), to: Coupon
+  defdelegate coupon_kpi_meta_promotion_codes_child(), to: Coupon
+  defdelegate coupon_kpi_redemptions_suffix(), to: Coupon
+  defdelegate coupon_table_column_coupon(), to: Coupon
+  defdelegate coupon_table_column_discount(), to: Coupon
+  defdelegate coupon_table_column_redemptions(), to: Coupon
+  defdelegate coupon_table_column_status(), to: Coupon
+  defdelegate coupon_table_column_redeem_by(), to: Coupon
+  defdelegate coupon_filter_label_search(), to: Coupon
+  defdelegate coupon_filter_label_validity(), to: Coupon
+  defdelegate coupon_filter_option_valid(), to: Coupon
+  defdelegate coupon_filter_option_invalid(), to: Coupon
+  defdelegate coupon_table_empty_title(), to: Coupon
+  defdelegate coupon_table_empty_copy(), to: Coupon
+  defdelegate coupon_page_title_index(), to: Coupon
+  defdelegate coupon_detail_eyebrow(), to: Coupon
+  defdelegate coupon_detail_kpi_section_aria_label(), to: Coupon
+  defdelegate coupon_kpi_label_redemptions(), to: Coupon
+  defdelegate coupon_detail_section_promotion_codes_eyebrow(), to: Coupon
+  defdelegate coupon_detail_section_codes_heading(), to: Coupon
+  defdelegate coupon_detail_promotion_codes_empty(), to: Coupon
+  defdelegate coupon_detail_section_projection_eyebrow(), to: Coupon
+  defdelegate coupon_detail_section_projection_heading(), to: Coupon
+  defdelegate coupon_detail_label_duration(), to: Coupon
+  defdelegate coupon_detail_label_currency(), to: Coupon
+  defdelegate coupon_detail_label_processor(), to: Coupon
+  defdelegate coupon_json_payload_label(), to: Coupon
+  defdelegate coupon_kpi_meta_redemptions_cap(), to: Coupon
+  defdelegate coupon_kpi_meta_promotion_codes_linked(), to: Coupon
+  defdelegate coupon_kpi_label_redeem_by(), to: Coupon
+  defdelegate coupon_kpi_meta_redeem_by(), to: Coupon
+  defdelegate coupon_page_title_show(), to: Coupon
+  defdelegate coupon_status_valid(), to: Coupon
+  defdelegate coupon_status_invalid(), to: Coupon
+  defdelegate coupon_redeem_by_no_expiry(), to: Coupon
+  defdelegate coupon_discount_processor_defined(), to: Coupon
+  defdelegate coupon_promotion_code_status_active(), to: Coupon
+  defdelegate coupon_promotion_code_status_inactive(), to: Coupon
+  defdelegate coupon_promotion_code_status_active_until_prefix(), to: Coupon
+
+  defdelegate promotion_codes_breadcrumb_index(), to: PromotionCode
+  defdelegate promotion_codes_index_eyebrow(), to: PromotionCode
+  defdelegate promotion_codes_index_headline(), to: PromotionCode
+  defdelegate promotion_codes_index_body_primary(), to: PromotionCode
+  defdelegate promotion_codes_index_kpi_section_aria_label(), to: PromotionCode
+  defdelegate promotion_codes_kpi_label_codes(), to: PromotionCode
+  defdelegate promotion_codes_kpi_meta_all_local_rows(), to: PromotionCode
+  defdelegate promotion_codes_kpi_label_active(), to: PromotionCode
+  defdelegate promotion_codes_kpi_inactive_suffix(), to: PromotionCode
+  defdelegate promotion_codes_kpi_meta_activation_state(), to: PromotionCode
+  defdelegate promotion_codes_kpi_label_expiring(), to: PromotionCode
+  defdelegate promotion_codes_kpi_redemptions_suffix(), to: PromotionCode
+  defdelegate promotion_codes_kpi_meta_expiring(), to: PromotionCode
+  defdelegate promotion_codes_table_column_code(), to: PromotionCode
+  defdelegate promotion_codes_table_column_coupon(), to: PromotionCode
+  defdelegate promotion_codes_table_column_status(), to: PromotionCode
+  defdelegate promotion_codes_table_column_redemptions(), to: PromotionCode
+  defdelegate promotion_codes_table_column_expires(), to: PromotionCode
+  defdelegate promotion_codes_filter_label_search(), to: PromotionCode
+  defdelegate promotion_codes_filter_label_status(), to: PromotionCode
+  defdelegate promotion_codes_filter_option_active(), to: PromotionCode
+  defdelegate promotion_codes_filter_option_inactive(), to: PromotionCode
+  defdelegate promotion_codes_filter_label_coupon_id(), to: PromotionCode
+  defdelegate promotion_codes_table_empty_title(), to: PromotionCode
+  defdelegate promotion_codes_table_empty_copy(), to: PromotionCode
+  defdelegate promotion_codes_page_title_index(), to: PromotionCode
+  defdelegate promotion_code_detail_eyebrow(), to: PromotionCode
+  defdelegate promotion_code_detail_kpi_section_aria_label(), to: PromotionCode
+  defdelegate promotion_code_kpi_label_coupon(), to: PromotionCode
+  defdelegate promotion_code_kpi_meta_parent_discount(), to: PromotionCode
+  defdelegate promotion_code_kpi_label_redemptions(), to: PromotionCode
+  defdelegate promotion_code_kpi_label_expires(), to: PromotionCode
+  defdelegate promotion_code_kpi_meta_expiry_boundary(), to: PromotionCode
+  defdelegate promotion_code_section_parent_coupon_eyebrow(), to: PromotionCode
+  defdelegate promotion_code_section_navigate_heading(), to: PromotionCode
+  defdelegate promotion_code_detail_no_coupon_projection(), to: PromotionCode
+  defdelegate promotion_code_json_payload_label(), to: PromotionCode
+  defdelegate promotion_code_page_title_show(), to: PromotionCode
+  defdelegate promotion_codes_coupon_none_label(), to: PromotionCode
+  defdelegate promotion_codes_status_active(), to: PromotionCode
+  defdelegate promotion_codes_status_inactive(), to: PromotionCode
+  defdelegate promotion_codes_status_active_expires_separator(), to: PromotionCode
+  defdelegate promotion_code_redeem_by_no_expiry(), to: PromotionCode
+  defdelegate promotion_codes_expires_summary_no_expiry(), to: PromotionCode
+  defdelegate promotion_code_kpi_meta_unlimited_cap(), to: PromotionCode
 
   def data_table_default_empty_title, do: "Nothing in this list yet"
 
