@@ -1,5 +1,17 @@
 # Milestones
 
+## v1.18 Onboarding confidence (Planning opened: 2026-04-23)
+
+**Status:** Active planning on **`main`** — **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`** Phase **66**.
+
+**Theme:** Proof-first onboarding confidence — **UAT-01..UAT-05** (deferred **Phase 62** human UAT baseline) + **PROOF-01** (adoption matrix / walkthrough / verifier spine). **No** **PROC-08** / **FIN-03**.
+
+**v1.17 phase tree archive:** [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/) — durable copy of **62–65** directories after milestone transition.
+
+**Next:** **`/gsd-plan-phase 66`** (or **`/gsd-discuss-phase 66`**) when execution planning starts.
+
+---
+
 ## v1.17 Friction-led developer readiness (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-23

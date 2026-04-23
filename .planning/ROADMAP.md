@@ -2,7 +2,8 @@
 
 ## Milestones
 
-- ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Archives: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md), [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
+- 🔄 **v1.18 Onboarding confidence** — Phase **66** (in planning). **UAT-01..UAT-05**, **PROOF-01**; proof-first milestone after trajectory review (**no** **PROC-08** / **FIN-03**). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
+- ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Archives: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md), [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md). Phase trees archived: [`milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
 - ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. Archives: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md), [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md).
 - ✅ **v1.14 Companion admin + billing depth** — Phases **54–56** shipped **2026-04-23**. Core admin **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** on invoice money-primary spine + **`Accrue.Billing.list_payment_methods`** (**Fake**, **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Archives: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
@@ -23,6 +24,36 @@
 
 ## Phases
 
+<details open>
+<summary>🔄 v1.18 Onboarding confidence (Phase 66) — IN PLANNING</summary>
+
+**Milestone goal:** Close deferred **Phase 62** human UAT confidence gaps (**UAT-01..UAT-05**) using the archived scenario baseline, then run a tight **adoption proof matrix / walkthrough / verifier** alignment pass (**PROOF-01**) — **no** new billing primitives and **no** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.17** shipped; **v1.17** phase artifacts under [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/) (including archived **`62-UAT.md`**).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 66 | Deferred UAT + evaluator proof | Execute, automate, or maintainer-sign each **UAT-** scenario; ship **`66-VERIFICATION.md`**; align matrix / walkthrough / verifiers for **PROOF-01**. | UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, PROOF-01 |
+
+**Success criteria (milestone):**
+
+1. **UAT-01..UAT-05** and **PROOF-01** satisfied per **`.planning/REQUIREMENTS.md`** with evidence in **`66-VERIFICATION.md`** (or cited automation paths).
+2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** contracts stay coherent with any doc or script edits.
+3. No **PROC-08** / **FIN-03** scope creep.
+
+### Phase 66: Deferred UAT + evaluator proof
+
+**Goal:** Replace “pending human UAT” with explicit **pass / automated / signed defer** outcomes for the **v1.17** friction milestone confidence spine, plus evaluator-facing proof alignment.
+
+**Requirements:** UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, PROOF-01
+
+**Success criteria:**
+
+1. **`66-VERIFICATION.md`** exists under **`.planning/phases/66-onboarding-confidence/`** and tables every **UAT-** / **PROOF-** row with closure status + proof links.
+2. **`STATE.md`** no longer lists the **v1.17** Phase **62** UAT gap as an open deferred item unless a row is explicitly signed **out of v1.18** with rationale.
+
+</details>
+
 <details>
 <summary>✅ v1.17 Friction-led developer readiness (Phases 62–65) — SHIPPED 2026-04-23</summary>
 
@@ -33,9 +64,9 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 62 | Friction triage + north star | Ranked inventory (**FRG-01**), north star + stop rules (**FRG-02**), scoped backlog for **63–65** (**FRG-03**). | FRG-01, FRG-02, FRG-03 |
-| 63 | P0 integrator / VERIFY / docs | Close every **P0** row tagged integrator/VERIFY/docs from **FRG-03**, or downgrade with rationale; keep merge-blocking contracts green. **Complete 2026-04-23** (3/3 plans; see `phases/63-p0-integrator-verify-docs/63-VERIFICATION.md`). | INT-10 |
-| 64 | P0 billing | Close every **P0** row tagged billing from **FRG-03**, or certify none; **Fake** + telemetry/docs/changelog alignment on code changes. **Complete 2026-04-23** (1/1 plans; see `phases/64-p0-billing/64-VERIFICATION.md`). | BIL-03 |
-| 65 | P0 admin / operator | Close every **P0** row tagged admin from **FRG-03**, or certify none; scoped **LiveView** / **Copy** / **VERIFY-01** on touched routes. **Complete 2026-04-23** (1/1 plans; see `phases/65-p0-admin-operator/65-VERIFICATION.md`). | ADM-12 |
+| 63 | P0 integrator / VERIFY / docs | Close every **P0** row tagged integrator/VERIFY/docs from **FRG-03**, or downgrade with rationale; keep merge-blocking contracts green. **Complete 2026-04-23** (3/3 plans; see [`milestones/v1.17-phases/63-p0-integrator-verify-docs/63-VERIFICATION.md`](milestones/v1.17-phases/63-p0-integrator-verify-docs/63-VERIFICATION.md)). | INT-10 |
+| 64 | P0 billing | Close every **P0** row tagged billing from **FRG-03**, or certify none; **Fake** + telemetry/docs/changelog alignment on code changes. **Complete 2026-04-23** (1/1 plans; see [`milestones/v1.17-phases/64-p0-billing/64-VERIFICATION.md`](milestones/v1.17-phases/64-p0-billing/64-VERIFICATION.md)). | BIL-03 |
+| 65 | P0 admin / operator | Close every **P0** row tagged admin from **FRG-03**, or certify none; scoped **LiveView** / **Copy** / **VERIFY-01** on touched routes. **Complete 2026-04-23** (1/1 plans; see [`milestones/v1.17-phases/65-p0-admin-operator/65-VERIFICATION.md`](milestones/v1.17-phases/65-p0-admin-operator/65-VERIFICATION.md)). | ADM-12 |
 
 **Success criteria (milestone):**
 
@@ -571,6 +602,12 @@
 | 59. Golden path + quickstart coherence | v1.16 | 2/2 | Complete | 2026-04-23 |
 | 60. Adoption proof + CI ownership map | v1.16 | 2/2 | Complete | 2026-04-23 |
 | 61. Root VERIFY hops + Hex doc SSOT | v1.16 | 2/2 | Complete | 2026-04-23 |
+
+**v1.18 (in planning — 2026-04-23)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 66. Deferred UAT + evaluator proof | v1.18 | 0/? | Not started | — |
 
 **v1.17 (complete — 2026-04-23)**
 
