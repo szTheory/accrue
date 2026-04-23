@@ -55,6 +55,8 @@ defmodule Accrue.Billing.PaymentMethodActions do
     operation_id: [type: {:or, [:string, nil]}, default: nil]
   ]
 
+  @list_payment_method_param_keys [:type, :limit, :starting_after, :ending_before]
+
   # ---------------------------------------------------------------------
   # attach_payment_method/3 (BILL-23)
   # ---------------------------------------------------------------------
@@ -269,10 +271,15 @@ defmodule Accrue.Billing.PaymentMethodActions do
   @spec list_payment_methods(Customer.t(), keyword()) ::
           {:ok, map()} | {:error, term()}
   def list_payment_methods(%Customer{} = customer, opts \\ []) when is_list(opts) do
-    validated = NimbleOptions.validate!(opts, @list_payment_methods_opts_schema)
-    params = list_params_for_processor(customer, validated)
+    NimbleOptions.validate!(opts, @list_payment_methods_opts_schema)
+    params = list_params_for_processor(customer, opts)
 
-    Processor.__impl__().list_payment_methods(params, sanitize_opts(opts))
+    processor_opts =
+      opts
+      |> Keyword.drop(@list_payment_method_param_keys)
+      |> sanitize_opts()
+
+    Processor.__impl__().list_payment_methods(params, processor_opts)
   end
 
   @doc "Raising variant of `list_payment_methods/2`."
@@ -289,9 +296,9 @@ defmodule Accrue.Billing.PaymentMethodActions do
   # helpers
   # ---------------------------------------------------------------------
 
-  defp list_params_for_processor(%Customer{} = customer, validated_kw) when is_list(validated_kw) do
-    validated_kw
-    |> Keyword.drop([:operation_id])
+  defp list_params_for_processor(%Customer{} = customer, opts) when is_list(opts) do
+    opts
+    |> Keyword.take(@list_payment_method_param_keys)
     |> Enum.reduce(%{customer: customer.processor_id}, fn
       {_k, nil}, acc -> acc
       {k, v}, acc -> Map.put(acc, k, v)
