@@ -219,6 +219,12 @@ Theme: **integrator golden path** + **auxiliary admin parity**; **PROC-08** and 
 - [x] **AUX-05** — **`ax-*`** + theme tokens on touched auxiliary surfaces; exceptions recorded in **`theme-exceptions.md`**. **Validated in Phase 53.**
 - [x] **AUX-06** — VERIFY-01 **Playwright** + **axe** on materially touched auxiliary mounted paths; **`export_copy_strings`** / **`copy_strings.json`** anti-drift wiring. **Validated in Phase 53.**
 
+### Validated v1.15 (Phases 57–58; docs shipped 2026-04-23)
+
+Theme: **release / trust semantics** (forcing function **B**); **PROC-08** and **FIN-03** not in this milestone.
+
+- [x] **TRT-01..TRT-04** — Hex + **`mix.exs`** baseline in **`upgrade.md`**; **`.planning/` vs SemVer** in **`RELEASING.md`** + root **`README.md`**; **Sigra vs `Accrue.Auth`** + **First Hour** / **organization billing** pointers in **`examples/accrue_host/README.md`**; **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. **Validated in Phases 57–58.**
+
 ### Validated v1.14 (Phases 54–56; milestone scope delivered 2026-04-23)
 
 Theme: **core admin parity** + **one billing / Stripe read slice**; **PROC-08** and **FIN-03** not in this milestone.
