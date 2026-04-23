@@ -398,7 +398,7 @@ defmodule Accrue.Test.StripeFixtures do
 
   @doc """
   Returns an atom-keyed Stripe-shape connected account map, matching
-  the shape `Accrue.Processor.Fake.create_account/2` emits.
+  the shape returned by the Fake processor when creating a Connect account.
 
   Accepts either a preset atom (`:standard_fully_onboarded`,
   `:express_fully_onboarded`, `:custom_partial`) or a free-form
