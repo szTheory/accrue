@@ -50,6 +50,15 @@ Accrue intentionally splits proof into a **deterministic Fake-first lane** (bloc
 
 Requires repository secrets; failures do not block merge (`continue-on-error: true`).
 
+### Trust and versioning (v1.15+)
+
+- **Hex (`hex.pm`):** Published SemVer in each package’s `mix.exs` is the authoritative pin for dependency upgrades — not informal references to unreleased `main`.
+- **Planning labels:** Milestone tags like **`v1.16`** under **`.planning/`** are planning artifacts only; they do not substitute for install pins or resolver output.
+- **Demo / optional adapters:** **Sigra** (or similar) in this checked-in host is **host wiring**, not a global production requirement — stay aligned with **`non-Sigra`** ORG-09 framing elsewhere in this file.
+- **Advisory Stripe:** Stripe test mode and scheduled **`live-stripe`**-class jobs remain **advisory** per **`## Advisory: Stripe test mode`** — not merge-blocking for contributors.
+- **First-hour SSOT:** Longer install + verification ordering narrative lives in [`../../../../accrue/guides/first_hour.md`](../../../../accrue/guides/first_hour.md).
+- **Host SSOT:** Example host setup and VERIFY-01 detail live in [`../README.md`](../README.md).
+
 ## Evaluator narrative
 
 For a human-recorded walkthrough (screen capture), follow [`evaluator-walkthrough-script.md`](evaluator-walkthrough-script.md).
