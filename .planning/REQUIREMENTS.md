@@ -12,8 +12,8 @@
 
 ## Companion admin — core surfaces (ADM)
 
-- [ ] **ADM-07**: Publish an inventory of **core** `accrue_admin` mounted surfaces (**customers**, **subscriptions**, **invoices**, **charges**, **webhooks**, **dashboard**, and related detail LiveViews) vs **`AccrueAdmin.Copy`** coverage, **`ax-*` / theme token** discipline, and **VERIFY-01** (Playwright + axe) coverage—explicitly **excluding** the v1.13 auxiliary set already validated (**coupons**, **promotion codes**, **Connect**, **events**). *(Phase 54)*
-- [ ] **ADM-08**: Burn down **P0** gaps from **ADM-07** on **≥1** money-primary list/detail flow so operator-visible strings route through **`AccrueAdmin.Copy`** (or an established submodule), **`ax-*`/tokens** match **v1.6 UX-04** intent, and **ExUnit** / **Playwright** avoid divergent raw literals on materially touched paths. *(Phase 54)*
+- [x] **ADM-07**: Publish an inventory of **core** `accrue_admin` mounted surfaces (**customers**, **subscriptions**, **invoices**, **charges**, **webhooks**, **dashboard**, and related detail LiveViews) vs **`AccrueAdmin.Copy`** coverage, **`ax-*` / theme token** discipline, and **VERIFY-01** (Playwright + axe) coverage—explicitly **excluding** the v1.13 auxiliary set already validated (**coupons**, **promotion codes**, **Connect**, **events**). *(Phase 54)*
+- [x] **ADM-08**: Burn down **P0** gaps from **ADM-07** on **≥1** money-primary list/detail flow so operator-visible strings route through **`AccrueAdmin.Copy`** (or an established submodule), **`ax-*`/tokens** match **v1.6 UX-04** intent, and **ExUnit** / **Playwright** avoid divergent raw literals on materially touched paths. *(Phase 54)*
 - [ ] **ADM-09**: Extend **VERIFY-01** with **Playwright + axe** coverage for **≥1** materially changed **core** mounted route group from **ADM-08** work, consistent with **v1.12** / **v1.13** precedent. *(Phase 55)*
 - [ ] **ADM-10**: Record intentional **theme / layout exceptions** for **ADM-08** / **ADM-09** touches in **`accrue_admin/guides/theme-exceptions.md`** (or successor) with rationale; keep contributor checklist honest. *(Phase 55)*
 - [ ] **ADM-11**: If **ADM-08** introduces or extends **`AccrueAdmin.Copy`** modules, wire **`mix accrue_admin.export_copy_strings`**, **`copy_strings.json`**, and CI allowlists so literals cannot drift. *(Phase 55)*
@@ -48,8 +48,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ADM-07 | Phase 54 | Pending |
-| ADM-08 | Phase 54 | Pending |
+| ADM-07 | Phase 54 | Complete |
+| ADM-08 | Phase 54 | Complete |
 | ADM-09 | Phase 55 | Pending |
 | ADM-10 | Phase 55 | Pending |
 | ADM-11 | Phase 55 | Pending |
