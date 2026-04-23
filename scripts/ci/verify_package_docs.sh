@@ -95,8 +95,13 @@ require_fixed "$ROOT_DIR/accrue/README.md" "examples/accrue_host"
 require_fixed "$ROOT_DIR/accrue/README.md" "mix verify"
 require_fixed "$ROOT_DIR/accrue/README.md" "mix verify.full"
 require_fixed "$ROOT_DIR/accrue/README.md" "bash scripts/ci/accrue_host_uat.sh"
-require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'extras: ["README.md", "guides/admin_ui.md", "guides/core-admin-parity.md"]'
-require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras: [Guides: ["guides/admin_ui.md", "guides/core-admin-parity.md"]]'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"README.md"'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/admin_ui.md"'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/core-admin-parity.md"'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/theme-exceptions.md"'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras:'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'Guides:'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'skip_code_autolink_to:'
 require_fixed "$ROOT_DIR/README.md" "Canonical local demo: Fake"
 require_fixed "$ROOT_DIR/README.md" "Provider parity: Stripe test mode"
 require_fixed "$ROOT_DIR/README.md" "Advisory/manual: live Stripe"
