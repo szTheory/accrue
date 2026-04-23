@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: Companion admin + billing depth
-status: ready_to_plan
-last_updated: "2026-04-23T01:55:18.854Z"
-last_activity: 2026-04-22 — **`/gsd-discuss-phase 54`** (parallel research → **`54-CONTEXT.md`**)
+status: planning
+last_updated: "2026-04-23T02:24:25.449Z"
+last_activity: 2026-04-23
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 2
-  completed_plans: 0
-  percent: 25
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -48,6 +48,7 @@ Plan: Not started
 - **`.planning/PROJECT.md`** — **v1.14** current milestone block
 - **`.planning/phases/01-*` … `53-*`** — prior milestone evidence (**`phases.clear` not run**)
 - **`.planning/phases/54-core-admin-inventory-first-burn-down/54-CONTEXT.md`** — Phase **54** implementation decisions (**ADM-07** / **ADM-08**)
+- **`.planning/phases/55-core-admin-verify-theme-copy-ci/55-CONTEXT.md`** — Phase **55** implementation decisions (**ADM-09** / **ADM-10** / **ADM-11**)
 
 ## Deferred Items
 
@@ -62,9 +63,10 @@ Plan: Not started
 - **2026-04-22:** **`/gsd-new-milestone` v1.14** — **Companion admin + billing depth**; **ADM-07..ADM-11**, **BIL-01..BIL-02**; phases **54–56**; brownfield research skipped; **`phases.clear`** skipped (preserve **1–53**).
 - **2026-04-23:** **`/gsd-complete-milestone` v1.13** — archives **`milestones/v1.13-*`**, planning tag **`v1.13`**.
 - **2026-04-22:** **`/gsd-discuss-phase 54`** — **`core-admin-parity.md`** SSOT, **invoices** ADM-08 anchor, router-derived **11** core rows, VERIFY expansion deferred to Phase **55**.
+- **2026-04-23:** **`/gsd-discuss-phase 55`** (all areas + research synthesis) — locked **VERIFY flow ids** (`core-admin-invoices-*`), tiered **PDF/tab/download** merge-blocking contract, **`export_copy_strings`** hybrid + determinism, **`theme-exceptions.md`** SSOT + **`admin_ui.md`** link hygiene (**`55-CONTEXT.md`**).
 
-**Next:** **`/gsd-plan-phase 54`** for **core admin inventory + first burn-down** (resume: **`54-CONTEXT.md`**).
+**Next:** **`/gsd-plan-phase 55`** — core admin VERIFY + theme + copy CI (resume: **`55-CONTEXT.md`**, design: **`55-UI-SPEC.md`**).
 
 **Completed:** Milestone **v1.13** — Phases **51–53**. Prior: **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
 
-**Planned Phase:** 54 (Core admin inventory + first burn-down) — 2 plans — 2026-04-23T01:55:18.844Z
+**Planned Phase:** 55 (Core admin VERIFY + theme + copy CI) — context gathered — 2026-04-23
