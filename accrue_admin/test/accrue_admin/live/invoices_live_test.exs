@@ -59,7 +59,8 @@ defmodule AccrueAdmin.InvoicesLiveTest do
 
     assert {:ok, _view, html} = live(conn, "/billing/invoices?status=open")
 
-    assert html =~ "Collections and invoice review"
+    assert html =~ Copy.invoices_index_headline()
+    assert html =~ AccrueAdmin.Copy.Invoice.invoices_index_eyebrow()
     assert html =~ "INV-0002"
     assert html =~ "/billing/invoices/"
     assert html =~ "ax-chip ax-label"

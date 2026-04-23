@@ -126,10 +126,10 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
     assert html =~ "Tax &amp; ownership"
     assert html =~ "Base plan"
-    assert html =~ "Open PDF"
+    assert html =~ AccrueAdmin.Copy.Invoice.invoice_open_pdf_button()
     assert html =~ "Automatic tax disabled reason: Finalization Requires Location Inputs."
     assert html =~ "Finalization failure code: customer_tax_location_invalid."
-    assert html =~ "Repair the customer tax location, then retry finalization from Accrue."
+    assert html =~ AccrueAdmin.Copy.Invoice.invoice_tax_recovery_body()
     refute html =~ "Invoice payload"
     refute html =~ "123 Private Lane"
 
@@ -158,10 +158,10 @@ defmodule AccrueAdmin.InvoiceLiveTest do
         %{"action_type" => "void", "source_event_id" => Integer.to_string(source_event.id)}
       )
 
-    assert html =~ "Confirm action"
+    assert html =~ AccrueAdmin.Copy.Invoice.invoice_confirm_panel_label()
 
     html = render_click(element(view, "[data-role='confirm-action']"))
-    assert html =~ "Step-up required"
+    assert html =~ Copy.step_up_title()
 
     html =
       render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
