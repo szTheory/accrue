@@ -1,16 +1,33 @@
 # Milestones
 
-## v1.14 Companion admin + billing depth (Opened: 2026-04-22)
+## v1.14 Companion admin + billing depth (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-22
 
-**Theme:** **Core `accrue_admin`** parity (**`AccrueAdmin.Copy`**, **`ax-*`/tokens**, **VERIFY-01**) on **money-primary** surfaces (excluding the v1.13 auxiliary set), then **one** scoped **`Accrue.Billing` / Stripe** expansion with **Fake** coverage + **`guides/telemetry.md`** alignment. **Integrator/adoption** and **release/Hex continuity** milestones are **explicitly later**. **PROC-08** / **FIN-03** remain non-goals.
+**Phases completed:** 3 phases (54–56), **6** plans
 
-**Phases:** **54–56** (see root `.planning/ROADMAP.md`). Requirements: `.planning/REQUIREMENTS.md` (**ADM-07..ADM-11**, **BIL-01..BIL-02**).
+**Key accomplishments:**
+
+- **Phase 54 (ADM-07, ADM-08):** **`guides/core-admin-parity.md`** router-derived **ADM-07** matrix; **`AccrueAdmin.Copy.Invoice`** + **`InvoicesLive`** / **`InvoiceLive`** operator chrome burn-down on the invoice money-primary spine.
+- **Phase 55 (ADM-09..ADM-11):** Merge-blocking **VERIFY-01** **`core-admin-invoices-*`** flows; host **E2E** deterministic **`invoice_id`**; **`verify_core_admin_invoice_verify_ids.sh`**; **`theme-exceptions.md`** + **`export_copy_strings`** / **`copy_strings.json`** hygiene and core list **org scoping** fixes.
+- **Phase 56 (BIL-01, BIL-02):** **`Accrue.Billing.list_payment_methods/2`** and **`!/2`** with **`span_billing(:payment_method, :list, …)`**, Fake **`payment_method_list_test.exs`**, **`guides/telemetry.md`** + **CHANGELOG** + installer **`billing.ex.eex`** + **`first_hour.md`** alignment.
+
+**Theme:** **Core `accrue_admin`** parity on money-primary surfaces, then **one** scoped **Billing** read API + honest telemetry/docs — **no** **PROC-08** / **FIN-03**; **integrator** and **Hex release-train** milestones **explicitly later**.
+
+**Milestone audit:** No standalone `v1.14-MILESTONE-AUDIT.md`; closure used per-phase verification, **`ROADMAP.md`** progress table, and requirements archive (**7/7 Complete**).
+
+**Known deferred items at close:** same **audit-open** carry-forward as prior closes (see `.planning/STATE.md` § Deferred Items).
 
 **Phase directories:** **`phases.clear` not run** — preserves **1–53** trees under `.planning/phases/`.
 
-**Status:** **Active** — not shipped.
+**Archives:**
+
+- Roadmap: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md)
+- Requirements: [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md)
+
+**Git tag:** `v1.14`
+
+**Next after ship:** `/gsd-new-milestone` when priorities for **v1.15+** are set.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- ○ **v1.14 Companion admin + billing depth** — Phases **54–56** (**active**). Core `accrue_admin` Copy / token / VERIFY parity on money-primary surfaces, then one scoped **`Accrue.Billing`** / Stripe expansion (**Fake** + **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.14 Companion admin + billing depth** — Phases **54–56** shipped **2026-04-23**. Core admin **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** on invoice money-primary spine + **`Accrue.Billing.list_payment_methods`** (**Fake**, **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Archives: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
 - ✅ **v1.13 Integrator path + secondary admin parity** — Phases **51–53** shipped **2026-04-23**. Golden-path docs + adoption proof alignment; auxiliary admin (**coupons**, **promotion codes**, **Connect**, **events**) **`AccrueAdmin.Copy`** + **`ax-*`** + **VERIFY-01**. Archives: [`milestones/v1.13-ROADMAP.md`](milestones/v1.13-ROADMAP.md), [`milestones/v1.13-REQUIREMENTS.md`](milestones/v1.13-REQUIREMENTS.md).
 - ✅ **v1.12 Admin & operator UX** — Phases **48–50** shipped **2026-04-22**. Post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright on touched routes. Archives: [`milestones/v1.12-ROADMAP.md`](milestones/v1.12-ROADMAP.md), [`milestones/v1.12-REQUIREMENTS.md`](milestones/v1.12-REQUIREMENTS.md).
 - ✅ **v1.11 Public Hex release + post-release continuity** — Phases **46–47** shipped **2026-04-22**. Linked **`accrue`** / **`accrue_admin`** **0.3.0** on Hex; **`RELEASING.md`**, **`first_hour`**, **`verify_package_docs`**, and planning mirrors aligned. Archives: [`milestones/v1.11-ROADMAP.md`](milestones/v1.11-ROADMAP.md), [`milestones/v1.11-REQUIREMENTS.md`](milestones/v1.11-REQUIREMENTS.md).
@@ -20,7 +20,10 @@
 
 ## Phases
 
-### v1.14 Companion admin + billing depth (Phases 54–56) — ACTIVE
+*(No active milestone — run `/gsd-new-milestone` when priorities for **v1.15+** are set.)*
+
+<details>
+<summary>✅ v1.14 Companion admin + billing depth (Phases 54–56) — SHIPPED 2026-04-23</summary>
 
 **Milestone goal:** Bring **core** companion admin (customers, subscriptions, invoices, charges, webhooks, dashboard—**excluding** the v1.13 auxiliary set) to the **v1.12 / v1.13** bar for **`AccrueAdmin.Copy`**, **`ax-*` / theme tokens**, and **VERIFY-01**; then ship **one** bounded **billing / Stripe** library expansion with **Fake** regressions and honest **telemetry / operator docs**—without **PROC-08**, **FIN-03**, integrator-milestone doc scope, or release-train milestone scope.
 
@@ -28,9 +31,9 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 54 | 2/2 | Complete    | 2026-04-23 |
-| 55 | 2/2 | Complete    | 2026-04-23 |
-| 56 | 2/2 | Complete    | 2026-04-23 |
+| 54 | Core admin inventory + first burn-down | **ADM-07** matrix + **ADM-08** invoice Copy burn-down. **Shipped 2026-04-22.** | ADM-07, ADM-08 |
+| 55 | Core admin VERIFY + theme + copy CI | **VERIFY-01** invoice anchors + **theme-exceptions** + **`export_copy_strings`**. **Shipped 2026-04-23.** | ADM-09, ADM-10, ADM-11 |
+| 56 | Billing / Stripe depth + telemetry truth | **`list_payment_methods`** + telemetry/docs (**BIL-01**, **BIL-02**). **Shipped 2026-04-23.** | BIL-01, BIL-02 |
 
 **Success criteria (milestone):**
 
@@ -38,50 +41,9 @@
 2. No **PROC-08** / **FIN-03** scope creep; no new third-party UI kits.
 3. **VERIFY-01** policy (**merge-blocking** vs **advisory** lanes) unchanged unless an explicit maintainer decision documents a rename (discouraged).
 
-### Phase 54: Core admin inventory + first burn-down
+**Archives:** [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
 
-**Goal:** Publish **ADM-07** gap inventory (core admin surfaces vs **`AccrueAdmin.Copy`**, **`ax-*` / theme tokens**, and **VERIFY-01**); close **P0** items on **≥1** money-primary flow (**ADM-08**).
-
-**Depends on:** **v1.13** shipped; **Hex `0.3.0`** pair remains the published baseline; existing **VERIFY-01** + **`export_copy_strings`** machinery from **v1.11–v1.13**.
-
-**Requirements:** ADM-07, ADM-08
-
-**Success criteria:**
-
-1. **ADM-07** inventory is published and maps **core** companion admin surfaces (customers, subscriptions, invoices, charges, webhooks, dashboard — **excluding** the v1.13 auxiliary set) against Copy / token / VERIFY expectations.
-2. **ADM-08**: **P0** gaps are closed on **at least one** money-primary operator flow, aligned with the **v1.12 / v1.13** precedent.
-
-**Plans:** TBD
-
-### Phase 55: Core admin VERIFY + theme + copy CI
-
-**Goal:** **VERIFY-01** Playwright + axe on the **ADM-08** route group (**ADM-09**); **theme-exceptions** + **`export_copy_strings`** hygiene (**ADM-10**, **ADM-11**).
-
-**Depends on:** **Phase 54** (**ADM-08** money-primary flow) established as the VERIFY anchor.
-
-**Requirements:** ADM-09, ADM-10, ADM-11
-
-**Success criteria:**
-
-1. **ADM-09**: merge-blocking **VERIFY-01** coverage (Playwright + axe) on the **ADM-08** route group.
-2. **ADM-10** / **ADM-11**: registered **theme-exceptions** stay honest; **`export_copy_strings`** / Copy export hygiene matches maintainer rules for churn in this milestone.
-
-**Plans:** TBD
-
-### Phase 56: Billing / Stripe depth + telemetry truth
-
-**Goal:** Ship **BIL-01** (one scoped public **`Accrue.Billing`** / Stripe capability with **Fake** coverage); align **`guides/telemetry.md`** and runbook links (**BIL-02**).
-
-**Depends on:** **v1.13** baseline; **Phase 55** admin CI/copy posture recommended before expanding **Billing** surface area.
-
-**Requirements:** BIL-01, BIL-02
-
-**Success criteria:**
-
-1. **BIL-01**: one bounded billing library expansion ships with **Fake** regressions; no **PROC-08** / **FIN-03** scope creep; no new third-party UI kits.
-2. **BIL-02**: telemetry catalog / operator narrative in **`guides/telemetry.md`** (and linked runbooks) matches what the code and admin actually expose.
-
-**Plans:** TBD
+</details>
 
 <details>
 <summary>✅ v1.13 Integrator path + secondary admin parity (Phases 51–53) — SHIPPED 2026-04-23</summary>
@@ -437,13 +399,13 @@
 | 52. Integrator proof + package alignment + auxiliary copy (part 1) | v1.13 | 3/3 | Complete | 2026-04-23 |
 | 53. Auxiliary admin — Connect, events, layout, VERIFY | v1.13 | 2/2 | Complete | 2026-04-23 |
 
-**v1.14 (active — opened 2026-04-22)**
+**v1.14 (complete — 2026-04-23)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 54. Core admin inventory + first burn-down | v1.14 | — | Pending | — |
-| 55. Core admin VERIFY + theme + copy CI | v1.14 | — | Pending | — |
-| 56. Billing / Stripe depth + telemetry truth | v1.14 | — | Pending | — |
+| 54. Core admin inventory + first burn-down | v1.14 | 2/2 | Complete | 2026-04-22 |
+| 55. Core admin VERIFY + theme + copy CI | v1.14 | 2/2 | Complete | 2026-04-23 |
+| 56. Billing / Stripe depth + telemetry truth | v1.14 | 2/2 | Complete | 2026-04-23 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

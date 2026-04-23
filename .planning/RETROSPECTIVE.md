@@ -540,12 +540,50 @@
 
 ---
 
+## Milestone: v1.14 — Companion admin + billing depth
+
+**Shipped:** 2026-04-23  
+**Phases:** 3 | **Plans:** 6
+
+### What Was Built
+
+- **Phase 54:** **`guides/core-admin-parity.md`** **ADM-07** matrix; **`AccrueAdmin.Copy.Invoice`** + invoice LiveView operator chrome (**ADM-08**).
+- **Phase 55:** Merge-blocking **VERIFY-01** **`core-admin-invoices-*`** flows; **`verify_core_admin_invoice_verify_ids.sh`**; **`theme-exceptions.md`** + **`export_copy_strings`** / **`copy_strings.json`**; core list **org scoping** on **`DataTable`** (**ADM-09..ADM-11**).
+- **Phase 56:** **`Accrue.Billing.list_payment_methods/2`** + **`!/2`** with **`span_billing(:payment_method, :list, …)`**, Fake **`payment_method_list_test.exs`**, **`guides/telemetry.md`** + **CHANGELOG** + installer **`billing.ex.eex`** + **`first_hour.md`** (**BIL-01**, **BIL-02**).
+
+### What Worked
+
+- Reusing the **v1.12 / v1.13** **Copy submodule + `defdelegate`** pattern on **invoices** kept core parity aligned with auxiliary work.
+- **Router-derived parity matrix** as single SSOT reduced forked “what’s covered?” narratives.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** failed again (`version required for phases archive`); milestone archives were written manually (same as **v1.11–v1.13**).
+
+### Patterns Established
+
+- **CI drift guard** for named **VERIFY-01** flow ids (`verify_core_admin_invoice_verify_ids.sh`) when invoice E2E anchors are merge-blocking.
+
+### Key Lessons
+
+1. **`roadmap.analyze`** can surface unrelated legacy phases; treat **milestone-scoped** phase directories as the readiness source of truth.
+2. Keep **telemetry catalog** rows in lockstep with **billing span** metadata when adding façade read APIs.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three short phases (**54–56**) spanning docs + admin + billing façade.
+- Notable: majority of churn was **VERIFY-01** + **copy_strings.json** + CI wiring, not **`Accrue.Billing`** core logic.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.14 | short | 3 | Core-admin parity matrix + invoice Copy burn-down (54), VERIFY-01 invoice anchors + theme/copy CI (55), `list_payment_methods` + telemetry/docs (56). |
 | v1.13 | short | 3 | Integrator spine + VERIFY-01 discoverability (51), proof matrix + package docs + coupon/promo Copy (52), Connect/events Copy + auxiliary VERIFY-01 + export allowlist (53). |
 | v1.12 | short | 3 | Post-metering admin KPI (48), subscription drill + README nav honesty (49), Copy.Subscription + theme register + export_copy_strings VERIFY-01 wiring (50). |
 | v1.11 | short | 2 | Release train + manifest SSOT (46), post-release docs + planning mirrors (47). |
@@ -563,6 +601,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.14 | ExUnit on invoice LiveViews; host VERIFY-01 **`core-admin-invoices-*`** + axe; Fake **`payment_method_list_test.exs`** | ADM-07..ADM-11 + BIL-01..BIL-02 (7/7) archived | `core-admin-parity.md`, `Copy.Invoice`, `verify_core_admin_invoice_verify_ids.sh`, billing `list` span + telemetry row. |
 | v1.12 | ExUnit on **DashboardLive** + **SubscriptionLive**; host **admin_mount** smoke; VERIFY-01 Playwright + axe using **`e2e/generated/copy_strings.json`** | ADM-01..ADM-06 (6/6) archived | `mix accrue_admin.export_copy_strings`, `Copy.Subscription`, `theme-exceptions.md`, `verify01-v112-admin-paths.md`. |
 | v1.11 | `verify_release_manifest_alignment.sh`, `verify_package_docs` + ExUnit, CI release-automation wiring | REL/DOC/HYG (7/7) archived | Maintainer-dispatch release PR workflow, manifest SSOT job, `46-VERIFICATION.md` ship index. |
 | v1.10 | ExUnit on Fake metering flows (happy, sync failure + idempotent retry, reconciler, webhook); guide cross-links | MTR-01..MTR-08 (8/8) archived | `guides/metering.md`, telemetry/runbook rows for `meter_reporting_failed` sources, guarded `MeterEvents` failure path. |
