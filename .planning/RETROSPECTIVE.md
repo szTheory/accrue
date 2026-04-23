@@ -650,12 +650,48 @@
 
 ---
 
+## Milestone: v1.17 — Friction-led developer readiness
+
+**Shipped:** 2026-04-23  
+**Phases:** 4 | **Plans:** 8
+
+### What Was Built
+
+- **Phase 62 (FRG-01..FRG-03):** **`research/v1.17-FRICTION-INVENTORY.md`** + **`v1.17-north-star.md`**; **FRG-03** backlog anchors mapping **P0** rows to **INT-10** / **BIL-03** / **ADM-12** (including explicit empty-queue rows).
+- **Phase 63 (INT-10):** Package README + **First Hour** **Hex vs branch** clarity (**63-01**); **`[host-integration] phase=…`** stderr slugs across host verify helpers + contributor map (**63-02**); remaining integrator/VERIFY/docs **P0** closure per **63-VERIFICATION.md** (**63-03**).
+- **Phase 64 (BIL-03):** Signed certification of **no billing P0** rows for this milestone + **`64-VERIFICATION.md`** + **`v1_17_friction_research_contract_test.exs`** / shell contract green.
+- **Phase 65 (ADM-12):** **`65-VERIFICATION.md`** + inventory maintainer line; signed certification of **no admin P0** rows; verification table family aligned with **63/64**.
+
+### What Worked
+
+- **Triage-first** milestone shape prevented another unfocused doc sweep after **v1.16**.
+- **Empty-queue certification** as an explicit ship path for **BIL-03** / **ADM-12** kept honesty high when **FRG-03** showed no billing/admin **P0** work.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** failed again (`version required for phases archive`); closeout archives were written manually (same as **v1.11–v1.16**).
+- **`roadmap.analyze`** disagreed with on-disk verification for Phase **64** (summary count / disk status); humans relied on **`*-VERIFICATION.md`** + **REQUIREMENTS** traceability instead.
+- **`audit-open`** reported a **Phase 62 UAT** gap at close; it was **acknowledged** and recorded in **STATE.md** rather than blocking archive.
+
+### Key Lessons
+
+1. When the milestone is **conditional axes** (**INT** / **BIL** / **ADM**), ship **FRG-03** anchors in the inventory doc *before* execution phases so empty queues are provable, not implied.
+2. Keep **one verification SSOT per phase** (**`*-VERIFICATION.md`**) so **`gsd-sdk`** heuristics cannot become the release-of-truth.
+
+### Cost Observations
+
+- Sessions: four short phases after **`phases.clear`** reset.
+- Notable: highest leverage was **inventory + contracts**, not new **Billing** APIs.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.17 | short | 4 | Friction inventory + north star + FRG-03 anchors (62); INT-10 README + host-integration slugs + integrator closure (63); BIL-03 empty-queue certification (64); ADM-12 empty-queue certification (65). |
 | v1.16 | short | 3 | Golden path + quickstart + CONTRIBUTING coherence (59); matrix/walkthrough + CI README INT map (60); README VERIFY pin + Hex/`main` SSOT in planning + CONTRIBUTING (61). |
 | v1.15 | single | 2 | Trust docs: upgrade + RELEASING + root README (57); demo Sigra vs Auth + package stability + verifier alignment (58). |
 | v1.14 | short | 3 | Core-admin parity matrix + invoice Copy burn-down (54), VERIFY-01 invoice anchors + theme/copy CI (55), `list_payment_methods` + telemetry/docs (56). |

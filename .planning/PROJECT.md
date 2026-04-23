@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.17 — Friction-led developer readiness** is **shipped** (**2026-04-23**). Phases **62–65**; **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12** validated. **Next:** open **v1.18** (or later) via **`/gsd-new-milestone`** when priorities are set — **`REQUIREMENTS.md`** / roadmap for **v1.17** remain until **`/gsd-complete-milestone`** archives them.
+**v1.17 — Friction-led developer readiness** is **archived** (**2026-04-23**). Phases **62–65**; **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12** validated. Archives: **`.planning/milestones/v1.17-ROADMAP.md`**, **`v1.17-REQUIREMENTS.md`**; planning git tag **`v1.17`**. **Next:** open **v1.18** (or later) via **`/gsd-new-milestone`** — root **`.planning/REQUIREMENTS.md`** is removed until then (fresh requirements file is created by that workflow).
 
 **Goal:** Maximize marginal **developer** value: invest where ranked evidence shows Phoenix integrators still stall — **integrator / VERIFY / docs**, **billing**, or **admin/operator** — instead of broad continuity sweeps after **v1.16**. Each phase stays **one sharp bet**; stop when the next increment is polish without removing failure modes.
 
@@ -53,9 +53,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** may still read **ahead** until the next ship.
 
-**Last shipped planning milestone:** **v1.17** — Phases **62–65** (**2026-04-23**): **FRG-01..FRG-03** triage + north star + scoped backlog; **INT-10**; **BIL-03**; **ADM-12** (empty-queue certification paths for **63–65** — see **`phases/*-VERIFICATION.md`**). Archives: pending **`/gsd-complete-milestone`**. Prior: **v1.16** — Phases **59–61**; archives **`.planning/milestones/v1.16-*`**; tag **`v1.16`**.
+**Last shipped planning milestone:** **v1.17** — Phases **62–65** (**2026-04-23**): **FRG-01..FRG-03** triage + north star + scoped backlog; **INT-10**; **BIL-03**; **ADM-12** (empty-queue certification paths for **63–65** — see **`phases/*-VERIFICATION.md`**). Archives: **`.planning/milestones/v1.17-*`**. Prior: **v1.16** — Phases **59–61**; archives **`.planning/milestones/v1.16-*`**; tag **`v1.16`**.
 
-**Now:** **v1.17** execution **complete** **2026-04-23** — verification SSOTs **`63-VERIFICATION.md`**, **`64-VERIFICATION.md`**, **`65-VERIFICATION.md`**; **`REQUIREMENTS.md`** shows all **v1.17** rows **Complete**. Run **`/gsd-complete-milestone`** when ready to archive + tag.
+**Now:** **v1.17** milestone close complete — **`MILESTONES.md`**, **`STATE.md`**, **`ROADMAP.md`** **Progress** table, and **`RETROSPECTIVE.md`** updated; root **`.planning/REQUIREMENTS.md`** removed for the next milestone line.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -462,6 +462,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.14 sequences core admin parity before integrator/Hex milestones | After auxiliary parity (v1.13), **core** money flows should meet the same Copy/token/VERIFY bar; one billing depth slice ships with Fake + telemetry truth before doc/release milestones return | ✓ Good — **shipped** Phases **54–56** (**2026-04-23**); tag **`v1.14`** |
 | v1.15 prioritizes release/trust semantics (forcing function **B**) over feature expansion | Pre-1.0 Hex + internal `v1.x` planning labels risk evaluator confusion; fix with docs + demo README clarity before further polish milestones | ✓ Good — **shipped** Phases **57–58** (**2026-04-23**); archived + planning tag **`v1.15`** |
 | v1.16 closes integrator/proof continuity deferred from v1.14–v1.15 | Trust SemVer messaging and v1.13 INT baseline can drift; explicit milestone re-binds golden path, matrix, root VERIFY hops, and package-doc SSOT without billing scope creep | ✓ Good — **shipped** Phases **59–61** (**2026-04-23**); archived + planning tag **`v1.16`** |
+| v1.17 uses friction triage before broad doc sweeps | After v1.16 continuity, ranked **FRG-01** evidence + **FRG-03** backlog prevents silent scope expansion; **BIL-03**/**ADM-12** allow signed empty-queue certification | ✓ Good — **shipped** Phases **62–65** (**2026-04-23**); archived + planning tag **`v1.17`** |
 
 ## Current Milestone Notes
 
@@ -501,7 +502,8 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** opened (**Integrator + proof continuity**); **`REQUIREMENTS.md`** (**INT-06..INT-09**); roadmap phases **59–61**.
 - **2026-04-23:** **`/gsd-complete-milestone` v1.16** — archives **`milestones/v1.16-*`**, root **`REQUIREMENTS.md`** removed for next milestone, planning tag **`v1.16`**.
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.17** opened (**Friction-led developer readiness**); **`REQUIREMENTS.md`** (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**); roadmap phases **62–65**; **`phases.clear`** executed (**43** trees).
-- **2026-04-23:** **`/gsd-execute-phase 65`** — **`65-VERIFICATION.md`**, inventory **ADM-12** maintainer line, **`REQUIREMENTS.md`** **ADM-12** complete; **v1.17** milestone requirements satisfied (pending formal **`/gsd-complete-milestone`** archive).
+- **2026-04-23:** **`/gsd-execute-phase 65`** — **`65-VERIFICATION.md`**, inventory **ADM-12** maintainer line, **`REQUIREMENTS.md`** **ADM-12** complete; **v1.17** milestone requirements satisfied.
+- **2026-04-23:** **`/gsd-complete-milestone`** (**v1.17**) — archives **`milestones/v1.17-*`**, root **`REQUIREMENTS.md`** removed for next milestone, **`audit-open`** Phase **62** UAT gap acknowledged in **`STATE.md`**, planning tag **`v1.17`**.
 
 ## Evolution
 
@@ -521,4 +523,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 — **v1.17** shipped (**Phases 62–65**); **`/gsd-complete-milestone`** pending for archives + tag.*
+*Last updated: 2026-04-23 after **v1.17** milestone archive + tag (**Phases 62–65**).*

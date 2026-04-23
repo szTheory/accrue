@@ -1,16 +1,34 @@
 # Milestones
 
-## v1.17 Friction-led developer readiness (Planning opened: 2026-04-23)
+## v1.17 Friction-led developer readiness (Shipped: 2026-04-23)
 
-**Status:** **IN PROGRESS**
+**Planning opened:** 2026-04-23
 
-**Phases:** **62–65** (see [ROADMAP.md](ROADMAP.md))
+**Phases completed:** **4** phases (**62–65**), **8** plans (Phase **64** ships verification + research closure on an empty billing **P0** queue).
 
-**Theme:** Triage-led **P0** closure across **integrator / VERIFY / docs**, **billing**, or **admin/operator** — evidence from **FRG-01**; **no** **PROC-08** / **FIN-03**; avoid broad **v1.16**-style sweeps without **P0** justification.
+**Known deferred items at close:** **1** (see [STATE.md](STATE.md) § **Deferred Items** — Phase **62** **UAT** scenarios acknowledged at milestone close).
 
-**Requirements:** [REQUIREMENTS.md](REQUIREMENTS.md) (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**)
+**Key accomplishments:**
 
-**Note:** **`.planning/phases/`** was cleared (**`phases.clear`**, **43** trees) at milestone open; new phase directories are created by **`/gsd-plan-phase`**.
+- **Phase 62 (FRG-01..FRG-03):** **`research/v1.17-FRICTION-INVENTORY.md`** + **`v1.17-north-star.md`**; scoped **FRG-03** backlog anchors for **INT-10** / **BIL-03** / **ADM-12** with explicit empty-queue rows where applicable.
+- **Phase 63 (INT-10):** **First Hour** + package README **Hex vs branch** skimmable facts (**63-01**); stable **`[host-integration] phase=…`** stderr slugs + contributor map (**63-02**); remaining **INT-10** slice per **63-VERIFICATION.md** (**63-03**).
+- **Phase 64 (BIL-03):** Maintainer-signed empty billing **P0** queue certification + **`64-VERIFICATION.md`** + friction research contract tests green.
+- **Phase 65 (ADM-12):** **`65-VERIFICATION.md`** + inventory maintainer line; empty admin **P0** queue certification aligned to **63/64** verification table family.
+
+**Theme:** Triage-led **P0** closure — **no** **PROC-08** / **FIN-03**; no broad **v1.16**-style sweeps without **FRG-01** evidence.
+
+**Milestone audit:** No standalone **`v1.17-MILESTONE-AUDIT.md`**; closure used **`REQUIREMENTS.md`** (6/6 **Complete**), per-phase **`*-VERIFICATION.md`**, and **`audit-open`** with the **Phase 62 UAT** gap acknowledged in **STATE.md**.
+
+**Note:** **`.planning/phases/`** was cleared (**`phases.clear`**, **43** trees) at milestone open; phases **62–65** directories were created by **`/gsd-plan-phase`**.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md)
+- Requirements: [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md)
+
+**Git tag:** `v1.17`
+
+**Next after ship:** **`/gsd-new-milestone`** when priorities for **v1.18+** are set.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. [REQUIREMENTS.md](REQUIREMENTS.md) + this file § Phases **62–65**.
+- ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Archives: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md), [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
 - ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
 - ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. Archives: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md), [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md).
 - ✅ **v1.14 Companion admin + billing depth** — Phases **54–56** shipped **2026-04-23**. Core admin **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** on invoice money-primary spine + **`Accrue.Billing.list_payment_methods`** (**Fake**, **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Archives: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
@@ -23,7 +23,7 @@
 
 ## Phases
 
-<details open>
+<details>
 <summary>✅ v1.17 Friction-led developer readiness (Phases 62–65) — SHIPPED 2026-04-23</summary>
 
 **Milestone goal:** Rank **where Phoenix integrators still stall**, then close **P0** items per axis — **integrator / VERIFY / docs** (**INT-10**), **billing** (**BIL-03**), **admin/operator** (**ADM-12**) — or **certify none** with signed rationale. Avoid broad continuity sweeps without **FRG-01** evidence.
@@ -572,11 +572,14 @@
 | 60. Adoption proof + CI ownership map | v1.16 | 2/2 | Complete | 2026-04-23 |
 | 61. Root VERIFY hops + Hex doc SSOT | v1.16 | 2/2 | Complete | 2026-04-23 |
 
-**v1.17 (in progress — 2026-04-23)**
+**v1.17 (complete — 2026-04-23)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
+| 62. Friction triage + north star | v1.17 | 3/3 | Complete | 2026-04-23 |
 | 63. P0 integrator / VERIFY / docs | v1.17 | 3/3 | Complete | 2026-04-23 |
+| 64. P0 billing | v1.17 | 1/1 | Complete | 2026-04-23 |
+| 65. P0 admin / operator | v1.17 | 1/1 | Complete | 2026-04-23 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

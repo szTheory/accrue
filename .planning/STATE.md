@@ -21,7 +21,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.17** shipped **2026-04-23** — start **v1.18** (or next milestone) via **`/gsd-new-milestone`** when ready.
+**Current focus:** **v1.17** archived **2026-04-23** — start **v1.18** (or next milestone) via **`/gsd-new-milestone`** when ready (**`.planning/REQUIREMENTS.md`** removed until then).
 
 ## Current Position
 
@@ -46,10 +46,9 @@ Plan: **65-01** — **complete**
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **v1.17** requirement set (**FRG**, **INT-10**, **BIL-03**, **ADM-12**)
-- **`.planning/ROADMAP.md`** — Phases **62–65** for **v1.17**
-- **`.planning/PROJECT.md`** — **Current milestone** = **v1.17**
-- **`.planning/MILESTONES.md`** — **v1.17** shipped entry (update when archiving)
+- **`.planning/ROADMAP.md`** — **v1.17** collapsed under **Milestones** + **Progress** (archived detail in **`milestones/v1.17-ROADMAP.md`**)
+- **`.planning/PROJECT.md`** — **v1.17** archived; next milestone TBD via **`/gsd-new-milestone`**
+- **`.planning/MILESTONES.md`** — **v1.17** shipped entry (**2026-04-23**)
 - **`.planning/phases/62-friction-triage-north-star/`** — **62-CONTEXT.md**, **62-DISCUSSION-LOG.md**
 - **`.planning/phases/63-p0-integrator-verify-docs/`** — **63-VERIFICATION.md**, **63-01..03-SUMMARY.md**
 - **`.planning/phases/64-p0-billing/`** — **64-CONTEXT.md**, **64-DISCUSSION-LOG.md**, **64-RESEARCH.md**, **64-VALIDATION.md**, **64-01-PLAN.md**, **64-VERIFICATION.md**
@@ -57,6 +56,12 @@ Plan: **65-01** — **complete**
 - **`.planning/research/v1.17-north-star.md`**, **`v1.17-FRICTION-INVENTORY.md`** — triage SSOT (**FRG-01..03**)
 
 ## Deferred Items
+
+Items acknowledged and deferred at milestone close on **2026-04-23** (**v1.17**):
+
+| Category | Item | Status |
+|----------|------|--------|
+| uat_gap | Phase 62 — `62-UAT.md` (5 open scenarios) | deferred_at_milestone_close |
 
 **Phase 21 UAT:** metadata row retained for traceability; scenarios are automated / resolved via quick task **260414-l9q** (see `03-HUMAN-UAT.md`).
 
@@ -73,6 +78,6 @@ Plan: **65-01** — **complete**
 - **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
 - **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** **`/gsd-new-milestone`** (or **`/gsd-complete-milestone`**) to archive **v1.17** and open the next version line.
+**Next:** **`/gsd-new-milestone`** to author fresh **`.planning/REQUIREMENTS.md`** + roadmap for **v1.18** (or next label).
 
-**Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**. **v1.17** — Phases **62–65** — **2026-04-23** (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**).
+**Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**. **v1.17** — Phases **62–65** — **2026-04-23** (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**); archives **`.planning/milestones/v1.17-*`**; planning tag **`v1.17`**.
