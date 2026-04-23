@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.19 Release continuity + proof resilience (Planning opened: 2026-04-23)
+
+**Theme:** Proof-contract hardening (**PRF-01..02**, closes **v1.17-P1-001** drift class) → linked **Hex** publish **0.3.1** (**REL-01..03**) → **First Hour** / **`verify_package_docs`** + **`.planning/`** Hex mirrors (**DOC-01..02**, **HYG-01**). **No** **PROC-08** / **FIN-03**.
+
+**Phases:** **67–69** (see [`.planning/ROADMAP.md`](ROADMAP.md)).
+
+**Depends on:** **v1.18** shipped; **v1.18** Phase **66** tree under [`.planning/milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/).
+
+**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md)
+
+**Status:** Active — execution starts with **Phase 67**.
+
+---
+
 ## v1.18 Onboarding confidence (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-23
@@ -25,7 +39,7 @@
 
 **Git tag:** `v1.18`
 
-**Next after ship:** **`/gsd-new-milestone`** — fresh **`.planning/REQUIREMENTS.md`** and next roadmap slice.
+**Next after ship:** **`/gsd-discuss-phase 67`** / **`/gsd-plan-phase 67`** (**v1.19**).
 
 ---
 

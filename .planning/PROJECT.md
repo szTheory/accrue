@@ -12,11 +12,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**No active planning milestone** — root **`.planning/REQUIREMENTS.md`** is removed after **v1.18** close until **`/gsd-new-milestone`**. **Roadmap:** **`.planning/ROADMAP.md`**. Historical Phase **66** artifacts: **`.planning/phases/66-onboarding-confidence/`**.
+**v1.19 — Release continuity + proof resilience** (opened **2026-04-23**). **Goal:** Ship **`accrue` / `accrue_admin` 0.3.1** to Hex with docs + planning SSOT aligned, and harden merge-blocking adoption-proof contracts so **`adoption-proof-matrix.md`** cannot drift from **`verify_adoption_proof_matrix.sh`** without CI failure (**addresses `v1.17-P1-001`**). **Roadmap:** **`.planning/ROADMAP.md`**. **Requirements:** **`.planning/REQUIREMENTS.md`**. **Phases 67–69:** proof contracts → release train → planning/doc mirrors. **No** **PROC-08** / **FIN-03**.
 
 **Triage doctrine (read-only context, v1.17–v1.18):** [North star + stop rules](research/v1.17-north-star.md) · [Friction inventory](research/v1.17-FRICTION-INVENTORY.md)
 
-**v1.18 — Onboarding confidence** is **archived** (**2026-04-23**). Phase **66**; **UAT-01..UAT-05**, **PROOF-01** validated. Archives: **`.planning/milestones/v1.18-ROADMAP.md`**, **`v1.18-REQUIREMENTS.md`**. Planning git tag **`v1.18`**.
+**v1.18 — Onboarding confidence** is **archived** (**2026-04-23**). Phase **66**; **UAT-01..UAT-05**, **PROOF-01** validated. Phase tree: **`.planning/milestones/v1.18-phases/66-onboarding-confidence/`**. Archives: **`.planning/milestones/v1.18-ROADMAP.md`**, **`v1.18-REQUIREMENTS.md`**. Planning git tag **`v1.18`**.
 
 **v1.17 — Friction-led developer readiness** is **archived** (**2026-04-23**). Phases **62–65**; **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12** validated. Archives: **`.planning/milestones/v1.17-ROADMAP.md`**, **`v1.17-REQUIREMENTS.md`**; planning git tag **`v1.17`**. Phase working trees: **`.planning/milestones/v1.17-phases/`**.
 
@@ -46,11 +46,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
-**Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** may still read **ahead** until the next ship.
+**Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each until **v1.19** ships **0.3.1**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** is **0.3.1** pending **Phase 68** publish.
 
-**Last shipped planning milestone:** **v1.18** — Phase **66** (**2026-04-23**): **UAT-01..UAT-05** + **PROOF-01** — **`66-VERIFICATION.md`**, **`verify_v1_17_friction_research_contract.sh`**, adoption matrix / walkthrough / verifier alignment. Archives: **`.planning/milestones/v1.18-*`**. Prior: **v1.17** — Phases **62–65**; **`.planning/milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.18** — Phase **66** (**2026-04-23**): **UAT-01..UAT-05** + **PROOF-01** — **`milestones/v1.18-phases/66-onboarding-confidence/66-VERIFICATION.md`**, **`verify_v1_17_friction_research_contract.sh`**, adoption matrix / walkthrough / verifier alignment. Archives: **`.planning/milestones/v1.18-*`**. Prior: **v1.17** — Phases **62–65**; **`.planning/milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Now:** Awaiting **`/gsd-new-milestone`** for the next requirements + roadmap slice. **v1.17** phase directories remain under **`.planning/milestones/v1.17-phases/`**; **Phase 66** tree remains under **`.planning/phases/66-onboarding-confidence/`** as execution history.
+**Now:** **v1.19** active — proof resilience (**67**), **0.3.1** Hex publish (**68**), post-ship doc + planning mirrors (**69**). **v1.17** phase directories under **`.planning/milestones/v1.17-phases/`**; **v1.18** Phase **66** tree under **`.planning/milestones/v1.18-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -466,9 +466,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.16 closes integrator/proof continuity deferred from v1.14–v1.15 | Trust SemVer messaging and v1.13 INT baseline can drift; explicit milestone re-binds golden path, matrix, root VERIFY hops, and package-doc SSOT without billing scope creep | ✓ Good — **shipped** Phases **59–61** (**2026-04-23**); archived + planning tag **`v1.16`** |
 | v1.17 uses friction triage before broad doc sweeps | After v1.16 continuity, ranked **FRG-01** evidence + **FRG-03** backlog prevents silent scope expansion; **BIL-03**/**ADM-12** allow signed empty-queue certification | ✓ Good — **shipped** Phases **62–65** (**2026-04-23**); archived + planning tag **`v1.17`** |
 | v1.18 closes deferred **62-UAT** confidence with a verification ledger + contracts | Proof-first slice: **REQUIREMENTS** normative over historical **`62-UAT`** body; thin bash/ExUnit for binary invariants; **PROOF-01** keeps matrix ↔ script ↔ README honest | ✓ Good — **shipped** Phase **66** (**2026-04-23**); archived + planning tag **`v1.18`** |
+| v1.19 sequences proof-contract hardening before **0.3.1** Hex publish | Workspace **`@version`** already **0.3.1** while public Hex lags **0.3.0**; **PRF-** work closes **v1.17-P1-001** drift class before release train; **HYG** mirrors follow ship | ✓ Planned — **opened** Phases **67–69** (**2026-04-23**) |
 
 ## Current Milestone Notes
 
+- **2026-04-23:** **`/gsd-new-milestone` v1.19** — **Release continuity + proof resilience**; **`REQUIREMENTS.md`** (**PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**); roadmap Phases **67–69** (proof → Hex **0.3.1** → mirrors); **v1.18** Phase **66** execution tree moved to **`.planning/milestones/v1.18-phases/`** (durable path after **`phases.clear`**).
 - Phase 17 verified that v1.2 has no remaining requirement, integration, flow, or cleanup gaps before milestone archival.
 - Phase 16 recorded a recommendation, not a feature delivery: `Stripe Tax support` is the recommended next implementation milestone because it deepens the current Stripe-first path without promising any v1.2 schema, API, or processor changes.
 - `Organization / multi-tenant billing` remains a recommendation-only backlog candidate until host-owned org semantics, row-scoped tenancy checks, and `cross-tenant billing leakage` protections are explicit.
@@ -528,4 +530,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 — **v1.18** milestone archived (**Onboarding confidence**, Phase **66**); **`/gsd-new-milestone`** opens the next requirements file.*
+*Last updated: 2026-04-23 — **v1.19** opened (**Release continuity + proof resilience**); **v1.18** Phase **66** archived under **`milestones/v1.18-phases/`**; root **`REQUIREMENTS.md`** + **`ROADMAP`** updated for Phases **67–69**.*
