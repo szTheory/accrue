@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.18
-milestone_name: milestone
-status: **v1.18** — defining execution plans (`/gsd-discuss-phase 66` or `/gsd-plan-phase 66`)
-last_updated: "2026-04-23T21:03:59.149Z"
-last_activity: 2026-04-23 — **`/gsd-new-milestone`** trajectory implementation (**v1.18** opened; **v1.17** phase trees archived)
+milestone_name: Onboarding confidence
+status: planning_active
+last_updated: "2026-04-23T12:00:00.000Z"
+last_activity: "2026-04-23 — /gsd-discuss-phase 66 (subagent research); 66-CONTEXT.md + 66-DISCUSSION-LOG.md committed"
 progress:
   total_phases: 1
   completed_phases: 0
@@ -24,13 +24,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 ## Current Position
 
-Phase: **Not started** — **66** next (**Deferred UAT + evaluator proof**)
+Phase: **66** — **Deferred UAT + evaluator proof** — context gathered (**`.planning/phases/66-onboarding-confidence/66-CONTEXT.md`**)
 
 Plan: —
 
-**Status:** **v1.18** — defining execution plans (`/gsd-discuss-phase 66` or `/gsd-plan-phase 66`)
+**Status:** **v1.18** — ready for **`/gsd-plan-phase 66`**
 
-**Last activity:** 2026-04-23 — **`/gsd-new-milestone`** trajectory implementation (**v1.18** opened; **v1.17** phase trees archived)
+**Last activity:** 2026-04-23 — **`/gsd-discuss-phase 66`** (five parallel research passes → cohesive **D-01..D-05** in **66-CONTEXT.md**)
 
 ## Milestone Progress
 
@@ -47,6 +47,7 @@ Plan: —
 
 ## Current Planning Artifacts
 
+- **`.planning/phases/66-onboarding-confidence/`** — Phase **66** context (**`66-CONTEXT.md`**) + discussion log; **`66-VERIFICATION.md`** to be added at execute
 - **`.planning/REQUIREMENTS.md`** — **v1.18** (**UAT-01..UAT-05**, **PROOF-01**)
 - **`.planning/ROADMAP.md`** — **v1.18** Phase **66** + shipped milestones
 - **`.planning/milestones/v1.17-phases/`** — archived **62–65** working trees (**verification**, **UAT**, plans)
@@ -66,6 +67,7 @@ Plan: —
 
 ## Recent Decisions
 
+- **2026-04-23:** **`/gsd-discuss-phase 66`** — Canonical phase dir **`66-onboarding-confidence/`**; **REQUIREMENTS** normative over **`62-UAT`** (banner errata, not body rewrite); **minimal `66-VERIFICATION.md` matrix**; **UAT** default maintainer sign-off + thin **`verify_*`** automation only for binary invariants; **PROOF-01** bounded + one semantic pass, matrix-first vs script harness; see **`66-CONTEXT.md`**.
 - **2026-04-23:** **Trajectory plan implementation** — **Priority:** proof-first **v1.18** (not expansion). **v1.17** phase directories moved to **`.planning/milestones/v1.17-phases/`**; **`.planning/phases/`** cleared; **`REQUIREMENTS.md`**, **`ROADMAP.md`**, **`PROJECT.md`**, **`STATE.md`**, **`MILESTONES.md`**, friction inventory verification paths updated.
 - **2026-04-23:** **`/gsd-execute-phase 65`** — **`65-VERIFICATION.md`**, inventory **ADM-12** maintainer line, **`REQUIREMENTS.md`** **ADM-12** complete; **v1.17** milestone requirements satisfied.
 - **2026-04-23:** **`/gsd-execute-phase 64`** — **`64-VERIFICATION.md`**, inventory **BIL-03** maintainer line, **`REQUIREMENTS.md`** **BIL-03** complete.
@@ -74,6 +76,6 @@ Plan: —
 - **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
 - **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** **`/gsd-discuss-phase 66`** or **`/gsd-plan-phase 66`** — Phase **66** (**Deferred UAT + evaluator proof**).
+**Next:** **`/gsd-plan-phase 66`** — Phase **66** (**Deferred UAT + evaluator proof**); resume file: **`.planning/phases/66-onboarding-confidence/66-CONTEXT.md`**.
 
 **Completed:** **v1.17** — Phases **62–65** — **2026-04-23**; archives **`.planning/milestones/v1.17-*`**; planning tag **`v1.17`**.
