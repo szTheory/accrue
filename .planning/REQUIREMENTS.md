@@ -16,7 +16,7 @@
 
 ### Integrator / VERIFY / docs (INT)
 
-- [ ] **INT-10**: **P0 integrator / VERIFY / docs closure** — For every **P0** backlog row tagged **integrator**, **VERIFY**, or **docs**, ship the fix (markdown, shell verifiers, tests as needed) **or** downgrade to **P1+** with maintainer-signed rationale in the inventory; **`bash scripts/ci/verify_package_docs.sh`** and merge-blocking **`host-integration`** / **VERIFY-01** contracts remain **green** on **`main`** after any change in this milestone.
+- [x] **INT-10**: **P0 integrator / VERIFY / docs closure** — For every **P0** backlog row tagged **integrator**, **VERIFY**, or **docs**, ship the fix (markdown, shell verifiers, tests as needed) **or** downgrade to **P1+** with maintainer-signed rationale in the inventory; **`bash scripts/ci/verify_package_docs.sh`** and merge-blocking **`host-integration`** / **VERIFY-01** contracts remain **green** on **`main`** after any change in this milestone.
 
 ### Billing (BIL)
 
@@ -48,7 +48,7 @@
 | FRG-01 | 62 | Complete |
 | FRG-02 | 62 | Complete |
 | FRG-03 | 62 | Complete |
-| INT-10 | 63 | Pending |
+| INT-10 | 63 | Complete |
 | BIL-03 | 64 | Pending |
 | ADM-12 | 65 | Pending |
 
