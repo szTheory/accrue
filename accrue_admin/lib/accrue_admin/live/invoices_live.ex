@@ -44,34 +44,33 @@ defmodule AccrueAdmin.Live.InvoicesLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Invoices"}
+              %{label: Copy.dashboard_breadcrumb_home(), href: @admin_mount_path},
+              %{label: Copy.invoices_index_breadcrumb_invoices()}
             ]}
           />
-          <p class="ax-eyebrow">Invoices</p>
-          <h2 class="ax-display">Collections and invoice review</h2>
+          <p class="ax-eyebrow"><%= Copy.invoices_index_eyebrow() %></p>
+          <h2 class="ax-display"><%= Copy.invoices_index_headline() %></h2>
           <p class="ax-body ax-page-copy">
-            Inspect invoice state, open detail pages, and route high-risk state changes through
-            the shared billing workflow and audit seams.
+            <%= Copy.invoices_index_body() %>
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Invoice summary">
-          <KpiCard.kpi_card label="Open" value={Integer.to_string(@summary.open_count)}>
-            <:meta>Invoices still collecting payment</:meta>
+        <section class="ax-kpi-grid" aria-label={Copy.invoices_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={Copy.invoices_kpi_open_label()} value={Integer.to_string(@summary.open_count)}>
+            <:meta><%= Copy.invoices_kpi_open_meta() %></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Paid" value={Integer.to_string(@summary.paid_count)}>
-            <:meta>Settled invoices in the local projection</:meta>
+          <KpiCard.kpi_card label={Copy.invoices_kpi_paid_label()} value={Integer.to_string(@summary.paid_count)}>
+            <:meta><%= Copy.invoices_kpi_paid_meta() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Uncollectible"
+            label={Copy.invoices_kpi_uncollectible_label()}
             value={Integer.to_string(@summary.uncollectible_count)}
-            delta={Integer.to_string(@summary.void_count) <> " void"}
+            delta={Integer.to_string(@summary.void_count) <> Copy.invoices_kpi_uncollectible_void_delta_suffix()}
             delta_tone="amber"
           >
-            <:meta>Operator-driven collection stops</:meta>
+            <:meta><%= Copy.invoices_kpi_uncollectible_meta() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
@@ -82,43 +81,43 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           path={@table_path}
           params={@params}
           columns={[
-            %{label: "Invoice", render: &invoice_link(&1, @admin_mount_path)},
-            %{label: "Customer", render: &customer_link(&1, @admin_mount_path)},
-            %{label: "Billing signals", render: &billing_signals_cell/1},
-            %{label: "Status", render: &status_summary/1},
-            %{label: "Balance", render: &balance_summary/1},
-            %{id: :collection_method, label: "Collection"}
+            %{label: Copy.invoices_column_invoice(), render: &invoice_link(&1, @admin_mount_path)},
+            %{label: Copy.invoices_column_customer(), render: &customer_link(&1, @admin_mount_path)},
+            %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1},
+            %{label: Copy.invoices_column_status(), render: &status_summary/1},
+            %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
+            %{id: :collection_method, label: Copy.invoices_column_collection()}
           ]}
           card_title={&card_title/1}
           card_fields={[
-            %{label: "Customer", render: &customer_label/1},
-            %{label: "Billing signals", render: &billing_signals_cell/1},
-            %{label: "Status", render: &status_summary/1},
-            %{label: "Balance", render: &balance_summary/1},
-            %{id: :collection_method, label: "Collection"}
+            %{label: Copy.invoices_card_customer(), render: &customer_label/1},
+            %{label: Copy.invoices_column_billing_signals(), render: &billing_signals_cell/1},
+            %{label: Copy.invoices_column_status(), render: &status_summary/1},
+            %{label: Copy.invoices_column_balance(), render: &balance_summary/1},
+            %{id: :collection_method, label: Copy.invoices_column_collection()}
           ]}
           filter_fields={[
-            %{id: :q, label: "Search"},
+            %{id: :q, label: Copy.invoices_filter_search()},
             %{
               id: :status,
-              label: "Status",
+              label: Copy.invoices_filter_status(),
               type: :select,
               options: [
-                {"draft", "Draft"},
-                {"open", "Open"},
-                {"paid", "Paid"},
-                {"uncollectible", "Uncollectible"},
-                {"void", "Void"}
+                {"draft", Copy.invoices_filter_status_draft()},
+                {"open", Copy.invoices_filter_status_open()},
+                {"paid", Copy.invoices_filter_status_paid()},
+                {"uncollectible", Copy.invoices_filter_status_uncollectible()},
+                {"void", Copy.invoices_filter_status_void()}
               ]
             },
-            %{id: :customer_id, label: "Customer id"},
+            %{id: :customer_id, label: Copy.invoices_filter_customer_id()},
             %{
               id: :collection_method,
-              label: "Collection",
+              label: Copy.invoices_filter_collection(),
               type: :select,
               options: [
-                {"charge_automatically", "Automatic"},
-                {"send_invoice", "Send invoice"}
+                {"charge_automatically", Copy.invoices_filter_collection_automatic()},
+                {"send_invoice", Copy.invoices_filter_collection_send_invoice()}
               ]
             }
           ]}
@@ -132,7 +131,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Invoices")
+    |> assign(:page_title, Copy.invoices_page_title_index())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -194,7 +193,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
     due = format_money(row.amount_due_minor, row.currency)
     paid = format_money(row.amount_paid_minor, row.currency)
     remaining = format_money(row.amount_remaining_minor, row.currency)
-    "#{due} due · #{paid} paid · #{remaining} remaining"
+    Copy.invoices_balance_summary(due, paid, remaining)
   end
 
   defp card_title(row), do: row.number || row.processor_id || row.id
