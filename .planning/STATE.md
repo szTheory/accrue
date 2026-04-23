@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Integrator + proof continuity
 status: ready_to_plan
-last_updated: "2026-04-23T15:19:02.530Z"
+last_updated: "2026-04-23T20:00:00.000Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 2
   completed_plans: 2
-  percent: 25
+  percent: 100
 ---
 
 # Project State
@@ -61,9 +61,10 @@ Plan: Not started
 
 ## Recent Decisions
 
+- **2026-04-23:** **`/gsd-discuss-phase 60`** — context + discussion log committed; research-backed defaults for INT-07 doc map, matrix/walkthrough parity, trust-stub IA, and narrow CI README scope (**`60-CONTEXT.md`**).
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** (**Integrator + proof continuity**); **`REQUIREMENTS.md`** + roadmap **59–61**.
 
-**Next:** **`/gsd-discuss-phase 60`** or **`/gsd-plan-phase 60`**
+**Next:** **`/gsd-plan-phase 60`**
 
 **Completed:** Phase **59** (Golden path + quickstart coherence) — **2026-04-23**; Milestone **v1.15** — Phases **57–58**; tag **`v1.15`**.
 
