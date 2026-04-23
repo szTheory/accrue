@@ -1,5 +1,6 @@
 defmodule AccrueHostSeedE2E do
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.Invoice
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
   alias Accrue.Connect.Account
@@ -56,6 +57,7 @@ defmodule AccrueHostSeedE2E do
       })
 
     admin_denial_customer = insert_org_customer!(admin_org_alpha)
+    fixture_invoice = insert_fixture_invoice!(admin_denial_customer)
     connect_account = insert_fixture_connect_account!(admin_org_alpha)
 
     customer = insert_fixture_customer!(history_user)
@@ -103,7 +105,8 @@ defmodule AccrueHostSeedE2E do
       admin_org_alpha_slug: admin_org_alpha.slug,
       admin_org_beta_slug: admin_org_beta.slug,
       admin_denial_customer_id: admin_denial_customer.id,
-      connect_account_id: connect_account.id
+      connect_account_id: connect_account.id,
+      invoice_id: to_string(fixture_invoice.id)
     }
 
     write_fixture!(fixture_path, fixture)
@@ -111,6 +114,14 @@ defmodule AccrueHostSeedE2E do
   end
 
   defp cleanup_fixture_footprint! do
+    # Browser VERIFY invoices use processor_id `inv_host_browser_*` on Fake — remove before
+    # churning subscriptions/customers so unique indexes stay idempotent across reruns.
+    Repo.delete_all(
+      from(i in Invoice,
+        where: i.processor == "fake" and fragment("? LIKE 'inv_host_browser_%'", i.processor_id)
+      )
+    )
+
     # Playwright / host browser runs persist Organization-billed Fake subscriptions as
     # `sub_fake_%` rows. They are outside the fixture `processor_id` contract; if left
     # behind, the next run's Fake id allocation can collide with PG and crash LiveView
@@ -296,6 +307,33 @@ defmodule AccrueHostSeedE2E do
       processor: "fake",
       processor_id: "cus_host_org_" <> String.replace(to_string(organization.id), "-", ""),
       email: "admin-e2e-alpha-customer@example.test"
+    })
+    |> Repo.insert!()
+  end
+
+  # Deterministic VERIFY-01 invoice row for Admin E2E Alpha org (`accrue-e2e-alpha`).
+  # processor_id prefix `inv_host_browser_%` is cleaned in `cleanup_fixture_footprint!/0`.
+  defp insert_fixture_invoice!(%Customer{} = organization_scoped_customer) do
+    %Invoice{}
+    |> Invoice.changeset(%{
+      customer_id: organization_scoped_customer.id,
+      subscription_id: nil,
+      processor: "fake",
+      processor_id: "inv_host_browser_replay",
+      status: :open,
+      number: "HOST-BROWSER-VERIFY01",
+      currency: "usd",
+      total_cents: 1_000,
+      metadata: %{},
+      data: %{},
+      collection_method: "charge_automatically",
+      total_discount_amounts: %{},
+      amount_due_minor: 1_000,
+      amount_paid_minor: 0,
+      amount_remaining_minor: 1_000,
+      total_minor: 1_000,
+      pdf_url: "https://example.test/e2e-invoice.pdf",
+      hosted_url: "https://example.test/e2e-hosted-invoice"
     })
     |> Repo.insert!()
   end
