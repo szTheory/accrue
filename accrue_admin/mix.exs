@@ -60,8 +60,28 @@ defmodule AccrueAdmin.MixProject do
     [
       main: "readme",
       source_ref: "accrue_admin-v#{@version}",
-      extras: ["README.md", "guides/admin_ui.md", "guides/core-admin-parity.md"],
-      groups_for_extras: [Guides: ["guides/admin_ui.md", "guides/core-admin-parity.md"]]
+      extras: [
+        "README.md",
+        "guides/admin_ui.md",
+        "guides/core-admin-parity.md",
+        "guides/theme-exceptions.md"
+      ],
+      groups_for_extras: [
+        Guides: [
+          "guides/admin_ui.md",
+          "guides/core-admin-parity.md",
+          "guides/theme-exceptions.md"
+        ]
+      ],
+      # `AccrueAdmin.Copy` defdelegates and README route tables mention implementation/hidden
+      # modules (`@moduledoc false`). Skipping autolink avoids ExDoc --warnings-as-errors.
+      skip_code_autolink_to: fn term ->
+        is_binary(term) and
+          (term =~
+             ~r/^AccrueAdmin\.Copy\.(BillingEvent|Connect|Coupon|Invoice|PromotionCode|Subscription)\b/ or
+             term =~ ~r/^AccrueAdmin\.Live\./ or
+             term =~ ~r/^AccrueAdmin\.Dev\./)
+      end
     ]
   end
 
