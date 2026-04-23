@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.17 — Friction-led developer readiness** is **active** (opened **2026-04-23**).
+**v1.17 — Friction-led developer readiness** is **shipped** (**2026-04-23**). Phases **62–65**; **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12** validated. **Next:** open **v1.18** (or later) via **`/gsd-new-milestone`** when priorities are set — **`REQUIREMENTS.md`** / roadmap for **v1.17** remain until **`/gsd-complete-milestone`** archives them.
 
 **Goal:** Maximize marginal **developer** value: invest where ranked evidence shows Phoenix integrators still stall — **integrator / VERIFY / docs**, **billing**, or **admin/operator** — instead of broad continuity sweeps after **v1.16**. Each phase stays **one sharp bet**; stop when the next increment is polish without removing failure modes.
 
@@ -53,9 +53,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** may still read **ahead** until the next ship.
 
-**Last shipped planning milestone:** **v1.16** — Phases **59–61** (**2026-04-23**): **INT-06..INT-09** integrator golden path + adoption proof + root **VERIFY-01** hops + **Hex / `main`** doc SSOT; archives **`.planning/milestones/v1.16-*`**; planning git tag **`v1.16`**. Prior: **v1.15** — Phases **57–58**; archives **`.planning/milestones/v1.15-*`**; tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**.
+**Last shipped planning milestone:** **v1.17** — Phases **62–65** (**2026-04-23**): **FRG-01..FRG-03** triage + north star + scoped backlog; **INT-10**; **BIL-03**; **ADM-12** (empty-queue certification paths for **63–65** — see **`phases/*-VERIFICATION.md`**). Archives: pending **`/gsd-complete-milestone`**. Prior: **v1.16** — Phases **59–61**; archives **`.planning/milestones/v1.16-*`**; tag **`v1.16`**.
 
-**Now:** **v1.17** planning active — **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** define Phases **62–65** (**2026-04-23**). **`phases.clear`** removed **43** stale **`phases/*`** trees (milestone archives under **`.planning/milestones/`** unchanged). **Phase 63** (**INT-10** / P0 integrator + VERIFY + docs) shipped **2026-04-23** — see **`phases/63-p0-integrator-verify-docs/63-VERIFICATION.md`**.
+**Now:** **v1.17** execution **complete** **2026-04-23** — verification SSOTs **`63-VERIFICATION.md`**, **`64-VERIFICATION.md`**, **`65-VERIFICATION.md`**; **`REQUIREMENTS.md`** shows all **v1.17** rows **Complete**. Run **`/gsd-complete-milestone`** when ready to archive + tag.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -245,16 +245,16 @@ Theme: **integrator + proof continuity** after **v1.15** trust SemVer work; **PR
 - [x] **INT-08** — Repo-root **README** preserves **VERIFY-01** / **`host-integration`** discoverability within the documented hop budget; verifier + README updated together when the contract moves. **Validated in Phase 61.**
 - [x] **INT-09** — **`verify_package_docs`**, **`first_hour`**, package READMEs, and **`.planning/`** Hex mirror callouts stay aligned with **`mix.exs` `@version`** on the branch under test. **Validated in Phase 61.**
 
-### Active v1.17 (opened 2026-04-23)
+### Validated v1.17 (opened 2026-04-23; shipped 2026-04-23)
 
 Theme: **friction-led developer readiness** — triage before broad doc sweeps; **PROC-08** and **FIN-03** not in this milestone.
 
-- [ ] **FRG-01** — Ranked **integrator-facing friction inventory** committed under **`.planning/`** (path recorded in **`.planning/STATE.md`**) with **sources** (e.g. VERIFY lanes, adoption matrix, host README, CI verifiers, maintainer notes) and explicit **P0 / P1 / P2** + **defer** rows.
-- [ ] **FRG-02** — **North star + diminishing-returns stop rules** for **v1.17** documented and cross-linked from this **Current milestone** section (or **`STATE.md`**).
-- [ ] **FRG-03** — **Scoped implementation backlog** for Phases **63–65** authored from **FRG-01**: each row either maps to **INT-10** / **BIL-03** / **ADM-12** work **or** is deferred with written rationale (no hidden scope).
+- [x] **FRG-01** — Ranked **integrator-facing friction inventory** committed under **`.planning/`** (path recorded in **`.planning/STATE.md`**) with **sources** (e.g. VERIFY lanes, adoption matrix, host README, CI verifiers, maintainer notes) and explicit **P0 / P1 / P2** + **defer** rows. **Validated in Phase 62.**
+- [x] **FRG-02** — **North star + diminishing-returns stop rules** for **v1.17** documented and cross-linked from this **Current milestone** section (or **`STATE.md`**). **Validated in Phase 62.**
+- [x] **FRG-03** — **Scoped implementation backlog** for Phases **63–65** authored from **FRG-01**: each row either maps to **INT-10** / **BIL-03** / **ADM-12** work **or** is deferred with written rationale (no hidden scope). **Validated in Phase 62.**
 - [x] **INT-10** — **P0 integrator / VERIFY / docs closure** — For every **P0** backlog row tagged **integrator**, **VERIFY**, or **docs**, ship the fix (docs, verifiers, tests as needed) **or** downgrade to **P1+** with maintainer rationale in the inventory doc; **`bash scripts/ci/verify_package_docs.sh`** and merge-blocking **`host-integration`** / **VERIFY-01** contracts stay **green** on **`main`** after changes. **Validated in Phase 63.**
-- [ ] **BIL-03** — **P0 billing closure** — For every **P0** backlog row tagged **billing**, ship the bounded **`Accrue.Billing` / Stripe / Fake** work with regressions + **`guides/telemetry.md`** + **CHANGELOG** alignment **or** certify **no P0 billing rows** with signed rationale (no **PROC-08**).
-- [ ] **ADM-12** — **P0 admin / operator closure** — For every **P0** backlog row tagged **admin**, ship the scoped **LiveView** / **`AccrueAdmin.Copy`** / **VERIFY-01** work **or** certify **no P0 admin rows** with signed rationale.
+- [x] **BIL-03** — **P0 billing closure** — For every **P0** backlog row tagged **billing**, ship the bounded **`Accrue.Billing` / Stripe / Fake** work with regressions + **`guides/telemetry.md`** + **CHANGELOG** alignment **or** certify **no P0 billing rows** with signed rationale (no **PROC-08**). **Validated in Phase 64.**
+- [x] **ADM-12** — **P0 admin / operator closure** — For every **P0** backlog row tagged **admin**, ship the scoped **LiveView** / **`AccrueAdmin.Copy`** / **VERIFY-01** work **or** certify **no P0 admin rows** with signed rationale. **Validated in Phase 65.**
 
 ### Validated v1.14 (Phases 54–56; milestone scope delivered 2026-04-23)
 
@@ -501,6 +501,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** opened (**Integrator + proof continuity**); **`REQUIREMENTS.md`** (**INT-06..INT-09**); roadmap phases **59–61**.
 - **2026-04-23:** **`/gsd-complete-milestone` v1.16** — archives **`milestones/v1.16-*`**, root **`REQUIREMENTS.md`** removed for next milestone, planning tag **`v1.16`**.
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.17** opened (**Friction-led developer readiness**); **`REQUIREMENTS.md`** (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**); roadmap phases **62–65**; **`phases.clear`** executed (**43** trees).
+- **2026-04-23:** **`/gsd-execute-phase 65`** — **`65-VERIFICATION.md`**, inventory **ADM-12** maintainer line, **`REQUIREMENTS.md`** **ADM-12** complete; **v1.17** milestone requirements satisfied (pending formal **`/gsd-complete-milestone`** archive).
 
 ## Evolution
 
@@ -520,4 +521,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 — **v1.17** (**Friction-led developer readiness**) opened; Phases **62–65**; **`phases.clear`** run.*
+*Last updated: 2026-04-23 — **v1.17** shipped (**Phases 62–65**); **`/gsd-complete-milestone`** pending for archives + tag.*
