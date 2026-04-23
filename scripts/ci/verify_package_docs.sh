@@ -102,6 +102,7 @@ require_fixed "$ROOT_DIR/README.md" "Provider parity: Stripe test mode"
 require_fixed "$ROOT_DIR/README.md" "Advisory/manual: live Stripe"
 require_fixed "$ROOT_DIR/README.md" "## Proof path (VERIFY-01)"
 require_fixed "$ROOT_DIR/README.md" "proof-and-verification"
+require_fixed "$ROOT_DIR/README.md" "[Merge-blocking proof, VERIFY-01 commands, and Playwright entry points](examples/accrue_host/README.md#proof-and-verification)."
 require_fixed "$ROOT_DIR/README.md" "Pull requests are merge-blocked on GitHub Actions job \`host-integration\`"
 require_fixed "$ROOT_DIR/README.md" 'bash scripts/ci/verify_adoption_proof_matrix.sh'
 require_fixed "$ROOT_DIR/README.md" 'bash scripts/ci/accrue_host_uat.sh'
@@ -111,6 +112,15 @@ require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Pull requests are merge-bloc
 
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/first_hour\.html)?'
+
+# INT-08: release-gate vs host-integration (61-CONTEXT D-04 / D-05 / D-07):
+# Structural pins on examples/accrue_host/README.md below back release-gate via
+# package_docs_verifier_test.exs (see verify_package_docs / verify_verify01_readme_contract.sh).
+# VERIFY-01 prose, Playwright inventory, and sk_live negation stay in
+# verify_verify01_readme_contract.sh (host-integration README contract).
+# Intentional overlap (e.g. mix verify.full) remains so release-gate does not depend on
+# host-integration alone.
+# D-07 audit: no removals; release-gate retains full host structural pins
 
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## First run"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Seeded history"

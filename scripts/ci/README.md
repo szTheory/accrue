@@ -29,8 +29,7 @@ This table is **delta-maintained** for merge-blocking checks **touched by phases
 |--------|-------------------------------|-------------------------|--------------------------|
 | INT-06 | `accrue/guides/first_hour.md`; `examples/accrue_host/README.md`; `accrue/guides/quickstart.md`; `CONTRIBUTING.md` — scripts `verify_package_docs.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/phases/59-golden-path-quickstart-coherence/59-VERIFICATION.md` |
 | INT-07 | `examples/accrue_host/docs/adoption-proof-matrix.md`; `examples/accrue_host/docs/evaluator-walkthrough-script.md` — scripts `verify_adoption_proof_matrix.sh` (add `verify_package_docs.sh` only when pins touch matrix paths) | `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` when ORG-09 matrix literals change; else **—** | `.planning/phases/60-adoption-proof-ci-ownership-map/60-VERIFICATION.md` |
-
-**INT-08/INT-09** — Phase **61**.
+| INT-08 | Root `README.md` merge-blocking proof path + cross-package pins — `verify_package_docs.sh`; VERIFY-01 host README depth — `verify_verify01_readme_contract.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/phases/61-root-verify-hops-hex-doc-ssot/61-VERIFICATION.md` |
 
 ### Triage: verify_adoption_proof_matrix.sh
 
