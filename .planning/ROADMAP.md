@@ -39,6 +39,39 @@
 1. **INT-06..INT-09** satisfied with committed docs/scripts/tests as needed; **`bash scripts/ci/verify_package_docs.sh`** green.
 2. No **PROC-08** / **FIN-03** scope creep.
 
+### Phase 59: Golden path + quickstart coherence
+
+**Goal:** **First Hour** ↔ **host README** ↔ **quickstart** consistent with **v1.15** messaging; verifier scripts green.
+
+**Requirements:** INT-06
+
+**Success criteria:**
+
+1. **INT-06** satisfied — **`accrue/guides/first_hour.md`**, **`examples/accrue_host/README.md`**, and **`accrue/guides/quickstart.md`** (plus explicitly linked tutorial sections) contain **no contradictory** version pins, command order, or capsule (**H/M/R**) instructions relative to **v1.15** trust SemVer messaging and current **CI** merge-blocking contracts; **`verify_verify01_readme_contract.sh`** and **`verify_adoption_proof_matrix.sh`** (or successors) stay **green** on **`main`**.
+2. No **PROC-08** / **FIN-03** scope creep.
+
+### Phase 60: Adoption proof + CI ownership map
+
+**Goal:** Matrix + evaluator script + contributor verifier map honest vs lanes and trust copy.
+
+**Requirements:** INT-07
+
+**Success criteria:**
+
+1. **INT-07** satisfied per [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+2. No **PROC-08** / **FIN-03** scope creep.
+
+### Phase 61: Root VERIFY hops + Hex doc SSOT
+
+**Goal:** README hop budget vs **VERIFY-01**; **`verify_package_docs`** + **`first_hour`** + planning mirrors vs **`@version`**.
+
+**Requirements:** INT-08, INT-09
+
+**Success criteria:**
+
+1. **INT-08** and **INT-09** satisfied per [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+2. No **PROC-08** / **FIN-03** scope creep.
+
 <details>
 <summary>✅ v1.15 Release / trust semantics (Phases 57–58) — SHIPPED 2026-04-23</summary>
 
