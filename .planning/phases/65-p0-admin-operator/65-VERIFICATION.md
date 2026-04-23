@@ -1,7 +1,7 @@
 ---
-status: pending
+status: passed
 phase: 65-p0-admin-operator
-verified: ""
+verified: "2026-04-23"
 ---
 
 # Phase 65 — P0 admin / operator verification
