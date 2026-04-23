@@ -21,15 +21,15 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase --phase — 52
+**Current focus:** Phase 53 — auxiliary admin (Connect, events, VERIFY)
 
 ## Current Position
 
-Phase: 52
+Phase: 53
 
 Plan: Not started
 
-**Status:** Milestone complete
+**Status:** Phase 53 context gathered (ready for planning)
 
 **Last activity:** 2026-04-23
 
@@ -60,8 +60,8 @@ Plan: Not started
 
 - **2026-04-22:** **`/gsd-new-milestone`** — **v1.13** scope locked to **integrator golden path** + **auxiliary admin** (**coupons**, **promotion codes**, **Connect**, **events**); **PROC-08** / **FIN-03** unchanged as non-goals; domain research skipped (brownfield); **`phases.clear`** skipped to preserve **1–50** evidence trees.
 
-**Next:** **`/gsd-discuss-phase 52`** or **`/gsd-plan-phase 52`** — integrator proof + package alignment + auxiliary copy (part 1).
+**Next:** **`/gsd-plan-phase 53`** — auxiliary admin Connect/events + VERIFY-01 (resume: `.planning/phases/53-auxiliary-admin-connect-events-layout-verify/53-CONTEXT.md`).
 
-**Completed:** Phase **51** (Integrator golden path & docs) — **2026-04-22** — plans **51-01..51-03** + `51-VERIFICATION.md`. Prior: Milestone **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
+**Completed:** Phase **52** (Integrator proof + auxiliary copy part 1) — context in `52-CONTEXT.md`. Prior: Phase **51** (Integrator golden path & docs) — **2026-04-22**. Milestone **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
 
-**Planned Phase:** 52 (integrator-proof-package-alignment-auxiliary-copy-part-1) — 3 plans — 2026-04-22T23:48:57.248Z
+**Planned Phase:** 53 (auxiliary-admin-connect-events-layout-verify) — after `/gsd-plan-phase 53`
