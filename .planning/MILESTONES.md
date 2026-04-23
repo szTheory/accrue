@@ -1,14 +1,31 @@
 # Milestones
 
-## v1.18 Onboarding confidence (Planning opened: 2026-04-23)
+## v1.18 Onboarding confidence (Shipped: 2026-04-23)
 
-**Status:** Active planning on **`main`** — **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`** Phase **66**.
+**Planning opened:** 2026-04-23
 
-**Theme:** Proof-first onboarding confidence — **UAT-01..UAT-05** (deferred **Phase 62** human UAT baseline) + **PROOF-01** (adoption matrix / walkthrough / verifier spine). **No** **PROC-08** / **FIN-03**.
+**Phases completed:** **1** phase (**66**), **3** plans (**66-01**..**66-03**).
 
-**v1.17 phase tree archive:** [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/) — durable copy of **62–65** directories after milestone transition.
+**Theme:** Proof-first onboarding confidence — **UAT-01..UAT-05** (archived **62-UAT** baseline + friction/north-star SSOT contracts) + **PROOF-01** (adoption matrix / walkthrough / **`verify_adoption_proof_matrix.sh`** alignment). **No** **PROC-08** / **FIN-03**.
 
-**Next:** **`/gsd-plan-phase 66`** (or **`/gsd-discuss-phase 66`**) when execution planning starts.
+**Milestone audit:** No standalone **`v1.18-MILESTONE-AUDIT.md`**; closure used **`REQUIREMENTS.md`** (6/6 **Satisfied**), **`66-VERIFICATION.md`** (`status: passed`), **`audit-open`** (all clear), and merge-blocking doc-contract CI.
+
+**Key accomplishments:**
+
+- **66-01:** **`66-VERIFICATION.md`** matrix for **UAT-01..UAT-05** + **`62-UAT.md`** supersession banner (body preserved under **`milestones/v1.17-phases/`**).
+- **66-02:** **`STATE.md`** deferred **62-UAT** row **closed**; **`verify_v1_17_friction_research_contract.sh`** archive gate + ExUnit + CI README row; **UAT-04** proof refreshed.
+- **66-03:** **PROOF-01** semantic alignment (matrix, walkthrough, host README, verifier, org matrix ExUnit); **`.planning/REQUIREMENTS.md`** traceability closed.
+
+**v1.17 phase tree archive:** [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/)
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md)
+- Requirements: [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md)
+
+**Git tag:** `v1.18`
+
+**Next after ship:** **`/gsd-new-milestone`** — fresh **`.planning/REQUIREMENTS.md`** and next roadmap slice.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- 🔄 **v1.18 Onboarding confidence** — Phase **66** (in planning). **UAT-01..UAT-05**, **PROOF-01**; proof-first milestone after trajectory review (**no** **PROC-08** / **FIN-03**). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
+- ✅ **v1.18 Onboarding confidence** — Phase **66** shipped **2026-04-23**. **UAT-01..UAT-05**, **PROOF-01**; proof-first confidence after **v1.17** (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Archives: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md), [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md). Phase trees archived: [`milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
 - ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. Archives: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md), [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md).
@@ -24,8 +24,8 @@
 
 ## Phases
 
-<details open>
-<summary>🔄 v1.18 Onboarding confidence (Phase 66) — IN PLANNING</summary>
+<details>
+<summary>✅ v1.18 Onboarding confidence (Phase 66) — SHIPPED 2026-04-23</summary>
 
 **Milestone goal:** Close deferred **Phase 62** human UAT confidence gaps (**UAT-01..UAT-05**) using the archived scenario baseline, then run a tight **adoption proof matrix / walkthrough / verifier** alignment pass (**PROOF-01**) — **no** new billing primitives and **no** **PROC-08** / **FIN-03**.
 
@@ -33,13 +33,15 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 66 | Deferred UAT + evaluator proof | Execute, automate, or maintainer-sign each **UAT-** scenario; ship **`66-VERIFICATION.md`**; align matrix / walkthrough / verifiers for **PROOF-01**. | UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, PROOF-01 |
+| 66 | Deferred UAT + evaluator proof | **Complete 2026-04-23** (3/3 plans; see [`phases/66-onboarding-confidence/66-VERIFICATION.md`](phases/66-onboarding-confidence/66-VERIFICATION.md)). | UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, PROOF-01 |
 
 **Success criteria (milestone):**
 
-1. **UAT-01..UAT-05** and **PROOF-01** satisfied per **`.planning/REQUIREMENTS.md`** with evidence in **`66-VERIFICATION.md`** (or cited automation paths).
+1. **UAT-01..UAT-05** and **PROOF-01** satisfied per archived **`.planning/milestones/v1.18-REQUIREMENTS.md`** with evidence in **`66-VERIFICATION.md`** (or cited automation paths).
 2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** contracts stay coherent with any doc or script edits.
 3. No **PROC-08** / **FIN-03** scope creep.
+
+**Archives:** [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md).
 
 ### Phase 66: Deferred UAT + evaluator proof
 
@@ -603,12 +605,6 @@
 | 60. Adoption proof + CI ownership map | v1.16 | 2/2 | Complete | 2026-04-23 |
 | 61. Root VERIFY hops + Hex doc SSOT | v1.16 | 2/2 | Complete | 2026-04-23 |
 
-**v1.18 (in planning — 2026-04-23)**
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 66. Deferred UAT + evaluator proof | v1.18 | 0/? | Not started | — |
-
 **v1.17 (complete — 2026-04-23)**
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -617,6 +613,12 @@
 | 63. P0 integrator / VERIFY / docs | v1.17 | 3/3 | Complete | 2026-04-23 |
 | 64. P0 billing | v1.17 | 1/1 | Complete | 2026-04-23 |
 | 65. P0 admin / operator | v1.17 | 1/1 | Complete | 2026-04-23 |
+
+**v1.18 (complete — 2026-04-23)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 66. Deferred UAT + evaluator proof | v1.18 | 3/3 | Complete | 2026-04-23 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

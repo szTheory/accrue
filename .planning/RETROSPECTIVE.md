@@ -685,12 +685,48 @@
 
 ---
 
+## Milestone: v1.18 — Onboarding confidence
+
+**Shipped:** 2026-04-23  
+**Phases:** 1 | **Plans:** 3
+
+### What Was Built
+
+- **`66-VERIFICATION.md`** as the single evidence ledger for **UAT-01..UAT-05** and **PROOF-01**, with merge-blocking command column and CI job citations.
+- **`verify_v1_17_friction_research_contract.sh`** + **`v1_17_friction_research_contract_test.exs`** extended for **UAT-04** archive presence and friction/north-star SSOT invariants.
+- **PROOF-01** alignment pass: adoption proof matrix, evaluator walkthrough, host README, **`verify_adoption_proof_matrix.sh`**, and org matrix ExUnit literals kept in one taxonomy change-set discipline.
+- **`62-UAT.md`** supersession banner only — archived scenario body preserved under **`milestones/v1.17-phases/`**.
+
+### What Worked
+
+- Treating **REQUIREMENTS** as normative over legacy **`62-UAT`** prose avoided rewriting historical UAT while still closing the confidence gap.
+- Reusing the **v1.17** friction script + shift-left CI lane gave binary invariants without over-automating subjective UAT rows.
+- Three-wave plan split (ledger → STATE/script → PROOF + requirements flip) kept review scope bounded.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** remained unusable (`version required for phases archive`); manual archives + **`git rm` REQUIREMENTS** again.
+- **`roadmap.analyze`** stayed on **planned** until plan **SUMMARY** files existed — easy to forget at close.
+
+### Key Lessons
+
+1. Backfill **`*-SUMMARY.md`** before calling milestone tooling so disk-derived progress matches verification SSOT.
+2. When **`milestone.complete` CLI** fails, mirror the **v1.17** manual archive pattern and record the debt in the milestone archive **Technical debt** section.
+
+### Cost Observations
+
+- Sessions: single phase, three short execute plans after research/plan phase.
+- Notable: mostly docs + CI contracts; no **Billing** API surface churn.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.18 | short | 1 | Verification ledger for deferred **62-UAT** baseline (**66-01**); STATE + friction script archive gate (**66-02**); PROOF-01 matrix/script/README alignment + requirements close (**66-03**). |
 | v1.17 | short | 4 | Friction inventory + north star + FRG-03 anchors (62); INT-10 README + host-integration slugs + integrator closure (63); BIL-03 empty-queue certification (64); ADM-12 empty-queue certification (65). |
 | v1.16 | short | 3 | Golden path + quickstart + CONTRIBUTING coherence (59); matrix/walkthrough + CI README INT map (60); README VERIFY pin + Hex/`main` SSOT in planning + CONTRIBUTING (61). |
 | v1.15 | single | 2 | Trust docs: upgrade + RELEASING + root README (57); demo Sigra vs Auth + package stability + verifier alignment (58). |
@@ -712,6 +748,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.18 | **`v1_17_friction_research_contract_test.exs`**; bash **`verify_v1_17_friction_research_contract.sh`**; **`verify_adoption_proof_matrix.sh`** + **`organization_billing_org09_matrix_test.exs`** | UAT-01..UAT-05 + PROOF-01 (6/6) archived | **`66-VERIFICATION.md`** ledger; **`62-UAT.md`** banner errata; friction SSOT + archive presence gates in shift-left CI. |
 | v1.16 | **`package_docs_verifier_test`** extensions; bash **`verify_package_docs`**, **`verify_verify01_readme_contract`**, **`verify_adoption_proof_matrix`** | INT-06..INT-09 (4/4) archived | Quickstart hub + capsule checks in **`verify_package_docs.sh`**; adoption matrix + walkthrough trust stub; root README VERIFY line pin; CI README INT rows; planning Hex mirror discipline. |
 | v1.14 | ExUnit on invoice LiveViews; host VERIFY-01 **`core-admin-invoices-*`** + axe; Fake **`payment_method_list_test.exs`** | ADM-07..ADM-11 + BIL-01..BIL-02 (7/7) archived | `core-admin-parity.md`, `Copy.Invoice`, `verify_core_admin_invoice_verify_ids.sh`, billing `list` span + telemetry row. |
 | v1.12 | ExUnit on **DashboardLive** + **SubscriptionLive**; host **admin_mount** smoke; VERIFY-01 Playwright + axe using **`e2e/generated/copy_strings.json`** | ADM-01..ADM-06 (6/6) archived | `mix accrue_admin.export_copy_strings`, `Copy.Subscription`, `theme-exceptions.md`, `verify01-v112-admin-paths.md`. |

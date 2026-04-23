@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.18
-milestone_name: Onboarding confidence
-status: phase_66_executed
-last_updated: "2026-04-23T22:00:00.000Z"
-last_activity: "2026-04-23 — /gsd-execute-phase 66 (plans 01–03; 66-VERIFICATION.md, friction script UAT-04 gate, PROOF-01)"
+milestone: planning_next
+milestone_name: ""
+status: v1.18_archived
+last_updated: "2026-04-23T23:59:00.000Z"
+last_activity: "2026-04-23 — /gsd-complete-milestone v1.18 (summaries, archives, REQUIREMENTS removal, tag v1.18)"
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -20,36 +20,32 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.18** — **Onboarding confidence** (proof-first). Requirements: **`.planning/REQUIREMENTS.md`**. Roadmap: **`.planning/ROADMAP.md`** (Phase **66**).
+**Current focus:** **`/gsd-new-milestone`** — root **`.planning/REQUIREMENTS.md`** removed until the next milestone is opened. Roadmap: **`.planning/ROADMAP.md`**. Last shipped: **v1.18** (Phase **66**).
 
 ## Current Position
 
-Phase: **66** — **Deferred UAT + evaluator proof** — **executed** **2026-04-23** (proof: **`.planning/phases/66-onboarding-confidence/66-VERIFICATION.md`**)
+**Milestone:** **v1.18** — **archived** **2026-04-23** (Phase **66** complete; proof **`.planning/milestones/v1.18-REQUIREMENTS.md`**, **`.planning/phases/66-onboarding-confidence/66-VERIFICATION.md`**).
 
-Plan: **01–03** (3 waves) — **complete**
-
-**Status:** **v1.18** — Phase **66** verification ledger closed; **`.planning/REQUIREMENTS.md`** checkboxes updated for **UAT-01..UAT-05** and **PROOF-01**
-
-**Last activity:** 2026-04-23 — **`/gsd-execute-phase 66`** (friction script archive gate, **STATE** deferral row, adoption matrix / walkthrough / README spot-check)
+**Last activity:** 2026-04-23 — **`/gsd-complete-milestone` v1.18** (plan summaries, roadmap + **MILESTONES** + **PROJECT**, **`git rm` REQUIREMENTS**, tag **`v1.18`**).
 
 ## Milestone Progress
 
-**Active:** **v1.18** — Phase **66** (see **`.planning/ROADMAP.md`**)
+**Active:** *(none — open with **`/gsd-new-milestone`**)*
 
-**Shipped:** **v1.17** — Phases **62–65** **2026-04-23**; phase artifacts: **`.planning/milestones/v1.17-phases/`** (includes archived **`62-UAT.md`**)
+**Shipped:** **v1.18** — Phase **66** **2026-04-23**; archives **`.planning/milestones/v1.18-*`**. Prior: **v1.17** — Phases **62–65** **2026-04-23**; phase artifacts **`.planning/milestones/v1.17-phases/`** (includes archived **`62-UAT.md`**)
 
 **Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`  
 **North star + stop rules (FRG-02):** `.planning/research/v1.17-north-star.md`
 
-**Last shipped (planning):** **v1.17** — Phases **62–65** **2026-04-23**. Prior: **v1.16** — Phases **59–61**; tag **`v1.16`**.
+**Last shipped (planning):** **v1.18** — Phase **66** **2026-04-23**. Prior: **v1.17** — Phases **62–65**; tag **`v1.17`**.
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (workspace **`@version`** on **`main`** may read ahead — **`verify_package_docs`** is SSOT for snippets).
 
 ## Current Planning Artifacts
 
-- **`.planning/phases/66-onboarding-confidence/`** — Phase **66** context, research, **`66-VERIFICATION.md`** (UAT + PROOF closure **2026-04-23**), **`66-01..03-PLAN.md`**
-- **`.planning/REQUIREMENTS.md`** — **v1.18** (**UAT-01..UAT-05**, **PROOF-01**)
-- **`.planning/ROADMAP.md`** — **v1.18** Phase **66** + shipped milestones
+- **`.planning/phases/66-onboarding-confidence/`** — Phase **66** execution history (**`66-VERIFICATION.md`**, plans, summaries)
+- **`.planning/ROADMAP.md`** — shipped milestones through **v1.18**
+- **`.planning/milestones/v1.18-ROADMAP.md`**, **`v1.18-REQUIREMENTS.md`** — **v1.18** archives
 - **`.planning/milestones/v1.17-phases/`** — archived **62–65** working trees (**verification**, **UAT**, plans)
 - **`.planning/milestones/v1.17-ROADMAP.md`**, **`v1.17-REQUIREMENTS.md`** — **v1.17** archives
 
@@ -77,6 +73,6 @@ Plan: **01–03** (3 waves) — **complete**
 - **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
 - **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** Continue **v1.18** per **`.planning/ROADMAP.md`** (Phase **66** verification complete).
+**Next:** **`/gsd-new-milestone`** — fresh **`.planning/REQUIREMENTS.md`** and next roadmap slice.
 
-**Completed:** **v1.17** — Phases **62–65** — **2026-04-23**; archives **`.planning/milestones/v1.17-*`**; planning tag **`v1.17`**.
+**Completed:** **v1.18** — Phase **66** — **2026-04-23**; archives **`.planning/milestones/v1.18-*`**; planning tag **`v1.18`**. Prior: **v1.17** — **`.planning/milestones/v1.17-*`**; tag **`v1.17`**.

@@ -12,19 +12,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.18 — Onboarding confidence** is **active** (opened **2026-04-23**). Phase **66**; requirements **UAT-01..UAT-05**, **PROOF-01** in **`.planning/REQUIREMENTS.md`**.
+**No active planning milestone** — root **`.planning/REQUIREMENTS.md`** is removed after **v1.18** close until **`/gsd-new-milestone`**. **Roadmap:** **`.planning/ROADMAP.md`**. Historical Phase **66** artifacts: **`.planning/phases/66-onboarding-confidence/`**.
 
-**Priority (trajectory):** **Proof-first** — close the deferred **Phase 62** human UAT / confidence spine and tighten evaluator-facing adoption proof — **without** **PROC-08** / **FIN-03** (they stay non-goals until a later milestone reopens them in writing).
-
-**Goal:** Give skeptical integrators **explicit pass / automation / maintainer-signed** outcomes on the **v1.17** friction milestone confidence checks deferred at ship, plus a bounded **adoption proof matrix ↔ walkthrough ↔ verifier** alignment pass.
-
-**Baseline SSOT:** archived **`62-UAT`** scenarios — [`.planning/milestones/v1.17-phases/62-friction-triage-north-star/62-UAT.md`](milestones/v1.17-phases/62-friction-triage-north-star/62-UAT.md). **Triage doctrine (read-only context):** [North star + stop rules](research/v1.17-north-star.md) · [Friction inventory](research/v1.17-FRICTION-INVENTORY.md).
-
-**Target features:**
-
-- **UAT closure** — **UAT-01..UAT-05** per **`.planning/REQUIREMENTS.md`** (mapped from archived **`62-UAT`** tests **1–5**).
-- **Evaluator proof** — **PROOF-01**: matrix + walkthrough + merge-blocking verifier needles stay honest.
-- **No expansion primitives** — Second processor / app-owned finance exports remain parked (**PROJECT.md** non-goals).
+**v1.18 — Onboarding confidence** is **archived** (**2026-04-23**). Phase **66**; **UAT-01..UAT-05**, **PROOF-01** validated. Archives: **`.planning/milestones/v1.18-ROADMAP.md`**, **`v1.18-REQUIREMENTS.md`**. Planning git tag **`v1.18`**.
 
 **v1.17 — Friction-led developer readiness** is **archived** (**2026-04-23**). Phases **62–65**; **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12** validated. Archives: **`.planning/milestones/v1.17-ROADMAP.md`**, **`v1.17-REQUIREMENTS.md`**; planning git tag **`v1.17`**. Phase working trees: **`.planning/milestones/v1.17-phases/`**.
 
@@ -56,9 +46,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** may still read **ahead** until the next ship.
 
-**Last shipped planning milestone:** **v1.17** — Phases **62–65** (**2026-04-23**): **FRG-01..FRG-03** triage + north star + scoped backlog; **INT-10**; **BIL-03**; **ADM-12** (empty-queue certification paths for **63–65** — see **`.planning/milestones/v1.17-phases/*-VERIFICATION.md`**). Archives: **`.planning/milestones/v1.17-*`**. Prior: **v1.16** — Phases **59–61**; archives **`.planning/milestones/v1.16-*`**; tag **`v1.16`**.
+**Last shipped planning milestone:** **v1.18** — Phase **66** (**2026-04-23**): **UAT-01..UAT-05** + **PROOF-01** — **`66-VERIFICATION.md`**, **`verify_v1_17_friction_research_contract.sh`**, adoption matrix / walkthrough / verifier alignment. Archives: **`.planning/milestones/v1.18-*`**. Prior: **v1.17** — Phases **62–65**; **`.planning/milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Now:** **v1.18** — **Onboarding confidence** opened **2026-04-23**; root **`.planning/REQUIREMENTS.md`** + **`ROADMAP.md`** Phase **66** track **UAT-01..UAT-05** and **PROOF-01**. **v1.17** phase directories moved to **`.planning/milestones/v1.17-phases/`** for a clean **`.planning/phases/`** root.
+**Now:** Awaiting **`/gsd-new-milestone`** for the next requirements + roadmap slice. **v1.17** phase directories remain under **`.planning/milestones/v1.17-phases/`**; **Phase 66** tree remains under **`.planning/phases/66-onboarding-confidence/`** as execution history.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -258,6 +248,13 @@ Theme: **friction-led developer readiness** — triage before broad doc sweeps; 
 - [x] **INT-10** — **P0 integrator / VERIFY / docs closure** — For every **P0** backlog row tagged **integrator**, **VERIFY**, or **docs**, ship the fix (docs, verifiers, tests as needed) **or** downgrade to **P1+** with maintainer rationale in the inventory doc; **`bash scripts/ci/verify_package_docs.sh`** and merge-blocking **`host-integration`** / **VERIFY-01** contracts stay **green** on **`main`** after changes. **Validated in Phase 63.**
 - [x] **BIL-03** — **P0 billing closure** — For every **P0** backlog row tagged **billing**, ship the bounded **`Accrue.Billing` / Stripe / Fake** work with regressions + **`guides/telemetry.md`** + **CHANGELOG** alignment **or** certify **no P0 billing rows** with signed rationale (no **PROC-08**). **Validated in Phase 64.**
 - [x] **ADM-12** — **P0 admin / operator closure** — For every **P0** backlog row tagged **admin**, ship the scoped **LiveView** / **`AccrueAdmin.Copy`** / **VERIFY-01** work **or** certify **no P0 admin rows** with signed rationale. **Validated in Phase 65.**
+
+### Validated v1.18 (archived in `.planning/milestones/v1.18-REQUIREMENTS.md`; milestone closed 2026-04-23)
+
+Theme: **Onboarding confidence** — deferred **Phase 62** human UAT baseline + evaluator proof alignment; **PROC-08** and **FIN-03** not in this milestone.
+
+- [x] **UAT-01..UAT-05** — Friction inventory / **STATE** / north-star / archive / **ROADMAP** consistency with **`66-VERIFICATION.md`** + **`verify_v1_17_friction_research_contract.sh`** where cited. **Validated in Phase 66.**
+- [x] **PROOF-01** — Adoption proof matrix, evaluator walkthrough, **`verify_adoption_proof_matrix.sh`**, host README, and org matrix ExUnit stay aligned. **Validated in Phase 66.**
 
 ### Validated v1.14 (Phases 54–56; milestone scope delivered 2026-04-23)
 
@@ -466,6 +463,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.15 prioritizes release/trust semantics (forcing function **B**) over feature expansion | Pre-1.0 Hex + internal `v1.x` planning labels risk evaluator confusion; fix with docs + demo README clarity before further polish milestones | ✓ Good — **shipped** Phases **57–58** (**2026-04-23**); archived + planning tag **`v1.15`** |
 | v1.16 closes integrator/proof continuity deferred from v1.14–v1.15 | Trust SemVer messaging and v1.13 INT baseline can drift; explicit milestone re-binds golden path, matrix, root VERIFY hops, and package-doc SSOT without billing scope creep | ✓ Good — **shipped** Phases **59–61** (**2026-04-23**); archived + planning tag **`v1.16`** |
 | v1.17 uses friction triage before broad doc sweeps | After v1.16 continuity, ranked **FRG-01** evidence + **FRG-03** backlog prevents silent scope expansion; **BIL-03**/**ADM-12** allow signed empty-queue certification | ✓ Good — **shipped** Phases **62–65** (**2026-04-23**); archived + planning tag **`v1.17`** |
+| v1.18 closes deferred **62-UAT** confidence with a verification ledger + contracts | Proof-first slice: **REQUIREMENTS** normative over historical **`62-UAT`** body; thin bash/ExUnit for binary invariants; **PROOF-01** keeps matrix ↔ script ↔ README honest | ✓ Good — **shipped** Phase **66** (**2026-04-23**); archived + planning tag **`v1.18`** |
 
 ## Current Milestone Notes
 
@@ -508,6 +506,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-23:** **`/gsd-execute-phase 65`** — **`65-VERIFICATION.md`**, inventory **ADM-12** maintainer line, **`REQUIREMENTS.md`** **ADM-12** complete; **v1.17** milestone requirements satisfied.
 - **2026-04-23:** **`/gsd-complete-milestone`** (**v1.17**) — archives **`milestones/v1.17-*`**, root **`REQUIREMENTS.md`** removed for next milestone, **`audit-open`** Phase **62** UAT gap acknowledged in **`STATE.md`**, planning tag **`v1.17`**.
 - **2026-04-23:** **`/gsd-new-milestone` (trajectory plan)** — **v1.18** opened (**Onboarding confidence**, proof-first); **`REQUIREMENTS.md`** (**UAT-01..UAT-05**, **PROOF-01**); roadmap Phase **66**; **v1.17** phase trees archived under **`milestones/v1.17-phases/`**; **`.planning/phases/`** cleared for new work.
+- **2026-04-23:** **`/gsd-complete-milestone` v1.18** — **`66-01..03-SUMMARY.md`** backfilled; archives **`milestones/v1.18-*`**; **`git rm` `.planning/REQUIREMENTS.md`** for fresh next milestone; planning tag **`v1.18`**.
 
 ## Evolution
 
@@ -527,4 +526,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 — **v1.18** milestone opened (**Onboarding confidence**); **v1.17** phase trees under **`milestones/v1.17-phases/`**.*
+*Last updated: 2026-04-23 — **v1.18** milestone archived (**Onboarding confidence**, Phase **66**); **`/gsd-new-milestone`** opens the next requirements file.*
