@@ -1,5 +1,5 @@
 ---
-status: automated
+status: complete
 phase: 21-admin-and-host-ux-proof
 source:
   - 21-01-SUMMARY.md
