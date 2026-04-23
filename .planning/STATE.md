@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.17
 milestone_name: Friction-led developer readiness
-status: planning
-last_updated: "2026-04-23T20:45:00.000Z"
-last_activity: 2026-04-23 — **`/gsd-execute-phase 62`** (inline after **`/gsd-next`**) — FRG-01..03 artifacts + plan summaries
+status: verifying
+last_updated: "2026-04-23T19:52:45.744Z"
+last_activity: 2026-04-23 — **`/gsd-new-milestone`**; **`phases.clear`** (**43** trees)
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 3
+  completed_phases: 1
+  total_plans: 6
   completed_plans: 3
-  percent: 25
+  percent: 50
 ---
 
 # Project State
@@ -71,4 +71,4 @@ Plan: **62-03** (wave 2 — FRG-03)
 
 **Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**.
 
-**Planned Phase:** 62 (Friction triage + north star) — 3 plans — 2026-04-23T19:19:20.892Z
+**Planned Phase:** 63 (p0-integrator-verify-docs) — 3 plans — 2026-04-23T19:52:45.721Z
