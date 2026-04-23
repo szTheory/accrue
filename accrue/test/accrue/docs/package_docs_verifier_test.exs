@@ -23,6 +23,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "host-integration"
     assert output =~ "retain-on-failure"
     assert output =~ "only-on-failure"
+    assert output =~ "quickstart"
   end
 
   test "package docs verifier rejects missing canonical verification labels" do
@@ -42,6 +43,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
@@ -88,6 +90,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
@@ -134,6 +137,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
@@ -195,6 +199,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
@@ -239,6 +244,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/mix.exs", tmp_dir)
     copy_fixture!("accrue/README.md", tmp_dir)
     copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
@@ -264,6 +270,52 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     assert status != 0
     assert output =~ "retain-on-failure"
+  end
+
+  test "package docs verifier rejects quickstart missing auth adapters link" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
+    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
+    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
+
+    copy_fixture!("README.md", tmp_dir)
+    copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("CONTRIBUTING.md", tmp_dir)
+    copy_fixture!("accrue/mix.exs", tmp_dir)
+    copy_fixture!("accrue/README.md", tmp_dir)
+    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
+    copy_fixture!("accrue/guides/testing.md", tmp_dir)
+    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
+    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
+    copy_fixture!("accrue_admin/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
+    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
+    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+
+    drifted_quickstart =
+      tmp_dir
+      |> Path.join("accrue/guides/quickstart.md")
+      |> File.read!()
+      |> String.replace("auth_adapters.md", "")
+
+    File.write!(Path.join(tmp_dir, "accrue/guides/quickstart.md"), drifted_quickstart)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "auth_adapters.md"
   end
 
   defp copy_fixture!(relative_path, tmp_dir) do

@@ -61,6 +61,22 @@ accrue_admin_version=$(extract_version "$ROOT_DIR/accrue_admin/mix.exs")
 
 [[ "$accrue_version" == "$accrue_admin_version" ]] || fail "package versions diverged"
 
+first_hour_md="$ROOT_DIR/accrue/guides/first_hour.md"
+host_readme_md="$ROOT_DIR/examples/accrue_host/README.md"
+
+require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" '[First Hour](first_hour.md)'
+require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" 'capsule'
+require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" 'auth_adapters.md'
+require_absent_regex "$ROOT_DIR/accrue/guides/quickstart.md" 'defp deps'
+
+require_fixed "$first_hour_md" '### Capsule H'
+require_fixed "$first_hour_md" '### Capsule M'
+require_fixed "$first_hour_md" '### Capsule R'
+
+require_fixed "$host_readme_md" '### Capsule H'
+require_fixed "$host_readme_md" '### Capsule M'
+require_fixed "$host_readme_md" '### Capsule R'
+
 require_fixed "$ROOT_DIR/accrue/mix.exs" 'source_ref: "accrue-v#{@version}"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'source_ref: "accrue_admin-v#{@version}"'
 
@@ -155,4 +171,4 @@ for guide in \
 done
 
 echo "package docs verified for accrue $accrue_version and accrue_admin $accrue_admin_version"
-echo "fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"
+echo "fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, quickstart.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"
