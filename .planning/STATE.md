@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-last_updated: "2026-04-23T20:00:00.000Z"
+milestone: v1.16
+milestone_name: Integrator + proof continuity
+status: defining_requirements
+last_updated: "2026-04-23T21:30:00.000Z"
 last_activity: 2026-04-23
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,35 +21,35 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Between milestones (`/gsd-new-milestone` for **v1.16+**).
+**Current focus:** Milestone **v1.16** — integrator + proof continuity (**INT-06..INT-09**).
 
 ## Current Position
 
-Phase: —
+Phase: Not started (planning complete — discuss/plan **59**)
 
 Plan: —
 
-**Status:** Between milestones (**v1.15** shipped and archived **2026-04-23**)
+**Status:** v1.16 open — **Phases 59–61** defined
 
-**Last activity:** 2026-04-23 — **`/gsd-complete-milestone` v1.15**
+**Last activity:** 2026-04-23 — **`/gsd-new-milestone`** (**v1.16**)
 
 ## Milestone Progress
 
-**Active:** *(none — run `/gsd-new-milestone` for v1.16+)*
+**Active:** **v1.16** — **Integrator + proof continuity** — Phases **59–61** — **INT-06..INT-09**
 
-**Last shipped (planning):** **v1.15** — Phases **57–58** (release / trust semantics — **TRT-01..TRT-04**). Archives: **`.planning/milestones/v1.15-*`**; tag **`v1.15`**.
+**Last shipped (planning):** **v1.15** — Phases **57–58**. Archives: **`.planning/milestones/v1.15-*`**; tag **`v1.15`**.
 
 **Prior shipped (planning):** **v1.14** — Phases **54–56**. Archives: **`.planning/milestones/v1.14-*`**; tag **`v1.14`**.
 
-**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (see **`accrue/mix.exs`** / **`accrue_admin/mix.exs`** **`@version`** on `main` for workspace ahead-of-Hex).
+**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (workspace **`@version`** on **`main`** may read **0.3.1+** — **`verify_package_docs`** is SSOT for snippets).
 
 ## Current Planning Artifacts
 
-- **`.planning/ROADMAP.md`** — shipped milestone history + between-milestones notice
-- **`.planning/PROJECT.md`** — project SSOT (**v1.15** archived)
-- **`.planning/MILESTONES.md`** — **v1.15** shipped entry
-- **`.planning/phases/`** — phase evidence **1–56** retained (**`phases.clear` not run**)
-- *Root **`.planning/REQUIREMENTS.md`** — removed at **v1.15** close; next milestone recreates it.*
+- **`.planning/ROADMAP.md`** — **v1.16** active phases **59–61**
+- **`.planning/PROJECT.md`** — project SSOT (**v1.16** in progress)
+- **`.planning/MILESTONES.md`** — **v1.16** planning opened
+- **`.planning/REQUIREMENTS.md`** — **INT-06..INT-09**
+- **`.planning/phases/`** — prior phase trees retained (**`phases.clear` not run**)
 
 ## Deferred Items
 
@@ -61,9 +61,8 @@ Plan: —
 
 ## Recent Decisions
 
-- **2026-04-23:** **`/gsd-complete-milestone` v1.15** — archives **`milestones/v1.15-*`**, **`git rm .planning/REQUIREMENTS.md`**, planning tag **`v1.15`**.
-- **2026-04-23:** **v1.15** doc slice landed (**TRT-01..TRT-04**, phases **57–58**).
+- **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** (**Integrator + proof continuity**); **`REQUIREMENTS.md`** + roadmap **59–61**.
 
-**Next:** **`/gsd-new-milestone`** when **v1.16+** priorities are set.
+**Next:** **`/gsd-discuss-phase 59`** or **`/gsd-plan-phase 59`**
 
-**Completed:** Milestone **v1.15** — Phases **57–58**. Prior: **v1.14** — Phases **54–56**; tag **`v1.14`**.
+**Completed:** Milestone **v1.15** — Phases **57–58**; tag **`v1.15`**.

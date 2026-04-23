@@ -1,5 +1,15 @@
 # Milestones
 
+## v1.16 Integrator + proof continuity (Planning opened: 2026-04-23)
+
+**Phases:** **59–61** (see `.planning/ROADMAP.md`). **Requirements:** **INT-06..INT-09** in **`.planning/REQUIREMENTS.md`**.
+
+**Theme:** Re-bind **First Hour** / **host README** / **quickstart**, **adoption proof matrix**, repo-root **VERIFY-01** discoverability, and **Hex / `main`** doc SSOT after **v1.15** trust SemVer work — **no** **PROC-08** / **FIN-03**, **no** new billing primitives.
+
+**Next:** **`/gsd-discuss-phase 59`** or **`/gsd-plan-phase 59`**.
+
+---
+
 ## v1.15 Release / trust semantics (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-23

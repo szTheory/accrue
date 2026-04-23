@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- **v1.16 Integrator + proof continuity** — Phases **59–61** (**in progress**). **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
 - ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. Archives: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md), [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md).
 - ✅ **v1.14 Companion admin + billing depth** — Phases **54–56** shipped **2026-04-23**. Core admin **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** on invoice money-primary spine + **`Accrue.Billing.list_payment_methods`** (**Fake**, **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Archives: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
 - ✅ **v1.13 Integrator path + secondary admin parity** — Phases **51–53** shipped **2026-04-23**. Golden-path docs + adoption proof alignment; auxiliary admin (**coupons**, **promotion codes**, **Connect**, **events**) **`AccrueAdmin.Copy`** + **`ax-*`** + **VERIFY-01**. Archives: [`milestones/v1.13-ROADMAP.md`](milestones/v1.13-ROADMAP.md), [`milestones/v1.13-REQUIREMENTS.md`](milestones/v1.13-REQUIREMENTS.md).
@@ -21,7 +22,22 @@
 
 ## Phases
 
-*(No active milestone — run **`/gsd-new-milestone`** when priorities for **v1.16+** are set.)*
+### v1.16 Integrator + proof continuity (Phases 59–61) — IN PROGRESS
+
+**Milestone goal:** Close **integrator / adoption / proof** drift opened by **v1.15** trust SemVer + demo README work — **docs + verifiers + proof artifacts** only (**no** new billing APIs, **no** **PROC-08** / **FIN-03**).
+
+**Depends on:** **v1.15** shipped; **v1.13** **INT-01..INT-05** baseline; merge-blocking **`host-integration`** contract unchanged unless explicitly revised in this milestone.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 59 | Golden path + quickstart coherence | **First Hour** ↔ **host README** ↔ **quickstart** consistent with **v1.15** messaging; verifier scripts green. | INT-06 |
+| 60 | Adoption proof + CI ownership map | Matrix + evaluator script + contributor verifier map honest vs lanes and trust copy. | INT-07 |
+| 61 | Root VERIFY hops + Hex doc SSOT | README hop budget vs **VERIFY-01**; **`verify_package_docs`** + **`first_hour`** + planning mirrors vs **`@version`**. | INT-08, INT-09 |
+
+**Success criteria (milestone):**
+
+1. **INT-06..INT-09** satisfied with committed docs/scripts/tests as needed; **`bash scripts/ci/verify_package_docs.sh`** green.
+2. No **PROC-08** / **FIN-03** scope creep.
 
 <details>
 <summary>✅ v1.15 Release / trust semantics (Phases 57–58) — SHIPPED 2026-04-23</summary>
@@ -435,6 +451,14 @@
 |-------|-----------|----------------|--------|-----------|
 | 57. Trust docs — SemVer + planning labels | v1.15 | inline | Complete | 2026-04-23 |
 | 58. Demo README — Sigra vs `Accrue.Auth` | v1.15 | inline | Complete | 2026-04-23 |
+
+**v1.16 (in progress)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 59. Golden path + quickstart coherence | v1.16 | — | Not started | — |
+| 60. Adoption proof + CI ownership map | v1.16 | — | Not started | — |
+| 61. Root VERIFY hops + Hex doc SSOT | v1.16 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
