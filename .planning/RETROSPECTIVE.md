@@ -501,12 +501,52 @@
 
 ---
 
+## Milestone: v1.13 — Integrator path + secondary admin parity
+
+**Shipped:** 2026-04-23  
+**Phases:** 3 | **Plans:** 8
+
+### What Was Built
+
+- **Phase 51:** Single **First Hour** ↔ **host README** integrator spine (H/M/R capsules), thin **quickstart** hub, repo-root **VERIFY-01** discoverability, and troubleshooting / webhook anchors with stable slugs (**INT-01..INT-03**).
+- **Phase 52:** Honest **adoption proof matrix** + **Hex** / **`verify_package_docs`** alignment (**INT-04**, **INT-05**); **`AccrueAdmin.Copy.Coupon`** + **`Copy.PromotionCode`** with LiveView + test literal discipline (**AUX-01**, **AUX-02**).
+- **Phase 53:** **`AccrueAdmin.Copy.Connect`** + **`Copy.BillingEvent`**; optional **`DataTable.filter_submit_label`**; **theme-exceptions** reviewer note; **VERIFY-01** Playwright + **axe** for auxiliary routes; **`export_copy_strings`** allowlist + **`copy_strings.json`** regeneration (**AUX-03..AUX-06**).
+
+### What Worked
+
+- Reusing the **v1.12** pattern (**Copy submodule** + **`defdelegate`** facade + export JSON for browser tests) extended cleanly to **coupon**, **promotion code**, **Connect**, and **events** surfaces.
+- Treating **First Hour** and **`accrue_host` README** as one paired narrative reduced first-run contradiction drift.
+
+### What Was Inefficient
+
+- Root **`.planning/REQUIREMENTS.md`** traceability for **INT-04** / **INT-05** lagged **Pending** until milestone archive despite Phase **52** completion—same checkbox hygiene gap noted on **v1.12**.
+- **`gsd-sdk query milestone.complete`** / **`roadmap.analyze`** remained unreliable for this repo layout; milestone files were authored manually again.
+
+### Patterns Established
+
+- **Per-surface `AccrueAdmin.Copy.*` modules** as the default shape for new admin English SSOT beyond **`Copy.Subscription`**.
+- **Host seed + fixture IDs** for deterministic **VERIFY-01** URLs on **Connect** detail paths without live Stripe.
+
+### Key Lessons
+
+1. Sync **`REQUIREMENTS.md`** checkboxes when **`requirements-completed`** YAML lands in the last plan summary of a phase—not only at milestone close.
+2. **Auxiliary** admin routes deserve the same **mounted-path inventory** + **axe** contract as money-spine pages whenever VERIFY-01 touches them.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three short phases (**51–53**) spanning docs + admin + CI gates.
+- Notable: majority of merge risk was **generated `copy_strings.json`** + Playwright allowlist churn, not domain billing logic.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.13 | short | 3 | Integrator spine + VERIFY-01 discoverability (51), proof matrix + package docs + coupon/promo Copy (52), Connect/events Copy + auxiliary VERIFY-01 + export allowlist (53). |
 | v1.12 | short | 3 | Post-metering admin KPI (48), subscription drill + README nav honesty (49), Copy.Subscription + theme register + export_copy_strings VERIFY-01 wiring (50). |
 | v1.11 | short | 2 | Release train + manifest SSOT (46), post-release docs + planning mirrors (47). |
 | v1.10 | short | 3 | Metering happy path + Fake determinism (43), failure/reconciler/webhook telemetry (44), metering + telemetry/runbook docs (45). |

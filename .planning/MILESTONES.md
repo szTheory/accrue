@@ -1,5 +1,36 @@
 # Milestones
 
+## v1.13 Integrator path + secondary admin parity (Shipped: 2026-04-23)
+
+**Planning opened:** 2026-04-22
+
+**Phases completed:** 3 phases (51–53), **8** plans
+
+**Key accomplishments:**
+
+- **Phase 51 (INT-01..INT-03):** Single **First Hour** ↔ **`accrue_host` README** integrator spine with H/M/R capsules; repo-root **VERIFY-01** discoverability; **troubleshooting** / webhooks anchors with stable slugs and bounded first-run failure callouts.
+- **Phase 52 (INT-04, INT-05, AUX-01, AUX-02):** Honest **adoption proof matrix** + **Hex** / **`verify_package_docs`** alignment; **`AccrueAdmin.Copy.Coupon`** + **`Copy.PromotionCode`** with LiveView + ExUnit literal discipline on coupon/promo paths.
+- **Phase 53 (AUX-03..AUX-06):** **`AccrueAdmin.Copy.Connect`** + **`Copy.BillingEvent`** for Connect/events surfaces; **theme-exceptions** note; **VERIFY-01** Playwright + **axe** on auxiliary mounted routes; **`export_copy_strings`** allowlist + **`copy_strings.json`** regeneration.
+
+**Theme:** **Integrator golden path** docs + **auxiliary admin** parity with **`AccrueAdmin.Copy`**, **`ax-*`**, and **VERIFY-01** — **no** **PROC-08** / **FIN-03** / new UI kits.
+
+**Milestone audit:** No standalone `v1.13-MILESTONE-AUDIT.md`; closure used per-phase verification, **`ROADMAP.md`** shipped table, and requirements archive (**11/11 Complete**).
+
+**Known deferred items at close:** same **audit-open** carry-forward as prior closes (see `.planning/STATE.md` § Deferred Items).
+
+**Phase directories:** **`phases.clear` not run** — preserves **1–50** trees under **`.planning/phases/`** for traceability.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.13-ROADMAP.md`](milestones/v1.13-ROADMAP.md)
+- Requirements: [`milestones/v1.13-REQUIREMENTS.md`](milestones/v1.13-REQUIREMENTS.md)
+
+**Git tag:** `v1.13`
+
+**Next after ship:** `/gsd-new-milestone` when priorities for **v1.14+** are set.
+
+---
+
 ## v1.12 Admin & operator UX (Shipped: 2026-04-22)
 
 **Planning opened:** 2026-04-22
