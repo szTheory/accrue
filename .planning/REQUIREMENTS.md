@@ -22,8 +22,8 @@
 
 ## Billing / Stripe depth (BIL)
 
-- [ ] **BIL-01**: Ship **one** scoped **`Accrue.Billing`** (or adjacent public host API) capability expansion in the **Stripe-first** family—chosen and bounded in **Phase 56** planning—including **Fake-backed** regression coverage for webhook/ingest paths where applicable, and **no** **PROC-08** processor work. *(Phase 56)*
-- [ ] **BIL-02**: Update **`guides/telemetry.md`** (and **`guides/operator-runbooks.md`** cross-links when revenue-adjacent) for any **new or changed** `:telemetry` / **ops** signals introduced by **BIL-01**; keep catalog rows truthful vs code. *(Phase 56)*
+- [x] **BIL-01**: Ship **one** scoped **`Accrue.Billing`** (or adjacent public host API) capability expansion in the **Stripe-first** family—chosen and bounded in **Phase 56** planning—including **Fake-backed** regression coverage for webhook/ingest paths where applicable, and **no** **PROC-08** processor work. *(Phase 56)*
+- [x] **BIL-02**: Update **`guides/telemetry.md`** (and **`guides/operator-runbooks.md`** cross-links when revenue-adjacent) for any **new or changed** `:telemetry` / **ops** signals introduced by **BIL-01**; keep catalog rows truthful vs code. *(Phase 56)*
 
 ---
 
@@ -53,8 +53,8 @@
 | ADM-09 | Phase 55 | Complete |
 | ADM-10 | Phase 55 | Complete |
 | ADM-11 | Phase 55 | Complete |
-| BIL-01 | Phase 56 | Pending |
-| BIL-02 | Phase 56 | Pending |
+| BIL-01 | Phase 56 | Complete |
+| BIL-02 | Phase 56 | Complete |
 
 **Coverage:**
 

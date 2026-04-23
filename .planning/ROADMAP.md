@@ -30,7 +30,7 @@
 |---|-------|------|----------------|
 | 54 | 2/2 | Complete    | 2026-04-23 |
 | 55 | 2/2 | Complete    | 2026-04-23 |
-| 56 | Billing / Stripe depth + telemetry truth | Ship **BIL-01** (one scoped public billing capability + **Fake** coverage); align **`guides/telemetry.md`** / runbook links (**BIL-02**). | BIL-01, BIL-02 |
+| 56 | 2/2 | Complete    | 2026-04-23 |
 
 **Success criteria (milestone):**
 

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: Companion admin + billing depth
-status: planning
-last_updated: "2026-04-23T03:37:20.649Z"
+status: milestone_complete
+last_updated: "2026-04-23T04:06:37.425Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 4
+  completed_phases: 3
+  total_plans: 6
   completed_plans: 4
-  percent: 100
+  percent: 75
 ---
 
 # Project State
@@ -21,7 +21,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase --phase — 55
+**Current focus:** Phase 56 — billing-stripe-depth-telemetry-truth
 
 ## Current Position
 
@@ -29,7 +29,7 @@ Phase: 56
 
 Plan: Not started
 
-**Status:** Ready to plan
+**Status:** Milestone complete
 
 **Last activity:** 2026-04-23
 
@@ -69,4 +69,4 @@ Plan: Not started
 
 **Completed:** Milestone **v1.13** — Phases **51–53**. Prior: **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
 
-**Planned Phase:** 55 (Core admin VERIFY + theme + copy CI) — 2 plans — 2026-04-23T02:33:07.621Z
+**Planned Phase:** 56 (Billing / Stripe depth + telemetry truth) — 2 plans — 2026-04-23T04:05:15.502Z
