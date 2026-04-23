@@ -11,6 +11,7 @@ defmodule AccrueAdmin.Copy do
   alias AccrueAdmin.Copy.Coupon
   alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
+  alias AccrueAdmin.Copy.Invoice
 
   defdelegate subscription_breadcrumb_subscriptions(), to: Subscription
   defdelegate subscription_detail_eyebrow(), to: Subscription
@@ -28,6 +29,100 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_pause_collection(), to: Subscription
   defdelegate subscription_action_create_comp_replacement(), to: Subscription
   defdelegate subscription_page_title(), to: Subscription
+
+  defdelegate invoices_index_empty_title(), to: Invoice
+  defdelegate invoices_index_empty_copy(), to: Invoice
+  defdelegate invoice_select_action_warning(), to: Invoice
+  defdelegate invoice_pdf_open_info(), to: Invoice
+  defdelegate invoice_action_recorded_info(), to: Invoice
+  defdelegate invoices_page_title_index(), to: Invoice
+  defdelegate invoices_index_breadcrumb_invoices(), to: Invoice
+  defdelegate invoices_index_eyebrow(), to: Invoice
+  defdelegate invoices_index_headline(), to: Invoice
+  defdelegate invoices_index_body(), to: Invoice
+  defdelegate invoices_kpi_section_aria_label(), to: Invoice
+  defdelegate invoices_kpi_open_label(), to: Invoice
+  defdelegate invoices_kpi_open_meta(), to: Invoice
+  defdelegate invoices_kpi_paid_label(), to: Invoice
+  defdelegate invoices_kpi_paid_meta(), to: Invoice
+  defdelegate invoices_kpi_uncollectible_label(), to: Invoice
+  defdelegate invoices_kpi_uncollectible_void_delta_suffix(), to: Invoice
+  defdelegate invoices_kpi_uncollectible_meta(), to: Invoice
+  defdelegate invoices_column_invoice(), to: Invoice
+  defdelegate invoices_column_customer(), to: Invoice
+  defdelegate invoices_column_billing_signals(), to: Invoice
+  defdelegate invoices_column_status(), to: Invoice
+  defdelegate invoices_column_balance(), to: Invoice
+  defdelegate invoices_column_collection(), to: Invoice
+  defdelegate invoices_card_customer(), to: Invoice
+  defdelegate invoices_filter_search(), to: Invoice
+  defdelegate invoices_filter_status(), to: Invoice
+  defdelegate invoices_filter_customer_id(), to: Invoice
+  defdelegate invoices_filter_collection(), to: Invoice
+  defdelegate invoices_filter_status_draft(), to: Invoice
+  defdelegate invoices_filter_status_open(), to: Invoice
+  defdelegate invoices_filter_status_paid(), to: Invoice
+  defdelegate invoices_filter_status_uncollectible(), to: Invoice
+  defdelegate invoices_filter_status_void(), to: Invoice
+  defdelegate invoices_filter_collection_automatic(), to: Invoice
+  defdelegate invoices_filter_collection_send_invoice(), to: Invoice
+  defdelegate invoices_balance_word_due(), to: Invoice
+  defdelegate invoices_balance_word_paid(), to: Invoice
+  defdelegate invoices_balance_word_remaining(), to: Invoice
+  defdelegate invoices_balance_sep(), to: Invoice
+  defdelegate invoices_balance_summary(due, paid, remaining), to: Invoice
+  defdelegate invoice_page_title_detail(), to: Invoice
+  defdelegate invoice_breadcrumb_invoices(), to: Invoice
+  defdelegate invoice_detail_eyebrow(), to: Invoice
+  defdelegate invoice_detail_due_prefix(), to: Invoice
+  defdelegate invoice_detail_kpi_section_aria_label(), to: Invoice
+  defdelegate invoice_kpi_status_label(), to: Invoice
+  defdelegate invoice_kpi_amount_due_label(), to: Invoice
+  defdelegate invoice_kpi_amount_due_delta_suffix(), to: Invoice
+  defdelegate invoice_kpi_amount_remaining_meta_suffix(), to: Invoice
+  defdelegate invoice_kpi_line_items_label(), to: Invoice
+  defdelegate invoice_kpi_line_items_meta(), to: Invoice
+  defdelegate invoice_tax_risk_eyebrow(), to: Invoice
+  defdelegate invoice_tax_risk_heading(), to: Invoice
+  defdelegate invoice_tax_disabled_reason_label(), to: Invoice
+  defdelegate invoice_tax_finalization_failure_label(), to: Invoice
+  defdelegate invoice_tax_recovery_body(), to: Invoice
+  defdelegate invoice_actions_eyebrow(), to: Invoice
+  defdelegate invoice_actions_heading(), to: Invoice
+  defdelegate invoice_actions_body(), to: Invoice
+  defdelegate invoice_action_finalize(), to: Invoice
+  defdelegate invoice_action_manual_pay(), to: Invoice
+  defdelegate invoice_action_void(), to: Invoice
+  defdelegate invoice_action_mark_uncollectible(), to: Invoice
+  defdelegate invoice_confirm_panel_label(), to: Invoice
+  defdelegate invoice_confirm_action_verb(), to: Invoice
+  defdelegate invoice_confirm_cancel(), to: Invoice
+  defdelegate invoice_confirm_workflow_message(action_label, source_suffix), to: Invoice
+  defdelegate invoice_confirm_source_event_suffix(source_event_id), to: Invoice
+  defdelegate invoice_pdf_section_eyebrow(), to: Invoice
+  defdelegate invoice_pdf_heading(), to: Invoice
+  defdelegate invoice_pdf_body(), to: Invoice
+  defdelegate invoice_open_pdf_button(), to: Invoice
+  defdelegate invoice_processor_pdf_link(), to: Invoice
+  defdelegate invoice_hosted_invoice_link(), to: Invoice
+  defdelegate invoice_open_rendered_pdf_link(), to: Invoice
+  defdelegate invoice_download_rendered_pdf_link(), to: Invoice
+  defdelegate invoice_line_items_eyebrow(), to: Invoice
+  defdelegate invoice_line_items_heading(), to: Invoice
+  defdelegate invoice_line_item_qty_prefix(), to: Invoice
+  defdelegate invoice_line_item_proration_suffix(), to: Invoice
+  defdelegate invoice_line_item_period_separator(), to: Invoice
+  defdelegate invoice_line_items_empty(), to: Invoice
+  defdelegate invoice_timeline_eyebrow(), to: Invoice
+  defdelegate invoice_timeline_heading(), to: Invoice
+  defdelegate invoice_timeline_label(), to: Invoice
+  defdelegate invoice_timeline_empty(), to: Invoice
+  defdelegate invoice_source_event_label(), to: Invoice
+  defdelegate invoice_source_event_none(), to: Invoice
+  defdelegate invoice_pdf_render_failed_prefix(), to: Invoice
+  defdelegate invoice_pdf_summary_processor_ready(), to: Invoice
+  defdelegate invoice_pdf_summary_hosted_ready(), to: Invoice
+  defdelegate invoice_pdf_summary_render_on_demand(), to: Invoice
 
   defdelegate coupon_breadcrumb_coupons(), to: Coupon
   defdelegate coupon_index_eyebrow(), to: Coupon
@@ -279,12 +374,6 @@ defmodule AccrueAdmin.Copy do
     do:
       "Subscriptions appear when billing is active for this organization. If you expected one, adjust filters or confirm organization scope."
 
-  def invoices_index_empty_title, do: "No invoices for this organization yet"
-
-  def invoices_index_empty_copy,
-    do:
-      "Invoices are created as Accrue records billing activity. If you expected invoices, adjust filters or confirm organization scope."
-
   def charges_index_empty_title, do: "No charges for this organization yet"
 
   def charges_index_empty_copy,
@@ -312,12 +401,6 @@ defmodule AccrueAdmin.Copy do
 
   def subscription_drill_link_events_index,
     do: "All billing events (full ledger)"
-
-  def invoice_select_action_warning, do: "Select an invoice action before confirming."
-
-  def invoice_pdf_open_info, do: "Open PDF now uses the shared invoice render path."
-
-  def invoice_action_recorded_info, do: "Invoice action recorded."
 
   def payment_processor_action_warning(payment_intent),
     do: "Processor requires action: " <> inspect(payment_intent)
