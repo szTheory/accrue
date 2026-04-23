@@ -12,9 +12,18 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.16 — Integrator + proof continuity** is **archived** (2026-04-23). Phases **59–61**; **INT-06..INT-09** validated. Archives: `.planning/milestones/v1.16-ROADMAP.md`, `v1.16-REQUIREMENTS.md`. Planning git tag **`v1.16`**.
+**v1.17 — Friction-led developer readiness** is **active** (opened **2026-04-23**).
 
-**Next:** run **`/gsd-new-milestone`** when **v1.17+** scope is ready (fresh **`.planning/REQUIREMENTS.md`** is created by that workflow).
+**Goal:** Maximize marginal **developer** value: invest where ranked evidence shows Phoenix integrators still stall — **integrator / VERIFY / docs**, **billing**, or **admin/operator** — instead of broad continuity sweeps after **v1.16**. Each phase stays **one sharp bet**; stop when the next increment is polish without removing failure modes.
+
+**Target features:**
+
+- **Triage** — Ranked friction inventory with sources, explicit deferrals, and a written north star + stop rules (**FRG-01**..**FRG-03**).
+- **Conditional integrator / VERIFY / docs** — Close **INT-10** P0 items from the inventory **or** certify none with maintainer-signed rationale (merge-blocking contracts stay green).
+- **Conditional billing** — Close **BIL-03** P0 billing items **or** certify none / defer with rationale (**Fake** + docs/telemetry alignment when code moves).
+- **Conditional admin / operator** — Close **ADM-12** P0 admin items **or** certify none / defer with rationale.
+
+**v1.16 — Integrator + proof continuity** is **archived** (2026-04-23). Phases **59–61**; **INT-06..INT-09** validated. Archives: `.planning/milestones/v1.16-ROADMAP.md`, `v1.16-REQUIREMENTS.md`. Planning git tag **`v1.16`**.
 
 **v1.15 — Release / trust semantics** is **archived** (2026-04-23). Phases **57–58**; **TRT-01..TRT-04** validated. Archives: `.planning/milestones/v1.15-ROADMAP.md`, `v1.15-REQUIREMENTS.md`. Planning git tag **`v1.15`**.
 
@@ -44,7 +53,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.16** — Phases **59–61** (**2026-04-23**): **INT-06..INT-09** integrator golden path + adoption proof + root **VERIFY-01** hops + **Hex / `main`** doc SSOT; archives **`.planning/milestones/v1.16-*`**; planning git tag **`v1.16`**. Prior: **v1.15** — Phases **57–58**; archives **`.planning/milestones/v1.15-*`**; tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**.
 
-**Now:** between milestones — root **`.planning/REQUIREMENTS.md`** removed after **v1.16** archive; define the next requirement set via **`/gsd-new-milestone`**. **`phases.clear`** not run (phase trees retained under **`.planning/phases/`** where present).
+**Now:** **v1.17** planning active — **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** define Phases **62–65** (**2026-04-23**). **`phases.clear`** removed **43** stale **`phases/*`** trees (milestone archives under **`.planning/milestones/`** unchanged).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -233,6 +242,17 @@ Theme: **integrator + proof continuity** after **v1.15** trust SemVer work; **PR
 - [x] **INT-07** — Adoption proof matrix + evaluator walkthrough trust stub + lane honesty; **`scripts/ci/README.md`** INT gates (**INT-06**/**INT-07**) with **CONTRIBUTING** routing. **Validated in Phase 60.**
 - [x] **INT-08** — Repo-root **README** preserves **VERIFY-01** / **`host-integration`** discoverability within the documented hop budget; verifier + README updated together when the contract moves. **Validated in Phase 61.**
 - [x] **INT-09** — **`verify_package_docs`**, **`first_hour`**, package READMEs, and **`.planning/`** Hex mirror callouts stay aligned with **`mix.exs` `@version`** on the branch under test. **Validated in Phase 61.**
+
+### Active v1.17 (opened 2026-04-23)
+
+Theme: **friction-led developer readiness** — triage before broad doc sweeps; **PROC-08** and **FIN-03** not in this milestone.
+
+- [ ] **FRG-01** — Ranked **integrator-facing friction inventory** committed under **`.planning/`** (path recorded in **`.planning/STATE.md`**) with **sources** (e.g. VERIFY lanes, adoption matrix, host README, CI verifiers, maintainer notes) and explicit **P0 / P1 / P2** + **defer** rows.
+- [ ] **FRG-02** — **North star + diminishing-returns stop rules** for **v1.17** documented and cross-linked from this **Current milestone** section (or **`STATE.md`**).
+- [ ] **FRG-03** — **Scoped implementation backlog** for Phases **63–65** authored from **FRG-01**: each row either maps to **INT-10** / **BIL-03** / **ADM-12** work **or** is deferred with written rationale (no hidden scope).
+- [ ] **INT-10** — **P0 integrator / VERIFY / docs closure** — For every **P0** backlog row tagged **integrator**, **VERIFY**, or **docs**, ship the fix (docs, verifiers, tests as needed) **or** downgrade to **P1+** with maintainer rationale in the inventory doc; **`bash scripts/ci/verify_package_docs.sh`** and merge-blocking **`host-integration`** / **VERIFY-01** contracts stay **green** on **`main`** after changes.
+- [ ] **BIL-03** — **P0 billing closure** — For every **P0** backlog row tagged **billing**, ship the bounded **`Accrue.Billing` / Stripe / Fake** work with regressions + **`guides/telemetry.md`** + **CHANGELOG** alignment **or** certify **no P0 billing rows** with signed rationale (no **PROC-08**).
+- [ ] **ADM-12** — **P0 admin / operator closure** — For every **P0** backlog row tagged **admin**, ship the scoped **LiveView** / **`AccrueAdmin.Copy`** / **VERIFY-01** work **or** certify **no P0 admin rows** with signed rationale.
 
 ### Validated v1.14 (Phases 54–56; milestone scope delivered 2026-04-23)
 
@@ -478,6 +498,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-23:** **`/gsd-complete-milestone` v1.15** — archives **`milestones/v1.15-*`**, **`git rm .planning/REQUIREMENTS.md`**, planning tag **`v1.15`**.
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** opened (**Integrator + proof continuity**); **`REQUIREMENTS.md`** (**INT-06..INT-09**); roadmap phases **59–61**.
 - **2026-04-23:** **`/gsd-complete-milestone` v1.16** — archives **`milestones/v1.16-*`**, root **`REQUIREMENTS.md`** removed for next milestone, planning tag **`v1.16`**.
+- **2026-04-23:** **`/gsd-new-milestone`** — **v1.17** opened (**Friction-led developer readiness**); **`REQUIREMENTS.md`** (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**); roadmap phases **62–65**; **`phases.clear`** executed (**43** trees).
 
 ## Evolution
 
@@ -497,4 +518,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 after **v1.16** milestone archive — **INT-06..INT-09** shipped; next requirements via **`/gsd-new-milestone`**.*
+*Last updated: 2026-04-23 — **v1.17** (**Friction-led developer readiness**) opened; Phases **62–65**; **`phases.clear`** run.*

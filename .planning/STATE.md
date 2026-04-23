@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-last_updated: "2026-04-23T18:00:00.000Z"
+milestone: v1.17
+milestone_name: Friction-led developer readiness
+status: milestone_active
+last_updated: "2026-04-23T20:00:00.000Z"
 last_activity: 2026-04-23
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,35 +21,35 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Between milestones — run **`/gsd-new-milestone`** for **v1.17+** scope and fresh **`.planning/REQUIREMENTS.md`**
+**Current focus:** **v1.17** — triage-led P0 closure across integrator/VERIFY, billing, or admin (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**). See **`.planning/REQUIREMENTS.md`** and **`.planning/ROADMAP.md`**.
 
 ## Current Position
 
-Phase: **—**
+Phase: **Not started** (next: **62** — friction triage + north star)
 
 Plan: **—**
 
-**Status:** **v1.16** archived — awaiting next milestone definition
+**Status:** Milestone **v1.17** opened — requirements + roadmap defined **2026-04-23**
 
-**Last activity:** 2026-04-23
+**Last activity:** 2026-04-23 — **`/gsd-new-milestone`**; **`phases.clear`** (**43** trees)
 
 ## Milestone Progress
 
-**Active:** *(none — next milestone not opened)*
+**Active:** **v1.17** — Phases **62–65** (see **`.planning/ROADMAP.md`**)
 
-**Last shipped (planning):** **v1.16** — Phases **59–61**. Archives: **`.planning/milestones/v1.16-*`**; tag **`v1.16`**.
+**Friction inventory (FRG-01):** *TBD after Phase 62 — path will be recorded here.*
 
-**Prior shipped (planning):** **v1.15** — Phases **57–58**. Archives: **`.planning/milestones/v1.15-*`**; tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; tag **`v1.14`**.
+**Last shipped (planning):** **v1.16** — Phases **59–61**; archives **`.planning/milestones/v1.16-*`**; tag **`v1.16`**.
 
-**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (workspace **`@version`** on **`main`** may read **0.3.1+** — **`verify_package_docs`** is SSOT for snippets).
+**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (workspace **`@version`** on **`main`** may read ahead — **`verify_package_docs`** is SSOT for snippets).
 
 ## Current Planning Artifacts
 
-- **`.planning/ROADMAP.md`** — shipped milestones through **v1.16**; next phases TBD
-- **`.planning/PROJECT.md`** — project SSOT (**v1.16** archived)
-- **`.planning/MILESTONES.md`** — **v1.16** shipped entry
-- **`.planning/REQUIREMENTS.md`** — *(removed after **v1.16** archive; recreate via **`/gsd-new-milestone`**)*
-- **`.planning/phases/`** — prior phase trees retained (**`phases.clear` not run**)
+- **`.planning/REQUIREMENTS.md`** — **v1.17** requirement set (**FRG**, **INT-10**, **BIL-03**, **ADM-12**)
+- **`.planning/ROADMAP.md`** — Phases **62–65** for **v1.17**
+- **`.planning/PROJECT.md`** — **Current milestone** = **v1.17**
+- **`.planning/MILESTONES.md`** — **v1.17** in-progress entry
+- **`.planning/phases/`** — empty after **`phases.clear`**; new phase trees created by **`/gsd-plan-phase`**
 
 ## Deferred Items
 
@@ -61,10 +61,9 @@ Plan: **—**
 
 ## Recent Decisions
 
-- **2026-04-23:** **`/gsd-discuss-phase 61`** — parallel research on all four gray areas; **`61-CONTEXT.md`** + **`61-DISCUSSION-LOG.md`**: hybrid root/host README IA, verifier split (no third script), planning Hex mirrors, `@version`-honest pins + pre-publish window (**INT-08**, **INT-09**).
-- **2026-04-23:** **`/gsd-discuss-phase 60`** — context + discussion log committed; research-backed defaults for INT-07 doc map, matrix/walkthrough parity, trust-stub IA, and narrow CI README scope (**`60-CONTEXT.md`**).
-- **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** (**Integrator + proof continuity**); **`REQUIREMENTS.md`** + roadmap **59–61**.
+- **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
+- **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** **`/gsd-new-milestone`** when **v1.17+** scope is ready.
+**Next:** **`/gsd-discuss-phase 62`** (gather context) or **`/gsd-plan-phase 62`** (plan directly).
 
-**Completed:** **v1.16** — Phases **59–61** (**INT-06..INT-09**) — **2026-04-23**; tag **`v1.16`**. Prior: **v1.15** — Phases **57–58**; tag **`v1.15`**.
+**Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**.
