@@ -3,7 +3,8 @@
 This guide mirrors the checked-in `examples/accrue_host` story in package-facing
 terms. Your Phoenix app owns `MyApp.Billing`, routing, auth, runtime config,
 and verification choices. Accrue owns the billing engine behind those public
-boundaries.
+boundaries. Read-only processor queries such as saved payment methods use
+`Accrue.Billing.list_payment_methods/2` (and the host wrapper `MyApp.Billing.list_payment_methods/2` after `mix accrue.install`); see [`guides/telemetry.md`](telemetry.md) for the `[:accrue, :billing, :payment_method, :list]` span.
 
 ## How to enter this guide
 

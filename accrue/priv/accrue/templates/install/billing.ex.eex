@@ -26,4 +26,15 @@ defmodule <%= @billing_context %> do
   def customer_for(billable) do
     Billing.customer(billable)
   end
+
+  # Host may add policy, preloads, or presentation mapping before delegating.
+  @doc false
+  def list_payment_methods(customer, opts \\ []) do
+    Billing.list_payment_methods(customer, opts)
+  end
+
+  @doc false
+  def list_payment_methods!(customer, opts \\ []) do
+    Billing.list_payment_methods!(customer, opts)
+  end
 end
