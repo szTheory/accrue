@@ -19,12 +19,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     Timeline
   }
 
-  alias AccrueAdmin.TaxOwnershipRow
-
   alias AccrueAdmin.Copy
-  alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.Queries.Subscriptions
+  alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.StepUp
+  alias AccrueAdmin.TaxOwnershipRow
 
   @destructive_actions ~w(cancel_now comp_subscription)
 

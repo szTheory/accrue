@@ -5,9 +5,9 @@ defmodule AccrueAdmin.InvoiceLiveTest do
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Processor.Fake
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Invoices
-  alias AccrueAdmin.Copy
   alias AccrueAdmin.TestRepo
 
   import Ecto.Query

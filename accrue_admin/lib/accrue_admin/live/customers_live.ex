@@ -8,8 +8,8 @@ defmodule AccrueAdmin.Live.CustomersLive do
   alias Accrue.Billing.Customer
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
-  alias AccrueAdmin.Copy
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Customers
 
   @impl true

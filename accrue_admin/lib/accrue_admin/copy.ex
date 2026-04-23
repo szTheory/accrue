@@ -9,9 +9,9 @@ defmodule AccrueAdmin.Copy do
   alias AccrueAdmin.Copy.BillingEvent
   alias AccrueAdmin.Copy.Connect
   alias AccrueAdmin.Copy.Coupon
+  alias AccrueAdmin.Copy.Invoice
   alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
-  alias AccrueAdmin.Copy.Invoice
 
   defdelegate subscription_breadcrumb_subscriptions(), to: Subscription
   defdelegate subscription_detail_eyebrow(), to: Subscription
