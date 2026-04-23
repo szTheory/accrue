@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.17 Friction-led developer readiness (Planning opened: 2026-04-23)
+
+**Status:** **IN PROGRESS**
+
+**Phases:** **62–65** (see [`.planning/ROADMAP.md`](ROADMAP.md))
+
+**Theme:** Triage-led **P0** closure across **integrator / VERIFY / docs**, **billing**, or **admin/operator** — evidence from **FRG-01**; **no** **PROC-08** / **FIN-03**; avoid broad **v1.16**-style sweeps without **P0** justification.
+
+**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**)
+
+**Note:** **`.planning/phases/`** was cleared (**`phases.clear`**, **43** trees) at milestone open; new phase directories are created by **`/gsd-plan-phase`**.
+
+---
+
 ## v1.16 Integrator + proof continuity (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-23

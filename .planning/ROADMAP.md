@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- 🚧 **v1.17 Friction-led developer readiness** — Phases **62–65** (planning **2026-04-23**). **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Active: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) + this file § Phases **62–65**.
 - ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
 - ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. Archives: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md), [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md).
 - ✅ **v1.14 Companion admin + billing depth** — Phases **54–56** shipped **2026-04-23**. Core admin **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** on invoice money-primary spine + **`Accrue.Billing.list_payment_methods`** (**Fake**, **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Archives: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
@@ -21,6 +22,73 @@
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
 ## Phases
+
+<details open>
+<summary>🚧 v1.17 Friction-led developer readiness (Phases 62–65) — IN PROGRESS</summary>
+
+**Milestone goal:** Rank **where Phoenix integrators still stall**, then close **P0** items per axis — **integrator / VERIFY / docs** (**INT-10**), **billing** (**BIL-03**), **admin/operator** (**ADM-12**) — or **certify none** with signed rationale. Avoid broad continuity sweeps without **FRG-01** evidence.
+
+**Depends on:** **v1.16** shipped (**INT-06..INT-09**); merge-blocking **`host-integration`** + **`verify_package_docs`** baseline unchanged unless a **P0** row explicitly revises it with verifier + doc updates together.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 62 | Friction triage + north star | Ranked inventory (**FRG-01**), north star + stop rules (**FRG-02**), scoped backlog for **63–65** (**FRG-03**). | FRG-01, FRG-02, FRG-03 |
+| 63 | P0 integrator / VERIFY / docs | Close every **P0** row tagged integrator/VERIFY/docs from **FRG-03**, or downgrade with rationale; keep merge-blocking contracts green. | INT-10 |
+| 64 | P0 billing | Close every **P0** row tagged billing from **FRG-03**, or certify none; **Fake** + telemetry/docs/changelog alignment on code changes. | BIL-03 |
+| 65 | P0 admin / operator | Close every **P0** row tagged admin from **FRG-03**, or certify none; scoped **LiveView** / **Copy** / **VERIFY-01** on touched routes. | ADM-12 |
+
+**Success criteria (milestone):**
+
+1. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, and **ADM-12** satisfied per **`.planning/REQUIREMENTS.md`** with committed artifacts (inventory path live in **`.planning/STATE.md`**).
+2. **`bash scripts/ci/verify_package_docs.sh`** green on **`main`** after any doc or snippet change in this milestone.
+3. No **PROC-08** / **FIN-03** scope creep.
+
+### Phase 62: Friction triage + north star
+
+**Goal:** Evidence-ranked inventory + written stop rules + execution backlog for Phases **63–65**.
+
+**Requirements:** FRG-01, FRG-02, FRG-03
+
+**Success criteria:**
+
+1. **FRG-01** — Inventory committed under **`.planning/`** with P0/P1/P2 + sources + deferrals; path recorded in **`.planning/STATE.md`**.
+2. **FRG-02** — North star + diminishing-returns stop rules linked from **`.planning/PROJECT.md`** and **`.planning/STATE.md`**.
+3. **FRG-03** — Every **P0** row from **FRG-01** maps to **INT-10**, **BIL-03**, or **ADM-12** in the backlog **or** is explicitly out of **v1.17** with rationale.
+
+### Phase 63: P0 integrator / VERIFY / docs
+
+**Goal:** Burn integrator/VERIFY/docs **P0** rows; no silent contract drift.
+
+**Requirements:** INT-10
+
+**Success criteria:**
+
+1. **INT-10** satisfied per **`.planning/REQUIREMENTS.md`**.
+2. Merge-blocking **VERIFY-01** / **`host-integration`** / **`verify_package_docs`** semantics stay coherent with committed README + verifier changes.
+
+### Phase 64: P0 billing
+
+**Goal:** Burn billing **P0** rows with library-grade regressions and honest operator docs.
+
+**Requirements:** BIL-03
+
+**Success criteria:**
+
+1. **BIL-03** satisfied per **`.planning/REQUIREMENTS.md`**.
+2. No **PROC-08**; any public **`Accrue.Billing`** surface change ships **Fake** coverage and doc/telemetry/changelog alignment as applicable.
+
+### Phase 65: P0 admin / operator
+
+**Goal:** Burn admin **P0** rows without new third-party UI kits.
+
+**Requirements:** ADM-12
+
+**Success criteria:**
+
+1. **ADM-12** satisfied per **`.planning/REQUIREMENTS.md`**.
+2. **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** discipline preserved on touched surfaces.
+
+</details>
 
 <details>
 <summary>✅ v1.16 Integrator + proof continuity (Phases 59–61) — SHIPPED 2026-04-23</summary>
