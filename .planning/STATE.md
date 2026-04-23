@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.18
 milestone_name: Onboarding confidence
-status: ready_to_execute
-last_updated: "2026-04-23T21:30:00.000Z"
-last_activity: "2026-04-23 — /gsd-plan-phase 66 (66-RESEARCH.md, 66-VALIDATION.md, 66-01..03-PLAN.md)"
+status: phase_66_executed
+last_updated: "2026-04-23T22:00:00.000Z"
+last_activity: "2026-04-23 — /gsd-execute-phase 66 (plans 01–03; 66-VERIFICATION.md, friction script UAT-04 gate, PROOF-01)"
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 3
 ---
 
 # Project State
@@ -24,13 +24,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 ## Current Position
 
-Phase: **66** — **Deferred UAT + evaluator proof** — planned (**`66-01..03-PLAN.md`** in **`.planning/phases/66-onboarding-confidence/`**)
+Phase: **66** — **Deferred UAT + evaluator proof** — **executed** **2026-04-23** (proof: **`.planning/phases/66-onboarding-confidence/66-VERIFICATION.md`**)
 
-Plan: **01–03** (3 waves)
+Plan: **01–03** (3 waves) — **complete**
 
-**Status:** **v1.18** — ready for **`/gsd-execute-phase 66`**
+**Status:** **v1.18** — Phase **66** verification ledger closed; **`.planning/REQUIREMENTS.md`** checkboxes updated for **UAT-01..UAT-05** and **PROOF-01**
 
-**Last activity:** 2026-04-23 — **`/gsd-plan-phase 66`** (research, Nyquist **66-VALIDATION.md**, pattern map, three executable plans)
+**Last activity:** 2026-04-23 — **`/gsd-execute-phase 66`** (friction script archive gate, **STATE** deferral row, adoption matrix / walkthrough / README spot-check)
 
 ## Milestone Progress
 
@@ -47,7 +47,7 @@ Plan: **01–03** (3 waves)
 
 ## Current Planning Artifacts
 
-- **`.planning/phases/66-onboarding-confidence/`** — Phase **66** context, research, validation strategy, pattern map, **`66-01..03-PLAN.md`**; **`66-VERIFICATION.md`** created at execute (plan 01)
+- **`.planning/phases/66-onboarding-confidence/`** — Phase **66** context, research, **`66-VERIFICATION.md`** (UAT + PROOF closure **2026-04-23**), **`66-01..03-PLAN.md`**
 - **`.planning/REQUIREMENTS.md`** — **v1.18** (**UAT-01..UAT-05**, **PROOF-01**)
 - **`.planning/ROADMAP.md`** — **v1.18** Phase **66** + shipped milestones
 - **`.planning/milestones/v1.17-phases/`** — archived **62–65** working trees (**verification**, **UAT**, plans)
@@ -57,7 +57,7 @@ Plan: **01–03** (3 waves)
 
 | Category | Item | Status |
 |----------|------|--------|
-| uat_gap | Phase **62** **`62-UAT.md`** (5 scenarios) — baseline path **`.planning/milestones/v1.17-phases/62-friction-triage-north-star/62-UAT.md`** | **in_milestone_v1.18** — tracked as **UAT-01..UAT-05** |
+| uat_gap | Phase **62** **`62-UAT.md`** (historical scenarios) — **`.planning/milestones/v1.17-phases/62-friction-triage-north-star/62-UAT.md`** | **closed** **2026-04-23** — v1.18 exit in **`.planning/REQUIREMENTS.md`**; proof **`.planning/phases/66-onboarding-confidence/66-VERIFICATION.md`** (Phase **66** execute) |
 
 **Phase 21 UAT:** metadata row retained for traceability; scenarios are automated / resolved via quick task **260414-l9q** (see `03-HUMAN-UAT.md`).
 
@@ -77,6 +77,6 @@ Plan: **01–03** (3 waves)
 - **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
 - **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** **`/gsd-execute-phase 66`** — Phase **66** (**Deferred UAT + evaluator proof**); plans + context: **`.planning/phases/66-onboarding-confidence/`**.
+**Next:** Continue **v1.18** per **`.planning/ROADMAP.md`** (Phase **66** verification complete).
 
 **Completed:** **v1.17** — Phases **62–65** — **2026-04-23**; archives **`.planning/milestones/v1.17-*`**; planning tag **`v1.17`**.
