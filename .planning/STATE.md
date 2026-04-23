@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: Companion admin + billing depth
 status: planning
-last_updated: "2026-04-23T02:24:25.449Z"
+last_updated: "2026-04-23T02:33:07.654Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
+  total_plans: 4
   completed_plans: 2
-  percent: 100
+  percent: 50
 ---
 
 # Project State
@@ -69,4 +69,4 @@ Plan: Not started
 
 **Completed:** Milestone **v1.13** — Phases **51–53**. Prior: **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
 
-**Planned Phase:** 55 (Core admin VERIFY + theme + copy CI) — context gathered — 2026-04-23
+**Planned Phase:** 55 (Core admin VERIFY + theme + copy CI) — 2 plans — 2026-04-23T02:33:07.621Z
