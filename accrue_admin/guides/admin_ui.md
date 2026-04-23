@@ -12,6 +12,10 @@ Start with the package quickstart in [`README.md`](../README.md), then return he
 - **Motion:** light CSS transitions on shells, drawers, and modals; honor `prefers-reduced-motion`; reach for LiveView `JS` only when CSS cannot carry the interaction.
 - **Responsive:** keep the mounted shell usable on small viewports first; avoid wide horizontal scroll for primary tables unless unavoidable—prefer column discipline and secondary detail surfaces.
 
+## Core operator surface parity (checklist)
+
+**ADM-07:** the canonical matrix of mounted core routes vs `AccrueAdmin.Copy`, `ax-*` / token discipline, and VERIFY-01 posture lives in **[`core-admin-parity.md`](core-admin-parity.md)**. Use it when triaging Tier A copy gaps or planning VERIFY extensions—do not maintain a second matrix in planning-only docs.
+
 ## Theming and exceptions
 
 Semantic color and spacing tokens for the mounted admin UI live in [`assets/css/theme.css`](../assets/css/theme.css) and are composed in [`assets/css/app.css`](../assets/css/app.css). If you introduce a **non-token color literal** (for example a one-off hex in HEEx or a fallback brand map in Elixir) during hierarchy or polish work, add a row to the phase registry at [`.planning/phases/26-hierarchy-and-pattern-alignment/26-theme-exceptions.md`](../../.planning/phases/26-hierarchy-and-pattern-alignment/26-theme-exceptions.md) so reviewers can see the exception without spelunking git history.
