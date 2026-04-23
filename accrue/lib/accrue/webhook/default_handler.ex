@@ -82,10 +82,8 @@ defmodule Accrue.Webhook.DefaultHandler do
   def handle_event("billing.meter.error_report_triggered", %Accrue.Webhook.Event{} = event, ctx) do
     obj = meter_error_object_from_ctx(ctx)
 
-    case reduce_meter_error_report(event.processor_event_id, obj) do
-      {:ok, _} -> :ok
-      other -> other
-    end
+    {:ok, _} = reduce_meter_error_report(event.processor_event_id, obj)
+    :ok
   end
 
   def handle_event(
@@ -95,10 +93,8 @@ defmodule Accrue.Webhook.DefaultHandler do
       ) do
     obj = meter_error_object_from_ctx(ctx)
 
-    case reduce_meter_error_report(event.processor_event_id, obj) do
-      {:ok, _} -> :ok
-      other -> other
-    end
+    {:ok, _} = reduce_meter_error_report(event.processor_event_id, obj)
+    :ok
   end
 
   # ---------------------------------------------------------------------

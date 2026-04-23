@@ -136,15 +136,17 @@ defmodule Accrue.Invoices do
   # host app has `Accrue.PDF.ChromicPDF` configured but forgot to add
   # `{ChromicPDF, on_demand: true}` to its supervisor, surface a clear
   # non-retriable error instead of the raw GenServer crash.
-  defp ensure_adapter_available(Accrue.PDF.ChromicPDF) do
-    if Process.whereis(ChromicPDF) do
-      :ok
+  defp ensure_adapter_available(adapter) do
+    if adapter == Accrue.PDF.ChromicPDF do
+      if Process.whereis(ChromicPDF) do
+        :ok
+      else
+        {:error, :chromic_pdf_not_started}
+      end
     else
-      {:error, :chromic_pdf_not_started}
+      :ok
     end
   end
-
-  defp ensure_adapter_available(_other), do: :ok
 
   defp safe_build_assigns(invoice_or_id, opts) do
     {:ok, Render.build_assigns(invoice_or_id, opts)}

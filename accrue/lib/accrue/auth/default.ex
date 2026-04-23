@@ -49,7 +49,7 @@ defmodule Accrue.Auth.Default do
   end
 
   @doc false
-  @spec do_boot_check!(:dev | :test | :prod | atom()) :: :ok
+  @spec do_boot_check!(atom()) :: :ok
   def do_boot_check!(:prod) do
     if Application.get_env(:accrue, :auth_adapter, __MODULE__) == __MODULE__ do
       diagnostic =
@@ -65,11 +65,9 @@ defmodule Accrue.Auth.Default do
     :ok
   end
 
-  def do_boot_check!(env) when env in [:dev, :test], do: :ok
-  # Any other atom (e.g., host-defined :staging) is treated as non-prod
-  # by this default adapter — hosts that want stricter behaviour should
-  # supply their own adapter.
-  def do_boot_check!(_other), do: :ok
+  # :dev, :test, host-defined :staging, etc. — non-:prod envs are permissive
+  # here; hosts that want stricter behaviour should supply their own adapter.
+  def do_boot_check!(_env), do: :ok
 
   @impl Accrue.Auth
   def current_user(_conn) do
