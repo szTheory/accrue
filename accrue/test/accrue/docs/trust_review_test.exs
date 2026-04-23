@@ -2,7 +2,7 @@ defmodule Accrue.Docs.TrustReviewTest do
   use ExUnit.Case, async: true
 
   @trust_review_path Path.expand(
-                       "../../../../.planning/phases/15-trust-hardening/15-TRUST-REVIEW.md",
+                       "../../../../.planning/research/v1.2-trust-review.md",
                        __DIR__
                      )
 

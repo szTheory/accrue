@@ -56,7 +56,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Goal:** Clearer evaluator **VERIFY-01** / adoption doc paths; honest **installer + CI** semantics; **operator-first** admin entry, drill, and nav; **token-safe** dashboard surfaces with **`AccrueAdmin.Copy`** SSOT; **audit corpus** + verifier ownership + dual-contract documentation.
 
-**Delivered (high level):** Phases **32–33** (ADOPT-01..06), **34** (OPS-01..03), **35** (OPS-04..05), **36** (integration hardening + forward-coupling). Evidence lives under `.planning/phases/32-*` … `36-*` and milestone archives.
+**Delivered (high level):** Phases **32–33** (ADOPT-01..06), **34** (OPS-01..03), **35** (OPS-04..05), **36** (integration hardening + forward-coupling). Evidence: **`.planning/milestones/v1.7-ROADMAP.md`** / **`v1.7-REQUIREMENTS.md`**; granular phase trees were under **`.planning/phases/`** until the **2026-04-23** prune (recoverable from **git history**).
 
 ## Shipped: v1.6 Admin UI / UX polish (2026-04-20)
 
@@ -64,7 +64,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Delivered:**
 
-- Phase **25** — Route matrix, component coverage notes, and UI-SPEC alignment artifacts under `.planning/phases/25-admin-ux-inventory/`.
+- Phase **25** — Route matrix, component coverage notes, and UI-SPEC alignment (v1.6 milestone; **`.planning/milestones/v1.6-ROADMAP.md`**, prior phase path **`25-admin-ux-inventory`** in **git history**).
 - Phase **26** — `ax-*` hierarchy on money indexes, detail pages, and webhooks; theme token discipline with documented exceptions.
 - Phase **27** — Operator microcopy pass and `AccrueAdmin.Copy` for stable literals in tests.
 - Phase **28** — Focus, captions, contrast verification, and mounted-admin axe in VERIFY-01.

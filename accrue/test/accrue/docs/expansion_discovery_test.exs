@@ -2,7 +2,7 @@ defmodule Accrue.Docs.ExpansionDiscoveryTest do
   use ExUnit.Case, async: true
 
   @recommendation_path Path.expand(
-                         "../../../../.planning/phases/16-expansion-discovery/16-EXPANSION-RECOMMENDATION.md",
+                         "../../../../.planning/research/v1.2-expansion-recommendation.md",
                          __DIR__
                        )
 

@@ -4,33 +4,35 @@ This directory hosts merge-adjacent bash gates and host-app checks. Use it as th
 
 ## ADOPT gates (v1.7 adoption milestone)
 
-Evidence columns are summarized from `.planning/phases/32-adoption-discoverability-doc-graph/32-VERIFICATION.md` and `.planning/phases/33-installer-host-contracts-ci-clarity/33-VERIFICATION.md`.
+Evidence for **ADOPT-01..06** is summarized in **`.planning/milestones/v1.7-ROADMAP.md`** / **`.planning/milestones/v1.7-REQUIREMENTS.md`** (milestone archives). Granular phase **`*-VERIFICATION.md`** ledgers for phases **32–36** live in **git history** (trees under `.planning/phases/` were pruned after **`phases.clear`** on **2026-04-23**).
 
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
 |--------|-------------------------------|-------------------------|--------------------------|
-| ADOPT-01 | `scripts/ci/verify_package_docs.sh` (root `README.md` proof path + merge-blocking labels); root `README.md` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` (invokes verifier end-to-end) | `.planning/phases/32-adoption-discoverability-doc-graph/32-VERIFICATION.md` |
-| ADOPT-02 | `scripts/ci/verify_verify01_readme_contract.sh`; `examples/accrue_host/README.md` (VERIFY-01 / Playwright / host-integration prose) | — (bash-only contract; runs in **`docs-contracts-shift-left`** CI job) | `32-VERIFICATION.md` |
-| ADOPT-03 | `verify_package_docs.sh` pins on `accrue/guides/testing.md`, `accrue/guides/first_hour.md`, `guides/testing-live-stripe.md` | `package_docs_verifier_test.exs` | `32-VERIFICATION.md` |
-| ADOPT-04 | `accrue/guides/first_hour.md` §4 + `upgrade.md#installer-rerun-behavior` anchor | `accrue/test/accrue/docs/first_hour_guide_test.exs` | `33-VERIFICATION.md` |
-| ADOPT-05 | `verify_package_docs.sh` `require_fixed` / `require_regex` pins (First Hour, troubleshooting, host README, package READMEs) | `package_docs_verifier_test.exs` (fixture drift regressions) | `33-VERIFICATION.md` |
-| ADOPT-06 | `.github/workflows/ci.yml` stable job-id header comments; `README.md` + `guides/testing-live-stripe.md` lane wording | `package_docs_verifier_test.exs` (workflow/contributor drift cases) | `33-VERIFICATION.md` |
+| ADOPT-01 | `scripts/ci/verify_package_docs.sh` (root `README.md` proof path + merge-blocking labels); root `README.md` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` (invokes verifier end-to-end) | `.planning/milestones/v1.7-ROADMAP.md` (Phases **32–33**) |
+| ADOPT-02 | `scripts/ci/verify_verify01_readme_contract.sh`; `examples/accrue_host/README.md` (VERIFY-01 / Playwright / host-integration prose) | — (bash-only contract; runs in **`docs-contracts-shift-left`** CI job) | `.planning/milestones/v1.7-ROADMAP.md` |
+| ADOPT-03 | `verify_package_docs.sh` pins on `accrue/guides/testing.md`, `accrue/guides/first_hour.md`, `guides/testing-live-stripe.md` | `package_docs_verifier_test.exs` | `.planning/milestones/v1.7-ROADMAP.md` |
+| ADOPT-04 | `accrue/guides/first_hour.md` §4 + `upgrade.md#installer-rerun-behavior` anchor | `accrue/test/accrue/docs/first_hour_guide_test.exs` | `.planning/milestones/v1.7-ROADMAP.md` |
+| ADOPT-05 | `verify_package_docs.sh` `require_fixed` / `require_regex` pins (First Hour, troubleshooting, host README, package READMEs) | `package_docs_verifier_test.exs` (fixture drift regressions) | `.planning/milestones/v1.7-ROADMAP.md` |
+| ADOPT-06 | `.github/workflows/ci.yml` stable job-id header comments; `README.md` + `guides/testing-live-stripe.md` lane wording | `package_docs_verifier_test.exs` (workflow/contributor drift cases) | `.planning/milestones/v1.7-ROADMAP.md` |
 
 ## ORG gates (v1.8 org billing proof)
 
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
 |--------|-------------------------------|-------------------------|--------------------------|
-| ORG-09 | `scripts/ci/verify_adoption_proof_matrix.sh`; `examples/accrue_host/docs/adoption-proof-matrix.md` | `accrue/test/accrue/docs/organization_billing_guide_test.exs`; `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` | `.planning/phases/39-org-billing-proof-alignment/39-VERIFICATION.md` |
+| ORG-09 | `scripts/ci/verify_adoption_proof_matrix.sh`; `examples/accrue_host/docs/adoption-proof-matrix.md` | `accrue/test/accrue/docs/organization_billing_guide_test.exs`; `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` | `.planning/milestones/v1.8-ROADMAP.md` (Phase **39**) |
 
 ## INT gates (v1.16 integrator + proof continuity)
 
 This table is **delta-maintained** for merge-blocking checks **touched by phases 59–61** on this milestone branch. The **normative** required-job set for every pull request remains **`.github/workflows/ci.yml`** plus **branch protection** — treat those as completeness SSOT, not this markdown registry alone.
 
+Granular **`*-VERIFICATION.md`** for phases **59–61** live in **git history** (pruned from `.planning/phases/`); milestone narrative and requirements closure: **`.planning/milestones/v1.16-ROADMAP.md`**, **`.planning/milestones/v1.16-REQUIREMENTS.md`**.
+
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
 |--------|-------------------------------|-------------------------|--------------------------|
-| INT-06 | `accrue/guides/first_hour.md`; `examples/accrue_host/README.md`; `accrue/guides/quickstart.md`; `CONTRIBUTING.md` — scripts `verify_package_docs.sh`, `verify_v1_17_friction_research_contract.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/phases/59-golden-path-quickstart-coherence/59-VERIFICATION.md` |
-| INT-07 | `examples/accrue_host/docs/adoption-proof-matrix.md`; `examples/accrue_host/docs/evaluator-walkthrough-script.md` — scripts `verify_adoption_proof_matrix.sh` (add `verify_package_docs.sh` only when pins touch matrix paths) | `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` when ORG-09 matrix literals change; else **—** | `.planning/phases/60-adoption-proof-ci-ownership-map/60-VERIFICATION.md` |
-| INT-08 | Root `README.md` merge-blocking proof path + cross-package pins — `verify_package_docs.sh`; VERIFY-01 host README depth — `verify_verify01_readme_contract.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/phases/61-root-verify-hops-hex-doc-ssot/61-VERIFICATION.md` |
-| INT-09 | Workspace **`@version`** vs **public Hex** honesty — `verify_package_docs.sh` enforces **`first_hour`**, **`accrue/README.md`**, **`accrue_admin/README.md`** pins; **`.planning/PROJECT.md`** / **`.planning/MILESTONES.md`** are **manual** mirrors (edit alongside intentional SemVer / milestone copy changes) | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/phases/61-root-verify-hops-hex-doc-ssot/61-VERIFICATION.md` |
+| INT-06 | `accrue/guides/first_hour.md`; `examples/accrue_host/README.md`; `accrue/guides/quickstart.md`; `CONTRIBUTING.md` — scripts `verify_package_docs.sh`, `verify_v1_17_friction_research_contract.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **59**) |
+| INT-07 | `examples/accrue_host/docs/adoption-proof-matrix.md`; `examples/accrue_host/docs/evaluator-walkthrough-script.md` — scripts `verify_adoption_proof_matrix.sh` (add `verify_package_docs.sh` only when pins touch matrix paths) | `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` when ORG-09 matrix literals change; else **—** | `.planning/milestones/v1.16-ROADMAP.md` (Phase **60**) |
+| INT-08 | Root `README.md` merge-blocking proof path + cross-package pins — `verify_package_docs.sh`; VERIFY-01 host README depth — `verify_verify01_readme_contract.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **61**) |
+| INT-09 | Workspace **`@version`** vs **public Hex** honesty — `verify_package_docs.sh` enforces **`first_hour`**, **`accrue/README.md`**, **`accrue_admin/README.md`** pins; **`.planning/PROJECT.md`** / **`.planning/MILESTONES.md`** are **manual** mirrors (edit alongside intentional SemVer / milestone copy changes) | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **61**) |
 | INT-10 (planning SSOT) | `scripts/ci/verify_v1_17_friction_research_contract.sh` — **`.planning/research/v1.17-FRICTION-INVENTORY.md`**, **`v1.17-north-star.md`**, **`STATE.md` / `PROJECT.md` / `ROADMAP.md`** pointer anchors | `accrue/test/accrue/docs/v1_17_friction_research_contract_test.exs` | `.planning/milestones/v1.17-phases/62-friction-triage-north-star/62-VALIDATION.md` |
 
 ### Triage: verify_v1_17_friction_research_contract.sh

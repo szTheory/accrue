@@ -345,7 +345,7 @@
 
 **Key accomplishments:**
 
-- Maintainer route matrix, component coverage vs `ComponentKitchenLive`, and Phase 20/21 UI-SPEC alignment tables checked into `.planning/phases/25-admin-ux-inventory/` (INV-01..03).
+- Maintainer route matrix, component coverage vs `ComponentKitchenLive`, and Phase 20/21 UI-SPEC alignment tables shipped for v1.6 (INV-01..03); see **`.planning/milestones/v1.6-ROADMAP.md`** — prior **`25-admin-ux-inventory`** tree in **git history** after **2026-04-23** `.planning/phases/` prune.
 - Money indexes, detail pages, and webhook surfaces aligned to `ax-*` hierarchy and typography; theme tokens default with documented exceptions (UX-01..04).
 - Plain-language empty/error/confirm copy plus `AccrueAdmin.Copy` module for stable Playwright and LiveView literals (COPY-01..03).
 - Step-up focus, table captions on customers/webhooks, VERIFY-01 axe (serious/critical) on mounted admin, and verification notes for contrast (A11Y-01..04).
