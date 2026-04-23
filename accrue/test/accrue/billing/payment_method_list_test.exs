@@ -2,7 +2,10 @@ defmodule Accrue.Billing.PaymentMethodListTest do
   @moduledoc """
   Phase 56 — `Accrue.Billing.list_payment_methods/2` happy path on Fake (BIL-01).
   """
-  use Accrue.BillingCase, async: true
+  # Async false: global `Accrue.Processor.Fake` + `ConnectCase`'s full
+  # `Fake.reset/0` can interleave with `BillingCase`'s `reset_preserve_connect/0`
+  # and wipe in-flight payment method state across test modules.
+  use Accrue.BillingCase, async: false
 
   alias Accrue.Billing
   alias Accrue.Billing.Customer

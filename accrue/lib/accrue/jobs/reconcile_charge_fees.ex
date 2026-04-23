@@ -24,8 +24,6 @@ defmodule Accrue.Jobs.ReconcileChargeFees do
     sweep()
   end
 
-  def perform(_other), do: sweep()
-
   @doc false
   def sweep do
     cutoff = DateTime.add(Accrue.Clock.utc_now(), -86_400, :second)

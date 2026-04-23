@@ -56,8 +56,6 @@ defmodule Accrue.Jobs.DunningSweeper do
     sweep()
   end
 
-  def perform(_other), do: sweep()
-
   @doc """
   Runs one sweep tick. Returns `{:ok, count}` where `count` is the
   number of subscriptions successfully transitioned this tick.

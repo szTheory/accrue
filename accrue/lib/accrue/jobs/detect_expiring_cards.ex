@@ -35,8 +35,6 @@ defmodule Accrue.Jobs.DetectExpiringCards do
     scan()
   end
 
-  def perform(_other), do: scan()
-
   @doc false
   def scan do
     thresholds = Config.get!(:expiring_card_thresholds)

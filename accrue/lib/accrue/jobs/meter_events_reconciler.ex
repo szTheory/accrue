@@ -51,11 +51,6 @@ defmodule Accrue.Jobs.MeterEventsReconciler do
     :ok
   end
 
-  def perform(_other) do
-    {:ok, _count} = reconcile()
-    :ok
-  end
-
   @doc """
   Runs a single reconciliation pass. Returns `{:ok, count}` where
   `count` is the number of pending rows this pass considered. Public
