@@ -1,5 +1,7 @@
 # Phase 66: Deferred UAT + evaluator proof - Context
 
+> **Archive path (2026-04-23):** This directory was moved from **`.planning/phases/66-onboarding-confidence/`** to **`.planning/milestones/v1.18-phases/66-onboarding-confidence/`** when **v1.19** opened, so **`phases.clear`** does not delete shipped verification history. **D-01a** below references the pre-move canonical path.
+
 **Gathered:** 2026-04-23  
 **Status:** Ready for planning
 

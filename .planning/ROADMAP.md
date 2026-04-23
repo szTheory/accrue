@@ -2,7 +2,8 @@
 
 ## Milestones
 
-- ✅ **v1.18 Onboarding confidence** — Phase **66** shipped **2026-04-23**. **UAT-01..UAT-05**, **PROOF-01**; proof-first confidence after **v1.17** (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
+- **v1.19 Release continuity + proof resilience** — Phases **67–69** opened **2026-04-23**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts before **0.3.1** Hex publish (**no** **PROC-08** / **FIN-03**). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.18 Onboarding confidence** — Phase **66** shipped **2026-04-23**. **UAT-01..UAT-05**, **PROOF-01**; proof-first confidence after **v1.17** (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md). Phase **66** tree: [`milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Archives: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md), [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md). Phase trees archived: [`milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
 - ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. Archives: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md), [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md).
@@ -24,6 +25,24 @@
 
 ## Phases
 
+### v1.19 Release continuity + proof resilience (Phases 67–69)
+
+**Milestone goal:** Close **v1.17-P1-001**-class drift between **`adoption-proof-matrix.md`** and **`verify_adoption_proof_matrix.sh`**, ship **`accrue` / `accrue_admin` 0.3.1** to Hex, then align **First Hour**, **`verify_package_docs`**, and **`.planning/`** public-Hex callouts — **no** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.18** shipped; **v1.18** verification history under [`milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 67 | Proof contracts | Strengthen matrix ↔ verifier ↔ contributor triage docs. | PRF-01, PRF-02 |
+| 68 | Release train | Linked Release Please publish **0.3.1** (`accrue` then `accrue_admin`), tags + changelogs. | REL-01, REL-02, REL-03 |
+| 69 | Doc + planning mirrors | **`first_hour`** / package README pins + **`verify_package_docs`** green; **PROJECT** / **MILESTONES** / **STATE** Hex lines. | DOC-01, DOC-02, HYG-01 |
+
+**Success criteria (milestone):**
+
+1. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, and **HYG-01** satisfied per **`.planning/REQUIREMENTS.md`** with phase verification artifacts.
+2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** contracts stay green through the publish line.
+3. No **PROC-08** / **FIN-03** scope creep.
+
 <details>
 <summary>✅ v1.18 Onboarding confidence (Phase 66) — SHIPPED 2026-04-23</summary>
 
@@ -33,7 +52,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 66 | Deferred UAT + evaluator proof | **Complete 2026-04-23** (3/3 plans; see [`phases/66-onboarding-confidence/66-VERIFICATION.md`](phases/66-onboarding-confidence/66-VERIFICATION.md)). | UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, PROOF-01 |
+| 66 | Deferred UAT + evaluator proof | **Complete 2026-04-23** (3/3 plans; see [`milestones/v1.18-phases/66-onboarding-confidence/66-VERIFICATION.md`](milestones/v1.18-phases/66-onboarding-confidence/66-VERIFICATION.md)). | UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, PROOF-01 |
 
 **Success criteria (milestone):**
 
@@ -51,7 +70,7 @@
 
 **Success criteria:**
 
-1. **`66-VERIFICATION.md`** exists under **`.planning/phases/66-onboarding-confidence/`** and tables every **UAT-** / **PROOF-** row with closure status + proof links.
+1. **`66-VERIFICATION.md`** exists under **`.planning/milestones/v1.18-phases/66-onboarding-confidence/`** and tables every **UAT-** / **PROOF-** row with closure status + proof links.
 2. **`STATE.md`** no longer lists the **v1.17** Phase **62** UAT gap as an open deferred item unless a row is explicitly signed **out of v1.18** with rationale.
 
 </details>
