@@ -65,7 +65,7 @@ test.describe("@mobile mounted admin shell and customers", () => {
 
     await page.getByRole("button", { name: "Menu" }).click();
     const sidebar = page.locator(".ax-sidebar");
-    await expect(sidebar.getByRole("link", { name: /Dashboard/i })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: /Home/i })).toBeVisible();
     await expect(sidebar.getByRole("link", { name: /Customers/i })).toBeVisible();
     await expect(sidebar.getByRole("link", { name: /Subscriptions/i })).toBeVisible();
 

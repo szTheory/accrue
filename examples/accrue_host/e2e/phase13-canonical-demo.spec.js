@@ -66,6 +66,15 @@ async function postSignedWebhook(page, fixture) {
   expect(JSON.parse(response.body)).toEqual({ ok: true });
 }
 
+/** Desktop events table uses `<td>` cells; mobile card rows surface the type as body copy. */
+function replayAuditEventLocator(page, testInfo) {
+  if (testInfo.project.name === "chromium-mobile") {
+    return page.locator("article").filter({ hasText: "admin.webhook.replay.completed" });
+  }
+
+  return page.getByRole("cell", { name: "admin.webhook.replay.completed" });
+}
+
 test("@phase15-trust canonical first-run and admin replay walkthrough stays release-blocking", async ({
   page,
   context
@@ -206,13 +215,13 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
     page,
     "admin replay audit",
     () => page.goto(`/billing/events?source_webhook_event_id=${fixture.webhook_id}&actor_type=admin`),
-    page.getByRole("cell", { name: "admin.webhook.replay.completed" })
+    replayAuditEventLocator(page, testInfo)
   );
 
   expect(auditElapsedMs).toBeGreaterThanOrEqual(0);
   await assertResponsiveState(page, "admin replay audit event", [
     {
-      locator: page.getByRole("cell", { name: "admin.webhook.replay.completed" }),
+      locator: replayAuditEventLocator(page, testInfo),
       label: "replay audit row"
     },
     {
