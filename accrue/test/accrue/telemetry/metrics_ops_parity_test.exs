@@ -7,7 +7,9 @@ defmodule Accrue.Telemetry.MetricsOpsParityTest do
 
   test "every canonical ops tuple has a defaults/0 metric with matching event_name" do
     defs = load_defaults!()
-    assert is_list(defs) and defs != [], "Accrue.Telemetry.Metrics.defaults/0 must return metric definitions"
+
+    assert is_list(defs) and defs != [],
+           "Accrue.Telemetry.Metrics.defaults/0 must return metric definitions"
 
     for tuple <- TelemetryOpsInventory.expected_ops_events() do
       assert Enum.any?(defs, &(&1.event_name == tuple)),
