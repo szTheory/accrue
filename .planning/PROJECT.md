@@ -14,6 +14,8 @@ Tagline: *"Billing state, modeled clearly."*
 
 **No active planning milestone** — root **`.planning/REQUIREMENTS.md`** is removed after **v1.18** close until **`/gsd-new-milestone`**. **Roadmap:** **`.planning/ROADMAP.md`**. Historical Phase **66** artifacts: **`.planning/phases/66-onboarding-confidence/`**.
 
+**Triage doctrine (read-only context, v1.17–v1.18):** [North star + stop rules](research/v1.17-north-star.md) · [Friction inventory](research/v1.17-FRICTION-INVENTORY.md)
+
 **v1.18 — Onboarding confidence** is **archived** (**2026-04-23**). Phase **66**; **UAT-01..UAT-05**, **PROOF-01** validated. Archives: **`.planning/milestones/v1.18-ROADMAP.md`**, **`v1.18-REQUIREMENTS.md`**. Planning git tag **`v1.18`**.
 
 **v1.17 — Friction-led developer readiness** is **archived** (**2026-04-23**). Phases **62–65**; **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12** validated. Archives: **`.planning/milestones/v1.17-ROADMAP.md`**, **`v1.17-REQUIREMENTS.md`**; planning git tag **`v1.17`**. Phase working trees: **`.planning/milestones/v1.17-phases/`**.
