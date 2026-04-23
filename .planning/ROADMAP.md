@@ -33,7 +33,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 62 | Friction triage + north star | Ranked inventory (**FRG-01**), north star + stop rules (**FRG-02**), scoped backlog for **63–65** (**FRG-03**). | FRG-01, FRG-02, FRG-03 |
-| 63 | P0 integrator / VERIFY / docs | Close every **P0** row tagged integrator/VERIFY/docs from **FRG-03**, or downgrade with rationale; keep merge-blocking contracts green. | INT-10 |
+| 63 | P0 integrator / VERIFY / docs | Close every **P0** row tagged integrator/VERIFY/docs from **FRG-03**, or downgrade with rationale; keep merge-blocking contracts green. **Complete 2026-04-23** (3/3 plans; see `phases/63-p0-integrator-verify-docs/63-VERIFICATION.md`). | INT-10 |
 | 64 | P0 billing | Close every **P0** row tagged billing from **FRG-03**, or certify none; **Fake** + telemetry/docs/changelog alignment on code changes. | BIL-03 |
 | 65 | P0 admin / operator | Close every **P0** row tagged admin from **FRG-03**, or certify none; scoped **LiveView** / **Copy** / **VERIFY-01** on touched routes. | ADM-12 |
 
@@ -571,6 +571,12 @@
 | 59. Golden path + quickstart coherence | v1.16 | 2/2 | Complete | 2026-04-23 |
 | 60. Adoption proof + CI ownership map | v1.16 | 2/2 | Complete | 2026-04-23 |
 | 61. Root VERIFY hops + Hex doc SSOT | v1.16 | 2/2 | Complete | 2026-04-23 |
+
+**v1.17 (in progress — 2026-04-23)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 63. P0 integrator / VERIFY / docs | v1.17 | 3/3 | Complete | 2026-04-23 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

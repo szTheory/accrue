@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.17
 milestone_name: Friction-led developer readiness
-status: verifying
-last_updated: "2026-04-23T19:52:45.744Z"
-last_activity: 2026-04-23 — **`/gsd-new-milestone`**; **`phases.clear`** (**43** trees)
+status: ready_to_plan
+last_updated: "2026-04-23T19:53:56.359Z"
+last_activity: 2026-04-23
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
   completed_plans: 3
   percent: 50
@@ -21,17 +21,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.17** — triage-led P0 closure across integrator/VERIFY, billing, or admin (**FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**). See **`.planning/REQUIREMENTS.md`** and **`.planning/ROADMAP.md`**.
+**Current focus:** **v1.17** — **INT-10** closed in Phase **63**; next execution slice is **Phase 64** (**BIL-03**).
 
 ## Current Position
 
-Phase: **62** — friction triage + north star (**context gathered** **2026-04-23**)
+Phase: **64** — P0 billing (**plan** or **execute** when ready)
 
-Plan: **62-03** (wave 2 — FRG-03)
+Plan: Not started
 
-**Status:** FRG-01..03 inventory + backlog committed; **Phase 62** ready for verification
+**Status:** Phase **63** complete **2026-04-23**; advance to **64** per **`.planning/ROADMAP.md`**.
 
-**Last activity:** 2026-04-23 — **`/gsd-new-milestone`**; **`phases.clear`** (**43** trees)
+**Last activity:** 2026-04-23 — **`/gsd-execute-phase 63`**
 
 ## Milestone Progress
 
@@ -51,6 +51,7 @@ Plan: **62-03** (wave 2 — FRG-03)
 - **`.planning/PROJECT.md`** — **Current milestone** = **v1.17**
 - **`.planning/MILESTONES.md`** — **v1.17** in-progress entry
 - **`.planning/phases/62-friction-triage-north-star/`** — **62-CONTEXT.md**, **62-DISCUSSION-LOG.md**
+- **`.planning/phases/63-p0-integrator-verify-docs/`** — **63-VERIFICATION.md**, **63-01..03-SUMMARY.md**
 - **`.planning/research/v1.17-north-star.md`**, **`v1.17-FRICTION-INVENTORY.md`** — triage SSOT (**FRG-01..03**)
 
 ## Deferred Items
@@ -67,8 +68,8 @@ Plan: **62-03** (wave 2 — FRG-03)
 - **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
 - **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** **`/gsd-verify-work`** for **Phase 62**, then **`/gsd-discuss-phase 63`** (or **`/gsd-execute-phase 63`** when plans exist).
+**Next:** **`/gsd-discuss-phase 64`** (recommended) or **`/gsd-plan-phase 64`** — **P0 billing** (**BIL-03**). Optionally **`/gsd-verify-work 62`** if Phase **62** verification is still pending.
 
-**Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**.
+**Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**. **v1.17** — Phase **63** (P0 integrator / VERIFY / docs) — **2026-04-23**.
 
-**Planned Phase:** 63 (p0-integrator-verify-docs) — 3 plans — 2026-04-23T19:52:45.721Z
+**Planned Phase:** 64 (p0-billing) — see **`.planning/ROADMAP.md`**
