@@ -14,6 +14,8 @@ operators.
 
 > **Hex vs `main`:** The `{:accrue_admin, "~> …"}` line below tracks `accrue_admin/mix.exs` `@version` on the branch you are reading (typically `main` on GitHub). [Hex.pm](https://hex.pm/packages/accrue_admin) publishes that train after release; use [HexDocs](https://hexdocs.pm/accrue_admin/) for operator UI docs matched to the Hex version you resolved.
 
+Keep **`accrue`** on the **same `~>` train** when both packages are in the host `mix.exs`, and pin production upgrades via **`mix.lock`**.
+
 Add `accrue_admin` to your host application and mount the package router where operators manage billing:
 
 ```elixir

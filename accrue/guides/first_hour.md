@@ -35,7 +35,9 @@ proof, mounted admin inspection, and a focused verification pass.
 
 > **Hex vs `main`:** The version pins below mirror `accrue/mix.exs` and `accrue_admin/mix.exs` `@version` on the branch you are reading (usually `main` on GitHub). [Hex.pm](https://hex.pm/packages/accrue) / [Hex.pm/packages/accrue_admin](https://hex.pm/packages/accrue_admin) reflect what is published; use HexDocs when you need docs tied to the resolved Hex version.
 
-Pre-1.0 **minor** bumps on Hex may include breaking API changes. **`accrue_admin`** is released in **lockstep** with **`accrue`** for each train; keep the two `~>` pins on the **same three-part version**. Patch releases within that minor are the usual safe upgrade path.
+1. The fenced `~>` pins below track the **Hex-published** SemVer line for the `@version` pair this branch ships with.
+2. **`path:`** / monorepo installs must keep **`accrue`** and **`accrue_admin`** on the **same three-part `~>`** (lockstep trains).
+3. Pre-1.0 **`~>`** minors may still ship breaking API changes—treat **`mix.lock`** as the production stability boundary, not semver intuition alone.
 
 ```elixir
 defp deps do

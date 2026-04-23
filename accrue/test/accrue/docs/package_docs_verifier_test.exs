@@ -1,6 +1,9 @@
 defmodule Accrue.Docs.PackageDocsVerifierTest do
   use ExUnit.Case, async: true
 
+  # Phase 63-01: First Hour + package README integrator copy is enforced by
+  # scripts/ci/verify_package_docs.sh end-to-end; no new require_fixed needles were added there.
+
   @script_path "../scripts/ci/verify_package_docs.sh"
 
   test "package docs verifier succeeds" do
@@ -20,6 +23,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "STRIPE_TEST_SECRET_KEY"
     assert output =~ "CONTRIBUTING.md"
     assert output =~ "release-gate"
+    assert output =~ "docs-contracts-shift-left"
     assert output =~ "host-integration"
     assert output =~ "retain-on-failure"
     assert output =~ "only-on-failure"
@@ -152,7 +156,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       |> Path.join("guides/testing-live-stripe.md")
       |> File.read!()
       |> String.replace(
-        "`release-gate` and `host-integration`\nresults in the workflow summary",
+        "`release-gate`, `docs-contracts-shift-left`, and `host-integration`\nresults in the workflow summary",
         "`release-gate` results in the workflow summary and can be monitored alongside the primary `test` job"
       )
 

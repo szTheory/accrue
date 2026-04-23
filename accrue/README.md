@@ -22,6 +22,8 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 
 > **Hex vs `main`:** The `{:accrue, "~> …"}` line below tracks `accrue/mix.exs` `@version` on the branch you are reading (typically `main` on GitHub). [Hex.pm](https://hex.pm/packages/accrue) publishes that train after release; use [HexDocs](https://hexdocs.pm/accrue/) for API docs matched to the Hex version you resolved.
 
+If you also pull **`accrue_admin`**, match its `~>` to the same train, and rely on a **resolved `mix.lock`** in production while Accrue is pre-1.0.
+
 In `mix.exs`:
 
 ```elixir
