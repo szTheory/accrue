@@ -1,14 +1,31 @@
 # Milestones
 
-## v1.16 Integrator + proof continuity (Planning opened: 2026-04-23)
+## v1.16 Integrator + proof continuity (Shipped: 2026-04-23)
 
-**Phases:** **59–61** (see `.planning/ROADMAP.md`). **Requirements:** **INT-06..INT-09** in **`.planning/REQUIREMENTS.md`**.
+**Planning opened:** 2026-04-23
 
-**Theme:** Re-bind **First Hour** / **host README** / **quickstart**, **adoption proof matrix**, repo-root **VERIFY-01** discoverability, and **Hex / `main`** doc SSOT after **v1.15** trust SemVer work — **no** **PROC-08** / **FIN-03**, **no** new billing primitives.
+**Phases completed:** 3 phases (**59–61**), **6** plans
 
-**Workspace vs Hex:** `mix.exs` **`@version`** on the branch you are testing may read **ahead** of **last published** on Hex — see **[`.planning/PROJECT.md`](.planning/PROJECT.md)** § **Current State** for the canonical dual-track wording.
+**Key accomplishments:**
 
-**Next (maintainers):** **`/gsd-execute-phase 61`** when executing remaining phase plans (see **`.planning/STATE.md`**). Published packages: [`accrue` on Hex](https://hex.pm/packages/accrue), [`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin).
+- **Phase 59 (INT-06):** **First Hour** trust boundary + **Sigra** capsule framing; **quickstart** auth routing hub; **CONTRIBUTING** doc preflight trio; **`verify_package_docs.sh`** quickstart hub + capsule structure + **`package_docs_verifier_test`** coverage.
+- **Phase 60 (INT-07):** **Adoption proof matrix** + **evaluator walkthrough** trust/versioning stub with walkthrough ↔ matrix traceability; **`scripts/ci/README.md`** INT-06/INT-07 contributor map rows; **CONTRIBUTING** routes editors to the map.
+- **Phase 61 (INT-08, INT-09):** **`verify_package_docs.sh`** **INT-08** ownership + root **README** merge-blocking line pin; **INT-09** **MILESTONES** / **PROJECT** Current State dual-track (**`@version`** vs **public Hex**) + CI README row + **CONTRIBUTING** pre-publish **`mix deps.get`** sharp edge.
+
+**Theme:** Integrator + proof continuity after **v1.15** — **no** **PROC-08** / **FIN-03**; **no** new billing primitives.
+
+**Milestone audit:** No standalone `v1.16-MILESTONE-AUDIT.md`; closure used **`audit-open`** (all clear), merge-blocking doc verifiers, and requirements archive (**4/4 Complete**).
+
+**Phase directories:** **`phases.clear` not run** — preserves prior phase trees under `.planning/phases/`.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md)
+- Requirements: [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md)
+
+**Git tag:** `v1.16`
+
+**Next after ship:** **`/gsd-new-milestone`** when priorities for **v1.17+** are set.
 
 ---
 

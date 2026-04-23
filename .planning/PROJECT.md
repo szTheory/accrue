@@ -12,18 +12,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.16 — Integrator + proof continuity (**complete — 2026-04-23**)
+**v1.16 — Integrator + proof continuity** is **archived** (2026-04-23). Phases **59–61**; **INT-06..INT-09** validated. Archives: `.planning/milestones/v1.16-ROADMAP.md`, `v1.16-REQUIREMENTS.md`. Planning git tag **`v1.16`**.
 
-**Goal:** Pick up **integrator / adoption / proof** work explicitly **deferred** during **v1.14**–**v1.15** so the golden path, **VERIFY-01** discoverability, **adoption proof matrix**, and **Hex / `main` doc SSOT** stay coherent after **v1.15** trust SemVer messaging — **without** new billing primitives, **PROC-08**, or **FIN-03**.
-
-**Target features:**
-
-- Re-audit **First Hour** ↔ **host README** ↔ **quickstart** for contradictions vs **v1.15** trust text; keep merge-blocking verifiers green.
-- Refresh **adoption proof matrix** + **evaluator walkthrough** + **`scripts/ci/README.md`** ownership map where lanes or copy changed.
-- Preserve **repo-root → VERIFY-01** hop budget (**v1.7 ADOPT** intent) after **v1.15** README additions; adjust verifiers if the contract moves.
-- Keep **`verify_package_docs`**, **`first_hour`**, and package README **Hex** paragraphs aligned with **`mix.exs` `@version`** on **`main`**.
-
-**Phases:** **59–61** (see `.planning/ROADMAP.md`). Requirements: **`.planning/REQUIREMENTS.md`** (**INT-06..INT-09**).
+**Next:** run **`/gsd-new-milestone`** when **v1.17+** scope is ready (fresh **`.planning/REQUIREMENTS.md`** is created by that workflow).
 
 **v1.15 — Release / trust semantics** is **archived** (2026-04-23). Phases **57–58**; **TRT-01..TRT-04** validated. Archives: `.planning/milestones/v1.15-ROADMAP.md`, `v1.15-REQUIREMENTS.md`. Planning git tag **`v1.15`**.
 
@@ -51,9 +42,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** may still read **ahead** until the next ship.
 
-**Last shipped planning milestone:** **v1.15** — Phases **57–58** (**2026-04-23**): **TRT-01..TRT-04** trust/versioning docs + demo **Sigra** clarity + **`verify_package_docs`** alignment; archives **`.planning/milestones/v1.15-*`**; planning git tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**. Prior: **v1.13** — Phases **51–53**; archives **`.planning/milestones/v1.13-*`**; tag **`v1.13`**.
+**Last shipped planning milestone:** **v1.16** — Phases **59–61** (**2026-04-23**): **INT-06..INT-09** integrator golden path + adoption proof + root **VERIFY-01** hops + **Hex / `main`** doc SSOT; archives **`.planning/milestones/v1.16-*`**; planning git tag **`v1.16`**. Prior: **v1.15** — Phases **57–58**; archives **`.planning/milestones/v1.15-*`**; tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**.
 
-**Now:** **v1.16** closed — **integrator + proof continuity** (**INT-06..INT-09**); **Phases 59–61** complete **2026-04-23**. Root **`.planning/REQUIREMENTS.md`** tracks **INT-06..INT-09** as satisfied. **`phases.clear`** not run (phase trees **1–58** evidence retained under **`.planning/phases/`** where present).
+**Now:** between milestones — root **`.planning/REQUIREMENTS.md`** removed after **v1.16** archive; define the next requirement set via **`/gsd-new-milestone`**. **`phases.clear`** not run (phase trees retained under **`.planning/phases/`** where present).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -228,10 +219,14 @@ Theme: **integrator golden path** + **auxiliary admin parity**; **PROC-08** and 
 - [x] **AUX-05** — **`ax-*`** + theme tokens on touched auxiliary surfaces; exceptions recorded in **`theme-exceptions.md`**. **Validated in Phase 53.**
 - [x] **AUX-06** — VERIFY-01 **Playwright** + **axe** on materially touched auxiliary mounted paths; **`export_copy_strings`** / **`copy_strings.json`** anti-drift wiring. **Validated in Phase 53.**
 
-### Validated v1.16 (in progress)
+### Validated v1.16 (archived in `.planning/milestones/v1.16-REQUIREMENTS.md`; milestone closed 2026-04-23)
+
+Theme: **integrator + proof continuity** after **v1.15** trust SemVer work; **PROC-08** and **FIN-03** not in this milestone.
 
 - [x] **INT-06** — **First Hour**, **quickstart**, and **CONTRIBUTING** aligned with trust boundary + auth routing narrative; **`verify_package_docs`** enforces quickstart hub + capsule structure; merge-blocking doc trio green. **Validated in Phase 59.**
 - [x] **INT-07** — Adoption proof matrix + evaluator walkthrough trust stub + lane honesty; **`scripts/ci/README.md`** INT gates (**INT-06**/**INT-07**) with **CONTRIBUTING** routing. **Validated in Phase 60.**
+- [x] **INT-08** — Repo-root **README** preserves **VERIFY-01** / **`host-integration`** discoverability within the documented hop budget; verifier + README updated together when the contract moves. **Validated in Phase 61.**
+- [x] **INT-09** — **`verify_package_docs`**, **`first_hour`**, package READMEs, and **`.planning/`** Hex mirror callouts stay aligned with **`mix.exs` `@version`** on the branch under test. **Validated in Phase 61.**
 
 ### Validated v1.15 (Phases 57–58; docs shipped 2026-04-23)
 
@@ -444,7 +439,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.13 pairs integrator golden-path docs with auxiliary admin parity | First-time hosts still judge the library on README ↔ first_hour ↔ VERIFY-01 coherence; secondary LiveViews must not feel “unshipped” next to customers/subscriptions/invoices | ✓ Good |
 | v1.14 sequences core admin parity before integrator/Hex milestones | After auxiliary parity (v1.13), **core** money flows should meet the same Copy/token/VERIFY bar; one billing depth slice ships with Fake + telemetry truth before doc/release milestones return | ✓ Good — **shipped** Phases **54–56** (**2026-04-23**); tag **`v1.14`** |
 | v1.15 prioritizes release/trust semantics (forcing function **B**) over feature expansion | Pre-1.0 Hex + internal `v1.x` planning labels risk evaluator confusion; fix with docs + demo README clarity before further polish milestones | ✓ Good — **shipped** Phases **57–58** (**2026-04-23**); archived + planning tag **`v1.15`** |
-| v1.16 closes integrator/proof continuity deferred from v1.14–v1.15 | Trust SemVer messaging and v1.13 INT baseline can drift; explicit milestone re-binds golden path, matrix, root VERIFY hops, and package-doc SSOT without billing scope creep | — Pending |
+| v1.16 closes integrator/proof continuity deferred from v1.14–v1.15 | Trust SemVer messaging and v1.13 INT baseline can drift; explicit milestone re-binds golden path, matrix, root VERIFY hops, and package-doc SSOT without billing scope creep | ✓ Good — **shipped** Phases **59–61** (**2026-04-23**); archived + planning tag **`v1.16`** |
 
 ## Current Milestone Notes
 
@@ -482,6 +477,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-23:** **v1.15** opened — **Release / trust semantics**; forcing function **B** (adoption readiness plan); **`.planning/REQUIREMENTS.md`** recreated (**TRT-01..TRT-04**); roadmap phases **57–58**.
 - **2026-04-23:** **`/gsd-complete-milestone` v1.15** — archives **`milestones/v1.15-*`**, **`git rm .planning/REQUIREMENTS.md`**, planning tag **`v1.15`**.
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** opened (**Integrator + proof continuity**); **`REQUIREMENTS.md`** (**INT-06..INT-09**); roadmap phases **59–61**.
+- **2026-04-23:** **`/gsd-complete-milestone` v1.16** — archives **`milestones/v1.16-*`**, root **`REQUIREMENTS.md`** removed for next milestone, planning tag **`v1.16`**.
 
 ## Evolution
 
@@ -501,4 +497,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 — **Phase 60** complete (**INT-07**); **v1.16** integrator + proof continuity in progress (**Phase 61** next).*
+*Last updated: 2026-04-23 after **v1.16** milestone archive — **INT-06..INT-09** shipped; next requirements via **`/gsd-new-milestone`**.*

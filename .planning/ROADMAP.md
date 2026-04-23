@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
 - ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. Archives: [`milestones/v1.15-ROADMAP.md`](milestones/v1.15-ROADMAP.md), [`milestones/v1.15-REQUIREMENTS.md`](milestones/v1.15-REQUIREMENTS.md).
 - ✅ **v1.14 Companion admin + billing depth** — Phases **54–56** shipped **2026-04-23**. Core admin **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** on invoice money-primary spine + **`Accrue.Billing.list_payment_methods`** (**Fake**, **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Archives: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
 - ✅ **v1.13 Integrator path + secondary admin parity** — Phases **51–53** shipped **2026-04-23**. Golden-path docs + adoption proof alignment; auxiliary admin (**coupons**, **promotion codes**, **Connect**, **events**) **`AccrueAdmin.Copy`** + **`ax-*`** + **VERIFY-01**. Archives: [`milestones/v1.13-ROADMAP.md`](milestones/v1.13-ROADMAP.md), [`milestones/v1.13-REQUIREMENTS.md`](milestones/v1.13-REQUIREMENTS.md).
@@ -22,7 +22,8 @@
 
 ## Phases
 
-### v1.16 Integrator + proof continuity (Phases 59–61) — COMPLETE (2026-04-23)
+<details>
+<summary>✅ v1.16 Integrator + proof continuity (Phases 59–61) — SHIPPED 2026-04-23</summary>
 
 **Milestone goal:** Close **integrator / adoption / proof** drift opened by **v1.15** trust SemVer + demo README work — **docs + verifiers + proof artifacts** only (**no** new billing APIs, **no** **PROC-08** / **FIN-03**).
 
@@ -58,7 +59,7 @@
 
 **Success criteria:**
 
-1. **INT-07** satisfied per [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+1. **INT-07** satisfied per **`.planning/milestones/v1.16-REQUIREMENTS.md`**.
 2. No **PROC-08** / **FIN-03** scope creep.
 
 ### Phase 61: Root VERIFY hops + Hex doc SSOT
@@ -69,8 +70,12 @@
 
 **Success criteria:**
 
-1. **INT-08** and **INT-09** satisfied per [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+1. **INT-08** and **INT-09** satisfied per **`.planning/milestones/v1.16-REQUIREMENTS.md`**.
 2. No **PROC-08** / **FIN-03** scope creep.
+
+**Archives:** [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
+
+</details>
 
 <details>
 <summary>✅ v1.15 Release / trust semantics (Phases 57–58) — SHIPPED 2026-04-23</summary>

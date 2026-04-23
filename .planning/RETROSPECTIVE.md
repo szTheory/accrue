@@ -611,12 +611,52 @@
 
 ---
 
+## Milestone: v1.16 — Integrator + proof continuity
+
+**Shipped:** 2026-04-23  
+**Phases:** 3 | **Plans:** 6
+
+### What Was Built
+
+- **Phase 59 (INT-06):** **First Hour** / **quickstart** / **CONTRIBUTING** coherence with **v1.15** trust messaging; **`verify_package_docs`** extended for quickstart hub + capsule literals with **`package_docs_verifier_test`** coverage.
+- **Phase 60 (INT-07):** **Adoption proof matrix** + **evaluator walkthrough** trust stub and cross-links; **`scripts/ci/README.md`** INT-06/INT-07 contributor map rows aligned to **ADOPT**/**ORG** table shape.
+- **Phase 61 (INT-08, INT-09):** Root **README** merge-blocking **VERIFY-01** line pinned in **`verify_package_docs.sh`**; **INT-09** dual-track (**`@version`** vs **public Hex**) in **PROJECT** / **MILESTONES** + **CONTRIBUTING** pre-publish **`mix deps.get`** note.
+
+### What Worked
+
+- **`audit-open`** pre-close was **all clear**, matching **v1.15** close hygiene.
+- Splitting **INT-08** (verifier ownership + README pin) from **INT-09** (planning + contributor **Hex** SSOT) kept each phase reviewable.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** failed again (`version required for phases archive`); milestone archives were written manually (same as **v1.11–v1.15**).
+- **`roadmap.analyze`** still picks up legacy phase rows (for example **Phase 24**) unrelated to the active milestone; human judgment on **59–61** remained the readiness source of truth.
+
+### Patterns Established
+
+- **Contributor map** rows for integrator milestones (**INT-***) live next to **ADOPT**/**ORG** gates in **`scripts/ci/README.md`**.
+- **`verify_package_docs.sh`** as the home for **release-gate** vs **host-integration** verifier ownership comments plus **README** literal pins when hop budgets are load-bearing.
+
+### Key Lessons
+
+1. After any **trust SemVer** milestone (**v1.15**), schedule an explicit **integrator continuity** pass so **First Hour** / **quickstart** / proof matrix cannot drift silently.
+2. When **`@version`** on **`main`** runs ahead of **Hex**, document the **dual authority** in **three places**: **PROJECT** Current State, **MILESTONES** header, and **CONTRIBUTING** sharp edges.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three short phases (**59–61**) spanning docs + CI scripts + planning mirrors.
+- Notable: highest leverage was **verifier + README pins**, not new runtime code.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.16 | short | 3 | Golden path + quickstart + CONTRIBUTING coherence (59); matrix/walkthrough + CI README INT map (60); README VERIFY pin + Hex/`main` SSOT in planning + CONTRIBUTING (61). |
 | v1.15 | single | 2 | Trust docs: upgrade + RELEASING + root README (57); demo Sigra vs Auth + package stability + verifier alignment (58). |
 | v1.14 | short | 3 | Core-admin parity matrix + invoice Copy burn-down (54), VERIFY-01 invoice anchors + theme/copy CI (55), `list_payment_methods` + telemetry/docs (56). |
 | v1.13 | short | 3 | Integrator spine + VERIFY-01 discoverability (51), proof matrix + package docs + coupon/promo Copy (52), Connect/events Copy + auxiliary VERIFY-01 + export allowlist (53). |
@@ -636,6 +676,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.16 | **`package_docs_verifier_test`** extensions; bash **`verify_package_docs`**, **`verify_verify01_readme_contract`**, **`verify_adoption_proof_matrix`** | INT-06..INT-09 (4/4) archived | Quickstart hub + capsule checks in **`verify_package_docs.sh`**; adoption matrix + walkthrough trust stub; root README VERIFY line pin; CI README INT rows; planning Hex mirror discipline. |
 | v1.14 | ExUnit on invoice LiveViews; host VERIFY-01 **`core-admin-invoices-*`** + axe; Fake **`payment_method_list_test.exs`** | ADM-07..ADM-11 + BIL-01..BIL-02 (7/7) archived | `core-admin-parity.md`, `Copy.Invoice`, `verify_core_admin_invoice_verify_ids.sh`, billing `list` span + telemetry row. |
 | v1.12 | ExUnit on **DashboardLive** + **SubscriptionLive**; host **admin_mount** smoke; VERIFY-01 Playwright + axe using **`e2e/generated/copy_strings.json`** | ADM-01..ADM-06 (6/6) archived | `mix accrue_admin.export_copy_strings`, `Copy.Subscription`, `theme-exceptions.md`, `verify01-v112-admin-paths.md`. |
 | v1.11 | `verify_release_manifest_alignment.sh`, `verify_package_docs` + ExUnit, CI release-automation wiring | REL/DOC/HYG (7/7) archived | Maintainer-dispatch release PR workflow, manifest SSOT job, `46-VERIFICATION.md` ship index. |

@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.16
-milestone_name: Integrator + proof continuity
-status: milestone_complete
-last_updated: "2026-04-23T16:24:51.760Z"
+milestone: null
+milestone_name: null
+status: between_milestones
+last_updated: "2026-04-23T18:00:00.000Z"
 last_activity: 2026-04-23
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,34 +21,34 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.16** milestone closed — integrator + proof continuity (**INT-06..INT-09**)
+**Current focus:** Between milestones — run **`/gsd-new-milestone`** for **v1.17+** scope and fresh **`.planning/REQUIREMENTS.md`**
 
 ## Current Position
 
-Phase: **61** (complete)
+Phase: **—**
 
-Plan: **61-02** (complete)
+Plan: **—**
 
-**Status:** Milestone complete — pick next shipping priority outside this execution
+**Status:** **v1.16** archived — awaiting next milestone definition
 
 **Last activity:** 2026-04-23
 
 ## Milestone Progress
 
-**Active:** **v1.16** — **Integrator + proof continuity** — Phases **59–61** — **INT-06..INT-09**
+**Active:** *(none — next milestone not opened)*
 
-**Last shipped (planning):** **v1.15** — Phases **57–58**. Archives: **`.planning/milestones/v1.15-*`**; tag **`v1.15`**.
+**Last shipped (planning):** **v1.16** — Phases **59–61**. Archives: **`.planning/milestones/v1.16-*`**; tag **`v1.16`**.
 
-**Prior shipped (planning):** **v1.14** — Phases **54–56**. Archives: **`.planning/milestones/v1.14-*`**; tag **`v1.14`**.
+**Prior shipped (planning):** **v1.15** — Phases **57–58**. Archives: **`.planning/milestones/v1.15-*`**; tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; tag **`v1.14`**.
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (workspace **`@version`** on **`main`** may read **0.3.1+** — **`verify_package_docs`** is SSOT for snippets).
 
 ## Current Planning Artifacts
 
-- **`.planning/ROADMAP.md`** — **v1.16** active phases **59–61**
-- **`.planning/PROJECT.md`** — project SSOT (**v1.16** in progress)
-- **`.planning/MILESTONES.md`** — **v1.16** planning opened
-- **`.planning/REQUIREMENTS.md`** — **INT-06..INT-09**
+- **`.planning/ROADMAP.md`** — shipped milestones through **v1.16**; next phases TBD
+- **`.planning/PROJECT.md`** — project SSOT (**v1.16** archived)
+- **`.planning/MILESTONES.md`** — **v1.16** shipped entry
+- **`.planning/REQUIREMENTS.md`** — *(removed after **v1.16** archive; recreate via **`/gsd-new-milestone`**)*
 - **`.planning/phases/`** — prior phase trees retained (**`phases.clear` not run**)
 
 ## Deferred Items
@@ -65,6 +65,6 @@ Plan: **61-02** (complete)
 - **2026-04-23:** **`/gsd-discuss-phase 60`** — context + discussion log committed; research-backed defaults for INT-07 doc map, matrix/walkthrough parity, trust-stub IA, and narrow CI README scope (**`60-CONTEXT.md`**).
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** (**Integrator + proof continuity**); **`REQUIREMENTS.md`** + roadmap **59–61**.
 
-**Next:** **`/gsd-new-milestone`** (or `/gsd-progress`) when **v1.17+** scope is ready.
+**Next:** **`/gsd-new-milestone`** when **v1.17+** scope is ready.
 
-**Completed:** **v1.16** — Phases **59–61** (**INT-06..INT-09**) — **2026-04-23**; Milestone **v1.15** — Phases **57–58**; tag **`v1.15`**.
+**Completed:** **v1.16** — Phases **59–61** (**INT-06..INT-09**) — **2026-04-23**; tag **`v1.16`**. Prior: **v1.15** — Phases **57–58**; tag **`v1.15`**.
