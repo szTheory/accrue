@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- ✅ **v1.15 Release / trust semantics** — Phases **57–58** shipped **2026-04-23**. **TRT-01..TRT-04**: **`upgrade.md`** baseline + **Hex vs `.planning/`** clarity (**`RELEASING.md`**, root **`README.md`**); demo **`Sigra` vs `Accrue.Auth`** callout (**`examples/accrue_host/README.md`**); **`accrue/README.md`** stability ties **`0.x`** to deprecation discipline + **`RELEASING`** appendix pointer; **`verify_package_docs`** extras string aligned to **`accrue_admin/mix.exs`**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) (milestone not yet git-tagged archived — run **`/gsd-complete-milestone` v1.15** when ready).
 - ✅ **v1.14 Companion admin + billing depth** — Phases **54–56** shipped **2026-04-23**. Core admin **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** on invoice money-primary spine + **`Accrue.Billing.list_payment_methods`** (**Fake**, **`guides/telemetry.md`**). Integrator/adoption + release/Hex continuity **deferred**. Archives: [`milestones/v1.14-ROADMAP.md`](milestones/v1.14-ROADMAP.md), [`milestones/v1.14-REQUIREMENTS.md`](milestones/v1.14-REQUIREMENTS.md).
 - ✅ **v1.13 Integrator path + secondary admin parity** — Phases **51–53** shipped **2026-04-23**. Golden-path docs + adoption proof alignment; auxiliary admin (**coupons**, **promotion codes**, **Connect**, **events**) **`AccrueAdmin.Copy`** + **`ax-*`** + **VERIFY-01**. Archives: [`milestones/v1.13-ROADMAP.md`](milestones/v1.13-ROADMAP.md), [`milestones/v1.13-REQUIREMENTS.md`](milestones/v1.13-REQUIREMENTS.md).
 - ✅ **v1.12 Admin & operator UX** — Phases **48–50** shipped **2026-04-22**. Post-metering admin signals, drill/nav polish, **`AccrueAdmin.Copy`** + token discipline, VERIFY-01 / Playwright on touched routes. Archives: [`milestones/v1.12-ROADMAP.md`](milestones/v1.12-ROADMAP.md), [`milestones/v1.12-REQUIREMENTS.md`](milestones/v1.12-REQUIREMENTS.md).
@@ -20,7 +21,23 @@
 
 ## Phases
 
-*(No active milestone — run `/gsd-new-milestone` when priorities for **v1.15+** are set.)*
+### v1.15 Release / trust semantics (Phases 57–58) — SHIPPED 2026-04-23
+
+**Milestone goal:** Remove evaluator confusion between **Hex SemVer** (`0.3.x` today), **internal planning milestone labels** (`v1.14`, `v1.15`, …), and the **checked-in demo’s Sigra dependency** — using docs only (**no** new billing primitives, **no** **PROC-08** / **FIN-03**).
+
+**Depends on:** **v1.14** shipped; **`verify_package_docs`** + linked **`mix.exs`** `@version` SSOT.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 57 | Trust docs — SemVer + planning labels | **`upgrade.md`** baseline accuracy; **`RELEASING.md`** + root **`README.md`** spell Hex vs `.planning/` milestones. **Shipped 2026-04-23.** | TRT-01, TRT-02, TRT-03 |
+| 58 | Demo README — Sigra vs `Accrue.Auth` | **`examples/accrue_host/README.md`** states Sigra as demo convenience and points non-Sigra hosts at **First Hour** / org billing guides; **`accrue/README.md`** stability paragraph. **Shipped 2026-04-23.** | TRT-04 |
+
+**Success criteria (milestone):**
+
+1. **TRT-01..TRT-04** satisfied with committed markdown and **`bash scripts/ci/verify_package_docs.sh`** green.
+2. No **PROC-08** / **FIN-03** scope creep.
+
+**Archival:** run **`/gsd-complete-milestone` v1.15** to move requirements to **`.planning/milestones/v1.15-*`** and apply planning git tag **`v1.15`** when satisfied.
 
 <details>
 <summary>✅ v1.14 Companion admin + billing depth (Phases 54–56) — SHIPPED 2026-04-23</summary>

@@ -1,5 +1,7 @@
 # Accrue Host Example
 
+> **Accrue does not require Sigra.** Production integrations use your host’s **`Accrue.Auth`** adapter (Sigra is one supported option). **This demo app** depends on Sigra so the checked-in story can show **signed-in org billing** and stay reproducible in CI — if you are **not** using Sigra, treat the demo as optional and follow **[First Hour](../../accrue/guides/first_hour.md)** plus **[Organization billing (non-Sigra)](../../accrue/guides/organization_billing.md)** in your own Phoenix app (**Capsule H** below).
+
 This checked-in Phoenix app is the canonical local evaluation path for `accrue`
 and `accrue_admin`. The primary story stays Fake-backed: start one
 subscription, post one signed webhook through the real endpoint, inspect the

@@ -6,6 +6,8 @@ by ordered Hex publishes and lightweight post-publish checks. The **same-day `1.
 bootstrap story is an **exceptional** appendix at the end — read that only when you
 are intentionally coordinating a first public major.
 
+**Planning milestones vs Hex SemVer:** files under **`.planning/`** may use labels like **`v1.14`** or **`v1.15`** for internal milestone bookkeeping. Those **do not** replace the **`accrue` / `accrue_admin` `@version`** values in each **`mix.exs`** or the versions published on **Hex**. Consumers pin and upgrade against **Hex + changelogs**; maintainers use this runbook plus **`accrue/guides/upgrade.md`**.
+
 **Last verified against** `release-please-config.json`, `.release-please-manifest.json`,
 and `.github/workflows/release-please.yml` on **2026-04-22** (UTC). Update this line when
 automation semantics change.

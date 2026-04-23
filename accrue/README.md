@@ -58,7 +58,7 @@ The LiveView dashboard ships as the sibling Hex package `accrue_admin`; pin it t
 
 ## Stability
 
-Your supported integration surface—generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `AccrueAdmin.Router`, `Accrue.Auth`, `Accrue.ConfigError`—is spelled out in [Upgrade](guides/upgrade.md). Breaking changes there go through deprecation, not silent reshuffles. Internal schemas, workers, and demo helpers are not that contract.
+Your supported integration surface—generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `AccrueAdmin.Router`, `Accrue.Auth`, `Accrue.ConfigError`—is spelled out in [Upgrade](guides/upgrade.md). Breaking changes on that surface go through **deprecation**, not silent reshuffles, including while public SemVer is still **`0.x`**. Internal schemas, workers, and demo helpers are not that contract. When you are ready to coordinate a **`1.0.0`** pair on Hex, maintainers follow repository root **`RELEASING.md`** (*Appendix: Same-day `1.0.0` bootstrap*).
 
 Generated files are yours after install. Accrue only refreshes pristine stamped copies on installer reruns; it does not stomp files you have edited.
 

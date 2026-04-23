@@ -12,6 +12,8 @@ Fake-first evaluation runs from **`examples/accrue_host`** (no live Stripe keys)
 
 > **Hex vs `main`:** This repository’s `mix.exs` `@version` values are the numeric SSOT for the `accrue` / `accrue_admin` pair on the branch you are reading. [Hex.pm](https://hex.pm/packages/accrue) lists published artifacts when you are consuming from Hex rather than `main`.
 
+> **`.planning/` milestone labels (`v1.14`, `v1.15`, …):** those names track **maintainer shipping cadence** in Git + planning docs only. They are **not** the public package major line (today’s releases are still **`0.x`** on Hex). See [`RELEASING.md`](RELEASING.md) and [`accrue/guides/upgrade.md`](accrue/guides/upgrade.md).
+
 ```bash
 # CI-equivalent local gate
 cd examples/accrue_host && mix verify.full

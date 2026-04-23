@@ -79,8 +79,8 @@ require_fixed "$ROOT_DIR/accrue/README.md" "examples/accrue_host"
 require_fixed "$ROOT_DIR/accrue/README.md" "mix verify"
 require_fixed "$ROOT_DIR/accrue/README.md" "mix verify.full"
 require_fixed "$ROOT_DIR/accrue/README.md" "bash scripts/ci/accrue_host_uat.sh"
-require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'extras: ["README.md", "guides/admin_ui.md"]'
-require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras: [Guides: ["guides/admin_ui.md"]]'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'extras: ["README.md", "guides/admin_ui.md", "guides/core-admin-parity.md"]'
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'groups_for_extras: [Guides: ["guides/admin_ui.md", "guides/core-admin-parity.md"]]'
 require_fixed "$ROOT_DIR/README.md" "Canonical local demo: Fake"
 require_fixed "$ROOT_DIR/README.md" "Provider parity: Stripe test mode"
 require_fixed "$ROOT_DIR/README.md" "Advisory/manual: live Stripe"

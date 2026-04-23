@@ -28,11 +28,13 @@ user-edited and leaves it alone on rerun.
 That contract is meant to keep upgrades predictable: generated code is
 host-owned, and installer reruns do not erase local policy edits.
 
-## v0.1.2 baseline
+## Current Hex baseline
 
-`v0.1.2` is the current public baseline for the release surface documented in the
-README, ExDoc API pages, and package guides. Upgrade planning should start from
-that boundary, not from internal modules or earlier pre-release commits.
+The **numeric SemVer** on [Hex.pm for `accrue`](https://hex.pm/packages/accrue) (and the matching **`accrue_admin`** version) is the consumer upgrade boundary. On the branch you are reading, authoritative versions are the **`@version`** fields in **`accrue/mix.exs`** and **`accrue_admin/mix.exs`** (they stay **lockstep** for linked releases — see repository root **`RELEASING.md`**).
+
+**Planning vs packages:** files under **`.planning/`** may refer to internal milestones as **`v1.14`**, **`v1.15`**, and so on. Those labels track **maintainer shipping cadence**, not the Hex major line. Until both packages publish **`1.0.0`**, public SemVer stays **`0.x`**. For the intentional same-day **`1.0.0`** bootstrap story, read **[`RELEASING.md`](../../RELEASING.md)** → *Appendix: Same-day `1.0.0` bootstrap*.
+
+Upgrade planning should start from the **published** version you have installed, not from internal modules or undocumented git SHAs.
 
 When upgrading, review the package-local docs for the package you consume:
 

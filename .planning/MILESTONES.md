@@ -1,5 +1,28 @@
 # Milestones
 
+## v1.15 Release / trust semantics (Shipped: 2026-04-23)
+
+**Planning opened:** 2026-04-23
+
+**Phases completed:** 2 phases (57–58), docs-only
+
+**Forcing function:** **B** (release / trust semantics — adoption readiness sanity check).
+
+**Key accomplishments:**
+
+- **Phase 57 (TRT-01..TRT-03):** **`accrue/guides/upgrade.md`** replaces stale **`v0.1.2` baseline** with **Hex + `mix.exs` `@version`** SSOT and **`.planning/` vs SemVer** explanation; **`RELEASING.md`** + root **`README.md`** call out internal milestone labels vs consumer pins.
+- **Phase 58 (TRT-04):** **`examples/accrue_host/README.md`** **Sigra vs `Accrue.Auth`** callout above the fold; **`accrue/README.md`** **Stability** clarifies **`0.x`** deprecation discipline + **`RELEASING`** appendix; **`scripts/ci/verify_package_docs.sh`** aligned to current **`accrue_admin/mix.exs`** **extras** list.
+
+**Theme:** Evaluator **trust** without new billing primitives — **no** **PROC-08** / **FIN-03**.
+
+**Archives:** pending **`/gsd-complete-milestone` v1.15** (requirements live at **`.planning/REQUIREMENTS.md`** until archived).
+
+**Git tag:** *(pending milestone close)*
+
+**Next after ship:** **`/gsd-complete-milestone` v1.15** to archive + tag; then **`/gsd-new-milestone`** for **v1.16+** or pause on external feedback.
+
+---
+
 ## v1.14 Companion admin + billing depth (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-22
