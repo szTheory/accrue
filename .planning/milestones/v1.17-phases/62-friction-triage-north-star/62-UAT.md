@@ -6,6 +6,10 @@ started: 2026-04-23T12:00:00Z
 updated: 2026-04-23T12:00:00Z
 ---
 
+> **Supersession notice (2026-04-23, v1.18):** Closure for **UAT-01..UAT-05** is defined in **`.planning/REQUIREMENTS.md`** (milestone **v1.18 — Onboarding confidence**), with proof in **`.planning/phases/66-onboarding-confidence/66-VERIFICATION.md`** once that file exists. This document stays the **historical Phase 62** human scenario; do not treat it as the normative v1.18 checklist.
+>
+> **Test 4** below referred to **v1.17** FRG traceability against the *then-current* root **`REQUIREMENTS.md`**. For **v1.18**, use **UAT-04** instead: **`.planning/milestones/v1.17-REQUIREMENTS.md`** must remain the historical v1.17 record, and **PROJECT** / **STATE** must not contradict shipped **FRG / INT / BIL / ADM** completion.
+
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
