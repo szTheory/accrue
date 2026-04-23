@@ -47,7 +47,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               socket
               |> record_override_update(updated_account, override_payload)
               |> assign_account(updated_account)
-              |> assign(:flashes, [%{kind: :info, message: "Platform fee override saved."}])
+              |> assign(:flashes, [%{kind: :info, message: AccrueAdmin.Copy.connect_account_flash_override_saved()}])
 
             {:noreply, socket}
 
@@ -79,12 +79,12 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Connect", href: @admin_mount_path <> "/connect"},
+              %{label: AccrueAdmin.Copy.dashboard_breadcrumb_home(), href: @admin_mount_path},
+              %{label: AccrueAdmin.Copy.connect_account_breadcrumb_connect(), href: @admin_mount_path <> "/connect"},
               %{label: @account.stripe_account_id || @account.id}
             ]}
           />
-          <p class="ax-eyebrow">Connect account detail</p>
+          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_eyebrow() %></p>
           <h2 class="ax-display"><%= @account.stripe_account_id %></h2>
           <p class="ax-body ax-page-copy">
             <%= @account.type |> humanize() %> · <%= owner_summary(@account) %> ·
@@ -94,45 +94,45 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
         <FlashGroup.flash_group flashes={@flashes} />
 
-        <section class="ax-kpi-grid" aria-label="Connect account summary">
-          <KpiCard.kpi_card label="Charges" value={enabled_label(@account.charges_enabled)}>
-            <:meta>Payouts: <%= enabled_label(@account.payouts_enabled) %></:meta>
+        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.connect_account_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.connect_account_kpi_label_charges()} value={enabled_label(@account.charges_enabled)}>
+            <:meta><%= AccrueAdmin.Copy.connect_account_kpi_meta_payouts_prefix() %><%= enabled_label(@account.payouts_enabled) %></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Onboarding" value={enabled_label(@account.details_submitted)}>
-            <:meta>Country: <%= @account.country || "--" %></:meta>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.connect_account_kpi_label_onboarding()} value={enabled_label(@account.details_submitted)}>
+            <:meta><%= AccrueAdmin.Copy.connect_account_kpi_meta_country_prefix() %><%= @account.country || "--" %></:meta>
           </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card label="Override" value={override_state_label(@account)}>
-            <:meta>Default policy: <%= describe_config(@default_fee_config) %></:meta>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.connect_account_kpi_label_override()} value={override_state_label(@account)}>
+            <:meta><%= AccrueAdmin.Copy.connect_account_kpi_meta_default_policy_prefix() %><%= describe_config(@default_fee_config) %></:meta>
           </KpiCard.kpi_card>
         </section>
 
         <section class="ax-grid ax-grid-2">
           <article class="ax-card">
             <header class="ax-page-header">
-              <p class="ax-eyebrow">Capabilities</p>
-              <h3 class="ax-heading">Operator-safe account readiness</h3>
+              <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_section_capabilities_eyebrow() %></p>
+              <h3 class="ax-heading"><%= AccrueAdmin.Copy.connect_account_section_capabilities_heading() %></h3>
             </header>
 
             <div class="ax-page">
-              <p class="ax-body">Owner: <%= owner_summary(@account) %></p>
-              <p class="ax-body">Email: <%= @account.email || "--" %></p>
-              <p class="ax-body">Capabilities: <%= capabilities_summary(@account.capabilities) %></p>
-              <p class="ax-body">Requirements: <%= requirements_summary(@account.requirements) %></p>
+              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_owner() %> <%= owner_summary(@account) %></p>
+              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_email() %> <%= @account.email || "--" %></p>
+              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_capabilities() %> <%= capabilities_summary(@account.capabilities) %></p>
+              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_requirements() %> <%= requirements_summary(@account.requirements) %></p>
             </div>
           </article>
 
           <article class="ax-card">
             <header class="ax-page-header">
-              <p class="ax-eyebrow">Effective fee preview</p>
-              <h3 class="ax-heading">Current default plus account override</h3>
+              <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_section_effective_fee_eyebrow() %></p>
+              <h3 class="ax-heading"><%= AccrueAdmin.Copy.connect_account_section_effective_fee_heading() %></h3>
             </header>
 
             <div class="ax-page">
-              <p class="ax-body">Stored override: <%= describe_override(@account) %></p>
-              <p class="ax-body">Preview gross: <%= preview_gross_summary(@override_preview.form) %></p>
-              <p class="ax-body">Computed fee: <%= @override_preview.fee_label %></p>
+              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_stored_override() %> <%= describe_override(@account) %></p>
+              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_preview_gross() %> <%= preview_gross_summary(@override_preview.form) %></p>
+              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_computed_fee() %> <%= @override_preview.fee_label %></p>
               <p :if={@override_preview.error} class="ax-body"><%= @override_preview.error %></p>
             </div>
           </article>
@@ -140,18 +140,17 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
         <section class="ax-card">
           <header class="ax-page-header">
-            <p class="ax-eyebrow">Platform fee override</p>
-            <h3 class="ax-heading">Save a per-account fee policy</h3>
+            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_section_platform_fee_eyebrow() %></p>
+            <h3 class="ax-heading"><%= AccrueAdmin.Copy.connect_account_section_platform_fee_heading() %></h3>
             <p class="ax-body">
-              Empty fields fall back to the global `Accrue.Config` default. Validation and preview
-              both use `Accrue.Connect.platform_fee/2` before anything is persisted.
+              <%= AccrueAdmin.Copy.connect_account_section_platform_fee_body() %>
             </p>
           </header>
 
           <form phx-change="validate_override" phx-submit="save_override">
             <div class="ax-grid ax-grid-2">
               <label class="ax-label">
-                Percent
+                <%= AccrueAdmin.Copy.connect_account_label_percent() %>
                 <input
                   type="text"
                   name="override[percent]"
@@ -161,7 +160,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               </label>
 
               <label class="ax-label">
-                Fixed minor units
+                <%= AccrueAdmin.Copy.connect_account_label_fixed_minor_units() %>
                 <input
                   type="text"
                   name="override[fixed_cents]"
@@ -171,7 +170,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               </label>
 
               <label class="ax-label">
-                Min minor units
+                <%= AccrueAdmin.Copy.connect_account_label_min_minor_units() %>
                 <input
                   type="text"
                   name="override[min_cents]"
@@ -181,7 +180,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               </label>
 
               <label class="ax-label">
-                Max minor units
+                <%= AccrueAdmin.Copy.connect_account_label_max_minor_units() %>
                 <input
                   type="text"
                   name="override[max_cents]"
@@ -191,7 +190,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               </label>
 
               <label class="ax-label">
-                Preview gross minor units
+                <%= AccrueAdmin.Copy.connect_account_label_preview_gross_minor_units() %>
                 <input
                   type="text"
                   name="override[preview_amount_minor]"
@@ -201,7 +200,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               </label>
 
               <label class="ax-label">
-                Preview currency
+                <%= AccrueAdmin.Copy.connect_account_label_preview_currency() %>
                 <input
                   type="text"
                   name="override[preview_currency]"
@@ -213,7 +212,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
             <div class="ax-page-header">
               <button type="submit" class="ax-button ax-button-primary" data-role="save-override">
-                Save platform fee override
+                <%= AccrueAdmin.Copy.connect_account_save_platform_fee_override() %>
               </button>
             </div>
           </form>
@@ -225,7 +224,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Connect Account")
+    |> assign(:page_title, AccrueAdmin.Copy.connect_account_page_title())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -322,7 +321,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         %{
           form: form,
           error: reason,
-          fee_label: "Unable to compute preview",
+          fee_label: AccrueAdmin.Copy.connect_account_preview_fee_unable(),
           override_payload: %{}
         }
     end
@@ -345,6 +344,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   end
 
   defp maybe_decimal(form, key, payload_key) do
+    label = override_field_label(key)
+
     case Map.get(form, key) do
       nil ->
         {:ok, nil, %{}}
@@ -354,12 +355,15 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
           decimal = Decimal.new(value)
           {:ok, decimal, %{payload_key => value}}
         rescue
-          _ -> {:error, "#{humanize(key)} must be a decimal value"}
+          _ ->
+            {:error, AccrueAdmin.Copy.connect_account_error_field_must_be_decimal(label)}
         end
     end
   end
 
   defp maybe_money(form, key, payload_key, payload) do
+    label = override_field_label(key)
+
     case Map.get(form, key) do
       nil ->
         {:ok, nil, payload}
@@ -372,10 +376,15 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
             end
 
           _ ->
-            {:error, "#{humanize(key)} must be an integer minor-unit amount"}
+            {:error, AccrueAdmin.Copy.connect_account_error_field_must_be_integer_minor(label)}
         end
     end
   end
+
+  defp override_field_label("percent"), do: AccrueAdmin.Copy.connect_account_label_percent()
+  defp override_field_label("fixed_cents"), do: AccrueAdmin.Copy.connect_account_label_fixed_minor_units()
+  defp override_field_label("min_cents"), do: AccrueAdmin.Copy.connect_account_label_min_minor_units()
+  defp override_field_label("max_cents"), do: AccrueAdmin.Copy.connect_account_label_max_minor_units()
 
   defp preview_gross(form) do
     with {amount_minor, ""} <- Integer.parse(form["preview_amount_minor"]),
@@ -383,13 +392,13 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
       {:ok, Money.new(amount_minor, currency)}
     else
       :error ->
-        {:error, "Preview amount must be an integer minor-unit amount"}
+        {:error, AccrueAdmin.Copy.connect_account_error_preview_amount_invalid()}
 
       {:error, _} = error ->
         error
 
       _ ->
-        {:error, "Preview amount must be an integer minor-unit amount"}
+        {:error, AccrueAdmin.Copy.connect_account_error_preview_amount_invalid()}
     end
   end
 
@@ -401,7 +410,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     try do
       {:ok, String.to_existing_atom(currency)}
     rescue
-      ArgumentError -> {:error, "Preview currency must be a known ISO code"}
+      ArgumentError -> {:error, AccrueAdmin.Copy.connect_account_error_preview_currency_unknown()}
     end
   end
 
@@ -425,13 +434,15 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   end
 
   defp override_state_label(account) do
-    if map_size(platform_fee_override(account)) > 0, do: "Override saved", else: "Default only"
+    if map_size(platform_fee_override(account)) > 0,
+      do: AccrueAdmin.Copy.connect_account_override_state_saved(),
+      else: AccrueAdmin.Copy.connect_account_override_state_default_only()
   end
 
   defp describe_override(account) do
     case platform_fee_override(account) do
       override when map_size(override) == 0 ->
-        "No override saved"
+        AccrueAdmin.Copy.connect_account_override_state_no_override_saved()
 
       override ->
         describe_override_payload(override)
@@ -478,20 +489,21 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   defp preview_gross_summary(form) do
     case preview_gross(form) do
       {:ok, gross} -> Money.to_string(gross)
-      {:error, _} -> "Invalid preview gross"
+      {:error, _} -> AccrueAdmin.Copy.connect_account_preview_gross_invalid()
     end
   end
 
-  defp owner_summary(account), do: "#{account.owner_type || "Owner"} #{account.owner_id || "--"}"
+  defp owner_summary(account),
+    do: "#{account.owner_type || AccrueAdmin.Copy.connect_accounts_row_owner_fallback()} #{account.owner_id || "--"}"
 
   defp account_status(%{deauthorized_at: %DateTime{} = value}),
-    do: "deauthorized " <> format_datetime(value)
+    do: AccrueAdmin.Copy.connect_account_status_deauthorized_prefix() <> format_datetime(value)
 
-  defp account_status(_account), do: "active authorization"
+  defp account_status(_account), do: AccrueAdmin.Copy.connect_account_status_active_authorization()
 
-  defp enabled_label(true), do: "Enabled"
-  defp enabled_label(false), do: "Disabled"
-  defp enabled_label(nil), do: "Unknown"
+  defp enabled_label(true), do: AccrueAdmin.Copy.connect_account_enabled_label_true()
+  defp enabled_label(false), do: AccrueAdmin.Copy.connect_account_enabled_label_false()
+  defp enabled_label(nil), do: AccrueAdmin.Copy.connect_account_enabled_label_unknown()
 
   defp capabilities_summary(capabilities)
        when is_map(capabilities) and map_size(capabilities) > 0 do
@@ -500,7 +512,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     |> Enum.join(", ")
   end
 
-  defp capabilities_summary(_capabilities), do: "No capabilities projected"
+  defp capabilities_summary(_capabilities), do: AccrueAdmin.Copy.connect_account_capabilities_none()
 
   defp requirements_summary(requirements)
        when is_map(requirements) and map_size(requirements) > 0 do
@@ -512,10 +524,10 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     |> Enum.join(" · ")
   end
 
-  defp requirements_summary(_requirements), do: "No outstanding requirements"
+  defp requirements_summary(_requirements), do: AccrueAdmin.Copy.connect_account_requirements_none()
 
   defp requirement_list(list) when is_list(list) and list != [],
-    do: "currently due: " <> Enum.join(list, ", ")
+    do: AccrueAdmin.Copy.connect_account_requirements_currently_due_prefix() <> Enum.join(list, ", ")
 
   defp requirement_list(_), do: nil
 

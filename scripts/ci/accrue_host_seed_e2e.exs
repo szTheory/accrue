@@ -2,6 +2,7 @@ defmodule AccrueHostSeedE2E do
   alias Accrue.Billing.Customer
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
+  alias Accrue.Connect.Account
   alias Accrue.Events
   alias Accrue.Events.Event
   alias Accrue.Webhook.WebhookEvent
@@ -55,6 +56,7 @@ defmodule AccrueHostSeedE2E do
       })
 
     admin_denial_customer = insert_org_customer!(admin_org_alpha)
+    connect_account = insert_fixture_connect_account!(admin_org_alpha)
 
     customer = insert_fixture_customer!(history_user)
     subscription = insert_fixture_subscription!(customer)
@@ -100,7 +102,8 @@ defmodule AccrueHostSeedE2E do
       tax_invalid_customer_hint: "tax_invalid_e2e_hint",
       admin_org_alpha_slug: admin_org_alpha.slug,
       admin_org_beta_slug: admin_org_beta.slug,
-      admin_denial_customer_id: admin_denial_customer.id
+      admin_denial_customer_id: admin_denial_customer.id,
+      connect_account_id: connect_account.id
     }
 
     write_fixture!(fixture_path, fixture)
@@ -242,6 +245,10 @@ defmodule AccrueHostSeedE2E do
     )
 
     Repo.delete_all(
+      from(account in Account, where: account.stripe_account_id == "acct_host_browser_verify01")
+    )
+
+    Repo.delete_all(
       from(t in UserToken,
         join: u in User,
         on: t.user_id == u.id,
@@ -289,6 +296,22 @@ defmodule AccrueHostSeedE2E do
       processor: "fake",
       processor_id: "cus_host_org_" <> String.replace(to_string(organization.id), "-", ""),
       email: "admin-e2e-alpha-customer@example.test"
+    })
+    |> Repo.insert!()
+  end
+
+  defp insert_fixture_connect_account!(organization) do
+    %Account{}
+    |> Account.changeset(%{
+      stripe_account_id: "acct_host_browser_verify01",
+      type: "standard",
+      owner_type: "Organization",
+      owner_id: to_string(organization.id),
+      email: "connect-e2e@example.test",
+      country: "us",
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true
     })
     |> Repo.insert!()
   end

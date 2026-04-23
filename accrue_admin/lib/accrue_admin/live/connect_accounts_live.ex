@@ -42,39 +42,38 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Connect"}
+              %{label: AccrueAdmin.Copy.dashboard_breadcrumb_home(), href: @admin_mount_path},
+              %{label: AccrueAdmin.Copy.connect_accounts_breadcrumb_connect()}
             ]}
           />
-          <p class="ax-eyebrow">Marketplace operations</p>
-          <h2 class="ax-display">Connected accounts and payout readiness</h2>
+          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_accounts_eyebrow() %></p>
+          <h2 class="ax-display"><%= AccrueAdmin.Copy.connect_accounts_headline() %></h2>
           <p class="ax-body ax-page-copy">
-            Operators can filter connected-account projections, inspect onboarding state, and jump
-            into per-account platform-fee configuration.
+            <%= AccrueAdmin.Copy.connect_accounts_page_copy_primary() %>
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Connect summary">
-          <KpiCard.kpi_card label="Accounts" value={Integer.to_string(@summary.total_count)}>
-            <:meta>All locally projected connected accounts</:meta>
+        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.connect_accounts_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.connect_accounts_kpi_label_accounts()} value={Integer.to_string(@summary.total_count)}>
+            <:meta><%= AccrueAdmin.Copy.connect_accounts_kpi_meta_all_accounts() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Charges enabled"
+            label={AccrueAdmin.Copy.connect_accounts_kpi_label_charges_enabled()}
             value={Integer.to_string(@summary.charges_enabled_count)}
-            delta={Integer.to_string(@summary.details_submitted_count) <> " submitted"}
+            delta={Integer.to_string(@summary.details_submitted_count) <> AccrueAdmin.Copy.connect_accounts_kpi_delta_submitted_suffix()}
             delta_tone="cobalt"
           >
-            <:meta>Capability and onboarding state from the local projection</:meta>
+            <:meta><%= AccrueAdmin.Copy.connect_accounts_kpi_meta_capability_onboarding() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Overrides"
+            label={AccrueAdmin.Copy.connect_accounts_kpi_label_overrides()}
             value={Integer.to_string(@summary.override_count)}
-            delta={Integer.to_string(@summary.deauthorized_count) <> " deauthorized"}
+            delta={Integer.to_string(@summary.deauthorized_count) <> AccrueAdmin.Copy.connect_accounts_kpi_delta_deauthorized_suffix()}
             delta_tone="amber"
           >
-            <:meta>Accounts carrying a local platform-fee override</:meta>
+            <:meta><%= AccrueAdmin.Copy.connect_accounts_kpi_meta_platform_fee_override() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
@@ -84,55 +83,72 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           query_module={ConnectAccounts}
           path={@table_path}
           params={@params}
+          filter_submit_label={AccrueAdmin.Copy.connect_accounts_apply_filters()}
           columns={[
-            %{label: "Account", render: &account_link(&1, @admin_mount_path)},
-            %{label: "Owner", render: &owner_summary/1},
-            %{label: "Readiness", render: &readiness_summary/1},
-            %{label: "Override", render: &override_summary/1},
-            %{label: "Status", render: &status_summary/1}
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_account(), render: &account_link(&1, @admin_mount_path)},
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_readiness(), render: &readiness_summary/1},
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_override(), render: &override_summary/1},
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
-            %{label: "Owner", render: &owner_summary/1},
-            %{label: "Readiness", render: &readiness_summary/1},
-            %{label: "Override", render: &override_summary/1},
-            %{label: "Status", render: &status_summary/1}
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_owner(), render: &owner_summary/1},
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_readiness(), render: &readiness_summary/1},
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_override(), render: &override_summary/1},
+            %{label: AccrueAdmin.Copy.connect_accounts_table_column_status(), render: &status_summary/1}
           ]}
           filter_fields={[
-            %{id: :q, label: "Search"},
+            %{id: :q, label: AccrueAdmin.Copy.connect_accounts_filter_label_search()},
             %{
               id: :type,
-              label: "Type",
+              label: AccrueAdmin.Copy.connect_accounts_filter_label_type(),
               type: :select,
-              options: [{"standard", "Standard"}, {"express", "Express"}, {"custom", "Custom"}]
+              options: [
+                {"standard", AccrueAdmin.Copy.connect_accounts_filter_option_type_standard()},
+                {"express", AccrueAdmin.Copy.connect_accounts_filter_option_type_express()},
+                {"custom", AccrueAdmin.Copy.connect_accounts_filter_option_type_custom()}
+              ]
             },
             %{
               id: :charges_enabled,
-              label: "Charges",
+              label: AccrueAdmin.Copy.connect_accounts_filter_label_charges(),
               type: :select,
-              options: [{"true", "Enabled"}, {"false", "Disabled"}]
+              options: [
+                {"true", AccrueAdmin.Copy.connect_accounts_filter_option_charges_enabled()},
+                {"false", AccrueAdmin.Copy.connect_accounts_filter_option_charges_disabled()}
+              ]
             },
             %{
               id: :payouts_enabled,
-              label: "Payouts",
+              label: AccrueAdmin.Copy.connect_accounts_filter_label_payouts(),
               type: :select,
-              options: [{"true", "Enabled"}, {"false", "Disabled"}]
+              options: [
+                {"true", AccrueAdmin.Copy.connect_accounts_filter_option_payouts_enabled()},
+                {"false", AccrueAdmin.Copy.connect_accounts_filter_option_payouts_disabled()}
+              ]
             },
             %{
               id: :details_submitted,
-              label: "Onboarding",
+              label: AccrueAdmin.Copy.connect_accounts_filter_label_onboarding(),
               type: :select,
-              options: [{"true", "Submitted"}, {"false", "Pending"}]
+              options: [
+                {"true", AccrueAdmin.Copy.connect_accounts_filter_option_onboarding_submitted()},
+                {"false", AccrueAdmin.Copy.connect_accounts_filter_option_onboarding_pending()}
+              ]
             },
             %{
               id: :deauthorized,
-              label: "Authorization",
+              label: AccrueAdmin.Copy.connect_accounts_filter_label_authorization(),
               type: :select,
-              options: [{"true", "Deauthorized"}, {"false", "Active"}]
+              options: [
+                {"true", AccrueAdmin.Copy.connect_accounts_filter_option_authorization_deauthorized()},
+                {"false", AccrueAdmin.Copy.connect_accounts_filter_option_authorization_active()}
+              ]
             }
           ]}
-          empty_title="No connected accounts matched"
-          empty_copy="Adjust the Connect filters or wait for the next projection sync."
+          empty_title={AccrueAdmin.Copy.connect_accounts_table_empty_title()}
+          empty_copy={AccrueAdmin.Copy.connect_accounts_table_empty_copy()}
         />
       </section>
     </AppShell.app_shell>
@@ -141,7 +157,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Connect")
+    |> assign(:page_title, AccrueAdmin.Copy.connect_accounts_page_title())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -180,7 +196,8 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
   defp account_link(row, mount_path),
     do: safe_link("#{mount_path}/connect/#{row.id}", row.stripe_account_id || row.id)
 
-  defp owner_summary(row), do: "#{row.owner_type || "Owner"} #{row.owner_id || "--"}"
+  defp owner_summary(row),
+    do: "#{row.owner_type || AccrueAdmin.Copy.connect_accounts_row_owner_fallback()} #{row.owner_id || "--"}"
 
   defp readiness_summary(row) do
     [
@@ -192,26 +209,29 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
     |> Enum.reject(&is_nil/1)
     |> Enum.reject(&(&1 == false))
     |> case do
-      [] -> "Needs onboarding"
-      values -> Enum.join(values, " · ")
+      [] -> AccrueAdmin.Copy.connect_accounts_readiness_needs_onboarding()
+      values -> Enum.join(values, AccrueAdmin.Copy.connect_accounts_readiness_joiner())
     end
   end
 
   defp override_summary(%{id: id}) do
     case Repo.get(Account, id) do
-      nil -> "Default only"
-      account -> if has_override?(account), do: "Override saved", else: "Default only"
+      nil -> AccrueAdmin.Copy.connect_accounts_override_default_only()
+      account ->
+        if has_override?(account),
+          do: AccrueAdmin.Copy.connect_accounts_override_saved(),
+          else: AccrueAdmin.Copy.connect_accounts_override_default_only()
     end
   end
 
   defp status_summary(%{deauthorized_at: %DateTime{} = value}),
-    do: "Deauthorized · " <> format_datetime(value)
+    do: AccrueAdmin.Copy.connect_accounts_status_deauthorized_prefix() <> format_datetime(value)
 
   defp status_summary(row) do
     if row.country do
-      "#{String.upcase(row.country)} · #{row.email || "No email"}"
+      "#{String.upcase(row.country)} · #{row.email || AccrueAdmin.Copy.connect_accounts_status_no_email()}"
     else
-      row.email || "No email"
+      row.email || AccrueAdmin.Copy.connect_accounts_status_no_email()
     end
   end
 

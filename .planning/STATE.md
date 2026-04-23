@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: milestone
 status: completed
-last_updated: "2026-04-23T00:29:36.544Z"
+last_updated: "2026-04-23T21:05:00.000Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 37
-  completed_phases: 32
-  total_plans: 96
-  completed_plans: 104
+  completed_phases: 33
+  total_plans: 98
+  completed_plans: 106
   percent: 100
 ---
 
@@ -21,15 +21,15 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 53 — auxiliary admin (Connect, events, VERIFY)
+**Current focus:** **v1.13** milestone — Phases **51–53** implemented in tree; coordinate **Hex** / **Release Please** when ready.
 
 ## Current Position
 
-Phase: 53
+Phase: —
 
-Plan: Not started
+Plan: —
 
-**Status:** Phase 53 context gathered (ready for planning)
+**Status:** Phases **51–53** complete in working tree (Phase **53** auxiliary **Copy** + **VERIFY-01** + **ADM-06** inventory).
 
 **Last activity:** 2026-04-23
 
@@ -37,7 +37,7 @@ Plan: Not started
 
 **Active:** **v1.13** — Integrator path + secondary admin parity — Phases **51–53** (see `.planning/ROADMAP.md`).
 
-**Last shipped (planning):** **v1.12** — Admin & operator UX — Phases **48–50**.
+**Last shipped (planning):** **v1.13** block — Phases **51–53** (integrator path, auxiliary **Copy** + **VERIFY-01** breadth for **Connect**, **events**, **coupons**, **promotion codes**).
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.0** (lockstep; see **`accrue/mix.exs`** **`@version`**).
 
@@ -60,8 +60,6 @@ Plan: Not started
 
 - **2026-04-22:** **`/gsd-new-milestone`** — **v1.13** scope locked to **integrator golden path** + **auxiliary admin** (**coupons**, **promotion codes**, **Connect**, **events**); **PROC-08** / **FIN-03** unchanged as non-goals; domain research skipped (brownfield); **`phases.clear`** skipped to preserve **1–50** evidence trees.
 
-**Next:** **`/gsd-plan-phase 53`** — auxiliary admin Connect/events + VERIFY-01 (resume: `.planning/phases/53-auxiliary-admin-connect-events-layout-verify/53-CONTEXT.md`).
+**Next:** Coordinate **v1.13** **Hex** release when CI is green on **`main`**; run **`bash scripts/ci/accrue_host_verify_browser.sh`** in CI (local run may prompt for **Stripe** auth).
 
-**Completed:** Phase **52** (Integrator proof + auxiliary copy part 1) — context in `52-CONTEXT.md`. Prior: Phase **51** (Integrator golden path & docs) — **2026-04-22**. Milestone **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).
-
-**Planned Phase:** 53 (auxiliary-admin-connect-events-layout-verify) — after `/gsd-plan-phase 53`
+**Completed:** Phase **53** (Auxiliary admin — Connect, events, layout, VERIFY) — `53-01-SUMMARY.md`, `53-02-SUMMARY.md`. Prior: Phase **52** — `52-CONTEXT.md`; Phase **51** — **2026-04-22**. Milestone **v1.12** — archived (`milestones/v1.12-*`, tag **`v1.12`**).

@@ -26,6 +26,16 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     subscription_detail_eyebrow
     subscription_proration_create
     subscriptions_index_empty_title
+    connect_accounts_headline
+    connect_accounts_table_empty_title
+    connect_accounts_apply_filters
+    connect_account_eyebrow
+    connect_account_save_platform_fee_override
+    billing_events_heading_organization
+    billing_events_table_empty_title
+    billing_events_apply_filters
+    coupon_index_headline
+    promotion_codes_index_headline
   )a
 
   @impl Mix.Task

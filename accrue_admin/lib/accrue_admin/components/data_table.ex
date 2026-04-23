@@ -19,6 +19,10 @@ defmodule AccrueAdmin.Components.DataTable do
     socket =
       socket
       |> assign(assigns)
+      |> assign(
+        :filter_submit_label,
+        Map.get(assigns, :filter_submit_label) || Copy.data_table_filter_submit_label()
+      )
       |> assign(:table_caption, Map.get(assigns, :table_caption))
       |> assign_new(:selected_ids, fn -> MapSet.new() end)
       |> assign_new(:filter_fields, fn -> [] end)
@@ -124,7 +128,7 @@ defmodule AccrueAdmin.Components.DataTable do
           <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
             <input type="hidden" name={key} value={value} />
           </div>
-          <button type="submit" class="ax-button ax-button-primary">Apply filters</button>
+          <button type="submit" class="ax-button ax-button-primary"><%= @filter_submit_label %></button>
           <a href={@path} class="ax-button ax-button-ghost">Clear</a>
         </form>
       </header>

@@ -6,6 +6,8 @@ defmodule AccrueAdmin.Copy do
   and related chrome described in `.planning/phases/27-microcopy-and-operator-strings/27-CONTEXT.md`.
   """
 
+  alias AccrueAdmin.Copy.BillingEvent
+  alias AccrueAdmin.Copy.Connect
   alias AccrueAdmin.Copy.Coupon
   alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
@@ -125,7 +127,141 @@ defmodule AccrueAdmin.Copy do
   defdelegate promotion_codes_expires_summary_no_expiry(), to: PromotionCode
   defdelegate promotion_code_kpi_meta_unlimited_cap(), to: PromotionCode
 
+  defdelegate connect_accounts_page_title(), to: Connect
+  defdelegate connect_accounts_breadcrumb_connect(), to: Connect
+  defdelegate connect_accounts_eyebrow(), to: Connect
+  defdelegate connect_accounts_headline(), to: Connect
+  defdelegate connect_accounts_page_copy_primary(), to: Connect
+  defdelegate connect_accounts_kpi_section_aria_label(), to: Connect
+  defdelegate connect_accounts_kpi_label_accounts(), to: Connect
+  defdelegate connect_accounts_kpi_meta_all_accounts(), to: Connect
+  defdelegate connect_accounts_kpi_label_charges_enabled(), to: Connect
+  defdelegate connect_accounts_kpi_delta_submitted_suffix(), to: Connect
+  defdelegate connect_accounts_kpi_meta_capability_onboarding(), to: Connect
+  defdelegate connect_accounts_kpi_label_overrides(), to: Connect
+  defdelegate connect_accounts_kpi_delta_deauthorized_suffix(), to: Connect
+  defdelegate connect_accounts_kpi_meta_platform_fee_override(), to: Connect
+  defdelegate connect_accounts_table_column_account(), to: Connect
+  defdelegate connect_accounts_table_column_owner(), to: Connect
+  defdelegate connect_accounts_table_column_readiness(), to: Connect
+  defdelegate connect_accounts_table_column_override(), to: Connect
+  defdelegate connect_accounts_table_column_status(), to: Connect
+  defdelegate connect_accounts_filter_label_search(), to: Connect
+  defdelegate connect_accounts_filter_label_type(), to: Connect
+  defdelegate connect_accounts_filter_option_type_standard(), to: Connect
+  defdelegate connect_accounts_filter_option_type_express(), to: Connect
+  defdelegate connect_accounts_filter_option_type_custom(), to: Connect
+  defdelegate connect_accounts_filter_label_charges(), to: Connect
+  defdelegate connect_accounts_filter_option_charges_enabled(), to: Connect
+  defdelegate connect_accounts_filter_option_charges_disabled(), to: Connect
+  defdelegate connect_accounts_filter_label_payouts(), to: Connect
+  defdelegate connect_accounts_filter_option_payouts_enabled(), to: Connect
+  defdelegate connect_accounts_filter_option_payouts_disabled(), to: Connect
+  defdelegate connect_accounts_filter_label_onboarding(), to: Connect
+  defdelegate connect_accounts_filter_option_onboarding_submitted(), to: Connect
+  defdelegate connect_accounts_filter_option_onboarding_pending(), to: Connect
+  defdelegate connect_accounts_filter_label_authorization(), to: Connect
+  defdelegate connect_accounts_filter_option_authorization_deauthorized(), to: Connect
+  defdelegate connect_accounts_filter_option_authorization_active(), to: Connect
+  defdelegate connect_accounts_table_empty_title(), to: Connect
+  defdelegate connect_accounts_table_empty_copy(), to: Connect
+  defdelegate connect_accounts_apply_filters(), to: Connect
+  defdelegate connect_accounts_row_owner_fallback(), to: Connect
+  defdelegate connect_accounts_readiness_needs_onboarding(), to: Connect
+  defdelegate connect_accounts_readiness_joiner(), to: Connect
+  defdelegate connect_accounts_override_default_only(), to: Connect
+  defdelegate connect_accounts_override_saved(), to: Connect
+  defdelegate connect_accounts_status_deauthorized_prefix(), to: Connect
+  defdelegate connect_accounts_status_no_email(), to: Connect
+  defdelegate connect_accounts_error_view_failed(), to: Connect
+
+  defdelegate connect_account_page_title(), to: Connect
+  defdelegate connect_account_breadcrumb_connect(), to: Connect
+  defdelegate connect_account_eyebrow(), to: Connect
+  defdelegate connect_account_kpi_section_aria_label(), to: Connect
+  defdelegate connect_account_kpi_label_charges(), to: Connect
+  defdelegate connect_account_kpi_meta_payouts_prefix(), to: Connect
+  defdelegate connect_account_kpi_label_onboarding(), to: Connect
+  defdelegate connect_account_kpi_meta_country_prefix(), to: Connect
+  defdelegate connect_account_kpi_label_override(), to: Connect
+  defdelegate connect_account_override_state_saved(), to: Connect
+  defdelegate connect_account_override_state_default_only(), to: Connect
+  defdelegate connect_account_kpi_meta_default_policy_prefix(), to: Connect
+  defdelegate connect_account_section_capabilities_eyebrow(), to: Connect
+  defdelegate connect_account_section_capabilities_heading(), to: Connect
+  defdelegate connect_account_detail_label_owner(), to: Connect
+  defdelegate connect_account_detail_label_email(), to: Connect
+  defdelegate connect_account_detail_label_capabilities(), to: Connect
+  defdelegate connect_account_detail_label_requirements(), to: Connect
+  defdelegate connect_account_section_effective_fee_eyebrow(), to: Connect
+  defdelegate connect_account_section_effective_fee_heading(), to: Connect
+  defdelegate connect_account_detail_label_stored_override(), to: Connect
+  defdelegate connect_account_detail_label_preview_gross(), to: Connect
+  defdelegate connect_account_detail_label_computed_fee(), to: Connect
+  defdelegate connect_account_section_platform_fee_eyebrow(), to: Connect
+  defdelegate connect_account_section_platform_fee_heading(), to: Connect
+  defdelegate connect_account_section_platform_fee_body(), to: Connect
+  defdelegate connect_account_label_percent(), to: Connect
+  defdelegate connect_account_label_fixed_minor_units(), to: Connect
+  defdelegate connect_account_label_min_minor_units(), to: Connect
+  defdelegate connect_account_label_max_minor_units(), to: Connect
+  defdelegate connect_account_label_preview_gross_minor_units(), to: Connect
+  defdelegate connect_account_label_preview_currency(), to: Connect
+  defdelegate connect_account_save_platform_fee_override(), to: Connect
+  defdelegate connect_account_flash_override_saved(), to: Connect
+  defdelegate connect_account_override_state_no_override_saved(), to: Connect
+  defdelegate connect_account_preview_fee_unable(), to: Connect
+  defdelegate connect_account_preview_gross_invalid(), to: Connect
+  defdelegate connect_account_status_deauthorized_prefix(), to: Connect
+  defdelegate connect_account_status_active_authorization(), to: Connect
+  defdelegate connect_account_enabled_label_true(), to: Connect
+  defdelegate connect_account_enabled_label_false(), to: Connect
+  defdelegate connect_account_enabled_label_unknown(), to: Connect
+  defdelegate connect_account_capabilities_none(), to: Connect
+  defdelegate connect_account_requirements_none(), to: Connect
+  defdelegate connect_account_requirements_currently_due_prefix(), to: Connect
+  defdelegate connect_account_error_preview_amount_invalid(), to: Connect
+  defdelegate connect_account_error_preview_currency_unknown(), to: Connect
+  defdelegate connect_account_error_field_must_be_decimal(field_label), to: Connect
+  defdelegate connect_account_error_field_must_be_integer_minor(field_label), to: Connect
+
+  defdelegate billing_events_page_title(), to: BillingEvent
+  defdelegate billing_events_breadcrumb_events(), to: BillingEvent
+  defdelegate billing_events_kpi_section_aria_label(), to: BillingEvent
+  defdelegate billing_events_kpi_label_ledger_rows(), to: BillingEvent
+  defdelegate billing_events_kpi_meta_total_append_only(), to: BillingEvent
+  defdelegate billing_events_kpi_label_webhook_sourced(), to: BillingEvent
+  defdelegate billing_events_kpi_delta_admin_suffix(), to: BillingEvent
+  defdelegate billing_events_kpi_meta_webhook_cause_chain(), to: BillingEvent
+  defdelegate billing_events_kpi_label_last_24h(), to: BillingEvent
+  defdelegate billing_events_kpi_delta_subject_types_suffix(), to: BillingEvent
+  defdelegate billing_events_kpi_meta_recent_cross_resource(), to: BillingEvent
+  defdelegate billing_events_table_column_event(), to: BillingEvent
+  defdelegate billing_events_table_column_subject(), to: BillingEvent
+  defdelegate billing_events_table_column_actor(), to: BillingEvent
+  defdelegate billing_events_table_column_webhook_source(), to: BillingEvent
+  defdelegate billing_events_table_column_when(), to: BillingEvent
+  defdelegate billing_events_filter_label_search(), to: BillingEvent
+  defdelegate billing_events_filter_label_event_type(), to: BillingEvent
+  defdelegate billing_events_filter_label_actor_type(), to: BillingEvent
+  defdelegate billing_events_filter_label_subject_type(), to: BillingEvent
+  defdelegate billing_events_filter_label_source_webhook_id(), to: BillingEvent
+  defdelegate billing_events_table_empty_title(), to: BillingEvent
+  defdelegate billing_events_table_empty_copy(), to: BillingEvent
+  defdelegate billing_events_apply_filters(), to: BillingEvent
+  defdelegate billing_events_eyebrow_organization(), to: BillingEvent
+  defdelegate billing_events_eyebrow_global(), to: BillingEvent
+  defdelegate billing_events_heading_organization(), to: BillingEvent
+  defdelegate billing_events_heading_global(), to: BillingEvent
+  defdelegate billing_events_copy_organization(), to: BillingEvent
+  defdelegate billing_events_copy_global(), to: BillingEvent
+  defdelegate billing_events_webhook_source_direct(), to: BillingEvent
+  defdelegate billing_events_when_unknown(), to: BillingEvent
+
   def data_table_default_empty_title, do: "Nothing in this list yet"
+
+  @doc "Shared DataTable filter toolbar primary submit (VERIFY-01 / UI-SPEC secondary CTA)."
+  def data_table_filter_submit_label, do: "Apply filters"
 
   def data_table_default_empty_copy,
     do:

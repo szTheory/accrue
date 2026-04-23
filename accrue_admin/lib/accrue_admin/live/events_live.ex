@@ -46,38 +46,38 @@ defmodule AccrueAdmin.Live.EventsLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Events"}
+              %{label: AccrueAdmin.Copy.dashboard_breadcrumb_home(), href: @admin_mount_path},
+              %{label: AccrueAdmin.Copy.billing_events_breadcrumb_events()}
             ]}
           />
-          <p class="ax-eyebrow"><%= activity_feed_eyebrow(@current_owner_scope) %></p>
-          <h2 class="ax-display"><%= activity_feed_heading(@current_owner_scope) %></h2>
+          <p class="ax-eyebrow"><%= billing_events_eyebrow(@current_owner_scope) %></p>
+          <h2 class="ax-display"><%= billing_events_heading(@current_owner_scope) %></h2>
           <p class="ax-body ax-page-copy">
-            <%= activity_feed_copy(@current_owner_scope) %>
+            <%= billing_events_copy(@current_owner_scope) %>
           </p>
         </header>
 
-        <section class="ax-kpi-grid" aria-label="Event summary">
-          <KpiCard.kpi_card label="Ledger rows" value={Integer.to_string(@summary.total_count)}>
-            <:meta>Total append-only events recorded locally</:meta>
+        <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.billing_events_kpi_section_aria_label()}>
+          <KpiCard.kpi_card label={AccrueAdmin.Copy.billing_events_kpi_label_ledger_rows()} value={Integer.to_string(@summary.total_count)}>
+            <:meta><%= AccrueAdmin.Copy.billing_events_kpi_meta_total_append_only() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Webhook sourced"
+            label={AccrueAdmin.Copy.billing_events_kpi_label_webhook_sourced()}
             value={Integer.to_string(@summary.webhook_linked_count)}
-            delta={Integer.to_string(@summary.admin_count) <> " admin"}
+            delta={Integer.to_string(@summary.admin_count) <> AccrueAdmin.Copy.billing_events_kpi_delta_admin_suffix()}
             delta_tone="cobalt"
           >
-            <:meta>Rows linked back to a webhook cause chain</:meta>
+            <:meta><%= AccrueAdmin.Copy.billing_events_kpi_meta_webhook_cause_chain() %></:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Last 24h"
+            label={AccrueAdmin.Copy.billing_events_kpi_label_last_24h()}
             value={Integer.to_string(@summary.last_day_count)}
-            delta={Integer.to_string(@summary.unique_subject_types) <> " subject types"}
+            delta={Integer.to_string(@summary.unique_subject_types) <> AccrueAdmin.Copy.billing_events_kpi_delta_subject_types_suffix()}
             delta_tone="moss"
           >
-            <:meta>Recent cross-resource billing activity</:meta>
+            <:meta><%= AccrueAdmin.Copy.billing_events_kpi_meta_recent_cross_resource() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
@@ -88,29 +88,30 @@ defmodule AccrueAdmin.Live.EventsLive do
           current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
+          filter_submit_label={AccrueAdmin.Copy.billing_events_apply_filters()}
           columns={[
-            %{id: :type, label: "Event"},
-            %{label: "Subject", render: &subject_summary/1},
-            %{label: "Actor", render: &actor_summary/1},
-            %{label: "Webhook source", render: &webhook_source_summary/1},
-            %{label: "When", render: &when_summary/1}
+            %{id: :type, label: AccrueAdmin.Copy.billing_events_table_column_event()},
+            %{label: AccrueAdmin.Copy.billing_events_table_column_subject(), render: &subject_summary/1},
+            %{label: AccrueAdmin.Copy.billing_events_table_column_actor(), render: &actor_summary/1},
+            %{label: AccrueAdmin.Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
+            %{label: AccrueAdmin.Copy.billing_events_table_column_when(), render: &when_summary/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
-            %{label: "Subject", render: &subject_summary/1},
-            %{label: "Actor", render: &actor_summary/1},
-            %{label: "Webhook source", render: &webhook_source_summary/1},
-            %{label: "When", render: &when_summary/1}
+            %{label: AccrueAdmin.Copy.billing_events_table_column_subject(), render: &subject_summary/1},
+            %{label: AccrueAdmin.Copy.billing_events_table_column_actor(), render: &actor_summary/1},
+            %{label: AccrueAdmin.Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
+            %{label: AccrueAdmin.Copy.billing_events_table_column_when(), render: &when_summary/1}
           ]}
           filter_fields={[
-            %{id: :q, label: "Search"},
-            %{id: :type, label: "Event type"},
-            %{id: :actor_type, label: "Actor type"},
-            %{id: :subject_type, label: "Subject type"},
-            %{id: :source_webhook_event_id, label: "Source webhook id"}
+            %{id: :q, label: AccrueAdmin.Copy.billing_events_filter_label_search()},
+            %{id: :type, label: AccrueAdmin.Copy.billing_events_filter_label_event_type()},
+            %{id: :actor_type, label: AccrueAdmin.Copy.billing_events_filter_label_actor_type()},
+            %{id: :subject_type, label: AccrueAdmin.Copy.billing_events_filter_label_subject_type()},
+            %{id: :source_webhook_event_id, label: AccrueAdmin.Copy.billing_events_filter_label_source_webhook_id()}
           ]}
-          empty_title="No event rows matched"
-          empty_copy="Adjust the activity filters or wait for the next billing mutation."
+          empty_title={AccrueAdmin.Copy.billing_events_table_empty_title()}
+          empty_copy={AccrueAdmin.Copy.billing_events_table_empty_copy()}
         />
       </section>
     </AppShell.app_shell>
@@ -119,7 +120,7 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   defp assign_shell(socket, admin) do
     socket
-    |> assign(:page_title, "Events")
+    |> assign(:page_title, AccrueAdmin.Copy.billing_events_page_title())
     |> assign(:brand, admin["brand"] || default_brand())
     |> assign(:theme, admin["theme"] || "system")
     |> assign(:csp_nonce, admin["csp_nonce"])
@@ -129,6 +130,15 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/events"))
   end
+
+  defp billing_events_eyebrow(%OwnerScope{mode: :organization}), do: AccrueAdmin.Copy.billing_events_eyebrow_organization()
+  defp billing_events_eyebrow(_owner_scope), do: AccrueAdmin.Copy.billing_events_eyebrow_global()
+
+  defp billing_events_heading(%OwnerScope{mode: :organization}), do: AccrueAdmin.Copy.billing_events_heading_organization()
+  defp billing_events_heading(_owner_scope), do: AccrueAdmin.Copy.billing_events_heading_global()
+
+  defp billing_events_copy(%OwnerScope{mode: :organization}), do: AccrueAdmin.Copy.billing_events_copy_organization()
+  defp billing_events_copy(_owner_scope), do: AccrueAdmin.Copy.billing_events_copy_global()
 
   defp event_summary(owner_scope) do
     day_ago = DateTime.add(DateTime.utc_now(), -86_400, :second)
@@ -204,22 +214,6 @@ defmodule AccrueAdmin.Live.EventsLive do
     )
   end
 
-  defp activity_feed_eyebrow(%OwnerScope{mode: :organization}), do: "Organization activity feed"
-  defp activity_feed_eyebrow(_owner_scope), do: "Global activity feed"
-
-  defp activity_feed_heading(%OwnerScope{mode: :organization}),
-    do: "Billing activity for the active organization"
-
-  defp activity_feed_heading(_owner_scope), do: "Append-only billing and admin activity"
-
-  defp activity_feed_copy(%OwnerScope{mode: :organization}) do
-    "This feed stays scoped to the active organization so linked webhook and admin activity can't reveal other billing owners."
-  end
-
-  defp activity_feed_copy(_owner_scope) do
-    "This complements the scoped subject timelines with one operations-wide ledger view over `accrue_events`."
-  end
-
   defp subject_summary(row), do: "#{row.subject_type} #{row.subject_id}"
 
   defp actor_summary(row) do
@@ -229,8 +223,9 @@ defmodule AccrueAdmin.Live.EventsLive do
     end
   end
 
-  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}), do: "Direct"
+  defp webhook_source_summary(%{caused_by_webhook_event_id: nil}), do: AccrueAdmin.Copy.billing_events_webhook_source_direct()
   defp webhook_source_summary(%{caused_by_webhook_event_id: webhook_id}), do: webhook_id
+
   defp when_summary(row), do: format_datetime(row.inserted_at)
   defp card_title(row), do: row.type
 
@@ -244,7 +239,7 @@ defmodule AccrueAdmin.Live.EventsLive do
   end
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
-  defp format_datetime(_value), do: "Unknown"
+  defp format_datetime(_value), do: AccrueAdmin.Copy.billing_events_when_unknown()
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

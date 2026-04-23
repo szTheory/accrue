@@ -6,4 +6,7 @@ This register tracks **intentional** deviations from Accrue Admin’s token-firs
 
 | slug | location | deviation | rationale | future_token | status | phase_ref |
 |------|------------|-----------|-----------|--------------|--------|-----------|
-| none-yet | — | — | Placeholder row until a reviewed exception ships; remove when first real entry lands. | — | clear | 50 |
+
+## Phase 53 reviewer note (auxiliary Connect / events)
+
+**v1.13 Phase 53:** `ConnectAccountsLive`, `ConnectAccountLive`, and `EventsLive` were audited for hard-coded hex colors, inline `style=`, and non-`ax-*` layout classes on touched auxiliary rows. **No token bypasses** were introduced; `default_brand/0` helper maps remain the only accent literals outside HEEx.

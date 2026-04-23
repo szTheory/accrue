@@ -20,12 +20,12 @@ Milestone theme: **first-time integrator golden path** (host-facing docs, proof 
 
 ## Auxiliary admin surfaces (AUX)
 
-- [ ] **AUX-01**: **`CouponsLive`** / **`CouponLive`** operator-visible English routes through **`AccrueAdmin.Copy`** (or an established copy submodule); **ExUnit** + **Playwright** do not assert divergent raw literals for strings governed by that SSOT on materially touched paths.
-- [ ] **AUX-02**: **`PromotionCodesLive`** / **`PromotionCodeLive`** meet the same **AUX-01** copy + test literal discipline.
-- [ ] **AUX-03**: **`ConnectAccountsLive`** / **`ConnectAccountLive`** meet the same **AUX-01** copy + test literal discipline.
-- [ ] **AUX-04**: **`EventsLive`** meets the same **AUX-01** copy + test literal discipline for operator-visible strings on materially touched paths.
-- [ ] **AUX-05**: All **v1.13**-touched auxiliary surfaces use **`ax-*` layout primitives and theme tokens** per **v1.6 UX-04**; intentional CSS/token exceptions are recorded in **`accrue_admin/guides/theme-exceptions.md`** (or successor register) with rationale.
-- [ ] **AUX-06**: Every **materially touched mounted-admin path** for **AUX-01..AUX-04** gains or extends **VERIFY-01** **Playwright** coverage and **axe** expectations consistent with **v1.12** precedent (reuse export/copy machinery where it reduces drift).
+- [x] **AUX-01**: **`CouponsLive`** / **`CouponLive`** operator-visible English routes through **`AccrueAdmin.Copy`** (or an established copy submodule); **ExUnit** + **Playwright** do not assert divergent raw literals for strings governed by that SSOT on materially touched paths.
+- [x] **AUX-02**: **`PromotionCodesLive`** / **`PromotionCodeLive`** meet the same **AUX-01** copy + test literal discipline.
+- [x] **AUX-03**: **`ConnectAccountsLive`** / **`ConnectAccountLive`** meet the same **AUX-01** copy + test literal discipline.
+- [x] **AUX-04**: **`EventsLive`** meets the same **AUX-01** copy + test literal discipline for operator-visible strings on materially touched paths.
+- [x] **AUX-05**: All **v1.13**-touched auxiliary surfaces use **`ax-*` layout primitives and theme tokens** per **v1.6 UX-04**; intentional CSS/token exceptions are recorded in **`accrue_admin/guides/theme-exceptions.md`** (or successor register) with rationale.
+- [x] **AUX-06**: Every **materially touched mounted-admin path** for **AUX-01..AUX-04** gains or extends **VERIFY-01** **Playwright** coverage and **axe** expectations consistent with **v1.12** precedent (reuse export/copy machinery where it reduces drift).
 
 ---
 
@@ -53,12 +53,12 @@ Milestone theme: **first-time integrator golden path** (host-facing docs, proof 
 | INT-03 | Phase 51 | Complete |
 | INT-04 | Phase 52 | Pending |
 | INT-05 | Phase 52 | Pending |
-| AUX-01 | Phase 52 | Pending |
-| AUX-02 | Phase 52 | Pending |
-| AUX-03 | Phase 53 | Pending |
-| AUX-04 | Phase 53 | Pending |
-| AUX-05 | Phase 53 | Pending |
-| AUX-06 | Phase 53 | Pending |
+| AUX-01 | Phase 52 | Complete |
+| AUX-02 | Phase 52 | Complete |
+| AUX-03 | Phase 53 | Complete |
+| AUX-04 | Phase 53 | Complete |
+| AUX-05 | Phase 53 | Complete |
+| AUX-06 | Phase 53 | Complete |
 
 **Coverage:**
 
