@@ -15,4 +15,4 @@ None. Certification copy avoids **`whsec_`** / Stripe-shaped literals; **FRG-01*
 
 ## Self-Check
 
-- `rg 'whsec_' .planning/phases/65-p0-admin-operator/ .planning/research/v1.17-FRICTION-INVENTORY.md` — no matches (pattern sanity).
+- `rg 'whsec_' .planning/phases/65-p0-admin-operator/65-VERIFICATION.md .planning/research/v1.17-FRICTION-INVENTORY.md` — no matches in certification prose (pattern sanity).
