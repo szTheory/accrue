@@ -4,6 +4,8 @@
 #
 set -euo pipefail
 
+echo "[host-integration] phase=full_mix_tests" >&2
+
 host_dir="$(cd "$(dirname "$0")/../../examples/accrue_host" && pwd)"
 cd "$host_dir"
 

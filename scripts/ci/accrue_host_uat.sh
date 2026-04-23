@@ -23,6 +23,7 @@ port="${ACCRUE_HOST_PORT:-4100}"
 browser_port="${ACCRUE_HOST_BROWSER_PORT:-4101}"
 
 echo "=== Accrue host UAT — repo root: $repo_root ==="
+echo "[host-integration] entry=accrue_host_uat delegating_to=mix_verify.full" >&2
 
 if command -v pg_isready >/dev/null 2>&1; then
   echo "--- checking Postgres availability ---"
@@ -43,7 +44,10 @@ export ACCRUE_HOST_BROWSER_LOG="${ACCRUE_HOST_BROWSER_LOG:-}"
 echo ""
 echo "--- delegating to host-local mix verify.full ---"
 cd "$host_dir"
-mix verify.full
+if ! mix verify.full; then
+  echo "FAILED_GATE=host-integration" >&2
+  exit 1
+fi
 
 echo ""
 echo "=== Accrue host UAT complete ==="

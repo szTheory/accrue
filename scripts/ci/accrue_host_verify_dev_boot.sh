@@ -4,6 +4,8 @@
 #
 set -euo pipefail
 
+echo "[host-integration] phase=dev_boot_smoke" >&2
+
 host_dir="$(cd "$(dirname "$0")/../../examples/accrue_host" && pwd)"
 cd "$host_dir"
 

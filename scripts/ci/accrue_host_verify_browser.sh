@@ -4,6 +4,8 @@
 #
 set -euo pipefail
 
+echo "[host-integration] phase=browser_playwright" >&2
+
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 host_dir="$repo_root/examples/accrue_host"
 cd "$host_dir"
