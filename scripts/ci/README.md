@@ -21,6 +21,17 @@ Evidence columns are summarized from `.planning/phases/32-adoption-discoverabili
 |--------|-------------------------------|-------------------------|--------------------------|
 | ORG-09 | `scripts/ci/verify_adoption_proof_matrix.sh`; `examples/accrue_host/docs/adoption-proof-matrix.md` | `accrue/test/accrue/docs/organization_billing_guide_test.exs`; `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` | `.planning/phases/39-org-billing-proof-alignment/39-VERIFICATION.md` |
 
+## INT gates (v1.16 integrator + proof continuity)
+
+This table is **delta-maintained** for merge-blocking checks **touched by phases 59–61** on this milestone branch. The **normative** required-job set for every pull request remains **`.github/workflows/ci.yml`** plus **branch protection** — treat those as completeness SSOT, not this markdown registry alone.
+
+| REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
+|--------|-------------------------------|-------------------------|--------------------------|
+| INT-06 | `accrue/guides/first_hour.md`; `examples/accrue_host/README.md`; `accrue/guides/quickstart.md`; `CONTRIBUTING.md` — scripts `verify_package_docs.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/phases/59-golden-path-quickstart-coherence/59-VERIFICATION.md` |
+| INT-07 | `examples/accrue_host/docs/adoption-proof-matrix.md`; `examples/accrue_host/docs/evaluator-walkthrough-script.md` — scripts `verify_adoption_proof_matrix.sh` (add `verify_package_docs.sh` only when pins touch matrix paths) | `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` when ORG-09 matrix literals change; else **—** | `.planning/phases/60-adoption-proof-ci-ownership-map/60-VERIFICATION.md` |
+
+**INT-08/INT-09** — Phase **61**.
+
 ### Triage: verify_adoption_proof_matrix.sh
 
 - **`verify_adoption_proof_matrix:`** (stderr prefix on failure) — treat as **ORG-09**: missing ORG-09 headings, primary/recipe lane markers, `phx.gen.auth` / `use Accrue.Billable` / `non-Sigra` literals, **ORG-07** / **ORG-08** advisory rows, or the self-referential script path in `adoption-proof-matrix.md`. Fix the matrix doc first; only change needles in the script after an intentional taxonomy edit.
