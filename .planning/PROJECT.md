@@ -12,7 +12,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.16 — Integrator + proof continuity (**in progress**)
+### v1.16 — Integrator + proof continuity (**complete — 2026-04-23**)
 
 **Goal:** Pick up **integrator / adoption / proof** work explicitly **deferred** during **v1.14**–**v1.15** so the golden path, **VERIFY-01** discoverability, **adoption proof matrix**, and **Hex / `main` doc SSOT** stay coherent after **v1.15** trust SemVer messaging — **without** new billing primitives, **PROC-08**, or **FIN-03**.
 
@@ -53,7 +53,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.15** — Phases **57–58** (**2026-04-23**): **TRT-01..TRT-04** trust/versioning docs + demo **Sigra** clarity + **`verify_package_docs`** alignment; archives **`.planning/milestones/v1.15-*`**; planning git tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**. Prior: **v1.13** — Phases **51–53**; archives **`.planning/milestones/v1.13-*`**; tag **`v1.13`**.
 
-**Now:** **v1.16** open — **integrator + proof continuity** (**INT-06..INT-09**); **Phases 59–60** complete (**INT-06**, **INT-07**); **Phase 61** next. Root **`.planning/REQUIREMENTS.md`** recreated **2026-04-23**. **`phases.clear`** not run (phase trees **1–58** evidence retained under **`.planning/phases/`** where present).
+**Now:** **v1.16** closed — **integrator + proof continuity** (**INT-06..INT-09**); **Phases 59–61** complete **2026-04-23**. Root **`.planning/REQUIREMENTS.md`** tracks **INT-06..INT-09** as satisfied. **`phases.clear`** not run (phase trees **1–58** evidence retained under **`.planning/phases/`** where present).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 

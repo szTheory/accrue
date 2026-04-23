@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.16
 milestone_name: Integrator + proof continuity
-status: planning
-last_updated: "2026-04-23T15:56:59.166Z"
+status: milestone_complete
+last_updated: "2026-04-23T16:24:51.760Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 3
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
-  percent: 67
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -21,15 +21,15 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 61 — Root VERIFY hops + Hex doc SSOT
+**Current focus:** **v1.16** milestone closed — integrator + proof continuity (**INT-06..INT-09**)
 
 ## Current Position
 
-Phase: 61
+Phase: **61** (complete)
 
-Plan: Not started
+Plan: **61-02** (complete)
 
-**Status:** Ready to plan
+**Status:** Milestone complete — pick next shipping priority outside this execution
 
 **Last activity:** 2026-04-23
 
@@ -65,8 +65,6 @@ Plan: Not started
 - **2026-04-23:** **`/gsd-discuss-phase 60`** — context + discussion log committed; research-backed defaults for INT-07 doc map, matrix/walkthrough parity, trust-stub IA, and narrow CI README scope (**`60-CONTEXT.md`**).
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.16** (**Integrator + proof continuity**); **`REQUIREMENTS.md`** + roadmap **59–61**.
 
-**Next:** **`/gsd-plan-phase 61`**
+**Next:** **`/gsd-new-milestone`** (or `/gsd-progress`) when **v1.17+** scope is ready.
 
-**Completed:** Phases **59–60** (**INT-06**, **INT-07**) — **2026-04-23**; Milestone **v1.15** — Phases **57–58**; tag **`v1.15`**.
-
-**Planned phase:** 61 (Root VERIFY hops + Hex doc SSOT) — context gathered **2026-04-23**
+**Completed:** **v1.16** — Phases **59–61** (**INT-06..INT-09**) — **2026-04-23**; Milestone **v1.15** — Phases **57–58**; tag **`v1.15`**.
