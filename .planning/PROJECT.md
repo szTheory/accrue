@@ -47,7 +47,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.13** — Phases **51–53** (2026-04-22 / **2026-04-23**): integrator golden-path docs + adoption proof / package alignment; auxiliary **Copy** + **`ax-*`** + **VERIFY-01** for coupons, promotion codes, Connect, and events (**INT-01..INT-05**, **AUX-01..AUX-06**); archives `.planning/milestones/v1.13-*`; planning git tag **`v1.13`**. Prior: **v1.12** — Phases **48–50**; archives `.planning/milestones/v1.12-*`; tag **`v1.12`**. Prior: **v1.11** — Phases **46–47**; archives `.planning/milestones/v1.11-*`; tag **`v1.11`**.
 
-**Now:** **v1.14** opened (**2026-04-22**); requirements + roadmap live at **`.planning/REQUIREMENTS.md`** / **`.planning/ROADMAP.md`**. **`phases.clear`** not run when opening **v1.14** (phase trees **1–53** retained under **`.planning/phases/`**).
+**Now:** **v1.14** opened (**2026-04-22**); requirements + roadmap live at **`.planning/REQUIREMENTS.md`** / **`.planning/ROADMAP.md`**. **`phases.clear`** not run when opening **v1.14** (phase trees **1–53** retained under **`.planning/phases/`**). **Phase 55** complete (**2026-04-23**): merge-blocking VERIFY-01 for invoice index/detail, fixture `invoice_id`, `export_copy_strings` + drift guard, parity/docs/theme SSOT hygiene, and org-scoped `DataTable` wiring for list surfaces.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -470,4 +470,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 after **`/gsd-new-milestone`**: opened **v1.14** (Phases **54–56**; **ADM-** + **BIL-** requirements; **`phases.clear`** skipped).*
+*Last updated: 2026-04-23 after **`/gsd-execute-phase 55`**: completed **Phase 55** (core admin VERIFY + theme + copy CI).*
