@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.17
 milestone_name: Friction-led developer readiness
 status: planning
-last_updated: "2026-04-23T20:10:55.058Z"
-last_activity: 2026-04-23 — **`/gsd-plan-phase 64`** complete; next **`/gsd-execute-phase 64`**
+last_updated: "2026-04-23T22:00:00.000Z"
+last_activity: 2026-04-23 — **`/gsd-execute-phase 64`** complete; next **Phase 65** (**ADM-12**)
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 6
-  percent: 86
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -21,17 +21,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.17** — **Phase 64** (**BIL-03**) — **`64-01-PLAN.md`** ready; next **`/gsd-execute-phase 64`**.
+**Current focus:** **v1.17** — **Phase 65** (**ADM-12**) — plan or execute when ready.
 
 ## Current Position
 
-Phase: **64** — P0 billing (**plan** or **execute** when ready)
+Phase: **65** — P0 admin / operator (**ADM-12**)
 
-Plan: **64-01** (see **`64-01-PLAN.md`**)
+Plan: *(see **`.planning/ROADMAP.md`** § Phase 65 when published)*
 
-**Status:** Phase **64** — planning complete **2026-04-23**; execute **`BIL-03`** certification path (empty billing P0 queue).
+**Status:** Phase **64** — **complete** **2026-04-23** — **BIL-03** certified on empty billing **P0** queue (**`64-VERIFICATION.md`** + inventory maintainer line).
 
-**Last activity:** 2026-04-23 — **`/gsd-plan-phase 64`**
+**Last activity:** 2026-04-23 — **`/gsd-execute-phase 64`**
 
 ## Milestone Progress
 
@@ -52,7 +52,7 @@ Plan: **64-01** (see **`64-01-PLAN.md`**)
 - **`.planning/MILESTONES.md`** — **v1.17** in-progress entry
 - **`.planning/phases/62-friction-triage-north-star/`** — **62-CONTEXT.md**, **62-DISCUSSION-LOG.md**
 - **`.planning/phases/63-p0-integrator-verify-docs/`** — **63-VERIFICATION.md**, **63-01..03-SUMMARY.md**
-- **`.planning/phases/64-p0-billing/`** — **64-CONTEXT.md**, **64-DISCUSSION-LOG.md**, **64-RESEARCH.md**, **64-VALIDATION.md**, **64-01-PLAN.md**
+- **`.planning/phases/64-p0-billing/`** — **64-CONTEXT.md**, **64-DISCUSSION-LOG.md**, **64-RESEARCH.md**, **64-VALIDATION.md**, **64-01-PLAN.md**, **64-VERIFICATION.md**
 - **`.planning/research/v1.17-north-star.md`**, **`v1.17-FRICTION-INVENTORY.md`** — triage SSOT (**FRG-01..03**)
 
 ## Deferred Items
@@ -65,13 +65,14 @@ Plan: **64-01** (see **`64-01-PLAN.md`**)
 
 ## Recent Decisions
 
+- **2026-04-23:** **`/gsd-execute-phase 64`** — **`64-VERIFICATION.md`**, inventory **Maintainer (2026-04-23)** line for **BIL-03**, **`REQUIREMENTS.md`** **BIL-03** checked + traceability **Complete**; friction script + **`v1_17_friction_research_contract_test.exs`** green.
 - **2026-04-23:** **`/gsd-discuss-phase 64`** — Four parallel research passes; **`64-CONTEXT.md`** + **`64-DISCUSSION-LOG.md`**: **D-01** inventory + lean **`64-VERIFICATION.md`** (no semantic friction-script duplication); **D-02** certification + bounded checklist, no prose CI; **D-03** no required CHANGELOG/telemetry edits when queue empty and nothing ships; **D-04** mandatory FRG-01 row + two-axis re-triage before full BIL-03 ship bar.
 - **2026-04-23:** **`/gsd-discuss-phase 62`** — Subagent-backed synthesis: **`research/v1.17-*`** SSOT split (inventory vs north star), **two-axis** P0 bar + **FRG-03** firewall, **ROADMAP** pointer-only optional index; **62-CONTEXT.md** + **62-DISCUSSION-LOG.md** committed.
 - **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
 - **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** **`/gsd-execute-phase 64`** — **P0 billing** (**BIL-03**). Optionally **`/gsd-verify-work 62`** if Phase **62** verification is still pending.
+**Next:** **`/gsd-plan-phase 65`** or **`/gsd-execute-phase 65`** — **P0 admin / operator** (**ADM-12**). Optionally **`/gsd-verify-work 62`** if Phase **62** verification is still pending.
 
-**Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**. **v1.17** — Phase **63** (P0 integrator / VERIFY / docs) — **2026-04-23**.
+**Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**. **v1.17** — Phases **63** (P0 integrator / VERIFY / docs) and **64** (P0 billing / **BIL-03**) — **2026-04-23**.
 
-**Planned Phase:** 64 (P0 billing) — 1 plans — 2026-04-23T20:10:55.048Z
+**Planned Phase:** 65 (P0 admin / operator) — *(plan count TBD when phase is planned)*

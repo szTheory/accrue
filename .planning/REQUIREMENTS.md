@@ -20,7 +20,7 @@
 
 ### Billing (BIL)
 
-- [ ] **BIL-03**: **P0 billing closure** — For every **P0** backlog row tagged **billing**, ship bounded **`Accrue.Billing` / `lattice_stripe` / Fake** work with regressions plus **`accrue/guides/telemetry.md`** + **`CHANGELOG`** (+ installer / First Hour pointers when public API or host stub changes) **or** certify **no P0 billing rows** this milestone with signed rationale in the inventory.
+- [x] **BIL-03**: **P0 billing closure** — For every **P0** backlog row tagged **billing**, ship bounded **`Accrue.Billing` / `lattice_stripe` / Fake** work with regressions plus **`accrue/guides/telemetry.md`** + **`CHANGELOG`** (+ installer / First Hour pointers when public API or host stub changes) **or** certify **no P0 billing rows** this milestone with signed rationale in the inventory.
 
 ### Admin / operator (ADM)
 
@@ -49,7 +49,7 @@
 | FRG-02 | 62 | Complete |
 | FRG-03 | 62 | Complete |
 | INT-10 | 63 | Complete |
-| BIL-03 | 64 | Pending |
+| BIL-03 | 64 | Complete |
 | ADM-12 | 65 | Pending |
 
 **Coverage:** v1.17 requirements **6** total; mapped **6**; unmapped **0**.
