@@ -343,6 +343,36 @@ defmodule Accrue.Billing do
     end)
   end
 
+  @doc """
+  Lists payment methods for `customer` from the configured processor (Stripe
+  or Fake). This is **read-through** processor state, not a projection of
+  local `accrue_payment_methods` rows.
+
+  Delegates to `Accrue.Billing.PaymentMethodActions.list_payment_methods/2`.
+  See that module for supported `opts` filters (`type`, `limit`, pagination
+  cursors).
+
+  *Since v0.3.1.*
+  """
+  def list_payment_methods(customer, opts \\ []) do
+    span_billing(:payment_method, :list, customer, opts, fn ->
+      PaymentMethodActions.list_payment_methods(customer, opts)
+    end)
+  end
+
+  @doc """
+  Raising variant of `list_payment_methods/2`.
+
+  Delegates to `Accrue.Billing.PaymentMethodActions.list_payment_methods!/2`.
+
+  *Since v0.3.1.*
+  """
+  def list_payment_methods!(customer, opts \\ []) do
+    span_billing(:payment_method, :list, customer, opts, fn ->
+      PaymentMethodActions.list_payment_methods!(customer, opts)
+    end)
+  end
+
   # ── Refund surface (Plan 06) ──────────────────────────────────────
   def create_refund(charge, opts \\ []),
     do:
