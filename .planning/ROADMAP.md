@@ -31,7 +31,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 59 | 2/2 | Complete    | 2026-04-23 |
-| 60 | Adoption proof + CI ownership map | Matrix + evaluator script + contributor verifier map honest vs lanes and trust copy. | INT-07 |
+| 60 | 2/2 | Complete    | 2026-04-23 |
 | 61 | Root VERIFY hops + Hex doc SSOT | README hop budget vs **VERIFY-01**; **`verify_package_docs`** + **`first_hour`** + planning mirrors vs **`@version`**. | INT-08, INT-09 |
 
 **Success criteria (milestone):**
