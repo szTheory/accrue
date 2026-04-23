@@ -24,7 +24,7 @@
 
 ### Admin / operator (ADM)
 
-- [ ] **ADM-12**: **P0 admin / operator closure** — For every **P0** backlog row tagged **admin**, ship scoped **`accrue_admin`** (**LiveView**, **`AccrueAdmin.Copy`**, theme/`ax-*`, **VERIFY-01** when routes change) **or** certify **no P0 admin rows** this milestone with signed rationale in the inventory.
+- [x] **ADM-12**: **P0 admin / operator closure** — For every **P0** backlog row tagged **admin**, ship scoped **`accrue_admin`** (**LiveView**, **`AccrueAdmin.Copy`**, theme/`ax-*`, **VERIFY-01** when routes change) **or** certify **no P0 admin rows** this milestone with signed rationale in the inventory.
 
 ## Future requirements
 
@@ -50,6 +50,6 @@
 | FRG-03 | 62 | Complete |
 | INT-10 | 63 | Complete |
 | BIL-03 | 64 | Complete |
-| ADM-12 | 65 | Pending |
+| ADM-12 | 65 | Complete |
 
 **Coverage:** v1.17 requirements **6** total; mapped **6**; unmapped **0**.
