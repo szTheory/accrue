@@ -29,7 +29,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 54 | 2/2 | Complete    | 2026-04-23 |
-| 55 | Core admin VERIFY + theme + copy CI | **VERIFY-01** Playwright + axe on **ADM-08** route group (**ADM-09**); **theme-exceptions** + **`export_copy_strings`** hygiene (**ADM-10**, **ADM-11**). | ADM-09, ADM-10, ADM-11 |
+| 55 | 2/2 | Complete    | 2026-04-23 |
 | 56 | Billing / Stripe depth + telemetry truth | Ship **BIL-01** (one scoped public billing capability + **Fake** coverage); align **`guides/telemetry.md`** / runbook links (**BIL-02**). | BIL-01, BIL-02 |
 
 **Success criteria (milestone):**
