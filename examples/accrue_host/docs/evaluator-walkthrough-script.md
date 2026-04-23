@@ -8,6 +8,7 @@ Use this as a **checklist** when recording a short demo for stakeholders. It mir
 
 1. Show repository root and `examples/accrue_host`.
 2. State that **pull requests** run `host-integration`: shift-left `verify_verify01_readme_contract.sh` and `verify_adoption_proof_matrix.sh`, then `accrue_host_uat.sh` → `mix verify.full`, then the full **`npm run e2e`** suite on CI (mounted-admin axe: `e2e/verify01-admin-a11y.spec.js`).
+3. Open [`adoption-proof-matrix.md`](adoption-proof-matrix.md) and read **`### Trust and versioning (v1.15+)`** before claiming install pins, internal milestone labels, or demo-**Sigra** wiring as universal production facts on camera.
 
 ## B. Local deterministic proof (~3–5 min)
 
@@ -31,5 +32,7 @@ Use this as a **checklist** when recording a short demo for stakeholders. It mir
 
 - **Default story:** Fake processor proves Phoenix wiring, webhooks, DB reducers, admin LiveView — what most regressions break.
 - **Stripe test mode:** Maintainer/advisory lane (`mix test.live`, scheduled `live-stripe` job) for API drift — not required for every contributor.
+
+**Lane honesty:** Stripe test mode stays **advisory** for contributors, matching the matrix heading **`## Advisory: Stripe test mode`** — it does not replace the Fake-backed merge contract and must not be described as merge-blocking on camera.
 
 Keep recordings free of real API keys, webhook secrets, or customer PII.
