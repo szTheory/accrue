@@ -51,7 +51,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.15** — Phases **57–58** (**2026-04-23**): **TRT-01..TRT-04** trust/versioning docs + demo **Sigra** clarity + **`verify_package_docs`** alignment; archives **`.planning/milestones/v1.15-*`**; planning git tag **`v1.15`**. Prior: **v1.14** — Phases **54–56**; archives **`.planning/milestones/v1.14-*`**; tag **`v1.14`**. Prior: **v1.13** — Phases **51–53**; archives **`.planning/milestones/v1.13-*`**; tag **`v1.13`**.
 
-**Now:** **v1.16** open — **integrator + proof continuity** (**INT-06..INT-09**); phases **59–61** active. Root **`.planning/REQUIREMENTS.md`** recreated **2026-04-23**. **`phases.clear`** not run (phase trees **1–58** evidence retained under **`.planning/phases/`** where present).
+**Now:** **v1.16** open — **integrator + proof continuity** (**INT-06..INT-09**); **Phase 59** complete (**INT-06**); phases **60–61** next. Root **`.planning/REQUIREMENTS.md`** recreated **2026-04-23**. **`phases.clear`** not run (phase trees **1–58** evidence retained under **`.planning/phases/`** where present).
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -225,6 +225,10 @@ Theme: **integrator golden path** + **auxiliary admin parity**; **PROC-08** and 
 - [x] **AUX-03, AUX-04** — **`Connect*`** / **`EventsLive`** meet the same copy + literal discipline. **Validated in Phase 53.**
 - [x] **AUX-05** — **`ax-*`** + theme tokens on touched auxiliary surfaces; exceptions recorded in **`theme-exceptions.md`**. **Validated in Phase 53.**
 - [x] **AUX-06** — VERIFY-01 **Playwright** + **axe** on materially touched auxiliary mounted paths; **`export_copy_strings`** / **`copy_strings.json`** anti-drift wiring. **Validated in Phase 53.**
+
+### Validated v1.16 (in progress)
+
+- [x] **INT-06** — **First Hour**, **quickstart**, and **CONTRIBUTING** aligned with trust boundary + auth routing narrative; **`verify_package_docs`** enforces quickstart hub + capsule structure; merge-blocking doc trio green. **Validated in Phase 59.**
 
 ### Validated v1.15 (Phases 57–58; docs shipped 2026-04-23)
 
@@ -494,4 +498,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 after **`/gsd-new-milestone`**: **v1.16** integrator + proof continuity opened.*
+*Last updated: 2026-04-23 — **Phase 59** complete (**INT-06**); **v1.16** integrator + proof continuity in progress.*
