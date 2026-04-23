@@ -3,13 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.17
 milestone_name: Friction-led developer readiness
 status: planning
-last_updated: "2026-04-23T19:06:48.802Z"
-last_activity: 2026-04-23 — **`/gsd-new-milestone`**; **`phases.clear`** (**43** trees)
+last_updated: "2026-04-23T20:45:00.000Z"
+last_activity: 2026-04-23 — **`/gsd-execute-phase 62`** (inline after **`/gsd-next`**) — FRG-01..03 artifacts + plan summaries
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -26,9 +27,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 Phase: **62** — friction triage + north star (**context gathered** **2026-04-23**)
 
-Plan: **—**
+Plan: **62-03** (wave 2 — FRG-03)
 
-**Status:** **62-CONTEXT.md** ready; triage SSOT files live under **`.planning/research/`**
+**Status:** FRG-01..03 inventory + backlog committed; **Phase 62** ready for verification
 
 **Last activity:** 2026-04-23 — **`/gsd-new-milestone`**; **`phases.clear`** (**43** trees)
 
@@ -66,6 +67,8 @@ Plan: **—**
 - **2026-04-23:** **`/gsd-new-milestone` v1.17** — User-confirmed **Friction-led developer readiness**: evidence-ranked work over broad **v1.16**-style doc sweeps; optional **billing** / **admin** P0s when inventory proves it; ecosystem **desk research skipped** (triage is the discovery mechanism).
 - **2026-04-23:** **`phases.clear`** — **43** stale **`.planning/phases/*`** directories removed; milestone archives preserved.
 
-**Next:** **`/gsd-plan-phase 62`** (fill inventory rows + satisfy **FRG-01..03** checklists).
+**Next:** **`/gsd-verify-work`** for **Phase 62**, then **`/gsd-discuss-phase 63`** (or **`/gsd-execute-phase 63`** when plans exist).
 
 **Completed:** **v1.16** — Phases **59–61** — **2026-04-23**; tag **`v1.16`**.
+
+**Planned Phase:** 62 (Friction triage + north star) — 3 plans — 2026-04-23T19:19:20.892Z

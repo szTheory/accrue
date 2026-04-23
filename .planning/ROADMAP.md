@@ -59,6 +59,8 @@
 
 **Goal:** Burn integrator/VERIFY/docs **P0** rows; no silent contract drift.
 
+**FRG-03 slice:** [INT-10 P0 backlog](research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63)
+
 **Requirements:** INT-10
 
 **Success criteria:**
@@ -70,6 +72,8 @@
 
 **Goal:** Burn billing **P0** rows with library-grade regressions and honest operator docs.
 
+**FRG-03 slice:** [BIL-03 backlog anchor](research/v1.17-FRICTION-INVENTORY.md#backlog--bil-03-phase-64) *(empty P0 queue this milestone — see inventory)*
+
 **Requirements:** BIL-03
 
 **Success criteria:**
@@ -80,6 +84,8 @@
 ### Phase 65: P0 admin / operator
 
 **Goal:** Burn admin **P0** rows without new third-party UI kits.
+
+**FRG-03 slice:** [ADM-12 backlog anchor](research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65) *(empty P0 queue this milestone — see inventory)*
 
 **Requirements:** ADM-12
 

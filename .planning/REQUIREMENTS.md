@@ -10,9 +10,9 @@
 
 ### Triage + north star (FRG)
 
-- [ ] **FRG-01**: **Ranked friction inventory** — Maintainers commit an **integrator-facing friction inventory** under **`.planning/`** (exact path recorded in **`.planning/STATE.md`**) listing **sources** (e.g. VERIFY lanes, adoption proof matrix, `examples/accrue_host/README.md`, merge-blocking verifiers, recent phase notes), **P0 / P1 / P2** classification, and explicit **defer** rows with reasons.
-- [ ] **FRG-02**: **North star + stop rules** — The **v1.17** north star (maximize marginal dev value; one sharp bet per phase; stop at diminishing returns) and **stop rules** are written in the inventory doc **or** a sibling markdown file and **cross-linked** from **`.planning/PROJECT.md`** § Current milestone and **`.planning/STATE.md`**.
-- [ ] **FRG-03**: **Scoped backlog for execution** — From **FRG-01**, authors produce the **scoped implementation backlog** for Phases **63–65**: each **P0** candidate maps to **INT-10**, **BIL-03**, or **ADM-12** (with tag) **or** is explicitly **not v1.17** with rationale (no tacit scope).
+- [x] **FRG-01**: **Ranked friction inventory** — Maintainers commit an **integrator-facing friction inventory** under **`.planning/`** (exact path recorded in **`.planning/STATE.md`**) listing **sources** (e.g. VERIFY lanes, adoption proof matrix, `examples/accrue_host/README.md`, merge-blocking verifiers, recent phase notes), **P0 / P1 / P2** classification, and explicit **defer** rows with reasons.
+- [x] **FRG-02**: **North star + stop rules** — The **v1.17** north star (maximize marginal dev value; one sharp bet per phase; stop at diminishing returns) and **stop rules** are written in the inventory doc **or** a sibling markdown file and **cross-linked** from **`.planning/PROJECT.md`** § Current milestone and **`.planning/STATE.md`**.
+- [x] **FRG-03**: **Scoped backlog for execution** — From **FRG-01**, authors produce the **scoped implementation backlog** for Phases **63–65**: each **P0** candidate maps to **INT-10**, **BIL-03**, or **ADM-12** (with tag) **or** is explicitly **not v1.17** with rationale (no tacit scope).
 
 ### Integrator / VERIFY / docs (INT)
 
@@ -45,9 +45,9 @@
 
 | Requirement | Phase | Status |
 |---------------|-------|--------|
-| FRG-01 | 62 | Pending |
-| FRG-02 | 62 | Pending |
-| FRG-03 | 62 | Pending |
+| FRG-01 | 62 | Complete |
+| FRG-02 | 62 | Complete |
+| FRG-03 | 62 | Complete |
 | INT-10 | 63 | Pending |
 | BIL-03 | 64 | Pending |
 | ADM-12 | 65 | Pending |
