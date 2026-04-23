@@ -94,6 +94,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
           module={DataTable}
           id="customers"
           query_module={Customers}
+          current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
           columns={[

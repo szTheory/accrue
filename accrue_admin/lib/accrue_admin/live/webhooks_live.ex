@@ -216,6 +216,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           module={DataTable}
           id="webhooks"
           query_module={Webhooks}
+          current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
           columns={[

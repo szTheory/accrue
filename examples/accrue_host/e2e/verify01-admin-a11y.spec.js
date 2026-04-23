@@ -297,3 +297,95 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
   });
 });
+
+test.describe("core-admin-invoices-index", () => {
+  test("invoice index passes axe in light and dark themes", async ({ page }, testInfo) => {
+    test.skip(
+      testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
+      "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
+    );
+
+    reseedFixture();
+    const fixture = readFixture();
+
+    expect(fixture.admin_org_alpha_slug).toBeTruthy();
+    expect(fixture.invoice_id).toBeTruthy();
+
+    await login(page, fixture, fixture.admin_email);
+    await page.getByRole("link", { name: "Go to billing" }).click();
+    await waitForLiveView(page);
+
+    await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+    await waitForLiveView(page);
+
+    const invoicesUrl = `/billing/invoices?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    await page.goto(invoicesUrl, { waitUntil: "domcontentloaded" });
+    await waitForLiveView(page);
+
+    await expect(page.locator("html")).toHaveClass(/accrue-admin/);
+
+    await expect(page.getByText(copyStrings.invoices_index_headline)).toBeVisible();
+
+    const lightBtn = page.locator('button[data-theme-target="light"]');
+    await expect(lightBtn).toBeVisible();
+    await lightBtn.click();
+    await waitForLiveView(page);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+    let violations = await scanAxe(page);
+    expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+
+    const darkBtn = page.locator('button[data-theme-target="dark"]');
+    await expect(darkBtn).toBeVisible();
+    await darkBtn.click();
+    await waitForLiveView(page);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector("a.ax-sidebar-link-active");
+        if (!el) return false;
+        const bg = getComputedStyle(el).backgroundColor;
+        return bg.includes("31") && bg.includes("40") && bg.includes("61");
+      },
+      { timeout: 5000 }
+    );
+
+    violations = await scanAxe(page);
+    expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+  });
+});
+
+test.describe("core-admin-invoices-detail", () => {
+  test("invoice detail shows PDF control enabled (D-07)", async ({ page }, testInfo) => {
+    test.skip(
+      testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
+      "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
+    );
+
+    reseedFixture();
+    const fixture = readFixture();
+
+    expect(fixture.invoice_id).toBeTruthy();
+
+    await login(page, fixture, fixture.admin_email);
+    await page.getByRole("link", { name: "Go to billing" }).click();
+    await waitForLiveView(page);
+
+    await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+    await waitForLiveView(page);
+
+    const detailUrl = `/billing/invoices/${fixture.invoice_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    await page.goto(detailUrl, { waitUntil: "domcontentloaded" });
+    await waitForLiveView(page);
+
+    await expect(page.locator("html")).toHaveClass(/accrue-admin/);
+
+    await expect(page.getByText(copyStrings.invoice_detail_eyebrow)).toBeVisible();
+
+    // D-07: primary on-demand PDF affordance is the LiveView button (D-08 download/popup optional).
+    const pdfButton = page.getByRole("button", { name: copyStrings.invoice_open_pdf_button });
+    await expect(pdfButton).toBeVisible();
+    await expect(pdfButton).toBeEnabled();
+  });
+});

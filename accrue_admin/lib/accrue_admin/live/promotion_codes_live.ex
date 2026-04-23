@@ -81,6 +81,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
           module={DataTable}
           id="promotion-codes"
           query_module={PromotionCodes}
+          current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
           columns={[

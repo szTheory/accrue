@@ -78,6 +78,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
           module={DataTable}
           id="invoices"
           query_module={Invoices}
+          current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
           columns={[

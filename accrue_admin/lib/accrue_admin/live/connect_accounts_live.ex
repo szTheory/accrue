@@ -81,6 +81,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
           module={DataTable}
           id="connect-accounts"
           query_module={ConnectAccounts}
+          current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
           filter_submit_label={AccrueAdmin.Copy.connect_accounts_apply_filters()}

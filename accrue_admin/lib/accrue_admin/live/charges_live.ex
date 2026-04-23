@@ -79,6 +79,7 @@ defmodule AccrueAdmin.Live.ChargesLive do
           module={DataTable}
           id="charges"
           query_module={Charges}
+          current_owner_scope={@current_owner_scope}
           path={@table_path}
           params={@params}
           columns={[

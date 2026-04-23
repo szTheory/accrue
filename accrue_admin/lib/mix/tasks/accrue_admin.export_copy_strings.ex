@@ -31,6 +31,9 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     connect_accounts_apply_filters
     connect_account_eyebrow
     connect_account_save_platform_fee_override
+    invoice_detail_eyebrow
+    invoice_open_pdf_button
+    invoices_index_headline
     billing_events_heading_organization
     billing_events_table_empty_title
     billing_events_apply_filters
