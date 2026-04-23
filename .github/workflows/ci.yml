@@ -370,6 +370,9 @@ jobs:
       - name: VERIFY-01 README contract (shift-left)
         run: bash scripts/ci/verify_verify01_readme_contract.sh
 
+      - name: Core admin invoice VERIFY flow id drift guard
+        run: bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
+
       - name: ORG-09 adoption proof matrix literals
         run: bash scripts/ci/verify_adoption_proof_matrix.sh
 

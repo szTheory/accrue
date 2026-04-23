@@ -30,3 +30,12 @@ Mounted paths added for **AUX-03..AUX-06** (Connect, billing events, coupons, pr
 | VERIFY-01 admin billing events index (auxiliary) | `/billing/events?org=<slug>` | AUX-04, AUX-06 |
 | VERIFY-01 admin coupons index (auxiliary) | `/billing/coupons?org=<slug>` | AUX-01, AUX-06 |
 | VERIFY-01 admin promotion codes index (auxiliary) | `/billing/promotion-codes?org=<slug>` | AUX-02, AUX-06 |
+
+## Phase 55 — v1.14 ADM-08 invoice anchor (merge-blocking)
+
+`verify01-admin-a11y.spec.js` carries **merge-blocking** Playwright + axe coverage for the **core** invoice surfaces under the same **`/billing`** mount and **`?org=<slug>`** org scope as other VERIFY-01 rows.
+
+| `test.describe` title (exact) | Mounted path template | Requirement ids |
+|--------------------------------|------------------------|-----------------|
+| `core-admin-invoices-index` | `/billing/invoices?org=<slug>` | ADM-09 |
+| `core-admin-invoices-detail` | `/billing/invoices/:id?org=<slug>` | ADM-09 |
