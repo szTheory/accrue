@@ -219,6 +219,12 @@ Theme: **integrator golden path** + **auxiliary admin parity**; **PROC-08** and 
 - [x] **AUX-05** — **`ax-*`** + theme tokens on touched auxiliary surfaces; exceptions recorded in **`theme-exceptions.md`**. **Validated in Phase 53.**
 - [x] **AUX-06** — VERIFY-01 **Playwright** + **axe** on materially touched auxiliary mounted paths; **`export_copy_strings`** / **`copy_strings.json`** anti-drift wiring. **Validated in Phase 53.**
 
+### Validated v1.15 (Phases 57–58; docs shipped 2026-04-23)
+
+Theme: **release / trust semantics** (forcing function **B**); **PROC-08** and **FIN-03** not in this milestone.
+
+- [x] **TRT-01..TRT-04** — Hex + **`mix.exs`** baseline in **`upgrade.md`**; **`.planning/` vs SemVer** in **`RELEASING.md`** + root **`README.md`**; **Sigra vs `Accrue.Auth`** + **First Hour** / **organization billing** pointers in **`examples/accrue_host/README.md`**; **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. **Validated in Phases 57–58.**
+
 ### Validated v1.16 (archived in `.planning/milestones/v1.16-REQUIREMENTS.md`; milestone closed 2026-04-23)
 
 Theme: **integrator + proof continuity** after **v1.15** trust SemVer work; **PROC-08** and **FIN-03** not in this milestone.
@@ -227,12 +233,6 @@ Theme: **integrator + proof continuity** after **v1.15** trust SemVer work; **PR
 - [x] **INT-07** — Adoption proof matrix + evaluator walkthrough trust stub + lane honesty; **`scripts/ci/README.md`** INT gates (**INT-06**/**INT-07**) with **CONTRIBUTING** routing. **Validated in Phase 60.**
 - [x] **INT-08** — Repo-root **README** preserves **VERIFY-01** / **`host-integration`** discoverability within the documented hop budget; verifier + README updated together when the contract moves. **Validated in Phase 61.**
 - [x] **INT-09** — **`verify_package_docs`**, **`first_hour`**, package READMEs, and **`.planning/`** Hex mirror callouts stay aligned with **`mix.exs` `@version`** on the branch under test. **Validated in Phase 61.**
-
-### Validated v1.15 (Phases 57–58; docs shipped 2026-04-23)
-
-Theme: **release / trust semantics** (forcing function **B**); **PROC-08** and **FIN-03** not in this milestone.
-
-- [x] **TRT-01..TRT-04** — Hex + **`mix.exs`** baseline in **`upgrade.md`**; **`.planning/` vs SemVer** in **`RELEASING.md`** + root **`README.md`**; **Sigra vs `Accrue.Auth`** + **First Hour** / **organization billing** pointers in **`examples/accrue_host/README.md`**; **`accrue/README.md`** stability + **`RELEASING`** appendix pointer; **`verify_package_docs`** aligned to **`accrue_admin/mix.exs`**. **Validated in Phases 57–58.**
 
 ### Validated v1.14 (Phases 54–56; milestone scope delivered 2026-04-23)
 
