@@ -45,7 +45,7 @@
 
 **Success criteria (milestone):**
 
-1. **PRS-01..PRS-03** satisfied per **`.planning/REQUIREMENTS.md`** with **`docs-contracts-shift-left`** green after edits.
+1. **PRS-01..PRS-03** satisfied per archived **`milestones/v1.22-REQUIREMENTS.md`** with **`docs-contracts-shift-left`** green after edits.
 2. No **PROC-08** / **FIN-03** scope creep.
 
 </details>
