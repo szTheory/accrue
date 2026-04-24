@@ -12,7 +12,14 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**None active** — run **`/gsd-new-milestone`** to open **v1.23+** (fresh **`.planning/REQUIREMENTS.md`** and Phase **75+** on **`.planning/ROADMAP.md`**).
+### v1.23 — Post-publish contract alignment (Branch A — plan default)
+
+**Goal:** After each **linked Hex publish** for **`accrue` / `accrue_admin`**, keep merge-blocking **package docs**, **adoption proof matrix**, and **docs-contracts-shift-left** (including **production-readiness discoverability**) honest, and align **`.planning/`** public-Hex callouts — so integrators on **`main`** and on **Hex** see one coherent pin and doc story.
+
+**Target features / obligations:**
+
+- **PPX-01..PPX-04** — see **`.planning/REQUIREMENTS.md`** (traceability → Phase **75**).
+- **Evidence SSOT:** **`v1.17-P1-002`** in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** (**open** until Phase **75** verification closes the row).
 
 **v1.22 — Production path discoverability** is **archived** (**2026-04-24**). Phase **74**; **PRS-01..PRS-03** validated. Phase tree: **`.planning/milestones/v1.22-phases/74-production-path-discoverability/`**. Archives: **`.planning/milestones/v1.22-ROADMAP.md`**, **`v1.22-REQUIREMENTS.md`**. Planning git tag **`v1.22`**.
 
@@ -63,7 +70,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** — (**`.planning/REQUIREMENTS.md`** removed until **`/gsd-new-milestone`**).
+**Active planning milestone:** **v1.23** — **`.planning/REQUIREMENTS.md`** (**PPX-01..04**); Phase **75** under **`.planning/milestones/v1.23-phases/`**; friction row **`v1.17-P1-002`** (**open**).
 
 **Last shipped planning milestone:** **v1.22** — Phase **74** (**2026-04-24**): production-readiness discoverability (**PRS-01..03**); **`milestones/v1.22-*`** + **`milestones/v1.22-phases/`**; tag **`v1.22`**. Prior: **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 

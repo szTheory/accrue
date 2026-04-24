@@ -1,5 +1,23 @@
 # Milestones
 
+## v1.23 Post-publish contract alignment (Planning)
+
+**Planning opened:** 2026-04-24
+
+**Phases:** **1** phase (**75**) — execute after next **linked Hex publish** for **`accrue` / `accrue_admin`** (see **`RELEASING.md`**).
+
+**Theme:** **PPX-01..PPX-04** — **`verify_package_docs`**, **`verify_adoption_proof_matrix`**, **docs-contracts-shift-left** (including **`verify_production_readiness_discoverability.sh`**), and **`.planning/`** public-Hex callouts stay aligned with registry reality; closes **`v1.17-P1-002`**. **Branch A** (auto-prioritized plan default). **No** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.22** shipped.
+
+**Phase execution tree:** [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/)
+
+**Requirements / traceability:** [`REQUIREMENTS.md`](REQUIREMENTS.md)
+
+**Next after ship:** **`/gsd-complete-milestone`** then **`/gsd-new-milestone`** for **v1.24+** (or **Branch B** intake if no publish).
+
+---
+
 ## v1.22 Production path discoverability (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-23
