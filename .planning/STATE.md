@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.24
 milestone_name: milestone
-status: planning
-last_updated: "2026-04-24T13:14:17.385Z"
+status: milestone_complete
+last_updated: "2026-04-24T13:30:00.000Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -21,23 +21,23 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.24** — billing portal session on **`Accrue.Billing`** + customer **`payment_methods`** admin operator surfaces (**ADM-13..16**, **BIL-04..05**).
+**Current focus:** **v1.24** milestone — all planned phases (**76–78**) executed in planning; **BIL-04** / **BIL-05** closed with **78-VERIFICATION.md**.
 
 ## Current Position
 
-**Milestone:** **v1.24** — Billing portal facade + customer PM operator surfaces
+**Milestone:** **v1.24** — Billing portal facade + customer PM operator surfaces (**complete** in `.planning/`)
 
-**Phase:** 78
+**Phase:** — (none active)
 
-**Plan:** Not started
+**Plan:** —
 
-**Status:** Ready to plan
+**Status:** Milestone complete — ready for release train / archive / next milestone per project workflow
 
 **Last activity:** 2026-04-24
 
 ## Milestone Progress
 
-**Active:** **v1.24** — Phases **76–78** (see **`.planning/ROADMAP.md`**).
+**v1.24** phases **76–78**: **Complete** (see **`.planning/ROADMAP.md`**).
 
 **Shipped (planning):** **v1.23** Phase **75** **2026-04-24** (**PPX-01..04**); archives + tag **`v1.23`**. **v1.22** — **`milestones/v1.22-phases/`** (**74**); tag **`v1.22`**.
 
@@ -48,8 +48,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **v1.24** (**ADM-13..16**, **BIL-04..05**)
-- **`.planning/ROADMAP.md`** — active phases **76+** for **v1.24**
+- **`.planning/REQUIREMENTS.md`** — **v1.24** (**ADM-13..16**, **BIL-04..05**) — billing + admin requirements **complete** in traceability table
+- **`.planning/ROADMAP.md`** — **v1.24** phase rows **76–78** marked **Complete**
 
 ## Deferred Items
 
@@ -61,8 +61,6 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 - **2026-04-24:** **`/gsd-new-milestone` v1.24** — billing + admin theme; **REQ** IDs **ADM-13..16**, **BIL-04..05**; phases continue from **76**.
 
-**Next:** **`/gsd-discuss-phase 78`** or **`/gsd-plan-phase 78`**.
+**Next:** **`/gsd-progress`** — confirm merge-blocking CI; **`/gsd-new-milestone`** when starting the next versioned milestone; release train per **`/gsd-ship`** if publishing Hex.
 
-**Completed:** **v1.24** Phase **77** — **2026-04-24** (**ADM-15**, **ADM-16** — VERIFY-01 customer **`payment_methods`** tab + theme/copy closure). **v1.24** Phase **76** — **2026-04-24** (**ADM-13**, **ADM-14** — customer **`payment_methods`** inventory + Copy). **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.
-
-**Planned Phase:** 78 (Billing portal on Accrue.Billing + telemetry truth) — 2 plans — 2026-04-24T13:14:17.366Z
+**Completed:** **v1.24** Phase **78** — **2026-04-24** (**BIL-04**, **BIL-05** — `Accrue.Billing` billing portal facade + telemetry/docs truth). **v1.24** Phase **77** — **2026-04-24** (**ADM-15**, **ADM-16**). **v1.24** Phase **76** — **2026-04-24** (**ADM-13**, **ADM-14**). **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.

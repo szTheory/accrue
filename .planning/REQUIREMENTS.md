@@ -25,9 +25,9 @@
 
 ## Billing / Stripe depth (BIL)
 
-- [ ] **BIL-04**: Ship **`Accrue.Billing.create_billing_portal_session/2`** (bang variant as established by sibling `!` APIs) — **`%Accrue.Billing.Customer{}`** plus validated **keyword / map** attrs (**`return_url`**, **`configuration`**, optional **`flow_data`** / **`locale`** / **`on_behalf_of`** / **`operation_id`**) — delegating to **`Accrue.BillingPortal.Session.create/1`** after resolving **Stripe customer id** from the Accrue customer row. Wrap the call in **`Accrue.Telemetry.span/3`** (same **`[:accrue, :billing, resource, :action]`** pattern as other **`Accrue.Billing`** delegates, e.g. **`:billing_portal`** + **`:create`**) with **PII-safe metadata** (no portal **URL** in logs/attrs). Include **Fake-backed** **ExUnit** proving happy path + at least one failure class appropriate to the facade.
+- [x] **BIL-04**: Ship **`Accrue.Billing.create_billing_portal_session/2`** (bang variant as established by sibling `!` APIs) — **`%Accrue.Billing.Customer{}`** plus validated **keyword / map** attrs (**`return_url`**, **`configuration`**, optional **`flow_data`** / **`locale`** / **`on_behalf_of`** / **`operation_id`**) — delegating to **`Accrue.BillingPortal.Session.create/1`** after resolving **Stripe customer id** from the Accrue customer row. Wrap the call in **`Accrue.Telemetry.span/3`** (same **`[:accrue, :billing, resource, :action]`** pattern as other **`Accrue.Billing`** delegates, e.g. **`:billing_portal`** + **`:create`**) with **PII-safe metadata** (no portal **URL** in logs/attrs). Include **Fake-backed** **ExUnit** proving happy path + at least one failure class appropriate to the facade.
 
-- [ ] **BIL-05**: Update **`accrue/guides/telemetry.md`** (and **`accrue/guides/operator-runbooks.md`** cross-links when revenue- or support-adjacent) for **(a)** the new **billing portal** span from **BIL-04**, and **(b)** **`[:accrue, :billing, :payment_method, :attach|:detach|:set_default]`** if not already catalogued consistently with **`billing_span_coverage_test.exs`**; extend **`CHANGELOG.md`** entries for **`accrue`** as applicable; add or refresh **First Hour** / **configuration** pointers only when they reduce integrator confusion (optional stretch inside phase close).
+- [x] **BIL-05**: Update **`accrue/guides/telemetry.md`** (and **`accrue/guides/operator-runbooks.md`** cross-links when revenue- or support-adjacent) for **(a)** the new **billing portal** span from **BIL-04**, and **(b)** **`[:accrue, :billing, :payment_method, :attach|:detach|:set_default]`** if not already catalogued consistently with **`billing_span_coverage_test.exs`**; extend **`CHANGELOG.md`** entries for **`accrue`** as applicable; add or refresh **First Hour** / **configuration** pointers only when they reduce integrator confusion (optional stretch inside phase close).
 
 ---
 
@@ -61,8 +61,8 @@
 | ADM-14 | Phase 76 | Complete |
 | ADM-15 | Phase 77 | Complete |
 | ADM-16 | Phase 77 | Complete |
-| BIL-04 | Phase 78 | Pending |
-| BIL-05 | Phase 78 | Pending |
+| BIL-04 | Phase 78 | Complete |
+| BIL-05 | Phase 78 | Complete |
 
 **Coverage:** v1.24 requirements **6** total · Mapped **6** · Unmapped **0** ✓
 
