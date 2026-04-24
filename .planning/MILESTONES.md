@@ -1,20 +1,24 @@
 # Milestones
 
-## v1.23 Post-publish contract alignment (Planning)
+## v1.23 Post-publish contract alignment (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24
 
-**Phases:** **1** phase (**75**) — execute after next **linked Hex publish** for **`accrue` / `accrue_admin`** (see **`RELEASING.md`**).
+**Phases completed:** **1** phase (**75**), contract verification at published **0.3.1** (no new SemVer bump in-tree).
 
-**Theme:** **PPX-01..PPX-04** — **`verify_package_docs`**, **`verify_adoption_proof_matrix`**, **docs-contracts-shift-left** (including **`verify_production_readiness_discoverability.sh`**), and **`.planning/`** public-Hex callouts stay aligned with registry reality; closes **`v1.17-P1-002`**. **Branch A** (auto-prioritized plan default). **No** **PROC-08** / **FIN-03**.
+**Theme:** **PPX-01..PPX-04** — **`verify_package_docs`**, **`verify_adoption_proof_matrix`**, **docs-contracts-shift-left** (including **`verify_production_readiness_discoverability.sh`**), **`verify_v1_17_friction_research_contract.sh`** (five-row inventory); **`v1.17-P1-002`** **closed**. **Branch A**. **No** **PROC-08** / **FIN-03**.
 
 **Depends on:** **v1.22** shipped.
 
 **Phase execution tree:** [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/)
 
-**Requirements / traceability:** [`REQUIREMENTS.md`](REQUIREMENTS.md)
+**Key accomplishments:**
 
-**Next after ship:** **`/gsd-complete-milestone`** then **`/gsd-new-milestone`** for **v1.24+** (or **Branch B** intake if no publish).
+- **75:** **PPX-01..04** — local **`docs-contracts-shift-left`** bash suite green; **`scripts/ci/README.md`** triage text updated for **5** inventory rows; **`75-VERIFICATION.md`** sign-off.
+
+**Requirements / traceability:** [`REQUIREMENTS.md`](REQUIREMENTS.md) (root; archive on **`/gsd-complete-milestone`**).
+
+**Next after ship:** **`/gsd-complete-milestone`** to archive **v1.23** + planning tag **`v1.23`**, then **`/gsd-new-milestone`** for **v1.24+**.
 
 ---
 

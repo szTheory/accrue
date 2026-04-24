@@ -67,7 +67,7 @@ This checklist closes **`v1.17-P2-001`**-class drift risk (**P2** → **closed**
 
 ### Triage: verify_v1_17_friction_research_contract.sh
 
-- **`verify_v1_17_friction_research_contract:`** (stderr prefix on failure) — treat as **INT-10 / FRG-01..03** planning SSOT: inventory table shape (four rows, two P0 with **INT-10** + **→63**), backlog anchors (**INT-10** / **BIL-03** / **ADM-12**), no **`*(example)*`**, no ambiguous **`v1.17-P0-`** substring, **STATE**/**PROJECT** links, **S1**/**S5** rows in north star, **ROADMAP** FRG-03 slice links, plus **UAT-04** binary gate that **`.planning/milestones/v1.17-REQUIREMENTS.md`** exists (historical v1.17 requirements archive). Fix **`.planning/research/*.md`** first; only relax needles after an intentional milestone edit.
+- **`verify_v1_17_friction_research_contract:`** (stderr prefix on failure) — treat as **INT-10 / FRG-01..03** planning SSOT: inventory table shape (**five** rows: two **P0**, two **P1**, one **P2**; two P0 with **INT-10** + **→63**), backlog anchors (**INT-10** / **BIL-03** / **ADM-12**), no **`*(example)*`**, no ambiguous **`v1.17-P0-`** substring, **STATE**/**PROJECT** links, **S1**/**S5** rows in north star, **ROADMAP** FRG-03 slice links, plus **UAT-04** binary gate that **`.planning/milestones/v1.17-REQUIREMENTS.md`** exists (historical v1.17 requirements archive). Fix **`.planning/research/*.md`** first; only relax needles after an intentional milestone edit.
 
 ### Triage: verify_adoption_proof_matrix.sh
 

@@ -12,14 +12,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.23 — Post-publish contract alignment (Branch A — plan default)
+### v1.23 — Post-publish contract alignment (Branch A — **Phase 75 verified 2026-04-24**)
 
 **Goal:** After each **linked Hex publish** for **`accrue` / `accrue_admin`**, keep merge-blocking **package docs**, **adoption proof matrix**, and **docs-contracts-shift-left** (including **production-readiness discoverability**) honest, and align **`.planning/`** public-Hex callouts — so integrators on **`main`** and on **Hex** see one coherent pin and doc story.
 
-**Target features / obligations:**
-
-- **PPX-01..PPX-04** — see **`.planning/REQUIREMENTS.md`** (traceability → Phase **75**).
-- **Evidence SSOT:** **`v1.17-P1-002`** in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** (**open** until Phase **75** verification closes the row).
+**Shipped (planning execution):** **PPX-01..PPX-04** complete per **`.planning/REQUIREMENTS.md`**; evidence **`milestones/v1.23-phases/75-post-publish-contract-alignment/75-VERIFICATION.md`**; **`v1.17-P1-002`** **closed** in the friction inventory. **`/gsd-complete-milestone`** remains to archive root **`REQUIREMENTS.md`**, write **`milestones/v1.23-*`**, and tag **`v1.23`**.
 
 **v1.22 — Production path discoverability** is **archived** (**2026-04-24**). Phase **74**; **PRS-01..PRS-03** validated. Phase tree: **`.planning/milestones/v1.22-phases/74-production-path-discoverability/`**. Archives: **`.planning/milestones/v1.22-ROADMAP.md`**, **`v1.22-REQUIREMENTS.md`**. Planning git tag **`v1.22`**.
 
@@ -68,13 +65,13 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
-**Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
+**Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **v1.23** — **`.planning/REQUIREMENTS.md`** (**PPX-01..04**); Phase **75** under **`.planning/milestones/v1.23-phases/`**; friction row **`v1.17-P1-002`** (**open**).
+**Active planning milestone:** **v1.23** — execution **complete**; run **`/gsd-complete-milestone`** to archive (**`milestones/v1.23-*`**, tag **`v1.23`**, remove root **`REQUIREMENTS.md`** per workflow).
 
-**Last shipped planning milestone:** **v1.22** — Phase **74** (**2026-04-24**): production-readiness discoverability (**PRS-01..03**); **`milestones/v1.22-*`** + **`milestones/v1.22-phases/`**; tag **`v1.22`**. Prior: **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.23** — Phase **75** (**2026-04-24**): post-publish contract alignment (**PPX-01..04**); **`milestones/v1.23-phases/`**; **`v1.17-P1-002`** closed. **Earlier:** **v1.22** — Phase **74** (**2026-04-24**): **PRS-01..03**; **`milestones/v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.22** Phase **74** under **`.planning/milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
+**Execution history:** **v1.23** Phase **75** **verified** under **`.planning/milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`.planning/milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -589,4 +586,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after **`/gsd-complete-milestone` v1.22** — archives **`milestones/v1.22-*`**, root **`REQUIREMENTS.md`** removed for next milestone.*
+*Last updated: 2026-04-24 — **v1.23** Phase **75** verified (**PPX-01..04**); **`v1.17-P1-002`** closed; **`verify_v1_17_friction_research_contract.sh`** expects **5** inventory rows; **`/gsd-complete-milestone`** pending for archive + tag **`v1.23`**.*

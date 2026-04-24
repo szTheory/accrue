@@ -9,13 +9,13 @@
 
 ### Proof and package contracts (PPX)
 
-- [ ] **PPX-01**: **`bash scripts/ci/verify_package_docs.sh`** and **`accrue/test/accrue/docs/package_docs_verifier_test.exs`** pass on **`main`** after the **`accrue` / `accrue_admin`** **`mix.exs` `@version`** bump that ships (or immediately accompanies) the linked registry release — install literals in enforced docs match workspace **`@version`**.
-- [ ] **PPX-02**: **`bash scripts/ci/verify_adoption_proof_matrix.sh`** passes; **`examples/accrue_host/docs/adoption-proof-matrix.md`** stays needle-aligned with the script (same-PR co-update discipline per **`scripts/ci/README.md`**).
-- [ ] **PPX-03**: Merge-blocking **`docs-contracts-shift-left`** set stays green, including **`scripts/ci/verify_production_readiness_discoverability.sh`**, after any doc or version touch in this milestone.
+- [x] **PPX-01**: **`bash scripts/ci/verify_package_docs.sh`** and **`accrue/test/accrue/docs/package_docs_verifier_test.exs`** pass on **`main`** after the **`accrue` / `accrue_admin`** **`mix.exs` `@version`** bump that ships (or immediately accompanies) the linked registry release — install literals in enforced docs match workspace **`@version`**. *(Script verified locally at **0.3.1**; ExUnit duplicate via CI — **`package_docs_verifier_test`** needs **TestRepo**.)*
+- [x] **PPX-02**: **`bash scripts/ci/verify_adoption_proof_matrix.sh`** passes; **`examples/accrue_host/docs/adoption-proof-matrix.md`** stays needle-aligned with the script (same-PR co-update discipline per **`scripts/ci/README.md`**).
+- [x] **PPX-03**: Merge-blocking **`docs-contracts-shift-left`** set stays green, including **`scripts/ci/verify_production_readiness_discoverability.sh`**, after any doc or version touch in this milestone.
 
 ### Planning hygiene (PPX)
 
-- [ ] **PPX-04**: **`.planning/PROJECT.md`**, **`.planning/MILESTONES.md`**, and **`.planning/STATE.md`** “public Hex” / last-published callouts match **actual** registry versions for the shipped release; **`v1.17-P1-002`** in the friction inventory is moved to **closed** with a verification pointer to Phase **75** evidence.
+- [x] **PPX-04**: **`.planning/PROJECT.md`**, **`.planning/MILESTONES.md`**, and **`.planning/STATE.md`** “public Hex” / last-published callouts match **actual** registry versions for the shipped release; **`v1.17-P1-002`** in the friction inventory is moved to **closed** with a verification pointer to Phase **75** evidence.
 
 ## Future requirements (deferred)
 
@@ -35,9 +35,12 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PPX-01 | Phase 75 | Pending |
-| PPX-02 | Phase 75 | Pending |
-| PPX-03 | Phase 75 | Pending |
-| PPX-04 | Phase 75 | Pending |
+| PPX-01 | Phase 75 | Complete |
+| PPX-02 | Phase 75 | Complete |
+| PPX-03 | Phase 75 | Complete |
+| PPX-04 | Phase 75 | Complete |
 
 **Coverage:** v1.23 requirements **4** total · Mapped **4** · Unmapped **0** ✓
+
+---
+*Last updated: 2026-04-24 — Phase **75** verification complete; **`v1.17-P1-002`** closed.*

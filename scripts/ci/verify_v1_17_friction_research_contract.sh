@@ -37,10 +37,16 @@ if ! perl -0777 -ne 'exit 1 if /v1\.17-P0-(?!\d{3})/' "$inv"; then
 fi
 
 row_count=$(grep -cE '^\| v1\.17-P[012]-[0-9]{3} \|' "$inv" || true)
-[[ "$row_count" -eq 4 ]] || die "expected exactly 4 inventory data rows (P0/P1/P2), got ${row_count}"
+[[ "$row_count" -eq 5 ]] || die "expected exactly 5 inventory data rows (P0/P1/P2), got ${row_count}"
 
 p0_count=$(grep -cE '^\| v1\.17-P0-' "$inv" || true)
 [[ "$p0_count" -eq 2 ]] || die "expected exactly 2 P0 inventory rows, got ${p0_count}"
+
+p1_count=$(grep -cE '^\| v1\.17-P1-' "$inv" || true)
+[[ "$p1_count" -eq 2 ]] || die "expected exactly 2 P1 inventory rows, got ${p1_count}"
+
+p2_count=$(grep -cE '^\| v1\.17-P2-' "$inv" || true)
+[[ "$p2_count" -eq 1 ]] || die "expected exactly 1 P2 inventory row, got ${p2_count}"
 
 while IFS= read -r line; do
   [[ -z "$line" ]] && continue
