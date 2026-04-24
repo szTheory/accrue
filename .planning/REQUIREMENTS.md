@@ -19,7 +19,7 @@
 
 ## Friction inventory (INV)
 
-- [ ] **INV-04**: Run a **maintainer pass** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** after **INT-13** lands: either **(a)** add **new sourced** **P1** / **P2** rows (with **`sources`**, **`ci_contract`**, **`integrator_impact`**, stable **`v1.17-P*-***` ids) for friction uncovered on **`main`**, **or** **(b)** publish an explicit **dated maintainer certification** that no new sourced rows were warranted (with pointers to **`verify_package_docs`**, **`verify_adoption_proof_matrix.sh`**, **VERIFY-01** / **`host-integration`**, and **`docs-contracts-shift-left`** green on the reviewed SHA). If **(a)** changes row counts, keep **`verify_v1_17_friction_research_contract.sh`** green with same-PR update.
+- [x] **INV-04**: Run a **maintainer pass** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** after **INT-13** lands: either **(a)** add **new sourced** **P1** / **P2** rows (with **`sources`**, **`ci_contract`**, **`integrator_impact`**, stable **`v1.17-P*-***` ids) for friction uncovered on **`main`**, **or** **(b)** publish an explicit **dated maintainer certification** that no new sourced rows were warranted (with pointers to **`verify_package_docs`**, **`verify_adoption_proof_matrix.sh`**, **VERIFY-01** / **`host-integration`**, and **`docs-contracts-shift-left`** green on the reviewed SHA). If **(a)** changes row counts, keep **`verify_v1_17_friction_research_contract.sh`** green with same-PR update.
 
 ---
 
@@ -40,7 +40,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INT-13 | Phase 82 | **Complete** 2026-04-24 — [`082-VERIFICATION.md`](milestones/v1.26-phases/082-first-hour-portal-spine/082-VERIFICATION.md) |
-| INV-04 | Phase 83 | Pending |
+| INV-04 | Phase 83 | **Complete** 2026-04-24 — [`083-VERIFICATION.md`](milestones/v1.26-phases/083-friction-inventory-post-touch/083-VERIFICATION.md) |
 
 **Coverage:**
 

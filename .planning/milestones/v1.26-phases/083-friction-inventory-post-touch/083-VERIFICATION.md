@@ -1,6 +1,6 @@
 ---
 phase: 83-friction-inventory-post-touch
-status: pending
+status: complete
 ---
 
 # Phase 83 — Friction inventory post-touch — Verification
@@ -53,3 +53,12 @@ verify_verify01_readme_contract: OK
 **VERIFY-01** maps to step **`VERIFY-01 README contract`** in GitHub Actions job **`docs-contracts-shift-left`**, which runs **`bash scripts/ci/verify_verify01_readme_contract.sh`** (see [`.github/workflows/ci.yml` @ reviewed SHA](https://github.com/szTheory/accrue/blob/d1f121c75bb21fb2dd53c9ac9315bd83c26a438e/.github/workflows/ci.yml) — job key **`docs-contracts-shift-left`**, lines ~30–55).
 
 **`host-integration`** is merge-blocking on **`pull_request`** to **`main`** per the workflow header comments and the **`host-integration`** job definition in the same file; that job declares **`needs: [admin-drift-docs, docs-contracts-shift-left]`**, so **`docs-contracts-shift-left`** (including **VERIFY-01**) must go green before **`host-integration`** runs. **`docs-contracts-shift-left`** is listed among merge-blocking jobs alongside **`host-integration`** in **`.github/workflows/ci.yml`**.
+
+## INV-04 closure checklist
+
+Per **`.planning/REQUIREMENTS.md`** **INV-04**:
+
+- [x] **(b)** — **Dated maintainer certification** that no new sourced **P1**/**P2** rows were warranted: **`.planning/research/v1.17-FRICTION-INVENTORY.md`** → **`### v1.26 INV-04 maintainer pass (2026-04-24)`** (normative voice; this file holds methodology + transcripts only).
+- [x] **Named verifiers + SHA** — **`verify_package_docs`**, **`verify_adoption_proof_matrix.sh`**, **VERIFY-01** / **`verify_verify01_readme_contract.sh`**, **`verify_v1_17_friction_research_contract.sh`**, **`docs-contracts-shift-left`**, and **`host-integration`** — documented above with **Reviewed merge SHA** **`d1f121c75bb21fb2dd53c9ac9315bd83c26a438e`**.
+- [x] **`docs-contracts-shift-left`** explicitly named in the certification bundle (inventory subsection + this file).
+- [x] **`verify_v1_17_friction_research_contract.sh`** green on final tree (path **(b)** — row counts unchanged; **83-01-03** skip line recorded).
