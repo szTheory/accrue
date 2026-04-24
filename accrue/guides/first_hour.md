@@ -9,6 +9,12 @@ Server-side **Stripe Checkout** session creation uses **`Accrue.Billing.create_c
 (and your host facade after install); telemetry is **`[:accrue, :billing, :checkout_session, :create]`**
 — see [`guides/telemetry.md#billing-checkout-session-create`](telemetry.md#billing-checkout-session-create).
 
+Customer Portal session creation is the parallel server-side helper for Stripe-hosted billing self-service.
+
+Server-side **Stripe Customer Portal** session creation uses **`Accrue.Billing.create_billing_portal_session/2`**
+(and your host facade after install); telemetry is **`[:accrue, :billing, :billing_portal, :create]`**
+— see [`guides/telemetry.md#billing-billing-portal-create`](telemetry.md#billing-billing-portal-create).
+
 ## How to enter this guide
 
 This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the **same** pull request (**D-02**). Maintainer checklist (**INT-11**): same-PR capsule discipline lives in the contributor map [`scripts/ci/README.md`](../../scripts/ci/README.md) — search for **First Hour + host README capsule parity**.

@@ -18,7 +18,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Target features:**
 
-- **INT-13** — Guide capsule, host README parity (**D-02** / **INT-11**), matrix row + **`verify_adoption_proof_matrix`** (and coupled doc verifiers in the **same PR** when required).
+- [x] **INT-13** — Guide capsule, host README parity (**D-02** / **INT-11**), matrix row + **`verify_adoption_proof_matrix`** (and coupled doc verifiers in the **same PR** when required). **Validated in Phase 82** (`milestones/v1.26-phases/082-first-hour-portal-spine/082-VERIFICATION.md`).
 - **INV-04** — **`v1.17-FRICTION-INVENTORY.md`** certification or new sourced rows with falsifiable verifier pointers.
 
 **Planning artifacts:** root **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`** (Phases **82–83**).
@@ -650,4 +650,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **`/gsd-new-milestone` v1.26** opened (**INT-13**, **INV-04**); **`REQUIREMENTS.md`** recreated; Phases **82–83**.*
+*Last updated: 2026-04-24 — Phase **82** complete (**INT-13**); **`INV-04`** remains in Phase **83**.*

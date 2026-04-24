@@ -7,7 +7,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 82 | First-hour portal spine | **First Hour** + **`examples/accrue_host` README** capsule parity (**D-02** / **INT-11**) for **`Accrue.Billing.create_billing_portal_session/2`** and **`[:accrue, :billing, :billing_portal, :create]`**; **adoption proof matrix** row + **`verify_adoption_proof_matrix.sh`** (and any coupled **`verify_package_docs`** / **`docs-contracts-shift-left`** updates) in the **same PR** when paths or literals change. | INT-13 |
+| 82 | First-hour portal spine | **Complete 2026-04-24** ([`milestones/v1.26-phases/082-first-hour-portal-spine/082-VERIFICATION.md`](milestones/v1.26-phases/082-first-hour-portal-spine/082-VERIFICATION.md)). **First Hour** + **`examples/accrue_host` README** capsule parity (**D-02** / **INT-11**) for **`Accrue.Billing.create_billing_portal_session/2`** and **`[:accrue, :billing, :billing_portal, :create]`**; **adoption proof matrix** row + **`verify_adoption_proof_matrix.sh`** + **`verify_package_docs.sh`** portal needles (**INT-13**). | INT-13 |
 | 83 | Friction inventory post-touch | **INV-04** maintainer pass on **`v1.17-FRICTION-INVENTORY.md`**: dated certification **or** new sourced **P1**/**P2** rows + verifier evidence; **`verify_v1_17_friction_research_contract.sh`** honest if row counts change. | INV-04 |
 
 **Success criteria (milestone):**
@@ -59,7 +59,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 82 | First-hour portal spine | Package + host integrator surfaces + matrix + verifiers reflect **billing portal** facade. | INT-13 |
+| 82 | First-hour portal spine | **Complete 2026-04-24** ([`082-VERIFICATION.md`](milestones/v1.26-phases/082-first-hour-portal-spine/082-VERIFICATION.md)). Package + host integrator surfaces + matrix + verifiers reflect **billing portal** facade. | INT-13 |
 | 83 | Friction inventory post-touch | Inventory certification or sourced new rows post-**INT-13**. | INV-04 |
 
 **Success criteria (milestone):**

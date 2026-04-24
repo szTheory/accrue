@@ -15,6 +15,7 @@ Accrue intentionally splits proof into a **deterministic Fake-first lane** (bloc
 | Concern | Proof | Where |
 |--------|--------|--------|
 | Billing **`Accrue.Billing.create_checkout_session/2`** facade + **`[:accrue, :billing, :checkout_session, :create]`** telemetry contract | `checkout_session_facade_test.exs` + First Hour / `guides/telemetry.md` | `accrue` package |
+| Billing **`Accrue.Billing.create_billing_portal_session/2`** facade + **`[:accrue, :billing, :billing_portal, :create]`** telemetry contract | `billing_portal_session_facade_test.exs` + First Hour / `guides/telemetry.md` | `accrue` package |
 | Installer + compile + bounded + full host ExUnit | `mix verify.full` (see `mix.exs` aliases) | `examples/accrue_host`, `scripts/ci/*.sh` |
 | VERIFY-01 contract (README, seed, fixture schema, Playwright) | `docs-contracts-shift-left` + `host-integration` jobs; bash gates + Playwright | `.github/workflows/ci.yml`, `scripts/ci/` |
 | Org-first billing LiveView (tax location, subscribe, cancel) | `subscription_flow_test.exs` | Bounded `mix verify` slice |

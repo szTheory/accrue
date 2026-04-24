@@ -133,7 +133,8 @@ examples below — for the enforced billing span inventory, see
 - `accrue.billing.payment_method.list` — `[:accrue, :billing, :payment_method, :list]`
   from `Accrue.Billing.list_payment_methods/2` (processor-backed read; no extra
   ops tuple).
-- `accrue.billing.billing_portal.create` — `[:accrue, :billing, :billing_portal, :create]`
+- <a id="billing-billing-portal-create"></a> `accrue.billing.billing_portal.create` —
+  `[:accrue, :billing, :billing_portal, :create]`
   from `Accrue.Billing.create_billing_portal_session/2` (Phase 78 / **BIL-04**).
 - <a id="billing-checkout-session-create"></a> `accrue.billing.checkout_session.create` —
   `[:accrue, :billing, :checkout_session, :create]` from

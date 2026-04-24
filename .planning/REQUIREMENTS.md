@@ -13,7 +13,7 @@
 
 ## Integrator path + proof (INT)
 
-- [ ] **INT-13**: **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) appears on the **First Hour** spine with the same **shape** as the **checkout** callout: host facade mention after **`mix accrue.install`**, **telemetry tuple** **`[:accrue, :billing, :billing_portal, :create]`** with anchor link into **`accrue/guides/telemetry.md`** (existing row). Update **`examples/accrue_host/README.md`** **§ proof-and-verification** capsule so **D-02** / **INT-11** parity holds when First Hour prose changes. Add an **adoption proof matrix** row (and any **Layer C** / **`verify_adoption_proof_matrix.sh`** needles) so **billing portal** is as **merge-blocking provable** as **checkout**. Touch **only** other verifiers (**`verify_package_docs`**, **`docs-contracts-shift-left`**, **`verify_v1_17_friction_research_contract.sh`**) when paths or row counts **require** it — **same PR** per **`scripts/ci/README.md`**.
+- [x] **INT-13**: **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) appears on the **First Hour** spine with the same **shape** as the **checkout** callout: host facade mention after **`mix accrue.install`**, **telemetry tuple** **`[:accrue, :billing, :billing_portal, :create]`** with anchor link into **`accrue/guides/telemetry.md`** (existing row). Update **`examples/accrue_host/README.md`** **§ proof-and-verification** capsule so **D-02** / **INT-11** parity holds when First Hour prose changes. Add an **adoption proof matrix** row (and any **Layer C** / **`verify_adoption_proof_matrix.sh`** needles) so **billing portal** is as **merge-blocking provable** as **checkout**. Touch **only** other verifiers (**`verify_package_docs`**, **`docs-contracts-shift-left`**, **`verify_v1_17_friction_research_contract.sh`**) when paths or row counts **require** it — **same PR** per **`scripts/ci/README.md`**. **Validated:** Phase **82** (`082-VERIFICATION.md`).
 
 ---
 
@@ -39,7 +39,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INT-13 | Phase 82 | Pending |
+| INT-13 | Phase 82 | **Complete** 2026-04-24 — [`082-VERIFICATION.md`](milestones/v1.26-phases/082-first-hour-portal-spine/082-VERIFICATION.md) |
 | INV-04 | Phase 83 | Pending |
 
 **Coverage:**

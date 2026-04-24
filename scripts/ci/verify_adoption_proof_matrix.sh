@@ -41,5 +41,8 @@ require_substring "ORG-08" "ORG-08 row"
 require_substring "Accrue.Billing.create_checkout_session/2" "checkout facade API in matrix"
 require_substring "[:accrue, :billing, :checkout_session, :create]" "checkout billing span tuple in matrix"
 require_substring "checkout_session_facade_test.exs" "checkout facade ExUnit path in matrix"
+require_substring "Accrue.Billing.create_billing_portal_session/2" "billing portal facade API in matrix"
+require_substring "[:accrue, :billing, :billing_portal, :create]" "billing portal billing span tuple in matrix"
+require_substring "billing_portal_session_facade_test.exs" "billing portal facade ExUnit path in matrix"
 
 echo "verify_adoption_proof_matrix: OK"

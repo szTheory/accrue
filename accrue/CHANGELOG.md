@@ -16,11 +16,13 @@ Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` sh
 
 ### Documentation
 
+* **INT-13:** extend **First Hour**, **`examples/accrue_host/README.md`**, and **`examples/accrue_host/docs/adoption-proof-matrix.md`** with **`Accrue.Billing.create_billing_portal_session/2`**, **`[:accrue, :billing, :billing_portal, :create]`**, anchor **`guides/telemetry.md#billing-billing-portal-create`**, and **`billing_portal_session_facade_test.exs`** — Customer Portal facade parity alongside checkout in the integrator spine.
 * Align **First Hour**, **`examples/accrue_host/README.md`**, **`examples/accrue_host/docs/adoption-proof-matrix.md`**, **`guides/telemetry.md`**, and **`guides/operator-runbooks.md`** with **`Accrue.Billing.create_checkout_session/2`** and the **`[:accrue, :billing, :checkout_session, :create]`** span (anchor **`#billing-checkout-session-create`**); operator Stripe triage stays pointer-depth only (no Checkout error matrix).
 * Harden the telemetry guide ops catalog (evergreen heading, Primary owner column, Hex vs `main` doc contract), correct OpenTelemetry examples (including meter reporting + ops failure cross-link), add an ops event contract test, and emit `[:accrue, :ops, :webhook_dlq, :dead_lettered]` when webhook dispatch exhausts retries.
 
 ### CI
 
+* Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for **billing portal** facade literals (**`create_billing_portal_session/2`**, **`[:accrue, :billing, :billing_portal, :create]`**, **`billing-billing-portal-create`** / **`billing_portal_session_facade_test.exs`**) alongside checkout.
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for checkout facade + billing-span literals co-evolving with golden-path docs.
 
 ## [0.3.1](https://github.com/szTheory/accrue/compare/accrue-v0.3.0...accrue-v0.3.1) (2026-04-22)

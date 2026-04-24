@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.26
-milestone_name: First-hour billing facade spine
-status: defining_requirements
-last_updated: "2026-04-24T12:00:00.000Z"
-last_activity: 2026-04-24 — `/gsd-new-milestone` v1.26 (INT-13, INV-04); roadmap Phases 82–83.
+milestone_name: milestone
+status: executing
+last_updated: "2026-04-24T16:25:00.000Z"
+last_activity: 2026-04-24 — **`/gsd-execute-phase 82`** (INT-13 markdown + CI gates; **`082-VERIFICATION.md`**).
 progress:
-  total_phases: 2
+  total_phases: 9
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 2
 ---
 
 # Project State
@@ -20,19 +20,19 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.26** — First Hour + host README + adoption proof matrix parity for **`Accrue.Billing.create_billing_portal_session/2`**, then **INV-04** friction inventory pass. **PROC-08** / **FIN-03** remain out of scope.
+**Current focus:** **v1.26** — First Hour + host README + adoption proof matrix parity for **`Accrue.Billing.create_billing_portal_session/2`** (**INT-13** Phase **82** implemented); then **INV-04** Phase **83**. **PROC-08** / **FIN-03** remain out of scope.
 
 ## Current Position
 
 **Milestone:** **v1.26** — First-hour billing facade spine
 
-**Phase:** **82** — context gathered (`082-CONTEXT.md`); ready for `/gsd-plan-phase 82`
+**Phase:** **82** — **complete** (plans **082-01** / **082-02** + **`082-VERIFICATION.md`**); next **83** — friction inventory post-touch (**INV-04**).
 
 **Plan:** —
 
-**Status:** Requirements + roadmap defined — ready to execute Phase **82**
+**Status:** Phase **82** execution finished — merge-blocking doc scripts green locally; run full CI on branch before merge.
 
-**Last activity:** 2026-04-24 — **`/gsd-discuss-phase 82`** (research-backed **`082-CONTEXT.md`** under **`.planning/milestones/v1.26-phases/082-first-hour-portal-spine/`**).
+**Last activity:** 2026-04-24 — **`/gsd-execute-phase 82`**: telemetry anchor **`#billing-billing-portal-create`**, First Hour + matrix + host README portal parity, **`verify_package_docs`** / **`verify_adoption_proof_matrix`** portal needles, **`CHANGELOG`**.
 
 ## Milestone Progress
 
@@ -60,6 +60,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 - **2026-04-24:** **`/gsd-new-milestone` v1.26** — integrator spine for **billing portal** (**INT-13**) + **INV-04** maintainer pass; research skipped (brownfield parity); **`phases.clear`** (0 trees).
 
-**Next:** **`/gsd-discuss-phase 82`** (recommended) or **`/gsd-plan-phase 82`**
+**Next:** **`/gsd-discuss-phase 83`** or **`/gsd-plan-phase 83`** (**INV-04**); optional **`/gsd-verify-work 82`** for conversational UAT.
 
 **Completed (v1.25):** Phases **79–81** — **`milestones/v1.25-phases/`**.
+
+**Planned Phase:** 82 (First-hour portal spine) — 2 plans — 2026-04-24T16:14:43.661Z

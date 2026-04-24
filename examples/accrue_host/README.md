@@ -90,6 +90,7 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 
 - **Cross-domain host subscription** (append `Accrue.Telemetry.Metrics.defaults/0`, attach once to `[:accrue, :ops, :webhook_dlq, :dead_lettered]`) is documented in [`../../accrue/guides/telemetry.md`](../../accrue/guides/telemetry.md#cross-domain-host-subscription). The compile-checked mirror in this app is `AccrueHost.AccrueOpsTelemetry`.
 - **Billing checkout facade:** `Accrue.Billing.create_checkout_session/2` emits **`[:accrue, :billing, :checkout_session, :create]`**; span metadata and Fake vs live processor notes live under [`../../accrue/guides/telemetry.md#billing-checkout-session-create`](../../accrue/guides/telemetry.md#billing-checkout-session-create) (ExUnit SSOT: `accrue/test/accrue/billing/checkout_session_facade_test.exs`).
+- **Billing portal facade:** `Accrue.Billing.create_billing_portal_session/2` emits **`[:accrue, :billing, :billing_portal, :create]`**; span notes live under [`../../accrue/guides/telemetry.md#billing-billing-portal-create`](../../accrue/guides/telemetry.md#billing-billing-portal-create) (ExUnit SSOT: `accrue/test/accrue/billing/billing_portal_session_facade_test.exs`).
 
 ## Production readiness
 
@@ -98,6 +99,8 @@ Before promoting billing to a live Stripe account, use the package checklist [`.
 ## Proof and verification
 
 Pull requests are merge-blocked on GitHub Actions jobs `docs-contracts-shift-left` and `host-integration` (see `.github/workflows/ci.yml`). Job `docs-contracts-shift-left` runs `bash scripts/ci/verify_package_docs.sh`, `bash scripts/ci/verify_v1_17_friction_research_contract.sh`, `bash scripts/ci/verify_verify01_readme_contract.sh`, `bash scripts/ci/verify_adoption_proof_matrix.sh`, and `bash scripts/ci/verify_core_admin_invoice_verify_ids.sh`. Job `host-integration` runs `bash scripts/ci/accrue_host_uat.sh` (which delegates to `cd examples/accrue_host && mix verify.full`), with `bash scripts/ci/accrue_host_hex_smoke.sh` on eligible runs. Use `mix verify` for a faster bounded Fake slice that is not CI-complete.
+
+For **`Accrue.Billing.create_checkout_session/2`** and **`Accrue.Billing.create_billing_portal_session/2`**, the teaching path and telemetry tuples live in [**First Hour**](../../accrue/guides/first_hour.md); span anchors and ExUnit SSOT paths are under [**#observability**](#observability).
 
 ### Verification modes
 
