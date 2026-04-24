@@ -976,7 +976,7 @@
 
 ### What Worked
 
-- **Phases already under **`milestones/v1.26-phases/`** before close avoided a second move; archives **`v1.26-*`** mirror **v1.25** manual closeout.
+- Phase trees already lived under **`.planning/milestones/v1.26-phases/`** before close, avoiding a second move; archives **`v1.26-*`** mirror the **v1.25** manual closeout.
 - **`audit-open`** all clear at pre-close gate; **2/2** requirements checked in **`REQUIREMENTS.md`** before archive.
 
 ### What Was Inefficient
