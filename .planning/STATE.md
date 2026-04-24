@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.28
 milestone_name: milestone
 status: planning
-last_updated: "2026-04-24T17:58:06.235Z"
+last_updated: "2026-04-24T18:01:29.917Z"
 last_activity: 2026-04-24 — Phase **86** post-publish contract alignment executed (**`086-01-PLAN.md`**).
 progress:
   total_phases: 0
@@ -67,3 +67,5 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 **Completed (v1.28):** Phase **86** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**.
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
+
+**Planned Phase:** 87 (Friction inventory post-publish) — 1 plans — 2026-04-24T18:01:29.902Z
