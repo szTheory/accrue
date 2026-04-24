@@ -91,6 +91,8 @@ bash scripts/ci/verify_adoption_proof_matrix.sh && \
 bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
 ```
 
+After you **`git push`** to **`main`**, you can wait on GitHub’s **CI** workflow locally with **`bash scripts/ci/watch_ci.sh`** (uses **`gh run watch`** on the latest run for that branch).
+
 **Hex-only `mix deps.get` vs `@version` on `main`:** When **`mix.exs` `@version`** bumps on **`main`** ahead of the matching **Hex** publish, **`mix deps.get`** against published **`~>`** pins can fail until the new artifacts ship. Prefer a **`path:`** dependency into this workspace, a **git** ref to the commit you need, or **wait for publish** before expecting Hex to resolve the newer number.
 
 ## Host proof (VERIFY-01)

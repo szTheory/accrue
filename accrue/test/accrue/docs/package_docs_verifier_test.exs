@@ -23,7 +23,6 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "STRIPE_TEST_SECRET_KEY"
     assert output =~ "CONTRIBUTING.md"
     assert output =~ "release-gate"
-    assert output =~ "docs-contracts-shift-left"
     assert output =~ "host-integration"
     assert output =~ "retain-on-failure"
     assert output =~ "only-on-failure"
@@ -156,7 +155,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       |> Path.join("guides/testing-live-stripe.md")
       |> File.read!()
       |> String.replace(
-        "`release-gate`, `docs-contracts-shift-left`, and `host-integration`\nresults in the workflow summary",
+        "`release-gate` and `host-integration`\nresults in the workflow summary",
         "`release-gate` results in the workflow summary and can be monitored alongside the primary `test` job"
       )
 

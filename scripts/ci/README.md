@@ -2,6 +2,8 @@
 
 This directory hosts merge-adjacent bash gates and host-app checks. Use it as the first stop when CI fails on documentation or VERIFY-01 contracts.
 
+**After a push:** from the repo root, **`bash scripts/ci/watch_ci.sh`** waits on the latest GitHub Actions **CI** run for **`main`** (optional branch argument). Requires the **`gh`** CLI and auth (`gh auth login`).
+
 ## ADOPT gates (v1.7 adoption milestone)
 
 Evidence for **ADOPT-01..06** is summarized in **`.planning/milestones/v1.7-ROADMAP.md`** / **`.planning/milestones/v1.7-REQUIREMENTS.md`** (milestone archives). Granular phase **`*-VERIFICATION.md`** ledgers for phases **32–36** live in **git history** (trees under `.planning/phases/` were pruned after **`phases.clear`** on **2026-04-23**).
