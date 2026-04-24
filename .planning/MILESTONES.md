@@ -4,7 +4,7 @@
 
 **Planning opened:** 2026-04-24
 
-**Phases planned:** **2** phases (**86–87**), **PPX-05..08** + **INV-06**.
+**Phases planned:** **2** phases (**86–87**), **PPX-05..08** + **INV-06**. **Phase 86** evidence **Complete** **2026-04-24** (**`086-VERIFICATION.md`**).
 
 **Theme:** **Spine B** from strategic wrap-up plan — **post-publish contract alignment** on the **next linked Hex publish** for **`accrue` / `accrue_admin`** (same obligation family as **v1.23** **PPX-01..04**), then **INV-06** friction-inventory maintainer pass per inventory **revisit triggers**. **No** **PROC-08** / **FIN-03**; **not** a **1.0.0** declaration unless reprioritized.
 
@@ -14,7 +14,11 @@
 
 **Live artifacts:** **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`** (Phases **86–87**).
 
-**Next:** Execute **Phase 86** when **`@version`** / registry release work begins; then **Phase 87** (**INV-06**).
+**Key accomplishments (Phase 86):**
+
+- **86:** **PPX-05..08** — **`verify_package_docs`**, **`package_docs_verifier_test.exs`**, **`verify_adoption_proof_matrix`**, full **`docs-contracts-shift-left`** six-script bundle, **`.planning/`** **0.3.1** mirrors — **`milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md`**.
+
+**Next:** **Phase 87** (**INV-06**) — dated **`v1.17-FRICTION-INVENTORY.md`** maintainer pass **(b)** + **`087-VERIFICATION.md`**.
 
 ---
 

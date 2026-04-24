@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.28
 milestone_name: milestone
-status: Requirements and roadmap defined; **Phase 86** awaits the **`mix.exs` `@version`** bump that accompanies the linked registry release (or immediate follow-up PR on **`main`**).
-last_updated: "2026-04-24T17:43:53.273Z"
-last_activity: 2026-04-24 — **`/gsd-new-milestone`** v1.28 planning artifacts committed (**spine B**).
+status: Phase 86 complete — **PPX-05..08** evidenced in **`086-VERIFICATION.md`**; **Phase 87** (**INV-06**) next.
+last_updated: "2026-04-24T18:50:00.000Z"
+last_activity: 2026-04-24 — **`/gsd-execute-phase 86`** — **086-01** executed; **`086-VERIFICATION.md`** + **`REQUIREMENTS.md`** traceability.
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 2
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
 ---
 
 # Project State
@@ -20,23 +20,23 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.28** — **Next linked publish continuity** (**PPX-05..08**, **INV-06**). Executes on the **next linked Hex publish** for **`accrue` / `accrue_admin`**. **PROC-08** / **FIN-03** remain out of scope.
+**Current focus:** **v1.28** — **Phase 87** (**INV-06**) after **Phase 86** closure.
 
 ## Current Position
 
 **Milestone:** **v1.28** — Next linked publish continuity
 
-**Phase:** **86** — Post-publish contract alignment — *not started*
+**Phase:** **87** — Friction inventory post-publish — *not started*
 
 **Plan:** —
 
-**Status:** Requirements and roadmap defined; **Phase 86** awaits the **`mix.exs` `@version`** bump that accompanies the linked registry release (or immediate follow-up PR on **`main`**).
+**Status:** **Phase 86** **Complete** **2026-04-24** — evidence **`.planning/milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md`**. Workspace **`@version`** **0.3.1**; **PPX-05..08** checked in **`.planning/REQUIREMENTS.md`**.
 
-**Last activity:** 2026-04-24 — **`/gsd-new-milestone`** v1.28 planning artifacts committed (**spine B**).
+**Last activity:** 2026-04-24 — Phase **86** post-publish contract alignment executed (**`086-01-PLAN.md`**).
 
 ## Milestone Progress
 
-**v1.28** (planning **2026-04-24**): Phases **86–87** — **PPX-05..08** (Phase **86**), **INV-06** (Phase **87**); live **`.planning/REQUIREMENTS.md`**; execution trees TBD under **`milestones/v1.28-phases/`** after **`/gsd-discuss-phase`** / **`/gsd-plan-phase`**.
+**v1.28** (planning **2026-04-24**): Phase **86** **Complete** (**`milestones/v1.28-phases/086-post-publish-contract-alignment/`**); Phase **87** (**INV-06**) pending; live **`.planning/REQUIREMENTS.md`**.
 
 **v1.27** (shipped **2026-04-24**): Phases **84–85** — **CLS-01..03**, **INV-05**; **`milestones/v1.27-phases/`**; archives **`v1.27-ROADMAP.md`**, **`v1.27-REQUIREMENTS.md`**; tag **`v1.27`**.
 
@@ -47,8 +47,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **v1.28** (**PPX-05..08**, **INV-06**)
+- **`.planning/REQUIREMENTS.md`** — **v1.28** (**PPX-05..08** complete; **INV-06** open)
 - **`.planning/ROADMAP.md`** — **v1.28** Phases **86–87** + shipped history
+- **`086-VERIFICATION.md`** — **`.planning/milestones/v1.28-phases/086-post-publish-contract-alignment/`**
 
 ## Deferred Items
 
@@ -59,9 +60,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 ## Recent Decisions
 
 - **2026-04-24:** **v1.28** opened — **spine B** (**next linked publish** + **INV-06**); **not** **1.0.0** (**spine A**) unless reprioritized.
+- **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 
-**Next:** **`/gsd-discuss-phase 86`** or **`/gsd-plan-phase 86`** when the linked **Hex** publish work is queued.
+**Next:** **`/gsd-discuss-phase 87`** or **`/gsd-plan-phase 87`** for **INV-06** (**`087-VERIFICATION.md`** + dated friction inventory pass **(b)**).
+
+**Completed (v1.28):** Phase **86** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**.
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
-
-**Planned Phase:** 86 (Post-publish contract alignment) — 1 plans — 2026-04-24T17:43:53.266Z

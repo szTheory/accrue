@@ -18,7 +18,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Target features:**
 
-- [ ] **PPX-05..08** — Package docs, adoption matrix + script, **`docs-contracts-shift-left`**, **`.planning/`** Hex mirrors aligned to the new **`@version`** / registry reality.
+- [x] **PPX-05..08** — Package docs, adoption matrix + script, **`docs-contracts-shift-left`**, **`.planning/`** Hex mirrors aligned to the new **`@version`** / registry reality. **Validated 2026-04-24** — **`.planning/milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md`** (re-verification at **0.3.1**; **Phase 87** / **INV-06** next).
 - [ ] **INV-06** — Post-publish **`v1.17-FRICTION-INVENTORY.md`** maintainer pass **(b)** with **`087-VERIFICATION.md`** verifier transcripts.
 
 **Live requirements:** **`.planning/REQUIREMENTS.md`**. **Phases:** **86–87** (see **`.planning/ROADMAP.md`**).
@@ -120,7 +120,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **v1.28** — **Next linked publish continuity** (**PPX-05..08**, **INV-06**); **`.planning/REQUIREMENTS.md`** restored **2026-04-24**. Workspace **`@version`** remains **0.3.1** until the **next** linked **Hex** release bumps it (milestone **86** forcing function).
+**Active planning milestone:** **v1.28** — **Next linked publish continuity** (**PPX-05..08** complete per **`086-VERIFICATION.md`**; **INV-06** / **Phase 87** pending); **`.planning/REQUIREMENTS.md`** restored **2026-04-24**. Workspace **`@version`** remains **0.3.1** until the **next** linked **Hex** release bumps it.
 
 **Last shipped planning milestone:** **v1.27** — Phases **84–85** (**2026-04-24**): **CLS-01..03**, **INV-05**; **`milestones/v1.27-*`**; execution trees **`milestones/v1.27-phases/`**; planning tag **`v1.27`**. **Prior:** **v1.26** — Phases **82–83** (**2026-04-24**): **INT-13**, **INV-04**; **`milestones/v1.26-*`**; execution trees **`milestones/v1.26-phases/`**; planning tag **`v1.26`**. **Earlier:** **v1.25** — Phases **79–81**; **`v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`**. **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 

@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- **v1.28 Next linked publish continuity** — Phases **86–87** (**planning** **2026-04-24**). **PPX-05..08** + **INV-06**; next linked **Hex** publish forcing function; **`.planning/REQUIREMENTS.md`**. **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
+- **v1.28 Next linked publish continuity** — Phase **86** **Complete** **2026-04-24** (**`086-VERIFICATION.md`**); Phase **87** (**INV-06**) **pending**. **PPX-05..08** closed in live **`.planning/REQUIREMENTS.md`**. **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.27 Pre-1.0 closure narrative** — Phases **84–85** shipped **2026-04-24** (**CLS-01..03**, **INV-05**); integrator-facing **maintenance posture**; **`RELEASING.md`** / **`upgrade.md`** wrap-up semantics; **INV-05** friction inventory certification. **Archives:** [`milestones/v1.27-ROADMAP.md`](milestones/v1.27-ROADMAP.md), [`milestones/v1.27-REQUIREMENTS.md`](milestones/v1.27-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.27-phases/`](milestones/v1.27-phases/). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.26 First-hour billing facade spine** — Phases **82–83** shipped **2026-04-24** (**INT-13**, **INV-04**); integrator doc + matrix + verifier parity for **`create_billing_portal_session`**; post-touch friction certification. **Archives:** [`milestones/v1.26-ROADMAP.md`](milestones/v1.26-ROADMAP.md), [`milestones/v1.26-REQUIREMENTS.md`](milestones/v1.26-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.26-phases/`](milestones/v1.26-phases/).
 - ✅ **v1.25 Evidence-bound triad (friction + integrator + billing depth)** — Phases **79–81** shipped **2026-04-24** (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**); friction inventory maintainer pass; **`Accrue.Billing.create_checkout_session`**, telemetry/catalog, integrator proof alignment. Execution trees [`milestones/v1.25-phases/`](milestones/v1.25-phases/). Archives: [`milestones/v1.25-ROADMAP.md`](milestones/v1.25-ROADMAP.md), [`milestones/v1.25-REQUIREMENTS.md`](milestones/v1.25-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
@@ -35,7 +35,7 @@
 ## Phases
 
 <details open>
-<summary>v1.28 Next linked publish continuity (Phases 86–87) — PLANNING</summary>
+<summary>v1.28 Next linked publish continuity (Phases 86–87) — IN PROGRESS</summary>
 
 **Milestone goal:** On the **next linked Hex publish** for **`accrue` / `accrue_admin`**, keep **merge-blocking** package + adoption + shift-left contracts honest, align **`.planning/`** registry mirrors (**PPX-05..08**), then **INV-06** dated maintainer pass on **`v1.17-FRICTION-INVENTORY.md`** with **`087-VERIFICATION.md`**. **Spine B** — **no** **PROC-08** / **FIN-03**.
 
@@ -43,7 +43,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 86 | Post-publish contract alignment | **`@version`** / registry bump + **`verify_package_docs`**, **`verify_adoption_proof_matrix`**, **`docs-contracts-shift-left`**, planning Hex mirrors — evidence **`086-VERIFICATION.md`** under **`milestones/v1.28-phases/`**. | PPX-05, PPX-06, PPX-07, PPX-08 |
+| 86 | Post-publish contract alignment | **Complete 2026-04-24** ([`086-VERIFICATION.md`](milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md)). **`@version`** / registry + **`verify_package_docs`**, **`verify_adoption_proof_matrix`**, **`docs-contracts-shift-left`**, planning Hex mirrors. | PPX-05, PPX-06, PPX-07, PPX-08 |
 | 87 | Friction inventory post-publish | **`INV-06`** path **(b)** — dated subsection in **`v1.17-FRICTION-INVENTORY.md`** + **`087-VERIFICATION.md`** transcripts (verifier bundle family aligned to **INV-03..05**). | INV-06 |
 
 **Success criteria (milestone):**
