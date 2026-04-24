@@ -12,17 +12,17 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.24 — Billing portal facade + customer PM operator surfaces (**active**)
+### v1.24 — Billing portal facade + customer PM operator surfaces (**planning complete — 2026-04-24**)
 
 **Goal:** Ship bounded **billing depth** (customer **Billing Portal** session creation on **`Accrue.Billing`** with **Fake**-provable tests and **telemetry** aligned to **`guides/telemetry.md`** / runbooks) plus **admin/operator** quality on the **customer `payment_methods`** tab (**`AccrueAdmin.Copy`**, **`ax-*`**, **VERIFY-01** where routes change materially). **No** **PROC-08** / **FIN-03**; no integrator-milestone or Hex-release theme.
 
-**Target features:**
+**Delivered (planning):**
 
-- **`Accrue.Billing.create_billing_portal_session/2`** (name as implemented) delegating to **`Accrue.BillingPortal.Session`**, with **`:telemetry`** / span parity and catalog/runbook updates (**BIL-04**, **BIL-05**).
-- **Customer LiveView** payment-methods tab: Copy SSOT burn-down, token discipline, theme exceptions as needed (**ADM-13**, **ADM-14**).
-- **VERIFY-01** + **axe** on materially touched customer paths; **`export_copy_strings`** / **`copy_strings.json`** hygiene (**ADM-15**, **ADM-16**).
+- **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) delegating to **`Accrue.BillingPortal.Session`**, with **`:telemetry`** / span parity and catalog/runbook updates (**BIL-04**, **BIL-05**) — **`78-VERIFICATION.md`**.
+- **Customer LiveView** payment-methods tab: Copy SSOT burn-down, token discipline, theme exceptions (**ADM-13**, **ADM-14**) — **`76-VERIFICATION.md`**.
+- **VERIFY-01** + **axe** on materially touched customer paths; **`export_copy_strings`** / **`copy_strings.json`** hygiene (**ADM-15**, **ADM-16**) — **`77-VERIFICATION.md`**.
 
-**Last closed:** **v1.23** (**2026-04-24**).
+**Last closed:** **v1.24** (Phases **76–78** in **`.planning/`**); prior milestone **v1.23** (**2026-04-24**).
 
 ### v1.23 — Post-publish contract alignment (Branch A — **archived 2026-04-24**)
 
@@ -79,11 +79,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **v1.24** — **Phases 76–78** on root **`.planning/ROADMAP.md`**; **`.planning/REQUIREMENTS.md`** (**ADM-13..16**, **BIL-04..05**).
+**Active planning milestone:** **none** — **v1.24** (**Phases 76–78**) is **complete** in **`.planning/ROADMAP.md`** / **`REQUIREMENTS.md`**; next step is **Hex publish / archive / new milestone** per maintainer workflow (workspace **`@version`** still **0.3.1** until a linked release).
 
 **Last shipped planning milestone:** **v1.23** — Phase **75** (**2026-04-24**): post-publish contract alignment (**PPX-01..04**); **`milestones/v1.23-*`** + **`milestones/v1.23-phases/`**; **`v1.17-P1-002`** closed; planning tag **`v1.23`**. **Earlier:** **v1.22** — Phase **74** (**2026-04-24**): **PRS-01..03**; **`milestones/v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`76-VERIFICATION.md`**). **v1.23** Phase **75** **verified** under **`.planning/milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`.planning/milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
+**Execution history:** **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`76-VERIFICATION.md`**). **v1.23** Phase **75** **verified** under **`.planning/milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`.planning/milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -308,12 +308,15 @@ Theme: **post-publish contract alignment** (**PPX-01..04**); **PROC-08** and **F
 - [x] **PPX-03** — Merge-blocking **`docs-contracts-shift-left`** (including **`verify_production_readiness_discoverability.sh`**) green after doc/version touches. **Validated in Phase 75.**
 - [x] **PPX-04** — **`.planning/`** public-Hex callouts + **`v1.17-P1-002`** closed with **75-VERIFICATION** pointer. **Validated in Phase 75.**
 
-### Validated v1.24 (partial — active milestone)
+### Validated v1.24 (Phases 76–78; planning milestone complete 2026-04-24)
 
-Theme: **billing portal facade + customer PM operator surfaces** (**ADM-13..16**, **BIL-04..05**). Milestone still open through Phase **78**.
+Theme: **billing portal facade + customer PM operator surfaces** (**ADM-13..16**, **BIL-04..05**). **PROC-08** / **FIN-03** not in this milestone.
 
+- [x] **ADM-13, ADM-14** — Customer **`payment_methods`** tab inventory + **`AccrueAdmin.Copy`** burn-down. **Validated in Phase 76** (**`76-VERIFICATION.md`**).
 - [x] **ADM-15** — Merge-blocking VERIFY-01 Playwright + **axe** for customer detail **`?tab=payment_methods`** (`examples/accrue_host`); matrix row in **`verify01-v112-admin-paths.md`**. **Validated in Phase 77** (**`77-VERIFICATION.md`**).
 - [x] **ADM-16** — **`accrue_admin/guides/theme-exceptions.md`** Phase 77 reviewer note; **`mix accrue_admin.export_copy_strings`** SSOT for **`copy_strings.json`**; closure in **`.planning/phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**. **Validated in Phase 77**.
+- [x] **BIL-04** — **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) with **`span_billing(:billing_portal, :create, …)`**, Fake-backed ExUnit. **Validated in Phase 78** (**`78-VERIFICATION.md`**).
+- [x] **BIL-05** — **`guides/telemetry.md`**, **`operator-runbooks.md`**, **`CHANGELOG.md`** aligned with billing portal + payment-method span inventory. **Validated in Phase 78** (**`78-VERIFICATION.md`**).
 
 ### Validated v1.20 (Phases 70–71 complete)
 
@@ -616,4 +619,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.24** Phase **77** verified (**ADM-15**, **ADM-16**); milestone roadmap still covers Phases **76–78**.*
+*Last updated: 2026-04-24 — **v1.24** Phases **76–78** verified (**ADM-13..16**, **BIL-04..05**); planning milestone complete.*
