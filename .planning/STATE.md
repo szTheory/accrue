@@ -1,7 +1,7 @@
 ---
 gsd_state_version: 1.0
 milestone: none
-milestone_name: null
+milestone_name: Between milestones
 status: between_milestones
 last_updated: "2026-04-24T23:59:59.000Z"
 last_activity: 2026-04-24 — v1.23 archived; REQUIREMENTS.md removed; tag v1.23
