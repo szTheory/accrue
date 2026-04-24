@@ -30,7 +30,22 @@ INV-03 normative maintainer conclusion is recorded only in `.planning/research/v
 
 ## Command transcripts
 
-_(completed in task 79-01-04)_
+Recorded **2026-04-24** from repository root; each command exited **0**. Final re-run in **79-01-06** re-confirms **`verify_v1_17_friction_research_contract.sh`** on the closing tree.
+
+```text
+$ bash scripts/ci/verify_v1_17_friction_research_contract.sh
+verify_v1_17_friction_research_contract: OK
+
+$ bash scripts/ci/verify_package_docs.sh
+package docs verified for accrue 0.3.1 and accrue_admin 0.3.1
+fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, quickstart.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full
+
+$ bash scripts/ci/verify_adoption_proof_matrix.sh
+verify_adoption_proof_matrix: OK
+
+$ bash scripts/ci/verify_verify01_readme_contract.sh
+verify_verify01_readme_contract: OK
+```
 
 ## VERIFY-01 / host-integration
 
