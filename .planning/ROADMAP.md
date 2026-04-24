@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- **v1.21 Maturity posture and diminishing returns** — Phases **72–73** complete **2026-04-23** (**MAT-01..02**, **INT-11**); verification under **`milestones/v1.21-phases/`**. Awaiting **`/gsd-complete-milestone` v1.21** for archive + tag **`v1.21`**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.21 Maturity posture and diminishing returns** — Phases **72–73** shipped **2026-04-23**. **MAT-01..02**, **INT-11**; **v1.17-P2-001** closed. Archives: [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md), [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md). Phase **72–73** trees: [`milestones/v1.21-phases/72-maturity-posture/`](milestones/v1.21-phases/72-maturity-posture/), [`73-capsule-parity-checklist/`](milestones/v1.21-phases/73-capsule-parity-checklist/).
 - ✅ **v1.20 Professional adoption confidence** — Phases **70–71** shipped **2026-04-24**. **INV-01..02**, **PRD-01..02**; post–**0.3.1** friction inventory pass + **`production-readiness.md`** spine (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.20-ROADMAP.md`](milestones/v1.20-ROADMAP.md), [`milestones/v1.20-REQUIREMENTS.md`](milestones/v1.20-REQUIREMENTS.md). Phase **70–71** trees: [`milestones/v1.20-phases/70-friction-evidence-refresh/`](milestones/v1.20-phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](milestones/v1.20-phases/71-production-readiness-spine/).
 - ✅ **v1.19 Release continuity + proof resilience** — Phases **67–69** shipped **2026-04-24**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts, **0.3.1** Hex publish, integrator + planning mirrors (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.19-ROADMAP.md`](milestones/v1.19-ROADMAP.md), [`milestones/v1.19-REQUIREMENTS.md`](milestones/v1.19-REQUIREMENTS.md). Phase **67–69** trees: [`milestones/v1.19-phases/67-proof-contracts/`](milestones/v1.19-phases/67-proof-contracts/), [`68-release-train/`](milestones/v1.19-phases/68-release-train/), [`69-doc-planning-mirrors/`](milestones/v1.19-phases/69-doc-planning-mirrors/).
 - ✅ **v1.18 Onboarding confidence** — Phase **66** shipped **2026-04-23**. **UAT-01..UAT-05**, **PROOF-01**; proof-first confidence after **v1.17** (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md). Phase **66** tree: [`milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
@@ -27,7 +27,12 @@
 
 ## Phases
 
-### Active: v1.21 Maturity posture and diminishing returns
+### Next milestone
+
+**Define the next shipped slice** with **`/gsd-new-milestone`** (fresh **`.planning/REQUIREMENTS.md`**, roadmap continuation from Phase **74**).
+
+<details>
+<summary>✅ v1.21 Maturity posture and diminishing returns (Phases 72–73) — SHIPPED 2026-04-23</summary>
 
 **Milestone goal:** Codify **maintenance-mode / diminishing-returns posture** (what “done enough” means, how new friction enters **FRG-01**) and ship the **INT-11** contributor **capsule parity** checklist (**v1.17-P2-001** closed) — **no** **PROC-08** / **FIN-03**.
 
@@ -40,10 +45,12 @@
 
 **Success criteria (milestone):**
 
-1. **MAT-01..MAT-02** and **INT-11** satisfied per **`.planning/REQUIREMENTS.md`** with merge-blocking **`verify_package_docs`** / **`verify_v1_17_friction_research_contract.sh`** green after edits.
+1. **MAT-01..MAT-02** and **INT-11** satisfied per archived **`.planning/milestones/v1.21-REQUIREMENTS.md`** with merge-blocking **`verify_package_docs`** / **`verify_v1_17_friction_research_contract.sh`** green after edits.
 2. No **PROC-08** / **FIN-03** scope creep.
 
-**Next:** **`/gsd-complete-milestone` v1.21** to archive + tag.
+**Archives:** [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md), [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md).
+
+</details>
 
 <details>
 <summary>✅ v1.20 Professional adoption confidence (Phases 70–71) — SHIPPED 2026-04-24</summary>
@@ -698,6 +705,13 @@
 |-------|-----------|----------------|--------|-----------|
 | 70. Friction evidence refresh | v1.20 | inline | Complete | 2026-04-24 |
 | 71. Production readiness spine | v1.20 | inline | Complete | 2026-04-24 |
+
+**v1.21 (complete — 2026-04-23)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 72. Maturity posture docs | v1.21 | inline | Complete | 2026-04-23 |
+| 73. Capsule parity checklist | v1.21 | inline | Complete | 2026-04-23 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

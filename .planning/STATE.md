@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.21
-milestone_name: Maturity posture and diminishing returns
-status: milestone_v121_execution_complete
-last_updated: "2026-04-23T12:00:00.000Z"
-last_activity: 2026-04-23 — v1.21 Phases 72–73 verified (MAT / INT-11)
+milestone: none
+milestone_name: Between milestones — use /gsd-new-milestone
+status: milestone_v121_archived
+last_updated: "2026-04-23T18:00:00.000Z"
+last_activity: 2026-04-23 — v1.21 archived + tag v1.21; REQUIREMENTS.md removed for next milestone
 progress:
-  total_phases: 2
-  completed_phases: 2
+  total_phases: 0
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
 ---
@@ -20,25 +20,25 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.21** — maintenance posture (**MAT-01..02**) + capsule parity checklist (**INT-11**); **`.planning/REQUIREMENTS.md`** live.
+**Current focus:** **`/gsd-new-milestone`** — define **v1.22+** requirements and roadmap (Phase **74+**). Root **`.planning/REQUIREMENTS.md`** was removed at **v1.21** close.
 
 ## Current Position
 
-**Milestone:** **v1.21** — Maturity posture and diminishing returns
+**Milestone:** **v1.21** — **archived** (**2026-04-23**); planning tag **`v1.21`**.
 
-**Phase:** **73** — complete (**72–73** verified)
+**Phase:** —
 
 **Plan:** —
 
-**Status:** **MAT-01..MAT-02**, **INT-11** satisfied; see **`milestones/v1.21-phases/*/*-VERIFICATION.md`**. Next: **`/gsd-complete-milestone` v1.21** when ready to archive + tag.
+**Status:** **MAT-01..MAT-02**, **INT-11** shipped; archives under **`.planning/milestones/v1.21-*`**.
 
 **Last activity:** 2026-04-23
 
 ## Milestone Progress
 
-**Active:** Phases **72–73** — see **`.planning/ROADMAP.md`**
+**Active:** **None** — next slice via **`/gsd-new-milestone`**.
 
-**Shipped (planning):** **v1.20** — **`milestones/v1.20-phases/`** (**70–71**); tag **`v1.20`**.
+**Shipped (planning):** **v1.21** — **`milestones/v1.21-phases/`** (**72–73**); tag **`v1.21`**. **v1.20** — **`milestones/v1.20-phases/`** (**70–71**); tag **`v1.20`**.
 
 **Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`  
 **North star + stop rules (FRG-02):** `.planning/research/v1.17-north-star.md`
@@ -47,8 +47,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **MAT-01..MAT-02**, **INT-11**
-- **`.planning/ROADMAP.md`** — **v1.21** Phases **72–73**
+- **`.planning/ROADMAP.md`** — **v1.21** collapsed to shipped **`details`**; **Next milestone** section points to **`/gsd-new-milestone`**
+- **`.planning/milestones/v1.21-phases/`** — **v1.21** execution history (**72–73**)
 - **`.planning/milestones/v1.20-phases/`** — **v1.20** execution history (**70–71**)
 
 ## Deferred Items
@@ -59,8 +59,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 ## Recent Decisions
 
-- **2026-04-23:** **`/gsd-new-milestone`** — **v1.21** opened; **MAT** / **INT-11** requirements; roadmap Phases **72–73**; **`maturity-and-maintenance.md`** + **PROJECT** maintenance posture + **INT-11** checklist (**v1.17-P2-001** closure).
+- **2026-04-23:** **`/gsd-complete-milestone` v1.21** — **`milestones/v1.21-ROADMAP.md`**, **`v1.21-REQUIREMENTS.md`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.21`**.
 
-**Next:** **`/gsd-discuss-phase 72`** or **`/gsd-plan-phase 72`**.
+**Next:** **`/gsd-new-milestone`**.
 
-**Completed:** **v1.20** Phases **70–71** — **2026-04-24** (archived + tag **`v1.20`**).
+**Completed:** **v1.21** Phases **72–73** — **2026-04-23** (archived + tag **`v1.21`**).

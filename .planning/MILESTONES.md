@@ -1,6 +1,6 @@
 # Milestones
 
-## v1.21 Maturity posture and diminishing returns (Phases 72–73 complete: 2026-04-23)
+## v1.21 Maturity posture and diminishing returns (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-23
 
@@ -17,9 +17,14 @@
 - **72:** **MAT-01..MAT-02** — maintenance bar + integrator-facing **maturity-and-maintenance** guide + **First Hour** / **production-readiness** / **CONTRIBUTING** links.
 - **73:** **INT-11** — contributor same-PR checklist; **v1.17-P2-001** **closed**.
 
-**Archives:** *(run **`/gsd-complete-milestone` v1.21** to produce **`milestones/v1.21-ROADMAP.md`** / **`v1.21-REQUIREMENTS.md`** + planning tag **`v1.21`**.)*
+**Archives:**
 
-**Next:** **`/gsd-complete-milestone` v1.21** — formal archive + tag.
+- Roadmap: [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md)
+- Requirements: [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md)
+
+**Git tag:** `v1.21`
+
+**Next after ship:** **`/gsd-new-milestone`** for **v1.22+** priorities.
 
 ---
 

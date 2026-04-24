@@ -12,19 +12,13 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.21 — Maturity posture and diminishing returns** (opened **2026-04-23**). Phases **72–73**; **MAT-01..MAT-02**, **INT-11**. **Goal:** Make **maintenance posture** and **evidence-only friction intake** explicit for maintainers and advanced integrators; close **v1.17-P2-001** with a contributor **capsule parity** checklist — **no** **PROC-08** / **FIN-03**.
+**None (between milestones).** Use **`/gsd-new-milestone`** to open **v1.22+** with fresh **`.planning/REQUIREMENTS.md`** and continued phase numbering from **74**.
 
-**Target features:**
-
-- **MAT-01** — **`.planning/PROJECT.md`** documents maintenance bar, when to add **FRG-01** inventory rows, and **revisit triggers** (next Hex publish; matrix/script taxonomy); links **north star**, **friction inventory**, **production readiness**, and **`maturity-and-maintenance.md`**.
-- **MAT-02** — **`accrue/guides/maturity-and-maintenance.md`** ships with cross-links from **First Hour**, **Production readiness**, and **CONTRIBUTING** (discoverability only — no new billing primitives).
-- **INT-11** — **`scripts/ci/README.md`** capsule parity **same-PR** checklist (**First Hour** H/M/R ↔ **`examples/accrue_host` README** proof spine); **`.planning/research/v1.17-FRICTION-INVENTORY.md`** row **v1.17-P2-001** closed with dated evidence pointer.
+**v1.21 — Maturity posture and diminishing returns** is **archived** (**2026-04-23**). Phases **72–73**; **MAT-01..MAT-02**, **INT-11** validated. Phase trees: **`.planning/milestones/v1.21-phases/`**. Archives: **`.planning/milestones/v1.21-ROADMAP.md`**, **`v1.21-REQUIREMENTS.md`**. Planning git tag **`v1.21`**.
 
 **v1.20 — Professional adoption confidence** is **archived** (**2026-04-24**). Phases **70–71**; **INV-01..INV-02**, **PRD-01..PRD-02** validated. Phase trees: **`.planning/milestones/v1.20-phases/`**. Archives: **`.planning/milestones/v1.20-ROADMAP.md`**, **`v1.20-REQUIREMENTS.md`**. Planning git tag **`v1.20`**.
 
 **v1.19 — Release continuity + proof resilience** is **archived** (**2026-04-24**). Phases **67–69**; **PRF-01..PRF-02**, **REL-01..REL-03**, **DOC-01..DOC-02**, **HYG-01** validated. Phase trees: **`.planning/milestones/v1.19-phases/67-proof-contracts/`**, **`68-release-train/`**, **`69-doc-planning-mirrors/`**. Archives: **`.planning/milestones/v1.19-ROADMAP.md`**, **`v1.19-REQUIREMENTS.md`**. Planning git tag **`v1.19`**.
-
-**Next:** **`/gsd-complete-milestone` v1.21** when ready to archive + planning tag (Phases **72–73** verified under **`milestones/v1.21-phases/`**).
 
 ### Library maintenance posture (v1.21)
 
@@ -67,11 +61,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **v1.21** — Phases **72–73** (**MAT-01..MAT-02**, **INT-11**); **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`**.
+**Active planning milestone:** **None** — root **`.planning/REQUIREMENTS.md`** removed at **v1.21** close; next requirements come from **`/gsd-new-milestone`**.
 
-**Last shipped planning milestone:** **v1.20** — Phases **70–71** (**2026-04-24**): friction inventory pass (**INV-01..02**) + production readiness guide (**PRD-01..02**); **`milestones/v1.20-*`** + **`milestones/v1.20-phases/`**; tag **`v1.20`**. Prior: **v1.19** — Phases **67–69**; **`milestones/v1.19-*`** + **`milestones/v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66** (**2026-04-23**); **`milestones/v1.18-phases/66-onboarding-confidence/`**; tag **`v1.18`**. **v1.17** — **`milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.21** — Phases **72–73** (**2026-04-23**): maintenance posture (**MAT-01..02**) + contributor capsule parity (**INT-11**); **`milestones/v1.21-*`** + **`milestones/v1.21-phases/`**; tag **`v1.21`**. Prior: **v1.20** — Phases **70–71** (**2026-04-24**); **`milestones/v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`milestones/v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.21** Phases **72–73** (planned; trees under **`.planning/milestones/v1.21-phases/`** after **`/gsd-execute-phase`**). **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
+**Execution history:** **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -278,6 +272,14 @@ Theme: **Onboarding confidence** — deferred **Phase 62** human UAT baseline + 
 
 - [x] **UAT-01..UAT-05** — Friction inventory / **STATE** / north-star / archive / **ROADMAP** consistency with **`66-VERIFICATION.md`** + **`verify_v1_17_friction_research_contract.sh`** where cited. **Validated in Phase 66.**
 - [x] **PROOF-01** — Adoption proof matrix, evaluator walkthrough, **`verify_adoption_proof_matrix.sh`**, host README, and org matrix ExUnit stay aligned. **Validated in Phase 66.**
+
+### Validated v1.21 (Phases 72–73 complete)
+
+Theme: **maintenance posture** + **contributor capsule parity**; **PROC-08** and **FIN-03** not in this milestone.
+
+- [x] **MAT-01** — **`.planning/PROJECT.md`** library maintenance posture (**FRG-01** intake, revisit triggers) with links to north star, friction inventory, **`production-readiness.md`**, **`maturity-and-maintenance.md`**. **Validated in Phase 72.**
+- [x] **MAT-02** — **`accrue/guides/maturity-and-maintenance.md`** + cross-links from **First Hour**, **production-readiness**, **CONTRIBUTING**. **Validated in Phase 72.**
+- [x] **INT-11** — **`scripts/ci/README.md`** same-PR checklist (**First Hour** H/M/R ↔ host README); **`v1.17-P2-001`** closed in friction inventory. **Validated in Phase 73.**
 
 ### Validated v1.20 (Phases 70–71 complete)
 
@@ -504,9 +506,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.18 closes deferred **62-UAT** confidence with a verification ledger + contracts | Proof-first slice: **REQUIREMENTS** normative over historical **`62-UAT`** body; thin bash/ExUnit for binary invariants; **PROOF-01** keeps matrix ↔ script ↔ README honest | ✓ Good — **shipped** Phase **66** (**2026-04-23**); archived + planning tag **`v1.18`** |
 | v1.19 sequences proof-contract hardening before **0.3.1** Hex publish | Workspace **`@version`** already **0.3.1** while public Hex lags **0.3.0**; **PRF-** work closes **v1.17-P1-001** drift class before release train; **HYG** mirrors follow ship | ✓ Good — **shipped** Phases **67–69** (**2026-04-24**); archived + planning tag **`v1.19`** |
 | v1.20 closes friction evidence loop + production readiness spine without billing scope | Post–**0.3.1** inventory pass (**INV-**) + **`production-readiness.md`** integrator cross-links (**PRD-**); **PROC-08** / **FIN-03** unchanged | ✓ Good — **shipped** Phases **70–71** (**2026-04-24**); archived + planning tag **`v1.20`** |
+| v1.21 codifies maintenance posture + capsule parity without billing scope | **MAT-** docs + **INT-11** checklist close **v1.17-P2-001**; evidence-gated friction intake explicit for maintainers | ✓ Good — **shipped** Phases **72–73** (**2026-04-23**); archived + planning tag **`v1.21`** |
 
 ## Current Milestone Notes
 
+- **2026-04-23:** **`/gsd-complete-milestone` v1.21** — archives **`milestones/v1.21-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.21`**.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.20** — archives **`milestones/v1.20-*`**, **`git mv`** Phases **70–71** → **`milestones/v1.20-phases/`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.20`**.
 - **2026-04-23:** **`/gsd-new-milestone` v1.19** — **Release continuity + proof resilience**; **`REQUIREMENTS.md`** (**PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**); roadmap Phases **67–69** (proof → Hex **0.3.1** → mirrors); **v1.18** Phase **66** execution tree moved to **`.planning/milestones/v1.18-phases/`** (durable path after **`phases.clear`**).
 - Phase 17 verified that v1.2 has no remaining requirement, integration, flow, or cleanup gaps before milestone archival.
@@ -573,4 +577,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 — **v1.21** milestone opened (**MAT** / **INT-11**); **`.planning/REQUIREMENTS.md`** recreated; roadmap Phases **72–73**; **v1.20** remains archived (**tag `v1.20`**).*
+*Last updated: 2026-04-23 after **v1.21** milestone — **MAT-01..MAT-02**, **INT-11** archived; root **`REQUIREMENTS.md`** removed for **`/gsd-new-milestone`**; planning tag **`v1.21`**.*

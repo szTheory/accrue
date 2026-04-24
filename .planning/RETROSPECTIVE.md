@@ -787,12 +787,48 @@
 
 ---
 
+## Milestone: v1.21 — Maturity posture and diminishing returns
+
+**Shipped:** 2026-04-23  
+**Phases:** 2 | **Plans:** 0 (verification-only bootstrap)
+
+### What Was Built
+
+- **MAT-01..MAT-02:** **`.planning/PROJECT.md`** maintenance posture (**FRG-01** intake, revisit triggers) with links to north star, friction inventory, **`production-readiness.md`**, and new **`accrue/guides/maturity-and-maintenance.md`**; discoverability cross-links from **First Hour**, **production-readiness**, and **CONTRIBUTING**.
+- **INT-11:** **`scripts/ci/README.md`** **same-PR** contributor checklist for **First Hour** H/M/R capsules vs **`examples/accrue_host` README** proof spine; **`v1.17-P2-001`** closed in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with dated pointer to that checklist.
+
+### What Worked
+
+- Pairing **PROJECT** posture with a short integrator-facing **maturity-and-maintenance** guide kept **PROC-08** / **FIN-03** boundaries visible without new billing APIs.
+- Closing **P2** friction rows with **CI README** contracts reuses the **v1.19** matrix/script co-update discipline at lower scope.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still cannot drive full archival; manual **`milestones/v1.21-*`** + **`git rm` REQUIREMENTS** closeout (**v1.18–v1.20** precedent).
+
+### Patterns Established
+
+- Treat **capsule parity** (First Hour ↔ host README) as a **same-PR** maintainer checklist, not an implicit reviewer memory.
+
+### Key Lessons
+
+1. **Bootstrap verification** phases (**`*-VERIFICATION.md`** only) remain sufficient for small doc milestones when **REQUIREMENTS** traceability stays at **3/3** and **`audit-open`** is green.
+2. Record **`milestone.complete` CLI** limitation in milestone archive **Technical debt** so the next close does not rediscover it.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: short milestone; no Hex publish or **`Accrue.Billing`** surface churn.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.21 | short | 2 | **PROJECT** + **`maturity-and-maintenance.md`** maintenance bar (**72-VERIFICATION**); **`scripts/ci/README.md`** capsule parity checklist + **v1.17-P2-001** closure (**73-VERIFICATION**); phases under **`v1.21-phases/`**. |
 | v1.20 | short | 2 | Friction inventory evidence refresh (**70-VERIFICATION**); **production-readiness** guide + integrator cross-links (**71-VERIFICATION**); phases moved to **`v1.20-phases/`**. |
 | v1.19 | short | 3 | Proof needles + README triage (**67-01**); **RELEASING** + **68-VERIFICATION** Hex/tag evidence (**68-01..02**); doc verifier + planning mirrors (**69-01..02**). |
 | v1.18 | short | 1 | Verification ledger for deferred **62-UAT** baseline (**66-01**); STATE + friction script archive gate (**66-02**); PROOF-01 matrix/script/README alignment + requirements close (**66-03**). |
@@ -817,6 +853,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.21 | Merge-blocking **`verify_package_docs`** / **`verify_v1_17_friction_research_contract.sh`** unchanged; **`*-VERIFICATION.md`** evidence only | MAT + INT-11 (3/3) archived | **`maturity-and-maintenance.md`**; **INT-11** checklist in **`scripts/ci/README.md`**; **v1.17-P2-001** closure note in friction inventory. |
 | v1.20 | Merge-blocking doc contracts unchanged; **`*-VERIFICATION.md`** evidence only | INV + PRD (4/4) archived | **`production-readiness.md`** spine; inventory **§ v1.20 evidence refresh**; phase trees under **`milestones/v1.20-phases/`**. |
 | v1.19 | **`verify_adoption_proof_matrix.sh`** needles + **`package_docs_verifier_test.exs`**; **`68-VERIFICATION.md`** external URL checks | PRF + REL + DOC + HYG (8/8) archived | **`scripts/ci/README.md`** triage for matrix/script/test co-update; **0.3.1** Hex + tag + changelog-at-tag evidence table. |
 | v1.18 | **`v1_17_friction_research_contract_test.exs`**; bash **`verify_v1_17_friction_research_contract.sh`**; **`verify_adoption_proof_matrix.sh`** + **`organization_billing_org09_matrix_test.exs`** | UAT-01..UAT-05 + PROOF-01 (6/6) archived | **`66-VERIFICATION.md`** ledger; **`62-UAT.md`** banner errata; friction SSOT + archive presence gates in shift-left CI. |
