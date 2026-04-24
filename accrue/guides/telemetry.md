@@ -133,6 +133,14 @@ examples below — for the enforced billing span inventory, see
 - `accrue.billing.payment_method.list` — `[:accrue, :billing, :payment_method, :list]`
   from `Accrue.Billing.list_payment_methods/2` (processor-backed read; no extra
   ops tuple).
+- `accrue.billing.billing_portal.create` — `[:accrue, :billing, :billing_portal, :create]`
+  from `Accrue.Billing.create_billing_portal_session/2` (Phase 78 / **BIL-04**).
+- `accrue.billing.payment_method.attach` — `[:accrue, :billing, :payment_method, :attach]`
+  from `Accrue.Billing.attach_payment_method/3`.
+- `accrue.billing.payment_method.detach` — `[:accrue, :billing, :payment_method, :detach]`
+  from `Accrue.Billing.detach_payment_method/2`.
+- `accrue.billing.payment_method.set_default` — `[:accrue, :billing, :payment_method, :set_default]`
+  from `Accrue.Billing.set_default_payment_method/3`.
 - `NOT an OTel span name` — `accrue.webhooks.dlq.replay` is the dotted
   **OpenTelemetry span name** only when a host maps the **ops** event
   `[:accrue, :ops, :webhook_dlq, :replay]` (via `Ops.emit/3` / `:telemetry.execute`)
@@ -141,6 +149,9 @@ examples below — for the enforced billing span inventory, see
 This mirrors the `:telemetry` event naming
 (`[:accrue, :billing, :subscription, :create]`) so a single name maps cleanly
 to both the telemetry event and the OTel span — no translation table.
+
+**Last reconciled (billing span examples):** 2026-04-24 — Phase 78 BIL-05
+(`billing_span_coverage_test.exs`).
 
 **Span kind:**
 - `INTERNAL` for Accrue context functions
