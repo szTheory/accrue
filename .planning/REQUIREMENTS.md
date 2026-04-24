@@ -15,9 +15,9 @@
 
 ## Release train (REL)
 
-- [ ] **REL-01**: Maintainer can follow **`RELEASING.md`** and **`.github/workflows/release-please.yml`** + **`release-please-config.json`** so **`accrue` publishes before `accrue_admin`** for the **0.3.1** (or current ship) bump.
-- [ ] **REL-02**: Shipped **`accrue/mix.exs`** and **`accrue_admin/mix.exs`** **`@version`**, both **`CHANGELOG.md`** files, and **Hex-published** SemVer match for the release (no “Unreleased” gap at ship boundary for that version).
-- [ ] **REL-03**: Git tags **`accrue-v{version}`** / **`accrue_admin-v{version}`** exist for the shipped release; Hex package pages show **0.3.1** (or shipped version).
+- [x] **REL-01**: Maintainer can follow **`RELEASING.md`** and **`.github/workflows/release-please.yml`** + **`release-please-config.json`** so **`accrue` publishes before `accrue_admin`** for the **0.3.1** (or current ship) bump.
+- [x] **REL-02**: Shipped **`accrue/mix.exs`** and **`accrue_admin/mix.exs`** **`@version`**, both **`CHANGELOG.md`** files, and **Hex-published** SemVer match for the release (no “Unreleased” gap at ship boundary for that version).
+- [x] **REL-03**: Git tags **`accrue-v{version}`** / **`accrue_admin-v{version}`** exist for the shipped release; Hex package pages show **0.3.1** (or shipped version).
 
 ## Documentation and integrator pins (DOC)
 
@@ -49,9 +49,9 @@
 |-------------|-------|--------|
 | PRF-01 | 67 | Complete |
 | PRF-02 | 67 | Complete |
-| REL-01 | 68 | Pending |
-| REL-02 | 68 | Pending |
-| REL-03 | 68 | Pending |
+| REL-01 | 68 | Complete |
+| REL-02 | 68 | Complete |
+| REL-03 | 68 | Complete |
 | DOC-01 | 69 | Pending |
 | DOC-02 | 69 | Pending |
 | HYG-01 | 69 | Pending |
