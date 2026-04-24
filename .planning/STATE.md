@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.22
-milestone_name: Production path discoverability
-status: phase_74_verified
-last_updated: "2026-04-23T20:00:00.000Z"
-last_activity: 2026-04-23 — v1.22 opened; Phase 74 PRS-01..03 verified
+milestone: none
+milestone_name: null
+status: milestone_v1_22_shipped
+last_updated: "2026-04-24T12:00:00.000Z"
+last_activity: 2026-04-24 — /gsd-complete-milestone v1.22; archives + tag; REQUIREMENTS.md removed for next milestone
 progress:
-  total_phases: 1
-  completed_phases: 1
+  total_phases: 0
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
 ---
@@ -16,29 +16,29 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-23)
+See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.22** — **PRS-01..03** production-readiness discoverability (**Phase 74** verified).
+**Current focus:** **Planning next milestone** — run **`/gsd-new-milestone`** (no active **`.planning/REQUIREMENTS.md`** until then).
 
 ## Current Position
 
-**Milestone:** **v1.22** — **Production path discoverability** (**opened** **2026-04-23**).
+**Milestone:** **None** — **`v1.22`** archived **2026-04-24**; use **`/gsd-new-milestone`** for **v1.23+**.
 
-**Phase:** **74** — **verification passed** ([`milestones/v1.22-phases/74-production-path-discoverability/74-VERIFICATION.md`](milestones/v1.22-phases/74-production-path-discoverability/74-VERIFICATION.md)).
+**Phase:** —
 
 **Plan:** —
 
-**Status:** **PRS-01..PRS-03** satisfied per **`.planning/REQUIREMENTS.md`**; merge-blocking **`verify_production_readiness_discoverability.sh`** wired in **`docs-contracts-shift-left`**.
+**Status:** Fresh **`.planning/REQUIREMENTS.md`** awaits the next milestone command.
 
-**Last activity:** 2026-04-23
+**Last activity:** 2026-04-24
 
 ## Milestone Progress
 
-**Active:** **v1.22** — **Phase 74** complete; **`/gsd-complete-milestone` v1.22** when ready to archive + planning tag.
+**Active:** —
 
-**Shipped (planning):** **v1.21** — **`milestones/v1.21-phases/`** (**72–73**); tag **`v1.21`**. **v1.20** — **`milestones/v1.20-phases/`** (**70–71**); tag **`v1.20`**.
+**Shipped (planning):** **v1.22** — **`milestones/v1.22-phases/`** (**74**); tag **`v1.22`**. **v1.21** — **`milestones/v1.21-phases/`** (**72–73**); tag **`v1.21`**. **v1.20** — **`milestones/v1.20-phases/`** (**70–71**); tag **`v1.20`**.
 
 **Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`  
 **North star + stop rules (FRG-02):** `.planning/research/v1.17-north-star.md`
@@ -47,9 +47,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **v1.22** (**PRS-01..03**)
-- **`.planning/ROADMAP.md`** — **v1.22** Phase **74**
-- **`.planning/milestones/v1.22-phases/74-production-path-discoverability/`** — **74-VERIFICATION.md**
+- **`.planning/ROADMAP.md`** — **v1.22** shipped; next milestone TBD
+- **`.planning/milestones/v1.22-phases/74-production-path-discoverability/`** — **74-VERIFICATION.md** (historical)
+- **`.planning/milestones/v1.22-ROADMAP.md`**, **`v1.22-REQUIREMENTS.md`** — archives
 
 ## Deferred Items
 
@@ -60,7 +60,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 ## Recent Decisions
 
 - **2026-04-23:** **`/gsd-new-milestone` v1.22** — **PRS-01..03**; **`verify_production_readiness_discoverability.sh`**; **`.planning/milestones/v1.22-phases/74-production-path-discoverability/74-VERIFICATION.md`**.
+- **2026-04-24:** **`/gsd-complete-milestone` v1.22** — archives **`milestones/v1.22-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.22`**.
 
-**Next:** **`/gsd-complete-milestone` v1.22`** (archive **`milestones/v1.22-*`**, planning tag **`v1.22`**) when maintainer chooses to close the slice.
+**Next:** **`/gsd-new-milestone`** for **v1.23+** priorities.
 
-**Completed:** **v1.22** Phase **74** — **2026-04-23** (**PRS-01..03**).
+**Completed:** **v1.22** — **2026-04-24** (**PRS-01..03**, Phase **74**).

@@ -1,8 +1,10 @@
 # Milestones
 
-## v1.22 Production path discoverability (Planning opened: 2026-04-23)
+## v1.22 Production path discoverability (Shipped: 2026-04-24)
 
-**Phases:** **1** phase (**74**), verification **passed** **2026-04-23** (bootstrap).
+**Planning opened:** 2026-04-23
+
+**Phases completed:** **1** phase (**74**), bootstrap verification (no multi-plan breakdown).
 
 **Theme:** **PRS-01..PRS-03** — repository root + **`accrue` package README** discoverability for **`accrue/guides/production-readiness.md`**; merge-blocking **`scripts/ci/verify_production_readiness_discoverability.sh`** for **§1–§10** checklist spine stability. **No** **PROC-08** / **FIN-03**.
 
@@ -10,7 +12,18 @@
 
 **Phase execution tree:** [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/)
 
-**Next:** **`/gsd-complete-milestone` v1.22** to archive **`milestones/v1.22-*`**, remove root **`REQUIREMENTS.md`** for the next open milestone, and planning tag **`v1.22`**.
+**Key accomplishments:**
+
+- **74:** **PRS-01..PRS-03** — root **`README.md`** + **`accrue/README.md`** ship-path links; **`verify_production_readiness_discoverability.sh`** in **`docs-contracts-shift-left`**; **`scripts/ci/README.md`** PRS gate map + co-update rule.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.22-ROADMAP.md`](milestones/v1.22-ROADMAP.md)
+- Requirements: [`milestones/v1.22-REQUIREMENTS.md`](milestones/v1.22-REQUIREMENTS.md)
+
+**Git tag:** `v1.22`
+
+**Next after ship:** **`/gsd-new-milestone`** for **v1.23+** priorities.
 
 ---
 

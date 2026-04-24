@@ -822,12 +822,48 @@
 
 ---
 
+## Milestone: v1.22 — Production path discoverability
+
+**Shipped:** 2026-04-24  
+**Phases:** 1 | **Plans:** 0 (bootstrap **74-VERIFICATION.md**)
+
+### What Was Built
+
+- Root **`README.md`** and **`accrue/README.md`** link **`accrue/guides/production-readiness.md`** with explicit production / live-Stripe promotion framing (**PRS-01**, **PRS-02**).
+- Merge-blocking **`scripts/ci/verify_production_readiness_discoverability.sh`** in **`docs-contracts-shift-left`**: link needles plus **`### 1.`**–**`### 10.`** spine stability (**PRS-03**).
+- **`scripts/ci/README.md`** PRS gate table + triage / same-PR co-update expectations for checklist edits.
+
+### What Worked
+
+- Shipping **PRS** as a narrow verifier plus CI lane avoided scope creep into **PROC-08** / **FIN-03** while reusing the **v1.20** production-readiness spine.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still cannot drive full archival; manual **`milestones/v1.22-*`** plus **`git rm` REQUIREMENTS** closeout (**v1.19–v1.21** precedent).
+
+### Patterns Established
+
+- Treat **production-readiness** discoverability as a **merge-blocking** doc contract alongside package-doc verifiers, not optional README polish.
+
+### Key Lessons
+
+1. **Bootstrap verification** (**`*-VERIFICATION.md`** only) remains sufficient when **REQUIREMENTS** traceability is **3/3** and **`audit-open`** is green at close.
+2. **`gsd-sdk query roadmap.analyze`** still does not parse this **ROADMAP** shape; rely on milestone archives and explicit progress tables for readiness.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: single open commit carried **PRS** implementation; follow-up commits were unrelated hygiene.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.22 | short | 1 | **PRS-01..03** — root + package README links; **`verify_production_readiness_discoverability.sh`** in shift-left; **`scripts/ci/README.md`** gate map (**74-VERIFICATION**); phase under **`v1.22-phases/`**. |
 | v1.21 | short | 2 | **PROJECT** + **`maturity-and-maintenance.md`** maintenance bar (**72-VERIFICATION**); **`scripts/ci/README.md`** capsule parity checklist + **v1.17-P2-001** closure (**73-VERIFICATION**); phases under **`v1.21-phases/`**. |
 | v1.20 | short | 2 | Friction inventory evidence refresh (**70-VERIFICATION**); **production-readiness** guide + integrator cross-links (**71-VERIFICATION**); phases moved to **`v1.20-phases/`**. |
 | v1.19 | short | 3 | Proof needles + README triage (**67-01**); **RELEASING** + **68-VERIFICATION** Hex/tag evidence (**68-01..02**); doc verifier + planning mirrors (**69-01..02**). |
@@ -853,6 +889,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.22 | Merge-blocking **`verify_production_readiness_discoverability.sh`** added to **`docs-contracts-shift-left`**; existing doc verifiers unchanged | PRS (3/3) archived | Bash verifier + CI wiring; **`scripts/ci/README.md`** PRS triage rows; phase tree **`v1.22-phases/74-*/`**. |
 | v1.21 | Merge-blocking **`verify_package_docs`** / **`verify_v1_17_friction_research_contract.sh`** unchanged; **`*-VERIFICATION.md`** evidence only | MAT + INT-11 (3/3) archived | **`maturity-and-maintenance.md`**; **INT-11** checklist in **`scripts/ci/README.md`**; **v1.17-P2-001** closure note in friction inventory. |
 | v1.20 | Merge-blocking doc contracts unchanged; **`*-VERIFICATION.md`** evidence only | INV + PRD (4/4) archived | **`production-readiness.md`** spine; inventory **§ v1.20 evidence refresh**; phase trees under **`milestones/v1.20-phases/`**. |
 | v1.19 | **`verify_adoption_proof_matrix.sh`** needles + **`package_docs_verifier_test.exs`**; **`68-VERIFICATION.md`** external URL checks | PRF + REL + DOC + HYG (8/8) archived | **`scripts/ci/README.md`** triage for matrix/script/test co-update; **0.3.1** Hex + tag + changelog-at-tag evidence table. |

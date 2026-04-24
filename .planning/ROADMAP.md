@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- ◆ **v1.22 Production path discoverability** — Phase **74** verification **passed** **2026-04-23** (**PRS-01..03**); merge-blocking **`verify_production_readiness_discoverability.sh`**; phase tree [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/) — **awaiting** **`/gsd-complete-milestone` v1.22** for archive + tag (**no** **PROC-08** / **FIN-03**).
+- ✅ **v1.22 Production path discoverability** — Phase **74** shipped **2026-04-24** (**PRS-01..03**); merge-blocking **`verify_production_readiness_discoverability.sh`**; phase tree [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/). Archives: [`milestones/v1.22-ROADMAP.md`](milestones/v1.22-ROADMAP.md), [`milestones/v1.22-REQUIREMENTS.md`](milestones/v1.22-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.21 Maturity posture and diminishing returns** — Phases **72–73** shipped **2026-04-23**. **MAT-01..02**, **INT-11**; **v1.17-P2-001** closed. Archives: [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md), [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md). Phase **72–73** trees: [`milestones/v1.21-phases/72-maturity-posture/`](milestones/v1.21-phases/72-maturity-posture/), [`73-capsule-parity-checklist/`](milestones/v1.21-phases/73-capsule-parity-checklist/).
 - ✅ **v1.20 Professional adoption confidence** — Phases **70–71** shipped **2026-04-24**. **INV-01..02**, **PRD-01..02**; post–**0.3.1** friction inventory pass + **`production-readiness.md`** spine (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.20-ROADMAP.md`](milestones/v1.20-ROADMAP.md), [`milestones/v1.20-REQUIREMENTS.md`](milestones/v1.20-REQUIREMENTS.md). Phase **70–71** trees: [`milestones/v1.20-phases/70-friction-evidence-refresh/`](milestones/v1.20-phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](milestones/v1.20-phases/71-production-readiness-spine/).
 - ✅ **v1.19 Release continuity + proof resilience** — Phases **67–69** shipped **2026-04-24**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts, **0.3.1** Hex publish, integrator + planning mirrors (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.19-ROADMAP.md`](milestones/v1.19-ROADMAP.md), [`milestones/v1.19-REQUIREMENTS.md`](milestones/v1.19-REQUIREMENTS.md). Phase **67–69** trees: [`milestones/v1.19-phases/67-proof-contracts/`](milestones/v1.19-phases/67-proof-contracts/), [`68-release-train/`](milestones/v1.19-phases/68-release-train/), [`69-doc-planning-mirrors/`](milestones/v1.19-phases/69-doc-planning-mirrors/).
@@ -30,12 +30,14 @@
 
 ### Next milestone
 
-**v1.22 — Production path discoverability** — **Phase 74** verification **passed** **2026-04-23**. Close with **`/gsd-complete-milestone` v1.22** when ready; next slice afterward with **`/gsd-new-milestone`** (Phase **75+**).
+**None active** — run **`/gsd-new-milestone`** to define **v1.23+** requirements and Phase **75+**.
 
 <details>
-<summary>◆ v1.22 Production path discoverability (Phase 74) — VERIFIED 2026-04-23 (await milestone close)</summary>
+<summary>✅ v1.22 Production path discoverability (Phase 74) — SHIPPED 2026-04-24</summary>
 
 **Milestone goal:** Repo-root + **`accrue` package README** discoverability for **[`accrue/guides/production-readiness.md`](../accrue/guides/production-readiness.md)**; merge-blocking **`verify_production_readiness_discoverability.sh`** for **§1–§10** spine — **no** **PROC-08** / **FIN-03**.
+
+**Archives:** [`milestones/v1.22-ROADMAP.md`](milestones/v1.22-ROADMAP.md), [`milestones/v1.22-REQUIREMENTS.md`](milestones/v1.22-REQUIREMENTS.md).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -729,6 +731,12 @@
 |-------|-----------|----------------|--------|-----------|
 | 72. Maturity posture docs | v1.21 | inline | Complete | 2026-04-23 |
 | 73. Capsule parity checklist | v1.21 | inline | Complete | 2026-04-23 |
+
+**v1.22 (complete — 2026-04-24)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 74. Production path discoverability | v1.22 | inline | Complete | 2026-04-24 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
