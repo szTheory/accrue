@@ -53,6 +53,10 @@ Work through the sections in order the first time you promote to production; lat
 
 For the canonical Fake-backed walkthrough and VERIFY-01 vocabulary, keep using [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification) alongside [First Hour](first_hour.md).
 
+## See also
+
+- [Maturity and maintenance](maturity-and-maintenance.md) — maintainer-facing **diminishing returns** and **FRG-01** intake context (monorepo **`.planning/`** pointers).
+
 ## Explicit non-goals (until a milestone says otherwise)
 
 Second processor (**PROC-08**), app-owned finance exports (**FIN-03**), and Stripe Dashboard–only workflows that Accrue does not own — see the package [README](README.md) **Stability** / deprecation posture and repository **`RELEASING.md`** for maintainer boundaries (clone-only planning detail lives under **`.planning/PROJECT.md`** in the GitHub repo).

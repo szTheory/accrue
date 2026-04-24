@@ -1,0 +1,39 @@
+# Requirements: Accrue — Milestone v1.21
+
+**Defined:** 2026-04-23  
+**Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version.
+
+## v1.21 — Maturity posture and diminishing returns
+
+Theme: **maintenance bar** (**MAT-01..02**) + **contributor capsule parity** (**INT-11**); closes **v1.17-P2-001**. **PROC-08** and **FIN-03** remain out of scope.
+
+### Maturity and documentation
+
+- [x] **MAT-01**: **`.planning/PROJECT.md`** includes an explicit **library maintenance posture** (maintenance-mode meaning, **FRG-01** intake, **revisit triggers**) and links **north star**, **friction inventory**, **`accrue/guides/production-readiness.md`**, and **`accrue/guides/maturity-and-maintenance.md`**.
+- [x] **MAT-02**: **`accrue/guides/maturity-and-maintenance.md`** exists (no new billing primitives); cross-linked from **`accrue/guides/first_hour.md`**, **`accrue/guides/production-readiness.md`**, and **`CONTRIBUTING.md`** at discoverable anchors.
+
+### Integrator contributor guardrail
+
+- [x] **INT-11**: **`scripts/ci/README.md`** documents a **same-PR** checklist for edits that touch **First Hour** H/M/R capsules and **`examples/accrue_host/README.md`** proof spine; **`.planning/research/v1.17-FRICTION-INVENTORY.md`** row **v1.17-P2-001** is **closed** with dated maintainer note pointing at that checklist.
+
+## Future requirements (deferred)
+
+None newly committed in v1.21 planning.
+
+## Out of scope
+
+| Item | Reason |
+|------|--------|
+| **PROC-08** (second processor) | Explicit non-goal until scoped milestone; see **PROJECT.md**. |
+| **FIN-03** (app-owned finance exports) | Explicit non-goal until scoped milestone; see **PROJECT.md**. |
+| Broad doc-only sweeps without new **FRG-01** **P0/P1** rows | **North star S1** — no speculative rewrites. |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| MAT-01 | Phase 72 | Complete |
+| MAT-02 | Phase 72 | Complete |
+| INT-11 | Phase 73 | Complete |
+
+**Coverage:** v1.21 requirements: **3** total · Mapped: **3** · Unmapped: **0** ✓

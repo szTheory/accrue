@@ -34,6 +34,22 @@ Granular **`*-VERIFICATION.md`** for phases **59–61** live in **git history** 
 | INT-08 | Root `README.md` merge-blocking proof path + cross-package pins — `verify_package_docs.sh`; VERIFY-01 host README depth — `verify_verify01_readme_contract.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **61**) |
 | INT-09 | Workspace **`@version`** vs **public Hex** honesty — `verify_package_docs.sh` enforces **`first_hour`**, **`accrue/README.md`**, **`accrue_admin/README.md`** pins; **`.planning/PROJECT.md`** / **`.planning/MILESTONES.md`** are **manual** mirrors (edit alongside intentional SemVer / milestone copy changes) | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **61**) |
 | INT-10 (planning SSOT) | `scripts/ci/verify_v1_17_friction_research_contract.sh` — **`.planning/research/v1.17-FRICTION-INVENTORY.md`**, **`v1.17-north-star.md`**, **`STATE.md` / `PROJECT.md` / `ROADMAP.md`** pointer anchors | `accrue/test/accrue/docs/v1_17_friction_research_contract_test.exs` | `.planning/milestones/v1.17-phases/62-friction-triage-north-star/62-VALIDATION.md` |
+| INT-11 (v1.21 capsule parity) | Same-PR discipline for **First Hour** ↔ **host README** proof spine — see subsection **First Hour + host README capsule parity** below | — | `.planning/REQUIREMENTS.md` (**INT-11**); inventory row **`v1.17-P2-001`** |
+
+### First Hour + host README capsule parity (**INT-11**)
+
+When a PR edits **any** of:
+
+- **`accrue/guides/first_hour.md`** — especially **§ How to enter this guide** (capsules **H** / **M** / **R**) or the ordered story that must stay aligned with the host demo, or
+- **`examples/accrue_host/README.md`** — especially [**#proof-and-verification**](../../examples/accrue_host/README.md#proof-and-verification) and the numbered Fake-backed arc,
+
+then **in the same PR** (unless it is a pure typo with zero semantic change):
+
+1. Re-read the other file’s matching capsule / proof section and align command vocabulary, cross-links, and “Hex vs `main`” framing.
+2. Run **`bash scripts/ci/verify_package_docs.sh`** when First Hour or package README pins move; run **`bash scripts/ci/verify_verify01_readme_contract.sh`** when host README VERIFY-01 depth changes.
+3. If you intentionally change only one side, add a short PR note explaining why the other file does **not** need an edit (rare — reviewers should push back).
+
+This checklist closes **`v1.17-P2-001`**-class drift risk (**P2** → **closed** in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with **v1.21** evidence).
 
 ### Triage: verify_v1_17_friction_research_contract.sh
 

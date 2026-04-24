@@ -8,7 +8,9 @@ boundaries. Read-only processor queries such as saved payment methods use
 
 ## How to enter this guide
 
-This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the **same** pull request (**D-02**).
+This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the **same** pull request (**D-02**). Maintainer checklist (**INT-11**): same-PR capsule discipline lives in the contributor map [`scripts/ci/README.md`](../../scripts/ci/README.md) — search for **First Hour + host README capsule parity**.
+
+For **maintenance posture** (when to stop speculative doc work, how friction is intake-gated), see [Maturity and maintenance](maturity-and-maintenance.md).
 
 ### Capsule H — Hex consumer
 

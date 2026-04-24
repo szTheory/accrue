@@ -1,5 +1,28 @@
 # Milestones
 
+## v1.21 Maturity posture and diminishing returns (Phases 72–73 complete: 2026-04-23)
+
+**Planning opened:** 2026-04-23
+
+**Phases completed:** **2** phases (**72–73**), bootstrap verification (no multi-plan breakdown).
+
+**Theme:** **MAT-01..MAT-02** — **`.planning/PROJECT.md`** library maintenance posture + **`accrue/guides/maturity-and-maintenance.md`** + cross-links; **INT-11** — **`scripts/ci/README.md`** capsule parity checklist; **`.planning/research/v1.17-FRICTION-INVENTORY.md`** row **`v1.17-P2-001`** closed. **No** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.20** shipped.
+
+**Phase execution trees (v1.21):** [`.planning/milestones/v1.21-phases/72-maturity-posture/`](milestones/v1.21-phases/72-maturity-posture/), [`73-capsule-parity-checklist/`](milestones/v1.21-phases/73-capsule-parity-checklist/)
+
+**Key accomplishments:**
+
+- **72:** **MAT-01..MAT-02** — maintenance bar + integrator-facing **maturity-and-maintenance** guide + **First Hour** / **production-readiness** / **CONTRIBUTING** links.
+- **73:** **INT-11** — contributor same-PR checklist; **v1.17-P2-001** **closed**.
+
+**Archives:** *(run **`/gsd-complete-milestone` v1.21** to produce **`milestones/v1.21-ROADMAP.md`** / **`v1.21-REQUIREMENTS.md`** + planning tag **`v1.21`**.)*
+
+**Next:** **`/gsd-complete-milestone` v1.21** — formal archive + tag.
+
+---
+
 ## v1.20 Professional adoption confidence (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24

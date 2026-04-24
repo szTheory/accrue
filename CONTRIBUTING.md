@@ -27,6 +27,10 @@ npm ci
 
 Use the package-local READMEs and guides for host-app wiring, browser UAT, and release-oriented docs checks.
 
+## Library maintenance (v1.21+)
+
+Doc PRs that touch **First Hour** or the **host README** proof spine must follow the **same-PR capsule parity** checklist in [`scripts/ci/README.md`](scripts/ci/README.md) (search for **First Hour + host README capsule parity** — **INT-11**). For **when Accrue is in maintenance posture** vs active feature milestones, read [`accrue/guides/maturity-and-maintenance.md`](accrue/guides/maturity-and-maintenance.md).
+
 ## Accrue Admin UI hygiene (v1.12+)
 
 Pull requests that introduce **non-token** color or layout exceptions in `accrue_admin` must add a row to the theme exception register at [`accrue_admin/guides/theme-exceptions.md`](accrue_admin/guides/theme-exceptions.md) so reviewers can track intentional deviations (**D-13** / Phase 50).
@@ -76,12 +80,14 @@ v1.7 adoption requirements (ADOPT-01–ADOPT-06) are enforced mostly through doc
 
 **v1.16 integrator + proof (INT-06..INT-09):** Verifier ownership for those rows lives under **`## INT gates (v1.16 integrator + proof continuity)`** in [scripts/ci/README.md](scripts/ci/README.md) — edit that section (not this file) when INT-related merge-blocking checks or owning `VERIFICATION.md` paths change.
 
-Before you open a PR that touches **First Hour**, the **root/host README**, **`accrue/guides/quickstart.md`**, or any **`verify_package_docs`** needle, run this **minimum local doc preflight** from the repository root (ordered; fast failures first). It does **not** replace the **`host-integration`** merge-blocking job.
+Before you open a PR that touches **First Hour**, the **root/host README**, **`accrue/guides/quickstart.md`**, or any **`verify_package_docs`** needle, run this **minimum local doc preflight** from the repository root (ordered; fast failures first). It mirrors job **`docs-contracts-shift-left`** and does **not** replace the **`host-integration`** merge-blocking job.
 
 ```bash
 bash scripts/ci/verify_package_docs.sh && \
+bash scripts/ci/verify_v1_17_friction_research_contract.sh && \
 bash scripts/ci/verify_verify01_readme_contract.sh && \
-bash scripts/ci/verify_adoption_proof_matrix.sh
+bash scripts/ci/verify_adoption_proof_matrix.sh && \
+bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
 ```
 
 **Hex-only `mix deps.get` vs `@version` on `main`:** When **`mix.exs` `@version`** bumps on **`main`** ahead of the matching **Hex** publish, **`mix deps.get`** against published **`~>`** pins can fail until the new artifacts ship. Prefer a **`path:`** dependency into this workspace, a **git** ref to the commit you need, or **wait for publish** before expecting Hex to resolve the newer number.
@@ -92,7 +98,7 @@ Host integration proofs sit in **Layer B** and **Layer C** relative to the per-p
 
 - **Layer A** — `accrue/` and `accrue_admin/` **`mix test`**, Credo, Dialyzer, docs, and related release checks (above).
 - **Layer B** — from the repo root, `cd examples/accrue_host` then **`mix verify`** (fast Fake slice) or **`mix verify.full`** (CI-equivalent host stack). See [examples/accrue_host/README.md#proof-and-verification](examples/accrue_host/README.md#proof-and-verification) for VERIFY-01 detail.
-- **Layer C** — merge-blocking PR job **`host-integration`** is the contract, not “I ran **`mix verify.full`** locally” alone; use [scripts/ci/README.md](scripts/ci/README.md) to map scripts and lanes before you change CI-facing prose.
+- **Layer C** — merge-blocking PR jobs **`docs-contracts-shift-left`** (bash contracts) then **`host-integration`** (BEAM + Playwright) are the contract, not “I ran **`mix verify.full`** locally” alone; use [scripts/ci/README.md](scripts/ci/README.md) to map scripts and lanes before you change CI-facing prose.
 
 ## No CLA
 
