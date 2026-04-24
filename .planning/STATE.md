@@ -53,6 +53,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-23)
 - **`.planning/ROADMAP.md`** — active Phases **67–69**
 - **`.planning/phases/67-proof-contracts/`** — **v1.19** Phase **67** verification (**`67-VERIFICATION.md`**, **`67-01-SUMMARY.md`**)
 - **`.planning/phases/68-release-train/`** — **v1.19** Phase **68** verification (**`68-VERIFICATION.md`**, **`68-01-SUMMARY.md`**, **`68-02-SUMMARY.md`**)
+- **`.planning/phases/69-doc-planning-mirrors/`** — **v1.19** Phase **69** doc + planning mirrors (**DOC-01..02**, **HYG-01**); **`/gsd-discuss-phase 69`** or **`/gsd-plan-phase 69`** next
 - **`.planning/milestones/v1.18-phases/66-onboarding-confidence/`** — **v1.18** execution history (**`66-VERIFICATION.md`**, plans, summaries)
 - **`.planning/milestones/v1.18-ROADMAP.md`**, **`v1.18-REQUIREMENTS.md`** — **v1.18** archives
 
