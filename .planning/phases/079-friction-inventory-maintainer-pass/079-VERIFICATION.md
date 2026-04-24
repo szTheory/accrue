@@ -25,7 +25,7 @@ INV-03 normative maintainer conclusion is recorded only in `.planning/research/v
 
 ## Path evidence
 
-_(completed in task 79-01-02)_
+79-01-02: certification subsection ### v1.25 INV-03 maintainer pass (2026-04-24) in `.planning/research/v1.17-FRICTION-INVENTORY.md`.
 
 ## Command transcripts
 
