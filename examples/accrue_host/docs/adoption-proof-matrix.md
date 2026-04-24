@@ -4,18 +4,18 @@ This matrix answers: **what is proven, where, and against what kind of “realis
 
 Accrue intentionally splits proof into a **deterministic Fake-first lane** (blocking PR CI) and a **Stripe test-mode provider parity lane** (advisory, scheduled / manual). There is no in-repo “digital twin” of Stripe; `lattice_stripe` talks to Stripe when configured, and `Accrue.Processor.Fake` simulates processor-shaped behavior for speed and CI stability.
 
-## Layering note (local proof vs `host-integration`)
+## Layering note (local proof vs merge-blocking CI)
 
 **Layer B (local Fake-backed proof):** running `mix verify` or `mix verify.full` inside `examples/accrue_host` exercises the host proof aliases (bounded vs full stack).
 
-**Layer C (merge-blocking `host-integration`):** the GitHub Actions job `host-integration` runs `verify_verify01_readme_contract.sh` and `verify_adoption_proof_matrix.sh` before `bash scripts/ci/accrue_host_uat.sh` (which delegates to `mix verify.full`), and may run `bash scripts/ci/accrue_host_hex_smoke.sh` on eligible workflow events. Local `mix verify.full` is the core host stack but **not** the entire merge contract unless you also run the same shift-left scripts from the repository root.
+**Layer C (merge-blocking `docs-contracts-shift-left` + `host-integration`):** job `docs-contracts-shift-left` runs `verify_package_docs.sh`, `verify_v1_17_friction_research_contract.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh`, and `verify_core_admin_invoice_verify_ids.sh` from the repository root. Job `host-integration` runs `bash scripts/ci/accrue_host_uat.sh` (which delegates to `mix verify.full`) and may run `bash scripts/ci/accrue_host_hex_smoke.sh` on eligible workflow events. Local `mix verify.full` is the core host stack but **not** the entire merge contract unless you also run the same shift-left scripts from the repository root.
 
 ## Blocking: Fake-backed host + browser
 
 | Concern | Proof | Where |
 |--------|--------|--------|
 | Installer + compile + bounded + full host ExUnit | `mix verify.full` (see `mix.exs` aliases) | `examples/accrue_host`, `scripts/ci/*.sh` |
-| VERIFY-01 contract (README, seed, fixture schema, Playwright) | `host-integration` job + `verify_verify01_readme_contract.sh` | `.github/workflows/ci.yml`, `scripts/ci/` |
+| VERIFY-01 contract (README, seed, fixture schema, Playwright) | `docs-contracts-shift-left` + `host-integration` jobs; bash gates + Playwright | `.github/workflows/ci.yml`, `scripts/ci/` |
 | Org-first billing LiveView (tax location, subscribe, cancel) | `subscription_flow_test.exs` | Bounded `mix verify` slice |
 | User-as-billable **API** (B2C-shaped host facade) | `billing_facade_test.exs` (`Billing.subscribe(user, …)`, `owner_type == "User"`) | Bounded `mix verify` slice |
 | Org access / denial, admin mount, webhooks | `org_billing_*`, `admin_*`, `webhook_ingest_test.exs` | Bounded + full suites |
@@ -32,7 +32,7 @@ Accrue intentionally splits proof into a **deterministic Fake-first lane** (bloc
 
 | Concern | Proof | Where |
 |--------|--------|--------|
-| **non-Sigra** mainline: **`phx.gen.auth`** + membership-gated **`Organization`** with **`use Accrue.Billable`** (ORG-05/ORG-06 alignment) | `scripts/ci/verify_adoption_proof_matrix.sh` (runs in **`host-integration`**) | [`../../../../accrue/guides/organization_billing.md`](../../../../accrue/guides/organization_billing.md) |
+| **non-Sigra** mainline: **`phx.gen.auth`** + membership-gated **`Organization`** with **`use Accrue.Billable`** (ORG-05/ORG-06 alignment) | `scripts/ci/verify_adoption_proof_matrix.sh` (runs in **`docs-contracts-shift-left`**) | [`../../../../accrue/guides/organization_billing.md`](../../../../accrue/guides/organization_billing.md) |
 
 ### Recipe lanes (advisory by default)
 
