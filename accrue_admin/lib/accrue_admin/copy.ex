@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Copy do
   alias AccrueAdmin.Copy.BillingEvent
   alias AccrueAdmin.Copy.Connect
   alias AccrueAdmin.Copy.Coupon
+  alias AccrueAdmin.Copy.CustomerPaymentMethods
   alias AccrueAdmin.Copy.Invoice
   alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
@@ -413,6 +414,11 @@ defmodule AccrueAdmin.Copy do
   def customer_detail_no_subscriptions, do: "No subscriptions for this customer yet."
 
   def customer_detail_no_invoices, do: "No invoices for this customer yet."
+
+  defdelegate customer_payment_methods_section_heading(), to: CustomerPaymentMethods, as: :section_heading
+  defdelegate customer_payment_methods_empty_copy(), to: CustomerPaymentMethods, as: :empty_copy
+  defdelegate customer_payment_methods_row_fallback_label(), to: CustomerPaymentMethods, as: :row_fallback_label
+  defdelegate customer_payment_methods_card_last4_mask(), to: CustomerPaymentMethods, as: :card_last4_mask
 
   def webhooks_index_empty_title, do: "No webhook deliveries for this organization yet"
 
