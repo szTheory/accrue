@@ -999,12 +999,48 @@
 
 ---
 
+## Milestone: v1.27 — Pre-1.0 closure narrative
+
+**Shipped:** 2026-04-24  
+**Phases:** 2 | **Plans:** 0 (inline verification)
+
+### What Was Built
+
+- **CLS-01..03** — **Maintenance posture** on repo root **`README.md`**; **`accrue/README.md`** **Start here** + **Stability**; **`RELEASING.md`** **Pre-1.0 closure**; **`accrue/guides/upgrade.md`** **Pre-1.0 wrap-up semantics** — **`084-VERIFICATION.md`**.
+- **INV-05** path **(b)** — **`### v1.27 INV-05 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** with verifier bundle pointers; **`085-VERIFICATION.md`** transcripts.
+
+### What Worked
+
+- **v1.26**-precedent manual **`milestones/v1.27-*`** archives + **`git rm` REQUIREMENTS** kept the close deterministic without **`gsd-sdk query milestone.complete`**.
+- **`audit-open`** all clear at pre-close gate; **4/4** requirements checked before archive.
+
+### What Was Inefficient
+
+- No per-plan **`SUMMARY.md`** for phases **84–85** (inline close); evidence weight sits on **`084-` / `085-VERIFICATION.md`** alone.
+
+### Patterns Established
+
+- **CLS-** narrative is the integrator-facing complement to **v1.21** **MAT-** maintainer docs: same **PROC-08** / **FIN-03** parking lot, clearer **pre-1.0** SemVer story on front doors.
+
+### Key Lessons
+
+1. **`INV-05`** reuses the **INV-03** / **INV-04** verifier-bundle transcript family — keeps friction SSOT honest after doc-only milestones.
+2. Optional **`v1.27-MILESTONE-AUDIT.md`** was not created; **traceability + `audit-open`** remained sufficient for doc + inventory scope.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: two phases same-day; no **Hex** **@version** bump in this planning milestone.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.27 | short | 2 | **CLS-01..03** + **INV-05** — pre-1.0 closure narrative on README / **`RELEASING`** / **`upgrade`** + post-touch friction certification **(b)**; **`*-VERIFICATION.md`** only (inline); phases **84–85** under **`milestones/v1.27-phases/`**; **`milestones/v1.27-*`** archives. |
 | v1.26 | short | 2 | **INT-13** + **INV-04** — billing portal on First Hour + matrix + CI needles; post-touch friction certification **(b)**; **`*-VERIFICATION.md`** + **3** plan summaries; phases **82–83** under **`milestones/v1.26-phases/`**. |
 | v1.25 | short | 3 | **INV-03** + **BIL-06..07** + **INT-12** — checkout **`Accrue.Billing`** facade + telemetry/docs + integrator verifiers; **`*-VERIFICATION.md`** + **3** plan summaries; phases **79–81** under **`milestones/v1.25-phases/`**. |
 | v1.24 | short | 3 | **ADM-13..16** + **BIL-04..05** — billing portal facade + customer **PM** VERIFY/copy/theme; **`*-VERIFICATION.md`** + **6** plan summaries; phases **76–78** under **`milestones/v1.24-phases/`**. |

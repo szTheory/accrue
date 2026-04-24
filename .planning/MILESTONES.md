@@ -19,9 +19,14 @@
 - **84:** **CLS-01..03** — root **`README.md`** **Maintenance posture**; **`accrue/README.md`** maturity link + **Stability** clarification; **`RELEASING.md`** **Pre-1.0 closure**; **`upgrade.md`** **Pre-1.0 wrap-up semantics** — **`084-VERIFICATION.md`**.
 - **85:** **INV-05** — **`### v1.27 INV-05 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** + **`085-VERIFICATION.md`** verifier transcripts.
 
-**Archives:** *(pending `/gsd-complete-milestone` v1.27 — `v1.27-ROADMAP.md`, `v1.27-REQUIREMENTS.md`, planning tag `v1.27`.)*
+**Archives:**
 
-**Next after ship:** **`/gsd-complete-milestone` v1.27** then **`/gsd-new-milestone`** when priorities return.
+- Roadmap: [`milestones/v1.27-ROADMAP.md`](milestones/v1.27-ROADMAP.md)
+- Requirements: [`milestones/v1.27-REQUIREMENTS.md`](milestones/v1.27-REQUIREMENTS.md)
+
+**Git tag:** `v1.27`
+
+**Next after ship:** **`/gsd-new-milestone`** when the next era is ready.
 
 ---
 
