@@ -26,4 +26,4 @@ Reviewed merge SHA: `d1f121c75bb21fb2dd53c9ac9315bd83c26a438e`
 
 ## Path evidence
 
-_(completed in task 83-01-02)_
+83-01-02: certification subsection ### v1.26 INV-04 maintainer pass (2026-04-24) in `.planning/research/v1.17-FRICTION-INVENTORY.md`.
