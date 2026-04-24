@@ -1,16 +1,31 @@
 # Milestones
 
-## v1.24 Billing portal facade + customer PM operator surfaces (**planning open**)
+## v1.24 Billing portal facade + customer PM operator surfaces (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24
 
-**Theme:** **ADM-13..ADM-16**, **BIL-04..BIL-05** — **`Accrue.Billing`** entry for **customer billing portal** sessions (telemetry + **Fake**), **`guides/telemetry.md`** truth for **payment_method** write spans; **customer** **`payment_methods`** tab **Copy** / **`ax-*`** / **VERIFY-01** / export hygiene. **No** **PROC-08** / **FIN-03**; no release-train / integrator-only milestone scope.
+**Phases completed:** **3** phases (**76–78**), **6** plans total (**2+2+2**).
+
+**Theme:** **ADM-13..ADM-16**, **BIL-04..BIL-05** — **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) with **Fake** + **`:telemetry` / span** parity; **`guides/telemetry.md`** / runbook / **CHANGELOG**; **customer** **`payment_methods`** **Copy** / **`ax-*`** / **VERIFY-01** / **`export_copy_strings`**. **No** **PROC-08** / **FIN-03**.
 
 **Depends on:** **v1.23** shipped.
 
-**Phases:** **76–78** (see root **`.planning/ROADMAP.md`**).
+**Phase execution trees:** **`.planning/phases/76-customer-pm-tab-inventory-copy-burn-down/`**, **`77-customer-pm-tab-verify-theme-copy-export/`**, **`78-billing-portal-on-accrue-billing-telemetry-truth/`**.
 
-**Next:** Execute **`/gsd-plan-phase`** / **`/gsd-discuss-phase`** starting at **Phase 76**.
+**Key accomplishments:**
+
+- **76:** **ADM-13** inventory + **ADM-14** **`AccrueAdmin.Copy`** / **`ax-*`** burn-down — **`76-VERIFICATION.md`**.
+- **77:** **ADM-15** VERIFY-01 Playwright + **axe**; **ADM-16** theme exceptions + **`export_copy_strings`** — **`77-VERIFICATION.md`**.
+- **78:** **BIL-04** billing-portal facade + span coverage tests; **BIL-05** telemetry + runbook + **CHANGELOG** — **`78-VERIFICATION.md`**.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md)
+- Requirements: [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md)
+
+**Git tag:** `v1.24`
+
+**Next after ship:** **`/gsd-new-milestone`** for **v1.25+** priorities.
 
 ---
 

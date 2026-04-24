@@ -892,12 +892,48 @@
 
 ---
 
+## Milestone: v1.24 — Billing portal facade + customer PM operator surfaces
+
+**Shipped:** 2026-04-24  
+**Phases:** 3 | **Plans:** 6
+
+### What Was Built
+
+- **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) with **Fake** ExUnit, **`span_billing(:billing_portal, :create, …)`**, and metadata guards excluding portal URLs (**BIL-04**).
+- **Telemetry + ops narrative** updates: **`guides/telemetry.md`**, **`operator-runbooks.md`**, **`CHANGELOG`** for billing portal + **payment_method** write spans (**BIL-05**).
+- **Customer `payment_methods`** tab: **ADM-13** inventory, **ADM-14** **`AccrueAdmin.Copy`** / **`ax-*`** burn-down, **ADM-15** VERIFY-01 Playwright + **axe**, **ADM-16** theme exceptions + **`export_copy_strings`** hygiene.
+
+### What Worked
+
+- Six plan **`*-SUMMARY.md`** files plus **`*-VERIFICATION.md`** gave auditable closure without a separate milestone audit artifact.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still not driving this repo’s closeout; manual **`milestones/v1.24-*`** + **`git rm` REQUIREMENTS** remains the durable path (**v1.19–v1.23** precedent).
+
+### Patterns Established
+
+- Treat **customer** mounted admin paths as first-class **VERIFY-01** citizens when **Copy** / theme work materially changes operator-visible chrome.
+
+### Key Lessons
+
+1. **Facade + span** pattern on **`Accrue.Billing`** keeps host entry consistent with other billing delegates while reusing **`BillingPortal.Session`** validation.
+2. **`audit-open`** all clear remains a sufficient pre-close gate when **REQUIREMENTS** traceability is **6/6**.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three tight phases in one day; no **Hex** SemVer bump in this planning milestone.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.24 | short | 3 | **ADM-13..16** + **BIL-04..05** — billing portal facade + customer **PM** VERIFY/copy/theme; **`*-VERIFICATION.md`** + **6** plan summaries; phases **76–78** under **`.planning/phases/`**. |
 | v1.23 | short | 1 | **PPX-01..04** — **`docs-contracts-shift-left`** + friction script + **`v1.17-P1-002`** closure (**75-VERIFICATION**); phase under **`v1.23-phases/`**. |
 | v1.22 | short | 1 | **PRS-01..03** — root + package README links; **`verify_production_readiness_discoverability.sh`** in shift-left; **`scripts/ci/README.md`** gate map (**74-VERIFICATION**); phase under **`v1.22-phases/`**. |
 | v1.21 | short | 2 | **PROJECT** + **`maturity-and-maintenance.md`** maintenance bar (**72-VERIFICATION**); **`scripts/ci/README.md`** capsule parity checklist + **v1.17-P2-001** closure (**73-VERIFICATION**); phases under **`v1.21-phases/`**. |
@@ -925,6 +961,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.24 | **`billing_portal_session_facade_test.exs`** + existing **VERIFY-01** / **host-integration** / **`verify_package_docs`** gates | ADM + BIL (6/6) archived | Public **`Accrue.Billing`** portal API; customer **PM** Playwright + **axe** row; **`milestones/v1.24-*`**; phases remain under **`.planning/phases/`**. |
 | v1.23 | Existing **`docs-contracts-shift-left`** suite + **`verify_v1_17_friction_research_contract.sh`**; no new CI jobs | PPX (4/4) archived | Friction inventory **P1-002** closure note; **`75-VERIFICATION.md`**; phase tree **`v1.23-phases/75-*/`**. |
 | v1.22 | Merge-blocking **`verify_production_readiness_discoverability.sh`** added to **`docs-contracts-shift-left`**; existing doc verifiers unchanged | PRS (3/3) archived | Bash verifier + CI wiring; **`scripts/ci/README.md`** PRS triage rows; phase tree **`v1.22-phases/74-*/`**. |
 | v1.21 | Merge-blocking **`verify_package_docs`** / **`verify_v1_17_friction_research_contract.sh`** unchanged; **`*-VERIFICATION.md`** evidence only | MAT + INT-11 (3/3) archived | **`maturity-and-maintenance.md`**; **INT-11** checklist in **`scripts/ci/README.md`**; **v1.17-P2-001** closure note in friction inventory. |

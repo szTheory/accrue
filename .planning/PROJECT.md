@@ -12,17 +12,21 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.24 — Billing portal facade + customer PM operator surfaces (**planning complete — 2026-04-24**)
+### Next milestone — not opened (**2026-04-24**)
+
+**Status:** **`v1.24`** is **archived** (**`milestones/v1.24-ROADMAP.md`**, **`milestones/v1.24-REQUIREMENTS.md`**); root **`.planning/REQUIREMENTS.md`** removed for a fresh **`/gsd-new-milestone`** cycle. Planning git tag **`v1.24`**.
+
+### v1.24 — Billing portal facade + customer PM operator surfaces (**archived 2026-04-24**)
 
 **Goal:** Ship bounded **billing depth** (customer **Billing Portal** session creation on **`Accrue.Billing`** with **Fake**-provable tests and **telemetry** aligned to **`guides/telemetry.md`** / runbooks) plus **admin/operator** quality on the **customer `payment_methods`** tab (**`AccrueAdmin.Copy`**, **`ax-*`**, **VERIFY-01** where routes change materially). **No** **PROC-08** / **FIN-03**; no integrator-milestone or Hex-release theme.
 
-**Delivered (planning):**
+**Shipped (planning):**
 
-- **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) delegating to **`Accrue.BillingPortal.Session`**, with **`:telemetry`** / span parity and catalog/runbook updates (**BIL-04**, **BIL-05**) — **`78-VERIFICATION.md`**.
+- **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) delegating to **`Accrue.BillingPortal.Session`**, with **`:telemetry`** / span parity and catalog/runbook updates (**BIL-04**, **BIL-05**) — **`78-VERIFICATION.md`** under **`.planning/phases/78-*/`**.
 - **Customer LiveView** payment-methods tab: Copy SSOT burn-down, token discipline, theme exceptions (**ADM-13**, **ADM-14**) — **`76-VERIFICATION.md`**.
 - **VERIFY-01** + **axe** on materially touched customer paths; **`export_copy_strings`** / **`copy_strings.json`** hygiene (**ADM-15**, **ADM-16**) — **`77-VERIFICATION.md`**.
 
-**Last closed:** **v1.24** (Phases **76–78** in **`.planning/`**); prior milestone **v1.23** (**2026-04-24**).
+**Last closed:** **v1.24** (Phases **76–78**); prior milestone **v1.23** (**2026-04-24**).
 
 ### v1.23 — Post-publish contract alignment (Branch A — **archived 2026-04-24**)
 
@@ -79,11 +83,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **none** — **v1.24** (**Phases 76–78**) is **complete** in **`.planning/ROADMAP.md`** / **`REQUIREMENTS.md`**; next step is **Hex publish / archive / new milestone** per maintainer workflow (workspace **`@version`** still **0.3.1** until a linked release).
+**Active planning milestone:** **none** — **`v1.24`** archived; open **`v1.25+`** with **`/gsd-new-milestone`**. Workspace **`@version`** remains **0.3.1** until a linked **Hex** release bumps it.
 
-**Last shipped planning milestone:** **v1.23** — Phase **75** (**2026-04-24**): post-publish contract alignment (**PPX-01..04**); **`milestones/v1.23-*`** + **`milestones/v1.23-phases/`**; **`v1.17-P1-002`** closed; planning tag **`v1.23`**. **Earlier:** **v1.22** — Phase **74** (**2026-04-24**): **PRS-01..03**; **`milestones/v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.24** — Phases **76–78** (**2026-04-24**): **ADM-13..16**, **BIL-04..05**; **`milestones/v1.24-*`**; execution trees under **`.planning/phases/`** (76–78); planning tag **`v1.24`**. **Earlier:** **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`76-VERIFICATION.md`**). **v1.23** Phase **75** **verified** under **`.planning/milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`.planning/milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
+**Execution history:** **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`76-VERIFICATION.md`**). **v1.23** Phase **75** under **`milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`milestones/v1.18-phases/`**; **v1.17** under **`milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -546,9 +550,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.21 codifies maintenance posture + capsule parity without billing scope | **MAT-** docs + **INT-11** checklist close **v1.17-P2-001**; evidence-gated friction intake explicit for maintainers | ✓ Good — **shipped** Phases **72–73** (**2026-04-23**); archived + planning tag **`v1.21`** |
 | v1.22 makes production-readiness discoverability merge-blocking | After maintenance posture, root + package README still hid the ship checklist; **PRS-** ties evaluator path to **§1–§10** spine without billing primitive expansion | ✓ Good — **shipped** Phase **74** (**2026-04-24**); archived + planning tag **`v1.22`** |
 | v1.23 re-verifies publish-adjacent contracts at **0.3.1** | After **v1.19** publish + **v1.22** discoverability, **PPX-** closes **v1.17-P1-002** with full **`docs-contracts-shift-left`** + friction-inventory alignment | ✓ Good — **shipped** Phase **75** (**2026-04-24**); archived + planning tag **`v1.23`** |
+| v1.24 ships **billing portal** facade on **`Accrue.Billing`** + **customer PM** admin parity | After **v1.23** contract pass, bounded **BIL-04..05** + **ADM-13..16** close operator trust on portal entry + **payment_methods** without **PROC-08** / **FIN-03** | ✓ Good — **shipped** Phases **76–78** (**2026-04-24**); archived + planning tag **`v1.24`** |
 
 ## Current Milestone Notes
 
+- **2026-04-24:** **`/gsd-complete-milestone` v1.24** — archives **`milestones/v1.24-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.24`** (**no** standalone **`v1.24-MILESTONE-AUDIT.md`**; **`audit-open`** clear).
 - **2026-04-24:** **`/gsd-complete-milestone` v1.23** — archives **`milestones/v1.23-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.23`**.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.22** — archives **`milestones/v1.22-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.22`**.
 - **2026-04-23:** **`/gsd-new-milestone` v1.22** — **Production path discoverability**; **`REQUIREMENTS.md`** (**PRS-01..03**); **`verify_production_readiness_discoverability.sh`** + **`docs-contracts-shift-left`**; roadmap Phase **74**.
@@ -619,4 +625,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.24** Phases **76–78** verified (**ADM-13..16**, **BIL-04..05**); planning milestone complete.*
+*Last updated: 2026-04-24 — **`/gsd-complete-milestone` v1.24**; **`milestones/v1.24-*`**; root **`REQUIREMENTS.md`** removed; planning tag **`v1.24`**.*
