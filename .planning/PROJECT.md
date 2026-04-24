@@ -46,11 +46,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
-**Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (today **0.3.0** each until **v1.19** ships **0.3.1**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** is **0.3.1** pending **Phase 68** publish.
+**Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
 **Last shipped planning milestone:** **v1.18** — Phase **66** (**2026-04-23**): **UAT-01..UAT-05** + **PROOF-01** — **`milestones/v1.18-phases/66-onboarding-confidence/66-VERIFICATION.md`**, **`verify_v1_17_friction_research_contract.sh`**, adoption matrix / walkthrough / verifier alignment. Archives: **`.planning/milestones/v1.18-*`**. Prior: **v1.17** — Phases **62–65**; **`.planning/milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Now:** **v1.19** active — Phase **67** proof contracts **complete** **2026-04-24**; next **0.3.1** Hex publish (**68**), then post-ship doc + planning mirrors (**69**). **v1.17** phase directories under **`.planning/milestones/v1.17-phases/`**; **v1.18** Phase **66** tree under **`.planning/milestones/v1.18-phases/`**.
+**Now:** **v1.19** active — Phases **67** (**PRF-01..02**) and **68** (**REL-01..03**, Hex **0.3.1**) **complete** **2026-04-24**; next post-ship doc + planning mirrors (**69**: **DOC-01..02**, **HYG-01**). **v1.17** phase directories under **`.planning/milestones/v1.17-phases/`**; **v1.18** Phase **66** tree under **`.planning/milestones/v1.18-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -258,10 +258,11 @@ Theme: **Onboarding confidence** — deferred **Phase 62** human UAT baseline + 
 - [x] **UAT-01..UAT-05** — Friction inventory / **STATE** / north-star / archive / **ROADMAP** consistency with **`66-VERIFICATION.md`** + **`verify_v1_17_friction_research_contract.sh`** where cited. **Validated in Phase 66.**
 - [x] **PROOF-01** — Adoption proof matrix, evaluator walkthrough, **`verify_adoption_proof_matrix.sh`**, host README, and org matrix ExUnit stay aligned. **Validated in Phase 66.**
 
-### Validated v1.19 (in flight; Phases 67–69)
+### Validated v1.19 (Phases 67–68 complete; Phase 69 pending)
 
 - [x] **PRF-01** — Merge-blocking **`verify_adoption_proof_matrix.sh`** needles track **`adoption-proof-matrix.md`** Layer C script names (including **`verify_core_admin_invoice_verify_ids.sh`**) plus **ORG-05** / **ORG-06** taxonomy tokens alongside existing ORG-09 archetype needles (**addresses `v1.17-P1-001`**). **Validated in Phase 67.**
 - [x] **PRF-02** — **`scripts/ci/README.md`** triage subsection documents matrix SSOT path, **`docs-contracts-shift-left`**, same-PR co-update rule for matrix + script + ExUnit literal harness (**`organization_billing_org09_matrix_test.exs`**), and a repo-relative matrix link. **Validated in Phase 67.**
+- [x] **REL-01..REL-03** — **`RELEASING.md`** default merge + ordered Hex publish narrative; ship-boundary changelog expectations; **Hex + tag + changelog-at-tag** evidence in **`68-VERIFICATION.md`**. **Validated in Phase 68.**
 
 ### Validated v1.14 (Phases 54–56; milestone scope delivered 2026-04-23)
 
@@ -535,4 +536,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.19** Phase **67** (**PRF-01..02**) complete; **`REQUIREMENTS.md`** traceability + **`67-VERIFICATION.md`**; next **Phase 68** release train.*
+*Last updated: 2026-04-24 — **v1.19** Phase **68** release train complete (**REL-01..03**, Hex **0.3.1**); next **Phase 69** doc + planning mirrors (**DOC-01..02**, **HYG-01**).*
