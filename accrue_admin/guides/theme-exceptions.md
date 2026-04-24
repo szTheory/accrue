@@ -14,3 +14,7 @@ This register tracks **intentional** deviations from Accrue Admin’s token-firs
 ## Phase 55 reviewer note (invoice VERIFY wiring)
 
 **v1.14 Phase 55:** `InvoicesLive` / `InvoiceLive` were reviewed for VERIFY-01 merge-blocking Playwright coverage (`core-admin-invoices-index`, `core-admin-invoices-detail`). **No new token exceptions** were required for invoice index/detail wiring; invoice chrome remains on `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Invoice` with existing `ax-*` shell tokens.
+
+## Phase 77 reviewer note (customer payment_methods tab)
+
+**v1.24 Phase 77:** **`AccrueAdmin.Live.CustomerLive`** (`accrue_admin/lib/accrue_admin/live/customer_live.ex`) — the **`payment_methods`** tab branch — was reviewed for hard-coded hex literals, inline `style=`, and non-`ax-*` layout hacks introduced by **ADM-14** / **ADM-15** work. The tab panel continues to use **`ax-card`**, **`ax-heading`**, **`ax-list-row`**, and **`ax-body`** with **`AccrueAdmin.Copy.customer_payment_methods_*`** for visible strings. **Outcome:** no new durable bypasses; the hybrid register table above is unchanged and no additional rows were required.
