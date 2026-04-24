@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.24
 milestone_name: milestone
-status: Roadmap ready — start **`/gsd-discuss-phase 76`** or **`/gsd-plan-phase 76`**.
+status: Phase 76 context gathered — run **`/gsd-plan-phase 76`** (or **`/gsd-plan-phase 76 --skip-research`** if you skip research).
 last_updated: "2026-04-24T12:09:08.501Z"
 last_activity: 2026-04-24
 progress:
@@ -30,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Plan:** —
 
-**Status:** Roadmap ready — start **`/gsd-discuss-phase 76`** or **`/gsd-plan-phase 76`**.
+**Status:** Phase **76** context gathered — **`76-CONTEXT.md`** ready; next **`/gsd-plan-phase 76`**.
 
 **Last activity:** 2026-04-24
 
