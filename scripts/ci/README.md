@@ -41,7 +41,10 @@ Granular **`*-VERIFICATION.md`** for phases **59–61** live in **git history** 
 
 ### Triage: verify_adoption_proof_matrix.sh
 
-- **`verify_adoption_proof_matrix:`** (stderr prefix on failure) — treat as **ORG-09**: missing ORG-09 headings, primary/recipe lane markers, `phx.gen.auth` / `use Accrue.Billable` / `non-Sigra` literals, **ORG-07** / **ORG-08** advisory rows, or the self-referential script path in `adoption-proof-matrix.md`. Fix the matrix doc first; only change needles in the script after an intentional taxonomy edit.
+- **`verify_adoption_proof_matrix:`** (stderr prefix on failure) — treat as **ORG-09**: missing ORG-09 headings, primary/recipe lane markers, `phx.gen.auth` / `use Accrue.Billable` / `non-Sigra` literals, **ORG-05** / **ORG-06** / **ORG-07** / **ORG-08** rows, Layer C script names (including **`verify_core_admin_invoice_verify_ids.sh`**), or the self-referential script path in `adoption-proof-matrix.md`. Fix the matrix doc first; only change needles in the script after an intentional taxonomy edit.
+- **SSOT:** the adoption proof matrix lives at **`examples/accrue_host/docs/adoption-proof-matrix.md`** — click-through from here: [**adoption-proof-matrix.md**](../../examples/accrue_host/docs/adoption-proof-matrix.md).
+- **CI job:** this gate runs under GitHub Actions job id **`docs-contracts-shift-left`** (see `.github/workflows/ci.yml`).
+- **Co-update rule:** any intentional change to adoption-proof matrix taxonomy, archetype labels, or row-level text that affects verifier needles **must** ship in the **same PR / commit** as edits to **`scripts/ci/verify_adoption_proof_matrix.sh`** and to **any ExUnit file that embeds matrix literals** — today that thin harness is **`accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs`** (shell-out only; it does not duplicate bash needles). **`verify_adoption_proof_matrix.sh`** remains the **canonical substring list** for this contract.
 
 ### Triage: host-integration / `accrue_host_uat.sh`
 
