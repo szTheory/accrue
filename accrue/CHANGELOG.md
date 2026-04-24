@@ -4,6 +4,7 @@
 
 ### Billing
 
+* Add `Accrue.Billing.create_billing_portal_session/2` and `create_billing_portal_session!/2`, delegating to `Accrue.BillingPortal.Session` with `[:accrue, :billing, :billing_portal, :create]` telemetry; see `guides/telemetry.md`.
 * Add `Accrue.Billing.list_payment_methods/2` and `list_payment_methods!/2` for processor-backed payment method listing (with optional validated list filters); installer `billing.ex.eex` delegates the same surface for host facades.
 
 ### Telemetry
