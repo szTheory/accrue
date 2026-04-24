@@ -12,7 +12,16 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**None (between milestones).** Use **`/gsd-new-milestone`** to open **v1.22+** with fresh **`.planning/REQUIREMENTS.md`** and continued phase numbering from **74**.
+**v1.22 — Production path discoverability** (**opened** **2026-04-23**).
+
+**Goal:** Teams promoting beyond the Fake demo find **[`accrue/guides/production-readiness.md`](../accrue/guides/production-readiness.md)** from the **repository root** and **`accrue` package README** without hunting; merge-blocking **`verify_production_readiness_discoverability.sh`** keeps the checklist **§1–§10** spine stable. **No** **PROC-08** / **FIN-03**.
+
+**Target features:**
+- **PRS-01** — Root **`README.md`** links **`accrue/guides/production-readiness.md`** with explicit production / live-Stripe promotion framing.
+- **PRS-02** — **`accrue/README.md`** “Start here” includes **`guides/production-readiness.md`** for Hex-facing readers.
+- **PRS-03** — Contributor map + **`docs-contracts-shift-left`** gate for the verifier; same-PR discipline when renumbering checklist headings or link targets.
+
+**Phases:** **74** (see **`.planning/ROADMAP.md`**). Requirements: **`.planning/REQUIREMENTS.md`**.
 
 **v1.21 — Maturity posture and diminishing returns** is **archived** (**2026-04-23**). Phases **72–73**; **MAT-01..MAT-02**, **INT-11** validated. Phase trees: **`.planning/milestones/v1.21-phases/`**. Archives: **`.planning/milestones/v1.21-ROADMAP.md`**, **`v1.21-REQUIREMENTS.md`**. Planning git tag **`v1.21`**.
 
@@ -61,11 +70,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **None** — root **`.planning/REQUIREMENTS.md`** removed at **v1.21** close; next requirements come from **`/gsd-new-milestone`**.
+**Active planning milestone:** **v1.22** — **`.planning/REQUIREMENTS.md`** (**PRS-01..03**); **`.planning/ROADMAP.md`** Phase **74** (in progress until **`74-VERIFICATION.md`** passes).
 
 **Last shipped planning milestone:** **v1.21** — Phases **72–73** (**2026-04-23**): maintenance posture (**MAT-01..02**) + contributor capsule parity (**INT-11**); **`milestones/v1.21-*`** + **`milestones/v1.21-phases/`**; tag **`v1.21`**. Prior: **v1.20** — Phases **70–71** (**2026-04-24**); **`milestones/v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`milestones/v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
+**Execution history:** **v1.22** Phase **74** (tree TBD under **`.planning/phases/`** or **`milestones/v1.22-phases/`** at execute/complete); **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -507,9 +516,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.19 sequences proof-contract hardening before **0.3.1** Hex publish | Workspace **`@version`** already **0.3.1** while public Hex lags **0.3.0**; **PRF-** work closes **v1.17-P1-001** drift class before release train; **HYG** mirrors follow ship | ✓ Good — **shipped** Phases **67–69** (**2026-04-24**); archived + planning tag **`v1.19`** |
 | v1.20 closes friction evidence loop + production readiness spine without billing scope | Post–**0.3.1** inventory pass (**INV-**) + **`production-readiness.md`** integrator cross-links (**PRD-**); **PROC-08** / **FIN-03** unchanged | ✓ Good — **shipped** Phases **70–71** (**2026-04-24**); archived + planning tag **`v1.20`** |
 | v1.21 codifies maintenance posture + capsule parity without billing scope | **MAT-** docs + **INT-11** checklist close **v1.17-P2-001**; evidence-gated friction intake explicit for maintainers | ✓ Good — **shipped** Phases **72–73** (**2026-04-23**); archived + planning tag **`v1.21`** |
+| v1.22 makes production-readiness discoverability merge-blocking | After maintenance posture, root + package README still hid the ship checklist; **PRS-** ties evaluator path to **§1–§10** spine without billing primitive expansion | ✓ Good — **Phase 74** verification **2026-04-23** |
 
 ## Current Milestone Notes
 
+- **2026-04-23:** **`/gsd-new-milestone` v1.22** — **Production path discoverability**; **`REQUIREMENTS.md`** (**PRS-01..03**); **`verify_production_readiness_discoverability.sh`** + **`docs-contracts-shift-left`**; roadmap Phase **74**.
 - **2026-04-23:** **`/gsd-complete-milestone` v1.21** — archives **`milestones/v1.21-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.21`**.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.20** — archives **`milestones/v1.20-*`**, **`git mv`** Phases **70–71** → **`milestones/v1.20-phases/`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.20`**.
 - **2026-04-23:** **`/gsd-new-milestone` v1.19** — **Release continuity + proof resilience**; **`REQUIREMENTS.md`** (**PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**); roadmap Phases **67–69** (proof → Hex **0.3.1** → mirrors); **v1.18** Phase **66** execution tree moved to **`.planning/milestones/v1.18-phases/`** (durable path after **`phases.clear`**).
@@ -577,4 +588,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 after **v1.21** milestone — **MAT-01..MAT-02**, **INT-11** archived; root **`REQUIREMENTS.md`** removed for **`/gsd-new-milestone`**; planning tag **`v1.21`**.*
+*Last updated: 2026-04-23 after **`/gsd-new-milestone` v1.22** — **PRS-01..03** opened; Phase **74**; root **`REQUIREMENTS.md`** recreated.*

@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- ◆ **v1.22 Production path discoverability** — Phase **74** verification **passed** **2026-04-23** (**PRS-01..03**); merge-blocking **`verify_production_readiness_discoverability.sh`**; phase tree [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/) — **awaiting** **`/gsd-complete-milestone` v1.22** for archive + tag (**no** **PROC-08** / **FIN-03**).
 - ✅ **v1.21 Maturity posture and diminishing returns** — Phases **72–73** shipped **2026-04-23**. **MAT-01..02**, **INT-11**; **v1.17-P2-001** closed. Archives: [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md), [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md). Phase **72–73** trees: [`milestones/v1.21-phases/72-maturity-posture/`](milestones/v1.21-phases/72-maturity-posture/), [`73-capsule-parity-checklist/`](milestones/v1.21-phases/73-capsule-parity-checklist/).
 - ✅ **v1.20 Professional adoption confidence** — Phases **70–71** shipped **2026-04-24**. **INV-01..02**, **PRD-01..02**; post–**0.3.1** friction inventory pass + **`production-readiness.md`** spine (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.20-ROADMAP.md`](milestones/v1.20-ROADMAP.md), [`milestones/v1.20-REQUIREMENTS.md`](milestones/v1.20-REQUIREMENTS.md). Phase **70–71** trees: [`milestones/v1.20-phases/70-friction-evidence-refresh/`](milestones/v1.20-phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](milestones/v1.20-phases/71-production-readiness-spine/).
 - ✅ **v1.19 Release continuity + proof resilience** — Phases **67–69** shipped **2026-04-24**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts, **0.3.1** Hex publish, integrator + planning mirrors (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.19-ROADMAP.md`](milestones/v1.19-ROADMAP.md), [`milestones/v1.19-REQUIREMENTS.md`](milestones/v1.19-REQUIREMENTS.md). Phase **67–69** trees: [`milestones/v1.19-phases/67-proof-contracts/`](milestones/v1.19-phases/67-proof-contracts/), [`68-release-train/`](milestones/v1.19-phases/68-release-train/), [`69-doc-planning-mirrors/`](milestones/v1.19-phases/69-doc-planning-mirrors/).
@@ -29,7 +30,23 @@
 
 ### Next milestone
 
-**Define the next shipped slice** with **`/gsd-new-milestone`** (fresh **`.planning/REQUIREMENTS.md`**, roadmap continuation from Phase **74**).
+**v1.22 — Production path discoverability** — **Phase 74** verification **passed** **2026-04-23**. Close with **`/gsd-complete-milestone` v1.22** when ready; next slice afterward with **`/gsd-new-milestone`** (Phase **75+**).
+
+<details>
+<summary>◆ v1.22 Production path discoverability (Phase 74) — VERIFIED 2026-04-23 (await milestone close)</summary>
+
+**Milestone goal:** Repo-root + **`accrue` package README** discoverability for **[`accrue/guides/production-readiness.md`](../accrue/guides/production-readiness.md)**; merge-blocking **`verify_production_readiness_discoverability.sh`** for **§1–§10** spine — **no** **PROC-08** / **FIN-03**.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 74 | Production path discoverability | **Verified 2026-04-23** ([`milestones/v1.22-phases/74-production-path-discoverability/74-VERIFICATION.md`](milestones/v1.22-phases/74-production-path-discoverability/74-VERIFICATION.md)). | PRS-01, PRS-02, PRS-03 |
+
+**Success criteria (milestone):**
+
+1. **PRS-01..PRS-03** satisfied per **`.planning/REQUIREMENTS.md`** with **`docs-contracts-shift-left`** green after edits.
+2. No **PROC-08** / **FIN-03** scope creep.
+
+</details>
 
 <details>
 <summary>✅ v1.21 Maturity posture and diminishing returns (Phases 72–73) — SHIPPED 2026-04-23</summary>

@@ -86,6 +86,7 @@ Before you open a PR that touches **First Hour**, the **root/host README**, **`a
 bash scripts/ci/verify_package_docs.sh && \
 bash scripts/ci/verify_v1_17_friction_research_contract.sh && \
 bash scripts/ci/verify_verify01_readme_contract.sh && \
+bash scripts/ci/verify_production_readiness_discoverability.sh && \
 bash scripts/ci/verify_adoption_proof_matrix.sh && \
 bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
 ```

@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.22 Production path discoverability (Planning opened: 2026-04-23)
+
+**Phases:** **1** phase (**74**), verification **passed** **2026-04-23** (bootstrap).
+
+**Theme:** **PRS-01..PRS-03** — repository root + **`accrue` package README** discoverability for **`accrue/guides/production-readiness.md`**; merge-blocking **`scripts/ci/verify_production_readiness_discoverability.sh`** for **§1–§10** checklist spine stability. **No** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.21** shipped.
+
+**Phase execution tree:** [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/)
+
+**Next:** **`/gsd-complete-milestone` v1.22** to archive **`milestones/v1.22-*`**, remove root **`REQUIREMENTS.md`** for the next open milestone, and planning tag **`v1.22`**.
+
+---
+
 ## v1.21 Maturity posture and diminishing returns (Shipped: 2026-04-23)
 
 **Planning opened:** 2026-04-23

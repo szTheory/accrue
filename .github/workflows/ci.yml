@@ -3,8 +3,9 @@ name: CI
 # Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
 # `release-manifest-ssot`, `release-gate`, `phase18-tax-gate`, `admin-drift-docs`,
 # `host-integration`, `annotation-sweep`, `live-stripe`.
-# Merge-blocking on pull_request: `release-manifest-ssot`, `release-gate`,
-# `phase18-tax-gate`, `admin-drift-docs`, `host-integration`, `annotation-sweep`.
+# Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
+# `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `host-integration`,
+# `annotation-sweep`.
 # Advisory: `live-stripe` (Stripe test-mode parity) runs on `workflow_dispatch` and
 # `schedule` only — not merge-blocking for PRs.
 
@@ -26,6 +27,32 @@ permissions:
   contents: read
 
 jobs:
+  docs-contracts-shift-left:
+    name: Docs and bash contracts (shift-left)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: verify_package_docs.sh
+        run: bash scripts/ci/verify_package_docs.sh
+
+      - name: v1.17 friction + north-star SSOT contract
+        run: bash scripts/ci/verify_v1_17_friction_research_contract.sh
+
+      - name: VERIFY-01 README contract
+        run: bash scripts/ci/verify_verify01_readme_contract.sh
+
+      - name: Production readiness discoverability contract
+        run: bash scripts/ci/verify_production_readiness_discoverability.sh
+
+      - name: Adoption proof matrix contract
+        run: bash scripts/ci/verify_adoption_proof_matrix.sh
+
+      - name: Core admin invoice VERIFY flow id drift guard
+        run: bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
+
   release-manifest-ssot:
     name: Release manifest SSOT (REL-02)
     if: github.event_name != 'schedule'
@@ -332,12 +359,13 @@ jobs:
     # host-integration proves Phoenix 1.8 / LiveView 1.1 by running the seeded host app
     # pinned in examples/accrue_host/mix.exs and accrue_admin/mix.exs. Keep this as the
     # single host-level proof instead of creating a second compatibility matrix.
+    # Bash doc / VERIFY-01 / planning SSOT gates run first in job `docs-contracts-shift-left`.
     # Required deterministic gate for TRUST-02 and TRUST-04:
     # trust review, seeded performance smoke, and browser accessibility/responsive checks
     # stay in this lane, and high-severity trust findings cannot be accepted here.
     name: Host integration (required deterministic gate)
     if: github.event_name != 'schedule'
-    needs: [admin-drift-docs]
+    needs: [admin-drift-docs, docs-contracts-shift-left]
     runs-on: ubuntu-24.04
 
     services:
@@ -366,15 +394,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-
-      - name: VERIFY-01 README contract (shift-left)
-        run: bash scripts/ci/verify_verify01_readme_contract.sh
-
-      - name: Core admin invoice VERIFY flow id drift guard
-        run: bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
-
-      - name: ORG-09 adoption proof matrix literals
-        run: bash scripts/ci/verify_adoption_proof_matrix.sh
 
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
@@ -463,6 +482,7 @@ jobs:
     needs:
       [
         release-manifest-ssot,
+        docs-contracts-shift-left,
         release-gate,
         phase18-tax-gate,
         admin-drift-docs,
@@ -479,8 +499,8 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GH_TOKEN: ${{ github.token }}
         run: >-
-          bash scripts/ci/annotation_sweep.sh release-manifest-ssot release-gate
-          phase18-tax-gate admin-drift-docs host-integration
+          bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
+          release-gate phase18-tax-gate admin-drift-docs host-integration
 
   # ---------------------------------------------------------------------
   # Advisory live-Stripe fidelity job (quick task 260414-l9q).

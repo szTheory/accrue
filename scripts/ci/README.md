@@ -29,7 +29,7 @@ Granular **`*-VERIFICATION.md`** for phases **59–61** live in **git history** 
 
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
 |--------|-------------------------------|-------------------------|--------------------------|
-| INT-06 | `accrue/guides/first_hour.md`; `examples/accrue_host/README.md`; `accrue/guides/quickstart.md`; `CONTRIBUTING.md` — scripts `verify_package_docs.sh`, `verify_v1_17_friction_research_contract.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **59**) |
+| INT-06 | `accrue/guides/first_hour.md`; `examples/accrue_host/README.md`; `accrue/guides/quickstart.md`; `CONTRIBUTING.md` — scripts `verify_package_docs.sh`, `verify_v1_17_friction_research_contract.sh`, `verify_verify01_readme_contract.sh`, `verify_production_readiness_discoverability.sh`, `verify_adoption_proof_matrix.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **59**) |
 | INT-07 | `examples/accrue_host/docs/adoption-proof-matrix.md`; `examples/accrue_host/docs/evaluator-walkthrough-script.md` — scripts `verify_adoption_proof_matrix.sh` (add `verify_package_docs.sh` only when pins touch matrix paths) | `accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs` when ORG-09 matrix literals change; else **—** | `.planning/milestones/v1.16-ROADMAP.md` (Phase **60**) |
 | INT-08 | Root `README.md` merge-blocking proof path + cross-package pins — `verify_package_docs.sh`; VERIFY-01 host README depth — `verify_verify01_readme_contract.sh` | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **61**) |
 | INT-09 | Workspace **`@version`** vs **public Hex** honesty — `verify_package_docs.sh` enforces **`first_hour`**, **`accrue/README.md`**, **`accrue_admin/README.md`** pins; **`.planning/PROJECT.md`** / **`.planning/MILESTONES.md`** are **manual** mirrors (edit alongside intentional SemVer / milestone copy changes) | `accrue/test/accrue/docs/package_docs_verifier_test.exs` | `.planning/milestones/v1.16-ROADMAP.md` (Phase **61**) |
@@ -50,6 +50,18 @@ then **in the same PR** (unless it is a pure typo with zero semantic change):
 3. If you intentionally change only one side, add a short PR note explaining why the other file does **not** need an edit (rare — reviewers should push back).
 
 This checklist closes **`v1.17-P2-001`**-class drift risk (**P2** → **closed** in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with **v1.21** evidence).
+
+## PRS gates (v1.22 production path discoverability)
+
+| REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
+|--------|-------------------------------|-------------------------|--------------------------|
+| PRS-01..03 | `scripts/ci/verify_production_readiness_discoverability.sh`; root **`README.md`**; **`accrue/README.md`**; **`accrue/guides/production-readiness.md`** §1–§10 headings | — (bash-only contract; runs in **`docs-contracts-shift-left`**) | `.planning/REQUIREMENTS.md` (**PRS-01..03**); **`.planning/ROADMAP.md`** Phase **74** |
+
+**Co-update rule:** intentional edits to **`accrue/guides/production-readiness.md`** section titles **`### 1.`**–**`### 10.`**, or to the canonical link targets checked by the script, ship in the **same PR** as **`verify_production_readiness_discoverability.sh`** and any **root / `accrue` README** link text required to stay discoverable.
+
+### Triage: verify_production_readiness_discoverability.sh
+
+- **`verify_production_readiness_discoverability:`** (stderr prefix on failure) — treat as **PRS-01..03**: missing root or package README links to **`production-readiness.md`**, or missing **`### 1.`**–**`### 10.`** / intro heading in the guide. Fix docs first; only relax needles after an intentional checklist renumbering milestone.
 
 ### Triage: verify_v1_17_friction_research_contract.sh
 
