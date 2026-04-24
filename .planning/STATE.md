@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.25
 milestone_name: Evidence-bound triad
-status: completed
-last_updated: "2026-04-24T14:37:49.710Z"
-last_activity: 2026-04-24 — Milestone **v1.25** opened; **`.planning/research/`** refreshed; **`v1.24`** phase trees under **`milestones/v1.24-phases/`**.
+status: milestone_planned
+last_updated: "2026-04-24T15:00:00.000Z"
+last_activity: 2026-04-24 — Phase **79** discuss complete; **`079-CONTEXT.md`** under **`.planning/phases/079-friction-inventory-maintainer-pass/`**; GSD **`workflow.research_before_questions`** + **`discuss_auto_all_gray_areas`** enabled in **`.planning/config.json`**.
 progress:
-  total_phases: 9
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -30,9 +30,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Plan:** —
 
-**Status:** Milestone planned — **`REQUIREMENTS.md`** + **`ROADMAP.md`** (Phases **79–81**) + research complete; use **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`**.
+**Status:** Phase **79** context gathered — **`079-CONTEXT.md`** ready; next **`/gsd-plan-phase 79`** (or **`/gsd-execute-phase 79`** after plans exist).
 
-**Last activity:** 2026-04-24 — Milestone **v1.25** opened; **`.planning/research/`** refreshed; **`v1.24`** phase trees under **`milestones/v1.24-phases/`**.
+**Last activity:** 2026-04-24 — **`/gsd-discuss-phase 79`** with research synthesis; workflow defaults updated in **`.planning/config.json`**.
 
 ## Milestone Progress
 
@@ -61,7 +61,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 - **2026-04-24:** **`/gsd-new-milestone` v1.25** — research-first; **`STACK`/`FEATURES`/`ARCHITECTURE`/`PITFALLS`/`SUMMARY`** under **`.planning/research/`**; **`v1.24`** working phases moved to **`milestones/v1.24-phases/`** (evidence preservation).
 - **2026-04-24:** **`/gsd-complete-milestone` v1.24** — archives **`milestones/v1.24-*`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.24`**; **`audit-open`** all clear.
+- **2026-04-24:** **`/gsd-discuss-phase 79`** — **`079-CONTEXT.md`** + **`079-DISCUSSION-LOG.md`**; discuss workflow **`research_before_questions`**, **`discuss_auto_all_gray_areas`**, **`discuss_high_impact_confirm`** in **`.planning/config.json`**.
 
-**Next:** **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`** — friction inventory maintainer pass (**INV-03**).
+**Next:** **`/gsd-plan-phase 79`** — friction inventory maintainer pass (**INV-03**); resume file **`.planning/phases/079-friction-inventory-maintainer-pass/079-CONTEXT.md`**.
 
 **Completed (prior milestone):** **v1.24** Phases **76–78** — evidence under **`milestones/v1.24-phases/`**.
