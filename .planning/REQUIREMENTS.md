@@ -21,7 +21,7 @@
 
 ### Friction inventory (INV)
 
-- [ ] **INV-06**: Post–**PPX** doc/version touch: maintainer pass **(b)** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with dated subsection + **`087-VERIFICATION.md`** verifier transcripts (same named verifier bundle family as **INV-03** / **INV-04** / **INV-05** per inventory **revisit triggers**).
+- [x] **INV-06**: Post–**PPX** doc/version touch: maintainer pass **(b)** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with dated subsection + **`087-VERIFICATION.md`** verifier transcripts (same named verifier bundle family as **INV-03** / **INV-04** / **INV-05** per inventory **revisit triggers**).
 
 ## Future requirements (deferred)
 
@@ -46,7 +46,7 @@
 | PPX-06 | Phase 86 | Complete |
 | PPX-07 | Phase 86 | Complete |
 | PPX-08 | Phase 86 | Complete |
-| INV-06 | Phase 87 | Pending |
+| INV-06 | Phase 87 | Complete |
 
 **Coverage:** v1.28 requirements **5** total · Mapped **5** · Unmapped **0** ✓
 

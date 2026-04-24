@@ -18,8 +18,8 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Target features:**
 
-- [x] **PPX-05..08** — Package docs, adoption matrix + script, **`docs-contracts-shift-left`**, **`.planning/`** Hex mirrors aligned to the new **`@version`** / registry reality. **Validated 2026-04-24** — **`.planning/milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md`** (re-verification at **0.3.1**; **Phase 87** / **INV-06** next).
-- [ ] **INV-06** — Post-publish **`v1.17-FRICTION-INVENTORY.md`** maintainer pass **(b)** with **`087-VERIFICATION.md`** verifier transcripts.
+- [x] **PPX-05..08** — Package docs, adoption matrix + script, **`docs-contracts-shift-left`**, **`.planning/`** Hex mirrors aligned to the new **`@version`** / registry reality. **Validated 2026-04-24** — **`.planning/milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md`** (re-verification at **0.3.1**).
+- [x] **INV-06** — Post-publish **`v1.17-FRICTION-INVENTORY.md`** maintainer pass **(b)** with **`087-VERIFICATION.md`** verifier evidence. **Validated 2026-04-24** — **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/087-VERIFICATION.md`**.
 
 **Live requirements:** **`.planning/REQUIREMENTS.md`**. **Phases:** **86–87** (see **`.planning/ROADMAP.md`**).
 
