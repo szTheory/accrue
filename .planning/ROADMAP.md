@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- **v1.19 Release continuity + proof resilience** — Phases **67–69** opened **2026-04-23**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts before **0.3.1** Hex publish (**no** **PROC-08** / **FIN-03**). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.19 Release continuity + proof resilience** — Phases **67–69** complete **2026-04-24**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts, **0.3.1** Hex publish, integrator + planning mirrors (**no** **PROC-08** / **FIN-03**). Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
 - ✅ **v1.18 Onboarding confidence** — Phase **66** shipped **2026-04-23**. **UAT-01..UAT-05**, **PROOF-01**; proof-first confidence after **v1.17** (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md). Phase **66** tree: [`milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Archives: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md), [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md). Phase trees archived: [`milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
@@ -35,7 +35,7 @@
 |---|-------|------|----------------|
 | 67 | Proof contracts | **Complete 2026-04-24** (1/1 plans; see [`phases/67-proof-contracts/67-VERIFICATION.md`](phases/67-proof-contracts/67-VERIFICATION.md)). | PRF-01, PRF-02 |
 | 68 | Release train | **Complete 2026-04-24** (2/2 plans; see [`phases/68-release-train/68-VERIFICATION.md`](phases/68-release-train/68-VERIFICATION.md)). | REL-01, REL-02, REL-03 |
-| 69 | 2/2 | Complete    | 2026-04-24 |
+| 69 | Doc + planning mirrors | **Complete 2026-04-24** (2/2 plans; see [`phases/69-doc-planning-mirrors/69-VERIFICATION.md`](phases/69-doc-planning-mirrors/69-VERIFICATION.md)). | DOC-01, DOC-02, HYG-01 |
 
 **Success criteria (milestone):**
 

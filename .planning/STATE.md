@@ -26,11 +26,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.19** — **Release continuity + proof resilience** (opened **2026-04-23**).
 
-**Phase:** 69
+**Phase:** **69** — doc + planning mirrors (**DOC-01..02**, **HYG-01**) — **complete** **2026-04-24**.
 
-**Plan:** Not started
+**Plan:** **69-01** / **69-02** shipped (**`69-01-SUMMARY.md`**, **`69-02-SUMMARY.md`**).
 
-**Status:** Milestone complete
+**Status:** **v1.19** milestone **complete** (Phases **67–69**).
 
 **Last activity:** 2026-04-24
 
