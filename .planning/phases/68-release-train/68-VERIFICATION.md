@@ -1,6 +1,6 @@
 ---
 phase: 68-release-train
-status: pending
+status: complete
 ship_version: "0.3.1"
 ---
 
@@ -10,5 +10,5 @@ Evidence for this release is **URL-first** (no screenshots for routine proof). C
 
 | Package | Version | Hex package URL | Git tag URL | Changelog at tag (blob) | Verified at (UTC) | Notes |
 |---------|---------|-----------------|-------------|-------------------------|---------------------|-------|
-| accrue | 0.3.1 | TBD | TBD | TBD | TBD | Linked publish with `accrue_admin`. |
-| accrue_admin | 0.3.1 | TBD | TBD | TBD | TBD | Publishes after core per workflow `needs:`. |
+| accrue | 0.3.1 | https://hex.pm/packages/accrue/0.3.1 | https://github.com/szTheory/accrue/releases/tag/accrue-v0.3.1 | https://github.com/szTheory/accrue/blob/accrue-v0.3.1/accrue/CHANGELOG.md | 2026-04-24 | Linked publish with `accrue_admin`. |
+| accrue_admin | 0.3.1 | https://hex.pm/packages/accrue_admin/0.3.1 | https://github.com/szTheory/accrue/releases/tag/accrue_admin-v0.3.1 | https://github.com/szTheory/accrue/blob/accrue_admin-v0.3.1/accrue_admin/CHANGELOG.md | 2026-04-24 | Publishes after core per workflow `needs:`. |
