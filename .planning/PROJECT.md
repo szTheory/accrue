@@ -691,4 +691,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.28** opened (**PPX-05..08**, **INV-06**, spine **B**); **v1.27** archived + tagged (**CLS-01..03**, **INV-05**).*
+*Last updated: 2026-04-24 — **v1.28** Phase **86** complete (**`086-VERIFICATION.md`**, **PPX-05..08**); **INV-06** / Phase **87** next; **v1.27** archived + tagged (**CLS-01..03**, **INV-05**).*
