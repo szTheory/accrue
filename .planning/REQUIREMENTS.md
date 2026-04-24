@@ -21,8 +21,8 @@
 
 ## Documentation and integrator pins (DOC)
 
-- [ ] **DOC-01**: **`accrue/guides/first_hour.md`** and package README **primary install** lines enforced by **`verify_package_docs`** use **`~>`** pins consistent with **newly published** **0.3.1** (or shipped version).
-- [ ] **DOC-02**: **`scripts/ci/verify_package_docs.sh`** and **`accrue/test/accrue/docs/package_docs_verifier_test.exs`** pass on **`main`** after the release merge (**source_ref**, extras lists, link invariants).
+- [x] **DOC-01**: **`accrue/guides/first_hour.md`** and package README **primary install** lines enforced by **`verify_package_docs`** use **`~>`** pins consistent with **newly published** **0.3.1** (or shipped version).
+- [x] **DOC-02**: **`scripts/ci/verify_package_docs.sh`** and **`accrue/test/accrue/docs/package_docs_verifier_test.exs`** pass on **`main`** after the release merge (**source_ref**, extras lists, link invariants).
 
 ## Planning hygiene (HYG)
 
@@ -52,8 +52,8 @@
 | REL-01 | 68 | Complete |
 | REL-02 | 68 | Complete |
 | REL-03 | 68 | Complete |
-| DOC-01 | 69 | Pending |
-| DOC-02 | 69 | Pending |
+| DOC-01 | 69 | Complete |
+| DOC-02 | 69 | Complete |
 | HYG-01 | 69 | Pending |
 
 **Coverage:** v1.19 requirements **8** total · Mapped **8** · Unmapped **0**
