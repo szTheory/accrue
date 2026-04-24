@@ -1,6 +1,6 @@
 ---
 phase: 67-proof-contracts
-status: pending
+status: complete
 ---
 
 # Phase 67 — Verification
@@ -9,5 +9,5 @@ status: pending
 
 | Row ID | Acceptance | Merge-blocking proof | Closure |
 |--------|-------------|----------------------|---------|
-| PRF-01 | Matrix ↔ `verify_adoption_proof_matrix.sh` (+ related ExUnit) co-evolve under CI | `bash scripts/ci/verify_adoption_proof_matrix.sh`; `mix test` paths TBD in **67-01** execute | pending |
-| PRF-02 | `scripts/ci/README.md` documents triage + co-update rule | Link + grep for `verify_adoption_proof_matrix` triage subsection | pending |
+| PRF-01 | Matrix ↔ `verify_adoption_proof_matrix.sh` (+ related ExUnit) co-evolve under CI | `bash scripts/ci/verify_adoption_proof_matrix.sh`; `cd accrue && mix test test/accrue/docs/organization_billing_org09_matrix_test.exs` | complete |
+| PRF-02 | `scripts/ci/README.md` documents triage + co-update rule | `scripts/ci/README.md` — subsection **`### Triage: verify_adoption_proof_matrix.sh`** (discover with `rg -n '### Triage: verify_adoption_proof_matrix.sh' scripts/ci/README.md`) | complete |
