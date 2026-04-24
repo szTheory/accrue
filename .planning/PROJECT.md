@@ -79,7 +79,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **v1.24** — root **`.planning/REQUIREMENTS.md`** + **`.planning/ROADMAP.md`** opened **2026-04-24** (billing portal facade + customer payment-method admin surfaces).
+**Active planning milestone:** **v1.24** — **Phases 76–78** on root **`.planning/ROADMAP.md`**; **`.planning/REQUIREMENTS.md`** (**ADM-13..16**, **BIL-04..05**).
 
 **Last shipped planning milestone:** **v1.23** — Phase **75** (**2026-04-24**): post-publish contract alignment (**PPX-01..04**); **`milestones/v1.23-*`** + **`milestones/v1.23-phases/`**; **`v1.17-P1-002`** closed; planning tag **`v1.23`**. **Earlier:** **v1.22** — Phase **74** (**2026-04-24**): **PRS-01..03**; **`milestones/v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
@@ -609,4 +609,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **`/gsd-new-milestone` v1.24** opened (**billing + admin**); **`REQUIREMENTS.md`** / **`ROADMAP.md`** in flight.*
+*Last updated: 2026-04-24 — **`/gsd-new-milestone` v1.24** complete through roadmap (**Phases 76–78**).*
