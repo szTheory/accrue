@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.28
 milestone_name: milestone
-status: Phase 86 complete — **PPX-05..08** evidenced in **`086-VERIFICATION.md`**; **Phase 87** (**INV-06**) next.
-last_updated: "2026-04-24T18:50:00.000Z"
-last_activity: 2026-04-24 — **`/gsd-execute-phase 86`** — **086-01** executed; **`086-VERIFICATION.md`** + **`REQUIREMENTS.md`** traceability.
+status: planning
+last_updated: "2026-04-24T17:58:06.235Z"
+last_activity: 2026-04-24 — Phase **86** post-publish contract alignment executed (**`086-01-PLAN.md`**).
 progress:
-  total_phases: 2
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
