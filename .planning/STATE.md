@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.25
 milestone_name: Evidence-bound triad
-status: milestone_planned
-last_updated: "2026-04-24T15:00:00.000Z"
-last_activity: 2026-04-24 — Phase **79** discuss complete; **`079-CONTEXT.md`** under **`.planning/phases/079-friction-inventory-maintainer-pass/`**; GSD **`workflow.research_before_questions`** + **`discuss_auto_all_gray_areas`** enabled in **`.planning/config.json`**.
+status: Phase **79** context gathered — **`079-CONTEXT.md`** ready; next **`/gsd-plan-phase 79`** (or **`/gsd-execute-phase 79`** after plans exist).
+last_updated: "2026-04-24T14:43:22.893Z"
+last_activity: 2026-04-24 — **`/gsd-discuss-phase 79`** with research synthesis; workflow defaults updated in **`.planning/config.json`**.
 progress:
-  total_phases: 3
+  total_phases: 9
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -66,3 +66,5 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 **Next:** **`/gsd-plan-phase 79`** — friction inventory maintainer pass (**INV-03**); resume file **`.planning/phases/079-friction-inventory-maintainer-pass/079-CONTEXT.md`**.
 
 **Completed (prior milestone):** **v1.24** Phases **76–78** — evidence under **`milestones/v1.24-phases/`**.
+
+**Planned Phase:** 79 (Friction inventory maintainer pass) — 1 plans — 2026-04-24T14:43:22.880Z
