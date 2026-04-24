@@ -1,0 +1,71 @@
+# Requirements: Accrue — Milestone v1.24
+
+**Defined:** 2026-04-24  
+**Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
+
+**Research:** Domain research **skipped** (brownfield: `Accrue.Billing`, `Accrue.BillingPortal`, `accrue_admin` customer LiveViews).
+
+## v1.24 — Billing portal facade + customer PM operator surfaces
+
+**Goal:** Give hosts a **first-class `Accrue.Billing` entry** for **Stripe Customer Billing Portal** sessions (with **Fake**-backed tests and **`:telemetry` / span** parity), and raise **operator trust** on the **customer `payment_methods`** admin tab via **`AccrueAdmin.Copy`**, **`ax-*` / theme tokens**, and **VERIFY-01** where materially touched. **No** **PROC-08** / **FIN-03**.
+
+---
+
+## Companion admin — customer payment methods (ADM)
+
+- [ ] **ADM-13**: Publish a short **inventory** (inline in phase notes or **`accrue_admin/guides/`** as appropriate) of **customer `payment_methods`** tab strings, **`ax-*` / token** usage, and **VERIFY-01** / Playwright coverage vs adjacent customer tabs — enough to scope **ADM-14..16** without broad admin sweeps.
+
+- [ ] **ADM-14**: Burn down **operator-visible strings** on the **customer `payment_methods`** tab so literals route through **`AccrueAdmin.Copy`** (or an established submodule); **`ax-*`** / token discipline matches **v1.6 UX-04** intent; **ExUnit** / **Playwright** avoid divergent raw literals on materially touched paths.
+
+- [ ] **ADM-15**: Extend **VERIFY-01** with **Playwright + axe** for **≥1** materially changed **customer** mounted route group tied to **ADM-14** (precedent: **v1.12** / **v1.14**).
+
+- [ ] **ADM-16**: Record intentional **theme / layout exceptions** for **ADM-14** / **ADM-15** touches in **`accrue_admin/guides/theme-exceptions.md`**; keep **`mix accrue_admin.export_copy_strings`**, **`copy_strings.json`**, and CI allowlists aligned when **Copy** modules change.
+
+---
+
+## Billing / Stripe depth (BIL)
+
+- [ ] **BIL-04**: Ship **`Accrue.Billing.create_billing_portal_session/2`** (bang variant as established by sibling `!` APIs) — **`%Accrue.Billing.Customer{}`** plus validated **keyword / map** attrs (**`return_url`**, **`configuration`**, optional **`flow_data`** / **`locale`** / **`on_behalf_of`** / **`operation_id`**) — delegating to **`Accrue.BillingPortal.Session.create/1`** after resolving **Stripe customer id** from the Accrue customer row. Wrap the call in **`Accrue.Telemetry.span/3`** (same **`[:accrue, :billing, resource, :action]`** pattern as other **`Accrue.Billing`** delegates, e.g. **`:billing_portal`** + **`:create`**) with **PII-safe metadata** (no portal **URL** in logs/attrs). Include **Fake-backed** **ExUnit** proving happy path + at least one failure class appropriate to the facade.
+
+- [ ] **BIL-05**: Update **`accrue/guides/telemetry.md`** (and **`accrue/guides/operator-runbooks.md`** cross-links when revenue- or support-adjacent) for **(a)** the new **billing portal** span from **BIL-04**, and **(b)** **`[:accrue, :billing, :payment_method, :attach|:detach|:set_default]`** if not already catalogued consistently with **`billing_span_coverage_test.exs`**; extend **`CHANGELOG.md`** entries for **`accrue`** as applicable; add or refresh **First Hour** / **configuration** pointers only when they reduce integrator confusion (optional stretch inside phase close).
+
+---
+
+## Future milestones (deferred)
+
+- **Integrator / adoption** golden-path-only milestone (First Hour, adoption matrix, `verify_package_docs` graph) — **not v1.24**.
+
+- **Hex publish / release-train** milestone — **not v1.24** unless a linked publish forces a **PPX**-style contract pass.
+
+- **PROGRAMMATIC BillingPortal.Configuration** in **lattice_stripe** — remains **deferred** per **`Accrue.BillingPortal.Session`** moduledoc until a future processor/library milestone explicitly schedules it.
+
+---
+
+## Out of scope
+
+| Item | Reason |
+|------|--------|
+| **PROC-08** | Second processor; unchanged non-goal. |
+| **FIN-03** | App-owned finance exports; unchanged non-goal. |
+| New third-party UI kits | Same **v1.6** / **v1.12** / **v1.13** UI contract. |
+| Full gettext / i18n | English **Copy** SSOT remains sufficient. |
+| Broad doc sweeps without shipped surface | North star **S1** / **S5** — tie docs to **BIL** / **ADM** work. |
+
+---
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ADM-13 | Phase 76 | Pending |
+| ADM-14 | Phase 76 | Pending |
+| ADM-15 | Phase 77 | Pending |
+| ADM-16 | Phase 77 | Pending |
+| BIL-04 | Phase 78 | Pending |
+| BIL-05 | Phase 78 | Pending |
+
+**Coverage:** v1.24 requirements **6** total · Mapped **6** · Unmapped **0** ✓
+
+---
+
+*Requirements defined: 2026-04-24 — `/gsd-new-milestone` v1.24.*
