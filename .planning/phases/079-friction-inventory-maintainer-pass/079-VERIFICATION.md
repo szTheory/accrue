@@ -21,6 +21,7 @@ INV-03 normative maintainer conclusion is recorded only in `.planning/research/v
 - `bash scripts/ci/verify_package_docs.sh`
 - `bash scripts/ci/verify_adoption_proof_matrix.sh`
 - `bash scripts/ci/verify_verify01_readme_contract.sh`
+- **79-01-03 skipped (path b)** — inventory row counts unchanged; no edits to **`scripts/ci/verify_v1_17_friction_research_contract.sh`** numeric asserts.
 - **host-integration** — merge-blocking GitHub Actions job **`host-integration`** in **`.github/workflows/ci.yml`** (see **## VERIFY-01 / host-integration**).
 
 ## Path evidence
