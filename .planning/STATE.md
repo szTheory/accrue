@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.28
-milestone_name: Next linked publish continuity
-status: Planning opened **2026-04-24** — strategic **spine B** (**PPX-05..08**, **INV-06**); domain research **skipped**.
-last_updated: "2026-04-24T20:00:00Z"
-last_activity: "2026-04-24 — `/gsd-new-milestone` v1.28 (plan implementation): REQUIREMENTS + ROADMAP Phases 86–87 + PROJECT/MILESTONES/STATE."
+milestone_name: milestone
+status: Requirements and roadmap defined; **Phase 86** awaits the **`mix.exs` `@version`** bump that accompanies the linked registry release (or immediate follow-up PR on **`main`**).
+last_updated: "2026-04-24T17:43:53.273Z"
+last_activity: 2026-04-24 — **`/gsd-new-milestone`** v1.28 planning artifacts committed (**spine B**).
 progress:
-  total_phases: 2
+  total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -63,3 +63,5 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 **Next:** **`/gsd-discuss-phase 86`** or **`/gsd-plan-phase 86`** when the linked **Hex** publish work is queued.
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
+
+**Planned Phase:** 86 (Post-publish contract alignment) — 1 plans — 2026-04-24T17:43:53.266Z
