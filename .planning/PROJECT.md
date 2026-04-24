@@ -50,7 +50,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Last shipped planning milestone:** **v1.18** — Phase **66** (**2026-04-23**): **UAT-01..UAT-05** + **PROOF-01** — **`milestones/v1.18-phases/66-onboarding-confidence/66-VERIFICATION.md`**, **`verify_v1_17_friction_research_contract.sh`**, adoption matrix / walkthrough / verifier alignment. Archives: **`.planning/milestones/v1.18-*`**. Prior: **v1.17** — Phases **62–65**; **`.planning/milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Now:** **v1.19** active — proof resilience (**67**), **0.3.1** Hex publish (**68**), post-ship doc + planning mirrors (**69**). **v1.17** phase directories under **`.planning/milestones/v1.17-phases/`**; **v1.18** Phase **66** tree under **`.planning/milestones/v1.18-phases/`**.
+**Now:** **v1.19** active — Phase **67** proof contracts **complete** **2026-04-24**; next **0.3.1** Hex publish (**68**), then post-ship doc + planning mirrors (**69**). **v1.17** phase directories under **`.planning/milestones/v1.17-phases/`**; **v1.18** Phase **66** tree under **`.planning/milestones/v1.18-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -257,6 +257,11 @@ Theme: **Onboarding confidence** — deferred **Phase 62** human UAT baseline + 
 
 - [x] **UAT-01..UAT-05** — Friction inventory / **STATE** / north-star / archive / **ROADMAP** consistency with **`66-VERIFICATION.md`** + **`verify_v1_17_friction_research_contract.sh`** where cited. **Validated in Phase 66.**
 - [x] **PROOF-01** — Adoption proof matrix, evaluator walkthrough, **`verify_adoption_proof_matrix.sh`**, host README, and org matrix ExUnit stay aligned. **Validated in Phase 66.**
+
+### Validated v1.19 (in flight; Phases 67–69)
+
+- [x] **PRF-01** — Merge-blocking **`verify_adoption_proof_matrix.sh`** needles track **`adoption-proof-matrix.md`** Layer C script names (including **`verify_core_admin_invoice_verify_ids.sh`**) plus **ORG-05** / **ORG-06** taxonomy tokens alongside existing ORG-09 archetype needles (**addresses `v1.17-P1-001`**). **Validated in Phase 67.**
+- [x] **PRF-02** — **`scripts/ci/README.md`** triage subsection documents matrix SSOT path, **`docs-contracts-shift-left`**, same-PR co-update rule for matrix + script + ExUnit literal harness (**`organization_billing_org09_matrix_test.exs`**), and a repo-relative matrix link. **Validated in Phase 67.**
 
 ### Validated v1.14 (Phases 54–56; milestone scope delivered 2026-04-23)
 
@@ -530,4 +535,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-23 — **v1.19** opened (**Release continuity + proof resilience**); **v1.18** Phase **66** archived under **`milestones/v1.18-phases/`**; root **`REQUIREMENTS.md`** + **`ROADMAP`** updated for Phases **67–69**.*
+*Last updated: 2026-04-24 — **v1.19** Phase **67** (**PRF-01..02**) complete; **`REQUIREMENTS.md`** traceability + **`67-VERIFICATION.md`**; next **Phase 68** release train.*
