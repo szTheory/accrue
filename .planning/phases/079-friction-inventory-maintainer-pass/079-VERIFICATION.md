@@ -1,6 +1,6 @@
 ---
 phase: 79-friction-inventory-maintainer-pass
-status: pending
+status: complete
 ---
 
 # Phase 79 — Friction inventory maintainer pass — Verification
@@ -59,4 +59,8 @@ verify_verify01_readme_contract: OK
 
 ## INV-03 closure checklist
 
-_(completed in task 79-01-06)_
+Per **`.planning/REQUIREMENTS.md`** **INV-03**:
+
+- [x] **(b)** — **Dated maintainer certification** that no new sourced rows were warranted: **`.planning/research/v1.17-FRICTION-INVENTORY.md`** → **`### v1.25 INV-03 maintainer pass (2026-04-24)`** (normative voice; links here for verifier bundle only).
+- [x] **Named verifiers + SHA** — **`verify_package_docs`**, **`verify_adoption_proof_matrix.sh`**, **VERIFY-01** / **`verify_verify01_readme_contract.sh`**, **`verify_v1_17_friction_research_contract.sh`**, and **GitHub Actions** **`host-integration`** — documented above with **Reviewed merge SHA** **`149736d0b1523f7ac8982da84cd14f49a5deebbd`**.
+- [x] **`verify_v1_17_friction_research_contract.sh`** remains green on final tree (no row-count drift for path **(b)**).

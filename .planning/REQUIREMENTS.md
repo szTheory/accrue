@@ -13,7 +13,7 @@
 
 ## Friction inventory (INV)
 
-- [ ] **INV-03**: Run a **maintainer pass** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** after **v1.24** ship: either **(a)** add **new sourced** **P1** / **P2** rows (with **`sources`**, **`ci_contract`**, **`integrator_impact`**, stable **`v1.17-P*-***` ids) for friction uncovered on **`main`**, **or** **(b)** publish an explicit **dated maintainer certification** that no new sourced rows were warranted (with pointers to **`verify_package_docs`**, **`verify_adoption_proof_matrix.sh`**, and **VERIFY-01** / **`host-integration`** green on the reviewed SHA). If **(a)** changes row counts, keep **`scripts/ci/verify_v1_17_friction_research_contract.sh`** green with same-PR update.
+- [x] **INV-03**: Run a **maintainer pass** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** after **v1.24** ship: either **(a)** add **new sourced** **P1** / **P2** rows (with **`sources`**, **`ci_contract`**, **`integrator_impact`**, stable **`v1.17-P*-***` ids) for friction uncovered on **`main`**, **or** **(b)** publish an explicit **dated maintainer certification** that no new sourced rows were warranted (with pointers to **`verify_package_docs`**, **`verify_adoption_proof_matrix.sh`**, and **VERIFY-01** / **`host-integration`** green on the reviewed SHA). If **(a)** changes row counts, keep **`scripts/ci/verify_v1_17_friction_research_contract.sh`** green with same-PR update.
 
 ---
 
@@ -45,7 +45,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INV-03 | Phase 79 | Pending |
+| INV-03 | Phase 79 | Complete |
 | BIL-06 | Phase 80 | Pending |
 | BIL-07 | Phase 81 | Pending |
 | INT-12 | Phase 81 | Pending |
