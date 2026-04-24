@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.24
 milestone_name: milestone
 status: ready_to_plan
-last_updated: "2026-04-24T12:33:09.831Z"
+last_updated: "2026-04-24T13:00:00.000Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 3
@@ -61,6 +61,6 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 - **2026-04-24:** **`/gsd-new-milestone` v1.24** — billing + admin theme; **REQ** IDs **ADM-13..16**, **BIL-04..05**; phases continue from **76**.
 
-**Next:** **`/gsd-discuss-phase 77`** or **`/gsd-plan-phase 77`**.
+**Next:** **`/gsd-discuss-phase 78`** or **`/gsd-plan-phase 78`**.
 
-**Completed:** **v1.24** Phase **76** — **2026-04-24** (**ADM-13**, **ADM-14** — customer **`payment_methods`** inventory + Copy). **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.
+**Completed:** **v1.24** Phase **77** — **2026-04-24** (**ADM-15**, **ADM-16** — VERIFY-01 customer **`payment_methods`** tab + theme/copy closure). **v1.24** Phase **76** — **2026-04-24** (**ADM-13**, **ADM-14** — customer **`payment_methods`** inventory + Copy). **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.

@@ -36,8 +36,8 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 76 | 2/2 | Complete    | 2026-04-24 |
-| 77 | 2/2 | Complete    | 2026-04-24 |
+| 76 | Customer PM tab — inventory + Copy burn-down | **Complete 2026-04-24** ([`76-VERIFICATION.md`](phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md)). | ADM-13, ADM-14 |
+| 77 | Customer PM tab — VERIFY + theme + copy export | **Complete 2026-04-24** ([`77-VERIFICATION.md`](phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md)). | ADM-15, ADM-16 |
 | 78 | Billing portal on `Accrue.Billing` + telemetry truth | **BIL-04**, **BIL-05** — facade + **Fake** tests + **`guides/telemetry.md`** / runbook / **CHANGELOG** (+ optional **First Hour** pointer). | BIL-04, BIL-05 |
 
 **Success criteria (milestone):**
@@ -815,7 +815,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 76. Customer PM tab — inventory + Copy burn-down | v1.24 | 2/2 | Complete | 2026-04-24 |
-| 77. Customer PM tab — VERIFY + theme + copy export | v1.24 | — | Not started | — |
+| 77. Customer PM tab — VERIFY + theme + copy export | v1.24 | 2/2 | Complete | 2026-04-24 |
 | 78. Billing portal on `Accrue.Billing` + telemetry truth | v1.24 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
