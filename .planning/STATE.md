@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.25
 milestone_name: Evidence-bound triad (friction + integrator + billing depth)
-status: defining_requirements
+status: milestone_planned
 last_updated: "2026-04-24T12:00:00.000Z"
 last_activity: 2026-04-24
 progress:
@@ -27,11 +27,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.25** — Evidence-bound triad
 
-**Phase:** Not started (requirements + roadmap defined; execution starts at **79**)
+**Phase:** Not started — next **79** (friction inventory maintainer pass)
 
 **Plan:** —
 
-**Status:** Defining requirements — research complete; use **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`**.
+**Status:** Milestone planned — **`REQUIREMENTS.md`** + **`ROADMAP.md`** (Phases **79–81**) + research complete; use **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`**.
 
 **Last activity:** 2026-04-24 — Milestone **v1.25** opened; **`.planning/research/`** refreshed; **`v1.24`** phase trees under **`milestones/v1.24-phases/`**.
 
