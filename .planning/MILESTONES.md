@@ -10,7 +10,7 @@
 
 **Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md)
 
-**Status:** Active — execution starts with **Phase 67**.
+**Status:** Active — Phase **67** complete **2026-04-24**; next **Phase 68** (release train).
 
 ---
 
@@ -39,7 +39,7 @@
 
 **Git tag:** `v1.18`
 
-**Next after ship:** **`/gsd-discuss-phase 67`** / **`/gsd-plan-phase 67`** (**v1.19**).
+**Next after ship:** **`/gsd-discuss-phase 68`** / **`/gsd-plan-phase 68`** (**v1.19**).
 
 ---
 
