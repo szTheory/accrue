@@ -9,7 +9,7 @@ are intentionally coordinating a first public major.
 **Planning milestones vs Hex SemVer:** files under **`.planning/`** may use labels like **`v1.14`** or **`v1.15`** for internal milestone bookkeeping. Those **do not** replace the **`accrue` / `accrue_admin` `@version`** values in each **`mix.exs`** or the versions published on **Hex**. Consumers pin and upgrade against **Hex + changelogs**; maintainers use this runbook plus **`accrue/guides/upgrade.md`**.
 
 **Last verified against** `release-please-config.json`, `.release-please-manifest.json`,
-and `.github/workflows/release-please.yml` on **2026-04-22** (UTC). Update this line when
+and `.github/workflows/release-please.yml` on **2026-04-23** (UTC). Update this line when
 automation semantics change.
 
 ## Routine pre-1.0 linked releases (Release Please + Hex)
@@ -19,7 +19,7 @@ automation semantics change.
    — `separate-pull-requests: false` — and `.release-please-manifest.json` for per-package versions).
 3. Review the PR: both `accrue/mix.exs` and `accrue_admin/mix.exs` `@version` values match the manifest,
    both package-local `CHANGELOG.md` files update, and automation outputs look sane.
-4. Merge after checklist sign-off, **or** after review dispatch **Actions → Release PR automation → Run workflow**
+4. **Default (primary path):** merge the combined Release Please PR manually on GitHub when required checks are green. Merge after checklist sign-off, **or** after review dispatch **Actions → Release PR automation → Run workflow**
    with the PR number so auto-merge queues **only** via **`workflow_dispatch`** (not on PR open/sync).
    Use `scripts/ci/gh_merge_release_pr.sh` if you need the Release Please PR number before dispatching.
 5. Confirm Hex package availability for **`accrue`** before relying on **`accrue_admin`** consumers.
@@ -39,6 +39,7 @@ The standard path is `.github/workflows/release-please.yml`:
   - `needs.release.outputs.accrue_admin_release_created`
 - `accrue` publishes first.
 - `accrue_admin` publishes only after the `accrue` publish job succeeds when both packages release together.
+- The `publish-accrue-admin` job in `release-please.yml` declares `needs: [release, publish-accrue]`, which enforces `accrue` before `accrue_admin` for linked Hex publishes.
 - `accrue_admin` dry-run and publish steps export `ACCRUE_ADMIN_HEX_RELEASE=1`.
 - If Release Please creates the **core** GitHub Release but not the admin one in the same run, the workflow **lockstep fallback** still publishes `accrue_admin` when both manifest versions match (same push SHA).
 
@@ -49,6 +50,12 @@ This automation does not publish from `pull_request`, `pull_request_target`, or 
 `.github/workflows/release-pr-automation.yml` runs **only** on **`workflow_dispatch`**. After you review the Release Please PR, optionally dispatch it with the PR number so `gh pr merge --merge --auto` queues merge when required checks pass — there is **no** subscription to `pull_request` events.
 
 Enable **Allow auto-merge** under repository **Settings → General**. If branch protection requires approving reviews, complete human review first, then dispatch (or merge manually / use `scripts/ci/gh_merge_release_pr.sh`).
+
+## Changelog ship boundary (Release Please)
+
+- **Release Please** is the single writer for **`@version` bumps** in **`accrue/mix.exs`** and **`accrue_admin/mix.exs`** and for **new numbered** sections in **`accrue/CHANGELOG.md`** and **`accrue_admin/CHANGELOG.md`**.
+- At the **merge/tag/publish boundary**, **`## Unreleased`** / **`## [Unreleased]`** must not be the only home for work that already appears under the shipped version section: when the release PR is cut, freeze or drain **Unreleased** so nothing ships with prose that belongs under the version that is tagging.
+- Human polish belongs on the **open release PR** or in **conventional commit bodies**, not as a competing manual version block on **`main`**.
 
 ## Release verification lanes
 
