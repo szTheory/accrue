@@ -1,6 +1,6 @@
 ---
-status: pending
 phase: 76-customer-pm-tab-inventory-copy-burn-down
+inventory_status: established
 verified: ""
 ---
 
@@ -12,10 +12,10 @@ This file is the **ADM-13** merge-facing inventory for operator-visible strings 
 
 | Location | Literal / helper | Copy-backed? | Notes |
 | --- | --- | --- | --- |
-| `customer_live.ex` — `payment_methods` branch, card `<h3>` | `"Payment methods"` | no | Section title for listed payment methods |
-| `customer_live.ex` — `payment_methods` branch, row label fallback | `"Payment method"` | no | Shown when `card_brand` and `type` are both absent on a row |
-| `customer_live.ex` — `payment_methods` branch, last4 mask | `"·••••"` | no | Visual separator before `card_last4` |
-| `customer_live.ex` — `payment_methods` branch, empty state `<p>` | `"No payment methods on file."` | no | When the customer has zero `PaymentMethod` rows |
+| `customer_live.ex` — `payment_methods` branch, card `<h3>` | `Copy.customer_payment_methods_section_heading/0` | yes | Section title for listed payment methods |
+| `customer_live.ex` — `payment_methods` branch, row label fallback | `Copy.customer_payment_methods_row_fallback_label/0` | yes | Shown when `card_brand` and `type` are both absent on a row |
+| `customer_live.ex` — `payment_methods` branch, last4 mask | `Copy.customer_payment_methods_card_last4_mask/0` | yes | Visual separator before `card_last4` |
+| `customer_live.ex` — `payment_methods` branch, empty state `<p>` | `Copy.customer_payment_methods_empty_copy/0` | yes | When the customer has zero `PaymentMethod` rows |
 
 ## ax-* and layout tokens
 

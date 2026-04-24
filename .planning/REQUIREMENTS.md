@@ -13,9 +13,9 @@
 
 ## Companion admin — customer payment methods (ADM)
 
-- [ ] **ADM-13**: Publish a short **inventory** (inline in phase notes or **`accrue_admin/guides/`** as appropriate) of **customer `payment_methods`** tab strings, **`ax-*` / token** usage, and **VERIFY-01** / Playwright coverage vs adjacent customer tabs — enough to scope **ADM-14..16** without broad admin sweeps.
+- [x] **ADM-13**: Publish a short **inventory** (inline in phase notes or **`accrue_admin/guides/`** as appropriate) of **customer `payment_methods`** tab strings, **`ax-*` / token** usage, and **VERIFY-01** / Playwright coverage vs adjacent customer tabs — enough to scope **ADM-14..16** without broad admin sweeps.
 
-- [ ] **ADM-14**: Burn down **operator-visible strings** on the **customer `payment_methods`** tab so literals route through **`AccrueAdmin.Copy`** (or an established submodule); **`ax-*`** / token discipline matches **v1.6 UX-04** intent; **ExUnit** / **Playwright** avoid divergent raw literals on materially touched paths.
+- [x] **ADM-14**: Burn down **operator-visible strings** on the **customer `payment_methods`** tab so literals route through **`AccrueAdmin.Copy`** (or an established submodule); **`ax-*`** / token discipline matches **v1.6 UX-04** intent; **ExUnit** / **Playwright** avoid divergent raw literals on materially touched paths.
 
 - [ ] **ADM-15**: Extend **VERIFY-01** with **Playwright + axe** for **≥1** materially changed **customer** mounted route group tied to **ADM-14** (precedent: **v1.12** / **v1.14**).
 
@@ -57,8 +57,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ADM-13 | Phase 76 | Pending |
-| ADM-14 | Phase 76 | Pending |
+| ADM-13 | Phase 76 | Complete |
+| ADM-14 | Phase 76 | Complete |
 | ADM-15 | Phase 77 | Pending |
 | ADM-16 | Phase 77 | Pending |
 | BIL-04 | Phase 78 | Pending |

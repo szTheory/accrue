@@ -36,7 +36,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 76 | Customer PM tab — inventory + Copy burn-down | Scope and ship **ADM-13**, **ADM-14** on **customer `payment_methods`** (**`AccrueAdmin.Copy`**, **`ax-*`**). | ADM-13, ADM-14 |
+| 76 | 2/2 | Complete    | 2026-04-24 |
 | 77 | Customer PM tab — VERIFY + theme + copy export | **ADM-15**, **ADM-16** — **VERIFY-01** / **axe**, **`theme-exceptions.md`**, **`export_copy_strings`** alignment. | ADM-15, ADM-16 |
 | 78 | Billing portal on `Accrue.Billing` + telemetry truth | **BIL-04**, **BIL-05** — facade + **Fake** tests + **`guides/telemetry.md`** / runbook / **CHANGELOG** (+ optional **First Hour** pointer). | BIL-04, BIL-05 |
 

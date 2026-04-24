@@ -39,6 +39,10 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     billing_events_apply_filters
     coupon_index_headline
     promotion_codes_index_headline
+    customer_payment_methods_section_heading
+    customer_payment_methods_empty_copy
+    customer_payment_methods_row_fallback_label
+    customer_payment_methods_card_last4_mask
   )a
 
   @impl Mix.Task

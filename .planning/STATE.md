@@ -2,14 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.24
 milestone_name: milestone
-status: Phase 76 context gathered — run **`/gsd-plan-phase 76`** (or **`/gsd-plan-phase 76 --skip-research`** if you skip research).
-last_updated: "2026-04-24T12:09:08.501Z"
+status: ready_to_plan
+last_updated: "2026-04-24T16:25:00.000Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -26,11 +27,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.24** — Billing portal facade + customer PM operator surfaces
 
-**Phase:** **76** — Customer PM tab — inventory + Copy burn-down (not started)
+**Phase:** 77
 
-**Plan:** —
+**Plan:** Not started
 
-**Status:** Phase **76** context gathered — **`76-CONTEXT.md`** ready; next **`/gsd-plan-phase 76`**.
+**Status:** Ready to plan
 
 **Last activity:** 2026-04-24
 
@@ -60,6 +61,6 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 - **2026-04-24:** **`/gsd-new-milestone` v1.24** — billing + admin theme; **REQ** IDs **ADM-13..16**, **BIL-04..05**; phases continue from **76**.
 
-**Next:** **`/gsd-discuss-phase 76`** or **`/gsd-plan-phase 76`**.
+**Next:** **`/gsd-discuss-phase 77`** or **`/gsd-plan-phase 77`**.
 
-**Completed:** **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.
+**Completed:** **v1.24** Phase **76** — **2026-04-24** (**ADM-13**, **ADM-14** — customer **`payment_methods`** inventory + Copy). **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.
