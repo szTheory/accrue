@@ -26,4 +26,4 @@ Roughly: **merge-blocking proof and package-doc contracts stay green**, the **po
 ## Related
 
 - [First Hour — How to enter](first_hour.md#how-to-enter-this-guide) (H/M/R capsules ↔ host README spine).
-- [Contributing](../../CONTRIBUTING.md) — release gate and doc-contract expectations.
+- [Contributing](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md) — release gate and doc-contract expectations (monorepo root; not bundled in the Hex tarball).
