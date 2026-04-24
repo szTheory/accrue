@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.24
 milestone_name: milestone
-status: ready_to_plan
-last_updated: "2026-04-24T13:00:00.000Z"
+status: planning
+last_updated: "2026-04-24T13:14:17.385Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 6
+  completed_plans: 4
   percent: 67
 ---
 
@@ -64,3 +64,5 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 **Next:** **`/gsd-discuss-phase 78`** or **`/gsd-plan-phase 78`**.
 
 **Completed:** **v1.24** Phase **77** — **2026-04-24** (**ADM-15**, **ADM-16** — VERIFY-01 customer **`payment_methods`** tab + theme/copy closure). **v1.24** Phase **76** — **2026-04-24** (**ADM-13**, **ADM-14** — customer **`payment_methods`** inventory + Copy). **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.
+
+**Planned Phase:** 78 (Billing portal on Accrue.Billing + telemetry truth) — 2 plans — 2026-04-24T13:14:17.366Z
