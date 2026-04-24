@@ -39,7 +39,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 79 | Friction inventory maintainer pass | Post–**v1.24** **FRG-01** evidence: new sourced rows **or** dated no-new-rows certification + **`verify_v1_17_friction_research_contract.sh`** if row inventory changes. | INV-03 |
+| 79 | Friction inventory maintainer pass | **Complete 2026-04-24** ([`phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md`](phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md)). **INV-03** path **(b)** — **`### v1.25 INV-03 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** + verifier transcripts in **`079-VERIFICATION.md`**. | INV-03 |
 | 80 | Checkout session on `Accrue.Billing` | Ship **`create_checkout_session/2`** (+ **`!`**) delegating to **`Accrue.Checkout.Session`**; **Fake** ExUnit; **PII-safe** span metadata (no **URL** / **client_secret** in attrs). | BIL-06 |
 | 81 | Telemetry truth + integrator contracts | **`guides/telemetry.md`**, **`billing_span_coverage_test.exs`**, **`CHANGELOG`**, **First Hour** / host README / adoption matrix / **VERIFY-01** co-update when checkout becomes a documented entry point. | BIL-07, INT-12 |
 

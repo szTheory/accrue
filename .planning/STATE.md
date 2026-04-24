@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.25
 milestone_name: Evidence-bound triad
-status: Phase **79** context gathered — **`079-CONTEXT.md`** ready; next **`/gsd-plan-phase 79`** (or **`/gsd-execute-phase 79`** after plans exist).
-last_updated: "2026-04-24T14:43:22.893Z"
-last_activity: 2026-04-24 — **`/gsd-discuss-phase 79`** with research synthesis; workflow defaults updated in **`.planning/config.json`**.
+status: Phase **79** complete (**INV-03**); next **`/gsd-discuss-phase 80`** or **`/gsd-plan-phase 80`** (checkout session on **`Accrue.Billing`**).
+last_updated: "2026-04-24T18:00:00.000Z"
+last_activity: 2026-04-24 — **`/gsd-execute-phase 79`** — **`079-VERIFICATION.md`** + **`v1.25`** maintainer subsection in friction inventory.
 progress:
   total_phases: 9
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.25** — Evidence-bound triad
 
-**Phase:** Not started — next **79** (friction inventory maintainer pass)
+**Phase:** **79** complete — next **80** (checkout session on **`Accrue.Billing`**)
 
-**Plan:** —
+**Plan:** **`079-01`** complete
 
-**Status:** Phase **79** context gathered — **`079-CONTEXT.md`** ready; next **`/gsd-plan-phase 79`** (or **`/gsd-execute-phase 79`** after plans exist).
+**Status:** **INV-03** closed path **(b)** — evidence **`.planning/phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md`**.
 
-**Last activity:** 2026-04-24 — **`/gsd-discuss-phase 79`** with research synthesis; workflow defaults updated in **`.planning/config.json`**.
+**Last activity:** 2026-04-24 — **`/gsd-execute-phase 79`** — maintainer certification + verifier bundle transcripts.
 
 ## Milestone Progress
 
@@ -63,8 +63,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 - **2026-04-24:** **`/gsd-complete-milestone` v1.24** — archives **`milestones/v1.24-*`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.24`**; **`audit-open`** all clear.
 - **2026-04-24:** **`/gsd-discuss-phase 79`** — **`079-CONTEXT.md`** + **`079-DISCUSSION-LOG.md`**; discuss workflow **`research_before_questions`**, **`discuss_auto_all_gray_areas`**, **`discuss_high_impact_confirm`** in **`.planning/config.json`**.
 
-**Next:** **`/gsd-plan-phase 79`** — friction inventory maintainer pass (**INV-03**); resume file **`.planning/phases/079-friction-inventory-maintainer-pass/079-CONTEXT.md`**.
+**Next:** **`/gsd-plan-phase 80`** — **`Accrue.Billing.create_checkout_session`** (**BIL-06**); resume when **`080-CONTEXT.md`** exists after discuss.
 
 **Completed (prior milestone):** **v1.24** Phases **76–78** — evidence under **`milestones/v1.24-phases/`**.
 
-**Planned Phase:** 79 (Friction inventory maintainer pass) — 1 plans — 2026-04-24T14:43:22.880Z
+**Completed (v1.25):** Phase **79** (friction inventory maintainer pass) — **`079-VERIFICATION.md`** — 2026-04-24.

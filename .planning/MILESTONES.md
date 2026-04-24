@@ -12,7 +12,7 @@
 
 **Research:** `.planning/research/SUMMARY.md` (milestone pass **2026-04-24**).
 
-**Next:** **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`**.
+**Next:** **`/gsd-discuss-phase 80`** or **`/gsd-plan-phase 80`** (Phase **79** / **INV-03** complete **2026-04-24**).
 
 ---
 
