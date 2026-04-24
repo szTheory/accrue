@@ -226,6 +226,33 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ Copy.customer_detail_no_invoices()
   end
 
+  test "payment_methods tab shows Copy-backed heading and fixture card last4", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
+
+    assert html =~ Copy.customer_payment_methods_section_heading()
+    assert html =~ Copy.customer_payment_methods_card_last4_mask()
+    assert html =~ "4242"
+    assert html =~ "visa"
+  end
+
+  test "payment_methods tab empty state uses Copy when customer has no payment methods", %{
+    conn: conn
+  } do
+    %{customer: bare_customer} = Factory.customer(%{email: "bare-pm@example.com"})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers/#{bare_customer.id}?tab=payment_methods")
+
+    assert html =~ Copy.customer_payment_methods_empty_copy()
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",
