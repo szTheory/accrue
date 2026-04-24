@@ -23,6 +23,7 @@ defmodule Accrue.Billing do
 
   alias Accrue.Billing.Customer
   alias Accrue.BillingPortal.Session
+  alias Accrue.Checkout.Session, as: CheckoutSession
 
   alias Accrue.Billing.{
     ChargeActions,
@@ -436,6 +437,76 @@ defmodule Accrue.Billing do
 
       {:error, other} ->
         raise "Accrue.BillingPortal.Session.create/1 failed: #{inspect(other)}"
+    end
+  end
+
+  @checkout_session_facade_attrs_schema [
+    mode: [type: {:in, [:subscription, :payment, :setup]}, default: :subscription],
+    ui_mode: [type: {:in, [:hosted, :embedded]}, default: :hosted],
+    line_items: [type: {:list, {:map, :any, :any}}, default: []],
+    success_url: [type: {:or, [:string, nil]}, default: nil],
+    cancel_url: [type: {:or, [:string, nil]}, default: nil],
+    return_url: [type: {:or, [:string, nil]}, default: nil],
+    metadata: [type: {:or, [{:map, :any, :any}, nil]}, default: nil],
+    client_reference_id: [type: {:or, [:string, nil]}, default: nil],
+    automatic_tax: [type: :boolean, default: false],
+    operation_id: [type: {:or, [:string, nil]}, default: nil]
+  ]
+
+  @doc """
+  Creates a Stripe Checkout Session for `customer` through the configured
+  processor.
+
+  `attrs` is a keyword list or map of options aligned with
+  `Accrue.Checkout.Session.create/1`, **except** `:customer` (supplied as the
+  first argument): `:mode`, `:ui_mode`, `:line_items`, `:success_url`,
+  `:cancel_url`, `:return_url`, `:metadata`, `:client_reference_id`,
+  `:automatic_tax`, `:operation_id`.
+
+  Invalid keys or types raise `NimbleOptions.ValidationError`.
+
+  The Checkout **redirect URL** (hosted mode) and **`client_secret`** (embedded
+  mode) are bearer credentials. Do **not** log raw session structs, processor
+  payloads, or URLs in production telemetry or support tickets.
+
+  Emits `[:accrue, :billing, :checkout_session, :create]` (OpenTelemetry-style
+  name `accrue.billing.checkout_session.create`). See `m:Accrue.Checkout.Session`
+  for field semantics and the underlying `@create_schema`.
+  """
+  @spec create_checkout_session(Customer.t(), keyword() | map()) ::
+          {:ok, CheckoutSession.t()} | {:error, term()}
+  def create_checkout_session(%Customer{} = customer, attrs)
+      when is_list(attrs) or is_map(attrs) do
+    opts_list = if is_list(attrs), do: attrs, else: Map.to_list(attrs)
+    validated = NimbleOptions.validate!(opts_list, @checkout_session_facade_attrs_schema)
+
+    span_billing(:checkout_session, :create, customer, validated, fn ->
+      CheckoutSession.create(Map.new([customer: customer] ++ validated))
+    end)
+  end
+
+  @doc """
+  Bang variant of `create_checkout_session/2` — returns
+  `%Accrue.Checkout.Session{}` or raises.
+
+  Raises `NimbleOptions.ValidationError` when `attrs` fail validation.
+
+  On `{:error, reason}` from the underlying `CheckoutSession.create/1`,
+  re-raises when `reason` implements `Exception`; otherwise raises with prefix
+  `Accrue.Checkout.Session.create/1 failed:`.
+  """
+  @spec create_checkout_session!(Customer.t(), keyword() | map()) :: CheckoutSession.t()
+  def create_checkout_session!(%Customer{} = customer, attrs)
+      when is_list(attrs) or is_map(attrs) do
+    case create_checkout_session(customer, attrs) do
+      {:ok, session} ->
+        session
+
+      {:error, err} when is_exception(err) ->
+        raise err
+
+      {:error, other} ->
+        raise "Accrue.Checkout.Session.create/1 failed: #{inspect(other)}"
     end
   end
 
@@ -940,7 +1011,20 @@ defmodule Accrue.Billing do
     |> put_metadata(:subscription_id, metadata_value(:subscription_id, subject, opts))
     |> put_metadata(:invoice_id, metadata_value(:invoice_id, subject, opts))
     |> put_metadata(:event_type, keyword_value(opts, :event_type))
+    |> merge_checkout_session_create_metadata(resource, action, opts)
   end
+
+  defp merge_checkout_session_create_metadata(metadata, :checkout_session, :create, opts)
+       when is_list(opts) do
+    line_items = Keyword.get(opts, :line_items, [])
+
+    metadata
+    |> put_metadata(:checkout_mode, Keyword.get(opts, :mode))
+    |> put_metadata(:checkout_ui_mode, Keyword.get(opts, :ui_mode))
+    |> Map.put(:checkout_line_items_count, length(line_items))
+  end
+
+  defp merge_checkout_session_create_metadata(metadata, _, _, _), do: metadata
 
   defp metadata_value(field, subject, opts) do
     subject_value(subject, field) || keyword_value(opts, field)
