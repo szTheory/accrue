@@ -16,6 +16,12 @@ Start with the package quickstart in [`README.md`](../README.md), then return he
 
 **ADM-07:** the canonical matrix of mounted core routes vs `AccrueAdmin.Copy`, `ax-*` / token discipline, and VERIFY-01 posture lives in **[`core-admin-parity.md`](core-admin-parity.md)**. Use it when triaging Tier A copy gaps or planning VERIFY extensions—do not maintain a second matrix in planning-only docs.
 
+## Customer payment methods tab (inventory)
+
+The v1.24 Phase 76 **`payment_methods`** tab inventory (ADM-13) lives in [`.planning/phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`](../../.planning/phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md).
+
+This stub intentionally does not duplicate the operator string table—use that file as the SSOT (per **76-CONTEXT.md** D-02).
+
 ## Theming and exceptions
 
 Semantic color and spacing tokens for the mounted admin UI live in [`assets/css/theme.css`](../assets/css/theme.css) and are composed in [`assets/css/app.css`](../assets/css/app.css). If you introduce a **non-token color literal** (for example a one-off hex in HEEx or a fallback brand map in Elixir) during hierarchy or polish work, add a row to the package register at [`theme-exceptions.md`](theme-exceptions.md) so reviewers can see the exception without spelunking git history.
