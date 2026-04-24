@@ -12,16 +12,20 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.26 — First-hour billing facade spine (**active**)
+### Next milestone
 
-**Goal:** Put **`Accrue.Billing.create_billing_portal_session/2`** on the same **First Hour + host README + adoption proof matrix + verifier** plane as **`create_checkout_session`**, then run a **dated friction-inventory maintainer pass** after that doc touch. **No** **PROC-08** / **FIN-03**.
+*Not defined in planning — run **`/gsd-new-milestone`** when priorities are ready.*
 
-**Target features:**
+### v1.26 — First-hour billing facade spine (**archived 2026-04-24**)
+
+**Goal (shipped):** Put **`Accrue.Billing.create_billing_portal_session/2`** on the same **First Hour + host README + adoption proof matrix + verifier** plane as **`create_checkout_session`**, then run a **dated friction-inventory maintainer pass** after that doc touch. **No** **PROC-08** / **FIN-03**.
+
+**Shipped:**
 
 - [x] **INT-13** — Guide capsule, host README parity (**D-02** / **INT-11**), matrix row + **`verify_adoption_proof_matrix`** (and coupled doc verifiers in the **same PR** when required). **Validated in Phase 82** (`milestones/v1.26-phases/082-first-hour-portal-spine/082-VERIFICATION.md`).
-- **INV-04** — **`v1.17-FRICTION-INVENTORY.md`** certification or new sourced rows with falsifiable verifier pointers.
+- [x] **INV-04** — Path **(b)** dated maintainer certification + **`083-VERIFICATION.md`** (`milestones/v1.26-phases/083-friction-inventory-post-touch/083-VERIFICATION.md`).
 
-**Planning artifacts:** root **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`** (Phases **82–83**).
+**Evidence:** **`.planning/milestones/v1.26-ROADMAP.md`**, **`v1.26-REQUIREMENTS.md`**, execution trees **`milestones/v1.26-phases/`**; planning git tag **`v1.26`**.
 
 ### v1.25 — Evidence-bound triad (friction + integrator + billing depth) (**archived 2026-04-24**)
 
@@ -39,7 +43,7 @@ Tagline: *"Billing state, modeled clearly."*
 - **Customer LiveView** payment-methods tab: Copy SSOT burn-down, token discipline, theme exceptions (**ADM-13**, **ADM-14**) — **`76-VERIFICATION.md`**.
 - **VERIFY-01** + **axe** on materially touched customer paths; **`export_copy_strings`** / **`copy_strings.json`** hygiene (**ADM-15**, **ADM-16**) — **`77-VERIFICATION.md`**.
 
-**Last closed:** **v1.25** (Phases **79–81**); prior **v1.24** (Phases **76–78**); prior **v1.23** (**2026-04-24**).
+**Last closed:** **v1.26** (Phases **82–83**); prior **v1.25** (Phases **79–81**); prior **v1.24** (Phases **76–78**); prior **v1.23** (**2026-04-24**).
 
 ### v1.23 — Post-publish contract alignment (Branch A — **archived 2026-04-24**)
 
@@ -96,11 +100,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **v1.26** — **First-hour billing facade spine**; requirements **`.planning/REQUIREMENTS.md`**; execution starts at **Phase 82**. Workspace **`@version`** remains **0.3.1** until a linked **Hex** release bumps it.
+**Active planning milestone:** *None — run **`/gsd-new-milestone`** to author **`REQUIREMENTS.md`** + **`ROADMAP.md`** for **v1.27+**.* Workspace **`@version`** remains **0.3.1** until a linked **Hex** release bumps it.
 
-**Last shipped planning milestone:** **v1.25** — Phases **79–81** (**2026-04-24**): **INV-03**, **BIL-06**, **BIL-07**, **INT-12**; **`milestones/v1.25-*`**; execution trees **`milestones/v1.25-phases/`**; planning tag **`v1.25`**. **Earlier:** **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.26** — Phases **82–83** (**2026-04-24**): **INT-13**, **INV-04**; **`milestones/v1.26-*`**; execution trees **`milestones/v1.26-phases/`**; planning tag **`v1.26`**. **Earlier:** **v1.25** — Phases **79–81**; **`v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`**. **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.25** Phases **79–81** under **`milestones/v1.25-phases/`** (**`079-VERIFICATION.md`**, **`080-VERIFICATION.md`**, **`081-VERIFICATION.md`**). **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`**). **v1.23** Phase **75** under **`milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`milestones/v1.18-phases/`**; **v1.17** under **`milestones/v1.17-phases/`**.
+**Execution history:** **v1.26** Phases **82–83** under **`milestones/v1.26-phases/`** (**`082-VERIFICATION.md`**, **`083-VERIFICATION.md`**). **v1.25** Phases **79–81** under **`milestones/v1.25-phases/`** (**`079-VERIFICATION.md`**, **`080-VERIFICATION.md`**, **`081-VERIFICATION.md`**). **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`**). **v1.23** Phase **75** under **`milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`milestones/v1.18-phases/`**; **v1.17** under **`milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -650,4 +654,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — Phase **82** complete (**INT-13**); **`INV-04`** remains in Phase **83**.*
+*Last updated: 2026-04-24 after **v1.26** milestone archive (**INT-13**, **INV-04** shipped; **`REQUIREMENTS.md`** removed pending next milestone).*

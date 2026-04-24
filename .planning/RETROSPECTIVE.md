@@ -964,12 +964,48 @@
 
 ---
 
+## Milestone: v1.26 — First-hour billing facade spine
+
+**Shipped:** 2026-04-24  
+**Phases:** 2 | **Plans:** 3
+
+### What Was Built
+
+- **INT-13** — **`create_billing_portal_session`** on **First Hour** + telemetry anchor **`#billing-billing-portal-create`**, host README observability + proof capsule, adoption proof matrix blocking row, **`verify_package_docs`** + **`verify_adoption_proof_matrix`** substring gates, **`CHANGELOG`** **[Unreleased]** slice (**`082-01`**, **`082-02`**, **`082-VERIFICATION.md`**).
+- **INV-04** path **(b)** — **`### v1.26 INV-04 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** with reviewed SHA + verifier bundle pointers; **`083-VERIFICATION.md`** transcripts + closure checklist (**`083-01`**).
+
+### What Worked
+
+- **Phases already under **`milestones/v1.26-phases/`** before close avoided a second move; archives **`v1.26-*`** mirror **v1.25** manual closeout.
+- **`audit-open`** all clear at pre-close gate; **2/2** requirements checked in **`REQUIREMENTS.md`** before archive.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still returns **`version required for phases archive`** — manual **`milestones/v1.26-*`** + **`git rm` REQUIREMENTS** remains the durable path.
+
+### Patterns Established
+
+- **INT-13** extends the **INT-12** “golden path mentions facade → same-PR verifier needles” rule to **billing portal** after **checkout** landed in **v1.25**.
+
+### Key Lessons
+
+1. Two-plan phase **82** plus single-plan **83** still benefits from explicit **`*-VERIFICATION.md`** per phase for friction inventory attestation chains.
+2. Optional **`v1.26-MILESTONE-AUDIT.md`** was not created; **traceability + `audit-open`** remained sufficient for this scope.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: two phases same-day; no **Hex** **@version** bump in this planning milestone.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.26 | short | 2 | **INT-13** + **INV-04** — billing portal on First Hour + matrix + CI needles; post-touch friction certification **(b)**; **`*-VERIFICATION.md`** + **3** plan summaries; phases **82–83** under **`milestones/v1.26-phases/`**. |
 | v1.25 | short | 3 | **INV-03** + **BIL-06..07** + **INT-12** — checkout **`Accrue.Billing`** facade + telemetry/docs + integrator verifiers; **`*-VERIFICATION.md`** + **3** plan summaries; phases **79–81** under **`milestones/v1.25-phases/`**. |
 | v1.24 | short | 3 | **ADM-13..16** + **BIL-04..05** — billing portal facade + customer **PM** VERIFY/copy/theme; **`*-VERIFICATION.md`** + **6** plan summaries; phases **76–78** under **`milestones/v1.24-phases/`**. |
 | v1.23 | short | 1 | **PPX-01..04** — **`docs-contracts-shift-left`** + friction script + **`v1.17-P1-002`** closure (**75-VERIFICATION**); phase under **`v1.23-phases/`**. |
@@ -999,6 +1035,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.26 | Extended **`verify_package_docs.sh`** + **`verify_adoption_proof_matrix.sh`** substring gates; no new ExUnit facade (portal facade shipped **v1.24**) | INT-13 + INV-04 (2/2) archived | Doc + CI needles only; **`milestones/v1.26-*`**; execution trees **`v1.26-phases/`**. |
 | v1.24 | **`billing_portal_session_facade_test.exs`** + existing **VERIFY-01** / **host-integration** / **`verify_package_docs`** gates | ADM + BIL (6/6) archived | Public **`Accrue.Billing`** portal API; customer **PM** Playwright + **axe** row; **`milestones/v1.24-*`**; phases remain under **`.planning/phases/`**. |
 | v1.23 | Existing **`docs-contracts-shift-left`** suite + **`verify_v1_17_friction_research_contract.sh`**; no new CI jobs | PPX (4/4) archived | Friction inventory **P1-002** closure note; **`75-VERIFICATION.md`**; phase tree **`v1.23-phases/75-*/`**. |
 | v1.22 | Merge-blocking **`verify_production_readiness_discoverability.sh`** added to **`docs-contracts-shift-left`**; existing doc verifiers unchanged | PRS (3/3) archived | Bash verifier + CI wiring; **`scripts/ci/README.md`** PRS triage rows; phase tree **`v1.22-phases/74-*/`**. |

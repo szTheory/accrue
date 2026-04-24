@@ -1,16 +1,32 @@
 # Milestones
 
-## v1.26 First-hour billing facade spine (Planning opened: 2026-04-24)
+## v1.26 First-hour billing facade spine (Shipped: 2026-04-24)
 
-**Status:** **Active** — execution Phases **82–83**.
+**Planning opened:** 2026-04-24
 
-**Theme:** **INT-13** — **`Accrue.Billing.create_billing_portal_session/2`** on **First Hour** + **`examples/accrue_host` README** + **adoption proof matrix** + merge-blocking verifiers (same-PR discipline). **INV-04** — post-touch **`v1.17-FRICTION-INVENTORY.md`** maintainer certification or new sourced rows. **No** **PROC-08** / **FIN-03**; **no** Hex-release theme unless amended.
+**Phases completed:** **2** phases (**82–83**), **3** plans total (**2+1**).
+
+**Theme:** **INT-13** — **`Accrue.Billing.create_billing_portal_session/2`** on **First Hour** + **`examples/accrue_host` README** + **adoption proof matrix** + merge-blocking verifiers (same-PR discipline). **INV-04** — post-touch **`v1.17-FRICTION-INVENTORY.md`** maintainer certification path **(b)**. **No** **PROC-08** / **FIN-03**; **no** Hex-release theme unless amended.
 
 **Depends on:** **v1.25** shipped.
 
 **Research:** Skipped — brownfield integrator parity; prior **`.planning/research/SUMMARY.md`** context.
 
-**Requirements / roadmap:** **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`**.
+**Phase execution trees:** **`.planning/milestones/v1.26-phases/082-first-hour-portal-spine/`**, **`083-friction-inventory-post-touch/`**.
+
+**Key accomplishments:**
+
+- **82:** **INT-13** — telemetry anchor, First Hour portal paragraph, adoption matrix blocking row, host README observability capsule; **`verify_package_docs`** / **`verify_adoption_proof_matrix`** needles + **`082-VERIFICATION.md`** (**`082-01`**, **`082-02`**).
+- **83:** **INV-04** path **(b)** — **`### v1.26 INV-04 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** + **`083-VERIFICATION.md`** verifier transcripts.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.26-ROADMAP.md`](milestones/v1.26-ROADMAP.md)
+- Requirements: [`milestones/v1.26-REQUIREMENTS.md`](milestones/v1.26-REQUIREMENTS.md)
+
+**Git tag:** `v1.26`
+
+**Next after ship:** **`/gsd-new-milestone`** for **v1.27+** priorities.
 
 ---
 
