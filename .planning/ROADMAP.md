@@ -35,7 +35,7 @@
 |---|-------|------|----------------|
 | 67 | Proof contracts | **Complete 2026-04-24** (1/1 plans; see [`phases/67-proof-contracts/67-VERIFICATION.md`](phases/67-proof-contracts/67-VERIFICATION.md)). | PRF-01, PRF-02 |
 | 68 | Release train | **Complete 2026-04-24** (2/2 plans; see [`phases/68-release-train/68-VERIFICATION.md`](phases/68-release-train/68-VERIFICATION.md)). | REL-01, REL-02, REL-03 |
-| 69 | Doc + planning mirrors | **`first_hour`** / package README pins + **`verify_package_docs`** green; **PROJECT** / **MILESTONES** / **STATE** Hex lines. | DOC-01, DOC-02, HYG-01 |
+| 69 | 2/2 | Complete    | 2026-04-24 |
 
 **Success criteria (milestone):**
 
