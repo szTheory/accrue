@@ -175,12 +175,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
           <% "payment_methods" -> %>
             <section class="ax-card">
-              <h3 class="ax-heading">Payment methods</h3>
+              <h3 class="ax-heading"><%= Copy.customer_payment_methods_section_heading() %></h3>
               <div :for={payment_method <- payment_methods(@customer)} class="ax-list-row">
-                <span class="ax-body"><%= payment_method.card_brand || payment_method.type || "Payment method" %> ·•••• <%= payment_method.card_last4 || "--" %></span>
+                <span class="ax-body"><%= payment_method.card_brand || payment_method.type || Copy.customer_payment_methods_row_fallback_label() %> <%= Copy.customer_payment_methods_card_last4_mask() %> <%= payment_method.card_last4 || "--" %></span>
                 <span class="ax-body"><%= expiry(payment_method) %></span>
               </div>
-              <p :if={payment_methods(@customer) == []} class="ax-body">No payment methods on file.</p>
+              <p :if={payment_methods(@customer) == []} class="ax-body"><%= Copy.customer_payment_methods_empty_copy() %></p>
             </section>
 
           <% "events" -> %>
