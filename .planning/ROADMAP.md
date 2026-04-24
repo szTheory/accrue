@@ -814,7 +814,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 76. Customer PM tab — inventory + Copy burn-down | v1.24 | — | Not started | — |
+| 76. Customer PM tab — inventory + Copy burn-down | v1.24 | 2/2 | Complete | 2026-04-24 |
 | 77. Customer PM tab — VERIFY + theme + copy export | v1.24 | — | Not started | — |
 | 78. Billing portal on `Accrue.Billing` + telemetry truth | v1.24 | — | Not started | — |
 
