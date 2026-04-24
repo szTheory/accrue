@@ -28,3 +28,22 @@ Reviewed merge SHA: `d1f121c75bb21fb2dd53c9ac9315bd83c26a438e`
 ## Path evidence
 
 83-01-02: certification subsection ### v1.26 INV-04 maintainer pass (2026-04-24) in `.planning/research/v1.17-FRICTION-INVENTORY.md`.
+
+## Command transcripts
+
+Recorded **2026-04-24** from repository root; each command exited **0** on the tree at reviewed SHA **`d1f121c75bb21fb2dd53c9ac9315bd83c26a438e`**.
+
+```text
+$ bash scripts/ci/verify_v1_17_friction_research_contract.sh
+verify_v1_17_friction_research_contract: OK
+
+$ bash scripts/ci/verify_package_docs.sh
+package docs verified for accrue 0.3.1 and accrue_admin 0.3.1
+fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, quickstart.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full
+
+$ bash scripts/ci/verify_adoption_proof_matrix.sh
+verify_adoption_proof_matrix: OK
+
+$ bash scripts/ci/verify_verify01_readme_contract.sh
+verify_verify01_readme_contract: OK
+```
