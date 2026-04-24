@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.24
-milestone_name: Billing portal facade + customer PM operator surfaces
-status: ready_to_build
-last_updated: "2026-04-24T12:00:00.000Z"
-last_activity: 2026-04-24 — v1.24 roadmap Phases 76–78 committed
+milestone_name: milestone
+status: Roadmap ready — start **`/gsd-discuss-phase 76`** or **`/gsd-plan-phase 76`**.
+last_updated: "2026-04-24T12:09:08.501Z"
+last_activity: 2026-04-24
 progress:
   total_phases: 3
   completed_phases: 0
