@@ -18,7 +18,7 @@ Start with the package quickstart in [`README.md`](../README.md), then return he
 
 ## Customer payment methods tab (inventory)
 
-The v1.24 Phase 76 **`payment_methods`** tab inventory (ADM-13) lives in [`.planning/phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`](../../.planning/phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md).
+The v1.24 Phase 76 **`payment_methods`** tab inventory (ADM-13) lives in [`.planning/milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`](../../.planning/milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md).
 
 This stub intentionally does not duplicate the operator string table—use that file as the SSOT (per **76-CONTEXT.md** D-02).
 

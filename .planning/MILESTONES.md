@@ -26,7 +26,7 @@
 
 **Depends on:** **v1.23** shipped.
 
-**Phase execution trees:** **`.planning/phases/76-customer-pm-tab-inventory-copy-burn-down/`**, **`77-customer-pm-tab-verify-theme-copy-export/`**, **`78-billing-portal-on-accrue-billing-telemetry-truth/`**.
+**Phase execution trees:** **`.planning/milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/`**, **`77-customer-pm-tab-verify-theme-copy-export/`**, **`78-billing-portal-on-accrue-billing-telemetry-truth/`**.
 
 **Key accomplishments:**
 

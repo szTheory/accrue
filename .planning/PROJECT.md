@@ -30,7 +30,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Shipped (planning):**
 
-- **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) delegating to **`Accrue.BillingPortal.Session`**, with **`:telemetry`** / span parity and catalog/runbook updates (**BIL-04**, **BIL-05**) — **`78-VERIFICATION.md`** under **`.planning/phases/78-*/`**.
+- **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) delegating to **`Accrue.BillingPortal.Session`**, with **`:telemetry`** / span parity and catalog/runbook updates (**BIL-04**, **BIL-05**) — **`78-VERIFICATION.md`** under **`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/`**.
 - **Customer LiveView** payment-methods tab: Copy SSOT burn-down, token discipline, theme exceptions (**ADM-13**, **ADM-14**) — **`76-VERIFICATION.md`**.
 - **VERIFY-01** + **axe** on materially touched customer paths; **`export_copy_strings`** / **`copy_strings.json`** hygiene (**ADM-15**, **ADM-16**) — **`77-VERIFICATION.md`**.
 
@@ -326,7 +326,7 @@ Theme: **billing portal facade + customer PM operator surfaces** (**ADM-13..16**
 
 - [x] **ADM-13, ADM-14** — Customer **`payment_methods`** tab inventory + **`AccrueAdmin.Copy`** burn-down. **Validated in Phase 76** (**`76-VERIFICATION.md`**).
 - [x] **ADM-15** — Merge-blocking VERIFY-01 Playwright + **axe** for customer detail **`?tab=payment_methods`** (`examples/accrue_host`); matrix row in **`verify01-v112-admin-paths.md`**. **Validated in Phase 77** (**`77-VERIFICATION.md`**).
-- [x] **ADM-16** — **`accrue_admin/guides/theme-exceptions.md`** Phase 77 reviewer note; **`mix accrue_admin.export_copy_strings`** SSOT for **`copy_strings.json`**; closure in **`.planning/phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**. **Validated in Phase 77**.
+- [x] **ADM-16** — **`accrue_admin/guides/theme-exceptions.md`** Phase 77 reviewer note; **`mix accrue_admin.export_copy_strings`** SSOT for **`copy_strings.json`**; closure in **`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**. **Validated in Phase 77**.
 - [x] **BIL-04** — **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) with **`span_billing(:billing_portal, :create, …)`**, Fake-backed ExUnit. **Validated in Phase 78** (**`78-VERIFICATION.md`**).
 - [x] **BIL-05** — **`guides/telemetry.md`**, **`operator-runbooks.md`**, **`CHANGELOG.md`** aligned with billing portal + payment-method span inventory. **Validated in Phase 78** (**`78-VERIFICATION.md`**).
 
