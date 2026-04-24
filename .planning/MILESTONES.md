@@ -1,5 +1,23 @@
 # Milestones
 
+## v1.28 Next linked publish continuity (Planning opened: 2026-04-24)
+
+**Planning opened:** 2026-04-24
+
+**Phases planned:** **2** phases (**86–87**), **PPX-05..08** + **INV-06**.
+
+**Theme:** **Spine B** from strategic wrap-up plan — **post-publish contract alignment** on the **next linked Hex publish** for **`accrue` / `accrue_admin`** (same obligation family as **v1.23** **PPX-01..04**), then **INV-06** friction-inventory maintainer pass per inventory **revisit triggers**. **No** **PROC-08** / **FIN-03**; **not** a **1.0.0** declaration unless reprioritized.
+
+**Depends on:** **v1.27** shipped.
+
+**Research:** Skipped — brownfield **v1.23** pattern; prior **`.planning/research/SUMMARY.md`** context.
+
+**Live artifacts:** **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`** (Phases **86–87**).
+
+**Next:** Execute **Phase 86** when **`@version`** / registry release work begins; then **Phase 87** (**INV-06**).
+
+---
+
 ## v1.27 Pre-1.0 closure narrative (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24
