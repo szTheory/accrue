@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.26
 milestone_name: milestone
 status: Phase **82** execution finished — merge-blocking doc scripts green locally; run full CI on branch before merge.
-last_updated: "2026-04-24T16:27:50.834Z"
-last_activity: "2026-04-24 — **`/gsd-execute-phase 82`**: telemetry anchor **`#billing-billing-portal-create`**, First Hour + matrix + host README portal parity, **`verify_package_docs`** / **`verify_adoption_proof_matrix`** portal needles, **`CHANGELOG`**."
+last_updated: "2026-04-24T17:00:00.000Z"
+last_activity: "2026-04-24 — **`/gsd-discuss-phase 83`**: **`083-CONTEXT.md`** + **`083-DISCUSSION-LOG.md`** (**INV-04** maintainer pass decisions; **`docs-contracts-shift-left`** in certification bundle)."
 progress:
   total_phases: 9
   completed_phases: 0
@@ -60,7 +60,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 - **2026-04-24:** **`/gsd-new-milestone` v1.26** — integrator spine for **billing portal** (**INT-13**) + **INV-04** maintainer pass; research skipped (brownfield parity); **`phases.clear`** (0 trees).
 
-**Next:** **`/gsd-discuss-phase 83`** or **`/gsd-plan-phase 83`** (**INV-04**); optional **`/gsd-verify-work 82`** for conversational UAT.
+**Next:** **`/gsd-plan-phase 83`** (**INV-04**); optional **`/gsd-verify-work 82`** for conversational UAT. Context: **`.planning/milestones/v1.26-phases/083-friction-inventory-post-touch/083-CONTEXT.md`**.
 
 **Completed (v1.25):** Phases **79–81** — **`milestones/v1.25-phases/`**.
 
