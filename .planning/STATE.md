@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.25
 milestone_name: Evidence-bound triad
 status: planning
-last_updated: "2026-04-24T19:30:00.000Z"
-last_activity: 2026-04-24 — **`/gsd-execute-phase 80`** — BIL-06 checkout facade + **`080-VERIFICATION.md`**.
+last_updated: "2026-04-24T20:00:00.000Z"
+last_activity: 2026-04-24 — **`/gsd-discuss-phase 81`** (research-backed) — **`081-CONTEXT.md`** + GSD **`workflow.discuss_default_*`** integrator/telemetry defaults.
 progress:
   total_phases: 9
   completed_phases: 0
@@ -26,13 +26,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.25** — Evidence-bound triad
 
-**Phase:** **80** complete — next **81** (telemetry truth + integrator contracts)
+**Phase:** **81** — context gathered (**BIL-07**, **INT-12**); planning next — **`.planning/phases/081-telemetry-truth-integrator-contracts/081-CONTEXT.md`**
 
 **Plan:** **`080-01`** complete
 
-**Status:** **BIL-06** — evidence **`.planning/phases/080-checkout-session-on-accrue-billing/080-VERIFICATION.md`**.
+**Status:** **BIL-06** complete — **`080-VERIFICATION.md`**. **BIL-07** / **INT-12** pending implementation per **081-CONTEXT**.
 
-**Last activity:** 2026-04-24 — **`/gsd-execute-phase 80`** — **`Accrue.Billing.create_checkout_session`** facade + ExUnit.
+**Last activity:** 2026-04-24 — **`/gsd-discuss-phase 81`** — subagent research → locked decisions in **`081-CONTEXT.md`**.
 
 ## Milestone Progress
 
