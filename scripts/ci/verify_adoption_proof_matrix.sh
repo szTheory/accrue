@@ -34,6 +34,8 @@ require_substring "scripts/ci/verify_adoption_proof_matrix.sh" "script path lite
 require_substring "phx.gen.auth" "phx.gen.auth mention"
 require_substring "use Accrue.Billable" "Accrue.Billable hook"
 require_substring "non-Sigra" "non-Sigra framing"
+require_substring "ORG-05" "ORG-05 taxonomy token in matrix"
+require_substring "ORG-06" "ORG-06 taxonomy token in matrix"
 require_substring "ORG-07" "ORG-07 row"
 require_substring "ORG-08" "ORG-08 row"
 
