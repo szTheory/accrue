@@ -10,11 +10,19 @@
 
 **Depends on:** **v1.19** shipped; **v1.19** execution trees under [`.planning/milestones/v1.19-phases/`](milestones/v1.19-phases/).
 
-**Phase execution trees (v1.20):** [`.planning/phases/70-friction-evidence-refresh/`](phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](phases/71-production-readiness-spine/)
+**Phase execution trees (v1.20):** [`.planning/milestones/v1.20-phases/70-friction-evidence-refresh/`](milestones/v1.20-phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](milestones/v1.20-phases/71-production-readiness-spine/)
 
-**Archives:** *(none yet — run **`/gsd-complete-milestone` v1.20** to write **`milestones/v1.20-*`**, remove root **`REQUIREMENTS.md`**, and tag.)*
+**Key accomplishments:**
 
-**Git tag:** *(pending `v1.20` planning tag at milestone close)*
+- **70:** **`v1.17-P1-001`** closed in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with **v1.19** **PRF** evidence pointers + maintainer revisit note (**INV-01..02**).
+- **71:** **`accrue/guides/production-readiness.md`** checklist spine + **First Hour** / **configuration** / **`examples/accrue_host` README** cross-links (**PRD-01..02**).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.20-ROADMAP.md`](milestones/v1.20-ROADMAP.md)
+- Requirements: [`milestones/v1.20-REQUIREMENTS.md`](milestones/v1.20-REQUIREMENTS.md)
+
+**Git tag:** `v1.20`
 
 **Next after ship:** **`/gsd-new-milestone`** for **v1.21+** priorities.
 

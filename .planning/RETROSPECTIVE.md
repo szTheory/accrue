@@ -756,12 +756,44 @@
 
 ---
 
+## Milestone: v1.20 — Professional adoption confidence
+
+**Shipped:** 2026-04-24  
+**Phases:** 2 | **Plans:** 0 (verification-only bootstrap)
+
+### What Was Built
+
+- **INV-01..02:** **`v1.17-P1-001`** row closed in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with pointers to **v1.19** **PRF** verification and a dated maintainer note when no new sourced **P0/P1** rows were added.
+- **PRD-01..02:** **`accrue/guides/production-readiness.md`** checklist spine linking only to existing guides; cross-links from **First Hour**, **configuration**, and **`examples/accrue_host` README**.
+
+### What Worked
+
+- Keeping **v1.20** strictly **docs + planning evidence** preserved merge-blocking CI semantics while still shipping evaluator-facing production posture routing.
+- Relocating Phases **70–71** to **`milestones/v1.20-phases/`** at close matches the **v1.19** durable execution-history pattern.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still cannot drive full archival; manual **`milestones/v1.20-*`** + **`git mv`** + **`git rm` REQUIREMENTS** closeout (same debt as **v1.18–v1.19**).
+
+### Key Lessons
+
+1. **Bootstrap verification** phases (**`*-VERIFICATION.md`** only) are sufficient for small doc milestones when **REQUIREMENTS** traceability stays tight.
+2. Record **`milestone.complete` CLI** limitation in each archive **Technical debt** section so the next close does not rediscover it.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: short milestone after **v1.19** ship; no Hex or billing API churn.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.20 | short | 2 | Friction inventory evidence refresh (**70-VERIFICATION**); **production-readiness** guide + integrator cross-links (**71-VERIFICATION**); phases moved to **`v1.20-phases/`**. |
 | v1.19 | short | 3 | Proof needles + README triage (**67-01**); **RELEASING** + **68-VERIFICATION** Hex/tag evidence (**68-01..02**); doc verifier + planning mirrors (**69-01..02**). |
 | v1.18 | short | 1 | Verification ledger for deferred **62-UAT** baseline (**66-01**); STATE + friction script archive gate (**66-02**); PROOF-01 matrix/script/README alignment + requirements close (**66-03**). |
 | v1.17 | short | 4 | Friction inventory + north star + FRG-03 anchors (62); INT-10 README + host-integration slugs + integrator closure (63); BIL-03 empty-queue certification (64); ADM-12 empty-queue certification (65). |
@@ -785,6 +817,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.20 | Merge-blocking doc contracts unchanged; **`*-VERIFICATION.md`** evidence only | INV + PRD (4/4) archived | **`production-readiness.md`** spine; inventory **§ v1.20 evidence refresh**; phase trees under **`milestones/v1.20-phases/`**. |
 | v1.19 | **`verify_adoption_proof_matrix.sh`** needles + **`package_docs_verifier_test.exs`**; **`68-VERIFICATION.md`** external URL checks | PRF + REL + DOC + HYG (8/8) archived | **`scripts/ci/README.md`** triage for matrix/script/test co-update; **0.3.1** Hex + tag + changelog-at-tag evidence table. |
 | v1.18 | **`v1_17_friction_research_contract_test.exs`**; bash **`verify_v1_17_friction_research_contract.sh`**; **`verify_adoption_proof_matrix.sh`** + **`organization_billing_org09_matrix_test.exs`** | UAT-01..UAT-05 + PROOF-01 (6/6) archived | **`66-VERIFICATION.md`** ledger; **`62-UAT.md`** banner errata; friction SSOT + archive presence gates in shift-left CI. |
 | v1.16 | **`package_docs_verifier_test`** extensions; bash **`verify_package_docs`**, **`verify_verify01_readme_contract`**, **`verify_adoption_proof_matrix`** | INT-06..INT-09 (4/4) archived | Quickstart hub + capsule checks in **`verify_package_docs.sh`**; adoption matrix + walkthrough trust stub; root README VERIFY line pin; CI README INT rows; planning Hex mirror discipline. |

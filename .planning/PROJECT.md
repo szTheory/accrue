@@ -12,11 +12,13 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.20 — Professional adoption confidence** (**2026-04-24**). Phases **70–71**; **INV-01..INV-02**, **PRD-01..PRD-02** validated. Post–**0.3.1** friction inventory pass (**`v1.17-P1-001`** closed) + **`accrue/guides/production-readiness.md`** spine with **First Hour** / **configuration** / **`accrue_host` README** cross-links. Phase trees: **`.planning/phases/70-friction-evidence-refresh/`**, **`71-production-readiness-spine/`**. **No** **PROC-08** / **FIN-03**.
+**v1.21+** — not opened yet. Run **`/gsd-new-milestone`** to define the next planning slice and recreate **`.planning/REQUIREMENTS.md`**.
+
+**v1.20 — Professional adoption confidence** is **archived** (**2026-04-24**). Phases **70–71**; **INV-01..INV-02**, **PRD-01..PRD-02** validated. Phase trees: **`.planning/milestones/v1.20-phases/`**. Archives: **`.planning/milestones/v1.20-ROADMAP.md`**, **`v1.20-REQUIREMENTS.md`**. Planning git tag **`v1.20`**.
 
 **v1.19 — Release continuity + proof resilience** is **archived** (**2026-04-24**). Phases **67–69**; **PRF-01..PRF-02**, **REL-01..REL-03**, **DOC-01..DOC-02**, **HYG-01** validated. Phase trees: **`.planning/milestones/v1.19-phases/67-proof-contracts/`**, **`68-release-train/`**, **`69-doc-planning-mirrors/`**. Archives: **`.planning/milestones/v1.19-ROADMAP.md`**, **`v1.19-REQUIREMENTS.md`**. Planning git tag **`v1.19`**.
 
-**Next:** **`/gsd-new-milestone`** when **v1.21+** priorities are set (or **`/gsd-complete-milestone` v1.20** to archive + tag).
+**Next:** **`/gsd-new-milestone`** when **v1.21+** priorities are set.
 
 **Triage doctrine (read-only context, v1.17–v1.18):** [North star + stop rules](research/v1.17-north-star.md) · [Friction inventory](research/v1.17-FRICTION-INVENTORY.md)
 
@@ -52,9 +54,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Last shipped planning milestone:** **v1.20** — Phases **70–71** (**2026-04-24**): friction inventory pass (**INV-01..02**) + production readiness guide (**PRD-01..02**). Prior: **v1.19** — Phases **67–69**; **`milestones/v1.19-*`** + **`milestones/v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66** (**2026-04-23**); **`milestones/v1.18-phases/66-onboarding-confidence/`**; tag **`v1.18`**. **v1.17** — **`milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.20** — Phases **70–71** (**2026-04-24**): friction inventory pass (**INV-01..02**) + production readiness guide (**PRD-01..02**); **`milestones/v1.20-*`** + **`milestones/v1.20-phases/`**; tag **`v1.20`**. Prior: **v1.19** — Phases **67–69**; **`milestones/v1.19-*`** + **`milestones/v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66** (**2026-04-23**); **`milestones/v1.18-phases/66-onboarding-confidence/`**; tag **`v1.18`**. **v1.17** — **`milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.20** phase directories under **`.planning/phases/`** (**70–71**); **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
+**Execution history:** **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -486,9 +488,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.17 uses friction triage before broad doc sweeps | After v1.16 continuity, ranked **FRG-01** evidence + **FRG-03** backlog prevents silent scope expansion; **BIL-03**/**ADM-12** allow signed empty-queue certification | ✓ Good — **shipped** Phases **62–65** (**2026-04-23**); archived + planning tag **`v1.17`** |
 | v1.18 closes deferred **62-UAT** confidence with a verification ledger + contracts | Proof-first slice: **REQUIREMENTS** normative over historical **`62-UAT`** body; thin bash/ExUnit for binary invariants; **PROOF-01** keeps matrix ↔ script ↔ README honest | ✓ Good — **shipped** Phase **66** (**2026-04-23**); archived + planning tag **`v1.18`** |
 | v1.19 sequences proof-contract hardening before **0.3.1** Hex publish | Workspace **`@version`** already **0.3.1** while public Hex lags **0.3.0**; **PRF-** work closes **v1.17-P1-001** drift class before release train; **HYG** mirrors follow ship | ✓ Good — **shipped** Phases **67–69** (**2026-04-24**); archived + planning tag **`v1.19`** |
+| v1.20 closes friction evidence loop + production readiness spine without billing scope | Post–**0.3.1** inventory pass (**INV-**) + **`production-readiness.md`** integrator cross-links (**PRD-**); **PROC-08** / **FIN-03** unchanged | ✓ Good — **shipped** Phases **70–71** (**2026-04-24**); archived + planning tag **`v1.20`** |
 
 ## Current Milestone Notes
 
+- **2026-04-24:** **`/gsd-complete-milestone` v1.20** — archives **`milestones/v1.20-*`**, **`git mv`** Phases **70–71** → **`milestones/v1.20-phases/`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.20`**.
 - **2026-04-23:** **`/gsd-new-milestone` v1.19** — **Release continuity + proof resilience**; **`REQUIREMENTS.md`** (**PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**); roadmap Phases **67–69** (proof → Hex **0.3.1** → mirrors); **v1.18** Phase **66** execution tree moved to **`.planning/milestones/v1.18-phases/`** (durable path after **`phases.clear`**).
 - Phase 17 verified that v1.2 has no remaining requirement, integration, flow, or cleanup gaps before milestone archival.
 - Phase 16 recorded a recommendation, not a feature delivery: `Stripe Tax support` is the recommended next implementation milestone because it deepens the current Stripe-first path without promising any v1.2 schema, API, or processor changes.
@@ -553,4 +557,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.20** milestone opened (**INV** / **PRD**); **v1.19** phase trees relocated to **`.planning/milestones/v1.19-phases/`**.*
+*Last updated: 2026-04-24 — **v1.20** milestone archived (**INV** / **PRD**); **`.planning/REQUIREMENTS.md`** removed pending **`/gsd-new-milestone`**; Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; planning tag **`v1.20`**.*
