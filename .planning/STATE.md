@@ -1,16 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.25
-milestone_name: Evidence-bound triad (friction + integrator + billing depth)
-status: milestone_planned
-last_updated: "2026-04-24T12:00:00.000Z"
-last_activity: 2026-04-24
+milestone_name: Evidence-bound triad
+status: completed
+last_updated: "2026-04-24T14:37:49.710Z"
+last_activity: 2026-04-24 — Milestone **v1.25** opened; **`.planning/research/`** refreshed; **`v1.24`** phase trees under **`milestones/v1.24-phases/`**.
 progress:
-  total_phases: 3
+  total_phases: 9
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
