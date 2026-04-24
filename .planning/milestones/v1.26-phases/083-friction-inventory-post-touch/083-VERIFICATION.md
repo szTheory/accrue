@@ -23,6 +23,7 @@ Reviewed merge SHA: `d1f121c75bb21fb2dd53c9ac9315bd83c26a438e`
 - `bash scripts/ci/verify_verify01_readme_contract.sh`
 - **`docs-contracts-shift-left`** — merge-blocking GitHub Actions job in **`.github/workflows/ci.yml`** that runs the bash contracts above (including **VERIFY-01**).
 - **`host-integration`** — merge-blocking job in the same workflow; see **## CI evidence: docs-contracts-shift-left, VERIFY-01, host-integration** for `needs:` wiring vs **`docs-contracts-shift-left`**.
+- **83-01-03 skipped (path b)** — row counts unchanged
 
 ## Path evidence
 
