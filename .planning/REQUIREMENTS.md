@@ -10,8 +10,8 @@
 
 ## Proof contracts (PRF)
 
-- [ ] **PRF-01**: Merge-blocking checks cover **taxonomy / archetype / row-id** alignment between **`examples/accrue_host/docs/adoption-proof-matrix.md`** and **`scripts/ci/verify_adoption_proof_matrix.sh`** (and any related **ExUnit** contract tests) so an intentional matrix edit **must** update verifier needles in the **same change set** (CI fails otherwise).
-- [ ] **PRF-02**: **`scripts/ci/README.md`** documents contributor triage for **`verify_adoption_proof_matrix.sh`** — including the **matrix + script + tests co-update** rule and pointers to the matrix SSOT.
+- [x] **PRF-01**: Merge-blocking checks cover **taxonomy / archetype / row-id** alignment between **`examples/accrue_host/docs/adoption-proof-matrix.md`** and **`scripts/ci/verify_adoption_proof_matrix.sh`** (and any related **ExUnit** contract tests) so an intentional matrix edit **must** update verifier needles in the **same change set** (CI fails otherwise).
+- [x] **PRF-02**: **`scripts/ci/README.md`** documents contributor triage for **`verify_adoption_proof_matrix.sh`** — including the **matrix + script + tests co-update** rule and pointers to the matrix SSOT.
 
 ## Release train (REL)
 
@@ -47,8 +47,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PRF-01 | 67 | Pending |
-| PRF-02 | 67 | Pending |
+| PRF-01 | 67 | Complete |
+| PRF-02 | 67 | Complete |
 | REL-01 | 68 | Pending |
 | REL-02 | 68 | Pending |
 | REL-03 | 68 | Pending |
