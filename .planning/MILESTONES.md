@@ -8,7 +8,7 @@
 
 **Depends on:** **v1.23** shipped.
 
-**Phases:** **76+** (see root **`.planning/ROADMAP.md`**).
+**Phases:** **76–78** (see root **`.planning/ROADMAP.md`**).
 
 **Next:** Execute **`/gsd-plan-phase`** / **`/gsd-discuss-phase`** starting at **Phase 76**.
 

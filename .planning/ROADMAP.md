@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- **v1.24 Billing portal facade + customer PM operator surfaces** — Phases **76–78** (**2026-04-24** planning). **ADM-13..ADM-16**, **BIL-04..BIL-05**; **`Accrue.Billing`** billing-portal session entry + customer **`payment_methods`** admin operator surfaces. **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.23 Post-publish contract alignment** — Phase **75** shipped **2026-04-24** (**PPX-01..04**); **`v1.17-P1-002`** closed; phase tree [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/). Archives: [`milestones/v1.23-ROADMAP.md`](milestones/v1.23-ROADMAP.md), [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.22 Production path discoverability** — Phase **74** shipped **2026-04-24** (**PRS-01..03**); merge-blocking **`verify_production_readiness_discoverability.sh`**; phase tree [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/). Archives: [`milestones/v1.22-ROADMAP.md`](milestones/v1.22-ROADMAP.md), [`milestones/v1.22-REQUIREMENTS.md`](milestones/v1.22-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.21 Maturity posture and diminishing returns** — Phases **72–73** shipped **2026-04-23**. **MAT-01..02**, **INT-11**; **v1.17-P2-001** closed. Archives: [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md), [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md). Phase **72–73** trees: [`milestones/v1.21-phases/72-maturity-posture/`](milestones/v1.21-phases/72-maturity-posture/), [`73-capsule-parity-checklist/`](milestones/v1.21-phases/73-capsule-parity-checklist/).
@@ -31,7 +32,19 @@
 
 ### Next milestone
 
-**None active** — run **`/gsd-new-milestone`** for **v1.24+** (root **`.planning/REQUIREMENTS.md`** starts empty after **v1.23** close).
+**v1.24** — **Billing portal facade + customer PM operator surfaces** — Phases **76–78**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 76 | Customer PM tab — inventory + Copy burn-down | Scope and ship **ADM-13**, **ADM-14** on **customer `payment_methods`** (**`AccrueAdmin.Copy`**, **`ax-*`**). | ADM-13, ADM-14 |
+| 77 | Customer PM tab — VERIFY + theme + copy export | **ADM-15**, **ADM-16** — **VERIFY-01** / **axe**, **`theme-exceptions.md`**, **`export_copy_strings`** alignment. | ADM-15, ADM-16 |
+| 78 | Billing portal on `Accrue.Billing` + telemetry truth | **BIL-04**, **BIL-05** — facade + **Fake** tests + **`guides/telemetry.md`** / runbook / **CHANGELOG** (+ optional **First Hour** pointer). | BIL-04, BIL-05 |
+
+**Success criteria (milestone):**
+
+1. **ADM-13..ADM-16** and **BIL-04..BIL-05** satisfied per **`.planning/REQUIREMENTS.md`** with phase **`76-`..`78-VERIFICATION.md`** (or successor paths under **`.planning/phases/`**).
+2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** contracts stay **green** on **`main`** after changes.
+3. No **PROC-08** / **FIN-03** scope creep.
 
 <details>
 <summary>✅ v1.23 Post-publish contract alignment (Phase 75) — SHIPPED 2026-04-24</summary>
@@ -763,6 +776,14 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 75. Post-publish contract alignment | v1.23 | inline | Complete | 2026-04-24 |
+
+**v1.24 (active — opened 2026-04-24)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 76. Customer PM tab — inventory + Copy burn-down | v1.24 | — | Not started | — |
+| 77. Customer PM tab — VERIFY + theme + copy export | v1.24 | — | Not started | — |
+| 78. Billing portal on `Accrue.Billing` + telemetry truth | v1.24 | — | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

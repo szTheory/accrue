@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.24
 milestone_name: Billing portal facade + customer PM operator surfaces
-status: defining_requirements
+status: ready_to_build
 last_updated: "2026-04-24T12:00:00.000Z"
-last_activity: 2026-04-24 — /gsd-new-milestone v1.24 opened (requirements + roadmap)
+last_activity: 2026-04-24 — v1.24 roadmap Phases 76–78 committed
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -26,17 +26,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.24** — Billing portal facade + customer PM operator surfaces
 
-**Phase:** Not started (defining requirements)
+**Phase:** **76** — Customer PM tab — inventory + Copy burn-down (not started)
 
 **Plan:** —
 
-**Status:** Defining requirements / roadmap after **`/gsd-new-milestone`**.
+**Status:** Roadmap ready — start **`/gsd-discuss-phase 76`** or **`/gsd-plan-phase 76`**.
 
 **Last activity:** 2026-04-24
 
 ## Milestone Progress
 
-**Active:** **v1.24** — Phases **76+** (see **`.planning/ROADMAP.md`** after roadmap commit).
+**Active:** **v1.24** — Phases **76–78** (see **`.planning/ROADMAP.md`**).
 
 **Shipped (planning):** **v1.23** Phase **75** **2026-04-24** (**PPX-01..04**); archives + tag **`v1.23`**. **v1.22** — **`milestones/v1.22-phases/`** (**74**); tag **`v1.22`**.
 
