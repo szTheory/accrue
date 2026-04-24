@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.24
 milestone_name: milestone
-status: planning
+status: ready_to_plan
 last_updated: "2026-04-24T12:33:09.831Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 2
   completed_plans: 2
-  percent: 100
+  percent: 67
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.24** — Billing portal facade + customer PM operator surfaces
 
-**Phase:** 77
+**Phase:** 78
 
 **Plan:** Not started
 

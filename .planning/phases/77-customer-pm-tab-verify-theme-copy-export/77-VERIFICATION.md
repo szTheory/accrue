@@ -1,12 +1,18 @@
 ---
 phase: 77-customer-pm-tab-verify-theme-copy-export
-verified: ""
-status: pending
+verified: "2026-04-24"
+status: passed
 ---
 
 # Phase 77 — Customer PM tab VERIFY + theme + copy export
 
 Phase closure record for **v1.24** requirements **ADM-15** (merge-blocking VERIFY / axe on the customer **`payment_methods`** tab) and **ADM-16** (documented theme posture + **`export_copy_strings`** alignment). This file references paths and Copy keys only — no live credentials or processor identifiers.
+
+## Automated verification
+
+- **Playwright (host):** `cd examples/accrue_host && PGUSER=<local user> npx playwright test e2e/verify01-admin-a11y.spec.js --grep "VERIFY-01 admin customer detail payment_methods tab"` — **passed** (desktop); mobile project skipped per design.
+- **ExUnit (admin):** `cd accrue_admin && PGUSER=<local user> mix test test/accrue_admin/live/customer_live_test.exs` — **7 tests, 0 failures**.
+- **Copy export:** `mix accrue_admin.export_copy_strings --out ../examples/accrue_host/e2e/generated/copy_strings.json` — **exit 0**, no diff on `copy_strings.json`.
 
 ## ADM-15 (VERIFY-01 / axe)
 
@@ -22,9 +28,9 @@ Phase closure record for **v1.24** requirements **ADM-15** (merge-blocking VERIF
 
 ## Closure checklist
 
-- [ ] **ADM-15** satisfied — VERIFY-01 spec + matrix doc in place; axe helper unchanged in intent.
-- [ ] **ADM-16** satisfied — Phase 77 theme reviewer note present; copy export command run with no drift.
-- [ ] Merge-blocking CI intent unchanged — `scripts/ci/accrue_host_verify_browser.sh` still orchestrates export + Playwright VERIFY paths as before this phase (no script edit required for Phase 77 scope).
+- [x] **ADM-15** satisfied — VERIFY-01 spec + matrix doc in place; axe helper unchanged in intent.
+- [x] **ADM-16** satisfied — Phase 77 theme reviewer note present; copy export command run with no drift.
+- [x] Merge-blocking CI intent unchanged — `scripts/ci/accrue_host_verify_browser.sh` still orchestrates export + Playwright VERIFY paths as before this phase (no script edit required for Phase 77 scope).
 
 ## Traceability
 

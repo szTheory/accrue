@@ -17,9 +17,9 @@
 
 - [x] **ADM-14**: Burn down **operator-visible strings** on the **customer `payment_methods`** tab so literals route through **`AccrueAdmin.Copy`** (or an established submodule); **`ax-*`** / token discipline matches **v1.6 UX-04** intent; **ExUnit** / **Playwright** avoid divergent raw literals on materially touched paths.
 
-- [ ] **ADM-15**: Extend **VERIFY-01** with **Playwright + axe** for **≥1** materially changed **customer** mounted route group tied to **ADM-14** (precedent: **v1.12** / **v1.14**).
+- [x] **ADM-15**: Extend **VERIFY-01** with **Playwright + axe** for **≥1** materially changed **customer** mounted route group tied to **ADM-14** (precedent: **v1.12** / **v1.14**).
 
-- [ ] **ADM-16**: Record intentional **theme / layout exceptions** for **ADM-14** / **ADM-15** touches in **`accrue_admin/guides/theme-exceptions.md`**; keep **`mix accrue_admin.export_copy_strings`**, **`copy_strings.json`**, and CI allowlists aligned when **Copy** modules change.
+- [x] **ADM-16**: Record intentional **theme / layout exceptions** for **ADM-14** / **ADM-15** touches in **`accrue_admin/guides/theme-exceptions.md`**; keep **`mix accrue_admin.export_copy_strings`**, **`copy_strings.json`**, and CI allowlists aligned when **Copy** modules change.
 
 ---
 
@@ -59,8 +59,8 @@
 |-------------|-------|--------|
 | ADM-13 | Phase 76 | Complete |
 | ADM-14 | Phase 76 | Complete |
-| ADM-15 | Phase 77 | Pending |
-| ADM-16 | Phase 77 | Pending |
+| ADM-15 | Phase 77 | Complete |
+| ADM-16 | Phase 77 | Complete |
 | BIL-04 | Phase 78 | Pending |
 | BIL-05 | Phase 78 | Pending |
 

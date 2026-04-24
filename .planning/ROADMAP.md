@@ -37,7 +37,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 76 | 2/2 | Complete    | 2026-04-24 |
-| 77 | Customer PM tab — VERIFY + theme + copy export | **ADM-15**, **ADM-16** — **VERIFY-01** / **axe**, **`theme-exceptions.md`**, **`export_copy_strings`** alignment. | ADM-15, ADM-16 |
+| 77 | 2/2 | Complete    | 2026-04-24 |
 | 78 | Billing portal on `Accrue.Billing` + telemetry truth | **BIL-04**, **BIL-05** — facade + **Fake** tests + **`guides/telemetry.md`** / runbook / **CHANGELOG** (+ optional **First Hour** pointer). | BIL-04, BIL-05 |
 
 **Success criteria (milestone):**
