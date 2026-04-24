@@ -19,7 +19,7 @@
 
 ## Integrator path + proof (INT)
 
-- [ ] **INT-12**: When **BIL-06** introduces or documents **`Accrue.Billing.create_checkout_session`** on any **merge-blocking** or **golden-path** surface (**First Hour**, **`examples/accrue_host` README**, adoption proof matrix, **VERIFY-01** docs), update **all** coupled verifier needles and **ExUnit** literal harnesses in the **same PR** per **`scripts/ci/README.md`** triage (including **`docs-contracts-shift-left`** members when paths change). If the API ships **without** changing those surfaces in the same milestone, **INT-12** is satisfied by a **signed deferral** in **`81-VERIFICATION.md`** with the exact follow-up milestone hook.
+- [x] **INT-12**: When **BIL-06** introduces or documents **`Accrue.Billing.create_checkout_session`** on any **merge-blocking** or **golden-path** surface (**First Hour**, **`examples/accrue_host` README**, adoption proof matrix, **VERIFY-01** docs), update **all** coupled verifier needles and **ExUnit** literal harnesses in the **same PR** per **`scripts/ci/README.md`** triage (including **`docs-contracts-shift-left`** members when paths change). If the API ships **without** changing those surfaces in the same milestone, **INT-12** is satisfied by a **signed deferral** in **`81-VERIFICATION.md`** with the exact follow-up milestone hook. **Validated in Phase 81** ([`phases/081-telemetry-truth-integrator-contracts/081-VERIFICATION.md`](phases/081-telemetry-truth-integrator-contracts/081-VERIFICATION.md)).
 
 ---
 
@@ -27,7 +27,7 @@
 
 - [x] **BIL-06**: Ship **`Accrue.Billing.create_checkout_session/2`** (+ **`!`**) taking **`%Accrue.Billing.Customer{}`** and **keyword/map attrs** aligned with **`Accrue.Checkout.Session`** **except** **`:customer`** (supplied as the first argument). Validate attrs with **`NimbleOptions`**. Delegate to **`Accrue.Checkout.Session.create/1`**. Wrap in **`span_billing(:checkout_session, :create, …)`** with **PII-safe** metadata (no checkout **URL**, **`client_secret`**, or raw attrs blob in telemetry). Include **Fake-backed** **ExUnit** proving happy path + at least one failure class appropriate to the facade (validation or processor error).
 
-- [ ] **BIL-07**: Update **`accrue/guides/telemetry.md`** (and **`accrue/guides/operator-runbooks.md`** cross-links when revenue- or support-adjacent) for **`[:accrue, :billing, :checkout_session, :create]`**; keep **`accrue/test/accrue/telemetry/billing_span_coverage_test.exs`** consistent; extend **`accrue/CHANGELOG.md`** for **`accrue`** as applicable.
+- [x] **BIL-07**: Update **`accrue/guides/telemetry.md`** (and **`accrue/guides/operator-runbooks.md`** cross-links when revenue- or support-adjacent) for **`[:accrue, :billing, :checkout_session, :create]`**; keep **`accrue/test/accrue/telemetry/billing_span_coverage_test.exs`** consistent; extend **`accrue/CHANGELOG.md`** for **`accrue`** as applicable. **Validated in Phase 81** ([`phases/081-telemetry-truth-integrator-contracts/081-VERIFICATION.md`](phases/081-telemetry-truth-integrator-contracts/081-VERIFICATION.md)).
 
 ---
 

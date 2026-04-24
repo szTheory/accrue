@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- **v1.25 Evidence-bound triad (friction + integrator + billing depth)** — **OPEN** **2026-04-24**. Phases **79–81** (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**): friction inventory maintainer pass; **`Accrue.Billing.create_checkout_session`**, telemetry/catalog, integrator proof alignment. **No** **PROC-08** / **FIN-03**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- **v1.25 Evidence-bound triad (friction + integrator + billing depth)** — **COMPLETE** **2026-04-24**. Phases **79–81** (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**): friction inventory maintainer pass; **`Accrue.Billing.create_checkout_session`**, telemetry/catalog, integrator proof alignment. **No** **PROC-08** / **FIN-03**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
 - ✅ **v1.24 Billing portal facade + customer PM operator surfaces** — Phases **76–78** shipped **2026-04-24** (**ADM-13..ADM-16**, **BIL-04..BIL-05**); **`Accrue.Billing`** billing-portal session entry + customer **`payment_methods`** admin operator surfaces; execution trees [`milestones/v1.24-phases/`](milestones/v1.24-phases/). Archives: [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md), [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.23 Post-publish contract alignment** — Phase **75** shipped **2026-04-24** (**PPX-01..04**); **`v1.17-P1-002`** closed; phase tree [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/). Archives: [`milestones/v1.23-ROADMAP.md`](milestones/v1.23-ROADMAP.md), [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.22 Production path discoverability** — Phase **74** shipped **2026-04-24** (**PRS-01..03**); merge-blocking **`verify_production_readiness_discoverability.sh`**; phase tree [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/). Archives: [`milestones/v1.22-ROADMAP.md`](milestones/v1.22-ROADMAP.md), [`milestones/v1.22-REQUIREMENTS.md`](milestones/v1.22-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
@@ -31,7 +31,7 @@
 
 ## Phases
 
-### v1.25 Evidence-bound triad (friction + integrator + billing depth) — OPEN
+### v1.25 Evidence-bound triad (friction + integrator + billing depth) — COMPLETE 2026-04-24
 
 **Milestone goal:** Maintainer pass on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** (**INV-03**); **`Accrue.Billing.create_checkout_session/2`** (**Fake** + **`:telemetry` / span**, **BIL-06**); **telemetry/catalog/changelog + integrator proof alignment** (**BIL-07**, **INT-12**) — **no** **PROC-08** / **FIN-03**.
 
@@ -41,7 +41,7 @@
 |---|-------|------|----------------|
 | 79 | Friction inventory maintainer pass | **Complete 2026-04-24** ([`phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md`](phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md)). **INV-03** path **(b)** — **`### v1.25 INV-03 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** + verifier transcripts in **`079-VERIFICATION.md`**. | INV-03 |
 | 80 | Checkout session on `Accrue.Billing` | **Complete 2026-04-24** ([`phases/080-checkout-session-on-accrue-billing/080-VERIFICATION.md`](phases/080-checkout-session-on-accrue-billing/080-VERIFICATION.md)). **`create_checkout_session/2`** (+ **`!`**) + **Fake** ExUnit + **PII-safe** span metadata. | BIL-06 |
-| 81 | Telemetry truth + integrator contracts | **`guides/telemetry.md`**, **`billing_span_coverage_test.exs`**, **`CHANGELOG`**, **First Hour** / host README / adoption matrix / **VERIFY-01** co-update when checkout becomes a documented entry point. | BIL-07, INT-12 |
+| 81 | Telemetry truth + integrator contracts | **Complete 2026-04-24** ([`phases/081-telemetry-truth-integrator-contracts/081-VERIFICATION.md`](phases/081-telemetry-truth-integrator-contracts/081-VERIFICATION.md)). **`guides/telemetry.md`** checkout span row + anchor; **`operator-runbooks.md`** Stripe pointer; **First Hour** / host README / adoption matrix + **`verify_package_docs`** / **`verify_adoption_proof_matrix`** needles; **`CHANGELOG`**. | BIL-07, INT-12 |
 
 **Success criteria (milestone):**
 

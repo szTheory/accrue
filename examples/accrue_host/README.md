@@ -89,6 +89,7 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 ## Observability
 
 - **Cross-domain host subscription** (append `Accrue.Telemetry.Metrics.defaults/0`, attach once to `[:accrue, :ops, :webhook_dlq, :dead_lettered]`) is documented in [`../../accrue/guides/telemetry.md`](../../accrue/guides/telemetry.md#cross-domain-host-subscription). The compile-checked mirror in this app is `AccrueHost.AccrueOpsTelemetry`.
+- **Billing checkout facade:** `Accrue.Billing.create_checkout_session/2` emits **`[:accrue, :billing, :checkout_session, :create]`**; span metadata and Fake vs live processor notes live under [`../../accrue/guides/telemetry.md#billing-checkout-session-create`](../../accrue/guides/telemetry.md#billing-checkout-session-create) (ExUnit SSOT: `accrue/test/accrue/billing/checkout_session_facade_test.exs`).
 
 ## Production readiness
 

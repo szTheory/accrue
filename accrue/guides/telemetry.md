@@ -135,6 +135,16 @@ examples below — for the enforced billing span inventory, see
   ops tuple).
 - `accrue.billing.billing_portal.create` — `[:accrue, :billing, :billing_portal, :create]`
   from `Accrue.Billing.create_billing_portal_session/2` (Phase 78 / **BIL-04**).
+- <a id="billing-checkout-session-create"></a> `accrue.billing.checkout_session.create` —
+  `[:accrue, :billing, :checkout_session, :create]` from
+  `Accrue.Billing.create_checkout_session/2` (**BIL-06** / Phase **80** emission;
+  **BIL-07** / Phase **81** catalog). **Checkout-only span metadata** merged
+  from validated attrs is exactly **`checkout_mode`**, **`checkout_ui_mode`**,
+  and **`checkout_line_items_count`** — no checkout URLs, **`client_secret`**,
+  or raw attrs blob (behavioral SSOT: `checkout_session_facade_test.exs` +
+  `merge_checkout_session_create_metadata/4`). Prefer these on **spans**;
+  **do not** promote them unmodified to **`Telemetry.Metrics` tags** (see
+  **Cardinality discipline** below).
 - `accrue.billing.payment_method.attach` — `[:accrue, :billing, :payment_method, :attach]`
   from `Accrue.Billing.attach_payment_method/3`.
 - `accrue.billing.payment_method.detach` — `[:accrue, :billing, :payment_method, :detach]`
@@ -150,8 +160,8 @@ This mirrors the `:telemetry` event naming
 (`[:accrue, :billing, :subscription, :create]`) so a single name maps cleanly
 to both the telemetry event and the OTel span — no translation table.
 
-**Last reconciled (billing span examples):** 2026-04-24 — Phase 78 BIL-05
-(`billing_span_coverage_test.exs`).
+**Last reconciled (billing span examples):** 2026-04-24 — Phase 81 BIL-07
+(checkout_session catalog row; `billing_span_coverage_test.exs` unchanged).
 
 **Span kind:**
 - `INTERNAL` for Accrue context functions

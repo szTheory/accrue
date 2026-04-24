@@ -330,9 +330,11 @@ Theme: **billing portal facade + customer PM operator surfaces** (**ADM-13..16**
 - [x] **BIL-04** — **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) with **`span_billing(:billing_portal, :create, …)`**, Fake-backed ExUnit. **Validated in Phase 78** (**`78-VERIFICATION.md`**).
 - [x] **BIL-05** — **`guides/telemetry.md`**, **`operator-runbooks.md`**, **`CHANGELOG.md`** aligned with billing portal + payment-method span inventory. **Validated in Phase 78** (**`78-VERIFICATION.md`**).
 
-### Validated v1.25 (in progress on `main`)
+### Validated v1.25 (complete on `main`)
 
 - [x] **BIL-06** — **`Accrue.Billing.create_checkout_session/2`** (+ **`!`**) with **`span_billing(:checkout_session, :create, …)`**, allowlisted checkout telemetry metadata, Fake-backed **`checkout_session_facade_test.exs`**. **Validated in Phase 80** (**`080-VERIFICATION.md`**).
+- [x] **BIL-07** — **`guides/telemetry.md`** + **`operator-runbooks.md`** checkout span catalog / triage pointer; **`CHANGELOG`**. **Validated in Phase 81** (**`081-VERIFICATION.md`**).
+- [x] **INT-12** — **First Hour**, **`examples/accrue_host` README**, adoption proof matrix + **`verify_package_docs.sh`** / **`verify_adoption_proof_matrix.sh`** needles for **`create_checkout_session`**. **Validated in Phase 81** (**`081-VERIFICATION.md`**).
 
 ### Validated v1.20 (Phases 70–71 complete)
 
@@ -640,4 +642,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **Phases 79–80** complete (**INV-03**, **BIL-06**); **`v1.25`** continues with **Phase 81** (**BIL-07**, **INT-12**).*
+*Last updated: 2026-04-24 — **Phases 79–81** complete (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**); **`v1.25`** ready for milestone closure.*

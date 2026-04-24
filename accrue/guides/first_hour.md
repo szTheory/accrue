@@ -5,6 +5,9 @@ terms. Your Phoenix app owns `MyApp.Billing`, routing, auth, runtime config,
 and verification choices. Accrue owns the billing engine behind those public
 boundaries. Read-only processor queries such as saved payment methods use
 `Accrue.Billing.list_payment_methods/2` (and the host wrapper `MyApp.Billing.list_payment_methods/2` after `mix accrue.install`); see [`guides/telemetry.md`](telemetry.md) for the `[:accrue, :billing, :payment_method, :list]` span.
+Server-side **Stripe Checkout** session creation uses **`Accrue.Billing.create_checkout_session/2`**
+(and your host facade after install); telemetry is **`[:accrue, :billing, :checkout_session, :create]`**
+— see [`guides/telemetry.md#billing-checkout-session-create`](telemetry.md#billing-checkout-session-create).
 
 ## How to enter this guide
 

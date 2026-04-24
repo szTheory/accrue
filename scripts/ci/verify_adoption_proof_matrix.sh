@@ -38,5 +38,8 @@ require_substring "ORG-05" "ORG-05 taxonomy token in matrix"
 require_substring "ORG-06" "ORG-06 taxonomy token in matrix"
 require_substring "ORG-07" "ORG-07 row"
 require_substring "ORG-08" "ORG-08 row"
+require_substring "Accrue.Billing.create_checkout_session/2" "checkout facade API in matrix"
+require_substring "[:accrue, :billing, :checkout_session, :create]" "checkout billing span tuple in matrix"
+require_substring "checkout_session_facade_test.exs" "checkout facade ExUnit path in matrix"
 
 echo "verify_adoption_proof_matrix: OK"

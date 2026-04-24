@@ -2,8 +2,11 @@
 
 ## Unreleased
 
+Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` ship together: grep **`guides/telemetry.md#billing-checkout-session-create`**, re-run **`bash scripts/ci/verify_package_docs.sh`** / **`bash scripts/ci/verify_adoption_proof_matrix.sh`**, and keep **First Hour** + **`examples/accrue_host`** observability copy aligned with **`checkout_session_facade_test.exs`**.
+
 ### Billing
 
+* Add `Accrue.Billing.create_checkout_session/2` and `create_checkout_session!/2`, delegating to `Accrue.Checkout.Session` under `[:accrue, :billing, :checkout_session, :create]` with allowlisted span metadata (no checkout URL, `client_secret`, or raw attrs); see `guides/telemetry.md#billing-checkout-session-create` and `test/accrue/billing/checkout_session_facade_test.exs`.
 * Add `Accrue.Billing.create_billing_portal_session/2` and `create_billing_portal_session!/2`, delegating to `Accrue.BillingPortal.Session` with `[:accrue, :billing, :billing_portal, :create]` telemetry; see `guides/telemetry.md`.
 * Add `Accrue.Billing.list_payment_methods/2` and `list_payment_methods!/2` for processor-backed payment method listing (with optional validated list filters); installer `billing.ex.eex` delegates the same surface for host facades.
 
@@ -13,7 +16,12 @@
 
 ### Documentation
 
+* Align **First Hour**, **`examples/accrue_host/README.md`**, **`examples/accrue_host/docs/adoption-proof-matrix.md`**, **`guides/telemetry.md`**, and **`guides/operator-runbooks.md`** with **`Accrue.Billing.create_checkout_session/2`** and the **`[:accrue, :billing, :checkout_session, :create]`** span (anchor **`#billing-checkout-session-create`**); operator Stripe triage stays pointer-depth only (no Checkout error matrix).
 * Harden the telemetry guide ops catalog (evergreen heading, Primary owner column, Hex vs `main` doc contract), correct OpenTelemetry examples (including meter reporting + ops failure cross-link), add an ops event contract test, and emit `[:accrue, :ops, :webhook_dlq, :dead_lettered]` when webhook dispatch exhausts retries.
+
+### CI
+
+* Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for checkout facade + billing-span literals co-evolving with golden-path docs.
 
 ## [0.3.1](https://github.com/szTheory/accrue/compare/accrue-v0.3.0...accrue-v0.3.1) (2026-04-22)
 

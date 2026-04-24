@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.25
 milestone_name: Evidence-bound triad
-status: planning
-last_updated: "2026-04-24T20:00:00.000Z"
-last_activity: 2026-04-24 — **`/gsd-discuss-phase 81`** (research-backed) — **`081-CONTEXT.md`** + GSD **`workflow.discuss_default_*`** integrator/telemetry defaults.
+status: complete
+last_updated: "2026-04-24T21:45:00.000Z"
+last_activity: 2026-04-24 — **Phase 81 implementation** — BIL-07 / INT-12 docs + CI needles; **`081-VERIFICATION.md`**.
 progress:
-  total_phases: 9
-  completed_phases: 0
+  total_phases: 3
+  completed_phases: 3
   total_plans: 0
   completed_plans: 0
 ---
@@ -26,13 +26,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.25** — Evidence-bound triad
 
-**Phase:** **81** — context gathered (**BIL-07**, **INT-12**); planning next — **`.planning/phases/081-telemetry-truth-integrator-contracts/081-CONTEXT.md`**
+**Phase:** **81** — **complete** (**BIL-07**, **INT-12**) — **`081-VERIFICATION.md`**
 
 **Plan:** **`080-01`** complete
 
-**Status:** **BIL-06** complete — **`080-VERIFICATION.md`**. **BIL-07** / **INT-12** pending implementation per **081-CONTEXT**.
+**Status:** **BIL-06** — **`080-VERIFICATION.md`**. **BIL-07** / **INT-12** — **`081-VERIFICATION.md`**.
 
-**Last activity:** 2026-04-24 — **`/gsd-discuss-phase 81`** — subagent research → locked decisions in **`081-CONTEXT.md`**.
+**Last activity:** 2026-04-24 — Phase **81** shipped — telemetry catalog + integrator surfaces + shift-left needles per **`081-CONTEXT.md`**.
 
 ## Milestone Progress
 
@@ -63,8 +63,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 - **2026-04-24:** **`/gsd-complete-milestone` v1.24** — archives **`milestones/v1.24-*`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.24`**; **`audit-open`** all clear.
 - **2026-04-24:** **`/gsd-discuss-phase 79`** — **`079-CONTEXT.md`** + **`079-DISCUSSION-LOG.md`**; discuss workflow **`research_before_questions`**, **`discuss_auto_all_gray_areas`**, **`discuss_high_impact_confirm`** in **`.planning/config.json`**.
 
-**Next:** **`/gsd-discuss-phase 81`** or **`/gsd-plan-phase 81`** — **BIL-07** / **INT-12** (telemetry catalog + integrator alignment).
+**Next:** Milestone **v1.25** closure (**`/gsd-complete-milestone`** when ready) — all phases **79–81** complete.
 
 **Completed (prior milestone):** **v1.24** Phases **76–78** — evidence under **`milestones/v1.24-phases/`**.
 
-**Completed (v1.25):** Phase **79** (**INV-03**) — **`079-VERIFICATION.md`** — 2026-04-24; Phase **80** (**BIL-06**) — **`080-VERIFICATION.md`** — 2026-04-24.
+**Completed (v1.25):** Phase **79** (**INV-03**) — **`079-VERIFICATION.md`** — 2026-04-24; Phase **80** (**BIL-06**) — **`080-VERIFICATION.md`** — 2026-04-24; Phase **81** (**BIL-07**, **INT-12**) — **`081-VERIFICATION.md`** — 2026-04-24.
