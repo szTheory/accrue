@@ -37,7 +37,9 @@
 
 **Milestone goal:** **INT-13** — **`create_billing_portal_session`** on the **First Hour** + host README spine with telemetry anchor parity to checkout; adoption proof matrix + script needles; **INV-04** — dated friction inventory maintainer pass after doc touch. **No** **PROC-08** / **FIN-03**.
 
-**Requirements:** **`.planning/REQUIREMENTS.md`** (**INT-13**, **INV-04**)
+**Archives:** [`milestones/v1.26-ROADMAP.md`](milestones/v1.26-ROADMAP.md), [`milestones/v1.26-REQUIREMENTS.md`](milestones/v1.26-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.26-phases/`](milestones/v1.26-phases/).
+
+**Requirements (archived):** **INT-13**, **INV-04** — see [`milestones/v1.26-REQUIREMENTS.md`](milestones/v1.26-REQUIREMENTS.md).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -46,7 +48,7 @@
 
 **Success criteria (milestone):**
 
-1. **INT-13** / **INV-04** satisfied per **`.planning/REQUIREMENTS.md`** with phase verification evidence.
+1. **INT-13** / **INV-04** satisfied per archived **`milestones/v1.26-REQUIREMENTS.md`** with phase verification evidence.
 2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** (and **`docs-contracts-shift-left`** where touched) stay **green** after changes.
 3. No **PROC-08** / **FIN-03** scope creep.
 

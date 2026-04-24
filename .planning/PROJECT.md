@@ -346,6 +346,11 @@ Theme: **billing portal facade + customer PM operator surfaces** (**ADM-13..16**
 - [x] **BIL-07** — **`guides/telemetry.md`** + **`operator-runbooks.md`** checkout span catalog / triage pointer; **`CHANGELOG`**. **Validated in Phase 81** (**`081-VERIFICATION.md`** under **`milestones/v1.25-phases/`**).
 - [x] **INT-12** — **First Hour**, **`examples/accrue_host` README**, adoption proof matrix + **`verify_package_docs.sh`** / **`verify_adoption_proof_matrix.sh`** needles for **`create_checkout_session`**. **Validated in Phase 81** (**`081-VERIFICATION.md`** under **`milestones/v1.25-phases/`**).
 
+### Validated v1.26 (archived in `.planning/milestones/v1.26-REQUIREMENTS.md`; milestone closed 2026-04-24)
+
+- [x] **INT-13** — **`create_billing_portal_session`** on **First Hour** + host README + adoption matrix + merge-blocking verifier needles (telemetry anchor **`#billing-billing-portal-create`**). **Validated in Phase 82** (**`082-VERIFICATION.md`** under **`milestones/v1.26-phases/`**).
+- [x] **INV-04** — Post-**INT-13** maintainer pass path **(b)** on **`v1.17-FRICTION-INVENTORY.md`** with **`083-VERIFICATION.md`** transcripts. **Validated in Phase 83** (**`083-VERIFICATION.md`** under **`milestones/v1.26-phases/`**).
+
 ### Validated v1.20 (Phases 70–71 complete)
 
 - [x] **INV-01** — Post–**0.3.1** friction inventory pass: **`v1.17-P1-001`** closed in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with **v1.19** **PRF** evidence pointers. **Validated in Phase 70.**
@@ -576,9 +581,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.23 re-verifies publish-adjacent contracts at **0.3.1** | After **v1.19** publish + **v1.22** discoverability, **PPX-** closes **v1.17-P1-002** with full **`docs-contracts-shift-left`** + friction-inventory alignment | ✓ Good — **shipped** Phase **75** (**2026-04-24**); archived + planning tag **`v1.23`** |
 | v1.24 ships **billing portal** facade on **`Accrue.Billing`** + **customer PM** admin parity | After **v1.23** contract pass, bounded **BIL-04..05** + **ADM-13..16** close operator trust on portal entry + **payment_methods** without **PROC-08** / **FIN-03** | ✓ Good — **shipped** Phases **76–78** (**2026-04-24**); archived + planning tag **`v1.24`** |
 | v1.25 sequences **friction maintainer pass** + **integrator contracts** + **checkout on `Accrue.Billing`** | After **v1.24**, keep **FRG-01** honest, **PPX-adjacent** proof/docs aligned, and mirror **BIL-04** facade patterns for **Stripe Checkout** via **`Accrue.Checkout.Session`** — still **no** **PROC-08** / **FIN-03** | ✓ Good — **shipped** Phases **79–81** (**2026-04-24**); **`milestones/v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`** |
+| v1.26 extends **INT-12** class proof to **billing portal** on golden-path surfaces | After **v1.25** checkout spine, **INT-13** + **INV-04** keep **First Hour** / matrix / friction SSOT honest without new **`Accrue.Billing`** APIs | ✓ Good — **shipped** Phases **82–83** (**2026-04-24**); **`milestones/v1.26-*`** + **`v1.26-phases/`**; tag **`v1.26`** |
 
 ## Current Milestone Notes
 
+- **2026-04-24:** **`/gsd-complete-milestone` v1.26** — archives **`milestones/v1.26-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.26`**; **`audit-open`** all clear; **ROADMAP** v1.26 `<details>` updated to archived requirements links.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.25** — archives **`milestones/v1.25-*`**, **`git mv`** Phases **79–81** → **`milestones/v1.25-phases/`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.25`**; **`audit-open`** all clear; **`081-01-SUMMARY.md`** backfilled.
 - **2026-04-24:** **`/gsd-new-milestone` v1.25** — **Evidence-bound triad**; domain research completed under **`.planning/research/`** before **`REQUIREMENTS.md`** / **`ROADMAP.md`**; **`v1.24`** phase trees live under **`milestones/v1.24-phases/`**.
 - **2026-04-24:** **`/gsd-execute-phase 79`** — **INV-03** path **(b)**; **`### v1.25 INV-03 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** + **`079-VERIFICATION.md`**.
