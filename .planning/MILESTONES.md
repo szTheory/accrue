@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.24 Billing portal facade + customer PM operator surfaces (**planning open**)
+
+**Planning opened:** 2026-04-24
+
+**Theme:** **ADM-13..ADM-16**, **BIL-04..BIL-05** — **`Accrue.Billing`** entry for **customer billing portal** sessions (telemetry + **Fake**), **`guides/telemetry.md`** truth for **payment_method** write spans; **customer** **`payment_methods`** tab **Copy** / **`ax-*`** / **VERIFY-01** / export hygiene. **No** **PROC-08** / **FIN-03**; no release-train / integrator-only milestone scope.
+
+**Depends on:** **v1.23** shipped.
+
+**Phases:** **76+** (see root **`.planning/ROADMAP.md`**).
+
+**Next:** Execute **`/gsd-plan-phase`** / **`/gsd-discuss-phase`** starting at **Phase 76**.
+
+---
+
 ## v1.23 Post-publish contract alignment (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24

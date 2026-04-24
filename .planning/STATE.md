@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: Between milestones
-status: between_milestones
-last_updated: "2026-04-24T23:59:59.000Z"
-last_activity: 2026-04-24 — v1.23 archived; REQUIREMENTS.md removed; tag v1.23
+milestone: v1.24
+milestone_name: Billing portal facade + customer PM operator surfaces
+status: defining_requirements
+last_updated: "2026-04-24T12:00:00.000Z"
+last_activity: 2026-04-24 — /gsd-new-milestone v1.24 opened (requirements + roadmap)
 progress:
   total_phases: 0
   completed_phases: 0
@@ -20,36 +20,35 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **Between milestones** — run **`/gsd-new-milestone`** for **v1.24+** (fresh **`REQUIREMENTS.md`**).
+**Current focus:** **v1.24** — billing portal session on **`Accrue.Billing`** + customer **`payment_methods`** admin operator surfaces (**ADM-13..16**, **BIL-04..05**).
 
 ## Current Position
 
-**Milestone:** **None** (last: **v1.23** — Post-publish contract alignment)
+**Milestone:** **v1.24** — Billing portal facade + customer PM operator surfaces
 
-**Phase:** —
+**Phase:** Not started (defining requirements)
 
 **Plan:** —
 
-**Status:** **v1.23** archived (**`milestones/v1.23-*`**); planning tag **`v1.23`**.
+**Status:** Defining requirements / roadmap after **`/gsd-new-milestone`**.
 
 **Last activity:** 2026-04-24
 
 ## Milestone Progress
 
-**Active:** **None**.
+**Active:** **v1.24** — Phases **76+** (see **`.planning/ROADMAP.md`** after roadmap commit).
 
-**Shipped (planning):** **v1.23** Phase **75** **2026-04-24** (**PPX-01..04**); archives + tag **`v1.23`**. **v1.22** — **`milestones/v1.22-phases/`** (**74**); tag **`v1.22`**. **v1.21** — **`milestones/v1.21-phases/`** (**72–73**); tag **`v1.21`**. **v1.20** — **`milestones/v1.20-phases/`** (**70–71**); tag **`v1.20`**.
+**Shipped (planning):** **v1.23** Phase **75** **2026-04-24** (**PPX-01..04**); archives + tag **`v1.23`**. **v1.22** — **`milestones/v1.22-phases/`** (**74**); tag **`v1.22`**.
 
-**Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md` (**`v1.17-P1-002`** **closed** **2026-04-24**)  
+**Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`  
 **North star + stop rules (FRG-02):** `.planning/research/v1.17-north-star.md`
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.1`** — **v1.19** Phase **68** (publish); **v1.23** Phase **75** (contract pass **2026-04-24**).
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **absent** until **`/gsd-new-milestone`** recreates it for **v1.24+**
-- **`.planning/ROADMAP.md`** — **v1.23** shipped + archived; next milestone **none**
-- **`.planning/milestones/v1.23-phases/75-post-publish-contract-alignment/75-VERIFICATION.md`** — signed off (historical)
+- **`.planning/REQUIREMENTS.md`** — **v1.24** (**ADM-13..16**, **BIL-04..05**)
+- **`.planning/ROADMAP.md`** — active phases **76+** for **v1.24**
 
 ## Deferred Items
 
@@ -59,10 +58,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Recent Decisions
 
-- **2026-04-24:** **`/gsd-complete-milestone` v1.23** — **`milestones/v1.23-ROADMAP.md`**, **`v1.23-REQUIREMENTS.md`**; **`git rm` `.planning/REQUIREMENTS.md`**; planning tag **`v1.23`**.
-- **2026-04-24:** **Phase 75** — **`docs-contracts-shift-left`** bash suite green locally; **`verify_v1_17_friction_research_contract.sh`** updated for **5**-row inventory; **`scripts/ci/README.md`** triage text aligned; **`v1.17-P1-002`** closed.
-- **2026-04-24:** **v1.23** opened (**Branch A**); **`v1.17-P1-002`** opened then closed same milestone window.
+- **2026-04-24:** **`/gsd-new-milestone` v1.24** — billing + admin theme; **REQ** IDs **ADM-13..16**, **BIL-04..05**; phases continue from **76**.
 
-**Next:** **`/gsd-new-milestone`** for **v1.24+**.
+**Next:** **`/gsd-discuss-phase 76`** or **`/gsd-plan-phase 76`**.
 
 **Completed:** **v1.23** Phase **75** — **2026-04-24** (**PPX-01..04**); milestone archived + tag **`v1.23`**.
