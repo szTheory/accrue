@@ -49,7 +49,13 @@ verify_verify01_readme_contract: OK
 
 ## VERIFY-01 / host-integration
 
-_(completed in task 79-01-05)_
+**VERIFY-01** (README contract) runs in GitHub Actions job **`docs-contracts-shift-left`** — step **VERIFY-01 README contract** in **`.github/workflows/ci.yml`** on the reviewed tree ([`ci.yml` @ reviewed SHA](https://github.com/szTheory/accrue/blob/149736d0b1523f7ac8982da84cd14f49a5deebbd/.github/workflows/ci.yml)).
+
+**host-integration** is the merge-blocking job **`host-integration`** in the same workflow file; it runs **`bash scripts/ci/accrue_host_uat.sh`** after **`docs-contracts-shift-left`** and **`admin-drift-docs`** succeed.
+
+**How to confirm on GitHub Actions:** open **https://github.com/szTheory/accrue/actions** and find a **`CI`** workflow run for commit **`149736d0b1523f7ac8982da84cd14f49a5deebbd`** (or the merge commit that introduced it to **`main`**). Verify **`docs-contracts-shift-left`** and **`host-integration`** both **succeeded**.
+
+**Local alignment:** The scripts in **## Command transcripts** were executed on that **`git`** tree with exit code **0**; they include the same **`verify_verify01_readme_contract.sh`** step used under **VERIFY-01** in **`docs-contracts-shift-left`**.
 
 ## INV-03 closure checklist
 
