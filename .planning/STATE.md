@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: awaiting_next_milestone
-last_updated: "2026-04-24T12:00:00.000Z"
-last_activity: 2026-04-24 — **`/gsd-complete-milestone` v1.19** (archives + REQUIREMENTS removal + tag)
+milestone: v1.20
+milestone_name: Professional adoption confidence
+status: milestone_complete
+last_updated: "2026-04-24T00:00:00.000Z"
+last_activity: 2026-04-24 — v1.20 Phases 70–71 verified (INV + PRD)
 progress:
-  total_phases: 0
-  completed_phases: 0
+  total_phases: 2
+  completed_phases: 2
   total_plans: 0
   completed_plans: 0
 ---
@@ -18,44 +18,41 @@ progress:
 
 See: `.planning/PROJECT.md` (updated 2026-04-24)
 
-**Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic, with tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
+**Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **`/gsd-new-milestone`** — define **v1.20+** requirements and roadmap (root **`.planning/REQUIREMENTS.md`** removed at **v1.19** close).
+**Current focus:** **v1.20** closed in bootstrap commit — use **`/gsd-complete-milestone` v1.20** to archive + tag when ready.
 
 ## Current Position
 
-**Milestone:** *(none — next milestone not opened)*
+**Milestone:** **v1.20 — Professional adoption confidence**
 
-**Phase:** —
+**Phase:** **71** — production readiness spine (**complete**)
 
 **Plan:** —
 
-**Status:** **v1.19** archived **2026-04-24**; planning tag **`v1.19`**.
+**Status:** Phases **70–71** verified; **`.planning/REQUIREMENTS.md`** all **Complete**.
 
 **Last activity:** 2026-04-24
 
 ## Milestone Progress
 
-**Active:** *(none)* — open **`/gsd-new-milestone`**.
+**Active:** **v1.20** — Phases **70–71** **2026-04-24** (**INV-01..02**, **PRD-01..02**).
 
-**Shipped:** **v1.19** — Phases **67–69** **2026-04-24**; archives **`.planning/milestones/v1.19-*`**, tag **`v1.19`**. Prior: **v1.18** — Phase **66** **2026-04-23**; **`milestones/v1.18-phases/`**; **`v1.18-*`**. **v1.17** — **`v1.17-phases/`**, tag **`v1.17`**.
+**Shipped (planning):** **v1.20** — **`.planning/phases/70-friction-evidence-refresh/`**, **`71-production-readiness-spine/`**. Prior: **v1.19** — **`milestones/v1.19-phases/`** (**67–69**); tag **`v1.19`**.
 
 **Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`  
 **North star + stop rules (FRG-02):** `.planning/research/v1.17-north-star.md`
-
-**Last shipped (planning):** **v1.19** — Phases **67–69** **2026-04-24**.
 
 **Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.1`** — **v1.19** Phase **68** (**2026-04-24**).
 
 ## Current Planning Artifacts
 
-- **`.planning/ROADMAP.md`** — **v1.19** collapsed under **Milestones**; **Next milestone** section points to **`/gsd-new-milestone`**
-- **`.planning/milestones/v1.19-ROADMAP.md`**, **`v1.19-REQUIREMENTS.md`** — **v1.19** archives
-- **`.planning/phases/67-proof-contracts/`** — **v1.19** Phase **67** execution history (**`67-VERIFICATION.md`**, **`67-01-SUMMARY.md`**)
-- **`.planning/phases/68-release-train/`** — **v1.19** Phase **68** (**`68-VERIFICATION.md`**, **`68-01-SUMMARY.md`**, **`68-02-SUMMARY.md`**)
-- **`.planning/phases/69-doc-planning-mirrors/`** — **v1.19** Phase **69** (**`69-VERIFICATION.md`**, **`69-CONTEXT.md`**, **`69-DISCUSSION-LOG.md`**, plans **01–02**)
-- **`.planning/milestones/v1.18-phases/66-onboarding-confidence/`** — **v1.18** execution history
-- **`.planning/milestones/v1.18-ROADMAP.md`**, **`v1.18-REQUIREMENTS.md`** — **v1.18** archives
+- **`.planning/REQUIREMENTS.md`** — **v1.20** (**INV-**, **PRD-**); all rows **Complete**
+- **`.planning/ROADMAP.md`** — **v1.20** phases **70–71** + milestone list
+- **`.planning/phases/70-friction-evidence-refresh/`** — **`70-VERIFICATION.md`**
+- **`.planning/phases/71-production-readiness-spine/`** — **`71-VERIFICATION.md`**
+- **`.planning/milestones/v1.19-phases/`** — **v1.19** execution history (**67–69**)
+- **`accrue/guides/production-readiness.md`** — production checklist spine
 
 ## Deferred Items
 
@@ -69,12 +66,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Recent Decisions
 
-- **2026-04-23:** **`/gsd-new-milestone` v1.19** — User-approved plan: proof hardening before **0.3.1** publish; **PROC-08** / **FIN-03** out of scope; desk research **skipped** (brownfield; **v1.11** archive precedent).
-- **2026-04-23:** **`phases.clear`** then **`git mv`** **`.planning/phases/66-onboarding-confidence/`** → **`.planning/milestones/v1.18-phases/`** — preserves **v1.18** verification tree outside active **`phases/`**.
-- **2026-04-24:** **`/gsd-discuss-phase 69`** — Subagent-backed **D-01..D-04** locked in **`69-CONTEXT.md`** (HYG vs DOC boundary, planning file SSOT roles, bash-first verifier coupling, pin-first capsules).
-- **2026-04-24:** **`/gsd-execute-phase 69`** — **`69-VERIFICATION.md`** (**DOC** + **HYG**); **`REQUIREMENTS.md`** **DOC-01..02** / **HYG-01** **Complete**; **`PROJECT`**, **`MILESTONES`**, **`STATE`** Hex **0.3.1** mirror pass.
-- **2026-04-24:** **`/gsd-complete-milestone` v1.19** — **`milestones/v1.19-*`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.19`**.
+- **2026-04-24:** **v1.20 bootstrap** — Friction inventory **P1-001** closure + **production-readiness** guide + planning/roadmap/requirements alignment (**A** + **B** plan).
+- **2026-04-24:** **`git mv`** **v1.19** phase trees **67–69** → **`.planning/milestones/v1.19-phases/`** (durable path; **`phases/`** hosts **70–71**).
 
-**Next:** **`/gsd-new-milestone`** when **v1.20+** priorities are set.
+**Next:** **`/gsd-complete-milestone` v1.20** (archive + **`git rm` `.planning/REQUIREMENTS.md`** + tag) **or** **`/gsd-new-milestone`** for **v1.21+** if skipping formal close.
 
-**Completed:** **v1.19** Phases **67–69** — **2026-04-24**; planning tag **`v1.19`**; **v1.18** Phase **66** — **2026-04-23**; tag **`v1.18`**.
+**Completed:** **v1.20** Phases **70–71** — **2026-04-24**; **v1.19** Phases **67–69** — **2026-04-24**; planning tag **`v1.19`**.

@@ -2,7 +2,8 @@
 
 ## Milestones
 
-- ✅ **v1.19 Release continuity + proof resilience** — Phases **67–69** shipped **2026-04-24**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts, **0.3.1** Hex publish, integrator + planning mirrors (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.19-ROADMAP.md`](milestones/v1.19-ROADMAP.md), [`milestones/v1.19-REQUIREMENTS.md`](milestones/v1.19-REQUIREMENTS.md). Phase **67–69** trees: [`.planning/phases/67-proof-contracts/`](phases/67-proof-contracts/), [`68-release-train/`](phases/68-release-train/), [`69-doc-planning-mirrors/`](phases/69-doc-planning-mirrors/).
+- ✅ **v1.20 Professional adoption confidence** — Phases **70–71** shipped **2026-04-24**. **INV-01..02**, **PRD-01..02**; post–**0.3.1** friction inventory pass + **`production-readiness.md`** spine (**no** **PROC-08** / **FIN-03**). Phase trees: [`phases/70-friction-evidence-refresh/`](phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](phases/71-production-readiness-spine/). Formal archives + planning tag: pending **`/gsd-complete-milestone` v1.20**.
+- ✅ **v1.19 Release continuity + proof resilience** — Phases **67–69** shipped **2026-04-24**. **PRF-01..02**, **REL-01..03**, **DOC-01..02**, **HYG-01**; proof contracts, **0.3.1** Hex publish, integrator + planning mirrors (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.19-ROADMAP.md`](milestones/v1.19-ROADMAP.md), [`milestones/v1.19-REQUIREMENTS.md`](milestones/v1.19-REQUIREMENTS.md). Phase **67–69** trees: [`milestones/v1.19-phases/67-proof-contracts/`](milestones/v1.19-phases/67-proof-contracts/), [`68-release-train/`](milestones/v1.19-phases/68-release-train/), [`69-doc-planning-mirrors/`](milestones/v1.19-phases/69-doc-planning-mirrors/).
 - ✅ **v1.18 Onboarding confidence** — Phase **66** shipped **2026-04-23**. **UAT-01..UAT-05**, **PROOF-01**; proof-first confidence after **v1.17** (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md). Phase **66** tree: [`milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/). **v1.17** phase working trees: [`.planning/milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.17 Friction-led developer readiness** — Phases **62–65** shipped **2026-04-23**. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, **ADM-12**: triage-led **P0** closure across integrator/VERIFY/docs, billing, or admin — **no** **PROC-08** / **FIN-03**. Archives: [`milestones/v1.17-ROADMAP.md`](milestones/v1.17-ROADMAP.md), [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md). Phase trees archived: [`milestones/v1.17-phases/`](milestones/v1.17-phases/).
 - ✅ **v1.16 Integrator + proof continuity** — Phases **59–61** shipped **2026-04-23**. **INT-06..INT-09**: golden path + **quickstart** coherence post-**v1.15**; adoption proof matrix + evaluator + **`scripts/ci/README`** verifier map; repo-root **VERIFY-01** hop budget; **`verify_package_docs`** / **`first_hour`** / planning mirrors vs **`@version`**. Archives: [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
@@ -27,7 +28,25 @@
 
 ### Next milestone
 
-Open **`/gsd-new-milestone`** when **v1.20+** priorities are set. Fresh **`.planning/REQUIREMENTS.md`** is created by that workflow (root requirements file removed at **v1.19** close).
+**v1.20** landed **2026-04-24** (Phases **70–71**). Run **`/gsd-complete-milestone` v1.20** to archive **`milestones/v1.20-*`**, remove root **`REQUIREMENTS.md`**, and add planning tag **`v1.20`**, then **`/gsd-new-milestone`** for **v1.21+**.
+
+<details>
+<summary>✅ v1.20 Professional adoption confidence (Phases 70–71) — SHIPPED 2026-04-24</summary>
+
+**Milestone goal:** Post–**0.3.1** **friction inventory** pass (**INV-01..02**) + **production readiness** checklist spine (**PRD-01..02**) for professional SaaS confidence — **no** **PROC-08** / **FIN-03**.
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 70 | Friction evidence refresh | **Complete 2026-04-24** (see [`phases/70-friction-evidence-refresh/70-VERIFICATION.md`](phases/70-friction-evidence-refresh/70-VERIFICATION.md)). | INV-01, INV-02 |
+| 71 | Production readiness spine | **Complete 2026-04-24** (see [`phases/71-production-readiness-spine/71-VERIFICATION.md`](phases/71-production-readiness-spine/71-VERIFICATION.md)). | PRD-01, PRD-02 |
+
+**Success criteria (milestone):**
+
+1. **INV-01..02** and **PRD-01..02** satisfied per **`.planning/REQUIREMENTS.md`** with phase verification artifacts.
+2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** contracts stay green after doc edits.
+3. No **PROC-08** / **FIN-03** scope creep.
+
+</details>
 
 <details>
 <summary>✅ v1.19 Release continuity + proof resilience (Phases 67–69) — SHIPPED 2026-04-24</summary>
@@ -38,9 +57,9 @@ Open **`/gsd-new-milestone`** when **v1.20+** priorities are set. Fresh **`.plan
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 67 | Proof contracts | **Complete 2026-04-24** (1/1 plans; see [`phases/67-proof-contracts/67-VERIFICATION.md`](phases/67-proof-contracts/67-VERIFICATION.md)). | PRF-01, PRF-02 |
-| 68 | Release train | **Complete 2026-04-24** (2/2 plans; see [`phases/68-release-train/68-VERIFICATION.md`](phases/68-release-train/68-VERIFICATION.md)). | REL-01, REL-02, REL-03 |
-| 69 | Doc + planning mirrors | **Complete 2026-04-24** (2/2 plans; see [`phases/69-doc-planning-mirrors/69-VERIFICATION.md`](phases/69-doc-planning-mirrors/69-VERIFICATION.md)). | DOC-01, DOC-02, HYG-01 |
+| 67 | Proof contracts | **Complete 2026-04-24** (1/1 plans; see [`milestones/v1.19-phases/67-proof-contracts/67-VERIFICATION.md`](milestones/v1.19-phases/67-proof-contracts/67-VERIFICATION.md)). | PRF-01, PRF-02 |
+| 68 | Release train | **Complete 2026-04-24** (2/2 plans; see [`milestones/v1.19-phases/68-release-train/68-VERIFICATION.md`](milestones/v1.19-phases/68-release-train/68-VERIFICATION.md)). | REL-01, REL-02, REL-03 |
+| 69 | Doc + planning mirrors | **Complete 2026-04-24** (2/2 plans; see [`milestones/v1.19-phases/69-doc-planning-mirrors/69-VERIFICATION.md`](milestones/v1.19-phases/69-doc-planning-mirrors/69-VERIFICATION.md)). | DOC-01, DOC-02, HYG-01 |
 
 **Success criteria (milestone):**
 

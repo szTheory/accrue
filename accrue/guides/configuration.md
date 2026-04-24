@@ -1,5 +1,7 @@
 # Configuration
 
+For a **pre-production checklist** that includes these keys plus webhooks, tenancy, and observability, see [Production readiness](production-readiness.md).
+
 ## Required runtime keys
 
 Keep processor secrets in `config/runtime.exs` so release artifacts never bake them in:

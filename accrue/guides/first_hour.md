@@ -26,6 +26,8 @@ Shortest read-only path: clone the repo, `cd examples/accrue_host`, run **`mix v
 
 Production apps integrate billing through host-owned **`Accrue.Auth`**; see [Auth adapters](auth_adapters.md) for adapter choices and wiring contracts. **Sigra** is optional: the demo uses it for deterministic organization billing and CI, not as a blanket production requirement. When you are not on Sigra, follow **Capsule H** and [Organization billing (non-Sigra)](organization_billing.md) for org-scoped Stripe customers. Demo-specific `mix.exs` and setup commands stay in [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md).
 
+When you are preparing a **real** deploy (not the demo loop), walk [Production readiness](production-readiness.md) once — it links the same guides in ship order without duplicating them.
+
 ## 1. First run
 
 The first hour should end with one Fake-backed subscription, one signed webhook

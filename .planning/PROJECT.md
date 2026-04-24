@@ -12,9 +12,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.19 — Release continuity + proof resilience** is **archived** (**2026-04-24**). Phases **67–69**; **PRF-01..PRF-02**, **REL-01..REL-03**, **DOC-01..DOC-02**, **HYG-01** validated. Phase trees: **`.planning/phases/67-proof-contracts/`**, **`68-release-train/`**, **`69-doc-planning-mirrors/`**. Archives: **`.planning/milestones/v1.19-ROADMAP.md`**, **`v1.19-REQUIREMENTS.md`**. Planning git tag **`v1.19`**.
+**v1.20 — Professional adoption confidence** (**2026-04-24**). Phases **70–71**; **INV-01..INV-02**, **PRD-01..PRD-02** validated. Post–**0.3.1** friction inventory pass (**`v1.17-P1-001`** closed) + **`accrue/guides/production-readiness.md`** spine with **First Hour** / **configuration** / **`accrue_host` README** cross-links. Phase trees: **`.planning/phases/70-friction-evidence-refresh/`**, **`71-production-readiness-spine/`**. **No** **PROC-08** / **FIN-03**.
 
-**Next:** **`/gsd-new-milestone`** — fresh **`.planning/REQUIREMENTS.md`** and roadmap for **v1.20+** when priorities are set.
+**v1.19 — Release continuity + proof resilience** is **archived** (**2026-04-24**). Phases **67–69**; **PRF-01..PRF-02**, **REL-01..REL-03**, **DOC-01..DOC-02**, **HYG-01** validated. Phase trees: **`.planning/milestones/v1.19-phases/67-proof-contracts/`**, **`68-release-train/`**, **`69-doc-planning-mirrors/`**. Archives: **`.planning/milestones/v1.19-ROADMAP.md`**, **`v1.19-REQUIREMENTS.md`**. Planning git tag **`v1.19`**.
+
+**Next:** **`/gsd-new-milestone`** when **v1.21+** priorities are set (or **`/gsd-complete-milestone` v1.20** to archive + tag).
 
 **Triage doctrine (read-only context, v1.17–v1.18):** [North star + stop rules](research/v1.17-north-star.md) · [Friction inventory](research/v1.17-FRICTION-INVENTORY.md)
 
@@ -50,9 +52,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Last shipped planning milestone:** **v1.19** — Phases **67–69** (**2026-04-24**): proof contracts (**PRF-01..02**), **0.3.1** Hex publish (**REL-01..03**), doc + planning mirrors (**DOC-01..02**, **HYG-01**). Archives: **`.planning/milestones/v1.19-*`**. Prior: **v1.18** — Phase **66** (**2026-04-23**); **`milestones/v1.18-phases/66-onboarding-confidence/`**; tag **`v1.18`**. **v1.17** — **`milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.20** — Phases **70–71** (**2026-04-24**): friction inventory pass (**INV-01..02**) + production readiness guide (**PRD-01..02**). Prior: **v1.19** — Phases **67–69**; **`milestones/v1.19-*`** + **`milestones/v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66** (**2026-04-23**); **`milestones/v1.18-phases/66-onboarding-confidence/`**; tag **`v1.18`**. **v1.17** — **`milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Execution history:** **v1.19** phase directories under **`.planning/phases/`** (**67–69**); **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
+**Execution history:** **v1.20** phase directories under **`.planning/phases/`** (**70–71**); **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -259,6 +261,13 @@ Theme: **Onboarding confidence** — deferred **Phase 62** human UAT baseline + 
 
 - [x] **UAT-01..UAT-05** — Friction inventory / **STATE** / north-star / archive / **ROADMAP** consistency with **`66-VERIFICATION.md`** + **`verify_v1_17_friction_research_contract.sh`** where cited. **Validated in Phase 66.**
 - [x] **PROOF-01** — Adoption proof matrix, evaluator walkthrough, **`verify_adoption_proof_matrix.sh`**, host README, and org matrix ExUnit stay aligned. **Validated in Phase 66.**
+
+### Validated v1.20 (Phases 70–71 complete)
+
+- [x] **INV-01** — Post–**0.3.1** friction inventory pass: **`v1.17-P1-001`** closed in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with **v1.19** **PRF** evidence pointers. **Validated in Phase 70.**
+- [x] **INV-02** — Dated maintainer note + **revisit trigger** when no new sourced **P0/P1** rows warranted. **Validated in Phase 70.**
+- [x] **PRD-01** — **`accrue/guides/production-readiness.md`** checklist spine (links to existing guides only). **Validated in Phase 71.**
+- [x] **PRD-02** — Cross-links from **First Hour**, **configuration**, and **`examples/accrue_host` README**. **Validated in Phase 71.**
 
 ### Validated v1.19 (Phases 67–69 complete)
 
@@ -524,6 +533,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-24:** **`/gsd-discuss-phase 69`** — Subagent-backed **D-01..D-04** locked in **`69-CONTEXT.md`** (HYG vs DOC boundary, planning file SSOT roles, bash-first verifier coupling, pin-first capsules).
 - **2026-04-24:** **`/gsd-execute-phase 69`** — **`69-VERIFICATION.md`** (**DOC** + **HYG**); **`REQUIREMENTS.md`** **DOC-01..02** / **HYG-01** **Complete**; **`PROJECT`**, **`MILESTONES`**, **`STATE`** Hex **0.3.1** mirror pass.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.19** — archives **`milestones/v1.19-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for fresh next milestone, planning tag **`v1.19`** (**`gsd-sdk query milestone.complete`** still blocked on phases-archive; manual archives).
+- **2026-04-24:** **`v1.20` bootstrap** — **`/gsd-new-milestone` plan implementation** (**A** + **B**): **`v1.17-P1-001`** closed in friction inventory; **`production-readiness.md`** + cross-links; **`REQUIREMENTS.md`** (**INV-01..02**, **PRD-01..02**); Phases **70–71** verification; **v1.19** execution trees moved to **`.planning/milestones/v1.19-phases/`**.
 
 ## Evolution
 
@@ -543,4 +553,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.19** milestone archived (**PRF** / **REL** / **DOC** / **HYG**); root **`REQUIREMENTS.md`** removed pending **`/gsd-new-milestone`**.*
+*Last updated: 2026-04-24 — **v1.20** milestone opened (**INV** / **PRD**); **v1.19** phase trees relocated to **`.planning/milestones/v1.19-phases/`**.*

@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.20 Professional adoption confidence (Shipped: 2026-04-24)
+
+**Planning opened:** 2026-04-24
+
+**Phases completed:** **2** phases (**70–71**), bootstrap verification (no multi-plan breakdown).
+
+**Theme:** Post–**0.3.1** **friction inventory** evidence pass (**INV-01..02**) — closes **`v1.17-P1-001`** with **v1.19** **PRF** pointers + **production readiness** doc spine (**PRD-01..02**) cross-linked from **First Hour**, **configuration**, and **`examples/accrue_host` README**. **No** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.19** shipped; **v1.19** execution trees under [`.planning/milestones/v1.19-phases/`](milestones/v1.19-phases/).
+
+**Phase execution trees (v1.20):** [`.planning/phases/70-friction-evidence-refresh/`](phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](phases/71-production-readiness-spine/)
+
+**Archives:** *(none yet — run **`/gsd-complete-milestone` v1.20** to write **`milestones/v1.20-*`**, remove root **`REQUIREMENTS.md`**, and tag.)*
+
+**Git tag:** *(pending `v1.20` planning tag at milestone close)*
+
+**Next after ship:** **`/gsd-new-milestone`** for **v1.21+** priorities.
+
+---
+
 ## v1.19 Release continuity + proof resilience (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-23
@@ -20,7 +40,7 @@
 
 **Depends on:** **v1.18** shipped; **v1.18** Phase **66** tree under [`.planning/milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/).
 
-**Phase execution trees (v1.19):** [`.planning/phases/67-proof-contracts/`](phases/67-proof-contracts/), [`68-release-train/`](phases/68-release-train/), [`69-doc-planning-mirrors/`](phases/69-doc-planning-mirrors/)
+**Phase execution trees (v1.19):** [`milestones/v1.19-phases/67-proof-contracts/`](milestones/v1.19-phases/67-proof-contracts/), [`68-release-train/`](milestones/v1.19-phases/68-release-train/), [`69-doc-planning-mirrors/`](milestones/v1.19-phases/69-doc-planning-mirrors/)
 
 **Archives:**
 
