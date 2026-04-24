@@ -39,3 +39,11 @@ Mounted paths added for **AUX-03..AUX-06** (Connect, billing events, coupons, pr
 |--------------------------------|------------------------|-----------------|
 | `core-admin-invoices-index` | `/billing/invoices?org=<slug>` | ADM-09 |
 | `core-admin-invoices-detail` | `/billing/invoices/:id?org=<slug>` | ADM-09 |
+
+## Phase 77 — v1.24 ADM-15 (customer payment_methods tab)
+
+Merge-blocking coverage for **customer detail** **`payment_methods`** lives in **`verify01-admin-a11y.spec.js`**.
+
+| `test.describe` title (exact) | Mounted path template | Requirement ids |
+|--------------------------------|------------------------|-------------------|
+| VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15) | `/billing/customers/:id?tab=payment_methods&org=<slug>` | ADM-15 |
