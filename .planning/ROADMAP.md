@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- ✅ **v1.23 Post-publish contract alignment** — Phase **75** shipped **2026-04-24** (**PPX-01..04**); **`v1.17-P1-002`** closed; phase tree [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/). Requirements: [`REQUIREMENTS.md`](REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
+- ✅ **v1.23 Post-publish contract alignment** — Phase **75** shipped **2026-04-24** (**PPX-01..04**); **`v1.17-P1-002`** closed; phase tree [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/). Archives: [`milestones/v1.23-ROADMAP.md`](milestones/v1.23-ROADMAP.md), [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.22 Production path discoverability** — Phase **74** shipped **2026-04-24** (**PRS-01..03**); merge-blocking **`verify_production_readiness_discoverability.sh`**; phase tree [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/). Archives: [`milestones/v1.22-ROADMAP.md`](milestones/v1.22-ROADMAP.md), [`milestones/v1.22-REQUIREMENTS.md`](milestones/v1.22-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.21 Maturity posture and diminishing returns** — Phases **72–73** shipped **2026-04-23**. **MAT-01..02**, **INT-11**; **v1.17-P2-001** closed. Archives: [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md), [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md). Phase **72–73** trees: [`milestones/v1.21-phases/72-maturity-posture/`](milestones/v1.21-phases/72-maturity-posture/), [`73-capsule-parity-checklist/`](milestones/v1.21-phases/73-capsule-parity-checklist/).
 - ✅ **v1.20 Professional adoption confidence** — Phases **70–71** shipped **2026-04-24**. **INV-01..02**, **PRD-01..02**; post–**0.3.1** friction inventory pass + **`production-readiness.md`** spine (**no** **PROC-08** / **FIN-03**). Archives: [`milestones/v1.20-ROADMAP.md`](milestones/v1.20-ROADMAP.md), [`milestones/v1.20-REQUIREMENTS.md`](milestones/v1.20-REQUIREMENTS.md). Phase **70–71** trees: [`milestones/v1.20-phases/70-friction-evidence-refresh/`](milestones/v1.20-phases/70-friction-evidence-refresh/), [`71-production-readiness-spine/`](milestones/v1.20-phases/71-production-readiness-spine/).
@@ -31,14 +31,14 @@
 
 ### Next milestone
 
-**None active** — run **`/gsd-complete-milestone`** to archive **v1.23** (then **`/gsd-new-milestone`** for **v1.24+**).
+**None active** — run **`/gsd-new-milestone`** for **v1.24+** (root **`.planning/REQUIREMENTS.md`** starts empty after **v1.23** close).
 
 <details>
 <summary>✅ v1.23 Post-publish contract alignment (Phase 75) — SHIPPED 2026-04-24</summary>
 
 **Milestone goal:** Post–**linked Hex publish** contract alignment (**`PPX-01..04`**) at **`@version` 0.3.1** / published **Hex** pair; **`docs-contracts-shift-left`** bash gates + friction SSOT verifier; **`v1.17-P1-002`** closed — **no** **PROC-08** / **FIN-03**.
 
-**Requirements:** [`REQUIREMENTS.md`](REQUIREMENTS.md)
+**Archives:** [`milestones/v1.23-ROADMAP.md`](milestones/v1.23-ROADMAP.md), [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -757,6 +757,12 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 74. Production path discoverability | v1.22 | inline | Complete | 2026-04-24 |
+
+**v1.23 (complete — 2026-04-24)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 75. Post-publish contract alignment | v1.23 | inline | Complete | 2026-04-24 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

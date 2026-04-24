@@ -857,12 +857,48 @@
 
 ---
 
+## Milestone: v1.23 — Post-publish contract alignment
+
+**Shipped:** 2026-04-24  
+**Phases:** 1 | **Plans:** 0 (bootstrap **75-VERIFICATION.md**)
+
+### What Was Built
+
+- **PPX-01..04** — **`verify_package_docs`** + **`verify_adoption_proof_matrix`** + full **`docs-contracts-shift-left`** pass (including **production-readiness discoverability**) at **0.3.1** workspace / Hex alignment.
+- **`verify_v1_17_friction_research_contract.sh`** + **`scripts/ci/README.md`** triage text aligned to **5** friction-inventory rows after **`v1.17-P1-002`** closure.
+- **`.planning/`** mirror callouts (**PROJECT**, **MILESTONES**, **STATE**) consistent with published pair; **`v1.17-P1-002`** closed with **75-VERIFICATION** pointer.
+
+### What Worked
+
+- Narrow **publish-adjacent** scope kept **PROC-08** / **FIN-03** out while re-binding the same verifier bundle used since **v1.19–v1.22**.
+
+### What Was Inefficient
+
+- **`gsd-sdk query roadmap.analyze`** / **`milestone.complete`** still do not drive this repo’s **ROADMAP** closeout; manual **`milestones/v1.23-*`** archives remain the durable path.
+
+### Patterns Established
+
+- Treat **post-Hex publish** as an explicit revisit trigger for **PPX-** class contract passes, not only **HYG-01** mirror edits.
+
+### Key Lessons
+
+1. **Bootstrap verification** remains sufficient for single-phase milestones when traceability is **4/4** and **`audit-open`** is green at close.
+2. Closing **P1 friction rows** in the same milestone that opens them is acceptable when scope stays verifier- and mirror-only.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: short verification + planning hygiene pass.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.23 | short | 1 | **PPX-01..04** — **`docs-contracts-shift-left`** + friction script + **`v1.17-P1-002`** closure (**75-VERIFICATION**); phase under **`v1.23-phases/`**. |
 | v1.22 | short | 1 | **PRS-01..03** — root + package README links; **`verify_production_readiness_discoverability.sh`** in shift-left; **`scripts/ci/README.md`** gate map (**74-VERIFICATION**); phase under **`v1.22-phases/`**. |
 | v1.21 | short | 2 | **PROJECT** + **`maturity-and-maintenance.md`** maintenance bar (**72-VERIFICATION**); **`scripts/ci/README.md`** capsule parity checklist + **v1.17-P2-001** closure (**73-VERIFICATION**); phases under **`v1.21-phases/`**. |
 | v1.20 | short | 2 | Friction inventory evidence refresh (**70-VERIFICATION**); **production-readiness** guide + integrator cross-links (**71-VERIFICATION**); phases moved to **`v1.20-phases/`**. |
@@ -889,6 +925,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.23 | Existing **`docs-contracts-shift-left`** suite + **`verify_v1_17_friction_research_contract.sh`**; no new CI jobs | PPX (4/4) archived | Friction inventory **P1-002** closure note; **`75-VERIFICATION.md`**; phase tree **`v1.23-phases/75-*/`**. |
 | v1.22 | Merge-blocking **`verify_production_readiness_discoverability.sh`** added to **`docs-contracts-shift-left`**; existing doc verifiers unchanged | PRS (3/3) archived | Bash verifier + CI wiring; **`scripts/ci/README.md`** PRS triage rows; phase tree **`v1.22-phases/74-*/`**. |
 | v1.21 | Merge-blocking **`verify_package_docs`** / **`verify_v1_17_friction_research_contract.sh`** unchanged; **`*-VERIFICATION.md`** evidence only | MAT + INT-11 (3/3) archived | **`maturity-and-maintenance.md`**; **INT-11** checklist in **`scripts/ci/README.md`**; **v1.17-P2-001** closure note in friction inventory. |
 | v1.20 | Merge-blocking doc contracts unchanged; **`*-VERIFICATION.md`** evidence only | INV + PRD (4/4) archived | **`production-readiness.md`** spine; inventory **§ v1.20 evidence refresh**; phase trees under **`milestones/v1.20-phases/`**. |

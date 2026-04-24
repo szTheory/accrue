@@ -16,9 +16,14 @@
 
 - **75:** **PPX-01..04** — local **`docs-contracts-shift-left`** bash suite green; **`scripts/ci/README.md`** triage text updated for **5** inventory rows; **`75-VERIFICATION.md`** sign-off.
 
-**Requirements / traceability:** [`REQUIREMENTS.md`](REQUIREMENTS.md) (root; archive on **`/gsd-complete-milestone`**).
+**Archives:**
 
-**Next after ship:** **`/gsd-complete-milestone`** to archive **v1.23** + planning tag **`v1.23`**, then **`/gsd-new-milestone`** for **v1.24+**.
+- Roadmap: [`milestones/v1.23-ROADMAP.md`](milestones/v1.23-ROADMAP.md)
+- Requirements: [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md)
+
+**Git tag:** `v1.23`
+
+**Next after ship:** **`/gsd-new-milestone`** for **v1.24+** priorities.
 
 ---
 

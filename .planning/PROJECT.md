@@ -12,11 +12,13 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.23 — Post-publish contract alignment (Branch A — **Phase 75 verified 2026-04-24**)
+**None active** — last closed: **v1.23** (**2026-04-24**). Run **`/gsd-new-milestone`** for **v1.24+**.
+
+### v1.23 — Post-publish contract alignment (Branch A — **archived 2026-04-24**)
 
 **Goal:** After each **linked Hex publish** for **`accrue` / `accrue_admin`**, keep merge-blocking **package docs**, **adoption proof matrix**, and **docs-contracts-shift-left** (including **production-readiness discoverability**) honest, and align **`.planning/`** public-Hex callouts — so integrators on **`main`** and on **Hex** see one coherent pin and doc story.
 
-**Shipped (planning execution):** **PPX-01..PPX-04** complete per **`.planning/REQUIREMENTS.md`**; evidence **`milestones/v1.23-phases/75-post-publish-contract-alignment/75-VERIFICATION.md`**; **`v1.17-P1-002`** **closed** in the friction inventory. **`/gsd-complete-milestone`** remains to archive root **`REQUIREMENTS.md`**, write **`milestones/v1.23-*`**, and tag **`v1.23`**.
+**Shipped:** **PPX-01..PPX-04**; evidence **`milestones/v1.23-phases/75-post-publish-contract-alignment/75-VERIFICATION.md`**; **`v1.17-P1-002`** **closed** in the friction inventory. Archives: **`.planning/milestones/v1.23-ROADMAP.md`**, **`v1.23-REQUIREMENTS.md`**. Planning git tag **`v1.23`**.
 
 **v1.22 — Production path discoverability** is **archived** (**2026-04-24**). Phase **74**; **PRS-01..PRS-03** validated. Phase tree: **`.planning/milestones/v1.22-phases/74-production-path-discoverability/`**. Archives: **`.planning/milestones/v1.22-ROADMAP.md`**, **`v1.22-REQUIREMENTS.md`**. Planning git tag **`v1.22`**.
 
@@ -67,9 +69,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **v1.23** — execution **complete**; run **`/gsd-complete-milestone`** to archive (**`milestones/v1.23-*`**, tag **`v1.23`**, remove root **`REQUIREMENTS.md`** per workflow).
+**Active planning milestone:** **None** — root **`.planning/REQUIREMENTS.md`** removed at **v1.23** close; start **v1.24+** with **`/gsd-new-milestone`**.
 
-**Last shipped planning milestone:** **v1.23** — Phase **75** (**2026-04-24**): post-publish contract alignment (**PPX-01..04**); **`milestones/v1.23-phases/`**; **`v1.17-P1-002`** closed. **Earlier:** **v1.22** — Phase **74** (**2026-04-24**): **PRS-01..03**; **`milestones/v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.23** — Phase **75** (**2026-04-24**): post-publish contract alignment (**PPX-01..04**); **`milestones/v1.23-*`** + **`milestones/v1.23-phases/`**; **`v1.17-P1-002`** closed; planning tag **`v1.23`**. **Earlier:** **v1.22** — Phase **74** (**2026-04-24**): **PRS-01..03**; **`milestones/v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73** (**2026-04-23**); **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71** (**2026-04-24**); **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
 **Execution history:** **v1.23** Phase **75** **verified** under **`.planning/milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`.planning/milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`.planning/milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`.planning/milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`.planning/milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
@@ -286,6 +288,15 @@ Theme: **maintenance posture** + **contributor capsule parity**; **PROC-08** and
 - [x] **MAT-01** — **`.planning/PROJECT.md`** library maintenance posture (**FRG-01** intake, revisit triggers) with links to north star, friction inventory, **`production-readiness.md`**, **`maturity-and-maintenance.md`**. **Validated in Phase 72.**
 - [x] **MAT-02** — **`accrue/guides/maturity-and-maintenance.md`** + cross-links from **First Hour**, **production-readiness**, **CONTRIBUTING**. **Validated in Phase 72.**
 - [x] **INT-11** — **`scripts/ci/README.md`** same-PR checklist (**First Hour** H/M/R ↔ host README); **`v1.17-P2-001`** closed in friction inventory. **Validated in Phase 73.**
+
+### Validated v1.23 (Phase 75; milestone closed 2026-04-24)
+
+Theme: **post-publish contract alignment** (**PPX-01..04**); **PROC-08** and **FIN-03** not in this milestone. Archive: **`.planning/milestones/v1.23-REQUIREMENTS.md`**.
+
+- [x] **PPX-01** — **`verify_package_docs.sh`** + **`package_docs_verifier_test.exs`** aligned with workspace **`@version`** at **0.3.1** after linked publish. **Validated in Phase 75.**
+- [x] **PPX-02** — **`verify_adoption_proof_matrix.sh`** + adoption matrix needle discipline. **Validated in Phase 75.**
+- [x] **PPX-03** — Merge-blocking **`docs-contracts-shift-left`** (including **`verify_production_readiness_discoverability.sh`**) green after doc/version touches. **Validated in Phase 75.**
+- [x] **PPX-04** — **`.planning/`** public-Hex callouts + **`v1.17-P1-002`** closed with **75-VERIFICATION** pointer. **Validated in Phase 75.**
 
 ### Validated v1.20 (Phases 70–71 complete)
 
@@ -514,9 +525,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.20 closes friction evidence loop + production readiness spine without billing scope | Post–**0.3.1** inventory pass (**INV-**) + **`production-readiness.md`** integrator cross-links (**PRD-**); **PROC-08** / **FIN-03** unchanged | ✓ Good — **shipped** Phases **70–71** (**2026-04-24**); archived + planning tag **`v1.20`** |
 | v1.21 codifies maintenance posture + capsule parity without billing scope | **MAT-** docs + **INT-11** checklist close **v1.17-P2-001**; evidence-gated friction intake explicit for maintainers | ✓ Good — **shipped** Phases **72–73** (**2026-04-23**); archived + planning tag **`v1.21`** |
 | v1.22 makes production-readiness discoverability merge-blocking | After maintenance posture, root + package README still hid the ship checklist; **PRS-** ties evaluator path to **§1–§10** spine without billing primitive expansion | ✓ Good — **shipped** Phase **74** (**2026-04-24**); archived + planning tag **`v1.22`** |
+| v1.23 re-verifies publish-adjacent contracts at **0.3.1** | After **v1.19** publish + **v1.22** discoverability, **PPX-** closes **v1.17-P1-002** with full **`docs-contracts-shift-left`** + friction-inventory alignment | ✓ Good — **shipped** Phase **75** (**2026-04-24**); archived + planning tag **`v1.23`** |
 
 ## Current Milestone Notes
 
+- **2026-04-24:** **`/gsd-complete-milestone` v1.23** — archives **`milestones/v1.23-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.23`**.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.22** — archives **`milestones/v1.22-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.22`**.
 - **2026-04-23:** **`/gsd-new-milestone` v1.22** — **Production path discoverability**; **`REQUIREMENTS.md`** (**PRS-01..03**); **`verify_production_readiness_discoverability.sh`** + **`docs-contracts-shift-left`**; roadmap Phase **74**.
 - **2026-04-23:** **`/gsd-complete-milestone` v1.21** — archives **`milestones/v1.21-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.21`**.
@@ -586,4 +599,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.23** Phase **75** verified (**PPX-01..04**); **`v1.17-P1-002`** closed; **`verify_v1_17_friction_research_contract.sh`** expects **5** inventory rows; **`/gsd-complete-milestone`** pending for archive + tag **`v1.23`**.*
+*Last updated: 2026-04-24 — **v1.23** milestone archived (**`milestones/v1.23-*`**); planning tag **`v1.23`**; root **`REQUIREMENTS.md`** removed for **`/gsd-new-milestone`**.*
