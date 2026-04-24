@@ -47,3 +47,9 @@ verify_adoption_proof_matrix: OK
 $ bash scripts/ci/verify_verify01_readme_contract.sh
 verify_verify01_readme_contract: OK
 ```
+
+## CI evidence: docs-contracts-shift-left, VERIFY-01, host-integration
+
+**VERIFY-01** maps to step **`VERIFY-01 README contract`** in GitHub Actions job **`docs-contracts-shift-left`**, which runs **`bash scripts/ci/verify_verify01_readme_contract.sh`** (see [`.github/workflows/ci.yml` @ reviewed SHA](https://github.com/szTheory/accrue/blob/d1f121c75bb21fb2dd53c9ac9315bd83c26a438e/.github/workflows/ci.yml) — job key **`docs-contracts-shift-left`**, lines ~30–55).
+
+**`host-integration`** is merge-blocking on **`pull_request`** to **`main`** per the workflow header comments and the **`host-integration`** job definition in the same file; that job declares **`needs: [admin-drift-docs, docs-contracts-shift-left]`**, so **`docs-contracts-shift-left`** (including **VERIFY-01**) must go green before **`host-integration`** runs. **`docs-contracts-shift-left`** is listed among merge-blocking jobs alongside **`host-integration`** in **`.github/workflows/ci.yml`**.
