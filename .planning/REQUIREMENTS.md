@@ -26,7 +26,7 @@
 
 ## Planning hygiene (HYG)
 
-- [ ] **HYG-01**: **`.planning/PROJECT.md`**, **`.planning/MILESTONES.md`**, and **`.planning/STATE.md`** “public Hex” / last-published callouts reflect **actual** post-release **`accrue`** / **`accrue_admin`** versions (**0.3.1** or shipped).
+- [x] **HYG-01**: **`.planning/PROJECT.md`**, **`.planning/MILESTONES.md`**, and **`.planning/STATE.md`** “public Hex” / last-published callouts reflect **actual** post-release **`accrue`** / **`accrue_admin`** versions (**0.3.1** or shipped).
 
 ---
 
@@ -54,6 +54,6 @@
 | REL-03 | 68 | Complete |
 | DOC-01 | 69 | Complete |
 | DOC-02 | 69 | Complete |
-| HYG-01 | 69 | Pending |
+| HYG-01 | 69 | Complete |
 
 **Coverage:** v1.19 requirements **8** total · Mapped **8** · Unmapped **0**
