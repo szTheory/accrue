@@ -1,5 +1,21 @@
 # Milestones
 
+## v1.25 Evidence-bound triad (friction + integrator + billing depth) (Opened: 2026-04-24)
+
+**Planning opened:** 2026-04-24
+
+**Phases planned:** **3** phases (**79–81**), requirements **INV-03**, **BIL-06**, **BIL-07**, **INT-12**.
+
+**Theme:** Post–**v1.24** **FRG-01** maintainer pass; **`Accrue.Billing.create_checkout_session/2`** (**Fake** + **`:telemetry` / span**) mirroring **BIL-04**; **telemetry/catalog/changelog** + **First Hour** / host README / adoption matrix / **VERIFY-01** alignment (**PPX-adjacent**). **No** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.24** shipped.
+
+**Research:** `.planning/research/SUMMARY.md` (milestone pass **2026-04-24**).
+
+**Next:** **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`**.
+
+---
+
 ## v1.24 Billing portal facade + customer PM operator surfaces (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24

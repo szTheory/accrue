@@ -1,33 +1,83 @@
-# Features Research
+# Feature Research
 
-**Domain:** ORG-04 — broader non-Sigra tenancy recipes
-**Researched:** 2026-04-21
-**Confidence:** MEDIUM–HIGH (product direction from archived v1.3 requirements)
+**Domain:** Accrue v1.25 — friction SSOT + integrator proof + **`Accrue.Billing`** checkout entry  
+**Researched:** 2026-04-24  
+**Confidence:** HIGH
 
-## Table stakes (must ship for ORG-04 to count)
+## Feature Landscape
 
-| Capability | Notes |
-|------------|--------|
-| **Single “spine” doc** | One host-facing entry (new guide or clearly linked chapter) that states: billable = host Ecto schema + `use Accrue.Billable`; active org (if any) is **host** responsibility before Accrue APIs run. |
-| **phx.gen.auth-shaped path** | Documented checklist: session → `current_user` → billable struct or org membership → `Accrue.Billing` calls; admin routes still behind `Accrue.Auth` adapter. |
-| **Pow-shaped path** | Same checklist with Pow session/user conventions; call out version/community maintenance expectations honestly. |
-| **Custom org model path** | Narrative + anti-patterns: `owner_type`/`owner_id` integrity, no cross-org admin reads, webhook replay actor scope (ties to **ORG-03**). |
-| **Proof alignment** | Adoption proof matrix (or VERIFY-01 contract) gains at least one **archetype row** for non-Sigra org billing, with merge-blocking vs advisory stance matching existing CI policy. |
+### Table Stakes (Hosts / Integrators Expect)
 
-## Differentiators (nice, if time allows)
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **`Accrue.Billing`** owns subscription + payment-method + portal entry | Single host **`MyApp.Billing`** teaching surface | LOW | **v1.24** added portal; checkout is the natural sibling for “start payment on Stripe.” |
+| **Fake-backed** tests for new billing API | CI determinism; library positioning | MEDIUM | Same bar as **BIL-04**. |
+| **`:telemetry` / span** on new public **`Billing`** functions | Ops catalog + **`billing_span_coverage_test`** gate | LOW | Extend **`guides/telemetry.md`** + span coverage test expectations. |
+| Friction inventory stays honest after ship | **FRG-01** / **v1.21** maintenance posture | LOW | Either **new sourced rows** or **explicit maintainer certification** — not silent drift. |
 
-- Minimal excerpt or **optional** host fixture path (e.g. documented branch or `examples/` note) for one non-Sigra archetype — only if it does not duplicate `examples/accrue_host` Sigra-first story confusingly.
-- Cross-links from `sigra_integration.md` (“if you are not on Sigra, see …”).
+### Differentiators (Competitive / Trust)
 
-## Anti-features (explicitly not ORG-04)
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Typed **`Accrue.Checkout.Session`** projection | Fewer foot-guns than raw Stripe maps | Already shipped — **Billing** facade exposes it consistently. |
+| **VERIFY-01** + adoption matrix co-move with docs | Evaluator trust | MEDIUM | **INT-12** — same-PR discipline from **`scripts/ci/README.md`**. |
 
-| Anti-feature | Reason |
-|--------------|--------|
-| Accrue-owned org / membership tables | Host owns tenancy; Accrue stays polymorphic billable reference. |
-| Official Pow/phx.gen.auth generators inside Accrue | Maintenance burden; recipes + pointers suffice. |
-| FIN-03 exports / PROC-08 | Milestone non-goals. |
+### Anti-Features (Defer / Avoid)
 
-## Dependencies on existing shipped work
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Full embedded Checkout UI in **`accrue_admin`** | “Ship UI” | Scope explosion; host owns web UI | Document **`ui_mode: :embedded`** in guides only. |
+| **PROC-08** second processor | Multi-gateway | False parity; milestone non-goal | Explicit future milestone. |
 
-- **ORG-01..03**, **ORG-02** Sigra-first proof — recipes must not weaken row-level admin/query contracts.
-- **VERIFY-01** / Phase 33 CI language — new proof rows must reuse existing verifier patterns.
+## Feature Dependencies
+
+```
+INV-03 (friction pass)
+    └── informs ──> INT-12 (which doc rows / verifiers need touch)
+
+BIL-06 (Billing checkout API)
+    └── requires ──> Accrue.Checkout.Session (existing)
+    └── enables ──> BIL-07 + INT-12 (docs + proof alignment)
+```
+
+### Dependency Notes
+
+- **BIL-06 before BIL-07:** Catalog and **CHANGELOG** should describe **observed** span names, not speculative ones.  
+- **INV-03** can complete in parallel with **BIL-06** at roadmap level, but **79** before **81** reduces thrash on **`verify_v1_17_friction_research_contract.sh`**.
+
+## MVP Definition (this milestone)
+
+### Launch With (v1.25)
+
+- [ ] **INV-03** — Inventory pass with evidence row or certification.  
+- [ ] **BIL-06** — **`create_checkout_session`** + **`!`**, Fake tests, span.  
+- [ ] **BIL-07** + **INT-12** — Telemetry doc + optional First Hour / matrix / VERIFY alignment when checkout is documented.
+
+### Add After Validation
+
+- [ ] Installer template adds **`create_checkout_session`** delegate on **`MyApp.Billing`** — only if **First Hour** / installer story references it (**stretch** inside **81**).
+
+## Feature Prioritization Matrix
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| BIL-06 checkout facade | HIGH | MEDIUM | P1 |
+| INV-03 friction pass | MEDIUM | LOW | P1 |
+| BIL-07 telemetry/docs | HIGH | LOW | P1 |
+| INT-12 integrator alignment | HIGH | MEDIUM | P1 |
+
+## Competitor Feature Analysis
+
+| Feature | Pay / Cashier (pattern) | Accrue v1.25 |
+|---------|-------------------------|--------------|
+| Checkout from “Billable” context | Single entry on user/account model | **`Accrue.Billing`** + **`%Customer{}`** first arg, same as portal. |
+
+## Sources
+
+- **`.planning/milestones/v1.24-REQUIREMENTS.md`**  
+- **`accrue/guides/testing.md`** — host **`MyApp.Billing.create_checkout_session`** mention (already suggests host facade naming).  
+- **`.planning/research/v1.17-north-star.md`**
+
+---
+*Feature research for: Accrue v1.25*  
+*Researched: 2026-04-24*

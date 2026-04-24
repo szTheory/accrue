@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: next
-milestone_name: (open with /gsd-new-milestone)
-status: between_milestones
-last_updated: "2026-04-24T18:00:00.000Z"
+milestone: v1.25
+milestone_name: Evidence-bound triad (friction + integrator + billing depth)
+status: defining_requirements
+last_updated: "2026-04-24T12:00:00.000Z"
 last_activity: 2026-04-24
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,25 +21,25 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **Between milestones** — **`v1.24`** archived (**`milestones/v1.24-*`**); root **`REQUIREMENTS.md`** removed; open **v1.25+** with **`/gsd-new-milestone`**.
+**Current focus:** **v1.25** — friction inventory maintainer pass, integrator/proof contract alignment, and **`Accrue.Billing.create_checkout_session`** facade (**Fake** + telemetry). **PROC-08** / **FIN-03** out of scope.
 
 ## Current Position
 
-**Milestone:** — (next not opened)
+**Milestone:** **v1.25** — Evidence-bound triad
 
-**Phase:** — (none active)
+**Phase:** Not started (requirements + roadmap defined; execution starts at **79**)
 
 **Plan:** —
 
-**Status:** **v1.24** planning milestone archived — **`git tag v1.24`**; no active **`REQUIREMENTS.md`** until **`/gsd-new-milestone`**.
+**Status:** Defining requirements — research complete; use **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`**.
 
-**Last activity:** 2026-04-24
+**Last activity:** 2026-04-24 — Milestone **v1.25** opened; **`.planning/research/`** refreshed; **`v1.24`** phase trees under **`milestones/v1.24-phases/`**.
 
 ## Milestone Progress
 
-**v1.24** phases **76–78**: **Archived** **2026-04-24** — see **`.planning/milestones/v1.24-ROADMAP.md`**, **`.planning/milestones/v1.24-REQUIREMENTS.md`**, planning tag **`v1.24`**.
+**v1.25** (planned): Phases **79–81** — **INV-03**, **BIL-06**, **BIL-07**, **INT-12** (see **`.planning/REQUIREMENTS.md`**).
 
-**Shipped (planning):** **v1.24** Phases **76–78** **2026-04-24** (**ADM-13..16**, **BIL-04..05**). **v1.23** Phase **75** (**PPX-01..04**); archives + tag **`v1.23`**. **v1.22** — **`milestones/v1.22-phases/`** (**74**); tag **`v1.22`**.
+**v1.24** phases **76–78**: **Archived** **2026-04-24** — execution trees **`milestones/v1.24-phases/`**; archives **`milestones/v1.24-ROADMAP.md`**, **`v1.24-REQUIREMENTS.md`**; tag **`v1.24`**.
 
 **Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`  
 **North star + stop rules (FRG-02):** `.planning/research/v1.17-north-star.md`
@@ -48,8 +48,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **absent** until **`/gsd-new-milestone`** (previous **v1.24** copy archived as **`milestones/v1.24-REQUIREMENTS.md`**)
-- **`.planning/ROADMAP.md`** — **v1.24** collapsed under **Milestones** + **`<details>`**; **Next milestone** stub
+- **`.planning/REQUIREMENTS.md`** — **v1.25** requirements (**INV-03**, **INT-12**, **BIL-06**, **BIL-07**)
+- **`.planning/ROADMAP.md`** — active **v1.25** phase table (**79–81**)
+- **`.planning/research/SUMMARY.md`** — **v1.25** research synthesis (**2026-04-24**)
 
 ## Deferred Items
 
@@ -59,9 +60,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Recent Decisions
 
+- **2026-04-24:** **`/gsd-new-milestone` v1.25** — research-first; **`STACK`/`FEATURES`/`ARCHITECTURE`/`PITFALLS`/`SUMMARY`** under **`.planning/research/`**; **`v1.24`** working phases moved to **`milestones/v1.24-phases/`** (evidence preservation).
 - **2026-04-24:** **`/gsd-complete-milestone` v1.24** — archives **`milestones/v1.24-*`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.24`**; **`audit-open`** all clear.
-- **2026-04-24:** **`/gsd-new-milestone` v1.24** — billing + admin theme; **REQ** IDs **ADM-13..16**, **BIL-04..05**; phases continue from **76**.
 
-**Next:** **`/gsd-new-milestone`** — fresh **`REQUIREMENTS.md`** + roadmap slice for **v1.25+**; **`/gsd-ship`** / **`/gsd-progress`** per maintainer cadence.
+**Next:** **`/gsd-discuss-phase 79`** or **`/gsd-plan-phase 79`** — friction inventory maintainer pass (**INV-03**).
 
-**Completed:** **v1.24** Phase **78** (**BIL-04**, **BIL-05**); Phase **77** (**ADM-15**, **ADM-16**); Phase **76** (**ADM-13**, **ADM-14**). **v1.23** Phase **75** (**PPX-01..04**); tag **`v1.23`**.
+**Completed (prior milestone):** **v1.24** Phases **76–78** — evidence under **`milestones/v1.24-phases/`**.

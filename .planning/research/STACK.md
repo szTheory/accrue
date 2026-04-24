@@ -1,8 +1,8 @@
 # Stack Research
 
-**Domain:** Accrue v1.8 — non-Sigra organization billing recipes (Phoenix host integration)
-**Researched:** 2026-04-21
-**Confidence:** HIGH (brownfield; no new Accrue runtime deps implied)
+**Domain:** Accrue v1.25 — billing facade + integrator contracts (brownfield Elixir / Phoenix billing library)  
+**Researched:** 2026-04-24  
+**Confidence:** HIGH
 
 ## Recommended Stack
 
@@ -10,31 +10,52 @@
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Elixir / Phoenix / Ecto | Accrue floor (1.17+, Phoenix 1.8+) | Host apps implementing recipes | Already project constraints; recipes must not imply older Phoenix. |
-| PostgreSQL | 14+ | Row-scoped `owner_type` / `owner_id` | Matches Accrue billing schema; org recipes stay row-scoped, not schema-per-tenant. |
-| `accrue` + `accrue_admin` | 0.1.x | Billing + operator UI | ORG-04 is integration and documentation depth, not a new Hex dependency story. |
+| Elixir / OTP | 1.17+ / 27+ (project floor) | Language + runtime | Already locked in **`.planning/PROJECT.md`**; no change for checkout facade. |
+| `lattice_stripe` | `~> 1.1` | Stripe HTTP + structs | Existing **`LatticeStripe.Checkout.Session`** path already used by **`Accrue.Processor.Stripe`**; facade only composes. |
+| `nimble_options` | `~> 1.1` | Attr validation on **`Accrue.Billing`** | Same pattern as **`create_billing_portal_session/2`** (**BIL-04**); keeps invalid keys fail-fast at API boundary. |
+| `Accrue.Telemetry.span/3` | core | Billing entry-point observability | Contract: every public **`Accrue.Billing`** function spanned or audited (**`billing_span_coverage_test.exs`**). |
 
-### Supporting Libraries (host-chosen, documented—not Accrue-enforced)
+### Supporting Libraries
 
 | Library | Version | Purpose | When to Use |
-|---------|---------|---------|---------------|
-| **Sigra** | optional `~> 0.1` | Org-aware auth + admin scope | Already first-party path (`Accrue.Integrations.Sigra`); v1.8 adds **non-Sigra** recipes alongside, not replacing. |
-| **phx.gen.auth** | Phoenix 1.8+ | Session + user schema owned by host | Common B2C / small-team billable = `User`; org-shaped billable needs explicit host pattern. |
-| **Pow** | community | Session + user | Same contract: Accrue never owns `users`; billable resolution is host code. |
+|---------|---------|---------|-------------|
+| `Accrue.Checkout.Session` | core | Typed checkout session create/fetch | **Required** delegate target for **`create_checkout_session`** — do not duplicate Stripe param assembly in **`Billing`**. |
+| ExUnit + Fake processor | test | Deterministic checkout proofs | **Required** for **BIL-06**; mirrors billing-portal Fake tests from **v1.24**. |
 
-### What not to add for ORG-04
+### Development Tools
 
-| Avoid | Why |
-|-------|-----|
-| New Accrue deps for Pow/phx.gen.auth | Recipes are host wiring + docs; optional compile deps would bloat core. |
-| Second processor (**PROC-08**) | Explicitly out of v1.8 scope. |
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| `scripts/ci/verify_package_docs.sh` | Install literal / `mix.exs` alignment | Touch **First Hour** only when it reduces confusion (**BIL-07** stretch). |
+| `scripts/ci/verify_v1_17_friction_research_contract.sh` | Friction table row-count / structure | Run when **INV-03** adds or closes inventory rows. |
 
-## Installation / integration posture
+## Alternatives Considered
 
-- Host installs `accrue` / `accrue_admin` as today; `mix accrue.install` remains the spine.
-- Non-Sigra recipes document **config + plugs + context** boundaries (`Accrue.Auth` adapter, `Accrue.Billable` target, admin `require_admin` / org scope) without vendoring Pow/phx.gen.auth into Accrue packages.
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Delegate to **`Accrue.Checkout.Session`** | Call **`Processor.checkout_session_create`** from **`Billing`** directly | Rejected — duplicates param projection and breaks single place for **`Inspect`** masking of **`client_secret`**. |
+| **`span_billing(:checkout_session, :create, …)`** | New top-level telemetry domain **`:checkout`** | Rejected for v1.25 — billing span catalog and OTel naming expect **`[:accrue, :billing, …]`** family. |
+
+## What NOT to Use
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Logging **`url`** or **`client_secret`** from checkout session | Bearer-equivalent credentials | **`Inspect` impl** on **`Accrue.Checkout.Session`** + PII-safe span metadata only (**`customer_id`**, ids). |
+| New Hex deps for “research” | Maintenance posture | None — stack unchanged. |
+
+## Version Compatibility
+
+| Anchor | Compatible With | Notes |
+|--------|-----------------|-------|
+| `accrue` **0.3.1** on branch | `lattice_stripe` **~> 1.1** | No lockfile churn required for facade-only milestone unless publish cadence dictates. |
 
 ## Sources
 
-- `.planning/PROJECT.md`, `.planning/milestones/v1.3-REQUIREMENTS.md` (ORG-01..03, deferred ORG-04)
-- `accrue/guides/auth_adapters.md`, `accrue/guides/sigra_integration.md`
+- **`accrue/lib/accrue/billing.ex`** — **`create_billing_portal_session`** + **`span_billing`** patterns.  
+- **`accrue/lib/accrue/checkout/session.ex`** — **`@create_schema`**, **`create/1`**.  
+- **`.planning/milestones/v1.24-REQUIREMENTS.md`** — **BIL-04** / **BIL-05** acceptance pattern.  
+- **`CLAUDE.md` / `.planning/PROJECT.md`** — stack floor and non-goals.
+
+---
+*Stack research for: Accrue v1.25*  
+*Researched: 2026-04-24*

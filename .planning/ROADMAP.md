@@ -2,7 +2,8 @@
 
 ## Milestones
 
-- ✅ **v1.24 Billing portal facade + customer PM operator surfaces** — Phases **76–78** shipped **2026-04-24** (**ADM-13..ADM-16**, **BIL-04..BIL-05**); **`Accrue.Billing`** billing-portal session entry + customer **`payment_methods`** admin operator surfaces; execution under **`.planning/phases/`** (76–78). Archives: [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md), [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
+- **v1.25 Evidence-bound triad (friction + integrator + billing depth)** — **OPEN** **2026-04-24**. Phases **79–81** (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**): friction inventory maintainer pass; **`Accrue.Billing.create_checkout_session`**, telemetry/catalog, integrator proof alignment. **No** **PROC-08** / **FIN-03**. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+- ✅ **v1.24 Billing portal facade + customer PM operator surfaces** — Phases **76–78** shipped **2026-04-24** (**ADM-13..ADM-16**, **BIL-04..BIL-05**); **`Accrue.Billing`** billing-portal session entry + customer **`payment_methods`** admin operator surfaces; execution trees [`milestones/v1.24-phases/`](milestones/v1.24-phases/). Archives: [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md), [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.23 Post-publish contract alignment** — Phase **75** shipped **2026-04-24** (**PPX-01..04**); **`v1.17-P1-002`** closed; phase tree [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/). Archives: [`milestones/v1.23-ROADMAP.md`](milestones/v1.23-ROADMAP.md), [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.22 Production path discoverability** — Phase **74** shipped **2026-04-24** (**PRS-01..03**); merge-blocking **`verify_production_readiness_discoverability.sh`**; phase tree [`milestones/v1.22-phases/74-production-path-discoverability/`](milestones/v1.22-phases/74-production-path-discoverability/). Archives: [`milestones/v1.22-ROADMAP.md`](milestones/v1.22-ROADMAP.md), [`milestones/v1.22-REQUIREMENTS.md`](milestones/v1.22-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.21 Maturity posture and diminishing returns** — Phases **72–73** shipped **2026-04-23**. **MAT-01..02**, **INT-11**; **v1.17-P2-001** closed. Archives: [`milestones/v1.21-ROADMAP.md`](milestones/v1.21-ROADMAP.md), [`milestones/v1.21-REQUIREMENTS.md`](milestones/v1.21-REQUIREMENTS.md). Phase **72–73** trees: [`milestones/v1.21-phases/72-maturity-posture/`](milestones/v1.21-phases/72-maturity-posture/), [`73-capsule-parity-checklist/`](milestones/v1.21-phases/73-capsule-parity-checklist/).
@@ -30,22 +31,36 @@
 
 ## Phases
 
-### Next milestone
+### v1.25 Evidence-bound triad (friction + integrator + billing depth) — OPEN
 
-**None opened** — use **`/gsd-new-milestone`** to define **v1.25+** (creates fresh **`.planning/REQUIREMENTS.md`**).
+**Milestone goal:** Maintainer pass on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** (**INV-03**); **`Accrue.Billing.create_checkout_session/2`** (**Fake** + **`:telemetry` / span**, **BIL-06**); **telemetry/catalog/changelog + integrator proof alignment** (**BIL-07**, **INT-12**) — **no** **PROC-08** / **FIN-03**.
+
+**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) · **Research:** [`.planning/research/SUMMARY.md`](research/SUMMARY.md)
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|----------------|
+| 79 | Friction inventory maintainer pass | Post–**v1.24** **FRG-01** evidence: new sourced rows **or** dated no-new-rows certification + **`verify_v1_17_friction_research_contract.sh`** if row inventory changes. | INV-03 |
+| 80 | Checkout session on `Accrue.Billing` | Ship **`create_checkout_session/2`** (+ **`!`**) delegating to **`Accrue.Checkout.Session`**; **Fake** ExUnit; **PII-safe** span metadata (no **URL** / **client_secret** in attrs). | BIL-06 |
+| 81 | Telemetry truth + integrator contracts | **`guides/telemetry.md`**, **`billing_span_coverage_test.exs`**, **`CHANGELOG`**, **First Hour** / host README / adoption matrix / **VERIFY-01** co-update when checkout becomes a documented entry point. | BIL-07, INT-12 |
+
+**Success criteria (milestone):**
+
+1. **INV-03**, **BIL-06**, **BIL-07**, **INT-12** satisfied per **`.planning/REQUIREMENTS.md`** with **`79-`..`81-VERIFICATION.md`** evidence under **`.planning/phases/`**.
+2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** (and **`docs-contracts-shift-left`** where doc paths change) stay **green** on **`main`** after changes.
+3. No **PROC-08** / **FIN-03** scope creep.
 
 <details>
 <summary>✅ v1.24 Billing portal facade + customer PM operator surfaces (Phases 76–78) — SHIPPED 2026-04-24</summary>
 
 **Milestone goal:** **`Accrue.Billing`** billing-portal session entry (**Fake** + **`:telemetry` / span** parity) plus **customer `payment_methods`** tab **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** / **`export_copy_strings`** hygiene — **no** **PROC-08** / **FIN-03**.
 
-**Archives:** [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md), [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md).
+**Archives:** [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md), [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.24-phases/`](milestones/v1.24-phases/).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
-| 76 | Customer PM tab — inventory + Copy burn-down | **Complete 2026-04-24** ([`phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`](phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md)). | ADM-13, ADM-14 |
-| 77 | Customer PM tab — VERIFY + theme + copy export | **Complete 2026-04-24** ([`phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`](phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md)). | ADM-15, ADM-16 |
-| 78 | Billing portal on `Accrue.Billing` + telemetry truth | **Complete 2026-04-24** ([`phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`](phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md)). | BIL-04, BIL-05 |
+| 76 | Customer PM tab — inventory + Copy burn-down | **Complete 2026-04-24** ([`milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`](milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md)). | ADM-13, ADM-14 |
+| 77 | Customer PM tab — VERIFY + theme + copy export | **Complete 2026-04-24** ([`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`](milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md)). | ADM-15, ADM-16 |
+| 78 | Billing portal on `Accrue.Billing` + telemetry truth | **Complete 2026-04-24** ([`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`](milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md)). | BIL-04, BIL-05 |
 
 **Success criteria (milestone):**
 

@@ -1,36 +1,99 @@
 # Architecture Research
 
-**Domain:** ORG-04 integration with existing Accrue architecture
-**Researched:** 2026-04-21
+**Domain:** Accrue v1.25 — **`Accrue.Billing`** checkout composition + planning artifact flow  
+**Researched:** 2026-04-24  
 **Confidence:** HIGH
 
-## Existing architecture (do not redesign)
+## Standard Architecture
 
-| Layer | Responsibility |
-|-------|----------------|
-| **Host app** | Chooses billable schema(s) (`User`, `Organization`, …), implements org resolution from session, wires `MyApp.Billing` facade. |
-| **`Accrue.Billable`** | Host schema concern — `owner_type` / `owner_id` on `Accrue.Billing.Customer` (and related) stays the polymorphic join. |
-| **`Accrue.Auth` behaviour** | Admin + actor id for audit; Sigra adapter is one implementation; phx.gen.auth / Pow adapters are **host-owned** modules implementing the same contract. |
-| **`accrue_admin`** | Queries scoped by configured auth adapter + host conventions; org isolation is **host + adapter** obligation. |
+### System Overview
 
-## Integration flow (conceptual)
+```
+Host `MyApp.Billing` (generated facade)
+        │
+        ▼
+Accrue.Billing  ──span[:accrue,:billing,:checkout_session,:create]──►  Accrue.Checkout.Session.create/1
+        │                                                      │
+        │                                                      ▼
+        │                                            Processor (Stripe | Fake)
+        ▼
+Accrue.Billing.Customer  (persisted row + processor customer id)
+```
 
-1. Request arrives (LiveView / controller).
-2. Host identifies **actor** (user) and optional **active organization** (membership, role).
-3. Host resolves **billable** Ecto struct the subscription is attached to (user-as-customer vs org-as-customer).
-4. Host calls `MyApp.Billing.*` (public facade) with that struct; Accrue persists Stripe customer linkage on `Accrue.Billing.Customer` for that billable.
-5. Admin and webhooks use same ownership columns — recipes must show where accidental cross-tenant reads creep in (preload scope, default_scopes).
+### Component Responsibilities
 
-## Suggested build order (for roadmap phases)
+| Component | Responsibility | Typical Implementation |
+|-----------|----------------|------------------------|
+| **`Accrue.Billing`** | Public billing context API; span + metadata; NimbleOptions on attrs | **`def create_checkout_session(%Customer{}, attrs)`** merges **`customer:`** into map passed to **`Session.create/1`**. |
+| **`Accrue.Checkout.Session`** | Stripe param build + struct projection + **`Inspect`** masking | Unchanged core; **`Billing`** is thin wrapper. |
+| **`Accrue.Processor`** | **`checkout_session_create/2`** | Already implemented Stripe + Fake. |
 
-1. **Doc spine + phx.gen.auth** — lowest ambiguity, largest adopter overlap with Phoenix defaults.
-2. **Pow + custom org** — higher variance; document boundaries and “bring your own” scope helpers.
-3. **Proof/matrix** — encode archetype so CI/docs drift is caught.
+## Recommended Project Structure
 
-## New vs modified components
+No new top-level apps — work confined to:
 
-| New / modified | What |
-|----------------|------|
-| **Guides + host README cross-links** | Primary delivery vehicle. |
-| **Optional** verifier / matrix scripts | If new anchors are promised merge-blocking. |
-| **No** new Accrue core tables for ORG-04 | Unless a gap is discovered during implementation — treat as scope change, not default. |
+```
+accrue/lib/accrue/billing.ex          # new API + schemas + span
+accrue/test/accrue/billing/           # new *_test.exs beside portal tests
+accrue/test/accrue/telemetry/billing_span_coverage_test.exs
+accrue/guides/telemetry.md
+examples/accrue_host/                 # VERIFY / README only if INT-12 demands
+.planning/research/v1.17-FRICTION-INVENTORY.md
+```
+
+### Structure Rationale
+
+- **`Billing`** remains the **only** supported public “context” for hosts per installer / First Hour story.  
+- **`Checkout`** namespace stays for session types and low-level create — avoids renaming shipped modules.
+
+## Architectural Patterns
+
+### Pattern 1: Facade + delegate (matches **BIL-04**)
+
+**What:** **`Accrue.Billing`** validates attrs, wraps **`span_billing`**, calls **`Accrue.BillingPortal.Session`** / **`Accrue.Checkout.Session`**.  
+**When to use:** Any new Stripe surface that hosts should reach through **`MyApp.Billing`**.  
+**Trade-offs:** Thin file growth vs. discoverability — acceptable; action modules not required until **`billing.ex`** becomes unwieldy (existing pattern mixes **`defdelegate`** to action modules + inline portal).
+
+### Pattern 2: Metadata sanitization
+
+**What:** Span metadata uses **`billing_metadata/4`** — never pass raw **`attrs`** maps containing URLs or secrets.  
+**When to use:** Always for **BIL-06**.  
+**Trade-offs:** Less debug detail in traces — use **`operation_id`** and **`customer_id`** instead.
+
+## Data Flow
+
+### Checkout create (hosted mode)
+
+```
+Host calls Billing.create_checkout_session(customer, attrs)
+    → NimbleOptions.validate!(attrs)
+    → span [:accrue,:billing,:checkout_session,:create]
+    → Checkout.Session.create(%{customer: customer, …merged…})
+    → Processor.checkout_session_create/2
+    → {:ok, %Accrue.Checkout.Session{url: …}}  (url not logged in telemetry)
+```
+
+## Integration Points
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| **`Billing` ↔ `Checkout.Session`** | function call | Session already accepts **`%Customer{}`** in **`@create_schema`**. |
+| **`Billing` ↔ telemetry catalog`** | docs + test allowlist | **`guides/telemetry.md`** must list **`checkout_session.create`**. |
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Two public checkout APIs
+
+**What people do:** Export **`Accrue.Checkout`** and **`Accrue.Billing`** checkout without guidance.  
+**Why it's wrong:** Host tutorial inconsistency; harder VERIFY matrix.  
+**Do this instead:** Treat **`Accrue.Billing.create_checkout_session`** as the **recommended** path; keep **`Accrue.Checkout`** as low-level escape hatch (documented).
+
+## Sources
+
+- **`accrue/lib/accrue/checkout/session.ex`**  
+- **`accrue/lib/accrue/billing.ex`** (**billing portal** block)  
+- **`accrue/lib/accrue/checkout.ex`** (thin **`Accrue.Checkout`** module)
+
+---
+*Architecture research for: Accrue v1.25*  
+*Researched: 2026-04-24*
