@@ -26,17 +26,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.26** — First-hour billing facade spine
 
-**Phase:** Not started (awaiting `/gsd-discuss-phase 82` or `/gsd-plan-phase 82`)
+**Phase:** **82** — context gathered (`082-CONTEXT.md`); ready for `/gsd-plan-phase 82`
 
 **Plan:** —
 
 **Status:** Requirements + roadmap defined — ready to execute Phase **82**
 
-**Last activity:** 2026-04-24 — Milestone **v1.26** opened; **`.planning/REQUIREMENTS.md`** and active roadmap slice (Phases **82–83**).
+**Last activity:** 2026-04-24 — **`/gsd-discuss-phase 82`** (research-backed **`082-CONTEXT.md`** under **`.planning/milestones/v1.26-phases/082-first-hour-portal-spine/`**).
 
 ## Milestone Progress
 
-**v1.26** (active): Phases **82–83** — **INT-13**, **INV-04**; evidence TBD under **`.planning/phases/`** (or workspace convention).
+**v1.26** (active): Phases **82–83** — **INT-13**, **INV-04**; Phase **82** evidence path: **`.planning/milestones/v1.26-phases/082-first-hour-portal-spine/`** (canonical; aligns with **v1.25** phase trees).
 
 **v1.25** (shipped **2026-04-24**): Phases **79–81** — **INV-03**, **BIL-06**, **BIL-07**, **INT-12**; **`milestones/v1.25-phases/`**; archives **`milestones/v1.25-ROADMAP.md`**, **`v1.25-REQUIREMENTS.md`**; tag **`v1.25`**.
 
