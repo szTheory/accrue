@@ -720,12 +720,49 @@
 
 ---
 
+## Milestone: v1.19 — Release continuity + proof resilience
+
+**Shipped:** 2026-04-24  
+**Phases:** 3 | **Plans:** 5
+
+### What Was Built
+
+- Merge-blocking **`verify_adoption_proof_matrix.sh`** alignment with **`adoption-proof-matrix.md`** (Layer C script names, **ORG-05** / **ORG-06** taxonomy) plus contributor triage in **`scripts/ci/README.md`** (**PRF-01..02**).
+- **`RELEASING.md`** publish-ordering clarity and **`68-VERIFICATION.md`** URL table for **0.3.1** Hex, GitHub release tags, and changelog blobs (**REL-01..03**).
+- **`verify_package_docs`** / **`package_docs_verifier_test.exs`** continuity and **PROJECT** / **MILESTONES** / **STATE** Hex mirror pass (**DOC-01..02**, **HYG-01**).
+
+### What Worked
+
+- Sequencing **PRF** before **REL** prevented shipping while matrix ↔ verifier drift could still regress CI.
+- URL-first verification tables made **REL-03** evidence reviewable without local Stripe or app boot.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still cannot archive phases automatically; milestone close remained partially manual (**v1.18** precedent).
+
+### Patterns Established
+
+- Treat **matrix + bash verifier + ExUnit literal harness** as a single co-update surface for shift-left contributor docs.
+
+### Key Lessons
+
+1. When workspace **`@version`** runs ahead of Hex, planning hygiene (**HYG-01**) should follow immediately after publish evidence lands.
+2. Keep **`audit-open`** in the pre-close checklist; it stayed green for **v1.19**.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: short milestone spanning proof, publish evidence, and planning mirrors.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.19 | short | 3 | Proof needles + README triage (**67-01**); **RELEASING** + **68-VERIFICATION** Hex/tag evidence (**68-01..02**); doc verifier + planning mirrors (**69-01..02**). |
 | v1.18 | short | 1 | Verification ledger for deferred **62-UAT** baseline (**66-01**); STATE + friction script archive gate (**66-02**); PROOF-01 matrix/script/README alignment + requirements close (**66-03**). |
 | v1.17 | short | 4 | Friction inventory + north star + FRG-03 anchors (62); INT-10 README + host-integration slugs + integrator closure (63); BIL-03 empty-queue certification (64); ADM-12 empty-queue certification (65). |
 | v1.16 | short | 3 | Golden path + quickstart + CONTRIBUTING coherence (59); matrix/walkthrough + CI README INT map (60); README VERIFY pin + Hex/`main` SSOT in planning + CONTRIBUTING (61). |
@@ -748,6 +785,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.19 | **`verify_adoption_proof_matrix.sh`** needles + **`package_docs_verifier_test.exs`**; **`68-VERIFICATION.md`** external URL checks | PRF + REL + DOC + HYG (8/8) archived | **`scripts/ci/README.md`** triage for matrix/script/test co-update; **0.3.1** Hex + tag + changelog-at-tag evidence table. |
 | v1.18 | **`v1_17_friction_research_contract_test.exs`**; bash **`verify_v1_17_friction_research_contract.sh`**; **`verify_adoption_proof_matrix.sh`** + **`organization_billing_org09_matrix_test.exs`** | UAT-01..UAT-05 + PROOF-01 (6/6) archived | **`66-VERIFICATION.md`** ledger; **`62-UAT.md`** banner errata; friction SSOT + archive presence gates in shift-left CI. |
 | v1.16 | **`package_docs_verifier_test`** extensions; bash **`verify_package_docs`**, **`verify_verify01_readme_contract`**, **`verify_adoption_proof_matrix`** | INT-06..INT-09 (4/4) archived | Quickstart hub + capsule checks in **`verify_package_docs.sh`**; adoption matrix + walkthrough trust stub; root README VERIFY line pin; CI README INT rows; planning Hex mirror discipline. |
 | v1.14 | ExUnit on invoice LiveViews; host VERIFY-01 **`core-admin-invoices-*`** + axe; Fake **`payment_method_list_test.exs`** | ADM-07..ADM-11 + BIL-01..BIL-02 (7/7) archived | `core-admin-parity.md`, `Copy.Invoice`, `verify_core_admin_invoice_verify_ids.sh`, billing `list` span + telemetry row. |

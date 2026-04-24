@@ -1,16 +1,35 @@
 # Milestones
 
-## v1.19 Release continuity + proof resilience (Planning opened: 2026-04-23)
+## v1.19 Release continuity + proof resilience (Shipped: 2026-04-24)
+
+**Planning opened:** 2026-04-23
+
+**Phases completed:** **3** phases (**67–69**), **5** plans (**67-01**, **68-01**..**68-02**, **69-01**..**69-02**).
 
 **Theme:** Proof-contract hardening (**PRF-01..02**, closes **v1.17-P1-001** drift class) → linked **Hex** publish **0.3.1** (**REL-01..03**) → **First Hour** / **`verify_package_docs`** + **`.planning/`** Hex mirrors (**DOC-01..02**, **HYG-01**). **No** **PROC-08** / **FIN-03**.
 
-**Phases:** **67–69** (see [`.planning/ROADMAP.md`](ROADMAP.md)).
+**Milestone audit:** No standalone **`v1.19-MILESTONE-AUDIT.md`**; closure used **`REQUIREMENTS.md`** (8/8 **Complete**), per-phase **`*-VERIFICATION.md`**, **`audit-open`** (all clear), and merge-blocking **`verify_package_docs`** / adoption-proof CI.
+
+**Key accomplishments:**
+
+- **67-01:** Merge-blocking **`verify_adoption_proof_matrix.sh`** needles for Layer C + **ORG-05** / **ORG-06**; contributor triage in **`scripts/ci/README.md`**; matrix co-commit with script (**PRF-01..02**).
+- **68-01:** **`RELEASING.md`** publish ordering (**`publish-accrue-admin`** **`needs:`**), manual-merge default path, changelog ship-boundary section (**REL-01..REL-02** docs).
+- **68-02:** **`68-VERIFICATION.md`** URL-first **0.3.1** Hex + GitHub tag + changelog-at-tag evidence; **REL-01..REL-03** traceability closed.
+- **69-01:** **`69-VERIFICATION.md`** DOC integrator proof; **`verify_package_docs.sh`** + **`package_docs_verifier_test.exs`** green on **0.3.1** pins (**DOC-01..02**).
+- **69-02:** **PROJECT** / **MILESTONES** / **STATE** **0.3.1** mirror pass; **HYG-01** closed.
 
 **Depends on:** **v1.18** shipped; **v1.18** Phase **66** tree under [`.planning/milestones/v1.18-phases/66-onboarding-confidence/`](milestones/v1.18-phases/66-onboarding-confidence/).
 
-**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md)
+**Phase execution trees (v1.19):** [`.planning/phases/67-proof-contracts/`](phases/67-proof-contracts/), [`68-release-train/`](phases/68-release-train/), [`69-doc-planning-mirrors/`](phases/69-doc-planning-mirrors/)
 
-**Status:** Shipped — Phases **67–69** complete **2026-04-24** (**PRF-01..02**, **REL-01..03**, Hex **0.3.1**, **DOC-01..02**, **HYG-01**).
+**Archives:**
+
+- Roadmap: [`milestones/v1.19-ROADMAP.md`](milestones/v1.19-ROADMAP.md)
+- Requirements: [`milestones/v1.19-REQUIREMENTS.md`](milestones/v1.19-REQUIREMENTS.md)
+
+**Git tag:** `v1.19`
+
+**Next after ship:** **`/gsd-new-milestone`** when **v1.20+** priorities are set.
 
 ---
 

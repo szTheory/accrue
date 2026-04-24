@@ -12,7 +12,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**v1.19 — Release continuity + proof resilience** (opened **2026-04-23**). **Goal:** Ship **`accrue` / `accrue_admin` 0.3.1** to Hex with docs + planning SSOT aligned, and harden merge-blocking adoption-proof contracts so **`adoption-proof-matrix.md`** cannot drift from **`verify_adoption_proof_matrix.sh`** without CI failure (**addresses `v1.17-P1-001`**). **Roadmap:** **`.planning/ROADMAP.md`**. **Requirements:** **`.planning/REQUIREMENTS.md`**. **Phases 67–69:** proof contracts → release train → planning/doc mirrors. **No** **PROC-08** / **FIN-03**.
+**v1.19 — Release continuity + proof resilience** is **archived** (**2026-04-24**). Phases **67–69**; **PRF-01..PRF-02**, **REL-01..REL-03**, **DOC-01..DOC-02**, **HYG-01** validated. Phase trees: **`.planning/phases/67-proof-contracts/`**, **`68-release-train/`**, **`69-doc-planning-mirrors/`**. Archives: **`.planning/milestones/v1.19-ROADMAP.md`**, **`v1.19-REQUIREMENTS.md`**. Planning git tag **`v1.19`**.
+
+**Next:** **`/gsd-new-milestone`** — fresh **`.planning/REQUIREMENTS.md`** and roadmap for **v1.20+** when priorities are set.
 
 **Triage doctrine (read-only context, v1.17–v1.18):** [North star + stop rules](research/v1.17-north-star.md) · [Friction inventory](research/v1.17-FRICTION-INVENTORY.md)
 
@@ -48,9 +50,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each as of **v1.19** Phase **68** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Last shipped planning milestone:** **v1.18** — Phase **66** (**2026-04-23**): **UAT-01..UAT-05** + **PROOF-01** — **`milestones/v1.18-phases/66-onboarding-confidence/66-VERIFICATION.md`**, **`verify_v1_17_friction_research_contract.sh`**, adoption matrix / walkthrough / verifier alignment. Archives: **`.planning/milestones/v1.18-*`**. Prior: **v1.17** — Phases **62–65**; **`.planning/milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.19** — Phases **67–69** (**2026-04-24**): proof contracts (**PRF-01..02**), **0.3.1** Hex publish (**REL-01..03**), doc + planning mirrors (**DOC-01..02**, **HYG-01**). Archives: **`.planning/milestones/v1.19-*`**. Prior: **v1.18** — Phase **66** (**2026-04-23**); **`milestones/v1.18-phases/66-onboarding-confidence/`**; tag **`v1.18`**. **v1.17** — **`milestones/v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
-**Now:** **v1.19** — Phases **67–69** **complete** **2026-04-24** (**PRF-01..02**, **REL-01..03**, Hex **0.3.1**, **DOC-01..02**, **HYG-01**). **v1.17** phase directories under **`.planning/milestones/v1.17-phases/`**; **v1.18** Phase **66** tree under **`.planning/milestones/v1.18-phases/`**.
+**Execution history:** **v1.19** phase directories under **`.planning/phases/`** (**67–69**); **v1.18** Phase **66** under **`.planning/milestones/v1.18-phases/`**; **v1.17** under **`.planning/milestones/v1.17-phases/`**.
 
 ## Shipped: v1.7 Adoption DX + operator admin depth (2026-04-21)
 
@@ -474,7 +476,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.16 closes integrator/proof continuity deferred from v1.14–v1.15 | Trust SemVer messaging and v1.13 INT baseline can drift; explicit milestone re-binds golden path, matrix, root VERIFY hops, and package-doc SSOT without billing scope creep | ✓ Good — **shipped** Phases **59–61** (**2026-04-23**); archived + planning tag **`v1.16`** |
 | v1.17 uses friction triage before broad doc sweeps | After v1.16 continuity, ranked **FRG-01** evidence + **FRG-03** backlog prevents silent scope expansion; **BIL-03**/**ADM-12** allow signed empty-queue certification | ✓ Good — **shipped** Phases **62–65** (**2026-04-23**); archived + planning tag **`v1.17`** |
 | v1.18 closes deferred **62-UAT** confidence with a verification ledger + contracts | Proof-first slice: **REQUIREMENTS** normative over historical **`62-UAT`** body; thin bash/ExUnit for binary invariants; **PROOF-01** keeps matrix ↔ script ↔ README honest | ✓ Good — **shipped** Phase **66** (**2026-04-23**); archived + planning tag **`v1.18`** |
-| v1.19 sequences proof-contract hardening before **0.3.1** Hex publish | Workspace **`@version`** already **0.3.1** while public Hex lags **0.3.0**; **PRF-** work closes **v1.17-P1-001** drift class before release train; **HYG** mirrors follow ship | ✓ Planned — **opened** Phases **67–69** (**2026-04-23**) |
+| v1.19 sequences proof-contract hardening before **0.3.1** Hex publish | Workspace **`@version`** already **0.3.1** while public Hex lags **0.3.0**; **PRF-** work closes **v1.17-P1-001** drift class before release train; **HYG** mirrors follow ship | ✓ Good — **shipped** Phases **67–69** (**2026-04-24**); archived + planning tag **`v1.19`** |
 
 ## Current Milestone Notes
 
@@ -519,6 +521,9 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-23:** **`/gsd-complete-milestone`** (**v1.17**) — archives **`milestones/v1.17-*`**, root **`REQUIREMENTS.md`** removed for next milestone, **`audit-open`** Phase **62** UAT gap acknowledged in **`STATE.md`**, planning tag **`v1.17`**.
 - **2026-04-23:** **`/gsd-new-milestone` (trajectory plan)** — **v1.18** opened (**Onboarding confidence**, proof-first); **`REQUIREMENTS.md`** (**UAT-01..UAT-05**, **PROOF-01**); roadmap Phase **66**; **v1.17** phase trees archived under **`milestones/v1.17-phases/`**; **`.planning/phases/`** cleared for new work.
 - **2026-04-23:** **`/gsd-complete-milestone` v1.18** — **`66-01..03-SUMMARY.md`** backfilled; archives **`milestones/v1.18-*`**; **`git rm` `.planning/REQUIREMENTS.md`** for fresh next milestone; planning tag **`v1.18`**.
+- **2026-04-24:** **`/gsd-discuss-phase 69`** — Subagent-backed **D-01..D-04** locked in **`69-CONTEXT.md`** (HYG vs DOC boundary, planning file SSOT roles, bash-first verifier coupling, pin-first capsules).
+- **2026-04-24:** **`/gsd-execute-phase 69`** — **`69-VERIFICATION.md`** (**DOC** + **HYG**); **`REQUIREMENTS.md`** **DOC-01..02** / **HYG-01** **Complete**; **`PROJECT`**, **`MILESTONES`**, **`STATE`** Hex **0.3.1** mirror pass.
+- **2026-04-24:** **`/gsd-complete-milestone` v1.19** — archives **`milestones/v1.19-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for fresh next milestone, planning tag **`v1.19`** (**`gsd-sdk query milestone.complete`** still blocked on phases-archive; manual archives).
 
 ## Evolution
 
@@ -538,4 +543,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **v1.19** Phase **69** complete (**DOC-01..02**, **HYG-01**); milestone proof + release + planning/doc mirrors closed.*
+*Last updated: 2026-04-24 — **v1.19** milestone archived (**PRF** / **REL** / **DOC** / **HYG**); root **`REQUIREMENTS.md`** removed pending **`/gsd-new-milestone`**.*
