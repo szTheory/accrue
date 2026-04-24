@@ -25,7 +25,7 @@
 
 ## Billing / Stripe depth (BIL)
 
-- [ ] **BIL-06**: Ship **`Accrue.Billing.create_checkout_session/2`** (+ **`!`**) taking **`%Accrue.Billing.Customer{}`** and **keyword/map attrs** aligned with **`Accrue.Checkout.Session`** **except** **`:customer`** (supplied as the first argument). Validate attrs with **`NimbleOptions`**. Delegate to **`Accrue.Checkout.Session.create/1`**. Wrap in **`span_billing(:checkout_session, :create, …)`** with **PII-safe** metadata (no checkout **URL**, **`client_secret`**, or raw attrs blob in telemetry). Include **Fake-backed** **ExUnit** proving happy path + at least one failure class appropriate to the facade (validation or processor error).
+- [x] **BIL-06**: Ship **`Accrue.Billing.create_checkout_session/2`** (+ **`!`**) taking **`%Accrue.Billing.Customer{}`** and **keyword/map attrs** aligned with **`Accrue.Checkout.Session`** **except** **`:customer`** (supplied as the first argument). Validate attrs with **`NimbleOptions`**. Delegate to **`Accrue.Checkout.Session.create/1`**. Wrap in **`span_billing(:checkout_session, :create, …)`** with **PII-safe** metadata (no checkout **URL**, **`client_secret`**, or raw attrs blob in telemetry). Include **Fake-backed** **ExUnit** proving happy path + at least one failure class appropriate to the facade (validation or processor error).
 
 - [ ] **BIL-07**: Update **`accrue/guides/telemetry.md`** (and **`accrue/guides/operator-runbooks.md`** cross-links when revenue- or support-adjacent) for **`[:accrue, :billing, :checkout_session, :create]`**; keep **`accrue/test/accrue/telemetry/billing_span_coverage_test.exs`** consistent; extend **`accrue/CHANGELOG.md`** for **`accrue`** as applicable.
 
@@ -46,7 +46,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INV-03 | Phase 79 | Complete |
-| BIL-06 | Phase 80 | Pending |
+| BIL-06 | Phase 80 | Complete |
 | BIL-07 | Phase 81 | Pending |
 | INT-12 | Phase 81 | Pending |
 
@@ -58,4 +58,4 @@
 
 ---
 *Requirements defined: 2026-04-24*  
-*Last updated: 2026-04-24 after `/gsd-new-milestone` v1.25 + research*
+*Last updated: 2026-04-24 after Phase 80 (`080-VERIFICATION.md`) — BIL-06 complete.*

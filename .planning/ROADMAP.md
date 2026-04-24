@@ -40,7 +40,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|----------------|
 | 79 | Friction inventory maintainer pass | **Complete 2026-04-24** ([`phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md`](phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md)). **INV-03** path **(b)** — **`### v1.25 INV-03 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** + verifier transcripts in **`079-VERIFICATION.md`**. | INV-03 |
-| 80 | Checkout session on `Accrue.Billing` | Ship **`create_checkout_session/2`** (+ **`!`**) delegating to **`Accrue.Checkout.Session`**; **Fake** ExUnit; **PII-safe** span metadata (no **URL** / **client_secret** in attrs). | BIL-06 |
+| 80 | Checkout session on `Accrue.Billing` | **Complete 2026-04-24** ([`phases/080-checkout-session-on-accrue-billing/080-VERIFICATION.md`](phases/080-checkout-session-on-accrue-billing/080-VERIFICATION.md)). **`create_checkout_session/2`** (+ **`!`**) + **Fake** ExUnit + **PII-safe** span metadata. | BIL-06 |
 | 81 | Telemetry truth + integrator contracts | **`guides/telemetry.md`**, **`billing_span_coverage_test.exs`**, **`CHANGELOG`**, **First Hour** / host README / adoption matrix / **VERIFY-01** co-update when checkout becomes a documented entry point. | BIL-07, INT-12 |
 
 **Success criteria (milestone):**
