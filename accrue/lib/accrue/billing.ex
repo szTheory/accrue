@@ -22,6 +22,7 @@ defmodule Accrue.Billing do
   """
 
   alias Accrue.Billing.Customer
+  alias Accrue.BillingPortal.Session
 
   alias Accrue.Billing.{
     ChargeActions,
@@ -371,6 +372,71 @@ defmodule Accrue.Billing do
     span_billing(:payment_method, :list, customer, opts, fn ->
       PaymentMethodActions.list_payment_methods!(customer, opts)
     end)
+  end
+
+  @billing_portal_session_attrs_schema [
+    return_url: [type: {:or, [:string, nil]}, default: nil],
+    configuration: [type: {:or, [:string, nil]}, default: nil],
+    flow_data: [type: {:or, [{:map, :any, :any}, nil]}, default: nil],
+    locale: [type: {:or, [:string, nil]}, default: nil],
+    on_behalf_of: [type: {:or, [:string, nil]}, default: nil],
+    operation_id: [type: {:or, [:string, nil]}, default: nil]
+  ]
+
+  @doc """
+  Creates a Customer Billing Portal session for `customer` through the
+  configured processor.
+
+  `attrs` is a keyword list or map of options aligned with
+  `Accrue.BillingPortal.Session.create/1`, **except** `:customer` (supplied as
+  the first argument): `:return_url`, `:configuration`, `:flow_data`,
+  `:locale`, `:on_behalf_of`, `:operation_id`.
+
+  Invalid keys or types raise `NimbleOptions.ValidationError`.
+
+  The portal session **URL** is a short-lived bearer credential. Do **not**
+  log raw session structs, processor payloads, or URLs in production telemetry
+  or support tickets. For `:configuration`, see
+  `guides/portal_configuration_checklist.md`.
+
+  Emits `[:accrue, :billing, :billing_portal, :create]` (OpenTelemetry name
+  `accrue.billing.billing_portal.create`).
+  """
+  @spec create_billing_portal_session(Customer.t(), keyword() | map()) ::
+          {:ok, Session.t()} | {:error, term()}
+  def create_billing_portal_session(%Customer{} = customer, attrs)
+      when is_list(attrs) or is_map(attrs) do
+    opts_list = if is_list(attrs), do: attrs, else: Map.to_list(attrs)
+    validated = NimbleOptions.validate!(opts_list, @billing_portal_session_attrs_schema)
+
+    span_billing(:billing_portal, :create, customer, validated, fn ->
+      Session.create(Map.new([customer: customer] ++ validated))
+    end)
+  end
+
+  @doc """
+  Bang variant of `create_billing_portal_session/2` — returns
+  `%Accrue.BillingPortal.Session{}` or raises.
+
+  Raises `NimbleOptions.ValidationError` when `attrs` fail validation.
+
+  On `{:error, reason}` from the underlying `Session.create/1`, re-raises when
+  `reason` implements `Exception`; otherwise raises the same message shape as
+  `Accrue.BillingPortal.Session.create!/1`.
+  """
+  @spec create_billing_portal_session!(Customer.t(), keyword() | map()) :: Session.t()
+  def create_billing_portal_session!(%Customer{} = customer, attrs)
+      when is_list(attrs) or is_map(attrs) do
+    case create_billing_portal_session(customer, attrs) do
+      {:ok, session} ->
+        session
+
+      {:error, err} when is_exception(err) ->
+        raise err
+
+      {:error, other} ->
+        raise "Accrue.BillingPortal.Session.create/1 failed: #{inspect(other)}"
+    end
   end
 
   # ── Refund surface (Plan 06) ──────────────────────────────────────
