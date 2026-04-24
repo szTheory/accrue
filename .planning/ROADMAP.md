@@ -46,6 +46,39 @@
 2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** contracts stay **green** on **`main`** after changes.
 3. No **PROC-08** / **FIN-03** scope creep.
 
+### Phase 76: Customer PM tab — inventory + Copy burn-down
+
+**Goal:** Scope and ship **ADM-13**, **ADM-14** on **customer `payment_methods`** (**`AccrueAdmin.Copy`**, **`ax-*`**).
+
+**Requirements:** ADM-13, ADM-14
+
+**Success criteria:**
+
+1. **`76-VERIFICATION.md`** (or successor under **`.planning/phases/`**) records closure for **ADM-13** and **ADM-14** per **`.planning/REQUIREMENTS.md`**.
+2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** stay green after materially touched admin paths.
+
+### Phase 77: Customer PM tab — VERIFY + theme + copy export
+
+**Goal:** Ship **ADM-15**, **ADM-16** — **VERIFY-01** / **axe**, **`theme-exceptions.md`**, **`export_copy_strings`** alignment.
+
+**Requirements:** ADM-15, ADM-16
+
+**Success criteria:**
+
+1. **`77-VERIFICATION.md`** (or successor under **`.planning/phases/`**) records closure for **ADM-15** and **ADM-16** per **`.planning/REQUIREMENTS.md`**.
+2. Merge-blocking verifier contracts stay green after changes.
+
+### Phase 78: Billing portal on `Accrue.Billing` + telemetry truth
+
+**Goal:** **BIL-04**, **BIL-05** — **`Accrue.Billing`** billing-portal facade + **Fake** tests + **`guides/telemetry.md`** / runbook / **CHANGELOG** (+ optional **First Hour** pointer).
+
+**Requirements:** BIL-04, BIL-05
+
+**Success criteria:**
+
+1. **`78-VERIFICATION.md`** (or successor under **`.planning/phases/`**) records closure for **BIL-04** and **BIL-05** per **`.planning/REQUIREMENTS.md`**.
+2. **Fake** tests and telemetry documentation stay aligned with **`billing_span_coverage_test.exs`** and milestone gates.
+
 <details>
 <summary>✅ v1.23 Post-publish contract alignment (Phase 75) — SHIPPED 2026-04-24</summary>
 
