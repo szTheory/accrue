@@ -553,7 +553,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-24:** **`/gsd-execute-phase 69`** — **`69-VERIFICATION.md`** (**DOC** + **HYG**); **`REQUIREMENTS.md`** **DOC-01..02** / **HYG-01** **Complete**; **`PROJECT`**, **`MILESTONES`**, **`STATE`** Hex **0.3.1** mirror pass.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.19** — archives **`milestones/v1.19-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for fresh next milestone, planning tag **`v1.19`** (**`gsd-sdk query milestone.complete`** still blocked on phases-archive; manual archives).
 - **2026-04-24:** **`v1.20` bootstrap** — **`/gsd-new-milestone` plan implementation** (**A** + **B**): **`v1.17-P1-001`** closed in friction inventory; **`production-readiness.md`** + cross-links; **`REQUIREMENTS.md`** (**INV-01..02**, **PRD-01..02**); Phases **70–71** verification; **v1.19** execution trees moved to **`.planning/milestones/v1.19-phases/`**.
-- **2026-04-23:** **`/gsd-new-milestone`** — **v1.21** opened (**Maturity posture and diminishing returns**); **`REQUIREMENTS.md`** (**MAT-01..MAT-02**, **INT-11**); roadmap Phases **72–73**; **`maturity-and-maintenance.md`** + **PROJECT** maintenance bar + **INT-11** contributor checklist (**v1.17-P2-001** closure).
+- **2026-04-23:** **`/gsd-new-milestone`** — **v1.21** opened and Phases **72–73** verified (**Maturity posture and diminishing returns**); **`REQUIREMENTS.md`** (**MAT-01..MAT-02**, **INT-11**); **`maturity-and-maintenance.md`** + **PROJECT** maintenance bar + **`scripts/ci/README.md`** capsule checklist (**v1.17-P2-001** closure); commit **`docs: open v1.21 maturity posture (MAT-01..02, INT-11)`**.
 
 ## Evolution
 
