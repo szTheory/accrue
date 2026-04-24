@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.26 First-hour billing facade spine (Planning opened: 2026-04-24)
+
+**Status:** **Active** — execution Phases **82–83**.
+
+**Theme:** **INT-13** — **`Accrue.Billing.create_billing_portal_session/2`** on **First Hour** + **`examples/accrue_host` README** + **adoption proof matrix** + merge-blocking verifiers (same-PR discipline). **INV-04** — post-touch **`v1.17-FRICTION-INVENTORY.md`** maintainer certification or new sourced rows. **No** **PROC-08** / **FIN-03**; **no** Hex-release theme unless amended.
+
+**Depends on:** **v1.25** shipped.
+
+**Research:** Skipped — brownfield integrator parity; prior **`.planning/research/SUMMARY.md`** context.
+
+**Requirements / roadmap:** **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`**.
+
+---
+
 ## v1.25 Evidence-bound triad (friction + integrator + billing depth) (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24

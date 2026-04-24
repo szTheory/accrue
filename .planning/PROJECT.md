@@ -12,7 +12,16 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**No active planning milestone** — root **`.planning/REQUIREMENTS.md`** was removed at **v1.25** close (**2026-04-24**). Open the next cycle with **`/gsd-new-milestone`** (fresh requirements + roadmap).
+### v1.26 — First-hour billing facade spine (**active**)
+
+**Goal:** Put **`Accrue.Billing.create_billing_portal_session/2`** on the same **First Hour + host README + adoption proof matrix + verifier** plane as **`create_checkout_session`**, then run a **dated friction-inventory maintainer pass** after that doc touch. **No** **PROC-08** / **FIN-03**.
+
+**Target features:**
+
+- **INT-13** — Guide capsule, host README parity (**D-02** / **INT-11**), matrix row + **`verify_adoption_proof_matrix`** (and coupled doc verifiers in the **same PR** when required).
+- **INV-04** — **`v1.17-FRICTION-INVENTORY.md`** certification or new sourced rows with falsifiable verifier pointers.
+
+**Planning artifacts:** root **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`** (Phases **82–83**).
 
 ### v1.25 — Evidence-bound triad (friction + integrator + billing depth) (**archived 2026-04-24**)
 
@@ -87,7 +96,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** **None** — **`/gsd-new-milestone`** defines the next **`REQUIREMENTS.md`** / active **`ROADMAP`** slice. Workspace **`@version`** remains **0.3.1** until a linked **Hex** release bumps it.
+**Active planning milestone:** **v1.26** — **First-hour billing facade spine**; requirements **`.planning/REQUIREMENTS.md`**; execution starts at **Phase 82**. Workspace **`@version`** remains **0.3.1** until a linked **Hex** release bumps it.
 
 **Last shipped planning milestone:** **v1.25** — Phases **79–81** (**2026-04-24**): **INV-03**, **BIL-06**, **BIL-07**, **INT-12**; **`milestones/v1.25-*`**; execution trees **`milestones/v1.25-phases/`**; planning tag **`v1.25`**. **Earlier:** **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
@@ -619,6 +628,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 - **2026-04-24:** **`/gsd-discuss-phase 69`** — Subagent-backed **D-01..D-04** locked in **`69-CONTEXT.md`** (HYG vs DOC boundary, planning file SSOT roles, bash-first verifier coupling, pin-first capsules).
 - **2026-04-24:** **`/gsd-execute-phase 69`** — **`69-VERIFICATION.md`** (**DOC** + **HYG**); **`REQUIREMENTS.md`** **DOC-01..02** / **HYG-01** **Complete**; **`PROJECT`**, **`MILESTONES`**, **`STATE`** Hex **0.3.1** mirror pass.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.19** — archives **`milestones/v1.19-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for fresh next milestone, planning tag **`v1.19`** (**`gsd-sdk query milestone.complete`** still blocked on phases-archive; manual archives).
+- **2026-04-24:** **`/gsd-new-milestone` v1.26** — **First-hour billing facade spine**; **`REQUIREMENTS.md`** (**INT-13**, **INV-04**); roadmap Phases **82–83**; domain research **skipped** (integrator parity with v1.24–v1.25 patterns).
 - **2026-04-24:** **`v1.20` bootstrap** — **`/gsd-new-milestone` plan implementation** (**A** + **B**): **`v1.17-P1-001`** closed in friction inventory; **`production-readiness.md`** + cross-links; **`REQUIREMENTS.md`** (**INV-01..02**, **PRD-01..02**); Phases **70–71** verification; **v1.19** execution trees moved to **`.planning/milestones/v1.19-phases/`**.
 - **2026-04-23:** **`/gsd-new-milestone`** — **v1.21** opened and Phases **72–73** verified (**Maturity posture and diminishing returns**); **`REQUIREMENTS.md`** (**MAT-01..MAT-02**, **INT-11**); **`maturity-and-maintenance.md`** + **PROJECT** maintenance bar + **`scripts/ci/README.md`** capsule checklist (**v1.17-P2-001** closure); commit **`docs: open v1.21 maturity posture (MAT-01..02, INT-11)`**.
 
@@ -640,4 +650,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 — **`v1.25`** milestone **archived**; **`REQUIREMENTS.md`** removed for next **`/gsd-new-milestone`**; planning tag **`v1.25`**.*
+*Last updated: 2026-04-24 — **`/gsd-new-milestone` v1.26** opened (**INT-13**, **INV-04**); **`REQUIREMENTS.md`** recreated; Phases **82–83**.*

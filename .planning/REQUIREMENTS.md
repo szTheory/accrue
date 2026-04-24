@@ -1,0 +1,52 @@
+# Requirements: Accrue — Milestone v1.26
+
+**Defined:** 2026-04-24  
+**Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
+
+**Research:** Skipped for this milestone — scope is integrator doc + verifier parity with shipped **BIL-04** / **INT-12** patterns; see **`.planning/research/SUMMARY.md`** (v1.25 pass).
+
+## v1.26 — First-hour billing facade spine
+
+**Goal:** After **v1.25** put **`create_checkout_session`** on the First Hour + matrix spine, bring **`create_billing_portal_session`** to the **same class** of discoverability (guide capsule, host README, adoption proof matrix, merge-blocking needles). Then run a **dated maintainer pass** on the friction inventory. **No** **PROC-08** / **FIN-03**; **no** linked-Hex release requirement unless explicitly expanded later.
+
+---
+
+## Integrator path + proof (INT)
+
+- [ ] **INT-13**: **`Accrue.Billing.create_billing_portal_session/2`** (+ **`!`**) appears on the **First Hour** spine with the same **shape** as the **checkout** callout: host facade mention after **`mix accrue.install`**, **telemetry tuple** **`[:accrue, :billing, :billing_portal, :create]`** with anchor link into **`accrue/guides/telemetry.md`** (existing row). Update **`examples/accrue_host/README.md`** **§ proof-and-verification** capsule so **D-02** / **INT-11** parity holds when First Hour prose changes. Add an **adoption proof matrix** row (and any **Layer C** / **`verify_adoption_proof_matrix.sh`** needles) so **billing portal** is as **merge-blocking provable** as **checkout**. Touch **only** other verifiers (**`verify_package_docs`**, **`docs-contracts-shift-left`**, **`verify_v1_17_friction_research_contract.sh`**) when paths or row counts **require** it — **same PR** per **`scripts/ci/README.md`**.
+
+---
+
+## Friction inventory (INV)
+
+- [ ] **INV-04**: Run a **maintainer pass** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** after **INT-13** lands: either **(a)** add **new sourced** **P1** / **P2** rows (with **`sources`**, **`ci_contract`**, **`integrator_impact`**, stable **`v1.17-P*-***` ids) for friction uncovered on **`main`**, **or** **(b)** publish an explicit **dated maintainer certification** that no new sourced rows were warranted (with pointers to **`verify_package_docs`**, **`verify_adoption_proof_matrix.sh`**, **VERIFY-01** / **`host-integration`**, and **`docs-contracts-shift-left`** green on the reviewed SHA). If **(a)** changes row counts, keep **`verify_v1_17_friction_research_contract.sh`** green with same-PR update.
+
+---
+
+## Out of Scope
+
+| Item | Reason |
+|------|--------|
+| **PROC-08** (second processor) | Milestone non-goal per **`.planning/PROJECT.md`**. |
+| **FIN-03** (app-owned finance exports) | Milestone non-goal per **`.planning/PROJECT.md`**. |
+| **New `Accrue.Billing` facades** | v1.26 is **doc + proof spine** only — no new billing APIs. |
+| **Admin LiveView** surfaces | No operator UI scope unless VERIFY-01 paths change materially (not expected). |
+| **Linked Hex publish** | Not required for v1.26 unless explicitly added in a milestone amendment. |
+
+---
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| INT-13 | Phase 82 | Pending |
+| INV-04 | Phase 83 | Pending |
+
+**Coverage:**
+
+- v1.26 requirements: **2** total  
+- Mapped to phases: **2**  
+- Unmapped: **0**
+
+---
+*Requirements defined: 2026-04-24*

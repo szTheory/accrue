@@ -1,7 +1,26 @@
 # Roadmap: Accrue
 
+## Active milestone (v1.26)
+
+**Name:** First-hour billing facade spine  
+**Requirements:** **INT-13**, **INV-04** · **`.planning/REQUIREMENTS.md`**
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 82 | First-hour portal spine | **First Hour** + **`examples/accrue_host` README** capsule parity (**D-02** / **INT-11**) for **`Accrue.Billing.create_billing_portal_session/2`** and **`[:accrue, :billing, :billing_portal, :create]`**; **adoption proof matrix** row + **`verify_adoption_proof_matrix.sh`** (and any coupled **`verify_package_docs`** / **`docs-contracts-shift-left`** updates) in the **same PR** when paths or literals change. | INT-13 |
+| 83 | Friction inventory post-touch | **INV-04** maintainer pass on **`v1.17-FRICTION-INVENTORY.md`**: dated certification **or** new sourced **P1**/**P2** rows + verifier evidence; **`verify_v1_17_friction_research_contract.sh`** honest if row counts change. | INV-04 |
+
+**Success criteria (milestone):**
+
+1. **INT-13** complete with phase verification artifact(s) and merge-blocking CI/doc contracts green on **`main`**.
+2. **INV-04** complete with inventory subsection or new rows + falsifiable verifier pointers.
+3. No **PROC-08** / **FIN-03** scope creep.
+
+---
+
 ## Milestones
 
+- 🔄 **v1.26 First-hour billing facade spine** — Phases **82–83** (**INT-13**, **INV-04**); integrator doc + matrix + verifier parity for **`create_billing_portal_session`**; post-touch friction certification.
 - ✅ **v1.25 Evidence-bound triad (friction + integrator + billing depth)** — Phases **79–81** shipped **2026-04-24** (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**); friction inventory maintainer pass; **`Accrue.Billing.create_checkout_session`**, telemetry/catalog, integrator proof alignment. Execution trees [`milestones/v1.25-phases/`](milestones/v1.25-phases/). Archives: [`milestones/v1.25-ROADMAP.md`](milestones/v1.25-ROADMAP.md), [`milestones/v1.25-REQUIREMENTS.md`](milestones/v1.25-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.24 Billing portal facade + customer PM operator surfaces** — Phases **76–78** shipped **2026-04-24** (**ADM-13..ADM-16**, **BIL-04..BIL-05**); **`Accrue.Billing`** billing-portal session entry + customer **`payment_methods`** admin operator surfaces; execution trees [`milestones/v1.24-phases/`](milestones/v1.24-phases/). Archives: [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md), [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.23 Post-publish contract alignment** — Phase **75** shipped **2026-04-24** (**PPX-01..04**); **`v1.17-P1-002`** closed; phase tree [`milestones/v1.23-phases/75-post-publish-contract-alignment/`](milestones/v1.23-phases/75-post-publish-contract-alignment/). Archives: [`milestones/v1.23-ROADMAP.md`](milestones/v1.23-ROADMAP.md), [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
@@ -30,6 +49,26 @@
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
 ## Phases
+
+<details>
+<summary>🔄 v1.26 First-hour billing facade spine (Phases 82–83) — ACTIVE</summary>
+
+**Milestone goal:** **INT-13** — **`create_billing_portal_session`** on the **First Hour** + host README spine with telemetry anchor parity to checkout; adoption proof matrix + script needles; **INV-04** — dated friction inventory maintainer pass after doc touch. **No** **PROC-08** / **FIN-03**.
+
+**Requirements:** **`.planning/REQUIREMENTS.md`** (**INT-13**, **INV-04**)
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 82 | First-hour portal spine | Package + host integrator surfaces + matrix + verifiers reflect **billing portal** facade. | INT-13 |
+| 83 | Friction inventory post-touch | Inventory certification or sourced new rows post-**INT-13**. | INV-04 |
+
+**Success criteria (milestone):**
+
+1. **INT-13** / **INV-04** satisfied per **`.planning/REQUIREMENTS.md`** with phase verification evidence.
+2. Merge-blocking **`verify_package_docs`**, **`host-integration`**, and **VERIFY-01** (and **`docs-contracts-shift-left`** where touched) stay **green** after changes.
+3. No **PROC-08** / **FIN-03** scope creep.
+
+</details>
 
 <details>
 <summary>✅ v1.25 Evidence-bound triad (Phases 79–81) — SHIPPED 2026-04-24</summary>
