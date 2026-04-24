@@ -8,6 +8,10 @@ are intentionally coordinating a first public major.
 
 **Planning milestones vs Hex SemVer:** files under **`.planning/`** may use labels like **`v1.14`** or **`v1.15`** for internal milestone bookkeeping. Those **do not** replace the **`accrue` / `accrue_admin` `@version`** values in each **`mix.exs`** or the versions published on **Hex**. Consumers pin and upgrade against **Hex + changelogs**; maintainers use this runbook plus **`accrue/guides/upgrade.md`**.
 
+## Pre-1.0 closure (maintainer intent)
+
+For the **`0.3.x`** era, treat the **documented public façade + Fake-first CI gates** as the practical stability boundary. Routine releases are correctness, docs, proof contracts, or **linked Hex publishes** followed by the post-publish verification discipline in this file (and **`accrue/guides/maturity-and-maintenance.md`**). A coordinated **`1.0.0`** pair remains the **exceptional** appendix at the end of this document—use it only when you intentionally freeze SemVer semantics for adopters.
+
 **Last verified against** `release-please-config.json`, `.release-please-manifest.json`,
 and `.github/workflows/release-please.yml` on **2026-04-23** (UTC). Update this line when
 automation semantics change.

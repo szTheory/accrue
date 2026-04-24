@@ -12,6 +12,7 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 - [Testing](guides/testing.md) — Fake-first verification posture for host billing flows.
 - [First Hour](guides/first_hour.md) — one sitting from deps to a working billing slice.
 - [Production readiness](guides/production-readiness.md) — ordered checklist before promoting billing to production or live Stripe (webhooks, tenancy, observability, CI vs live lanes).
+- [Maturity and maintenance](guides/maturity-and-maintenance.md) — when Accrue is “done enough” for the pre-1.0 line, how friction enters planning, and how Hex publishes trigger contract passes.
 - [Troubleshooting](guides/troubleshooting.md) — when something already wired misbehaves.
 - [Webhooks](guides/webhooks.md) — signing, retries, and operational notes.
 - [Quickstart](guides/quickstart.md) — smallest possible skim.
@@ -61,7 +62,7 @@ The LiveView dashboard ships as the sibling Hex package `accrue_admin`; pin it t
 
 ## Stability
 
-Your supported integration surface—generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `AccrueAdmin.Router`, `Accrue.Auth`, `Accrue.ConfigError`—is spelled out in [Upgrade](guides/upgrade.md). Breaking changes on that surface go through **deprecation**, not silent reshuffles, including while public SemVer is still **`0.x`**. Internal schemas, workers, and demo helpers are not that contract. When you are ready to coordinate a **`1.0.0`** pair on Hex, maintainers follow repository root **`RELEASING.md`** (*Appendix: Same-day `1.0.0` bootstrap*).
+Your supported integration surface—generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `AccrueAdmin.Router`, `Accrue.Auth`, `Accrue.ConfigError`—is spelled out in [Upgrade](guides/upgrade.md). Breaking changes on that surface go through **deprecation**, not silent reshuffles, including while public SemVer is still **`0.x`**. Internal schemas, workers, and demo helpers are not that contract. **`0.x`** may still ship additive work and proof tightening, but it does **not** promise an ever-growing feature roadmap—see [Maturity and maintenance](guides/maturity-and-maintenance.md). When you are ready to coordinate a **`1.0.0`** pair on Hex, maintainers follow repository root **`RELEASING.md`** (*Appendix: Same-day `1.0.0` bootstrap*).
 
 Generated files are yours after install. Accrue only refreshes pristine stamped copies on installer reruns; it does not stomp files you have edited.
 

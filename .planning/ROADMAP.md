@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- ✅ **v1.27 Pre-1.0 closure narrative** — Phases **84–85** shipped **2026-04-24** (**CLS-01..03**, **INV-05**); integrator-facing **maintenance posture**; **`RELEASING.md`** / **`upgrade.md`** wrap-up semantics; **INV-05** friction inventory certification. **Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md). **Phase trees:** [`milestones/v1.27-phases/`](milestones/v1.27-phases/). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.26 First-hour billing facade spine** — Phases **82–83** shipped **2026-04-24** (**INT-13**, **INV-04**); integrator doc + matrix + verifier parity for **`create_billing_portal_session`**; post-touch friction certification. **Archives:** [`milestones/v1.26-ROADMAP.md`](milestones/v1.26-ROADMAP.md), [`milestones/v1.26-REQUIREMENTS.md`](milestones/v1.26-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.26-phases/`](milestones/v1.26-phases/).
 - ✅ **v1.25 Evidence-bound triad (friction + integrator + billing depth)** — Phases **79–81** shipped **2026-04-24** (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**); friction inventory maintainer pass; **`Accrue.Billing.create_checkout_session`**, telemetry/catalog, integrator proof alignment. Execution trees [`milestones/v1.25-phases/`](milestones/v1.25-phases/). Archives: [`milestones/v1.25-ROADMAP.md`](milestones/v1.25-ROADMAP.md), [`milestones/v1.25-REQUIREMENTS.md`](milestones/v1.25-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.24 Billing portal facade + customer PM operator surfaces** — Phases **76–78** shipped **2026-04-24** (**ADM-13..ADM-16**, **BIL-04..BIL-05**); **`Accrue.Billing`** billing-portal session entry + customer **`payment_methods`** admin operator surfaces; execution trees [`milestones/v1.24-phases/`](milestones/v1.24-phases/). Archives: [`milestones/v1.24-ROADMAP.md`](milestones/v1.24-ROADMAP.md), [`milestones/v1.24-REQUIREMENTS.md`](milestones/v1.24-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
@@ -31,6 +32,26 @@
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
 ## Phases
+
+<details>
+<summary>✅ v1.27 Pre-1.0 closure narrative (Phases 84–85) — SHIPPED 2026-04-24</summary>
+
+**Milestone goal:** **CLS-01..03** — closure narrative on **repository root `README.md`**, **`accrue/README.md`**, **`RELEASING.md`**, **`accrue/guides/upgrade.md`** (maintenance posture, **`0.x`** expectations, **PROC-08** / **FIN-03** parked). **INV-05** — post-touch maintainer pass on **`v1.17-FRICTION-INVENTORY.md`** with **`085-VERIFICATION.md`**. **No** **PROC-08** / **FIN-03** implementation.
+
+**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md). **Phase trees:** [`milestones/v1.27-phases/`](milestones/v1.27-phases/).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 84 | Pre-1.0 closure narrative | **Complete 2026-04-24** ([`084-VERIFICATION.md`](milestones/v1.27-phases/84-pre-1-0-closure-narrative/084-VERIFICATION.md)). **CLS-01..03** doc spine. | CLS-01, CLS-02, CLS-03 |
+| 85 | Friction inventory post-closure | **Complete 2026-04-24** ([`085-VERIFICATION.md`](milestones/v1.27-phases/85-friction-inventory-post-closure/085-VERIFICATION.md)). **INV-05** path **(b)**. | INV-05 |
+
+**Success criteria (milestone):**
+
+1. **CLS-01..03** and **INV-05** satisfied per **`.planning/REQUIREMENTS.md`** with **`084-VERIFICATION.md`** / **`085-VERIFICATION.md`** evidence.
+2. Merge-blocking **`verify_package_docs`**, **`docs-contracts-shift-left`**, **`host-integration`** (where touched) stay **green**.
+3. No **PROC-08** / **FIN-03** scope creep.
+
+</details>
 
 <details>
 <summary>✅ v1.26 First-hour billing facade spine (Phases 82–83) — SHIPPED 2026-04-24</summary>
@@ -842,6 +863,20 @@
 | 79. Friction inventory maintainer pass | v1.25 | 1/1 | Complete | 2026-04-24 |
 | 80. Checkout session on `Accrue.Billing` | v1.25 | 1/1 | Complete | 2026-04-24 |
 | 81. Telemetry truth + integrator contracts | v1.25 | 1/1 | Complete | 2026-04-24 |
+
+**v1.26 (complete — 2026-04-24)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 82. First-hour portal spine | v1.26 | inline | Complete | 2026-04-24 |
+| 83. Friction inventory post-touch | v1.26 | inline | Complete | 2026-04-24 |
+
+**v1.27 (complete — 2026-04-24)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 84. Pre-1.0 closure narrative | v1.27 | inline | Complete | 2026-04-24 |
+| 85. Friction inventory post-closure | v1.27 | inline | Complete | 2026-04-24 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

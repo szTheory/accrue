@@ -1,5 +1,30 @@
 # Milestones
 
+## v1.27 Pre-1.0 closure narrative (Shipped: 2026-04-24)
+
+**Planning opened:** 2026-04-24
+
+**Phases completed:** **2** phases (**84–85**), inline verification.
+
+**Theme:** **CLS-01..03** — integrator-facing **maintenance posture** + **`RELEASING.md`** / **`upgrade.md`** wrap-up semantics for the **`0.3.x`** line. **INV-05** — dated friction inventory maintainer pass **(b)** after **CLS** doc landings. **No** **PROC-08** / **FIN-03**; **no** Hex-release theme.
+
+**Depends on:** **v1.26** shipped.
+
+**Research:** Skipped — maintainer narrative + inventory certification (brownfield).
+
+**Phase execution trees:** **`.planning/milestones/v1.27-phases/84-pre-1-0-closure-narrative/`**, **`85-friction-inventory-post-closure/`**.
+
+**Key accomplishments:**
+
+- **84:** **CLS-01..03** — root **`README.md`** **Maintenance posture**; **`accrue/README.md`** maturity link + **Stability** clarification; **`RELEASING.md`** **Pre-1.0 closure**; **`upgrade.md`** **Pre-1.0 wrap-up semantics** — **`084-VERIFICATION.md`**.
+- **85:** **INV-05** — **`### v1.27 INV-05 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`** + **`085-VERIFICATION.md`** verifier transcripts.
+
+**Archives:** *(pending `/gsd-complete-milestone` v1.27 — `v1.27-ROADMAP.md`, `v1.27-REQUIREMENTS.md`, planning tag `v1.27`.)*
+
+**Next after ship:** **`/gsd-complete-milestone` v1.27** then **`/gsd-new-milestone`** when priorities return.
+
+---
+
 ## v1.26 First-hour billing facade spine (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24

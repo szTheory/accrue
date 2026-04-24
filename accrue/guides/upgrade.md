@@ -34,6 +34,8 @@ The **numeric SemVer** on [Hex.pm for `accrue`](https://hex.pm/packages/accrue) 
 
 **Planning vs packages:** files under **`.planning/`** may refer to internal milestones as **`v1.14`**, **`v1.15`**, and so on. Those labels track **maintainer shipping cadence**, not the Hex major line. Until both packages publish **`1.0.0`**, public SemVer stays **`0.x`**. For the intentional same-day **`1.0.0`** bootstrap story, read **[`RELEASING.md`](https://github.com/szTheory/accrue/blob/main/RELEASING.md)** → *Appendix: Same-day `1.0.0` bootstrap*.
 
+**Pre-1.0 wrap-up semantics:** while SemVer is **`0.x`**, expect additive fixes, proof hardening, and integrator-contract tightening—not an open-ended public roadmap for every Stripe-shaped bet. Maintainer framing lives in **[Maturity and maintenance](maturity-and-maintenance.md)**.
+
 Upgrade planning should start from the **published** version you have installed, not from internal modules or undocumented git SHAs.
 
 When upgrading, review the package-local docs for the package you consume:

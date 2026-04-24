@@ -12,9 +12,22 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
+### v1.27 — Pre-1.0 closure narrative (**shipped 2026-04-24**)
+
+**Goal (shipped):** Make the **“parked / intake-gated”** maintainer posture and **pre-1.0 vs 1.0.0** intent legible on integrator front doors and release docs—without new billing primitives. Close with a dated **friction inventory** maintainer pass after the doc touch (**INV-05**). **No** **PROC-08** / **FIN-03**.
+
+**Shipped:**
+
+- [x] **CLS-01** — Root + **`accrue`** README surfaces link **maturity-and-maintenance** + **production-readiness** and state **intake-gated** work (no speculative roadmap implied).
+- [x] **CLS-02** — **`RELEASING.md`** documents **pre-1.0 closure** maintainer intent; **`upgrade.md`** adds **wrap-up semantics** pointer to maturity doc.
+- [x] **CLS-03** — **`accrue/README.md` Stability** clarifies **`0.x`** ≠ open-ended feature expansion; **PROC-08** / **FIN-03** remain **`PROJECT.md`** non-goals (cross-linked from root **Maintenance posture**).
+- [x] **INV-05** — Post-CLS doc touch: maintainer pass **(b)** on **`v1.17-FRICTION-INVENTORY.md`** with **`085-VERIFICATION.md`** verifier transcripts (same bundle family as **INV-03** / **INV-04**).
+
+**Evidence:** **`.planning/REQUIREMENTS.md`**, **`.planning/ROADMAP.md`**, **`milestones/v1.27-phases/84-pre-1-0-closure-narrative/084-VERIFICATION.md`**, **`milestones/v1.27-phases/85-friction-inventory-post-closure/085-VERIFICATION.md`**; inventory **`### v1.27 INV-05 maintainer pass (2026-04-24)`**.
+
 ### Next milestone
 
-*Not defined in planning — run **`/gsd-new-milestone`** when priorities are ready.*
+*Run **`/gsd-complete-milestone` v1.27** to archive + tag, then **`/gsd-new-milestone`** when a new era is ready.*
 
 ### v1.26 — First-hour billing facade spine (**archived 2026-04-24**)
 
@@ -100,9 +113,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **Public Hex (last published):** registry reality for consumers — **[`accrue` on Hex](https://hex.pm/packages/accrue)** and **[`accrue_admin` on Hex](https://hex.pm/packages/accrue_admin)** (**0.3.1** each; linked publish **v1.19** Phase **68**, contract pass **v1.23** Phase **75** **2026-04-24**) — updates on **publish** / **HYG**, not on arbitrary doc commits. Workspace **`@version`** on **`main`** matches the published pair.
 
-**Active planning milestone:** *None — run **`/gsd-new-milestone`** to author **`REQUIREMENTS.md`** + **`ROADMAP.md`** for **v1.27+**.* Workspace **`@version`** remains **0.3.1** until a linked **Hex** release bumps it.
+**Active planning milestone:** *v1.27 shipped **2026-04-24** — run **`/gsd-complete-milestone` v1.27** to archive + tag, or **`/gsd-new-milestone`** for the next era.* Workspace **`@version`** remains **0.3.1** until a linked **Hex** release bumps it.
 
-**Last shipped planning milestone:** **v1.26** — Phases **82–83** (**2026-04-24**): **INT-13**, **INV-04**; **`milestones/v1.26-*`**; execution trees **`milestones/v1.26-phases/`**; planning tag **`v1.26`**. **Earlier:** **v1.25** — Phases **79–81**; **`v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`**. **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
+**Last shipped planning milestone:** **v1.27** — Phases **84–85** (**2026-04-24**): **CLS-01..03**, **INV-05**; execution trees **`milestones/v1.27-phases/`**; planning tag **`v1.27`** pending **`/gsd-complete-milestone` v1.27**. **Prior:** **v1.26** — Phases **82–83** (**2026-04-24**): **INT-13**, **INV-04**; **`milestones/v1.26-*`**; execution trees **`milestones/v1.26-phases/`**; planning tag **`v1.26`**. **Earlier:** **v1.25** — Phases **79–81**; **`v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`**. **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
 **Execution history:** **v1.26** Phases **82–83** under **`milestones/v1.26-phases/`** (**`082-VERIFICATION.md`**, **`083-VERIFICATION.md`**). **v1.25** Phases **79–81** under **`milestones/v1.25-phases/`** (**`079-VERIFICATION.md`**, **`080-VERIFICATION.md`**, **`081-VERIFICATION.md`**). **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`**). **v1.23** Phase **75** under **`milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`milestones/v1.18-phases/`**; **v1.17** under **`milestones/v1.17-phases/`**.
 
@@ -346,6 +359,11 @@ Theme: **billing portal facade + customer PM operator surfaces** (**ADM-13..16**
 - [x] **BIL-07** — **`guides/telemetry.md`** + **`operator-runbooks.md`** checkout span catalog / triage pointer; **`CHANGELOG`**. **Validated in Phase 81** (**`081-VERIFICATION.md`** under **`milestones/v1.25-phases/`**).
 - [x] **INT-12** — **First Hour**, **`examples/accrue_host` README**, adoption proof matrix + **`verify_package_docs.sh`** / **`verify_adoption_proof_matrix.sh`** needles for **`create_checkout_session`**. **Validated in Phase 81** (**`081-VERIFICATION.md`** under **`milestones/v1.25-phases/`**).
 
+### Validated v1.27 (requirements in `.planning/REQUIREMENTS.md`; milestone complete 2026-04-24)
+
+- [x] **CLS-01..03** — Pre-1.0 **closure narrative** on repo root **`README.md`**, **`accrue/README.md`**, **`RELEASING.md`**, **`accrue/guides/upgrade.md`**. **Validated in Phase 84** (**`084-VERIFICATION.md`** under **`milestones/v1.27-phases/`**).
+- [x] **INV-05** — Post-**CLS** maintainer pass path **(b)** on **`v1.17-FRICTION-INVENTORY.md`** with **`085-VERIFICATION.md`** transcripts. **Validated in Phase 85** (**`085-VERIFICATION.md`** under **`milestones/v1.27-phases/`**).
+
 ### Validated v1.26 (archived in `.planning/milestones/v1.26-REQUIREMENTS.md`; milestone closed 2026-04-24)
 
 - [x] **INT-13** — **`create_billing_portal_session`** on **First Hour** + host README + adoption matrix + merge-blocking verifier needles (telemetry anchor **`#billing-billing-portal-create`**). **Validated in Phase 82** (**`082-VERIFICATION.md`** under **`milestones/v1.26-phases/`**).
@@ -582,9 +600,11 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 | v1.24 ships **billing portal** facade on **`Accrue.Billing`** + **customer PM** admin parity | After **v1.23** contract pass, bounded **BIL-04..05** + **ADM-13..16** close operator trust on portal entry + **payment_methods** without **PROC-08** / **FIN-03** | ✓ Good — **shipped** Phases **76–78** (**2026-04-24**); archived + planning tag **`v1.24`** |
 | v1.25 sequences **friction maintainer pass** + **integrator contracts** + **checkout on `Accrue.Billing`** | After **v1.24**, keep **FRG-01** honest, **PPX-adjacent** proof/docs aligned, and mirror **BIL-04** facade patterns for **Stripe Checkout** via **`Accrue.Checkout.Session`** — still **no** **PROC-08** / **FIN-03** | ✓ Good — **shipped** Phases **79–81** (**2026-04-24**); **`milestones/v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`** |
 | v1.26 extends **INT-12** class proof to **billing portal** on golden-path surfaces | After **v1.25** checkout spine, **INT-13** + **INV-04** keep **First Hour** / matrix / friction SSOT honest without new **`Accrue.Billing`** APIs | ✓ Good — **shipped** Phases **82–83** (**2026-04-24**); **`milestones/v1.26-*`** + **`v1.26-phases/`**; tag **`v1.26`** |
+| v1.27 states **pre-1.0 closure** posture on integrator + release docs and re-certifies friction inventory | After **v1.26**, **CLS-** narrative + **INV-05** dated pass keep **FRG-02** / **S5** honest without **PROC-08** / **FIN-03** | ✓ Good — **shipped** Phases **84–85** (**2026-04-24**); **`milestones/v1.27-phases/`** |
 
 ## Current Milestone Notes
 
+- **2026-04-24:** **`/gsd-new-milestone` (closure)** — **v1.27** **Pre-1.0 closure narrative**; **`REQUIREMENTS.md`** (**CLS-01..03**, **INV-05**); roadmap Phases **84–85**; domain research **skipped** (maintainer narrative + inventory pass).
 - **2026-04-24:** **`/gsd-complete-milestone` v1.26** — archives **`milestones/v1.26-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.26`**; **`audit-open`** all clear; **ROADMAP** v1.26 `<details>` updated to archived requirements links.
 - **2026-04-24:** **`/gsd-complete-milestone` v1.25** — archives **`milestones/v1.25-*`**, **`git mv`** Phases **79–81** → **`milestones/v1.25-phases/`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.25`**; **`audit-open`** all clear; **`081-01-SUMMARY.md`** backfilled.
 - **2026-04-24:** **`/gsd-new-milestone` v1.25** — **Evidence-bound triad**; domain research completed under **`.planning/research/`** before **`REQUIREMENTS.md`** / **`ROADMAP.md`**; **`v1.24`** phase trees live under **`milestones/v1.24-phases/`**.
@@ -661,4 +681,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after **v1.26** milestone archive (**INT-13**, **INV-04** shipped; **`REQUIREMENTS.md`** removed pending next milestone).*
+*Last updated: 2026-04-24 — **v1.27** shipped (**CLS-01..03**, **INV-05**); run **`/gsd-complete-milestone` v1.27** when archival is ready.*
