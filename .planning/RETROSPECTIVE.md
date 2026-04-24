@@ -927,13 +927,51 @@
 
 ---
 
+## Milestone: v1.25 — Evidence-bound triad (friction + integrator + billing depth)
+
+**Shipped:** 2026-04-24  
+**Phases:** 3 | **Plans:** 3
+
+### What Was Built
+
+- **INV-03** path **(b)** — dated maintainer certification on **`v1.17-FRICTION-INVENTORY.md`** with **`079-VERIFICATION.md`** verifier transcripts.
+- **`Accrue.Billing.create_checkout_session/2`** (+ **`!`**) — **NimbleOptions**, **`span_billing(:checkout_session, :create, …)`**, **PII-safe** metadata, **Fake** **`checkout_session_facade_test.exs`** (**BIL-06**).
+- **BIL-07** + **INT-12** — **`guides/telemetry.md`** / **`operator-runbooks.md`** / **`CHANGELOG`**; **First Hour**, host README, adoption matrix, **`verify_package_docs`**, **`verify_adoption_proof_matrix`** needles aligned in one slice (**`081-VERIFICATION.md`**).
+
+### What Worked
+
+- **`audit-open`** all clear at pre-close gate; **4/4** requirements traceability once **`REQUIREMENTS.md`** table was aligned to **Phase 81** completion.
+- Moving **79–81** execution trees to **`milestones/v1.25-phases/`** keeps **`phases/`** empty for the next milestone without losing evidence paths.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still returns **`version required for phases archive`** — manual **`milestones/v1.25-*`** + **`git rm` REQUIREMENTS** remains the durable closeout path.
+- **Phase 81** lacked a **`*-SUMMARY.md`** until milestone close backfill.
+
+### Patterns Established
+
+- Treat **INT-12** “same PR” integrator needle updates as mandatory whenever **`Accrue.Billing`** checkout is promoted on golden-path surfaces.
+
+### Key Lessons
+
+1. **Traceability tables** must be updated when the last phase closes, or milestone close surfaces false **Pending** rows against green verification.
+2. Single-plan phases still benefit from a minimal **`*-01-SUMMARY.md`** for accomplishment extraction and audit consistency.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three phases same-day; no **Hex** **@version** bump in this planning milestone.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
-| v1.24 | short | 3 | **ADM-13..16** + **BIL-04..05** — billing portal facade + customer **PM** VERIFY/copy/theme; **`*-VERIFICATION.md`** + **6** plan summaries; phases **76–78** under **`.planning/phases/`**. |
+| v1.25 | short | 3 | **INV-03** + **BIL-06..07** + **INT-12** — checkout **`Accrue.Billing`** facade + telemetry/docs + integrator verifiers; **`*-VERIFICATION.md`** + **3** plan summaries; phases **79–81** under **`milestones/v1.25-phases/`**. |
+| v1.24 | short | 3 | **ADM-13..16** + **BIL-04..05** — billing portal facade + customer **PM** VERIFY/copy/theme; **`*-VERIFICATION.md`** + **6** plan summaries; phases **76–78** under **`milestones/v1.24-phases/`**. |
 | v1.23 | short | 1 | **PPX-01..04** — **`docs-contracts-shift-left`** + friction script + **`v1.17-P1-002`** closure (**75-VERIFICATION**); phase under **`v1.23-phases/`**. |
 | v1.22 | short | 1 | **PRS-01..03** — root + package README links; **`verify_production_readiness_discoverability.sh`** in shift-left; **`scripts/ci/README.md`** gate map (**74-VERIFICATION**); phase under **`v1.22-phases/`**. |
 | v1.21 | short | 2 | **PROJECT** + **`maturity-and-maintenance.md`** maintenance bar (**72-VERIFICATION**); **`scripts/ci/README.md`** capsule parity checklist + **v1.17-P2-001** closure (**73-VERIFICATION**); phases under **`v1.21-phases/`**. |

@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.25
-milestone_name: Evidence-bound triad
-status: complete
-last_updated: "2026-04-24T21:45:00.000Z"
-last_activity: 2026-04-24 — **Phase 81 implementation** — BIL-07 / INT-12 docs + CI needles; **`081-VERIFICATION.md`**.
+milestone: none
+milestone_name: null
+status: between_milestones
+last_updated: "2026-04-24T23:59:00.000Z"
+last_activity: 2026-04-24 — **`/gsd-complete-milestone` v1.25** — archives + **`git rm` REQUIREMENTS.md** + tag **`v1.25`**.
 progress:
-  total_phases: 3
-  completed_phases: 3
+  total_phases: 0
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
 ---
@@ -20,23 +20,23 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.25** — friction inventory maintainer pass, integrator/proof contract alignment, and **`Accrue.Billing.create_checkout_session`** facade (**Fake** + telemetry). **PROC-08** / **FIN-03** out of scope.
+**Current focus:** **Between milestones** — run **`/gsd-new-milestone`** to open the next planning cycle (fresh **`REQUIREMENTS.md`**). **PROC-08** / **FIN-03** remain out of scope until reprioritized.
 
 ## Current Position
 
-**Milestone:** **v1.25** — Evidence-bound triad
+**Milestone:** **None** (last shipped: **v1.25** — **2026-04-24**)
 
-**Phase:** **81** — **complete** (**BIL-07**, **INT-12**) — **`081-VERIFICATION.md`**
+**Phase:** **—**
 
-**Plan:** **`080-01`** complete
+**Plan:** **—**
 
-**Status:** **BIL-06** — **`080-VERIFICATION.md`**. **BIL-07** / **INT-12** — **`081-VERIFICATION.md`**.
+**Status:** **v1.25** archived — **`milestones/v1.25-*`**, **`milestones/v1.25-phases/`** (79–81); planning tag **`v1.25`**.
 
-**Last activity:** 2026-04-24 — Phase **81** shipped — telemetry catalog + integrator surfaces + shift-left needles per **`081-CONTEXT.md`**.
+**Last activity:** 2026-04-24 — Milestone **v1.25** closed; root **`.planning/REQUIREMENTS.md`** removed per workflow.
 
 ## Milestone Progress
 
-**v1.25** (planned): Phases **79–81** — **INV-03**, **BIL-06**, **BIL-07**, **INT-12** (see **`.planning/REQUIREMENTS.md`**).
+**v1.25** (shipped **2026-04-24**): Phases **79–81** — **INV-03**, **BIL-06**, **BIL-07**, **INT-12**; evidence **`milestones/v1.25-phases/`**; archives **`milestones/v1.25-ROADMAP.md`**, **`v1.25-REQUIREMENTS.md`**.
 
 **v1.24** phases **76–78**: **Archived** **2026-04-24** — execution trees **`milestones/v1.24-phases/`**; archives **`milestones/v1.24-ROADMAP.md`**, **`v1.24-REQUIREMENTS.md`**; tag **`v1.24`**.
 
@@ -47,9 +47,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **v1.25** requirements (**INV-03**, **INT-12**, **BIL-06**, **BIL-07**)
-- **`.planning/ROADMAP.md`** — active **v1.25** phase table (**79–81**)
-- **`.planning/research/SUMMARY.md`** — **v1.25** research synthesis (**2026-04-24**)
+- **`.planning/ROADMAP.md`** — shipped milestones + collapsed phase history (**no** root **`REQUIREMENTS.md`** until **`/gsd-new-milestone`**).
+- **`.planning/research/SUMMARY.md`** — last milestone research pass (**v1.25**, **2026-04-24**).
 
 ## Deferred Items
 
@@ -59,12 +58,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Recent Decisions
 
-- **2026-04-24:** **`/gsd-new-milestone` v1.25** — research-first; **`STACK`/`FEATURES`/`ARCHITECTURE`/`PITFALLS`/`SUMMARY`** under **`.planning/research/`**; **`v1.24`** working phases moved to **`milestones/v1.24-phases/`** (evidence preservation).
-- **2026-04-24:** **`/gsd-complete-milestone` v1.24** — archives **`milestones/v1.24-*`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.24`**; **`audit-open`** all clear.
-- **2026-04-24:** **`/gsd-discuss-phase 79`** — **`079-CONTEXT.md`** + **`079-DISCUSSION-LOG.md`**; discuss workflow **`research_before_questions`**, **`discuss_auto_all_gray_areas`**, **`discuss_high_impact_confirm`** in **`.planning/config.json`**.
+- **2026-04-24:** **`/gsd-complete-milestone` v1.25** — archives **`milestones/v1.25-*`**, **`git mv`** Phases **79–81** → **`milestones/v1.25-phases/`**, **`git rm` `.planning/REQUIREMENTS.md`**, planning tag **`v1.25`**; **`audit-open`** all clear; **`081-01-SUMMARY.md`** backfilled.
+- **2026-04-24:** **`/gsd-new-milestone` v1.25** — research-first; **`v1.24`** working phases moved to **`milestones/v1.24-phases/`**.
 
-**Next:** Milestone **v1.25** closure (**`/gsd-complete-milestone`** when ready) — all phases **79–81** complete.
+**Next:** **`/gsd-new-milestone`** — define **v1.26+** requirements and active roadmap slice.
+
+**Completed (v1.25):** Phase **79** (**INV-03**) — **`milestones/v1.25-phases/079-friction-inventory-maintainer-pass/079-VERIFICATION.md`** — 2026-04-24; Phase **80** (**BIL-06**) — **`milestones/v1.25-phases/080-checkout-session-on-accrue-billing/080-VERIFICATION.md`** — 2026-04-24; Phase **81** (**BIL-07**, **INT-12**) — **`milestones/v1.25-phases/081-telemetry-truth-integrator-contracts/081-VERIFICATION.md`** — 2026-04-24.
 
 **Completed (prior milestone):** **v1.24** Phases **76–78** — evidence under **`milestones/v1.24-phases/`**.
-
-**Completed (v1.25):** Phase **79** (**INV-03**) — **`079-VERIFICATION.md`** — 2026-04-24; Phase **80** (**BIL-06**) — **`080-VERIFICATION.md`** — 2026-04-24; Phase **81** (**BIL-07**, **INT-12**) — **`081-VERIFICATION.md`** — 2026-04-24.

@@ -1,18 +1,33 @@
 # Milestones
 
-## v1.25 Evidence-bound triad (friction + integrator + billing depth) (Opened: 2026-04-24)
+## v1.25 Evidence-bound triad (friction + integrator + billing depth) (Shipped: 2026-04-24)
 
 **Planning opened:** 2026-04-24
 
-**Phases planned:** **3** phases (**79–81**), requirements **INV-03**, **BIL-06**, **BIL-07**, **INT-12**.
+**Phases completed:** **3** phases (**79–81**), **3** plans total (**1+1+1**).
 
-**Theme:** Post–**v1.24** **FRG-01** maintainer pass; **`Accrue.Billing.create_checkout_session/2`** (**Fake** + **`:telemetry` / span**) mirroring **BIL-04**; **telemetry/catalog/changelog** + **First Hour** / host README / adoption matrix / **VERIFY-01** alignment (**PPX-adjacent**). **No** **PROC-08** / **FIN-03**.
+**Theme:** Post–**v1.24** **FRG-01** maintainer pass (**INV-03**); **`Accrue.Billing.create_checkout_session/2`** (**Fake** + **`:telemetry` / span**, **BIL-06**); **telemetry/catalog/changelog** + integrator needles (**BIL-07**, **INT-12**). **No** **PROC-08** / **FIN-03**.
 
 **Depends on:** **v1.24** shipped.
 
 **Research:** `.planning/research/SUMMARY.md` (milestone pass **2026-04-24**).
 
-**Next:** **`/gsd-discuss-phase 81`** or **`/gsd-plan-phase 81`** (Phases **79–80** complete **2026-04-24**; next **BIL-07** / **INT-12**).
+**Phase execution trees:** **`.planning/milestones/v1.25-phases/079-friction-inventory-maintainer-pass/`**, **`080-checkout-session-on-accrue-billing/`**, **`081-telemetry-truth-integrator-contracts/`**.
+
+**Key accomplishments:**
+
+- **79:** **INV-03** path **(b)** — dated maintainer certification + **`079-VERIFICATION.md`** verifier transcripts.
+- **80:** **BIL-06** — **`create_checkout_session/2`** (+ **`!`**) + **Fake** **`checkout_session_facade_test.exs`** + **PII-safe** span metadata — **`080-VERIFICATION.md`**.
+- **81:** **BIL-07** + **INT-12** — **`guides/telemetry.md`** / **`operator-runbooks.md`** / **`CHANGELOG`**; **First Hour**, host README, adoption matrix, **`verify_package_docs`**, **`verify_adoption_proof_matrix`** — **`081-VERIFICATION.md`**.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.25-ROADMAP.md`](milestones/v1.25-ROADMAP.md)
+- Requirements: [`milestones/v1.25-REQUIREMENTS.md`](milestones/v1.25-REQUIREMENTS.md)
+
+**Git tag:** `v1.25`
+
+**Next after ship:** **`/gsd-new-milestone`** for **v1.26+** priorities.
 
 ---
 
