@@ -10,7 +10,7 @@
 
 **Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md)
 
-**Status:** Active — Phases **67–69** complete **2026-04-24** (**PRF-01..02**, **REL-01..03**, Hex **0.3.1**, **DOC-01..02**, **HYG-01**).
+**Status:** Shipped — Phases **67–69** complete **2026-04-24** (**PRF-01..02**, **REL-01..03**, Hex **0.3.1**, **DOC-01..02**, **HYG-01**).
 
 ---
 
