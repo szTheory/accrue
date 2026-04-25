@@ -4,7 +4,7 @@ milestone: v1.29
 milestone_name: Mailglass Integration
 status: planning
 last_updated: "2026-04-25T17:22:27.349Z"
-last_activity: "2026-04-25 — Phase **88** **Mailglass Foundation** planned: 3 plans (088-01, 088-02, 088-03) covering MG-01..MG-03."
+last_activity: "2026-04-25 — Quick task **260425-imj**: stripped GSD requirement-ID artifacts from public hexdocs (51 files, ~80 rewrites)."
 progress:
   total_phases: 3
   completed_phases: 0
@@ -62,6 +62,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260425-gr1 | Drop deprecated flat-branding-keys infrastructure | 2026-04-25 | 50f80db | [260425-gr1-drop-deprecated-flat-branding-keys-infra](./quick/260425-gr1-drop-deprecated-flat-branding-keys-infra/) |
+| 260425-imj | Strip GSD requirement-ID artifacts from public hexdocs | 2026-04-25 | c855743 | [260425-imj-strip-gsd-requirement-ids-from-public-he](./quick/260425-imj-strip-gsd-requirement-ids-from-public-he/) |
 
 ## Recent Decisions
 
