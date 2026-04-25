@@ -1,5 +1,13 @@
 # Milestones
 
+## v1.29 Mailglass Integration (Planned)
+
+**Theme:** Explore integration with [Mailglass](https://github.com/szTheory/mailglass) to simplify our email code and leverage its robust transactional email framework (HEEx-native components, event ledger, LiveView preview).
+
+**Status:** Planned for next milestone.
+
+---
+
 ## v1.28 Next linked publish continuity (Planning opened: 2026-04-24)
 
 **Planning opened:** 2026-04-24

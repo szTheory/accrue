@@ -35,6 +35,12 @@
 ## Phases
 
 <details open>
+<summary>v1.29 Mailglass Integration (Planned)</summary>
+
+**Milestone goal:** Explore integration with [Mailglass](https://github.com/szTheory/mailglass) in the next milestone. This should simplify our email code and provide benefits like HEEx-native components, a LiveView admin dashboard, and an append-only event ledger.
+</details>
+
+<details open>
 <summary>v1.28 Next linked publish continuity (Phases 86–87) — PLANNING COMPLETE 2026-04-24</summary>
 
 **Milestone goal:** On the **next linked Hex publish** for **`accrue` / `accrue_admin`**, keep **merge-blocking** package + adoption + shift-left contracts honest, align **`.planning/`** registry mirrors (**PPX-05..08**), then **INV-06** dated maintainer pass on **`v1.17-FRICTION-INVENTORY.md`** with **`087-VERIFICATION.md`**. **Spine B** — **no** **PROC-08** / **FIN-03**.
