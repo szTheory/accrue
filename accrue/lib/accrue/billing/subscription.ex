@@ -2,17 +2,20 @@ defmodule Accrue.Billing.Subscription do
   @moduledoc """
   Ecto schema for the `accrue_subscriptions` table.
 
-  Stores the local projection of a processor subscription (e.g. Stripe
-  `sub_xxx`). `:status` is an `Ecto.Enum` over the canonical Stripe
-  subscription status set, and the schema includes the
-  cancel-at-period-end + pause_collection fields needed for the full
-  lifecycle state machine.
+  Stores the local projection of a Stripe subscription. `:status` is an
+  `Ecto.Enum` over the full Stripe subscription status set, and the schema
+  includes `cancel_at_period_end`, `pause_collection`, and other lifecycle
+  fields needed to answer all common billing questions locally.
 
-  ## Predicates
+  ## Use the predicates, not raw `.status`
 
-  Never gate on raw `.status` access. The predicates defined in this
-  module are the canonical way to ask "is this subscription X?" — raw
-  access is lint-time forbidden by `Accrue.Credo.NoRawStatusAccess`.
+  Do not gate business logic on direct comparisons to `.status`. Raw
+  status checks are easy to get wrong — for example, a subscription with
+  `cancel_at_period_end: true` still has status `:active`, and an
+  `:incomplete_expired` subscription is just as terminated as a
+  `:canceled` one.
+
+  The predicates in this module capture those edge cases correctly:
 
     - `trialing?/1`
     - `active?/1` — includes `:trialing`
@@ -20,6 +23,9 @@ defmodule Accrue.Billing.Subscription do
     - `canceled?/1` — `:canceled`, `:incomplete_expired`, or any `ended_at`
     - `canceling?/1` — `:active` + `cancel_at_period_end` + future period end
     - `paused?/1` — legacy `:paused` status OR non-nil `pause_collection`
+
+  For database queries over multiple subscriptions, the matching fragments
+  are in `Accrue.Billing.Query`.
   """
 
   use Ecto.Schema
@@ -92,7 +98,7 @@ defmodule Accrue.Billing.Subscription do
   @required_fields ~w[customer_id processor]a
 
   @doc """
-  Webhook-path changeset (D3-17). Skips user-path validation guards so
+  Webhook-path changeset. Skips user-path validation guards so
   out-of-order webhook events can settle arbitrary state without the
   state-machine check failing on an otherwise-valid transition.
   """
@@ -105,7 +111,7 @@ defmodule Accrue.Billing.Subscription do
     |> foreign_key_constraint(:customer_id)
   end
 
-  @doc "Canonical list of subscription statuses (D3-03, Stripe's 8 values)."
+  @doc "Canonical list of subscription statuses (Stripe's 8 values)."
   @spec statuses() :: [atom()]
   def statuses, do: @statuses
 
@@ -135,7 +141,7 @@ defmodule Accrue.Billing.Subscription do
   @doc """
   True if the subscription counts as "active" for entitlement purposes.
 
-  Includes `:trialing` per D3-03.
+  Includes `:trialing` — a customer in a trial period has full access.
   """
   @spec active?(%__MODULE__{} | map()) :: boolean()
   def active?(%__MODULE__{status: s}) when s in [:active, :trialing], do: true
@@ -187,8 +193,9 @@ defmodule Accrue.Billing.Subscription do
   @doc """
   True if the subscription is paused.
 
-  Covers both the legacy `:paused` status (used by earlier Stripe versions)
-  and the modern `pause_collection` map (D3-03).
+  Covers both the legacy `:paused` status (used by earlier Stripe API
+  versions) and the modern `pause_collection` map returned by current
+  Stripe versions.
   """
   @spec paused?(%__MODULE__{} | map()) :: boolean()
   def paused?(%__MODULE__{pause_collection: pc}) when is_map(pc), do: true
@@ -229,13 +236,13 @@ defmodule Accrue.Billing.Subscription do
 
   @doc """
   Extracts a pre-hydrated PaymentIntent from `data.latest_invoice.payment_intent`,
-  used by Plan 04 `subscribe/3` to surface SCA/3DS action-required to the caller.
+  used by `subscribe/3` to surface SCA/3DS action-required to the caller.
   """
   @spec pending_intent(%__MODULE__{} | map()) :: map() | nil
   def pending_intent(%__MODULE__{data: data}) when is_map(data) do
-    # WR-02: dual-key lookup. Fake adapter returns atom-keyed maps,
-    # Stripe adapter returns string-keyed maps. Normalize here rather
-    # than forcing callers to know which shape they have.
+    # Dual-key lookup: the Fake adapter returns atom-keyed maps,
+    # the Stripe adapter returns string-keyed maps. Normalize here
+    # rather than forcing callers to know which shape they have.
     fetch_key(data, [:latest_invoice, "latest_invoice"])
     |> case do
       %{} = inv -> fetch_key(inv, [:payment_intent, "payment_intent"])

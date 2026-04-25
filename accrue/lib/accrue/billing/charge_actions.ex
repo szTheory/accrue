@@ -7,13 +7,14 @@ defmodule Accrue.Billing.ChargeActions do
 
     * `charge/3` — atomic charge creation with SCA-safe tagged returns.
       Resolves payment method from `opts[:payment_method]` or the
-      customer's `default_payment_method` association. Returns typed
+      customer's `default_payment_method` association. Returns a typed
       `{:error, %Accrue.Error.NoDefaultPaymentMethod{}}` when neither is
-      set — never silently falls back to the first attached PM
-      (Cashier footgun).
+      set — Accrue never silently falls back to the first attached payment
+      method, because doing so can charge the wrong card when a customer
+      has multiple payment methods on file.
     * `create_payment_intent/2` — thin wrapper with `IntentResult.wrap/1`
       on the result.
-    * `create_setup_intent/2` — off-session card-on-file parallel.
+    * `create_setup_intent/2` — off-session card-on-file setup.
 
   Every mutation runs inside `Accrue.Repo.transact/2` with an
   `accrue_events` row written in the same transaction.
@@ -28,7 +29,7 @@ defmodule Accrue.Billing.ChargeActions do
   alias Accrue.Repo
 
   # ---------------------------------------------------------------------
-  # charge/3 (BILL-20, BILL-21)
+  # charge/3
   # ---------------------------------------------------------------------
 
   @doc """
@@ -89,7 +90,7 @@ defmodule Accrue.Billing.ChargeActions do
              "customer.default_payment_method_id. Call " <>
              "Accrue.Billing.set_default_payment_method/2 first, or pass " <>
              "opts[:payment_method]. Accrue never silently falls back to the " <>
-             "first attached PM — see BILL-21."
+             "first attached payment method."
        }}
     else
       run_charge(customer, amount, pm_id, opts)
@@ -116,7 +117,7 @@ defmodule Accrue.Billing.ChargeActions do
 
     # Call the processor OUTSIDE the Repo.transact so we can branch on
     # SCA/3DS shape without persisting a half-baked Charge row for a
-    # PaymentIntent that still needs customer action. BILL-20.
+    # PaymentIntent that still needs customer action.
     case Processor.__impl__().create_charge(params, stripe_opts) do
       {:ok, stripe_ch} ->
         case IntentResult.wrap({:ok, stripe_ch}) do
@@ -160,10 +161,9 @@ defmodule Accrue.Billing.ChargeActions do
           | {:error, term()}
   def create_payment_intent(params, opts \\ []) when is_map(params) do
     op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
-    # WR-01: Pre-generate a deterministic subject_uuid (D3-60/61) —
-    # previously the idempotency key was keyed on (op_id, op_id), which
-    # collapsed two different PaymentIntents in the same operation to
-    # the same Stripe key.
+    # Pre-generate a deterministic subject_uuid so that two different
+    # PaymentIntents created in the same operation do not collapse to
+    # the same Stripe idempotency key.
     subject_uuid = Idempotency.subject_uuid(:create_payment_intent, op_id)
     idem_key = Idempotency.key(:create_payment_intent, subject_uuid, op_id)
 
@@ -186,7 +186,7 @@ defmodule Accrue.Billing.ChargeActions do
   end
 
   # ---------------------------------------------------------------------
-  # create_setup_intent/2 (BILL-22)
+  # create_setup_intent/2
   # ---------------------------------------------------------------------
 
   @doc """

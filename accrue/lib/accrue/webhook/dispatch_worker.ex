@@ -1,8 +1,8 @@
 defmodule Accrue.Webhook.DispatchWorker do
   @moduledoc """
-  Oban worker for async webhook handler dispatch (D2-27).
+  Oban worker for async webhook handler dispatch.
 
-  Enqueued by   `Accrue.Webhook.Ingest` in the same transaction as the
+  Enqueued by `Accrue.Webhook.Ingest` in the same transaction as the
   webhook event row. Loads the `WebhookEvent`, projects it to
   `%Accrue.Webhook.Event{}`, and dispatches to the handler chain.
 
@@ -14,16 +14,20 @@ defmodule Accrue.Webhook.DispatchWorker do
   handlers read this key so `handle_event/3` can extract usage identifiers
   without re-parsing the full signing payload.
 
-  ## Dispatch order (D2-30)
+  ## Dispatch order
 
-  1. `Accrue.Webhook.DefaultHandler` runs first (non-disableable)
-  2. User handlers from `Accrue.Config.webhook_handlers/0` run sequentially
-  3. Each handler is rescue-wrapped for crash isolation
+  1. `Accrue.Webhook.DefaultHandler` runs first (non-disableable).
+     Connect-scoped events route to `Accrue.Webhook.ConnectHandler`.
+  2. User handlers from `Accrue.Config.webhook_handlers/0` run sequentially.
+  3. Each handler is rescue-wrapped for crash isolation — a user handler
+     crash is logged and emits telemetry, but does not cause a retry.
 
   ## Retry policy
 
-  25 attempts with exponential backoff. On final attempt, transitions
-  the webhook event to `:dead` status.
+  25 attempts with exponential backoff. On the final attempt, transitions
+  the webhook event to `:dead` status and emits
+  `[:accrue, :ops, :webhook_dlq, :dead_lettered]` telemetry. Dead-lettered
+  events can be replayed via `Accrue.Webhooks.DLQ.requeue/1`.
 
   ## Status lifecycle
 
@@ -71,13 +75,12 @@ defmodule Accrue.Webhook.DispatchWorker do
       meter_error_object: meter_error_object
     }
 
-    # Push actor context (D2-12)
+    # Push actor context so telemetry and audit events carry webhook identity.
     Accrue.Actor.put_current(%{type: :webhook, id: row.processor_event_id})
 
-    # D2-30 + D5-01: Default handler first (non-disableable), branched by
-    # `row.endpoint`. Connect-scoped events route to `ConnectHandler`;
-    # everything else routes to the platform `DefaultHandler`. The
-    # user-handler loop below is endpoint-agnostic.
+    # Default handler runs first (non-disableable), branched by endpoint.
+    # Connect-scoped events route to ConnectHandler; everything else routes
+    # to the platform DefaultHandler. The user-handler loop is endpoint-agnostic.
     default_handler =
       case row.endpoint do
         :connect -> ConnectHandler
@@ -90,7 +93,7 @@ defmodule Accrue.Webhook.DispatchWorker do
       Accrue.Config.webhook_handlers()
       |> Enum.map(fn handler -> safe_handle(handler, event, ctx) end)
 
-    # Only re-raise if default handler failed (D2-30).
+    # Only re-raise if the default handler failed.
     # User handler crashes are logged but do not cause retry.
     case default_result do
       :ok ->

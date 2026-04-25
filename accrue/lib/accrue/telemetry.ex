@@ -2,15 +2,32 @@ defmodule Accrue.Telemetry do
   @moduledoc """
   Telemetry conventions and helpers for Accrue.
 
+  ## When you attach handlers
+
+  Attach to Accrue telemetry events to feed your metrics pipeline —
+  Prometheus, DataDog, StatsD, or any `:telemetry`-compatible reporter.
+  For example, to count subscription creations in Prometheus:
+
+      :telemetry.attach(
+        "my-app-subscription-created",
+        [:accrue, :billing, :subscription, :create, :stop],
+        &MyApp.Metrics.handle_event/4,
+        nil
+      )
+
+  You can also use `Telemetry.Metrics` definitions and a reporter like
+  `TelemetryMetricsPrometheus` to declare metrics declaratively rather
+  than attaching individual handlers.
+
   ## Event naming
 
   All Accrue telemetry events follow a **4-level name** plus a phase suffix:
 
       [:accrue, :domain, :resource, :action, :start | :stop | :exception]
 
-  The **second element** is the domain layer. Domains currently passed to
-  `span/3` from `accrue/lib` are `:billing`, `:connect`, `:mailer`, `:pdf`,
-  `:processor`, and `:storage`. Concrete examples:
+  The **second element** is the domain layer. Domains currently emitted
+  are `:billing`, `:connect`, `:mailer`, `:pdf`, `:processor`, and
+  `:storage`. Concrete examples:
 
       [:accrue, :billing, :subscription, :create, :start]
       [:accrue, :billing, :meter_event, :report_usage, :start]
@@ -28,15 +45,15 @@ defmodule Accrue.Telemetry do
   unchanged — the helper does the metadata plumbing.
 
   > ⚠️ `span/3` does NOT auto-include raw arguments in metadata — only
-  > the explicit metadata map you pass. The Stripe processor MUST NOT
-  > shove raw `lattice_stripe` responses into span metadata.
+  > the explicit metadata map you pass. Raw Stripe API responses are
+  > never inserted into span metadata.
 
   ## OpenTelemetry bridge
 
   `current_trace_id/0` returns the active OTel trace id as a hex string
-  when `:opentelemetry` is loaded, and `nil` otherwise. The conditional
-  compile pattern (CLAUDE.md §Conditional Compilation) keeps the
-  `without_opentelemetry` CI matrix warning-free.
+  when `:opentelemetry` is loaded, and `nil` otherwise. The optional
+  dependency compiles to a no-op when `:opentelemetry` is absent, so no
+  warnings appear in environments without it.
   """
 
   @compile {:no_warn_undefined, [:otel_tracer, :otel_span]}

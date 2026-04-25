@@ -5,16 +5,18 @@ defmodule Accrue.Mailer do
   ## Semantic API
 
   Callers invoke `Accrue.Mailer.deliver/2` with an email **type atom** and a
-  plain **assigns map** — never a `%Swoosh.Email{}` struct. The configured
-  adapter (`Accrue.Mailer.Default` by default) is responsible for turning
-  the type + assigns into an actual email and delivering it. This is D-21:
-  callers never construct `%Swoosh.Email{}` — that's the pipeline's job.
+  plain **assigns map**. The configured adapter (`Accrue.Mailer.Default` by
+  default) is responsible for turning the type + assigns into a rendered email
+  and delivering it. Callers never construct a `%Swoosh.Email{}` directly —
+  that is the adapter's job, keeping call sites decoupled from the email
+  rendering pipeline.
 
-  ## Kill switch (D-25)
+  ## Per-type kill switch
 
   Set `config :accrue, :emails, [<type>: false]` to disable a specific
-  transactional email. `deliver/2` returns `{:ok, :skipped}` without
-  enqueueing. The `:emails` schema key is defined by `Accrue.Config`.
+  transactional email type. When a type is disabled, `deliver/2` returns
+  `{:ok, :skipped}` immediately without enqueueing a job or rendering
+  anything. The `:emails` config schema is defined by `Accrue.Config`.
 
   ## Telemetry
 

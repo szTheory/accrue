@@ -1,17 +1,18 @@
 defmodule Accrue.Clock do
   @moduledoc """
-  Canonical time source for Accrue (D3-86).
+  Canonical time source for Accrue.
 
-  All code inside Accrue that needs "now" MUST call `Accrue.Clock.utc_now/0`
+  All code inside Accrue that needs "now" calls `Accrue.Clock.utc_now/0`
   instead of `DateTime.utc_now/0`. In the test environment (`:accrue, :env`
   set to `:test`) this delegates to `Accrue.Processor.Fake.now/0`, which is
   backed by the Fake processor's in-memory test clock. In any other
   environment it delegates to the BEAM's `DateTime.utc_now/0`.
 
-  This indirection is what makes the Fake Processor the primary test
-  surface: time-sensitive billing logic (trial ends, dunning,
-  expiring-card notices) can be exercised deterministically by advancing
-  the Fake clock rather than by sleeping or by stubbing `DateTime`.
+  This indirection is the mechanism that makes time-sensitive billing logic
+  testable without sleeping or monkeypatching. Trial expiry, dunning grace
+  windows, and expiring-card notices can all be exercised deterministically
+  by advancing `Accrue.Test.Clock` in your tests rather than waiting for
+  wall-clock time to pass.
 
   ## Why application env, not compile env
 

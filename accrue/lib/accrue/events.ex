@@ -1,40 +1,65 @@
 defmodule Accrue.Events do
   @moduledoc """
-  Append-only event ledger API (D-13, D-14, D-15, D-16).
+  Tamper-evident audit ledger for Accrue billing events.
 
-  Every state mutation in Phase 2+ emits a corresponding row in
-  `accrue_events` in the SAME transaction as the mutation. This module
-  provides two entry points:
+  Every state mutation in the billing system emits a corresponding row in
+  `accrue_events` in the **same database transaction** as the mutation. This
+  gives you an ordered, immutable record of what happened, who did it, and
+  when — without a separate event store.
 
-    * `record/1` — for use inside `Accrue.Repo.transact/1` blocks.
-    * `record_multi/3` — for use inside `Ecto.Multi` pipelines.
+  ## When you reach for this module
 
-  Both paths go through the same `Accrue.Events.Event.changeset/1`, and
-  both honor the idempotency guarantee: a duplicate `idempotency_key`
-  collapses to the existing row via `on_conflict: :nothing` plus a
-  manual fetch fallback, so webhook replays are no-ops.
+  - **Recording a billing lifecycle change** — call `record/1` inside a
+    `Repo.transact/1` block, or `record_multi/3` inside an `Ecto.Multi` pipeline.
+  - **Auditing what happened to a subscription or customer** — use `timeline_for/3`
+    to fetch all events for a subject in chronological order.
+  - **Reconstructing state at a point in time** — use `state_as_of/3` to fold
+    events up to a timestamp into a projected state map.
+  - **Charting event volume over time** — use `bucket_by/2` for dashboard
+    aggregations (daily/weekly/monthly).
 
-  ## Actor + trace_id auto-capture
+  ## Key functions
+
+    * `record/1` — insert a single event; use inside `Repo.transact/1`.
+    * `record_multi/3` — append an event step to an `Ecto.Multi` pipeline.
+    * `timeline_for/3` — list events for a subject, oldest first.
+    * `state_as_of/3` — reconstruct a subject's projected state at a past moment.
+    * `bucket_by/2` — count events by day/week/month for analytics.
+
+  ## Idempotency
+
+  Both `record/1` and `record_multi/3` accept an optional `:idempotency_key`.
+  A duplicate key collapses to the existing row via `on_conflict: :nothing`
+  plus a fallback fetch — webhook replays and Oban retries are safe no-ops.
+
+  ## Actor and trace ID auto-capture
 
   `record/1` reads `Accrue.Actor.current/0` and
   `Accrue.Telemetry.current_trace_id/0` from the process dictionary so
-  upstream plugs (`Accrue.Plug.PutActor`, Phase 2) and Oban worker
-  middleware can stamp events without the call site passing anything
-  explicitly. Callers override either by passing `:actor` / `:trace_id`
-  in the attrs map.
+  request-scoped plugs and Oban worker middleware can stamp events without
+  the call site passing anything explicitly. Override either by passing
+  `:actor` or `:trace_id` in the attrs map.
+
+  ## Schema versioning (upcasting)
+
+  Each event row carries a `schema_version` integer. When you read events
+  back via `timeline_for/3` or `state_as_of/3`, each row is automatically
+  migrated forward through any registered upcasters to the current schema
+  version. This means you can evolve what an event's `data` map looks like
+  over time without rewriting historical rows.
+
+  ## Immutability
+
+  Events are append-only. A PostgreSQL `BEFORE UPDATE OR DELETE` trigger
+  raises SQLSTATE `45A01` on any attempt to modify or delete an event row.
+  This module translates the resulting `Postgrex.Error` into
+  `Accrue.EventLedgerImmutableError` by pattern-matching on `pg_code` —
+  never by parsing the error message string.
 
   ## Security
 
   > ⚠️ The `data` jsonb column is **not** automatically sanitized.
-  > Callers MUST NOT put payment-method PII or secrets into `data`. A
-  > redactor may land in a future release; the current release
-  > deliberately accepts this risk and documents it here.
-
-  Immutability is enforced at the Postgres layer by a
-  `BEFORE UPDATE OR DELETE` trigger raising SQLSTATE `45A01`. This
-  module translates the resulting `Postgrex.Error` into
-  `Accrue.EventLedgerImmutableError` via pattern-match on the
-  `pg_code` field — **never** by parsing the error message string (D-11).
+  > Callers must not store payment-method PII or secrets in `data`.
   """
 
   alias Accrue.Actor
@@ -92,9 +117,8 @@ defmodule Accrue.Events do
   end
 
   @doc """
-  Appends an event insert to an `Ecto.Multi` pipeline. Downstream plans
-  (Phase 2 billing context) use this to commit a state mutation and its
-  event record in the same transaction.
+  Appends an event insert to an `Ecto.Multi` pipeline, committing the state
+  mutation and its audit record in the same transaction.
 
   ### Examples
 
@@ -201,10 +225,9 @@ defmodule Accrue.Events do
     end
   end
 
-  # Per Pitfall #2 (01-RESEARCH.md): Postgrex 0.22 surfaces unknown
-  # SQLSTATE codes on the `pg_code` key of the postgres error map, with
-  # `code` set to `nil`. Our trigger raises `45A01` → we pattern-match
-  # on `pg_code: "45A01"`. NEVER on message string (D-11).
+  # Postgrex 0.22+ surfaces unknown SQLSTATE codes on the `pg_code` key of
+  # the postgres error map, with `code` set to `nil`. Our trigger raises
+  # `45A01` → we pattern-match on `pg_code: "45A01"`. Never on message string.
   defp reraise_if_immutable(%Postgrex.Error{postgres: %{pg_code: "45A01"} = pg}, stacktrace) do
     reraise Accrue.EventLedgerImmutableError,
             [message: pg[:message], pg_code: "45A01"],
@@ -224,12 +247,12 @@ defmodule Accrue.Events do
     reraise err, stacktrace
   end
 
-  # --- Query API (EVT-06 / EVT-10 / Plan 04-06) -------------------------
+  # --- Query API --------------------------------------------------------
 
   @doc """
   Returns events scoped to a single subject, ordered by `inserted_at`
-  ascending. Each row is routed through the upcaster chain to the
-  current schema version before returning (Pitfall 10).
+  ascending. Each row is automatically migrated through the upcaster chain
+  to the current schema version before being returned.
 
   ## Options
 
@@ -255,7 +278,9 @@ defmodule Accrue.Events do
 
   Returns a map with `:state`, `:event_count`, and `:last_event_at`.
 
-  Each row is routed through the upcaster chain BEFORE folding (Pitfall 10).
+  Each row is migrated through the upcaster chain before folding, so the
+  resulting state reflects the current schema regardless of when the events
+  were recorded.
   """
   @spec state_as_of(String.t(), String.t(), DateTime.t()) :: %{
           state: map(),
@@ -364,8 +389,8 @@ defmodule Accrue.Events do
     end
   end
 
-  # Returns the current in-app schema version for an event type. Phase 3
-  # ships everything at version 1; future schemas can return 2+ as their
-  # payloads evolve. Defaults to 1 for unknown types.
+  # Returns the current in-app schema version for an event type. Defaults to
+  # 1 for all known types. Future schema versions return 2+ as their payloads
+  # evolve. Unknown types also default to 1.
   defp current_schema_version(_type), do: 1
 end

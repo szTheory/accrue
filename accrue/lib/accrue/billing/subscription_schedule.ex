@@ -2,16 +2,22 @@ defmodule Accrue.Billing.SubscriptionSchedule do
   @moduledoc """
   Ecto schema for `accrue_subscription_schedules`.
 
-  Thin projection of Stripe's SubscriptionSchedule resource. Stripe is
-  canonical for phase state; we persist only the typed columns
-  `accrue_admin` LiveView filters and sorts on, plus a `data` jsonb
-  that stores the full Stripe payload (string-keyed) for callers that
-  want to inspect the raw shape.
+  A subscription schedule lets you pre-program future plan changes:
+  start a customer on a discounted trial phase, then automatically
+  migrate them to full pricing at a specific date — without manual
+  intervention. Use a schedule instead of a plain subscription when you
+  need time-boxed phases or future price changes locked in advance.
 
-  Follows the D3-17 dual-changeset pattern — `changeset/2` validates
-  status transitions on the user path, `force_status_changeset/2`
-  bypasses that validation on the webhook path because Stripe is the
-  source of truth for schedule state.
+  This schema stores a thin local projection of Stripe's
+  SubscriptionSchedule resource. Stripe is canonical for phase state;
+  Accrue persists only the typed columns the admin UI needs to filter
+  and sort on, plus a `data` jsonb with the full Stripe payload for
+  callers that need the raw shape.
+
+  Two changeset functions reflect the two sources of writes:
+  `changeset/2` validates status on the user path, while
+  `force_status_changeset/2` bypasses that check on the webhook path
+  because Stripe is the source of truth for schedule state.
   """
 
   use Ecto.Schema
@@ -75,9 +81,9 @@ defmodule Accrue.Billing.SubscriptionSchedule do
   end
 
   @doc """
-  Webhook-path changeset (D3-17). Stripe is canonical for schedule
-  state; this path skips the status allowlist so out-of-order events
-  can settle arbitrary state without validation failing.
+  Webhook-path changeset. Stripe is canonical for schedule state; this
+  path skips the status allowlist so out-of-order events can settle
+  arbitrary state without validation failing.
   """
   @spec force_status_changeset(%__MODULE__{} | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def force_status_changeset(schedule_or_changeset, attrs \\ %{}) do

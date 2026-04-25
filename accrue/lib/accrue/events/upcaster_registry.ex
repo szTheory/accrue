@@ -8,7 +8,7 @@ defmodule Accrue.Events.UpcasterRegistry do
   migrate a payload from the row's recorded version up to the current
   in-app version.
 
-  ## Failure mode (Pitfall 9)
+  ## Failure mode
 
   If the requested target version is unknown for a type, this module
   returns `{:error, {:unknown_schema_version, v}}`. It NEVER silently

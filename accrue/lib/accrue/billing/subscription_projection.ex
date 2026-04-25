@@ -1,8 +1,13 @@
 defmodule Accrue.Billing.SubscriptionProjection do
   @moduledoc """
-  Decomposes a processor (Stripe- or Fake-shaped) subscription map into
-  a flat attrs map ready for `Accrue.Billing.Subscription.changeset/2`
-  (D3-02).
+  Translates a Stripe subscription API response into local Ecto changesets.
+
+  A "projection" in Accrue means decomposing a Stripe API response into a
+  flat attrs map that `Accrue.Billing.Subscription.changeset/2` accepts.
+  This module handles the type coercions (Unix timestamps → `DateTime`,
+  status strings → atoms, nested discount objects → a plain id string)
+  and normalizes the `data` jsonb to string-keyed maps for round-trip
+  safety.
 
   Handles both the atom-keyed shape produced by `Accrue.Processor.Fake`
   and the string-keyed shape produced by `Accrue.Processor.Stripe`
@@ -36,10 +41,9 @@ defmodule Accrue.Billing.SubscriptionProjection do
      }}
   end
 
-  # Phase 4 Plan 05 (BILL-28) — project Stripe's nested `discount`
-  # object down to just the discount id for the local `discount_id`
-  # column. Supports both the string form (`"di_..."`) and the nested
-  # `%{id: ...}` shape.
+  # Project Stripe's nested `discount` object down to just the discount
+  # id for the local `discount_id` column. Supports both the bare
+  # string form (`"di_..."`) and the nested `%{id: ...}` shape.
   defp parse_discount_id(nil), do: nil
   defp parse_discount_id(s) when is_binary(s), do: s
   defp parse_discount_id(%{} = m), do: get(m, :id)

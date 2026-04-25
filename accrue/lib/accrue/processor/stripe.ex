@@ -1,45 +1,60 @@
 defmodule Accrue.Processor.Stripe do
   @moduledoc """
-  Real-world processor adapter delegating to `:lattice_stripe`.
+  Production Stripe adapter — wires all `Accrue.Processor` callbacks to
+  `:lattice_stripe`.
 
-  **This is the ONLY module in the codebase allowed to alias, import, or
-  reference `LatticeStripe`** (D-07). All raw Stripe errors cross this
-  facade and are translated to `Accrue.Error` subtypes via
-  `Accrue.Processor.Stripe.ErrorMapper` — downstream Billing code never
-  sees raw `LatticeStripe.Error` shapes. A CI-enforced facade-lockdown test
-  in `test/accrue/processor/stripe_test.exs` walks `lib/accrue/**/*.ex`
-  and fails if `LatticeStripe` appears anywhere except `stripe.ex` and
-  `stripe/error_mapper.ex`.
+  This is the adapter you configure in production. Every `Accrue.Billing`
+  operation flows through here when `:processor` is set to
+  `Accrue.Processor.Stripe`. All raw Stripe errors are translated to
+  `Accrue.Error` subtypes via `Accrue.Processor.Stripe.ErrorMapper` so
+  nothing upstream ever sees a raw `LatticeStripe.Error`.
 
-  ## Config keys (READ-ONLY)
+  > **Facade boundary:** This is the only module in the Accrue codebase
+  > allowed to reference `LatticeStripe` directly. A CI test enforces this
+  > by scanning `lib/accrue/**/*.ex` and failing if `LatticeStripe` appears
+  > anywhere except `stripe.ex` and `stripe/error_mapper.ex`.
 
-  This module reads (never writes) the following Phase 1 keys that
-  `Accrue.Config` already defines:
+  ## When you reach for this module
 
-  - `:stripe_secret_key` — runtime only (CLAUDE.md §Config Boundaries). An
-    unset key raises `Accrue.ConfigError` at call time rather than at
-    `Application.compile_env!/2` load time so secrets never leak into
-    compiled release artifacts.
-  - `:stripe_api_version` — runtime only, defaults to `"2026-03-25.dahlia"`.
+  - **Configuring Stripe credentials** — set `:stripe_secret_key` and
+    optionally `:stripe_api_version` in `config/runtime.exs`.
+  - **Debugging a Stripe-specific error** — check `Accrue.Processor.Stripe.ErrorMapper`
+    for how Stripe error codes map to `Accrue.Error` subtypes.
+  - **Overriding the API version per-call** — use `opts[:api_version]` or
+    scope a block with `Accrue.Stripe.with_api_version/2`.
+
+  ## Configuration
+
+      # config/runtime.exs
+      config :accrue,
+        processor: Accrue.Processor.Stripe,
+        stripe_secret_key: System.fetch_env!("STRIPE_SECRET_KEY"),
+        stripe_api_version: "2026-03-25.dahlia"   # optional; this is the default
+
+  Both keys are **runtime-only** — never set them at compile time or they
+  will be baked into your release artifact.
+
+  An unset or empty `:stripe_secret_key` raises `Accrue.ConfigError` at
+  the first call, not at boot.
+
+  ## API version precedence
+
+  The resolved API version for each call follows this order:
+
+    1. `opts[:api_version]` (explicit per-call override)
+    2. `Process.get(:accrue_stripe_api_version)` (scoped via `Accrue.Stripe.with_api_version/2`)
+    3. `Accrue.Config.stripe_api_version/0` (application config default)
 
   ## PII discipline
 
-  Raw Stripe responses often contain PII in fields like `email`, `name`,
-  `address`, `phone`, `shipping`. This adapter:
+  Raw Stripe responses can contain PII in fields like `email`, `name`,
+  `address`, `phone`, and `shipping`. This adapter:
 
-  - **Does not log `processor_error` verbatim**.
-  - **Does not auto-inject params or responses into telemetry metadata**
-    — only `%{adapter: :stripe, operation: ...}` at this layer.
-  - **Converts `LatticeStripe.Customer` structs to plain maps** via
-    `customer_to_map/1` so downstream code never pattern-matches on
-    `%LatticeStripe.Customer{}`.
-
-  ## Initial scope
-
-  Only the three customer callbacks are implemented. Wire-level
-  integration tests against Stripe test mode are deferred — the initial
-  scope only proves the behaviour conformance, the error-mapping
-  contract, and the facade lockdown.
+  - Does not log processor errors verbatim.
+  - Emits only `%{adapter: :stripe, operation: ...}` in telemetry metadata
+    — never raw params or response bodies.
+  - Converts `LatticeStripe` structs to plain maps so downstream code never
+    pattern-matches on library-internal struct types.
   """
 
   @behaviour Accrue.Processor
@@ -516,12 +531,12 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Meter event (Phase 4 Plan 02, BILL-13, D4-03)
+  # Meter event
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
   def report_meter_event(%Accrue.Billing.MeterEvent{} = row) do
-    # Stripe requires the payload `value` as a STRING (Pitfall 7) and
+    # Stripe requires the payload `value` as a STRING (not an integer) and
     # params keys as strings on the wire. Stripe's body-level
     # `identifier` + HTTP `idempotency_key` form two-layer dedup.
     params = %{
@@ -547,7 +562,7 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Subscription items (Phase 4 Plan 03, BILL-12)
+  # Subscription items
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
@@ -583,7 +598,7 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Subscription schedules (Phase 4 Plan 03, BILL-16)
+  # Subscription schedules
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
@@ -639,7 +654,7 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Coupons + Promotion Codes (Phase 4 Plan 05, BILL-27)
+  # Coupons + Promotion Codes
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
@@ -681,7 +696,7 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Checkout + Customer Portal (Phase 4 Plan 07, CHKT-01..06)
+  # Checkout + Customer Portal
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
@@ -714,7 +729,7 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Connect — Account Links + Login Links (Phase 5 Plan 03, D5-06)
+  # Connect — Account Links + Login Links
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
@@ -744,7 +759,7 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # Connect — Transfers (Phase 5 Plan 05, CONN-05)
+  # Connect — Transfers
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
@@ -803,7 +818,7 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # fetch/2 — generic refetch dispatch (D3-48)
+  # fetch/2 — generic refetch dispatch
   # ---------------------------------------------------------------------------
 
   @impl Accrue.Processor
@@ -819,18 +834,16 @@ defmodule Accrue.Processor.Stripe do
   def fetch(:checkout_session, id), do: checkout_session_fetch(id, [])
 
   # ---------------------------------------------------------------------------
-  # Phase 3 helpers
+  # Helpers
   # ---------------------------------------------------------------------------
 
   @spec stripe_opts(atom(), String.t(), keyword()) :: keyword()
   defp stripe_opts(op, subject_id, opts) do
-    # CR-01: Preserve an explicit caller-supplied idempotency key (from
-    # the billing context, computed via Accrue.Processor.Idempotency.key/4
-    # with the D3-60/61 deterministic subject_uuid). Only compute our own
-    # as a fallback when the caller didn't supply one (e.g. direct adapter
-    # use outside the billing context). The SHA256 seed for the
-    # fallback is still based on (op, subject_id, operation_id) for
-    # parity with PROC-02.
+    # Preserve an explicit caller-supplied idempotency key (from the billing
+    # context, computed via Accrue.Processor.Idempotency.key/4). Only
+    # compute our own as a fallback when the caller didn't supply one
+    # (e.g. direct adapter use outside the billing context). The SHA256
+    # seed for the fallback is based on (op, subject_id, operation_id).
     idem_key =
       Keyword.get(opts, :idempotency_key) ||
         compute_idempotency_key(op, subject_id, opts)
@@ -871,16 +884,17 @@ defmodule Accrue.Processor.Stripe do
   defp translate_resource({:error, raw}), do: {:error, ErrorMapper.to_accrue_error(raw)}
 
   # ---------------------------------------------------------------------------
-  # Idempotency keys (D2-11, D2-12, PROC-04)
+  # Idempotency keys
   # ---------------------------------------------------------------------------
 
   @doc """
   Computes a deterministic idempotency key from the operation, subject ID,
-  and a seed (D2-11). The seed resolution chain is (D2-12):
+  and a seed. The seed resolution chain is:
 
-    1. `opts[:operation_id]` (explicit)
-    2. `Accrue.Actor.current_operation_id/0` (process dict)
-    3. Random UUID + `Logger.warning` (non-deterministic fallback)
+    1. `opts[:operation_id]` (explicit per-call value)
+    2. `Accrue.Actor.current_operation_id/0` (process dictionary)
+    3. Random UUID + `Logger.warning` (non-deterministic fallback — retries
+       will NOT be idempotent when this path is taken)
 
   Returns a string like `"accr_<22 url-safe base64 chars>"`.
   """
@@ -897,11 +911,11 @@ defmodule Accrue.Processor.Stripe do
   end
 
   # ---------------------------------------------------------------------------
-  # API version override (D2-14, D2-15, PROC-06)
+  # API version override
   # ---------------------------------------------------------------------------
 
   @doc """
-  Resolves the Stripe API version using three-level precedence (D2-14):
+  Resolves the Stripe API version using three-level precedence:
 
     1. `opts[:api_version]` (explicit per-call override)
     2. `Process.get(:accrue_stripe_api_version)` (scoped via `Accrue.Stripe.with_api_version/2`)
@@ -915,16 +929,15 @@ defmodule Accrue.Processor.Stripe do
   end
 
   @doc """
-  Resolves the Stripe-Account header using three-level precedence (D5-01):
+  Resolves the Stripe-Account header using three-level precedence:
 
     1. `opts[:stripe_account]` (explicit per-call override)
-    2. `Process.get(:accrue_connected_account_id)` (via `Accrue.Connect.with_account/2`
-       — scoped pdict key; the `Accrue.Connect` module itself lands in Plan 05-02)
+    2. `Process.get(:accrue_connected_account_id)` (scoped via `Accrue.Connect.with_account/2`)
     3. `Accrue.Config.connect/0` `[:default_stripe_account]` (config fallback)
 
-  Returns `nil` when no connected-account context is set, which preserves
-  platform-scoped behavior: `lattice_stripe` omits the `Stripe-Account`
-  header when the client is built with `stripe_account: nil`.
+  Returns `nil` when no connected-account context is set, which causes
+  `lattice_stripe` to omit the `Stripe-Account` header — preserving
+  platform-scoped behaviour for calls that must run as the platform.
   """
   @spec resolve_stripe_account(keyword()) :: String.t() | nil
   def resolve_stripe_account(opts \\ []) when is_list(opts) do
@@ -991,8 +1004,8 @@ defmodule Accrue.Processor.Stripe do
   @spec customer_to_map(LatticeStripe.Customer.t()) :: map()
   defp customer_to_map(%LatticeStripe.Customer{} = c) do
     # Convert to a plain map so downstream code never pattern-matches on
-    # a LatticeStripe struct. Keep all fields — this is the full Phase 1
-    # shape Billing will consume. Drop the :__struct__ key explicitly.
+    # a LatticeStripe struct. Keep all fields — this is the full shape
+    # Billing consumes. Drop the :__struct__ key explicitly.
     c
     |> Map.from_struct()
   end

@@ -1,16 +1,56 @@
 defmodule Accrue.Billing.SubscriptionActions do
   @moduledoc """
-  Subscription write surface.
+  Write surface for subscription lifecycle operations.
 
-  Every function here is exposed on `Accrue.Billing` via `defdelegate`.
-  All public functions follow the dual-API `foo/n` + `foo!/n` pattern
-  and emit an `accrue_events` row inside the same `Repo.transact/2` as
-  the DB mutation.
+  Every function here is exposed on `Accrue.Billing` — you rarely call
+  this module directly. Use `Accrue.Billing.subscribe/3`,
+  `Accrue.Billing.cancel/2`, etc. instead.
 
-  The intent_result tagged return is used for ops that can surface a
-  requires_action PaymentIntent (`subscribe`, `swap_plan`, `cancel`
-  when `invoice_now: true`). Non-intent ops return plain
-  `{:ok, %Subscription{}}`.
+  ## When you reach for this module
+
+  If you need to go deeper than `Accrue.Billing` exposes — for example,
+  to call a function in a context where `defdelegate` wrapping is in the
+  way — these are the underlying implementations.
+
+  ## Lifecycle groups
+
+  **Create**
+  - `subscribe/3` — subscribe a billable to a price; returns an intent result
+    (SCA-safe: may return `{:ok, :requires_action, payment_intent}`)
+  - `comp_subscription/3` — create a 100%-off comped subscription
+
+  **Manage plan**
+  - `swap_plan/3` — replace the current price with a new one (proration required)
+  - `update_quantity/3` — change the quantity on a single-item subscription
+  - `preview_upcoming_invoice/2` — fetch the next invoice before it's finalized
+
+  **Pause and resume**
+  - `pause/2` — pause collection (void, mark_uncollectible, or keep_as_draft)
+  - `unpause/2` — resume a paused subscription
+  - `resume/2` — cancel a pending cancellation (undo `cancel_at_period_end`)
+
+  **Cancel**
+  - `cancel/2` — cancel immediately
+  - `cancel_at_period_end/2` — schedule cancellation at the end of the billing period
+
+  **Read**
+  - `get_subscription/2` — fetch a local subscription row by id
+
+  ## Return types
+
+  Operations that involve a PaymentIntent (subscribe, swap_plan, cancel
+  with `invoice_now: true`) return `intent_result(Subscription.t())`:
+
+      {:ok, %Subscription{}}
+      | {:ok, :requires_action, payment_intent_map}
+      | {:error, term()}
+
+  All other operations return `{:ok, %Subscription{}} | {:error, term()}`.
+
+  ## Atomicity
+
+  Every write atomically persists the local row change **and** appends an
+  event to `accrue_events` inside the same `Repo.transact/1` call.
   """
 
   require Logger
@@ -31,7 +71,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   alias Accrue.Repo
 
   # ---------------------------------------------------------------------
-  # subscribe/2..3 (BILL-03, BILL-04, BILL-07)
+  # subscribe/2..3
   # ---------------------------------------------------------------------
 
   @doc """
@@ -135,7 +175,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   end
 
   # ---------------------------------------------------------------------
-  # swap_plan/3 (BILL-09)
+  # swap_plan/3
   # ---------------------------------------------------------------------
 
   @swap_schema [
@@ -167,7 +207,7 @@ defmodule Accrue.Billing.SubscriptionActions do
 
   @required_proration_msg "Accrue.Billing.swap_plan/3 requires an explicit :proration option " <>
                             "(:create_prorations, :none, or :always_invoice). Accrue never " <>
-                            "inherits Stripe defaults — see BILL-09."
+                            "inherits Stripe defaults for proration — be explicit."
 
   @spec swap_plan(Subscription.t(), String.t(), keyword()) ::
           {:ok, Subscription.t()}
@@ -249,7 +289,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   end
 
   # ---------------------------------------------------------------------
-  # preview_upcoming_invoice/1..2 (BILL-10)
+  # preview_upcoming_invoice/1..2
   # ---------------------------------------------------------------------
 
   @spec preview_upcoming_invoice(Subscription.t() | Customer.t(), keyword()) ::
@@ -300,7 +340,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   end
 
   # ---------------------------------------------------------------------
-  # update_quantity/2..3 (single-item invariant, D3-33)
+  # update_quantity/2..3 (single-item subscriptions only)
   # ---------------------------------------------------------------------
 
   @spec update_quantity(Subscription.t(), pos_integer(), keyword()) ::
@@ -343,7 +383,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   end
 
   # ---------------------------------------------------------------------
-  # cancel / cancel_at_period_end / resume / pause / unpause (Task 3)
+  # cancel / cancel_at_period_end / resume / pause / unpause
   # ---------------------------------------------------------------------
 
   @cancel_schema [
@@ -507,10 +547,9 @@ defmodule Accrue.Billing.SubscriptionActions do
   def pause(%Subscription{} = sub, opts) do
     v = NimbleOptions.validate!(opts, @pause_schema)
 
-    # BILL-11: if the new string :pause_behavior option is supplied,
-    # it takes precedence over the legacy :behavior atom. Otherwise
-    # derive the string form from the atom for persistence into the
-    # new accrue_subscriptions.pause_behavior column.
+    # If the string :pause_behavior option is supplied, it takes precedence
+    # over the atom :behavior option. Otherwise derive the string form from
+    # the atom for persistence into accrue_subscriptions.pause_behavior.
     behavior_atom =
       case v[:pause_behavior] do
         nil -> v[:behavior]
@@ -558,7 +597,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   end
 
   # ---------------------------------------------------------------------
-  # comp_subscription/2..3 (BILL-14)
+  # comp_subscription/2..3
   # ---------------------------------------------------------------------
 
   @doc """
@@ -685,7 +724,8 @@ defmodule Accrue.Billing.SubscriptionActions do
   defp normalize_price_spec(list) when is_list(list) do
     raise ArgumentError,
           "Accrue.Billing.subscribe/2 expects a single price_id or {price_id, quantity} " <>
-            "tuple; for multi-item subs use Phase 4 update_items/3. Got: #{inspect(list)}"
+            "tuple; use `Accrue.Billing.SubscriptionItems` to add, remove, or update items " <>
+            "on an active subscription. Got: #{inspect(list)}"
   end
 
   defp normalize_price_spec(other) do
@@ -823,9 +863,8 @@ defmodule Accrue.Billing.SubscriptionActions do
         list when is_list(list) -> list
       end
 
-    # WR-09: use reduce_while so a bad changeset propagates as
-    # {:error, changeset} rather than escaping Repo.transact via
-    # Ecto.InvalidChangesetError from Repo.insert!/update!.
+    # Use reduce_while so a bad changeset propagates as {:error, changeset}
+    # rather than escaping Repo.transact via Ecto.InvalidChangesetError.
     Enum.reduce_while(items, {:ok, []}, fn si, {:ok, acc} ->
       case upsert_item(sub, si) do
         {:ok, item} -> {:cont, {:ok, [item | acc]}}
@@ -851,8 +890,8 @@ defmodule Accrue.Billing.SubscriptionActions do
       metadata: SubscriptionProjection.get(si, :metadata) || %{}
     }
 
-    # WR-09: non-bang variants so Ecto.InvalidChangesetError no longer
-    # bypasses the enclosing with-chain.
+      # Use non-bang variants so Ecto.InvalidChangesetError doesn't bypass
+      # the enclosing with-chain.
     case Repo.one(from(i in SubscriptionItem, where: i.processor_id == ^stripe_id)) do
       nil ->
         %SubscriptionItem{}
@@ -900,7 +939,8 @@ defmodule Accrue.Billing.SubscriptionActions do
         item_count: length(items),
         message:
           "Accrue.Billing.#{op} supports single-item subscriptions only; " <>
-            "for multi-item subs use Phase 4 update_items/3."
+            "use `Accrue.Billing.SubscriptionItems` to add, remove, or update items " <>
+            "on an active subscription."
     end
   end
 

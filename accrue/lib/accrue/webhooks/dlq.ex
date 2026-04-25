@@ -17,8 +17,7 @@ defmodule Accrue.Webhooks.DLQ do
     * `prune/1` — delete `:dead` rows older than N days
     * `prune_succeeded/1` — delete `:succeeded` rows older than N days
 
-  Each public function ships in dual bang/tuple form per the D-05
-  convention.
+  Each public function ships in dual bang/tuple form.
 
   ## Replay-death-loop prevention
 

@@ -2,15 +2,23 @@ defmodule Accrue.PDF do
   @moduledoc """
   Behaviour + facade for PDF rendering.
 
-  Callers pass pre-rendered HTML + opts; the adapter returns a binary
-  PDF body. Two adapters ship by default:
+  You rarely call this module directly. The typical entry point is
+  `Accrue.Invoices.render_invoice_pdf/2`, which renders an invoice to HTML
+  and then calls `Accrue.PDF.render/2` under the hood. You interact with
+  this module mainly through two concerns:
+
+  1. **Adapter configuration** — choose which backend renders PDFs.
+  2. **Test setup** — swap in `Accrue.PDF.Test` so your test suite does not
+     require a Chrome binary.
+
+  ## Adapters
 
   - `Accrue.PDF.ChromicPDF` — production default. Delegates to the host
     application's ChromicPDF instance. **Accrue does NOT start ChromicPDF** —
-    the host app starts it in its own supervision tree.
+    the host app must add it to its own supervision tree.
   - `Accrue.PDF.Test` — Chrome-free test adapter. Sends
     `{:pdf_rendered, html, opts}` to `self()` and returns `{:ok, "%PDF-TEST"}`.
-    Use in tests to avoid Chrome binary dependency.
+    Use in tests to avoid the Chrome binary dependency in CI.
 
   ## Telemetry
 
@@ -34,8 +42,7 @@ defmodule Accrue.PDF do
     ChromicPDF uses `print_to_pdfa/1` in this case.
   - `:header_html`, `:footer_html` — optional header/footer HTML. The
     ChromicPDF adapter translates these to the `:header`/`:footer` keys
-    that `ChromicPDF.Template.source_and_options/1` expects (RESEARCH
-    Summary point 5).
+    that `ChromicPDF.Template.source_and_options/1` expects.
   """
   @spec render(html(), opts()) :: {:ok, binary()} | {:error, term()}
   def render(html, opts \\ []) when is_binary(html) and is_list(opts) do

@@ -1,27 +1,53 @@
 defmodule Accrue.Application do
   @moduledoc """
-  OTP Application entry point for Accrue.
+  OTP Application module for Accrue — manages boot-time validation and
+  the supervision tree.
 
-  Empty-supervisor pattern: Accrue is a library, not a service. It does
-  NOT start host-owned components (host Repo, Oban, host ChromicPDF pool,
-  host Finch pool) — the host application's supervision tree owns those
-  (D-33, D-42, Pitfall #4).
+  ## What this is
 
-  Before the supervisor starts we run three boot-time validations:
+  Accrue follows an empty-supervisor pattern: it is a library, not a
+  service. The supervisor starts with no children. Accrue does **not**
+  start host-owned processes such as your Repo, Oban, ChromicPDF pool, or
+  Finch pool — your application's supervision tree owns those.
 
-    1. `Accrue.Config.validate_at_boot!/0` — validates the current
-       `:accrue` application env against the NimbleOptions schema.
-       Misconfig fails loud, before any state is touched.
+  ## What happens at boot
 
-    2. `Accrue.Auth.Default.boot_check!/0` — refuses to boot in `:prod`
-       when `:auth_adapter` still points at the dev-permissive default.
+  Before the (empty) supervisor starts, Accrue runs several validations:
 
-    3. `warn_on_secret_collision/0` — emits a `Logger.warning/1` (not
-       fatal) when the configured Connect webhook endpoint secret is
-       byte-identical to the platform endpoint secret. Stripe issues a
-       SEPARATE signing secret per Connect endpoint in the Stripe
-       Dashboard; mixing them causes silent signature verification
-       failures (Phase 5 Pitfall 5; `guides/connect.md`).
+    1. **Config schema check** — `Accrue.Config.validate_at_boot!/0`
+       validates the `:accrue` application environment against the
+       NimbleOptions schema. Misconfiguration fails loudly at startup,
+       before any state is touched.
+
+    2. **Auth adapter safety check** — `Accrue.Auth.Default.boot_check!/0`
+       refuses to start in `:prod` when `:auth_adapter` still points at
+       the dev-permissive default adapter.
+
+    3. **PDF adapter availability check** — warns at boot if
+       `Accrue.PDF.ChromicPDF` is configured but no ChromicPDF supervisor
+       child is running in the host app's supervision tree.
+
+    4. **Oban queue / PDF pool size check** — warns if the `:accrue_mailers`
+       Oban queue concurrency exceeds the ChromicPDF pool size, which can
+       cause back-pressure on invoice email rendering.
+
+    5. **Connect webhook secret collision check** — warns when a Connect
+       endpoint's webhook signing secret is byte-identical to a platform
+       endpoint secret. Stripe issues a separate signing secret for Connect
+       endpoints in the Dashboard; mixing them causes silent signature
+       verification failures. See `guides/connect.md`.
+
+    6. **Company address / locale check** — warns when customers have
+       EU/CA preferred locales but `:branding[:company_address]` is unset.
+       CAN-SPAM/CASL require a physical postal address in transactional
+       emails for those locales.
+
+  ## Host app integration
+
+  `Accrue.Application` is started automatically by OTP when `:accrue` is
+  listed as a dependency — host applications do **not** start it manually.
+  Ensure your `config/runtime.exs` is complete before the application
+  starts, as validation runs during `start/2`.
   """
 
   use Application
@@ -43,11 +69,11 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Pitfall guard: emit a boot-time warning when the configured
-  # PDF adapter is `Accrue.PDF.ChromicPDF` but the host app has NOT
-  # started a ChromicPDF supervisor child. Accrue does not start
-  # ChromicPDF itself (D-33). The mailer worker's PDF attachment branch
-  # treats `:chromic_pdf_not_started` as a terminal error and falls
+  # Emit a boot-time warning when the configured PDF adapter is
+  # `Accrue.PDF.ChromicPDF` but the host app has NOT started a ChromicPDF
+  # supervisor child. Accrue does not start ChromicPDF itself — the host
+  # app's supervision tree owns it. The mailer worker's PDF attachment
+  # branch treats `:chromic_pdf_not_started` as a terminal error and falls
   # through to the hosted-invoice-url note — this warning surfaces the
   # misconfig at boot instead of waiting for the first invoice email.
   @spec warn_pdf_adapter_unavailable() :: :ok
@@ -74,9 +100,10 @@ defmodule Accrue.Application do
 
         Logger.warning("""
         [Accrue] :pdf_adapter is Accrue.PDF.ChromicPDF but no ChromicPDF
-        supervisor child is running. Accrue does NOT start ChromicPDF
-        (D-33). Invoice emails will fall through to the hosted_invoice_url
-        note instead of attaching a rendered PDF.
+        supervisor child is running. Accrue does not start ChromicPDF —
+        add it to your host application's supervision tree.
+        Invoice emails will fall through to the hosted_invoice_url note
+        instead of attaching a rendered PDF until this is fixed.
         Add `{ChromicPDF, on_demand: true}` (dev) or a persistent pool
         (prod) to your host application's supervision tree.
         """)
@@ -86,11 +113,10 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Pitfall guard: emit a boot-time warning when the
-  # `:accrue_mailers` Oban queue is configured with a concurrency
-  # greater than the declared ChromicPDF pool size. Without this guard
-  # the mailer queue can starve the PDF pool and back-pressure the
-  # entire billing email path.
+  # Emit a boot-time warning when the `:accrue_mailers` Oban queue is
+  # configured with a concurrency greater than the declared ChromicPDF pool
+  # size. Without this guard the mailer queue can starve the PDF pool and
+  # back-pressure the entire billing email path.
   @spec warn_oban_queue_vs_pdf_pool() :: :ok
   def warn_oban_queue_vs_pdf_pool do
     key = :accrue_oban_queue_vs_pdf_pool_warned?
@@ -106,7 +132,7 @@ defmodule Accrue.Application do
       [Accrue] :accrue_mailers Oban queue concurrency (#{queue_concurrency}) exceeds
       :chromic_pdf_pool_size (#{pool_size}). Invoice email rendering may
       back-pressure the ChromicPDF pool — set queue concurrency ≤ pool
-      size or bump :chromic_pdf_pool_size. See guides/email.md Pitfall 4.
+      size or bump :chromic_pdf_pool_size. See guides/email.md.
       """)
 
       :ok
@@ -225,11 +251,11 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Pitfall 5 (Phase 5): emit a boot-time warning when the Connect
-  # endpoint secret byte-equals any non-Connect (platform) endpoint
-  # secret. Non-fatal — hosts may intentionally set identical secrets
-  # in dev/test fixtures — but a warning surfaces the footgun before
-  # the host hits a silent signature verification failure in prod.
+  # Emit a boot-time warning when the Connect endpoint secret byte-equals
+  # any non-Connect (platform) endpoint secret. Non-fatal — hosts may
+  # intentionally set identical secrets in dev/test fixtures — but a
+  # warning surfaces the footgun before hitting a silent signature
+  # verification failure in production.
   @spec warn_on_secret_collision() :: :ok
   def warn_on_secret_collision do
     endpoints =
@@ -258,10 +284,10 @@ defmodule Accrue.Application do
         {pname, psecret} <- other_secrets,
         csecret == psecret do
       Logger.warning(
-        "[Accrue] :#{cname} and :#{pname} webhook secrets are byte-identical. " <>
-          "Stripe issues a SEPARATE signing secret per Connect endpoint in the " <>
-          "Stripe Dashboard. Mixing them causes silent verification failures. " <>
-          "(Pitfall 5; see guides/connect.md)"
+          "[Accrue] :#{cname} and :#{pname} webhook secrets are byte-identical. " <>
+            "Stripe issues a separate signing secret per Connect endpoint in the " <>
+            "Stripe Dashboard. Mixing them causes silent verification failures. " <>
+            "See guides/connect.md for the correct setup."
       )
     end
 

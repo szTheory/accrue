@@ -1,12 +1,15 @@
 defmodule Accrue.Billing.Query do
   @moduledoc """
   Composable `Ecto.Query` fragments mirroring the
-  `Accrue.Billing.Subscription` predicates (D3-04).
+  `Accrue.Billing.Subscription` predicates.
 
-  Every predicate in `Subscription` has a matching query fragment here.
-  Use these in `where` clauses instead of accessing raw `.status` — raw
-  status access is forbidden outside this module and `Subscription`
-  itself (enforced by `Accrue.Credo.NoRawStatusAccess`).
+  Every predicate in `Accrue.Billing.Subscription` has a matching query
+  fragment here so you can filter subscriptions in the database with the
+  same semantics as the in-memory predicates. Prefer these fragments over
+  direct `.status` comparisons in `where` clauses — the predicates on
+  `Accrue.Billing.Subscription` are the correct way to check subscription
+  state, as direct comparisons miss edge cases like `cancel_at_period_end`
+  and `ended_at` that the predicates cover.
 
   All functions accept an optional queryable (default
   `Accrue.Billing.Subscription`) and compose via `|>`:

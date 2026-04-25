@@ -8,7 +8,7 @@ defmodule Accrue.Jobs.DunningSweeper do
   move the subscription to the terminal action (`:unpaid` or
   `:canceled`) and stamps `dunning_sweep_attempted_at` on success.
 
-  ## Canonicality (D2-29)
+  ## How status updates work
 
   This worker NEVER flips the local `subscription.status`. It only:
 
@@ -97,7 +97,7 @@ defmodule Accrue.Jobs.DunningSweeper do
     case Processor.__impl__().update_subscription(sub.processor_id, stripe_params, []) do
       {:ok, _stripe_sub} ->
         # Stamp attempt AFTER successful processor call. Does NOT flip
-        # local status — webhook does that (D2-29).
+        # local status — the webhook from Stripe does that.
         now_usec = %{Accrue.Clock.utc_now() | microsecond: {0, 6}}
 
         {:ok, _updated} =

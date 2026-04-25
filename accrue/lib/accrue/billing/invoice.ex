@@ -2,9 +2,15 @@ defmodule Accrue.Billing.Invoice do
   @moduledoc """
   Ecto schema for the `accrue_invoices` table.
 
-  Phase 3 upgrades `:status` to an `Ecto.Enum` and introduces a dual-path
-  changeset (D3-17) so user-facing operations enforce the legal state
-  machine while webhook reconciles accept any status from Stripe.
+  Stores the local copy of a Stripe invoice, including all rollup columns
+  (`subtotal_minor`, `tax_minor`, `total_minor`, etc.) that the admin UI
+  and application logic need without round-tripping to Stripe. The `data`
+  jsonb column holds the full Stripe payload for callers that need the
+  raw shape.
+
+  For mutations (`finalize_invoice`, `pay_invoice`, `void_invoice`, etc.)
+  see `Accrue.Billing.InvoiceActions`, which is the correct entry point
+  for any write operation.
 
   ## Legal user-path transitions
 
@@ -13,6 +19,9 @@ defmodule Accrue.Billing.Invoice do
       paid, uncollectible, void  -> (terminal)
 
   ## Changeset paths
+
+  Two changeset functions exist to support the two sources of status
+  changes:
 
     * `changeset/2` — enforces the transition table; use for user-originated
       writes (`finalize_invoice`, `pay_invoice`, `void_invoice`).
@@ -54,7 +63,7 @@ defmodule Accrue.Billing.Invoice do
     field(:due_date, :utc_datetime_usec)
     field(:paid_at, :utc_datetime_usec)
 
-    # D3-14 rollup columns
+    # Rollup columns — denormalized from the Stripe invoice for local queries
     field(:subtotal_minor, :integer)
     field(:tax_minor, :integer)
     field(:automatic_tax, :boolean, default: false)

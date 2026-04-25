@@ -78,11 +78,11 @@ defmodule Accrue.Billing.MeterEventActions do
     identifier = opts[:identifier] || derive_identifier(customer, event_name, value, ts)
     override_op = opts[:operation_id]
 
-    with :ok <- validate_backdating_window(ts),
+      with :ok <- validate_backdating_window(ts),
          {:ok, row} <-
            insert_pending(customer, event_name, value, ts, identifier, override_op) do
-      # Stripe call OUTSIDE Repo.transact/2 — D2-09 / D4-03. Crashes here
-      # leave the row in `pending` for the reconciler to retry.
+      # Stripe call OUTSIDE Repo.transact/2. Crashes here leave the row in
+      # `pending` for the reconciler to retry on its next cron tick.
       cond do
         row.stripe_status in ["reported", "failed"] ->
           {:ok, row}

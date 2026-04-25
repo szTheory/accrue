@@ -25,7 +25,7 @@ defmodule Accrue.Billing.RefundActions do
   alias Accrue.Repo
 
   # ---------------------------------------------------------------------
-  # create_refund/2 (BILL-26)
+  # create_refund/2
   # ---------------------------------------------------------------------
 
   @doc """
@@ -43,10 +43,9 @@ defmodule Accrue.Billing.RefundActions do
   @spec create_refund(Charge.t(), keyword()) ::
           {:ok, Refund.t()} | {:error, term()}
   def create_refund(%Charge{} = charge, opts \\ []) do
-    # WR-05: Validate :amount shape and currency match against the
-    # parent charge. A typo or integer literal would otherwise raise
-    # CaseClauseError with an opaque stacktrace; fail loud with a
-    # typed error instead.
+    # Validate :amount shape and currency match against the parent charge.
+    # A typo or integer literal would raise CaseClauseError with an opaque
+    # stacktrace; fail loud with a typed error instead.
     amount_minor =
       case Keyword.get(opts, :amount) do
         nil ->
@@ -135,8 +134,8 @@ defmodule Accrue.Billing.RefundActions do
     {stripe_fee_refunded, merchant_loss, settled_at} =
       case {fee, fee_refunded} do
         {f, fr} when is_integer(f) and is_integer(fr) ->
-          # WR-03: clamp at 0 — Stripe's fee_refunded can exceed fee in
-          # fee-adjustment scenarios. BILL-26 requires non-negative.
+          # Clamp merchant_loss at 0 — Stripe's fee_refunded can exceed
+          # fee in fee-adjustment scenarios; the result must be non-negative.
           {fr, max(0, f - fr), Accrue.Clock.utc_now()}
 
         _ ->
@@ -149,8 +148,7 @@ defmodule Accrue.Billing.RefundActions do
           s
 
         s when is_binary(s) ->
-          # WR-04: mirror the DefaultHandler rescue pattern — an
-          # unknown status string should not crash; fall back to
+          # An unknown status string should not crash; fall back to
           # :pending and let the later webhook drive convergence.
           try do
             String.to_existing_atom(s)
@@ -198,9 +196,9 @@ defmodule Accrue.Billing.RefundActions do
     })
   end
 
-  # WR-05 helper: safely coerce charge.currency ("usd") to atom (:usd)
-  # for comparison against %Money{currency: :usd}. Uses to_existing_atom
-  # since the charge was persisted with a known currency code.
+  # Safely coerce charge.currency ("usd") to atom (:usd) for comparison
+  # against %Money{currency: :usd}. Uses to_existing_atom since the
+  # charge was persisted with a known currency code.
   defp charge_currency_atom(%Charge{currency: currency}) when is_binary(currency) do
     try do
       String.to_existing_atom(currency)

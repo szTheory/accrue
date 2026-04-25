@@ -2,23 +2,18 @@ defmodule Accrue.Billing.InvoiceActions do
   @moduledoc """
   Invoice write surface.
 
-  Exposes the five user-path invoice actions on `Accrue.Billing` via a
+  Exposes five user-path invoice actions on `Accrue.Billing` via a
   `defdelegate` facade: `finalize_invoice`, `void_invoice`,
-  `pay_invoice`, `mark_uncollectible`, `send_invoice`. Each follows a
-  one-shape `Repo.transact/2` pattern:
+  `pay_invoice`, `mark_uncollectible`, `send_invoice`.
 
-      telemetry.span
-        |> Repo.transact (
-             Processor.<op>(stripe_id, opts)
-             |> InvoiceProjection.decompose/1
-             |> update row via Invoice.changeset/2 (user path, enforces transitions)
-             |> upsert child items by stripe_id
-             |> Events.record/1 (same transaction)
-           )
-        |> IntentResult.wrap (pay_invoice only — may surface SCA)
+  Each action follows a consistent pattern: call the Stripe API, decompose
+  the response into local schema changes via `InvoiceProjection`, write
+  the updated invoice row and upsert its line items, and record an audit
+  event — all in a single database transaction.
 
-  `pay_invoice/2` returns an `intent_result` tagged union because Stripe
-  may surface SCA/3DS; the other four return plain `{:ok, %Invoice{}}`.
+  `pay_invoice/2` returns an intent result (`{:ok, %Invoice{}}` or
+  `{:ok, :requires_action, pi}`) because Stripe may surface SCA/3DS.
+  The other four actions return plain `{:ok, %Invoice{}}`.
   Every action has a bang variant that raises on `{:error, _}`;
   `pay_invoice!/2` additionally raises `Accrue.ActionRequiredError` on
   `:requires_action`.
@@ -111,7 +106,7 @@ defmodule Accrue.Billing.InvoiceActions do
   defp bang!({:error, other}, label), do: raise("#{label} failed: #{inspect(other)}")
 
   # ---------------------------------------------------------------------
-  # workflow shape (D3-18) — one Repo.transact per user action
+  # workflow shape — one Repo.transact per user action
   # ---------------------------------------------------------------------
 
   defp run_action(%Invoice{} = inv, processor_fn, event_type, opts) do
@@ -148,8 +143,8 @@ defmodule Accrue.Billing.InvoiceActions do
   end
 
   defp upsert_items(%Invoice{} = invoice, item_attrs_list) when is_list(item_attrs_list) do
-    # WR-09: reduce_while + non-bang variants so changeset errors
-    # propagate into the enclosing Repo.transact with-chain.
+    # reduce_while + non-bang variants so changeset errors propagate
+    # into the enclosing Repo.transact with-chain.
     Enum.reduce_while(item_attrs_list, {:ok, []}, fn attrs, {:ok, acc} ->
       attrs = Map.put(attrs, :invoice_id, invoice.id)
 

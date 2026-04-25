@@ -44,20 +44,8 @@ defmodule Accrue.Billing do
   import Ecto.Query, only: [from: 2]
 
   # ---------------------------------------------------------------------------
-  # Phase 3 write-surface facade (D3-03, D3-58)
-  #
-  # Every Phase 3 public function is declared here via `defdelegate`, pointing
-  # at a per-surface action module. Wave 2 plans (04/05/06) implement the real
-  # logic in those action modules and MUST NOT touch this file — that's how
-  # three parallel plans can run without colliding on billing.ex.
-  #
-  # `defdelegate` is resolved at runtime, so these compile even though the
-  # target modules are empty stubs at Plan 03-01 time. Calling any of these
-  # before Wave 2 lands will raise `UndefinedFunctionError` — that's fine,
-  # those calls only exist in Wave 2 tests.
+  # Subscription management
   # ---------------------------------------------------------------------------
-
-  # ── Subscription surface (Plan 04) ────────────────────────────────
   def subscribe(user, price_id_or_opts \\ [], opts \\ []) do
     span_billing(:subscription, :create, user, opts, fn ->
       SubscriptionActions.subscribe(user, price_id_or_opts, opts)
@@ -160,7 +148,7 @@ defmodule Accrue.Billing do
     end)
   end
 
-  # ── Advanced subscription surface (Phase 4 Plan 03) ───────────────
+  # ── Advanced subscription management ──────────────────────────────
   def comp_subscription(billable, price_spec, opts \\ []) do
     span_billing(:subscription, :comp, billable, opts, fn ->
       SubscriptionActions.comp_subscription(billable, price_spec, opts)
@@ -203,7 +191,7 @@ defmodule Accrue.Billing do
     end)
   end
 
-  # ── SubscriptionSchedule surface (Phase 4 Plan 03, BILL-16) ───────
+  # ── SubscriptionSchedule management ───────────────────────────────
   def subscribe_via_schedule(billable, phases, opts \\ []) do
     span_billing(:subscription_schedule, :create, billable, opts, fn ->
       SubscriptionScheduleActions.subscribe_via_schedule(billable, phases, opts)
@@ -240,7 +228,7 @@ defmodule Accrue.Billing do
   def cancel_schedule!(sched, opts \\ []),
     do: span_schedule(:cancel, sched, opts, &SubscriptionScheduleActions.cancel_schedule!/2)
 
-  # ── Invoice surface (Plan 05) ─────────────────────────────────────
+  # ── Invoice management ────────────────────────────────────────────
   def finalize_invoice(invoice, opts \\ []),
     do: span_invoice(:finalize, invoice, opts, &InvoiceActions.finalize_invoice/2)
 
@@ -271,7 +259,7 @@ defmodule Accrue.Billing do
   def send_invoice!(invoice, opts \\ []),
     do: span_invoice(:send, invoice, opts, &InvoiceActions.send_invoice!/2)
 
-  # ── Charge / PaymentIntent / SetupIntent surface (Plan 06) ────────
+  # ── Charges, PaymentIntents, and SetupIntents ─────────────────────
   def charge(customer, amount_or_opts, opts \\ []) do
     span_billing(:charge, :create, customer, opts, fn ->
       ChargeActions.charge(customer, amount_or_opts, opts)
@@ -308,7 +296,7 @@ defmodule Accrue.Billing do
     end)
   end
 
-  # ── PaymentMethod surface (Plan 06) ───────────────────────────────
+  # ── PaymentMethod management ──────────────────────────────────────
   def attach_payment_method(customer, pm_id_or_opts, opts \\ []) do
     span_billing(:payment_method, :attach, customer, opts, fn ->
       PaymentMethodActions.attach_payment_method(customer, pm_id_or_opts, opts)
@@ -353,8 +341,6 @@ defmodule Accrue.Billing do
   Delegates to `Accrue.Billing.PaymentMethodActions.list_payment_methods/2`.
   See that module for supported `opts` filters (`type`, `limit`, pagination
   cursors).
-
-  *Since v0.3.1.*
   """
   def list_payment_methods(customer, opts \\ []) do
     span_billing(:payment_method, :list, customer, opts, fn ->
@@ -366,8 +352,6 @@ defmodule Accrue.Billing do
   Raising variant of `list_payment_methods/2`.
 
   Delegates to `Accrue.Billing.PaymentMethodActions.list_payment_methods!/2`.
-
-  *Since v0.3.1.*
   """
   def list_payment_methods!(customer, opts \\ []) do
     span_billing(:payment_method, :list, customer, opts, fn ->
@@ -510,7 +494,7 @@ defmodule Accrue.Billing do
     end
   end
 
-  # ── Refund surface (Plan 06) ──────────────────────────────────────
+  # ── Refunds ───────────────────────────────────────────────────────
   def create_refund(charge, opts \\ []),
     do:
       span_billing(:refund, :create, charge, opts, fn ->
@@ -523,7 +507,7 @@ defmodule Accrue.Billing do
         RefundActions.create_refund!(charge, opts)
       end)
 
-  # ── Invoice PDF surface (Phase 6 Plan 06, D6-04) ──────────────────
+  # ── Invoice PDF rendering ─────────────────────────────────────────
   def render_invoice_pdf(invoice_or_id, opts \\ []),
     do: span_invoice(:render_pdf, invoice_or_id, opts, &Accrue.Invoices.render_invoice_pdf/2)
 
@@ -536,7 +520,7 @@ defmodule Accrue.Billing do
         Accrue.Invoices.fetch_invoice_pdf(invoice)
       end)
 
-  # ── Metered billing surface (Phase 4 Plan 02, BILL-13) ────────────
+  # ── Metered billing ───────────────────────────────────────────────
   @report_usage_doc """
   `report_usage/3` records a metered usage event for `customer` (a `%Accrue.Billing.Customer{}` or Stripe customer id string) and `event_name`, persisting through the transactional outbox before invoking the configured processor.
 
@@ -608,7 +592,7 @@ defmodule Accrue.Billing do
     )
   end
 
-  # ── Coupons + promotion codes (Phase 4 Plan 05, BILL-27/28) ───────
+  # ── Coupons + PromotionCodes ──────────────────────────────────────
   def create_coupon(params, opts \\ []),
     do:
       span_billing(:coupon, :create, params, opts, fn ->
@@ -646,7 +630,7 @@ defmodule Accrue.Billing do
   end
 
   # ---------------------------------------------------------------------------
-  # Customer — lazy fetch-or-create (D2-06)
+  # Customer — lazy fetch-or-create
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -720,7 +704,7 @@ defmodule Accrue.Billing do
   end
 
   # ---------------------------------------------------------------------------
-  # Customer — explicit create (D2-05)
+  # Customer — explicit create
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -749,7 +733,6 @@ defmodule Accrue.Billing do
 
       params = build_processor_params(billable)
 
-      # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
       Repo.transact(fn ->
         with {:ok, processor_result} <- Processor.create_customer(params),
              customer_attrs = %{
@@ -855,7 +838,7 @@ defmodule Accrue.Billing do
   end
 
   # ---------------------------------------------------------------------------
-  # Customer — update (D2-07, D2-09)
+  # Customer — update
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -873,7 +856,6 @@ defmodule Accrue.Billing do
   @spec update_customer(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
   def update_customer(%Customer{} = customer, attrs) when is_map(attrs) do
     span_billing(:customer, :update, customer, [], fn ->
-      # WR-08: migrated from Ecto.Multi to Repo.transact/1 per D3-18.
       Repo.transact(fn ->
         with {:ok, updated} <- customer |> Customer.changeset(attrs) |> Repo.update(),
              {:ok, _event} <-
@@ -893,11 +875,11 @@ defmodule Accrue.Billing do
   end
 
   # ---------------------------------------------------------------------------
-  # Data operations (D2-08)
+  # Data operations
   # ---------------------------------------------------------------------------
 
   @doc """
-  Fully replaces the `data` jsonb column on a billing record (D2-08).
+  Fully replaces the `data` jsonb column on a billing record.
 
   Used by webhook reconcile paths that receive the whole object (e.g.
   `customer.updated`). Applies optimistic locking via `lock_version`.
@@ -917,7 +899,7 @@ defmodule Accrue.Billing do
   end
 
   @doc """
-  Shallow-merges `partial_data` into the existing `data` column (D2-08).
+  Shallow-merges `partial_data` into the existing `data` column.
 
   Used when a partial event carries only a delta. Applies optimistic
   locking via `lock_version`.

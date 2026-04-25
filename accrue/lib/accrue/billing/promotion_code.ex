@@ -69,9 +69,9 @@ defmodule Accrue.Billing.PromotionCode do
   end
 
   @doc """
-  Webhook-path changeset (D3-17). Skips required-field validation so
-  out-of-order webhook events can settle partial state. Processor is
-  canonical (D2-29).
+  Webhook-path changeset. Skips required-field validation so out-of-order
+  webhook events can settle partial state. The processor (Stripe) is
+  canonical for promotion code state.
   """
   @spec force_status_changeset(%__MODULE__{} | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def force_status_changeset(promo_or_changeset, attrs \\ %{}) do

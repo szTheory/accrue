@@ -58,7 +58,7 @@ defmodule Accrue.Billing.PaymentMethodActions do
   @list_payment_method_param_keys [:type, :limit, :starting_after, :ending_before]
 
   # ---------------------------------------------------------------------
-  # attach_payment_method/3 (BILL-23)
+  # attach_payment_method/3
   # ---------------------------------------------------------------------
 
   @doc """
@@ -204,7 +204,7 @@ defmodule Accrue.Billing.PaymentMethodActions do
   end
 
   # ---------------------------------------------------------------------
-  # set_default_payment_method/3 (BILL-25)
+  # set_default_payment_method/3
   # ---------------------------------------------------------------------
 
   @doc """
@@ -261,7 +261,7 @@ defmodule Accrue.Billing.PaymentMethodActions do
   end
 
   # ---------------------------------------------------------------------
-  # list_payment_methods/2 (Phase 56, BIL-01)
+  # list_payment_methods/2
   # ---------------------------------------------------------------------
 
   @doc """
