@@ -58,6 +58,7 @@ defmodule Accrue.MixProject do
       {:swoosh, "~> 1.25"},
       {:phoenix_swoosh, "~> 1.2"},
       {:mjml_eex, "~> 0.13"},
+      {:mailglass, path: "../../mailglass"},
       {:chromic_pdf, "~> 1.17"},
       {:nimble_options, "~> 1.1"},
       {:telemetry, "~> 1.3"},
