@@ -81,6 +81,19 @@ defmodule AccrueAdmin.Router do
           end
         end
       end
+
+      # Mailglass dev-preview dashboard (MG-02 / Phase 88).
+      # Mounted as a SIBLING scope (not nested in the :accrue_admin live_session)
+      # because mailglass_admin_routes/2 emits its own live_session internally,
+      # and Phoenix forbids nested live_session blocks.
+      if dev_routes? do
+        scope mount_path do
+          pipe_through(:accrue_admin_browser)
+          import Phoenix.LiveView.Router
+          import MailglassAdmin.Router
+          mailglass_admin_routes("/dev/mail")
+        end
+      end
     end
   end
 
