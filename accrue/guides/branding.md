@@ -1,9 +1,8 @@
 # Branding
 
 Accrue's branding config drives visual customization of transactional
-emails and invoice PDFs. This guide covers the full schema, migration
-from legacy flat top-level keys, and the logo strategy across HTTPS vs PDF
-rendering contexts.
+emails and invoice PDFs. This guide covers the full schema and the logo
+strategy across HTTPS vs PDF rendering contexts.
 
 Use the nested `:branding` keyword list (see below); it is the supported schema.
 
@@ -81,45 +80,6 @@ Host apps can inject branding overrides on a per-type basis via the
 rung-3 override ladder (see `guides/email.md`). The default templates
 read branding via `@context.branding` — pass an overridden map via
 the mailer assigns pipeline.
-
-## Deprecated flat keys
-
-Older setups exposed six flat branding keys directly on `:accrue`:
-
-- `:from_name`
-- `:from_email`
-- `:business_name`
-- `:support_email`
-- `:logo_url`
-- `:accent_color`
-
-These are deprecated: migrate to the nested `:branding` keyword list.
-Accrue emits a boot-time branding warning listing every affected flat key.
-
-### Migration example
-
-```elixir
-# Before (legacy flat keys — deprecated)
-config :accrue,
-  from_name: "Acme Billing",
-  from_email: "billing@acme.example",
-  business_name: "Acme Corp",
-  support_email: "support@acme.example",
-  logo_url: "https://cdn.acme.example/logo.png",
-  accent_color: "#1F6FEB"
-
-# After (nested `:branding` — recommended)
-config :accrue, :branding,
-  business_name: "Acme Corp",
-  from_name: "Acme Billing",
-  from_email: "billing@acme.example",
-  support_email: "support@acme.example",
-  logo_url: "https://cdn.acme.example/logo.png",
-  accent_color: "#1F6FEB"
-```
-
-Do not rely on flat keys in new code; nested `:branding` is the
-long-term shape Accrue documents and validates.
 
 ## Connect note
 

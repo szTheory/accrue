@@ -3,11 +3,11 @@ defmodule Accrue.ConfigTest do
 
   alias Accrue.Config
 
-  # Phase 6 (D6-02): nested :branding has two required inner keys
+  # The nested `:branding` schema has two required inner keys
   # (:from_email + :support_email). Any direct `Config.validate!/1`
   # call site must supply them or NimbleOptions raises at the nested
-  # schema level. This helper keeps Phase 1-4 test intent untouched
-  # while satisfying the Phase 6 schema contract.
+  # schema level. This helper keeps existing test intent untouched while
+  # satisfying that schema contract.
   @test_branding [from_email: "noreply@example.test", support_email: "support@example.test"]
 
   defp with_branding(opts), do: Keyword.put_new(opts, :branding, @test_branding)

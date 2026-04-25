@@ -83,7 +83,7 @@ defmodule Accrue.Config do
         "When true, `Accrue.Application` boot raises if the current PG role has UPDATE/DELETE on `accrue_events`."
     ],
 
-    # --- Brand config (flat keys; prefer nested :branding) ---------------
+    # --- Brand config (top-level legacy keys; prefer nested :branding) ---
     business_name: [
       type: :string,
       default: "Accrue",
@@ -550,12 +550,10 @@ defmodule Accrue.Config do
   @doc """
   Returns the branding config keyword list.
 
-  Falls back to building a keyword list from deprecated top-level flat
-  branding keys (`:business_name`, `:logo_url`, `:from_email`,
-  `:from_name`, `:support_email`, `:business_address`) when the nested
-  `:branding` key is unset or empty. Nested `:branding` always takes
-  precedence. See `Accrue.Application.warn_deprecated_branding/0` for the
-  boot-time `Logger.warning` when flat keys are still in use.
+  Reads the nested `:branding` keyword list from app env, merging any
+  unset keys with their schema defaults so callers can `Keyword.fetch!`
+  any valid key without re-running the full NimbleOptions validator on
+  every call site.
   """
   @spec branding() :: keyword()
   def branding do
@@ -563,7 +561,7 @@ defmodule Accrue.Config do
 
     cond do
       is_list(raw) and raw == [] ->
-        branding_from_flat_keys()
+        branding_defaults()
 
       is_list(raw) ->
         merge_with_defaults(raw)
@@ -595,47 +593,9 @@ defmodule Accrue.Config do
   @spec branding(atom()) :: term()
   def branding(key) when is_atom(key), do: Keyword.fetch!(branding(), key)
 
-  @doc """
-  Returns the list of deprecated flat branding keys.
-  Consumed by `Accrue.Application.warn_deprecated_branding/0` and by the
-  internal flat-key shim in `branding/0`.
-  """
-  @spec deprecated_flat_branding_keys() :: [atom()]
-  def deprecated_flat_branding_keys do
-    [:business_name, :logo_url, :from_email, :from_name, :support_email, :business_address]
-  end
-
-  # Build a branding keyword list from the deprecated top-level flat keys.
-  # Only keys the host has actually set are copied; remaining slots come
-  # from the nested :branding schema defaults.
-  defp branding_from_flat_keys do
-    flat = deprecated_flat_branding_keys()
-    any_set? = Enum.any?(flat, fn k -> Application.get_env(:accrue, k) != nil end)
-
-    if any_set? do
-      base = branding_defaults()
-
-      Enum.reduce(flat, base, fn key, acc ->
-        case Application.get_env(:accrue, key) do
-          nil ->
-            acc
-
-          value ->
-            target_key = flat_key_to_nested(key)
-            Keyword.put(acc, target_key, value)
-        end
-      end)
-    else
-      branding_defaults()
-    end
-  end
-
-  defp flat_key_to_nested(:business_address), do: :company_address
-  defp flat_key_to_nested(other), do: other
-
   defp branding_defaults do
     # Pull the nested :branding schema's inner :keys list and extract
-    # `{atom, default}` pairs so the shim returns a fully-populated kw
+    # `{atom, default}` pairs so callers get a fully-populated keyword
     # list with the same shape the validated schema would yield.
     @schema
     |> Keyword.fetch!(:branding)
