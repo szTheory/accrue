@@ -35,6 +35,70 @@ config :accrue, Accrue.Mailer.Swoosh,
 The host application's supervision tree is responsible for starting
 Oban, ChromicPDF, and the Swoosh adapter — Accrue does not start them.
 
+## Mailglass migrations (Phase 88+ pipeline)
+
+Starting in Accrue v1.29, the email pipeline is being migrated from
+`mjml_eex` + `phoenix_swoosh` to [Mailglass](https://github.com/szTheory/mailglass)
+— a HEEx-native transactional email framework with an append-only event
+ledger, native idempotency, and a LiveView dev-preview dashboard.
+
+Mailglass introduces three Postgres tables that the host application
+must create alongside Accrue's existing migrations:
+
+| Table | Purpose |
+|-------|---------|
+| `mailglass_deliveries` | One row per outbound message — content, recipients, status, retries. |
+| `mailglass_events` | Append-only event ledger (sent, opened, bounced, complained, etc.). Tamper-evident via Postgres triggers. |
+| `mailglass_suppressions` | Recipient-level suppression list (hard bounces, complaints, manual blocks). |
+
+### Install
+
+From the host application root:
+
+```bash
+mix mailglass.install   # generates the wrapper migration + adds router mounts
+mix ecto.migrate        # applies all three Mailglass migrations
+```
+
+The generated wrapper migration is a thin 8-line file that
+delegates to `Mailglass.Migration.up/0` — Mailglass owns the per-version
+DDL and tracks the applied version in a `pg_class` comment on
+`mailglass_events`. Host applications never edit Mailglass DDL by hand.
+
+### Requirements
+
+- **PostgreSQL 14+** — Mailglass uses immutable Postgres triggers.
+  Accrue already requires PG 14+, so no new floor.
+- **Repo configured** — set `config :mailglass, repo: MyApp.Repo` in
+  `config/runtime.exs` before running migrations.
+
+### Test-suite compatibility
+
+Mailglass's immutable triggers compose with `Ecto.Adapters.SQL.Sandbox`
+without special configuration: the sandbox's per-test transactions isolate
+trigger-driven inserts the same way they isolate ordinary writes. No
+additional `:trigger` mode or sandbox flag is needed.
+
+If `mix test` fails inside a host app after applying Mailglass
+migrations, the most common cause is a stale snapshot in
+`priv/repo/structure.sql` (or `priv/repo/migrations.sql`) — regenerate via
+`mix ecto.dump` after running migrations against the test DB.
+
+### What changes for Accrue users
+
+Phase 88 only ADDS the Mailglass dependency and admin dashboard.
+The existing `Accrue.Mailer.deliver/2` API, the type/assigns contract,
+the override ladder, and the Oban-based async pipeline remain unchanged.
+
+Phase 89 refactors `Accrue.Workers.Mailer` to dispatch via
+`Mailglass.deliver/1` and adds explicit idempotency keys. Phase 90 ports
+the remaining MJML templates and removes `mjml_eex` and `phoenix_swoosh`
+from `accrue/mix.exs`. Until Phase 90 ships, both pipelines coexist
+safely.
+
+See [Mailglass getting started](https://github.com/szTheory/mailglass/blob/main/guides/getting-started.md)
+for the upstream install reference.
+
 ## Semantic API
 
 Callers send an email by type + scalar assigns map — never by
