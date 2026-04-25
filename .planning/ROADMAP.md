@@ -57,7 +57,7 @@
 
 **Phase tree:** `.planning/milestones/v1.29-phases/` (created on plan/execute).
 
-### Phase 88: Mailglass Foundation *(in progress — Plans 01–02 ✅)*
+### Phase 88: Mailglass Foundation *(execute complete — Plans 01–03 ✅, awaiting verifier)*
 
 **Goal:** Mailglass dependencies are present, the three Mailglass migrations execute in the host application, and the `/dev/mail` LiveView dev-preview dashboard is mounted in `accrue_admin`.
 
