@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.29
 milestone_name: Mailglass Integration
-status: planning
-last_updated: "2026-04-25T17:22:27.349Z"
-last_activity: "2026-04-25 — Quick task **260425-imj**: stripped GSD requirement-ID artifacts from public hexdocs (51 files, ~80 rewrites)."
+status: in_progress
+last_updated: "2026-04-25T19:57:47Z"
+last_activity: "2026-04-25 — Phase 88 Plan 01 (path-dependencies): added :mailglass and :mailglass_admin path deps to accrue/ and accrue_admin/."
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
 ---
 
 # Project State
@@ -24,15 +24,15 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Position
 
-**Milestone:** **v1.28** — Next linked publish continuity (**planning milestones 86–87 complete** **2026-04-24**)
+**Milestone:** **v1.29** — Mailglass Integration (in progress)
 
-**Phase:** **87** — Friction inventory post-publish — **Complete** **2026-04-24**
+**Phase:** **88** — Mailglass Foundation — **Plan 01 Complete 2026-04-25**
 
-**Plan:** **`087-01-PLAN.md`** **Complete**
+**Plan:** **`088-01-PLAN.md`** **Complete** — `088-02-PLAN.md` next
 
-**Status:** **v1.28** **PPX-05..08** + **INV-06** satisfied in **`.planning/REQUIREMENTS.md`** — **`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**, **`### v1.28 INV-06 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`**.
+**Status:** Phase 88 Plan 01 (path-dependencies) complete — `:mailglass` and `:mailglass_admin` path deps wired. Phase 88 Plans 02–03 remain.
 
-**Last activity:** 2026-04-25 — Quick task **260425-gr1**: dropped deprecated flat-branding-keys infrastructure (no users to migrate).
+**Last activity:** 2026-04-25 — Phase **88** Plan **01** (path-dependencies): added `:mailglass` path dep to `accrue/mix.exs` and `:mailglass_admin` (dev+test) to `accrue_admin/mix.exs`; fixed mailglass credo checks compilation issue (moved to `credo_checks/`).
 
 ## Milestone Progress
 
@@ -66,14 +66,17 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Recent Decisions
 
+- **2026-04-25:** **Phase 88 Plan 01** — Path is `../../mailglass` (not `../mailglass`) — accrue packages are two levels below `~/projects/`.
+- **2026-04-25:** **Phase 88 Plan 01** — `only: [:dev, :test]` for mailglass_admin (not `:dev` only) — test env compiles `accrue_admin/2` macro expansion which imports `MailglassAdmin.Router` at compile time.
+- **2026-04-25:** **Phase 88 Plan 01** — Fixed mailglass credo checks compilation: moved 13 custom credo check files from `lib/mailglass/credo/` to `credo_checks/` in the mailglass sibling repo, matching the accrue pattern.
 - **2026-04-24:** **v1.28** opened — **spine B** (**next linked publish** + **INV-06**); **not** **1.0.0** (**spine A**) unless reprioritized.
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** **v1.28** planning spine **B** closed in-repo — follow **`RELEASING.md`** for the **next linked Hex** publish when ready.
+**Next:** Phase **88** Plans **02–03** — mount `MailglassAdmin.Router` in dev routes and wire Mailglass runtime modules.
+
+**Completed (v1.29 Phase 88):** Plan 01 (path-dependencies) — **`milestones/v1.29-phases/088-mailglass-foundation/088-01-SUMMARY.md`**.
 
 **Completed (v1.28):** Phases **86–87** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**, **`087-friction-inventory-post-publish/`**.
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
-
-**Planned Phase:** 88 (Mailglass Foundation) — 3 plans — 2026-04-25T17:22:27.344Z
