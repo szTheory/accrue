@@ -40,6 +40,7 @@ defmodule AccrueAdmin.MixProject do
       {:phoenix, "~> 1.8"},
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.2"},
+      {:mailglass_admin, path: "../../mailglass/mailglass_admin", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.7", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},
