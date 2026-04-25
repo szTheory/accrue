@@ -13,6 +13,7 @@ the Phoenix host-app order proved in `examples/accrue_host`:
 - `mix accrue.install`
 - `config/runtime.exs`
 - migrations and Oban
+- `mix mailglass.install` then `mix ecto.migrate` — creates `mailglass_deliveries`, `mailglass_events`, `mailglass_suppressions`. See [the email guide](email.md#mailglass-migrations-phase-88-pipeline) for details.
 - `/webhooks/stripe`
 - `accrue_admin "/billing"`
 - first Fake-backed subscription
