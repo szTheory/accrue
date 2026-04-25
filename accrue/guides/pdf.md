@@ -205,6 +205,21 @@ When to stay on ChromicPDF:
 - Latency-sensitive renders (ChromicPDF persistent pool ≈ 50ms;
   Gotenberg adds a network hop).
 
+## Future / experimental adapters
+
+A pure-Elixir PDF backend (Prawn-equivalent shape) is on the radar as
+a possible future `@behaviour Accrue.PDF` adapter — useful for hosts
+that want to drop both the Chromium dependency and the Gotenberg
+sidecar. Benefits if it lands: no Chrome on host, no external service,
+smaller container images, fewer moving parts. Performance vs Chromium
+is unknown until benchmarked.
+
+This is a "someday/maybe" — **not a v1.0 commitment**. ChromicPDF
+remains the documented default; Gotenberg remains the documented
+illustrative alternative. If you maintain a custom adapter against
+the `Accrue.PDF` behaviour, point `:pdf_adapter` at your module the
+same way the Gotenberg example above does.
+
 ## `@page` CSS warning (Pitfall 6)
 
 ChromicPDF does **not** interpret `@page` CSS rules. Setting page
