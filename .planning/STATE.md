@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.29
-milestone_name: Mailglass Integration
-status: in_progress
-last_updated: "2026-04-25T19:57:47Z"
-last_activity: "2026-04-25 — Phase 88 Plan 01 (path-dependencies): added :mailglass and :mailglass_admin path deps to accrue/ and accrue_admin/."
+milestone: v1.28
+milestone_name: milestone
+status: completed
+last_updated: "2026-04-25T20:06:30Z"
+last_activity: "2026-04-25 — Phase 88 Plan 02 (dev-preview-mount): mounted mailglass_admin_routes at /dev/mail in accrue_admin router; automated route-existence tests added (shift-left)."
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Milestone:** **v1.29** — Mailglass Integration (in progress)
 
-**Phase:** **88** — Mailglass Foundation — **Plan 01 Complete 2026-04-25**
+**Phase:** **88** — Mailglass Foundation — **Plans 01–02 Complete 2026-04-25**
 
-**Plan:** **`088-01-PLAN.md`** **Complete** — `088-02-PLAN.md` next
+**Plan:** **`088-02-PLAN.md`** **Complete** — `088-03-PLAN.md` next (Phase 88 final plan)
 
-**Status:** Phase 88 Plan 01 (path-dependencies) complete — `:mailglass` and `:mailglass_admin` path deps wired. Phase 88 Plans 02–03 remain.
+**Status:** Phase 88 Plans 01–02 complete — path deps wired, `/dev/mail` mounted in router with automated route-existence tests. Phase 88 Plan 03 (migrations) remains.
 
-**Last activity:** 2026-04-25 — Phase **88** Plan **01** (path-dependencies): added `:mailglass` path dep to `accrue/mix.exs` and `:mailglass_admin` (dev+test) to `accrue_admin/mix.exs`; fixed mailglass credo checks compilation issue (moved to `credo_checks/`).
+**Last activity:** 2026-04-25 — Phase **88** Plan **02** (dev-preview-mount): mounted `mailglass_admin_routes("/dev/mail")` as sibling dev-gated scope in `accrue_admin/2` macro; 3 ExUnit route-existence tests added (shift-left automation replaces human browser-verify checkpoint).
 
 ## Milestone Progress
 
@@ -66,6 +66,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Recent Decisions
 
+- **2026-04-25:** **Phase 88 Plan 02** — Sibling scope pattern: `mailglass_admin_routes` mounted OUTSIDE the `:accrue_admin` live_session to avoid nested live_session conflict; Phoenix forbids nested `live_session` blocks.
+- **2026-04-25:** **Phase 88 Plan 02** — Shift-left: human browser-verify checkpoint replaced with ExUnit `__routes__/0` assertions — route existence verified at compile time.
 - **2026-04-25:** **Phase 88 Plan 01** — Path is `../../mailglass` (not `../mailglass`) — accrue packages are two levels below `~/projects/`.
 - **2026-04-25:** **Phase 88 Plan 01** — `only: [:dev, :test]` for mailglass_admin (not `:dev` only) — test env compiles `accrue_admin/2` macro expansion which imports `MailglassAdmin.Router` at compile time.
 - **2026-04-25:** **Phase 88 Plan 01** — Fixed mailglass credo checks compilation: moved 13 custom credo check files from `lib/mailglass/credo/` to `credo_checks/` in the mailglass sibling repo, matching the accrue pattern.
@@ -73,9 +75,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Phase **88** Plans **02–03** — mount `MailglassAdmin.Router` in dev routes and wire Mailglass runtime modules.
+**Next:** Phase **88** Plan **03** — verify the three Mailglass migrations execute in the host application.
 
-**Completed (v1.29 Phase 88):** Plan 01 (path-dependencies) — **`milestones/v1.29-phases/088-mailglass-foundation/088-01-SUMMARY.md`**.
+**Completed (v1.29 Phase 88):** Plans 01–02 — **`milestones/v1.29-phases/088-mailglass-foundation/088-01-SUMMARY.md`**, **`088-02-SUMMARY.md`**.
 
 **Completed (v1.28):** Phases **86–87** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**, **`087-friction-inventory-post-publish/`**.
 
