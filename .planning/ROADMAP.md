@@ -57,7 +57,9 @@
 
 **Phase tree:** `.planning/milestones/v1.29-phases/` (created on plan/execute).
 
-### Phase 88: Mailglass Foundation *(execute complete — Plans 01–03 ✅, awaiting verifier)*
+### Phase 88: Mailglass Foundation ✅ **Complete 2026-04-25**
+
+> Verified: `088-VERIFICATION.md` — 5/5 must-haves passed. All 3 success criteria met (path deps, `/dev/mail` mount, migration docs). Sandbox+DDL integration test deferred to Phase 89.
 
 **Goal:** Mailglass dependencies are present, the three Mailglass migrations execute in the host application, and the `/dev/mail` LiveView dev-preview dashboard is mounted in `accrue_admin`.
 
