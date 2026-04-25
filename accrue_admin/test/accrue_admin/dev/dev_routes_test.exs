@@ -25,6 +25,29 @@ defmodule AccrueAdmin.DevRoutesTest do
     assert "/billing/dev/fake-inspect" in paths
   end
 
+  # MG-02: /dev/mail route-existence checks (Phase 88 shift-left automation)
+  test "allow_live_reload: true generates /dev/mail mailglass route" do
+    paths = AccrueAdmin.TestRouter.__routes__() |> Enum.map(& &1.path)
+
+    assert Enum.any?(paths, &String.starts_with?(&1, "/billing/dev/mail")),
+           "Expected at least one route starting with /billing/dev/mail in TestRouter " <>
+             "(allow_live_reload: true). Got: #{inspect(paths)}"
+  end
+
+  test "allow_live_reload: true preserves legacy /dev/email-preview route (regression guard)" do
+    paths = AccrueAdmin.TestRouter.__routes__() |> Enum.map(& &1.path)
+
+    assert "/billing/dev/email-preview" in paths,
+           "Legacy /dev/email-preview route must remain until Phase 90 retires it"
+  end
+
+  test "allow_live_reload: false omits /dev/mail mailglass routes (prod guard)" do
+    prod_paths = AccrueAdmin.DevRoutesProdLikeRouter.__routes__() |> Enum.map(& &1.path)
+
+    refute Enum.any?(prod_paths, &String.starts_with?(&1, "/ops/dev/mail")),
+           "Mailglass /dev/mail routes must NOT appear in prod-like routers (allow_live_reload: false)"
+  end
+
   test "prod-like router omits dev routes at compile time" do
     prod_paths = AccrueAdmin.DevRoutesProdLikeRouter.__routes__() |> Enum.map(& &1.path)
 
