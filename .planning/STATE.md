@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Status:** **v1.28** **PPX-05..08** + **INV-06** satisfied in **`.planning/REQUIREMENTS.md`** — **`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**, **`### v1.28 INV-06 maintainer pass (2026-04-24)`** in **`v1.17-FRICTION-INVENTORY.md`**.
 
-**Last activity:** 2026-04-24 — Phase **87** **INV-06** friction inventory post-publish executed (**`087-01-PLAN.md`**).
+**Last activity:** 2026-04-25 — Quick task **260425-gr1**: dropped deprecated flat-branding-keys infrastructure (no users to migrate).
 
 ## Milestone Progress
 
@@ -56,6 +56,12 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 | Category | Item | Status |
 |----------|------|--------|
 | uat_gap | Phase **62** **`62-UAT.md`** | **closed** — **v1.18** |
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260425-gr1 | Drop deprecated flat-branding-keys infrastructure | 2026-04-25 | 50f80db | [260425-gr1-drop-deprecated-flat-branding-keys-infra](./quick/260425-gr1-drop-deprecated-flat-branding-keys-infra/) |
 
 ## Recent Decisions
 
