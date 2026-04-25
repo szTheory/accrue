@@ -12,16 +12,28 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.28 — Next linked publish continuity (**planning opened 2026-04-24**)
+### v1.29 — Mailglass Integration (**planning opened 2026-04-25**)
 
-**Goal:** On the **next linked Hex publish** for **`accrue` / `accrue_admin`**, re-run **post-publish contract** work (**PPX-05..08**, same semantics family as **v1.23** **PPX-01..04**) and the **dated friction-inventory maintainer pass** inventory triggers require after that publish (**INV-06**). **Strategic spine B** (maintenance / wrap-up plan) — **not** a **1.0.0** declaration unless reprioritized to spine **A**. **No** **PROC-08** / **FIN-03**.
+**Goal:** Replace `mjml_eex` and `phoenix_swoosh` with the [Mailglass](https://github.com/szTheory/mailglass) framework as a path dependency. Mailglass provides HEEx-native components (no Node MJML compile), an append-only event ledger, native database-level idempotency via `idempotency_key`, and a LiveView dev-preview dashboard mounted at `/dev/mail` in `accrue_admin`. **No** **PROC-08** / **FIN-03**.
 
 **Target features:**
 
-- [x] **PPX-05..08** — Package docs, adoption matrix + script, **`docs-contracts-shift-left`**, **`.planning/`** Hex mirrors aligned to the new **`@version`** / registry reality. **Validated 2026-04-24** — **`.planning/milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md`** (re-verification at **0.3.1**).
-- [x] **INV-06** — Post-publish **`v1.17-FRICTION-INVENTORY.md`** maintainer pass **(b)** with **`087-VERIFICATION.md`** verifier evidence. **Validated 2026-04-24** — **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/087-VERIFICATION.md`**.
+- [ ] **MG-01..MG-03** (Phase 88 — Foundation): path-dep `mailglass` in `accrue` and `mailglass_admin` in `accrue_admin`; mount `/dev/mail` LiveView dashboard; verify the three Mailglass migrations execute in host.
+- [ ] **MG-04..MG-06** (Phase 89 — Proof of Concept): refactor `Accrue.Workers.Mailer` to dispatch via `Mailglass.deliver/1` with explicit `idempotency_key`; port `Accrue.Emails.Receipt` + `Accrue.Emails.PaymentFailed` from MJML to `Mailglass.Mailable`; verify PDF attachment.
+- [ ] **MG-07** (Phase 90 — Cleanup): port the remaining 11 MJML templates; remove `mjml_eex` and `phoenix_swoosh` from `accrue/mix.exs`; retire `mix accrue.mail.preview`.
 
-**Live requirements:** **`.planning/REQUIREMENTS.md`**. **Phases:** **86–87** (see **`.planning/ROADMAP.md`**).
+**Live requirements:** `.planning/REQUIREMENTS.md`. **Phases:** **88–90** (see `.planning/ROADMAP.md`). **Background research:** `.planning/research/v1.29-mailglass-integration.md`.
+
+### v1.28 — Next linked publish continuity (**archived 2026-04-25 — planning complete 2026-04-24**)
+
+**Goal (planning closed):** Post-publish contract work (**PPX-05..08**, same semantics family as **v1.23** **PPX-01..04**) and the dated friction-inventory maintainer pass (**INV-06**). Strategic spine **B** (maintenance / wrap-up plan). **No** **PROC-08** / **FIN-03**.
+
+**Shipped artifacts:**
+
+- [x] **PPX-05..08** — Package docs, adoption matrix + script, `docs-contracts-shift-left`, `.planning/` Hex mirrors aligned to the new `@version` / registry reality. Validated 2026-04-24 — `.planning/milestones/v1.28-phases/086-post-publish-contract-alignment/086-VERIFICATION.md` (re-verification at **0.3.1**).
+- [x] **INV-06** — Post-publish `v1.17-FRICTION-INVENTORY.md` maintainer pass (b) with `087-VERIFICATION.md` verifier evidence. Validated 2026-04-24 — `.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/087-VERIFICATION.md`.
+
+**Archived requirements:** `.planning/milestones/v1.28-REQUIREMENTS.md`. **Phases:** **86–87** in `.planning/milestones/v1.28-ROADMAP.md`. **Next forcing function:** linked Hex publish per `RELEASING.md` (outside this in-repo planning milestone).
 
 ### v1.27 — Pre-1.0 closure narrative (**archived 2026-04-24**)
 

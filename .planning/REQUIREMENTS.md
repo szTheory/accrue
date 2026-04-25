@@ -1,54 +1,34 @@
-# Requirements: Accrue — Milestone v1.28
+# Requirements: Mailglass Integration — Milestone v1.29
 
-**Defined:** 2026-04-24  
-**Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
+**Core value:** Modernize the transactional email pipeline by replacing MJML and raw Swoosh with the HEEx-native Mailglass framework. This improves developer experience, adds built-in idempotency and event tracking, and provides a powerful dev-preview UI.
 
-## v1.28 — Next linked publish continuity (spine B)
+## v1.29 — Mailglass Integration
 
-**Goal:** When **`accrue` / `accrue_admin`** ship the **next linked Hex** version bump, keep merge-blocking **package docs**, **adoption proof matrix**, and **docs-contracts-shift-left** (including **production-readiness discoverability**) honest, align **`.planning/`** registry mirrors, then run the **dated friction-inventory maintainer pass** required by inventory **revisit triggers** after publish (**INV-06**). **No** **PROC-08** / **FIN-03**. **Not** a **1.0.0** declaration milestone unless explicitly reprioritized (spine **A**).
+**Goal:** Integrate the mailglass packages (as path dependencies for now) to completely replace MJML and the raw Swoosh pipeline in accrue.
 
-### Proof and package contracts (PPX)
+### Mailglass Foundation & Admin (MG)
+- **MG-01**: Replace `mjml_eex` and `phoenix_swoosh` with `{:mailglass, path: "../mailglass"}` in `accrue` and `{:mailglass_admin, path: "../mailglass", only: [:dev]}` in `accrue_admin`.
+- **MG-02**: Mount the `mailglass_admin` LiveView UI in `accrue_admin`'s router to provide an instantaneous visual feedback loop, replacing the old `mix accrue.mail.preview` command.
+- **MG-03**: Update Accrue's installation instructions and/or `mix accrue.install` to apply the required Mailglass Postgres migrations (`mailglass_deliveries`, `mailglass_events`, `mailglass_suppressions`).
 
-- [x] **PPX-05**: **`bash scripts/ci/verify_package_docs.sh`** and **`accrue/test/accrue/docs/package_docs_verifier_test.exs`** pass on **`main`** after the **`accrue` / `accrue_admin`** **`mix.exs` `@version`** bump that ships (or immediately accompanies) the linked registry release — install literals in enforced docs match workspace **`@version`**.
+### Pipeline & Idempotency (MG)
+- **MG-04**: Refactor `Accrue.Workers.Mailer` to build and dispatch via `Mailglass.deliver/1`, orchestrating dynamic assignment hydration and Multi-tenant PDF attachment logic before dispatch.
+- **MG-05**: Implement database-level idempotency by passing an explicit `idempotency_key` to Mailglass messages, replacing the Oban `unique: [period: 60]` logic to prevent duplicate webhook dispatches.
 
-- [x] **PPX-06**: **`bash scripts/ci/verify_adoption_proof_matrix.sh`** passes; **`examples/accrue_host/docs/adoption-proof-matrix.md`** stays needle-aligned with the script (same-PR co-update discipline per **`scripts/ci/README.md`**).
-
-- [x] **PPX-07**: Merge-blocking **`docs-contracts-shift-left`** set stays green, including **`scripts/ci/verify_production_readiness_discoverability.sh`**, after any doc or version touch in this milestone.
-
-### Planning hygiene (PPX)
-
-- [x] **PPX-08**: **`.planning/PROJECT.md`**, **`.planning/MILESTONES.md`**, and **`.planning/STATE.md`** “public Hex” / last-published callouts match **actual** registry versions for the shipped release; any friction-inventory row reopened by the **next publish** trigger is **closed** or **updated** with a verification pointer to Phase **86** / **87** evidence (same discipline as **v1.23** **`v1.17-P1-002`**).
-
-### Friction inventory (INV)
-
-- [x] **INV-06**: Post–**PPX** doc/version touch: maintainer pass **(b)** on **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with dated subsection + **`087-VERIFICATION.md`** verifier transcripts (same named verifier bundle family as **INV-03** / **INV-04** / **INV-05** per inventory **revisit triggers**).
-
-## Future requirements (deferred)
-
-- **1.0.0 closing narrative** — spine **A**; open a dedicated milestone when semver + stability promises are ready.
-- New **FRG-01** rows from **sourced** integrator stalls — optional follow-up only when evidence clears the **FRG-01** bar.
-- **PROC-08** / **FIN-03** — explicit future milestone only (see **`.planning/PROJECT.md`** non-goals).
-
-## Out of scope
-
-| Item | Reason |
-|------|--------|
-| **PROC-08** | Second processor; unchanged non-goal. |
-| **FIN-03** | App-owned finance exports; unchanged non-goal. |
-| New billing / admin product features | v1.28 is **publish-adjacent contract + inventory** only. |
-| Broad doc sweeps without a friction row or publish forcing function | North star **S1** / **S5**. |
+### Template Porting (MG)
+- **MG-06**: Port the Proof-of-Concept templates (`Accrue.Emails.Receipt` and `Accrue.Emails.PaymentFailed`) from MJML to `Mailglass.Mailable` using native Mailglass HEEx components.
+- **MG-07**: Port the remaining 11 MJML templates in `priv/accrue/templates/emails/` to `Mailglass.Mailable` and completely remove the MJML compiler dependency.
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PPX-05 | Phase 86 | Complete |
-| PPX-06 | Phase 86 | Complete |
-| PPX-07 | Phase 86 | Complete |
-| PPX-08 | Phase 86 | Complete |
-| INV-06 | Phase 87 | Complete |
+| MG-01 | Phase 88 | Pending |
+| MG-02 | Phase 88 | Pending |
+| MG-03 | Phase 88 | Pending |
+| MG-04 | Phase 89 | Pending |
+| MG-05 | Phase 89 | Pending |
+| MG-06 | Phase 89 | Pending |
+| MG-07 | Phase 90 | Pending |
 
-**Coverage:** v1.28 requirements **5** total · Mapped **5** · Unmapped **0** ✓
-
----
-*Requirements defined: 2026-04-24 — **`/gsd-new-milestone`** v1.28 (spine **B**); domain research **skipped**.*
+**Coverage:** v1.29 requirements **7** total · Mapped **7** · Unmapped **0** ✓
