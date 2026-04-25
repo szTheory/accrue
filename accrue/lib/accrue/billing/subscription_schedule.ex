@@ -1,6 +1,6 @@
 defmodule Accrue.Billing.SubscriptionSchedule do
   @moduledoc """
-  Ecto schema for `accrue_subscription_schedules` (BILL-16).
+  Ecto schema for `accrue_subscription_schedules`.
 
   Thin projection of Stripe's SubscriptionSchedule resource. Stripe is
   canonical for phase state; we persist only the typed columns

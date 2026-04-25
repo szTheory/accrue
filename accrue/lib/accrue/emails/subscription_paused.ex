@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.SubscriptionPaused do
   @moduledoc """
-  Subscription-paused notification (MAIL-11a).
+  Subscription-paused notification.
 
   Sent when a subscription transitions to `paused`. When
   `@context[:pause_behavior]` is supplied it's rendered in the body to

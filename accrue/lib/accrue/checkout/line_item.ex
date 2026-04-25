@@ -1,7 +1,6 @@
 defmodule Accrue.Checkout.LineItem do
   @moduledoc """
-  Helpers for constructing Stripe Checkout `line_items` array entries
-  (CHKT-03).
+  Helpers for constructing Stripe Checkout `line_items` array entries.
 
   Line items are plain string-keyed maps in the shape Stripe Checkout
   expects. Two constructors are provided:

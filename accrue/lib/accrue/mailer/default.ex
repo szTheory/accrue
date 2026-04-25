@@ -3,21 +3,20 @@ defmodule Accrue.Mailer.Default do
   Default `Accrue.Mailer` adapter — enqueues an Oban job on the
   `:accrue_mailers` queue that a worker later turns into a delivered email.
 
-  ## Pay-style override ladder (D-23)
+  ## Pay-style override ladder
 
-  This adapter documents the Pay-inspired four-rung override ladder but
-  Phase 1 implements only rungs 1 and 3. The full catalog lands in Phase 6.
+  This adapter implements a Pay-inspired four-rung override ladder:
 
   1. **Kill switch** (`:emails` config) — `Accrue.Mailer.deliver/2`
      short-circuits before this adapter is reached. Handled at the
      behaviour layer.
-  2. MFA conditional (`:emails` value is `{Mod, :fun, args}`) — Phase 6.
+  2. MFA conditional (`:emails` value is `{Mod, :fun, args}`).
   3. **Template module override** (`:email_overrides` config) — resolved
      in `Accrue.Workers.Mailer.resolve_template/1`.
   4. Full pipeline replace (`:mailer` config pointing at a custom
      module) — already supported via `Accrue.Mailer.impl/0`.
 
-  ## Oban args safety (D-27, Pitfall #5, T-MAIL-01)
+  ## Oban args safety
 
   Oban persists job `args` as JSONB. The `assigns` map MUST contain only
   scalars (no structs, pids, functions, refs) so a worker crash mid-job
@@ -64,7 +63,7 @@ defmodule Accrue.Mailer.Default do
     raise ArgumentError,
           "Accrue.Mailer.deliver/2 assigns must be Oban-safe (scalars only); " <>
             "got struct #{inspect(v.__struct__)}. Pass entity IDs instead — see " <>
-            "Accrue.Mailer.Default moduledoc (T-MAIL-01, D-27)."
+            "Accrue.Mailer.Default moduledoc."
   end
 
   defp check_scalar!(v) when is_map(v) do
@@ -76,7 +75,7 @@ defmodule Accrue.Mailer.Default do
     raise ArgumentError,
           "Accrue.Mailer.deliver/2 assigns must be Oban-safe (scalars only); " <>
             "got #{inspect(v)}. Pass entity IDs instead — see " <>
-            "Accrue.Mailer.Default moduledoc (T-MAIL-01, D-27)."
+            "Accrue.Mailer.Default moduledoc."
   end
 
   defp stringify_keys(map) when is_map(map) do

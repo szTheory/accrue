@@ -1,6 +1,6 @@
 defmodule Accrue.Billing.UpcomingInvoice do
   @moduledoc """
-  Non-persistent struct representing a proration preview (BILL-10, D3-19).
+  Non-persistent struct representing a proration preview.
 
   Returned from `Accrue.Billing.preview_upcoming_invoice/2` and never
   written to the database — Stripe's upcoming-invoice endpoint is the

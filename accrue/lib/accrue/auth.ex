@@ -1,20 +1,20 @@
 defmodule Accrue.Auth do
   @moduledoc """
-  Behaviour + facade for host-app auth integration (AUTH-01, AUTH-02).
+  Behaviour + facade for host-app auth integration.
 
   Accrue does NOT own authentication. The host application (using Sigra,
   `phx.gen.auth`, Ueberauth, or any custom solution) implements this
   behaviour and wires it via `config :accrue, :auth_adapter, MyApp.Auth`.
-  `Accrue.Admin` (Phase 7) and any callers that need `current_user` reach
-  through this facade.
+  `Accrue.Admin` and any callers that need `current_user` reach through
+  this facade.
 
   ## Default adapter (`Accrue.Auth.Default`)
 
-  Phase 1 ships a dev-permissive default (`Accrue.Auth.Default`) that
-  returns a stubbed `%{id: "dev"}` in `:dev` / `:test` and **refuses to
-  boot** in `:prod` (D-40). Plan 06 will call
-  `Accrue.Auth.Default.boot_check!/0` from `Accrue.Application.start/2`
-  so production deploys can never run with no auth in place.
+  A dev-permissive default (`Accrue.Auth.Default`) returns a stubbed
+  `%{id: "dev"}` in `:dev` / `:test` and **refuses to boot** in `:prod`.
+  `Accrue.Auth.Default.boot_check!/0` is called from
+  `Accrue.Application.start/2` so production deploys can never run with
+  no auth in place.
 
   ## Contract
 

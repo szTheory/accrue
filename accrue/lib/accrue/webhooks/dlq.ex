@@ -1,6 +1,6 @@
 defmodule Accrue.Webhooks.DLQ do
   @moduledoc """
-  Dead-letter queue replay and retention for webhook events (WH-08 / D4-04).
+  Dead-letter queue replay and retention for webhook events.
 
   Replay inserts a fresh Oban dispatch job. Oban's own `retry_job/2`
   refuses jobs in `:discarded`/`:cancelled` states, and dead-lettered

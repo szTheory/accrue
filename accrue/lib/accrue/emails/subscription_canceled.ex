@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.SubscriptionCanceled do
   @moduledoc """
-  Subscription cancellation confirmation (MAIL-10).
+  Subscription cancellation confirmation.
 
   Sent when a subscription is canceled (either immediately or at period
   end). When `@context.subscription.current_period_end` is present, the

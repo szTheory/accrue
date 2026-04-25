@@ -27,8 +27,8 @@ defmodule Accrue.Events do
 
   > ⚠️ The `data` jsonb column is **not** automatically sanitized.
   > Callers MUST NOT put payment-method PII or secrets into `data`. A
-  > redactor may land in Phase 6; Phase 1 deliberately accepts this
-  > risk (T-EVT-03) and documents it here.
+  > redactor may land in a future release; the current release
+  > deliberately accepts this risk and documents it here.
 
   Immutability is enforced at the Postgres layer by a
   `BEFORE UPDATE OR DELETE` trigger raising SQLSTATE `45A01`. This

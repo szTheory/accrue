@@ -1,19 +1,19 @@
 defmodule Accrue.Billing.RefundActions do
   @moduledoc """
-  Phase 3 Plan 06 refund write surface (BILL-26, D3-45..47).
+  Refund write surface.
 
   Ships `create_refund/2` with **sync best-effort fee math**: when the
   processor response carries an expanded
   `charge.balance_transaction.fee_refunded`, the refund row is persisted
   with `stripe_fee_refunded_amount_minor`, `merchant_loss_amount_minor`,
   and `fees_settled_at`. When the balance_transaction is not yet
-  populated, those columns stay nil — the webhook backstop in Plan 07
+  populated, those columns stay nil — the webhook backstop
   (`charge.refund.updated`) fills them asynchronously.
 
   Return shape is uniform `{:ok, %Refund{}}` — **no** tagged variant
   like `{:ok, :pending_fees, _}` — because fee settlement state is a
   property of the row (`fees_settled?/1` predicate), not a branch in the
-  caller's control flow (D3-47).
+  caller's control flow.
   """
 
   alias Accrue.Actor

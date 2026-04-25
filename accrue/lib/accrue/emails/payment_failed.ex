@@ -1,11 +1,11 @@
 defmodule Accrue.Emails.PaymentFailed do
   @moduledoc """
-  Payment-failed notification (MAIL-04).
+  Payment-failed notification.
 
   Sent when a payment attempt fails. Body contains retry guidance and a
   CTA pointing at the host-supplied `@context[:update_pm_url]`. Dunning
-  cadence and escalation live in the Phase 4 Dunning policy module —
-  this email is only the customer-facing notification.
+  cadence and escalation live in the Dunning policy module — this email
+  is only the customer-facing notification.
   """
 
   use MjmlEEx,

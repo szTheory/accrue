@@ -136,11 +136,11 @@ defmodule Accrue.Billing.Invoice do
   end
 
   @doc """
-  Phase 4 Plan 05 (BILL-28) — webhook-path discount denormalization.
-  Mirrors Stripe's `discount_minor` + `total_discount_amounts` into
-  local columns. Stripe is canonical (D2-29) — no local math, no
-  `validate_number` guard. Callers pass nil-safe attrs so the cast
-  preserves existing values when the webhook doesn't carry them.
+  Webhook-path discount denormalization. Mirrors Stripe's
+  `discount_minor` + `total_discount_amounts` into local columns.
+  Stripe is canonical — no local math, no `validate_number` guard.
+  Callers pass nil-safe attrs so the cast preserves existing values
+  when the webhook doesn't carry them.
   """
   @spec force_discount_changeset(%__MODULE__{} | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def force_discount_changeset(invoice_or_changeset, attrs \\ %{}) do

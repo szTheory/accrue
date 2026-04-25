@@ -730,7 +730,7 @@ defmodule Accrue.Billing do
 
     1. Create the customer on the processor side (Fake or Stripe)
     2. Insert the `accrue_customers` row with the processor-assigned ID
-    3. Record a `"customer.created"` event (EVT-04)
+    3. Record a `"customer.created"` event
 
   Returns `{:ok, %Customer{}}` on success or `{:error, reason}` on
   failure. The entire transaction rolls back if any step fails.
@@ -862,9 +862,9 @@ defmodule Accrue.Billing do
   Updates a `Customer` with the given attributes.
 
   Uses `Ecto.Multi` to atomically update the customer and record a
-  `"customer.updated"` event (EVT-04). Metadata is validated per D2-07
-  (flat string map, max 50 keys, etc.). Optimistic locking via
-  `lock_version` prevents torn writes (D2-09).
+  `"customer.updated"` event. Metadata is validated as a flat string
+  map (max 50 keys, etc.). Optimistic locking via `lock_version`
+  prevents torn writes.
 
   ## Examples
 

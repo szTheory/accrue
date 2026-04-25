@@ -1,6 +1,6 @@
 defmodule Accrue.Mailer do
   @moduledoc """
-  Behaviour + facade for the Accrue transactional email pipeline (MAIL-01, D-21).
+  Behaviour + facade for the Accrue transactional email pipeline.
 
   ## Semantic API
 
@@ -16,7 +16,7 @@ defmodule Accrue.Mailer do
   transactional email. `deliver/2` returns `{:ok, :skipped}` without
   enqueueing. The `:emails` schema key is defined by `Accrue.Config`.
 
-  ## Telemetry (D-28, T-MAIL-02)
+  ## Telemetry
 
   Every `deliver/2` call emits `[:accrue, :mailer, :deliver, :start | :stop |
   :exception]` with `%{email_type: atom, customer_id: binary | nil}` metadata.

@@ -1,10 +1,10 @@
 defmodule Accrue.Emails.InvoiceFinalized do
   @moduledoc """
-  Invoice finalized notification (MAIL-07).
+  Invoice finalized notification.
 
   Sent when Stripe emits `invoice.finalized`. The PDF-attachment branch
-  is wired by `Accrue.Workers.Mailer` in Plan 06-07 — this module only
-  provides the subject/body. The template embeds
+  is wired by `Accrue.Workers.Mailer` — this module only provides the
+  subject/body. The template embeds
   `Accrue.Invoices.Components.invoice_header/1`, `line_items/1`, and
   `totals/1` via `Accrue.Emails.HtmlBridge` inside `<mj-raw>` blocks so
   email and PDF share one component library (single source of truth).

@@ -4,13 +4,12 @@ defmodule Accrue.Billing.PromotionCode do
 
   Stores the thin local projection of a processor promotion code — the
   customer-facing string (e.g. `"SUMMER25"`) that resolves to a
-  `Coupon`. Phase 4 (BILL-27) mirrors only the fields the admin
-  LiveView needs to filter/sort: `code`, `active`, `max_redemptions`,
-  `times_redeemed`, `expires_at`, plus the FK to `accrue_coupons`.
+  `Coupon`. The admin mirrors only the fields the admin LiveView needs
+  to filter/sort: `code`, `active`, `max_redemptions`, `times_redeemed`,
+  `expires_at`, plus the FK to `accrue_coupons`.
 
-  Per D4-01 / Claude's Discretion: full processor mirror is NOT a
-  goal. The canonical source of truth is the processor; Accrue
-  denormalizes only what the admin UI touches.
+  Full processor mirror is NOT a goal. The canonical source of truth
+  is the processor; Accrue denormalizes only what the admin UI touches.
   """
 
   use Ecto.Schema

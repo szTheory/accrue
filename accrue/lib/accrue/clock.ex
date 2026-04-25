@@ -9,7 +9,7 @@ defmodule Accrue.Clock do
   environment it delegates to the BEAM's `DateTime.utc_now/0`.
 
   This indirection is what makes the Fake Processor the primary test
-  surface (TEST-01): time-sensitive billing logic (trial ends, dunning,
+  surface: time-sensitive billing logic (trial ends, dunning,
   expiring-card notices) can be exercised deterministically by advancing
   the Fake clock rather than by sleeping or by stubbing `DateTime`.
 

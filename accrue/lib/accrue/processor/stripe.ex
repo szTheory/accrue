@@ -27,19 +27,19 @@ defmodule Accrue.Processor.Stripe do
   Raw Stripe responses often contain PII in fields like `email`, `name`,
   `address`, `phone`, `shipping`. This adapter:
 
-  - **Does not log `processor_error` verbatim** — T-PROC-01 mitigation.
+  - **Does not log `processor_error` verbatim**.
   - **Does not auto-inject params or responses into telemetry metadata**
     — only `%{adapter: :stripe, operation: ...}` at this layer.
   - **Converts `LatticeStripe.Customer` structs to plain maps** via
     `customer_to_map/1` so downstream code never pattern-matches on
     `%LatticeStripe.Customer{}`.
 
-  ## Phase 1 scope
+  ## Initial scope
 
-  Only the three customer callbacks are implemented (PROC-01, PROC-03,
-  PROC-07). Wire-level integration tests against Stripe test mode are
-  deferred to Phase 3 (PROC-02) — Phase 1 only proves the behaviour
-  conformance, the error-mapping contract, and the facade lockdown.
+  Only the three customer callbacks are implemented. Wire-level
+  integration tests against Stripe test mode are deferred — the initial
+  scope only proves the behaviour conformance, the error-mapping
+  contract, and the facade lockdown.
   """
 
   @behaviour Accrue.Processor

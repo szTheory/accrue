@@ -1,14 +1,14 @@
 defmodule Accrue.Webhook.Event do
   @moduledoc """
-  Lean event struct passed to webhook handlers (D2-29).
+  Lean event struct passed to webhook handlers.
 
   Deliberately does NOT include the raw Stripe object -- handlers
   call `Accrue.Processor.retrieve_*(event.object_id)` for canonical state.
-  This forces WH-10 compliance (re-fetch current state) by shape.
+  This forces re-fetch-current-state compliance by shape.
 
   The `type` field is kept as a `String.t()` in the struct. Conversion
   to atom for pattern-matching dispatch happens at the handler call site
-  in Plan 04, using `String.to_existing_atom/1` with a bounded allow-list.
+  using `String.to_existing_atom/1` with a bounded allow-list.
   """
 
   @processor_atoms %{

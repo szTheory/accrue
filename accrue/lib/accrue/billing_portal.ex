@@ -1,6 +1,6 @@
 defmodule Accrue.BillingPortal do
   @moduledoc """
-  Customer Billing Portal context (CHKT-04/05/06).
+  Customer Billing Portal context.
 
   Thin facade over `Accrue.BillingPortal.Session.create/1`. The portal
   itself is hosted by Stripe — Accrue's job is wrapping session

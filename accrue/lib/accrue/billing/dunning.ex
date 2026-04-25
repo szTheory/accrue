@@ -1,6 +1,6 @@
 defmodule Accrue.Billing.Dunning do
   @moduledoc """
-  Pure policy module for BILL-15 dunning (D4-02 hybrid).
+  Pure policy module for dunning.
 
   No side effects, no DB, no Stripe calls — `Accrue.Jobs.DunningSweeper`
   owns those. This module's job is to answer one question for each

@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.CouponApplied do
   @moduledoc """
-  Coupon applied notification (MAIL-13).
+  Coupon applied notification.
 
   Sent when a discount is applied via an action module
   (`Accrue.Billing.apply_promotion_code/3`) or when Stripe emits

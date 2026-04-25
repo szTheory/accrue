@@ -1,11 +1,11 @@
 defmodule Accrue.Billing.InvoiceActions do
   @moduledoc """
-  Phase 3 Plan 05 invoice write surface (BILL-17/18/19).
+  Invoice write surface.
 
-  Exposes the five user-path invoice actions on `Accrue.Billing` via the
-  Plan 01 `defdelegate` facade: `finalize_invoice`, `void_invoice`,
-  `pay_invoice`, `mark_uncollectible`, `send_invoice`. Each follows the
-  D3-18 one-shape `Repo.transact/2` pattern:
+  Exposes the five user-path invoice actions on `Accrue.Billing` via a
+  `defdelegate` facade: `finalize_invoice`, `void_invoice`,
+  `pay_invoice`, `mark_uncollectible`, `send_invoice`. Each follows a
+  one-shape `Repo.transact/2` pattern:
 
       telemetry.span
         |> Repo.transact (
@@ -13,7 +13,7 @@ defmodule Accrue.Billing.InvoiceActions do
              |> InvoiceProjection.decompose/1
              |> update row via Invoice.changeset/2 (user path, enforces transitions)
              |> upsert child items by stripe_id
-             |> Events.record/1 (same transaction — EVT-04)
+             |> Events.record/1 (same transaction)
            )
         |> IntentResult.wrap (pay_invoice only — may surface SCA)
 

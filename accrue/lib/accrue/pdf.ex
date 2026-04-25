@@ -1,18 +1,18 @@
 defmodule Accrue.PDF do
   @moduledoc """
-  Behaviour + facade for PDF rendering (PDF-01, D-32).
+  Behaviour + facade for PDF rendering.
 
   Callers pass pre-rendered HTML + opts; the adapter returns a binary
-  PDF body. Two adapters ship with Phase 1:
+  PDF body. Two adapters ship by default:
 
   - `Accrue.PDF.ChromicPDF` — production default. Delegates to the host
-    application's ChromicPDF instance. **Accrue does NOT start ChromicPDF**
-    (D-33, Pitfall #4) — the host app starts it in its own supervision tree.
+    application's ChromicPDF instance. **Accrue does NOT start ChromicPDF** —
+    the host app starts it in its own supervision tree.
   - `Accrue.PDF.Test` — Chrome-free test adapter. Sends
-    `{:pdf_rendered, html, opts}` to `self()` and returns `{:ok, "%PDF-TEST"}`
-    (D-34). Use in tests to avoid Chrome binary dependency.
+    `{:pdf_rendered, html, opts}` to `self()` and returns `{:ok, "%PDF-TEST"}`.
+    Use in tests to avoid Chrome binary dependency.
 
-  ## Telemetry (T-PDF-01)
+  ## Telemetry
 
   `[:accrue, :pdf, :render, :start | :stop | :exception]` is emitted with
   metadata `%{size, archival, adapter}`. The HTML body is NEVER placed in

@@ -1,12 +1,12 @@
 defmodule Accrue.Emails.Receipt do
   @moduledoc """
-  Canonical receipt email (MAIL-03).
+  Canonical receipt email.
 
   Sent when a one-off or subscription payment succeeds. This module does
-  NOT attach a PDF — the PDF-bearing variant is `Accrue.Emails.InvoicePaid`
-  (Plan 06-06). Both are registered in `Accrue.Workers.Mailer` dispatch.
+  NOT attach a PDF — the PDF-bearing variant is `Accrue.Emails.InvoicePaid`.
+  Both are registered in `Accrue.Workers.Mailer` dispatch.
 
-  `Accrue.Emails.PaymentSucceeded` is a legacy alias retained for Phase 1
+  `Accrue.Emails.PaymentSucceeded` is a legacy alias retained for
   back-compat; downstream code should dispatch by atom (`:receipt`).
   """
 

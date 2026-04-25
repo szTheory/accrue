@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.InvoicePaid do
   @moduledoc """
-  Invoice paid confirmation (MAIL-08).
+  Invoice paid confirmation.
 
   Sent when Stripe emits `invoice.paid`. Embeds `invoice_header/1`,
   `line_items/1`, and `totals/1` components via `HtmlBridge` so the

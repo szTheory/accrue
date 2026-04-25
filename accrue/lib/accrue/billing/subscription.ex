@@ -3,12 +3,12 @@ defmodule Accrue.Billing.Subscription do
   Ecto schema for the `accrue_subscriptions` table.
 
   Stores the local projection of a processor subscription (e.g. Stripe
-  `sub_xxx`). Phase 3 upgrades `:status` to an `Ecto.Enum` over the
-  canonical Stripe subscription status set (BILL-05, D3-03) and adds
-  the cancel-at-period-end + pause_collection fields needed for the
-  full lifecycle state machine.
+  `sub_xxx`). `:status` is an `Ecto.Enum` over the canonical Stripe
+  subscription status set, and the schema includes the
+  cancel-at-period-end + pause_collection fields needed for the full
+  lifecycle state machine.
 
-  ## Predicates (BILL-05)
+  ## Predicates
 
   Never gate on raw `.status` access. The predicates defined in this
   module are the canonical way to ask "is this subscription X?" — raw
@@ -199,13 +199,13 @@ defmodule Accrue.Billing.Subscription do
 
   @doc """
   True if the subscription is in the narrow `:past_due` retry window
-  where the D4-02 dunning sweeper is allowed to ask the processor
-  facade to move it to a terminal action.
+  where the dunning sweeper is allowed to ask the processor facade
+  to move it to a terminal action.
 
   Strictly `:past_due` — does NOT include `:unpaid`. An `:unpaid`
   subscription has already reached its terminal state (whether via
   Stripe-native termination or a prior sweep) and must not be swept
-  again (BILL-15).
+  again.
   """
   @spec dunning_sweepable?(%__MODULE__{} | map()) :: boolean()
   def dunning_sweepable?(%__MODULE__{status: :past_due}), do: true
@@ -217,8 +217,8 @@ defmodule Accrue.Billing.Subscription do
   if the subscription has reached a dunning-exhaustion state. Returns
   `nil` otherwise.
 
-  Used by the `customer.subscription.updated` webhook reducer (BILL-15,
-  D4-02) to detect terminal transitions without raw `.status` access.
+  Used by the `customer.subscription.updated` webhook reducer to
+  detect terminal transitions without raw `.status` access.
   """
   @spec dunning_exhausted_status(%__MODULE__{} | map()) :: :unpaid | :canceled | nil
   def dunning_exhausted_status(%__MODULE__{status: :unpaid}), do: :unpaid

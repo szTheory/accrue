@@ -1,6 +1,6 @@
 defmodule Accrue.Billing.MeterEventActions do
   @moduledoc """
-  Phase 4 Plan 02 — metered billing write surface (BILL-13, D4-03).
+  Metered billing write surface.
 
   Implements `Accrue.Billing.report_usage/3` as a sync-through with a
   transactional-outbox audit table:

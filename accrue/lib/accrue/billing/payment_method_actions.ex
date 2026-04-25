@@ -1,13 +1,13 @@
 defmodule Accrue.Billing.PaymentMethodActions do
   @moduledoc """
-  Phase 3 Plan 06 payment method write surface (BILL-23, BILL-25).
+  Payment method write surface.
 
   Ships four public entry points, all exposed via `defdelegate` on
   `Accrue.Billing`:
 
     * `attach_payment_method/3` — attaches a processor-side payment
-      method to a customer, with **fingerprint dedup** (BILL-23). If an
-      existing PaymentMethod row for the same `(customer_id, fingerprint)`
+      method to a customer, with **fingerprint dedup**. If an existing
+      PaymentMethod row for the same `(customer_id, fingerprint)`
       exists, the processor-side duplicate is detached and the existing
       row is returned with `existing?: true`. A concurrent race that
       slips past the application-level check hits the
@@ -16,13 +16,13 @@ defmodule Accrue.Billing.PaymentMethodActions do
     * `detach_payment_method/2` — detaches on the processor and deletes
       the local row.
     * `set_default_payment_method/3` — asserts `pm.customer_id ==
-      customer.id` (BILL-25, strict attachment check) and raises
+      customer.id` (strict attachment check) and raises
       `Accrue.Error.NotAttached` otherwise. Never silently wires a
       foreign PM as a customer default.
     * `list_payment_methods/2` — read-only listing of processor-side
-      payment methods for the customer's Stripe customer id (Phase 56,
-      BIL-01). Optional keyword filters are validated with
-      `NimbleOptions` before the processor call.
+      payment methods for the customer's Stripe customer id. Optional
+      keyword filters are validated with `NimbleOptions` before the
+      processor call.
 
   ## `list_payment_methods/2` options
 
@@ -63,8 +63,8 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
   @doc """
   Attaches a processor-side payment method to a customer with fingerprint
-  dedup (BILL-23). Returns `{:ok, %PaymentMethod{}}`; the
-  `existing?: true` virtual flag is set when dedup hit an existing row.
+  dedup. Returns `{:ok, %PaymentMethod{}}`; the `existing?: true`
+  virtual flag is set when dedup hit an existing row.
   """
   @spec attach_payment_method(Customer.t(), String.t(), keyword()) ::
           {:ok, PaymentMethod.t()} | {:error, term()}
@@ -209,9 +209,9 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
   @doc """
   Sets a payment method as the customer's default. Raises
-  `Accrue.Error.NotAttached` if `pm.customer_id != customer.id` (BILL-25
-  strict attachment check — never silently wires a foreign PM as
-  default).
+  `Accrue.Error.NotAttached` if `pm.customer_id != customer.id` —
+  strict attachment check, never silently wires a foreign PM as
+  default.
   """
   @spec set_default_payment_method(Customer.t(), PaymentMethod.t(), keyword()) ::
           {:ok, Customer.t()} | {:error, term()}

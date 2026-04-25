@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.SubscriptionResumed do
   @moduledoc """
-  Subscription-resumed notification (MAIL-11b).
+  Subscription-resumed notification.
 
   Sent when a previously paused subscription returns to `active`.
   Charges resume on the next billing cycle.

@@ -1,6 +1,6 @@
 defmodule Accrue.Events.UpcasterRegistry do
   @moduledoc """
-  Chain composition for event schema-version upcasting (EVT-05 / D4 Discretion).
+  Chain composition for event schema-version upcasting.
 
   When `Accrue.Events.state_as_of/3` or `timeline_for/3` reads historical
   rows, each row may have an outdated `schema_version` for its type. This

@@ -1,12 +1,11 @@
 defmodule Accrue.Processor.Stripe.ErrorMapper do
   @moduledoc """
-  Translates raw `LatticeStripe` error shapes into `Accrue.Error` subtypes
-  (D-07, PROC-07, OBS-06).
+  Translates raw `LatticeStripe` error shapes into `Accrue.Error` subtypes.
 
   This is one of only two modules in the entire Accrue codebase allowed to
   reference `LatticeStripe` — the other is `Accrue.Processor.Stripe`. The
   facade-lockdown test in `test/accrue/processor/stripe_test.exs` enforces
-  this at CI time (T-PROC-02 mitigation).
+  this at CI time.
 
   ## Mapping table
 
@@ -23,8 +22,8 @@ defmodule Accrue.Processor.Stripe.ErrorMapper do
 
   ## SignatureError raises, never returns
 
-  Per D-08, any webhook signature verification failure is raised, never
-  returned as a tuple. Both the typed
+  Any webhook signature verification failure is raised, never returned
+  as a tuple. Both the typed
   `%LatticeStripe.Webhook.SignatureVerificationError{}` struct and an
   `invalid_request_error` with code `"signature_verification_failed"`
   trigger an `Accrue.SignatureError` raise.
@@ -32,9 +31,9 @@ defmodule Accrue.Processor.Stripe.ErrorMapper do
   ## Metadata preservation
 
   The full raw error term is stashed in the Accrue error's `:processor_error`
-  field so operators can debug the original response. Per T-PROC-01, this
-  field MUST NOT be logged verbatim — downstream logging sanitizer is a
-  Plan 06 concern.
+  field so operators can debug the original response. This field MUST
+  NOT be logged verbatim — downstream logging sanitizer is a separate
+  concern.
   """
 
   @compile {:no_warn_undefined,

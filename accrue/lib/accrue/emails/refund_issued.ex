@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.RefundIssued do
   @moduledoc """
-  Refund issued notification (MAIL-12).
+  Refund issued notification.
 
   Sent when Stripe emits `charge.refunded`. Body renders the full fee
   breakdown (`formatted_amount`, `formatted_stripe_fee_refunded`,

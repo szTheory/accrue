@@ -1,13 +1,13 @@
 defmodule Accrue.Billing.MeterEvents do
   @moduledoc """
-  Phase 4 Plan 02 helper for asynchronous meter-event state transitions
-  driven by Stripe webhooks (BILL-13, Pitfall 5).
+  Helper for asynchronous meter-event state transitions driven by
+  Stripe webhooks.
 
   Kept separate from `Accrue.Billing.MeterEventActions` so the webhook
   path (`Accrue.Webhook.DefaultHandler`) doesn't pull the outbox/
   NimbleOptions surface into its dependency graph.
 
-  Phase 44 centralizes **pending → failed** transitions with guarded updates
+  Centralizes **pending → failed** transitions with guarded updates
   and `[:accrue, :ops, :meter_reporting_failed]` so retries and duplicate
   deliveries do not inflate ops counters.
   """

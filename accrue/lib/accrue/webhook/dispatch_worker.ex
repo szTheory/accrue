@@ -22,8 +22,8 @@ defmodule Accrue.Webhook.DispatchWorker do
 
   ## Retry policy
 
-  25 attempts with exponential backoff (WH-05). On final attempt,
-  transitions the webhook event to `:dead` status (D2-35).
+  25 attempts with exponential backoff. On final attempt, transitions
+  the webhook event to `:dead` status.
 
   ## Status lifecycle
 

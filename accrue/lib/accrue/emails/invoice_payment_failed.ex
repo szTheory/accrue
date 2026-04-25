@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.InvoicePaymentFailed do
   @moduledoc """
-  Invoice payment-failed notification (MAIL-09).
+  Invoice payment-failed notification.
 
   Sent when Stripe emits `invoice.payment_failed`. Body contains a CTA
   pointing at `@context.invoice.hosted_invoice_url` (the Stripe-hosted

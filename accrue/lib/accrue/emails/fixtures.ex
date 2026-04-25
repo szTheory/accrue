@@ -1,13 +1,13 @@
 defmodule Accrue.Emails.Fixtures do
   @moduledoc """
-  Canned assigns for every `Accrue.Emails.*` type (D6-08).
+  Canned assigns for every `Accrue.Emails.*` type.
 
   Lives in `lib/` (not `test/support/`) so that:
 
-    * `mix accrue.mail.preview` (Plan 06-07) can import without
-      `test`-env dependencies.
+    * `mix accrue.mail.preview` can import without `test`-env
+      dependencies.
     * ExUnit tests can call it without setup boilerplate.
-    * (Phase 7) `AccrueAdmin.EmailPreviewLive` can import via
+    * `AccrueAdmin.EmailPreviewLive` can import via
       `import Accrue.Emails.Fixtures`.
 
   Pure data — zero side effects, no `Accrue.Repo` calls, no
@@ -69,7 +69,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.Receipt` (MAIL-03)."
+  @doc "Fixture for `Accrue.Emails.Receipt`."
   def receipt do
     %{
       context: base_context(),
@@ -78,7 +78,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.PaymentFailed` (MAIL-04)."
+  @doc "Fixture for `Accrue.Emails.PaymentFailed`."
   def payment_failed do
     %{
       context: base_context(),
@@ -88,7 +88,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.TrialEnding` (MAIL-05)."
+  @doc "Fixture for `Accrue.Emails.TrialEnding`."
   def trial_ending do
     %{
       context: Map.put(base_context(), :days_until_end, 3),
@@ -99,7 +99,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.TrialEnded` (MAIL-06)."
+  @doc "Fixture for `Accrue.Emails.TrialEnded`."
   def trial_ended do
     %{
       context: base_context(),
@@ -109,7 +109,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.InvoiceFinalized` (MAIL-07)."
+  @doc "Fixture for `Accrue.Emails.InvoiceFinalized`."
   def invoice_finalized do
     %{
       context: base_context(),
@@ -118,7 +118,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.InvoicePaid` (MAIL-08)."
+  @doc "Fixture for `Accrue.Emails.InvoicePaid`."
   def invoice_paid do
     %{
       context: base_context(),
@@ -127,7 +127,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.InvoicePaymentFailed` (MAIL-09)."
+  @doc "Fixture for `Accrue.Emails.InvoicePaymentFailed`."
   def invoice_payment_failed do
     %{
       context: base_context(),
@@ -136,7 +136,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.SubscriptionCanceled` (MAIL-10)."
+  @doc "Fixture for `Accrue.Emails.SubscriptionCanceled`."
   def subscription_canceled do
     %{
       context: base_context(),
@@ -145,7 +145,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.SubscriptionPaused` (MAIL-11a)."
+  @doc "Fixture for `Accrue.Emails.SubscriptionPaused`."
   def subscription_paused do
     %{
       context: Map.put(base_context(), :pause_behavior, "keep_as_draft"),
@@ -155,7 +155,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.SubscriptionResumed` (MAIL-11b)."
+  @doc "Fixture for `Accrue.Emails.SubscriptionResumed`."
   def subscription_resumed do
     %{
       context: base_context(),
@@ -164,7 +164,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.RefundIssued` (MAIL-12)."
+  @doc "Fixture for `Accrue.Emails.RefundIssued`."
   def refund_issued do
     %{
       context:
@@ -182,7 +182,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.CouponApplied` (MAIL-13)."
+  @doc "Fixture for `Accrue.Emails.CouponApplied`."
   def coupon_applied do
     %{
       context:
@@ -195,7 +195,7 @@ defmodule Accrue.Emails.Fixtures do
     }
   end
 
-  @doc "Fixture for `Accrue.Emails.CardExpiringSoon` (Phase 3 cron)."
+  @doc "Fixture for `Accrue.Emails.CardExpiringSoon` (cron-driven)."
   def card_expiring_soon do
     %{
       context:
@@ -218,8 +218,8 @@ defmodule Accrue.Emails.Fixtures do
   @doc """
   Returns the full catalogue as a map of email type atom → fixture map.
 
-  Used by `mix accrue.mail.preview` (Plan 06-07) to iterate every
-  registered type and by ExUnit tests to drive coverage loops.
+  Used by `mix accrue.mail.preview` to iterate every registered type
+  and by ExUnit tests to drive coverage loops.
   """
   @spec all() :: %{atom() => map()}
   def all do

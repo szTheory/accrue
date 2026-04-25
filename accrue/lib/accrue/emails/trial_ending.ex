@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.TrialEnding do
   @moduledoc """
-  Trial-ending reminder email (MAIL-05).
+  Trial-ending reminder email.
 
   Triggered by the `customer.subscription.trial_will_end` Stripe webhook
   (usually 3 days before `trial_end`). Uses the shared transactional MJML

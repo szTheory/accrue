@@ -1,6 +1,6 @@
 defmodule Accrue.Jobs.DetectExpiringCards do
   @moduledoc """
-  Scheduled Oban worker for expiring-card detection (D3-71..78, BILL-24).
+  Scheduled Oban worker for expiring-card detection.
 
   Scans `accrue_payment_methods` with non-nil `exp_month` / `exp_year`,
   computes days-until-expiry (end of expiry month), and emits a
@@ -19,7 +19,7 @@ defmodule Accrue.Jobs.DetectExpiringCards do
   dedup entry forever.
 
   No new column is added to `accrue_payment_methods` for dedup — the
-  event ledger IS the dedup source of truth (D3-14, EVT-04).
+  event ledger IS the dedup source of truth.
   """
 
   use Oban.Worker, queue: :accrue_scheduled, max_attempts: 3

@@ -1,6 +1,6 @@
 defmodule Accrue.Jobs.DunningSweeper do
   @moduledoc """
-  Oban cron worker for BILL-15 / D4-02 dunning grace-period overlay.
+  Oban cron worker for the dunning grace-period overlay.
 
   Stripe Smart Retries owns the retry cadence. Accrue owns a thin
   grace-period overlay on top: once `past_due_since` is older than the

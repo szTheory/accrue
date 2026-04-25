@@ -1,15 +1,15 @@
 defmodule Accrue.Billing.SubscriptionActions do
   @moduledoc """
-  Phase 3 Plan 04 subscription write surface (BILL-03/04/06/07/08/09/10).
+  Subscription write surface.
 
-  Every function here is exposed on `Accrue.Billing` via `defdelegate`
-  (wired in Plan 01 Task 4). All public functions follow the dual-API
-  `foo/n` + `foo!/n` pattern and emit an `accrue_events` row inside the
-  same `Repo.transact/2` as the DB mutation (EVT-04 invariant).
+  Every function here is exposed on `Accrue.Billing` via `defdelegate`.
+  All public functions follow the dual-API `foo/n` + `foo!/n` pattern
+  and emit an `accrue_events` row inside the same `Repo.transact/2` as
+  the DB mutation.
 
-  The intent_result tagged return (D3-06..12) is used for ops that can
-  surface a requires_action PaymentIntent (`subscribe`, `swap_plan`,
-  `cancel` when `invoice_now: true`). Non-intent ops return plain
+  The intent_result tagged return is used for ops that can surface a
+  requires_action PaymentIntent (`subscribe`, `swap_plan`, `cancel`
+  when `invoice_now: true`). Non-intent ops return plain
   `{:ok, %Subscription{}}`.
   """
 

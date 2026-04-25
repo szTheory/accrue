@@ -1,19 +1,19 @@
 defmodule Accrue.Billing.SubscriptionItems do
   @moduledoc """
-  Multi-item subscription surface (BILL-12).
+  Multi-item subscription surface.
 
   `add_item/3`, `remove_item/2`, and `update_item_quantity/3` mutate
   a subscription's item list through the processor adapter and project
   the result to the local `accrue_subscription_items` table inside a
   single `Repo.transact/1` block.
 
-  All three require an explicit `:proration` option (BILL-09 carryover) —
-  Accrue never inherits Stripe's default proration behavior. Missing
-  proration raises at NimbleOptions validation time.
+  All three require an explicit `:proration` option — Accrue never
+  inherits Stripe's default proration behavior. Missing proration
+  raises at NimbleOptions validation time.
 
-  The WR-09 non-bang + `reduce_while` pattern is used for any list
-  upsert path so `Ecto.InvalidChangesetError` propagates cleanly
-  rather than aborting the enclosing transaction.
+  The non-bang + `reduce_while` pattern is used for any list upsert
+  path so `Ecto.InvalidChangesetError` propagates cleanly rather than
+  aborting the enclosing transaction.
   """
 
   import Ecto.Query, only: [from: 2]

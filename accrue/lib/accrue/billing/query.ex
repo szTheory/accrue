@@ -4,9 +4,9 @@ defmodule Accrue.Billing.Query do
   `Accrue.Billing.Subscription` predicates (D3-04).
 
   Every predicate in `Subscription` has a matching query fragment here.
-  Use these in `where` clauses instead of accessing raw `.status` — BILL-05
-  forbids raw status access outside this module and `Subscription` itself
-  (enforced by `Accrue.Credo.NoRawStatusAccess`).
+  Use these in `where` clauses instead of accessing raw `.status` — raw
+  status access is forbidden outside this module and `Subscription`
+  itself (enforced by `Accrue.Credo.NoRawStatusAccess`).
 
   All functions accept an optional queryable (default
   `Accrue.Billing.Subscription`) and compose via `|>`:
@@ -70,9 +70,9 @@ defmodule Accrue.Billing.Query do
   end
 
   @doc """
-  Subscriptions eligible for a BILL-15 dunning sweep tick: strictly
+  Subscriptions eligible for a dunning sweep tick: strictly
   `:past_due`, with `past_due_since` older than the grace window, and
-  with no prior `dunning_sweep_attempted_at` stamp (D4-02).
+  with no prior `dunning_sweep_attempted_at` stamp.
   """
   @spec dunning_sweep_candidates(pos_integer(), Ecto.Queryable.t()) :: Ecto.Query.t()
   def dunning_sweep_candidates(grace_days, query \\ Subscription)

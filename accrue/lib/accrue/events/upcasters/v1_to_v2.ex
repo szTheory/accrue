@@ -1,7 +1,6 @@
 defmodule Accrue.Events.Upcasters.V1ToV2 do
   @moduledoc """
-  Example upcaster from `schema_version: 1` to `schema_version: 2`
-  (EVT-05).
+  Example upcaster from `schema_version: 1` to `schema_version: 2`.
 
   Real upcasters implement actual field migrations — renames,
   defaults, denormalization. This module ships an identity transform

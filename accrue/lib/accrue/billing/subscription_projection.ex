@@ -109,8 +109,8 @@ defmodule Accrue.Billing.SubscriptionProjection do
   DateTimes to ISO8601 strings so the result is jsonb round-trip safe.
 
   Public so `Accrue.Billing.InvoiceProjection` can reuse the same
-  normalization (WR-11) rather than storing atom-keyed data and
-  getting shape drift on reload.
+  normalization rather than storing atom-keyed data and getting shape
+  drift on reload.
   """
   @spec to_string_keys(term()) :: term()
   def to_string_keys(%DateTime{} = dt), do: DateTime.to_iso8601(dt)

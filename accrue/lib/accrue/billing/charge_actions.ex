@@ -1,23 +1,22 @@
 defmodule Accrue.Billing.ChargeActions do
   @moduledoc """
-  Phase 3 Plan 06 charge / payment intent / setup intent write surface
-  (BILL-20, BILL-21, BILL-22).
+  Charge / payment intent / setup intent write surface.
 
   Ships three public entry points, all exposed on `Accrue.Billing` via
-  `defdelegate` in Plan 01 Task 4:
+  `defdelegate`:
 
     * `charge/3` — atomic charge creation with SCA-safe tagged returns.
       Resolves payment method from `opts[:payment_method]` or the
       customer's `default_payment_method` association. Returns typed
       `{:error, %Accrue.Error.NoDefaultPaymentMethod{}}` when neither is
-      set (BILL-21) — never silently falls back to the first attached PM
-      (Cashier footgun, D3-58).
+      set — never silently falls back to the first attached PM
+      (Cashier footgun).
     * `create_payment_intent/2` — thin wrapper with `IntentResult.wrap/1`
       on the result.
-    * `create_setup_intent/2` — BILL-22 off-session card-on-file parallel.
+    * `create_setup_intent/2` — off-session card-on-file parallel.
 
   Every mutation runs inside `Accrue.Repo.transact/2` with an
-  `accrue_events` row written in the same transaction (EVT-04 invariant).
+  `accrue_events` row written in the same transaction.
   """
 
   alias Accrue.Actor
@@ -37,10 +36,10 @@ defmodule Accrue.Billing.ChargeActions do
   `intent_result(Charge.t())`:
 
     * `{:ok, %Charge{}}` — happy path
-    * `{:ok, :requires_action, pi}` — SCA / 3DS required (BILL-20)
+    * `{:ok, :requires_action, pi}` — SCA / 3DS required
     * `{:error, %Accrue.Error.NoDefaultPaymentMethod{}}` — no PM resolved
-      (BILL-21 — typed, loud, pattern-matchable; never silently falls
-      back to "first attached PM")
+      (typed, loud, pattern-matchable; never silently falls back to
+      "first attached PM")
     * `{:error, other}` — anything else
 
   ## Options
@@ -191,7 +190,7 @@ defmodule Accrue.Billing.ChargeActions do
   # ---------------------------------------------------------------------
 
   @doc """
-  BILL-22 off-session card-on-file parallel. Creates a SetupIntent with
+  Off-session card-on-file parallel. Creates a SetupIntent with
   `usage: "off_session"` so the resulting PaymentMethod can be charged
   off-session later (e.g. subscription renewals with SCA pre-authorized).
   Returns `intent_result(map())`.

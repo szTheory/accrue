@@ -1,6 +1,6 @@
 defmodule Accrue.Emails.TrialEnded do
   @moduledoc """
-  Trial-ended notification email (MAIL-06).
+  Trial-ended notification email.
 
   Sent after the trial period has concluded. Copy emphasizes that a
   payment method must be added to continue using the service.

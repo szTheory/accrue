@@ -1,6 +1,6 @@
 defmodule Accrue.Telemetry do
   @moduledoc """
-  Telemetry conventions and helpers for Accrue (D-17, D-18, OBS-01).
+  Telemetry conventions and helpers for Accrue.
 
   ## Event naming
 
@@ -28,9 +28,8 @@ defmodule Accrue.Telemetry do
   unchanged — the helper does the metadata plumbing.
 
   > ⚠️ `span/3` does NOT auto-include raw arguments in metadata — only
-  > the explicit metadata map you pass. Plan 04's Stripe processor MUST
-  > NOT shove raw `lattice_stripe` responses into span metadata. Mitigates
-  > T-OBS-01.
+  > the explicit metadata map you pass. The Stripe processor MUST NOT
+  > shove raw `lattice_stripe` responses into span metadata.
 
   ## OpenTelemetry bridge
 

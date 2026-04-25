@@ -1,6 +1,6 @@
 defmodule Accrue.Application do
   @moduledoc """
-  OTP Application entry point for Accrue (FND-05, D-05).
+  OTP Application entry point for Accrue.
 
   Empty-supervisor pattern: Accrue is a library, not a service. It does
   NOT start host-owned components (host Repo, Oban, host ChromicPDF pool,
@@ -14,8 +14,7 @@ defmodule Accrue.Application do
        Misconfig fails loud, before any state is touched.
 
     2. `Accrue.Auth.Default.boot_check!/0` — refuses to boot in `:prod`
-       when `:auth_adapter` still points at the dev-permissive default
-       (D-40, T-FND-07 mitigation).
+       when `:auth_adapter` still points at the dev-permissive default.
 
     3. `warn_on_secret_collision/0` — emits a `Logger.warning/1` (not
        fatal) when the configured Connect webhook endpoint secret is

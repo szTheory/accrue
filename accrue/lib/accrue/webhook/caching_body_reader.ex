@@ -3,9 +3,9 @@ defmodule Accrue.Webhook.CachingBodyReader do
   Custom body reader for `Plug.Parsers` that tees the raw body into
   `conn.assigns[:raw_body]` for webhook signature verification.
 
-  Only used inside the `:accrue_webhook_raw_body` pipeline (D2-20) --
-  never globally. This ensures that non-webhook routes are unaffected
-  by raw-body capture (WH-01).
+  Only used inside the `:accrue_webhook_raw_body` pipeline -- never
+  globally. This ensures that non-webhook routes are unaffected by
+  raw-body capture.
 
   ## Usage
 

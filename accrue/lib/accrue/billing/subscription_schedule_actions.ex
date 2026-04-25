@@ -1,11 +1,10 @@
 defmodule Accrue.Billing.SubscriptionScheduleActions do
   @moduledoc """
-  BILL-16 write surface for Stripe SubscriptionSchedules.
+  Write surface for Stripe SubscriptionSchedules.
 
-  Mirrors the Phase 3 `SubscriptionActions` shape: Repo.transact →
-  Processor call → projection → local insert/update → event record,
-  all inside a single transaction with deterministic idempotency
-  keys.
+  Mirrors the `SubscriptionActions` shape: Repo.transact → Processor
+  call → projection → local insert/update → event record, all inside
+  a single transaction with deterministic idempotency keys.
   """
 
   require Logger
