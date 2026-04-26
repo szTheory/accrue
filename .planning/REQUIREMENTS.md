@@ -64,28 +64,30 @@ Explicitly excluded from v1.30 to prevent scope creep on the `1.0.0` declaration
 
 ## Traceability
 
-Empty initially — populated during roadmap creation (Step 10 of `/gsd-new-milestone`).
+Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Phase numbering continues from v1.29's last phase (90); v1.30 spans Phases 91–93.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-05 | TBD | Pending |
-| REL-06 | TBD | Pending |
-| REL-07 | TBD | Pending |
-| REL-08 | TBD | Pending |
-| PPX-09 | TBD | Pending |
-| PPX-10 | TBD | Pending |
-| PPX-11 | TBD | Pending |
-| PPX-12 | TBD | Pending |
-| HYG-02 | TBD | Pending |
-| DOC-03 | TBD | Pending |
-| DOC-04 | TBD | Pending |
-| INV-07 | TBD | Pending |
+| REL-05 | Phase 92 | Pending |
+| REL-06 | Phase 91 | Pending |
+| REL-07 | Phase 91 | Pending |
+| REL-08 | Phase 93 | Pending |
+| PPX-09 | Phase 92 | Pending |
+| PPX-10 | Phase 92 | Pending |
+| PPX-11 | Phase 92 | Pending |
+| PPX-12 | Phase 92 | Pending |
+| HYG-02 | Phase 93 | Pending |
+| DOC-03 | Phase 91 | Pending |
+| DOC-04 | Phase 91 | Pending |
+| INV-07 | Phase 93 | Pending |
 
 **Coverage:**
 - v1.30 requirements: 12 total
-- Mapped to phases: 0 (pre-roadmap)
-- Unmapped: 12 ⚠️ (will be mapped during roadmap creation)
+- Mapped to phases: 12 / Unmapped: 0 ✓
+- Phase 91 (Pre-publish prep): REL-06, REL-07, DOC-03, DOC-04 (4)
+- Phase 92 (Linked publish + contract sweep): REL-05, PPX-09, PPX-10, PPX-11, PPX-12 (5)
+- Phase 93 (HYG mirror + INV + tag): HYG-02, INV-07, REL-08 (3)
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 after initial definition (v1.30 milestone open)*
+*Last updated: 2026-04-26 — traceability populated by `/gsd-new-milestone` Step 10 (roadmap creation)*
