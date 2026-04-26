@@ -1,16 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.30
-milestone_name: 1.0.0 Declaration (Spine A)
-status: planning
-last_updated: "2026-04-26T21:21:04.500Z"
-last_activity: 2026-04-26
+milestone_name: INV-07 maintainer pass
+status: Roadmap drafted — awaiting `/gsd-plan-phase 91`
+last_updated: "2026-04-26T21:51:07.220Z"
+last_activity: 2026-04-26 — v1.30 ROADMAP.md written, REQUIREMENTS.md traceability populated (12/12 mapped)
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,11 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Position
 
-Phase: Not started (roadmap drafted, planning Phase 91 next)
+Phase: 91 Pre-publish 1.0.0 prep — context gathered (REL-06, REL-07, DOC-03, DOC-04)
 Plan: —
-Status: Roadmap drafted — awaiting `/gsd-plan-phase 91`
-Last activity: 2026-04-26 — v1.30 ROADMAP.md written, REQUIREMENTS.md traceability populated (12/12 mapped)
+Status: `091-CONTEXT.md` committed — awaiting `/gsd-plan-phase 91`
+Resume file: `milestones/v1.30-phases/091-pre-publish-prep/091-CONTEXT.md`
+Last activity: 2026-04-26 — Phase 91 context gathered via advisor-style cohesive synthesis (4 parallel research agents, no high-impact forks); auto-applied: A1 sequencing (separate pre-bump PR), hybrid CHANGELOG preamble in `## Unreleased`, replace-in-place `RELEASING.md` post-1.0 cadence, two-pass scoped doc flip (READMEs + maturity-and-maintenance + upgrade), dated DOC-04 sub-section
 
 ## Milestone Progress
 
