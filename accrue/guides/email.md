@@ -92,9 +92,9 @@ the override ladder, and the Oban-based async pipeline remain unchanged.
 
 Phase 89 refactors `Accrue.Workers.Mailer` to dispatch via
 `Mailglass.deliver/1` and adds explicit idempotency keys. Phase 90 ports
-the remaining MJML templates and removes `mjml_eex` and `phoenix_swoosh`
-from `accrue/mix.exs`. Until Phase 90 ships, both pipelines coexist
-safely.
+the remaining MJML templates, removes `mjml_eex` and `phoenix_swoosh`
+from `accrue/mix.exs`, and leaves the admin preview UI as the supported
+inspection surface.
 
 See [Mailglass getting started](https://github.com/szTheory/mailglass/blob/main/guides/getting-started.md)
 for the upstream install reference.
@@ -282,26 +282,14 @@ Unknown locales/timezones emit
 
 Override the CLDR backend via `config :accrue, :cldr_backend, MyApp.Cldr`.
 
-## mix accrue.mail.preview
+## Previewing emails
 
-Render every email type with canned fixtures:
+Use the admin dev preview at `/dev/email-preview` to inspect the current
+fixture set. It renders the same canned assigns used by ExUnit, so any
+template or fixture drift shows up immediately in the browser.
 
-```bash
-# Render all 13 types as HTML + TXT
-mix accrue.mail.preview
-
-# Only specific types
-mix accrue.mail.preview --only receipt,trial_ending
-
-# Only one format
-mix accrue.mail.preview --only receipt --format html
-mix accrue.mail.preview --only invoice_finalized --format pdf
-```
-
-Output lands in `.accrue/previews/{type}.{html,txt,pdf}`. The
-`.accrue/` directory is git-ignored by convention. Paste the HTML into
-Litmus/Email on Acid/Gmail/Outlook for visual QA — Accrue does not
-ship a headless rendering matrix.
+For a full sweep, run the email test suite; it exercises the rendered
+HTML/text outputs directly and keeps the preview surface honest.
 
 ## Pitfall 7 — single dispatch discipline
 

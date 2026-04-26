@@ -1,8 +1,6 @@
 defmodule Accrue.Invoices.Components do
   @moduledoc """
-  Phoenix.Component function components shared by email (via
-  `Accrue.Emails.HtmlBridge` + `<mj-raw>`) and PDF (via
-  `Accrue.Invoices.Layouts.print_shell/1`).
+  Phoenix.Component function components shared by email and PDF.
 
   ## Single source of truth
 

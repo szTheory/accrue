@@ -3,7 +3,7 @@ defmodule Accrue.Emails.FixturesTest do
   Plan 06-06 Task 3: `Accrue.Emails.Fixtures` canned-assigns module.
 
   Asserts:
-    * `all/0` returns a 13-key map covering every email type
+   * `all/0` returns a 14-key map covering every email type
     * Every fixture has a `:context` key
     * Fixtures are deterministic (calling twice returns identical maps)
     * Every fixture renders via the corresponding `Accrue.Emails.<Type>`
@@ -28,12 +28,13 @@ defmodule Accrue.Emails.FixturesTest do
     :subscription_resumed,
     :refund_issued,
     :coupon_applied,
-    :card_expiring_soon
+    :card_expiring_soon,
+    :payment_succeeded
   ]
 
-  test "all/0 returns 13 email type keys" do
+  test "all/0 returns 14 email type keys" do
     all = Fixtures.all()
-    assert map_size(all) == 13
+    assert map_size(all) == 14
 
     for type <- @expected_types do
       assert Map.has_key?(all, type), "missing fixture: #{type}"
@@ -63,6 +64,7 @@ defmodule Accrue.Emails.FixturesTest do
     assert Fixtures.all() == Fixtures.all()
     assert Fixtures.receipt() == Fixtures.receipt()
     assert Fixtures.refund_issued() == Fixtures.refund_issued()
+    assert Fixtures.payment_succeeded() == Fixtures.payment_succeeded()
   end
 
   test "each fixture renders via its corresponding email module without raising" do

@@ -40,7 +40,6 @@ defmodule Accrue.Invoices do
   HTML shell.
   """
 
-  alias Accrue.Emails.HtmlBridge
   alias Accrue.Invoices.{Layouts, Render}
 
   @type invoice_or_id :: Accrue.Billing.Invoice.t() | String.t()
@@ -155,7 +154,9 @@ defmodule Accrue.Invoices do
   end
 
   defp render_shell_html(context) do
-    HtmlBridge.render(&Layouts.print_shell/1, %{context: context})
+    Layouts.print_shell(%{context: context})
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
   end
 
   defp adapter_opts(opts) do

@@ -36,9 +36,9 @@ defmodule Accrue.Emails.SubscriptionResumedTest do
     assert is_binary(SubscriptionResumed.subject(%{}))
   end
 
-  test "render/1 MSO conditionals" do
+  test "render/1 is HTML" do
     html = SubscriptionResumed.render(fixture())
-    assert html =~ "<!--[if mso"
+    assert html =~ ~r/<html|<!DOCTYPE/i
   end
 
   test "render/1 mentions resumed" do

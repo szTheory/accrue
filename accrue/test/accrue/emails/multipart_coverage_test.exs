@@ -5,7 +5,7 @@ defmodule Accrue.Emails.MultipartCoverageTest do
   and return non-empty binaries for a minimal context fixture.
 
   Also enforces D6-07 (no opt-out line in transactional emails) as a
-  library-wide invariant across all 8 types.
+  library-wide invariant across all 9 types.
 
   Dispatch uses `Accrue.Workers.Mailer.resolve_template/1` (public
   fall-through to the private `default_template/1` catalogue) so this
@@ -22,7 +22,8 @@ defmodule Accrue.Emails.MultipartCoverageTest do
     :subscription_canceled,
     :subscription_paused,
     :subscription_resumed,
-    :card_expiring_soon
+    :card_expiring_soon,
+    :payment_succeeded
   ]
 
   setup do
@@ -47,6 +48,10 @@ defmodule Accrue.Emails.MultipartCoverageTest do
       context: context,
       subject: "Test",
       preview: "Test preview",
+      customer_name: "Jo Example",
+      amount: "$29.00",
+      invoice_number: "INV-1",
+      receipt_url: "https://acme.test/receipt",
       days_until_end: 3,
       brand: "visa",
       last4: "4242",

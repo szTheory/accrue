@@ -6,10 +6,10 @@ defmodule Accrue.Workers.Mailer do
 
   1. `Accrue.Mailer.Default.deliver/2` enqueues a job with string-keyed
      `%{"type" => "...", "assigns" => %{...}}` args (Oban-safe scalars only).
-  2. `perform/1` rehydrates the assigns (locale/timezone/customer hydration
-     via `enrich/2`), resolves the template module (honoring `:email_overrides`
-     rung 2 MFA and rung 3 atom), builds a Mailglass message, and delivers
-     via `Mailglass.deliver/1`.
+   2. `perform/1` rehydrates the assigns (locale/timezone/customer hydration
+      via `enrich/2`), resolves the template module (honoring `:email_overrides`
+      rung 2 MFA and rung 3 atom), builds a Mailglass message for the Mailglass
+      mailers, and delivers via `Mailglass.deliver/1`.
 
   ## Queue
 
@@ -53,11 +53,11 @@ defmodule Accrue.Workers.Mailer do
     type = String.to_existing_atom(type_str)
     template_mod = resolve_template(type)
     enriched = enrich(type, assigns)
-    # Phoenix.HTML.Engine (used by mjml_eex) fetches atom keys out of the
-    # assigns, so we atomize before handing to the template module. Keys
-    # came from Oban JSON round-trip as strings — we only atomize keys
-    # that already exist as atoms in the VM (the template fields) to keep
-    # this safe against untrusted input.
+    # Mailglass / HEEx fetch atom keys out of the assigns, so we atomize
+    # before handing to the template module. Keys came from the Oban JSON
+    # round-trip as strings — we only atomize keys that already exist as
+    # atoms in the VM (the template fields) to keep this safe against
+    # untrusted input.
     atomized = atomize_known_keys(enriched)
 
     recipient = atomized[:to] || enriched["to"]
@@ -145,14 +145,6 @@ defmodule Accrue.Workers.Mailer do
         default_template(type)
     end
   end
-
-  @doc """
-  Public accessor for the default template module for a given email
-  type. Used by `mix accrue.mail.preview` (D6-08) and by tests. Honors
-  the full 13-type catalogue plus the `:payment_succeeded` legacy alias.
-  """
-  @spec template_for(atom()) :: module()
-  def template_for(type) when is_atom(type), do: default_template(type)
 
   # Apply branding.reply_to_email when configured. No-op on nil so hosts
   # that don't set it fall through cleanly.
@@ -318,9 +310,17 @@ defmodule Accrue.Workers.Mailer do
     end
   end
 
+  defp idempotency_key(:payment_succeeded, assigns) do
+    case assigns[:invoice_number] || assigns["invoice_number"] do
+      nil -> {:error, :missing_invoice_number}
+      "" -> {:error, :missing_invoice_number}
+      invoice_number -> "accrue:v1:payment_succeeded:#{invoice_number}"
+    end
+  end
+
   defp idempotency_key(_type, _assigns), do: {:error, :unsupported_type}
 
-  # Full 13-type catalogue + :payment_succeeded legacy alias (Phase 6 MAIL-03..13).
+  # Full catalogue plus the `:payment_succeeded` receipt-style alias.
   # Ordered by frequency: receipt → payment_failed → invoice_* etc. so the
   # most-common types match earliest in the pattern-match chain.
   defp default_template(:receipt), do: Accrue.Emails.Receipt

@@ -7,7 +7,7 @@ defmodule Accrue.Invoices.Styles do
   ## Why inline, not classname-driven?
 
   MJML's post-render CSS inliner does NOT descend into `<mj-raw>` blocks
-  (D6-01 Pitfall 2). Components rendered via `Accrue.Emails.HtmlBridge`
+  (D6-01 Pitfall 2). Components rendered directly via Phoenix.Component
   into an `<mj-raw>` therefore cannot rely on classname selectors — every
   structural element must carry its styling inline, and every inline
   style must be derived from the frozen branding snapshot in the render

@@ -4,7 +4,7 @@ defmodule Accrue.Emails.Fixtures do
 
   Lives in `lib/` (not `test/support/`) so that:
 
-    * `mix accrue.mail.preview` can import without `test`-env
+    * the admin preview surface can import without `test`-env
       dependencies.
     * ExUnit tests can call it without setup boilerplate.
     * `AccrueAdmin.EmailPreviewLive` can import via
@@ -20,7 +20,7 @@ defmodule Accrue.Emails.Fixtures do
       %{context: %{...}, subject: "Receipt", preview: "Thanks for your payment"}
 
       iex> Accrue.Emails.Fixtures.all()
-      %{receipt: %{...}, payment_failed: %{...}, ...}
+      %{receipt: %{...}, payment_failed: %{...}, payment_succeeded: %{...}, ...}
   """
 
   @doc """
@@ -85,6 +85,19 @@ defmodule Accrue.Emails.Fixtures do
       subject: "Payment failed",
       preview: "Action required",
       update_pm_url: "https://example.test/billing/payment-methods"
+    }
+  end
+
+  @doc "Fixture for `Accrue.Emails.PaymentSucceeded`."
+  def payment_succeeded do
+    %{
+      context: base_context(),
+      customer_name: "Jo Example",
+      amount: "$29.00",
+      invoice_number: "INV-2026-0001",
+      receipt_url: "https://example.test/receipts/r_fixture",
+      subject: "Receipt for your payment",
+      preview: "Payment received"
     }
   end
 
@@ -218,14 +231,15 @@ defmodule Accrue.Emails.Fixtures do
   @doc """
   Returns the full catalogue as a map of email type atom → fixture map.
 
-  Used by `mix accrue.mail.preview` to iterate every registered type
-  and by ExUnit tests to drive coverage loops.
+   Used by the admin preview surface and by ExUnit tests to drive
+   coverage loops.
   """
   @spec all() :: %{atom() => map()}
   def all do
     %{
       receipt: receipt(),
       payment_failed: payment_failed(),
+      payment_succeeded: payment_succeeded(),
       trial_ending: trial_ending(),
       trial_ended: trial_ended(),
       invoice_finalized: invoice_finalized(),

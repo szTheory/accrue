@@ -3,7 +3,7 @@ defmodule Accrue.Invoices.RenderContext do
   Format-neutral hydrated invoice payload (D6-04).
 
   Built once per render by `Accrue.Invoices.Render.build_assigns/2` and
-  passed through BOTH the email body (via `<mj-raw>` + `HtmlBridge`) and
+  passed through BOTH the email body and
   the PDF shell (via `Accrue.Invoices.Layouts.print_shell/1`). This
   guarantees every format sees byte-identical money strings and the
   same frozen branding snapshot.

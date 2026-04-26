@@ -56,8 +56,6 @@ defmodule Accrue.MixProject do
       {:lattice_stripe, "~> 1.1"},
       {:oban, "~> 2.21"},
       {:swoosh, "~> 1.25"},
-      {:phoenix_swoosh, "~> 1.2"},
-      {:mjml_eex, "~> 0.13"},
       {:mailglass, path: "../../mailglass"},
       {:chromic_pdf, "~> 1.17"},
       {:nimble_options, "~> 1.1"},
@@ -74,10 +72,8 @@ defmodule Accrue.MixProject do
       # Phoenix.Router.forward/3 when Phoenix is loaded, but the webhook
       # plug works without Phoenix (plain Plug.Router).
       {:phoenix, "~> 1.8", optional: true},
-      # Phoenix.Component + ~H sigil for the shared invoice
-      # component library (`Accrue.Invoices.Components`) used by both email
-      # (via HtmlBridge + <mj-raw>) and PDF (via Layouts.print_shell). Loaded
-      # for compile + runtime because the components live in lib/, not test/.
+      # Phoenix.Component + ~H sigil for the shared invoice component library.
+      # Loaded for compile + runtime because the components live in lib/, not test/.
       {:phoenix_live_view, "~> 1.1"},
       #
       # NOTE on :sigra — optional integration; when not published to Hex the
