@@ -81,7 +81,6 @@ defmodule AccrueAdmin.Router do
           end
         end
       end
-
     end
     |> wrap_with_mailglass_dev_routes(dev_routes?, mount_path)
   end
