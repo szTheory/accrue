@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.28
 milestone_name: milestone
 status: completed
-last_updated: "2026-04-25T22:30:00Z"
-last_activity: "2026-04-25 — Phase 88 (Mailglass Foundation) ✅ COMPLETE. Verifier passed 5/5 must-haves. Path deps + /dev/mail mount + migration docs all shipped. Phase 89 (Mailer dispatch + first templates) is next."
+last_updated: "2026-04-26T01:07:36.833Z"
+last_activity: "2026-04-25 — Phase **88** Plan **02** (dev-preview-mount): mounted `mailglass_admin_routes("/dev/mail")` as sibling dev-gated scope in `accrue_admin/2` macro; 3 ExUnit route-existence tests added (shift-left automation replaces human browser-verify checkpoint)."
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -20,19 +20,19 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.28** — Phases **86–87** **Complete** **2026-04-24**; next forcing function is **linked Hex publish** per **`RELEASING.md`**.
+**Current focus:** **v1.29** — Phase **89** **Complete** **2026-04-26**; next forcing function is **Phase 90** Mailglass template cleanup.
 
 ## Current Position
 
 **Milestone:** **v1.29** — Mailglass Integration (in progress)
 
-**Phase:** **88** — Mailglass Foundation — **Plans 01–02 Complete 2026-04-25**
+**Phase:** **89** — Proof of Concept Templates & Pipeline — **Plans 01–02 Complete 2026-04-26**
 
-**Plan:** **`088-02-PLAN.md`** **Complete** — `088-03-PLAN.md` next (Phase 88 final plan)
+**Plan:** **`089-02-PLAN.md`** **Complete**
 
-**Status:** Phase 88 Plans 01–02 complete — path deps wired, `/dev/mail` mounted in router with automated route-existence tests. Phase 88 Plan 03 (migrations) remains.
+**Status:** Phase 89 Plans 01–02 complete — worker mail now routes through Mailglass, and Receipt / PaymentFailed are HEEx-backed mailables with parity tests.
 
-**Last activity:** 2026-04-25 — Phase **88** Plan **02** (dev-preview-mount): mounted `mailglass_admin_routes("/dev/mail")` as sibling dev-gated scope in `accrue_admin/2` macro; 3 ExUnit route-existence tests added (shift-left automation replaces human browser-verify checkpoint).
+**Last activity:** 2026-04-26 — Phase **89** Plans **01–02**: Mailglass worker seam, explicit idempotency, and first HEEx template ports shipped.
 
 ## Milestone Progress
 
@@ -47,9 +47,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — **v1.28** (**PPX-05..08** + **INV-06** complete)
-- **`.planning/ROADMAP.md`** — **v1.28** Phases **86–87** + shipped history
-- **`086-VERIFICATION.md`** / **`087-VERIFICATION.md`** — **`.planning/milestones/v1.28-phases/`**
+- **`.planning/REQUIREMENTS.md`** — **v1.29** (**MG-04..06** complete)
+- **`.planning/ROADMAP.md`** — **v1.29** Phases **88–90** + shipped history
+- **`089-01-SUMMARY.md`** / **`089-02-SUMMARY.md`** — **`.planning/milestones/v1.29-phases/089-proof-of-concept-templates-pipeline/`**
 
 ## Deferred Items
 
@@ -71,13 +71,14 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 - **2026-04-25:** **Phase 88 Plan 01** — Path is `../../mailglass` (not `../mailglass`) — accrue packages are two levels below `~/projects/`.
 - **2026-04-25:** **Phase 88 Plan 01** — `only: [:dev, :test]` for mailglass_admin (not `:dev` only) — test env compiles `accrue_admin/2` macro expansion which imports `MailglassAdmin.Router` at compile time.
 - **2026-04-25:** **Phase 88 Plan 01** — Fixed mailglass credo checks compilation: moved 13 custom credo check files from `lib/mailglass/credo/` to `credo_checks/` in the mailglass sibling repo, matching the accrue pattern.
+- **2026-04-26:** **Phase 89 Plans 01–02** — Mailglass worker seam now dispatches through `Mailglass.deliver/1` with explicit idempotency; Receipt and PaymentFailed are Mailglass HEEx mailables.
 - **2026-04-24:** **v1.28** opened — **spine B** (**next linked publish** + **INV-06**); **not** **1.0.0** (**spine A**) unless reprioritized.
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Phase **88** Plan **03** — verify the three Mailglass migrations execute in the host application.
+**Next:** Phase **90** — remaining Mailglass templates + cleanup.
 
-**Completed (v1.29 Phase 88):** Plans 01–02 — **`milestones/v1.29-phases/088-mailglass-foundation/088-01-SUMMARY.md`**, **`088-02-SUMMARY.md`**.
+**Completed (v1.29 Phase 89):** Plans 01–02 — **`milestones/v1.29-phases/089-proof-of-concept-templates-pipeline/089-01-SUMMARY.md`**, **`089-02-SUMMARY.md`**.
 
 **Completed (v1.28):** Phases **86–87** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**, **`087-friction-inventory-post-publish/`**.
 

@@ -26,9 +26,9 @@
 | MG-01 | Phase 88 | Pending |
 | MG-02 | Phase 88 | Pending |
 | MG-03 | Phase 88 | Pending |
-| MG-04 | Phase 89 | Pending |
-| MG-05 | Phase 89 | Pending |
-| MG-06 | Phase 89 | Pending |
+| MG-04 | Phase 89 | Complete |
+| MG-05 | Phase 89 | Complete |
+| MG-06 | Phase 89 | Complete |
 | MG-07 | Phase 90 | Pending |
 
 **Coverage:** v1.29 requirements **7** total · Mapped **7** · Unmapped **0** ✓

@@ -44,7 +44,7 @@
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
 | 88 | Mailglass Foundation | Path-dep `mailglass` in `accrue` and `mailglass_admin` in `accrue_admin`, mount `/dev/mail` LiveView, verify the three Mailglass migrations (`mailglass_deliveries`, `mailglass_events`, `mailglass_suppressions`) execute in host. | MG-01, MG-02, MG-03 |
-| 89 | Proof of Concept Templates & Pipeline | Refactor `Accrue.Workers.Mailer` to dispatch via `Mailglass.deliver/1` with explicit `idempotency_key`; port `Accrue.Emails.Receipt` + `Accrue.Emails.PaymentFailed` from MJML to `Mailglass.Mailable`; verify PDF attachment works end-to-end. | MG-04, MG-05, MG-06 |
+| 89 | Proof of Concept Templates & Pipeline | **Complete 2026-04-26**. Refactored `Accrue.Workers.Mailer` to dispatch via `Mailglass.deliver/1` with explicit `idempotency_key`; ported `Accrue.Emails.Receipt` + `Accrue.Emails.PaymentFailed` from MJML to `Mailglass.Mailable`; verified PDF attachment behavior end-to-end. | MG-04, MG-05, MG-06 |
 | 90 | Full Template Port & Cleanup | Port the remaining 11 MJML templates to `Mailglass.Mailable`; remove `mjml_eex` and `phoenix_swoosh` from `accrue/mix.exs`; retire `mix accrue.mail.preview`. | MG-07 |
 
 **Success criteria (milestone):**
@@ -85,8 +85,8 @@
 **Plans:** 2 plans
 
 Plans:
-- [ ] 089-01-PLAN.md — Refactor the worker seam to build and send Mailglass messages with deterministic idempotency and receipt PDF attachment handling.
-- [ ] 089-02-PLAN.md — Port the Receipt and PaymentFailed templates to Mailglass HEEx mailables while preserving adopter-visible output.
+- [x] 089-01-PLAN.md — Refactor the worker seam to build and send Mailglass messages with deterministic idempotency and receipt PDF attachment handling.
+- [x] 089-02-PLAN.md — Port the Receipt and PaymentFailed templates to Mailglass HEEx mailables while preserving adopter-visible output.
 
 **Success Criteria:**
 1. `Accrue.Workers.Mailer` delegates to `Mailglass.deliver/1` with correctly hydrated assigns and explicit `idempotency_key`.
