@@ -82,11 +82,24 @@ defmodule AccrueAdmin.Router do
         end
       end
 
-      # Mailglass dev-preview dashboard (MG-02 / Phase 88).
-      # Mounted as a SIBLING scope (not nested in the :accrue_admin live_session)
-      # because mailglass_admin_routes/2 emits its own live_session internally,
-      # and Phoenix forbids nested live_session blocks.
-      if dev_routes? do
+    end
+    |> wrap_with_mailglass_dev_routes(dev_routes?, mount_path)
+  end
+
+  # Mailglass dev-preview dashboard (MG-02 / Phase 88).
+  #
+  # Mounted as a SIBLING scope (not nested in the :accrue_admin live_session)
+  # because mailglass_admin_routes/2 emits its own live_session internally and
+  # Phoenix forbids nested live_session blocks.
+  #
+  # Emitted at MACRO-EXPANSION time only when dev_routes? is true. The
+  # `import MailglassAdmin.Router` directive cannot live inside an `if false do`
+  # branch because import runs at compile time regardless of the wrapping
+  # condition — and `mailglass_admin` is `only: [:dev, :test]` in
+  # `accrue_admin/mix.exs`, so it's not available in host :prod compiles.
+  defp wrap_with_mailglass_dev_routes(base_ast, true, mount_path) do
+    dev_ast =
+      quote bind_quoted: [mount_path: mount_path] do
         scope mount_path do
           pipe_through(:accrue_admin_browser)
           import Phoenix.LiveView.Router
@@ -94,8 +107,14 @@ defmodule AccrueAdmin.Router do
           mailglass_admin_routes("/dev/mail")
         end
       end
+
+    quote do
+      unquote(base_ast)
+      unquote(dev_ast)
     end
   end
+
+  defp wrap_with_mailglass_dev_routes(base_ast, _dev_routes?, _mount_path), do: base_ast
 
   @spec __session__(Plug.Conn.t(), [atom() | String.t()], String.t()) :: map()
   def __session__(conn, session_keys, mount_path)
