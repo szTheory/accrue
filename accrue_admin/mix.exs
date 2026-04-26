@@ -79,10 +79,15 @@ defmodule AccrueAdmin.MixProject do
       skip_code_autolink_to: fn term ->
         is_binary(term) and
           (term =~
-             ~r/^AccrueAdmin\.Copy\.(BillingEvent|Connect|Coupon|Invoice|PromotionCode|Subscription)\b/ or
+             ~r/^AccrueAdmin\.Copy\.(BillingEvent|Connect|Coupon|CustomerPaymentMethods|Invoice|PromotionCode|Subscription)\b/ or
              term =~ ~r/^AccrueAdmin\.Live\./ or
              term =~ ~r/^AccrueAdmin\.Dev\./)
-      end
+      end,
+      # ExDoc resolves relative markdown links in guides; the
+      # `.planning/milestones/...` paths sit outside the package tarball but
+      # add operator-discoverable context for repo readers. Skip the warning
+      # rather than break the link or duplicate the SSOT inside the package.
+      skip_undefined_reference_warnings_on: ["guides/admin_ui.md", "guides/core-admin-parity.md"]
     ]
   end
 
