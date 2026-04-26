@@ -27,7 +27,10 @@ defmodule Accrue.Emails.InvoicePaymentFailed do
     new()
     |> Mailglass.Message.update_swoosh(fn email ->
       email
-      |> from({map_get(assigns.branding, :from_name) || "Acme Billing", map_get(assigns.branding, :from_email) || "billing@example.test"})
+      |> from(
+        {map_get(assigns.branding, :from_name) || "Acme Billing",
+         map_get(assigns.branding, :from_email) || "billing@example.test"}
+      )
       |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "")
       |> subject(assigns.subject)
       |> html_body(fn _ -> html(assigns) end)
@@ -97,7 +100,10 @@ defmodule Accrue.Emails.InvoicePaymentFailed do
         |> Map.put_new(:branding, branding)
         |> Map.put_new(:customer, customer)
         |> Map.put_new(:invoice, invoice)
-        |> Map.put_new(:formatted_total, map_get(context, :formatted_total) || map_get(assigns, :formatted_total))
+        |> Map.put_new(
+          :formatted_total,
+          map_get(context, :formatted_total) || map_get(assigns, :formatted_total)
+        )
         |> Map.put_new(:timezone, map_get(assigns, :timezone) || "Etc/UTC"),
       branding: branding,
       customer: customer,
@@ -106,7 +112,8 @@ defmodule Accrue.Emails.InvoicePaymentFailed do
       customer_email: map_get(customer, :email),
       to: map_get(assigns, :to) || map_get(assigns, "to"),
       formatted_total: map_get(context, :formatted_total) || map_get(assigns, :formatted_total),
-      hosted_invoice_url: map_get(invoice, :hosted_invoice_url) || map_get(assigns, :hosted_invoice_url)
+      hosted_invoice_url:
+        map_get(invoice, :hosted_invoice_url) || map_get(assigns, :hosted_invoice_url)
     }
   end
 

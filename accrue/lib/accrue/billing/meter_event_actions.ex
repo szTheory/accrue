@@ -78,7 +78,7 @@ defmodule Accrue.Billing.MeterEventActions do
     identifier = opts[:identifier] || derive_identifier(customer, event_name, value, ts)
     override_op = opts[:operation_id]
 
-      with :ok <- validate_backdating_window(ts),
+    with :ok <- validate_backdating_window(ts),
          {:ok, row} <-
            insert_pending(customer, event_name, value, ts, identifier, override_op) do
       # Stripe call OUTSIDE Repo.transact/2. Crashes here leave the row in

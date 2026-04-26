@@ -16,7 +16,10 @@ defmodule Accrue.Emails.PaymentSucceeded do
     new()
     |> Mailglass.Message.update_swoosh(fn email ->
       email
-      |> from({map_get(assigns.branding, :from_name) || "Acme Billing", map_get(assigns.branding, :from_email) || "billing@example.test"})
+      |> from(
+        {map_get(assigns.branding, :from_name) || "Acme Billing",
+         map_get(assigns.branding, :from_email) || "billing@example.test"}
+      )
       |> to(assigns.customer_email || "customer@example.test")
       |> subject(assigns.subject)
       |> html_body(fn _ -> html(assigns) end)
@@ -75,7 +78,11 @@ defmodule Accrue.Emails.PaymentSucceeded do
 
   defp template_assigns(assigns) do
     context = normalize_map(map_get(assigns, :context) || %{})
-    branding = normalize_map(map_get(context, :branding) || map_get(assigns, :branding) || Accrue.Config.branding())
+
+    branding =
+      normalize_map(
+        map_get(context, :branding) || map_get(assigns, :branding) || Accrue.Config.branding()
+      )
 
     customer_name =
       map_get(assigns, :customer_name) ||
@@ -104,7 +111,8 @@ defmodule Accrue.Emails.PaymentSucceeded do
       invoice_number: invoice_number,
       receipt_url: receipt_url,
       business_name: business_name,
-      customer_email: map_get(assigns, :customer_email) || map_get(map_get(context, :customer) || %{}, :email),
+      customer_email:
+        map_get(assigns, :customer_email) || map_get(map_get(context, :customer) || %{}, :email),
       subject: subject(assigns)
     }
   end

@@ -28,7 +28,10 @@ defmodule Accrue.Emails.Receipt do
     new()
     |> Mailglass.Message.update_swoosh(fn email ->
       email
-      |> from({map_get(assigns.branding, :from_name) || "Acme Billing", map_get(assigns.branding, :from_email) || "billing@example.test"})
+      |> from(
+        {map_get(assigns.branding, :from_name) || "Acme Billing",
+         map_get(assigns.branding, :from_email) || "billing@example.test"}
+      )
       |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "")
       |> subject(assigns.subject)
       |> html_body(fn _ -> html(assigns) end)
@@ -87,10 +90,12 @@ defmodule Accrue.Emails.Receipt do
     invoice = normalize_map(map_get(context, :invoice) || map_get(assigns, :invoice) || %{})
     charge = load_charge(assigns)
     locale = map_get(context, :locale) || map_get(assigns, :locale) || "en"
+
     formatted_total =
       map_get(context, :formatted_total) ||
         map_get(assigns, :formatted_total) ||
         formatted_total(charge, locale)
+
     invoice_number =
       map_get(invoice, :number) ||
         map_get(assigns, :invoice_number) ||
@@ -129,7 +134,9 @@ defmodule Accrue.Emails.Receipt do
 
   defp load_charge(assigns) do
     case map_get(assigns, :charge_id) do
-      nil -> nil
+      nil ->
+        nil
+
       charge_id ->
         Accrue.Repo.get_by(Accrue.Billing.Charge, processor_id: charge_id)
     end

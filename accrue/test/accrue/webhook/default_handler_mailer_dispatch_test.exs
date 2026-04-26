@@ -69,6 +69,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
       Application.put_env(:mailglass, :repo, Accrue.TestRepo)
       Application.put_env(:mailglass, :suppression_store, Mailglass.SuppressionStore.ETS)
       Mailglass.SuppressionStore.ETS.reset()
+
       Application.put_env(:accrue, :branding,
         business_name: "Acme Corp",
         from_name: "Acme Billing",
@@ -80,6 +81,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
         secondary_color: "#6B7280",
         font_stack: "-apple-system, BlinkMacSystemFont, sans-serif"
       )
+
       Application.put_env(:mailglass, :adapter, {Mailglass.Adapters.Fake, []})
       Mailglass.Tenancy.put_current("test-tenant")
       Mailglass.Adapters.Fake.checkout()
@@ -186,7 +188,9 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
       assert Enum.any?(msg.swoosh_email.attachments, &(&1.content_type == "application/pdf"))
     end
 
-    test "falls back to the hosted invoice URL note when PDF rendering does not run", %{customer: cus} do
+    test "falls back to the hosted invoice URL note when PDF rendering does not run", %{
+      customer: cus
+    } do
       job = %Oban.Job{
         args: %{
           "type" => "receipt",
@@ -202,7 +206,10 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
 
       msg = last_mail()
       assert msg.metadata.idempotency_key == "accrue:v1:receipt:ch_pdf_fallback"
-      assert msg.swoosh_email.text_body =~ "View your invoice online: https://example.test/invoices/ch_pdf_fallback"
+
+      assert msg.swoosh_email.text_body =~
+               "View your invoice online: https://example.test/invoices/ch_pdf_fallback"
+
       refute Enum.any?(msg.swoosh_email.attachments, &(&1.content_type == "application/pdf"))
     end
   end
@@ -222,6 +229,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
       Application.put_env(:mailglass, :repo, Accrue.TestRepo)
       Application.put_env(:mailglass, :suppression_store, Mailglass.SuppressionStore.ETS)
       Mailglass.SuppressionStore.ETS.reset()
+
       Application.put_env(:accrue, :branding,
         business_name: "Acme Corp",
         from_name: "Acme Billing",
@@ -233,6 +241,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
         secondary_color: "#6B7280",
         font_stack: "-apple-system, BlinkMacSystemFont, sans-serif"
       )
+
       Application.put_env(:mailglass, :adapter, {Mailglass.Adapters.Fake, []})
       Mailglass.Tenancy.put_current("test-tenant")
       Mailglass.Adapters.Fake.checkout()
@@ -275,7 +284,9 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
       :ok
     end
 
-    test "dispatches :payment_failed with explicit idempotency and no attachment", %{customer: cus} do
+    test "dispatches :payment_failed with explicit idempotency and no attachment", %{
+      customer: cus
+    } do
       {:ok, stripe_ch} =
         Fake.create_charge(
           %{amount: 10_000, currency: "usd", customer: cus.processor_id},

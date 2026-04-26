@@ -34,7 +34,10 @@ defmodule Accrue.Emails.InvoicePaid do
     new()
     |> Mailglass.Message.update_swoosh(fn email ->
       email
-      |> from({map_get(assigns.branding, :from_name) || "Acme Billing", map_get(assigns.branding, :from_email) || "billing@example.test"})
+      |> from(
+        {map_get(assigns.branding, :from_name) || "Acme Billing",
+         map_get(assigns.branding, :from_email) || "billing@example.test"}
+      )
       |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "")
       |> subject(assigns.subject)
       |> html_body(fn _ -> html(assigns) end)
@@ -106,9 +109,18 @@ defmodule Accrue.Emails.InvoicePaid do
         |> Map.put_new(:branding, branding)
         |> Map.put_new(:customer, customer)
         |> Map.put_new(:invoice, invoice)
-        |> Map.put_new(:formatted_total, map_get(context, :formatted_total) || map_get(assigns, :formatted_total))
-        |> Map.put_new(:line_items, map_get(context, :line_items) || map_get(assigns, :line_items) || [])
-        |> Map.put_new(:currency, map_get(context, :currency) || map_get(assigns, :currency) || :usd)
+        |> Map.put_new(
+          :formatted_total,
+          map_get(context, :formatted_total) || map_get(assigns, :formatted_total)
+        )
+        |> Map.put_new(
+          :line_items,
+          map_get(context, :line_items) || map_get(assigns, :line_items) || []
+        )
+        |> Map.put_new(
+          :currency,
+          map_get(context, :currency) || map_get(assigns, :currency) || :usd
+        )
         |> Map.put_new(:locale, map_get(context, :locale) || map_get(assigns, :locale) || "en")
         |> Map.put_new(:timezone, map_get(assigns, :timezone) || "Etc/UTC"),
       branding: branding,

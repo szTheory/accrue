@@ -27,8 +27,14 @@ defmodule Accrue.Emails.SubscriptionResumed do
     new()
     |> Mailglass.Message.update_swoosh(fn email ->
       email
-      |> from({map_get(assigns.branding, :from_name) || "Acme Billing", map_get(assigns.branding, :from_email) || "billing@example.test"})
-      |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "customer@example.test")
+      |> from(
+        {map_get(assigns.branding, :from_name) || "Acme Billing",
+         map_get(assigns.branding, :from_email) || "billing@example.test"}
+      )
+      |> to(
+        assigns.customer_email || assigns.to || map_get(assigns.customer, :email) ||
+          "customer@example.test"
+      )
       |> subject(assigns.subject)
       |> html_body(fn _ -> html(assigns) end)
     end)

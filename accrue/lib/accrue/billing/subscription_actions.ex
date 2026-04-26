@@ -890,8 +890,8 @@ defmodule Accrue.Billing.SubscriptionActions do
       metadata: SubscriptionProjection.get(si, :metadata) || %{}
     }
 
-      # Use non-bang variants so Ecto.InvalidChangesetError doesn't bypass
-      # the enclosing with-chain.
+    # Use non-bang variants so Ecto.InvalidChangesetError doesn't bypass
+    # the enclosing with-chain.
     case Repo.one(from(i in SubscriptionItem, where: i.processor_id == ^stripe_id)) do
       nil ->
         %SubscriptionItem{}

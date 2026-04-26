@@ -69,7 +69,13 @@ defmodule Accrue.Invoices.ComponentsTest do
   end
 
   test "components escape user input" do
-    ctx = build_context(%{invoice: %{number: "<script>alert(1)</script>"}, line_items: [%{description: "<b>evil</b>", quantity: 1, amount_minor: 100, currency: "usd"}]})
+    ctx =
+      build_context(%{
+        invoice: %{number: "<script>alert(1)</script>"},
+        line_items: [
+          %{description: "<b>evil</b>", quantity: 1, amount_minor: 100, currency: "usd"}
+        ]
+      })
 
     header = render_component(&Components.invoice_header/1, %{context: ctx})
     items = render_component(&Components.line_items/1, %{context: ctx})
