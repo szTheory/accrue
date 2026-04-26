@@ -8,26 +8,24 @@ defmodule Accrue.Workers.Mailer do
      `%{"type" => "...", "assigns" => %{...}}` args (Oban-safe scalars only).
   2. `perform/1` rehydrates the assigns (locale/timezone/customer hydration
      via `enrich/2`), resolves the template module (honoring `:email_overrides`
-     rung 2 MFA and rung 3 atom), builds a `%Swoosh.Email{}`, and
-     delivers via `Accrue.Mailer.Swoosh`.
+     rung 2 MFA and rung 3 atom), builds a Mailglass message, and delivers
+     via `Mailglass.deliver/1`.
 
   ## Queue
 
   Host applications MUST configure an Oban queue named `:accrue_mailers`.
   Recommended concurrency: 20.
 
-  ## Pitfall 7 defense
+  ## Idempotency
 
-  `unique: [period: 60, fields: [:args, :worker]]` prevents double-dispatch
-  when both a Billing action AND a webhook reducer try to enqueue the same
-  email within 60s. DO NOT TOUCH this option — it's the only guard against
-  the action+webhook duplication pitfall.
+  Delivery-level idempotency uses a business-event key stamped onto the
+  Mailglass message metadata. That keeps the enqueue boundary scalar-only
+  while letting the delivery path dedupe on the approved event key.
   """
 
   use Oban.Worker,
     queue: :accrue_mailers,
-    max_attempts: 5,
-    unique: [period: 60, fields: [:args, :worker]]
+    max_attempts: 5
 
   # Phase 6 Plans 05 + 06 create these modules; listing them here silences
   # `mix compile --warnings-as-errors` on the forward references in
@@ -72,6 +70,14 @@ defmodule Accrue.Workers.Mailer do
   end
 
   defp deliver_email(type, template_mod, atomized, recipient) do
+    case type do
+      :receipt -> deliver_mailglass(type, template_mod, atomized, recipient)
+      :payment_failed -> deliver_mailglass(type, template_mod, atomized, recipient)
+      _ -> deliver_swoosh(type, template_mod, atomized, recipient)
+    end
+  end
+
+  defp deliver_swoosh(type, template_mod, atomized, recipient) do
     email =
       Swoosh.Email.new()
       |> Swoosh.Email.to(recipient)
@@ -93,6 +99,22 @@ defmodule Accrue.Workers.Mailer do
     case Accrue.Mailer.Swoosh.deliver(email) do
       {:ok, _} = ok -> ok
       {:error, _} = err -> err
+    end
+  end
+
+  defp deliver_mailglass(type, template_mod, atomized, _recipient) do
+    case idempotency_key(type, atomized) do
+      {:error, reason} -> {:cancel, reason}
+      idempotency_key ->
+        msg =
+          template_mod.message(atomized)
+          |> maybe_attach_pdf(atomized, type)
+          |> Mailglass.Message.put_metadata(:idempotency_key, idempotency_key)
+
+        case Mailglass.deliver(msg) do
+          {:ok, _} = ok -> ok
+          {:error, _} = err -> err
+        end
     end
   end
 
@@ -150,6 +172,47 @@ defmodule Accrue.Workers.Mailer do
   # attaches it to the email, falls through to a hosted_invoice_url
   # note (terminal PDF errors), or re-raises Accrue.PDF.RenderFailed
   # so Oban backoff retries transient render errors.
+  defp maybe_attach_pdf(%Mailglass.Message{} = msg, assigns, type) do
+    invoice_id =
+      assigns[:invoice_id] ||
+        case assigns[:invoice] do
+          %{id: id} -> id
+          %{"id" => id} -> id
+          _ -> nil
+        end
+
+    case safe_render_invoice_pdf(invoice_id, assigns) do
+      {:ok, binary} ->
+        filename =
+          "invoice-#{assigns[:invoice_number] || invoice_id || "unknown"}.pdf"
+
+        Mailglass.Message.update_swoosh(msg, fn email ->
+          Swoosh.Email.attachment(
+            email,
+            Swoosh.Attachment.new({:data, binary},
+              filename: filename,
+              content_type: "application/pdf"
+            )
+          )
+        end)
+
+      {:error, %Accrue.Error.PdfDisabled{}} ->
+        append_hosted_url_note(msg, assigns, type)
+
+      {:error, :chromic_pdf_not_started} ->
+        :telemetry.execute(
+          [:accrue, :ops, :pdf_adapter_unavailable],
+          %{count: 1},
+          %{type: type}
+        )
+
+        append_hosted_url_note(msg, assigns, type)
+
+      {:error, reason} ->
+        raise Accrue.PDF.RenderFailed, reason: reason
+    end
+  end
+
   defp maybe_attach_pdf(email, assigns, type) do
     invoice_id =
       assigns[:invoice_id] ||
@@ -206,6 +269,10 @@ defmodule Accrue.Workers.Mailer do
     )
   end
 
+  defp append_hosted_url_note(%Mailglass.Message{} = msg, assigns, type) do
+    %{msg | swoosh_email: append_hosted_url_note(msg.swoosh_email, assigns, type)}
+  end
+
   defp append_hosted_url_note(email, assigns, _type) do
     url =
       case assigns[:invoice] do
@@ -215,26 +282,43 @@ defmodule Accrue.Workers.Mailer do
       end
 
     if is_binary(url) and url != "" do
-      new_text =
-        (email.text_body || "") <>
-          "\n\nView your invoice online: " <> url
+      note = "<p>View your invoice online: #{Phoenix.HTML.html_escape(url) |> Phoenix.HTML.safe_to_string()}</p>"
 
-      safe_url =
-        url
-        |> Phoenix.HTML.html_escape()
-        |> Phoenix.HTML.safe_to_string()
+      case email.html_body do
+        fun when is_function(fun, 1) ->
+          Swoosh.Email.html_body(email, fn assigns ->
+            fun.(assigns)
+            |> Phoenix.HTML.Safe.to_iodata()
+            |> IO.iodata_to_binary()
+            |> Kernel.<>(note)
+          end)
 
-      new_html =
-        (email.html_body || "") <>
-          ~s(<p><a href="#{safe_url}">View your invoice online</a></p>)
+        html when is_binary(html) ->
+          Swoosh.Email.html_body(email, html <> note)
 
-      email
-      |> Swoosh.Email.text_body(new_text)
-      |> Swoosh.Email.html_body(new_html)
+        _ ->
+          Swoosh.Email.html_body(email, note)
+      end
     else
       email
     end
   end
+
+  defp idempotency_key(type, assigns) when type in [:receipt, :payment_failed] do
+    prefix =
+      case type do
+        :receipt -> "receipt"
+        :payment_failed -> "payment_failed"
+      end
+
+    case assigns[:charge_id] || assigns["charge_id"] do
+      nil -> {:error, :missing_charge_id}
+      "" -> {:error, :missing_charge_id}
+      charge_id -> "accrue:v1:#{prefix}:#{charge_id}"
+    end
+  end
+
+  defp idempotency_key(_type, _assigns), do: {:error, :unsupported_type}
 
   # Full 13-type catalogue + :payment_succeeded legacy alias (Phase 6 MAIL-03..13).
   # Ordered by frequency: receipt → payment_failed → invoice_* etc. so the

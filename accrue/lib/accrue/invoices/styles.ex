@@ -42,7 +42,11 @@ defmodule Accrue.Invoices.Styles do
   Returns an inline CSS string for the given style key and frozen
   branding snapshot. Always returns a binary — never nil.
   """
-  @spec for(key(), keyword()) :: String.t()
+  @spec for(key(), keyword() | map()) :: String.t()
+  def for(key, branding) when is_map(branding) do
+    apply(__MODULE__, :for, [key, Map.to_list(branding)])
+  end
+
   def for(key, branding) when is_list(branding) do
     accent = to_string(Keyword.get(branding, :accent_color, "#3B82F6"))
     secondary = to_string(Keyword.get(branding, :secondary_color, "#6B7280"))

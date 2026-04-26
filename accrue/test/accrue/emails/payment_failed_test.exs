@@ -38,6 +38,14 @@ defmodule Accrue.Emails.PaymentFailedTest do
     assert is_binary(PaymentFailed.subject(%{}))
   end
 
+  test "message/1 builds a Mailglass payment_failed mailable" do
+    msg = PaymentFailed.message(fixture())
+
+    assert msg.mailable == PaymentFailed
+    assert msg.mailable_function == :payment_failed
+    assert msg.swoosh_email.subject == "Action required: payment failed at Acme"
+  end
+
   test "render/1 MSO conditionals" do
     html = PaymentFailed.render(fixture())
     assert html =~ "<!--[if mso"
@@ -60,8 +68,14 @@ defmodule Accrue.Emails.PaymentFailedTest do
     assert text =~ "https://acme.test/pm"
   end
 
-  test "no unsubscribe (D6-07)" do
-    refute String.downcase(PaymentFailed.render(fixture())) =~ "unsubscribe"
-    refute String.downcase(PaymentFailed.render_text(fixture())) =~ "unsubscribe"
+  test "no unsubscribe and CTA preserved" do
+    html = PaymentFailed.render(fixture())
+    text = PaymentFailed.render_text(fixture())
+
+    refute String.downcase(html) =~ "unsubscribe"
+    refute String.downcase(text) =~ "unsubscribe"
+    assert html =~ "Update payment method"
+    assert text =~ "Update payment method"
+    assert text =~ "https://acme.test/pm"
   end
 end

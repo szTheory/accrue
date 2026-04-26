@@ -18,6 +18,9 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
   """
   use Accrue.BillingCase, async: false
   use Accrue.Test.MailerAssertions
+  import Mailglass.TestAssertions
+
+  use Oban.Testing, repo: Accrue.TestRepo
 
   alias Accrue.Webhook.DefaultHandler
   alias Accrue.Billing.{Charge, Invoice}
@@ -52,12 +55,76 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
   end
 
   describe "charge.succeeded → :receipt" do
-    test "dispatches :receipt with customer_id scalar", %{customer: cus} do
+    setup do
+      prior_mailer = Application.get_env(:accrue, :mailer)
+      prior_pdf = Application.get_env(:accrue, :pdf_adapter)
+      prior_branding = Application.get_env(:accrue, :branding)
+      prior_mailglass = Application.get_env(:mailglass, :adapter)
+      prior_mailglass_repo = Application.get_env(:mailglass, :repo)
+      prior_suppression_store = Application.get_env(:mailglass, :suppression_store)
+      prior_tenant = Mailglass.Tenancy.current()
+
+      Application.put_env(:accrue, :mailer, Accrue.Mailer.Default)
+      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
+      Application.put_env(:mailglass, :repo, Accrue.TestRepo)
+      Application.put_env(:mailglass, :suppression_store, Mailglass.SuppressionStore.ETS)
+      Mailglass.SuppressionStore.ETS.reset()
+      Application.put_env(:accrue, :branding,
+        business_name: "Acme Corp",
+        from_name: "Acme Billing",
+        from_email: "billing@acme.test",
+        support_email: "support@acme.test",
+        company_address: "123 Main St, San Francisco, CA 94103",
+        logo_url: "https://example.test/logo.png",
+        accent_color: "#1F6FEB",
+        secondary_color: "#6B7280",
+        font_stack: "-apple-system, BlinkMacSystemFont, sans-serif"
+      )
+      Application.put_env(:mailglass, :adapter, {Mailglass.Adapters.Fake, []})
+      Mailglass.Tenancy.put_current("test-tenant")
+      Mailglass.Adapters.Fake.checkout()
+      Mailglass.Adapters.Fake.clear()
+
+      on_exit(fn ->
+        case prior_mailer do
+          nil -> Application.delete_env(:accrue, :mailer)
+          v -> Application.put_env(:accrue, :mailer, v)
+        end
+
+        case prior_pdf do
+          nil -> Application.delete_env(:accrue, :pdf_adapter)
+          v -> Application.put_env(:accrue, :pdf_adapter, v)
+        end
+
+        case prior_branding do
+          nil -> Application.delete_env(:accrue, :branding)
+          v -> Application.put_env(:accrue, :branding, v)
+        end
+
+        case prior_mailglass do
+          nil -> Application.delete_env(:mailglass, :adapter)
+          v -> Application.put_env(:mailglass, :adapter, v)
+        end
+
+        case prior_mailglass_repo do
+          nil -> Application.delete_env(:mailglass, :repo)
+          v -> Application.put_env(:mailglass, :repo, v)
+        end
+
+        case prior_suppression_store do
+          nil -> Application.delete_env(:mailglass, :suppression_store)
+          v -> Application.put_env(:mailglass, :suppression_store, v)
+        end
+
+        Mailglass.Tenancy.put_current(prior_tenant)
+      end)
+
+      :ok
+    end
+
+    test "dispatches :receipt through the worker with explicit idempotency", %{customer: cus} do
       {:ok, stripe_ch} =
-        Fake.create_charge(
-          %{amount: 10_000, currency: "usd", customer: cus.processor_id},
-          []
-        )
+        Fake.create_charge(%{amount: 10_000, currency: "usd", customer: cus.processor_id}, [])
 
       event =
         StripeFixtures.webhook_event(
@@ -65,13 +132,150 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
           StripeFixtures.charge(%{"id" => stripe_ch.id, "customer" => cus.processor_id})
         )
 
-      assert {:ok, %Charge{}} = DefaultHandler.handle(event)
-      assert_email_sent(:receipt, customer_id: cus.id)
+      assert {:ok, %Charge{id: charge_id}} = DefaultHandler.handle(event)
+
+      assert_enqueued(
+        worker: Accrue.Workers.Mailer,
+        queue: :accrue_mailers,
+        args: %{"type" => "receipt"}
+      )
+
+      [job] = all_enqueued(worker: Accrue.Workers.Mailer)
+      assert {:ok, _} = Accrue.Workers.Mailer.perform(job)
+
+      assert_mail_sent(subject: "Receipt from Acme Corp", to: cus.email)
+
+      msg = last_mail()
+      assert msg.metadata.idempotency_key == "accrue:v1:receipt:#{charge_id}"
+    end
+
+    test "attaches the invoice PDF when invoice_id is present", %{customer: cus} do
+      {:ok, invoice} =
+        %Invoice{customer_id: cus.id, processor: "fake"}
+        |> Invoice.force_status_changeset(%{
+          processor_id: "in_pdf_receipt",
+          status: :open,
+          currency: "usd",
+          number: "INV-ATTACH-1",
+          hosted_url: "https://example.test/invoices/in_pdf_receipt",
+          total_minor: 29_00,
+          subtotal_minor: 29_00,
+          amount_due_minor: 29_00,
+          amount_paid_minor: 0,
+          amount_remaining_minor: 29_00
+        })
+        |> Repo.insert()
+
+      job = %Oban.Job{
+        args: %{
+          "type" => "receipt",
+          "assigns" => %{
+            "charge_id" => "ch_pdf_receipt",
+            "customer_id" => cus.id,
+            "invoice_id" => invoice.id,
+            "invoice_number" => invoice.number,
+            "hosted_invoice_url" => invoice.hosted_url
+          }
+        }
+      }
+
+      assert {:ok, _} = Accrue.Workers.Mailer.perform(job)
+
+      msg = last_mail()
+      assert msg.metadata.idempotency_key == "accrue:v1:receipt:ch_pdf_receipt"
+      assert Enum.any?(msg.swoosh_email.attachments, &(&1.content_type == "application/pdf"))
+    end
+
+    test "falls back to the hosted invoice URL note when PDF rendering does not run", %{customer: cus} do
+      job = %Oban.Job{
+        args: %{
+          "type" => "receipt",
+          "assigns" => %{
+            "charge_id" => "ch_pdf_fallback",
+            "customer_id" => cus.id,
+            "hosted_invoice_url" => "https://example.test/invoices/ch_pdf_fallback"
+          }
+        }
+      }
+
+      assert {:ok, _} = Accrue.Workers.Mailer.perform(job)
+
+      msg = last_mail()
+      assert msg.metadata.idempotency_key == "accrue:v1:receipt:ch_pdf_fallback"
+      assert msg.swoosh_email.text_body =~ "View your invoice online: https://example.test/invoices/ch_pdf_fallback"
+      refute Enum.any?(msg.swoosh_email.attachments, &(&1.content_type == "application/pdf"))
     end
   end
 
   describe "charge.failed → :payment_failed" do
-    test "dispatches :payment_failed", %{customer: cus} do
+    setup do
+      prior_mailer = Application.get_env(:accrue, :mailer)
+      prior_pdf = Application.get_env(:accrue, :pdf_adapter)
+      prior_branding = Application.get_env(:accrue, :branding)
+      prior_mailglass = Application.get_env(:mailglass, :adapter)
+      prior_mailglass_repo = Application.get_env(:mailglass, :repo)
+      prior_suppression_store = Application.get_env(:mailglass, :suppression_store)
+      prior_tenant = Mailglass.Tenancy.current()
+
+      Application.put_env(:accrue, :mailer, Accrue.Mailer.Default)
+      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
+      Application.put_env(:mailglass, :repo, Accrue.TestRepo)
+      Application.put_env(:mailglass, :suppression_store, Mailglass.SuppressionStore.ETS)
+      Mailglass.SuppressionStore.ETS.reset()
+      Application.put_env(:accrue, :branding,
+        business_name: "Acme Corp",
+        from_name: "Acme Billing",
+        from_email: "billing@acme.test",
+        support_email: "support@acme.test",
+        company_address: "123 Main St, San Francisco, CA 94103",
+        logo_url: "https://example.test/logo.png",
+        accent_color: "#1F6FEB",
+        secondary_color: "#6B7280",
+        font_stack: "-apple-system, BlinkMacSystemFont, sans-serif"
+      )
+      Application.put_env(:mailglass, :adapter, {Mailglass.Adapters.Fake, []})
+      Mailglass.Tenancy.put_current("test-tenant")
+      Mailglass.Adapters.Fake.checkout()
+      Mailglass.Adapters.Fake.clear()
+
+      on_exit(fn ->
+        case prior_mailer do
+          nil -> Application.delete_env(:accrue, :mailer)
+          v -> Application.put_env(:accrue, :mailer, v)
+        end
+
+        case prior_pdf do
+          nil -> Application.delete_env(:accrue, :pdf_adapter)
+          v -> Application.put_env(:accrue, :pdf_adapter, v)
+        end
+
+        case prior_branding do
+          nil -> Application.delete_env(:accrue, :branding)
+          v -> Application.put_env(:accrue, :branding, v)
+        end
+
+        case prior_mailglass do
+          nil -> Application.delete_env(:mailglass, :adapter)
+          v -> Application.put_env(:mailglass, :adapter, v)
+        end
+
+        case prior_mailglass_repo do
+          nil -> Application.delete_env(:mailglass, :repo)
+          v -> Application.put_env(:mailglass, :repo, v)
+        end
+
+        case prior_suppression_store do
+          nil -> Application.delete_env(:mailglass, :suppression_store)
+          v -> Application.put_env(:mailglass, :suppression_store, v)
+        end
+
+        Mailglass.Tenancy.put_current(prior_tenant)
+      end)
+
+      :ok
+    end
+
+    test "dispatches :payment_failed with explicit idempotency and no attachment", %{customer: cus} do
       {:ok, stripe_ch} =
         Fake.create_charge(
           %{amount: 10_000, currency: "usd", customer: cus.processor_id},
@@ -84,8 +288,22 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
           StripeFixtures.charge(%{"id" => stripe_ch.id, "customer" => cus.processor_id})
         )
 
-      assert {:ok, %Charge{}} = DefaultHandler.handle(event)
-      assert_email_sent(:payment_failed, customer_id: cus.id)
+      assert {:ok, %Charge{id: charge_id}} = DefaultHandler.handle(event)
+
+      assert_enqueued(
+        worker: Accrue.Workers.Mailer,
+        queue: :accrue_mailers,
+        args: %{"type" => "payment_failed"}
+      )
+
+      [job] = all_enqueued(worker: Accrue.Workers.Mailer)
+      assert {:ok, _} = Accrue.Workers.Mailer.perform(job)
+
+      assert_mail_sent(subject: "Action required: payment failed at Acme Corp", to: cus.email)
+
+      msg = last_mail()
+      assert msg.metadata.idempotency_key == "accrue:v1:payment_failed:#{charge_id}"
+      refute Enum.any?(msg.swoosh_email.attachments, &(&1.content_type == "application/pdf"))
     end
   end
 
