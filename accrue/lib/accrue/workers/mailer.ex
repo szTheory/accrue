@@ -104,7 +104,9 @@ defmodule Accrue.Workers.Mailer do
 
   defp deliver_mailglass(type, template_mod, atomized, _recipient) do
     case idempotency_key(type, atomized) do
-      {:error, reason} -> {:cancel, reason}
+      {:error, reason} ->
+        {:cancel, reason}
+
       idempotency_key ->
         msg =
           template_mod.message(atomized)
@@ -274,7 +276,8 @@ defmodule Accrue.Workers.Mailer do
       end
 
     if is_binary(url) and url != "" do
-      note = "<p>View your invoice online: #{Phoenix.HTML.html_escape(url) |> Phoenix.HTML.safe_to_string()}</p>"
+      note =
+        "<p>View your invoice online: #{Phoenix.HTML.html_escape(url) |> Phoenix.HTML.safe_to_string()}</p>"
 
       case email.html_body do
         fun when is_function(fun, 1) ->

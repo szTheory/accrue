@@ -2,6 +2,21 @@
 # Credo.Test.Case (Credo.Service.SourceFileAST is required by to_source_file/1).
 {:ok, _} = Application.ensure_all_started(:credo)
 
+# Eagerly start :mailglass and its transitive deps (uuidv7, phoenix_html, etc.)
+# before any test runs. With path-dep mailglass these get pulled in via parent
+# compilation order; with Hex'd mailglass the load timing depends on test
+# ordering, which can surface as `UUIDv7.autogenerate/0 is undefined` and
+# `Phoenix.HTML.Safe.BitString.to_iodata/1` flakes under random seeds.
+{:ok, _} = Application.ensure_all_started(:mailglass)
+
+# Force-load modules that random test ordering can leave purgable. UUIDv7 is
+# used by Mailglass.Repo for delivery autogenerate; Phoenix.HTML.Safe.BitString
+# implements the protocol for binary HEEx assigns. Both are present in the dep
+# graph but only get auto-loaded on first reference — and some tests' module
+# purge cycles can leave them unavailable mid-suite under random seeds.
+Code.ensure_loaded!(UUIDv7)
+Code.ensure_loaded!(Phoenix.HTML.Safe.BitString)
+
 Accrue.MoxSetup.define_mocks()
 
 # Configure webhook signing secrets for test fixtures (Plan 06).

@@ -27,7 +27,10 @@ defmodule Accrue.Emails.TrialEnding do
     new()
     |> Mailglass.Message.update_swoosh(fn email ->
       email
-      |> from({map_get(assigns.branding, :from_name) || "Acme Billing", map_get(assigns.branding, :from_email) || "billing@example.test"})
+      |> from(
+        {map_get(assigns.branding, :from_name) || "Acme Billing",
+         map_get(assigns.branding, :from_email) || "billing@example.test"}
+      )
       |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "")
       |> subject(assigns.subject)
       |> html_body(fn _ -> html(assigns) end)
@@ -97,7 +100,10 @@ defmodule Accrue.Emails.TrialEnding do
         context
         |> Map.put_new(:branding, branding)
         |> Map.put_new(:customer, customer)
-        |> Map.put_new(:days_until_end, map_get(context, :days_until_end) || map_get(assigns, :days_until_end))
+        |> Map.put_new(
+          :days_until_end,
+          map_get(context, :days_until_end) || map_get(assigns, :days_until_end)
+        )
         |> Map.put_new(:timezone, map_get(assigns, :timezone) || "Etc/UTC"),
       branding: branding,
       customer: customer,

@@ -34,7 +34,10 @@ defmodule Accrue.Emails.CouponApplied do
     new()
     |> Mailglass.Message.update_swoosh(fn email ->
       email
-      |> from({map_get(assigns.branding, :from_name) || "Acme Billing", map_get(assigns.branding, :from_email) || "billing@example.test"})
+      |> from(
+        {map_get(assigns.branding, :from_name) || "Acme Billing",
+         map_get(assigns.branding, :from_email) || "billing@example.test"}
+      )
       |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "")
       |> subject(assigns.subject)
       |> html_body(fn _ -> html(assigns) end)
@@ -105,7 +108,9 @@ defmodule Accrue.Emails.CouponApplied do
     branding = normalize_map(branding(assigns))
     customer = normalize_map(map_get(context, :customer) || map_get(assigns, :customer) || %{})
     coupon = normalize_map(map_get(context, :coupon) || map_get(assigns, :coupon) || %{})
-    promotion_code = normalize_map(map_get(context, :promotion_code) || map_get(assigns, :promotion_code) || %{})
+
+    promotion_code =
+      normalize_map(map_get(context, :promotion_code) || map_get(assigns, :promotion_code) || %{})
 
     %{
       context:

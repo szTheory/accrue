@@ -17,7 +17,8 @@ defmodule Accrue.MixProject do
       description: "Billing state, modeled clearly.",
       source_url: @source_url,
       dialyzer: [
-        plt_add_apps: [:mix, :ex_unit, :credo]
+        plt_add_apps: [:mix, :ex_unit, :credo],
+        ignore_warnings: ".dialyzer_ignore.exs"
       ],
       docs: docs()
     ]
@@ -56,7 +57,7 @@ defmodule Accrue.MixProject do
       {:lattice_stripe, "~> 1.1"},
       {:oban, "~> 2.21"},
       {:swoosh, "~> 1.25"},
-      {:mailglass, path: "../../mailglass"},
+      {:mailglass, "~> 0.1"},
       {:chromic_pdf, "~> 1.17"},
       {:nimble_options, "~> 1.1"},
       {:telemetry, "~> 1.3"},

@@ -284,10 +284,10 @@ defmodule Accrue.Application do
         {pname, psecret} <- other_secrets,
         csecret == psecret do
       Logger.warning(
-          "[Accrue] :#{cname} and :#{pname} webhook secrets are byte-identical. " <>
-            "Stripe issues a separate signing secret per Connect endpoint in the " <>
-            "Stripe Dashboard. Mixing them causes silent verification failures. " <>
-            "See guides/connect.md for the correct setup."
+        "[Accrue] :#{cname} and :#{pname} webhook secrets are byte-identical. " <>
+          "Stripe issues a separate signing secret per Connect endpoint in the " <>
+          "Stripe Dashboard. Mixing them causes silent verification failures. " <>
+          "See guides/connect.md for the correct setup."
       )
     end
 

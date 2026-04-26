@@ -89,8 +89,10 @@ defmodule AccrueHost.MixProject do
   end
 
   defp sigra_dep do
-    # Sigra is not on Hex yet. Default to the public GitHub repo so CI and fresh clones
-    # resolve without a sibling checkout. To point at a local Sigra working tree:
+    # Sigra is on Hex (~> 0.2). Default to the Hex package so dep resolution
+    # stays clean — Mailglass declares `{:sigra, "~> 0.2", optional: true}`
+    # and would conflict with a non-versioned `github:` source. To point at a
+    # local Sigra working tree for development:
     #   export ACCRUE_SIGRA_PATH=../../../sigra
     # (path is relative to this `mix.exs` unless absolute).
     path =
@@ -99,7 +101,7 @@ defmodule AccrueHost.MixProject do
       |> String.trim()
 
     if path == "" do
-      {:sigra, github: "szTheory/sigra"}
+      {:sigra, "~> 0.2"}
     else
       {:sigra, path: Path.expand(path, __DIR__)}
     end

@@ -40,7 +40,7 @@ defmodule AccrueAdmin.MixProject do
       {:phoenix, "~> 1.8"},
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.2"},
-      {:mailglass_admin, path: "../../mailglass/mailglass_admin", only: [:dev, :test]},
+      {:mailglass_admin, "~> 0.1", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.7", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},
@@ -79,10 +79,15 @@ defmodule AccrueAdmin.MixProject do
       skip_code_autolink_to: fn term ->
         is_binary(term) and
           (term =~
-             ~r/^AccrueAdmin\.Copy\.(BillingEvent|Connect|Coupon|Invoice|PromotionCode|Subscription)\b/ or
+             ~r/^AccrueAdmin\.Copy\.(BillingEvent|Connect|Coupon|CustomerPaymentMethods|Invoice|PromotionCode|Subscription)\b/ or
              term =~ ~r/^AccrueAdmin\.Live\./ or
              term =~ ~r/^AccrueAdmin\.Dev\./)
-      end
+      end,
+      # ExDoc resolves relative markdown links in guides; the
+      # `.planning/milestones/...` paths sit outside the package tarball but
+      # add operator-discoverable context for repo readers. Skip the warning
+      # rather than break the link or duplicate the SSOT inside the package.
+      skip_undefined_reference_warnings_on: ["guides/admin_ui.md", "guides/core-admin-parity.md"]
     ]
   end
 
