@@ -1,10 +1,33 @@
 # Milestones
 
-## v1.29 Mailglass Integration (Planned)
+## v1.29 Mailglass Integration (Shipped: 2026-04-26)
 
-**Theme:** Explore integration with [Mailglass](https://github.com/szTheory/mailglass) to simplify our email code and leverage its robust transactional email framework (HEEx-native components, event ledger, LiveView preview).
+**Planning opened:** 2026-04-25
 
-**Status:** Planned for next milestone.
+**Phases completed:** **3** phases (**88–90**), **MG-01..MG-07** validated.
+
+**Theme:** Replace `mjml_eex` and `phoenix_swoosh` with the [Mailglass](https://github.com/szTheory/mailglass) framework as a path dependency. Mailglass provides HEEx-native components (no Node MJML compile), an append-only event ledger, native database-level idempotency via `idempotency_key`, and a LiveView dev-preview dashboard mounted at `/dev/mail` in `accrue_admin`. **No** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.28** planning closure.
+
+**Research:** Brownfield from v1.28's `phoenix_swoosh`/`mjml_eex` baseline; sibling Mailglass repo as the canonical reference.
+
+**Phase execution trees:** **`.planning/milestones/v1.29-phases/088-mailglass-foundation/`**, **`089-proof-of-concept-templates-pipeline/`**, **`090-full-template-port-cleanup/`**.
+
+**Key accomplishments:**
+
+- **88:** **MG-01..MG-03** — Mailglass and `mailglass_admin` path deps; `/dev/mail` LiveView mounted via sibling scope; install + email guides updated for the three Mailglass migrations. **`088-VERIFICATION.md`** (5/5).
+- **89:** **MG-04..MG-06** — `Accrue.Workers.Mailer` dispatches via `Mailglass.deliver/1` with explicit `idempotency_key` (Oban `unique: [period: 60]` removed); `Receipt` and `PaymentFailed` ported to Mailglass HEEx with PDF attachment preserved. **`089-01-SUMMARY.md`** / **`089-02-SUMMARY.md`**.
+- **90:** **MG-07** — All 13 transactional templates Mailglass-backed (including `payment_succeeded`); `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; 26 legacy `.mjml.eex`/`.text.eex` assets deleted; `mix accrue.mail.preview`, `Accrue.Emails.HtmlBridge`, and `Accrue.Workers.Mailer.template_for/1` retired; `mailglass_cleanup_test` guards regressions; email guide rewritten around `/dev/email-preview`. **`090-VERIFICATION.md`** (6/6) + **`090-UAT.md`** (7/7 automated).
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md)
+- Requirements: [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md)
+
+**Git tag:** `v1.29`
+
+**Next after ship:** **`/gsd-new-milestone`** when the next era is ready.
 
 ---
 

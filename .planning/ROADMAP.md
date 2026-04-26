@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- ✅ **v1.29 Mailglass Integration** — Phases **88–90** shipped **2026-04-26**. **MG-01..MG-07** validated; `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`. **Archives:** [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md), [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.29-phases/`](milestones/v1.29-phases/). **No** **PROC-08** / **FIN-03**.
 - **v1.28 Next linked publish continuity** — Phases **86–87** **Complete** **2026-04-24** (**`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**). **PPX-05..08** + **INV-06** closed in live **`.planning/REQUIREMENTS.md`**. **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.27 Pre-1.0 closure narrative** — Phases **84–85** shipped **2026-04-24** (**CLS-01..03**, **INV-05**); integrator-facing **maintenance posture**; **`RELEASING.md`** / **`upgrade.md`** wrap-up semantics; **INV-05** friction inventory certification. **Archives:** [`milestones/v1.27-ROADMAP.md`](milestones/v1.27-ROADMAP.md), [`milestones/v1.27-REQUIREMENTS.md`](milestones/v1.27-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.27-phases/`](milestones/v1.27-phases/). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.26 First-hour billing facade spine** — Phases **82–83** shipped **2026-04-24** (**INT-13**, **INV-04**); integrator doc + matrix + verifier parity for **`create_billing_portal_session`**; post-touch friction certification. **Archives:** [`milestones/v1.26-ROADMAP.md`](milestones/v1.26-ROADMAP.md), [`milestones/v1.26-REQUIREMENTS.md`](milestones/v1.26-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.26-phases/`](milestones/v1.26-phases/).
@@ -34,8 +35,8 @@
 
 ## Phases
 
-<details open>
-<summary>v1.29 Mailglass Integration (Phases 88–90) — PLANNING IN PROGRESS 2026-04-25</summary>
+<details>
+<summary>✅ v1.29 Mailglass Integration (Phases 88–90) — SHIPPED 2026-04-26</summary>
 
 **Milestone goal:** Integrate the [Mailglass](https://github.com/szTheory/mailglass) framework as a path dependency to replace `mjml_eex` and `phoenix_swoosh` with HEEx-native components, an append-only event ledger, native idempotency, and a LiveView dev-preview dashboard. Eliminates the Node-dependent MJML compile step and the bespoke Oban-uniqueness idempotency window.
 
@@ -43,9 +44,9 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 88 | Mailglass Foundation | Path-dep `mailglass` in `accrue` and `mailglass_admin` in `accrue_admin`, mount `/dev/mail` LiveView, verify the three Mailglass migrations (`mailglass_deliveries`, `mailglass_events`, `mailglass_suppressions`) execute in host. | MG-01, MG-02, MG-03 |
+| 88 | Mailglass Foundation | **Complete 2026-04-25**. Path-dep `mailglass` in `accrue` and `mailglass_admin` in `accrue_admin`; `/dev/mail` LiveView mounted; install + email guides updated for the three Mailglass migrations (`mailglass_deliveries`, `mailglass_events`, `mailglass_suppressions`). | MG-01, MG-02, MG-03 |
 | 89 | Proof of Concept Templates & Pipeline | **Complete 2026-04-26**. Refactored `Accrue.Workers.Mailer` to dispatch via `Mailglass.deliver/1` with explicit `idempotency_key`; ported `Accrue.Emails.Receipt` + `Accrue.Emails.PaymentFailed` from MJML to `Mailglass.Mailable`; verified PDF attachment behavior end-to-end. | MG-04, MG-05, MG-06 |
-| 90 | Full Template Port & Cleanup | Port the remaining 11 MJML templates to `Mailglass.Mailable`; remove `mjml_eex` and `phoenix_swoosh` from `accrue/mix.exs`; retire `mix accrue.mail.preview`. | MG-07 |
+| 90 | Full Template Port & Cleanup | **Complete 2026-04-26**. Ported the remaining 11 MJML templates (plus `payment_succeeded`); removed `mjml_eex` and `phoenix_swoosh` from `accrue/mix.exs`; retired `mix accrue.mail.preview`, `Accrue.Emails.HtmlBridge`, `Accrue.Workers.Mailer.template_for/1`; deleted 26 legacy `.mjml.eex`/`.text.eex` assets; `mailglass_cleanup_test` guards regressions; email guide rewritten around `/dev/email-preview`. | MG-07 |
 
 **Success criteria (milestone):**
 
@@ -105,9 +106,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 090-01-PLAN.md — Port the first six remaining transactional email templates to Mailglass.
-- [ ] 090-02-PLAN.md — Port the invoice, refund, and coupon templates to Mailglass.
-- [ ] 090-03-PLAN.md — Retire the preview CLI, delete legacy MJML assets, and finish the payment_succeeded cleanup.
+- [x] 090-01-PLAN.md — Port the first six remaining transactional email templates to Mailglass.
+- [x] 090-02-PLAN.md — Port the invoice, refund, and coupon templates to Mailglass.
+- [x] 090-03-PLAN.md — Retire the preview CLI, delete legacy MJML assets, and finish the payment_succeeded cleanup.
 
 **Success Criteria:**
 1. All 13 email templates render correctly via Mailglass HEEx components.

@@ -12,17 +12,17 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.29 — Mailglass Integration (**planning opened 2026-04-25**)
+### v1.29 — Mailglass Integration (**archived 2026-04-26**)
 
-**Goal:** Replace `mjml_eex` and `phoenix_swoosh` with the [Mailglass](https://github.com/szTheory/mailglass) framework as a path dependency. Mailglass provides HEEx-native components (no Node MJML compile), an append-only event ledger, native database-level idempotency via `idempotency_key`, and a LiveView dev-preview dashboard mounted at `/dev/mail` in `accrue_admin`. **No** **PROC-08** / **FIN-03**.
+**Goal (shipped):** Replaced `mjml_eex` and `phoenix_swoosh` with the [Mailglass](https://github.com/szTheory/mailglass) framework as a path dependency. Mailglass provides HEEx-native components (no Node MJML compile), an append-only event ledger, native database-level idempotency via `idempotency_key`, and a LiveView dev-preview dashboard mounted at `/dev/mail` in `accrue_admin`. **No** **PROC-08** / **FIN-03**.
 
-**Target features:**
+**Shipped:**
 
-- [ ] **MG-01..MG-03** (Phase 88 — Foundation): path-dep `mailglass` in `accrue` and `mailglass_admin` in `accrue_admin`; mount `/dev/mail` LiveView dashboard; verify the three Mailglass migrations execute in host.
-- [ ] **MG-04..MG-06** (Phase 89 — Proof of Concept): refactor `Accrue.Workers.Mailer` to dispatch via `Mailglass.deliver/1` with explicit `idempotency_key`; port `Accrue.Emails.Receipt` + `Accrue.Emails.PaymentFailed` from MJML to `Mailglass.Mailable`; verify PDF attachment.
-- [ ] **MG-07** (Phase 90 — Cleanup): port the remaining 11 MJML templates; remove `mjml_eex` and `phoenix_swoosh` from `accrue/mix.exs`; retire `mix accrue.mail.preview`.
+- [x] **MG-01..MG-03** (Phase 88 — Foundation): path-dep `mailglass` in `accrue` and `mailglass_admin` (dev+test) in `accrue_admin`; `/dev/mail` LiveView mounted via sibling scope; install + email guides updated for the three Mailglass migrations. Validated 2026-04-25 — `088-VERIFICATION.md` (5/5).
+- [x] **MG-04..MG-06** (Phase 89 — Proof of Concept): `Accrue.Workers.Mailer` dispatches via `Mailglass.deliver/1` with explicit `idempotency_key` (Oban `unique: [period: 60]` removed); `Accrue.Emails.Receipt` + `Accrue.Emails.PaymentFailed` ported to `Mailglass.Mailable` with PDF attachment intact. Validated 2026-04-26 — `089-01-SUMMARY.md`, `089-02-SUMMARY.md`.
+- [x] **MG-07** (Phase 90 — Cleanup): all 13 transactional templates Mailglass-backed; `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; 26 legacy `.mjml.eex`/`.text.eex` deleted; `mix accrue.mail.preview` + `Accrue.Emails.HtmlBridge` + `Accrue.Workers.Mailer.template_for/1` retired; `mailglass_cleanup_test` guards regressions. Validated 2026-04-26 — `090-VERIFICATION.md` (6/6) + `090-UAT.md` (7/7 automated).
 
-**Live requirements:** `.planning/REQUIREMENTS.md`. **Phases:** **88–90** (see `.planning/ROADMAP.md`). **Background research:** `.planning/research/v1.29-mailglass-integration.md`.
+**Archives:** [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md), [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.29-phases/`](milestones/v1.29-phases/). **Git tag:** `v1.29`. **Next forcing function:** linked Hex publish for Mailglass itself (gating Mailglass on Hex via `~> x.y` instead of path dep) — outside this milestone's scope.
 
 ### v1.28 — Next linked publish continuity (**archived 2026-04-25 — planning complete 2026-04-24**)
 

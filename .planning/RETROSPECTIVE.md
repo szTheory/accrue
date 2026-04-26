@@ -1034,12 +1034,61 @@
 
 ---
 
+## Milestone: v1.29 — Mailglass Integration
+
+**Shipped:** 2026-04-26
+**Phases:** 3 (88–90) | **Plans:** 8 | **Tasks:** ~18
+
+### What Was Built
+
+- Mailglass framework wired in as a sibling-repo path dependency (`{:mailglass, path: "../../mailglass"}`), with `mailglass_admin` mounted at `/dev/mail` in `accrue_admin` for instant template preview.
+- Worker seam refactored: `Accrue.Workers.Mailer` now dispatches via `Mailglass.deliver/1` with explicit `idempotency_key`, replacing the in-process Oban `unique: [period: 60]` window with database-level deduplication.
+- All 13 transactional templates ported from MJML to Mailglass HEEx mailables (Receipt, PaymentFailed, Trial-Ending, Trial-Ended, Subscription-Canceled/Paused/Resumed, Card-Expiring-Soon, Invoice-Finalized/Paid/Payment-Failed, Refund-Issued, Coupon-Applied, Payment-Succeeded). PDF attachment for Receipt preserved end-to-end.
+- Hard cleanup: `mjml_eex` and `phoenix_swoosh` removed from `accrue/mix.exs`; 26 legacy `*.mjml.eex` / `*.text.eex` template assets deleted; `mix accrue.mail.preview`, `Accrue.Emails.HtmlBridge`, and `Accrue.Workers.Mailer.template_for/1` retired with no compatibility shim.
+- `mailglass_cleanup_test` introduced as a permanent regression guard (5 assertions in CI) that the dropped deps, helpers, and assets stay gone — and that the email guide stays pointed at the supported `/dev/email-preview` LiveView.
+
+### What Worked
+
+- Phase-by-phase batches kept the port digestible: lifecycle group → invoice/refund/coupon group → cleanup. Each commit was independently revertible.
+- Treating the Phase 90 `mailglass_cleanup_test` as a "merge gate" — not a one-shot check — encoded the cleanup intent into CI rather than relying on tribal memory. Future contributors can't accidentally reintroduce `mjml_eex`.
+- Parity tests deliberately asserted adopter-visible content/structure rather than byte-for-byte HTML equality (D-07/D-08). This kept the port honest without bikeshedding markup differences between MJML and HEEx.
+- Shift-left UAT taken to its conclusion in Phase 90: 7/7 truths automated, 0 human steps. The `email_preview_live_test` fixture-sweep proves every mail type renders through the admin LiveView in the same test pass that proves the cleanup landed.
+
+### What Was Inefficient
+
+- The pre-existing `milestones/v1.29-{ROADMAP,REQUIREMENTS}.md` archive stubs (created at milestone open) were stale by the time of close — they had to be fully overwritten with real archive content. Future milestones should either skip the open-time stubs or mark them clearly as "to-be-overwritten" so they aren't mistaken for current state.
+- Phase 90 plan execution committed source-code work via `feat(90-XX)` commits but the per-plan SUMMARY.md / VERIFICATION.md files lagged until milestone close. Closing the loop required reconstructing summaries from commit messages and plan files — workable but slower than recording at completion time.
+- v1.28 was opened then "transitioned" rather than formally closed (no `v1.28` git tag exists). Loss of bookkeeping is small, but it's a precedent worth flagging — milestones should either ship-and-tag or be explicitly skipped, not silently rolled into the next.
+
+### Patterns Established
+
+- **Cleanup-with-CI-guard:** when retiring a dependency or helper, ship a regression test in the same PR that asserts the dependency / helper stays gone (`mailglass_cleanup_test` is the canonical example).
+- **Sibling-scope LiveView mounting:** when a sub-package exposes its own LiveView, mount it OUTSIDE the host's `live_session` block via a sibling scope. Phoenix forbids nested `live_session` blocks.
+- **Path-dep first, Hex later:** integrating a sibling library can ship via `path:` dep first, with the Hex publish gating to a follow-up milestone. Avoids blocking the integration on the dependency's release cadence.
+- **Explicit `idempotency_key` over Oban `unique:`:** when the work is meaningful enough to warrant database-level dedup, push idempotency into the persistence layer rather than the queue layer. Stronger guarantees, observable in DB.
+
+### Key Lessons
+
+1. Pre-built archive stubs at milestone-open create stale state that must be reconciled at close. Either skip them or treat them as ephemeral.
+2. Plan SUMMARY/VERIFICATION files should land in the same commit as the source-code changes — reconstructing from commits is workable but error-prone.
+3. Shift-left UAT (`mode: shift-left`, `human_steps_required: 0`) is achievable for cleanup-shaped phases when the assertions are file-system / dependency / content checks. Codify the pattern in `CONTRIBUTING.md` so future phases default to it.
+4. Library cleanup commits should always include a regression-guard test (`mailglass_cleanup_test` as precedent). Otherwise CI will pass and the next contributor will reintroduce the dropped surface.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: three phases over ~36 hours (Phase 88 → 89 → 90). Combined-commit pattern (one commit per plan instead of per task) kept git history readable.
+- Notable: the cleanup phase was the largest by file-count (52 files in the single commit) but the lowest-risk by behavior — driven by deletes plus the `payment_succeeded` port.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.29 | short | 3 | **MG-01..MG-07** — Mailglass framework integration replacing `mjml_eex` + `phoenix_swoosh`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`; 13 templates ported, 26 MJML/text assets deleted; `mailglass_cleanup_test` enforces non-regression in CI; phases **88–90** under **`milestones/v1.29-phases/`**; archives **`milestones/v1.29-*`**. |
 | v1.27 | short | 2 | **CLS-01..03** + **INV-05** — pre-1.0 closure narrative on README / **`RELEASING`** / **`upgrade`** + post-touch friction certification **(b)**; **`*-VERIFICATION.md`** only (inline); phases **84–85** under **`milestones/v1.27-phases/`**; **`milestones/v1.27-*`** archives. |
 | v1.26 | short | 2 | **INT-13** + **INV-04** — billing portal on First Hour + matrix + CI needles; post-touch friction certification **(b)**; **`*-VERIFICATION.md`** + **3** plan summaries; phases **82–83** under **`milestones/v1.26-phases/`**. |
 | v1.25 | short | 3 | **INV-03** + **BIL-06..07** + **INT-12** — checkout **`Accrue.Billing`** facade + telemetry/docs + integrator verifiers; **`*-VERIFICATION.md`** + **3** plan summaries; phases **79–81** under **`milestones/v1.25-phases/`**. |
@@ -1071,6 +1120,7 @@
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
+| v1.29 | New `mailglass_cleanup_test` (5 regression-guard assertions), `email_preview_live_test` fixture sweep (renders every type via admin LiveView), `mailglass_admin_routes/__routes__/0` ExUnit assertion in `accrue_admin`; 128 email tests pass post-cleanup | MG-01..MG-07 (7/7) archived | **Net dep removal:** `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; new `:mailglass` path dep replaces them. `accrue/priv/repo/migrations/20260426000000_create_mailglass_poc_tables.exs` for host bootstrap. |
 | v1.26 | Extended **`verify_package_docs.sh`** + **`verify_adoption_proof_matrix.sh`** substring gates; no new ExUnit facade (portal facade shipped **v1.24**) | INT-13 + INV-04 (2/2) archived | Doc + CI needles only; **`milestones/v1.26-*`**; execution trees **`v1.26-phases/`**. |
 | v1.24 | **`billing_portal_session_facade_test.exs`** + existing **VERIFY-01** / **host-integration** / **`verify_package_docs`** gates | ADM + BIL (6/6) archived | Public **`Accrue.Billing`** portal API; customer **PM** Playwright + **axe** row; **`milestones/v1.24-*`**; phases remain under **`.planning/phases/`**. |
 | v1.23 | Existing **`docs-contracts-shift-left`** suite + **`verify_v1_17_friction_research_contract.sh`**; no new CI jobs | PPX (4/4) archived | Friction inventory **P1-002** closure note; **`75-VERIFICATION.md`**; phase tree **`v1.23-phases/75-*/`**. |
