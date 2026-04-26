@@ -73,3 +73,19 @@ That's a separate milestone, executed in `~/projects/mailglass` first, then a sm
 ## Status
 
 Phase 1 of the post-v1.29 main-CI recovery — DONE. PR #16 is open and ready to merge. Awaiting user confirmation before merge.
+
+---
+
+## TODO: Bump Mailglass when next release ships
+
+User noted on 2026-04-26 that Mailglass will be bumped soon (issue with the latest 0.1.0 releases). When the new version ships:
+
+1. Update `accrue/mix.exs`: `{:mailglass, "~> 0.1"}` → new constraint
+2. Update `accrue_admin/mix.exs`: `{:mailglass_admin, "~> 0.1", only: [:dev, :test]}` → new constraint
+3. `cd accrue && mix deps.update mailglass mailglass_admin`
+4. `cd accrue_admin && mix deps.update mailglass_admin`
+5. Run full test suite + dialyzer in both packages
+6. Try removing entries from `accrue/.dialyzer_ignore.exs` — if Mailglass added a typed `html_body/2` helper (function-or-binary), the suppressions may no longer be needed
+7. Update `accrue/test/test_helper.exs` — if the new Mailglass fixes the protocol-consolidation timing issue, `Code.ensure_loaded!(UUIDv7)` and `Code.ensure_loaded!(Phoenix.HTML.Safe.BitString)` may be removable
+
+Test the bump on a PR before merging — the protocol-consolidation fix and dialyzer suppressions are sensitive to Mailglass internals.
