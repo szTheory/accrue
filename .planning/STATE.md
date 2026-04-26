@@ -1,15 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.29
-milestone_name: Mailglass Integration
-status: shipped
-last_updated: "2026-04-26T07:00:00.000Z"
-last_activity: "2026-04-26 — v1.29 Mailglass Integration shipped. Phases **88–90** complete (**MG-01..MG-07**). `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; explicit `Mailglass.deliver/1` idempotency replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`. Planning git tag `v1.29`."
+milestone: v1.30
+milestone_name: 1.0.0 Declaration (Spine A)
+status: planning
+last_updated: "2026-04-26T21:21:04.500Z"
+last_activity: 2026-04-26
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -24,15 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 ## Current Position
 
-**Milestone:** **v1.29** — Mailglass Integration (✅ **shipped 2026-04-26**)
-
-**Phase:** **90** — Full Template Port & Cleanup — **Complete 2026-04-26**
-
-**Plan:** All 8 plans across Phases 88–90 complete.
-
-**Status:** v1.29 milestone shipped — Mailglass replaces `mjml_eex` + `phoenix_swoosh` in `accrue/mix.exs`; explicit `Mailglass.deliver/1` idempotency replaces Oban `unique: [period: 60]`; legacy preview CLI retired in favor of `/dev/email-preview` LiveView.
-
-**Last activity:** 2026-04-26 — Milestone close: archived `milestones/v1.29-{ROADMAP,REQUIREMENTS}.md`, collapsed live ROADMAP, evolved PROJECT.md, appended RETROSPECTIVE, planning git tag `v1.29`.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-26 — Milestone v1.30 started
 
 ## Milestone Progress
 
