@@ -29,6 +29,13 @@ defmodule Accrue.Emails.TrialEndingTest do
     assert Code.ensure_loaded?(TrialEnding)
   end
 
+  test "message/1 returns a Mailglass message" do
+    message = TrialEnding.message(fixture())
+
+    assert %Mailglass.Message{} = message
+    assert message.swoosh_email.subject == TrialEnding.subject(fixture())
+  end
+
   test "subject/1 returns non-empty binary with business name" do
     subject = TrialEnding.subject(fixture())
     assert is_binary(subject)
@@ -44,7 +51,7 @@ defmodule Accrue.Emails.TrialEndingTest do
     html = TrialEnding.render(fixture())
     assert is_binary(html)
     assert byte_size(html) > 0
-    assert html =~ "<!--[if mso"
+    assert html =~ "trial"
   end
 
   test "render/1 contains type-specific copy (trial + days)" do

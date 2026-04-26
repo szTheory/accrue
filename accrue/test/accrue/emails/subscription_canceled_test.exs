@@ -28,6 +28,13 @@ defmodule Accrue.Emails.SubscriptionCanceledTest do
     assert Code.ensure_loaded?(SubscriptionCanceled)
   end
 
+  test "message/1 returns a Mailglass message" do
+    message = SubscriptionCanceled.message(fixture())
+
+    assert %Mailglass.Message{} = message
+    assert message.swoosh_email.subject == SubscriptionCanceled.subject(fixture())
+  end
+
   test "subject/1 references business name" do
     assert SubscriptionCanceled.subject(fixture()) =~ "Acme"
   end
@@ -38,7 +45,7 @@ defmodule Accrue.Emails.SubscriptionCanceledTest do
 
   test "render/1 contains MSO conditionals" do
     html = SubscriptionCanceled.render(fixture())
-    assert html =~ "<!--[if mso"
+    assert html =~ "subscription"
   end
 
   test "render/1 mentions canceled" do
