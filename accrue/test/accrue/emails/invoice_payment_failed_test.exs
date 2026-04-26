@@ -32,6 +32,13 @@ defmodule Accrue.Emails.InvoicePaymentFailedTest do
     assert Code.ensure_loaded?(InvoicePaymentFailed)
   end
 
+  test "message/1 returns a Mailglass message" do
+    message = InvoicePaymentFailed.message(fixture())
+
+    assert %Mailglass.Message{} = message
+    assert message.swoosh_email.subject == InvoicePaymentFailed.subject(fixture())
+  end
+
   test "subject is action-required" do
     s = InvoicePaymentFailed.subject(fixture())
     assert String.downcase(s) =~ "action required" or String.downcase(s) =~ "failed"

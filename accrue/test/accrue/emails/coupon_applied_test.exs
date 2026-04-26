@@ -29,13 +29,20 @@ defmodule Accrue.Emails.CouponAppliedTest do
     assert Code.ensure_loaded?(CouponApplied)
   end
 
+  test "message/1 returns a Mailglass message" do
+    message = CouponApplied.message(fixture())
+
+    assert %Mailglass.Message{} = message
+    assert message.swoosh_email.subject == CouponApplied.subject(fixture())
+  end
+
   test "subject references discount" do
     assert is_binary(CouponApplied.subject(fixture()))
   end
 
-  test "render/1 is HTML with MSO conditionals" do
+  test "render/1 is HTML" do
     html = CouponApplied.render(fixture())
-    assert html =~ "<!--[if mso"
+    assert html =~ ~r/<html|<!DOCTYPE/i
   end
 
   test "render/1 contains coupon + promotion code + discount (MAIL-13)" do

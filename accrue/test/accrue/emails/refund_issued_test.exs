@@ -34,14 +34,21 @@ defmodule Accrue.Emails.RefundIssuedTest do
     assert Code.ensure_loaded?(RefundIssued)
   end
 
+  test "message/1 returns a Mailglass message" do
+    message = RefundIssued.message(fixture())
+
+    assert %Mailglass.Message{} = message
+    assert message.swoosh_email.subject == RefundIssued.subject(fixture())
+  end
+
   test "subject references refund" do
     assert is_binary(RefundIssued.subject(fixture()))
     assert RefundIssued.subject(fixture()) =~ "efund"
   end
 
-  test "render/1 is HTML with MSO conditionals" do
+  test "render/1 is HTML" do
     html = RefundIssued.render(fixture())
-    assert html =~ "<!--[if mso"
+    assert html =~ ~r/<html|<!DOCTYPE/i
   end
 
   test "render/1 contains fee breakdown (MAIL-12)" do

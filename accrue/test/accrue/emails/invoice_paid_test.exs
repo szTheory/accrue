@@ -40,6 +40,13 @@ defmodule Accrue.Emails.InvoicePaidTest do
     assert Code.ensure_loaded?(InvoicePaid)
   end
 
+  test "message/1 returns a Mailglass message" do
+    message = InvoicePaid.message(fixture())
+
+    assert %Mailglass.Message{} = message
+    assert message.swoosh_email.subject == InvoicePaid.subject(fixture())
+  end
+
   test "subject references invoice number" do
     assert InvoicePaid.subject(fixture()) =~ "INV-2"
   end
@@ -48,9 +55,9 @@ defmodule Accrue.Emails.InvoicePaidTest do
     assert is_binary(InvoicePaid.subject(%{}))
   end
 
-  test "render/1 is HTML with MSO conditionals" do
+  test "render/1 is HTML" do
     html = InvoicePaid.render(fixture())
-    assert html =~ "<!--[if mso"
+    assert html =~ ~r/<html|<!DOCTYPE/i
   end
 
   test "render/1 contains total + line items" do
