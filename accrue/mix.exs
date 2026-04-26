@@ -17,7 +17,8 @@ defmodule Accrue.MixProject do
       description: "Billing state, modeled clearly.",
       source_url: @source_url,
       dialyzer: [
-        plt_add_apps: [:mix, :ex_unit, :credo]
+        plt_add_apps: [:mix, :ex_unit, :credo],
+        ignore_warnings: ".dialyzer_ignore.exs"
       ],
       docs: docs()
     ]
