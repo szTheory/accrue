@@ -103,6 +103,24 @@ Host integration proofs sit in **Layer B** and **Layer C** relative to the per-p
 - **Layer B** — from the repo root, `cd examples/accrue_host` then **`mix verify`** (fast Fake slice) or **`mix verify.full`** (CI-equivalent host stack). See [examples/accrue_host/README.md#proof-and-verification](examples/accrue_host/README.md#proof-and-verification) for VERIFY-01 detail.
 - **Layer C** — merge-blocking PR jobs **`docs-contracts-shift-left`** (bash contracts) then **`host-integration`** (BEAM + Playwright) are the contract, not “I ran **`mix verify.full`** locally” alone; use [scripts/ci/README.md](scripts/ci/README.md) to map scripts and lanes before you change CI-facing prose.
 
+## Phase verification: shift left, no human UAT
+
+Phase verification (`/gsd-verify-work N`) defaults to **0 human steps**. Every truth in a phase's `*-UAT.md` must point at a green automated check or carry an explicit `automation_deferred:` reason.
+
+**Automatable by default — write the test, don't write a checkbox:**
+
+- File existence / non-existence → `File.exists?`, `Path.wildcard`, `refute File.exists?` (precedent: `accrue/test/accrue/emails/mailglass_cleanup_test.exs`).
+- `mix.exs` deps present/absent → `File.read!("mix.exs") =~ "..."` in ExUnit (same file).
+- Guide / doc content → `File.read!("guides/<name>.md") =~ "..."` (same file).
+- Module / function exported / removed → `function_exported?/3`, `Code.ensure_loaded?/1`.
+- Fixture or coverage breadth → enumerate `Accrue.Emails.Fixtures.all/0` (or equivalent) and assert per-key.
+- Admin LiveView page renders → `Phoenix.LiveViewTest` via `AccrueAdmin.LiveCase` (precedent: `accrue_admin/test/accrue_admin/dev/email_preview_live_test.exs`).
+- Browser-only behavior (real navigation, JS interop, visual diff) → Playwright spec under `examples/accrue_host/e2e/` or `accrue_admin/e2e/` (precedent: `phase7-uat.spec.js`).
+
+**`automation_deferred:`** is permitted only when the check genuinely requires hardware, a third-party live account, or human judgment that no assertion can encode. Record the reason in the UAT entry and link a follow-up issue.
+
+Closed UAT files should include an `## Automation Map` section mapping each truth → test path[:line range] → CI gate, so the next phase's verifier can audit the trail without reopening the question. See `.planning/milestones/v1.29-phases/090-full-template-port-cleanup/090-UAT.md` for the canonical shape.
+
 ## No CLA
 
 Accrue does not require a Contributor License Agreement at this time. By submitting a contribution, you confirm that you have the right to license your work under the repository's MIT license.

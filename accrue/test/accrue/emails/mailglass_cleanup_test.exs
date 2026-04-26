@@ -19,4 +19,17 @@ defmodule Accrue.Emails.MailglassCleanupTest do
     refute File.exists?("priv/accrue/templates/emails/payment_succeeded.mjml.eex")
     refute File.exists?("priv/accrue/templates/emails/payment_succeeded.text.eex")
   end
+
+  test "no legacy MJML or text template assets remain in priv/" do
+    mjml = Path.wildcard("priv/accrue/templates/emails/*.mjml.eex")
+    text = Path.wildcard("priv/accrue/templates/emails/*.text.eex")
+    assert mjml == [], "stray MJML assets: #{inspect(mjml)}"
+    assert text == [], "stray legacy text assets: #{inspect(text)}"
+  end
+
+  test "email guide retires the CLI and points at the supported preview surface" do
+    guide = File.read!("guides/email.md")
+    refute guide =~ "mix accrue.mail.preview", "retired CLI still documented"
+    assert guide =~ "/dev/email-preview", "supported preview surface not documented"
+  end
 end

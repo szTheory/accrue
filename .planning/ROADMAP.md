@@ -102,6 +102,13 @@ Plans:
 
 **Requirements:** MG-07.
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 090-01-PLAN.md — Port the first six remaining transactional email templates to Mailglass.
+- [ ] 090-02-PLAN.md — Port the invoice, refund, and coupon templates to Mailglass.
+- [ ] 090-03-PLAN.md — Retire the preview CLI, delete legacy MJML assets, and finish the payment_succeeded cleanup.
+
 **Success Criteria:**
 1. All 13 email templates render correctly via Mailglass HEEx components.
 2. `mjml_eex` and `phoenix_swoosh` are entirely removed from `accrue/mix.exs`.
