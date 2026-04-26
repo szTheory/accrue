@@ -82,6 +82,12 @@
 
 **Requirements:** MG-04, MG-05, MG-06.
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 089-01-PLAN.md — Refactor the worker seam to build and send Mailglass messages with deterministic idempotency and receipt PDF attachment handling.
+- [ ] 089-02-PLAN.md — Port the Receipt and PaymentFailed templates to Mailglass HEEx mailables while preserving adopter-visible output.
+
 **Success Criteria:**
 1. `Accrue.Workers.Mailer` delegates to `Mailglass.deliver/1` with correctly hydrated assigns and explicit `idempotency_key`.
 2. `Accrue.Emails.Receipt` and `Accrue.Emails.PaymentFailed` render visually matching their MJML counterparts using HEEx components.
