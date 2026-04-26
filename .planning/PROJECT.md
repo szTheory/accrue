@@ -14,18 +14,20 @@ Tagline: *"Billing state, modeled clearly."*
 
 ### v1.30 — `1.0.0` Declaration (Spine A) (**opened 2026-04-26**)
 
-**Goal:** Cut `accrue` / `accrue_admin` `1.0.0` on a single linked Hex publish, with the final post-publish contract sweep verifying everything is consistent at `1.0.0`, and a dated post-publish friction-inventory maintainer pass to certify the post-1.0 surface.
+**Goal:** Cut `accrue` / `accrue_admin` `1.0.0` on a single linked Hex publish, with the final post-publish contract sweep verifying everything is consistent at `1.0.0`, the planning mirror aligned, the stability posture flipped to "1.0.0 stable, post-1.0 cadence," and a dated post-publish friction-inventory maintainer pass to certify the post-1.0 surface. **`PROC-08` (second processor) and `FIN-03` (app-owned finance exports) remain explicitly out of scope at 1.0.0** — calling stable does not lift those non-goals.
 
 **Target features:**
 
-- **PROC-08** — Linked `1.0.0` publish for `accrue` and `accrue_admin` (single coordinated cut), `CHANGELOG` "1.0.0 — Stable" entry per package, `RELEASING.md` post-1.0 cadence section, planning git tag `v1.30`.
-- **FIN-03** — Final post-publish contract sweep at `1.0.0`: `verify_package_docs` + `verify_adoption_proof_matrix` + the six-script `docs-contracts-shift-left` bundle re-run as `1.0.0` mirrors; `.planning/` `1.0.0` mirrors landed; needles refreshed across First Hour, host README, adoption matrix.
-- **INV-07** — Post-1.0 dated maintainer pass `(b)` in `v1.17-FRICTION-INVENTORY.md` certifying the friction inventory remains accurate at `1.0.0`.
+- **REL-05..08** — Linked `1.0.0` Hex publish (single coordinated cut for `accrue` and `accrue_admin`), `CHANGELOG` "1.0.0 — Stable" entry per package, `RELEASING.md` post-1.0 cadence section (semver discipline + deprecation policy), planning git tag `v1.30`.
+- **PPX-09..12** — Final post-publish contract sweep at `1.0.0`: `verify_package_docs` + `verify_adoption_proof_matrix` + the six-script `docs-contracts-shift-left` bundle re-run clean at `1.0.0`; First Hour + host README + adoption matrix needles refreshed across the surface for the `0.3.1 → 1.0.0` jump.
+- **HYG-02** — `.planning/` mirror pass (`PROJECT.md`, `MILESTONES.md`, `STATE.md`) aligned to the published `1.0.0` pair after the linked publish lands.
+- **DOC-03..04** — `accrue/README.md` Stability + root README maintenance posture flipped from "pre-1.0 closure" to "1.0.0 stable, post-1.0 cadence"; PROJECT.md non-goals section retained (PROC-08 / FIN-03 reaffirmed as explicitly out of scope at `1.0.0`, with written boundaries — not lifted).
+- **INV-07** — Post-1.0 dated maintainer pass `(b)` in `v1.17-FRICTION-INVENTORY.md` certifying the inventory remains accurate at `1.0.0`.
 
 **Key context:**
 
-- Forcing function for **PROC-08** / **FIN-03** has been deferred since v1.28; v1.27/28/29 each closed cleanly with no half-finished migrations overhanging the surface, so calling `1.0.0` now does not stack risk.
-- Same spine pattern as v1.23 PPX-01..04 / v1.28 PPX-05..08, but bumped to `1.0.0` rather than another `0.3.x` patch.
+- Forcing function for the `1.0.0` declaration (Spine A) has been deferred since v1.28; v1.27/28/29 each closed cleanly with no half-finished migrations overhanging the surface, so calling `1.0.0` now does not stack risk.
+- Same spine pattern as v1.11 (REL-01..04 / DOC-01..02 / HYG-01) and v1.23/v1.28 (PPX-01..08), but bumped to `1.0.0` rather than another `0.3.x` patch.
 - "Ship complete, not MVP" — calling `1.0.0` is the obligation embedded in the project's Core Value (zero breaking-change pain through v1.x), not a stretch.
 - **No new feature surface** in this milestone — explicitly out of scope (no second processor, no app-owned finance exports, no new billing primitives).
 
@@ -724,4 +726,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-26 — **v1.30** opened — **`1.0.0` Declaration (Spine A)**: **PROC-08** (linked `1.0.0` publish for `accrue` / `accrue_admin`) + **FIN-03** (final post-publish contract sweep at `1.0.0`) + **INV-07** (post-1.0 friction-inventory maintainer pass). Continues from **v1.29** Phase 90 → starts at **Phase 91**.*
+*Last updated: 2026-04-26 — **v1.30** opened — **`1.0.0` Declaration (Spine A)**: **REL-05..08** (linked `1.0.0` publish + `CHANGELOG` 1.0.0 entries + `RELEASING.md` post-1.0 cadence + planning tag `v1.30`) + **PPX-09..12** (final contract sweep at `1.0.0`) + **HYG-02** (`.planning/` mirror at `1.0.0`) + **DOC-03..04** (Stability flipped to "1.0.0 stable"; PROC-08/FIN-03 non-goals reaffirmed) + **INV-07** (post-1.0 friction-inventory maintainer pass). Continues from **v1.29** Phase 90 → starts at **Phase 91**.*
