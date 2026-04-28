@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** **planning** (opened **2026-04-26**). **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** in live [`REQUIREMENTS.md`](REQUIREMENTS.md). **Spine A** — linked **`accrue` / `accrue_admin` 1.0.0** Hex publish, post-publish contract sweep at `1.0.0`, planning mirror, stability posture flip, dated post-1.0 friction inventory pass. **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0 (DOC-04 — calling stable does not lift the non-goals).
+- **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** **executing** (opened **2026-04-26**). **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** in live [`REQUIREMENTS.md`](REQUIREMENTS.md). **Spine A** — linked **`accrue` / `accrue_admin` 1.0.0** Hex publish, post-publish contract sweep at `1.0.0`, planning mirror, stability posture flip, dated post-1.0 friction inventory pass. **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0 (DOC-04 — calling stable does not lift the non-goals).
 - ✅ **v1.29 Mailglass Integration** — Phases **88–90** shipped **2026-04-26**. **MG-01..MG-07** validated; `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`. **Archives:** [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md), [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.29-phases/`](milestones/v1.29-phases/). **No** **PROC-08** / **FIN-03**.
 - **v1.28 Next linked publish continuity** — Phases **86–87** **Complete** **2026-04-24** (**`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**). **PPX-05..08** + **INV-06** closed in live **`.planning/REQUIREMENTS.md`**. **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.27 Pre-1.0 closure narrative** — Phases **84–85** shipped **2026-04-24** (**CLS-01..03**, **INV-05**); integrator-facing **maintenance posture**; **`RELEASING.md`** / **`upgrade.md`** wrap-up semantics; **INV-05** friction inventory certification. **Archives:** [`milestones/v1.27-ROADMAP.md`](milestones/v1.27-ROADMAP.md), [`milestones/v1.27-REQUIREMENTS.md`](milestones/v1.27-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.27-phases/`](milestones/v1.27-phases/). **No** **PROC-08** / **FIN-03**.
@@ -37,7 +37,7 @@
 ## Phases
 
 <details open>
-<summary>📦 v1.30 `1.0.0` Declaration (Spine A) (Phases 91–93) — PLANNING 2026-04-26</summary>
+<summary>📦 v1.30 `1.0.0` Declaration (Spine A) (Phases 91–93) — EXECUTING 2026-04-28</summary>
 
 **Milestone goal:** Cut **`accrue` / `accrue_admin` `1.0.0`** on a single linked Hex publish, with the final post-publish contract sweep verifying everything is consistent at `1.0.0`, the planning mirror aligned to the published `1.0.0` pair, the stability posture flipped from "pre-1.0 closure" to "1.0.0 stable, post-1.0 cadence," and a dated post-publish friction-inventory maintainer pass certifying the post-1.0 surface. **`PROC-08`** (second processor) and **`FIN-03`** (app-owned finance exports) remain **explicitly out of scope** at 1.0.0 — calling stable does **not** lift those non-goals (DOC-04).
 
@@ -96,17 +96,22 @@ Plans:
 
 **Requirements:** REL-05, PPX-09, PPX-10, PPX-11, PPX-12.
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [x] 092-01-PLAN.md — Lock `1.0.0` across both mix projects, the Release Please manifest, and package-doc install literals in one release slice.
+- [ ] 092-02-PLAN.md — Re-run the host/adoption/doc-contract verifiers at `1.0.0`, updating host-facing proof surfaces only when the scripts require it.
+- [ ] 092-03-PLAN.md — Record same-day publish evidence for the linked `1.0.0` cut and close REL-05 / PPX-09..12 only after proof exists.
 
 **Success Criteria:**
-1. `mix.exs` `@version "1.0.0"` lands on `main` for both `accrue/mix.exs` and `accrue_admin/mix.exs` in the same PR (or same-day coordinated PRs per Release Please's two-package model).
+1. `mix.exs` `@version "1.0.0"` lands for both `accrue/mix.exs` and `accrue_admin/mix.exs` in one combined Release Please PR; only if that path is mechanically impossible may the maintainer use the documented same-day fallback while preserving one coherent release slice.
 2. **Hex registry** shows `accrue 1.0.0` and `accrue_admin 1.0.0` published as a coordinated pair; release-train order matches `RELEASING.md` for the `accrue → accrue_admin` sequence.
 3. `scripts/ci/verify_package_docs.sh` exits 0 on `main` after publish — install literals / `~>` pins follow `mix.exs @version` for both packages (PPX-09, same merge-blocking discipline as v1.11 DOC-02 + v1.23 PPX-01..04 + v1.28 PPX-05..08).
 4. `scripts/ci/verify_adoption_proof_matrix.sh` exits 0 on `main` after publish — matrix rows + needles + per-row evidence refreshed for the `0.3.1 → 1.0.0` jump (PPX-10).
 5. The full **`docs-contracts-shift-left`** six-script bundle re-runs clean at `1.0.0` (PPX-11) — same enumerate-snapshot evidence shape as Phase 86 `086-VERIFICATION.md`, normative membership from `.github/workflows/ci.yml` at the reviewed SHA.
 6. **First Hour**, **host README**, and **adoption matrix** needles all read `1.0.0` (PPX-12) — same-PR co-update discipline from v1.19 PRF (no needle drift between integrator surface and verifier scripts).
 
-**Definition-of-done artifact:** `milestones/v1.30-phases/092-linked-publish-and-contract-sweep/092-VERIFICATION.md` with the linked-publish URL evidence + post-publish verifier transcripts.
+**Definition-of-done artifact:** `milestones/v1.30-phases/092-linked-1-0-0-publish-post-publish-contract-sweep/092-VERIFICATION.md` with the linked-publish URL evidence + post-publish verifier transcripts.
 
 ### Phase 93: Post-publish HYG mirror + INV-07 + tag
 
@@ -1095,8 +1100,8 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 91. Pre-publish 1.0.0 prep | v1.30 | 0/TBD | Not started | — |
-| 92. Linked 1.0.0 publish + post-publish contract sweep | v1.30 | 0/TBD | Not started | — |
+| 91. Pre-publish 1.0.0 prep | v1.30 | 3/3 | Complete | 2026-04-28 |
+| 92. Linked 1.0.0 publish + post-publish contract sweep | v1.30 | 1/3 | In progress | — |
 | 93. Post-publish HYG mirror + INV-07 + tag | v1.30 | 0/TBD | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.

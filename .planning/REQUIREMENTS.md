@@ -13,17 +13,17 @@
 
 ### Release cut (REL — continues from REL-04 / v1.11)
 
-- [ ] **REL-05**: Linked `1.0.0` Hex publish for `accrue` and `accrue_admin` ships as a single coordinated release (both packages bumped to `1.0.0` in the same PR / on the same day; release-train order matches `RELEASING.md` for the `accrue → accrue_admin` pair)
+- [x] **REL-05**: Linked `1.0.0` Hex publish for `accrue` and `accrue_admin` ships as a single coordinated release (both packages bumped to `1.0.0` in the same PR / on the same day; release-train order matches `RELEASING.md` for the `accrue → accrue_admin` pair)
 - [x] **REL-06**: `CHANGELOG.md` "1.0.0 — Stable" entry per package (`accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md`), Conventional-Commits / Release-Please-rendered, calling out the API stability commitment under v1.x
 - [x] **REL-07**: `RELEASING.md` post-1.0 cadence section documents semver discipline, deprecation policy, and what changes after stable (replaces / supersedes the "pre-1.0 closure" narrative shipped in v1.27 CLS-02)
 - [ ] **REL-08**: Planning git tag `v1.30` after milestone close (mirrors v1.27 / v1.29 tag discipline; tag follows the linked Hex publish landing on `main`)
 
 ### Post-publish contract alignment at 1.0.0 (PPX — continues from PPX-08 / v1.28)
 
-- [ ] **PPX-09**: `verify_package_docs` re-runs clean at `1.0.0` (install literals / `~>` pins follow `mix.exs @version` for both packages; same merge-blocking discipline as v1.11 DOC-02 + v1.23 PPX-01..04 + v1.28 PPX-05..08)
+- [x] **PPX-09**: `verify_package_docs` re-runs clean at `1.0.0` (install literals / `~>` pins follow `mix.exs @version` for both packages; same merge-blocking discipline as v1.11 DOC-02 + v1.23 PPX-01..04 + v1.28 PPX-05..08)
 - [ ] **PPX-10**: `verify_adoption_proof_matrix` re-runs clean at `1.0.0` (matrix rows + needles + per-row evidence refreshed for the `0.3.1 → 1.0.0` jump; merge-blocking)
 - [ ] **PPX-11**: `docs-contracts-shift-left` six-script bundle re-runs clean at `1.0.0` (full bundle parity with v1.28 Phase 86 086-VERIFICATION evidence, re-aligned to the new `1.0.0` registry reality)
-- [ ] **PPX-12**: First Hour + host README + adoption matrix needles refreshed across the integrator surface for the `0.3.1 → 1.0.0` jump (single-PR co-update discipline from v1.19 PRF; same-PR coupling between needle edits and verifier scripts)
+- [x] **PPX-12**: First Hour + host README + adoption matrix needles refreshed across the integrator surface for the `0.3.1 → 1.0.0` jump (single-PR co-update discipline from v1.19 PRF; same-PR coupling between needle edits and verifier scripts)
 
 ### Planning mirror (HYG — continues from HYG-01 / v1.11)
 
@@ -68,14 +68,14 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-05 | Phase 92 | Pending |
+| REL-05 | Phase 92 | Complete |
 | REL-06 | Phase 91 | Complete |
 | REL-07 | Phase 91 | Complete |
 | REL-08 | Phase 93 | Pending |
-| PPX-09 | Phase 92 | Pending |
+| PPX-09 | Phase 92 | Complete |
 | PPX-10 | Phase 92 | Pending |
 | PPX-11 | Phase 92 | Pending |
-| PPX-12 | Phase 92 | Pending |
+| PPX-12 | Phase 92 | Complete |
 | HYG-02 | Phase 93 | Pending |
 | DOC-03 | Phase 91 | Complete |
 | DOC-04 | Phase 91 | Complete |
@@ -90,4 +90,4 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 — Phase 91 complete; REL-06, REL-07, DOC-03, and DOC-04 verified at reviewed SHA `3cca930`*
+*Last updated: 2026-04-28 — Phase 91 complete; Phase 92 Plan 01 executed with REL-05, PPX-09, and PPX-12 evidence recorded via PR `#15`, workflow runs `25051925091` / `25055758784`, and summary `092-01-SUMMARY.md`*

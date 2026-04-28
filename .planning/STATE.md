@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.30
 milestone_name: INV-07 maintainer pass
-status: verifying
-last_updated: "2026-04-28T11:28:15.891Z"
-last_activity: 2026-04-28 — Phase 91 executed on `main`; changelog preambles, post-1.0 cadence runbook, README posture flip, dated DOC-04 reaffirmation, and validation/verification artifacts landed. Reviewed SHA `3cca930` passed docs-contracts-shift-left and `host-integration`.
+status: executing
+last_updated: "2026-04-28T13:50:56Z"
+last_activity: 2026-04-28 — Phase 92 Plan 01 executed on `main`; merged Release Please PR #15 delivered the linked 1.0.0 slice and follow-up commit `ee8792f` fixed nested changelog-path drift.
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 6
+  completed_plans: 4
 ---
 
 # Project State
@@ -20,19 +20,19 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.30 execution in progress (2026-04-28)** — Phase 91 is complete and Phase 92 is the next forcing function: linked `1.0.0` publish + post-publish contract sweep, followed by the planning mirror and dated post-1.0 friction-inventory pass. **PROC-08 / FIN-03 reaffirmed out of scope** at 1.0.0 (DOC-04).
+**Current focus:** **v1.30 execution in progress (2026-04-28)** — Phase 91 is complete, Phase 92 Plan 01 is complete, and Plan 02 is next for the `1.0.0` post-publish verifier/proof sweep. **PROC-08 / FIN-03 remain out of scope** at 1.0.0.
 
 ## Current Position
 
-Phase: 91 Pre-publish 1.0.0 prep — complete (REL-06, REL-07, DOC-03, DOC-04)
-Plan: 091-01, 091-02, 091-03 complete
-Status: `091-VERIFICATION.md` signed off — ready for `/gsd-plan-phase 92`
-Resume file: --resume-file
-Last activity: 2026-04-28 — Phase 91 executed on `main`; changelog preambles, post-1.0 cadence runbook, README posture flip, dated DOC-04 reaffirmation, and validation/verification artifacts landed. Reviewed SHA `3cca930` passed docs-contracts-shift-left and `host-integration`.
+Phase: 92 Linked 1.0.0 publish + post-publish contract sweep — in progress
+Plan: 092-01 complete; 092-02 next
+Status: `092-01-SUMMARY.md` recorded; Release Please PR #15 merged and follow-up fix `ee8792f` is on `main`
+Resume file: None
+Last activity: 2026-04-28 — Verified PR #15 / release runs / package-doc pins at `1.0.0`, then fixed `release-please-config.json` so future release PRs keep numbered changelogs at package root only.
 
 ## Milestone Progress
 
-**v1.30** (opened **2026-04-26**): **Phase 91 complete 2026-04-28** — **REL-06**, **REL-07**, **DOC-03**, **DOC-04** closed via [`091-VERIFICATION.md`](milestones/v1.30-phases/091-pre-publish-prep/091-VERIFICATION.md) at reviewed SHA `3cca930`; Phase 92 planning remains next for **REL-05**, **PPX-09..12**. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
+**v1.30** (opened **2026-04-26**): **Phase 91 complete 2026-04-28** and **Phase 92 Plan 01 complete 2026-04-28** — **REL-06**, **REL-07**, **DOC-03**, **DOC-04**, **REL-05**, **PPX-09**, and **PPX-12** now have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`). Phase 92 Plans 02–03 remain for the remaining verifier sweep and publish proof. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
 
 **v1.29** (shipped **2026-04-26**): Phases **88–90** — **MG-01..MG-07**; **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`**, **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
@@ -43,7 +43,7 @@ Last activity: 2026-04-28 — Phase 91 executed on `main`; changelog preambles, 
 **Friction inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`  
 **North star + stop rules (FRG-02):** `.planning/research/v1.17-north-star.md`
 
-**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 0.3.1`** — v1.30 will cut **`1.0.0`** as a coordinated linked publish (REL-05).
+**Last shipped (public packages on Hex):** **`accrue` / `accrue_admin` 1.0.0** — linked release landed on 2026-04-28; Phase 92 Plans 02–03 remain for the post-publish verifier and evidence sweep.
 
 ## Current Planning Artifacts
 
@@ -87,7 +87,7 @@ Last activity: 2026-04-28 — Phase 91 executed on `main`; changelog preambles, 
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** `/gsd-plan-phase 92` — plan the linked `1.0.0` publish + post-publish contract sweep.
+**Next:** Execute `092-02-PLAN.md` — re-run the host/adoption/doc-contract verifiers at `1.0.0` and capture the reviewed-SHA proof for the remaining PPX requirements.
 
 **Completed (v1.29):** Phases **88–90** — **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`** + **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
