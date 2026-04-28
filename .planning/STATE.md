@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.30
 milestone_name: INV-07 maintainer pass
-status: Roadmap drafted — awaiting `/gsd-plan-phase 91`
-last_updated: "2026-04-26T21:51:07.220Z"
-last_activity: 2026-04-26 — v1.30 ROADMAP.md written, REQUIREMENTS.md traceability populated (12/12 mapped)
+status: Phase 91 complete — Phase 92 planning next
+last_updated: "2026-04-28T09:09:24Z"
+last_activity: 2026-04-28 — Phase 91 executed and verified at reviewed SHA 3cca930 (docs-contracts-shift-left + host-integration green)
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
@@ -20,19 +20,19 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.30 planning open (2026-04-26)** — `1.0.0` Declaration (Spine A): linked Hex publish, post-publish contract sweep, planning mirror, stability-posture flip, dated post-1.0 friction-inventory pass. Phases **91–93** drafted in [`ROADMAP.md`](ROADMAP.md). **PROC-08 / FIN-03 reaffirmed out of scope** at 1.0.0 (DOC-04).
+**Current focus:** **v1.30 execution in progress (2026-04-28)** — Phase 91 is complete and Phase 92 is the next forcing function: linked `1.0.0` publish + post-publish contract sweep, followed by the planning mirror and dated post-1.0 friction-inventory pass. **PROC-08 / FIN-03 reaffirmed out of scope** at 1.0.0 (DOC-04).
 
 ## Current Position
 
-Phase: 91 Pre-publish 1.0.0 prep — context gathered (REL-06, REL-07, DOC-03, DOC-04)
-Plan: —
-Status: `091-CONTEXT.md` committed — awaiting `/gsd-plan-phase 91`
-Resume file: `milestones/v1.30-phases/091-pre-publish-prep/091-CONTEXT.md`
-Last activity: 2026-04-26 — Phase 91 context gathered via advisor-style cohesive synthesis (4 parallel research agents, no high-impact forks); auto-applied: A1 sequencing (separate pre-bump PR), hybrid CHANGELOG preamble in `## Unreleased`, replace-in-place `RELEASING.md` post-1.0 cadence, two-pass scoped doc flip (READMEs + maturity-and-maintenance + upgrade), dated DOC-04 sub-section
+Phase: 91 Pre-publish 1.0.0 prep — complete (REL-06, REL-07, DOC-03, DOC-04)
+Plan: 091-01, 091-02, 091-03 complete
+Status: `091-VERIFICATION.md` signed off — ready for `/gsd-plan-phase 92`
+Resume file: `milestones/v1.30-phases/091-pre-publish-prep/091-VERIFICATION.md`
+Last activity: 2026-04-28 — Phase 91 executed on `main`; changelog preambles, post-1.0 cadence runbook, README posture flip, dated DOC-04 reaffirmation, and validation/verification artifacts landed. Reviewed SHA `3cca930` passed docs-contracts-shift-left and `host-integration`.
 
 ## Milestone Progress
 
-**v1.30** (planning **2026-04-26**): Phases **91–93** **planned** — **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** mapped 12/12 in [`REQUIREMENTS.md`](REQUIREMENTS.md). Phase tree: `milestones/v1.30-phases/` (created on `/gsd-plan-phase 91`). Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
+**v1.30** (opened **2026-04-26**): **Phase 91 complete 2026-04-28** — **REL-06**, **REL-07**, **DOC-03**, **DOC-04** closed via [`091-VERIFICATION.md`](milestones/v1.30-phases/091-pre-publish-prep/091-VERIFICATION.md) at reviewed SHA `3cca930`; Phase 92 planning remains next for **REL-05**, **PPX-09..12**. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
 
 **v1.29** (shipped **2026-04-26**): Phases **88–90** — **MG-01..MG-07**; **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`**, **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
@@ -47,11 +47,11 @@ Last activity: 2026-04-26 — Phase 91 context gathered via advisor-style cohesi
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — v1.30 (12 reqs across REL / PPX / HYG / DOC / INV families). Traceability populated 2026-04-26 (12/12 mapped to Phases 91–93).
-- **`.planning/ROADMAP.md`** — v1.30 details block at top (Phases 91–93, success criteria, definition-of-done artifact paths). v1.29 collapsed in `<details>` block; all prior milestones preserved.
+- **`.planning/REQUIREMENTS.md`** — v1.30 (12 reqs across REL / PPX / HYG / DOC / INV families). Phase 91 rows closed 2026-04-28; remaining Phase 92–93 rows pending.
+- **`.planning/ROADMAP.md`** — v1.30 details block at top (Phase 91 complete; Phases 92–93 pending planning/execution). v1.29 collapsed in `<details>` block; all prior milestones preserved.
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
 - **Phase summaries (v1.29):** `088-01..03-SUMMARY.md`, `089-01..02-SUMMARY.md`, `090-01..03-SUMMARY.md` under `milestones/v1.29-phases/`.
-- **Research (v1.30):** Skipped — brownfield maintenance/release milestone with no new feature surface (same pattern as v1.23 / v1.28).
+- **Research (v1.30):** `091-RESEARCH.md` captured the pre-publish contract sweep for Phase 91; no new product-surface research beyond that docs/release scope.
 
 ## Deferred Items
 
@@ -69,6 +69,7 @@ Last activity: 2026-04-26 — Phase 91 context gathered via advisor-style cohesi
 
 ## Recent Decisions
 
+- **2026-04-28:** **Phase 91 complete** — Reviewed SHA `3cca930` passed the full docs-contracts-shift-left bundle plus `host-integration`; REL-06, REL-07, DOC-03, and DOC-04 are now closed and the phase is ready to hand off to Phase 92 planning.
 - **2026-04-26:** **v1.30 opened** — Spine A (`1.0.0` declaration). 3 phases (91–93) following v1.11 / v1.28 / v1.27 precedent: pre-publish prep (DOC + REL narrative) → linked publish + post-publish contract sweep → HYG mirror + INV-07 + tag. Granularity standard; same 3-phase ceiling as recent maintenance milestones.
 - **2026-04-26:** **v1.30 traceability** — 12/12 requirements mapped: Phase 91 (4 — REL-06, REL-07, DOC-03, DOC-04), Phase 92 (5 — REL-05, PPX-09..12), Phase 93 (3 — HYG-02, INV-07, REL-08). No orphans, no duplicates.
 - **2026-04-26:** **v1.30 research skipped** — same brownfield rationale as v1.23 / v1.28: maintenance/release milestone, no new feature surface, prior `.planning/research/SUMMARY.md` context still applies.
@@ -86,7 +87,7 @@ Last activity: 2026-04-26 — Phase 91 context gathered via advisor-style cohesi
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** `/gsd-plan-phase 91` — start v1.30 execution at Phase 91 (Pre-publish 1.0.0 prep).
+**Next:** `/gsd-plan-phase 92` — plan the linked `1.0.0` publish + post-publish contract sweep.
 
 **Completed (v1.29):** Phases **88–90** — **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`** + **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 

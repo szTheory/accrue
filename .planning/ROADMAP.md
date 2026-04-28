@@ -70,12 +70,14 @@
 
 **Requirements:** REL-06, REL-07, DOC-03, DOC-04.
 
+**Status:** Complete 2026-04-28 (`091-VERIFICATION.md`, reviewed SHA `3cca930`)
+
 **Plans:** 3 plans
 
 Plans:
-- [ ] 091-01-PLAN.md — Preload the REL-06 changelog preambles and replace the release runbook with the REL-07 post-1.0 cadence contract.
-- [ ] 091-02-PLAN.md — Flip the root and package README posture to the 1.0.x stability commitment while preserving current install pins and non-goal warnings.
-- [ ] 091-03-PLAN.md — Add the dated DOC-04 reaffirmation, define validation/verification evidence, and wire Phase 91 closeout requirements.
+- [x] 091-01-PLAN.md — Preload the REL-06 changelog preambles and replace the release runbook with the REL-07 post-1.0 cadence contract.
+- [x] 091-02-PLAN.md — Flip the root and package README posture to the 1.0.x stability commitment while preserving current install pins and non-goal warnings.
+- [x] 091-03-PLAN.md — Add the dated DOC-04 reaffirmation, define validation/verification evidence, and wire Phase 91 closeout requirements.
 
 **Success Criteria:**
 1. A reader of `accrue/README.md` Stability and root `README.md` Maintenance posture sees **"1.0.0 stable, post-1.0 cadence"** framing (not "pre-1.0 closure" / "intake-gated") with a cross-link into `RELEASING.md` and `accrue/guides/maturity-and-maintenance.md`.

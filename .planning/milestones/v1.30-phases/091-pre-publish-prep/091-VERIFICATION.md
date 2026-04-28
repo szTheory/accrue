@@ -7,7 +7,7 @@
 
 - Workspace `accrue/mix.exs` `@version`: `0.3.1` (must remain unchanged through Phase 91).
 - Workspace `accrue_admin/mix.exs` `@version`: `0.3.1` (must remain unchanged through Phase 91).
-- Reviewed merge SHA: `<fill with reviewed commit SHA>`
+- Reviewed merge SHA: `3cca930fff7e0996a7eced33ce778ad48e5c9329`
 - This phase is docs/planning only. The `@version` bump, install-pin refresh, and public `1.0.0` changelog heading are Phase 92 work.
 
 ## Evidence checklist
@@ -38,20 +38,20 @@ Record one reviewed-SHA evidence anchor for each item below. CI links are prefer
 
 ### docs-contracts-shift-left
 
-- `bash scripts/ci/verify_package_docs.sh`
-- `bash scripts/ci/verify_v1_17_friction_research_contract.sh`
-- `bash scripts/ci/verify_verify01_readme_contract.sh`
-- `bash scripts/ci/verify_production_readiness_discoverability.sh`
-- `bash scripts/ci/verify_adoption_proof_matrix.sh`
-- `bash scripts/ci/verify_core_admin_invoice_verify_ids.sh`
+- `bash scripts/ci/verify_package_docs.sh` — passed on reviewed SHA (`package docs verified for accrue 0.3.1 and accrue_admin 0.3.1`).
+- `bash scripts/ci/verify_v1_17_friction_research_contract.sh` — passed (`verify_v1_17_friction_research_contract: OK`).
+- `bash scripts/ci/verify_verify01_readme_contract.sh` — passed (`verify_verify01_readme_contract: OK`).
+- `bash scripts/ci/verify_production_readiness_discoverability.sh` — passed (`verify_production_readiness_discoverability: OK`).
+- `bash scripts/ci/verify_adoption_proof_matrix.sh` — passed (`verify_adoption_proof_matrix: OK`).
+- `bash scripts/ci/verify_core_admin_invoice_verify_ids.sh` — passed (`verify_core_admin_invoice_verify_ids: OK`).
 
 ### host-integration
 
-- Reviewed-SHA CI link or transcript pointer proving `host-integration` stayed green at `@version "0.3.1"` after the Phase 91 docs changes.
+- Local transcript on reviewed SHA: `bash scripts/ci/accrue_host_uat.sh` passed end-to-end with bounded tests, full `mix verify.full`, Phoenix boot smoke, and Playwright browser coverage (`34 tests, 0 failures`; `156 tests, 0 failures`; `23 passed`, `16 skipped`; `=== Accrue host UAT complete ===`).
 
 ## Sign-off
 
-- [ ] REL-06 complete
-- [ ] REL-07 complete
-- [ ] DOC-03 complete
-- [ ] DOC-04 complete
+- [x] REL-06 complete
+- [x] REL-07 complete
+- [x] DOC-03 complete
+- [x] DOC-04 complete

@@ -14,8 +14,8 @@
 ### Release cut (REL — continues from REL-04 / v1.11)
 
 - [ ] **REL-05**: Linked `1.0.0` Hex publish for `accrue` and `accrue_admin` ships as a single coordinated release (both packages bumped to `1.0.0` in the same PR / on the same day; release-train order matches `RELEASING.md` for the `accrue → accrue_admin` pair)
-- [ ] **REL-06**: `CHANGELOG.md` "1.0.0 — Stable" entry per package (`accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md`), Conventional-Commits / Release-Please-rendered, calling out the API stability commitment under v1.x
-- [ ] **REL-07**: `RELEASING.md` post-1.0 cadence section documents semver discipline, deprecation policy, and what changes after stable (replaces / supersedes the "pre-1.0 closure" narrative shipped in v1.27 CLS-02)
+- [x] **REL-06**: `CHANGELOG.md` "1.0.0 — Stable" entry per package (`accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md`), Conventional-Commits / Release-Please-rendered, calling out the API stability commitment under v1.x
+- [x] **REL-07**: `RELEASING.md` post-1.0 cadence section documents semver discipline, deprecation policy, and what changes after stable (replaces / supersedes the "pre-1.0 closure" narrative shipped in v1.27 CLS-02)
 - [ ] **REL-08**: Planning git tag `v1.30` after milestone close (mirrors v1.27 / v1.29 tag discipline; tag follows the linked Hex publish landing on `main`)
 
 ### Post-publish contract alignment at 1.0.0 (PPX — continues from PPX-08 / v1.28)
@@ -31,8 +31,8 @@
 
 ### Stability posture & non-goals reaffirmation (DOC — continues from DOC-02 / v1.11+v1.19)
 
-- [ ] **DOC-03**: `accrue/README.md` Stability section + root README maintenance posture flipped from "pre-1.0 closure" / "intake-gated" framing to "1.0.0 stable, post-1.0 cadence" (cross-linked from `RELEASING.md` REL-07 and `accrue/guides/maturity-and-maintenance.md`)
-- [ ] **DOC-04**: PROJECT.md non-goals section retained at 1.0.0 — `PROC-08` (second processor) and `FIN-03` (app-owned finance exports) reaffirmed as explicitly out of scope with written boundaries (calling stable does NOT lift these non-goals; revisit only via explicit later-milestone reprioritization, same posture as v1.27 CLS-03)
+- [x] **DOC-03**: `accrue/README.md` Stability section + root README maintenance posture flipped from "pre-1.0 closure" / "intake-gated" framing to "1.0.0 stable, post-1.0 cadence" (cross-linked from `RELEASING.md` REL-07 and `accrue/guides/maturity-and-maintenance.md`)
+- [x] **DOC-04**: PROJECT.md non-goals section retained at 1.0.0 — `PROC-08` (second processor) and `FIN-03` (app-owned finance exports) reaffirmed as explicitly out of scope with written boundaries (calling stable does NOT lift these non-goals; revisit only via explicit later-milestone reprioritization, same posture as v1.27 CLS-03)
 
 ### Friction inventory (INV — continues from INV-06 / v1.28)
 
@@ -69,16 +69,16 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | REL-05 | Phase 92 | Pending |
-| REL-06 | Phase 91 | Pending |
-| REL-07 | Phase 91 | Pending |
+| REL-06 | Phase 91 | Complete |
+| REL-07 | Phase 91 | Complete |
 | REL-08 | Phase 93 | Pending |
 | PPX-09 | Phase 92 | Pending |
 | PPX-10 | Phase 92 | Pending |
 | PPX-11 | Phase 92 | Pending |
 | PPX-12 | Phase 92 | Pending |
 | HYG-02 | Phase 93 | Pending |
-| DOC-03 | Phase 91 | Pending |
-| DOC-04 | Phase 91 | Pending |
+| DOC-03 | Phase 91 | Complete |
+| DOC-04 | Phase 91 | Complete |
 | INV-07 | Phase 93 | Pending |
 
 **Coverage:**
@@ -90,4 +90,4 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 — traceability populated by `/gsd-new-milestone` Step 10 (roadmap creation)*
+*Last updated: 2026-04-28 — Phase 91 complete; REL-06, REL-07, DOC-03, and DOC-04 verified at reviewed SHA `3cca930`*
