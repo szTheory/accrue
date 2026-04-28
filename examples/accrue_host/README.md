@@ -99,6 +99,7 @@ Before promoting billing to a live Stripe account, use the package checklist [`.
 ## Proof and verification
 
 Pull requests are merge-blocked on GitHub Actions jobs `docs-contracts-shift-left` and `host-integration` (see `.github/workflows/ci.yml`). Job `docs-contracts-shift-left` runs `bash scripts/ci/verify_package_docs.sh`, `bash scripts/ci/verify_v1_17_friction_research_contract.sh`, `bash scripts/ci/verify_verify01_readme_contract.sh`, `bash scripts/ci/verify_adoption_proof_matrix.sh`, and `bash scripts/ci/verify_core_admin_invoice_verify_ids.sh`. Job `host-integration` runs `bash scripts/ci/accrue_host_uat.sh` (which delegates to `cd examples/accrue_host && mix verify.full`), with `bash scripts/ci/accrue_host_hex_smoke.sh` on eligible runs. Use `mix verify` for a faster bounded Fake slice that is not CI-complete.
+This checked-in proof surface is the linked `accrue` / `accrue_admin` `1.0.0` release slice: the same host README, shift-left scripts, and wrapper UAT prove the public pair before and after publish.
 
 For **`Accrue.Billing.create_checkout_session/2`** and **`Accrue.Billing.create_billing_portal_session/2`**, the teaching path and telemetry tuples live in [**First Hour**](../../accrue/guides/first_hour.md); span anchors and ExUnit SSOT paths are under [**#observability**](#observability).
 

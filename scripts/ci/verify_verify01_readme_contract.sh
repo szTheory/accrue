@@ -26,6 +26,7 @@ require_substring "cd examples/accrue_host" "examples/accrue_host cwd instructio
 require_substring "host-integration" "GitHub Actions job name for PR CI"
 require_substring "bash scripts/ci/verify_adoption_proof_matrix.sh" "adoption matrix shift-left command in proof intro"
 require_substring "bash scripts/ci/accrue_host_uat.sh" "host UAT wrapper command in proof intro"
+require_substring 'accrue` / `accrue_admin` `1.0.0`' "linked 1.0.0 proof needle"
 require_substring "mix verify.full" "canonical verify.full gate"
 require_substring ".github/workflows/ci.yml" "CI workflow pointer"
 require_substring "docs/adoption-proof-matrix.md" "adoption proof matrix doc link"
