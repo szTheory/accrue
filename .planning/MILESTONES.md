@@ -1,5 +1,38 @@
 # Milestones
 
+## v1.30 `1.0.0` Declaration (Spine A) (Shipped: 2026-04-28)
+
+**Planning opened:** 2026-04-26
+
+**Phases completed:** **3** phases (**91–93**), with the linked **`accrue` / `accrue_admin` `1.0.0`** declaration closed on the same day as the publish proof.
+
+**Theme:** Declare the stable **`1.0.0`** pair, complete the post-publish contract sweep, align the maintainer planning mirrors, and finish the dated post-1.0 maintainer pass. **No** **PROC-08** / **FIN-03**.
+
+**Depends on:** **v1.29** shipped.
+
+**Research:** Brownfield from the v1.11 / v1.23 / v1.28 release-continuity pattern, with the canonical linked publish proof living in **`092-VERIFICATION.md`**.
+
+**Phase execution trees:** **`.planning/milestones/v1.30-phases/091-pre-publish-prep/`**, **`092-linked-1-0-0-publish-post-publish-contract-sweep/`**, **`093-hyg-mirror-inv-tag/`**.
+
+**Key accomplishments:**
+
+- **91:** **REL-06**, **REL-07**, **DOC-03**, **DOC-04** — `CHANGELOG` stable entries, `RELEASING.md` post-1.0 cadence, README stability flip, and explicit `PROC-08` / `FIN-03` non-goal reaffirmation. Evidence: **`091-VERIFICATION.md`** and Phase 91 summaries.
+- **92:** **REL-05**, **PPX-09..12** — linked `1.0.0` Hex publish for both packages, ordered workflow proof, `release-manifest-ssot`, the six-script `docs-contracts-shift-left` bundle, and host/adoption parity at `1.0.0`. Canonical publish proof: **`092-VERIFICATION.md`**.
+- **93:** **HYG-02**, **INV-07**, **REL-08** — planning mirrors aligned to the published pair, dated maintainer-closeout artifacts recorded, and the planning tag closed after the final milestone state landed.
+
+**Outcome:** Phases **91–93** closed the **v1.30** `1.0.0` declaration without reopening public release-surface work beyond the proof already captured in **`092-VERIFICATION.md`**. No **PROC-08** / **FIN-03**.
+
+**Archives:**
+
+- Roadmap: [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md)
+- Requirements: [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md)
+
+**Git tag:** `v1.30`
+
+**Next after ship:** Next milestone pending reprioritization; the `1.0.0` declaration is closed.
+
+---
+
 ## v1.29 Mailglass Integration (Shipped: 2026-04-26)
 
 **Planning opened:** 2026-04-25
