@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.30
 milestone_name: INV-07 maintainer pass
-status: "`092-03-SUMMARY.md` recorded; Phase 92 release proof is complete and Phase 93 closeout remains"
-last_updated: "2026-04-28T17:05:00Z"
-last_activity: 2026-04-28 -- Phase 93 closeout planning mirror execution
+status: shipped
+last_updated: "2026-04-28T16:47:53Z"
+last_activity: 2026-04-28 -- v1.30 closeout commit prepared for planning tag
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
   completed_plans: 6
 ---
@@ -20,19 +20,19 @@ See: `.planning/PROJECT.md` (updated 2026-04-28)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 93 closeout for the published `accrue` / `accrue_admin` `1.0.0` pair.
+**Current focus:** v1.30 shipped closeout for the published `accrue` / `accrue_admin` `1.0.0` pair.
 
 ## Current Position
 
-Phase: 93 Post-publish HYG mirror + INV-07 + tag — next
-Plan: 1 of 3
-Status: `092-03-SUMMARY.md` recorded; Phase 92 release proof is complete and Phase 93 closeout remains
+Phase: v1.30 closed — next milestone pending
+Plan: Phase 93 closeout complete; planning tag step next
+Status: shipped
 Resume file: None
-Last activity: 2026-04-28 -- executing the planning mirror closeout after the linked `1.0.0` publish proof
+Last activity: 2026-04-28 -- milestone-closing tracked state prepared before creating planning tag `v1.30`
 
 ## Milestone Progress
 
-**v1.30** (opened **2026-04-26**): **Phases 91-92 complete 2026-04-28** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, the host wrapper, and the durable linked-publish ledger all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`, `092-VERIFICATION.md`, `092-03-SUMMARY.md`). Phase 93 is the remaining closeout slice for the planning mirrors, the INV-07 maintainer pass, and the `v1.30` tag. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
+**v1.30** (opened **2026-04-26**, closed **2026-04-28**): **Phases 91-93 complete** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, the host wrapper, the planning mirrors, the dated INV-07 maintainer pass, and the durable closeout ledger all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`, `092-VERIFICATION.md`, `092-03-SUMMARY.md`, `093-VERIFICATION.md`). This tracked state is the milestone-closing commit intended for planning tag `v1.30`. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
 
 **v1.29** (shipped **2026-04-26**): Phases **88–90** — **MG-01..MG-07**; **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`**, **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
@@ -47,11 +47,11 @@ Last activity: 2026-04-28 -- executing the planning mirror closeout after the li
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — v1.30 (12 reqs across REL / PPX / HYG / DOC / INV families). Phases 91-92 rows are closed; only HYG-02, INV-07, and REL-08 remain in Phase 93.
+- **`.planning/REQUIREMENTS.md`** — v1.30 (12 reqs across REL / PPX / HYG / DOC / INV families). HYG-02, INV-07, and REL-08 are closed on the milestone-closing tracked state described in `093-VERIFICATION.md`.
 - **`.planning/ROADMAP.md`** — v1.30 details block at top (Phases 91-92 complete; Phase 93 is the remaining closeout slice). v1.29 collapsed in `<details>` block; all prior milestones preserved.
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
-- **Phase 92 proof:** `092-VERIFICATION.md` is the canonical same-day linked `1.0.0` publish ledger; this phase consumes that proof rather than reopening release-surface work.
-- **Research (v1.30):** `093-RESEARCH.md` constrains Phase 93 to the planning mirror, INV-07, and tag closeout only.
+- **Phase 92 proof:** `092-VERIFICATION.md` is the canonical same-day linked `1.0.0` publish ledger; `093-VERIFICATION.md` reuses it and adds the final planning closeout ledger.
+- **Research (v1.30):** `093-RESEARCH.md` constrained Phase 93 to the planning mirror, INV-07, and tag closeout only; that scope is now complete.
 
 ## Deferred Items
 
@@ -89,7 +89,7 @@ Last activity: 2026-04-28 -- executing the planning mirror closeout after the li
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Execute Phase 93 closeout — align the planning mirrors to the published `1.0.0` pair, record INV-07, and create the `v1.30` tag.
+**Next:** Open the next milestone when priorities are ready; `v1.30` is closed and awaiting planning tag `v1.30` on this commit.
 
 **Completed (v1.29):** Phases **88–90** — **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`** + **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 

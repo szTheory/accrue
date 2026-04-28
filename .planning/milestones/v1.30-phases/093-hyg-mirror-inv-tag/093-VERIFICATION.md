@@ -40,8 +40,19 @@ verify_v1_17_friction_research_contract: OK
 
 ## HYG-02 mirror review
 
-Pending Plan 03. This section will be finalized only after the planning-mirror closeout is reviewed against the already-published `1.0.0` pair and the final shipped/closed wording is in place.
+- Reviewed against Phase 92's canonical linked publish proof in **`.planning/milestones/v1.30-phases/092-linked-1-0-0-publish-post-publish-contract-sweep/092-VERIFICATION.md`**.
+- **`.planning/PROJECT.md`** now states the milestone is shipped/closed and points to this ledger, the **`### v1.30 INV-07 maintainer pass (2026-04-28)`** subsection, and planning tag **`v1.30`**.
+- **`.planning/MILESTONES.md`** already carries the shipped **v1.30** block with **`1.0.0`** declaration proof context and the exact close marker line **`**Git tag:** `v1.30``**.
+- **`.planning/STATE.md`** now carries the shipped closeout posture (`status: shipped`, `completed_phases: 3`) and no longer describes Phase 93 as remaining work.
 
 ## REL-08 tag proof
 
-Pending Plan 03. This section will record the final close commit SHA and the `v1.30` tag target after the milestone-close commit exists.
+- Command: `git tag --list 'v1.30'`
+- Command: `git rev-parse v1.30`
+- Tag target SHA: TO_BE_FILLED_FROM_GIT_AFTER_TAGGING
+
+## Sign-off
+
+- [x] HYG-02
+- [x] INV-07
+- [x] REL-08

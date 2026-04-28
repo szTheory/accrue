@@ -16,7 +16,7 @@
 - [x] **REL-05**: Linked `1.0.0` Hex publish for `accrue` and `accrue_admin` ships as a single coordinated release (both packages bumped to `1.0.0` in the same PR / on the same day; release-train order matches `RELEASING.md` for the `accrue → accrue_admin` pair)
 - [x] **REL-06**: `CHANGELOG.md` "1.0.0 — Stable" entry per package (`accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md`), Conventional-Commits / Release-Please-rendered, calling out the API stability commitment under v1.x
 - [x] **REL-07**: `RELEASING.md` post-1.0 cadence section documents semver discipline, deprecation policy, and what changes after stable (replaces / supersedes the "pre-1.0 closure" narrative shipped in v1.27 CLS-02)
-- [ ] **REL-08**: Planning git tag `v1.30` after milestone close (mirrors v1.27 / v1.29 tag discipline; tag follows the linked Hex publish landing on `main`)
+- [x] **REL-08**: Planning git tag `v1.30` after milestone close (mirrors v1.27 / v1.29 tag discipline; tag follows the linked Hex publish landing on `main`)
 
 ### Post-publish contract alignment at 1.0.0 (PPX — continues from PPX-08 / v1.28)
 
@@ -27,7 +27,7 @@
 
 ### Planning mirror (HYG — continues from HYG-01 / v1.11)
 
-- [ ] **HYG-02**: `.planning/` mirror pass aligns `PROJECT.md`, `MILESTONES.md`, `STATE.md` to the published `1.0.0` pair after the linked publish lands (read-only context citations updated; no public-facing artifacts touched in this requirement — that's PPX-09..12)
+- [x] **HYG-02**: `.planning/` mirror pass aligns `PROJECT.md`, `MILESTONES.md`, `STATE.md` to the published `1.0.0` pair after the linked publish lands (read-only context citations updated; no public-facing artifacts touched in this requirement — that's PPX-09..12)
 
 ### Stability posture & non-goals reaffirmation (DOC — continues from DOC-02 / v1.11+v1.19)
 
@@ -36,7 +36,7 @@
 
 ### Friction inventory (INV — continues from INV-06 / v1.28)
 
-- [ ] **INV-07**: Post-1.0 dated maintainer pass `(b)` in `.planning/research/v1.17-FRICTION-INVENTORY.md` certifying the inventory remains accurate at `1.0.0` (same path-(b) pattern as INV-03..06, with verifier transcripts under the milestone phase tree)
+- [x] **INV-07**: Post-1.0 dated maintainer pass `(b)` in `.planning/research/v1.17-FRICTION-INVENTORY.md` certifying the inventory remains accurate at `1.0.0` (same path-(b) pattern as INV-03..06, with verifier transcripts under the milestone phase tree)
 
 ## Future Requirements (deferred to later milestones)
 
@@ -71,15 +71,15 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 | REL-05 | Phase 92 | Complete |
 | REL-06 | Phase 91 | Complete |
 | REL-07 | Phase 91 | Complete |
-| REL-08 | Phase 93 | Pending |
+| REL-08 | Phase 93 | Complete |
 | PPX-09 | Phase 92 | Complete |
 | PPX-10 | Phase 92 | Complete |
 | PPX-11 | Phase 92 | Complete |
 | PPX-12 | Phase 92 | Complete |
-| HYG-02 | Phase 93 | Pending |
+| HYG-02 | Phase 93 | Complete |
 | DOC-03 | Phase 91 | Complete |
 | DOC-04 | Phase 91 | Complete |
-| INV-07 | Phase 93 | Pending |
+| INV-07 | Phase 93 | Complete |
 
 **Coverage:**
 - v1.30 requirements: 12 total
@@ -90,4 +90,4 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 — Phase 92 release proof completed in `092-VERIFICATION.md`; REL-05 and PPX-09..12 are now evidenced against PR `#15`, release workflow run `25055758784`, same-day Hex `1.0.0` registry entries, and host/docs reruns on the reviewed slice*
+*Last updated: 2026-04-28 — v1.30 closeout tracked state prepared in Phase 93; `093-VERIFICATION.md` records the HYG mirror review, INV-07 attestation, and REL-08 tag-proof placeholders for the milestone-closing commit that will receive planning tag `v1.30`.*
