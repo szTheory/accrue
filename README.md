@@ -14,11 +14,11 @@ For a **fixture-only** Playwright smoke on `accrue_admin` (not the merge-blockin
 
 > **Hex vs `main`:** This repository’s `mix.exs` `@version` values are the numeric SSOT for the `accrue` / `accrue_admin` pair on the branch you are reading. [Hex.pm](https://hex.pm/packages/accrue) lists published artifacts when you are consuming from Hex rather than `main`.
 
-> **`.planning/` milestone labels (`v1.14`, `v1.15`, …):** those names track **maintainer shipping cadence** in Git + planning docs only. They are **not** the public package major line (today’s releases are still **`0.x`** on Hex). See [`RELEASING.md`](RELEASING.md) and [`accrue/guides/upgrade.md`](accrue/guides/upgrade.md).
+> **`.planning/` milestone labels (`v1.14`, `v1.15`, …):** those names track **maintainer shipping cadence** in Git + planning docs only. They are **not** the public package major line; the public Hex line tracks the `mix.exs` `@version` values on the branch you are reading. See [`RELEASING.md`](RELEASING.md) and [`accrue/guides/upgrade.md`](accrue/guides/upgrade.md).
 
 ## Maintenance posture
 
-The **pre-1.0** line treats the public façade, Fake-backed proofs, and merge-blocking CI contracts as the stability boundary: new work is **intake-gated** (security, correctness, linked Hex publishes, or **sourced** friction in the maintainer inventory), not open-ended feature expansion. Read [`accrue/guides/maturity-and-maintenance.md`](accrue/guides/maturity-and-maintenance.md) for stop rules and revisit triggers. **Second processor** (**PROC-08**) and **app-owned finance exports** (**FIN-03**) remain explicitly out of scope until a future milestone reopens them — see [`.planning/PROJECT.md`](.planning/PROJECT.md) non-goals.
+The **`1.0.x`** line treats the public facade, Fake-backed proofs, and merge-blocking CI contracts as the stability boundary; post-1.0 cadence follows semver discipline (deprecation cycle for breaking changes, see [`RELEASING.md`](RELEASING.md#post-1-0-cadence-maintainer-intent)), and new work is **intake-gated** (security, correctness, linked Hex publishes, or **sourced** friction in the maintainer inventory), not open-ended feature expansion. Read [`accrue/guides/maturity-and-maintenance.md`](accrue/guides/maturity-and-maintenance.md) for stop rules and revisit triggers. **Second processor** (**PROC-08**) and **app-owned finance exports** (**FIN-03**) remain explicitly out of scope until a later milestone reopens them — see [`.planning/PROJECT.md`](.planning/PROJECT.md) non-goals.
 
 ```bash
 # CI-equivalent local gate
@@ -69,4 +69,3 @@ Generated files are host-owned after install. Accrue may refresh pristine stampe
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [SECURITY.md](SECURITY.md)
 - [RELEASING.md](RELEASING.md)
-
