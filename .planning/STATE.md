@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.30
 milestone_name: INV-07 maintainer pass
 status: shipped
-last_updated: "2026-04-28T16:47:53Z"
-last_activity: 2026-04-28 -- v1.30 closeout commit prepared for planning tag
+last_updated: "2026-04-28T16:50:29.383Z"
+last_activity: 2026-04-28 -- milestone-closing tracked state prepared before creating planning tag `v1.30`
 progress:
   total_phases: 3
   completed_phases: 3
@@ -89,7 +89,7 @@ Last activity: 2026-04-28 -- milestone-closing tracked state prepared before cre
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Open the next milestone when priorities are ready; `v1.30` is closed and awaiting planning tag `v1.30` on this commit.
+**Next:** Open the next milestone when priorities are ready; `v1.30` is closed and planning tag `v1.30` already points to commit `c88f7666662bdb127c815f1d08c45053982521e8`.
 
 **Completed (v1.29):** Phases **88–90** — **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`** + **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
