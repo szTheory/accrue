@@ -121,7 +121,12 @@ Plans:
 
 **Requirements:** HYG-02, INV-07, REL-08.
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] `093-01-PLAN.md` — align the fenced HYG mirror files to the published `1.0.0` pair and add the shipped `v1.30` milestone block
+- [ ] `093-02-PLAN.md` — append the dated INV-07 path-(b) certification and create the lean Phase 93 verification ledger
+- [ ] `093-03-PLAN.md` — close traceability from completed evidence and create the post-close `v1.30` planning tag
 
 **Success Criteria:**
 1. `.planning/PROJECT.md`, `.planning/MILESTONES.md`, and `.planning/STATE.md` cite **`accrue / accrue_admin 1.0.0`** as the public Hex pair (HYG-02 — context citations only; public-facing artifacts are PPX-09..12's responsibility, not HYG-02's).
@@ -1102,7 +1107,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 91. Pre-publish 1.0.0 prep | v1.30 | 3/3 | Complete | 2026-04-28 |
 | 92. Linked 1.0.0 publish + post-publish contract sweep | v1.30 | 1/3 | In progress | — |
-| 93. Post-publish HYG mirror + INV-07 + tag | v1.30 | 0/TBD | Not started | — |
+| 93. Post-publish HYG mirror + INV-07 + tag | v1.30 | 0/3 | Not started | — |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 
