@@ -14,14 +14,14 @@
       "component": "accrue",
       "release-type": "elixir",
       "package-name": "accrue",
-      "changelog-path": "accrue/CHANGELOG.md",
+      "changelog-path": "CHANGELOG.md",
       "include-component-in-tag": true
     },
     "accrue_admin": {
       "component": "accrue_admin",
       "release-type": "elixir",
       "package-name": "accrue_admin",
-      "changelog-path": "accrue_admin/CHANGELOG.md",
+      "changelog-path": "CHANGELOG.md",
       "include-component-in-tag": true
     }
   }
