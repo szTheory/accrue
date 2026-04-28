@@ -21,8 +21,8 @@
 ### Post-publish contract alignment at 1.0.0 (PPX — continues from PPX-08 / v1.28)
 
 - [x] **PPX-09**: `verify_package_docs` re-runs clean at `1.0.0` (install literals / `~>` pins follow `mix.exs @version` for both packages; same merge-blocking discipline as v1.11 DOC-02 + v1.23 PPX-01..04 + v1.28 PPX-05..08)
-- [ ] **PPX-10**: `verify_adoption_proof_matrix` re-runs clean at `1.0.0` (matrix rows + needles + per-row evidence refreshed for the `0.3.1 → 1.0.0` jump; merge-blocking)
-- [ ] **PPX-11**: `docs-contracts-shift-left` six-script bundle re-runs clean at `1.0.0` (full bundle parity with v1.28 Phase 86 086-VERIFICATION evidence, re-aligned to the new `1.0.0` registry reality)
+- [x] **PPX-10**: `verify_adoption_proof_matrix` re-runs clean at `1.0.0` (matrix rows + needles + per-row evidence refreshed for the `0.3.1 → 1.0.0` jump; merge-blocking)
+- [x] **PPX-11**: `docs-contracts-shift-left` six-script bundle re-runs clean at `1.0.0` (full bundle parity with v1.28 Phase 86 086-VERIFICATION evidence, re-aligned to the new `1.0.0` registry reality)
 - [x] **PPX-12**: First Hour + host README + adoption matrix needles refreshed across the integrator surface for the `0.3.1 → 1.0.0` jump (single-PR co-update discipline from v1.19 PRF; same-PR coupling between needle edits and verifier scripts)
 
 ### Planning mirror (HYG — continues from HYG-01 / v1.11)
@@ -73,8 +73,8 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 | REL-07 | Phase 91 | Complete |
 | REL-08 | Phase 93 | Pending |
 | PPX-09 | Phase 92 | Complete |
-| PPX-10 | Phase 92 | Pending |
-| PPX-11 | Phase 92 | Pending |
+| PPX-10 | Phase 92 | Complete |
+| PPX-11 | Phase 92 | Complete |
 | PPX-12 | Phase 92 | Complete |
 | HYG-02 | Phase 93 | Pending |
 | DOC-03 | Phase 91 | Complete |
@@ -90,4 +90,4 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 — Phase 91 complete; Phase 92 Plan 01 executed with REL-05, PPX-09, and PPX-12 evidence recorded via PR `#15`, workflow runs `25051925091` / `25055758784`, and summary `092-01-SUMMARY.md`*
+*Last updated: 2026-04-28 — Phase 92 release proof completed in `092-VERIFICATION.md`; REL-05 and PPX-09..12 are now evidenced against PR `#15`, release workflow run `25055758784`, same-day Hex `1.0.0` registry entries, and host/docs reruns on the reviewed slice*

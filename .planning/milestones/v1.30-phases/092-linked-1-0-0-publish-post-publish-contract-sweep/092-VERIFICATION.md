@@ -71,3 +71,11 @@ Normative membership comes from `.github/workflows/ci.yml` job `docs-contracts-s
 - Full wrapper:
   - `bash scripts/ci/accrue_host_uat.sh`
   - Result: bounded tests passed, full tests passed, Phoenix boot smoke passed on `http://127.0.0.1:4100/`, Playwright lane completed with `23 passed` and `16 skipped`, wrapper exited 0.
+
+## Sign-off
+
+- [x] REL-05
+- [x] PPX-09
+- [x] PPX-10
+- [x] PPX-11
+- [x] PPX-12
