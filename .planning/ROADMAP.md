@@ -2,9 +2,9 @@
 
 ## Milestones
 
-- ✅ **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** shipped **2026-04-28**. **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** closed in live [`REQUIREMENTS.md`](REQUIREMENTS.md); linked publish proof in **`092-VERIFICATION.md`**, planning closeout proof in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **Spine A** — linked **`accrue` / `accrue_admin` 1.0.0** Hex publish, post-publish contract sweep at `1.0.0`, planning mirror, stability posture flip, dated post-1.0 friction inventory pass. **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0 (DOC-04 — calling stable does not lift the non-goals).
+- ✅ **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** shipped **2026-04-28**. **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** closed; linked publish proof in **`092-VERIFICATION.md`**, planning closeout proof in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **Archives:** [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.30-phases/`](milestones/v1.30-phases/). **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0.
 - ✅ **v1.29 Mailglass Integration** — Phases **88–90** shipped **2026-04-26**. **MG-01..MG-07** validated; `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`. **Archives:** [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md), [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.29-phases/`](milestones/v1.29-phases/). **No** **PROC-08** / **FIN-03**.
-- **v1.28 Next linked publish continuity** — Phases **86–87** **Complete** **2026-04-24** (**`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**). **PPX-05..08** + **INV-06** closed in live **`.planning/REQUIREMENTS.md`**. **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
+- **v1.28 Next linked publish continuity** — Phases **86–87** **Complete** **2026-04-24** (**`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**). **PPX-05..08** + **INV-06** closed in archived [`milestones/v1.28-REQUIREMENTS.md`](milestones/v1.28-REQUIREMENTS.md). **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.27 Pre-1.0 closure narrative** — Phases **84–85** shipped **2026-04-24** (**CLS-01..03**, **INV-05**); integrator-facing **maintenance posture**; **`RELEASING.md`** / **`upgrade.md`** wrap-up semantics; **INV-05** friction inventory certification. **Archives:** [`milestones/v1.27-ROADMAP.md`](milestones/v1.27-ROADMAP.md), [`milestones/v1.27-REQUIREMENTS.md`](milestones/v1.27-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.27-phases/`](milestones/v1.27-phases/). **No** **PROC-08** / **FIN-03**.
 - ✅ **v1.26 First-hour billing facade spine** — Phases **82–83** shipped **2026-04-24** (**INT-13**, **INV-04**); integrator doc + matrix + verifier parity for **`create_billing_portal_session`**; post-touch friction certification. **Archives:** [`milestones/v1.26-ROADMAP.md`](milestones/v1.26-ROADMAP.md), [`milestones/v1.26-REQUIREMENTS.md`](milestones/v1.26-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.26-phases/`](milestones/v1.26-phases/).
 - ✅ **v1.25 Evidence-bound triad (friction + integrator + billing depth)** — Phases **79–81** shipped **2026-04-24** (**INV-03**, **BIL-06**, **BIL-07**, **INT-12**); friction inventory maintainer pass; **`Accrue.Billing.create_checkout_session`**, telemetry/catalog, integrator proof alignment. Execution trees [`milestones/v1.25-phases/`](milestones/v1.25-phases/). Archives: [`milestones/v1.25-ROADMAP.md`](milestones/v1.25-ROADMAP.md), [`milestones/v1.25-REQUIREMENTS.md`](milestones/v1.25-REQUIREMENTS.md). **No** **PROC-08** / **FIN-03**.
@@ -36,117 +36,12 @@
 
 ## Phases
 
-<details open>
-<summary>✅ v1.30 `1.0.0` Declaration (Spine A) (Phases 91–93) — SHIPPED 2026-04-28</summary>
-
-**Milestone goal:** Cut **`accrue` / `accrue_admin` `1.0.0`** on a single linked Hex publish, with the final post-publish contract sweep verifying everything is consistent at `1.0.0`, the planning mirror aligned to the published `1.0.0` pair, the stability posture flipped from "pre-1.0 closure" to "1.0.0 stable, post-1.0 cadence," and a dated post-publish friction-inventory maintainer pass certifying the post-1.0 surface. **`PROC-08`** (second processor) and **`FIN-03`** (app-owned finance exports) remain **explicitly out of scope** at 1.0.0 — calling stable does **not** lift those non-goals (DOC-04).
-
-**Strategic spine:** Spine A — the `1.0.0` declaration deferred since v1.27 across v1.27 / v1.28 / v1.29.
-
-**Precedent shape:** v1.11 (Phases 46–47, first linked Hex publish — REL- / DOC- / HYG- families) + v1.23 / v1.28 (post-publish contract alignment — PPX- family) + v1.27 (CLS- + INV- closure narrative). REQ-IDs continue those families.
-
-**Requirements (live):** **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** — see [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
-
-| # | Phase | Goal | Requirements |
-|---|-------|------|--------------|
-| 91 | Pre-publish 1.0.0 prep | Documentation posture + CHANGELOG + RELEASING cadence are **true on `main`** before the linked publish bumps `@version` to `1.0.0`. README Stability flips, non-goals reaffirmed, locked CHANGELOG `1.0.0 — Stable` preambles sit under `## Unreleased`, `RELEASING.md` post-1.0 cadence section written. | REL-06, REL-07, DOC-03, DOC-04 |
-| 92 | Linked 1.0.0 publish + post-publish contract sweep | Bump `@version` to `1.0.0` for both packages, ship the linked Hex publish, then re-run `verify_package_docs` / `verify_adoption_proof_matrix` / the `docs-contracts-shift-left` six-script bundle clean at `1.0.0`. First Hour + host README + adoption matrix needles refreshed for the `0.3.1 → 1.0.0` jump (single-PR co-update discipline, v1.19 PRF). | REL-05, PPX-09, PPX-10, PPX-11, PPX-12 |
-| 93 | Post-publish HYG mirror + INV-07 + tag | `.planning/` mirror pass aligned to published `1.0.0` pair (PROJECT.md / MILESTONES.md / STATE.md citations); dated INV-07 maintainer pass `(b)` in `v1.17-FRICTION-INVENTORY.md`; planning git tag `v1.30`. | HYG-02, INV-07, REL-08 |
-
-**Success criteria (milestone):**
-
-1. **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** satisfied per `.planning/REQUIREMENTS.md` with per-phase `*-VERIFICATION.md` evidence under [`milestones/v1.30-phases/`](milestones/v1.30-phases/).
-2. **Hex registry shows `accrue 1.0.0` and `accrue_admin 1.0.0`** as a coordinated cut (single PR / same-day pair, release-train order per `RELEASING.md`).
-3. Merge-blocking **`verify_package_docs`**, **`verify_adoption_proof_matrix`**, full **`docs-contracts-shift-left`** six-script bundle, **`host-integration`** stay **green** on `main` after the publish lands.
-4. **`accrue/README.md` Stability** + root **`README.md` Maintenance posture** read as **"1.0.0 stable, post-1.0 cadence"** (replacing the v1.27 "pre-1.0 closure" framing).
-5. **`PROC-08` / `FIN-03`** explicitly retained as non-goals in `PROJECT.md` with written boundaries; **no** scope creep under the 1.0.0 banner.
-6. Planning git tag `v1.30` exists after milestone close (mirrors v1.27 / v1.29 tag discipline).
-
-### Phase 91: Pre-publish 1.0.0 prep
-
-**Goal:** Make the documentation, CHANGELOG, and release-cadence narrative true on `main` **before** the linked publish bumps `@version` to `1.0.0`. Everything that needs to land in writing first so the publish itself is a mechanical bump.
-
-**Depends on:** v1.29 shipped (Phase 90).
-
-**Requirements:** REL-06, REL-07, DOC-03, DOC-04.
-
-**Status:** Complete 2026-04-28 (`091-VERIFICATION.md`, reviewed SHA `3cca930`)
-
-**Plans:** 3 plans
-
-Plans:
-- [x] 091-01-PLAN.md — Preload the REL-06 changelog preambles and replace the release runbook with the REL-07 post-1.0 cadence contract.
-- [x] 091-02-PLAN.md — Flip the root and package README posture to the 1.0.x stability commitment while preserving current install pins and non-goal warnings.
-- [x] 091-03-PLAN.md — Add the dated DOC-04 reaffirmation, define validation/verification evidence, and wire Phase 91 closeout requirements.
-
-**Success Criteria:**
-1. A reader of `accrue/README.md` Stability and root `README.md` Maintenance posture sees **"1.0.0 stable, post-1.0 cadence"** framing (not "pre-1.0 closure" / "intake-gated") with a cross-link into `RELEASING.md` and `accrue/guides/maturity-and-maintenance.md`.
-2. `RELEASING.md` contains a **post-1.0 cadence** section documenting semver discipline, deprecation policy, and what changes after stable — replacing / superseding the v1.27 "pre-1.0 closure" narrative.
-3. `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md` each contain the locked `1.0.0 — Stable` preamble under `## Unreleased`, ready for the Release Please-rendered public `1.0.0` entry in Phase 92.
-4. `PROJECT.md` non-goals section explicitly retains `PROC-08` (second processor) and `FIN-03` (app-owned finance exports) with written boundaries — calling stable does **not** lift the non-goals.
-5. `mix.exs` `@version` is still `0.3.1` for both packages at end of phase (the bump itself is Phase 92's work).
-
-**Definition-of-done artifacts:** `milestones/v1.30-phases/091-pre-publish-prep/091-VALIDATION.md` and `milestones/v1.30-phases/091-pre-publish-prep/091-VERIFICATION.md` with per-requirement evidence and reviewed-SHA transcript pointers.
-
-### Phase 92: Linked 1.0.0 publish + post-publish contract sweep
-
-**Goal:** Ship the linked `1.0.0` Hex publish for `accrue` + `accrue_admin`, then verify every merge-blocking contract is honest at `1.0.0` (verifiers green, integrator surfaces refreshed for the `0.3.1 → 1.0.0` needle jump). The single forcing function of v1.30.
-
-**Depends on:** Phase 91.
-
-**Requirements:** REL-05, PPX-09, PPX-10, PPX-11, PPX-12.
-
-**Plans:** 3 plans
-
-Plans:
-- [x] 092-01-PLAN.md — Lock `1.0.0` across both mix projects, the Release Please manifest, and package-doc install literals in one release slice.
-- [x] 092-02-PLAN.md — Re-run the host/adoption/doc-contract verifiers at `1.0.0`, updating host-facing proof surfaces only when the scripts require it.
-- [x] 092-03-PLAN.md — Record same-day publish evidence for the linked `1.0.0` cut and close REL-05 / PPX-09..12 only after proof exists.
-
-**Success Criteria:**
-1. `mix.exs` `@version "1.0.0"` lands for both `accrue/mix.exs` and `accrue_admin/mix.exs` in one combined Release Please PR; only if that path is mechanically impossible may the maintainer use the documented same-day fallback while preserving one coherent release slice.
-2. **Hex registry** shows `accrue 1.0.0` and `accrue_admin 1.0.0` published as a coordinated pair; release-train order matches `RELEASING.md` for the `accrue → accrue_admin` sequence.
-3. `scripts/ci/verify_package_docs.sh` exits 0 on `main` after publish — install literals / `~>` pins follow `mix.exs @version` for both packages (PPX-09, same merge-blocking discipline as v1.11 DOC-02 + v1.23 PPX-01..04 + v1.28 PPX-05..08).
-4. `scripts/ci/verify_adoption_proof_matrix.sh` exits 0 on `main` after publish — matrix rows + needles + per-row evidence refreshed for the `0.3.1 → 1.0.0` jump (PPX-10).
-5. The full **`docs-contracts-shift-left`** six-script bundle re-runs clean at `1.0.0` (PPX-11) — same enumerate-snapshot evidence shape as Phase 86 `086-VERIFICATION.md`, normative membership from `.github/workflows/ci.yml` at the reviewed SHA.
-6. **First Hour**, **host README**, and **adoption matrix** needles all read `1.0.0` (PPX-12) — same-PR co-update discipline from v1.19 PRF (no needle drift between integrator surface and verifier scripts).
-
-**Definition-of-done artifact:** `milestones/v1.30-phases/092-linked-1-0-0-publish-post-publish-contract-sweep/092-VERIFICATION.md` with the linked-publish URL evidence + post-publish verifier transcripts.
-
-### Phase 93: Post-publish HYG mirror + INV-07 + tag
-
-**Goal:** Align `.planning/` registry mirrors to the published `1.0.0` pair, certify the post-1.0 surface against the friction inventory, and tag the planning milestone.
-
-**Depends on:** Phase 92 (linked publish landed; verifiers green at 1.0.0).
-
-**Requirements:** HYG-02, INV-07, REL-08.
-
-**Plans:** 3 plans
-
-**Status:** Complete 2026-04-28 (`093-VERIFICATION.md`, planning tag `v1.30` resolves to the final milestone-closing `HEAD`)
-
-Plans:
-- [x] `093-01-PLAN.md` — align the fenced HYG mirror files to the published `1.0.0` pair and add the shipped `v1.30` milestone block
-- [x] `093-02-PLAN.md` — append the dated INV-07 path-(b) certification and create the lean Phase 93 verification ledger
-- [x] `093-03-PLAN.md` — close traceability from completed evidence and create the post-close `v1.30` planning tag
-
-**Success Criteria:**
-1. `.planning/PROJECT.md`, `.planning/MILESTONES.md`, and `.planning/STATE.md` cite **`accrue / accrue_admin 1.0.0`** as the public Hex pair (HYG-02 — context citations only; public-facing artifacts are PPX-09..12's responsibility, not HYG-02's).
-2. `.planning/research/v1.17-FRICTION-INVENTORY.md` contains a dated `### v1.30 INV-07 maintainer pass (YYYY-MM-DD)` subsection certifying the inventory remains accurate at `1.0.0` (same `path-(b)` pattern as INV-03..06 — no Hex pin in the heading; thematic prose in body).
-3. Verifier transcripts for INV-07 live under `milestones/v1.30-phases/093-hyg-mirror-inv-tag/` (lean spine, same as Phase 87's `087-VERIFICATION.md` annex pattern when no shift-left delta vs Phase 92).
-4. Planning git tag **`v1.30`** exists on the commit that closes the milestone (mirrors v1.27 / v1.29 tag discipline; tag follows the linked Hex publish landing on `main`, not the publish itself).
-5. `STATE.md` `status: shipped` (or equivalent close marker), `progress.completed_phases: 3`, milestone-progress entry appended for v1.30.
-
-**Definition-of-done artifact:** `milestones/v1.30-phases/093-hyg-mirror-inv-tag/093-VERIFICATION.md`.
-
-</details>
-
 <details>
 <summary>✅ v1.29 Mailglass Integration (Phases 88–90) — SHIPPED 2026-04-26</summary>
 
 **Milestone goal:** Integrate the [Mailglass](https://github.com/szTheory/mailglass) framework as a path dependency to replace `mjml_eex` and `phoenix_swoosh` with HEEx-native components, an append-only event ledger, native idempotency, and a LiveView dev-preview dashboard. Eliminates the Node-dependent MJML compile step and the bespoke Oban-uniqueness idempotency window.
 
-**Requirements (live):** **MG-01..MG-07** — see [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+**Requirements (archived):** **MG-01..MG-07** — see [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -156,7 +51,7 @@ Plans:
 
 **Success criteria (milestone):**
 
-1. **MG-01..MG-07** satisfied per `.planning/REQUIREMENTS.md` with per-phase `*-VERIFICATION.md` evidence.
+1. **MG-01..MG-07** satisfied per archived [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md) with per-phase `*-VERIFICATION.md` evidence.
 2. All 13 email templates render via Mailglass HEEx components and pass visual-parity checks against their MJML counterparts.
 3. `mjml_eex` and `phoenix_swoosh` no longer appear in `accrue/mix.exs` after Phase 90.
 4. Mailglass `idempotency_key` replaces Oban `unique: [period: 60]` for webhook-driven dispatch.
@@ -228,7 +123,7 @@ Plans:
 
 **Milestone goal:** On the **next linked Hex publish** for **`accrue` / `accrue_admin`**, keep **merge-blocking** package + adoption + shift-left contracts honest, align **`.planning/`** registry mirrors (**PPX-05..08**), then **INV-06** dated maintainer pass on **`v1.17-FRICTION-INVENTORY.md`** with **`087-VERIFICATION.md`**. **Spine B** — **no** **PROC-08** / **FIN-03**.
 
-**Requirements (live):** **PPX-05..08**, **INV-06** — see [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md).
+**Requirements (archived):** **PPX-05..08**, **INV-06** — see [`milestones/v1.28-REQUIREMENTS.md`](milestones/v1.28-REQUIREMENTS.md).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
@@ -237,7 +132,7 @@ Plans:
 
 **Success criteria (milestone):**
 
-1. **PPX-05..08** and **INV-06** satisfied per **`.planning/REQUIREMENTS.md`** with **`086-VERIFICATION.md`** / **`087-VERIFICATION.md`** evidence.
+1. **PPX-05..08** and **INV-06** satisfied per archived [`milestones/v1.28-REQUIREMENTS.md`](milestones/v1.28-REQUIREMENTS.md) with **`086-VERIFICATION.md`** / **`087-VERIFICATION.md`** evidence.
 2. Merge-blocking **`verify_package_docs`**, **`docs-contracts-shift-left`**, **`host-integration`** (where touched) stay **green**.
 3. No **PROC-08** / **FIN-03** scope creep.
 
@@ -257,7 +152,7 @@ Plans:
 
 **Success criteria (milestone):**
 
-1. **CLS-01..03** and **INV-05** satisfied per **`.planning/REQUIREMENTS.md`** with **`084-VERIFICATION.md`** / **`085-VERIFICATION.md`** evidence.
+1. **CLS-01..03** and **INV-05** satisfied per archived [`milestones/v1.27-REQUIREMENTS.md`](milestones/v1.27-REQUIREMENTS.md) with **`084-VERIFICATION.md`** / **`085-VERIFICATION.md`** evidence.
 2. Merge-blocking **`verify_package_docs`**, **`docs-contracts-shift-left`**, **`host-integration`** (where touched) stay **green**.
 3. No **PROC-08** / **FIN-03** scope creep.
 
@@ -340,7 +235,7 @@ Plans:
 
 **Success criteria (milestone):**
 
-1. **PPX-01..PPX-04** satisfied per **`REQUIREMENTS.md`** with **`75-VERIFICATION.md`** evidence.
+1. **PPX-01..PPX-04** satisfied per archived [`milestones/v1.23-REQUIREMENTS.md`](milestones/v1.23-REQUIREMENTS.md) with **`75-VERIFICATION.md`** evidence.
 2. **`v1.17-P1-002`** **closed** in **`research/v1.17-FRICTION-INVENTORY.md`**.
 3. No **PROC-08** / **FIN-03** scope creep.
 
@@ -476,7 +371,7 @@ Plans:
 
 **Success criteria (milestone):**
 
-1. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, and **ADM-12** satisfied per **`.planning/REQUIREMENTS.md`** with committed artifacts (inventory path live in **`.planning/STATE.md`**).
+1. **FRG-01..FRG-03**, **INT-10**, **BIL-03**, and **ADM-12** satisfied per archived [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md) with committed artifacts (inventory path live in **`.planning/STATE.md`**).
 2. **`bash scripts/ci/verify_package_docs.sh`** green on **`main`** after any doc or snippet change in this milestone.
 3. No **PROC-08** / **FIN-03** scope creep.
 
@@ -502,7 +397,7 @@ Plans:
 
 **Success criteria:**
 
-1. **INT-10** satisfied per **`.planning/REQUIREMENTS.md`**.
+1. **INT-10** satisfied per archived [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
 2. Merge-blocking **VERIFY-01** / **`host-integration`** / **`verify_package_docs`** semantics stay coherent with committed README + verifier changes.
 
 ### Phase 64: P0 billing
@@ -515,7 +410,7 @@ Plans:
 
 **Success criteria:**
 
-1. **BIL-03** satisfied per **`.planning/REQUIREMENTS.md`**.
+1. **BIL-03** satisfied per archived [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
 2. No **PROC-08**; any public **`Accrue.Billing`** surface change ships **Fake** coverage and doc/telemetry/changelog alignment as applicable.
 
 ### Phase 65: P0 admin / operator
@@ -528,7 +423,7 @@ Plans:
 
 **Success criteria:**
 
-1. **ADM-12** satisfied per **`.planning/REQUIREMENTS.md`**.
+1. **ADM-12** satisfied per archived [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
 2. **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** discipline preserved on touched surfaces.
 
 </details>

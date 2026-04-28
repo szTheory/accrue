@@ -8,8 +8,8 @@ last_activity: 2026-04-28 -- planning tag `v1.30` verified on the final mileston
 progress:
   total_phases: 3
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -20,12 +20,12 @@ See: `.planning/PROJECT.md` (updated 2026-04-28)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.30 shipped closeout for the published `accrue` / `accrue_admin` `1.0.0` pair.
+**Current focus:** v1.30 archival closeout for the published `accrue` / `accrue_admin` `1.0.0` pair.
 
 ## Current Position
 
 Phase: v1.30 closed — next milestone pending
-Plan: No active plan; milestone closed and tagged
+Plan: No active plan; milestone archived and tagged
 Status: shipped
 Resume file: None
 Last activity: 2026-04-28 -- planning tag `v1.30` verified on the final milestone-closing HEAD
@@ -47,8 +47,9 @@ Last activity: 2026-04-28 -- planning tag `v1.30` verified on the final mileston
 
 ## Current Planning Artifacts
 
-- **`.planning/REQUIREMENTS.md`** — v1.30 (12 reqs across REL / PPX / HYG / DOC / INV families). HYG-02, INV-07, and REL-08 are closed on the milestone-closing tracked state described in `093-VERIFICATION.md`.
-- **`.planning/ROADMAP.md`** — v1.30 shipped; the detailed milestone block, phase checklist, and progress table all now reflect that Phase 93 closed on 2026-04-28 with planning tag `v1.30`.
+- **`.planning/ROADMAP.md`** — milestone index only; v1.30 is collapsed to the archive links and phase-tree pointer.
+- **`milestones/v1.30-ROADMAP.md`** / **`v1.30-REQUIREMENTS.md`** — final v1.30 archives (phases 91–93, all 12 requirements, final proof links, archived intact).
+- **`.planning/REQUIREMENTS.md`** — intentionally absent until the next milestone is defined.
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
 - **Phase 92 proof:** `092-VERIFICATION.md` is the canonical same-day linked `1.0.0` publish ledger; `093-VERIFICATION.md` reuses it and adds the final planning closeout ledger.
 - **Research (v1.30):** `093-RESEARCH.md` constrained Phase 93 to the planning mirror, INV-07, and tag closeout only; that scope is now complete.

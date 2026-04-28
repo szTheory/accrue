@@ -10,9 +10,9 @@ Tagline: *"Billing state, modeled clearly."*
 
 **A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one** — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
-## Current milestone
+## Last shipped milestone
 
-### v1.30 — `1.0.0` Declaration (Spine A) (**shipped 2026-04-28**)
+### v1.30 — `1.0.0` Declaration (Spine A) (**archived 2026-04-28**)
 
 **Goal:** Cut `accrue` / `accrue_admin` `1.0.0` on a single linked Hex publish, with the final post-publish contract sweep verifying everything is consistent at `1.0.0`, the planning mirror aligned, the stability posture flipped to "1.0.0 stable, post-1.0 cadence," and a dated post-publish friction-inventory maintainer pass to certify the post-1.0 surface. **`PROC-08` (second processor) and `FIN-03` (app-owned finance exports) remain explicitly out of scope at 1.0.0** — calling stable does not lift those non-goals.
 
@@ -34,6 +34,8 @@ Tagline: *"Billing state, modeled clearly."*
 **Phase numbering:** continues from v1.29 → starts at **Phase 91** (default; no `--reset-phase-numbers`).
 
 **Closeout proof:** `.planning/milestones/v1.30-phases/093-hyg-mirror-inv-tag/093-VERIFICATION.md`, `.planning/research/v1.17-FRICTION-INVENTORY.md` (`### v1.30 INV-07 maintainer pass (2026-04-28)`), and planning git tag `v1.30`.
+
+**Archives:** [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.30-phases/`](milestones/v1.30-phases/).
 
 ### v1.29 — Mailglass Integration (**archived 2026-04-26**)
 
@@ -154,15 +156,21 @@ Tagline: *"Billing state, modeled clearly."*
 - **PROC-08 (second processor):** explicit non-goal at 1.0.0; revisit only via later-milestone reprioritization with written boundaries.
 - **FIN-03 (app-owned finance exports):** explicit non-goal at 1.0.0; Accrue is a billing/subscription library, not an accounting system; revisit only via later-milestone reprioritization with written boundaries.
 
+## Next Milestone Goals
+
+- Open the next milestone only after priorities are explicitly reset with fresh requirements via `$gsd-new-milestone`.
+- Keep `.planning/REQUIREMENTS.md` absent until the next milestone scope is written; the shipped v1.30 requirements now live only in the archive.
+- Treat post-1.0 work as deliberate reprioritization, not implicit follow-on scope from the `1.0.0` declaration.
+
 ## Current State
 
-Current focus: **post-v1.30 shipped posture (2026-04-28)** — the linked **`accrue` / `accrue_admin` `1.0.0`** pair is published, the planning mirrors are closed, the dated **INV-07** maintainer certification is on disk, and planning tag **`v1.30`** is expected to resolve to the final milestone-closing `HEAD` recorded in **`093-VERIFICATION.md`**.
+Current focus: **post-v1.30 archived posture (2026-04-28)** — the linked **`accrue` / `accrue_admin` `1.0.0`** pair is published, the planning mirrors are closed, the dated **INV-07** maintainer certification is on disk, and planning tag **`v1.30`** resolves to the final archival closeout `HEAD` recorded in **`093-VERIFICATION.md`**.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
 Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
 
-Current milestone: **v1.30 shipped (2026-04-28)** — **`1.0.0` Declaration (Spine A)** is closed. **Phases 91–93** are complete: the linked publish and contract sweep are recorded in **`091-VERIFICATION.md`**, **`092-01-SUMMARY.md`**, **`092-02-SUMMARY.md`**, **`092-03-SUMMARY.md`**, and **`092-VERIFICATION.md`**; the planning closeout lives in **`093-VERIFICATION.md`**, the normative inventory attestation lives under **`### v1.30 INV-07 maintainer pass (2026-04-28)`**, and the final close marker is planning tag **`v1.30`**.
+Current milestone: none active. **v1.30** is archived and closed: see [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md), and [`milestones/v1.30-phases/`](milestones/v1.30-phases/).
 
 **Last shipped planning milestone:** **v1.29** — Phases **88–90** (**2026-04-26**): **MG-01..MG-07**; **`milestones/v1.29-*`**; execution trees **`milestones/v1.29-phases/`**; planning tag **`v1.29`**. **Prior:** **v1.28** — Phases **86–87** (**2026-04-24**): **PPX-05..08**, **INV-06**; **`milestones/v1.28-*`**; execution trees **`milestones/v1.28-phases/`**; not separately tagged. **Earlier:** **v1.27** — Phases **84–85**; **`v1.27-*`** + **`v1.27-phases/`**; tag **`v1.27`**. **v1.26** — Phases **82–83**; **`v1.26-*`** + **`v1.26-phases/`**; tag **`v1.26`**. **v1.25** — Phases **79–81**; **`v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`**. **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
