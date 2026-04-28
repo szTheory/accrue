@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.30
 milestone_name: INV-07 maintainer pass
-status: executing
-last_updated: "2026-04-28T13:50:56Z"
-last_activity: 2026-04-28 — Phase 92 Plan 01 executed on `main`; merged Release Please PR #15 delivered the linked 1.0.0 slice and follow-up commit `ee8792f` fixed nested changelog-path drift.
+status: "`092-02-SUMMARY.md` recorded; host/doc contract reruns and host wrapper proof are green on the reviewed `1.0.0` state"
+last_updated: "2026-04-28T14:00:52Z"
+last_activity: "2026-04-28 — Re-ran release-manifest-ssot, the six-script docs bundle, and the host wrapper on the reviewed `1.0.0` main-branch state; merged PR #15 remains the canonical release-slice proof."
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -20,19 +20,19 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** **v1.30 execution in progress (2026-04-28)** — Phase 91 is complete, Phase 92 Plan 01 is complete, and Plan 02 is next for the `1.0.0` post-publish verifier/proof sweep. **PROC-08 / FIN-03 remain out of scope** at 1.0.0.
+**Current focus:** **v1.30 execution in progress (2026-04-28)** — Phase 91 is complete, Phase 92 Plans 01-02 are complete, and Plan 03 is next for the reviewed-SHA publish evidence closeout. **PROC-08 / FIN-03 remain out of scope** at 1.0.0.
 
 ## Current Position
 
 Phase: 92 Linked 1.0.0 publish + post-publish contract sweep — in progress
-Plan: 092-01 complete; 092-02 next
-Status: `092-01-SUMMARY.md` recorded; Release Please PR #15 merged and follow-up fix `ee8792f` is on `main`
+Plan: 092-01 and 092-02 complete; 092-03 next
+Status: `092-02-SUMMARY.md` recorded; host/doc contract reruns and host wrapper proof are green on the reviewed `1.0.0` state
 Resume file: None
-Last activity: 2026-04-28 — Verified PR #15 / release runs / package-doc pins at `1.0.0`, then fixed `release-please-config.json` so future release PRs keep numbered changelogs at package root only.
+Last activity: 2026-04-28 — Re-ran release-manifest-ssot, the six-script docs bundle, and the host wrapper on the reviewed `1.0.0` main-branch state; merged PR #15 remains the canonical release-slice proof.
 
 ## Milestone Progress
 
-**v1.30** (opened **2026-04-26**): **Phase 91 complete 2026-04-28** and **Phase 92 Plan 01 complete 2026-04-28** — **REL-06**, **REL-07**, **DOC-03**, **DOC-04**, **REL-05**, **PPX-09**, and **PPX-12** now have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`). Phase 92 Plans 02–03 remain for the remaining verifier sweep and publish proof. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
+**v1.30** (opened **2026-04-26**): **Phase 91 complete 2026-04-28** and **Phase 92 Plans 01-02 complete 2026-04-28** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, and the host wrapper all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`). Phase 92 Plan 03 remains for the reviewed-SHA publish proof closeout. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
 
 **v1.29** (shipped **2026-04-26**): Phases **88–90** — **MG-01..MG-07**; **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`**, **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
@@ -70,6 +70,7 @@ Last activity: 2026-04-28 — Verified PR #15 / release runs / package-doc pins 
 ## Recent Decisions
 
 - **2026-04-28:** **Phase 91 complete** — Reviewed SHA `3cca930` passed the full docs-contracts-shift-left bundle plus `host-integration`; REL-06, REL-07, DOC-03, and DOC-04 are now closed and the phase is ready to hand off to Phase 92 planning.
+- **2026-04-28:** **Phase 92 Plan 02 complete** — Reviewed `1.0.0` branch state passed `release-manifest-ssot`, the full `docs-contracts-shift-left` bundle, and `bash scripts/ci/accrue_host_uat.sh`; merged PR `#15` file list remains the canonical proof for the full release slice.
 - **2026-04-26:** **v1.30 opened** — Spine A (`1.0.0` declaration). 3 phases (91–93) following v1.11 / v1.28 / v1.27 precedent: pre-publish prep (DOC + REL narrative) → linked publish + post-publish contract sweep → HYG mirror + INV-07 + tag. Granularity standard; same 3-phase ceiling as recent maintenance milestones.
 - **2026-04-26:** **v1.30 traceability** — 12/12 requirements mapped: Phase 91 (4 — REL-06, REL-07, DOC-03, DOC-04), Phase 92 (5 — REL-05, PPX-09..12), Phase 93 (3 — HYG-02, INV-07, REL-08). No orphans, no duplicates.
 - **2026-04-26:** **v1.30 research skipped** — same brownfield rationale as v1.23 / v1.28: maintenance/release milestone, no new feature surface, prior `.planning/research/SUMMARY.md` context still applies.
@@ -87,7 +88,7 @@ Last activity: 2026-04-28 — Verified PR #15 / release runs / package-doc pins 
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Execute `092-02-PLAN.md` — re-run the host/adoption/doc-contract verifiers at `1.0.0` and capture the reviewed-SHA proof for the remaining PPX requirements.
+**Next:** Execute `092-03-PLAN.md` — record the reviewed-SHA publish evidence and close the remaining Phase 92 proof requirements without pulling Phase 93 mirror work forward.
 
 **Completed (v1.29):** Phases **88–90** — **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`** + **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 

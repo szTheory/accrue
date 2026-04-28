@@ -100,7 +100,7 @@ Plans:
 
 Plans:
 - [x] 092-01-PLAN.md — Lock `1.0.0` across both mix projects, the Release Please manifest, and package-doc install literals in one release slice.
-- [ ] 092-02-PLAN.md — Re-run the host/adoption/doc-contract verifiers at `1.0.0`, updating host-facing proof surfaces only when the scripts require it.
+- [x] 092-02-PLAN.md — Re-run the host/adoption/doc-contract verifiers at `1.0.0`, updating host-facing proof surfaces only when the scripts require it.
 - [ ] 092-03-PLAN.md — Record same-day publish evidence for the linked `1.0.0` cut and close REL-05 / PPX-09..12 only after proof exists.
 
 **Success Criteria:**
