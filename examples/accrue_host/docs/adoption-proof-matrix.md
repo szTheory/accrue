@@ -3,6 +3,7 @@
 This matrix answers: **what is proven, where, and against what kind of “realism”?**
 
 Accrue intentionally splits proof into a **deterministic Fake-first lane** (blocking PR CI) and a **Stripe test-mode provider parity lane** (advisory, scheduled / manual). There is no in-repo “digital twin” of Stripe; `lattice_stripe` talks to Stripe when configured, and `Accrue.Processor.Fake` simulates processor-shaped behavior for speed and CI stability.
+This matrix is refreshed for the linked `1.0.0` pair: the same merge-blocking host/docs proof still attests the coordinated `accrue` + `accrue_admin` release surface after the first public major.
 
 ## Layering note (local proof vs merge-blocking CI)
 

@@ -44,5 +44,6 @@ require_substring "checkout_session_facade_test.exs" "checkout facade ExUnit pat
 require_substring "Accrue.Billing.create_billing_portal_session/2" "billing portal facade API in matrix"
 require_substring "[:accrue, :billing, :billing_portal, :create]" "billing portal billing span tuple in matrix"
 require_substring "billing_portal_session_facade_test.exs" "billing portal facade ExUnit path in matrix"
+require_substring 'linked `1.0.0` pair' "linked 1.0.0 pair proof needle"
 
 echo "verify_adoption_proof_matrix: OK"
