@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.30
 milestone_name: INV-07 maintainer pass
-status: Phase 91 complete — Phase 92 planning next
-last_updated: "2026-04-28T09:09:24Z"
-last_activity: 2026-04-28 — Phase 91 executed and verified at reviewed SHA 3cca930 (docs-contracts-shift-left + host-integration green)
+status: verifying
+last_updated: "2026-04-28T11:28:15.891Z"
+last_activity: 2026-04-28 — Phase 91 executed on `main`; changelog preambles, post-1.0 cadence runbook, README posture flip, dated DOC-04 reaffirmation, and validation/verification artifacts landed. Reviewed SHA `3cca930` passed docs-contracts-shift-left and `host-integration`.
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-24)
 Phase: 91 Pre-publish 1.0.0 prep — complete (REL-06, REL-07, DOC-03, DOC-04)
 Plan: 091-01, 091-02, 091-03 complete
 Status: `091-VERIFICATION.md` signed off — ready for `/gsd-plan-phase 92`
-Resume file: `milestones/v1.30-phases/091-pre-publish-prep/091-VERIFICATION.md`
+Resume file: --resume-file
 Last activity: 2026-04-28 — Phase 91 executed on `main`; changelog preambles, post-1.0 cadence runbook, README posture flip, dated DOC-04 reaffirmation, and validation/verification artifacts landed. Reviewed SHA `3cca930` passed docs-contracts-shift-left and `host-integration`.
 
 ## Milestone Progress
