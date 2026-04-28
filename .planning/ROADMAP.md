@@ -37,7 +37,7 @@
 ## Phases
 
 <details open>
-<summary>📦 v1.30 `1.0.0` Declaration (Spine A) (Phases 91–93) — EXECUTING 2026-04-28</summary>
+<summary>✅ v1.30 `1.0.0` Declaration (Spine A) (Phases 91–93) — SHIPPED 2026-04-28</summary>
 
 **Milestone goal:** Cut **`accrue` / `accrue_admin` `1.0.0`** on a single linked Hex publish, with the final post-publish contract sweep verifying everything is consistent at `1.0.0`, the planning mirror aligned to the published `1.0.0` pair, the stability posture flipped from "pre-1.0 closure" to "1.0.0 stable, post-1.0 cadence," and a dated post-publish friction-inventory maintainer pass certifying the post-1.0 surface. **`PROC-08`** (second processor) and **`FIN-03`** (app-owned finance exports) remain **explicitly out of scope** at 1.0.0 — calling stable does **not** lift those non-goals (DOC-04).
 
@@ -123,10 +123,12 @@ Plans:
 
 **Plans:** 3 plans
 
+**Status:** Complete 2026-04-28 (`093-VERIFICATION.md`, planning tag `v1.30` -> `c88f7666662bdb127c815f1d08c45053982521e8`)
+
 Plans:
-- [ ] `093-01-PLAN.md` — align the fenced HYG mirror files to the published `1.0.0` pair and add the shipped `v1.30` milestone block
-- [ ] `093-02-PLAN.md` — append the dated INV-07 path-(b) certification and create the lean Phase 93 verification ledger
-- [ ] `093-03-PLAN.md` — close traceability from completed evidence and create the post-close `v1.30` planning tag
+- [x] `093-01-PLAN.md` — align the fenced HYG mirror files to the published `1.0.0` pair and add the shipped `v1.30` milestone block
+- [x] `093-02-PLAN.md` — append the dated INV-07 path-(b) certification and create the lean Phase 93 verification ledger
+- [x] `093-03-PLAN.md` — close traceability from completed evidence and create the post-close `v1.30` planning tag
 
 **Success Criteria:**
 1. `.planning/PROJECT.md`, `.planning/MILESTONES.md`, and `.planning/STATE.md` cite **`accrue / accrue_admin 1.0.0`** as the public Hex pair (HYG-02 — context citations only; public-facing artifacts are PPX-09..12's responsibility, not HYG-02's).
@@ -1106,8 +1108,8 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 91. Pre-publish 1.0.0 prep | v1.30 | 3/3 | Complete | 2026-04-28 |
-| 92. Linked 1.0.0 publish + post-publish contract sweep | v1.30 | 1/3 | In progress | — |
-| 93. Post-publish HYG mirror + INV-07 + tag | v1.30 | 0/3 | Not started | — |
+| 92. Linked 1.0.0 publish + post-publish contract sweep | v1.30 | 3/3 | Complete | 2026-04-28 |
+| 93. Post-publish HYG mirror + INV-07 + tag | v1.30 | 3/3 | Complete | 2026-04-28 |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

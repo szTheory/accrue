@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.30
 milestone_name: INV-07 maintainer pass
 status: shipped
-last_updated: "2026-04-28T16:50:29.383Z"
-last_activity: 2026-04-28 -- milestone-closing tracked state prepared before creating planning tag `v1.30`
+last_updated: "2026-04-28T17:12:00Z"
+last_activity: 2026-04-28 -- planning tag `v1.30` verified on milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`
 progress:
   total_phases: 3
   completed_phases: 3
@@ -25,14 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-04-28)
 ## Current Position
 
 Phase: v1.30 closed — next milestone pending
-Plan: Phase 93 closeout complete; planning tag step next
+Plan: No active plan; milestone closed and tagged
 Status: shipped
 Resume file: None
-Last activity: 2026-04-28 -- milestone-closing tracked state prepared before creating planning tag `v1.30`
+Last activity: 2026-04-28 -- planning tag `v1.30` verified on milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`
 
 ## Milestone Progress
 
-**v1.30** (opened **2026-04-26**, closed **2026-04-28**): **Phases 91-93 complete** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, the host wrapper, the planning mirrors, the dated INV-07 maintainer pass, and the durable closeout ledger all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`, `092-VERIFICATION.md`, `092-03-SUMMARY.md`, `093-VERIFICATION.md`). This tracked state is the milestone-closing commit intended for planning tag `v1.30`. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
+**v1.30** (opened **2026-04-26**, closed **2026-04-28**): **Phases 91-93 complete** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, the host wrapper, the planning mirrors, the dated INV-07 maintainer pass, and the durable closeout ledger all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`, `092-VERIFICATION.md`, `092-03-SUMMARY.md`, `093-VERIFICATION.md`). Planning tag `v1.30` points to milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
 
 **v1.29** (shipped **2026-04-26**): Phases **88–90** — **MG-01..MG-07**; **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`**, **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
@@ -48,7 +48,7 @@ Last activity: 2026-04-28 -- milestone-closing tracked state prepared before cre
 ## Current Planning Artifacts
 
 - **`.planning/REQUIREMENTS.md`** — v1.30 (12 reqs across REL / PPX / HYG / DOC / INV families). HYG-02, INV-07, and REL-08 are closed on the milestone-closing tracked state described in `093-VERIFICATION.md`.
-- **`.planning/ROADMAP.md`** — v1.30 details block at top (Phases 91-92 complete; Phase 93 is the remaining closeout slice). v1.29 collapsed in `<details>` block; all prior milestones preserved.
+- **`.planning/ROADMAP.md`** — v1.30 shipped; the detailed milestone block, phase checklist, and progress table all now reflect that Phase 93 closed on 2026-04-28 with planning tag `v1.30`.
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
 - **Phase 92 proof:** `092-VERIFICATION.md` is the canonical same-day linked `1.0.0` publish ledger; `093-VERIFICATION.md` reuses it and adds the final planning closeout ledger.
 - **Research (v1.30):** `093-RESEARCH.md` constrained Phase 93 to the planning mirror, INV-07, and tag closeout only; that scope is now complete.
