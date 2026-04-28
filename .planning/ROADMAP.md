@@ -101,7 +101,7 @@ Plans:
 Plans:
 - [x] 092-01-PLAN.md — Lock `1.0.0` across both mix projects, the Release Please manifest, and package-doc install literals in one release slice.
 - [x] 092-02-PLAN.md — Re-run the host/adoption/doc-contract verifiers at `1.0.0`, updating host-facing proof surfaces only when the scripts require it.
-- [ ] 092-03-PLAN.md — Record same-day publish evidence for the linked `1.0.0` cut and close REL-05 / PPX-09..12 only after proof exists.
+- [x] 092-03-PLAN.md — Record same-day publish evidence for the linked `1.0.0` cut and close REL-05 / PPX-09..12 only after proof exists.
 
 **Success Criteria:**
 1. `mix.exs` `@version "1.0.0"` lands for both `accrue/mix.exs` and `accrue_admin/mix.exs` in one combined Release Please PR; only if that path is mechanically impossible may the maintainer use the documented same-day fallback while preserving one coherent release slice.
