@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+**1.0.0 — Stable.** Released in lockstep with `accrue` 1.0.0. The supported integration surface for the admin package is `AccrueAdmin.Router` and the documented mount/scope helpers; see `accrue/CHANGELOG.md` and `accrue/guides/maturity-and-maintenance.md` for the v1.x stability commitment that governs both packages.
+
 ### Host-visible copy (accrue_admin)
 
 - Webhook replay confirmations, bulk DLQ prompts, and related operator strings now live in `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Locked` (Phase 27). Hosts that snapshot admin flash or HEEx literals should diff package tests when upgrading.

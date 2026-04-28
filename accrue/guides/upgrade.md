@@ -32,9 +32,9 @@ host-owned, and installer reruns do not erase local policy edits.
 
 The **numeric SemVer** on [Hex.pm for `accrue`](https://hex.pm/packages/accrue) (and the matching **`accrue_admin`** version) is the consumer upgrade boundary. On the branch you are reading, authoritative versions are the **`@version`** fields in **`accrue/mix.exs`** and **`accrue_admin/mix.exs`** (they stay **lockstep** for linked releases — see repository root **`RELEASING.md`**).
 
-**Planning vs packages:** files under **`.planning/`** may refer to internal milestones as **`v1.14`**, **`v1.15`**, and so on. Those labels track **maintainer shipping cadence**, not the Hex major line. Until both packages publish **`1.0.0`**, public SemVer stays **`0.x`**. For the intentional same-day **`1.0.0`** bootstrap story, read **[`RELEASING.md`](https://github.com/szTheory/accrue/blob/main/RELEASING.md)** → *Appendix: Same-day `1.0.0` bootstrap*.
+**Planning vs packages:** files under **`.planning/`** may refer to internal milestones as **`v1.14`**, **`v1.15`**, and so on. Those labels track **maintainer shipping cadence**, not the Hex major line. `accrue` and `accrue_admin` publish in lockstep on the **`1.0.x`** line. For the 1.0.0 bootstrap story (historical reference for the cut event), read **[`RELEASING.md`](https://github.com/szTheory/accrue/blob/main/RELEASING.md)** → *Appendix: Same-day `1.0.0` bootstrap*.
 
-**Pre-1.0 wrap-up semantics:** while SemVer is **`0.x`**, expect additive fixes, proof hardening, and integrator-contract tightening—not an open-ended public roadmap for every Stripe-shaped bet. Maintainer framing lives in **[Maturity and maintenance](maturity-and-maintenance.md)**.
+**Post-1.0 cadence:** On the `1.0.x` line, expect additive fixes, proof hardening, and integrator-contract tightening within the documented facade; breaking changes go through the deprecation cycle in [`RELEASING.md`](https://github.com/szTheory/accrue/blob/main/RELEASING.md#post-1-0-cadence-maintainer-intent). Maintainer framing lives in **[Maturity and maintenance](maturity-and-maintenance.md)**.
 
 Upgrade planning should start from the **published** version you have installed, not from internal modules or undocumented git SHAs.
 

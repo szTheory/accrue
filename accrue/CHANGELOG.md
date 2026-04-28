@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+**1.0.0 — Stable.** This release commits Accrue to v1.x API stability for the documented integration surface: generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `Accrue.Auth`, and `Accrue.ConfigError`. Breaking changes on that surface go through deprecation, not silent reshuffles. Internal schemas, workers, and demo helpers are not part of the contract. See `accrue/README.md` Stability, `accrue/guides/upgrade.md`, `accrue/guides/maturity-and-maintenance.md`, and root `RELEASING.md` for the v1.x stability commitment and post-1.0 cadence.
+
 Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` ship together: grep **`guides/telemetry.md#billing-checkout-session-create`**, re-run **`bash scripts/ci/verify_package_docs.sh`** / **`bash scripts/ci/verify_adoption_proof_matrix.sh`**, and keep **First Hour** + **`examples/accrue_host`** observability copy aligned with **`checkout_session_facade_test.exs`**.
 
 ### Billing

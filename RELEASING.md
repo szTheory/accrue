@@ -1,22 +1,33 @@
 # Releasing Accrue
 
-This runbook is written for the **recurring** maintainer path: **pre-1.0 linked**
-`accrue` + `accrue_admin` releases via **Release Please** on a green `main`, followed
-by ordered Hex publishes and lightweight post-publish checks. The **same-day `1.0.0`**
-bootstrap story is an **exceptional** appendix at the end — read that only when you
-are intentionally coordinating a first public major.
+This runbook is written for the **recurring** maintainer path: linked `accrue` +
+`accrue_admin` releases via **Release Please** on a green `main`, followed by ordered
+Hex publishes and lightweight post-publish checks. The **same-day `1.0.0`** bootstrap
+story is an **exceptional** appendix at the end — read that only when you are
+intentionally coordinating a first public major.
 
 **Planning milestones vs Hex SemVer:** files under **`.planning/`** may use labels like **`v1.14`** or **`v1.15`** for internal milestone bookkeeping. Those **do not** replace the **`accrue` / `accrue_admin` `@version`** values in each **`mix.exs`** or the versions published on **Hex**. Consumers pin and upgrade against **Hex + changelogs**; maintainers use this runbook plus **`accrue/guides/upgrade.md`**.
 
-## Pre-1.0 closure (maintainer intent)
+## Post-1.0 cadence (maintainer intent)
 
-For the **`0.3.x`** era, treat the **documented public façade + Fake-first CI gates** as the practical stability boundary. Routine releases are correctness, docs, proof contracts, or **linked Hex publishes** followed by the post-publish verification discipline in this file (and **`accrue/guides/maturity-and-maintenance.md`**). A coordinated **`1.0.0`** pair remains the **exceptional** appendix at the end of this document—use it only when you intentionally freeze SemVer semantics for adopters.
+The `1.0.x` line treats the documented public facade as the SemVer boundary: generated `MyApp.Billing`, the `Accrue.Billing` context, public behaviors such as `Accrue.Auth`, `Accrue.PDF`, and `Accrue.Mailer`, public Ecto schemas, public Plug routes, and the documented Telemetry event contract. Routine releases tighten correctness, docs, observability, and provider parity within that boundary; breaking the boundary requires a new major.
+
+1. **SemVer discipline.** Patch releases carry bug fixes and doc-only changes inside the documented facade. Minor releases carry additive features, optional config, optional adapters, forward-compatible Telemetry events, and soft deprecations. Major releases remove hard-deprecated symbols, change the documented Plug/router contract, introduce breaking schema migrations on `accrue_*` tables, or change the webhook signature verification contract.
+2. **Deprecation cycle.** Breaking changes on the documented surface follow a two-step deprecation cycle: first mark the old path in `CHANGELOG.md`, with `@deprecated`, and in `accrue/guides/upgrade.md` without a runtime warning; then hard-deprecate in a later minor with a runtime warning. The replacement path must exist for at least one minor before removal in the next major.
+3. **Cadence.** Patch releases land as needed. Minor releases land when a coherent additive batch is ready. Major releases are rare and pre-announced with at least one `2.0.0-rc.N` stabilization window before the stable tag.
+4. **Lockstep.** `accrue` and `accrue_admin` continue shipping as a coordinated combined Release Please PR. Major versions stay aligned, even when an admin-only minor leads the core package.
+5. **Supported integration surface.** `accrue/guides/maturity-and-maintenance.md` is the authoritative list of the public facade, the Telemetry event contract, and the pieces that are explicitly not part of the SemVer boundary.
+6. **Verification expectation.** Every release passes the merge-blocking `host-integration` Fake-backed gate. Majors additionally require the `live-stripe` lane green within the release window as maintainer sign-off.
+7. **Forward-port policy.** critical security fixes are forward-ported to the latest minor of the previous major for 6 months after a new major ships. Older majors are end-of-life and documented in `accrue/guides/maturity-and-maintenance.md`.
+8. **Pre-release tags.** Use `1.x.y-rc.N` for opt-in previews of risky changes and `2.0.0-rc.N` for the next major's stabilization window. RC tags publish to Hex with `--pre` and never auto-resolve for `~> 1.0` consumers.
+9. **Verification lanes.** Fake stays the canonical deterministic gate, while provider parity remains a separate lane for Stripe-specific validation that Fake cannot cover.
+10. **Last verified line.** Update the line below whenever `release-please-config.json`, `.release-please-manifest.json`, or `.github/workflows/release-please.yml` change.
 
 **Last verified against** `release-please-config.json`, `.release-please-manifest.json`,
 and `.github/workflows/release-please.yml` on **2026-04-23** (UTC). Update this line when
 automation semantics change.
 
-## Routine pre-1.0 linked releases (Release Please + Hex)
+## Routine linked releases (Release Please + Hex)
 
 1. Confirm CI is green on `main`, especially the `release-gate` workflow and the lanes below.
 2. Let **Release Please** open the **combined** linked release PR (see `release-please-config.json`
