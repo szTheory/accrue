@@ -149,6 +149,11 @@ Tagline: *"Billing state, modeled clearly."*
 
 **PROC-08** (second processor) and **FIN-03** (app-owned finance exports) remain **explicitly out of scope** until a later milestone prioritizes them with written boundaries. **Stripe Dashboard** meter setup UX stays host/Stripe documentation unless a future requirement explicitly pulls UI scope in.
 
+### Reaffirmed at 1.0.0 (2026-04-26)
+
+- **PROC-08 (second processor):** explicit non-goal at 1.0.0; revisit only via later-milestone reprioritization with written boundaries.
+- **FIN-03 (app-owned finance exports):** explicit non-goal at 1.0.0; Accrue is a billing/subscription library, not an accounting system; revisit only via later-milestone reprioritization with written boundaries.
+
 ## Current State
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
