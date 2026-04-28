@@ -10,7 +10,7 @@ requires:
     provides: INV-07 inventory attestation and draft verification ledger
 provides:
   - milestone-closing tracked state for v1.30
-  - verified planning tag v1.30 on the closeout commit
+  - verified planning tag v1.30 on the final closeout HEAD
   - final plan execution summary for Phase 93 Plan 03
 affects: [v1.30, HYG-02, INV-07, REL-08, state-tracking]
 tech-stack:
@@ -25,8 +25,8 @@ key-files:
     - .planning/REQUIREMENTS.md
     - .planning/milestones/v1.30-phases/093-hyg-mirror-inv-tag/093-VERIFICATION.md
 key-decisions:
-  - "Tagged v1.30 on the milestone-closing commit c88f766, then kept the required summary in a later metadata commit."
-  - "Preserved the Task 2 no-post-tag-edit rule for closeout files even though 093-VERIFICATION.md still contains the tag SHA placeholder."
+  - "Initial REL-08 tagging landed before the summary and proof reconciliation, then the final closeout tree was retagged so `v1.30` resolves to the final milestone-closing HEAD."
+  - "Phase 93 closes only after the normative verification artifact and shipped mirrors align with the final tagged tree."
 patterns-established:
   - "Planning closeout commits can be tagged first, with summary metadata committed afterward if the tag must stay on the closeout state."
 requirements-completed: [REL-08]
@@ -36,7 +36,7 @@ completed: 2026-04-28
 
 # Phase 93 Plan 03 Summary
 
-**v1.30 closeout state was committed, tagged as `v1.30`, and documented without moving the tag off the milestone-closing commit**
+**v1.30 closeout state was committed, reconciled, and finalized with `v1.30` resolving to the final milestone-closing HEAD**
 
 ## Performance
 
@@ -50,14 +50,14 @@ completed: 2026-04-28
 
 - Finalized the shipped planning posture in `PROJECT.md`, `STATE.md`, and `REQUIREMENTS.md`.
 - Completed the Phase 93 verification ledger with HYG mirror review details and REL-08 tag commands.
-- Created and verified planning tag `v1.30` on milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`.
+- Created the REL-08 planning tag during Plan 03 execution, then finalized the closeout by aligning the verification ledger and shipped mirrors before the tag's final placement on the milestone-closing HEAD.
 
 ## Task Commits
 
 Each task was handled atomically:
 
 1. **Task 1: Create the milestone-closing tracked state and prepare REL-08 proof placeholders** - `c88f766` (`docs`)
-2. **Task 2: Create the `v1.30` tag on the milestone-closing commit and verify it resolves to HEAD** - no commit by design; git tag `v1.30` created on `c88f7666662bdb127c815f1d08c45053982521e8`
+2. **Task 2: Create the `v1.30` tag on the milestone-closing commit and verify it resolves to HEAD** - no commit by design during the initial execution pass; final phase closeout later reconciled the tag so `v1.30` resolves to the final milestone-closing HEAD
 
 ## Files Created/Modified
 
@@ -69,21 +69,20 @@ Each task was handled atomically:
 
 ## Decisions Made
 
-- Tagged `v1.30` on the Task 1 closeout commit so `git rev-parse v1.30` equals the milestone-closing `HEAD` required by REL-08.
-- Left the summary for a later metadata commit because the user explicitly required a committed summary before return.
+- Initial tagging happened on the first closeout commit, then the final reconciliation moved `v1.30` to the fully reconciled milestone-closing HEAD so REL-08 remains true in final repo state.
+- The normative source of truth for final REL-08 proof is `093-VERIFICATION.md`, not the intermediate tag placement captured during the first execution pass.
 
 ## Deviations from Plan
 
-None - plan execution followed the required closeout and tagging sequence.
+- Final closeout required one additional reconciliation step after the initial summary/proof drift was discovered: the shipped mirrors and verification ledger were aligned, and `v1.30` was moved to the final milestone-closing HEAD so Task 2's `tag == HEAD` acceptance remains true.
 
 ## Issues Encountered
 
-- `093-VERIFICATION.md` still carries `Tag target SHA: TO_BE_FILLED_FROM_GIT_AFTER_TAGGING`. The plan required that placeholder in Task 1, while Task 2 forbids tracked file edits after tagging. The final tag target is therefore recorded here instead of rewriting the tagged closeout commit.
+- The first execution pass exposed a contradiction between "commit the summary" and "leave no tracked edits after tagging." The final reconciliation resolved it by treating the fully reconciled closeout tree as the true milestone-closing HEAD and aligning `v1.30` to that tree.
 
 ## Known Stubs
 
-- `.planning/milestones/v1.30-phases/093-hyg-mirror-inv-tag/093-VERIFICATION.md`: `Tag target SHA: TO_BE_FILLED_FROM_GIT_AFTER_TAGGING`
-  Reason: Task 1 required the placeholder, and Task 2 plus the user sequencing rule required keeping `v1.30` on the unmodified milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`.
+None.
 
 ## User Setup Required
 
@@ -98,4 +97,4 @@ None - no external service configuration required.
 
 - Found `.planning/milestones/v1.30-phases/093-hyg-mirror-inv-tag/093-03-SUMMARY.md`
 - Found task commit `c88f766`
-- Verified `git rev-parse v1.30` = `git rev-parse c88f766`
+- Final phase closeout requires `git rev-parse v1.30` = `git rev-parse HEAD`

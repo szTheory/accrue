@@ -90,4 +90,4 @@ Populated 2026-04-26 during roadmap creation (`/gsd-new-milestone` Step 10). Pha
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 — v1.30 closeout tracked state was tagged as `v1.30` at `c88f7666662bdb127c815f1d08c45053982521e8`; `093-VERIFICATION.md` records the HYG mirror review, INV-07 attestation, and REL-08 tag commands while the exact tag target is captured in `093-03-SUMMARY.md`.*
+*Last updated: 2026-04-28 — v1.30 closeout is complete; `093-VERIFICATION.md` records the HYG mirror review, INV-07 attestation, and the final REL-08 proof that planning tag `v1.30` resolves to the milestone-closing `HEAD`.*

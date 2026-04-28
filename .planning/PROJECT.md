@@ -156,7 +156,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-Current focus: **post-v1.30 shipped posture (2026-04-28)** — the linked **`accrue` / `accrue_admin` `1.0.0`** pair is published, the planning mirrors are closed, the dated **INV-07** maintainer certification is on disk, and planning tag **`v1.30`** already points to milestone-closing commit **`c88f7666662bdb127c815f1d08c45053982521e8`**.
+Current focus: **post-v1.30 shipped posture (2026-04-28)** — the linked **`accrue` / `accrue_admin` `1.0.0`** pair is published, the planning mirrors are closed, the dated **INV-07** maintainer certification is on disk, and planning tag **`v1.30`** is expected to resolve to the final milestone-closing `HEAD` recorded in **`093-VERIFICATION.md`**.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
@@ -733,4 +733,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-28 — **v1.30** shipped — linked **`accrue` / `accrue_admin` `1.0.0`** publish proved in **Phase 92**, planning closeout recorded in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** points to milestone-closing commit **`c88f7666662bdb127c815f1d08c45053982521e8`**. **PROC-08** / **FIN-03** stay out of scope at `1.0.0`.*
+*Last updated: 2026-04-28 — **v1.30** shipped — linked **`accrue` / `accrue_admin` `1.0.0`** publish proved in **Phase 92**, planning closeout recorded in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **PROC-08** / **FIN-03** stay out of scope at `1.0.0`.*

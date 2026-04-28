@@ -4,7 +4,7 @@ milestone: v1.30
 milestone_name: INV-07 maintainer pass
 status: shipped
 last_updated: "2026-04-28T17:12:00Z"
-last_activity: 2026-04-28 -- planning tag `v1.30` verified on milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`
+last_activity: 2026-04-28 -- planning tag `v1.30` verified on the final milestone-closing HEAD
 progress:
   total_phases: 3
   completed_phases: 3
@@ -28,11 +28,11 @@ Phase: v1.30 closed — next milestone pending
 Plan: No active plan; milestone closed and tagged
 Status: shipped
 Resume file: None
-Last activity: 2026-04-28 -- planning tag `v1.30` verified on milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`
+Last activity: 2026-04-28 -- planning tag `v1.30` verified on the final milestone-closing HEAD
 
 ## Milestone Progress
 
-**v1.30** (opened **2026-04-26**, closed **2026-04-28**): **Phases 91-93 complete** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, the host wrapper, the planning mirrors, the dated INV-07 maintainer pass, and the durable closeout ledger all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`, `092-VERIFICATION.md`, `092-03-SUMMARY.md`, `093-VERIFICATION.md`). Planning tag `v1.30` points to milestone-closing commit `c88f7666662bdb127c815f1d08c45053982521e8`. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
+**v1.30** (opened **2026-04-26**, closed **2026-04-28**): **Phases 91-93 complete** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, the host wrapper, the planning mirrors, the dated INV-07 maintainer pass, and the durable closeout ledger all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`, `092-VERIFICATION.md`, `092-03-SUMMARY.md`, `093-VERIFICATION.md`). Planning tag `v1.30` resolves to the final milestone-closing `HEAD` proven in `093-VERIFICATION.md`. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
 
 **v1.29** (shipped **2026-04-26**): Phases **88–90** — **MG-01..MG-07**; **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`**, **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
@@ -89,7 +89,7 @@ Last activity: 2026-04-28 -- planning tag `v1.30` verified on milestone-closing 
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Open the next milestone when priorities are ready; `v1.30` is closed and planning tag `v1.30` already points to commit `c88f7666662bdb127c815f1d08c45053982521e8`.
+**Next:** Open the next milestone when priorities are ready; `v1.30` is closed and planning tag `v1.30` resolves to the final milestone-closing `HEAD`.
 
 **Completed (v1.29):** Phases **88–90** — **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`** + **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
