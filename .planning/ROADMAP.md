@@ -49,7 +49,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 91 | Pre-publish 1.0.0 prep | Documentation posture + CHANGELOG + RELEASING cadence are **true on `main`** before the linked publish bumps `@version` to `1.0.0`. README Stability flips, non-goals reaffirmed, CHANGELOG `1.0.0 — Stable` entries authored, `RELEASING.md` post-1.0 cadence section written. | REL-06, REL-07, DOC-03, DOC-04 |
+| 91 | Pre-publish 1.0.0 prep | Documentation posture + CHANGELOG + RELEASING cadence are **true on `main`** before the linked publish bumps `@version` to `1.0.0`. README Stability flips, non-goals reaffirmed, locked CHANGELOG `1.0.0 — Stable` preambles sit under `## Unreleased`, `RELEASING.md` post-1.0 cadence section written. | REL-06, REL-07, DOC-03, DOC-04 |
 | 92 | Linked 1.0.0 publish + post-publish contract sweep | Bump `@version` to `1.0.0` for both packages, ship the linked Hex publish, then re-run `verify_package_docs` / `verify_adoption_proof_matrix` / the `docs-contracts-shift-left` six-script bundle clean at `1.0.0`. First Hour + host README + adoption matrix needles refreshed for the `0.3.1 → 1.0.0` jump (single-PR co-update discipline, v1.19 PRF). | REL-05, PPX-09, PPX-10, PPX-11, PPX-12 |
 | 93 | Post-publish HYG mirror + INV-07 + tag | `.planning/` mirror pass aligned to published `1.0.0` pair (PROJECT.md / MILESTONES.md / STATE.md citations); dated INV-07 maintainer pass `(b)` in `v1.17-FRICTION-INVENTORY.md`; planning git tag `v1.30`. | HYG-02, INV-07, REL-08 |
 
@@ -70,16 +70,21 @@
 
 **Requirements:** REL-06, REL-07, DOC-03, DOC-04.
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 091-01-PLAN.md — Preload the REL-06 changelog preambles and replace the release runbook with the REL-07 post-1.0 cadence contract.
+- [ ] 091-02-PLAN.md — Flip the root and package README posture to the 1.0.x stability commitment while preserving current install pins and non-goal warnings.
+- [ ] 091-03-PLAN.md — Add the dated DOC-04 reaffirmation, define validation/verification evidence, and wire Phase 91 closeout requirements.
 
 **Success Criteria:**
 1. A reader of `accrue/README.md` Stability and root `README.md` Maintenance posture sees **"1.0.0 stable, post-1.0 cadence"** framing (not "pre-1.0 closure" / "intake-gated") with a cross-link into `RELEASING.md` and `accrue/guides/maturity-and-maintenance.md`.
 2. `RELEASING.md` contains a **post-1.0 cadence** section documenting semver discipline, deprecation policy, and what changes after stable — replacing / superseding the v1.27 "pre-1.0 closure" narrative.
-3. `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md` each contain a `## 1.0.0 — Stable` entry (Conventional-Commits / Release-Please-rendered) calling out the v1.x API stability commitment.
+3. `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md` each contain the locked `1.0.0 — Stable` preamble under `## Unreleased`, ready for the Release Please-rendered public `1.0.0` entry in Phase 92.
 4. `PROJECT.md` non-goals section explicitly retains `PROC-08` (second processor) and `FIN-03` (app-owned finance exports) with written boundaries — calling stable does **not** lift the non-goals.
 5. `mix.exs` `@version` is still `0.3.1` for both packages at end of phase (the bump itself is Phase 92's work).
 
-**Definition-of-done artifact:** `milestones/v1.30-phases/091-pre-publish-prep/091-VERIFICATION.md` with per-requirement transcript pointers.
+**Definition-of-done artifacts:** `milestones/v1.30-phases/091-pre-publish-prep/091-VALIDATION.md` and `milestones/v1.30-phases/091-pre-publish-prep/091-VERIFICATION.md` with per-requirement evidence and reviewed-SHA transcript pointers.
 
 ### Phase 92: Linked 1.0.0 publish + post-publish contract sweep
 
