@@ -105,6 +105,8 @@ Use `Oban.Testing` for queue assertions and `perform_job/2` when the test needs 
 
 Use the Fake Processor for normal test coverage, then keep a small provider-parity suite for behaviors where Stripe itself is the contract: SCA/3DS cards, Stripe test clocks, hosted checkout redirect behavior, and webhook signatures. Tag those tests separately so local development and CI do not depend on network calls by default.
 
+For the staged processor-expansion track, Fake is the merge-blocking source of truth for the official thin slice: direct subscription creation, vault acquisition, webhook verify/parse, and lifecycle projection rows. Provider-backed checks stay in the provider-parity lane.
+
 ## Usage metering (Fake)
 
 Metered usage flows through `Accrue.Billing.report_usage/3`. With `Accrue.Test.setup_fake_processor/1` in `setup`, the configured processor is Fake so tests stay offline. Accrue inserts an `accrue_meter_events` row that starts `pending` inside the transaction, then moves to `reported` on the happy path after Fake acknowledges the meter event—treat the persisted `%Accrue.Billing.MeterEvent{}` as the primary contract.

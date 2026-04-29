@@ -334,13 +334,12 @@ defmodule Accrue.Billing do
   end
 
   @doc """
-  Lists payment methods for `customer` from the configured processor (Stripe
-  or Fake). This is **read-through** processor state, not a projection of
-  local `accrue_payment_methods` rows.
+  Returns `processor_operation_unsupported` for `customer` in Phase 95.
 
-  Delegates to `Accrue.Billing.PaymentMethodActions.list_payment_methods/2`.
-  See that module for supported `opts` filters (`type`, `limit`, pagination
-  cursors).
+  `Accrue.Billing.list_payment_methods/2` remains a public compatibility seam,
+  but processor-side listing is intentionally **out of slice** for the
+  official first-party contract. Delegates to
+  `Accrue.Billing.PaymentMethodActions.list_payment_methods/2`.
   """
   def list_payment_methods(customer, opts \\ []) do
     span_billing(:payment_method, :list, customer, opts, fn ->
@@ -438,7 +437,7 @@ defmodule Accrue.Billing do
   ]
 
   @doc """
-  Creates a Stripe Checkout Session for `customer` through the configured
+  Creates a checkout handoff for `customer` through the configured
   processor.
 
   `attrs` is a keyword list or map of options aligned with
@@ -449,7 +448,7 @@ defmodule Accrue.Billing do
 
   Invalid keys or types raise `NimbleOptions.ValidationError`.
 
-  The Checkout **redirect URL** (hosted mode) and **`client_secret`** (embedded
+  The checkout **redirect URL** (hosted mode) and **`client_secret`** (embedded
   mode) are bearer credentials. Do **not** log raw session structs, processor
   payloads, or URLs in production telemetry or support tickets.
 

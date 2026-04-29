@@ -214,6 +214,32 @@ defmodule Accrue.Processor.Fake do
   end
 
   @impl Accrue.Processor
+  def processor_name, do: "fake"
+
+  @impl Accrue.Processor
+  def capabilities do
+    %{
+      customer: %{create: true, retrieve: true, update: true},
+      payment_method: %{vault_acquisition: true},
+      checkout: %{create: true, fetch: true, hosted: true, embedded: true},
+      subscription: %{
+        direct_create: true,
+        fetch: true,
+        cancel: true,
+        lifecycle_webhook_projection: true,
+        update: true,
+        cancel_at_period_end: true,
+        cancel_immediately: true,
+        pause: true,
+        resume: true
+      },
+      billing_portal: %{create: true},
+      invoice: %{lifecycle_webhook_projection: true},
+      webhook: %{verify: true, parse: true}
+    }
+  end
+
+  @impl Accrue.Processor
   def retrieve_customer(id, opts \\ []) when is_binary(id) and is_list(opts) do
     call({:retrieve_customer, id, opts})
   end

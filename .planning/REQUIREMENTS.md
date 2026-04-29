@@ -1,0 +1,42 @@
+# Requirements: PROC-08 Phase 1 — Milestone v1.31
+
+**Status:** Active  
+**Opened:** 2026-04-28  
+**Total requirements:** 5
+
+**Core value:** Reach real production adopters without diluting the Stripe-first first-user path by turning the long-deferred second-processor story into a bounded, official product track.
+
+## v1.31 — PROC-08 Phase 1: boundary hardening + thin slice
+
+**Goal:** Reopen **PROC-08** with written boundaries, harden the processor contract where Stripe-specific assumptions block expansion, choose a Stripe-like second provider, and ship one real provider-backed billing slice through the documented public facade.
+
+### Processor strategy + target lock (PROC)
+
+- [ ] **PROC-09**: Accrue records a persistent processor-expansion strategy, an explicit capability matrix for the official second-processor track, and a locked target-provider decision with written rationale.
+
+- [x] **PROC-10**: Accrue defines and proves a first-party processor conformance contract for the supported slice so Stripe, Fake, and the chosen second processor can be validated against the same expectations.
+
+- [x] **PROC-11**: Slice-blocking Stripe assumptions are removed or isolated from the processor boundary, config, test harness, and public integration seams without broad abstraction churn outside the chosen slice.
+
+- [ ] **PROC-12**: The chosen second processor supports one real end-to-end public billing slice through the documented Accrue facade, with Stripe and Fake non-regression still passing.
+
+- [ ] **PROC-13**: Strategy, adopter docs, and public positioning are honest about the new state of the project: Stripe remains the default first-user path, but official second-processor support is now active, bounded maintainer work.
+
+## Out of Scope
+
+- **FIN-03**: App-owned finance exports remain out of scope for this milestone and this strategic track.
+- Merchant-of-record pivots, accounting ownership, or other provider classes that would fundamentally reshape Accrue’s product boundary.
+- Broad admin polish, unrelated release hygiene, or speculative documentation sweeps that do not directly advance the processor track.
+- “Complete parity with Stripe everywhere” in one milestone; this milestone is explicitly a **Phase 1** slice.
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| PROC-09 | Phase 94 | Pending |
+| PROC-10 | Phase 95 | Complete |
+| PROC-11 | Phase 95 | Complete |
+| PROC-12 | Phase 96 | Pending |
+| PROC-13 | Phase 96 | Pending |
+
+**Coverage:** v1.31 requirements **5** total · Mapped **5** · Unmapped **0**

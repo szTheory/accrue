@@ -84,6 +84,11 @@ Plans:
 
 **Requirements:** PROC-10, PROC-11.
 
+Plans:
+- [x] 095-01-PLAN.md — Replace optimistic capability inheritance with explicit support truth and label helpers.
+- [x] 095-02-PLAN.md — Add unsupported-operation facade guards and isolate the direct-subscribe request seam.
+- [x] 095-03-PLAN.md — Lock Fake-first conformance, provider-parity docs wording, and validation tracking to the implemented contract.
+
 **Success Criteria:**
 1. Stripe, Fake, and the chosen provider can be validated against one first-party conformance contract for the supported slice.
 2. Slice-blocking Stripe assumptions are isolated or removed from processor dispatch, config, tests, and the public integration seam.

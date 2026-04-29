@@ -106,31 +106,26 @@ defmodule Accrue.Billing.SubscriptionActions do
   end
 
   defp do_subscribe(%Customer{} = customer, price_spec, opts) do
+    with :ok <- ensure_subscribe_support() do
+      do_subscribe_supported(customer, price_spec, opts)
+    end
+  end
+
+  defp do_subscribe_supported(%Customer{} = customer, price_spec, opts) do
     {price_id, quantity} = normalize_price_spec(price_spec)
     op_id = resolve_operation_id(opts)
     idem_key = Idempotency.key(:create_subscription, customer.id, op_id)
 
     {item_params, trial_end} = build_subscribe_params({price_id, quantity}, opts)
 
-    stripe_params =
-      %{
-        customer: customer.processor_id,
-        items: [item_params],
-        payment_behavior: "default_incomplete",
-        expand: ["latest_invoice.payment_intent"]
-      }
-      |> put_if(:trial_end, trial_end)
-      |> maybe_put_automatic_tax(opts)
-      |> maybe_put_default_pm(opts)
-      |> maybe_put_coupon(opts)
-      |> maybe_put_collection_method(opts)
+    processor_params = build_subscription_request(customer, item_params, trial_end, opts)
 
     result =
       Repo.transact(fn ->
         with :ok <- ensure_customer_tax_location(customer, opts),
              {:ok, stripe_sub} <-
                Processor.__impl__().create_subscription(
-                 stripe_params,
+                 processor_params,
                  [idempotency_key: idem_key] ++ sanitize_opts(opts)
                ),
              :ok <- ensure_valid_tax_location(stripe_sub, opts),
@@ -144,6 +139,34 @@ defmodule Accrue.Billing.SubscriptionActions do
       end)
 
     IntentResult.wrap(result)
+  end
+
+  defp ensure_subscribe_support do
+    if Processor.first_party_supported?([:subscription, :direct_create]) do
+      :ok
+    else
+      {:error,
+       %Accrue.APIError{
+         code: "processor_operation_unsupported",
+         message: "#{Processor.name()} does not support subscription creation"
+       }}
+    end
+  end
+
+  defp build_subscription_request(%Customer{} = customer, item_params, trial_end, opts) do
+    # Keep the current Stripe-shaped request assembly isolated behind one seam
+    # so Phase 96 can swap only this direct-create path without broad churn.
+    %{
+      customer: customer.processor_id,
+      items: [item_params],
+      payment_behavior: "default_incomplete",
+      expand: ["latest_invoice.payment_intent"]
+    }
+    |> put_if(:trial_end, trial_end)
+    |> maybe_put_automatic_tax(opts)
+    |> maybe_put_default_pm(opts)
+    |> maybe_put_coupon(opts)
+    |> maybe_put_collection_method(opts)
   end
 
   # ---------------------------------------------------------------------

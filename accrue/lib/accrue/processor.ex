@@ -280,6 +280,9 @@ defmodule Accrue.Processor do
   # implementations can be added incrementally. Once all adapters implement
   # the full Connect surface, this `@optional_callbacks` declaration can
   # be removed to re-enable strict behaviour checks.
+  @callback capabilities() :: map()
+  @callback processor_name() :: String.t()
+
   @optional_callbacks create_account: 2,
                       retrieve_account: 2,
                       update_account: 3,
@@ -289,7 +292,9 @@ defmodule Accrue.Processor do
                       create_account_link: 2,
                       create_login_link: 2,
                       create_transfer: 2,
-                      retrieve_transfer: 2
+                      retrieve_transfer: 2,
+                      capabilities: 0,
+                      processor_name: 0
 
   # ---------------------------------------------------------------------------
   # Facade dispatch (customer operations)
@@ -341,4 +346,68 @@ defmodule Accrue.Processor do
   @doc false
   @spec __impl__() :: module()
   def __impl__, do: Application.get_env(:accrue, :processor, Accrue.Processor.Fake)
+
+  @doc """
+  Returns the configured processor name used in persisted rows and telemetry.
+
+  Adapters may expose `processor_name/0` for an explicit identifier. Legacy
+  adapters that do not implement it fall back to a snake-cased module tail.
+  """
+  @spec name() :: String.t()
+  def name do
+    adapter = __impl__()
+
+    cond do
+      function_exported?(adapter, :processor_name, 0) ->
+        adapter.processor_name()
+
+      true ->
+        adapter
+        |> Module.split()
+        |> List.last()
+        |> Macro.underscore()
+    end
+  end
+
+  @doc """
+  Returns the declared capability map for the configured processor.
+
+  New first-party adapters should implement `capabilities/0` so callers can
+  branch on supported slices without assuming Stripe parity.
+  """
+  @spec capabilities() :: map()
+  def capabilities do
+    Accrue.Processor.Capabilities.for(__impl__())
+  end
+
+  @doc """
+  True when the configured processor supports the given capability path.
+
+      Accrue.Processor.supports?([:checkout, :embedded])
+      Accrue.Processor.supports?([:subscription, :cancel_immediately])
+  """
+  @spec supports?(atom() | [atom()]) :: boolean()
+  def supports?(path) when is_atom(path), do: supports?([path])
+
+  def supports?(path) when is_list(path),
+    do: Accrue.Processor.Capabilities.supports?(capabilities(), path)
+
+  @doc """
+  Returns the public support label for a capability path when one is defined.
+  """
+  @spec support_label(atom() | [atom()]) :: String.t() | nil
+  def support_label(path) when is_atom(path), do: support_label([path])
+
+  def support_label(path) when is_list(path),
+    do: Accrue.Processor.Capabilities.support_label(path)
+
+  @doc """
+  True when the configured processor both supports a capability and that
+  capability is part of Accrue's official first-party contract.
+  """
+  @spec first_party_supported?(atom() | [atom()]) :: boolean()
+  def first_party_supported?(path) when is_atom(path), do: first_party_supported?([path])
+
+  def first_party_supported?(path) when is_list(path),
+    do: Accrue.Processor.Capabilities.first_party_supported?(capabilities(), path)
 end

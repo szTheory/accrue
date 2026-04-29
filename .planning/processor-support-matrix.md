@@ -30,11 +30,11 @@ The first official dual-provider promise is **gateway subscription core**:
 |------------|------|--------|-----------|--------------|
 | customer.create | Required | Required | Required target | all first-party |
 | customer.retrieve | Required | Required | Required target | all first-party |
-| customer.update | Required | Required | Required target | all first-party |
+| customer.update | Supported | Supported | Staged target | staged first-party target |
 | payment_method.vault_acquisition | Deterministic proof | Supported | Required target | all first-party |
 | subscription.direct_create | Required | Required | Required target | all first-party |
 | subscription.fetch | Required | Required | Required target | all first-party |
-| subscription.cancel | Required | Required | Required target | all first-party |
+| subscription.cancel | Supported | Supported | Staged target | staged first-party target |
 | subscription.lifecycle_webhook_projection | Deterministic projection | Supported | Required target | all first-party |
 | invoice.lifecycle_webhook_projection | Deterministic projection | Supported | Required target | all first-party |
 | webhook.verify | Required | Required | Required target | all first-party |
@@ -50,9 +50,9 @@ The `Stripe-only` rows stay visible because they are real public APIs today, but
 |------------|-------|-------|
 | `Accrue.Billing.subscribe/3` | all first-party | Primary gateway-subscription-core facade for the second-provider slice. |
 | `Accrue.Billing.get_subscription/2` | all first-party | Read side required for lifecycle truth on the supported slice. |
-| `Accrue.Billing.cancel/2` | all first-party | Cancellation is part of the bounded subscription core. |
+| `Accrue.Billing.cancel/2` | staged first-party target | Existing Stripe/Fake behavior remains, but Braintree parity is not promised in Phase 95. |
 | `Accrue.Billing.create_customer/1` | all first-party | Customer creation remains part of the supported facade boundary. |
-| `Accrue.Billing.update_customer/2` | all first-party | Customer updates stay inside the bounded support contract. |
+| `Accrue.Billing.update_customer/2` | staged first-party target | Existing behavior remains, but this row is not yet part of the merge-blocking thin slice. |
 | `Accrue.Billing.create_checkout_session/2` | Stripe-only | Valuable public API, but not part of the first official second-provider promise. |
 | `Accrue.Billing.create_billing_portal_session/2` | Stripe-only | Valuable public API, but not part of the first official second-provider promise. |
 | `Accrue.Billing.list_payment_methods/2` | out of slice | Payment-method CRUD beyond minimal vault acquisition is not in the first slice. |
@@ -86,6 +86,7 @@ The following remain explicit non-targets for this track:
 ## Support-boundary rules
 
 - Unsupported capabilities must **fail clearly and early** via capability checks rather than implying Stripe parity and surprising adopters later.
+- Rows labeled `staged first-party target` remain documented and executable, but they are not part of the Fake-first lane's merge-blocking Phase 95 conformance set.
 - Accrue should learn from **Laravel Cashier** by naming provider tracks honestly.
 - Accrue should learn from **Pay (Rails)** by keeping the shared surface bounded and warning where provider behavior diverges.
 - Accrue should avoid the **ActiveMerchant** trap of over-broad gateway sameness.

@@ -19,10 +19,11 @@ defmodule Accrue.Billing.PaymentMethodActions do
       customer.id` (strict attachment check) and raises
       `Accrue.Error.NotAttached` otherwise. Never silently wires a
       foreign PM as a customer default.
-    * `list_payment_methods/2` — read-only listing of processor-side
-      payment methods for the customer's Stripe customer id. Optional
-      keyword filters are validated with `NimbleOptions` before the
-      processor call.
+    * `list_payment_methods/2` — public compatibility seam that now
+      fails early with `processor_operation_unsupported` because
+      processor-side listing is outside the official first-party slice
+      in Phase 95. Optional keyword filters are still validated so the
+      surface can be promoted later without an arity break.
 
   ## `list_payment_methods/2` options
 
@@ -265,21 +266,27 @@ defmodule Accrue.Billing.PaymentMethodActions do
   # ---------------------------------------------------------------------
 
   @doc """
-  Lists payment methods attached to the customer on the processor (Stripe
-  truth — not a local cache projection).
+  Returns `processor_operation_unsupported` for Phase 95.
+
+  Processor-side payment-method listing is intentionally out of slice for the
+  official first-party contract. The API stays in place so callers get a clear
+  error now instead of silent Stripe-parity assumptions.
   """
   @spec list_payment_methods(Customer.t(), keyword()) ::
           {:ok, map()} | {:error, term()}
   def list_payment_methods(%Customer{} = customer, opts \\ []) when is_list(opts) do
     NimbleOptions.validate!(opts, @list_payment_methods_opts_schema)
-    params = list_params_for_processor(customer, opts)
 
-    processor_opts =
-      opts
-      |> Keyword.drop(@list_payment_method_param_keys)
-      |> sanitize_opts()
+    with :ok <- ensure_payment_method_list_support() do
+      params = list_params_for_processor(customer, opts)
 
-    Processor.__impl__().list_payment_methods(params, processor_opts)
+      processor_opts =
+        opts
+        |> Keyword.drop(@list_payment_method_param_keys)
+        |> sanitize_opts()
+
+      Processor.__impl__().list_payment_methods(params, processor_opts)
+    end
   end
 
   @doc "Raising variant of `list_payment_methods/2`."
@@ -303,6 +310,18 @@ defmodule Accrue.Billing.PaymentMethodActions do
       {_k, nil}, acc -> acc
       {k, v}, acc -> Map.put(acc, k, v)
     end)
+  end
+
+  defp ensure_payment_method_list_support do
+    if Processor.first_party_supported?([:payment_method, :list]) do
+      :ok
+    else
+      {:error,
+       %Accrue.APIError{
+         code: "processor_operation_unsupported",
+         message: "#{Processor.name()} does not support payment-method listing"
+       }}
+    end
   end
 
   defp get_card_fingerprint(canonical) do
