@@ -1,9 +1,9 @@
 ---
 phase: 96
 slug: chosen-second-provider-thin-slice
-status: draft
+status: active
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-29
 ---
 
@@ -30,10 +30,10 @@ created: 2026-04-29
 
 ## Sampling Rate
 
-- **After every task commit:** Run the smoke command.
-- **After any shared `subscribe/3` seam change in Plan 01:** Run the quick command and the shared Stripe/Fake regression command.
+- **After every task commit:** Run the sub-30-second smoke command.
+- **After any shared `subscribe/3` seam change in Plan 01:** Run the quick command and the separate shared Stripe/Fake regression command (which reruns `test/accrue/billing/subscription_test.exs` plus the Phase 95 conformance bundle).
 - **After Plans 02-04:** Run the quick command.
-- **Before Phase 96 completion:** Run the credentialed host proof command above with all `BRAINTREE_*` vars exported and capture the passing result in `96-03-SUMMARY.md`.
+- **Before Phase 96 completion:** Run the credentialed host proof command above with all `BRAINTREE_*` vars exported and capture the passing result in `96-03-SUMMARY.md`. Live-provider proof evidence is captured only after Plan 02 completes.
 - **Before `$gsd-verify-work`:** Run the full suite command.
 - **Max feedback latency:** 25 seconds on the smoke loop.
 
@@ -43,17 +43,17 @@ created: 2026-04-29
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 96-01-01 | 01 | 1 | PROC-12 | T-96-01 | Unsupported Braintree-adjacent paths fail with `processor_operation_unsupported`; the supported subscribe path accepts only `payment_method.vault_acquisition.reference`. | unit | `cd accrue && mix test test/accrue/processor/braintree_test.exs` | ❌ W0 | ⬜ pending |
-| 96-01-02 | 01 | 1 | PROC-12 | T-96-03 | Subscription projection stays provider-aware without pretending Stripe and Braintree payloads are identical. | unit | `cd accrue && mix test test/accrue/billing/subscription_actions_test.exs test/accrue/billing/subscription_projection_provider_test.exs test/accrue/processor/braintree_test.exs` | ❌ W0 | ⬜ pending |
-| 96-01-03 | 01 | 1 | PROC-12 | T-96-13 | Shared Stripe/Fake facade behavior still passes after the Braintree seam changes. | regression | `cd accrue && mix test test/accrue/billing/subscription_test.exs test/accrue/billing/subscription_actions_test.exs test/accrue/billing/subscription_projection_provider_test.exs test/accrue/processor/braintree_test.exs && mix test test/accrue/billing/subscription_test.exs test/accrue/billing/payment_method_actions_test.exs test/accrue/processor/capabilities_test.exs test/accrue/webhook/default_handler_phase3_test.exs test/accrue/checkout/session_test.exs --max-cases 1` | ❌ W0 | ⬜ pending |
-| 96-02-01 | 02 | 2 | PROC-12 | T-96-04 | Webhook verification rejects malformed `bt_signature` / `bt_payload` input before persistence. | unit | `cd accrue && mix test test/accrue/webhook/plug_test.exs` | ✅ | ⬜ pending |
-| 96-02-02 | 02 | 2 | PROC-12 | T-96-05 | Validated Braintree lifecycle events normalize into the shared reducer path and persist local truth without Stripe-only assumptions. | unit | `cd accrue && mix test test/accrue/webhook/plug_test.exs test/accrue/webhook/default_handler_test.exs` | ✅ | ⬜ pending |
-| 96-03-01 | 03 | 3 | PROC-12 | T-96-07 | The example host owns vault acquisition, loads the browser asset explicitly, and forwards only the narrow handoff reference into `Accrue.Billing.subscribe/3`. | integration | `cd examples/accrue_host && mix test test/accrue_host/billing_facade_test.exs && rg -n 'import .*braintree_vault_acquisition' assets/js/app.js && rg -n 'phx-hook=|data-braintree|vault acquisition' lib/accrue_host_web/live/subscription_live.ex` | ❌ W0 | ⬜ pending |
-| 96-03-03 | 03 | 3 | PROC-12 | T-96-09 | The real-provider proof lane requires `BRAINTREE_*` credentials plus `BRAINTREE_SANDBOX_PLAN_ID`, exercises the host proof path, and runs only after Plan 02 completes. | integration | `cd examples/accrue_host && mix test test/accrue_host/braintree_subscribe_test.exs --include live_braintree` | ❌ W0 | ⬜ pending |
-| 96-04-01 | 04 | 4 | PROC-13 | T-96-10 | The canonical matrix and package README say Braintree is official only for gateway subscription core while checkout and billing portal remain Stripe-only. | docs | `bash scripts/ci/verify_processor_support_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ⬜ pending |
-| 96-04-02 | 04 | 4 | PROC-13 | T-96-11 | Package guides preserve Fake-first merge blocking and advisory provider-backed proof wording. | docs | `bash scripts/ci/verify_processor_support_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ⬜ pending |
-| 96-05-01 | 05 | 5 | PROC-13 | T-96-14 | Example-host docs mirror the bounded support story without broadening the promise. | docs | `bash scripts/ci/verify_adoption_proof_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ⬜ pending |
-| 96-05-02 | 05 | 5 | PROC-12, PROC-13 | T-96-15 | Verifier scripts and validation tracking enforce the new wording, smoke cadence, shared regression rerun, and credentialed proof command. | docs | `bash scripts/ci/verify_processor_support_matrix.sh && bash scripts/ci/verify_adoption_proof_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ⬜ pending |
+| 96-01-01 | 01 | 1 | PROC-12 | T-96-01 | Unsupported Braintree-adjacent paths fail with `processor_operation_unsupported`; the supported subscribe path accepts only `payment_method.vault_acquisition.reference`. | unit | `cd accrue && mix test test/accrue/processor/braintree_test.exs` | ✅ | ✅ green |
+| 96-01-02 | 01 | 1 | PROC-12 | T-96-03 | Subscription projection stays provider-aware without pretending Stripe and Braintree payloads are identical. | unit | `cd accrue && mix test test/accrue/billing/subscription_actions_test.exs test/accrue/billing/subscription_projection_provider_test.exs test/accrue/processor/braintree_test.exs` | ✅ | ✅ green |
+| 96-01-03 | 01 | 1 | PROC-12 | T-96-13 | Shared Stripe/Fake facade behavior still passes after the Braintree seam changes. | regression | `cd accrue && mix test test/accrue/billing/subscription_test.exs test/accrue/billing/subscription_actions_test.exs test/accrue/billing/subscription_projection_provider_test.exs test/accrue/processor/braintree_test.exs && mix test test/accrue/billing/subscription_test.exs test/accrue/billing/payment_method_actions_test.exs test/accrue/processor/capabilities_test.exs test/accrue/webhook/default_handler_phase3_test.exs test/accrue/checkout/session_test.exs --max-cases 1` | ✅ | ✅ green |
+| 96-02-01 | 02 | 2 | PROC-12 | T-96-04 | Webhook verification rejects malformed `bt_signature` / `bt_payload` input before persistence. | unit | `cd accrue && mix test test/accrue/webhook/plug_test.exs` | ✅ | ✅ green |
+| 96-02-02 | 02 | 2 | PROC-12 | T-96-05 | Validated Braintree lifecycle events normalize into the shared reducer path and persist local truth without Stripe-only assumptions. | unit | `cd accrue && mix test test/accrue/webhook/plug_test.exs test/accrue/webhook/default_handler_test.exs` | ✅ | ✅ green |
+| 96-03-01 | 03 | 3 | PROC-12 | T-96-07 | The example host owns vault acquisition, loads the browser asset explicitly, and forwards only the narrow handoff reference into `Accrue.Billing.subscribe/3`. | integration | `cd examples/accrue_host && mix test test/accrue_host/billing_facade_test.exs && rg -n 'import .*braintree_vault_acquisition' assets/js/app.js && rg -n 'phx-hook=|data-braintree|vault acquisition' lib/accrue_host_web/live/subscription_live.ex` | ✅ | ✅ green |
+| 96-03-03 | 03 | 3 | PROC-12 | T-96-09 | The real-provider proof lane requires `BRAINTREE_*` credentials plus `BRAINTREE_SANDBOX_PLAN_ID`, exercises the host proof path, and runs only after Plan 02 completes. | integration | `cd examples/accrue_host && mix test test/accrue_host/braintree_subscribe_test.exs --include live_braintree` | ✅ | ✅ green |
+| 96-04-01 | 04 | 4 | PROC-13 | T-96-10 | The canonical matrix and package README say Braintree is official only for gateway subscription core while checkout and billing portal remain Stripe-only. | docs | `bash scripts/ci/verify_processor_support_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ✅ green |
+| 96-04-02 | 04 | 4 | PROC-13 | T-96-11 | Package guides preserve Fake-first merge blocking and advisory provider-backed proof wording. | docs | `bash scripts/ci/verify_processor_support_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ✅ green |
+| 96-05-01 | 05 | 5 | PROC-13 | T-96-14 | Example-host docs mirror the bounded support story without broadening the promise. | docs | `bash scripts/ci/verify_adoption_proof_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ✅ green |
+| 96-05-02 | 05 | 5 | PROC-12, PROC-13 | T-96-15 | Verifier scripts and validation tracking enforce the new wording, smoke cadence, shared regression rerun, and credentialed proof command. | docs | `bash scripts/ci/verify_processor_support_matrix.sh && bash scripts/ci/verify_adoption_proof_matrix.sh && bash scripts/ci/verify_package_docs.sh` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -61,11 +61,11 @@ created: 2026-04-29
 
 ## Wave 0 Requirements
 
-- [ ] `accrue/test/accrue/processor/braintree_test.exs` — dedicated adapter and capability smoke for the new first-party slice
-- [ ] `accrue/test/accrue/billing/subscription_test.exs` shared regression updates — explicit Stripe/Fake non-regression after the `subscribe/3` seam changes
-- [ ] `examples/accrue_host/test/accrue_host/braintree_subscribe_test.exs` — canonical credentialed host proof for the Braintree-backed `subscribe/3` path
-- [ ] `examples/accrue_host/assets/js/braintree_vault_acquisition.js` plus host-page wiring in `assets/js/app.js` / `lib/accrue_host_web/live/subscription_live.ex` — explicit proof-path asset loading
-- [ ] Shared Braintree test fixtures/helpers — signed webhook payload helpers and fixture builders for the thin slice
+- [x] `accrue/test/accrue/processor/braintree_test.exs` — dedicated adapter and capability smoke for the new first-party slice
+- [x] `accrue/test/accrue/billing/subscription_test.exs` shared regression updates — explicit Stripe/Fake non-regression after the `subscribe/3` seam changes
+- [x] `examples/accrue_host/test/accrue_host/braintree_subscribe_test.exs` — canonical credentialed host proof for the Braintree-backed `subscribe/3` path
+- [x] `examples/accrue_host/assets/js/braintree_vault_acquisition.js` plus host-page wiring in `assets/js/app.js` / `lib/accrue_host_web/live/subscription_live.ex` — explicit proof-path asset loading
+- [x] Shared Braintree test fixtures/helpers — signed webhook payload helpers and fixture builders for the thin slice
 
 ---
 
@@ -82,10 +82,10 @@ created: 2026-04-29
 - [x] All auto tasks have automated verification commands
 - [x] Sampling continuity uses a sub-30-second smoke loop
 - [x] Shared Stripe/Fake regression coverage is explicit after `subscribe/3` seam changes
-- [ ] Wave 0 files exist
+- [x] Wave 0 files exist
 - [x] No watch-mode flags
 - [x] Max feedback latency is below 30 seconds on the smoke loop
-- [ ] `96-03-SUMMARY.md` includes one passing credentialed `live_braintree` command with date and sandbox plan-id source
+- [x] `96-03-SUMMARY.md` includes one passing credentialed `live_braintree` command with date and sandbox plan-id source
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** true

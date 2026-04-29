@@ -40,5 +40,7 @@ require_substring "fail clearly and early" "early failure support rule"
 require_substring "Laravel Cashier" "cashier lesson"
 require_substring "Pay (Rails)" "pay rails lesson"
 require_substring "ActiveMerchant" "activemerchant lesson"
+require_substring '`Stripe` remains the default first-user path' "stripe default path wording"
+require_substring '`Fake` is the required local and CI proof surface' "fake required surface wording"
 
 echo "verify_processor_support_matrix: OK"
