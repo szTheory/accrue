@@ -82,6 +82,27 @@ defmodule Accrue.Billing.SubscriptionTest do
     end
   end
 
+  test "subscribe/3 explicitly maps standard Stripe requests cleanly", %{customer: cus} do
+    previous = Application.get_env(:accrue, :processor)
+    Application.put_env(:accrue, :processor, Accrue.Processor.Stripe)
+
+    try do
+      # Use a dummy customer so it doesn't fail trying to hit actual Stripe if unmocked
+      # or expect the mock to be correctly shaped. The seam should pass the params through.
+      assert_raise Accrue.ConfigError, ~r/Set config :accrue, :stripe_secret_key/, fn ->
+        # We just want to ensure it doesn't blow up with `invalid_request_error` 
+        # from the Braintree payment method validation logic.
+        Billing.subscribe!(cus, "price_stripe_1")
+      end
+    after
+      if previous do
+        Application.put_env(:accrue, :processor, previous)
+      else
+        Application.delete_env(:accrue, :processor)
+      end
+    end
+  end
+
   test "subscribe/2 returns intent_result on requires_action", %{customer: cus} do
     fake_sub = %{
       id: "sub_fake_scripted",
