@@ -38,6 +38,9 @@ jobs:
       - name: verify_package_docs.sh
         run: bash scripts/ci/verify_package_docs.sh
 
+      - name: Processor support matrix contract
+        run: bash scripts/ci/verify_processor_support_matrix.sh
+
       - name: v1.17 friction + north-star SSOT contract
         run: bash scripts/ci/verify_v1_17_friction_research_contract.sh
 
