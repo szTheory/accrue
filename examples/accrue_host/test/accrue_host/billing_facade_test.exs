@@ -219,6 +219,16 @@ defmodule AccrueHost.BillingFacadeTest do
     assert billing_source =~ "apply(Billing, :update_customer_tax_location, [customer, attrs])"
   end
 
+  test "installer-facing facade template stays generic with no Braintree jargon" do
+    template_source = File.read!(Path.join(@host_root, "../../accrue/priv/accrue/templates/install/billing.ex.eex"))
+
+    refute template_source =~ "Braintree"
+    refute template_source =~ "vault"
+    refute template_source =~ "client_token"
+    assert template_source =~ "def subscribe(billable, price_id, opts \\\\ []) do"
+    assert template_source =~ "Billing.subscribe(billable, price_id, opts)"
+  end
+
   test "subscribe/3 proof path creates customer state without direct fixture inserts", %{
     user: user
   } do
