@@ -63,6 +63,36 @@ defmodule AccrueHostWeb.SubscriptionLive do
     end
   end
 
+  def handle_event("vault_acquisition_success", %{"payment_method_token" => vault_reference, "plan_id" => plan_id} = params, socket) do
+    case Billing.subscribe_with_vault_reference(socket.assigns.current_scope, plan_id, vault_reference,
+           automatic_tax: true,
+           operation_id: operation_id(params, "subscribe")
+         ) do
+      {:ok, _subscription} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Subscription started.")
+         |> assign(:confirm_cancel, false)
+         |> assign(:tax_location_error, nil)
+         |> load_state()}
+
+      {:error, %APIError{code: "customer_tax_location_invalid"}} ->
+        {:noreply,
+         socket
+         |> assign(:tax_location_error, @tax_location_repair_copy)
+         |> put_flash(:error, @tax_location_repair_copy)}
+
+      {:error, :no_active_organization} ->
+        {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
+
+      {:error, :forbidden} ->
+        {:noreply, put_flash(socket, :error, @member_denial_copy)}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, @error_copy)}
+    end
+  end
+
   def handle_event("update_tax_location", %{"tax_location" => params}, socket) do
     case Billing.update_active_organization_tax_location(
            socket.assigns.current_scope,
@@ -368,20 +398,40 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 </span>
               </div>
 
-              <button
-                type="button"
-                phx-click="start_subscription"
-                phx-value-plan={plan.id}
-                phx-value-operation_id={Map.fetch!(@plan_operation_ids, plan.id)}
-                style={primary_button_style(plan.id == active_plan_id(@subscription))}
-                disabled={
-                  @billing_locked? ||
-                    (plan.id == active_plan_id(@subscription) &&
-                       !Subscription.canceled?(@subscription))
-                }
-              >
-                {@start_subscription_copy}
-              </button>
+              <%= if !@billing_locked? && plan.id != active_plan_id(@subscription) && @braintree_client_token do %>
+                <div
+                  id={"braintree-container-#{plan.id}"}
+                  phx-hook="BraintreeVaultAcquisition"
+                  phx-update="ignore"
+                  data-client-token={@braintree_client_token}
+                  data-plan-id={plan.id}
+                  data-operation-id={Map.fetch!(@plan_operation_ids, plan.id)}
+                >
+                  <div id="braintree-dropin-container"></div>
+                  <button
+                    id="braintree-submit-button"
+                    type="button"
+                    style={primary_button_style(false)}
+                  >
+                    {@start_subscription_copy}
+                  </button>
+                </div>
+              <% else %>
+                <button
+                  type="button"
+                  phx-click="start_subscription"
+                  phx-value-plan={plan.id}
+                  phx-value-operation_id={Map.fetch!(@plan_operation_ids, plan.id)}
+                  style={primary_button_style(plan.id == active_plan_id(@subscription))}
+                  disabled={
+                    @billing_locked? ||
+                      (plan.id == active_plan_id(@subscription) &&
+                         !Subscription.canceled?(@subscription))
+                  }
+                >
+                  {@start_subscription_copy}
+                </button>
+              <% end %>
             </article>
           </section>
         </div>

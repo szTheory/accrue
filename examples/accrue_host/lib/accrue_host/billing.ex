@@ -86,6 +86,14 @@ defmodule AccrueHost.Billing do
     end
   end
 
+  def subscribe_with_vault_reference(%Scope{} = scope, price_id, vault_reference, opts \\ []) do
+    with {:ok, organization} <- organization_from_scope(scope),
+         :ok <- authorize_billing_mutation(scope) do
+      opts = Keyword.put(opts, :payment_method, %{vault_acquisition: %{reference: vault_reference}})
+      subscribe(organization, price_id, opts)
+    end
+  end
+
   def update_active_organization_tax_location(%Scope{} = scope, attrs) when is_map(attrs) do
     with {:ok, organization} <- organization_from_scope(scope),
          :ok <- authorize_billing_mutation(scope) do
