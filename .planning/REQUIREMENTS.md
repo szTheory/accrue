@@ -21,7 +21,8 @@
 - [x] **PROC-12
 **: The chosen second processor supports one real end-to-end public billing slice through the documented Accrue facade, with Stripe and Fake non-regression still passing.
 
-- [ ] **PROC-13**: Strategy, adopter docs, and public positioning are honest about the new state of the project: Stripe remains the default first-user path, but official second-processor support is now active, bounded maintainer work.
+- [x] **PROC-13
+**: Strategy, adopter docs, and public positioning are honest about the new state of the project: Stripe remains the default first-user path, but official second-processor support is now active, bounded maintainer work.
 
 ## Out of Scope
 
