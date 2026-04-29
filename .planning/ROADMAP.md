@@ -102,13 +102,14 @@ Plans:
 
 **Requirements:** PROC-12, PROC-13.
 
-**Plans:** 4 plans
+**Plans:** 5 plans
 
 Plans:
 - [ ] 96-01-PLAN.md — Add the Braintree-backed `subscribe/3` thin slice through the existing public billing seam.
 - [ ] 96-02-PLAN.md — Add processor-aware Braintree webhook verify/parse and lifecycle normalization.
-- [ ] 96-03-PLAN.md — Prove the slice in `examples/accrue_host` with a host-owned advisory Braintree lane.
-- [ ] 96-04-PLAN.md — Mirror the bounded support truth across docs, scripts, and validation tracking.
+- [ ] 96-03-PLAN.md — Prove the slice in `examples/accrue_host` only after webhook/lifecycle completion, with a host-owned advisory Braintree lane.
+- [ ] 96-04-PLAN.md — Update the canonical matrix and package-facing docs to the bounded Phase 96 truth.
+- [ ] 96-05-PLAN.md — Mirror the bounded story into example-host docs and tighten verifier/validation contracts.
 
 **Success Criteria:**
 1. One real second-provider vertical slice is executable through the documented public facade.
