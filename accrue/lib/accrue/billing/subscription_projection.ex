@@ -1,44 +1,110 @@
 defmodule Accrue.Billing.SubscriptionProjection do
   @moduledoc """
-  Translates a Stripe subscription API response into local Ecto changesets.
+  Translates a processor subscription response into local Ecto changesets.
 
-  A "projection" in Accrue means decomposing a Stripe API response into a
-  flat attrs map that `Accrue.Billing.Subscription.changeset/2` accepts.
-  This module handles the type coercions (Unix timestamps → `DateTime`,
-  status strings → atoms, nested discount objects → a plain id string)
-  and normalizes the `data` jsonb to string-keyed maps for round-trip
-  safety.
+  A "projection" in Accrue means decomposing a processor subscription
+  response into a flat attrs map that `Accrue.Billing.Subscription`
+  accepts. This module handles type coercions, provider-specific lifecycle
+  fields, and `data` normalization for round-trip safety.
 
   Handles both the atom-keyed shape produced by `Accrue.Processor.Fake`
-  and the string-keyed shape produced by `Accrue.Processor.Stripe`
-  (after `Map.from_struct/1`).
+  and the string-keyed shape produced by remote adapters. Callers may pass
+  `processor: :stripe | :paddle | ...` to force a specific projection mode;
+  otherwise the configured processor name is used.
   """
 
   @valid_statuses ~w(trialing active past_due canceled unpaid incomplete incomplete_expired paused)a
 
-  @spec decompose(map()) :: {:ok, map()}
-  def decompose(stripe_sub) when is_map(stripe_sub) do
+  @spec decompose(map(), keyword()) :: {:ok, map()}
+  def decompose(subscription, opts \\ [])
+
+  def decompose(subscription, opts) when is_map(subscription) and is_list(opts) do
+    processor = Keyword.get(opts, :processor, processor_atom())
+
+    case processor do
+      :paddle -> {:ok, paddle_attrs(subscription)}
+      :braintree -> {:ok, braintree_attrs(subscription)}
+      _ -> {:ok, stripe_attrs(subscription)}
+    end
+  end
+
+  defp stripe_attrs(stripe_sub) do
     automatic_tax = automatic_tax_fields(get(stripe_sub, :automatic_tax))
 
-    {:ok,
-     %{
-       processor_id: get(stripe_sub, :id),
-       status: parse_status(get(stripe_sub, :status)),
-       cancel_at_period_end: get(stripe_sub, :cancel_at_period_end) || false,
-       pause_collection: parse_pause_collection(get(stripe_sub, :pause_collection)),
-       automatic_tax: automatic_tax.enabled,
-       automatic_tax_status: automatic_tax.status,
-       automatic_tax_disabled_reason: automatic_tax.disabled_reason,
-       current_period_start: unix_to_dt(get(stripe_sub, :current_period_start)),
-       current_period_end: unix_to_dt(get(stripe_sub, :current_period_end)),
-       trial_start: unix_to_dt(get(stripe_sub, :trial_start)),
-       trial_end: unix_to_dt(get(stripe_sub, :trial_end)),
-       canceled_at: unix_to_dt(get(stripe_sub, :canceled_at)),
-       ended_at: unix_to_dt(get(stripe_sub, :ended_at)),
-       discount_id: parse_discount_id(get(stripe_sub, :discount)),
-       data: normalize_data(stripe_sub),
-       metadata: get(stripe_sub, :metadata) || %{}
-     }}
+    %{
+      processor_id: get(stripe_sub, :id),
+      status: parse_status(get(stripe_sub, :status)),
+      cancel_at_period_end: get(stripe_sub, :cancel_at_period_end) || false,
+      pause_collection: parse_pause_collection(get(stripe_sub, :pause_collection)),
+      automatic_tax: automatic_tax.enabled,
+      automatic_tax_status: automatic_tax.status,
+      automatic_tax_disabled_reason: automatic_tax.disabled_reason,
+      current_period_start: unix_to_dt(get(stripe_sub, :current_period_start)),
+      current_period_end: unix_to_dt(get(stripe_sub, :current_period_end)),
+      trial_start: unix_to_dt(get(stripe_sub, :trial_start)),
+      trial_end: unix_to_dt(get(stripe_sub, :trial_end)),
+      cancel_at: unix_to_dt(get(stripe_sub, :cancel_at)),
+      canceled_at: unix_to_dt(get(stripe_sub, :canceled_at)),
+      ended_at: unix_to_dt(get(stripe_sub, :ended_at)),
+      discount_id: parse_discount_id(get(stripe_sub, :discount)),
+      data: normalize_data(stripe_sub),
+      metadata: get(stripe_sub, :metadata) || %{}
+    }
+  end
+
+  defp braintree_attrs(braintree_sub) do
+    status_str = get(braintree_sub, :status) |> to_string() |> String.downcase() |> String.replace(" ", "_")
+    status = parse_status(status_str)
+
+    %{
+      processor_id: get(braintree_sub, :id),
+      status: status,
+      cancel_at_period_end: false,
+      pause_collection: nil,
+      automatic_tax: false,
+      automatic_tax_status: nil,
+      automatic_tax_disabled_reason: nil,
+      current_period_start: unix_to_dt(get(braintree_sub, :billing_period_start_date)),
+      current_period_end: unix_to_dt(get(braintree_sub, :billing_period_end_date)),
+      trial_start: unix_to_dt(get(braintree_sub, :first_billing_date)),
+      trial_end: nil,
+      cancel_at: nil,
+      canceled_at: nil,
+      ended_at: nil,
+      discount_id: nil,
+      data: normalize_data(braintree_sub),
+      metadata: %{}
+    }
+  end
+
+  defp paddle_attrs(subscription) do
+    billing_period = get(subscription, :current_billing_period) || %{}
+    scheduled_change = get(subscription, :scheduled_change) || %{}
+    status = parse_status(get(subscription, :status))
+    cancel_action? = scheduled_change_action(scheduled_change) == "cancel"
+    paused? = status == :paused or scheduled_change_action(scheduled_change) == "pause"
+
+    %{
+      processor_id: get(subscription, :id),
+      status: status,
+      cancel_at_period_end: cancel_action?,
+      pause_collection: if(paused?, do: normalize_data(scheduled_change), else: nil),
+      automatic_tax: false,
+      automatic_tax_status: nil,
+      automatic_tax_disabled_reason: nil,
+      current_period_start:
+        unix_to_dt(get(billing_period, :starts_at) || get(subscription, :current_period_start)),
+      current_period_end:
+        unix_to_dt(get(billing_period, :ends_at) || get(subscription, :current_period_end)),
+      trial_start: unix_to_dt(get(subscription, :trial_start)),
+      trial_end: unix_to_dt(get(subscription, :trial_end)),
+      cancel_at: unix_to_dt(get(scheduled_change, :effective_at)),
+      canceled_at: unix_to_dt(get(subscription, :canceled_at)),
+      ended_at: unix_to_dt(get(subscription, :ended_at) || get(subscription, :canceled_at)),
+      discount_id: parse_discount_id(first_discount(subscription)),
+      data: normalize_data(subscription),
+      metadata: get(subscription, :custom_data) || get(subscription, :metadata) || %{}
+    }
   end
 
   # Project Stripe's nested `discount` object down to just the discount
@@ -106,6 +172,35 @@ defmodule Accrue.Billing.SubscriptionProjection do
   defp normalize_data(map) when is_map(map) do
     map
     |> to_string_keys()
+  end
+
+  defp first_discount(subscription) do
+    subscription
+    |> get(:discount)
+    |> case do
+      nil ->
+        subscription
+        |> get(:discounts)
+        |> case do
+          [%{} = discount | _] -> discount
+          _ -> nil
+        end
+
+      discount ->
+        discount
+    end
+  end
+
+  defp scheduled_change_action(%{} = scheduled_change), do: get(scheduled_change, :action)
+  defp scheduled_change_action(_), do: nil
+
+  defp processor_atom do
+    case Accrue.Processor.name() do
+      "paddle" -> :paddle
+      "fake" -> :fake
+      "braintree" -> :braintree
+      _ -> :stripe
+    end
   end
 
   @doc """

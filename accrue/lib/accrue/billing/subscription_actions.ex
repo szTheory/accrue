@@ -118,11 +118,11 @@ defmodule Accrue.Billing.SubscriptionActions do
 
     {item_params, trial_end} = build_subscribe_params({price_id, quantity}, opts)
 
-    processor_params = build_subscription_request(customer, item_params, trial_end, opts)
-
     result =
       Repo.transact(fn ->
-        with :ok <- ensure_customer_tax_location(customer, opts),
+        with {:ok, processor_params} <-
+               build_subscription_request(customer, item_params, trial_end, opts),
+             :ok <- ensure_customer_tax_location(customer, opts),
              {:ok, stripe_sub} <-
                Processor.__impl__().create_subscription(
                  processor_params,
@@ -154,19 +154,43 @@ defmodule Accrue.Billing.SubscriptionActions do
   end
 
   defp build_subscription_request(%Customer{} = customer, item_params, trial_end, opts) do
-    # Keep the current Stripe-shaped request assembly isolated behind one seam
-    # so Phase 96 can swap only this direct-create path without broad churn.
-    %{
-      customer: customer.processor_id,
-      items: [item_params],
-      payment_behavior: "default_incomplete",
-      expand: ["latest_invoice.payment_intent"]
-    }
-    |> put_if(:trial_end, trial_end)
-    |> maybe_put_automatic_tax(opts)
-    |> maybe_put_default_pm(opts)
-    |> maybe_put_coupon(opts)
-    |> maybe_put_collection_method(opts)
+    if Processor.__impl__() == Accrue.Processor.Braintree do
+      case Keyword.get(opts, :payment_method) do
+        %{vault_acquisition: %{reference: ref}} when is_binary(ref) ->
+          {:ok,
+           %{
+             payment_method: %{vault_acquisition: %{reference: ref}},
+             items: [item_params]
+           }}
+
+        _ ->
+          {:error,
+           %Accrue.APIError{
+             code: "invalid_request_error",
+             http_status: 400,
+             message:
+               "Braintree subscriptions require a vaulted payment_method_token passed as " <>
+                 "`payment_method: %{vault_acquisition: %{reference: token}}`."
+           }}
+      end
+    else
+      # Keep the current Stripe-shaped request assembly isolated behind one seam
+      # so Phase 96 can swap only this direct-create path without broad churn.
+      params =
+        %{
+          customer: customer.processor_id,
+          items: [item_params],
+          payment_behavior: "default_incomplete",
+          expand: ["latest_invoice.payment_intent"]
+        }
+        |> put_if(:trial_end, trial_end)
+        |> maybe_put_automatic_tax(opts)
+        |> maybe_put_default_pm(opts)
+        |> maybe_put_coupon(opts)
+        |> maybe_put_collection_method(opts)
+
+      {:ok, params}
+    end
   end
 
   # ---------------------------------------------------------------------

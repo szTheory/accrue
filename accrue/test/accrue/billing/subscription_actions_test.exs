@@ -61,6 +61,32 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
     assert subscription.status in [:active, :trialing]
   end
 
+  test "subscribe/3 returns invalid_request_error for malformed Braintree handoff" do
+    Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
+
+    {:ok, customer} =
+      %Customer{}
+      |> Customer.changeset(%{
+        owner_type: "User",
+        owner_id: Ecto.UUID.generate(),
+        processor: "braintree",
+        processor_id: "cus_braintree_123",
+        email: "bt@example.com"
+      })
+      |> Repo.insert()
+
+    assert {:error, %Accrue.APIError{code: "invalid_request_error"} = error} =
+             Billing.subscribe(customer, "price_premium", payment_method: "pm_123")
+
+    assert error.message =~ "require a vaulted payment_method_token passed as"
+
+    assert {:error, %Accrue.APIError{code: "invalid_request_error"}} =
+             Billing.subscribe(customer, "price_premium", payment_method: %{vault_acquisition: %{}})
+
+    assert {:error, %Accrue.APIError{code: "invalid_request_error"}} =
+             Billing.subscribe(customer, "price_premium")
+  end
+
   test "subscribe/3 returns the unsupported-operation tuple when direct create is outside the slice" do
     Application.put_env(:accrue, :processor, ReadOnlyProcessor)
 
