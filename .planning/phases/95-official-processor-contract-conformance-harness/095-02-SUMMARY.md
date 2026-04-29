@@ -57,8 +57,8 @@ completed: 2026-04-29
 
 ## Task Commits
 
-1. **Task 1: Add first-party slice guards at the public facade boundary** — `PENDING`
-2. **Task 2: Isolate the minimum direct-subscription request seam** — `PENDING`
+1. **Task 1: Add first-party slice guards at the public facade boundary** — `1ca55ec`
+2. **Task 2: Isolate the minimum direct-subscription request seam** — `1ca55ec`
 
 ## Self-Check: PASSED
 

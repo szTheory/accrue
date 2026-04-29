@@ -57,8 +57,8 @@ completed: 2026-04-29
 
 ## Task Commits
 
-1. **Task 1: Replace optimistic capability defaults with explicit support truth** — `PENDING`
-2. **Task 2: Expose support-label helpers and prove matrix/code parity** — `PENDING`
+1. **Task 1: Replace optimistic capability defaults with explicit support truth** — `1ca55ec`
+2. **Task 2: Expose support-label helpers and prove matrix/code parity** — `1ca55ec`
 
 ## Self-Check: PASSED
 

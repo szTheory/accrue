@@ -56,8 +56,8 @@ completed: 2026-04-29
 
 ## Task Commits
 
-1. **Task 1: Add the Fake-first conformance harness and lifecycle proof coverage** — `PENDING`
-2. **Task 2: Align provider-smoke docs and validation artifacts** — `PENDING`
+1. **Task 1: Add the Fake-first conformance harness and lifecycle proof coverage** — `1ca55ec`
+2. **Task 2: Align provider-smoke docs and validation artifacts** — `1ca55ec`
 
 ## Self-Check: PASSED
 
