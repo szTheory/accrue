@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.31
 milestone_name: milestone
 status: active
-last_updated: "2026-04-29T19:05:00Z"
-last_activity: 2026-04-29 -- completed Phase 95 with executable processor support truth, facade guardrails, and Fake-first conformance proof for the staged slice
+last_updated: "2026-04-29T19:58:43.882Z"
+last_activity: 2026-04-29 -- completed Phase 95 with explicit capability truth, support-label guards, and Fake-first conformance coverage
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 6
   completed_plans: 6
-  percent: 67
+  percent: 100
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-28)
 Phase: Phase 95 complete — Phase 96 next
 Plan: Phase 96 next — chosen second-provider thin slice
 Status: active
-Resume file: None
+Resume file: --resume-file
 Last activity: 2026-04-29 -- completed Phase 95 with explicit capability truth, support-label guards, and Fake-first conformance coverage
 
 ## Milestone Progress
