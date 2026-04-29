@@ -2,8 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.31
 milestone_name: milestone
+current_plan: 1 of 5
 status: active
-last_updated: "2026-04-29T21:10:18.373Z"
+last_updated: "2026-04-29T21:10:39.391Z"
 last_activity: 2026-04-29 -- completed Phase 95 with explicit capability truth, support-label guards, and Fake-first conformance coverage
 progress:
   total_phases: 3
@@ -25,8 +26,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-28)
 
 ## Current Position
 
-Phase: Phase 95 complete — Phase 96 next
-Plan: Phase 96 next — chosen second-provider thin slice
+Phase: 96
+Plan: 01
+Current Plan: 1 of 5
 Status: active
 Resume file: None
 Last activity: 2026-04-29 -- completed Phase 95 with explicit capability truth, support-label guards, and Fake-first conformance coverage
