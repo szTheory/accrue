@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.31
 milestone_name: milestone
 current_plan: 5 of 5
-status: active
-last_updated: "2026-04-29T21:42:36.540Z"
-last_activity: 2026-04-29 -- completed Phase 96 Plan 04
+status: completed
+last_updated: "2026-04-29T21:55:00.000Z"
+last_activity: 2026-04-29 -- completed Phase 96 Plan 05
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-28)
 Phase: 96
 Plan: 05
 Current Plan: 5 of 5
-Status: active
+Status: completed
 Resume file: None
-Last activity: 2026-04-29 -- completed Phase 96 Plan 04
+Last activity: 2026-04-29 -- completed Phase 96 Plan 05
 
 ## Milestone Progress
 
@@ -76,6 +76,7 @@ Last activity: 2026-04-29 -- completed Phase 96 Plan 04
 
 ## Recent Decisions
 
+- **2026-04-29:** **Phase 96 complete** — the Braintree-backed thin slice is implemented through the public facade with webhook lifecycle support. The canonical matrix, package docs, and example-host docs now mirror the bounded support story, and verifiers pin the new Phase 96 wording.
 - **2026-04-28:** **v1.31 opened** — maintenance-only follow-on work was rejected as diminishing-return territory after `1.0.0`; the project is now on a bounded **PROC-08** strategic track aimed at an official dual-provider core.
 - **2026-04-28:** **Persistent strategic tracking added** — `.planning/STRATEGY.md` is now the parent artifact for the processor-expansion epic so future milestones inherit the rationale instead of re-deriving it.
 - **2026-04-28:** **v1.31 traceability** — 5/5 requirements mapped: Phase 94 (**PROC-09**), Phase 95 (**PROC-10**, **PROC-11**), Phase 96 (**PROC-12**, **PROC-13**). No orphans, no duplicate ownership.

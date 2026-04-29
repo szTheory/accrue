@@ -38,7 +38,7 @@
 | PROC-09 | Phase 94 | Pending |
 | PROC-10 | Phase 95 | Complete |
 | PROC-11 | Phase 95 | Complete |
-| PROC-12 | Phase 96 | Pending |
-| PROC-13 | Phase 96 | Pending |
+| PROC-12 | Phase 96 | Complete |
+| PROC-13 | Phase 96 | Complete |
 
 **Coverage:** v1.31 requirements **5** total · Mapped **5** · Unmapped **0**

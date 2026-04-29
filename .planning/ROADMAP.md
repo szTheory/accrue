@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- **v1.31 PROC-08 Phase 1: boundary hardening + thin slice** — Phases **94–96** planned **2026-04-28**. Reopens the long-deferred second-processor track with written boundaries: strategy + capability matrix + target-provider lock, official processor conformance harness + boundary hardening, then one real second-provider vertical slice through the public billing facade. **Active strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
+- ✅ **v1.31 PROC-08 Phase 1: boundary hardening + thin slice** — Phases **94–96** shipped **2026-04-29**. Reopens the long-deferred second-processor track with written boundaries: strategy + capability matrix + target-provider lock, official processor conformance harness + boundary hardening, then one real second-provider vertical slice through the public billing facade. **Active strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** shipped **2026-04-28**. **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** closed; linked publish proof in **`092-VERIFICATION.md`**, planning closeout proof in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **Archives:** [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.30-phases/`](milestones/v1.30-phases/). **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0.
 - ✅ **v1.29 Mailglass Integration** — Phases **88–90** shipped **2026-04-26**. **MG-01..MG-07** validated; `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`. **Archives:** [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md), [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.29-phases/`](milestones/v1.29-phases/). **No** **PROC-08** / **FIN-03**.
 - **v1.28 Next linked publish continuity** — Phases **86–87** **Complete** **2026-04-24** (**`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**). **PPX-05..08** + **INV-06** closed in archived [`milestones/v1.28-REQUIREMENTS.md`](milestones/v1.28-REQUIREMENTS.md). **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
@@ -38,7 +38,7 @@
 ## Phases
 
 <details>
-<summary>🟡 v1.31 PROC-08 Phase 1: boundary hardening + thin slice (Phases 94–96) — ACTIVE</summary>
+<summary>✅ v1.31 PROC-08 Phase 1: boundary hardening + thin slice (Phases 94–96) — COMPLETE</summary>
 
 **Milestone goal:** Reopen **PROC-08** deliberately after `1.0.0` by keeping Stripe as the default first-user path while making official second-processor support real maintainer work. This milestone must lock the processor capability model, choose a Stripe-like target provider, harden the official processor boundary, and ship one real second-provider vertical slice through the public billing facade. **FIN-03** stays out of scope.
 
@@ -105,11 +105,11 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 96-01-PLAN.md — Add the Braintree-backed `subscribe/3` thin slice through the existing public billing seam.
-- [ ] 96-02-PLAN.md — Add processor-aware Braintree webhook verify/parse and lifecycle normalization.
-- [ ] 96-03-PLAN.md — Prove the slice in `examples/accrue_host` only after webhook/lifecycle completion, with a host-owned advisory Braintree lane.
-- [ ] 96-04-PLAN.md — Update the canonical matrix and package-facing docs to the bounded Phase 96 truth.
-- [ ] 96-05-PLAN.md — Mirror the bounded story into example-host docs and tighten verifier/validation contracts.
+- [x] 96-01-PLAN.md — Add the Braintree-backed `subscribe/3` thin slice through the existing public billing seam.
+- [x] 96-02-PLAN.md — Add processor-aware Braintree webhook verify/parse and lifecycle normalization.
+- [x] 96-03-PLAN.md — Prove the slice in `examples/accrue_host` only after webhook/lifecycle completion, with a host-owned advisory Braintree lane.
+- [x] 96-04-PLAN.md — Update the canonical matrix and package-facing docs to the bounded Phase 96 truth.
+- [x] 96-05-PLAN.md — Mirror the bounded story into example-host docs and tighten verifier/validation contracts.
 
 **Success Criteria:**
 1. One real second-provider vertical slice is executable through the documented public facade.
