@@ -213,4 +213,69 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
       assert attrs.last_finalization_error_code == "customer_tax_location_invalid"
     end
   end
+
+  describe "decompose/1 (Braintree shape)" do
+    test "decomposes braintree subscription transactions into an invoice and single line item" do
+      now_unix = DateTime.to_unix(DateTime.utc_now())
+
+      braintree_sub = %{
+        "id" => "sub_12345",
+        "plan_id" => "basic_plan",
+        "transactions" => [
+          %{
+            "id" => "tx_abcde",
+            "status" => "settled",
+            "amount" => 15.00,
+            "tax_amount" => 1.50,
+            "currency_iso_code" => "USD",
+            "created_at" => now_unix
+          }
+        ]
+      }
+
+      {:ok, %{invoice_attrs: attrs, item_attrs: items}} = InvoiceProjection.decompose(braintree_sub)
+
+      assert attrs.processor_id == "tx_abcde"
+      assert attrs.status == :paid
+      assert attrs.subtotal_minor == 1500.0
+      assert attrs.tax_minor == 150.0
+      assert attrs.total_minor == 1500.0
+      assert attrs.amount_due_minor == 0
+      assert attrs.amount_paid_minor == 1500
+      assert attrs.currency == "USD"
+      assert attrs.number == "tx_abcde"
+      assert attrs.billing_reason == "subscription_cycle"
+
+      assert length(items) == 1
+      [item] = items
+      assert item.stripe_id == "tx_abcde"
+      assert item.amount_minor == 1500.0
+      assert item.description == "Braintree subscription sub_12345"
+      assert item.price_ref == "basic_plan"
+    end
+
+    test "handles voided braintree transactions" do
+      now_unix = DateTime.to_unix(DateTime.utc_now())
+
+      braintree_sub = %{
+        "id" => "sub_12345",
+        "plan_id" => "basic_plan",
+        "transactions" => [
+          %{
+            "id" => "tx_abcde",
+            "status" => "voided",
+            "amount" => 15.00,
+            "tax_amount" => 1.50,
+            "currency_iso_code" => "USD",
+            "created_at" => now_unix
+          }
+        ]
+      }
+
+      {:ok, %{invoice_attrs: attrs}} = InvoiceProjection.decompose(braintree_sub)
+      assert attrs.status == :void
+      assert attrs.amount_due_minor == 1500
+      assert attrs.amount_paid_minor == 0
+    end
+  end
 end
