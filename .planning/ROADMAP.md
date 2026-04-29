@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- **v1.31 PROC-08 Phase 1: boundary hardening + thin slice** — Phases **94–96** planned **2026-04-28**. Reopens the long-deferred second-processor track with written boundaries: strategy + capability matrix + target-provider lock, official processor conformance harness + boundary hardening, then one real second-provider vertical slice through the public billing facade. **Active strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** shipped **2026-04-28**. **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** closed; linked publish proof in **`092-VERIFICATION.md`**, planning closeout proof in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **Archives:** [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.30-phases/`](milestones/v1.30-phases/). **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0.
 - ✅ **v1.29 Mailglass Integration** — Phases **88–90** shipped **2026-04-26**. **MG-01..MG-07** validated; `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`. **Archives:** [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md), [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.29-phases/`](milestones/v1.29-phases/). **No** **PROC-08** / **FIN-03**.
 - **v1.28 Next linked publish continuity** — Phases **86–87** **Complete** **2026-04-24** (**`086-VERIFICATION.md`**, **`087-VERIFICATION.md`**). **PPX-05..08** + **INV-06** closed in archived [`milestones/v1.28-REQUIREMENTS.md`](milestones/v1.28-REQUIREMENTS.md). **Spine B** (maintenance wrap-up). **No** **PROC-08** / **FIN-03**.
@@ -35,6 +36,73 @@
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
 ## Phases
+
+<details>
+<summary>🟡 v1.31 PROC-08 Phase 1: boundary hardening + thin slice (Phases 94–96) — ACTIVE</summary>
+
+**Milestone goal:** Reopen **PROC-08** deliberately after `1.0.0` by keeping Stripe as the default first-user path while making official second-processor support real maintainer work. This milestone must lock the processor capability model, choose a Stripe-like target provider, harden the official processor boundary, and ship one real second-provider vertical slice through the public billing facade. **FIN-03** stays out of scope.
+
+**Requirements:** **PROC-09..13** — see [REQUIREMENTS.md](REQUIREMENTS.md). **Strategic parent:** [STRATEGY.md](STRATEGY.md).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 94 | Strategy + capability matrix + target lock | Turn the processor expansion into written repo truth: persistent strategy tracker, capability matrix, target-provider decision, and explicit boundaries for the track. | PROC-09 |
+| 95 | Official processor contract + conformance harness | Make the supported processor slice provable across Stripe, Fake, and the chosen second provider; isolate or remove slice-blocking Stripe assumptions without broad abstraction churn. | PROC-10, PROC-11 |
+| 96 | Chosen second-provider thin slice | Ship one real provider-backed billing slice through the documented public facade and update public positioning so the processor track is honest and actionable. | PROC-12, PROC-13 |
+
+**Success criteria (milestone):**
+
+1. **PROC-09..13** are all mapped to Phases **94–96** with no orphaned strategic work hidden outside the milestone.
+2. Stripe remains the default first-user path while the repo gains a credible official second-processor story on the documented facade.
+3. **FIN-03** and merchant-of-record scope do not leak into the milestone.
+
+### Phase 94: Strategy + capability matrix + target lock
+
+**Goal:** Make the processor-expansion track decision-complete inside the repo before implementation spreads.
+
+**Depends on:** Phase 93.
+
+**Requirements:** PROC-09.
+
+**Plans:** 3 plans
+
+Plans:
+- [x] 094-01-PLAN.md — Rewrite the persistent strategy and project truth around the locked Braintree target, Fake-first proof lane, and gateway subscription core slice.
+- [x] 094-02-PLAN.md — Create the canonical processor support matrix, add a dedicated bash verifier, and wire it into docs-contracts-shift-left.
+- [x] 094-03-PLAN.md — Add the ExUnit shell-out smoke for the new matrix verifier and close the Phase 94 validation contract.
+
+**Success Criteria:**
+1. A persistent strategy artifact exists and clearly describes the dual-provider track, success condition, and non-goals.
+2. The official second-processor capability matrix names the supported slice and its required behaviours.
+3. A single Stripe-like target provider is chosen with written rationale and explicit exclusions.
+
+### Phase 95: Official processor contract + conformance harness
+
+**Goal:** Turn the current custom-processor extension point into an official first-party processor contract for the supported slice.
+
+**Depends on:** Phase 94.
+
+**Requirements:** PROC-10, PROC-11.
+
+**Success Criteria:**
+1. Stripe, Fake, and the chosen provider can be validated against one first-party conformance contract for the supported slice.
+2. Slice-blocking Stripe assumptions are isolated or removed from processor dispatch, config, tests, and the public integration seam.
+3. No broad processor-agnostic refactor lands unless it directly unblocks the chosen slice.
+
+### Phase 96: Chosen second-provider thin slice
+
+**Goal:** Prove Accrue can drive one real second-provider billing path through the documented public facade and describe that truth honestly to adopters.
+
+**Depends on:** Phase 95.
+
+**Requirements:** PROC-12, PROC-13.
+
+**Success Criteria:**
+1. One real second-provider vertical slice is executable through the documented public facade.
+2. Stripe and Fake non-regression remain intact for the same public billing path.
+3. Public docs and strategy notes are explicit about what is supported now versus what remains for the follow-on dual-provider milestone.
+
+</details>
 
 <details>
 <summary>✅ v1.29 Mailglass Integration (Phases 88–90) — SHIPPED 2026-04-26</summary>

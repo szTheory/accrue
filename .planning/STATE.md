@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.30
-milestone_name: INV-07 maintainer pass
-status: shipped
-last_updated: "2026-04-28T17:12:00Z"
-last_activity: 2026-04-28 -- planning tag `v1.30` verified on the final milestone-closing HEAD
+milestone: v1.31
+milestone_name: PROC-08 Phase 1
+status: active
+last_updated: "2026-04-29T17:30:00Z"
+last_activity: 2026-04-29 -- completed Phase 94, locked the Braintree support contract, and pointed Phase 95 at the official processor matrix
 progress:
   total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
@@ -20,17 +20,19 @@ See: `.planning/PROJECT.md` (updated 2026-04-28)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.30 archival closeout for the published `accrue` / `accrue_admin` `1.0.0` pair.
+**Current focus:** v1.31 PROC-08 Phase 1 — boundary hardening + thin slice on the processor-expansion track, while keeping the published `accrue` / `accrue_admin` `1.0.0` pair as the stable public release.
 
 ## Current Position
 
-Phase: v1.30 closed — next milestone pending
-Plan: No active plan; milestone archived and tagged
-Status: shipped
+Phase: Phase 94 complete — Phase 95 next
+Plan: Phase 95 next — official processor contract + conformance harness
+Status: active
 Resume file: None
-Last activity: 2026-04-28 -- planning tag `v1.30` verified on the final milestone-closing HEAD
+Last activity: 2026-04-29 -- completed Phase 94 with strategy, matrix, verifier, CI, and ExUnit contract coverage
 
 ## Milestone Progress
+
+**v1.31** (opened **2026-04-28**): **Phase 94 complete; Phases 95-96 planned** — **PROC-09..13**. Strategic aim: reopen the long-deferred second-processor track with written boundaries, keep Stripe as the default first-user story, and make real progress toward an official dual-provider core via strategy + capability lock, processor conformance + boundary hardening, and one real second-provider vertical slice. Phase 94 locked `Braintree`, the **gateway subscription core** slice, the processor-support matrix, the bash verifier, and ExUnit smoke coverage (`094-01-SUMMARY.md`, `094-02-SUMMARY.md`, `094-03-SUMMARY.md`). Strategic parent: **`.planning/STRATEGY.md`**. **FIN-03** remains out of scope.
 
 **v1.30** (opened **2026-04-26**, closed **2026-04-28**): **Phases 91-93 complete** — package-doc pins, host/adoption `1.0.0` needles, `release-manifest-ssot`, the six-script docs bundle, the host wrapper, the planning mirrors, the dated INV-07 maintainer pass, and the durable closeout ledger all have execution evidence (`091-VERIFICATION.md`, `092-01-SUMMARY.md`, `092-02-SUMMARY.md`, `092-VERIFICATION.md`, `092-03-SUMMARY.md`, `093-VERIFICATION.md`). Planning tag `v1.30` resolves to the final milestone-closing `HEAD` proven in `093-VERIFICATION.md`. Spine A — `1.0.0` declaration. **No** **PROC-08** / **FIN-03**.
 
@@ -47,12 +49,13 @@ Last activity: 2026-04-28 -- planning tag `v1.30` verified on the final mileston
 
 ## Current Planning Artifacts
 
-- **`.planning/ROADMAP.md`** — milestone index only; v1.30 is collapsed to the archive links and phase-tree pointer.
+- **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
+- **`.planning/ROADMAP.md`** — active milestone roadmap for **v1.31** (phases **94–96**) plus archived milestone index.
+- **`.planning/REQUIREMENTS.md`** — active **v1.31** requirements (**PROC-09..13**).
 - **`milestones/v1.30-ROADMAP.md`** / **`v1.30-REQUIREMENTS.md`** — final v1.30 archives (phases 91–93, all 12 requirements, final proof links, archived intact).
-- **`.planning/REQUIREMENTS.md`** — intentionally absent until the next milestone is defined.
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
 - **Phase 92 proof:** `092-VERIFICATION.md` is the canonical same-day linked `1.0.0` publish ledger; `093-VERIFICATION.md` reuses it and adds the final planning closeout ledger.
-- **Research (v1.30):** `093-RESEARCH.md` constrained Phase 93 to the planning mirror, INV-07, and tag closeout only; that scope is now complete.
+- **Strategic context:** `093-RESEARCH.md` closed the v1.30 maintenance posture; `STRATEGY.md` is now the parent context for the next product-expansion sequence.
 
 ## Deferred Items
 
@@ -70,6 +73,10 @@ Last activity: 2026-04-28 -- planning tag `v1.30` verified on the final mileston
 
 ## Recent Decisions
 
+- **2026-04-28:** **v1.31 opened** — maintenance-only follow-on work was rejected as diminishing-return territory after `1.0.0`; the project is now on a bounded **PROC-08** strategic track aimed at an official dual-provider core.
+- **2026-04-28:** **Persistent strategic tracking added** — `.planning/STRATEGY.md` is now the parent artifact for the processor-expansion epic so future milestones inherit the rationale instead of re-deriving it.
+- **2026-04-28:** **v1.31 traceability** — 5/5 requirements mapped: Phase 94 (**PROC-09**), Phase 95 (**PROC-10**, **PROC-11**), Phase 96 (**PROC-12**, **PROC-13**). No orphans, no duplicate ownership.
+- **2026-04-29:** **Phase 94 complete** — the repo now has a locked `Braintree` target, a canonical processor-support matrix, a dedicated `verify_processor_support_matrix.sh` gate, Phase 94 package-doc drift needles, and ExUnit shell-out coverage for both docs verifiers.
 - **2026-04-28:** **Phase 92 Plan 03 complete** — `092-VERIFICATION.md` now ties merged PR `#15`, release workflow run `25055758784`, GitHub release URLs, Hex `1.0.0` timestamps, `release-manifest-ssot`, the six-script docs bundle, and `host-integration` to the final REL-05 / PPX-09..12 closeout.
 - **2026-04-28:** **Phase 91 complete** — Reviewed SHA `3cca930` passed the full docs-contracts-shift-left bundle plus `host-integration`; REL-06, REL-07, DOC-03, and DOC-04 are now closed and the phase is ready to hand off to Phase 92 planning.
 - **2026-04-28:** **Phase 92 Plan 02 complete** — Reviewed `1.0.0` branch state passed `release-manifest-ssot`, the full `docs-contracts-shift-left` bundle, and `bash scripts/ci/accrue_host_uat.sh`; merged PR `#15` file list remains the canonical proof for the full release slice.
@@ -90,7 +97,7 @@ Last activity: 2026-04-28 -- planning tag `v1.30` verified on the final mileston
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Open the next milestone when priorities are ready; `v1.30` is closed and planning tag `v1.30` resolves to the final milestone-closing `HEAD`.
+**Next:** Execute **Phase 95** — official processor contract + conformance harness for the supported slice.
 
 **Completed (v1.29):** Phases **88–90** — **`milestones/v1.29-phases/`**; archives **`v1.29-ROADMAP.md`** + **`v1.29-REQUIREMENTS.md`**; tag **`v1.29`**.
 
