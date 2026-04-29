@@ -102,6 +102,14 @@ Plans:
 
 **Requirements:** PROC-12, PROC-13.
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 96-01-PLAN.md — Add the Braintree-backed `subscribe/3` thin slice through the existing public billing seam.
+- [ ] 96-02-PLAN.md — Add processor-aware Braintree webhook verify/parse and lifecycle normalization.
+- [ ] 96-03-PLAN.md — Prove the slice in `examples/accrue_host` with a host-owned advisory Braintree lane.
+- [ ] 96-04-PLAN.md — Mirror the bounded support truth across docs, scripts, and validation tracking.
+
 **Success Criteria:**
 1. One real second-provider vertical slice is executable through the documented public facade.
 2. Stripe and Fake non-regression remain intact for the same public billing path.
