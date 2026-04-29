@@ -45,5 +45,9 @@ require_substring "Accrue.Billing.create_billing_portal_session/2" "billing port
 require_substring "[:accrue, :billing, :billing_portal, :create]" "billing portal billing span tuple in matrix"
 require_substring "billing_portal_session_facade_test.exs" "billing portal facade ExUnit path in matrix"
 require_substring 'linked `1.0.0` pair' "linked 1.0.0 pair proof needle"
+require_substring "Fake remains the merge-blocking SSOT" "Fake-backed merge-blocking SSOT"
+require_substring "advisory" "advisory proof lane"
+require_substring "Braintree" "Braintree provider mention"
+require_substring "gateway subscription core" "gateway subscription core slice"
 
 echo "verify_adoption_proof_matrix: OK"

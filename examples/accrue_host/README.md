@@ -16,7 +16,10 @@ result in the mounted admin UI, then run the focused proof command.
 
 The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live
-Stripe credentials.
+Stripe credentials. Stripe remains the default first-user path, and Braintree
+is official only for the `gateway subscription core` slice. (Checkout and
+billing portal remain Stripe-only). The Braintree proof lane in
+`examples/accrue_host` is advisory while Fake remains the merge-blocking SSOT.
 
 **Sigra:** the example host depends on Sigra (not on Hex yet). `mix deps.get`
 pulls it from [szTheory/sigra](https://github.com/szTheory/sigra) by default so

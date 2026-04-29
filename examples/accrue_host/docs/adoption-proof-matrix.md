@@ -2,7 +2,7 @@
 
 This matrix answers: **what is proven, where, and against what kind of “realism”?**
 
-Accrue intentionally splits proof into a **deterministic Fake-first lane** (blocking PR CI) and a **Stripe test-mode provider parity lane** (advisory, scheduled / manual). There is no in-repo “digital twin” of Stripe; `lattice_stripe` talks to Stripe when configured, and `Accrue.Processor.Fake` simulates processor-shaped behavior for speed and CI stability.
+Accrue intentionally splits proof into a **deterministic Fake-first lane** (blocking PR CI) and live provider parity lanes (advisory, scheduled / manual). There is no in-repo “digital twin” of Stripe or Braintree; `lattice_stripe` talks to Stripe when configured, `Accrue.Processor.Fake` simulates processor-shaped behavior for speed and CI stability. Stripe remains the default first-user path, and Braintree is official only for the `gateway subscription core` slice. (Checkout and billing portal remain Stripe-only). The Braintree proof lane in `examples/accrue_host` is advisory while Fake remains the merge-blocking SSOT.
 This matrix is refreshed for the linked `1.0.0` pair: the same merge-blocking host/docs proof still attests the coordinated `accrue` + `accrue_admin` release surface after the first public major.
 
 ## Layering note (local proof vs merge-blocking CI)
