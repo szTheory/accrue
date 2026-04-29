@@ -1,9 +1,11 @@
 # Custom Processors
 
-Accrue ships with Stripe and the Fake Processor, but the processor boundary is
+Accrue ships with Stripe, Braintree (official for the `gateway subscription core` slice), and the Fake Processor. The processor boundary remains
 an explicit extension point. A custom adapter should implement the documented
 behaviour and return the same shape of `{:ok, map}` or `{:error, exception}`
 results that the billing context already expects.
+
+Stripe remains the default first-user path. `Accrue.Billing.create_checkout_session/2` and `Accrue.Billing.create_billing_portal_session/2` remain Stripe-only.
 
 Do not use a custom processor to fake undocumented parity with every Stripe
 feature. The contract is the public `Accrue.Processor` behaviour, and host apps

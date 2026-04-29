@@ -105,7 +105,7 @@ Use `Oban.Testing` for queue assertions and `perform_job/2` when the test needs 
 
 Use the Fake Processor for normal test coverage, then keep a small provider-parity suite for behaviors where Stripe itself is the contract: SCA/3DS cards, Stripe test clocks, hosted checkout redirect behavior, and webhook signatures. Tag those tests separately so local development and CI do not depend on network calls by default.
 
-For the staged processor-expansion track, Fake is the merge-blocking source of truth for the official thin slice: direct subscription creation, vault acquisition, webhook verify/parse, and lifecycle projection rows. Provider-backed checks stay in the provider-parity lane.
+For the staged processor-expansion track, Fake is the merge-blocking source of truth for the official gateway subscription core slice: direct subscription creation, vault acquisition, webhook verify/parse, and lifecycle projection rows. Provider-backed Stripe and Braintree checks stay in the explicitly advisory provider-parity lane. Checkout and billing portal remain Stripe-only.
 
 ## Usage metering (Fake)
 

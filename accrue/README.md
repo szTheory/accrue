@@ -54,7 +54,7 @@ Optional checks from the host app:
 ## What you get
 
 - Billing domain: customers, subscriptions, invoices, charges, refunds, coupons, promotion codes, metered usage.
-- Money paths: Checkout, billing portal, Connect helpers behind one processor contract (Stripe in production, Fake in test).
+- Money paths: Checkout, billing portal, Connect helpers behind one processor contract. Stripe remains the default first-user path in production (Fake in test), while Braintree is official only for the `gateway subscription core` slice. `Accrue.Billing.create_checkout_session/2` and `Accrue.Billing.create_billing_portal_session/2` remain Stripe-only.
 - Operations: webhook ingest, async dispatch, replay, event history, telemetry.
 - Product polish: transactional email, invoice PDFs, installer tasks.
 
