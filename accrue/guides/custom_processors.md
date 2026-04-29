@@ -9,6 +9,11 @@ Do not use a custom processor to fake undocumented parity with every Stripe
 feature. The contract is the public `Accrue.Processor` behaviour, and host apps
 should rely on the documented billing facade rather than adapter internals.
 
+Custom adapters are also **outside first-party support** unless Accrue names
+them in the official processor-support matrix. Implementing the behaviour does
+not automatically place an adapter inside parity promises, release gates, or
+the official multi-processor support contract.
+
 ## Behaviour contract
 
 A custom adapter starts with the behaviour declaration:

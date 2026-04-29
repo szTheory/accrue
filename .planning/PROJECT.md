@@ -10,6 +10,33 @@ Tagline: *"Billing state, modeled clearly."*
 
 **A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one** — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
+## Current milestone
+
+### v1.31 — PROC-08 Phase 1: boundary hardening + thin slice (**opened 2026-04-28**)
+
+**Goal:** Reopen **PROC-08** with written boundaries, keep Stripe as the default first-user path, and make substantive product progress toward an official dual-provider core by hardening the processor boundary, choosing a Stripe-like second provider, and shipping one real provider-backed vertical slice through the public billing facade.
+
+**Target features:**
+
+- **PROC-09** — Persistent strategy tracking for the processor expansion epic, a capability matrix for the official second-processor contract, and a locked target-provider decision with written rationale.
+- **PROC-10** — First-party processor conformance harness that makes Stripe, Fake, and the chosen second processor prove the same required capability contract for the supported slice.
+- **PROC-11** — Bounded processor-boundary hardening that removes slice-blocking Stripe assumptions from config, dispatch, tests, and public integration seams without broad abstraction churn.
+- **PROC-12** — One real second-provider billing slice exposed through the documented public facade, with Stripe/Fake non-regression still intact.
+- **PROC-13** — Honest strategy and adopter docs: Stripe-first by default, but official second-processor work is now active and explicitly scoped.
+
+**Key context:**
+
+- The repo's post-`1.0.0` maintenance posture did its job: there are no open P0/P1 maintainer-friction rows, the proof contracts are green, and another maintenance-only milestone would likely produce diminishing returns.
+- **PROC-08** was explicitly reaffirmed as out of scope at `1.0.0`; this milestone is the deliberate reprioritization that reopens it with written boundaries rather than by accident.
+- The strategic target is **Stripe plus one Stripe-like gateway**, not a merchant-of-record pivot and not a finance/accounting expansion.
+- The locked second provider for this milestone is **Braintree**, and the official first-party support promise is the **gateway subscription core** slice rather than generic processor parity.
+- **Accrue.Billing.subscribe/3** is the primary public-facade candidate for the second-provider thin slice; **`Accrue.Billing.create_checkout_session/2`** and **`Accrue.Billing.create_billing_portal_session/2`** remain **Stripe-first** until another first-party processor proves them honestly.
+- **Fake** remains the deterministic merge-blocking proof lane; provider-backed runs are fidelity checks for supported features, not the primary development loop.
+- Custom processors remain an extension point, but they stay outside first-party support unless they are explicitly named in the official processor-support matrix.
+- **FIN-03** remains out of scope. Stripe stays the fastest path for a Phoenix SaaS team adopting Accrue today.
+
+**Phase numbering:** continues from v1.30 → starts at **Phase 94**.
+
 ## Last shipped milestone
 
 ### v1.30 — `1.0.0` Declaration (Spine A) (**archived 2026-04-28**)
@@ -149,28 +176,30 @@ Tagline: *"Billing state, modeled clearly."*
 
 ### Non-goals (until reprioritized in a future milestone)
 
-**PROC-08** (second processor) and **FIN-03** (app-owned finance exports) remain **explicitly out of scope** until a later milestone prioritizes them with written boundaries. **Stripe Dashboard** meter setup UX stays host/Stripe documentation unless a future requirement explicitly pulls UI scope in.
+**FIN-03** (app-owned finance exports) remains **explicitly out of scope** until a later milestone prioritizes it with written boundaries. **Stripe Dashboard** meter setup UX stays host/Stripe documentation unless a future requirement explicitly pulls UI scope in.
+
+**PROC-08** is no longer a parked non-goal in the abstract: it has been **reopened in v1.31** as a bounded strategic track toward an official dual-provider core. The track remains constrained to **Stripe-like gateway** work and does **not** imply a merchant-of-record or accounting-surface expansion.
 
 ### Reaffirmed at 1.0.0 (2026-04-26)
 
-- **PROC-08 (second processor):** explicit non-goal at 1.0.0; revisit only via later-milestone reprioritization with written boundaries.
+- **PROC-08 (second processor):** explicit non-goal at 1.0.0; reopened on **2026-04-28** via **v1.31** with written boundaries and a persistent strategy tracker.
 - **FIN-03 (app-owned finance exports):** explicit non-goal at 1.0.0; Accrue is a billing/subscription library, not an accounting system; revisit only via later-milestone reprioritization with written boundaries.
 
 ## Next Milestone Goals
 
-- Open the next milestone only after priorities are explicitly reset with fresh requirements via `$gsd-new-milestone`.
-- Keep `.planning/REQUIREMENTS.md` absent until the next milestone scope is written; the shipped v1.30 requirements now live only in the archive.
-- Treat post-1.0 work as deliberate reprioritization, not implicit follow-on scope from the `1.0.0` declaration.
+- Execute **v1.31** as the first active milestone in the **PROC-08** strategy track recorded in [STRATEGY.md](STRATEGY.md).
+- Keep the next milestone substantial: provider selection, boundary hardening, conformance proof, and one real second-provider slice must all move forward in the same milestone.
+- Preserve the Stripe-first first-user path while making official multi-processor support a real maintainer commitment rather than a planted seed.
 
 ## Current State
 
-Current focus: **post-v1.30 archived posture (2026-04-28)** — the linked **`accrue` / `accrue_admin` `1.0.0`** pair is published, the planning mirrors are closed, the dated **INV-07** maintainer certification is on disk, and planning tag **`v1.30`** resolves to the final archival closeout `HEAD` recorded in **`093-VERIFICATION.md`**.
+Current focus: **v1.31 — PROC-08 Phase 1 (2026-04-28)** — the linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, but the planning posture has intentionally moved from maintenance-only closeout into a bounded second-processor expansion track.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
 Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
 
-Current milestone: none active. **v1.30** is archived and closed: see [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md), and [`milestones/v1.30-phases/`](milestones/v1.30-phases/).
+Current milestone: **v1.31** is active. Requirements live in [REQUIREMENTS.md](REQUIREMENTS.md), roadmap lives in [ROADMAP.md](ROADMAP.md), and the parent strategy tracker lives in [STRATEGY.md](STRATEGY.md). **v1.30** is archived and closed: see [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md), and [`milestones/v1.30-phases/`](milestones/v1.30-phases/).
 
 **Last shipped planning milestone:** **v1.29** — Phases **88–90** (**2026-04-26**): **MG-01..MG-07**; **`milestones/v1.29-*`**; execution trees **`milestones/v1.29-phases/`**; planning tag **`v1.29`**. **Prior:** **v1.28** — Phases **86–87** (**2026-04-24**): **PPX-05..08**, **INV-06**; **`milestones/v1.28-*`**; execution trees **`milestones/v1.28-phases/`**; not separately tagged. **Earlier:** **v1.27** — Phases **84–85**; **`v1.27-*`** + **`v1.27-phases/`**; tag **`v1.27`**. **v1.26** — Phases **82–83**; **`v1.26-*`** + **`v1.26-phases/`**; tag **`v1.26`**. **v1.25** — Phases **79–81**; **`v1.25-*`** + **`v1.25-phases/`**; tag **`v1.25`**. **v1.24** — Phases **76–78**; **`v1.24-*`** + **`v1.24-phases/`**; tag **`v1.24`**. **v1.23** — Phase **75** (**PPX-01..04**); **`v1.23-*`** + **`v1.23-phases/`**; **`v1.17-P1-002`** closed; tag **`v1.23`**. **v1.22** — Phase **74**; **`v1.22-*`**; tag **`v1.22`**. **v1.21** — Phases **72–73**; **`v1.21-*`** + **`v1.21-phases/`**; tag **`v1.21`**. **v1.20** — Phases **70–71**; **`v1.20-*`** + **`v1.20-phases/`**; tag **`v1.20`**. **v1.19** — Phases **67–69**; **`v1.19-*`** + **`v1.19-phases/`**; tag **`v1.19`**. **v1.18** — Phase **66**; **`v1.18-phases/`**; tag **`v1.18`**. **v1.17** — **`v1.17-*`** + **`v1.17-phases/`**; tag **`v1.17`**.
 
