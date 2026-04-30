@@ -10,7 +10,7 @@ defmodule AccrueHost.Billing do
   import Ecto.Query, only: [from: 2]
 
   alias Accrue.Billing
-  alias Accrue.Billing.Customer
+  alias Accrue.Billing.{Customer, PaymentMethod}
   alias Accrue.Billing.Subscription
   alias AccrueHost.Accounts.Scope
   alias AccrueHost.Repo
@@ -94,6 +94,32 @@ defmodule AccrueHost.Billing do
     end
   end
 
+  def add_payment_method_with_vault_reference(%Scope{} = scope, vault_reference, opts \\ []) do
+    with {:ok, customer} <- customer_for_scope(scope),
+         :ok <- authorize_billing_mutation(scope) do
+      Billing.add_payment_method(customer, %{vault_acquisition: %{reference: vault_reference}}, opts)
+    end
+  end
+
+  def replace_payment_method_with_vault_reference(
+        %Scope{} = scope,
+        %PaymentMethod{} = payment_method,
+        vault_reference,
+        opts \\ []
+      ) do
+    with {:ok, customer} <- customer_for_scope(scope),
+         :ok <- authorize_billing_mutation(scope),
+         :ok <- authorize_customer_payment_method(customer, payment_method) do
+      make_default? = Keyword.get(opts, :make_default, true)
+
+      Billing.update_payment_method(
+        payment_method,
+        %{replacement_reference: vault_reference, make_default: make_default?},
+        Keyword.delete(opts, :make_default)
+      )
+    end
+  end
+
   def update_active_organization_tax_location(%Scope{} = scope, attrs) when is_map(attrs) do
     with {:ok, organization} <- organization_from_scope(scope),
          :ok <- authorize_billing_mutation(scope) do
@@ -126,6 +152,14 @@ defmodule AccrueHost.Billing do
        do: :ok
 
   defp authorize_billing_mutation(%Scope{}), do: {:error, :forbidden}
+
+  defp authorize_customer_payment_method(
+         %Customer{id: customer_id},
+         %PaymentMethod{customer_id: customer_id}
+       ),
+       do: :ok
+
+  defp authorize_customer_payment_method(%Customer{}, %PaymentMethod{}), do: {:error, :forbidden}
 
   defp find_customer(%{__struct__: mod, id: id}) do
     billable_type = mod.__accrue__(:billable_type)
