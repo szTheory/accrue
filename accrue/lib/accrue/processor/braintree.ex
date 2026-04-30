@@ -13,6 +13,7 @@ defmodule Accrue.Processor.Braintree do
   @impl Accrue.Processor
   def capabilities do
     %{
+      customer: %{create: true, retrieve: true, update: true},
       payment_method: %{
         vault_acquisition: true,
         create: true,
@@ -81,13 +82,32 @@ defmodule Accrue.Processor.Braintree do
     |> Map.from_struct()
     |> Map.put(:items, translated_items(sub))
   end
+
   # Customer
   @impl Accrue.Processor
-  def create_customer(_params, _opts), do: {:error, unsupported()}
+  def create_customer(params, opts) when is_map(params) and is_list(opts) do
+    case customer_gateway().create(translate_customer_params(params), opts) do
+      {:ok, customer} -> {:ok, translate_customer(customer)}
+      {:error, raw} -> {:error, to_accrue_error(raw)}
+    end
+  end
+
   @impl Accrue.Processor
-  def retrieve_customer(_id, _opts), do: {:error, unsupported()}
+  def retrieve_customer(id, opts) when is_binary(id) and is_list(opts) do
+    case customer_gateway().find(id, opts) do
+      {:ok, customer} -> {:ok, translate_customer(customer)}
+      {:error, raw} -> {:error, to_accrue_error(raw)}
+    end
+  end
+
   @impl Accrue.Processor
-  def update_customer(_id, _params, _opts), do: {:error, unsupported()}
+  def update_customer(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    case customer_gateway().update(id, translate_customer_params(params), opts) do
+      {:ok, customer} -> {:ok, translate_customer(customer)}
+      {:error, raw} -> {:error, to_accrue_error(raw)}
+    end
+  end
 
   # Subscription
   @impl Accrue.Processor
@@ -432,7 +452,53 @@ defmodule Accrue.Processor.Braintree do
       {:error,
        invalid_request(
          "Braintree update_payment_method requires replacement_reference for replacement semantics on #{id}."
-       )}
+      )}
+    end
+  end
+
+  defp translate_customer(customer) do
+    %{
+      id: Map.get(customer, :id),
+      name: customer_name(customer),
+      email: Map.get(customer, :email),
+      metadata: Map.get(customer, :custom_fields, %{})
+    }
+  end
+
+  defp translate_customer_params(params) do
+    params
+    |> stringify_keys()
+    |> maybe_move_name_to_company()
+  end
+
+  defp maybe_move_name_to_company(%{"name" => name} = params) when is_binary(name) and name != "" do
+    params
+    |> Map.put_new("company", name)
+    |> Map.delete("name")
+  end
+
+  defp maybe_move_name_to_company(params), do: params
+
+  defp customer_name(customer) do
+    company = Map.get(customer, :company)
+    first_name = Map.get(customer, :first_name)
+    last_name = Map.get(customer, :last_name)
+
+    cond do
+      is_binary(company) and company != "" ->
+        company
+
+      is_binary(first_name) and is_binary(last_name) ->
+        String.trim("#{first_name} #{last_name}")
+
+      is_binary(first_name) ->
+        first_name
+
+      is_binary(last_name) ->
+        last_name
+
+      true ->
+        nil
     end
   end
 
@@ -470,6 +536,12 @@ defmodule Accrue.Processor.Braintree do
   end
 
   defp truthy?(value), do: value in [true, "true", 1, "1"]
+
+  defp stringify_keys(params) do
+    for {key, value} <- params, into: %{} do
+      {to_string(key), value}
+    end
+  end
 
   defp invalid_request(message) do
     %APIError{

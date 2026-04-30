@@ -4,12 +4,25 @@ defmodule Accrue.Processor.BraintreeTest do
   alias Accrue.Processor.Braintree
 
   defmodule CustomerGatewayStub do
+    def create(params, _opts) do
+      {:ok,
+       %{
+         id: "cus_bt_123",
+         company: params["company"],
+         email: params["email"],
+         custom_fields: %{"source" => "stubbed"}
+       }}
+    end
+
     def find(id, _opts) do
       {:ok,
        %{
-         id: id,
-         default_payment_method_token: "pm_bt_default_1111",
-         payment_methods: [
+          id: id,
+          company: "ACME Billing",
+          email: "billing@example.com",
+          custom_fields: %{"source" => "stubbed"},
+          default_payment_method_token: "pm_bt_default_1111",
+          payment_methods: [
            %{
              token: "pm_bt_default_1111",
              default: true,
@@ -33,7 +46,13 @@ defmodule Accrue.Processor.BraintreeTest do
     end
 
     def update(id, params, _opts) do
-      {:ok, Map.put(params, :id, id)}
+      {:ok,
+       %{
+         id: id,
+         company: params["company"] || "ACME Billing",
+         email: params["email"] || "billing@example.com",
+         custom_fields: %{"source" => "stubbed"}
+       }}
     end
   end
 
@@ -222,6 +241,26 @@ defmodule Accrue.Processor.BraintreeTest do
     assert accrue_map.plan_id == "premium_monthly"
     assert accrue_map.status == "Active"
     assert [%{id: "sub_123:plan", price: %{id: "premium_monthly"}, quantity: 1}] = accrue_map.items
+  end
+
+  test "customer callbacks create, retrieve, and update through the gateway" do
+    assert {:ok, created} =
+             Braintree.create_customer(%{name: "ACME Billing", email: "billing@example.com"}, [])
+
+    assert created.id == "cus_bt_123"
+    assert created.name == "ACME Billing"
+    assert created.email == "billing@example.com"
+    assert created.metadata == %{"source" => "stubbed"}
+
+    assert {:ok, retrieved} = Braintree.retrieve_customer("cus_bt_123", [])
+    assert retrieved.name == "ACME Billing"
+    assert retrieved.email == "billing@example.com"
+
+    assert {:ok, updated} =
+             Braintree.update_customer("cus_bt_123", %{name: "Updated Billing"}, [])
+
+    assert updated.id == "cus_bt_123"
+    assert updated.name == "Updated Billing"
   end
 
   test "update_subscription/3 maps a plan swap onto Braintree update" do

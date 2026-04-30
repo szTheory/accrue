@@ -4,6 +4,7 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
   @host_root Path.expand("../..", __DIR__)
 
   alias Accrue.Billing.PaymentMethod
+  alias Accrue.Processor.Braintree
   alias AccrueHost.Accounts.Scope
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Billing
@@ -53,89 +54,79 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
       Agent.get(__MODULE__, & &1.last_update_call)
     end
 
-    def processor_name, do: "braintree"
-
-    def capabilities do
-      %{
-        customer: %{create: true, retrieve: true, update: true},
-        payment_method: %{
-          vault_acquisition: true,
-          list: true,
-          create: true,
-          update: true,
-          delete: true,
-          set_default: true
-        },
-        subscription: %{direct_create: true, fetch: true, cancel: true, update: true},
-        invoice: %{lifecycle_webhook_projection: true},
-        webhook: %{verify: true, parse: true}
-      }
-    end
-
-    def create_customer(params, _opts) do
+    def create_customer(params) do
       customer = %{
         id: "cus_bt_host_scope",
-        email: params[:email] || params["email"],
-        name: params[:name] || params["name"],
-        metadata: %{}
+        company: params["company"],
+        email: params["email"],
+        custom_fields: %{}
       }
 
       Agent.update(__MODULE__, &Map.put(&1, :customer, customer))
       {:ok, customer}
     end
 
-    def retrieve_customer(id, _opts) do
-      {:ok, Agent.get(__MODULE__, &(&1.customer || %{id: id, email: nil, name: nil, metadata: %{}}))}
+    def retrieve_customer(id) do
+      {:ok,
+       Agent.get(__MODULE__, fn state ->
+         base = state.customer || %{id: id, company: nil, email: nil, custom_fields: %{}}
+
+         base
+         |> Map.put(:payment_methods, Map.values(state.payment_methods))
+         |> Map.put(:default_payment_method_token, state.default_payment_method_id)
+       end)}
     end
 
-    def create_payment_method(params, _opts) do
-      reference = get_in(params, [:vault_acquisition, :reference]) || get_in(params, ["vault_acquisition", "reference"])
+    def create_payment_method(params) do
+      reference = params[:payment_method_nonce] || params["payment_method_nonce"]
 
       payment_method = payment_method(reference, params)
 
       Agent.update(__MODULE__, fn state ->
         state
         |> Map.put(:last_create_params, Map.new(params))
-        |> put_in([:payment_methods, payment_method.id], payment_method)
+        |> put_in([:payment_methods, payment_method.token], payment_method)
+        |> maybe_set_initial_default(payment_method.token)
       end)
 
       {:ok, payment_method}
     end
 
-    def retrieve_payment_method(id, _opts) do
+    def retrieve_payment_method(id) do
       case Agent.get(__MODULE__, &get_in(&1, [:payment_methods, id])) do
         nil -> {:error, %Accrue.APIError{code: "not_found", http_status: 404, message: "payment method #{id} not found"}}
         payment_method -> {:ok, payment_method}
       end
     end
 
-    def list_payment_methods(%{customer: customer_id}, _opts) do
+    def list_payment_methods(%{customer: customer_id}) do
       methods =
         __MODULE__
         |> Agent.get(& &1.payment_methods)
         |> Map.values()
-        |> Enum.filter(&(&1.customer == customer_id))
+        |> Enum.filter(&(&1.customer_id == customer_id))
 
       {:ok, %{data: methods}}
     end
 
-    def list_payment_methods(_params, _opts), do: {:ok, %{data: []}}
+    def list_payment_methods(_params), do: {:ok, %{data: []}}
 
-    def update_payment_method(id, params, _opts) do
-      with {:ok, existing} <- retrieve_payment_method(id, []),
+    def update_payment_method(id, params) do
+      with {:ok, existing} <- retrieve_payment_method(id),
            replacement_reference when is_binary(replacement_reference) <-
-             Map.get(params, :replacement_reference) || params["replacement_reference"] do
+             Map.get(params, :payment_method_nonce) || params["payment_method_nonce"] do
         replacement =
           replacement_reference
           |> payment_method(params)
-          |> Map.put(:id, "pm_bt_repl_" <> suffix(replacement_reference))
-          |> Map.put(:customer, existing.customer)
+          |> Map.put(:token, "pm_bt_repl_" <> suffix(replacement_reference))
+          |> Map.put(:customer_id, existing.customer_id)
 
         Agent.update(__MODULE__, fn state ->
           state
           |> Map.put(:last_update_call, %{id: id, params: Map.new(params)})
           |> update_in([:payment_methods], &Map.delete(&1, id))
-          |> put_in([:payment_methods, replacement.id], replacement)
+          |> put_in([:payment_methods, replacement.token], replacement)
+          |> maybe_promote_default(replacement, id)
         end)
 
         {:ok, replacement}
@@ -150,9 +141,9 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
       end
     end
 
-    def detach_payment_method(id, _opts), do: retrieve_payment_method(id, [])
+    def detach_payment_method(id), do: retrieve_payment_method(id)
 
-    def set_default_payment_method(_customer_id, params, _opts) do
+    def set_default_payment_method(_customer_id, params) do
       default_id =
         get_in(params, [:invoice_settings, :default_payment_method]) ||
           get_in(params, ["invoice_settings", "default_payment_method"])
@@ -163,18 +154,18 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
 
     defp payment_method(reference, params) do
       %{
-        id: "pm_bt_" <> suffix(reference),
-        object: "payment_method",
-        type: "card",
-        customer: params[:customer] || params["customer"],
-        default: Map.get(params, :make_default, Map.get(params, "make_default", false)),
-        card: %{
-          brand: "visa",
-          last4: String.slice(reference, -4, 4),
-          exp_month: 12,
-          exp_year: 2035,
-          fingerprint: "fp_" <> suffix(reference)
-        }
+        token: "pm_bt_" <> suffix(reference),
+        customer_id:
+          params[:customer_id] || params["customer_id"] || params[:customer] || params["customer"],
+        default:
+          get_in(params, [:options, :make_default]) ||
+            get_in(params, ["options", "make_default"]) ||
+            Map.get(params, :make_default, Map.get(params, "make_default", false)),
+        card_type: "visa",
+        last_4: String.slice(reference, -4, 4),
+        expiration_month: 12,
+        expiration_year: 2035,
+        unique_number_identifier: "fp_" <> suffix(reference)
       }
     end
 
@@ -183,11 +174,45 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
       |> String.replace(~r/[^a-zA-Z0-9]/, "")
       |> String.downcase()
     end
+
+    defp maybe_promote_default(state, replacement, previous_token) do
+      if state.default_payment_method_id == previous_token || replacement.default do
+        Map.put(state, :default_payment_method_id, replacement.token)
+      else
+        state
+      end
+    end
+
+    defp maybe_set_initial_default(state, token) do
+      if is_nil(state.default_payment_method_id) do
+        Map.put(state, :default_payment_method_id, token)
+      else
+        state
+      end
+    end
+  end
+
+  defmodule CustomerGatewayStub do
+    def create(params, _opts), do: BraintreePaymentMethodStub.create_customer(params)
+    def find(id, _opts), do: BraintreePaymentMethodStub.retrieve_customer(id)
+    def update(id, _params, _opts), do: BraintreePaymentMethodStub.retrieve_customer(id)
+  end
+
+  defmodule PaymentMethodGatewayStub do
+    def create(params, _opts), do: BraintreePaymentMethodStub.create_payment_method(params)
+    def find(id, _opts), do: BraintreePaymentMethodStub.retrieve_payment_method(id)
+    def update(id, params, _opts), do: BraintreePaymentMethodStub.update_payment_method(id, params)
+    def delete(id, _opts), do: BraintreePaymentMethodStub.detach_payment_method(id)
   end
 
   setup do
     previous = Application.get_env(:accrue, :processor)
-    Application.put_env(:accrue, :processor, BraintreePaymentMethodStub)
+    previous_customer_gateway = Application.get_env(:accrue, :braintree_customer_gateway)
+    previous_payment_method_gateway = Application.get_env(:accrue, :braintree_payment_method_gateway)
+
+    Application.put_env(:accrue, :processor, Braintree)
+    Application.put_env(:accrue, :braintree_customer_gateway, CustomerGatewayStub)
+    Application.put_env(:accrue, :braintree_payment_method_gateway, PaymentMethodGatewayStub)
     :ok = BraintreePaymentMethodStub.reset()
 
     on_exit(fn ->
@@ -195,6 +220,18 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
         Application.put_env(:accrue, :processor, previous)
       else
         Application.delete_env(:accrue, :processor)
+      end
+
+      if previous_customer_gateway do
+        Application.put_env(:accrue, :braintree_customer_gateway, previous_customer_gateway)
+      else
+        Application.delete_env(:accrue, :braintree_customer_gateway)
+      end
+
+      if previous_payment_method_gateway do
+        Application.put_env(:accrue, :braintree_payment_method_gateway, previous_payment_method_gateway)
+      else
+        Application.delete_env(:accrue, :braintree_payment_method_gateway)
       end
     end)
 
@@ -226,8 +263,8 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
 
     create_params = BraintreePaymentMethodStub.last_create_params()
 
-    assert create_params["customer"] == customer.processor_id
-    assert get_in(create_params, ["vault_acquisition", "reference"]) == "host_nonce_4242"
+    assert create_params[:customer_id] == customer.processor_id
+    assert create_params[:payment_method_nonce] == "host_nonce_4242"
 
     source = File.read!(Path.join(@host_root, "lib/accrue_host/billing.ex"))
     assert source =~ "def add_payment_method_with_vault_reference(%Scope{} = scope, vault_reference, opts \\\\ []) do"
@@ -255,7 +292,7 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
     update_call = BraintreePaymentMethodStub.last_update_call()
 
     assert update_call.id == original.processor_id
-    assert update_call.params["make_default"] == true
-    assert update_call.params["replacement_reference"] == "host_nonce_2222"
+    assert get_in(update_call.params, [:options, :make_default]) == true
+    assert update_call.params[:payment_method_nonce] == "host_nonce_2222"
   end
 end
