@@ -1,7 +1,6 @@
 defmodule Accrue.Billing.PaymentMethodListTest do
   @moduledoc """
-  Phase 95 — `Accrue.Billing.list_payment_methods/2` now hard-fails as
-  out-of-slice public surface instead of implying Stripe/Fake parity.
+  Phase 98 keeps `list_payment_methods/2` as a local-row-first read model.
   """
   # Async false: global `Accrue.Processor.Fake` + `ConnectCase`'s full
   # `Fake.reset/0` can interleave with `BillingCase`'s `reset_preserve_connect/0`
@@ -32,14 +31,11 @@ defmodule Accrue.Billing.PaymentMethodListTest do
     %{customer: customer}
   end
 
-  test "list_payment_methods returns the unsupported-operation tuple", %{customer: cus} do
+  test "list_payment_methods returns local payment-method rows without provider fetches", %{customer: cus} do
     {:ok, %{id: pm_id}} = Fake.create_payment_method(%{type: "card"}, [])
 
-    assert {:ok, %PaymentMethod{}} = Billing.attach_payment_method(cus, pm_id)
-
-    assert {:error, %Accrue.APIError{code: "processor_operation_unsupported"} = error} =
-             Billing.list_payment_methods(cus, [])
-
-    assert error.message =~ "does not support payment-method listing"
+    assert {:ok, %PaymentMethod{} = attached} = Billing.attach_payment_method(cus, pm_id)
+    assert {:ok, listed} = Billing.list_payment_methods(cus, [])
+    assert Enum.map(listed, & &1.id) == [attached.id]
   end
 end

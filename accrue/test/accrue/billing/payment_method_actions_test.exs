@@ -42,4 +42,17 @@ defmodule Accrue.Billing.PaymentMethodActionsTest do
       Billing.list_payment_methods!(customer, [])
     end
   end
+
+  test "canonical payment-method CRUD verbs are exported from Accrue.Billing" do
+    exports = Accrue.Billing.module_info(:exports)
+
+    assert {:add_payment_method, 3} in exports
+    assert {:add_payment_method!, 3} in exports
+    assert {:update_payment_method, 3} in exports
+    assert {:update_payment_method!, 3} in exports
+    assert {:delete_payment_method, 2} in exports
+    assert {:delete_payment_method!, 2} in exports
+    assert {:sync_payment_methods, 2} in exports
+    assert {:sync_payment_methods!, 2} in exports
+  end
 end
