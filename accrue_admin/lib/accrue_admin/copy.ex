@@ -457,6 +457,10 @@ defmodule AccrueAdmin.Copy do
     to: CustomerPaymentMethods,
     as: :delete_warning
 
+  defdelegate customer_payment_methods_cancel_action(),
+    to: CustomerPaymentMethods,
+    as: :cancel_action
+
   defdelegate customer_payment_methods_delete_blocked_in_use(),
     to: CustomerPaymentMethods,
     as: :delete_blocked_in_use

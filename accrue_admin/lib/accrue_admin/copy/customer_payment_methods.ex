@@ -40,6 +40,9 @@ defmodule AccrueAdmin.Copy.CustomerPaymentMethods do
   def delete_warning, do: "Review dependencies before you continue."
 
   @doc false
+  def cancel_action, do: "Cancel"
+
+  @doc false
   def delete_blocked_in_use, do: "This payment method still funds an active subscription."
 
   @doc false

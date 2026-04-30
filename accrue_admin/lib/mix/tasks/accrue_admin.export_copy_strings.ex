@@ -51,6 +51,7 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     customer_payment_methods_delete_action
     customer_payment_methods_delete_success
     customer_payment_methods_delete_warning
+    customer_payment_methods_cancel_action
     customer_payment_methods_delete_blocked_in_use
     customer_payment_methods_delete_blocked_replacement_required
     customer_payment_methods_replace_handoff

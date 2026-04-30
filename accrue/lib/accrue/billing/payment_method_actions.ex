@@ -126,7 +126,11 @@ defmodule Accrue.Billing.PaymentMethodActions do
     customer = Repo.get!(Customer, payment_method.customer_id)
 
     with :ok <- ensure_delete_allowed(customer, payment_method),
-         {:ok, _} <- Processor.__impl__().detach_payment_method(payment_method.processor_id, []),
+         {:ok, _} <-
+           Processor.__impl__().detach_payment_method(
+             payment_method.processor_id,
+             sanitize_opts(opts)
+           ),
          {:ok, _synced} <- sync_payment_methods(customer, opts),
          {:ok, _} <-
            record_event("payment_method.deleted", payment_method, %{
@@ -180,9 +184,11 @@ defmodule Accrue.Billing.PaymentMethodActions do
       when is_binary(pm_processor_id) do
     op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
     idem_key = Idempotency.key(:attach_payment_method, customer.id, op_id)
+    sanitized_opts = sanitize_opts(opts)
 
     Repo.transact(fn ->
-      with {:ok, canonical} <- Processor.__impl__().retrieve_payment_method(pm_processor_id, []),
+      with {:ok, canonical} <-
+             Processor.__impl__().retrieve_payment_method(pm_processor_id, sanitized_opts),
            fingerprint = get_card_fingerprint(canonical),
            {:ok, pm} <-
              dedup_or_attach(customer, canonical, fingerprint, pm_processor_id, idem_key, opts),
@@ -224,7 +230,8 @@ defmodule Accrue.Billing.PaymentMethodActions do
           attach_and_insert(customer, pm_processor_id, idem_key, opts)
         rescue
           Ecto.ConstraintError ->
-            {:ok, _} = Processor.__impl__().detach_payment_method(pm_processor_id, [])
+            {:ok, _} =
+              Processor.__impl__().detach_payment_method(pm_processor_id, sanitize_opts(opts))
 
             winner =
               Repo.get_by!(PaymentMethod,
@@ -236,7 +243,9 @@ defmodule Accrue.Billing.PaymentMethodActions do
         end
 
       %PaymentMethod{} = existing ->
-        {:ok, _} = Processor.__impl__().detach_payment_method(pm_processor_id, [])
+        {:ok, _} =
+          Processor.__impl__().detach_payment_method(pm_processor_id, sanitize_opts(opts))
+
         {:ok, %{existing | existing?: true}}
     end
   end
@@ -274,9 +283,13 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
   @spec detach_payment_method(PaymentMethod.t(), keyword()) ::
           {:ok, PaymentMethod.t()} | {:error, term()}
-  def detach_payment_method(%PaymentMethod{} = payment_method, _opts \\ []) do
+  def detach_payment_method(%PaymentMethod{} = payment_method, opts \\ []) do
     Repo.transact(fn ->
-      with {:ok, _} <- Processor.__impl__().detach_payment_method(payment_method.processor_id, []),
+      with {:ok, _} <-
+             Processor.__impl__().detach_payment_method(
+               payment_method.processor_id,
+               sanitize_opts(opts)
+             ),
            {:ok, _} <- Repo.delete(payment_method),
            {:ok, _} <-
              record_event("payment_method.detached", payment_method, %{

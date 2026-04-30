@@ -274,11 +274,12 @@ defmodule AccrueAdmin.CustomerLiveTest do
 
   test "payment_methods tab exposes only server-driven operator controls and host-handoff copy", %{
     conn: conn,
-    customer: customer
+    customer: customer,
+    deletable_payment_method: deletable_payment_method
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} =
+    assert {:ok, view, html} =
              live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
 
     assert html =~ "Sync payment methods"
@@ -288,6 +289,16 @@ defmodule AccrueAdmin.CustomerLiveTest do
     refute html =~ "Card number"
     refute html =~ "Drop-in"
     refute html =~ "Hosted Fields"
+
+    html =
+      render_click(
+        element(
+          view,
+          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{deletable_payment_method.id}']"
+        )
+      )
+
+    assert html =~ Copy.customer_payment_methods_cancel_action()
   end
 
   test "payment_methods tab runs set default and sync through LiveView events", %{

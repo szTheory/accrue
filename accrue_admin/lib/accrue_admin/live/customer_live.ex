@@ -337,7 +337,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                     class="ax-button ax-button-ghost"
                     phx-click="cancel_delete_payment_method"
                   >
-                    Cancel
+                    <%= Copy.customer_payment_methods_cancel_action() %>
                   </button>
                 </div>
               </section>

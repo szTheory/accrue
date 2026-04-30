@@ -56,11 +56,22 @@ defmodule Accrue.Processor.CapabilitiesTest do
 
   test "known adapters report the staged contract rows explicitly" do
     stripe_caps = Capabilities.for(Accrue.Processor.Stripe)
+    braintree_caps = Capabilities.for(Accrue.Processor.Braintree)
 
     assert get_in(stripe_caps, [:payment_method, :vault_acquisition]) == true
+    assert get_in(stripe_caps, [:payment_method, :list]) == true
     assert get_in(stripe_caps, [:subscription, :direct_create]) == true
     assert get_in(stripe_caps, [:subscription, :lifecycle_webhook_projection]) == true
     assert get_in(stripe_caps, [:invoice, :lifecycle_webhook_projection]) == true
+
+    assert get_in(braintree_caps, [:payment_method, :list]) == true
+    assert get_in(braintree_caps, [:subscription, :update]) == true
+    assert get_in(braintree_caps, [:subscription, :cancel_immediately]) == true
+    assert get_in(braintree_caps, [:subscription, :cancel_at_period_end]) == false
+    assert get_in(braintree_caps, [:subscription, :pause]) == false
+    assert Capabilities.support_label([:subscription, :update]) == "staged first-party target"
+    assert Capabilities.support_label([:subscription, :cancel_immediately]) ==
+             "staged first-party target"
   end
 
   test "custom adapters only advertise the leaves they declare" do
@@ -89,7 +100,7 @@ defmodule Accrue.Processor.CapabilitiesTest do
     assert Processor.supports?([:checkout, :hosted])
     refute Processor.supports?([:checkout, :embedded])
     assert Processor.support_label([:subscription, :direct_create]) == "all first-party"
-    assert Processor.support_label([:payment_method, :list]) == "out of slice"
+    assert Processor.support_label([:payment_method, :list]) == "all first-party"
     refute Processor.first_party_supported?([:subscription, :direct_create])
     assert Processor.first_party_supported?([:customer, :create])
   end
