@@ -13,6 +13,8 @@ Accrue intentionally splits processor truth into a **deterministic Fake-first la
 - **Braintree:** locked Stripe-like gateway target for the official second-provider track.
 - **Custom processors:** extension-point adapters outside first-party support, parity promises, release gates, and the official matrix unless named explicitly here.
 
+For the Phase 97 subscription-mutation slice, the required Braintree proof is hermetic: checked-in Fake/mock host coverage proves the generic facade path locally and in CI with no network access. Any real-provider Braintree run is fidelity evidence only and stays advisory unless a later phase explicitly promotes it.
+
 ## Official first-party capability slice
 
 The first official dual-provider promise is **gateway subscription core**:
@@ -32,6 +34,11 @@ The first official dual-provider promise is **gateway subscription core**:
 | customer.retrieve | Required | Required | Required target | all first-party |
 | customer.update | Supported | Supported | Staged target | staged first-party target |
 | payment_method.vault_acquisition | Deterministic proof | Supported | Required target | all first-party |
+| payment_method.create | Supported via attach-style compatibility | Supported | Required target | all first-party |
+| payment_method.list | Supported via local projection | Supported | Required target | all first-party |
+| payment_method.update | Unsupported | Supported | Required target | all first-party |
+| payment_method.delete | Supported via detach-style compatibility | Supported | Required target | all first-party |
+| payment_method.set_default | Supported | Supported | Required target | all first-party |
 | subscription.direct_create | Required | Required | Required target | all first-party |
 | subscription.fetch | Required | Required | Required target | all first-party |
 | subscription.cancel | Supported | Supported | Staged target | staged first-party target |
@@ -44,18 +51,24 @@ The first official dual-provider promise is **gateway subscription core**:
 
 The `Stripe-only` rows stay visible because they are real public APIs today, but they are not part of the first official second-provider promise. They remain **Stripe-first** until another first-party processor proves them honestly.
 
+Phase 97 extends the shipped Braintree slice to include explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is supported in the shipped slice, while quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
+
 ## Public facade API mapping
 
 | Public API | Label | Notes |
 |------------|-------|-------|
 | `Accrue.Billing.subscribe/3` | all first-party | Primary gateway-subscription-core facade for the second-provider slice. |
 | `Accrue.Billing.get_subscription/2` | all first-party | Read side required for lifecycle truth on the supported slice. |
-| `Accrue.Billing.cancel/2` | staged first-party target | Existing Stripe/Fake behavior remains, but Braintree parity is not promised in Phase 95. |
+| `Accrue.Billing.cancel/2` | all first-party | Included in the shipped Braintree mutation slice with hermetic host proof and webhook convergence coverage. |
 | `Accrue.Billing.create_customer/1` | all first-party | Customer creation remains part of the supported facade boundary. |
 | `Accrue.Billing.update_customer/2` | staged first-party target | Existing behavior remains, but this row is not yet part of the merge-blocking thin slice. |
+| `Accrue.Billing.add_payment_method/3` | all first-party | Canonical add verb; Braintree accepts only the narrow vault-acquisition handoff. |
+| `Accrue.Billing.update_payment_method/3` | all first-party | Replacement-oriented payment-method update semantics. |
+| `Accrue.Billing.delete_payment_method/2` | all first-party | Guarded delete that blocks still-in-use and replacement-required paths. |
+| `Accrue.Billing.set_default_payment_method/3` | all first-party | Explicit customer-default mutation remains canonical. |
+| `Accrue.Billing.list_payment_methods/2` | all first-party | Local projection read path; provider fetches are reserved for write-through sync and repair. |
 | `Accrue.Billing.create_checkout_session/2` | Stripe-only | Valuable public API, but not part of the first official second-provider promise. |
 | `Accrue.Billing.create_billing_portal_session/2` | Stripe-only | Valuable public API, but not part of the first official second-provider promise. |
-| `Accrue.Billing.list_payment_methods/2` | out of slice | Payment-method CRUD beyond minimal vault acquisition is not in the first slice. |
 | `Accrue.Billing.subscribe_via_schedule/3` | out of slice | Advanced subscription scheduling is intentionally deferred. |
 | `Accrue.Billing.preview_upcoming_invoice/2` | out of slice | Preview/proration parity is not part of gateway subscription core. |
 

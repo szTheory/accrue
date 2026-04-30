@@ -297,6 +297,42 @@ defmodule Accrue.Billing do
   end
 
   # ── PaymentMethod management ──────────────────────────────────────
+  def add_payment_method(customer, attrs_or_id, opts \\ []) do
+    span_billing(:payment_method, :add, customer, opts, fn ->
+      PaymentMethodActions.add_payment_method(customer, attrs_or_id, opts)
+    end)
+  end
+
+  def add_payment_method!(customer, attrs_or_id, opts \\ []) do
+    span_billing(:payment_method, :add, customer, opts, fn ->
+      PaymentMethodActions.add_payment_method!(customer, attrs_or_id, opts)
+    end)
+  end
+
+  def update_payment_method(payment_method, attrs, opts \\ []) do
+    span_billing(:payment_method, :update, payment_method, opts, fn ->
+      PaymentMethodActions.update_payment_method(payment_method, attrs, opts)
+    end)
+  end
+
+  def update_payment_method!(payment_method, attrs, opts \\ []) do
+    span_billing(:payment_method, :update, payment_method, opts, fn ->
+      PaymentMethodActions.update_payment_method!(payment_method, attrs, opts)
+    end)
+  end
+
+  def delete_payment_method(payment_method, opts \\ []) do
+    span_billing(:payment_method, :delete, payment_method, opts, fn ->
+      PaymentMethodActions.delete_payment_method(payment_method, opts)
+    end)
+  end
+
+  def delete_payment_method!(payment_method, opts \\ []) do
+    span_billing(:payment_method, :delete, payment_method, opts, fn ->
+      PaymentMethodActions.delete_payment_method!(payment_method, opts)
+    end)
+  end
+
   def attach_payment_method(customer, pm_id_or_opts, opts \\ []) do
     span_billing(:payment_method, :attach, customer, opts, fn ->
       PaymentMethodActions.attach_payment_method(customer, pm_id_or_opts, opts)
@@ -334,12 +370,7 @@ defmodule Accrue.Billing do
   end
 
   @doc """
-  Returns `processor_operation_unsupported` for `customer` in Phase 95.
-
-  `Accrue.Billing.list_payment_methods/2` remains a public compatibility seam,
-  but processor-side listing is intentionally **out of slice** for the
-  official first-party contract. Delegates to
-  `Accrue.Billing.PaymentMethodActions.list_payment_methods/2`.
+  Returns locally projected payment methods for `customer`.
   """
   def list_payment_methods(customer, opts \\ []) do
     span_billing(:payment_method, :list, customer, opts, fn ->
@@ -355,6 +386,18 @@ defmodule Accrue.Billing do
   def list_payment_methods!(customer, opts \\ []) do
     span_billing(:payment_method, :list, customer, opts, fn ->
       PaymentMethodActions.list_payment_methods!(customer, opts)
+    end)
+  end
+
+  def sync_payment_methods(customer, opts \\ []) do
+    span_billing(:payment_method, :sync, customer, opts, fn ->
+      PaymentMethodActions.sync_payment_methods(customer, opts)
+    end)
+  end
+
+  def sync_payment_methods!(customer, opts \\ []) do
+    span_billing(:payment_method, :sync, customer, opts, fn ->
+      PaymentMethodActions.sync_payment_methods!(customer, opts)
     end)
   end
 

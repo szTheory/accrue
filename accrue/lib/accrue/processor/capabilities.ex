@@ -16,16 +16,20 @@ defmodule Accrue.Processor.Capabilities do
     },
     payment_method: %{
       vault_acquisition: "all first-party",
-      list: "out of slice"
+      create: "all first-party",
+      list: "all first-party",
+      update: "all first-party",
+      delete: "all first-party",
+      set_default: "all first-party"
     },
     subscription: %{
       direct_create: "all first-party",
       fetch: "all first-party",
       cancel: "staged first-party target",
       lifecycle_webhook_projection: "all first-party",
-      update: "out of slice",
-      cancel_at_period_end: "out of slice",
-      cancel_immediately: "out of slice",
+      update: "staged first-party target",
+      cancel_at_period_end: "staged first-party target",
+      cancel_immediately: "staged first-party target",
       pause: "out of slice",
       resume: "out of slice"
     },

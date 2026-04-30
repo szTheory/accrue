@@ -1,48 +1,25 @@
 defmodule Accrue.Billing.PaymentMethodActions do
   @moduledoc """
-  Payment method write surface.
+  Payment method orchestration.
 
-  Ships four public entry points, all exposed via `defdelegate` on
-  `Accrue.Billing`:
+  Canonical CRUD verbs are projection-first:
 
-    * `attach_payment_method/3` — attaches a processor-side payment
-      method to a customer, with **fingerprint dedup**. If an existing
-      PaymentMethod row for the same `(customer_id, fingerprint)`
-      exists, the processor-side duplicate is detached and the existing
-      row is returned with `existing?: true`. A concurrent race that
-      slips past the application-level check hits the
-      `accrue_payment_methods_customer_fingerprint_idx` partial unique
-      index and is rescued via `Ecto.ConstraintError`.
-    * `detach_payment_method/2` — detaches on the processor and deletes
-      the local row.
-    * `set_default_payment_method/3` — asserts `pm.customer_id ==
-      customer.id` (strict attachment check) and raises
-      `Accrue.Error.NotAttached` otherwise. Never silently wires a
-      foreign PM as a customer default.
-    * `list_payment_methods/2` — public compatibility seam that now
-      fails early with `processor_operation_unsupported` because
-      processor-side listing is outside the official first-party slice
-      in Phase 95. Optional keyword filters are still validated so the
-      surface can be promoted later without an arity break.
+    * `add_payment_method/3`
+    * `update_payment_method/3`
+    * `delete_payment_method/2`
+    * `set_default_payment_method/3`
+    * `list_payment_methods/2`
+    * `sync_payment_methods/2`
 
-  ## `list_payment_methods/2` options
-
-  | Key | Type | Notes |
-  |-----|------|-------|
-  | `type` | string | Stripe `type` filter (e.g. `\"card\"`). |
-  | `limit` | pos_integer | Page size for Stripe list. |
-  | `starting_after` | string | Pagination cursor. |
-  | `ending_before` | string | Pagination cursor. |
-  | `operation_id` | string | Dropped before the wire; reserved for parity with write paths. |
-
-  Empty `[]` is always valid. Additional host-visible filters can extend
-  this schema in a minor release without changing the arity.
+  Legacy `attach_payment_method/3` and `detach_payment_method/2` stay in place
+  as compatibility wrappers for the existing Stripe/Fake semantics.
   """
 
   import Ecto.Query, only: [from: 2]
 
   alias Accrue.Actor
-  alias Accrue.Billing.{Customer, PaymentMethod}
+  alias Accrue.APIError
+  alias Accrue.Billing.{Customer, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Processor
   alias Accrue.Processor.Idempotency
@@ -58,15 +35,145 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
   @list_payment_method_param_keys [:type, :limit, :starting_after, :ending_before]
 
+  @spec add_payment_method(Customer.t(), map() | String.t(), keyword()) ::
+          {:ok, PaymentMethod.t()} | {:error, term()}
+  def add_payment_method(customer, attrs_or_id, opts \\ [])
+
+  def add_payment_method(%Customer{} = customer, pm_processor_id, opts)
+      when is_binary(pm_processor_id) do
+    attach_payment_method(customer, pm_processor_id, opts)
+  end
+
+  def add_payment_method(%Customer{} = customer, attrs, opts)
+      when is_map(attrs) and is_list(opts) do
+    op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
+    idem_key = Idempotency.key(:add_payment_method, customer.id, op_id)
+
+    params =
+      attrs
+      |> stringify_keys()
+      |> Map.put("customer", customer.processor_id)
+
+    with :ok <- validate_add_params(params),
+         {:ok, created} <-
+           Processor.__impl__().create_payment_method(
+             params,
+             [idempotency_key: idem_key] ++ sanitize_opts(opts)
+           ),
+         {:ok, _synced} <- sync_payment_methods(customer, opts),
+         {:ok, payment_method} <- get_payment_method(customer.id, get_field(created, :id)),
+         {:ok, _} <-
+           record_event("payment_method.added", payment_method, %{
+             processor_id: payment_method.processor_id
+           }) do
+      {:ok, payment_method}
+    end
+  end
+
+  @spec add_payment_method!(Customer.t(), map() | String.t(), keyword()) :: PaymentMethod.t()
+  def add_payment_method!(%Customer{} = customer, attrs, opts \\ []) do
+    case add_payment_method(customer, attrs, opts) do
+      {:ok, payment_method} -> payment_method
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "add_payment_method!/3 failed: #{inspect(other)}"
+    end
+  end
+
+  @spec update_payment_method(PaymentMethod.t(), map(), keyword()) ::
+          {:ok, PaymentMethod.t()} | {:error, term()}
+  def update_payment_method(%PaymentMethod{} = payment_method, attrs, opts \\ [])
+      when is_map(attrs) and is_list(opts) do
+    customer = Repo.get!(Customer, payment_method.customer_id)
+    make_default? = Map.get(attrs, :make_default, Map.get(attrs, "make_default", false))
+    op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
+    idem_key = Idempotency.key(:update_payment_method, payment_method.id, op_id)
+
+    params =
+      attrs
+      |> stringify_keys()
+      |> Map.put_new("customer", customer.processor_id)
+
+    with {:ok, updated} <-
+           Processor.__impl__().update_payment_method(
+             payment_method.processor_id,
+             params,
+             [idempotency_key: idem_key] ++ sanitize_opts(opts)
+           ),
+         {:ok, _synced} <- sync_payment_methods(customer, opts),
+         refreshed_customer = Repo.get!(Customer, customer.id),
+         {:ok, replacement} <- get_payment_method(customer.id, get_field(updated, :id)),
+         {:ok, _customer} <- maybe_set_default(refreshed_customer, replacement, make_default?),
+         {:ok, _} <-
+           record_event("payment_method.updated", replacement, %{
+             replaced_payment_method_id: payment_method.id
+           }) do
+      {:ok, replacement}
+    end
+  end
+
+  @spec update_payment_method!(PaymentMethod.t(), map(), keyword()) :: PaymentMethod.t()
+  def update_payment_method!(%PaymentMethod{} = payment_method, attrs, opts \\ []) do
+    case update_payment_method(payment_method, attrs, opts) do
+      {:ok, replacement} -> replacement
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "update_payment_method!/3 failed: #{inspect(other)}"
+    end
+  end
+
+  @spec delete_payment_method(PaymentMethod.t(), keyword()) ::
+          {:ok, PaymentMethod.t()} | {:error, term()}
+  def delete_payment_method(%PaymentMethod{} = payment_method, opts \\ []) do
+    customer = Repo.get!(Customer, payment_method.customer_id)
+
+    with :ok <- ensure_delete_allowed(customer, payment_method),
+         {:ok, _} <- Processor.__impl__().detach_payment_method(payment_method.processor_id, []),
+         {:ok, _synced} <- sync_payment_methods(customer, opts),
+         {:ok, _} <-
+           record_event("payment_method.deleted", payment_method, %{
+             processor_id: payment_method.processor_id
+           }) do
+      {:ok, payment_method}
+    end
+  end
+
+  @spec delete_payment_method!(PaymentMethod.t(), keyword()) :: PaymentMethod.t()
+  def delete_payment_method!(%PaymentMethod{} = payment_method, opts \\ []) do
+    case delete_payment_method(payment_method, opts) do
+      {:ok, payment_method} -> payment_method
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "delete_payment_method!/2 failed: #{inspect(other)}"
+    end
+  end
+
+  @spec sync_payment_methods(Customer.t(), keyword()) ::
+          {:ok, [PaymentMethod.t()]} | {:error, term()}
+  def sync_payment_methods(%Customer{} = customer, opts \\ []) when is_list(opts) do
+    if Processor.supports?([:payment_method, :list]) do
+      params = list_params_for_processor(customer, opts)
+
+      with {:ok, remote} <-
+             Processor.__impl__().list_payment_methods(params, sanitize_opts(opts)),
+           {:ok, payment_methods} <- reproject_payment_methods(customer, remote_payment_methods(remote)) do
+        {:ok, payment_methods}
+      end
+    else
+      list_payment_methods(customer, opts)
+    end
+  end
+
+  @spec sync_payment_methods!(Customer.t(), keyword()) :: [PaymentMethod.t()]
+  def sync_payment_methods!(%Customer{} = customer, opts \\ []) when is_list(opts) do
+    case sync_payment_methods(customer, opts) do
+      {:ok, payment_methods} -> payment_methods
+      {:error, err} when is_exception(err) -> raise err
+      {:error, other} -> raise "sync_payment_methods!/2 failed: #{inspect(other)}"
+    end
+  end
+
   # ---------------------------------------------------------------------
-  # attach_payment_method/3
+  # Compatibility wrappers
   # ---------------------------------------------------------------------
 
-  @doc """
-  Attaches a processor-side payment method to a customer with fingerprint
-  dedup. Returns `{:ok, %PaymentMethod{}}`; the `existing?: true`
-  virtual flag is set when dedup hit an existing row.
-  """
   @spec attach_payment_method(Customer.t(), String.t(), keyword()) ::
           {:ok, PaymentMethod.t()} | {:error, term()}
   def attach_payment_method(%Customer{} = customer, pm_processor_id, opts \\ [])
@@ -89,7 +196,6 @@ defmodule Accrue.Billing.PaymentMethodActions do
     end)
   end
 
-  @doc "Raising variant of `attach_payment_method/3`."
   @spec attach_payment_method!(Customer.t(), String.t(), keyword()) :: PaymentMethod.t()
   def attach_payment_method!(%Customer{} = customer, pm_processor_id, opts \\ []) do
     case attach_payment_method(customer, pm_processor_id, opts) do
@@ -99,7 +205,6 @@ defmodule Accrue.Billing.PaymentMethodActions do
     end
   end
 
-  # nil fingerprint: always fresh insert (cannot dedup without a key)
   defp dedup_or_attach(customer, _canonical, nil, pm_processor_id, idem_key, opts) do
     attach_and_insert(customer, pm_processor_id, idem_key, opts)
   end
@@ -119,9 +224,6 @@ defmodule Accrue.Billing.PaymentMethodActions do
           attach_and_insert(customer, pm_processor_id, idem_key, opts)
         rescue
           Ecto.ConstraintError ->
-            # Race: another process inserted concurrently between our
-            # SELECT and INSERT. Detach the loser's Stripe PM and return
-            # the winner's row.
             {:ok, _} = Processor.__impl__().detach_payment_method(pm_processor_id, [])
 
             winner =
@@ -134,7 +236,6 @@ defmodule Accrue.Billing.PaymentMethodActions do
         end
 
       %PaymentMethod{} = existing ->
-        # Dupe found at application level: detach the new Stripe PM.
         {:ok, _} = Processor.__impl__().detach_payment_method(pm_processor_id, [])
         {:ok, %{existing | existing?: true}}
     end
@@ -171,59 +272,44 @@ defmodule Accrue.Billing.PaymentMethodActions do
     end
   end
 
-  # ---------------------------------------------------------------------
-  # detach_payment_method/2
-  # ---------------------------------------------------------------------
-
-  @doc """
-  Detaches a payment method from its customer on the processor and
-  deletes the local row in the same transaction.
-  """
   @spec detach_payment_method(PaymentMethod.t(), keyword()) ::
           {:ok, PaymentMethod.t()} | {:error, term()}
-  def detach_payment_method(%PaymentMethod{} = pm, _opts \\ []) do
+  def detach_payment_method(%PaymentMethod{} = payment_method, _opts \\ []) do
     Repo.transact(fn ->
-      with {:ok, _} <- Processor.__impl__().detach_payment_method(pm.processor_id, []),
-           {:ok, _} <- Repo.delete(pm),
+      with {:ok, _} <- Processor.__impl__().detach_payment_method(payment_method.processor_id, []),
+           {:ok, _} <- Repo.delete(payment_method),
            {:ok, _} <-
-             record_event("payment_method.detached", pm, %{
-               processor_id: pm.processor_id
+             record_event("payment_method.detached", payment_method, %{
+               processor_id: payment_method.processor_id
              }) do
-        {:ok, pm}
+        {:ok, payment_method}
       end
     end)
   end
 
-  @doc "Raising variant of `detach_payment_method/2`."
   @spec detach_payment_method!(PaymentMethod.t(), keyword()) :: PaymentMethod.t()
-  def detach_payment_method!(pm, opts \\ []) do
-    case detach_payment_method(pm, opts) do
-      {:ok, pm} -> pm
+  def detach_payment_method!(payment_method, opts \\ []) do
+    case detach_payment_method(payment_method, opts) do
+      {:ok, payment_method} -> payment_method
       {:error, err} when is_exception(err) -> raise err
       {:error, other} -> raise "detach_payment_method!/2 failed: #{inspect(other)}"
     end
   end
 
   # ---------------------------------------------------------------------
-  # set_default_payment_method/3
+  # Shared helpers
   # ---------------------------------------------------------------------
 
-  @doc """
-  Sets a payment method as the customer's default. Raises
-  `Accrue.Error.NotAttached` if `pm.customer_id != customer.id` —
-  strict attachment check, never silently wires a foreign PM as
-  default.
-  """
   @spec set_default_payment_method(Customer.t(), PaymentMethod.t(), keyword()) ::
           {:ok, Customer.t()} | {:error, term()}
-  def set_default_payment_method(%Customer{} = customer, %PaymentMethod{} = pm, opts \\ []) do
-    unless pm.customer_id == customer.id do
+  def set_default_payment_method(%Customer{} = customer, %PaymentMethod{} = payment_method, opts \\ []) do
+    unless payment_method.customer_id == customer.id do
       raise Accrue.Error.NotAttached,
         customer_id: customer.id,
-        payment_method_id: pm.id,
+        payment_method_id: payment_method.id,
         message:
           "Accrue.Billing.set_default_payment_method/2 refused to wire " <>
-            "payment_method #{inspect(pm.id)} as the default for " <>
+            "payment_method #{inspect(payment_method.id)} as the default for " <>
             "customer #{inspect(customer.id)} because the PM is attached " <>
             "to a different customer. Call attach_payment_method/2 first."
     end
@@ -235,73 +321,215 @@ defmodule Accrue.Billing.PaymentMethodActions do
       with {:ok, _} <-
              Processor.__impl__().set_default_payment_method(
                customer.processor_id,
-               %{invoice_settings: %{default_payment_method: pm.processor_id}},
+               %{invoice_settings: %{default_payment_method: payment_method.processor_id}},
                [idempotency_key: idem_key] ++ sanitize_opts(opts)
              ),
-           {:ok, updated} <-
-             customer
-             |> Customer.changeset(%{default_payment_method_id: pm.id})
-             |> Repo.update(),
+           {:ok, updated} <- update_customer_default(customer, payment_method.id),
            {:ok, _} <-
              record_event("customer.default_payment_method_changed", updated, %{
-               payment_method_id: pm.id
+               payment_method_id: payment_method.id
              }) do
         {:ok, updated}
       end
     end)
   end
 
-  @doc "Raising variant of `set_default_payment_method/3`."
   @spec set_default_payment_method!(Customer.t(), PaymentMethod.t(), keyword()) :: Customer.t()
-  def set_default_payment_method!(customer, pm, opts \\ []) do
-    case set_default_payment_method(customer, pm, opts) do
-      {:ok, c} -> c
+  def set_default_payment_method!(customer, payment_method, opts \\ []) do
+    case set_default_payment_method(customer, payment_method, opts) do
+      {:ok, customer} -> customer
       {:error, err} when is_exception(err) -> raise err
       {:error, other} -> raise "set_default_payment_method!/3 failed: #{inspect(other)}"
     end
   end
 
-  # ---------------------------------------------------------------------
-  # list_payment_methods/2
-  # ---------------------------------------------------------------------
-
-  @doc """
-  Returns `processor_operation_unsupported` for Phase 95.
-
-  Processor-side payment-method listing is intentionally out of slice for the
-  official first-party contract. The API stays in place so callers get a clear
-  error now instead of silent Stripe-parity assumptions.
-  """
   @spec list_payment_methods(Customer.t(), keyword()) ::
-          {:ok, map()} | {:error, term()}
+          {:ok, [PaymentMethod.t()]} | {:error, term()}
   def list_payment_methods(%Customer{} = customer, opts \\ []) when is_list(opts) do
     NimbleOptions.validate!(opts, @list_payment_methods_opts_schema)
-
-    with :ok <- ensure_payment_method_list_support() do
-      params = list_params_for_processor(customer, opts)
-
-      processor_opts =
-        opts
-        |> Keyword.drop(@list_payment_method_param_keys)
-        |> sanitize_opts()
-
-      Processor.__impl__().list_payment_methods(params, processor_opts)
-    end
+    {:ok, local_payment_methods(customer)}
   end
 
-  @doc "Raising variant of `list_payment_methods/2`."
-  @spec list_payment_methods!(Customer.t(), keyword()) :: map()
+  @spec list_payment_methods!(Customer.t(), keyword()) :: [PaymentMethod.t()]
   def list_payment_methods!(%Customer{} = customer, opts \\ []) when is_list(opts) do
-    case list_payment_methods(customer, opts) do
-      {:ok, body} -> body
-      {:error, err} when is_exception(err) -> raise err
-      {:error, other} -> raise "list_payment_methods!/2 failed: #{inspect(other)}"
+    {:ok, payment_methods} = list_payment_methods(customer, opts)
+    payment_methods
+  end
+
+  defp reproject_payment_methods(%Customer{} = customer, remote_payment_methods) do
+    Repo.transact(fn ->
+      existing =
+        Repo.all(from p in PaymentMethod, where: p.customer_id == ^customer.id)
+
+      existing_by_processor_id = Map.new(existing, &{&1.processor_id, &1})
+      remote_ids = MapSet.new(Enum.map(remote_payment_methods, &get_field(&1, :id)))
+
+      synced_rows =
+        Enum.map(remote_payment_methods, fn remote_payment_method ->
+          attrs = payment_method_attrs(customer, remote_payment_method)
+          processor_id = attrs.processor_id
+
+          case Map.get(existing_by_processor_id, processor_id) do
+            nil ->
+              %PaymentMethod{}
+              |> PaymentMethod.changeset(attrs)
+              |> Repo.insert!()
+
+            %PaymentMethod{} = existing_row ->
+              existing_row
+              |> PaymentMethod.changeset(attrs)
+              |> Repo.update!()
+          end
+        end)
+
+      Enum.each(existing, fn existing_row ->
+        unless MapSet.member?(remote_ids, existing_row.processor_id) do
+          {:ok, _deleted_row} = Repo.delete(existing_row)
+        end
+      end)
+
+      default_processor_id =
+        Enum.find_value(remote_payment_methods, fn remote_payment_method ->
+          if truthy?(get_field(remote_payment_method, :default)),
+            do: get_field(remote_payment_method, :id)
+        end)
+
+      default_row =
+        Enum.find(synced_rows, fn row ->
+          row.processor_id == default_processor_id
+        end)
+
+      Enum.each(synced_rows, fn row ->
+        row
+        |> PaymentMethod.changeset(%{is_default: default_row != nil and row.id == default_row.id})
+        |> Repo.update!()
+      end)
+
+      _updated_customer =
+        customer
+        |> Customer.changeset(%{default_payment_method_id: default_row && default_row.id})
+        |> Repo.update!()
+
+      {:ok, local_payment_methods(customer)}
+    end)
+  end
+
+  defp payment_method_attrs(customer, remote_payment_method) do
+    card = get_field(remote_payment_method, :card) || %{}
+
+    %{
+      customer_id: customer.id,
+      processor: processor_name(),
+      processor_id: get_field(remote_payment_method, :id),
+      type: normalize_type(get_field(remote_payment_method, :type)),
+      is_default: truthy?(get_field(remote_payment_method, :default)),
+      fingerprint: get_field(card, :fingerprint),
+      card_brand: get_field(card, :brand),
+      card_last4: get_field(card, :last4),
+      card_exp_month: integer_field(card, :exp_month),
+      card_exp_year: integer_field(card, :exp_year),
+      exp_month: integer_field(card, :exp_month),
+      exp_year: integer_field(card, :exp_year),
+      metadata: get_field(remote_payment_method, :metadata) || %{},
+      data: stringify(remote_payment_method)
+    }
+  end
+
+  defp maybe_set_default(customer, payment_method, true), do: update_customer_default(customer, payment_method.id)
+  defp maybe_set_default(customer, _payment_method, false), do: {:ok, customer}
+
+  defp ensure_delete_allowed(customer, payment_method) do
+    cond do
+      active_braintree_subscription_uses?(customer, payment_method) ->
+        {:error,
+         %APIError{
+           code: "payment_method_still_in_use",
+           http_status: 409,
+           message: "payment method is still funding an active subscription"
+         }}
+
+      customer.default_payment_method_id == payment_method.id and has_other_usable_methods?(customer, payment_method) ->
+        {:error,
+         %APIError{
+           code: "payment_method_replacement_required",
+           http_status: 409,
+           message: "default payment method replacement is required before deletion"
+         }}
+
+      true ->
+        :ok
     end
   end
 
-  # ---------------------------------------------------------------------
-  # helpers
-  # ---------------------------------------------------------------------
+  defp active_braintree_subscription_uses?(customer, payment_method) do
+    customer.id
+    |> active_braintree_subscriptions()
+    |> Enum.any?(fn subscription ->
+      get_in(subscription.data, ["payment_method_token"]) == payment_method.processor_id
+    end)
+  end
+
+  defp active_braintree_subscriptions(customer_id) do
+    Repo.all(
+      from s in Subscription,
+        where: s.customer_id == ^customer_id and s.processor == "braintree"
+    )
+    |> Enum.filter(&Subscription.active?/1)
+  end
+
+  defp has_other_usable_methods?(customer, payment_method) do
+    customer
+    |> local_payment_methods()
+    |> Enum.reject(&(&1.id == payment_method.id))
+    |> Enum.any?()
+  end
+
+  defp local_payment_methods(%Customer{} = customer) do
+    payment_methods =
+      Repo.all(
+        from p in PaymentMethod,
+          where: p.customer_id == ^customer.id,
+          order_by: [asc: p.inserted_at]
+      )
+
+    Enum.sort_by(payment_methods, fn payment_method ->
+      {payment_method.id != customer.default_payment_method_id, payment_method.inserted_at}
+    end)
+  end
+
+  defp update_customer_default(customer, payment_method_id) do
+    customer
+    |> Customer.changeset(%{default_payment_method_id: payment_method_id})
+    |> Repo.update()
+  end
+
+  defp get_payment_method(customer_id, processor_id) when is_binary(processor_id) do
+    case Repo.get_by(PaymentMethod, customer_id: customer_id, processor_id: processor_id) do
+      %PaymentMethod{} = payment_method -> {:ok, payment_method}
+      nil -> {:error, invalid_request("payment-method sync did not project processor row #{processor_id}")}
+    end
+  end
+
+  defp get_payment_method(_customer_id, _processor_id),
+    do: {:error, invalid_request("processor response did not include a payment-method id")}
+
+  defp validate_add_params(params) do
+    if processor_name() == "braintree" do
+      case get_in(params, ["vault_acquisition", "reference"]) do
+        reference when is_binary(reference) and reference != "" ->
+          :ok
+
+        _ ->
+          {:error, invalid_request("Braintree add_payment_method requires vault_acquisition.reference")}
+      end
+    else
+      :ok
+    end
+  end
+
+  defp remote_payment_methods(%{data: payment_methods}) when is_list(payment_methods), do: payment_methods
+  defp remote_payment_methods(payment_methods) when is_list(payment_methods), do: payment_methods
+  defp remote_payment_methods(_), do: []
 
   defp list_params_for_processor(%Customer{} = customer, opts) when is_list(opts) do
     opts
@@ -312,18 +540,6 @@ defmodule Accrue.Billing.PaymentMethodActions do
     end)
   end
 
-  defp ensure_payment_method_list_support do
-    if Processor.first_party_supported?([:payment_method, :list]) do
-      :ok
-    else
-      {:error,
-       %Accrue.APIError{
-         code: "processor_operation_unsupported",
-         message: "#{Processor.name()} does not support payment-method listing"
-       }}
-    end
-  end
-
   defp get_card_fingerprint(canonical) do
     case get_field(canonical, :card) do
       %{} = card -> get_field(card, :fingerprint)
@@ -331,15 +547,27 @@ defmodule Accrue.Billing.PaymentMethodActions do
     end
   end
 
+  defp integer_field(map, key) do
+    case get_field(map, key) do
+      value when is_integer(value) -> value
+      value when is_binary(value) -> String.to_integer(value)
+      _ -> nil
+    end
+  rescue
+    ArgumentError -> nil
+  end
+
+  defp truthy?(value), do: value in [true, "true", 1, "1"]
+
   defp normalize_type(atom) when is_atom(atom) and not is_nil(atom), do: Atom.to_string(atom)
   defp normalize_type(str) when is_binary(str), do: str
   defp normalize_type(_), do: nil
 
-  defp record_event(type, %PaymentMethod{} = pm, data) do
+  defp record_event(type, %PaymentMethod{} = payment_method, data) do
     Events.record(%{
       type: type,
       subject_type: "PaymentMethod",
-      subject_id: pm.id,
+      subject_id: payment_method.id,
       data: data
     })
   end
@@ -353,34 +581,46 @@ defmodule Accrue.Billing.PaymentMethodActions do
     })
   end
 
-  defp get_field(%{} = m, key) when is_atom(key) do
-    Map.get(m, key) || Map.get(m, Atom.to_string(key))
+  defp invalid_request(message) do
+    %APIError{
+      code: "invalid_request_error",
+      http_status: 400,
+      message: message
+    }
+  end
+
+  defp get_field(%{} = map, key) when is_atom(key) do
+    Map.get(map, key) || Map.get(map, Atom.to_string(key))
   end
 
   defp get_field(_, _), do: nil
 
   defp processor_name do
-    case Processor.__impl__() do
-      Accrue.Processor.Fake -> "fake"
-      Accrue.Processor.Stripe -> "stripe"
-      other -> other |> Module.split() |> List.last() |> String.downcase()
-    end
+    Processor.name()
   end
 
   defp sanitize_opts(opts), do: Keyword.drop(opts, [:operation_id])
 
+  defp stringify_keys(value) when is_map(value) and not is_struct(value) do
+    for {key, nested_value} <- value, into: %{} do
+      rendered_key = if is_atom(key), do: Atom.to_string(key), else: key
+      {rendered_key, stringify_keys(nested_value)}
+    end
+  end
+
+  defp stringify_keys(value) when is_list(value), do: Enum.map(value, &stringify_keys/1)
+  defp stringify_keys(value), do: value
+
   defp stringify(value) when is_map(value) and not is_struct(value) do
-    for {k, v} <- value, into: %{} do
-      key = if is_atom(k), do: Atom.to_string(k), else: k
-      {key, stringify(v)}
+    for {key, nested_value} <- value, into: %{} do
+      rendered_key = if is_atom(key), do: Atom.to_string(key), else: key
+      {rendered_key, stringify(nested_value)}
     end
   end
 
   defp stringify(value) when is_list(value), do: Enum.map(value, &stringify/1)
   defp stringify(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
-
-  defp stringify(value) when is_atom(value) and not is_nil(value) and not is_boolean(value),
-    do: Atom.to_string(value)
-
+  defp stringify(value) when is_atom(value) and not is_nil(value), do: Atom.to_string(value)
+  defp stringify(%_{} = struct), do: struct |> Map.from_struct() |> stringify()
   defp stringify(value), do: value
 end

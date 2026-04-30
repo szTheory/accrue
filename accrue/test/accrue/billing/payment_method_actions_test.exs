@@ -30,17 +30,12 @@ defmodule Accrue.Billing.PaymentMethodActionsTest do
     %{customer: customer}
   end
 
-  test "list_payment_methods/2 returns the unsupported-operation tuple", %{customer: customer} do
-    assert {:error, %Accrue.APIError{code: "processor_operation_unsupported"} = error} =
-             Billing.list_payment_methods(customer, [])
-
-    assert error.message =~ "does not support payment-method listing"
+  test "list_payment_methods/2 returns the local projection", %{customer: customer} do
+    assert {:ok, []} = Billing.list_payment_methods(customer, [])
   end
 
-  test "list_payment_methods!/2 raises the same unsupported-operation error", %{customer: customer} do
-    assert_raise Accrue.APIError, ~r/does not support payment-method listing/, fn ->
-      Billing.list_payment_methods!(customer, [])
-    end
+  test "list_payment_methods!/2 returns the local projection", %{customer: customer} do
+    assert [] = Billing.list_payment_methods!(customer, [])
   end
 
   test "canonical payment-method CRUD verbs are exported from Accrue.Billing" do
