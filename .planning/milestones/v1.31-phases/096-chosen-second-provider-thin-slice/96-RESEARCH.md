@@ -334,22 +334,22 @@ end
 | A2 | The narrow public handoff can likely remain an opt shape under `subscribe/3` rather than requiring a new public helper immediately. | Summary | Medium — if the current `subscribe/3` validation cannot absorb this cleanly, a small helper becomes necessary. |
 | A3 | Existing shared webhook reducers can be reused after processor-aware ingress normalization rather than needing a fully separate Braintree reducer tree. | Architecture Patterns | Medium — if Braintree lifecycle shapes diverge too far, more explicit branching is required. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What is the exact public handoff shape for the Braintree vault-acquisition artifact?**
-   - What we know: locked context requires one narrow handoff and forbids raw provider jargon leaking broadly. [VERIFIED: codebase grep]
-   - What's unclear: whether that handoff fits cleanly as a `subscribe/3` opt or needs a tiny preparatory helper. [VERIFIED: codebase grep]
-   - Recommendation: decide this in planning before task breakdown; it affects facade tests, docs, and host proof wiring. [ASSUMED]
+   - Decision: keep the public seam on `Accrue.Billing.subscribe/3` and pass the Braintree handoff as `payment_method: %{vault_acquisition: %{reference: reference}}`. [ASSUMED]
+   - Rationale: this keeps the server-side contract narrow, avoids leaking raw provider browser jargon into the public facade, and still leaves room for one host-only convenience helper in `examples/accrue_host` if the proof harness needs it. [VERIFIED: codebase grep][ASSUMED]
+   - Planning impact: facade tests, docs, and host proof wiring should all use the exact `vault_acquisition.reference` shape and no broader Braintree-specific public API. [ASSUMED]
 
 2. **How will the Braintree proof host obtain or map plan identifiers?**
-   - What we know: Braintree subscription creation requires `plan_id`, and the current Accrue facade passes a `price_id` string. [CITED: https://developer.paypal.com/braintree/docs/reference/request/subscription/create][VERIFIED: codebase grep]
-   - What's unclear: whether the host should pass Braintree plan ids directly or introduce a local alias layer. [ASSUMED]
-   - Recommendation: keep Phase 96 direct and host-local unless another active milestone already needs cross-provider catalog translation. [ASSUMED]
+   - Decision: for Phase 96, the host passes the Braintree recurring `plan_id` directly through the existing `price_id` public argument, and the Braintree adapter maps that `price_id` value straight to `plan_id` internally. [CITED: https://developer.paypal.com/braintree/docs/reference/request/subscription/create][ASSUMED]
+   - Rationale: a new cross-provider catalog translation layer is outside the thin-slice boundary and is not required to prove one honest provider-backed path. [VERIFIED: codebase grep][ASSUMED]
+   - Planning impact: docs and host proof copy should say this slice expects the host to choose the Braintree sandbox plan id explicitly for the proof flow. [ASSUMED]
 
 3. **How much webhook normalization can stay shared?**
-   - What we know: Braintree delivers `bt_signature` and `bt_payload`, warns about non-sequential delivery, and exposes subscription webhook kinds such as `subscription_went_active` and `subscription_charged_successfully`. [CITED: https://developer.paypal.com/braintree/docs/guides/webhooks/parse][CITED: https://developer.paypal.com/braintree/docs/reference/general/webhooks/subscription]
-   - What's unclear: the minimum mapping needed to drive Accrue’s existing subscription and invoice truth model. [ASSUMED]
-   - Recommendation: treat webhook normalization as a first-class planning task, not a hidden adapter detail. [ASSUMED]
+   - Decision: keep processor-aware Braintree verify/parse at ingress, then reuse the existing shared reducers and persistence pipeline with explicit `:braintree` branches in normalization/projection seams where field shapes differ. [VERIFIED: codebase grep][ASSUMED]
+   - Rationale: Braintree webhook transport and lifecycle kinds differ at ingress, but Accrue’s canonical-refetch-first handler and projection layers already provide the right place for explicit provider branching without building a separate reducer tree. [VERIFIED: codebase grep][CITED: https://developer.paypal.com/braintree/docs/guides/webhooks/parse]
+   - Planning impact: webhook normalization must remain a first-class planned task, but the downstream subscription/invoice truth model can stay shared with explicit Braintree branches. [ASSUMED]
 
 ## Environment Availability
 
@@ -359,12 +359,12 @@ end
 | Node.js | `examples/accrue_host` browser/build verification | ✓ [VERIFIED: local command] | Present locally; exact version probe was partially degraded by shell behavior in this session. [VERIFIED: local command][ASSUMED] | Run only Mix-based host tests if browser tasks are intentionally deferred. [ASSUMED] |
 | npm / npx | Playwright and host asset/browser lanes | ✓ [VERIFIED: local command] | Present locally. [VERIFIED: local command] | Same as above. [ASSUMED] |
 | PostgreSQL client / server availability | `mix verify`, `mix verify.full`, and host proof | Partial [VERIFIED: local command] | `psql` is available locally; no DB env vars were set in this shell. [VERIFIED: local command] | Local defaults already point the host app to `localhost:5432`. [VERIFIED: codebase grep] |
-| Braintree sandbox credentials | Real Braintree advisory lane | ✗ in current shell [VERIFIED: local command] | No `BRAINTREE_*` env vars detected. [VERIFIED: local command] | Keep Fake and Stripe as blocking lanes; document Braintree proof as opt-in or protected-branch/manual until credentials exist. [VERIFIED: codebase grep][ASSUMED] |
+| Braintree sandbox credentials | Real Braintree provider-backed host proof | ✗ in current shell [VERIFIED: local command] | No `BRAINTREE_*` env vars detected. [VERIFIED: local command] | Treat credentials plus a recurring sandbox `plan_id` as a blocking execution precondition for Plan 03; do not mark `PROC-12` complete without one successful credentialed run. [ASSUMED] |
 | Stripe test-mode credentials | Existing advisory Stripe lane | ✗ in current shell [VERIFIED: local command] | No `STRIPE_TEST_SECRET_KEY` or live-lane price env vars detected. [VERIFIED: local command] | Existing Fake lane remains blocking. [VERIFIED: codebase grep] |
 
 **Missing dependencies with no fallback:**
 
-- Braintree sandbox credentials for any real-provider execution in this shell. [VERIFIED: local command]
+- Braintree sandbox credentials and a recurring sandbox `plan_id` for the required real-provider host proof in this shell. [VERIFIED: local command][ASSUMED]
 
 **Missing dependencies with fallback:**
 

@@ -691,6 +691,8 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 
 ## Current Milestone Notes
 
+- **2026-04-29:** **`/gsd-complete-milestone` v1.31** — archives **`milestones/v1.31-*`**, **`git mv`** Phases **94–96** -> **`milestones/v1.31-phases/`**, **`git rm`** **`.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.31`**.
+
 - **2026-04-24:** **`/gsd-new-milestone` (plan implementation)** — **v1.28** **Next linked publish continuity** (strategic **spine B**); **`REQUIREMENTS.md`** (**PPX-05..08**, **INV-06**); roadmap Phases **86–87**; domain research **skipped** (brownfield **v1.23** pattern).
 - **2026-04-24:** **`/gsd-new-milestone` (closure)** — **v1.27** **Pre-1.0 closure narrative**; **`REQUIREMENTS.md`** (**CLS-01..03**, **INV-05**); roadmap Phases **84–85**; domain research **skipped** (maintainer narrative + inventory pass).
 - **2026-04-24:** **`/gsd-complete-milestone` v1.27** — archives **`milestones/v1.27-*`**, **`git rm` `.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.27`**; **`audit-open`** all clear (**no** **`v1.27-MILESTONE-AUDIT.md`**); **ROADMAP** v1.27 `<details>` updated to archived requirements links.
@@ -770,4 +772,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-28 — **v1.30** shipped — linked **`accrue` / `accrue_admin` `1.0.0`** publish proved in **Phase 92**, planning closeout recorded in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **PROC-08** / **FIN-03** stay out of scope at `1.0.0`.*
+*Last updated: 2026-04-29 — **v1.31** shipped — Phase 96 closed the **PROC-08** bounded Braintree slice through the public billing facade; strategy, docs, and matrix updated. **FIN-03** stays out of scope.*

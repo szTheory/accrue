@@ -380,22 +380,16 @@ That shape is directly supported by Braintree’s recurring billing, webhook, Ho
 | A1 | The best new canonical file home for the capability matrix is a dedicated `.planning/processor-support-matrix.md` linked from `.planning/STRATEGY.md`. [ASSUMED] | Architecture Patterns | Low to medium. The planner may create the right artifact with a different filename or embed it directly in `STRATEGY.md`. |
 | A2 | A dedicated `scripts/ci/verify_processor_support_matrix.sh` plus a paired ExUnit shell-out test is the cleanest enforcement pattern, rather than only extending `verify_package_docs.sh`. [ASSUMED] | Architecture Patterns, Validation Architecture | Low. The repo could fold the new needles into existing verifiers instead of adding a new one. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the processor capability matrix be its own file or a major section inside `.planning/STRATEGY.md`?**
-   What we know: the repo already uses `.planning/STRATEGY.md` for strategic truth and dedicated matrix docs for support/proof truth. [VERIFIED: codebase grep]
-   What's unclear: whether maintainers want one-file strategy concentration or matrix-specific diff locality. [ASSUMED]
-   Recommendation: choose one canonical home in Phase 94 and make every later doc/verifier point there. [ASSUMED]
+   Resolution: use a dedicated `.planning/processor-support-matrix.md` and have `.planning/STRATEGY.md`, `.planning/PROJECT.md`, `accrue/guides/custom_processors.md`, `scripts/ci/verify_package_docs.sh`, and `scripts/ci/verify_processor_support_matrix.sh` point back to it. This follows the repo’s matrix-plus-verifier pattern while keeping strategic narrative and support-table diffs separate. [RESOLVED per A1][VERIFIED: codebase grep]
 
 2. **Will Phase 96 expose Braintree vault acquisition through a new facade helper or keep it inside the host example first?**
-   What we know: Braintree’s client path is tokenized/hosted and discuss-phase explicitly left this point to discretion. [CITED: https://developer.paypal.com/braintree/docs/guides/hosted-fields/overview/javascript/v3/][VERIFIED: 094-CONTEXT.md]
-   What's unclear: whether a new public helper is necessary for the first thin slice. [ASSUMED]
-   Recommendation: keep Phase 94 neutral, but make the matrix explicitly include `payment_method.vault_acquisition` so the later implementation choice is framed correctly. [ASSUMED]
+   Resolution: explicitly defer the delivery choice to Phase 96, but lock `payment_method.vault_acquisition` into the Phase 94 matrix so the capability is visible regardless of where the first host/runtime seam lands. This is an allowed discretion area and does not block Phase 94. [DEFERRED TO PHASE 96][CITED: https://developer.paypal.com/braintree/docs/guides/hosted-fields/overview/javascript/v3/][VERIFIED: 094-CONTEXT.md]
 
 3. **How granular should Phase-95 capability leaves become?**
-   What we know: the context already points to leaves like `customer.create/retrieve/update`, `subscription.direct_create`, `invoice.lifecycle_webhook_projection`, and `checkout.hosted_handoff`. [VERIFIED: 094-CONTEXT.md]
-   What's unclear: whether those become dotted-string public identifiers, nested atom keys, or both. [ASSUMED]
-   Recommendation: keep Phase 94 at semantic-row granularity and let Phase 95 decide the exact code-level naming while preserving the same semantics. [ASSUMED]
+   Resolution: keep Phase 94 at semantic row granularity using the context’s named behaviors, then let Phase 95 choose the exact code representation so long as it preserves the same contract semantics and matrix labels. Phase 94 therefore locks behavior names, not implementation-key syntax. [RESOLVED][VERIFIED: 094-CONTEXT.md]
 
 ## Environment Availability
 

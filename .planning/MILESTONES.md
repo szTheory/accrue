@@ -1,5 +1,33 @@
 # Milestones
 
+## v1.31 PROC-08 Phase 1: boundary hardening + thin slice (Shipped: 2026-04-29)
+
+**Planning opened:** 2026-04-28
+
+**Phases completed:** **3** phases (**94–96**).
+
+**Theme:** Deliberately reopen **PROC-08** after the `1.0.0` declaration by keeping Stripe as the default first-user story while starting the official dual-provider track. This milestone locks the processor capability model, chooses a Stripe-like target provider, hardens the official processor boundary, and ships one real second-provider vertical slice through the documented public facade. **FIN-03** remains out of scope.
+
+**Depends on:** **v1.30** shipped.
+
+**Research:** Milestone-internal — provider selection is an explicit output of Phase 94 rather than a prerequisite external milestone.
+
+**Phase execution trees:** **`.planning/milestones/v1.31-phases/094-strategy-capability-matrix-target-lock/`**, **`095-official-processor-contract-conformance-harness/`**, **`096-chosen-second-provider-thin-slice/`**.
+
+**Key accomplishments:**
+
+- **94:** **PROC-09** — Strategy + capability matrix + target-provider lock.
+- **95:** **PROC-10**, **PROC-11** — Official processor contract + conformance harness + boundary hardening.
+- **96:** **PROC-12**, **PROC-13** — Chosen second-provider thin slice + public positioning updates.
+
+**Outcome:** Phases **94–96** closed the **v1.31** PROC-08 phase 1 without leaking FIN-03.
+
+**Archives:**
+- **`.planning/milestones/v1.31-ROADMAP.md`**
+- **`.planning/milestones/v1.31-REQUIREMENTS.md`**
+
+---
+
 ## v1.30 `1.0.0` Declaration (Spine A) (Shipped: 2026-04-28)
 
 **Planning opened:** 2026-04-26
