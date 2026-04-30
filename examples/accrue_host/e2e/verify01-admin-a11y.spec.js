@@ -419,6 +419,15 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     await expect(
       page.getByRole("heading", { name: copyStrings.customer_payment_methods_section_heading })
     ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: copyStrings.customer_payment_methods_sync_action })
+    ).toBeVisible();
+    await expect(
+      page.getByText(copyStrings.customer_payment_methods_replace_handoff)
+    ).toBeVisible();
+    await expect(
+      page.getByText(copyStrings.customer_payment_methods_section_body)
+    ).toContainText("host billing flow");
 
     const lightBtn = page.locator('button[data-theme-target="light"]');
     await expect(lightBtn).toBeVisible();

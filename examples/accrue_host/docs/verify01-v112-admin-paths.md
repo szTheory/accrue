@@ -47,3 +47,9 @@ Merge-blocking coverage for **customer detail** **`payment_methods`** lives in *
 | `test.describe` title (exact) | Mounted path template | Requirement ids |
 |--------------------------------|------------------------|-------------------|
 | VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15) | `/billing/customers/:id?tab=payment_methods&org=<slug>` | ADM-15 |
+
+Phase 98 keeps this proof lane honest to the shipped operator boundary:
+
+- Admin verifies the mounted **payment method** route only for truthful operator actions: **`Sync payment methods`**, default reassignment, and guarded delete.
+- **Add** and **Replace payment method** remain **host-owned**. The tab should show host billing handoff copy, not embedded payment capture.
+- When Playwright dependencies are missing locally, bootstrap them explicitly from `examples/accrue_host` with `npm ci` and `npm run e2e:install` before running the phase-gate `npm run e2e:a11y`.

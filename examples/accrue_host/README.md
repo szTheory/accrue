@@ -19,7 +19,10 @@ signing secret `whsec_test_host`. You can exercise the full path without live
 Stripe credentials. Stripe remains the default first-user path, and Braintree
 is official only for the `gateway subscription core` slice. (Checkout and
 billing portal remain Stripe-only). The Braintree proof lane in
-`examples/accrue_host` is advisory while Fake remains the merge-blocking SSOT.
+`examples/accrue_host` is fully hermetic and uses checked-in mocks/fixtures to
+exercise the generic billing facade without network access. Any future
+real-provider Braintree smoke is advisory only while Fake remains the
+merge-blocking SSOT.
 
 **Sigra:** the example host depends on Sigra (not on Hex yet). `mix deps.get`
 pulls it from [szTheory/sigra](https://github.com/szTheory/sigra) by default so
@@ -132,6 +135,10 @@ including **`e2e/verify01-admin-a11y.spec.js`** (Phase 28: `@axe-core/playwright
 serious + critical violations, forced light then dark on desktop; mobile projects
 skip this file). Focused local run after the usual seed + server: `npm run e2e:a11y`.
 For the mobile shell lane on **`chromium-mobile`**, **`npm run e2e:mobile`** runs **`e2e/verify01-admin-mobile.spec.js`** after the same seed + server setup.
+The payment-method route in this suite stays intentionally narrow: operators can
+review projected inventory, **Sync payment methods**, set a new default, and hit
+guarded delete warnings, while **Replace payment method** remains a host-owned
+handoff outside admin.
 
 **Copy anti-drift (Phase 50 / D-23):** VERIFY-01 specs read operator strings from
 **`e2e/generated/copy_strings.json`**, produced by
@@ -184,11 +191,22 @@ Run each step from the repository root using `cd examples/accrue_host` first:
    MIX_ENV=test mix test --warnings-as-errors
    ```
 
-3. Playwright (after `npm ci` in `examples/accrue_host` if dependencies are not
-   installed yet):
+3. Playwright phase gate (after deterministic JS bootstrap in
+   `examples/accrue_host`):
 
    ```bash
    cd examples/accrue_host
+   npm ci
+   npm run e2e:install
+   npm run e2e:a11y
+   ```
+
+4. Full host browser suite, if you need more than the merge-blocking admin a11y lane:
+
+   ```bash
+   cd examples/accrue_host
+   npm ci
+   npm run e2e:install
    npx playwright test
    ```
 
