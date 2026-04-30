@@ -421,6 +421,8 @@ defmodule AccrueAdmin.Copy do
 
   defdelegate customer_payment_methods_empty_copy(), to: CustomerPaymentMethods, as: :empty_copy
 
+  defdelegate customer_payment_methods_section_body(), to: CustomerPaymentMethods, as: :section_body
+
   defdelegate customer_payment_methods_row_fallback_label(),
     to: CustomerPaymentMethods,
     as: :row_fallback_label
@@ -428,6 +430,52 @@ defmodule AccrueAdmin.Copy do
   defdelegate customer_payment_methods_card_last4_mask(),
     to: CustomerPaymentMethods,
     as: :card_last4_mask
+
+  defdelegate customer_payment_methods_sync_action(), to: CustomerPaymentMethods, as: :sync_action
+
+  defdelegate customer_payment_methods_sync_success(),
+    to: CustomerPaymentMethods,
+    as: :sync_success
+
+  defdelegate customer_payment_methods_set_default_action(),
+    to: CustomerPaymentMethods,
+    as: :set_default_action
+
+  defdelegate customer_payment_methods_set_default_success(),
+    to: CustomerPaymentMethods,
+    as: :set_default_success
+
+  defdelegate customer_payment_methods_delete_action(),
+    to: CustomerPaymentMethods,
+    as: :delete_action
+
+  defdelegate customer_payment_methods_delete_success(),
+    to: CustomerPaymentMethods,
+    as: :delete_success
+
+  defdelegate customer_payment_methods_delete_warning(),
+    to: CustomerPaymentMethods,
+    as: :delete_warning
+
+  defdelegate customer_payment_methods_delete_blocked_in_use(),
+    to: CustomerPaymentMethods,
+    as: :delete_blocked_in_use
+
+  defdelegate customer_payment_methods_delete_blocked_replacement_required(),
+    to: CustomerPaymentMethods,
+    as: :delete_blocked_replacement_required
+
+  defdelegate customer_payment_methods_replace_handoff(),
+    to: CustomerPaymentMethods,
+    as: :replace_handoff
+
+  defdelegate customer_payment_methods_default_badge(),
+    to: CustomerPaymentMethods,
+    as: :default_badge
+
+  defdelegate customer_payment_methods_in_use_badge(),
+    to: CustomerPaymentMethods,
+    as: :in_use_badge
 
   def webhooks_index_empty_title, do: "No webhook deliveries for this organization yet"
 

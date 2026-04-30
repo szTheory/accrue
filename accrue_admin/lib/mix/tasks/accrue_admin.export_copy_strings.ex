@@ -41,8 +41,21 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     promotion_codes_index_headline
     customer_payment_methods_section_heading
     customer_payment_methods_empty_copy
+    customer_payment_methods_section_body
     customer_payment_methods_row_fallback_label
     customer_payment_methods_card_last4_mask
+    customer_payment_methods_sync_action
+    customer_payment_methods_sync_success
+    customer_payment_methods_set_default_action
+    customer_payment_methods_set_default_success
+    customer_payment_methods_delete_action
+    customer_payment_methods_delete_success
+    customer_payment_methods_delete_warning
+    customer_payment_methods_delete_blocked_in_use
+    customer_payment_methods_delete_blocked_replacement_required
+    customer_payment_methods_replace_handoff
+    customer_payment_methods_default_badge
+    customer_payment_methods_in_use_badge
   )a
 
   @impl Mix.Task

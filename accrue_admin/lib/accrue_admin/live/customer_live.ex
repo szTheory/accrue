@@ -5,6 +5,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   import Ecto.Query
 
+  alias Accrue.APIError
+  alias Accrue.Billing
   alias Accrue.Billing.{Charge, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Repo
@@ -15,6 +17,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
+    FlashGroup,
     JsonViewer,
     KpiCard,
     MoneyFormatter,
@@ -49,7 +52,10 @@ defmodule AccrueAdmin.Live.CustomerLive do
            scoped_admin_path(admin, socket.assigns.current_owner_scope, "/customers")
          )
          |> assign(:customer, customer)
+         |> assign(:flashes, [])
          |> assign(:params, %{})
+         |> assign(:pending_payment_method_delete, nil)
+         |> assign(:payment_methods, payment_methods(customer))
          |> assign(:tab, "subscriptions")
          |> assign(:tab_counts, tab_counts(customer))}
     end
@@ -63,6 +69,76 @@ defmodule AccrueAdmin.Live.CustomerLive do
       |> normalize_tab()
 
     {:noreply, socket |> assign(:params, params) |> assign(:tab, tab)}
+  end
+
+  @impl true
+  def handle_event("sync_payment_methods", _params, socket) do
+    case Billing.sync_payment_methods(socket.assigns.customer, []) do
+      {:ok, _payment_methods} ->
+        {:noreply,
+         socket
+         |> push_flash(:info, Copy.customer_payment_methods_sync_success())
+         |> refresh_customer_detail()}
+
+      {:error, reason} ->
+        {:noreply, push_flash(socket, :error, payment_method_error_message(reason))}
+    end
+  end
+
+  def handle_event("set_default_payment_method", %{"payment_method_id" => payment_method_id}, socket) do
+    with {:ok, payment_method} <- fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
+         {:ok, _customer} <-
+           Billing.set_default_payment_method(socket.assigns.customer, payment_method, []) do
+      {:noreply,
+       socket
+       |> push_flash(:info, Copy.customer_payment_methods_set_default_success())
+       |> refresh_customer_detail()}
+    else
+      {:error, reason} ->
+        {:noreply, push_flash(socket, :error, payment_method_error_message(reason))}
+    end
+  end
+
+  def handle_event("prepare_delete_payment_method", %{"payment_method_id" => payment_method_id}, socket) do
+    with {:ok, payment_method} <- fetch_customer_payment_method(socket.assigns.customer, payment_method_id) do
+      {:noreply,
+       assign(
+         socket,
+         :pending_payment_method_delete,
+         build_pending_payment_method_delete(socket.assigns.customer, payment_method)
+       )}
+    else
+      {:error, reason} ->
+        {:noreply, push_flash(socket, :error, payment_method_error_message(reason))}
+    end
+  end
+
+  def handle_event("cancel_delete_payment_method", _params, socket) do
+    {:noreply, assign(socket, :pending_payment_method_delete, nil)}
+  end
+
+  def handle_event("confirm_delete_payment_method", _params, socket) do
+    case socket.assigns.pending_payment_method_delete do
+      %{blocked_reason: nil, payment_method: %PaymentMethod{} = payment_method} ->
+        case Billing.delete_payment_method(payment_method, []) do
+          {:ok, _payment_method} ->
+            {:noreply,
+             socket
+             |> reconcile_deleted_payment_method(payment_method)
+             |> push_flash(:info, Copy.customer_payment_methods_delete_success())
+             |> assign(:pending_payment_method_delete, nil)
+             |> refresh_customer_detail()}
+
+          {:error, reason} ->
+            {:noreply, push_flash(socket, :error, payment_method_error_message(reason))}
+        end
+
+      %{blocked_reason: blocked_reason} when not is_nil(blocked_reason) ->
+        {:noreply, push_flash(socket, :warning, blocked_reason_copy(blocked_reason))}
+
+      _ ->
+        {:noreply, push_flash(socket, :warning, Copy.customer_payment_methods_delete_warning())}
+    end
   end
 
   @impl true
@@ -94,6 +170,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <%= @customer.processor_id %> · locale <%= @customer.preferred_locale || "--" %> · timezone <%= @customer.preferred_timezone || "--" %>
           </p>
         </header>
+
+        <FlashGroup.flash_group flashes={@flashes} />
 
         <section class="ax-kpi-grid" aria-label="Customer summary">
           <KpiCard.kpi_card label="Owner" value={@customer.owner_type}>
@@ -175,12 +253,94 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
           <% "payment_methods" -> %>
             <section class="ax-card">
-              <h3 class="ax-heading"><%= Copy.customer_payment_methods_section_heading() %></h3>
-              <div :for={payment_method <- payment_methods(@customer)} class="ax-list-row">
-                <span class="ax-body"><%= payment_method.card_brand || payment_method.type || Copy.customer_payment_methods_row_fallback_label() %> <%= Copy.customer_payment_methods_card_last4_mask() %> <%= payment_method.card_last4 || "--" %></span>
-                <span class="ax-body"><%= expiry(payment_method) %></span>
+              <header class="ax-page-header">
+                <div>
+                  <h3 class="ax-heading"><%= Copy.customer_payment_methods_section_heading() %></h3>
+                  <p class="ax-body"><%= Copy.customer_payment_methods_section_body() %></p>
+                </div>
+                <button
+                  type="button"
+                  class="ax-button ax-button-primary"
+                  phx-click="sync_payment_methods"
+                  data-role="sync-payment-methods"
+                >
+                  <%= Copy.customer_payment_methods_sync_action() %>
+                </button>
+              </header>
+              <div :for={payment_method <- @payment_methods} class="ax-list-row">
+                <div>
+                  <p class="ax-body">
+                    <%= payment_method.card_brand || payment_method.type || Copy.customer_payment_methods_row_fallback_label() %> <%= Copy.customer_payment_methods_card_last4_mask() %> <%= payment_method.card_last4 || "--" %>
+                  </p>
+                  <p class="ax-body">
+                    <%= expiry(payment_method) %>
+                    <span :if={default_payment_method?(@customer, payment_method)}>
+                      · <%= Copy.customer_payment_methods_default_badge() %>
+                    </span>
+                    <span :if={active_subscription_payment_method?(@customer, payment_method)}>
+                      · <%= Copy.customer_payment_methods_in_use_badge() %>
+                    </span>
+                  </p>
+                </div>
+                <div class="ax-page-header">
+                  <button
+                    :if={!default_payment_method?(@customer, payment_method)}
+                    type="button"
+                    class="ax-button ax-button-ghost"
+                    phx-click="set_default_payment_method"
+                    phx-value-payment_method_id={payment_method.id}
+                    data-role="set-default-payment-method"
+                    data-payment-method-id={payment_method.id}
+                  >
+                    <%= Copy.customer_payment_methods_set_default_action() %>
+                  </button>
+                  <button
+                    type="button"
+                    class="ax-button ax-button-ghost"
+                    phx-click="prepare_delete_payment_method"
+                    phx-value-payment_method_id={payment_method.id}
+                    data-role="prepare-delete-payment-method"
+                    data-payment-method-id={payment_method.id}
+                  >
+                    <%= Copy.customer_payment_methods_delete_action() %>
+                  </button>
+                </div>
               </div>
-              <p :if={payment_methods(@customer) == []} class="ax-body"><%= Copy.customer_payment_methods_empty_copy() %></p>
+              <p :if={@payment_methods == []} class="ax-body"><%= Copy.customer_payment_methods_empty_copy() %></p>
+              <p class="ax-body"><%= Copy.customer_payment_methods_replace_handoff() %></p>
+
+              <section
+                :if={@pending_payment_method_delete}
+                class="ax-card"
+                data-role="payment-method-delete-confirmation"
+              >
+                <p class="ax-label"><%= Copy.customer_payment_methods_delete_action() %></p>
+                <p class="ax-body"><%= Copy.customer_payment_methods_delete_warning() %></p>
+                <p class="ax-body">
+                  <%= pending_delete_label(@pending_payment_method_delete.payment_method) %>
+                </p>
+                <p :if={@pending_payment_method_delete.blocked_reason} class="ax-body">
+                  <%= blocked_reason_copy(@pending_payment_method_delete.blocked_reason) %>
+                </p>
+                <div class="ax-page-header">
+                  <button
+                    :if={is_nil(@pending_payment_method_delete.blocked_reason)}
+                    type="button"
+                    class="ax-button ax-button-primary"
+                    phx-click="confirm_delete_payment_method"
+                    data-role="confirm-delete-payment-method"
+                  >
+                    <%= Copy.customer_payment_methods_delete_action() %>
+                  </button>
+                  <button
+                    type="button"
+                    class="ax-button ax-button-ghost"
+                    phx-click="cancel_delete_payment_method"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </section>
             </section>
 
           <% "events" -> %>
@@ -275,9 +435,123 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp payment_methods(customer) do
     PaymentMethod
     |> where([payment_method], payment_method.customer_id == ^customer.id)
-    |> order_by([payment_method], desc: payment_method.inserted_at, desc: payment_method.id)
+    |> order_by([payment_method], asc: payment_method.inserted_at, asc: payment_method.id)
     |> Repo.all()
+    |> Enum.sort_by(fn payment_method ->
+      {not default_payment_method?(customer, payment_method), payment_method.inserted_at}
+    end)
   end
+
+  defp default_payment_method?(customer, payment_method),
+    do: customer.default_payment_method_id == payment_method.id
+
+  defp active_subscription_payment_method?(customer, payment_method) do
+    customer
+    |> subscriptions()
+    |> Enum.filter(&(&1.processor == "braintree"))
+    |> Enum.filter(&Subscription.active?/1)
+    |> Enum.any?(fn subscription ->
+      get_in(subscription.data || %{}, ["payment_method_token"]) == payment_method.processor_id
+    end)
+  end
+
+  defp build_pending_payment_method_delete(customer, payment_method) do
+    %{
+      payment_method: payment_method,
+      blocked_reason: payment_method_delete_blocked_reason(customer, payment_method)
+    }
+  end
+
+  defp payment_method_delete_blocked_reason(customer, payment_method) do
+    cond do
+      active_subscription_payment_method?(customer, payment_method) ->
+        :in_use
+
+      default_payment_method?(customer, payment_method) and has_other_payment_methods?(customer, payment_method) ->
+        :replacement_required
+
+      true ->
+        nil
+    end
+  end
+
+  defp has_other_payment_methods?(customer, payment_method) do
+    customer
+    |> payment_methods()
+    |> Enum.reject(&(&1.id == payment_method.id))
+    |> Enum.any?()
+  end
+
+  defp blocked_reason_copy(:in_use), do: Copy.customer_payment_methods_delete_blocked_in_use()
+
+  defp blocked_reason_copy(:replacement_required),
+    do: Copy.customer_payment_methods_delete_blocked_replacement_required()
+
+  defp blocked_reason_copy(_reason), do: Copy.customer_payment_methods_delete_warning()
+
+  defp pending_delete_label(payment_method) do
+    [
+      payment_method.card_brand || payment_method.type || Copy.customer_payment_methods_row_fallback_label(),
+      Copy.customer_payment_methods_card_last4_mask(),
+      payment_method.card_last4 || "--"
+    ]
+    |> Enum.join(" ")
+  end
+
+  defp refresh_customer_detail(socket) do
+    customer_id = socket.assigns.customer.id
+
+    case Customers.detail(customer_id, socket.assigns.current_owner_scope) do
+      {:ok, customer} ->
+        socket
+        |> assign(:customer, customer)
+        |> assign(:payment_methods, payment_methods(customer))
+        |> assign(:tab_counts, tab_counts(customer))
+
+      :not_found ->
+        socket
+    end
+  end
+
+  defp fetch_customer_payment_method(customer, payment_method_id) do
+    case Repo.get(PaymentMethod, payment_method_id) do
+      %PaymentMethod{customer_id: customer_id} = payment_method when customer_id == customer.id ->
+        {:ok, payment_method}
+
+      _ ->
+        {:error, :payment_method_not_found}
+    end
+  end
+
+  defp push_flash(socket, kind, message) do
+    assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])
+  end
+
+  defp reconcile_deleted_payment_method(socket, payment_method) do
+    if persisted_payment_method = Repo.get(PaymentMethod, payment_method.id) do
+      {:ok, _deleted_payment_method} = Repo.delete(persisted_payment_method)
+
+      if socket.assigns.customer.default_payment_method_id == payment_method.id do
+        socket.assigns.customer
+        |> Accrue.Billing.Customer.changeset(%{default_payment_method_id: nil})
+        |> Repo.update!()
+      end
+    end
+
+    socket
+  end
+
+  defp payment_method_error_message(%APIError{code: "payment_method_still_in_use"}),
+    do: Copy.customer_payment_methods_delete_blocked_in_use()
+
+  defp payment_method_error_message(%APIError{code: "payment_method_replacement_required"}),
+    do: Copy.customer_payment_methods_delete_blocked_replacement_required()
+
+  defp payment_method_error_message(%APIError{message: message}) when is_binary(message), do: message
+  defp payment_method_error_message(:payment_method_not_found), do: "Payment method not found."
+
+  defp payment_method_error_message(_reason),
+    do: "We couldn't update the payment methods for this customer."
 
   defp tax_risk_summary(customer) do
     subscriptions =

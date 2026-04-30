@@ -2,7 +2,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
   use AccrueAdmin.LiveCase, async: false
 
   alias Accrue.Billing
-  alias Accrue.Billing.{Charge, Customer, Invoice, PaymentMethod}
+  alias Accrue.Billing.{Charge, Customer, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events
   alias Accrue.Processor.Fake
   alias Accrue.Test.Factory
@@ -68,6 +68,33 @@ defmodule AccrueAdmin.CustomerLiveTest do
         })
       )
 
+    blocked_payment_method =
+      TestRepo.insert!(
+        PaymentMethod.changeset(%PaymentMethod{}, %{
+          customer_id: customer.id,
+          processor: "braintree",
+          processor_id: "pm_blocked",
+          type: "card",
+          card_brand: "mastercard",
+          card_last4: "5454",
+          exp_month: 4,
+          exp_year: 2034
+        })
+      )
+
+    Fake.scripted_response(:retrieve_payment_method, {:ok, scripted_pm("pm_9999", "9999")})
+    Fake.scripted_response(:attach_payment_method, {:ok, scripted_pm("pm_9999", "9999")})
+    Fake.scripted_response(:detach_payment_method, {:ok, scripted_pm("pm_9999", "9999")})
+    {:ok, deletable_payment_method} = Billing.attach_payment_method(customer, "pm_9999")
+
+    subscription =
+      subscription
+      |> Subscription.changeset(%{
+        processor: "braintree",
+        data: Map.put(subscription.data || %{}, "payment_method_token", blocked_payment_method.processor_id)
+      })
+      |> TestRepo.update!()
+
     customer =
       customer
       |> Customer.changeset(%{
@@ -116,7 +143,11 @@ defmodule AccrueAdmin.CustomerLiveTest do
         actor_id: "admin_1"
       })
 
-    {:ok, customer: customer}
+    {:ok,
+     customer: customer,
+     blocked_payment_method: blocked_payment_method,
+     default_payment_method: payment_method,
+     deletable_payment_method: deletable_payment_method}
   end
 
   test "renders customer tabs for subscriptions, events, and metadata", %{
@@ -241,6 +272,89 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ "visa"
   end
 
+  test "payment_methods tab exposes only server-driven operator controls and host-handoff copy", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
+
+    assert html =~ "Sync payment methods"
+    assert html =~ "Set default payment method"
+    assert html =~ "Delete payment method"
+    assert html =~ "Replace payment method in host billing"
+    refute html =~ "Card number"
+    refute html =~ "Drop-in"
+    refute html =~ "Hosted Fields"
+  end
+
+  test "payment_methods tab runs set default and sync through LiveView events", %{
+    conn: conn,
+    customer: customer,
+    deletable_payment_method: payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
+
+    html =
+      render_click(
+        element(
+          view,
+          "[data-role='set-default-payment-method'][data-payment-method-id='#{payment_method.id}']"
+        )
+      )
+
+    assert html =~ "Default payment method updated."
+    assert TestRepo.get!(Customer, customer.id).default_payment_method_id == payment_method.id
+
+    html = render_click(element(view, "[data-role='sync-payment-methods']"))
+
+    assert html =~ "Payment methods synced."
+  end
+
+  test "payment_methods tab shows guarded delete states and only confirms safe deletes", %{
+    conn: conn,
+    customer: customer,
+    blocked_payment_method: blocked_payment_method,
+    deletable_payment_method: deletable_payment_method
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}?tab=payment_methods")
+
+    html =
+      render_click(
+        element(
+          view,
+          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{blocked_payment_method.id}']"
+        )
+      )
+
+    assert html =~ "This payment method still funds an active subscription."
+    refute html =~ ~s(data-role="confirm-delete-payment-method")
+
+    html =
+      render_click(
+        element(
+          view,
+          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{deletable_payment_method.id}']"
+        )
+      )
+
+    assert html =~ "Delete payment method"
+    assert html =~ "Review dependencies before you continue."
+
+    html = render_click(element(view, "[data-role='confirm-delete-payment-method']"))
+
+    assert html =~ "Payment method deleted."
+    refute has_element?(
+             view,
+             "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{deletable_payment_method.id}']"
+           )
+    assert TestRepo.get(PaymentMethod, deletable_payment_method.id) == nil
+  end
+
   test "payment_methods tab empty state uses Copy when customer has no payment methods", %{
     conn: conn
   } do
@@ -267,6 +381,22 @@ defmodule AccrueAdmin.CustomerLiveTest do
     %Customer{}
     |> Customer.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
+  end
+
+  defp scripted_pm(id, last4) do
+    %{
+      id: id,
+      object: "payment_method",
+      type: "card",
+      card: %{
+        fingerprint: "fp_" <> last4,
+        brand: "discover",
+        last4: last4,
+        exp_month: 8,
+        exp_year: 2036
+      },
+      customer: nil
+    }
   end
 
   defp organization_owner_scope(organization_id) do
