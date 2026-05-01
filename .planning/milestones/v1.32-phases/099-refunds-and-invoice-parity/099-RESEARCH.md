@@ -413,17 +413,15 @@ Source: [VERIFIED: accrue/lib/accrue/webhook/default_handler.ex]
 
 All material claims in this research were verified from the codebase, local dependency source, runtime inspection, or official Braintree/Hex documentation in this session. [VERIFIED: codebase grep] [CITED: https://developer.paypal.com/braintree/docs/reference/request/transaction/refund/ruby/] [VERIFIED: https://hex.pm/packages/braintree]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should Phase 99 rename the public API immediately or ship `refund/2` as a compatibility alias over `create_refund/2`?**
-   - What we know: locked D-01 names `Accrue.Billing.refund/2` as canonical, while the current code only exposes `create_refund/2`. [VERIFIED: .planning/milestones/v1.32-phases/099-refunds-and-invoice-parity/099-CONTEXT.md] [VERIFIED: accrue/lib/accrue/billing.ex]
-   - What's unclear: whether docs and tests should flip callers immediately or stage a deprecation. [VERIFIED: accrue/lib/accrue/billing.ex]
-   - Recommendation: plan for `refund/2` + `refund!/2` as new public entrypoints, keep `create_refund/2` delegating for v1.x, and update admin to call the canonical name in the same phase. [VERIFIED: accrue/lib/accrue/billing.ex]
+1. **Public refund seam**
+   - Decision: Phase 99 should introduce `Accrue.Billing.refund/2` and `refund!/2` as the canonical public entrypoints, keep `create_refund/2` as a v1.x compatibility delegate, and update admin/tests/docs to call `refund/2` in the same phase. [VERIFIED: .planning/milestones/v1.32-phases/099-refunds-and-invoice-parity/099-CONTEXT.md] [VERIFIED: accrue/lib/accrue/billing.ex]
+   - Why: this satisfies locked D-01 without taking on a destructive rename or a broader compatibility churn than the phase needs. [VERIFIED: .planning/milestones/v1.32-phases/099-refunds-and-invoice-parity/099-CONTEXT.md]
 
-2. **How should Braintree card refund convergence be proven for PROC-19 when generic transaction webhooks are not documented for card refunds?**
-   - What we know: official docs scope transaction webhooks to ACH and SEPA Direct Debit sale/refund requests; current Braintree event normalization only handles subscription events. [CITED: https://developer.paypal.com/braintree/docs/reference/general/webhooks/transaction/node/] [VERIFIED: accrue/lib/accrue/webhook/default_handler.ex]
-   - What's unclear: whether the team wants a scheduled reconcile, post-write refetch, or both as the normative convergence path. [VERIFIED: accrue/lib/accrue/jobs/reconcile_refund_fees.ex]
-   - Recommendation: planner should make an explicit choice for card refunds: immediate post-write retrieve plus idempotent periodic reconcile is the safest bounded design. [VERIFIED: accrue/lib/accrue/processor/braintree.ex] [VERIFIED: accrue/lib/accrue/jobs/reconcile_refund_fees.ex]
+2. **Braintree card refund convergence path**
+   - Decision: Phase 99 should treat card refund truth as `immediate post-write retrieve + idempotent periodic reconcile`, with webhook handling remaining additive and conditional where Braintree actually emits an applicable refund lifecycle event. [CITED: https://developer.paypal.com/braintree/docs/reference/general/webhooks/transaction/node/] [VERIFIED: accrue/lib/accrue/jobs/reconcile_refund_fees.ex]
+   - Why: official docs do not support planning generic card refunds as webhook-only, and the repo already has a projection-first reconcile pattern that can carry eventual truth without over-promising provider event coverage. [VERIFIED: accrue/lib/accrue/webhook/default_handler.ex] [VERIFIED: accrue/lib/accrue/jobs/reconcile_refund_fees.ex]
 
 ## Environment Availability
 
