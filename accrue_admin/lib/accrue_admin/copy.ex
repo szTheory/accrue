@@ -410,6 +410,10 @@ defmodule AccrueAdmin.Copy do
 
   def charge_refund_created_info,
     do: "Refund created with fee-aware fields from the billing facade."
+    
+  def charge_refund_braintree_eligibility_info, do: "Refunds apply to settled or settling transactions. Pre-settlement voids are separate."
+  def charge_refund_not_final_truth_warning, do: "API success is not final lifecycle truth; child refunds must converge via webhook or reconcile backstop."
+  def charge_refund_child_fact_disclaimer, do: "Repeated partial refunds will appear as separate child facts."
 
   def customer_detail_no_subscriptions, do: "No subscriptions for this customer yet."
 

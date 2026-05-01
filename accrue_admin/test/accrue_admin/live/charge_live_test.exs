@@ -209,6 +209,61 @@ defmodule AccrueAdmin.ChargeLiveTest do
     refute html =~ ~s(id="accrue-admin-step-up-dialog")
   end
 
+  test "braintree charge displays explicit eligibility and void copy, calls refund/2, and renders rollups", %{
+    conn: conn
+  } do
+    # Braintree setup
+    customer =
+      insert_customer(%{
+        name: "Braintree Detail",
+        processor: "braintree",
+        processor_id: "cus_bt_1"
+      })
+
+    subscription = insert_subscription(customer |> Map.put(:processor, "braintree"))
+
+    charge =
+      insert_charge(customer, subscription, %{
+        processor: "braintree",
+        processor_id: "ch_bt_detail",
+        status: "succeeded",
+        amount_cents: 10_000
+      })
+
+    insert_refund(charge, %{
+      processor_id: "re_bt_seeded_1",
+      stripe_id: "re_bt_seeded_1",
+      amount_minor: 2_500,
+      currency: "usd",
+      status: :succeeded
+    })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, view, html} = live(conn, "/billing/charges/#{charge.id}")
+
+    assert html =~ Copy.charge_refund_braintree_eligibility_info()
+    assert html =~ Copy.charge_refund_not_final_truth_warning()
+
+    # Renders rollups and identity
+    assert html =~ "re_bt_seeded_1"
+    
+    html =
+      render_submit(
+        element(view, "[data-role='refund-form']"),
+        %{
+          "amount_minor" => "4000",
+          "reason" => "requested_by_customer"
+        }
+      )
+      
+    html = render_click(element(view, "[data-role='confirm-refund']"))
+    
+    html =
+      render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
+      
+    assert html =~ Copy.charge_refund_created_info()
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",

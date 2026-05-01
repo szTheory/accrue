@@ -181,6 +181,10 @@ defmodule AccrueAdmin.Live.ChargeLive do
                 Leave the amount blank to refund the full charge. Existing fee fields surface after
                 the refund is created.
               </p>
+              <div :if={@charge.processor == "braintree"} class="ax-stack-sm">
+                <p class="ax-body"><%= Copy.charge_refund_braintree_eligibility_info() %></p>
+                <p class="ax-body"><%= Copy.charge_refund_not_final_truth_warning() %></p>
+              </div>
             </header>
 
             <form phx-submit="prepare_refund" class="ax-stack-xl" data-role="refund-form">
@@ -223,7 +227,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
           <div :for={refund <- @refunds} class="ax-list-row">
             <div>
-              <p class="ax-label"><%= refund.stripe_id || refund.id %></p>
+              <p class="ax-label"><%= refund.processor_id || refund.stripe_id || refund.id %></p>
               <p class="ax-body">
                 <%= humanize(refund.status) %>
                 <span :if={refund.reason}> · <%= refund.reason %></span>
