@@ -34,7 +34,8 @@ defmodule Accrue.Processor.Braintree do
         resume: false
       },
       invoice: %{lifecycle_webhook_projection: true},
-      webhook: %{verify: true, parse: true}
+      webhook: %{verify: true, parse: true},
+      billing_portal: %{create: false}
     }
   end
 

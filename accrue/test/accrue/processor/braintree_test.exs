@@ -253,6 +253,7 @@ defmodule Accrue.Processor.BraintreeTest do
     assert caps.invoice.lifecycle_webhook_projection == true
     assert caps.webhook.verify == true
     assert caps.webhook.parse == true
+    assert get_in(caps, [:billing_portal, :create]) == false
 
   end
 
