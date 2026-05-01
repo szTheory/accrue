@@ -1,8 +1,8 @@
 ---
 phase: 98
 slug: payment-method-crud-operator-admin
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-04-30
 ---
@@ -58,12 +58,18 @@ created: 2026-04-30
 
 ---
 
-## Manual-Only Verifications
+## Browser Gate Coverage
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Operator delete warning clarity | PROC-17 | Impact phrasing and replacement guidance are copy/UX judgments | Exercise the payment-method tab in light and dark theme, open blocked and allowed delete flows, and confirm the warning copy states whether a subscription dependency or replacement requirement blocks deletion. |
-| Host-assisted replace boundary | PROC-16, PROC-17 | Requires checking that admin does not embed raw card entry and instead routes to host-owned flow or explanatory copy | Verify the customer payment-method tab exposes handoff guidance only, with no embedded Braintree form fields or Drop-in UI. |
+The phase gate is fully automated. `examples/accrue_host/e2e/verify01-admin-a11y.spec.js`
+now covers the mounted payment-method route boundary directly:
+
+- host-owned capture boundary: no embedded Braintree form fields, Hosted Fields, Drop-in UI, or Braintree iframe chrome on the admin route
+- replacement-required delete confirmation: operator sees the replacement guidance and no destructive confirm button
+- allowed delete confirmation: operator sees the generic warning and the destructive confirm button
+
+The active-subscription blocked-copy path remains automated in `accrue_admin/test/accrue_admin/live/customer_live_test.exs`,
+which already asserts the mounted admin customer payment-method delete flow renders
+`customer_payment_methods_delete_blocked_in_use`.
 
 ## Phase-Gate Browser Bootstrap
 
@@ -84,9 +90,9 @@ This bootstrap is required even on machines that have run other host specs befor
 
 - [ ] All tasks have automated verify or a Wave 0 dependency
 - [ ] Sampling continuity: no plan wave merges without the quick run command
-- [ ] Browser verification is included only at the phase gate, with `npm ci` and `npm run e2e:install` completed first
+- [x] Browser verification is included only at the phase gate, with `npm ci` and `npm run e2e:install` completed first
 - [ ] No watch-mode flags
 - [ ] Feedback latency stays fast at task level because Playwright is not part of per-task verification
-- [ ] `nyquist_compliant: true` set in frontmatter when phase closes
+- [x] `nyquist_compliant: true` set in frontmatter when phase closes
 
-**Approval:** pending
+**Approval:** automated

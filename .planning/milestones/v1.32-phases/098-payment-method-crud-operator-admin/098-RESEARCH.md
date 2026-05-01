@@ -344,17 +344,15 @@ PaymentMethod
 |---|-------|---------|---------------|
 | A1 | Operators may still infer Stripe-like “set default moves subscriptions” behavior unless copy and guardrails make the distinction explicit. | Common Pitfalls | Medium: UI and docs could under-warn a destructive path even if the backend is correct. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What is the cheapest durable way to prove a payment method is funding an active Braintree subscription?**
-   - What we know: Braintree subscription responses include `paymentMethodToken`, and Accrue stores the full normalized subscription payload in `Subscription.data`. [CITED: https://developer.paypal.com/braintree/docs/reference/response/subscription/] [VERIFIED: codebase grep]
-   - What's unclear: whether all existing projected Braintree subscriptions already retain that field reliably enough for guarded delete queries, or whether Phase 98 should add a first-class projection field or index. [VERIFIED: codebase grep]
-   - Recommendation: plan a small spike at the start of implementation to query active Braintree subscriptions by `data["payment_method_token"]`; only add schema/index work if the JSONB path is inadequate. [VERIFIED: codebase grep]
+   - Decision: Phase 98 should rely on the existing projected `Subscription.data["payment_method_token"]` field as the delete guard source of truth, queried only for active Braintree subscriptions. This keeps the phase inside the current schema budget and matches the canonical subscription payload Accrue already stores. [CITED: https://developer.paypal.com/braintree/docs/reference/response/subscription/] [VERIFIED: codebase grep]
+   - Boundary: do not add a new first-class schema field or index in Phase 98 unless the implementation proves the JSONB path is unavailable or materially too slow under the repo's current proof lane. If that evidence appears, treat it as a follow-up phase rather than reopening this plan mid-execution. [VERIFIED: codebase grep]
 
 2. **Should `update_payment_method/3` be a first-class public command or a documented orchestrator?**
-   - What we know: locked decisions allow either shape as long as semantics are replacement-oriented and host-owned at the browser seam. [VERIFIED: codebase grep]
-   - What's unclear: whether exposing `update_payment_method/3` directly helps DX more than a clearer “replace payment method” helper in docs/UI. [VERIFIED: codebase grep]
-   - Recommendation: plan the behavior first as `add + optional set_default + optional cleanup`, then decide whether the public API needs a dedicated wrapper after tests prove the orchestration. [VERIFIED: codebase grep]
+   - Decision: yes. Phase 98 should expose `update_payment_method/3` as a first-class public `Accrue.Billing` command, but its semantics must stay replacement-oriented: add a new vaulted method through the host-owned seam, optionally set it as default, then optionally remove the replaced method when guardrails allow. [VERIFIED: codebase grep]
+   - Boundary: this is a convenience wrapper over explicit orchestration, not a promise of provider-agnostic in-place card editing. UI and docs should prefer "Replace payment method" language and avoid implying universal edit semantics. [VERIFIED: codebase grep]
 
 ## Environment Availability
 

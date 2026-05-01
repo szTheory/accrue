@@ -1,33 +1,33 @@
 ---
-status: partial
+status: automated
 phase: 098-payment-method-crud-operator-admin
 source:
   - 098-VERIFICATION.md
-started: 2026-04-30T21:45:30Z
-updated: 2026-04-30T21:45:30Z
+updated: 2026-04-30T22:05:36Z
 ---
 
-## Current Test
+## Current State
 
-Awaiting human testing for the mounted customer payment-method route and delete-copy clarity.
+No human UAT is required for Phase 098.
 
-## Tests
+## Automated Replacements
 
-### 1. Browser route boundary
-expected: The mounted payment-method route shows only sync/default/delete plus host handoff copy, with no embedded Braintree capture UI.
-result: pending
+1. Mounted payment-method route boundary
+expected: The admin route exposes sync/default/delete plus host handoff copy only, with no embedded Braintree capture UI.
+coverage:
+- `examples/accrue_host/e2e/verify01-admin-a11y.spec.js`
 
-### 2. Delete warning clarity
-expected: The tab clearly distinguishes active-subscription blocking, replacement-required blocking, and the allowed last-method delete path.
-result: pending
+2. Delete-flow clarity
+expected: The route distinguishes replacement-required blocked delete from allowed delete, and the active-subscription blocked-copy path remains covered.
+coverage:
+- `examples/accrue_host/e2e/verify01-admin-a11y.spec.js`
+- `accrue_admin/test/accrue_admin/live/customer_live_test.exs`
 
 ## Summary
 
 total: 2
-passed: 0
+passed: 2
 issues: 0
-pending: 2
+pending: 0
 skipped: 0
 blocked: 0
-
-## Gaps

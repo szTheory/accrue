@@ -1,5 +1,50 @@
 # Milestones
 
+## v1.33 Braintree Full Maturity (Planning)
+
+**Planning opened:** 2026-05-01
+
+**Phases planned:** **4** phases (**101–104**).
+
+**Theme:** Achieve full Braintree maturity and parity with Stripe. Addresses critical gaps by building a first-party Accrue Portal/Checkout UI (since Braintree lacks hosted versions), local coupon/discount mapping, a custom metered usage engine, and evaluating Connect parity.
+
+**Depends on:** **v1.32** shipped.
+
+**Phase execution trees (planned):** **`.planning/milestones/v1.33-phases/`**
+
+**Archives:**
+- **`.planning/milestones/v1.33-ROADMAP.md`**
+- **`.planning/milestones/v1.33-REQUIREMENTS.md`**
+
+---
+
+## v1.32 Braintree Production Parity (Shipped: 2026-05-01)
+
+**Planning opened:** 2026-04-30
+
+**Phases completed:** **4** phases (**97–100**).
+
+**Theme:** Expand the Braintree integration (v1.31 "thin slice") to achieve deeper feature parity with Stripe for production usage, adhering to Accrue's "direct gateway" explicit-capability strategy.
+
+**Depends on:** **v1.31** shipped.
+
+**Phase execution trees:** **`.planning/milestones/v1.32-phases/097-advanced-subscription-lifecycle/`**, **`098-payment-method-crud-operator-admin/`**, **`099-refunds-and-invoice-parity/`**, **`100-billing-portal-semantics/`**.
+
+**Key accomplishments:**
+
+- **97:** **PROC-14**, **PROC-15** — Advanced Subscription Lifecycle (Braintree subscription mutations, plan swaps, pause/resume, and webhook convergence).
+- **98:** **PROC-16**, **PROC-17** — Payment Method CRUD & Operator Admin for Braintree payment methods.
+- **99:** **PROC-18**, **PROC-19** — Refunds and Invoice Parity for Braintree.
+- **100:** **PROC-20** — Billing Portal Semantics (explicit capability rejection and documentation for Braintree self-serve portal).
+
+**Outcome:** Phases **97–100** closed the **v1.32** Braintree Production Parity milestone.
+
+**Archives:**
+- **`.planning/milestones/v1.32-ROADMAP.md`**
+- **`.planning/milestones/v1.32-REQUIREMENTS.md`**
+
+---
+
 ## v1.31 PROC-08 Phase 1: boundary hardening + thin slice (Shipped: 2026-04-29)
 
 **Planning opened:** 2026-04-28

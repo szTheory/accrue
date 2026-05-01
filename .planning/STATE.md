@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.32
-milestone_name: Braintree Production Parity
-current_plan: 3
-status: verifying
+milestone: v1.33
+milestone_name: Braintree Full Maturity
+current_plan: null
+status: planning
 last_updated: "2026-05-01T17:14:23.143Z"
 last_activity: 2026-05-01
 progress:
-  total_phases: 16
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,20 +21,20 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 099 — refunds-and-invoice-parity
+**Current focus:** v1.33 planning — Phase 101 (Accrue Portal Foundation & Checkout) ready for spec/discuss.
 
 ## Current Position
 
-Phase: 099 (refunds-and-invoice-parity) — COMPLETE
-Plan: 3 of 3
-Current Plan: 3
-Status: Phase complete — ready for verification
+Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
+Phase: 101 (accrue-portal-foundation-and-checkout) — Not started
+Plan: — (not yet planned)
+Status: Awaiting `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`
 Resume file: None
-Last activity: 2026-05-01
+Last activity: 2026-05-01 (v1.32 milestone closed)
 
 ## Milestone Progress
 
-**v1.32** (opened **open**): Phases **97–100** — **PROC-14..20**; **`milestones/v1.32-phases/`**; active **`v1.32-ROADMAP.md`**, **`v1.32-REQUIREMENTS.md`**. Strategic parent: **`.planning/STRATEGY.md`**.
+**v1.32** (shipped **2026-05-01**): Phases **97–100** — **PROC-14..20**; **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`**, **`v1.32-REQUIREMENTS.md`**. Strategic parent: **`.planning/STRATEGY.md`**.
 
 **v1.31** (shipped **2026-04-29**): Phases **94–96** — **PROC-09..13**; **`milestones/v1.31-phases/`**; archives **`v1.31-ROADMAP.md`**, **`v1.31-REQUIREMENTS.md`**; tag **`v1.31`**. Strategic parent: **`.planning/STRATEGY.md`**.
 
@@ -105,7 +105,9 @@ Last activity: 2026-05-01
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Stand by for new milestone planning (`/gsd-new-milestone`).
+**Next:** **v1.33** planning open — Phases **101–104** scaffolded in **`milestones/v1.33-ROADMAP.md`** / **`v1.33-REQUIREMENTS.md`**. Continue with `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`.
+
+**Completed (v1.32):** Phases **97–100** — **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`** + **`v1.32-REQUIREMENTS.md`**; tag **`v1.32`** (local).
 
 **Completed (v1.31):** Phases **94–96** — **`milestones/v1.31-phases/`**; archives **`v1.31-ROADMAP.md`** + **`v1.31-REQUIREMENTS.md`**; tag **`v1.31`**.
 
@@ -115,4 +117,4 @@ Last activity: 2026-05-01
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
 
-**Planned Phase:** 99 (Refunds and Invoice Parity) — 3 plans — 2026-05-01T02:29:58.789Z
+
