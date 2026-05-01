@@ -2,10 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.33
 milestone_name: Braintree Full Maturity
-current_plan: null
-status: planning
-last_updated: "2026-05-01T19:25:52.177Z"
-last_activity: 2026-05-01
+status: Awaiting `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`
+last_updated: "2026-05-01T20:04:56.998Z"
+last_activity: "2026-05-01 - Completed quick task 260501-lfk: repair active ROADMAP.md for v1.33"
 progress:
   total_phases: 4
   completed_phases: 0
@@ -29,7 +28,7 @@ Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
 Phase: 101 (accrue-portal-foundation-and-checkout) — Not started
 Plan: — (not yet planned)
 Status: Awaiting `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`
-Resume file: None
+Resume file: --resume-file
 Last activity: 2026-05-01 - Completed quick task 260501-lfk: repair active ROADMAP.md for v1.33
 
 ## Milestone Progress
@@ -117,5 +116,3 @@ Last activity: 2026-05-01 - Completed quick task 260501-lfk: repair active ROADM
 **Completed (v1.28):** Phases **86–87** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**, **`087-friction-inventory-post-publish/`**.
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
-
-
