@@ -44,6 +44,25 @@ defmodule Accrue.Billing.BillingPortalSessionFacadeTest do
                Billing.create_billing_portal_session(customer, return_url: "https://x.test")
     end
 
+    test "returns :unsupported_by_gateway when processor lacks billing_portal create capability", %{customer: customer} do
+      previous = Application.get_env(:accrue, :processor)
+      Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
+
+      on_exit(fn ->
+        if previous do
+          Application.put_env(:accrue, :processor, previous)
+        else
+          Application.delete_env(:accrue, :processor)
+        end
+      end)
+
+      assert {:error, %Accrue.APIError{code: :unsupported_by_gateway} = err} =
+               Billing.create_billing_portal_session(customer, return_url: "https://x.test")
+
+      assert err.message =~ "does not support a hosted billing portal"
+      assert err.message =~ "guides/braintree-local-portal.md"
+    end
+
     test "telemetry metadata excludes portal URL and sets operation", %{customer: customer} do
       handler_id = "billing_portal_facade_test_#{:erlang.unique_integer([:positive])}"
       parent = self()
