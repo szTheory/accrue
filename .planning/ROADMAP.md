@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- **v1.32 Braintree Production Parity** — Phases **97–100** **Active**. Expands Braintree integration to achieve deeper feature parity with Stripe for production usage (subscription mutation, payment method CRUD, refunds, portal). **Requirements:** PROC-14..20. **Phase trees:** [`milestones/v1.32-phases/`](milestones/v1.32-phases/).
 - ✅ **v1.31 PROC-08 Phase 1: boundary hardening + thin slice** — Phases **94–96** shipped **2026-04-29**. Reopens the long-deferred second-processor track with written boundaries: strategy + capability matrix + target-provider lock, official processor conformance harness + boundary hardening, then one real second-provider vertical slice through the public billing facade. **Archives:** [`milestones/v1.31-ROADMAP.md`](milestones/v1.31-ROADMAP.md), [`milestones/v1.31-REQUIREMENTS.md`](milestones/v1.31-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.31-phases/`](milestones/v1.31-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** shipped **2026-04-28**. **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** closed; linked publish proof in **`092-VERIFICATION.md`**, planning closeout proof in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **Archives:** [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.30-phases/`](milestones/v1.30-phases/). **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0.
 - ✅ **v1.29 Mailglass Integration** — Phases **88–90** shipped **2026-04-26**. **MG-01..MG-07** validated; `mjml_eex` + `phoenix_swoosh` removed from `accrue/mix.exs`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`. **Archives:** [`milestones/v1.29-ROADMAP.md`](milestones/v1.29-ROADMAP.md), [`milestones/v1.29-REQUIREMENTS.md`](milestones/v1.29-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.29-phases/`](milestones/v1.29-phases/). **No** **PROC-08** / **FIN-03**.
@@ -34,6 +35,103 @@
 - ✅ **v1.8 Org billing recipes & host integration depth** — Phases **37–39** shipped **2026-04-22**. Delivers deferred **ORG-04**. Archives: [`milestones/v1.8-ROADMAP.md`](milestones/v1.8-ROADMAP.md), [`milestones/v1.8-REQUIREMENTS.md`](milestones/v1.8-REQUIREMENTS.md).
 - ✅ **v1.9 Observability & operator runbooks** — Phases **40–42** shipped **2026-04-22**. Full archive: [`milestones/v1.9-ROADMAP.md`](milestones/v1.9-ROADMAP.md), [`milestones/v1.9-REQUIREMENTS.md`](milestones/v1.9-REQUIREMENTS.md). Gap audit (research): [`research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md).
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
+
+## v1.32 Braintree Production Parity
+
+**Status:** Active
+**Phases:** 97–100
+
+## Overview
+
+Expand the Braintree integration (v1.31 "thin slice") to achieve deeper feature parity with Stripe for production usage, adhering to Accrue's "direct gateway" explicit-capability strategy.
+
+**Requirements:** **PROC-14..20** — see [REQUIREMENTS.md](REQUIREMENTS.md). **Strategic parent:** [STRATEGY.md](STRATEGY.md).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 97 | Advanced Subscription Lifecycle | Implement plan swaps, quantity changes, and pause/resume logic for Braintree adapters, alongside the required webhook event parsing to converge these changes locally. | PROC-14, PROC-15 |
+| 98 | Payment Method CRUD & Operator Admin | Extend the `AccrueAdmin` UI and the `Accrue.Billing` facade to handle Braintree payment method updates. | PROC-16, PROC-17 |
+| 99 | Refunds and Invoice Parity | Implement the Braintree refund flow and ensure the local `Invoice` / `Charge` records correctly project Braintree's transaction statuses. | PROC-18, PROC-19 |
+| 100 | Billing Portal Semantics | Address `create_billing_portal_session/2` parity for Braintree (Local Portal UI or documented alternative). | PROC-20 |
+
+**Success criteria (milestone):**
+
+1. All v1.32 requirements (PROC-14..20) are fully implemented.
+2. Braintree support achieves production-readiness parity with Stripe for core subscription lifecycle, payment methods, and refunds.
+3. The host application has clear guidance or a provided component for a customer billing portal on Braintree.
+
+### Phase 97: Advanced Subscription Lifecycle
+
+**Goal:** Braintree subscriptions can be mutated (plan swaps, quantity, pause/resume) and synchronized via webhooks.
+
+**Depends on:** Phase 96
+
+**Requirements:** PROC-14, PROC-15
+
+**Success Criteria:**
+
+1. A host application can upgrade, downgrade, pause, and resume a Braintree subscription via `Accrue.Billing`.
+2. Braintree webhooks for subscription changes successfully converge local `Accrue.Subscription` records.
+3. Parity with Stripe subscription mutation capabilities is achieved for Braintree.
+
+**Plans:** 3 plans
+
+Plans:
+- [ ] 099-01-PLAN.md — Canonical `Accrue.Billing.refund/2`, additive refund `processor_id` schema evolution, and Braintree refund adapter callbacks.
+- [ ] 099-02-PLAN.md — Fetch-backed Braintree refund convergence, sale-truth invoice/charge refund rollups, and narrow explicit proration support.
+- [ ] 099-03-PLAN.md — Thin `AccrueAdmin` charge refund shell, honest Braintree refund copy, and finalized phase validation coverage.
+
+### Phase 98: Payment Method CRUD & Operator Admin
+
+**Goal:** Customers and operators can manage Braintree vaulted payment methods.
+
+**Depends on:** Phase 97
+
+**Requirements:** PROC-16, PROC-17
+
+**Success Criteria:**
+
+1. `Accrue.Billing` supports listing, adding, deleting, and setting default Braintree payment methods.
+2. `AccrueAdmin` displays Braintree payment methods accurately and allows operators to manage them if supported.
+3. No feature degradation for existing Stripe payment method management.
+
+**Plans:** 1 plan
+
+Plans:
+- [ ] 098-01-PLAN.md — Ship the coupled payment-method CRUD slice: canonical Billing verbs, Braintree write-through resync/guard semantics, and the AccrueAdmin operator surface with copy/export/browser proof.
+**UI hint:** yes
+
+### Phase 99: Refunds and Invoice Parity
+
+**Goal:** Operators can issue refunds for Braintree transactions, with accurate local projections.
+
+**Depends on:** Phase 98
+
+**Requirements:** PROC-18, PROC-19
+
+**Success Criteria:**
+
+1. A Braintree charge can be fully or partially refunded via `Accrue.Billing.refund/2`.
+2. Webhooks correctly reflect refund events into local `Charge` and `Invoice` records.
+3. Proration calculations during subscription mutations are handled correctly.
+
+**Plans:** TBD
+
+### Phase 100: Billing Portal Semantics
+
+**Goal:** Clarity and tooling for self-serve customer management on Braintree.
+
+**Depends on:** Phase 99
+
+**Requirements:** PROC-20
+
+**Success Criteria:**
+
+1. A clear path exists for Braintree integrators calling `create_billing_portal_session/2` (e.g., throwing a helpful error with documentation, or rendering a first-party Accrue local portal).
+2. If a local portal is provided, it handles basic self-serve tasks (viewing active plan, updating card).
+
+**Plans:** TBD
+**UI hint:** yes
 
 ## Phases
 
@@ -1006,6 +1104,23 @@ Plans:
 | 91. Pre-publish 1.0.0 prep | v1.30 | 3/3 | Complete | 2026-04-28 |
 | 92. Linked 1.0.0 publish + post-publish contract sweep | v1.30 | 3/3 | Complete | 2026-04-28 |
 | 93. Post-publish HYG mirror + INV-07 + tag | v1.30 | 3/3 | Complete | 2026-04-28 |
+
+**v1.31 (complete — 2026-04-29)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 94. Strategy + capability matrix + target lock | v1.31 | 3/3 | Complete | 2026-04-29 |
+| 95. Official processor contract + conformance harness | v1.31 | 3/3 | Complete | 2026-04-29 |
+| 96. Chosen second-provider thin slice | v1.31 | 5/5 | Complete | 2026-04-29 |
+
+**v1.32 (planning — open)**
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 97. Advanced Subscription Lifecycle | v1.32 | 0/0 | Not started | - |
+| 98. Payment Method CRUD & Operator Admin | v1.32 | 0/0 | Not started | - |
+| 99. Refunds and Invoice Parity | v1.32 | 0/0 | Not started | - |
+| 100. Billing Portal Semantics | v1.32 | 0/0 | Not started | - |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
 

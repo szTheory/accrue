@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.31
-milestone_name: milestone
-current_plan: 5 of 5
-status: completed
-last_updated: "2026-04-29T21:55:00.000Z"
-last_activity: 2026-04-29 -- completed Phase 96 Plan 05
+milestone: v1.32
+milestone_name: Braintree Production Parity
+current_plan: 1
+status: executing
+last_updated: "2026-05-01T03:05:28.828Z"
+last_activity: 2026-05-01
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_phases: 16
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -22,18 +21,20 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.31 PROC-08 Phase 1 — Phase 96 complete.
+**Current focus:** Phase 098 — payment-method-crud-operator-admin
 
 ## Current Position
 
-Phase: 96
-Plan: 05
-Current Plan: 5 of 5
-Status: completed
+Phase: 098 (payment-method-crud-operator-admin) — EXECUTING
+Plan: 2 of 3
+Current Plan: 1
+Status: Ready to execute
 Resume file: None
-Last activity: 2026-04-29 -- completed Phase 96 Plan 05
+Last activity: 2026-05-01
 
 ## Milestone Progress
+
+**v1.32** (opened **open**): Phases **97–100** — **PROC-14..20**; **`milestones/v1.32-phases/`**; active **`v1.32-ROADMAP.md`**, **`v1.32-REQUIREMENTS.md`**. Strategic parent: **`.planning/STRATEGY.md`**.
 
 **v1.31** (shipped **2026-04-29**): Phases **94–96** — **PROC-09..13**; **`milestones/v1.31-phases/`**; archives **`v1.31-ROADMAP.md`**, **`v1.31-REQUIREMENTS.md`**; tag **`v1.31`**. Strategic parent: **`.planning/STRATEGY.md`**.
 
@@ -53,8 +54,9 @@ Last activity: 2026-04-29 -- completed Phase 96 Plan 05
 ## Current Planning Artifacts
 
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
-- **`.planning/ROADMAP.md`** — active milestone roadmap for **v1.31** (phases **94–96**) plus archived milestone index.
-- **`.planning/REQUIREMENTS.md`** — active **v1.31** requirements (**PROC-09..13**).
+- **`.planning/ROADMAP.md`** — active milestone roadmap for **v1.32** (phases **97–100**) plus archived milestone index.
+- **`.planning/REQUIREMENTS.md`** — active **v1.32** requirements (**PROC-14..20**).
+- **`milestones/v1.31-ROADMAP.md`** / **`v1.31-REQUIREMENTS.md`** — final v1.31 archives (phases 94–96, 5 requirements).
 - **`milestones/v1.30-ROADMAP.md`** / **`v1.30-REQUIREMENTS.md`** — final v1.30 archives (phases 91–93, all 12 requirements, final proof links, archived intact).
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
 - **Phase 92 proof:** `092-VERIFICATION.md` is the canonical same-day linked `1.0.0` publish ledger; `093-VERIFICATION.md` reuses it and adds the final planning closeout ledger.
@@ -76,6 +78,7 @@ Last activity: 2026-04-29 -- completed Phase 96 Plan 05
 
 ## Recent Decisions
 
+- **v1.32 opened**: Expanding Braintree integration for production parity (Subscription mutation, Payment Methods CRUD, Refunds, Portal semantics).
 - **2026-04-29:** **Phase 96 complete** — the Braintree-backed thin slice is implemented through the public facade with webhook lifecycle support. The canonical matrix, package docs, and example-host docs now mirror the bounded support story, and verifiers pin the new Phase 96 wording.
 - **2026-04-28:** **v1.31 opened** — maintenance-only follow-on work was rejected as diminishing-return territory after `1.0.0`; the project is now on a bounded **PROC-08** strategic track aimed at an official dual-provider core.
 - **2026-04-28:** **Persistent strategic tracking added** — `.planning/STRATEGY.md` is now the parent artifact for the processor-expansion epic so future milestones inherit the rationale instead of re-deriving it.
@@ -111,3 +114,5 @@ Last activity: 2026-04-29 -- completed Phase 96 Plan 05
 **Completed (v1.28):** Phases **86–87** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**, **`087-friction-inventory-post-publish/`**.
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
+
+**Planned Phase:** 99 (Refunds and Invoice Parity) — 3 plans — 2026-05-01T02:29:58.789Z
