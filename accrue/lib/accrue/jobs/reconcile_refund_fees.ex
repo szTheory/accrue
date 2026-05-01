@@ -53,7 +53,7 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
 
     query =
       from(r in Refund,
-        where: is_nil(r.fees_settled_at) and r.inserted_at < ^cutoff
+        where: (is_nil(r.fees_settled_at) or r.status == :pending) and r.inserted_at < ^cutoff
       )
 
     query
@@ -67,35 +67,50 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
     with {:ok, canonical} <-
            Processor.__impl__().retrieve_refund(sid,
              expand: ["balance_transaction", "charge.balance_transaction"]
-           ),
-         charge_bt <- extract_charge_balance_transaction(canonical),
-         fee when is_integer(fee) <- Map.get(charge_bt, "fee") || Map.get(charge_bt, :fee),
-         fr when is_integer(fr) <-
-           Map.get(charge_bt, "fee_refunded") || Map.get(charge_bt, :fee_refunded) do
-      attrs = %{
-        stripe_fee_refunded_amount_minor: fr,
-        # WR-03: clamp at 0 — fee_refunded can exceed fee in
-        # fee-adjustment scenarios. BILL-26 requires non-negative.
-        merchant_loss_amount_minor: max(0, fee - fr),
-        fees_settled_at: Accrue.Clock.utc_now()
-      }
+           ) do
+      
+      # Update status if changed
+      new_status = extract_status(canonical) || row.status
+      
+      # Extract fees
+      charge_bt = extract_charge_balance_transaction(canonical)
+      fee = Map.get(charge_bt, "fee") || Map.get(charge_bt, :fee)
+      fr = Map.get(charge_bt, "fee_refunded") || Map.get(charge_bt, :fee_refunded)
 
-      {:ok, updated} = row |> Refund.changeset(attrs) |> Repo.update()
+      attrs = 
+        if is_integer(fee) and is_integer(fr) do
+          %{
+            stripe_fee_refunded_amount_minor: fr,
+            # WR-03: clamp at 0 — fee_refunded can exceed fee in
+            # fee-adjustment scenarios. BILL-26 requires non-negative.
+            merchant_loss_amount_minor: max(0, fee - fr),
+            fees_settled_at: Accrue.Clock.utc_now(),
+            status: new_status
+          }
+        else
+          %{status: new_status}
+        end
 
-      :telemetry.execute(
-        [:accrue, :billing, :refund, :fees_settled],
-        %{},
-        %{refund_id: updated.id, source: :reconciler}
-      )
+      if attrs[:status] != row.status or Map.has_key?(attrs, :stripe_fee_refunded_amount_minor) do
+        {:ok, updated} = row |> Refund.changeset(attrs) |> Repo.update()
+        
+        if Map.has_key?(attrs, :stripe_fee_refunded_amount_minor) and is_nil(row.fees_settled_at) do
+          :telemetry.execute(
+            [:accrue, :billing, :refund, :fees_settled],
+            %{},
+            %{refund_id: updated.id, source: :reconciler}
+          )
 
-      _ =
-        Events.record(%{
-          type: "refund.fees_settled",
-          subject_type: "Refund",
-          subject_id: updated.id,
-          data: %{source: "reconciler"}
-        })
-
+          _ =
+            Events.record(%{
+              type: "refund.fees_settled",
+              subject_type: "Refund",
+              subject_id: updated.id,
+              data: %{source: "reconciler"}
+            })
+        end
+      end
+      
       :ok
     else
       _ -> :skip
@@ -103,6 +118,19 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
   end
 
   defp reconcile(_), do: :skip
+
+  defp extract_status(canonical) do
+    status_str = Map.get(canonical, "status") || Map.get(canonical, :status)
+    if is_binary(status_str) do
+      try do
+        String.to_existing_atom(status_str)
+      rescue
+        ArgumentError -> :pending
+      end
+    else
+      status_str
+    end
+  end
 
   defp extract_charge_balance_transaction(canonical) do
     case Map.get(canonical, "charge") || Map.get(canonical, :charge) do

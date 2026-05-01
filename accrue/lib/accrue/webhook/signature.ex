@@ -31,4 +31,23 @@ defmodule Accrue.Webhook.Signature do
     e in LatticeStripe.Webhook.SignatureVerificationError ->
       reraise Accrue.SignatureError, [reason: Exception.message(e)], __STACKTRACE__
   end
+
+  @doc """
+  Verifies a Braintree webhook signature and parses its XML payload.
+
+  Raises `Accrue.SignatureError` if the signature is invalid or missing.
+  """
+  @spec parse_braintree!(String.t() | nil, String.t() | nil, keyword() | map()) :: map()
+  def parse_braintree!(bt_signature, bt_payload, opts \\ []) do
+    opts = Keyword.new(opts)
+
+    case Braintree.Webhook.parse(bt_signature, bt_payload, opts) do
+      {:ok, %{"payload" => decoded_xml}} ->
+        Braintree.XML.Decoder.load(decoded_xml)
+        |> Map.get("notification", %{})
+
+      {:error, reason} ->
+        raise Accrue.SignatureError, reason: reason
+    end
+  end
 end

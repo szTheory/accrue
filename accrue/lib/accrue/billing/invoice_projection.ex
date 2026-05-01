@@ -23,6 +23,96 @@ defmodule Accrue.Billing.InvoiceProjection do
   @type decomposed :: %{invoice_attrs: map(), item_attrs: [map()]}
 
   @spec decompose(map()) :: {:ok, decomposed()}
+  def decompose(%{"transactions" => transactions} = braintree_sub) when is_list(transactions) do
+    # Braintree branch: project the latest transaction from the subscription as an invoice.
+    # The webhook sends the subscription object, and the most recent transaction reflects the lifecycle event.
+    tx = List.first(transactions) || %{}
+    
+    status =
+      case tx["status"] do
+        "settled" -> :paid
+        "settling" -> :paid
+        "submitted_for_settlement" -> :paid
+        "processor_declined" -> :uncollectible
+        "gateway_rejected" -> :uncollectible
+        "failed" -> :uncollectible
+        "voided" -> :void
+        _ -> :draft
+      end
+
+    amount_due = if status == :paid, do: 0, else: (tx["amount"] || 0) * 100
+    amount_paid = if status == :paid, do: (tx["amount"] || 0) * 100, else: 0
+
+    refund_ids = tx["refund_ids"] || []
+    refund_count = length(refund_ids)
+    
+    # We will compute the total refunded amount. Braintree transaction returns `refunded_transaction_id` on the refund itself.
+    # If the braintree_sub payload doesn't embed refund amounts natively in the parent transaction, we might need 
+    # to rely on something else or assume it's added. Let's look for `refund_amount` or just default.
+    # Braintree transactions don't have a `total_refunded_amount_minor` out of the box in the summary unless we fetch it.
+    # However, if it's provided in the payload (e.g. by our normalization or fetch), we'll read it.
+    total_refunded_amount_minor = (tx["refunded_amount"] || 0) * 100
+    
+    refund_progress =
+      cond do
+        refund_count > 0 and total_refunded_amount_minor >= (tx["amount"] || 0) * 100 -> :fully_refunded
+        refund_count > 0 -> :partially_refunded
+        true -> :none
+      end
+
+    invoice_attrs = %{
+      processor_id: tx["id"],
+      status: status,
+      subtotal_minor: (tx["amount"] || 0) * 100,
+      tax_minor: (tx["tax_amount"] || 0) * 100,
+      automatic_tax: false,
+      automatic_tax_status: nil,
+      automatic_tax_disabled_reason: nil,
+      last_finalization_error_code: nil,
+      discount_minor: nil,
+      total_discount_amounts: %{"data" => []},
+      total_minor: (tx["amount"] || 0) * 100,
+      amount_due_minor: trunc(amount_due),
+      amount_paid_minor: trunc(amount_paid),
+      amount_remaining_minor: trunc(amount_due),
+      total_refunded_amount_minor: trunc(total_refunded_amount_minor),
+      refund_count: refund_count,
+      refund_progress: refund_progress,
+      currency: tx["currency_iso_code"] || "USD",
+      number: tx["id"],
+      hosted_url: nil,
+      pdf_url: nil,
+      period_start: unix_dt(tx["created_at"]),
+      period_end: unix_dt(tx["created_at"]),
+      due_date: unix_dt(tx["created_at"]),
+      collection_method: "charge_automatically",
+      billing_reason: "subscription_cycle",
+      finalized_at: unix_dt(tx["created_at"]),
+      paid_at: if(status == :paid, do: unix_dt(tx["created_at"]), else: nil),
+      voided_at: if(status == :void, do: unix_dt(tx["created_at"]), else: nil),
+      data: SubscriptionProjection.to_string_keys(braintree_sub),
+      metadata: %{}
+    }
+
+    item_attrs = [
+      %{
+        stripe_id: tx["id"],
+        description: "Braintree subscription #{braintree_sub["id"]}",
+        amount_minor: (tx["amount"] || 0) * 100,
+        currency: tx["currency_iso_code"] || "USD",
+        quantity: 1,
+        period_start: unix_dt(tx["created_at"]),
+        period_end: unix_dt(tx["created_at"]),
+        proration: false,
+        price_ref: braintree_sub["plan_id"],
+        subscription_item_ref: nil,
+        data: tx
+      }
+    ]
+
+    {:ok, %{invoice_attrs: invoice_attrs, item_attrs: item_attrs}}
+  end
+
   def decompose(stripe_inv) when is_map(stripe_inv) do
     currency = SubscriptionProjection.get(stripe_inv, :currency)
     status_transitions = SubscriptionProjection.get(stripe_inv, :status_transitions) || %{}

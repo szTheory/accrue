@@ -263,41 +263,52 @@ defmodule Accrue.Billing.SubscriptionActions do
   def swap_plan(%Subscription{} = sub, new_price_id, opts) when is_binary(new_price_id) do
     validated = validate_swap_opts!(opts)
     sub = Repo.preload(sub, :subscription_items)
-    assert_single_item!(sub, "swap_plan/3")
-
-    [existing_item | _] = sub.subscription_items
-    op_id = validated[:operation_id] || Actor.current_operation_id!()
-    idem_key = Idempotency.key(:swap_plan, sub.id, op_id)
-
-    item_params =
-      %{id: existing_item.processor_id, price: new_price_id}
-      |> maybe_put_quantity(validated[:quantity])
-
-    stripe_params = %{
-      items: [item_params],
-      proration_behavior: Atom.to_string(validated[:proration]),
-      expand: ["latest_invoice.payment_intent"]
-    }
-
     result =
-      Repo.transact(fn ->
-        with {:ok, stripe_sub} <-
-               Processor.__impl__().update_subscription(
-                 sub.processor_id,
-                 stripe_params,
-                 idempotency_key: idem_key
-               ),
-             {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
-             {:ok, updated} <- update_subscription_row(sub, attrs),
-             {:ok, _items} <- upsert_items(updated, stripe_sub),
-             {:ok, _} <-
-               record_event("subscription.plan_swapped", updated, %{
-                 new_price_id: new_price_id,
-                 proration: validated[:proration]
-               }) do
-          {:ok, Repo.preload(updated, :subscription_items, force: true)}
-        end
-      end)
+      if braintree_processor?() do
+        {:error,
+         %Accrue.APIError{
+           code: "processor_operation_unsupported",
+           http_status: 422,
+           message:
+             "Braintree plan swaps are unsupported through Accrue's generic swap_plan/3 facade " <>
+               "because the provider requires an explicit subscription price update alongside plan_id."
+         }}
+      else
+        assert_single_item!(sub, "swap_plan/3")
+
+        [existing_item | _] = sub.subscription_items
+        op_id = validated[:operation_id] || Actor.current_operation_id!()
+        idem_key = Idempotency.key(:swap_plan, sub.id, op_id)
+
+        item_params =
+          %{id: existing_item.processor_id, price: new_price_id}
+          |> maybe_put_quantity(validated[:quantity])
+
+        stripe_params = %{
+          items: [item_params],
+          proration_behavior: Atom.to_string(validated[:proration]),
+          expand: ["latest_invoice.payment_intent"]
+        }
+
+        Repo.transact(fn ->
+          with {:ok, stripe_sub} <-
+                 Processor.__impl__().update_subscription(
+                   sub.processor_id,
+                   stripe_params,
+                   idempotency_key: idem_key
+                 ),
+               {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
+               {:ok, updated} <- update_subscription_row(sub, attrs),
+               {:ok, _items} <- upsert_items(updated, stripe_sub),
+               {:ok, _} <-
+                 record_event("subscription.plan_swapped", updated, %{
+                   new_price_id: new_price_id,
+                   proration: validated[:proration]
+                 }) do
+            {:ok, Repo.preload(updated, :subscription_items, force: true)}
+          end
+        end)
+      end
 
     IntentResult.wrap(result)
   end
@@ -396,28 +407,38 @@ defmodule Accrue.Billing.SubscriptionActions do
 
   def update_quantity(%Subscription{} = sub, new_quantity, opts)
       when is_integer(new_quantity) and new_quantity > 0 do
-    sub = Repo.preload(sub, :subscription_items)
-    assert_single_item!(sub, "update_quantity/3")
+    if braintree_processor?() do
+      {:error,
+       %Accrue.APIError{
+         code: "processor_operation_unsupported",
+         http_status: 422,
+         message:
+           "Braintree does not expose Accrue's update_quantity/3 semantic for subscriptions."
+       }}
+    else
+      sub = Repo.preload(sub, :subscription_items)
+      assert_single_item!(sub, "update_quantity/3")
 
-    [item | _] = sub.subscription_items
-    op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
-    idem_key = Idempotency.key(:update_quantity, sub.id, op_id)
+      [item | _] = sub.subscription_items
+      op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
+      idem_key = Idempotency.key(:update_quantity, sub.id, op_id)
 
-    Repo.transact(fn ->
-      with {:ok, stripe_sub} <-
-             Processor.__impl__().update_subscription(
-               sub.processor_id,
-               %{items: [%{id: item.processor_id, quantity: new_quantity}]},
-               idempotency_key: idem_key
-             ),
-           {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
-           {:ok, updated} <- update_subscription_row(sub, attrs),
-           {:ok, _} <- upsert_items(updated, stripe_sub),
-           {:ok, _} <-
-             record_event("subscription.updated", updated, %{quantity: new_quantity}) do
-        {:ok, Repo.preload(updated, :subscription_items, force: true)}
-      end
-    end)
+      Repo.transact(fn ->
+        with {:ok, stripe_sub} <-
+               Processor.__impl__().update_subscription(
+                 sub.processor_id,
+                 %{items: [%{id: item.processor_id, quantity: new_quantity}]},
+                 idempotency_key: idem_key
+               ),
+             {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
+             {:ok, updated} <- update_subscription_row(sub, attrs),
+             {:ok, _} <- upsert_items(updated, stripe_sub),
+             {:ok, _} <-
+               record_event("subscription.updated", updated, %{quantity: new_quantity}) do
+          {:ok, Repo.preload(updated, :subscription_items, force: true)}
+        end
+      end)
+    end
   end
 
   @spec update_quantity!(Subscription.t(), pos_integer(), keyword()) :: Subscription.t()
@@ -541,24 +562,34 @@ defmodule Accrue.Billing.SubscriptionActions do
             "For paused subs use unpause/1."
     end
 
-    op_id = Actor.current_operation_id!()
-    idem_key = Idempotency.key(:resume_subscription, sub.id, op_id)
+    if braintree_processor?() do
+      {:error,
+       %Accrue.APIError{
+         code: "processor_operation_unsupported",
+         http_status: 422,
+         message:
+           "Braintree subscriptions cannot be resumed through resume/2 because provider-side cancellations cannot be reactivated."
+       }}
+    else
+      op_id = Actor.current_operation_id!()
+      idem_key = Idempotency.key(:resume_subscription, sub.id, op_id)
 
-    Repo.transact(fn ->
-      with {:ok, stripe_sub} <-
-             Processor.__impl__().update_subscription(
-               sub.processor_id,
-               %{cancel_at_period_end: false},
-               idempotency_key: idem_key
-             ),
-           {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
-           merged <- Map.merge(attrs, %{cancel_at_period_end: false, cancel_at: nil}),
-           {:ok, updated} <- update_subscription_row(sub, merged),
-           {:ok, _} <-
-             record_event("subscription.resumed", updated, %{from: "canceling"}) do
-        {:ok, Repo.preload(updated, :subscription_items, force: true)}
-      end
-    end)
+      Repo.transact(fn ->
+        with {:ok, stripe_sub} <-
+               Processor.__impl__().update_subscription(
+                 sub.processor_id,
+                 %{cancel_at_period_end: false},
+                 idempotency_key: idem_key
+               ),
+             {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
+             merged <- Map.merge(attrs, %{cancel_at_period_end: false, cancel_at: nil}),
+             {:ok, updated} <- update_subscription_row(sub, merged),
+             {:ok, _} <-
+               record_event("subscription.resumed", updated, %{from: "canceling"}) do
+          {:ok, Repo.preload(updated, :subscription_items, force: true)}
+        end
+      end)
+    end
   end
 
   @spec resume!(Subscription.t(), keyword()) :: Subscription.t()
@@ -617,30 +648,38 @@ defmodule Accrue.Billing.SubscriptionActions do
         %DateTime{} = dt -> %{resumes_at: DateTime.to_unix(dt)}
       end
 
-    Repo.transact(fn ->
-      with {:ok, stripe_sub} <-
-             Processor.__impl__().pause_subscription_collection(
-               sub.processor_id,
-               behavior_atom,
-               params,
-               idempotency_key: idem_key
-             ),
-           {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
-           # Fake may store pause_collection atom-keyed; SubscriptionProjection
-           # handles that, but we also force it locally to be safe.
-           merged <-
-             attrs
-             |> Map.put(:pause_collection, %{"behavior" => behavior_string})
-             |> Map.put(:pause_behavior, behavior_string)
-             |> Map.put(:paused_at, Accrue.Clock.utc_now()),
-           {:ok, updated} <- update_subscription_row(sub, merged),
-           {:ok, _} <-
-             record_event("subscription.paused", updated, %{
-               behavior: behavior_string
-             }) do
-        {:ok, Repo.preload(updated, :subscription_items, force: true)}
-      end
-    end)
+    if braintree_processor?() do
+      {:error,
+       %Accrue.APIError{
+         code: "processor_operation_unsupported",
+         http_status: 422,
+         message:
+           "Braintree does not expose Accrue's pause/2 collection semantic."
+       }}
+    else
+      Repo.transact(fn ->
+        with {:ok, stripe_sub} <-
+               Processor.__impl__().pause_subscription_collection(
+                 sub.processor_id,
+                 behavior_atom,
+                 params,
+                 idempotency_key: idem_key
+               ),
+             {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
+             merged <-
+               attrs
+               |> Map.put(:pause_collection, %{"behavior" => behavior_string})
+               |> Map.put(:pause_behavior, behavior_string)
+               |> Map.put(:paused_at, Accrue.Clock.utc_now()),
+             {:ok, updated} <- update_subscription_row(sub, merged),
+             {:ok, _} <-
+               record_event("subscription.paused", updated, %{
+                 behavior: behavior_string
+               }) do
+          {:ok, Repo.preload(updated, :subscription_items, force: true)}
+        end
+      end)
+    end
   end
 
   # ---------------------------------------------------------------------
@@ -729,24 +768,34 @@ defmodule Accrue.Billing.SubscriptionActions do
             "(non-nil pause_collection). For canceling subs use resume/1."
     end
 
-    op_id = Actor.current_operation_id!()
-    idem_key = Idempotency.key(:unpause_subscription, sub.id, op_id)
+    if braintree_processor?() do
+      {:error,
+       %Accrue.APIError{
+         code: "processor_operation_unsupported",
+         http_status: 422,
+         message:
+           "Braintree does not expose Accrue's unpause/2 collection semantic."
+       }}
+    else
+      op_id = Actor.current_operation_id!()
+      idem_key = Idempotency.key(:unpause_subscription, sub.id, op_id)
 
-    Repo.transact(fn ->
-      with {:ok, stripe_sub} <-
-             Processor.__impl__().update_subscription(
-               sub.processor_id,
-               %{pause_collection: nil},
-               idempotency_key: idem_key
-             ),
-           {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
-           merged <- Map.put(attrs, :pause_collection, nil),
-           {:ok, updated} <- update_subscription_row(sub, merged),
-           {:ok, _} <-
-             record_event("subscription.resumed", updated, %{from: "paused"}) do
-        {:ok, Repo.preload(updated, :subscription_items, force: true)}
-      end
-    end)
+      Repo.transact(fn ->
+        with {:ok, stripe_sub} <-
+               Processor.__impl__().update_subscription(
+                 sub.processor_id,
+                 %{pause_collection: nil},
+                 idempotency_key: idem_key
+               ),
+             {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
+             merged <- Map.put(attrs, :pause_collection, nil),
+             {:ok, updated} <- update_subscription_row(sub, merged),
+             {:ok, _} <-
+               record_event("subscription.resumed", updated, %{from: "paused"}) do
+          {:ok, Repo.preload(updated, :subscription_items, force: true)}
+        end
+      end)
+    end
   end
 
   @spec unpause!(Subscription.t(), keyword()) :: Subscription.t()
@@ -977,6 +1026,10 @@ defmodule Accrue.Billing.SubscriptionActions do
       Accrue.Processor.Stripe -> "stripe"
       other -> other |> Module.split() |> List.last() |> String.downcase()
     end
+  end
+
+  defp braintree_processor? do
+    Processor.__impl__() == Accrue.Processor.Braintree
   end
 
   defp assert_single_item!(%Subscription{subscription_items: items} = sub, op) do

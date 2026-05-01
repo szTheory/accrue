@@ -101,6 +101,23 @@ defmodule Accrue.Webhook.DefaultHandler do
   # Phase 3 event families — dispatch from Accrue.Webhook.Event struct
   # ---------------------------------------------------------------------
 
+  def handle_event(type, %Accrue.Webhook.Event{processor: :braintree, object_id: nil}, _ctx) when is_binary(type) do
+    :telemetry.execute([:accrue, :webhooks, :missing_object_id], %{}, %{type: type, processor: :braintree})
+    :ok
+  end
+
+  def handle_event(type, %Accrue.Webhook.Event{processor: :braintree} = event, _ctx) when is_binary(type) do
+    case normalize_braintree_type(type) do
+      {:ok, normalized_type} ->
+        case dispatch(normalized_type, event.processor_event_id, event.created_at, %{"id" => event.object_id}) do
+          {:ok, _} -> :ok
+          other -> other
+        end
+      :ignored ->
+        :ok
+    end
+  end
+
   def handle_event(type, %Accrue.Webhook.Event{object_id: nil}, _ctx) when is_binary(type) do
     # WR-10: Guard against nil object_id — the downstream reducer would
     # call Processor.fetch/2 with nil and crash in the Stripe adapter
@@ -556,8 +573,12 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp reduce_invoice(action, evt_id, evt_ts, obj) do
     stripe_id = get(obj, :id)
 
+    # For Braintree, the payload's ID is the subscription ID. The most recent
+    # transaction on that subscription will be projected as the invoice.
+    fetch_type = if processor_name() == "braintree", do: :subscription, else: :invoice
+
     reduce_row(:invoice, stripe_id, evt_ts, evt_id, fn row ->
-      with {:ok, canonical} <- Processor.__impl__().fetch(:invoice, stripe_id),
+      with {:ok, canonical} <- Processor.__impl__().fetch(fetch_type, stripe_id),
            {:ok, %{invoice_attrs: attrs, item_attrs: item_attrs}} <-
              InvoiceProjection.decompose(canonical),
            attrs <- stamp_watermark(attrs, evt_ts, evt_id),
@@ -973,7 +994,7 @@ defmodule Accrue.Webhook.DefaultHandler do
 
   defp load_row(:invoice, id), do: Repo.get_by(Invoice, processor_id: id)
   defp load_row(:charge, id), do: Repo.get_by(Charge, processor_id: id)
-  defp load_row(:refund, id), do: Repo.get_by(Refund, stripe_id: id)
+  defp load_row(:refund, id), do: Repo.get_by(Refund, processor_id: id) || Repo.get_by(Refund, stripe_id: id)
   defp load_row(:payment_method, id), do: Repo.get_by(PaymentMethod, processor_id: id)
 
   defp stamp_watermark(attrs, evt_ts, evt_id) do
@@ -1194,4 +1215,13 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   defp refund_customer_id(_), do: nil
+
+  defp normalize_braintree_type("subscription_charged_successfully"), do: {:ok, "invoice.paid"}
+  defp normalize_braintree_type("subscription_charged_unsuccessfully"), do: {:ok, "invoice.payment_failed"}
+  defp normalize_braintree_type("subscription_canceled"), do: {:ok, "customer.subscription.deleted"}
+  defp normalize_braintree_type("subscription_expired"), do: {:ok, "customer.subscription.deleted"}
+  defp normalize_braintree_type("subscription_went_past_due"), do: {:ok, "customer.subscription.updated"}
+  defp normalize_braintree_type("subscription_went_active"), do: {:ok, "customer.subscription.updated"}
+  defp normalize_braintree_type("subscription_trial_ended"), do: {:ok, "customer.subscription.trial_will_end"}
+  defp normalize_braintree_type(_), do: :ignored
 end

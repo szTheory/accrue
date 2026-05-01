@@ -60,7 +60,7 @@ defmodule Accrue.Webhook.Plug do
       |> halt()
   end
 
-  defp do_call(conn, processor, endpoint) do
+  defp do_call(conn, :stripe, endpoint) do
     raw_body = flatten_raw_body(conn)
     sig_header = get_req_header(conn, "stripe-signature") |> List.first()
 
@@ -68,13 +68,49 @@ defmodule Accrue.Webhook.Plug do
       raise Accrue.SignatureError, reason: "missing stripe-signature header"
     end
 
-    secrets = resolve_secrets!(endpoint, processor)
+    secrets = resolve_secrets!(endpoint, :stripe)
     stripe_event = Signature.verify!(raw_body, sig_header, secrets)
 
     # Transactional persist + Oban enqueue.
-    # Event projection happens inside DispatchWorker from the persisted row.
-    # Thread `endpoint` through so DispatchWorker can branch on it.
-    Accrue.Webhook.Ingest.run(conn, processor, stripe_event, raw_body, endpoint)
+    Accrue.Webhook.Ingest.run(conn, :stripe, stripe_event, raw_body, endpoint)
+  end
+
+  defp do_call(conn, :braintree, endpoint) do
+    conn = Plug.Conn.fetch_query_params(conn)
+    
+    bt_signature = conn.params["bt_signature"]
+    bt_payload = conn.params["bt_payload"]
+
+    unless bt_signature do
+      raise Accrue.SignatureError, reason: "missing bt_signature"
+    end
+
+    unless bt_payload do
+      raise Accrue.SignatureError, reason: "missing bt_payload"
+    end
+
+    braintree_event = Signature.parse_braintree!(bt_signature, bt_payload)
+    
+    # Braintree webhooks lack a unique event ID, so we hash the payload for idempotency.
+    # We construct a %LatticeStripe.Event{} simply to satisfy the Ingest.run signature and DB constraints.
+    event_id = "bt_" <> Base.encode16(:crypto.hash(:sha256, bt_payload), case: :lower)
+    kind = braintree_event["kind"] || "unknown"
+
+    livemode = Braintree.get_env(:environment) == :production
+
+    subject = braintree_event["subject"] || %{}
+    subject_entity = subject |> Map.values() |> Enum.find(&is_map/1) || %{}
+    object_id = subject_entity["id"]
+    object_data = if object_id, do: Map.put(subject, "id", object_id), else: subject
+
+    pseudo_event = %LatticeStripe.Event{
+      id: event_id,
+      type: kind,
+      livemode: livemode,
+      data: %{"object" => object_data}
+    }
+
+    Accrue.Webhook.Ingest.run(conn, :braintree, pseudo_event, bt_payload, endpoint)
   end
 
   # Endpoint-aware secret resolution.

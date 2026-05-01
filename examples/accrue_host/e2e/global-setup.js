@@ -30,11 +30,14 @@ function ensureDatabase() {
 
 module.exports = async () => {
   const fixturePath = process.env.ACCRUE_HOST_E2E_FIXTURE || defaultFixturePath;
+  const reuseServer = process.env.ACCRUE_HOST_REUSE_SERVER === "1";
 
   fs.mkdirSync(path.dirname(fixturePath), { recursive: true });
 
-  ensureDatabase();
-  runMix(["ecto.migrate", "--quiet"], { MIX_ENV: "test" });
+  if (!reuseServer) {
+    ensureDatabase();
+    runMix(["ecto.migrate", "--quiet"], { MIX_ENV: "test" });
+  }
 
   if (process.env.ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED === "1") {
     if (!fs.existsSync(fixturePath)) {

@@ -85,6 +85,7 @@ defmodule Accrue.Billing.RefundActions do
                params,
                [idempotency_key: idem_key] ++ sanitize_opts(opts)
              ),
+           {:ok, refund_payload} <- maybe_retrieve_refund(charge, refund_payload),
            {:ok, refund_row} <-
              insert_or_fetch_refund(subject_uuid, charge, refund_payload, amount_minor),
            {:ok, _} <-
@@ -110,6 +111,19 @@ defmodule Accrue.Billing.RefundActions do
   # ---------------------------------------------------------------------
   # helpers
   # ---------------------------------------------------------------------
+
+  defp maybe_retrieve_refund(%Charge{processor: "braintree"}, refund_payload) do
+    # Braintree create_refund returns a transaction with type "credit".
+    # We retrieve it immediately to ensure we have the canonical shape for convergence.
+    refund_id = get_field(refund_payload, :id) || get_field(refund_payload, :refund_id)
+    if refund_id do
+      Processor.__impl__().fetch(:refund, refund_id)
+    else
+      {:ok, refund_payload}
+    end
+  end
+
+  defp maybe_retrieve_refund(_charge, refund_payload), do: {:ok, refund_payload}
 
   defp insert_or_fetch_refund(id, charge, refund_payload, amount_minor) do
     case Repo.get(Refund, id) do

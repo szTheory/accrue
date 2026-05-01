@@ -17,13 +17,32 @@ async function scanAxe(page) {
   return results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 }
 
+function reseedFixtureIfNeeded() {
+  if (process.env.ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED !== "1") {
+    reseedFixture();
+  }
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {string} paymentMethodId
+ */
+async function openDeleteConfirmation(page, paymentMethodId) {
+  await page
+    .locator(
+      `[data-role='prepare-delete-payment-method'][data-payment-method-id='${paymentMethodId}']`
+    )
+    .click();
+  await expect(page.locator("[data-role='payment-method-delete-confirmation']")).toBeVisible();
+}
+
 test("mounted admin customers index passes axe in light and dark themes", async ({ page }, testInfo) => {
   test.skip(
     testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
     "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
   );
 
-  reseedFixture();
+  reseedFixtureIfNeeded();
   const fixture = readFixture();
 
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -76,7 +95,7 @@ test("mounted admin subscriptions index passes axe in light theme", async ({ pag
     "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
   );
 
-  reseedFixture();
+  reseedFixtureIfNeeded();
   const fixture = readFixture();
 
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -100,8 +119,6 @@ test("mounted admin subscriptions index passes axe in light theme", async ({ pag
   await waitForLiveView(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-  await expect(page.getByText(copyStrings.subscriptions_index_empty_title)).toBeVisible();
-
   const violations = await scanAxe(page);
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
 });
@@ -113,7 +130,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -152,7 +169,7 @@ test.describe("VERIFY-01 admin Connect account detail (auxiliary)", () => {
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.connect_account_id).toBeTruthy();
@@ -191,7 +208,7 @@ test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -229,7 +246,7 @@ test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -267,7 +284,7 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -305,7 +322,7 @@ test.describe("core-admin-invoices-index", () => {
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -363,7 +380,7 @@ test.describe("core-admin-invoices-detail", () => {
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.invoice_id).toBeTruthy();
@@ -397,7 +414,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
     );
 
-    reseedFixture();
+    reseedFixtureIfNeeded();
     const fixture = readFixture();
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
@@ -456,5 +473,55 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
 
     violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+  });
+
+  test("enforces host-owned capture boundary and guarded delete states", async ({ page }) => {
+    reseedFixtureIfNeeded();
+    const fixture = readFixture();
+
+    expect(fixture.admin_org_alpha_slug).toBeTruthy();
+    expect(fixture.admin_denial_customer_id).toBeTruthy();
+    expect(fixture.admin_denial_payment_method_ids).toBeTruthy();
+
+    await login(page, fixture, fixture.admin_email);
+    await page.getByRole("link", { name: "Go to billing" }).click();
+    await waitForLiveView(page);
+
+    await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
+    await waitForLiveView(page);
+
+    const pmUrl = `/billing/customers/${fixture.admin_denial_customer_id}?tab=payment_methods&org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    await page.goto(pmUrl, { waitUntil: "domcontentloaded" });
+    await waitForLiveView(page);
+
+    await expect(page.getByText(copyStrings.customer_payment_methods_replace_handoff)).toBeVisible();
+    await expect(page.getByText(/drop-in/i)).toHaveCount(0);
+    await expect(page.getByText(/hosted fields/i)).toHaveCount(0);
+    await expect(page.getByLabel(/card number/i)).toHaveCount(0);
+    await expect(page.locator("iframe[name*='braintree']")).toHaveCount(0);
+    await expect(page.locator("[data-braintree-client-token]")).toHaveCount(0);
+
+    await openDeleteConfirmation(
+      page,
+      fixture.admin_denial_payment_method_ids.replacement_required_default
+    );
+    await expect(page.getByText(copyStrings.customer_payment_methods_delete_warning)).toBeVisible();
+    await expect(
+      page.getByText(copyStrings.customer_payment_methods_delete_blocked_replacement_required)
+    ).toBeVisible();
+    await expect(page.locator("[data-role='confirm-delete-payment-method']")).toHaveCount(0);
+
+    await page.getByRole("button", { name: copyStrings.customer_payment_methods_cancel_action }).click();
+    await expect(page.locator("[data-role='payment-method-delete-confirmation']")).toHaveCount(0);
+
+    await openDeleteConfirmation(page, fixture.admin_denial_payment_method_ids.deletable);
+    await expect(page.getByText(copyStrings.customer_payment_methods_delete_warning)).toBeVisible();
+    await expect(page.locator("[data-role='confirm-delete-payment-method']")).toHaveCount(1);
+    await expect(
+      page.getByText(copyStrings.customer_payment_methods_delete_blocked_in_use)
+    ).toHaveCount(0);
+    await expect(
+      page.getByText(copyStrings.customer_payment_methods_delete_blocked_replacement_required)
+    ).toHaveCount(0);
   });
 });

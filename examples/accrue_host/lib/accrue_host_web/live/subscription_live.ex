@@ -478,6 +478,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign(:access_state, access_state)
     |> assign(:access_message, access_message(access_state))
     |> assign(:billing_locked?, billing_locked?(access_state))
+    |> assign_new(:braintree_client_token, fn -> nil end)
     |> assign_new(:tax_location_error, fn -> nil end)
     |> assign_new(:tax_location_form, fn -> empty_tax_location_form() end)
     |> assign(:customer, customer)

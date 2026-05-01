@@ -27,6 +27,10 @@ jq -e '
   and (.admin_org_alpha_slug | type) == "string"
   and (.admin_org_beta_slug | type) == "string"
   and ((.admin_denial_customer_id | type) == "string" or (.admin_denial_customer_id | type) == "number")
+  and (.admin_denial_payment_method_ids | type) == "object"
+  and ((.admin_denial_payment_method_ids.in_use_blocked | type) == "string" or (.admin_denial_payment_method_ids.in_use_blocked | type) == "number")
+  and ((.admin_denial_payment_method_ids.replacement_required_default | type) == "string" or (.admin_denial_payment_method_ids.replacement_required_default | type) == "number")
+  and ((.admin_denial_payment_method_ids.deletable | type) == "string" or (.admin_denial_payment_method_ids.deletable | type) == "number")
   and (.invoice_id | type) == "string"
   and (.first_run_webhook | type) == "object"
   and (.first_run_webhook | has("processor_event_id"))

@@ -403,7 +403,7 @@ defmodule Accrue.Processor.BraintreeTest do
   test "create_refund/2 creates a refund via Transaction gateway" do
     assert {:ok, refund} = Braintree.create_refund(%{charge: "ch_bt_123", amount: "15.00"}, [])
     assert refund.id == "ref_bt_456"
-    assert refund.status == "submitted_for_settlement"
+    assert refund.status == "pending"
     assert refund.amount == "15.00"
     assert refund.currency == "USD"
     assert refund.charge == "ch_bt_123"
@@ -415,7 +415,7 @@ defmodule Accrue.Processor.BraintreeTest do
   test "retrieve_refund/2 retrieves a refund via Transaction gateway" do
     assert {:ok, refund} = Braintree.retrieve_refund("ref_bt_456", [])
     assert refund.id == "ref_bt_456"
-    assert refund.status == "settled"
+    assert refund.status == "succeeded"
     assert refund.amount == "10.00"
     assert refund.currency == "USD"
     assert refund.charge == "ch_bt_123"
@@ -427,6 +427,6 @@ defmodule Accrue.Processor.BraintreeTest do
   test "fetch/2 fetches a refund" do
     assert {:ok, refund} = Braintree.fetch(:refund, "ref_bt_456")
     assert refund.id == "ref_bt_456"
-    assert refund.status == "settled"
+    assert refund.status == "succeeded"
   end
 end

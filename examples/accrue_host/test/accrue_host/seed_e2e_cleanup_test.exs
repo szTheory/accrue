@@ -6,6 +6,7 @@ defmodule AccrueHost.SeedE2ECleanupTest do
   use AccrueHost.DataCase, async: false
 
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.PaymentMethod
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
   alias Accrue.Events
@@ -28,6 +29,10 @@ defmodule AccrueHost.SeedE2ECleanupTest do
 
     fixture_webhook_id = first_fixture.webhook_id
     fixture_subscription_id = first_fixture.subscription_id
+    fixture_payment_method_ids = Map.values(first_fixture.admin_denial_payment_method_ids)
+
+    assert length(fixture_payment_method_ids) == 3
+    assert Repo.aggregate(from(pm in PaymentMethod, where: pm.id in ^fixture_payment_method_ids), :count) == 3
 
     assert Repo.aggregate(
              from(event in Event,
@@ -49,11 +54,15 @@ defmodule AccrueHost.SeedE2ECleanupTest do
     unrelated = insert_unrelated_rows!()
 
     second_fixture = AccrueHostSeedE2E.run!(fixture_file)
+    second_fixture_payment_method_ids = Map.values(second_fixture.admin_denial_payment_method_ids)
 
     assert second_fixture.webhook_id != fixture_webhook_id
     assert second_fixture.subscription_id != fixture_subscription_id
+    assert length(second_fixture_payment_method_ids) == 3
+    assert Repo.aggregate(from(pm in PaymentMethod, where: pm.id in ^second_fixture_payment_method_ids), :count) == 3
 
     refute Repo.get(WebhookEvent, fixture_webhook_id)
+    refute Repo.exists?(from(pm in PaymentMethod, where: pm.id in ^fixture_payment_method_ids))
 
     refute Repo.exists?(
              from(job in Oban.Job,

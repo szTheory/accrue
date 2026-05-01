@@ -59,6 +59,12 @@ defmodule Accrue.Processor.Braintree do
   @impl Accrue.Processor
   def fetch(:subscription, id), do: retrieve_subscription(id, [])
 
+  @impl Accrue.Processor
+  def fetch(:refund, id), do: retrieve_refund(id, [])
+
+  @impl Accrue.Processor
+  def fetch(_type, _id), do: {:error, unsupported()}
+
   @doc false
   def build_request(params) do
     payment_method = params[:payment_method] || params["payment_method"] || %{}
@@ -309,8 +315,6 @@ defmodule Accrue.Processor.Braintree do
     end
   end
 
-  def fetch(:refund, id), do: retrieve_refund(id, [])
-
   # Meter event
   @impl Accrue.Processor
   def report_meter_event(_event), do: {:error, unsupported()}
@@ -352,8 +356,6 @@ defmodule Accrue.Processor.Braintree do
   def checkout_session_fetch(_id, _opts), do: {:error, unsupported()}
   @impl Accrue.Processor
   def portal_session_create(_params, _opts), do: {:error, unsupported()}
-
-  def fetch(_type, _id), do: {:error, unsupported()}
 
   # --- Translation Helpers ---
 
@@ -471,9 +473,20 @@ defmodule Accrue.Processor.Braintree do
   defp translate_refund(%{} = transaction) do
     data = if is_struct(transaction), do: Map.from_struct(transaction), else: transaction
 
+    raw_status = Map.get(data, :status) || Map.get(data, "status")
+    
+    normalized_status = 
+      case raw_status do
+        s when s in ["settled", :settled] -> "succeeded"
+        s when s in ["settling", :settling, "submitted_for_settlement", :submitted_for_settlement, "authorized", :authorized, "authorizing", :authorizing] -> "pending"
+        s when s in ["settlement_declined", :settlement_declined, "failed", :failed, "gateway_rejected", :gateway_rejected, "processor_declined", :processor_declined] -> "failed"
+        s when s in ["voided", :voided] -> "canceled"
+        _ -> "pending"
+      end
+
     %{
       id: Map.get(data, :id) || Map.get(data, "id"),
-      status: Map.get(data, :status) || Map.get(data, "status"),
+      status: normalized_status,
       amount: Map.get(data, :amount) || Map.get(data, "amount"),
       currency: Map.get(data, :currency_iso_code) || Map.get(data, "currency_iso_code"),
       charge: Map.get(data, :refunded_transaction_id) || Map.get(data, "refunded_transaction_id"),

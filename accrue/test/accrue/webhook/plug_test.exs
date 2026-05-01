@@ -39,6 +39,25 @@ defmodule Accrue.Webhook.PlugTest do
     end
   end
 
+  defmodule TestBraintreeWebhookRouter do
+    @moduledoc false
+    use Plug.Router
+
+    plug(Plug.Parsers,
+      parsers: [:urlencoded],
+      pass: ["*/*"]
+    )
+
+    plug(:match)
+    plug(:dispatch)
+
+    forward("/webhooks/braintree", to: Accrue.Webhook.Plug, init_opts: [processor: :braintree])
+
+    match _ do
+      send_resp(conn, 404, "not found")
+    end
+  end
+
   # A second router WITHOUT CachingBodyReader to verify scoping (Test 5)
   defmodule TestNonWebhookRouter do
     @moduledoc false
@@ -230,5 +249,67 @@ defmodule Accrue.Webhook.PlugTest do
     assert log =~ "ACCRUE-DX-WEBHOOK-RAW-BODY"
     assert log =~ "/guides/troubleshooting.html#accrue-dx-webhook-raw-body"
     refute log =~ @test_secret
+  end
+
+  # --- Braintree tests ----------------------------------------------------
+
+  test "POST to braintree webhook with valid signature and payload persists event" do
+    Application.put_env(:braintree, :environment, :sandbox)
+    Application.put_env(:braintree, :merchant_id, "test_merchant_id")
+    Application.put_env(:braintree, :public_key, "test_public_key")
+    Application.put_env(:braintree, :private_key, "test_private_key")
+
+    xml_payload = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <notification>
+      <kind>subscription_charged_successfully</kind>
+      <subject>
+        <subscription>
+          <id>test_sub_id</id>
+        </subscription>
+      </subject>
+    </notification>
+    """
+    
+    payload = Base.encode64(xml_payload)
+    hash = Braintree.Webhook.Digest.hexdigest("test_private_key", payload)
+    sig = "test_public_key|#{hash}"
+
+    body = URI.encode_query(%{"bt_signature" => sig, "bt_payload" => payload})
+
+    conn =
+      Plug.Test.conn(:post, "/webhooks/braintree", body)
+      |> Plug.Conn.put_req_header("content-type", "application/x-www-form-urlencoded")
+      |> TestBraintreeWebhookRouter.call(TestBraintreeWebhookRouter.init([]))
+
+    assert conn.status == 200
+
+    events = Accrue.TestRepo.all(Accrue.Webhook.WebhookEvent)
+    # Braintree event should be inserted
+    assert Enum.any?(events, fn e -> e.processor == "braintree" and e.type == "subscription_charged_successfully" end)
+  end
+
+  test "POST to braintree webhook missing bt_signature returns 400" do
+    body = URI.encode_query(%{"bt_payload" => "some_payload"})
+
+    conn =
+      Plug.Test.conn(:post, "/webhooks/braintree", body)
+      |> Plug.Conn.put_req_header("content-type", "application/x-www-form-urlencoded")
+      |> TestBraintreeWebhookRouter.call(TestBraintreeWebhookRouter.init([]))
+
+    assert conn.status == 400
+    assert Jason.decode!(conn.resp_body)["error"] == "signature_verification_failed"
+  end
+
+  test "POST to braintree webhook missing bt_payload returns 400" do
+    body = URI.encode_query(%{"bt_signature" => "some_sig"})
+
+    conn =
+      Plug.Test.conn(:post, "/webhooks/braintree", body)
+      |> Plug.Conn.put_req_header("content-type", "application/x-www-form-urlencoded")
+      |> TestBraintreeWebhookRouter.call(TestBraintreeWebhookRouter.init([]))
+
+    assert conn.status == 400
+    assert Jason.decode!(conn.resp_body)["error"] == "signature_verification_failed"
   end
 end

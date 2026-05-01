@@ -1,23 +1,27 @@
 defmodule Accrue.Checkout.Session do
   @moduledoc """
-  Stripe Checkout Session wrapper.
+  Checkout handoff wrapper.
 
   Wraps the processor-level `checkout_session_create/2` and
-  `checkout_session_fetch/2` callbacks, projects the raw Stripe
-  payload into a tightly-typed struct, and masks the embedded-mode
-  `:client_secret` field in `Inspect` output — anyone
-  holding a `client_secret` can mount the embedded checkout flow on
-  the customer's behalf until the session expires.
+  `checkout_session_fetch/2` callbacks, projects the raw processor payload
+  into a tightly-typed struct, and masks the embedded-mode `:client_secret`
+  field in `Inspect` output.
 
-  Two `ui_mode` values are supported:
+  Accrue models checkout as a provider-neutral handoff. Stripe currently maps
+  this to a Checkout Session. Other processors may map it to a transaction or
+  similar hosted checkout primitive, as long as they can return a redirect URL
+  (hosted mode) or a bearer credential (embedded mode).
 
-    * `:hosted` (default) — Stripe-hosted Checkout page; the
+  Two `ui_mode` values are supported when the configured processor declares
+  them in `Accrue.Processor.capabilities/0`:
+
+    * `:hosted` (default) — processor-hosted checkout page; the
       returned `%Session{}` has a `:url` to redirect the customer to.
-    * `:embedded` — the host app mounts Stripe.js's embedded form;
+    * `:embedded` — the host app mounts the processor's embedded form;
       the returned `%Session{}` has a `:client_secret` to hand to
       the front end.
 
-  The `:mode` option mirrors the Stripe Checkout `mode` parameter:
+  The `:mode` option mirrors the dominant subscription billing modes:
   `:subscription` (default), `:payment`, or `:setup`.
   """
 
@@ -76,10 +80,12 @@ defmodule Accrue.Checkout.Session do
 
   def create(params) when is_map(params) do
     opts = NimbleOptions.validate!(Map.to_list(params), @create_schema)
-    {stripe_params, request_opts} = build_stripe_params(opts)
+    ensure_checkout_support!(:create)
+    ensure_ui_mode_support!(opts[:ui_mode])
+    {processor_params, request_opts} = build_processor_params(opts)
 
-    case Processor.__impl__().checkout_session_create(stripe_params, request_opts) do
-      {:ok, stripe_session} -> {:ok, from_stripe(stripe_session)}
+    case Processor.__impl__().checkout_session_create(processor_params, request_opts) do
+      {:ok, processor_session} -> {:ok, from_processor(processor_session)}
       {:error, err} -> {:error, err}
     end
   end
@@ -107,38 +113,41 @@ defmodule Accrue.Checkout.Session do
   """
   @spec retrieve(String.t()) :: {:ok, t()} | {:error, term()}
   def retrieve(id) when is_binary(id) do
+    ensure_checkout_support!(:fetch)
+
     case Processor.__impl__().checkout_session_fetch(id, []) do
-      {:ok, stripe_session} -> {:ok, from_stripe(stripe_session)}
+      {:ok, processor_session} -> {:ok, from_processor(processor_session)}
       {:error, err} -> {:error, err}
     end
   end
 
   @doc false
-  @spec from_stripe(map()) :: t()
-  def from_stripe(stripe) when is_map(stripe) do
+  @spec from_processor(map()) :: t()
+  def from_processor(processor_payload) when is_map(processor_payload) do
     %__MODULE__{
-      id: get(stripe, :id),
-      object: get(stripe, :object) || "checkout.session",
-      mode: to_string_or_nil(get(stripe, :mode)),
-      ui_mode: to_string_or_nil(get(stripe, :ui_mode)),
-      automatic_tax: automatic_tax_enabled(stripe),
-      url: get(stripe, :url),
-      client_secret: get(stripe, :client_secret),
-      status: to_string_or_nil(get(stripe, :status)),
-      payment_status: to_string_or_nil(get(stripe, :payment_status)),
-      customer: get(stripe, :customer),
-      subscription: get(stripe, :subscription),
-      payment_intent: get(stripe, :payment_intent),
-      amount_total: get(stripe, :amount_total),
-      amount_tax: amount_tax(stripe),
-      currency: to_string_or_nil(get(stripe, :currency)),
-      expires_at: get(stripe, :expires_at),
-      metadata: get(stripe, :metadata) || %{},
-      data: stripe
+      id: get(processor_payload, :id),
+      object: get(processor_payload, :object) || infer_object(processor_payload),
+      mode: infer_mode(processor_payload),
+      ui_mode: infer_ui_mode(processor_payload),
+      automatic_tax: automatic_tax_enabled(processor_payload),
+      url: checkout_url(processor_payload),
+      client_secret: get(processor_payload, :client_secret),
+      status: to_string_or_nil(get(processor_payload, :status)),
+      payment_status: to_string_or_nil(get(processor_payload, :payment_status)),
+      customer: get(processor_payload, :customer) || get(processor_payload, :customer_id),
+      subscription:
+        get(processor_payload, :subscription) || get(processor_payload, :subscription_id),
+      payment_intent: get(processor_payload, :payment_intent),
+      amount_total: get(processor_payload, :amount_total),
+      amount_tax: amount_tax(processor_payload),
+      currency: to_string_or_nil(get(processor_payload, :currency)),
+      expires_at: get(processor_payload, :expires_at),
+      metadata: get(processor_payload, :metadata) || get(processor_payload, :custom_data) || %{},
+      data: processor_payload
     }
   end
 
-  defp build_stripe_params(opts) do
+  defp build_processor_params(opts) do
     {operation_id, opts} = Keyword.pop(opts, :operation_id)
 
     customer_id =
@@ -169,6 +178,38 @@ defmodule Accrue.Checkout.Session do
     {base, request_opts}
   end
 
+  defp ensure_checkout_support!(:create) do
+    unless Processor.supports?([:checkout, :create]) do
+      raise Accrue.APIError,
+        code: "processor_operation_unsupported",
+        message: "#{Processor.name()} does not support checkout creation"
+    end
+  end
+
+  defp ensure_checkout_support!(:fetch) do
+    unless Processor.supports?([:checkout, :fetch]) do
+      raise Accrue.APIError,
+        code: "processor_operation_unsupported",
+        message: "#{Processor.name()} does not support checkout fetch"
+    end
+  end
+
+  defp ensure_ui_mode_support!(:hosted) do
+    unless Processor.supports?([:checkout, :hosted]) do
+      raise Accrue.APIError,
+        code: "processor_operation_unsupported",
+        message: "#{Processor.name()} does not support hosted checkout"
+    end
+  end
+
+  defp ensure_ui_mode_support!(:embedded) do
+    unless Processor.supports?([:checkout, :embedded]) do
+      raise Accrue.APIError,
+        code: "processor_operation_unsupported",
+        message: "#{Processor.name()} does not support embedded checkout"
+    end
+  end
+
   defp put_unless_nil(map, _key, nil), do: map
   defp put_unless_nil(map, key, value), do: Map.put(map, key, value)
 
@@ -194,6 +235,33 @@ defmodule Accrue.Checkout.Session do
     |> case do
       nil -> nil
       total_details -> get(total_details, :amount_tax)
+    end
+  end
+
+  defp checkout_url(payload) do
+    get(payload, :url) || get(get(payload, :checkout) || %{}, :url)
+  end
+
+  defp infer_mode(payload) do
+    to_string_or_nil(get(payload, :mode)) ||
+      if get(payload, :subscription) || get(payload, :subscription_id),
+        do: "subscription",
+        else: nil
+  end
+
+  defp infer_ui_mode(payload) do
+    to_string_or_nil(get(payload, :ui_mode)) ||
+      cond do
+        is_binary(checkout_url(payload)) -> "hosted"
+        is_binary(get(payload, :client_secret)) -> "embedded"
+        true -> nil
+      end
+  end
+
+  defp infer_object(payload) do
+    cond do
+      get(payload, :checkout) -> "checkout.handoff"
+      true -> "checkout.session"
     end
   end
 

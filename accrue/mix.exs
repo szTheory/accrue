@@ -55,6 +55,7 @@ defmodule Accrue.MixProject do
       {:postgrex, "~> 0.22"},
       {:ex_money, "~> 5.24"},
       {:lattice_stripe, "~> 1.1"},
+      {:braintree, "~> 0.16"},
       {:oban, "~> 2.21"},
       {:swoosh, "~> 1.25"},
       {:mailglass, "~> 0.1"},

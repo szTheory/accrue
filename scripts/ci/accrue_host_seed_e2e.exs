@@ -1,6 +1,7 @@
 defmodule AccrueHostSeedE2E do
   alias Accrue.Billing.Customer
   alias Accrue.Billing.Invoice
+  alias Accrue.Billing.PaymentMethod
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
   alias Accrue.Connect.Account
@@ -57,6 +58,8 @@ defmodule AccrueHostSeedE2E do
       })
 
     admin_denial_customer = insert_org_customer!(admin_org_alpha)
+    admin_denial_payment_methods = insert_org_payment_methods!(admin_denial_customer)
+    insert_org_fixture_subscription!(admin_denial_customer, admin_denial_payment_methods.in_use_blocked)
     fixture_invoice = insert_fixture_invoice!(admin_denial_customer)
     connect_account = insert_fixture_connect_account!(admin_org_alpha)
 
@@ -105,6 +108,11 @@ defmodule AccrueHostSeedE2E do
       admin_org_alpha_slug: admin_org_alpha.slug,
       admin_org_beta_slug: admin_org_beta.slug,
       admin_denial_customer_id: admin_denial_customer.id,
+      admin_denial_payment_method_ids: %{
+        in_use_blocked: admin_denial_payment_methods.in_use_blocked.id,
+        replacement_required_default: admin_denial_payment_methods.replacement_required_default.id,
+        deletable: admin_denial_payment_methods.deletable.id
+      },
       connect_account_id: connect_account.id,
       invoice_id: to_string(fixture_invoice.id)
     }
@@ -311,6 +319,63 @@ defmodule AccrueHostSeedE2E do
     |> Repo.insert!()
   end
 
+  defp insert_org_payment_methods!(customer) do
+    in_use_blocked =
+      insert_payment_method!(customer, %{
+        processor_id: "pm_host_org_in_use_1111",
+        fingerprint: "fp_host_org_in_use_1111",
+        card_brand: "visa",
+        card_last4: "1111",
+        card_exp_month: 1,
+        card_exp_year: 2030
+      })
+
+    replacement_required_default =
+      insert_payment_method!(customer, %{
+        processor_id: "pm_host_org_default_2222",
+        fingerprint: "fp_host_org_default_2222",
+        card_brand: "mastercard",
+        card_last4: "2222",
+        card_exp_month: 2,
+        card_exp_year: 2031
+      })
+
+    deletable =
+      insert_payment_method!(customer, %{
+        processor_id: "pm_host_org_deletable_3333",
+        fingerprint: "fp_host_org_deletable_3333",
+        card_brand: "discover",
+        card_last4: "3333",
+        card_exp_month: 3,
+        card_exp_year: 2032
+      })
+
+    customer
+    |> Customer.changeset(%{default_payment_method_id: replacement_required_default.id})
+    |> Repo.update!()
+
+    %{
+      in_use_blocked: in_use_blocked,
+      replacement_required_default: replacement_required_default,
+      deletable: deletable
+    }
+  end
+
+  defp insert_payment_method!(customer, attrs) do
+    defaults = %{
+      customer_id: customer.id,
+      processor: "fake",
+      type: "card",
+      is_default: false,
+      metadata: %{},
+      data: %{}
+    }
+
+    %PaymentMethod{}
+    |> PaymentMethod.changeset(Map.merge(defaults, attrs))
+    |> Repo.insert!()
+  end
+
   # Deterministic VERIFY-01 invoice row for Admin E2E Alpha org (`accrue-e2e-alpha`).
   # processor_id prefix `inv_host_browser_%` is cleaned in `cleanup_fixture_footprint!/0`.
   defp insert_fixture_invoice!(%Customer{} = organization_scoped_customer) do
@@ -334,6 +399,21 @@ defmodule AccrueHostSeedE2E do
       total_minor: 1_000,
       pdf_url: "https://example.test/e2e-invoice.pdf",
       hosted_url: "https://example.test/e2e-hosted-invoice"
+    })
+    |> Repo.insert!()
+  end
+
+  defp insert_org_fixture_subscription!(customer, payment_method) do
+    %Subscription{}
+    |> Subscription.changeset(%{
+      customer_id: customer.id,
+      processor: "fake",
+      processor_id: "sub_host_org_payment_method_guard",
+      status: :active,
+      data: %{
+        "payment_method_token" => payment_method.processor_id,
+        "items" => %{"data" => [%{"price" => %{"id" => "price_admin_verify01"}}]}
+      }
     })
     |> Repo.insert!()
   end

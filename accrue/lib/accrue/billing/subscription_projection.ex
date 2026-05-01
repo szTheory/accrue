@@ -53,8 +53,15 @@ defmodule Accrue.Billing.SubscriptionProjection do
   end
 
   defp braintree_attrs(braintree_sub) do
-    status_str = get(braintree_sub, :status) |> to_string() |> String.downcase() |> String.replace(" ", "_")
-    status = parse_status(status_str)
+    status_str =
+      braintree_sub
+      |> get(:status)
+      |> to_string()
+      |> String.downcase()
+      |> String.replace(" ", "_")
+
+    status = parse_braintree_status(status_str)
+    canceled_at = braintree_canceled_at(braintree_sub, status)
 
     %{
       processor_id: get(braintree_sub, :id),
@@ -69,8 +76,8 @@ defmodule Accrue.Billing.SubscriptionProjection do
       trial_start: unix_to_dt(get(braintree_sub, :first_billing_date)),
       trial_end: nil,
       cancel_at: nil,
-      canceled_at: nil,
-      ended_at: nil,
+      canceled_at: canceled_at,
+      ended_at: braintree_ended_at(braintree_sub, status, canceled_at),
       discount_id: nil,
       data: normalize_data(braintree_sub),
       metadata: %{}
@@ -167,6 +174,23 @@ defmodule Accrue.Billing.SubscriptionProjection do
   defp parse_pause_collection(nil), do: nil
   defp parse_pause_collection(%{} = m) when map_size(m) == 0, do: nil
   defp parse_pause_collection(%{} = m), do: m
+
+  defp parse_braintree_status("expired"), do: :canceled
+  defp parse_braintree_status(status), do: parse_status(status)
+
+  defp braintree_canceled_at(subscription, status) when status in [:canceled] do
+    unix_to_dt(get(subscription, :updated_at)) || unix_to_dt(get(subscription, :billing_period_end_date))
+  end
+
+  defp braintree_canceled_at(_subscription, _status), do: nil
+
+  defp braintree_ended_at(subscription, :canceled, canceled_at) do
+    canceled_at || unix_to_dt(get(subscription, :billing_period_end_date))
+  end
+
+  defp braintree_ended_at(subscription, _status, _canceled_at) do
+    nil
+  end
 
   # Persisted `data` jsonb should be string-keyed (JSON round-trip safe).
   defp normalize_data(map) when is_map(map) do

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "braintree-web-drop-in": "^1.46.1"
+  }
+}
