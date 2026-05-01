@@ -155,13 +155,49 @@ defmodule Accrue.Processor.BraintreeTest do
     end
   end
 
+  defmodule TransactionGatewayStub do
+    def refund(id, amount, _opts \\ []) do
+      if amount == "invalid" do
+        {:error, %Elixir.Braintree.ErrorResponse{message: "Amount is invalid"}}
+      else
+        {:ok,
+         %{
+           id: "ref_bt_456",
+           type: "credit",
+           status: "submitted_for_settlement",
+           amount: amount || "10.00",
+           currency_iso_code: "USD",
+           refunded_transaction_id: id
+         }}
+      end
+    end
+
+    def find(id, _opts) do
+      if id == "not_found" do
+        {:error, %Elixir.Braintree.ErrorResponse{message: "Not Found"}}
+      else
+        {:ok,
+         %{
+           id: id,
+           type: "credit",
+           status: "settled",
+           amount: "10.00",
+           currency_iso_code: "USD",
+           refunded_transaction_id: "ch_bt_123"
+         }}
+      end
+    end
+  end
+
   setup do
     previous = Application.get_env(:accrue, :braintree_subscription_gateway)
     previous_customer = Application.get_env(:accrue, :braintree_customer_gateway)
     previous_payment_method = Application.get_env(:accrue, :braintree_payment_method_gateway)
+    previous_transaction = Application.get_env(:accrue, :braintree_transaction_gateway)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
     Application.put_env(:accrue, :braintree_customer_gateway, CustomerGatewayStub)
     Application.put_env(:accrue, :braintree_payment_method_gateway, PaymentMethodGatewayStub)
+    Application.put_env(:accrue, :braintree_transaction_gateway, TransactionGatewayStub)
 
     on_exit(fn ->
       if previous do
@@ -180,6 +216,12 @@ defmodule Accrue.Processor.BraintreeTest do
         Application.put_env(:accrue, :braintree_payment_method_gateway, previous_payment_method)
       else
         Application.delete_env(:accrue, :braintree_payment_method_gateway)
+      end
+
+      if previous_transaction do
+        Application.put_env(:accrue, :braintree_transaction_gateway, previous_transaction)
+      else
+        Application.delete_env(:accrue, :braintree_transaction_gateway)
       end
     end)
 
@@ -356,5 +398,35 @@ defmodule Accrue.Processor.BraintreeTest do
 
     assert {:ok, %{id: "pm_bt_default_1111"}} =
              Braintree.detach_payment_method("pm_bt_default_1111", [])
+  end
+
+  test "create_refund/2 creates a refund via Transaction gateway" do
+    assert {:ok, refund} = Braintree.create_refund(%{charge: "ch_bt_123", amount: "15.00"}, [])
+    assert refund.id == "ref_bt_456"
+    assert refund.status == "submitted_for_settlement"
+    assert refund.amount == "15.00"
+    assert refund.currency == "USD"
+    assert refund.charge == "ch_bt_123"
+
+    assert {:error, %Accrue.APIError{code: "invalid_request_error"}} =
+             Braintree.create_refund(%{charge: "ch_bt_123", amount: "invalid"}, [])
+  end
+
+  test "retrieve_refund/2 retrieves a refund via Transaction gateway" do
+    assert {:ok, refund} = Braintree.retrieve_refund("ref_bt_456", [])
+    assert refund.id == "ref_bt_456"
+    assert refund.status == "settled"
+    assert refund.amount == "10.00"
+    assert refund.currency == "USD"
+    assert refund.charge == "ch_bt_123"
+
+    assert {:error, %Accrue.APIError{code: "braintree_error"}} =
+             Braintree.retrieve_refund("not_found", [])
+  end
+
+  test "fetch/2 fetches a refund" do
+    assert {:ok, refund} = Braintree.fetch(:refund, "ref_bt_456")
+    assert refund.id == "ref_bt_456"
+    assert refund.status == "settled"
   end
 end
