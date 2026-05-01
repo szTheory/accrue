@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.32
 milestone_name: Braintree Production Parity
-current_plan: 1
+current_plan: 3
 status: verifying
-last_updated: "2026-05-01T04:33:18.685Z"
+last_updated: "2026-05-01T17:14:23.143Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 16
