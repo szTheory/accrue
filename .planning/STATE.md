@@ -4,7 +4,7 @@ milestone: v1.33
 milestone_name: Braintree Full Maturity
 current_plan: null
 status: planning
-last_updated: "2026-05-01T17:14:23.143Z"
+last_updated: "2026-05-01T19:25:52.177Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 4
@@ -30,7 +30,7 @@ Phase: 101 (accrue-portal-foundation-and-checkout) — Not started
 Plan: — (not yet planned)
 Status: Awaiting `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`
 Resume file: None
-Last activity: 2026-05-01 (v1.32 milestone closed)
+Last activity: 2026-05-01 - Completed quick task 260501-lfk: repair active ROADMAP.md for v1.33
 
 ## Milestone Progress
 
@@ -75,6 +75,7 @@ Last activity: 2026-05-01 (v1.32 milestone closed)
 | 260425-gr1 | Drop deprecated flat-branding-keys infrastructure | 2026-04-25 | 50f80db | [260425-gr1-drop-deprecated-flat-branding-keys-infra](./quick/260425-gr1-drop-deprecated-flat-branding-keys-infra/) |
 | 260425-imj | Strip GSD requirement-ID artifacts from public hexdocs | 2026-04-25 | c855743 | [260425-imj-strip-gsd-requirement-ids-from-public-he](./quick/260425-imj-strip-gsd-requirement-ids-from-public-he/) |
 | 260426-fb8 | Mix format auto-fix for v1.29 Mailglass commits (Phase 1 main-CI recovery, PR #16) | 2026-04-26 | 9869c85 | [260426-fb8-mix-format-v1.29](./quick/260426-fb8-mix-format-v1.29/) |
+| 260501-lfk | Repair active ROADMAP.md for v1.33 (archive stale ### Phase blocks for 24, 59-66, 88-90; add Phase 101-104 detail blocks) | 2026-05-01 | 445c742 | [260501-lfk-repair-active-roadmap-md-for-v1-33-archi](./quick/260501-lfk-repair-active-roadmap-md-for-v1-33-archi/) |
 
 ## Recent Decisions
 
