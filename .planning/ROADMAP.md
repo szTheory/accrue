@@ -50,7 +50,7 @@ Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Ac
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 101 | Accrue Portal Foundation & Checkout | First-party LiveView checkout + customer portal scaffolding wrapping Braintree Drop-in. | BT-01, BT-02, BT-03 |
+| 101 | Accrue Portal Foundation & Checkout | First-party LiveView checkout + customer portal scaffolding wrapping Braintree Hosted Fields. | BT-01, BT-02, BT-03 |
 | 102 | Coupon / Discount Mapping | Local promotion-code resolution mapping to Braintree Discount IDs at subscription time. | BT-04, BT-05 |
 | 103 | Metering Engine | Custom local aggregation engine for metered usage (Braintree has no first-party meter). | TBD |
 | 104 | Connect Spike / Decision | Investigate Hyperwallet for Braintree marketplace parity; produce go/no-go decision. | TBD |
@@ -70,7 +70,7 @@ Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Ac
 **Requirements**: BT-01, BT-02, BT-03
 **Success Criteria** (what must be TRUE):
   1. A host app can mount the `Accrue.Portal` router pipeline.
-  2. `create_checkout_session/2` returns a URL to a local hosted checkout that embeds Braintree Drop-in UI.
+  2. `create_checkout_session/2` returns a URL to a local hosted checkout that embeds Braintree Hosted Fields. (Drop-in for Web is deprecated 2025-07-14, unsupported 2026-07-14.)
   3. User can view and manage subscriptions and payment methods via the portal.
 **Plans**: TBD
 **UI hint**: yes

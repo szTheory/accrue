@@ -58,7 +58,7 @@ end
 
 ### 2. Managing Payment Methods
 
-Customers need to add, set default, and remove payment methods. For Braintree, you'll first acquire a nonce using the Drop-in UI or Hosted Fields, then send it to your LiveView.
+Customers need to add, set default, and remove payment methods. For Braintree, you'll first acquire a nonce using Hosted Fields (Drop-in for Web is deprecated 2025-07-14 and unsupported 2026-07-14 — use Hosted Fields for new integrations), then send it to your LiveView.
 
 ```elixir
   # Adding a payment method using a vault acquisition reference (nonce)
