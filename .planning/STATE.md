@@ -4,7 +4,7 @@ milestone: v1.32
 milestone_name: Braintree Production Parity
 current_plan: 1
 status: verifying
-last_updated: "2026-05-01T04:26:08.399Z"
+last_updated: "2026-05-01T04:33:18.685Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 16
@@ -21,13 +21,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 098 — payment-method-crud-operator-admin
+**Current focus:** Phase 099 — refunds-and-invoice-parity
 
 ## Current Position
 
-Phase: 098 (payment-method-crud-operator-admin) — EXECUTING
+Phase: 099 (refunds-and-invoice-parity) — COMPLETE
 Plan: 3 of 3
-Current Plan: 1
+Current Plan: 3
 Status: Phase complete — ready for verification
 Resume file: None
 Last activity: 2026-05-01
