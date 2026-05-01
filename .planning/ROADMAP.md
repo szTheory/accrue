@@ -62,6 +62,46 @@ Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Ac
 3. Metered usage is locally aggregated and billed through Braintree without a Braintree-side meter.
 4. A documented decision exists on Connect/Hyperwallet parity for Braintree marketplaces.
 
+## Phase Details
+
+### Phase 101: Accrue Portal Foundation & Checkout
+**Goal**: Users can access a first-party hosted checkout and customer portal via LiveView.
+**Depends on**: None
+**Requirements**: BT-01, BT-02, BT-03
+**Success Criteria** (what must be TRUE):
+  1. A host app can mount the `Accrue.Portal` router pipeline.
+  2. `create_checkout_session/2` returns a URL to a local hosted checkout that embeds Braintree Drop-in UI.
+  3. User can view and manage subscriptions and payment methods via the portal.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 102: Coupon/Discount Mapping
+**Goal**: Users can apply promotion codes in checkout which correctly map to Braintree discounts.
+**Depends on**: Phase 101
+**Requirements**: BT-04, BT-05
+**Success Criteria** (what must be TRUE):
+  1. System maintains local promotion codes.
+  2. Promo codes entered in checkout correctly apply corresponding Braintree Discount ID to the created subscription.
+**Plans**: TBD
+
+### Phase 103: Metering Engine
+**Goal**: Users are accurately billed for metered usage at the end of their billing cycle.
+**Depends on**: Phase 101
+**Requirements**: BT-06, BT-07
+**Success Criteria** (what must be TRUE):
+  1. Usage is aggregated locally using an Oban worker.
+  2. Separate `Transaction.sale` charges are correctly executed against the vaulted payment method at month-end based on usage.
+**Plans**: TBD
+
+### Phase 104: Connect Spike / Decision
+**Goal**: Clear architectural decision made on Hyperwallet integration vs Connect parity scope reduction.
+**Depends on**: None
+**Requirements**: BT-08, BT-09
+**Success Criteria** (what must be TRUE):
+  1. Hyperwallet architecture and feasibility is thoroughly spiked.
+  2. Go/no-go decision is documented for `Accrue.Connect` parity.
+**Plans**: TBD
+
 ## Phases
 
 <details>
@@ -110,63 +150,6 @@ Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Ac
 5. No **PROC-08** / **FIN-03** scope creep.
 
 **Phase tree:** `.planning/milestones/v1.29-phases/` (created on plan/execute).
-
-### Phase 88: Mailglass Foundation ✅ **Complete 2026-04-25**
-
-> Verified: `088-VERIFICATION.md` — 5/5 must-haves passed. All 3 success criteria met (path deps, `/dev/mail` mount, migration docs). Sandbox+DDL integration test deferred to Phase 89.
-
-**Goal:** Mailglass dependencies are present, the three Mailglass migrations execute in the host application, and the `/dev/mail` LiveView dev-preview dashboard is mounted in `accrue_admin`.
-
-**Depends on:** Phase 87.
-
-**Requirements:** MG-01, MG-02, MG-03.
-
-**Progress:** Plans 01–02 complete `2026-04-25` — path deps wired; `/dev/mail` mounted with automated route-existence tests. Plan 03 (migrations) remains.
-
-**Success Criteria:**
-1. Developer can run Mailglass migrations (`mailglass_deliveries`, `mailglass_events`, `mailglass_suppressions`) in the host application successfully.
-2. Developer can access the `/dev/mail` LiveView dashboard via `accrue_admin` locally (replaces `mix accrue.mail.preview`).
-3. `mailglass` and `mailglass_admin` are correctly installed as path dependencies (`accrue/mix.exs` and `accrue_admin/mix.exs` respectively).
-
-### Phase 89: Proof of Concept Templates & Pipeline
-
-**Goal:** `Accrue.Workers.Mailer` dispatches via `Mailglass.deliver/1` with explicit `idempotency_key`, and the first two MJML templates (`Accrue.Emails.Receipt`, `Accrue.Emails.PaymentFailed`) ship as Mailglass HEEx components with PDF attachment intact.
-
-**Depends on:** Phase 88.
-
-**Requirements:** MG-04, MG-05, MG-06.
-
-**Plans:** 2 plans
-
-Plans:
-- [x] 089-01-PLAN.md — Refactor the worker seam to build and send Mailglass messages with deterministic idempotency and receipt PDF attachment handling.
-- [x] 089-02-PLAN.md — Port the Receipt and PaymentFailed templates to Mailglass HEEx mailables while preserving adopter-visible output.
-
-**Success Criteria:**
-1. `Accrue.Workers.Mailer` delegates to `Mailglass.deliver/1` with correctly hydrated assigns and explicit `idempotency_key`.
-2. `Accrue.Emails.Receipt` and `Accrue.Emails.PaymentFailed` render visually matching their MJML counterparts using HEEx components.
-3. PDF invoices are successfully attached to the Mailglass message for Receipt emails.
-4. Duplicate dispatches are natively rejected using Mailglass's `idempotency_key` index (Oban `unique: [period: 60]` removed).
-
-### Phase 90: Full Template Port & Cleanup
-
-**Goal:** All 13 email templates use Mailglass HEEx components; `mjml_eex` and `phoenix_swoosh` are removed from `accrue/mix.exs`; legacy `mix accrue.mail.preview` is retired.
-
-**Depends on:** Phase 89.
-
-**Requirements:** MG-07.
-
-**Plans:** 3 plans
-
-Plans:
-- [x] 090-01-PLAN.md — Port the first six remaining transactional email templates to Mailglass.
-- [x] 090-02-PLAN.md — Port the invoice, refund, and coupon templates to Mailglass.
-- [x] 090-03-PLAN.md — Retire the preview CLI, delete legacy MJML assets, and finish the payment_succeeded cleanup.
-
-**Success Criteria:**
-1. All 13 email templates render correctly via Mailglass HEEx components.
-2. `mjml_eex` and `phoenix_swoosh` are entirely removed from `accrue/mix.exs`.
-3. Legacy `mix accrue.mail.preview` tooling is retired.
 
 </details>
 
@@ -394,17 +377,6 @@ Plans:
 
 **Archives:** [`milestones/v1.18-ROADMAP.md`](milestones/v1.18-ROADMAP.md), [`milestones/v1.18-REQUIREMENTS.md`](milestones/v1.18-REQUIREMENTS.md).
 
-### Phase 66: Deferred UAT + evaluator proof
-
-**Goal:** Replace “pending human UAT” with explicit **pass / automated / signed defer** outcomes for the **v1.17** friction milestone confidence spine, plus evaluator-facing proof alignment.
-
-**Requirements:** UAT-01, UAT-02, UAT-03, UAT-04, UAT-05, PROOF-01
-
-**Success criteria:**
-
-1. **`66-VERIFICATION.md`** exists under **`.planning/milestones/v1.18-phases/66-onboarding-confidence/`** and tables every **UAT-** / **PROOF-** row with closure status + proof links.
-2. **`STATE.md`** no longer lists the **v1.17** Phase **62** UAT gap as an open deferred item unless a row is explicitly signed **out of v1.18** with rationale.
-
 </details>
 
 <details>
@@ -427,57 +399,6 @@ Plans:
 2. **`bash scripts/ci/verify_package_docs.sh`** green on **`main`** after any doc or snippet change in this milestone.
 3. No **PROC-08** / **FIN-03** scope creep.
 
-### Phase 62: Friction triage + north star
-
-**Goal:** Evidence-ranked inventory + written stop rules + execution backlog for Phases **63–65**.
-
-**Requirements:** FRG-01, FRG-02, FRG-03
-
-**Success criteria:**
-
-1. **FRG-01** — Inventory committed under **`.planning/`** with P0/P1/P2 + sources + deferrals; path recorded in **`.planning/STATE.md`**.
-2. **FRG-02** — North star + diminishing-returns stop rules linked from **`.planning/PROJECT.md`** and **`.planning/STATE.md`**.
-3. **FRG-03** — Every **P0** row from **FRG-01** maps to **INT-10**, **BIL-03**, or **ADM-12** in the backlog **or** is explicitly out of **v1.17** with rationale.
-
-### Phase 63: P0 integrator / VERIFY / docs
-
-**Goal:** Burn integrator/VERIFY/docs **P0** rows; no silent contract drift.
-
-**FRG-03 slice:** [INT-10 P0 backlog](research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63)
-
-**Requirements:** INT-10
-
-**Success criteria:**
-
-1. **INT-10** satisfied per archived [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
-2. Merge-blocking **VERIFY-01** / **`host-integration`** / **`verify_package_docs`** semantics stay coherent with committed README + verifier changes.
-
-### Phase 64: P0 billing
-
-**Goal:** Burn billing **P0** rows with library-grade regressions and honest operator docs.
-
-**FRG-03 slice:** [BIL-03 backlog anchor](research/v1.17-FRICTION-INVENTORY.md#backlog--bil-03-phase-64) *(empty P0 queue this milestone — see inventory)*
-
-**Requirements:** BIL-03
-
-**Success criteria:**
-
-1. **BIL-03** satisfied per archived [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
-2. No **PROC-08**; any public **`Accrue.Billing`** surface change ships **Fake** coverage and doc/telemetry/changelog alignment as applicable.
-
-### Phase 65: P0 admin / operator
-
-**Goal:** Burn admin **P0** rows without new third-party UI kits.
-
-**FRG-03 slice:** [ADM-12 backlog anchor](research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65) *(empty P0 queue this milestone — see inventory)*
-
-**Requirements:** ADM-12
-
-**Success criteria:**
-
-1. **ADM-12** satisfied per archived [`milestones/v1.17-REQUIREMENTS.md`](milestones/v1.17-REQUIREMENTS.md).
-2. **`AccrueAdmin.Copy`** / **`ax-*`** / **VERIFY-01** discipline preserved on touched surfaces.
-
 </details>
 
 <details>
@@ -496,39 +417,6 @@ Plans:
 **Success criteria (milestone):**
 
 1. **INT-06..INT-09** satisfied with committed docs/scripts/tests as needed; **`bash scripts/ci/verify_package_docs.sh`** green.
-2. No **PROC-08** / **FIN-03** scope creep.
-
-### Phase 59: Golden path + quickstart coherence
-
-**Goal:** **First Hour** ↔ **host README** ↔ **quickstart** consistent with **v1.15** messaging; verifier scripts green.
-
-**Requirements:** INT-06
-
-**Success criteria:**
-
-1. **INT-06** satisfied — **`accrue/guides/first_hour.md`**, **`examples/accrue_host/README.md`**, and **`accrue/guides/quickstart.md`** (plus explicitly linked tutorial sections) contain **no contradictory** version pins, command order, or capsule (**H/M/R**) instructions relative to **v1.15** trust SemVer messaging and current **CI** merge-blocking contracts; **`verify_verify01_readme_contract.sh`** and **`verify_adoption_proof_matrix.sh`** (or successors) stay **green** on **`main`**.
-2. No **PROC-08** / **FIN-03** scope creep.
-
-### Phase 60: Adoption proof + CI ownership map
-
-**Goal:** Matrix + evaluator script + contributor verifier map honest vs lanes and trust copy.
-
-**Requirements:** INT-07
-
-**Success criteria:**
-
-1. **INT-07** satisfied per **`.planning/milestones/v1.16-REQUIREMENTS.md`**.
-2. No **PROC-08** / **FIN-03** scope creep.
-
-### Phase 61: Root VERIFY hops + Hex doc SSOT
-
-**Goal:** README hop budget vs **VERIFY-01**; **`verify_package_docs`** + **`first_hour`** + planning mirrors vs **`@version`**.
-
-**Requirements:** INT-08, INT-09
-
-**Success criteria:**
-
-1. **INT-08** and **INT-09** satisfied per **`.planning/milestones/v1.16-REQUIREMENTS.md`**.
 2. No **PROC-08** / **FIN-03** scope creep.
 
 **Archives:** [`milestones/v1.16-ROADMAP.md`](milestones/v1.16-ROADMAP.md), [`milestones/v1.16-REQUIREMENTS.md`](milestones/v1.16-REQUIREMENTS.md).
@@ -805,23 +693,6 @@ Plans:
 **Milestone goal:** Make the existing **Fake-first VERIFY-01** story and the **Stripe test-mode parity** lane easy to understand for evaluators and maintainers — without changing release-blocking CI semantics.
 
 - [x] **Phase 24: Adoption proof hardening** — Documentation + host README contract + CI display naming + cross-links (PROOF-01..03).
-
-### Phase 24: Adoption proof hardening
-
-**Goal:** One matrix doc ties bounded host tests, Playwright VERIFY-01, and advisory `live-stripe` / `mix test.live` together; evaluator recording checklist ships; no new billing product scope.
-
-**Depends on:** Phase 23 (v1.4 complete)
-
-**Requirements:** PROOF-01, PROOF-02, PROOF-03
-
-**Success criteria:**
-
-1. `examples/accrue_host/docs/adoption-proof-matrix.md` exists and is linked from `examples/accrue_host/README.md` (enforced by `verify_verify01_readme_contract.sh`).
-2. `examples/accrue_host/docs/evaluator-walkthrough-script.md` exists and is linked from the host README.
-3. `.github/workflows/ci.yml` advisory Stripe job display name states test-mode parity; `guides/testing-live-stripe.md` states job id vs key mode explicitly.
-4. `accrue/guides/testing.md` links host VERIFY-01 matrix + `guides/testing-live-stripe.md`.
-
-**Plans:** (executed inline — planning-only phase)
 
 </details>
 
