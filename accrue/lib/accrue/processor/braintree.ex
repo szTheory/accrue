@@ -58,7 +58,6 @@ defmodule Accrue.Processor.Braintree do
 
   @impl Accrue.Processor
   def fetch(:subscription, id), do: retrieve_subscription(id, [])
-  def fetch(_type, _id), do: {:error, unsupported()}
 
   @doc false
   def build_request(params) do
@@ -273,9 +272,44 @@ defmodule Accrue.Processor.Braintree do
 
   # Refund
   @impl Accrue.Processor
-  def create_refund(_params, _opts), do: {:error, unsupported()}
+  def create_refund(params, opts) when is_map(params) and is_list(opts) do
+    charge_id = params[:charge] || params["charge"]
+    amount = params[:amount] || params["amount"]
+
+    amount_str =
+      case amount do
+        nil -> nil
+        a when is_integer(a) -> :erlang.float_to_binary(a / 100.0, [{:decimals, 2}])
+        a when is_binary(a) -> a
+        _ -> nil
+      end
+
+    with {:ok, transaction} <- transaction_gateway().find(charge_id, opts),
+         :ok <- validate_refundable_status(transaction),
+         {:ok, refund} <- transaction_gateway().refund(charge_id, amount_str, opts) do
+      {:ok, translate_refund(refund)}
+    else
+      {:error, %Elixir.Braintree.ErrorResponse{} = e} ->
+        {:error, invalid_request(e.message)}
+
+      {:error, %APIError{} = error} ->
+        {:error, error}
+
+      {:error, raw} ->
+        {:error, invalid_request(inspect(raw))}
+    end
+  end
+
   @impl Accrue.Processor
-  def retrieve_refund(_id, _opts), do: {:error, unsupported()}
+  def retrieve_refund(id, opts) when is_binary(id) and is_list(opts) do
+    case transaction_gateway().find(id, opts) do
+      {:ok, refund} -> {:ok, translate_refund(refund)}
+      {:error, %Elixir.Braintree.ErrorResponse{} = e} -> {:error, to_accrue_error(e)}
+      {:error, raw} -> {:error, to_accrue_error(raw)}
+    end
+  end
+
+  def fetch(:refund, id), do: retrieve_refund(id, [])
 
   # Meter event
   @impl Accrue.Processor
@@ -318,6 +352,8 @@ defmodule Accrue.Processor.Braintree do
   def checkout_session_fetch(_id, _opts), do: {:error, unsupported()}
   @impl Accrue.Processor
   def portal_session_create(_params, _opts), do: {:error, unsupported()}
+
+  def fetch(_type, _id), do: {:error, unsupported()}
 
   # --- Translation Helpers ---
 
@@ -417,6 +453,32 @@ defmodule Accrue.Processor.Braintree do
 
   defp payment_method_gateway do
     Application.get_env(:accrue, :braintree_payment_method_gateway, Braintree.PaymentMethod)
+  end
+
+  defp transaction_gateway do
+    Application.get_env(:accrue, :braintree_transaction_gateway, Braintree.Transaction)
+  end
+
+  defp validate_refundable_status(transaction) do
+    status = Map.get(transaction, :status) || Map.get(transaction, "status")
+    if status in ["settling", "settled"] do
+      :ok
+    else
+      {:error, invalid_request("Braintree refunds require the sale to be settling or settled; got #{status}.")}
+    end
+  end
+
+  defp translate_refund(%{} = transaction) do
+    data = if is_struct(transaction), do: Map.from_struct(transaction), else: transaction
+
+    %{
+      id: Map.get(data, :id) || Map.get(data, "id"),
+      status: Map.get(data, :status) || Map.get(data, "status"),
+      amount: Map.get(data, :amount) || Map.get(data, "amount"),
+      currency: Map.get(data, :currency_iso_code) || Map.get(data, "currency_iso_code"),
+      charge: Map.get(data, :refunded_transaction_id) || Map.get(data, "refunded_transaction_id"),
+      data: data
+    }
   end
 
   defp translate_payment_method_create(params) do

@@ -25,7 +25,7 @@ defmodule Accrue.Billing.RefundActions do
   alias Accrue.Repo
 
   # ---------------------------------------------------------------------
-  # create_refund/2
+  # refund/2
   # ---------------------------------------------------------------------
 
   @doc """
@@ -40,9 +40,9 @@ defmodule Accrue.Billing.RefundActions do
     * `:reason` — refund reason string passed to the processor.
     * `:operation_id` — deterministic idempotency seed.
   """
-  @spec create_refund(Charge.t(), keyword()) ::
+  @spec refund(Charge.t(), keyword()) ::
           {:ok, Refund.t()} | {:error, term()}
-  def create_refund(%Charge{} = charge, opts \\ []) do
+  def refund(%Charge{} = charge, opts \\ []) do
     # Validate :amount shape and currency match against the parent charge.
     # A typo or integer literal would raise CaseClauseError with an opaque
     # stacktrace; fail loud with a typed error instead.
@@ -80,13 +80,13 @@ defmodule Accrue.Billing.RefundActions do
       |> put_if_present(:reason, Keyword.get(opts, :reason))
 
     Repo.transact(fn ->
-      with {:ok, stripe_refund} <-
+      with {:ok, refund_payload} <-
              Processor.__impl__().create_refund(
                params,
                [idempotency_key: idem_key] ++ sanitize_opts(opts)
              ),
            {:ok, refund_row} <-
-             insert_or_fetch_refund(subject_uuid, charge, stripe_refund, amount_minor),
+             insert_or_fetch_refund(subject_uuid, charge, refund_payload, amount_minor),
            {:ok, _} <-
              record_event("refund.created", refund_row, %{
                amount_minor: amount_minor,
@@ -97,13 +97,13 @@ defmodule Accrue.Billing.RefundActions do
     end)
   end
 
-  @doc "Raising variant of `create_refund/2`."
-  @spec create_refund!(Charge.t(), keyword()) :: Refund.t()
-  def create_refund!(charge, opts \\ []) do
-    case create_refund(charge, opts) do
-      {:ok, refund} -> refund
+  @doc "Raising variant of `refund/2`."
+  @spec refund!(Charge.t(), keyword()) :: Refund.t()
+  def refund!(charge, opts \\ []) do
+    case refund(charge, opts) do
+      {:ok, refund_row} -> refund_row
       {:error, err} when is_exception(err) -> raise err
-      {:error, other} -> raise "create_refund!/2 failed: #{inspect(other)}"
+      {:error, other} -> raise "refund!/2 failed: #{inspect(other)}"
     end
   end
 
@@ -111,19 +111,19 @@ defmodule Accrue.Billing.RefundActions do
   # helpers
   # ---------------------------------------------------------------------
 
-  defp insert_or_fetch_refund(id, charge, stripe_refund, amount_minor) do
+  defp insert_or_fetch_refund(id, charge, refund_payload, amount_minor) do
     case Repo.get(Refund, id) do
       %Refund{} = existing ->
         {:ok, existing}
 
       nil ->
-        insert_refund(id, charge, stripe_refund, amount_minor)
+        insert_refund(id, charge, refund_payload, amount_minor)
     end
   end
 
-  defp insert_refund(id, %Charge{} = charge, stripe_refund, amount_minor) do
+  defp insert_refund(id, %Charge{} = charge, refund_payload, amount_minor) do
     charge_bt =
-      case get_field(stripe_refund, :charge) do
+      case get_field(refund_payload, :charge) do
         %{} = c -> get_field(c, :balance_transaction) || %{}
         _ -> %{}
       end
@@ -143,7 +143,7 @@ defmodule Accrue.Billing.RefundActions do
       end
 
     status =
-      case get_field(stripe_refund, :status) do
+      case get_field(refund_payload, :status) do
         s when is_atom(s) and not is_nil(s) ->
           s
 
@@ -161,24 +161,37 @@ defmodule Accrue.Billing.RefundActions do
       end
 
     currency =
-      case get_field(stripe_refund, :currency) do
+      case get_field(refund_payload, :currency) || get_field(refund_payload, :currency_iso_code) do
         c when is_binary(c) -> c
         c when is_atom(c) and not is_nil(c) -> Atom.to_string(c)
         _ -> charge.currency
       end
 
+    amount_field = get_field(refund_payload, :amount)
+    parsed_amount = 
+      case amount_field do
+        a when is_integer(a) -> a
+        a when is_binary(a) ->
+          case Float.parse(a) do
+            {f, _} -> trunc(f * 100)
+            :error -> nil
+          end
+        _ -> nil
+      end
+
     attrs = %{
       charge_id: charge.id,
-      stripe_id: get_field(stripe_refund, :id),
-      amount_minor: get_field(stripe_refund, :amount) || amount_minor,
+      processor_id: get_field(refund_payload, :id) || get_field(refund_payload, :refund_id),
+      stripe_id: get_field(refund_payload, :id) || get_field(refund_payload, :refund_id),
+      amount_minor: parsed_amount || amount_minor,
       currency: currency,
-      reason: get_field(stripe_refund, :reason),
+      reason: get_field(refund_payload, :reason),
       status: status,
       stripe_fee_refunded_amount_minor: stripe_fee_refunded,
       merchant_loss_amount_minor: merchant_loss,
       fees_settled_at: settled_at,
-      data: stringify(stripe_refund),
-      metadata: get_field(stripe_refund, :metadata) || %{}
+      data: stringify(refund_payload),
+      metadata: get_field(refund_payload, :metadata) || %{}
     }
 
     %Refund{}

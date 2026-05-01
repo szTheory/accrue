@@ -9,13 +9,21 @@ defmodule Accrue.Billing.RefundBraintreeTest do
   alias Accrue.Billing.{Charge, Customer, Refund}
 
   defmodule TransactionGatewayStub do
+    def find(id, _opts) do
+      if id == "ch_bt_unsettled" do
+        {:ok, %{status: "authorized", id: id}}
+      else
+        {:ok, %{status: "settled", id: id}}
+      end
+    end
+
     def refund(id, amount, _opts \\ []) do
       if amount == "invalid" do
         {:error, %Elixir.Braintree.ErrorResponse{message: "Amount is invalid"}}
       else
         {:ok,
          %{
-           id: "ref_bt_scripted",
+           id: "ref_bt_scripted_#{amount}",
            type: "credit",
            status: "submitted_for_settlement",
            amount: amount || "100.00",
@@ -74,40 +82,44 @@ defmodule Accrue.Billing.RefundBraintreeTest do
   end
 
   test "Billing.refund/2 returns uniform {:ok, refund} for a Braintree charge", %{charge: charge} do
-    assert {:ok, %Refund{} = refund} = Billing.refund(charge)
+    assert {:ok, %Refund{} = refund} = Billing.refund(charge, operation_id: "op_1")
     assert refund.charge_id == charge.id
     assert refund.amount_minor == 10_000
-    assert refund.processor_id == "ref_bt_scripted"
+    assert refund.processor_id == "ref_bt_scripted_100.00"
   end
 
   test "create_refund/2 acts as an additive compatibility alias", %{charge: charge} do
-    assert {:ok, %Refund{} = refund} = Billing.create_refund(charge)
+    assert {:ok, %Refund{} = refund} = Billing.create_refund(charge, operation_id: "op_2")
     assert refund.charge_id == charge.id
     assert refund.amount_minor == 10_000
-    assert refund.processor_id == "ref_bt_scripted"
+    assert refund.processor_id == "ref_bt_scripted_100.00"
   end
 
   test "repeated partial refunds create distinct refund rows tied to one parent charge", %{charge: charge} do
     assert {:ok, %Refund{} = r1} =
-             Billing.refund(charge, amount: Accrue.Money.new(4000, :usd))
+             Billing.refund(charge, amount: Accrue.Money.new(4000, :usd), operation_id: "op_3")
 
     assert r1.amount_minor == 4000
-    assert r1.processor_id == "ref_bt_scripted"
+    assert r1.processor_id == "ref_bt_scripted_40.00"
 
     assert {:ok, %Refund{} = r2} =
-             Billing.refund(charge, amount: Accrue.Money.new(2000, :usd))
+             Billing.refund(charge, amount: Accrue.Money.new(2000, :usd), operation_id: "op_4")
 
     assert r2.amount_minor == 2000
-    assert r2.processor_id == "ref_bt_scripted"
+    assert r2.processor_id == "ref_bt_scripted_20.00"
 
     # Because both use the stub, they might get the same processor_id right now in test,
     # but they are inserted as distinct rows. Let's just assert counts.
-    count = Repo.aggregate(from(r in "accrue_refunds", where: r.charge_id == ^charge.id), :count)
+    count = Repo.aggregate(from(r in Refund, where: r.charge_id == ^charge.id), :count)
     assert count == 2
   end
 
   test "fails with explicit pre-settlement / invalid inputs APIError", %{charge: charge} do
-    assert {:error, %Accrue.APIError{code: "invalid_request_error"}} =
-             Billing.refund(charge, amount: "invalid")
+    unsettled_charge = %{charge | processor_id: "ch_bt_unsettled"}
+
+    assert {:error, %Accrue.APIError{code: "invalid_request_error", message: msg}} =
+             Billing.refund(unsettled_charge)
+
+    assert msg =~ "settling or settled"
   end
 end

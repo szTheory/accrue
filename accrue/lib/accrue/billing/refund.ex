@@ -28,6 +28,7 @@ defmodule Accrue.Billing.Refund do
   schema "accrue_refunds" do
     belongs_to(:charge, Accrue.Billing.Charge)
 
+    field(:processor_id, :string)
     field(:stripe_id, :string)
     field(:amount_minor, :integer)
     field(:currency, :string)
@@ -46,7 +47,7 @@ defmodule Accrue.Billing.Refund do
   end
 
   @cast_fields ~w[
-    charge_id stripe_id amount_minor currency reason status
+    charge_id processor_id stripe_id amount_minor currency reason status
     stripe_fee_refunded_amount_minor merchant_loss_amount_minor
     fees_settled_at last_stripe_event_ts last_stripe_event_id
     data metadata lock_version

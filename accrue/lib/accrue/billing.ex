@@ -537,17 +537,20 @@ defmodule Accrue.Billing do
   end
 
   # ── Refunds ───────────────────────────────────────────────────────
-  def create_refund(charge, opts \\ []),
+  def refund(charge, opts \\ []),
     do:
       span_billing(:refund, :create, charge, opts, fn ->
-        RefundActions.create_refund(charge, opts)
+        RefundActions.refund(charge, opts)
       end)
 
-  def create_refund!(charge, opts \\ []),
+  def refund!(charge, opts \\ []),
     do:
       span_billing(:refund, :create, charge, opts, fn ->
-        RefundActions.create_refund!(charge, opts)
+        RefundActions.refund!(charge, opts)
       end)
+
+  def create_refund(charge, opts \\ []), do: refund(charge, opts)
+  def create_refund!(charge, opts \\ []), do: refund!(charge, opts)
 
   # ── Invoice PDF rendering ─────────────────────────────────────────
   def render_invoice_pdf(invoice_or_id, opts \\ []),
