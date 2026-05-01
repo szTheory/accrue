@@ -72,7 +72,13 @@ Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Ac
   1. A host app can mount the `Accrue.Portal` router pipeline.
   2. `create_checkout_session/2` returns a URL to a local hosted checkout that embeds Braintree Hosted Fields. (Drop-in for Web is deprecated 2025-07-14, unsupported 2026-07-14.)
   3. User can view and manage subscriptions and payment methods via the portal.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] `101-01-PLAN.md` — Harden persisted local checkout sessions, portal URL config, and migration-backed tests in `accrue`
+- [ ] `101-02-PLAN.md` — Align `accrue_portal` mount/auth/CSP shell with the locked public contract and sibling host mount
+- [ ] `101-03-PLAN.md` — Flip Braintree adapter/facade checkout and billing-portal semantics to first-party local portal support
+- [ ] `101-04-PLAN.md` — Implement the Hosted Fields checkout flow plus synthetic completion event and telemetry wiring
+- [ ] `101-05-PLAN.md` — Complete customer portal LiveViews, tenant-scoped authorization, and adoption docs
 **UI hint**: yes
 
 ### Phase 102: Coupon/Discount Mapping
