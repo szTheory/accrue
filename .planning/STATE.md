@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.33
 milestone_name: Braintree Full Maturity
-status: executing
-last_updated: "2026-05-02T18:22:36.893Z"
+status: verifying
+last_updated: "2026-05-02T18:31:14.962Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 14
-  completed_plans: 13
-  percent: 93
+  completed_plans: 14
+  percent: 100
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
 Phase: 102 (coupon-discount-mapping) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Resume file: None
 Last activity: 2026-05-02
 
@@ -79,6 +79,8 @@ Last activity: 2026-05-02
 
 ## Recent Decisions
 
+- **2026-05-02:** **Phase 102 Plan 03 complete** — `AccruePortal.Live.CheckoutLive` now previews Braintree promotion-code savings in LiveView, updates the pay CTA before submit, and announces provisional results through an `aria-live` status region.
+- **2026-05-02:** **Phase 102 Plan 03 submit contract** — the portal keeps `promotion_code` on the existing `Accrue.Billing.subscribe/3` seam and translates `%Accrue.Error.DiscountMappingInvalid{}` into safe customer copy instead of allowing an undiscounted subscription.
 - **2026-05-02:** **Phase 102 Plan 01 complete** — Braintree discount mappings now live in a dedicated `accrue_discount_mappings` table instead of reusing Stripe promotion-code projections.
 - **2026-05-02:** **Phase 102 Plan 01 validation contract** — local discount resolution returns explicit `:not_found` / `:inactive` / `:expired` / `:max_redemptions_reached` atoms and reserves `%Accrue.Error.DiscountMappingInvalid{}` for stored drift.
 - **2026-05-02:** **Phase 101 Plan 07 complete** — `accrue_portal` now publishes explicit `:plug` / `:jason` runtime deps, owns package-local config/test bootstrap, and ships router/auth/CSP shell regression tests with a reusable Braintree client-token stub for later portal suites.
@@ -111,7 +113,7 @@ Last activity: 2026-05-02
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** **Phase 102 Plan 02** — wire local discount mappings into `subscribe/3`, emit Braintree `discounts.add[*].inherited_from_id`, and hard-fail operator drift with ops telemetry.
+**Next:** **Phase 102 verification / Phase 103 planning** — coupon-discount mapping is implementation-complete; next work should shift to validation handoff or metering-engine planning.
 
 **Completed (v1.32):** Phases **97–100** — **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`** + **`v1.32-REQUIREMENTS.md`**; tag **`v1.32`** (local).
 
