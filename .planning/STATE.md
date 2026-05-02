@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.33
 milestone_name: Braintree Full Maturity
 status: executing
-last_updated: "2026-05-02T15:08:05.440Z"
+last_updated: "2026-05-02T18:14:26.073Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_phases: 1
+  total_plans: 14
+  completed_plans: 12
+  percent: 86
 ---
 
 # Project State
@@ -21,13 +21,13 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 101 — Accrue Portal foundation and checkout execution
+**Current focus:** Phase 102 (coupon-discount-mapping)
 
 ## Current Position
 
 Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
-Phase: 101 (accrue-portal-foundation-checkout) — EXECUTING
-Plan: 7 of 11
+Phase: 102 (coupon-discount-mapping) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
 Resume file: None
 Last activity: 2026-05-02
@@ -55,7 +55,7 @@ Last activity: 2026-05-02
 
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
 - **`.planning/ROADMAP.md`** — active milestone roadmap for **v1.33** (phases **101–104**) plus archived milestone index.
-- **`.planning/REQUIREMENTS.md`** — active **v1.33** requirements (**BT-01..BT-07**).
+- **`.planning/milestones/v1.33-REQUIREMENTS.md`** — active **v1.33** requirements (**BT-01..BT-09**).
 - **`milestones/v1.31-ROADMAP.md`** / **`v1.31-REQUIREMENTS.md`** — final v1.31 archives (phases 94–96, 5 requirements).
 - **`milestones/v1.30-ROADMAP.md`** / **`v1.30-REQUIREMENTS.md`** — final v1.30 archives (phases 91–93, all 12 requirements, final proof links, archived intact).
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
@@ -79,6 +79,8 @@ Last activity: 2026-05-02
 
 ## Recent Decisions
 
+- **2026-05-02:** **Phase 102 Plan 01 complete** — Braintree discount mappings now live in a dedicated `accrue_discount_mappings` table instead of reusing Stripe promotion-code projections.
+- **2026-05-02:** **Phase 102 Plan 01 validation contract** — local discount resolution returns explicit `:not_found` / `:inactive` / `:expired` / `:max_redemptions_reached` atoms and reserves `%Accrue.Error.DiscountMappingInvalid{}` for stored drift.
 - **2026-05-02:** **Phase 101 Plan 07 complete** — `accrue_portal` now publishes explicit `:plug` / `:jason` runtime deps, owns package-local config/test bootstrap, and ships router/auth/CSP shell regression tests with a reusable Braintree client-token stub for later portal suites.
 - **2026-05-02:** **Phase 101 Plan 03 complete** — Braintree local billing-portal availability is enforced in the adapter via `portal_base_url`, preserving the `:unsupported_by_gateway` fallback when the host has not configured the local portal.
 - **2026-05-02:** **Phase 101 Plan 03 docs** — `Accrue.Billing` now states explicitly that Stripe remains hosted upstream while Braintree returns host-mounted local portal URLs without adding a new `ui_mode`.
@@ -109,7 +111,7 @@ Last activity: 2026-05-02
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** **Phase 101 execution in progress** — continue from the recovered local-portal baseline and finish plans **101-04** through **101-11**.
+**Next:** **Phase 102 Plan 02** — wire local discount mappings into `subscribe/3`, emit Braintree `discounts.add[*].inherited_from_id`, and hard-fail operator drift with ops telemetry.
 
 **Completed (v1.32):** Phases **97–100** — **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`** + **`v1.32-REQUIREMENTS.md`**; tag **`v1.32`** (local).
 
@@ -120,3 +122,5 @@ Last activity: 2026-05-02
 **Completed (v1.28):** Phases **86–87** — **`milestones/v1.28-phases/086-post-publish-contract-alignment/`**, **`087-friction-inventory-post-publish/`**.
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
+
+**Planned Phase:** 102 (Coupon/Discount Mapping) — 3 plans — 2026-05-02T15:59:06.760Z

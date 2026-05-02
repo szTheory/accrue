@@ -97,7 +97,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] `102-01-PLAN.md` — Establish the explicit local discount-mapping domain, facade write/read surface, and Wave 0 BT-04 coverage.
+- [x] `102-01-PLAN.md` — Establish the explicit local discount-mapping domain, facade write/read surface, and Wave 0 BT-04 coverage. Summary: `102-01-SUMMARY.md`
 - [ ] `102-02-PLAN.md` — Revalidate promotion codes during `subscribe/3`, emit Braintree `discounts.add[*].inherited_from_id`, and hard-fail operator drift with ops telemetry.
 - [ ] `102-03-PLAN.md` — Add checkout preview/revalidation UX in `accrue_portal` and document the local-mapping processor distinction for adopters.
 
