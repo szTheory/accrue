@@ -32,6 +32,7 @@ hostlog.txt
 .bg-shell/
 .gsd/
 .mcp.json
+.tmp/
 .planning/phases/
 
 # Local `act` secret files for live-Stripe CI replay (quick task 260414-l9q).
