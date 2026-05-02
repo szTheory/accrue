@@ -45,6 +45,13 @@ defmodule Accrue.Portal.Router do
         get("/assets/brand-#{AccruePortal.Assets.brand_hash()}", AccruePortal.Assets, :brand)
         get("/assets/css-#{AccruePortal.Assets.css_hash()}", AccruePortal.Assets, :css)
         get("/assets/js-#{AccruePortal.Assets.js_hash()}", AccruePortal.Assets, :js)
+        get("/assets/phoenix-#{AccruePortal.Assets.phoenix_hash()}", AccruePortal.Assets, :phoenix)
+
+        get(
+          "/assets/live-view-#{AccruePortal.Assets.live_view_hash()}",
+          AccruePortal.Assets,
+          :live_view
+        )
 
         pipe_through([:accrue_portal_browser, :accrue_portal_authenticated])
 
@@ -97,6 +104,8 @@ defmodule Accrue.Portal.Router do
         "brand_css_path" => AccruePortal.Assets.hashed_path(:brand, mount_path),
         "assets_css_path" => AccruePortal.Assets.hashed_path(:css, mount_path),
         "assets_js_path" => AccruePortal.Assets.hashed_path(:js, mount_path),
+        "phoenix_js_path" => AccruePortal.Assets.hashed_path(:phoenix, mount_path),
+        "live_view_js_path" => AccruePortal.Assets.hashed_path(:live_view, mount_path),
         "brand" => conn.assigns[:accrue_portal_brand],
         "theme" => conn.assigns[:accrue_portal_theme] || "system",
         "csp_nonce" => conn.assigns[:accrue_portal_csp_nonce]

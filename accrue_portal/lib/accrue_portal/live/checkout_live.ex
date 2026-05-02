@@ -1,9 +1,15 @@
 defmodule AccruePortal.Live.CheckoutLive do
   use Phoenix.LiveView
 
+  alias Accrue.Billing
   alias Accrue.Checkout.LocalSession
   alias AccruePortal.BraintreeClient
-  alias AccruePortal.Path
+  alias AccruePortal.Copy
+
+  @client_script_src "https://js.braintreegateway.com/web/3.132.0/js/client.min.js"
+  @client_script_sri "sha384-rNv6rxT4CpVv9Kb8luV4l/GpBwbhHTmZxWbI74/LX+ShrJzh/b9AL7nynSmHDpRC"
+  @hosted_fields_script_src "https://js.braintreegateway.com/web/3.132.0/js/hosted-fields.min.js"
+  @hosted_fields_script_sri "sha384-QAzc9uX3XQPGzTESbnMNOUn9hY9jVL/L10Eq3Gxt4NKXIZZWzGlhnEscA3iGj8Jp"
 
   @impl true
   def mount(%{"token" => token}, %{"accrue_portal" => portal}, socket) do
@@ -13,68 +19,200 @@ defmodule AccruePortal.Live.CheckoutLive do
       %LocalSession{customer_id: customer_id} = checkout
       when customer_id == socket.assigns.current_customer.id ->
         client_token =
-          case BraintreeClient.client_token_for(socket.assigns.current_customer) do
+          case checkout_ready?(checkout) && BraintreeClient.client_token_for(socket.assigns.current_customer) do
             {:ok, value} -> value
-            {:error, _reason} -> nil
+            _ -> nil
           end
 
         {:ok,
          socket
-         |> assign(:page_title, "Checkout")
+         |> assign(:page_title, Copy.checkout_page_title())
          |> assign(:portal, portal)
          |> assign(:base_path, portal["mount_path"])
          |> assign(:checkout_session, checkout)
-         |> assign(:client_token, client_token)}
+         |> assign(:client_token, client_token)
+         |> assign(:checkout_amount, checkout_amount(checkout))
+         |> assign(:checkout_error, nil)
+         |> assign(:checkout_success, false)
+         |> assign(:client_script_src, @client_script_src)
+         |> assign(:client_script_sri, @client_script_sri)
+         |> assign(:hosted_fields_script_src, @hosted_fields_script_src)
+         |> assign(:hosted_fields_script_sri, @hosted_fields_script_sri)}
 
       _ ->
         {:ok,
          socket
-         |> put_flash(:error, "Checkout session not found.")
          |> redirect(to: portal["mount_path"])}
     end
+  end
+
+  @impl true
+  def handle_event("checkout_tokenized", %{"nonce" => nonce}, socket)
+      when is_binary(nonce) and nonce != "" do
+    checkout = socket.assigns.checkout_session
+
+    cond do
+      not checkout_ready?(checkout) ->
+        {:noreply, assign_expired_error(socket)}
+
+      true ->
+        case Billing.subscribe(
+               socket.assigns.current_customer,
+               checkout.price_id,
+               payment_method: %{vault_acquisition: %{reference: nonce}},
+               operation_id: checkout.operation_id
+             ) do
+          {:ok, _subscription} ->
+            {:ok, _session} = LocalSession.mark_completed(checkout)
+
+            case checkout.success_url do
+              url when is_binary(url) and url != "" ->
+                {:noreply, redirect(socket, external: url)}
+
+              _ ->
+                {:noreply,
+                 socket
+                 |> assign(:checkout_error, nil)
+                 |> assign(:checkout_success, true)}
+            end
+
+          {:error, _reason} ->
+            {:noreply,
+             socket
+             |> assign(:checkout_error, Copy.checkout_subscription_error())
+             |> assign(:checkout_success, false)}
+        end
+    end
+  end
+
+  def handle_event("checkout_tokenized", _params, socket) do
+    {:noreply, assign(socket, :checkout_error, Copy.checkout_missing_nonce_error())}
+  end
+
+  def handle_event("checkout_failed", %{"message" => message}, socket) do
+    {:noreply,
+     socket
+     |> assign(:checkout_error, Copy.checkout_card_error(message))
+     |> assign(:checkout_success, false)}
+  end
+
+  def handle_event("checkout_failed", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:checkout_error, Copy.checkout_card_error(nil))
+     |> assign(:checkout_success, false)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
     <main class="portal-shell">
-      <section class="portal-card">
-        <h1>Checkout</h1>
-        <p>Confirm subscription for <strong>{@checkout_session.price_id}</strong>.</p>
+      <script src={@client_script_src} integrity={@client_script_sri} crossorigin="anonymous"></script>
+      <script
+        src={@hosted_fields_script_src}
+        integrity={@hosted_fields_script_sri}
+        crossorigin="anonymous"
+      >
+      </script>
+
+      <section class="portal-card portal-card-checkout">
+        <p class="portal-eyebrow">Secure checkout</p>
+        <h1>{Copy.checkout_heading()}</h1>
+        <p :if={not @checkout_success}>
+          Confirm subscription for <strong>{@checkout_session.price_id}</strong>.
+        </p>
+        <p :if={@checkout_success} class="portal-success-copy">Subscription created.</p>
+
+        <div
+          :if={@checkout_error}
+          class="portal-inline-error"
+          role="alert"
+          data-checkout-error
+        >
+          <p>{@checkout_error}</p>
+          <p :if={@checkout_error != Copy.checkout_subscription_error()}>
+            {Copy.checkout_retry_help()}
+          </p>
+        </div>
+
+        <div :if={not checkout_ready?(@checkout_session)} class="portal-inline-error" role="alert">
+          <p>{Copy.checkout_session_expired_title()}</p>
+          <p>{Copy.checkout_session_expired_body()}</p>
+        </div>
 
         <form
-          :if={@client_token}
-          action={Path.checkout_complete(@base_path, @checkout_session.session_token)}
-          method="post"
+          :if={@client_token && checkout_ready?(@checkout_session) && !@checkout_success}
+          id="checkout-form"
+          phx-hook="BraintreeHostedFields"
+          phx-submit="checkout_submit"
           class="portal-hosted-fields-form"
           data-portal-hosted-fields="checkout"
           data-client-token={@client_token}
         >
-          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-          <input type="hidden" name="payment_method_nonce" value="" data-braintree-nonce-input />
           <div class="portal-hosted-grid">
-            <label>
-              Card number
+            <label class="portal-hosted-label">
+              <span>Card number</span>
               <div class="portal-hosted-field" data-braintree-field="number"></div>
             </label>
-            <label>
-              Expiration
+            <label class="portal-hosted-label">
+              <span>Expiration</span>
               <div class="portal-hosted-field" data-braintree-field="expirationDate"></div>
             </label>
-            <label>
-              CVV
+            <label class="portal-hosted-label">
+              <span>CVV</span>
               <div class="portal-hosted-field" data-braintree-field="cvv"></div>
             </label>
           </div>
           <p class="portal-help" data-braintree-error></p>
-          <button type="submit" class="portal-button-primary">Complete checkout</button>
+          <div class="portal-checkout-actions">
+            <button
+              type="submit"
+              class="portal-button-primary"
+              data-checkout-submit
+              data-label-processing={Copy.checkout_processing_cta()}
+            >
+              {Copy.checkout_pay_cta(@checkout_amount)}
+            </button>
+            <a
+              :if={@checkout_session.cancel_url}
+              href={@checkout_session.cancel_url}
+              class="portal-button-secondary"
+            >
+              {Copy.checkout_leave_cta()}
+            </a>
+          </div>
         </form>
 
-        <a :if={@checkout_session.cancel_url} href={@checkout_session.cancel_url} class="portal-button-secondary">
-          Cancel
+        <a
+          :if={(!@client_token || !checkout_ready?(@checkout_session)) && @checkout_session.cancel_url}
+          href={@checkout_session.cancel_url}
+          class="portal-button-secondary"
+        >
+          {Copy.checkout_leave_cta()}
         </a>
       </section>
     </main>
     """
+  end
+
+  defp checkout_amount(%LocalSession{line_items: [first | _]}) when is_map(first) do
+    first
+    |> Map.get("amount", "0.00")
+    |> normalize_amount()
+  end
+
+  defp checkout_amount(_session), do: "$0.00"
+
+  defp normalize_amount("$" <> amount), do: "$" <> amount
+  defp normalize_amount(amount) when is_binary(amount), do: "$" <> amount
+
+  defp checkout_ready?(%LocalSession{expires_at: %DateTime{} = expires_at}) do
+    DateTime.compare(expires_at, DateTime.utc_now()) == :gt
+  end
+
+  defp checkout_ready?(_session), do: true
+
+  defp assign_expired_error(socket) do
+    assign(socket, :checkout_error, Copy.checkout_session_expired_body())
   end
 end

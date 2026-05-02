@@ -1,79 +1,159 @@
 (function () {
-  function initHostedFields() {
-    if (!window.braintree) return;
+  var Hooks = {};
 
-    document.querySelectorAll("[data-portal-hosted-fields]").forEach(function (form) {
-      if (form.dataset.hostedFieldsBound === "1") return;
+  Hooks.BraintreeHostedFields = {
+    mounted: function () {
+      if (!window.braintree) return;
+      if (this.el.dataset.hostedFieldsBound === "1") return;
 
-      var token = form.dataset.clientToken;
-      var nonceInput = form.querySelector("[data-braintree-nonce-input]");
-      var errorNode = form.querySelector("[data-braintree-error]");
+      var token = this.el.dataset.clientToken;
+      var errorNode = this.el.querySelector("[data-braintree-error]");
+      var submitButton = this.el.querySelector("[data-checkout-submit]");
 
-      if (!token || !nonceInput) return;
+      if (!token) return;
 
-      form.dataset.hostedFieldsBound = "1";
+      this.el.dataset.hostedFieldsBound = "1";
+      this.hostedFields = null;
+      this.readyToSubmit = false;
 
       window.braintree.client.create({ authorization: token }, function (clientErr, clientInstance) {
         if (clientErr) {
-          if (errorNode) errorNode.textContent = "Unable to start card entry.";
+          setInlineError(errorNode, "Unable to start card entry.");
           return;
         }
 
         window.braintree.hostedFields.create(
           {
             client: clientInstance,
-            styles: {
-              input: {
-                color: "#111418",
-                "font-size": "16px",
-                "font-family": "Iowan Old Style, Palatino Linotype, Georgia, serif"
-              }
-            },
+            styles: hostedFieldStyles(),
             fields: {
-              number: { selector: fieldSelector(form, "number"), placeholder: "4111 1111 1111 1111" },
-              expirationDate: { selector: fieldSelector(form, "expirationDate"), placeholder: "MM / YY" },
-              cvv: { selector: fieldSelector(form, "cvv"), placeholder: "123" }
+              number: { selector: fieldSelector(this.el, "number"), placeholder: "4111 1111 1111 1111" },
+              expirationDate: { selector: fieldSelector(this.el, "expirationDate"), placeholder: "MM / YY" },
+              cvv: { selector: fieldSelector(this.el, "cvv"), placeholder: "123" }
             }
           },
-          function (hostedFieldsErr, hostedFields) {
+          function (hostedFieldsErr, hostedFieldsInstance) {
             if (hostedFieldsErr) {
-              if (errorNode) errorNode.textContent = "Unable to load secure card fields.";
+              setInlineError(errorNode, "Unable to load secure card fields.");
               return;
             }
 
-            form.addEventListener("submit", function (event) {
-              if (form.dataset.hostedFieldsSubmitting === "1") return;
+            this.hostedFields = hostedFieldsInstance;
 
-              event.preventDefault();
-              form.dataset.hostedFieldsSubmitting = "1";
-              if (errorNode) errorNode.textContent = "";
-
-              hostedFields.tokenize(function (tokenizeErr, payload) {
-                form.dataset.hostedFieldsSubmitting = "0";
-
-                if (tokenizeErr) {
-                  if (errorNode) errorNode.textContent = tokenizeErr.message || "Unable to tokenize card.";
+            this.el.addEventListener(
+              "submit",
+              function (event) {
+                if (this.readyToSubmit) {
+                  this.readyToSubmit = false;
                   return;
                 }
 
-                nonceInput.value = payload.nonce;
-                form.submit();
-              });
-            });
-          }
+                event.preventDefault();
+                this.tokenizeAndSubmit(errorNode, submitButton);
+              }.bind(this)
+            );
+          }.bind(this)
         );
-      });
-    });
+      }.bind(this));
+    },
+
+    destroyed: function () {
+      if (this.hostedFields && this.hostedFields.teardown) {
+        this.hostedFields.teardown(function () {});
+      }
+    },
+
+    tokenizeAndSubmit: function (errorNode, submitButton) {
+      if (!this.hostedFields) return;
+
+      setInlineError(errorNode, "");
+      setSubmitting(submitButton, true);
+
+      this.hostedFields.tokenize(
+        function (tokenizeErr, payload) {
+          if (tokenizeErr) {
+            setSubmitting(submitButton, false);
+
+            this.pushEvent("checkout_failed", {
+              message: tokenizeErr.message || "Unable to tokenize card."
+            });
+
+            return;
+          }
+
+          this.pushEvent("checkout_tokenized", { nonce: payload.nonce }, function () {
+            setSubmitting(submitButton, false);
+          });
+        }.bind(this)
+      );
+    }
+  };
+
+  function hostedFieldStyles() {
+    return {
+      input: {
+        color: "#111418",
+        "font-size": "16px",
+        "font-family": "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        "font-weight": "400",
+        "line-height": "1.5"
+      },
+      "input.invalid": {
+        color: "#B42318"
+      },
+      "::placeholder": {
+        color: "#5D6A73"
+      }
+    };
   }
 
   function fieldSelector(form, fieldName) {
     var field = form.querySelector('[data-braintree-field="' + fieldName + '"]');
+
     if (!field.id) {
       field.id = "accrue-portal-" + fieldName + "-" + Math.random().toString(36).slice(2);
     }
+
     return "#" + field.id;
   }
 
-  document.addEventListener("DOMContentLoaded", initHostedFields);
-  window.addEventListener("phx:page-loading-stop", initHostedFields);
+  function setInlineError(node, message) {
+    if (node) node.textContent = message || "";
+  }
+
+  function setSubmitting(button, submitting) {
+    if (!button) return;
+
+    if (!button.dataset.labelDefault) {
+      button.dataset.labelDefault = button.textContent;
+    }
+
+    button.disabled = !!submitting;
+    button.textContent = submitting
+      ? button.dataset.labelProcessing || button.dataset.labelDefault
+      : button.dataset.labelDefault;
+  }
+
+  function bootLiveSocket() {
+    if (!window.Phoenix || !window.Phoenix.LiveView || window.accruePortalLiveSocket) return;
+
+    var csrf = document.querySelector("meta[name='csrf-token']");
+    var liveSocket = new window.Phoenix.LiveView.LiveSocket("/live", window.Phoenix.Socket, {
+      hooks: Hooks,
+      params: {
+        _csrf_token: csrf ? csrf.getAttribute("content") : null
+      }
+    });
+
+    liveSocket.connect();
+    window.accruePortalLiveSocket = liveSocket;
+  }
+
+  window.addEventListener("phx:page-loading-stop", bootLiveSocket);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootLiveSocket);
+  } else {
+    bootLiveSocket();
+  }
 })();
