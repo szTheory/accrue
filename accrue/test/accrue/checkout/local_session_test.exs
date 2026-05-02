@@ -55,6 +55,21 @@ defmodule Accrue.Checkout.LocalSessionTest do
     assert LocalSession.by_id(session.id).status == "completed"
   end
 
+  test "create_or_reuse/2 rejects non-braintree processors" do
+    customer = CheckoutSessionFixture.build_customer()
+
+    attrs = %{
+      processor: "stripe",
+      mode: "subscription",
+      ui_mode: "hosted",
+      price_id: "price_pro",
+      line_items: [%{"price" => "price_pro"}]
+    }
+
+    assert {:error, changeset} = LocalSession.create_or_reuse(customer, attrs)
+    assert "must be braintree" in errors_on(changeset).processor
+  end
+
   test "unique constraints reject duplicate session tokens and operation ids" do
     customer = CheckoutSessionFixture.build_customer()
     session = CheckoutSessionFixture.local_session_fixture(customer, %{operation_id: "dup-op"})
