@@ -6,6 +6,7 @@ defmodule Accrue.Billing.CheckoutSessionFacadeTest do
   alias Accrue.Billing
   alias Accrue.Billing.Customer
   alias Accrue.Checkout.{LineItem, Session}
+  alias Accrue.Processor.Braintree
   alias Accrue.Processor.Fake
 
   setup do
@@ -100,6 +101,60 @@ defmodule Accrue.Billing.CheckoutSessionFacadeTest do
         Billing.create_checkout_session(customer, %{not_a_real_key: true})
       end
     end
+
+    test "returns a mounted local portal checkout URL for Braintree and reuses operation_id" do
+      previous = Application.get_env(:accrue, :processor)
+      previous_base_url = Application.get_env(:accrue, :portal_base_url)
+      previous_mount_path = Application.get_env(:accrue, :portal_mount_path)
+
+      Application.put_env(:accrue, :processor, Braintree)
+      Application.put_env(:accrue, :portal_base_url, "https://app.example.test")
+      Application.put_env(:accrue, :portal_mount_path, "/billing")
+
+      on_exit(fn ->
+        if previous do
+          Application.put_env(:accrue, :processor, previous)
+        else
+          Application.delete_env(:accrue, :processor)
+        end
+
+        if previous_base_url do
+          Application.put_env(:accrue, :portal_base_url, previous_base_url)
+        else
+          Application.delete_env(:accrue, :portal_base_url)
+        end
+
+        if previous_mount_path do
+          Application.put_env(:accrue, :portal_mount_path, previous_mount_path)
+        else
+          Application.delete_env(:accrue, :portal_mount_path)
+        end
+      end)
+
+      customer = insert_braintree_customer()
+
+      assert {:ok, %Session{} = session} =
+               Billing.create_checkout_session(customer,
+                 line_items: [LineItem.from_price("price_braintree_monthly", 1)],
+                 success_url: "/after-checkout",
+                 cancel_url: "/cancel-checkout",
+                 return_url: "/billing",
+                 operation_id: "checkout-facade-op-1"
+               )
+
+      assert session.url =~ "https://app.example.test/billing/checkout/"
+      assert session.customer == customer.processor_id
+      assert session.data["local_portal"] == true
+      assert session.data["price_id"] == "price_braintree_monthly"
+
+      assert {:ok, %Session{} = reused} =
+               Billing.create_checkout_session(customer,
+                 line_items: [LineItem.from_price("price_braintree_monthly", 1)],
+                 operation_id: "checkout-facade-op-1"
+               )
+
+      assert reused.id == session.id
+    end
   end
 
   describe "create_checkout_session!/2" do
@@ -114,5 +169,17 @@ defmodule Accrue.Billing.CheckoutSessionFacadeTest do
       assert %Session{} = session
       assert String.starts_with?(session.id, "cs_fake_")
     end
+  end
+
+  defp insert_braintree_customer do
+    %Customer{}
+    |> Customer.changeset(%{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "braintree",
+      processor_id: "cus_bt_checkout_facade",
+      email: "checkout-braintree@example.com"
+    })
+    |> Repo.insert!()
   end
 end

@@ -6,6 +6,7 @@ defmodule Accrue.Billing.BillingPortalSessionFacadeTest do
   alias Accrue.Billing
   alias Accrue.Billing.Customer
   alias Accrue.BillingPortal.Session
+  alias Accrue.Processor.Braintree
   alias Accrue.Processor.Fake
 
   setup do
@@ -44,10 +45,12 @@ defmodule Accrue.Billing.BillingPortalSessionFacadeTest do
                Billing.create_billing_portal_session(customer, return_url: "https://x.test")
     end
 
-    test "returns :unsupported_by_gateway when processor lacks billing_portal create capability",
-         %{customer: customer} do
+    test "returns :unsupported_by_gateway when the Braintree local portal is unavailable" do
       previous = Application.get_env(:accrue, :processor)
-      Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
+      previous_base_url = Application.get_env(:accrue, :portal_base_url)
+
+      Application.put_env(:accrue, :processor, Braintree)
+      Application.delete_env(:accrue, :portal_base_url)
 
       on_exit(fn ->
         if previous do
@@ -55,13 +58,59 @@ defmodule Accrue.Billing.BillingPortalSessionFacadeTest do
         else
           Application.delete_env(:accrue, :processor)
         end
+
+        if previous_base_url do
+          Application.put_env(:accrue, :portal_base_url, previous_base_url)
+        else
+          Application.delete_env(:accrue, :portal_base_url)
+        end
       end)
 
       assert {:error, %Accrue.APIError{code: :unsupported_by_gateway} = err} =
-               Billing.create_billing_portal_session(customer, return_url: "https://x.test")
+               Billing.create_billing_portal_session(insert_braintree_customer(),
+                 return_url: "https://x.test"
+               )
 
       assert err.message =~ "does not support a hosted billing portal"
       assert err.message =~ "guides/braintree-local-portal.md"
+    end
+
+    test "returns the mounted local portal URL for Braintree" do
+      previous = Application.get_env(:accrue, :processor)
+      previous_base_url = Application.get_env(:accrue, :portal_base_url)
+      previous_mount_path = Application.get_env(:accrue, :portal_mount_path)
+
+      Application.put_env(:accrue, :processor, Braintree)
+      Application.put_env(:accrue, :portal_base_url, "https://app.example.test")
+      Application.put_env(:accrue, :portal_mount_path, "/billing")
+
+      on_exit(fn ->
+        if previous do
+          Application.put_env(:accrue, :processor, previous)
+        else
+          Application.delete_env(:accrue, :processor)
+        end
+
+        if previous_base_url do
+          Application.put_env(:accrue, :portal_base_url, previous_base_url)
+        else
+          Application.delete_env(:accrue, :portal_base_url)
+        end
+
+        if previous_mount_path do
+          Application.put_env(:accrue, :portal_mount_path, previous_mount_path)
+        else
+          Application.delete_env(:accrue, :portal_mount_path)
+        end
+      end)
+
+      assert {:ok, %Session{} = session} =
+               Billing.create_billing_portal_session(insert_braintree_customer(),
+                 return_url: "/settings/billing"
+               )
+
+      assert session.url == "https://app.example.test/billing?return_url=%2Fsettings%2Fbilling"
+      assert session.return_url == "/settings/billing"
     end
 
     test "telemetry metadata excludes portal URL and sets operation", %{customer: customer} do
@@ -108,5 +157,17 @@ defmodule Accrue.Billing.BillingPortalSessionFacadeTest do
       assert %Session{} = session
       assert String.starts_with?(session.id, "bps_fake_")
     end
+  end
+
+  defp insert_braintree_customer do
+    %Customer{}
+    |> Customer.changeset(%{
+      owner_type: "User",
+      owner_id: Ecto.UUID.generate(),
+      processor: "braintree",
+      processor_id: "cus_bt_portal_facade",
+      email: "portal-braintree@example.com"
+    })
+    |> Repo.insert!()
   end
 end
