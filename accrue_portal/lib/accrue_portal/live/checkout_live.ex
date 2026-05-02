@@ -1,8 +1,11 @@
 defmodule AccruePortal.Live.CheckoutLive do
   use Phoenix.LiveView
 
+  require Logger
+
   alias Accrue.Billing
   alias Accrue.Checkout.LocalSession
+  alias Accrue.Portal.Checkout.CompletionJob
   alias AccruePortal.BraintreeClient
   alias AccruePortal.Copy
 
@@ -19,7 +22,8 @@ defmodule AccruePortal.Live.CheckoutLive do
       %LocalSession{customer_id: customer_id} = checkout
       when customer_id == socket.assigns.current_customer.id ->
         client_token =
-          case checkout_ready?(checkout) && BraintreeClient.client_token_for(socket.assigns.current_customer) do
+          case checkout_ready?(checkout) &&
+                 BraintreeClient.client_token_for(socket.assigns.current_customer) do
             {:ok, value} -> value
             _ -> nil
           end
@@ -62,8 +66,9 @@ defmodule AccruePortal.Live.CheckoutLive do
                payment_method: %{vault_acquisition: %{reference: nonce}},
                operation_id: checkout.operation_id
              ) do
-          {:ok, _subscription} ->
+          {:ok, subscription} ->
             {:ok, _session} = LocalSession.mark_completed(checkout)
+            maybe_enqueue_completion(checkout, subscription)
 
             case checkout.success_url do
               url when is_binary(url) and url != "" ->
@@ -214,5 +219,19 @@ defmodule AccruePortal.Live.CheckoutLive do
 
   defp assign_expired_error(socket) do
     assign(socket, :checkout_error, Copy.checkout_session_expired_body())
+  end
+
+  defp maybe_enqueue_completion(checkout, subscription) do
+    case CompletionJob.enqueue(checkout.id, subscription.id) do
+      {:ok, _job} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning(
+          "failed to enqueue portal checkout completion for #{checkout.id}: #{inspect(reason)}"
+        )
+
+        :ok
+    end
   end
 end

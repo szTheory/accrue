@@ -87,6 +87,19 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   def handle_event(
+        "accrue.portal.checkout.completed",
+        %Accrue.Webhook.Event{} = event,
+        ctx
+      ) do
+    obj = portal_checkout_object_from_ctx(ctx, event)
+
+    case dispatch(event.type, event.processor_event_id, event.created_at, obj) do
+      {:ok, _} -> :ok
+      other -> other
+    end
+  end
+
+  def handle_event(
         "v1.billing.meter.error_report_triggered",
         %Accrue.Webhook.Event{} = event,
         ctx
@@ -228,6 +241,10 @@ defmodule Accrue.Webhook.DefaultHandler do
     reduce_checkout_session(action, evt_id, evt_ts, obj)
   end
 
+  defp dispatch("accrue.portal.checkout.completed", evt_id, evt_ts, obj) do
+    reduce_portal_checkout_completed(evt_id, evt_ts, obj)
+  end
+
   # Phase 4 Plan 02 — metered billing error report (BILL-13, Pitfall 5).
   defp dispatch("v1.billing.meter.error_report_triggered", evt_id, _evt_ts, obj) do
     reduce_meter_error_report(evt_id, obj)
@@ -266,6 +283,62 @@ defmodule Accrue.Webhook.DefaultHandler do
             %{
               session_id: session_id,
               customer_stripe_id: customer_stripe_id,
+              reason: reason
+            }
+          )
+
+          {:ok, :deferred}
+
+        {:error, _} = err ->
+          err
+      end
+    end)
+  end
+
+  defp reduce_portal_checkout_completed(evt_id, evt_ts, obj) do
+    Repo.transact(fn ->
+      session_id = get(obj, :id) || get(obj, :checkout_session_id)
+      customer_processor_id = get(obj, :customer)
+      subscription_processor_id = get(obj, :subscription)
+
+      with :ok <-
+             maybe_link_subscription(
+               "completed",
+               customer_processor_id,
+               subscription_processor_id
+             ),
+           {:ok, _} <-
+             record_event(
+               "checkout.session.completed",
+               "CheckoutSession",
+               session_id || "unknown",
+               evt_id,
+               idempotency_key: "portal-checkout-completed:" <> evt_id
+             ) do
+        :telemetry.execute(
+          [:accrue, :portal, :checkout, :completed],
+          %{count: 1},
+          %{
+            checkout_session_id: session_id,
+            customer_id: get(obj, :customer_id),
+            subscription_id: get(obj, :subscription_id),
+            customer_processor_id: customer_processor_id,
+            subscription_processor_id: subscription_processor_id,
+            processor: :braintree,
+            source: :default_handler,
+            event_timestamp: evt_ts
+          }
+        )
+
+        {:ok, %{session_id: session_id, action: "completed"}}
+      else
+        {:deferred, reason} ->
+          :telemetry.execute(
+            [:accrue, :webhooks, :orphan_checkout_session],
+            %{},
+            %{
+              session_id: session_id,
+              customer_stripe_id: customer_processor_id,
               reason: reason
             }
           )
@@ -346,6 +419,12 @@ defmodule Accrue.Webhook.DefaultHandler do
     Map.get(ctx, :meter_error_object) ||
       Map.get(ctx, "meter_error_object") ||
       %{}
+  end
+
+  defp portal_checkout_object_from_ctx(ctx, event) when is_map(ctx) do
+    Map.get(ctx, :portal_checkout_object) ||
+      Map.get(ctx, "portal_checkout_object") ||
+      %{"id" => event.object_id}
   end
 
   defp extract_meter_identifier(obj) do
@@ -1013,13 +1092,14 @@ defmodule Accrue.Webhook.DefaultHandler do
     Map.merge(attrs, %{last_stripe_event_ts: evt_ts, last_stripe_event_id: evt_id})
   end
 
-  defp record_event(type, subject_type, subject_id, stripe_event_id)
+  defp record_event(type, subject_type, subject_id, stripe_event_id, opts \\ [])
        when is_binary(type) and is_binary(subject_type) do
     Events.record(%{
       type: type,
       subject_type: subject_type,
       subject_id: subject_id,
-      data: %{source: "webhook", stripe_event_id: stripe_event_id}
+      data: %{source: "webhook", stripe_event_id: stripe_event_id},
+      idempotency_key: Keyword.get(opts, :idempotency_key)
     })
   end
 
