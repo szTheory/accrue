@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.33
 milestone_name: Braintree Full Maturity
 status: executing
-last_updated: "2026-05-02T02:06:46.264Z"
+last_updated: "2026-05-02T02:13:51.890Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 11
-  completed_plans: 2
-  percent: 18
+  completed_plans: 3
+  percent: 27
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
 Phase: 101 (accrue-portal-foundation-checkout) — EXECUTING
-Plan: 3 of 11
+Plan: 4 of 11
 Status: Ready to execute
 Resume file: None
 Last activity: 2026-05-02
@@ -79,6 +79,8 @@ Last activity: 2026-05-02
 
 ## Recent Decisions
 
+- **2026-05-02:** **Phase 101 Plan 03 complete** — Braintree local billing-portal availability is enforced in the adapter via `portal_base_url`, preserving the `:unsupported_by_gateway` fallback when the host has not configured the local portal.
+- **2026-05-02:** **Phase 101 Plan 03 docs** — `Accrue.Billing` now states explicitly that Stripe remains hosted upstream while Braintree returns host-mounted local portal URLs without adding a new `ui_mode`.
 - **v1.32 opened**: Expanding Braintree integration for production parity (Subscription mutation, Payment Methods CRUD, Refunds, Portal semantics).
 - **2026-04-29:** **Phase 96 complete** — the Braintree-backed thin slice is implemented through the public facade with webhook lifecycle support. The canonical matrix, package docs, and example-host docs now mirror the bounded support story, and verifiers pin the new Phase 96 wording.
 - **2026-04-28:** **v1.31 opened** — maintenance-only follow-on work was rejected as diminishing-return territory after `1.0.0`; the project is now on a bounded **PROC-08** strategic track aimed at an official dual-provider core.
@@ -106,7 +108,7 @@ Last activity: 2026-05-02
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** **Phase 101 execution in progress** — continue from the recovered local-portal baseline and finish plans **101-01** through **101-11**.
+**Next:** **Phase 101 execution in progress** — continue from the recovered local-portal baseline and finish plans **101-04** through **101-11**.
 
 **Completed (v1.32):** Phases **97–100** — **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`** + **`v1.32-REQUIREMENTS.md`**; tag **`v1.32`** (local).
 

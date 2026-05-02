@@ -76,7 +76,7 @@ Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Ac
 Plans:
 - [ ] `101-01-PLAN.md` — Harden persisted local checkout sessions, portal URL config, and migration-backed tests in `accrue`
 - [ ] `101-02-PLAN.md` — Align `accrue_portal` mount/auth/CSP shell with the locked public contract and establish the base browser harness
-- [ ] `101-03-PLAN.md` — Flip Braintree adapter/facade checkout and billing-portal semantics to first-party local portal support
+- [x] `101-03-PLAN.md` — Flip Braintree adapter/facade checkout and billing-portal semantics to first-party local portal support
 - [ ] `101-04-PLAN.md` — Implement the Hosted Fields checkout UI, browser hook, and package-local checkout coverage
 - [ ] `101-05-PLAN.md` — Complete the dashboard/subscription production slice with D-19 customer scoping and centralized copy
 - [ ] `101-06-PLAN.md` — Finish payment-method/invoice production surfaces and route wiring
@@ -962,7 +962,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 101. Accrue Portal Foundation & Checkout | v1.33 | 0/0 | Not started | - |
+| 101. Accrue Portal Foundation & Checkout | v1.33 | 3/11 | In progress | - |
 | 102. Coupon / Discount Mapping | v1.33 | 0/0 | Not started | - |
 | 103. Metering Engine | v1.33 | 0/0 | Not started | - |
 | 104. Connect Spike / Decision | v1.33 | 0/0 | Not started | - |
