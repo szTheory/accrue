@@ -18,6 +18,50 @@ portal for self-serve subscription management. Accrue now closes that gap with
 first-party local portal semantics while still exposing the core primitives for
 hand-rolled flows.
 
+## Local Promotion-Code Mappings
+
+Stripe promotions are created upstream and projected locally. Braintree is
+different: the customer-facing code is local to Accrue and resolves to a
+Control Panel discount id at checkout submit time.
+
+Use `Accrue.Billing.upsert_discount_mapping/3` to create or update that local
+mapping:
+
+```elixir
+{:ok, _mapping} =
+  Accrue.Billing.upsert_discount_mapping("SPRING25", %{
+    discount_id: "bt_discount_25",
+    amount_off_minor: 2_500,
+    currency: "USD",
+    active: true,
+    max_redemptions: 100
+  })
+```
+
+The mounted portal and any hand-rolled checkout should use the same core
+resolver. Preview the code before payment submit, show the estimated savings
+and total, then rely on `Accrue.Billing.subscribe/3` to revalidate the code
+authoritatively on the final submit. The portal copy calls this out as
+preview-before-submit so customers do not confuse a local preview with a final
+processor confirmation.
+
+### Drift and Operator Remediation
+
+If a code is locally valid but points at a missing or invalid Braintree
+discount id, Accrue returns `%Accrue.Error.DiscountMappingInvalid{}` and the
+portal shows safe customer copy such as "This promotion is temporarily
+unavailable." No subscription is created at the undiscounted amount.
+
+Operator remediation is:
+
+1. Inspect the local mapping row for the entered code.
+2. Compare `discount_id` against the Braintree Control Panel discount.
+3. Repair the mapping with `upsert_discount_mapping/3`.
+4. Retry checkout after the mapping is valid again.
+
+If you need alerting, subscribe to the `[:accrue, :ops, :discount_mapping_invalid]`
+telemetry event that Plan 02 added for this drift condition.
+
 ## Why Accrue Remains Headless
 
 We explicitly decided not to ship a drop-in local portal UI within Accrue for several reasons:
