@@ -375,7 +375,8 @@ defmodule Accrue.Processor.Braintree do
 
   @impl Accrue.Processor
   def portal_session_create(params, _opts) when is_map(params) do
-    with {:ok, customer} <- portal_customer(params) do
+    with :ok <- ensure_local_portal_available(),
+         {:ok, customer} <- portal_customer(params) do
       {:ok,
        %{
          id: "bps_local_" <> customer.id,
@@ -383,10 +384,12 @@ defmodule Accrue.Processor.Braintree do
          customer: customer.processor_id,
          url: billing_portal_url(params),
          return_url: params["return_url"] || params[:return_url],
-         data: %{
-           processor: "braintree",
-           local_portal: true
-         }
+          data: %{
+            processor: "braintree",
+            local_portal: true,
+            customer_processor_id: customer.processor_id,
+            mount_path: Config.portal_mount_path()
+          }
        }}
     end
   end
@@ -784,7 +787,12 @@ defmodule Accrue.Processor.Braintree do
       metadata: session.metadata,
       line_items: session.line_items,
       data:
-        Map.merge(session.data || %{}, %{"local_portal" => true, "price_id" => session.price_id})
+        Map.merge(session.data || %{}, %{
+          local_portal: true,
+          price_id: session.price_id,
+          session_token: session.session_token,
+          mount_path: Config.portal_mount_path()
+        })
     }
   end
 
@@ -808,5 +816,24 @@ defmodule Accrue.Processor.Braintree do
       _ ->
         Config.portal_url(base)
     end
+  end
+
+  defp ensure_local_portal_available do
+    case Config.portal_base_url() do
+      base when is_binary(base) and base != "" ->
+        :ok
+
+      _ ->
+        {:error, unsupported_gateway_portal()}
+    end
+  end
+
+  defp unsupported_gateway_portal do
+    %APIError{
+      code: :unsupported_by_gateway,
+      http_status: 422,
+      message:
+        "Braintree does not support a hosted billing portal unless the local Accrue portal is mounted and configured. See guides/braintree-local-portal.md."
+    }
   end
 end

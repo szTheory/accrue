@@ -57,8 +57,10 @@ defmodule Accrue.Processor.BraintreeLocalPortalTest do
     assert persisted.return_url == nil
     assert session.url == "https://app.example.test/billing/checkout/" <> persisted.session_token
     assert session.customer == customer.processor_id
-    assert session.data["local_portal"] == true
-    assert session.data["price_id"] == "plan_pro"
+    assert session.data[:data][:local_portal] == true
+    assert session.data[:data][:price_id] == "plan_pro"
+    assert session.data[:data][:session_token] == persisted.session_token
+    assert session.data[:data][:mount_path] == "/billing"
 
     assert {:ok, same_session} =
              CheckoutSession.create(
@@ -85,7 +87,9 @@ defmodule Accrue.Processor.BraintreeLocalPortalTest do
 
     assert portal_session.customer == customer.processor_id
     assert portal_session.return_url == "/settings/billing"
-    assert portal_session.data[:local_portal] == true
+    assert portal_session.data[:data][:local_portal] == true
+    assert portal_session.data[:data][:customer_processor_id] == customer.processor_id
+    assert portal_session.data[:data][:mount_path] == "/billing"
   end
 
   test "create_billing_portal_session/2 preserves unsupported fallback when local portal is unavailable" do

@@ -144,8 +144,9 @@ defmodule Accrue.Billing.CheckoutSessionFacadeTest do
 
       assert session.url =~ "https://app.example.test/billing/checkout/"
       assert session.customer == customer.processor_id
-      assert session.data["local_portal"] == true
-      assert session.data["price_id"] == "price_braintree_monthly"
+      assert session.data[:data][:local_portal] == true
+      assert session.data[:data][:price_id] == "price_braintree_monthly"
+      assert session.data[:data][:mount_path] == "/billing"
 
       assert {:ok, %Session{} = reused} =
                Billing.create_checkout_session(customer,
