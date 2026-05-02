@@ -88,6 +88,7 @@ defmodule Accrue.Portal.Router do
           live("/subscriptions", AccruePortal.Live.SubscriptionsLive, :index)
           live("/subscriptions/:id", AccruePortal.Live.SubscriptionLive, :show)
           live("/payment-methods", AccruePortal.Live.PaymentMethodsLive, :index)
+          live("/payment-methods/new", AccruePortal.Live.AddPaymentMethodLive, :new)
           live("/invoices", AccruePortal.Live.InvoicesLive, :index)
           live("/checkout/:token", AccruePortal.Live.CheckoutLive, :show)
         end
