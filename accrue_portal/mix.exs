@@ -36,6 +36,8 @@ defmodule AccruePortal.MixProject do
       {:phoenix, "~> 1.8"},
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.2"},
+      {:plug, "~> 1.16"},
+      {:jason, "~> 1.4"},
       {:plug_cowboy, "~> 2.7", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false}
@@ -60,7 +62,7 @@ defmodule AccruePortal.MixProject do
 
   defp accrue_dep do
     if System.get_env("ACCRUE_PORTAL_HEX_RELEASE") == "1" do
-      {:accrue, "~> #{@version}"}
+      {:accrue, "== #{@version}"}
     else
       {:accrue, path: "../accrue"}
     end
