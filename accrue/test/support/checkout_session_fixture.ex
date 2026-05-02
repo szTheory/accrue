@@ -25,27 +25,30 @@ defmodule Accrue.Test.CheckoutSessionFixture do
   end
 
   def local_session_fixture(customer, attrs \\ %{}) do
-    attrs =
-      Map.merge(
-        %{
-          processor: "braintree",
-          mode: "subscription",
-          ui_mode: "hosted",
-          status: "open",
-          price_id: "price_fixture",
-          line_items: [%{"price" => "price_fixture"}],
-          success_url: "https://app.example.test/billing/success",
-          cancel_url: "https://app.example.test/billing/cancel",
-          return_url: "https://app.example.test/settings/billing",
-          operation_id:
-            "checkout-fixture-" <> Integer.to_string(System.unique_integer([:positive])),
-          metadata: %{"source" => "fixture"},
-          data: %{"local_portal" => true}
-        },
-        attrs
-      )
+    attrs = local_session_attrs(attrs)
 
     {:ok, session} = LocalSession.create_or_reuse(customer, attrs)
     session
+  end
+
+  def local_session_attrs(attrs \\ %{}) do
+    Map.merge(
+      %{
+        processor: "braintree",
+        mode: "subscription",
+        ui_mode: "hosted",
+        status: "open",
+        price_id: "price_fixture",
+        line_items: [%{"price" => "price_fixture"}],
+        success_url: "https://app.example.test/billing/success",
+        cancel_url: "https://app.example.test/billing/cancel",
+        return_url: "https://app.example.test/settings/billing",
+        operation_id:
+          "checkout-fixture-" <> Integer.to_string(System.unique_integer([:positive])),
+        metadata: %{"source" => "fixture"},
+        data: %{"local_portal" => true}
+      },
+      attrs
+    )
   end
 end

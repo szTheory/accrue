@@ -39,6 +39,7 @@ defmodule Accrue.Checkout.LocalSessionTest do
     assert created.data == %{"local_portal" => true}
     assert created.session_token =~ ~r/^chk_local_/
     assert %DateTime{} = created.expires_at
+    assert DateTime.diff(created.expires_at, created.inserted_at, :second) in 1790..1810
 
     assert {:ok, reused} = LocalSession.create_or_reuse(customer, attrs)
     assert reused.id == created.id
