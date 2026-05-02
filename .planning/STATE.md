@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.33
 milestone_name: Braintree Full Maturity
 status: executing
-last_updated: "2026-05-02T02:13:51.890Z"
+last_updated: "2026-05-02T02:27:49.031Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 11
-  completed_plans: 3
-  percent: 27
+  completed_plans: 4
+  percent: 36
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
 Phase: 101 (accrue-portal-foundation-checkout) — EXECUTING
-Plan: 4 of 11
+Plan: 5 of 11
 Status: Ready to execute
 Resume file: None
 Last activity: 2026-05-02
@@ -79,6 +79,7 @@ Last activity: 2026-05-02
 
 ## Recent Decisions
 
+- **2026-05-02:** **Phase 101 Plan 07 complete** — `accrue_portal` now publishes explicit `:plug` / `:jason` runtime deps, owns package-local config/test bootstrap, and ships router/auth/CSP shell regression tests with a reusable Braintree client-token stub for later portal suites.
 - **2026-05-02:** **Phase 101 Plan 03 complete** — Braintree local billing-portal availability is enforced in the adapter via `portal_base_url`, preserving the `:unsupported_by_gateway` fallback when the host has not configured the local portal.
 - **2026-05-02:** **Phase 101 Plan 03 docs** — `Accrue.Billing` now states explicitly that Stripe remains hosted upstream while Braintree returns host-mounted local portal URLs without adding a new `ui_mode`.
 - **v1.32 opened**: Expanding Braintree integration for production parity (Subscription mutation, Payment Methods CRUD, Refunds, Portal semantics).

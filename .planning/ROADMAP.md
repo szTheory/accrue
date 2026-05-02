@@ -80,7 +80,7 @@ Plans:
 - [ ] `101-04-PLAN.md` — Implement the Hosted Fields checkout UI, browser hook, and package-local checkout coverage
 - [ ] `101-05-PLAN.md` — Complete the dashboard/subscription production slice with D-19 customer scoping and centralized copy
 - [ ] `101-06-PLAN.md` — Finish payment-method/invoice production surfaces and route wiring
-- [ ] `101-07-PLAN.md` — Lock the D-04 portal dependency contract, Braintree mocks, and shell regression tests
+- [x] `101-07-PLAN.md` — Lock the D-04 portal dependency contract, Braintree mocks, and shell regression tests
 - [ ] `101-08-PLAN.md` — Add synthetic checkout-completion event plumbing and portal telemetry coverage
 - [ ] `101-09-PLAN.md` — Add shared fixtures, authorization assertions, and property-backed subscription isolation tests
 - [ ] `101-10-PLAN.md` — Add focused payment-method/invoice/router coverage including wrong-tenant denial cases
