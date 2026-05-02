@@ -94,7 +94,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. System maintains local promotion codes.
   2. Promo codes entered in checkout correctly apply corresponding Braintree Discount ID to the created subscription.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] `102-01-PLAN.md` — Establish the explicit local discount-mapping domain, facade write/read surface, and Wave 0 BT-04 coverage.
+- [ ] `102-02-PLAN.md` — Revalidate promotion codes during `subscribe/3`, emit Braintree `discounts.add[*].inherited_from_id`, and hard-fail operator drift with ops telemetry.
+- [ ] `102-03-PLAN.md` — Add checkout preview/revalidation UX in `accrue_portal` and document the local-mapping processor distinction for adopters.
 
 ### Phase 103: Metering Engine
 **Goal**: Users are accurately billed for metered usage at the end of their billing cycle.
