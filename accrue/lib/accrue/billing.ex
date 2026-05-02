@@ -426,9 +426,12 @@ defmodule Accrue.Billing do
   or support tickets. For `:configuration`, see
   `guides/portal_configuration_checklist.md`.
 
-  **Note on processor support:** Some processors route billing-portal access
-  through a first-party local portal rather than an upstream hosted page.
-  In that case the returned `url` points at the host app's mounted portal path.
+  **Processor routing:** Stripe keeps returning Stripe-hosted billing-portal
+  URLs. Braintree routes this call through the host app's mounted first-party
+  local portal, so the returned `url` points at the configured
+  `Accrue.Portal` mount path instead of an upstream Braintree page. If that
+  local portal is not mounted/configured yet, the Braintree adapter preserves
+  the `:unsupported_by_gateway` fallback from the pre-portal contract.
 
   Emits `[:accrue, :billing, :billing_portal, :create]` (OpenTelemetry name
   `accrue.billing.billing_portal.create`).
@@ -497,6 +500,11 @@ defmodule Accrue.Billing do
   The checkout **redirect URL** (hosted mode) and **`client_secret`** (embedded
   mode) are bearer credentials. Do **not** log raw session structs, processor
   payloads, or URLs in production telemetry or support tickets.
+
+  **Processor routing:** Stripe semantics are unchanged. When the configured
+  processor is Braintree, hosted checkout resolves to the host app's mounted
+  first-party local portal URL rather than an upstream hosted page, while the
+  public `:ui_mode` contract stays limited to `:hosted | :embedded`.
 
   Emits `[:accrue, :billing, :checkout_session, :create]` (OpenTelemetry-style
   name `accrue.billing.checkout_session.create`). See `m:Accrue.Checkout.Session`
