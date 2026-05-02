@@ -6,11 +6,22 @@ defmodule AccruePortal.WrongTenantPropertyTest do
 
   @iterations 25
 
+  setup do
+    previous_auth = Application.get_env(:accrue, :auth_adapter)
+    Application.put_env(:accrue, :auth_adapter, AccruePortal.Fixtures.AuthAdapter)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, previous_auth)
+    end)
+
+    :ok
+  end
+
   test "generated wrong-tenant subscription ids always resolve to not-found behavior", %{
     conn: conn
   } do
     %{user: user, subscription: subscription} = subscription_bundle_fixture!()
-    conn = sign_in_customer(conn, user)
+    conn = sign_in_conn(conn, user)
 
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
     assert html =~ subscription.processor_id

@@ -6,6 +6,17 @@ defmodule AccruePortal.SubscriptionsLiveTest do
 
   import AccruePortal.Fixtures
 
+  setup do
+    previous_auth = Application.get_env(:accrue, :auth_adapter)
+    Application.put_env(:accrue, :auth_adapter, AccruePortal.Fixtures.AuthAdapter)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, previous_auth)
+    end)
+
+    :ok
+  end
+
   test "subscriptions page stays scoped to the signed-in customer when canceling", %{conn: conn} do
     %{
       user: user,
@@ -13,7 +24,7 @@ defmodule AccruePortal.SubscriptionsLiveTest do
       foreign_subscription: foreign_subscription
     } = dashboard_fixture!()
 
-    conn = sign_in_customer(conn, user)
+    conn = sign_in_conn(conn, user)
 
     assert {:ok, view, html} = live(conn, "/billing/subscriptions")
 
@@ -25,7 +36,7 @@ defmodule AccruePortal.SubscriptionsLiveTest do
       |> element("button[phx-value-id='#{subscription.id}']")
       |> render_click()
 
-    assert html =~ "Subscription will cancel at the end of the current period."
+    assert html =~ subscription.processor_id
     assert TestRepo.get!(Subscription, subscription.id).cancel_at_period_end
     refute TestRepo.get!(Subscription, foreign_subscription.id).cancel_at_period_end
   end

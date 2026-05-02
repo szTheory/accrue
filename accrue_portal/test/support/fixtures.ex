@@ -14,11 +14,34 @@ defmodule AccruePortal.Fixtures do
     end
   end
 
+  defmodule AuthAdapter do
+    @behaviour Accrue.Auth
+
+    @impl Accrue.Auth
+    def current_user(%{"user_token" => "customer:" <> user_id}) do
+      %AccruePortal.Fixtures.TestUser{id: user_id}
+    end
+
+    def current_user(_session), do: nil
+
+    @impl Accrue.Auth
+    def require_admin_plug, do: fn conn, _opts -> conn end
+
+    @impl Accrue.Auth
+    def user_schema, do: nil
+
+    @impl Accrue.Auth
+    def log_audit(_user, _event), do: :ok
+
+    @impl Accrue.Auth
+    def actor_id(%{id: id}), do: id
+  end
+
   @spec dashboard_fixture!() :: map()
   def dashboard_fixture! do
     current = subscription_bundle_fixture!()
 
-    current_payment_method =
+    payment_method =
       payment_method_fixture!(current.customer, %{
         processor_id: "pm_current_dashboard",
         card_brand: "visa",
@@ -30,7 +53,7 @@ defmodule AccruePortal.Fixtures do
         is_default: true
       })
 
-    current_invoice =
+    invoice =
       invoice_fixture!(current.customer, current.subscription, %{
         processor_id: "in_current_dashboard",
         status: :open,
@@ -56,17 +79,17 @@ defmodule AccruePortal.Fixtures do
     foreign_invoice =
       invoice_fixture!(foreign.customer, foreign.subscription, %{
         processor_id: "in_foreign_dashboard",
-        status: :paid,
+        status: :open,
         total_minor: 9_900,
-        amount_due_minor: 0,
-        amount_paid_minor: 9_900,
-        amount_remaining_minor: 0,
+        amount_due_minor: 9_900,
+        amount_paid_minor: 0,
+        amount_remaining_minor: 9_900,
         number: "INV-FOREIGN-001"
       })
 
     Map.merge(current, %{
-      payment_method: current_payment_method,
-      invoice: current_invoice,
+      payment_method: payment_method,
+      invoice: invoice,
       foreign_user: foreign.user,
       foreign_customer: foreign.customer,
       foreign_subscription: foreign.subscription,
@@ -78,7 +101,7 @@ defmodule AccruePortal.Fixtures do
   @spec subscription_bundle_fixture!(map()) :: map()
   def subscription_bundle_fixture!(attrs \\ %{}) do
     attrs = Enum.into(attrs, %{})
-    user = build_user(Map.get(attrs, :user_attrs, %{}))
+    user = user_fixture(Map.get(attrs, :user_attrs, %{}))
 
     %{customer: customer, subscription: subscription} =
       Factory.active_subscription(%{
@@ -94,8 +117,14 @@ defmodule AccruePortal.Fixtures do
   @spec foreign_subscription_fixture!(non_neg_integer()) :: map()
   def foreign_subscription_fixture!(index) when is_integer(index) and index >= 0 do
     foreign = subscription_bundle_fixture!(%{email: "wrong-tenant-#{index}@example.com"})
+    subscription = read_only_subscription_fixture!(foreign.customer, %{index: index})
+    %{user: foreign.user, customer: foreign.customer, subscription: subscription}
+  end
 
-    Map.put(foreign, :subscription, read_only_subscription_fixture!(foreign.customer, %{index: index}))
+  @spec user_fixture(map()) :: TestUser.t()
+  def user_fixture(attrs \\ %{}) do
+    attrs = Enum.into(attrs, %{})
+    struct!(TestUser, Map.merge(%{id: Ecto.UUID.generate()}, attrs))
   end
 
   @spec payment_method_fixture!(Customer.t(), map()) :: PaymentMethod.t()
@@ -144,6 +173,7 @@ defmodule AccruePortal.Fixtures do
 
   @spec read_only_subscription_fixture!(Customer.t(), map()) :: Subscription.t()
   def read_only_subscription_fixture!(%Customer{} = customer, attrs \\ %{}) do
+    attrs = Enum.into(attrs, %{})
     index = Map.get(attrs, :index, System.unique_integer([:positive]))
 
     defaults = %{
@@ -151,9 +181,9 @@ defmodule AccruePortal.Fixtures do
       processor: customer.processor || "fake",
       processor_id: "sub_read_only_" <> Integer.to_string(index),
       status: :active,
-      cancel_at_period_end: false,
       current_period_start: DateTime.add(DateTime.utc_now(), -86_400, :second),
       current_period_end: DateTime.add(DateTime.utc_now(), 2_592_000, :second),
+      cancel_at_period_end: false,
       metadata: %{},
       data: %{}
     }
@@ -163,8 +193,8 @@ defmodule AccruePortal.Fixtures do
     |> TestRepo.insert!()
   end
 
-  defp build_user(attrs) do
-    attrs = Enum.into(attrs, %{})
-    %TestUser{id: Map.get(attrs, :id, Ecto.UUID.generate())}
+  @spec sign_in_conn(Plug.Conn.t(), TestUser.t()) :: Plug.Conn.t()
+  def sign_in_conn(conn, %TestUser{id: id}) do
+    Plug.Test.init_test_session(conn, %{"user_token" => "customer:" <> id})
   end
 end

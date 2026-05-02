@@ -3,6 +3,17 @@ defmodule AccruePortal.HomeLiveTest do
 
   import AccruePortal.Fixtures
 
+  setup do
+    previous_auth = Application.get_env(:accrue, :auth_adapter)
+    Application.put_env(:accrue, :auth_adapter, AccruePortal.Fixtures.AuthAdapter)
+
+    on_exit(fn ->
+      Application.put_env(:accrue, :auth_adapter, previous_auth)
+    end)
+
+    :ok
+  end
+
   test "home renders only the current customer's dashboard data", %{conn: conn} do
     %{
       user: user,
@@ -10,7 +21,7 @@ defmodule AccruePortal.HomeLiveTest do
       foreign_subscription: foreign_subscription
     } = dashboard_fixture!()
 
-    conn = sign_in_customer(conn, user)
+    conn = sign_in_conn(conn, user)
 
     assert {:ok, _view, html} = live(conn, "/billing")
 
