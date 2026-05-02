@@ -19,6 +19,10 @@ defmodule AccruePortal.Assets do
 
   @type kind :: :brand | :css | :js
 
+  def brand_hash, do: @brand_hash
+  def css_hash, do: @css_hash
+  def js_hash, do: @js_hash
+
   def init(kind) when kind in [:brand, :css, :js], do: kind
 
   def call(conn, kind) when kind in [:brand, :css, :js] do

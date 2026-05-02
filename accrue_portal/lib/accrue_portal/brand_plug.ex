@@ -3,11 +3,15 @@ defmodule Accrue.Portal.BrandPlug do
 
   import Plug.Conn
 
+  @theme_cookie "accrue_theme"
+
   @spec init(keyword()) :: keyword()
   def init(opts), do: opts
 
   @spec call(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
   def call(conn, _opts) do
+    conn = fetch_cookies(conn)
+
     brand =
       Accrue.Config.branding()
       |> Enum.into(%{})
@@ -21,7 +25,7 @@ defmodule Accrue.Portal.BrandPlug do
 
     conn
     |> assign(:accrue_portal_brand, brand)
-    |> assign(:accrue_portal_theme, conn.cookies["accrue_theme"] || "system")
+    |> assign(:accrue_portal_theme, conn.cookies[@theme_cookie] || "system")
   end
 end
 

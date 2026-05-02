@@ -1,5 +1,5 @@
 defmodule AccruePortal.RouterTest do
-  use AccruePortal.ConnCase, async: true
+  use ExUnit.Case, async: true
 
   defmodule ProdLikeRouter do
     use Phoenix.Router
@@ -24,21 +24,23 @@ defmodule AccruePortal.RouterTest do
 
     live_routes =
       Enum.filter(routes, fn route ->
-        match?({Phoenix.LiveView.Plug, :call}, route.plug)
+        route.plug == Phoenix.LiveView.Plug
       end)
 
     live_sessions =
       live_routes
-      |> Enum.map(& &1.private[:phoenix_live_view])
+      |> Enum.map(& &1.metadata[:phoenix_live_view])
       |> Enum.reject(&is_nil/1)
+      |> Enum.map(fn {_view, _action, _opts, live_session} -> live_session.name end)
       |> Enum.uniq()
 
+    assert length(live_routes) == 5
     assert length(live_sessions) == 1
   end
 
   test "session callback only forwards explicit host session keys" do
     conn =
-      build_conn()
+      Phoenix.ConnTest.build_conn()
       |> Plug.Test.init_test_session(%{
         "user_token" => "token-123",
         "ignored" => "secret"

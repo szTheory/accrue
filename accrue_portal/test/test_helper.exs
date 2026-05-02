@@ -16,7 +16,8 @@ Application.put_env(:accrue_portal, AccruePortal.TestEndpoint,
   secret_key_base: String.duplicate("abcd1234", 8),
   server: false,
   url: [host: "localhost"],
-  render_errors: [formats: [html: Phoenix.Controller.status_message_from_template/1]]
+  live_view: [signing_salt: "accrue-portal-test"],
+  render_errors: [formats: [html: &Phoenix.Controller.status_message_from_template/1]]
 )
 
 repo = AccruePortal.TestRepo

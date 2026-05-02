@@ -32,7 +32,6 @@ defmodule Accrue.Portal.Router do
           ] do
       pipeline :accrue_portal_browser do
         plug(:fetch_session)
-        plug(:fetch_live_flash)
         plug(:protect_from_forgery)
         plug(Accrue.Portal.CSPPlug)
         plug(Accrue.Portal.BrandPlug)
