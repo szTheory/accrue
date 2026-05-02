@@ -24,7 +24,7 @@ Stripe promotions are created upstream and projected locally. Braintree is
 different: the customer-facing code is local to Accrue and resolves to a
 Control Panel discount id at checkout submit time.
 
-Use `Accrue.Billing.upsert_discount_mapping/3` to create or update that local
+Use `Accrue.Billing.upsert_discount_mapping/2` to create or update that local
 mapping:
 
 ```elixir
@@ -56,7 +56,7 @@ Operator remediation is:
 
 1. Inspect the local mapping row for the entered code.
 2. Compare `discount_id` against the Braintree Control Panel discount.
-3. Repair the mapping with `upsert_discount_mapping/3`.
+3. Repair the mapping with `upsert_discount_mapping/2`.
 4. Retry checkout after the mapping is valid again.
 
 If you need alerting, subscribe to the `[:accrue, :ops, :discount_mapping_invalid]`

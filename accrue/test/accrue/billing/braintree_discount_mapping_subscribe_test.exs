@@ -4,12 +4,22 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
   alias Accrue.Billing
   alias Accrue.Billing.Customer
   alias Accrue.Billing.Subscription
+  alias Accrue.Billing.DiscountMapping
   alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Events.Event
 
   defmodule SubscriptionGatewayStub do
     def create(params, _opts) do
       send(self(), {:gateway_create, params})
+
+      redemption_count =
+        Repo.one!(
+          from mapping in DiscountMapping,
+            where: mapping.processor == "braintree",
+            select: mapping.times_redeemed
+        )
+
+      send(self(), {:gateway_redemption_count, redemption_count})
 
       discount_id =
         get_in(params, [:discounts, :add])
@@ -84,6 +94,7 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
                          plan_id: "plan_premium",
                          discounts: %{add: [%{inherited_from_id: "bt_discount_25"}]}
                        }}
+      assert_received {:gateway_redemption_count, 1}
 
       assert subscription.discount_id == "bt_discount_25"
 

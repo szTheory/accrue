@@ -125,6 +125,54 @@ defmodule Accrue.Billing.DiscountMappingActions do
     end
   end
 
+  @spec reserve_discount_mapping(String.t(), non_neg_integer(), keyword()) ::
+          {:ok,
+           %{
+             mapping: DiscountMapping.t(),
+             amount_off_minor: non_neg_integer(),
+             estimated_total_minor: non_neg_integer()
+           }}
+          | {:error, resolve_error()}
+  def reserve_discount_mapping(code, checkout_amount_minor, opts \\ [])
+      when is_binary(code) and is_integer(checkout_amount_minor) and checkout_amount_minor >= 0 and
+             is_list(opts) do
+    _ = opts
+
+    normalized_code = normalize_code(code)
+    now = Accrue.Clock.utc_now()
+
+    Repo.transact(fn ->
+      query =
+        from(m in DiscountMapping,
+          where: m.processor == ^@processor and m.code == ^normalized_code,
+          lock: "FOR UPDATE"
+        )
+
+      case Repo.one(query) do
+        nil ->
+          {:error, :not_found}
+
+        %DiscountMapping{active: false} ->
+          {:error, :inactive}
+
+        %DiscountMapping{} = mapping ->
+          with :ok <- ensure_not_expired(mapping, now),
+               :ok <- ensure_redemption_capacity(mapping),
+               :ok <- validate_mapping_for_resolution(mapping),
+               {:ok, reserved_mapping} <- increment_redemption(mapping) do
+            amount_off_minor = min(reserved_mapping.amount_off_minor, checkout_amount_minor)
+
+            {:ok,
+             %{
+               mapping: reserved_mapping,
+               amount_off_minor: amount_off_minor,
+               estimated_total_minor: max(checkout_amount_minor - amount_off_minor, 0)
+             }}
+          end
+      end
+    end)
+  end
+
   defp fetch_applicable_mapping(code) do
     now = Accrue.Clock.utc_now()
 
@@ -158,6 +206,12 @@ defmodule Accrue.Billing.DiscountMappingActions do
   end
 
   defp ensure_redemption_capacity(%DiscountMapping{}), do: :ok
+
+  defp increment_redemption(%DiscountMapping{} = mapping) do
+    mapping
+    |> DiscountMapping.changeset(%{times_redeemed: mapping.times_redeemed + 1})
+    |> Repo.update()
+  end
 
   defp validate_mapping_for_resolution(%DiscountMapping{} = mapping) do
     cond do

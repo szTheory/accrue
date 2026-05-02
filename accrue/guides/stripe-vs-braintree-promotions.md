@@ -54,5 +54,5 @@ When the event fires:
 1. Find the code in the local `accrue_discount_mappings` row.
 2. Confirm the mapped `discount_id` still exists and is the intended Control
    Panel discount.
-3. Repair the row with `Accrue.Billing.upsert_discount_mapping/3`.
+3. Repair the row with `Accrue.Billing.upsert_discount_mapping/2`.
 4. Ask the customer to retry after the mapping is fixed.

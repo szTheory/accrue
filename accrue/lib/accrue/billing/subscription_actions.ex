@@ -128,7 +128,6 @@ defmodule Accrue.Billing.SubscriptionActions do
       Repo.transact(fn ->
         with {:ok, processor_params} <-
                build_subscription_request(customer, item_params, trial_end, opts),
-             {:ok, discount_mapping} <- extract_discount_mapping(processor_params),
              :ok <- ensure_customer_tax_location(customer, opts),
              {:ok, stripe_sub} <-
                Processor.__impl__().create_subscription(
@@ -139,7 +138,6 @@ defmodule Accrue.Billing.SubscriptionActions do
              {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
              {:ok, sub} <- insert_subscription(customer.id, attrs),
              {:ok, _items} <- upsert_items(sub, stripe_sub),
-             :ok <- consume_discount_mapping(discount_mapping),
              {:ok, _} <- record_event("subscription.created", sub, %{price_id: price_id}) do
           sub = Repo.preload(sub, :subscription_items, force: true)
           {:ok, sub}
@@ -910,7 +908,10 @@ defmodule Accrue.Billing.SubscriptionActions do
         {:ok, params}
 
       code when is_binary(code) ->
-        case DiscountMappingActions.resolve_discount_mapping(code, @submit_resolution_amount_minor) do
+        case DiscountMappingActions.reserve_discount_mapping(
+               code,
+               @submit_resolution_amount_minor
+             ) do
           {:ok, %{mapping: %DiscountMapping{} = mapping}} ->
             {:ok,
              params
@@ -927,24 +928,12 @@ defmodule Accrue.Billing.SubscriptionActions do
     end
   end
 
-  defp extract_discount_mapping(%{discount_mapping: %{} = mapping}), do: {:ok, mapping}
-  defp extract_discount_mapping(_processor_params), do: {:ok, nil}
-
   defp discount_mapping_payload(%DiscountMapping{} = mapping) do
     %{
       mapping_id: mapping.id,
       code: mapping.code,
       discount_id: mapping.discount_id
     }
-  end
-
-  defp consume_discount_mapping(nil), do: :ok
-
-  defp consume_discount_mapping(%{code: code}) when is_binary(code) do
-    case DiscountMappingActions.record_discount_mapping_redemption(code) do
-      {:ok, _mapping} -> :ok
-      {:error, reason} -> {:error, reason}
-    end
   end
 
   defp emit_discount_mapping_invalid(%DiscountMappingInvalid{} = error) do
