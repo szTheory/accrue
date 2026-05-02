@@ -5,6 +5,7 @@ defmodule AccruePortal.Live.CheckoutLive do
 
   alias Accrue.Billing
   alias Accrue.Checkout.LocalSession
+  alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Portal.Checkout.CompletionJob
   alias AccruePortal.BraintreeClient
   alias AccruePortal.Copy
@@ -30,14 +31,18 @@ defmodule AccruePortal.Live.CheckoutLive do
 
         {:ok,
          socket
+         |> assign_checkout_pricing(checkout)
          |> assign(:page_title, Copy.checkout_page_title())
          |> assign(:portal, portal)
          |> assign(:base_path, portal["mount_path"])
          |> assign(:checkout_session, checkout)
          |> assign(:client_token, client_token)
-         |> assign(:checkout_amount, checkout_amount(checkout))
          |> assign(:checkout_error, nil)
          |> assign(:checkout_success, false)
+         |> assign(:promotion_code, nil)
+         |> assign(:promotion_code_input, "")
+         |> assign(:promo_status, nil)
+         |> assign(:promo_preview, nil)
          |> assign(:client_script_src, @client_script_src)
          |> assign(:client_script_sri, @client_script_sri)
          |> assign(:hosted_fields_script_src, @hosted_fields_script_src)
@@ -60,12 +65,7 @@ defmodule AccruePortal.Live.CheckoutLive do
         {:noreply, assign_expired_error(socket)}
 
       true ->
-        case Billing.subscribe(
-               socket.assigns.current_customer,
-               checkout.price_id,
-               payment_method: %{vault_acquisition: %{reference: nonce}},
-               operation_id: checkout.operation_id
-             ) do
+        case subscribe_with_checkout(socket, checkout, nonce) do
           {:ok, subscription} ->
             {:ok, _session} = LocalSession.mark_completed(checkout)
             maybe_enqueue_completion(checkout, subscription)
@@ -81,6 +81,25 @@ defmodule AccruePortal.Live.CheckoutLive do
                  |> assign(:checkout_success, true)}
             end
 
+          {:error, %DiscountMappingInvalid{}} ->
+            {:noreply,
+             socket
+             |> assign(:checkout_error, nil)
+             |> assign(:checkout_success, false)
+             |> assign(:promo_preview, nil)
+             |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
+             |> assign_base_checkout_amount()}
+
+          {:error, reason} when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
+            {:noreply,
+             socket
+             |> assign(:checkout_error, nil)
+             |> assign(:checkout_success, false)
+             |> assign(:promotion_code, nil)
+             |> assign(:promo_preview, nil)
+             |> assign(:promo_status, Copy.checkout_promo_invalid())
+             |> assign_base_checkout_amount()}
+
           {:error, _reason} ->
             {:noreply,
              socket
@@ -92,6 +111,58 @@ defmodule AccruePortal.Live.CheckoutLive do
 
   def handle_event("checkout_tokenized", _params, socket) do
     {:noreply, assign(socket, :checkout_error, Copy.checkout_missing_nonce_error())}
+  end
+
+  def handle_event("validate_promo", %{"promo" => %{"code" => code}}, socket) do
+    checkout = socket.assigns.checkout_session
+    trimmed_code = String.trim(code)
+
+    cond do
+      not checkout_ready?(checkout) ->
+        {:noreply, assign_expired_error(socket)}
+
+      trimmed_code == "" ->
+        {:noreply,
+         socket
+         |> assign(:promotion_code, nil)
+         |> assign(:promotion_code_input, "")
+         |> assign(:promo_preview, nil)
+         |> assign(:promo_status, nil)
+         |> assign_base_checkout_amount()}
+
+      true ->
+        case Billing.resolve_discount_mapping(trimmed_code, socket.assigns.base_amount_minor) do
+          {:ok, %{amount_off_minor: amount_off_minor, estimated_total_minor: total_minor}} ->
+            {:noreply,
+             socket
+             |> assign(:promotion_code, trimmed_code)
+             |> assign(:promotion_code_input, trimmed_code)
+             |> assign(:promo_status, Copy.checkout_promo_ready())
+             |> assign(:promo_preview, %{
+               amount_off: format_minor_amount(amount_off_minor),
+               estimated_total: format_minor_amount(total_minor)
+             })
+             |> assign(:checkout_amount, format_minor_amount(total_minor))}
+
+          {:error, %DiscountMappingInvalid{}} ->
+            {:noreply,
+             socket
+             |> assign(:promotion_code, nil)
+             |> assign(:promotion_code_input, trimmed_code)
+             |> assign(:promo_preview, nil)
+             |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
+             |> assign_base_checkout_amount()}
+
+          {:error, _reason} ->
+            {:noreply,
+             socket
+             |> assign(:promotion_code, nil)
+             |> assign(:promotion_code_input, trimmed_code)
+             |> assign(:promo_preview, nil)
+             |> assign(:promo_status, Copy.checkout_promo_invalid())
+             |> assign_base_checkout_amount()}
+        end
+    end
   end
 
   def handle_event("checkout_failed", %{"message" => message}, socket) do
@@ -144,6 +215,31 @@ defmodule AccruePortal.Live.CheckoutLive do
           <p>{Copy.checkout_session_expired_title()}</p>
           <p>{Copy.checkout_session_expired_body()}</p>
         </div>
+
+        <form
+          :if={@client_token && checkout_ready?(@checkout_session) && !@checkout_success}
+          id="promo-code-form"
+          phx-change="validate_promo"
+          class="portal-promo-form"
+        >
+          <label class="portal-hosted-label" for="promo-code-input">
+            <span>{Copy.checkout_promo_label()}</span>
+          </label>
+          <input
+            id="promo-code-input"
+            type="text"
+            name="promo[code]"
+            value={@promotion_code_input}
+            autocomplete="off"
+          />
+          <p class="portal-help">{Copy.checkout_promo_hint()}</p>
+          <div id="promo-status" role="status" aria-live="polite">
+            <p :if={@promo_status}>{@promo_status}</p>
+            <p :if={@promo_preview}>{Copy.checkout_discount_amount_label(@promo_preview.amount_off)}</p>
+            <p :if={@promo_preview}>{Copy.checkout_estimated_total_label(@promo_preview.estimated_total)}</p>
+            <p :if={@promo_preview} class="portal-help">{Copy.checkout_promo_preview_notice()}</p>
+          </div>
+        </form>
 
         <form
           :if={@client_token && checkout_ready?(@checkout_session) && !@checkout_success}
@@ -200,16 +296,61 @@ defmodule AccruePortal.Live.CheckoutLive do
     """
   end
 
-  defp checkout_amount(%LocalSession{line_items: [first | _]}) when is_map(first) do
-    first
-    |> Map.get("amount", "0.00")
-    |> normalize_amount()
+  defp assign_checkout_pricing(socket, %LocalSession{} = checkout) do
+    amount_minor = checkout_amount_minor(checkout)
+    amount_text = format_minor_amount(amount_minor)
+
+    socket
+    |> assign(:base_amount_minor, amount_minor)
+    |> assign(:base_checkout_amount, amount_text)
+    |> assign(:checkout_amount, amount_text)
   end
 
-  defp checkout_amount(_session), do: "$0.00"
+  defp assign_base_checkout_amount(socket) do
+    assign(socket, :checkout_amount, socket.assigns.base_checkout_amount)
+  end
 
-  defp normalize_amount("$" <> amount), do: "$" <> amount
-  defp normalize_amount(amount) when is_binary(amount), do: "$" <> amount
+  defp subscribe_with_checkout(socket, checkout, nonce) do
+    subscribe_opts = [
+      payment_method: %{vault_acquisition: %{reference: nonce}},
+      operation_id: checkout.operation_id
+    ]
+
+    subscribe_opts =
+      case socket.assigns.promotion_code do
+        code when is_binary(code) and code != "" ->
+          Keyword.put(subscribe_opts, :promotion_code, code)
+
+        _ ->
+          subscribe_opts
+      end
+
+    Billing.subscribe(socket.assigns.current_customer, checkout.price_id, subscribe_opts)
+  end
+
+  defp checkout_amount_minor(%LocalSession{line_items: [first | _]}) when is_map(first) do
+    first
+    |> Map.get("amount", "0.00")
+    |> parse_amount_minor()
+  end
+
+  defp checkout_amount_minor(_session), do: 0
+
+  defp parse_amount_minor(amount) when is_binary(amount) do
+    amount
+    |> String.trim()
+    |> String.trim_leading("$")
+    |> Decimal.new()
+    |> Decimal.mult(Decimal.new(100))
+    |> Decimal.round(0, :half_even)
+    |> Decimal.to_integer()
+  end
+
+  defp format_minor_amount(amount_minor) when is_integer(amount_minor) do
+    dollars = div(amount_minor, 100)
+    cents = rem(amount_minor, 100) |> abs() |> Integer.to_string() |> String.pad_leading(2, "0")
+    "$#{dollars}.#{cents}"
+  end
 
   defp checkout_ready?(%LocalSession{expires_at: %DateTime{} = expires_at}) do
     DateTime.compare(expires_at, DateTime.utc_now()) == :gt

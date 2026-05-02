@@ -4,7 +4,6 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
   alias Accrue.Billing
   alias Accrue.Billing.Customer
   alias Accrue.Checkout.LocalSession
-  alias Accrue.Error.DiscountMappingInvalid
   alias AccruePortal.BraintreeMox
   alias AccruePortal.TestRepo
 
@@ -42,7 +41,9 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
 
   defmodule SubscriptionGatewayStub do
     def create(params, _opts) do
-      send(self(), {:gateway_create, params})
+      if pid = Application.get_env(:accrue_portal, :checkout_discount_test_pid) do
+        send(pid, {:gateway_create, params})
+      end
 
       {:ok,
        struct!(Braintree.Subscription,
@@ -62,10 +63,12 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
     previous_auth = Application.get_env(:accrue, :auth_adapter)
+    previous_test_pid = Application.get_env(:accrue_portal, :checkout_discount_test_pid)
 
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
+    Application.put_env(:accrue_portal, :checkout_discount_test_pid, self())
     BraintreeMox.stub_client_token("portal-client-token")
 
     user = %TestUser{id: Ecto.UUID.generate()}
@@ -88,6 +91,12 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
         Application.put_env(:accrue, :auth_adapter, previous_auth)
       else
         Application.delete_env(:accrue, :auth_adapter)
+      end
+
+      if previous_test_pid do
+        Application.put_env(:accrue_portal, :checkout_discount_test_pid, previous_test_pid)
+      else
+        Application.delete_env(:accrue_portal, :checkout_discount_test_pid)
       end
     end)
 
@@ -122,6 +131,18 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     assert html =~ "Estimated total: $24.00"
     assert html =~ "Pay $24.00"
     assert html =~ ~s(aria-live="polite")
+
+    assert {:error, {:redirect, %{to: "https://app.example.test/billing/success"}}} =
+             render_hook(view, "checkout_tokenized", %{"nonce" => "fake-valid-nonce"})
+
+    assert_received {:gateway_create,
+                     %{
+                       payment_method_token: "fake-valid-nonce",
+                       plan_id: "price_fixture",
+                       discounts: %{add: [%{inherited_from_id: "bt_discount_25"}]}
+                     }}
+
+    assert LocalSession.by_id(session.id).status == "completed"
   end
 
   test "invalid promo preview keeps failure copy in the customer domain", %{
@@ -151,21 +172,13 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     customer: customer
   } do
     session = checkout_fixture(customer)
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-    {:ok, _} =
-      Ecto.Adapters.SQL.query(
-        AccruePortal.TestRepo,
-        """
-        INSERT INTO accrue_discount_mappings
-          (id, processor, code, discount_id, active, amount_off_minor, currency, metadata, data,
-           lock_version, inserted_at, updated_at)
-        VALUES
-          ($1, 'braintree', 'DRIFTED', '', true, 500, 'USD', '{}'::jsonb, '{}'::jsonb,
-           1, $2, $2)
-        """,
-        [Ecto.UUID.generate() |> Ecto.UUID.dump!(), now]
-      )
+    assert {:ok, mapping} =
+             Billing.upsert_discount_mapping("DRIFTED", %{
+               discount_id: "bt_discount_drifted",
+               amount_off_minor: 500,
+               currency: "USD"
+             })
 
     conn = sign_in_customer(conn, user)
 
@@ -176,7 +189,19 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
       |> form("#promo-code-form", promo: %{code: "DRIFTED"})
       |> render_change()
 
-    assert preview_html =~ "This promotion is temporarily unavailable."
+    assert preview_html =~ "Discount ready."
+    assert preview_html =~ "Pay $44.00"
+
+    assert {:ok, _} =
+             Ecto.Adapters.SQL.query(
+               AccruePortal.TestRepo,
+               """
+               UPDATE accrue_discount_mappings
+               SET discount_id = '', updated_at = $2
+               WHERE id = $1
+               """,
+               [Ecto.UUID.dump!(mapping.id), DateTime.utc_now() |> DateTime.truncate(:second)]
+             )
 
     submit_html = render_hook(view, "checkout_tokenized", %{"nonce" => "fake-valid-nonce"})
 

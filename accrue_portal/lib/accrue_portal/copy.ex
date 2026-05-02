@@ -10,6 +10,14 @@ defmodule AccruePortal.Copy do
   def checkout_session_expired_title, do: "This checkout link has expired"
   def checkout_session_expired_body, do: "Return to Accrue and start a new subscription."
   def checkout_retry_help, do: "Check the card number, expiration, and CVV, then try again."
+  def checkout_promo_label, do: "Promotion code"
+  def checkout_promo_hint, do: "Preview savings before you pay."
+  def checkout_promo_ready, do: "Discount ready."
+  def checkout_promo_preview_notice, do: "Preview only. Final total is confirmed after secure submit."
+  def checkout_promo_invalid, do: "This code is unavailable. Check the code and try again."
+  def checkout_promo_temporarily_unavailable, do: "This promotion is temporarily unavailable."
+  def checkout_discount_amount_label(amount_text), do: "Estimated savings: " <> amount_text
+  def checkout_estimated_total_label(amount_text), do: "Estimated total: " <> amount_text
 
   def checkout_pay_cta(amount_text) when is_binary(amount_text), do: "Pay " <> amount_text
 
