@@ -24,6 +24,16 @@ defmodule AccruePortal.BillingReadModel do
     |> Repo.preload(:subscription_items)
   end
 
+  def subscription(%Customer{id: customer_id}, id) when is_binary(id) do
+    case Repo.get_by(Subscription, id: id, customer_id: customer_id) do
+      %Subscription{} = subscription ->
+        {:ok, Repo.preload(subscription, :subscription_items)}
+
+      nil ->
+        {:error, :not_found}
+    end
+  end
+
   def active_subscription(%Customer{} = customer) do
     customer
     |> subscriptions()

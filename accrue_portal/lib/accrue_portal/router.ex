@@ -45,7 +45,12 @@ defmodule Accrue.Portal.Router do
         get("/assets/brand-#{AccruePortal.Assets.brand_hash()}", AccruePortal.Assets, :brand)
         get("/assets/css-#{AccruePortal.Assets.css_hash()}", AccruePortal.Assets, :css)
         get("/assets/js-#{AccruePortal.Assets.js_hash()}", AccruePortal.Assets, :js)
-        get("/assets/phoenix-#{AccruePortal.Assets.phoenix_hash()}", AccruePortal.Assets, :phoenix)
+
+        get(
+          "/assets/phoenix-#{AccruePortal.Assets.phoenix_hash()}",
+          AccruePortal.Assets,
+          :phoenix
+        )
 
         get(
           "/assets/live-view-#{AccruePortal.Assets.live_view_hash()}",
@@ -81,6 +86,7 @@ defmodule Accrue.Portal.Router do
           session: {Accrue.Portal.Router, :__session__, [session_keys, mount_path]} do
           live("/", AccruePortal.Live.HomeLive, :index)
           live("/subscriptions", AccruePortal.Live.SubscriptionsLive, :index)
+          live("/subscriptions/:id", AccruePortal.Live.SubscriptionLive, :show)
           live("/payment-methods", AccruePortal.Live.PaymentMethodsLive, :index)
           live("/invoices", AccruePortal.Live.InvoicesLive, :index)
           live("/checkout/:token", AccruePortal.Live.CheckoutLive, :show)
