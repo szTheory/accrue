@@ -102,7 +102,10 @@ defmodule Accrue.Telemetry.PortalCheckoutCompletedTest do
     assert metadata.checkout_session_id == checkout_session.id
     assert metadata.customer_id == customer.id
     assert metadata.subscription_id == subscription.id
+    assert metadata.customer_processor_id == customer.processor_id
+    assert metadata.subscription_processor_id == subscription.processor_id
     assert metadata.processor == :braintree
+    assert metadata.source == :default_handler
 
     ledger_events =
       Repo.all(
