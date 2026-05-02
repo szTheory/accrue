@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.33
 milestone_name: Braintree Full Maturity
 status: executing
-last_updated: "2026-05-02T01:53:12.942Z"
+last_updated: "2026-05-02T02:06:46.264Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 11
-  completed_plans: 1
-  percent: 9
+  completed_plans: 2
+  percent: 18
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
 Phase: 101 (accrue-portal-foundation-checkout) — EXECUTING
-Plan: 2 of 11
+Plan: 3 of 11
 Status: Ready to execute
 Resume file: None
 Last activity: 2026-05-02
