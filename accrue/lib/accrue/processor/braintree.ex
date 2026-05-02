@@ -84,6 +84,7 @@ defmodule Accrue.Processor.Braintree do
       payment_method_token: token,
       plan_id: plan_id
     }
+    |> maybe_put_discounts(params)
   end
 
   @doc false
@@ -662,6 +663,22 @@ defmodule Accrue.Processor.Braintree do
       |> translate_payment_method()
       |> Map.put(:default, card.default || card.token == default_token)
     end)
+  end
+
+  defp maybe_put_discounts(request, params) do
+    case params[:discounts] || params["discounts"] do
+      [%{} = discount | _] ->
+        case discount[:discount_id] || discount["discount_id"] do
+          id when is_binary(id) and id != "" ->
+            Map.put(request, :discounts, %{add: [%{inherited_from_id: id}]})
+
+          _ ->
+            request
+        end
+
+      _ ->
+        request
+    end
   end
 
   defp translate_payment_method(payment_method) do

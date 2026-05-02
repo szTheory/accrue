@@ -78,7 +78,7 @@ defmodule Accrue.Billing.SubscriptionProjection do
       cancel_at: nil,
       canceled_at: canceled_at,
       ended_at: braintree_ended_at(braintree_sub, status, canceled_at),
-      discount_id: nil,
+      discount_id: parse_discount_id(first_discount(braintree_sub)),
       data: normalize_data(braintree_sub),
       metadata: %{}
     }

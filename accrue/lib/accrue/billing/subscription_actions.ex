@@ -59,6 +59,8 @@ defmodule Accrue.Billing.SubscriptionActions do
 
   alias Accrue.Actor
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.DiscountMapping
+  alias Accrue.Billing.DiscountMappingActions
   alias Accrue.Billing.IntentResult
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
@@ -69,6 +71,8 @@ defmodule Accrue.Billing.SubscriptionActions do
   alias Accrue.Processor
   alias Accrue.Processor.Idempotency
   alias Accrue.Repo
+
+  @submit_resolution_amount_minor 1_000_000_000_000
 
   # ---------------------------------------------------------------------
   # subscribe/2..3
@@ -122,6 +126,7 @@ defmodule Accrue.Billing.SubscriptionActions do
       Repo.transact(fn ->
         with {:ok, processor_params} <-
                build_subscription_request(customer, item_params, trial_end, opts),
+             {:ok, discount_mapping} <- extract_discount_mapping(processor_params),
              :ok <- ensure_customer_tax_location(customer, opts),
              {:ok, stripe_sub} <-
                Processor.__impl__().create_subscription(
@@ -132,6 +137,7 @@ defmodule Accrue.Billing.SubscriptionActions do
              {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
              {:ok, sub} <- insert_subscription(customer.id, attrs),
              {:ok, _items} <- upsert_items(sub, stripe_sub),
+             :ok <- consume_discount_mapping(discount_mapping),
              {:ok, _} <- record_event("subscription.created", sub, %{price_id: price_id}) do
           sub = Repo.preload(sub, :subscription_items, force: true)
           {:ok, sub}
@@ -157,11 +163,11 @@ defmodule Accrue.Billing.SubscriptionActions do
     if Processor.__impl__() == Accrue.Processor.Braintree do
       case Keyword.get(opts, :payment_method) do
         %{vault_acquisition: %{reference: ref}} when is_binary(ref) ->
-          {:ok,
-           %{
-             payment_method: %{vault_acquisition: %{reference: ref}},
-             items: [item_params]
-           }}
+          %{
+            payment_method: %{vault_acquisition: %{reference: ref}},
+            items: [item_params]
+          }
+          |> maybe_put_braintree_promotion_code(opts)
 
         _ ->
           {:error,
@@ -893,6 +899,45 @@ defmodule Accrue.Billing.SubscriptionActions do
     case Keyword.get(opts, :coupon) do
       nil -> params
       id when is_binary(id) -> Map.put(params, :discounts, [%{coupon: id}])
+    end
+  end
+
+  defp maybe_put_braintree_promotion_code(params, opts) do
+    case Keyword.get(opts, :promotion_code) do
+      nil ->
+        {:ok, params}
+
+      code when is_binary(code) ->
+        case DiscountMappingActions.resolve_discount_mapping(code, @submit_resolution_amount_minor) do
+          {:ok, %{mapping: %DiscountMapping{} = mapping}} ->
+            {:ok,
+             params
+             |> Map.put(:discount_mapping, discount_mapping_payload(mapping))
+             |> Map.put(:discounts, [%{discount_id: mapping.discount_id}])}
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  defp extract_discount_mapping(%{discount_mapping: %{} = mapping}), do: {:ok, mapping}
+  defp extract_discount_mapping(_processor_params), do: {:ok, nil}
+
+  defp discount_mapping_payload(%DiscountMapping{} = mapping) do
+    %{
+      mapping_id: mapping.id,
+      code: mapping.code,
+      discount_id: mapping.discount_id
+    }
+  end
+
+  defp consume_discount_mapping(nil), do: :ok
+
+  defp consume_discount_mapping(%{code: code}) when is_binary(code) do
+    case DiscountMappingActions.record_discount_mapping_redemption(code) do
+      {:ok, _mapping} -> :ok
+      {:error, reason} -> {:error, reason}
     end
   end
 
