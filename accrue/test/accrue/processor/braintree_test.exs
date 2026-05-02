@@ -260,15 +260,22 @@ defmodule Accrue.Processor.BraintreeTest do
     assert get_in(caps, [:billing_portal, :create]) == true
   end
 
-  test "build_request/1 maps price_id to plan_id and accepts only payment_method.vault_acquisition.reference" do
+  test "build_request/1 maps price_id to plan_id and translates discount mappings to inherited_from_id" do
     params = %{
       payment_method: %{vault_acquisition: %{reference: "vaulted_token_abc"}},
-      items: [%{price: "premium_monthly"}]
+      items: [%{price: "premium_monthly"}],
+      discounts: [%{discount_id: "bt_discount_25"}],
+      discount_mapping: %{
+        mapping_id: "map_123",
+        code: "SPRING25",
+        discount_id: "bt_discount_25"
+      }
     }
 
     assert Braintree.build_request(params) == %{
              payment_method_token: "vaulted_token_abc",
-             plan_id: "premium_monthly"
+             plan_id: "premium_monthly",
+             discounts: %{add: [%{inherited_from_id: "bt_discount_25"}]}
            }
   end
 
