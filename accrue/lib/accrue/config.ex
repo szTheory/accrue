@@ -167,8 +167,10 @@ defmodule Accrue.Config do
       type: {:or, [:string, nil]},
       default: nil,
       doc:
-        "Optional absolute base URL (for example `https://app.example.com`) " <>
-          "required for returned local portal checkout and billing-portal URLs."
+        "Absolute base URL (for example `https://app.example.com`) used to " <>
+          "generate returned local portal checkout and billing-portal URLs. " <>
+          "Leave unset only when those local portal URLs are not in use; " <>
+          "`portal_url/1` raises instead of falling back to a relative path."
     ],
     braintree_client_token_generator: [
       type: :atom,

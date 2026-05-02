@@ -49,11 +49,14 @@ defmodule Accrue.Checkout.LocalSession do
     status price_id
   ]a
 
+  @processors ["braintree"]
+
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(session, attrs \\ %{}) do
     session
     |> cast(attrs, @cast_fields)
     |> validate_required(@required_fields)
+    |> validate_inclusion(:processor, @processors, message: "must be braintree")
     |> foreign_key_constraint(:customer_id)
     |> unique_constraint(:session_token)
     |> unique_constraint(:operation_id)
