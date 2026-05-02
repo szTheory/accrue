@@ -125,24 +125,32 @@ defmodule Accrue.Billing.SubscriptionActions do
     {item_params, trial_end} = build_subscribe_params({price_id, quantity}, opts)
 
     result =
-      Repo.transact(fn ->
-        with {:ok, processor_params} <-
-               build_subscription_request(customer, item_params, trial_end, opts),
-             :ok <- ensure_customer_tax_location(customer, opts),
-             {:ok, stripe_sub} <-
-               Processor.__impl__().create_subscription(
-                 processor_params,
-                 [idempotency_key: idem_key] ++ sanitize_opts(opts)
-               ),
-             :ok <- ensure_valid_tax_location(stripe_sub, opts),
-             {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
-             {:ok, sub} <- insert_subscription(customer.id, attrs),
-             {:ok, _items} <- upsert_items(sub, stripe_sub),
-             {:ok, _} <- record_event("subscription.created", sub, %{price_id: price_id}) do
-          sub = Repo.preload(sub, :subscription_items, force: true)
-          {:ok, sub}
+      with {:ok, processor_params} <-
+             build_subscription_request(customer, item_params, trial_end, opts),
+           :ok <- ensure_customer_tax_location(customer, opts),
+           processor_result <-
+             Processor.__impl__().create_subscription(
+               processor_params,
+               [idempotency_key: idem_key] ++ sanitize_opts(opts)
+             ) do
+        case processor_result do
+          {:ok, stripe_sub} ->
+            Repo.transact(fn ->
+              with :ok <- ensure_valid_tax_location(stripe_sub, opts),
+                   {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
+                   {:ok, sub} <- insert_subscription(customer.id, attrs),
+                   {:ok, _items} <- upsert_items(sub, stripe_sub),
+                   {:ok, _} <- record_event("subscription.created", sub, %{price_id: price_id}) do
+                sub = Repo.preload(sub, :subscription_items, force: true)
+                {:ok, sub}
+              end
+            end)
+
+          {:error, reason} ->
+            rollback_reserved_discount_mapping(processor_params)
+            {:error, reason}
         end
-      end)
+      end
 
     IntentResult.wrap(result)
   end
@@ -944,6 +952,16 @@ defmodule Accrue.Billing.SubscriptionActions do
       reason: error.reason
     })
   end
+
+  defp rollback_reserved_discount_mapping(%{discount_mapping: %{code: code}})
+       when is_binary(code) do
+    case DiscountMappingActions.release_discount_mapping_reservation(code) do
+      {:ok, _mapping} -> :ok
+      {:error, _reason} -> :ok
+    end
+  end
+
+  defp rollback_reserved_discount_mapping(_processor_params), do: :ok
 
   defp maybe_put_collection_method(params, opts) do
     case Keyword.get(opts, :collection_method) do

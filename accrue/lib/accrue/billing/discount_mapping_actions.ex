@@ -125,6 +125,46 @@ defmodule Accrue.Billing.DiscountMappingActions do
     end
   end
 
+  @spec release_discount_mapping_reservation(String.t() | DiscountMapping.t(), keyword()) ::
+          {:ok, DiscountMapping.t()} | {:error, :not_found | term()}
+  def release_discount_mapping_reservation(mapping_or_code, opts \\ [])
+
+  def release_discount_mapping_reservation(%DiscountMapping{} = mapping, opts) when is_list(opts) do
+    _ = opts
+
+    Repo.transact(fn ->
+      query = from(m in DiscountMapping, where: m.id == ^mapping.id, lock: "FOR UPDATE")
+
+      case Repo.one(query) do
+        nil ->
+          {:error, :not_found}
+
+        %DiscountMapping{} = fresh_mapping ->
+          decrement_redemption(fresh_mapping)
+      end
+    end)
+  end
+
+  def release_discount_mapping_reservation(code, opts) when is_binary(code) and is_list(opts) do
+    normalized_code = normalize_code(code)
+
+    Repo.transact(fn ->
+      query =
+        from(m in DiscountMapping,
+          where: m.processor == ^@processor and m.code == ^normalized_code,
+          lock: "FOR UPDATE"
+        )
+
+      case Repo.one(query) do
+        nil ->
+          {:error, :not_found}
+
+        %DiscountMapping{} = mapping ->
+          decrement_redemption(mapping)
+      end
+    end)
+  end
+
   @spec reserve_discount_mapping(String.t(), non_neg_integer(), keyword()) ::
           {:ok,
            %{
@@ -212,6 +252,14 @@ defmodule Accrue.Billing.DiscountMappingActions do
     |> DiscountMapping.changeset(%{times_redeemed: mapping.times_redeemed + 1})
     |> Repo.update()
   end
+
+  defp decrement_redemption(%DiscountMapping{times_redeemed: redeemed} = mapping) when redeemed > 0 do
+    mapping
+    |> DiscountMapping.changeset(%{times_redeemed: redeemed - 1})
+    |> Repo.update()
+  end
+
+  defp decrement_redemption(%DiscountMapping{} = mapping), do: {:ok, mapping}
 
   defp validate_mapping_for_resolution(%DiscountMapping{} = mapping) do
     cond do
