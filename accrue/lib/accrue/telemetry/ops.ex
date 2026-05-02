@@ -11,6 +11,7 @@ defmodule Accrue.Telemetry.Ops do
 
       [:accrue, :ops, :revenue_loss]
       [:accrue, :ops, :dunning_exhaustion]
+      [:accrue, :ops, :discount_mapping_invalid]
       [:accrue, :ops, :incomplete_expired]
       [:accrue, :ops, :charge_failed]
       [:accrue, :ops, :meter_reporting_failed]

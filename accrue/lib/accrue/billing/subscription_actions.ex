@@ -67,10 +67,12 @@ defmodule Accrue.Billing.SubscriptionActions do
   alias Accrue.Billing.SubscriptionProjection
   alias Accrue.Billing.Trial
   alias Accrue.Billing.UpcomingInvoice
+  alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Events
   alias Accrue.Processor
   alias Accrue.Processor.Idempotency
   alias Accrue.Repo
+  alias Accrue.Telemetry.Ops
 
   @submit_resolution_amount_minor 1_000_000_000_000
 
@@ -915,6 +917,10 @@ defmodule Accrue.Billing.SubscriptionActions do
              |> Map.put(:discount_mapping, discount_mapping_payload(mapping))
              |> Map.put(:discounts, [%{discount_id: mapping.discount_id}])}
 
+          {:error, %DiscountMappingInvalid{} = error} ->
+            emit_discount_mapping_invalid(error)
+            {:error, error}
+
           {:error, reason} ->
             {:error, reason}
         end
@@ -939,6 +945,15 @@ defmodule Accrue.Billing.SubscriptionActions do
       {:ok, _mapping} -> :ok
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  defp emit_discount_mapping_invalid(%DiscountMappingInvalid{} = error) do
+    Ops.emit(:discount_mapping_invalid, %{count: 1}, %{
+      mapping_id: error.mapping_id,
+      code: error.code,
+      discount_id: error.discount_id,
+      reason: error.reason
+    })
   end
 
   defp maybe_put_collection_method(params, opts) do

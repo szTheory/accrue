@@ -63,6 +63,7 @@ they correspond to — they are idempotent under webhook replay via the
 |-------|-------------|----------|---------------|
 | `[:accrue, :ops, :revenue_loss]` | `count`, `amount_minor`, `currency` | `subject_type`, `subject_id`, `reason` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :dunning_exhaustion]` | `count` | `subscription_id`, `from_status`, `to_status`, `source` (`:accrue_sweeper \| :stripe_native \| :manual`) | `Accrue.Webhook.DefaultHandler` |
+| `[:accrue, :ops, :discount_mapping_invalid]` | `count` | `mapping_id`, `code`, `discount_id`, `reason`, `operation_id` | `Accrue.Billing.SubscriptionActions` |
 | `[:accrue, :ops, :incomplete_expired]` | `count` | `subscription_id` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :charge_failed]` | `count` | `charge_id`, `customer_id`, `failure_code` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :meter_reporting_failed]` | `count` | `meter_event_id`, `event_name`, `source` (`:reconciler \| :webhook \| :sync`) | `Accrue.Webhook.DefaultHandler` / `Accrue.Billing.MeterEventActions` / `Accrue.Jobs.MeterEventsReconciler` |
