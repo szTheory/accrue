@@ -96,6 +96,40 @@ defmodule Accrue.ConfigTest do
     end
   end
 
+  describe "portal helpers" do
+    test "normalize_mount_path/1 canonicalizes blank and nested paths" do
+      assert Config.normalize_mount_path("") == "/"
+      assert Config.normalize_mount_path("billing") == "/billing"
+      assert Config.normalize_mount_path("/billing/") == "/billing"
+      assert Config.normalize_mount_path(" /billing/checkout/ ") == "/billing/checkout"
+    end
+
+    test "portal_url/1 requires portal_base_url and returns absolute URLs" do
+      Application.delete_env(:accrue, :portal_base_url)
+
+      assert_raise Accrue.ConfigError, ~r/portal_base_url/, fn ->
+        Config.portal_url("/billing/checkout/chk_local_123")
+      end
+
+      Application.put_env(:accrue, :portal_base_url, "https://app.example.test/")
+
+      assert Config.portal_url("/billing/checkout/chk_local_123") ==
+               "https://app.example.test/billing/checkout/chk_local_123"
+    after
+      Application.delete_env(:accrue, :portal_base_url)
+    end
+
+    test "portal_base_url/0 rejects relative values" do
+      Application.put_env(:accrue, :portal_base_url, "/billing")
+
+      assert_raise Accrue.ConfigError, ~r/absolute http\(s\) URL/, fn ->
+        Config.portal_base_url()
+      end
+    after
+      Application.delete_env(:accrue, :portal_base_url)
+    end
+  end
+
   describe "get!/1 unknown key" do
     test "raises Accrue.ConfigError" do
       err =

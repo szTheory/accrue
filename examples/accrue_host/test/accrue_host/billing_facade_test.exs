@@ -220,7 +220,10 @@ defmodule AccrueHost.BillingFacadeTest do
   end
 
   test "installer-facing facade template stays generic with no Braintree jargon" do
-    template_source = File.read!(Path.join(@host_root, "../../accrue/priv/accrue/templates/install/billing.ex.eex"))
+    template_source =
+      File.read!(
+        Path.join(@host_root, "../../accrue/priv/accrue/templates/install/billing.ex.eex")
+      )
 
     refute template_source =~ "Braintree"
     refute template_source =~ "vault"

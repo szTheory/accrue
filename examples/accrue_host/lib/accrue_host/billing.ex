@@ -89,7 +89,9 @@ defmodule AccrueHost.Billing do
   def subscribe_with_vault_reference(%Scope{} = scope, price_id, vault_reference, opts \\ []) do
     with {:ok, organization} <- organization_from_scope(scope),
          :ok <- authorize_billing_mutation(scope) do
-      opts = Keyword.put(opts, :payment_method, %{vault_acquisition: %{reference: vault_reference}})
+      opts =
+        Keyword.put(opts, :payment_method, %{vault_acquisition: %{reference: vault_reference}})
+
       subscribe(organization, price_id, opts)
     end
   end
@@ -97,7 +99,11 @@ defmodule AccrueHost.Billing do
   def add_payment_method_with_vault_reference(%Scope{} = scope, vault_reference, opts \\ []) do
     with {:ok, customer} <- customer_for_scope(scope),
          :ok <- authorize_billing_mutation(scope) do
-      Billing.add_payment_method(customer, %{vault_acquisition: %{reference: vault_reference}}, opts)
+      Billing.add_payment_method(
+        customer,
+        %{vault_acquisition: %{reference: vault_reference}},
+        opts
+      )
     end
   end
 

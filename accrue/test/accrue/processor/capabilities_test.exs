@@ -70,6 +70,7 @@ defmodule Accrue.Processor.CapabilitiesTest do
     assert get_in(braintree_caps, [:subscription, :cancel_at_period_end]) == false
     assert get_in(braintree_caps, [:subscription, :pause]) == false
     assert Capabilities.support_label([:subscription, :update]) == "staged first-party target"
+
     assert Capabilities.support_label([:subscription, :cancel_immediately]) ==
              "staged first-party target"
   end

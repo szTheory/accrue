@@ -72,13 +72,19 @@ Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Ac
   1. A host app can mount the `Accrue.Portal` router pipeline.
   2. `create_checkout_session/2` returns a URL to a local hosted checkout that embeds Braintree Hosted Fields. (Drop-in for Web is deprecated 2025-07-14, unsupported 2026-07-14.)
   3. User can view and manage subscriptions and payment methods via the portal.
-**Plans**: 5 plans
+**Plans**: 11 plans
 Plans:
 - [ ] `101-01-PLAN.md` — Harden persisted local checkout sessions, portal URL config, and migration-backed tests in `accrue`
-- [ ] `101-02-PLAN.md` — Align `accrue_portal` mount/auth/CSP shell with the locked public contract and sibling host mount
+- [ ] `101-02-PLAN.md` — Align `accrue_portal` mount/auth/CSP shell with the locked public contract and establish the base browser harness
 - [ ] `101-03-PLAN.md` — Flip Braintree adapter/facade checkout and billing-portal semantics to first-party local portal support
-- [ ] `101-04-PLAN.md` — Implement the Hosted Fields checkout flow plus synthetic completion event and telemetry wiring
-- [ ] `101-05-PLAN.md` — Complete customer portal LiveViews, tenant-scoped authorization, and adoption docs
+- [ ] `101-04-PLAN.md` — Implement the Hosted Fields checkout UI, browser hook, and package-local checkout coverage
+- [ ] `101-05-PLAN.md` — Complete the dashboard/subscription production slice with D-19 customer scoping and centralized copy
+- [ ] `101-06-PLAN.md` — Finish payment-method/invoice production surfaces and route wiring
+- [ ] `101-07-PLAN.md` — Lock the D-04 portal dependency contract, Braintree mocks, and shell regression tests
+- [ ] `101-08-PLAN.md` — Add synthetic checkout-completion event plumbing and portal telemetry coverage
+- [ ] `101-09-PLAN.md` — Add shared fixtures, authorization assertions, and property-backed subscription isolation tests
+- [ ] `101-10-PLAN.md` — Add focused payment-method/invoice/router coverage including wrong-tenant denial cases
+- [ ] `101-11-PLAN.md` — Publish linked release metadata, sibling-mount host example, and v1.33 portal boundary docs
 **UI hint**: yes
 
 ### Phase 102: Coupon/Discount Mapping

@@ -77,7 +77,7 @@ defmodule Accrue.Webhook.Plug do
 
   defp do_call(conn, :braintree, endpoint) do
     conn = Plug.Conn.fetch_query_params(conn)
-    
+
     bt_signature = conn.params["bt_signature"]
     bt_payload = conn.params["bt_payload"]
 
@@ -90,7 +90,7 @@ defmodule Accrue.Webhook.Plug do
     end
 
     braintree_event = Signature.parse_braintree!(bt_signature, bt_payload)
-    
+
     # Braintree webhooks lack a unique event ID, so we hash the payload for idempotency.
     # We construct a %LatticeStripe.Event{} simply to satisfy the Ingest.run signature and DB constraints.
     event_id = "bt_" <> Base.encode16(:crypto.hash(:sha256, bt_payload), case: :lower)

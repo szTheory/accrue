@@ -21,29 +21,31 @@ defmodule AccrueHost.BraintreeSubscribeTest do
       # Return a shape that `SubscriptionProjection.stripe_attrs/1` can digest,
       # because our mock module isn't strictly `Accrue.Processor.Braintree` so
       # `processor_atom()` defaults to `:stripe`.
-      {:ok, %{
-        id: "sub_braintree_123",
-        status: "active",
-        cancel_at_period_end: false,
-        current_period_start: System.os_time(:second),
-        current_period_end: System.os_time(:second) + 30 * 86_400,
-        items: %{
-          data: [
-            %{
-              id: "si_braintree_123",
-              price: %{id: plan_id},
-              quantity: 1
-            }
-          ]
-        }
-      }}
+      {:ok,
+       %{
+         id: "sub_braintree_123",
+         status: "active",
+         cancel_at_period_end: false,
+         current_period_start: System.os_time(:second),
+         current_period_end: System.os_time(:second) + 30 * 86_400,
+         items: %{
+           data: [
+             %{
+               id: "si_braintree_123",
+               price: %{id: plan_id},
+               quantity: 1
+             }
+           ]
+         }
+       }}
     end
 
     def retrieve_subscription(id, _opts) do
-      {:ok, %{
-        id: id,
-        status: "active"
-      }}
+      {:ok,
+       %{
+         id: id,
+         status: "active"
+       }}
     end
 
     def create_customer(params, _opts) do
@@ -96,7 +98,10 @@ defmodule AccrueHost.BraintreeSubscribeTest do
     def update_customer(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def update_subscription(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def resume_subscription(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
-    def pause_subscription_collection(_, _, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
+
+    def pause_subscription_collection(_, _, _, _),
+      do: {:error, %Accrue.APIError{message: "Unsupported"}}
+
     def create_invoice(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def retrieve_invoice(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def update_invoice(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
@@ -118,7 +123,10 @@ defmodule AccrueHost.BraintreeSubscribeTest do
     def detach_payment_method(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def list_payment_methods(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def update_payment_method(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
-    def set_default_payment_method(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
+
+    def set_default_payment_method(_, _, _),
+      do: {:error, %Accrue.APIError{message: "Unsupported"}}
+
     def create_charge(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def retrieve_charge(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def list_charges(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
@@ -129,8 +137,13 @@ defmodule AccrueHost.BraintreeSubscribeTest do
     def subscription_item_update(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def subscription_item_delete(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def subscription_schedule_create(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
-    def subscription_schedule_update(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
-    def subscription_schedule_release(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
+
+    def subscription_schedule_update(_, _, _),
+      do: {:error, %Accrue.APIError{message: "Unsupported"}}
+
+    def subscription_schedule_release(_, _),
+      do: {:error, %Accrue.APIError{message: "Unsupported"}}
+
     def subscription_schedule_cancel(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def subscription_schedule_fetch(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def coupon_create(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
@@ -146,25 +159,33 @@ defmodule AccrueHost.BraintreeSubscribeTest do
     # Save original processor config
     orig_processor = Application.get_env(:accrue, :processor)
     Application.put_env(:accrue, :processor, BraintreeMockAdapter.Braintree)
-    
+
     on_exit(fn ->
       Application.put_env(:accrue, :processor, orig_processor)
     end)
-    
+
     user = AccountsFixtures.user_fixture()
     organization = AccountsFixtures.organization_fixture(%{owner: user})
-    membership = AccountsFixtures.organization_membership_fixture(%{organization: organization, user: user, role: :owner})
+
+    membership =
+      AccountsFixtures.organization_membership_fixture(%{
+        organization: organization,
+        user: user,
+        role: :owner
+      })
+
     scope = Scope.for_user(user) |> Scope.put_active_organization(organization, membership)
-    
+
     %{scope: scope, user: user, organization: organization}
   end
 
-  test "host Braintree path converts browser acquisition result, forwards it, and persists as braintree", %{scope: scope} do
+  test "host Braintree path converts browser acquisition result, forwards it, and persists as braintree",
+       %{scope: scope} do
     vault_reference = "fake-valid-nonce"
     sandbox_plan_id = "plan_sandbox_recurring"
 
     assert {:ok, %Accrue.Billing.Subscription{} = subscription} =
-      Billing.subscribe_with_vault_reference(scope, sandbox_plan_id, vault_reference)
+             Billing.subscribe_with_vault_reference(scope, sandbox_plan_id, vault_reference)
 
     assert subscription.processor == "braintree"
     assert subscription.processor_id == "sub_braintree_123"
@@ -173,9 +194,14 @@ defmodule AccrueHost.BraintreeSubscribeTest do
     assert item.price_id == sandbox_plan_id
   end
 
-  test "hermetic Braintree proof exercises a lifecycle mutation through the generic billing facade", %{scope: scope} do
+  test "hermetic Braintree proof exercises a lifecycle mutation through the generic billing facade",
+       %{scope: scope} do
     assert {:ok, %Accrue.Billing.Subscription{} = subscription} =
-             Billing.subscribe_with_vault_reference(scope, "plan_sandbox_recurring", "fake-valid-nonce")
+             Billing.subscribe_with_vault_reference(
+               scope,
+               "plan_sandbox_recurring",
+               "fake-valid-nonce"
+             )
 
     assert {:ok, %Accrue.Billing.Subscription{} = canceled} = Billing.cancel(subscription)
 

@@ -116,6 +116,7 @@ defmodule Accrue.Billing.RefundActions do
     # Braintree create_refund returns a transaction with type "credit".
     # We retrieve it immediately to ensure we have the canonical shape for convergence.
     refund_id = get_field(refund_payload, :id) || get_field(refund_payload, :refund_id)
+
     if refund_id do
       Processor.__impl__().fetch(:refund, refund_id)
     else
@@ -182,15 +183,20 @@ defmodule Accrue.Billing.RefundActions do
       end
 
     amount_field = get_field(refund_payload, :amount)
-    parsed_amount = 
+
+    parsed_amount =
       case amount_field do
-        a when is_integer(a) -> a
+        a when is_integer(a) ->
+          a
+
         a when is_binary(a) ->
           case Float.parse(a) do
             {f, _} -> trunc(f * 100)
             :error -> nil
           end
-        _ -> nil
+
+        _ ->
+          nil
       end
 
     attrs = %{

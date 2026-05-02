@@ -2,6 +2,7 @@ defmodule AccrueHostWeb.Router do
   use AccrueHostWeb, :router
 
   import AccrueAdmin.Router
+  import AccruePortal.Router
   import Accrue.Router
   import AccrueHostWeb.UserAuth
 
@@ -85,7 +86,8 @@ defmodule AccrueHostWeb.Router do
     accrue_webhook "/stripe", :stripe
   end
 
-  # Protect this mount with AccrueAdmin.AuthHook via accrue_admin/2.
+  # Protect these mounts with package auth hooks via accrue_admin/2 and accrue_portal/2.
   # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
-  accrue_admin "/billing", session_keys: [:user_token], allow_live_reload: false
+  accrue_admin "/admin", session_keys: [:user_token], allow_live_reload: false
+  accrue_portal("/billing", session_keys: [:user_token])
 end

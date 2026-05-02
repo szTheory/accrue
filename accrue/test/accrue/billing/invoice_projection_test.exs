@@ -233,7 +233,8 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
         ]
       }
 
-      {:ok, %{invoice_attrs: attrs, item_attrs: items}} = InvoiceProjection.decompose(braintree_sub)
+      {:ok, %{invoice_attrs: attrs, item_attrs: items}} =
+        InvoiceProjection.decompose(braintree_sub)
 
       assert attrs.processor_id == "tx_abcde"
       assert attrs.status == :paid

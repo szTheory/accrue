@@ -63,8 +63,15 @@ defmodule AccrueHostWeb.SubscriptionLive do
     end
   end
 
-  def handle_event("vault_acquisition_success", %{"payment_method_token" => vault_reference, "plan_id" => plan_id} = params, socket) do
-    case Billing.subscribe_with_vault_reference(socket.assigns.current_scope, plan_id, vault_reference,
+  def handle_event(
+        "vault_acquisition_success",
+        %{"payment_method_token" => vault_reference, "plan_id" => plan_id} = params,
+        socket
+      ) do
+    case Billing.subscribe_with_vault_reference(
+           socket.assigns.current_scope,
+           plan_id,
+           vault_reference,
            automatic_tax: true,
            operation_id: operation_id(params, "subscribe")
          ) do

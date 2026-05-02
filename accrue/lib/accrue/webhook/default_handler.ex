@@ -101,18 +101,27 @@ defmodule Accrue.Webhook.DefaultHandler do
   # Phase 3 event families — dispatch from Accrue.Webhook.Event struct
   # ---------------------------------------------------------------------
 
-  def handle_event(type, %Accrue.Webhook.Event{processor: :braintree, object_id: nil}, _ctx) when is_binary(type) do
-    :telemetry.execute([:accrue, :webhooks, :missing_object_id], %{}, %{type: type, processor: :braintree})
+  def handle_event(type, %Accrue.Webhook.Event{processor: :braintree, object_id: nil}, _ctx)
+      when is_binary(type) do
+    :telemetry.execute([:accrue, :webhooks, :missing_object_id], %{}, %{
+      type: type,
+      processor: :braintree
+    })
+
     :ok
   end
 
-  def handle_event(type, %Accrue.Webhook.Event{processor: :braintree} = event, _ctx) when is_binary(type) do
+  def handle_event(type, %Accrue.Webhook.Event{processor: :braintree} = event, _ctx)
+      when is_binary(type) do
     case normalize_braintree_type(type) do
       {:ok, normalized_type} ->
-        case dispatch(normalized_type, event.processor_event_id, event.created_at, %{"id" => event.object_id}) do
+        case dispatch(normalized_type, event.processor_event_id, event.created_at, %{
+               "id" => event.object_id
+             }) do
           {:ok, _} -> :ok
           other -> other
         end
+
       :ignored ->
         :ok
     end
@@ -994,7 +1003,10 @@ defmodule Accrue.Webhook.DefaultHandler do
 
   defp load_row(:invoice, id), do: Repo.get_by(Invoice, processor_id: id)
   defp load_row(:charge, id), do: Repo.get_by(Charge, processor_id: id)
-  defp load_row(:refund, id), do: Repo.get_by(Refund, processor_id: id) || Repo.get_by(Refund, stripe_id: id)
+
+  defp load_row(:refund, id),
+    do: Repo.get_by(Refund, processor_id: id) || Repo.get_by(Refund, stripe_id: id)
+
   defp load_row(:payment_method, id), do: Repo.get_by(PaymentMethod, processor_id: id)
 
   defp stamp_watermark(attrs, evt_ts, evt_id) do
@@ -1217,11 +1229,24 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp refund_customer_id(_), do: nil
 
   defp normalize_braintree_type("subscription_charged_successfully"), do: {:ok, "invoice.paid"}
-  defp normalize_braintree_type("subscription_charged_unsuccessfully"), do: {:ok, "invoice.payment_failed"}
-  defp normalize_braintree_type("subscription_canceled"), do: {:ok, "customer.subscription.deleted"}
-  defp normalize_braintree_type("subscription_expired"), do: {:ok, "customer.subscription.deleted"}
-  defp normalize_braintree_type("subscription_went_past_due"), do: {:ok, "customer.subscription.updated"}
-  defp normalize_braintree_type("subscription_went_active"), do: {:ok, "customer.subscription.updated"}
-  defp normalize_braintree_type("subscription_trial_ended"), do: {:ok, "customer.subscription.trial_will_end"}
+
+  defp normalize_braintree_type("subscription_charged_unsuccessfully"),
+    do: {:ok, "invoice.payment_failed"}
+
+  defp normalize_braintree_type("subscription_canceled"),
+    do: {:ok, "customer.subscription.deleted"}
+
+  defp normalize_braintree_type("subscription_expired"),
+    do: {:ok, "customer.subscription.deleted"}
+
+  defp normalize_braintree_type("subscription_went_past_due"),
+    do: {:ok, "customer.subscription.updated"}
+
+  defp normalize_braintree_type("subscription_went_active"),
+    do: {:ok, "customer.subscription.updated"}
+
+  defp normalize_braintree_type("subscription_trial_ended"),
+    do: {:ok, "customer.subscription.trial_will_end"}
+
   defp normalize_braintree_type(_), do: :ignored
 end

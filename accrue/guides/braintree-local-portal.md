@@ -1,8 +1,22 @@
 # Building a Local Billing Portal for Braintree
 
-Unlike Stripe, Braintree does not offer a pre-built, hosted customer billing portal for self-serve subscription management. Consequently, when Accrue is configured to use the Braintree processor, calling `Accrue.Billing.create_billing_portal_session/2` will safely intercept the request and return an `{:error, %Accrue.APIError{code: :unsupported_by_gateway}}` response.
+Phase 101 introduces `accrue_portal`, the batteries-included mounted portal
+package for Braintree local checkout and self-serve billing flows. Hosts that
+want the packaged path should mount `accrue_admin "/admin"` and
+`accrue_portal "/billing"` as sibling scopes, set `:portal_mount_path` to
+`"/billing"`, and configure `:portal_base_url` so returned checkout and
+billing-portal URLs are absolute.
 
-Instead of shipping an opinionated, built-in UI for this missing functionality, Accrue remains a headless backend facade. This guide explains why this architectural decision was made and demonstrates how to build a robust local portal yourself using Accrue's primitives.
+This guide remains the hand-rolled escape hatch. Use it when you want total UX
+control, or when you need behaviors outside the v1.33 packaged boundary such as
+emailed-link checkout bootstraps. In that case, build your own
+`/checkout/start?token=...` controller in the host app, resolve the token to a
+signed-in session, and then redirect into the mounted portal or your custom UI.
+
+Unlike Stripe, Braintree does not offer a pre-built, hosted customer billing
+portal for self-serve subscription management. Accrue now closes that gap with
+first-party local portal semantics while still exposing the core primitives for
+hand-rolled flows.
 
 ## Why Accrue Remains Headless
 

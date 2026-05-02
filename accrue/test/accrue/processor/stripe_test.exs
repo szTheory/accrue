@@ -308,6 +308,7 @@ defmodule Accrue.Processor.StripeTest do
           "lib/accrue/processor/stripe/error_mapper.ex",
           "lib/accrue/webhook/event.ex",
           "lib/accrue/webhook/ingest.ex",
+          "lib/accrue/webhook/plug.ex",
           "lib/accrue/webhook/signature.ex"
         ])
 

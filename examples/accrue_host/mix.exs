@@ -64,6 +64,7 @@ defmodule AccrueHost.MixProject do
       {:telemetry_poller, "~> 1.0"},
       accrue_dep(),
       accrue_admin_dep(),
+      accrue_portal_dep(),
       sigra_dep(),
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
@@ -85,6 +86,14 @@ defmodule AccrueHost.MixProject do
       {:accrue_admin, "~> #{accrue_admin_version()}"}
     else
       {:accrue_admin, path: "../../accrue_admin"}
+    end
+  end
+
+  defp accrue_portal_dep do
+    if hex_release?() do
+      {:accrue_portal, "~> #{accrue_portal_version()}"}
+    else
+      {:accrue_portal, path: "../../accrue_portal"}
     end
   end
 
@@ -112,6 +121,8 @@ defmodule AccrueHost.MixProject do
   defp accrue_version, do: sibling_package_version!("../../accrue/mix.exs")
 
   defp accrue_admin_version, do: sibling_package_version!("../../accrue_admin/mix.exs")
+
+  defp accrue_portal_version, do: sibling_package_version!("../../accrue_portal/mix.exs")
 
   defp sibling_package_version!(relative_path) do
     relative_path

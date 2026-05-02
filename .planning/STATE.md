@@ -2,14 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.33
 milestone_name: Braintree Full Maturity
-status: Awaiting `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`
-last_updated: "2026-05-01T20:04:56.998Z"
-last_activity: "2026-05-01 - Completed quick task 260501-lfk: repair active ROADMAP.md for v1.33"
+status: executing
+last_updated: "2026-05-02T01:32:31.287Z"
+last_activity: "2026-05-02 - Recovered Phase 101 execution baseline"
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 11
   completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -20,16 +21,16 @@ See: `.planning/PROJECT.md` (updated 2026-04-29)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.33 planning — Phase 101 (Accrue Portal Foundation & Checkout) ready for spec/discuss.
+**Current focus:** Phase 101 — Accrue Portal foundation and checkout recovery baseline
 
 ## Current Position
 
 Milestone: v1.33 — Braintree Full Maturity (planning open 2026-05-01)
-Phase: 101 (accrue-portal-foundation-and-checkout) — Not started
-Plan: — (not yet planned)
-Status: Awaiting `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`
-Resume file: --resume-file
-Last activity: 2026-05-01 - Completed quick task 260501-lfk: repair active ROADMAP.md for v1.33
+Phase: 101 (accrue-portal-foundation-checkout) — EXECUTING
+Plan: recovery baseline
+Status: Executing Phase 101
+Resume file: .planning/phases/101-accrue-portal-foundation-checkout/101-01-PLAN.md
+Last activity: 2026-05-02 - Recovered Phase 101 execution baseline
 
 ## Milestone Progress
 
@@ -53,8 +54,8 @@ Last activity: 2026-05-01 - Completed quick task 260501-lfk: repair active ROADM
 ## Current Planning Artifacts
 
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
-- **`.planning/ROADMAP.md`** — active milestone roadmap for **v1.32** (phases **97–100**) plus archived milestone index.
-- **`.planning/REQUIREMENTS.md`** — active **v1.32** requirements (**PROC-14..20**).
+- **`.planning/ROADMAP.md`** — active milestone roadmap for **v1.33** (phases **101–104**) plus archived milestone index.
+- **`.planning/REQUIREMENTS.md`** — active **v1.33** requirements (**BT-01..BT-07**).
 - **`milestones/v1.31-ROADMAP.md`** / **`v1.31-REQUIREMENTS.md`** — final v1.31 archives (phases 94–96, 5 requirements).
 - **`milestones/v1.30-ROADMAP.md`** / **`v1.30-REQUIREMENTS.md`** — final v1.30 archives (phases 91–93, all 12 requirements, final proof links, archived intact).
 - **`milestones/v1.29-ROADMAP.md`** / **`v1.29-REQUIREMENTS.md`** — final v1.29 archives (preserved, untouched).
@@ -105,7 +106,7 @@ Last activity: 2026-05-01 - Completed quick task 260501-lfk: repair active ROADM
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** **v1.33** planning open — Phases **101–104** scaffolded in **`milestones/v1.33-ROADMAP.md`** / **`v1.33-REQUIREMENTS.md`**. Continue with `/gsd-spec-phase 101` or `/gsd-discuss-phase 101`.
+**Next:** **Phase 101 execution in progress** — continue from the recovered local-portal baseline and finish plans **101-01** through **101-11**.
 
 **Completed (v1.32):** Phases **97–100** — **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`** + **`v1.32-REQUIREMENTS.md`**; tag **`v1.32`** (local).
 

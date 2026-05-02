@@ -94,8 +94,16 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
 
     def retrieve_payment_method(id) do
       case Agent.get(__MODULE__, &get_in(&1, [:payment_methods, id])) do
-        nil -> {:error, %Accrue.APIError{code: "not_found", http_status: 404, message: "payment method #{id} not found"}}
-        payment_method -> {:ok, payment_method}
+        nil ->
+          {:error,
+           %Accrue.APIError{
+             code: "not_found",
+             http_status: 404,
+             message: "payment method #{id} not found"
+           }}
+
+        payment_method ->
+          {:ok, payment_method}
       end
     end
 
@@ -201,14 +209,19 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
   defmodule PaymentMethodGatewayStub do
     def create(params, _opts), do: BraintreePaymentMethodStub.create_payment_method(params)
     def find(id, _opts), do: BraintreePaymentMethodStub.retrieve_payment_method(id)
-    def update(id, params, _opts), do: BraintreePaymentMethodStub.update_payment_method(id, params)
+
+    def update(id, params, _opts),
+      do: BraintreePaymentMethodStub.update_payment_method(id, params)
+
     def delete(id, _opts), do: BraintreePaymentMethodStub.detach_payment_method(id)
   end
 
   setup do
     previous = Application.get_env(:accrue, :processor)
     previous_customer_gateway = Application.get_env(:accrue, :braintree_customer_gateway)
-    previous_payment_method_gateway = Application.get_env(:accrue, :braintree_payment_method_gateway)
+
+    previous_payment_method_gateway =
+      Application.get_env(:accrue, :braintree_payment_method_gateway)
 
     Application.put_env(:accrue, :processor, Braintree)
     Application.put_env(:accrue, :braintree_customer_gateway, CustomerGatewayStub)
@@ -229,7 +242,11 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
       end
 
       if previous_payment_method_gateway do
-        Application.put_env(:accrue, :braintree_payment_method_gateway, previous_payment_method_gateway)
+        Application.put_env(
+          :accrue,
+          :braintree_payment_method_gateway,
+          previous_payment_method_gateway
+        )
       else
         Application.delete_env(:accrue, :braintree_payment_method_gateway)
       end
@@ -267,8 +284,13 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
     assert create_params[:payment_method_nonce] == "host_nonce_4242"
 
     source = File.read!(Path.join(@host_root, "lib/accrue_host/billing.ex"))
-    assert source =~ "def add_payment_method_with_vault_reference(%Scope{} = scope, vault_reference, opts \\\\ []) do"
-    assert source =~ "Billing.add_payment_method(customer, %{vault_acquisition: %{reference: vault_reference}}, opts)"
+
+    assert source =~
+             "def add_payment_method_with_vault_reference(%Scope{} = scope, vault_reference, opts \\\\ []) do"
+
+    assert source =~
+             "Billing.add_payment_method(customer, %{vault_acquisition: %{reference: vault_reference}}, opts)"
+
     refute source =~ "AccrueAdmin"
     refute source =~ "Drop-in"
   end

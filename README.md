@@ -39,6 +39,7 @@ cd examples/accrue_host && mix verify.full
 
 - `accrue` is the core billing library. Start there for generated `MyApp.Billing`, webhook wiring, test helpers, and upgrade guidance.
 - `accrue_admin` is the mounted LiveView admin UI. Add it after the core billing and signed-webhook path is in place.
+- `accrue_portal` is the mounted customer portal UI. Use it when a first-party processor needs local checkout or local self-serve billing flows.
 
 ## Stable first-time setup surface
 

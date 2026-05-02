@@ -179,7 +179,8 @@ defmodule Accrue.Billing.SubscriptionProjection do
   defp parse_braintree_status(status), do: parse_status(status)
 
   defp braintree_canceled_at(subscription, status) when status in [:canceled] do
-    unix_to_dt(get(subscription, :updated_at)) || unix_to_dt(get(subscription, :billing_period_end_date))
+    unix_to_dt(get(subscription, :updated_at)) ||
+      unix_to_dt(get(subscription, :billing_period_end_date))
   end
 
   defp braintree_canceled_at(_subscription, _status), do: nil
@@ -188,7 +189,7 @@ defmodule Accrue.Billing.SubscriptionProjection do
     canceled_at || unix_to_dt(get(subscription, :billing_period_end_date))
   end
 
-  defp braintree_ended_at(subscription, _status, _canceled_at) do
+  defp braintree_ended_at(_subscription, _status, _canceled_at) do
     nil
   end
 

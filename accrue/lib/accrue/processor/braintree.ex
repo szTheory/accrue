@@ -6,6 +6,9 @@ defmodule Accrue.Processor.Braintree do
   @behaviour Accrue.Processor
 
   alias Accrue.APIError
+  alias Accrue.Billing.Customer
+  alias Accrue.Checkout.LocalSession
+  alias Accrue.Config
 
   @impl Accrue.Processor
   def processor_name, do: "braintree"
@@ -33,9 +36,10 @@ defmodule Accrue.Processor.Braintree do
         pause: false,
         resume: false
       },
+      checkout: %{create: true, fetch: true, hosted: true, embedded: false},
       invoice: %{lifecycle_webhook_projection: true},
       webhook: %{verify: true, parse: true},
-      billing_portal: %{create: false}
+      billing_portal: %{create: true}
     }
   end
 
@@ -224,7 +228,8 @@ defmodule Accrue.Processor.Braintree do
   end
 
   @impl Accrue.Processor
-  def list_payment_methods(%{customer: customer_id}, opts) when is_binary(customer_id) and is_list(opts) do
+  def list_payment_methods(%{customer: customer_id}, opts)
+      when is_binary(customer_id) and is_list(opts) do
     case customer_gateway().find(customer_id, opts) do
       {:ok, customer} -> {:ok, %{data: translate_customer_payment_methods(customer)}}
       {:error, raw} -> {:error, to_accrue_error(raw)}
@@ -352,11 +357,39 @@ defmodule Accrue.Processor.Braintree do
 
   # Checkout + Customer Portal
   @impl Accrue.Processor
-  def checkout_session_create(_params, _opts), do: {:error, unsupported()}
+  def checkout_session_create(params, opts) when is_map(params) and is_list(opts) do
+    with {:ok, customer} <- checkout_customer(params),
+         {:ok, attrs} <- build_local_checkout_attrs(customer, params, opts),
+         {:ok, session} <- LocalSession.create_or_reuse(customer, attrs) do
+      {:ok, local_checkout_payload(session)}
+    end
+  end
+
   @impl Accrue.Processor
-  def checkout_session_fetch(_id, _opts), do: {:error, unsupported()}
+  def checkout_session_fetch(id, _opts) when is_binary(id) do
+    case LocalSession.by_id(id) do
+      %LocalSession{} = session -> {:ok, local_checkout_payload(session)}
+      nil -> {:error, invalid_request("unknown local checkout session #{inspect(id)}")}
+    end
+  end
+
   @impl Accrue.Processor
-  def portal_session_create(_params, _opts), do: {:error, unsupported()}
+  def portal_session_create(params, _opts) when is_map(params) do
+    with {:ok, customer} <- portal_customer(params) do
+      {:ok,
+       %{
+         id: "bps_local_" <> customer.id,
+         object: "billing_portal.session",
+         customer: customer.processor_id,
+         url: billing_portal_url(params),
+         return_url: params["return_url"] || params[:return_url],
+         data: %{
+           processor: "braintree",
+           local_portal: true
+         }
+       }}
+    end
+  end
 
   # --- Translation Helpers ---
 
@@ -383,7 +416,8 @@ defmodule Accrue.Processor.Braintree do
         {:error, unsupported_semantic("pause collection")}
 
       true ->
-        {:error, invalid_request("Unsupported Braintree subscription update payload: #{inspect(params)}")}
+        {:error,
+         invalid_request("Unsupported Braintree subscription update payload: #{inspect(params)}")}
     end
   end
 
@@ -400,7 +434,8 @@ defmodule Accrue.Processor.Braintree do
         {:ok, %{plan_id: plan_id}}
 
       true ->
-        {:error, invalid_request("Braintree plan swaps require a target plan_id/price reference.")}
+        {:error,
+         invalid_request("Braintree plan swaps require a target plan_id/price reference.")}
     end
   end
 
@@ -422,14 +457,11 @@ defmodule Accrue.Processor.Braintree do
     cond do
       invoice_now ->
         {:error,
-         invalid_request(
-           "Braintree immediate cancellation does not support invoice_now: true."
-         )}
+         invalid_request("Braintree immediate cancellation does not support invoice_now: true.")}
 
       prorate ->
         {:error,
-         invalid_request("Braintree immediate cancellation does not support prorate: true.")
-         }
+         invalid_request("Braintree immediate cancellation does not support prorate: true.")}
 
       true ->
         :ok
@@ -464,10 +496,14 @@ defmodule Accrue.Processor.Braintree do
 
   defp validate_refundable_status(transaction) do
     status = Map.get(transaction, :status) || Map.get(transaction, "status")
+
     if status in ["settling", "settled"] do
       :ok
     else
-      {:error, invalid_request("Braintree refunds require the sale to be settling or settled; got #{status}.")}
+      {:error,
+       invalid_request(
+         "Braintree refunds require the sale to be settling or settled; got #{status}."
+       )}
     end
   end
 
@@ -475,14 +511,43 @@ defmodule Accrue.Processor.Braintree do
     data = if is_struct(transaction), do: Map.from_struct(transaction), else: transaction
 
     raw_status = Map.get(data, :status) || Map.get(data, "status")
-    
-    normalized_status = 
+
+    normalized_status =
       case raw_status do
-        s when s in ["settled", :settled] -> "succeeded"
-        s when s in ["settling", :settling, "submitted_for_settlement", :submitted_for_settlement, "authorized", :authorized, "authorizing", :authorizing] -> "pending"
-        s when s in ["settlement_declined", :settlement_declined, "failed", :failed, "gateway_rejected", :gateway_rejected, "processor_declined", :processor_declined] -> "failed"
-        s when s in ["voided", :voided] -> "canceled"
-        _ -> "pending"
+        s when s in ["settled", :settled] ->
+          "succeeded"
+
+        s
+        when s in [
+               "settling",
+               :settling,
+               "submitted_for_settlement",
+               :submitted_for_settlement,
+               "authorized",
+               :authorized,
+               "authorizing",
+               :authorizing
+             ] ->
+          "pending"
+
+        s
+        when s in [
+               "settlement_declined",
+               :settlement_declined,
+               "failed",
+               :failed,
+               "gateway_rejected",
+               :gateway_rejected,
+               "processor_declined",
+               :processor_declined
+             ] ->
+          "failed"
+
+        s when s in ["voided", :voided] ->
+          "canceled"
+
+        _ ->
+          "pending"
       end
 
     %{
@@ -504,7 +569,8 @@ defmodule Accrue.Processor.Braintree do
 
     cond do
       not is_binary(reference) or reference == "" ->
-        {:error, invalid_request("Braintree create_payment_method requires vault_acquisition.reference.")}
+        {:error,
+         invalid_request("Braintree create_payment_method requires vault_acquisition.reference.")}
 
       not is_binary(customer_id) or customer_id == "" ->
         {:error, invalid_request("Braintree create_payment_method requires a customer id.")}
@@ -528,7 +594,7 @@ defmodule Accrue.Processor.Braintree do
       {:error,
        invalid_request(
          "Braintree update_payment_method requires replacement_reference for replacement semantics on #{id}."
-      )}
+       )}
     end
   end
 
@@ -547,7 +613,8 @@ defmodule Accrue.Processor.Braintree do
     |> maybe_move_name_to_company()
   end
 
-  defp maybe_move_name_to_company(%{"name" => name} = params) when is_binary(name) and name != "" do
+  defp maybe_move_name_to_company(%{"name" => name} = params)
+       when is_binary(name) and name != "" do
     params
     |> Map.put_new("company", name)
     |> Map.delete("name")
@@ -641,5 +708,105 @@ defmodule Accrue.Processor.Braintree do
       http_status: 501,
       message: "This operation is out of slice for the Braintree adapter."
     }
+  end
+
+  defp checkout_customer(params) do
+    portal_customer(params)
+  end
+
+  defp portal_customer(params) do
+    case params["customer"] || params[:customer] do
+      customer_id when is_binary(customer_id) ->
+        case Accrue.Repo.get_by(Customer, processor_id: customer_id, processor: "braintree") do
+          %Customer{} = customer ->
+            {:ok, customer}
+
+          nil ->
+            {:error,
+             invalid_request("customer #{inspect(customer_id)} is not provisioned locally")}
+        end
+
+      _ ->
+        {:error, invalid_request("local portal sessions require a customer id")}
+    end
+  end
+
+  defp build_local_checkout_attrs(%Customer{} = customer, params, opts) do
+    line_items = params["line_items"] || params[:line_items] || []
+    operation_id = Keyword.get(opts, :operation_id)
+
+    with {:ok, price_id} <- checkout_price_id(line_items) do
+      {:ok,
+       %{
+         processor: "braintree",
+         mode: params["mode"] || params[:mode] || "subscription",
+         ui_mode: params["ui_mode"] || params[:ui_mode] || "hosted",
+         price_id: price_id,
+         line_items: line_items,
+         success_url: params["success_url"] || params[:success_url],
+         cancel_url: params["cancel_url"] || params[:cancel_url],
+         return_url: params["return_url"] || params[:return_url],
+         operation_id: operation_id,
+         metadata: params["metadata"] || params[:metadata] || %{},
+         data: %{
+           customer_processor_id: customer.processor_id,
+           automatic_tax: params["automatic_tax"] || params[:automatic_tax] || %{}
+         }
+       }}
+    end
+  end
+
+  defp checkout_price_id([item | _]) when is_map(item) do
+    case item[:price] || item["price"] do
+      price when is_binary(price) and price != "" ->
+        {:ok, price}
+
+      _ ->
+        {:error,
+         invalid_request("Braintree checkout requires the first line item to carry a price id")}
+    end
+  end
+
+  defp checkout_price_id(_),
+    do: {:error, invalid_request("Braintree checkout requires at least one line item")}
+
+  defp local_checkout_payload(%LocalSession{} = session) do
+    %{
+      id: session.id,
+      object: "checkout.session",
+      customer: customer_processor_id(session),
+      mode: session.mode,
+      ui_mode: session.ui_mode,
+      status: session.status,
+      payment_status: payment_status(session),
+      url: Config.portal_url("#{Config.portal_mount_path()}/checkout/#{session.session_token}"),
+      expires_at: session.expires_at,
+      metadata: session.metadata,
+      line_items: session.line_items,
+      data:
+        Map.merge(session.data || %{}, %{"local_portal" => true, "price_id" => session.price_id})
+    }
+  end
+
+  defp customer_processor_id(%LocalSession{customer_id: customer_id}) do
+    case Accrue.Repo.get(Customer, customer_id) do
+      %Customer{processor_id: processor_id} -> processor_id
+      _ -> nil
+    end
+  end
+
+  defp payment_status(%LocalSession{status: "completed"}), do: "paid"
+  defp payment_status(_session), do: "unpaid"
+
+  defp billing_portal_url(params) do
+    base = Config.portal_mount_path()
+
+    case params["return_url"] || params[:return_url] do
+      value when is_binary(value) and value != "" ->
+        Config.portal_url("#{base}?return_url=#{URI.encode_www_form(value)}")
+
+      _ ->
+        Config.portal_url(base)
+    end
   end
 end

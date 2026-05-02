@@ -31,7 +31,9 @@ defmodule Accrue.Billing.PaymentMethodListTest do
     %{customer: customer}
   end
 
-  test "list_payment_methods returns local payment-method rows without provider fetches", %{customer: cus} do
+  test "list_payment_methods returns local payment-method rows without provider fetches", %{
+    customer: cus
+  } do
     {:ok, %{id: pm_id}} = Fake.create_payment_method(%{type: "card"}, [])
 
     assert {:ok, %PaymentMethod{} = attached} = Billing.attach_payment_method(cus, pm_id)

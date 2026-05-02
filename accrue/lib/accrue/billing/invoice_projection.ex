@@ -27,7 +27,7 @@ defmodule Accrue.Billing.InvoiceProjection do
     # Braintree branch: project the latest transaction from the subscription as an invoice.
     # The webhook sends the subscription object, and the most recent transaction reflects the lifecycle event.
     tx = List.first(transactions) || %{}
-    
+
     status =
       case tx["status"] do
         "settled" -> :paid
@@ -45,19 +45,24 @@ defmodule Accrue.Billing.InvoiceProjection do
 
     refund_ids = tx["refund_ids"] || []
     refund_count = length(refund_ids)
-    
+
     # We will compute the total refunded amount. Braintree transaction returns `refunded_transaction_id` on the refund itself.
     # If the braintree_sub payload doesn't embed refund amounts natively in the parent transaction, we might need 
     # to rely on something else or assume it's added. Let's look for `refund_amount` or just default.
     # Braintree transactions don't have a `total_refunded_amount_minor` out of the box in the summary unless we fetch it.
     # However, if it's provided in the payload (e.g. by our normalization or fetch), we'll read it.
     total_refunded_amount_minor = (tx["refunded_amount"] || 0) * 100
-    
+
     refund_progress =
       cond do
-        refund_count > 0 and total_refunded_amount_minor >= (tx["amount"] || 0) * 100 -> :fully_refunded
-        refund_count > 0 -> :partially_refunded
-        true -> :none
+        refund_count > 0 and total_refunded_amount_minor >= (tx["amount"] || 0) * 100 ->
+          :fully_refunded
+
+        refund_count > 0 ->
+          :partially_refunded
+
+        true ->
+          :none
       end
 
     invoice_attrs = %{

@@ -17,12 +17,12 @@ defmodule Accrue.Processor.BraintreeTest do
     def find(id, _opts) do
       {:ok,
        %{
-          id: id,
-          company: "ACME Billing",
-          email: "billing@example.com",
-          custom_fields: %{"source" => "stubbed"},
-          default_payment_method_token: "pm_bt_default_1111",
-          payment_methods: [
+         id: id,
+         company: "ACME Billing",
+         email: "billing@example.com",
+         custom_fields: %{"source" => "stubbed"},
+         default_payment_method_token: "pm_bt_default_1111",
+         payment_methods: [
            %{
              token: "pm_bt_default_1111",
              default: true,
@@ -250,11 +250,14 @@ defmodule Accrue.Processor.BraintreeTest do
     assert caps.subscription.cancel_at_period_end == false
     assert caps.subscription.pause == false
     assert caps.subscription.resume == false
+    assert get_in(caps, [:checkout, :create]) == true
+    assert get_in(caps, [:checkout, :fetch]) == true
+    assert get_in(caps, [:checkout, :hosted]) == true
+    assert get_in(caps, [:checkout, :embedded]) == false
     assert caps.invoice.lifecycle_webhook_projection == true
     assert caps.webhook.verify == true
     assert caps.webhook.parse == true
-    assert get_in(caps, [:billing_portal, :create]) == false
-
+    assert get_in(caps, [:billing_portal, :create]) == true
   end
 
   test "build_request/1 maps price_id to plan_id and accepts only payment_method.vault_acquisition.reference" do
@@ -264,9 +267,9 @@ defmodule Accrue.Processor.BraintreeTest do
     }
 
     assert Braintree.build_request(params) == %{
-      payment_method_token: "vaulted_token_abc",
-      plan_id: "premium_monthly"
-    }
+             payment_method_token: "vaulted_token_abc",
+             plan_id: "premium_monthly"
+           }
   end
 
   test "translate_subscription/1 converts Braintree.Subscription struct to a plain map" do
@@ -283,7 +286,9 @@ defmodule Accrue.Processor.BraintreeTest do
     assert accrue_map.id == "sub_123"
     assert accrue_map.plan_id == "premium_monthly"
     assert accrue_map.status == "Active"
-    assert [%{id: "sub_123:plan", price: %{id: "premium_monthly"}, quantity: 1}] = accrue_map.items
+
+    assert [%{id: "sub_123:plan", price: %{id: "premium_monthly"}, quantity: 1}] =
+             accrue_map.items
   end
 
   test "customer callbacks create, retrieve, and update through the gateway" do
@@ -333,7 +338,11 @@ defmodule Accrue.Processor.BraintreeTest do
     assert canceled.status == "Canceled"
 
     assert {:ok, canceled} =
-             Braintree.cancel_subscription("sub_bt_123", %{invoice_now: false, prorate: false}, [])
+             Braintree.cancel_subscription(
+               "sub_bt_123",
+               %{invoice_now: false, prorate: false},
+               []
+             )
 
     assert canceled.status == "Canceled"
 

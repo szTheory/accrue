@@ -37,13 +37,13 @@ defmodule Accrue.Processor.Capabilities do
       lifecycle_webhook_projection: "all first-party"
     },
     checkout: %{
-      create: "Stripe-only",
-      fetch: "Stripe-only",
-      hosted: "Stripe-only",
+      create: "first-party local portal",
+      fetch: "first-party local portal",
+      hosted: "first-party local portal",
       embedded: "out of slice"
     },
     billing_portal: %{
-      create: "Stripe-only"
+      create: "first-party local portal"
     },
     webhook: %{
       verify: "all first-party",

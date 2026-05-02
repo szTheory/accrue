@@ -1,0 +1,124 @@
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #f6f9fb 0%, #eef4f6 100%);
+  color: var(--accrue-ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+}
+
+.portal-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.portal-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(17, 20, 24, 0.08);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 18px 48px rgba(36, 48, 59, 0.08);
+  margin-bottom: 18px;
+}
+
+.portal-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.portal-nav,
+.portal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.portal-nav a,
+.portal-button-primary,
+.portal-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border-radius: 999px;
+  padding: 0 16px;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.portal-button-primary {
+  background: var(--accrue-moss);
+  color: white;
+}
+
+.portal-button-secondary,
+.portal-nav a {
+  background: #f1f4f6;
+  color: var(--accrue-slate);
+}
+
+.portal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.portal-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid var(--accrue-fog);
+}
+
+.portal-list li:first-child {
+  border-top: 0;
+}
+
+.portal-hosted-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.portal-hosted-field {
+  min-height: 42px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--accrue-fog);
+  background: white;
+}
+
+.portal-help {
+  min-height: 1.25rem;
+  color: #b14f2d;
+}
+
+.portal-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  color: var(--accrue-cobalt);
+}
+
+.portal-metric {
+  font-size: 2rem;
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .portal-hero {
+    flex-direction: column;
+  }
+}

@@ -68,16 +68,15 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
            Processor.__impl__().retrieve_refund(sid,
              expand: ["balance_transaction", "charge.balance_transaction"]
            ) do
-      
       # Update status if changed
       new_status = extract_status(canonical) || row.status
-      
+
       # Extract fees
       charge_bt = extract_charge_balance_transaction(canonical)
       fee = Map.get(charge_bt, "fee") || Map.get(charge_bt, :fee)
       fr = Map.get(charge_bt, "fee_refunded") || Map.get(charge_bt, :fee_refunded)
 
-      attrs = 
+      attrs =
         if is_integer(fee) and is_integer(fr) do
           %{
             stripe_fee_refunded_amount_minor: fr,
@@ -93,7 +92,7 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
 
       if attrs[:status] != row.status or Map.has_key?(attrs, :stripe_fee_refunded_amount_minor) do
         {:ok, updated} = row |> Refund.changeset(attrs) |> Repo.update()
-        
+
         if Map.has_key?(attrs, :stripe_fee_refunded_amount_minor) and is_nil(row.fees_settled_at) do
           :telemetry.execute(
             [:accrue, :billing, :refund, :fees_settled],
@@ -110,7 +109,7 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
             })
         end
       end
-      
+
       :ok
     else
       _ -> :skip
@@ -121,6 +120,7 @@ defmodule Accrue.Jobs.ReconcileRefundFees do
 
   defp extract_status(canonical) do
     status_str = Map.get(canonical, "status") || Map.get(canonical, :status)
+
     if is_binary(status_str) do
       try do
         String.to_existing_atom(status_str)

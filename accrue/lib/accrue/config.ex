@@ -154,6 +154,30 @@ defmodule Accrue.Config do
           "Example: `[MyApp.BillingHandler, MyApp.AnalyticsHandler]`."
     ],
 
+    # --- Customer portal / local checkout ----------------------------------
+    portal_mount_path: [
+      type: :string,
+      default: "/billing",
+      doc:
+        "Mount path for the first-party `Accrue.Portal` routes when a processor " <>
+          "uses local portal semantics. Returned checkout / billing-portal URLs " <>
+          "append to this normalized path after `:portal_base_url` supplies the absolute host."
+    ],
+    portal_base_url: [
+      type: {:or, [:string, nil]},
+      default: nil,
+      doc:
+        "Optional absolute base URL (for example `https://app.example.com`) " <>
+          "required for returned local portal checkout and billing-portal URLs."
+    ],
+    braintree_client_token_generator: [
+      type: :atom,
+      default: Braintree.ClientToken,
+      doc:
+        "Module used to generate Braintree client tokens for Hosted Fields. " <>
+          "Must export `generate/1`."
+    ],
+
     # --- Subscription lifecycle --------------------------------------------
     expiring_card_thresholds: [
       type: {:custom, __MODULE__, :validate_descending, []},
@@ -515,6 +539,82 @@ defmodule Accrue.Config do
 
       migrations
     end)
+  end
+
+  @spec portal_mount_path() :: String.t()
+  def portal_mount_path do
+    :accrue
+    |> Application.get_env(:portal_mount_path, "/billing")
+    |> normalize_mount_path()
+  end
+
+  @spec portal_base_url() :: String.t() | nil
+  def portal_base_url do
+    case Application.get_env(:accrue, :portal_base_url) do
+      value when is_binary(value) ->
+        value
+        |> String.trim()
+        |> String.trim_trailing("/")
+        |> case do
+          "" -> nil
+          normalized -> validate_portal_base_url!(normalized)
+        end
+
+      _ ->
+        nil
+    end
+  end
+
+  @spec portal_url(String.t()) :: String.t()
+  def portal_url(path) when is_binary(path) do
+    normalized_path =
+      path
+      |> String.trim()
+      |> case do
+        "" -> "/"
+        value -> "/" <> String.trim_leading(value, "/")
+      end
+
+    case portal_base_url() do
+      nil ->
+        raise Accrue.ConfigError,
+          key: :portal_base_url,
+          message:
+            "missing accrue config key: :portal_base_url (set an absolute base URL before returning local portal checkout or billing portal URLs)"
+
+      base ->
+        base <> normalized_path
+    end
+  end
+
+  @spec normalize_mount_path(String.t()) :: String.t()
+  def normalize_mount_path(path) when is_binary(path) do
+    path
+    |> String.trim()
+    |> case do
+      "" -> "/"
+      "/" -> "/"
+      value -> "/" <> String.trim_leading(value, "/")
+    end
+    |> String.trim_trailing("/")
+    |> case do
+      "" -> "/"
+      value -> value
+    end
+  end
+
+  defp validate_portal_base_url!(value) do
+    case URI.parse(value) do
+      %URI{scheme: scheme, host: host}
+      when scheme in ["http", "https"] and is_binary(host) and host != "" ->
+        value
+
+      _ ->
+        raise Accrue.ConfigError,
+          key: :portal_base_url,
+          message:
+            "invalid accrue config key: :portal_base_url (expected an absolute http(s) URL such as https://app.example.com)"
+    end
   end
 
   @doc """

@@ -93,7 +93,11 @@ defmodule Accrue.Billing.PaymentMethodCrudBraintreeTest do
 
     def update_payment_method(id, params, _opts) do
       with {:ok, existing} <- retrieve_payment_method(id, []),
-           replacement <- payment_method(Map.get(params, :replacement_reference) || params["replacement_reference"], params) do
+           replacement <-
+             payment_method(
+               Map.get(params, :replacement_reference) || params["replacement_reference"],
+               params
+             ) do
         updated =
           existing
           |> Map.merge(replacement)
@@ -238,10 +242,18 @@ defmodule Accrue.Billing.PaymentMethodCrudBraintreeTest do
     customer: customer
   } do
     {:ok, default_pm} =
-      Billing.add_payment_method(customer, %{vault_acquisition: %{reference: "vault_tok_1111"}}, [])
+      Billing.add_payment_method(
+        customer,
+        %{vault_acquisition: %{reference: "vault_tok_1111"}},
+        []
+      )
 
     {:ok, _other_pm} =
-      Billing.add_payment_method(customer, %{vault_acquisition: %{reference: "vault_tok_2222"}}, [])
+      Billing.add_payment_method(
+        customer,
+        %{vault_acquisition: %{reference: "vault_tok_2222"}},
+        []
+      )
 
     {:ok, _customer} = Billing.set_default_payment_method(customer, default_pm, [])
 
@@ -254,7 +266,11 @@ defmodule Accrue.Billing.PaymentMethodCrudBraintreeTest do
   test "delete_payment_method/2 blocks deletion when an active braintree subscription still uses the token",
        %{customer: customer} do
     {:ok, payment_method} =
-      Billing.add_payment_method(customer, %{vault_acquisition: %{reference: "vault_tok_3333"}}, [])
+      Billing.add_payment_method(
+        customer,
+        %{vault_acquisition: %{reference: "vault_tok_3333"}},
+        []
+      )
 
     {:ok, customer} = Billing.set_default_payment_method(customer, payment_method, [])
 
@@ -278,11 +294,17 @@ defmodule Accrue.Billing.PaymentMethodCrudBraintreeTest do
   test "delete_payment_method/2 allows deleting the last remaining default when no active dependency blocks removal",
        %{customer: customer} do
     {:ok, payment_method} =
-      Billing.add_payment_method(customer, %{vault_acquisition: %{reference: "vault_tok_4444"}}, [])
+      Billing.add_payment_method(
+        customer,
+        %{vault_acquisition: %{reference: "vault_tok_4444"}},
+        []
+      )
 
     {:ok, customer} = Billing.set_default_payment_method(customer, payment_method, [])
 
-    assert {:ok, %PaymentMethod{id: deleted_id}} = Billing.delete_payment_method(payment_method, [])
+    assert {:ok, %PaymentMethod{id: deleted_id}} =
+             Billing.delete_payment_method(payment_method, [])
+
     assert deleted_id == payment_method.id
     assert Repo.get(PaymentMethod, payment_method.id) == nil
     assert Repo.get!(Customer, customer.id).default_payment_method_id == nil
@@ -291,15 +313,17 @@ defmodule Accrue.Billing.PaymentMethodCrudBraintreeTest do
   test "sync_payment_methods/2 repairs local drift while list_payment_methods/2 stays local-row-first",
        %{customer: customer} do
     stale =
-      Repo.insert!(PaymentMethod.changeset(%PaymentMethod{}, %{
-        customer_id: customer.id,
-        processor: "braintree",
-        processor_id: "pm_bt_stale",
-        type: "card",
-        fingerprint: "fp_stale",
-        card_brand: "visa",
-        card_last4: "0000"
-      }))
+      Repo.insert!(
+        PaymentMethod.changeset(%PaymentMethod{}, %{
+          customer_id: customer.id,
+          processor: "braintree",
+          processor_id: "pm_bt_stale",
+          type: "card",
+          fingerprint: "fp_stale",
+          card_brand: "visa",
+          card_last4: "0000"
+        })
+      )
 
     :ok =
       BraintreeCRUDStub.reset(%{
@@ -308,7 +332,13 @@ defmodule Accrue.Billing.PaymentMethodCrudBraintreeTest do
           object: "payment_method",
           type: "card",
           customer: customer.processor_id,
-          card: %{brand: "visa", last4: "5555", exp_month: 12, exp_year: 2035, fingerprint: "fp_live5555"}
+          card: %{
+            brand: "visa",
+            last4: "5555",
+            exp_month: 12,
+            exp_year: 2035,
+            fingerprint: "fp_live5555"
+          }
         }
       })
 

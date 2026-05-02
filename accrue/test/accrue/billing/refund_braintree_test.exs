@@ -95,7 +95,9 @@ defmodule Accrue.Billing.RefundBraintreeTest do
     assert refund.processor_id == "ref_bt_scripted_100.00"
   end
 
-  test "repeated partial refunds create distinct refund rows tied to one parent charge", %{charge: charge} do
+  test "repeated partial refunds create distinct refund rows tied to one parent charge", %{
+    charge: charge
+  } do
     assert {:ok, %Refund{} = r1} =
              Billing.refund(charge, amount: Accrue.Money.new(4000, :usd), operation_id: "op_3")
 

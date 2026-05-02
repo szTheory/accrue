@@ -6,7 +6,7 @@
     {
       "type": "linked-versions",
       "groupName": "accrue-monorepo",
-      "components": ["accrue", "accrue_admin"]
+      "components": ["accrue", "accrue_admin", "accrue_portal"]
     }
   ],
   "packages": {
@@ -21,6 +21,13 @@
       "component": "accrue_admin",
       "release-type": "elixir",
       "package-name": "accrue_admin",
+      "changelog-path": "CHANGELOG.md",
+      "include-component-in-tag": true
+    },
+    "accrue_portal": {
+      "component": "accrue_portal",
+      "release-type": "elixir",
+      "package-name": "accrue_portal",
       "changelog-path": "CHANGELOG.md",
       "include-component-in-tag": true
     }

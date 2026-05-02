@@ -270,7 +270,7 @@ defmodule Accrue.Webhook.PlugTest do
       </subject>
     </notification>
     """
-    
+
     payload = Base.encode64(xml_payload)
     hash = Braintree.Webhook.Digest.hexdigest("test_private_key", payload)
     sig = "test_public_key|#{hash}"
@@ -286,7 +286,9 @@ defmodule Accrue.Webhook.PlugTest do
 
     events = Accrue.TestRepo.all(Accrue.Webhook.WebhookEvent)
     # Braintree event should be inserted
-    assert Enum.any?(events, fn e -> e.processor == "braintree" and e.type == "subscription_charged_successfully" end)
+    assert Enum.any?(events, fn e ->
+             e.processor == "braintree" and e.type == "subscription_charged_successfully"
+           end)
   end
 
   test "POST to braintree webhook missing bt_signature returns 400" do

@@ -263,6 +263,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   def swap_plan(%Subscription{} = sub, new_price_id, opts) when is_binary(new_price_id) do
     validated = validate_swap_opts!(opts)
     sub = Repo.preload(sub, :subscription_items)
+
     result =
       if braintree_processor?() do
         {:error,
@@ -653,8 +654,7 @@ defmodule Accrue.Billing.SubscriptionActions do
        %Accrue.APIError{
          code: "processor_operation_unsupported",
          http_status: 422,
-         message:
-           "Braintree does not expose Accrue's pause/2 collection semantic."
+         message: "Braintree does not expose Accrue's pause/2 collection semantic."
        }}
     else
       Repo.transact(fn ->
@@ -773,8 +773,7 @@ defmodule Accrue.Billing.SubscriptionActions do
        %Accrue.APIError{
          code: "processor_operation_unsupported",
          http_status: 422,
-         message:
-           "Braintree does not expose Accrue's unpause/2 collection semantic."
+         message: "Braintree does not expose Accrue's unpause/2 collection semantic."
        }}
     else
       op_id = Actor.current_operation_id!()

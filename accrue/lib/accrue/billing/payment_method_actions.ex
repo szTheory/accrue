@@ -157,7 +157,8 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
       with {:ok, remote} <-
              Processor.__impl__().list_payment_methods(params, sanitize_opts(opts)),
-           {:ok, payment_methods} <- reproject_payment_methods(customer, remote_payment_methods(remote)) do
+           {:ok, payment_methods} <-
+             reproject_payment_methods(customer, remote_payment_methods(remote)) do
         {:ok, payment_methods}
       end
     else
@@ -315,7 +316,11 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
   @spec set_default_payment_method(Customer.t(), PaymentMethod.t(), keyword()) ::
           {:ok, Customer.t()} | {:error, term()}
-  def set_default_payment_method(%Customer{} = customer, %PaymentMethod{} = payment_method, opts \\ []) do
+  def set_default_payment_method(
+        %Customer{} = customer,
+        %PaymentMethod{} = payment_method,
+        opts \\ []
+      ) do
     unless payment_method.customer_id == customer.id do
       raise Accrue.Error.NotAttached,
         customer_id: customer.id,
@@ -372,7 +377,7 @@ defmodule Accrue.Billing.PaymentMethodActions do
   defp reproject_payment_methods(%Customer{} = customer, remote_payment_methods) do
     Repo.transact(fn ->
       existing =
-        Repo.all(from p in PaymentMethod, where: p.customer_id == ^customer.id)
+        Repo.all(from(p in PaymentMethod, where: p.customer_id == ^customer.id))
 
       existing_by_processor_id = Map.new(existing, &{&1.processor_id, &1})
       remote_ids = MapSet.new(Enum.map(remote_payment_methods, &get_field(&1, :id)))
@@ -448,7 +453,9 @@ defmodule Accrue.Billing.PaymentMethodActions do
     }
   end
 
-  defp maybe_set_default(customer, payment_method, true), do: update_customer_default(customer, payment_method.id)
+  defp maybe_set_default(customer, payment_method, true),
+    do: update_customer_default(customer, payment_method.id)
+
   defp maybe_set_default(customer, _payment_method, false), do: {:ok, customer}
 
   defp ensure_delete_allowed(customer, payment_method) do
@@ -461,7 +468,8 @@ defmodule Accrue.Billing.PaymentMethodActions do
            message: "payment method is still funding an active subscription"
          }}
 
-      customer.default_payment_method_id == payment_method.id and has_other_usable_methods?(customer, payment_method) ->
+      customer.default_payment_method_id == payment_method.id and
+          has_other_usable_methods?(customer, payment_method) ->
         {:error,
          %APIError{
            code: "payment_method_replacement_required",
@@ -484,8 +492,9 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
   defp active_braintree_subscriptions(customer_id) do
     Repo.all(
-      from s in Subscription,
+      from(s in Subscription,
         where: s.customer_id == ^customer_id and s.processor == "braintree"
+      )
     )
     |> Enum.filter(&Subscription.active?/1)
   end
@@ -500,9 +509,10 @@ defmodule Accrue.Billing.PaymentMethodActions do
   defp local_payment_methods(%Customer{} = customer) do
     payment_methods =
       Repo.all(
-        from p in PaymentMethod,
+        from(p in PaymentMethod,
           where: p.customer_id == ^customer.id,
           order_by: [asc: p.inserted_at]
+        )
       )
 
     Enum.sort_by(payment_methods, fn payment_method ->
@@ -518,8 +528,12 @@ defmodule Accrue.Billing.PaymentMethodActions do
 
   defp get_payment_method(customer_id, processor_id) when is_binary(processor_id) do
     case Repo.get_by(PaymentMethod, customer_id: customer_id, processor_id: processor_id) do
-      %PaymentMethod{} = payment_method -> {:ok, payment_method}
-      nil -> {:error, invalid_request("payment-method sync did not project processor row #{processor_id}")}
+      %PaymentMethod{} = payment_method ->
+        {:ok, payment_method}
+
+      nil ->
+        {:error,
+         invalid_request("payment-method sync did not project processor row #{processor_id}")}
     end
   end
 
@@ -533,14 +547,17 @@ defmodule Accrue.Billing.PaymentMethodActions do
           :ok
 
         _ ->
-          {:error, invalid_request("Braintree add_payment_method requires vault_acquisition.reference")}
+          {:error,
+           invalid_request("Braintree add_payment_method requires vault_acquisition.reference")}
       end
     else
       :ok
     end
   end
 
-  defp remote_payment_methods(%{data: payment_methods}) when is_list(payment_methods), do: payment_methods
+  defp remote_payment_methods(%{data: payment_methods}) when is_list(payment_methods),
+    do: payment_methods
+
   defp remote_payment_methods(payment_methods) when is_list(payment_methods), do: payment_methods
   defp remote_payment_methods(_), do: []
 

@@ -100,7 +100,9 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
     %{previous_processor: previous}
   end
 
-  test "subscribe/3 keeps the fake-backed direct-create slice working", %{previous_processor: _previous} do
+  test "subscribe/3 keeps the fake-backed direct-create slice working", %{
+    previous_processor: _previous
+  } do
     Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
 
     {:ok, customer} =
@@ -139,7 +141,9 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
     assert error.message =~ "require a vaulted payment_method_token passed as"
 
     assert {:error, %Accrue.APIError{code: "invalid_request_error"}} =
-             Billing.subscribe(customer, "price_premium", payment_method: %{vault_acquisition: %{}})
+             Billing.subscribe(customer, "price_premium",
+               payment_method: %{vault_acquisition: %{}}
+             )
 
     assert {:error, %Accrue.APIError{code: "invalid_request_error"}} =
              Billing.subscribe(customer, "price_premium")

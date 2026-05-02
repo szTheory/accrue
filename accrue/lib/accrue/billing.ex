@@ -426,10 +426,9 @@ defmodule Accrue.Billing do
   or support tickets. For `:configuration`, see
   `guides/portal_configuration_checklist.md`.
 
-  **Note on processor support:** Not all gateways support hosted billing
-  portals (e.g., Braintree). If the configured processor lacks the capability,
-  this will return an `{:error, %Accrue.APIError{code: :unsupported_by_gateway}}`.
-  See `guides/braintree-local-portal.md` for building a local portal.
+  **Note on processor support:** Some processors route billing-portal access
+  through a first-party local portal rather than an upstream hosted page.
+  In that case the returned `url` points at the host app's mounted portal path.
 
   Emits `[:accrue, :billing, :billing_portal, :create]` (OpenTelemetry name
   `accrue.billing.billing_portal.create`).
@@ -442,17 +441,7 @@ defmodule Accrue.Billing do
     validated = NimbleOptions.validate!(opts_list, @billing_portal_session_attrs_schema)
 
     span_billing(:billing_portal, :create, customer, validated, fn ->
-      if Accrue.Processor.supports?([:billing_portal, :create]) do
-        Session.create(Map.new([customer: customer] ++ validated))
-      else
-        {:error,
-         %Accrue.APIError{
-           code: :unsupported_by_gateway,
-           http_status: 400,
-           message:
-             "The configured processor (Braintree) does not support a hosted billing portal. See guides/braintree-local-portal.md for building a local portal."
-         }}
-      end
+      Session.create(Map.new([customer: customer] ++ validated))
     end)
   end
 
@@ -463,9 +452,7 @@ defmodule Accrue.Billing do
   Raises `NimbleOptions.ValidationError` when `attrs` fail validation.
 
   On `{:error, reason}` from the underlying processor operation, re-raises when
-  `reason` implements `Exception` (including `:unsupported_by_gateway` errors);
-  otherwise raises a generic failure message. See `guides/braintree-local-portal.md`
-  for dealing with processors that do not support hosted portals.
+  `reason` implements `Exception`; otherwise raises a generic failure message.
   """
   @spec create_billing_portal_session!(Customer.t(), keyword() | map()) :: Session.t()
   def create_billing_portal_session!(%Customer{} = customer, attrs)

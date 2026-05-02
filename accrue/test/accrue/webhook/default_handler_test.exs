@@ -114,7 +114,8 @@ defmodule Accrue.Webhook.DefaultHandlerTest do
 
       assert :ok = DefaultHandler.handle_event("subscription_canceled", event, %{})
 
-      assert_received {:telemetry_missing_id, %{type: "subscription_canceled", processor: :braintree}}
+      assert_received {:telemetry_missing_id,
+                       %{type: "subscription_canceled", processor: :braintree}}
 
       :telemetry.detach("test-braintree-missing-id")
     end
@@ -132,10 +133,12 @@ defmodule Accrue.Webhook.DefaultHandlerTest do
       # For braintree, invoice.paid fetches a :subscription.
       # Fake.fetch(:subscription, "sub_123") will return {:error, %APIError{code: "resource_missing"}}.
       # If normalization works, handle_event will return the error from the reducer.
-      assert {:error, %Accrue.APIError{code: "resource_missing"}} = DefaultHandler.handle_event("subscription_charged_successfully", event, %{})
-      
+      assert {:error, %Accrue.APIError{code: "resource_missing"}} =
+               DefaultHandler.handle_event("subscription_charged_successfully", event, %{})
+
       # For customer.subscription.deleted, it also fetches a :subscription.
-      assert {:error, %Accrue.APIError{code: "resource_missing"}} = DefaultHandler.handle_event("subscription_canceled", event, %{})
+      assert {:error, %Accrue.APIError{code: "resource_missing"}} =
+               DefaultHandler.handle_event("subscription_canceled", event, %{})
     end
   end
 end

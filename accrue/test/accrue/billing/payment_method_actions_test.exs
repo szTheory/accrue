@@ -70,7 +70,10 @@ defmodule Accrue.Billing.PaymentMethodActionsTest do
     end)
 
     assert {:ok, _deleted} =
-             Billing.delete_payment_method(payment_method, actor: %{id: "admin_1"}, scope: :test_scope)
+             Billing.delete_payment_method(payment_method,
+               actor: %{id: "admin_1"},
+               scope: :test_scope
+             )
 
     assert_receive {:detach_payment_method, "pm_delete_opts", opts}
     assert opts[:actor] == %{id: "admin_1"}

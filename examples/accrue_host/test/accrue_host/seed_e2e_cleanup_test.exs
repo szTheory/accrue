@@ -32,7 +32,11 @@ defmodule AccrueHost.SeedE2ECleanupTest do
     fixture_payment_method_ids = Map.values(first_fixture.admin_denial_payment_method_ids)
 
     assert length(fixture_payment_method_ids) == 3
-    assert Repo.aggregate(from(pm in PaymentMethod, where: pm.id in ^fixture_payment_method_ids), :count) == 3
+
+    assert Repo.aggregate(
+             from(pm in PaymentMethod, where: pm.id in ^fixture_payment_method_ids),
+             :count
+           ) == 3
 
     assert Repo.aggregate(
              from(event in Event,
@@ -59,7 +63,11 @@ defmodule AccrueHost.SeedE2ECleanupTest do
     assert second_fixture.webhook_id != fixture_webhook_id
     assert second_fixture.subscription_id != fixture_subscription_id
     assert length(second_fixture_payment_method_ids) == 3
-    assert Repo.aggregate(from(pm in PaymentMethod, where: pm.id in ^second_fixture_payment_method_ids), :count) == 3
+
+    assert Repo.aggregate(
+             from(pm in PaymentMethod, where: pm.id in ^second_fixture_payment_method_ids),
+             :count
+           ) == 3
 
     refute Repo.get(WebhookEvent, fixture_webhook_id)
     refute Repo.exists?(from(pm in PaymentMethod, where: pm.id in ^fixture_payment_method_ids))
