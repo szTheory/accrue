@@ -78,7 +78,7 @@ Plans:
 - [ ] `101-02-PLAN.md` — Align `accrue_portal` mount/auth/CSP shell with the locked public contract and establish the base browser harness
 - [x] `101-03-PLAN.md` — Flip Braintree adapter/facade checkout and billing-portal semantics to first-party local portal support
 - [ ] `101-04-PLAN.md` — Implement the Hosted Fields checkout UI, browser hook, and package-local checkout coverage
-- [ ] `101-05-PLAN.md` — Complete the dashboard/subscription production slice with D-19 customer scoping and centralized copy
+- [x] `101-05-PLAN.md` — Complete the dashboard/subscription production slice with D-19 customer scoping and centralized copy
 - [ ] `101-06-PLAN.md` — Finish payment-method/invoice production surfaces and route wiring
 - [x] `101-07-PLAN.md` — Lock the D-04 portal dependency contract, Braintree mocks, and shell regression tests
 - [ ] `101-08-PLAN.md` — Add synthetic checkout-completion event plumbing and portal telemetry coverage
