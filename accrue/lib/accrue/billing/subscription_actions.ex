@@ -127,24 +127,29 @@ defmodule Accrue.Billing.SubscriptionActions do
     result =
       with {:ok, processor_params} <-
              build_subscription_request(customer, item_params, trial_end, opts),
-           :ok <- ensure_customer_tax_location(customer, opts),
-           processor_result <-
-             Processor.__impl__().create_subscription(
-               processor_params,
-               [idempotency_key: idem_key] ++ sanitize_opts(opts)
-             ) do
-        case processor_result do
-          {:ok, stripe_sub} ->
-            Repo.transact(fn ->
-              with :ok <- ensure_valid_tax_location(stripe_sub, opts),
-                   {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
-                   {:ok, sub} <- insert_subscription(customer.id, attrs),
-                   {:ok, _items} <- upsert_items(sub, stripe_sub),
-                   {:ok, _} <- record_event("subscription.created", sub, %{price_id: price_id}) do
-                sub = Repo.preload(sub, :subscription_items, force: true)
-                {:ok, sub}
-              end
-            end)
+           _result <- :ok do
+        case ensure_customer_tax_location(customer, opts) do
+          :ok ->
+            case Processor.__impl__().create_subscription(
+                   processor_params,
+                   [idempotency_key: idem_key] ++ sanitize_opts(opts)
+                 ) do
+              {:ok, stripe_sub} ->
+                Repo.transact(fn ->
+                  with :ok <- ensure_valid_tax_location(stripe_sub, opts),
+                       {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
+                       {:ok, sub} <- insert_subscription(customer.id, attrs),
+                       {:ok, _items} <- upsert_items(sub, stripe_sub),
+                       {:ok, _} <- record_event("subscription.created", sub, %{price_id: price_id}) do
+                    sub = Repo.preload(sub, :subscription_items, force: true)
+                    {:ok, sub}
+                  end
+                end)
+
+              {:error, reason} ->
+                rollback_reserved_discount_mapping(processor_params)
+                {:error, reason}
+            end
 
           {:error, reason} ->
             rollback_reserved_discount_mapping(processor_params)

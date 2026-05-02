@@ -49,15 +49,31 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
     end
   end
 
+  defmodule CustomerGatewayStub do
+    def create(_params, _opts), do: {:ok, %Braintree.Customer{id: "bt_customer"}}
+    def find(id, _opts), do: {:ok, %Braintree.Customer{id: id}}
+
+    def update(id, _params, _opts) do
+      if Process.get(:customer_update_failure_reason) do
+        {:error, Process.get(:customer_update_failure_reason)}
+      else
+        {:ok, %Braintree.Customer{id: id}}
+      end
+    end
+  end
+
   setup do
     previous_processor = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
+    previous_customer_gateway = Application.get_env(:accrue, :braintree_customer_gateway)
 
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, SubscriptionGatewayStub)
+    Application.put_env(:accrue, :braintree_customer_gateway, CustomerGatewayStub)
 
     on_exit(fn ->
       Process.delete(:gateway_failure_reason)
+      Process.delete(:customer_update_failure_reason)
 
       if previous_processor do
         Application.put_env(:accrue, :processor, previous_processor)
@@ -69,6 +85,12 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
         Application.put_env(:accrue, :braintree_subscription_gateway, previous_gateway)
       else
         Application.delete_env(:accrue, :braintree_subscription_gateway)
+      end
+
+      if previous_customer_gateway do
+        Application.put_env(:accrue, :braintree_customer_gateway, previous_customer_gateway)
+      else
+        Application.delete_env(:accrue, :braintree_customer_gateway)
       end
     end)
 
@@ -142,6 +164,37 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
 
       assert error.code == "braintree_error"
       assert_received {:gateway_redemption_count_before_failure, 1}
+
+      assert {:ok, mapping} = Billing.get_discount_mapping("SPRING25")
+      assert mapping.times_redeemed == 0
+      assert Repo.aggregate(Subscription, :count) == 0
+    end
+
+    test "releases a reserved redemption when customer tax validation fails before the gateway call" do
+      customer = insert_braintree_customer!()
+
+      assert {:ok, _mapping} =
+               Billing.upsert_discount_mapping("SPRING25", %{
+                 discount_id: "bt_discount_25",
+                 amount_off_minor: 2_500,
+                 currency: "USD",
+                 max_redemptions: 1,
+                 times_redeemed: 0
+               })
+
+      Process.put(:customer_update_failure_reason, :customer_update_failed)
+
+      assert {:error, %Accrue.APIError{} = error} =
+               Billing.subscribe(
+                 customer,
+                 "plan_premium",
+                 promotion_code: "spring25",
+                 automatic_tax: true,
+                 payment_method: %{vault_acquisition: %{reference: "pm_token_123"}}
+               )
+
+      assert error.code == "braintree_error"
+      refute_received {:gateway_create, _}
 
       assert {:ok, mapping} = Billing.get_discount_mapping("SPRING25")
       assert mapping.times_redeemed == 0
