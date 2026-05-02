@@ -44,11 +44,13 @@ defmodule Accrue.Billing.DiscountMappingActionsTest do
                  currency: "USD"
                })
 
-      assert {:ok, %DiscountMapping{id: ^mapping.id}} =
+      mapping_id = mapping.id
+
+      assert {:ok, %DiscountMapping{id: ^mapping_id}} =
                Billing.get_discount_mapping("SAVE20")
 
       assert {:ok, preview} = Billing.resolve_discount_mapping("SAVE20", 2_000)
-      assert %DiscountMapping{id: ^mapping.id} = preview.mapping
+      assert %DiscountMapping{id: ^mapping_id} = preview.mapping
 
       refute_received :coupon_create_called
       refute_received :promotion_code_create_called
@@ -65,10 +67,10 @@ defmodule Accrue.Billing.DiscountMappingActionsTest do
             (id, processor, code, discount_id, active, amount_off_minor, currency, metadata, data,
              lock_version, inserted_at, updated_at)
           VALUES
-            ($1, 'braintree', 'BROKEN', 'bt_discount_broken', true, 500, NULL, '{}'::jsonb, '{}'::jsonb,
+            ($1, 'braintree', 'BROKEN', 'bt_discount_broken', true, -500, 'USD', '{}'::jsonb, '{}'::jsonb,
              1, $2, $2)
           """,
-          [Ecto.UUID.generate(), now]
+          [Ecto.UUID.generate() |> Ecto.UUID.dump!(), now]
         )
 
       assert {:error, %DiscountMappingInvalid{} = error} =

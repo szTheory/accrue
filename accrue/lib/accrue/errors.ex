@@ -175,6 +175,24 @@ defmodule Accrue.Error.InvalidState do
   end
 end
 
+defmodule Accrue.Error.DiscountMappingInvalid do
+  @moduledoc """
+  Raised when a stored local discount mapping is present but cannot be
+  resolved safely because the canonical local row has drifted into an
+  invalid state.
+  """
+
+  @type t :: %__MODULE__{}
+  defexception [:mapping_id, :code, :discount_id, :reason, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{code: code, discount_id: discount_id, reason: reason}) do
+    "discount mapping #{inspect(code)} -> #{inspect(discount_id)} is invalid: #{inspect(reason)}"
+  end
+end
+
 defmodule Accrue.Error.NotAttached do
   @moduledoc """
   Raised when a payment method is referenced for a customer it is not

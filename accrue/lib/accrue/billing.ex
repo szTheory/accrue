@@ -28,6 +28,7 @@ defmodule Accrue.Billing do
   alias Accrue.Billing.{
     ChargeActions,
     CouponActions,
+    DiscountMappingActions,
     InvoiceActions,
     MeterEventActions,
     PaymentMethodActions,
@@ -682,6 +683,30 @@ defmodule Accrue.Billing do
   def apply_promotion_code!(sub, code, opts \\ []) do
     span_billing(:promotion_code, :apply, sub, opts, fn ->
       CouponActions.apply_promotion_code!(sub, code, opts)
+    end)
+  end
+
+  def upsert_discount_mapping(code, attrs, opts \\ []) do
+    span_billing(:discount_mapping, :upsert, %{code: code}, opts, fn ->
+      DiscountMappingActions.upsert_discount_mapping(code, attrs)
+    end)
+  end
+
+  def upsert_discount_mapping!(code, attrs, opts \\ []) do
+    span_billing(:discount_mapping, :upsert, %{code: code}, opts, fn ->
+      DiscountMappingActions.upsert_discount_mapping!(code, attrs)
+    end)
+  end
+
+  def get_discount_mapping(code, opts \\ []) do
+    span_billing(:discount_mapping, :get, %{code: code}, opts, fn ->
+      DiscountMappingActions.get_discount_mapping(code, opts)
+    end)
+  end
+
+  def resolve_discount_mapping(code, checkout_amount_minor, opts \\ []) do
+    span_billing(:discount_mapping, :resolve, %{code: code}, opts, fn ->
+      DiscountMappingActions.resolve_discount_mapping(code, checkout_amount_minor, opts)
     end)
   end
 
