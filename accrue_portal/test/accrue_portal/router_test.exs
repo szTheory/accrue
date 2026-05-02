@@ -19,6 +19,7 @@ defmodule AccruePortal.RouterTest do
     assert "/billing" in paths
     assert "/billing/subscriptions" in paths
     assert "/billing/payment-methods" in paths
+    assert "/billing/payment-methods/new" in paths
     assert "/billing/invoices" in paths
     assert "/billing/checkout/:token" in paths
 
@@ -34,7 +35,7 @@ defmodule AccruePortal.RouterTest do
       |> Enum.map(fn {_view, _action, _opts, live_session} -> live_session.name end)
       |> Enum.uniq()
 
-    assert length(live_routes) == 5
+    assert length(live_routes) == 7
     assert length(live_sessions) == 1
   end
 

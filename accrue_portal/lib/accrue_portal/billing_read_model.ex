@@ -45,6 +45,13 @@ defmodule AccruePortal.BillingReadModel do
     methods
   end
 
+  def payment_method(%Customer{id: customer_id}, id) when is_binary(id) do
+    case Repo.get_by(PaymentMethod, id: id, customer_id: customer_id) do
+      %PaymentMethod{} = payment_method -> {:ok, payment_method}
+      nil -> {:error, :not_found}
+    end
+  end
+
   def payment_method!(%Customer{id: customer_id}, id) do
     Repo.get_by!(PaymentMethod, id: id, customer_id: customer_id)
   end
