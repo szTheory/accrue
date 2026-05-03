@@ -3,7 +3,15 @@ defmodule Accrue.Billing.MeteredRenewalActions do
   Opens immutable metered renewal windows from canonical Braintree renewal evidence.
   """
 
-  alias Accrue.Billing.{MeterDefinitions, MeteredRenewal, Subscription, SubscriptionProjection}
+  alias Accrue.Billing.{
+    Invoice,
+    MeterDefinitions,
+    MeteredRenewal,
+    MeteredRenewalInvoice,
+    Subscription,
+    SubscriptionProjection
+  }
+
   alias Accrue.{Events, Processor, Repo}
 
   @processor "braintree"
@@ -36,6 +44,39 @@ defmodule Accrue.Billing.MeteredRenewalActions do
       nil -> {:ok, :ignored}
       {:ok, :ignored} -> {:ok, :ignored}
       other -> other
+    end
+  end
+
+  @spec author_local_invoice(Ecto.UUID.t()) ::
+          {:ok, %{invoice: Invoice.t(), renewal: MeteredRenewal.t()}} | {:error, term()}
+  def author_local_invoice(metered_renewal_id) when is_binary(metered_renewal_id) do
+    MeteredRenewalInvoice.author_invoice(metered_renewal_id)
+  end
+
+  @spec mark_invoice_authored(MeteredRenewal.t(), Invoice.t(), map()) ::
+          {:ok, MeteredRenewal.t()} | {:error, term()}
+  def mark_invoice_authored(%MeteredRenewal{} = renewal, %Invoice{} = invoice, attrs \\ %{})
+      when is_map(attrs) do
+    now = DateTime.utc_now()
+
+    summary =
+      attrs
+      |> Map.new()
+      |> Map.new(fn {key, value} -> {to_string(key), value} end)
+      |> Map.put("invoice_id", invoice.id)
+      |> Map.put("invoice_status", "authored")
+
+    with {:ok, updated} <-
+           renewal
+           |> MeteredRenewal.changeset(%{
+             invoice_id: invoice.id,
+             invoice_status: "authored",
+             invoice_authored_at: now,
+             data: Map.merge(renewal.data || %{}, summary)
+           })
+           |> Repo.update(),
+         {:ok, _event} <- record_invoice_authored_event(updated, invoice, attrs) do
+      {:ok, updated}
     end
   end
 
@@ -158,6 +199,24 @@ defmodule Accrue.Billing.MeteredRenewalActions do
         "metered-renewal-opened:" <>
           subscription.id <>
           ":" <> maybe_iso8601(attrs.period_start) <> ":" <> maybe_iso8601(attrs.period_end)
+    })
+  end
+
+  defp record_invoice_authored_event(%MeteredRenewal{} = renewal, %Invoice{} = invoice, attrs) do
+    Events.record(%{
+      type: "metered_renewal.invoice_authored",
+      subject_type: "MeteredRenewal",
+      subject_id: renewal.id,
+      data: %{
+        source: "worker",
+        processor: renewal.processor,
+        invoice_id: invoice.id,
+        invoice_processor_id: invoice.processor_id,
+        matched_event_count: Map.get(attrs, :matched_event_count, 0),
+        unmatched_event_count: Map.get(attrs, :unmatched_event_count, 0),
+        unusable_event_count: Map.get(attrs, :unusable_event_count, 0)
+      },
+      idempotency_key: "metered-renewal-invoice-authored:" <> renewal.id
     })
   end
 

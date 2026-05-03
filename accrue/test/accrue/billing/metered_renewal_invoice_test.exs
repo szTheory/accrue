@@ -23,7 +23,8 @@ defmodule Accrue.Billing.MeteredRenewalInvoiceTest do
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
         processor: "braintree",
-        processor_id: "cus_metered_invoice_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "cus_metered_invoice_" <> Integer.to_string(System.unique_integer([:positive])),
         email: "metered-invoice@example.com"
       })
       |> Repo.insert()
@@ -33,7 +34,8 @@ defmodule Accrue.Billing.MeteredRenewalInvoiceTest do
       |> Subscription.changeset(%{
         customer_id: customer.id,
         processor: "braintree",
-        processor_id: "sub_metered_invoice_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "sub_metered_invoice_" <> Integer.to_string(System.unique_integer([:positive])),
         status: :active,
         current_period_start: ~U[2026-05-01 00:00:00Z],
         current_period_end: ~U[2026-06-01 00:00:00Z]
@@ -45,7 +47,8 @@ defmodule Accrue.Billing.MeteredRenewalInvoiceTest do
       |> SubscriptionItem.changeset(%{
         subscription_id: subscription.id,
         processor: "braintree",
-        processor_id: "si_metered_invoice_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "si_metered_invoice_" <> Integer.to_string(System.unique_integer([:positive])),
         price_id: "price_ai_tokens_v1",
         processor_plan_id: "plan_ai_tokens_v1",
         quantity: 1,

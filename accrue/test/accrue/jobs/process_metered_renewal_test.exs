@@ -24,7 +24,8 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
         processor: "braintree",
-        processor_id: "cus_process_metered_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "cus_process_metered_" <> Integer.to_string(System.unique_integer([:positive])),
         email: "process-metered@example.com"
       })
       |> Repo.insert()
@@ -34,7 +35,8 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
       |> Subscription.changeset(%{
         customer_id: customer.id,
         processor: "braintree",
-        processor_id: "sub_process_metered_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "sub_process_metered_" <> Integer.to_string(System.unique_integer([:positive])),
         status: :active,
         current_period_start: ~U[2026-05-01 00:00:00Z],
         current_period_end: ~U[2026-06-01 00:00:00Z]
@@ -46,7 +48,8 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
       |> SubscriptionItem.changeset(%{
         subscription_id: subscription.id,
         processor: "braintree",
-        processor_id: "si_process_metered_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "si_process_metered_" <> Integer.to_string(System.unique_integer([:positive])),
         price_id: "price_process_metered",
         processor_plan_id: "plan_process_metered",
         quantity: 1,
@@ -118,7 +121,9 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
     %{renewal: renewal}
   end
 
-  test "worker processes one renewal window and remains idempotent under replay", %{renewal: renewal} do
+  test "worker processes one renewal window and remains idempotent under replay", %{
+    renewal: renewal
+  } do
     job = %Oban.Job{args: %{"metered_renewal_id" => renewal.id}, attempt: 1, id: 123}
 
     assert :ok = ProcessMeteredRenewal.perform(job)
@@ -127,7 +132,9 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
     invoice =
       Repo.one(
         from(i in Invoice,
-          where: i.subscription_id == ^renewal.subscription_id and i.period_start == ^renewal.period_start
+          where:
+            i.subscription_id == ^renewal.subscription_id and
+              i.period_start == ^renewal.period_start
         )
       )
 

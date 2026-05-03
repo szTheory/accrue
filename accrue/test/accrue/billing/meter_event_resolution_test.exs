@@ -21,7 +21,8 @@ defmodule Accrue.Billing.MeterEventResolutionTest do
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
         processor: "braintree",
-        processor_id: "cus_meter_resolution_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "cus_meter_resolution_" <> Integer.to_string(System.unique_integer([:positive])),
         email: "meter-resolution@example.com"
       })
       |> Repo.insert()
@@ -31,7 +32,8 @@ defmodule Accrue.Billing.MeterEventResolutionTest do
       |> Subscription.changeset(%{
         customer_id: customer.id,
         processor: "braintree",
-        processor_id: "sub_meter_resolution_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "sub_meter_resolution_" <> Integer.to_string(System.unique_integer([:positive])),
         status: :active,
         current_period_start: ~U[2026-05-01 00:00:00Z],
         current_period_end: ~U[2026-06-01 00:00:00Z]
@@ -43,7 +45,8 @@ defmodule Accrue.Billing.MeterEventResolutionTest do
       |> SubscriptionItem.changeset(%{
         subscription_id: subscription.id,
         processor: "braintree",
-        processor_id: "si_meter_resolution_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "si_meter_resolution_" <> Integer.to_string(System.unique_integer([:positive])),
         price_id: "price_ai_tokens",
         processor_plan_id: "plan_ai_tokens",
         quantity: 1,

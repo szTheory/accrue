@@ -32,6 +32,8 @@ defmodule Accrue.Billing.MeterEvent do
 
   schema "accrue_meter_events" do
     belongs_to(:customer, Accrue.Billing.Customer, type: :binary_id)
+    belongs_to(:meter_definition, Accrue.Billing.MeterDefinition, type: :binary_id)
+    belongs_to(:metered_renewal, Accrue.Billing.MeteredRenewal, type: :binary_id)
     field(:stripe_customer_id, :string)
     field(:event_name, :string)
     field(:value, :integer)
@@ -40,6 +42,8 @@ defmodule Accrue.Billing.MeterEvent do
     field(:reported_at, :utc_datetime_usec)
     field(:stripe_status, :string, default: "pending")
     field(:stripe_error, :map)
+    field(:billing_status, :string)
+    field(:billing_error, :string)
     field(:operation_id, :string)
 
     timestamps(type: :utc_datetime_usec)
@@ -47,6 +51,7 @@ defmodule Accrue.Billing.MeterEvent do
 
   @pending_cast ~w[customer_id stripe_customer_id event_name value identifier occurred_at operation_id]a
   @pending_required ~w[stripe_customer_id event_name value identifier occurred_at]a
+  @resolution_cast ~w[meter_definition_id metered_renewal_id billing_status billing_error]a
 
   @doc """
   Builds a changeset for inserting a `pending` meter-event row.
@@ -85,6 +90,18 @@ defmodule Accrue.Billing.MeterEvent do
       stripe_status: "failed",
       stripe_error: normalize_error(err)
     })
+  end
+
+  @doc """
+  Persists the local billing-resolution outcome for a meter event.
+  """
+  @spec resolution_changeset(t(), map()) :: Ecto.Changeset.t()
+  def resolution_changeset(%__MODULE__{} = row, attrs) when is_map(attrs) do
+    row
+    |> cast(attrs, @resolution_cast)
+    |> validate_inclusion(:billing_status, ["matched", "unmatched", "unusable"])
+    |> foreign_key_constraint(:meter_definition_id)
+    |> foreign_key_constraint(:metered_renewal_id)
   end
 
   defp normalize_error(nil), do: %{}
