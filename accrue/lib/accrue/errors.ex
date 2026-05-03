@@ -227,6 +227,40 @@ defmodule Accrue.Error.NoDefaultPaymentMethod do
   end
 end
 
+defmodule Accrue.Error.MeteredSettlementMissingPrerequisite do
+  @moduledoc """
+  Raised when a metered renewal settlement is attempted before the renewal
+  has the local billing truth required for money movement.
+  """
+
+  @type t :: %__MODULE__{}
+  defexception [:metered_renewal_id, :prerequisite, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{metered_renewal_id: renewal_id, prerequisite: prerequisite}) do
+    "metered renewal #{inspect(renewal_id)} is missing prerequisite #{inspect(prerequisite)}"
+  end
+end
+
+defmodule Accrue.Error.MeteredSettlementConflict do
+  @moduledoc """
+  Raised when a metered renewal attempts to create a second settlement unit
+  for a period that already has a canonical charge attempt.
+  """
+
+  @type t :: %__MODULE__{}
+  defexception [:metered_renewal_id, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{metered_renewal_id: renewal_id}) do
+    "metered renewal #{inspect(renewal_id)} already has a canonical settlement attempt"
+  end
+end
+
 defmodule Accrue.ActionRequiredError do
   @moduledoc """
   Raised when a Stripe PaymentIntent or SetupIntent transitions to

@@ -32,7 +32,9 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
          currency_iso_code: "USD",
          customer_details: %{id: params[:customer_id] || params["customer_id"]},
          payment_instrument_type: "credit_card",
-         credit_card_details: %{token: params[:payment_method_token] || params["payment_method_token"]}
+         credit_card_details: %{
+           token: params[:payment_method_token] || params["payment_method_token"]
+         }
        }}
     end
   end
@@ -208,11 +210,9 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
     assert Repo.aggregate(MeteredChargeAttempt, :count, :id) == 1
 
     attempt =
-      Repo.one!(
-        from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id)
-      )
+      Repo.one!(from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id))
 
-    assert attempt.status == "paid"
+    assert attempt.status == :paid
     assert attempt.attempted_payment_method_id == payment_method.processor_id
 
     reloaded = Repo.get!(MeteredRenewal, renewal.id)
@@ -233,9 +233,7 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
     assert {:error, %Accrue.Error.NoDefaultPaymentMethod{}} = ProcessMeteredRenewal.perform(job)
 
     first_attempt =
-      Repo.one!(
-        from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id)
-      )
+      Repo.one!(from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id))
 
     {:ok, repaired_payment_method} =
       %PaymentMethod{}
@@ -245,7 +243,8 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
         processor_id:
           "pm_process_metered_repair_" <> Integer.to_string(System.unique_integer([:positive])),
         type: "card",
-        fingerprint: "fp-process-repair-" <> Integer.to_string(System.unique_integer([:positive])),
+        fingerprint:
+          "fp-process-repair-" <> Integer.to_string(System.unique_integer([:positive])),
         card_brand: "Visa",
         card_last4: "4242",
         card_exp_month: 3,
@@ -265,12 +264,10 @@ defmodule Accrue.Jobs.ProcessMeteredRenewalTest do
     assert Repo.aggregate(MeteredChargeAttempt, :count, :id) == 1
 
     repaired_attempt =
-      Repo.one!(
-        from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id)
-      )
+      Repo.one!(from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id))
 
     assert repaired_attempt.subject_uuid == first_attempt.subject_uuid
     assert repaired_attempt.original_failure_class == "payment_method_required"
-    assert repaired_attempt.status == "paid"
+    assert repaired_attempt.status == :paid
   end
 end

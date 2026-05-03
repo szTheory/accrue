@@ -34,7 +34,8 @@ defmodule Accrue.Billing.MeteredChargeAttemptsTest do
       |> PaymentMethod.changeset(%{
         customer_id: customer.id,
         processor: "braintree",
-        processor_id: "pm_metered_failed_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "pm_metered_failed_" <> Integer.to_string(System.unique_integer([:positive])),
         type: "card",
         fingerprint: "fp-failed-" <> Integer.to_string(System.unique_integer([:positive])),
         card_brand: "Visa",
@@ -49,7 +50,8 @@ defmodule Accrue.Billing.MeteredChargeAttemptsTest do
       |> PaymentMethod.changeset(%{
         customer_id: customer.id,
         processor: "braintree",
-        processor_id: "pm_metered_fixed_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "pm_metered_fixed_" <> Integer.to_string(System.unique_integer([:positive])),
         type: "card",
         fingerprint: "fp-fixed-" <> Integer.to_string(System.unique_integer([:positive])),
         card_brand: "Mastercard",
@@ -132,11 +134,9 @@ defmodule Accrue.Billing.MeteredChargeAttemptsTest do
              )
 
     attempt =
-      Repo.one!(
-        from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id)
-      )
+      Repo.one!(from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id))
 
-    assert attempt.status == "retry_scheduled"
+    assert attempt.status == :retry_scheduled
     assert attempt.failure_class == "retryable"
     assert attempt.attempted_payment_method_id == failed_payment_method.processor_id
     assert is_binary(attempt.subject_uuid)
@@ -159,11 +159,9 @@ defmodule Accrue.Billing.MeteredChargeAttemptsTest do
     assert customer_id == customer.id
 
     first_attempt =
-      Repo.one!(
-        from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id)
-      )
+      Repo.one!(from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id))
 
-    assert first_attempt.status == "awaiting_payment_method"
+    assert first_attempt.status == :awaiting_payment_method
     assert first_attempt.failure_class == "payment_method_required"
     assert is_nil(first_attempt.attempted_payment_method_id)
 
@@ -176,11 +174,9 @@ defmodule Accrue.Billing.MeteredChargeAttemptsTest do
     assert Repo.aggregate(MeteredChargeAttempt, :count, :id) == 1
 
     repaired_attempt =
-      Repo.one!(
-        from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id)
-      )
+      Repo.one!(from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id))
 
-    assert repaired_attempt.status == "paid"
+    assert repaired_attempt.status == :paid
     assert repaired_attempt.attempted_payment_method_id == repaired_payment_method.processor_id
     assert repaired_attempt.original_failed_payment_method_id == nil
     assert repaired_attempt.original_failure_class == "payment_method_required"
@@ -190,18 +186,18 @@ defmodule Accrue.Billing.MeteredChargeAttemptsTest do
     assert reloaded.state == :paid
   end
 
-  test "hard declines exhaust the renewal into operator-visible terminal state", %{renewal: renewal} do
+  test "hard declines exhaust the renewal into operator-visible terminal state", %{
+    renewal: renewal
+  } do
     assert {:error, %Accrue.CardError{decline_code: "do_not_honor"}} =
              MeteredRenewalActions.settle_metered_renewal(renewal.id,
                processor_error: :hard_decline
              )
 
     attempt =
-      Repo.one!(
-        from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id)
-      )
+      Repo.one!(from(a in MeteredChargeAttempt, where: a.metered_renewal_id == ^renewal.id))
 
-    assert attempt.status == "failed_exhausted"
+    assert attempt.status == :failed_exhausted
     assert attempt.failure_class == "hard_decline"
     assert attempt.failure_code == "do_not_honor"
 

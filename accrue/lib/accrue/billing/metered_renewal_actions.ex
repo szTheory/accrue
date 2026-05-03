@@ -5,13 +5,17 @@ defmodule Accrue.Billing.MeteredRenewalActions do
 
   alias Accrue.Billing.{
     Invoice,
+    MeteredChargeAttempt,
+    MeteredChargeAttempts,
     MeterDefinitions,
     MeteredRenewal,
     MeteredRenewalInvoice,
+    PaymentMethod,
     Subscription,
     SubscriptionProjection
   }
 
+  alias Accrue.Processor.Idempotency
   alias Accrue.{Events, Processor, Repo}
 
   @processor "braintree"
@@ -51,6 +55,68 @@ defmodule Accrue.Billing.MeteredRenewalActions do
           {:ok, %{invoice: Invoice.t(), renewal: MeteredRenewal.t()}} | {:error, term()}
   def author_local_invoice(metered_renewal_id) when is_binary(metered_renewal_id) do
     MeteredRenewalInvoice.author_invoice(metered_renewal_id)
+  end
+
+  @spec process_metered_renewal(Ecto.UUID.t()) ::
+          {:ok, %{attempt: MeteredChargeAttempt.t() | nil, renewal: MeteredRenewal.t()}}
+          | {:error, term()}
+  def process_metered_renewal(metered_renewal_id) when is_binary(metered_renewal_id) do
+    with {:ok, %{renewal: renewal}} <- author_local_invoice(metered_renewal_id),
+         {:ok, result} <- settle_metered_renewal(renewal.id) do
+      {:ok, result}
+    end
+  end
+
+  @spec settle_metered_renewal(Ecto.UUID.t(), keyword()) ::
+          {:ok, %{attempt: MeteredChargeAttempt.t(), renewal: MeteredRenewal.t()}}
+          | {:error, term()}
+  def settle_metered_renewal(metered_renewal_id, opts \\ []) when is_binary(metered_renewal_id) do
+    with %MeteredRenewal{} = renewal <- Repo.get(MeteredRenewal, metered_renewal_id),
+         :ok <- ensure_invoice_authored(renewal),
+         {:ok, attempt, subject_uuid} <- settlement_attempt(renewal) do
+      case resolve_payment_method(renewal) do
+        {:ok, customer, payment_method} ->
+          case create_settlement_charge(renewal, subject_uuid, customer, payment_method, opts) do
+            {:ok, charge} ->
+              with {:ok, paid_attempt} <-
+                     MeteredChargeAttempts.mark_paid(attempt, charge, payment_method),
+                   {:ok, paid_renewal} <-
+                     mark_settled(renewal, charge, paid_attempt, payment_method) do
+                {:ok, %{attempt: paid_attempt, renewal: paid_renewal}}
+              end
+
+            {:error, %Accrue.CardError{} = error, payment_method} ->
+              {:ok, _} =
+                MeteredChargeAttempts.mark_failed_exhausted(attempt, error, payment_method)
+
+              {:ok, _} = mark_retry_state(metered_renewal_id, :failed_exhausted, attempt, error)
+              {:error, error}
+
+            {:error, error, payment_method} ->
+              {:ok, _} = MeteredChargeAttempts.mark_retryable(attempt, error, payment_method)
+              {:ok, _} = mark_retry_state(metered_renewal_id, :retry_scheduled, attempt, error)
+              {:error, error}
+          end
+
+        {:error, %Accrue.Error.NoDefaultPaymentMethod{} = error} ->
+          {:ok, _} = MeteredChargeAttempts.mark_awaiting_payment_method(attempt, error)
+
+          {:ok, _} =
+            mark_retry_state(metered_renewal_id, :awaiting_payment_method, attempt, error)
+
+          {:error, error}
+      end
+    else
+      {:already_paid, attempt} ->
+        renewal = Repo.get!(MeteredRenewal, metered_renewal_id)
+        {:ok, %{attempt: attempt, renewal: renewal}}
+
+      nil ->
+        {:error, :not_found}
+
+      {:error, _} = error ->
+        error
+    end
   end
 
   @spec mark_invoice_authored(MeteredRenewal.t(), Invoice.t(), map()) ::
@@ -232,4 +298,146 @@ defmodule Accrue.Billing.MeteredRenewalActions do
 
   defp maybe_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
   defp maybe_iso8601(_), do: nil
+
+  defp ensure_invoice_authored(%MeteredRenewal{
+         invoice_status: "authored",
+         invoice_id: invoice_id
+       })
+       when is_binary(invoice_id),
+       do: :ok
+
+  defp ensure_invoice_authored(%MeteredRenewal{} = renewal) do
+    {:error,
+     %Accrue.Error.MeteredSettlementMissingPrerequisite{
+       metered_renewal_id: renewal.id,
+       prerequisite: :invoice_authored
+     }}
+  end
+
+  defp settlement_attempt(%MeteredRenewal{} = renewal) do
+    subject_uuid = Idempotency.subject_uuid(:metered_renewal_charge, renewal.id)
+
+    with {:ok, attempt} <- MeteredChargeAttempts.ensure_attempt(renewal, subject_uuid) do
+      if attempt.status == :paid do
+        {:already_paid, attempt}
+      else
+        {:ok, attempt, subject_uuid}
+      end
+    end
+  end
+
+  defp resolve_payment_method(%MeteredRenewal{} = renewal) do
+    customer =
+      renewal.customer_id
+      |> then(&Repo.get!(Accrue.Billing.Customer, &1))
+      |> Repo.preload(:default_payment_method)
+
+    case customer.default_payment_method do
+      %PaymentMethod{} = payment_method ->
+        {:ok, customer, payment_method}
+
+      _ ->
+        {:error,
+         %Accrue.Error.NoDefaultPaymentMethod{
+           customer_id: customer.id,
+           message:
+             "metered renewal #{renewal.id} requires the customer's current default payment method before settlement"
+         }}
+    end
+  end
+
+  defp create_settlement_charge(renewal, subject_uuid, customer, payment_method, opts) do
+    invoice = Repo.get!(Invoice, renewal.invoice_id)
+    idem_key = Idempotency.key(:create_charge, subject_uuid, renewal.id)
+
+    request_opts = Keyword.put_new(opts, :idempotency_key, idem_key)
+
+    params = %{
+      amount: invoice.total_minor,
+      currency: invoice.currency,
+      customer: customer.processor_id,
+      payment_method: payment_method.processor_id,
+      description:
+        "Metered renewal #{Date.to_iso8601(DateTime.to_date(renewal.period_start))} - " <>
+          "#{Date.to_iso8601(DateTime.to_date(renewal.period_end))}",
+      metadata: %{
+        "accrue_subject_uuid" => subject_uuid,
+        "metered_renewal_id" => renewal.id,
+        "invoice_id" => invoice.id
+      }
+    }
+
+    case Keyword.get(opts, :processor_error) do
+      :transient_gateway_timeout ->
+        {:error,
+         %Accrue.APIError{
+           code: "gateway_timeout",
+           http_status: 502,
+           message: "Gateway timeout while creating sale"
+         }}
+
+      :hard_decline ->
+        {:error,
+         %Accrue.CardError{
+           code: "card_declined",
+           decline_code: "do_not_honor",
+           message: "Processor Declined: Do Not Honor"
+         }}
+
+      nil ->
+        Processor.__impl__().create_charge(params, request_opts)
+    end
+    |> normalize_charge_result(payment_method)
+  end
+
+  defp normalize_charge_result({:ok, charge}, _payment_method), do: {:ok, charge}
+
+  defp normalize_charge_result(
+         {:error, %Accrue.Error.NoDefaultPaymentMethod{} = error},
+         _payment_method
+       ),
+       do: {:error, error}
+
+  defp normalize_charge_result({:error, %Accrue.CardError{} = error}, payment_method),
+    do: {:error, error, payment_method}
+
+  defp normalize_charge_result({:error, %Accrue.APIError{} = error}, payment_method),
+    do: {:error, error, payment_method}
+
+  defp normalize_charge_result({:error, error}, payment_method),
+    do: {:error, error, payment_method}
+
+  defp mark_settled(%MeteredRenewal{} = renewal, charge, attempt, payment_method) do
+    now = DateTime.utc_now()
+
+    renewal
+    |> MeteredRenewal.changeset(%{
+      state: :paid,
+      paid_at: now,
+      data:
+        Map.merge(renewal.data || %{}, %{
+          "processor_charge_id" => charge[:id] || charge["id"],
+          "charge_attempt_id" => attempt.id,
+          "payment_method_id" => payment_method.processor_id,
+          "paid_at" => DateTime.to_iso8601(now)
+        })
+    })
+    |> Repo.update()
+  end
+
+  defp mark_retry_state(metered_renewal_id, state, attempt, error) do
+    renewal = Repo.get!(MeteredRenewal, metered_renewal_id)
+
+    renewal
+    |> MeteredRenewal.changeset(%{
+      state: state,
+      data:
+        Map.merge(renewal.data || %{}, %{
+          "charge_attempt_id" => attempt.id,
+          "settlement_error" => Exception.message(error),
+          "settlement_state" => Atom.to_string(state)
+        })
+    })
+    |> Repo.update()
+  end
 end

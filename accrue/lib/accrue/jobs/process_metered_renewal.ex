@@ -12,7 +12,7 @@ defmodule Accrue.Jobs.ProcessMeteredRenewal do
       when is_binary(metered_renewal_id) do
     _ = Accrue.Oban.Middleware.put(job)
 
-    case MeteredRenewalActions.author_local_invoice(metered_renewal_id) do
+    case MeteredRenewalActions.process_metered_renewal(metered_renewal_id) do
       {:ok, _result} -> :ok
       {:error, err} -> {:error, err}
     end

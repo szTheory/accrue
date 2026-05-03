@@ -161,7 +161,8 @@ defmodule Accrue.Processor.BraintreeTest do
 
       case Map.get(params, :amount) || Map.get(params, "amount") do
         "49.00" ->
-          {:error, %Elixir.Braintree.ErrorResponse{message: "Gateway timeout while creating sale"}}
+          {:error,
+           %Elixir.Braintree.ErrorResponse{message: "Gateway timeout while creating sale"}}
 
         "77.00" ->
           {:error, %Elixir.Braintree.ErrorResponse{message: "Processor Declined: Do Not Honor"}}
@@ -174,10 +175,13 @@ defmodule Accrue.Processor.BraintreeTest do
              status: "submitted_for_settlement",
              amount: Map.get(params, :amount) || Map.get(params, "amount"),
              currency_iso_code: "USD",
-             customer_details: %{id: Map.get(params, :customer_id) || Map.get(params, "customer_id")},
+             customer_details: %{
+               id: Map.get(params, :customer_id) || Map.get(params, "customer_id")
+             },
              payment_instrument_type: "credit_card",
              credit_card_details: %{
-               token: Map.get(params, :payment_method_token) || Map.get(params, "payment_method_token")
+               token:
+                 Map.get(params, :payment_method_token) || Map.get(params, "payment_method_token")
              },
              custom_fields: %{
                "accrue_subject_uuid" =>

@@ -29,6 +29,7 @@ defmodule Accrue.Billing.MeteredRenewal do
     field(:last_processor_event_ts, :utc_datetime_usec)
     field(:invoice_status, :string)
     field(:invoice_authored_at, :utc_datetime_usec)
+    field(:paid_at, :utc_datetime_usec)
     field(:data, :map, default: %{})
     field(:lock_version, :integer, default: 1)
 
@@ -38,7 +39,7 @@ defmodule Accrue.Billing.MeteredRenewal do
   @cast_fields ~w[
     subscription_id customer_id processor state period_start period_end
     trigger_source snapshot last_processor_event_id last_processor_event_ts
-    invoice_id invoice_status invoice_authored_at data lock_version
+    invoice_id invoice_status invoice_authored_at paid_at data lock_version
   ]a
 
   @required_fields ~w[

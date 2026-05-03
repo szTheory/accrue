@@ -277,7 +277,22 @@ defmodule Accrue.Processor.Braintree do
 
   # Charge
   @impl Accrue.Processor
-  def create_charge(_params, _opts), do: {:error, unsupported()}
+  def create_charge(params, opts) when is_map(params) and is_list(opts) do
+    with {:ok, request} <- translate_charge_params(params),
+         {:ok, transaction} <- transaction_gateway().sale(request, opts) do
+      {:ok, translate_charge(transaction)}
+    else
+      {:error, %Elixir.Braintree.ErrorResponse{} = error} ->
+        {:error, translate_charge_error(error)}
+
+      {:error, %APIError{} = error} ->
+        {:error, error}
+
+      {:error, raw} ->
+        {:error, to_accrue_error(raw)}
+    end
+  end
+
   @impl Accrue.Processor
   def retrieve_charge(_id, _opts), do: {:error, unsupported()}
   @impl Accrue.Processor
@@ -385,12 +400,12 @@ defmodule Accrue.Processor.Braintree do
          customer: customer.processor_id,
          url: billing_portal_url(params),
          return_url: params["return_url"] || params[:return_url],
-          data: %{
-            processor: "braintree",
-            local_portal: true,
-            customer_processor_id: customer.processor_id,
-            mount_path: Config.portal_mount_path()
-          }
+         data: %{
+           processor: "braintree",
+           local_portal: true,
+           customer_processor_id: customer.processor_id,
+           mount_path: Config.portal_mount_path()
+         }
        }}
     end
   end
@@ -626,6 +641,121 @@ defmodule Accrue.Processor.Braintree do
 
   defp maybe_move_name_to_company(params), do: params
 
+  defp translate_charge_params(params) do
+    amount = params[:amount] || params["amount"]
+    customer_id = params[:customer] || params["customer"]
+    payment_method = params[:payment_method] || params["payment_method"]
+    description = params[:description] || params["description"]
+    metadata = params[:metadata] || params["metadata"] || %{}
+
+    cond do
+      not is_integer(amount) or amount < 0 ->
+        {:error,
+         invalid_request("Braintree charges require a positive integer amount in minor units.")}
+
+      not is_binary(customer_id) or customer_id == "" ->
+        {:error, invalid_request("Braintree charges require a customer id.")}
+
+      not is_binary(payment_method) or payment_method == "" ->
+        {:error, invalid_request("Braintree charges require a vaulted payment method token.")}
+
+      true ->
+        {:ok,
+         %{
+           amount: money_string(amount),
+           customer_id: customer_id,
+           payment_method_token: payment_method,
+           options: %{submit_for_settlement: true},
+           custom_fields: stringify_keys(metadata)
+         }
+         |> maybe_put_description(description)}
+    end
+  end
+
+  defp maybe_put_description(request, description)
+       when is_binary(description) and description != "" do
+    Map.put(request, :order_id, description)
+  end
+
+  defp maybe_put_description(request, _description), do: request
+
+  defp translate_charge(%{} = transaction) do
+    data = if is_struct(transaction), do: Map.from_struct(transaction), else: transaction
+    raw_status = Map.get(data, :status) || Map.get(data, "status")
+
+    status =
+      case raw_status do
+        s
+        when s in [
+               "submitted_for_settlement",
+               :submitted_for_settlement,
+               "settling",
+               :settling,
+               "settled",
+               :settled
+             ] ->
+          "succeeded"
+
+        s when s in ["authorized", :authorized, "authorizing", :authorizing] ->
+          "pending"
+
+        s
+        when s in [
+               "processor_declined",
+               :processor_declined,
+               "gateway_rejected",
+               :gateway_rejected,
+               "settlement_declined",
+               :settlement_declined
+             ] ->
+          "failed"
+
+        _ ->
+          "pending"
+      end
+
+    %{
+      id: Map.get(data, :id) || Map.get(data, "id"),
+      status: status,
+      amount: Map.get(data, :amount) || Map.get(data, "amount"),
+      currency: Map.get(data, :currency_iso_code) || Map.get(data, "currency_iso_code"),
+      customer:
+        get_in(data, [:customer_details, :id]) || get_in(data, ["customer_details", "id"]),
+      payment_method:
+        get_in(data, [:credit_card_details, :token]) ||
+          get_in(data, ["credit_card_details", "token"]),
+      data: data
+    }
+  end
+
+  defp translate_charge_error(%Elixir.Braintree.ErrorResponse{message: message} = error) do
+    cond do
+      String.contains?(message, "Processor Declined") ->
+        %Accrue.CardError{
+          code: "card_declined",
+          decline_code: "do_not_honor",
+          message: message,
+          processor_error: error
+        }
+
+      String.contains?(message, "Declined") ->
+        %Accrue.CardError{
+          code: "card_declined",
+          decline_code: "declined",
+          message: message,
+          processor_error: error
+        }
+
+      true ->
+        %APIError{
+          code: "braintree_error",
+          http_status: 400,
+          message: message,
+          processor_error: error
+        }
+    end
+  end
+
   defp customer_name(customer) do
     company = Map.get(customer, :company)
     first_name = Map.get(customer, :first_name)
@@ -699,6 +829,10 @@ defmodule Accrue.Processor.Braintree do
   end
 
   defp truthy?(value), do: value in [true, "true", 1, "1"]
+
+  defp money_string(amount_minor) when is_integer(amount_minor) do
+    :erlang.float_to_binary(amount_minor / 100.0, [{:decimals, 2}])
+  end
 
   defp stringify_keys(params) do
     for {key, value} <- params, into: %{} do
