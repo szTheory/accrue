@@ -42,5 +42,8 @@ require_substring "Pay (Rails)" "pay rails lesson"
 require_substring "ActiveMerchant" "activemerchant lesson"
 require_substring '`Stripe` remains the default first-user path' "stripe default path wording"
 require_substring '`Fake` is the required local and CI proof surface' "fake required surface wording"
+require_substring "Hyperwallet" "explicit Hyperwallet boundary"
+require_substring "strategically out of bounds unless the project boundary changes" "Phase 104 no-go wording"
+require_substring "reopening requires an explicit strategy change plus a new milestone" "Phase 104 reopen rule"
 
 echo "verify_processor_support_matrix: OK"

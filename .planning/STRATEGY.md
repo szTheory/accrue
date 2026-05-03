@@ -45,6 +45,7 @@
 - `Braintree` is the locked target because it is the closest Stripe-like direct gateway fit for Accrue's current customer, payment-method, subscription, and webhook-shaped surface.
 - The first official multi-provider slice is **gateway subscription core**, centered on customer operations, payment-method vault acquisition, direct subscription creation, webhook verify/parse, and webhook-backed lifecycle projection.
 - `Accrue.Billing.subscribe/3` is the primary second-provider public-facade candidate. Checkout and billing portal remain **Stripe-first** until proven otherwise.
+- Braintree marketplace support via Hyperwallet stays outside the active direct-gateway track. Braintree pay-ins and Hyperwallet payouts are separate truths, marketplace parity is strategically out of bounds unless the project boundary changes, and reopening requires an explicit strategy change plus a new milestone.
 - Unsupported capabilities must **fail clearly and early** through capability checks instead of implying parity and surprising adopters later.
 - Accrue should learn from **Laravel Cashier** by naming provider tracks honestly instead of pretending every billing system fits one identical contract.
 - Accrue should learn from **Pay (Rails)** that bounded multi-provider support works when the shared surface stays narrow and the docs admit where provider behavior diverges.

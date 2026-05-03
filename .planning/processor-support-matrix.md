@@ -83,7 +83,7 @@ The following remain intentionally **out of slice** for first-party second-provi
 - coupons
 - promotion codes
 - metering
-- Connect
+- marketplace Connect parity for Braintree via Hyperwallet
 
 ## Provider rationale and exclusions
 
@@ -100,6 +100,8 @@ The following remain explicit non-targets for this track:
 
 - Unsupported capabilities must **fail clearly and early** via capability checks rather than implying Stripe parity and surprising adopters later.
 - Rows labeled `staged first-party target` remain documented and executable, but they are not part of the Fake-first lane's merge-blocking Phase 95 conformance set.
+- Braintree pay-ins and Hyperwallet payouts are separate truths. Marketplace parity through Hyperwallet is strategically out of bounds unless the project boundary changes.
+- Any revisit to Braintree marketplace support must start from the rule that reopening requires an explicit strategy change plus a new milestone.
 - Accrue should learn from **Laravel Cashier** by naming provider tracks honestly.
 - Accrue should learn from **Pay (Rails)** by keeping the shared surface bounded and warning where provider behavior diverges.
 - Accrue should avoid the **ActiveMerchant** trap of over-broad gateway sameness.
