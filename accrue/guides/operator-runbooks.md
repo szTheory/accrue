@@ -12,7 +12,7 @@ Queue names are **host-configurable**; the table lists Accrue’s **documented d
 |----------------------|----------------|---------------------|------------------|-------------------|
 | `:accrue_webhooks` | `Accrue.Webhook.DispatchWorker` | Async webhook handler dispatch after ingest | Webhooks stuck `:processing`, DLQ growth, dead-letter ops | Inspect `accrue_webhook_events`, Oban retries for this queue, handler logs (no raw bodies) |
 | `:accrue_mailers` | `Accrue.Workers.Mailer` | Transactional email delivery | Mail backlog, PDF/email failures surfacing as ops | Oban job args shape, mailer adapter, ChromicPDF availability |
-| `:accrue_meters` | `Accrue.Jobs.MeterEventsReconciler` | Meter usage reconciliation | `meter_reporting_failed` ops, stale meter rows | Reconciler jobs, Stripe meter API health, `accrue_meter_events` |
+| `:accrue_meters` | `Accrue.Jobs.MeterEventsReconciler`, `Accrue.Jobs.MeteredRenewalReconciler`, `Accrue.Jobs.ProcessMeteredRenewal` | Meter usage reconciliation, stale renewal repair, and metered settlement | `meter_reporting_failed`, metered renewal repair, metered settlement recovery | Reconciler jobs, Stripe meter API health, Braintree renewal evidence, `accrue_meter_events`, `accrue_metered_renewals` |
 | `:accrue_dunning` | `Accrue.Jobs.DunningSweeper` | Subscription dunning sweeps | Unexpected dunning transitions | Scheduled runs, subscription state vs Stripe |
 | `:accrue_reconcilers` | `Accrue.Jobs.ReconcileChargeFees` | Fee reconciliation for charges | Fee drift vs Stripe balance | Reconciler errors, Stripe charge/balance transaction lookups |
 | `:accrue_reconcilers` | `Accrue.Jobs.ReconcileRefundFees` | Fee reconciliation for refunds | Refund fee mismatches | Same as above for refund path |
@@ -74,6 +74,34 @@ Shared verification (all sources):
 4. Cross-check Stripe usage reporting with [Metered billing](https://stripe.com/docs/billing/subscriptions/usage-based/recording-usage) — operational alignment, not accounting close.
 5. After code or config fix, allow reconciler retry where applicable; watch ops counters and host metrics.
 
+## Mini-playbook: Braintree metered renewal and settlement recovery
+
+These steps apply to the Phase 103 Braintree-local metering tuples documented in [`telemetry.md`](telemetry.md). The ordering matters because Accrue's local invoice ledger is canonical and Braintree is settlement-only in this flow.
+
+### `[:accrue, :ops, :metered_renewal_stale_repaired]`
+
+1. Confirm the affected `metered_renewal_id` maps to a subscription period that should already have advanced.
+2. Inspect the corresponding subscription in Braintree and verify the cycle actually renewed; the backstop should mirror webhook truth, not invent renewal windows.
+3. Check `Accrue.Jobs.MeteredRenewalReconciler` and `Accrue.Jobs.ProcessMeteredRenewal` on `:accrue_meters` ([Oban queue topology](#oban-queue-topology)) so the repaired window continues into local invoice authoring and settlement.
+
+### `[:accrue, :ops, :metered_missing_definition]`
+
+1. Inspect the renewal window and its unmatched meter events; identify which `event_name` rows lack a local meter definition.
+2. Add or repair the missing definition so future windows classify those events explicitly.
+3. Replay the same renewal window after the definition exists; do not create ad-hoc manual charges that bypass the local invoice decomposition.
+
+### `[:accrue, :ops, :metered_charge_awaiting_payment_method]`
+
+1. Repair or replace the customer's default vaulted payment method.
+2. Confirm the local invoice for that renewal window is still the correct settlement target.
+3. Replay the same renewal window so Accrue reuses the existing charge unit instead of creating a second `Transaction.sale`.
+
+### `[:accrue, :ops, :metered_charge_failed_exhausted]`
+
+1. Confirm the failure class and the current local invoice state before retrying anything.
+2. Decide whether to retry, write off, or pair the failed renewal with a later operator-approved recovery step.
+3. Preserve the original failed attempt trail; do not delete the renewal or charge-attempt rows to force a clean slate.
+
 ## Mini-playbook: [:accrue, :ops, :revenue_loss]
 
 1. Capture `reason`, `subject_type`, `subject_id`, and currency amounts from telemetry (aggregates / IDs only — no customer narrative in shared logs).
@@ -85,7 +113,7 @@ Shared verification (all sources):
 ## RUN-01 coverage
 
 - **Full ops tuple list and one-line first actions** live under **`## Operator runbooks (first actions)`** in [`telemetry.md`](telemetry.md) — bookmark that table for **every** RUN-01 class, including `:connect_account_deauthorized`, `:connect_payout_failed`, `:dunning_exhaustion`, `:charge_failed`, `:incomplete_expired`, `:pdf_adapter_unavailable`, replay (`:webhook_dlq, :replay`), and prune (`:webhook_dlq, :prune`).
-- **This file** adds **depth** only for the four mini-playbooks above (`:webhook_dlq, :dead_lettered`, `:events_upcast_failed`, `:meter_reporting_failed`, `:revenue_loss`).
+- **This file** adds **depth** for the four classic mini-playbooks above plus the Phase 103 Braintree metered-billing recovery sequence.
 
 ## See also
 

@@ -67,6 +67,10 @@ they correspond to — they are idempotent under webhook replay via the
 | `[:accrue, :ops, :incomplete_expired]` | `count` | `subscription_id` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :charge_failed]` | `count` | `charge_id`, `customer_id`, `failure_code` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :meter_reporting_failed]` | `count` | `meter_event_id`, `event_name`, `source` (`:reconciler \| :webhook \| :sync`) | `Accrue.Webhook.DefaultHandler` / `Accrue.Billing.MeterEventActions` / `Accrue.Jobs.MeterEventsReconciler` |
+| `[:accrue, :ops, :metered_renewal_stale_repaired]` | `count` | `source` (`:reconciler`), `processor`, `subscription_id`, `metered_renewal_id` | `Accrue.Jobs.MeteredRenewalReconciler` |
+| `[:accrue, :ops, :metered_missing_definition]` | `count` | `processor`, `subscription_id`, `metered_renewal_id`, `unmatched_event_count` | `Accrue.Billing.MeteredRenewalInvoice` |
+| `[:accrue, :ops, :metered_charge_awaiting_payment_method]` | `count` | `processor`, `state`, `subscription_id`, `metered_renewal_id`, `failure_class` | `Accrue.Billing.MeteredRenewalActions` |
+| `[:accrue, :ops, :metered_charge_failed_exhausted]` | `count` | `processor`, `state`, `subscription_id`, `metered_renewal_id`, `failure_class` | `Accrue.Billing.MeteredRenewalActions` |
 | `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | `count` | `event_id`, `processor_event_id`, `type`, `attempt` | `Accrue.Webhook.DispatchWorker` |
 | `[:accrue, :ops, :webhook_dlq, :replay]` | `count`, `duration`, `requeued_count`, `skipped_count` | `actor`, `filter`, `dry_run?` | `Accrue.Webhooks.DLQ` |
 | `[:accrue, :ops, :webhook_dlq, :prune]` | `dead_deleted`, `succeeded_deleted`, `duration` | `retention_days` | `Accrue.Webhook.Pruner` |
@@ -86,6 +90,24 @@ they correspond to — they are idempotent under webhook replay via the
 - **`:webhook`** — Stripe-reported meter errors: `Accrue.Webhook.DefaultHandler` ingests the billing path and `Accrue.Webhook.DispatchWorker` carries the async context when the handler marks the row `failed` with telemetry.
 
 Read this block before tuning Grafana annotations—alert links should point here (tuple + semantics), then [`operator-runbooks.md`](operator-runbooks.md) for ordered triage.
+
+## Braintree metered billing ops semantics
+
+These Phase 103 tuples are specific to the Braintree-local metering architecture. They are **durable transition signals**, not per-attempt noise:
+
+- `[:accrue, :ops, :metered_renewal_stale_repaired]` fires when the scheduled backstop opens a renewal window that the webhook-primary path missed after the grace period.
+- `[:accrue, :ops, :metered_missing_definition]` fires when local aggregation closes a renewal window with unmatched usage because no local meter definition bound those events to a billable target.
+- `[:accrue, :ops, :metered_charge_awaiting_payment_method]` fires on the first durable transition of a renewal window into the customer-repair state.
+- `[:accrue, :ops, :metered_charge_failed_exhausted]` fires on the first durable transition of a renewal window into terminal settlement exhaustion.
+
+The matching default counters are:
+
+- `accrue.ops.metered_renewal_stale_repaired.count`
+- `accrue.ops.metered_missing_definition.count`
+- `accrue.ops.metered_charge_awaiting_payment_method.count`
+- `accrue.ops.metered_charge_failed_exhausted.count`
+
+Those counters stay low-cardinality. Identifiers remain in telemetry metadata, not metric tags.
 
 Connect ops rows above are emitted via `Accrue.Telemetry.Ops.emit/3` from
 `Accrue.Webhook.ConnectHandler`. PDF and ledger rows use `:telemetry.execute/3`
@@ -363,6 +385,10 @@ For **ordered triage**, default **Oban** queue placement (anchor **`#oban-queue-
 | `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | Inspect `accrue_webhook_events` row; fix handler bug or data; use admin **Replay** or DLQ tools; watch replay telemetry; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
 | `[:accrue, :ops, :webhook_dlq, :replay]` | Validate `requeued_count` vs expectation; if dry-run, follow up with real replay. |
 | `[:accrue, :ops, :meter_reporting_failed]` | Check `source` (`:sync`, `:webhook`, `:reconciler`); inspect `accrue_meter_events`; verify Stripe meter + API keys; retry after fix; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
+| `[:accrue, :ops, :metered_renewal_stale_repaired]` | Confirm the renewal window was missing locally, then inspect Braintree renewal evidence and `Accrue.Jobs.MeteredRenewalReconciler` cadence before widening the backstop. |
+| `[:accrue, :ops, :metered_missing_definition]` | Add or repair the local meter definition, then inspect the affected renewal window and its unmatched events before replaying settlement. |
+| `[:accrue, :ops, :metered_charge_awaiting_payment_method]` | Repair the customer’s default payment method, then replay the same renewal window rather than creating a new charge unit. |
+| `[:accrue, :ops, :metered_charge_failed_exhausted]` | Treat the renewal as terminal until an operator decides whether to retry, refund, or write off the local invoice. |
 | `[:accrue, :ops, :dunning_exhaustion]` | Confirm subscription status transition; notify customer success; verify payment method in Stripe. |
 | `[:accrue, :ops, :revenue_loss]` | Triage `reason` + `subject_*`; fraud vs refund policy; reconcile with Stripe balance transactions; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
 | `[:accrue, :ops, :charge_failed]` | Map `failure_code`; prompt card update or alternative PM; check Radar rules in Stripe if unexpected. |

@@ -14,10 +14,26 @@ Each host call creates or advances an **`Accrue.Billing.MeterEvent`** row: the r
 
 The configured **`Accrue.Processor`** must implement **`report_meter_event/1`**. Tests use **`Accrue.Processor.Fake`** (for example via `Accrue.Test.setup_fake_processor/1`) so meter payloads are captured without network calls; production hosts configure a real processor (typically Stripe-backed) through normal Accrue wiring.
 
+## Processor distinction
+
+Stripe and Braintree share the same ingress seam, but they do **not** share the same settlement model.
+
+- **Stripe** can treat `report_usage/3` as direct meter reporting because Stripe exposes native meter APIs.
+- **Braintree** treats `report_usage/3` as the raw event ledger only. Accrue layers **local meter definitions**, **immutable renewal windows**, **local invoice decomposition**, and one external **`Transaction.sale`** settlement per closed window on top of those raw rows.
+
+For the full Braintree-specific flow, read [`braintree-metered-billing.md`](braintree-metered-billing.md).
+
 ## Out of scope
 
 **PROC-08** and any narrative about hosting a **second processor** alongside the primary configured seam are intentionally omitted from the v1.10 metering story—only the single processor boundary above matters here.
 
 ## When metering fails (ops)
 
-When usage cannot be reported durably, operators rely on **`[:accrue, :ops, :meter_reporting_failed]`** and related notes in [`telemetry.md`](telemetry.md); ordered triage lives in [`operator-runbooks.md`](operator-runbooks.md). This guide defers entirely to those documents for failure telemetry—no duplicate ops catalog.
+When usage cannot be reported durably, operators rely on **`[:accrue, :ops, :meter_reporting_failed]`** for Stripe-style meter ingestion failures and the Phase 103 Braintree-local metering tuples for renewal repair and settlement recovery:
+
+- `[:accrue, :ops, :metered_renewal_stale_repaired]`
+- `[:accrue, :ops, :metered_missing_definition]`
+- `[:accrue, :ops, :metered_charge_awaiting_payment_method]`
+- `[:accrue, :ops, :metered_charge_failed_exhausted]`
+
+The exact tuple metadata and counter names live in [`telemetry.md`](telemetry.md); ordered triage lives in [`operator-runbooks.md`](operator-runbooks.md).
