@@ -14,6 +14,7 @@ defmodule Accrue.Billing.MeteredRenewalInvoice do
   }
 
   alias Accrue.{Config, Repo}
+  alias Accrue.Telemetry.Ops
 
   @authored_status "authored"
 
@@ -54,6 +55,7 @@ defmodule Accrue.Billing.MeteredRenewalInvoice do
       end
     end)
     |> normalize_transact_result()
+    |> maybe_emit_missing_definition_ops(renewal, classified)
   end
 
   defp existing_invoice(%MeteredRenewal{invoice_id: invoice_id, invoice_status: @authored_status})
@@ -260,4 +262,21 @@ defmodule Accrue.Billing.MeteredRenewalInvoice do
   defp normalize_transact_result({:ok, {:ok, result}}), do: {:ok, result}
   defp normalize_transact_result({:ok, result}), do: {:ok, result}
   defp normalize_transact_result({:error, err}), do: {:error, err}
+
+  defp maybe_emit_missing_definition_ops({:ok, _result} = ok, renewal, classified) do
+    unmatched_count = length(classified.unmatched)
+
+    if unmatched_count > 0 do
+      Ops.emit(:metered_missing_definition, %{count: 1}, %{
+        processor: renewal.processor,
+        metered_renewal_id: renewal.id,
+        subscription_id: renewal.subscription_id,
+        unmatched_event_count: unmatched_count
+      })
+    end
+
+    ok
+  end
+
+  defp maybe_emit_missing_definition_ops(other, _renewal, _classified), do: other
 end

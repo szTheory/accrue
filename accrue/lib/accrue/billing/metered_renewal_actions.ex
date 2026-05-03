@@ -17,6 +17,7 @@ defmodule Accrue.Billing.MeteredRenewalActions do
 
   alias Accrue.Processor.Idempotency
   alias Accrue.{Events, Processor, Repo}
+  alias Accrue.Telemetry.Ops
 
   @processor "braintree"
 
@@ -86,23 +87,33 @@ defmodule Accrue.Billing.MeteredRenewalActions do
               end
 
             {:error, %Accrue.CardError{} = error, payment_method} ->
-              {:ok, _} =
+              {:ok, failed_attempt} =
                 MeteredChargeAttempts.mark_failed_exhausted(attempt, error, payment_method)
 
-              {:ok, _} = mark_retry_state(metered_renewal_id, :failed_exhausted, attempt, error)
+              {:ok, _} =
+                mark_retry_state(metered_renewal_id, :failed_exhausted, failed_attempt, error)
               {:error, error}
 
             {:error, error, payment_method} ->
-              {:ok, _} = MeteredChargeAttempts.mark_retryable(attempt, error, payment_method)
-              {:ok, _} = mark_retry_state(metered_renewal_id, :retry_scheduled, attempt, error)
+              {:ok, retry_attempt} =
+                MeteredChargeAttempts.mark_retryable(attempt, error, payment_method)
+
+              {:ok, _} =
+                mark_retry_state(metered_renewal_id, :retry_scheduled, retry_attempt, error)
               {:error, error}
           end
 
         {:error, %Accrue.Error.NoDefaultPaymentMethod{} = error} ->
-          {:ok, _} = MeteredChargeAttempts.mark_awaiting_payment_method(attempt, error)
+          {:ok, awaiting_attempt} =
+            MeteredChargeAttempts.mark_awaiting_payment_method(attempt, error)
 
           {:ok, _} =
-            mark_retry_state(metered_renewal_id, :awaiting_payment_method, attempt, error)
+            mark_retry_state(
+              metered_renewal_id,
+              :awaiting_payment_method,
+              awaiting_attempt,
+              error
+            )
 
           {:error, error}
       end
@@ -427,17 +438,50 @@ defmodule Accrue.Billing.MeteredRenewalActions do
 
   defp mark_retry_state(metered_renewal_id, state, attempt, error) do
     renewal = Repo.get!(MeteredRenewal, metered_renewal_id)
+    previous_state = renewal.state
 
-    renewal
-    |> MeteredRenewal.changeset(%{
-      state: state,
-      data:
-        Map.merge(renewal.data || %{}, %{
-          "charge_attempt_id" => attempt.id,
-          "settlement_error" => Exception.message(error),
-          "settlement_state" => Atom.to_string(state)
-        })
-    })
-    |> Repo.update()
+    with {:ok, updated} <-
+           renewal
+           |> MeteredRenewal.changeset(%{
+             state: state,
+             data:
+               Map.merge(renewal.data || %{}, %{
+                 "charge_attempt_id" => attempt.id,
+                 "settlement_error" => Exception.message(error),
+                 "settlement_state" => Atom.to_string(state)
+               })
+           })
+           |> Repo.update() do
+      maybe_emit_metered_state_transition(previous_state, updated, attempt)
+      {:ok, updated}
+    end
   end
+
+  defp maybe_emit_metered_state_transition(previous_state, renewal, _attempt)
+       when previous_state == renewal.state,
+       do: :ok
+
+  defp maybe_emit_metered_state_transition(_previous_state, renewal, attempt)
+       when renewal.state == :awaiting_payment_method do
+    Ops.emit(:metered_charge_awaiting_payment_method, %{count: 1}, %{
+      processor: renewal.processor,
+      state: renewal.state,
+      metered_renewal_id: renewal.id,
+      subscription_id: renewal.subscription_id,
+      failure_class: attempt.failure_class
+    })
+  end
+
+  defp maybe_emit_metered_state_transition(_previous_state, renewal, attempt)
+       when renewal.state == :failed_exhausted do
+    Ops.emit(:metered_charge_failed_exhausted, %{count: 1}, %{
+      processor: renewal.processor,
+      state: renewal.state,
+      metered_renewal_id: renewal.id,
+      subscription_id: renewal.subscription_id,
+      failure_class: attempt.failure_class
+    })
+  end
+
+  defp maybe_emit_metered_state_transition(_previous_state, _renewal, _attempt), do: :ok
 end

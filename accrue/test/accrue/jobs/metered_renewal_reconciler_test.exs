@@ -45,7 +45,7 @@ defmodule Accrue.Jobs.MeteredRenewalReconcilerTest do
   end
 
   test "repairs only stale expected-renewal windows and reuses the renewal-opening contract" do
-    now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
+    now = Accrue.Clock.utc_now() |> DateTime.truncate(:microsecond)
     stale_end = DateTime.add(now, -120, :second)
     fresh_end = DateTime.add(now, -10, :second)
 
