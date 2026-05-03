@@ -6,6 +6,11 @@ routing charges with destination or separate-charge semantics,
 computing platform fees, rendering Express dashboard login links, and
 receiving Connect webhooks on a dedicated endpoint.
 
+> **Braintree boundary:** Braintree recurring billing is incompatible with Marketplace, and Accrue does not present Braintree marketplace work as current first-party Connect parity. Braintree pay-ins and Hyperwallet payouts are separate truths. Read
+> [`connect-hyperwallet-decision.md`](./connect-hyperwallet-decision.md)
+> for the Phase 104 no-go verdict, the reopen rule, and the narrow
+> future boundary.
+
 This guide walks through the full public API in the order a platform
 builder will encounter it, and calls out the Connect footguns that
 will silently cost you money if ignored (Pitfalls section).

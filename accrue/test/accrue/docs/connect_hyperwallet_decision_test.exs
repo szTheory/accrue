@@ -4,8 +4,8 @@ defmodule Accrue.Docs.ConnectHyperwalletDecisionTest do
   defp repo_root, do: Path.expand("../../../..", __DIR__)
 
   defp read!(path) do
-    path
-    |> Path.join(repo_root())
+    repo_root()
+    |> Path.join(path)
     |> File.read!()
   end
 
