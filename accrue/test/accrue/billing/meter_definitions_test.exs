@@ -9,6 +9,7 @@ defmodule Accrue.Billing.MeterDefinitionsTest do
   use Accrue.BillingCase, async: false
 
   alias Accrue.Billing
+
   alias Accrue.Billing.{
     Customer,
     MeterDefinition,

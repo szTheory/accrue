@@ -51,6 +51,7 @@ defmodule Accrue.Webhook.DefaultHandler do
     Invoice,
     InvoiceItem,
     InvoiceProjection,
+    MeteredRenewalActions,
     PaymentMethod,
     Refund,
     Subscription,
@@ -128,11 +129,21 @@ defmodule Accrue.Webhook.DefaultHandler do
       when is_binary(type) do
     case normalize_braintree_type(type) do
       {:ok, normalized_type} ->
-        case dispatch(normalized_type, event.processor_event_id, event.created_at, %{
-               "id" => event.object_id
-             }) do
-          {:ok, _} -> :ok
-          other -> other
+        with {:ok, _} <-
+               maybe_open_braintree_metered_renewal(
+                 type,
+                 event.object_id,
+                 event.created_at,
+                 event.processor_event_id
+               ),
+             result <-
+               dispatch(normalized_type, event.processor_event_id, event.created_at, %{
+                 "id" => event.object_id
+               }) do
+          case result do
+            {:ok, _} -> :ok
+            other -> other
+          end
         end
 
       :ignored ->
@@ -1110,6 +1121,15 @@ defmodule Accrue.Webhook.DefaultHandler do
       other -> other |> Module.split() |> List.last() |> String.downcase()
     end
   end
+
+  defp maybe_open_braintree_metered_renewal(type, object_id, evt_ts, evt_id)
+       when type in ["subscription_charged_successfully", "subscription_went_active"] and
+              is_binary(object_id) do
+    MeteredRenewalActions.open_braintree_renewal_window(object_id, evt_ts, evt_id, type)
+  end
+
+  defp maybe_open_braintree_metered_renewal(_type, _object_id, _evt_ts, _evt_id),
+    do: {:ok, :ignored}
 
   # Dual atom/string key lookup — handles both Fake (atom) and Stripe
   # (string) shapes without forcing callers to normalize.

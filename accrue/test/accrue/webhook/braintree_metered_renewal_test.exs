@@ -8,8 +8,15 @@ defmodule Accrue.Webhook.BraintreeMeteredRenewalTest do
   """
   use Accrue.BillingCase, async: false
 
-  alias Accrue.Billing.{Customer, MeterDefinition, MeterDefinitions, MeteredRenewal, Subscription,
-    SubscriptionItem}
+  alias Accrue.Billing.{
+    Customer,
+    MeterDefinition,
+    MeterDefinitions,
+    MeteredRenewal,
+    Subscription,
+    SubscriptionItem
+  }
+
   alias Accrue.Events.Event, as: LedgerEvent
   alias Accrue.Webhook.DefaultHandler
 
@@ -131,8 +138,8 @@ defmodule Accrue.Webhook.BraintreeMeteredRenewalTest do
     assert renewal.state == :pending
     assert renewal.subscription_id == subscription.id
     assert renewal.customer_id == subscription.customer_id
-    assert renewal.period_start == ~U[2026-04-01 00:00:00Z]
-    assert renewal.period_end == ~U[2026-05-01 00:00:00Z]
+    assert DateTime.compare(renewal.period_start, ~U[2026-04-01 00:00:00Z]) == :eq
+    assert DateTime.compare(renewal.period_end, ~U[2026-05-01 00:00:00Z]) == :eq
     assert renewal.trigger_source == "braintree_webhook"
     assert renewal.last_processor_event_id == "evt_bt_renewal_1"
 
@@ -196,8 +203,8 @@ defmodule Accrue.Webhook.BraintreeMeteredRenewalTest do
 
     reloaded = Repo.get!(MeteredRenewal, renewal.id)
 
-    assert reloaded.period_start == ~U[2026-04-01 00:00:00Z]
-    assert reloaded.period_end == ~U[2026-05-01 00:00:00Z]
+    assert DateTime.compare(reloaded.period_start, ~U[2026-04-01 00:00:00Z]) == :eq
+    assert DateTime.compare(reloaded.period_end, ~U[2026-05-01 00:00:00Z]) == :eq
     assert reloaded.snapshot["subscription_item_id"] == subscription_item.id
     assert reloaded.snapshot["price_id"] == "price_metered"
     assert reloaded.snapshot["processor_plan_id"] == "plan_metered"
