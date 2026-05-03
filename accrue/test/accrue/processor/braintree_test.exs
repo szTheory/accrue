@@ -156,6 +156,38 @@ defmodule Accrue.Processor.BraintreeTest do
   end
 
   defmodule TransactionGatewayStub do
+    def sale(params, opts) do
+      send(self(), {:braintree_sale, params, opts})
+
+      case Map.get(params, :amount) || Map.get(params, "amount") do
+        "49.00" ->
+          {:error, %Elixir.Braintree.ErrorResponse{message: "Gateway timeout while creating sale"}}
+
+        "77.00" ->
+          {:error, %Elixir.Braintree.ErrorResponse{message: "Processor Declined: Do Not Honor"}}
+
+        _ ->
+          {:ok,
+           %{
+             id: "ch_bt_123",
+             type: "sale",
+             status: "submitted_for_settlement",
+             amount: Map.get(params, :amount) || Map.get(params, "amount"),
+             currency_iso_code: "USD",
+             customer_details: %{id: Map.get(params, :customer_id) || Map.get(params, "customer_id")},
+             payment_instrument_type: "credit_card",
+             credit_card_details: %{
+               token: Map.get(params, :payment_method_token) || Map.get(params, "payment_method_token")
+             },
+             custom_fields: %{
+               "accrue_subject_uuid" =>
+                 Map.get(params, :custom_fields, %{})["accrue_subject_uuid"] ||
+                   get_in(params, ["custom_fields", "accrue_subject_uuid"])
+             }
+           }}
+      end
+    end
+
     def refund(id, amount, _opts \\ []) do
       if amount == "invalid" do
         {:error, %Elixir.Braintree.ErrorResponse{message: "Amount is invalid"}}
@@ -445,5 +477,65 @@ defmodule Accrue.Processor.BraintreeTest do
     assert {:ok, refund} = Braintree.fetch(:refund, "ref_bt_456")
     assert refund.id == "ref_bt_456"
     assert refund.status == "succeeded"
+  end
+
+  test "create_charge/2 authors an off-session sale with idempotency metadata and explicit payment-method resolution" do
+    assert {:ok, charge} =
+             Braintree.create_charge(
+               %{
+                 amount: 2_400,
+                 currency: "usd",
+                 customer: "cus_bt_123",
+                 payment_method: "pm_bt_default_1111",
+                 description: "Metered renewal 2026-04",
+                 metadata: %{
+                   "accrue_subject_uuid" => "renewal-subject-123",
+                   "metered_renewal_id" => "renewal_123"
+                 }
+               },
+               idempotency_key: "idem-metered-renewal-123"
+             )
+
+    assert_receive {:braintree_sale, params, opts}
+    assert params[:amount] == "24.00"
+    assert params[:customer_id] == "cus_bt_123"
+    assert params[:payment_method_token] == "pm_bt_default_1111"
+    assert params[:options][:submit_for_settlement] == true
+    assert params[:custom_fields]["accrue_subject_uuid"] == "renewal-subject-123"
+    assert params[:custom_fields]["metered_renewal_id"] == "renewal_123"
+    assert opts[:idempotency_key] == "idem-metered-renewal-123"
+    assert charge.id == "ch_bt_123"
+    assert charge.status == "succeeded"
+  end
+
+  test "create_charge/2 translates retryable Braintree sale failures into typed API errors" do
+    assert {:error, %Accrue.APIError{} = error} =
+             Braintree.create_charge(
+               %{
+                 amount: 4_900,
+                 currency: "usd",
+                 customer: "cus_bt_123",
+                 payment_method: "pm_bt_default_1111"
+               },
+               idempotency_key: "idem-metered-retry"
+             )
+
+    assert error.message =~ "Gateway timeout"
+  end
+
+  test "create_charge/2 translates hard declines into typed card errors instead of raw tuples" do
+    assert {:error, %Accrue.CardError{} = error} =
+             Braintree.create_charge(
+               %{
+                 amount: 7_700,
+                 currency: "usd",
+                 customer: "cus_bt_123",
+                 payment_method: "pm_bt_default_1111"
+               },
+               idempotency_key: "idem-metered-decline"
+             )
+
+    assert error.decline_code == "do_not_honor"
+    assert error.message =~ "Processor Declined"
   end
 end
