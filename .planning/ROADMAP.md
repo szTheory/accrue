@@ -68,7 +68,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 109 | Support Contract Truth | Align package docs, support matrix, planning mirrors, and host-facing guidance around one provider-honest Stripe + Braintree contract for checkout and billing portal behavior, with one shared facade and provider-specific URL semantics. | SUP-01, SUP-02 |
+| 109 | Support Contract Truth | **Complete 2026-05-06**. Package docs, support matrix, planning mirrors, example-host proof docs, and shift-left bash gates now share one provider-honest Stripe + Braintree contract for checkout and billing portal behavior, with one shared facade and provider-specific URL semantics. | SUP-01, SUP-02 |
 | 110 | Lifecycle Semantics & Self-Serve Clarity | Publish one lifecycle SSOT and tighten any touched portal/admin/customer-facing copy or UI so subscription actions and states are explicit and least-surprising across providers. | LIF-01, LIF-02 |
 | 111 | Webhook & Operator Closure | Make webhook docs, runbooks, telemetry references, and deterministic proof lanes first-class for the shipped Braintree slice, with replay/recovery guidance that matches runtime truth. | OPS-01, OPS-02 |
 

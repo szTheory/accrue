@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.35
 milestone_name: Dual-Provider Supportability Closure
 status: in_progress
-last_updated: "2026-05-06T20:07:43Z"
+last_updated: "2026-05-06T20:11:12Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 67
+  completed_plans: 3
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ See: `.planning/PROJECT.md` (updated 2026-05-06)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.35 support-contract execution and follow-on supportability closure planning
+**Current focus:** v1.35 follow-on supportability closure planning after Phase 109 support-contract completion
 
 ## Current Position
 
 Milestone: v1.35 — Dual-Provider Supportability Closure
-Phase: 109 — Support Contract Truth
-Plan: 03 pending (`.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-PLAN.md`)
-Status: In progress
-Resume file: `.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-PLAN.md`
-Last activity: 2026-05-06 — Phase 109 Plan 02 executed; First Hour, the Braintree portal guide, accrue_portal README, production readiness, and telemetry now share the mounted Braintree setup contract and failure semantics
+Phase: 109 — Support Contract Truth complete
+Plan: Complete (`.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-SUMMARY.md`)
+Status: Ready for next phase planning
+Resume file: `.planning/ROADMAP.md`
+Last activity: 2026-05-06 — Phase 109 Plan 03 executed; example-host proof docs and shift-left bash gates now mirror and enforce the provider-honest Stripe-hosted vs Braintree-mounted local checkout and billing-portal contract
 
 ## Milestone Progress
 
@@ -60,6 +60,7 @@ Last activity: 2026-05-06 — Phase 109 Plan 02 executed; First Hour, the Braint
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
 - **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-01-SUMMARY.md`** — execution summary for the support-contract truth slice (**SUP-01**).
 - **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-02-SUMMARY.md`** — execution summary for the onboarding/operator mounted-path guidance slice (**SUP-02**).
+- **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-SUMMARY.md`** — execution summary for the example-host mirror and support-contract drift-gate closeout slice.
 - **`.planning/milestones/v1.34-REQUIREMENTS.md`** — archived **v1.34** requirements for the Rendro-default invoice PDF milestone.
 - **`.planning/milestones/v1.34-ROADMAP.md`** — archived **v1.34** roadmap for Phases **106–108**.
 - **`.planning/v1.34-v1.34-MILESTONE-AUDIT.md`** — passed milestone audit for **v1.34**.
@@ -87,6 +88,7 @@ Last activity: 2026-05-06 — Phase 109 Plan 02 executed; First Hour, the Braint
 
 ## Recent Decisions
 
+- **2026-05-06:** **Phase 109 complete** — the example-host README, adoption proof matrix, contributor map, and shift-left bash gates now repeat and enforce the same provider-honest contract: Stripe returns upstream hosted checkout and portal URLs, while Braintree returns mounted local checkout and portal URLs inside the bounded `gateway subscription core`.
 - **2026-05-06:** **Phase 109 Plan 02 complete** — First Hour, `braintree-local-portal.md`, `accrue_portal/README.md`, production readiness, and telemetry now repeat one mounted Braintree contract: absolute `portal_base_url`, matching `portal_mount_path`, auth/session continuity, Hosted Fields / CSP readiness, provisional discount preview, and local checkout completion semantics.
 - **2026-05-06:** **Phase 109 Plan 01 complete** — the processor support matrix, root README, package README, roadmap, and project mirror now repeat one provider-honest contract: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs.
 - **2026-05-06:** **v1.34 archived** — audit passed; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the final closeout run.
