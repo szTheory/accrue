@@ -40,9 +40,45 @@
 
 ## Active Milestone
 
-No active milestone. **v1.34** shipped on **2026-05-06**, and the next milestone has not been opened yet.
+### v1.35 Dual-Provider Supportability Closure
+
+**Status:** Planning opened 2026-05-06
+**Phases:** 109–111
+**Requirements:** **SUP-01..02**, **LIF-01..02**, **OPS-01..02** — see [`REQUIREMENTS.md`](REQUIREMENTS.md)
+**Strategic parent:** [STRATEGY.md](STRATEGY.md)
+
+**Milestone goal:** Make the shipped Stripe + Braintree surface genuinely adoption-grade by aligning the public support contract, lifecycle semantics, mounted portal/checkout story, and webhook/operator recovery guidance before expanding breadth again.
+
+**Success criteria:**
+
+1. The same provider-honest truth is visible in package docs, support matrix, planning mirrors, and host-facing examples.
+2. Lifecycle semantics across Stripe, Fake, and Braintree are explicit enough that integrators and operators can predict behavior without reading source.
+3. Braintree webhook, replay, and support guidance feels first-class rather than Stripe-retrofitted.
+
+**Phase numbering:** continues from **v1.34** → starts at **Phase 109**.
 
 ## Phases
+
+<details>
+<summary>🟡 v1.35 Dual-Provider Supportability Closure (Phases 109–111) — PLANNING OPENED 2026-05-06</summary>
+
+**Milestone goal:** Close the supportability gap between Accrue's shipped dual-provider capabilities and the truth exposed to adopters, operators, and future maintainers.
+
+**Requirements:** **SUP-01..02**, **LIF-01..02**, **OPS-01..02** — see [`REQUIREMENTS.md`](REQUIREMENTS.md).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 109 | Support Contract Truth | Align package docs, support matrix, planning mirrors, and host-facing guidance around one provider-honest Stripe + Braintree contract for checkout and billing portal behavior. | SUP-01, SUP-02 |
+| 110 | Lifecycle Semantics & Self-Serve Clarity | Publish one lifecycle SSOT and tighten any touched portal/admin/customer-facing copy or UI so subscription actions and states are explicit and least-surprising across providers. | LIF-01, LIF-02 |
+| 111 | Webhook & Operator Closure | Make webhook docs, runbooks, telemetry references, and deterministic proof lanes first-class for the shipped Braintree slice, with replay/recovery guidance that matches runtime truth. | OPS-01, OPS-02 |
+
+**Planned boundaries:**
+
+1. No new processors, Connect reopening, or finance/export scope.
+2. No broad new billing primitives; this milestone consolidates the surface already shipped in v1.31-v1.33.
+3. UI work is allowed only where it improves lifecycle clarity or recovery ergonomics.
+
+</details>
 
 <details>
 <summary>✅ v1.34 Rendro Native Invoice PDF Default (Phases 106–108) — SHIPPED 2026-05-06</summary>

@@ -12,7 +12,15 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-No active milestone. **v1.34** shipped on **2026-05-06**, and the next milestone has not been opened yet.
+**v1.35 — Dual-Provider Supportability Closure** opened on **2026-05-06**.
+
+**Goal:** Make the shipped Stripe + Braintree surface easier to adopt, easier to operate, and harder to misunderstand by closing contract drift across docs, lifecycle semantics, portal behavior, and webhook/operator truth.
+
+**Target features:**
+
+- Provider-honest support contract and package-doc truth for checkout, billing portal, and the official Stripe + Braintree facade surface.
+- Canonical lifecycle semantics for cancel, cancel-at-period-end, resume, pause, state labels, and post-action convergence across Stripe, Fake, and Braintree.
+- First-class Braintree operability guidance covering webhook setup, replay/recovery, drift diagnosis, and mounted portal/checkout failure modes.
 
 **Current posture:**
 
@@ -200,23 +208,31 @@ No active milestone. **v1.34** shipped on **2026-05-06**, and the next milestone
 
 ## Current Milestone
 
-No active milestone. **v1.34** is closed and archived.
+### v1.35 — Dual-Provider Supportability Closure
+
+**Goal:** Consolidate the already-shipped dual-provider core so its public contract, lifecycle semantics, self-serve portal story, and operator recovery guidance all tell the same truth.
+
+**Target features:**
+
+- Support-matrix and package-doc alignment for provider-honest checkout and billing-portal semantics.
+- Lifecycle SSOT and user/operator-facing copy that prefer least-surprise billing behavior over vague parity claims.
+- Processor-aware webhook/runbook/telemetry proof so Braintree feels supportable in failure, not just functional on the happy path.
 
 ## Next Milestone Goals
 
-- Not opened yet. Start with fresh requirements before reopening roadmap work.
-- Preserve the current Rendro-first invoice contract, explicit Chromic compatibility path, and Hex-backed release proof as the new baseline.
-- Keep **PROC-08** and **FIN-03** boundaries explicit unless a future milestone changes strategy in writing.
+- Reopen **PROC-08** with a consolidation milestone rather than another feature-expansion sweep.
+- Preserve the current Rendro-first invoice contract, explicit Chromic compatibility path, and Hex-backed release proof as the new baseline while support work proceeds.
+- Keep **FIN-03**, marketplace/Hyperwallet reopening, and broad new billing primitives out of scope.
 
 ## Current State
 
-Current focus: **post-v1.34 closeout**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the latest completed planning milestone is the Rendro-first invoice-PDF engine shift captured in **v1.34**.
+Current focus: **v1.35 requirements and roadmap definition**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the latest completed feature-expansion milestone is the Braintree maturity work from **v1.31–v1.33**, followed by the Rendro invoice-path closeout in **v1.34**.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
 Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
 
-No planning milestone is currently active. The latest shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The prior shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md).
+The active planning milestone is **v1.35**: **Dual-Provider Supportability Closure**. It continues phase numbering at **109** and treats the shipped Stripe + Braintree surface as the baseline to harden rather than as a prompt for new processor breadth. The latest shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The prior shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md).
 
 **Last shipped planning milestone:** **v1.34** — Phases **106–108** (**2026-05-06**): **PDF-01..PDF-09**; **`milestones/v1.34-*`**; execution trees **`milestones/v1.34-phases/`**; planning tag **`v1.34`**. **Prior:** **v1.33** — Phases **101–104** (**2026-05-06**): **BT-01..BT-09**; **`milestones/v1.33-*`**; execution trees **`milestones/v1.33-phases/`**; planning tag **`v1.33`**. **Earlier:** **v1.32** — Phases **97–100** (**2026-05-01**): **PROC-14..20**; **`v1.32-*`**; execution trees **`milestones/v1.32-phases/`**; tag **`v1.32`**.
 
@@ -790,4 +806,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-06 — **v1.34** shipped — Rendro is now the default invoice PDF path, the explicit Chromic compatibility contract is documented, and the milestone is archived with Hex-backed release proof.*
+*Last updated: 2026-05-06 — **v1.35** opened — the next milestone focuses on dual-provider supportability closure across docs, lifecycle semantics, portal clarity, and webhook/operator truth.*

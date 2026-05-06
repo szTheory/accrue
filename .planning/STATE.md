@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: Rendro Native Invoice PDF Default
-status: milestone_closed
-last_updated: "2026-05-06T19:05:00.000Z"
+milestone: v1.35
+milestone_name: Dual-Provider Supportability Closure
+status: defining_requirements
+last_updated: "2026-05-06T20:15:00.000Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 3
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,16 +21,16 @@ See: `.planning/PROJECT.md` (updated 2026-05-06)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** No active milestone; v1.34 closeout is archived and the next milestone has not been opened
+**Current focus:** v1.35 requirement and roadmap definition for dual-provider supportability closure
 
 ## Current Position
 
-Milestone: None active
-Phase: —
+Milestone: v1.35 — Dual-Provider Supportability Closure
+Phase: Not started (defining requirements)
 Plan: —
-Status: Milestone closed
+Status: Defining requirements
 Resume file: None
-Last activity: 2026-05-06 — v1.34 archived after audit pass, docs proof pass, and release-proof rerun
+Last activity: 2026-05-06 — v1.35 opened to consolidate docs, lifecycle semantics, portal clarity, and Braintree webhook/operator truth
 
 ## Milestone Progress
 
