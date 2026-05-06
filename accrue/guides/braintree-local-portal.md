@@ -1,22 +1,43 @@
 # Building a Local Billing Portal for Braintree
 
 Phase 101 introduces `accrue_portal`, the batteries-included mounted portal
-package for Braintree local checkout and self-serve billing flows. Hosts that
-want the packaged path should mount `accrue_admin "/admin"` and
-`accrue_portal "/billing"` as sibling scopes, set `:portal_mount_path` to
-`"/billing"`, and configure `:portal_base_url` so returned checkout and
-billing-portal URLs are absolute.
+package for Braintree local checkout and self-serve billing flows. This guide
+is the SSOT for that packaged path.
 
-This guide remains the hand-rolled escape hatch. Use it when you want total UX
-control, or when you need behaviors outside the v1.33 packaged boundary such as
-emailed-link checkout bootstraps. In that case, build your own
-`/checkout/start?token=...` controller in the host app, resolve the token to a
-signed-in session, and then redirect into the mounted portal or your custom UI.
+For the default mounted path:
+
+- mount `accrue_admin "/admin"` and `accrue_portal "/billing"` as sibling scopes
+- set `:portal_mount_path` to `"/billing"`
+- set `:portal_base_url` to an absolute host URL so returned checkout and
+  billing-portal URLs stay absolute
+- keep auth/session continuity across the browser pipeline and LiveView mounts
+- load the Hosted Fields scripts and keep CSP aligned with that checkout surface
+
+If any of those are incomplete, Braintree does not fall back to an upstream
+hosted billing portal. The failure is local and typed: wrong `portal_mount_path`
+or `portal_base_url` breaks URL generation, broken auth/session continuity
+prevents customer resolution, missing Hosted Fields / CSP readiness breaks
+checkout, and discount preview remains provisional until final submit.
 
 Unlike Stripe, Braintree does not offer a pre-built, hosted customer billing
 portal for self-serve subscription management. Accrue now closes that gap with
 first-party local portal semantics while still exposing the core primitives for
 hand-rolled flows.
+
+## When to stay packaged vs go hand-rolled
+
+The packaged `accrue_portal` mount is the default story. It is the shortest path
+to a supported local checkout and billing portal because it already aligns the
+router contract, local URL return shape, auth expectations, and Hosted Fields
+checkout flow.
+
+The hand-rolled path is the escape hatch. Use it when you want total UX control,
+or when you need behaviors outside the packaged boundary such as emailed-link
+checkout bootstraps. In that case, build your own `/checkout/start?token=...`
+controller in the host app, resolve the token to a signed-in session, and then
+redirect into the mounted portal or your custom UI. The core processor truth
+does not change: Braintree checkout and billing portal URLs are still mounted
+local URLs, not upstream hosted sessions.
 
 ## Local Promotion-Code Mappings
 
@@ -44,6 +65,12 @@ and total, then rely on `Accrue.Billing.subscribe/3` to revalidate the code
 authoritatively on the final submit. The portal copy calls this out as
 preview-before-submit so customers do not confuse a local preview with a final
 processor confirmation.
+
+That means discount preview is a setup-contract truth, not just UX copy:
+successful preview proves only that the local mapping resolved. The
+authoritative checkout result is the final mounted submit, which persists local
+completion after the processor confirms the payment method and subscription
+work.
 
 ### Drift and Operator Remediation
 

@@ -5,15 +5,23 @@ terms. Your Phoenix app owns `MyApp.Billing`, routing, auth, runtime config,
 and verification choices. Accrue owns the billing engine behind those public
 boundaries. Read-only processor queries such as saved payment methods use
 `Accrue.Billing.list_payment_methods/2` (and the host wrapper `MyApp.Billing.list_payment_methods/2` after `mix accrue.install`); see [`guides/telemetry.md`](telemetry.md) for the `[:accrue, :billing, :payment_method, :list]` span.
-Server-side **Stripe Checkout** session creation uses **`Accrue.Billing.create_checkout_session/2`**
+Server-side checkout session creation uses **`Accrue.Billing.create_checkout_session/2`**
 (and your host facade after install); telemetry is **`[:accrue, :billing, :checkout_session, :create]`**
 — see [`guides/telemetry.md#billing-checkout-session-create`](telemetry.md#billing-checkout-session-create).
 
-Customer Portal session creation is the parallel server-side helper for Stripe-hosted billing self-service.
+Customer Portal session creation is the parallel server-side helper for
+billing self-service.
 
-Server-side **Stripe Customer Portal** session creation uses **`Accrue.Billing.create_billing_portal_session/2`**
+Server-side billing portal session creation uses **`Accrue.Billing.create_billing_portal_session/2`**
 (and your host facade after install); telemetry is **`[:accrue, :billing, :billing_portal, :create]`**
 — see [`guides/telemetry.md#billing-billing-portal-create`](telemetry.md#billing-billing-portal-create).
+
+Provider behavior stays honest across the shared facade:
+
+| Provider | Checkout session result | Billing portal result |
+| --- | --- | --- |
+| Stripe | Upstream hosted URL | Upstream hosted URL |
+| Braintree | Mounted local URL | Mounted local URL |
 
 ## How to enter this guide
 
@@ -38,6 +46,28 @@ Shortest read-only path: clone the repo, `cd examples/accrue_host`, run **`mix v
 Production apps integrate billing through host-owned **`Accrue.Auth`**; see [Auth adapters](auth_adapters.md) for adapter choices and wiring contracts. **Sigra** is optional: the demo uses it for deterministic organization billing and CI, not as a blanket production requirement. When you are not on Sigra, follow **Capsule H** and [Organization billing (non-Sigra)](organization_billing.md) for org-scoped Stripe customers. Demo-specific `mix.exs` and setup commands stay in [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md).
 
 When you are preparing a **real** deploy (not the demo loop), walk [Production readiness](production-readiness.md) once — it links the same guides in ship order without duplicating them.
+
+## Stripe-first spine, early Braintree branch
+
+Stay on the default Stripe-hosted path unless you already know you need
+Braintree. Stripe remains the fastest first-user production route through this
+guide.
+
+If you are using Braintree instead, branch early and treat the mounted portal
+contract as part of initial setup, not a later polish task:
+
+- add `accrue_portal`
+- mount `accrue_portal "/billing"` as a sibling scope beside `accrue_admin`
+- set `portal_mount_path` to the mounted portal route
+- set `portal_base_url` to an absolute host URL
+- keep auth/session continuity across the Plug and LiveView portal mounts
+- satisfy the Hosted Fields script and CSP contract before opening checkout
+
+That branch stays intentionally short here. Use
+[Braintree local portal](braintree-local-portal.md) for the full mounted-path
+setup, the packaged `accrue_portal` default story, and the sharp failure modes
+to expect when `portal_mount_path`, `portal_base_url`, auth/session state, or
+Hosted Fields readiness are wrong.
 
 ## 1. First run
 
