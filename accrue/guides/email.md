@@ -13,7 +13,7 @@ Minimal config for a host Phoenix app:
 # config/config.exs
 config :accrue,
   mailer: Accrue.Mailer.Default,
-  pdf_adapter: Accrue.PDF.ChromicPDF,
+  invoice_pdf_adapter: Accrue.InvoiceRenderer.Rendro,
   branding: [
     business_name: "Acme Corp",
     from_name: "Acme Billing",
@@ -33,7 +33,16 @@ config :accrue, Accrue.Mailer.Swoosh,
 ```
 
 The host application's supervision tree is responsible for starting
-Oban, ChromicPDF, and the Swoosh adapter — Accrue does not start them.
+Oban and the Swoosh adapter. On the default Rendro path, invoice PDF
+attachments do not require Chrome or a `ChromicPDF` process.
+
+Invoice attachments follow the invoice renderer, not the lower-level HTML seam:
+
+- `:invoice_pdf_adapter` controls whether invoice emails attach a PDF or fall
+  back to the hosted invoice URL note.
+- `Accrue.InvoiceRenderer.Rendro` is the normal default path.
+- `Accrue.InvoiceRenderer.ChromicPDF` is the explicit compatibility path when a
+  host intentionally wants the older Chrome-backed invoice renderer.
 
 ## Mailglass migrations (Phase 88+ pipeline)
 
@@ -133,6 +142,21 @@ Full catalogue of supported transactional types:
 The worker rehydrates entities at delivery time. `Accrue.Mailer.Default`
 raises `ArgumentError` on non-scalar values to fail loud at the call
 site.
+
+## Invoice PDF attachments
+
+Invoice-carrying email types use the same invoice renderer contract documented
+in `guides/pdf.md`.
+
+- With `config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Rendro`,
+  invoice emails attach a Rendro-generated PDF on the default path.
+- With `config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF`,
+  invoice emails use the explicit ChromicPDF compatibility path instead.
+- If rendering is disabled or unavailable, Accrue falls back to the hosted
+  invoice URL rather than pretending a PDF binary exists.
+
+Only hosts that explicitly choose `Accrue.InvoiceRenderer.ChromicPDF` need to
+start `ChromicPDF` and size the runtime around Chrome-backed rendering.
 
 ## Override ladder
 

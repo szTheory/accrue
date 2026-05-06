@@ -62,17 +62,31 @@ identifying the offending key.
 
 ## Logo strategy
 
-Emails and PDFs have different logo constraints:
+Emails and PDFs have different logo constraints, and the PDF posture depends on
+which renderer you chose:
 
 | Format | Preferred source | Why |
 |--------|------------------|-----|
 | HTML email | `logo_url` (HTTPS) | Email clients cache remote images; reduces email size |
-| PDF (ChromicPDF) | `logo_url` (HTTPS) OR `logo_base64` | Chromium fetches HTTPS at render time. Base64 avoids network dependency for air-gapped renders |
+| PDF (Rendro) | `logo_base64` | Rendro's default posture is native/offline. Treat remote `logo_url` fetches as unsupported and embed the logo when the invoice must render reliably without network access |
+| PDF (ChromicPDF) | `logo_url` (HTTPS) or `logo_base64` | Chromium can fetch HTTPS assets at render time on the explicit compatibility path. `logo_base64` is still strongly preferred when you need deterministic or air-gapped output |
 | PDF (offline) | `logo_base64` | Required — no outbound HTTP |
 
 When both are set, `logo_base64` takes precedence for PDF and
-`logo_url` takes precedence for email. See `guides/pdf.md` for the
-ChromicPDF font + image loading strategy.
+`logo_url` takes precedence for email.
+
+## Renderer-specific constraints
+
+Rendro and ChromicPDF do not have the same asset and font behavior:
+
+| Renderer | Assets | Fonts | Operational note |
+|----------|--------|-------|------------------|
+| Rendro | Prefer `logo_base64`; plan for native/offline rendering | Use supported embedded assets and validate glyph coverage up front | Best fit for deterministic invoice rendering without Chrome |
+| ChromicPDF | Can fetch `logo_url` over HTTPS, but `logo_base64` remains safer for deterministic output | Browser-like CSS and webfont behavior exist, but remote fetch timing can still fail | Only applies when the host explicitly opts into `Accrue.InvoiceRenderer.ChromicPDF` |
+
+If you care about air-gapped deploys, reproducible CI output, or environments
+where outbound fetches are restricted, treat `logo_base64` as required for
+Rendro and strongly preferred even on the ChromicPDF compatibility path.
 
 ## Per-template override
 

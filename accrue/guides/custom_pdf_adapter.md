@@ -1,9 +1,14 @@
 # Custom PDF Adapter
 
-Accrue renders invoice PDFs through a behaviour boundary so hosts can replace
-the default ChromicPDF path when their deployment shape requires something
-else. Common examples are a sidecar renderer, an internal document service, or
-an environment that cannot run Chromium locally.
+This guide covers the advanced HTML seam behind `Accrue.PDF`, not the default
+invoice renderer. Use it when you need custom HTML-in, PDF-binary-out behavior
+for non-invoice callers, an explicit Chromic compatibility flow, or a host
+specific document service.
+
+If you are trying to change how invoice PDFs render by default, start with
+`guides/pdf.md`. Invoice rendering is owned by `:invoice_pdf_adapter`, while
+`Accrue.PDF` remains the advanced HTML seam for ChromicPDF and custom
+HTML-to-PDF adapters.
 
 The public contract is the `Accrue.PDF` behaviour. Keep adapters focused on
 HTML-in, PDF-binary-out, and avoid reaching into invoice or email internals.
@@ -48,8 +53,9 @@ That keeps calls on the stable facade:
 Accrue.PDF.render("<html><body>invoice preview</body></html>", size: :a4)
 ```
 
-See `guides/pdf.md` for the built-in adapter behavior, paper-size options, and
-the shared template path used by invoice email and PDF rendering.
+See `guides/pdf.md` for the built-in adapter behavior, paper-size options, the
+invoice-renderer defaults, and the shared template path used by invoice email
+and PDF rendering.
 
 ## Null adapter fallback
 
