@@ -49,7 +49,7 @@ The first official dual-provider promise is **gateway subscription core**:
 | checkout.hosted_handoff | Local proof helper | Supported | Supported via first-party local checkout | all first-party |
 | billing_portal.hosted_self_serve | Local proof helper | Supported | Supported via mounted first-party portal | all first-party |
 
-The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe routes to upstream hosted pages, while Braintree routes to Accrue-owned mounted local UI.
+The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs through Accrue-owned local UI.
 
 Phase 97 extends the shipped Braintree slice to include explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is supported in the shipped slice, while quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
 
