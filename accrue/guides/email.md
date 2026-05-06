@@ -38,11 +38,13 @@ attachments do not require Chrome or a `ChromicPDF` process.
 
 Invoice attachments follow the invoice renderer, not the lower-level HTML seam:
 
-- `:invoice_pdf_adapter` controls whether invoice emails attach a PDF or fall
-  back to the hosted invoice URL note.
+- invoice-carrying email types attempt to render an attachment through
+  `:invoice_pdf_adapter`.
 - `Accrue.InvoiceRenderer.Rendro` is the normal default path.
 - `Accrue.InvoiceRenderer.ChromicPDF` is the explicit compatibility path when a
   host intentionally wants the older Chrome-backed invoice renderer.
+- disabled or unavailable invoice renderers fall back to the hosted invoice URL
+  note instead of pretending an attachment exists.
 
 ## Mailglass migrations (Phase 88+ pipeline)
 
@@ -148,12 +150,16 @@ site.
 Invoice-carrying email types use the same invoice renderer contract documented
 in `guides/pdf.md`.
 
+- Invoice-carrying email types (`:invoice_finalized` and `:invoice_paid`)
+  attempt to attach a PDF through `:invoice_pdf_adapter`.
 - With `config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Rendro`,
-  invoice emails attach a Rendro-generated PDF on the default path.
+  the attachment uses the default Rendro renderer.
 - With `config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF`,
-  invoice emails use the explicit ChromicPDF compatibility path instead.
-- If rendering is disabled or unavailable, Accrue falls back to the hosted
-  invoice URL rather than pretending a PDF binary exists.
+  the attachment uses the explicit ChromicPDF compatibility path instead.
+- If rendering is disabled or the ChromicPDF renderer is unavailable, Accrue
+  falls back to the hosted invoice URL rather than pretending a PDF binary
+  exists.
+- This behavior is separate from the lower-level `:pdf_adapter` seam.
 
 Only hosts that explicitly choose `Accrue.InvoiceRenderer.ChromicPDF` need to
 start `ChromicPDF` and size the runtime around Chrome-backed rendering.
@@ -284,9 +290,9 @@ config :accrue, Oban,
 
 Recommended concurrency: 20. **Pitfall 4:** set
 `accrue_mailers` concurrency ≤ `chromic_pdf_pool_size` (default 3)
-when `:attach_invoice_pdf` is enabled, otherwise invoice emails can
-back-pressure the PDF pool. Accrue emits a boot-time warning when
-this invariant is violated.
+when you explicitly choose `Accrue.InvoiceRenderer.ChromicPDF` for invoice
+attachments, otherwise invoice emails can back-pressure the PDF pool. The
+boot-time warning for this invariant keys off `:attach_invoice_pdf`.
 
 ## Localization
 

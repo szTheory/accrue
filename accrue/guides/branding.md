@@ -17,7 +17,6 @@ config :accrue, :branding,
   support_email: "support@acme.example",
   company_address: "123 Main St, San Francisco, CA 94103",
   logo_url: "https://cdn.acme.example/logo.png",
-  logo_base64: nil,
   accent_color: "#1F6FEB",
   secondary_color: "#6B7280",
   font_stack: "-apple-system, BlinkMacSystemFont, sans-serif",
@@ -40,7 +39,6 @@ loud via `Accrue.ConfigError`.
 | `support_email` | `string` | nil | no | Rendered in `Contact support at` footer line |
 | `company_address` | `string` | nil | conditional | Physical postal address shown in email footer. **Required** for EU/CA audiences per CAN-SPAM/CASL transactional exemptions — see guides/email.md |
 | `logo_url` | `string (HTTPS)` | nil | no | HTTPS-accessible logo. Used in email `<img>` src + PDF URL mode |
-| `logo_base64` | `string (data URL)` | nil | no | Base64-embedded logo. Use when PDFs must render offline / air-gapped. Email clients prefer `logo_url` |
 | `accent_color` | `hex color (#RRGGBB)` | `"#1F6FEB"` | no | Primary CTA button + link color |
 | `secondary_color` | `hex color (#RRGGBB)` | `"#6B7280"` | no | Muted text + borders |
 | `font_stack` | `string` | `"-apple-system, BlinkMacSystemFont, sans-serif"` | no | CSS font-family. Web-safe stack recommended |
@@ -67,13 +65,10 @@ which renderer you chose:
 
 | Format | Preferred source | Why |
 |--------|------------------|-----|
-| HTML email | `logo_url` (HTTPS) | Email clients cache remote images; reduces email size |
-| PDF (Rendro) | `logo_base64` | Rendro's default posture is native/offline. Treat remote `logo_url` fetches as unsupported and embed the logo when the invoice must render reliably without network access |
-| PDF (ChromicPDF) | `logo_url` (HTTPS) or `logo_base64` | Chromium can fetch HTTPS assets at render time on the explicit compatibility path. `logo_base64` is still strongly preferred when you need deterministic or air-gapped output |
-| PDF (offline) | `logo_base64` | Required — no outbound HTTP |
-
-When both are set, `logo_base64` takes precedence for PDF and
-`logo_url` takes precedence for email.
+| HTML email | `logo_url` (HTTPS) | Email clients load the configured logo URL directly |
+| PDF (Rendro) | `logo_url` (HTTPS) or no logo | The current invoice renderer reads `logo_url`; if the render environment cannot reach that URL, verify the fallback text posture instead of assuming an embedded-logo config exists |
+| PDF (ChromicPDF) | `logo_url` (HTTPS) | Chromium can fetch HTTPS assets at render time on the explicit compatibility path, but the host still owns network reachability and timeout behavior |
+| PDF (restricted/offline) | no logo or text fallback | Accrue does not currently expose a separate embedded-logo branding key for offline PDF rendering |
 
 ## Renderer-specific constraints
 
@@ -81,12 +76,13 @@ Rendro and ChromicPDF do not have the same asset and font behavior:
 
 | Renderer | Assets | Fonts | Operational note |
 |----------|--------|-------|------------------|
-| Rendro | Prefer `logo_base64`; plan for native/offline rendering | Use supported embedded assets and validate glyph coverage up front | Best fit for deterministic invoice rendering without Chrome |
-| ChromicPDF | Can fetch `logo_url` over HTTPS, but `logo_base64` remains safer for deterministic output | Browser-like CSS and webfont behavior exist, but remote fetch timing can still fail | Only applies when the host explicitly opts into `Accrue.InvoiceRenderer.ChromicPDF` |
+| Rendro | Uses the configured `logo_url` when present, otherwise falls back to text | Validate glyph coverage up front and verify logo reachability in the actual render environment | Best fit for deterministic invoice rendering without Chrome, but it does not add a separate offline logo embedding contract today |
+| ChromicPDF | Uses the configured `logo_url` over HTTPS on the explicit compatibility path | Browser-like CSS and webfont behavior exist, but remote fetch timing can still fail | Only applies when the host explicitly opts into `Accrue.InvoiceRenderer.ChromicPDF` |
 
 If you care about air-gapped deploys, reproducible CI output, or environments
-where outbound fetches are restricted, treat `logo_base64` as required for
-Rendro and strongly preferred even on the ChromicPDF compatibility path.
+where outbound fetches are restricted, verify the no-logo/text fallback output
+explicitly. Accrue does not currently expose a dedicated embedded-logo setting
+for PDF rendering.
 
 ## Per-template override
 

@@ -109,7 +109,25 @@ Observed warnings:
 
 Interpretation:
 - The advanced-guide edits from Plan `108-02` did not introduce the reported warnings.
-- The command still serves as supporting evidence that no new failure surfaced from the plan-owned guide changes.
+- The command is supporting build evidence only; it does not validate guide snippets against runtime config.
+
+## Docs-to-runtime parity check
+
+Because the docs verifier and HexDocs build did not exercise the new Phase 108
+guide snippets directly, the final closeout also included a manual parity pass
+against the live implementation:
+
+- `accrue/lib/accrue/config.ex` for supported branding and mailer config keys
+- `accrue/lib/accrue/invoices/components.ex` for invoice branding fields used at render time
+- `accrue/lib/accrue/invoice_renderer/rendro.ex` for the Rendro invoice path
+- `accrue/lib/accrue/workers/mailer.ex` for invoice attachment and fallback behavior
+
+Result:
+- Final Phase 108 docs only describe config keys and attachment behavior that
+  exist in the checked-in implementation.
+- No dedicated automated docs/config smoke test exists yet, so this parity check
+  should be treated as manual closeout evidence rather than a new merge-blocking
+  contract.
 
 ## Rendro Hex release-truth proof
 
