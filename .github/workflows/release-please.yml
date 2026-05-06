@@ -28,6 +28,10 @@ jobs:
       accrue_admin_tag_name: ${{ steps.release.outputs.accrue_admin_tag_name }}
       accrue_admin_version: ${{ steps.release.outputs.accrue_admin_version }}
       accrue_admin_sha: ${{ steps.release.outputs.accrue_admin_sha }}
+      accrue_portal_release_created: ${{ steps.release.outputs.accrue_portal_release_created }}
+      accrue_portal_tag_name: ${{ steps.release.outputs.accrue_portal_tag_name }}
+      accrue_portal_version: ${{ steps.release.outputs.accrue_portal_version }}
+      accrue_portal_sha: ${{ steps.release.outputs.accrue_portal_sha }}
     steps:
       - name: Bootstrap reminder
         if: ${{ github.event_name == 'workflow_dispatch' }}
@@ -89,8 +93,10 @@ jobs:
 
           accrue_version="$(jq -r '.accrue // empty' .release-please-manifest.json)"
           accrue_admin_version="$(jq -r '.accrue_admin // empty' .release-please-manifest.json)"
+          accrue_portal_version="$(jq -r '.accrue_portal // empty' .release-please-manifest.json)"
           accrue_tag="accrue-v${accrue_version}"
           accrue_admin_tag="accrue_admin-v${accrue_admin_version}"
+          accrue_portal_tag="accrue_portal-v${accrue_portal_version}"
 
           if [ -n "$accrue_version" ] && release_exists "$accrue_tag"; then
             accrue_release_before="true"
@@ -104,6 +110,12 @@ jobs:
             accrue_admin_release_before="false"
           fi
 
+          if [ -n "$accrue_portal_version" ] && release_exists "$accrue_portal_tag"; then
+            accrue_portal_release_before="true"
+          else
+            accrue_portal_release_before="false"
+          fi
+
           $release_please github-release \
             --repo-url "$repo" \
             --target-branch "$target_branch" \
@@ -113,12 +125,14 @@ jobs:
 
           write_release_outputs "accrue" "accrue" "$accrue_release_before"
           write_release_outputs "accrue_admin" "accrue_admin" "$accrue_admin_release_before"
+          write_release_outputs "accrue_portal" "accrue_portal" "$accrue_portal_release_before"
 
           # Release Please sometimes creates only the core GitHub Release when both
           # packages bump in one merge; accrue_admin would never publish. When manifest
           # versions match (lockstep), still publish admin from this push SHA.
           accrue_created="$(grep '^accrue_release_created=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
           accrue_admin_created="$(grep '^accrue_admin_release_created=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
+          accrue_portal_created="$(grep '^accrue_portal_release_created=' "$GITHUB_OUTPUT" | tail -n1 | cut -d= -f2-)"
           if [ "$accrue_created" = "true" ] && [ "$accrue_admin_created" != "true" ]; then
             if [ -n "$accrue_version" ] && [ -n "$accrue_admin_version" ] && [ "$accrue_version" = "$accrue_admin_version" ]; then
               {
@@ -128,6 +142,17 @@ jobs:
                 echo "accrue_admin_sha=${GITHUB_SHA}"
               } >> "$GITHUB_OUTPUT"
               echo "Applied lockstep accrue_admin publish fallback (missing admin GitHub Release detection)." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+          if [ "$accrue_created" = "true" ] && [ "$accrue_portal_created" != "true" ]; then
+            if [ -n "$accrue_version" ] && [ -n "$accrue_portal_version" ] && [ "$accrue_version" = "$accrue_portal_version" ]; then
+              {
+                echo "accrue_portal_release_created=true"
+                echo "accrue_portal_tag_name=${accrue_portal_tag}"
+                echo "accrue_portal_version=${accrue_portal_version}"
+                echo "accrue_portal_sha=${GITHUB_SHA}"
+              } >> "$GITHUB_OUTPUT"
+              echo "Applied lockstep accrue_portal publish fallback (missing portal GitHub Release detection)." >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
 
@@ -199,3 +224,36 @@ jobs:
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
           ACCRUE_ADMIN_HEX_RELEASE: ${{ env.ACCRUE_ADMIN_HEX_RELEASE }}
+
+  publish-accrue-portal:
+    name: Publish accrue_portal
+    needs: [release, publish-accrue, publish-accrue-admin]
+    if: ${{ always() && needs.release.outputs.accrue_portal_release_created == 'true' && (needs.release.outputs.accrue_release_created != 'true' || needs.publish-accrue.result == 'success') && (needs.release.outputs.accrue_admin_release_created != 'true' || needs.publish-accrue-admin.result == 'success') }}
+    runs-on: ubuntu-24.04
+    env:
+      ACCRUE_PORTAL_HEX_RELEASE: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.accrue_portal_sha }}
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+      - name: Install Hex
+        run: mix local.hex --force
+      - name: Install accrue_portal deps
+        run: cd accrue_portal && mix deps.get
+      - name: Verify accrue_portal release version
+        run: grep -n "@version \"${{ needs.release.outputs.accrue_portal_version }}\"" accrue_portal/mix.exs
+      - name: Dry run accrue_portal Hex publish
+        run: cd accrue_portal && mix hex.publish --dry-run
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_PORTAL_HEX_RELEASE: ${{ env.ACCRUE_PORTAL_HEX_RELEASE }}
+      - name: Publish accrue_portal to Hex
+        run: cd accrue_portal && mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_PORTAL_HEX_RELEASE: ${{ env.ACCRUE_PORTAL_HEX_RELEASE }}

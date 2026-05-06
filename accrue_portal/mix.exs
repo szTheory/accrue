@@ -12,10 +12,22 @@ defmodule AccruePortal.MixProject do
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
+      aliases: aliases(),
       package: package(),
       description: "Customer portal UI for Accrue billing.",
       source_url: @source_url,
       docs: docs()
+    ]
+  end
+
+  defp aliases do
+    [
+      "test.ci": [
+        "format --check-formatted",
+        "compile --warnings-as-errors",
+        "test --warnings-as-errors",
+        "hex.audit"
+      ]
     ]
   end
 

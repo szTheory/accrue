@@ -273,6 +273,29 @@ jobs:
       - name: Accrue admin retired package audit
         run: cd accrue_admin && mix hex.audit
 
+      - name: Restore accrue_portal deps cache
+        uses: actions/cache@v5
+        with:
+          path: accrue_portal/deps
+          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-portal-deps-${{ hashFiles('accrue_portal/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ matrix.sigra }}-${{ matrix.opentelemetry }}-accrue-portal-deps-
+
+      - name: Install accrue_portal deps
+        run: cd accrue_portal && mix deps.get
+
+      - name: Accrue portal format
+        run: cd accrue_portal && mix format --check-formatted
+
+      - name: Accrue portal compile
+        run: cd accrue_portal && mix compile --warnings-as-errors
+
+      - name: Accrue portal test
+        run: cd accrue_portal && mix test --warnings-as-errors
+
+      - name: Accrue portal retired package audit
+        run: cd accrue_portal && mix hex.audit
+
   phase18-tax-gate:
     name: Phase 18 Stripe Tax gate
     if: github.event_name != 'schedule'
