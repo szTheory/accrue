@@ -70,7 +70,8 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
     assert generated =~ "use Accrue.Test"
     assert generated =~ "#   config :accrue, :processor, Accrue.Processor.Fake"
     assert generated =~ "#   config :accrue, :mailer, Accrue.Mailer.Test"
-    assert generated =~ "#   config :accrue, :pdf_adapter, Accrue.PDF.Test"
+    assert generated =~
+             "#   config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test"
     refute generated =~ "\nconfig :accrue"
 
     Code.compile_string(generated)
@@ -106,7 +107,7 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
     end
     """)
 
-    with_app_env([:processor, :mailer, :pdf_adapter, :env], fn ->
+    with_app_env([:processor, :mailer, :invoice_pdf_adapter, :env], fn ->
       assert :ok = apply(Accrue.InstallUAT.GeneratedHostProbe, :run, [])
     end)
   end

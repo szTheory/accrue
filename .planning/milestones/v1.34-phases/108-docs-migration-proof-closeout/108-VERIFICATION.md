@@ -81,17 +81,11 @@ Command:
 bash scripts/ci/verify_package_docs.sh
 ```
 
-Result: FAIL, but only on an out-of-scope planning contract the plan explicitly excluded
+Result: PASS
 
-Observed output:
-
-```text
-[verify_package_docs] package docs verification failed: /Users/jon/projects/accrue/.planning/PROJECT.md is missing: gateway subscription core
-```
-
-Interpretation:
-- This failure did not point at `accrue/guides/custom_pdf_adapter.md`, `accrue/guides/email.md`, or `accrue/guides/branding.md`.
-- Per the 108-02 execution constraints, `.planning/PROJECT.md` remained out of scope and was not changed here.
+Evidence:
+- `package docs verified for accrue 1.0.0 and accrue_admin 1.0.0`
+- The supporting `.planning/PROJECT.md` wording contract was repaired during milestone closeout, and the verifier now passes without exceptions.
 
 ### HexDocs build
 
@@ -101,15 +95,11 @@ Command:
 cd accrue && MIX_ENV=dev mix docs --warnings-as-errors
 ```
 
-Result: FAIL on pre-existing doc warnings outside this plan's owned files
+Result: PASS
 
-Observed warnings:
-- `README.md` references `../RELEASING.md#post-1-0-cadence-maintainer-intent`, but that file anchor does not resolve.
-- `guides/testing.md:128` references hidden module `Accrue.InvoiceRenderer.Test`.
-
-Interpretation:
-- The advanced-guide edits from Plan `108-02` did not introduce the reported warnings.
-- The command is supporting build evidence only; it does not validate guide snippets against runtime config.
+Evidence:
+- HexDocs generated successfully after removing the stale `RELEASING.md` file anchor from `accrue/README.md`.
+- `guides/testing.md` now refers to the invoice renderer test adapter without linking a hidden module.
 
 ## Docs-to-runtime parity check
 
@@ -137,16 +127,8 @@ Command:
 bash scripts/ci/verify_rendro_hex_resolution.sh
 ```
 
-Result: inherited prerequisite evidence from Phase 107, not rerun in Plan `108-02`
+Result: PASS
 
-Why inherited:
-- This plan did not modify `accrue/mix.exs`
-- This plan did not modify `accrue/mix.lock`
-- This plan did not modify `RELEASING.md`
-- This plan did not modify `scripts/ci/verify_rendro_hex_resolution.sh`
-
-Source artifact:
-- `.planning/milestones/v1.34-phases/107-rendro-release-optional-chromic-path/107-02-SUMMARY.md`
-
-Inherited proof statement:
-- Phase 107 already proved that `accrue` resolves Rendro from Hex at `~> 0.1.0` and that `bash scripts/ci/verify_rendro_hex_resolution.sh` passes against the Hex-backed handoff.
+Evidence:
+- The script reapplied the current workspace diff into a temp clone, ran `mix deps.get`, verified `mix deps.tree`, and finished with `[verify_rendro_hex_resolution] ok`.
+- Closeout now has direct same-run evidence that the Hex-backed Rendro resolution lane still passes after the final docs and planning updates.

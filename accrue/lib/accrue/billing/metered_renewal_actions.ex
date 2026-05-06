@@ -92,6 +92,7 @@ defmodule Accrue.Billing.MeteredRenewalActions do
 
               {:ok, _} =
                 mark_retry_state(metered_renewal_id, :failed_exhausted, failed_attempt, error)
+
               {:error, error}
 
             {:error, error, payment_method} ->
@@ -100,6 +101,7 @@ defmodule Accrue.Billing.MeteredRenewalActions do
 
               {:ok, _} =
                 mark_retry_state(metered_renewal_id, :retry_scheduled, retry_attempt, error)
+
               {:error, error}
           end
 

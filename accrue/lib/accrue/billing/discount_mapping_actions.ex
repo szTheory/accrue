@@ -129,7 +129,8 @@ defmodule Accrue.Billing.DiscountMappingActions do
           {:ok, DiscountMapping.t()} | {:error, :not_found | term()}
   def release_discount_mapping_reservation(mapping_or_code, opts \\ [])
 
-  def release_discount_mapping_reservation(%DiscountMapping{} = mapping, opts) when is_list(opts) do
+  def release_discount_mapping_reservation(%DiscountMapping{} = mapping, opts)
+      when is_list(opts) do
     _ = opts
 
     Repo.transact(fn ->
@@ -253,7 +254,8 @@ defmodule Accrue.Billing.DiscountMappingActions do
     |> Repo.update()
   end
 
-  defp decrement_redemption(%DiscountMapping{times_redeemed: redeemed} = mapping) when redeemed > 0 do
+  defp decrement_redemption(%DiscountMapping{times_redeemed: redeemed} = mapping)
+       when redeemed > 0 do
     mapping
     |> DiscountMapping.changeset(%{times_redeemed: redeemed - 1})
     |> Repo.update()

@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.33
-milestone_name: Braintree Full Maturity
-status: shipped
-last_updated: "2026-05-06T10:35:00.000Z"
+milestone: none
+milestone_name: Rendro Native Invoice PDF Default
+status: milestone_closed
+last_updated: "2026-05-06T19:05:00.000Z"
 last_activity: 2026-05-06
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 20
-  completed_plans: 20
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
   percent: 100
 ---
 
@@ -17,22 +17,24 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-29)
+See: `.planning/PROJECT.md` (updated 2026-05-06)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.33 shipped; awaiting next milestone definition
+**Current focus:** No active milestone; v1.34 closeout is archived and the next milestone has not been opened
 
 ## Current Position
 
-Milestone: v1.33 — Braintree Full Maturity (opened 2026-05-01, shipped 2026-05-06)
-Phase: none active
-Plan: none active
-Status: Milestone archived; next milestone not started
+Milestone: None active
+Phase: —
+Plan: —
+Status: Milestone closed
 Resume file: None
-Last activity: 2026-05-06
+Last activity: 2026-05-06 — v1.34 archived after audit pass, docs proof pass, and release-proof rerun
 
 ## Milestone Progress
+
+**v1.34** (opened **2026-05-06**, shipped **2026-05-06**): Phases **106–108 complete** — **PDF-01..PDF-09**; archived in **`milestones/v1.34-ROADMAP.md`**, **`milestones/v1.34-REQUIREMENTS.md`**, and **`milestones/v1.34-phases/`**; Rendro is the default invoice renderer, ChromicPDF is an explicit compatibility path, and Rendro now resolves from Hex with checked-in release proof.
 
 **v1.33** (shipped **2026-05-06**): Phases **101–104** — **BT-01..BT-09**; **`milestones/v1.33-phases/`**; archives **`v1.33-ROADMAP.md`**, **`v1.33-REQUIREMENTS.md`**; tag **`v1.33`**. Strategic parent: **`.planning/STRATEGY.md`**.
 
@@ -56,7 +58,9 @@ Last activity: 2026-05-06
 ## Current Planning Artifacts
 
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
-- **`.planning/ROADMAP.md`** — archived milestone index; no active milestone is open after shipping **v1.33**.
+- **`.planning/milestones/v1.34-REQUIREMENTS.md`** — archived **v1.34** requirements for the Rendro-default invoice PDF milestone.
+- **`.planning/milestones/v1.34-ROADMAP.md`** — archived **v1.34** roadmap for Phases **106–108**.
+- **`.planning/v1.34-v1.34-MILESTONE-AUDIT.md`** — passed milestone audit for **v1.34**.
 - **`.planning/milestones/v1.33-ROADMAP.md`** / **`v1.33-REQUIREMENTS.md`** — final **v1.33** archives (**BT-01..BT-09**) with phase tree **`milestones/v1.33-phases/`**.
 - **`milestones/v1.31-ROADMAP.md`** / **`v1.31-REQUIREMENTS.md`** — final v1.31 archives (phases 94–96, 5 requirements).
 - **`milestones/v1.30-ROADMAP.md`** / **`v1.30-REQUIREMENTS.md`** — final v1.30 archives (phases 91–93, all 12 requirements, final proof links, archived intact).
@@ -81,6 +85,9 @@ Last activity: 2026-05-06
 
 ## Recent Decisions
 
+- **2026-05-06:** **v1.34 archived** — audit passed; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the final closeout run.
+- **2026-05-06:** **v1.34 ready to close** — PDF-01..PDF-09 are complete; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the milestone closeout run.
+- **2026-05-06:** **v1.34 opened** — Rendro becomes the planned default invoice PDF renderer, the invoice path gets its own renderer seam, ChromicPDF is retained only as an explicit fallback, and the milestone must finish on a published Rendro Hex version rather than a local path dep.
 - **2026-05-06:** **Phase 105 complete (v1.33 closure)** — backfilled `101/103/104-VERIFICATION.md`, repaired the example-host `/app/billing` proof lane, reconciled `102-VALIDATION.md`, and refreshed the milestone audit to `passed`.
 - **2026-05-02:** **Phase 104 planned** — two sequential plans now lock the Hyperwallet decision spike as docs-contract work first, then support-matrix/strategy hardening, with a hard no-go default and an explicit narrow if-go boundary.
 - **2026-05-02:** **Phase 102 Plan 03 complete** — `AccruePortal.Live.CheckoutLive` now previews Braintree promotion-code savings in LiveView, updates the pay CTA before submit, and announces provisional results through an `aria-live` status region.
@@ -117,7 +124,7 @@ Last activity: 2026-05-06
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Open a fresh milestone and requirements set before continuing the PROC-08 strategy track.
+**Next:** Open the next milestone with fresh requirements when new scope is chosen.
 
 **Completed (v1.32):** Phases **97–100** — **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`** + **`v1.32-REQUIREMENTS.md`**; tag **`v1.32`** (local).
 
@@ -129,4 +136,4 @@ Last activity: 2026-05-06
 
 **Completed (v1.27):** Phases **84–85** — **`milestones/v1.27-phases/`**.
 
-**Planned Phase:** None — next milestone not opened
+**Planned Phase:** None

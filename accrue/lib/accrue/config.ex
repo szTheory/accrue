@@ -22,10 +22,19 @@ defmodule Accrue.Config do
       default: Accrue.Mailer.Swoosh,
       doc: "Swoosh-backed mailer delivery module."
     ],
+    invoice_pdf_adapter: [
+      type: :atom,
+      default: Accrue.InvoiceRenderer.Rendro,
+      doc:
+        "Invoice PDF adapter implementing `Accrue.InvoiceRenderer` behaviour. " <>
+          "Defaults to the native Rendro-backed invoice renderer."
+    ],
     pdf_adapter: [
       type: :atom,
       default: Accrue.PDF.ChromicPDF,
-      doc: "PDF adapter implementing `Accrue.PDF` behaviour."
+      doc:
+        "Legacy HTML-to-PDF adapter implementing `Accrue.PDF` behaviour. " <>
+          "Used by the Chromic invoice renderer path and by custom HTML callers."
     ],
     auth_adapter: [
       type: :atom,
@@ -346,8 +355,8 @@ defmodule Accrue.Config do
 
   ## Compile-time vs runtime
 
-  Adapter atoms (`:processor`, `:mailer`, `:mailer_adapter`, `:pdf_adapter`,
-  `:auth_adapter`) are stable per-deploy and fine at compile time via
+  Adapter atoms (`:processor`, `:mailer`, `:mailer_adapter`,
+  `:invoice_pdf_adapter`, `:pdf_adapter`, `:auth_adapter`) are stable per-deploy and fine at compile time via
   `Application.compile_env!/2`.
 
   Secrets (`:stripe_secret_key`) and host-owned fields (`:default_currency`,

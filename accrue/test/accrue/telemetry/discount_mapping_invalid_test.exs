@@ -60,7 +60,8 @@ defmodule Accrue.Telemetry.DiscountMappingInvalidTest do
                payment_method: %{vault_acquisition: %{reference: "pm_token_123"}}
              )
 
-    assert_received {:telemetry, [:accrue, :ops, :discount_mapping_invalid], %{count: 1}, metadata}
+    assert_received {:telemetry, [:accrue, :ops, :discount_mapping_invalid], %{count: 1},
+                     metadata}
 
     assert metadata.mapping_id == error.mapping_id
     assert metadata.code == "DRIFTED"

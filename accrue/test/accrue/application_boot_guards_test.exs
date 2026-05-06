@@ -19,6 +19,7 @@ defmodule Accrue.ApplicationBootGuardsTest do
   defp clear_dedupe_keys do
     for k <- [
           :accrue_pdf_adapter_unavailable_warned?,
+          :accrue_invoice_pdf_adapter_migration_warned?,
           :accrue_oban_queue_vs_pdf_pool_warned?,
           :accrue_company_address_locale_warned?
         ] do
@@ -33,6 +34,7 @@ defmodule Accrue.ApplicationBootGuardsTest do
   setup do
     clear_dedupe_keys()
 
+    original_invoice_pdf = Application.get_env(:accrue, :invoice_pdf_adapter)
     original_pdf = Application.get_env(:accrue, :pdf_adapter)
     original_branding = Application.get_env(:accrue, :branding)
     original_oban = Application.get_env(:accrue, Oban)
@@ -40,6 +42,10 @@ defmodule Accrue.ApplicationBootGuardsTest do
 
     on_exit(fn ->
       clear_dedupe_keys()
+
+      if is_nil(original_invoice_pdf),
+        do: Application.delete_env(:accrue, :invoice_pdf_adapter),
+        else: Application.put_env(:accrue, :invoice_pdf_adapter, original_invoice_pdf)
 
       if is_nil(original_pdf),
         do: Application.delete_env(:accrue, :pdf_adapter),
@@ -63,24 +69,33 @@ defmodule Accrue.ApplicationBootGuardsTest do
 
   describe "warn_pdf_adapter_unavailable/0" do
     test "no warn when adapter is not ChromicPDF" do
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Null)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Null)
 
       log = capture_log(fn -> assert :ok = App.warn_pdf_adapter_unavailable() end)
       refute log =~ "pdf_adapter"
     end
 
     test "no warn in :test env even when ChromicPDF is absent" do
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.ChromicPDF)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF)
 
       # Mix.env/0 returns :test inside the test suite — guard
       # silently returns :ok because the warning is prod-only.
       log = capture_log(fn -> assert :ok = App.warn_pdf_adapter_unavailable() end)
       refute log =~ "ChromicPDF"
     end
+
+    test "migration warning branch stays silent in :test" do
+      Application.delete_env(:accrue, :invoice_pdf_adapter)
+      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Null)
+
+      log = capture_log(fn -> assert :ok = App.warn_pdf_adapter_unavailable() end)
+      refute log =~ ":invoice_pdf_adapter"
+    end
   end
 
   describe "warn_oban_queue_vs_pdf_pool/0" do
     test "no warn when queue concurrency ≤ pool size" do
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF)
       Application.put_env(:accrue, Oban, queues: [accrue_mailers: 3])
       Application.put_env(:accrue, :chromic_pdf_pool_size, 5)
 
@@ -89,6 +104,7 @@ defmodule Accrue.ApplicationBootGuardsTest do
     end
 
     test "warns when queue concurrency > pool size" do
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF)
       Application.put_env(:accrue, Oban, queues: [accrue_mailers: 20])
       Application.put_env(:accrue, :chromic_pdf_pool_size, 3)
 
@@ -99,6 +115,7 @@ defmodule Accrue.ApplicationBootGuardsTest do
     end
 
     test "dedupes via :persistent_term — second call silent" do
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF)
       Application.put_env(:accrue, Oban, queues: [accrue_mailers: 20])
       Application.put_env(:accrue, :chromic_pdf_pool_size, 3)
 

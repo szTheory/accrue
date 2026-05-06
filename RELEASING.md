@@ -42,6 +42,15 @@ automation semantics change.
    (`needs.release.outputs.*`, `ACCRUE_ADMIN_HEX_RELEASE=1`) say it is safe — **`accrue` publishes first**.
 7. Verify HexDocs for both packages, tags, and GitHub releases as appropriate.
 
+### Rendro publish handoff
+
+When the invoice renderer depends on a newly published Rendro version, preserve this order:
+
+1. Publish `rendro`.
+2. Confirm the new Rendro version is available on Hex.
+3. Update `accrue/mix.exs` to use the published `{:rendro, "~> 0.1.0"}`-style dependency.
+4. Run `bash scripts/ci/verify_rendro_hex_resolution.sh` to prove a clean checkout resolves Rendro from Hex instead of `../../rendro`.
+
 ### Release Please + Hex (linked automation)
 
 The standard path is `.github/workflows/release-please.yml`:
@@ -158,6 +167,16 @@ Manual fallback order:
 1. Publish `accrue`.
 2. Confirm Hex availability.
 3. Publish `accrue_admin`.
+
+If the current release also includes a Rendro handoff, insert the Rendro proof before publishing Accrue:
+
+1. Publish `rendro`.
+2. Confirm Rendro availability on Hex.
+3. Update/use the published Rendro version in `accrue`.
+4. Run `bash scripts/ci/verify_rendro_hex_resolution.sh`.
+5. Publish `accrue`.
+6. Confirm Hex availability.
+7. Publish `accrue_admin`.
 
 Each recovery run checks out the explicit ref, verifies the package `@version`, runs `mix hex.publish --dry-run`, then runs `mix hex.publish --yes`. The recovery workflow never references `steps.release.outputs[...]`.
 

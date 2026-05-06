@@ -287,9 +287,9 @@ defmodule Accrue.PDF.RenderFailed do
   Raised from `Accrue.Workers.Mailer.perform/1` when
   `Accrue.Billing.render_invoice_pdf/2` returns a non-terminal
   `{:error, reason}` (i.e., not `%Accrue.Error.PdfDisabled{}` and not
-  `:chromic_pdf_not_started`). Raising this exception lets Oban backoff
-  handle transient render failures — the mailer job is retried per its
-  `max_attempts` setting.
+  `%Accrue.Error.InvoiceRendererUnavailable{}`). Raising this exception lets
+  Oban backoff handle transient render failures — the mailer job is retried
+  per its `max_attempts` setting.
 
   Terminal errors (Null adapter + missing ChromicPDF supervisor child)
   are NOT wrapped in this exception — they route to the hosted-invoice
@@ -302,6 +302,26 @@ defmodule Accrue.PDF.RenderFailed do
   @impl true
   def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
   def message(%__MODULE__{reason: r}), do: "PDF render failed: #{inspect(r)}"
+end
+
+defmodule Accrue.Error.InvoiceRendererUnavailable do
+  @moduledoc """
+  Returned when the explicitly configured invoice renderer cannot run due to a
+  stable host misconfiguration.
+
+  This is terminal for the current render attempt. Callers should pattern-match
+  the adapter/reason fields and degrade to a non-PDF path rather than retrying.
+  """
+
+  @type t :: %__MODULE__{}
+  defexception [:adapter, :reason, :message]
+
+  @impl true
+  def message(%__MODULE__{message: m}) when is_binary(m) and m != "", do: m
+
+  def message(%__MODULE__{adapter: adapter, reason: reason}) do
+    "invoice renderer #{inspect(adapter)} is unavailable: #{inspect(reason)}"
+  end
 end
 
 defmodule Accrue.Error.PdfDisabled do

@@ -63,12 +63,13 @@ defmodule Accrue.Test do
   end
 
   @doc """
-  Configures Accrue to capture PDF renders through `Accrue.PDF.Test`.
+  Configures Accrue to capture invoice PDF renders through
+  `Accrue.InvoiceRenderer.Test`.
   """
   @spec setup_pdf_test(keyword() | map()) :: :ok | {:ok, keyword()}
   def setup_pdf_test(context \\ []) do
-    Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
-    setup_return(context, pdf_adapter: Accrue.PDF.Test)
+    Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test)
+    setup_return(context, invoice_pdf_adapter: Accrue.InvoiceRenderer.Test)
   end
 
   defp setup_return(context, _values) when context in [[], %{}], do: :ok

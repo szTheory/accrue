@@ -1,5 +1,32 @@
 # Milestones
 
+## v1.34 Rendro Native Invoice PDF Default (Shipped: 2026-05-06)
+
+**Planning opened:** 2026-05-06
+
+**Phases completed:** **3** phases (**106–108**).
+
+**Theme:** Make Rendro the default invoice PDF engine so the normal Accrue install story no longer requires Chrome. Preserve the existing invoice API and lazy render semantics, keep ChromicPDF as an explicit compatibility path, and finish by publishing the required Rendro version to Hex instead of leaving Accrue on a local path dependency.
+
+**Depends on:** **v1.33** shipped.
+
+**Phase execution trees:** **`.planning/milestones/v1.34-phases/106-invoice-renderer-seam-rendro-default/`**, **`107-rendro-release-optional-chromic-path/`**, **`108-docs-migration-proof-closeout/`**.
+
+**Key accomplishments:**
+
+- **106:** **PDF-01..PDF-05** — invoice-renderer seam, Rendro default, stable billing facade semantics, and billing/mailer/admin parity proof.
+- **107:** **PDF-06..PDF-07** — typed explicit-Chromic compatibility contract, migration-safe warnings/telemetry, and Hex-backed Rendro dependency proof.
+- **108:** **PDF-08..PDF-09** — Rendro-first install/migration docs, advanced guide cleanup, package-doc and HexDocs verification, and final closeout proof.
+
+**Outcome:** Phases **106–108** closed the **v1.34** Rendro Native Invoice PDF Default milestone with all `PDF-01..PDF-09` requirements satisfied.
+
+**Archives:**
+- **`.planning/milestones/v1.34-ROADMAP.md`**
+- **`.planning/milestones/v1.34-REQUIREMENTS.md`**
+- **`.planning/v1.34-v1.34-MILESTONE-AUDIT.md`**
+
+---
+
 ## v1.33 Braintree Full Maturity (Planning)
 
 **Planning opened:** 2026-05-01

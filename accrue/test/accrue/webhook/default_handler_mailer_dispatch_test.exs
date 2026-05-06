@@ -57,7 +57,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
   describe "charge.succeeded → :receipt" do
     setup do
       prior_mailer = Application.get_env(:accrue, :mailer)
-      prior_pdf = Application.get_env(:accrue, :pdf_adapter)
+      prior_invoice_pdf = Application.get_env(:accrue, :invoice_pdf_adapter)
       prior_branding = Application.get_env(:accrue, :branding)
       prior_mailglass = Application.get_env(:mailglass, :adapter)
       prior_mailglass_repo = Application.get_env(:mailglass, :repo)
@@ -65,7 +65,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
       prior_tenant = Mailglass.Tenancy.current()
 
       Application.put_env(:accrue, :mailer, Accrue.Mailer.Default)
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test)
       Application.put_env(:mailglass, :repo, Accrue.TestRepo)
       Application.put_env(:mailglass, :suppression_store, Mailglass.SuppressionStore.ETS)
       Mailglass.SuppressionStore.ETS.reset()
@@ -93,9 +93,9 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
           v -> Application.put_env(:accrue, :mailer, v)
         end
 
-        case prior_pdf do
-          nil -> Application.delete_env(:accrue, :pdf_adapter)
-          v -> Application.put_env(:accrue, :pdf_adapter, v)
+        case prior_invoice_pdf do
+          nil -> Application.delete_env(:accrue, :invoice_pdf_adapter)
+          v -> Application.put_env(:accrue, :invoice_pdf_adapter, v)
         end
 
         case prior_branding do
@@ -217,7 +217,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
   describe "charge.failed → :payment_failed" do
     setup do
       prior_mailer = Application.get_env(:accrue, :mailer)
-      prior_pdf = Application.get_env(:accrue, :pdf_adapter)
+      prior_invoice_pdf = Application.get_env(:accrue, :invoice_pdf_adapter)
       prior_branding = Application.get_env(:accrue, :branding)
       prior_mailglass = Application.get_env(:mailglass, :adapter)
       prior_mailglass_repo = Application.get_env(:mailglass, :repo)
@@ -225,7 +225,7 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
       prior_tenant = Mailglass.Tenancy.current()
 
       Application.put_env(:accrue, :mailer, Accrue.Mailer.Default)
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test)
       Application.put_env(:mailglass, :repo, Accrue.TestRepo)
       Application.put_env(:mailglass, :suppression_store, Mailglass.SuppressionStore.ETS)
       Mailglass.SuppressionStore.ETS.reset()
@@ -253,9 +253,9 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
           v -> Application.put_env(:accrue, :mailer, v)
         end
 
-        case prior_pdf do
-          nil -> Application.delete_env(:accrue, :pdf_adapter)
-          v -> Application.put_env(:accrue, :pdf_adapter, v)
+        case prior_invoice_pdf do
+          nil -> Application.delete_env(:accrue, :invoice_pdf_adapter)
+          v -> Application.put_env(:accrue, :invoice_pdf_adapter, v)
         end
 
         case prior_branding do

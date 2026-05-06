@@ -12,17 +12,32 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-No active milestone. **v1.33** shipped on **2026-05-06**, and the next milestone has not been opened yet.
+No active milestone. **v1.34** shipped on **2026-05-06**, and the next milestone has not been opened yet.
 
 **Current posture:**
 
-- The active strategy remains **PROC-08**: a bounded dual-provider core centered on Stripe plus one Stripe-like gateway.
+- The active strategy remains **PROC-08**: a bounded dual-provider core centered on **Stripe-first** defaults plus one Stripe-like gateway.
+- The official second-provider slice remains **gateway subscription core**, with **`Accrue.Billing.subscribe/3`** as the primary public-facade entry and **Fake** as the deterministic merge-blocking proof lane.
 - The shipped first-party surface now includes provider-honest checkout and billing-portal APIs: Stripe returns upstream hosted pages, and Braintree returns mounted local UI.
 - Braintree metering is now an explicit local-ledger capability, not a claim of native Braintree meter parity.
 - Braintree marketplace parity via Hyperwallet remains out of scope unless a future strategy change explicitly reopens it.
 - **FIN-03** remains out of scope. Stripe is still the fastest first-user path.
 
 ## Last shipped milestone
+
+### v1.34 — Rendro Native Invoice PDF Default (**archived 2026-05-06**)
+
+**Goal:** Make Rendro the default invoice PDF path in Accrue so the primary install story no longer requires Chrome, while preserving invoice-facing APIs, lazy render semantics, an explicit ChromicPDF compatibility path, and a published Rendro Hex release handoff.
+
+**Delivered:**
+
+- [x] **PDF-01..PDF-05** (Phase 106) — invoice-specific renderer seam, stable `render/store/fetch_invoice_pdf` facade semantics, Rendro default-path proof, and billing/mailer/admin parity.
+- [x] **PDF-06..PDF-07** (Phase 107) — typed explicit-Chromic compatibility errors, migration-aware boot warnings, invoice-path telemetry, Hex-backed Rendro dependency resolution, and a clean-checkout release proof script.
+- [x] **PDF-08..PDF-09** (Phase 108) — Rendro-first install and migration docs, advanced guide cleanup, package-doc verification, clean HexDocs build, and final billing/mailer/admin closeout proof.
+
+**Closeout proof:** [v1.34-v1.34-MILESTONE-AUDIT.md](v1.34-v1.34-MILESTONE-AUDIT.md), [milestones/v1.34-ROADMAP.md](milestones/v1.34-ROADMAP.md), [milestones/v1.34-REQUIREMENTS.md](milestones/v1.34-REQUIREMENTS.md), and [milestones/v1.34-phases/](milestones/v1.34-phases/).
+
+## Prior shipped milestone
 
 ### v1.33 — Braintree Full Maturity (**archived 2026-05-06**)
 
@@ -36,8 +51,6 @@ No active milestone. **v1.33** shipped on **2026-05-06**, and the next milestone
 - [x] **BT-08..BT-09** (Phase 104) — Hyperwallet spike, explicit no-go verdict, strategy/support-matrix/verifier mirrors, and a narrow reopen rule.
 
 **Closeout proof:** [v1.33-v1.33-MILESTONE-AUDIT.md](v1.33-v1.33-MILESTONE-AUDIT.md), [milestones/v1.33-ROADMAP.md](milestones/v1.33-ROADMAP.md), [milestones/v1.33-REQUIREMENTS.md](milestones/v1.33-REQUIREMENTS.md), and [milestones/v1.33-phases/](milestones/v1.33-phases/).
-
-## Prior shipped milestone
 
 ### v1.30 — `1.0.0` Declaration (Spine A) (**archived 2026-04-28**)
 
@@ -185,23 +198,27 @@ No active milestone. **v1.33** shipped on **2026-05-06**, and the next milestone
 - **PROC-08 (second processor):** explicit non-goal at 1.0.0; reopened on **2026-04-28** via **v1.31** with written boundaries and a persistent strategy tracker.
 - **FIN-03 (app-owned finance exports):** explicit non-goal at 1.0.0; Accrue is a billing/subscription library, not an accounting system; revisit only via later-milestone reprioritization with written boundaries.
 
+## Current Milestone
+
+No active milestone. **v1.34** is closed and archived.
+
 ## Next Milestone Goals
 
-- Open the next milestone with fresh requirements and a new roadmap instead of carrying forward stale active-milestone scaffolding.
-- Preserve the shipped provider-honest boundary: Stripe hosted pages, Braintree local UI, local Braintree metering, and no Hyperwallet parity by implication.
-- Choose the next bounded **PROC-08** step explicitly rather than letting strategy, docs, and code drift ahead of a named milestone.
+- Not opened yet. Start with fresh requirements before reopening roadmap work.
+- Preserve the current Rendro-first invoice contract, explicit Chromic compatibility path, and Hex-backed release proof as the new baseline.
+- Keep **PROC-08** and **FIN-03** boundaries explicit unless a future milestone changes strategy in writing.
 
 ## Current State
 
-Current focus: **v1.33 shipped; next milestone not started**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the planning state now reflects a shipped Braintree maturity track rather than an in-flight active milestone.
+Current focus: **post-v1.34 closeout**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the latest completed planning milestone is the Rendro-first invoice-PDF engine shift captured in **v1.34**.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
 Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
 
-No milestone is currently active. The latest shipped planning milestone is **v1.33**: see [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md), and the next milestone should begin from a fresh requirements pass.
+No planning milestone is currently active. The latest shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The prior shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md).
 
-**Last shipped planning milestone:** **v1.33** — Phases **101–104** (**2026-05-06**): **BT-01..BT-09**; **`milestones/v1.33-*`**; execution trees **`milestones/v1.33-phases/`**; planning tag **`v1.33`**. **Prior:** **v1.32** — Phases **97–100** (**2026-05-01**): **PROC-14..20**; **`milestones/v1.32-*`**; execution trees **`milestones/v1.32-phases/`**; tag **`v1.32`**. **Earlier:** **v1.31** — Phases **94–96**; **`v1.31-*`** + **`v1.31-phases/`**; tag **`v1.31`**. **v1.30** — Phases **91–93**; **`v1.30-*`** + **`v1.30-phases/`**; tag **`v1.30`**.
+**Last shipped planning milestone:** **v1.34** — Phases **106–108** (**2026-05-06**): **PDF-01..PDF-09**; **`milestones/v1.34-*`**; execution trees **`milestones/v1.34-phases/`**; planning tag **`v1.34`**. **Prior:** **v1.33** — Phases **101–104** (**2026-05-06**): **BT-01..BT-09**; **`milestones/v1.33-*`**; execution trees **`milestones/v1.33-phases/`**; planning tag **`v1.33`**. **Earlier:** **v1.32** — Phases **97–100** (**2026-05-01**): **PROC-14..20**; **`v1.32-*`**; execution trees **`milestones/v1.32-phases/`**; tag **`v1.32`**.
 
 **Execution history:** **v1.27** Phases **84–85** under **`milestones/v1.27-phases/`** (**`084-VERIFICATION.md`**, **`085-VERIFICATION.md`**). **v1.26** Phases **82–83** under **`milestones/v1.26-phases/`** (**`082-VERIFICATION.md`**, **`083-VERIFICATION.md`**). **v1.25** Phases **79–81** under **`milestones/v1.25-phases/`** (**`079-VERIFICATION.md`**, **`080-VERIFICATION.md`**, **`081-VERIFICATION.md`**). **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`**). **v1.23** Phase **75** under **`milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`milestones/v1.18-phases/`**; **v1.17** under **`milestones/v1.17-phases/`**.
 
@@ -691,6 +708,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 
 ## Current Milestone Notes
 
+- **2026-05-06:** **`/gsd-new-milestone` v1.34** — opened **Rendro Native Invoice PDF Default**; created active **`REQUIREMENTS.md`** (**PDF-01..PDF-09**); roadmap phases **106–108**; research skipped as brownfield because the integration has already been proven locally and partially implemented in the workspace.
 - **2026-04-29:** **`/gsd-complete-milestone` v1.31** — archives **`milestones/v1.31-*`**, **`git mv`** Phases **94–96** -> **`milestones/v1.31-phases/`**, **`git rm`** **`.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.31`**.
 
 - **2026-04-24:** **`/gsd-new-milestone` (plan implementation)** — **v1.28** **Next linked publish continuity** (strategic **spine B**); **`REQUIREMENTS.md`** (**PPX-05..08**, **INV-06**); roadmap Phases **86–87**; domain research **skipped** (brownfield **v1.23** pattern).
@@ -772,4 +790,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-29 — **v1.31** shipped — Phase 96 closed the **PROC-08** bounded Braintree slice through the public billing facade; strategy, docs, and matrix updated. **FIN-03** stays out of scope.*
+*Last updated: 2026-05-06 — **v1.34** shipped — Rendro is now the default invoice PDF path, the explicit Chromic compatibility contract is documented, and the milestone is archived with Hex-backed release proof.*

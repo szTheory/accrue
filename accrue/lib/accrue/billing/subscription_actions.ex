@@ -140,7 +140,8 @@ defmodule Accrue.Billing.SubscriptionActions do
                        {:ok, attrs} <- SubscriptionProjection.decompose(stripe_sub),
                        {:ok, sub} <- insert_subscription(customer.id, attrs),
                        {:ok, _items} <- upsert_items(sub, stripe_sub),
-                       {:ok, _} <- record_event("subscription.created", sub, %{price_id: price_id}) do
+                       {:ok, _} <-
+                         record_event("subscription.created", sub, %{price_id: price_id}) do
                     sub = Repo.preload(sub, :subscription_items, force: true)
                     {:ok, sub}
                   end

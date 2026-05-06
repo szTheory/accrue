@@ -48,19 +48,19 @@ defmodule AccrueAdmin.InvoiceLiveTest do
 
   setup do
     prior_auth = Application.get_env(:accrue, :auth_adapter)
-    prior_pdf = Application.get_env(:accrue, :pdf_adapter)
+    prior_invoice_pdf = Application.get_env(:accrue, :invoice_pdf_adapter)
 
     Application.put_env(:accrue, :auth_adapter, AuthAdapter)
-    Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
+    Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test)
 
     on_exit(fn ->
       Application.put_env(:accrue, :auth_adapter, prior_auth)
       Application.delete_env(:accrue_admin, :expected_step_up_subject_id)
 
-      if prior_pdf do
-        Application.put_env(:accrue, :pdf_adapter, prior_pdf)
+      if prior_invoice_pdf do
+        Application.put_env(:accrue, :invoice_pdf_adapter, prior_invoice_pdf)
       else
-        Application.delete_env(:accrue, :pdf_adapter)
+        Application.delete_env(:accrue, :invoice_pdf_adapter)
       end
     end)
 

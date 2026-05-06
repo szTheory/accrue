@@ -42,9 +42,10 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
 
     defp current_redemption_count do
       Repo.one!(
-        from mapping in DiscountMapping,
+        from(mapping in DiscountMapping,
           where: mapping.processor == "braintree",
           select: mapping.times_redeemed
+        )
       )
     end
   end
@@ -124,6 +125,7 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
                          plan_id: "plan_premium",
                          discounts: %{add: [%{inherited_from_id: "bt_discount_25"}]}
                        }}
+
       assert_received {:gateway_redemption_count, 1}
 
       assert subscription.discount_id == "bt_discount_25"
@@ -135,8 +137,9 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
 
       assert %Event{} =
                Repo.one!(
-                 from e in Event,
+                 from(e in Event,
                    where: e.type == "subscription.created" and e.subject_id == ^subscription.id
+                 )
                )
     end
 

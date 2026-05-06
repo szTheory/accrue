@@ -3,9 +3,9 @@ defmodule Accrue.Billing.PdfTest do
   Plan 06-06 Task 1: Accrue.Invoices facade + Accrue.Billing delegates.
 
   Covers the D6-04 lazy render path:
-    * Accrue.PDF.Test adapter → {:ok, "%PDF-TEST"} + {:pdf_rendered, ...}
-    * Accrue.PDF.Null adapter → {:error, %Accrue.Error.PdfDisabled{}}
-    * ChromicPDF configured but process absent → {:error, :chromic_pdf_not_started}
+    * Accrue.InvoiceRenderer.Test adapter → {:ok, "%PDF-TEST"} + {:invoice_pdf_rendered, ...}
+    * Accrue.InvoiceRenderer.Null adapter → {:error, %Accrue.Error.PdfDisabled{}}
+    * ChromicPDF configured but process absent → {:error, %Accrue.Error.InvoiceRendererUnavailable{}}
     * Storage.Null fetch → {:error, :not_configured}, put → {:ok, key}
     * Billing facade defdelegate wired
   """
@@ -45,14 +45,14 @@ defmodule Accrue.Billing.PdfTest do
       })
       |> Repo.insert()
 
-    prior_pdf = Application.get_env(:accrue, :pdf_adapter)
+    prior_invoice_pdf = Application.get_env(:accrue, :invoice_pdf_adapter)
     prior_storage = Application.get_env(:accrue, :storage_adapter)
 
     on_exit(fn ->
-      if prior_pdf do
-        Application.put_env(:accrue, :pdf_adapter, prior_pdf)
+      if prior_invoice_pdf do
+        Application.put_env(:accrue, :invoice_pdf_adapter, prior_invoice_pdf)
       else
-        Application.delete_env(:accrue, :pdf_adapter)
+        Application.delete_env(:accrue, :invoice_pdf_adapter)
       end
 
       if prior_storage do
@@ -65,27 +65,30 @@ defmodule Accrue.Billing.PdfTest do
     %{cus: cus, inv: inv}
   end
 
-  describe "Accrue.Invoices.render_invoice_pdf/2 with Accrue.PDF.Test" do
+  describe "Accrue.Invoices.render_invoice_pdf/2 with Accrue.InvoiceRenderer.Test" do
     setup do
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test)
       :ok
     end
 
-    test "returns {:ok, binary} and sends {:pdf_rendered, ...}", %{inv: inv} do
+    test "returns {:ok, binary} and sends {:invoice_pdf_rendered, ...}", %{inv: inv} do
       assert {:ok, "%PDF-TEST"} = Accrue.Invoices.render_invoice_pdf(inv)
-      {html, _opts} = assert_pdf_rendered()
-      assert html =~ "INV-PDF-0001"
-      assert html =~ "$29.00"
+      assert_received {:invoice_pdf_rendered, context, _opts}
+      assert context.invoice.number == "INV-PDF-0001"
+      assert context.formatted_total == "$29.00"
     end
 
-    test "html contains print_shell markup with invoice number + total", %{inv: inv} do
+    test "render context contains invoice number + total", %{inv: inv} do
       assert {:ok, _} = Accrue.Invoices.render_invoice_pdf(inv)
-      assert_pdf_rendered(contains: "INV-PDF-0001")
+      assert_received {:invoice_pdf_rendered, context, _opts}
+      assert context.invoice.number == "INV-PDF-0001"
+      assert context.formatted_total == "$29.00"
     end
 
     test "accepts invoice id (string) as first arg", %{inv: inv} do
       assert {:ok, _} = Accrue.Invoices.render_invoice_pdf(inv.id)
-      assert_pdf_rendered(contains: "INV-PDF-0001")
+      assert_received {:invoice_pdf_rendered, context, _opts}
+      assert context.invoice.number == "INV-PDF-0001"
     end
 
     test "accepts :locale + :timezone + :archival + :size opts", %{inv: inv} do
@@ -97,16 +100,19 @@ defmodule Accrue.Billing.PdfTest do
                  size: :a4
                )
 
-      assert_pdf_rendered(opts_include: [archival: true, size: :a4])
+      assert_received {:invoice_pdf_rendered, _context, opts}
+      assert opts[:archival] == true
+      assert opts[:size] == :a4
     end
 
     test "locale/timezone from opts thread through RenderContext (PDF-10)", %{inv: inv} do
       assert {:ok, _} =
                Accrue.Invoices.render_invoice_pdf(inv, locale: "en", timezone: "Etc/UTC")
 
-      {html, _opts} = assert_pdf_rendered()
-      # The print_shell includes the invoice number + business_name from branding
-      assert html =~ "INV-PDF-0001"
+      assert_received {:invoice_pdf_rendered, context, _opts}
+      assert context.locale == "en"
+      assert context.timezone == "Etc/UTC"
+      assert context.invoice.number == "INV-PDF-0001"
     end
 
     test "Accrue.Billing.render_invoice_pdf/2 defdelegates", %{inv: inv} do
@@ -116,9 +122,21 @@ defmodule Accrue.Billing.PdfTest do
     end
   end
 
-  describe "Accrue.Invoices.render_invoice_pdf/2 with Accrue.PDF.Null" do
+  describe "Accrue.Invoices.render_invoice_pdf/2 with Rendro default" do
     setup do
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Null)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Rendro)
+      :ok
+    end
+
+    test "returns a real PDF binary without Chrome", %{inv: inv} do
+      assert {:ok, binary} = Accrue.Invoices.render_invoice_pdf(inv)
+      assert binary_part(binary, 0, 4) == "%PDF"
+    end
+  end
+
+  describe "Accrue.Invoices.render_invoice_pdf/2 with Accrue.InvoiceRenderer.Null" do
+    setup do
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Null)
       :ok
     end
 
@@ -129,19 +147,23 @@ defmodule Accrue.Billing.PdfTest do
 
   describe "Accrue.Invoices.render_invoice_pdf/2 with ChromicPDF adapter but process absent" do
     setup do
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.ChromicPDF)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF)
       refute Process.whereis(ChromicPDF), "test precondition: ChromicPDF must not be started"
       :ok
     end
 
-    test "returns {:error, :chromic_pdf_not_started}", %{inv: inv} do
-      assert {:error, :chromic_pdf_not_started} = Accrue.Invoices.render_invoice_pdf(inv)
+    test "returns a typed unavailable error", %{inv: inv} do
+      assert {:error,
+              %Accrue.Error.InvoiceRendererUnavailable{
+                adapter: Accrue.InvoiceRenderer.ChromicPDF,
+                reason: :chromic_pdf_not_started
+              }} = Accrue.Invoices.render_invoice_pdf(inv)
     end
   end
 
   describe "Accrue.Invoices.store_invoice_pdf/2" do
     setup do
-      Application.put_env(:accrue, :pdf_adapter, Accrue.PDF.Test)
+      Application.put_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test)
       Application.put_env(:accrue, :storage_adapter, Accrue.Storage.Null)
       :ok
     end

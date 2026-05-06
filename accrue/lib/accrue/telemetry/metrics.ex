@@ -79,7 +79,7 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
         counter("accrue.ops.metered_charge_failed_exhausted.count"),
         counter("accrue.ops.revenue_loss.count"),
         counter("accrue.ops.incomplete_expired.count"),
-        counter("accrue.ops.pdf_adapter_unavailable.count", tags: [:type]),
+        counter("accrue.ops.pdf_adapter_unavailable.count", tags: [:adapter, :surface]),
         counter("accrue.ops.events_upcast_failed.count"),
         counter("accrue.ops.connect_account_deauthorized.count"),
         counter("accrue.ops.connect_capability_lost.count", tags: [:capability]),

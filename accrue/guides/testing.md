@@ -125,7 +125,7 @@ For failure-path telemetry (`meter_reporting_failed` and related ops notes), see
 - `Accrue.Test.setup_fake_processor/1` configures the Fake Processor for the test process.
 - `Accrue.Test.meter_events_for/1` returns Fake-captured meter payloads after `Accrue.Billing.report_usage/3` (Fake-only; see Usage metering section above).
 - `Accrue.Test.setup_mailer_test/1` captures `Accrue.Mailer.Test` deliveries in the current process mailbox.
-- `Accrue.Test.setup_pdf_test/1` captures `Accrue.PDF.Test` renders in the current process mailbox.
+- `Accrue.Test.setup_pdf_test/1` configures the invoice renderer test adapter so invoice PDF renders stay Chrome-free in the current process mailbox.
 - `Accrue.Test.advance_clock/2` advances Fake time with readable strings, seconds, or keyword durations.
 - `Accrue.Test.trigger_event/2` synthesizes a webhook event through Accrue ingest and the default handler path.
 - `assert_email_sent/2` matches captured emails by type, recipient, assigns, or predicate.

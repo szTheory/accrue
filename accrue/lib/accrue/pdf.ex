@@ -1,11 +1,14 @@
 defmodule Accrue.PDF do
   @moduledoc """
-  Behaviour + facade for PDF rendering.
+  Behaviour + facade for legacy HTML-to-PDF rendering.
 
-  You rarely call this module directly. The typical entry point is
-  `Accrue.Invoices.render_invoice_pdf/2`, which renders an invoice to HTML
-  and then calls `Accrue.PDF.render/2` under the hood. You interact with
-  this module mainly through two concerns:
+  You rarely call this module directly. Invoice PDFs now flow through
+  `Accrue.Invoices.render_invoice_pdf/2` and the invoice-specific
+  `Accrue.InvoiceRenderer` seam, which defaults to the native Rendro path.
+  This module remains the lower-level HTML contract for ChromicPDF and
+  custom HTML-to-PDF adapters.
+
+  You interact with this module mainly through two concerns:
 
   1. **Adapter configuration** — choose which backend renders PDFs.
   2. **Test setup** — swap in `Accrue.PDF.Test` so your test suite does not
@@ -13,7 +16,7 @@ defmodule Accrue.PDF do
 
   ## Adapters
 
-  - `Accrue.PDF.ChromicPDF` — production default. Delegates to the host
+  - `Accrue.PDF.ChromicPDF` — legacy first-party HTML renderer. Delegates to the host
     application's ChromicPDF instance. **Accrue does NOT start ChromicPDF** —
     the host app must add it to its own supervision tree.
   - `Accrue.PDF.Test` — Chrome-free test adapter. Sends
@@ -34,6 +37,9 @@ defmodule Accrue.PDF do
 
   @doc """
   Renders `html` to a PDF binary via the configured adapter.
+
+  This is the HTML-specific escape hatch. For normal invoice rendering,
+  prefer `Accrue.Invoices.render_invoice_pdf/2`.
 
   ## Options
 

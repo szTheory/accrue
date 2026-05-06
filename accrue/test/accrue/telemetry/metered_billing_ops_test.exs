@@ -60,8 +60,12 @@ defmodule Accrue.Telemetry.MeteredBillingOpsTest do
 
     try do
       %{renewal: missing_definition_renewal} = insert_missing_definition_fixture()
-      assert {:ok, _result} = MeteredRenewalActions.author_local_invoice(missing_definition_renewal.id)
-      assert {:ok, _result} = MeteredRenewalActions.author_local_invoice(missing_definition_renewal.id)
+
+      assert {:ok, _result} =
+               MeteredRenewalActions.author_local_invoice(missing_definition_renewal.id)
+
+      assert {:ok, _result} =
+               MeteredRenewalActions.author_local_invoice(missing_definition_renewal.id)
 
       assert_received {:missing_definition, %{count: 1}, missing_metadata}
       assert missing_metadata.unmatched_event_count == 1

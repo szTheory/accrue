@@ -76,10 +76,12 @@ defmodule Accrue.ConfigTest do
     end
 
     test "adapter defaults resolve to module atoms" do
+      Application.delete_env(:accrue, :invoice_pdf_adapter)
       Application.delete_env(:accrue, :pdf_adapter)
       Application.delete_env(:accrue, :auth_adapter)
       Application.delete_env(:accrue, :mailer)
       Application.delete_env(:accrue, :mailer_adapter)
+      assert Accrue.InvoiceRenderer.Rendro == Config.get!(:invoice_pdf_adapter)
       assert Accrue.PDF.ChromicPDF == Config.get!(:pdf_adapter)
       assert Accrue.Auth.Default == Config.get!(:auth_adapter)
       assert Accrue.Mailer.Default == Config.get!(:mailer)
@@ -210,6 +212,7 @@ defmodule Accrue.ConfigTest do
         :processor,
         :mailer,
         :mailer_adapter,
+        :invoice_pdf_adapter,
         :pdf_adapter,
         :auth_adapter,
         :stripe_secret_key,

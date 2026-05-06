@@ -23,9 +23,12 @@ defmodule Accrue.Application do
        refuses to start in `:prod` when `:auth_adapter` still points at
        the dev-permissive default adapter.
 
-    3. **PDF adapter availability check** — warns at boot if
-       `Accrue.PDF.ChromicPDF` is configured but no ChromicPDF supervisor
-       child is running in the host app's supervision tree.
+    3. **Invoice renderer availability check** — warns at boot if
+       `:invoice_pdf_adapter` is explicitly set to
+       `Accrue.InvoiceRenderer.ChromicPDF` but no ChromicPDF supervisor
+       child is running in the host app's supervision tree, and separately
+       warns when a host still only configures the lower-level
+       `:pdf_adapter` seam.
 
     4. **Oban queue / PDF pool size check** — warns if the `:accrue_mailers`
        Oban queue concurrency exceeds the ChromicPDF pool size, which can
@@ -69,47 +72,34 @@ defmodule Accrue.Application do
   end
 
   @doc false
-  # Emit a boot-time warning when the configured PDF adapter is
-  # `Accrue.PDF.ChromicPDF` but the host app has NOT started a ChromicPDF
-  # supervisor child. Accrue does not start ChromicPDF itself — the host
-  # app's supervision tree owns it. The mailer worker's PDF attachment
-  # branch treats `:chromic_pdf_not_started` as a terminal error and falls
-  # through to the hosted-invoice-url note — this warning surfaces the
-  # misconfig at boot instead of waiting for the first invoice email.
+  # Emit boot-time warnings for the invoice renderer seam:
+  #
+  # * explicit `:invoice_pdf_adapter == Accrue.InvoiceRenderer.ChromicPDF`
+  #   without a running ChromicPDF process
+  # * legacy/custom `:pdf_adapter` configuration without an explicit
+  #   `:invoice_pdf_adapter` override
   @spec warn_pdf_adapter_unavailable() :: :ok
   def warn_pdf_adapter_unavailable do
-    key = :accrue_pdf_adapter_unavailable_warned?
-    adapter = Application.get_env(:accrue, :pdf_adapter, Accrue.PDF.ChromicPDF)
+    invoice_adapter =
+      Application.get_env(
+        :accrue,
+        :invoice_pdf_adapter,
+        Accrue.InvoiceRenderer.Rendro
+      )
+
+    invoice_adapter_explicit? =
+      match?({:ok, _}, Application.fetch_env(:accrue, :invoice_pdf_adapter))
+
+    pdf_adapter = Application.get_env(:accrue, :pdf_adapter, Accrue.PDF.ChromicPDF)
     env = safe_mix_env()
 
-    cond do
-      adapter != Accrue.PDF.ChromicPDF ->
-        :ok
+    maybe_warn_legacy_pdf_adapter_without_invoice_adapter(
+      invoice_adapter_explicit?,
+      pdf_adapter,
+      env
+    )
 
-      env != :prod ->
-        :ok
-
-      Process.whereis(ChromicPDF) != nil ->
-        :ok
-
-      :persistent_term.get(key, false) ->
-        :ok
-
-      true ->
-        :persistent_term.put(key, true)
-
-        Logger.warning("""
-        [Accrue] :pdf_adapter is Accrue.PDF.ChromicPDF but no ChromicPDF
-        supervisor child is running. Accrue does not start ChromicPDF —
-        add it to your host application's supervision tree.
-        Invoice emails will fall through to the hosted_invoice_url note
-        instead of attaching a rendered PDF until this is fixed.
-        Add `{ChromicPDF, on_demand: true}` (dev) or a persistent pool
-        (prod) to your host application's supervision tree.
-        """)
-
-        :ok
-    end
+    maybe_warn_missing_chromic_invoice_renderer(invoice_adapter, env)
   end
 
   @doc false
@@ -123,6 +113,8 @@ defmodule Accrue.Application do
 
     with false <- :persistent_term.get(key, false),
          true <- Application.get_env(:accrue, :attach_invoice_pdf, true),
+         Accrue.InvoiceRenderer.ChromicPDF <-
+           Application.get_env(:accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Rendro),
          queue_concurrency when is_integer(queue_concurrency) <- mailer_queue_concurrency(),
          pool_size when is_integer(pool_size) and queue_concurrency > pool_size <-
            Application.get_env(:accrue, :chromic_pdf_pool_size, 3) do
@@ -247,6 +239,69 @@ defmodule Accrue.Application do
       Mix.env()
     rescue
       _ -> :prod
+    end
+  end
+
+  defp maybe_warn_missing_chromic_invoice_renderer(adapter, env) do
+    key = :accrue_pdf_adapter_unavailable_warned?
+
+    cond do
+      adapter != Accrue.InvoiceRenderer.ChromicPDF ->
+        :ok
+
+      env != :prod ->
+        :ok
+
+      Process.whereis(ChromicPDF) != nil ->
+        :ok
+
+      :persistent_term.get(key, false) ->
+        :ok
+
+      true ->
+        :persistent_term.put(key, true)
+
+        Logger.warning("""
+        [Accrue] :invoice_pdf_adapter is Accrue.InvoiceRenderer.ChromicPDF but no ChromicPDF
+        supervisor child is running. Accrue does not start ChromicPDF —
+        add it to your host application's supervision tree.
+        Invoice emails will fall through to the hosted_invoice_url note
+        instead of attaching a rendered PDF until this is fixed.
+        Add `{ChromicPDF, on_demand: true}` (dev) or a persistent pool
+        (prod) to your host application's supervision tree.
+        """)
+
+        :ok
+    end
+  end
+
+  defp maybe_warn_legacy_pdf_adapter_without_invoice_adapter(invoice_adapter_explicit?, pdf_adapter, env) do
+    key = :accrue_invoice_pdf_adapter_migration_warned?
+
+    cond do
+      invoice_adapter_explicit? ->
+        :ok
+
+      env == :test ->
+        :ok
+
+      pdf_adapter == Accrue.PDF.ChromicPDF ->
+        :ok
+
+      :persistent_term.get(key, false) ->
+        :ok
+
+      true ->
+        :persistent_term.put(key, true)
+
+        Logger.warning("""
+        [Accrue] :pdf_adapter is configured as #{inspect(pdf_adapter)} but :invoice_pdf_adapter is unset.
+        Invoice rendering now reads :invoice_pdf_adapter and does not infer from :pdf_adapter.
+        Keep :pdf_adapter for the lower-level HTML seam only, or set
+        :invoice_pdf_adapter to Accrue.InvoiceRenderer.ChromicPDF if you want the explicit compatibility path.
+        """)
+
+        :ok
     end
   end
 

@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- ✅ **v1.34 Rendro Native Invoice PDF Default** — Phases **106–108** shipped **2026-05-06**. **PDF-01..09** closed: invoice-specific renderer seam, Rendro default invoice path, explicit ChromicPDF compatibility path, Rendro Hex release handoff, and migration/docs proof. **Archives:** [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.34-phases/`](milestones/v1.34-phases/). **Closeout proof:** [`v1.34-v1.34-MILESTONE-AUDIT.md`](v1.34-v1.34-MILESTONE-AUDIT.md).
 - ✅ **v1.33 Braintree Full Maturity** — Phases **101–104** shipped **2026-05-06**. **BT-01..09** closed: first-party `Accrue.Portal` checkout + self-serve portal for Braintree, local promotion-code/discount mapping, local metered renewal authoring + settlement + telemetry/docs, and an explicit Hyperwallet no-go boundary for Braintree marketplace parity. **Archives:** [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.33-phases/`](milestones/v1.33-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.32 Braintree Production Parity** — Phases **97–100** shipped **2026-05-01**. **PROC-14..20** closed: Braintree subscription mutation + webhook convergence, payment-method CRUD on `Accrue.Billing` + `AccrueAdmin` operator surfaces, canonical `Accrue.Billing.refund/2` + invoice rollups + proration guardrails, explicit billing-portal capability rejection + local-portal LiveView guide. **Archives:** [`milestones/v1.32-ROADMAP.md`](milestones/v1.32-ROADMAP.md), [`milestones/v1.32-REQUIREMENTS.md`](milestones/v1.32-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.32-phases/`](milestones/v1.32-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.31 PROC-08 Phase 1: boundary hardening + thin slice** — Phases **94–96** shipped **2026-04-29**. Reopens the long-deferred second-processor track with written boundaries: strategy + capability matrix + target-provider lock, official processor conformance harness + boundary hardening, then one real second-provider vertical slice through the public billing facade. **Archives:** [`milestones/v1.31-ROADMAP.md`](milestones/v1.31-ROADMAP.md), [`milestones/v1.31-REQUIREMENTS.md`](milestones/v1.31-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.31-phases/`](milestones/v1.31-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
@@ -39,11 +40,33 @@
 
 ## Active Milestone
 
-No active milestone. **v1.33** shipped on **2026-05-06**.
-
-Start the next milestone with fresh requirements and roadmap scope. The shipped `v1.33` archive lives in [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/).
+No active milestone. **v1.34** shipped on **2026-05-06**, and the next milestone has not been opened yet.
 
 ## Phases
+
+<details>
+<summary>✅ v1.34 Rendro Native Invoice PDF Default (Phases 106–108) — SHIPPED 2026-05-06</summary>
+
+**Milestone goal:** Make Rendro the default invoice PDF path without changing Accrue’s public invoice semantics, keep ChromicPDF available only as an explicit compatibility path, and finish on a published Rendro Hex release rather than a local sibling dependency.
+
+**Requirements (archived):** **PDF-01..PDF-09** — see [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.34-phases/`](milestones/v1.34-phases/).
+
+| # | Phase | Goal | Requirements |
+|---|-------|------|--------------|
+| 106 | Invoice Renderer Seam & Rendro Default | **Complete 2026-05-06** ([`106-VERIFICATION.md`](milestones/v1.34-phases/106-invoice-renderer-seam-rendro-default/106-VERIFICATION.md)). Split invoice rendering from the legacy HTML `Accrue.PDF` seam, route invoice PDFs through a Rendro-backed adapter by default, and preserve lazy render/storage behavior plus invoice parity across billing, mailer, and admin download flows. | PDF-01, PDF-02, PDF-03, PDF-04, PDF-05 |
+| 107 | Rendro Release & Optional Chromic Path | **Complete 2026-05-06** ([`107-VERIFICATION.md`](milestones/v1.34-phases/107-rendro-release-optional-chromic-path/107-VERIFICATION.md)). Make the Chromic path explicitly optional with clear failure messaging, harden the Rendro-facing integration surface, and replace the temporary path dep with a published Rendro Hex version. | PDF-06, PDF-07 |
+| 108 | Docs, Migration, and Proof Closeout | **Complete 2026-05-06** ([`108-VERIFICATION.md`](milestones/v1.34-phases/108-docs-migration-proof-closeout/108-VERIFICATION.md)). Rewrite the install and PDF guidance around Rendro-first defaults, document migration for existing `:pdf_adapter` or Chromic users, and rerun the invoice/admin/email proof lanes on the final dependency set. | PDF-08, PDF-09 |
+
+**Key outcomes:**
+
+1. Invoice PDFs render through Rendro by default with no Chrome requirement in the normal install path. ✓
+2. Public invoice-facing APIs and lazy render/storage semantics remain stable. ✓
+3. ChromicPDF remains available only as an explicit compatibility path with typed errors and clear docs. ✓
+4. The milestone closed on a published Rendro Hex version with direct clean-checkout proof. ✓
+
+**Closeout proof:** [`v1.34-v1.34-MILESTONE-AUDIT.md`](v1.34-v1.34-MILESTONE-AUDIT.md) passed on **2026-05-06** with all `PDF-01..PDF-09` requirements satisfied, billing/mailer/admin proof lanes green, package docs verified, HexDocs clean, and `verify_rendro_hex_resolution.sh` passing.
+
+</details>
 
 <details>
 <summary>✅ v1.33 Braintree Full Maturity (Phases 101–104) — SHIPPED 2026-05-06</summary>

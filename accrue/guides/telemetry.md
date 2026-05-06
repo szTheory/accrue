@@ -74,7 +74,7 @@ they correspond to — they are idempotent under webhook replay via the
 | `[:accrue, :ops, :webhook_dlq, :dead_lettered]` | `count` | `event_id`, `processor_event_id`, `type`, `attempt` | `Accrue.Webhook.DispatchWorker` |
 | `[:accrue, :ops, :webhook_dlq, :replay]` | `count`, `duration`, `requeued_count`, `skipped_count` | `actor`, `filter`, `dry_run?` | `Accrue.Webhooks.DLQ` |
 | `[:accrue, :ops, :webhook_dlq, :prune]` | `dead_deleted`, `succeeded_deleted`, `duration` | `retention_days` | `Accrue.Webhook.Pruner` |
-| `[:accrue, :ops, :pdf_adapter_unavailable]` | `count` | `type` (email template key), `operation_id` when set | `Accrue.Workers.Mailer` |
+| `[:accrue, :ops, :pdf_adapter_unavailable]` | `count` | `adapter` (`:chromic_pdf`), `surface` (`:invoice_pdf`), `operation_id` when set | `Accrue.Invoices` |
 | `[:accrue, :ops, :events_upcast_failed]` | `count` | `event_id`, `type`, `schema_version` | `Accrue.Events` |
 | `[:accrue, :ops, :connect_account_deauthorized]` | `count` | `stripe_account_id`, `deauthorized_at` **or** `unresolved: true` | `Accrue.Webhook.ConnectHandler` |
 | `[:accrue, :ops, :connect_capability_lost]` | `count` | `stripe_account_id`, `capability`, `from`, `to` | `Accrue.Webhook.ConnectHandler` |
@@ -110,9 +110,10 @@ The matching default counters are:
 Those counters stay low-cardinality. Identifiers remain in telemetry metadata, not metric tags.
 
 Connect ops rows above are emitted via `Accrue.Telemetry.Ops.emit/3` from
-`Accrue.Webhook.ConnectHandler`. PDF and ledger rows use `:telemetry.execute/3`
-directly with the same `[:accrue, :ops]` prefix — treat them as **first-class
-ops signals** for paging and dashboards.
+`Accrue.Webhook.ConnectHandler`. The invoice PDF unavailable signal now emits
+through the same helper from `Accrue.Invoices`, while ledger rows still use
+`:telemetry.execute/3` directly with the same `[:accrue, :ops]` prefix —
+treated as **first-class ops signals** for paging and dashboards.
 
 **Note:** `[:accrue, :ops, :revenue_loss]`, `:incomplete_expired`, and
 `:charge_failed` are part of the supported **host + Accrue** ops vocabulary
