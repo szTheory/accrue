@@ -19,9 +19,19 @@ defmodule Accrue.Portal.AuthHook do
   defp mount_customer(session, socket, opts) do
     case CustomerSession.resolve(session, opts) do
       {:ok, user, customer} ->
+        portal = Map.get(session, "accrue_portal", %{})
+
         {:cont,
          socket
          |> assign(:accrue_portal_session, session)
+         |> assign(:brand, Map.get(portal, "brand", %{}))
+         |> assign(:theme, Map.get(portal, "theme", "system"))
+         |> assign(:csp_nonce, Map.get(portal, "csp_nonce"))
+         |> assign(:brand_css_path, Map.get(portal, "brand_css_path"))
+         |> assign(:assets_css_path, Map.get(portal, "assets_css_path"))
+         |> assign(:assets_js_path, Map.get(portal, "assets_js_path"))
+         |> assign(:phoenix_js_path, Map.get(portal, "phoenix_js_path"))
+         |> assign(:live_view_js_path, Map.get(portal, "live_view_js_path"))
          |> assign(:current_user, user)
          |> assign(:current_customer, customer)}
 

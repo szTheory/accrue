@@ -20,6 +20,7 @@ config :accrue,
   env: :test,
   repo: AccrueHost.Repo,
   processor: Accrue.Processor.Fake,
+  braintree_client_token_generator: AccrueHost.BraintreePortalStub.ClientTokenGenerator,
   webhook_handlers: [AccrueHost.BillingHandler],
   webhook_signing_secrets: %{stripe: "whsec_test_host"},
   branding: [

@@ -135,10 +135,12 @@
   }
 
   function bootLiveSocket() {
-    if (!window.Phoenix || !window.Phoenix.LiveView || window.accruePortalLiveSocket) return;
+    var liveView = window.LiveView || (window.Phoenix && window.Phoenix.LiveView);
+
+    if (!window.Phoenix || !liveView || window.accruePortalLiveSocket) return;
 
     var csrf = document.querySelector("meta[name='csrf-token']");
-    var liveSocket = new window.Phoenix.LiveView.LiveSocket("/live", window.Phoenix.Socket, {
+    var liveSocket = new liveView.LiveSocket("/live", window.Phoenix.Socket, {
       hooks: Hooks,
       params: {
         _csrf_token: csrf ? csrf.getAttribute("content") : null

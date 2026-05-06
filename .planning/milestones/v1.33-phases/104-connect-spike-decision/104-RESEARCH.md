@@ -284,22 +284,19 @@ paypal.PayoutsAAC.render({
 
 All claims in this research were verified or cited in this session. No user confirmation is required for unstated assumptions.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does BT-09 require only a phase-local decision artifact, or must public package docs and the processor-support matrix change in the same phase?**
    - What we know: the requirement says the final decision must be documented, and the repo already enforces public docs truth with tests/scripts. [VERIFIED: codebase grep]
-   - What's unclear: whether the planner should schedule public-doc changes in Phase 104 or only record the result for a later milestone. [VERIFIED: codebase grep]
-   - Recommendation: default to updating any public support-matrix/doc surface that would otherwise mislead adopters. [VERIFIED: codebase grep]
+   - Resolution: Phase 104 should update any public support-matrix/doc surface that would otherwise mislead adopters, so BT-09 is satisfied as repo truth rather than a phase-local note. [VERIFIED: codebase grep]
 
 2. **If the outcome is go, is onboarding limited to existing merchant/payout accounts or expected to create new ones?**
    - What we know: Braintree Auth connect flow is closed beta, while Hyperwallet onboarding requires explicit program setup and contact exchange. [CITED: https://developer.paypal.com/braintree/docs/guides/braintree-auth/server-side/] [CITED: https://docs.hyperwallet.com/assets/docs/onboarding/client-requirements.pdf]
-   - What's unclear: whether Accrue's intended adopters even have access to the necessary provider programs. [CITED: https://docs.hyperwallet.com/assets/docs/onboarding/client-requirements.pdf]
-   - Recommendation: do not plan implementation until provider-program eligibility is confirmed. [CITED: https://docs.hyperwallet.com/assets/docs/onboarding/client-requirements.pdf]
+   - Resolution: Treat provider-program eligibility as a blocker for any future go implementation. Phase 104 should preserve only a narrow if-go contract and must not plan runtime work that assumes sandbox or production access already exists. [CITED: https://docs.hyperwallet.com/assets/docs/onboarding/client-requirements.pdf]
 
 3. **Should a no-go decision also state the reopening condition?**
    - What we know: the locked phase context says reopening should require an explicit strategy change plus a new milestone. [VERIFIED: 104-CONTEXT.md]
-   - What's unclear: whether the final artifact should embed that rule in package docs, strategy docs, or only the phase verification. [VERIFIED: 104-CONTEXT.md]
-   - Recommendation: include the reopening rule anywhere adopters or maintainers could otherwise misread the boundary as "maybe later." [VERIFIED: 104-CONTEXT.md]
+   - Resolution: Yes. The final artifact should embed the reopening rule anywhere adopters or maintainers could otherwise misread the boundary as "maybe later," especially in public docs and strategy/support-matrix truth. [VERIFIED: 104-CONTEXT.md]
 
 ## Environment Availability
 
@@ -333,8 +330,8 @@ All claims in this research were verified or cited in this session. No user conf
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| BT-08 | Spike artifact captures official feasibility constraints and provider split. [CITED: https://docs.hyperwallet.com/assets/docs/onboarding/client-requirements.pdf] [CITED: https://developer.paypal.com/braintree/docs/guides/recurring-billing/overview/] | docs contract | `mix test test/accrue/docs/connect_hyperwallet_decision_test.exs -x` | ❌ Wave 0 |
-| BT-09 | Final go/no-go decision is mirrored in public docs/support matrix if the public contract changes. [VERIFIED: codebase grep] | docs contract | `mix test test/accrue/docs/connect_hyperwallet_decision_test.exs -x` and, if matrix touched, `mix test test/accrue/docs/processor_support_matrix_test.exs -x` | ❌ Wave 0 / ✅ existing matrix test |
+| BT-08 | Spike artifact captures official feasibility constraints and provider split. [CITED: https://docs.hyperwallet.com/assets/docs/onboarding/client-requirements.pdf] [CITED: https://developer.paypal.com/braintree/docs/guides/recurring-billing/overview/] | docs contract | `mix test test/accrue/docs/connect_hyperwallet_decision_test.exs -x` | Created in Plan 01, Task 1 |
+| BT-09 | Final go/no-go decision is mirrored in public docs/support matrix if the public contract changes. [VERIFIED: codebase grep] | docs contract | `mix test test/accrue/docs/connect_hyperwallet_decision_test.exs -x` and, if matrix touched, `mix test test/accrue/docs/processor_support_matrix_test.exs -x` | Created in Plan 01 / existing matrix test |
 
 ### Sampling Rate
 
@@ -344,8 +341,7 @@ All claims in this research were verified or cited in this session. No user conf
 
 ### Wave 0 Gaps
 
-- [ ] `accrue/test/accrue/docs/connect_hyperwallet_decision_test.exs` - asserts the final decision doc contains the hard boundary or the loud if-go exclusions required by BT-09. [VERIFIED: gap from file scan]
-- [ ] Optional script verifier if multiple public docs are touched, mirroring the existing processor-support matrix pattern. [VERIFIED: codebase grep]
+- None. Existing ExUnit docs-test infrastructure already exists, and the only missing asset is the new `connect_hyperwallet_decision_test.exs` file created in Plan 01 before the guide-verification task runs. [VERIFIED: codebase grep]
 
 ## Security Domain
 

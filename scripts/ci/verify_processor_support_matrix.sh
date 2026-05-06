@@ -29,7 +29,10 @@ require_substring "billing_portal.hosted_self_serve" "billing portal self-serve 
 require_substring 'Accrue.Billing.subscribe/3' "subscribe facade mapping"
 require_substring 'Accrue.Billing.create_checkout_session/2' "checkout facade mapping"
 require_substring 'Accrue.Billing.create_billing_portal_session/2' "billing portal facade mapping"
-require_substring "Stripe-only" "stripe-only support label"
+require_substring "Supported via first-party local checkout" "braintree local checkout support label"
+require_substring "Supported via mounted first-party portal" "braintree local portal support label"
+require_substring "Stripe returns upstream hosted URLs; Braintree returns mounted first-party local checkout URLs." "checkout provider-honest facade wording"
+require_substring "Stripe returns upstream hosted URLs; Braintree returns mounted first-party local portal URLs." "billing portal provider-honest facade wording"
 require_substring "out of slice" "out-of-slice support label"
 require_substring "Fake-first lane" "fake-first lane wording"
 require_substring "Braintree" "locked target provider"
@@ -45,5 +48,14 @@ require_substring '`Fake` is the required local and CI proof surface' "fake requ
 require_substring "Hyperwallet" "explicit Hyperwallet boundary"
 require_substring "strategically out of bounds unless the project boundary changes" "Phase 104 no-go wording"
 require_substring "reopening requires an explicit strategy change plus a new milestone" "Phase 104 reopen rule"
+if grep -Fq "| checkout.hosted_handoff | Local proof helper | Supported | No | Stripe-only |" "${matrix}"; then
+  echo "verify_processor_support_matrix: stale Stripe-only checkout row still present" >&2
+  exit 1
+fi
+
+if grep -Fq "| billing_portal.hosted_self_serve | Local proof helper | Supported | No | Stripe-only |" "${matrix}"; then
+  echo "verify_processor_support_matrix: stale Stripe-only billing portal row still present" >&2
+  exit 1
+fi
 
 echo "verify_processor_support_matrix: OK"

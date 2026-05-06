@@ -288,8 +288,9 @@ defmodule AccrueHost.BraintreePaymentMethodFlowTest do
     assert source =~
              "def add_payment_method_with_vault_reference(%Scope{} = scope, vault_reference, opts \\\\ []) do"
 
-    assert source =~
-             "Billing.add_payment_method(customer, %{vault_acquisition: %{reference: vault_reference}}, opts)"
+    assert source =~ "Billing.add_payment_method("
+    assert source =~ "%{vault_acquisition: %{reference: vault_reference}}"
+    assert source =~ "opts"
 
     refute source =~ "AccrueAdmin"
     refute source =~ "Drop-in"

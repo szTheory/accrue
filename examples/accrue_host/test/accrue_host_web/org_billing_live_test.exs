@@ -1,8 +1,7 @@
 defmodule AccrueHostWeb.OrgBillingLiveTest do
   use AccrueHostWeb.ConnCase, async: false
 
-  alias Accrue.Billing.Customer
-  alias Accrue.Billing.SubscriptionItem
+  alias Accrue.Billing.{Customer, Subscription, SubscriptionItem}
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Repo
 
@@ -78,6 +77,9 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     conn: conn,
     owner: owner
   } do
+    customer_count_before = organization_customer_count()
+    subscription_count_before = organization_subscription_count()
+
     {:ok, view, html} =
       conn
       |> log_in_user(owner)
@@ -94,11 +96,8 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
 
     assert html =~ "Select an active organization before managing billing."
 
-    assert Repo.aggregate(
-             from(customer in Customer, where: customer.owner_type == "Organization"),
-             :count,
-             :id
-           ) == 0
+    assert organization_customer_count() == customer_count_before
+    assert organization_subscription_count() == subscription_count_before
   end
 
   test "members can review billing state but cannot mutate it", %{
@@ -113,6 +112,9 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
         user: member,
         role: :member
       })
+
+    customer_count_before = organization_customer_count()
+    subscription_count_before = organization_subscription_count()
 
     {:ok, view, html} =
       conn
@@ -135,11 +137,8 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     assert render(view) =~ "Billing is managed by organization admins."
     assert render(view) =~ "you can&#39;t change it."
 
-    assert Repo.aggregate(
-             from(customer in Customer, where: customer.owner_type == "Organization"),
-             :count,
-             :id
-           ) == 0
+    assert organization_customer_count() == customer_count_before
+    assert organization_subscription_count() == subscription_count_before
   end
 
   test "forged organization ids do not change the billed owner on follow-up mutations", %{
@@ -213,6 +212,26 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       from(customer in Customer,
         where: like(customer.processor_id, "cus_fake_%")
       )
+    )
+  end
+
+  defp organization_customer_count do
+    Repo.aggregate(
+      from(customer in Customer, where: customer.owner_type == "Organization"),
+      :count,
+      :id
+    )
+  end
+
+  defp organization_subscription_count do
+    Repo.aggregate(
+      from(subscription in Subscription,
+        join: customer in Customer,
+        on: customer.id == subscription.customer_id,
+        where: customer.owner_type == "Organization"
+      ),
+      :count,
+      :id
     )
   end
 end

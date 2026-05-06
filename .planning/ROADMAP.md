@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- **v1.33 Braintree Full Maturity** — Phases **101–104** **Planning**. Builds first-party Accrue Portal/Checkout (Braintree lacks hosted UI), local coupon/discount mapping, custom metered usage engine, and Connect/Hyperwallet decision spike. **Requirements:** BT-01..BT-05 (+TBD). **Archives:** [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md).
+- ✅ **v1.33 Braintree Full Maturity** — Phases **101–104** shipped **2026-05-06**. **BT-01..09** closed: first-party `Accrue.Portal` checkout + self-serve portal for Braintree, local promotion-code/discount mapping, local metered renewal authoring + settlement + telemetry/docs, and an explicit Hyperwallet no-go boundary for Braintree marketplace parity. **Archives:** [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.33-phases/`](milestones/v1.33-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.32 Braintree Production Parity** — Phases **97–100** shipped **2026-05-01**. **PROC-14..20** closed: Braintree subscription mutation + webhook convergence, payment-method CRUD on `Accrue.Billing` + `AccrueAdmin` operator surfaces, canonical `Accrue.Billing.refund/2` + invoice rollups + proration guardrails, explicit billing-portal capability rejection + local-portal LiveView guide. **Archives:** [`milestones/v1.32-ROADMAP.md`](milestones/v1.32-ROADMAP.md), [`milestones/v1.32-REQUIREMENTS.md`](milestones/v1.32-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.32-phases/`](milestones/v1.32-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.31 PROC-08 Phase 1: boundary hardening + thin slice** — Phases **94–96** shipped **2026-04-29**. Reopens the long-deferred second-processor track with written boundaries: strategy + capability matrix + target-provider lock, official processor conformance harness + boundary hardening, then one real second-provider vertical slice through the public billing facade. **Archives:** [`milestones/v1.31-ROADMAP.md`](milestones/v1.31-ROADMAP.md), [`milestones/v1.31-REQUIREMENTS.md`](milestones/v1.31-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.31-phases/`](milestones/v1.31-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.30 `1.0.0` Declaration (Spine A)** — Phases **91–93** shipped **2026-04-28**. **REL-05..08**, **PPX-09..12**, **HYG-02**, **DOC-03..04**, **INV-07** closed; linked publish proof in **`092-VERIFICATION.md`**, planning closeout proof in **`093-VERIFICATION.md`**, and planning tag **`v1.30`** resolves to the final milestone-closing `HEAD`. **Archives:** [`milestones/v1.30-ROADMAP.md`](milestones/v1.30-ROADMAP.md), [`milestones/v1.30-REQUIREMENTS.md`](milestones/v1.30-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.30-phases/`](milestones/v1.30-phases/). **PROC-08** / **FIN-03** **reaffirmed out of scope** at 1.0.0.
@@ -37,89 +37,38 @@
 - ✅ **v1.9 Observability & operator runbooks** — Phases **40–42** shipped **2026-04-22**. Full archive: [`milestones/v1.9-ROADMAP.md`](milestones/v1.9-ROADMAP.md), [`milestones/v1.9-REQUIREMENTS.md`](milestones/v1.9-REQUIREMENTS.md). Gap audit (research): [`research/v1.9-TELEMETRY-GAP-AUDIT.md`](research/v1.9-TELEMETRY-GAP-AUDIT.md).
 - ✅ **v1.10 Metered usage + Fake parity** — Phases **43–45** shipped **2026-04-22**. **MTR-01..MTR-08** complete. Full archive: [`milestones/v1.10-ROADMAP.md`](milestones/v1.10-ROADMAP.md), [`milestones/v1.10-REQUIREMENTS.md`](milestones/v1.10-REQUIREMENTS.md). Spike (research): [`research/v1.10-METERING-SPIKE.md`](research/v1.10-METERING-SPIKE.md).
 
-## v1.33 Braintree Full Maturity
+## Active Milestone
 
-**Status:** Planning (opened 2026-05-01)
-**Phases:** 101–104
+No active milestone. **v1.33** shipped on **2026-05-06**.
 
-## Overview
+Start the next milestone with fresh requirements and roadmap scope. The shipped `v1.33` archive lives in [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/).
 
-Achieve full Braintree maturity and parity with Stripe. Builds a first-party `Accrue.Portal` LiveView (Checkout + Customer Portal) since Braintree lacks hosted UI, local coupon/discount mapping to Braintree Discounts, a custom metered-usage aggregation engine, and a Connect/Hyperwallet evaluation spike.
+## Phases
 
-**Requirements:** **BT-01..BT-05 (+TBD)** — see [REQUIREMENTS.md](REQUIREMENTS.md). **Strategic parent:** [STRATEGY.md](STRATEGY.md).
+<details>
+<summary>✅ v1.33 Braintree Full Maturity (Phases 101–104) — SHIPPED 2026-05-06</summary>
+
+**Milestone goal:** Achieve honest Braintree first-party maturity for hosted checkout, self-serve billing portal, local promotion-code discounts, local metered billing, and a written Connect/Hyperwallet boundary without drifting into unsupported marketplace parity.
+
+**Requirements (archived):** **BT-01..BT-09** — see [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.33-phases/`](milestones/v1.33-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md).
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 101 | Accrue Portal Foundation & Checkout | First-party LiveView checkout + customer portal scaffolding wrapping Braintree Hosted Fields. | BT-01, BT-02, BT-03 |
-| 102 | Coupon / Discount Mapping | Local promotion-code resolution mapping to Braintree Discount IDs at subscription time. | BT-04, BT-05 |
-| 103 | Metering Engine | Custom local aggregation engine for metered usage (Braintree has no first-party meter). | TBD |
-| 104 | Connect Spike / Decision | Investigate Hyperwallet for Braintree marketplace parity; produce go/no-go decision. | TBD |
+| 101 | Accrue Portal Foundation & Checkout | **Complete 2026-05-02**. Mounted `Accrue.Portal` shell, Braintree Hosted Fields checkout, customer dashboard/payment-method/invoice portal surfaces, telemetry, and boundary docs. | BT-01, BT-02, BT-03 |
+| 102 | Coupon / Discount Mapping | **Complete 2026-05-02** ([`102-VERIFICATION.md`](milestones/v1.33-phases/102-coupon-discount-mapping/102-VERIFICATION.md)). Local discount-mapping table, subscription-time revalidation, operator drift failures, and checkout preview UX. | BT-04, BT-05 |
+| 103 | Metering Engine | **Complete 2026-05-03** ([`103-VERIFICATION.md`](milestones/v1.33-phases/103-metering-engine/103-VERIFICATION.md)). Local usage ledger, invoice authoring, renewal settlement, stale-window repair, telemetry, and operator/public metering docs. | BT-06, BT-07 |
+| 104 | Connect Spike / Decision | **Complete 2026-05-03** ([`104-VERIFICATION.md`](milestones/v1.33-phases/104-connect-spike-decision/104-VERIFICATION.md)). Hyperwallet feasibility spike, explicit no-go verdict, strategy/matrix/verifier mirrors, and reopen rule. | BT-08, BT-09 |
 
 **Success criteria (milestone):**
 
-1. Host apps can mount `Accrue.Portal` and route customers through a first-party hosted checkout + self-serve portal on Braintree.
-2. Promotion codes entered in the portal correctly apply Braintree Discount IDs to subscriptions.
-3. Metered usage is locally aggregated and billed through Braintree without a Braintree-side meter.
-4. A documented decision exists on Connect/Hyperwallet parity for Braintree marketplaces.
+1. Host apps can mount `Accrue.Portal` and route Braintree customers through a first-party checkout and self-serve portal. ✓
+2. Promotion codes entered in the portal resolve through a local mapping and apply the correct Braintree discount at subscription time. ✓
+3. Metered usage is aggregated and settled locally on Braintree without implying native Braintree metering parity. ✓
+4. Connect/Hyperwallet parity for Braintree is explicitly rejected for the current strategy, with a narrow written reopen rule. ✓
 
-## Phase Details
+**Closeout proof:** [`v1.33-v1.33-MILESTONE-AUDIT.md`](v1.33-v1.33-MILESTONE-AUDIT.md) passed on **2026-05-06** after backfilling `101` / `103` / `104` verification artifacts, reconciling `102-VALIDATION.md`, and restoring the example-host billing proof lane.
 
-### Phase 101: Accrue Portal Foundation & Checkout
-**Goal**: Users can access a first-party hosted checkout and customer portal via LiveView.
-**Depends on**: None
-**Requirements**: BT-01, BT-02, BT-03
-**Success Criteria** (what must be TRUE):
-  1. A host app can mount the `Accrue.Portal` router pipeline.
-  2. `create_checkout_session/2` returns a URL to a local hosted checkout that embeds Braintree Hosted Fields. (Drop-in for Web is deprecated 2025-07-14, unsupported 2026-07-14.)
-  3. User can view and manage subscriptions and payment methods via the portal.
-**Plans**: 11 plans
-Plans:
-- [ ] `101-01-PLAN.md` — Harden persisted local checkout sessions, portal URL config, and migration-backed tests in `accrue`
-- [ ] `101-02-PLAN.md` — Align `accrue_portal` mount/auth/CSP shell with the locked public contract and establish the base browser harness
-- [x] `101-03-PLAN.md` — Flip Braintree adapter/facade checkout and billing-portal semantics to first-party local portal support
-- [ ] `101-04-PLAN.md` — Implement the Hosted Fields checkout UI, browser hook, and package-local checkout coverage
-- [x] `101-05-PLAN.md` — Complete the dashboard/subscription production slice with D-19 customer scoping and centralized copy
-- [ ] `101-06-PLAN.md` — Finish payment-method/invoice production surfaces and route wiring
-- [x] `101-07-PLAN.md` — Lock the D-04 portal dependency contract, Braintree mocks, and shell regression tests
-- [ ] `101-08-PLAN.md` — Add synthetic checkout-completion event plumbing and portal telemetry coverage
-- [ ] `101-09-PLAN.md` — Add shared fixtures, authorization assertions, and property-backed subscription isolation tests
-- [ ] `101-10-PLAN.md` — Add focused payment-method/invoice/router coverage including wrong-tenant denial cases
-- [ ] `101-11-PLAN.md` — Publish linked release metadata, sibling-mount host example, and v1.33 portal boundary docs
-**UI hint**: yes
-
-### Phase 102: Coupon/Discount Mapping
-**Goal**: Users can apply promotion codes in checkout which correctly map to Braintree discounts.
-**Depends on**: Phase 101
-**Requirements**: BT-04, BT-05
-**Success Criteria** (what must be TRUE):
-  1. System maintains local promotion codes.
-  2. Promo codes entered in checkout correctly apply corresponding Braintree Discount ID to the created subscription.
-**Plans**: 3 plans
-
-Plans:
-- [x] `102-01-PLAN.md` — Establish the explicit local discount-mapping domain, facade write/read surface, and Wave 0 BT-04 coverage. Summary: `102-01-SUMMARY.md`
-- [x] `102-02-PLAN.md` — Revalidate promotion codes during `subscribe/3`, emit Braintree `discounts.add[*].inherited_from_id`, and hard-fail operator drift with ops telemetry. Summary: `102-02-SUMMARY.md`
-- [x] `102-03-PLAN.md` — Add checkout preview/revalidation UX in `accrue_portal` and document the local-mapping processor distinction for adopters. Summary: `102-03-SUMMARY.md`
-
-### Phase 103: Metering Engine
-**Goal**: Users are accurately billed for metered usage at the end of their billing cycle.
-**Depends on**: Phase 101
-**Requirements**: BT-06, BT-07
-**Success Criteria** (what must be TRUE):
-  1. Usage is aggregated locally using an Oban worker.
-  2. Separate `Transaction.sale` charges are correctly executed against the vaulted payment method at month-end based on usage.
-**Plans**: TBD
-
-### Phase 104: Connect Spike / Decision
-**Goal**: Clear architectural decision made on Hyperwallet integration vs Connect parity scope reduction.
-**Depends on**: None
-**Requirements**: BT-08, BT-09
-**Success Criteria** (what must be TRUE):
-  1. Hyperwallet architecture and feasibility is thoroughly spiked.
-  2. Go/no-go decision is documented for `Accrue.Connect` parity.
-**Plans**: TBD
-
-## Phases
+</details>
 
 <details>
 <summary>✅ v1.32 Braintree Production Parity (Phases 97–100) — SHIPPED 2026-05-01</summary>
@@ -970,9 +919,19 @@ Plans:
 | 101. Accrue Portal Foundation & Checkout | v1.33 | 3/11 | In progress | - |
 | 102. Coupon / Discount Mapping | v1.33 | 0/0 | Not started | - |
 | 103. Metering Engine | v1.33 | 0/0 | Not started | - |
-| 104. Connect Spike / Decision | v1.33 | 0/0 | Not started | - |
+| 104. Connect Spike / Decision | v1.33 | 0/2 | Not started | - |
 
 Earlier shipped phases (1–17) remain in per-milestone roadmap archives under `.planning/milestones/`.
+
+### Phase 105: v1.33 Milestone Closure
+
+**Goal:** Close the v1.33 milestone by backfilling missing verification artifacts, restoring the example-host billing proof lane, and reconciling support-contract drift.
+**Requirements**: BT-01, BT-02, BT-03, BT-06, BT-07, BT-08, BT-09
+**Depends on:** Phase 104
+**Plans:** 1 closeout pass
+
+Plans:
+- [x] Closeout pass — `101/103/104-VERIFICATION.md` added, `102-VALIDATION.md` reconciled, support matrix updated, host proof lane green, milestone audit refreshed to `passed`
 
 ---
 

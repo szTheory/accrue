@@ -77,7 +77,18 @@ async function login(page, fixture, email) {
 async function waitForLiveView(page) {
   try {
     await page.waitForFunction(
-      () => Boolean(document.querySelector("[data-phx-main].phx-connected")),
+      () => {
+        const root = document.querySelector("[data-phx-main].phx-connected");
+        if (root) return true;
+
+        const hostSocketConnected =
+          typeof window.liveSocket?.isConnected === "function" && window.liveSocket.isConnected();
+        const portalSocketConnected =
+          typeof window.accruePortalLiveSocket?.isConnected === "function" &&
+          window.accruePortalLiveSocket.isConnected();
+
+        return Boolean(hostSocketConnected || portalSocketConnected);
+      },
       null,
       { timeout: 5_000 }
     );
@@ -87,6 +98,7 @@ async function waitForLiveView(page) {
       await page.evaluate(() => ({
         classes: document.documentElement.className,
         liveSocket: Boolean(window.liveSocket),
+        accruePortalLiveSocket: Boolean(window.accruePortalLiveSocket),
         scripts: Array.from(document.scripts).map((script) => script.src || "[inline]")
       }))
     );

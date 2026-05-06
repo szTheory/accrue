@@ -9,7 +9,16 @@ defmodule AccruePortal.Assets do
   @css_file Application.app_dir(:accrue_portal, "priv/static/accrue_portal.css")
   @js_file Application.app_dir(:accrue_portal, "priv/static/accrue_portal.js")
   @phoenix_js_file Application.app_dir(:phoenix, "priv/static/phoenix.min.js")
-  @live_view_js_file Application.app_dir(:phoenix_live_view, "priv/static/phoenix_live_view.min.js")
+  @live_view_js_file Application.app_dir(
+                       :phoenix_live_view,
+                       "priv/static/phoenix_live_view.min.js"
+                     )
+
+  @external_resource @brand_file
+  @external_resource @css_file
+  @external_resource @js_file
+  @external_resource @phoenix_js_file
+  @external_resource @live_view_js_file
 
   @brand_body File.read!(@brand_file)
   @css_body File.read!(@css_file)

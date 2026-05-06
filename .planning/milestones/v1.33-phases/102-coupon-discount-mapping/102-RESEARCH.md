@@ -333,17 +333,15 @@ end
 
 All claims in this research were verified or cited in this session — no user confirmation is required before planning.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the first slice ship a discount-catalog cache or only direct local mappings?**
    - What we know: The locked context allows deferring import/sync, and the current Elixir Braintree client already exposes `Braintree.Discount.all/1`. [VERIFIED: .planning/phases/102-coupon-discount-mapping/102-CONTEXT.md][VERIFIED: accrue/deps/braintree/lib/discount.ex]
-   - What's unclear: Whether operator DX requires dropdown discovery in the same phase or whether API/setup examples are enough. [VERIFIED: .planning/phases/102-coupon-discount-mapping/102-CONTEXT.md]
-   - Recommendation: Plan the public contract so cache import is optional, but keep the first executable slice focused on direct mapping rows plus advisory verification. [VERIFIED: .planning/phases/102-coupon-discount-mapping/102-CONTEXT.md]
+   - Resolution: Phase 102 will ship direct local mappings first, with optional discount-cache/import deferred behind the same public contract. Operator DX in this slice is satisfied by the facade write path, setup examples, and advisory verification rather than dropdown discovery. [VERIFIED: .planning/phases/102-coupon-discount-mapping/102-CONTEXT.md][VERIFIED: .planning/phases/102-coupon-discount-mapping/102-01-PLAN.md][VERIFIED: .planning/phases/102-coupon-discount-mapping/102-03-PLAN.md]
 
 2. **How should local redemption accounting be modeled for `max_redemptions`?**
    - What we know: Existing promo validation checks `times_redeemed` but current success paths do not increment it. [VERIFIED: accrue/lib/accrue/billing/coupon_actions.ex][VERIFIED: accrue/test/accrue/billing/coupon_actions_test.exs]
-   - What's unclear: Whether Phase 102 should mutate a counter on successful subscription create or introduce a dedicated redemption ledger for auditability. [VERIFIED: codebase grep]
-   - Recommendation: At minimum, include one plan slice that makes redemption-cap semantics honest; do not keep `max_redemptions` as a write-only field. [VERIFIED: .planning/phases/102-coupon-discount-mapping/102-CONTEXT.md]
+   - Resolution: Phase 102 will mutate executable redemption state on successful subscription create/update rather than introduce a separate ledger in this slice. The first implementation is a transactional counter-based path that keeps `times_redeemed` honest; a richer audit ledger remains a future enhancement if later phases need it. [VERIFIED: .planning/phases/102-coupon-discount-mapping/102-CONTEXT.md][VERIFIED: .planning/phases/102-coupon-discount-mapping/102-01-PLAN.md][VERIFIED: .planning/phases/102-coupon-discount-mapping/102-02-PLAN.md]
 
 ## Environment Availability
 

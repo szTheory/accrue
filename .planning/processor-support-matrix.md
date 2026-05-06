@@ -46,10 +46,10 @@ The first official dual-provider promise is **gateway subscription core**:
 | invoice.lifecycle_webhook_projection | Deterministic projection | Supported | Required target | all first-party |
 | webhook.verify | Required | Required | Required target | all first-party |
 | webhook.parse | Required | Required | Required target | all first-party |
-| checkout.hosted_handoff | Local proof helper | Supported | No | Stripe-only |
-| billing_portal.hosted_self_serve | Local proof helper | Supported | No | Stripe-only |
+| checkout.hosted_handoff | Local proof helper | Supported | Supported via first-party local checkout | all first-party |
+| billing_portal.hosted_self_serve | Local proof helper | Supported | Supported via mounted first-party portal | all first-party |
 
-The `Stripe-only` rows stay visible because they are real public APIs today, but they are not part of the first official second-provider promise. They remain **Stripe-first** until another first-party processor proves them honestly.
+The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe routes to upstream hosted pages, while Braintree routes to Accrue-owned mounted local UI.
 
 Phase 97 extends the shipped Braintree slice to include explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is supported in the shipped slice, while quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
 
@@ -67,8 +67,8 @@ Phase 97 extends the shipped Braintree slice to include explicit subscription mu
 | `Accrue.Billing.delete_payment_method/2` | all first-party | Guarded delete that blocks still-in-use and replacement-required paths. |
 | `Accrue.Billing.set_default_payment_method/3` | all first-party | Explicit customer-default mutation remains canonical. |
 | `Accrue.Billing.list_payment_methods/2` | all first-party | Local projection read path; provider fetches are reserved for write-through sync and repair. |
-| `Accrue.Billing.create_checkout_session/2` | Stripe-only | Valuable public API, but not part of the first official second-provider promise. |
-| `Accrue.Billing.create_billing_portal_session/2` | Stripe-only | Valuable public API, but not part of the first official second-provider promise. |
+| `Accrue.Billing.create_checkout_session/2` | all first-party | Stripe returns upstream hosted URLs; Braintree returns mounted first-party local checkout URLs. |
+| `Accrue.Billing.create_billing_portal_session/2` | all first-party | Stripe returns upstream hosted URLs; Braintree returns mounted first-party local portal URLs. |
 | `Accrue.Billing.subscribe_via_schedule/3` | out of slice | Advanced subscription scheduling is intentionally deferred. |
 | `Accrue.Billing.preview_upcoming_invoice/2` | out of slice | Preview/proration parity is not part of gateway subscription core. |
 
@@ -82,7 +82,6 @@ The following remain intentionally **out of slice** for first-party second-provi
 - refunds
 - coupons
 - promotion codes
-- metering
 - marketplace Connect parity for Braintree via Hyperwallet
 
 ## Provider rationale and exclusions

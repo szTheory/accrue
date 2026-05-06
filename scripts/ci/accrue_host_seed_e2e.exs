@@ -1,9 +1,11 @@
 defmodule AccrueHostSeedE2E do
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.DiscountMapping
   alias Accrue.Billing.Invoice
   alias Accrue.Billing.PaymentMethod
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.SubscriptionItem
+  alias Accrue.Checkout.LocalSession
   alias Accrue.Connect.Account
   alias Accrue.Events
   alias Accrue.Events.Event
@@ -25,6 +27,8 @@ defmodule AccrueHostSeedE2E do
   @fixture_customer_processor_ids ["cus_host_browser_replay"]
   @fixture_subscription_processor_ids ["sub_host_browser_replay"]
   @fixture_subscription_item_processor_ids ["si_host_browser_replay"]
+  @fixture_discount_codes ["SPRING25", "BROKEN"]
+  @fixture_checkout_operation_ids ["host-browser-portal-checkout"]
 
   def run!(fixture_path \\ System.fetch_env!("ACCRUE_HOST_E2E_FIXTURE")) do
     cleanup_fixture_footprint!()
@@ -67,6 +71,9 @@ defmodule AccrueHostSeedE2E do
     subscription = insert_fixture_subscription!(customer)
     insert_fixture_subscription_item!(subscription)
     webhook = insert_fixture_webhook!(customer, subscription)
+    portal_customer = insert_portal_checkout_customer!(normal_user)
+    checkout_session = insert_portal_checkout_session!(portal_customer)
+    seed_portal_discount_mappings!()
 
     first_run_webhook = build_first_run_webhook(subscription)
 
@@ -114,7 +121,9 @@ defmodule AccrueHostSeedE2E do
         deletable: admin_denial_payment_methods.deletable.id
       },
       connect_account_id: connect_account.id,
-      invoice_id: to_string(fixture_invoice.id)
+      invoice_id: to_string(fixture_invoice.id),
+      portal_checkout_token: checkout_session.session_token,
+      portal_checkout_url: "/billing/checkout/#{checkout_session.session_token}"
     }
 
     write_fixture!(fixture_path, fixture)
@@ -250,10 +259,24 @@ defmodule AccrueHostSeedE2E do
     )
 
     Repo.delete_all(
+      from(session in LocalSession,
+        where:
+          session.customer_id in ^cleanup_customer_ids or
+            session.operation_id in ^@fixture_checkout_operation_ids
+      )
+    )
+
+    Repo.delete_all(
       from(customer in Customer,
         where:
           customer.processor_id in ^@fixture_customer_processor_ids or
             customer.id in ^cleanup_customer_ids
+      )
+    )
+
+    Repo.delete_all(
+      from(mapping in DiscountMapping,
+        where: mapping.processor == "braintree" and mapping.code in ^@fixture_discount_codes
       )
     )
 
@@ -444,6 +467,63 @@ defmodule AccrueHostSeedE2E do
       email: history_user.email
     })
     |> Repo.insert!()
+  end
+
+  defp insert_portal_checkout_customer!(user) do
+    %Customer{}
+    |> Customer.changeset(%{
+      owner_type: "User",
+      owner_id: user.id,
+      processor: "braintree",
+      processor_id: "cus_bt_host_portal_fixture",
+      email: user.email
+    })
+    |> Repo.insert!()
+  end
+
+  defp insert_portal_checkout_session!(customer) do
+    {:ok, session} =
+      LocalSession.create_or_reuse(customer, %{
+        processor: "braintree",
+        mode: "subscription",
+        ui_mode: "hosted",
+        status: "open",
+        price_id: "price_fixture",
+        line_items: [%{"price" => "price_fixture", "amount" => "49.00"}],
+        success_url: "https://app.example.test/billing/success",
+        cancel_url: "https://app.example.test/billing/cancel",
+        return_url: "https://app.example.test/settings/billing",
+        operation_id: "host-browser-portal-checkout",
+        metadata: %{"source" => "fixture"},
+        data: %{"local_portal" => true}
+      })
+
+    session
+  end
+
+  defp seed_portal_discount_mappings! do
+    {:ok, _mapping} =
+      Accrue.Billing.upsert_discount_mapping("SPRING25", %{
+        discount_id: "bt_discount_25",
+        amount_off_minor: 2_500,
+        currency: "USD"
+      })
+
+    {:ok, broken_mapping} =
+      Accrue.Billing.upsert_discount_mapping("BROKEN", %{
+        discount_id: "bt_discount_broken",
+        amount_off_minor: 500,
+        currency: "USD"
+      })
+
+    Repo.query!(
+      """
+      UPDATE accrue_discount_mappings
+      SET discount_id = '', updated_at = $2
+      WHERE id = $1
+      """,
+      [Ecto.UUID.dump!(broken_mapping.id), DateTime.utc_now() |> DateTime.truncate(:second)]
+    )
   end
 
   defp insert_fixture_subscription!(customer) do
