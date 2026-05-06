@@ -17,12 +17,13 @@ result in the mounted admin UI, then run the focused proof command.
 The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live
 Stripe credentials. Stripe remains the default first-user path, and Braintree
-is official only for the `gateway subscription core` slice. (Checkout and
-billing portal remain Stripe-only). The Braintree proof lane in
-`examples/accrue_host` is fully hermetic and uses checked-in mocks/fixtures to
-exercise the generic billing facade without network access. Any future
-real-provider Braintree smoke is advisory only while Fake remains the
-merge-blocking SSOT.
+is official only for the `gateway subscription core` slice. The shared billing
+facade stays provider-honest: Stripe returns upstream hosted checkout and
+billing-portal URLs, while Braintree returns mounted local checkout and portal
+URLs owned by the host app. The Braintree proof lane in `examples/accrue_host`
+is fully hermetic and uses checked-in mocks/fixtures to exercise the generic
+billing facade without network access. Any future real-provider Braintree smoke
+is advisory only while Fake remains the merge-blocking SSOT.
 
 **Sigra:** the example host depends on Sigra (not on Hex yet). `mix deps.get`
 pulls it from [szTheory/sigra](https://github.com/szTheory/sigra) by default so
@@ -37,7 +38,7 @@ This README is the **host-facing** telling of the same ordered spine as
 
 ### Capsule H — Hex consumer
 
-Integrate Accrue into your **own** Phoenix app: follow package steps in **First Hour** (`mix accrue.install`, `config/runtime.exs`, migrations, Oban, webhook pipeline, admin mount), then use this demo only for proof vocabulary if needed.
+Integrate Accrue into your **own** Phoenix app: follow package steps in **First Hour** (`mix accrue.install`, `config/runtime.exs`, migrations, Oban, webhook pipeline, admin mount, and the mounted Braintree portal contract when needed), then use this demo only for proof vocabulary if needed.
 
 ### Capsule M — Monorepo clone
 
