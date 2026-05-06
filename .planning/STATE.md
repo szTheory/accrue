@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.35
 milestone_name: Dual-Provider Supportability Closure
 status: in_progress
-last_updated: "2026-05-06T20:01:58Z"
+last_updated: "2026-05-06T20:07:43Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-06)
 
 Milestone: v1.35 — Dual-Provider Supportability Closure
 Phase: 109 — Support Contract Truth
-Plan: 02 pending (`.planning/milestones/v1.35-phases/109-support-contract-truth/109-02-PLAN.md`)
+Plan: 03 pending (`.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-PLAN.md`)
 Status: In progress
-Resume file: `.planning/milestones/v1.35-phases/109-support-contract-truth/109-02-PLAN.md`
-Last activity: 2026-05-06 — Phase 109 Plan 01 executed; support matrix, front-door docs, and planning mirrors now share the provider-honest checkout and billing-portal contract
+Resume file: `.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-PLAN.md`
+Last activity: 2026-05-06 — Phase 109 Plan 02 executed; First Hour, the Braintree portal guide, accrue_portal README, production readiness, and telemetry now share the mounted Braintree setup contract and failure semantics
 
 ## Milestone Progress
 
@@ -59,6 +59,7 @@ Last activity: 2026-05-06 — Phase 109 Plan 01 executed; support matrix, front-
 
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
 - **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-01-SUMMARY.md`** — execution summary for the support-contract truth slice (**SUP-01**).
+- **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-02-SUMMARY.md`** — execution summary for the onboarding/operator mounted-path guidance slice (**SUP-02**).
 - **`.planning/milestones/v1.34-REQUIREMENTS.md`** — archived **v1.34** requirements for the Rendro-default invoice PDF milestone.
 - **`.planning/milestones/v1.34-ROADMAP.md`** — archived **v1.34** roadmap for Phases **106–108**.
 - **`.planning/v1.34-v1.34-MILESTONE-AUDIT.md`** — passed milestone audit for **v1.34**.
@@ -86,6 +87,7 @@ Last activity: 2026-05-06 — Phase 109 Plan 01 executed; support matrix, front-
 
 ## Recent Decisions
 
+- **2026-05-06:** **Phase 109 Plan 02 complete** — First Hour, `braintree-local-portal.md`, `accrue_portal/README.md`, production readiness, and telemetry now repeat one mounted Braintree contract: absolute `portal_base_url`, matching `portal_mount_path`, auth/session continuity, Hosted Fields / CSP readiness, provisional discount preview, and local checkout completion semantics.
 - **2026-05-06:** **Phase 109 Plan 01 complete** — the processor support matrix, root README, package README, roadmap, and project mirror now repeat one provider-honest contract: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs.
 - **2026-05-06:** **v1.34 archived** — audit passed; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the final closeout run.
 - **2026-05-06:** **v1.34 ready to close** — PDF-01..PDF-09 are complete; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the milestone closeout run.
