@@ -49,5 +49,12 @@ require_substring "Fake remains the merge-blocking SSOT" "Fake-backed merge-bloc
 require_substring "advisory" "advisory proof lane"
 require_substring "Braintree" "Braintree provider mention"
 require_substring "gateway subscription core" "gateway subscription core slice"
+require_substring "Stripe returns upstream hosted checkout and billing-portal URLs" "provider-honest Stripe hosted wording"
+require_substring "Braintree returns mounted local checkout and portal URLs" "provider-honest Braintree mounted wording"
+
+if grep -Eq 'Stripe-only|remain Stripe-only' "${matrix}"; then
+  echo "verify_adoption_proof_matrix: matrix still contains stale Stripe-only wording" >&2
+  exit 1
+fi
 
 echo "verify_adoption_proof_matrix: OK"

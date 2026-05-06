@@ -33,6 +33,9 @@ require_substring "docs/adoption-proof-matrix.md" "adoption proof matrix doc lin
 require_substring "e2e/verify01-admin-a11y.spec.js" "mounted admin axe gate spec path"
 require_substring "e2e/verify01-admin-mobile.spec.js" "mobile VERIFY-01 spec path"
 require_substring "Mounted admin — mobile shell" "VERIFY-01 mobile shell subsection heading"
+require_substring "gateway subscription core" "bounded Braintree support slice wording"
+require_substring "Stripe returns upstream hosted checkout and" "provider-honest Stripe hosted wording"
+require_substring "Braintree returns mounted local checkout and portal" "provider-honest Braintree mounted wording"
 
 while IFS= read -r spec_path; do
   [[ -z "${spec_path}" ]] && continue
@@ -41,6 +44,11 @@ while IFS= read -r spec_path; do
     exit 1
   fi
 done < <(grep -oE 'e2e/verify01-[a-zA-Z0-9_-]+\.spec\.js' "${readme}" | sort -u)
+
+if grep -Eq 'Stripe-only|remain Stripe-only' "${readme}"; then
+  echo "verify_verify01_readme_contract: README still contains stale Stripe-only wording" >&2
+  exit 1
+fi
 
 # Negative: VERIFY-01 section must not advise storing sk_live without explicit negation.
 if awk '

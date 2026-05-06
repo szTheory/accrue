@@ -53,6 +53,34 @@ then **in the same PR** (unless it is a pure typo with zero semantic change):
 
 This checklist closes **`v1.17-P2-001`**-class drift risk (**P2** → **closed** in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with **v1.21** evidence).
 
+### Support-contract mirror parity (Phase 109)
+
+When a PR edits support wording for checkout, billing portal, Stripe, or
+Braintree in any of:
+
+- **`.planning/processor-support-matrix.md`** as the support SSOT,
+- **`accrue/README.md`** or **`accrue/guides/first_hour.md`** as package-facing mirrors,
+- **`examples/accrue_host/README.md`** or **`examples/accrue_host/docs/adoption-proof-matrix.md`** as proof/reference mirrors,
+
+then update the same provider-honest wording in the **same PR** for:
+
+- **`scripts/ci/verify_processor_support_matrix.sh`** when the SSOT literals move,
+- **`scripts/ci/verify_package_docs.sh`** when package-doc or host README needles move,
+- **`scripts/ci/verify_verify01_readme_contract.sh`** when host README proof wording changes,
+- **`scripts/ci/verify_adoption_proof_matrix.sh`** when matrix wording changes.
+
+Run the full support-contract bundle from the repo root before merging:
+
+```bash
+bash scripts/ci/verify_processor_support_matrix.sh && \
+  bash scripts/ci/verify_package_docs.sh && \
+  bash scripts/ci/verify_verify01_readme_contract.sh && \
+  bash scripts/ci/verify_adoption_proof_matrix.sh
+```
+
+This rule exists so stale Stripe-only checkout or billing-portal wording
+cannot drift back into package docs, host proof docs, or shift-left gates.
+
 ## PRS gates (v1.22 production path discoverability)
 
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |

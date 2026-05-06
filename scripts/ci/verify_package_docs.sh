@@ -162,6 +162,9 @@ require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "checkout_session_facad
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Accrue.Billing.create_billing_portal_session/2"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "[:accrue, :billing, :billing_portal, :create]"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "billing_portal_session_facade_test.exs"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "gateway subscription core"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Stripe returns upstream hosted checkout and"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Braintree returns mounted local checkout and portal"
 require_fixed "$ROOT_DIR/accrue/guides/troubleshooting.md" "mix accrue.install --check"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "Braintree"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "gateway subscription core"
@@ -208,6 +211,8 @@ require_absent_regex "$ROOT_DIR/guides/testing-live-stripe.md" 'primary `test` j
 require_absent_regex "$ROOT_DIR/CONTRIBUTING.md" 'Node\.js for browser UAT in `accrue_admin`'
 require_fixed "$ROOT_DIR/examples/accrue_host/playwright.config.js" 'trace: "retain-on-failure"'
 require_fixed "$ROOT_DIR/examples/accrue_host/playwright.config.js" 'screenshot: "only-on-failure"'
+require_absent_regex "$ROOT_DIR/examples/accrue_host/README.md" 'Stripe-only|remain Stripe-only'
+require_absent_regex "$ROOT_DIR/examples/accrue_host/docs/adoption-proof-matrix.md" 'Stripe-only|remain Stripe-only'
 
 for guide in \
   "$ROOT_DIR/accrue/guides/first_hour.md" \
