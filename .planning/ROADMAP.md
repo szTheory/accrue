@@ -47,11 +47,11 @@
 **Requirements:** **SUP-01..02**, **LIF-01..02**, **OPS-01..02** — see [`REQUIREMENTS.md`](REQUIREMENTS.md)
 **Strategic parent:** [STRATEGY.md](STRATEGY.md)
 
-**Milestone goal:** Make the shipped Stripe + Braintree surface genuinely adoption-grade by aligning the public support contract, lifecycle semantics, mounted portal/checkout story, and webhook/operator recovery guidance before expanding breadth again.
+**Milestone goal:** Make the shipped Stripe + Braintree surface genuinely adoption-grade by aligning the public support contract, lifecycle semantics, mounted portal/checkout story, and webhook/operator recovery guidance around one provider-honest contract before expanding breadth again.
 
 **Success criteria:**
 
-1. The same provider-honest truth is visible in package docs, support matrix, planning mirrors, and host-facing examples.
+1. The same provider-honest truth is visible in package docs, support matrix, planning mirrors, and host-facing examples: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs.
 2. Lifecycle semantics across Stripe, Fake, and Braintree are explicit enough that integrators and operators can predict behavior without reading source.
 3. Braintree webhook, replay, and support guidance feels first-class rather than Stripe-retrofitted.
 
@@ -68,7 +68,7 @@
 
 | # | Phase | Goal | Requirements |
 |---|-------|------|--------------|
-| 109 | Support Contract Truth | Align package docs, support matrix, planning mirrors, and host-facing guidance around one provider-honest Stripe + Braintree contract for checkout and billing portal behavior. | SUP-01, SUP-02 |
+| 109 | Support Contract Truth | Align package docs, support matrix, planning mirrors, and host-facing guidance around one provider-honest Stripe + Braintree contract for checkout and billing portal behavior, with one shared facade and provider-specific URL semantics. | SUP-01, SUP-02 |
 | 110 | Lifecycle Semantics & Self-Serve Clarity | Publish one lifecycle SSOT and tighten any touched portal/admin/customer-facing copy or UI so subscription actions and states are explicit and least-surprising across providers. | LIF-01, LIF-02 |
 | 111 | Webhook & Operator Closure | Make webhook docs, runbooks, telemetry references, and deterministic proof lanes first-class for the shipped Braintree slice, with replay/recovery guidance that matches runtime truth. | OPS-01, OPS-02 |
 
