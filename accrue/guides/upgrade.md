@@ -38,6 +38,11 @@ The **numeric SemVer** on [Hex.pm for `accrue`](https://hex.pm/packages/accrue) 
 
 Upgrade planning should start from the **published** version you have installed, not from internal modules or undocumented git SHAs.
 
+If you are upgrading from a legacy Chrome-backed invoice setup, review
+[PDF Rendering](pdf.md#migration) before changing config. The canonical
+migration contract lives there, including when to set
+`:invoice_pdf_adapter` explicitly and how it now differs from `:pdf_adapter`.
+
 When upgrading, review the package-local docs for the package you consume:
 
 - `accrue/CHANGELOG.md`

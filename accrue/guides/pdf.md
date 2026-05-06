@@ -1,226 +1,139 @@
 # PDF Rendering
 
 Accrue renders invoice PDFs from the same `Accrue.Invoices.Components`
-that power the transactional emails, via the `Accrue.PDF` behaviour.
-The default adapter drives ChromicPDF (headless Chrome) in-process on
-the host app. Two alternate adapters ship for test and Chrome-hostile
-environments, and the behaviour is open so hosts can add their own
-(for example, a Gotenberg sidecar).
+that power the transactional emails, but the default invoice renderer is now
+native Rendro rather than Chrome. The invoice entry point is
+`Accrue.Invoices.render_invoice_pdf/2`, which resolves `:invoice_pdf_adapter`
+and renders a PDF without requiring a browser process by default.
 
-If you only read one section: jump to **ChromicPDF setup** for the
-production wiring, or **`Accrue.PDF.Null` graceful degradation** if
-your deployment target cannot run Chromium.
+The older `Accrue.PDF` behaviour still exists for HTML-to-PDF adapters such as
+ChromicPDF or a custom Gotenberg sidecar, but it is no longer the primary
+invoice path.
+
+If you only read one section: Rendro is the default. Jump to
+**ChromicPDF explicit compatibility path** only if you explicitly want the
+old HTML-based path.
 
 ## Adapters
 
-Three adapters ship with v1.0:
+Invoice rendering ships with three first-party adapters:
 
 | Adapter | When to use | Returns |
 | --- | --- | --- |
-| `Accrue.PDF.ChromicPDF` | Production default. Renders HTML → PDF via a host-supervised `ChromicPDF` pool. | `{:ok, pdf_binary}` |
-| `Accrue.PDF.Test` | Test env. Sends `{:pdf_rendered, html, opts}` to `self()` and returns a `"%PDF-TEST"` stub. Chrome-free. | `{:ok, "%PDF-TEST"}` |
-| `Accrue.PDF.Null` | Chrome-hostile deploys (minimal Alpine, locked-down containers). Returns a typed error without rendering. | `{:error, %Accrue.Error.PdfDisabled{}}` |
+| `Accrue.InvoiceRenderer.Rendro` | Production default. Native Elixir invoice PDF rendering with no Chrome dependency. | `{:ok, pdf_binary}` |
+| `Accrue.InvoiceRenderer.ChromicPDF` | Optional fallback. Preserves the older HTML → Chrome path via a host-supervised `ChromicPDF` pool. | `{:ok, pdf_binary}` |
+| `Accrue.InvoiceRenderer.Null` | PDF-disabled / Chrome-hostile deploys. Returns a typed error without rendering. | `{:error, %Accrue.Error.PdfDisabled{}}` |
 
-The adapter is resolved via `:storage_adapter`'s sibling config key:
+The invoice renderer is resolved via `:invoice_pdf_adapter`:
 
 ```elixir
 # config/config.exs
-config :accrue, :pdf_adapter, Accrue.PDF.ChromicPDF
+config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Rendro
 
 # config/test.exs
-config :accrue, :pdf_adapter, Accrue.PDF.Test
+config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test
 ```
 
-All three adapters implement `@behaviour Accrue.PDF`, so hosts that
-need a custom backend can follow the same shape — see **Custom
-adapter: Gotenberg sidecar** below.
+If you still need the lower-level HTML seam, `:pdf_adapter` continues to
+configure `Accrue.PDF` for ChromicPDF/custom HTML renderers.
 
-## ChromicPDF setup
+## Rendro default
 
-Accrue does **not** start ChromicPDF itself. The host app owns
-the supervision tree and supervises the pool. Pick the right shape for
-the environment:
+The default path needs no extra supervisor child and no Chrome/Chromium
+binary on the host image. That keeps the default install/setup smaller and
+easier to maintain.
+
+The main tradeoff is honesty about assets and fonts:
+
+- remote `logo_url` fetching is not part of the Rendro default path
+- unsupported glyphs fail explicitly instead of silently degrading
+- lazy render semantics are unchanged; Accrue still re-renders from current
+  invoice data unless you explicitly store the bytes yourself
+
+## ChromicPDF explicit compatibility path
+
+If you want the previous HTML-based invoice rendering path, switch:
+
+```elixir
+config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF
+```
+
+Accrue still does **not** start ChromicPDF itself. The host app owns the
+supervision tree and supervises the pool.
+
+This is an explicit compatibility path. Invoice rendering only switches when
+you set `:invoice_pdf_adapter`; Accrue does not infer invoice behavior from
+the lower-level `:pdf_adapter` HTML seam.
 
 ```elixir
 # lib/my_app/application.ex
-def start(_type, _args) do
-  children = [
-    MyApp.Repo,
-    {Phoenix.PubSub, name: MyApp.PubSub},
-    chromic_pdf_child(),
-    MyAppWeb.Endpoint
-  ]
-
-  Supervisor.start_link(children, strategy: :one_for_one, name: MyApp.Supervisor)
-end
-
-# Dev + test: lazy, one-shot browser session per render.
-defp chromic_pdf_child do
-  if Application.get_env(:my_app, :env) in [:dev, :test] do
-    {ChromicPDF, on_demand: true}
-  else
-    {ChromicPDF, session_pool: [size: 3]}
-  end
-end
+children = [
+  MyApp.Repo,
+  {ChromicPDF, on_demand: true},
+  MyAppWeb.Endpoint
+]
 ```
 
-### Performance posture — keep Oban concurrency ≤ pool size
+Keep `accrue_mailers` queue concurrency less than or equal to the
+ChromicPDF pool size if you attach invoice PDFs from mailer jobs.
 
-ChromicPDF's `session_pool[:size]` caps the number of concurrent
-Chromium sessions. If Accrue's `accrue_mailers` Oban queue concurrency
-exceeds that cap, workers will block on `:poolboy` checkouts and
-silently balloon job runtimes.
+If this explicit compatibility path is configured without a running
+`ChromicPDF` process, `Accrue.Invoices.render_invoice_pdf/2` returns
+`{:error, %Accrue.Error.InvoiceRendererUnavailable{adapter: Accrue.InvoiceRenderer.ChromicPDF, reason: :chromic_pdf_not_started}}`.
 
-**Rule:** the `accrue_mailers` queue concurrency MUST be less
-than or equal to the ChromicPDF `session_pool[:size]`. Start at
-`session_pool[:size]: 3` and `accrue_mailers: 3`; scale both together.
+## Migration
+
+The seam split is explicit:
+
+- `:invoice_pdf_adapter` owns invoice rendering.
+- `:pdf_adapter` remains the lower-level `Accrue.PDF` HTML seam.
+
+Invoice rendering does not infer behavior from `:pdf_adapter`. If you are
+upgrading, use the host state that matches your app:
+
+### 1. No custom PDF config
+
+If you never customized Accrue's PDF settings, **no action needed**.
+Rendro is now the default invoice renderer, so invoice PDFs render without
+Chrome on the normal path.
+
+### 2. You only set `:pdf_adapter`
+
+If your host only set `config :accrue, :pdf_adapter, ...`, invoice PDFs no
+longer follow that key. Set `:invoice_pdf_adapter` explicitly if you want the
+legacy Chrome-backed invoice path:
 
 ```elixir
-# config/runtime.exs
-config :my_app, Oban,
-  queues: [
-    accrue_webhooks: 10,
-    accrue_mailers: 3  # matches ChromicPDF session_pool[:size]
-  ]
+config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.ChromicPDF
 ```
 
-### Docker / container notes
+Keep `:pdf_adapter` only if you also still use the lower-level HTML seam.
 
-ChromicPDF requires Chrome or Chromium on the host image (Chrome ≥ 91
-for full-page screenshot features; core rendering works on older).
-For PDF/A archival output, Ghostscript is additionally required.
-On Alpine, install `chromium` and `ghostscript` in the image; on
-Debian-slim, `chromium` + `fonts-liberation` gets you sane defaults.
+### 3. You use a custom HTML seam
 
-If your target image cannot ship Chromium (smallest Alpine,
-distroless, some serverless platforms), use `Accrue.PDF.Null` and
-fall back to the Stripe-hosted invoice URL path described below.
+If your host uses a custom `Accrue.PDF` adapter, keep `:pdf_adapter` for that
+HTML seam. Invoice rendering remains on the default Rendro path unless you
+also set `:invoice_pdf_adapter` explicitly.
 
-## `Accrue.PDF.Null` graceful degradation {#null-adapter}
+That means a host can keep a custom HTML renderer for non-invoice callers
+without changing invoice behavior, and a host can choose
+`Accrue.InvoiceRenderer.ChromicPDF` only when it intentionally wants the old
+invoice path back.
 
-`Accrue.PDF.Null` is the escape hatch for Chrome-hostile deploys.
-It implements `@behaviour Accrue.PDF` but never renders:
+## Null graceful degradation {#null-adapter}
+
+`Accrue.InvoiceRenderer.Null` is the escape hatch for PDF-disabled deploys.
+It returns a typed error without rendering:
 
 ```elixir
-iex> Accrue.PDF.render("<html/>", [])
+iex> Accrue.Invoices.render_invoice_pdf(invoice)
 {:error, %Accrue.Error.PdfDisabled{reason: :adapter_disabled, docs_url: "..."}}
 ```
 
-### How the invoice email worker handles it
+The mailer path treats `%Accrue.Error.PdfDisabled{}` as terminal and falls
+through to the hosted invoice URL instead of retrying forever.
 
-The invoice email worker (`Accrue.Workers.Mailer` with
-`Accrue.Emails.InvoicePaid`) pattern-matches on the tagged error and
-falls through to appending the Stripe `hosted_invoice_url` as a link
-in the email body instead of attaching a rendered binary:
-
-```elixir
-case Accrue.PDF.Invoice.render(invoice_id) do
-  {:ok, pdf_binary} ->
-    email
-    |> Swoosh.Email.attachment(
-      Swoosh.Attachment.new(
-        {:data, pdf_binary},
-        filename: "invoice-#{invoice.number}.pdf",
-        content_type: "application/pdf"
-      )
-    )
-
-  {:error, %Accrue.Error.PdfDisabled{}} ->
-    # Expected, terminal — NOT a transient retry. Log at :debug,
-    # attach the hosted link instead.
-    Swoosh.Email.assign(email, :invoice_link, invoice.hosted_invoice_url)
-end
-```
-
-The adapter logs the skip at `:debug` only. Oban workers must NOT
-treat `%Accrue.Error.PdfDisabled{}` as a transient failure — it is
-stable configuration, not an outage.
-
-## Custom adapter: Gotenberg sidecar
-
-When ChromicPDF is not viable (no Chromium in the image, locked-down
-container, hard size budget), the idiomatic alternative is to run
-[Gotenberg](https://gotenberg.dev) as a sidecar service and POST HTML
-to its REST API from a custom adapter. The following example is
-illustrative — **Gotenberg is not a first-party adapter in v1.0**.
-Copy-paste, adjust to your HTTP client and endpoint shape, and point
-`:pdf_adapter` at your module.
-
-```elixir
-defmodule MyApp.PDF.Gotenberg do
-  @moduledoc """
-  Illustrative, not first-party. `@behaviour Accrue.PDF` adapter that
-  POSTs HTML to a Gotenberg sidecar and returns the rendered PDF
-  binary. Useful when the host image cannot ship Chromium.
-  """
-
-  @behaviour Accrue.PDF
-
-  @finch MyApp.Finch
-  @endpoint "http://gotenberg:3000/forms/chromium/convert/html"
-
-  @impl true
-  def render(html, opts) when is_binary(html) and is_list(opts) do
-    boundary = "gotenberg-#{System.unique_integer([:positive])}"
-
-    body =
-      [
-        {"files", html, {"form-data", [{"name", "index.html"}, {"filename", "index.html"}]},
-         [{"content-type", "text/html"}]}
-      ]
-      |> multipart(boundary)
-
-    headers = [{"content-type", "multipart/form-data; boundary=#{boundary}"}]
-
-    case Finch.build(:post, @endpoint, headers, body) |> Finch.request(@finch) do
-      {:ok, %{status: 200, body: pdf}} -> {:ok, pdf}
-      {:ok, %{status: status, body: err}} -> {:error, {:gotenberg, status, err}}
-      {:error, reason} -> {:error, {:gotenberg_transport, reason}}
-    end
-  end
-
-  defp multipart(_parts, _boundary), do: "..." # host-specific encoding
-end
-```
-
-Wire it in:
-
-```elixir
-# config/runtime.exs
-config :accrue, :pdf_adapter, MyApp.PDF.Gotenberg
-```
-
-When to choose Gotenberg over ChromicPDF:
-
-- Host image cannot bundle Chromium (smallest Alpine, distroless).
-- Locked-down containers that forbid `execve` of subprocess browsers.
-- A central PDF service already exists in the fleet.
-- You want horizontal PDF rendering separated from BEAM capacity.
-
-When to stay on ChromicPDF:
-
-- Standard Phoenix deployments with control over the base image.
-- Single-node or small-fleet SaaS where the sidecar cost is pure
-  overhead.
-- Latency-sensitive renders (ChromicPDF persistent pool ≈ 50ms;
-  Gotenberg adds a network hop).
-
-## Future / experimental adapters
-
-A pure-Elixir PDF backend (Prawn-equivalent shape) is on the radar as
-a possible future `@behaviour Accrue.PDF` adapter — useful for hosts
-that want to drop both the Chromium dependency and the Gotenberg
-sidecar. Benefits if it lands: no Chrome on host, no external service,
-smaller container images, fewer moving parts. Performance vs Chromium
-is unknown until benchmarked.
-
-This is a "someday/maybe" — **not a v1.0 commitment**. ChromicPDF
-remains the documented default; Gotenberg remains the documented
-illustrative alternative. If you maintain a custom adapter against
-the `Accrue.PDF` behaviour, point `:pdf_adapter` at your module the
-same way the Gotenberg example above does.
-
-## `@page` CSS warning (Pitfall 6)
+## `@page` CSS warning (Chromic fallback only)
 
 ChromicPDF does **not** interpret `@page` CSS rules. Setting page
 size, margins, or paper dimensions via a stylesheet has no effect —
