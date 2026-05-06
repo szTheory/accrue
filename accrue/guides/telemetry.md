@@ -160,6 +160,9 @@ examples below — for the enforced billing span inventory, see
 - <a id="billing-billing-portal-create"></a> `accrue.billing.billing_portal.create` —
   `[:accrue, :billing, :billing_portal, :create]`
   from `Accrue.Billing.create_billing_portal_session/2` (Phase 78 / **BIL-04**).
+  Interpret this provider-honestly: Stripe emits the span before returning an
+  upstream hosted portal URL, while Braintree emits the same span before
+  returning a mounted local billing portal URL from `accrue_portal`.
 - <a id="billing-checkout-session-create"></a> `accrue.billing.checkout_session.create` —
   `[:accrue, :billing, :checkout_session, :create]` from
   `Accrue.Billing.create_checkout_session/2` (**BIL-06** / Phase **80** emission;
@@ -170,6 +173,12 @@ examples below — for the enforced billing span inventory, see
   `merge_checkout_session_create_metadata/4`). Prefer these on **spans**;
   **do not** promote them unmodified to **`Telemetry.Metrics` tags** (see
   **Cardinality discipline** below).
+  For operators, the important distinction is not the shared event name but the
+  returned surface: Stripe checkout resolves to an upstream hosted URL, while
+  Braintree checkout resolves to a mounted local URL whose completion is
+  persisted locally after the portal flow succeeds. Local discount preview is
+  intentionally provisional; watch the final submit path, not preview-only UI,
+  when triaging checkout completion.
 - `accrue.billing.payment_method.attach` — `[:accrue, :billing, :payment_method, :attach]`
   from `Accrue.Billing.attach_payment_method/3`.
 - `accrue.billing.payment_method.detach` — `[:accrue, :billing, :payment_method, :detach]`
