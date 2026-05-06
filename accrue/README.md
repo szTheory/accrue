@@ -45,6 +45,11 @@ mix accrue.install
 
 After install, pick up the walkthrough from **Start here** (First Hour) above—no need to duplicate those steps here.
 
+Invoice PDFs are Rendro-first by default, so the normal path no longer
+requires Chrome or ChromicPDF on the host. If you need the explicit
+Chromic compatibility path or the `:invoice_pdf_adapter` / `:pdf_adapter`
+split, see [PDF Rendering](guides/pdf.md).
+
 Optional checks from the host app:
 
 - `mix verify` — short “tutorial proof” suite

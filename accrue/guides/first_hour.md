@@ -98,6 +98,11 @@ mix ecto.create
 mix ecto.migrate
 ```
 
+Invoice rendering now defaults to Rendro, so the normal invoice path does
+not require Chrome. Only hosts that explicitly choose the legacy
+Chromic compatibility path need ChromicPDF setup; the deeper renderer and
+migration details live in [PDF Rendering](pdf.md).
+
 Start Oban with the app so webhook dispatch and replay work end to end:
 
 ```elixir

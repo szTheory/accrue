@@ -13,7 +13,7 @@ Work through the sections in order the first time you promote to production; lat
 ### 2. Runtime secrets and config
 
 - [ ] **`:stripe_secret_key`** and **`:webhook_signing_secret`** are read from **`config/runtime.exs`** (or equivalent), not compile-time config. See [Configuration](configuration.md#required-runtime-keys).
-- [ ] Optional adapters (**`:auth_adapter`**, **`:pdf_adapter`**, **`:mailer`**) match how you run in prod vs dev/test.
+- [ ] Optional adapters (**`:auth_adapter`**, **`:invoice_pdf_adapter`**, **`:pdf_adapter`**, **`:mailer`**) match how you run in prod vs dev/test. `:invoice_pdf_adapter` owns invoice rendering; `:pdf_adapter` remains the lower-level HTML seam. See [Configuration](configuration.md).
 
 ### 3. Webhooks (highest ROI failure surface)
 
@@ -31,6 +31,8 @@ Work through the sections in order the first time you promote to production; lat
 ### 6. Observability and operations
 
 - [ ] **`:telemetry`** handlers (and optional OpenTelemetry) are wired in the **host** app for the ops events you need on-call. See [Telemetry](telemetry.md) and [Operator runbooks](operator-runbooks.md).
+- [ ] If you explicitly chose `Accrue.InvoiceRenderer.ChromicPDF`, the host supervision tree starts `ChromicPDF` and the `accrue_mailers` queue concurrency does not exceed the ChromicPDF pool size. See [PDF Rendering](pdf.md#chromicpdf-explicit-compatibility-path).
+- [ ] Invoice assets and fonts are validated on the renderer you actually run in production, including invoice attachments sent through email. See [Branding](branding.md) and [PDF Rendering](pdf.md).
 
 ### 7. Testing stance in CI vs live
 

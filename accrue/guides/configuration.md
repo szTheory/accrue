@@ -19,8 +19,20 @@ The runtime-only keys you must supply for the Stripe processor are `:stripe_secr
 Accrue keeps host integration points explicit. The most common optional adapters are:
 
 - `:auth_adapter` for host-owned authentication and admin authorization.
-- `:pdf_adapter` for invoice rendering, including custom PDF backends.
+- `:invoice_pdf_adapter` for invoice rendering through `Accrue.InvoiceRenderer`.
+- `:pdf_adapter` for the lower-level HTML-to-PDF seam used by ChromicPDF and custom HTML renderers.
 - `:mailer` for delivery behavior in development, test, or production.
+
+For invoice rendering specifically, `:invoice_pdf_adapter` is the only switch.
+Keep `:pdf_adapter` for advanced HTML-seam configuration only.
+
+```elixir
+config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Rendro
+```
+
+That is the default invoice renderer. Keep `:pdf_adapter` only when you need
+to control the lower-level `Accrue.PDF` seam; see [PDF Rendering](pdf.md) for
+the explicit Chromic compatibility path and migration posture.
 
 These adapters can stay on Accrue defaults while you bootstrap, then move to host-owned modules as your app takes control of billing flows.
 
