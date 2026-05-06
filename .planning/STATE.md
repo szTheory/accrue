@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.35
 milestone_name: Dual-Provider Supportability Closure
-status: defining_requirements
-last_updated: "2026-05-06T20:15:00.000Z"
+status: in_progress
+last_updated: "2026-05-06T20:01:58Z"
 last_activity: 2026-05-06
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -21,16 +21,16 @@ See: `.planning/PROJECT.md` (updated 2026-05-06)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.35 requirement and roadmap definition for dual-provider supportability closure
+**Current focus:** v1.35 support-contract execution and follow-on supportability closure planning
 
 ## Current Position
 
 Milestone: v1.35 — Dual-Provider Supportability Closure
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Resume file: None
-Last activity: 2026-05-06 — v1.35 opened to consolidate docs, lifecycle semantics, portal clarity, and Braintree webhook/operator truth
+Phase: 109 — Support Contract Truth
+Plan: 02 pending (`.planning/milestones/v1.35-phases/109-support-contract-truth/109-02-PLAN.md`)
+Status: In progress
+Resume file: `.planning/milestones/v1.35-phases/109-support-contract-truth/109-02-PLAN.md`
+Last activity: 2026-05-06 — Phase 109 Plan 01 executed; support matrix, front-door docs, and planning mirrors now share the provider-honest checkout and billing-portal contract
 
 ## Milestone Progress
 
@@ -58,6 +58,7 @@ Last activity: 2026-05-06 — v1.35 opened to consolidate docs, lifecycle semant
 ## Current Planning Artifacts
 
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
+- **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-01-SUMMARY.md`** — execution summary for the support-contract truth slice (**SUP-01**).
 - **`.planning/milestones/v1.34-REQUIREMENTS.md`** — archived **v1.34** requirements for the Rendro-default invoice PDF milestone.
 - **`.planning/milestones/v1.34-ROADMAP.md`** — archived **v1.34** roadmap for Phases **106–108**.
 - **`.planning/v1.34-v1.34-MILESTONE-AUDIT.md`** — passed milestone audit for **v1.34**.
@@ -85,6 +86,7 @@ Last activity: 2026-05-06 — v1.35 opened to consolidate docs, lifecycle semant
 
 ## Recent Decisions
 
+- **2026-05-06:** **Phase 109 Plan 01 complete** — the processor support matrix, root README, package README, roadmap, and project mirror now repeat one provider-honest contract: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs.
 - **2026-05-06:** **v1.34 archived** — audit passed; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the final closeout run.
 - **2026-05-06:** **v1.34 ready to close** — PDF-01..PDF-09 are complete; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the milestone closeout run.
 - **2026-05-06:** **v1.34 opened** — Rendro becomes the planned default invoice PDF renderer, the invoice path gets its own renderer seam, ChromicPDF is retained only as an explicit fallback, and the milestone must finish on a published Rendro Hex version rather than a local path dep.

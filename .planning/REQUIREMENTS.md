@@ -9,7 +9,7 @@
 
 ### Support Contract
 
-- [ ] **SUP-01**: Public package docs, support matrix, and planning mirrors MUST state one provider-honest contract for checkout, billing portal, and the official Stripe + Braintree facade surface.
+- [x] **SUP-01**: Public package docs, support matrix, and planning mirrors MUST state one provider-honest contract for checkout, billing portal, and the official Stripe + Braintree facade surface.
 - [ ] **SUP-02**: First-hour and host-facing guidance MUST document the mounted Braintree portal/checkout setup contract, including `portal_base_url`, `portal_mount_path`, auth/CSP expectations, and the sharp failure modes adopters need to diagnose.
 
 ### Lifecycle Semantics
@@ -36,7 +36,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SUP-01 | Phase 109 | Pending |
+| SUP-01 | Phase 109 | Complete |
 | SUP-02 | Phase 109 | Pending |
 | LIF-01 | Phase 110 | Pending |
 | LIF-02 | Phase 110 | Pending |
@@ -50,4 +50,4 @@
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-06 after v1.35 milestone opening*
+*Last updated: 2026-05-06 after Phase 109 Plan 01 execution*
