@@ -31,6 +31,7 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
 
   def set_default(conn, %{"id" => id}) do
     customer = conn.assigns.current_customer
+
     case BillingReadModel.payment_method(customer, id) do
       {:ok, payment_method} ->
         case Billing.set_default_payment_method(customer, payment_method) do
@@ -52,6 +53,7 @@ defmodule AccruePortal.Controllers.PaymentMethodController do
 
   def delete(conn, %{"id" => id}) do
     customer = conn.assigns.current_customer
+
     case BillingReadModel.payment_method(customer, id) do
       {:ok, payment_method} ->
         case Billing.delete_payment_method(payment_method) do

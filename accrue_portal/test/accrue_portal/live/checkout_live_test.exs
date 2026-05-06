@@ -161,7 +161,9 @@ defmodule AccruePortal.CheckoutLiveTest do
 
     conn = sign_in_customer(conn, user)
 
-    assert {:ok, expired_view, expired_html} = live(conn, "/billing/checkout/#{expired.session_token}")
+    assert {:ok, expired_view, expired_html} =
+             live(conn, "/billing/checkout/#{expired.session_token}")
+
     assert expired_html =~ "This checkout link has expired"
     assert expired_html =~ "Leave checkout"
 
@@ -172,7 +174,8 @@ defmodule AccruePortal.CheckoutLiveTest do
     assert expired_html_after =~ "Return to Accrue and start a new subscription."
     assert LocalSession.by_id(expired.id).status == "open"
 
-    assert {:error, {:redirect, %{to: "/billing"}}} = live(conn, "/billing/checkout/missing-token")
+    assert {:error, {:redirect, %{to: "/billing"}}} =
+             live(conn, "/billing/checkout/missing-token")
   end
 
   test "inline tokenize errors stay on the checkout LiveView", %{

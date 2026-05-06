@@ -103,12 +103,14 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     {:ok, user: user, customer: customer}
   end
 
-  test "valid promo preview updates the CTA, total, and aria-live status with provisional copy", %{
-    conn: conn,
-    user: user,
-    customer: customer
-  } do
-    session = checkout_fixture(customer, line_items: [%{"price" => "price_pro", "amount" => "49.00"}])
+  test "valid promo preview updates the CTA, total, and aria-live status with provisional copy",
+       %{
+         conn: conn,
+         user: user,
+         customer: customer
+       } do
+    session =
+      checkout_fixture(customer, line_items: [%{"price" => "price_pro", "amount" => "49.00"}])
 
     assert {:ok, _mapping} =
              Billing.upsert_discount_mapping("SPRING25", %{
@@ -166,11 +168,12 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
     assert html =~ "Pay $49.00"
   end
 
-  test "submit-time drift revalidation shows safe customer copy and blocks subscription creation", %{
-    conn: conn,
-    user: user,
-    customer: customer
-  } do
+  test "submit-time drift revalidation shows safe customer copy and blocks subscription creation",
+       %{
+         conn: conn,
+         user: user,
+         customer: customer
+       } do
     session = checkout_fixture(customer)
 
     assert {:ok, mapping} =

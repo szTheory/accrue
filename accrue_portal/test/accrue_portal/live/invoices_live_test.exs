@@ -23,7 +23,8 @@ defmodule AccruePortal.InvoicesLiveTest do
         hosted_url: "https://billing.example.test/invoices/current"
       })
 
-    %{customer: foreign_customer, subscription: foreign_subscription} = subscription_bundle_fixture!()
+    %{customer: foreign_customer, subscription: foreign_subscription} =
+      subscription_bundle_fixture!()
 
     foreign_invoice =
       invoice_fixture!(foreign_customer, foreign_subscription, %{

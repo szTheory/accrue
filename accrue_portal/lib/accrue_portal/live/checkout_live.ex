@@ -90,7 +90,8 @@ defmodule AccruePortal.Live.CheckoutLive do
              |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
              |> assign_base_checkout_amount()}
 
-          {:error, reason} when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
+          {:error, reason}
+          when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
             {:noreply,
              socket
              |> assign(:checkout_error, nil)
