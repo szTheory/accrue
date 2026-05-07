@@ -58,6 +58,9 @@ defmodule AccruePortal.Live.SubscriptionsLive do
               <p>{Copy.subscriptions_status_label()}: {Copy.subscription_lifecycle_label(subscription)}</p>
               <p>{Copy.subscriptions_summary_label()}: {Copy.subscription_lifecycle_summary(subscription)}</p>
               <p>{Copy.subscription_access_timing(subscription)}</p>
+              <p>
+                {plan_change_summary(subscription)}
+              </p>
             </div>
             <div>
               <a href={Path.subscriptions(@base_path) <> "/" <> subscription.id}>
@@ -81,4 +84,10 @@ defmodule AccruePortal.Live.SubscriptionsLive do
 
   defp cancel_subscription(%Subscription{} = subscription),
     do: Billing.cancel_at_period_end(subscription)
+
+  defp plan_change_summary(%Subscription{processor: "braintree"} = subscription),
+    do: Copy.subscriptions_plan_change_host_managed(subscription)
+
+  defp plan_change_summary(%Subscription{}),
+    do: Copy.subscriptions_plan_change_ready()
 end

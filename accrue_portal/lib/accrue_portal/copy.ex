@@ -65,6 +65,17 @@ defmodule AccruePortal.Copy do
   def subscriptions_view_cta, do: "View details"
   def subscriptions_manage_cta, do: "Manage subscriptions"
 
+  def subscriptions_plan_change_ready,
+    do: "Preview supported plan changes from details before you confirm."
+
+  def subscriptions_plan_change_host_managed(%Subscription{processor: "braintree"}) do
+    "Plan changes stay host-managed for this Braintree subscription."
+  end
+
+  def subscriptions_plan_change_host_managed(_subscription) do
+    "Open details to review supported plan-change options."
+  end
+
   def subscriptions_cancel_success(%Subscription{processor: "braintree"}),
     do: "Subscription canceled now. Review access changes in your host app."
 
@@ -83,6 +94,59 @@ defmodule AccruePortal.Copy do
   def subscription_summary_label, do: "Lifecycle summary"
   def subscription_period_end_label, do: "Current period ends"
   def subscription_identifier_label, do: "Reference"
+  def subscription_plan_change_heading, do: "Need to change plans?"
+
+  def subscription_plan_change_body(_subscription) do
+    "Preview the next invoice before you confirm a supported plan change. Quantity, item management, and other billing policy still stay outside this portal."
+  end
+
+  def subscription_plan_change_current_label, do: "Current plan"
+  def subscription_plan_change_target_label, do: "New plan reference"
+
+  def subscription_plan_change_target_hint,
+    do: "Use the host app's plan reference, such as price_pro."
+
+  def subscription_plan_change_preview_cta, do: "Preview plan change"
+  def subscription_plan_change_commit_cta, do: "Confirm plan change"
+  def subscription_plan_change_reset_cta, do: "Choose a different plan"
+  def subscription_plan_change_preview_heading, do: "Preview upcoming invoice"
+  def subscription_plan_change_preview_total_label, do: "Preview total"
+
+  def subscription_plan_change_preview_body do
+    "This preview is a snapshot before commit. Final billing still follows the provider's current invoice state."
+  end
+
+  def subscription_plan_change_preview_unavailable_heading,
+    do: "Plan changes stay host-managed here"
+
+  def subscription_plan_change_preview_unavailable_body(%Subscription{processor: "braintree"}) do
+    "Braintree plan changes can stay bounded to host-managed next steps. This mounted portal does not preview upcoming invoices for Braintree or offer direct self-serve swaps here."
+  end
+
+  def subscription_plan_change_preview_unavailable_body(_subscription) do
+    "This subscription does not expose a self-serve plan-change preview from the mounted portal."
+  end
+
+  def subscription_plan_change_preview_error do
+    "We couldn't preview that plan change. Check the plan reference in your host app and try again."
+  end
+
+  def subscription_plan_change_commit_success do
+    "Plan updated. Review the refreshed billing summary below."
+  end
+
+  def subscription_plan_change_commit_error do
+    "We couldn't confirm that plan change."
+  end
+
+  def subscription_plan_change_requires_preview do
+    "Preview the plan change before confirming it."
+  end
+
+  def subscription_plan_change_missing_reference do
+    "Enter the host app's plan reference to preview the change."
+  end
+
   def subscription_cancel_heading(%Subscription{processor: "braintree"}),
     do: "Need to stop now?"
 
@@ -93,7 +157,8 @@ defmodule AccruePortal.Copy do
   end
 
   def subscription_cancel_body(_subscription),
-    do: "End at period end to turn off renewal now and keep access through the current billing period."
+    do:
+      "End at period end to turn off renewal now and keep access through the current billing period."
 
   def subscription_cancel_cta(%Subscription{processor: "braintree"}), do: "Cancel now"
   def subscription_cancel_cta(_subscription), do: "Cancel renewal"

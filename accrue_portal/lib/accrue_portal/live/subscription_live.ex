@@ -2,7 +2,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
   use Phoenix.LiveView
 
   alias Accrue.Billing
-  alias Accrue.Billing.Subscription
+  alias Accrue.Billing.{Subscription, UpcomingInvoice}
   alias AccruePortal.Authorize
   alias AccruePortal.Copy
   alias AccruePortal.Path
@@ -17,7 +17,9 @@ defmodule AccruePortal.Live.SubscriptionLive do
          |> assign(:portal, portal)
          |> assign(:base_path, portal["mount_path"])
          |> assign(:subscription, subscription)
-         |> assign(:show_cancel_confirmation, false)}
+         |> assign(:show_cancel_confirmation, false)
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)}
 
       {:error, :not_found} ->
         {:ok,
@@ -26,13 +28,84 @@ defmodule AccruePortal.Live.SubscriptionLive do
          |> assign(:portal, portal)
          |> assign(:base_path, portal["mount_path"])
          |> assign(:subscription, nil)
-         |> assign(:show_cancel_confirmation, false)}
+         |> assign(:show_cancel_confirmation, false)
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)}
     end
   end
 
   @impl true
   def handle_event("toggle_cancel_confirmation", _params, socket) do
     {:noreply, update(socket, :show_cancel_confirmation, &(!&1))}
+  end
+
+  def handle_event(
+        "preview_plan_change",
+        %{"plan_change" => %{"price_id" => price_id}},
+        %{assigns: %{subscription: %Subscription{} = subscription}} = socket
+      ) do
+    case preview_plan_change(subscription, price_id) do
+      {:ok, %UpcomingInvoice{} = preview, normalized_price_id} ->
+        {:noreply,
+         socket
+         |> assign(:plan_change_price_id, normalized_price_id)
+         |> assign(:plan_change_preview, preview)}
+
+      {:error, :preview_unsupported} ->
+        {:noreply,
+         socket
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)
+         |> put_flash(
+           :error,
+           Copy.subscription_plan_change_preview_unavailable_body(subscription)
+         )}
+
+      {:error, :missing_reference} ->
+        {:noreply, put_flash(socket, :error, Copy.subscription_plan_change_missing_reference())}
+
+      {:error, _reason} ->
+        {:noreply,
+         socket
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)
+         |> put_flash(:error, Copy.subscription_plan_change_preview_error())}
+    end
+  end
+
+  def handle_event(
+        "confirm_plan_change",
+        _params,
+        %{
+          assigns: %{subscription: %Subscription{} = subscription, plan_change_price_id: price_id}
+        } = socket
+      )
+      when is_binary(price_id) do
+    case swap_plan(subscription, price_id) do
+      {:ok, _updated_subscription} ->
+        {:ok, refreshed} = Authorize.subscription(socket, subscription.id)
+
+        {:noreply,
+         socket
+         |> assign(:subscription, refreshed)
+         |> assign(:plan_change_price_id, nil)
+         |> assign(:plan_change_preview, nil)
+         |> put_flash(:info, Copy.subscription_plan_change_commit_success())}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, Copy.subscription_plan_change_commit_error())}
+    end
+  end
+
+  def handle_event("confirm_plan_change", _params, socket) do
+    {:noreply, put_flash(socket, :error, Copy.subscription_plan_change_requires_preview())}
+  end
+
+  def handle_event("reset_plan_change", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:plan_change_price_id, nil)
+     |> assign(:plan_change_preview, nil)}
   end
 
   def handle_event(
@@ -51,7 +124,8 @@ defmodule AccruePortal.Live.SubscriptionLive do
              |> put_flash(:info, Copy.subscription_cancel_success(scoped_subscription))}
 
           {:error, _reason} ->
-            {:noreply, put_flash(socket, :error, Copy.subscription_cancel_error(scoped_subscription))}
+            {:noreply,
+             put_flash(socket, :error, Copy.subscription_cancel_error(scoped_subscription))}
         end
 
       {:error, :not_found} ->
@@ -117,6 +191,58 @@ defmodule AccruePortal.Live.SubscriptionLive do
           </button>
         </div>
       </section>
+
+      <section class="portal-card">
+        <h2>{Copy.subscription_plan_change_heading()}</h2>
+        <p>{Copy.subscription_plan_change_body(@subscription)}</p>
+        <%= if preview_supported?(@subscription) do %>
+          <div>
+            <p>
+              <strong>{Copy.subscription_plan_change_current_label()}</strong>
+              <span>{current_plan_reference(@subscription)}</span>
+            </p>
+            <.form id="plan-change-form" for={%{}} as={:plan_change} phx-submit="preview_plan_change">
+              <label for="plan-change-price-id">{Copy.subscription_plan_change_target_label()}</label>
+              <input
+                id="plan-change-price-id"
+                name="plan_change[price_id]"
+                type="text"
+                value={@plan_change_price_id}
+              />
+              <p>{Copy.subscription_plan_change_target_hint()}</p>
+              <button type="submit" class="portal-button-secondary">
+                {Copy.subscription_plan_change_preview_cta()}
+              </button>
+            </.form>
+          </div>
+
+          <div :if={match?(%UpcomingInvoice{}, @plan_change_preview)}>
+            <h3>{Copy.subscription_plan_change_preview_heading()}</h3>
+            <p>{Copy.subscription_plan_change_preview_body()}</p>
+            <p>
+              <strong>{Copy.subscription_plan_change_preview_total_label()}</strong>
+              <span>{format_money(@plan_change_preview.total)}</span>
+            </p>
+            <ul class="portal-list" :if={@plan_change_preview.lines != []}>
+              <li :for={line <- @plan_change_preview.lines}>
+                <span>{line.description || line.price_id || "Invoice line"}</span>
+                <span>{format_money(line.amount)}</span>
+              </li>
+            </ul>
+            <div>
+              <button phx-click="confirm_plan_change" class="portal-button-secondary">
+                {Copy.subscription_plan_change_commit_cta()}
+              </button>
+              <button phx-click="reset_plan_change" class="portal-button-secondary">
+                {Copy.subscription_plan_change_reset_cta()}
+              </button>
+            </div>
+          </div>
+        <% else %>
+          <h3>{Copy.subscription_plan_change_preview_unavailable_heading()}</h3>
+          <p>{Copy.subscription_plan_change_preview_unavailable_body(@subscription)}</p>
+        <% end %>
+      </section>
     </main>
     """
   end
@@ -124,9 +250,62 @@ defmodule AccruePortal.Live.SubscriptionLive do
   defp format_datetime(nil), do: "-"
   defp format_datetime(%DateTime{} = dt), do: Calendar.strftime(dt, "%Y-%m-%d")
 
+  defp format_money(nil), do: "--"
+
+  defp format_money(%Accrue.Money{amount_minor: amount_minor, currency: currency}) do
+    Accrue.Invoices.Render.format_money(amount_minor, currency, "en")
+  end
+
   defp cancel_subscription(%Subscription{processor: "braintree"} = subscription),
     do: Billing.cancel(subscription)
 
   defp cancel_subscription(%Subscription{} = subscription),
     do: Billing.cancel_at_period_end(subscription)
+
+  defp preview_supported?(%Subscription{processor: "braintree"}), do: false
+  defp preview_supported?(%Subscription{}), do: true
+
+  defp preview_plan_change(%Subscription{} = subscription, price_id) do
+    normalized_price_id = normalize_price_id(price_id)
+
+    cond do
+      not preview_supported?(subscription) ->
+        {:error, :preview_unsupported}
+
+      is_nil(normalized_price_id) ->
+        {:error, :missing_reference}
+
+      true ->
+        case Billing.preview_upcoming_invoice(subscription,
+               new_price_id: normalized_price_id,
+               proration: :create_prorations
+             ) do
+          {:ok, %UpcomingInvoice{} = preview} -> {:ok, preview, normalized_price_id}
+          {:error, reason} -> {:error, reason}
+        end
+    end
+  end
+
+  defp swap_plan(%Subscription{} = subscription, price_id) do
+    Billing.swap_plan(subscription, price_id, proration: :create_prorations)
+  end
+
+  defp current_plan_reference(%Subscription{} = subscription) do
+    subscription
+    |> primary_subscription_item()
+    |> case do
+      nil -> "Unavailable"
+      item -> item.price_id || item.processor_id || item.id
+    end
+  end
+
+  defp primary_subscription_item(%Subscription{subscription_items: [item | _]}), do: item
+  defp primary_subscription_item(_subscription), do: nil
+
+  defp normalize_price_id(price_id) when is_binary(price_id) do
+    trimmed = String.trim(price_id)
+    if trimmed == "", do: nil, else: trimmed
+  end
+
+  defp normalize_price_id(_price_id), do: nil
 end

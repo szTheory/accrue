@@ -31,6 +31,7 @@ defmodule AccruePortal.SubscriptionsLiveTest do
     assert html =~ subscription.processor_id
     assert html =~ "Lifecycle"
     assert html =~ "Active and renewing."
+    assert html =~ "Preview supported plan changes from details before you confirm."
     refute html =~ foreign_subscription.processor_id
 
     html =
@@ -45,7 +46,9 @@ defmodule AccruePortal.SubscriptionsLiveTest do
     refute html =~ "Cancel subscription"
   end
 
-  test "subscriptions list renders past due lifecycle wording without leaking raw status", %{conn: conn} do
+  test "subscriptions list renders past due lifecycle wording without leaking raw status", %{
+    conn: conn
+  } do
     user = user_fixture()
 
     %{subscription: subscription} =
@@ -91,6 +94,7 @@ defmodule AccruePortal.SubscriptionsLiveTest do
 
     assert html =~ subscription.processor_id
     assert html =~ "Braintree immediate cancellation can end access now."
+    assert html =~ "Plan changes stay host-managed for this Braintree subscription."
     assert html =~ ~s(href="/billing/subscriptions/#{subscription.id}")
     refute html =~ ~s(phx-value-id="#{subscription.id}")
     refute html =~ "Cancel now"

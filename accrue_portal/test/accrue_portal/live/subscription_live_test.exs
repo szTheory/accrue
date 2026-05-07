@@ -1,10 +1,11 @@
 defmodule AccruePortal.SubscriptionLiveTest do
   use AccruePortal.ConnCase, async: false
 
-  alias Accrue.Billing.{Customer, Subscription}
+  alias Accrue.Billing.{Customer, Subscription, SubscriptionItem}
   alias AccruePortal.TestRepo
 
   import AccruePortal.Fixtures
+  import Ecto.Query
 
   setup do
     previous_auth = Application.get_env(:accrue, :auth_adapter)
@@ -48,7 +49,46 @@ defmodule AccruePortal.SubscriptionLiveTest do
     assert TestRepo.get!(Subscription, subscription.id).cancel_at_period_end
   end
 
-  test "subscription detail renders canceling lifecycle wording from shared copy helpers", %{conn: conn} do
+  test "subscription detail previews and commits a bounded plan change for supported providers",
+       %{conn: conn} do
+    %{user: user, subscription: subscription} = subscription_bundle_fixture!()
+    conn = sign_in_conn(conn, user)
+
+    assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Need to change plans?"
+    assert html =~ "Preview plan change"
+    assert html =~ "Current plan"
+    assert html =~ "price_basic"
+
+    html =
+      view
+      |> form("#plan-change-form", %{"plan_change" => %{"price_id" => "price_pro"}})
+      |> render_submit()
+
+    assert html =~ "Preview upcoming invoice"
+    assert html =~ "Preview total"
+    assert html =~ "Confirm plan change"
+    assert html =~ "Choose a different plan"
+
+    html =
+      view
+      |> element("button[phx-click='confirm_plan_change']")
+      |> render_click()
+
+    assert html =~ "Current plan"
+    assert html =~ "price_pro"
+
+    assert "price_pro" ==
+             SubscriptionItem
+             |> where([item], item.subscription_id == ^subscription.id)
+             |> TestRepo.one!()
+             |> Map.fetch!(:price_id)
+  end
+
+  test "subscription detail renders canceling lifecycle wording from shared copy helpers", %{
+    conn: conn
+  } do
     user = user_fixture()
 
     %{subscription: subscription} =
@@ -103,6 +143,7 @@ defmodule AccruePortal.SubscriptionLiveTest do
 
     assert html =~ "Need to stop now?"
     assert html =~ "Cancel now"
+    assert html =~ "Plan changes stay host-managed here"
 
     assert html =~
              "Braintree supports Cancel now through Accrue.Billing.cancel/2. If you need end-of-term non-renewal instead, keep that softer policy in your host app."
@@ -110,6 +151,10 @@ defmodule AccruePortal.SubscriptionLiveTest do
     assert html =~
              "Braintree immediate cancellation can end access now. Softer end-of-term handling belongs in your host app."
 
+    assert html =~
+             "Braintree plan changes can stay bounded to host-managed next steps. This mounted portal does not preview upcoming invoices for Braintree or offer direct self-serve swaps here."
+
     refute html =~ "Cancel renewal"
+    refute html =~ "Preview plan change"
   end
 end
