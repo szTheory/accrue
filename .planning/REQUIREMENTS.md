@@ -8,8 +8,8 @@
 ### Processor Contract Closure
 
 - [x] **PROC-21**: Host code can call `Accrue.Billing.update_customer/2` on the official Stripe, Fake, and Braintree processors with one explicit first-party support contract and deterministic proof.
-- [ ] **PROC-22**: Host code can use the supported subscription cancellation path on Stripe, Fake, and Braintree through the generic billing facade without staged-label drift or ambiguous processor semantics.
-- [ ] **PROC-23**: Maintainers and adopters can inspect capability labels for customer update and cancellation semantics and see runtime truth that matches actual supported behavior, with unsupported lifecycle branches still failing clearly.
+- [x] **PROC-22**: Host code can use the supported subscription cancellation path on Stripe, Fake, and Braintree through the generic billing facade without staged-label drift or ambiguous processor semantics.
+- [x] **PROC-23**: Maintainers and adopters can inspect capability labels for customer update and cancellation semantics and see runtime truth that matches actual supported behavior, with unsupported lifecycle branches still failing clearly.
 - [ ] **PROC-24**: Public docs, planning mirrors, example-host proofs, and merge-blocking verifiers repeat the finalized dual-provider core contract so staged-vs-first-party drift is caught automatically.
 
 ## v2 Requirements
@@ -34,8 +34,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PROC-21 | Phase 112 | Complete 2026-05-07 |
-| PROC-22 | Phase 113 | Pending |
-| PROC-23 | Phase 113 | Pending |
+| PROC-22 | Phase 113 | Complete 2026-05-07 (Plan 01) |
+| PROC-23 | Phase 113 | Complete 2026-05-07 (Plan 01) |
 | PROC-24 | Phase 114 | Pending |
 
 **Coverage:**
@@ -45,4 +45,4 @@
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-07 after Phase 112 verification passed*
+*Last updated: 2026-05-07 after Phase 113 Plan 01 verification passed*
