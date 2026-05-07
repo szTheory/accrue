@@ -395,7 +395,7 @@ defmodule Accrue.Processor.BraintreeTest do
     assert error.message =~ "quantity mutation semantics"
   end
 
-  test "cancel_subscription/2 and /3 route immediate cancellation and reject unsupported flags" do
+  test "cancel_subscription/2 and /3 route immediate cancellation and reject unsupported semantics" do
     assert {:ok, canceled} = Braintree.cancel_subscription("sub_bt_123", [])
     assert canceled.status == "Canceled"
 
@@ -408,6 +408,21 @@ defmodule Accrue.Processor.BraintreeTest do
 
     assert canceled.status == "Canceled"
 
+    assert {:error,
+            %Accrue.APIError{code: "processor_operation_unsupported"} = scheduled_end_error} =
+             Braintree.cancel_subscription("sub_bt_123", %{cancel_at_period_end: true}, [])
+
+    assert scheduled_end_error.message =~ "cancel at period end"
+    assert scheduled_end_error.message =~ "Accrue.Billing.cancel/2"
+    assert scheduled_end_error.message =~ "host-owned seam"
+
+    assert {:error,
+            %Accrue.APIError{code: "processor_operation_unsupported"} = scheduled_at_error} =
+             Braintree.cancel_subscription("sub_bt_123", %{cancel_at: 1_717_171_717}, [])
+
+    assert scheduled_at_error.message =~ "scheduled cancellation"
+    assert scheduled_at_error.message =~ "Accrue.Billing.cancel/2"
+
     assert {:error, %Accrue.APIError{code: "invalid_request_error"} = error} =
              Braintree.cancel_subscription("sub_bt_123", %{invoice_now: true}, [])
 
@@ -419,6 +434,7 @@ defmodule Accrue.Processor.BraintreeTest do
              Braintree.resume_subscription("sub_bt_123", [])
 
     assert resume_error.message =~ "resume"
+    assert resume_error.message =~ "Create a new subscription"
 
     assert {:error, %Accrue.APIError{code: "processor_operation_unsupported"} = pause_error} =
              Braintree.pause_subscription_collection("sub_bt_123", :void, %{}, [])

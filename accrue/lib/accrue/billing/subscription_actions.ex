@@ -589,7 +589,8 @@ defmodule Accrue.Billing.SubscriptionActions do
          code: "processor_operation_unsupported",
          http_status: 422,
          message:
-           "Braintree subscriptions cannot be resumed through resume/2 because provider-side cancellations cannot be reactivated."
+           "Braintree subscriptions cannot be resumed through resume/2 because provider-side cancellations cannot be reactivated. " <>
+             "Create a new subscription when service should restart after cancellation."
        }}
     else
       op_id = Actor.current_operation_id!()

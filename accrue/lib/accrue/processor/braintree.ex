@@ -472,8 +472,16 @@ defmodule Accrue.Processor.Braintree do
   defp validate_cancel_params(params) do
     invoice_now = truthy?(params[:invoice_now] || params["invoice_now"])
     prorate = truthy?(params[:prorate] || params["prorate"])
+    cancel_at_period_end = truthy?(params[:cancel_at_period_end] || params["cancel_at_period_end"])
+    cancel_at = params[:cancel_at] || params["cancel_at"]
 
     cond do
+      cancel_at_period_end ->
+        {:error, unsupported_semantic("cancel at period end")}
+
+      not is_nil(cancel_at) ->
+        {:error, unsupported_semantic("scheduled cancellation")}
+
       invoice_now ->
         {:error,
          invalid_request("Braintree immediate cancellation does not support invoice_now: true.")}
@@ -859,10 +867,30 @@ defmodule Accrue.Processor.Braintree do
   end
 
   defp unsupported_semantic(semantic) do
+    message =
+      case semantic do
+        "cancel at period end" ->
+          "Braintree does not support Accrue's cancel at period end semantic. " <>
+            "Use Accrue.Billing.cancel/2 when you need an immediate stop, or keep end-of-term " <>
+            "non-renewal in a host-owned seam."
+
+        "scheduled cancellation" ->
+          "Braintree does not support Accrue's scheduled cancellation semantic. " <>
+            "Use Accrue.Billing.cancel/2 when you need an immediate stop, or keep end-of-term " <>
+            "non-renewal in a host-owned seam."
+
+        "resume" ->
+          "Braintree does not support Accrue's resume semantic. " <>
+            "Create a new subscription when service should restart after cancellation."
+
+        _ ->
+          "Braintree does not support Accrue's #{semantic} semantic."
+      end
+
     %APIError{
       code: "processor_operation_unsupported",
       http_status: 422,
-      message: "Braintree does not support Accrue's #{semantic} semantic."
+      message: message
     }
   end
 
