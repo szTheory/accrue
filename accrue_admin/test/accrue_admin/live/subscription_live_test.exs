@@ -247,6 +247,44 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "turn off renewal now and preserve access through the current billing period"
   end
 
+  test "renders explicit Braintree action boundaries for immediate versus scheduled cancellation", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    customer =
+      insert_customer(%{
+        owner_id: "subscription-detail-braintree",
+        processor: "braintree",
+        processor_id: "cus_bt_admin_detail"
+      })
+
+    subscription =
+      insert_subscription(customer, %{
+        processor: "braintree",
+        processor_id: "sub_bt_admin_detail",
+        current_period_start: DateTime.add(DateTime.utc_now(), -86_400, :second),
+        current_period_end: DateTime.add(DateTime.utc_now(), 2_592_000, :second)
+      })
+
+    {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert html =~ "Cancel now"
+    assert html =~ "Cancel at period end"
+
+    assert html =~
+             "Braintree supports immediate cancellation through Accrue.Billing.cancel/2. Scheduled end-of-period, reversible cancellation, pause, and unpause semantics remain host-owned or unsupported."
+
+    html =
+      render_submit(
+        element(view, "[data-role='cancel-at-period-end-form']"),
+        %{"action_type" => "cancel_at_period_end"}
+      )
+
+    assert html =~
+             "Cancel at period end will turn off renewal now and preserve access through the current billing period where the processor supports that semantic."
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",
@@ -264,14 +302,18 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
   end
 
   defp insert_subscription(customer) do
+    insert_subscription(customer, %{})
+  end
+
+  defp insert_subscription(customer, attrs) do
     %Subscription{}
-    |> Subscription.changeset(%{
+    |> Subscription.changeset(Map.merge(%{
       customer_id: customer.id,
-      processor: "fake",
+      processor: customer.processor || "fake",
       processor_id: "sub_" <> Integer.to_string(System.unique_integer([:positive])),
       status: :active,
       currency: "usd"
-    })
+    }, attrs))
     |> TestRepo.insert!()
   end
 

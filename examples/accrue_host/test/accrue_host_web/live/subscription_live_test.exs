@@ -124,6 +124,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert html =~ "Need to stop renewal?"
     assert html =~ "Cancel now for this organization"
     assert html =~ "Default customer self-serve guidance should prefer cancel renewal at period end."
+    assert html =~ "any softer Braintree end-of-term policy stays host-owned."
     refute html =~ "Cancel organization subscription"
 
     html =

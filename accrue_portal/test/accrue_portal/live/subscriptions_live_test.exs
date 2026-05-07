@@ -39,8 +39,10 @@ defmodule AccruePortal.SubscriptionsLiveTest do
       |> render_click()
 
     assert html =~ subscription.processor_id
+    assert html =~ "Cancel renewal scheduled. Access ends at the current period end."
     assert TestRepo.get!(Subscription, subscription.id).cancel_at_period_end
     refute TestRepo.get!(Subscription, foreign_subscription.id).cancel_at_period_end
+    refute html =~ "Cancel subscription"
   end
 
   test "subscriptions list renders past due lifecycle wording without leaking raw status", %{conn: conn} do
