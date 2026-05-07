@@ -26,6 +26,7 @@ require_substring "cd examples/accrue_host" "examples/accrue_host cwd instructio
 require_substring "host-integration" "GitHub Actions job name for PR CI"
 require_substring "bash scripts/ci/verify_adoption_proof_matrix.sh" "adoption matrix shift-left command in proof intro"
 require_substring "bash scripts/ci/accrue_host_uat.sh" "host UAT wrapper command in proof intro"
+require_substring "scripts/ci/README.md" "support-contract bundle readme pointer"
 require_substring 'accrue` / `accrue_admin` `1.0.0`' "linked 1.0.0 proof needle"
 require_substring "mix verify.full" "canonical verify.full gate"
 require_substring ".github/workflows/ci.yml" "CI workflow pointer"
@@ -36,6 +37,9 @@ require_substring "Mounted admin — mobile shell" "VERIFY-01 mobile shell subse
 require_substring "gateway subscription core" "bounded Braintree support slice wording"
 require_substring "Stripe returns upstream hosted checkout and" "provider-honest Stripe hosted wording"
 require_substring "Braintree returns mounted local checkout and portal" "provider-honest Braintree mounted wording"
+require_substring "update_customer/2" "bounded customer-update wording"
+require_substring "cancel/2" "shared immediate cancellation wording"
+require_substring "cancel_at_period_end/2" "scheduled-end split wording"
 
 while IFS= read -r spec_path; do
   [[ -z "${spec_path}" ]] && continue
@@ -47,6 +51,11 @@ done < <(grep -oE 'e2e/verify01-[a-zA-Z0-9_-]+\.spec\.js' "${readme}" | sort -u)
 
 if grep -Eq 'Stripe-only|remain Stripe-only' "${readme}"; then
   echo "verify_verify01_readme_contract: README still contains stale Stripe-only wording" >&2
+  exit 1
+fi
+
+if grep -Eq 'verify_package_docs\.sh|verify_v1_17_friction_research_contract\.sh|verify_core_admin_invoice_verify_ids\.sh' "${readme}"; then
+  echo "verify_verify01_readme_contract: README drifted back to an inline docs-contracts-shift-left inventory" >&2
   exit 1
 fi
 

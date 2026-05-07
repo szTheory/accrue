@@ -27,6 +27,8 @@ require_substring "verify_v1_17_friction_research_contract.sh" "v1.17 planning S
 require_substring "verify_verify01_readme_contract.sh" "VERIFY-01 shift-left script name in matrix"
 require_substring "verify_core_admin_invoice_verify_ids.sh" "Layer C verify_core_admin_invoice_verify_ids script name in matrix"
 require_substring "accrue_host_hex_smoke.sh" "Hex smoke script name in matrix layering note"
+require_substring "scripts/ci/README.md" "support-contract bundle readme pointer"
+require_substring 'exact bundle membership lives in `scripts/ci/README.md` and `.github/workflows/ci.yml`' "pointer-based bundle wording"
 require_substring "## Organization billing proof (ORG-09)" "ORG-09 section heading"
 require_substring "### Primary archetype (merge-blocking)" "primary archetype heading"
 require_substring "### Recipe lanes (advisory by default)" "recipe lanes heading"
@@ -51,9 +53,17 @@ require_substring "Braintree" "Braintree provider mention"
 require_substring "gateway subscription core" "gateway subscription core slice"
 require_substring "Stripe returns upstream hosted checkout and billing-portal URLs" "provider-honest Stripe hosted wording"
 require_substring "Braintree returns mounted local checkout and portal URLs" "provider-honest Braintree mounted wording"
+require_substring "update_customer/2" "bounded customer-update wording"
+require_substring "cancel/2" "shared immediate cancellation wording"
+require_substring "cancel_at_period_end/2" "scheduled-end split wording"
 
 if grep -Eq 'Stripe-only|remain Stripe-only' "${matrix}"; then
   echo "verify_adoption_proof_matrix: matrix still contains stale Stripe-only wording" >&2
+  exit 1
+fi
+
+if grep -Fq 'job `docs-contracts-shift-left` runs `verify_package_docs.sh`' "${matrix}"; then
+  echo "verify_adoption_proof_matrix: matrix drifted back to the stale inline docs-contracts-shift-left inventory wording" >&2
   exit 1
 fi
 

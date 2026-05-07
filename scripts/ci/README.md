@@ -81,6 +81,32 @@ bash scripts/ci/verify_processor_support_matrix.sh && \
 This rule exists so stale Stripe-only checkout or billing-portal wording
 cannot drift back into package docs, host proof docs, or shift-left gates.
 
+### Support-contract bundle (Phase 114 closeout)
+
+`docs-contracts-shift-left` is the merge-blocking CI home for the named
+**support-contract bundle**. The exact bundle membership is:
+
+- `bash scripts/ci/verify_processor_support_matrix.sh` — canonical support SSOT in `.planning/processor-support-matrix.md`
+- `bash scripts/ci/verify_package_docs.sh` — package-facing mirrors in `accrue/README.md`, `accrue/guides/first_hour.md`, `accrue/guides/testing.md`, and `guides/testing-live-stripe.md`
+- `bash scripts/ci/verify_verify01_readme_contract.sh` — thin host README proof wording in `examples/accrue_host/README.md`
+- `bash scripts/ci/verify_adoption_proof_matrix.sh` — thin host proof taxonomy in `examples/accrue_host/docs/adoption-proof-matrix.md`
+
+Run the full bundle from the repo root when you touch support wording:
+
+```bash
+bash scripts/ci/verify_processor_support_matrix.sh && \
+  bash scripts/ci/verify_package_docs.sh && \
+  bash scripts/ci/verify_verify01_readme_contract.sh && \
+  bash scripts/ci/verify_adoption_proof_matrix.sh
+```
+
+Surface-to-script map:
+
+- If you edit `.planning/processor-support-matrix.md`, expect `verify_processor_support_matrix.sh` and job `docs-contracts-shift-left` to fail first.
+- If you edit `accrue/README.md`, `accrue/guides/first_hour.md`, `accrue/guides/testing.md`, or `guides/testing-live-stripe.md`, expect `verify_package_docs.sh`.
+- If you edit `examples/accrue_host/README.md`, expect `verify_verify01_readme_contract.sh` plus `verify_package_docs.sh` for shared structural pins.
+- If you edit `examples/accrue_host/docs/adoption-proof-matrix.md`, expect `verify_adoption_proof_matrix.sh`.
+
 ## PRS gates (v1.22 production path discoverability)
 
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |

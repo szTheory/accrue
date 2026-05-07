@@ -29,6 +29,9 @@ permissions:
 jobs:
   docs-contracts-shift-left:
     name: Docs and bash contracts (shift-left)
+    # Support-contract bundle CI home: verify_processor_support_matrix.sh,
+    # verify_package_docs.sh, verify_verify01_readme_contract.sh,
+    # and verify_adoption_proof_matrix.sh all run here as merge-blocking checks.
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
 

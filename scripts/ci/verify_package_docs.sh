@@ -95,6 +95,9 @@ require_fixed "$ROOT_DIR/accrue/README.md" "examples/accrue_host"
 require_fixed "$ROOT_DIR/accrue/README.md" "mix verify"
 require_fixed "$ROOT_DIR/accrue/README.md" "mix verify.full"
 require_fixed "$ROOT_DIR/accrue/README.md" "bash scripts/ci/accrue_host_uat.sh"
+require_fixed "$ROOT_DIR/accrue/README.md" "processor support matrix"
+require_fixed "$ROOT_DIR/accrue/README.md" "gateway subscription core"
+require_fixed "$ROOT_DIR/accrue/README.md" "mounted first-party local checkout and portal URLs"
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"README.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/admin_ui.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/core-admin-parity.md"'
@@ -114,6 +117,9 @@ require_fixed "$ROOT_DIR/README.md" 'bash scripts/ci/accrue_host_uat.sh'
 require_fixed "$ROOT_DIR/README.md" '> **Hex vs `main`:**'
 require_fixed "$ROOT_DIR/README.md" 'https://hex.pm/packages/accrue'
 require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Pull requests are merge-blocked on GitHub Actions job \`host-integration\`"
+require_fixed "$ROOT_DIR/accrue/guides/testing.md" "gateway subscription core"
+require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Checkout and billing portal use the same shared facade across both providers"
+require_fixed "$ROOT_DIR/accrue/guides/testing.md" "processor-support-matrix.md"
 
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/first_hour\.html)?'
@@ -156,6 +162,10 @@ require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "billing-checkout-session-
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "Accrue.Billing.create_billing_portal_session/2"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "[:accrue, :billing, :billing_portal, :create]"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "billing-billing-portal-create"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "processor support matrix"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "update_customer/2"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "cancel/2"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "cancel_at_period_end/2"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Accrue.Billing.create_checkout_session/2"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "[:accrue, :billing, :checkout_session, :create]"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "checkout_session_facade_test.exs"
@@ -165,6 +175,10 @@ require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "billing_portal_session
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "gateway subscription core"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Stripe returns upstream hosted checkout and"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Braintree returns mounted local checkout and portal"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "update_customer/2"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "cancel/2"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "cancel_at_period_end/2"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "scripts/ci/README.md"
 require_fixed "$ROOT_DIR/accrue/guides/troubleshooting.md" "mix accrue.install --check"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "Braintree"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "gateway subscription core"
@@ -205,6 +219,8 @@ require_fixed "$ROOT_DIR/RELEASING.md" "RELEASE_PLEASE_TOKEN"
 require_fixed "$ROOT_DIR/RELEASING.md" "release-gate"
 require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "STRIPE_TEST_SECRET_KEY"
 require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "host-integration"
+require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "first-party shared-facade surfaces"
+require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "mounted-local Braintree side"
 require_fixed "$ROOT_DIR/CONTRIBUTING.md" 'Node.js for browser UAT in `examples/accrue_host`'
 require_absent_regex "$ROOT_DIR/RELEASING.md" 'Phase 9 release gate'
 require_absent_regex "$ROOT_DIR/guides/testing-live-stripe.md" 'primary `test` job'
