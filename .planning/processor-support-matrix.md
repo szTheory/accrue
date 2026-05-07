@@ -41,7 +41,9 @@ The first official dual-provider promise is **gateway subscription core**:
 | payment_method.set_default | Supported | Supported | Required target | all first-party |
 | subscription.direct_create | Required | Required | Required target | all first-party |
 | subscription.fetch | Required | Required | Required target | all first-party |
-| subscription.cancel | Supported | Supported | Staged target | staged first-party target |
+| subscription.cancel | Supported | Supported | Supported | all first-party |
+| subscription.cancel_immediately | Supported | Supported | Supported | all first-party |
+| subscription.cancel_at_period_end | Supported | Supported | Unsupported | staged first-party target |
 | subscription.lifecycle_webhook_projection | Deterministic projection | Supported | Required target | all first-party |
 | invoice.lifecycle_webhook_projection | Deterministic projection | Supported | Required target | all first-party |
 | webhook.verify | Required | Required | Required target | all first-party |
@@ -51,7 +53,7 @@ The first official dual-provider promise is **gateway subscription core**:
 
 The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs through Accrue-owned local UI.
 
-Phase 97 extends the shipped Braintree slice to include explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is supported in the shipped slice, while quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
+Phase 97 extends the shipped Braintree slice to include explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is the shipped immediate-cancel path across Fake, Stripe, and Braintree, while `cancel_at_period_end/2` remains a Stripe/Fake-only scheduled-end path and quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
 
 ## Public facade API mapping
 
@@ -59,7 +61,8 @@ Phase 97 extends the shipped Braintree slice to include explicit subscription mu
 |------------|-------|-------|
 | `Accrue.Billing.subscribe/3` | all first-party | Primary gateway-subscription-core facade for the second-provider slice. |
 | `Accrue.Billing.get_subscription/2` | all first-party | Read side required for lifecycle truth on the supported slice. |
-| `Accrue.Billing.cancel/2` | all first-party | Included in the shipped Braintree mutation slice with hermetic host proof and webhook convergence coverage. |
+| `Accrue.Billing.cancel/2` | all first-party | Immediate cancellation is the shared shipped path across Fake, Stripe, and Braintree. |
+| `Accrue.Billing.cancel_at_period_end/2` | staged first-party target | Scheduled-end cancellation remains supported on Fake and Stripe; Braintree rejects it with a typed unsupported error and a host-owned next-step hint. |
 | `Accrue.Billing.create_customer/1` | all first-party | Customer creation remains part of the supported facade boundary. |
 | `Accrue.Billing.update_customer/2` | all first-party | Bounded remote write-through facade for the shared `name`, `email`, and flat `metadata` contract only. |
 | `Accrue.Billing.add_payment_method/3` | all first-party | Canonical add verb; Braintree accepts only the narrow vault-acquisition handoff. |

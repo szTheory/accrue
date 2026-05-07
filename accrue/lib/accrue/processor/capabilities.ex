@@ -25,11 +25,11 @@ defmodule Accrue.Processor.Capabilities do
     subscription: %{
       direct_create: "all first-party",
       fetch: "all first-party",
-      cancel: "staged first-party target",
+      cancel: "all first-party",
       lifecycle_webhook_projection: "all first-party",
       update: "staged first-party target",
       cancel_at_period_end: "staged first-party target",
-      cancel_immediately: "staged first-party target",
+      cancel_immediately: "all first-party",
       pause: "out of slice",
       resume: "out of slice"
     },

@@ -54,7 +54,7 @@ defmodule Accrue.Processor.CapabilitiesTest do
     end
   end
 
-  test "known adapters report the promoted and staged contract rows explicitly" do
+  test "known adapters report the promoted immediate-cancel contract and split scheduled-end row explicitly" do
     stripe_caps = Capabilities.for(Accrue.Processor.Stripe)
     braintree_caps = Capabilities.for(Accrue.Processor.Braintree)
 
@@ -72,9 +72,10 @@ defmodule Accrue.Processor.CapabilitiesTest do
     assert get_in(braintree_caps, [:subscription, :cancel_at_period_end]) == false
     assert get_in(braintree_caps, [:subscription, :pause]) == false
     assert Capabilities.support_label([:subscription, :update]) == "staged first-party target"
-    assert Capabilities.support_label([:subscription, :cancel]) == "staged first-party target"
+    assert Capabilities.support_label([:subscription, :cancel]) == "all first-party"
+    assert Capabilities.support_label([:subscription, :cancel_immediately]) == "all first-party"
 
-    assert Capabilities.support_label([:subscription, :cancel_immediately]) ==
+    assert Capabilities.support_label([:subscription, :cancel_at_period_end]) ==
              "staged first-party target"
   end
 
