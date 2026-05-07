@@ -945,10 +945,11 @@ defmodule Accrue.Billing do
       operation_id = Actor.current_operation_id!()
 
       with {:ok, validated_attrs} <- validate_customer_update_attrs(attrs),
+           normalized_attrs = normalize_customer_update_attrs(customer, validated_attrs),
            {:ok, processor_result} <-
-             Processor.update_customer(customer.processor_id, validated_attrs, []) do
+             Processor.update_customer(customer.processor_id, normalized_attrs, []) do
         customer_attrs = customer_projection_attrs(processor_result)
-        changed_fields = customer_update_field_names(validated_attrs)
+        changed_fields = customer_update_field_names(normalized_attrs)
 
         Repo.transact(fn ->
           with {:ok, updated} <-
@@ -1114,6 +1115,20 @@ defmodule Accrue.Billing do
        do: true
 
   defp supported_customer_update_attr?(_key), do: false
+
+  defp normalize_customer_update_attrs(%Customer{} = customer, attrs) when is_map(attrs) do
+    case Map.fetch(attrs, :metadata) do
+      {:ok, metadata} ->
+        Map.put(
+          attrs,
+          :metadata,
+          Metadata.shallow_merge(customer.metadata || %{}, metadata)
+        )
+
+      :error ->
+        attrs
+    end
+  end
 
   defp customer_update_event_data(customer, changed_fields, operation_id) do
     %{

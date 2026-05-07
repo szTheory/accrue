@@ -216,6 +216,30 @@ defmodule Accrue.Billing.EventsTransactionTest do
       refute Map.has_key?(updated.data, "tax") or Map.has_key?(updated.data, :tax)
     end
 
+    test "shallow-merges metadata updates and deletes keys with blank or nil values" do
+      user = test_user()
+      {:ok, customer} = Billing.create_customer(user)
+
+      assert {:ok, customer} =
+               Billing.update_customer(customer, %{
+                 metadata: %{"keep" => "yes", "drop" => "remove-me"}
+               })
+
+      assert {:ok, updated} =
+               Billing.update_customer(customer, %{
+                 metadata: %{
+                   "add" => "new",
+                   "drop" => "",
+                   "keep" => nil
+                 }
+               })
+
+      assert updated.metadata == %{"add" => "new"}
+
+      assert {:ok, remote_customer} = Processor.retrieve_customer(updated.processor_id, [])
+      assert remote_customer.metadata == %{"add" => "new"}
+    end
+
     test "nested map in metadata raises validation error" do
       user = test_user()
       {:ok, customer} = Billing.create_customer(user)
