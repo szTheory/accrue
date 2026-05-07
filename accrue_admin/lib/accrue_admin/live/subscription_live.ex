@@ -3,8 +3,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   use Phoenix.LiveView
 
-  alias Accrue.{Actor, Auth, Billing, Events}
+  alias Accrue.{Actor, Auth, Billing, Events, PlanResolver}
   alias Accrue.Billing.Subscription
+  alias Accrue.Billing.UpcomingInvoice
   alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
@@ -52,6 +53,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          |> assign(:customer, subscription.customer)
          |> assign(:timeline_events, timeline_events(subscription.id))
          |> assign(:proration_options, proration_options())
+         |> assign(:swap_plan_available, swap_plan_available?(subscription))
          |> assign(:flashes, [])
          |> assign(:pending_action, nil)}
     end
@@ -59,7 +61,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   @impl true
   def handle_event("prepare_action", params, socket) do
-    {:noreply, assign(socket, :pending_action, pending_action(params, socket))}
+    action = pending_action(params, socket)
+    {:noreply, assign(socket, :pending_action, maybe_attach_preview(socket, action))}
   end
 
   def handle_event("cancel_pending_action", _params, socket) do
@@ -249,7 +252,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </form>
 
               <form
-                :if={@subscription.processor != "braintree"}
+                :if={!braintree_processor?(@subscription)}
                 phx-submit="prepare_action"
                 data-role="cancel-at-period-end-form"
               >
@@ -261,7 +264,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </form>
 
               <form
-                :if={@subscription.processor != "braintree"}
+                :if={!braintree_processor?(@subscription)}
                 phx-submit="prepare_action"
                 data-role="pause-form"
               >
@@ -279,7 +282,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </form>
 
               <form
-                :if={@subscription.processor != "braintree"}
+                :if={!braintree_processor?(@subscription)}
                 phx-submit="prepare_action"
                 data-role="resume-form"
               >
@@ -290,7 +293,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </button>
               </form>
 
-              <form phx-submit="prepare_action" data-role="swap-plan-form">
+              <form
+                :if={@swap_plan_available}
+                phx-submit="prepare_action"
+                data-role="swap-plan-form"
+              >
                 <input type="hidden" name="action_type" value="swap_plan" />
                 <label class="ax-label" for="new-price-id">New price id</label>
                 <input id="new-price-id" type="text" name="new_price_id" value={current_price_id(@subscription)} class="ax-input" />
@@ -303,6 +310,101 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                   <%= Copy.subscription_action_swap_plan() %>
                 </button>
               </form>
+
+              <form
+                :if={quantity_change_available?(@subscription)}
+                phx-submit="prepare_action"
+                data-role="quantity-update-form"
+              >
+                <input type="hidden" name="action_type" value="update_quantity" />
+                <label class="ax-label" for="new-quantity">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
+                </label>
+                <input id="new-quantity" type="number" min="1" name="new_quantity" value="1" class="ax-input" />
+                <p class="ax-body">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_single_item_quantity_guidance() %>
+                </p>
+                <.source_event_select events={@timeline_events} />
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_update_quantity() %>
+                </button>
+              </form>
+
+              <form
+                :if={quantity_item_changes_available?(@subscription)}
+                phx-submit="prepare_action"
+                data-role="item-add-form"
+              >
+                <input type="hidden" name="action_type" value="add_item" />
+                <label class="ax-label" for="add-item-price-id">New price id</label>
+                <input id="add-item-price-id" type="text" name="new_price_id" class="ax-input" />
+                <label class="ax-label" for="add-item-quantity">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
+                </label>
+                <input id="add-item-quantity" type="number" min="1" name="new_quantity" value="1" class="ax-input" />
+                <label class="ax-label" for="add-item-proration">Proration</label>
+                <select id="add-item-proration" name="proration" class="ax-select">
+                  <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
+                </select>
+                <.source_event_select events={@timeline_events} />
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_add_item() %>
+                </button>
+              </form>
+
+              <form
+                :if={quantity_item_changes_available?(@subscription)}
+                phx-submit="prepare_action"
+                data-role="item-quantity-form"
+              >
+                <input type="hidden" name="action_type" value="update_item_quantity" />
+                <.subscription_item_select subscription={@subscription} input_name="item_id" input_id="item-quantity-id" />
+                <label class="ax-label" for="item-quantity-value">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_quantity_label() %>
+                </label>
+                <input id="item-quantity-value" type="number" min="1" name="new_quantity" value="1" class="ax-input" />
+                <label class="ax-label" for="item-quantity-proration">Proration</label>
+                <select id="item-quantity-proration" name="proration" class="ax-select">
+                  <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
+                </select>
+                <.source_event_select events={@timeline_events} />
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_update_item_quantity() %>
+                </button>
+              </form>
+
+              <form
+                :if={quantity_item_changes_available?(@subscription)}
+                phx-submit="prepare_action"
+                data-role="item-remove-form"
+              >
+                <input type="hidden" name="action_type" value="remove_item" />
+                <.subscription_item_select subscription={@subscription} input_name="item_id" input_id="item-remove-id" />
+                <label class="ax-label" for="item-remove-proration">Proration</label>
+                <select id="item-remove-proration" name="proration" class="ax-select">
+                  <option :for={option <- @proration_options} value={option.value}><%= option.label %></option>
+                </select>
+                <.source_event_select events={@timeline_events} />
+                <button type="submit" class="ax-button ax-button-secondary">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_remove_item() %>
+                </button>
+              </form>
+
+              <p
+                :if={!@swap_plan_available and braintree_processor?(@subscription)}
+                class="ax-body"
+                data-role="swap-plan-unavailable"
+              >
+                <%= Copy.subscription_action_braintree_swap_setup_guidance() %>
+              </p>
+
+              <p
+                :if={braintree_processor?(@subscription)}
+                class="ax-body"
+                data-role="quantity-item-unsupported"
+              >
+                <%= AccrueAdmin.Copy.Subscription.subscription_action_braintree_quantity_item_guidance() %>
+              </p>
 
               <form phx-submit="prepare_action" data-role="comp-form">
                 <input type="hidden" name="action_type" value="comp_subscription" />
@@ -318,6 +420,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             <section :if={@pending_action} class="ax-card" data-role="confirm-panel">
               <p class="ax-label">Confirm action</p>
               <p class="ax-body"><%= confirm_copy(@pending_action) %></p>
+              <section
+                :if={match?(%UpcomingInvoice{}, @pending_action[:preview])}
+                class="ax-stack-md"
+                data-role="swap-plan-preview"
+              >
+                <p class="ax-label"><%= AccrueAdmin.Copy.Subscription.subscription_action_preview_heading() %></p>
+                <p class="ax-body"><%= preview_summary(@pending_action.preview) %></p>
+                <p class="ax-body">
+                  <%= AccrueAdmin.Copy.Subscription.subscription_action_preview_total_label() %>:
+                  <%= money_or_dash(@pending_action.preview.total) %>
+                </p>
+                <ul class="ax-stack-sm">
+                  <li :for={line <- Enum.take(@pending_action.preview.lines, 3)} class="ax-body">
+                    <%= preview_line_summary(line) %>
+                  </li>
+                </ul>
+              </section>
               <div class="ax-page-header">
                 <button phx-click="confirm_action" class="ax-button ax-button-primary" data-role="confirm-action">
                   Confirm <%= humanize(@pending_action.type) %>
@@ -377,6 +496,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     """
   end
 
+  attr(:subscription, :map, required: true)
+  attr(:input_name, :string, required: true)
+  attr(:input_id, :string, required: true)
+
+  defp subscription_item_select(assigns) do
+    ~H"""
+    <label class="ax-label" for={@input_id}>
+      <%= AccrueAdmin.Copy.Subscription.subscription_action_item_id_label() %>
+    </label>
+    <select id={@input_id} name={@input_name} class="ax-select">
+      <option :for={item <- @subscription.subscription_items || []} value={item.id}>
+        <%= subscription_item_label(item) %>
+      </option>
+    </select>
+    """
+  end
+
   defp assign_shell(socket, admin) do
     socket
     |> assign(:page_title, Copy.subscription_page_title())
@@ -428,7 +564,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       Accrue.Billing.Subscription.canceling?(subscription) && "canceling",
       Accrue.Billing.Subscription.paused?(subscription) && "paused",
       Accrue.Billing.Subscription.past_due?(subscription) && "past due",
-      Accrue.Billing.Subscription.canceled?(subscription) && Copy.subscription_lifecycle_ended_label()
+      Accrue.Billing.Subscription.canceled?(subscription) &&
+        Copy.subscription_lifecycle_ended_label()
     ]
     |> Enum.reject(&is_nil/1)
     |> Enum.reject(&(&1 == false))
@@ -451,6 +588,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     %{
       type: Map.fetch!(params, "action_type"),
       new_price_id: blank_to_nil(params["new_price_id"]),
+      new_quantity: integer_param(params["new_quantity"]),
+      item_id: blank_to_nil(params["item_id"]),
       pause_behavior: blank_to_nil(params["pause_behavior"]) || "void",
       proration: blank_to_nil(params["proration"]) || "create_prorations",
       source_event_id: source_event && source_event.id,
@@ -567,6 +706,126 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp execute_action(
          _subscription,
          _customer,
+         %{type: "update_quantity", new_quantity: nil},
+         _operation_id
+       ) do
+    {:error, :missing_new_quantity}
+  end
+
+  defp execute_action(
+         subscription,
+         _customer,
+         %{type: "update_quantity", new_quantity: new_quantity},
+         operation_id
+       ) do
+    Billing.update_quantity(subscription, new_quantity, operation_id: operation_id)
+  end
+
+  defp execute_action(
+         _subscription,
+         _customer,
+         %{type: "add_item", new_price_id: nil},
+         _operation_id
+       ) do
+    {:error, :missing_new_price_id}
+  end
+
+  defp execute_action(
+         _subscription,
+         _customer,
+         %{type: "add_item", new_quantity: nil},
+         _operation_id
+       ) do
+    {:error, :missing_new_quantity}
+  end
+
+  defp execute_action(
+         subscription,
+         _customer,
+         %{
+           type: "add_item",
+           new_price_id: new_price_id,
+           new_quantity: new_quantity,
+           proration: proration
+         },
+         operation_id
+       ) do
+    Billing.add_item(subscription, new_price_id,
+      quantity: new_quantity,
+      proration: String.to_existing_atom(proration),
+      operation_id: operation_id
+    )
+  rescue
+    ArgumentError -> {:error, :invalid_proration}
+  end
+
+  defp execute_action(
+         _subscription,
+         _customer,
+         %{type: "update_item_quantity", item_id: nil},
+         _operation_id
+       ) do
+    {:error, :missing_item_id}
+  end
+
+  defp execute_action(
+         _subscription,
+         _customer,
+         %{type: "update_item_quantity", new_quantity: nil},
+         _operation_id
+       ) do
+    {:error, :missing_new_quantity}
+  end
+
+  defp execute_action(
+         subscription,
+         _customer,
+         %{
+           type: "update_item_quantity",
+           item_id: item_id,
+           new_quantity: new_quantity,
+           proration: proration
+         },
+         operation_id
+       ) do
+    with {:ok, item} <- subscription_item(subscription, item_id) do
+      Billing.update_item_quantity(item, new_quantity,
+        proration: String.to_existing_atom(proration),
+        operation_id: operation_id
+      )
+    end
+  rescue
+    ArgumentError -> {:error, :invalid_proration}
+  end
+
+  defp execute_action(
+         _subscription,
+         _customer,
+         %{type: "remove_item", item_id: nil},
+         _operation_id
+       ) do
+    {:error, :missing_item_id}
+  end
+
+  defp execute_action(
+         subscription,
+         _customer,
+         %{type: "remove_item", item_id: item_id, proration: proration},
+         operation_id
+       ) do
+    with {:ok, item} <- subscription_item(subscription, item_id) do
+      Billing.remove_item(item,
+        proration: String.to_existing_atom(proration),
+        operation_id: operation_id
+      )
+    end
+  rescue
+    ArgumentError -> {:error, :invalid_proration}
+  end
+
+  defp execute_action(
+         _subscription,
+         _customer,
          %{type: "comp_subscription", new_price_id: nil},
          _operation_id
        ) do
@@ -628,6 +887,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     |> assign(:subscription, subscription)
     |> assign(:customer, subscription.customer)
     |> assign(:timeline_events, timeline_events(subscription_id))
+    |> assign(:swap_plan_available, swap_plan_available?(subscription))
   end
 
   defp push_flash(socket, kind, message) do
@@ -649,16 +909,39 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   end
 
   defp action_confirmation_copy("cancel_now"),
-    do: "Cancel now will execute against the local billing projection and should be treated as an exceptional hard-stop path."
+    do:
+      "Cancel now will execute against the local billing projection and should be treated as an exceptional hard-stop path."
 
   defp action_confirmation_copy("cancel_at_period_end"),
-    do: "Cancel at period end will turn off renewal now and preserve access through the current billing period where the processor supports that semantic."
+    do:
+      "Cancel at period end will turn off renewal now and preserve access through the current billing period where the processor supports that semantic."
 
   defp action_confirmation_copy("pause"),
-    do: "Pause collection will only succeed where the processor supports Accrue's pause semantic; Braintree does not."
+    do:
+      "Pause collection will only succeed where the processor supports Accrue's pause semantic; Braintree does not."
 
   defp action_confirmation_copy("resume"),
-    do: "Resume will unpause a paused subscription or reverse a scheduled end when the processor and current state support it; Braintree does not provide that parity."
+    do:
+      "Resume will unpause a paused subscription or reverse a scheduled end when the processor and current state support it; Braintree does not provide that parity."
+
+  defp action_confirmation_copy("swap_plan"),
+    do:
+      "Swap plan stages a preview before commit where the provider supports upcoming-invoice previews."
+
+  defp action_confirmation_copy("update_quantity"),
+    do:
+      "Update quantity commits the supported single-item quantity change path. Use item-level actions once add-ons exist."
+
+  defp action_confirmation_copy("add_item"),
+    do: "Add item will attach a new subscription item on the supported Stripe/Fake lane."
+
+  defp action_confirmation_copy("update_item_quantity"),
+    do:
+      "Update item quantity will change the selected subscription item on the supported Stripe/Fake lane."
+
+  defp action_confirmation_copy("remove_item"),
+    do:
+      "Remove item will delete the selected subscription item on the supported Stripe/Fake lane."
 
   defp action_confirmation_copy(type),
     do: "#{humanize(type)} will execute against the local billing projection."
@@ -711,11 +994,65 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     end
   end
 
-  defp provider_action_guidance(%{processor: "braintree"}),
-    do: Copy.subscription_action_braintree_guidance()
+  defp provider_action_guidance(subscription) do
+    if braintree_processor?(subscription) do
+      Copy.subscription_action_braintree_guidance()
+    else
+      Copy.subscription_action_stripe_guidance() <>
+        " " <> AccrueAdmin.Copy.Subscription.subscription_action_supported_change_guidance()
+    end
+  end
 
-  defp provider_action_guidance(_subscription),
-    do: Copy.subscription_action_stripe_guidance()
+  defp maybe_attach_preview(
+         socket,
+         %{type: "swap_plan", new_price_id: new_price_id, proration: proration} = action
+       )
+       when is_binary(new_price_id) do
+    if preview_supported?(socket.assigns.subscription) do
+      case Billing.preview_upcoming_invoice(socket.assigns.subscription,
+             new_price_id: new_price_id,
+             proration: String.to_existing_atom(proration)
+           ) do
+        {:ok, %UpcomingInvoice{} = preview} -> Map.put(action, :preview, preview)
+        {:error, reason} -> Map.put(action, :preview_error, inspect(reason))
+      end
+    else
+      action
+    end
+  rescue
+    ArgumentError -> Map.put(action, :preview_error, inspect(:invalid_proration))
+  end
+
+  defp maybe_attach_preview(_socket, action), do: action
+
+  defp swap_plan_available?(subscription) do
+    if braintree_processor?(subscription) do
+      PlanResolver.configured?()
+    else
+      true
+    end
+  end
+
+  defp preview_supported?(subscription), do: not braintree_processor?(subscription)
+
+  defp quantity_change_available?(subscription) do
+    quantity_item_changes_available?(subscription) and single_item_subscription?(subscription)
+  end
+
+  defp quantity_item_changes_available?(subscription), do: not braintree_processor?(subscription)
+
+  defp single_item_subscription?(subscription) do
+    length(subscription.subscription_items || []) == 1
+  end
+
+  defp braintree_processor?(%{processor: processor}),
+    do: normalize_processor(processor) == "braintree"
+
+  defp braintree_processor?(_subscription), do: false
+
+  defp normalize_processor(processor) when is_atom(processor), do: Atom.to_string(processor)
+  defp normalize_processor(processor) when is_binary(processor), do: processor
+  defp normalize_processor(_processor), do: nil
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 
@@ -728,6 +1065,48 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp customer_label(customer),
     do: customer.name || customer.email || customer.processor_id || customer.id
+
+  defp subscription_item(%{subscription_items: items}, item_id) do
+    case Enum.find(items || [], &(to_string(&1.id) == item_id)) do
+      nil -> {:error, :missing_item_id}
+      item -> {:ok, item}
+    end
+  end
+
+  defp subscription_item_label(item) do
+    quantity = item.quantity || 1
+    "#{item.price_id || item.processor_id || item.id} · qty #{quantity}"
+  end
+
+  defp integer_param(nil), do: nil
+  defp integer_param(""), do: nil
+
+  defp integer_param(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {integer, ""} when integer > 0 -> integer
+      _ -> nil
+    end
+  end
+
+  defp integer_param(value) when is_integer(value) and value > 0, do: value
+  defp integer_param(_value), do: nil
+
+  defp preview_summary(%UpcomingInvoice{} = preview) do
+    line_count = length(preview.lines || [])
+    "#{line_count} preview line(s) captured before commit."
+  end
+
+  defp preview_line_summary(line) do
+    description = line.description || line.price_id || "Preview line"
+    quantity = if line.quantity, do: " · qty #{line.quantity}", else: ""
+    "#{description}#{quantity} · #{money_or_dash(line.amount)}"
+  end
+
+  defp money_or_dash(nil), do: "-"
+
+  defp money_or_dash(%Accrue.Money{} = money) do
+    "#{money.amount_minor} #{money.currency}"
+  end
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
