@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.36
 milestone_name: Dual-Provider Core Completion
 status: active
-last_updated: "2026-05-07T15:07:03Z"
+last_updated: "2026-05-07T15:30:00Z"
 last_activity: 2026-05-07
 progress:
   total_phases: 5
@@ -21,16 +21,16 @@ See: `.planning/PROJECT.md` (updated 2026-05-06)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.36 audit closeout — Phase 113 verification backfill is complete and Phase 114 verification backfill remains
+**Current focus:** v1.36 audit closeout — Phase 116 context is gathered and the Phase 114 verification backfill is the only remaining archival blocker
 
 ## Current Position
 
 Milestone: v1.36 — Dual-Provider Core Completion
-Phase: 115 — Phase 113 Verification Backfill
-Plan: 01 complete
-Status: Phase 115 complete; milestone audit closeout still open for Phase 116 / PROC-24
-Resume file: `.planning/ROADMAP.md`
-Last activity: 2026-05-07 — completed Plan 115-01 by restoring `113-VERIFICATION.md`, closing the PROC-22 / PROC-23 audit orphan gap, and refreshing the v1.36 milestone audit/state mirrors
+Phase: 116 — Phase 114 Verification Backfill
+Plan: context gathered
+Status: Phase 116 context captured; milestone audit closeout still open for `PROC-24`
+Resume file: `.planning/phases/116-phase-114-verification-backfill/116-CONTEXT.md`
+Last activity: 2026-05-07 — synthesized the Phase 116 verification-backfill context from the shipped Phase 114 artifacts, the current v1.36 milestone audit, and the completed Phase 115 backfill pattern
 
 ## Milestone Progress
 
@@ -73,4 +73,4 @@ Last activity: 2026-05-07 — completed Plan 115-01 by restoring `113-VERIFICATI
 - **2026-05-07:** Name and document the support-contract bundle in `scripts/ci/README.md` while keeping the existing targeted verifier split.
 - **2026-05-07:** Backfill `113-VERIFICATION.md` from shipped Phase 113 summaries plus same-day reruns, and treat audit-closeout phases as narrow evidence repair rather than reopened feature scope.
 
-**Next:** Execute Phase 116 to restore `114-VERIFICATION.md`, then rerun the v1.36 milestone audit before archival.
+**Next:** Plan and execute Phase 116 to restore `114-VERIFICATION.md`, then rerun the v1.36 milestone audit before archival.
