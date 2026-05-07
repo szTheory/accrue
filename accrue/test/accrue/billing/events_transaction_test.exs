@@ -9,9 +9,11 @@ defmodule Accrue.Billing.EventsTransactionTest do
 
   use Accrue.RepoCase, async: false
 
+  alias Accrue.Actor
   alias Accrue.Billing
   alias Accrue.Billing.Customer
   alias Accrue.Events.Event
+  alias Accrue.Processor
 
   # Test schema matching what BillableTest uses
   defmodule TestUser do
@@ -30,6 +32,11 @@ defmodule Accrue.Billing.EventsTransactionTest do
     end
 
     :ok = Accrue.Processor.Fake.reset()
+
+    on_exit(fn ->
+      Actor.put_operation_id(nil)
+    end)
+
     :ok
   end
 
@@ -107,10 +114,104 @@ defmodule Accrue.Billing.EventsTransactionTest do
   end
 
   # ---------------------------------------------------------------------------
-  # D2-07: update_customer metadata validation
+  # Phase 112: update_customer/2 remote write-through semantics
   # ---------------------------------------------------------------------------
 
-  describe "update_customer/2 metadata validation" do
+  describe "update_customer/2" do
+    test "writes through to the processor, updates the local projection, and records a bounded event" do
+      user = test_user()
+      {:ok, customer} = Billing.create_customer(user)
+      :ok = Actor.put_operation_id("cust-update-op-1")
+
+      assert {:ok, updated} =
+               Billing.update_customer(customer, %{
+                 name: "Updated Name",
+                 email: "updated@example.com",
+                 metadata: %{"tier" => "pro"}
+               })
+
+      assert updated.name == "Updated Name"
+      assert updated.email == "updated@example.com"
+      assert updated.metadata == %{"tier" => "pro"}
+
+      assert {:ok, remote_customer} = Processor.retrieve_customer(customer.processor_id, [])
+      assert remote_customer.name == "Updated Name"
+      assert remote_customer.email == "updated@example.com"
+      assert remote_customer.metadata == %{"tier" => "pro"}
+
+      event =
+        Accrue.TestRepo.one!(
+          from(e in Event,
+            where: e.subject_id == ^updated.id and e.type == "customer.updated",
+            order_by: [desc: e.inserted_at],
+            limit: 1
+          )
+        )
+
+      assert event.data["customer_id"] == updated.id
+      assert event.data["processor"] == "fake"
+      assert event.data["processor_id"] == updated.processor_id
+      assert event.data["operation_id"] == "cust-update-op-1"
+      assert Enum.sort(event.data["changed_fields"]) == ["email", "metadata", "name"]
+      refute inspect(event.data) =~ "updated@example.com"
+      refute inspect(event.data) =~ "Updated Name"
+    end
+
+    test "rejects unsupported attrs before processor drift" do
+      user = test_user()
+      {:ok, customer} = Billing.create_customer(user)
+      {:ok, before_remote_customer} = Processor.retrieve_customer(customer.processor_id, [])
+
+      assert {:error, {:unsupported_customer_update_attrs, ["preferred_locale"]}} =
+               Billing.update_customer(customer, %{preferred_locale: "en"})
+
+      assert {:ok, remote_customer} = Processor.retrieve_customer(customer.processor_id, [])
+      assert remote_customer == before_remote_customer
+
+      refute Accrue.TestRepo.one(
+               from(e in Event,
+                 where: e.subject_id == ^customer.id and e.type == "customer.updated",
+                 limit: 1
+               )
+             )
+    end
+
+    test "persists a sanitized local projection from the processor response" do
+      user = test_user()
+      {:ok, customer} = Billing.create_customer(user)
+
+      :ok =
+        Accrue.Processor.Fake.scripted_response(:update_customer, {
+          :ok,
+          %{
+            id: customer.processor_id,
+            object: "customer",
+            name: "Projection Name",
+            email: "projection@example.com",
+            metadata: %{"plan" => "plus"},
+            address: %{line1: "27 Fredrick Ave"},
+            shipping: %{name: "Projection Name"},
+            phone: "+1-555-0100",
+            tax: %{validate_location: "immediately"}
+          }
+        })
+
+      assert {:ok, updated} =
+               Billing.update_customer(customer, %{
+                 name: "Projection Name",
+                 metadata: %{"plan" => "plus"}
+               })
+
+      assert updated.name == "Projection Name"
+      assert updated.email == "projection@example.com"
+      assert updated.metadata == %{"plan" => "plus"}
+      assert updated.data["object"] == "customer" or updated.data[:object] == "customer"
+      refute Map.has_key?(updated.data, "address") or Map.has_key?(updated.data, :address)
+      refute Map.has_key?(updated.data, "shipping") or Map.has_key?(updated.data, :shipping)
+      refute Map.has_key?(updated.data, "phone") or Map.has_key?(updated.data, :phone)
+      refute Map.has_key?(updated.data, "tax") or Map.has_key?(updated.data, :tax)
+    end
+
     test "nested map in metadata raises validation error" do
       user = test_user()
       {:ok, customer} = Billing.create_customer(user)
@@ -135,6 +236,106 @@ defmodule Accrue.Billing.EventsTransactionTest do
 
       assert {:error, changeset} = result
       assert changeset.errors[:metadata]
+    end
+
+    test "returns a typed projection-sync failure and emits telemetry when remote success is followed by local write failure" do
+      user = test_user()
+      {:ok, customer} = Billing.create_customer(user)
+      :ok = Actor.put_operation_id("cust-update-op-stale")
+
+      stale_customer = Accrue.TestRepo.get!(Customer, customer.id)
+
+      customer
+      |> Customer.changeset(%{name: "Local drift"})
+      |> Accrue.TestRepo.update!()
+
+      parent = self()
+      handler_id = {__MODULE__, make_ref()}
+
+      :telemetry.attach(
+        handler_id,
+        [:accrue, :ops, :customer_projection_sync_failed],
+        fn event, measurements, metadata, _ ->
+          send(parent, {:telemetry, event, measurements, metadata})
+        end,
+        nil
+      )
+
+      on_exit(fn ->
+        :telemetry.detach(handler_id)
+      end)
+
+      assert {:error,
+              {:customer_projection_sync_failed,
+               %{
+                 customer_id: customer_id,
+                 processor: "fake",
+                 processor_id: processor_id,
+                 operation_id: "cust-update-op-stale",
+                 changed_fields: ["name"],
+                 failure_kind: :stale_local_projection,
+                 cause: %Ecto.Changeset{}
+               }}} = Billing.update_customer(stale_customer, %{name: "Remote Wins"})
+
+      assert customer_id == customer.id
+      assert processor_id == customer.processor_id
+
+      assert {:ok, remote_customer} = Processor.retrieve_customer(customer.processor_id, [])
+      assert remote_customer.name == "Remote Wins"
+
+      refreshed_customer = Accrue.TestRepo.get!(Customer, customer.id)
+      assert refreshed_customer.name == "Local drift"
+
+      assert_received {:telemetry, [:accrue, :ops, :customer_projection_sync_failed], %{count: 1},
+                       telemetry_meta}
+
+      assert telemetry_meta.customer_id == customer.id
+      assert telemetry_meta.processor == "fake"
+      assert telemetry_meta.processor_id == customer.processor_id
+      assert telemetry_meta.operation_id == "cust-update-op-stale"
+      assert telemetry_meta.changed_fields == ["name"]
+      assert telemetry_meta.failure_kind == :stale_local_projection
+
+      refute Accrue.TestRepo.one(
+               from(e in Event,
+                 where: e.subject_id == ^customer.id and e.type == "customer.updated",
+                 limit: 1
+               )
+             )
+    end
+  end
+
+  describe "update_customer_local/2" do
+    test "preserves explicit local-only customer maintenance without mutating the processor" do
+      user = test_user()
+      {:ok, customer} = Billing.create_customer(user)
+      :ok = Actor.put_operation_id("cust-local-op-1")
+
+      assert {:ok, updated} =
+               Billing.update_customer_local(customer, %{
+                 preferred_locale: "en",
+                 preferred_timezone: "America/New_York"
+               })
+
+      assert updated.preferred_locale == "en"
+      assert updated.preferred_timezone == "America/New_York"
+
+      assert {:ok, remote_customer} = Processor.retrieve_customer(customer.processor_id, [])
+      refute Map.has_key?(remote_customer, :preferred_locale)
+      refute Map.has_key?(remote_customer, :preferred_timezone)
+
+      event =
+        Accrue.TestRepo.one!(
+          from(e in Event,
+            where: e.subject_id == ^updated.id and e.type == "customer.local_updated",
+            order_by: [desc: e.inserted_at],
+            limit: 1
+          )
+        )
+
+      assert event.data["customer_id"] == updated.id
+      assert event.data["operation_id"] == "cust-local-op-1"
+      assert Enum.sort(event.data["changed_fields"]) == ["preferred_locale", "preferred_timezone"]
     end
   end
 

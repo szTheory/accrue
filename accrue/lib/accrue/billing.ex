@@ -21,7 +21,9 @@ defmodule Accrue.Billing do
   corresponding `accrue_events` entry are committed atomically.
   """
 
+  alias Accrue.Actor
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.Metadata
   alias Accrue.BillingPortal.Session
   alias Accrue.Checkout.Session, as: CheckoutSession
 
@@ -41,8 +43,11 @@ defmodule Accrue.Billing do
   alias Accrue.Events
   alias Accrue.Processor
   alias Accrue.Repo
+  alias Accrue.Telemetry.Ops
 
   import Ecto.Query, only: [from: 2]
+
+  @customer_update_supported_attrs [:name, :email, :metadata]
 
   # ---------------------------------------------------------------------------
   # Subscription management
@@ -871,8 +876,8 @@ defmodule Accrue.Billing do
   @doc """
   Updates a processor-backed customer's tax location with immediate validation.
 
-  This public path is distinct from `update_customer/2`, which remains a
-  local-only row update for non-processor customer maintenance.
+  This public path remains distinct from `update_customer/2`, which is the
+  bounded shared customer-update contract.
   """
   @spec update_customer_tax_location(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
   def update_customer_tax_location(%Customer{} = customer, attrs) when is_map(attrs) do
@@ -923,12 +928,12 @@ defmodule Accrue.Billing do
   # ---------------------------------------------------------------------------
 
   @doc """
-  Updates a `Customer` with the given attributes.
+  Updates a processor-backed `Customer` with the bounded shared contract.
 
-  Uses `Ecto.Multi` to atomically update the customer and record a
-  `"customer.updated"` event. Metadata is validated as a flat string
-  map (max 50 keys, etc.). Optimistic locking via `lock_version`
-  prevents torn writes.
+  Supported attrs are limited to `name`, `email`, and flat string
+  `metadata`. The processor is updated first, then the sanitized
+  processor response is projected into the local row and an
+  `"customer.updated"` event is recorded in the same local transaction.
 
   ## Examples
 
@@ -937,16 +942,76 @@ defmodule Accrue.Billing do
   @spec update_customer(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
   def update_customer(%Customer{} = customer, attrs) when is_map(attrs) do
     span_billing(:customer, :update, customer, [], fn ->
+      operation_id = Actor.current_operation_id!()
+
+      with {:ok, validated_attrs} <- validate_customer_update_attrs(attrs),
+           {:ok, processor_result} <-
+             Processor.update_customer(customer.processor_id, validated_attrs, []) do
+        customer_attrs = customer_projection_attrs(processor_result)
+        changed_fields = customer_update_field_names(validated_attrs)
+
+        Repo.transact(fn ->
+          with {:ok, updated} <-
+                 customer
+                 |> Customer.changeset(customer_attrs)
+                 |> Repo.update(stale_error_field: :lock_version),
+               {:ok, _event} <-
+                 Events.record(%{
+                   type: "customer.updated",
+                   subject_type: "Customer",
+                   subject_id: updated.id,
+                   data:
+                     customer_update_event_data(
+                       updated,
+                       changed_fields,
+                       operation_id
+                     )
+                 }) do
+            {:ok, updated}
+          else
+            {:error, reason} ->
+              emit_customer_projection_sync_failure(
+                customer,
+                changed_fields,
+                operation_id,
+                reason
+              )
+
+              {:error,
+               customer_projection_sync_failure(
+                 customer,
+                 changed_fields,
+                 operation_id,
+                 reason
+               )}
+          end
+        end)
+      end
+    end)
+  end
+
+  @doc """
+  Updates only the local `Customer` row for host-owned maintenance.
+
+  This explicit path preserves the broad local `Customer.changeset/2`
+  behavior without implying processor support.
+  """
+  @spec update_customer_local(%Customer{}, map()) :: {:ok, Customer.t()} | {:error, term()}
+  def update_customer_local(%Customer{} = customer, attrs) when is_map(attrs) do
+    span_billing(:customer, :local_update, customer, [], fn ->
+      operation_id = Actor.current_operation_id!()
+
       Repo.transact(fn ->
         with {:ok, updated} <- customer |> Customer.changeset(attrs) |> Repo.update(),
              {:ok, _event} <-
                Events.record(%{
-                 type: "customer.updated",
+                 type: "customer.local_updated",
                  subject_type: "Customer",
                  subject_id: updated.id,
                  data: %{
-                   changes:
-                     Map.take(attrs, [:metadata, :name, :email, "metadata", "name", "email"])
+                   customer_id: updated.id,
+                   operation_id: operation_id,
+                   changed_fields: local_customer_update_field_names(attrs)
                  }
                }) do
           {:ok, updated}
@@ -1018,6 +1083,97 @@ defmodule Accrue.Billing do
       "tax"
     ])
   end
+
+  defp validate_customer_update_attrs(attrs) when is_map(attrs) do
+    unsupported =
+      attrs
+      |> Map.keys()
+      |> Enum.reject(&supported_customer_update_attr?/1)
+      |> Enum.map(&customer_update_attr_name/1)
+      |> Enum.sort()
+
+    case unsupported do
+      [] ->
+        changeset =
+          {%{}, %{name: :string, email: :string, metadata: :map}}
+          |> Ecto.Changeset.cast(attrs, @customer_update_supported_attrs)
+          |> Metadata.validate_metadata(:metadata)
+
+        case Ecto.Changeset.apply_action(changeset, :update) do
+          {:ok, validated_attrs} -> {:ok, validated_attrs}
+          {:error, changeset} -> {:error, changeset}
+        end
+
+      unsupported ->
+        {:error, {:unsupported_customer_update_attrs, unsupported}}
+    end
+  end
+
+  defp supported_customer_update_attr?(key)
+       when key in [:name, :email, :metadata, "name", "email", "metadata"],
+       do: true
+
+  defp supported_customer_update_attr?(_key), do: false
+
+  defp customer_update_event_data(customer, changed_fields, operation_id) do
+    %{
+      customer_id: customer.id,
+      processor: customer.processor,
+      processor_id: customer.processor_id,
+      operation_id: operation_id,
+      changed_fields: changed_fields
+    }
+  end
+
+  defp customer_projection_sync_failure(customer, changed_fields, operation_id, reason) do
+    {:customer_projection_sync_failed,
+     %{
+       customer_id: customer.id,
+       processor: customer.processor,
+       processor_id: customer.processor_id,
+       operation_id: operation_id,
+       changed_fields: changed_fields,
+       failure_kind: customer_projection_sync_failure_kind(reason),
+       cause: reason
+     }}
+  end
+
+  defp emit_customer_projection_sync_failure(customer, changed_fields, operation_id, reason) do
+    Ops.emit(:customer_projection_sync_failed, %{count: 1}, %{
+      customer_id: customer.id,
+      processor: customer.processor,
+      processor_id: customer.processor_id,
+      operation_id: operation_id,
+      changed_fields: changed_fields,
+      failure_kind: customer_projection_sync_failure_kind(reason)
+    })
+  end
+
+  defp customer_projection_sync_failure_kind(%Ecto.Changeset{errors: errors}) do
+    if Keyword.has_key?(errors, :lock_version),
+      do: :stale_local_projection,
+      else: :local_persist_failed
+  end
+
+  defp customer_projection_sync_failure_kind(_reason), do: :local_persist_failed
+
+  defp customer_update_field_names(attrs) when is_map(attrs) do
+    @customer_update_supported_attrs
+    |> Enum.filter(&(Map.has_key?(attrs, &1) or Map.has_key?(attrs, Atom.to_string(&1))))
+    |> Enum.map(&Atom.to_string/1)
+  end
+
+  defp local_customer_update_field_names(attrs) when is_map(attrs) do
+    attrs
+    |> Map.keys()
+    |> Enum.map(&customer_update_attr_name/1)
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
+  defp customer_update_attr_name(key) when is_atom(key), do: Atom.to_string(key)
+  defp customer_update_attr_name(key) when is_binary(key), do: key
+  defp customer_update_attr_name(key), do: inspect(key)
 
   defp processor_tax_location_attrs(attrs) when is_map(attrs) do
     attrs
