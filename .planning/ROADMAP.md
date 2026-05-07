@@ -16,8 +16,10 @@
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 112 | Customer Update Contract Closure | Complete 2026-05-07: `Accrue.Billing.update_customer/2` is now fully first-party across capability labels, adapter truth, facade semantics, deterministic proof, and host-facing usage. | PROC-21 | 4 |
-| 113 | Cancellation Semantics Closure | Normalize the shipped Stripe/Fake/Braintree cancellation surface and capability labels so immediate cancel vs end-of-period cancel are explicit, truthful, and bounded. | PROC-22, PROC-23 | 5 |
-| 114 | Contract Drift Gate Closeout | Complete 2026-05-07: processor matrix, package docs, example-host proofs, and targeted drift gates now close the finalized dual-provider core contract. | PROC-24 | 4 |
+| 113 | Cancellation Semantics Closure | Complete 2026-05-07 (`113-01` through `113-03` complete); verification artifact backfill required before archive. | PROC-22, PROC-23 | 5 |
+| 114 | Contract Drift Gate Closeout | Complete 2026-05-07 (`114-01` through `114-03` complete); verification artifact backfill required before archive. | PROC-24 | 4 |
+| 115 | Phase 113 Verification Backfill | Create the missing Phase 113 verification artifact so the shipped cancellation semantics evidence satisfies the milestone audit chain. | PROC-22, PROC-23 | 3 |
+| 116 | Phase 114 Verification Backfill | Create the missing Phase 114 verification artifact so the support-contract closeout evidence satisfies the milestone audit chain. | PROC-24 | 3 |
 
 ### Phase 112: Customer Update Contract Closure
 
@@ -57,6 +59,30 @@
 
 **Outcome:** Completed in three waves. The processor support matrix is now the settled canonical wording spine, package docs and example-host proof stay thin and provider-honest, and the named support-contract bundle (`verify_processor_support_matrix.sh`, `verify_package_docs.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh`) is documented and merge-blocking before milestone closeout.
 
+### Phase 115: Phase 113 Verification Backfill
+
+**Status:** Planned 2026-05-07
+**Goal:** Restore the missing Phase 113 verification artifact so `PROC-22` and `PROC-23` are represented in the audit-required verification chain.
+
+**Success criteria:**
+1. `113-VERIFICATION.md` exists and explicitly traces `PROC-22` and `PROC-23`.
+2. The verification artifact cites the already-green cancellation, portal, admin, and host proof lanes accurately.
+3. The milestone audit no longer reports Phase 113 requirements as orphaned.
+
+**Gap closure:** Closes the `PROC-22` and `PROC-23` audit gaps caused solely by the missing Phase 113 verification report.
+
+### Phase 116: Phase 114 Verification Backfill
+
+**Status:** Planned 2026-05-07
+**Goal:** Restore the missing Phase 114 verification artifact so `PROC-24` is represented in the audit-required verification chain.
+
+**Success criteria:**
+1. `114-VERIFICATION.md` exists and explicitly traces `PROC-24`.
+2. The verification artifact cites the green support-contract verifier bundle and host-proof evidence accurately.
+3. The milestone audit no longer reports Phase 114 requirements as orphaned.
+
+**Gap closure:** Closes the `PROC-24` audit gap caused solely by the missing Phase 114 verification report.
+
 ## Recent Milestones
 
 - ✅ **v1.35 Dual-Provider Supportability Closure** — Phases **109–111** shipped **2026-05-07**. Provider-honest support contract mirrors, lifecycle semantics SSOT, and Braintree webhook/operator recovery proof. Archives: [milestones/v1.35-ROADMAP.md](/Users/jon/projects/accrue/.planning/milestones/v1.35-ROADMAP.md), [milestones/v1.35-REQUIREMENTS.md](/Users/jon/projects/accrue/.planning/milestones/v1.35-REQUIREMENTS.md).
@@ -67,9 +93,9 @@
 
 ## Notes
 
-- Phase numbering continues from v1.35, so the next planning phase starts at **112**.
+- Phase numbering now continues through the audit-closeout follow-up phases, so the next unused planning phase starts at **117**.
 - `FIN-03`, Hyperwallet reopening, advanced scheduling, preview/proration parity, and broader processor expansion remain out of scope for this milestone.
 - Earlier shipped phase detail remains preserved in per-milestone archives under `.planning/milestones/`.
 
 ---
-*Last updated: 2026-05-07 — Phase **114** completed; **v1.36** shipped.
+*Last updated: 2026-05-07 — audit gaps planned as Phases **115-116** before **v1.36** archival.
