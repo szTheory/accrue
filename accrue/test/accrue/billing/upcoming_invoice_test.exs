@@ -32,4 +32,27 @@ defmodule Accrue.Billing.UpcomingInvoiceTest do
     assert %Accrue.Money{} = preview.total
     assert %Accrue.Money{} = preview.subtotal
   end
+
+  test "preview remains available after supported quantity changes on the active-change lane" do
+    {:ok, customer} =
+      %Customer{}
+      |> Customer.changeset(%{
+        owner_type: "User",
+        owner_id: Ecto.UUID.generate(),
+        processor: "fake",
+        processor_id: "cus_fake_upcoming_quantity",
+        email: "upcoming-quantity@example.com"
+      })
+      |> Repo.insert()
+
+    {:ok, sub} = Billing.subscribe(customer, "price_basic")
+    {:ok, updated_sub} = Billing.update_quantity(sub, 3)
+
+    assert {:ok, %UpcomingInvoice{} = preview} =
+             Billing.preview_upcoming_invoice(updated_sub, proration: :create_prorations)
+
+    assert is_list(preview.lines)
+    assert %Accrue.Money{} = preview.total
+    assert %Accrue.Money{} = preview.subtotal
+  end
 end

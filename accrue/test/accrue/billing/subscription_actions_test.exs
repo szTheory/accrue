@@ -4,6 +4,61 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
   alias Accrue.Billing
   alias Accrue.Billing.Customer
 
+  defmodule BraintreePlanResolver do
+    @behaviour Accrue.PlanResolver
+
+    @impl Accrue.PlanResolver
+    def resolve_price("plan_basic") do
+      {:ok,
+       %{
+         price_id: "plan_basic",
+         processor: "braintree",
+         processor_plan_id: "plan_basic",
+         unit_amount_minor: 1_500,
+         currency: "USD",
+         billing_cycle: %{unit: :month, count: 1}
+       }}
+    end
+
+    def resolve_price("plan_pro") do
+      {:ok,
+       %{
+         price_id: "plan_pro",
+         processor: "braintree",
+         processor_plan_id: "plan_pro",
+         unit_amount_minor: 3_000,
+         currency: "USD",
+         billing_cycle: %{unit: :month, count: 1}
+       }}
+    end
+
+    def resolve_price("plan_yearly") do
+      {:ok,
+       %{
+         price_id: "plan_yearly",
+         processor: "braintree",
+         processor_plan_id: "plan_yearly",
+         unit_amount_minor: 25_000,
+         currency: "USD",
+         billing_cycle: %{unit: :year, count: 1}
+       }}
+    end
+
+    def resolve_price("plan_eur") do
+      {:ok,
+       %{
+         price_id: "plan_eur",
+         processor: "braintree",
+         processor_plan_id: "plan_eur",
+         unit_amount_minor: 2_800,
+         currency: "EUR",
+         billing_cycle: %{unit: :month, count: 1}
+       }}
+    end
+
+    def resolve_price(_price_id), do: {:error, :unknown_price_id}
+  end
+
   defmodule BraintreeGatewayStub do
     def create(params, _opts) do
       {:ok,
@@ -82,6 +137,7 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
   setup do
     previous = Application.get_env(:accrue, :processor)
     previous_gateway = Application.get_env(:accrue, :braintree_subscription_gateway)
+    previous_plan_resolver = Application.get_env(:accrue, :plan_resolver)
 
     on_exit(fn ->
       if previous do
@@ -94,6 +150,12 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
         Application.put_env(:accrue, :braintree_subscription_gateway, previous_gateway)
       else
         Application.delete_env(:accrue, :braintree_subscription_gateway)
+      end
+
+      if previous_plan_resolver do
+        Application.put_env(:accrue, :plan_resolver, previous_plan_resolver)
+      else
+        Application.delete_env(:accrue, :plan_resolver)
       end
     end)
 
@@ -209,9 +271,10 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
     assert %DateTime{} = canceled.ended_at
   end
 
-  test "Braintree swap_plan/3 rejects unsupported plan pricing semantics explicitly" do
+  test "Braintree swap_plan/3 succeeds when the host configures a resolver" do
     Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
     Application.put_env(:accrue, :braintree_subscription_gateway, BraintreeGatewayStub)
+    Application.put_env(:accrue, :plan_resolver, BraintreePlanResolver)
 
     customer = insert_braintree_customer!()
 
@@ -222,10 +285,92 @@ defmodule Accrue.Billing.SubscriptionActionsTest do
                payment_method: %{vault_acquisition: %{reference: "pm_token_123"}}
              )
 
-    assert {:error, %Accrue.APIError{code: "processor_operation_unsupported"} = error} =
+    assert {:ok, updated} =
              Billing.swap_plan(subscription, "plan_pro", proration: :none)
 
-    assert error.message =~ "requires an explicit subscription price update"
+    assert updated.id == subscription.id
+  end
+
+  test "Braintree swap_plan/3 fails cleanly when no plan resolver is configured" do
+    Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
+    Application.put_env(:accrue, :braintree_subscription_gateway, BraintreeGatewayStub)
+    Application.delete_env(:accrue, :plan_resolver)
+
+    customer = insert_braintree_customer!()
+
+    assert {:ok, subscription} =
+             Billing.subscribe(
+               customer,
+               "plan_basic",
+               payment_method: %{vault_acquisition: %{reference: "pm_token_123"}}
+             )
+
+    assert {:error, %Accrue.APIError{code: "plan_resolution_unavailable"} = error} =
+             Billing.swap_plan(subscription, "plan_pro", proration: :none)
+
+    assert error.message =~ "requires a configured :plan_resolver"
+  end
+
+  test "Braintree swap_plan/3 rejects billing-cycle mismatches explicitly" do
+    Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
+    Application.put_env(:accrue, :braintree_subscription_gateway, BraintreeGatewayStub)
+    Application.put_env(:accrue, :plan_resolver, BraintreePlanResolver)
+
+    customer = insert_braintree_customer!()
+
+    assert {:ok, subscription} =
+             Billing.subscribe(
+               customer,
+               "plan_basic",
+               payment_method: %{vault_acquisition: %{reference: "pm_token_123"}}
+             )
+
+    assert {:error, %Accrue.APIError{code: "invalid_request_error"} = error} =
+             Billing.swap_plan(subscription, "plan_yearly", proration: :none)
+
+    assert error.message =~ "only supports plan changes within the same billing cycle"
+  end
+
+  test "Braintree swap_plan/3 rejects currency mismatches explicitly" do
+    Application.put_env(:accrue, :processor, Accrue.Processor.Braintree)
+    Application.put_env(:accrue, :braintree_subscription_gateway, BraintreeGatewayStub)
+    Application.put_env(:accrue, :plan_resolver, BraintreePlanResolver)
+
+    customer = insert_braintree_customer!()
+
+    assert {:ok, subscription} =
+             Billing.subscribe(
+               customer,
+               "plan_basic",
+               payment_method: %{vault_acquisition: %{reference: "pm_token_123"}}
+             )
+
+    assert {:error, %Accrue.APIError{code: "invalid_request_error"} = error} =
+             Billing.swap_plan(subscription, "plan_eur", proration: :none)
+
+    assert error.message =~ "requires matching currencies"
+  end
+
+  test "update_quantity/3 stays in the official Fake-first active-change lane" do
+    Application.put_env(:accrue, :processor, Accrue.Processor.Fake)
+
+    {:ok, customer} =
+      %Customer{}
+      |> Customer.changeset(%{
+        owner_type: "User",
+        owner_id: Ecto.UUID.generate(),
+        processor: "fake",
+        processor_id: "cus_fake_quantity_guard",
+        email: "quantity-guard@example.com"
+      })
+      |> Repo.insert()
+
+    assert {:ok, subscription} = Billing.subscribe(customer, "price_basic")
+
+    assert {:ok, updated} = Billing.update_quantity(subscription, 4)
+
+    assert updated.id == subscription.id
+    assert Enum.map(updated.subscription_items, & &1.quantity) == [4]
   end
 
   test "Braintree update_quantity/3 rejects unsupported quantity semantics explicitly" do

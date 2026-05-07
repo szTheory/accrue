@@ -72,6 +72,29 @@ defmodule Accrue.Billing.SubscriptionItemsTest do
     end
   end
 
+  test "the official Fake-first lane supports quantity and item mutations together", %{sub: sub} do
+    assert {:ok, quantity_updated} = Billing.update_quantity(sub, 3)
+
+    [base_item] = quantity_updated.subscription_items
+    assert base_item.quantity == 3
+
+    assert {:ok, added_item} =
+             Billing.add_item(quantity_updated, "price_support_addon",
+               quantity: 2,
+               proration: :create_prorations
+             )
+
+    assert {:ok, resized_item} =
+             Billing.update_item_quantity(added_item, 5, proration: :create_prorations)
+
+    assert resized_item.quantity == 5
+    assert resized_item.price_id == "price_support_addon"
+
+    assert {:ok, removed_item} = Billing.remove_item(resized_item, proration: :none)
+    assert removed_item.id == resized_item.id
+    refute Repo.get(SubscriptionItem, resized_item.id)
+  end
+
   describe "update_item_quantity/3" do
     test "updates local SubscriptionItem quantity with explicit :proration", %{sub: sub} do
       [item | _] = sub.subscription_items

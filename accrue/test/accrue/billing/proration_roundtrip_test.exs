@@ -1,7 +1,7 @@
 defmodule Accrue.Billing.ProrationRoundtripTest do
   @moduledoc """
-  Quick task 260414-l9q: Fake-asserted correctness test for Phase 3
-  HUMAN-UAT Item 3 (proration preview vs. committed round-trip).
+  Quick task 260414-l9q: Fake-asserted correctness test for the official
+  active-subscription-change preview-before-commit lane.
 
   ## Scope & limitations
 
@@ -57,7 +57,8 @@ defmodule Accrue.Billing.ProrationRoundtripTest do
     %{customer: customer, sub: sub}
   end
 
-  test "preview → swap_plan → preview round-trip stays coherent", %{sub: sub} do
+  test "preview → swap_plan → preview round-trip stays coherent for the official change bundle",
+       %{sub: sub} do
     # --- Leg 1: preview the swap ------------------------------------
     assert {:ok, %UpcomingInvoice{} = preview} =
              Billing.preview_upcoming_invoice(sub,
