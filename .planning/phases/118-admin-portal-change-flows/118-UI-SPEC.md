@@ -1,10 +1,11 @@
 ---
 phase: 118
 slug: admin-portal-change-flows
-status: draft
+status: approved
 shadcn_initialized: false
 preset: not applicable
 created: 2026-05-07
+reviewed_at: 2026-05-07T15:54:34-0400
 package: accrue_admin + accrue_portal
 mounts_alongside: shared host Phoenix app
 ---
@@ -117,6 +118,7 @@ Status color rules:
 ### Shared shell posture
 
 - The phase introduces one **conceptual** change-workflow family across admin and portal, but keeps actual mutations explicit.
+- The primary focal point of the main change screen is always the **change-workflow shell header plus active subflow selector**. Users should understand "what kind of change am I making?" before they are asked to review preview math or confirm a mutation.
 - Preview is a separate step from commit wherever `preview_upcoming_invoice/2` is supported.
 - Braintree never shows a fake preview control.
 - Unsupported controls must remain visible as unavailable states with adjacent explanation, not silently disappear.
@@ -159,6 +161,7 @@ Status color rules:
 ### Preview card family
 
 - Preview UI uses a shared summary/detail component family across admin and portal.
+- Once a preview has been generated, the **preview summary card** becomes the secondary focal point within the shell and should sit visually above raw line-item detail and above any tertiary helper copy.
 - Summary-first content order is fixed:
   1. estimated immediate charge or credit
   2. next renewal amount
@@ -173,6 +176,7 @@ Status color rules:
 
 - Quantity change is the lightest editable subflow.
 - Prefer a minus button, inline numeric field, and plus button on portal; admin may use numeric input plus explicit update action.
+- Minus and plus controls must never be icon-only without an accessible name. Use visible adjacent labels where practical, otherwise require `aria-label="Decrease quantity"` and `aria-label="Increase quantity"` on the stepper triggers.
 - Quantity cannot drop below `1`.
 - The preview CTA is disabled until the entered quantity differs from the current value.
 - If the subscription shape is not single-item, show a non-editable explanation instead of a broken numeric control.
@@ -193,6 +197,7 @@ Status color rules:
   - what the user should do next
 - Admin next steps may point to setup or operator workflow.
 - Portal next steps may point to contacting support or managing the change through the account team/host app.
+- Disclosure triggers such as **View estimate details** must expose a clear text label at all times; if a chevron icon is used, it is decorative only and the clickable control must keep an accessible expanded/collapsed name.
 
 ### Feedback and pending states
 
@@ -250,11 +255,11 @@ Primary labels by surface:
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-05-07
