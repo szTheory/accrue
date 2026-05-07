@@ -121,7 +121,7 @@ Use `Oban.Testing` for queue assertions and `perform_job/2` when the test needs 
 
 Use the Fake Processor for normal test coverage, then keep a small provider-parity suite for behaviors where Stripe itself is the contract: SCA/3DS cards, Stripe test clocks, hosted checkout redirect behavior, and webhook signatures. Tag those tests separately so local development and CI do not depend on network calls by default.
 
-For the staged processor-expansion track, Fake is the merge-blocking source of truth for the official gateway subscription core slice: direct subscription creation, vault acquisition, webhook verify/parse, and lifecycle projection rows. Provider-backed Stripe and Braintree checks stay in the explicitly advisory provider-parity lane. Checkout and billing portal remain Stripe-only.
+For the finalized `gateway subscription core` contract, Fake is the merge-blocking source of truth: direct subscription creation, vault acquisition, webhook verify/parse, lifecycle projection rows, and the bounded cancellation/customer-update semantics the public docs surface. Provider-backed Stripe and Braintree checks stay in the explicitly advisory provider-parity lane. Checkout and billing portal use the same shared facade across both providers, but the behavior stays provider-honest: Stripe returns upstream hosted URLs, while Braintree returns mounted local checkout and portal URLs. For the full contract, see the canonical [`processor-support-matrix.md`](../../.planning/processor-support-matrix.md).
 
 The exception is documentation and recovery semantics that must stay
 provider-honest. Braintree supportability is still proved locally: replay

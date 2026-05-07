@@ -23,6 +23,8 @@ Provider behavior stays honest across the shared facade:
 | Stripe | Upstream hosted URL | Upstream hosted URL |
 | Braintree | Mounted local URL | Mounted local URL |
 
+This guide mirrors only the setup-critical needles from the canonical [processor support matrix](../../.planning/processor-support-matrix.md): the shared checkout and portal facade stays provider-honest, `update_customer/2` remains a bounded provider-neutral write-through, `cancel/2` is the shared immediate path, and `cancel_at_period_end/2` stays a Fake/Stripe-only scheduled-end path.
+
 ## How to enter this guide
 
 This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the **same** pull request (**D-02**). Maintainer checklist (**INT-11**): same-PR capsule discipline lives in the contributor map [`scripts/ci/README.md`](../../scripts/ci/README.md) — search for **First Hour + host README capsule parity**.
@@ -51,7 +53,8 @@ When you are preparing a **real** deploy (not the demo loop), walk [Production r
 
 Stay on the default Stripe-hosted path unless you already know you need
 Braintree. Stripe remains the fastest first-user production route through this
-guide.
+guide, while the bounded Braintree branch keeps the same public facade with
+mounted local checkout and portal behavior.
 
 If you are using Braintree instead, branch early and treat the mounted portal
 contract as part of initial setup, not a later polish task:
