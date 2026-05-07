@@ -27,14 +27,22 @@ defmodule Accrue.Processor.Capabilities do
       fetch: "all first-party",
       cancel: "all first-party",
       lifecycle_webhook_projection: "all first-party",
-      update: "staged first-party target",
+      update: "all first-party",
+      swap_plan: "official active-subscription-change",
+      update_quantity: "official active-subscription-change",
       cancel_at_period_end: "staged first-party target",
       cancel_immediately: "all first-party",
       pause: "out of slice",
       resume: "out of slice"
     },
+    subscription_item: %{
+      add: "official active-subscription-change",
+      remove: "official active-subscription-change",
+      update_quantity: "official active-subscription-change"
+    },
     invoice: %{
-      lifecycle_webhook_projection: "all first-party"
+      lifecycle_webhook_projection: "all first-party",
+      preview_upcoming_invoice: "official active-subscription-change"
     },
     checkout: %{
       create: "first-party local portal",
@@ -48,6 +56,45 @@ defmodule Accrue.Processor.Capabilities do
     webhook: %{
       verify: "all first-party",
       parse: "all first-party"
+    }
+  }
+
+  @provider_support_labels %{
+    subscription: %{
+      swap_plan: %{
+        fake: "testing/local-only",
+        stripe: "native",
+        braintree: "bounded first-party"
+      },
+      update_quantity: %{
+        fake: "testing/local-only",
+        stripe: "native",
+        braintree: "unsupported"
+      }
+    },
+    subscription_item: %{
+      add: %{
+        fake: "testing/local-only",
+        stripe: "native",
+        braintree: "unsupported"
+      },
+      remove: %{
+        fake: "testing/local-only",
+        stripe: "native",
+        braintree: "unsupported"
+      },
+      update_quantity: %{
+        fake: "testing/local-only",
+        stripe: "native",
+        braintree: "unsupported"
+      }
+    },
+    invoice: %{
+      preview_upcoming_invoice: %{
+        fake: "testing/local-only",
+        stripe: "native",
+        braintree: "unsupported"
+      }
     }
   }
 
@@ -78,6 +125,18 @@ defmodule Accrue.Processor.Capabilities do
 
   def support_label(path) when is_list(path) do
     case get_in(@support_labels, path) do
+      label when is_binary(label) -> label
+      _ -> nil
+    end
+  end
+
+  @spec provider_support_label(atom(), atom() | [atom()]) :: String.t() | nil
+  def provider_support_label(provider, path) when is_atom(path),
+    do: provider_support_label(provider, [path])
+
+  def provider_support_label(provider, path)
+      when is_atom(provider) and is_list(path) do
+    case get_in(@provider_support_labels, path ++ [provider]) do
       label when is_binary(label) -> label
       _ -> nil
     end

@@ -54,7 +54,7 @@ defmodule Accrue.Processor.CapabilitiesTest do
     end
   end
 
-  test "known adapters report the promoted immediate-cancel contract and split scheduled-end row explicitly" do
+  test "known adapters report the promoted active-change labels and explicit Braintree bounds" do
     stripe_caps = Capabilities.for(Accrue.Processor.Stripe)
     braintree_caps = Capabilities.for(Accrue.Processor.Braintree)
 
@@ -71,9 +71,76 @@ defmodule Accrue.Processor.CapabilitiesTest do
     assert get_in(braintree_caps, [:subscription, :cancel_immediately]) == true
     assert get_in(braintree_caps, [:subscription, :cancel_at_period_end]) == false
     assert get_in(braintree_caps, [:subscription, :pause]) == false
-    assert Capabilities.support_label([:subscription, :update]) == "staged first-party target"
+    assert Capabilities.support_label([:subscription, :update]) == "all first-party"
+    assert Capabilities.support_label([:subscription, :swap_plan]) ==
+             "official active-subscription-change"
+
+    assert Capabilities.support_label([:subscription, :update_quantity]) ==
+             "official active-subscription-change"
+
+    assert Capabilities.support_label([:subscription_item, :add]) ==
+             "official active-subscription-change"
+
+    assert Capabilities.support_label([:subscription_item, :remove]) ==
+             "official active-subscription-change"
+
+    assert Capabilities.support_label([:subscription_item, :update_quantity]) ==
+             "official active-subscription-change"
+
+    assert Capabilities.support_label([:invoice, :preview_upcoming_invoice]) ==
+             "official active-subscription-change"
+
     assert Capabilities.support_label([:subscription, :cancel]) == "all first-party"
     assert Capabilities.support_label([:subscription, :cancel_immediately]) == "all first-party"
+    assert Capabilities.provider_support_label(:stripe, [:subscription, :swap_plan]) == "native"
+
+    assert Capabilities.provider_support_label(:braintree, [:subscription, :swap_plan]) ==
+             "bounded first-party"
+
+    assert Capabilities.provider_support_label(:fake, [:subscription, :swap_plan]) ==
+             "testing/local-only"
+
+    assert Capabilities.provider_support_label(:stripe, [:subscription, :update_quantity]) ==
+             "native"
+
+    assert Capabilities.provider_support_label(:fake, [:subscription, :update_quantity]) ==
+             "testing/local-only"
+
+    assert Capabilities.provider_support_label(:braintree, [:subscription, :update_quantity]) ==
+             "unsupported"
+
+    assert Capabilities.provider_support_label(:stripe, [:subscription_item, :add]) == "native"
+    assert Capabilities.provider_support_label(:fake, [:subscription_item, :add]) == "testing/local-only"
+
+    assert Capabilities.provider_support_label(:braintree, [:subscription_item, :add]) ==
+             "unsupported"
+
+    assert Capabilities.provider_support_label(:stripe, [:subscription_item, :remove]) ==
+             "native"
+
+    assert Capabilities.provider_support_label(:fake, [:subscription_item, :remove]) ==
+             "testing/local-only"
+
+    assert Capabilities.provider_support_label(:braintree, [:subscription_item, :remove]) ==
+             "unsupported"
+
+    assert Capabilities.provider_support_label(:stripe, [:subscription_item, :update_quantity]) ==
+             "native"
+
+    assert Capabilities.provider_support_label(:fake, [:subscription_item, :update_quantity]) ==
+             "testing/local-only"
+
+    assert Capabilities.provider_support_label(:braintree, [:subscription_item, :update_quantity]) ==
+             "unsupported"
+
+    assert Capabilities.provider_support_label(:stripe, [:invoice, :preview_upcoming_invoice]) ==
+             "native"
+
+    assert Capabilities.provider_support_label(:braintree, [:invoice, :preview_upcoming_invoice]) ==
+             "unsupported"
+
+    assert Capabilities.provider_support_label(:fake, [:invoice, :preview_upcoming_invoice]) ==
+             "testing/local-only"
 
     assert Capabilities.support_label([:subscription, :cancel_at_period_end]) ==
              "staged first-party target"

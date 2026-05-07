@@ -42,10 +42,16 @@ The first official dual-provider promise is **gateway subscription core**:
 | subscription.direct_create | Required | Required | Required target | all first-party |
 | subscription.fetch | Required | Required | Required target | all first-party |
 | subscription.cancel | Supported | Supported | Supported | all first-party |
+| subscription.swap_plan | testing/local-only | native | bounded first-party | official active-subscription-change |
+| subscription.update_quantity | testing/local-only | native | unsupported | official active-subscription-change |
+| subscription_item.add | testing/local-only | native | unsupported | official active-subscription-change |
+| subscription_item.remove | testing/local-only | native | unsupported | official active-subscription-change |
+| subscription_item.update_quantity | testing/local-only | native | unsupported | official active-subscription-change |
 | subscription.cancel_immediately | Supported | Supported | Supported | all first-party |
 | subscription.cancel_at_period_end | Supported | Supported | Unsupported | staged first-party target |
 | subscription.lifecycle_webhook_projection | Deterministic projection | Supported | Required target | all first-party |
 | invoice.lifecycle_webhook_projection | Deterministic projection | Supported | Required target | all first-party |
+| invoice.preview_upcoming_invoice | testing/local-only | native | unsupported | official active-subscription-change |
 | webhook.verify | Required | Required | Required target | all first-party |
 | webhook.parse | Required | Required | Required target | all first-party |
 | checkout.hosted_handoff | Local proof helper | Supported | Supported via first-party local checkout | all first-party |
@@ -53,7 +59,7 @@ The first official dual-provider promise is **gateway subscription core**:
 
 The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs through Accrue-owned local UI.
 
-The shipped Braintree slice includes explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is the shipped immediate-cancel path across Fake, Stripe, and Braintree, while `cancel_at_period_end/2` remains a Stripe/Fake-only scheduled-end path and quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
+The shipped Braintree slice includes explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is the shipped immediate-cancel path across Fake, Stripe, and Braintree, `swap_plan/3` is a bounded first-party path when the host configures `:plan_resolver`, and `preview_upcoming_invoice/2` remains the canonical path where supported rather than implied cross-provider parity. `cancel_at_period_end/2` remains a Stripe/Fake-only scheduled-end path. Quantity updates and subscription-item mutations are official active-subscription-change APIs on Stripe/Fake, while Braintree keeps those rows explicitly unsupported with typed errors instead of implied parity. Pause/unpause and resume remain out of slice.
 
 ## Public facade API mapping
 
@@ -62,6 +68,8 @@ The shipped Braintree slice includes explicit subscription mutation semantics at
 | `Accrue.Billing.subscribe/3` | all first-party | Primary gateway-subscription-core facade for the second-provider slice. |
 | `Accrue.Billing.get_subscription/2` | all first-party | Read side required for lifecycle truth on the supported slice. |
 | `Accrue.Billing.cancel/2` | all first-party | Immediate cancellation is the shared shipped path across Fake, Stripe, and Braintree. |
+| `Accrue.Billing.swap_plan/3` | official active-subscription-change | Official active-subscription-change facade for plan changes: Stripe is native, Fake is testing/local-only, and Braintree is bounded first-party only when the host provides `:plan_resolver`. |
+| `Accrue.Billing.update_quantity/3` | official active-subscription-change | Official quantity-change facade for single-item subscriptions on Stripe/Fake. Braintree explicitly rejects this semantic with a typed unsupported error. |
 | `Accrue.Billing.cancel_at_period_end/2` | staged first-party target | Scheduled-end cancellation remains supported on Fake and Stripe; Braintree rejects it with a typed unsupported error and a host-owned next-step hint. |
 | `Accrue.Billing.create_customer/1` | all first-party | Customer creation remains part of the supported facade boundary. |
 | `Accrue.Billing.update_customer/2` | all first-party | Bounded remote write-through facade for the shared `name`, `email`, and flat `metadata` contract only. |
@@ -72,8 +80,11 @@ The shipped Braintree slice includes explicit subscription mutation semantics at
 | `Accrue.Billing.list_payment_methods/2` | all first-party | Local projection read path; provider fetches are reserved for write-through sync and repair. |
 | `Accrue.Billing.create_checkout_session/2` | all first-party | Stripe returns upstream hosted URLs; Braintree returns mounted first-party local checkout URLs. |
 | `Accrue.Billing.create_billing_portal_session/2` | all first-party | Stripe returns upstream hosted URLs; Braintree returns mounted first-party local portal URLs. |
+| `Accrue.Billing.add_item/3` | official active-subscription-change | Official subscription-item add facade on Stripe/Fake. Braintree remains explicitly unsupported. |
+| `Accrue.Billing.remove_item/2` | official active-subscription-change | Official subscription-item remove facade on Stripe/Fake. Braintree remains explicitly unsupported. |
+| `Accrue.Billing.update_item_quantity/3` | official active-subscription-change | Official subscription-item quantity facade on Stripe/Fake. Braintree remains explicitly unsupported. |
 | `Accrue.Billing.subscribe_via_schedule/3` | out of slice | Advanced subscription scheduling is intentionally deferred. |
-| `Accrue.Billing.preview_upcoming_invoice/2` | out of slice | Preview/proration parity is not part of gateway subscription core. |
+| `Accrue.Billing.preview_upcoming_invoice/2` | official active-subscription-change | Official active-subscription-change preview facade and the canonical path where supported before committing a swap. Stripe is native, Fake is testing/local-only proof, and Braintree is explicitly unsupported. |
 
 ## Explicit out-of-slice surfaces
 
@@ -81,7 +92,7 @@ The following remain intentionally **out of slice** for first-party second-provi
 
 - embedded checkout
 - setup/payment intents
-- advanced subscription mutation parity such as swaps, quantity updates, pause/resume, schedules, previews, and proration
+- pause/resume, schedules beyond the bounded swap contract, and invented preview equivalents
 - refunds
 - coupons
 - promotion codes
