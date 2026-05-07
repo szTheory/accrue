@@ -270,19 +270,16 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
     assert html =~ "Cancel now"
-    assert html =~ "Cancel at period end"
+    refute html =~ "Cancel at period end"
+    refute html =~ "Pause collection"
+    refute html =~ "Resume"
+    assert has_element?(view, "[data-role='cancel-now-form']")
+    refute has_element?(view, "[data-role='cancel-at-period-end-form']")
+    refute has_element?(view, "[data-role='pause-form']")
+    refute has_element?(view, "[data-role='resume-form']")
 
     assert html =~
              "Braintree supports immediate cancellation through Accrue.Billing.cancel/2. Scheduled end-of-period, reversible cancellation, pause, and unpause semantics remain host-owned or unsupported."
-
-    html =
-      render_submit(
-        element(view, "[data-role='cancel-at-period-end-form']"),
-        %{"action_type" => "cancel_at_period_end"}
-      )
-
-    assert html =~
-             "Cancel at period end will turn off renewal now and preserve access through the current billing period where the processor supports that semantic."
   end
 
   defp insert_customer(attrs) do

@@ -248,7 +248,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </button>
               </form>
 
-              <form phx-submit="prepare_action" data-role="cancel-at-period-end-form">
+              <form
+                :if={@subscription.processor != "braintree"}
+                phx-submit="prepare_action"
+                data-role="cancel-at-period-end-form"
+              >
                 <input type="hidden" name="action_type" value="cancel_at_period_end" />
                 <.source_event_select events={@timeline_events} />
                 <button type="submit" class="ax-button ax-button-secondary">
@@ -256,7 +260,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </button>
               </form>
 
-              <form phx-submit="prepare_action" data-role="pause-form">
+              <form
+                :if={@subscription.processor != "braintree"}
+                phx-submit="prepare_action"
+                data-role="pause-form"
+              >
                 <input type="hidden" name="action_type" value="pause" />
                 <label class="ax-label" for="pause-behavior">Pause behavior</label>
                 <select id="pause-behavior" name="pause_behavior" class="ax-select">
@@ -270,7 +278,11 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                 </button>
               </form>
 
-              <form phx-submit="prepare_action" data-role="resume-form">
+              <form
+                :if={@subscription.processor != "braintree"}
+                phx-submit="prepare_action"
+                data-role="resume-form"
+              >
                 <input type="hidden" name="action_type" value="resume" />
                 <.source_event_select events={@timeline_events} />
                 <button type="submit" class="ax-button ax-button-secondary">

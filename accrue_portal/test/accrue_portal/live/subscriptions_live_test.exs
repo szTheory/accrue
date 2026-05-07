@@ -63,4 +63,36 @@ defmodule AccruePortal.SubscriptionsLiveTest do
     assert html =~ "Past due"
     assert html =~ "Past due. Access may change if payment recovery does not complete."
   end
+
+  test "subscriptions list routes Braintree cancellation through the detail page instead of a one-click hard stop",
+       %{conn: conn} do
+    user = user_fixture()
+
+    %{customer: customer} =
+      Accrue.Test.Factory.customer(%{
+        owner_type: AccruePortal.Fixtures.TestUser.__accrue__(:billable_type),
+        owner_id: user.id,
+        email: "portal-braintree-list-#{user.id}@example.com",
+        processor: "braintree",
+        processor_id: "cus_bt_list_#{System.unique_integer([:positive])}"
+      })
+
+    subscription =
+      read_only_subscription_fixture!(customer, %{
+        customer_id: customer.id,
+        processor: "braintree",
+        processor_id: "sub_bt_list_#{System.unique_integer([:positive])}",
+        status: :active
+      })
+
+    conn = sign_in_conn(conn, user)
+
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions")
+
+    assert html =~ subscription.processor_id
+    assert html =~ "Braintree immediate cancellation can end access now."
+    assert html =~ ~s(href="/billing/subscriptions/#{subscription.id}")
+    refute html =~ ~s(phx-value-id="#{subscription.id}")
+    refute html =~ "Cancel now"
+  end
 end

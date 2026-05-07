@@ -64,6 +64,7 @@ defmodule AccruePortal.Live.SubscriptionsLive do
                 {Copy.subscriptions_view_cta()}
               </a>
               <button
+                :if={subscription.processor != "braintree"}
                 phx-click="cancel"
                 phx-value-id={subscription.id}
                 class="portal-button-secondary"
@@ -77,9 +78,6 @@ defmodule AccruePortal.Live.SubscriptionsLive do
     </main>
     """
   end
-
-  defp cancel_subscription(%Subscription{processor: "braintree"} = subscription),
-    do: Billing.cancel(subscription)
 
   defp cancel_subscription(%Subscription{} = subscription),
     do: Billing.cancel_at_period_end(subscription)
