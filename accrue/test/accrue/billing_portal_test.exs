@@ -117,13 +117,20 @@ defmodule Accrue.BillingPortalTest do
       assert lifecycle =~ "past_due"
       assert lifecycle =~ "ended"
       assert lifecycle =~ "host-owned"
+      assert lifecycle =~ "Braintree: `native`"
+      assert lifecycle =~ "Braintree supports this path through `Accrue.Billing.cancel/2` today."
 
       assert checklist =~ "lifecycle_semantics.md"
       assert checklist =~ "at_period_end"
+      assert checklist =~ "host-owned seam above `Accrue.Billing.cancel/2`"
       assert braintree =~ "lifecycle_semantics.md"
+      assert braintree =~ "The supported first-party Braintree cancellation path is immediate"
+      assert braintree =~ "`Accrue.Billing.cancel/2`"
       assert braintree =~ ~r/cancel renewal/i
+      assert braintree =~ "host-owned policy seam"
       refute braintree =~ "Offer immediate cancellations using Accrue's cancel functions"
       refute braintree =~ "Braintree supports immediate cancellation"
+      refute braintree =~ "Braintree supports `cancel_at_period_end/2`"
     end
 
     test "webhook and operator guides keep the Braintree replay and recovery contract adjacent" do

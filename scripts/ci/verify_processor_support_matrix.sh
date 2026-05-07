@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shift-left gate: Phase 94 processor-support matrix literals must stay aligned with strategy and CI.
+# Shift-left gate: processor-support matrix literals must stay aligned with strategy and CI.
 set -euo pipefail
 
 repo_root="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -22,11 +22,16 @@ require_substring() {
 require_substring "| Capability | Fake | Stripe | Braintree | Public label |" "matrix header"
 require_substring "gateway subscription core" "official capability slice"
 require_substring "subscription.direct_create" "direct subscription capability row"
+require_substring "| subscription.cancel | Supported | Supported | Supported | all first-party |" "immediate cancellation capability row"
+require_substring "| subscription.cancel_immediately | Supported | Supported | Supported | all first-party |" "immediate cancellation alias capability row"
+require_substring "| subscription.cancel_at_period_end | Supported | Supported | Unsupported | staged first-party target |" "scheduled-end split capability row"
 require_substring "subscription.lifecycle_webhook_projection" "subscription lifecycle projection row"
 require_substring "invoice.lifecycle_webhook_projection" "invoice lifecycle projection row"
 require_substring "checkout.hosted_handoff" "checkout hosted handoff row"
 require_substring "billing_portal.hosted_self_serve" "billing portal self-serve row"
 require_substring 'Accrue.Billing.subscribe/3' "subscribe facade mapping"
+require_substring '| `Accrue.Billing.cancel/2` | all first-party | Immediate cancellation is the shared shipped path across Fake, Stripe, and Braintree. |' "cancel facade mapping"
+require_substring '| `Accrue.Billing.cancel_at_period_end/2` | staged first-party target | Scheduled-end cancellation remains supported on Fake and Stripe; Braintree rejects it with a typed unsupported error and a host-owned next-step hint. |' "cancel-at-period-end facade mapping"
 require_substring 'Accrue.Billing.create_checkout_session/2' "checkout facade mapping"
 require_substring 'Accrue.Billing.create_billing_portal_session/2' "billing portal facade mapping"
 require_substring "Supported via first-party local checkout" "braintree local checkout support label"
@@ -55,6 +60,26 @@ fi
 
 if grep -Fq "| billing_portal.hosted_self_serve | Local proof helper | Supported | No | Stripe-only |" "${matrix}"; then
   echo "verify_processor_support_matrix: stale Stripe-only billing portal row still present" >&2
+  exit 1
+fi
+
+if grep -Fq "| subscription.cancel | Supported | Supported | Supported | staged first-party target |" "${matrix}"; then
+  echo "verify_processor_support_matrix: immediate cancellation row drifted back to staged" >&2
+  exit 1
+fi
+
+if grep -Fq "| subscription.cancel_immediately | Supported | Supported | Supported | staged first-party target |" "${matrix}"; then
+  echo "verify_processor_support_matrix: immediate cancellation alias row drifted back to staged" >&2
+  exit 1
+fi
+
+if grep -Fq "| subscription.cancel_at_period_end | Supported | Supported | Supported | all first-party |" "${matrix}"; then
+  echo "verify_processor_support_matrix: Braintree scheduled-end parity was reintroduced" >&2
+  exit 1
+fi
+
+if grep -Fq '| `Accrue.Billing.cancel_at_period_end/2` | all first-party |' "${matrix}"; then
+  echo "verify_processor_support_matrix: scheduled-end facade mapping drifted to first-party parity" >&2
   exit 1
 fi
 
