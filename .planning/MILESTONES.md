@@ -1,5 +1,35 @@
 # Milestones
 
+## v1.36 Dual-Provider Core Completion (Shipped: 2026-05-07)
+
+**Planning opened:** 2026-05-06
+
+**Phases completed:** **5** phases (**112–116**).
+
+**Theme:** Close the remaining staged rows in the official Stripe + Braintree gateway-subscription-core contract, then restore the missing verification artifacts so the shipped support surface, planning mirrors, and drift gates all tell one merge-blocking story.
+
+**Depends on:** **v1.35** shipped.
+
+**Key accomplishments:**
+
+- **112:** **PROC-21** — promoted `Accrue.Billing.update_customer/2` to an explicit bounded first-party contract across Fake, Stripe, and Braintree, with host/helper proof.
+- **113:** **PROC-22..PROC-23** — promoted immediate cancellation to first-party support, kept Braintree scheduled-end semantics explicit, and aligned docs, portal/admin copy, and drift gates to the same provider-honest contract.
+- **114:** **PROC-24** — settled the canonical support matrix, thinned package/example-host mirrors to point back to it, and documented the support-contract verifier bundle and CI home.
+- **115–116:** restored `113-VERIFICATION.md` and `114-VERIFICATION.md`, cleared the audit orphan gaps, and flipped the `v1.36` milestone audit to `passed`.
+
+**Outcome:** Phases **112–116** closed the **v1.36** Dual-Provider Core Completion milestone with all `PROC-21..24` requirements satisfied and represented by verification artifacts.
+
+**Archives:**
+- **`.planning/milestones/v1.36-ROADMAP.md`**
+- **`.planning/milestones/v1.36-REQUIREMENTS.md`**
+- **`.planning/v1.36-v1.36-MILESTONE-AUDIT.md`**
+
+**Git tag:** `v1.36`
+
+**Next after ship:** Run the linked release-readiness pass, then choose the next bounded milestone with `$gsd-new-milestone`.
+
+---
+
 ## v1.34 Rendro Native Invoice PDF Default (Shipped: 2026-05-06)
 
 **Planning opened:** 2026-05-06

@@ -12,28 +12,32 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-### v1.36 — Dual-Provider Core Completion
-
-**Goal:** Close the remaining staged rows in the official Stripe + Braintree gateway-subscription-core contract so the shipped support surface is fully consistent, merge-blocking, and no longer half-staged.
-
-**Target features:**
-
-- Promote **`Accrue.Billing.update_customer/2`** from staged to explicit first-party support across Stripe, Fake, and Braintree proof lanes.
-- Normalize the shipped cancellation contract so supported Stripe/Fake/Braintree paths are clear, capability labels match runtime truth, and unsupported lifecycle branches remain explicit.
-- Align **`.planning/processor-support-matrix.md`**, runtime capability labels, public docs, and example-host proof artifacts so they repeat one contract.
-
-**Why now:** `v1.35` closed supportability drift around docs, lifecycle wording, and operator truth, but the dual-provider core still exposes staged contract rows that should be either promoted or explicitly bounded before any further processor-facing expansion.
+No active milestone. `v1.36` shipped on **2026-05-07** and the project is ready
+for `$gsd-new-milestone`.
 
 **Current posture:**
 
 - The active strategy remains **PROC-08**: a bounded dual-provider core centered on **Stripe-first** defaults plus one Stripe-like gateway.
 - The official second-provider slice remains **gateway subscription core**, with **`Accrue.Billing.subscribe/3`** as the primary public-facade entry and **Fake** as the deterministic merge-blocking proof lane.
-- The shipped first-party surface already includes provider-honest checkout and billing-portal APIs on one shared facade: Stripe returns upstream hosted URLs, and Braintree returns mounted first-party local checkout and portal URLs.
-- `v1.36` is a contract-closure milestone, not a new breadth-expansion milestone.
+- The shipped first-party surface now includes explicit provider-honest customer update, cancellation, checkout, and billing-portal guidance on one shared facade.
 - Braintree marketplace parity via Hyperwallet remains out of scope unless a future strategy change explicitly reopens it.
 - **FIN-03** remains out of scope. Stripe is still the fastest first-user path.
 
 ## Last shipped milestone
+
+### v1.36 — Dual-Provider Core Completion (**archived 2026-05-07**)
+
+**Goal:** Close the remaining staged rows in the official Stripe + Braintree gateway-subscription-core contract so the shipped support surface is fully consistent, merge-blocking, and no longer half-staged.
+
+**Delivered:**
+
+- [x] **PROC-21** (Phase 112) — `Accrue.Billing.update_customer/2` is now an explicit bounded first-party contract across Fake, Stripe, and Braintree, with matching host/helper proof.
+- [x] **PROC-22..PROC-23** (Phase 113, verification backfilled by Phase 115) — immediate cancellation is first-party across the shipped slice, while Braintree scheduled-end semantics stay explicit, typed, and provider-honest across runtime labels, docs, and UI copy.
+- [x] **PROC-24** (Phase 114, verification backfilled by Phase 116) — the processor support matrix, package docs, example-host proof docs, and support-contract verifier bundle now repeat one finalized contract and re-fail drift before merge.
+
+**Closeout proof:** [v1.36-v1.36-MILESTONE-AUDIT.md](v1.36-v1.36-MILESTONE-AUDIT.md), [milestones/v1.36-ROADMAP.md](milestones/v1.36-ROADMAP.md), [milestones/v1.36-REQUIREMENTS.md](milestones/v1.36-REQUIREMENTS.md), [113-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VERIFICATION.md), and [114-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/114-contract-drift-gate-closeout/114-VERIFICATION.md).
+
+## Prior shipped milestone
 
 ### v1.35 — Dual-Provider Supportability Closure (**archived 2026-05-07**)
 
@@ -224,25 +228,26 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current Milestone
 
-**v1.36 — Dual-Provider Core Completion** opened on **2026-05-06**. Phase **112** shipped on **2026-05-07**, and the milestone is now active for Phases **113–114**.
+No active milestone. The latest shipped planning milestone is **v1.36**; the
+next planning step is `$gsd-new-milestone`.
 
 ## Next Milestone Goals
 
-- Close the remaining staged **PROC-08** contract rows instead of expanding provider-facing scope again.
-- Preserve the shipped Rendro-first invoice contract, provider-honest checkout/portal semantics, and `v1.35` supportability baseline while core contract closure proceeds.
-- Keep **FIN-03**, marketplace/Hyperwallet reopening, advanced scheduling, preview/proration parity, and broad new billing primitives out of scope.
+- Run the linked post-`v1.36` release-readiness pass and cut the next Hex release window if the deterministic release gate remains green.
+- Choose the next bounded **PROC-08** milestone only after the release checkpoint, rather than folding release operations into feature scope again.
+- Keep **FIN-03**, marketplace/Hyperwallet reopening, advanced scheduling, preview/proration parity, and broad new billing primitives out of scope unless a fresh milestone explicitly reopens them.
 
 ## Current State
 
-Current focus: **execute `v1.36` starting from Phase 113**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the active planning milestone is now **v1.36**, where Phase **112** already closed the customer-update contract and the remaining work is cancellation semantics plus drift-gate cleanup.
+Current focus: **post-`v1.36` archival and next-milestone selection**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the latest shipped planning milestone is now **v1.36**, which closed the remaining staged customer-update and cancellation rows in the official dual-provider core contract and left the repo at a passed milestone audit with no active planning milestone yet.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
 Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
 
-The active planning milestone is **v1.36**: [ROADMAP.md](ROADMAP.md), [REQUIREMENTS.md](REQUIREMENTS.md), [research/SUMMARY.md](research/SUMMARY.md), and [112-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VERIFICATION.md). The latest shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The prior shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The earlier shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated after Phase **112** completed on **2026-05-07**.
+The latest shipped planning milestone is **v1.36**: [`milestones/v1.36-ROADMAP.md`](milestones/v1.36-ROADMAP.md), [`milestones/v1.36-REQUIREMENTS.md`](milestones/v1.36-REQUIREMENTS.md), [113-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VERIFICATION.md), and [114-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/114-contract-drift-gate-closeout/114-VERIFICATION.md). The prior shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The earlier shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The preceding shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated after `v1.36` archival on **2026-05-07**.
 
-**Last shipped planning milestone:** **v1.35** — Phases **109–111** (**2026-05-07**): **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; **`milestones/v1.35-*`**; execution trees **`milestones/v1.35-phases/`**; planning tag **`v1.35`**. **Prior:** **v1.34** — Phases **106–108** (**2026-05-06**): **PDF-01..PDF-09**; **`milestones/v1.34-*`**; execution trees **`milestones/v1.34-phases/`**; planning tag **`v1.34`**. **Earlier:** **v1.33** — Phases **101–104** (**2026-05-06**): **BT-01..BT-09**; **`milestones/v1.33-*`**; execution trees **`milestones/v1.33-phases/`**; planning tag **`v1.33`**.
+**Last shipped planning milestone:** **v1.36** — Phases **112–116** (**2026-05-07**): **PROC-21..24**; **`milestones/v1.36-*`**; planning tag **`v1.36`**. **Prior:** **v1.35** — Phases **109–111** (**2026-05-07**): **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; **`milestones/v1.35-*`**; execution trees **`milestones/v1.35-phases/`**; planning tag **`v1.35`**. **Earlier:** **v1.34** — Phases **106–108** (**2026-05-06**): **PDF-01..PDF-09**; **`milestones/v1.34-*`**; execution trees **`milestones/v1.34-phases/`**; planning tag **`v1.34`**.
 
 **Execution history:** **v1.27** Phases **84–85** under **`milestones/v1.27-phases/`** (**`084-VERIFICATION.md`**, **`085-VERIFICATION.md`**). **v1.26** Phases **82–83** under **`milestones/v1.26-phases/`** (**`082-VERIFICATION.md`**, **`083-VERIFICATION.md`**). **v1.25** Phases **79–81** under **`milestones/v1.25-phases/`** (**`079-VERIFICATION.md`**, **`080-VERIFICATION.md`**, **`081-VERIFICATION.md`**). **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`**). **v1.23** Phase **75** under **`milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`milestones/v1.18-phases/`**; **v1.17** under **`milestones/v1.17-phases/`**.
 
@@ -815,4 +820,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-07 — Phase **112** complete; **v1.36** continues with the remaining dual-provider core closure work.*
+*Last updated: 2026-05-07 — **v1.36** archived; no active milestone is open.*
