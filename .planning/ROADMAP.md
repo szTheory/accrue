@@ -4,7 +4,7 @@
 
 ### v1.36 — Dual-Provider Core Completion
 
-**Status:** Active 2026-05-07  
+**Status:** Complete 2026-05-07  
 **Phases:** 112-114  
 **Requirements:** PROC-21..PROC-24  
 **Strategic parent:** [STRATEGY.md](STRATEGY.md)
@@ -17,7 +17,7 @@
 |---|-------|------|--------------|------------------|
 | 112 | Customer Update Contract Closure | Complete 2026-05-07: `Accrue.Billing.update_customer/2` is now fully first-party across capability labels, adapter truth, facade semantics, deterministic proof, and host-facing usage. | PROC-21 | 4 |
 | 113 | Cancellation Semantics Closure | Normalize the shipped Stripe/Fake/Braintree cancellation surface and capability labels so immediate cancel vs end-of-period cancel are explicit, truthful, and bounded. | PROC-22, PROC-23 | 5 |
-| 114 | Contract Drift Gate Closeout | Align the processor support matrix, public docs, example-host proofs, and merge-blocking verifiers to the finalized dual-provider core contract. | PROC-24 | 4 |
+| 114 | Contract Drift Gate Closeout | Complete 2026-05-07: processor matrix, package docs, example-host proofs, and targeted drift gates now close the finalized dual-provider core contract. | PROC-24 | 4 |
 
 ### Phase 112: Customer Update Contract Closure
 
@@ -46,6 +46,7 @@
 
 ### Phase 114: Contract Drift Gate Closeout
 
+**Status:** Complete 2026-05-07 (`114-01` through `114-03` complete)
 **Goal:** Finish the milestone by making the finalized dual-provider core contract the only truth across planning mirrors, docs, and verifier gates.
 
 **Success criteria:**
@@ -53,6 +54,8 @@
 2. Public docs and example-host proof artifacts repeat the same closure contract.
 3. Merge-blocking tests or scripts fail if staged-vs-first-party drift reappears.
 4. `REQUIREMENTS.md`, `ROADMAP.md`, and `STATE.md` all reflect the active milestone cleanly.
+
+**Outcome:** Completed in three waves. The processor support matrix is now the settled canonical wording spine, package docs and example-host proof stay thin and provider-honest, and the named support-contract bundle (`verify_processor_support_matrix.sh`, `verify_package_docs.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh`) is documented and merge-blocking before milestone closeout.
 
 ## Recent Milestones
 
@@ -69,4 +72,4 @@
 - Earlier shipped phase detail remains preserved in per-milestone archives under `.planning/milestones/`.
 
 ---
-*Last updated: 2026-05-07 — Phase **113 Plans 01-03** completed; **v1.36** remains active for Phase **114**.*
+*Last updated: 2026-05-07 — Phase **114** completed; **v1.36** shipped.
