@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.37
 milestone_name: Subscription Change Management
-status: active
-last_updated: "2026-05-07T21:07:30Z"
+status: shipped
+last_updated: "2026-05-07T21:20:00Z"
 last_activity: 2026-05-07
 progress:
   total_phases: 3
@@ -21,20 +21,20 @@ See: `.planning/PROJECT.md` (updated 2026-05-07)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** `v1.37` is execution-complete; Phase 119 hardened the bounded Braintree plan-swap contract and the milestone is ready for closeout
+**Current focus:** `v1.37` archived; no active milestone is open yet
 
 ## Current Position
 
 Milestone: v1.37 — Subscription Change Management
-Phase: 119 — Braintree Bounded Plan-Swap Closeout
-Plan: Phase complete
-Status: Phase 119 execution is complete and all three plans now have summary artifacts and passing verification
+Phase: None
+Plan: None
+Status: v1.37 archived; next milestone not started
 Resume file: None
-Last activity: 2026-05-07 — executed Phase 119 across runtime, docs, and support-contract verifier lanes; `v1.37` is now ready for milestone completion
+Last activity: 2026-05-07 — archived `v1.37` roadmap and requirements, collapsed the active roadmap, and prepared the project for the next milestone
 
 ## Milestone Progress
 
-**v1.37** (opened **2026-05-07**): Phases **117–119 complete**. **SCM-01..06** now cover the shipped active subscription change management contract across API, admin, portal, docs, and support-contract verifiers.
+**v1.37** (opened **2026-05-07**, shipped **2026-05-07**, archived **2026-05-07**): Phases **117**, **118**, and **119** are complete. **SCM-01..06** are archived under **`milestones/v1.37-*`** and **`milestones/v1.37-phases/`**.
 
 **v1.36** (opened **2026-05-06**, shipped **2026-05-07**, archived **2026-05-07**): Phases **112**, **113**, **114**, **115**, and **116** are complete. **PROC-21..24** are represented by verification artifacts and archived under **`milestones/v1.36-*`**.
 
@@ -47,8 +47,9 @@ Last activity: 2026-05-07 — executed Phase 119 across runtime, docs, and suppo
 ## Current Planning Artifacts
 
 - **`.planning/STRATEGY.md`** — active PROC-08 strategic parent.
-- **`.planning/ROADMAP.md`** — active `v1.37` roadmap for Phases 117–119.
-- **`.planning/REQUIREMENTS.md`** — active `v1.37` requirements for `SCM-01..06`.
+- **`.planning/ROADMAP.md`** — no-active-milestone summary plus recent archives.
+- **`.planning/milestones/v1.37-ROADMAP.md`** — archived roadmap and milestone narrative for Phases 117–119.
+- **`.planning/milestones/v1.37-REQUIREMENTS.md`** — archived requirements and traceability for `SCM-01..06`.
 - **`.planning/milestones/v1.36-ROADMAP.md`** — archived roadmap and milestone narrative for Phases 112–116.
 - **`.planning/milestones/v1.36-REQUIREMENTS.md`** — archived requirements and traceability for `PROC-21..24`.
 - **`.planning/STRATEGY.md`** — active PROC-08 strategic parent for future milestone selection.
@@ -64,6 +65,7 @@ Last activity: 2026-05-07 — executed Phase 119 across runtime, docs, and suppo
 |----------|------|--------|
 | processor_scope | Schedule management / pause-resume expansion beyond active subscription change | deferred beyond v1.37 |
 | processor_scope | Braintree quantity and subscription-item parity | explicitly unsupported for this milestone |
+| process_gap | Dedicated `v1.37` milestone audit artifact | deferred; closeout accepted on targeted verification and clean open-artifact audit |
 | strategy_non_goal | FIN-03 finance exports | explicit non-goal |
 | strategy_non_goal | Hyperwallet reopening | explicit non-goal |
 
@@ -73,6 +75,7 @@ Last activity: 2026-05-07 — executed Phase 119 across runtime, docs, and suppo
 - **2026-05-07:** Promote the active subscription-change bundle (`swap_plan/3`, `preview_upcoming_invoice/2`, quantity/item changes where supported) as the next confidence and batteries-included gap to close.
 - **2026-05-07:** Keep the contract provider-honest: full depth on Stripe/Fake, bounded Braintree plan-swap support through `:plan_resolver`, and explicit unsupported guidance for quantity/item semantics.
 - **2026-05-07:** Require API, admin, and portal surfaces to ship the same subscription-change story within this milestone instead of treating UI as optional follow-on work.
+- **2026-05-07:** Archive `v1.37` without a dedicated milestone-audit artifact, accepting the process gap because targeted phase verification and the open-artifact audit were clean.
 - **2026-05-06:** Open **v1.36** as a closure milestone, not another broad supportability pass.
 - **2026-05-06:** Treat `Accrue.Billing.update_customer/2` and the cancellation family as the remaining visible staged rows in the official dual-provider contract.
 - **2026-05-06:** Keep advanced scheduling, preview/proration parity, Hyperwallet reopening, and new processor breadth out of scope.
@@ -83,4 +86,4 @@ Last activity: 2026-05-07 — executed Phase 119 across runtime, docs, and suppo
 - **2026-05-07:** Name and document the support-contract bundle in `scripts/ci/README.md` while keeping the existing targeted verifier split.
 - **2026-05-07:** Backfill `113-VERIFICATION.md` from shipped Phase 113 summaries plus same-day reruns, and treat audit-closeout phases as narrow evidence repair rather than reopened feature scope.
 
-**Next:** Run milestone closeout/archive flow for `v1.37`; execution is complete and the active subscription change milestone is ready to ship/retire.
+**Next:** Start the next milestone with `$gsd-new-milestone`, or run the linked release-readiness pass before picking new feature scope.

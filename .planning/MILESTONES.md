@@ -1,5 +1,43 @@
 # Milestones
 
+## v1.37 Subscription Change Management (Shipped: 2026-05-07)
+
+**Planning opened:** 2026-05-07
+
+**Phases completed:** **3** phases (**117–119**).
+
+**Theme:** Promote active subscription changes into a first-party contract across
+the billing facade, admin/operator UI, customer self-serve portal, package
+docs, host mirrors, and verifier gates, while keeping Braintree explicitly
+bounded to resolver-backed plan swaps.
+
+**Depends on:** **v1.36** shipped.
+
+**Key accomplishments:**
+
+- **117:** **SCM-01..SCM-02** — promoted `swap_plan/3` and `preview_upcoming_invoice/2` into the official active-subscription-change contract, aligned package/host docs to the same preview-before-commit story, and made drift in that wording merge-blocking.
+- **118:** **SCM-03..SCM-05** — promoted Stripe/Fake quantity and subscription-item mutations into the first-party contract, added preview-backed admin flows, and shipped bounded customer self-serve plan-change support with provider-honest Braintree copy.
+- **119:** **SCM-06** — finalized the bounded Braintree `:plan_resolver` contract across runtime, package docs, host mirrors, and support-contract verifier needles.
+
+**Outcome:** Phases **117–119** closed the **v1.37** Subscription Change
+Management milestone with all `SCM-01..06` requirements satisfied.
+
+**Known gaps accepted at close:**
+
+- No dedicated `v1.37` milestone audit artifact was run before archival; closeout proceeded on targeted phase verification plus a clean open-artifact audit.
+
+**Archives:**
+- **`.planning/milestones/v1.37-ROADMAP.md`**
+- **`.planning/milestones/v1.37-REQUIREMENTS.md`**
+- **`.planning/milestones/v1.37-phases/`**
+
+**Git tag:** `v1.37`
+
+**Next after ship:** Run the linked release-readiness pass or open the next
+milestone with `$gsd-new-milestone`.
+
+---
+
 ## v1.36 Dual-Provider Core Completion (Shipped: 2026-05-07)
 
 **Planning opened:** 2026-05-06

@@ -12,18 +12,32 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-No active milestone. `v1.36` shipped on **2026-05-07** and the project is ready
+No active milestone. `v1.37` shipped on **2026-05-07** and the project is ready
 for `$gsd-new-milestone`.
 
 **Current posture:**
 
 - The active strategy remains **PROC-08**: a bounded dual-provider core centered on **Stripe-first** defaults plus one Stripe-like gateway.
 - The official second-provider slice remains **gateway subscription core**, with **`Accrue.Billing.subscribe/3`** as the primary public-facade entry and **Fake** as the deterministic merge-blocking proof lane.
-- The shipped first-party surface now includes explicit provider-honest customer update, cancellation, checkout, and billing-portal guidance on one shared facade.
+- The shipped first-party surface now includes explicit provider-honest customer update, cancellation, checkout, billing-portal, and active-subscription-change guidance on one shared facade.
 - Braintree marketplace parity via Hyperwallet remains out of scope unless a future strategy change explicitly reopens it.
 - **FIN-03** remains out of scope. Stripe is still the fastest first-user path.
 
 ## Last shipped milestone
+
+### v1.37 — Subscription Change Management (**archived 2026-05-07**)
+
+**Goal:** Make Accrue feel complete for the most common post-checkout SaaS billing work by promoting active subscription-change management into an explicit first-party contract across the public billing facade, admin/operator surfaces, and customer self-serve portal.
+
+**Delivered:**
+
+- [x] **SCM-01..SCM-02** (Phase 117) — `Accrue.Billing.swap_plan/3` and `preview_upcoming_invoice/2` are now explicit first-party APIs with provider-honest support labels, canonical docs, and merge-blocking drift gates.
+- [x] **SCM-03..SCM-05** (Phase 118) — Stripe/Fake quantity and subscription-item changes are official, admin surfaces expose supported preview/change actions, and portal/host flows now support bounded plan-change preview and commit semantics.
+- [x] **SCM-06** (Phase 119) — Braintree plan swaps are finalized around the `:plan_resolver` contract, with public docs, host mirrors, and verifier scripts all pinned to the same swap-only boundary.
+
+**Closeout proof:** [milestones/v1.37-ROADMAP.md](milestones/v1.37-ROADMAP.md), [milestones/v1.37-REQUIREMENTS.md](milestones/v1.37-REQUIREMENTS.md), [117-VERIFICATION.md](/Users/jon/projects/accrue/.planning/milestones/v1.37-phases/117-contract-promotion-preview-truth/117-VERIFICATION.md), [118-VERIFICATION.md](/Users/jon/projects/accrue/.planning/milestones/v1.37-phases/118-admin-portal-change-flows/118-VERIFICATION.md), and [119-03-SUMMARY.md](/Users/jon/projects/accrue/.planning/milestones/v1.37-phases/119-braintree-bounded-plan-swap-closeout/119-03-SUMMARY.md). Milestone closeout accepted one known process gap: no dedicated `v1.37` milestone audit artifact was produced before archival.
+
+## Prior shipped milestone
 
 ### v1.36 — Dual-Provider Core Completion (**archived 2026-05-07**)
 
@@ -35,7 +49,7 @@ for `$gsd-new-milestone`.
 - [x] **PROC-22..PROC-23** (Phase 113, verification backfilled by Phase 115) — immediate cancellation is first-party across the shipped slice, while Braintree scheduled-end semantics stay explicit, typed, and provider-honest across runtime labels, docs, and UI copy.
 - [x] **PROC-24** (Phase 114, verification backfilled by Phase 116) — the processor support matrix, package docs, example-host proof docs, and support-contract verifier bundle now repeat one finalized contract and re-fail drift before merge.
 
-**Closeout proof:** [v1.36-v1.36-MILESTONE-AUDIT.md](v1.36-v1.36-MILESTONE-AUDIT.md), [milestones/v1.36-ROADMAP.md](milestones/v1.36-ROADMAP.md), [milestones/v1.36-REQUIREMENTS.md](milestones/v1.36-REQUIREMENTS.md), [113-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VERIFICATION.md), and [114-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/114-contract-drift-gate-closeout/114-VERIFICATION.md).
+**Closeout proof:** [v1.36-v1.36-MILESTONE-AUDIT.md](v1.36-v1.36-MILESTONE-AUDIT.md), [milestones/v1.36-ROADMAP.md](milestones/v1.36-ROADMAP.md), [milestones/v1.36-REQUIREMENTS.md](milestones/v1.36-REQUIREMENTS.md), [113-VERIFICATION.md](/Users/jon/projects/accrue/.planning/milestones/v1.36-phases/113-cancellation-semantics-closure/113-VERIFICATION.md), and [114-VERIFICATION.md](/Users/jon/projects/accrue/.planning/milestones/v1.36-phases/114-contract-drift-gate-closeout/114-VERIFICATION.md).
 
 ## Prior shipped milestone
 
