@@ -109,6 +109,25 @@ The matching default counters are:
 
 Those counters stay low-cardinality. Identifiers remain in telemetry metadata, not metric tags.
 
+## Webhook replay and local checkout completion semantics
+
+The webhook and portal completion signals used in operator triage are also
+provider-honest:
+
+- `[:accrue, :ops, :webhook_dlq, :replay]` describes replay of persisted
+  Accrue webhook rows through `Accrue.Webhooks.DLQ`; it is the recovery signal
+  for both Stripe delivery failures and Braintree normalization or dispatch
+  failures.
+- `[:accrue, :portal, :checkout, :completed]` is the local portal-completion
+  telemetry event emitted after Accrue persists and reduces
+  `accrue.portal.checkout.completed`.
+
+For Braintree, checkout completion is locally persisted and projection-backed.
+Do not treat it like a Stripe-style hosted redirect truth. The mounted checkout
+flow returns a local URL, and the operator-visible completion proof is the
+synthetic `accrue.portal.checkout.completed` event plus the projection updates
+it drives.
+
 Connect ops rows above are emitted via `Accrue.Telemetry.Ops.emit/3` from
 `Accrue.Webhook.ConnectHandler`. The invoice PDF unavailable signal now emits
 through the same helper from `Accrue.Invoices`, while ledger rows still use

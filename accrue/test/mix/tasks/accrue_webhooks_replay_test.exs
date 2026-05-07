@@ -24,6 +24,24 @@ defmodule Mix.Tasks.Accrue.Webhooks.ReplayTest do
     assert updated.status == :received
   end
 
+  test "single event id requeues a Braintree portal completion row through the same CLI path" do
+    row =
+      insert_dead_event!(
+        processor: "braintree",
+        type: "accrue.portal.checkout.completed"
+      )
+
+    Replay.run([row.id])
+
+    assert_received {:mix_shell, :info, [info]}
+    assert info =~ "Requeued #{row.id}"
+
+    updated = Accrue.TestRepo.get!(WebhookEvent, row.id)
+    assert updated.status == :received
+    assert updated.processor == "braintree"
+    assert updated.type == "accrue.portal.checkout.completed"
+  end
+
   test "--dry-run --since --type reports without mutation" do
     _r1 = insert_dead_event!(type: "invoice.payment_failed")
     _r2 = insert_dead_event!(type: "invoice.payment_failed")
@@ -66,9 +84,10 @@ defmodule Mix.Tasks.Accrue.Webhooks.ReplayTest do
 
   defp insert_dead_event!(opts \\ []) do
     type = Keyword.get(opts, :type, "customer.created")
+    processor = Keyword.get(opts, :processor, "stripe")
 
     attrs = %{
-      processor: "stripe",
+      processor: processor,
       processor_event_id: "evt_test_#{System.unique_integer([:positive])}",
       type: type,
       livemode: false,

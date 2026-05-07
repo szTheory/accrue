@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- ✅ **v1.35 Dual-Provider Supportability Closure** — Phases **109–111** shipped **2026-05-07**. **SUP-01..02**, **LIF-01..02**, **OPS-01..02** closed: provider-honest support contract mirrors, mounted Braintree onboarding truth, lifecycle semantics SSOT + touched-surface wording, and processor-aware webhook/replay/operator recovery proof. **Archives:** [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.35-phases/`](milestones/v1.35-phases/). **Closeout proof:** [`v1.35-v1.35-MILESTONE-AUDIT.md`](v1.35-v1.35-MILESTONE-AUDIT.md). **Strategic parent:** [STRATEGY.md](STRATEGY.md).
 - ✅ **v1.34 Rendro Native Invoice PDF Default** — Phases **106–108** shipped **2026-05-06**. **PDF-01..09** closed: invoice-specific renderer seam, Rendro default invoice path, explicit ChromicPDF compatibility path, Rendro Hex release handoff, and migration/docs proof. **Archives:** [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.34-phases/`](milestones/v1.34-phases/). **Closeout proof:** [`v1.34-v1.34-MILESTONE-AUDIT.md`](v1.34-v1.34-MILESTONE-AUDIT.md).
 - ✅ **v1.33 Braintree Full Maturity** — Phases **101–104** shipped **2026-05-06**. **BT-01..09** closed: first-party `Accrue.Portal` checkout + self-serve portal for Braintree, local promotion-code/discount mapping, local metered renewal authoring + settlement + telemetry/docs, and an explicit Hyperwallet no-go boundary for Braintree marketplace parity. **Archives:** [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.33-phases/`](milestones/v1.33-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
 - ✅ **v1.32 Braintree Production Parity** — Phases **97–100** shipped **2026-05-01**. **PROC-14..20** closed: Braintree subscription mutation + webhook convergence, payment-method CRUD on `Accrue.Billing` + `AccrueAdmin` operator surfaces, canonical `Accrue.Billing.refund/2` + invoice rollups + proration guardrails, explicit billing-portal capability rejection + local-portal LiveView guide. **Archives:** [`milestones/v1.32-ROADMAP.md`](milestones/v1.32-ROADMAP.md), [`milestones/v1.32-REQUIREMENTS.md`](milestones/v1.32-REQUIREMENTS.md). **Phase trees:** [`milestones/v1.32-phases/`](milestones/v1.32-phases/). **Strategic parent:** [STRATEGY.md](STRATEGY.md). **FIN-03 remains out of scope.**
@@ -40,45 +41,9 @@
 
 ## Active Milestone
 
-### v1.35 Dual-Provider Supportability Closure
-
-**Status:** Planning opened 2026-05-06
-**Phases:** 109–111
-**Requirements:** **SUP-01..02**, **LIF-01..02**, **OPS-01..02** — see [`REQUIREMENTS.md`](REQUIREMENTS.md)
-**Strategic parent:** [STRATEGY.md](STRATEGY.md)
-
-**Milestone goal:** Make the shipped Stripe + Braintree surface genuinely adoption-grade by aligning the public support contract, lifecycle semantics, mounted portal/checkout story, and webhook/operator recovery guidance around one provider-honest contract before expanding breadth again.
-
-**Success criteria:**
-
-1. The same provider-honest truth is visible in package docs, support matrix, planning mirrors, and host-facing examples: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs.
-2. Lifecycle semantics across Stripe, Fake, and Braintree are explicit enough that integrators and operators can predict behavior without reading source.
-3. Braintree webhook, replay, and support guidance feels first-class rather than Stripe-retrofitted.
-
-**Phase numbering:** continues from **v1.34** → starts at **Phase 109**.
+No active milestone. Open the next one with `$gsd-new-milestone`.
 
 ## Phases
-
-<details>
-<summary>🟡 v1.35 Dual-Provider Supportability Closure (Phases 109–111) — PLANNING OPENED 2026-05-06</summary>
-
-**Milestone goal:** Close the supportability gap between Accrue's shipped dual-provider capabilities and the truth exposed to adopters, operators, and future maintainers.
-
-**Requirements:** **SUP-01..02**, **LIF-01..02**, **OPS-01..02** — see [`REQUIREMENTS.md`](REQUIREMENTS.md).
-
-| # | Phase | Goal | Requirements |
-|---|-------|------|--------------|
-| 109 | Support Contract Truth | **Complete 2026-05-06**. Package docs, support matrix, planning mirrors, example-host proof docs, and shift-left bash gates now share one provider-honest Stripe + Braintree contract for checkout and billing portal behavior, with one shared facade and provider-specific URL semantics. | SUP-01, SUP-02 |
-| 110 | Lifecycle Semantics & Self-Serve Clarity | Publish one lifecycle SSOT and tighten any touched portal/admin/customer-facing copy or UI so subscription actions and states are explicit and least-surprising across providers. | LIF-01, LIF-02 |
-| 111 | Webhook & Operator Closure | Make webhook docs, runbooks, telemetry references, and deterministic proof lanes first-class for the shipped Braintree slice, with replay/recovery guidance that matches runtime truth. | OPS-01, OPS-02 |
-
-**Planned boundaries:**
-
-1. No new processors, Connect reopening, or finance/export scope.
-2. No broad new billing primitives; this milestone consolidates the surface already shipped in v1.31-v1.33.
-3. UI work is allowed only where it improves lifecycle clarity or recovery ergonomics.
-
-</details>
 
 <details>
 <summary>✅ v1.34 Rendro Native Invoice PDF Default (Phases 106–108) — SHIPPED 2026-05-06</summary>

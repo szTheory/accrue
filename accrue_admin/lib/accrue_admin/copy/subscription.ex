@@ -23,6 +23,11 @@ defmodule AccrueAdmin.Copy.Subscription do
   def subscription_action_swap_plan, do: "Swap plan"
   def subscription_action_pause_collection, do: "Pause collection"
   def subscription_action_create_comp_replacement, do: "Create comp replacement"
+  def subscription_action_default_guidance, do: "Default to cancel renewal and keep access through the paid-through date."
+  def subscription_action_exception_guidance, do: "Use Cancel now only for explicit hard-stop, support-led, or compliance flows."
+  def subscription_action_braintree_guidance, do: "Braintree keeps mounted host-owned lifecycle semantics. Do not imply native pause, unpause, or reversible cancellation support where the action layer rejects it."
+  def subscription_action_stripe_guidance, do: "Stripe can natively schedule end-of-period cancellation and resume that scheduled end when the subscription remains active."
+  def subscription_lifecycle_ended_label, do: "ended"
 
   def subscription_page_title, do: "Subscription"
 end

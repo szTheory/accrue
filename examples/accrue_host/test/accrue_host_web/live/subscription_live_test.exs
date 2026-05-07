@@ -109,6 +109,31 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert html =~ "AccrueHost.Billing"
   end
 
+  test "organization billing renders explicit hard-stop cancellation copy instead of a generic cancel label", %{
+    conn: conn,
+    organization: organization,
+    user: user
+  } do
+    assert {:ok, _} = Billing.subscribe(organization, "price_basic", trial_end: {:days, 14})
+
+    {:ok, view, html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live(~p"/app/billing")
+
+    assert html =~ "Need to stop renewal?"
+    assert html =~ "Cancel now for this organization"
+    assert html =~ "Default customer self-serve guidance should prefer cancel renewal at period end."
+    refute html =~ "Cancel organization subscription"
+
+    html =
+      view
+      |> element("button[phx-click='request_cancel']")
+      |> render_click()
+
+    assert html =~ "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
+  end
+
   defp cleanup_fake_billing_rows! do
     Repo.delete_all(
       from(item in SubscriptionItem,

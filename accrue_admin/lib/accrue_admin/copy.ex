@@ -29,6 +29,11 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_swap_plan(), to: Subscription
   defdelegate subscription_action_pause_collection(), to: Subscription
   defdelegate subscription_action_create_comp_replacement(), to: Subscription
+  defdelegate subscription_action_default_guidance(), to: Subscription
+  defdelegate subscription_action_exception_guidance(), to: Subscription
+  defdelegate subscription_action_braintree_guidance(), to: Subscription
+  defdelegate subscription_action_stripe_guidance(), to: Subscription
+  defdelegate subscription_lifecycle_ended_label(), to: Subscription
   defdelegate subscription_page_title(), to: Subscription
 
   defdelegate invoices_index_empty_title(), to: Invoice

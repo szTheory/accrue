@@ -94,6 +94,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "invoice.payment_failed"
     assert html =~ "Automatic tax is currently disabled"
     assert html =~ "Local reason: Requires Location Inputs."
+    assert html =~ "Default to cancel renewal and keep access through the paid-through date."
+    assert html =~ "Use Cancel now only for explicit hard-stop, support-led, or compliance flows."
+    assert html =~ "Stripe can natively schedule end-of-period cancellation"
 
     assert html =~
              "Update the customer tax location in the host app, then retry recurring tax on this subscription."
@@ -220,6 +223,28 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert denied == Copy.Locked.owner_access_denied()
 
     assert redirect
+  end
+
+  test "renders provider-honest confirmation copy for cancel now and cancel at period end", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    html =
+      render_submit(element(view, "[data-role='cancel-now-form']"), %{"action_type" => "cancel_now"})
+
+    assert html =~ "Cancel now will execute against the local billing projection"
+
+    html =
+      render_submit(
+        element(view, "[data-role='cancel-at-period-end-form']"),
+        %{"action_type" => "cancel_at_period_end"}
+      )
+
+    assert html =~ "turn off renewal now and preserve access through the current billing period"
   end
 
   defp insert_customer(attrs) do

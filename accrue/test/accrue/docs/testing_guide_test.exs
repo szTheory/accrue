@@ -51,6 +51,23 @@ defmodule Accrue.Docs.TestingGuideTest do
     end
   end
 
+  test "testing guide names the deterministic Braintree supportability proof bundle" do
+    guide = File.read!(@guide)
+
+    for phrase <- [
+          "Braintree",
+          "accrue.portal.checkout.completed",
+          "webhook replay",
+          "admin replay",
+          "test/accrue/webhooks/dlq_test.exs",
+          "test/mix/tasks/accrue_webhooks_replay_test.exs",
+          "test/accrue/telemetry/portal_checkout_completed_test.exs",
+          "examples/accrue_host/test/accrue_host_web/admin_webhook_replay_test.exs"
+        ] do
+      assert guide =~ phrase
+    end
+  end
+
   test "testing guide keeps Phase 9 release docs out of scope" do
     guide = File.read!(@guide)
 

@@ -1,5 +1,9 @@
 # Webhook Gotchas
 
+Use [Lifecycle Semantics](lifecycle_semantics.md) for lifecycle vocabulary and
+customer/operator meaning. This guide only covers the wiring mistakes that can
+delay or corrupt the local projection that those lifecycle labels depend on.
+
 Webhook bugs usually come from wiring mistakes, not from the reducer itself.
 This guide covers the failure modes most likely to break verification,
 idempotency, or replay safety in a production Phoenix app.
@@ -57,6 +61,11 @@ object through the processor path before you persist local state changes.
 
 That avoids stale-snapshot bugs and keeps out-of-order deliveries from forcing
 the local model backward.
+
+When customer or operator copy references local projection truth, it should
+acknowledge convergence timing honestly rather than promising impossible instant
+global truth. The lifecycle glossary stays stable even while webhook delivery
+catches local state up.
 
 ## Replay and DLQ hygiene
 

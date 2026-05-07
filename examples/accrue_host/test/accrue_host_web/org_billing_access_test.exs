@@ -52,18 +52,18 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
       |> fetch_flash()
 
     assert_denied_redirect(
-      live(conn, "/billing/customers/#{outsider_customer.id}?org=#{allowed_org.slug}"),
-      "/billing/customers?org=#{allowed_org.slug}"
+      live(conn, "/admin/customers/#{outsider_customer.id}?org=#{allowed_org.slug}"),
+      "/admin/customers?org=#{allowed_org.slug}"
     )
 
     assert_denied_redirect(
-      live(conn, "/billing/subscriptions/#{outsider_subscription.id}?org=#{allowed_org.slug}"),
-      "/billing/subscriptions?org=#{allowed_org.slug}"
+      live(conn, "/admin/subscriptions/#{outsider_subscription.id}?org=#{allowed_org.slug}"),
+      "/admin/subscriptions?org=#{allowed_org.slug}"
     )
 
     assert_denied_redirect(
-      live(conn, "/billing/webhooks/#{outsider_webhook.id}?org=#{allowed_org.slug}"),
-      "/billing/webhooks?org=#{allowed_org.slug}"
+      live(conn, "/admin/webhooks/#{outsider_webhook.id}?org=#{allowed_org.slug}"),
+      "/admin/webhooks?org=#{allowed_org.slug}"
     )
   end
 

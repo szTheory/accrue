@@ -86,7 +86,11 @@ defmodule AccruePortal.Live.SubscriptionLive do
           </li>
           <li>
             <strong>{Copy.subscription_status_label()}</strong>
-            <span>{@subscription.status}</span>
+            <span>{Copy.subscription_lifecycle_label(@subscription)}</span>
+          </li>
+          <li>
+            <strong>{Copy.subscription_summary_label()}</strong>
+            <span>{Copy.subscription_lifecycle_summary(@subscription)}</span>
           </li>
           <li>
             <strong>{Copy.subscription_period_end_label()}</strong>
@@ -98,6 +102,7 @@ defmodule AccruePortal.Live.SubscriptionLive do
       <section class="portal-card">
         <h2>{Copy.subscription_cancel_heading()}</h2>
         <p>{Copy.subscription_cancel_body()}</p>
+        <p>{Copy.subscription_access_timing(@subscription)}</p>
         <div :if={!@show_cancel_confirmation}>
           <button phx-click="toggle_cancel_confirmation" class="portal-button-secondary">
             {Copy.subscription_cancel_cta()}

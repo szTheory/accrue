@@ -5,11 +5,16 @@ host app **must** enable on its Customer Billing Portal configuration
 before going live. All three close revenue-recovery loopholes that the
 default portal config leaves wide open.
 
+For the canonical meaning of `cancel_at_period_end`, state vocabulary, and
+provider labels across Stripe and Braintree, see
+[Lifecycle Semantics](lifecycle_semantics.md).
+
 ## Background — the "cancel without dunning" footgun
 
-Stripe's out-of-the-box Customer Portal lets customers cancel
-**immediately** with one click and zero friction. From the host app's
-point of view, this turns the portal into a "cancel my account" button
+Stripe's out-of-the-box Customer Portal lets customers cancel in a way
+that can default to **immediate** termination with one click and zero
+friction. From the host app's point of view, this turns the portal into
+a "cancel my account" button
 that bypasses every dunning workflow Accrue offers
 (`Accrue.Billing.Dunning`, `[:accrue, :ops, :dunning_exhaustion]`,
 grace periods, retain-offer flows, and so on).
@@ -68,7 +73,11 @@ customer keeps access through the period they already paid for, the
 subscription transitions to `cancel_at_period_end: true`, and
 `Accrue.Billing.Subscription.canceling?/1` returns true so the host
 app can trigger any "we're sorry to see you go" mailers, retention
-campaigns, or win-back flows during the grace period.
+campaigns, or win-back flows during the grace period. This is the same
+least-surprise cancellation posture described in
+[Lifecycle Semantics](lifecycle_semantics.md): turn off renewal now,
+preserve paid-through access, and keep immediate cancellation as the
+exceptional path.
 
 This is also the only setting that makes
 reversing a scheduled cancellation useful — you can't undo a

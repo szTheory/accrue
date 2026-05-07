@@ -48,6 +48,26 @@ defmodule Accrue.Webhooks.DLQTest do
       assert {:ok, updated} = DLQ.requeue(row.id)
       assert updated.status == :received
     end
+
+    test "requeue is deterministic once the row leaves dead-lettered status" do
+      row = insert_event!(status: :dead)
+
+      assert {:ok, updated} = DLQ.requeue(row.id)
+      assert updated.status == :received
+
+      assert {:error, :not_dead_lettered} = DLQ.requeue(row.id)
+
+      ledger_count =
+        Accrue.TestRepo.aggregate(
+          from(e in Accrue.Events.Event,
+            where: e.type == "webhook.replay_requested" and e.subject_id == ^row.id
+          ),
+          :count,
+          :id
+        )
+
+      assert ledger_count == 1
+    end
   end
 
   describe "requeue_where/2" do

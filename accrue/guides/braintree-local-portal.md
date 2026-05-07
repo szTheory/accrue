@@ -2,7 +2,9 @@
 
 Phase 101 introduces `accrue_portal`, the batteries-included mounted portal
 package for Braintree local checkout and self-serve billing flows. This guide
-is the SSOT for that packaged path.
+is the SSOT for that packaged path. For lifecycle meaning, action vocabulary,
+and provider labels, use [Lifecycle Semantics](lifecycle_semantics.md) as the
+canonical glossary.
 
 For the default mounted path:
 
@@ -186,21 +188,29 @@ Customers need to add, set default, and remove payment methods. For Braintree, y
 
 ### 3. Canceling Subscriptions
 
-Offer immediate cancellations using Accrue's cancel functions:
+Default self-serve posture should match
+[Lifecycle Semantics](lifecycle_semantics.md): turn off renewal now and keep
+access through the paid-through date. In the mounted Braintree path this is a
+host-owned contract, not a native hosted Braintree portal behavior.
+
+Use `cancel_at_period_end` as the primary customer self-serve example:
 
 ```elixir
   def handle_event("cancel_subscription", %{"id" => sub_id}, socket) do
     subscription = Accrue.Billing.get_subscription!(sub_id)
-    
-    # Braintree supports immediate cancellation
-    case Billing.cancel(subscription) do
-      {:ok, _canceled_sub} ->
-        {:noreply, put_flash(socket, :info, "Subscription canceled.")}
+
+    case Billing.cancel_at_period_end(subscription) do
+      {:ok, _updated_sub} ->
+        {:noreply,
+         put_flash(socket, :info, "Cancel renewal scheduled. Access continues until period end.")}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to cancel subscription.")}
+        {:noreply, put_flash(socket, :error, "Failed to schedule the end of renewal.")}
     end
   end
 ```
+
+Reserve immediate `Billing.cancel/2` for explicit support-led or hard-stop
+flows instead of the default customer self-serve path.
 
 By connecting these primitives in your LiveViews, you retain absolute control over the UX, styling, and business rules, while relying on Accrue to maintain consistency with the underlying Braintree gateway.

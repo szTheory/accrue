@@ -97,6 +97,22 @@ assert_pdf_rendered(invoice)
 
 Replays should enter the same reducer path as first delivery. Trigger or requeue the event, assert idempotent persisted state, and verify that duplicate delivery does not duplicate customer-visible side effects.
 
+For the Phase 111 Braintree supportability closure, keep this deterministic
+proof bundle named explicitly:
+
+- `test/accrue/webhooks/dlq_test.exs` for persisted `webhook replay`
+  semantics on dead and failed rows
+- `test/mix/tasks/accrue_webhooks_replay_test.exs` for the bounded
+  `mix accrue.webhooks.replay` operator entry point
+- `test/accrue/telemetry/portal_checkout_completed_test.exs` for the local
+  Braintree `accrue.portal.checkout.completed` completion path
+- `examples/accrue_host/test/accrue_host_web/admin_webhook_replay_test.exs`
+  for the bounded host admin replay lane
+
+Those lanes are still Fake-first and deterministic. They document the operator
+story for persisted replay, local portal completion, and admin recovery without
+making live-provider verification the default path.
+
 ## Background jobs
 
 Use `Oban.Testing` for queue assertions and `perform_job/2` when the test needs to prove worker behavior. Keep queue names and worker modules host-visible so failures point to the app wiring a developer can fix.
@@ -106,6 +122,12 @@ Use `Oban.Testing` for queue assertions and `perform_job/2` when the test needs 
 Use the Fake Processor for normal test coverage, then keep a small provider-parity suite for behaviors where Stripe itself is the contract: SCA/3DS cards, Stripe test clocks, hosted checkout redirect behavior, and webhook signatures. Tag those tests separately so local development and CI do not depend on network calls by default.
 
 For the staged processor-expansion track, Fake is the merge-blocking source of truth for the official gateway subscription core slice: direct subscription creation, vault acquisition, webhook verify/parse, and lifecycle projection rows. Provider-backed Stripe and Braintree checks stay in the explicitly advisory provider-parity lane. Checkout and billing portal remain Stripe-only.
+
+The exception is documentation and recovery semantics that must stay
+provider-honest. Braintree supportability is still proved locally: replay
+tests, the synthetic `accrue.portal.checkout.completed` lane, and the bounded
+host admin replay verifier together cover the required operator recovery story
+without promoting live-provider checks to merge-blocking status.
 
 ## Usage metering (Fake)
 

@@ -96,7 +96,7 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
       |> fetch_flash()
 
     assert {:ok, _subscription_view, subscription_html} =
-             live(conn, "/billing/subscriptions/#{subscription.id}?org=#{organization.slug}")
+             live(conn, "/admin/subscriptions/#{subscription.id}?org=#{organization.slug}")
 
     assert subscription_html =~ subscription.id
     assert subscription_html =~ organization.name
@@ -104,21 +104,21 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert subscription_html =~ "active"
 
     assert {:ok, _webhook_view, webhook_html} =
-             live(conn, "/billing/webhooks/#{webhook.id}?org=#{organization.slug}")
+             live(conn, "/admin/webhooks/#{webhook.id}?org=#{organization.slug}")
 
     assert webhook_html =~ webhook.processor_event_id
     assert webhook_html =~ "invoice.payment_failed"
     assert webhook_html =~ "Attempt 3/25"
 
     assert {:ok, _events_view, events_html} =
-             live(conn, "/billing/events?source_webhook_event_id=#{webhook.id}")
+             live(conn, "/admin/events?source_webhook_event_id=#{webhook.id}")
 
     assert events_html =~ "Append-only billing and admin activity"
     assert events_html =~ "invoice.payment_failed"
     assert events_html =~ "activity"
 
     {:ok, replay_view, _html} =
-      live(conn, "/billing/webhooks/#{webhook.id}?org=#{organization.slug}")
+      live(conn, "/admin/webhooks/#{webhook.id}?org=#{organization.slug}")
 
     replay_html = render_click(element(replay_view, "[data-role='replay-single']"))
     assert replay_html =~ "Replay webhook for the active organization?"
@@ -130,7 +130,7 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     assert updated.status == :received
 
     assert {:ok, _audit_view, audit_html} =
-             live(conn, "/billing/events?source_webhook_event_id=#{webhook.id}&actor_type=admin")
+             live(conn, "/admin/events?source_webhook_event_id=#{webhook.id}&actor_type=admin")
 
     assert audit_html =~ "admin.webhook.replay.completed"
 
@@ -206,13 +206,13 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
 
     assert {:error,
             {:redirect,
-             %{to: "/billing/webhooks?org=" <> _slug, flash: %{"error" => denial_copy}}}} =
-             live(conn, "/billing/webhooks/#{outsider_webhook.id}?org=#{allowed_org.slug}")
+             %{to: "/admin/webhooks?org=" <> _slug, flash: %{"error" => denial_copy}}}} =
+             live(conn, "/admin/webhooks/#{outsider_webhook.id}?org=#{allowed_org.slug}")
 
     assert denial_copy == "You don't have access to billing for this organization."
 
     assert {:ok, _view, ambiguous_html} =
-             live(conn, "/billing/webhooks/#{ambiguous_webhook.id}?org=#{allowed_org.slug}")
+             live(conn, "/admin/webhooks/#{ambiguous_webhook.id}?org=#{allowed_org.slug}")
 
     assert ambiguous_html =~
              "Ownership couldn&#39;t be verified for this webhook. Replay is unavailable until the linked billing owner is resolved."
@@ -220,7 +220,7 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
     {:ok, bulk_view, _html} =
       live(
         conn,
-        "/billing/webhooks?status=dead&type=invoice.payment_failed&org=#{allowed_org.slug}"
+        "/admin/webhooks?status=dead&type=invoice.payment_failed&org=#{allowed_org.slug}"
       )
 
     bulk_html = render_click(element(bulk_view, "[data-role='prepare-bulk-replay']"))

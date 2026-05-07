@@ -37,6 +37,12 @@ For finance and tax reporting, use **Stripe Dashboard / reporting products** as 
 5. Cross-check the same event type in Stripe via Developers → Webhooks → recent deliveries ([Webhook docs](https://stripe.com/docs/webhooks)).
 6. After fix, enqueue or allow retry; watch `[:accrue, :ops, :webhook_dlq, :replay]` and related metrics for confirmation.
 
+If the dead-lettered row is Braintree-sourced or tied to local portal checkout:
+
+7. Confirm whether the failed row should reduce into `accrue.portal.checkout.completed` or a normalized subscription/invoice event before replaying it.
+8. Fix host-local causes first: `portal_base_url`, `portal_mount_path`, auth/session continuity, or Hosted Fields readiness.
+9. Replay the persisted row only after the mounted path is healthy; Braintree recovery is local projection convergence, not an upstream hosted checkout retry.
+
 ## Mini-playbook: [:accrue, :ops, :events_upcast_failed]
 
 1. Record `event_id`, `type`, and `schema_version` from the ops metadata (identifiers only).
@@ -83,6 +89,7 @@ These steps apply to the Phase 103 Braintree-local metering tuples documented in
 1. Confirm the affected `metered_renewal_id` maps to a subscription period that should already have advanced.
 2. Inspect the corresponding subscription in Braintree and verify the cycle actually renewed; the backstop should mirror webhook truth, not invent renewal windows.
 3. Check `Accrue.Jobs.MeteredRenewalReconciler` and `Accrue.Jobs.ProcessMeteredRenewal` on `:accrue_meters` ([Oban queue topology](#oban-queue-topology)) so the repaired window continues into local invoice authoring and settlement.
+4. If the renewal only became visible after webhook backlog or replay work, pair this tuple with `[:accrue, :ops, :webhook_dlq, :replay]` so the replay trail and the stale-window repair tell one story.
 
 ### `[:accrue, :ops, :metered_missing_definition]`
 
@@ -95,6 +102,7 @@ These steps apply to the Phase 103 Braintree-local metering tuples documented in
 1. Repair or replace the customer's default vaulted payment method.
 2. Confirm the local invoice for that renewal window is still the correct settlement target.
 3. Replay the same renewal window so Accrue reuses the existing charge unit instead of creating a second `Transaction.sale`.
+4. If checkout completion is still ambiguous for the same customer, verify whether `accrue.portal.checkout.completed` already persisted locally before creating any manual recovery plan.
 
 ### `[:accrue, :ops, :metered_charge_failed_exhausted]`
 

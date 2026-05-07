@@ -113,6 +113,58 @@ defmodule Accrue.Webhook.DefaultHandlerPortalEventTest do
     assert length(ledger_events) == 1
   end
 
+  test "replaying the same accrue.portal.checkout.completed event stays idempotent" do
+    customer = insert_braintree_customer!()
+    checkout_session = insert_checkout_session!(customer)
+
+    assert {:ok, subscription} =
+             Billing.subscribe(
+               customer,
+               "price_portal",
+               payment_method: %{vault_acquisition: %{reference: "pm_portal_repeat"}}
+             )
+
+    {1, _} =
+      Repo.delete_all(from(s in Subscription, where: s.id == ^subscription.id))
+
+    event = %WebhookEventStruct{
+      type: "accrue.portal.checkout.completed",
+      object_id: checkout_session.id,
+      livemode: false,
+      created_at: DateTime.utc_now(),
+      processor_event_id: "evt_portal_repeat",
+      processor: :braintree
+    }
+
+    ctx = %{
+      portal_checkout_object: %{
+        "id" => checkout_session.id,
+        "customer" => customer.processor_id,
+        "subscription" => subscription.processor_id
+      }
+    }
+
+    assert :ok = DefaultHandler.handle_event(event.type, event, ctx)
+    assert :ok = DefaultHandler.handle_event(event.type, event, ctx)
+
+    assert Repo.aggregate(
+             from(s in Subscription, where: s.processor_id == ^subscription.processor_id),
+             :count,
+             :id
+           ) == 1
+
+    assert Repo.aggregate(
+             from(e in LedgerEvent,
+               where:
+                 e.type == "checkout.session.completed" and
+                   e.subject_type == "CheckoutSession" and
+                   e.subject_id == ^checkout_session.id
+             ),
+             :count,
+             :id
+           ) == 1
+  end
+
   defp insert_braintree_customer! do
     {:ok, customer} =
       %Customer{}

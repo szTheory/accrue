@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.35
 milestone_name: Dual-Provider Supportability Closure
-status: in_progress
-last_updated: "2026-05-06T20:11:12Z"
-last_activity: 2026-05-06
+status: completed
+last_updated: "2026-05-07T04:45:00Z"
+last_activity: 2026-05-07
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 9
   percent: 100
 ---
 
@@ -17,22 +17,24 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-06)
+See: `.planning/PROJECT.md` (updated 2026-05-07)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.35 follow-on supportability closure planning after Phase 109 support-contract completion
+**Current focus:** v1.35 shipped; waiting for next milestone definition and fresh requirements
 
 ## Current Position
 
 Milestone: v1.35 — Dual-Provider Supportability Closure
-Phase: 109 — Support Contract Truth complete
-Plan: Complete (`.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-SUMMARY.md`)
-Status: Ready for next phase planning
+Phase: Complete
+Plan: Complete
+Status: Shipped 2026-05-07
 Resume file: `.planning/ROADMAP.md`
-Last activity: 2026-05-06 — Phase 109 Plan 03 executed; example-host proof docs and shift-left bash gates now mirror and enforce the provider-honest Stripe-hosted vs Braintree-mounted local checkout and billing-portal contract
+Last activity: 2026-05-07 — archived `v1.35` roadmap and requirements, collapsed active planning mirrors, and marked the milestone shipped with a passed closeout audit
 
 ## Milestone Progress
+
+**v1.35** (opened **2026-05-06**, shipped **2026-05-07**): Phases **109–111 complete** — **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; archived in **`milestones/v1.35-ROADMAP.md`**, **`milestones/v1.35-REQUIREMENTS.md`**, and **`milestones/v1.35-phases/`**; provider-honest docs, lifecycle SSOT, and Braintree replay/operator truth are now part of the shipped baseline.
 
 **v1.34** (opened **2026-05-06**, shipped **2026-05-06**): Phases **106–108 complete** — **PDF-01..PDF-09**; archived in **`milestones/v1.34-ROADMAP.md`**, **`milestones/v1.34-REQUIREMENTS.md`**, and **`milestones/v1.34-phases/`**; Rendro is the default invoice renderer, ChromicPDF is an explicit compatibility path, and Rendro now resolves from Hex with checked-in release proof.
 
@@ -58,9 +60,9 @@ Last activity: 2026-05-06 — Phase 109 Plan 03 executed; example-host proof doc
 ## Current Planning Artifacts
 
 - **`.planning/STRATEGY.md`** — persistent strategic tracker for the active **PROC-08** dual-provider core track.
-- **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-01-SUMMARY.md`** — execution summary for the support-contract truth slice (**SUP-01**).
-- **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-02-SUMMARY.md`** — execution summary for the onboarding/operator mounted-path guidance slice (**SUP-02**).
-- **`.planning/milestones/v1.35-phases/109-support-contract-truth/109-03-SUMMARY.md`** — execution summary for the example-host mirror and support-contract drift-gate closeout slice.
+- **`.planning/milestones/v1.35-ROADMAP.md`** / **`v1.35-REQUIREMENTS.md`** — final **v1.35** archives with the shipped support-contract, lifecycle, and operator-closure record.
+- **`.planning/milestones/v1.35-phases/`** — archived execution tree for Phases **109–111**.
+- **`.planning/v1.35-v1.35-MILESTONE-AUDIT.md`** — passed milestone audit for **v1.35**.
 - **`.planning/milestones/v1.34-REQUIREMENTS.md`** — archived **v1.34** requirements for the Rendro-default invoice PDF milestone.
 - **`.planning/milestones/v1.34-ROADMAP.md`** — archived **v1.34** roadmap for Phases **106–108**.
 - **`.planning/v1.34-v1.34-MILESTONE-AUDIT.md`** — passed milestone audit for **v1.34**.
@@ -88,7 +90,10 @@ Last activity: 2026-05-06 — Phase 109 Plan 03 executed; example-host proof doc
 
 ## Recent Decisions
 
+- **2026-05-06:** **Rendro Hex bump available** — `rendro` `0.2.0` is now published on Hex; when the dependency is next touched in this repo, bump to `0.2.0` and rerun the affected package test lanes instead of staying on the older pin.
+- **2026-05-07:** **v1.35 archived** — roadmap and requirements moved to milestone archives, active planning mirrors collapsed, and the milestone shipped with all six requirements closed plus a passed closeout audit.
 - **2026-05-06:** **Phase 109 complete** — the example-host README, adoption proof matrix, contributor map, and shift-left bash gates now repeat and enforce the same provider-honest contract: Stripe returns upstream hosted checkout and portal URLs, while Braintree returns mounted local checkout and portal URLs inside the bounded `gateway subscription core`.
+- **2026-05-07:** **v1.35 ready to close** — all six requirements (**SUP-01..02**, **LIF-01..02**, **OPS-01..02**) now have phase verification artifacts; the support-contract doc gates, lifecycle proof lanes, replay/idempotency bundle, and bounded host verifier all passed on the closeout rerun; milestone audit refreshed to `passed`.
 - **2026-05-06:** **Phase 109 Plan 02 complete** — First Hour, `braintree-local-portal.md`, `accrue_portal/README.md`, production readiness, and telemetry now repeat one mounted Braintree contract: absolute `portal_base_url`, matching `portal_mount_path`, auth/session continuity, Hosted Fields / CSP readiness, provisional discount preview, and local checkout completion semantics.
 - **2026-05-06:** **Phase 109 Plan 01 complete** — the processor support matrix, root README, package README, roadmap, and project mirror now repeat one provider-honest contract: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs.
 - **2026-05-06:** **v1.34 archived** — audit passed; targeted billing, mailer, admin, package-doc, HexDocs, and Rendro Hex-resolution proof all passed on the final closeout run.
@@ -130,7 +135,7 @@ Last activity: 2026-05-06 — Phase 109 Plan 03 executed; example-host proof doc
 - **2026-04-24:** **Phase 86** — **PPX-05..08** contract re-verification at **0.3.1** documented in **`086-VERIFICATION.md`** (no new SemVer bump in this pass).
 - **2026-04-24:** **Phase 87** — **INV-06** dated maintainer pass **(b)** + **`087-VERIFICATION.md`** closed per **`.planning/milestones/v1.28-phases/087-friction-inventory-post-publish/`**.
 
-**Next:** Open the next milestone with fresh requirements when new scope is chosen.
+**Next:** Open the next milestone with `$gsd-new-milestone` when the next scope is chosen.
 
 **Completed (v1.32):** Phases **97–100** — **`milestones/v1.32-phases/`**; archives **`v1.32-ROADMAP.md`** + **`v1.32-REQUIREMENTS.md`**; tag **`v1.32`** (local).
 

@@ -84,11 +84,11 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     assert render(view) =~ "price_basic"
 
     view
-    |> element("button", "Cancel organization subscription")
+    |> element("button", "Cancel now for this organization")
     |> render_click()
 
     assert render(view) =~
-             "Cancel organization subscription: Confirm cancellation before ending organization access."
+             "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
 
     cancel_log =
       capture_log(fn ->
@@ -104,7 +104,7 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     assert Subscription.canceled?(canceled_subscription) or
              Subscription.canceling?(canceled_subscription)
 
-    assert render(view) =~ "Subscription canceled."
+    assert render(view) =~ "Subscription canceled now. Organization access may end immediately."
   end
 
   defp latest_subscription!(%Customer{id: customer_id}) do

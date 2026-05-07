@@ -95,5 +95,64 @@ defmodule Accrue.BillingPortalTest do
       assert content =~ ~r/retain offers/i
       assert content =~ ~r/cancellation reason/i
     end
+
+    test "lifecycle guide exists and adjacent guides link back to the same cancellation posture" do
+      lifecycle_path = Path.join([File.cwd!(), "guides", "lifecycle_semantics.md"])
+      checklist_path = Path.join([File.cwd!(), "guides", "portal_configuration_checklist.md"])
+      braintree_path = Path.join([File.cwd!(), "guides", "braintree-local-portal.md"])
+
+      assert File.exists?(lifecycle_path)
+
+      lifecycle = File.read!(lifecycle_path)
+      checklist = File.read!(checklist_path)
+      braintree = File.read!(braintree_path)
+
+      assert lifecycle =~ "cancel_at_period_end"
+      assert lifecycle =~ "resume/2"
+      assert lifecycle =~ "pause/2"
+      assert lifecycle =~ "unpause/2"
+      assert lifecycle =~ "active"
+      assert lifecycle =~ "canceling"
+      assert lifecycle =~ "paused"
+      assert lifecycle =~ "past_due"
+      assert lifecycle =~ "ended"
+      assert lifecycle =~ "host-owned"
+
+      assert checklist =~ "lifecycle_semantics.md"
+      assert checklist =~ "at_period_end"
+      assert braintree =~ "lifecycle_semantics.md"
+      assert braintree =~ ~r/cancel renewal/i
+      refute braintree =~ "Offer immediate cancellations using Accrue's cancel functions"
+      refute braintree =~ "Braintree supports immediate cancellation"
+    end
+
+    test "webhook and operator guides keep the Braintree replay and recovery contract adjacent" do
+      webhook_path = Path.join([File.cwd!(), "guides", "webhooks.md"])
+      telemetry_path = Path.join([File.cwd!(), "guides", "telemetry.md"])
+      runbook_path = Path.join([File.cwd!(), "guides", "operator-runbooks.md"])
+      metered_path = Path.join([File.cwd!(), "guides", "braintree-metered-billing.md"])
+
+      webhook = File.read!(webhook_path)
+      telemetry = File.read!(telemetry_path)
+      runbook = File.read!(runbook_path)
+      metered = File.read!(metered_path)
+
+      assert webhook =~ "Braintree"
+      assert webhook =~ "mix accrue.webhooks.replay"
+      assert webhook =~ "accrue.portal.checkout.completed"
+
+      assert telemetry =~ "accrue.portal.checkout.completed"
+      assert telemetry =~ "[:accrue, :ops, :webhook_dlq, :replay]"
+      assert telemetry =~ "[:accrue, :ops, :metered_renewal_stale_repaired]"
+
+      assert runbook =~ "accrue.portal.checkout.completed"
+      assert runbook =~ "portal_base_url"
+      assert runbook =~ "portal_mount_path"
+      assert runbook =~ "[:accrue, :ops, :webhook_dlq, :replay]"
+
+      assert metered =~ "awaiting-payment-method"
+      assert metered =~ "failed-exhausted"
+      assert metered =~ "operator-runbooks.md"
+    end
   end
 end

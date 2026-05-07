@@ -1,6 +1,8 @@
 defmodule AccruePortal.Copy do
   @moduledoc false
 
+  alias Accrue.Billing.Subscription
+
   def checkout_page_title, do: "Checkout"
   def checkout_heading, do: "Checkout"
   def checkout_leave_cta, do: "Leave checkout"
@@ -59,11 +61,12 @@ defmodule AccruePortal.Copy do
   end
 
   def subscriptions_status_label, do: "Status"
+  def subscriptions_summary_label, do: "Lifecycle"
   def subscriptions_view_cta, do: "View details"
   def subscriptions_manage_cta, do: "Manage subscriptions"
 
   def subscriptions_cancel_success,
-    do: "Subscription will cancel at the end of the current billing period."
+    do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
 
   def subscriptions_cancel_error, do: "Unable to cancel subscription."
   def subscriptions_unknown_error, do: "Subscription not found."
@@ -71,18 +74,19 @@ defmodule AccruePortal.Copy do
   def subscription_page_title, do: "Subscription"
   def subscription_heading, do: "Subscription details"
   def subscription_status_label, do: "Status"
+  def subscription_summary_label, do: "Lifecycle summary"
   def subscription_period_end_label, do: "Current period ends"
   def subscription_identifier_label, do: "Reference"
   def subscription_cancel_heading, do: "Need to stop renewing?"
 
   def subscription_cancel_body,
-    do: "Cancel at period end to keep access through the current billing period."
+    do: "End at period end to turn off renewal now and keep access through the current billing period."
 
-  def subscription_cancel_cta, do: "Cancel subscription"
+  def subscription_cancel_cta, do: "Cancel renewal"
   def subscription_keep_cta, do: "Keep subscription"
 
   def subscription_cancel_success,
-    do: "Subscription will cancel at the end of the current billing period."
+    do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
 
   def subscription_cancel_error, do: "Unable to cancel subscription."
   def subscription_not_found_title, do: "Page not found"
@@ -134,4 +138,50 @@ defmodule AccruePortal.Copy do
 
   def invoices_status_label, do: "Status"
   def invoices_open_cta, do: "Open invoice"
+
+  def subscription_lifecycle_label(%Subscription{} = subscription) do
+    cond do
+      Subscription.canceling?(subscription) -> "Canceling"
+      Subscription.paused?(subscription) -> "Paused"
+      Subscription.past_due?(subscription) -> "Past due"
+      Subscription.canceled?(subscription) -> "Ended"
+      Subscription.active?(subscription) -> "Active"
+      true -> "Unknown"
+    end
+  end
+
+  def subscription_lifecycle_summary(%Subscription{} = subscription) do
+    cond do
+      Subscription.canceling?(subscription) ->
+        "Cancel renewal scheduled. Access ends at the current period end."
+
+      Subscription.paused?(subscription) ->
+        "Paused. Billing collection is stopped until the subscription is unpaused."
+
+      Subscription.past_due?(subscription) ->
+        "Past due. Access may change if payment recovery does not complete."
+
+      Subscription.canceled?(subscription) ->
+        "Ended. This subscription is no longer renewing."
+
+      Subscription.active?(subscription) ->
+        "Active and renewing."
+
+      true ->
+        "Lifecycle status unavailable."
+    end
+  end
+
+  def subscription_access_timing(%Subscription{} = subscription) do
+    cond do
+      Subscription.canceling?(subscription) ->
+        "Access ends on the current period end date shown below."
+
+      Subscription.canceled?(subscription) ->
+        "Access has already ended."
+
+      true ->
+        "Changes can take a moment to converge across local projection and provider updates."
+    end
+  end
 end

@@ -52,6 +52,12 @@ Metered settlement keeps one replay-safe charge unit per renewal window.
 
 Recovery reuses the same renewal window instead of inventing a second bill.
 
+If the surrounding webhook path needed repair first, do that work through the
+same operator story documented in [`webhooks.md`](webhooks.md) and
+[`operator-runbooks.md`](operator-runbooks.md): replay the persisted event
+stream, let local projections converge, then retry settlement against the
+existing renewal window.
+
 ## Operator signals
 
 Watch these ops tuples and matching counters:

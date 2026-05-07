@@ -143,6 +143,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           <p class="ax-body ax-page-copy">
             <%= @customer.name || @customer.email || @customer.id %> · period ends <%= format_datetime(@subscription.current_period_end) %>
           </p>
+          <p class="ax-body ax-page-copy">
+            <%= lifecycle_operator_summary(@subscription) %>
+          </p>
         </header>
 
         <FlashGroup.flash_group flashes={@flashes} />
@@ -231,6 +234,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               <p class="ax-eyebrow">Admin actions</p>
               <h3 class="ax-heading">Confirmed billing changes</h3>
               <p class="ax-body">Choose an optional source event, then stage and confirm an action.</p>
+              <p class="ax-body"><%= Copy.subscription_action_default_guidance() %></p>
+              <p class="ax-body"><%= Copy.subscription_action_exception_guidance() %></p>
+              <p class="ax-body"><%= provider_action_guidance(@subscription) %></p>
             </header>
 
             <div class="ax-stack-xl">
@@ -410,7 +416,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       Accrue.Billing.Subscription.canceling?(subscription) && "canceling",
       Accrue.Billing.Subscription.paused?(subscription) && "paused",
       Accrue.Billing.Subscription.past_due?(subscription) && "past due",
-      Accrue.Billing.Subscription.canceled?(subscription) && "canceled"
+      Accrue.Billing.Subscription.canceled?(subscription) && Copy.subscription_lifecycle_ended_label()
     ]
     |> Enum.reject(&is_nil/1)
     |> Enum.reject(&(&1 == false))
@@ -627,8 +633,23 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         ""
       end
 
-    "#{humanize(action.type)} will execute against the local billing projection.#{source}"
+    "#{action_confirmation_copy(action.type)}#{source}"
   end
+
+  defp action_confirmation_copy("cancel_now"),
+    do: "Cancel now will execute against the local billing projection and should be treated as an exceptional hard-stop path."
+
+  defp action_confirmation_copy("cancel_at_period_end"),
+    do: "Cancel at period end will turn off renewal now and preserve access through the current billing period."
+
+  defp action_confirmation_copy("pause"),
+    do: "Pause collection will only succeed where the processor supports Accrue's pause semantic."
+
+  defp action_confirmation_copy("resume"),
+    do: "Resume will unpause a paused subscription or reverse a scheduled end when the processor and current state support it."
+
+  defp action_confirmation_copy(type),
+    do: "#{humanize(type)} will execute against the local billing projection."
 
   defp subscription_payload(subscription) do
     %{
@@ -664,6 +685,25 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
   defp format_datetime(_value), do: "Unknown"
+
+  defp lifecycle_operator_summary(subscription) do
+    case predicate_summary(subscription) do
+      "active" ->
+        "Active and renewing. Default customer guidance should keep renewal changes explicit."
+
+      "active · canceling" ->
+        "Cancel renewal is already scheduled. Access remains until the current period end."
+
+      summary when is_binary(summary) ->
+        "Lifecycle summary: #{summary}. Keep provider-specific action promises honest."
+    end
+  end
+
+  defp provider_action_guidance(%{processor: "braintree"}),
+    do: Copy.subscription_action_braintree_guidance()
+
+  defp provider_action_guidance(_subscription),
+    do: Copy.subscription_action_stripe_guidance()
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

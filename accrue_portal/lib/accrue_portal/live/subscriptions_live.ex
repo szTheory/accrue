@@ -55,7 +55,9 @@ defmodule AccruePortal.Live.SubscriptionsLive do
           <li :for={subscription <- @subscriptions}>
             <div>
               <strong>{subscription.processor_id || subscription.id}</strong>
-              <p>{Copy.subscriptions_status_label()}: {subscription.status}</p>
+              <p>{Copy.subscriptions_status_label()}: {Copy.subscription_lifecycle_label(subscription)}</p>
+              <p>{Copy.subscriptions_summary_label()}: {Copy.subscription_lifecycle_summary(subscription)}</p>
+              <p>{Copy.subscription_access_timing(subscription)}</p>
             </div>
             <div>
               <a href={Path.subscriptions(@base_path) <> "/" <> subscription.id}>

@@ -13,18 +13,18 @@ defmodule AccrueHostWeb.AdminMountTest do
   import Ecto.Query
   import Phoenix.LiveViewTest
 
-  test "anonymous users are redirected away from /billing", %{conn: conn} do
-    assert {:error, {:redirect, %{to: "/"}}} = live(conn, "/billing")
+  test "anonymous users are redirected away from /admin", %{conn: conn} do
+    assert {:error, {:redirect, %{to: "/"}}} = live(conn, "/admin")
   end
 
-  test "signed-in non-admin users are redirected away from /billing", %{conn: conn} do
+  test "signed-in non-admin users are redirected away from /admin", %{conn: conn} do
     user = AccrueHost.AccountsFixtures.user_fixture()
     conn = log_in_user(conn, user)
 
-    assert {:error, {:redirect, %{to: "/"}}} = live(conn, "/billing")
+    assert {:error, {:redirect, %{to: "/"}}} = live(conn, "/admin")
   end
 
-  test "signed-in billing admins can mount /billing with forwarded owner scope session", %{
+  test "signed-in billing admins can mount /admin with forwarded owner scope session", %{
     conn: conn
   } do
     user =
@@ -49,7 +49,7 @@ defmodule AccrueHostWeb.AdminMountTest do
     assert %AccrueHost.Accounts.User{id: ^user_id, billing_admin: true} =
              AccrueHost.Auth.current_user(%{"user_token" => user_token})
 
-    assert {:ok, view, html} = live(conn, "/billing")
+    assert {:ok, view, html} = live(conn, "/admin")
     assert html =~ Copy.dashboard_display_headline()
 
     socket = live_socket(view)
@@ -97,9 +97,9 @@ defmodule AccrueHostWeb.AdminMountTest do
       |> Plug.Conn.put_session(:active_organization_name, organization.name)
       |> Plug.Conn.put_session(:admin_organization_ids, [organization.id])
 
-    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+    assert {:ok, _view, html} = live(conn, "/admin/subscriptions/#{subscription.id}")
 
-    assert html =~ "/customers/#{customer.id}"
+    assert html =~ "/admin/customers/#{customer.id}"
     assert html =~ Copy.subscription_drill_related_card_title()
   end
 
@@ -126,7 +126,7 @@ defmodule AccrueHostWeb.AdminMountTest do
           :active_organization_name,
           :admin_organization_ids
         ],
-        "/billing"
+        "/admin"
       )
 
     assert {:ok, owner_scope} = OwnerScope.resolve(session, %{"org" => allowed_org.slug})

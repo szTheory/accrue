@@ -16,7 +16,11 @@ defmodule AccrueHostWeb.SubscriptionLive do
   @empty_state_heading "No organization billing activity yet"
   @empty_state_body "Billing records appear after an organization starts a subscription or a webhook is processed. Start the organization subscription or review webhook activity for this organization."
   @error_copy "We couldn't complete that billing action for the active organization. Check organization access, billing setup, or webhook processing, then try again."
-  @cancel_copy "Cancel organization subscription: Confirm cancellation before ending organization access."
+  @cancel_copy "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
+  @cancel_heading "Need to stop renewal?"
+  @cancel_body "Default customer self-serve guidance should prefer cancel renewal at period end. This example host still makes the immediate path explicit instead of hiding it behind a generic cancel label."
+  @cancel_cta "Cancel now for this organization"
+  @cancel_keep_cta "Keep organization subscription"
   @tax_location_repair_copy "Please update customer address or shipping before enabling automatic tax."
   @tax_location_success_copy "Tax location saved. Start the subscription again when you're ready."
   @member_denial_copy "Billing is managed by organization admins. You can review the current billing state, but you can't change it."
@@ -163,7 +167,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
           {:ok, _updated_subscription} ->
             {:noreply,
              socket
-             |> put_flash(:info, "Subscription canceled.")
+             |> put_flash(:info, "Subscription canceled now. Organization access may end immediately.")
              |> assign(:confirm_cancel, false)
              |> load_state()}
 
@@ -261,6 +265,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
               </dl>
 
               <div :if={!Subscription.canceled?(@subscription)} style={danger_zone_style()}>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <h3 style={section_heading_style()}>{@cancel_heading}</h3>
+                  <p style={muted_body_style()}>{@cancel_body}</p>
+                </div>
                 <%= if @confirm_cancel do %>
                   <p style={warning_copy_style()}>{@cancel_copy}</p>
                   <div style={action_row_style()}>
@@ -279,7 +287,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
                       style={secondary_button_style()}
                       disabled={@billing_locked?}
                     >
-                      Keep subscription
+                      {@cancel_keep_cta}
                     </button>
                   </div>
                 <% else %>
@@ -289,7 +297,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
                     style={secondary_button_style()}
                     disabled={@billing_locked?}
                   >
-                    Cancel organization subscription
+                    {@cancel_cta}
                   </button>
                 <% end %>
               </div>
@@ -480,6 +488,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign(:start_subscription_copy, @start_subscription_copy)
     |> assign(:empty_state_heading, @empty_state_heading)
     |> assign(:empty_state_body, @empty_state_body)
+    |> assign(:cancel_heading, @cancel_heading)
+    |> assign(:cancel_body, @cancel_body)
+    |> assign(:cancel_cta, @cancel_cta)
+    |> assign(:cancel_keep_cta, @cancel_keep_cta)
     |> assign(:cancel_copy, @cancel_copy)
     |> assign(:tax_location_repair_copy, @tax_location_repair_copy)
     |> assign(:access_state, access_state)
