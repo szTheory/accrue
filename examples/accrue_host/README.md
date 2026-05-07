@@ -24,6 +24,11 @@ URLs owned by the host app. The Braintree proof lane in `examples/accrue_host`
 is fully hermetic and uses checked-in mocks/fixtures to exercise the generic
 billing facade without network access. Any future real-provider Braintree smoke
 is advisory only while Fake remains the merge-blocking SSOT.
+At this host layer, the semantics stay intentionally thin: `update_customer/2`
+remains a bounded provider-neutral helper, `cancel/2` is the shared immediate
+path, and `cancel_at_period_end/2` is not a first-party Braintree path. The
+full contract still lives in the canonical
+[`processor-support-matrix.md`](../../.planning/processor-support-matrix.md).
 
 **Sigra:** the example host depends on Sigra (not on Hex yet). `mix deps.get`
 pulls it from [szTheory/sigra](https://github.com/szTheory/sigra) by default so
@@ -105,7 +110,7 @@ Before promoting billing to a live Stripe account, use the package checklist [`.
 
 ## Proof and verification
 
-Pull requests are merge-blocked on GitHub Actions jobs `docs-contracts-shift-left` and `host-integration` (see `.github/workflows/ci.yml`). Job `docs-contracts-shift-left` runs `bash scripts/ci/verify_package_docs.sh`, `bash scripts/ci/verify_v1_17_friction_research_contract.sh`, `bash scripts/ci/verify_verify01_readme_contract.sh`, `bash scripts/ci/verify_adoption_proof_matrix.sh`, and `bash scripts/ci/verify_core_admin_invoice_verify_ids.sh`. Job `host-integration` runs `bash scripts/ci/accrue_host_uat.sh` (which delegates to `cd examples/accrue_host && mix verify.full`), with `bash scripts/ci/accrue_host_hex_smoke.sh` on eligible runs. Use `mix verify` for a faster bounded Fake slice that is not CI-complete.
+Pull requests are merge-blocked on GitHub Actions jobs `docs-contracts-shift-left` and `host-integration` (see `.github/workflows/ci.yml`). This README only names the host-facing checks it directly depends on: `bash scripts/ci/verify_adoption_proof_matrix.sh` keeps the adoption-proof contract aligned, and `bash scripts/ci/accrue_host_uat.sh` runs the full host stack (`cd examples/accrue_host && mix verify.full`). Use `mix verify` for a faster bounded Fake slice that is not CI-complete. For the exact support-contract bundle membership and CI-home truth, see `scripts/ci/README.md` together with `.github/workflows/ci.yml`.
 This checked-in proof surface is the linked `accrue` / `accrue_admin` `1.0.0` release slice: the same host README, shift-left scripts, and wrapper UAT prove the public pair before and after publish.
 
 For **`Accrue.Billing.create_checkout_session/2`** and **`Accrue.Billing.create_billing_portal_session/2`**, the teaching path and telemetry tuples live in [**First Hour**](../../accrue/guides/first_hour.md); span anchors and ExUnit SSOT paths are under [**#observability**](#observability).
