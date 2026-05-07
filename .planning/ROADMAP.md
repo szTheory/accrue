@@ -4,8 +4,8 @@
 
 ### v1.36 — Dual-Provider Core Completion
 
-**Status:** Complete 2026-05-07  
-**Phases:** 112-114  
+**Status:** Audit closeout in progress 2026-05-07  
+**Phases:** 112-116  
 **Requirements:** PROC-21..PROC-24  
 **Strategic parent:** [STRATEGY.md](STRATEGY.md)
 
@@ -16,9 +16,9 @@
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 112 | Customer Update Contract Closure | Complete 2026-05-07: `Accrue.Billing.update_customer/2` is now fully first-party across capability labels, adapter truth, facade semantics, deterministic proof, and host-facing usage. | PROC-21 | 4 |
-| 113 | Cancellation Semantics Closure | Complete 2026-05-07 (`113-01` through `113-03` complete); verification artifact backfill required before archive. | PROC-22, PROC-23 | 5 |
+| 113 | Cancellation Semantics Closure | Complete 2026-05-07 (`113-01` through `113-03` complete); verification artifact restored via Phase 115. | PROC-22, PROC-23 | 5 |
 | 114 | Contract Drift Gate Closeout | Complete 2026-05-07 (`114-01` through `114-03` complete); verification artifact backfill required before archive. | PROC-24 | 4 |
-| 115 | Phase 113 Verification Backfill | Create the missing Phase 113 verification artifact so the shipped cancellation semantics evidence satisfies the milestone audit chain. | PROC-22, PROC-23 | 3 |
+| 115 | Phase 113 Verification Backfill | Complete 2026-05-07: restored `113-VERIFICATION.md` and closed the PROC-22 / PROC-23 audit orphan gap without reopening shipped implementation scope. | PROC-22, PROC-23 | 3 |
 | 116 | Phase 114 Verification Backfill | Create the missing Phase 114 verification artifact so the support-contract closeout evidence satisfies the milestone audit chain. | PROC-24 | 3 |
 
 ### Phase 112: Customer Update Contract Closure
@@ -36,7 +36,7 @@
 
 ### Phase 113: Cancellation Semantics Closure
 
-**Status:** Complete 2026-05-07 (`113-01` through `113-03` complete)
+**Status:** Complete 2026-05-07 (`113-01` through `113-03` complete; verification backfill closed in Phase 115)
 **Goal:** Make the shipped cancellation story coherent across facade verbs, capability labels, and Braintree-specific limits.
 
 **Success criteria:**
@@ -61,7 +61,7 @@
 
 ### Phase 115: Phase 113 Verification Backfill
 
-**Status:** Planned 2026-05-07
+**Status:** Complete 2026-05-07
 **Goal:** Restore the missing Phase 113 verification artifact so `PROC-22` and `PROC-23` are represented in the audit-required verification chain.
 
 **Success criteria:**
@@ -69,7 +69,9 @@
 2. The verification artifact cites the already-green cancellation, portal, admin, and host proof lanes accurately.
 3. The milestone audit no longer reports Phase 113 requirements as orphaned.
 
-**Gap closure:** Closes the `PROC-22` and `PROC-23` audit gaps caused solely by the missing Phase 113 verification report.
+**Outcome:** `113-VERIFICATION.md` now exists, traces `PROC-22` and `PROC-23` to the shipped runtime, doc, admin, portal, and host proof lanes, and labels each lane as either shipped Phase 113 evidence or a dated Phase 115 rerun on the current branch.
+
+**Gap closure:** Closed the `PROC-22` and `PROC-23` audit gaps caused solely by the missing Phase 113 verification report.
 
 ### Phase 116: Phase 114 Verification Backfill
 
@@ -98,4 +100,4 @@
 - Earlier shipped phase detail remains preserved in per-milestone archives under `.planning/milestones/`.
 
 ---
-*Last updated: 2026-05-07 — audit gaps planned as Phases **115-116** before **v1.36** archival.
+*Last updated: 2026-05-07 — Phase **115** complete; Phase **116** remains before **v1.36** archival.
