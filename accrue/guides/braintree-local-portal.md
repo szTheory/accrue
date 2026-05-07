@@ -188,29 +188,43 @@ Customers need to add, set default, and remove payment methods. For Braintree, y
 
 ### 3. Canceling Subscriptions
 
-Default self-serve posture should match
-[Lifecycle Semantics](lifecycle_semantics.md): turn off renewal now and keep
-access through the paid-through date. In the mounted Braintree path this is a
-host-owned contract, not a native hosted Braintree portal behavior.
+Default self-serve posture should still match
+[Lifecycle Semantics](lifecycle_semantics.md): `cancel_at_period_end/2` means
+"turn off renewal now and keep access through the paid-through date." The
+important Braintree-specific caveat is that this softer non-renewal behavior is
+not a first-party processor capability in Accrue's generic facade. If your
+product wants an end-of-term Braintree policy, keep that logic in a host-owned
+seam above Accrue instead of implying generic parity.
 
-Use `cancel_at_period_end` as the primary customer self-serve example:
+The supported first-party Braintree cancellation path is immediate
+`Accrue.Billing.cancel/2`:
 
 ```elixir
-  def handle_event("cancel_subscription", %{"id" => sub_id}, socket) do
+  def handle_event("cancel_subscription_now", %{"id" => sub_id}, socket) do
     subscription = Accrue.Billing.get_subscription!(sub_id)
 
-    case Billing.cancel_at_period_end(subscription) do
+    case Billing.cancel(subscription) do
       {:ok, _updated_sub} ->
         {:noreply,
-         put_flash(socket, :info, "Cancel renewal scheduled. Access continues until period end.")}
+         put_flash(socket, :info, "Subscription canceled now. Review entitlement effects before exposing this flow.")}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to schedule the end of renewal.")}
+        {:noreply, put_flash(socket, :error, "Failed to cancel the subscription now.")}
     end
   end
 ```
 
-Reserve immediate `Billing.cancel/2` for explicit support-led or hard-stop
-flows instead of the default customer self-serve path.
+If you want a softer "cancel renewal" product experience for Braintree, model
+that as a local host contract. Typical patterns are:
+
+1. mark the subscription for end-of-term handling in your own app state
+2. explain that renewal is turning off locally while service continues through
+   the paid-through date
+3. execute the final hard stop through `Accrue.Billing.cancel/2` when your
+   host-owned policy says the term is over
+
+That keeps the mounted portal honest: immediate cancellation is the supported
+Accrue path, while end-of-term non-renewal remains a host-owned policy seam for
+Braintree.
 
 By connecting these primitives in your LiveViews, you retain absolute control over the UX, styling, and business rules, while relying on Accrue to maintain consistency with the underlying Braintree gateway.

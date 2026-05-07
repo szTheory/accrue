@@ -33,11 +33,15 @@ subscription now instead of at the paid-through boundary.
   review of downstream entitlement effects
 - Provider labels:
   - Stripe: `native`
-  - Braintree: `host-owned`
+  - Braintree: `native`
   - Fake: `testing/local-only`
 
 Do not make `cancel/2` the primary self-serve example unless your product
 explicitly wants a hard-stop cancellation flow.
+
+Braintree supports this path through `Accrue.Billing.cancel/2` today. The
+provider mismatch is on softer end-of-term and reversal semantics, not on the
+immediate hard-stop action itself.
 
 ### `resume/2`
 

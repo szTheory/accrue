@@ -9,6 +9,11 @@ For the canonical meaning of `cancel_at_period_end`, state vocabulary, and
 provider labels across Stripe and Braintree, see
 [Lifecycle Semantics](lifecycle_semantics.md).
 
+This checklist is Stripe-specific. It documents the hosted Stripe portal path
+that natively supports scheduled end-of-period cancellation. Do not project the
+same runtime parity onto Braintree, where softer non-renewal policy remains a
+host-owned seam above `Accrue.Billing.cancel/2`.
+
 ## Background — the "cancel without dunning" footgun
 
 Stripe's out-of-the-box Customer Portal lets customers cancel in a way
