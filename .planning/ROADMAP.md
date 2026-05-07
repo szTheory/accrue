@@ -4,7 +4,7 @@
 
 ### v1.36 — Dual-Provider Core Completion
 
-**Status:** Audit closeout in progress 2026-05-07  
+**Status:** Complete 2026-05-07  
 **Phases:** 112-116  
 **Requirements:** PROC-21..PROC-24  
 **Strategic parent:** [STRATEGY.md](STRATEGY.md)
@@ -17,9 +17,9 @@
 |---|-------|------|--------------|------------------|
 | 112 | Customer Update Contract Closure | Complete 2026-05-07: `Accrue.Billing.update_customer/2` is now fully first-party across capability labels, adapter truth, facade semantics, deterministic proof, and host-facing usage. | PROC-21 | 4 |
 | 113 | Cancellation Semantics Closure | Complete 2026-05-07 (`113-01` through `113-03` complete); verification artifact restored via Phase 115. | PROC-22, PROC-23 | 5 |
-| 114 | Contract Drift Gate Closeout | Complete 2026-05-07 (`114-01` through `114-03` complete); verification artifact backfill required before archive. | PROC-24 | 4 |
+| 114 | Contract Drift Gate Closeout | Complete 2026-05-07 (`114-01` through `114-03` complete); verification artifact restored in Phase 116. | PROC-24 | 4 |
 | 115 | Phase 113 Verification Backfill | Complete 2026-05-07: restored `113-VERIFICATION.md` and closed the PROC-22 / PROC-23 audit orphan gap without reopening shipped implementation scope. | PROC-22, PROC-23 | 3 |
-| 116 | Phase 114 Verification Backfill | Create the missing Phase 114 verification artifact so the support-contract closeout evidence satisfies the milestone audit chain. | PROC-24 | 3 |
+| 116 | Phase 114 Verification Backfill | Complete 2026-05-07: restored `114-VERIFICATION.md` and closed the PROC-24 audit orphan gap without reopening shipped implementation scope. | PROC-24 | 3 |
 
 ### Phase 112: Customer Update Contract Closure
 
@@ -48,7 +48,7 @@
 
 ### Phase 114: Contract Drift Gate Closeout
 
-**Status:** Complete 2026-05-07 (`114-01` through `114-03` complete)
+**Status:** Complete 2026-05-07 (`114-01` through `114-03` complete; verification backfill closed in Phase 116)
 **Goal:** Finish the milestone by making the finalized dual-provider core contract the only truth across planning mirrors, docs, and verifier gates.
 
 **Success criteria:**
@@ -57,7 +57,7 @@
 3. Merge-blocking tests or scripts fail if staged-vs-first-party drift reappears.
 4. `REQUIREMENTS.md`, `ROADMAP.md`, and `STATE.md` all reflect the active milestone cleanly.
 
-**Outcome:** Completed in three waves. The processor support matrix is now the settled canonical wording spine, package docs and example-host proof stay thin and provider-honest, and the named support-contract bundle (`verify_processor_support_matrix.sh`, `verify_package_docs.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh`) is documented and merge-blocking before milestone closeout.
+**Outcome:** Completed in three waves, with `114-VERIFICATION.md` restored in Phase 116. The processor support matrix is now the settled canonical wording spine, package docs and example-host proof stay thin and provider-honest, and the named support-contract bundle (`verify_processor_support_matrix.sh`, `verify_package_docs.sh`, `verify_verify01_readme_contract.sh`, `verify_adoption_proof_matrix.sh`) is documented and merge-blocking before milestone closeout.
 
 ### Phase 115: Phase 113 Verification Backfill
 
@@ -75,7 +75,7 @@
 
 ### Phase 116: Phase 114 Verification Backfill
 
-**Status:** Planned 2026-05-07
+**Status:** Complete 2026-05-07
 **Goal:** Restore the missing Phase 114 verification artifact so `PROC-24` is represented in the audit-required verification chain.
 
 **Success criteria:**
@@ -83,7 +83,9 @@
 2. The verification artifact cites the green support-contract verifier bundle and host-proof evidence accurately.
 3. The milestone audit no longer reports Phase 114 requirements as orphaned.
 
-**Gap closure:** Closes the `PROC-24` audit gap caused solely by the missing Phase 114 verification report.
+**Outcome:** `114-VERIFICATION.md` now exists, traces `PROC-24` to the shipped support-matrix, package-doc, host-proof, and targeted-verifier lanes, and labels each lane as either shipped Phase 114 evidence or a dated Phase 116 rerun on the current branch.
+
+**Gap closure:** Closed the `PROC-24` audit gap caused solely by the missing Phase 114 verification report.
 
 ## Recent Milestones
 
@@ -100,4 +102,4 @@
 - Earlier shipped phase detail remains preserved in per-milestone archives under `.planning/milestones/`.
 
 ---
-*Last updated: 2026-05-07 — Phase **115** complete; Phase **116** remains before **v1.36** archival.
+*Last updated: 2026-05-07 — Phase **116** complete; **v1.36** audit closeout restored and ready for archival.

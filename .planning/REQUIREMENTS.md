@@ -10,7 +10,7 @@
 - [x] **PROC-21**: Host code can call `Accrue.Billing.update_customer/2` on the official Stripe, Fake, and Braintree processors with one explicit first-party support contract and deterministic proof.
 - [x] **PROC-22**: Host code can use the supported subscription cancellation path on Stripe, Fake, and Braintree through the generic billing facade without staged-label drift or ambiguous processor semantics.
 - [x] **PROC-23**: Maintainers and adopters can inspect capability labels for customer update and cancellation semantics and see runtime truth that matches actual supported behavior, with unsupported lifecycle branches still failing clearly.
-- [ ] **PROC-24**: Public docs, planning mirrors, example-host proofs, and merge-blocking verifiers repeat the finalized dual-provider core contract so staged-vs-first-party drift is caught automatically.
+- [x] **PROC-24**: Public docs, planning mirrors, example-host proofs, and merge-blocking verifiers repeat the finalized dual-provider core contract so staged-vs-first-party drift is caught automatically.
 
 ## v2 Requirements
 
@@ -36,7 +36,7 @@
 | PROC-21 | Phase 112 | Complete 2026-05-07 |
 | PROC-22 | Phase 113 (backfilled by Phase 115) | Complete 2026-05-07 (`113-VERIFICATION.md`) |
 | PROC-23 | Phase 113 (backfilled by Phase 115) | Complete 2026-05-07 (`113-VERIFICATION.md`) |
-| PROC-24 | Phase 116 | Pending (Phase 114 verification artifact missing in audit) |
+| PROC-24 | Phase 114 (verification backfilled by Phase 116) | Complete 2026-05-07 (`114-VERIFICATION.md`) |
 
 **Coverage:**
 - v1 requirements: 4 total
@@ -45,4 +45,4 @@
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-07 after Phase 115 restored `113-VERIFICATION.md`; only PROC-24 remains pending Phase 116 backfill*
+*Last updated: 2026-05-07 after Phase 116 restored `114-VERIFICATION.md`; all v1.36 requirements now have verification artifacts*
