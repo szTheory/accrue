@@ -34,7 +34,7 @@
 
 ### Phase 113: Cancellation Semantics Closure
 
-**Status:** In progress 2026-05-07 (`113-01` and `113-02` complete)
+**Status:** Complete 2026-05-07 (`113-01` through `113-03` complete)
 **Goal:** Make the shipped cancellation story coherent across facade verbs, capability labels, and Braintree-specific limits.
 
 **Success criteria:**
@@ -69,4 +69,4 @@
 - Earlier shipped phase detail remains preserved in per-milestone archives under `.planning/milestones/`.
 
 ---
-*Last updated: 2026-05-07 — Phase **113 Plans 01-02** completed; **v1.36** remains active for **113-03** and Phase **114**.*
+*Last updated: 2026-05-07 — Phase **113 Plans 01-03** completed; **v1.36** remains active for Phase **114**.*

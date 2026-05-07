@@ -34,8 +34,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PROC-21 | Phase 112 | Complete 2026-05-07 |
-| PROC-22 | Phase 113 | Complete 2026-05-07 (Plan 01) |
-| PROC-23 | Phase 113 | Complete 2026-05-07 (Plan 01) |
+| PROC-22 | Phase 113 | Complete 2026-05-07 (Plan 01; drift-gated in Plan 03) |
+| PROC-23 | Phase 113 | Complete 2026-05-07 (Plan 01; drift-gated in Plan 03) |
 | PROC-24 | Phase 114 | Pending |
 
 **Coverage:**
@@ -45,4 +45,4 @@
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-07 after Phase 113 Plan 01 verification passed*
+*Last updated: 2026-05-07 after Phase 113 Plan 03 verification passed*
