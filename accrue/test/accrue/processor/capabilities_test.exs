@@ -54,7 +54,7 @@ defmodule Accrue.Processor.CapabilitiesTest do
     end
   end
 
-  test "known adapters report the staged contract rows explicitly" do
+  test "known adapters report the promoted and staged contract rows explicitly" do
     stripe_caps = Capabilities.for(Accrue.Processor.Stripe)
     braintree_caps = Capabilities.for(Accrue.Processor.Braintree)
 
@@ -63,13 +63,16 @@ defmodule Accrue.Processor.CapabilitiesTest do
     assert get_in(stripe_caps, [:subscription, :direct_create]) == true
     assert get_in(stripe_caps, [:subscription, :lifecycle_webhook_projection]) == true
     assert get_in(stripe_caps, [:invoice, :lifecycle_webhook_projection]) == true
+    assert Capabilities.support_label([:customer, :update]) == "all first-party"
 
     assert get_in(braintree_caps, [:payment_method, :list]) == true
+    assert get_in(braintree_caps, [:customer, :update]) == true
     assert get_in(braintree_caps, [:subscription, :update]) == true
     assert get_in(braintree_caps, [:subscription, :cancel_immediately]) == true
     assert get_in(braintree_caps, [:subscription, :cancel_at_period_end]) == false
     assert get_in(braintree_caps, [:subscription, :pause]) == false
     assert Capabilities.support_label([:subscription, :update]) == "staged first-party target"
+    assert Capabilities.support_label([:subscription, :cancel]) == "staged first-party target"
 
     assert Capabilities.support_label([:subscription, :cancel_immediately]) ==
              "staged first-party target"

@@ -12,7 +12,7 @@ defmodule Accrue.Processor.Capabilities do
     customer: %{
       create: "all first-party",
       retrieve: "all first-party",
-      update: "staged first-party target"
+      update: "all first-party"
     },
     payment_method: %{
       vault_acquisition: "all first-party",

@@ -32,7 +32,7 @@ The first official dual-provider promise is **gateway subscription core**:
 |------------|------|--------|-----------|--------------|
 | customer.create | Required | Required | Required target | all first-party |
 | customer.retrieve | Required | Required | Required target | all first-party |
-| customer.update | Supported | Supported | Staged target | staged first-party target |
+| customer.update | Supported | Supported | Supported | all first-party |
 | payment_method.vault_acquisition | Deterministic proof | Supported | Required target | all first-party |
 | payment_method.create | Supported via attach-style compatibility | Supported | Required target | all first-party |
 | payment_method.list | Supported via local projection | Supported | Required target | all first-party |
@@ -61,7 +61,7 @@ Phase 97 extends the shipped Braintree slice to include explicit subscription mu
 | `Accrue.Billing.get_subscription/2` | all first-party | Read side required for lifecycle truth on the supported slice. |
 | `Accrue.Billing.cancel/2` | all first-party | Included in the shipped Braintree mutation slice with hermetic host proof and webhook convergence coverage. |
 | `Accrue.Billing.create_customer/1` | all first-party | Customer creation remains part of the supported facade boundary. |
-| `Accrue.Billing.update_customer/2` | staged first-party target | Existing behavior remains, but this row is not yet part of the merge-blocking thin slice. |
+| `Accrue.Billing.update_customer/2` | all first-party | Bounded remote write-through facade for the shared `name`, `email`, and flat `metadata` contract only. |
 | `Accrue.Billing.add_payment_method/3` | all first-party | Canonical add verb; Braintree accepts only the narrow vault-acquisition handoff. |
 | `Accrue.Billing.update_payment_method/3` | all first-party | Replacement-oriented payment-method update semantics. |
 | `Accrue.Billing.delete_payment_method/2` | all first-party | Guarded delete that blocks still-in-use and replacement-required paths. |
