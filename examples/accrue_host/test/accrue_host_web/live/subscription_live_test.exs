@@ -109,11 +109,30 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert html =~ "AccrueHost.Billing"
   end
 
-  test "organization billing renders explicit hard-stop cancellation copy instead of a generic cancel label", %{
-    conn: conn,
-    organization: organization,
-    user: user
+  test "host billing facade exposes preview-before-commit helpers for local plan changes", %{
+    organization: organization
   } do
+    assert {:ok, subscription} =
+             Billing.subscribe(organization, "price_basic", trial_end: {:days, 14})
+
+    assert {:ok, preview} =
+             Billing.preview_plan_change(subscription, "price_pro", proration: :create_prorations)
+
+    assert preview.lines != []
+
+    assert {:ok, updated} =
+             Billing.change_plan(subscription, "price_pro", proration: :create_prorations)
+
+    updated = Repo.preload(updated, :subscription_items)
+    assert Enum.any?(updated.subscription_items, &(&1.price_id == "price_pro"))
+  end
+
+  test "organization billing renders explicit hard-stop cancellation copy instead of a generic cancel label",
+       %{
+         conn: conn,
+         organization: organization,
+         user: user
+       } do
     assert {:ok, _} = Billing.subscribe(organization, "price_basic", trial_end: {:days, 14})
 
     {:ok, view, html} =
@@ -123,7 +142,10 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
 
     assert html =~ "Need to stop renewal?"
     assert html =~ "Cancel now for this organization"
-    assert html =~ "Default customer self-serve guidance should prefer cancel renewal at period end."
+
+    assert html =~
+             "Default customer self-serve guidance should prefer cancel renewal at period end."
+
     assert html =~ "any softer Braintree end-of-term policy stays host-owned."
     refute html =~ "Cancel organization subscription"
 
@@ -132,7 +154,8 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
       |> element("button[phx-click='request_cancel']")
       |> render_click()
 
-    assert html =~ "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
+    assert html =~
+             "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
   end
 
   defp cleanup_fake_billing_rows! do

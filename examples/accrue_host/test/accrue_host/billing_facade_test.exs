@@ -44,6 +44,10 @@ defmodule AccrueHost.BillingFacadeTest do
     assert {:subscribe, 2} in exports
     assert {:subscribe, 3} in exports
     assert {:swap_plan, 3} in exports
+    assert {:preview_plan_change, 2} in exports
+    assert {:preview_plan_change, 3} in exports
+    assert {:change_plan, 2} in exports
+    assert {:change_plan, 3} in exports
     assert {:cancel, 1} in exports
     assert {:cancel, 2} in exports
     assert {:customer_for, 1} in exports
@@ -197,6 +201,26 @@ defmodule AccrueHost.BillingFacadeTest do
     assert reloaded.metadata == %{"plan" => "growth"}
   end
 
+  test "preview_plan_change/3 and change_plan/3 stay thin over Accrue.Billing", %{user: user} do
+    assert {:ok, %Subscription{} = subscription} =
+             Billing.subscribe(user, "price_basic", trial_end: {:days, 14})
+
+    assert {:ok, preview} =
+             Billing.preview_plan_change(
+               subscription,
+               "price_pro",
+               proration: :create_prorations
+             )
+
+    assert preview.subscription_id == subscription.processor_id
+
+    assert {:ok, %Subscription{} = updated} =
+             Billing.change_plan(subscription, "price_pro", proration: :create_prorations)
+
+    updated = Repo.preload(updated, :subscription_items)
+    assert Enum.any?(updated.subscription_items, &(&1.price_id == "price_pro"))
+  end
+
   test "update_customer_tax_location/2 delegates to Accrue.Billing when available", %{user: user} do
     assert {:ok, customer} = Billing.customer_for(user)
 
@@ -228,6 +252,16 @@ defmodule AccrueHost.BillingFacadeTest do
     assert billing_source =~ "Billing.subscribe(billable, price_id, opts)"
     assert billing_source =~ "def swap_plan(subscription, price_id, opts) do"
     assert billing_source =~ "Billing.swap_plan(subscription, price_id, opts)"
+
+    assert billing_source =~
+             "def preview_plan_change(subscription, price_id, opts \\\\ [proration: :create_prorations]) do"
+
+    assert billing_source =~ "Billing.preview_upcoming_invoice("
+    assert billing_source =~ "Keyword.put(opts, :new_price_id, price_id)"
+
+    assert billing_source =~
+             "def change_plan(subscription, price_id, opts \\\\ [proration: :create_prorations]) do"
+
     assert billing_source =~ "def cancel(subscription, opts \\\\ []) do"
     assert billing_source =~ "Billing.cancel(subscription, opts)"
     assert billing_source =~ "def customer_for(billable) do"
@@ -259,6 +293,17 @@ defmodule AccrueHost.BillingFacadeTest do
     refute template_source =~ "client_token"
     assert template_source =~ "def subscribe(billable, price_id, opts \\\\ []) do"
     assert template_source =~ "Billing.subscribe(billable, price_id, opts)"
+
+    assert template_source =~
+             "def preview_plan_change(subscription, price_id, opts \\\\ [proration: :create_prorations]) do"
+
+    assert template_source =~ "Billing.preview_upcoming_invoice("
+    assert template_source =~ "Keyword.put(opts, :new_price_id, price_id)"
+
+    assert template_source =~
+             "def change_plan(subscription, price_id, opts \\\\ [proration: :create_prorations]) do"
+
+    assert template_source =~ "Billing.swap_plan(subscription, price_id, opts)"
     assert template_source =~ "def update_customer(billable, attrs) when is_map(attrs) do"
     assert template_source =~ "with {:ok, customer} <- customer_for(billable) do"
     assert template_source =~ "Billing.update_customer(customer, attrs)"

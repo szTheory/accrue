@@ -17,6 +17,21 @@ defmodule <%= @billing_context %> do
     Billing.swap_plan(subscription, price_id, opts)
   end
 
+  # Host policy hook: present the shared preview-before-commit contract without
+  # teaching UI code to assemble preview opts on its own.
+  def preview_plan_change(subscription, price_id, opts \\ [proration: :create_prorations]) do
+    Billing.preview_upcoming_invoice(
+      subscription,
+      Keyword.put(opts, :new_price_id, price_id)
+    )
+  end
+
+  # Host policy hook: keep the actual commit path explicit and adjacent to the
+  # preview helper.
+  def change_plan(subscription, price_id, opts \\ [proration: :create_prorations]) do
+    Billing.swap_plan(subscription, price_id, opts)
+  end
+
   # Host policy hook: decide immediate cancellation vs grace-period flows.
   def cancel(subscription, opts \\ []) do
     Billing.cancel(subscription, opts)
