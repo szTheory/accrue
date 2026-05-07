@@ -4,7 +4,7 @@
 
 ### v1.36 — Dual-Provider Core Completion
 
-**Status:** Proposed 2026-05-06  
+**Status:** Active 2026-05-07  
 **Phases:** 112-114  
 **Requirements:** PROC-21..PROC-24  
 **Strategic parent:** [STRATEGY.md](STRATEGY.md)
@@ -15,12 +15,13 @@
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
-| 112 | Customer Update Contract Closure | Promote `Accrue.Billing.update_customer/2` from staged to fully first-party across capability labels, adapter truth, facade semantics, and deterministic proof. | PROC-21 | 4 |
+| 112 | Customer Update Contract Closure | Complete 2026-05-07: `Accrue.Billing.update_customer/2` is now fully first-party across capability labels, adapter truth, facade semantics, deterministic proof, and host-facing usage. | PROC-21 | 4 |
 | 113 | Cancellation Semantics Closure | Normalize the shipped Stripe/Fake/Braintree cancellation surface and capability labels so immediate cancel vs end-of-period cancel are explicit, truthful, and bounded. | PROC-22, PROC-23 | 5 |
 | 114 | Contract Drift Gate Closeout | Align the processor support matrix, public docs, example-host proofs, and merge-blocking verifiers to the finalized dual-provider core contract. | PROC-24 | 4 |
 
 ### Phase 112: Customer Update Contract Closure
 
+**Status:** Complete 2026-05-07
 **Goal:** Make `Accrue.Billing.update_customer/2` an explicit first-party row instead of a staged holdover.
 
 **Success criteria:**
@@ -28,6 +29,8 @@
 2. Stripe, Fake, and Braintree adapter truth for customer update matches the public contract.
 3. `Accrue.Billing.update_customer/2` preserves customer projection and event semantics across the supported processors.
 4. Deterministic tests and host-facing proof cover the promoted row.
+
+**Outcome:** Completed in three waves with a passed verification report at [112-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VERIFICATION.md). The billing facade is now a bounded remote write-through contract, `customer.update` is `all first-party` in runtime and planning mirrors, and the example host plus installer template expose the same provider-neutral helper.
 
 ### Phase 113: Cancellation Semantics Closure
 
@@ -65,4 +68,4 @@
 - Earlier shipped phase detail remains preserved in per-milestone archives under `.planning/milestones/`.
 
 ---
-*Last updated: 2026-05-06 — opened **v1.36** to close the remaining staged rows in the dual-provider core contract.*
+*Last updated: 2026-05-07 — Phase **112** completed; **v1.36** remains active for Phases **113–114**.*

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.36
 milestone_name: Dual-Provider Core Completion
-status: planning
-last_updated: "2026-05-06T12:00:00Z"
-last_activity: 2026-05-06
+status: executing
+last_updated: "2026-05-07T02:04:00Z"
+last_activity: 2026-05-07
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -21,20 +21,20 @@ See: `.planning/PROJECT.md` (updated 2026-05-06)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.36 planning — close the remaining staged rows in the Stripe + Braintree dual-provider core contract
+**Current focus:** v1.36 execution — Phase 113 cancellation semantics closure
 
 ## Current Position
 
 Milestone: v1.36 — Dual-Provider Core Completion
-Phase: Not started
-Plan: —
-Status: Requirements and roadmap defined
+Phase: 113 — Cancellation Semantics Closure
+Plan: pending planning artifacts
+Status: Phase 112 complete; ready to start the next active phase
 Resume file: `.planning/ROADMAP.md`
-Last activity: 2026-05-06 — opened v1.36, completed focused brownfield research, defined requirements PROC-21..24, and created a three-phase roadmap starting at Phase 112
+Last activity: 2026-05-07 — completed Phase 112 with passed review and verification, promoting `Accrue.Billing.update_customer/2` to a fully first-party contract across runtime, proof, and host mirrors
 
 ## Milestone Progress
 
-**v1.36** (opened **2026-05-06**): Phases **112–114 planned** — **PROC-21..24**. Focus: promote shipped customer-update and cancellation rows from staged contract leftovers to fully aligned first-party support, then lock the result across docs and verifier gates.
+**v1.36** (opened **2026-05-06**): Phase **112 complete** on **2026-05-07**; Phases **113–114** remain. **PROC-21** is now validated; focus shifts to cancellation semantics closure and final drift gates for **PROC-22..24**.
 
 **v1.35** (opened **2026-05-06**, shipped **2026-05-07**): Phases **109–111 complete** — **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; archived in **`milestones/v1.35-ROADMAP.md`**, **`milestones/v1.35-REQUIREMENTS.md`**, and **`milestones/v1.35-phases/`**.
 
@@ -67,4 +67,4 @@ Last activity: 2026-05-06 — opened v1.36, completed focused brownfield researc
 - **2026-05-06:** Treat `Accrue.Billing.update_customer/2` and the cancellation family as the remaining visible staged rows in the official dual-provider contract.
 - **2026-05-06:** Keep advanced scheduling, preview/proration parity, Hyperwallet reopening, and new processor breadth out of scope.
 
-**Next:** Start execution with `$gsd-plan-phase 112`.
+**Next:** Plan and execute `$gsd-plan-phase 113`.

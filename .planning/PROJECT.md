@@ -224,7 +224,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current Milestone
 
-**v1.36 — Dual-Provider Core Completion** opened on **2026-05-06**. The project is now in active planning for Phases **112–114**.
+**v1.36 — Dual-Provider Core Completion** opened on **2026-05-06**. Phase **112** shipped on **2026-05-07**, and the milestone is now active for Phases **113–114**.
 
 ## Next Milestone Goals
 
@@ -234,13 +234,13 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current State
 
-Current focus: **plan and execute `v1.36`**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the active planning milestone is now **v1.36**, which is intended to finish the remaining staged contract cleanup in the shipped Stripe + Braintree surface.
+Current focus: **execute `v1.36` starting from Phase 113**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the active planning milestone is now **v1.36**, where Phase **112** already closed the customer-update contract and the remaining work is cancellation semantics plus drift-gate cleanup.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
 Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
 
-The active planning milestone is **v1.36**: [ROADMAP.md](ROADMAP.md), [REQUIREMENTS.md](REQUIREMENTS.md), and [research/SUMMARY.md](research/SUMMARY.md). The latest shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The prior shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The earlier shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated for milestone open on **2026-05-06**.
+The active planning milestone is **v1.36**: [ROADMAP.md](ROADMAP.md), [REQUIREMENTS.md](REQUIREMENTS.md), [research/SUMMARY.md](research/SUMMARY.md), and [112-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/112-customer-update-contract-closure/112-VERIFICATION.md). The latest shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The prior shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The earlier shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated after Phase **112** completed on **2026-05-07**.
 
 **Last shipped planning milestone:** **v1.35** — Phases **109–111** (**2026-05-07**): **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; **`milestones/v1.35-*`**; execution trees **`milestones/v1.35-phases/`**; planning tag **`v1.35`**. **Prior:** **v1.34** — Phases **106–108** (**2026-05-06**): **PDF-01..PDF-09**; **`milestones/v1.34-*`**; execution trees **`milestones/v1.34-phases/`**; planning tag **`v1.34`**. **Earlier:** **v1.33** — Phases **101–104** (**2026-05-06**): **BT-01..BT-09**; **`milestones/v1.33-*`**; execution trees **`milestones/v1.33-phases/`**; planning tag **`v1.33`**.
 
@@ -732,6 +732,7 @@ v1.3 Tax + Organization Billing shipped and validated on 2026-04-17. Outcomes: `
 
 ## Current Milestone Notes
 
+- **2026-05-07:** **`/gsd-execute-phase 112`** — Phase **112** completed with clean review and passed verification; **PROC-21** is now validated and the active focus moves to Phase **113** cancellation semantics closure.
 - **2026-05-06:** **`/gsd-new-milestone` v1.34** — opened **Rendro Native Invoice PDF Default**; created active **`REQUIREMENTS.md`** (**PDF-01..PDF-09**); roadmap phases **106–108**; research skipped as brownfield because the integration has already been proven locally and partially implemented in the workspace.
 - **2026-04-29:** **`/gsd-complete-milestone` v1.31** — archives **`milestones/v1.31-*`**, **`git mv`** Phases **94–96** -> **`milestones/v1.31-phases/`**, **`git rm`** **`.planning/REQUIREMENTS.md`** for next milestone, planning tag **`v1.31`**.
 
@@ -814,4 +815,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-06 — **v1.36** opened — the active milestone closes the remaining staged rows in the dual-provider core contract.*
+*Last updated: 2026-05-07 — Phase **112** complete; **v1.36** continues with the remaining dual-provider core closure work.*
