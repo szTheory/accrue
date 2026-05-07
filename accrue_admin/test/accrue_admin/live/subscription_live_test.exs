@@ -99,7 +99,41 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "Stripe can natively schedule end-of-period cancellation"
 
     assert html =~
+             "Stripe and Fake support preview-backed plan swaps plus operator-managed quantity and subscription-item changes"
+
+    assert html =~
              "Update the customer tax location in the host app, then retry recurring tax on this subscription."
+  end
+
+  test "stages preview-backed swap-plan confirmation and exposes supported quantity and item actions",
+       %{
+         conn: conn,
+         subscription: subscription
+       } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    assert has_element?(view, "[data-role='swap-plan-form']")
+    assert has_element?(view, "[data-role='quantity-update-form']")
+    assert has_element?(view, "[data-role='item-add-form']")
+    assert has_element?(view, "[data-role='item-quantity-form']")
+    assert has_element?(view, "[data-role='item-remove-form']")
+    assert html =~ "Quantity changes apply to the single-item subscription lane."
+
+    html =
+      render_submit(element(view, "[data-role='swap-plan-form']"), %{
+        "action_type" => "swap_plan",
+        "new_price_id" => "price_pro",
+        "proration" => "create_prorations"
+      })
+
+    assert html =~
+             "Swap plan stages a preview before commit where the provider supports upcoming-invoice previews."
+
+    assert html =~ "Preview upcoming invoice"
+    assert html =~ "Preview total"
+    assert html =~ "preview line(s) captured before commit."
   end
 
   test "cancel now requires step-up and records admin audit linkage", %{
@@ -234,7 +268,9 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
     html =
-      render_submit(element(view, "[data-role='cancel-now-form']"), %{"action_type" => "cancel_now"})
+      render_submit(element(view, "[data-role='cancel-now-form']"), %{
+        "action_type" => "cancel_now"
+      })
 
     assert html =~ "Cancel now will execute against the local billing projection"
 
@@ -247,9 +283,10 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     assert html =~ "turn off renewal now and preserve access through the current billing period"
   end
 
-  test "renders explicit Braintree action boundaries for immediate versus scheduled cancellation", %{
-    conn: conn
-  } do
+  test "renders explicit Braintree action boundaries for immediate versus scheduled cancellation",
+       %{
+         conn: conn
+       } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     customer =
@@ -277,9 +314,24 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
     refute has_element?(view, "[data-role='cancel-at-period-end-form']")
     refute has_element?(view, "[data-role='pause-form']")
     refute has_element?(view, "[data-role='resume-form']")
+    refute has_element?(view, "[data-role='swap-plan-form']")
+    refute has_element?(view, "[data-role='quantity-update-form']")
+    refute has_element?(view, "[data-role='item-add-form']")
+    refute has_element?(view, "[data-role='item-quantity-form']")
+    refute has_element?(view, "[data-role='item-remove-form']")
+    assert has_element?(view, "[data-role='swap-plan-unavailable']")
+    assert has_element?(view, "[data-role='quantity-item-unsupported']")
 
     assert html =~
-             "Braintree supports immediate cancellation through Accrue.Billing.cancel/2. Scheduled end-of-period, reversible cancellation, pause, and unpause semantics remain host-owned or unsupported."
+             "Braintree supports immediate cancellation through Accrue.Billing.cancel/2 and bounded first-party plan swaps when the host configures :plan_resolver."
+
+    assert html =~ "Preview is unavailable for this provider"
+
+    assert html =~
+             "Configure :plan_resolver before exposing Braintree swap_plan/3 through admin."
+
+    assert html =~
+             "Braintree does not expose first-party quantity or subscription-item mutations through Accrue."
   end
 
   defp insert_customer(attrs) do
@@ -304,13 +356,18 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
 
   defp insert_subscription(customer, attrs) do
     %Subscription{}
-    |> Subscription.changeset(Map.merge(%{
-      customer_id: customer.id,
-      processor: customer.processor || "fake",
-      processor_id: "sub_" <> Integer.to_string(System.unique_integer([:positive])),
-      status: :active,
-      currency: "usd"
-    }, attrs))
+    |> Subscription.changeset(
+      Map.merge(
+        %{
+          customer_id: customer.id,
+          processor: customer.processor || "fake",
+          processor_id: "sub_" <> Integer.to_string(System.unique_integer([:positive])),
+          status: :active,
+          currency: "usd"
+        },
+        attrs
+      )
+    )
     |> TestRepo.insert!()
   end
 
