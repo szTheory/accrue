@@ -2,7 +2,7 @@
 
 This matrix answers: **what does Accrue mean by official multi-processor support, and where does that promise stop?**
 
-Phase 94 locks the contract before the runtime work is complete. This file is therefore the support SSOT for the active dual-provider track, not a claim that every Braintree row is already implemented on this branch today. Phase 95 and Phase 96 must satisfy the contract recorded here.
+This file is the canonical support SSOT for Accrue's official dual-provider track. It records the finalized `gateway subscription core` contract and the provider-honest boundaries that ship with it.
 
 Accrue intentionally splits processor truth into a **deterministic Fake-first lane** and **provider-backed fidelity lanes**. `Fake` is the required local and CI proof surface. `Stripe` remains the default first-user path. `Braintree` is the locked second-provider target because it best matches Accrue's Stripe-shaped direct-gateway facade without pulling the repo into a merchant-of-record or finance-system strategy.
 
@@ -13,7 +13,7 @@ Accrue intentionally splits processor truth into a **deterministic Fake-first la
 - **Braintree:** locked Stripe-like gateway target for the official second-provider track.
 - **Custom processors:** extension-point adapters outside first-party support, parity promises, release gates, and the official matrix unless named explicitly here.
 
-For the Phase 97 subscription-mutation slice, the required Braintree proof is hermetic: checked-in Fake/mock host coverage proves the generic facade path locally and in CI with no network access. Any real-provider Braintree run is fidelity evidence only and stays advisory unless a later phase explicitly promotes it.
+The required Braintree proof is hermetic: checked-in Fake/mock host coverage proves the generic facade path locally and in CI with no network access. Any real-provider Braintree run is fidelity evidence only and stays advisory unless the support boundary changes explicitly.
 
 ## Official first-party capability slice
 
@@ -53,7 +53,7 @@ The first official dual-provider promise is **gateway subscription core**:
 
 The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs through Accrue-owned local UI.
 
-Phase 97 extends the shipped Braintree slice to include explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is the shipped immediate-cancel path across Fake, Stripe, and Braintree, while `cancel_at_period_end/2` remains a Stripe/Fake-only scheduled-end path and quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
+The shipped Braintree slice includes explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is the shipped immediate-cancel path across Fake, Stripe, and Braintree, while `cancel_at_period_end/2` remains a Stripe/Fake-only scheduled-end path and quantity updates, pause/unpause, and resume stay bounded by typed unsupported errors rather than implied parity.
 
 ## Public facade API mapping
 
@@ -89,7 +89,7 @@ The following remain intentionally **out of slice** for first-party second-provi
 
 ## Provider rationale and exclusions
 
-`Braintree` is the locked second-provider target because it is the closest direct-gateway fit for Accrue's existing Stripe-shaped surface: customer records, vaulted payment methods, recurring subscriptions, transactions, and webhook-backed state convergence. It stays inside the strategy boundary better than enterprise-heavy or wallet-first alternatives, and it offers a tractable Elixir package surface for the next phases.
+`Braintree` is the locked second-provider target because it is the closest direct-gateway fit for Accrue's existing Stripe-shaped surface: customer records, vaulted payment methods, recurring subscriptions, transactions, and webhook-backed state convergence. It stays inside the strategy boundary better than enterprise-heavy or wallet-first alternatives, and it offers a tractable Elixir package surface for the bounded support slice.
 
 The following remain explicit non-targets for this track:
 
@@ -101,7 +101,7 @@ The following remain explicit non-targets for this track:
 ## Support-boundary rules
 
 - Unsupported capabilities must **fail clearly and early** via capability checks rather than implying Stripe parity and surprising adopters later.
-- Rows labeled `staged first-party target` remain documented and executable, but they are not part of the Fake-first lane's merge-blocking Phase 95 conformance set.
+- Rows labeled `staged first-party target` remain documented and executable, but they are not part of the Fake-first lane's merge-blocking support bundle.
 - Braintree pay-ins and Hyperwallet payouts are separate truths. Marketplace parity through Hyperwallet is strategically out of bounds unless the project boundary changes.
 - Any revisit to Braintree marketplace support must start from the rule that reopening requires an explicit strategy change plus a new milestone.
 - Accrue should learn from **Laravel Cashier** by naming provider tracks honestly.
