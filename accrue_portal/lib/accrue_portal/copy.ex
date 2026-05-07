@@ -65,10 +65,16 @@ defmodule AccruePortal.Copy do
   def subscriptions_view_cta, do: "View details"
   def subscriptions_manage_cta, do: "Manage subscriptions"
 
-  def subscriptions_cancel_success,
+  def subscriptions_cancel_success(%Subscription{processor: "braintree"}),
+    do: "Subscription canceled now. Review access changes in your host app."
+
+  def subscriptions_cancel_success(_subscription),
     do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
 
-  def subscriptions_cancel_error, do: "Unable to cancel subscription."
+  def subscriptions_cancel_error(%Subscription{processor: "braintree"}),
+    do: "Unable to cancel subscription now."
+
+  def subscriptions_cancel_error(_subscription), do: "Unable to cancel subscription."
   def subscriptions_unknown_error, do: "Subscription not found."
 
   def subscription_page_title, do: "Subscription"
@@ -77,18 +83,32 @@ defmodule AccruePortal.Copy do
   def subscription_summary_label, do: "Lifecycle summary"
   def subscription_period_end_label, do: "Current period ends"
   def subscription_identifier_label, do: "Reference"
-  def subscription_cancel_heading, do: "Need to stop renewing?"
+  def subscription_cancel_heading(%Subscription{processor: "braintree"}),
+    do: "Need to stop now?"
 
-  def subscription_cancel_body,
+  def subscription_cancel_heading(_subscription), do: "Need to stop renewing?"
+
+  def subscription_cancel_body(%Subscription{processor: "braintree"}) do
+    "Braintree supports Cancel now through Accrue.Billing.cancel/2. If you need end-of-term non-renewal instead, keep that softer policy in your host app."
+  end
+
+  def subscription_cancel_body(_subscription),
     do: "End at period end to turn off renewal now and keep access through the current billing period."
 
-  def subscription_cancel_cta, do: "Cancel renewal"
+  def subscription_cancel_cta(%Subscription{processor: "braintree"}), do: "Cancel now"
+  def subscription_cancel_cta(_subscription), do: "Cancel renewal"
   def subscription_keep_cta, do: "Keep subscription"
 
-  def subscription_cancel_success,
+  def subscription_cancel_success(%Subscription{processor: "braintree"}),
+    do: "Subscription canceled now. Review access changes in your host app."
+
+  def subscription_cancel_success(_subscription),
     do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
 
-  def subscription_cancel_error, do: "Unable to cancel subscription."
+  def subscription_cancel_error(%Subscription{processor: "braintree"}),
+    do: "Unable to cancel subscription now."
+
+  def subscription_cancel_error(_subscription), do: "Unable to cancel subscription."
   def subscription_not_found_title, do: "Page not found"
   def subscription_not_found_body, do: "We couldn't find that subscription."
   def subscription_back_home_cta, do: "Go to your account home"
@@ -174,6 +194,9 @@ defmodule AccruePortal.Copy do
 
   def subscription_access_timing(%Subscription{} = subscription) do
     cond do
+      subscription.processor == "braintree" and not Subscription.canceled?(subscription) ->
+        "Braintree immediate cancellation can end access now. Softer end-of-term handling belongs in your host app."
+
       Subscription.canceling?(subscription) ->
         "Access ends on the current period end date shown below."
 

@@ -22,18 +22,18 @@ defmodule AccruePortal.Live.SubscriptionsLive do
   def handle_event("cancel", %{"id" => id}, socket) do
     case Authorize.subscription(socket, id) do
       {:ok, %Subscription{} = sub} ->
-        case Billing.cancel_at_period_end(sub) do
+        case cancel_subscription(sub) do
           {:ok, _} ->
             {:noreply,
              socket
-             |> put_flash(:info, Copy.subscriptions_cancel_success())
+             |> put_flash(:info, Copy.subscriptions_cancel_success(sub))
              |> assign(
                :subscriptions,
                BillingReadModel.subscriptions(socket.assigns.current_customer)
              )}
 
           {:error, _reason} ->
-            {:noreply, put_flash(socket, :error, Copy.subscriptions_cancel_error())}
+            {:noreply, put_flash(socket, :error, Copy.subscriptions_cancel_error(sub))}
         end
 
       {:error, :not_found} ->
@@ -68,7 +68,7 @@ defmodule AccruePortal.Live.SubscriptionsLive do
                 phx-value-id={subscription.id}
                 class="portal-button-secondary"
               >
-                {Copy.subscription_cancel_cta()}
+                {Copy.subscription_cancel_cta(subscription)}
               </button>
             </div>
           </li>
@@ -77,4 +77,10 @@ defmodule AccruePortal.Live.SubscriptionsLive do
     </main>
     """
   end
+
+  defp cancel_subscription(%Subscription{processor: "braintree"} = subscription),
+    do: Billing.cancel(subscription)
+
+  defp cancel_subscription(%Subscription{} = subscription),
+    do: Billing.cancel_at_period_end(subscription)
 end

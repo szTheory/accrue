@@ -42,16 +42,16 @@ defmodule AccruePortal.Live.SubscriptionLive do
       ) do
     case Authorize.subscription(socket, subscription.id) do
       {:ok, %Subscription{} = scoped_subscription} ->
-        case Billing.cancel_at_period_end(scoped_subscription) do
+        case cancel_subscription(scoped_subscription) do
           {:ok, updated} ->
             {:noreply,
              socket
              |> assign(:subscription, updated)
              |> assign(:show_cancel_confirmation, false)
-             |> put_flash(:info, Copy.subscription_cancel_success())}
+             |> put_flash(:info, Copy.subscription_cancel_success(scoped_subscription))}
 
           {:error, _reason} ->
-            {:noreply, put_flash(socket, :error, Copy.subscription_cancel_error())}
+            {:noreply, put_flash(socket, :error, Copy.subscription_cancel_error(scoped_subscription))}
         end
 
       {:error, :not_found} ->
@@ -100,17 +100,17 @@ defmodule AccruePortal.Live.SubscriptionLive do
       </section>
 
       <section class="portal-card">
-        <h2>{Copy.subscription_cancel_heading()}</h2>
-        <p>{Copy.subscription_cancel_body()}</p>
+        <h2>{Copy.subscription_cancel_heading(@subscription)}</h2>
+        <p>{Copy.subscription_cancel_body(@subscription)}</p>
         <p>{Copy.subscription_access_timing(@subscription)}</p>
         <div :if={!@show_cancel_confirmation}>
           <button phx-click="toggle_cancel_confirmation" class="portal-button-secondary">
-            {Copy.subscription_cancel_cta()}
+            {Copy.subscription_cancel_cta(@subscription)}
           </button>
         </div>
         <div :if={@show_cancel_confirmation}>
           <button phx-click="cancel" class="portal-button-secondary">
-            {Copy.subscription_cancel_cta()}
+            {Copy.subscription_cancel_cta(@subscription)}
           </button>
           <button phx-click="toggle_cancel_confirmation" class="portal-button-secondary">
             {Copy.subscription_keep_cta()}
@@ -123,4 +123,10 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
   defp format_datetime(nil), do: "-"
   defp format_datetime(%DateTime{} = dt), do: Calendar.strftime(dt, "%Y-%m-%d")
+
+  defp cancel_subscription(%Subscription{processor: "braintree"} = subscription),
+    do: Billing.cancel(subscription)
+
+  defp cancel_subscription(%Subscription{} = subscription),
+    do: Billing.cancel_at_period_end(subscription)
 end

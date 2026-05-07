@@ -640,13 +640,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     do: "Cancel now will execute against the local billing projection and should be treated as an exceptional hard-stop path."
 
   defp action_confirmation_copy("cancel_at_period_end"),
-    do: "Cancel at period end will turn off renewal now and preserve access through the current billing period."
+    do: "Cancel at period end will turn off renewal now and preserve access through the current billing period where the processor supports that semantic."
 
   defp action_confirmation_copy("pause"),
-    do: "Pause collection will only succeed where the processor supports Accrue's pause semantic."
+    do: "Pause collection will only succeed where the processor supports Accrue's pause semantic; Braintree does not."
 
   defp action_confirmation_copy("resume"),
-    do: "Resume will unpause a paused subscription or reverse a scheduled end when the processor and current state support it."
+    do: "Resume will unpause a paused subscription or reverse a scheduled end when the processor and current state support it; Braintree does not provide that parity."
 
   defp action_confirmation_copy(type),
     do: "#{humanize(type)} will execute against the local billing projection."

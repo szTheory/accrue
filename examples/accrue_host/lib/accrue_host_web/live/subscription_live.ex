@@ -18,7 +18,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   @error_copy "We couldn't complete that billing action for the active organization. Check organization access, billing setup, or webhook processing, then try again."
   @cancel_copy "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
   @cancel_heading "Need to stop renewal?"
-  @cancel_body "Default customer self-serve guidance should prefer cancel renewal at period end. This example host still makes the immediate path explicit instead of hiding it behind a generic cancel label."
+  @cancel_body "Default customer self-serve guidance should prefer cancel renewal at period end. This example host still makes the immediate path explicit instead of hiding it behind a generic cancel label, and any softer Braintree end-of-term policy stays host-owned."
   @cancel_cta "Cancel now for this organization"
   @cancel_keep_cta "Keep organization subscription"
   @tax_location_repair_copy "Please update customer address or shipping before enabling automatic tax."
