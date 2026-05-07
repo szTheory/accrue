@@ -27,6 +27,14 @@ defmodule <%= @billing_context %> do
     Billing.customer(billable)
   end
 
+  # Host policy hook: resolve the billable boundary before delegating the
+  # shared customer-update contract to Accrue.
+  def update_customer(billable, attrs) when is_map(attrs) do
+    with {:ok, customer} <- customer_for(billable) do
+      Billing.update_customer(customer, attrs)
+    end
+  end
+
   # Host may add policy, preloads, or presentation mapping before delegating.
   @doc false
   def list_payment_methods(customer, opts \\ []) do

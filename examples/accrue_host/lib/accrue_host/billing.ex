@@ -37,6 +37,14 @@ defmodule AccrueHost.Billing do
     Billing.customer(billable)
   end
 
+  # Host policy hook: resolve the billable boundary before delegating the
+  # shared customer-update contract to Accrue.
+  def update_customer(billable, attrs) when is_map(attrs) do
+    with {:ok, customer} <- customer_for(billable) do
+      Billing.update_customer(customer, attrs)
+    end
+  end
+
   # Host policy hook: expose current billing state without teaching UI code
   # about direct Accrue schema/Repo access.
   def billing_state_for(billable) do
