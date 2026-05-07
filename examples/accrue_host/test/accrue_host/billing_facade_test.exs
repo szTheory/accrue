@@ -47,6 +47,7 @@ defmodule AccrueHost.BillingFacadeTest do
     assert {:cancel, 1} in exports
     assert {:cancel, 2} in exports
     assert {:customer_for, 1} in exports
+    assert {:update_customer, 2} in exports
     assert {:billing_state_for, 1} in exports
     assert {:update_customer_tax_location, 2} in exports
   end
@@ -174,6 +175,28 @@ defmodule AccrueHost.BillingFacadeTest do
     assert subscription.processor == "fake"
   end
 
+  test "update_customer/2 delegates through the host billing facade", %{user: user} do
+    assert {:ok, %Customer{} = customer} = Billing.customer_for(user)
+
+    attrs = %{
+      name: "Updated User",
+      email: "updated@example.com",
+      metadata: %{"plan" => "growth"}
+    }
+
+    assert {:ok, %Customer{} = updated} = Billing.update_customer(user, attrs)
+    assert updated.id == customer.id
+    assert updated.name == "Updated User"
+    assert updated.email == "updated@example.com"
+    assert updated.metadata == %{"plan" => "growth"}
+
+    assert {:ok, %Customer{} = reloaded} = Billing.customer_for(user)
+    assert reloaded.id == customer.id
+    assert reloaded.name == "Updated User"
+    assert reloaded.email == "updated@example.com"
+    assert reloaded.metadata == %{"plan" => "growth"}
+  end
+
   test "update_customer_tax_location/2 delegates to Accrue.Billing when available", %{user: user} do
     assert {:ok, customer} = Billing.customer_for(user)
 
@@ -209,27 +232,36 @@ defmodule AccrueHost.BillingFacadeTest do
     assert billing_source =~ "Billing.cancel(subscription, opts)"
     assert billing_source =~ "def customer_for(billable) do"
     assert billing_source =~ "Billing.customer(billable)"
+    assert billing_source =~ "def update_customer(billable, attrs) when is_map(attrs) do"
+    assert billing_source =~ "with {:ok, customer} <- customer_for(billable) do"
+    assert billing_source =~ "Billing.update_customer(customer, attrs)"
     assert billing_source =~ "def billing_state_for(billable) do"
     assert billing_source =~ "{:ok, %{customer: customer, subscription: subscription}}"
 
     assert billing_source =~
              "def update_customer_tax_location(billable, attrs) when is_map(attrs) do"
 
+    refute billing_source =~ "Stripe"
+    refute billing_source =~ "Braintree"
     assert billing_source =~ ":update_customer_tax_location"
     assert billing_source =~ "apply(Billing, :update_customer_tax_location, [customer, attrs])"
   end
 
-  test "installer-facing facade template stays generic with no Braintree jargon" do
+  test "installer-facing facade template stays generic with no provider jargon" do
     template_source =
       File.read!(
         Path.join(@host_root, "../../accrue/priv/accrue/templates/install/billing.ex.eex")
       )
 
+    refute template_source =~ "Stripe"
     refute template_source =~ "Braintree"
     refute template_source =~ "vault"
     refute template_source =~ "client_token"
     assert template_source =~ "def subscribe(billable, price_id, opts \\\\ []) do"
     assert template_source =~ "Billing.subscribe(billable, price_id, opts)"
+    assert template_source =~ "def update_customer(billable, attrs) when is_map(attrs) do"
+    assert template_source =~ "with {:ok, customer} <- customer_for(billable) do"
+    assert template_source =~ "Billing.update_customer(customer, attrs)"
   end
 
   test "subscribe/3 proof path creates customer state without direct fixture inserts", %{
