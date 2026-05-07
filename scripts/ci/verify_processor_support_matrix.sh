@@ -23,15 +23,19 @@ require_substring "| Capability | Fake | Stripe | Braintree | Public label |" "m
 require_substring "gateway subscription core" "official capability slice"
 require_substring "subscription.direct_create" "direct subscription capability row"
 require_substring "| subscription.cancel | Supported | Supported | Supported | all first-party |" "immediate cancellation capability row"
+require_substring "| subscription.swap_plan | testing/local-only | native | bounded first-party | official active-subscription-change |" "swap-plan capability row"
 require_substring "| subscription.cancel_immediately | Supported | Supported | Supported | all first-party |" "immediate cancellation alias capability row"
 require_substring "| subscription.cancel_at_period_end | Supported | Supported | Unsupported | staged first-party target |" "scheduled-end split capability row"
 require_substring "subscription.lifecycle_webhook_projection" "subscription lifecycle projection row"
 require_substring "invoice.lifecycle_webhook_projection" "invoice lifecycle projection row"
+require_substring "| invoice.preview_upcoming_invoice | testing/local-only | native | unsupported | official active-subscription-change |" "preview capability row"
 require_substring "checkout.hosted_handoff" "checkout hosted handoff row"
 require_substring "billing_portal.hosted_self_serve" "billing portal self-serve row"
 require_substring 'Accrue.Billing.subscribe/3' "subscribe facade mapping"
 require_substring '| `Accrue.Billing.cancel/2` | all first-party | Immediate cancellation is the shared shipped path across Fake, Stripe, and Braintree. |' "cancel facade mapping"
+require_substring '| `Accrue.Billing.swap_plan/3` | official active-subscription-change | Official active-subscription-change facade for plan changes: Stripe is native, Fake is testing/local-only, and Braintree is bounded first-party only when the host provides `:plan_resolver`. |' "swap-plan facade mapping"
 require_substring '| `Accrue.Billing.cancel_at_period_end/2` | staged first-party target | Scheduled-end cancellation remains supported on Fake and Stripe; Braintree rejects it with a typed unsupported error and a host-owned next-step hint. |' "cancel-at-period-end facade mapping"
+require_substring '| `Accrue.Billing.preview_upcoming_invoice/2` | official active-subscription-change | Official active-subscription-change preview facade and the canonical path where supported before committing a swap. Stripe is native, Fake is testing/local-only proof, and Braintree is explicitly unsupported. |' "preview facade mapping"
 require_substring 'Accrue.Billing.create_checkout_session/2' "checkout facade mapping"
 require_substring 'Accrue.Billing.create_billing_portal_session/2' "billing portal facade mapping"
 require_substring "Supported via first-party local checkout" "braintree local checkout support label"
@@ -80,6 +84,16 @@ fi
 
 if grep -Fq '| `Accrue.Billing.cancel_at_period_end/2` | all first-party |' "${matrix}"; then
   echo "verify_processor_support_matrix: scheduled-end facade mapping drifted to first-party parity" >&2
+  exit 1
+fi
+
+if grep -Fq '| `Accrue.Billing.preview_upcoming_invoice/2` | out of slice |' "${matrix}"; then
+  echo "verify_processor_support_matrix: preview facade drifted back to out-of-slice wording" >&2
+  exit 1
+fi
+
+if grep -Eq 'preview parity|pseudo-preview' "${matrix}"; then
+  echo "verify_processor_support_matrix: stale preview-parity wording still present" >&2
   exit 1
 fi
 

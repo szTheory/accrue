@@ -423,7 +423,11 @@ defmodule Accrue.Processor.Braintree do
   defp translate_update_params(params) do
     cond do
       Map.has_key?(params, :items) or Map.has_key?(params, "items") ->
-        translate_item_update(params[:items] || params["items"])
+        translate_item_update(
+          params[:items] || params["items"],
+          params[:braintree_plan_ref] || params["braintree_plan_ref"],
+          params[:proration_behavior] || params["proration_behavior"]
+        )
 
       truthy?(params[:cancel_at_period_end] || params["cancel_at_period_end"]) ->
         {:error, unsupported_semantic("cancel at period end")}
@@ -440,7 +444,7 @@ defmodule Accrue.Processor.Braintree do
     end
   end
 
-  defp translate_item_update([item]) when is_map(item) do
+  defp translate_item_update([item], plan_ref, proration_behavior) when is_map(item) do
     cond do
       quantity = item[:quantity] || item["quantity"] ->
         {:error,
@@ -450,7 +454,15 @@ defmodule Accrue.Processor.Braintree do
          )}
 
       plan_id = item[:price] || item["price"] ->
-        {:ok, %{plan_id: plan_id}}
+        with {:ok, resolved_plan} <- normalize_plan_ref(plan_ref, plan_id),
+             {:ok, options} <- translate_proration_behavior(proration_behavior) do
+          {:ok,
+           %{
+             plan_id: resolved_plan.processor_plan_id,
+             price: minor_to_decimal_string(resolved_plan.unit_amount_minor),
+             options: options
+           }}
+        end
 
       true ->
         {:error,
@@ -458,21 +470,72 @@ defmodule Accrue.Processor.Braintree do
     end
   end
 
-  defp translate_item_update(items) when is_list(items) do
+  defp translate_item_update(items, _plan_ref, _proration_behavior) when is_list(items) do
     {:error,
      invalid_request(
        "Braintree subscription updates support exactly one plan mutation item; got #{length(items)}."
      )}
   end
 
-  defp translate_item_update(_items) do
+  defp translate_item_update(_items, _plan_ref, _proration_behavior) do
     {:error, invalid_request("Braintree subscription updates require an items list.")}
+  end
+
+  defp normalize_plan_ref(
+         %{processor_plan_id: plan_id, unit_amount_minor: amount_minor} = plan_ref,
+         requested_price_id
+       )
+       when is_binary(plan_id) and is_integer(amount_minor) and amount_minor >= 0 do
+    if Map.get(plan_ref, :price_id) in [nil, requested_price_id] do
+      {:ok, plan_ref}
+    else
+      {:error,
+       invalid_request(
+         "Resolved Braintree plan metadata #{inspect(plan_ref.price_id)} does not match requested #{inspect(requested_price_id)}."
+       )}
+    end
+  end
+
+  defp normalize_plan_ref(_plan_ref, requested_price_id) do
+    {:error,
+     invalid_request(
+       "Braintree plan swaps require resolved processor_plan_id and unit_amount_minor metadata for #{inspect(requested_price_id)}."
+     )}
+  end
+
+  defp translate_proration_behavior(:create_prorations), do: {:ok, %{prorate_charges: true}}
+  defp translate_proration_behavior(:none), do: {:ok, %{prorate_charges: false}}
+
+  defp translate_proration_behavior(:always_invoice) do
+    {:error,
+     %APIError{
+       code: "processor_operation_unsupported",
+       http_status: 422,
+       message:
+         "Braintree swap_plan/3 does not support proration: :always_invoice. Use :create_prorations or :none."
+     }}
+  end
+
+  defp translate_proration_behavior(nil), do: {:ok, %{}}
+
+  defp translate_proration_behavior(other) do
+    {:error, invalid_request("Unsupported Braintree proration behavior: #{inspect(other)}")}
+  end
+
+  defp minor_to_decimal_string(amount_minor)
+       when is_integer(amount_minor) and amount_minor >= 0 do
+    dollars = div(amount_minor, 100)
+    cents = rem(amount_minor, 100) |> Integer.to_string() |> String.pad_leading(2, "0")
+    "#{dollars}.#{cents}"
   end
 
   defp validate_cancel_params(params) do
     invoice_now = truthy?(params[:invoice_now] || params["invoice_now"])
     prorate = truthy?(params[:prorate] || params["prorate"])
-    cancel_at_period_end = truthy?(params[:cancel_at_period_end] || params["cancel_at_period_end"])
+
+    cancel_at_period_end =
+      truthy?(params[:cancel_at_period_end] || params["cancel_at_period_end"])
+
     cancel_at = params[:cancel_at] || params["cancel_at"]
 
     cond do

@@ -26,8 +26,11 @@ billing facade without network access. Any future real-provider Braintree smoke
 is advisory only while Fake remains the merge-blocking SSOT.
 At this host layer, the semantics stay intentionally thin: `update_customer/2`
 remains a bounded provider-neutral helper, `cancel/2` is the shared immediate
-path, and `cancel_at_period_end/2` is not a first-party Braintree path. The
-full contract still lives in the canonical
+path, and the official active-subscription-change contract is
+`swap_plan/3` plus `preview_upcoming_invoice/2`. Preview is the canonical path where supported before commit; Braintree keeps a bounded first-party
+`swap_plan/3` path when the host configures `:plan_resolver`, but
+`preview_upcoming_invoice/2` stays explicitly unsupported there. `cancel_at_period_end/2`
+is not a first-party Braintree path. The full contract still lives in the canonical
 [`processor-support-matrix.md`](../../.planning/processor-support-matrix.md).
 
 **Sigra:** the example host depends on Sigra (not on Hex yet). `mix deps.get`

@@ -7,32 +7,42 @@ defmodule Accrue.Docs.OrganizationBillingGuideTest do
              )
   @readme Path.expand(Path.join([__DIR__, "..", "..", "..", "README.md"]))
 
-  test "organization billing guide keeps mandatory org billing anchors" do
+  test "organization billing guide keeps mandatory org billing anchors without maintainer taxonomy" do
     guide = File.read!(@guide)
 
     for needle <- [
-          "ORG-03",
           "fetch_current_organization",
           "use Accrue.Billable",
           "MyApp.Auth.PhxGenAuth",
           "AccrueHost.Accounts.Organization",
           "AccrueHost.Billing",
           "auth_adapters.md",
-          "Phase 38",
           "owner_type",
-          "ORG-07",
           "MyApp.Auth.Pow",
           "Pow.Plug.current_user",
-          "ORG-08",
           "Custom organization model",
           "Anti-pattern",
-          "ORG-09",
-          "examples/accrue_host/docs/adoption-proof-matrix.md",
-          "verify_adoption_proof_matrix.sh",
-          "## Adoption proof matrix (ORG-09)"
+          "## Security boundaries at a glance",
+          "## Pow-oriented checklist"
         ] do
       assert guide =~ needle,
              "expected guides/organization_billing.md to include #{inspect(needle)}"
+    end
+
+    for forbidden <- [
+          "ORG-03",
+          "ORG-07",
+          "ORG-08",
+          "ORG-09",
+          "Phase 38",
+          "verify_adoption_proof_matrix.sh",
+          "adoption-proof-matrix.md",
+          ".planning/",
+          "v1.3-REQUIREMENTS.md",
+          "## Adoption proof matrix"
+        ] do
+      refute guide =~ forbidden,
+             "expected guides/organization_billing.md to avoid #{inspect(forbidden)}"
     end
   end
 

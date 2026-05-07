@@ -23,7 +23,7 @@ Provider behavior stays honest across the shared facade:
 | Stripe | Upstream hosted URL | Upstream hosted URL |
 | Braintree | Mounted local URL | Mounted local URL |
 
-This guide mirrors only the setup-critical needles from the canonical [processor support matrix](../../.planning/processor-support-matrix.md): the shared checkout and portal facade stays provider-honest, `update_customer/2` remains a bounded provider-neutral write-through, `cancel/2` is the shared immediate path, and `cancel_at_period_end/2` stays a Fake/Stripe-only scheduled-end path.
+This guide mirrors only the setup-critical needles from the canonical [processor support matrix](../../.planning/processor-support-matrix.md): the shared checkout and portal facade stays provider-honest, `update_customer/2` remains a bounded provider-neutral write-through, `cancel/2` is the shared immediate path, and the official active-subscription-change contract is `swap_plan/3` plus `preview_upcoming_invoice/2`. Preview is the canonical path where supported before commit; `swap_plan/3` is native on Stripe, testing/local-only on Fake, bounded on Braintree when the host configures `:plan_resolver`, and `cancel_at_period_end/2` stays a Fake/Stripe-only scheduled-end path.
 
 ## How to enter this guide
 
@@ -63,6 +63,10 @@ contract as part of initial setup, not a later polish task:
 - mount `accrue_portal "/billing"` as a sibling scope beside `accrue_admin`
 - set `portal_mount_path` to the mounted portal route
 - set `portal_base_url` to an absolute host URL
+- configure `:plan_resolver` if you want first-party plan swaps through
+  `Accrue.Billing.swap_plan/3` or `accrue_admin`
+- use `Accrue.Billing.preview_upcoming_invoice/2` as the canonical
+  preview-before-commit path where supported; Braintree remains unsupported
 - keep auth/session continuity across the Plug and LiveView portal mounts
 - satisfy the Hosted Fields script and CSP contract before opening checkout
 

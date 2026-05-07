@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.37
 milestone_name: Subscription Change Management
 status: active
-last_updated: "2026-05-07T21:25:00Z"
+last_updated: "2026-05-07T21:07:30Z"
 last_activity: 2026-05-07
 progress:
   total_phases: 3
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
-  percent: 67
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -21,20 +21,20 @@ See: `.planning/PROJECT.md` (updated 2026-05-07)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** `v1.37` has completed and verified Phase 118; bounded Braintree plan-swap closeout in Phase 119 is now next
+**Current focus:** `v1.37` is execution-complete; Phase 119 hardened the bounded Braintree plan-swap contract and the milestone is ready for closeout
 
 ## Current Position
 
 Milestone: v1.37 — Subscription Change Management
 Phase: 119 — Braintree Bounded Plan-Swap Closeout
-Plan: ready for execution
-Status: Phase 118 is complete and verified; Phase 119 is the next execution target
+Plan: Phase complete
+Status: Phase 119 execution is complete and all three plans now have summary artifacts and passing verification
 Resume file: None
-Last activity: 2026-05-07 — completed and verified Phase 118 across facade, admin, portal, and host proof lanes; advanced the milestone handoff to Phase 119
+Last activity: 2026-05-07 — executed Phase 119 across runtime, docs, and support-contract verifier lanes; `v1.37` is now ready for milestone completion
 
 ## Milestone Progress
 
-**v1.37** (opened **2026-05-07**): Phases **117–118 complete**; Phase **119** remains. **SCM-01..06** target active subscription change management across API, admin, and portal surfaces.
+**v1.37** (opened **2026-05-07**): Phases **117–119 complete**. **SCM-01..06** now cover the shipped active subscription change management contract across API, admin, portal, docs, and support-contract verifiers.
 
 **v1.36** (opened **2026-05-06**, shipped **2026-05-07**, archived **2026-05-07**): Phases **112**, **113**, **114**, **115**, and **116** are complete. **PROC-21..24** are represented by verification artifacts and archived under **`milestones/v1.36-*`**.
 
@@ -83,4 +83,4 @@ Last activity: 2026-05-07 — completed and verified Phase 118 across facade, ad
 - **2026-05-07:** Name and document the support-contract bundle in `scripts/ci/README.md` while keeping the existing targeted verifier split.
 - **2026-05-07:** Backfill `113-VERIFICATION.md` from shipped Phase 113 summaries plus same-day reruns, and treat audit-closeout phases as narrow evidence repair rather than reopened feature scope.
 
-**Next:** Execute Phase 119 to harden the bounded Braintree plan-swap closeout and lock the remaining public mirrors to the same provider-honest contract.
+**Next:** Run milestone closeout/archive flow for `v1.37`; execution is complete and the active subscription change milestone is ready to ship/retire.

@@ -228,24 +228,35 @@ for `$gsd-new-milestone`.
 
 ## Current Milestone
 
-No active milestone. The latest shipped planning milestone is **v1.36**; the
-next planning step is `$gsd-new-milestone`.
+### v1.37 — Subscription Change Management
+
+**Goal:** Make Accrue feel complete for the most common post-checkout SaaS billing work by promoting active subscription-change management into an explicit first-party contract across the public billing facade, admin/operator surfaces, and customer self-serve portal.
+
+**Target features:**
+
+- Official first-party contract for `swap_plan/3`, `preview_upcoming_invoice/2`, and the active subscription-change flow they represent.
+- Stripe/Fake first-party quantity and subscription-item change management, with Braintree kept provider-honest and explicitly bounded.
+- Admin and portal flows for plan-change preview and commit that match the same support contract and capability gates.
+- Support-matrix, First Hour, lifecycle, and production-readiness docs that present one coherent “change an active subscription” story.
+
+**Why now:** The dual-provider core closure work in `v1.35` and `v1.36` removed the staged customer-update and cancellation gaps, which means the next meaningful “batteries included” step is not another supportability pass. It is the active-subscription-change experience SaaS teams expect after initial checkout: plan changes, seat/quantity changes where supported, and clear preview-before-commit guidance without parity theater.
 
 ## Next Milestone Goals
 
-- Run the linked post-`v1.36` release-readiness pass and cut the next Hex release window if the deterministic release gate remains green.
-- Choose the next bounded **PROC-08** milestone only after the release checkpoint, rather than folding release operations into feature scope again.
-- Keep **FIN-03**, marketplace/Hyperwallet reopening, advanced scheduling, preview/proration parity, and broad new billing primitives out of scope unless a fresh milestone explicitly reopens them.
+- Promote the active subscription-change bundle from “exists in code” to an explicit official support promise.
+- Keep the provider contract honest: full depth on Stripe/Fake, bounded Braintree plan-swap support with `:plan_resolver`, and typed guidance for unsupported quantity/item semantics.
+- Ship one coherent API + admin + portal story for changing an active subscription.
+- Keep release-readiness follow-through, advanced schedules, pause/resume expansion, Hyperwallet reopening, and **FIN-03** out of this milestone’s scope.
 
 ## Current State
 
-Current focus: **post-`v1.36` archival and next-milestone selection**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the latest shipped planning milestone is now **v1.36**, which closed the remaining staged customer-update and cancellation rows in the official dual-provider core contract and left the repo at a passed milestone audit with no active planning milestone yet.
+Current focus: **v1.37 Subscription Change Management**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the active planning milestone has now shifted from dual-provider core closure to the next adopter-facing depth layer: making subscription changes feel first-party, trustworthy, and batteries-included across the repo’s public surfaces.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
 
 Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
 
-The latest shipped planning milestone is **v1.36**: [`milestones/v1.36-ROADMAP.md`](milestones/v1.36-ROADMAP.md), [`milestones/v1.36-REQUIREMENTS.md`](milestones/v1.36-REQUIREMENTS.md), [113-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/113-cancellation-semantics-closure/113-VERIFICATION.md), and [114-VERIFICATION.md](/Users/jon/projects/accrue/.planning/phases/114-contract-drift-gate-closeout/114-VERIFICATION.md). The prior shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The earlier shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The preceding shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated after `v1.36` archival on **2026-05-07**.
+The active planning milestone is **v1.37**: `REQUIREMENTS.md` and `ROADMAP.md` now track the active subscription-change bundle, with planned Phases **117–119** continuing the current numbering line. The latest shipped planning milestone is **v1.36**: [`milestones/v1.36-ROADMAP.md`](milestones/v1.36-ROADMAP.md), [`milestones/v1.36-REQUIREMENTS.md`](milestones/v1.36-REQUIREMENTS.md), and the milestone audit at [`v1.36-v1.36-MILESTONE-AUDIT.md`](v1.36-v1.36-MILESTONE-AUDIT.md). The prior shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The earlier shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The preceding shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated when `v1.37` opened on **2026-05-07**.
 
 **Last shipped planning milestone:** **v1.36** — Phases **112–116** (**2026-05-07**): **PROC-21..24**; **`milestones/v1.36-*`**; planning tag **`v1.36`**. **Prior:** **v1.35** — Phases **109–111** (**2026-05-07**): **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; **`milestones/v1.35-*`**; execution trees **`milestones/v1.35-phases/`**; planning tag **`v1.35`**. **Earlier:** **v1.34** — Phases **106–108** (**2026-05-06**): **PDF-01..PDF-09**; **`milestones/v1.34-*`**; execution trees **`milestones/v1.34-phases/`**; planning tag **`v1.34`**.
 
@@ -820,4 +831,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-07 — **v1.36** archived; no active milestone is open.*
+*Last updated: 2026-05-07 — **v1.37** opened for active subscription change management.*

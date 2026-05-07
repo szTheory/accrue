@@ -53,6 +53,10 @@ require_substring "Braintree" "Braintree provider mention"
 require_substring "gateway subscription core" "gateway subscription core slice"
 require_substring "Stripe returns upstream hosted checkout and billing-portal URLs" "provider-honest Stripe hosted wording"
 require_substring "Braintree returns mounted local checkout and portal URLs" "provider-honest Braintree mounted wording"
+require_substring "swap_plan/3" "swap-plan API in matrix"
+require_substring "preview_upcoming_invoice/2" "preview API in matrix"
+require_substring "canonical path where supported" "preview-before-commit wording"
+require_substring "unsupported on Braintree" "braintree preview boundary wording"
 require_substring "update_customer/2" "bounded customer-update wording"
 require_substring "cancel/2" "shared immediate cancellation wording"
 require_substring "cancel_at_period_end/2" "scheduled-end split wording"
@@ -64,6 +68,11 @@ fi
 
 if grep -Fq 'job `docs-contracts-shift-left` runs `verify_package_docs.sh`' "${matrix}"; then
   echo "verify_adoption_proof_matrix: matrix drifted back to the stale inline docs-contracts-shift-left inventory wording" >&2
+  exit 1
+fi
+
+if grep -Eq 'preview parity|pseudo-preview' "${matrix}"; then
+  echo "verify_adoption_proof_matrix: stale preview-parity wording still present" >&2
   exit 1
 fi
 

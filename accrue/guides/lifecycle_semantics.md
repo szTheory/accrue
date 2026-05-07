@@ -7,6 +7,46 @@ instead of redefining actions or states independently.
 
 ## Action glossary
 
+Active subscription changes should be described as the **official active-subscription-change**
+contract centered on `swap_plan/3` plus `preview_upcoming_invoice/2`.
+
+### `swap_plan/3`
+
+Replace the current subscription price with a new `price_id` while keeping the
+public lifecycle facade app-facing.
+
+- Primary wording: `Swap plan` or `Change plan`
+- Customer expectation: the host app still owns catalog copy and upgrade/downgrade
+  framing; Accrue owns the billing mutation
+- Provider labels:
+  - Stripe: `native`
+  - Braintree: `host-owned metadata + native mutation`
+  - Fake: `testing/local-only`
+
+For Braintree, `swap_plan/3` is first-party only within a bounded contract:
+the host must configure `:plan_resolver` so Accrue can translate the app-facing
+`price_id` into the target Braintree `plan_id`, amount, currency, and billing
+cycle metadata. Keep quantity mutation, scheduled-end cancellation, pause, and
+resume copy separate from plan-swap copy; Braintree does not gain those broader
+lifecycle semantics through this path.
+
+### `preview_upcoming_invoice/2`
+
+Fetch a non-persistent invoice preview before committing a billing mutation.
+
+- Primary wording: `Preview upcoming invoice` or `Preview before commit`
+- Customer expectation: this is the canonical path where supported for checking
+  proration and next-invoice shape before `swap_plan/3`
+- Provider labels:
+  - Stripe: `native`
+  - Braintree: `unsupported`
+  - Fake: `testing/local-only`
+
+Keep Braintree wording explicit: there is no first-party preview parity through
+Accrue today. Hosts may still explain direct bounded swaps on Braintree, but
+they should not imply a broken or hidden preview button where the feature is
+actually unsupported.
+
 ### `cancel_at_period_end`
 
 Default self-serve cancellation posture. Turn off renewal now and preserve
@@ -125,7 +165,8 @@ Attach these labels when a guide or UI needs to explain lifecycle differences:
 
 - `native`: the processor supports the lifecycle behavior directly
 - `host-owned`: the host app or mounted Accrue surface owns the customer-facing
-  semantics locally
+  semantics locally, or must supply local metadata before Accrue can perform
+  the processor mutation
 - `unsupported`: the processor does not support that Accrue lifecycle semantic
 - `testing/local-only`: deterministic proof behavior used for Fake or local
   verification, not evidence of cross-provider parity

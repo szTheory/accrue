@@ -1,10 +1,8 @@
 # Organization billing
 
-This guide is the **non-Sigra** mainline for **organization-shaped** Stripe billing on Phoenix: you establish identity with `phx.gen.auth` (or equivalent), resolve an **active organization** from the session with **membership checks**, attach **`use Accrue.Billable`** to the org row, and route subscribe/cancel flows through a small host billing facade that accepts **`Organization`** as the billable. It complements the adapter contract in [Auth adapters](auth_adapters.md)—that file stays the `Accrue.Auth` SSOT; here we focus on **session → organization → billable** and **ORG-03** obligations.
+This guide is the mainline for **organization-shaped** billing in Phoenix when the Stripe Customer should follow an **organization**, not only the signed-in user. You establish identity with `phx.gen.auth` (or equivalent), resolve an **active organization** from the session with **membership checks**, attach **`use Accrue.Billable`** to the org row, and route subscribe/cancel flows through a small host billing facade that accepts **`Organization`** as the billable.
 
-## Adoption proof matrix (ORG-09)
-
-For the **blocking vs advisory** map of what merge-blocking CI proves versus optional recipe lanes, read [`examples/accrue_host/docs/adoption-proof-matrix.md`](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/docs/adoption-proof-matrix.md). The **Organization billing proof (ORG-09)** subsection there is the canonical entry point for ORG-09. Merge-blocking drift in that matrix is enforced by **`scripts/ci/verify_adoption_proof_matrix.sh`** (run from the repo root). **Non-Sigra** in this guide still refers to **`Accrue.Auth` / `Accrue.Billable`** contracts and how you wire them—not a promise that the demo host never enables Sigra for convenience.
+It complements [Auth adapters](auth_adapters.md): that guide explains how to implement `Accrue.Auth`, while this guide focuses on **session → organization → billable** and the host-side scoping rules that keep multi-tenant billing safe.
 
 ## Who this guide is for
 
@@ -20,13 +18,13 @@ Teams shipping **B2B or multi-tenant SaaS** where the Stripe Customer should fol
 
 For **which row** owns finance exports and revenue reporting, see [Finance handoff](finance-handoff.md).
 
-## ORG-03 boundaries at a glance
+## Security boundaries at a glance
 
-Accrue stores billing state, but **cross-tenant isolation** is host-owned. Every host surface falls into one of four path classes: **public**, **admin**, **webhook replay**, and **export**. The full ORG-03 requirement text lives in the repo milestone [v1.3-REQUIREMENTS.md](https://github.com/szTheory/accrue/blob/main/.planning/milestones/v1.3-REQUIREMENTS.md) (ORG-03); Phase 38 (**ORG-07**, **ORG-08**) adds deeper anti-patterns for Pow, custom org resolution, and replay matrices.
+Accrue stores billing state, but **cross-tenant isolation** is host-owned. Every host surface falls into one of four path classes: **public**, **admin**, **webhook replay**, and **export**.
 
 | Path class | Threat one-liner | Host obligation | Enforce at | Further reading |
 |------------|------------------|------------------|------------|-------------------|
-| public | IDOR via guessable org URLs | Scope every query by membership; never “first org in DB” defaults | Router plugs, context functions | ORG-03 |
+| public | IDOR via guessable org URLs | Scope every query by membership; never “first org in DB” defaults | Router plugs, context functions | This guide |
 | admin | Privilege escalation into another tenant’s billing | Require admin role **and** org membership before Accrue Admin or destructive billing UI | `require_admin_plug`, LiveView mounts | [Auth adapters](auth_adapters.md) |
 | webhook replay | Cross-org mutation from replayed or mis-scoped events | Resolve billable from event metadata; no global `Repo.all` in handlers | Webhook handler, Oban workers | [Webhooks](webhooks.md) |
 | export | Data spill into wrong tenant file or inbox | Filter exports by org scope; same Stripe account as configured customer | Export jobs, Sigma/RR joins | [Finance handoff](finance-handoff.md) |
@@ -43,7 +41,7 @@ Model at least **`Organization`**, **`OrganizationMembership`** (user ↔ org + 
 4. Ensure host **`MyApp.Billing`** functions used for org-shaped subscribe/customer flows take **`Organization`** (or a scope that resolves to one) as the billable argument passed into Accrue.
 5. Set **`config :accrue, :auth_adapter, MyApp.Auth.PhxGenAuth`** — copy the adapter module body from [`guides/auth_adapters.md`](auth_adapters.md); it lists every `Accrue.Auth` callback.
 
-## Pow-oriented checklist (ORG-07)
+## Pow-oriented checklist
 
 Pow answers **who is signed in**; it does **not** infer which **organization** is active. Treat `Pow.Plug.current_user/1` as the identity boundary, then run the same **membership-gated** `fetch_current_organization` pattern as the `phx.gen.auth` mainline—never promote a raw session org hint to `current_organization` without a membership join.
 
@@ -73,12 +71,12 @@ Copy the **`MyApp.Auth.Pow`** module body from [`auth_adapters.md`](auth_adapter
 
 Pow is **community-maintained**. Pin `pow` (and extensions) deliberately, read upstream changelog on every bump, and **re-verify** Plug ordering and session fetch after upgrades—Pow integrates at the connection layer and regressions often surface as missing assigns rather than compile errors.
 
-## Custom organization model (ORG-08)
+## Custom organization model
 
-**ORG-08** covers hosts that resolve tenancy through **custom signals**—subdomains, headers, alternate session keys, or background jobs—while still anchoring billing on **`Organization`**. Those signals must always collapse to a **membership-verified** org row before any `Accrue.Billing` mutation. Canonical ORG-03 path-class rules remain in [v1.3-REQUIREMENTS.md](https://github.com/szTheory/accrue/blob/main/.planning/milestones/v1.3-REQUIREMENTS.md); the table below maps common mistakes to those classes.
+Some hosts resolve tenancy through **custom signals**—subdomains, headers, alternate session keys, or background jobs—while still anchoring billing on **`Organization`**. Those signals must always collapse to a **membership-verified** org row before any `Accrue.Billing` mutation. The table below maps common mistakes to the path classes above.
 
-| Anti-pattern | ORG-03 path class | Why it violates | Host obligation |
-|--------------|-------------------|-----------------|-----------------|
+| Anti-pattern | Path class | Why it violates | Host obligation |
+|--------------|------------|-----------------|-----------------|
 | Trusting `org_id` query params on unauthenticated or partially authenticated routes | public | IDOR and accidental cross-tenant reads | Resolve org only after the session user passes a membership join; never “helpfully” default to the first org |
 | Admin LiveViews that select org solely from `live_action` params | admin | Privilege escalation into another org’s billing UI | Require `on_mount` membership checks tied to session-backed org id; treat params as untrusted hints |
 | Context modules that widen queries when org id is omitted | public | Silent cross-tenant data access | Require first-arg org scope or explicit org id sourced from verified session |
@@ -91,7 +89,7 @@ Accrue Admin and host operator UIs must inherit **org scope from the verified se
 
 ### Context functions
 
-`MyApp.Billing` / `MyApp.Accounts` functions should accept **org id or a scope struct derived from the verified session** as the first argument (or explicit keyword). Optional-org APIs are a footgun: widening queries when org is `nil` violates **public** and **admin** classes from ORG-03.
+`MyApp.Billing` / `MyApp.Accounts` functions should accept **org id or a scope struct derived from the verified session** as the first argument (or explicit keyword). Optional-org APIs are a footgun: widening queries when org is `nil` violates the **public** and **admin** boundaries above.
 
 ### Webhook replay
 
@@ -103,7 +101,7 @@ Privileged tooling calls `Accrue.Auth.actor_id/1` when writing audit rows. Retur
 
 ## User-as-billable (bounded aside)
 
-**User-as-billable** (Cashier-style: `use Accrue.Billable` on **`User`**) is a valid stepping stone for single-tenant or solo apps. Accrue still expects consistent **`owner_type`** / **`owner_id`** on persisted billing rows. If you later move Stripe Customer ownership to an **Organization**, plan a **migration** of customer/subscription ownership—Stripe IDs cannot silently “move” without host data work. **Pow** is covered in **ORG-07** above; **custom organization models** (alternate session keys, subdomains, replay/export matrices) are covered in **ORG-08** above.
+**User-as-billable** (Cashier-style: `use Accrue.Billable` on **`User`**) is a valid stepping stone for single-tenant or solo apps. Accrue still expects consistent **`owner_type`** / **`owner_id`** on persisted billing rows. If you later move Stripe Customer ownership to an **Organization**, plan a **migration** of customer/subscription ownership—Stripe IDs cannot silently “move” without host data work. Pow is covered above; custom organization models are covered in the previous section.
 
 ## Reference wiring (examples/accrue_host)
 

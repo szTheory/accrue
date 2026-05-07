@@ -53,7 +53,7 @@ then **in the same PR** (unless it is a pure typo with zero semantic change):
 
 This checklist closes **`v1.17-P2-001`**-class drift risk (**P2** → **closed** in **`.planning/research/v1.17-FRICTION-INVENTORY.md`** with **v1.21** evidence).
 
-### Support-contract mirror parity (Phase 109)
+### Support-contract mirror parity (Phase 119)
 
 When a PR edits support wording for checkout, billing portal, Stripe, or
 Braintree in any of:
@@ -79,12 +79,18 @@ bash scripts/ci/verify_processor_support_matrix.sh && \
 ```
 
 This rule exists so stale Stripe-only checkout or billing-portal wording
-cannot drift back into package docs, host proof docs, or shift-left gates.
+cannot drift back into package docs, host proof docs, or shift-left gates. For
+Phase 119, the same-PR rule also applies to the official active-subscription-change
+contract: `swap_plan/3` plus `preview_upcoming_invoice/2`, preview-before-commit
+wording, `bounded first-party` / `testing/local-only` / `unsupported` labels,
+and the explicit Braintree no-preview boundary.
 
-### Support-contract bundle (Phase 114 closeout)
+### Support-contract bundle (Phase 119 closeout)
 
 `docs-contracts-shift-left` is the merge-blocking CI home for the named
-**support-contract bundle**. The exact bundle membership is:
+**support-contract bundle**. It pins the canonical support matrix plus the thin
+mirrors for checkout, portal, and the promoted swap/preview contract. The exact
+bundle membership is:
 
 - `bash scripts/ci/verify_processor_support_matrix.sh` — canonical support SSOT in `.planning/processor-support-matrix.md`
 - `bash scripts/ci/verify_package_docs.sh` — package-facing mirrors in `accrue/README.md`, `accrue/guides/first_hour.md`, `accrue/guides/testing.md`, and `guides/testing-live-stripe.md`

@@ -41,6 +41,14 @@ defmodule Accrue.Config do
       default: Accrue.Auth.Default,
       doc: "Auth adapter implementing `Accrue.Auth` behaviour."
     ],
+    plan_resolver: [
+      type: {:or, [:atom, nil]},
+      default: nil,
+      doc:
+        "Optional host-owned resolver module implementing `Accrue.PlanResolver`. " <>
+          "Required when a processor needs more than a bare `price_id` to perform " <>
+          "plan changes through the shared facade (for example Braintree swap-plan flows)."
+    ],
     storage_adapter: [
       type: :atom,
       default: Accrue.Storage.Null,
@@ -557,6 +565,14 @@ defmodule Accrue.Config do
     :accrue
     |> Application.get_env(:portal_mount_path, "/billing")
     |> normalize_mount_path()
+  end
+
+  @spec plan_resolver() :: module() | nil
+  def plan_resolver do
+    case Application.get_env(:accrue, :plan_resolver) do
+      resolver when is_atom(resolver) -> resolver
+      _ -> nil
+    end
   end
 
   @spec portal_base_url() :: String.t() | nil

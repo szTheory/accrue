@@ -25,6 +25,7 @@ config :accrue_host, AccrueHostWeb.Endpoint,
 
 config :accrue, :processor, Accrue.Processor.Fake
 config :accrue, :auth_adapter, AccrueHost.Auth
+config :accrue, :plan_resolver, AccrueHost.Billing.PlanResolver
 
 webhook_secret =
   if config_env() == :prod do

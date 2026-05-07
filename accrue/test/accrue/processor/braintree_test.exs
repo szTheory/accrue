@@ -133,6 +133,8 @@ defmodule Accrue.Processor.BraintreeTest do
     end
 
     def update(id, params, _opts) do
+      send(self(), {:braintree_subscription_update, id, params})
+
       {:ok,
        struct!(Elixir.Braintree.Subscription,
          id: id,
@@ -377,11 +379,23 @@ defmodule Accrue.Processor.BraintreeTest do
     assert {:ok, updated} =
              Braintree.update_subscription(
                "sub_bt_123",
-               %{items: [%{id: "sub_bt_123:plan", price: "plan_pro"}]},
+               %{
+                 items: [%{id: "sub_bt_123:plan", price: "price_pro"}],
+                 braintree_plan_ref: %{
+                   price_id: "price_pro",
+                   processor_plan_id: "plan_pro",
+                   unit_amount_minor: 3_000
+                 },
+                 proration_behavior: :create_prorations
+               },
                []
              )
 
     assert updated.plan_id == "plan_pro"
+    assert_received {:braintree_subscription_update, "sub_bt_123", params}
+    assert params.plan_id == "plan_pro"
+    assert params.price == "30.00"
+    assert params.options == %{prorate_charges: true}
   end
 
   test "update_subscription/3 rejects quantity updates explicitly" do
@@ -393,6 +407,25 @@ defmodule Accrue.Processor.BraintreeTest do
              )
 
     assert error.message =~ "quantity mutation semantics"
+  end
+
+  test "update_subscription/3 rejects unsupported always-invoice proration for Braintree swaps" do
+    assert {:error, %Accrue.APIError{code: "processor_operation_unsupported"} = error} =
+             Braintree.update_subscription(
+               "sub_bt_123",
+               %{
+                 items: [%{id: "sub_bt_123:plan", price: "price_pro"}],
+                 braintree_plan_ref: %{
+                   price_id: "price_pro",
+                   processor_plan_id: "plan_pro",
+                   unit_amount_minor: 3_000
+                 },
+                 proration_behavior: :always_invoice
+               },
+               []
+             )
+
+    assert error.message =~ "does not support proration: :always_invoice"
   end
 
   test "cancel_subscription/2 and /3 route immediate cancellation and reject unsupported semantics" do

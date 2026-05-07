@@ -76,12 +76,22 @@ defmodule Accrue.Billing do
     end)
   end
 
+  @doc """
+  Official active-subscription-change facade for replacing the current
+  subscription price with a new `price_id`.
+
+  Use `preview_upcoming_invoice/2` as the canonical path where supported
+  before committing a swap. See `guides/lifecycle_semantics.md` for the
+  semantic contract and `.planning/processor-support-matrix.md` for the
+  provider-honest support boundary.
+  """
   def swap_plan(sub, new_price_id, opts) do
     span_billing(:subscription, :swap_plan, sub, opts, fn ->
       SubscriptionActions.swap_plan(sub, new_price_id, opts)
     end)
   end
 
+  @doc "Raising variant of `swap_plan/3`."
   def swap_plan!(sub, new_price_id, opts) do
     span_billing(:subscription, :swap_plan, sub, opts, fn ->
       SubscriptionActions.swap_plan!(sub, new_price_id, opts)
@@ -142,12 +152,22 @@ defmodule Accrue.Billing do
     end)
   end
 
+  @doc """
+  Official active-subscription-change preview facade for inspecting the next
+  invoice before commit.
+
+  This is the canonical path where supported for preview-before-commit
+  guidance. See `guides/lifecycle_semantics.md` for the semantic contract and
+  `.planning/processor-support-matrix.md` for provider-honest support limits,
+  including Braintree's explicit preview boundary.
+  """
   def preview_upcoming_invoice(sub_or_customer, opts \\ []) do
     span_billing(:invoice, :preview_upcoming, sub_or_customer, opts, fn ->
       SubscriptionActions.preview_upcoming_invoice(sub_or_customer, opts)
     end)
   end
 
+  @doc "Raising variant of `preview_upcoming_invoice/2`."
   def preview_upcoming_invoice!(sub_or_customer, opts \\ []) do
     span_billing(:invoice, :preview_upcoming, sub_or_customer, opts, fn ->
       SubscriptionActions.preview_upcoming_invoice!(sub_or_customer, opts)

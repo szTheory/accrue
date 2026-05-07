@@ -12,6 +12,8 @@ For the default mounted path:
 - set `:portal_mount_path` to `"/billing"`
 - set `:portal_base_url` to an absolute host URL so returned checkout and
   billing-portal URLs stay absolute
+- configure `:plan_resolver` if your local portal or admin UI will expose
+  first-party `swap_plan/3` for Braintree subscriptions
 - keep auth/session continuity across the browser pipeline and LiveView mounts
 - load the Hosted Fields scripts and keep CSP aligned with that checkout surface
 
@@ -108,6 +110,17 @@ You can quickly assemble a cohesive self-serve local portal using Phoenix LiveVi
 
 To allow a customer to view their active subscription and swap plans:
 
+First, configure a host-owned resolver that can translate your app-facing
+`price_id` into the Braintree plan metadata Accrue needs:
+
+```elixir
+config :accrue, :plan_resolver, MyApp.Billing.PlanResolver
+```
+
+The resolver should return `price_id`, `processor`, `processor_plan_id`,
+`unit_amount_minor`, `currency`, and normalized `billing_cycle` metadata for
+each swappable plan.
+
 ```elixir
 defmodule MyAppWeb.BillingPortalLive do
   use MyAppWeb, :live_view
@@ -129,7 +142,7 @@ defmodule MyAppWeb.BillingPortalLive do
   def handle_event("swap_plan", %{"subscription_id" => sub_id, "new_price_id" => price_id}, socket) do
     subscription = Accrue.Billing.get_subscription!(sub_id)
     
-    case Billing.swap_plan(subscription, price_id, []) do
+    case Billing.swap_plan(subscription, price_id, proration: :create_prorations) do
       {:ok, _updated_sub} ->
         {:noreply,
          socket

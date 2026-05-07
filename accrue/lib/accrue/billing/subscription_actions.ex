@@ -69,6 +69,7 @@ defmodule Accrue.Billing.SubscriptionActions do
   alias Accrue.Billing.UpcomingInvoice
   alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Events
+  alias Accrue.PlanResolver
   alias Accrue.Processor
   alias Accrue.Processor.Idempotency
   alias Accrue.Repo
@@ -286,14 +287,27 @@ defmodule Accrue.Billing.SubscriptionActions do
 
     result =
       if braintree_processor?() do
-        {:error,
-         %Accrue.APIError{
-           code: "processor_operation_unsupported",
-           http_status: 422,
-           message:
-             "Braintree plan swaps are unsupported through Accrue's generic swap_plan/3 facade " <>
-               "because the provider requires an explicit subscription price update alongside plan_id."
-         }}
+        with {:ok, braintree_params} <-
+               build_braintree_swap_request(sub, new_price_id, validated) do
+          Repo.transact(fn ->
+            with {:ok, bt_sub} <-
+                   Processor.__impl__().update_subscription(
+                     sub.processor_id,
+                     braintree_params,
+                     []
+                   ),
+                 {:ok, attrs} <- SubscriptionProjection.decompose(bt_sub),
+                 {:ok, updated} <- update_subscription_row(sub, attrs),
+                 {:ok, _items} <- upsert_items(updated, bt_sub),
+                 {:ok, _} <-
+                   record_event("subscription.plan_swapped", updated, %{
+                     new_price_id: new_price_id,
+                     proration: validated[:proration]
+                   }) do
+              {:ok, Repo.preload(updated, :subscription_items, force: true)}
+            end
+          end)
+        end
       else
         assert_single_item!(sub, "swap_plan/3")
 
@@ -333,6 +347,89 @@ defmodule Accrue.Billing.SubscriptionActions do
 
     IntentResult.wrap(result)
   end
+
+  defp build_braintree_swap_request(%Subscription{} = sub, new_price_id, validated) do
+    assert_single_item!(sub, "swap_plan/3")
+    [existing_item | _] = sub.subscription_items
+
+    with {:ok, current_plan} <- resolve_braintree_plan(existing_item.price_id),
+         {:ok, target_plan} <- resolve_braintree_plan(new_price_id),
+         :ok <- ensure_braintree_plan_processor(target_plan),
+         :ok <- ensure_braintree_swap_currency_match(current_plan, target_plan),
+         :ok <- ensure_braintree_swap_billing_cycle_match(current_plan, target_plan) do
+      {:ok,
+       %{
+         items: [%{id: existing_item.processor_id, price: new_price_id}],
+         braintree_plan_ref: target_plan,
+         proration_behavior: validated[:proration]
+       }}
+    end
+  end
+
+  defp resolve_braintree_plan(nil) do
+    {:error,
+     %Accrue.APIError{
+       code: "price_resolution_missing",
+       http_status: 422,
+       message:
+         "Accrue.Billing.swap_plan/3 could not resolve the current Braintree price_id from the local subscription item."
+     }}
+  end
+
+  defp resolve_braintree_plan(price_id), do: PlanResolver.resolve_price(price_id)
+
+  defp ensure_braintree_plan_processor(%{processor: "braintree"}), do: :ok
+
+  defp ensure_braintree_plan_processor(%{price_id: price_id, processor: processor}) do
+    {:error,
+     %Accrue.APIError{
+       code: "price_resolution_invalid",
+       http_status: 422,
+       message:
+         "Resolved plan #{inspect(price_id)} belongs to #{inspect(processor)}, but the Braintree swap path requires processor: \"braintree\"."
+     }}
+  end
+
+  defp ensure_braintree_swap_currency_match(current_plan, target_plan) do
+    current = normalize_currency(current_plan.currency)
+    target = normalize_currency(target_plan.currency)
+
+    if current == target do
+      :ok
+    else
+      {:error,
+       %Accrue.APIError{
+         code: "invalid_request_error",
+         http_status: 422,
+         message:
+           "Braintree swap_plan/3 requires matching currencies; current #{inspect(current_plan.price_id)} is #{current} while target #{inspect(target_plan.price_id)} is #{target}."
+       }}
+    end
+  end
+
+  defp ensure_braintree_swap_billing_cycle_match(current_plan, target_plan) do
+    if current_plan.billing_cycle == target_plan.billing_cycle do
+      :ok
+    else
+      {:error,
+       %Accrue.APIError{
+         code: "invalid_request_error",
+         http_status: 422,
+         message:
+           "Braintree swap_plan/3 only supports plan changes within the same billing cycle. " <>
+             "Current #{inspect(current_plan.price_id)} is #{format_billing_cycle(current_plan.billing_cycle)} " <>
+             "while target #{inspect(target_plan.price_id)} is #{format_billing_cycle(target_plan.billing_cycle)}."
+       }}
+    end
+  end
+
+  defp normalize_currency(value) when is_atom(value),
+    do: value |> Atom.to_string() |> String.upcase()
+
+  defp normalize_currency(value) when is_binary(value), do: String.upcase(value)
+
+  defp format_billing_cycle(%{unit: unit, count: count}),
+    do: "#{count} #{unit}"
 
   @spec swap_plan!(Subscription.t(), String.t(), keyword()) :: Subscription.t()
   def swap_plan!(sub, price, opts) do
@@ -1101,9 +1198,7 @@ defmodule Accrue.Billing.SubscriptionActions do
     end
   end
 
-  defp braintree_processor? do
-    Processor.__impl__() == Accrue.Processor.Braintree
-  end
+  defp braintree_processor?, do: Processor.__impl__() == Accrue.Processor.Braintree
 
   defp assert_single_item!(%Subscription{subscription_items: items} = sub, op) do
     if is_list(items) and length(items) > 1 do

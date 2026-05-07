@@ -4,7 +4,7 @@
 
 ### v1.37 — Subscription Change Management
 
-**Status:** Planned 2026-05-07
+**Status:** Complete 2026-05-07
 **Phases:** 117-119
 
 **Goal:** Make Accrue feel complete for the most common post-checkout SaaS
@@ -48,6 +48,7 @@ changes, and preview-before-commit guidance.
 
 ### Phase 119: Braintree Bounded Plan-Swap Closeout
 
+**Status:** Complete 2026-05-07
 **Goal**: Finish the milestone by hardening the bounded Braintree plan-swap story and locking every public mirror to the same contract.
 **Depends on**: Phase 118
 **Requirements**: SCM-06
@@ -77,4 +78,4 @@ changes, and preview-before-commit guidance.
 - Advanced schedules, broader pause/resume promotion, Hyperwallet reopening, and `FIN-03` stay out of scope unless a later milestone explicitly reopens them.
 
 ---
-*Last updated: 2026-05-07 — **v1.37** opened for active subscription change management.*
+*Last updated: 2026-05-07 — **v1.37** execution completed across Phases 117–119.*

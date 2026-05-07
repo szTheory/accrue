@@ -98,6 +98,9 @@ require_fixed "$ROOT_DIR/accrue/README.md" "bash scripts/ci/accrue_host_uat.sh"
 require_fixed "$ROOT_DIR/accrue/README.md" "processor support matrix"
 require_fixed "$ROOT_DIR/accrue/README.md" "gateway subscription core"
 require_fixed "$ROOT_DIR/accrue/README.md" "mounted first-party local checkout and portal URLs"
+require_fixed "$ROOT_DIR/accrue/README.md" "swap_plan/3"
+require_fixed "$ROOT_DIR/accrue/README.md" "preview_upcoming_invoice/2"
+require_fixed "$ROOT_DIR/accrue/README.md" "canonical path where supported"
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"README.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/admin_ui.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/core-admin-parity.md"'
@@ -166,6 +169,9 @@ require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "processor support matrix"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "update_customer/2"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "cancel/2"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "cancel_at_period_end/2"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "swap_plan/3"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "preview_upcoming_invoice/2"
+require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "canonical path where supported"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Accrue.Billing.create_checkout_session/2"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "[:accrue, :billing, :checkout_session, :create]"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "checkout_session_facade_test.exs"
@@ -178,7 +184,14 @@ require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Braintree returns moun
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "update_customer/2"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "cancel/2"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "cancel_at_period_end/2"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "swap_plan/3"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "preview_upcoming_invoice/2"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "canonical path where supported"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "scripts/ci/README.md"
+require_absent_regex "$ROOT_DIR/accrue/README.md" 'all first-party.*(swap_plan/3|preview_upcoming_invoice/2)'
+require_absent_regex "$ROOT_DIR/accrue/guides/first_hour.md" 'all first-party.*(swap_plan/3|preview_upcoming_invoice/2)'
+require_absent_regex "$ROOT_DIR/examples/accrue_host/README.md" 'all first-party.*(swap_plan/3|preview_upcoming_invoice/2)'
+require_absent_regex "$ROOT_DIR/examples/accrue_host/README.md" 'preview parity|pseudo-preview'
 require_fixed "$ROOT_DIR/accrue/guides/troubleshooting.md" "mix accrue.install --check"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "Braintree"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "gateway subscription core"
