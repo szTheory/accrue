@@ -56,13 +56,18 @@ defmodule Accrue.Processor.FakeTest do
   end
 
   describe "update_customer/3" do
-    test "merges new params into the stored customer" do
+    test "merges the shared first-party attrs into the stored customer" do
       {:ok, %{id: id}} = Processor.create_customer(%{email: "a@b", name: "Old"}, [])
 
-      assert {:ok, %{id: ^id, name: "New", email: "a@b"}} =
-               Processor.update_customer(id, %{name: "New"}, [])
+      assert {:ok, %{id: ^id, name: "New", email: "new@example.com", metadata: %{"tier" => "pro"}}} =
+               Processor.update_customer(
+                 id,
+                 %{name: "New", email: "new@example.com", metadata: %{"tier" => "pro"}},
+                 []
+               )
 
-      assert {:ok, %{name: "New"}} = Processor.retrieve_customer(id, [])
+      assert {:ok, %{name: "New", email: "new@example.com", metadata: %{"tier" => "pro"}}} =
+               Processor.retrieve_customer(id, [])
     end
 
     test "returns APIError for unknown id" do

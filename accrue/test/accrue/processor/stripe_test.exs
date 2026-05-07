@@ -181,6 +181,13 @@ defmodule Accrue.Processor.StripeTest do
   end
 
   describe "automatic tax passthrough" do
+    test "keeps the promoted shared customer-update facade narrow while preserving the specialized tax-location path" do
+      billing_source = File.read!("lib/accrue/billing.ex")
+
+      assert billing_source =~ "@customer_update_supported_attrs [:name, :email, :metadata]"
+      assert billing_source =~ "def update_customer_tax_location(%Customer{} = customer, attrs)"
+    end
+
     test "preserves normalized automatic_tax maps for subscription requests" do
       assert %{"automatic_tax" => %{"enabled" => true}} =
                outgoing_request_shape(%{automatic_tax: %{"enabled" => true}})

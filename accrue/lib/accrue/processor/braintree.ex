@@ -630,6 +630,7 @@ defmodule Accrue.Processor.Braintree do
     params
     |> stringify_keys()
     |> maybe_move_name_to_company()
+    |> maybe_move_metadata_to_custom_fields()
   end
 
   defp maybe_move_name_to_company(%{"name" => name} = params)
@@ -640,6 +641,15 @@ defmodule Accrue.Processor.Braintree do
   end
 
   defp maybe_move_name_to_company(params), do: params
+
+  defp maybe_move_metadata_to_custom_fields(%{"metadata" => metadata} = params)
+       when is_map(metadata) do
+    params
+    |> Map.put("custom_fields", stringify_keys(metadata))
+    |> Map.delete("metadata")
+  end
+
+  defp maybe_move_metadata_to_custom_fields(params), do: params
 
   defp translate_charge_params(params) do
     amount = params[:amount] || params["amount"]

@@ -157,13 +157,17 @@ defmodule Accrue.Billing.EventsTransactionTest do
       refute inspect(event.data) =~ "Updated Name"
     end
 
-    test "rejects unsupported attrs before processor drift" do
+    test "rejects provider-specific and unsupported attrs before processor drift" do
       user = test_user()
       {:ok, customer} = Billing.create_customer(user)
       {:ok, before_remote_customer} = Processor.retrieve_customer(customer.processor_id, [])
 
-      assert {:error, {:unsupported_customer_update_attrs, ["preferred_locale"]}} =
-               Billing.update_customer(customer, %{preferred_locale: "en"})
+      assert {:error,
+              {:unsupported_customer_update_attrs, ["default_source", "preferred_locale"]}} =
+               Billing.update_customer(customer, %{
+                 preferred_locale: "en",
+                 default_source: "card_123"
+               })
 
       assert {:ok, remote_customer} = Processor.retrieve_customer(customer.processor_id, [])
       assert remote_customer == before_remote_customer

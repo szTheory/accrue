@@ -46,12 +46,14 @@ defmodule Accrue.Processor.BraintreeTest do
     end
 
     def update(id, params, _opts) do
+      send(self(), {:braintree_customer_update, id, params})
+
       {:ok,
        %{
          id: id,
          company: params["company"] || "ACME Billing",
          email: params["email"] || "billing@example.com",
-         custom_fields: %{"source" => "stubbed"}
+         custom_fields: params["custom_fields"] || %{"source" => "stubbed"}
        }}
     end
   end
@@ -334,7 +336,7 @@ defmodule Accrue.Processor.BraintreeTest do
              accrue_map.items
   end
 
-  test "customer callbacks create, retrieve, and update through the gateway" do
+  test "customer callbacks keep the promoted shared subset narrow and translated" do
     assert {:ok, created} =
              Braintree.create_customer(%{name: "ACME Billing", email: "billing@example.com"}, [])
 
@@ -348,10 +350,27 @@ defmodule Accrue.Processor.BraintreeTest do
     assert retrieved.email == "billing@example.com"
 
     assert {:ok, updated} =
-             Braintree.update_customer("cus_bt_123", %{name: "Updated Billing"}, [])
+             Braintree.update_customer(
+               "cus_bt_123",
+               %{
+                 name: "Updated Billing",
+                 email: "updated@example.com",
+                 metadata: %{"tier" => "pro"}
+               },
+               []
+             )
 
     assert updated.id == "cus_bt_123"
     assert updated.name == "Updated Billing"
+    assert updated.email == "updated@example.com"
+    assert updated.metadata == %{"tier" => "pro"}
+
+    assert_received {:braintree_customer_update, "cus_bt_123", params}
+    assert params["company"] == "Updated Billing"
+    assert params["email"] == "updated@example.com"
+    assert params["custom_fields"] == %{"tier" => "pro"}
+    refute Map.has_key?(params, "name")
+    refute Map.has_key?(params, "payment_method_nonce")
   end
 
   test "update_subscription/3 maps a plan swap onto Braintree update" do
