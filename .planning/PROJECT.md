@@ -242,37 +242,37 @@ for `$gsd-new-milestone`.
 
 ## Current Milestone
 
-### v1.37 — Subscription Change Management
+### v1.38 — Linked Release Truth
 
-**Goal:** Make Accrue feel complete for the most common post-checkout SaaS billing work by promoting active subscription-change management into an explicit first-party contract across the public billing facade, admin/operator surfaces, and customer self-serve portal.
+**Goal:** Close the shipped linked `1.1.1` public release cleanly: Phase 121 already proved the public package, tag, release, and workflow truth, and Phase 122 exists only to align the live planning mirrors and required maintainer closeout artifacts to that shipped line.
 
 **Target features:**
 
-- Official first-party contract for `swap_plan/3`, `preview_upcoming_invoice/2`, and the active subscription-change flow they represent.
-- Stripe/Fake first-party quantity and subscription-item change management, with Braintree kept provider-honest and explicitly bounded.
-- Admin and portal flows for plan-change preview and commit that match the same support contract and capability gates.
-- Support-matrix, First Hour, lifecycle, and production-readiness docs that present one coherent “change an active subscription” story.
+- Release contract audit that locked the three-package linked release story across `RELEASING.md`, Release Please configuration, manifests, changelogs, and maintainer proof steps.
+- Linked publish execution for the shipped trio, with canonical proof recorded in `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md`.
+- Post-publish contract sweep across package docs, adoption proof, and shift-left verifier lanes so install guidance reflects the shipped public line instead of branch-local assumptions.
+- Final live planning-mirror and maintainer-closeout cleanup so the shipped release truth and the milestone-closeout truth remain explicit without contradiction.
 
-**Why now:** The dual-provider core closure work in `v1.35` and `v1.36` removed the staged customer-update and cancellation gaps, which means the next meaningful “batteries included” step is not another supportability pass. It is the active-subscription-change experience SaaS teams expect after initial checkout: plan changes, seat/quantity changes where supported, and clear preview-before-commit guidance without parity theater.
+**Why now:** The release itself is already public; the remaining work is maintainer truth. Live planning mirrors still contain pre-closeout cues that read as if Phase 121 has not happened yet, so Phase 122 must finish the bounded cleanup before `v1.38` can be treated as fully shipped and archived.
 
 ## Next Milestone Goals
 
-- Promote the active subscription-change bundle from “exists in code” to an explicit official support promise.
-- Keep the provider contract honest: full depth on Stripe/Fake, bounded Braintree plan-swap support with `:plan_resolver`, and typed guidance for unsupported quantity/item semantics.
-- Ship one coherent API + admin + portal story for changing an active subscription.
-- Keep release-readiness follow-through, advanced schedules, pause/resume expansion, Hyperwallet reopening, and **FIN-03** out of this milestone’s scope.
+- Keep the active planning mirrors aligned to the shipped linked trio and the canonical proof already captured in Phase 121.
+- Record the dated `INV-08` maintainer certification without inventing a new friction row unless the evidence truly demands it.
+- Flip `v1.38` from short post-publish closeout to shipped/archive only after the mirror and inventory artifacts are complete.
+- Keep new billing primitives, broader lifecycle expansion, Hyperwallet reopening, and **FIN-03** out of this milestone’s scope.
 
 ## Current State
 
-Current focus: **v1.37 Subscription Change Management**. The linked **`accrue` / `accrue_admin` `1.0.0`** pair remains the current stable public release, and the active planning milestone has now shifted from dual-provider core closure to the next adopter-facing depth layer: making subscription changes feel first-party, trustworthy, and batteries-included across the repo’s public surfaces.
+Current focus: **v1.38 Linked Release Truth**. Current public linked release line: accrue / accrue_admin / accrue_portal 1.1.1 (published 2026-05-08). `v1.38` remained open briefly after publish to align planning mirrors and record INV-08.
 
-**Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}`** in package READMEs and **First Hour** follow **`mix.exs` `@version`** on the branch you are reading — enforced by **`verify_package_docs`**.
+**Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}` / any `accrue_portal` guidance** in package READMEs and **First Hour** now follow the shipped `1.1.1` trio, with Phase 121 retaining the detailed publish proof and rerun transcripts.
 
-Last shipped (public packages on Hex): **`accrue` / `accrue_admin` 1.0.0** — registry reality for consumers; the linked publish landed on **2026-04-28** and the same-day proof lives in **`092-VERIFICATION.md`**. Workspace **`@version`** on **`main`** matches the published pair.
+Detailed release evidence, including the superseded `1.1.0` recovery story, lives in `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md`; this live project narrative only carries the current shipped trio line and the bounded closeout posture.
 
-The active planning milestone is **v1.37**: `REQUIREMENTS.md` and `ROADMAP.md` now track the active subscription-change bundle, with planned Phases **117–119** continuing the current numbering line. The latest shipped planning milestone is **v1.36**: [`milestones/v1.36-ROADMAP.md`](milestones/v1.36-ROADMAP.md), [`milestones/v1.36-REQUIREMENTS.md`](milestones/v1.36-REQUIREMENTS.md), and the milestone audit at [`v1.36-v1.36-MILESTONE-AUDIT.md`](v1.36-v1.36-MILESTONE-AUDIT.md). The prior shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The earlier shipped planning milestone is **v1.34**: [`milestones/v1.34-ROADMAP.md`](milestones/v1.34-ROADMAP.md), [`milestones/v1.34-REQUIREMENTS.md`](milestones/v1.34-REQUIREMENTS.md), and [`milestones/v1.34-phases/`](milestones/v1.34-phases/). The preceding shipped planning milestone is **v1.33**: [`milestones/v1.33-ROADMAP.md`](milestones/v1.33-ROADMAP.md), [`milestones/v1.33-REQUIREMENTS.md`](milestones/v1.33-REQUIREMENTS.md), and [`milestones/v1.33-phases/`](milestones/v1.33-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated when `v1.37` opened on **2026-05-07**.
+The active planning milestone remains **v1.38** only for closeout: `REQUIREMENTS.md` and `ROADMAP.md` track the already-completed release-contract audit, the already-shipped linked publish, and the remaining post-publish mirror pass in Phase 122. The latest shipped planning milestone is **v1.37**: [`milestones/v1.37-ROADMAP.md`](milestones/v1.37-ROADMAP.md), [`milestones/v1.37-REQUIREMENTS.md`](milestones/v1.37-REQUIREMENTS.md), and [`milestones/v1.37-phases/`](milestones/v1.37-phases/). The prior shipped planning milestone is **v1.36**: [`milestones/v1.36-ROADMAP.md`](milestones/v1.36-ROADMAP.md), [`milestones/v1.36-REQUIREMENTS.md`](milestones/v1.36-REQUIREMENTS.md), and the milestone audit at [`v1.36-v1.36-MILESTONE-AUDIT.md`](v1.36-v1.36-MILESTONE-AUDIT.md). The earlier shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated during the post-publish closeout on **2026-05-08**.
 
-**Last shipped planning milestone:** **v1.36** — Phases **112–116** (**2026-05-07**): **PROC-21..24**; **`milestones/v1.36-*`**; planning tag **`v1.36`**. **Prior:** **v1.35** — Phases **109–111** (**2026-05-07**): **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; **`milestones/v1.35-*`**; execution trees **`milestones/v1.35-phases/`**; planning tag **`v1.35`**. **Earlier:** **v1.34** — Phases **106–108** (**2026-05-06**): **PDF-01..PDF-09**; **`milestones/v1.34-*`**; execution trees **`milestones/v1.34-phases/`**; planning tag **`v1.34`**.
+**Last shipped planning milestone:** **v1.37** — Phases **117–119** (**2026-05-07**): **SCM-01..06**; **`milestones/v1.37-*`**; planning tag **`v1.37`**. **Prior:** **v1.36** — Phases **112–116** (**2026-05-07**): **PROC-21..24**; **`milestones/v1.36-*`**; planning tag **`v1.36`**. **Earlier:** **v1.35** — Phases **109–111** (**2026-05-07**): **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; **`milestones/v1.35-*`**; execution trees **`milestones/v1.35-phases/`**; planning tag **`v1.35`**.
 
 **Execution history:** **v1.27** Phases **84–85** under **`milestones/v1.27-phases/`** (**`084-VERIFICATION.md`**, **`085-VERIFICATION.md`**). **v1.26** Phases **82–83** under **`milestones/v1.26-phases/`** (**`082-VERIFICATION.md`**, **`083-VERIFICATION.md`**). **v1.25** Phases **79–81** under **`milestones/v1.25-phases/`** (**`079-VERIFICATION.md`**, **`080-VERIFICATION.md`**, **`081-VERIFICATION.md`**). **v1.24** Phase **78** — billing portal on **`Accrue.Billing`** + telemetry truth (**`milestones/v1.24-phases/78-billing-portal-on-accrue-billing-telemetry-truth/78-VERIFICATION.md`**); **v1.24** Phase **77** — customer PM tab VERIFY + theme + copy export (**`milestones/v1.24-phases/77-customer-pm-tab-verify-theme-copy-export/77-VERIFICATION.md`**); **v1.24** Phase **76** — customer PM inventory + Copy (**`milestones/v1.24-phases/76-customer-pm-tab-inventory-copy-burn-down/76-VERIFICATION.md`**). **v1.23** Phase **75** under **`milestones/v1.23-phases/`**; **v1.22** Phase **74** under **`milestones/v1.22-phases/`**; **v1.21** Phases **72–73** under **`milestones/v1.21-phases/`**; **v1.20** Phases **70–71** under **`milestones/v1.20-phases/`**; **v1.19** Phases **67–69** under **`milestones/v1.19-phases/`**; **v1.18** Phase **66** under **`milestones/v1.18-phases/`**; **v1.17** under **`milestones/v1.17-phases/`**.
 
@@ -845,4 +845,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-07 — **v1.37** opened for active subscription change management.*
+*Last updated: 2026-05-07 — **v1.38** opened for linked release truth and public release continuity.*
