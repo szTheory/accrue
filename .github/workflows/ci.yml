@@ -39,6 +39,8 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: verify_package_docs.sh
+        env:
+          RELEASE_PLEASE_PR: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'release-please--') && '1' || '' }}
         run: bash scripts/ci/verify_package_docs.sh
 
       - name: Processor support matrix contract
@@ -69,6 +71,9 @@ jobs:
 
       - name: Verify Release Please manifest ↔ mix.exs @version
         run: bash scripts/ci/verify_release_manifest_alignment.sh
+
+      - name: Verify linked release contract
+        run: bash scripts/ci/verify_release_contract.sh
 
   release-gate:
     name: Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})

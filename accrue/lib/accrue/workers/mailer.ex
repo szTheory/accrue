@@ -193,7 +193,8 @@ defmodule Accrue.Workers.Mailer do
       {:error, %Accrue.Error.PdfDisabled{}} ->
         append_hosted_url_note(msg, assigns, type)
 
-      {:error, %Accrue.Error.InvoiceRendererUnavailable{adapter: Accrue.InvoiceRenderer.ChromicPDF}} ->
+      {:error,
+       %Accrue.Error.InvoiceRendererUnavailable{adapter: Accrue.InvoiceRenderer.ChromicPDF}} ->
         append_hosted_url_note(msg, assigns, type)
 
       {:error, reason} ->
@@ -226,7 +227,8 @@ defmodule Accrue.Workers.Mailer do
       {:error, %Accrue.Error.PdfDisabled{}} ->
         append_hosted_url_note(email, assigns, type)
 
-      {:error, %Accrue.Error.InvoiceRendererUnavailable{adapter: Accrue.InvoiceRenderer.ChromicPDF}} ->
+      {:error,
+       %Accrue.Error.InvoiceRendererUnavailable{adapter: Accrue.InvoiceRenderer.ChromicPDF}} ->
         append_hosted_url_note(email, assigns, type)
 
       {:error, reason} ->

@@ -1,12 +1,12 @@
 # Releasing Accrue
 
 This runbook is written for the **recurring** maintainer path: linked `accrue` +
-`accrue_admin` releases via **Release Please** on a green `main`, followed by ordered
-Hex publishes and lightweight post-publish checks. The **same-day `1.0.0`** bootstrap
-story is an **exceptional** appendix at the end — read that only when you are
-intentionally coordinating a first public major.
+`accrue_admin` + `accrue_portal` releases via **Release Please** on a green `main`,
+followed by ordered Hex publishes and lightweight post-publish checks. The
+**same-day `1.0.0`** bootstrap story is an **exceptional** appendix at the end —
+read that only when you are intentionally coordinating a first public major.
 
-**Planning milestones vs Hex SemVer:** files under **`.planning/`** may use labels like **`v1.14`** or **`v1.15`** for internal milestone bookkeeping. Those **do not** replace the **`accrue` / `accrue_admin` `@version`** values in each **`mix.exs`** or the versions published on **Hex**. Consumers pin and upgrade against **Hex + changelogs**; maintainers use this runbook plus **`accrue/guides/upgrade.md`**.
+**Planning milestones vs Hex SemVer:** files under **`.planning/`** may use labels like **`v1.14`** or **`v1.15`** for internal milestone bookkeeping. Those **do not** replace the **`accrue` / `accrue_admin` / `accrue_portal` `@version`** values in each **`mix.exs`** or the versions published on **Hex**. Consumers pin and upgrade against **Hex + changelogs**; maintainers use this runbook plus **`accrue/guides/upgrade.md`**.
 
 ## Post-1.0 cadence (maintainer intent)
 
@@ -15,7 +15,7 @@ The `1.0.x` line treats the documented public facade as the SemVer boundary: gen
 1. **SemVer discipline.** Patch releases carry bug fixes and doc-only changes inside the documented facade. Minor releases carry additive features, optional config, optional adapters, forward-compatible Telemetry events, and soft deprecations. Major releases remove hard-deprecated symbols, change the documented Plug/router contract, introduce breaking schema migrations on `accrue_*` tables, or change the webhook signature verification contract.
 2. **Deprecation cycle.** Breaking changes on the documented surface follow a two-step deprecation cycle: first mark the old path in `CHANGELOG.md`, with `@deprecated`, and in `accrue/guides/upgrade.md` without a runtime warning; then hard-deprecate in a later minor with a runtime warning. The replacement path must exist for at least one minor before removal in the next major.
 3. **Cadence.** Patch releases land as needed. Minor releases land when a coherent additive batch is ready. Major releases are rare and pre-announced with at least one `2.0.0-rc.N` stabilization window before the stable tag.
-4. **Lockstep.** `accrue` and `accrue_admin` continue shipping as a coordinated combined Release Please PR. Major versions stay aligned, even when an admin-only minor leads the core package.
+4. **Lockstep.** `accrue`, `accrue_admin`, and `accrue_portal` continue shipping as a coordinated combined Release Please PR. Major versions stay aligned, even when a UI-only minor leads the core package.
 5. **Supported integration surface.** `accrue/guides/maturity-and-maintenance.md` is the authoritative list of the public facade, the Telemetry event contract, and the pieces that are explicitly not part of the SemVer boundary.
 6. **Verification expectation.** Every release passes the merge-blocking `host-integration` Fake-backed gate. Majors additionally require the `live-stripe` lane green within the release window as maintainer sign-off.
 7. **Forward-port policy.** critical security fixes are forward-ported to the latest minor of the previous major for 6 months after a new major ships. Older majors are end-of-life and documented in `accrue/guides/maturity-and-maintenance.md`.
@@ -24,7 +24,7 @@ The `1.0.x` line treats the documented public facade as the SemVer boundary: gen
 10. **Last verified line.** Update the line below whenever `release-please-config.json`, `.release-please-manifest.json`, or `.github/workflows/release-please.yml` change.
 
 **Last verified against** `release-please-config.json`, `.release-please-manifest.json`,
-and `.github/workflows/release-please.yml` on **2026-04-23** (UTC). Update this line when
+and `.github/workflows/release-please.yml` on **2026-05-07** (UTC). Update this line when
 automation semantics change.
 
 ## Routine linked releases (Release Please + Hex)
@@ -32,15 +32,21 @@ automation semantics change.
 1. Confirm CI is green on `main`, especially the `release-gate` workflow and the lanes below.
 2. Let **Release Please** open the **combined** linked release PR (see `release-please-config.json`
    — `separate-pull-requests: false` — and `.release-please-manifest.json` for per-package versions).
-3. Review the PR: both `accrue/mix.exs` and `accrue_admin/mix.exs` `@version` values match the manifest,
-   both package-local `CHANGELOG.md` files update, and automation outputs look sane.
+3. Review the PR: `accrue/mix.exs`, `accrue_admin/mix.exs`, and `accrue_portal/mix.exs` `@version`
+   values match the manifest, all three package-local `CHANGELOG.md` files update, and automation outputs look sane.
+   If the release branch is stale and no longer contains the current `main` tree, reset `release-please--branches--main`
+   back to `main`, rerun Release Please, and review the regenerated PR before any package-specific repair.
+   If Release Please leaves `accrue_portal` behind on the release branch, run
+   `bash scripts/ci/repair_linked_release_pr.sh --version <target-version>` on the checked-out release branch,
+   push the repaired branch, and re-run `bash scripts/ci/verify_release_pr_scope.sh --pr <number> --version <target-version>`.
 4. **Default (primary path):** merge the combined Release Please PR manually on GitHub when required checks are green. Merge after checklist sign-off, **or** after review dispatch **Actions → Release PR automation → Run workflow**
    with the PR number so auto-merge queues **only** via **`workflow_dispatch`** (not on PR open/sync).
    Use `scripts/ci/gh_merge_release_pr.sh` if you need the Release Please PR number before dispatching.
-5. Confirm Hex package availability for **`accrue`** before relying on **`accrue_admin`** consumers.
+5. Confirm Hex package availability for **`accrue`** before relying on **`accrue_admin`** or **`accrue_portal`** consumers.
 6. Let `.github/workflows/release-please.yml` publish **`accrue_admin`** when the workflow gates
    (`needs.release.outputs.*`, `ACCRUE_ADMIN_HEX_RELEASE=1`) say it is safe — **`accrue` publishes first**.
-7. Verify HexDocs for both packages, tags, and GitHub releases as appropriate.
+7. Let `.github/workflows/release-please.yml` publish **`accrue_portal`** only after the same-workflow gates say both upstream packages are safe.
+8. Verify HexDocs for all three packages, tags, and GitHub releases as appropriate.
 
 ### Rendro publish handoff
 
@@ -56,16 +62,21 @@ When the invoice renderer depends on a newly published Rendro version, preserve 
 The standard path is `.github/workflows/release-please.yml`:
 
 - Release Please runs only on pushes to `main` and manual `workflow_dispatch`.
-- `release-please-config.json` uses **one combined release PR** for `accrue` and `accrue_admin` (`separate-pull-requests: false`) so versions and `scripts/ci/verify_package_docs.sh` stay aligned.
-- Authoritative package changelogs are only `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md` (the paths wired in `release-please-config.json`); do not add duplicate changelogs under nested directories such as `accrue/accrue/` or `accrue_admin/accrue_admin/`.
+- `release-please-config.json` uses **one combined release PR** for `accrue`, `accrue_admin`, and `accrue_portal` (`separate-pull-requests: false`) so versions and `scripts/ci/verify_package_docs.sh` stay aligned.
+- Authoritative package changelogs are only `accrue/CHANGELOG.md`, `accrue_admin/CHANGELOG.md`, and `accrue_portal/CHANGELOG.md` (the paths wired in `release-please-config.json`); do not add duplicate changelogs under nested directories such as `accrue/accrue/`, `accrue_admin/accrue_admin/`, or `accrue_portal/accrue_portal/`.
 - Automated publish is gated by same-workflow outputs:
   - `needs.release.outputs.accrue_release_created`
   - `needs.release.outputs.accrue_admin_release_created`
+  - `needs.release.outputs.accrue_portal_release_created`
 - `accrue` publishes first.
-- `accrue_admin` publishes only after the `accrue` publish job succeeds when both packages release together.
+- `accrue_admin` publishes only after the `accrue` publish job succeeds when multiple linked packages release together.
+- `accrue_portal` publishes only after the `accrue` publish job succeeds and, when needed, after the `accrue_admin` publish job succeeds in the same workflow.
 - The `publish-accrue-admin` job in `release-please.yml` declares `needs: [release, publish-accrue]`, which enforces `accrue` before `accrue_admin` for linked Hex publishes.
+- The `publish-accrue-portal` job in `release-please.yml` declares `needs: [release, publish-accrue, publish-accrue-admin]`, which preserves `accrue` before `accrue_admin` before `accrue_portal` for linked Hex publishes.
 - `accrue_admin` dry-run and publish steps export `ACCRUE_ADMIN_HEX_RELEASE=1`.
+- `accrue_portal` dry-run and publish steps export `ACCRUE_PORTAL_HEX_RELEASE=1`.
 - If Release Please creates the **core** GitHub Release but not the admin one in the same run, the workflow **lockstep fallback** still publishes `accrue_admin` when both manifest versions match (same push SHA).
+- If Release Please creates the **core** GitHub Release but not the portal one in the same run, the workflow **lockstep fallback** still publishes `accrue_portal` when both manifest versions match (same push SHA).
 
 This automation does not publish from `pull_request`, `pull_request_target`, or ordinary branch pushes.
 
@@ -95,9 +106,10 @@ For the provider-parity detail lane, see [guides/testing-live-stripe.md](guides/
 
 ## Release PR review checklist
 
-- The combined release PR updates **both** `accrue/mix.exs` and `accrue_admin/mix.exs` `@version` consistently with `.release-please-manifest.json` before publish jobs run.
-- The same PR updates both package-local `CHANGELOG.md` files.
-- `accrue` publishes before `accrue_admin`.
+- The combined release PR updates `accrue/mix.exs`, `accrue_admin/mix.exs`, and `accrue_portal/mix.exs` `@version` consistently with `.release-please-manifest.json` before publish jobs run.
+- The same PR updates all three package-local `CHANGELOG.md` files.
+- `accrue` publishes before `accrue_admin` and `accrue_portal`.
+- `accrue_portal` publishes after `accrue_admin` when both release in the same run.
 - `Canonical local demo: Fake` remains the required deterministic gate before release.
 - The required deterministic gate still includes `security/trust artifact`, `seeded performance smoke`, `compatibility floor/target checks`, and `browser accessibility/responsive checks`.
 - `Provider parity: Stripe test mode` stays optional/manual and out of the required release lane.
@@ -112,7 +124,7 @@ Create both secrets in GitHub before the first release run:
 1. Open the repository on GitHub.
 2. Go to **Settings** -> **Secrets and variables** -> **Actions**.
 3. Add `RELEASE_PLEASE_TOKEN` as a GitHub token that can create release pull requests, push release tags, create GitHub releases, and write pull-request comments for this repository.
-4. Add `HEX_API_KEY` as a Hex.pm API key that can publish the `accrue` and `accrue_admin` packages.
+4. Add `HEX_API_KEY` as a Hex.pm API key that can publish the `accrue`, `accrue_admin`, and `accrue_portal` packages.
 5. Never paste either value into workflow files, docs, commit messages, terminal transcripts, issues, or pull requests.
 
 For the first anonymous maintainer release, use the GitHub identity `szTheory`
@@ -154,11 +166,11 @@ Keep provider-backed checks out of the required release lane. In real integratio
 
 ## Manual fallback
 
-If Release Please dry-run cannot produce a combined release PR when you need one, use the manual fallback only after creating and reviewing a manual release PR that sets both package versions and both package changelogs consistently.
+If Release Please dry-run cannot produce a combined release PR when you need one, use the manual fallback only after creating and reviewing a manual release PR that sets all package versions and all package changelogs consistently.
 
 Use `.github/workflows/publish-hex.yml` only as a manual fallback or recovery path:
 
-- `package`: choose `accrue` or `accrue_admin`
+- `package`: choose `accrue`, `accrue_admin`, or `accrue_portal`
 - `tag`: reviewed tag or commit ref to publish from
 - `release_version`: expected version at that ref
 
@@ -167,6 +179,8 @@ Manual fallback order:
 1. Publish `accrue`.
 2. Confirm Hex availability.
 3. Publish `accrue_admin`.
+4. Confirm Hex availability.
+5. Publish `accrue_portal`.
 
 If the current release also includes a Rendro handoff, insert the Rendro proof before publishing Accrue:
 
@@ -177,6 +191,8 @@ If the current release also includes a Rendro handoff, insert the Rendro proof b
 5. Publish `accrue`.
 6. Confirm Hex availability.
 7. Publish `accrue_admin`.
+8. Confirm Hex availability.
+9. Publish `accrue_portal`.
 
 Each recovery run checks out the explicit ref, verifies the package `@version`, runs `mix hex.publish --dry-run`, then runs `mix hex.publish --yes`. The recovery workflow never references `steps.release.outputs[...]`.
 
@@ -184,23 +200,24 @@ Each recovery run checks out the explicit ref, verifies the package `@version`, 
 
 When the dual publish is not one atomic transaction, prefer the smallest corrective step first:
 
-- **Retry `accrue_admin`** for the **same** version if core `accrue` at **V** is already correct on Hex — token, metadata, or transient CI issues often clear on a focused re-run.
+- **Retry `accrue_admin` or `accrue_portal`** for the **same** version if upstream `accrue` at **V** is already correct on Hex — token, metadata, or transient CI issues often clear on a focused re-run.
 - **`mix hex.publish --revert`** only for a **clear mistake** on **`accrue`** and **only** inside Hex’s short post-publish window; see [Hex immutability / retire FAQ](https://hex.pm/docs/faq).
-- **Otherwise** use **`mix hex.retire`** on the bad release and ship a **new paired version** forward (new combined release PR), with changelog honesty about what not to use.
-- If **`accrue`** at **V** should not be consumed without admin **V**, document the partial state and follow the retire / forward-fix path rather than leaving a silent half-pair.
+- **Otherwise** use **`mix hex.retire`** on the bad release and ship a **new linked version** forward (new combined release PR), with changelog honesty about what not to use.
+- If **`accrue`** at **V** should not be consumed without matching admin or portal **V**, document the partial state and follow the retire / forward-fix path rather than leaving a silent partial suite.
 
 See [https://hex.pm/docs/faq](https://hex.pm/docs/faq) for revert windows, retirement, and registry semantics.
 
 ## Appendix: Same-day `1.0.0` bootstrap (exceptional)
 
 Use this section only when you are intentionally coordinating a **first public `1.0.0`**
-(or an equivalent historic bootstrap) for **both** packages in one tightly managed window.
+(or an equivalent historic bootstrap) for **all three** packages in one tightly managed window.
 
-1. Confirm CI is green on `main`, especially the `release-gate` workflow and the required deterministic gate for both packages.
-2. Trigger or merge the **combined** Release Please PR that explicitly carries `Release-As: 1.0.0` for both package paths when needed. The first bootstrap should use Conventional Commits plus the `Release-As: 1.0.0` trailer for both `accrue` and `accrue_admin`.
-3. Review the release PR diff and confirm each package shows `@version "1.0.0"` in its `mix.exs` and the package-local changelog updates in `accrue/CHANGELOG.md` and `accrue_admin/CHANGELOG.md`.
+1. Confirm CI is green on `main`, especially the `release-gate` workflow and the required deterministic gate for all three packages.
+2. Trigger or merge the **combined** Release Please PR that explicitly carries `Release-As: 1.0.0` for all package paths when needed. The first bootstrap should use Conventional Commits plus the `Release-As: 1.0.0` trailer for `accrue`, `accrue_admin`, and `accrue_portal`.
+3. Review the release PR diff and confirm each package shows `@version "1.0.0"` in its `mix.exs` and the package-local changelog updates in `accrue/CHANGELOG.md`, `accrue_admin/CHANGELOG.md`, and `accrue_portal/CHANGELOG.md`.
 4. Merge the reviewed release PR manually, **or** after checklist sign-off run **Actions → Release PR automation → Run workflow** and enter the PR number so auto-merge queues **only** via **`workflow_dispatch`** (not on PR open/sync). Then let `.github/workflows/release-please.yml` publish `accrue`. You can use `scripts/ci/gh_merge_release_pr.sh` to discover the Release Please PR number before dispatching.
 5. Confirm Hex package availability for `accrue` before proceeding.
 6. Let `.github/workflows/release-please.yml` publish `accrue_admin` with `ACCRUE_ADMIN_HEX_RELEASE=1`.
-7. Verify HexDocs for both packages and confirm `llms.txt` is present in generated docs output.
-8. Verify repo health files, package changelogs, and GitHub release notes for both tags.
+7. Let `.github/workflows/release-please.yml` publish `accrue_portal` with `ACCRUE_PORTAL_HEX_RELEASE=1`.
+8. Verify HexDocs for all three packages and confirm `llms.txt` is present in generated docs output.
+9. Verify repo health files, package changelogs, and GitHub release notes for all three tags.

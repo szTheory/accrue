@@ -163,6 +163,49 @@ jobs:
             --manifest-file .release-please-manifest.json \
             --token "$RELEASE_PLEASE_TOKEN"
 
+          release_pr_number="$(gh pr list --repo "$repo" --state open --head "release-please--branches--${target_branch}" --json number --jq '.[0].number // empty')"
+          if [ -n "$release_pr_number" ]; then
+            release_branch="$(gh pr view "$release_pr_number" --repo "$repo" --json headRefName --jq '.headRefName')"
+            git fetch origin "$target_branch" "$release_branch"
+            git checkout -B "$release_branch" "origin/$release_branch"
+
+            expected_base="$(git rev-parse "origin/${target_branch}")"
+            actual_base="$(git merge-base HEAD "$expected_base")"
+            if [ "$actual_base" != "$expected_base" ]; then
+              git checkout "$target_branch"
+              git checkout -B "$release_branch" "$expected_base"
+              git push --force-with-lease origin HEAD:"$release_branch"
+
+              $release_please release-pr \
+                --repo-url "$repo" \
+                --target-branch "$target_branch" \
+                --config-file release-please-config.json \
+                --manifest-file .release-please-manifest.json \
+                --token "$RELEASE_PLEASE_TOKEN"
+
+              git fetch origin "$release_branch"
+              git checkout -B "$release_branch" "origin/$release_branch"
+            fi
+
+            repair_version="$(jq -r '.accrue // empty' .release-please-manifest.json)"
+            repair_admin_version="$(jq -r '.accrue_admin // empty' .release-please-manifest.json)"
+            repair_portal_version="$(jq -r '.accrue_portal // empty' .release-please-manifest.json)"
+
+            if [ -n "$repair_version" ] && [ "$repair_version" = "$repair_admin_version" ] && [ "$repair_portal_version" != "$repair_version" ]; then
+              bash scripts/ci/repair_linked_release_pr.sh --version "$repair_version"
+              if ! git diff --quiet; then
+                git config user.name "github-actions[bot]"
+                git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                git add .release-please-manifest.json accrue_portal/mix.exs accrue_portal/CHANGELOG.md
+                git commit -m "fix: repair linked portal release PR to ${repair_version}"
+                git push origin HEAD:"$release_branch"
+              fi
+            fi
+
+            git checkout "$target_branch"
+            bash scripts/ci/verify_release_pr_scope.sh --pr "$release_pr_number"
+          fi
+
   publish-accrue:
     name: Publish accrue
     needs: release

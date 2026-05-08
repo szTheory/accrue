@@ -72,6 +72,7 @@ defmodule Accrue.Processor.CapabilitiesTest do
     assert get_in(braintree_caps, [:subscription, :cancel_at_period_end]) == false
     assert get_in(braintree_caps, [:subscription, :pause]) == false
     assert Capabilities.support_label([:subscription, :update]) == "all first-party"
+
     assert Capabilities.support_label([:subscription, :swap_plan]) ==
              "official active-subscription-change"
 
@@ -110,7 +111,9 @@ defmodule Accrue.Processor.CapabilitiesTest do
              "unsupported"
 
     assert Capabilities.provider_support_label(:stripe, [:subscription_item, :add]) == "native"
-    assert Capabilities.provider_support_label(:fake, [:subscription_item, :add]) == "testing/local-only"
+
+    assert Capabilities.provider_support_label(:fake, [:subscription_item, :add]) ==
+             "testing/local-only"
 
     assert Capabilities.provider_support_label(:braintree, [:subscription_item, :add]) ==
              "unsupported"

@@ -155,7 +155,9 @@ defmodule Accrue.Billing.SubscriptionCancelTest do
       assert error.message =~ "Accrue.Billing.cancel/2"
       assert error.message =~ "host-owned seam"
 
-      reloaded = Repo.preload(Repo.get!(Subscription, subscription.id), :subscription_items, force: true)
+      reloaded =
+        Repo.preload(Repo.get!(Subscription, subscription.id), :subscription_items, force: true)
+
       assert reloaded.status == :active
       refute reloaded.cancel_at_period_end
       refute Subscription.canceling?(reloaded)
