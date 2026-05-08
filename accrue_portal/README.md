@@ -7,6 +7,12 @@ It gives host apps a package-owned portal mount for subscriptions, payment
 methods, invoices, and local checkout flows when a processor uses
 first-party-local-portal semantics.
 
+> **Hex vs `main`:** The `{:accrue_portal, "~> …"}` line tracks
+> `accrue_portal/mix.exs` `@version` on the branch you are reading
+> (typically `main` on GitHub). [Hex.pm](https://hex.pm/packages/accrue_portal)
+> publishes that train after release; use HexDocs matched to the resolved Hex
+> version when you need portal docs tied to published artifacts.
+
 For Braintree, both checkout and billing portal sessions return mounted local
 URLs from your app, not upstream hosted URLs.
 

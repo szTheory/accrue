@@ -1,9 +1,10 @@
 # Contributing
 
-Thanks for contributing to Accrue. This repository ships two sibling Mix packages:
+Thanks for contributing to Accrue. This repository ships three sibling Mix packages:
 
 - `accrue/` for the core billing library
 - `accrue_admin/` for the LiveView admin UI
+- `accrue_portal/` for the customer billing portal UI
 
 ## Development setup
 
@@ -14,7 +15,7 @@ Install the supported toolchain first:
 - PostgreSQL 14+
 - Node.js for browser UAT in `examples/accrue_host`
 
-Then bootstrap both packages:
+Then bootstrap the package suite:
 
 ```bash
 cd accrue
@@ -23,6 +24,9 @@ mix deps.get
 cd ../accrue_admin
 mix deps.get
 npm ci
+
+cd ../accrue_portal
+mix deps.get
 ```
 
 Use the package-local READMEs and guides for host-app wiring, browser UAT, and release-oriented docs checks.
@@ -66,6 +70,15 @@ For `accrue_admin`, use publish-mode dry runs when validating release packaging:
 ```bash
 cd accrue_admin
 export ACCRUE_ADMIN_HEX_RELEASE=1
+mix hex.build
+mix hex.publish --dry-run
+```
+
+For `accrue_portal`, use the matching publish-mode dry run:
+
+```bash
+cd accrue_portal
+export ACCRUE_PORTAL_HEX_RELEASE=1
 mix hex.build
 mix hex.publish --dry-run
 ```

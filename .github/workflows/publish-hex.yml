@@ -4,12 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: 'Package to publish. Run accrue before accrue_admin when recovering a same-day release.'
+        description: 'Package to publish. Run accrue before accrue_admin before accrue_portal when recovering a same-day release.'
         required: true
         type: choice
         options:
           - accrue
           - accrue_admin
+          - accrue_portal
       tag:
         description: 'Reviewed git tag or commit ref to publish from.'
         required: true
@@ -79,3 +80,35 @@ jobs:
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
           ACCRUE_ADMIN_HEX_RELEASE: ${{ env.ACCRUE_ADMIN_HEX_RELEASE }}
+
+  publish-accrue-portal:
+    name: Publish accrue_portal recovery
+    if: ${{ inputs.package == 'accrue_portal' }}
+    runs-on: ubuntu-24.04
+    env:
+      ACCRUE_PORTAL_HEX_RELEASE: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+      - name: Install Hex
+        run: mix local.hex --force
+      - name: Verify accrue_portal release version
+        run: grep -n "@version \"${{ inputs.release_version }}\"" accrue_portal/mix.exs
+      - name: Install accrue_portal deps
+        run: cd accrue_portal && mix deps.get
+      - name: Dry run accrue_portal Hex publish
+        run: cd accrue_portal && mix hex.publish --dry-run
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_PORTAL_HEX_RELEASE: ${{ env.ACCRUE_PORTAL_HEX_RELEASE }}
+      - name: Publish accrue_portal to Hex
+        run: cd accrue_portal && mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          ACCRUE_PORTAL_HEX_RELEASE: ${{ env.ACCRUE_PORTAL_HEX_RELEASE }}
