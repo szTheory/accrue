@@ -17,6 +17,7 @@ Start the next milestone with `$gsd-new-milestone`.
 - The next unused planning phase is now **120**.
 - The linked release-readiness pass remains the next concrete operational follow-up after archival.
 - Advanced schedules, broader pause/resume promotion, broader preview/proration parity, Hyperwallet reopening, and `FIN-03` stay out of scope unless a later milestone explicitly reopens them.
+- Maintenance triage references remain canonical in the archived v1.17 inventory backlog slices: [INT-10](research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63), [BIL-03](research/v1.17-FRICTION-INVENTORY.md#backlog--bil-03-phase-64), and [ADM-12](research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65).
 
 ---
 *Last updated: 2026-05-07 — **v1.37** archived; no active milestone.*
