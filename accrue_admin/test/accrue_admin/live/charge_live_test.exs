@@ -209,9 +209,10 @@ defmodule AccrueAdmin.ChargeLiveTest do
     refute html =~ ~s(id="accrue-admin-step-up-dialog")
   end
 
-  test "braintree charge displays explicit eligibility and void copy, calls refund/2, and renders rollups", %{
-    conn: conn
-  } do
+  test "braintree charge displays explicit eligibility and void copy, calls refund/2, and renders rollups",
+       %{
+         conn: conn
+       } do
     # Braintree setup
     customer =
       insert_customer(%{
@@ -246,8 +247,8 @@ defmodule AccrueAdmin.ChargeLiveTest do
 
     # Renders rollups and identity
     assert html =~ "re_bt_seeded_1"
-    
-    html =
+
+    _html =
       render_submit(
         element(view, "[data-role='refund-form']"),
         %{
@@ -255,12 +256,12 @@ defmodule AccrueAdmin.ChargeLiveTest do
           "reason" => "requested_by_customer"
         }
       )
-      
-    html = render_click(element(view, "[data-role='confirm-refund']"))
-    
+
+    _html = render_click(element(view, "[data-role='confirm-refund']"))
+
     html =
       render_submit(element(view, "form[phx-submit='step_up_submit']"), %{"code" => "123456"})
-      
+
     assert html =~ Copy.charge_refund_created_info()
   end
 
