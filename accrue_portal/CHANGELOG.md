@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.1.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.0.0...accrue_portal-v1.1.0) (2026-05-08)
+
+
+### Features
+
+* **101-02:** align portal mount contract ([6ab10c3](https://github.com/szTheory/accrue/commit/6ab10c363ed8f6e91efee94f7e0f2b99b0512518))
+* **101-04:** ship hosted checkout flow ([7941c5d](https://github.com/szTheory/accrue/commit/7941c5d7eb65662ce35f2353c137e88aaca6a675))
+* **101-05:** add customer-scoped subscription portal flows ([e55434b](https://github.com/szTheory/accrue/commit/e55434bf539c6f65b0047368cfacda4babc071bf))
+* **101-06:** finish portal payment method surfaces ([a74de65](https://github.com/szTheory/accrue/commit/a74de65ed808061be56eb151604cea0a415e6f44))
+* **101-07:** lock portal shell proof and braintree test seam ([403deba](https://github.com/szTheory/accrue/commit/403deba5c7e01cb8b6f709d7316bb96c87e2665f))
+* **101-07:** publish portal runtime dependency contract ([9495f88](https://github.com/szTheory/accrue/commit/9495f886aa097f09c112bef64871c724a9c930e9))
+* **101-08:** wire portal checkout completion pipeline ([ce86b7b](https://github.com/szTheory/accrue/commit/ce86b7bb9352baf48a6fb79dd13da990cf01e450))
+* **101-09:** add portal test fixtures and auth assertions ([836880b](https://github.com/szTheory/accrue/commit/836880b6e0fbc75ebb986b6dcdfac7e3787d3da0))
+* **102-03:** add portal promo preview and revalidation ([60111cf](https://github.com/szTheory/accrue/commit/60111cf624f8297b97fe0925d083849353e03aa5))
+* **118-03:** add bounded portal plan change flow ([1d66cb2](https://github.com/szTheory/accrue/commit/1d66cb235587d894ceaa6650ba40fc1256421480))
+
+
+### Bug Fixes
+
+* **101-09:** prove portal customer scoping end to end ([fb8315f](https://github.com/szTheory/accrue/commit/fb8315f5f0bd8cbaeb4392db48ab4f45808fc011))
+* **101-10:** prove portal payment and invoice boundaries ([184500a](https://github.com/szTheory/accrue/commit/184500a88daf64adf09697518cf5bf442ecaf701))
+* **113-02:** gate portal cancellation flows by provider ([d20fdc1](https://github.com/szTheory/accrue/commit/d20fdc1758709ecd7aa0c2b083709f16322868bd))
+* **113:** tighten braintree destructive action gating ([3340b33](https://github.com/szTheory/accrue/commit/3340b3345ae52beb8263e56050e69e9ec6629263))
+
 ## 1.0.0
 
 - Initial `accrue_portal` package with mounted customer portal, local Braintree
