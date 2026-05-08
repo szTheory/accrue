@@ -58,12 +58,15 @@ Work through the sections in order the first time you promote to production; lat
 
 ## Proof vocabulary (local / CI)
 
-For the canonical Fake-backed walkthrough and VERIFY-01 vocabulary, keep using [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification) alongside [First Hour](first_hour.md).
+For the canonical Fake-backed walkthrough and browser-proof commands, keep using [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification) alongside [First Hour](first_hour.md).
 
 ## See also
 
-- [Maturity and maintenance](maturity-and-maintenance.md) — maintainer-facing **diminishing returns** and **FRG-01** intake context (monorepo **`.planning/`** pointers).
+- [Maturity and maintenance](maturity-and-maintenance.md) — maintainer-facing diminishing-returns and intake context.
 
-## Explicit non-goals (until a milestone says otherwise)
+## Explicit non-goals (unless Accrue adds them explicitly later)
 
-Second processor (**PROC-08**), app-owned finance exports (**FIN-03**), and Stripe Dashboard–only workflows that Accrue does not own — see the package [README](README.md) **Stability** / deprecation posture and repository **`RELEASING.md`** for maintainer boundaries (clone-only planning detail lives under **`.planning/PROJECT.md`** in the GitHub repo).
+Second processor support, app-owned finance exports, and Stripe
+Dashboard-only workflows that Accrue does not own remain out of scope.
+See the package [README](README.md) **Stability** section and
+repository **`RELEASING.md`** for maintainer boundaries.

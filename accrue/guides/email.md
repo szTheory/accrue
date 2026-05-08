@@ -46,7 +46,7 @@ Invoice attachments follow the invoice renderer, not the lower-level HTML seam:
 - disabled or unavailable invoice renderers fall back to the hosted invoice URL
   note instead of pretending an attachment exists.
 
-## Mailglass migrations (Phase 88+ pipeline)
+## Mailglass migrations (staged rollout)
 
 Starting in Accrue v1.29, the email pipeline is being migrated from
 `mjml_eex` + `phoenix_swoosh` to [Mailglass](https://github.com/szTheory/mailglass)
@@ -97,15 +97,16 @@ migrations, the most common cause is a stale snapshot in
 
 ### What changes for Accrue users
 
-Phase 88 only ADDS the Mailglass dependency and admin dashboard.
+The first rollout step only adds the Mailglass dependency and admin
+dashboard.
 The existing `Accrue.Mailer.deliver/2` API, the type/assigns contract,
 the override ladder, and the Oban-based async pipeline remain unchanged.
 
-Phase 89 refactors `Accrue.Workers.Mailer` to dispatch via
-`Mailglass.deliver/1` and adds explicit idempotency keys. Phase 90 ports
-the remaining MJML templates, removes `mjml_eex` and `phoenix_swoosh`
-from `accrue/mix.exs`, and leaves the admin preview UI as the supported
-inspection surface.
+The next rollout step refactors `Accrue.Workers.Mailer` to dispatch via
+`Mailglass.deliver/1` and adds explicit idempotency keys. The final
+step ports the remaining MJML templates, removes `mjml_eex` and
+`phoenix_swoosh` from `accrue/mix.exs`, and leaves the admin preview UI
+as the supported inspection surface.
 
 See [Mailglass getting started](https://github.com/szTheory/mailglass/blob/main/guides/getting-started.md)
 for the upstream install reference.

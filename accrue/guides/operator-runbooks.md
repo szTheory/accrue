@@ -82,7 +82,10 @@ Shared verification (all sources):
 
 ## Mini-playbook: Braintree metered renewal and settlement recovery
 
-These steps apply to the Phase 103 Braintree-local metering tuples documented in [`telemetry.md`](telemetry.md). The ordering matters because Accrue's local invoice ledger is canonical and Braintree is settlement-only in this flow.
+These steps apply to the Braintree-local metering tuples documented in
+[`telemetry.md`](telemetry.md). The ordering matters because Accrue's
+local invoice ledger is canonical and Braintree is settlement-only in
+this flow.
 
 ### `[:accrue, :ops, :metered_renewal_stale_repaired]`
 
@@ -121,7 +124,7 @@ These steps apply to the Phase 103 Braintree-local metering tuples documented in
 ## RUN-01 coverage
 
 - **Full ops tuple list and one-line first actions** live under **`## Operator runbooks (first actions)`** in [`telemetry.md`](telemetry.md) — bookmark that table for **every** RUN-01 class, including `:connect_account_deauthorized`, `:connect_payout_failed`, `:dunning_exhaustion`, `:charge_failed`, `:incomplete_expired`, `:pdf_adapter_unavailable`, replay (`:webhook_dlq, :replay`), and prune (`:webhook_dlq, :prune`).
-- **This file** adds **depth** for the four classic mini-playbooks above plus the Phase 103 Braintree metered-billing recovery sequence.
+- **This file** adds **depth** for the four classic mini-playbooks above plus the Braintree metered-billing recovery sequence.
 
 ## See also
 

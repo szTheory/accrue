@@ -1,10 +1,10 @@
 # Building a Local Billing Portal for Braintree
 
-Phase 101 introduces `accrue_portal`, the batteries-included mounted portal
-package for Braintree local checkout and self-serve billing flows. This guide
-is the SSOT for that packaged path. For lifecycle meaning, action vocabulary,
-and provider labels, use [Lifecycle Semantics](lifecycle_semantics.md) as the
-canonical glossary.
+`accrue_portal` is the batteries-included mounted portal package for
+Braintree local checkout and self-serve billing flows. This guide is
+the SSOT for that packaged path. For lifecycle meaning, action
+vocabulary, and provider labels, use
+[Lifecycle Semantics](lifecycle_semantics.md) as the canonical glossary.
 
 For the default mounted path:
 

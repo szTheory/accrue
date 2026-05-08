@@ -107,7 +107,7 @@ GAAP journal entries.
   domain.
 - **No hosted finance CSV product in v1.3** — downloadable exports that mix PII,
   retention, and audience rules belong in **host-owned** product decisions (see FIN-03
-  in future milestones).
+  in future releases).
 
 ## wrong-audience finance exports
 

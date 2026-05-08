@@ -1,16 +1,16 @@
 # Testing Accrue Billing Flows
 
-Pull requests are merge-blocked on GitHub Actions job `host-integration`, which runs the same contract as `cd examples/accrue_host && mix verify.full`; use `mix verify` for a faster bounded Fake slice that is not CI-complete. [Runnable VERIFY-01 commands and Playwright entry points](../../examples/accrue_host/README.md#proof-and-verification).
+The example host proves the end-to-end browser and integration path with `cd examples/accrue_host && mix verify.full`; use `mix verify` there for a faster bounded Fake-backed slice. [Runnable browser-proof commands and Playwright entry points](../../examples/accrue_host/README.md#proof-and-verification).
 
-## Accrue package: automated UAT surrogates
+## Accrue package: automated proof suite
 
-Conversational `/gsd-verify-work` checklists for **library-only** phases are intentionally replaced by ExUnit whenever behavior is observable without a human clicking through a product UI.
+For the library itself, Accrue prefers ExUnit and deterministic helper-driven proofs whenever behavior is observable without a human clicking through a product UI.
 
 - **`accrue/test/accrue/verification/`** — manifest tests that assert migration files + backing suites still exist (prevents silent drift).
-- **`mix verify.uat_phase_04`** — runs the Phase 04 surrogate plus the focused ExUnit files that prove metered billing, dunning, DLQ, multi-endpoint webhooks, checkout/portal, events query API, and telemetry ops/metrics.
-- **`mix verify.uat`** — runs the whole `test/accrue/verification/` tree (add more `*_surrogate_test.exs` modules as new phases gain checklists).
+- **`mix verify.uat_phase_04`** — runs the legacy `uat_phase_04` verify target plus the focused ExUnit files that prove metered billing, dunning, DLQ, multi-endpoint webhooks, checkout/portal, events query API, and telemetry ops/metrics.
+- **`mix verify.uat`** — runs the whole `test/accrue/verification/` tree (add more `*_surrogate_test.exs` modules as coverage grows).
 
-Merge-blocking **`release-gate`** already runs `mix test --warnings-as-errors` for `accrue/`, which includes every surrogate — CI does not need a second duplicate job.
+The repository CI already runs `mix test --warnings-as-errors` for `accrue/`, which includes every surrogate — there is no second duplicate suite to keep in sync.
 
 ## Fake-first Phoenix scenario
 
@@ -97,8 +97,8 @@ assert_pdf_rendered(invoice)
 
 Replays should enter the same reducer path as first delivery. Trigger or requeue the event, assert idempotent persisted state, and verify that duplicate delivery does not duplicate customer-visible side effects.
 
-For the Phase 111 Braintree supportability closure, keep this deterministic
-proof bundle named explicitly:
+For the Braintree supportability closeout, keep this deterministic proof
+bundle named explicitly:
 
 - `test/accrue/webhooks/dlq_test.exs` for persisted `webhook replay`
   semantics on dead and failed rows
@@ -121,7 +121,15 @@ Use `Oban.Testing` for queue assertions and `perform_job/2` when the test needs 
 
 Use the Fake Processor for normal test coverage, then keep a small provider-parity suite for behaviors where Stripe itself is the contract: SCA/3DS cards, Stripe test clocks, hosted checkout redirect behavior, and webhook signatures. Tag those tests separately so local development and CI do not depend on network calls by default.
 
-For the finalized `gateway subscription core` contract, Fake is the merge-blocking source of truth: direct subscription creation, vault acquisition, webhook verify/parse, lifecycle projection rows, and the bounded cancellation/customer-update semantics the public docs surface. Provider-backed Stripe and Braintree checks stay in the explicitly advisory provider-parity lane. Checkout and billing portal use the same shared facade across both providers, but the behavior stays provider-honest: Stripe returns upstream hosted URLs, while Braintree returns mounted local checkout and portal URLs. For the full contract, see the canonical [`processor-support-matrix.md`](../../.planning/processor-support-matrix.md).
+For the finalized `gateway subscription core` contract, Fake is the
+merge-blocking source of truth: direct subscription creation, vault
+acquisition, webhook verify/parse, lifecycle projection rows, and the
+bounded cancellation/customer-update semantics the public docs surface.
+Provider-backed Stripe and Braintree checks stay in the explicitly
+advisory provider-parity lane. Checkout and billing portal use the same shared facade across both providers, but the behavior stays provider-honest: Stripe returns upstream hosted URLs, while Braintree returns mounted local checkout and portal URLs.
+
+The processor-support-matrix.md contract remains the maintainer-facing
+reference for the bounded provider support story behind these tests.
 
 The exception is documentation and recovery semantics that must stay
 provider-honest. Braintree supportability is still proved locally: replay
@@ -154,11 +162,10 @@ For failure-path telemetry (`meter_reporting_failed` and related ops notes), see
 - `assert_pdf_rendered/1` matches captured PDF renders by invoice id, contents, options, or predicate.
 - `assert_event_recorded/1` and `assert_event_recorded/2` query the event ledger visible to the test sandbox.
 
-## Host VERIFY-01 vs provider parity
+## Host browser proof vs provider parity
 
 The canonical **Phoenix + mounted admin + browser** proof for adopters lives in
-`examples/accrue_host` (`mix verify.full`, job `host-integration`). That gate is
-Fake-backed. For how it sits next to Stripe test-mode canaries, see
+`examples/accrue_host` (`mix verify.full`). That proof is Fake-backed. For how it sits next to Stripe test-mode canaries, see
 `examples/accrue_host/docs/adoption-proof-matrix.md` and
 `guides/testing-live-stripe.md`.
 
@@ -187,9 +194,3 @@ live webhook forwarding is useful when validating local endpoint wiring and sign
 For **Stripe-native finance and reporting** — what Accrue stores vs Stripe, when to
 use Revenue Recognition vs Sigma vs Data Pipeline, and explicit **non-accounting**
 boundaries — see [Finance handoff](finance-handoff.md).
-
-## Adoption documentation contracts (dual README gates)
-
-Editorial changes to adoption-facing docs routinely touch **two** merge-adjacent bash gates: `scripts/ci/verify_package_docs.sh` (package READMEs, guides, root `README.md`, `RELEASING.md`, contributor strings, host paths) and `scripts/ci/verify_verify01_readme_contract.sh` (deep **VERIFY-01** prose and Playwright pointers in **`examples/accrue_host/README.md`**). The repo root `README.md` is the short proof path into the host; the host README is the long-form VERIFY-01 contract—both must stay consistent with **`accrue/guides/testing.md`**, **`accrue/guides/first_hour.md`**, and **`guides/testing-live-stripe.md`** where those files repeat merge-blocking language, or one gate can pass while the other fails.
-
-- Before expanding **operator UI** work that falls under Phases **34–35** scope (nav, summaries, Copy, Playwright), read `.planning/phases/36-audit-corpus-adoption-integration-hardening/36-FORWARD-COUPLING-OPS-34-35.md` so route matrix, UX-04 token discipline, and Copy/Playwright SSOT constraints stay synchronized across code and docs.

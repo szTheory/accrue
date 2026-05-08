@@ -29,7 +29,7 @@ For the full Braintree-specific flow, read [`braintree-metered-billing.md`](brai
 
 ## When metering fails (ops)
 
-When usage cannot be reported durably, operators rely on **`[:accrue, :ops, :meter_reporting_failed]`** for Stripe-style meter ingestion failures and the Phase 103 Braintree-local metering tuples for renewal repair and settlement recovery:
+When usage cannot be reported durably, operators rely on **`[:accrue, :ops, :meter_reporting_failed]`** for Stripe-style meter ingestion failures and the Braintree-local metering tuples for renewal repair and settlement recovery:
 
 - `[:accrue, :ops, :metered_renewal_stale_repaired]`
 - `[:accrue, :ops, :metered_missing_definition]`

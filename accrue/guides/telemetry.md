@@ -93,7 +93,8 @@ Read this block before tuning Grafana annotations—alert links should point her
 
 ## Braintree metered billing ops semantics
 
-These Phase 103 tuples are specific to the Braintree-local metering architecture. They are **durable transition signals**, not per-attempt noise:
+These tuples are specific to the Braintree-local metering architecture.
+They are **durable transition signals**, not per-attempt noise:
 
 - `[:accrue, :ops, :metered_renewal_stale_repaired]` fires when the scheduled backstop opens a renewal window that the webhook-primary path missed after the grace period.
 - `[:accrue, :ops, :metered_missing_definition]` fires when local aggregation closes a renewal window with unmatched usage because no local meter definition bound those events to a billable target.
@@ -146,10 +147,9 @@ seed used for processor idempotency keys). This lets you correlate
 ops events with the originating webhook, Oban job, or admin action across
 service boundaries.
 
-**Last reconciled with v1.9 gap audit §1:** 2026-04-21 — PR #14.
-The §1 ops inventory in `.planning/research/v1.9-TELEMETRY-GAP-AUDIT.md` is
-reflected in the ops catalog table above (including Connect, PDF, ledger,
-and DLQ rows).
+**Last reconciled with the ops gap audit:** 2026-04-21 — PR #14.
+That audit is reflected in the ops catalog table above, including
+Connect, PDF, ledger, and DLQ rows.
 
 ## Span naming conventions (OpenTelemetry)
 
@@ -178,14 +178,13 @@ examples below — for the enforced billing span inventory, see
   ops tuple).
 - <a id="billing-billing-portal-create"></a> `accrue.billing.billing_portal.create` —
   `[:accrue, :billing, :billing_portal, :create]`
-  from `Accrue.Billing.create_billing_portal_session/2` (Phase 78 / **BIL-04**).
+  from `Accrue.Billing.create_billing_portal_session/2`.
   Interpret this provider-honestly: Stripe emits the span before returning an
   upstream hosted portal URL, while Braintree emits the same span before
   returning a mounted local billing portal URL from `accrue_portal`.
 - <a id="billing-checkout-session-create"></a> `accrue.billing.checkout_session.create` —
   `[:accrue, :billing, :checkout_session, :create]` from
-  `Accrue.Billing.create_checkout_session/2` (**BIL-06** / Phase **80** emission;
-  **BIL-07** / Phase **81** catalog). **Checkout-only span metadata** merged
+  `Accrue.Billing.create_checkout_session/2`. **Checkout-only span metadata** merged
   from validated attrs is exactly **`checkout_mode`**, **`checkout_ui_mode`**,
   and **`checkout_line_items_count`** — no checkout URLs, **`client_secret`**,
   or raw attrs blob (behavioral SSOT: `checkout_session_facade_test.exs` +
@@ -213,7 +212,7 @@ This mirrors the `:telemetry` event naming
 (`[:accrue, :billing, :subscription, :create]`) so a single name maps cleanly
 to both the telemetry event and the OTel span — no translation table.
 
-**Last reconciled (billing span examples):** 2026-04-24 — Phase 81 BIL-07
+**Last reconciled (billing span examples):** 2026-04-24
 (checkout_session catalog row; `billing_span_coverage_test.exs` unchanged).
 
 **Span kind:**
