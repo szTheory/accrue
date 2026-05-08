@@ -71,6 +71,7 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
         counter("accrue.ops.webhook_dlq.prune.dead_deleted"),
         counter("accrue.ops.dunning_exhaustion.count", tags: [:source]),
         counter("accrue.ops.discount_mapping_invalid.count"),
+        counter("accrue.ops.customer_projection_sync_failed.count"),
         counter("accrue.ops.meter_reporting_failed.count", tags: [:source]),
         counter("accrue.ops.charge_failed.count"),
         counter("accrue.ops.metered_renewal_stale_repaired.count"),

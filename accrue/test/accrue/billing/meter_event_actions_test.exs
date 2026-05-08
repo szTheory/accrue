@@ -120,10 +120,12 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       Fake.scripted_response(:report_meter_event, {:error, err})
 
       :ok = Accrue.Actor.put_operation_id("op_meter_idem_fail")
+
       ts =
         DateTime.utc_now()
         |> DateTime.add(-3 * 86_400, :second)
         |> DateTime.truncate(:second)
+
       opts = [operation_id: "op_meter_idem_fail", timestamp: ts, value: 1]
 
       test_pid = self()
@@ -159,10 +161,12 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       Fake.scripted_response(:report_meter_event, {:error, err})
 
       :ok = Accrue.Actor.put_operation_id("op_meter_bang_idem")
+
       ts =
         DateTime.utc_now()
         |> DateTime.add(-2 * 86_400, :second)
         |> DateTime.truncate(:second)
+
       opts = [operation_id: "op_meter_bang_idem", timestamp: ts, value: 2]
 
       assert_raise Accrue.APIError, fn ->
