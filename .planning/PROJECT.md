@@ -244,7 +244,7 @@ for `$gsd-new-milestone`.
 
 ### v1.38 — Linked Release Truth
 
-**Goal:** Close the shipped linked `1.1.1` public release cleanly: Phase 121 already proved the public package, tag, release, and workflow truth, and Phase 122 exists only to align the live planning mirrors and required maintainer closeout artifacts to that shipped line.
+**Goal:** `v1.38` closed the shipped linked `1.1.1` public release cleanly: Phase 121 proved the public package, tag, release, and workflow truth, and Phase 122 aligned the live planning mirrors and required maintainer closeout artifacts to that shipped line.
 
 **Target features:**
 
@@ -257,20 +257,20 @@ for `$gsd-new-milestone`.
 
 ## Next Milestone Goals
 
-- Keep the active planning mirrors aligned to the shipped linked trio and the canonical proof already captured in Phase 121.
-- Record the dated `INV-08` maintainer certification without inventing a new friction row unless the evidence truly demands it.
-- Flip `v1.38` from short post-publish closeout to shipped/archive only after the mirror and inventory artifacts are complete.
+- Preserve one current public release-line sentence across the live planning mirrors while treating Phase 121 as the canonical proof source.
+- Keep the dated `INV-08` maintainer certification on path `(b)` unless a future release exposes genuinely new sourced downstream friction.
+- Open the next milestone only from this shipped `1.1.1` trio baseline rather than from a fuzzy post-publish limbo state.
 - Keep new billing primitives, broader lifecycle expansion, Hyperwallet reopening, and **FIN-03** out of this milestone’s scope.
 
 ## Current State
 
-Current focus: **v1.38 Linked Release Truth**. Current public linked release line: accrue / accrue_admin / accrue_portal 1.1.1 (published 2026-05-08). `v1.38` remained open briefly after publish to align planning mirrors and record INV-08.
+Current focus: **v1.38 shipped**. Current public linked release line: accrue / accrue_admin / accrue_portal 1.1.1 (published 2026-05-08). `v1.38` remained open briefly after publish to align planning mirrors and record INV-08; that closeout is now complete.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}` / any `accrue_portal` guidance** in package READMEs and **First Hour** now follow the shipped `1.1.1` trio, with Phase 121 retaining the detailed publish proof and rerun transcripts.
 
 Detailed release evidence, including the superseded `1.1.0` recovery story, lives in `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md`; this live project narrative only carries the current shipped trio line and the bounded closeout posture.
 
-The active planning milestone remains **v1.38** only for closeout: `REQUIREMENTS.md` and `ROADMAP.md` track the already-completed release-contract audit, the already-shipped linked publish, and the remaining post-publish mirror pass in Phase 122. The latest shipped planning milestone is **v1.37**: [`milestones/v1.37-ROADMAP.md`](milestones/v1.37-ROADMAP.md), [`milestones/v1.37-REQUIREMENTS.md`](milestones/v1.37-REQUIREMENTS.md), and [`milestones/v1.37-phases/`](milestones/v1.37-phases/). The prior shipped planning milestone is **v1.36**: [`milestones/v1.36-ROADMAP.md`](milestones/v1.36-ROADMAP.md), [`milestones/v1.36-REQUIREMENTS.md`](milestones/v1.36-REQUIREMENTS.md), and the milestone audit at [`v1.36-v1.36-MILESTONE-AUDIT.md`](v1.36-v1.36-MILESTONE-AUDIT.md). The earlier shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated during the post-publish closeout on **2026-05-08**.
+`v1.38` is now shipped: `REQUIREMENTS.md` and `ROADMAP.md` record the linked release-truth milestone that carried the three-package release contract, the shipped `1.1.1` publish proof, and the final post-publish planning closeout. The latest shipped planning milestone before it is **v1.37**: [`milestones/v1.37-ROADMAP.md`](milestones/v1.37-ROADMAP.md), [`milestones/v1.37-REQUIREMENTS.md`](milestones/v1.37-REQUIREMENTS.md), and [`milestones/v1.37-phases/`](milestones/v1.37-phases/). The prior shipped planning milestone is **v1.36**: [`milestones/v1.36-ROADMAP.md`](milestones/v1.36-ROADMAP.md), [`milestones/v1.36-REQUIREMENTS.md`](milestones/v1.36-REQUIREMENTS.md), and the milestone audit at [`v1.36-v1.36-MILESTONE-AUDIT.md`](milestones/v1.36-v1.36-MILESTONE-AUDIT.md). The earlier shipped planning milestone is **v1.35**: [`milestones/v1.35-ROADMAP.md`](milestones/v1.35-ROADMAP.md), [`milestones/v1.35-REQUIREMENTS.md`](milestones/v1.35-REQUIREMENTS.md), and [`milestones/v1.35-phases/`](milestones/v1.35-phases/). The parent strategy tracker remains [STRATEGY.md](STRATEGY.md). This document was last materially updated during the final closeout on **2026-05-08**.
 
 **Last shipped planning milestone:** **v1.37** — Phases **117–119** (**2026-05-07**): **SCM-01..06**; **`milestones/v1.37-*`**; planning tag **`v1.37`**. **Prior:** **v1.36** — Phases **112–116** (**2026-05-07**): **PROC-21..24**; **`milestones/v1.36-*`**; planning tag **`v1.36`**. **Earlier:** **v1.35** — Phases **109–111** (**2026-05-07**): **SUP-01..02**, **LIF-01..02**, **OPS-01..02**; **`milestones/v1.35-*`**; execution trees **`milestones/v1.35-phases/`**; planning tag **`v1.35`**.
 

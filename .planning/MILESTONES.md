@@ -1,5 +1,33 @@
 # Milestones
 
+## v1.38 Linked Release Truth (Shipped: 2026-05-08)
+
+**Planning opened:** 2026-05-07
+
+**Phases completed:** **3** phases (**120–122**).
+
+**Theme:** Close the linked release-truth gap by locking the three-package contract, shipping the public `1.1.1` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
+
+Current public linked release line: accrue / accrue_admin / accrue_portal 1.1.1 (published 2026-05-08).
+
+**Depends on:** **v1.37** shipped.
+
+**Key accomplishments:**
+
+- **120:** **REL-09**, **PPX-15** — locked the three-package release contract, aligned the runbook/workflows, and made release truth merge-blocking.
+- **121:** **REL-10**, **REL-11**, **PPX-13**, **PPX-14** — published the linked `1.1.1` trio, recorded canonical public proof in `121-VERIFICATION.md`, and reran the post-publish docs/adoption/shift-left bundle.
+- **122:** **HYG-03**, **INV-08** — aligned the live planning mirrors to the shipped trio line, recorded the dated path-`(b)` maintainer certification, and finalized the planning closeout ledger in `122-VERIFICATION.md`.
+
+**Outcome:** Phases **120–122** closed the **v1.38** Linked Release Truth milestone with one coherent maintainer story: the public `1.1.1` trio is shipped, the canonical publish proof lives in `121-VERIFICATION.md`, and the live planning closeout proof lives in `122-VERIFICATION.md`.
+
+**Key proof artifacts:**
+- **`.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md`**
+- **`.planning/phases/122-post-publish-mirrors-friction-pass/122-VERIFICATION.md`**
+
+**Next after ship:** Open the next bounded milestone from the shipped `1.1.1` trio baseline.
+
+---
+
 ## v1.37 Subscription Change Management (Shipped: 2026-05-07)
 
 **Planning opened:** 2026-05-07
