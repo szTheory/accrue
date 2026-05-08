@@ -64,6 +64,7 @@ defmodule AccrueHost.MixProject do
       {:telemetry_poller, "~> 1.0"},
       accrue_dep(),
       accrue_admin_dep(),
+      {:mailglass_admin, "~> 1.0", only: [:dev, :test], runtime: false},
       accrue_portal_dep(),
       sigra_dep(),
       {:gettext, "~> 1.0"},
@@ -151,7 +152,7 @@ defmodule AccrueHost.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "verify.install": [
         "deps.get",
-        "accrue.install --yes --billable AccrueHost.Accounts.User --billing-context AccrueHost.Billing --admin-mount /billing --webhook-path /webhooks/stripe"
+        "accrue.install --yes --billable AccrueHost.Accounts.User --billing-context AccrueHost.Billing --admin-mount /admin --webhook-path /webhooks/stripe"
       ],
       verify: [verify_command()],
       "verify.full": [

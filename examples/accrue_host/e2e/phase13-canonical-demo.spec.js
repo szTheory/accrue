@@ -160,8 +160,8 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
 
   const billingElapsedMs = await measureVisibleTransition(
     page,
-    "/billing admin dashboard",
-    () => page.goto("/billing"),
+    "/admin admin dashboard",
+    () => page.goto("/admin"),
     page.getByText(DASHBOARD_DISPLAY_HEADLINE)
   );
 
@@ -180,13 +180,13 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
 
   const webhookElapsedMs = await measureVisibleTransition(
     page,
-    "/billing/webhooks/:id detail",
-    () => page.goto(`/billing/webhooks/${fixture.webhook_id}`),
+    "/admin/webhooks/:id detail",
+    () => page.goto(`/admin/webhooks/${fixture.webhook_id}`),
     page.getByRole("heading", { name: "invoice.payment_failed" })
   );
 
   expect(webhookElapsedMs).toBeGreaterThanOrEqual(0);
-  await expect(page).toHaveURL(new RegExp(`/billing/webhooks/${fixture.webhook_id}$`));
+  await expect(page).toHaveURL(new RegExp(`/admin/webhooks/${fixture.webhook_id}$`));
   await assertResponsiveState(page, "webhook replay detail", [
     {
       locator: page.getByRole("heading", { name: "invoice.payment_failed" }),
@@ -214,7 +214,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   const auditElapsedMs = await measureVisibleTransition(
     page,
     "admin replay audit",
-    () => page.goto(`/billing/events?source_webhook_event_id=${fixture.webhook_id}&actor_type=admin`),
+    () => page.goto(`/admin/events?source_webhook_event_id=${fixture.webhook_id}&actor_type=admin`),
     replayAuditEventLocator(page, testInfo)
   );
 

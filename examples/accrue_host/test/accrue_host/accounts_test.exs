@@ -170,7 +170,18 @@ defmodule AccrueHost.AccountsTest do
     end
 
     test "does not update email if token expired", %{user: user, token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+      {:ok, decoded_token} = Base.url_decode64(token, padding: false)
+      hashed_token = :crypto.hash(:sha256, decoded_token)
+
+      {count, nil} =
+        Repo.update_all(
+          from(t in UserToken,
+            where: t.context == ^"change:#{user.email}" and t.token == ^hashed_token
+          ),
+          set: [inserted_at: ~N[2020-01-01 00:00:00]]
+        )
+
+      assert count == 1
 
       assert Accounts.update_user_email(user, token) ==
                {:error, :transaction_aborted}
@@ -301,8 +312,9 @@ defmodule AccrueHost.AccountsTest do
     end
 
     test "does not return user for expired token", %{token: token} do
-      dt = ~N[2020-01-01 00:00:00]
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: dt, authenticated_at: dt])
+      {count, nil} = offset_user_token(token, -15, :day)
+
+      assert count == 1
       refute Accounts.get_user_by_session_token(token)
     end
   end
@@ -324,7 +336,16 @@ defmodule AccrueHost.AccountsTest do
     end
 
     test "does not return user for expired token", %{token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+      {:ok, decoded_token} = Base.url_decode64(token, padding: false)
+      hashed_token = :crypto.hash(:sha256, decoded_token)
+
+      {count, nil} =
+        Repo.update_all(
+          from(t in UserToken, where: t.context == "login" and t.token == ^hashed_token),
+          set: [inserted_at: ~N[2020-01-01 00:00:00]]
+        )
+
+      assert count == 1
       refute Accounts.get_user_by_magic_link_token(token)
     end
   end
@@ -352,7 +373,14 @@ defmodule AccrueHost.AccountsTest do
 
     test "raises when unconfirmed user has password set" do
       user = unconfirmed_user_fixture()
-      {1, nil} = Repo.update_all(User, set: [hashed_password: "hashed"])
+
+      {count, nil} =
+        Repo.update_all(
+          from(u in User, where: u.id == ^user.id),
+          set: [hashed_password: "hashed"]
+        )
+
+      assert count == 1
       {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
 
       assert_raise RuntimeError, ~r/magic link log in is not allowed/, fn ->

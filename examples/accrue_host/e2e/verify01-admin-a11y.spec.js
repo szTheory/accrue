@@ -54,7 +54,7 @@ test("mounted admin customers index passes axe in light and dark themes", async 
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
   await waitForLiveView(page);
 
-  const customersUrl = `/billing/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+  const customersUrl = `/admin/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
   await page.goto(customersUrl, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 
@@ -107,7 +107,7 @@ test("mounted admin subscriptions index passes axe in light theme", async ({ pag
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
   await waitForLiveView(page);
 
-  const subscriptionsUrl = `/billing/subscriptions?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+  const subscriptionsUrl = `/admin/subscriptions?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
   await page.goto(subscriptionsUrl, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 
@@ -142,7 +142,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const connectUrl = `/billing/connect?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const connectUrl = `/admin/connect?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(connectUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -181,7 +181,7 @@ test.describe("VERIFY-01 admin Connect account detail (auxiliary)", () => {
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const detailUrl = `/billing/connect/${fixture.connect_account_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const detailUrl = `/admin/connect/${fixture.connect_account_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(detailUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -220,7 +220,7 @@ test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const eventsUrl = `/billing/events?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const eventsUrl = `/admin/events?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(eventsUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -258,7 +258,7 @@ test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const couponsUrl = `/billing/coupons?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const couponsUrl = `/admin/coupons?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(couponsUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -296,7 +296,7 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const promoUrl = `/billing/promotion-codes?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const promoUrl = `/admin/promotion-codes?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(promoUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -335,7 +335,7 @@ test.describe("core-admin-invoices-index", () => {
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const invoicesUrl = `/billing/invoices?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const invoicesUrl = `/admin/invoices?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(invoicesUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -392,7 +392,7 @@ test.describe("core-admin-invoices-detail", () => {
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const detailUrl = `/billing/invoices/${fixture.invoice_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const detailUrl = `/admin/invoices/${fixture.invoice_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(detailUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -427,7 +427,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const pmUrl = `/billing/customers/${fixture.admin_denial_customer_id}?tab=payment_methods&org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const pmUrl = `/admin/customers/${fixture.admin_denial_customer_id}?tab=payment_methods&org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(pmUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -490,7 +490,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
     await waitForLiveView(page);
 
-    const pmUrl = `/billing/customers/${fixture.admin_denial_customer_id}?tab=payment_methods&org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const pmUrl = `/admin/customers/${fixture.admin_denial_customer_id}?tab=payment_methods&org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(pmUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
