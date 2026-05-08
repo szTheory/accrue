@@ -75,6 +75,8 @@ defmodule Accrue.Docs.TestingGuideTest do
     refute guide =~ "Release Please"
     refute guide =~ "Hex publishing"
     refute guide =~ "GitHub Actions release"
+    refute guide =~ "/gsd-verify-work"
+    refute guide =~ "VERIFY-01"
   end
 
   test "testing guide positions Fake tests before external providers" do

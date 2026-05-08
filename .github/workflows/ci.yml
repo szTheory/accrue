@@ -61,6 +61,9 @@ jobs:
       - name: Core admin invoice VERIFY flow id drift guard
         run: bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
 
+      - name: Release notes freshness contract
+        run: bash scripts/ci/verify_release_notes_contract.sh
+
   release-manifest-ssot:
     name: Release manifest SSOT (REL-02)
     if: github.event_name != 'schedule'

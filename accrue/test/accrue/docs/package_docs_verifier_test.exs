@@ -14,7 +14,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert status == 0
 
     assert output =~
-             "package docs verified for accrue #{accrue_version} and accrue_admin #{accrue_admin_version}"
+             "package docs verified for accrue #{accrue_version}, accrue_admin #{accrue_admin_version}, and accrue_portal #{accrue_admin_version}"
 
     assert output =~ "README.md"
     assert output =~ "RELEASING.md"
@@ -35,29 +35,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
-    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
-    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
-    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
-    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
-
-    copy_fixture!("README.md", tmp_dir)
-    copy_fixture!("RELEASING.md", tmp_dir)
-    copy_fixture!("CONTRIBUTING.md", tmp_dir)
-    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
-    copy_fixture!(".planning/PROJECT.md", tmp_dir)
-    copy_fixture!("accrue/mix.exs", tmp_dir)
-    copy_fixture!("accrue/README.md", tmp_dir)
-    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
-    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
-    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
-    copy_fixture!("accrue/guides/testing.md", tmp_dir)
-    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
-    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
-    copy_fixture!("accrue_admin/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
-    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
-    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    seed_tmp_dir!(tmp_dir)
 
     drifted_custom_processors =
       tmp_dir
@@ -88,29 +66,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
-    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
-    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
-    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
-    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
-
-    copy_fixture!("README.md", tmp_dir)
-    copy_fixture!("RELEASING.md", tmp_dir)
-    copy_fixture!("CONTRIBUTING.md", tmp_dir)
-    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
-    copy_fixture!(".planning/PROJECT.md", tmp_dir)
-    copy_fixture!("accrue/mix.exs", tmp_dir)
-    copy_fixture!("accrue/README.md", tmp_dir)
-    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
-    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
-    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
-    copy_fixture!("accrue/guides/testing.md", tmp_dir)
-    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
-    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
-    copy_fixture!("accrue_admin/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
-    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
-    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    seed_tmp_dir!(tmp_dir)
 
     drifted_readme =
       tmp_dir
@@ -138,29 +94,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
-    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
-    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
-    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
-    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
-
-    copy_fixture!("README.md", tmp_dir)
-    copy_fixture!("RELEASING.md", tmp_dir)
-    copy_fixture!("CONTRIBUTING.md", tmp_dir)
-    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
-    copy_fixture!(".planning/PROJECT.md", tmp_dir)
-    copy_fixture!("accrue/mix.exs", tmp_dir)
-    copy_fixture!("accrue/README.md", tmp_dir)
-    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
-    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
-    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
-    copy_fixture!("accrue/guides/testing.md", tmp_dir)
-    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
-    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
-    copy_fixture!("accrue_admin/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
-    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
-    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    seed_tmp_dir!(tmp_dir)
 
     drifted_releasing =
       tmp_dir
@@ -188,29 +122,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
-    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
-    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
-    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
-    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
-
-    copy_fixture!("README.md", tmp_dir)
-    copy_fixture!("RELEASING.md", tmp_dir)
-    copy_fixture!("CONTRIBUTING.md", tmp_dir)
-    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
-    copy_fixture!(".planning/PROJECT.md", tmp_dir)
-    copy_fixture!("accrue/mix.exs", tmp_dir)
-    copy_fixture!("accrue/README.md", tmp_dir)
-    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
-    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
-    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
-    copy_fixture!("accrue/guides/testing.md", tmp_dir)
-    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
-    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
-    copy_fixture!("accrue_admin/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
-    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
-    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    seed_tmp_dir!(tmp_dir)
 
     drifted_guide =
       tmp_dir
@@ -253,29 +165,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
-    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
-    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
-    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
-    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
-
-    copy_fixture!("README.md", tmp_dir)
-    copy_fixture!("RELEASING.md", tmp_dir)
-    copy_fixture!("CONTRIBUTING.md", tmp_dir)
-    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
-    copy_fixture!(".planning/PROJECT.md", tmp_dir)
-    copy_fixture!("accrue/mix.exs", tmp_dir)
-    copy_fixture!("accrue/README.md", tmp_dir)
-    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
-    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
-    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
-    copy_fixture!("accrue/guides/testing.md", tmp_dir)
-    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
-    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
-    copy_fixture!("accrue_admin/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
-    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
-    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    seed_tmp_dir!(tmp_dir)
 
     drifted_releasing =
       tmp_dir
@@ -301,29 +191,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
-    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
-    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
-    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
-    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
-
-    copy_fixture!("README.md", tmp_dir)
-    copy_fixture!("RELEASING.md", tmp_dir)
-    copy_fixture!("CONTRIBUTING.md", tmp_dir)
-    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
-    copy_fixture!(".planning/PROJECT.md", tmp_dir)
-    copy_fixture!("accrue/mix.exs", tmp_dir)
-    copy_fixture!("accrue/README.md", tmp_dir)
-    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
-    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
-    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
-    copy_fixture!("accrue/guides/testing.md", tmp_dir)
-    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
-    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
-    copy_fixture!("accrue_admin/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
-    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
-    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    seed_tmp_dir!(tmp_dir)
 
     drifted_config =
       tmp_dir
@@ -349,29 +217,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.rm_rf!(tmp_dir)
     on_exit(fn -> File.rm_rf(tmp_dir) end)
-    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
-    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
-    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
-    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
-
-    copy_fixture!("README.md", tmp_dir)
-    copy_fixture!("RELEASING.md", tmp_dir)
-    copy_fixture!("CONTRIBUTING.md", tmp_dir)
-    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
-    copy_fixture!(".planning/PROJECT.md", tmp_dir)
-    copy_fixture!("accrue/mix.exs", tmp_dir)
-    copy_fixture!("accrue/README.md", tmp_dir)
-    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
-    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
-    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
-    copy_fixture!("accrue/guides/testing.md", tmp_dir)
-    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
-    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
-    copy_fixture!("accrue_admin/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
-    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
-    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
-    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    seed_tmp_dir!(tmp_dir)
 
     drifted_quickstart =
       tmp_dir
@@ -396,6 +242,36 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     destination = Path.join(tmp_dir, relative_path)
     File.mkdir_p!(Path.dirname(destination))
     File.cp!(Path.expand("../../../../" <> relative_path, __DIR__), destination)
+  end
+
+  defp seed_tmp_dir!(tmp_dir) do
+    File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_portal"))
+    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
+    File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
+
+    copy_fixture!("README.md", tmp_dir)
+    copy_fixture!("RELEASING.md", tmp_dir)
+    copy_fixture!("CONTRIBUTING.md", tmp_dir)
+    copy_fixture!(".planning/STRATEGY.md", tmp_dir)
+    copy_fixture!(".planning/PROJECT.md", tmp_dir)
+    copy_fixture!("accrue/mix.exs", tmp_dir)
+    copy_fixture!("accrue/README.md", tmp_dir)
+    copy_fixture!("accrue/guides/custom_processors.md", tmp_dir)
+    copy_fixture!("accrue/guides/first_hour.md", tmp_dir)
+    copy_fixture!("accrue/guides/quickstart.md", tmp_dir)
+    copy_fixture!("accrue/guides/production-readiness.md", tmp_dir)
+    copy_fixture!("accrue/guides/testing.md", tmp_dir)
+    copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
+    copy_fixture!("accrue_admin/mix.exs", tmp_dir)
+    copy_fixture!("accrue_admin/README.md", tmp_dir)
+    copy_fixture!("accrue_portal/mix.exs", tmp_dir)
+    copy_fixture!("accrue_portal/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/README.md", tmp_dir)
+    copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
+    copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
+    copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
   end
 
   defp extract_version!(relative_path) do

@@ -125,10 +125,13 @@ require_fixed "$ROOT_DIR/README.md" 'bash scripts/ci/verify_adoption_proof_matri
 require_fixed "$ROOT_DIR/README.md" 'bash scripts/ci/accrue_host_uat.sh'
 require_fixed "$ROOT_DIR/README.md" '> **Hex vs `main`:**'
 require_fixed "$ROOT_DIR/README.md" 'https://hex.pm/packages/accrue'
-require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Pull requests are merge-blocked on GitHub Actions job \`host-integration\`"
+require_fixed "$ROOT_DIR/accrue/guides/testing.md" "browser and integration path"
 require_fixed "$ROOT_DIR/accrue/guides/testing.md" "gateway subscription core"
 require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Checkout and billing portal use the same shared facade across both providers"
 require_fixed "$ROOT_DIR/accrue/guides/testing.md" "processor-support-matrix.md"
+require_fixed "$ROOT_DIR/accrue/guides/testing.md" "Host browser proof vs provider parity"
+require_absent_regex "$ROOT_DIR/accrue/guides/testing.md" '(/gsd-|gsd-)'
+require_absent_regex "$ROOT_DIR/accrue/guides/testing.md" 'VERIFY-01'
 
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue_admin(/admin_ui\.html)?'
 require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/first_hour\.html)?'
@@ -176,6 +179,7 @@ require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "cancel_at_period_end/2"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "swap_plan/3"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "preview_upcoming_invoice/2"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "canonical path where supported"
+require_absent_regex "$ROOT_DIR/accrue/guides/first_hour.md" 'VERIFY-01'
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Accrue.Billing.create_checkout_session/2"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "[:accrue, :billing, :checkout_session, :create]"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "checkout_session_facade_test.exs"
@@ -197,6 +201,8 @@ require_absent_regex "$ROOT_DIR/accrue/guides/first_hour.md" 'all first-party.*(
 require_absent_regex "$ROOT_DIR/examples/accrue_host/README.md" 'all first-party.*(swap_plan/3|preview_upcoming_invoice/2)'
 require_absent_regex "$ROOT_DIR/examples/accrue_host/README.md" 'preview parity|pseudo-preview'
 require_fixed "$ROOT_DIR/accrue/guides/troubleshooting.md" "mix accrue.install --check"
+require_absent_regex "$ROOT_DIR/accrue/guides/production-readiness.md" 'VERIFY-01'
+require_absent_regex "$ROOT_DIR/accrue_admin/README.md" 'VERIFY-01'
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "Braintree"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "gateway subscription core"
 require_fixed "$ROOT_DIR/.planning/STRATEGY.md" "Fake"

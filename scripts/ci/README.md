@@ -129,6 +129,12 @@ Surface-to-script map:
 
 - **`verify_v1_17_friction_research_contract:`** (stderr prefix on failure) — treat as **INT-10 / FRG-01..03** planning SSOT: inventory table shape (**five** rows: two **P0**, two **P1**, one **P2**; two P0 with **INT-10** + **→63**), backlog anchors (**INT-10** / **BIL-03** / **ADM-12**), no **`*(example)*`**, no ambiguous **`v1.17-P0-`** substring, **STATE**/**PROJECT** links, **S1**/**S5** rows in north star, **ROADMAP** FRG-03 slice links, plus **UAT-04** binary gate that **`.planning/milestones/v1.17-REQUIREMENTS.md`** exists (historical v1.17 requirements archive). Fix **`.planning/research/*.md`** first; only relax needles after an intentional milestone edit.
 
+### Triage: verify_release_notes_contract.sh
+
+- **`verify_release_notes_contract:`** (stderr prefix on failure) — treat as the plain-language release-notes freshness gate for `accrue/guides/release-notes.md`.
+- The script requires the current lockstep package version from `accrue/mix.exs`, `accrue_admin/mix.exs`, and `accrue_portal/mix.exs` to appear in release-notes headings for both `accrue` and `accrue_admin`.
+- If this fails during a release, update `accrue/guides/release-notes.md` in the same PR as the version bump so HexDocs does not stall on an older story while changelogs and package versions advance.
+
 ### Triage: verify_adoption_proof_matrix.sh
 
 - **`verify_adoption_proof_matrix:`** (stderr prefix on failure) — treat as **ORG-09**: missing ORG-09 headings, primary/recipe lane markers, `phx.gen.auth` / `use Accrue.Billable` / `non-Sigra` literals, **ORG-05** / **ORG-06** / **ORG-07** / **ORG-08** rows, Layer C script names (including **`verify_core_admin_invoice_verify_ids.sh`**), or the self-referential script path in `adoption-proof-matrix.md`. Fix the matrix doc first; only change needles in the script after an intentional taxonomy edit.

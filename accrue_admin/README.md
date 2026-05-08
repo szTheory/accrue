@@ -21,7 +21,7 @@ Add `accrue_admin` to your host application and mount the package router where o
 ```elixir
 defp deps do
   [
-    {:accrue_admin, "~> 1.1.0"}
+    {:accrue_admin, "~> 1.1.1"}
   ]
 end
 ```
@@ -69,7 +69,7 @@ The canonical local demo path lives in the checked-in host app:
 
 - `examples/accrue_host/README.md`
 
-Published `accrue_admin` releases resolve `accrue ~> 1.1.0`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
+Published `accrue_admin` releases resolve `accrue ~> 1.1.1`. Monorepo development keeps the sibling `../accrue` path dependency unless `ACCRUE_ADMIN_HEX_RELEASE=1` is set for release validation.
 
 ## Assets
 
@@ -84,7 +84,7 @@ No host Tailwind config or JavaScript bootstrap changes are required.
 
 ## Browser UAT
 
-**VERIFY-01** in [`examples/accrue_host/README.md`](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) is the **merge-blocking** path for mounted admin browser proofs on the real example host. The commands below are fast package smoke against the admin fixture endpoint only.
+The example-host browser proof in [`examples/accrue_host/README.md`](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) is the full mounted-admin proof path. The commands below are fast package smoke against the admin fixture endpoint only.
 
 The browser regression suite lives under `e2e/` and runs against the package's test Phoenix endpoint:
 

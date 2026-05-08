@@ -41,7 +41,7 @@ From the repository root: `cd examples/accrue_host`, run **`mix setup`**, start 
 
 ### Capsule R — Evaluate / read-only
 
-Shortest read-only path: clone the repo, `cd examples/accrue_host`, run **`mix verify`** or **`mix verify.full`**. For merge-blocking VERIFY-01 detail and Playwright entry points, use [**#proof-and-verification**](../../examples/accrue_host/README.md#proof-and-verification) in the host README when you need more than the bounded proof commands.
+Shortest read-only path: clone the repo, `cd examples/accrue_host`, run **`mix verify`** or **`mix verify.full`**. For the full browser-proof walkthrough and Playwright entry points, use [**#proof-and-verification**](../../examples/accrue_host/README.md#proof-and-verification) in the host README when you need more than the bounded proof commands.
 
 ### Trust boundary (production vs demo)
 
@@ -92,8 +92,8 @@ proof, mounted admin inspection, and a focused verification pass.
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 1.1.0"},
-    {:accrue_admin, "~> 1.1.0"}
+    {:accrue, "~> 1.1.1"},
+    {:accrue_admin, "~> 1.1.1"}
   ]
 end
 ```
@@ -239,7 +239,7 @@ mix verify
 `mix verify` is the focused tutorial proof suite. `mix verify.full` is the
 CI-equivalent local gate that adds compile, assets, dev boot, regression, and
 browser smoke after the first-run story is already clear. For the authoritative
-merge-blocking command matrix, VERIFY-01, and Playwright entry points, see
+browser-proof command matrix and Playwright entry points, see
 [Proof and verification in the host demo README](../../examples/accrue_host/README.md#proof-and-verification).
 
 ## 2. Seeded history

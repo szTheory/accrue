@@ -6,11 +6,31 @@ This page is the **story** of what shipped—not a commit list. For every line i
 - [`accrue_admin/CHANGELOG.md`](https://github.com/szTheory/accrue/blob/main/accrue_admin/CHANGELOG.md) — same for the admin UI package
 - [GitHub releases](https://github.com/szTheory/accrue/releases) — tags and generated notes (more technical)
 
-`accrue` and `accrue_admin` live in one repo and are usually bumped together so your host app never depends on mismatched versions.
+`accrue` and `accrue_admin` live in one repo and are usually bumped together so your host app never depends on mismatched versions. `accrue_portal` ships in the same version family; for now, its package-specific history is easiest to track through the package changelog and README.
 
 ---
 
 ## accrue
+
+### 1.1.1
+
+**Linked-release recovery and public release-truth cleanup.**
+
+`1.1.1` keeps the active-subscription-change and three-package release story from `1.1.0`, then tightens the public release contract after the first linked publish attempt. The shipped line, package docs, and recovery workflow now describe the same `accrue` / `accrue_admin` / `accrue_portal` version family more clearly.
+
+### 1.1.0
+
+**Official subscription-change flows, clearer release truth, same-version three-package publishing.**
+
+This release makes **active subscription changes** feel first-party instead of implied. `swap_plan/3` and `preview_upcoming_invoice/2` are now part of the explicit public story, with provider-honest boundaries across Stripe, Fake, and the bounded Braintree path.
+
+The operator and self-serve surfaces moved with the same contract: admin and portal flows now describe the same preview-before-commit story as the core library. The release process was also tightened so `accrue`, `accrue_admin`, and `accrue_portal` publish together with one clearer public version line, changelog, and install story.
+
+### 1.0.0
+
+**Stable public baseline for the core billing surface.**
+
+`1.0.0` is the point where Accrue stopped reading like a promising pre-1.0 library and started reading like a deliberate public contract. The core checkout, billing portal, webhook, invoice, admin, docs, and proof surfaces were locked into a stable release line with clearer upgrade and maintenance expectations.
 
 ### 0.2.0
 
@@ -35,6 +55,18 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 ## accrue_admin
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
+
+### 1.1.1
+
+Matches **accrue 1.1.1**: the admin package stays on the linked three-package release line and picks up the same release-truth and recovery-path cleanup as the core package.
+
+### 1.1.0
+
+Matches **accrue 1.1.0**: the admin UI now documents and exercises the same active-subscription-change story as the core library, while staying aligned with the linked three-package publish flow.
+
+### 1.0.0
+
+Matches **accrue 1.0.0**: the admin package shipped as part of the stable public baseline, with the mounted operator dashboard and docs treated as a first-class part of the release contract.
 
 ### 0.2.0
 
