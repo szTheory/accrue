@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/szTheory/accrue/compare/accrue_portal-v1.1.0...accrue_portal-v1.1.1) (2026-05-08)
+
+
+### Bug Fixes
+
+* add missing accrue_portal package license ([fc92978](https://github.com/szTheory/accrue/commit/fc929783aad92be2c41641e0dee6a0fdf624464a))
+* **portal:** add missing package license ([f6ad680](https://github.com/szTheory/accrue/commit/f6ad680ccebf6a25cba3e0b5dec00880ef61c48d))
+
 ## [1.1.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.0.0...accrue_portal-v1.1.0) (2026-05-08)
 
 
