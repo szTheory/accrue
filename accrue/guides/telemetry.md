@@ -66,6 +66,7 @@ they correspond to — they are idempotent under webhook replay via the
 | `[:accrue, :ops, :discount_mapping_invalid]` | `count` | `mapping_id`, `code`, `discount_id`, `reason`, `operation_id` | `Accrue.Billing.SubscriptionActions` |
 | `[:accrue, :ops, :incomplete_expired]` | `count` | `subscription_id` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :charge_failed]` | `count` | `charge_id`, `customer_id`, `failure_code` | `Accrue.Telemetry.Ops` |
+| `[:accrue, :ops, :customer_projection_sync_failed]` | `count` | `customer_id`, `processor`, `processor_id`, `operation_id`, `changed_fields`, `failure_kind` | `Accrue.Billing` |
 | `[:accrue, :ops, :meter_reporting_failed]` | `count` | `meter_event_id`, `event_name`, `source` (`:reconciler \| :webhook \| :sync`) | `Accrue.Webhook.DefaultHandler` / `Accrue.Billing.MeterEventActions` / `Accrue.Jobs.MeterEventsReconciler` |
 | `[:accrue, :ops, :metered_renewal_stale_repaired]` | `count` | `source` (`:reconciler`), `processor`, `subscription_id`, `metered_renewal_id` | `Accrue.Jobs.MeteredRenewalReconciler` |
 | `[:accrue, :ops, :metered_missing_definition]` | `count` | `processor`, `subscription_id`, `metered_renewal_id`, `unmatched_event_count` | `Accrue.Billing.MeteredRenewalInvoice` |

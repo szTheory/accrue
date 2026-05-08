@@ -9,6 +9,7 @@ defmodule Accrue.TestSupport.TelemetryOpsInventory do
       [:accrue, :ops, :discount_mapping_invalid],
       [:accrue, :ops, :incomplete_expired],
       [:accrue, :ops, :charge_failed],
+      [:accrue, :ops, :customer_projection_sync_failed],
       [:accrue, :ops, :meter_reporting_failed],
       [:accrue, :ops, :metered_renewal_stale_repaired],
       [:accrue, :ops, :metered_missing_definition],

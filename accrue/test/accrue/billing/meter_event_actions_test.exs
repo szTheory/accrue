@@ -120,7 +120,10 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       Fake.scripted_response(:report_meter_event, {:error, err})
 
       :ok = Accrue.Actor.put_operation_id("op_meter_idem_fail")
-      ts = ~U[2026-04-10 12:00:00.000000Z]
+      ts =
+        DateTime.utc_now()
+        |> DateTime.add(-3 * 86_400, :second)
+        |> DateTime.truncate(:second)
       opts = [operation_id: "op_meter_idem_fail", timestamp: ts, value: 1]
 
       test_pid = self()
@@ -156,7 +159,10 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       Fake.scripted_response(:report_meter_event, {:error, err})
 
       :ok = Accrue.Actor.put_operation_id("op_meter_bang_idem")
-      ts = ~U[2026-04-11 12:00:00.000000Z]
+      ts =
+        DateTime.utc_now()
+        |> DateTime.add(-2 * 86_400, :second)
+        |> DateTime.truncate(:second)
       opts = [operation_id: "op_meter_bang_idem", timestamp: ts, value: 2]
 
       assert_raise Accrue.APIError, fn ->
@@ -225,7 +231,10 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       :ok = Accrue.Actor.put_operation_id("op_golden_meter_43")
 
       # Fixed instant within the 35-day backdating window enforced on usage timestamps.
-      ts = ~U[2026-04-01 03:04:05.000000Z]
+      ts =
+        DateTime.utc_now()
+        |> DateTime.add(-7 * 86_400, :second)
+        |> DateTime.truncate(:second)
 
       assert {:ok, %MeterEvent{} = row} =
                Billing.report_usage(customer, "api_call",
@@ -267,7 +276,10 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       try do
         assert {:ok, _} =
                  Billing.report_usage(customer, "api_call",
-                   timestamp: ~U[2026-04-15 00:00:00.000000Z]
+                   timestamp:
+                     DateTime.utc_now()
+                     |> DateTime.add(-86_400, :second)
+                     |> DateTime.truncate(:second)
                  )
 
         assert_receive {:telemetry, [:accrue, :billing, :meter_event, :report_usage, :stop], meas,
