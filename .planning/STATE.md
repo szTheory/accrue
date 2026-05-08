@@ -48,6 +48,8 @@ Last activity: 2026-05-07 — archived `v1.37` roadmap and requirements, collaps
 
 - **`.planning/STRATEGY.md`** — active PROC-08 strategic parent.
 - **`.planning/ROADMAP.md`** — no-active-milestone summary plus recent archives.
+- **`.planning/research/v1.17-FRICTION-INVENTORY.md`** — canonical friction inventory for intake-gated maintenance and dated maintainer passes.
+- **`.planning/research/v1.17-north-star.md`** — stop-rule and maintenance-triage SSOT for the library-maintenance posture.
 - **`.planning/milestones/v1.37-ROADMAP.md`** — archived roadmap and milestone narrative for Phases 117–119.
 - **`.planning/milestones/v1.37-REQUIREMENTS.md`** — archived requirements and traceability for `SCM-01..06`.
 - **`.planning/milestones/v1.36-ROADMAP.md`** — archived roadmap and milestone narrative for Phases 112–116.
@@ -58,6 +60,8 @@ Last activity: 2026-05-07 — archived `v1.37` roadmap and requirements, collaps
 - **`.planning/research/ARCHITECTURE.md`** — most recent closure-milestone build-order guidance.
 - **`.planning/research/PITFALLS.md`** — most recent contract-drift and proof-lane risk notes.
 - **`.planning/research/SUMMARY.md`** — most recent synthesized research summary.
+
+**Triage doctrine (read-only context, v1.17–v1.18):** [North star + stop rules](research/v1.17-north-star.md) · [Friction inventory](research/v1.17-FRICTION-INVENTORY.md)
 
 ## Deferred Items
 

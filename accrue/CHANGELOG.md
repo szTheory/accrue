@@ -27,6 +27,50 @@ Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` sh
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for **billing portal** facade literals (**`create_billing_portal_session/2`**, **`[:accrue, :billing, :billing_portal, :create]`**, **`billing-billing-portal-create`** / **`billing_portal_session_facade_test.exs`**) alongside checkout.
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for checkout facade + billing-span literals co-evolving with golden-path docs.
 
+## [1.1.0](https://github.com/szTheory/accrue/compare/accrue-v1.0.0...accrue-v1.1.0) (2026-05-08)
+
+
+### Features
+
+* **098-01:** implement payment method CRUD for braintree ([717e7d7](https://github.com/szTheory/accrue/commit/717e7d7178e9d835195aef9881ba3ea67a45ac8f))
+* **099-01:** implement canonical refund facade and Braintree callbacks ([9f3d081](https://github.com/szTheory/accrue/commit/9f3d08126c0a2fc6c991c9f96db599c6e9b29fb2))
+* **099-02:** implement braintree refund convergence and narrow proration support ([b1df372](https://github.com/szTheory/accrue/commit/b1df372f2ddba3d111b98ec6750747a25a1295f3))
+* **100-01:** disable braintree portal capability ([47e8ce3](https://github.com/szTheory/accrue/commit/47e8ce34d24b6feefaa940533c186dc86c0506d9))
+* **100-01:** fail cleanly in billing facade on unsupported gateways ([10410e2](https://github.com/szTheory/accrue/commit/10410e2b5c5b2a1006bfe2813b939aba3d171e21))
+* **101-01:** lock local checkout session contract ([e3fc56a](https://github.com/szTheory/accrue/commit/e3fc56ab0cbc336445de19b6fc1e4ef55bf2319a))
+* **101-03:** align braintree local portal adapter contract ([b6791f9](https://github.com/szTheory/accrue/commit/b6791f98bc228afb2ce55c5cb91823b7d5c71dda))
+* **101-08:** wire portal checkout completion pipeline ([ce86b7b](https://github.com/szTheory/accrue/commit/ce86b7bb9352baf48a6fb79dd13da990cf01e450))
+* **102-01:** add local discount mapping domain ([a64d25c](https://github.com/szTheory/accrue/commit/a64d25c08a933595a9861ce75d6a5888294d8ac7))
+* **102-02:** emit discount mapping drift telemetry ([125151a](https://github.com/szTheory/accrue/commit/125151a60a0a06d2ec158f12e5c941a60f028208))
+* **102-02:** enforce braintree discount mappings in subscribe ([a74e931](https://github.com/szTheory/accrue/commit/a74e931ed2101a76eb0262f19babae063a587462))
+* **103-01:** add metering definition and renewal contracts ([c80a83c](https://github.com/szTheory/accrue/commit/c80a83c9fa1ab95187a26afc81303b1b9e698d60))
+* **103-02:** implement metered renewal invoice authoring ([bc77e2d](https://github.com/szTheory/accrue/commit/bc77e2d9f94eb2db65d0292e7a4d83011ef5acc4))
+* **103-03:** implement metered renewal settlement ([6c668b1](https://github.com/szTheory/accrue/commit/6c668b10ed43bf05e0c84dca585a48c7fe98dda1))
+* **103-04:** implement metered renewal backstop telemetry ([aabda22](https://github.com/szTheory/accrue/commit/aabda22831bfd5ecfb8c1618dd3b11f2f74d0ba8))
+* **112-01:** promote bounded customer update contract ([1b4f623](https://github.com/szTheory/accrue/commit/1b4f62352b4dd61d2cddcd6aff7c9eb4cf0ed4ca))
+* **112-02:** promote customer update support truth ([12ae9ac](https://github.com/szTheory/accrue/commit/12ae9ac4fbabafe66970caaa1f095d9606806bd1))
+* **112-03:** add host customer update helper ([a64b259](https://github.com/szTheory/accrue/commit/a64b259efa1f469f564f77b49d1bac80703576f3))
+* **113-01:** promote immediate cancellation support truth ([1c55f1e](https://github.com/szTheory/accrue/commit/1c55f1ef48ebe74a48e2342a2aef62c896290578))
+* **118-01:** promote quantity and item support contract ([3cb03fc](https://github.com/szTheory/accrue/commit/3cb03fc02f184dcc931705eada906ed8cc40b71b))
+* **118-03:** add thin host plan change seam ([3e84edd](https://github.com/szTheory/accrue/commit/3e84edd765c82e7ff5215ab5ac0cc72d9a958f06))
+* **119:** close subscription change support contract ([03e6c9b](https://github.com/szTheory/accrue/commit/03e6c9b9ae2520f9566fba43e3adb3b9513bdf8a))
+* **94-01:** lock processor support posture ([5cedca6](https://github.com/szTheory/accrue/commit/5cedca6741180ce9a4b8b3e0c38e2e29d5f8a1ca))
+* **96-01:** branch subscribe/3 for braintree at processor seam ([85e44f6](https://github.com/szTheory/accrue/commit/85e44f687b952a1b8b50aee60b7f85c62132e459))
+* **processor:** harden phase 95 support contract ([1ca55ec](https://github.com/szTheory/accrue/commit/1ca55ecffacf811e584b9f8ce583ae9a4fa3e9b6))
+
+
+### Bug Fixes
+
+* **092-01:** keep package changelogs at package root ([ee8792f](https://github.com/szTheory/accrue/commit/ee8792ff7632252958ae2fee82aa8ba2faeff38c))
+* **098:** close review findings and normalize locks ([e277987](https://github.com/szTheory/accrue/commit/e2779872e11443bf1036c92904159cd66c18dc3a))
+* **098:** support braintree host customer flow ([7b8275d](https://github.com/szTheory/accrue/commit/7b8275d9789e8267008e05958b7c77579238e1ca))
+* **102:** compensate reserved mappings on gateway failure ([e34c795](https://github.com/szTheory/accrue/commit/e34c795f611db52ff7f0bc1a3de81d66048d510a))
+* **102:** release reservations on pre-gateway failures ([a6fbee7](https://github.com/szTheory/accrue/commit/a6fbee75f283ca5a8f8249a7c4a475831a940f42))
+* **102:** reserve discount mappings before braintree create ([22db22c](https://github.com/szTheory/accrue/commit/22db22c76f5b46d277185b4ce29a70a1ba9bd825))
+* **112-02:** lock customer update proof bundle ([29528fa](https://github.com/szTheory/accrue/commit/29528fa292707e3d2710f03bfab60135524d0279))
+* **112:** preserve metadata merge semantics ([63fa708](https://github.com/szTheory/accrue/commit/63fa708cb65ee63e74dd1dc7619c61cf511e392d))
+* **113-01:** lock cancellation semantics behind facade and adapter proof ([fca2dff](https://github.com/szTheory/accrue/commit/fca2dffdf1677a6e87e509856b15d7f1061bb56e))
+
 ## [0.3.1](https://github.com/szTheory/accrue/compare/accrue-v0.3.0...accrue-v0.3.1) (2026-04-22)
 
 ### Miscellaneous Chores

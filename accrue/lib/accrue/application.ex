@@ -275,7 +275,11 @@ defmodule Accrue.Application do
     end
   end
 
-  defp maybe_warn_legacy_pdf_adapter_without_invoice_adapter(invoice_adapter_explicit?, pdf_adapter, env) do
+  defp maybe_warn_legacy_pdf_adapter_without_invoice_adapter(
+         invoice_adapter_explicit?,
+         pdf_adapter,
+         env
+       ) do
     key = :accrue_invoice_pdf_adapter_migration_warned?
 
     cond do

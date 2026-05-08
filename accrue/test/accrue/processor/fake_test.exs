@@ -59,7 +59,8 @@ defmodule Accrue.Processor.FakeTest do
     test "merges the shared first-party attrs into the stored customer" do
       {:ok, %{id: id}} = Processor.create_customer(%{email: "a@b", name: "Old"}, [])
 
-      assert {:ok, %{id: ^id, name: "New", email: "new@example.com", metadata: %{"tier" => "pro"}}} =
+      assert {:ok,
+              %{id: ^id, name: "New", email: "new@example.com", metadata: %{"tier" => "pro"}}} =
                Processor.update_customer(
                  id,
                  %{name: "New", email: "new@example.com", metadata: %{"tier" => "pro"}},

@@ -8,6 +8,24 @@
 
 - Webhook replay confirmations, bulk DLQ prompts, and related operator strings now live in `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Locked` (Phase 27). Hosts that snapshot admin flash or HEEx literals should diff package tests when upgrading.
 
+## [1.1.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.0.0...accrue_admin-v1.1.0) (2026-05-08)
+
+
+### Features
+
+* **098-02:** add admin payment method operator controls ([03b4bd0](https://github.com/szTheory/accrue/commit/03b4bd0659d6f070d4f4d31aa895559b73007eb9))
+* **099-03:** implement LiveView charge detail refund capabilities ([cb1d44f](https://github.com/szTheory/accrue/commit/cb1d44fd2bd7e75ba0d9df0abf5512d0d2adf617))
+* **118-02:** add admin subscription change actions ([9430313](https://github.com/szTheory/accrue/commit/94303131d5a2b78fa923bb9ac367dc4dde8e1fac))
+* **119:** close subscription change support contract ([03e6c9b](https://github.com/szTheory/accrue/commit/03e6c9b9ae2520f9566fba43e3adb3b9513bdf8a))
+
+
+### Bug Fixes
+
+* **092-01:** keep package changelogs at package root ([ee8792f](https://github.com/szTheory/accrue/commit/ee8792ff7632252958ae2fee82aa8ba2faeff38c))
+* **098:** close review findings and normalize locks ([e277987](https://github.com/szTheory/accrue/commit/e2779872e11443bf1036c92904159cd66c18dc3a))
+* **113-02:** gate portal cancellation flows by provider ([d20fdc1](https://github.com/szTheory/accrue/commit/d20fdc1758709ecd7aa0c2b083709f16322868bd))
+* **113:** tighten braintree destructive action gating ([3340b33](https://github.com/szTheory/accrue/commit/3340b3345ae52beb8263e56050e69e9ec6629263))
+
 ## [0.3.1](https://github.com/szTheory/accrue/compare/accrue_admin-v0.3.0...accrue_admin-v0.3.1) (2026-04-22)
 
 ### Bug Fixes

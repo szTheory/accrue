@@ -56,10 +56,16 @@ require_any_fixed() {
   fail "$file is missing all of: $*"
 }
 
+is_release_please_pr() {
+  [[ -n "${RELEASE_PLEASE_PR:-}" ]]
+}
+
 accrue_version=$(extract_version "$ROOT_DIR/accrue/mix.exs")
 accrue_admin_version=$(extract_version "$ROOT_DIR/accrue_admin/mix.exs")
+accrue_portal_version=$(extract_version "$ROOT_DIR/accrue_portal/mix.exs")
 
 [[ "$accrue_version" == "$accrue_admin_version" ]] || fail "package versions diverged"
+[[ "$accrue_version" == "$accrue_portal_version" ]] || fail "package versions diverged"
 
 first_hour_md="$ROOT_DIR/accrue/guides/first_hour.md"
 host_readme_md="$ROOT_DIR/examples/accrue_host/README.md"
@@ -80,13 +86,13 @@ require_fixed "$host_readme_md" '### Capsule R'
 require_fixed "$ROOT_DIR/accrue/mix.exs" 'source_ref: "accrue-v#{@version}"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" 'source_ref: "accrue_admin-v#{@version}"'
 
-require_fixed "$ROOT_DIR/accrue/README.md" "{:accrue, \"~> $accrue_version\"}"
 require_fixed "$ROOT_DIR/accrue/README.md" '> **Hex vs `main`:**'
 require_fixed "$ROOT_DIR/accrue/README.md" 'https://hex.pm/packages/accrue'
-require_fixed "$ROOT_DIR/accrue_admin/README.md" "{:accrue_admin, \"~> $accrue_admin_version\"}"
-require_fixed "$ROOT_DIR/accrue_admin/README.md" "accrue ~> $accrue_version"
 require_fixed "$ROOT_DIR/accrue_admin/README.md" '> **Hex vs `main`:**'
 require_fixed "$ROOT_DIR/accrue_admin/README.md" 'https://hex.pm/packages/accrue_admin'
+require_fixed "$ROOT_DIR/accrue_portal/README.md" '> **Hex vs `main`:**'
+require_fixed "$ROOT_DIR/accrue_portal/README.md" 'https://hex.pm/packages/accrue_portal'
+require_fixed "$ROOT_DIR/accrue_portal/mix.exs" 'source_ref: "accrue_portal-v#{@version}"'
 
 require_fixed "$ROOT_DIR/accrue/README.md" '[First Hour](guides/first_hour.md)'
 require_fixed "$ROOT_DIR/accrue/README.md" '[Troubleshooting](guides/troubleshooting.md)'
@@ -150,8 +156,6 @@ require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "bash scripts/ci/accrue
 
 require_any_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "## 1. First run" "## First run"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" '> **Hex vs `main`:**'
-require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "{:accrue, \"~> $accrue_version\"}"
-require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "{:accrue_admin, \"~> $accrue_admin_version\"}"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "Seeded history"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "mix verify"
 require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "mix verify.full"
@@ -230,11 +234,20 @@ require_fixed "$ROOT_DIR/RELEASING.md" "15-TRUST-REVIEW.md"
 require_fixed "$ROOT_DIR/RELEASING.md" "HEX_API_KEY"
 require_fixed "$ROOT_DIR/RELEASING.md" "RELEASE_PLEASE_TOKEN"
 require_fixed "$ROOT_DIR/RELEASING.md" "release-gate"
+require_fixed "$ROOT_DIR/RELEASING.md" 'linked `accrue` +'
+require_fixed "$ROOT_DIR/RELEASING.md" '`accrue_admin` + `accrue_portal`'
+require_fixed "$ROOT_DIR/RELEASING.md" "publish-accrue-portal"
+require_fixed "$ROOT_DIR/RELEASING.md" "ACCRUE_PORTAL_HEX_RELEASE=1"
+require_fixed "$ROOT_DIR/RELEASING.md" 'choose `accrue`, `accrue_admin`, or `accrue_portal`'
 require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "STRIPE_TEST_SECRET_KEY"
 require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "host-integration"
 require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "first-party shared-facade surfaces"
 require_fixed "$ROOT_DIR/guides/testing-live-stripe.md" "mounted-local Braintree side"
 require_fixed "$ROOT_DIR/CONTRIBUTING.md" 'Node.js for browser UAT in `examples/accrue_host`'
+require_fixed "$ROOT_DIR/CONTRIBUTING.md" "three sibling Mix packages"
+require_fixed "$ROOT_DIR/CONTRIBUTING.md" '`accrue_portal/` for the customer billing portal UI'
+require_fixed "$ROOT_DIR/CONTRIBUTING.md" "cd ../accrue_portal"
+require_fixed "$ROOT_DIR/CONTRIBUTING.md" "ACCRUE_PORTAL_HEX_RELEASE=1"
 require_absent_regex "$ROOT_DIR/RELEASING.md" 'Phase 9 release gate'
 require_absent_regex "$ROOT_DIR/guides/testing-live-stripe.md" 'primary `test` job'
 require_absent_regex "$ROOT_DIR/CONTRIBUTING.md" 'Node\.js for browser UAT in `accrue_admin`'
@@ -247,9 +260,17 @@ for guide in \
   "$ROOT_DIR/accrue/guides/first_hour.md" \
   "$ROOT_DIR/accrue/guides/troubleshooting.md"; do
   require_fixed "$guide" 'config :accrue, :webhook_signing_secrets, %{'
-  require_fixed "$guide" 'stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")'
+require_fixed "$guide" 'stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")'
   require_absent_regex "$guide" 'webhook_signing_secret([^s]|$)'
 done
 
-echo "package docs verified for accrue $accrue_version and accrue_admin $accrue_admin_version"
+if ! is_release_please_pr; then
+  require_fixed "$ROOT_DIR/accrue/README.md" "{:accrue, \"~> $accrue_version\"}"
+  require_fixed "$ROOT_DIR/accrue_admin/README.md" "{:accrue_admin, \"~> $accrue_admin_version\"}"
+  require_fixed "$ROOT_DIR/accrue_admin/README.md" "accrue ~> $accrue_version"
+  require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "{:accrue, \"~> $accrue_version\"}"
+  require_fixed "$ROOT_DIR/accrue/guides/first_hour.md" "{:accrue_admin, \"~> $accrue_admin_version\"}"
+fi
+
+echo "package docs verified for accrue $accrue_version, accrue_admin $accrue_admin_version, and accrue_portal $accrue_portal_version"
 echo "fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, quickstart.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"

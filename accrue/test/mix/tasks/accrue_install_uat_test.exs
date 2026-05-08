@@ -70,8 +70,10 @@ defmodule Mix.Tasks.Accrue.InstallUATTest do
     assert generated =~ "use Accrue.Test"
     assert generated =~ "#   config :accrue, :processor, Accrue.Processor.Fake"
     assert generated =~ "#   config :accrue, :mailer, Accrue.Mailer.Test"
+
     assert generated =~
              "#   config :accrue, :invoice_pdf_adapter, Accrue.InvoiceRenderer.Test"
+
     refute generated =~ "\nconfig :accrue"
 
     Code.compile_string(generated)
