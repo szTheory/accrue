@@ -73,7 +73,6 @@ defmodule Accrue.Portal.Checkout.CompletionJob do
       case DefaultHandler.handle_event(event.type, event, ctx) do
         :ok -> :ok
         {:error, _} = error -> error
-        other -> {:error, other}
       end
     end
   end
