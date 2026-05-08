@@ -120,15 +120,15 @@ jobs:
             compatibility: 'Primary dev target'
             support: 'required'
             continue-on-error: false
-          # Forward-compat smoke compatibility cell (still required while within the documented support contract).
-          # Required deterministic gate: high-severity trust findings block release here.
+          # Forward-compat smoke compatibility cell (advisory canary for upstream compatibility drift).
+          # Advisory cells stay visible, but they do not block merge/release while upstream packages lag.
           - elixir: '1.18.4'
             otp: '28.0'
             sigra: 'off'
             opentelemetry: 'off'
             compatibility: 'Forward-compat smoke'
-            support: 'required'
-            continue-on-error: false
+            support: 'advisory'
+            continue-on-error: true
           # Advisory compatibility cell: unpublished optional :sigra integration.
           # Advisory cells stay visibly non-blocking through matrix continue-on-error.
           - elixir: '1.18.0'
