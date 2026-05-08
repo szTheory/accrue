@@ -27,6 +27,13 @@ Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` sh
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for **billing portal** facade literals (**`create_billing_portal_session/2`**, **`[:accrue, :billing, :billing_portal, :create]`**, **`billing-billing-portal-create`** / **`billing_portal_session_facade_test.exs`**) alongside checkout.
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for checkout facade + billing-span literals co-evolving with golden-path docs.
 
+## [1.1.1](https://github.com/szTheory/accrue/compare/accrue-v1.1.0...accrue-v1.1.1) (2026-05-08)
+
+
+### Miscellaneous Chores
+
+* **accrue:** Synchronize accrue-monorepo versions
+
 ## [1.1.0](https://github.com/szTheory/accrue/compare/accrue-v1.0.0...accrue-v1.1.0) (2026-05-08)
 
 
