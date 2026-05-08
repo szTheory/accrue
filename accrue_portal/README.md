@@ -16,9 +16,9 @@ first-party-local-portal semantics.
 For Braintree, both checkout and billing portal sessions return mounted local
 URLs from your app, not upstream hosted URLs.
 
-Phase 101 keeps the portal boundary session-resolved-customer-only. Hosts that
-need emailed-link checkout must add their own `/checkout/start?token=...`
-bootstrap endpoint before redirecting into the mounted portal.
+The portal boundary stays session-resolved-customer-only. Hosts that need
+emailed-link checkout must add their own `/checkout/start?token=...` bootstrap
+endpoint before redirecting into the mounted portal.
 
 ## Mount
 
@@ -43,7 +43,7 @@ Mount `accrue_admin "/admin"` and `accrue_portal "/billing"` as sibling scopes.
 
 ## Braintree local checkout
 
-Phase 101 wires Braintree checkout through package-owned Hosted Fields.
+The Braintree checkout path wires through package-owned Hosted Fields.
 `Accrue.Billing.create_checkout_session/2` returns a URL under the mounted
 portal path, and the checkout page completes the subscription using the same
 core `Accrue.Billing.subscribe/3` flow as the rest of the library.

@@ -48,7 +48,7 @@ and auth details:
 
 ## Operator copy (tiers)
 
-Contributors should treat operator-facing strings in three tiers (Phase 27 CONTEXT D-03):
+Contributors should treat operator-facing strings in three tiers:
 
 - **Tier A — Host contract:** production `accrue_admin` LiveView copy on mounted routes lives in `AccrueAdmin.Copy` (and verbatim legal/replay gates in `AccrueAdmin.Copy.Locked`). Treat changes as host-visible: follow semver and call them out under `### Host-visible copy (accrue_admin)` in this package `CHANGELOG.md`.
 - **v1.14 parity inventory:** route-level Copy / token / VERIFY posture for the **11** core mounted surfaces is tracked in [`guides/core-admin-parity.md`](guides/core-admin-parity.md) (**ADM-07**); start there before widening VERIFY or Copy modules.
