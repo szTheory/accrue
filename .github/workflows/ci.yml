@@ -462,7 +462,9 @@ jobs:
         run: cd examples/accrue_host && mix deps.get
 
       - name: Install browser deps
-        run: cd examples/accrue_host && npm ci
+        run: |
+          cd examples/accrue_host && npm ci
+          cd assets && npm ci
 
       - name: Install Chromium
         run: cd examples/accrue_host && npm run e2e:install

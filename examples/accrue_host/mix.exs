@@ -164,7 +164,7 @@ defmodule AccrueHost.MixProject do
         verify_dev_boot_command(),
         verify_browser_command()
       ],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing", "cmd --cd assets npm install"],
       "assets.build": ["compile", "tailwind accrue_host", "esbuild accrue_host"],
       "assets.deploy": [
         "tailwind accrue_host --minify",

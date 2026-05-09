@@ -59,7 +59,9 @@ jobs:
             ${{ runner.os }}-otp27-elixir118-accrue-host-deps-
 
       - name: Install browser deps
-        run: cd examples/accrue_host && npm ci
+        run: |
+          cd examples/accrue_host && npm ci
+          cd assets && npm ci
 
       - name: Install Chromium
         run: cd examples/accrue_host && npm run e2e:install
