@@ -8,6 +8,13 @@
 
 - Webhook replay confirmations, bulk DLQ prompts, and related operator strings now live in `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Locked` (Phase 27). Hosts that snapshot admin flash or HEEx literals should diff package tests when upgrading.
 
+## [1.1.2](https://github.com/szTheory/accrue/compare/accrue_admin-v1.1.1...accrue_admin-v1.1.2) (2026-05-08)
+
+
+### Bug Fixes
+
+* trigger 1.1.2 patch release for docs contract alignment ([1e4d970](https://github.com/szTheory/accrue/commit/1e4d9709c03bb6a98f2f24d88be6e1d601994552))
+
 ## [1.1.1](https://github.com/szTheory/accrue/compare/accrue_admin-v1.1.0...accrue_admin-v1.1.1) (2026-05-08)
 
 

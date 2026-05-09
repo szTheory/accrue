@@ -10,7 +10,7 @@ How Accrue thinks about **“done enough”** for the core library and companion
 ## Operational pair
 
 1. **[Production readiness](production-readiness.md)** — ordered checklist for shipping billing in a real Phoenix app (what to verify, where to read next).
-2. **Friction inventory + stop rules (monorepo)** — ranked evidence and diminishing-returns doctrine live at **`.planning/research/v1.17-north-star.md`** (stop rules) and **`.planning/research/v1.17-FRICTION-INVENTORY.md`** (intake table) **relative to the git repository root** (not shipped inside the Hex package tarball). Use a full monorepo checkout or GitHub browse to read them.
+2. **Friction inventory + stop rules (monorepo)** — ranked evidence and diminishing-returns doctrine live in the repo-root planning notes for a full monorepo checkout. They are not shipped inside the Hex package tarball, so use GitHub browse or the repository root when you need the live inventory.
 
 New **P0 / P1** friction rows belong in that inventory only when they meet the **priority bar** in the inventory preamble (sources, integrator impact, CI contract). **Broad doc sweeps without a row** are out of policy — see north star **S1** / **S5**.
 

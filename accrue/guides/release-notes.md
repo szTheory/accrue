@@ -12,6 +12,12 @@ This page is the **story** of what shipped—not a commit list. For every line i
 
 ## accrue
 
+### 1.1.2
+
+**Patch release for linked release-contract alignment and CI stability.**
+
+`1.1.2` is a small follow-up to the `1.1.1` linked publish line. It keeps the same public billing surface, then tightens the release contract around it: package docs, release notes, and CI now agree on the same three-package `accrue` / `accrue_admin` / `accrue_portal` version family.
+
 ### 1.1.1
 
 **Linked-release recovery and public release-truth cleanup.**
@@ -55,6 +61,10 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 ## accrue_admin
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
+
+### 1.1.2
+
+Matches **accrue 1.1.2**: the admin package stays on the same linked three-package release line, with public release notes and CI checks updated so the published version story stays consistent across the core, admin, and portal packages.
 
 ### 1.1.1
 

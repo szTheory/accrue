@@ -93,7 +93,7 @@ Tagline: *"Billing state, modeled clearly."*
 |--------|-----|---------|-------|
 | 1.17.x | 27 | 1.8.x | Floor — this is the minimum supported. |
 | 1.18.x | 27 | 1.8.x | Primary development target. |
-| 1.18.x | 28 | 1.8.x | Forward-compat smoke test. |
+| 1.18.x | 28 | 1.8.x | Forward-compat smoke canary. |
 ## Conditional Compilation for Optional Deps
 ### 1. Declare optional in `deps/0`
 ### 2. Silence compiler warnings for undefined optional modules

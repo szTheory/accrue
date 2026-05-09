@@ -283,7 +283,7 @@ defmodule Accrue.Install.Patches do
 
   defp admin_mount_present?(content, mount_path) do
     escaped_path = Regex.escape(mount_path)
-    Regex.match?(~r/accrue_admin(?:\s+|\()\"#{escaped_path}\"\)?/, content)
+    Regex.match?(~r/accrue_admin(?:\s+|\()\s*"#{escaped_path}"(?:\s*,[^\n)]*)?\)?/, content)
   end
 
   defp webhook_scope(path) when is_binary(path) do

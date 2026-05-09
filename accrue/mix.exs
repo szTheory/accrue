@@ -1,7 +1,7 @@
 defmodule Accrue.MixProject do
   use Mix.Project
 
-  @version "1.1.1"
+  @version "1.1.2"
   @source_url "https://github.com/szTheory/accrue"
 
   def project do
@@ -58,7 +58,7 @@ defmodule Accrue.MixProject do
       {:braintree, "~> 0.16"},
       {:oban, "~> 2.21"},
       {:swoosh, "~> 1.25"},
-      {:mailglass, "~> 0.1"},
+      {:mailglass, "~> 1.0"},
       {:rendro, "~> 0.1.0"},
       {:chromic_pdf, "~> 1.17"},
       {:nimble_options, "~> 1.1"},

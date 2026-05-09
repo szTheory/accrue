@@ -11,6 +11,7 @@ defmodule Accrue.Repo.Migrations.CreateMailglassPocTables do
       add(:stream, :text, null: false)
       add(:recipient, :text, null: false)
       add(:recipient_domain, :text, null: false)
+      add(:adapter_ref, :text)
       add(:provider, :text)
       add(:provider_message_id, :text)
       add(:last_event_type, :text, null: false)

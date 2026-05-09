@@ -30,7 +30,7 @@ test.describe("@mobile mounted admin shell and customers", () => {
     await orgButton.click();
     await waitForLiveView(page);
 
-    const customersUrl = `/billing/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const customersUrl = `/admin/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(customersUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
@@ -38,7 +38,7 @@ test.describe("@mobile mounted admin shell and customers", () => {
     await expectNoHorizontalOverflow(page, "customers index");
 
     await page.goto(
-      `/billing/customers/${fixture.admin_denial_customer_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`,
+      `/admin/customers/${fixture.admin_denial_customer_id}?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`,
       { waitUntil: "domcontentloaded" }
     );
     await waitForLiveView(page);
@@ -57,7 +57,7 @@ test.describe("@mobile mounted admin shell and customers", () => {
     await orgButton.click();
     await waitForLiveView(page);
 
-    const customersUrl = `/billing/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+    const customersUrl = `/admin/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
     await page.goto(customersUrl, { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 

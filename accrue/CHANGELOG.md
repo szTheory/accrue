@@ -27,6 +27,16 @@ Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` sh
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for **billing portal** facade literals (**`create_billing_portal_session/2`**, **`[:accrue, :billing, :billing_portal, :create]`**, **`billing-billing-portal-create`** / **`billing_portal_session_facade_test.exs`**) alongside checkout.
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for checkout facade + billing-span literals co-evolving with golden-path docs.
 
+## [1.1.2](https://github.com/szTheory/accrue/compare/accrue-v1.1.1...accrue-v1.1.2) (2026-05-08)
+
+
+### Bug Fixes
+
+* remove dead portal checkout dialyzer fallback ([60c0ce3](https://github.com/szTheory/accrue/commit/60c0ce35052fdbd3848442065a5e07b20cac3a09))
+* restore ops metrics parity across release gates ([d272b6b](https://github.com/szTheory/accrue/commit/d272b6b41cf3bdd895d9644042a232648a73a8b1))
+* restore telemetry ops inventory and stable meter-event tests ([abdbf6f](https://github.com/szTheory/accrue/commit/abdbf6f9af0db1abb4f3b238c9c3c335eeb8ee60))
+* trigger 1.1.2 patch release for docs contract alignment ([1e4d970](https://github.com/szTheory/accrue/commit/1e4d9709c03bb6a98f2f24d88be6e1d601994552))
+
 ## [1.1.1](https://github.com/szTheory/accrue/compare/accrue-v1.1.0...accrue-v1.1.1) (2026-05-08)
 
 

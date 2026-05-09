@@ -1,7 +1,7 @@
 defmodule AccrueAdmin.MixProject do
   use Mix.Project
 
-  @version "1.1.1"
+  @version "1.1.2"
   @source_url "https://github.com/szTheory/accrue"
 
   def project do
@@ -40,7 +40,7 @@ defmodule AccrueAdmin.MixProject do
       {:phoenix, "~> 1.8"},
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_html, "~> 4.2"},
-      {:mailglass_admin, "~> 0.1", only: [:dev, :test]},
+      {:mailglass_admin, "~> 1.0", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.7", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},

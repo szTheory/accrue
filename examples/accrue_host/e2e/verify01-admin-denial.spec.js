@@ -10,9 +10,9 @@ test.skip("admin customer detail denies out-of-scope organization rows", async (
 
   await login(page, fixture, fixture.admin_email);
 
-  await page.goto("/billing", { waitUntil: "domcontentloaded" });
+  await page.goto("/admin", { waitUntil: "domcontentloaded" });
 
-  const url = `/billing/customers/${fixture.admin_denial_customer_id}?org=${encodeURIComponent(fixture.admin_org_beta_slug)}`;
+  const url = `/admin/customers/${fixture.admin_denial_customer_id}?org=${encodeURIComponent(fixture.admin_org_beta_slug)}`;
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
   await expect(

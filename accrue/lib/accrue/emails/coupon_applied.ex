@@ -32,16 +32,13 @@ defmodule Accrue.Emails.CouponApplied do
     assigns = template_assigns(assigns)
 
     new()
-    |> Mailglass.Message.update_swoosh(fn email ->
-      email
-      |> from(
-        {map_get(assigns.branding, :from_name) || "Acme Billing",
-         map_get(assigns.branding, :from_email) || "billing@example.test"}
-      )
-      |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "")
-      |> subject(assigns.subject)
-      |> html_body(fn _ -> html(assigns) end)
-    end)
+    |> from(
+      {map_get(assigns.branding, :from_name) || "Acme Billing",
+       map_get(assigns.branding, :from_email) || "billing@example.test"}
+    )
+    |> to(assigns.customer_email || assigns.to || map_get(assigns.customer, :email) || "")
+    |> subject(assigns.subject)
+    |> html_body(html(assigns) |> Phoenix.HTML.Safe.to_iodata() |> IO.iodata_to_binary())
     |> Mailglass.Message.put_function(:coupon_applied)
   end
 

@@ -167,7 +167,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
           {:ok, _updated_subscription} ->
             {:noreply,
              socket
-             |> put_flash(:info, "Subscription canceled now. Organization access may end immediately.")
+             |> put_flash(
+               :info,
+               "Subscription canceled now. Organization access may end immediately."
+             )
              |> assign(:confirm_cancel, false)
              |> load_state()}
 

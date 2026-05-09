@@ -17,7 +17,7 @@ test("mounted admin customers index shows tenant chrome and billing signals", as
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
   await waitForLiveView(page);
 
-  const customersUrl = `/billing/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
+  const customersUrl = `/admin/customers?org=${encodeURIComponent(fixture.admin_org_alpha_slug)}`;
   await page.goto(customersUrl, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 

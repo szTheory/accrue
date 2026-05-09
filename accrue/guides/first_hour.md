@@ -23,11 +23,11 @@ Provider behavior stays honest across the shared facade:
 | Stripe | Upstream hosted URL | Upstream hosted URL |
 | Braintree | Mounted local URL | Mounted local URL |
 
-This guide mirrors only the setup-critical needles from the canonical [processor support matrix](../../.planning/processor-support-matrix.md): the shared checkout and portal facade stays provider-honest, `update_customer/2` remains a bounded provider-neutral write-through, `cancel/2` is the shared immediate path, and the official active-subscription-change contract is `swap_plan/3` plus `preview_upcoming_invoice/2`. Preview is the canonical path where supported before commit; `swap_plan/3` is native on Stripe, testing/local-only on Fake, bounded on Braintree when the host configures `:plan_resolver`, and `cancel_at_period_end/2` stays a Fake/Stripe-only scheduled-end path.
+This guide mirrors only the setup-critical needles from the processor support matrix: the shared checkout and portal facade stays provider-honest, `update_customer/2` remains a bounded provider-neutral write-through, `cancel/2` is the shared immediate path, and the official active-subscription-change contract is `swap_plan/3` plus `preview_upcoming_invoice/2`. Preview is the canonical path where supported before commit; `swap_plan/3` is native on Stripe, testing/local-only on Fake, bounded on Braintree when the host configures `:plan_resolver`, and `cancel_at_period_end/2` stays a Fake/Stripe-only scheduled-end path.
 
 ## How to enter this guide
 
-This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the **same** pull request (**D-02**). Maintainer checklist (**INT-11**): same-PR capsule discipline lives in the contributor map [`scripts/ci/README.md`](../../scripts/ci/README.md) — search for **First Hour + host README capsule parity**.
+This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the same pull request. Same-PR capsule discipline lives in the contributor map [`scripts/ci/README.md`](../../scripts/ci/README.md).
 
 For **maintenance posture** (when to stop speculative doc work, how friction is intake-gated), see [Maturity and maintenance](maturity-and-maintenance.md).
 
@@ -92,8 +92,8 @@ proof, mounted admin inspection, and a focused verification pass.
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 1.1.1"},
-    {:accrue_admin, "~> 1.1.1"}
+    {:accrue, "~> 1.1.2"},
+    {:accrue_admin, "~> 1.1.2"}
   ]
 end
 ```

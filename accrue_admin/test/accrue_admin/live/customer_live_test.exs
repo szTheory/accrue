@@ -91,7 +91,12 @@ defmodule AccrueAdmin.CustomerLiveTest do
       subscription
       |> Subscription.changeset(%{
         processor: "braintree",
-        data: Map.put(subscription.data || %{}, "payment_method_token", blocked_payment_method.processor_id)
+        data:
+          Map.put(
+            subscription.data || %{},
+            "payment_method_token",
+            blocked_payment_method.processor_id
+          )
       })
       |> TestRepo.update!()
 
@@ -272,11 +277,12 @@ defmodule AccrueAdmin.CustomerLiveTest do
     assert html =~ "visa"
   end
 
-  test "payment_methods tab exposes only server-driven operator controls and host-handoff copy", %{
-    conn: conn,
-    customer: customer,
-    deletable_payment_method: deletable_payment_method
-  } do
+  test "payment_methods tab exposes only server-driven operator controls and host-handoff copy",
+       %{
+         conn: conn,
+         customer: customer,
+         deletable_payment_method: deletable_payment_method
+       } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, view, html} =
@@ -359,10 +365,12 @@ defmodule AccrueAdmin.CustomerLiveTest do
     html = render_click(element(view, "[data-role='confirm-delete-payment-method']"))
 
     assert html =~ "Payment method deleted."
+
     refute has_element?(
              view,
              "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{deletable_payment_method.id}']"
            )
+
     assert TestRepo.get(PaymentMethod, deletable_payment_method.id) == nil
   end
 

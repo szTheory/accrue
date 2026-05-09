@@ -85,8 +85,13 @@ defmodule AccrueAdmin.Live.CustomerLive do
     end
   end
 
-  def handle_event("set_default_payment_method", %{"payment_method_id" => payment_method_id}, socket) do
-    with {:ok, payment_method} <- fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
+  def handle_event(
+        "set_default_payment_method",
+        %{"payment_method_id" => payment_method_id},
+        socket
+      ) do
+    with {:ok, payment_method} <-
+           fetch_customer_payment_method(socket.assigns.customer, payment_method_id),
          {:ok, _customer} <-
            Billing.set_default_payment_method(socket.assigns.customer, payment_method, []) do
       {:noreply,
@@ -99,8 +104,13 @@ defmodule AccrueAdmin.Live.CustomerLive do
     end
   end
 
-  def handle_event("prepare_delete_payment_method", %{"payment_method_id" => payment_method_id}, socket) do
-    with {:ok, payment_method} <- fetch_customer_payment_method(socket.assigns.customer, payment_method_id) do
+  def handle_event(
+        "prepare_delete_payment_method",
+        %{"payment_method_id" => payment_method_id},
+        socket
+      ) do
+    with {:ok, payment_method} <-
+           fetch_customer_payment_method(socket.assigns.customer, payment_method_id) do
       {:noreply,
        assign(
          socket,
@@ -448,8 +458,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp active_subscription_payment_method?(customer, payment_method) do
     customer
     |> subscriptions()
-    |> Enum.filter(&(&1.processor == "braintree"))
-    |> Enum.filter(&Subscription.active?/1)
+    |> Enum.filter(fn subscription ->
+      subscription.processor == "braintree" and Subscription.active?(subscription)
+    end)
     |> Enum.any?(fn subscription ->
       get_in(subscription.data || %{}, ["payment_method_token"]) == payment_method.processor_id
     end)
@@ -467,7 +478,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
       active_subscription_payment_method?(customer, payment_method) ->
         :in_use
 
-      default_payment_method?(customer, payment_method) and has_other_payment_methods?(customer, payment_method) ->
+      default_payment_method?(customer, payment_method) and
+          has_other_payment_methods?(customer, payment_method) ->
         :replacement_required
 
       true ->
@@ -491,7 +503,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp pending_delete_label(payment_method) do
     [
-      payment_method.card_brand || payment_method.type || Copy.customer_payment_methods_row_fallback_label(),
+      payment_method.card_brand || payment_method.type ||
+        Copy.customer_payment_methods_row_fallback_label(),
       Copy.customer_payment_methods_card_last4_mask(),
       payment_method.card_last4 || "--"
     ]
@@ -547,7 +560,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
   defp payment_method_error_message(%APIError{code: "payment_method_replacement_required"}),
     do: Copy.customer_payment_methods_delete_blocked_replacement_required()
 
-  defp payment_method_error_message(%APIError{message: message}) when is_binary(message), do: message
+  defp payment_method_error_message(%APIError{message: message}) when is_binary(message),
+    do: message
+
   defp payment_method_error_message(:payment_method_not_found), do: "Payment method not found."
 
   defp payment_method_error_message(_reason),
