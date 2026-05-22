@@ -48,8 +48,18 @@ defmodule Accrue.ConfigEntitlementsTest do
       assert Config.validate_at_boot!() == :ok
     end
 
-    test "the schema fragment validates via validate!/1 directly" do
-      assert Keyword.fetch!(Config.validate!(repo: Accrue.TestRepo, entitlements: @valid_entitlements), :entitlements)
+    test "the validated value is readable via entitlements/0 with nested defaults applied" do
+      Application.put_env(:accrue, :entitlements, @valid_entitlements)
+
+      assert Config.validate_at_boot!() == :ok
+
+      ent = Config.entitlements()
+      assert Keyword.has_key?(ent, :plans)
+      assert Keyword.get(Keyword.fetch!(ent, :plans), :pro)[:features] == [
+               :basic_reports,
+               :api_access,
+               :advanced_reports
+             ]
     end
   end
 

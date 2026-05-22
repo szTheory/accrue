@@ -350,6 +350,54 @@ defmodule Accrue.Config do
           "percentage (e.g. `Decimal.new(\"2.9\")` for 2.9%), `:fixed` is " <>
           "an `Accrue.Money` fee in minor units added after the percentage, " <>
           "and `:min`/`:max` optionally clamp the result."
+    ],
+
+    # --- Entitlements / plan-gating (ENT-01) ------------------------------
+    entitlements: [
+      type: :keyword_list,
+      default: [],
+      keys: [
+        plans: [
+          type: :keyword_list,
+          default: [],
+          keys: [
+            *: [
+              type: :keyword_list,
+              keys: [
+                features: [type: {:list, :atom}, default: []],
+                limits: [
+                  # `[atom: pos_integer]` quota caps (D-02). NimbleOptions has
+                  # no `{:keyword_list, value_type}` form, so constrain every
+                  # value via the wildcard-key `*` typed entry — same intent,
+                  # valid 1.1 syntax.
+                  type: :keyword_list,
+                  default: [],
+                  keys: [*: [type: :pos_integer]]
+                ],
+                price_ids: [type: {:list, :string}, default: []]
+              ]
+            ]
+          ],
+          doc:
+            "Logical plan name (atom) -> entitlement entry (features/limits/price_ids)"
+        ],
+        resolver: [
+          type: :atom,
+          default: Accrue.Entitlements.Resolver.LocalMap,
+          doc:
+            "Resolver module (Accrue.Entitlements.Resolver behaviour). Default LocalMap."
+        ],
+        unmapped_action: [
+          type: {:in, [:deny, :raise]},
+          default: :deny,
+          doc:
+            "Behaviour when an active price_id is unmapped. :deny fails closed; never silent-allow."
+        ]
+      ],
+      doc:
+        "Plan->feature/quota entitlement catalog (host-owned, runtime). " <>
+          "Boot-validated and the same `price_id` may not map to two plans " <>
+          "(raises `Accrue.ConfigError` at boot). See guides/entitlements.md."
     ]
   ]
 
@@ -783,6 +831,19 @@ defmodule Accrue.Config do
   @spec cldr_backend() :: module()
   def cldr_backend, do: get!(:cldr_backend)
 
+  @doc """
+  Returns the runtime `:entitlements` config keyword list (the plan->feature/
+  quota catalog), or the schema default `[]` when unset.
+
+  This is a thin runtime accessor (`get!/1`, NOT `compile_env!`) because
+  `:entitlements` is host-owned catalog data that legitimately differs per
+  environment (e.g. test-mode vs live-mode `price_ids`), like `:branding` and
+  `:dunning`. The schema's nested defaults normalize each plan entry, so the
+  resolver (Plan 03) can read this without re-running the full validator.
+  """
+  @spec entitlements() :: keyword()
+  def entitlements, do: get!(:entitlements)
+
   defp maybe_validate_boot_setup!(opts) do
     _ = Keyword.fetch!(opts, :repo)
 
@@ -793,6 +854,45 @@ defmodule Accrue.Config do
     if Keyword.get(opts, :processor, Accrue.Processor.Fake) == Accrue.Processor.Stripe do
       _ = webhook_signing_secrets(:stripe)
     end
+
+    _ = validate_entitlements_price_ids!(opts)
+
+    :ok
+  end
+
+  # Cross-plan boot guard (D-04 / T-123-01): a single `price_id` mapped under
+  # two different plans is a silent mis-resolution hazard, so we fail loud at
+  # boot. This MUST live here (not as a per-field `{:custom, ...}` validator)
+  # because a custom validator only sees one plan entry's value at a time and
+  # cannot detect a collision ACROSS plans (RESEARCH § Pattern 3).
+  defp validate_entitlements_price_ids!(opts) do
+    plans =
+      opts
+      |> Keyword.get(:entitlements, [])
+      |> Keyword.get(:plans, [])
+
+    Enum.reduce(plans, %{}, fn {plan, entry}, seen ->
+      entry
+      |> Keyword.get(:price_ids, [])
+      |> Enum.reduce(seen, fn price_id, acc ->
+        case Map.fetch(acc, price_id) do
+          {:ok, ^plan} ->
+            # Same price_id repeated within the SAME plan is harmless.
+            acc
+
+          {:ok, other_plan} ->
+            raise Accrue.ConfigError,
+              key: :entitlements,
+              message:
+                "price_id #{inspect(price_id)} mapped to both " <>
+                  "#{inspect(other_plan)} and #{inspect(plan)} " <>
+                  "(a price_id may belong to at most one plan)"
+
+          :error ->
+            Map.put(acc, price_id, plan)
+        end
+      end)
+    end)
 
     :ok
   end
