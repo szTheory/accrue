@@ -1,0 +1,190 @@
+defmodule Accrue.Entitlements.Resolver.LocalMapTest do
+  @moduledoc """
+  Read-path tests for the default `Accrue.Entitlements.Resolver.LocalMap`:
+  reads local subscription state (active/trialing only), folds active items
+  into the `active_plans` SET + features UNION + merged quantities, and
+  makes ZERO processor calls. Mutates `:entitlements` app env with on_exit
+  restore (`async: false`).
+  """
+
+  use Accrue.BillingCase, async: false
+
+  alias Accrue.Entitlements.Resolver.LocalMap
+
+  # Billable whose billable_type "User" matches the factory's default
+  # owner_type, so the resolver's (owner_type, owner_id) lookup resolves the
+  # customer the factory created.
+  defmodule TestUser do
+    use Ecto.Schema
+    use Accrue.Billable
+
+    @primary_key {:id, :binary_id, autogenerate: true}
+    schema "test_users" do
+    end
+  end
+
+  @entitlements [
+    plans: [
+      p1: [features: [:reports, :export], limits: [seats: 5], price_ids: ["price_p1"]],
+      p2: [features: [:export, :api], limits: [api_calls: 100], price_ids: ["price_p2"]]
+    ],
+    unmapped_action: :deny
+  ]
+
+  setup do
+    prev = Application.get_env(:accrue, :entitlements)
+    Application.put_env(:accrue, :entitlements, @entitlements)
+
+    on_exit(fn ->
+      if prev do
+        Application.put_env(:accrue, :entitlements, prev)
+      else
+        Application.delete_env(:accrue, :entitlements)
+      end
+    end)
+
+    :ok
+  end
+
+  defp billable_for(owner_id), do: %TestUser{id: owner_id}
+
+  describe "resolve/2 single active plan" do
+    test "active sub maps to features, quantities, and active_plans" do
+      oid = Ecto.UUID.generate()
+      %{customer: _c} = Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.member?(resolved.active_plans, :p1)
+      assert MapSet.equal?(resolved.features, MapSet.new([:reports, :export]))
+      assert resolved.quantities[:seats] == 1
+      assert resolved.plan == :p1
+    end
+
+    test "min(cap, quantity) caps the seat quantity" do
+      oid = Ecto.UUID.generate()
+      %{subscription: sub} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      # Bump the item quantity above the cap of 5.
+      item = hd(sub.subscription_items)
+
+      {:ok, _} =
+        item
+        |> Ecto.Changeset.change(quantity: 9)
+        |> Accrue.TestRepo.update()
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert resolved.quantities[:seats] == 5
+    end
+
+    test "no-cap quota falls back to the raw quantity" do
+      oid = Ecto.UUID.generate()
+      %{subscription: sub} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p2"})
+
+      item = hd(sub.subscription_items)
+
+      {:ok, _} =
+        item
+        |> Ecto.Changeset.change(quantity: 3)
+        |> Accrue.TestRepo.update()
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      # api_calls cap is 100, quantity 3 -> min = 3
+      assert resolved.quantities[:api_calls] == 3
+    end
+  end
+
+  describe "resolve/2 multi-active-plan (one billable, two different mapped plans)" do
+    test "active_plans holds BOTH atoms and features is the union" do
+      oid = Ecto.UUID.generate()
+
+      result =
+        Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      # Second active sub on the SAME customer (subscribe/2 reuses it) — NOT a
+      # second factory call (which would mint a distinct customer).
+      {:ok, _} = Accrue.Billing.subscribe(result.customer, "price_p2")
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.member?(resolved.active_plans, :p1)
+      assert MapSet.member?(resolved.active_plans, :p2)
+      assert MapSet.equal?(resolved.features, MapSet.new([:reports, :export, :api]))
+    end
+  end
+
+  describe "resolve/2 lifecycle" do
+    test "trialing sub counts as active" do
+      oid = Ecto.UUID.generate()
+      Accrue.Test.Factory.trialing_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.member?(resolved.active_plans, :p1)
+    end
+
+    test "canceled sub yields an empty result" do
+      oid = Ecto.UUID.generate()
+      Accrue.Test.Factory.canceled_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.features) == 0
+      assert resolved.quantities == %{}
+      assert resolved.plan == nil
+    end
+  end
+
+  describe "resolve/2 unmapped + missing" do
+    test "unmapped active price_id under :deny is dropped" do
+      oid = Ecto.UUID.generate()
+      # price_unknown is not in the @entitlements plans.
+      Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_unknown"})
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.features) == 0
+    end
+
+    test "unmapped active price_id under :raise raises" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :unmapped_action, :raise)
+      )
+
+      oid = Ecto.UUID.generate()
+      Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_unknown"})
+
+      assert_raise RuntimeError, fn -> LocalMap.resolve(billable_for(oid), []) end
+    end
+
+    test "billable with no customer row yields an empty result" do
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(Ecto.UUID.generate()), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert resolved.plan == nil
+    end
+
+    test "customer with no active sub yields an empty result" do
+      oid = Ecto.UUID.generate()
+      %{customer: _c} = Accrue.Test.Factory.customer(%{owner_id: oid})
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+    end
+  end
+
+  describe "resolve/2 fail-closed inputs" do
+    test "nil billable yields an empty result (not an error tuple)" do
+      assert {:ok, resolved} = LocalMap.resolve(nil, [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.features) == 0
+      assert resolved.quantities == %{}
+      assert resolved.plan == nil
+    end
+
+    test "wrong-shape billable yields an empty result" do
+      assert {:ok, resolved} = LocalMap.resolve(%{not: :a_billable}, [])
+      assert MapSet.size(resolved.active_plans) == 0
+    end
+  end
+end
