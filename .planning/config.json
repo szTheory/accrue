@@ -27,6 +27,8 @@
     "discuss_auto_all_gray_areas": true,
     "discuss_high_impact_confirm": true,
     "discuss_auto_resolve_low_impact": true,
+    "discuss_high_impact_confirm_bar": "confirm_only_if_irreversible_or_public_maintainer_commitment_or_contradicts_locked_roadmap__additive_safe_or_reversible_public_surface_decisions_auto_resolve_via_subagent_research_even_when_public_api_shaped",
+    "discuss_default_entitlements_gate_api_surface": "boolean_only_now__no_tuple_diagnostic_variant__fetch_entitled_additive_later_only_on_sourced_host_need__denied_vs_couldnt_check_distinction_lives_in_telemetry_reason_metadata_not_a_code_api",
     "discuss_default_billing_facade_telemetry": "allowlist_safe_dimensions",
     "discuss_default_billing_facade_test_file": "dedicated_adjacent_facade_test",
     "discuss_default_billing_facade_doc_style": "hybrid_portal_shape_session_ssot",
