@@ -50,6 +50,18 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
 
   defp billable_for(owner_id), do: %TestUser{id: owner_id}
 
+  # Sets the (single) subscription item's quantity, mirroring the inline
+  # quantity-bump pattern used by the single-plan cap tests.
+  defp set_item_quantity(sub, quantity) do
+    sub = Accrue.TestRepo.preload(sub, :subscription_items)
+    item = hd(sub.subscription_items)
+
+    {:ok, _} =
+      item
+      |> Ecto.Changeset.change(quantity: quantity)
+      |> Accrue.TestRepo.update()
+  end
+
   describe "resolve/2 single active plan" do
     test "active sub maps to features, quantities, and active_plans" do
       oid = Ecto.UUID.generate()
@@ -112,6 +124,47 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
       assert MapSet.member?(resolved.active_plans, :p1)
       assert MapSet.member?(resolved.active_plans, :p2)
       assert MapSet.equal?(resolved.features, MapSet.new([:reports, :export, :api]))
+    end
+
+    # WR-01: two active mapped plans that SHARE a quota key must merge
+    # deterministically to the most-generous (max) per-plan min(cap, quantity),
+    # independent of the DB-return / fold order. The previous Map.put/3 was
+    # last-write-wins over row order (non-deterministic). pa: seats cap 10 with
+    # qty 8 -> 8; pb: seats cap 5 with qty 3 -> 3; merged seats == max(8, 3).
+    test "shared quota key merges to the max per-plan min(cap, qty), order-independent" do
+      shared = [
+        plans: [
+          pa: [features: [:fa], limits: [seats: 10], price_ids: ["price_pa"]],
+          pb: [features: [:fb], limits: [seats: 5], price_ids: ["price_pb"]]
+        ],
+        unmapped_action: :deny
+      ]
+
+      Application.put_env(:accrue, :entitlements, shared)
+
+      # pa: cap 10, qty 8 -> min = 8 ; pb: cap 5, qty 3 -> min = 3.
+      # Run TWICE, swapping the creation/fold order of pa vs pb, to prove the
+      # merged result is order-independent. max(8, 3) == 8 either way.
+      merged_seats = fn first_price, first_qty, second_price, second_qty ->
+        oid = Ecto.UUID.generate()
+
+        first = Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: first_price})
+        set_item_quantity(first.subscription, first_qty)
+
+        {:ok, second_sub} = Accrue.Billing.subscribe(first.customer, second_price)
+        set_item_quantity(second_sub, second_qty)
+
+        assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+        resolved.quantities[:seats]
+      end
+
+      pa_first = merged_seats.("price_pa", 8, "price_pb", 3)
+      pb_first = merged_seats.("price_pb", 3, "price_pa", 8)
+
+      assert pa_first == 8
+      assert pb_first == 8
+      # Order-independent: the chosen rule yields the same value either way.
+      assert pa_first == pb_first
     end
   end
 

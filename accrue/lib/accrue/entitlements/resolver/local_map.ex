@@ -98,9 +98,17 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
     features = Keyword.get(plan_entry, :features, [])
     limits = Keyword.get(plan_entry, :limits, [])
 
+    # WR-01: when two active plans share a quota key, merge with the
+    # most-generous (max) per-plan `min(cap, quantity)` rather than a blind
+    # `Map.put/3` overwrite. `Map.put/3` was last-write-wins over the
+    # DB-return order of active items — non-deterministic, and able to both
+    # under- and over-grant. `Map.update/4` with `max/2` is deterministic and
+    # order-independent (matches the union semantics used for active_plans and
+    # features).
     quantities =
       Enum.reduce(limits, acc.quantities, fn {quota_key, cap}, q ->
-        Map.put(q, quota_key, min(cap, quantity))
+        capped = min(cap, quantity)
+        Map.update(q, quota_key, capped, &max(&1, capped))
       end)
 
     %{
