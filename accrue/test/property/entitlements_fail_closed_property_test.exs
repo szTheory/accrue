@@ -132,6 +132,18 @@ defmodule Accrue.Property.EntitlementsFailClosedPropertyTest do
       assert_fail_closed(billable_for(oid))
     end
 
+    # Regression for CR-01: a map shaped like a billable whose `:id` is NOT
+    # stringable (tuple / map / non-charlist list / PID) used to RAISE out of
+    # the telemetry metadata builder (`to_string/1` in `subject_id/1`), which
+    # runs OUTSIDE the resolver's rescue — a crash, not a fail-closed value.
+    # `StreamData.term()` essentially never produces a map keyed exactly on
+    # `:id` with such a value, so the property leg above did not cover it.
+    test "non-stringable :id (tuple / map / list / PID) fails closed, never raises" do
+      for non_stringable_id <- [{1, 2}, %{}, [:a, :b], self()] do
+        assert_fail_closed(%{id: non_stringable_id})
+      end
+    end
+
     test "raising resolver collapses every public fn to fail-closed (D-08)" do
       Application.put_env(
         :accrue,

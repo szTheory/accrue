@@ -195,7 +195,16 @@ defmodule Accrue.Entitlements do
   defp subject_type(%{__struct__: mod}), do: inspect(mod)
   defp subject_type(_), do: nil
 
-  defp subject_id(%{id: id}) when not is_nil(id), do: to_string(id)
+  # Total — NEVER raises out of a gate function. `to_string/1` is only safe
+  # for terms that implement `String.Chars` (binaries, integers, atoms);
+  # tuples, maps, PIDs, structs without the protocol, and non-charlist lists
+  # would raise (Protocol.UndefinedError / ArgumentError) and escape the
+  # fail-closed contract because `span/5` runs OUTSIDE `resolve/2`'s rescue.
+  # `inspect/1` never raises, so we fall back to it for any other shape.
+  defp subject_id(%{id: id}) when is_binary(id) or is_integer(id) or is_atom(id),
+    do: to_string(id)
+
+  defp subject_id(%{id: id}) when not is_nil(id), do: inspect(id)
   defp subject_id(_), do: nil
 
   # Build the fully-resolved D-18 metadata BEFORE opening the span — the span
