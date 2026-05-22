@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 123 context gathered
-last_updated: "2026-05-22T14:18:44.547Z"
-last_activity: 2026-05-22 -- Phase 123 planning complete
+last_updated: "2026-05-22T22:29:40.644Z"
+last_activity: 2026-05-22
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.39 — Entitlements / Plan-Gating. Phase 123 (Config + Core Gate API Foundation).
+**Current focus:** Phase 123 — config-core-gate-api-foundation
 
 ## Current Position
 
-Phase: 123 of 127 (Config + Core Gate API Foundation)
-Plan: — (not yet planned)
+Phase: 123 (config-core-gate-api-foundation) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-05-22 -- Phase 123 planning complete
+Last activity: 2026-05-22
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -62,6 +62,8 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Accumulated Context
 
+| Phase 123 P01 | 4min | 2 tasks | 2 files |
+
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
@@ -72,6 +74,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-22:** Split observability — per-check decisions → telemetry only; grant/revoke/sync → immutable event ledger.
 - **2026-05-22:** Keep core runtime-LiveView-free; the `on_mount` guard ships conditionally compiled with a merge-blocking no-LiveView CI check (Phase 124).
 - **2026-05-22:** Isolate optional Stripe-native sync to the final phase (127) so it cannot block the milestone's core value; flagged needs-deeper-research.
+- [Phase 123]: ENT-01 :entitlements config schema landed — runtime-read (not compile_env!), boot-validated, with a cross-plan price_id-collision guard raising Accrue.ConfigError. limits typed as keyword_list with wildcard :pos_integer keys (NimbleOptions 1.1 has no {:keyword_list,value_type} form).
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22T12:27:12.724Z
+Last session: 2026-05-22T22:26:44.657Z
 Stopped at: Phase 123 context gathered
-Resume file: .planning/phases/123-config-core-gate-api-foundation/123-CONTEXT.md
+Resume file: None
