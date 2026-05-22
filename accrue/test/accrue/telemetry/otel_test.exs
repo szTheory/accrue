@@ -40,6 +40,28 @@ defmodule Accrue.Telemetry.OTelTest do
            }
   end
 
+  test "retains the six entitlement (D-19) attributes instead of dropping them" do
+    metadata = %{
+      feature: :advanced_reports,
+      result: true,
+      resolver: :local_map,
+      reason: :entitled,
+      subject_type: "User",
+      subject_id: "00000000-0000-0000-0000-000000000000"
+    }
+
+    # `:result` is given as the boolean `true`; `sanitize_value/1` stringifies
+    # atoms (and `true`/`false` are atoms) so it crosses the bridge as "true".
+    assert Accrue.Telemetry.OTel.sanitize_attributes(metadata) == %{
+             "accrue.feature" => "advanced_reports",
+             "accrue.result" => "true",
+             "accrue.resolver" => "local_map",
+             "accrue.reason" => "entitled",
+             "accrue.subject_type" => "User",
+             "accrue.subject_id" => "00000000-0000-0000-0000-000000000000"
+           }
+  end
+
   test "drops prohibited sensitive keys from span attributes" do
     prohibited = %{
       email: "customer@example.com",

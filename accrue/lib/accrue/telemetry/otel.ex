@@ -17,13 +17,27 @@ defmodule Accrue.Telemetry.OTel do
     :event_type => "accrue.event_type",
     :operation => "accrue.operation",
     :status => "accrue.status",
+    # Entitlement (D-19) attributes — bounded-cardinality decision metadata.
+    # `:result` is a distinct key (D-19); do NOT fold it into `:status`.
+    :feature => "accrue.feature",
+    :result => "accrue.result",
+    :resolver => "accrue.resolver",
+    :reason => "accrue.reason",
+    :subject_type => "accrue.subject_type",
+    :subject_id => "accrue.subject_id",
     "accrue.processor" => "accrue.processor",
     "accrue.customer_id" => "accrue.customer_id",
     "accrue.subscription_id" => "accrue.subscription_id",
     "accrue.invoice_id" => "accrue.invoice_id",
     "accrue.event_type" => "accrue.event_type",
     "accrue.operation" => "accrue.operation",
-    "accrue.status" => "accrue.status"
+    "accrue.status" => "accrue.status",
+    "accrue.feature" => "accrue.feature",
+    "accrue.result" => "accrue.result",
+    "accrue.resolver" => "accrue.resolver",
+    "accrue.reason" => "accrue.reason",
+    "accrue.subject_type" => "accrue.subject_type",
+    "accrue.subject_id" => "accrue.subject_id"
   }
 
   @prohibited_keys Map.new(
