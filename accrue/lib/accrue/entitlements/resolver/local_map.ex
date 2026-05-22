@@ -67,6 +67,14 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
     active_items =
       Subscription
       |> Query.active()
+      # WR-04: `Query.active/1` filters on status only (`:active`/`:trialing`),
+      # but `Subscription.canceled?/1` treats ANY non-nil `ended_at` as
+      # terminated. A `status: :active, ended_at: <past>` row would otherwise
+      # be simultaneously "active" and "canceled" and grant entitlements for an
+      # ended subscription — a fail-open hazard for a paid gate. Exclude ended
+      # rows LOCALLY here (the shared `Query.active/1` keeps its semantics for
+      # other callers).
+      |> where([s], is_nil(s.ended_at))
       |> where([s], s.customer_id == ^customer_id)
       |> join(:inner, [s], i in SubscriptionItem, on: i.subscription_id == s.id)
       |> select([_s, i], {i.price_id, i.quantity})

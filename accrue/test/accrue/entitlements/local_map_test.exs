@@ -134,6 +134,35 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
       assert resolved.quantities == %{}
       assert resolved.plan == nil
     end
+
+    # WR-04: a `status: :active` row with a non-nil (past) `ended_at` is
+    # simultaneously "active" per `Query.active/1` (status-only) and "canceled"
+    # per `Subscription.canceled?/1` (any ended_at). The entitlements read path
+    # must NOT grant on an ended subscription — `fold_active/1` excludes ended
+    # rows locally without touching the shared `Query.active/1`.
+    test "active-status sub with a past ended_at yields NO entitlements (fail-closed)" do
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      past = DateTime.add(Accrue.Clock.utc_now(), -86_400, :second)
+
+      {:ok, ended} =
+        sub
+        |> Accrue.Billing.Subscription.changeset(%{ended_at: past})
+        |> Accrue.TestRepo.update()
+
+      # Sanity: the row is still status :active but is canceled? via ended_at.
+      assert ended.status == :active
+      assert Accrue.Billing.Subscription.canceled?(ended)
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.features) == 0
+      assert resolved.quantities == %{}
+      assert resolved.plan == nil
+    end
   end
 
   describe "resolve/2 unmapped + missing" do
