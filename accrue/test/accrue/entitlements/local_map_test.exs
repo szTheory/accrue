@@ -16,7 +16,9 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
   # customer the factory created.
   defmodule TestUser do
     use Ecto.Schema
-    use Accrue.Billable
+    # billable_type "User" matches the factory's default owner_type so the
+    # resolver's (owner_type, owner_id) lookup resolves the seeded customer.
+    use Accrue.Billable, billable_type: "User"
 
     @primary_key {:id, :binary_id, autogenerate: true}
     schema "test_users" do
