@@ -1,64 +1,79 @@
-# Requirements: Accrue — Milestone v1.38
+# Requirements: Accrue — Milestone v1.39
 
-**Defined:** 2026-05-07  
+**Defined:** 2026-05-22
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-## v1.38 — Linked release truth
+## v1.39 — Entitlements / Plan-Gating
 
-**Goal:** Ship the next coherent public Accrue release and make the developer-facing release story true end-to-end: the linked package set, publish order, tags, changelogs, install docs, verifier lanes, and `.planning/` mirrors all need to agree with the actual published line. **No** new billing surface, lifecycle expansion, or strategy reopening in this milestone.
+**Goal:** Close the last open step of the canonical SaaS loop — let a Phoenix dev *gate features and access on what a customer has paid for*, first-party, with the same provider-honest + telemetry + admin + docs rigor as the rest of Accrue. Entitlements is a thin derivation layer over subscription state Accrue already holds locally; it adds no new external dependency for the core, and ships **local-first across all providers** (Stripe native Entitlements API is not yet wrapped by `lattice_stripe`, and Stripe itself recommends persisting locally for fast auth checks).
 
-### Release contract and publish path (REL)
+**Source:** `research/JTBD-FRONTIER.md` ranks entitlements the **#1** remaining JTBD and the only gap inconsistent with Accrue's "more-complete-than-Pay/Cashier" positioning. Backed by **SEED-002 #4**. Research: `research/SUMMARY.md` (+ `STACK/FEATURES/ARCHITECTURE/PITFALLS.md`).
 
-- [ ] **REL-09**: A maintainer can follow `RELEASING.md`, `release-please-config.json`, `.release-please-manifest.json`, and `.github/workflows/release-please.yml` without ambiguity about which packages participate in the linked release, what order they publish in, and what proof is required before and after publish.
+## v1 Requirements
 
-- [ ] **REL-10**: The next public release lands with package `@version`, git tags, GitHub releases, and package changelog sections all matching the shipped registry versions for every package intentionally included in the linked release.
+Requirements for this milestone. Each maps to exactly one roadmap phase.
 
-- [ ] **REL-11**: The publish proof chain records the ordered release outcome for the linked package set, including any required dependency ordering between `accrue` and its UI packages, so maintainers can prove the public line from tags and workflow evidence instead of branch assumptions.
+### Entitlement Model & Core Gate API
 
-### Post-publish contract sweep (PPX)
+- [ ] **ENT-01**: A host can declare a plan/price → feature (and optional seat/quota) mapping via `NimbleOptions`-validated config, as the canonical entitlement source across all providers.
+- [ ] **ENT-02**: A developer can call `Accrue.has_active_plan?(billable, plan)` and get a boolean derived from local subscription state, reusing the existing `Subscription.active?/1` lifecycle truth (never raw `.status`).
+- [ ] **ENT-03**: A developer can call `Accrue.entitled?(billable, feature)` and `features_for(billable)` with a **fail-closed** contract — the only path to `true` is an affirmative resolved match; errors, `nil`, unmapped plans, and exceptions all resolve to `false` (property-tested).
+- [ ] **ENT-04**: A developer can read a billable's entitled seat/quantity for a feature (`entitlement_quantity/2`), derived read-only from local subscription quantity. (Atomic seat enforcement stays host-owned and documented, not a core API.)
+- [ ] **ENT-05**: Entitlement checks emit `[:accrue, :entitlement, :check]` telemetry/OTel spans; deliberate grant/revoke/sync state changes are recorded in the immutable event ledger, while per-check decisions are **not** ledgered.
 
-- [ ] **PPX-13**: `bash scripts/ci/verify_package_docs.sh` passes after the release, and all enforced install/version literals across package READMEs and First Hour reflect the actual published package line rather than stale pre-publish or branch-only values.
+### Enforcement Surfaces
 
-- [ ] **PPX-14**: `bash scripts/ci/verify_adoption_proof_matrix.sh` and the merge-blocking `docs-contracts-shift-left` bundle pass against the post-release docs state, with any touched host or package mirrors kept needle-aligned in the same release truth chain.
+- [ ] **ENT-06**: A developer can gate a Phoenix controller route with a Plug guard (`require_plan` / `require_feature`) that halts with a configurable fail response (redirect / 403) when not entitled.
+- [ ] **ENT-07**: A developer can gate a host LiveView with an `on_mount` guard, shipped via conditional compilation so core `accrue` stays runtime-LiveView-free; the billable-resolution key (e.g. `current_scope` / `current_user`) is host-configurable and adapter-thin (no required Sigra/Lockspire coupling).
 
-- [ ] **PPX-15**: The release narrative explicitly resolves the current package-set reality: if `accrue_portal` is in the linked-version automation, the docs and maintainer runbook must either include it honestly in the release contract or narrow the automation so the published story stays truthful.
+### Provider Honesty & Lifecycle Truth
 
-### Planning hygiene and maintainer continuity
+- [ ] **ENT-08**: Entitlement resolution is provider-honest via a Resolver behaviour + capability-matrix rows — local plan→feature mapping behaves identically across Stripe, Braintree, and Fake, with a merge-blocking drift gate (mirroring the SCM-06 / PROC-24 support-contract pattern).
+- [ ] **ENT-09**: Entitlement truth maps explicitly to existing lifecycle states (trialing ✅, canceling/paid-through ✅, paused ✗, canceled ✗), with past-due grace as a fail-safe configurable knob reusing the dunning grace overlay, documented as an SSOT truth table.
 
-- [x] **HYG-03**: `.planning/PROJECT.md`, `.planning/MILESTONES.md`, `.planning/ROADMAP.md`, and `.planning/STATE.md` reflect the actual public release line and the chosen linked package scope after publish, with no stale “current public version” or package-set contradictions.
+### Optional Stripe-Native Sync (isolated final phase)
 
-- [x] **INV-08**: After the release and mirror pass, the maintainer performs the required dated post-publish friction certification or adds new sourced friction rows if the release exposed fresh integrator-facing problems.
+- [ ] **ENT-10**: When explicitly enabled (off by default), Accrue consumes Stripe's `entitlements.active_entitlement_summary.updated` webhook into a local cache used as an advisory overlay with monotonic ordering; local mapping remains the canonical default. Live Stripe entitlement API reads are deferred (depends on `lattice_stripe ≥ 1.2`).
 
-## Future requirements (deferred)
+### Admin & Docs
 
-- Additional subscription lifecycle expansion beyond the shipped `v1.37` surface.
-- New provider breadth, Hyperwallet reopening, or broader processor strategy changes.
-- `FIN-03` app-owned finance exports.
-- Any new billing, admin, or portal feature work that is not needed to make the public release line truthful.
+- [ ] **ENT-11**: An operator can view a customer's currently-active entitlements/features in `accrue_admin` (read-only).
+- [ ] **ENT-12**: `guides/entitlements.md` documents the full story (gate API, Plug guard, LiveView guard, provider matrix, lifecycle truth table); the JTBD docs flip entitlements ⛔→✅ and the First Hour + README "Start here" spine reference it; package-doc verifiers stay green.
 
-## Out of scope
+## Future Requirements
 
-| Item | Reason |
-|------|--------|
-| New billing facade APIs or lifecycle capabilities | `v1.38` is release continuity and public truth, not feature expansion. |
-| Broad doc rewrites without a release or verifier forcing function | Keep the milestone evidence-bound to publish continuity. |
-| Reopening processor strategy boundaries | The active dual-provider strategy stays as-is; this milestone ships what already exists. |
-| `FIN-03` finance exports | Explicit non-goal. |
+Deferred. Tracked but not in this milestone's roadmap.
+
+- **Typed upstream Stripe Entitlements resources** — first-class `Feature`/`ProductFeature`/`ActiveEntitlement` modules + live API reads via `lattice_stripe ≥ 1.2` (candidate upstream contribution / SEED). v1.39 uses the generic webhook + raw-API escape hatch instead.
+- **Dunning depth / notification journeys** (JTBD #2) — multi-step recovery via Chimeway + Mailglass (SEED-002 #1). Own milestone.
+- **Admin search** across billing records (SEED-002 #5 / Scrypath) — intake-gated.
+
+## Out of Scope
+
+Explicitly excluded for v1.39. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Rich metered/tiered/range entitlement math (Chargebee Range/Custom types) | Boolean features + read-only seat count is the value; richer quota math is a different product surface. Revisit only on sourced demand. |
+| Atomic seat enforcement / membership management | Accrue never owns the membership/user schema; the host owns atomic increment. Documented as a recipe, not a core API. |
+| Feature-catalog / feature-flag management UI | Accrue is a billing library, not a feature-flag product. |
+| Deep Sigra / Lockspire coupling | Entitlement guards stay adapter-thin over host identity; identity stays optional and host-owned. |
+| Dunning notification journeys | Next-milestone candidate (JTBD #2); needs an external orchestration lib — heavier than entitlements. |
+| FIN-03 finance exports · MRR/ARR analytics product · MoR processors · Hyperwallet | Standing non-goals with written boundaries. |
 
 ## Traceability
 
+Which phases cover which requirements. Populated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-09 | Phase 120 | Planned |
-| PPX-15 | Phase 120 | Planned |
-| REL-10 | Phase 121 | Planned |
-| REL-11 | Phase 121 | Planned |
-| PPX-13 | Phase 121 | Planned |
-| PPX-14 | Phase 121 | Planned |
-| HYG-03 | Phase 122 | Complete |
-| INV-08 | Phase 122 | Complete |
+| ENT-01..12 | (pending roadmap) | Pending |
 
-**Coverage:** v1.38 requirements **8** total · Mapped **8** · Unmapped **0** ✓
+**Coverage:**
+- v1.39 requirements: 12 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 12 ⚠️
 
 ---
-*Requirements defined: 2026-05-07 — `gsd-new-milestone` v1.38; domain research skipped because this is a release-operational milestone.*
+*Requirements defined: 2026-05-22*
+*Last updated: 2026-05-22 after milestone v1.39 opening*
