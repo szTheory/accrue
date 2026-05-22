@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Completed 123-02-PLAN.md
-last_updated: "2026-05-22T22:34:36.237Z"
+last_updated: "2026-05-22T22:45:41.969Z"
 last_activity: 2026-05-22
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 123 (config-core-gate-api-foundation) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-05-22
 
@@ -64,6 +64,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase 123 P01 | 4min | 2 tasks | 2 files |
 | Phase 123 P02 | 1 | 1 tasks | 2 files |
+| Phase 123 P03 | 5min | 3 tasks | 7 files |
 
 ### Decisions
 
@@ -77,6 +78,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-22:** Isolate optional Stripe-native sync to the final phase (127) so it cannot block the milestone's core value; flagged needs-deeper-research.
 - [Phase 123]: ENT-01 :entitlements config schema landed — runtime-read (not compile_env!), boot-validated, with a cross-plan price_id-collision guard raising Accrue.ConfigError. limits typed as keyword_list with wildcard :pos_integer keys (NimbleOptions 1.1 has no {:keyword_list,value_type} form).
 - [Phase 123 P02]: ENT-05 OTel half — @allowed_attributes extended with 6 D-19 entitlement keys (atom + accrue.* string forms). :result kept distinct from :status (no reuse). result:true crosses the bridge as "true" since sanitize_value/1 stringifies atoms (true/false are atoms); @prohibited_keys/PII rule untouched.
+- [Phase 123 P03]: has_active_plan?/2 tests MapSet.member? on the active_plans SET (membership truth), never the representative :plan — multi-active-plan correct, consistent with entitled?/features_for UNION semantics (T-123-07b).
+- [Phase 123 P03]: LocalMap folds local active-subs with zero processor calls (read-only customer lookup, Query.active/1, never raw .status); per-check decisions telemetry-only, zero accrue_events writes (D-21).
 
 ### Pending Todos
 
@@ -100,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22T22:34:36.227Z
+Last session: 2026-05-22T22:45:27.476Z
 Stopped at: Completed 123-02-PLAN.md
 Resume file: None

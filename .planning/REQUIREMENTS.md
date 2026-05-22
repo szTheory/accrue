@@ -16,9 +16,9 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 ### Entitlement Model & Core Gate API
 
 - [x] **ENT-01**: A host can declare a plan/price → feature (and optional seat/quota) mapping via `NimbleOptions`-validated config, as the canonical entitlement source across all providers.
-- [ ] **ENT-02**: A developer can call `Accrue.has_active_plan?(billable, plan)` and get a boolean derived from local subscription state, reusing the existing `Subscription.active?/1` lifecycle truth (never raw `.status`).
-- [ ] **ENT-03**: A developer can call `Accrue.entitled?(billable, feature)` and `features_for(billable)` with a **fail-closed** contract — the only path to `true` is an affirmative resolved match; errors, `nil`, unmapped plans, and exceptions all resolve to `false` (property-tested).
-- [ ] **ENT-04**: A developer can read a billable's entitled seat/quantity for a feature (`entitlement_quantity/2`), derived read-only from local subscription quantity. (Atomic seat enforcement stays host-owned and documented, not a core API.)
+- [x] **ENT-02**: A developer can call `Accrue.has_active_plan?(billable, plan)` and get a boolean derived from local subscription state, reusing the existing `Subscription.active?/1` lifecycle truth (never raw `.status`).
+- [x] **ENT-03**: A developer can call `Accrue.entitled?(billable, feature)` and `features_for(billable)` with a **fail-closed** contract — the only path to `true` is an affirmative resolved match; errors, `nil`, unmapped plans, and exceptions all resolve to `false` (property-tested).
+- [x] **ENT-04**: A developer can read a billable's entitled seat/quantity for a feature (`entitlement_quantity/2`), derived read-only from local subscription quantity. (Atomic seat enforcement stays host-owned and documented, not a core API.)
 - [x] **ENT-05**: Entitlement checks emit `[:accrue, :entitlement, :check]` telemetry/OTel spans; deliberate grant/revoke/sync state changes are recorded in the immutable event ledger, while per-check decisions are **not** ledgered.
 
 ### Enforcement Surfaces
@@ -68,9 +68,9 @@ Which phases cover which requirements. Phases continue from v1.38 (ended at Phas
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ENT-01 | Phase 123 | Complete |
-| ENT-02 | Phase 123 | Pending |
-| ENT-03 | Phase 123 | Pending |
-| ENT-04 | Phase 123 | Pending |
+| ENT-02 | Phase 123 | Complete |
+| ENT-03 | Phase 123 | Complete |
+| ENT-04 | Phase 123 | Complete |
 | ENT-05 | Phase 123 | Complete |
 | ENT-06 | Phase 124 | Pending |
 | ENT-07 | Phase 124 | Pending |
