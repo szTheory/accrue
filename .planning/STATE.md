@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.38
-milestone_name: Linked Release Truth
-status: shipped
-last_updated: "2026-05-08T14:15:25Z"
-last_activity: 2026-05-08
+milestone: v1.39
+milestone_name: Entitlements / Plan-Gating
+status: planning
+last_updated: "2026-05-22T09:29:11.224Z"
+last_activity: 2026-05-22
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,12 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-07)
 
 ## Current Position
 
-Milestone: v1.38 — Linked Release Truth
-Phase: None
-Plan: None
-Status: v1.38 shipped; live planning mirrors and INV-08 closeout are complete
-Resume file: None
-Last activity: 2026-05-08 — finalized the shipped `1.1.1` trio planning mirrors, recorded INV-08, and closed the live `v1.38` state
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-22 — Milestone v1.39 started
 
 ## Milestone Progress
 

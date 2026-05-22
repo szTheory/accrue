@@ -12,16 +12,32 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-No active milestone. `v1.37` shipped on **2026-05-07** and the project is ready
-for `$gsd-new-milestone`.
+**v1.39 — Entitlements / Plan-Gating** (opened **2026-05-22**). `v1.38` shipped on
+**2026-05-08** (linked `1.1.1` trio public on Hex; tags have since moved to
+`1.1.2`).
+
+**Goal:** Close the last open step of the canonical SaaS loop — let a Phoenix
+dev *gate features and access on what a customer has paid for*, first-party,
+with the same provider-honest + telemetry + admin + docs rigor as the rest of
+Accrue.
+
+**Why now / why this:** Per [`research/JTBD-FRONTIER.md`](research/JTBD-FRONTIER.md)
+(2026-05-22), Accrue is feature-complete on the core SaaS-billing JTBD except for
+**one** headline gap: entitlements. The canonical loop is *bill → change/cancel →
+recover failed payments → self-serve → **gate access** → operate with an audit
+trail*; five of the six are shipped and the sixth is the only piece missing. It is
+ranked **#1** of future JTBD, is the only gap inconsistent with Accrue's
+"more-complete-than-Pay/Cashier" positioning, and is already seeded
+(**SEED-002 #4** — Sigra/Lockspire identity tie-in). It is also the *fastest*
+high-value win: it gates on subscription state Accrue already holds locally, so no
+new external dependency is needed for the core.
 
 **Current posture:**
 
-- The active strategy remains **PROC-08**: a bounded dual-provider core centered on **Stripe-first** defaults plus one Stripe-like gateway.
-- The official second-provider slice remains **gateway subscription core**, with **`Accrue.Billing.subscribe/3`** as the primary public-facade entry and **Fake** as the deterministic merge-blocking proof lane.
-- The shipped first-party surface now includes explicit provider-honest customer update, cancellation, checkout, billing-portal, and active-subscription-change guidance on one shared facade.
+- The active strategy remains **PROC-08**: a bounded dual-provider core centered on **Stripe-first** defaults plus one Stripe-like gateway. Entitlements is **provider-honest**: Stripe native Entitlements where available, local plan→feature mapping for Braintree/Fake.
+- Entitlement guards are **adapter-thin** over host identity (Sigra/Lockspire optional, never required). Accrue never owns the auth user schema.
 - Braintree marketplace parity via Hyperwallet remains out of scope unless a future strategy change explicitly reopens it.
-- **FIN-03** remains out of scope. Stripe is still the fastest first-user path.
+- **FIN-03** (app-owned finance exports) and dunning notification journeys remain out of scope for this milestone.
 
 ## Last shipped milestone
 
@@ -242,29 +258,42 @@ for `$gsd-new-milestone`.
 
 ## Current Milestone
 
-### v1.38 — Linked Release Truth
+### v1.39 — Entitlements / Plan-Gating (opened 2026-05-22)
 
-**Goal:** `v1.38` closed the shipped linked `1.1.1` public release cleanly: Phase 121 proved the public package, tag, release, and workflow truth, and Phase 122 aligned the live planning mirrors and required maintainer closeout artifacts to that shipped line.
+**Goal:** Close the last open step of the canonical SaaS loop — let a Phoenix dev *gate features and access on what a customer has paid for*, first-party, with the same provider-honest + telemetry + admin + docs rigor as the rest of Accrue.
 
 **Target features:**
 
-- Release contract audit that locked the three-package linked release story across `RELEASING.md`, Release Please configuration, manifests, changelogs, and maintainer proof steps.
-- Linked publish execution for the shipped trio, with canonical proof recorded in `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md`.
-- Post-publish contract sweep across package docs, adoption proof, and shift-left verifier lanes so install guidance reflects the shipped public line instead of branch-local assumptions.
-- Final live planning-mirror and maintainer-closeout cleanup so the shipped release truth and the milestone-closeout truth remain explicit without contradiction.
+- **Entitlement model** — plan → feature/quota mapping (host-declared; Stripe native Entitlements as the source where available).
+- **Core gate API** — `has_active_plan?` / `entitled?` / feature checks on `Accrue`, telemetry-instrumented and recorded in the event ledger.
+- **Plug guard** — controller-level gating (`require_plan` / `require_feature`).
+- **LiveView `on_mount` guard** — route-level gating for host LiveViews (`phoenix_live_view` stays optional in core).
+- **Provider-honest matrix** — Stripe native Entitlements · Braintree/Fake local mapping · Fake deterministic proof lane.
+- **Optional Stripe sync** — consume `entitlements.active_entitlement_summary.updated`.
+- **Admin surface** — show a customer's active entitlements in `accrue_admin`.
+- **Docs** — `guides/entitlements.md`, JTBD ⛔→✅ flip, First Hour + README spine.
 
-**Why now:** The release itself is already public; the remaining work is maintainer truth. Live planning mirrors still contain pre-closeout cues that read as if Phase 121 has not happened yet, so Phase 122 must finish the bounded cleanup before `v1.38` can be treated as fully shipped and archived.
+**Why now:** [`research/JTBD-FRONTIER.md`](research/JTBD-FRONTIER.md) (2026-05-22) ranks entitlements the **#1** remaining JTBD and the only gap inconsistent with Accrue's "more-complete-than-Pay/Cashier" positioning; it completes the six-step canonical SaaS loop (five shipped) and gates on subscription state Accrue already holds, making it the fastest high-value win.
 
-## Next Milestone Goals
+**Out of scope (this milestone):** rich quota/metering-as-entitlement math beyond seat counts; deep Sigra/Lockspire coupling (keep adapter-thin); dunning notification journeys (next-milestone candidate); standing non-goals (FIN-03, MRR/ARR product, MoR processors, Hyperwallet).
 
-- Preserve one current public release-line sentence across the live planning mirrors while treating Phase 121 as the canonical proof source.
-- Keep the dated `INV-08` maintainer certification on path `(b)` unless a future release exposes genuinely new sourced downstream friction.
-- Open the next milestone only from this shipped `1.1.1` trio baseline rather than from a fuzzy post-publish limbo state.
-- Keep new billing primitives, broader lifecycle expansion, Hyperwallet reopening, and **FIN-03** out of this milestone’s scope.
+**Phase numbering:** continues from v1.38 → starts at **Phase 123** (default; no `--reset-phase-numbers`).
+
+## Last Shipped Milestone
+
+### v1.38 — Linked Release Truth (shipped 2026-05-08)
+
+`v1.38` closed the shipped linked `1.1.1` public release cleanly: Phase 121 proved the public package/tag/release/workflow truth, and Phase 122 aligned the live planning mirrors plus required maintainer closeout artifacts (`HYG-03`, `INV-08`) to that shipped line. Evidence: `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md`, `.planning/phases/122-post-publish-mirrors-friction-pass/122-VERIFICATION.md`.
+
+## Next Milestone Goals (post-v1.39)
+
+- **Dunning depth / notification journeys** (JTBD #2) — multi-step recovery (email → wait → escalate); maps to SEED-002 #1 (Chimeway + Mailglass). Deserves its own milestone — it needs an external orchestration lib, so it is heavier and less universal than entitlements.
+- **Intake-gated only:** admin search (SEED-002 #5 / Scrypath), ad-hoc invoice line items, disputes read-view — build only on a sourced request per stop rule S1.
+- **Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet.
 
 ## Current State
 
-Current focus: **v1.38 shipped**. Current public linked release line: accrue / accrue_admin / accrue_portal 1.1.1 (published 2026-05-08). `v1.38` remained open briefly after publish to align planning mirrors and record INV-08; that closeout is now complete.
+Current focus: **v1.39 — Entitlements / Plan-Gating** (opened 2026-05-22; defining requirements). Last shipped: **v1.38** — current public linked release line accrue / accrue_admin / accrue_portal `1.1.1` (published 2026-05-08; tags since moved to `1.1.2`). The v1.38 post-publish closeout (planning mirrors + `INV-08`) is complete.
 
 **Install literals / `{:accrue, "~> …"}` / `{:accrue_admin, "~> …"}` / any `accrue_portal` guidance** in package READMEs and **First Hour** now follow the shipped `1.1.1` trio, with Phase 121 retaining the detailed publish proof and rerun transcripts.
 
@@ -845,4 +874,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-07 — **v1.38** opened for linked release truth and public release continuity.*
+*Last updated: 2026-05-22 — **v1.39** opened for entitlements / plan-gating (closes the canonical SaaS loop's last step).*
