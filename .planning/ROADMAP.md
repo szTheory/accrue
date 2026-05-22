@@ -36,7 +36,11 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
   3. The fail-closed contract holds under property tests: the only path to `true` is an affirmative resolved match — errors, `nil` billables, unmapped plans, and exceptions all resolve to `false`.
   4. `Accrue.entitlement_quantity/2` returns a read-only entitled seat/quantity derived from local subscription quantity, with atomic seat enforcement documented as host-owned (not a core API).
   5. Entitlement checks emit `[:accrue, :entitlement, :check]` telemetry/OTel spans; per-check decisions are NOT written to the immutable event ledger.
-**Plans**: TBD
+**Plans**: 4 plans
+  - [ ] 123-01-PLAN.md — :entitlements config schema + entitlements/0 accessor + boot price_id-collision guard (ENT-01)
+  - [ ] 123-02-PLAN.md — OTel @allowed_attributes: add the 6 entitlement keys so check spans retain attributes (ENT-05)
+  - [ ] 123-03-PLAN.md — Accrue.Entitlements context tree: Plan struct + Resolver behaviour + LocalMap + 4 fail-closed gate fns w/ telemetry (ENT-02..05)
+  - [ ] 123-04-PLAN.md — 4 Accrue defdelegates + load-bearing fail-closed property test + D-14 dependency gate + plural-event doc reconcile (ENT-02..05)
 
 ### Phase 124: Enforcement Surfaces — Plug + LiveView Guards
 **Goal**: A developer can gate both controller routes and host LiveViews on entitlement, with the same fail-closed contract, while core `accrue` remains runtime-LiveView-free for headless/API hosts.
@@ -91,7 +95,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 123. Config + Core Gate API Foundation | v1.39 | 0/TBD | Not started | - |
+| 123. Config + Core Gate API Foundation | v1.39 | 0/4 | Planned | - |
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 0/TBD | Not started | - |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 0/TBD | Not started | - |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 0/TBD | Not started | - |
