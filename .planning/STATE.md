@@ -4,7 +4,7 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: verifying
 stopped_at: Completed 123-04-PLAN.md (phase 123 ready for verification)
-last_updated: "2026-05-22T22:53:11.371Z"
+last_updated: "2026-05-22T23:11:16.967Z"
 last_activity: 2026-05-22
 progress:
   total_phases: 5
@@ -26,8 +26,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 ## Current Position
 
-Phase: 123 (config-core-gate-api-foundation) — EXECUTING
-Plan: 4 of 4
+Phase: 124
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-05-22
 
@@ -50,7 +50,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 
 **Velocity:**
 
-- Total plans completed: 0 (v1.39)
+- Total plans completed: 4 (v1.39)
 - Average duration: —
 - Total execution time: —
 
@@ -58,7 +58,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 123 | 4 | - | - |
 
 ## Accumulated Context
 
