@@ -38,7 +38,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
   2. `Accrue.has_active_plan?(billable, plan)` returns a boolean derived from the existing `Subscription.active?/1` lifecycle truth (never raw `.status`), and `Accrue.entitled?(billable, feature)` / `features_for(billable)` resolve from local subscription state with zero processor API calls.
   3. The fail-closed contract holds under property tests: the only path to `true` is an affirmative resolved match — errors, `nil` billables, unmapped plans, and exceptions all resolve to `false`.
   4. `Accrue.entitlement_quantity/2` returns a read-only entitled seat/quantity derived from local subscription quantity, with atomic seat enforcement documented as host-owned (not a core API).
-  5. Entitlement checks emit `[:accrue, :entitlement, :check]` telemetry/OTel spans; per-check decisions are NOT written to the immutable event ledger.
+  5. Entitlement checks emit `[:accrue, :entitlements, :check]` telemetry/OTel spans; per-check decisions are NOT written to the immutable event ledger.
 
 **Plans**: 4 plans
 
