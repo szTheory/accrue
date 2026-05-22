@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
-status: planning
+status: executing
 stopped_at: Phase 123 context gathered
-last_updated: "2026-05-22T12:27:12.727Z"
-last_activity: 2026-05-22 — Roadmap created; ENT-01..12 mapped to Phases 123–127
+last_updated: "2026-05-22T14:18:44.547Z"
+last_activity: 2026-05-22 -- Phase 123 planning complete
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -28,8 +28,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 123 of 127 (Config + Core Gate API Foundation)
 Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-05-22 — Roadmap created; ENT-01..12 mapped to Phases 123–127
+Status: Ready to execute
+Last activity: 2026-05-22 -- Phase 123 planning complete
 
 Progress: [░░░░░░░░░░] 0%
 
