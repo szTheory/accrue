@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
-status: executing
-stopped_at: Completed 123-02-PLAN.md
-last_updated: "2026-05-22T22:45:41.969Z"
+status: verifying
+stopped_at: Completed 123-04-PLAN.md (phase 123 ready for verification)
+last_updated: "2026-05-22T22:53:11.371Z"
 last_activity: 2026-05-22
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 20
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 123 (config-core-gate-api-foundation) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-22
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100% (phase 123 plans complete)
 
 ## Milestone Progress
 
@@ -65,6 +65,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 123 P01 | 4min | 2 tasks | 2 files |
 | Phase 123 P02 | 1 | 1 tasks | 2 files |
 | Phase 123 P03 | 5min | 3 tasks | 7 files |
+| Phase 123 P04 | 4min | 3 tasks | 4 files |
+| Phase 123 P04 | 4min | 3 tasks | 4 files |
 
 ### Decisions
 
@@ -80,6 +82,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 123 P02]: ENT-05 OTel half — @allowed_attributes extended with 6 D-19 entitlement keys (atom + accrue.* string forms). :result kept distinct from :status (no reuse). result:true crosses the bridge as "true" since sanitize_value/1 stringifies atoms (true/false are atoms); @prohibited_keys/PII rule untouched.
 - [Phase 123 P03]: has_active_plan?/2 tests MapSet.member? on the active_plans SET (membership truth), never the representative :plan — multi-active-plan correct, consistent with entitled?/features_for UNION semantics (T-123-07b).
 - [Phase 123 P03]: LocalMap folds local active-subs with zero processor calls (read-only customer lookup, Query.active/1, never raw .status); per-check decisions telemetry-only, zero accrue_events writes (D-21).
+- [Phase 123 P04]: public gate API is 4 thin defdelegates on Accrue to Accrue.Entitlements (no re-implementation); the D-10 property test asserts through the public Accrue.* delegates so it proves delegate wiring AND the fail-closed contract in one pass.
+- [Phase 123 P04]: D-16 reconcile — ROADMAP SC#5 + REQUIREMENTS ENT-05 changed singular [:accrue, :entitlement, :check] -> plural [:accrue, :entitlements, :check] (event-token only); D-14 one-way-dependency grep gate certified green.
 
 ### Pending Todos
 
@@ -103,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22T22:45:27.476Z
-Stopped at: Completed 123-02-PLAN.md
+Last session: 2026-05-22T22:53:11.368Z
+Stopped at: Completed 123-04-PLAN.md (phase 123 ready for verification)
 Resume file: None

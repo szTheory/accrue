@@ -19,7 +19,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 - Integer phases (123, 124, …): Planned milestone work
 - Decimal phases (124.1, …): Urgent insertions (marked INSERTED)
 
-- [ ] **Phase 123: Config + Core Gate API Foundation** - Host plan→feature/quota config plus fail-closed `has_active_plan?` / `entitled?` / `features_for` / `entitlement_quantity` over local subscription state, with telemetry/ledger split
+- [x] **Phase 123: Config + Core Gate API Foundation** - Host plan→feature/quota config plus fail-closed `has_active_plan?` / `entitled?` / `features_for` / `entitlement_quantity` over local subscription state, with telemetry/ledger split (completed 2026-05-22)
 - [ ] **Phase 124: Enforcement Surfaces — Plug + LiveView Guards** - Controller Plug guard and conditionally-compiled LiveView `on_mount` guard, with a merge-blocking "core stays runtime-LiveView-free" check
 - [ ] **Phase 125: Provider Honesty + Lifecycle Truth** - Resolver behaviour + capability-matrix rows + merge-blocking drift gate, plus the lifecycle→entitlement truth-table SSOT
 - [ ] **Phase 126: Admin Surface + Docs / JTBD Spine** - Read-only entitlements view in `accrue_admin`, `guides/entitlements.md`, the JTBD ⛔→✅ flip, First Hour/README spine, and green package-doc verifiers
@@ -45,7 +45,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
   - [x] 123-01-PLAN.md — :entitlements config schema + entitlements/0 accessor + boot price_id-collision guard (ENT-01)
   - [x] 123-02-PLAN.md — OTel @allowed_attributes: add the 6 entitlement keys so check spans retain attributes (ENT-05)
   - [x] 123-03-PLAN.md — Accrue.Entitlements context tree: Plan struct + Resolver behaviour + LocalMap + 4 fail-closed gate fns w/ telemetry (ENT-02..05)
-  - [ ] 123-04-PLAN.md — 4 Accrue defdelegates + load-bearing fail-closed property test + D-14 dependency gate + plural-event doc reconcile (ENT-02..05)
+  - [x] 123-04-PLAN.md — 4 Accrue defdelegates + load-bearing fail-closed property test + D-14 dependency gate + plural-event doc reconcile (ENT-02..05)
 
 ### Phase 124: Enforcement Surfaces — Plug + LiveView Guards
 
@@ -112,7 +112,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 123. Config + Core Gate API Foundation | v1.39 | 3/4 | In Progress|  |
+| 123. Config + Core Gate API Foundation | v1.39 | 4/4 | Complete   | 2026-05-22 |
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 0/TBD | Not started | - |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 0/TBD | Not started | - |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 0/TBD | Not started | - |
