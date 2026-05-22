@@ -63,17 +63,35 @@ Explicitly excluded for v1.39. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Populated during roadmap creation.
+Which phases cover which requirements. Phases continue from v1.38 (ended at Phase 122) → v1.39 starts at Phase 123.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENT-01..12 | (pending roadmap) | Pending |
+| ENT-01 | Phase 123 | Pending |
+| ENT-02 | Phase 123 | Pending |
+| ENT-03 | Phase 123 | Pending |
+| ENT-04 | Phase 123 | Pending |
+| ENT-05 | Phase 123 | Pending |
+| ENT-06 | Phase 124 | Pending |
+| ENT-07 | Phase 124 | Pending |
+| ENT-08 | Phase 125 | Pending |
+| ENT-09 | Phase 125 | Pending |
+| ENT-10 | Phase 127 | Pending |
+| ENT-11 | Phase 126 | Pending |
+| ENT-12 | Phase 126 | Pending |
 
 **Coverage:**
 - v1.39 requirements: 12 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12 ✓
+- Unmapped: 0 ✓
+
+**Phase map:**
+- **Phase 123** — Config + Core Gate API Foundation: ENT-01, ENT-02, ENT-03, ENT-04, ENT-05
+- **Phase 124** — Enforcement Surfaces (Plug + LiveView Guards): ENT-06, ENT-07
+- **Phase 125** — Provider Honesty + Lifecycle Truth: ENT-08, ENT-09
+- **Phase 126** — Admin Surface + Docs / JTBD Spine: ENT-11, ENT-12
+- **Phase 127** — Optional Stripe-Native Sync (isolated, off by default): ENT-10
 
 ---
 *Requirements defined: 2026-05-22*
-*Last updated: 2026-05-22 after milestone v1.39 opening*
+*Last updated: 2026-05-22 — v1.39 roadmap created; ENT-01..12 mapped to Phases 123–127 (12/12, no orphans, no double-mapping)*
