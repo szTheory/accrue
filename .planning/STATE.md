@@ -1,10 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.39
-milestone_name: Entitlements / Plan-Gating
-status: ready_to_plan
-last_updated: "2026-05-22T10:15:00.000Z"
-last_activity: 2026-05-22
+milestone_name: — Entitlements / Plan-Gating
+status: planning
+stopped_at: Phase 123 context gathered
+last_updated: "2026-05-22T12:27:12.727Z"
+last_activity: 2026-05-22 — Roadmap created; ENT-01..12 mapped to Phases 123–127
 progress:
   total_phases: 5
   completed_phases: 0
@@ -48,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0 (v1.39)
 - Average duration: —
 - Total execution time: —
@@ -93,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22 10:15
-Stopped at: Created v1.39 ROADMAP.md (Phases 123–127), updated REQUIREMENTS.md traceability (ENT-01..12, 12/12 mapped), and reset STATE.md for the new milestone.
-Resume file: None — next step is `/gsd:plan-phase 123`.
+Last session: 2026-05-22T12:27:12.724Z
+Stopped at: Phase 123 context gathered
+Resume file: .planning/phases/123-config-core-gate-api-foundation/123-CONTEXT.md
