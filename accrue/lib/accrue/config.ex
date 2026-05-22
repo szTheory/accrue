@@ -838,8 +838,13 @@ defmodule Accrue.Config do
   This is a thin runtime accessor (`get!/1`, NOT `compile_env!`) because
   `:entitlements` is host-owned catalog data that legitimately differs per
   environment (e.g. test-mode vs live-mode `price_ids`), like `:branding` and
-  `:dunning`. The schema's nested defaults normalize each plan entry, so the
-  resolver (Plan 03) can read this without re-running the full validator.
+  `:dunning`. Unlike `branding/0` (which merges schema defaults), this is a
+  **raw** runtime read — it does NOT apply the nested per-plan defaults
+  (`features: []`, `limits: []`, `price_ids: []`). `validate_at_boot!/0`
+  validates the config but discards the normalized result and never writes it
+  back to app env. The resolver tolerates missing nested keys via
+  `Keyword.get/3` defaults, so it reads this raw value without re-running the
+  full validator.
   """
   @spec entitlements() :: keyword()
   def entitlements, do: get!(:entitlements)
