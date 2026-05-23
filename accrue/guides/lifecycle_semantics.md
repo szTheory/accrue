@@ -159,6 +159,46 @@ The subscription has terminated. This maps to Accrue's canonical ended truth:
 `canceled?/1` returns true for `:canceled`, `:incomplete_expired`, or any row
 with a non-nil `ended_at`.
 
+### `entitling`
+
+The subscription's pure lifecycle grants entitlement: it is active (including
+trialing and a paid-through `cancel_at_period_end` row), and is neither paused
+nor terminated. `Accrue.Billing.Subscription.entitling?/1` is the single source
+of truth for "which lifecycle states grant access to a paid feature," and its
+database twin is `Accrue.Billing.Query.entitling/1`. Every downstream
+surface — the entitlements resolver, the admin entitlements view, and these
+guides — derives entitlement from `entitling?/1` rather than re-deriving from
+raw `.status`.
+
+## Lifecycle → entitlement truth table
+
+`entitling?/1` answers, for any single subscription, whether its lifecycle
+grants entitlement. The table below is the canonical mapping; it composes
+`active?/1`, `paused?/1`, and `canceled?/1`, so it inherits every edge case
+those predicates already handle.
+
+| Status / modifier | Entitled? | Basis |
+|---|:---:|---|
+| `:trialing` | ✅ | `active?` includes trialing |
+| `:active` | ✅ | normal paid-active |
+| `:active` + `cancel_at_period_end`, period future (`canceling?`) | ✅ | paid-through |
+| `:active` + `pause_collection` non-nil | ✗ | `paused?` overrides status (paused fail-open gap closed) |
+| `:active` + `ended_at` non-nil | ✗ | `canceled?` terminal override |
+| `:paused` (legacy status) | ✗ | `paused?` |
+| `:past_due` | ✗ default / ✅ in-grace [^past_due_grace] | knob (`past_due_grace`) |
+| `:unpaid` | ✗ | dunning-terminal; grace does NOT extend |
+| `:canceled` / `:incomplete_expired` / any `ended_at` | ✗ | `canceled?` |
+| `:incomplete` | ✗ | initial payment not yet succeeded |
+
+[^past_due_grace]: The `:past_due` row is the only knob-controlled row. By
+    default a `:past_due` subscription fails closed (not entitling). A
+    configured `past_due_grace` policy can grant entitlement during a bounded
+    window measured from `past_due_since`; the grace knob mechanics and the
+    detailed window/`reason` semantics are configured via `past_due_grace`. A
+    grace grant is an affirmative, configured, resolved decision — never a
+    fail-open. `entitling?/1` itself models the pure pre-grace lifecycle
+    (`:past_due` ✗); the grace overlay is layered by the resolver.
+
 ## Provider labels
 
 Attach these labels when a guide or UI needs to explain lifecycle differences:

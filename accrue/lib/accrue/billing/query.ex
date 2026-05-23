@@ -31,6 +31,33 @@ defmodule Accrue.Billing.Query do
     from(s in query, where: s.status in [:active, :trialing])
   end
 
+  @doc """
+  Subscriptions whose lifecycle grants entitlement: active/trialing, not
+  paused, not ended.
+
+  The database twin of `Accrue.Billing.Subscription.entitling?/1` — the
+  rows this fragment returns are exactly those for which `entitling?/1`
+  is true. Beyond `active/1`'s status set it adds `is_nil(s.pause_collection)`
+  (the SQL twin of `paused?/1`'s non-nil `pause_collection` head, closing
+  the `status: :active` + `pause_collection` fail-open gap) and
+  `is_nil(s.ended_at)` (the SQL twin of `canceled?/1`'s terminal `ended_at`
+  override). It deliberately does NOT add the legacy `:paused` status
+  OR-clause that `paused/1` carries, because `active/1`'s status set
+  already excludes `:paused`.
+
+  Distinct from `active/1`, which keeps its status-only semantics for
+  other callers (e.g. the dunning sweeper and projections).
+  """
+  @spec entitling(Ecto.Queryable.t()) :: Ecto.Query.t()
+  def entitling(query \\ Subscription) do
+    from(s in query,
+      where:
+        s.status in [:active, :trialing] and
+          is_nil(s.pause_collection) and
+          is_nil(s.ended_at)
+    )
+  end
+
   @doc "Subscriptions currently in trial."
   @spec trialing(Ecto.Queryable.t()) :: Ecto.Query.t()
   def trialing(query \\ Subscription) do

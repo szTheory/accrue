@@ -23,6 +23,7 @@ defmodule Accrue.Billing.Subscription do
     - `canceled?/1` — `:canceled`, `:incomplete_expired`, or any `ended_at`
     - `canceling?/1` — `:active` + `cancel_at_period_end` + future period end
     - `paused?/1` — legacy `:paused` status OR non-nil `pause_collection`
+    - `entitling?/1` — pure-lifecycle entitlement grant (active, not paused, not terminated)
 
   For database queries over multiple subscriptions, the matching fragments
   are in `Accrue.Billing.Query`.
@@ -203,6 +204,26 @@ defmodule Accrue.Billing.Subscription do
   def paused?(%{pause_collection: pc}) when is_map(pc), do: true
   def paused?(%{status: :paused}), do: true
   def paused?(_), do: false
+
+  @doc """
+  True iff the subscription's pure lifecycle grants entitlement.
+
+  Active (including `:trialing` and a paid-through `cancel_at_period_end`
+  row) AND not paused AND not terminated. This is the single source of
+  truth for which lifecycle states grant entitlement; every downstream
+  surface (resolver, admin, guides) derives from it rather than
+  re-deriving from raw `.status`.
+
+  Composes `active?/1`, `paused?/1`, and `canceled?/1`, so it inherits
+  their edge-case handling: a `cancel_at_period_end` paid-through row is
+  `:active` and therefore entitling, while a `status: :active` row with a
+  non-nil `pause_collection` (paused) or a non-nil `ended_at` (terminated)
+  is correctly excluded.
+
+  See `guides/lifecycle_semantics.md` for the canonical truth table.
+  """
+  @spec entitling?(%__MODULE__{} | map()) :: boolean()
+  def entitling?(sub), do: active?(sub) and not paused?(sub) and not canceled?(sub)
 
   @doc """
   True if the subscription is in the narrow `:past_due` retry window
