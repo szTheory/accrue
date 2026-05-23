@@ -102,12 +102,21 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
   # The entitling price_ids the resolver structurally discards under :deny
   # (handle_unmapped/3) — the resolved map can never show this drift, so the seam
   # re-derives it from the same catalog()/active_items() privates the fold uses.
+  #
+  # WR-01: rows tagged `:expired` (an out-of-grace-window `:past_due` candidate)
+  # are NOT entitling — `fold_item({_, _, :expired}, ...)` deliberately does not
+  # grant them. They were dropped because they fell outside the grace window, not
+  # because the price is unmapped, so reporting them as catalog drift would send
+  # operators chasing a phantom :plans-config problem. Reject `:expired` before
+  # deriving the unmapped set. (Only reachable when `past_due_grace` is enabled;
+  # the default `:none` lane always tags `false`, so this is a no-op there.)
   @doc false
   def unmapped_entitling_price_ids(%Customer{id: customer_id}) do
     {reverse_index, _plans, _action} = catalog()
 
     customer_id
     |> active_items()
+    |> Enum.reject(fn {_price_id, _qty, via} -> via == :expired end)
     |> Enum.map(fn {price_id, _qty, _via} -> price_id end)
     |> Enum.reject(&Map.has_key?(reverse_index, &1))
     |> Enum.uniq()
