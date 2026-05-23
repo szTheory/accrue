@@ -33,10 +33,18 @@ defmodule Accrue.Entitlements do
 
   Each check emits `[:accrue, :entitlements, :check, :start | :stop |
   :exception]` via `Accrue.Telemetry.span/3` with metadata
-  `%{feature, result, resolver, reason, subject_type, subject_id}`.
+  `%{feature, result, resolver, reason, surface, subject_type, subject_id}`.
   `subject_id` is the internal customer/billable id only — never email/name
   or any PII. Per-check decisions are **telemetry only**; this module NEVER
   writes to the `accrue_events` audit ledger.
+
+  `surface: :plug | :live` is an additive, guard-supplied metadata dimension
+  (D-18): `entitled?/3` and `has_active_plan?/3` accept an optional
+  `opts` keyword list whose `:surface` is merged onto the same `:check`
+  span, so a deny/allow from the Plug guard is distinguishable from one from
+  the LiveView `on_mount` guard. It defaults to `nil` for direct (non-guard)
+  callers and is internal telemetry only — the public `Accrue.entitled?/2` /
+  `Accrue.has_active_plan?/2` facade delegates stay arity 2.
   """
 
   alias Accrue.Entitlements.Resolver
@@ -44,9 +52,14 @@ defmodule Accrue.Entitlements do
   @doc """
   Returns `true` iff `billable`'s resolved active feature set contains
   `feature`. Fail-closed `false` otherwise.
+
+  `opts` is an additive, internal keyword list; `surface: :plug | :live`
+  (guard-supplied, D-18) is merged onto the `:check` span metadata. All
+  existing 2-arity callers (incl. the `Accrue.entitled?/2` facade delegate)
+  are unaffected.
   """
-  @spec entitled?(term(), atom()) :: boolean()
-  def entitled?(billable, feature) do
+  @spec entitled?(term(), atom(), keyword()) :: boolean()
+  def entitled?(billable, feature, opts \\ []) do
     {result, reason} =
       case resolve(billable) do
         {:ok, %{features: features} = resolved} ->
@@ -60,7 +73,7 @@ defmodule Accrue.Entitlements do
           {false, :error}
       end
 
-    span(billable, feature, result, reason, fn -> result end)
+    span(billable, feature, result, reason, opts, fn -> result end)
   end
 
   @doc """
@@ -68,9 +81,14 @@ defmodule Accrue.Entitlements do
   is a plan atom or a `price_id` string (reverse-indexed to its plan atom).
   Tests membership in the SET of ALL active plans — multi-active-plan
   correct. Fail-closed `false` otherwise.
+
+  `opts` is an additive, internal keyword list; `surface: :plug | :live`
+  (guard-supplied, D-18) is merged onto the `:check` span metadata. All
+  existing 2-arity callers (incl. the `Accrue.has_active_plan?/2` facade
+  delegate) are unaffected.
   """
-  @spec has_active_plan?(term(), atom() | String.t()) :: boolean()
-  def has_active_plan?(billable, plan) do
+  @spec has_active_plan?(term(), atom() | String.t(), keyword()) :: boolean()
+  def has_active_plan?(billable, plan, opts \\ []) do
     {result, reason, feature} =
       case resolve(billable) do
         {:ok, %{active_plans: active_plans} = resolved} ->
@@ -90,7 +108,7 @@ defmodule Accrue.Entitlements do
           {false, :error, plan}
       end
 
-    span(billable, feature, result, reason, fn -> result end)
+    span(billable, feature, result, reason, opts, fn -> result end)
   end
 
   @doc """
@@ -109,7 +127,7 @@ defmodule Accrue.Entitlements do
           {[], :error}
       end
 
-    span(billable, nil, features != [], reason, fn -> features end)
+    span(billable, nil, features != [], reason, [], fn -> features end)
   end
 
   @doc """
@@ -130,7 +148,7 @@ defmodule Accrue.Entitlements do
           {0, :error}
       end
 
-    span(billable, quota_key, quantity > 0, reason, fn -> quantity end)
+    span(billable, quota_key, quantity > 0, reason, [], fn -> quantity end)
   end
 
   # --------------------------------------------------------------------------
@@ -209,13 +227,15 @@ defmodule Accrue.Entitlements do
 
   # Build the fully-resolved D-18 metadata BEFORE opening the span — the span
   # helper reuses one base_metadata map for :start and :stop, so the decision
-  # must already be known.
-  defp span(billable, feature, result, reason, fun) do
+  # must already be known. `:surface` (guard-supplied, Phase 124 / D-18) is
+  # the ONLY key merged from `opts`; it defaults to `nil` for direct callers.
+  defp span(billable, feature, result, reason, opts, fun) do
     metadata = %{
       feature: feature,
       result: result,
       resolver: resolver_tag(),
       reason: reason,
+      surface: Keyword.get(opts, :surface),
       subject_type: subject_type(billable),
       subject_id: subject_id(billable)
     }

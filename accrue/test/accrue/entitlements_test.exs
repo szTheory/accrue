@@ -265,6 +265,38 @@ defmodule Accrue.EntitlementsTest do
       Entitlements.entitlement_quantity(b, :seats)
       assert_receive {:telemetry_event, [:accrue, :entitlements, :check, :stop], _, _}
     end
+
+    # --- Phase 124 (ENT-06/07): additive surface: opt (D-18) ---
+    test "the 2-arity call emits :surface => nil on the same :check span" do
+      oid = Ecto.UUID.generate()
+      active_p1(oid)
+
+      assert Entitlements.entitled?(billable_for(oid), :reports)
+
+      assert_receive {:telemetry_event, [:accrue, :entitlements, :check, :stop], _, meta}
+      assert meta.surface == nil
+    end
+
+    test "entitled?/3 with surface: :plug lands :plug on the :check span metadata" do
+      oid = Ecto.UUID.generate()
+      active_p1(oid)
+
+      assert Entitlements.entitled?(billable_for(oid), :reports, surface: :plug)
+
+      assert_receive {:telemetry_event, [:accrue, :entitlements, :check, :stop], _, meta}
+      assert meta.surface == :plug
+      assert meta.feature == :reports
+    end
+
+    test "has_active_plan?/3 with surface: :live lands :live on the :check span metadata" do
+      oid = Ecto.UUID.generate()
+      active_p1(oid)
+
+      assert Entitlements.has_active_plan?(billable_for(oid), :p1, surface: :live)
+
+      assert_receive {:telemetry_event, [:accrue, :entitlements, :check, :stop], _, meta}
+      assert meta.surface == :live
+    end
   end
 
   # ----------------------------------------------------------------------
