@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Completed 124-03-PLAN.md
-last_updated: "2026-05-23T12:36:10.895Z"
+last_updated: "2026-05-23T12:40:46.308Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 20
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 124 (enforcement-surfaces-plug-liveview-guards) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-05-23
 
@@ -63,6 +63,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 124 P05 | 3min | 2 tasks | 5 files |
 | Phase 124 P02 | 3min | 3 tasks | 3 files |
 | Phase 124 P03 | 2min | 2 tasks | 4 files |
+| Phase 124 P04 | 1min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: [Phase 124 P02]: ctx.reason is coarse-by-design (:no_active_subscription if no billable resolved else :not_entitled); precise Phase 123 reason atom lives in the :check span, not ctx (one gate call, D-08/D-17). deny_plug/4 is pure-Plug opaque content-negotiated 403/redirect/status-body/fn/MFA (no Phoenix.Controller)
 - [Phase 124]: [Phase 124 P03]: Accrue.Plug.RequireEntitlement (ENT-06) is a thin Plug adapter — init/1 raises ArgumentError on ambiguous feature:/plan: intent (T-124-08), call/2 delegates allow/deny to Accrue.Entitlements.Guard.check/3 + deny_plug/4; pure Plug, zero Phoenix.Controller coupling
 - [Phase 124]: [Phase 124 P03]: require_feature/1 + require_plan/1 router macros are single-arg sugar expanding to plug(Accrue.Plug.RequireEntitlement, feature:/plan: …); status:/on_deny:/billable: overrides route through the explicit plug form (documented split)
+- [Phase ?]: [Phase 124 P04]: Accrue.Live.Entitlements (ENT-07) is the cond-compiled on_mount/4 LiveView surface — {:require_feature,x}/{:require_plan,y} clauses delegate to Guard.check(:live,…) and only surface-translate the deny enum ({:redirect,path}->redirect; :forbidden/{status,body} degradation->put_flash+redirect(deny_path)); resolve-once billable-only assign_new(:accrue_billable). The ONLY core file with LiveView refs, all inside Code.ensure_loaded?(Phoenix.LiveView) (D-04); merge gate (Plan 06) excludes /accrue/live/
 
 ### Pending Todos
 
@@ -119,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T12:36:04.646Z
+Last session: 2026-05-23T12:40:42.620Z
 Stopped at: Completed 124-03-PLAN.md
 Resume file: None
