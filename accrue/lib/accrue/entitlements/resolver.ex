@@ -34,12 +34,17 @@ defmodule Accrue.Entitlements.Resolver do
       source of truth.
     * `:features` — `MapSet` UNION of features across all active subs.
     * `:quantities` — merged `quota_key => min(cap, quantity)` map.
+    * `:grace_plans` — `MapSet` of plan atoms admitted via the past-due
+      grace window (a SUBSET of `:active_plans`). Empty when
+      `past_due_grace` is `:none` (the default). `Accrue.Entitlements` reads
+      it to select the `:past_due_grace` telemetry reason without re-querying.
   """
   @type resolved :: %{
           plan: term(),
           active_plans: MapSet.t(),
           features: MapSet.t(),
-          quantities: map()
+          quantities: map(),
+          grace_plans: MapSet.t()
         }
 
   @doc """

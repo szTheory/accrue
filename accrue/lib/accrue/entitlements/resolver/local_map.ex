@@ -21,7 +21,19 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
          * `active_plans` — the SET of ALL active plan atoms (membership
            source of truth for `has_active_plan?/2`),
          * `features` — the UNION of every active plan's features,
-         * `quantities` — merged `quota_key => min(cap, quantity)`.
+         * `quantities` — merged `quota_key => min(cap, quantity)`,
+         * `grace_plans` — the SUBSET of `active_plans` admitted via the
+           past-due grace window (empty unless `past_due_grace` is enabled).
+
+  Past-due grace overlay (ENT-09): when `Accrue.Config.past_due_grace/0` is
+  `:none` (default) the base fetch stays `Query.entitling/1` with the lean
+  `{price_id, quantity}` select — zero query/compute change. When grace is
+  enabled the fetch widens to `Query.entitling_with_grace_candidates/1` (adds
+  `:past_due` only, never `:unpaid`), and each `:past_due` candidate (per
+  `Subscription.dunning_sweepable?/1`) is kept only if
+  `PastDueGrace.within_grace?/2` is true for its `past_due_since`; kept rows
+  are tagged into `grace_plans`. A grace grant is an affirmative, resolved,
+  configured decision — never a fail-open.
 
   An active item whose `price_id` is unmapped is dropped under the default
   `:deny` (and its plan is NOT added to `active_plans`); under `:raise` the
@@ -36,8 +48,15 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
   import Ecto.Query
 
   alias Accrue.Billing.{Customer, Query, Subscription, SubscriptionItem}
+  alias Accrue.Entitlements.PastDueGrace
 
-  @empty %{plan: nil, active_plans: MapSet.new(), features: MapSet.new(), quantities: %{}}
+  @empty %{
+    plan: nil,
+    active_plans: MapSet.new(),
+    features: MapSet.new(),
+    quantities: %{},
+    grace_plans: MapSet.new()
+  }
 
   @impl true
   def resolve(billable, _opts \\ []) do
@@ -68,29 +87,15 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
   defp lookup_customer(_), do: nil
 
   defp fold_active(%Customer{id: customer_id}) do
-    active_items =
-      Subscription
-      # `Query.entitling/1` is the entitlement-grade base fetch: active/trialing,
-      # not paused, not ended. It is the database twin of
-      # `Subscription.entitling?/1`, so it closes the paused fail-open gap (a
-      # `status: :active` row with a non-nil `pause_collection` no longer grants
-      # entitlement) and folds in the WR-04 ended-row exclusion (`is_nil(ended_at)`)
-      # that used to live here as a local `where`. The status-only active
-      # fragment keeps its semantics for other callers (dunning sweeper,
-      # projections) and is intentionally NOT used for the entitlement gate.
-      |> Query.entitling()
-      |> where([s], s.customer_id == ^customer_id)
-      |> join(:inner, [s], i in SubscriptionItem, on: i.subscription_id == s.id)
-      |> select([_s, i], {i.price_id, i.quantity})
-      |> Accrue.Repo.all()
-
     {reverse_index, plans, unmapped_action} = catalog()
 
-    Enum.reduce(active_items, @empty, fn {price_id, quantity}, acc ->
+    customer_id
+    |> active_items()
+    |> Enum.reduce(@empty, fn {price_id, quantity, via_grace?}, acc ->
       case Map.fetch(reverse_index, price_id) do
         {:ok, plan_atom} ->
           plan_entry = Keyword.get(plans, plan_atom, [])
-          merge_plan(acc, plan_atom, plan_entry, quantity)
+          merge_plan(acc, plan_atom, plan_entry, quantity, via_grace?)
 
         :error ->
           handle_unmapped(acc, price_id, unmapped_action)
@@ -98,7 +103,75 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
     end)
   end
 
-  defp merge_plan(acc, plan_atom, plan_entry, quantity) do
+  # Returns a normalized list of `{price_id, quantity, via_grace?}` tuples.
+  #
+  # Cost-aware (D-18): the common `past_due_grace: :none` case keeps the lean
+  # `{price_id, quantity}` select via the entitlement-grade `Query.entitling/1`
+  # (zero query/compute change, every row `via_grace? == false`). When grace is
+  # enabled the fetch widens to `Query.entitling_with_grace_candidates/1` (adds
+  # `:past_due` only, never `:unpaid`) with a richer select carrying the row so
+  # the per-row clock window check runs in Elixir; out-of-window `:past_due`
+  # rows are dropped BEFORE folding, and kept `:past_due` rows are tagged so the
+  # resolver can record them in `:grace_plans`.
+  defp active_items(customer_id) do
+    case Accrue.Config.past_due_grace() do
+      :none -> none_lane_items(customer_id)
+      grace -> grace_lane_items(customer_id, grace)
+    end
+  end
+
+  # `Query.entitling/1` is the entitlement-grade base fetch: active/trialing,
+  # not paused, not ended. It is the database twin of `Subscription.entitling?/1`,
+  # so it closes the paused fail-open gap (a `status: :active` row with a non-nil
+  # `pause_collection` no longer grants entitlement) and folds in the WR-04
+  # ended-row exclusion. The status-only active fragment keeps its semantics for
+  # other callers (dunning sweeper, projections) and is intentionally NOT used
+  # for the entitlement gate.
+  defp none_lane_items(customer_id) do
+    Subscription
+    |> Query.entitling()
+    |> where([s], s.customer_id == ^customer_id)
+    |> join(:inner, [s], i in SubscriptionItem, on: i.subscription_id == s.id)
+    |> select([_s, i], {i.price_id, i.quantity})
+    |> Accrue.Repo.all()
+    |> Enum.map(fn {price_id, quantity} -> {price_id, quantity, false} end)
+  end
+
+  defp grace_lane_items(customer_id, grace) do
+    grace_days = grace_days(grace)
+
+    Subscription
+    |> Query.entitling_with_grace_candidates()
+    |> where([s], s.customer_id == ^customer_id)
+    |> join(:inner, [s], i in SubscriptionItem, on: i.subscription_id == s.id)
+    |> select([s, i], {i.price_id, i.quantity, s})
+    |> Accrue.Repo.all()
+    |> Enum.flat_map(fn {price_id, quantity, sub} -> grace_row(price_id, quantity, sub, grace_days) end)
+  end
+
+  # A `:past_due` candidate (per `Subscription.dunning_sweepable?/1`, the
+  # Credo-clean strict-`:past_due` check) is kept only inside the grace window;
+  # outside it, it is dropped before folding. Non-candidate rows (the
+  # active/trialing rows the widen fragment also returns) always fold, never
+  # tagged as grace.
+  defp grace_row(price_id, quantity, sub, grace_days) do
+    if Subscription.dunning_sweepable?(sub) do
+      if PastDueGrace.within_grace?(sub, grace_days) do
+        [{price_id, quantity, true}]
+      else
+        []
+      end
+    else
+      [{price_id, quantity, false}]
+    end
+  end
+
+  # Resolve the configured policy to a concrete day count: `:dunning` reuses the
+  # dunning overlay's `grace_days`; an integer N is used directly.
+  defp grace_days(:dunning), do: Accrue.Config.dunning() |> Keyword.fetch!(:grace_days)
+  defp grace_days(n) when is_integer(n) and n > 0, do: n
+
+  defp merge_plan(acc, plan_atom, plan_entry, quantity, via_grace?) do
     features = Keyword.get(plan_entry, :features, [])
     limits = Keyword.get(plan_entry, :limits, [])
 
@@ -115,12 +188,16 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
         Map.update(q, quota_key, capped, &max(&1, capped))
       end)
 
+    grace_plans =
+      if via_grace?, do: MapSet.put(acc.grace_plans, plan_atom), else: acc.grace_plans
+
     %{
       acc
       | plan: plan_atom,
         active_plans: MapSet.put(acc.active_plans, plan_atom),
         features: Enum.reduce(features, acc.features, &MapSet.put(&2, &1)),
-        quantities: quantities
+        quantities: quantities,
+        grace_plans: grace_plans
     }
   end
 

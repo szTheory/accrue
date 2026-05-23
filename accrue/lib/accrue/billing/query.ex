@@ -58,6 +58,32 @@ defmodule Accrue.Billing.Query do
     )
   end
 
+  @doc """
+  Entitlement candidates including `:past_due` rows for the grace overlay.
+
+  The grace-widen twin of `entitling/1`: it adds `:past_due` (and ONLY
+  `:past_due` — never `:unpaid`, which is dunning-terminal) to the status
+  set while keeping both `is_nil(s.pause_collection)` and
+  `is_nil(s.ended_at)` guards. This widens the read just enough to surface
+  candidate `:past_due` rows; the per-row grace-window cutoff check stays in
+  Elixir (`Accrue.Entitlements.PastDueGrace.within_grace?/2`) because the
+  clock comparison must be test-driven, so this fragment deliberately does
+  NOT do any cutoff math.
+
+  Used only by `Accrue.Entitlements.Resolver.LocalMap.fold_active/1` when
+  `Accrue.Config.past_due_grace/0` is enabled; the `:none` default path uses
+  the leaner `entitling/1` instead (zero query change).
+  """
+  @spec entitling_with_grace_candidates(Ecto.Queryable.t()) :: Ecto.Query.t()
+  def entitling_with_grace_candidates(query \\ Subscription) do
+    from(s in query,
+      where:
+        s.status in [:active, :trialing, :past_due] and
+          is_nil(s.pause_collection) and
+          is_nil(s.ended_at)
+    )
+  end
+
   @doc "Subscriptions currently in trial."
   @spec trialing(Ecto.Queryable.t()) :: Ecto.Query.t()
   def trialing(query \\ Subscription) do

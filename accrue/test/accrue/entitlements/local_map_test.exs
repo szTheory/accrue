@@ -247,6 +247,129 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
     end
   end
 
+  # ENT-09 (Task 2): past-due grace overlay. With grace disabled (:none, the
+  # default) a :past_due sub never grants and the fold issues zero widening.
+  # With grace enabled, an in-window :past_due sub grants and is tagged into
+  # :grace_plans; an out-of-window one is dropped; :unpaid never receives grace.
+  defp set_past_due_since(sub, since) do
+    {:ok, updated} =
+      sub
+      |> Accrue.Billing.Subscription.changeset(%{past_due_since: since})
+      |> Accrue.TestRepo.update()
+
+    updated
+  end
+
+  describe "resolve/2 past-due grace overlay (ENT-09, D-15..D-18)" do
+    test "default :none denies a :past_due sub and leaves :grace_plans empty" do
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -1 * 86_400, :second))
+
+      # Sanity: default is fail-closed.
+      assert Accrue.Config.past_due_grace() == :none
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.features) == 0
+      assert MapSet.size(resolved.grace_plans) == 0
+    end
+
+    test "grace enabled (N days): an in-window :past_due sub grants and is tagged in :grace_plans" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -1 * 86_400, :second))
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.member?(resolved.active_plans, :p1)
+      assert MapSet.member?(resolved.grace_plans, :p1)
+      assert MapSet.equal?(resolved.features, MapSet.new([:reports, :export]))
+    end
+
+    test "grace enabled (:dunning) honors the dunning grace_days window" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :past_due_grace, :dunning)
+      )
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      # dunning grace_days default is 14; 2 days ago is well within.
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -2 * 86_400, :second))
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.member?(resolved.active_plans, :p1)
+      assert MapSet.member?(resolved.grace_plans, :p1)
+    end
+
+    test "grace enabled: an out-of-window :past_due sub is dropped before folding" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -30 * 86_400, :second))
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.features) == 0
+      assert MapSet.size(resolved.grace_plans) == 0
+    end
+
+    test "grace enabled: a :past_due sub with nil past_due_since is fail-closed (dropped)" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+
+      oid = Ecto.UUID.generate()
+      # past_due_subscription leaves past_due_since nil unless set.
+      Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.grace_plans) == 0
+    end
+
+    test "grace enabled: an :unpaid sub is NEVER granted (grace does not extend to :unpaid)" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.subscription(%{owner_id: oid, price_id: "price_p1", status: :unpaid})
+
+      # Even with a fresh past_due_since, :unpaid is dunning-terminal.
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -1 * 86_400, :second))
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.grace_plans) == 0
+    end
+
+    test "grace enabled: a normal :active sub still grants and is NOT tagged as a grace plan" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+
+      oid = Ecto.UUID.generate()
+      Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.member?(resolved.active_plans, :p1)
+      refute MapSet.member?(resolved.grace_plans, :p1)
+    end
+  end
+
   describe "resolve/2 unmapped + missing" do
     test "unmapped active price_id under :deny is dropped" do
       oid = Ecto.UUID.generate()

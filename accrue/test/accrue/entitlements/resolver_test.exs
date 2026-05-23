@@ -24,6 +24,19 @@ defmodule Accrue.Entitlements.ResolverTest do
     :ok
   end
 
+  describe "resolved/0 type (ENT-09, :grace_plans additive field)" do
+    test "the default LocalMap resolve surfaces a :grace_plans MapSet (empty when grace disabled)" do
+      Application.put_env(:accrue, :entitlements, plans: [])
+
+      assert {:ok, resolved} =
+               Accrue.Entitlements.Resolver.LocalMap.resolve(%{not: :a_billable}, [])
+
+      assert Map.has_key?(resolved, :grace_plans)
+      assert %MapSet{} = resolved.grace_plans
+      assert MapSet.size(resolved.grace_plans) == 0
+    end
+  end
+
   describe "__impl__/0 runtime dispatch" do
     test "defaults to LocalMap when :entitlements has no :resolver" do
       Application.delete_env(:accrue, :entitlements)
