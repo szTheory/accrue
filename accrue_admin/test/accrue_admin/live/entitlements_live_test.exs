@@ -104,4 +104,33 @@ defmodule AccrueAdmin.EntitlementsLiveTest do
     assert html =~ Copy.entitlements_empty_copy()
     assert html =~ Copy.entitlements_no_drift_copy()
   end
+
+  test "the tab renders the fail-closed error copy (no crash) under unmapped_action: :raise (WR-03/CR-01)",
+       %{conn: conn} do
+    # Under :raise an unmapped entitling price_id makes the resolver raise
+    # mid-resolution. The CR-01 guard must collapse that to the fail-closed
+    # error state (status 200, error copy) instead of crashing the LiveView.
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(@entitlements, :unmapped_action, :raise)
+    )
+
+    # "price_basic" is the factory default and is NOT in @entitlements, so under
+    # :raise the resolver raises rather than dropping it.
+    %{customer: customer} = Factory.active_subscription(%{price_id: "price_basic"})
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} =
+             live(conn, "/billing/customers/#{customer.id}?tab=entitlements")
+
+    # The fail-closed error branch rendered (data-role marker + copy), so the
+    # process did NOT crash. The error copy contains an apostrophe ("couldn't")
+    # which HEEx HTML-escapes to &#39;, so assert on the apostrophe-free tail to
+    # stay escaping-robust while still pinning the fail-closed message.
+    assert html =~ ~s(data-role="entitlements-error")
+    assert html =~ "The gate fails closed, so no access is granted on error"
+    # The normal happy-path drift section must NOT render on the error branch.
+    refute html =~ Copy.entitlements_no_drift_copy()
+  end
 end

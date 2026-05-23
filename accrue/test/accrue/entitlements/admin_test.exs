@@ -82,6 +82,45 @@ defmodule Accrue.Entitlements.AdminTest do
     end
   end
 
+  describe "resolve_for_customer/1 under unmapped_action: :raise (WR-03)" do
+    test "an unmapped entitling sub raises through the seam (the crash CR-01 contains)" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :unmapped_action, :raise)
+      )
+
+      oid = Ecto.UUID.generate()
+
+      # Factory default "price_basic" is NOT in @entitlements -> the resolver's
+      # handle_unmapped/3 raises under :raise rather than silently dropping
+      # (the :deny default). This is the seam-level behavior the LiveView guard
+      # (CR-01) collapses to a fail-closed error state.
+      %{customer: customer} = Accrue.Test.Factory.active_subscription(%{owner_id: oid})
+
+      assert_raise RuntimeError, ~r/unmapped/, fn ->
+        Admin.resolve_for_customer(customer)
+      end
+    end
+
+    test "a fully-mapped customer resolves normally even when :raise is configured" do
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :unmapped_action, :raise)
+      )
+
+      oid = Ecto.UUID.generate()
+
+      %{customer: customer} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      assert {resolved, unmapped} = Admin.resolve_for_customer(customer)
+      assert MapSet.member?(resolved.active_plans, :p1)
+      assert unmapped == []
+    end
+  end
+
   describe "resolve_for_customer/1 empty" do
     test "a customer with no entitling subscription resolves an empty map + []" do
       oid = Ecto.UUID.generate()
@@ -137,6 +176,26 @@ defmodule Accrue.Entitlements.AdminTest do
       assert MapSet.size(resolved.active_plans) == 0
       assert MapSet.size(resolved.grace_plans) == 0
       assert MapSet.member?(resolved.expired_grace_plans, :p1)
+    end
+
+    test "an out-of-window UNMAPPED past_due sub is NOT reported as catalog drift (WR-01)" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+
+      oid = Ecto.UUID.generate()
+
+      # Factory default "price_basic" is unmapped. Pushed out of the grace
+      # window it is tagged :expired (not entitling) — the fold drops it
+      # because it fell outside the window, NOT because the price is unmapped.
+      # Reporting it as drift would point operators at a phantom :plans-config
+      # problem, so unmapped must exclude :expired rows.
+      %{customer: customer, subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -30 * 86_400, :second))
+
+      assert {_resolved, unmapped} = Admin.resolve_for_customer(customer)
+      refute "price_basic" in unmapped
+      assert unmapped == []
     end
   end
 end
