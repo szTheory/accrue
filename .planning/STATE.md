@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 124 context gathered
-last_updated: "2026-05-23T12:19:10.729Z"
+last_updated: "2026-05-23T12:24:28.942Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 5
+  completed_plans: 6
   percent: 20
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 124 (enforcement-surfaces-plug-liveview-guards) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-05-23
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 |-------|-------|-------|----------|
 | 123 | 4 | - | - |
 | Phase 124 P01 | 3min | 3 tasks | 5 files |
+| Phase 124 P05 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: [Phase 124 P01]: guard config (billable/on_deny/deny_path) lives under :entitlements, boot-validated free via validate_at_boot!; on_deny uses a custom validate_on_deny/1 (fail loud at boot, T-124-01) not type: :any
 - [Phase ?]: [Phase 124 P01]: billable uses {:or, [nil, {:fun, 1}]} — NimbleOptions 1.1.1 supports both subtypes (verified in deps), no :any fallback needed; entitlements/0 surfaces the 3 guard-key defaults via Keyword.put_new (raw :plans read unchanged, resolver unaffected)
 - [Phase ?]: [Phase 124 P01]: surface: is an additive opt on internal entitled?/3 + has_active_plan?/3 merged onto the existing :check span (:surface OTel-allowlisted atom+string); public Accrue facade delegates stay arity 2 (D-18, T-124-03 non-breaking, fail-closed property test green)
+- [Phase ?]: [Phase 124 P05]: D-06 lockstep — reconciled CLAUDE.md/ROADMAP SC#3/PITFALLS#8/oban middleware/mix.exs comment from 'core LiveView-FREE / no LiveView present' to 'core stays LiveView-runtime-free'; SC#3 now points at the static merge-gate invariant (no always-compiled core module references the LiveView socket runtime). REQUIREMENTS ENT-07 already runtime-LiveView-free, untouched; mix.exs dep kept non-optional (D-02).
 
 ### Pending Todos
 
@@ -111,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T12:16:39.060Z
+Last session: 2026-05-23T12:24:20.486Z
 Stopped at: Phase 124 context gathered
 Resume file: None

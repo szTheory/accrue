@@ -65,7 +65,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
   - [ ] 124-02-PLAN.md — Shared Accrue.Entitlements.Guard engine (billable resolution + resolve-once + fail-closed delegation + tiered on_deny + ctx) + guard/telemetry tests (ENT-06/07)
   - [ ] 124-03-PLAN.md — Plug surface: Accrue.Plug.RequireEntitlement + require_feature/require_plan router macros + plug/router tests (ENT-06)
   - [ ] 124-04-PLAN.md — LiveView surface: cond-compiled Accrue.Live.Entitlements on_mount guard + source-assertion/on_mount test (ENT-07)
-  - [ ] 124-05-PLAN.md — D-06 LiveView-runtime-free doc reconciliation (CLAUDE.md / ROADMAP SC#3 / PITFALLS.md / oban middleware / mix.exs comment) (ENT-07)
+  - [x] 124-05-PLAN.md — D-06 LiveView-runtime-free doc reconciliation (CLAUDE.md / ROADMAP SC#3 / PITFALLS.md / oban middleware / mix.exs comment) (ENT-07)
   - [ ] 124-06-PLAN.md — Merge-blocking static LiveView-runtime-free CI gate + ci.yml wiring + cross-surface fail-closed property test (ENT-06/07)
 
 **UI hint**: yes
@@ -121,7 +121,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 123. Config + Core Gate API Foundation | v1.39 | 4/4 | Complete    | 2026-05-22 |
-| 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 1/6 | In Progress|  |
+| 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 2/6 | In Progress|  |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 0/TBD | Not started | - |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 0/TBD | Not started | - |
 | 127. Optional Stripe-Native Sync (isolated) | v1.39 | 0/TBD | Not started | - |
