@@ -355,79 +355,87 @@ defmodule AccrueAdmin.Live.CustomerLive do
             </section>
 
           <% "entitlements" -> %>
-            <% {resolved, unmapped} = entitlements_view(@customer) %>
-            <% active_plans = resolved.active_plans |> MapSet.to_list() |> Enum.sort() %>
-            <% features = resolved.features |> MapSet.to_list() |> Enum.sort() %>
-            <% grace_plans = resolved.grace_plans |> MapSet.to_list() |> Enum.sort() %>
-            <% grace_features = resolved.grace_features |> MapSet.to_list() |> Enum.sort() %>
-            <% expired_grace_plans = resolved.expired_grace_plans |> MapSet.to_list() |> Enum.sort() %>
-            <% any_grace? = grace_plans != [] or grace_features != [] or expired_grace_plans != [] %>
-            <section class="ax-card">
-              <h3 class="ax-heading"><%= Copy.entitlements_section_title() %></h3>
+            <%= case entitlements_view(@customer) do %>
+              <% :error -> %>
+                <section class="ax-card" data-role="entitlements-error">
+                  <h3 class="ax-heading"><%= Copy.entitlements_section_title() %></h3>
+                  <p class="ax-body"><%= Copy.entitlements_error_copy() %></p>
+                </section>
 
-              <div class="ax-stack-sm">
-                <p class="ax-label"><%= Copy.entitlements_active_plans_label() %></p>
-                <div :for={plan <- active_plans} class="ax-list-row">
-                  <StatusBadge.status_badge status={plan} tone="moss" />
-                </div>
-              </div>
+              <% {:ok, resolved, unmapped} -> %>
+                <% active_plans = resolved.active_plans |> MapSet.to_list() |> Enum.sort() %>
+                <% features = resolved.features |> MapSet.to_list() |> Enum.sort() %>
+                <% grace_plans = resolved.grace_plans |> MapSet.to_list() |> Enum.sort() %>
+                <% grace_features = resolved.grace_features |> MapSet.to_list() |> Enum.sort() %>
+                <% expired_grace_plans = resolved.expired_grace_plans |> MapSet.to_list() |> Enum.sort() %>
+                <% any_grace? = grace_plans != [] or grace_features != [] or expired_grace_plans != [] %>
+                <section class="ax-card">
+                  <h3 class="ax-heading"><%= Copy.entitlements_section_title() %></h3>
 
-              <div class="ax-stack-sm">
-                <p class="ax-label"><%= Copy.entitlements_features_label() %></p>
-                <div :for={feature <- features} class="ax-list-row">
-                  <StatusBadge.status_badge status={feature} tone="moss" />
-                </div>
-              </div>
+                  <div class="ax-stack-sm">
+                    <p class="ax-label"><%= Copy.entitlements_active_plans_label() %></p>
+                    <div :for={plan <- active_plans} class="ax-list-row">
+                      <StatusBadge.status_badge status={plan} tone="moss" />
+                    </div>
+                  </div>
 
-              <div :if={resolved.quantities != %{}} class="ax-stack-sm">
-                <p class="ax-label"><%= Copy.entitlements_quantities_label() %></p>
-                <div class="ax-kpi-grid">
-                  <KpiCard.kpi_card
-                    :for={{quota_key, count} <- Enum.sort_by(resolved.quantities, &elem(&1, 0))}
-                    label={to_string(quota_key)}
-                    value={Integer.to_string(count)}
-                  />
-                </div>
-              </div>
+                  <div class="ax-stack-sm">
+                    <p class="ax-label"><%= Copy.entitlements_features_label() %></p>
+                    <div :for={feature <- features} class="ax-list-row">
+                      <StatusBadge.status_badge status={feature} tone="moss" />
+                    </div>
+                  </div>
 
-              <div :if={any_grace?} class="ax-stack-sm">
-                <p class="ax-label"><%= Copy.entitlements_grace_label() %></p>
-                <div :for={plan <- grace_plans} class="ax-list-row">
-                  <StatusBadge.status_badge status={plan} tone="amber" />
-                </div>
-                <div :for={feature <- grace_features} class="ax-list-row">
-                  <StatusBadge.status_badge status={feature} tone="amber" />
-                </div>
-                <div :for={plan <- expired_grace_plans} class="ax-list-row">
-                  <StatusBadge.status_badge status={plan} tone="slate" />
-                </div>
-              </div>
+                  <div :if={resolved.quantities != %{}} class="ax-stack-sm">
+                    <p class="ax-label"><%= Copy.entitlements_quantities_label() %></p>
+                    <div class="ax-kpi-grid">
+                      <KpiCard.kpi_card
+                        :for={{quota_key, count} <- Enum.sort_by(resolved.quantities, &elem(&1, 0))}
+                        label={to_string(quota_key)}
+                        value={Integer.to_string(count)}
+                      />
+                    </div>
+                  </div>
 
-              <p :if={active_plans == [] and unmapped == []} class="ax-body">
-                <%= Copy.entitlements_empty_title() %> · <%= Copy.entitlements_empty_copy() %>
-              </p>
-            </section>
+                  <div :if={any_grace?} class="ax-stack-sm">
+                    <p class="ax-label"><%= Copy.entitlements_grace_label() %></p>
+                    <div :for={plan <- grace_plans} class="ax-list-row">
+                      <StatusBadge.status_badge status={plan} tone="amber" />
+                    </div>
+                    <div :for={feature <- grace_features} class="ax-list-row">
+                      <StatusBadge.status_badge status={feature} tone="amber" />
+                    </div>
+                    <div :for={plan <- expired_grace_plans} class="ax-list-row">
+                      <StatusBadge.status_badge status={plan} tone="slate" />
+                    </div>
+                  </div>
 
-            <section class="ax-card">
-              <h3 class="ax-heading"><%= Copy.entitlements_drift_section_title() %></h3>
-              <div :for={price_id <- unmapped} class="ax-list-row">
-                <div>
-                  <StatusBadge.status_badge
-                    status={:unmapped}
-                    label={Copy.entitlements_unmapped_badge()}
-                    tone="amber"
-                  />
-                  <p class="ax-muted ax-body"><%= price_id %> · <%= Copy.entitlements_unmapped_hint() %></p>
-                </div>
-              </div>
-              <p :if={unmapped == []} class="ax-body"><%= Copy.entitlements_no_drift_copy() %></p>
-            </section>
+                  <p :if={active_plans == [] and unmapped == []} class="ax-body">
+                    <%= Copy.entitlements_empty_title() %> · <%= Copy.entitlements_empty_copy() %>
+                  </p>
+                </section>
 
-            <JsonViewer.json_viewer
-              id="customer-entitlements"
-              label={Copy.entitlements_raw_map_label()}
-              payload={entitlements_display_map(resolved)}
-            />
+                <section class="ax-card">
+                  <h3 class="ax-heading"><%= Copy.entitlements_drift_section_title() %></h3>
+                  <div :for={price_id <- unmapped} class="ax-list-row">
+                    <div>
+                      <StatusBadge.status_badge
+                        status={:unmapped}
+                        label={Copy.entitlements_unmapped_badge()}
+                        tone="amber"
+                      />
+                      <p class="ax-muted ax-body"><%= price_id %> · <%= Copy.entitlements_unmapped_hint() %></p>
+                    </div>
+                  </div>
+                  <p :if={unmapped == []} class="ax-body"><%= Copy.entitlements_no_drift_copy() %></p>
+                </section>
+
+                <JsonViewer.json_viewer
+                  id="customer-entitlements"
+                  label={Copy.entitlements_raw_map_label()}
+                  payload={entitlements_display_map(resolved)}
+                />
+            <% end %>
 
           <% "events" -> %>
             <section class="ax-card">
@@ -504,11 +512,22 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> Repo.all()
   end
 
-  # Calls the read-only entitlements diagnostic seam ONCE, returning
-  # {resolved, unmapped_price_ids}. One-way dependency: admin -> core; the
-  # LiveView only renders, never re-derives resolution truth.
+  # Calls the read-only entitlements diagnostic seam ONCE, returning a contained
+  # result. One-way dependency: admin -> core; the LiveView only renders, never
+  # re-derives resolution truth.
+  #
+  # CR-01: the seam can RAISE — under `unmapped_action: :raise` an unmapped
+  # entitling price_id makes `LocalMap.handle_unmapped/3` raise, and either of
+  # the two DB round-trips can fail transiently. Wrap the resolution in
+  # try/rescue so a failure collapses to the fail-closed `:error` sentinel
+  # (rendered as `Copy.entitlements_error_copy/0`) instead of crashing the
+  # LiveView process. Returns `{:ok, resolved, unmapped}` on success, `:error`
+  # on any resolution failure.
   defp entitlements_view(customer) do
-    Accrue.Entitlements.Admin.resolve_for_customer(customer)
+    {resolved, unmapped} = Accrue.Entitlements.Admin.resolve_for_customer(customer)
+    {:ok, resolved, unmapped}
+  rescue
+    _ -> :error
   end
 
   # Converts the resolved map's MapSets to sorted plain lists before the
