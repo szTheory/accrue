@@ -69,7 +69,11 @@ defmodule AccrueAdmin.Live.CustomerLive do
       |> Map.get("tab", "subscriptions")
       |> normalize_tab()
 
-    {:noreply, socket |> assign(:params, params) |> assign(:tab, tab)}
+    {:noreply,
+     socket
+     |> assign(:params, params)
+     |> assign(:tab, tab)
+     |> assign_entitlements_view(tab)}
   end
 
   @impl true
@@ -355,7 +359,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
             </section>
 
           <% "entitlements" -> %>
-            <%= case entitlements_view(@customer) do %>
+            <%= case @entitlements_view do %>
               <% :error -> %>
                 <section class="ax-card" data-role="entitlements-error">
                   <h3 class="ax-heading"><%= Copy.entitlements_section_title() %></h3>
@@ -512,9 +516,25 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> Repo.all()
   end
 
+  # WR-04: resolve the entitlements diagnostic ONCE into a socket assign in
+  # handle_params (mirroring the :payment_methods assign in mount/3), not inside
+  # the ~H template. This keeps render/1 pure (no DB round-trips per render),
+  # lets CR-01's contained result be computed once and reused across unrelated
+  # re-renders, and is the structural reason the failure can be contained. The
+  # assign is only computed on the entitlements tab; other tabs carry `nil`
+  # (never read by render, which only touches @entitlements_view inside the
+  # "entitlements" case branch).
+  defp assign_entitlements_view(socket, "entitlements") do
+    assign(socket, :entitlements_view, entitlements_view(socket.assigns.customer))
+  end
+
+  defp assign_entitlements_view(socket, _tab) do
+    assign(socket, :entitlements_view, nil)
+  end
+
   # Calls the read-only entitlements diagnostic seam ONCE, returning a contained
-  # result. One-way dependency: admin -> core; the LiveView only renders, never
-  # re-derives resolution truth.
+  # result. One-way dependency: admin -> core; the LiveView only reads through
+  # the resolver's SSOT fold, never re-derives resolution truth.
   #
   # CR-01: the seam can RAISE — under `unmapped_action: :raise` an unmapped
   # entitling price_id makes `LocalMap.handle_unmapped/3` raise, and either of
