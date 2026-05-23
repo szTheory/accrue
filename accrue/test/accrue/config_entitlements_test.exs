@@ -221,6 +221,61 @@ defmodule Accrue.ConfigEntitlementsTest do
     end
   end
 
+  # --- Phase 125 (ENT-09): past_due_grace knob -------------------------
+  describe "past_due_grace config key (ENT-09, D-16)" do
+    test "defaults to :none when unset (fail-closed)" do
+      Application.delete_env(:accrue, :entitlements)
+      assert Config.past_due_grace() == :none
+    end
+
+    test "default is surfaced even when only :plans is configured" do
+      Application.put_env(:accrue, :entitlements, plans: [pro: [features: [:api_access]]])
+      assert Config.past_due_grace() == :none
+    end
+
+    test ":none passes boot validation and reads back" do
+      Application.put_env(:accrue, :entitlements, past_due_grace: :none)
+      assert Config.validate_at_boot!() == :ok
+      assert Config.past_due_grace() == :none
+    end
+
+    test ":dunning passes boot validation and reads back" do
+      Application.put_env(:accrue, :entitlements, past_due_grace: :dunning)
+      assert Config.validate_at_boot!() == :ok
+      assert Config.past_due_grace() == :dunning
+    end
+
+    test "a positive integer passes boot validation and reads back" do
+      Application.put_env(:accrue, :entitlements, past_due_grace: 7)
+      assert Config.validate_at_boot!() == :ok
+      assert Config.past_due_grace() == 7
+    end
+
+    test "an unknown atom raises at boot (fail loud, not fail open)" do
+      Application.put_env(:accrue, :entitlements, past_due_grace: :bogus)
+
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate_at_boot!()
+      end
+    end
+
+    test "zero raises at boot (not a positive integer)" do
+      Application.put_env(:accrue, :entitlements, past_due_grace: 0)
+
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate_at_boot!()
+      end
+    end
+
+    test "a negative integer raises at boot" do
+      Application.put_env(:accrue, :entitlements, past_due_grace: -3)
+
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate_at_boot!()
+      end
+    end
+  end
+
   describe "validate_on_deny/1 (ENT-06, custom validator)" do
     test "accepts every conforming shape" do
       assert {:ok, :forbidden} = Config.validate_on_deny(:forbidden)

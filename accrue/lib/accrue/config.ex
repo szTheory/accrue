@@ -416,6 +416,17 @@ defmodule Accrue.Config do
           default: "/",
           doc:
             "LiveView fallback redirect target for `:forbidden` / non-redirectable denies."
+        ],
+        # --- Phase 125 (ENT-09): past-due grace knob ---
+        past_due_grace: [
+          type: {:or, [{:in, [:dunning, :none]}, :pos_integer]},
+          default: :none,
+          doc:
+            "Entitlement access for :past_due subscriptions. :none (default) fails closed " <>
+              "immediately. :dunning honors the dunning grace window (reuses " <>
+              "Accrue.Config.dunning()[:grace_days]). A positive integer N honors an " <>
+              "entitlement-specific N-day window. Grace grants are affirmative, resolved, " <>
+              "configured decisions — never a fail-open."
         ]
       ],
       doc:
@@ -745,6 +756,19 @@ defmodule Accrue.Config do
   """
   @spec dunning() :: keyword()
   def dunning, do: get!(:dunning)
+
+  @doc """
+  Returns the past-due entitlement grace policy: `:none` (default,
+  fail-closed), `:dunning` (reuse the dunning grace window), or a positive
+  integer of days.
+
+  The `:none` default is applied here because `entitlements/0` does a raw
+  read without normalizing nested `:entitlements` defaults. The
+  `:dunning` -> `grace_days` resolution is done by the resolver when it
+  widens the fold, not by this accessor.
+  """
+  @spec past_due_grace() :: :none | :dunning | pos_integer()
+  def past_due_grace, do: entitlements() |> Keyword.get(:past_due_grace, :none)
 
   @doc """
   Returns the branding config keyword list.
