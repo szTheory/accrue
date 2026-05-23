@@ -32,6 +32,27 @@ defmodule Accrue.Router do
       end
 
   Each resolves to its own signing secret via `Accrue.Config`.
+
+  ## Entitlement guards (controller pipeline)
+
+  `require_feature/1` and `require_plan/1` are single-arg sugar over
+  `Accrue.Plug.RequireEntitlement` for the common "gate one feature / plan"
+  case in a controller's `plug` pipeline:
+
+      import Accrue.Router
+
+      defmodule MyAppWeb.ReportsController do
+        use MyAppWeb, :controller
+
+        require_feature :reports      # plug Accrue.Plug.RequireEntitlement, feature: :reports
+        require_plan :pro             # plug Accrue.Plug.RequireEntitlement, plan: :pro
+        # ... actions
+      end
+
+  For advanced overrides (`status:`, `on_deny:`, `billable:`) use the explicit
+  plug form directly:
+
+      plug Accrue.Plug.RequireEntitlement, feature: :reports, on_deny: {:redirect, "/pricing"}
   """
 
   @doc """
@@ -45,6 +66,33 @@ defmodule Accrue.Router do
   defmacro accrue_webhook(path, processor) do
     quote do
       forward(unquote(path), Accrue.Webhook.Plug, processor: unquote(processor))
+    end
+  end
+
+  @doc """
+  Gates a controller pipeline on a single `feature`.
+
+  Expands to `plug Accrue.Plug.RequireEntitlement, feature: feature`. For
+  `status:` / `on_deny:` / `billable:` overrides, use the explicit
+  `plug Accrue.Plug.RequireEntitlement, …` form instead.
+  """
+  defmacro require_feature(feature) do
+    quote do
+      plug(Accrue.Plug.RequireEntitlement, feature: unquote(feature))
+    end
+  end
+
+  @doc """
+  Gates a controller pipeline on an active `plan` (an atom plan key or a
+  `price_id` String).
+
+  Expands to `plug Accrue.Plug.RequireEntitlement, plan: plan`. For
+  `status:` / `on_deny:` / `billable:` overrides, use the explicit
+  `plug Accrue.Plug.RequireEntitlement, …` form instead.
+  """
+  defmacro require_plan(plan) do
+    quote do
+      plug(Accrue.Plug.RequireEntitlement, plan: unquote(plan))
     end
   end
 end
