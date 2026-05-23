@@ -56,7 +56,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 
   1. A developer can gate a Phoenix controller route with a Plug guard (`require_plan` / `require_feature`) that halts with a configurable fail response (redirect or 403) when the billable is not entitled.
   2. A developer can gate a host LiveView with an `on_mount` guard whose billable-resolution key (e.g. `current_scope` / `current_user`) is host-configurable and adapter-thin, with no required Sigra/Lockspire coupling.
-  3. The LiveView guard is shipped via conditional compilation, and a merge-blocking CI check proves no always-compiled core module references the LiveView socket runtime (Phoenix.LiveView / on_mount / Socket) — core `accrue` stays runtime-LiveView-free even though `phoenix_live_view` is a required core dep for `Phoenix.Component`.
+  3. The LiveView guard is shipped via conditional compilation, and a merge-blocking CI check proves no always-compiled core module references the LiveView socket runtime (Phoenix.LiveView / on_mount / Socket) — core `accrue` stays runtime-LiveView-free even though `phoenix_live_view` is a required core dep.
   4. Both guards resolve entitlement once per request/mount and reuse the Phase 123 fail-closed contract — a guard whose check cannot resolve denies rather than allows.
 
 **Plans**: 6 plans
@@ -82,7 +82,11 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
   3. Entitlement truth maps explicitly to existing lifecycle states (trialing ✅, canceling/paid-through ✅, paused ✗, canceled ✗) as a documented SSOT truth table, with past-due grace as a fail-safe configurable knob reusing the dunning grace overlay.
   4. An operator/developer can read one canonical truth table and know exactly which lifecycle states grant entitlement and how the past-due grace knob behaves.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+  - [ ] 125-01-PLAN.md — Provider-honesty capability surface: `entitlements:` Capabilities group + 3 adapter `capabilities/0` rows + matrix-doc + drift-gate (positive + negative divergence guard) + Fake-lane proof (ENT-08, Wave 1)
+  - [ ] 125-02-PLAN.md — Lifecycle-truth SSOT: `Subscription.entitling?/1` + `Query.entitling/1` twin + retarget `fold_active/1` (closes paused fail-OPEN gap) + truth-table guide entry + 8-status pin + twin-invariant test (ENT-09, Wave 1)
+  - [ ] 125-03-PLAN.md — Past-due grace knob: `past_due_grace` config + `PastDueGrace.within_grace?/2` + conditional fold-widening + `:grace_plans` resolved field + `:past_due_grace`/`:past_due_expired` telemetry + truth-table footnote (ENT-09, Wave 2, depends on 125-02)
 
 ### Phase 126: Admin Surface + Docs / JTBD Spine
 
@@ -122,7 +126,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 |-------|-----------|----------------|--------|-----------|
 | 123. Config + Core Gate API Foundation | v1.39 | 4/4 | Complete    | 2026-05-22 |
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 6/6 | Complete    | 2026-05-23 |
-| 125. Provider Honesty + Lifecycle Truth | v1.39 | 0/TBD | Not started | - |
+| 125. Provider Honesty + Lifecycle Truth | v1.39 | 0/3 | Not started | - |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 0/TBD | Not started | - |
 | 127. Optional Stripe-Native Sync (isolated) | v1.39 | 0/TBD | Not started | - |
 
@@ -141,4 +145,4 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 - ✅ **v1.35 Dual-Provider Supportability Closure** — Phases **109–111** shipped **2026-05-07**. Provider-honest support contract mirrors, lifecycle semantics SSOT, and Braintree webhook/operator recovery proof. Archives: [milestones/v1.35-ROADMAP.md](/Users/jon/projects/accrue/.planning/milestones/v1.35-ROADMAP.md), [milestones/v1.35-REQUIREMENTS.md](/Users/jon/projects/accrue/.planning/milestones/v1.35-REQUIREMENTS.md).
 
 ---
-*Last updated: 2026-05-22 — **v1.39** roadmap created; Phases 123–127 cover ENT-01..12 (12/12 mapped).*
+*Last updated: 2026-05-23 — Phase 125 planned (3 plans, 2 waves); ENT-08 + ENT-09 covered. v1.39 roadmap created 2026-05-22; Phases 123–127 cover ENT-01..12 (12/12 mapped).*
