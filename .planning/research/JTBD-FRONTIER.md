@@ -18,9 +18,9 @@ This doc does **not** introduce a new "should we keep building?" framework. It f
 
 **Accrue is feature-complete for its core promise** — "a Phoenix dev can launch a real SaaS with subscription billing on day one." On the core subscription-billing JTBD it **matches or exceeds** Pay (Rails) and Laravel Cashier, and it ships things they don't (companion admin UI, tamper-evident audit ledger, first-class telemetry, metered billing, Connect, pure-Elixir invoice PDFs).
 
-The value curve has flattened. Of everything still missing, exactly **one** item meaningfully dents the "feature-complete for a real SaaS" claim: **entitlements / plan-gating** — you can bill a customer but Accrue gives you nothing first-party to *gate features* on that subscription. Everything else is either an intentional non-goal (accounting, marketplace-MoR) or genuine polish.
+The value curve has flattened, and the last user-flow gap is now closed: **6 of 6 shipped** on the canonical SaaS loop. **Entitlements / plan-gating** shipped in **v1.39** — a fail-closed first-party gate API (`has_active_plan?`/`entitled?`/`features_for`/`entitlement_quantity`), a `Accrue.Plug.RequireEntitlement` controller plug + `require_feature`/`require_plan` router macros, a conditionally-compiled LiveView `on_mount` guard, an admin entitlements view, provider-honest local-identical resolution, and a lifecycle-truthful `entitling?/1` derivation. The *optional* Stripe-native sync (`entitlements.active_entitlement_summary.updated`) is deliberately deferred and off-by-default (Phase 127) — the core needs no Stripe dependency. Everything else still missing is either an intentional non-goal (accounting, marketplace-MoR) or genuine polish.
 
-**If one more milestone is ever spent on user-flow surface, spend it on entitlements.** After that, diminishing returns are real.
+**The user-flow surface is now feature-complete — 6 of 6.** Diminishing returns are real from here; future work is intake-gated, not speculative.
 
 ## Coverage map — what's built
 
@@ -82,7 +82,7 @@ Status legend: **✅ Shipped** · **🟡 Partial** (bounded; note says how) · *
 | Organization / multi-tenant billing | ✅ | polymorphic billable + owner-scoped queries (v1.3 ORG, v1.8 non-Sigra recipes) | Sigra optional, not required |
 | Marketplace / Connect (accounts, split charges, transfers) | ✅ | `Accrue.Connect` | Stripe Connect |
 | Admin search across billing records | ⛔ | none | SEED-002 #5 (Scrypath) |
-| Entitlements / plan-gating (`has_active_plan?`, plugs/guards) | ⛔ | `Subscription.is_active?/1` exists but no public gate | **SEED-002 #4 — the headline gap** |
+| Entitlements / plan-gating (`has_active_plan?`, plugs/guards) | ✅ | `Accrue.entitled?/2`, `has_active_plan?/2`, `features_for/1`, `entitlement_quantity/2`; `Accrue.Plug.RequireEntitlement` + `require_feature`/`require_plan` macros; `Accrue.Live.Entitlements` `on_mount`; admin entitlements tab | v1.39. Local-identical across providers; `entitling?/1` lifecycle truth + `past_due_grace` knob. Optional Stripe-native sync deferred/off-by-default (Phase 127). Was SEED-002 #4. |
 | SaaS metrics (MRR/ARR/churn/LTV) | 🚫 | ledger primitives only (`bucket_by/2`) | Opinionated math deliberately left to host |
 | Revenue recognition / accounting exports | 🚫 | — | **FIN-03** explicit non-goal |
 | GDPR data purge / cascading delete | 🚫 | — | Host policy; ledger immutable by design |
@@ -107,7 +107,7 @@ Benchmarked against the libraries Accrue is positioned next to, plus the commerc
 | **Tamper-evident audit ledger** | ✅ | ⛔ | ⛔ | 🟡 | 🟡 |
 | **First-class telemetry/OTel** | ✅ | ⛔ | ⛔ | n/a | n/a |
 | Connect / marketplace | ✅ | 🟡 | ⛔ | ✅ | 🟡 |
-| **Entitlements / feature-gating** | ⛔ | ⛔ | ⛔ | ✅ (Entitlements API, 2024) | ✅ |
+| **Entitlements / feature-gating** | ✅ (v1.39) | ⛔ | ⛔ | ✅ (Entitlements API, 2024) | ✅ |
 | Revenue recognition | 🚫 | ⛔ | ⛔ | ✅ | ✅ |
 | MRR/ARR/churn analytics | 🚫 | ⛔ | ⛔ | ✅ (Sigma) | ✅ |
 | # of processors | 2 + Fake | 4 + Fake | 1–2 | n/a | n/a |
@@ -115,20 +115,20 @@ Benchmarked against the libraries Accrue is positioned next to, plus the commerc
 **Reading of the delta:**
 
 1. **Accrue already wins the "Phoenix-idiomatic batteries-included" comparison.** Versus Pay/Cashier it is at parity on the billing core and *ahead* on admin UI, audit, observability, metering, and PDF. Nothing here is a gap — this is the moat.
-2. **The one capability every comparator-or-better has that Accrue lacks is entitlements.** Stripe shipped a first-class Entitlements API; Chargebee/Recurly have always had it. Pay/Cashier also lack it, but Accrue's whole pitch is "more complete than they are." This is the gap that's *inconsistent with Accrue's own positioning*.
+2. **The one capability that used to be inconsistent with Accrue's positioning — entitlements — is now shipped (v1.39).** Stripe has a first-class Entitlements API and Chargebee/Recurly have always had it; Pay/Cashier still lack it. Accrue closing it (fail-closed gate API + Plug/LiveView guards + admin view, provider-honest and lifecycle-truthful) restores the "more complete than they are" claim — and it ships ahead of Pay/Cashier on this axis too.
 3. **The rest of the delta is intentional.** Revenue recognition (FIN-03), opinionated MRR math, MoR processors, Hyperwallet — all explicit non-goals with written boundaries. Closing them would be scope-creep into "accounting platform" / "merchant of record," which Accrue has deliberately decided not to be.
 
 ## Prioritized future JTBD (if/when a milestone opens)
 
 Ranked by **value × fit-with-posture ÷ effort**. None of these are committed — they're the reasoned ordering for when intake or a strategy change pulls one in.
 
-1. **Entitlements / plan-gating** — `Accrue.has_active_plan?(billable, "pro")`, Plug + LiveView `on_mount` guards, optional sync from Stripe's `entitlements.active_entitlement_summary.updated` webhook.
-   - *Why #1:* highest-frequency post-subscription JTBD ("I'm subscribed — now gate the feature"), the only gap that contradicts the "more complete than Pay/Cashier" claim, increasingly table-stakes, and **already seeded** (SEED-002 #4: Sigra/Lockspire identity). Subscription state already exists locally — this is a thin, high-leverage layer, not a new domain.
-2. **Dunning depth / notification journeys** — move from grace+terminal decision to multi-step recovery (email → wait → escalate). Maps to SEED-002 #1 (Chimeway + Mailglass). Recovers revenue; current state is bounded.
-3. **Admin search** — Ecto-native search across Customer/Invoice/Subscription in `accrue_admin`. SEED-002 #5 (Scrypath). Pure operator-JTBD friction that grows with customer count.
-4. **Ad-hoc / manual invoice line items** — let hosts add one-off charges/credits to an invoice before finalize. Fills a real B2B billing edge; small surface.
-5. **Disputes / chargebacks visibility (read-only)** — project `charge.dispute.*` events into the ledger + admin for operator awareness. Read-only keeps it cheap and on-posture.
-6. **Audit bridge** — sink critical events to an external immutable audit platform (SEED-002 #2, Threadline). Low marginal value since Accrue already has its own tamper-evident ledger; mostly for shops standardizing on a separate audit system.
+> **~~Entitlements / plan-gating~~ — SHIPPED in v1.39.** The former #1 closed: fail-closed gate API (`Accrue.has_active_plan?(billable, "pro")`, `entitled?`/`features_for`/`entitlement_quantity`), Plug + LiveView `on_mount` guards, admin entitlements view, provider-honest local-identical resolution, lifecycle-truthful `entitling?/1` + `past_due_grace` knob. The only remaining slice is the *optional* Stripe-native sync (consuming `entitlements.active_entitlement_summary.updated`), deliberately deferred and off-by-default (Phase 127, needs-deeper-research) — it does not gate core value.
+
+1. **Dunning depth / notification journeys** — move from grace+terminal decision to multi-step recovery (email → wait → escalate). Maps to SEED-002 #1 (Chimeway + Mailglass). Recovers revenue; current state is bounded. *Now the highest-value remaining user-flow candidate.*
+2. **Admin search** — Ecto-native search across Customer/Invoice/Subscription in `accrue_admin`. SEED-002 #5 (Scrypath). Pure operator-JTBD friction that grows with customer count.
+3. **Ad-hoc / manual invoice line items** — let hosts add one-off charges/credits to an invoice before finalize. Fills a real B2B billing edge; small surface.
+4. **Disputes / chargebacks visibility (read-only)** — project `charge.dispute.*` events into the ledger + admin for operator awareness. Read-only keeps it cheap and on-posture.
+5. **Audit bridge** — sink critical events to an external immutable audit platform (SEED-002 #2, Threadline). Low marginal value since Accrue already has its own tamper-evident ledger; mostly for shops standardizing on a separate audit system.
 
 ## Diminishing-returns frontier — "definition of done"
 
@@ -139,7 +139,7 @@ Ranked by **value × fit-with-posture ÷ effort**. None of these are committed �
    |  invoices/PM/webhooks ───●  (DONE)
    |  audit/telemetry/admin ──●  (DONE: ahead of comparators)
    |  metering/Connect/tax ───●  (DONE / bounded)
-   |                          ●  entitlements   ← the last high-value point
+   |  entitlements ───────────●  (DONE v1.39 — the last user-flow gap, closed)
    |                            ◌  dunning journeys, admin search
    |                              ◌ ad-hoc items, disputes view
    |                                ◌ audit bridge, more processors…
@@ -148,15 +148,16 @@ Ranked by **value × fit-with-posture ÷ effort**. None of these are committed �
                     diminishing returns begin here
 ```
 
-**Definition of "done" for the user-flow surface:** Accrue is *done* the moment a Phoenix dev can **bill a customer, change/cancel that subscription, recover failed payments, let the customer self-serve, gate access on what they paid for, and operate it all from an admin UI with an audit trail.** Five of those six are shipped. **The sixth — gate access — is the only missing piece of the canonical SaaS loop.**
+**Definition of "done" for the user-flow surface:** Accrue is *done* the moment a Phoenix dev can **bill a customer, change/cancel that subscription, recover failed payments, let the customer self-serve, gate access on what they paid for, and operate it all from an admin UI with an audit trail.** All six are now shipped — **6 of 6**. The sixth, gate access, closed in v1.39; the canonical SaaS loop is complete.
 
 Therefore:
-- **Above the line (worth building if pulled in):** entitlements (#1), and arguably dunning depth (#2) for revenue-recovery shops.
+- **Above the line (worth building if pulled in):** dunning depth (#1 now) for revenue-recovery shops; the entitlements loop step is done.
 - **At the line (intake-only):** admin search, ad-hoc invoice items, disputes view — build only on a sourced request, per stop rule S1.
 - **Below the line (don't):** anything that turns Accrue into an accounting system (FIN-03), a metrics product, a merchant-of-record, or a marketplace-payouts platform. These are not "more billing" — they are *different products*. Pursuing them is the textbook diminishing-returns trap for a billing library.
 
-The honest summary for the maintainer: **the autopilot did, in fact, build a feature-complete billing library.** The "we're basically done / intake-gated" posture is correct. Entitlements is the one place where "basically" is doing real work — it's the highest-leverage thing left, and it's already on the seed list.
+The honest summary for the maintainer: **the autopilot did, in fact, build a feature-complete billing library — now 6 of 6 on the canonical SaaS loop.** Entitlements was the one place "basically done" was doing real work; v1.39 closed it. The "we're done / intake-gated" posture is now unqualified for the user-flow surface — remaining items (dunning depth, admin search, ad-hoc items, disputes view, audit bridge) are intake-only or below-the-line.
 
 ## Update log
 
 - **2026-05-22** — Initial frontier map. As-of accrue 1.1.1 / v1.38. Verified all status cells against source (`accrue/lib/accrue/billing.ex` et al.) and `.planning/MILESTONES.md`; corrected first-pass errors (Stripe Tax, partial refunds, trials, org billing, webhook customization are all shipped). Benchmarked vs Pay/Cashier/Stripe Billing/Chargebee. Verdict: feature-complete on core; entitlements is the single headline gap.
+- **2026-05-23** — Entitlements flipped ⛔ → ✅ (v1.39, Phases 123–126). Re-verified against shipped code (`Accrue.Entitlements` 4-fn fail-closed gate API on the `Accrue` facade; `Accrue.Plug.RequireEntitlement` + `require_feature`/`require_plan` router macros; cond-compiled `Accrue.Live.Entitlements` `on_mount`; `Accrue.Entitlements.Resolver.LocalMap` provider-honest local-identical resolution; `Accrue.Billing.Subscription.entitling?/1` lifecycle truth + `past_due_grace` knob; admin entitlements tab at `/customers/:id?tab=entitlements`). Updated: TL;DR ("6 of 6 shipped"), coverage-map Operator & platform row (Gap → Shipped), delta table Accrue cell (⛔ → ✅), diminishing-returns prose + ASCII chart, and the future-JTBD list (entitlements struck; dunning depth promoted). Remaining entitlements slice: optional Stripe-native sync, deferred/off-by-default (Phase 127). No public roadmap leakage — deferred items stay here.
