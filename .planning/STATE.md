@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 124 context gathered
-last_updated: "2026-05-23T12:24:28.942Z"
+last_updated: "2026-05-23T12:31:32.027Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 6
+  completed_plans: 7
   percent: 20
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 124 (enforcement-surfaces-plug-liveview-guards) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-05-23
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | 123 | 4 | - | - |
 | Phase 124 P01 | 3min | 3 tasks | 5 files |
 | Phase 124 P05 | 3min | 2 tasks | 5 files |
+| Phase 124 P02 | 3min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: [Phase 124 P01]: billable uses {:or, [nil, {:fun, 1}]} — NimbleOptions 1.1.1 supports both subtypes (verified in deps), no :any fallback needed; entitlements/0 surfaces the 3 guard-key defaults via Keyword.put_new (raw :plans read unchanged, resolver unaffected)
 - [Phase ?]: [Phase 124 P01]: surface: is an additive opt on internal entitled?/3 + has_active_plan?/3 merged onto the existing :check span (:surface OTel-allowlisted atom+string); public Accrue facade delegates stay arity 2 (D-18, T-124-03 non-breaking, fail-closed property test green)
 - [Phase ?]: [Phase 124 P05]: D-06 lockstep — reconciled CLAUDE.md/ROADMAP SC#3/PITFALLS#8/oban middleware/mix.exs comment from 'core LiveView-FREE / no LiveView present' to 'core stays LiveView-runtime-free'; SC#3 now points at the static merge-gate invariant (no always-compiled core module references the LiveView socket runtime). REQUIREMENTS ENT-07 already runtime-LiveView-free, untouched; mix.exs dep kept non-optional (D-02).
+- [Phase ?]: [Phase 124 P02]: Accrue.Entitlements.Guard is the always-compiled LiveView-runtime-free shared decision engine both surfaces call — check/3 resolves billable once (per-guard opt > config global > current_scope.user/current_user probe), delegates fail-closed to entitled?/3 + has_active_plan?/3 with surface:, tiered on_deny (D-11), bounded no-PII ctx (D-12)
+- [Phase ?]: [Phase 124 P02]: ctx.reason is coarse-by-design (:no_active_subscription if no billable resolved else :not_entitled); precise Phase 123 reason atom lives in the :check span, not ctx (one gate call, D-08/D-17). deny_plug/4 is pure-Plug opaque content-negotiated 403/redirect/status-body/fn/MFA (no Phoenix.Controller)
 
 ### Pending Todos
 
@@ -113,6 +116,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T12:24:20.486Z
+Last session: 2026-05-23T12:31:16.434Z
 Stopped at: Phase 124 context gathered
 Resume file: None
