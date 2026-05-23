@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 125 context gathered
-last_updated: "2026-05-23T13:43:16.654Z"
-last_activity: 2026-05-23 -- Phase 125 planning complete
+last_updated: "2026-05-23T14:15:33.864Z"
+last_activity: 2026-05-23
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 40
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 124 — enforcement-surfaces-plug-liveview-guards
+**Current focus:** Phase 125 — provider-honesty-lifecycle-truth
 
 ## Current Position
 
-Phase: 125
-Plan: Not started
+Phase: 125 (provider-honesty-lifecycle-truth) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-05-23 -- Phase 125 planning complete
+Last activity: 2026-05-23
 
 Progress: [██████████] 100% (phase 123 plans complete)
 
@@ -66,6 +66,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 124 P04 | 1min | 2 tasks | 2 files |
 | Phase 124 P06 | 2min | 3 tasks | 3 files |
 | 124 | 6 | - | - |
+| Phase 125 P01 | 5min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 124]: [Phase 124 P03]: require_feature/1 + require_plan/1 router macros are single-arg sugar expanding to plug(Accrue.Plug.RequireEntitlement, feature:/plan: …); status:/on_deny:/billable: overrides route through the explicit plug form (documented split)
 - [Phase ?]: [Phase 124 P04]: Accrue.Live.Entitlements (ENT-07) is the cond-compiled on_mount/4 LiveView surface — {:require_feature,x}/{:require_plan,y} clauses delegate to Guard.check(:live,…) and only surface-translate the deny enum ({:redirect,path}->redirect; :forbidden/{status,body} degradation->put_flash+redirect(deny_path)); resolve-once billable-only assign_new(:accrue_billable). The ONLY core file with LiveView refs, all inside Code.ensure_loaded?(Phoenix.LiveView) (D-04); merge gate (Plan 06) excludes /accrue/live/
 - [Phase ?]: [Phase 124 P06]: runtime-LiveView-free is now machine-enforced — scripts/ci/verify_core_liveview_runtime_free.sh (D-05) static grep gate scans accrue/lib for real socket-runtime refs (import/alias Phoenix.LiveView/Socket, def on_mount), ^[^#]* allowlists doc comments, grep -v /accrue/live/ exempts the cond-compiled on_mount guard; wired merge-blocking in docs-contracts-shift-left. SC#4 cross-surface fail-closed property drives Guard.check/3 on :plug AND :live: nil/garbage/raising/no-active-sub DENY, allow pinned to the sole affirmative-resolved-match path
+- [Phase ?]: [Phase 125 P01]: ENT-08 provider-honesty surface — additive entitlements: capability group (support label 'all first-party'; the matrix's first CONVERGENCE lane 'local-identical' across fake/stripe/braintree, contrasting every existing divergence lane). Mirrored byte-for-byte across code labels + processor-support-matrix doc + verify_processor_support_matrix.sh drift gate (same-PR SSOT co-update, D-09). Negative divergence guard rejects any native/unsupported/bounded entitlements label; widened its regex to scan ALL provider columns (planner regex only checked the Fake column). provider_honesty_test proves LocalMap.resolve/2 is == across all three processors with zero processor calls (telemetry-never-fired guard).
 
 ### Pending Todos
 
@@ -124,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T13:19:17.903Z
+Last session: 2026-05-23T14:12:53.771Z
 Stopped at: Phase 125 context gathered
-Resume file: .planning/phases/125-provider-honesty-lifecycle-truth/125-CONTEXT.md
+Resume file: None
