@@ -127,7 +127,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 | 123. Config + Core Gate API Foundation | v1.39 | 4/4 | Complete    | 2026-05-22 |
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 6/6 | Complete    | 2026-05-23 |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 3/3 | Complete    | 2026-05-23 |
-| 126. Admin Surface + Docs / JTBD Spine | v1.39 | 1/4 | In Progress|  |
+| 126. Admin Surface + Docs / JTBD Spine | v1.39 | 2/4 | In Progress|  |
 | 127. Optional Stripe-Native Sync (isolated) | v1.39 | 0/TBD | Not started | - |
 
 ## Notes

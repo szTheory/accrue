@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Completed 126-01-PLAN.md
-last_updated: "2026-05-23T20:34:29.017Z"
+last_updated: "2026-05-23T20:40:10.939Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
   percent: 60
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 126 (admin-surface-docs-jtbd-spine) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-23
 
@@ -71,6 +71,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 125 P03 | 11min | 3 tasks | 11 files |
 | 125 | 3 | - | - |
 | Phase 126 P01 | 2min | 3 tasks | 3 files |
+| Phase 126 P3 | 10min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: [Phase 125 P03]: ENT-09 past-due grace knob — past_due_grace config key ({:or,[{:in,[:dunning,:none]},:pos_integer]}, default :none, boot-validated) + pure clock-driven PastDueGrace.within_grace?/2 (fail-closed on nil past_due_since) + Query.entitling_with_grace_candidates/1 (adds :past_due only, never :unpaid). LocalMap.fold_active/1 conditionally widens (zero query/compute when :none, D-18), gates per-row via Subscription.dunning_sweepable?/1 (Credo-clean), drops out-of-window rows, tags additive :grace_plans/:grace_features/:expired_grace_plans. entitled?/3 + has_active_plan?/3 surface additive :past_due_grace/:past_due_expired reasons on the existing :check span (no new event, no Ops.emit, D-19/D-21). Grace is always an affirmative resolved configured decision — never fail-open (D-15).
 - [Phase 126]: [Phase 126 P01]: ENT-11 admin read seam — Accrue.Entitlements.Admin.resolve_for_customer/1 returns {resolved, unmapped_price_ids}; fold_for_customer/1 literally calls fold_active/1 (single SSOT fold, zero copy, T-126-02); unmapped list re-derived independently via catalog()/active_items() since the resolver discards unmapped under :deny (D-04 candidate iii).
 - [Phase 126]: [Phase 126 P01]: no new public Accrue.* gate API (entitlements.ex unchanged, 4 public defs); two LocalMap helpers @doc false; one-way dependency admin -> billing verified (no reverse ref); fetch_entitled/2 (D-07) stays deferred; Admin hard-codes LocalMap (A2 limitation, documented in moduledoc).
+- [Phase 126 P03]: ENT-12 docs — guides/entitlements.md (fail-closed-first, summarize-and-link to lifecycle_semantics.md + Processor.Capabilities; 3 needles: entitled?, Accrue.Plug.RequireEntitlement, [:accrue, :entitlements, :check]); JTBD ⛔→✅ flip in public jobs_to_be_done.md (now committed/tracked) + internal JTBD-FRONTIER.md (6 of 6 shipped); README + quickstart spine pointers; PROJECT.md 'gateway subscription core' parity fix clears verify_package_docs.sh:220 RED holdout. Pinned post-flip shipped marker for Plan 04 needle 5a (byte-for-byte): "entitlements ✅ shipped" (in the dated 2026-05-23 jobs_to_be_done.md Update-log line). Public file had no entitlements ⛔ table row — prose flip + new body section cover it; the ⛔→✅ table-row flips live only in JTBD-FRONTIER.md.
 
 ### Pending Todos
 
@@ -134,6 +136,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T20:34:29.014Z
+Last session: 2026-05-23T20:39:46.589Z
 Stopped at: Completed 126-01-PLAN.md
 Resume file: None

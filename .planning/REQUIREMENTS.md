@@ -38,7 +38,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 ### Admin & Docs
 
 - [x] **ENT-11**: An operator can view a customer's currently-active entitlements/features in `accrue_admin` (read-only).
-- [ ] **ENT-12**: `guides/entitlements.md` documents the full story (gate API, Plug guard, LiveView guard, provider matrix, lifecycle truth table); the JTBD docs flip entitlements ⛔→✅ and the First Hour + README "Start here" spine reference it; package-doc verifiers stay green.
+- [x] **ENT-12**: `guides/entitlements.md` documents the full story (gate API, Plug guard, LiveView guard, provider matrix, lifecycle truth table); the JTBD docs flip entitlements ⛔→✅ and the First Hour + README "Start here" spine reference it; package-doc verifiers stay green.
 
 ## Future Requirements
 
@@ -78,7 +78,7 @@ Which phases cover which requirements. Phases continue from v1.38 (ended at Phas
 | ENT-09 | Phase 125 | Complete |
 | ENT-10 | Phase 127 | Pending |
 | ENT-11 | Phase 126 | Complete |
-| ENT-12 | Phase 126 | Pending |
+| ENT-12 | Phase 126 | Complete |
 
 **Coverage:**
 
