@@ -25,11 +25,14 @@ files_reviewed_list:
   - accrue/test/property/guard_fail_closed_property_test.exs
   - scripts/ci/verify_core_liveview_runtime_free.sh
 findings:
-  critical: 1
-  warning: 5
+  critical: 0
+  warning: 4
   info: 4
-  total: 10
-status: issues_found
+  total: 8
+status: partially_addressed
+resolved:
+  - CR-01 (fixed in commit aecd640)
+  - WR-01 (fixed in commit aecd640)
 ---
 
 # Phase 124: Code Review Report
@@ -37,7 +40,15 @@ status: issues_found
 **Reviewed:** 2026-05-23
 **Depth:** standard
 **Files Reviewed:** 19
-**Status:** issues_found
+**Status:** partially_addressed (BLOCKER CR-01 + WR-01 resolved; 4 warnings + 4 info open)
+
+> **Resolution (2026-05-23, commit `aecd640`):** CR-01 fixed — `Guard.resolve_once(:live, …)`
+> now stashes the resolved billable onto the returned container's assigns via a plain,
+> gate-clean map update (mirroring the `:plug` clause), so `Accrue.Live.Entitlements`'
+> `assign_new` carries the real billable instead of `nil`. WR-01 fixed — the live allow
+> test now asserts the stashed billable VALUE, and a new Guard-level `:live` resolve-once
+> test locks the contract. The merge gate stays green; compile + affected suites pass.
+> WR-02, WR-03, WR-04 and the four INFO findings remain open for follow-up.
 
 ## Summary
 
@@ -63,7 +74,7 @@ mount stays denied). The damage is functional: hosts relying on the documented
 
 ## Critical Issues
 
-### CR-01: LiveView resolve-once stash always returns `nil` — the resolved billable is silently discarded
+### CR-01 [RESOLVED — commit aecd640]: LiveView resolve-once stash always returns `nil` — the resolved billable is silently discarded
 
 **File:** `accrue/lib/accrue/entitlements/guard.ex:99,108,228-239` and `accrue/lib/accrue/live/entitlements.ex:121-124`
 
