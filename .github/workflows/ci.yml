@@ -46,6 +46,9 @@ jobs:
       - name: Processor support matrix contract
         run: bash scripts/ci/verify_processor_support_matrix.sh
 
+      - name: Core stays LiveView-runtime-free (ENT-07 D-05)
+        run: bash scripts/ci/verify_core_liveview_runtime_free.sh
+
       - name: v1.17 friction + north-star SSOT contract
         run: bash scripts/ci/verify_v1_17_friction_research_contract.sh
 
