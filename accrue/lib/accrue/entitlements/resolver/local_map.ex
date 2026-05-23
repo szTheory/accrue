@@ -9,9 +9,13 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
        a clone of the private `Accrue.Billing.fetch_customer/2`, NEVER the
        effectful get-or-create customer path (which would hit the processor
        on a miss). A `nil`/wrong-shape billable resolves to no customer.
-    2. Active-subscription read via `Accrue.Billing.Query.active/1`
-       (`:active` + `:trialing`; never raw `.status`) joined to its items,
-       selecting `{price_id, quantity}`.
+    2. Entitling-subscription read via `Accrue.Billing.Query.entitling/1`
+       (active/trialing, not paused, not ended; the database twin of
+       `Accrue.Billing.Subscription.entitling?/1`; never raw `.status`)
+       joined to its items, selecting `{price_id, quantity}`. Using the
+       entitlement-grade fragment closes the paused fail-open gap: a
+       `status: :active` row with a non-nil `pause_collection` no longer
+       grants entitlement.
     3. Fold each active item through the `price_id -> plan` reverse index
        built from `Accrue.Config.entitlements/0`, accumulating:
          * `active_plans` — the SET of ALL active plan atoms (membership
@@ -66,15 +70,15 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
   defp fold_active(%Customer{id: customer_id}) do
     active_items =
       Subscription
-      |> Query.active()
-      # WR-04: `Query.active/1` filters on status only (`:active`/`:trialing`),
-      # but `Subscription.canceled?/1` treats ANY non-nil `ended_at` as
-      # terminated. A `status: :active, ended_at: <past>` row would otherwise
-      # be simultaneously "active" and "canceled" and grant entitlements for an
-      # ended subscription — a fail-open hazard for a paid gate. Exclude ended
-      # rows LOCALLY here (the shared `Query.active/1` keeps its semantics for
-      # other callers).
-      |> where([s], is_nil(s.ended_at))
+      # `Query.entitling/1` is the entitlement-grade base fetch: active/trialing,
+      # not paused, not ended. It is the database twin of
+      # `Subscription.entitling?/1`, so it closes the paused fail-open gap (a
+      # `status: :active` row with a non-nil `pause_collection` no longer grants
+      # entitlement) and folds in the WR-04 ended-row exclusion (`is_nil(ended_at)`)
+      # that used to live here as a local `where`. The status-only active
+      # fragment keeps its semantics for other callers (dunning sweeper,
+      # projections) and is intentionally NOT used for the entitlement gate.
+      |> Query.entitling()
       |> where([s], s.customer_id == ^customer_id)
       |> join(:inner, [s], i in SubscriptionItem, on: i.subscription_id == s.id)
       |> select([_s, i], {i.price_id, i.quantity})
