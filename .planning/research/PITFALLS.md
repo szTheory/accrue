@@ -205,13 +205,13 @@ Entitlement-model phase (map schema + `nimble_options` validation + unmapped-pla
 - **Redirect loop:** the guard redirects unentitled users to an upgrade/pricing LiveView that *itself* is (accidentally) under the same gate → infinite redirect.
 - **Gating after expensive mount:** the check is placed *inside* `mount/3` after data loading, so expensive queries run for users about to be denied — wasted work and a side-channel (timing/partial render) before redirect.
 - **Disconnected vs connected mount:** `on_mount` runs twice (static render + connected). Doing the load only in the connected branch, or expensive provider work in both, causes flicker or double-work.
-- **LiveView leaking into core:** to make `on_mount` "first-party," someone adds `phoenix_live_view` as a hard dep of `accrue` core — violating the constraint that core stays LiveView-free (LV is admin-only).
+- **LiveView *socket runtime* leaking into always-compiled core:** to make `on_mount` "first-party," someone references `Phoenix.LiveView` / `on_mount` / `Socket` from an always-compiled core module — violating the real constraint that core stays **LiveView-runtime-free** (no socket-runtime coupling in always-compiled code). Note: `phoenix_live_view` is *already* a required core dep (it ships `Phoenix.Component`/`~H` for the email + invoice render spine), so adding the package is **not** the violation — coupling the socket runtime is.
 
 **Why it happens:**
-`on_mount` composition order is subtle and host-controlled; the gate author doesn't control where the host places it. And the milestone wants a first-party LiveView guard, pressuring LV code into core.
+`on_mount` composition order is subtle and host-controlled; the gate author doesn't control where the host places it. And the milestone wants a first-party LiveView guard, pressuring socket-runtime code into always-compiled core.
 
 **How to avoid:**
-- **Ship the `on_mount` guard from a LiveView-aware location, not `accrue` core.** Per "phoenix_live_view stays optional in core," the helper belongs in `accrue_admin` (already hard-deps LiveView) or a thin opt-in module guarded by the optional-dep/conditional-compilation pattern — never a hard core dependency. Document that hosts add it to their *own* LiveView's `on_mount` list.
+- **Ship the `on_mount` guard from CORE `accrue`, conditionally compiled — not from `accrue_admin`, not a new package.** The guard lives at `lib/accrue/live/entitlements.ex` (`Accrue.Live.Entitlements`) and is wrapped in the canonical Sigra 4-pattern (`if Code.ensure_loaded?(Phoenix.LiveView) do … end` + `@compile {:no_warn_undefined, …}` + narrow imports). It gates the *host's own* LiveViews, so placing it in `accrue_admin` would force host route-gating to pull in the entire admin dashboard — a layering inversion. `phoenix_live_view` is already required in core, so no new dep is added. The real invariant is "no always-compiled core module references the LiveView socket runtime," enforced by a merge-blocking static gate (grep/Credo over `lib/accrue/`). Document that hosts add the guard to their *own* LiveView's `on_mount` list.
 - **Document required ordering explicitly:** entitlement `on_mount` comes **after** the host's auth `on_mount` (it depends on `current_user`). Provide the exact `live_session`/`on_mount` snippet in `guides/entitlements.md`. Make the guard tolerate (fail-closed on) a missing `current_user` rather than crash, so misordering degrades to "denied," never "500."
 - **Halt early, before expensive work:** the guard returns `{:halt, redirect(...)}` from `on_mount` *before* the host's `mount/3` data loading — `on_mount` is exactly the right hook. Never gate inside `mount/3` after loads.
 - **Break redirect loops:** document that the upgrade/pricing destination must be *outside* the gated `live_session`. Optionally detect self-redirect and fall through to a plain halt.
@@ -219,14 +219,14 @@ Entitlement-model phase (map schema + `nimble_options` validation + unmapped-pla
 - Provide the controller-level `Plug` guard (`require_plan`/`require_feature`) for non-LiveView routes in core (plugs are fine in core — only LiveView is restricted), so non-LiveView hosts still get gating.
 
 **Warning signs:**
-- `phoenix_live_view` shows up in `accrue/mix.exs` deps (non-optional).
+- An **always-compiled** core module (anything outside the `if Code.ensure_loaded?(Phoenix.LiveView)` block under `lib/accrue/live/`) references `Phoenix.LiveView` / `on_mount` / `Phoenix.LiveView.Socket` / `Phoenix.Socket`. (A non-optional `phoenix_live_view` in `accrue/mix.exs` is **expected and correct** — it backs `Phoenix.Component` — and is *not* a warning sign.)
 - The guide's `on_mount` example places entitlement before auth.
 - The pricing/upgrade page is inside the same `live_session` as gated pages.
 - `mount/3` loads data then checks entitlement.
 - The guard raises (rather than halts/denies) when `current_user` is missing.
 
 **Phase to address:**
-LiveView `on_mount` guard phase (placement outside core, ordering docs, halt-before-load) and plug-guard phase (controller path in core). The "must not add LV to core" check belongs in that phase's exit criteria and ideally a compile/deps verifier.
+LiveView `on_mount` guard phase (cond-compiled guard in core `lib/accrue/live/entitlements.ex`, ordering docs, halt-before-load) and plug-guard phase (controller path in core). The "no always-compiled core module references the LiveView socket runtime" check belongs in that phase's exit criteria as a merge-blocking static gate (grep/Credo over `lib/accrue/`).
 
 ---
 
@@ -265,7 +265,7 @@ Entitlement-model phase (seat predicate read-only, boundary documented). Flag fo
 | Live Stripe call in `entitled?/2` for "freshness" | Always "current" | Latency + rate limits + Stripe outage = auth outage (P4) | **Never** — persist locally per Stripe's own guidance |
 | Separate Stripe vs local resolution paths | Each path simple in isolation | Provider drift; Fake-passes-prod-fails (P5) | Only if a shared core resolver underlies both |
 | Cross-request cache without invalidation hooks | Fast hot path | Stale "entitled" never clears = persistent leak (P4) | Only with invalidation wired to webhook worker + write path, and only if a benchmark proves need |
-| `phoenix_live_view` as hard dep to ship `on_mount` in core | First-party LV guard | Violates core-stays-LV-free constraint (P8) | **Never** — guard lives in admin/opt-in module |
+| Referencing the LiveView socket runtime (`Phoenix.LiveView` / `on_mount` / `Socket`) from always-compiled core | First-party LV guard | Violates core-stays-LiveView-**runtime**-free constraint (P8) | **Never** — guard lives in cond-compiled core (`lib/accrue/live/entitlements.ex`); a non-optional `phoenix_live_view` dep is fine (backs `Phoenix.Component`) |
 | Plan→feature map keyed on display names | Reads nicely | Drift on Dashboard price changes, silent miss (P7) | Only for throwaway demos, never production guidance |
 | Seat predicate treated as enforcement | No transaction needed | Over-allocation under concurrency (P9) | Only as a read-only hint with host owning atomicity |
 
@@ -279,7 +279,7 @@ Entitlement-model phase (seat predicate read-only, boundary documented). Flag fo
 | Braintree (no native entitlements) | Building a Braintree-specific entitlement path | Resolve from the canonical host plan→feature map; label `host-owned` |
 | `Accrue.Auth` (Sigra/phx.gen.auth/Ueberauth) | Coupling the gate to a concrete session/user type | Take a billable; reach identity only through the `Accrue.Auth` behaviour facade |
 | Oban webhook queue | Entitlement webhooks stuck behind slow queues, widening convergence gap | Entitlement-relevant events in a fast queue; projection write in the dispatch worker |
-| `accrue_admin` LiveView | Adding LV to core to ship the `on_mount` guard | Ship the guard from admin / opt-in conditional module; core stays LV-free |
+| `accrue_admin` LiveView | Coupling the LiveView socket runtime into always-compiled core to ship the `on_mount` guard | Ship the guard from cond-compiled core (`lib/accrue/live/entitlements.ex`); core stays runtime-LiveView-free (no socket runtime in always-compiled code; `phoenix_live_view` is already a required core dep) |
 
 ## Performance Traps
 
@@ -330,7 +330,7 @@ The immutable `accrue_events` ledger is append-only (PG trigger blocks UPDATE/DE
 - [ ] **Stripe summary sync:** Often missing ordering — verify an out-of-order older summary can't overwrite a newer one (monotonic ts/id), and that >10-entitlement truncation doesn't silently drop features.
 - [ ] **Provider parity:** Often missing real-Stripe check — verify the advisory live-Stripe lane asserts the same access as Fake; verify per-provider support labels exist.
 - [ ] **No live API on gate path:** Verify telemetry shows `entitled?` doing zero DB/HTTP work when entitlements are pre-resolved into assigns.
-- [ ] **Core stays LV-free:** Verify `accrue/mix.exs` has no non-optional `phoenix_live_view`; the `on_mount` guard ships from admin/opt-in.
+- [ ] **Core stays runtime-LiveView-free:** Verify no always-compiled core module references the LiveView socket runtime (`Phoenix.LiveView` / `on_mount` / `Socket`); the `on_mount` guard ships cond-compiled in core (`lib/accrue/live/entitlements.ex`). A non-optional `phoenix_live_view` dep is expected (backs `Phoenix.Component`), not a violation.
 - [ ] **Auth-agnostic:** Verify the gate works with a plain `phx.gen.auth`-shaped user (no Sigra) end to end.
 - [ ] **Unmapped plan:** Verify a subscription on a plan absent from the map denies + emits `[:accrue, :entitlement, :unmapped_plan]`.
 - [ ] **Telemetry/ledger:** Verify gate decisions emit spans; verify *grants/denials of normal traffic are not flooding the immutable ledger*.
@@ -346,7 +346,7 @@ The immutable `accrue_events` ledger is append-only (PG trigger blocks UPDATE/DE
 | Stale cache leaking grants | MEDIUM | Wire invalidation to webhook worker + write path, or remove cache and rely on per-request resolve; force-refresh affected customers |
 | Stripe summary out-of-order overwrite | MEDIUM | Add monotonic ts/id guard; replay/refresh affected customers via existing webhook replay/DLQ admin |
 | Plan→feature map drift | LOW | Update map (stable-id keyed); run drift mix task; unmapped-plan telemetry tells you who was affected |
-| LV added to core | MEDIUM | Move `on_mount` guard to admin/opt-in; remove core dep; re-verify deps gate |
+| LiveView socket runtime referenced from always-compiled core | MEDIUM | Move the offending reference into the cond-compiled `lib/accrue/live/entitlements.ex` block (or remove it); re-verify the static merge gate over `lib/accrue/` (no `phoenix_live_view` dep removal needed — it backs `Phoenix.Component`) |
 | Seat over-allocation | MEDIUM | Add transaction/constraint on host add path; reconcile over-allocated tenants; document host-atomicity |
 
 ## Pitfall-to-Phase Mapping
@@ -360,7 +360,7 @@ The immutable `accrue_events` ledger is append-only (PG trigger blocks UPDATE/DE
 | 5. Provider drift | Provider-honest-matrix + Stripe-sync | Shared resolver core; support-matrix verifier re-fails on drift; advisory live-Stripe parity job |
 | 6. Auth/identity over-coupling | Gate-API core + plug/LiveView guard | Gate works with plain `phx.gen.auth` user; no Sigra/Lockspire in core entitlement paths |
 | 7. Config/mapping drift | Entitlement-model + admin-surface | `nimble_options` boot validation; unmapped-plan telemetry; drift mix task; admin shows resolved entitlements |
-| 8. LiveView guard pitfalls | LiveView `on_mount` guard phase | Deps gate: no non-optional LV in core; ordering/halt-before-load docs + tests; upgrade route outside gated session |
+| 8. LiveView guard pitfalls | LiveView `on_mount` guard phase | Static merge gate: no always-compiled core module references the LiveView socket runtime (cond-compiled guard in `lib/accrue/live/`); ordering/halt-before-load docs + tests; upgrade route outside gated session |
 | 9. Seat race conditions | Entitlement-model (seats only) | Read-only predicate documented as non-enforcing; concurrent add test in example/docs |
 | Ledger/telemetry noise | All entitlement phases | Per-check = telemetry only; state-changes = ledger via `record_multi`; ledger row-count sanity test |
 
@@ -373,7 +373,7 @@ The immutable `accrue_events` ledger is append-only (PG trigger blocks UPDATE/DE
 - `accrue/lib/accrue/events.ex` — append-only ledger `record/1`/`record_multi/2`; immutability trigger; actor/trace capture. (HIGH — source)
 - `accrue/lib/accrue/telemetry.ex` + `billing.ex` — `span/3` over `:telemetry.span/3`; `span_billing` pattern for entry points. (HIGH — source)
 - `accrue/lib/accrue/config.ex` — `nimble_options` config validation; compile-time vs runtime adapter boundary. (HIGH — source)
-- `.planning/PROJECT.md` — v1.39 targets + out-of-scope (no rich quota math, keep Sigra/Lockspire adapter-thin, core stays LiveView-free, fast Oban webhook queue concurrency); dual-provider drift-gate culture (v1.33–v1.37). (HIGH)
+- `.planning/PROJECT.md` — v1.39 targets + out-of-scope (no rich quota math, keep Sigra/Lockspire adapter-thin, core stays runtime-LiveView-free — `phoenix_live_view` required for `Phoenix.Component`, no socket-runtime coupling, fast Oban webhook queue concurrency); dual-provider drift-gate culture (v1.33–v1.37). (HIGH)
 - `.planning/research/JTBD-FRONTIER.md` — entitlements = #1 gap; "gate on subscription state Accrue already holds locally"; verify→persist→enqueue→200 webhook path. (HIGH)
 - `.planning/seeds/SEED-002-ecosystem-integrations.md` #4 — Sigra/Lockspire framing; `Accrue.has_active_plan?(user, "pro")` example. (HIGH)
 - Stripe Entitlements docs — recommends persisting active entitlements locally rather than fetching on demand; `entitlements.active_entitlement_summary.updated` webhook is the change signal: https://docs.stripe.com/billing/entitlements (MEDIUM — official docs, verified 2026-05-22)

@@ -18,10 +18,14 @@ defmodule Accrue.Oban.Middleware do
 
   ## LiveView integration
 
-  LiveView is a hard dependency of `accrue_admin` only, never `accrue`.
-  The on_mount hook equivalent (setting operation_id from the LiveView
-  socket's `session_id`) lives in `accrue_admin` — see CLAUDE.md for
-  the dependency boundary rule.
+  LiveView's socket runtime is never coupled in core; `phoenix_live_view`
+  is a required core dep for `Phoenix.Component` (the email/invoice render
+  spine plus the cond-compiled `Accrue.Live.Entitlements` on_mount guard),
+  but core `accrue` stays runtime-LiveView-free — no LiveView socket
+  runtime in always-compiled code. The operation_id on_mount equivalent
+  (setting operation_id from the LiveView socket's `session_id`) for the
+  admin socket lives in `accrue_admin` — see CLAUDE.md for the dependency
+  boundary rule.
   """
 
   @doc """
