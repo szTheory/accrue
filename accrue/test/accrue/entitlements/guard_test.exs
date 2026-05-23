@@ -144,6 +144,19 @@ defmodule Accrue.Entitlements.GuardTest do
       assert conn.assigns[:accrue_billable] == b
       refute Map.has_key?(conn.assigns, :accrue_entitled)
     end
+
+    test "the :live surface stashes the resolved billable TERM onto the returned container" do
+      b = entitled_billable()
+      # A socket-shaped container (the Guard only needs `%{assigns: ...}`).
+      container = %{assigns: %{current_user: b}}
+
+      assert {:allow, container} = Guard.check(:live, container, feature: :reports)
+
+      # D-17: the resolved billable is carried on the returned container's assigns
+      # (the surface mirrors it via assign_new) — not dropped, never the boolean.
+      assert container.assigns[:accrue_billable] == b
+      refute Map.has_key?(container.assigns, :accrue_entitled)
+    end
   end
 
   # --------------------------------------------------------------------------

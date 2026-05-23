@@ -88,9 +88,10 @@ defmodule Accrue.Entitlements.Guard do
 
   For the `:plug` surface the resolved billable is stashed once on the conn via
   `Plug.Conn.assign(conn, :accrue_billable, billable)` (read first; resolved at
-  most once). For the `:live` surface the resolved billable is returned inside
-  the allowed container untouched (no `assign_new`/Component reference) so the
-  surface owns its own `assign_new` stash.
+  most once). For the `:live` surface the resolved billable is stashed onto the
+  returned container's assigns via a plain map update (NO `Component.assign`
+  reference here) so the cond-compiled surface can mirror it with `assign_new`
+  (read first; resolved at most once).
   """
   @spec check(:plug | :live, container(), keyword()) ::
           {:allow, container()} | {:deny, deny_form(), ctx()}
@@ -229,8 +230,19 @@ defmodule Accrue.Entitlements.Guard do
     case container do
       %{assigns: %{} = assigns} ->
         case Map.get(assigns, @stash_key, :__unset__) do
-          :__unset__ -> {resolve_billable(:live, container, opts), container}
-          billable -> {billable, container}
+          :__unset__ ->
+            billable = resolve_billable(:live, container, opts)
+            # Carry the billable TERM on the returned container's assigns via a
+            # plain map update — NOT a LiveView component assign helper, so this
+            # module keeps zero socket-runtime references (Plan 06 merge gate).
+            # This mirrors the :plug clause's Plug.Conn.assign (itself a map put);
+            # the cond-compiled surface re-stashes via assign_new so the value is
+            # registered for change tracking. Without this the surface's
+            # assign_new read nil and D-17 resolve-once was silently defeated.
+            {billable, %{container | assigns: Map.put(assigns, @stash_key, billable)}}
+
+          billable ->
+            {billable, container}
         end
 
       _ ->

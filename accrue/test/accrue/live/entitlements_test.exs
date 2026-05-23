@@ -116,12 +116,15 @@ defmodule Accrue.Live.EntitlementsTest do
   # --------------------------------------------------------------------------
   describe "on_mount allow leg ({:cont, socket})" do
     test "{:require_feature, :reports} with an entitled billable -> {:cont, _}, billable stashed" do
-      socket = socket_with_billable(entitled_billable())
+      billable = entitled_billable()
+      socket = socket_with_billable(billable)
 
       assert {:cont, socket2} = LiveGuard.on_mount({:require_feature, :reports}, %{}, %{}, socket)
 
-      # The billable-only stash is present; the boolean decision is NOT stashed.
-      assert Map.has_key?(socket2.assigns, :accrue_billable)
+      # The billable-only stash carries the RESOLVED billable VALUE (D-17
+      # resolve-once) — asserting the value, not merely the key, so a silently
+      # nil stash (CR-01) fails. The boolean decision is NEVER stashed.
+      assert socket2.assigns.accrue_billable == billable
       refute Map.has_key?(socket2.assigns, :accrue_entitled)
       # Allowed mounts are never redirected.
       assert socket2.redirected == nil
