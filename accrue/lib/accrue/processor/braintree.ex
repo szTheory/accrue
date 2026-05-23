@@ -39,7 +39,8 @@ defmodule Accrue.Processor.Braintree do
       checkout: %{create: true, fetch: true, hosted: true, embedded: false},
       invoice: %{lifecycle_webhook_projection: true},
       webhook: %{verify: true, parse: true},
-      billing_portal: %{create: true}
+      billing_portal: %{create: true},
+      entitlements: %{local_mapping: true}
     }
   end
 

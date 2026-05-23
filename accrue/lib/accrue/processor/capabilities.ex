@@ -56,6 +56,9 @@ defmodule Accrue.Processor.Capabilities do
     webhook: %{
       verify: "all first-party",
       parse: "all first-party"
+    },
+    entitlements: %{
+      local_mapping: "all first-party"
     }
   }
 
@@ -94,6 +97,17 @@ defmodule Accrue.Processor.Capabilities do
         fake: "testing/local-only",
         stripe: "native",
         braintree: "unsupported"
+      }
+    },
+    # CONVERGENCE row — unlike every divergence lane above, entitlement
+    # resolution is provider-INDEPENDENT local derivation (D-03), so all three
+    # providers carry the same "local-identical" lane. Never a native/
+    # unsupported/bounded label here (the drift gate enforces this).
+    entitlements: %{
+      local_mapping: %{
+        fake: "local-identical",
+        stripe: "local-identical",
+        braintree: "local-identical"
       }
     }
   }
