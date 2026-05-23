@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
-status: verifying
-stopped_at: Phase 126 context gathered
-last_updated: "2026-05-23T18:55:02.846Z"
-last_activity: 2026-05-23
+status: executing
+stopped_at: Phase 126 UI-SPEC approved
+last_updated: "2026-05-23T20:24:15.064Z"
+last_activity: 2026-05-23 -- Phase 126 planning complete
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 13
+  total_plans: 17
   completed_plans: 13
   percent: 60
 ---
@@ -28,8 +28,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 126
 Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-05-23
+Status: Ready to execute
+Last activity: 2026-05-23 -- Phase 126 planning complete
 
 Progress: [██████████] 100% (phase 123 plans complete)
 
@@ -131,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T18:55:02.840Z
-Stopped at: Phase 126 context gathered
-Resume file: .planning/phases/126-admin-surface-docs-jtbd-spine/126-CONTEXT.md
+Last session: 2026-05-23T19:13:01.674Z
+Stopped at: Phase 126 UI-SPEC approved
+Resume file: .planning/phases/126-admin-surface-docs-jtbd-spine/126-UI-SPEC.md
