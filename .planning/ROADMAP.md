@@ -20,7 +20,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 - Decimal phases (124.1, …): Urgent insertions (marked INSERTED)
 
 - [x] **Phase 123: Config + Core Gate API Foundation** - Host plan→feature/quota config plus fail-closed `has_active_plan?` / `entitled?` / `features_for` / `entitlement_quantity` over local subscription state, with telemetry/ledger split (completed 2026-05-22)
-- [ ] **Phase 124: Enforcement Surfaces — Plug + LiveView Guards** - Controller Plug guard and conditionally-compiled LiveView `on_mount` guard, with a merge-blocking "core stays runtime-LiveView-free" check
+- [x] **Phase 124: Enforcement Surfaces — Plug + LiveView Guards** - Controller Plug guard and conditionally-compiled LiveView `on_mount` guard, with a merge-blocking "core stays runtime-LiveView-free" check (completed 2026-05-23)
 - [ ] **Phase 125: Provider Honesty + Lifecycle Truth** - Resolver behaviour + capability-matrix rows + merge-blocking drift gate, plus the lifecycle→entitlement truth-table SSOT
 - [ ] **Phase 126: Admin Surface + Docs / JTBD Spine** - Read-only entitlements view in `accrue_admin`, `guides/entitlements.md`, the JTBD ⛔→✅ flip, First Hour/README spine, and green package-doc verifiers
 - [ ] **Phase 127: Optional Stripe-Native Sync (isolated, off by default)** - Webhook→cache advisory overlay with monotonic ordering, behind a flag, that must not block the milestone's core value
@@ -66,7 +66,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
   - [x] 124-03-PLAN.md — Plug surface: Accrue.Plug.RequireEntitlement + require_feature/require_plan router macros + plug/router tests (ENT-06)
   - [x] 124-04-PLAN.md — LiveView surface: cond-compiled Accrue.Live.Entitlements on_mount guard + source-assertion/on_mount test (ENT-07)
   - [x] 124-05-PLAN.md — D-06 LiveView-runtime-free doc reconciliation (CLAUDE.md / ROADMAP SC#3 / PITFALLS.md / oban middleware / mix.exs comment) (ENT-07)
-  - [ ] 124-06-PLAN.md — Merge-blocking static LiveView-runtime-free CI gate + ci.yml wiring + cross-surface fail-closed property test (ENT-06/07)
+  - [x] 124-06-PLAN.md — Merge-blocking static LiveView-runtime-free CI gate + ci.yml wiring + cross-surface fail-closed property test (ENT-06/07)
 
 **UI hint**: yes
 
@@ -121,7 +121,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 123. Config + Core Gate API Foundation | v1.39 | 4/4 | Complete    | 2026-05-22 |
-| 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 5/6 | In Progress|  |
+| 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 6/6 | Complete   | 2026-05-23 |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 0/TBD | Not started | - |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 0/TBD | Not started | - |
 | 127. Optional Stripe-Native Sync (isolated) | v1.39 | 0/TBD | Not started | - |

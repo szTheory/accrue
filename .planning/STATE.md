@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
-status: executing
+status: verifying
 stopped_at: Completed 124-03-PLAN.md
-last_updated: "2026-05-23T12:40:46.308Z"
+last_updated: "2026-05-23T12:46:22.010Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 10
-  completed_plans: 9
-  percent: 20
+  completed_plans: 10
+  percent: 40
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 124 (enforcement-surfaces-plug-liveview-guards) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-23
 
 Progress: [██████████] 100% (phase 123 plans complete)
@@ -64,6 +64,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 124 P02 | 3min | 3 tasks | 3 files |
 | Phase 124 P03 | 2min | 2 tasks | 4 files |
 | Phase 124 P04 | 1min | 2 tasks | 2 files |
+| Phase 124 P06 | 2min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 124]: [Phase 124 P03]: Accrue.Plug.RequireEntitlement (ENT-06) is a thin Plug adapter — init/1 raises ArgumentError on ambiguous feature:/plan: intent (T-124-08), call/2 delegates allow/deny to Accrue.Entitlements.Guard.check/3 + deny_plug/4; pure Plug, zero Phoenix.Controller coupling
 - [Phase 124]: [Phase 124 P03]: require_feature/1 + require_plan/1 router macros are single-arg sugar expanding to plug(Accrue.Plug.RequireEntitlement, feature:/plan: …); status:/on_deny:/billable: overrides route through the explicit plug form (documented split)
 - [Phase ?]: [Phase 124 P04]: Accrue.Live.Entitlements (ENT-07) is the cond-compiled on_mount/4 LiveView surface — {:require_feature,x}/{:require_plan,y} clauses delegate to Guard.check(:live,…) and only surface-translate the deny enum ({:redirect,path}->redirect; :forbidden/{status,body} degradation->put_flash+redirect(deny_path)); resolve-once billable-only assign_new(:accrue_billable). The ONLY core file with LiveView refs, all inside Code.ensure_loaded?(Phoenix.LiveView) (D-04); merge gate (Plan 06) excludes /accrue/live/
+- [Phase ?]: [Phase 124 P06]: runtime-LiveView-free is now machine-enforced — scripts/ci/verify_core_liveview_runtime_free.sh (D-05) static grep gate scans accrue/lib for real socket-runtime refs (import/alias Phoenix.LiveView/Socket, def on_mount), ^[^#]* allowlists doc comments, grep -v /accrue/live/ exempts the cond-compiled on_mount guard; wired merge-blocking in docs-contracts-shift-left. SC#4 cross-surface fail-closed property drives Guard.check/3 on :plug AND :live: nil/garbage/raising/no-active-sub DENY, allow pinned to the sole affirmative-resolved-match path
 
 ### Pending Todos
 
@@ -121,6 +123,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T12:40:42.620Z
+Last session: 2026-05-23T12:46:01.612Z
 Stopped at: Completed 124-03-PLAN.md
 Resume file: None
