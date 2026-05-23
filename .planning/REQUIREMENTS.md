@@ -29,7 +29,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 ### Provider Honesty & Lifecycle Truth
 
 - [x] **ENT-08**: Entitlement resolution is provider-honest via a Resolver behaviour + capability-matrix rows — local plan→feature mapping behaves identically across Stripe, Braintree, and Fake, with a merge-blocking drift gate (mirroring the SCM-06 / PROC-24 support-contract pattern).
-- [ ] **ENT-09**: Entitlement truth maps explicitly to existing lifecycle states (trialing ✅, canceling/paid-through ✅, paused ✗, canceled ✗), with past-due grace as a fail-safe configurable knob reusing the dunning grace overlay, documented as an SSOT truth table.
+- [x] **ENT-09**: Entitlement truth maps explicitly to existing lifecycle states (trialing ✅, canceling/paid-through ✅, paused ✗, canceled ✗), with past-due grace as a fail-safe configurable knob reusing the dunning grace overlay, documented as an SSOT truth table.
 
 ### Optional Stripe-Native Sync (isolated final phase)
 
@@ -75,7 +75,7 @@ Which phases cover which requirements. Phases continue from v1.38 (ended at Phas
 | ENT-06 | Phase 124 | Complete |
 | ENT-07 | Phase 124 | Complete |
 | ENT-08 | Phase 125 | Complete |
-| ENT-09 | Phase 125 | Pending |
+| ENT-09 | Phase 125 | Complete |
 | ENT-10 | Phase 127 | Pending |
 | ENT-11 | Phase 126 | Pending |
 | ENT-12 | Phase 126 | Pending |

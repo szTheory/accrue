@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
-stopped_at: Phase 125 context gathered
-last_updated: "2026-05-23T14:15:33.864Z"
+stopped_at: Completed 125-02-PLAN.md
+last_updated: "2026-05-23T14:25:32.595Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 40
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 125 (provider-honesty-lifecycle-truth) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-23
 
@@ -67,6 +67,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 124 P06 | 2min | 3 tasks | 3 files |
 | 124 | 6 | - | - |
 | Phase 125 P01 | 5min | 3 tasks | 7 files |
+| Phase 125 P02 | 6min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: [Phase 124 P04]: Accrue.Live.Entitlements (ENT-07) is the cond-compiled on_mount/4 LiveView surface — {:require_feature,x}/{:require_plan,y} clauses delegate to Guard.check(:live,…) and only surface-translate the deny enum ({:redirect,path}->redirect; :forbidden/{status,body} degradation->put_flash+redirect(deny_path)); resolve-once billable-only assign_new(:accrue_billable). The ONLY core file with LiveView refs, all inside Code.ensure_loaded?(Phoenix.LiveView) (D-04); merge gate (Plan 06) excludes /accrue/live/
 - [Phase ?]: [Phase 124 P06]: runtime-LiveView-free is now machine-enforced — scripts/ci/verify_core_liveview_runtime_free.sh (D-05) static grep gate scans accrue/lib for real socket-runtime refs (import/alias Phoenix.LiveView/Socket, def on_mount), ^[^#]* allowlists doc comments, grep -v /accrue/live/ exempts the cond-compiled on_mount guard; wired merge-blocking in docs-contracts-shift-left. SC#4 cross-surface fail-closed property drives Guard.check/3 on :plug AND :live: nil/garbage/raising/no-active-sub DENY, allow pinned to the sole affirmative-resolved-match path
 - [Phase ?]: [Phase 125 P01]: ENT-08 provider-honesty surface — additive entitlements: capability group (support label 'all first-party'; the matrix's first CONVERGENCE lane 'local-identical' across fake/stripe/braintree, contrasting every existing divergence lane). Mirrored byte-for-byte across code labels + processor-support-matrix doc + verify_processor_support_matrix.sh drift gate (same-PR SSOT co-update, D-09). Negative divergence guard rejects any native/unsupported/bounded entitlements label; widened its regex to scan ALL provider columns (planner regex only checked the Fake column). provider_honesty_test proves LocalMap.resolve/2 is == across all three processors with zero processor calls (telemetry-never-fired guard).
+- [Phase 125 P02]: ENT-09 lifecycle->entitlement SSOT — Subscription.entitling?/1 (composes active?/paused?/canceled?, never raw .status) + its Query.entitling/1 Ecto twin (active/trialing + is_nil(pause_collection) + is_nil(ended_at), NOT the legacy :paused OR-clause since active/1 already excludes :paused). LocalMap.fold_active/1 retargeted to Query.entitling/1, closing the D-11 paused fail-OPEN broken-access-control gap (status:active + pause_collection no longer grants). Query.active/1 left untouched (status-only semantics for dunning/projections). Pinned merge-blocking: 8-status truth table, predicate<->fragment twin invariant (per-row DB cross-check), end-to-end paused-gap closure. Truth table documented in lifecycle_semantics.md; :past_due row is a knob placeholder for Plan 03.
 
 ### Pending Todos
 
@@ -126,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T14:12:53.771Z
-Stopped at: Phase 125 context gathered
+Last session: 2026-05-23T14:25:32.586Z
+Stopped at: Completed 125-02-PLAN.md
 Resume file: None
