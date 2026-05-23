@@ -23,8 +23,8 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Enforcement Surfaces
 
-- [ ] **ENT-06**: A developer can gate a Phoenix controller route with a Plug guard (`require_plan` / `require_feature`) that halts with a configurable fail response (redirect / 403) when not entitled.
-- [ ] **ENT-07**: A developer can gate a host LiveView with an `on_mount` guard, shipped via conditional compilation so core `accrue` stays runtime-LiveView-free; the billable-resolution key (e.g. `current_scope` / `current_user`) is host-configurable and adapter-thin (no required Sigra/Lockspire coupling).
+- [x] **ENT-06**: A developer can gate a Phoenix controller route with a Plug guard (`require_plan` / `require_feature`) that halts with a configurable fail response (redirect / 403) when not entitled.
+- [x] **ENT-07**: A developer can gate a host LiveView with an `on_mount` guard, shipped via conditional compilation so core `accrue` stays runtime-LiveView-free; the billable-resolution key (e.g. `current_scope` / `current_user`) is host-configurable and adapter-thin (no required Sigra/Lockspire coupling).
 
 ### Provider Honesty & Lifecycle Truth
 
@@ -72,8 +72,8 @@ Which phases cover which requirements. Phases continue from v1.38 (ended at Phas
 | ENT-03 | Phase 123 | Complete |
 | ENT-04 | Phase 123 | Complete |
 | ENT-05 | Phase 123 | Complete |
-| ENT-06 | Phase 124 | Pending |
-| ENT-07 | Phase 124 | Pending |
+| ENT-06 | Phase 124 | Complete |
+| ENT-07 | Phase 124 | Complete |
 | ENT-08 | Phase 125 | Pending |
 | ENT-09 | Phase 125 | Pending |
 | ENT-10 | Phase 127 | Pending |

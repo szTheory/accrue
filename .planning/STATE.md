@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 124 context gathered
-last_updated: "2026-05-23T12:07:27.908Z"
-last_activity: 2026-05-23 -- Phase 124 planning complete
+last_updated: "2026-05-23T12:19:10.729Z"
+last_activity: 2026-05-23
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 123 — config-core-gate-api-foundation
+**Current focus:** Phase 124 — enforcement-surfaces-plug-liveview-guards
 
 ## Current Position
 
-Phase: 124
-Plan: Not started
+Phase: 124 (enforcement-surfaces-plug-liveview-guards) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-05-23 -- Phase 124 planning complete
+Last activity: 2026-05-23
 
 Progress: [██████████] 100% (phase 123 plans complete)
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 123 | 4 | - | - |
+| Phase 124 P01 | 3min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 123 P03]: LocalMap folds local active-subs with zero processor calls (read-only customer lookup, Query.active/1, never raw .status); per-check decisions telemetry-only, zero accrue_events writes (D-21).
 - [Phase 123 P04]: public gate API is 4 thin defdelegates on Accrue to Accrue.Entitlements (no re-implementation); the D-10 property test asserts through the public Accrue.* delegates so it proves delegate wiring AND the fail-closed contract in one pass.
 - [Phase 123 P04]: D-16 reconcile — ROADMAP SC#5 + REQUIREMENTS ENT-05 changed singular [:accrue, :entitlement, :check] -> plural [:accrue, :entitlements, :check] (event-token only); D-14 one-way-dependency grep gate certified green.
+- [Phase ?]: [Phase 124 P01]: guard config (billable/on_deny/deny_path) lives under :entitlements, boot-validated free via validate_at_boot!; on_deny uses a custom validate_on_deny/1 (fail loud at boot, T-124-01) not type: :any
+- [Phase ?]: [Phase 124 P01]: billable uses {:or, [nil, {:fun, 1}]} — NimbleOptions 1.1.1 supports both subtypes (verified in deps), no :any fallback needed; entitlements/0 surfaces the 3 guard-key defaults via Keyword.put_new (raw :plans read unchanged, resolver unaffected)
+- [Phase ?]: [Phase 124 P01]: surface: is an additive opt on internal entitled?/3 + has_active_plan?/3 merged onto the existing :check span (:surface OTel-allowlisted atom+string); public Accrue facade delegates stay arity 2 (D-18, T-124-03 non-breaking, fail-closed property test green)
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T09:34:12.604Z
+Last session: 2026-05-23T12:16:39.060Z
 Stopped at: Phase 124 context gathered
-Resume file: .planning/phases/124-enforcement-surfaces-plug-liveview-guards/124-CONTEXT.md
+Resume file: None
