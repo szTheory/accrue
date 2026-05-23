@@ -370,6 +370,112 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
     end
   end
 
+  # ENT-09 (Task 3): grace telemetry reasons surfaced end-to-end through the
+  # public gate (`Accrue.Entitlements.entitled?/2`), captured off the inherited
+  # `[:accrue, :entitlements, :check]` span (no new event).
+  defp attach_reason_capture do
+    test_pid = self()
+    ref = make_ref()
+    handler_id = {__MODULE__, :reason, ref}
+
+    :telemetry.attach(
+      handler_id,
+      [:accrue, :entitlements, :check, :stop],
+      fn _name, _measurements, metadata, _ ->
+        send(test_pid, {:reason_event, metadata.reason, metadata.result})
+      end,
+      nil
+    )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+    :ok
+  end
+
+  describe "grace telemetry reasons (ENT-09, D-19)" do
+    test "in-window past_due grant carries reason: :past_due_grace" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+      attach_reason_capture()
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -1 * 86_400, :second))
+
+      assert Accrue.Entitlements.entitled?(billable_for(oid), :reports)
+      assert_receive {:reason_event, :past_due_grace, true}
+    end
+
+    test "out-of-window past_due deny carries reason: :past_due_expired (distinct from :no_active_subscription)" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+      attach_reason_capture()
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -30 * 86_400, :second))
+
+      refute Accrue.Entitlements.entitled?(billable_for(oid), :reports)
+      assert_receive {:reason_event, :past_due_expired, false}
+    end
+
+    test "with grace :none a past_due sub denies with :no_active_subscription, NOT :past_due_expired" do
+      attach_reason_capture()
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -1 * 86_400, :second))
+
+      refute Accrue.Entitlements.entitled?(billable_for(oid), :reports)
+      assert_receive {:reason_event, :no_active_subscription, false}
+    end
+
+    test "a normal active grant keeps reason: :entitled (non-grace path unchanged)" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+      attach_reason_capture()
+
+      oid = Ecto.UUID.generate()
+      Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      assert Accrue.Entitlements.entitled?(billable_for(oid), :reports)
+      assert_receive {:reason_event, :entitled, true}
+    end
+
+    test "has_active_plan?/2 carries :past_due_grace for an in-window grace plan" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+      attach_reason_capture()
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.past_due_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -1 * 86_400, :second))
+
+      assert Accrue.Entitlements.has_active_plan?(billable_for(oid), :p1)
+      assert_receive {:reason_event, :past_due_grace, true}
+    end
+
+    test "end-to-end: :unpaid never grants even with grace enabled" do
+      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :past_due_grace, 14))
+
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.subscription(%{owner_id: oid, price_id: "price_p1", status: :unpaid})
+
+      _ = set_past_due_since(sub, DateTime.add(Accrue.Clock.utc_now(), -1 * 86_400, :second))
+
+      refute Accrue.Entitlements.entitled?(billable_for(oid), :reports)
+    end
+  end
+
   describe "resolve/2 unmapped + missing" do
     test "unmapped active price_id under :deny is dropped" do
       oid = Ecto.UUID.generate()

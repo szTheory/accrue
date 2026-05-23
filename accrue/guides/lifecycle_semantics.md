@@ -190,14 +190,25 @@ those predicates already handle.
 | `:canceled` / `:incomplete_expired` / any `ended_at` | ✗ | `canceled?` |
 | `:incomplete` | ✗ | initial payment not yet succeeded |
 
-[^past_due_grace]: The `:past_due` row is the only knob-controlled row. By
-    default a `:past_due` subscription fails closed (not entitling). A
-    configured `past_due_grace` policy can grant entitlement during a bounded
-    window measured from `past_due_since`; the grace knob mechanics and the
-    detailed window/`reason` semantics are configured via `past_due_grace`. A
-    grace grant is an affirmative, configured, resolved decision — never a
-    fail-open. `entitling?/1` itself models the pure pre-grace lifecycle
-    (`:past_due` ✗); the grace overlay is layered by the resolver.
+[^past_due_grace]: The `:past_due` row is the only knob-controlled row,
+    governed by the `past_due_grace` config key under `:entitlements`. By
+    default (`:none`) a `:past_due` subscription fails closed — not entitling.
+    Set `past_due_grace: :dunning` to reuse the dunning grace window
+    (`Accrue.Config.dunning()[:grace_days]`, default 14), or
+    `past_due_grace: N` for an entitlement-specific N-day window. The window is
+    measured from the subscription's `past_due_since` timestamp against
+    `Accrue.Clock` (the testable clock, never the raw wall clock), so a grant
+    holds only while `now - past_due_since` is within the window. A grace grant
+    is an affirmative, configured, **resolved** decision — never a fail-open;
+    the headline fail-closed contract is preserved. The resolver surfaces the
+    outcome on the `[:accrue, :entitlements, :check]` telemetry span's
+    `reason`: `:past_due_grace` when access is granted via the window, and the
+    distinct `:past_due_expired` (not `:no_active_subscription`) when access is
+    denied specifically because the window lapsed. Grace extends ONLY to
+    `:past_due`; `:unpaid` is dunning-terminal and never receives grace.
+    `entitling?/1` itself models the pure pre-grace lifecycle (`:past_due` ✗);
+    the grace overlay is layered conditionally by the resolver (zero query or
+    compute cost when `past_due_grace` is `:none`).
 
 ## Provider labels
 

@@ -38,13 +38,25 @@ defmodule Accrue.Entitlements.Resolver do
       grace window (a SUBSET of `:active_plans`). Empty when
       `past_due_grace` is `:none` (the default). `Accrue.Entitlements` reads
       it to select the `:past_due_grace` telemetry reason without re-querying.
+    * `:grace_features` — `MapSet` of features contributed by `:grace_plans`;
+      lets `Accrue.Entitlements` decide whether a feature grant was decided
+      by grace (and so should report `:past_due_grace`).
+    * `:expired_grace_plans` — `MapSet` of plan atoms whose `:past_due` grace
+      window has lapsed; these do NOT grant, but let `Accrue.Entitlements`
+      report the distinct `:past_due_expired` reason on the resulting deny.
+
+  Resolvers that do not implement the past-due grace overlay MAY omit the
+  three grace fields; `Accrue.Entitlements` treats absent grace fields as
+  empty.
   """
   @type resolved :: %{
-          plan: term(),
-          active_plans: MapSet.t(),
-          features: MapSet.t(),
-          quantities: map(),
-          grace_plans: MapSet.t()
+          required(:plan) => term(),
+          required(:active_plans) => MapSet.t(),
+          required(:features) => MapSet.t(),
+          required(:quantities) => map(),
+          optional(:grace_plans) => MapSet.t(),
+          optional(:grace_features) => MapSet.t(),
+          optional(:expired_grace_plans) => MapSet.t()
         }
 
   @doc """

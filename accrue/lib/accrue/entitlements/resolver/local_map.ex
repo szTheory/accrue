@@ -55,8 +55,15 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
     active_plans: MapSet.new(),
     features: MapSet.new(),
     quantities: %{},
-    grace_plans: MapSet.new()
+    grace_plans: MapSet.new(),
+    grace_features: MapSet.new(),
+    expired_grace_plans: MapSet.new()
   }
+
+  # The fold carries one extra internal accumulator (`:non_grace_features`)
+  # used only to compute the exclusive `:grace_features` set; it is stripped
+  # before the resolved map is returned.
+  @fold_seed Map.put(@empty, :non_grace_features, MapSet.new())
 
   @impl true
   def resolve(billable, _opts \\ []) do
@@ -89,18 +96,45 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
   defp fold_active(%Customer{id: customer_id}) do
     {reverse_index, plans, unmapped_action} = catalog()
 
-    customer_id
-    |> active_items()
-    |> Enum.reduce(@empty, fn {price_id, quantity, via_grace?}, acc ->
-      case Map.fetch(reverse_index, price_id) do
-        {:ok, plan_atom} ->
-          plan_entry = Keyword.get(plans, plan_atom, [])
-          merge_plan(acc, plan_atom, plan_entry, quantity, via_grace?)
+    folded =
+      customer_id
+      |> active_items()
+      |> Enum.reduce(@fold_seed, fn item, acc ->
+        fold_item(item, acc, reverse_index, plans, unmapped_action)
+      end)
 
-        :error ->
-          handle_unmapped(acc, price_id, unmapped_action)
-      end
-    end)
+    # A feature granted by BOTH a grace plan and a normal active plan is decided
+    # by the normal plan (`:entitled`), not by grace — so the exclusive grace
+    # feature set subtracts every feature any non-grace plan also grants. Strip
+    # the internal accumulator before returning the public resolved map.
+    folded
+    |> Map.put(:grace_features, MapSet.difference(folded.grace_features, folded.non_grace_features))
+    |> Map.delete(:non_grace_features)
+  end
+
+  # An out-of-window `:past_due` candidate does NOT grant, but its (mapped)
+  # plan is recorded in `expired_grace_plans` so `Accrue.Entitlements` can
+  # surface the `:past_due_expired` reason (distinct from
+  # `:no_active_subscription`). Unmapped expired rows have no plan to record.
+  defp fold_item({price_id, _quantity, :expired}, acc, reverse_index, _plans, _unmapped) do
+    case Map.fetch(reverse_index, price_id) do
+      {:ok, plan_atom} ->
+        %{acc | expired_grace_plans: MapSet.put(acc.expired_grace_plans, plan_atom)}
+
+      :error ->
+        acc
+    end
+  end
+
+  defp fold_item({price_id, quantity, via_grace?}, acc, reverse_index, plans, unmapped_action) do
+    case Map.fetch(reverse_index, price_id) do
+      {:ok, plan_atom} ->
+        plan_entry = Keyword.get(plans, plan_atom, [])
+        merge_plan(acc, plan_atom, plan_entry, quantity, via_grace?)
+
+      :error ->
+        handle_unmapped(acc, price_id, unmapped_action)
+    end
   end
 
   # Returns a normalized list of `{price_id, quantity, via_grace?}` tuples.
@@ -150,19 +184,16 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
   end
 
   # A `:past_due` candidate (per `Subscription.dunning_sweepable?/1`, the
-  # Credo-clean strict-`:past_due` check) is kept only inside the grace window;
-  # outside it, it is dropped before folding. Non-candidate rows (the
-  # active/trialing rows the widen fragment also returns) always fold, never
-  # tagged as grace.
+  # Credo-clean strict-`:past_due` check) is kept (tagged `true`) only inside
+  # the grace window; outside it, it is marked `:expired` so the resolver can
+  # record `expired_grace_plans` (it does NOT grant). Non-candidate rows (the
+  # active/trialing rows the widen fragment also returns) always fold (`false`),
+  # never tagged as grace.
   defp grace_row(price_id, quantity, sub, grace_days) do
-    if Subscription.dunning_sweepable?(sub) do
-      if PastDueGrace.within_grace?(sub, grace_days) do
-        [{price_id, quantity, true}]
-      else
-        []
-      end
-    else
-      [{price_id, quantity, false}]
+    cond do
+      not Subscription.dunning_sweepable?(sub) -> [{price_id, quantity, false}]
+      PastDueGrace.within_grace?(sub, grace_days) -> [{price_id, quantity, true}]
+      true -> [{price_id, quantity, :expired}]
     end
   end
 
@@ -188,16 +219,25 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
         Map.update(q, quota_key, capped, &max(&1, capped))
       end)
 
-    grace_plans =
-      if via_grace?, do: MapSet.put(acc.grace_plans, plan_atom), else: acc.grace_plans
+    feature_set = MapSet.new(features)
+
+    {grace_plans, grace_features, non_grace_features} =
+      if via_grace? do
+        {MapSet.put(acc.grace_plans, plan_atom), MapSet.union(acc.grace_features, feature_set),
+         acc.non_grace_features}
+      else
+        {acc.grace_plans, acc.grace_features, MapSet.union(acc.non_grace_features, feature_set)}
+      end
 
     %{
       acc
       | plan: plan_atom,
         active_plans: MapSet.put(acc.active_plans, plan_atom),
-        features: Enum.reduce(features, acc.features, &MapSet.put(&2, &1)),
+        features: MapSet.union(acc.features, feature_set),
         quantities: quantities,
-        grace_plans: grace_plans
+        grace_plans: grace_plans,
+        grace_features: grace_features,
+        non_grace_features: non_grace_features
     }
   end
 

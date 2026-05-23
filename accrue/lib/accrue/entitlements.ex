@@ -64,9 +64,17 @@ defmodule Accrue.Entitlements do
       case resolve(billable) do
         {:ok, %{features: features} = resolved} ->
           cond do
-            MapSet.member?(features, feature) -> {true, :entitled}
-            empty?(resolved) -> {false, :no_active_subscription}
-            true -> {false, :not_entitled}
+            MapSet.member?(features, feature) ->
+              {true, grant_reason(resolved, grace_features(resolved), feature)}
+
+            expired_grace?(resolved) ->
+              {false, :past_due_expired}
+
+            empty?(resolved) ->
+              {false, :no_active_subscription}
+
+            true ->
+              {false, :not_entitled}
           end
 
         :error ->
@@ -95,9 +103,17 @@ defmodule Accrue.Entitlements do
           case plan_atom(plan) do
             {:ok, plan_atom} ->
               cond do
-                MapSet.member?(active_plans, plan_atom) -> {true, :entitled, plan_atom}
-                empty?(resolved) -> {false, :no_active_subscription, plan_atom}
-                true -> {false, :not_entitled, plan_atom}
+                MapSet.member?(active_plans, plan_atom) ->
+                  {true, plan_grant_reason(resolved, plan_atom), plan_atom}
+
+                MapSet.member?(expired_grace_plans(resolved), plan_atom) ->
+                  {false, :past_due_expired, plan_atom}
+
+                empty?(resolved) ->
+                  {false, :no_active_subscription, plan_atom}
+
+                true ->
+                  {false, :not_entitled, plan_atom}
               end
 
             :error ->
@@ -172,6 +188,37 @@ defmodule Accrue.Entitlements do
 
   defp empty?(%{active_plans: active_plans}), do: MapSet.size(active_plans) == 0
   defp empty?(_), do: true
+
+  # --- Past-due grace reason selection (ENT-09, D-19) -----------------------
+  # The grace fields are additive and OPTIONAL on the resolved map; a resolver
+  # that does not implement the grace overlay simply omits them, and these
+  # readers treat absent fields as empty sets (fail-safe: no spurious grace
+  # reason). The `:reason` atom is already OTel-allowlisted (only the VALUES
+  # change) — no new telemetry event, and no ops-ledger emission: per-check
+  # decisions stay telemetry-only (D-19/D-21).
+  defp grace_features(resolved), do: Map.get(resolved, :grace_features, MapSet.new())
+  defp grace_plans(resolved), do: Map.get(resolved, :grace_plans, MapSet.new())
+
+  defp expired_grace_plans(resolved),
+    do: Map.get(resolved, :expired_grace_plans, MapSet.new())
+
+  # A feature grant is decided BY grace when the feature is granted ONLY by a
+  # past-due grace plan (`grace_features` already excludes any feature a normal
+  # active plan also grants). Otherwise it is a normal `:entitled` grant.
+  defp grant_reason(_resolved, grace_features, feature) do
+    if MapSet.member?(grace_features, feature), do: :past_due_grace, else: :entitled
+  end
+
+  # A plan grant is decided BY grace when the matched plan was admitted via the
+  # grace window (it is in `grace_plans`).
+  defp plan_grant_reason(resolved, plan_atom) do
+    if MapSet.member?(grace_plans(resolved), plan_atom), do: :past_due_grace, else: :entitled
+  end
+
+  # True when the resolved state has at least one plan whose past-due grace
+  # window lapsed — used to surface the distinct `:past_due_expired` deny reason
+  # (vs the generic `:no_active_subscription`).
+  defp expired_grace?(resolved), do: MapSet.size(expired_grace_plans(resolved)) > 0
 
   # Reverse-index a price_id string to its plan atom; pass atoms through.
   defp plan_atom(plan) when is_atom(plan), do: {:ok, plan}
