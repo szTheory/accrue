@@ -21,7 +21,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 
 - [x] **Phase 123: Config + Core Gate API Foundation** - Host plan→feature/quota config plus fail-closed `has_active_plan?` / `entitled?` / `features_for` / `entitlement_quantity` over local subscription state, with telemetry/ledger split (completed 2026-05-22)
 - [x] **Phase 124: Enforcement Surfaces — Plug + LiveView Guards** - Controller Plug guard and conditionally-compiled LiveView `on_mount` guard, with a merge-blocking "core stays runtime-LiveView-free" check (completed 2026-05-23)
-- [ ] **Phase 125: Provider Honesty + Lifecycle Truth** - Resolver behaviour + capability-matrix rows + merge-blocking drift gate, plus the lifecycle→entitlement truth-table SSOT
+- [x] **Phase 125: Provider Honesty + Lifecycle Truth** - Resolver behaviour + capability-matrix rows + merge-blocking drift gate, plus the lifecycle→entitlement truth-table SSOT (completed 2026-05-23)
 - [ ] **Phase 126: Admin Surface + Docs / JTBD Spine** - Read-only entitlements view in `accrue_admin`, `guides/entitlements.md`, the JTBD ⛔→✅ flip, First Hour/README spine, and green package-doc verifiers
 - [ ] **Phase 127: Optional Stripe-Native Sync (isolated, off by default)** - Webhook→cache advisory overlay with monotonic ordering, behind a flag, that must not block the milestone's core value
 
@@ -86,7 +86,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 
   - [x] 125-01-PLAN.md — Provider-honesty capability surface: `entitlements:` Capabilities group + 3 adapter `capabilities/0` rows + matrix-doc + drift-gate (positive + negative divergence guard) + Fake-lane proof (ENT-08, Wave 1)
   - [x] 125-02-PLAN.md — Lifecycle-truth SSOT: `Subscription.entitling?/1` + `Query.entitling/1` twin + retarget `fold_active/1` (closes paused fail-OPEN gap) + truth-table guide entry + 8-status pin + twin-invariant test (ENT-09, Wave 1)
-  - [ ] 125-03-PLAN.md — Past-due grace knob: `past_due_grace` config + `PastDueGrace.within_grace?/2` + conditional fold-widening + `:grace_plans` resolved field + `:past_due_grace`/`:past_due_expired` telemetry + truth-table footnote (ENT-09, Wave 2, depends on 125-02)
+  - [x] 125-03-PLAN.md — Past-due grace knob: `past_due_grace` config + `PastDueGrace.within_grace?/2` + conditional fold-widening + `:grace_plans` resolved field + `:past_due_grace`/`:past_due_expired` telemetry + truth-table footnote (ENT-09, Wave 2, depends on 125-02)
 
 ### Phase 126: Admin Surface + Docs / JTBD Spine
 
@@ -126,7 +126,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 |-------|-----------|----------------|--------|-----------|
 | 123. Config + Core Gate API Foundation | v1.39 | 4/4 | Complete    | 2026-05-22 |
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 6/6 | Complete    | 2026-05-23 |
-| 125. Provider Honesty + Lifecycle Truth | v1.39 | 2/3 | In Progress|  |
+| 125. Provider Honesty + Lifecycle Truth | v1.39 | 3/3 | Complete   | 2026-05-23 |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 0/TBD | Not started | - |
 | 127. Optional Stripe-Native Sync (isolated) | v1.39 | 0/TBD | Not started | - |
 
