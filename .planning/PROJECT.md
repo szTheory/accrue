@@ -34,7 +34,7 @@ new external dependency is needed for the core.
 
 **Current posture:**
 
-- The active strategy remains **PROC-08**: a bounded dual-provider **gateway subscription core** centered on **Stripe-first** defaults plus one Stripe-like gateway. Entitlements is **provider-honest**: Stripe native Entitlements where available, local plan→feature mapping for Braintree/Fake.
+- The active strategy remains **PROC-08**: a bounded dual-provider **gateway subscription core** centered on **Stripe-first** defaults plus one Stripe-like gateway, with **`Accrue.Billing.subscribe/3`** as the primary public-facade entry and **Fake** as the deterministic merge-blocking proof lane. Entitlements is **provider-honest**: Stripe native Entitlements where available, local plan→feature mapping for Braintree/Fake.
 - Entitlement guards are **adapter-thin** over host identity (Sigra/Lockspire optional, never required). Accrue never owns the auth user schema.
 - Braintree marketplace parity via Hyperwallet remains out of scope unless a future strategy change explicitly reopens it.
 - **FIN-03** (app-owned finance exports) and dunning notification journeys remain out of scope for this milestone.
