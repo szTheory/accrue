@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Copy do
   alias AccrueAdmin.Copy.Connect
   alias AccrueAdmin.Copy.Coupon
   alias AccrueAdmin.Copy.CustomerPaymentMethods
+  alias AccrueAdmin.Copy.Entitlements
   alias AccrueAdmin.Copy.Invoice
   alias AccrueAdmin.Copy.PromotionCode
   alias AccrueAdmin.Copy.Subscription
@@ -498,6 +499,32 @@ defmodule AccrueAdmin.Copy do
   defdelegate customer_payment_methods_in_use_badge(),
     to: CustomerPaymentMethods,
     as: :in_use_badge
+
+  defdelegate entitlements_section_title(), to: Entitlements, as: :section_title
+
+  defdelegate entitlements_drift_section_title(), to: Entitlements, as: :drift_section_title
+
+  defdelegate entitlements_active_plans_label(), to: Entitlements, as: :active_plans_label
+
+  defdelegate entitlements_features_label(), to: Entitlements, as: :features_label
+
+  defdelegate entitlements_quantities_label(), to: Entitlements, as: :quantities_label
+
+  defdelegate entitlements_grace_label(), to: Entitlements, as: :grace_label
+
+  defdelegate entitlements_unmapped_badge(), to: Entitlements, as: :unmapped_badge
+
+  defdelegate entitlements_unmapped_hint(), to: Entitlements, as: :unmapped_hint
+
+  defdelegate entitlements_empty_title(), to: Entitlements, as: :empty_title
+
+  defdelegate entitlements_empty_copy(), to: Entitlements, as: :empty_copy
+
+  defdelegate entitlements_no_drift_copy(), to: Entitlements, as: :no_drift_copy
+
+  defdelegate entitlements_raw_map_label(), to: Entitlements, as: :raw_map_label
+
+  defdelegate entitlements_error_copy(), to: Entitlements, as: :error_copy
 
   def webhooks_index_empty_title, do: "No webhook deliveries for this organization yet"
 

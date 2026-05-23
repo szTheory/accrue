@@ -57,6 +57,19 @@ defmodule Mix.Tasks.AccrueAdmin.ExportCopyStrings do
     customer_payment_methods_replace_handoff
     customer_payment_methods_default_badge
     customer_payment_methods_in_use_badge
+    entitlements_section_title
+    entitlements_drift_section_title
+    entitlements_active_plans_label
+    entitlements_features_label
+    entitlements_quantities_label
+    entitlements_grace_label
+    entitlements_unmapped_badge
+    entitlements_unmapped_hint
+    entitlements_empty_title
+    entitlements_empty_copy
+    entitlements_no_drift_copy
+    entitlements_raw_map_label
+    entitlements_error_copy
   )a
 
   @impl Mix.Task
