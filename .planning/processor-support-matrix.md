@@ -56,8 +56,15 @@ The first official dual-provider promise is **gateway subscription core**:
 | webhook.parse | Required | Required | Required target | all first-party |
 | checkout.hosted_handoff | Local proof helper | Supported | Supported via first-party local checkout | all first-party |
 | billing_portal.hosted_self_serve | Local proof helper | Supported | Supported via mounted first-party portal | all first-party |
+| entitlements.local_mapping | local-identical | local-identical | local-identical | all first-party |
 
 The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs through Accrue-owned local UI.
+
+## Entitlements
+
+The `entitlements.local_mapping` row is the matrix's first **convergence** row, and it inverts the checkout/portal honesty framing above. For checkout and the billing portal the public API shape is shared while the provider implementation diverges; for entitlements **both the public API shape AND the implementation are identical by construction**. Local plan-to-feature mapping **behaves identically across Stripe, Braintree, and Fake** because `Accrue.Entitlements.Resolver.LocalMap` derives entitlements from local subscription state only — `accrue_customers`, active subscription items, and the `price_id -> plan` configuration — with **zero processor calls**. The resolver takes no processor argument, so swapping `:processor` cannot change who is entitled; the identity is structural, not coincidental. That is why every provider lane reads `local-identical` rather than the `native`/`bounded first-party`/`unsupported` divergence labels used by the gateway rows above.
+
+The Stripe-native Entitlements API is not wrapped by `lattice_stripe` 1.1, and **local mapping remains the canonical default** for all providers. An optional Stripe-native webhook-to-cache advisory overlay is deferred (off by default, isolated to a later phase); it never displaces the local-first resolution path, so this row must never sprout a per-provider divergence label.
 
 The shipped Braintree slice includes explicit subscription mutation semantics at the existing facade boundary. `cancel/2` is the shipped immediate-cancel path across Fake, Stripe, and Braintree, `swap_plan/3` is a bounded first-party path when the host configures `:plan_resolver`, and `preview_upcoming_invoice/2` remains the canonical path where supported rather than implied cross-provider parity. `cancel_at_period_end/2` remains a Stripe/Fake-only scheduled-end path. Quantity updates and subscription-item mutations are official active-subscription-change APIs on Stripe/Fake, while Braintree keeps those rows explicitly unsupported with typed errors instead of implied parity. Pause/unpause and resume remain out of slice.
 
