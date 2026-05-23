@@ -107,6 +107,22 @@ require_fixed "$ROOT_DIR/accrue/README.md" "mounted first-party local checkout a
 require_fixed "$ROOT_DIR/accrue/README.md" "swap_plan/3"
 require_fixed "$ROOT_DIR/accrue/README.md" "preview_upcoming_invoice/2"
 require_fixed "$ROOT_DIR/accrue/README.md" "canonical path where supported"
+
+# Entitlements spine (Phase 126, ENT-12)
+# Pins the doc strings Plan 03 authored (D-14). grep -F is literal:
+# brackets/parens/the ✅ glyph are matched byte-for-byte. The flip-guard is
+# scoped to the unique scope-prose phrase Plan 03 removed (Pitfall 4) — it does
+# NOT collide with the historical Update log. Excluded by design (D-14): the
+# deny-redirect prose, quota numbers, the per-provider matrix wording, and the
+# gate-fn names replicated across README/first_hour/host.
+require_fixed "$ROOT_DIR/accrue/README.md" '[Entitlements](guides/entitlements.md)'
+require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'entitled?'
+require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'Accrue.Plug.RequireEntitlement'
+require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" '[:accrue, :entitlements, :check]'
+require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'entitlements ✅ shipped'
+require_absent_regex "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'on the table\*\* is \*\*entitlements'
+require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" '[Entitlements](entitlements.md)'
+
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"README.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/admin_ui.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/core-admin-parity.md"'
