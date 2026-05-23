@@ -392,6 +392,30 @@ defmodule Accrue.Config do
           default: :deny,
           doc:
             "Behaviour when an active price_id is unmapped. :deny fails closed; never silent-allow."
+        ],
+        # --- Phase 124 (ENT-06/07): guard config ---
+        billable: [
+          type: {:or, [nil, {:fun, 1}]},
+          default: nil,
+          doc:
+            "Global billable resolver: a 1-arity fn `(conn | socket -> billable | nil)`. " <>
+              "When unset, the default probes `current_scope.user -> current_user -> nil`. " <>
+              "Must never raise — fail closed (resolve to nil) on any miss."
+        ],
+        on_deny: [
+          type: {:custom, __MODULE__, :validate_on_deny, []},
+          default: :forbidden,
+          doc:
+            "Global deny handler. Default is a content-negotiated opaque 403. " <>
+              "Accepts `:forbidden | {:redirect, path} | {status, body} | fun/2 | {m,f,a}`. " <>
+              "A per-guard `on_deny:` opt overrides this; this overrides the built-in 403. " <>
+              "A malformed value fails loud at boot (never silently fails open)."
+        ],
+        deny_path: [
+          type: :string,
+          default: "/",
+          doc:
+            "LiveView fallback redirect target for `:forbidden` / non-redirectable denies."
         ]
       ],
       doc:
@@ -847,7 +871,19 @@ defmodule Accrue.Config do
   full validator.
   """
   @spec entitlements() :: keyword()
-  def entitlements, do: get!(:entitlements)
+  def entitlements do
+    # Raw runtime read of the host catalog (no nested per-plan defaults — the
+    # resolver tolerates missing `:plans` inner keys). The three Phase 124
+    # guard keys (`:billable`/`:on_deny`/`:deny_path`) ARE surfaced with their
+    # schema defaults via `Keyword.put_new/3` so guard surfaces (Plan 02) can
+    # read a usable value whether or not the host overrode them — without
+    # re-running the full validator or applying the `:plans` nested defaults.
+    :entitlements
+    |> get!()
+    |> Keyword.put_new(:billable, nil)
+    |> Keyword.put_new(:on_deny, :forbidden)
+    |> Keyword.put_new(:deny_path, "/")
+  end
 
   defp maybe_validate_boot_setup!(opts) do
     _ = Keyword.fetch!(opts, :repo)
@@ -965,6 +1001,42 @@ defmodule Accrue.Config do
 
   def validate_descending(other) do
     {:error, "expected a non-empty list of positive integers, got: #{inspect(other)}"}
+  end
+
+  @doc """
+  NimbleOptions `:custom` validator for the global `:entitlements`
+  `on_deny` handler (Phase 124, ENT-06).
+
+  Accepts any of the supported deny-handler shapes and returns
+  `{:ok, value}`; a malformed value returns `{:error, message}` so boot
+  validation (`validate_at_boot!/0`) fails loud rather than letting a
+  broken deny path silently fail open (T-124-01).
+
+  Supported shapes:
+
+    * `:forbidden` — built-in opaque 403 / LiveView redirect to `deny_path`.
+    * `{:redirect, path}` when `path` is a binary.
+    * `{status, body}` when `status` is an integer and `body` is a binary.
+    * a 2-arity `fun` `(container, ctx -> result)`.
+    * an MFA `{m, f, a}` when `m`/`f` are atoms and `a` is a list.
+  """
+  @spec validate_on_deny(term()) :: {:ok, term()} | {:error, String.t()}
+  def validate_on_deny(:forbidden), do: {:ok, :forbidden}
+
+  def validate_on_deny({:redirect, path} = value) when is_binary(path), do: {:ok, value}
+
+  def validate_on_deny({status, body} = value) when is_integer(status) and is_binary(body),
+    do: {:ok, value}
+
+  def validate_on_deny(fun) when is_function(fun, 2), do: {:ok, fun}
+
+  def validate_on_deny({m, f, a} = value) when is_atom(m) and is_atom(f) and is_list(a),
+    do: {:ok, value}
+
+  def validate_on_deny(other) do
+    {:error,
+     "expected :forbidden | {:redirect, path} | {status, body} | fun/2 | {m,f,a}, " <>
+       "got: #{inspect(other)}"}
   end
 
   @doc """

@@ -117,18 +117,126 @@ defmodule Accrue.ConfigEntitlementsTest do
   end
 
   describe "absent / empty :entitlements (ENT-01)" do
-    test "absent config defaults to [] and validates clean" do
+    test "absent config has no :plans and validates clean" do
       Application.delete_env(:accrue, :entitlements)
 
       assert Config.validate_at_boot!() == :ok
-      assert Config.entitlements() == []
+      # Phase 124: entitlements/0 now surfaces the guard-key defaults via
+      # Keyword.put_new, so the raw [] gains billable/on_deny/deny_path.
+      # :plans (the Phase 123 catalog) stays absent.
+      refute Keyword.has_key?(Config.entitlements(), :plans)
     end
 
     test "explicitly empty config validates clean" do
       Application.put_env(:accrue, :entitlements, [])
 
       assert Config.validate_at_boot!() == :ok
-      assert Config.entitlements() == []
+      refute Keyword.has_key?(Config.entitlements(), :plans)
+    end
+  end
+
+  # --- Phase 124 (ENT-06/07): guard config keys -------------------------
+  describe "guard config defaults (ENT-06/07)" do
+    test "billable/on_deny/deny_path default to nil/:forbidden/\"/\" when unset" do
+      Application.delete_env(:accrue, :entitlements)
+
+      ent = Config.entitlements()
+      assert Keyword.get(ent, :billable) == nil
+      assert Keyword.get(ent, :on_deny) == :forbidden
+      assert Keyword.get(ent, :deny_path) == "/"
+    end
+
+    test "guard defaults are surfaced even when only :plans is configured" do
+      Application.put_env(:accrue, :entitlements, plans: [pro: [features: [:api_access]]])
+
+      ent = Config.entitlements()
+      assert Keyword.get(ent, :on_deny) == :forbidden
+      assert Keyword.get(ent, :deny_path) == "/"
+    end
+
+    test "host-supplied guard keys override the defaults" do
+      Application.put_env(:accrue, :entitlements,
+        billable: fn _container -> :ok end,
+        on_deny: {:redirect, "/pricing"},
+        deny_path: "/login"
+      )
+
+      ent = Config.entitlements()
+      assert is_function(Keyword.get(ent, :billable), 1)
+      assert Keyword.get(ent, :on_deny) == {:redirect, "/pricing"}
+      assert Keyword.get(ent, :deny_path) == "/login"
+    end
+  end
+
+  describe "on_deny boot validation (ENT-06, T-124-01)" do
+    test "a valid {:redirect, path} passes boot validation" do
+      Application.put_env(:accrue, :entitlements, on_deny: {:redirect, "/pricing"})
+      assert Config.validate_at_boot!() == :ok
+    end
+
+    test ":forbidden passes boot validation" do
+      Application.put_env(:accrue, :entitlements, on_deny: :forbidden)
+      assert Config.validate_at_boot!() == :ok
+    end
+
+    test "a {status, body} pair passes boot validation" do
+      Application.put_env(:accrue, :entitlements, on_deny: {402, "Payment required"})
+      assert Config.validate_at_boot!() == :ok
+    end
+
+    test "a 2-arity fun passes boot validation" do
+      Application.put_env(:accrue, :entitlements, on_deny: fn _container, _ctx -> :halt end)
+      assert Config.validate_at_boot!() == :ok
+    end
+
+    test "an MFA tuple passes boot validation" do
+      Application.put_env(:accrue, :entitlements, on_deny: {MyMod, :handle, []})
+      assert Config.validate_at_boot!() == :ok
+    end
+
+    test "a bare integer raises at boot (fail loud, not fail open)" do
+      Application.put_env(:accrue, :entitlements, on_deny: 42)
+
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate_at_boot!()
+      end
+    end
+
+    test "a malformed {:redirect, non_string} raises at boot" do
+      Application.put_env(:accrue, :entitlements, on_deny: {:redirect, 99})
+
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate_at_boot!()
+      end
+    end
+  end
+
+  describe "deny_path boot validation (ENT-07)" do
+    test "a non-string deny_path raises at boot" do
+      Application.put_env(:accrue, :entitlements, deny_path: :not_a_string)
+
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate_at_boot!()
+      end
+    end
+  end
+
+  describe "validate_on_deny/1 (ENT-06, custom validator)" do
+    test "accepts every conforming shape" do
+      assert {:ok, :forbidden} = Config.validate_on_deny(:forbidden)
+      assert {:ok, {:redirect, "/x"}} = Config.validate_on_deny({:redirect, "/x"})
+      assert {:ok, {403, "no"}} = Config.validate_on_deny({403, "no"})
+      fun = fn _a, _b -> :ok end
+      assert {:ok, ^fun} = Config.validate_on_deny(fun)
+      assert {:ok, {M, :f, []}} = Config.validate_on_deny({M, :f, []})
+    end
+
+    test "rejects non-conforming shapes with a descriptive message" do
+      assert {:error, msg} = Config.validate_on_deny(42)
+      assert msg =~ ":forbidden"
+      assert {:error, _} = Config.validate_on_deny({:redirect, 99})
+      assert {:error, _} = Config.validate_on_deny({200, :not_a_binary})
+      assert {:error, _} = Config.validate_on_deny(fn _only_one_arg -> :ok end)
     end
   end
 end
