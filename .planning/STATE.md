@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
-status: executing
+status: verifying
 stopped_at: Completed 126-01-PLAN.md
-last_updated: "2026-05-23T20:56:27.297Z"
+last_updated: "2026-05-23T21:00:59.256Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 17
-  completed_plans: 16
-  percent: 60
+  completed_plans: 17
+  percent: 80
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 126 (admin-surface-docs-jtbd-spine) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-23
 
 Progress: [██████████] 100% (phase 123 plans complete)
@@ -73,6 +73,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 126 P01 | 2min | 3 tasks | 3 files |
 | Phase 126 P3 | 10min | 3 tasks | 7 files |
 | Phase 126 P02 | 11min | 3 tasks | 6 files |
+| Phase 126 P04 | 6min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 126 P03]: ENT-12 docs — guides/entitlements.md (fail-closed-first, summarize-and-link to lifecycle_semantics.md + Processor.Capabilities; 3 needles: entitled?, Accrue.Plug.RequireEntitlement, [:accrue, :entitlements, :check]); JTBD ⛔→✅ flip in public jobs_to_be_done.md (now committed/tracked) + internal JTBD-FRONTIER.md (6 of 6 shipped); README + quickstart spine pointers; PROJECT.md 'gateway subscription core' parity fix clears verify_package_docs.sh:220 RED holdout. Pinned post-flip shipped marker for Plan 04 needle 5a (byte-for-byte): "entitlements ✅ shipped" (in the dated 2026-05-23 jobs_to_be_done.md Update-log line). Public file had no entitlements ⛔ table row — prose flip + new body section cover it; the ⛔→✅ table-row flips live only in JTBD-FRONTIER.md.
 - [Phase ?]: [Phase 126 P02]: ENT-11 admin entitlements tab — read-only entitlements tab on CustomerLive (/customers/:id?tab=entitlements) renders resolved plans/features/quantities/grace first, then a Plan-mapping drift card badging unmapped price_ids amber with a self-explaining hint (D-02/D-03). Calls Accrue.Entitlements.Admin.resolve_for_customer/1 once via entitlements_view/1 (one-way admin->core), dodges the JsonViewer MapSet trap via entitlements_display_map/1, omits tab_counts :entitlements key (D-01, no badge). No new route/auth surface (T-126-04).
 - [Phase ?]: [Phase 126 P02]: VERIFY-01 three-part copy contract held — Copy.Entitlements (13 @doc false fns incl. fail-closed error copy) -> 13 Copy.entitlements_* defdelegates -> 13 export-allowlist entries (export now 54 strings); zero hardcoded template strings. Rule 3 fix: synced accrue_admin/mix.lock to reconcile rendro ~> 0.3.0 so accrue_admin compiles.
+- [Phase ?]: [Phase 126 P04]: ENT-12 SC#4 closed — verify_package_docs.sh entitlements-spine block (D-14): README link, 3 entitlements.md needles (entitled?/Accrue.Plug.RequireEntitlement/[:accrue, :entitlements, :check]), JTBD shipped marker 'entitlements ✅ shipped' (byte-for-byte, U+2705 literal), scoped flip-guard 'on the table** is **entitlements' (NOT 'headline gap'), quickstart pointer. No gateway-subscription-core line added (already :220; the subscribe/3 second masked needle was restored by orchestrator 5635d77).
+- [Phase ?]: [Phase 126 P04]: D-15 seed co-update — package_docs_verifier_test.exs seeds entitlements.md + jobs_to_be_done.md so negative-drift fixtures don't fail 'No such file'. 3-command phase gate GREEN: verifier exit 0 + verifier-test 8/0 + mix docs builds entitlements.html (35KB). Full accrue seed-0 1462/0; accrue_admin 131/0; default-seed lone failure is the known-flaky PdfTest (no regression).
 
 ### Pending Todos
 
@@ -139,6 +142,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T20:56:07.425Z
+Last session: 2026-05-23T21:00:38.494Z
 Stopped at: Completed 126-01-PLAN.md
 Resume file: None
