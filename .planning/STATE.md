@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: verifying
-stopped_at: Completed 124-03-PLAN.md
-last_updated: "2026-05-23T13:01:53.225Z"
+stopped_at: Phase 125 context gathered
+last_updated: "2026-05-23T13:19:17.907Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 5
@@ -124,6 +124,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T12:46:01.612Z
-Stopped at: Completed 124-03-PLAN.md
-Resume file: None
+Last session: 2026-05-23T13:19:17.903Z
+Stopped at: Phase 125 context gathered
+Resume file: .planning/phases/125-provider-honesty-lifecycle-truth/125-CONTEXT.md
