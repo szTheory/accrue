@@ -149,6 +149,30 @@ defmodule Accrue.Processor.CapabilitiesTest do
              "staged first-party target"
   end
 
+  test "entitlements local-mapping is a convergence row: identical across all providers" do
+    # Support label: the public promise is first-party for the single local-mapping slice.
+    assert Capabilities.support_label([:entitlements, :local_mapping]) == "all first-party"
+
+    # Provider lanes encode CONVERGENCE (not divergence): every provider is
+    # "local-identical" because entitlement resolution is provider-independent
+    # local derivation (Phase 125 D-03).
+    for provider <- [:fake, :stripe, :braintree] do
+      assert Capabilities.provider_support_label(provider, [:entitlements, :local_mapping]) ==
+               "local-identical"
+    end
+
+    # Each adapter's capabilities/0 advertises the identical entitlements key.
+    fake_caps = Capabilities.for(Accrue.Processor.Fake)
+    stripe_caps = Capabilities.for(Accrue.Processor.Stripe)
+    braintree_caps = Capabilities.for(Accrue.Processor.Braintree)
+
+    assert fake_caps[:entitlements] == %{local_mapping: true}
+    assert stripe_caps[:entitlements] == %{local_mapping: true}
+    assert braintree_caps[:entitlements] == %{local_mapping: true}
+    assert fake_caps[:entitlements] == stripe_caps[:entitlements]
+    assert stripe_caps[:entitlements] == braintree_caps[:entitlements]
+  end
+
   test "custom adapters only advertise the leaves they declare" do
     caps = Capabilities.for(HostedOnlyProcessor)
 
