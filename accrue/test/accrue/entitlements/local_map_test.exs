@@ -216,6 +216,35 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
       assert resolved.quantities == %{}
       assert resolved.plan == nil
     end
+
+    # D-11 paused fail-open gap closed end-to-end: a `status: :active` row with a
+    # non-nil `pause_collection` is paused per `Subscription.paused?/1` and must
+    # NOT grant entitlement. `fold_active/1`'s base fetch is now
+    # `Query.entitling/1`, which carries `is_nil(pause_collection)`, so the
+    # resolver no longer folds the paused plan into the resolved map.
+    test "active-status sub with a non-nil pause_collection yields NO entitlements (paused gap closed)" do
+      oid = Ecto.UUID.generate()
+
+      %{subscription: sub} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      {:ok, paused} =
+        sub
+        |> Accrue.Billing.Subscription.changeset(%{pause_collection: %{"behavior" => "void"}})
+        |> Accrue.TestRepo.update()
+
+      # Sanity: still status :active but paused? via pause_collection, and
+      # therefore NOT entitling? per the pure-lifecycle predicate.
+      assert paused.status == :active
+      assert Accrue.Billing.Subscription.paused?(paused)
+      refute Accrue.Billing.Subscription.entitling?(paused)
+
+      assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
+      assert MapSet.size(resolved.active_plans) == 0
+      assert MapSet.size(resolved.features) == 0
+      assert resolved.quantities == %{}
+      assert resolved.plan == nil
+    end
   end
 
   describe "resolve/2 unmapped + missing" do

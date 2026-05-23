@@ -82,4 +82,58 @@ defmodule Accrue.Billing.SubscriptionPredicatesTest do
     assert Subscription.past_due?(%Subscription{status: :unpaid})
     refute Subscription.past_due?(%Subscription{status: :active})
   end
+
+  # Lifecycle -> entitlement truth-table pin (D-12/D-14). entitling?/1 is the
+  # single source of truth for which pure-lifecycle states grant entitlement;
+  # this enumerates every status in @statuses plus the pause/ended/cancel
+  # modifiers and pins the exact truth from guides/lifecycle_semantics.md.
+  # The two gap rows the table flags (pause_collection-on-active and
+  # ended_at-on-active) are merge-blocking refutes.
+  test "entitling?/1 truth table over all statuses and modifiers" do
+    now = Accrue.Clock.utc_now()
+    future = DateTime.add(now, 7, :day)
+    past = DateTime.add(now, -1, :day)
+
+    # ✅ entitling lifecycle states
+    assert Subscription.entitling?(%Subscription{status: :trialing})
+    assert Subscription.entitling?(%Subscription{status: :active})
+
+    assert Subscription.entitling?(%Subscription{
+             status: :active,
+             cancel_at_period_end: true,
+             current_period_end: future
+           })
+
+    # ✗ paused fail-open gap: status:active + non-nil pause_collection (D-11)
+    refute Subscription.entitling?(%Subscription{
+             status: :active,
+             pause_collection: %{"behavior" => "void"}
+           })
+
+    # ✗ terminal override: status:active + non-nil ended_at (WR-04)
+    refute Subscription.entitling?(%Subscription{status: :active, ended_at: past})
+
+    # ✗ remaining non-entitling statuses
+    refute Subscription.entitling?(%Subscription{status: :paused})
+    refute Subscription.entitling?(%Subscription{status: :past_due})
+    refute Subscription.entitling?(%Subscription{status: :unpaid})
+    refute Subscription.entitling?(%Subscription{status: :canceled})
+    refute Subscription.entitling?(%Subscription{status: :incomplete})
+    refute Subscription.entitling?(%Subscription{status: :incomplete_expired})
+
+    # Coverage guard: every status in @statuses is exercised above.
+    exercised =
+      MapSet.new([
+        :trialing,
+        :active,
+        :paused,
+        :past_due,
+        :unpaid,
+        :canceled,
+        :incomplete,
+        :incomplete_expired
+      ])
+
+    assert MapSet.equal?(MapSet.new(Subscription.statuses()), exercised)
+  end
 end

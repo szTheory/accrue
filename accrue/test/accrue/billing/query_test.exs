@@ -21,10 +21,18 @@ defmodule Accrue.Billing.QueryTest do
     now = Accrue.Clock.utc_now()
     future = DateTime.add(now, 7, :day)
 
+    past = DateTime.add(now, -1, :day)
+
     statuses_with_attrs = [
       {:trialing, %{}},
       {:active, %{}},
       {:active, %{cancel_at_period_end: true, current_period_end: future}},
+      # The paused fail-open gap row: status :active but a non-nil
+      # pause_collection. entitling?/1 must refute this, and Query.entitling/1
+      # must exclude it (twin invariant).
+      {:active, %{pause_collection: %{"behavior" => "void"}}},
+      # Terminal-via-ended_at row: status :active but a past ended_at.
+      {:active, %{ended_at: past}},
       {:past_due, %{}},
       {:unpaid, %{}},
       {:canceled, %{}},
@@ -94,5 +102,42 @@ defmodule Accrue.Billing.QueryTest do
       |> Repo.all()
 
     assert Enum.all?(result, &(&1.status in [:active, :trialing]))
+  end
+
+  test "entitling/1 excludes paused (status:active + pause_collection) and ended rows" do
+    rows = Query.entitling() |> Repo.all()
+
+    # No paused row (legacy :paused status OR a non-nil pause_collection on an
+    # otherwise-active row) survives the entitling fragment.
+    refute Enum.any?(rows, &(&1.status == :paused))
+    refute Enum.any?(rows, &(not is_nil(&1.pause_collection)))
+    # No ended row survives.
+    refute Enum.any?(rows, &(not is_nil(&1.ended_at)))
+    # Only active/trialing statuses remain.
+    assert Enum.all?(rows, &(&1.status in [:active, :trialing]))
+  end
+
+  # Predicate <-> fragment twin invariant (the strongest drift guard): for EVERY
+  # seeded row, Subscription.entitling?(row) must agree with the row's presence
+  # in Query.entitling() |> Repo.all(). Drift between the in-memory predicate and
+  # the SQL fragment silently grants/denies on one path only.
+  test "entitling?/1 and Query.entitling/1 are twins (per-row agreement)" do
+    all_rows = Repo.all(Subscription)
+    entitling_ids = Query.entitling() |> Repo.all() |> Enum.map(& &1.id) |> MapSet.new()
+
+    # Sanity: the seed includes the gap rows so the invariant is non-trivial.
+    assert Enum.any?(all_rows, &(not is_nil(&1.pause_collection)))
+    assert Enum.any?(all_rows, &(not is_nil(&1.ended_at)))
+
+    for row <- all_rows do
+      predicate = Subscription.entitling?(row)
+      in_fragment = MapSet.member?(entitling_ids, row.id)
+
+      assert predicate == in_fragment,
+             "twin drift for status=#{inspect(row.status)} " <>
+               "pause_collection=#{inspect(row.pause_collection)} " <>
+               "ended_at=#{inspect(row.ended_at)}: " <>
+               "entitling?/1=#{predicate} but in Query.entitling/1=#{in_fragment}"
+    end
   end
 end
