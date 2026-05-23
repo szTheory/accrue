@@ -93,6 +93,26 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
 
   defp lookup_customer(_), do: nil
 
+  # Public seam for the admin read-only diagnostic (ENT-11). Reuses fold_active/1 —
+  # the SSOT fold — so there is zero drift; it does NOT widen the public gate API
+  # (@doc false keeps it off the published docs surface).
+  @doc false
+  def fold_for_customer(%Customer{} = customer), do: fold_active(customer)
+
+  # The entitling price_ids the resolver structurally discards under :deny
+  # (handle_unmapped/3) — the resolved map can never show this drift, so the seam
+  # re-derives it from the same catalog()/active_items() privates the fold uses.
+  @doc false
+  def unmapped_entitling_price_ids(%Customer{id: customer_id}) do
+    {reverse_index, _plans, _action} = catalog()
+
+    customer_id
+    |> active_items()
+    |> Enum.map(fn {price_id, _qty, _via} -> price_id end)
+    |> Enum.reject(&Map.has_key?(reverse_index, &1))
+    |> Enum.uniq()
+  end
+
   defp fold_active(%Customer{id: customer_id}) do
     {reverse_index, plans, unmapped_action} = catalog()
 
