@@ -8,6 +8,7 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 
 ## Start here
 
+- [Jobs to Be Done](guides/jobs_to_be_done.md) — a ~15-minute tour of what you can build, organized by the life of a paying customer; the best first read for understanding Accrue's surface.
 - [Organization billing (non-Sigra)](guides/organization_billing.md) — session→billable org path when the Stripe Customer should follow an organization, not only the signed-in user.
 - [Testing](guides/testing.md) — Fake-first verification posture for host billing flows.
 - [First Hour](guides/first_hour.md) — one sitting from deps to a working billing slice.
@@ -15,6 +16,7 @@ If you ship a SaaS on Elixir and want documentation you can hand to a teammate, 
 - [Maturity and maintenance](guides/maturity-and-maintenance.md) — when Accrue is “done enough” for the `1.0.x` line, how friction enters planning, and how Hex publishes trigger contract passes.
 - [Troubleshooting](guides/troubleshooting.md) — when something already wired misbehaves.
 - [Webhooks](guides/webhooks.md) — signing, retries, and operational notes.
+- [Entitlements](guides/entitlements.md) — gate features on what they paid for; the next read when you need to lock paid surfaces.
 - [Quickstart](guides/quickstart.md) — smallest possible skim.
 - [Demo app README](https://github.com/szTheory/accrue/blob/main/examples/accrue_host/README.md) — command parity with Accrue’s CI host gate.
 - [Release notes](guides/release-notes.md) and [Upgrade](guides/upgrade.md) — what changed, in plain language, then the formal contract.
