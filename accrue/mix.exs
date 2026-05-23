@@ -75,8 +75,14 @@ defmodule Accrue.MixProject do
       # Phoenix.Router.forward/3 when Phoenix is loaded, but the webhook
       # plug works without Phoenix (plain Plug.Router).
       {:phoenix, "~> 1.8", optional: true},
-      # Phoenix.Component + ~H sigil for the shared invoice component library.
-      # Loaded for compile + runtime because the components live in lib/, not test/.
+      # REQUIRED (non-optional) core dep — NOT optional. Ships Phoenix.Component +
+      # the ~H sigil for the email + invoice render spine (the components live in
+      # lib/, not test/, so it is loaded for compile + runtime), AND backs the
+      # conditionally-compiled Accrue.Live.Entitlements on_mount guard.
+      # Core stays LiveView-runtime-free: no LiveView socket runtime
+      # (Phoenix.LiveView / on_mount / Socket) in always-compiled code, and
+      # phoenix_live_view never appears in extra_applications (see
+      # application/0 — [:logger] only).
       {:phoenix_live_view, "~> 1.1"},
       #
       # NOTE on :sigra — optional integration; when not published to Hex the

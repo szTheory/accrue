@@ -56,7 +56,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 
   1. A developer can gate a Phoenix controller route with a Plug guard (`require_plan` / `require_feature`) that halts with a configurable fail response (redirect or 403) when the billable is not entitled.
   2. A developer can gate a host LiveView with an `on_mount` guard whose billable-resolution key (e.g. `current_scope` / `current_user`) is host-configurable and adapter-thin, with no required Sigra/Lockspire coupling.
-  3. The LiveView guard is shipped via conditional compilation, and a merge-blocking CI check proves core `accrue` compiles and loads with no LiveView present (no required LiveView in core).
+  3. The LiveView guard is shipped via conditional compilation, and a merge-blocking CI check proves no always-compiled core module references the LiveView socket runtime (Phoenix.LiveView / on_mount / Socket) — core `accrue` stays runtime-LiveView-free even though `phoenix_live_view` is a required core dep for `Phoenix.Component`.
   4. Both guards resolve entitlement once per request/mount and reuse the Phase 123 fail-closed contract — a guard whose check cannot resolve denies rather than allows.
 
 **Plans**: 6 plans
@@ -130,7 +130,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 
 - **Critical-path isolation:** Phases 123→124→125→126 deliver the headline JTBD ("gate a feature on a paid subscription") with no new tables and no Stripe dependency. Phase 127 is the optional Stripe-native depth and must not block the milestone's core value — it is the natural slip-point.
 - **Research flag:** Phase 127 (Stripe-native sync) is flagged needs-deeper-research by both ARCHITECTURE and PITFALLS (eventual consistency, out-of-order summaries, the 10-entitlement cap). Run `/gsd:plan-phase --research-phase` for it. Phases 123–126 clone existing Accrue patterns (telemetry span, `Events.record`, `nimble_options` schema, `Processor.Capabilities` matrix, conditional-compile à la `Integrations.Sigra`, `accrue_admin` Copy/VERIFY-01 discipline) and need no external research.
-- **LiveView-free constraint:** the `on_mount` guard (Phase 124) ships conditionally-compiled with a merge-blocking CI cell proving core compiles absent LiveView. "LiveView-free" means core must not require a host to run LiveView nor couple its public APIs to the LiveView socket lifecycle — verify the live `accrue/mix.exs` posture at Phase 124 planning time.
+- **LiveView-runtime-free constraint:** the `on_mount` guard (Phase 124) ships conditionally-compiled, with a merge-blocking static CI check proving **no always-compiled core module references the LiveView socket runtime** (Phoenix.LiveView / on_mount / Socket). `phoenix_live_view` is a **required core dep** (it ships `Phoenix.Component`/`~H` for the email + invoice render spine), so "runtime-LiveView-free" means core must not require a host to run LiveView nor couple its public APIs to the LiveView socket lifecycle — it does **not** mean the package is absent. (`accrue/mix.exs` posture verified at Phase 124 planning time: `{:phoenix_live_view, "~> 1.1"}` is correctly non-optional.)
 - **Standing non-goals (unchanged):** rich metered/tiered entitlement math beyond seat counts; atomic seat enforcement / membership management; feature-catalog authoring UI; deep Sigra/Lockspire coupling; dunning notification journeys (next-milestone candidate); FIN-03, MRR/ARR product, MoR processors, Hyperwallet.
 
 ## Recent Milestones

@@ -13,7 +13,7 @@ Tagline: *"Billing state, modeled clearly."*
 
 - **Tech stack**: Elixir 1.17+, OTP 27+, Phoenix 1.8+, Ecto 3.12+, PostgreSQL 14+. No legacy OTP support.
 - **Dependencies (required)**: `lattice_stripe` (Stripe calls), `oban` (webhook async + email async + scheduled jobs), `swoosh` (email), `ecto_sql`, `postgrex`, `nimble_options` (config validation), `telemetry`, `chromic_pdf` (default PDF adapter — pullable via `accrue_admin` and core).
-- **Dependencies (optional)**: `sigra` (`optional: true`), `phoenix_live_view` (hard dep in `accrue_admin`, not in core).
+- **Dependencies (optional)**: `sigra` (`optional: true`). NOTE: `phoenix_live_view` is a **required** (non-optional) core dep — it ships `Phoenix.Component`/`~H` for the email + invoice render spine and backs the conditionally-compiled entitlement `on_mount` guard. Core stays **LiveView-runtime-free**: no LiveView socket runtime in always-compiled code, and `phoenix_live_view` never appears in `extra_applications` (OTP-level it is `[:logger]` only). `accrue_admin` additionally hard-deps LiveView for its dashboard.
 - **Release model**: ship complete. No public v0.x iteration cycle. Internal phases are build milestones, not public releases. First public release is v1.0 (or `0.1.0` if strict semver-pre-1 is preferred, but conceptually "complete").
 - **Compatibility**: Phoenix 1.8+, LiveView 1.0+. No attempt at backward compatibility with Phoenix 1.7 or earlier.
 - **Security**: Webhook signature verification mandatory and non-bypassable. Raw-body plug must run before `Plug.Parsers`. Sensitive Stripe fields never logged. Payment method details stored as Stripe references, never as PII.
@@ -50,7 +50,7 @@ Tagline: *"Billing state, modeled clearly."*
 | Technology | Version Constraint | Purpose | Rationale |
 |------------|-------------------|---------|-----------|
 | `:accrue` | `== <same version>` | Core billing lib | Sibling dep via `path:` in dev (monorepo) and version-pinned in published releases. Must be exact version match per release — documented in release script. |
-| `:phoenix_live_view` | `~> 1.1` | LiveView dashboard | Current **1.1.28** (2026-03-27). LiveView 1.1 is the stable line; `~> 1.1` gets us 1.1.x patches without 1.2 surprises. Admin UI is the only place LiveView appears — core `accrue` stays LiveView-free. |
+| `:phoenix_live_view` | `~> 1.1` | LiveView dashboard | Current **1.1.28** (2026-03-27). LiveView 1.1 is the stable line; `~> 1.1` gets us 1.1.x patches without 1.2 surprises. The admin UI is where the LiveView *socket runtime* (live sessions, sockets) is exercised; core `accrue` stays LiveView-runtime-free — it uses `Phoenix.Component` for email/invoice rendering and a cond-compiled `on_mount` guard, with no socket runtime and `phoenix_live_view` never in `extra_applications`. |
 | `:phoenix` | `~> 1.8` | Router/Endpoint | Same as core. |
 | `:phoenix_html` | `~> 4.2` | HEEx helpers | LiveView 1.1 requires phoenix_html 4.x. |
 ### Optional Dependencies
