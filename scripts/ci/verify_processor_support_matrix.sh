@@ -57,6 +57,10 @@ require_substring '`Fake` is the required local and CI proof surface' "fake requ
 require_substring "Hyperwallet" "explicit Hyperwallet boundary"
 require_substring "strategically out of bounds unless the project boundary changes" "Phase 104 no-go wording"
 require_substring "reopening requires an explicit strategy change plus a new milestone" "Phase 104 reopen rule"
+require_substring "| entitlements.local_mapping | local-identical | local-identical | local-identical | all first-party |" "entitlements local-mapping convergence row"
+require_substring "behaves identically across Stripe, Braintree, and Fake" "entitlements identity prose"
+require_substring "zero processor calls" "entitlements zero-call prose"
+require_substring "local mapping remains the canonical default" "ENT-10 deferral honesty"
 if grep -Fq "| checkout.hosted_handoff | Local proof helper | Supported | No | Stripe-only |" "${matrix}"; then
   echo "verify_processor_support_matrix: stale Stripe-only checkout row still present" >&2
   exit 1
@@ -94,6 +98,16 @@ fi
 
 if grep -Eq 'preview parity|pseudo-preview' "${matrix}"; then
   echo "verify_processor_support_matrix: stale preview-parity wording still present" >&2
+  exit 1
+fi
+
+# NEGATIVE divergence guard: an entitlements row must NEVER carry a per-provider
+# native/unsupported/bounded label in ANY column. Such a label would over-promise
+# the deferred Phase 127 Stripe-native path and break the local-identical
+# convergence contract. The pattern scans the WHOLE row (across pipe-delimited
+# cells), so a divergence token in the Fake, Stripe, OR Braintree column is caught.
+if grep -Eq '^\| entitlements\.[a-z_]+ \|.*\b(native|unsupported|bounded)\b' "${matrix}"; then
+  echo "verify_processor_support_matrix: entitlements row sprouted a per-provider divergence label (drift toward Phase 127 ahead of schedule)" >&2
   exit 1
 fi
 
