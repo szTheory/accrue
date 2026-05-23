@@ -376,14 +376,14 @@ defmodule AccrueAdmin.Live.CustomerLive do
                 <section class="ax-card">
                   <h3 class="ax-heading"><%= Copy.entitlements_section_title() %></h3>
 
-                  <div class="ax-stack-sm">
+                  <div :if={active_plans != []} class="ax-stack-sm">
                     <p class="ax-label"><%= Copy.entitlements_active_plans_label() %></p>
                     <div :for={plan <- active_plans} class="ax-list-row">
                       <StatusBadge.status_badge status={plan} tone="moss" />
                     </div>
                   </div>
 
-                  <div class="ax-stack-sm">
+                  <div :if={features != []} class="ax-stack-sm">
                     <p class="ax-label"><%= Copy.entitlements_features_label() %></p>
                     <div :for={feature <- features} class="ax-list-row">
                       <StatusBadge.status_badge status={feature} tone="moss" />
@@ -414,7 +414,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                     </div>
                   </div>
 
-                  <p :if={active_plans == [] and unmapped == []} class="ax-body">
+                  <p :if={active_plans == [] and features == []} class="ax-body">
                     <%= Copy.entitlements_empty_title() %> · <%= Copy.entitlements_empty_copy() %>
                   </p>
                 </section>
