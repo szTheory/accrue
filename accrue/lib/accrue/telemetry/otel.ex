@@ -23,6 +23,9 @@ defmodule Accrue.Telemetry.OTel do
     :result => "accrue.result",
     :resolver => "accrue.resolver",
     :reason => "accrue.reason",
+    # Guard surface (D-18) — bounded two-value atom set (:plug | :live);
+    # distinct key, never folded into :status or :result. No PII.
+    :surface => "accrue.surface",
     :subject_type => "accrue.subject_type",
     :subject_id => "accrue.subject_id",
     "accrue.processor" => "accrue.processor",
@@ -36,6 +39,7 @@ defmodule Accrue.Telemetry.OTel do
     "accrue.result" => "accrue.result",
     "accrue.resolver" => "accrue.resolver",
     "accrue.reason" => "accrue.reason",
+    "accrue.surface" => "accrue.surface",
     "accrue.subject_type" => "accrue.subject_type",
     "accrue.subject_id" => "accrue.subject_id"
   }
