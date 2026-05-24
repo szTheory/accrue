@@ -80,6 +80,7 @@ they correspond to — they are idempotent under webhook replay via the
 | `[:accrue, :ops, :connect_account_deauthorized]` | `count` | `stripe_account_id`, `deauthorized_at` **or** `unresolved: true` | `Accrue.Webhook.ConnectHandler` |
 | `[:accrue, :ops, :connect_capability_lost]` | `count` | `stripe_account_id`, `capability`, `from`, `to` | `Accrue.Webhook.ConnectHandler` |
 | `[:accrue, :ops, :connect_payout_failed]` | `count` | `stripe_account_id`, `payout_id`, `amount`, `currency`, `failure_code` | `Accrue.Webhook.ConnectHandler` |
+| `[:accrue, :ops, :entitlement_summary_truncated]` | `count` | `customer_id`, `operation_id` when set | `Accrue.Webhook.DefaultHandler` |
 
 <a id="meter-reporting-semantics"></a>
 ## Meter reporting failures: semantics & sources
@@ -427,6 +428,7 @@ For **ordered triage**, default **Oban** queue placement (anchor **`#oban-queue-
 | `[:accrue, :ops, :connect_account_deauthorized]` | Disconnect Connect account in product UI; stop destination charges; audit open Connect transfers. |
 | `[:accrue, :ops, :connect_capability_lost]` | Read `capability` + `to` status; Stripe Connect onboarding / requirements. |
 | `[:accrue, :ops, :connect_payout_failed]` | Use `payout_id` + `failure_code` in Stripe; update bank account or resolve restriction. |
+| `[:accrue, :ops, :entitlement_summary_truncated]` | Optional Stripe-native entitlement sync cached a known-incomplete summary (>10 inline entitlements, `has_more: true`); the advisory cache is observational-only and never gates access — full pagination lands with `lattice_stripe >= 1.2`. |
 
 ## See also
 

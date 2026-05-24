@@ -22,7 +22,8 @@ defmodule Accrue.TestSupport.TelemetryOpsInventory do
       [:accrue, :ops, :events_upcast_failed],
       [:accrue, :ops, :connect_account_deauthorized],
       [:accrue, :ops, :connect_capability_lost],
-      [:accrue, :ops, :connect_payout_failed]
+      [:accrue, :ops, :connect_payout_failed],
+      [:accrue, :ops, :entitlement_summary_truncated]
     ]
   end
 

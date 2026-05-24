@@ -84,7 +84,8 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
         counter("accrue.ops.events_upcast_failed.count"),
         counter("accrue.ops.connect_account_deauthorized.count"),
         counter("accrue.ops.connect_capability_lost.count", tags: [:capability]),
-        counter("accrue.ops.connect_payout_failed.count")
+        counter("accrue.ops.connect_payout_failed.count"),
+        counter("accrue.ops.entitlement_summary_truncated.count")
       ]
     end
   end
