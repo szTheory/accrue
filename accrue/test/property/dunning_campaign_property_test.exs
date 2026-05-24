@@ -95,9 +95,11 @@ defmodule Accrue.Property.DunningCampaignPropertyTest do
   defp last_after_days(steps), do: steps |> List.last() |> Keyword.fetch!(:after_days)
 
   # The expected next step under the resolver's contract, computed
-  # independently of the implementation (the oracle).
+  # independently of the implementation (the oracle). A step is pending
+  # while its boundary has not yet PASSED (>=), which is what gives day-0
+  # its "first step immediately" semantics (must_have truth #2).
   defp expected_next(steps, elapsed) do
-    Enum.find(steps, fn step -> Keyword.fetch!(step, :after_days) * @seconds_per_day > elapsed end)
+    Enum.find(steps, fn step -> Keyword.fetch!(step, :after_days) * @seconds_per_day >= elapsed end)
   end
 
   # --- properties ------------------------------------------------------------
@@ -183,7 +185,7 @@ defmodule Accrue.Property.DunningCampaignPropertyTest do
     assert Campaign.next_step(steps, anchor, past) == :done
   end
 
-  test "at-exact-boundary (elapsed == after_days seconds) advances past that step" do
+  test "at-exact-boundary (elapsed == after_days seconds) keeps that step pending, schedule_in 0" do
     anchor = ~U[2026-01-01 00:00:00Z]
     steps = [
       [after_days: 0, key: :s0, template: :"Elixir.S0"],
@@ -191,18 +193,25 @@ defmodule Accrue.Property.DunningCampaignPropertyTest do
       [after_days: 12, key: :s12, template: :"Elixir.S12"]
     ]
 
-    # Exactly at day 5: the 5-day step is NOT in the future (strict >),
-    # so the resolver returns the next one (day 12) with schedule_in 7 days.
+    # Exactly at day 5: the 5-day step's boundary has not yet PASSED (>=),
+    # so it is still pending and returned immediately (schedule_in 0).
     now = DateTime.add(anchor, 5 * @seconds_per_day, :second)
     assert {:next, step, schedule_in} = Campaign.next_step(steps, anchor, now)
-    assert Keyword.fetch!(step, :key) == :s12
-    assert schedule_in == 7 * @seconds_per_day
+    assert Keyword.fetch!(step, :key) == :s5
+    assert schedule_in == 0
 
-    # Exactly at day 0: day-0 step is not strictly in the future either,
-    # so day-5 is next, due in 5 days.
-    assert {:next, day5, day5_delay} = Campaign.next_step(steps, anchor, anchor)
-    assert Keyword.fetch!(day5, :key) == :s5
-    assert day5_delay == 5 * @seconds_per_day
+    # One second PAST day 5: the day-5 boundary has passed → advance to
+    # day-12, due in 7 days minus the one second.
+    just_past = DateTime.add(anchor, 5 * @seconds_per_day + 1, :second)
+    assert {:next, after5, after5_delay} = Campaign.next_step(steps, anchor, just_past)
+    assert Keyword.fetch!(after5, :key) == :s12
+    assert after5_delay == 7 * @seconds_per_day - 1
+
+    # Exactly at day 0: the day-0 step is pending immediately (must_have:
+    # day-0 returns the first step with schedule_in 0).
+    assert {:next, day0, day0_delay} = Campaign.next_step(steps, anchor, anchor)
+    assert Keyword.fetch!(day0, :key) == :s0
+    assert day0_delay == 0
   end
 
   test "default [0,5,12] journey resolves the expected step at each phase" do
