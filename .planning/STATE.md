@@ -4,13 +4,13 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
 stopped_at: Phase 128 context gathered
-last_updated: "2026-05-24T17:23:28.224Z"
-last_activity: 2026-05-24 -- Phase 128 planning complete
+last_updated: "2026-05-24T17:44:47.586Z"
+last_activity: 2026-05-24
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.40 — Dunning depth / notification journeys (roadmap created; Phases 128–132 cover DUN-01..10 + PROOF-03). Research pre-resolved in `.planning/threads/dunning-depth-milestone-prep.md` and `.planning/threads/adopter-proof-gaps.md`.
+**Current focus:** Phase 128 — campaign-engine-foundation-idempotency-must-fix
 
 ## Current Position
 
-Phase: Not started — roadmap created (Phases 128–132)
-Plan: —
+Phase: 128 (campaign-engine-foundation-idempotency-must-fix) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-05-24 -- Phase 128 planning complete
+Last activity: 2026-05-24
 
 ## Milestone Progress
 
@@ -67,6 +67,7 @@ Last activity: 2026-05-24 -- Phase 128 planning complete
 | 125 Provider Honesty + Lifecycle Truth | 3 | Resolver + capability matrix, entitling?/1 SSOT |
 | 126 Admin Surface + Docs / JTBD Spine | 4 | admin tab, guides/entitlements.md, JTBD flip |
 | 127 Optional Stripe-Native Sync (isolated) | 4 | off-by-default advisory cache, isolation gate |
+| Phase 128 P01 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **Three open questions carried into phase context (do not re-litigate):** pin the campaign key to the FIRST nil→past_due transition (not every `past_due_since` bump); validate `last_step.after_days <= grace_days` in the NimbleOptions schema so final notice precedes the sweeper's terminal action; verify Chimeway's published 1.0.0 public API before coding the adapter (guide vs code disagree).
 
 _v1.39 per-plan decision detail (Phases 123–127) is archived — full Key Decisions log lives in PROJECT.md, with per-plan rationale in each phase's SUMMARY.md / LEARNINGS.md and [milestones/v1.39-ROADMAP.md](milestones/v1.39-ROADMAP.md)._
+
+- [Phase ?]: 2026-05-24 (128-01): dunning campaign opt-out shorthand campaign:false normalized at all three raw read sites (boot grace validator, dunning_campaign/0 accessor, {:custom} validator) because validate_at_boot!/0 passes UN-normalized opts to maybe_validate_boot_setup!/1
 
 ### Pending Todos
 
@@ -130,9 +133,9 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-24T16:47:09.551Z
+Last session: 2026-05-24T17:44:43.715Z
 Stopped at: Phase 128 context gathered
-Resume file: .planning/phases/128-campaign-engine-foundation-idempotency-must-fix/128-CONTEXT.md
+Resume file: None
 
 ## Operator Next Steps
 

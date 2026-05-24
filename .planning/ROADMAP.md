@@ -46,7 +46,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 **Wave 1**
 
-- [ ] 128-01-PLAN.md — Config-driven dunning cadence schema + two-layer validation + default journey (DUN-01)
+- [x] 128-01-PLAN.md — Config-driven dunning cadence schema + two-layer validation + default journey (DUN-01)
 - [ ] 128-02-PLAN.md — Nullable campaign anchor column + migration + Subscription predicate (DUN-05 foundation)
 - [ ] 128-03-PLAN.md — Pure `Accrue.Dunning.Campaign` step resolver + property tests (DUN-02)
 - [ ] 128-04-PLAN.md — `:invoice_payment_failed` idempotency must-fix + two new step email templates (DUN-04, DUN-01)
@@ -128,7 +128,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 0/6 | Planned | - |
+| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 1/6 | In Progress|  |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 0/TBD | Not started | - |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 0/TBD | Not started | - |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
