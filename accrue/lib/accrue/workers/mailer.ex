@@ -80,6 +80,15 @@ defmodule Accrue.Workers.Mailer do
       # NO dedup). The PRIMARY dedup is still the D-13 enqueue-`unique` in
       # `Accrue.Mailer.Default.deliver/2`; this lane makes the backstop real.
       :invoice_payment_failed -> deliver_mailglass(type, template_mod, atomized, recipient)
+      # CR-01: the campaign step-2/step-3 emails have NO enqueue-level dedup,
+      # and the `DunningStep` worker delivers them BEFORE it does retryable
+      # work (the next-step `Oban.insert`). A worker retry would otherwise
+      # re-send them. Route both through the Mailglass lane so the
+      # `idempotency_key/2` clause keyed on the campaign identity
+      # (subscription_id + campaign_started_at) gives them delivery-level
+      # idempotency that is STABLE across `DunningStep` retries.
+      :dunning_action_required -> deliver_mailglass(type, template_mod, atomized, recipient)
+      :dunning_final_notice -> deliver_mailglass(type, template_mod, atomized, recipient)
       _ -> deliver_swoosh(type, template_mod, atomized, recipient)
     end
   end
@@ -134,6 +143,12 @@ defmodule Accrue.Workers.Mailer do
   # an invoice_id is present (the receipt/payment_failed behavior), which would
   # wrongly render a PDF for the failed-payment email. Skip it here.
   defp maybe_attach_pdf_for_lane(msg, _atomized, :invoice_payment_failed), do: msg
+
+  # CR-01: the campaign step-2/step-3 emails are dunning notifications, not
+  # invoice deliveries — they carry NO invoice PDF (mirrors
+  # `:invoice_payment_failed`). Skip the Mailglass-lane PDF render for them.
+  defp maybe_attach_pdf_for_lane(msg, _atomized, :dunning_action_required), do: msg
+  defp maybe_attach_pdf_for_lane(msg, _atomized, :dunning_final_notice), do: msg
 
   defp maybe_attach_pdf_for_lane(msg, atomized, type),
     do: maybe_attach_pdf(msg, atomized, type)
@@ -339,6 +354,27 @@ defmodule Accrue.Workers.Mailer do
       nil -> {:error, :missing_invoice_id}
       "" -> {:error, :missing_invoice_id}
       invoice_id -> "accrue:v1:invoice_payment_failed:#{invoice_id}"
+    end
+  end
+
+  # CR-01: delivery-level idempotency for the campaign step-2/step-3 emails,
+  # keyed on the CAMPAIGN IDENTITY (subscription_id + campaign_started_at
+  # anchor) plus the email type. The anchor is threaded unchanged through
+  # every `DunningStep` retry (it is the immutable campaign anchor stored in
+  # the Oban args), so this key is STABLE across retries — a re-executed
+  # worker re-derives the SAME key and the second delivery is deduped. The
+  # `:dunning_action_required` and `:dunning_final_notice` types map to the
+  # campaign step that owns each, so the per-type key never collides across
+  # steps of the same campaign.
+  defp idempotency_key(type, assigns)
+       when type in [:dunning_action_required, :dunning_final_notice] do
+    sub = assigns[:subscription_id] || assigns["subscription_id"]
+    anchor = assigns[:campaign_started_at] || assigns["campaign_started_at"]
+
+    if is_binary(sub) and is_binary(anchor) and sub != "" and anchor != "" do
+      "accrue:v1:#{type}:#{sub}:#{anchor}"
+    else
+      {:error, :missing_campaign_identity}
     end
   end
 

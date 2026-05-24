@@ -257,6 +257,59 @@ defmodule Accrue.Workers.MailerIdempotencyTest do
 
       assert {:cancel, :missing_invoice_id} = perform_job(Mailer, args)
     end
+
+    # CR-01: the campaign step-2/step-3 emails route through the Mailglass lane
+    # and get a delivery-level idempotency key derived from the CAMPAIGN
+    # IDENTITY (subscription_id + campaign_started_at anchor). Because the
+    # anchor is the immutable campaign anchor threaded unchanged through every
+    # `DunningStep` retry, this key is STABLE across retries — re-executing the
+    # SAME worker re-derives the SAME key and the second delivery dedupes.
+    for type <- ["dunning_action_required", "dunning_final_notice"] do
+      test "delivering #{type} stamps accrue:v1:#{type}:<sub>:<anchor> (retry-stable)",
+           %{customer: customer} do
+        type = unquote(type)
+        anchor = "2026-05-24T00:00:00Z"
+
+        # Override the dunning template with CardExpiringSoon so the message
+        # renders cleanly from a hydrated customer + update_pm_url (no invoice
+        # struct needed); idempotency_key/2 keys on the TYPE + campaign
+        # identity regardless of the template module.
+        Application.put_env(:accrue, :email_overrides,
+          [
+            {String.to_existing_atom(type), Accrue.Emails.CardExpiringSoon}
+          ]
+        )
+
+        args = %{
+          "type" => type,
+          "assigns" => %{
+            "subscription_id" => "sub_CR01",
+            "campaign_started_at" => anchor,
+            "customer_id" => customer.id,
+            "to" => "k@example.test",
+            "update_pm_url" => "https://acme.test/portal/update-payment-method"
+          }
+        }
+
+        assert {:ok, _} = perform_job(Mailer, args)
+
+        msg = Mailglass.TestAssertions.last_mail()
+        assert msg.metadata.idempotency_key == "accrue:v1:#{type}:sub_CR01:#{anchor}"
+      end
+    end
+
+    test "a dunning step email with no campaign identity cancels with :missing_campaign_identity" do
+      Application.put_env(:accrue, :email_overrides,
+        dunning_action_required: Accrue.Emails.CardExpiringSoon
+      )
+
+      args = %{
+        "type" => "dunning_action_required",
+        "assigns" => %{"to" => "k@example.test"}
+      }
+
+      assert {:cancel, :missing_campaign_identity} = perform_job(Mailer, args)
+    end
   end
 
   describe "no regression: non-:invoice_payment_failed types are NOT deduped" do
