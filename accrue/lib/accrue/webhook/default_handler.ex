@@ -893,7 +893,11 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp dunning_source(nil), do: :stripe_native
 
   defp dunning_source(%DateTime{} = attempted_at) do
-    if DateTime.diff(DateTime.utc_now(), attempted_at, :second) < 300 do
+    # WR-03: read the wall clock via Accrue.Clock for Fake-lane determinism
+    # (Phase 130), consistent with every other clock read in this phase. A
+    # direct DateTime.utc_now/0 made the exhaustion-telemetry `source` tag
+    # non-deterministic under the Fake clock and could flap at the 300s boundary.
+    if DateTime.diff(Accrue.Clock.utc_now(), attempted_at, :second) < 300 do
       :accrue_sweeper
     else
       :stripe_native

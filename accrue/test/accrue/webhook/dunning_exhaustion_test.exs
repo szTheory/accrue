@@ -148,9 +148,11 @@ defmodule Accrue.Webhook.DunningExhaustionTest do
   describe "dunning_exhaustion telemetry" do
     test "emits :accrue_sweeper source when sweep_attempted_at is within 5 minutes",
          %{sub: sub, sub_id: sub_id} do
-      # Mark this row as recently-swept.
+      # Mark this row as recently-swept. WR-03: anchor to Accrue.Clock (the
+      # Fake clock under test), not the wall clock, so the `dunning_source/1`
+      # comparison — which now reads Accrue.Clock.utc_now/0 — is deterministic.
       recent =
-        DateTime.utc_now()
+        Accrue.Clock.utc_now()
         |> DateTime.add(-60, :second)
         |> Map.put(:microsecond, {0, 6})
 
@@ -199,8 +201,10 @@ defmodule Accrue.Webhook.DunningExhaustionTest do
 
     test "emits :stripe_native when sweep_attempted_at is older than 5 minutes",
          %{sub: sub, sub_id: sub_id} do
+      # WR-03: anchor to Accrue.Clock (the Fake clock under test) so the
+      # 300s-boundary comparison in dunning_source/1 is deterministic.
       old =
-        DateTime.utc_now()
+        Accrue.Clock.utc_now()
         |> DateTime.add(-600, :second)
         |> Map.put(:microsecond, {0, 6})
 
