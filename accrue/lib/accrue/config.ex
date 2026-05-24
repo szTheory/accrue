@@ -427,6 +427,19 @@ defmodule Accrue.Config do
               "Accrue.Config.dunning()[:grace_days]). A positive integer N honors an " <>
               "entitlement-specific N-day window. Grace grants are affirmative, resolved, " <>
               "configured decisions — never a fail-open."
+        ],
+        # --- Phase 127 (ENT-10): optional Stripe-native entitlement sync ---
+        stripe_native_sync: [
+          type: {:in, [:disabled, :advisory]},
+          default: :disabled,
+          doc:
+            "Optional Stripe-native entitlement-summary sync. :disabled (default) is " <>
+              "fully inert — no webhook reducer runs, no cache table is read or written. " <>
+              ":advisory records Stripe entitlement summaries to an advisory cache for " <>
+              "audit / telemetry / the admin read-seam; it does NOT change " <>
+              "entitled?/has_active_plan? decisions in v1.x (local mapping stays " <>
+              "canonical). The enum (not a boolean) reserves room for future additive " <>
+              "modes without a breaking config change."
         ]
       ],
       doc:
@@ -769,6 +782,28 @@ defmodule Accrue.Config do
   """
   @spec past_due_grace() :: :none | :dunning | pos_integer()
   def past_due_grace, do: entitlements() |> Keyword.get(:past_due_grace, :none)
+
+  @doc """
+  Returns the optional Stripe-native entitlement-sync mode: `:disabled`
+  (default, fully inert) or `:advisory` (record summaries to the advisory
+  cache for audit / telemetry / the admin read-seam — does NOT change
+  `entitled?`/`has_active_plan?` decisions; local mapping stays canonical).
+
+  The `:disabled` default is supplied here because `entitlements/0` does a
+  raw read without normalizing nested `:entitlements` defaults (identical
+  constraint to `past_due_grace/0`).
+  """
+  @spec stripe_native_sync() :: :disabled | :advisory
+  def stripe_native_sync, do: entitlements() |> Keyword.get(:stripe_native_sync, :disabled)
+
+  @doc """
+  Ergonomic predicate for the Stripe-native sync gate: `true` when sync is
+  enabled in any non-`:disabled` mode, `false` otherwise. The webhook
+  reducer dispatch checks this FIRST so the off lane early-returns before
+  any `Repo` call.
+  """
+  @spec stripe_native_sync?() :: boolean()
+  def stripe_native_sync?, do: stripe_native_sync() != :disabled
 
   @doc """
   Returns the branding config keyword list.
