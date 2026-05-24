@@ -23,7 +23,7 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 - [x] **Phase 124: Enforcement Surfaces — Plug + LiveView Guards** - Controller Plug guard and conditionally-compiled LiveView `on_mount` guard, with a merge-blocking "core stays runtime-LiveView-free" check (completed 2026-05-23)
 - [x] **Phase 125: Provider Honesty + Lifecycle Truth** - Resolver behaviour + capability-matrix rows + merge-blocking drift gate, plus the lifecycle→entitlement truth-table SSOT (completed 2026-05-23)
 - [x] **Phase 126: Admin Surface + Docs / JTBD Spine** - Read-only entitlements view in `accrue_admin`, `guides/entitlements.md`, the JTBD ⛔→✅ flip, First Hour/README spine, and green package-doc verifiers (completed 2026-05-23)
-- [ ] **Phase 127: Optional Stripe-Native Sync (isolated, off by default)** - Webhook→cache advisory overlay with monotonic ordering, behind a flag, that must not block the milestone's core value
+- [x] **Phase 127: Optional Stripe-Native Sync (isolated, off by default)** - Webhook→cache advisory overlay with monotonic ordering, behind a flag, that must not block the milestone's core value (completed 2026-05-24)
 
 ## Phase Details
 
@@ -129,7 +129,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 127-04-PLAN.md — guides/entitlements.md + telemetry.md Stripe-native sync docs + verify_package_docs.sh needles (ENT-10)
+- [x] 127-04-PLAN.md — guides/entitlements.md + telemetry.md Stripe-native sync docs + verify_package_docs.sh needles (ENT-10)
 
 ## Progress
 
@@ -142,7 +142,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 6/6 | Complete    | 2026-05-23 |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 3/3 | Complete    | 2026-05-23 |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 4/4 | Complete    | 2026-05-23 |
-| 127. Optional Stripe-Native Sync (isolated) | v1.39 | 3/4 | In Progress|  |
+| 127. Optional Stripe-Native Sync (isolated) | v1.39 | 4/4 | Complete   | 2026-05-24 |
 
 ## Notes
 
