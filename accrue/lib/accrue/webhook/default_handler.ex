@@ -1746,26 +1746,37 @@ defmodule Accrue.Webhook.DefaultHandler do
 
   # Wraps the mailer deliver in a try/rescue so dispatch failures don't
   # rollback state reconciliation. Emits telemetry on dispatch failure.
+  #
+  # WR-05: a swallowed dunning email is a revenue event, so the telemetry now
+  # carries enough to reconstruct WHICH email was dropped (subscription_id +
+  # invoice_id from assigns, in addition to type). The `catch` is narrowed to
+  # `:throw` only; an abnormal `exit` (e.g. DBConnection.OwnershipError,
+  # `exit(:shutdown)`) is RE-RAISED rather than masked as a silent `:ok`,
+  # since suppressing it would hide genuine infrastructure failures behind a
+  # successful reconciliation.
   defp safe_deliver(type, assigns) do
     Accrue.Mailer.deliver(type, assigns)
   rescue
     e ->
-      :telemetry.execute(
-        [:accrue, :mailer, :dispatch_failed],
-        %{count: 1},
-        %{type: type, reason: inspect(e)}
-      )
-
+      emit_dispatch_failed(type, assigns, inspect(e))
       :ok
   catch
-    kind, reason ->
-      :telemetry.execute(
-        [:accrue, :mailer, :dispatch_failed],
-        %{count: 1},
-        %{type: type, reason: inspect({kind, reason})}
-      )
-
+    :throw, reason ->
+      emit_dispatch_failed(type, assigns, inspect({:throw, reason}))
       :ok
+  end
+
+  defp emit_dispatch_failed(type, assigns, reason) do
+    :telemetry.execute(
+      [:accrue, :mailer, :dispatch_failed],
+      %{count: 1},
+      %{
+        type: type,
+        reason: reason,
+        subscription_id: Map.get(assigns, :subscription_id),
+        invoice_id: Map.get(assigns, :invoice_id)
+      }
+    )
   end
 
   defp drop_nils(map) when is_map(map) do
