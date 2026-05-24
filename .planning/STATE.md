@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.39
-milestone_name: — Entitlements / Plan-Gating
-status: Awaiting next milestone
-stopped_at: Phase 127 context gathered
-last_updated: "2026-05-24T15:24:01.676Z"
-last_activity: 2026-05-24 — Milestone v1.39 completed and archived
+milestone: v1.40
+milestone_name: Dunning depth
+status: planning
+last_updated: "2026-05-24T16:26:32.736Z"
+last_activity: 2026-05-24
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 21
-  completed_plans: 21
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -22,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning next milestone (post-v1.39). v1.39 — Entitlements / Plan-Gating shipped & archived 2026-05-24.
+**Current focus:** v1.40 — Dunning depth / notification journeys (defining requirements; phases begin at 128). Research pre-resolved in `.planning/threads/dunning-depth-milestone-prep.md`.
 
 ## Current Position
 
-Phase: Milestone v1.39 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-05-24 — Milestone v1.39 completed and archived
+Status: Defining requirements
+Last activity: 2026-05-24 — Milestone v1.40 started
 
 ## Milestone Progress
 
@@ -68,6 +67,14 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-22:** Split observability — per-check decisions → telemetry only; grant/revoke/sync → immutable event ledger.
 - **2026-05-22:** Keep core runtime-LiveView-free; the `on_mount` guard ships conditionally compiled with a merge-blocking no-LiveView CI check (Phase 124).
 - **2026-05-22:** Isolate optional Stripe-native sync to the final phase (127) so it cannot block the milestone's core value; flagged needs-deeper-research.
+
+**2026-05-24 — post-v1.39 next-step assessment:**
+
+- **Selected next milestone = Dunning depth / multi-step notification journeys** (JTBD #2). It is the only 🟡-bounded item on the canonical revenue loop and the project's #1 ranked candidate. Assessment puts the lib at ~90–95% done for its stated scope (canonical 6/6 loop shipped; original Elixir-Stripe-gap wedge fully closed). Full research in thread `dunning-depth-milestone-prep`.
+- **Chimeway = optional integration, NOT a hard dependency.** Ship a thin built-in `Accrue.Dunning.Campaign` (Oban-driven, no new heavy deps) as the always-on default + a conditional-compiled off-by-default `Accrue.Integrations.Chimeway` adapter behind an `Accrue.Dunning.Engine` behaviour. Rationale: Chimeway is only `1.0.0`-on-Hex (2026-05-08, churn risk vs zero-breaking-change promise), pulls its own schema/migrations + Oban, and dunning is not on the critical install path. (Mailglass/lattice_stripe are hard deps because they ARE.)
+- **Must-fix folded into the dunning milestone:** `:invoice_payment_failed` email has no idempotency key (`workers/mailer.ex:292,314`) → re-sends on every Stripe retry. Fix via `Mailer.idempotency_key/2` coverage + Oban `unique`.
+- **Did NOT change `workflow.research`/quality-gate config** (per shift-left ask-first rule). Did NOT auto-run new-milestone (per assessment instruction).
+
 _v1.39 per-plan decision detail (Phases 123–127) is archived — full Key Decisions log lives in PROJECT.md, with per-plan rationale in each phase's SUMMARY.md / LEARNINGS.md and [milestones/v1.39-ROADMAP.md](milestones/v1.39-ROADMAP.md)._
 
 ### Pending Todos
@@ -76,7 +83,14 @@ None yet.
 
 ### Blockers/Concerns
 
-None open. (v1.39 blockers resolved at ship: Phase 124 confirmed `accrue/mix.exs` keeps `{:phoenix_live_view, "~> 1.1"}` non-optional with core runtime-LiveView-free; Phase 127 research completed — eventual-consistency window, out-of-order monotonic ordering, and the 10-entitlement inline cap all handled and documented.)
+**Surfaced by the 2026-05-24 assessment (none block shipping; inputs to the next milestone):**
+
+- **Latent bug:** `:invoice_payment_failed` email has no idempotency key → duplicate sends on each Stripe retry. Fix in the dunning milestone (thread `dunning-depth-milestone-prep`).
+- **Adopter-proof gap:** the v1.39 headline JTBD (entitlements/plan-gating) has ZERO usage in `examples/accrue_host`; metered + checkout-session also unexercised there; recovery crons (`DunningSweeper`, `DetectExpiringCards`) ship dormant/host-unwired. See thread `adopter-proof-gaps`.
+- **Chimeway watch-item:** its guide and code disagree on the public API surface; only `1.0.0` is on Hex while the local repo's `mix.exs` version string is stale at `0.1.0`. Verify against published 1.0.0 before coding the adapter.
+- **Graduation-candidate lesson (cross-phase):** "a fully green suite can hide a feature dead on the production path" — caught at code review in BOTH Phase 126 (CR-01) and 127 (CR-01). Already in `126-LEARNINGS.md`/`127-LEARNINGS.md`; flagged here as a cross-phase graduation candidate (test the production entry point, not just the unit handler).
+
+Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirmed `accrue/mix.exs` keeps `{:phoenix_live_view, "~> 1.1"}` non-optional with core runtime-LiveView-free; Phase 127 research completed — eventual-consistency window, out-of-order monotonic ordering, and the 10-entitlement inline cap all handled and documented.)
 
 ## Deferred Items
 
@@ -102,4 +116,6 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd:new-milestone
+- **Next milestone selected: Dunning depth / notification journeys.** Research is pre-resolved in thread `dunning-depth-milestone-prep` (run `/gsd-thread dunning-depth-milestone-prep` to load it).
+- Kick off when ready: `/gsd-new-milestone "v1.40 Dunning depth"` (assessment intentionally did NOT auto-start it).
+- Consider the `adopter-proof-gaps` thread (entitlements not proven in example host) — fold into the dunning milestone's example-host work or take as a small dedicated phase.

@@ -12,9 +12,22 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**None active — planning next milestone.** `v1.39 — Entitlements / Plan-Gating`
-**shipped & archived 2026-05-24** (Phases 123–127, ENT-01..12, planning tag
-`v1.39`). The canonical six-step SaaS loop (*bill → change/cancel → recover failed
+**Active: `v1.40 — Dunning depth / notification journeys`** (started 2026-05-24; phases begin at **128**, continuing from v1.39 — no phase-number reset).
+
+**Goal:** Promote failed-payment recovery from today's single un-deduped email + grace/terminal sweeper into a first-party, configurable **multi-step dunning journey** (reminder → wait → escalate → final notice) with a customer recovery surface, admin visibility, and provider-honest + Fake-proven behavior — with Chimeway as an **optional** engine, not a hard dep. Also closes the v1.39 adopter-proof gap by demonstrating entitlements gating in `examples/accrue_host`.
+
+**Target features:**
+- Built-in Oban `Accrue.Dunning.Campaign` — config-driven cadence + per-step Mailglass templates (default journey).
+- `Accrue.Dunning.Engine` behaviour + off-by-default `Accrue.Integrations.Chimeway` adapter (SEED-002 #1).
+- `:invoice_payment_failed` email idempotency (must-fix double-send) + cancel-on-recovery.
+- Customer recovery surface (portal "update card" banner) + admin dunning-state visibility.
+- Dunning ledger events + telemetry (incl. a recovered-revenue counter).
+- Fake-lane deterministic clock-advance proof + default campaign wired into `examples/accrue_host`.
+- Entitlements adopter-proof: an entitlement-gated route/page demonstrated in `examples/accrue_host`.
+
+**Pre-resolved research:** `.planning/threads/dunning-depth-milestone-prep.md` + `.planning/threads/adopter-proof-gaps.md`.
+
+**Previously:** `v1.39 — Entitlements / Plan-Gating` **shipped & archived 2026-05-24** (Phases 123–127, ENT-01..12, planning tag `v1.39`). The canonical six-step SaaS loop (*bill → change/cancel → recover failed
 payments → self-serve → **gate access** → operate with an audit trail*) is now
 **complete** — entitlements was the last open step. The current public linked
 release line is `accrue` / `accrue_admin` / `accrue_portal` `1.1.1`
@@ -283,8 +296,11 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Next Milestone Goals (post-v1.39)
 
-- **Dunning depth / notification journeys** (JTBD #2) — multi-step recovery (email → wait → escalate); maps to SEED-002 #1 (Chimeway + Mailglass). Deserves its own milestone — it needs an external orchestration lib, so it is heavier and less universal than entitlements.
+**Assessment (2026-05-24, post-v1.39 next-step review):** Accrue is **~90–95% done for its stated scope** — the canonical 6-step SaaS loop is 6/6 shipped and the original "Elixir Stripe gap" wedge is fully closed. Exactly **one 🟡-bounded item remains on the canonical revenue loop: dunning depth.** Everything else is intake-gated or below-the-line. Verdict: finish this one last revenue-recovering wedge, then the lib is essentially done for scope. Full research in `.planning/threads/dunning-depth-milestone-prep.md`.
+
+- **Dunning depth / notification journeys** (JTBD #2) — **SELECTED as the next milestone.** Multi-step recovery (email → wait → escalate); maps to SEED-002 #1 (Chimeway + Mailglass). Decision: **Chimeway is an optional integration, not a hard dep** — ship a thin built-in `Accrue.Dunning.Campaign` (Oban-driven default) + an off-by-default `Accrue.Integrations.Chimeway` adapter. Folds in the must-fix `:invoice_payment_failed` email-idempotency bug.
 - **Intake-gated only:** admin search (SEED-002 #5 / Scrypath), ad-hoc invoice line items, disputes read-view — build only on a sourced request per stop rule S1.
+- **Adopter-proof gap (newly surfaced):** v1.39 entitlements has zero usage in `examples/accrue_host`; the headline JTBD isn't proven end-to-end in the canonical demo. See `.planning/threads/adopter-proof-gaps.md`.
 - **Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet.
 
 ## Current State
@@ -893,4 +909,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-24 after **v1.39 — Entitlements / Plan-Gating** milestone (shipped & archived; Phases 123–127, ENT-01..12, tag `v1.39`). The canonical six-step SaaS loop is now complete; no active milestone — planning next (dunning depth is the leading candidate).*
+*Last updated: 2026-05-24 — started **v1.40 — Dunning depth / notification journeys** (phases from 128, continuing v1.39). The canonical six-step SaaS loop shipped at v1.39; v1.40 deepens the recovery step (JTBD #2) and closes the entitlements adopter-proof gap. Prior: **v1.39 — Entitlements / Plan-Gating** shipped & archived (Phases 123–127, ENT-01..12, tag `v1.39`).*
