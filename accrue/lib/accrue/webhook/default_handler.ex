@@ -804,8 +804,17 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp maybe_finalize_dunning_campaign(nil, _updated), do: :ok
 
   defp maybe_finalize_dunning_campaign(%Subscription{} = row, %Subscription{} = updated) do
+    # A campaign FINALIZES on EITHER edge out of the live (`:past_due`)
+    # window: recovery (the sub is active/paid again) OR terminal exhaustion
+    # (CR-02: the sub reached `:unpaid`/`:canceled` via the Accrue sweeper or
+    # Stripe-native termination). In BOTH cases the still-set anchor must be
+    # cleared and the scheduled steps proactively cancelled — otherwise an
+    # in-flight `:action_required`/`:final_notice` step keeps firing to a
+    # subscription that has left the dunning window. Previously only the
+    # recovery edge was handled, so a terminal `:unpaid` transition left the
+    # anchor live and the per-step guard as the sole backstop.
     with true <- Subscription.dunning_campaign_active?(row),
-         true <- Subscription.active?(updated),
+         true <- finalizing_transition?(updated),
          %DateTime{} = anchor <- row.dunning_campaign_started_at do
       iso_anchor = DateTime.to_iso8601(anchor)
 
@@ -825,6 +834,15 @@ defmodule Accrue.Webhook.DefaultHandler do
     else
       _ -> :ok
     end
+  end
+
+  # A subscription leaves the dunning campaign on EITHER edge out of
+  # `:past_due`: recovery (active/paid again) OR terminal exhaustion
+  # (`:unpaid`/`:canceled`). `dunning_exhausted_status/1` returns a non-nil
+  # status atom for the terminal edge.
+  defp finalizing_transition?(%Subscription{} = updated) do
+    Subscription.active?(updated) or
+      not is_nil(Subscription.dunning_exhausted_status(updated))
   end
 
   # POST-COMMIT bulk cancel (D-12). Run by the dispatch site AFTER the

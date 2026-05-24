@@ -116,6 +116,22 @@ defmodule Accrue.Webhook.DunningCampaignKeyingTest do
     DefaultHandler.handle(event)
   end
 
+  # CR-02: a TERMINAL transition out of `:past_due` (the sub reached the
+  # dunning-exhaustion state `:unpaid`/`:canceled` via the sweeper or
+  # Stripe-native termination). Like recovery, this must finalize the campaign.
+  defp fire_terminal(sub_id, status) when status in [:unpaid, :canceled] do
+    status_str = Atom.to_string(status)
+    stub_subscription_fetch(sub_id, status)
+
+    event =
+      StripeFixtures.webhook_event(
+        "customer.subscription.updated",
+        StripeFixtures.subscription_created(%{"id" => sub_id, "status" => status_str})
+      )
+
+    DefaultHandler.handle(event)
+  end
+
   # --- (1) concurrent elector — exactly one winner -------------------
 
   describe "race-safe first-transition elector (D-09)" do
@@ -188,6 +204,50 @@ defmodule Accrue.Webhook.DunningCampaignKeyingTest do
         |> Repo.all()
 
       assert length(remaining) == 2
+    end
+  end
+
+  # --- (3b) cancel-on-TERMINAL (CR-02) -------------------------------
+
+  describe "cancel-on-terminal-exhaustion (CR-02, D-12)" do
+    for status <- [:unpaid, :canceled] do
+      test "a terminal #{status} transition nils the anchor and cancels scheduled steps",
+           %{sub: sub, sub_id: sub_id} do
+        status = unquote(status)
+        anchor = %{Accrue.Clock.utc_now() | microsecond: {0, 6}}
+        sub = set_anchor(sub, anchor)
+
+        iso = DateTime.to_iso8601(anchor)
+        {:ok, _} = DunningStep.enqueue_step(sub.id, :action_required, anchor, %{})
+        {:ok, _} = DunningStep.enqueue_step(sub.id, :final_notice, anchor, %{})
+
+        scheduled =
+          from(j in Oban.Job,
+            where: j.worker == "Accrue.Workers.DunningStep",
+            where: fragment("? ->> 'campaign_started_at' = ?", j.args, ^iso)
+          )
+          |> Repo.all()
+
+        assert length(scheduled) == 2
+
+        assert {:ok, %Subscription{status: ^status}} = fire_terminal(sub_id, status)
+
+        # Anchor durably nilled on the terminal edge (previously only the
+        # recovery edge cleared it, so terminal steps kept firing — CR-02).
+        reloaded = Repo.reload!(sub)
+        assert is_nil(reloaded.dunning_campaign_started_at)
+
+        # Scheduled steps proactively cancelled post-commit, keyed on the anchor.
+        cancelled =
+          from(j in Oban.Job,
+            where: j.worker == "Accrue.Workers.DunningStep",
+            where: fragment("? ->> 'campaign_started_at' = ?", j.args, ^iso),
+            where: j.state == "cancelled"
+          )
+          |> Repo.all()
+
+        assert length(cancelled) == 2
+      end
     end
   end
 

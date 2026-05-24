@@ -97,6 +97,22 @@ defmodule Accrue.Workers.DunningStepTest do
       refute_received {:accrue_email_delivered, _type, _assigns}
       assert [] = all_enqueued(worker: DunningStep)
     end
+
+    # CR-02: an `:unpaid` sub has reached the dunning-TERMINAL state. Even with
+    # a still-set anchor (e.g. a terminal transition that raced an in-flight
+    # step), the cancel-guard must treat it as NOT live and deliver nothing —
+    # the guard now mirrors `dunning_sweepable?/1` (`:past_due` only) rather
+    # than `past_due?/1` (which also matches `:unpaid`).
+    test "a terminal :unpaid sub with a live anchor returns {:cancel, :recovered}",
+         %{customer: cus} do
+      sub = seed_sub(cus, %{status: :unpaid, dunning_campaign_started_at: @anchor})
+
+      assert {:cancel, :recovered} =
+               perform_job(DunningStep, args(sub, :final_notice, @anchor, cus))
+
+      refute_received {:accrue_email_delivered, _type, _assigns}
+      assert [] = all_enqueued(worker: DunningStep)
+    end
   end
 
   describe "happy-path chain (D-10)" do

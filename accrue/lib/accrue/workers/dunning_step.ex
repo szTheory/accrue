@@ -141,10 +141,16 @@ defmodule Accrue.Workers.DunningStep do
     ]
   end
 
-  # Live-state cancel-guard: a campaign is active iff the sub is still
-  # past_due (or unpaid) AND has a non-nil campaign anchor.
+  # Live-state cancel-guard (CR-02): a campaign is active iff the sub is
+  # STRICTLY `:past_due` AND has a non-nil campaign anchor. `:unpaid` is the
+  # dunning-terminal state — a sub that has reached it (via the Accrue sweeper
+  # or Stripe-native termination) must NOT be dunned further, so we mirror
+  # `Subscription.dunning_sweepable?/1` (`:past_due` only) rather than
+  # `past_due?/1` (which ALSO matches `:unpaid`). This is the backstop the
+  # design leans on: any in-flight step that races a terminal transition
+  # self-cancels here instead of emailing a terminated customer.
   defp campaign_active?(%Subscription{} = sub) do
-    Subscription.past_due?(sub) and Subscription.dunning_campaign_active?(sub)
+    Subscription.dunning_sweepable?(sub) and Subscription.dunning_campaign_active?(sub)
   end
 
   # Deliver the current step's email exactly once. Kept OUTSIDE any
