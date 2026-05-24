@@ -4,7 +4,7 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: verifying
 stopped_at: Phase 128 context gathered
-last_updated: "2026-05-24T18:13:54.627Z"
+last_updated: "2026-05-24T18:48:42.148Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 5
@@ -26,8 +26,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 ## Current Position
 
-Phase: 128 (campaign-engine-foundation-idempotency-must-fix) — EXECUTING
-Plan: 6 of 6
+Phase: 129
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-05-24
 
@@ -44,7 +44,7 @@ Last activity: 2026-05-24
 
 **Velocity:**
 
-- Total plans completed: 21 (v1.39)
+- Total plans completed: 27 (v1.39)
 - Average duration: —
 - Total execution time: —
 
