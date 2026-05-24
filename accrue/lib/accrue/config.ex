@@ -826,8 +826,15 @@ defmodule Accrue.Config do
   without re-stating `:campaign`. Ships ON by default.
   """
   @spec dunning_campaign() :: keyword()
-  def dunning_campaign,
-    do: dunning() |> Keyword.get(:campaign, enabled: true, steps: @default_dunning_steps)
+  def dunning_campaign do
+    case dunning() |> Keyword.get(:campaign, enabled: true, steps: @default_dunning_steps) do
+      # `campaign: false` opt-out shorthand — normalize to the keyword shape
+      # so the predicate/steps accessors always operate on a keyword list
+      # (the `{:custom}` validator does the same normalization at boot).
+      false -> [enabled: false, steps: []]
+      campaign -> campaign
+    end
+  end
 
   @doc """
   Returns whether the multi-step dunning campaign is enabled (D-07).
@@ -1094,7 +1101,13 @@ defmodule Accrue.Config do
   defp validate_dunning_campaign_grace!(opts) do
     dunning = Keyword.get(opts, :dunning, [])
     grace_days = Keyword.get(dunning, :grace_days, 14)
-    campaign = Keyword.get(dunning, :campaign, enabled: true, steps: @default_dunning_steps)
+    raw_campaign = Keyword.get(dunning, :campaign, enabled: true, steps: @default_dunning_steps)
+
+    # `validate_at_boot!/0` passes the RAW (un-normalized) opts here, so the
+    # campaign may still be the `false` opt-out shorthand (the `{:custom}`
+    # normalization to `[enabled: false, steps: []]` happens on the discarded
+    # validated copy). Treat `false` as disabled — nothing to cross-check.
+    campaign = if raw_campaign == false, do: [enabled: false, steps: []], else: raw_campaign
 
     with true <- Keyword.get(campaign, :enabled, false),
          [_ | _] = steps <- Keyword.get(campaign, :steps, []),
