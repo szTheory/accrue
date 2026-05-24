@@ -1,15 +1,12 @@
 defmodule Accrue.Property.EntitlementSummaryMonotonicPropertyTest do
   @moduledoc """
-  Phase 127 (ENT-10) — Wave 0 RED scaffold (property).
+  Phase 127 (ENT-10) — entitlement-summary monotonic-ordering property.
 
   The monotonic-ordering invariant for the entitlement-summary cache: no
   matter what order Stripe delivers `entitlements.active_entitlement_summary.updated`
   events (Stripe gives no delivery-order guarantee), the persisted cache row
   for a customer always reflects the snapshot with the **highest event
-  timestamp** — older / replayed events can never regress it.
-
-  Tagged `:pending_plan_02` and EXCLUDED by default (see
-  `test/test_helper.exs`): intentionally RED until Plan 02 lands the
+  timestamp** — older / replayed events can never regress it. Backed by the
   config-gated reducer that reuses `check_stale/2` + `stamp_watermark/3`.
 
   Structure cloned from `entitlements_fail_closed_property_test.exs`
@@ -17,8 +14,6 @@ defmodule Accrue.Property.EntitlementSummaryMonotonicPropertyTest do
   """
   use Accrue.BillingCase, async: false
   use ExUnitProperties
-
-  @moduletag :pending_plan_02
 
   alias Accrue.Billing.EntitlementSummary
 

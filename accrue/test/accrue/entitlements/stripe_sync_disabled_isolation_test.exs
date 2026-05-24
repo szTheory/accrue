@@ -1,6 +1,6 @@
 defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
   @moduledoc """
-  Phase 127 (ENT-10) — Wave 0 RED scaffold (isolation).
+  Phase 127 (ENT-10) — gate-path isolation (disabled mode).
 
   Proves the off-by-default isolation invariant (D-04 layer 3): with
   `stripe_native_sync: :disabled` (the default), an `Accrue.entitled?/2`
@@ -9,13 +9,9 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
   answers **byte-for-byte as after Phase 126** (local mapping canonical, no
   Stripe dependency on the gate path).
 
-  Tagged `:pending_plan_02` and EXCLUDED by default (see
-  `test/test_helper.exs`). It is RED this wave because the Phase-126
-  local-resolution parity fixture asserts against a surface whose isolation
-  is only fully meaningful once Plan 02 introduces the cache write path that
-  this test proves the gate never touches. The static-grep companion gate
-  `scripts/ci/verify_entitlement_sync_isolation.sh` (also Plan 02) is the
-  compile-time twin of this runtime proof.
+  The static-grep companion gate
+  `scripts/ci/verify_entitlement_sync_isolation.sh` is the compile-time twin
+  of this runtime proof.
 
   Ecto emits query telemetry under the repo's otp-app-derived prefix; for
   the host-canonical `Accrue.Repo` that is `[:accrue, :repo, :query]`. In
@@ -24,8 +20,6 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
   but assert against the same canonical contract.
   """
   use Accrue.BillingCase, async: false
-
-  @moduletag :pending_plan_02
 
   alias Accrue.Test.Factory
 

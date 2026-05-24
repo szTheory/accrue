@@ -44,7 +44,7 @@ for f in "${gate_path_files[@]}"; do
 done
 
 hits=$(grep -rnE \
-  '^[^#]*(EntitlementSummary|StripeSync|accrue_entitlement_summaries)' \
+  '^[^#]*(EntitlementSummary|StripeSync|accrue_entitlement_summaries|stripe_native_sync)' \
   "${gate_path_files[@]}" \
   || true)
 
