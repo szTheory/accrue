@@ -21,6 +21,15 @@ defmodule Accrue.Config do
     [after_days: 12, key: :final_notice, template: Accrue.Emails.DunningFinalNotice]
   ]
 
+  # WR-01: single source of truth for the `:dunning` `:grace_days` default and
+  # the default `:campaign` journey. Both the `@schema` defaults AND the boot
+  # guards (`validate_dunning_campaign_grace!/1`) and the `dunning_campaign/0`
+  # accessor read these — so the boot guard can never validate against a stale
+  # default that drifted from the schema (it previously inlined `14` and the
+  # default journey as literals in three places).
+  @default_grace_days 14
+  @default_dunning_campaign [enabled: true, steps: @default_dunning_steps]
+
   @schema [
     # --- Repo + adapters --------------------------------------------------
     repo: [
@@ -251,19 +260,19 @@ defmodule Accrue.Config do
       type: :keyword_list,
       default: [
         mode: :stripe_smart_retries,
-        grace_days: 14,
+        grace_days: @default_grace_days,
         terminal_action: :unpaid,
         telemetry_prefix: [:accrue, :ops],
-        campaign: [enabled: true, steps: @default_dunning_steps]
+        campaign: @default_dunning_campaign
       ],
       keys: [
         mode: [type: {:in, [:stripe_smart_retries, :disabled]}, default: :stripe_smart_retries],
-        grace_days: [type: :pos_integer, default: 14],
+        grace_days: [type: :pos_integer, default: @default_grace_days],
         terminal_action: [type: {:in, [:unpaid, :canceled]}, default: :unpaid],
         telemetry_prefix: [type: {:list, :atom}, default: [:accrue, :ops]],
         campaign: [
           type: {:custom, __MODULE__, :validate_dunning_campaign, []},
-          default: [enabled: true, steps: @default_dunning_steps],
+          default: @default_dunning_campaign,
           doc:
             "Multi-step dunning cadence (D-04). A keyword list of " <>
               "`[enabled: boolean, steps: [...]]` where each step is " <>
@@ -827,7 +836,7 @@ defmodule Accrue.Config do
   """
   @spec dunning_campaign() :: keyword()
   def dunning_campaign do
-    case dunning() |> Keyword.get(:campaign, enabled: true, steps: @default_dunning_steps) do
+    case dunning() |> Keyword.get(:campaign, @default_dunning_campaign) do
       # `campaign: false` opt-out shorthand — normalize to the keyword shape
       # so the predicate/steps accessors always operate on a keyword list
       # (the `{:custom}` validator does the same normalization at boot).
@@ -1100,8 +1109,8 @@ defmodule Accrue.Config do
   # terminal), so we fail LOUD at boot.
   defp validate_dunning_campaign_grace!(opts) do
     dunning = Keyword.get(opts, :dunning, [])
-    grace_days = Keyword.get(dunning, :grace_days, 14)
-    raw_campaign = Keyword.get(dunning, :campaign, enabled: true, steps: @default_dunning_steps)
+    grace_days = Keyword.get(dunning, :grace_days, @default_grace_days)
+    raw_campaign = Keyword.get(dunning, :campaign, @default_dunning_campaign)
 
     # `validate_at_boot!/0` passes the RAW (un-normalized) opts here, so the
     # campaign may still be the `false` opt-out shorthand (the `{:custom}`
