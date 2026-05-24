@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 127 context gathered
-last_updated: "2026-05-24T11:19:14.439Z"
-last_activity: 2026-05-24 -- Phase 127 planning complete
+last_updated: "2026-05-24T12:02:00.485Z"
+last_activity: 2026-05-24
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 21
-  completed_plans: 17
+  completed_plans: 18
   percent: 80
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 126 — admin-surface-docs-jtbd-spine
+**Current focus:** Phase 127 — optional-stripe-native-sync-isolated-off-by-default
 
 ## Current Position
 
-Phase: 127
-Plan: Not started
+Phase: 127 (optional-stripe-native-sync-isolated-off-by-default) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-05-24 -- Phase 127 planning complete
+Last activity: 2026-05-24
 
 Progress: [██████████] 100% (phase 123 plans complete)
 
@@ -75,6 +75,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 126 P02 | 11min | 3 tasks | 6 files |
 | Phase 126 P04 | 6min | 2 tasks | 2 files |
 | 126 | 4 | - | - |
+| Phase 127 P01 | 5min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: [Phase 126 P02]: VERIFY-01 three-part copy contract held — Copy.Entitlements (13 @doc false fns incl. fail-closed error copy) -> 13 Copy.entitlements_* defdelegates -> 13 export-allowlist entries (export now 54 strings); zero hardcoded template strings. Rule 3 fix: synced accrue_admin/mix.lock to reconcile rendro ~> 0.3.0 so accrue_admin compiles.
 - [Phase ?]: [Phase 126 P04]: ENT-12 SC#4 closed — verify_package_docs.sh entitlements-spine block (D-14): README link, 3 entitlements.md needles (entitled?/Accrue.Plug.RequireEntitlement/[:accrue, :entitlements, :check]), JTBD shipped marker 'entitlements ✅ shipped' (byte-for-byte, U+2705 literal), scoped flip-guard 'on the table** is **entitlements' (NOT 'headline gap'), quickstart pointer. No gateway-subscription-core line added (already :220; the subscribe/3 second masked needle was restored by orchestrator 5635d77).
 - [Phase ?]: [Phase 126 P04]: D-15 seed co-update — package_docs_verifier_test.exs seeds entitlements.md + jobs_to_be_done.md so negative-drift fixtures don't fail 'No such file'. 3-command phase gate GREEN: verifier exit 0 + verifier-test 8/0 + mix docs builds entitlements.html (35KB). Full accrue seed-0 1462/0; accrue_admin 131/0; default-seed lone failure is the known-flaky PdfTest (no regression).
+- [Phase 127]: [Phase 127 P01]: ENT-10 foundation — accrue_entitlement_summaries advisory cache (schema + migration), keyed on customer_id (no processor-side id field; summary has no top-level id, A4/D-06), data JSONB + typed operator cols + watermark + lock_version; force_changeset/2 (drops status allowlist + subscription_id FK vs SubscriptionSchedule analog) with optimistic_lock + unique_constraint(:customer_id) + foreign_key_constraint(:customer_id); FK on_delete: :delete_all; unique + stripe_customer_id + partial truncated=true indexes.
+- [Phase 127]: [Phase 127 P01]: stripe_native_sync config enum {:disabled,:advisory} default :disabled boot-validated (NOT boolean, D-03 reserves future modes); stripe_native_sync/0 raw entitlements/0 read supplying own :disabled default + stripe_native_sync?/0 predicate; D-03 disclaimer doc string (:advisory observational, does NOT change entitled?/has_active_plan?). Defaults verified {:disabled,false}.
+- [Phase 127]: [Phase 127 P01]: Wave 0 RED scaffolds (3 test files + entitlement_summary_event/2 fixture) tagged :pending_plan_02 + excluded in test_helper.exs so suite stays green this wave — Plan 02 removes the exclusion as it turns them GREEN. Isolation test attaches to actual [:accrue,:test_repo,:query] (TestRepo otp-app prefix) while referencing host-canonical [:accrue,:repo,:query]. NOTE: library has no :repo outside :test env, plan verify cmds run under MIX_ENV=test.
 
 ### Pending Todos
 
@@ -143,6 +147,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-24T11:05:48.997Z
+Last session: 2026-05-24T11:59:42.944Z
 Stopped at: Phase 127 context gathered
-Resume file: .planning/phases/127-optional-stripe-native-sync-isolated-off-by-default/127-CONTEXT.md
+Resume file: None

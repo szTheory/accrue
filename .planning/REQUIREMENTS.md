@@ -33,7 +33,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Optional Stripe-Native Sync (isolated final phase)
 
-- [ ] **ENT-10**: When explicitly enabled (off by default), Accrue consumes Stripe's `entitlements.active_entitlement_summary.updated` webhook into a local cache used as an advisory overlay with monotonic ordering; local mapping remains the canonical default. Live Stripe entitlement API reads are deferred (depends on `lattice_stripe ≥ 1.2`).
+- [x] **ENT-10**: When explicitly enabled (off by default), Accrue consumes Stripe's `entitlements.active_entitlement_summary.updated` webhook into a local cache used as an advisory overlay with monotonic ordering; local mapping remains the canonical default. Live Stripe entitlement API reads are deferred (depends on `lattice_stripe ≥ 1.2`).
 
 ### Admin & Docs
 
@@ -76,7 +76,7 @@ Which phases cover which requirements. Phases continue from v1.38 (ended at Phas
 | ENT-07 | Phase 124 | Complete |
 | ENT-08 | Phase 125 | Complete |
 | ENT-09 | Phase 125 | Complete |
-| ENT-10 | Phase 127 | Pending |
+| ENT-10 | Phase 127 | Complete |
 | ENT-11 | Phase 126 | Complete |
 | ENT-12 | Phase 126 | Complete |
 
