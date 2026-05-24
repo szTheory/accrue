@@ -21,7 +21,7 @@ Dunning depth is **net-new product surface over a thin existing baseline** (a si
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 128: Campaign Engine Foundation + Idempotency Must-Fix** - Config-driven durable Oban dunning campaign with default journey, the `:invoice_payment_failed` email de-dup fix, and cancel-on-recovery campaign keying
+- [x] **Phase 128: Campaign Engine Foundation + Idempotency Must-Fix** - Config-driven durable Oban dunning campaign with default journey, the `:invoice_payment_failed` email de-dup fix, and cancel-on-recovery campaign keying (completed 2026-05-24)
 - [ ] **Phase 129: Customer + Operator Surfaces + Observability** - Portal "update your card" recovery banner, read-only admin dunning-state visibility, and dunning ledger events + telemetry incl. a recovered-vs-lost signal
 - [ ] **Phase 130: Provider Honesty + Fake-Lane Proof + Example-Host Wiring** - Provider-honest dunning docs with a merge-blocking drift check, the deterministic clock-advanceable Fake-lane journey gate, and the default campaign wired into `examples/accrue_host`
 - [ ] **Phase 131: Optional Chimeway Engine Adapter (isolated, off by default)** - `Accrue.Dunning.Engine` behaviour + conditionally-compiled off-by-default `Accrue.Integrations.Chimeway` adapter so a host can swap engines without changing call sites
@@ -54,7 +54,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 128-05-PLAN.md — `Accrue.Workers.DunningStep` cancel-guarded, Oban-unique, chained worker (DUN-02, DUN-05)
-- [ ] 128-06-PLAN.md — Webhook wiring: atomic first-transition elector + cancel-on-recovery + D-15 REPLACE gate (DUN-02, DUN-05)
+- [x] 128-06-PLAN.md — Webhook wiring: atomic first-transition elector + cancel-on-recovery + D-15 REPLACE gate (DUN-02, DUN-05)
 
 > **Carried-forward open questions for plan context (do not re-litigate, just honor):**
 > - Pin the campaign key to the **first** nil→`past_due` transition, not every `past_due_since` bump — `past_due_since` is bumped on every failure; bumps must not restart/orphan in-flight jobs (add a "campaign already running" guard).
@@ -128,7 +128,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 5/6 | In Progress|  |
+| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete   | 2026-05-24 |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 0/TBD | Not started | - |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 0/TBD | Not started | - |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
