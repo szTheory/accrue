@@ -40,7 +40,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Duplicate processor retries (e.g. repeated `invoice.payment_failed`) never produce duplicate emails: the `:invoice_payment_failed` email is now idempotent (closing the `workers/mailer.ex:292,314` un-deduped gap) and each campaign step is uniquely keyed so a step cannot send twice.
   4. The moment a subscription leaves `past_due` (payment recovered), the in-flight campaign cancels — no further steps or emails fire — and the campaign is keyed to the FIRST nil→past_due transition so subsequent failure webhooks within the same past-due window cannot restart, orphan, or duplicate an in-flight campaign.
 
-**Plans**: TBD
+**Plans**: 6 plans (2 waves)
+
+Plans:
+- [ ] 128-01-PLAN.md — Config-driven dunning cadence schema + two-layer validation + default journey (DUN-01)
+- [ ] 128-02-PLAN.md — Nullable campaign anchor column + migration + Subscription predicate (DUN-05 foundation)
+- [ ] 128-03-PLAN.md — Pure `Accrue.Dunning.Campaign` step resolver + property tests (DUN-02)
+- [ ] 128-04-PLAN.md — `:invoice_payment_failed` idempotency must-fix + two new step email templates (DUN-04, DUN-01)
+- [ ] 128-05-PLAN.md — `Accrue.Workers.DunningStep` cancel-guarded, Oban-unique, chained worker (DUN-02, DUN-05)
+- [ ] 128-06-PLAN.md — Webhook wiring: atomic first-transition elector + cancel-on-recovery + D-15 REPLACE gate (DUN-02, DUN-05)
 
 > **Carried-forward open questions for plan context (do not re-litigate, just honor):**
 > - Pin the campaign key to the **first** nil→`past_due` transition, not every `past_due_since` bump — `past_due_since` is bumped on every failure; bumps must not restart/orphan in-flight jobs (add a "campaign already running" guard).
@@ -110,7 +118,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 0/TBD | Not started | - |
+| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 0/6 | Planned | - |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 0/TBD | Not started | - |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 0/TBD | Not started | - |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
