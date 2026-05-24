@@ -4,7 +4,7 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: verifying
 stopped_at: Phase 127 context gathered
-last_updated: "2026-05-24T12:20:12.565Z"
+last_updated: "2026-05-24T12:34:43.499Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 5
@@ -26,8 +26,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 ## Current Position
 
-Phase: 127 (optional-stripe-native-sync-isolated-off-by-default) — EXECUTING
-Plan: 4 of 4
+Phase: 127
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-05-24
 
@@ -50,7 +50,7 @@ Progress: [█████████░] 95% (20 of 21 plans complete)
 
 **Velocity:**
 
-- Total plans completed: 17 (v1.39)
+- Total plans completed: 21 (v1.39)
 - Average duration: —
 - Total execution time: —
 
@@ -79,6 +79,7 @@ Progress: [█████████░] 95% (20 of 21 plans complete)
 | Phase 127 P03 | 4min | 2 tasks | 5 files |
 | Phase 127 P02 | 6min | 2 tasks | 6 files |
 | Phase 127 P04 | 2min | 2 tasks | 3 files |
+| 127 | 4 | - | - |
 
 ## Accumulated Context
 
