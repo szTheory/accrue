@@ -21,8 +21,10 @@ defmodule Accrue.Property.DunningCampaignPropertyTest do
       => :done                       -- journey exhausted / no steps
 
   `elapsed = DateTime.diff(now, campaign_started_at, :second)`. The next
-  step is the FIRST step whose absolute `after_days * 86_400` is strictly
-  greater than `elapsed`; `schedule_in = max(0, after_days_seconds - elapsed)`.
+  step is the FIRST step whose absolute `after_days * 86_400` is greater than
+  or equal to `elapsed` (an at-boundary step stays PENDING — this is the
+  day-0 immediate-send semantics; matches the resolver's `>=` and the
+  `expected_next/2` oracle below); `schedule_in = max(0, after_days_seconds - elapsed)`.
 
   Properties verified:
 
