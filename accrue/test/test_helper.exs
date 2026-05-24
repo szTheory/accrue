@@ -63,10 +63,10 @@ Ecto.Adapters.SQL.Sandbox.mode(Accrue.TestRepo, :manual)
 #
 # See `accrue/test/live_stripe/` and `guides/testing-live-stripe.md`.
 #
-# `:pending_plan_02` is the Phase 127 Wave 0 RED scaffold tag: the
-# entitlement-summary reducer + read-seam are NOT implemented until Plan 02,
-# so those three test files encode the contract but are excluded by default
-# (intentional RED). Plan 02 removes this exclusion as it turns them GREEN.
-ExUnit.configure(exclude: [:live_stripe, :slow, :compile_matrix, :pending_plan_02])
+# The Phase 127 Wave 0 `:pending_plan_02` RED scaffolds (entitlement-summary
+# reducer + read-seam) were turned GREEN by Plan 02 — the reducer, the
+# on-change ledger, and `Accrue.Entitlements.StripeSync` now exist, so the
+# three scaffold files run in the default suite (exclusion removed).
+ExUnit.configure(exclude: [:live_stripe, :slow, :compile_matrix])
 
 ExUnit.start()

@@ -108,6 +108,10 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
     assert Accrue.has_active_plan?(billable, :pro)
     assert Accrue.has_active_plan?(billable, "price_pro")
     assert Accrue.features_for(billable) == [:export, :reports]
-    assert Accrue.entitlement_quantity(billable, :seats) == 5
+    # Canonical Phase-126 SSOT: quantities[quota_key] = min(cap, item.quantity)
+    # (see local_map.ex merge_plan/5 + local_map_test.exs:73). The factory
+    # subscription has the default item quantity 1, so the :seats cap of 5
+    # resolves to min(5, 1) == 1 — NOT the bare configured cap.
+    assert Accrue.entitlement_quantity(billable, :seats) == 1
   end
 end

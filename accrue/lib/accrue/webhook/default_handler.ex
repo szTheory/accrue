@@ -528,6 +528,14 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp write_entitlement_summary(evt_id, evt_ts, obj, cus_id, customer, row, entitlements, data) do
     has_more = get(entitlements, :has_more) == true
     entitlement_count = length(data)
+    new_pairs = entitlement_pairs(data)
+
+    # D-08: on-change-only ledger. The set is the sorted {feature_id,
+    # lookup_key} pairs; a first-ever write (no prior row) is material;
+    # otherwise material iff the pairs OR the truncated flag changed. A
+    # byte-identical re-delivery is NOT material — it is observable via the
+    # `result: :unchanged` telemetry but writes no ledger row.
+    material? = summary_material_change?(row, new_pairs, has_more)
 
     attrs =
       %{
@@ -544,11 +552,12 @@ defmodule Accrue.Webhook.DefaultHandler do
     metadata = %{customer_id: customer.id, has_more: has_more, entitlement_count: entitlement_count}
 
     Accrue.Telemetry.span([:accrue, :entitlements, :sync], metadata, fn ->
-      with {:ok, saved} <- upsert_entitlement_summary(row, attrs) do
+      with {:ok, saved} <- upsert_entitlement_summary(row, attrs),
+           {:ok, _} <- maybe_record_summary_event(material?, saved, evt_id) do
         :telemetry.execute(
           [:accrue, :entitlements, :summary_synced],
           %{count: 1, entitlement_count: entitlement_count},
-          Map.put(metadata, :result, :written)
+          Map.put(metadata, :result, if(material?, do: :written, else: :unchanged))
         )
 
         if has_more do
@@ -563,6 +572,43 @@ defmodule Accrue.Webhook.DefaultHandler do
       end
     end)
   end
+
+  # D-08: ledger row ONLY on material change. The ledger `data` carries
+  # IDs/counts only (via record_event/5's fixed {source, stripe_event_id}
+  # shape) — NEVER the raw summary payload (V7). The idempotency key
+  # collapses Oban retries of the same Stripe event via the partial unique
+  # index on accrue_events.idempotency_key.
+  defp maybe_record_summary_event(false, _saved, _evt_id), do: {:ok, :unchanged}
+
+  defp maybe_record_summary_event(true, %EntitlementSummary{} = saved, evt_id) do
+    record_event(
+      "entitlements.summary.synced",
+      "EntitlementSummary",
+      saved.id,
+      evt_id,
+      idempotency_key: "entitlements.summary.synced:" <> evt_id
+    )
+  end
+
+  # First-ever write is always material. Otherwise material iff the sorted
+  # {feature_id, lookup_key} pair set OR the truncated flag differs from
+  # the persisted row.
+  defp summary_material_change?(nil, _new_pairs, _has_more), do: true
+
+  defp summary_material_change?(%EntitlementSummary{} = row, new_pairs, has_more) do
+    existing = get(row.data || %{}, :entitlements) |> get(:data)
+    new_pairs != entitlement_pairs(existing) or (row.truncated || false) != has_more
+  end
+
+  # Sorted list of {feature_id, lookup_key} pairs from an entitlements
+  # data list, tolerant of nil / non-list / missing keys.
+  defp entitlement_pairs(data) when is_list(data) do
+    data
+    |> Enum.map(fn ent -> {get(ent, :feature), get(ent, :lookup_key)} end)
+    |> Enum.sort()
+  end
+
+  defp entitlement_pairs(_), do: []
 
   defp upsert_entitlement_summary(nil, attrs) do
     %EntitlementSummary{}
