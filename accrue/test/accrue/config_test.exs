@@ -40,6 +40,46 @@ defmodule Accrue.ConfigTest do
   end
 
   describe "get!/1 defaults" do
+    # These tests assert the hardcoded fallbacks by DELETING each key from the
+    # global `:accrue` Application env. Without restoring them, the deletions
+    # leak across the whole `mix test` run (Application env is process-global,
+    # not sandboxed). The :mailer deletion is especially load-bearing: the
+    # test env sets `config :accrue, :mailer, Accrue.Mailer.Test`, and once it
+    # is dropped every later test sees `Accrue.Mailer.impl/0` fall back to
+    # `Accrue.Mailer.Default` (Oban enqueue instead of the capture adapter) —
+    # which silently breaks downstream `{:accrue_email_delivered, ...}`
+    # assertions in the dunning/webhook email suites. Snapshot + restore every
+    # key these tests delete so the block is hermetic.
+    setup do
+      keys = [
+        :default_currency,
+        :stripe_api_version,
+        :emails,
+        :email_overrides,
+        :attach_invoice_pdf,
+        :enforce_immutability,
+        :business_name,
+        :invoice_pdf_adapter,
+        :pdf_adapter,
+        :auth_adapter,
+        :mailer,
+        :mailer_adapter
+      ]
+
+      prior = for key <- keys, into: %{}, do: {key, Application.get_env(:accrue, key, :__unset__)}
+
+      on_exit(fn ->
+        for {key, value} <- prior do
+          case value do
+            :__unset__ -> Application.delete_env(:accrue, key)
+            v -> Application.put_env(:accrue, key, v)
+          end
+        end
+      end)
+
+      :ok
+    end
+
     test ":default_currency defaults to :usd" do
       Application.delete_env(:accrue, :default_currency)
       assert :usd == Config.get!(:default_currency)
