@@ -968,25 +968,96 @@ defmodule Accrue.Webhook.DefaultHandler do
   # means Stripe has stopped retrying — the grace window still runs).
   defp maybe_bump_past_due_since("payment_failed", canonical) do
     with sub_stripe_id when is_binary(sub_stripe_id) <- get(canonical, :subscription),
-         %Subscription{} = sub <- Repo.get_by(Subscription, processor_id: sub_stripe_id),
-         attempt_unix when is_integer(attempt_unix) <- get(canonical, :next_payment_attempt) do
-      past_due_since =
-        attempt_unix
-        |> DateTime.from_unix!()
-        |> Map.put(:microsecond, {0, 6})
-
-      case sub
-           |> Subscription.force_status_changeset(%{past_due_since: past_due_since})
-           |> Repo.update() do
-        {:ok, _} -> :ok
-        {:error, _} = err -> err
-      end
+         %Subscription{} = sub <- Repo.get_by(Subscription, processor_id: sub_stripe_id) do
+      maybe_bump_attempt(sub, canonical)
+      maybe_start_dunning_campaign(sub, canonical)
+      :ok
     else
       _ -> :ok
     end
   end
 
   defp maybe_bump_past_due_since(_action, _canonical), do: :ok
+
+  # Bump past_due_since from Stripe's next_payment_attempt (UNCHANGED from
+  # the Phase 4 behaviour). Never clears it (nil attempt = Stripe stopped
+  # retrying; the grace window still runs).
+  defp maybe_bump_attempt(%Subscription{} = sub, canonical) do
+    case get(canonical, :next_payment_attempt) do
+      attempt_unix when is_integer(attempt_unix) ->
+        past_due_since =
+          attempt_unix
+          |> DateTime.from_unix!()
+          |> Map.put(:microsecond, {0, 6})
+
+        sub
+        |> Subscription.force_status_changeset(%{past_due_since: past_due_since})
+        |> Repo.update()
+
+      _ ->
+        :ok
+    end
+  end
+
+  # D-09 first-transition elector + day-0 enqueue (DUN-02, DUN-05).
+  #
+  # Race-safe campaign start: an atomic
+  # `update_all WHERE is_nil(dunning_campaign_started_at)` is the ONLY
+  # exactly-one-winner primitive under concurrent `invoice.payment_failed`
+  # webhooks (Oban OSS `unique` is advisory-only — backstop, not the
+  # elector). count==1 wins the first nil→past_due edge and enqueues the
+  # day-0 `DunningStep`; count==0 means the campaign is already running
+  # (a later failure in the same window) — no-op, no second start.
+  #
+  # This is a SIBLING `update_all`, NOT a `force_status_changeset`/
+  # `optimistic_lock` write — it sets one column and never touches
+  # `lock_version`, so it cannot contend with the status/past_due_since
+  # changeset path above. Gated on `dunning_campaign_enabled?/0`: a host
+  # that opted out never starts a campaign (the standalone email fires
+  # instead via the D-15 gate).
+  defp maybe_start_dunning_campaign(%Subscription{} = sub, canonical) do
+    if Accrue.Config.dunning_campaign_enabled?() do
+      import Ecto.Query, only: [from: 2]
+
+      now_usec = %{Accrue.Clock.utc_now() | microsecond: {0, 6}}
+
+      {count, _} =
+        from(s in Subscription, where: s.id == ^sub.id and is_nil(s.dunning_campaign_started_at))
+        |> Repo.update_all(set: [dunning_campaign_started_at: now_usec])
+
+      case count do
+        1 -> enqueue_day_zero_step(sub, now_usec, canonical)
+        _ -> :ok
+      end
+    end
+
+    :ok
+  end
+
+  # Winner of the first-transition election enqueues exactly one day-0 step
+  # (the `after_days: 0` step from the configured cadence) carrying the
+  # campaign anchor as an ISO8601 string. The D-16 `unique` (keyed on
+  # subscription_id + step_key + campaign_started_at) on the worker's
+  # enqueue helper backstops the atomic elector.
+  defp enqueue_day_zero_step(%Subscription{} = sub, %DateTime{} = anchor, canonical) do
+    case day_zero_step_key() do
+      nil ->
+        :ok
+
+      step_key ->
+        Accrue.Workers.DunningStep.enqueue_step(sub.id, step_key, anchor, %{
+          customer_id: sub.customer_id,
+          invoice_id: get(canonical, :id)
+        })
+    end
+  end
+
+  # The day-0 step is the configured step at `after_days: 0`.
+  defp day_zero_step_key do
+    Enum.find_value(Accrue.Config.dunning_campaign_steps(), fn step ->
+      if Keyword.get(step, :after_days) == 0, do: Keyword.get(step, :key)
+    end)
+  end
 
   defp upsert_invoice(nil, canonical, attrs) do
     # CR-03: Tolerate webhook-first-for-unknown-customer.
@@ -1464,7 +1535,14 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   defp maybe_dispatch_invoice_email("payment_failed", {:ok, %Invoice{} = invoice}, obj) do
-    do_dispatch_invoice(:invoice_payment_failed, invoice, obj)
+    # D-15 REPLACE: when the campaign is ENABLED, campaign step-1 owns
+    # day-0 — SKIP the standalone email so only one day-0 email is sent.
+    # When DISABLED, the standalone fires (deduped at enqueue by Plan 04).
+    if Accrue.Config.dunning_campaign_enabled?() do
+      :ok
+    else
+      do_dispatch_invoice(:invoice_payment_failed, invoice, obj)
+    end
   end
 
   defp maybe_dispatch_invoice_email(_action, _result, _obj), do: :ok
