@@ -48,6 +48,7 @@ defmodule Accrue.Webhook.DefaultHandler do
   alias Accrue.Billing.{
     Charge,
     Customer,
+    EntitlementSummary,
     Invoice,
     InvoiceItem,
     InvoiceProjection,
@@ -265,6 +266,21 @@ defmodule Accrue.Webhook.DefaultHandler do
     reduce_meter_error_report(evt_id, obj)
   end
 
+  # Phase 127 — ENT-10 optional Stripe-native entitlement-summary sync.
+  #
+  # OFF by default (D-04 layer 1): the runtime gate is checked FIRST and
+  # the off lane early-returns `{:ok, :ignored}` BEFORE any `Repo` call,
+  # so a host that has not opted into `stripe_native_sync: :advisory`
+  # behaves byte-for-byte as Phase 126 — the cache table is never read or
+  # written from the webhook path.
+  defp dispatch("entitlements.active_entitlement_summary.updated", evt_id, evt_ts, obj) do
+    if Accrue.Config.stripe_native_sync?() do
+      reduce_entitlement_summary(evt_id, evt_ts, obj)
+    else
+      {:ok, :ignored}
+    end
+  end
+
   defp dispatch(_type, _evt_id, _evt_ts, _obj), do: {:ok, :ignored}
 
   # ---------------------------------------------------------------------
@@ -424,6 +440,151 @@ defmodule Accrue.Webhook.DefaultHandler do
 
         {:ok, :ignored}
     end
+  end
+
+  # ---------------------------------------------------------------------
+  # Entitlement-summary reducer (Phase 127 Plan 02, ENT-10)
+  #
+  # Monotonic-snapshot, NOT refetch-canonical. The Connect reducer
+  # (`Accrue.Webhook.ConnectHandler`) refetches canonical state from the
+  # Stripe API on every event to immunize itself against out-of-order
+  # delivery. That option is unavailable here: `lattice_stripe` 1.1 ships
+  # no Entitlements list API (verified — typed reads land in
+  # `lattice_stripe >= 1.2`), so there is nothing to refetch. Instead this
+  # reducer trusts the full-snapshot summary payload and enforces ordering
+  # the same way the subscription/invoice/charge reducers do — via
+  # `check_stale/2` keyed on the event `created` watermark (D-06). A
+  # strictly-older event (`:lt`) is skipped; `:eq`/`:gt` proceed. The
+  # result is the same monotonic guarantee without an API round-trip.
+  #
+  # The cache is **observational-only** (D-01): it is written, ledgered,
+  # telemetered, and exposed via a read-only seam, but the gate path
+  # (`Accrue.entitled?/2`, `has_active_plan?/2`, `Resolver`, `LocalMap`)
+  # NEVER reads it. Truncation (`has_more` → `truncated`) is recorded for
+  # operator honesty (D-07) but can never affect a grant decision.
+  defp reduce_entitlement_summary(evt_id, evt_ts, obj) do
+    cus_id = get(obj, :customer)
+    entitlements = get(obj, :entitlements)
+    data = get(entitlements, :data)
+
+    cond do
+      not is_binary(cus_id) ->
+        emit_summary_malformed(evt_id, :missing_customer)
+        {:ok, :ignored}
+
+      not is_list(data) ->
+        emit_summary_malformed(evt_id, :non_list_entitlements)
+        {:ok, :ignored}
+
+      true ->
+        reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data)
+    end
+  end
+
+  defp reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data) do
+    Repo.transact(fn ->
+      case Repo.get_by(Customer, processor_id: cus_id) do
+        %Customer{} = customer ->
+          row = Repo.get_by(EntitlementSummary, customer_id: customer.id)
+
+          case check_stale(row, evt_ts) do
+            :stale ->
+              :telemetry.execute(
+                [:accrue, :webhooks, :stale_event],
+                %{},
+                %{object_type: :entitlement_summary, stripe_id: cus_id, event_id: evt_id}
+              )
+
+              {:ok, :stale}
+
+            :ok ->
+              write_entitlement_summary(
+                evt_id,
+                evt_ts,
+                obj,
+                cus_id,
+                customer,
+                row,
+                entitlements,
+                data
+              )
+          end
+
+        _ ->
+          # Out-of-order delivery: the summary can arrive before the
+          # customer.created event. Tolerate it (clone of orphan_charge,
+          # :840-848) — never raise, never create a customer.
+          :telemetry.execute(
+            [:accrue, :webhooks, :orphan_entitlement_summary],
+            %{},
+            %{customer_stripe_id: cus_id}
+          )
+
+          {:ok, :deferred}
+      end
+    end)
+  end
+
+  defp write_entitlement_summary(evt_id, evt_ts, obj, cus_id, customer, row, entitlements, data) do
+    has_more = get(entitlements, :has_more) == true
+    entitlement_count = length(data)
+
+    attrs =
+      %{
+        customer_id: customer.id,
+        stripe_customer_id: cus_id,
+        livemode: get(obj, :livemode) == true,
+        entitlement_count: entitlement_count,
+        truncated: has_more,
+        synced_at: synced_at_from_event(evt_ts),
+        data: obj
+      }
+      |> stamp_watermark(evt_ts, evt_id)
+
+    metadata = %{customer_id: customer.id, has_more: has_more, entitlement_count: entitlement_count}
+
+    Accrue.Telemetry.span([:accrue, :entitlements, :sync], metadata, fn ->
+      with {:ok, saved} <- upsert_entitlement_summary(row, attrs) do
+        :telemetry.execute(
+          [:accrue, :entitlements, :summary_synced],
+          %{count: 1, entitlement_count: entitlement_count},
+          Map.put(metadata, :result, :written)
+        )
+
+        if has_more do
+          Accrue.Telemetry.Ops.emit(
+            :entitlement_summary_truncated,
+            %{count: 1},
+            %{customer_id: customer.id}
+          )
+        end
+
+        {:ok, saved}
+      end
+    end)
+  end
+
+  defp upsert_entitlement_summary(nil, attrs) do
+    %EntitlementSummary{}
+    |> EntitlementSummary.force_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp upsert_entitlement_summary(%EntitlementSummary{} = row, attrs) do
+    row
+    |> EntitlementSummary.force_changeset(attrs)
+    |> Repo.update()
+  end
+
+  defp synced_at_from_event(%DateTime{} = evt_ts), do: evt_ts
+  defp synced_at_from_event(_), do: Accrue.Clock.utc_now()
+
+  defp emit_summary_malformed(evt_id, reason) do
+    :telemetry.execute(
+      [:accrue, :webhooks, :malformed_entitlement_summary],
+      %{},
+      %{event_id: evt_id, reason: reason}
+    )
   end
 
   defp meter_error_object_from_ctx(ctx) when is_map(ctx) do
