@@ -166,6 +166,47 @@ defmodule Accrue.Workers.DunningStepTest do
     end
   end
 
+  describe "WR-02: step no longer in live cadence ends the journey (no wall-clock re-resolve)" do
+    test "a delivered step whose key was removed from the live config enqueues nothing",
+         %{customer: cus} do
+      # Host edits the cadence mid-flight so it no longer contains the step
+      # being delivered. Previously the chain fell back to the wall clock and
+      # could re-resolve to a DIFFERENT step (a double-send vector); now it
+      # treats "step no longer configured" as journey-exhausted.
+      prior = Application.get_env(:accrue, :dunning, :__unset__)
+
+      Application.put_env(:accrue, :dunning,
+        mode: :stripe_smart_retries,
+        grace_days: 14,
+        terminal_action: :unpaid,
+        campaign: [
+          enabled: true,
+          steps: [
+            [after_days: 0, key: :reminder, template: Accrue.Emails.InvoicePaymentFailed]
+          ]
+        ]
+      )
+
+      on_exit(fn ->
+        case prior do
+          :__unset__ -> Application.delete_env(:accrue, :dunning)
+          value -> Application.put_env(:accrue, :dunning, value)
+        end
+      end)
+
+      now = Accrue.Clock.utc_now()
+      sub = seed_sub(cus, %{status: :past_due, dunning_campaign_started_at: now})
+
+      # `final_notice` is no longer in the live cadence (only `reminder` is).
+      assert {:ok, _} = perform_job(DunningStep, args(sub, :final_notice, now, cus))
+
+      # The step email still delivered (email_type/1 maps the key), but the
+      # chain enqueues NOTHING — no wall-clock re-resolve to a different step.
+      assert_received {:accrue_email_delivered, :dunning_final_notice, _assigns}
+      assert [] = all_enqueued(worker: DunningStep)
+    end
+  end
+
   describe "duplicate enqueue is impossible (D-16 unique)" do
     test "re-enqueuing the same [subscription_id, step_key, campaign_started_at] conflicts",
          %{customer: cus} do

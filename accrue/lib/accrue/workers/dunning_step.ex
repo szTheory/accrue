@@ -185,25 +185,44 @@ defmodule Accrue.Workers.DunningStep do
   # from the anchor + the configured offset, not from wall-clock drift.
   defp chain_next(subscription_id, step_key_str, anchor, args) do
     steps = Config.dunning_campaign_steps()
-    advanced_now = advance_past_current(steps, step_key_str, anchor)
 
-    case Campaign.next_step(steps, anchor, advanced_now) do
-      {:next, step, schedule_in} ->
-        next_key = Keyword.fetch!(step, :key)
-        extra = %{customer_id: Map.get(args, "customer_id"), invoice_id: Map.get(args, "invoice_id")}
-        enqueue_step(subscription_id, next_key, anchor, extra, schedule_in)
-
-      :done ->
+    case advance_past_current(steps, step_key_str, anchor) do
+      # WR-02: the just-delivered step key is no longer present in the live
+      # cadence (the host edited/disabled the campaign mid-flight). Treat
+      # "step no longer configured" as journey-EXHAUSTED rather than falling
+      # back to the wall clock and re-resolving against the new cadence — a
+      # wall-clock fallback could re-enqueue a step under a DIFFERENT key
+      # whose boundary is still pending, a double-send vector. Enqueue
+      # nothing and let the chain end here.
+      :unknown_step ->
         :ok
+
+      %DateTime{} = advanced_now ->
+        case Campaign.next_step(steps, anchor, advanced_now) do
+          {:next, step, schedule_in} ->
+            next_key = Keyword.fetch!(step, :key)
+
+            extra = %{
+              customer_id: Map.get(args, "customer_id"),
+              invoice_id: Map.get(args, "invoice_id")
+            }
+
+            enqueue_step(subscription_id, next_key, anchor, extra, schedule_in)
+
+          :done ->
+            :ok
+        end
     end
   end
 
   # `now` positioned one second past the current step's absolute boundary, so
-  # the resolver advances to the NEXT step. Falls back to the live clock when
-  # the current step is unknown (defensive; the configured list is the SSOT).
+  # the resolver advances to the NEXT step. Returns `:unknown_step` when the
+  # current step key is NOT in the live cadence (the configured list is the
+  # SSOT) — the caller treats that as journey-exhausted (WR-02), never a
+  # wall-clock re-resolve.
   defp advance_past_current(steps, step_key_str, anchor) do
     case find_after_days(steps, step_key_str) do
-      nil -> %{Accrue.Clock.utc_now() | microsecond: {0, 6}}
+      nil -> :unknown_step
       after_days -> DateTime.add(anchor, after_days * 86_400 + 1, :second)
     end
   end
