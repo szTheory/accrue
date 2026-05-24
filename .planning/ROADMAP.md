@@ -121,7 +121,7 @@ Plans:
 **Wave 1**
 
 - [x] 127-01-PLAN.md — accrue_entitlement_summaries schema + migration + stripe_native_sync config enum + Wave 0 test/fixture scaffolds (ENT-10)
-- [ ] 127-03-PLAN.md — new entitlements.stripe_native_sync capability row + tightened drift gate + static isolation CI gate + ci.yml wiring (ENT-10)
+- [x] 127-03-PLAN.md — new entitlements.stripe_native_sync capability row + tightened drift gate + static isolation CI gate + ci.yml wiring (ENT-10)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -142,7 +142,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 6/6 | Complete    | 2026-05-23 |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 3/3 | Complete    | 2026-05-23 |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 4/4 | Complete    | 2026-05-23 |
-| 127. Optional Stripe-Native Sync (isolated) | v1.39 | 1/4 | In Progress|  |
+| 127. Optional Stripe-Native Sync (isolated) | v1.39 | 2/4 | In Progress|  |
 
 ## Notes
 

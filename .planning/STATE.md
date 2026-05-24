@@ -4,13 +4,13 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 127 context gathered
-last_updated: "2026-05-24T12:02:00.485Z"
+last_updated: "2026-05-24T12:06:04.109Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 21
-  completed_plans: 18
+  completed_plans: 19
   percent: 80
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 127 (optional-stripe-native-sync-isolated-off-by-default) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-24
 
@@ -76,6 +76,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | Phase 126 P04 | 6min | 2 tasks | 2 files |
 | 126 | 4 | - | - |
 | Phase 127 P01 | 5min | 3 tasks | 8 files |
+| Phase 127 P03 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 127]: [Phase 127 P01]: ENT-10 foundation — accrue_entitlement_summaries advisory cache (schema + migration), keyed on customer_id (no processor-side id field; summary has no top-level id, A4/D-06), data JSONB + typed operator cols + watermark + lock_version; force_changeset/2 (drops status allowlist + subscription_id FK vs SubscriptionSchedule analog) with optimistic_lock + unique_constraint(:customer_id) + foreign_key_constraint(:customer_id); FK on_delete: :delete_all; unique + stripe_customer_id + partial truncated=true indexes.
 - [Phase 127]: [Phase 127 P01]: stripe_native_sync config enum {:disabled,:advisory} default :disabled boot-validated (NOT boolean, D-03 reserves future modes); stripe_native_sync/0 raw entitlements/0 read supplying own :disabled default + stripe_native_sync?/0 predicate; D-03 disclaimer doc string (:advisory observational, does NOT change entitled?/has_active_plan?). Defaults verified {:disabled,false}.
 - [Phase 127]: [Phase 127 P01]: Wave 0 RED scaffolds (3 test files + entitlement_summary_event/2 fixture) tagged :pending_plan_02 + excluded in test_helper.exs so suite stays green this wave — Plan 02 removes the exclusion as it turns them GREEN. Isolation test attaches to actual [:accrue,:test_repo,:query] (TestRepo otp-app prefix) while referencing host-canonical [:accrue,:repo,:query]. NOTE: library has no :repo outside :test env, plan verify cmds run under MIX_ENV=test.
+- [Phase ?]: [Phase 127 P03]: ENT-10 provider-honesty + isolation — NEW entitlements.stripe_native_sync capability row (stripe: native (advisory), fake: out of slice, braintree: unsupported) added across @support_labels + @provider_support_labels + matrix markdown + drift gate (3-way SSOT); convergence local_mapping row byte-unchanged. Negative divergence guard TIGHTENED from entitlements.[a-z_]+ to entitlements.local_mapping so the new advisory row is allowed while convergence is still protected (regex-proven both ways).
+- [Phase ?]: [Phase 127 P03]: D-04 layer 2 — new merge-blocking verify_entitlement_sync_isolation.sh clones verify_core_liveview_runtime_free.sh (^[^#]* anchor + || true verbatim), scoped to the 3 always-on gate-path files (entitlements.ex, resolver.ex, resolver/local_map.ex), exit 1 on any EntitlementSummary/StripeSync/accrue_entitlement_summaries ref (T-127-09). Scoped to named files (not all accrue/lib) so the cache MODEL can live in core; wired into docs-contracts-shift-left after the LiveView-runtime-free step. Negative-proven.
 
 ### Pending Todos
 
@@ -147,6 +150,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-24T11:59:42.944Z
+Last session: 2026-05-24T12:05:56.613Z
 Stopped at: Phase 127 context gathered
 Resume file: None
