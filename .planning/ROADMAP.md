@@ -30,6 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 128: Campaign Engine Foundation + Idempotency Must-Fix
+
 **Goal**: Failed-payment recovery runs as a first-party, durable, config-driven multi-step Oban campaign that emails on a host-defined cadence from local `past_due_since` state, never double-sends, and stops the instant payment recovers — replacing today's single un-deduped email.
 **Depends on**: Nothing (first phase of this milestone; builds on the shipped Mailglass mailer, `past_due_since` bookkeeping, and existing `dunning:` config)
 **Requirements**: DUN-01, DUN-02, DUN-04, DUN-05
@@ -43,10 +44,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 6 plans (2 waves)
 
 Plans:
+**Wave 1**
+
 - [ ] 128-01-PLAN.md — Config-driven dunning cadence schema + two-layer validation + default journey (DUN-01)
 - [ ] 128-02-PLAN.md — Nullable campaign anchor column + migration + Subscription predicate (DUN-05 foundation)
 - [ ] 128-03-PLAN.md — Pure `Accrue.Dunning.Campaign` step resolver + property tests (DUN-02)
 - [ ] 128-04-PLAN.md — `:invoice_payment_failed` idempotency must-fix + two new step email templates (DUN-04, DUN-01)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 128-05-PLAN.md — `Accrue.Workers.DunningStep` cancel-guarded, Oban-unique, chained worker (DUN-02, DUN-05)
 - [ ] 128-06-PLAN.md — Webhook wiring: atomic first-transition elector + cancel-on-recovery + D-15 REPLACE gate (DUN-02, DUN-05)
 
@@ -56,6 +62,7 @@ Plans:
 > - Idempotency = Oban `unique: [keys: [:subscription_id, :step_key, :campaign_started_at]]` + extending `Mailer.idempotency_key/2` to cover `:invoice_payment_failed`.
 
 ### Phase 129: Customer + Operator Surfaces + Observability
+
 **Goal**: A customer with a failed payment is prompted to fix it, an operator can see exactly where a customer is in their dunning journey, and the whole campaign lifecycle is observable through the ledger and telemetry — including the recovered-vs-lost signal merchants care about.
 **Depends on**: Phase 128 (campaign engine + ledger events emitted by the campaign)
 **Requirements**: DUN-06, DUN-07, DUN-08
@@ -70,6 +77,7 @@ Plans:
 **UI hint**: yes
 
 ### Phase 130: Provider Honesty + Fake-Lane Proof + Example-Host Wiring
+
 **Goal**: Dunning's per-provider behavior is documented honestly and drift-gated, the full journey is proven deterministically as a merge-blocking gate, and recovery is demonstrated end-to-end in the canonical example host instead of shipping as a dormant cron.
 **Depends on**: Phase 128 (campaign engine), Phase 129 (ledger events + surfaces the proof and docs describe)
 **Requirements**: DUN-09, DUN-10
@@ -85,6 +93,7 @@ Plans:
 > **Carried-forward note for plan context:** also surface the over-emailing risk — if a host has Stripe Dashboard dunning emails enabled, Accrue's cadence can double-email; ship the default opt-out posture with a documented warning (open question #2).
 
 ### Phase 131: Optional Chimeway Engine Adapter (isolated, off by default)
+
 **Goal**: A host can optionally upgrade the dunning engine to Chimeway's orchestration engine without changing any call site, while core `accrue` never requires Chimeway and the default built-in campaign remains the always-on path.
 **Depends on**: Phase 128 (the `Accrue.Dunning` campaign engine + the engine seam it generalizes). Final core-dunning slice and deliberately isolated.
 **Requirements**: DUN-03
@@ -100,6 +109,7 @@ Plans:
 > **Carried-forward open question for plan context (verify before coding the adapter):** Chimeway's guide and code disagree on the public surface — the guide uses `Chimeway.Workflow` / `Chimeway.Trigger.trigger`, while the code's public entry is `Chimeway.trigger/3` + a `Chimeway.Notifier` behaviour (`workflow/2` callback) + `Chimeway.Signal.track/4`. Pin to and target the published 1.0.0 API; note the local repo's `mix.exs` version string is stale at `0.1.0` while Hex is at `1.0.0` (2026-05-08).
 
 ### Phase 132: Entitlements Adopter-Proof Demo
+
 **Goal**: The canonical `examples/accrue_host` demonstrates the v1.39 headline JTBD — gate access on what a customer has paid for — end-to-end, so the flagship entitlements capability is provable in the demo, not just unit-tested in core.
 **Depends on**: Nothing in this milestone (independent of dunning; uses the shipped v1.39 entitlements gate API/guards). Sequenced last so it never blocks the dunning core value.
 **Requirements**: PROOF-03

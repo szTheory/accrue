@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
-status: planning
+status: executing
 stopped_at: Phase 128 context gathered
-last_updated: "2026-05-24T16:47:09.554Z"
-last_activity: 2026-05-24 — v1.40 roadmap created (5 phases, 128–132); 11/11 requirements mapped
+last_updated: "2026-05-24T17:23:28.224Z"
+last_activity: 2026-05-24 -- Phase 128 planning complete
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 6
   completed_plans: 0
   percent: 0
 ---
@@ -28,8 +28,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 Phase: Not started — roadmap created (Phases 128–132)
 Plan: —
-Status: Roadmap created; awaiting phase planning
-Last activity: 2026-05-24 — v1.40 roadmap created (5 phases, 128–132); 11/11 requirements mapped
+Status: Ready to execute
+Last activity: 2026-05-24 -- Phase 128 planning complete
 
 ## Milestone Progress
 
