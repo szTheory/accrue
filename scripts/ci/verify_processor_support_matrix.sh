@@ -58,6 +58,7 @@ require_substring "Hyperwallet" "explicit Hyperwallet boundary"
 require_substring "strategically out of bounds unless the project boundary changes" "Phase 104 no-go wording"
 require_substring "reopening requires an explicit strategy change plus a new milestone" "Phase 104 reopen rule"
 require_substring "| entitlements.local_mapping | local-identical | local-identical | local-identical | all first-party |" "entitlements local-mapping convergence row"
+require_substring "| entitlements.stripe_native_sync | out of slice | native (advisory) | unsupported | Stripe-native advisory (observational) |" "entitlements stripe-native-sync advisory row"
 require_substring "behaves identically across Stripe, Braintree, and Fake" "entitlements identity prose"
 require_substring "zero processor calls" "entitlements zero-call prose"
 require_substring "local mapping remains the canonical default" "ENT-10 deferral honesty"
@@ -101,13 +102,19 @@ if grep -Eq 'preview parity|pseudo-preview' "${matrix}"; then
   exit 1
 fi
 
-# NEGATIVE divergence guard: an entitlements row must NEVER carry a per-provider
-# native/unsupported/bounded label in ANY column. Such a label would over-promise
-# the deferred Phase 127 Stripe-native path and break the local-identical
-# convergence contract. The pattern scans the WHOLE row (across pipe-delimited
-# cells), so a divergence token in the Fake, Stripe, OR Braintree column is caught.
-if grep -Eq '^\| entitlements\.[a-z_]+ \|.*\b(native|unsupported|bounded)\b' "${matrix}"; then
-  echo "verify_processor_support_matrix: entitlements row sprouted a per-provider divergence label (drift toward Phase 127 ahead of schedule)" >&2
+# NEGATIVE divergence guard (TIGHTENED for Phase 127 / D-10): the
+# `entitlements.local_mapping` CONVERGENCE row must NEVER carry a per-provider
+# native/unsupported/bounded label in ANY column — that would break the
+# local-identical convergence contract (all three providers resolve entitlements
+# from local state only). The guard is now scoped to `entitlements.local_mapping`
+# specifically (rather than every `entitlements.*` row), so the legitimate
+# `entitlements.stripe_native_sync` divergence row — whose `native (advisory)` /
+# `unsupported` labels are honest, off-by-default, observational-only (D-10) — is
+# allowed. The convergence row is still fully protected: flipping any of its three
+# cells to native/unsupported/bounded still fails the build. The pattern scans the
+# WHOLE row, so a divergence token in the Fake, Stripe, OR Braintree column is caught.
+if grep -Eq '^\| entitlements\.local_mapping \|.*\b(native|unsupported|bounded)\b' "${matrix}"; then
+  echo "verify_processor_support_matrix: entitlements.local_mapping convergence row sprouted a per-provider divergence label (broke the local-identical contract)" >&2
   exit 1
 fi
 

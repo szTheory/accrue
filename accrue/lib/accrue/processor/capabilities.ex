@@ -58,7 +58,8 @@ defmodule Accrue.Processor.Capabilities do
       parse: "all first-party"
     },
     entitlements: %{
-      local_mapping: "all first-party"
+      local_mapping: "all first-party",
+      stripe_native_sync: "Stripe-native advisory (observational)"
     }
   }
 
@@ -108,6 +109,18 @@ defmodule Accrue.Processor.Capabilities do
         fake: "local-identical",
         stripe: "local-identical",
         braintree: "local-identical"
+      },
+      # DIVERGENCE row (D-10) — the OPTIONAL, off-by-default Stripe-native
+      # entitlement-summary sync is an advisory/observational overlay only on
+      # Stripe; it never displaces local-first resolution and does NOT change
+      # `entitled?/2` / `has_active_plan?/2`. Fake/Braintree are out of slice /
+      # unsupported. Unlike `local_mapping` above, this row legitimately carries
+      # per-provider divergence labels (the drift gate exempts THIS row by name
+      # while still protecting the `local_mapping` convergence contract).
+      stripe_native_sync: %{
+        fake: "out of slice",
+        stripe: "native (advisory)",
+        braintree: "unsupported"
       }
     }
   }
