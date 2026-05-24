@@ -67,28 +67,38 @@ Explicitly excluded for v1.40. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Phases continue from v1.39 (ended at Phase 127) → **v1.40 starts at Phase 128** (no phase-number reset). Populated during roadmap creation.
+Which phases cover which requirements. Phases continue from v1.39 (ended at Phase 127) → **v1.40 starts at Phase 128** (no phase-number reset). Mapped by the v1.40 roadmap (`.planning/ROADMAP.md`).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DUN-01 | TBD | Pending |
-| DUN-02 | TBD | Pending |
-| DUN-03 | TBD | Pending |
-| DUN-04 | TBD | Pending |
-| DUN-05 | TBD | Pending |
-| DUN-06 | TBD | Pending |
-| DUN-07 | TBD | Pending |
-| DUN-08 | TBD | Pending |
-| DUN-09 | TBD | Pending |
-| DUN-10 | TBD | Pending |
-| PROOF-03 | TBD | Pending |
+| DUN-01 | Phase 128 | Pending |
+| DUN-02 | Phase 128 | Pending |
+| DUN-04 | Phase 128 | Pending |
+| DUN-05 | Phase 128 | Pending |
+| DUN-06 | Phase 129 | Pending |
+| DUN-07 | Phase 129 | Pending |
+| DUN-08 | Phase 129 | Pending |
+| DUN-09 | Phase 130 | Pending |
+| DUN-10 | Phase 130 | Pending |
+| DUN-03 | Phase 131 | Pending |
+| PROOF-03 | Phase 132 | Pending |
+
+**Phase map:**
+
+| Phase | Goal (one line) | Requirements |
+|-------|-----------------|--------------|
+| 128 — Campaign Engine Foundation + Idempotency Must-Fix | Durable config-driven Oban dunning campaign, idempotency must-fix, cancel-on-recovery keying | DUN-01, DUN-02, DUN-04, DUN-05 |
+| 129 — Customer + Operator Surfaces + Observability | Portal recovery banner, read-only admin dunning state, ledger events + telemetry + recovered-vs-lost counter | DUN-06, DUN-07, DUN-08 |
+| 130 — Provider Honesty + Fake-Lane Proof + Example-Host Wiring | Provider-honest docs + drift gate, deterministic Fake-lane journey gate, default campaign wired into example host | DUN-09, DUN-10 |
+| 131 — Optional Chimeway Engine Adapter (isolated) | `Accrue.Dunning.Engine` behaviour + off-by-default conditionally-compiled Chimeway adapter | DUN-03 |
+| 132 — Entitlements Adopter-Proof Demo | Entitlement-gated route/page in `examples/accrue_host` + adoption-proof-matrix row | PROOF-03 |
 
 **Coverage:**
 
 - v1.40 requirements: 11 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 11 ⚠️ (resolved by roadmap)
+- Mapped to phases: 11 ✓ (each to exactly one phase; no orphans, no duplicates)
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-24*
-*Last updated: 2026-05-24 — v1.40 requirements drafted (DUN-01..10 + PROOF-03); roadmap pending.*
+*Last updated: 2026-05-24 — v1.40 roadmap created; DUN-01..10 + PROOF-03 mapped to Phases 128–132 (11/11). Phase numbering continues from v1.39 (ended at Phase 127); no reset.*
