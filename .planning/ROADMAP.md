@@ -115,7 +115,13 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
   3. With sync disabled (the default), the entire entitlements surface behaves exactly as after Phase 126 — no Stripe dependency on the core gate path.
   4. The eventual-consistency window and the 10-entitlement inline-summary cap are documented, with full paginated reads recorded as a deferred follow-up (depends on `lattice_stripe ≥ 1.2`).
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 127-01-PLAN.md — accrue_entitlement_summaries schema + migration + stripe_native_sync config enum + Wave 0 test/fixture scaffolds (ENT-10)
+- [ ] 127-02-PLAN.md — config-gated monotonic webhook reducer + on-change ledger + telemetry/span/ops + read-only observational seam (ENT-10)
+- [ ] 127-03-PLAN.md — new entitlements.stripe_native_sync capability row + tightened drift gate + static isolation CI gate + ci.yml wiring (ENT-10)
+- [ ] 127-04-PLAN.md — guides/entitlements.md + telemetry.md Stripe-native sync docs + verify_package_docs.sh needles (ENT-10)
 
 ## Progress
 
@@ -128,7 +134,7 @@ Phases execute in numeric order: 123 → 124 → 125 → 126 → 127
 | 124. Enforcement Surfaces — Plug + LiveView Guards | v1.39 | 6/6 | Complete    | 2026-05-23 |
 | 125. Provider Honesty + Lifecycle Truth | v1.39 | 3/3 | Complete    | 2026-05-23 |
 | 126. Admin Surface + Docs / JTBD Spine | v1.39 | 4/4 | Complete    | 2026-05-23 |
-| 127. Optional Stripe-Native Sync (isolated) | v1.39 | 0/TBD | Not started | - |
+| 127. Optional Stripe-Native Sync (isolated) | v1.39 | 0/4 | Not started | - |
 
 ## Notes
 
