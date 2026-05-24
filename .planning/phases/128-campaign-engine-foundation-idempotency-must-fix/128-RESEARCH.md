@@ -374,12 +374,18 @@ end
 
 **Only one assumption.** Everything else was verified against live source, installed-dep source, or official docs.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `invoice.paid` produce a subscription-status transition the reducer observes, or only `customer.subscription.updated`?**
    - What we know: `reduce_subscription` (default_handler.ex:722) is the clean recovery-detection site with `(row, updated)` in hand. `maybe_dispatch_invoice_email("paid", …)` (default_handler.ex:1462) fires on `invoice.paid` but operates on the `%Invoice{}`, not a subscription transition pair.
    - What's unclear: whether D-12's "and on the `invoice.paid` path" wiring needs a subscription reload to compare prior status.
    - Recommendation: Plan recovery cancel on the `subscription.updated → active/paid` reducer path (D-12 primary) and treat the per-step cancel-guard (D-11) as the guaranteed backstop. If the planner wants belt-and-suspenders on `invoice.paid`, reload the linked subscription and run the same `maybe_finalize_dunning_campaign/2` logic. Either way correctness holds because the cancel-guard re-checks live state.
+   - **RESOLVED (planning):** Adopted as recommended. **Plan 06** wires recovery cancel on the
+     `subscription.updated → active/paid` reducer path as PRIMARY (`maybe_finalize_dunning_campaign/2`:
+     in-transaction anchor-clear + post-commit `Oban.cancel_all_jobs` keyed on `campaign_started_at`),
+     and **Plan 05** ships the per-step cancel-guard (`{:cancel, :recovered}` on nil-anchor / not-past_due)
+     as the guaranteed backstop. The optional `invoice.paid` belt-and-suspenders wiring is NOT added in
+     Phase 128 (cancel-guard fully backstops it); revisit only if a sourced need appears. No open item remains.
 
 ## Environment Availability
 
