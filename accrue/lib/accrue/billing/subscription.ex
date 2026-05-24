@@ -63,6 +63,7 @@ defmodule Accrue.Billing.Subscription do
     field(:pause_behavior, :string)
     field(:past_due_since, :utc_datetime_usec)
     field(:dunning_sweep_attempted_at, :utc_datetime_usec)
+    field(:dunning_campaign_started_at, :utc_datetime_usec)
     field(:discount_id, :string)
     field(:automatic_tax, :boolean, default: false)
     field(:automatic_tax_status, :string)
@@ -88,7 +89,8 @@ defmodule Accrue.Billing.Subscription do
   @cast_fields ~w[
     customer_id processor processor_id status
     cancel_at_period_end pause_collection
-    paused_at pause_behavior past_due_since dunning_sweep_attempted_at discount_id
+    paused_at pause_behavior past_due_since dunning_sweep_attempted_at
+    dunning_campaign_started_at discount_id
     automatic_tax automatic_tax_status automatic_tax_disabled_reason
     current_period_start current_period_end
     trial_start trial_end cancel_at canceled_at ended_at
@@ -254,6 +256,20 @@ defmodule Accrue.Billing.Subscription do
   def dunning_exhausted_status(%{status: :unpaid}), do: :unpaid
   def dunning_exhausted_status(%{status: :canceled}), do: :canceled
   def dunning_exhausted_status(_), do: nil
+
+  @doc """
+  True if a dunning campaign is currently active for the subscription.
+
+  The campaign anchor `dunning_campaign_started_at` (D-08) is the campaign
+  identity and the first-transition edge signal. A campaign is active iff the
+  anchor is a non-nil `DateTime` — set once on the first `nil → past_due`
+  transition by the D-09 atomic `update_all` elector and cleared on recovery
+  via `force_status_changeset/2` (D-12).
+  """
+  @spec dunning_campaign_active?(%__MODULE__{} | map()) :: boolean()
+  def dunning_campaign_active?(%__MODULE__{dunning_campaign_started_at: %DateTime{}}), do: true
+  def dunning_campaign_active?(%{dunning_campaign_started_at: %DateTime{}}), do: true
+  def dunning_campaign_active?(_), do: false
 
   @doc """
   Extracts a pre-hydrated PaymentIntent from `data.latest_invoice.payment_intent`,
