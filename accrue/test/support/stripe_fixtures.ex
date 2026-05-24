@@ -394,6 +394,82 @@ defmodule Accrue.Test.StripeFixtures do
     deep_merge(base, overrides)
   end
 
+  @doc """
+  Builds an `entitlements.active_entitlement_summary.updated` webhook event
+  (ENT-10, Phase 127).
+
+  The `data.object` is the active-entitlement-summary object, which —
+  unlike most Stripe objects — has **NO top-level `id`** (its identity is
+  the `customer`, A4 / D-06). Inline entitlements are capped at 10 by
+  Stripe; pass `has_more: true` to model a truncated summary.
+
+  ## Options (all optional)
+
+    * `:customer` — the `cus_...` id (default a random one)
+    * `:entitlements` — a list of `{id, feature, lookup_key}` maps to inline
+      (default a single entitlement); composed into the `entitlements.data`
+      list. Pass `[]` for an empty summary.
+    * `:has_more` — truncation flag mapping to `entitlements.has_more`
+      (default `false`)
+    * `:livemode` — default `false`
+    * `:url` — the deferred-1.2 pagination handle in `entitlements.url`
+    * `:created` — event-envelope `created` (Unix seconds)
+    * `:id` — event-envelope id (the `evt_...`, NOT an object id)
+
+  Composes `webhook_event/3` for the `id`/`created`/`type` envelope.
+  """
+  @spec entitlement_summary_event(keyword() | map(), map()) :: map()
+  def entitlement_summary_event(opts \\ [], overrides \\ %{}) do
+    opts = Enum.into(opts, %{})
+
+    customer = Map.get(opts, :customer, "cus_test_" <> rand())
+    livemode = Map.get(opts, :livemode, false)
+    has_more = Map.get(opts, :has_more, false)
+    url = Map.get(opts, :url, "/v1/customers/#{customer}/entitlements")
+
+    entitlements =
+      Map.get(opts, :entitlements, [
+        %{
+          "id" => "ent_test_" <> rand(),
+          "feature" => "feat_test_" <> rand(),
+          "lookup_key" => "premium-support"
+        }
+      ])
+
+    # The summary object intentionally has NO top-level "id" (A4): identity
+    # is the customer. Inline list capped at 10 inline by Stripe.
+    summary_object = %{
+      "object" => "entitlements.active_entitlement_summary",
+      "customer" => customer,
+      "livemode" => livemode,
+      "entitlements" => %{
+        "object" => "list",
+        "data" => Enum.map(entitlements, &normalize_entitlement/1),
+        "has_more" => has_more,
+        "url" => url
+      }
+    }
+
+    envelope_overrides =
+      %{}
+      |> maybe_put("id", Map.get(opts, :id))
+      |> maybe_put("created", Map.get(opts, :created))
+      |> deep_merge(overrides)
+
+    webhook_event(
+      "entitlements.active_entitlement_summary.updated",
+      summary_object,
+      envelope_overrides
+    )
+  end
+
+  defp normalize_entitlement(%{} = ent) do
+    Map.put_new(ent, "object", "entitlements.active_entitlement")
+  end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
+
   # --- Phase 5 Connect fixtures --------------------------------------
 
   @doc """
