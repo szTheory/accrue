@@ -1082,6 +1082,50 @@
 
 ---
 
+## Milestone: v1.39 — Entitlements / Plan-Gating
+
+**Shipped:** 2026-05-24
+**Phases:** 5 (123–127) | **Plans:** 21 | **Tasks:** 53 | **Timeline:** 2026-05-22 → 2026-05-24 (3 days, 32 `feat` commits, +31,759/−252 across 194 files)
+
+> Note: the retrospective was not maintained for v1.30–v1.38; this resumes the living log at v1.39.
+
+### What Was Built
+
+Closed the last open step of the canonical SaaS loop — gate features/access on what a customer has paid for — first-party, local-first, fail-closed. The headline JTBD shipped with **no new tables and no Stripe dependency** on the core gate path: a `NimbleOptions`-validated plan→feature/quota config, four fail-closed `Accrue.*` gate functions over local subscription state, a shared `Accrue.Entitlements.Guard` engine feeding a Plug guard + cond-compiled LiveView `on_mount` guard, a provider-honest Resolver + capability matrix, a lifecycle→entitlement truth-table SSOT (closing the paused fail-OPEN gap), a read-only admin entitlements tab, the `guides/entitlements.md` spine + JTBD ⛔→✅ flip, and an isolated off-by-default Stripe-native advisory-sync overlay.
+
+### What Worked
+
+- **Foundational correctness contracts (fail-closed boolean + lifecycle-predicate reuse) baked into Phase 123 exit criteria** — every downstream surface inherited them; the load-bearing property test asserts through the public `Accrue.*` delegates so it proves wiring + the contract in one pass.
+- **Isolating the riskiest slice (Stripe-native sync) last and off-by-default** — the local-first headline value landed in Phases 123–126 before any Stripe-specific work; the isolation invariant is machine-enforced (`verify_entitlement_sync_isolation.sh`), so Phase 127 could never block or regress core value.
+- **Merge-blocking static gates for cross-cutting invariants** — runtime-LiveView-free, processor support-matrix drift, and sync isolation are all grep-based CI gates cloned from the same proven pattern, keeping posture honest without runtime cost.
+- **In-phase code review caught real BLOCKERs** — each of Phases 124/126/127 surfaced a genuine bug (live resolve-once nil; admin tab crash under `:raise`; reducer unreachable because the Stripe summary object has no top-level `id`) that was fixed and regression-pinned before completion, not deferred.
+
+### What Was Inefficient
+
+- **Nyquist validation left partial on Phases 123–125** — VALIDATION.md scaffolds stayed in `draft` (wave_0 not completed) while goals were otherwise fully verified; closing them retroactively via `/gsd:validate-phase` is now deferred tech debt.
+- **The ENT-10 advisory cache shipped with known robustness gaps** — concurrent same-customer delivery raises `Ecto.StaleEntryError` (self-heals via Oban retry but noisy); a DB-level upsert (`on_conflict`) would have been cleaner up front. Tracked in a pending todo.
+- **One exported seam (`StripeSync.summary_for_customer/1`) ships inert** — zero consumers until a deferred admin view / `lattice_stripe ≥ 1.2`; intentional but a loose end the audit flagged.
+
+### Patterns Established
+
+- **Telemetry/ledger split for high-frequency decisions** — per-check gate decisions emit telemetry only; only deliberate state changes (advisory sync writes) hit the immutable ledger, and only on-change.
+- **Cond-compiled core surface (Sigra 4-pattern) for optional runtime coupling** — the LiveView `on_mount` guard lives in core but behind `Code.ensure_loaded?(Phoenix.LiveView)`, with a static gate exempting only that file.
+- **Convergence row in the provider capability matrix** — entitlements is the first "local-identical across all providers" lane, contrasting every prior divergence lane; same-PR SSOT co-update with the drift gate.
+
+### Key Lessons
+
+- Putting the two highest-leverage correctness contracts in the *first* phase's exit criteria is the cheapest way to make an entire feature surface safe-by-construction.
+- "Isolated, off-by-default, machine-enforced" is a repeatable recipe for shipping a risky optional dependency without it becoming a critical-path liability.
+- A milestone can legitimately close at `tech_debt` (not `passed`) when the DoD is achieved and every open item is documented and non-fail-open — the status communicates "review these follow-ups," not "blocked."
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: 5 phases over ~3 days; phase execution times ranged 1–11 min/plan (per STATE.md velocity notes).
+- Notable: the heaviest phase by file-count was 127 (advisory cache schema + reducer + isolation gate); the headline value (123–126) was almost entirely additive over existing billing state.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -1089,6 +1133,7 @@
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
 | v1.29 | short | 3 | **MG-01..MG-07** — Mailglass framework integration replacing `mjml_eex` + `phoenix_swoosh`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`; 13 templates ported, 26 MJML/text assets deleted; `mailglass_cleanup_test` enforces non-regression in CI; phases **88–90** under **`milestones/v1.29-phases/`**; archives **`milestones/v1.29-*`**. |
+| v1.39 | ~3 days | 5 | **ENT-01..12** — closed the canonical SaaS loop's last step (entitlements/plan-gating), local-first with no new tables / no Stripe dependency on the gate path. Correctness contracts (fail-closed + lifecycle-predicate reuse) baked into the first phase's exit criteria; risky Stripe-native sync isolated last + off-by-default behind a machine-enforced isolation gate; three new merge-blocking static gates (runtime-LiveView-free, support-matrix drift, sync isolation). Closed at `tech_debt` (DoD achieved, deferred non-fail-open follow-ups + partial Nyquist 123–125). Phases **123–127** under **`milestones/v1.39-*`**. |
 | v1.27 | short | 2 | **CLS-01..03** + **INV-05** — pre-1.0 closure narrative on README / **`RELEASING`** / **`upgrade`** + post-touch friction certification **(b)**; **`*-VERIFICATION.md`** only (inline); phases **84–85** under **`milestones/v1.27-phases/`**; **`milestones/v1.27-*`** archives. |
 | v1.26 | short | 2 | **INT-13** + **INV-04** — billing portal on First Hour + matrix + CI needles; post-touch friction certification **(b)**; **`*-VERIFICATION.md`** + **3** plan summaries; phases **82–83** under **`milestones/v1.26-phases/`**. |
 | v1.25 | short | 3 | **INV-03** + **BIL-06..07** + **INT-12** — checkout **`Accrue.Billing`** facade + telemetry/docs + integrator verifiers; **`*-VERIFICATION.md`** + **3** plan summaries; phases **79–81** under **`milestones/v1.25-phases/`**. |

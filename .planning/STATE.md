@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
-status: verifying
+status: Awaiting next milestone
 stopped_at: Phase 127 context gathered
-last_updated: "2026-05-24T12:34:43.499Z"
-last_activity: 2026-05-24
+last_updated: "2026-05-24T15:24:01.676Z"
+last_activity: 2026-05-24 — Milestone v1.39 completed and archived
 progress:
   total_phases: 5
   completed_phases: 5
@@ -18,30 +18,22 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-08)
+See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 127 — optional-stripe-native-sync-isolated-off-by-default
+**Current focus:** Planning next milestone (post-v1.39). v1.39 — Entitlements / Plan-Gating shipped & archived 2026-05-24.
 
 ## Current Position
 
-Phase: 127
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-05-24
-
-Progress: [█████████░] 95% (20 of 21 plans complete)
+Phase: Milestone v1.39 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-24 — Milestone v1.39 completed and archived
 
 ## Milestone Progress
 
-**v1.39** (opened **2026-05-22**, roadmap created **2026-05-22**): 5 phases (**123–127**), continuing from v1.38's Phase 122. ENT-01..12 mapped 12/12, no orphans. Phases 123→124→125→126 deliver the headline JTBD with no new tables / no Stripe dependency; Phase 127 (optional Stripe-native sync) is isolated last and must not block core value.
-
-- **123** — ENT-01..05 — Config + core gate API foundation (fail-closed contract, lifecycle-predicate reuse, telemetry/ledger split). Not started.
-- **124** — ENT-06, ENT-07 — Plug guard + conditionally-compiled LiveView `on_mount` guard + merge-blocking "core stays runtime-LiveView-free" check. Not started.
-- **125** — ENT-08, ENT-09 — Resolver behaviour + capability-matrix rows + drift gate; lifecycle entitlement truth-table SSOT. Not started.
-- **126** — ENT-11, ENT-12 — Read-only admin entitlements view + `guides/entitlements.md` + JTBD ⛔→✅ flip + First Hour/README spine + green doc verifiers. Not started.
-- **127** — ENT-10 — Optional Stripe-native webhook→cache advisory overlay, off by default, monotonic ordering. **Needs-deeper-research** (`/gsd:plan-phase --research-phase`). Not started.
+**v1.39** (shipped & archived **2026-05-24**): 5 phases (**123–127**), 21 plans, ENT-01..12 (12/12). Headline JTBD — fail-closed local-first plan/feature gating with no new tables and no Stripe dependency — plus the isolated off-by-default Stripe-native advisory sync. Milestone audit `tech_debt` (DoD achieved, zero blockers). Archives: [milestones/v1.39-ROADMAP.md](milestones/v1.39-ROADMAP.md), [milestones/v1.39-REQUIREMENTS.md](milestones/v1.39-REQUIREMENTS.md); audit `.planning/v1.39-v1.39-MILESTONE-AUDIT.md`; planning tag `v1.39`.
 
 **v1.38** (shipped **2026-05-08**): Phases **120–122** complete — linked `1.1.1` trio (`121-VERIFICATION.md`) + closeout (`122-VERIFICATION.md`).
 **v1.37** (shipped **2026-05-07**): Phases **117–119** — SCM-01..06. **v1.36** (shipped **2026-05-07**): Phases **112–116** — PROC-21..24.
@@ -54,40 +46,17 @@ Progress: [█████████░] 95% (20 of 21 plans complete)
 - Average duration: —
 - Total execution time: —
 
-**By Phase:**
+**By Phase (v1.39, archived):**
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 123 | 4 | - | - |
-| Phase 124 P01 | 3min | 3 tasks | 5 files |
-| Phase 124 P05 | 3min | 2 tasks | 5 files |
-| Phase 124 P02 | 3min | 3 tasks | 3 files |
-| Phase 124 P03 | 2min | 2 tasks | 4 files |
-| Phase 124 P04 | 1min | 2 tasks | 2 files |
-| Phase 124 P06 | 2min | 3 tasks | 3 files |
-| 124 | 6 | - | - |
-| Phase 125 P01 | 5min | 3 tasks | 7 files |
-| Phase 125 P02 | 6min | 3 tasks | 7 files |
-| Phase 125 P03 | 11min | 3 tasks | 11 files |
-| 125 | 3 | - | - |
-| Phase 126 P01 | 2min | 3 tasks | 3 files |
-| Phase 126 P3 | 10min | 3 tasks | 7 files |
-| Phase 126 P02 | 11min | 3 tasks | 6 files |
-| Phase 126 P04 | 6min | 2 tasks | 2 files |
-| 126 | 4 | - | - |
-| Phase 127 P01 | 5min | 3 tasks | 8 files |
-| Phase 127 P03 | 4min | 2 tasks | 5 files |
-| Phase 127 P02 | 6min | 2 tasks | 6 files |
-| Phase 127 P04 | 2min | 2 tasks | 3 files |
-| 127 | 4 | - | - |
+| Phase | Plans | Notes |
+|-------|-------|-------|
+| 123 Config + Core Gate API Foundation | 4 | fail-closed gate API, telemetry/ledger split |
+| 124 Enforcement Surfaces (Plug + LiveView) | 6 | shared Guard engine, runtime-LiveView-free CI gate |
+| 125 Provider Honesty + Lifecycle Truth | 3 | Resolver + capability matrix, entitling?/1 SSOT |
+| 126 Admin Surface + Docs / JTBD Spine | 4 | admin tab, guides/entitlements.md, JTBD flip |
+| 127 Optional Stripe-Native Sync (isolated) | 4 | off-by-default advisory cache, isolation gate |
 
 ## Accumulated Context
-
-| Phase 123 P01 | 4min | 2 tasks | 2 files |
-| Phase 123 P02 | 1 | 1 tasks | 2 files |
-| Phase 123 P03 | 5min | 3 tasks | 7 files |
-| Phase 123 P04 | 4min | 3 tasks | 4 files |
-| Phase 123 P04 | 4min | 3 tasks | 4 files |
 
 ### Decisions
 
@@ -99,40 +68,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-22:** Split observability — per-check decisions → telemetry only; grant/revoke/sync → immutable event ledger.
 - **2026-05-22:** Keep core runtime-LiveView-free; the `on_mount` guard ships conditionally compiled with a merge-blocking no-LiveView CI check (Phase 124).
 - **2026-05-22:** Isolate optional Stripe-native sync to the final phase (127) so it cannot block the milestone's core value; flagged needs-deeper-research.
-- [Phase 123]: ENT-01 :entitlements config schema landed — runtime-read (not compile_env!), boot-validated, with a cross-plan price_id-collision guard raising Accrue.ConfigError. limits typed as keyword_list with wildcard :pos_integer keys (NimbleOptions 1.1 has no {:keyword_list,value_type} form).
-- [Phase 123 P02]: ENT-05 OTel half — @allowed_attributes extended with 6 D-19 entitlement keys (atom + accrue.* string forms). :result kept distinct from :status (no reuse). result:true crosses the bridge as "true" since sanitize_value/1 stringifies atoms (true/false are atoms); @prohibited_keys/PII rule untouched.
-- [Phase 123 P03]: has_active_plan?/2 tests MapSet.member? on the active_plans SET (membership truth), never the representative :plan — multi-active-plan correct, consistent with entitled?/features_for UNION semantics (T-123-07b).
-- [Phase 123 P03]: LocalMap folds local active-subs with zero processor calls (read-only customer lookup, Query.active/1, never raw .status); per-check decisions telemetry-only, zero accrue_events writes (D-21).
-- [Phase 123 P04]: public gate API is 4 thin defdelegates on Accrue to Accrue.Entitlements (no re-implementation); the D-10 property test asserts through the public Accrue.* delegates so it proves delegate wiring AND the fail-closed contract in one pass.
-- [Phase 123 P04]: D-16 reconcile — ROADMAP SC#5 + REQUIREMENTS ENT-05 changed singular [:accrue, :entitlement, :check] -> plural [:accrue, :entitlements, :check] (event-token only); D-14 one-way-dependency grep gate certified green.
-- [Phase ?]: [Phase 124 P01]: guard config (billable/on_deny/deny_path) lives under :entitlements, boot-validated free via validate_at_boot!; on_deny uses a custom validate_on_deny/1 (fail loud at boot, T-124-01) not type: :any
-- [Phase ?]: [Phase 124 P01]: billable uses {:or, [nil, {:fun, 1}]} — NimbleOptions 1.1.1 supports both subtypes (verified in deps), no :any fallback needed; entitlements/0 surfaces the 3 guard-key defaults via Keyword.put_new (raw :plans read unchanged, resolver unaffected)
-- [Phase ?]: [Phase 124 P01]: surface: is an additive opt on internal entitled?/3 + has_active_plan?/3 merged onto the existing :check span (:surface OTel-allowlisted atom+string); public Accrue facade delegates stay arity 2 (D-18, T-124-03 non-breaking, fail-closed property test green)
-- [Phase ?]: [Phase 124 P05]: D-06 lockstep — reconciled CLAUDE.md/ROADMAP SC#3/PITFALLS#8/oban middleware/mix.exs comment from 'core LiveView-FREE / no LiveView present' to 'core stays LiveView-runtime-free'; SC#3 now points at the static merge-gate invariant (no always-compiled core module references the LiveView socket runtime). REQUIREMENTS ENT-07 already runtime-LiveView-free, untouched; mix.exs dep kept non-optional (D-02).
-- [Phase ?]: [Phase 124 P02]: Accrue.Entitlements.Guard is the always-compiled LiveView-runtime-free shared decision engine both surfaces call — check/3 resolves billable once (per-guard opt > config global > current_scope.user/current_user probe), delegates fail-closed to entitled?/3 + has_active_plan?/3 with surface:, tiered on_deny (D-11), bounded no-PII ctx (D-12)
-- [Phase ?]: [Phase 124 P02]: ctx.reason is coarse-by-design (:no_active_subscription if no billable resolved else :not_entitled); precise Phase 123 reason atom lives in the :check span, not ctx (one gate call, D-08/D-17). deny_plug/4 is pure-Plug opaque content-negotiated 403/redirect/status-body/fn/MFA (no Phoenix.Controller)
-- [Phase 124]: [Phase 124 P03]: Accrue.Plug.RequireEntitlement (ENT-06) is a thin Plug adapter — init/1 raises ArgumentError on ambiguous feature:/plan: intent (T-124-08), call/2 delegates allow/deny to Accrue.Entitlements.Guard.check/3 + deny_plug/4; pure Plug, zero Phoenix.Controller coupling
-- [Phase 124]: [Phase 124 P03]: require_feature/1 + require_plan/1 router macros are single-arg sugar expanding to plug(Accrue.Plug.RequireEntitlement, feature:/plan: …); status:/on_deny:/billable: overrides route through the explicit plug form (documented split)
-- [Phase ?]: [Phase 124 P04]: Accrue.Live.Entitlements (ENT-07) is the cond-compiled on_mount/4 LiveView surface — {:require_feature,x}/{:require_plan,y} clauses delegate to Guard.check(:live,…) and only surface-translate the deny enum ({:redirect,path}->redirect; :forbidden/{status,body} degradation->put_flash+redirect(deny_path)); resolve-once billable-only assign_new(:accrue_billable). The ONLY core file with LiveView refs, all inside Code.ensure_loaded?(Phoenix.LiveView) (D-04); merge gate (Plan 06) excludes /accrue/live/
-- [Phase ?]: [Phase 124 P06]: runtime-LiveView-free is now machine-enforced — scripts/ci/verify_core_liveview_runtime_free.sh (D-05) static grep gate scans accrue/lib for real socket-runtime refs (import/alias Phoenix.LiveView/Socket, def on_mount), ^[^#]* allowlists doc comments, grep -v /accrue/live/ exempts the cond-compiled on_mount guard; wired merge-blocking in docs-contracts-shift-left. SC#4 cross-surface fail-closed property drives Guard.check/3 on :plug AND :live: nil/garbage/raising/no-active-sub DENY, allow pinned to the sole affirmative-resolved-match path
-- [Phase ?]: [Phase 125 P01]: ENT-08 provider-honesty surface — additive entitlements: capability group (support label 'all first-party'; the matrix's first CONVERGENCE lane 'local-identical' across fake/stripe/braintree, contrasting every existing divergence lane). Mirrored byte-for-byte across code labels + processor-support-matrix doc + verify_processor_support_matrix.sh drift gate (same-PR SSOT co-update, D-09). Negative divergence guard rejects any native/unsupported/bounded entitlements label; widened its regex to scan ALL provider columns (planner regex only checked the Fake column). provider_honesty_test proves LocalMap.resolve/2 is == across all three processors with zero processor calls (telemetry-never-fired guard).
-- [Phase 125 P02]: ENT-09 lifecycle->entitlement SSOT — Subscription.entitling?/1 (composes active?/paused?/canceled?, never raw .status) + its Query.entitling/1 Ecto twin (active/trialing + is_nil(pause_collection) + is_nil(ended_at), NOT the legacy :paused OR-clause since active/1 already excludes :paused). LocalMap.fold_active/1 retargeted to Query.entitling/1, closing the D-11 paused fail-OPEN broken-access-control gap (status:active + pause_collection no longer grants). Query.active/1 left untouched (status-only semantics for dunning/projections). Pinned merge-blocking: 8-status truth table, predicate<->fragment twin invariant (per-row DB cross-check), end-to-end paused-gap closure. Truth table documented in lifecycle_semantics.md; :past_due row is a knob placeholder for Plan 03.
-- [Phase ?]: [Phase 125 P03]: ENT-09 past-due grace knob — past_due_grace config key ({:or,[{:in,[:dunning,:none]},:pos_integer]}, default :none, boot-validated) + pure clock-driven PastDueGrace.within_grace?/2 (fail-closed on nil past_due_since) + Query.entitling_with_grace_candidates/1 (adds :past_due only, never :unpaid). LocalMap.fold_active/1 conditionally widens (zero query/compute when :none, D-18), gates per-row via Subscription.dunning_sweepable?/1 (Credo-clean), drops out-of-window rows, tags additive :grace_plans/:grace_features/:expired_grace_plans. entitled?/3 + has_active_plan?/3 surface additive :past_due_grace/:past_due_expired reasons on the existing :check span (no new event, no Ops.emit, D-19/D-21). Grace is always an affirmative resolved configured decision — never fail-open (D-15).
-- [Phase 126]: [Phase 126 P01]: ENT-11 admin read seam — Accrue.Entitlements.Admin.resolve_for_customer/1 returns {resolved, unmapped_price_ids}; fold_for_customer/1 literally calls fold_active/1 (single SSOT fold, zero copy, T-126-02); unmapped list re-derived independently via catalog()/active_items() since the resolver discards unmapped under :deny (D-04 candidate iii).
-- [Phase 126]: [Phase 126 P01]: no new public Accrue.* gate API (entitlements.ex unchanged, 4 public defs); two LocalMap helpers @doc false; one-way dependency admin -> billing verified (no reverse ref); fetch_entitled/2 (D-07) stays deferred; Admin hard-codes LocalMap (A2 limitation, documented in moduledoc).
-- [Phase 126 P03]: ENT-12 docs — guides/entitlements.md (fail-closed-first, summarize-and-link to lifecycle_semantics.md + Processor.Capabilities; 3 needles: entitled?, Accrue.Plug.RequireEntitlement, [:accrue, :entitlements, :check]); JTBD ⛔→✅ flip in public jobs_to_be_done.md (now committed/tracked) + internal JTBD-FRONTIER.md (6 of 6 shipped); README + quickstart spine pointers; PROJECT.md 'gateway subscription core' parity fix clears verify_package_docs.sh:220 RED holdout. Pinned post-flip shipped marker for Plan 04 needle 5a (byte-for-byte): "entitlements ✅ shipped" (in the dated 2026-05-23 jobs_to_be_done.md Update-log line). Public file had no entitlements ⛔ table row — prose flip + new body section cover it; the ⛔→✅ table-row flips live only in JTBD-FRONTIER.md.
-- [Phase ?]: [Phase 126 P02]: ENT-11 admin entitlements tab — read-only entitlements tab on CustomerLive (/customers/:id?tab=entitlements) renders resolved plans/features/quantities/grace first, then a Plan-mapping drift card badging unmapped price_ids amber with a self-explaining hint (D-02/D-03). Calls Accrue.Entitlements.Admin.resolve_for_customer/1 once via entitlements_view/1 (one-way admin->core), dodges the JsonViewer MapSet trap via entitlements_display_map/1, omits tab_counts :entitlements key (D-01, no badge). No new route/auth surface (T-126-04).
-- [Phase ?]: [Phase 126 P02]: VERIFY-01 three-part copy contract held — Copy.Entitlements (13 @doc false fns incl. fail-closed error copy) -> 13 Copy.entitlements_* defdelegates -> 13 export-allowlist entries (export now 54 strings); zero hardcoded template strings. Rule 3 fix: synced accrue_admin/mix.lock to reconcile rendro ~> 0.3.0 so accrue_admin compiles.
-- [Phase ?]: [Phase 126 P04]: ENT-12 SC#4 closed — verify_package_docs.sh entitlements-spine block (D-14): README link, 3 entitlements.md needles (entitled?/Accrue.Plug.RequireEntitlement/[:accrue, :entitlements, :check]), JTBD shipped marker 'entitlements ✅ shipped' (byte-for-byte, U+2705 literal), scoped flip-guard 'on the table** is **entitlements' (NOT 'headline gap'), quickstart pointer. No gateway-subscription-core line added (already :220; the subscribe/3 second masked needle was restored by orchestrator 5635d77).
-- [Phase ?]: [Phase 126 P04]: D-15 seed co-update — package_docs_verifier_test.exs seeds entitlements.md + jobs_to_be_done.md so negative-drift fixtures don't fail 'No such file'. 3-command phase gate GREEN: verifier exit 0 + verifier-test 8/0 + mix docs builds entitlements.html (35KB). Full accrue seed-0 1462/0; accrue_admin 131/0; default-seed lone failure is the known-flaky PdfTest (no regression).
-- [Phase 127]: [Phase 127 P01]: ENT-10 foundation — accrue_entitlement_summaries advisory cache (schema + migration), keyed on customer_id (no processor-side id field; summary has no top-level id, A4/D-06), data JSONB + typed operator cols + watermark + lock_version; force_changeset/2 (drops status allowlist + subscription_id FK vs SubscriptionSchedule analog) with optimistic_lock + unique_constraint(:customer_id) + foreign_key_constraint(:customer_id); FK on_delete: :delete_all; unique + stripe_customer_id + partial truncated=true indexes.
-- [Phase 127]: [Phase 127 P01]: stripe_native_sync config enum {:disabled,:advisory} default :disabled boot-validated (NOT boolean, D-03 reserves future modes); stripe_native_sync/0 raw entitlements/0 read supplying own :disabled default + stripe_native_sync?/0 predicate; D-03 disclaimer doc string (:advisory observational, does NOT change entitled?/has_active_plan?). Defaults verified {:disabled,false}.
-- [Phase 127]: [Phase 127 P01]: Wave 0 RED scaffolds (3 test files + entitlement_summary_event/2 fixture) tagged :pending_plan_02 + excluded in test_helper.exs so suite stays green this wave — Plan 02 removes the exclusion as it turns them GREEN. Isolation test attaches to actual [:accrue,:test_repo,:query] (TestRepo otp-app prefix) while referencing host-canonical [:accrue,:repo,:query]. NOTE: library has no :repo outside :test env, plan verify cmds run under MIX_ENV=test.
-- [Phase ?]: [Phase 127 P03]: ENT-10 provider-honesty + isolation — NEW entitlements.stripe_native_sync capability row (stripe: native (advisory), fake: out of slice, braintree: unsupported) added across @support_labels + @provider_support_labels + matrix markdown + drift gate (3-way SSOT); convergence local_mapping row byte-unchanged. Negative divergence guard TIGHTENED from entitlements.[a-z_]+ to entitlements.local_mapping so the new advisory row is allowed while convergence is still protected (regex-proven both ways).
-- [Phase ?]: [Phase 127 P03]: D-04 layer 2 — new merge-blocking verify_entitlement_sync_isolation.sh clones verify_core_liveview_runtime_free.sh (^[^#]* anchor + || true verbatim), scoped to the 3 always-on gate-path files (entitlements.ex, resolver.ex, resolver/local_map.ex), exit 1 on any EntitlementSummary/StripeSync/accrue_entitlement_summaries ref (T-127-09). Scoped to named files (not all accrue/lib) so the cache MODEL can live in core; wired into docs-contracts-shift-left after the LiveView-runtime-free step. Negative-proven.
-- [Phase 127]: [Phase 127 P02]: ENT-10 reducer+seam — config-gated dispatch clause in DefaultHandler checks stripe_native_sync?/0 FIRST (off lane {:ok,:ignored} BEFORE any Repo call, D-04 layer 1); reduce_entitlement_summary/3 reuses check_stale/2 + stamp_watermark/3 verbatim (monotonic-snapshot NOT refetch — lattice_stripe 1.1 has no Entitlements list API), orphan->{:ok,:deferred}+[:accrue,:webhooks,:orphan_entitlement_summary], malformed->{:ok,:ignored}, truncated<-has_more, [:accrue,:entitlements,:sync] span + summary_synced event (result :written|:unchanged) + entitlement_summary_truncated ops only when has_more; OTel allowlist UNCHANGED (D-09).
-- [Phase 127]: [Phase 127 P02]: D-08 on-change-only ledger — material = sorted {feature,lookup_key} pairs OR truncated differs; first write material; byte-identical re-delivery -> result:unchanged, NO ledger row; stale/orphan/malformed no ledger; type entitlements.summary.synced idempotency-keyed (\"entitlements.summary.synced:\"<>evt_id) IDs/counts only never raw payload. D-11 Accrue.Entitlements.StripeSync.summary_for_customer/1 read-only one-way seam (@doc false), gate path cache-free (grep 0 across entitlements.ex/resolver.ex/local_map.ex). New [:accrue,:ops,:entitlement_summary_truncated] registered in TelemetryOpsInventory + Metrics.defaults/0 + guides/telemetry.md (2 merge-blocking contract gates, Rule 3). Isolation surface-parity fixed: entitlement_quantity(:seats)=min(cap,qty)=min(5,1)=1 per local_map SSOT [Rule 1]. :pending_plan_02 exclusion removed; 3 scaffolds GREEN; full suite 1475/0 seed 0; credo --strict clean.
-- [Phase ?]: [Phase 127 P04]: ENT-10 docs (D-12) — entitlements.md 'Optional Stripe-native sync (advisory)' section: observational disclaimer (advisory does NOT change entitled?/has_active_plan?, local mapping canonical), two-step enable (config stripe_native_sync: :advisory default :disabled + host Stripe Dashboard enable of entitlements.active_entitlement_summary.updated), eventual-consistency window, 10-entitlement inline cap (has_more->truncated->entitlement_summary_truncated ops), deferred full paginated read (lattice_stripe >= 1.2); names the Plan 03 entitlements.stripe_native_sync matrix row. telemetry.md catalogs [:accrue,:entitlements,:sync] span + summary_synced (result :written|:unchanged) + reused stale_event/orphan_entitlement_summary + truncated ops xref. verify_package_docs.sh pins 4 needles (existing 118-124 block byte-unchanged). Phase 127 complete, ready_for_verification.
+_v1.39 per-plan decision detail (Phases 123–127) is archived — full Key Decisions log lives in PROJECT.md, with per-plan rationale in each phase's SUMMARY.md / LEARNINGS.md and [milestones/v1.39-ROADMAP.md](milestones/v1.39-ROADMAP.md)._
 
 ### Pending Todos
 
@@ -140,8 +76,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- **Phase 124 (verify at planning):** STACK says core has no LiveView dep and would add `phoenix_live_view, optional: true`; ARCHITECTURE notes `accrue/mix.exs` already declares a non-optional `{:phoenix_live_view, "~> 1.1"}` (for `Phoenix.Component`/`~H`, with `:phoenix` optional). Resolve against the live `mix.exs` — either way the guard ships conditionally compiled and core stays runtime-LiveView-free.
-- **Phase 127 (research):** Stripe summary eventual consistency, out-of-order summaries, and the 10-entitlement inline cap are the subtlest part of the milestone. Run `/gsd:plan-phase --research-phase`.
+None open. (v1.39 blockers resolved at ship: Phase 124 confirmed `accrue/mix.exs` keeps `{:phoenix_live_view, "~> 1.1"}` non-optional with core runtime-LiveView-free; Phase 127 research completed — eventual-consistency window, out-of-order monotonic ordering, and the 10-entitlement inline cap all handled and documented.)
 
 ## Deferred Items
 
@@ -153,9 +88,18 @@ None yet.
 | scope | Dunning depth / notification journeys (JTBD #2) | next-milestone candidate | 2026-05-22 |
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | carried |
 | process_gap | Dedicated `v1.37` milestone audit artifact | accepted prior-milestone gap | carried |
+| quick_task | `260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p` | stale pre-v1.39 leftover; not v1.39 scope | 2026-05-24 (close) |
+| quick_task | `260414-l9q-automate-phase-3-human-verification-item` | stale pre-v1.39 leftover; not v1.39 scope | 2026-05-24 (close) |
+| todo | `2026-05-24-ent10-advisory-cache-followups.md` (webhooks) | Phase 127 advisory-cache follow-ups (WR-05 StaleEntryError → DB upsert, IN-01..04); non-fail-open, documented in milestone audit | 2026-05-24 (close) |
+| seed | `SEED-002-ecosystem-integrations` | dormant; future-milestone candidate | 2026-05-24 (close) |
+| nyquist | Partial Nyquist coverage on Phases 123–125 (VALIDATION.md draft) | goals fully verified by VERIFICATION.md + test suites; close retroactively via `/gsd:validate-phase 123\|124\|125` | 2026-05-24 (close) |
 
 ## Session Continuity
 
 Last session: 2026-05-24T12:20:08.045Z
 Stopped at: Phase 127 context gathered
 Resume file: None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd:new-milestone
