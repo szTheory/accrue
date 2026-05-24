@@ -223,7 +223,122 @@ For the machine-readable capability surface, see `Accrue.Processor.Capabilities`
 (the `entitlements:` capability group is labeled "all first-party" — the
 matrix's one *convergence* lane). The optional Stripe-native entitlement sync is
 a separate, off-by-default overlay; the core gate described here needs no Stripe
-dependency.
+dependency. That overlay is the `entitlements.stripe_native_sync` capability row
+(labeled **"Stripe-native advisory (observational)"**, with Stripe `native
+(advisory)`, Fake out-of-slice, and Braintree unsupported) — distinct from the
+`entitlements.local_mapping` convergence row above.
+
+---
+
+## Optional Stripe-native sync (advisory)
+
+Everything above is **local-first and Stripe-free**. Accrue also ships an
+**optional, off-by-default** path that ingests Stripe's native entitlement
+summaries into a local *advisory cache*. It is **observational only** — turning
+it on never changes a gate decision. This section is the operator's guide to
+what it does, how to enable it, and the consistency caveats you inherit when you
+do.
+
+### What `:advisory` means — observational, not gate-influencing
+
+> **The disclaimer, plainly: `:advisory` does NOT change `entitled?` /
+> `has_active_plan?`.** When sync is enabled, Accrue records each
+> `entitlements.active_entitlement_summary.updated` webhook into an advisory
+> cache for **audit, telemetry, and the admin read-seam** — and nothing else.
+> Local plan→feature mapping stays **canonical** in v1.x; the gate path never
+> reads the cache. `entitled?` behaves byte-for-byte the same with sync ON, OFF,
+> or as it did after Phase 126. The sole path to `true` is still an affirmative,
+> resolved **local** match.
+
+This is deliberate. An eventual-consistency Stripe cache that silently fed gate
+decisions would be an authorization surface: a stale or partial snapshot could
+hand out — or withhold — a paid feature. Keeping the overlay observational means
+a cache that is stale, partial, or missing entirely **can never produce a wrong
+gate answer**. (Gate-influencing semantics are reserved as a future,
+non-breaking opt-in enum value — see *Deferred* below — but they are not v1.x.)
+
+The advisory cache is exposed read-only via a core seam — the
+`Accrue.Entitlements.StripeSync` module's `summary_for_customer/1` function
+(one-way, internal `@doc false`) — so the recorded summary is programmatically
+inspectable without ever touching the gate.
+
+### How to enable it
+
+Enabling is a **two-step opt-in** — both are required:
+
+1. **Set the config flag.** Under `:entitlements`, set `stripe_native_sync:
+   :advisory` (the default is `:disabled`, which makes the entire path inert —
+   the webhook reducer early-returns before any database read):
+
+   ```elixir
+   config :accrue,
+     entitlements: [
+       plans: [ # ... your catalog, as above ... ],
+       unmapped_action: :deny,
+       past_due_grace: :none,
+       stripe_native_sync: :advisory   # default :disabled
+     ]
+   ```
+
+   The key is a boot-validated enum (`:disabled | :advisory`), not a boolean, so
+   future modes (e.g. the deferred paginated reconcile) can be appended without a
+   breaking config change.
+
+2. **Enable the Stripe event on your Dashboard.** This is **host-owned** — Accrue
+   cannot do it for you. On your Stripe webhook endpoint (the same one Accrue
+   already verifies under your `:webhook_signing_secret`), enable the
+   `entitlements.active_entitlement_summary.updated` event. Until that event is
+   enabled in Stripe, no summaries arrive and the cache stays empty.
+
+With both in place, each summary webhook is reduced into the advisory cache with
+the same **monotonic skip-stale** discipline the rest of Accrue uses (older
+out-of-order or replayed summaries are skipped, never clobbering newer state),
+and a `entitlements.summary.synced` ledger row is recorded on each *material*
+change. See [Telemetry](telemetry.md) for the full event catalog.
+
+### The eventual-consistency window
+
+Stripe webhooks carry **no delivery-order guarantee and no documented
+propagation-lag SLA** — a summary can lag the underlying change, arrive
+out-of-order, or fail delivery and retry. The advisory cache is therefore
+**eventually consistent**: it can briefly trail Stripe's actual state.
+
+This is harmless *because the cache is observational*. Local-first canonical
+resolution means a stale advisory cache **never produces a wrong gate
+decision** — the local subscription projection (kept in sync by
+`customer.subscription.*` webhooks on the same monotonic discipline) is the
+truth the gate reads. The monotonic guard guarantees the cache, once it catches
+up, reflects the highest-timestamp summary regardless of delivery order. The
+proper fix for *missed* webhooks (the deferred reconcile) is described below.
+
+### The 10-entitlement inline cap
+
+The summary webhook inlines **at most 10** entitlements in
+`entitlements.data`, with `has_more: true` and a `url` pagination handle when a
+customer holds more. Accrue records exactly what the webhook delivers and is
+**honest about partiality**:
+
+- The `has_more` flag is persisted to a typed, indexed `truncated` column, so a
+  known-incomplete cache row is queryable and operator-visible.
+- When `has_more: true`, Accrue fires the ops signal
+  `[:accrue, :ops, :entitlement_summary_truncated]` (see
+  [Telemetry](telemetry.md)) so operators can find partial caches without
+  scanning.
+- Because the cache is observational, a truncated (partial) summary can **never**
+  cause a wrong gate decision — it is surfaced for transparency, not consulted
+  for access.
+
+### Deferred: the full paginated read (`lattice_stripe >= 1.2`)
+
+The complete fix for both missed webhooks (eventual consistency) and the
+10-entitlement cap is a **full paginated read** of Stripe's
+`GET /v1/entitlements/active_entitlements` API — fetched on startup and to
+reconcile after a webhook delivery failure, following Stripe's own guidance.
+That read is **deferred**: `lattice_stripe 1.1` has no Entitlements list API, so
+the monotonic-snapshot reducer is the complete in-scope path for v1.x. The
+paginated reconcile lands as a follow-up depending on `lattice_stripe >= 1.2`
+(exposed as a future `stripe_native_sync` mode value). Until then, `truncated`
+and the truncation ops event surface the gap honestly.
 
 ---
 

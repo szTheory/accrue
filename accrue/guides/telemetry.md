@@ -44,6 +44,9 @@ typically for paging:
   (see `Accrue.Telemetry` module doc).
 - **Webhooks** — `[:accrue, :webhook, :receive]`, handler exceptions, orphan
   reducers under `[:accrue, :webhooks, :orphan_*]`, `[:accrue, :webhooks, :stale_event]`, etc.
+- **Entitlements** — `[:accrue, :entitlements, :check]` (per-decision gate
+  telemetry) and `[:accrue, :entitlements, :sync]` (advisory Stripe-native
+  cache-write span; see the **Entitlement sync events** section below).
 - **Mail / PDF** — `[:accrue, :mailer, :deliver, …]`, `[:accrue, :pdf, :render, …]`,
   email fallbacks `[:accrue, :email, :locale_fallback | :timezone_fallback | :format_money_failed]`.
 
@@ -52,6 +55,27 @@ latency percentiles, diagnostics, or high-cardinality dashboards — keep
 **on-call paging** on `[:accrue, :ops, :*]` above. The firehose stays useful
 for tracing and anomaly detection, but its volume is intentionally unsuitable
 for wake-the-oncall thresholds.
+
+### Entitlement sync events (optional Stripe-native advisory cache)
+
+These events fire **only** when a host opts into the optional Stripe-native
+entitlement sync (`config :accrue, entitlements: [stripe_native_sync:
+:advisory]`, default `:disabled`) **and** enables the
+`entitlements.active_entitlement_summary.updated` event on their Stripe
+Dashboard webhook endpoint. The advisory cache is **observational only** — it
+never changes `entitled?` / `has_active_plan?`. See
+[Entitlements › Optional Stripe-native sync (advisory)](entitlements.md#optional-stripe-native-sync-advisory)
+for the full story. All dimensions are allowlist-safe IDs and counts — the OTel
+`@allowed_attributes` allowlist is intentionally **not** widened for
+`entitlement_count` / `has_more` (telemetry-only).
+
+| Event | Measurements | Metadata | Notes |
+|-------|-------------|----------|-------|
+| `[:accrue, :entitlements, :sync]` (`:start` / `:stop` / `:exception`) | span | `customer_id` | The cache-write span. The deliberate **state-change** mirror of `[:accrue, :entitlements, :check]` (per-decision, telemetry-only) — this is the ENT-05 split made visible in two spans. |
+| `[:accrue, :entitlements, :summary_synced]` | `count`, `entitlement_count` | `customer_id`, `has_more`, `result` (`:written` \| `:unchanged`) | Fires on every processed summary. `result: :written` = the advisory cache changed (also ledgered as `entitlements.summary.synced`); `result: :unchanged` = a redelivery the reducer processed with no material change (**no** ledger row) — the signal lets you observe idempotent redelivery without an audit row. |
+| `[:accrue, :webhooks, :stale_event]` (reused) | — | `object_type: :entitlement_summary`, `stripe_id`, `event_id` | An out-of-order or replayed summary older than the cache watermark was skipped (monotonic guard). The same `:stale_event` used by every other monotonic reducer — not a new variant. |
+| `[:accrue, :webhooks, :orphan_entitlement_summary]` (reused shape) | — | `customer_stripe_id` | A summary arrived for a `cus_` with no local customer row; the cache is deferred (`{:ok, :deferred}`), never raising and never creating a customer. |
+| `[:accrue, :ops, :entitlement_summary_truncated]` | `count` | `customer_id`, `operation_id` when set | **Ops signal** (see the catalog table below). Fires only when `has_more: true` — a curated "this advisory cache is known-incomplete (>10 inline entitlements)" signal, not a per-sync heartbeat. |
 
 ## Ops event catalog (`[:accrue, :ops, :*]`)
 
