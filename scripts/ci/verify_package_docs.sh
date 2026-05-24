@@ -123,6 +123,17 @@ require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'entitlements ✅ shi
 require_absent_regex "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'on the table\*\* is \*\*entitlements'
 require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" '[Entitlements](entitlements.md)'
 
+# Optional Stripe-native advisory sync (Phase 127, ENT-10 / D-12)
+# Pins the entitlements.md Stripe-native section + the telemetry.md sync catalog
+# so the observational-disclaimer, enable steps, 10-cap, deferred 1.2 read, and
+# the new telemetry events cannot silently regress. grep -F is literal: the
+# brackets/backticks/event name are matched byte-for-byte. The disclaimer needle
+# is the single-line slice of the blockquote (the line wraps after the "/").
+require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'stripe_native_sync'
+require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'entitlements.active_entitlement_summary.updated'
+require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'does NOT change `entitled?` /'
+require_fixed "$ROOT_DIR/accrue/guides/telemetry.md" '[:accrue, :entitlements, :sync]'
+
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"README.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/admin_ui.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/core-admin-parity.md"'
