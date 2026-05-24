@@ -1,10 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.40
-milestone_name: Dunning depth
+milestone_name: — Dunning depth / notification journeys
 status: planning
-last_updated: "2026-05-24T17:10:00.000Z"
-last_activity: 2026-05-24
+stopped_at: Phase 128 context gathered
+last_updated: "2026-05-24T16:47:09.554Z"
+last_activity: 2026-05-24 — v1.40 roadmap created (5 phases, 128–132); 11/11 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
@@ -129,9 +130,9 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-24T17:10:00.000Z
-Stopped at: v1.40 roadmap created (Phases 128–132); requirements traceability filled
-Resume file: None
+Last session: 2026-05-24T16:47:09.551Z
+Stopped at: Phase 128 context gathered
+Resume file: .planning/phases/128-campaign-engine-foundation-idempotency-must-fix/128-CONTEXT.md
 
 ## Operator Next Steps
 
