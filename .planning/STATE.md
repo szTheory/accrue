@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: verifying
-stopped_at: Completed 126-01-PLAN.md
-last_updated: "2026-05-24T10:26:16.525Z"
+stopped_at: Phase 127 context gathered
+last_updated: "2026-05-24T11:05:49.002Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 5
@@ -143,6 +143,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T21:00:38.494Z
-Stopped at: Completed 126-01-PLAN.md
-Resume file: None
+Last session: 2026-05-24T11:05:48.997Z
+Stopped at: Phase 127 context gathered
+Resume file: .planning/phases/127-optional-stripe-native-sync-isolated-off-by-default/127-CONTEXT.md
