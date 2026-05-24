@@ -1,4 +1,26 @@
 defmodule Accrue.Config do
+  # --- Dunning campaign cadence (DUN-01, D-01/D-04/D-07) -----------------
+  # Per-step NimbleOptions schema for a dunning campaign step. `template`
+  # is `:atom` because module names ARE atoms — no `{:in, ...}` needed; the
+  # host owns the value (trusted compile-time-ish config, not webhook/DB
+  # input, so there is no atom-table exhaustion surface — threat T-128-02).
+  @step_schema [
+    after_days: [type: :non_neg_integer, required: true],
+    key: [type: :atom, required: true],
+    template: [type: :atom, required: true]
+  ]
+
+  # The default multi-step dunning journey (D-01). Absolute day offsets from
+  # campaign start: `[0, 5, 12]`. Last step (12) sits two days inside the
+  # default `grace_days` (14) so the final notice always precedes the
+  # sweeper's terminal action (the cross-field invariant enforced at boot by
+  # `validate_dunning_campaign_grace!/1`). Ships ON by default (opt-out).
+  @default_dunning_steps [
+    [after_days: 0, key: :reminder, template: Accrue.Emails.InvoicePaymentFailed],
+    [after_days: 5, key: :action_required, template: Accrue.Emails.DunningActionRequired],
+    [after_days: 12, key: :final_notice, template: Accrue.Emails.DunningFinalNotice]
+  ]
+
   @schema [
     # --- Repo + adapters --------------------------------------------------
     repo: [
@@ -231,14 +253,39 @@ defmodule Accrue.Config do
         mode: :stripe_smart_retries,
         grace_days: 14,
         terminal_action: :unpaid,
-        telemetry_prefix: [:accrue, :ops]
+        telemetry_prefix: [:accrue, :ops],
+        campaign: [enabled: true, steps: @default_dunning_steps]
+      ],
+      keys: [
+        mode: [type: {:in, [:stripe_smart_retries, :disabled]}, default: :stripe_smart_retries],
+        grace_days: [type: :pos_integer, default: 14],
+        terminal_action: [type: {:in, [:unpaid, :canceled]}, default: :unpaid],
+        telemetry_prefix: [type: {:list, :atom}, default: [:accrue, :ops]],
+        campaign: [
+          type: {:custom, __MODULE__, :validate_dunning_campaign, []},
+          default: [enabled: true, steps: @default_dunning_steps],
+          doc:
+            "Multi-step dunning cadence (D-04). A keyword list of " <>
+              "`[enabled: boolean, steps: [...]]` where each step is " <>
+              "`[after_days: non_neg_integer, key: atom, template: atom]`. " <>
+              "`after_days` is ABSOLUTE from campaign start, strictly " <>
+              "increasing and unique across the list; `key` is required and " <>
+              "unique (it becomes the Oban-unique step identity). Ships a " <>
+              "default journey ON by default (offsets `[0, 5, 12]`); set " <>
+              "`campaign: false` (normalized to `[enabled: false, steps: []]`) " <>
+              "to opt out. `steps: []` while `enabled: true` is a loud error. " <>
+              "The last step's `after_days` MUST be `<= grace_days` (validated " <>
+              "loud at boot) so the final notice precedes the sweeper's " <>
+              "terminal action."
+        ]
       ],
       doc:
         "Dunning grace-period overlay config. `:mode` is " <>
           "`:stripe_smart_retries` or `:disabled`; `:terminal_action` is " <>
           "`:unpaid` or `:canceled`; `:grace_days` adds N days past Stripe's " <>
           "last retry before Accrue asks the processor facade to move the " <>
-          "subscription to the terminal action."
+          "subscription to the terminal action. `:campaign` is the multi-step " <>
+          "dunning cadence (see its own doc)."
     ],
     webhook_endpoints: [
       type: :keyword_list,
@@ -771,6 +818,42 @@ defmodule Accrue.Config do
   def dunning, do: get!(:dunning)
 
   @doc """
+  Returns the dunning campaign cadence config (D-07).
+
+  Raw read with its own nested default — `dunning/0` does not normalize the
+  nested `:campaign` key (identical constraint to `past_due_grace/0`), so
+  the default journey is supplied here when a host overrides `:dunning`
+  without re-stating `:campaign`. Ships ON by default.
+  """
+  @spec dunning_campaign() :: keyword()
+  def dunning_campaign,
+    do: dunning() |> Keyword.get(:campaign, enabled: true, steps: @default_dunning_steps)
+
+  @doc """
+  Returns whether the multi-step dunning campaign is enabled (D-07).
+
+  `false` when the campaign is opted out (`campaign: false` /
+  `enabled: false`). Fail-closed: an absent `:enabled` key reads as `false`.
+  """
+  @spec dunning_campaign_enabled?() :: boolean()
+  def dunning_campaign_enabled?, do: Keyword.get(dunning_campaign(), :enabled, false)
+
+  @doc """
+  Returns the configured dunning campaign steps (D-07).
+
+  Returns `[]` when the campaign is disabled (so downstream consumers never
+  fire steps for an opted-out host), else the configured step list.
+  """
+  @spec dunning_campaign_steps() :: [keyword()]
+  def dunning_campaign_steps do
+    if dunning_campaign_enabled?() do
+      Keyword.get(dunning_campaign(), :steps, [])
+    else
+      []
+    end
+  end
+
+  @doc """
   Returns the past-due entitlement grace policy: `:none` (default,
   fail-closed), `:dunning` (reuse the dunning grace window), or a positive
   integer of days.
@@ -956,6 +1039,7 @@ defmodule Accrue.Config do
     end
 
     _ = validate_entitlements_price_ids!(opts)
+    _ = validate_dunning_campaign_grace!(opts)
 
     :ok
   end
@@ -993,6 +1077,39 @@ defmodule Accrue.Config do
         end
       end)
     end)
+
+    :ok
+  end
+
+  # Cross-field boot guard (D-06 / T-128-01): the campaign's final notice
+  # MUST fire BEFORE the dunning sweeper moves the subscription to its
+  # terminal action — i.e. `last_step.after_days <= grace_days`. This MUST
+  # live here (not as a per-field `{:custom, ...}` validator on `:campaign`)
+  # because a custom validator only sees the `:campaign` value and cannot
+  # read the SIBLING `:grace_days` key on the same `:dunning` map to
+  # cross-validate (same NimbleOptions constraint that forces the
+  # entitlements price-id guard out of `{:custom}`). A violation here would
+  # silently mis-fire (final notice arrives after the account is already
+  # terminal), so we fail LOUD at boot.
+  defp validate_dunning_campaign_grace!(opts) do
+    dunning = Keyword.get(opts, :dunning, [])
+    grace_days = Keyword.get(dunning, :grace_days, 14)
+    campaign = Keyword.get(dunning, :campaign, enabled: true, steps: @default_dunning_steps)
+
+    with true <- Keyword.get(campaign, :enabled, false),
+         [_ | _] = steps <- Keyword.get(campaign, :steps, []),
+         last_step = List.last(steps),
+         last_after_days when is_integer(last_after_days) <- Keyword.get(last_step, :after_days) do
+      if last_after_days > grace_days do
+        raise Accrue.ConfigError,
+          key: :dunning,
+          message:
+            "dunning campaign last step after_days (#{last_after_days}) must be " <>
+              "<= grace_days (#{grace_days}) so the final notice precedes the " <>
+              "sweeper's terminal action; got last step after_days=" <>
+              "#{last_after_days}, grace_days=#{grace_days}"
+      end
+    end
 
     :ok
   end
@@ -1063,6 +1180,111 @@ defmodule Accrue.Config do
   end
 
   @doc """
+  NimbleOptions `:custom` validator for the `:dunning.campaign` cadence
+  (DUN-01, D-04/D-05).
+
+  Accepts:
+
+    * `false` — normalized to `[enabled: false, steps: []]` (opt-out, D-05).
+    * a keyword list `[enabled: boolean, steps: [...]]` where each step is a
+      keyword list `[after_days: non_neg_integer, key: atom, template: atom]`
+      validated against `@step_schema`.
+
+  Intra-list invariants (the cross-field `last_step.after_days <= grace_days`
+  invariant is checked separately at boot by
+  `validate_dunning_campaign_grace!/1`, since a `{:custom}` validator cannot
+  read the sibling `:grace_days` key):
+
+    * `after_days` strictly increasing AND unique across the list.
+    * `key` unique across the list.
+    * when `enabled: true`, `steps` MUST be non-empty — `steps: []` while
+      enabled is a LOUD `{:error, _}` (never a silent disable, D-05).
+
+  Returns `{:ok, normalized_keyword}` on success, `{:error, message}` on
+  failure (so boot validation fails loud rather than silently mis-firing).
+  """
+  @spec validate_dunning_campaign(term()) :: {:ok, keyword()} | {:error, String.t()}
+  def validate_dunning_campaign(false), do: {:ok, [enabled: false, steps: []]}
+
+  def validate_dunning_campaign(campaign) when is_list(campaign) do
+    enabled = Keyword.get(campaign, :enabled, false)
+    steps = Keyword.get(campaign, :steps, [])
+
+    cond do
+      not is_boolean(enabled) ->
+        {:error, "expected :enabled to be a boolean, got: #{inspect(enabled)}"}
+
+      not is_list(steps) ->
+        {:error, "expected :steps to be a list of keyword lists, got: #{inspect(steps)}"}
+
+      enabled and steps == [] ->
+        {:error,
+         "dunning campaign is enabled but :steps is empty; set `campaign: false` " <>
+           "to opt out, or supply at least one step (an empty enabled cadence " <>
+           "would silently never fire)"}
+
+      true ->
+        validate_dunning_campaign_steps(enabled, steps)
+    end
+  end
+
+  def validate_dunning_campaign(other) do
+    {:error,
+     "expected `false` or a keyword list `[enabled: boolean, steps: [...]]`, " <>
+       "got: #{inspect(other)}"}
+  end
+
+  defp validate_dunning_campaign_steps(enabled, steps) do
+    with {:ok, validated} <- validate_each_step(steps),
+         :ok <- validate_steps_after_days(validated),
+         :ok <- validate_steps_keys_unique(validated) do
+      {:ok, [enabled: enabled, steps: validated]}
+    end
+  end
+
+  defp validate_each_step(steps) do
+    Enum.reduce_while(steps, {:ok, []}, fn step, {:ok, acc} ->
+      case NimbleOptions.validate(step, @step_schema) do
+        {:ok, normalized} -> {:cont, {:ok, [normalized | acc]}}
+        {:error, %NimbleOptions.ValidationError{} = err} -> {:halt, {:error, Exception.message(err)}}
+      end
+    end)
+    |> case do
+      {:ok, reversed} -> {:ok, Enum.reverse(reversed)}
+      {:error, _} = err -> err
+    end
+  end
+
+  defp validate_steps_after_days(steps) do
+    after_days = Enum.map(steps, &Keyword.fetch!(&1, :after_days))
+
+    cond do
+      length(Enum.uniq(after_days)) != length(after_days) ->
+        {:error,
+         "expected strictly-increasing unique :after_days across steps, got " <>
+           "duplicates in: #{inspect(after_days)}"}
+
+      not strictly_increasing?(after_days) ->
+        {:error,
+         "expected a strictly increasing list of :after_days across steps, " <>
+           "got: #{inspect(after_days)}"}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validate_steps_keys_unique(steps) do
+    keys = Enum.map(steps, &Keyword.fetch!(&1, :key))
+
+    if length(Enum.uniq(keys)) == length(keys) do
+      :ok
+    else
+      {:error, "expected unique step :key values across steps, got: #{inspect(keys)}"}
+    end
+  end
+
+  @doc """
   NimbleOptions `:custom` validator for the global `:entitlements`
   `on_deny` handler (Phase 124, ENT-06).
 
@@ -1121,6 +1343,14 @@ defmodule Accrue.Config do
   defp strictly_descending?([a, b | rest]) when a > b, do: strictly_descending?([b | rest])
 
   defp strictly_descending?(_), do: false
+
+  defp strictly_increasing?([]), do: true
+
+  defp strictly_increasing?([_]), do: true
+
+  defp strictly_increasing?([a, b | rest]) when a < b, do: strictly_increasing?([b | rest])
+
+  defp strictly_increasing?(_), do: false
 
   # --- internals --------------------------------------------------------
 
