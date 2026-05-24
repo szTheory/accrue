@@ -53,7 +53,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 128-05-PLAN.md — `Accrue.Workers.DunningStep` cancel-guarded, Oban-unique, chained worker (DUN-02, DUN-05)
+- [x] 128-05-PLAN.md — `Accrue.Workers.DunningStep` cancel-guarded, Oban-unique, chained worker (DUN-02, DUN-05)
 - [ ] 128-06-PLAN.md — Webhook wiring: atomic first-transition elector + cancel-on-recovery + D-15 REPLACE gate (DUN-02, DUN-05)
 
 > **Carried-forward open questions for plan context (do not re-litigate, just honor):**
@@ -128,7 +128,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 4/6 | In Progress|  |
+| 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 5/6 | In Progress|  |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 0/TBD | Not started | - |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 0/TBD | Not started | - |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |

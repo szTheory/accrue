@@ -4,13 +4,13 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
 stopped_at: Phase 128 context gathered
-last_updated: "2026-05-24T18:00:23.848Z"
+last_updated: "2026-05-24T18:06:36.692Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 ## Current Position
 
 Phase: 128 (campaign-engine-foundation-idempotency-must-fix) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-05-24
 
@@ -71,6 +71,7 @@ Last activity: 2026-05-24
 | Phase 128 P02 | 2min | 2 tasks | 3 files |
 | Phase 128 P03 | 3min | 2 tasks | 2 files |
 | Phase 128 P04 | 6min | 3 tasks | 7 files |
+| Phase 128 P05 | 3min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,7 @@ _v1.39 per-plan decision detail (Phases 123–127) is archived — full Key Deci
 - [Phase ?]: 2026-05-24 (128-03): Accrue.Dunning.Campaign next_step/3 returns {:next, step, schedule_in} | :done; boundary is >= so day-0 returns the first step immediately (schedule_in 0) — must_have overrides the discretionary strict-> sketch; schedule_in clamped to max(0,...) (T-128-05); module grep-asserted side-effect-free (no DB/Oban/clock), keeping the Phase-131 engine seam clean
 - [Phase ?]: 2026-05-24 (128-04): :invoice_payment_failed deduped at enqueue via Oban unique with invoice_id PROMOTED to a TOP-LEVEL arg (keys narrow to top-level only); period :infinity + :completed for week-2 Smart-Retry; dedup_unique/2 returns false for all other types (no regression)
 - [Phase ?]: 2026-05-24 (128-04): routed :invoice_payment_failed to the Mailglass lane so the D-14 idempotency_key backstop fires; added maybe_attach_pdf_for_lane/3 to SKIP PDF for it (Rule 1 — lane otherwise renders an invoice PDF for any invoice_id)
+- [Phase ?]: 2026-05-24 (128-05): Accrue.Workers.DunningStep chains via the pure resolver by deriving resolver now from anchor + current-step after_days + 1s (NOT raw Clock.utc_now/0) — raw wall-clock at elapsed approx boundary re-resolves to the current step (D-16-suppressed, chain never advances); D-16 unique keys [:subscription_id,:step_key,:campaign_started_at] period :infinity + :completed; cancel-guard FIRST returns {:cancel,:recovered} on not-past_due OR nil anchor; campaign_started_at carried/parsed as ISO8601 string (no atomization); no ledger/telemetry/engine-behaviour (scope-fenced to Phase 128)
 
 ### Pending Todos
 
@@ -140,7 +142,7 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-24T18:00:20.067Z
+Last session: 2026-05-24T18:06:28.987Z
 Stopped at: Phase 128 context gathered
 Resume file: None
 
