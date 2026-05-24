@@ -33,10 +33,59 @@ defmodule Accrue.Mailer.Default do
   def deliver(type, assigns) when is_atom(type) and is_map(assigns) do
     scalar_assigns = only_scalars!(assigns)
 
-    %{type: Atom.to_string(type), assigns: stringify_keys(scalar_assigns)}
-    |> Accrue.Workers.Mailer.new()
+    dedup_args(type, assigns, stringify_keys(scalar_assigns))
+    |> Accrue.Workers.Mailer.new(unique: dedup_unique(type, assigns))
     |> Oban.insert()
   end
+
+  # Builds the Oban args map per-type. For `:invoice_payment_failed` with a
+  # usable `invoice_id`, the id is PROMOTED to a TOP-LEVEL Oban arg so the
+  # `unique` `keys: [:type, :invoice_id]` actually discriminates per invoice
+  # (Oban's `Map.take` on the `unique` keys operates on TOP-LEVEL stringified
+  # arg keys only — NO recursion; verified against
+  # `deps/oban/lib/oban/engines/basic.ex:514-525`). A nested-only `invoice_id`
+  # under `assigns` would collapse EVERY invoice to one unique signature →
+  # global suppression (worse than the bug being fixed). The promoted `invoice_id`
+  # is the SAME scalar id that already lives inside `assigns` (the worker still
+  # reads it from `assigns`; the extra top-level key is ignored by the worker's
+  # `%{"type" => _, "assigns" => _}` match). Every OTHER type keeps the existing
+  # `%{type:, assigns:}` shape with NO top-level invoice_id (no scope creep).
+  defp dedup_args(:invoice_payment_failed, assigns, stringified_assigns) do
+    case assigns[:invoice_id] do
+      id when is_binary(id) and id != "" ->
+        %{type: "invoice_payment_failed", invoice_id: id, assigns: stringified_assigns}
+
+      _ ->
+        # Degenerate / missing invoice_id — fall back to the non-promoted shape
+        # so we never promote a nil/"" discriminator (which would re-introduce
+        # global suppression). Mirrors the `dedup_unique/2` guard below.
+        %{type: "invoice_payment_failed", assigns: stringified_assigns}
+    end
+  end
+
+  defp dedup_args(type, _assigns, stringified_assigns) do
+    %{type: Atom.to_string(type), assigns: stringified_assigns}
+  end
+
+  # Derives the Oban `unique` keyword for the enqueue. ONLY
+  # `:invoice_payment_failed` (with a usable `invoice_id`) gets a unique —
+  # keyed on `[:type, :invoice_id]` with `period: :infinity` (Stripe Smart
+  # Retries span 1-4 weeks, so the window is never finite) and `:completed` in
+  # `states` (a completed prior send must still block a week-2 redelivery).
+  # `:cancelled`/`:discarded` are excluded so a cancelled send is re-sendable.
+  # Every other type returns `false` (a no-op for `Oban.Worker.new/2`) — no
+  # regression, no scope creep.
+  defp dedup_unique(:invoice_payment_failed, %{invoice_id: id})
+       when is_binary(id) and id != "" do
+    [
+      fields: [:worker, :args],
+      keys: [:type, :invoice_id],
+      period: :infinity,
+      states: [:available, :scheduled, :executing, :retryable, :completed]
+    ]
+  end
+
+  defp dedup_unique(_type, _assigns), do: false
 
   @doc """
   Walks `map` and raises `ArgumentError` if any value is not

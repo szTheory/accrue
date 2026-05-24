@@ -45,7 +45,9 @@ defmodule Accrue.Workers.Mailer do
               Accrue.Emails.SubscriptionResumed,
               Accrue.Emails.RefundIssued,
               Accrue.Emails.CouponApplied,
-              Accrue.Emails.CardExpiringSoon
+              Accrue.Emails.CardExpiringSoon,
+              Accrue.Emails.DunningActionRequired,
+              Accrue.Emails.DunningFinalNotice
             ]}
 
   @impl Oban.Worker
@@ -73,6 +75,11 @@ defmodule Accrue.Workers.Mailer do
     case type do
       :receipt -> deliver_mailglass(type, template_mod, atomized, recipient)
       :payment_failed -> deliver_mailglass(type, template_mod, atomized, recipient)
+      # Route :invoice_payment_failed through the Mailglass lane so the D-14
+      # `idempotency_key/2` backstop key takes effect (the Swoosh lane applies
+      # NO dedup). The PRIMARY dedup is still the D-13 enqueue-`unique` in
+      # `Accrue.Mailer.Default.deliver/2`; this lane makes the backstop real.
+      :invoice_payment_failed -> deliver_mailglass(type, template_mod, atomized, recipient)
       _ -> deliver_swoosh(type, template_mod, atomized, recipient)
     end
   end
@@ -311,6 +318,19 @@ defmodule Accrue.Workers.Mailer do
     end
   end
 
+  # D-14 backstop for the deduped `:invoice_payment_failed` lane. Keyed on
+  # `invoice_id` (always present) — NOT the nullable/drop_nils `invoice_number`.
+  # The primary dedup is the D-13 enqueue-`unique`; this delivery-level key is
+  # the documented backstop that takes effect now that the type routes through
+  # the Mailglass lane.
+  defp idempotency_key(:invoice_payment_failed, assigns) do
+    case assigns[:invoice_id] || assigns["invoice_id"] do
+      nil -> {:error, :missing_invoice_id}
+      "" -> {:error, :missing_invoice_id}
+      invoice_id -> "accrue:v1:invoice_payment_failed:#{invoice_id}"
+    end
+  end
+
   defp idempotency_key(_type, _assigns), do: {:error, :unsupported_type}
 
   # Full catalogue plus the `:payment_succeeded` receipt-style alias.
@@ -329,6 +349,8 @@ defmodule Accrue.Workers.Mailer do
   defp default_template(:refund_issued), do: Accrue.Emails.RefundIssued
   defp default_template(:coupon_applied), do: Accrue.Emails.CouponApplied
   defp default_template(:card_expiring_soon), do: Accrue.Emails.CardExpiringSoon
+  defp default_template(:dunning_action_required), do: Accrue.Emails.DunningActionRequired
+  defp default_template(:dunning_final_notice), do: Accrue.Emails.DunningFinalNotice
   defp default_template(:payment_succeeded), do: Accrue.Emails.PaymentSucceeded
 
   @doc """
