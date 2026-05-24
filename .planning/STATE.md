@@ -4,14 +4,14 @@ milestone: v1.39
 milestone_name: — Entitlements / Plan-Gating
 status: executing
 stopped_at: Phase 127 context gathered
-last_updated: "2026-05-24T12:06:04.109Z"
+last_updated: "2026-05-24T12:14:26.906Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 21
-  completed_plans: 19
-  percent: 80
+  completed_plans: 20
+  percent: 95
 ---
 
 # Project State
@@ -27,11 +27,11 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 127 (optional-stripe-native-sync-isolated-off-by-default) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
+Plan: 4 of 4
+Status: Ready to execute (plans 01, 02, 03 complete)
 Last activity: 2026-05-24
 
-Progress: [██████████] 100% (phase 123 plans complete)
+Progress: [█████████░] 95% (20 of 21 plans complete)
 
 ## Milestone Progress
 
@@ -77,6 +77,7 @@ Progress: [██████████] 100% (phase 123 plans complete)
 | 126 | 4 | - | - |
 | Phase 127 P01 | 5min | 3 tasks | 8 files |
 | Phase 127 P03 | 4min | 2 tasks | 5 files |
+| Phase 127 P02 | 6min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 127]: [Phase 127 P01]: Wave 0 RED scaffolds (3 test files + entitlement_summary_event/2 fixture) tagged :pending_plan_02 + excluded in test_helper.exs so suite stays green this wave — Plan 02 removes the exclusion as it turns them GREEN. Isolation test attaches to actual [:accrue,:test_repo,:query] (TestRepo otp-app prefix) while referencing host-canonical [:accrue,:repo,:query]. NOTE: library has no :repo outside :test env, plan verify cmds run under MIX_ENV=test.
 - [Phase ?]: [Phase 127 P03]: ENT-10 provider-honesty + isolation — NEW entitlements.stripe_native_sync capability row (stripe: native (advisory), fake: out of slice, braintree: unsupported) added across @support_labels + @provider_support_labels + matrix markdown + drift gate (3-way SSOT); convergence local_mapping row byte-unchanged. Negative divergence guard TIGHTENED from entitlements.[a-z_]+ to entitlements.local_mapping so the new advisory row is allowed while convergence is still protected (regex-proven both ways).
 - [Phase ?]: [Phase 127 P03]: D-04 layer 2 — new merge-blocking verify_entitlement_sync_isolation.sh clones verify_core_liveview_runtime_free.sh (^[^#]* anchor + || true verbatim), scoped to the 3 always-on gate-path files (entitlements.ex, resolver.ex, resolver/local_map.ex), exit 1 on any EntitlementSummary/StripeSync/accrue_entitlement_summaries ref (T-127-09). Scoped to named files (not all accrue/lib) so the cache MODEL can live in core; wired into docs-contracts-shift-left after the LiveView-runtime-free step. Negative-proven.
+- [Phase 127]: [Phase 127 P02]: ENT-10 reducer+seam — config-gated dispatch clause in DefaultHandler checks stripe_native_sync?/0 FIRST (off lane {:ok,:ignored} BEFORE any Repo call, D-04 layer 1); reduce_entitlement_summary/3 reuses check_stale/2 + stamp_watermark/3 verbatim (monotonic-snapshot NOT refetch — lattice_stripe 1.1 has no Entitlements list API), orphan->{:ok,:deferred}+[:accrue,:webhooks,:orphan_entitlement_summary], malformed->{:ok,:ignored}, truncated<-has_more, [:accrue,:entitlements,:sync] span + summary_synced event (result :written|:unchanged) + entitlement_summary_truncated ops only when has_more; OTel allowlist UNCHANGED (D-09).
+- [Phase 127]: [Phase 127 P02]: D-08 on-change-only ledger — material = sorted {feature,lookup_key} pairs OR truncated differs; first write material; byte-identical re-delivery -> result:unchanged, NO ledger row; stale/orphan/malformed no ledger; type entitlements.summary.synced idempotency-keyed (\"entitlements.summary.synced:\"<>evt_id) IDs/counts only never raw payload. D-11 Accrue.Entitlements.StripeSync.summary_for_customer/1 read-only one-way seam (@doc false), gate path cache-free (grep 0 across entitlements.ex/resolver.ex/local_map.ex). New [:accrue,:ops,:entitlement_summary_truncated] registered in TelemetryOpsInventory + Metrics.defaults/0 + guides/telemetry.md (2 merge-blocking contract gates, Rule 3). Isolation surface-parity fixed: entitlement_quantity(:seats)=min(cap,qty)=min(5,1)=1 per local_map SSOT [Rule 1]. :pending_plan_02 exclusion removed; 3 scaffolds GREEN; full suite 1475/0 seed 0; credo --strict clean.
 
 ### Pending Todos
 
@@ -150,6 +153,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-24T12:05:56.613Z
+Last session: 2026-05-24T12:14:26.903Z
 Stopped at: Phase 127 context gathered
 Resume file: None
