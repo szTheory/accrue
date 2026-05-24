@@ -118,9 +118,17 @@ Entitlements is an **integration design over Accrue's already-feature-complete b
 **Plans**: 4 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 127-01-PLAN.md — accrue_entitlement_summaries schema + migration + stripe_native_sync config enum + Wave 0 test/fixture scaffolds (ENT-10)
-- [ ] 127-02-PLAN.md — config-gated monotonic webhook reducer + on-change ledger + telemetry/span/ops + read-only observational seam (ENT-10)
 - [ ] 127-03-PLAN.md — new entitlements.stripe_native_sync capability row + tightened drift gate + static isolation CI gate + ci.yml wiring (ENT-10)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 127-02-PLAN.md — config-gated monotonic webhook reducer + on-change ledger + telemetry/span/ops + read-only observational seam (ENT-10)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 127-04-PLAN.md — guides/entitlements.md + telemetry.md Stripe-native sync docs + verify_package_docs.sh needles (ENT-10)
 
 ## Progress
