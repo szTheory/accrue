@@ -372,7 +372,27 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
   end
 
   describe "invoice.payment_failed → :invoice_payment_failed" do
-    test "dispatches :invoice_payment_failed", %{customer: cus} do
+    # Phase 128 Plan 06 (D-15 REPLACE): when the dunning campaign is ENABLED
+    # (the test-env default), campaign step-1 owns day-0 and the standalone
+    # `:invoice_payment_failed` dispatch is SKIPPED. This test exercises the
+    # standalone wiring, so it opts the campaign OUT for its scope.
+    test "dispatches :invoice_payment_failed when the campaign is disabled", %{customer: cus} do
+      prev_dunning = Application.get_env(:accrue, :dunning, :__unset__)
+
+      Application.put_env(:accrue, :dunning,
+        mode: :stripe_native,
+        grace_days: 14,
+        terminal_action: :cancel,
+        campaign: [enabled: false, steps: []]
+      )
+
+      on_exit(fn ->
+        case prev_dunning do
+          :__unset__ -> Application.delete_env(:accrue, :dunning)
+          value -> Application.put_env(:accrue, :dunning, value)
+        end
+      end)
+
       params = %{customer: cus.processor_id, collection_method: "charge_automatically"}
       {:ok, stripe_inv} = Fake.create_invoice(params, [])
       {:ok, _} = Fake.finalize_invoice(stripe_inv.id, [])

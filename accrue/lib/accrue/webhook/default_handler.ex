@@ -230,6 +230,11 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp dispatch("customer.subscription." <> action, evt_id, evt_ts, obj)
        when action in ~w(created updated trial_will_end deleted paused resumed) do
     result = reduce_subscription(action, evt_id, evt_ts, obj)
+    # POST-COMMIT (D-12): the reducer transaction has now committed; run the
+    # cancel-on-recovery bulk cancel OUTSIDE any Repo.transact. Only fire on
+    # a committed success — a rolled-back reducer means the anchor-clear was
+    # undone, so the stale stash must be discarded WITHOUT cancelling.
+    run_post_commit_dunning_cancel(result)
     maybe_dispatch_subscription_email(action, result, obj)
     result
   end
@@ -734,6 +739,7 @@ defmodule Accrue.Webhook.DefaultHandler do
           %Subscription{} = updated ->
             with {:ok, _} <- upsert_subscription_items(updated, canonical),
                  :ok <- maybe_emit_dunning_exhaustion(row, updated),
+                 :ok <- maybe_finalize_dunning_campaign(row, updated),
                  {:ok, _} <-
                    record_event(
                      subscription_event_type(action),
@@ -772,6 +778,98 @@ defmodule Accrue.Webhook.DefaultHandler do
     end
 
     :ok
+  end
+
+  # D-12 cancel-on-recovery — IN-TRANSACTION anchor-clear half (DUN-05).
+  #
+  # When the subscription was running a dunning campaign (`row` had a
+  # non-nil anchor) and it has now recovered (`updated` is active/paid),
+  # nil the anchor DURABLY: the `force_status_changeset` write runs inside
+  # the reducer's enclosing `reduce_row -> Repo.transact`, so the
+  # anchor-clear commits ATOMICALLY with the status write — there is no
+  # window where the row is recovered but still carries a live anchor.
+  #
+  # The bulk `Oban.cancel_all_jobs` is NOT run here: Oban dispatches
+  # against `conf.repo` and is not guaranteed to enlist in this
+  # surrounding transaction connection (verified deps/oban/lib/oban.ex).
+  # Instead we capture `iso_anchor` (the anchor value AT recovery, read
+  # from `row` BEFORE the clear) and stash a post-commit cancel
+  # instruction; the dispatch site runs the bulk cancel AFTER this
+  # transaction commits. Post-commit is correct because the per-step
+  # cancel-guard (Plan 05, D-11) self-cancels any step that races the
+  # cancel — so a cancel failure can never leave a zombie campaign.
+  #
+  # Scope fence: emits NO `dunning.recovered` ledger event / telemetry
+  # (Phase 129).
+  defp maybe_finalize_dunning_campaign(nil, _updated), do: :ok
+
+  defp maybe_finalize_dunning_campaign(%Subscription{} = row, %Subscription{} = updated) do
+    with true <- Subscription.dunning_campaign_active?(row),
+         true <- Subscription.active?(updated),
+         %DateTime{} = anchor <- row.dunning_campaign_started_at do
+      iso_anchor = DateTime.to_iso8601(anchor)
+
+      case updated
+           |> Subscription.force_status_changeset(%{dunning_campaign_started_at: nil})
+           |> Repo.update() do
+        {:ok, _cleared} ->
+          # Stash the post-commit bulk-cancel instruction for the dispatch
+          # site to run AFTER this transaction commits. Tightly scoped to
+          # this synchronous webhook call; consumed-and-deleted once.
+          Process.put(:accrue_dunning_cancel, {updated.id, iso_anchor})
+          :ok
+
+        {:error, _} = err ->
+          err
+      end
+    else
+      _ -> :ok
+    end
+  end
+
+  # POST-COMMIT bulk cancel (D-12). Run by the dispatch site AFTER the
+  # reducer transaction commits — NEVER inside any `Repo.transact`. Keyed
+  # on `campaign_started_at` so a stale recovery for an old campaign cannot
+  # cancel a fresh re-lapse campaign's steps (Pitfall 3). Wrapped so a
+  # cancel error/raise does NOT propagate: the anchor-clear is already
+  # committed and the per-step cancel-guard backstops any uncancelled step.
+  defp run_post_commit_dunning_cancel({:ok, %Subscription{}}) do
+    case Process.delete(:accrue_dunning_cancel) do
+      {sub_id, iso_anchor} when is_binary(sub_id) and is_binary(iso_anchor) ->
+        cancel_dunning_steps(sub_id, iso_anchor)
+
+      _ ->
+        :ok
+    end
+  end
+
+  # Reducer did not commit a subscription success (rolled back / deferred /
+  # stale) — discard any stale stash WITHOUT cancelling. The anchor-clear,
+  # if it ran, was rolled back with the transaction.
+  defp run_post_commit_dunning_cancel(_result) do
+    _ = Process.delete(:accrue_dunning_cancel)
+    :ok
+  end
+
+  defp cancel_dunning_steps(sub_id, iso_anchor) do
+    import Ecto.Query, only: [from: 2]
+
+    from(j in Oban.Job,
+      where: j.worker == "Accrue.Workers.DunningStep",
+      where: fragment("? ->> 'subscription_id' = ?", j.args, ^sub_id),
+      where: fragment("? ->> 'campaign_started_at' = ?", j.args, ^iso_anchor)
+    )
+    |> Oban.cancel_all_jobs()
+
+    :ok
+  rescue
+    e ->
+      # The anchor-clear already committed; the per-step cancel-guard
+      # (D-11) backstops any step we failed to cancel. Log the failure
+      # without undoing the committed recovery (no new telemetry/ledger —
+      # that family is Phase 129).
+      Logger.warning("dunning cancel-on-recovery bulk cancel failed: #{inspect(e)}")
+      :ok
   end
 
   defp dunning_source(nil), do: :stripe_native
