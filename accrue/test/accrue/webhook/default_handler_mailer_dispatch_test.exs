@@ -379,10 +379,13 @@ defmodule Accrue.Webhook.DefaultHandlerMailerDispatchTest do
     test "dispatches :invoice_payment_failed when the campaign is disabled", %{customer: cus} do
       prev_dunning = Application.get_env(:accrue, :dunning, :__unset__)
 
+      # WR-04: schema-VALID values (`:stripe_native`/`:cancel` are rejected by
+      # the @schema {:in, ...} constraints; the prior fixture only passed
+      # because the read accessors never re-validate app env).
       Application.put_env(:accrue, :dunning,
-        mode: :stripe_native,
+        mode: :stripe_smart_retries,
         grace_days: 14,
-        terminal_action: :cancel,
+        terminal_action: :canceled,
         campaign: [enabled: false, steps: []]
       )
 

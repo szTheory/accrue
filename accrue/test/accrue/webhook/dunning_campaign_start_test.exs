@@ -99,12 +99,18 @@ defmodule Accrue.Webhook.DunningCampaignStartTest do
   end
 
   defp disable_campaign! do
+    # WR-04: use schema-VALID values so this fixture is a faithful, bootable
+    # host config. `:stripe_native`/`:cancel` are rejected by the @schema
+    # {:in, ...} constraints — the prior fixture only passed because it wrote
+    # straight to app env and the read accessors never re-validate.
     Application.put_env(:accrue, :dunning,
-      mode: :stripe_native,
+      mode: :stripe_smart_retries,
       grace_days: 14,
-      terminal_action: :cancel,
+      terminal_action: :canceled,
       campaign: [enabled: false, steps: []]
     )
+
+    :ok = Accrue.Config.validate_at_boot!()
   end
 
   # --- D-09 first-transition elector + day-0 enqueue -----------------
