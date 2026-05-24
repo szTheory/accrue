@@ -117,7 +117,7 @@ defmodule Accrue.Workers.Mailer do
       idempotency_key ->
         msg =
           template_mod.message(atomized)
-          |> maybe_attach_pdf(atomized, type)
+          |> maybe_attach_pdf_for_lane(atomized, type)
           |> Mailglass.Message.put_metadata(:idempotency_key, idempotency_key)
 
         case Mailglass.deliver(msg) do
@@ -126,6 +126,17 @@ defmodule Accrue.Workers.Mailer do
         end
     end
   end
+
+  # `:invoice_payment_failed` is a dunning-step notification and carries NO
+  # invoice PDF (it is now routed through the Mailglass lane purely so the
+  # D-14 idempotency_key backstop fires). The Swoosh lane gated PDF attachment
+  # via `needs_pdf?/1`; the Mailglass lane otherwise attempts a render whenever
+  # an invoice_id is present (the receipt/payment_failed behavior), which would
+  # wrongly render a PDF for the failed-payment email. Skip it here.
+  defp maybe_attach_pdf_for_lane(msg, _atomized, :invoice_payment_failed), do: msg
+
+  defp maybe_attach_pdf_for_lane(msg, atomized, type),
+    do: maybe_attach_pdf(msg, atomized, type)
 
   @doc """
   Resolves the template module for an email type. Honors `:email_overrides`
