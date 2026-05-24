@@ -4,13 +4,13 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
 stopped_at: Phase 128 context gathered
-last_updated: "2026-05-24T17:47:48.974Z"
+last_updated: "2026-05-24T17:52:39.684Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 ## Current Position
 
 Phase: 128 (campaign-engine-foundation-idempotency-must-fix) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-05-24
 
@@ -69,6 +69,7 @@ Last activity: 2026-05-24
 | 127 Optional Stripe-Native Sync (isolated) | 4 | off-by-default advisory cache, isolation gate |
 | Phase 128 P01 | 3min | 2 tasks | 2 files |
 | Phase 128 P02 | 2min | 2 tasks | 3 files |
+| Phase 128 P03 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,7 @@ _v1.39 per-plan decision detail (Phases 123–127) is archived — full Key Deci
 
 - [Phase ?]: 2026-05-24 (128-01): dunning campaign opt-out shorthand campaign:false normalized at all three raw read sites (boot grace validator, dunning_campaign/0 accessor, {:custom} validator) because validate_at_boot!/0 passes UN-normalized opts to maybe_validate_boot_setup!/1
 - [Phase ?]: 2026-05-24 (128-02): dunning campaign anchor is a single nullable column dunning_campaign_started_at on accrue_subscriptions (column-add, NOT a new table, mirrors dunning_sweep_attempted_at); cast-for-CLEAR-path-only in @cast_fields (D-12 recovery clear) — START is a sibling update_all (D-09), never a cast, so it never contends with optimistic_lock(:lock_version); no index (deferred to Phase 129); Subscription.dunning_campaign_active?/1 true iff anchor is a non-nil DateTime
+- [Phase ?]: 2026-05-24 (128-03): Accrue.Dunning.Campaign next_step/3 returns {:next, step, schedule_in} | :done; boundary is >= so day-0 returns the first step immediately (schedule_in 0) — must_have overrides the discretionary strict-> sketch; schedule_in clamped to max(0,...) (T-128-05); module grep-asserted side-effect-free (no DB/Oban/clock), keeping the Phase-131 engine seam clean
 
 ### Pending Todos
 
@@ -135,7 +137,7 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-24T17:47:45.351Z
+Last session: 2026-05-24T17:52:32.346Z
 Stopped at: Phase 128 context gathered
 Resume file: None
 

@@ -16,7 +16,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 ### Dunning Campaign Engine & Configuration
 
 - [x] **DUN-01**: A host can configure a multi-step dunning cadence (ordered steps, each with a delay and an email template) via `NimbleOptions`-validated config nested under the existing `:dunning` key, with a sensible default journey shipped out of the box (opt-out, not opt-in).
-- [ ] **DUN-02**: Failed-payment recovery runs as a first-party durable built-in Oban campaign (`Accrue.Dunning.Campaign` + `Accrue.Workers.DunningStep`) that schedules each step from local `past_due_since` state, independent of when/whether the processor re-fires webhooks, and emits each step's email through the existing Mailglass mailer.
+- [x] **DUN-02**: Failed-payment recovery runs as a first-party durable built-in Oban campaign (`Accrue.Dunning.Campaign` + `Accrue.Workers.DunningStep`) that schedules each step from local `past_due_since` state, independent of when/whether the processor re-fires webhooks, and emits each step's email through the existing Mailglass mailer.
 - [ ] **DUN-03**: The dunning engine is swappable behind an `Accrue.Dunning.Engine` behaviour, with an off-by-default `Accrue.Integrations.Chimeway` adapter (conditionally compiled; core `accrue` does not require Chimeway) so a host can upgrade to the Chimeway orchestration engine without changing call sites (SEED-002 #1).
 
 ### Correctness & Idempotency
@@ -72,7 +72,7 @@ Which phases cover which requirements. Phases continue from v1.39 (ended at Phas
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DUN-01 | Phase 128 | Complete |
-| DUN-02 | Phase 128 | Pending |
+| DUN-02 | Phase 128 | Complete |
 | DUN-04 | Phase 128 | Pending |
 | DUN-05 | Phase 128 | Complete |
 | DUN-06 | Phase 129 | Pending |
