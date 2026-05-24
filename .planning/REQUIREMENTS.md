@@ -21,7 +21,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Correctness & Idempotency
 
-- [ ] **DUN-04**: Failed-payment and dunning-step emails are idempotent — duplicate processor retries (e.g. repeated `invoice.payment_failed`) never produce duplicate emails (fixes today's un-deduped `:invoice_payment_failed`, `workers/mailer.ex:292,314`).
+- [x] **DUN-04**: Failed-payment and dunning-step emails are idempotent — duplicate processor retries (e.g. repeated `invoice.payment_failed`) never produce duplicate emails (fixes today's un-deduped `:invoice_payment_failed`, `workers/mailer.ex:292,314`).
 - [x] **DUN-05**: A dunning journey automatically cancels the moment a subscription leaves `past_due` (payment recovered) — no further steps or emails fire — and is keyed so subsequent failure webhooks within the same past-due window cannot restart or duplicate an in-flight campaign.
 
 ### Customer & Operator Surfaces
@@ -73,7 +73,7 @@ Which phases cover which requirements. Phases continue from v1.39 (ended at Phas
 |-------------|-------|--------|
 | DUN-01 | Phase 128 | Complete |
 | DUN-02 | Phase 128 | Complete |
-| DUN-04 | Phase 128 | Pending |
+| DUN-04 | Phase 128 | Complete |
 | DUN-05 | Phase 128 | Complete |
 | DUN-06 | Phase 129 | Pending |
 | DUN-07 | Phase 129 | Pending |
