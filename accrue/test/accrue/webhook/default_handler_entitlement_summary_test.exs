@@ -1,14 +1,9 @@
 defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
   @moduledoc """
-  Phase 127 (ENT-10) — Wave 0 RED scaffold.
+  Phase 127 (ENT-10) — entitlement-summary reducer contract.
 
   Encodes the executable contract for the optional, off-by-default
-  Stripe-native entitlement-summary sync reducer (Plan 02). The whole
-  module is tagged `:pending_plan_02` and EXCLUDED by default (see
-  `test/test_helper.exs`) — it is intentionally RED this wave because the
-  config-gated dispatch clause + `reduce_entitlement_summary/3` reducer do
-  not exist until Plan 02. Plan 02 removes the exclusion as it turns these
-  GREEN.
+  Stripe-native entitlement-summary sync reducer.
 
   Behaviors covered (VALIDATION Per-Task Verification Map):
 
@@ -29,8 +24,6 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
       early-returns `{:ok, :ignored}` and writes no row (off-lane is inert).
   """
   use Accrue.BillingCase, async: false
-
-  @moduletag :pending_plan_02
 
   alias Accrue.Billing.EntitlementSummary
 
@@ -61,6 +54,56 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
         Application.delete_env(:accrue, :entitlements)
       end
     end)
+  end
+
+  # CR-01 regression: the production webhook path is DispatchWorker ->
+  # `handle_event/3`, NOT the raw-map `handle/1` the other tests use. The
+  # summary object has no top-level `id`, so the lean `%Accrue.Webhook.Event{}`
+  # carries `object_id: nil`; without a dedicated dispatch clause the event
+  # short-circuits on the generic nil-guard and the reducer never runs. These
+  # tests lock the real path end-to-end (the object travels in `ctx`, exactly
+  # as `Accrue.Webhook.DispatchWorker` stows it under `:meter_error_object`).
+  describe "real DispatchWorker path (handle_event/3)" do
+    @summary_type "entitlements.active_entitlement_summary.updated"
+
+    defp summary_event_and_ctx(customer_processor_id, opts) do
+      raw = StripeFixtures.entitlement_summary_event([customer: customer_processor_id] ++ opts)
+      summary_object = raw["data"]["object"]
+
+      event = %Accrue.Webhook.Event{
+        type: raw["type"],
+        object_id: nil,
+        livemode: false,
+        created_at: DateTime.from_unix!(raw["created"]),
+        processor_event_id: raw["id"],
+        processor: :stripe
+      }
+
+      {event, %{meter_error_object: summary_object}}
+    end
+
+    test "enabled (:advisory): writes a row via the lean event + ctx", %{customer: customer} do
+      enable_advisory_sync()
+
+      {event, ctx} =
+        summary_event_and_ctx(customer.processor_id,
+          entitlements: [%{"id" => "ent_1", "feature" => "feat_a", "lookup_key" => "alpha"}]
+        )
+
+      assert :ok = Accrue.Webhook.DefaultHandler.handle_event(event.type, event, ctx)
+
+      row = Repo.get_by(EntitlementSummary, customer_id: customer.id)
+      assert row
+      assert row.entitlement_count == 1
+      assert row.stripe_customer_id == customer.processor_id
+    end
+
+    test "disabled (default): writes no row via the lean event + ctx", %{customer: customer} do
+      {event, ctx} = summary_event_and_ctx(customer.processor_id, [])
+
+      assert :ok = Accrue.Webhook.DefaultHandler.handle_event(event.type, event, ctx)
+      refute Repo.get_by(EntitlementSummary, customer_id: customer.id)
+    end
   end
 
   describe "enabled (:advisory) -> cache write" do

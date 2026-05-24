@@ -112,6 +112,30 @@ defmodule Accrue.Webhook.DefaultHandler do
     :ok
   end
 
+  # Phase 127 — ENT-10 optional Stripe-native entitlement-summary sync.
+  #
+  # The `entitlements.active_entitlement_summary` object has NO top-level
+  # `id`, so `Accrue.Webhook.Event.from_webhook_event/1` derives
+  # `object_id: nil`. Without this dedicated clause the event would fall
+  # through to the generic `object_id: nil` short-circuit below and never
+  # reach `dispatch/4` — the reducer would be unreachable on the real
+  # `DispatchWorker` path even with `stripe_native_sync: :advisory` enabled.
+  # Mirror the meter-error/portal pattern: pull the full object out of `ctx`
+  # (DispatchWorker stows `data.data.object` there) and dispatch explicitly.
+  # The config gate still runs first inside `dispatch/4`.
+  def handle_event(
+        "entitlements.active_entitlement_summary.updated",
+        %Accrue.Webhook.Event{} = event,
+        ctx
+      ) do
+    obj = entitlement_summary_object_from_ctx(ctx)
+
+    case dispatch(event.type, event.processor_event_id, event.created_at, obj) do
+      {:ok, _} -> :ok
+      other -> other
+    end
+  end
+
   # ---------------------------------------------------------------------
   # Phase 3 event families — dispatch from Accrue.Webhook.Event struct
   # ---------------------------------------------------------------------
@@ -547,7 +571,7 @@ defmodule Accrue.Webhook.DefaultHandler do
         synced_at: synced_at_from_event(evt_ts),
         data: obj
       }
-      |> stamp_watermark(evt_ts, evt_id)
+      |> stamp_summary_watermark(evt_ts, evt_id, row)
 
     metadata = %{customer_id: customer.id, has_more: has_more, entitlement_count: entitlement_count}
 
@@ -625,6 +649,26 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp synced_at_from_event(%DateTime{} = evt_ts), do: evt_ts
   defp synced_at_from_event(_), do: Accrue.Clock.utc_now()
 
+  # WR-02 (D-06 monotonicity): never let a nil/missing event timestamp
+  # clobber an existing watermark. A null `last_stripe_event_ts` re-opens the
+  # stale gate (`check_stale/2` treats nil as "always proceed"), so a
+  # timestamp-less event could wipe a newer snapshot's watermark and let a
+  # later older event overwrite it. Stamp only on a real `%DateTime{}`;
+  # otherwise carry the prior row's watermark forward (or leave unset on the
+  # first-ever write). Scoped to the summary reducer — the shared
+  # `stamp_watermark/3` keeps its existing behaviour for other reducers.
+  defp stamp_summary_watermark(attrs, %DateTime{} = evt_ts, evt_id, _row),
+    do: stamp_watermark(attrs, evt_ts, evt_id)
+
+  defp stamp_summary_watermark(attrs, _evt_ts, _evt_id, nil), do: attrs
+
+  defp stamp_summary_watermark(attrs, _evt_ts, _evt_id, %EntitlementSummary{} = row) do
+    Map.merge(attrs, %{
+      last_stripe_event_ts: row.last_stripe_event_ts,
+      last_stripe_event_id: row.last_stripe_event_id
+    })
+  end
+
   defp emit_summary_malformed(evt_id, reason) do
     :telemetry.execute(
       [:accrue, :webhooks, :malformed_entitlement_summary],
@@ -635,6 +679,19 @@ defmodule Accrue.Webhook.DefaultHandler do
 
   defp meter_error_object_from_ctx(ctx) when is_map(ctx) do
     Map.get(ctx, :meter_error_object) ||
+      Map.get(ctx, "meter_error_object") ||
+      %{}
+  end
+
+  # Phase 127 — the full summary object is needed (customer, entitlements.data,
+  # has_more, livemode) and is NOT recoverable from the lean event struct.
+  # DispatchWorker stows the raw `data.data.object` under `:meter_error_object`
+  # for every event type, so reuse it (preferring a dedicated key if a future
+  # caller supplies one).
+  defp entitlement_summary_object_from_ctx(ctx) when is_map(ctx) do
+    Map.get(ctx, :entitlement_summary_object) ||
+      Map.get(ctx, "entitlement_summary_object") ||
+      Map.get(ctx, :meter_error_object) ||
       Map.get(ctx, "meter_error_object") ||
       %{}
   end
