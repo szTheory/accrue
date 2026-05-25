@@ -4,8 +4,8 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
 stopped_at: Phase 131 context gathered
-last_updated: "2026-05-25T15:55:03.267Z"
-last_activity: 2026-05-25 -- Phase 131 planning complete
+last_updated: "2026-05-25T16:03:22.802Z"
+last_activity: 2026-05-25 -- Phase 131 execution started
 progress:
   total_phases: 5
   completed_phases: 3
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 130 — provider-honesty-fake-lane-proof-example-host-wiring
+**Current focus:** Phase 131 — optional-chimeway-engine-adapter-isolated-off-by-default
 
 ## Current Position
 
-Phase: 131
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-25 -- Phase 131 planning complete
+Phase: 131 (optional-chimeway-engine-adapter-isolated-off-by-default) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 131
+Last activity: 2026-05-25 -- Phase 131 execution started
 
 ## Milestone Progress
 

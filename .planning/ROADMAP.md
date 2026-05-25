@@ -120,11 +120,11 @@ Plans:
 Plans:
 **Wave 0**
 
-- [ ] 131-01-PLAN.md — Wave 0 test stubs (engine_test, engine/oban_test, chimeway_test) (DUN-03)
+- [x] 131-01-PLAN.md — Wave 0 test stubs (engine_test, engine/oban_test, chimeway_test) (DUN-03)
 
 **Wave 1**
 
-- [ ] 131-02-PLAN.md — `Accrue.Dunning.Engine` behaviour + `dunning: [engine:]` config key + `Config.dunning_engine/0` (DUN-03)
+- [x] 131-02-PLAN.md — `Accrue.Dunning.Engine` behaviour + `dunning: [engine:]` config key + `Config.dunning_engine/0` (DUN-03)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -161,7 +161,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete    | 2026-05-25 |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 4/4 | Complete    | 2026-05-25 |
-| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/6 | Not started | - |
+| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 2/6 | In Progress|  |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |
 
 ## Notes
