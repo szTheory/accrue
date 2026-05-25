@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
-status: verifying
+status: executing
 stopped_at: Phase 130 context gathered
-last_updated: "2026-05-25T07:31:23.203Z"
-last_activity: 2026-05-25
+last_updated: "2026-05-25T13:16:29.838Z"
+last_activity: 2026-05-25 -- Phase 130 planning complete
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 10
+  total_plans: 14
   completed_plans: 10
   percent: 40
 ---
@@ -28,8 +28,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 Phase: 130
 Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-05-25
+Status: Ready to execute
+Last activity: 2026-05-25 -- Phase 130 planning complete
 
 ## Milestone Progress
 
