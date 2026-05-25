@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: verifying
-stopped_at: Phase 130 context gathered
-last_updated: "2026-05-25T14:51:57.135Z"
+stopped_at: Phase 131 context gathered
+last_updated: "2026-05-25T15:24:55.819Z"
 last_activity: 2026-05-25
 progress:
   total_phases: 5
@@ -154,9 +154,9 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-25T14:30:26.689Z
-Stopped at: Phase 130 context gathered
-Resume file: None
+Last session: 2026-05-25T15:24:55.810Z
+Stopped at: Phase 131 context gathered
+Resume file: .planning/phases/131-optional-chimeway-engine-adapter-isolated-off-by-default/131-CONTEXT.md
 
 ## Operator Next Steps
 
