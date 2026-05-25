@@ -74,10 +74,12 @@ Plans:
   4. A recovered-vs-lost signal is derivable as a ledger-query counter (no new table) — an operator/developer can answer "how much past-due revenue did dunning recover vs. lose to terminal action?".
 
 **Plans**: 4 plans
-- [ ] 129-01-PLAN.md — DUN-08 observability contract: 4 dunning lifecycle ledger + telemetry events at the Phase-128 scope fences + drift-gate triad registration (inventory + metrics + guide)
+
+- [x] 129-01-PLAN.md — DUN-08 observability contract: 4 dunning lifecycle ledger + telemetry events at the Phase-128 scope fences + drift-gate triad registration (inventory + metrics + guide)
 - [ ] 129-02-PLAN.md — DUN-08 recovered-vs-lost ledger-fold counter (`Accrue.Billing.Dunning.recovered_vs_lost/1`, no new table)
 - [ ] 129-03-PLAN.md — DUN-06 portal recovery banner (conditional `portal-card` section + provider-aware update-PM CTA)
 - [ ] 129-04-PLAN.md — DUN-07 admin read-only dunning-state `ax-card` (resolver-derived next action, all copy via `AccrueAdmin.Copy`)
+
 **UI hint**: yes
 
 ### Phase 130: Provider Honesty + Fake-Lane Proof + Example-Host Wiring
@@ -133,7 +135,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
-| 129. Customer + Operator Surfaces + Observability | v1.40 | 0/TBD | Not started | - |
+| 129. Customer + Operator Surfaces + Observability | v1.40 | 1/4 | In Progress|  |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 0/TBD | Not started | - |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |

@@ -4,13 +4,13 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
 stopped_at: Phase 129 UI-SPEC approved
-last_updated: "2026-05-25T06:00:50.209Z"
-last_activity: 2026-05-25 -- Phase 129 planning complete
+last_updated: "2026-05-25T06:16:36.657Z"
+last_activity: 2026-05-25
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 6
+  completed_plans: 7
   percent: 20
 ---
 
@@ -26,10 +26,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 ## Current Position
 
-Phase: 129
-Plan: Not started
+Phase: 129 (customer-operator-surfaces-observability) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-05-25 -- Phase 129 planning complete
+Last activity: 2026-05-25
 
 ## Milestone Progress
 
@@ -144,9 +144,9 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-25T05:41:03.490Z
+Last session: 2026-05-25T06:16:36.653Z
 Stopped at: Phase 129 UI-SPEC approved
-Resume file: .planning/phases/129-customer-operator-surfaces-observability/129-UI-SPEC.md
+Resume file: None
 
 ## Operator Next Steps
 
