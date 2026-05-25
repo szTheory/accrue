@@ -4,13 +4,13 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
 stopped_at: Phase 130 context gathered
-last_updated: "2026-05-25T13:29:59.541Z"
+last_updated: "2026-05-25T14:12:34.040Z"
 last_activity: 2026-05-25
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
   percent: 40
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 ## Current Position
 
 Phase: 130 (provider-honesty-fake-lane-proof-example-host-wiring) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-05-25
 
@@ -78,6 +78,7 @@ Last activity: 2026-05-25
 | Phase 129 P02 | 3min | 1 tasks | 2 files |
 | Phase 130 P01 | 8min | - tasks | - files |
 | Phase 130 P02 | 3min | 2 tasks | 2 files |
+| Phase 130 P03 | 7min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,7 @@ _v1.39 per-plan decision detail (Phases 123–127) is archived — full Key Deci
 - [Phase ?]: 2026-05-24 (128-06): campaign wired into the REAL webhook path. D-09 atomic update_all WHERE is_nil(anchor) in maybe_bump_past_due_since elects exactly ONE concurrent invoice.payment_failed winner (count==1 enqueues day-0 DunningStep; count==0 no-op; sibling update_all, never touches lock_version). D-12 cancel-on-recovery SPLITS the commit boundary: in-transaction force_status_changeset anchor-clear (durable, atomic with the status write) + POST-commit Oban.cancel_all_jobs keyed on subscription_id+campaign_started_at (run OUTSIDE any Repo.transact at the dispatch site, only on a committed {:ok,%Subscription{}}, handed off via a tightly-scoped process-dict stash). D-15 REPLACE skips the standalone :invoice_payment_failed email when the campaign owns day-0. Cancel-failure is logged via Logger.warning (NOT telemetry/ledger — Phase 129); per-step cancel-guard backstops uncancelled steps. iso_anchor captured from row BEFORE the clear so a stale recovery can't cancel a fresh re-lapse campaign. Stale standalone-dispatch test re-scoped to campaign-disabled (Rule 1).
 - [Phase ?]: 2026-05-25 (129-04): DUN-07 admin read-only dunning-state ax-card. New <article data-role=subscription-dunning-state> cloned from related-billing in SubscriptionLive.render/1, ALWAYS rendered (state surface). next_action_summary/1 derives next action from the PURE Accrue.Dunning.Campaign.next_step/3 resolver (Config.dunning_campaign_steps + Clock.utc_now for Fake-lane determinism), rescuing failure to Copy.dunning_next_action_unavailable (T-129-14). dunning_badge_tone/1 amber (active) / slate (none). Strictly read-only (D-12): zero phx-click/phx-submit/button/form. All operator copy via dedicated AccrueAdmin.Copy.Dunning (D-13). Empty state renders body + Started/Next labels so copy-routing holds. No new CSS. 137 admin tests green.
 - [Phase ?]: 2026-05-25 (129-02): DUN-08 SC#4 recovered-vs-lost counter. Accrue.Billing.Dunning.recovered_vs_lost/1 folds accrue_events into flat %{recovered: count(dunning.recovered), lost: count(dunning.exhausted)} — no new table (D-07), raw map only no rate field (D-08). Request-time terminal-action-request type structurally excluded so lost never double-counts (D-06, T-129-06); grep gate enforces the excluded string == 0. Optional since:/until: %DateTime{} window bound as Ecto params, no interpolation (T-129-05/V5). Mirrors Events bucket_query/1 type+since/until shape as a flat count (not the private bucket_query/1 nor bucket_by/2). DB-backed counter tests in a sibling RepoCase module beside the pure policy tests.
+- [Phase ?]: 130-03-SUMMARY.md
 
 ### Pending Todos
 
@@ -152,7 +154,7 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-25T13:29:59.537Z
+Last session: 2026-05-25T14:12:34.036Z
 Stopped at: Phase 130 context gathered
 Resume file: None
 

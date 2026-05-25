@@ -98,7 +98,7 @@ Plans:
 
 - [x] 130-01-PLAN.md — DUN-09 SC#2: `dunning:` capability group (campaign convergence + smart_retry_alignment divergence) in `Capabilities` + 3 adapters + support matrix rows/prose + drift-gate pins & negative convergence guard
 - [x] 130-02-PLAN.md — DUN-09 SC#1: provider-honest `guides/dunning.md` (per-provider story, over-email warning, Test Clocks note, lifecycle cross-ref) + light guide-side drift pins
-- [ ] 130-03-PLAN.md — DUN-10 SC#3: deterministic full-journey Fake-lane test through the real `DefaultHandler` (start → progression → recovery → exhaustion) + observability assertions + D-09 label mirror
+- [x] 130-03-PLAN.md — DUN-10 SC#3: deterministic full-journey Fake-lane test through the real `DefaultHandler` (start → progression → recovery → exhaustion) + observability assertions + D-09 label mirror
 - [ ] 130-04-PLAN.md — DUN-10 SC#4: example-host Oban wiring (`accrue_dunning` queue + Cron sweeper) + Fake-backed host wiring proof + adoption-proof-matrix row & verifier needle
 
 > **Carried-forward note for plan context:** also surface the over-emailing risk — if a host has Stripe Dashboard dunning emails enabled, Accrue's cadence can double-email; ship the default opt-out posture with a documented warning (open question #2).
@@ -141,7 +141,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 |-------|-----------|----------------|--------|-----------|
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete    | 2026-05-25 |
-| 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 2/4 | In Progress|  |
+| 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 3/4 | In Progress|  |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |
 
