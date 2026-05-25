@@ -24,6 +24,7 @@ This matrix is refreshed for the linked `1.0.0` pair: the same merge-blocking ho
 | Org access / denial, admin mount, webhooks | `org_billing_*`, `admin_*`, `webhook_ingest_test.exs` | Bounded + full suites |
 | Mounted admin + trust / responsiveness + a11y (axe) | Playwright `@phase15-trust`, per-verify01 specs, `e2e/verify01-admin-a11y.spec.js` | `e2e/` |
 | Visual screenshots (maintainers / evaluators) | `npm run e2e:visuals`, CI artifact `accrue-host-phase15-screenshots` | README VERIFY-01 + visuals section |
+| Dunning campaign wiring — `accrue_dunning` queue + `Oban.Plugins.Cron` DunningSweeper in host config; Fake-backed failed-payment → campaign-step → recovery loop through the real webhook entry point | `dunning_wiring_test.exs` (host wiring smoke) + `dunning_full_journey_test.exs` (accrue package full journey) | `examples/accrue_host/test/accrue_host/dunning_wiring_test.exs` + `accrue/test/accrue/dunning/dunning_full_journey_test.exs` |
 
 **Caveat:** `/app/billing` LiveView in this host is **organization-scoped** (active org, `subscribe_active_organization/3`). User-level billing is proven at the **generated `AccrueHost.Billing` facade + `Accrue.Billing`** layer in ExUnit — a realistic B2C SaaS would expose its own LiveViews or controllers on top of the same APIs.
 

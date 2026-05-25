@@ -60,6 +60,10 @@ require_substring "unsupported on Braintree" "braintree preview boundary wording
 require_substring "update_customer/2" "bounded customer-update wording"
 require_substring "cancel/2" "shared immediate cancellation wording"
 require_substring "cancel_at_period_end/2" "scheduled-end split wording"
+require_substring "dunning_wiring_test.exs" "dunning wiring host smoke test path in matrix"
+require_substring "accrue_dunning" "accrue_dunning queue token in matrix"
+require_substring "Oban.Plugins.Cron" "Oban.Plugins.Cron crontab token in matrix"
+require_substring "dunning_full_journey_test.exs" "dunning full journey test path in matrix"
 
 if grep -Eq 'Stripe-only|remain Stripe-only' "${matrix}"; then
   echo "verify_adoption_proof_matrix: matrix still contains stale Stripe-only wording" >&2
