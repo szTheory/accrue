@@ -2,7 +2,7 @@
 phase: 130-provider-honesty-fake-lane-proof-example-host-wiring
 reviewed: 2026-05-25T00:00:00Z
 depth: standard
-files_reviewed: 13
+files_reviewed: 12
 files_reviewed_list:
   - accrue/guides/dunning.md
   - accrue/lib/accrue/processor/braintree.ex
@@ -12,295 +12,330 @@ files_reviewed_list:
   - accrue/test/accrue/dunning/dunning_full_journey_test.exs
   - examples/accrue_host/config/config.exs
   - examples/accrue_host/config/test.exs
-  - examples/accrue_host/docs/adoption-proof-matrix.md
   - examples/accrue_host/priv/repo/migrations/20260525120000_add_dunning_campaign_started_at_to_subscriptions.exs
   - examples/accrue_host/test/accrue_host/dunning_wiring_test.exs
   - scripts/ci/verify_adoption_proof_matrix.sh
   - scripts/ci/verify_processor_support_matrix.sh
 findings:
-  critical: 1
+  critical: 2
   warning: 4
   info: 3
-  total: 8
+  total: 9
 status: issues_found
 ---
 
 # Phase 130: Code Review Report
 
-**Reviewed:** 2026-05-25T00:00:00Z
+**Reviewed:** 2026-05-25
 **Depth:** standard
-**Files Reviewed:** 13
+**Files Reviewed:** 12
 **Status:** issues_found
 
 ## Summary
 
-This phase delivers provider-honest capability declarations, the Fake-lane full-journey dunning
-proof, example-host wiring for the `accrue_dunning` Oban queue, and two CI gate scripts. The
-documentation and test files are largely well-structured and the capability convergence/divergence
-model (local-identical vs. per-provider) is correctly expressed in `capabilities.ex`.
+Phase 130 delivers provider-honest capability declarations across three processor adapters, the
+dunning guide, a Fake-lane full-journey test, example-host Oban queue wiring, and two CI
+shift-left scripts. The convergence/divergence taxonomy in `capabilities.ex` is internally
+consistent and well-documented. The migration is minimal and correct. The test structure follows
+established project patterns and `async: false` is correctly applied.
 
-One blocker was found: a double telemetry emission on the exhaustion path that will cause
-double-counting in every production telemetry reporter. Four warnings cover misleading capability
-declarations, a floating-point amount conversion inconsistency, a loose drain assertion in the host
-wiring test, and a redundant assertion that reads as stronger than it is. Three info items flag
-dead telemetry code, an unused/misleading `smart_retry_alignment: true` flag on Fake, and a
-migration comment that references the wrong parent migration file.
+Two blockers were found. The most significant is that `Fake.capabilities/0` reports
+`smart_retry_alignment: true`, which is the same boolean value as the Stripe adapter and implies
+the Fake has an adaptive payment-retry overlay — the opposite of the documented "testing/local-only"
+label. The second blocker is a struct dot-access crash in `Braintree.translate_customer_payment_methods/1`
+that will raise `KeyError` at runtime when Braintree cards are plain maps rather than Braintree
+library structs. Four warnings address floating-point money arithmetic, a missing `translate_resource`
+clause in the Stripe adapter, a hardcoded webhook secret in test config, and non-unique telemetry
+handler names in the journey test. Three info items flag a duplicate prefix on the Fake, a
+tagline imprecision in the dunning guide, and a script inconsistency between the two CI verifiers.
+
+---
 
 ## Critical Issues
 
-### CR-01: Double telemetry emission on dunning exhaustion path causes metric double-counting
+### CR-01: `Fake.capabilities/0` reports `smart_retry_alignment: true` — misrepresents the Fake as having adaptive retries
 
-**File:** `accrue/lib/accrue/webhook/default_handler.ex:770-797`
+**File:** `accrue/lib/accrue/processor/fake.ex:240`
 
-**Issue:** `maybe_emit_dunning_exhaustion/2` fires two separate telemetry events for every single
-subscription exhaustion:
-
-1. `[:accrue, :ops, :dunning_exhaustion]` via a raw `:telemetry.execute/3` call (line ~771).
-2. `[:accrue, :ops, :dunning_exhausted]` via `Accrue.Telemetry.Ops.emit(:dunning_exhausted, ...)`
-   (line ~796).
-
-These are two **different event names** for the same logical occurrence. `telemetry/metrics.ex`
-registers counters for both:
+**Issue:** `Fake.capabilities/0` returns:
 
 ```elixir
-counter("accrue.ops.dunning_exhaustion.count", tags: [:source])  # old, line ~72
-counter("accrue.ops.dunning_exhausted.count", tags: [:source])   # DUN-08 canonical, line ~97
+dunning: %{campaign: true, smart_retry_alignment: true}
 ```
 
-Any `TelemetryMetrics` reporter attached to the default metrics will increment BOTH counters on
-every exhaustion transition. SRE dashboards, alerts, and the `recovered_vs_lost/1` counter
-commentary all assume a single `dunning.exhausted` event per exhaustion. The double fire means
-the `dunning_exhaustion` metric is orphaned noise AND the `dunning_exhausted` metric is correct —
-but together they produce double the signal, making any rate-based alert fire at twice the actual
-rate if both metrics are subscribed.
+The Fake has no adaptive payment-retry overlay. Its documented role for the `smart_retry_alignment`
+row is `"testing/local-only"` (the Fake is the proof lane for campaign step sequencing, not smart
+retries). However `true` as a raw boolean capability value means any caller using
+`Capabilities.supports?(fake_caps, [:dunning, :smart_retry_alignment])` returns `true`, implying
+the Fake implements native Smart Retries.
 
-The `[:accrue, :ops, :dunning_exhaustion]` call appears to be a leftover from a pre-DUN-08
-implementation. `Accrue.Telemetry.Ops` docs list `[:accrue, :ops, :dunning_exhaustion]` as the
-canonical name but the DUN-08 implementation renamed it to `dunning_exhausted` via `Ops.emit`.
+Cross-adapter comparison shows the error clearly:
 
-**Fix:** Remove the raw `:telemetry.execute` call on `[:accrue, :ops, :dunning_exhaustion]` and
-remove the corresponding `counter("accrue.ops.dunning_exhaustion.count", ...)` metric registration
-from `telemetry/metrics.ex`. Then update `telemetry/ops.ex` to list `[:accrue, :ops, :dunning_exhausted]`
-in the canonical docs (replacing `dunning_exhaustion`).
+- `Braintree.capabilities/0` line 44: `dunning: %{campaign: true, smart_retry_alignment: false}` — correct (Braintree has no smart retries)
+- `Stripe.capabilities/0` line 99: `dunning: %{campaign: true, smart_retry_alignment: true}` — correct (Stripe genuinely has Smart Retries)
+- `Fake.capabilities/0` line 240: `dunning: %{campaign: true, smart_retry_alignment: true}` — wrong (same value as Stripe despite having no adaptive retries)
+
+The label mirror test in `dunning_full_journey_test.exs` at line 248 tests
+`Capabilities.provider_support_label(:fake, [:dunning, :smart_retry_alignment])` which reads
+directly from the `@provider_support_labels` module attribute — it passes regardless of this bug.
+The capability boolean is what `Capabilities.supports?/2` and `Capabilities.first_party_supported?/2`
+operate on, so any future consumer checking whether the Fake supports smart_retry_alignment
+receives an incorrect affirmative.
+
+**Fix:**
+```elixir
+# fake.ex line 240
+dunning: %{campaign: true, smart_retry_alignment: false}
+```
+
+---
+
+### CR-02: Dot-access crash in `Braintree.translate_customer_payment_methods/1` when cards are plain maps
+
+**File:** `accrue/lib/accrue/processor/braintree.ex:877`
+
+**Issue:** Line 877 accesses `card.default` and `card.token` using Elixir struct dot-notation:
 
 ```elixir
-# REMOVE these lines from maybe_emit_dunning_exhaustion/2:
-:telemetry.execute(
-  [:accrue, :ops, :dunning_exhaustion],   # DELETE
-  %{count: 1},
-  %{...}
-)
+|> Map.put(:default, card.default || card.token == default_token)
+```
 
-# REMOVE from telemetry/metrics.ex:
-counter("accrue.ops.dunning_exhaustion.count", tags: [:source])   # DELETE
+Dot-notation access on a plain map raises `KeyError` at runtime. The `cards` list comes from
+`Map.get(customer, :credit_cards) || Map.get(customer, :payment_methods) || []` (lines 869-872).
+When cards arrive as plain maps (e.g., from a custom gateway implementation, partial fixture, or
+future SDK version that returns maps instead of structs), this line crashes. The exception is not
+caught — `list_payment_methods/2` returns `{:error, …}` only when the gateway call fails; this
+crash propagates uncaught and is not translated to an `Accrue.APIError`.
 
-# KEEP (this is the canonical DUN-08 event):
-Accrue.Telemetry.Ops.emit(:dunning_exhausted, %{count: 1}, %{...})
-counter("accrue.ops.dunning_exhausted.count", tags: [:source])
+The inconsistency is internal: `translate_payment_method/1` at line 897 uses `Map.get/2`
+throughout, which is safe for both structs and maps. Line 877 accesses the raw card *before*
+calling `translate_payment_method/1`, using the unsafe dot form. The correct pattern is to use
+`Map.get` for both the `:default` and `:token` fields:
+
+**Fix:**
+```elixir
+# braintree.ex lines 873-879 — replace dot-access with Map.get
+cards
+|> Enum.map(fn card ->
+  raw_default = Map.get(card, :default) || Map.get(card, "default") || false
+  token = Map.get(card, :token) || Map.get(card, "token")
+  card
+  |> translate_payment_method()
+  |> Map.put(:default, raw_default || token == default_token)
+end)
 ```
 
 ---
 
 ## Warnings
 
-### WR-01: Fake `payment_method` capabilities map understates what the adapter actually implements
+### WR-01: Floating-point arithmetic for Braintree money amounts introduces precision risk
 
-**File:** `accrue/lib/accrue/processor/fake.ex:223`
+**File:** `accrue/lib/accrue/processor/braintree.ex:312` and `916-917`
 
-**Issue:** The Fake capabilities declaration is:
+**Issue:** Both `create_refund/2` (line 312) and `money_string/1` (lines 916-917) convert
+minor-unit integer amounts to decimal strings via IEEE 754 float division:
 
 ```elixir
-payment_method: %{vault_acquisition: true, list: true},
+# line 312 — inline in create_refund
+a when is_integer(a) -> :erlang.float_to_binary(a / 100.0, [{:decimals, 2}])
+
+# lines 916-917 — money_string/1
+defp money_string(amount_minor) when is_integer(amount_minor) do
+  :erlang.float_to_binary(amount_minor / 100.0, [{:decimals, 2}])
+end
 ```
 
-However the Fake adapter fully implements `create_payment_method`, `retrieve_payment_method`,
-`attach_payment_method`, `detach_payment_method`, `update_payment_method`, and
-`set_default_payment_method`. `Capabilities.first_party_supported?(fake_caps, [:payment_method, :create])`
-returns `false` even though Fake silently executes the operation correctly. The mismatch means
-any guard that gates on capability before calling will incorrectly reject the Fake path.
+The same adapter already contains `minor_to_decimal_string/1` (lines 527-532) that uses
+`div/2` and `rem/2` — exact integer arithmetic that cannot lose precision. CLAUDE.md explicitly
+states: "Pin `:decimal` explicitly — money math correctness depends on it." Two competing
+implementations for the same operation create a correctness hazard: a developer who adds a new
+call site may use the float variant without realizing the safe variant already exists.
 
-Stripe has the same omission (`payment_method: %{vault_acquisition: true, list: true}`),
-while Braintree declares the full set. The support labels in `capabilities.ex` call
-`payment_method.create` "all first-party" but neither Fake nor Stripe capability maps reflect
-this in the boolean support fields.
-
-**Fix:** Add the missing boolean keys to both Fake and Stripe:
+**Fix:** Replace both float-path callers with the integer approach already in `minor_to_decimal_string/1`,
+or consolidate to a single `money_string/1` using integer arithmetic:
 
 ```elixir
-# fake.ex and stripe.ex
-payment_method: %{
-  vault_acquisition: true,
-  create: true,
-  list: true,
-  update: true,
-  delete: true,
-  set_default: true
-},
-```
-
----
-
-### WR-02: `Fake` capabilities declare `smart_retry_alignment: true`, semantically misleading
-
-**File:** `accrue/lib/accrue/processor/fake.ex:240`
-
-**Issue:** The Fake adapter declares:
-
-```elixir
-dunning: %{campaign: true, smart_retry_alignment: true}
-```
-
-The canonical `@provider_support_labels` in `capabilities.ex` gives Fake's
-`smart_retry_alignment` the label `"testing/local-only"`, meaning Fake is the proof lane — not
-that it actually implements adaptive smart retries. Stripe's `smart_retry_alignment: true` is
-accurate (Stripe genuinely has adaptive payment retries); Fake's `true` carries the same boolean
-but different semantics.
-
-Any code that calls `Capabilities.supports?(fake_caps, [:dunning, :smart_retry_alignment])`
-gets `true`, which reads as "this processor has smart retries" — incorrect for Fake. While no
-current code paths gate on this value at runtime (verified by grep), it creates a correctness
-hazard for future consumers of the capability map.
-
-**Fix:**
-
-```elixir
-# fake.ex: use false to reflect "no real smart-retry implementation"
-dunning: %{campaign: true, smart_retry_alignment: false}
-```
-
-Update `@provider_support_labels` if the Fake label should still be `"testing/local-only"` (it
-currently is, so the label stays; only the boolean changes). Alternatively, add a third value
-(e.g., `:testing_only`) to the capability map type to distinguish "test proof lane" from
-"unsupported". The simplest fix is `false`, matching the actual processor behavior.
-
----
-
-### WR-03: `money_string/1` and inline `amount_str` in `create_refund` use floating-point division where `minor_to_decimal_string/1` uses safe integer arithmetic
-
-**File:** `accrue/lib/accrue/processor/braintree.ex:310-315, 916-918`
-
-**Issue:** The adapter has two different strategies for converting minor-unit integers to decimal
-strings for Braintree's wire format:
-
-- `minor_to_decimal_string/1` (line 527–532): Uses `div/2` and `rem/2` — correct integer
-  arithmetic that is exact for all values.
-- `money_string/1` (line 916–918) and the inline `amount_str` in `create_refund` (line 310–315):
-  Both use `:erlang.float_to_binary(a / 100.0, [{:decimals, 2}])` — IEEE 754 float division
-  that can lose precision for large amounts.
-
-For currency values up to roughly USD 100,000, float division at 2-decimal precision is
-empirically safe. But the inconsistency means the two paths behave differently at the limit, and
-billing libraries should never depend on float rounding being consistent.
-
-**Fix:** Replace both float paths with the safe integer approach already in `minor_to_decimal_string/1`:
-
-```elixir
-# Use everywhere instead of float division:
-defp cents_to_string(amount_minor) when is_integer(amount_minor) and amount_minor >= 0 do
+defp money_string(amount_minor) when is_integer(amount_minor) and amount_minor >= 0 do
   dollars = div(amount_minor, 100)
   cents = amount_minor |> rem(100) |> Integer.to_string() |> String.pad_leading(2, "0")
   "#{dollars}.#{cents}"
 end
 ```
 
-Then replace all callers of `money_string/1` and the inline `amount_str` float logic with
-`cents_to_string/1` (or rename `minor_to_decimal_string` to be the single canonical function).
+---
+
+### WR-02: `Stripe.translate_resource/1` has no clause for `{:ok, plain_map}` — FunctionClauseError on non-struct responses
+
+**File:** `accrue/lib/accrue/processor/stripe.ex:911-912`
+
+**Issue:** `translate_resource/1` only matches a struct in the ok branch:
+
+```elixir
+defp translate_resource({:ok, %_{} = result}), do: {:ok, Map.from_struct(result)}
+defp translate_resource({:error, raw}), do: {:error, ErrorMapper.to_accrue_error(raw)}
+```
+
+If `LatticeStripe` ever returns `{:ok, %{}}` (a plain map — possible for list endpoints,
+delete-confirmation responses, or a future minor version change in the library), this function
+raises `FunctionClauseError` at the call site rather than propagating a structured error. Every
+public callback in `stripe.ex` pipes through `translate_resource/1`, so a non-struct ok response
+from any LatticeStripe module would be an unhandled exception rather than a graceful `{:error, …}`.
+
+**Fix:** Add a plain-map passthrough clause between the struct clause and the error clause:
+
+```elixir
+defp translate_resource({:ok, %_{} = result}), do: {:ok, Map.from_struct(result)}
+defp translate_resource({:ok, result}) when is_map(result), do: {:ok, result}
+defp translate_resource({:error, raw}), do: {:error, ErrorMapper.to_accrue_error(raw)}
+```
 
 ---
 
-### WR-04: Drain assertion in host wiring test is a lower-bound check that cannot distinguish correct-count from excess-count
+### WR-03: Hardcoded webhook signing secret in test config mismodels the correct runtime pattern
 
-**File:** `examples/accrue_host/test/accrue_host/dunning_wiring_test.exs:221,229`
+**File:** `examples/accrue_host/config/test.exs:26`
 
-**Issue:** Stage B uses `assert success_count >= 1` and `assert day5_success >= 1`. These pass
-even if 2, 3, or more jobs ran (e.g., due to queue pollution across tests). This can mask
-situations where duplicate DunningStep jobs were enqueued, making the campaign fire more steps
-than configured. The Stage A test (line 202) correctly asserts `length(jobs) == 1`.
-
-**Fix:**
+**Issue:**
 
 ```elixir
-# Line 221: exact count, not lower bound
-assert success_count == 1
+webhook_signing_secrets: %{stripe: "whsec_test_host"},
+```
 
-# Line 229: exact count for the day-5 step
-assert day5_success == 1
+CLAUDE.md security requirements state: "Webhook signature verification mandatory and
+non-bypassable." Hardcoding a webhook signing secret in a checked-in test config — even a
+placeholder — establishes a visual pattern that a host developer may replicate in
+`config/runtime.exs`, inadvertently bypassing the security requirement by using a static value
+instead of `System.fetch_env!/1`. The example app is the primary reference for how hosts should
+wire Accrue; the config files it ships should model correct patterns even for test-only values.
+
+**Fix:** Add a comment that explicitly marks this as a test placeholder and shows the correct
+production pattern:
+
+```elixir
+# test.exs — PLACEHOLDER ONLY. Production must use:
+#   webhook_signing_secrets: %{stripe: System.fetch_env!("STRIPE_WEBHOOK_SECRET")}
+webhook_signing_secrets: %{stripe: "whsec_test_host"},
+```
+
+---
+
+### WR-04: Telemetry handler names in `dunning_full_journey_test.exs` are static strings — duplicate-attach risk across retries or parallel CI
+
+**File:** `accrue/test/accrue/dunning/dunning_full_journey_test.exs:268-269`, `312`, `327`
+
+**Issue:** Handler names like `"journey-campaign-started"`, `"journey-step-sent-day0"`,
+`"journey-step-sent-day5"`, `"journey-step-sent-day12"` are static string literals. When
+`telemetry.attach/4` is called with a name that is already registered, it returns
+`{:error, :already_exists}`. The `attach_telemetry/2` helper asserts `:ok =` at line 204, so
+a duplicate name raises `MatchError` with a misleading message. This can happen if:
+
+1. The test process crashes mid-run without executing `on_exit` cleanup.
+2. A CI retry re-runs the test in the same beam (e.g., `--max-failures 1` with re-run).
+
+The test module uses `async: false`, which prevents intra-file concurrency, but the static names
+are still risky across retries because telemetry handler registrations are global and persist
+process lifetime.
+
+**Fix:** Make handler names unique per invocation:
+
+```elixir
+defp attach_telemetry(name, event) do
+  unique_name = "#{name}-#{System.unique_integer([:positive])}"
+  test_pid = self()
+  :ok = :telemetry.attach(
+    unique_name, event,
+    fn evt, meas, meta, _ -> send(test_pid, {:telemetry, evt, meas, meta}) end,
+    nil
+  )
+  ExUnit.Callbacks.on_exit(fn -> :telemetry.detach(unique_name) end)
+end
 ```
 
 ---
 
 ## Info
 
-### IN-01: Redundant `or` condition in full-journey test assertion is logically dead code
+### IN-01: `@setup_intent_prefix` and `@subscription_item_prefix` both resolve to `"si_fake_"` — identical prefix makes IDs ambiguous
 
-**File:** `accrue/test/accrue/dunning/dunning_full_journey_test.exs:343`
+**File:** `accrue/lib/accrue/processor/fake.ex:70,75`
 
 **Issue:**
 
 ```elixir
-assert remaining_jobs == [] or length(remaining_jobs) == 0,
-       "No further DunningStep jobs should be enqueued after the final step"
+@setup_intent_prefix   "si_fake_"        # line 70
+@subscription_item_prefix "si_fake_"     # line 75
 ```
 
-The two conditions are logically identical: a list is empty if and only if its length is 0.
-The `or` makes this assertion appear as two independent safety nets when it is actually one
-condition written twice. The recovery test at line 379 uses the simpler `assert remaining_jobs == []`.
+Both resource types share the prefix `"si_fake_"`. A setup intent with counter value 1 and a
+subscription item with counter value 1 both produce `"si_fake_00001"`. They use separate counter
+slots (`:setup_intent` and `:subscription_item`), but since these counters are not synchronized,
+the IDs will collide in practice (counter slots reset independently on `reset/0`). The module
+docstring at line 48 documents `si_fake_` only for setup intents, suggesting subscription items
+were added later without updating the prefix.
+
+**Fix:** Give subscription items a distinct prefix:
+
+```elixir
+@subscription_item_prefix "subi_fake_"
+```
+
+---
+
+### IN-02: Dunning guide tagline says "two per-provider retry stories" but there are three
+
+**File:** `accrue/guides/dunning.md:9`
+
+**Issue:** The tagline reads:
+
+> **Tagline:** one provider-independent email cadence, **two per-provider retry stories**,
+> zero processor calls on the campaign step path.
+
+There are three per-provider retry stories: Stripe (native Smart Retries), Braintree
+(unsupported / clock-driven only), and Fake (testing/local-only). The "two" is likely a
+holdover from before Braintree was added as a first-party adapter. The guide correctly documents
+all three providers in the per-provider breakdown section — the tagline is inconsistent with the
+body.
 
 **Fix:**
 
-```elixir
-assert remaining_jobs == [],
-       "No further DunningStep jobs should be enqueued after the final step"
+```markdown
+> **Tagline:** one provider-independent email cadence, three per-provider retry stories,
+> zero processor calls on the campaign step path.
 ```
 
 ---
 
-### IN-02: Orphaned `[:accrue, :ops, :dunning_exhaustion]` listed as canonical in `telemetry/ops.ex` docstring
+### IN-03: `verify_adoption_proof_matrix.sh` does not accept the `ROOT_DIR` override that `verify_processor_support_matrix.sh` does — sibling script inconsistency
 
-**File:** `accrue/lib/accrue/telemetry/ops.ex:13`
+**File:** `scripts/ci/verify_adoption_proof_matrix.sh:5` vs `scripts/ci/verify_processor_support_matrix.sh:5`
 
-**Issue:** The module docstring lists `[:accrue, :ops, :dunning_exhaustion]` as a canonical ops
-event. This name refers to the old (pre-DUN-08) event that will be removed as part of the CR-01
-fix. After CR-01 is applied, the list will reference a no-longer-emitted event while the actual
-DUN-08 canonical `[:accrue, :ops, :dunning_exhausted]` is absent from the list.
+**Issue:** `verify_processor_support_matrix.sh` line 5:
 
-**Fix:** Update `ops.ex` canonical event list to replace `dunning_exhaustion` with `dunning_exhausted`:
+```bash
+repo_root="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+```
 
-```elixir
-# REMOVE:
-[:accrue, :ops, :dunning_exhaustion]
-# ADD:
-[:accrue, :ops, :dunning_exhausted]
+`verify_adoption_proof_matrix.sh` line 5:
+
+```bash
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+```
+
+If CI runs these scripts with a `ROOT_DIR` environment variable override (e.g., from a matrix
+build in a non-standard working directory), `verify_adoption_proof_matrix.sh` silently ignores
+it and uses the wrong root. The two scripts are structural siblings that should behave the same
+way.
+
+**Fix:**
+
+```bash
+# verify_adoption_proof_matrix.sh line 5
+repo_root="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 ```
 
 ---
 
-### IN-03: Host migration comment references wrong parent migration file (the accrue library migration, not the host one)
-
-**File:** `examples/accrue_host/priv/repo/migrations/20260525120000_add_dunning_campaign_started_at_to_subscriptions.exs:14`
-
-**Issue:** The migration docstring says:
-
-> Nullable, forward-only, mirrors the sibling `dunning_sweep_attempted_at` column added in
-> `20260414130300_add_dunning_and_pause_columns_to_subscriptions`.
-
-That timestamp `20260414130300` refers to a migration in the `accrue` library's
-`priv/repo/migrations/` directory. The host copy of this migration is in
-`examples/accrue_host/priv/repo/migrations/` and the parallel host migration for the
-`dunning_sweep_attempted_at` column would have a different filename (if it exists). A developer
-reading the host migration and searching for `20260414130300` in the host migrations directory
-will not find it, creating confusion about which file added the sibling column in the host schema.
-
-**Fix:** Either reference the host-side migration timestamp/filename for the sibling column, or
-clarify the comment to indicate the source is in the `accrue` library's migrations:
-
-```elixir
-# Mirrors the sibling `dunning_sweep_attempted_at` column added in the
-# accrue library migration 20260414130300_add_dunning_and_pause_columns_to_subscriptions.
-```
-
----
-
-_Reviewed: 2026-05-25T00:00:00Z_
+_Reviewed: 2026-05-25_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
