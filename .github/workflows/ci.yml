@@ -52,6 +52,9 @@ jobs:
       - name: Entitlement gate path stays advisory-cache-free (ENT-10 D-04)
         run: bash scripts/ci/verify_entitlement_sync_isolation.sh
 
+      - name: Dunning core stays Chimeway-free (DUN-03 D-04)
+        run: bash scripts/ci/verify_dunning_chimeway_isolation.sh
+
       - name: v1.17 friction + north-star SSOT contract
         run: bash scripts/ci/verify_v1_17_friction_research_contract.sh
 
