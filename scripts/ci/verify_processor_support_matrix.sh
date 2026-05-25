@@ -62,6 +62,11 @@ require_substring "| entitlements.stripe_native_sync | out of slice | native (ad
 require_substring "behaves identically across Stripe, Braintree, and Fake" "entitlements identity prose"
 require_substring "zero processor calls" "entitlements zero-call prose"
 require_substring "local mapping remains the canonical default" "ENT-10 deferral honesty"
+require_substring "| dunning.campaign | local-identical | local-identical | local-identical | all first-party |" "dunning campaign convergence row"
+require_substring "| dunning.smart_retry_alignment | testing/local-only | native (Smart Retries) | unsupported (clock-driven only) |" "dunning smart-retry-alignment divergence row"
+require_substring "the campaign cadence behaves identically across Stripe, Braintree, and Fake" "dunning campaign convergence prose"
+require_substring "Braintree is not retry-aligned" "dunning braintree no-retry prose"
+require_substring "Stripe has adaptive Smart Retries" "dunning stripe smart-retries prose"
 if grep -Fq "| checkout.hosted_handoff | Local proof helper | Supported | No | Stripe-only |" "${matrix}"; then
   echo "verify_processor_support_matrix: stale Stripe-only checkout row still present" >&2
   exit 1
@@ -115,6 +120,16 @@ fi
 # WHOLE row, so a divergence token in the Fake, Stripe, OR Braintree column is caught.
 if grep -Eq '^\| entitlements\.local_mapping \|.*\b(native|unsupported|bounded)\b' "${matrix}"; then
   echo "verify_processor_support_matrix: entitlements.local_mapping convergence row sprouted a per-provider divergence label (broke the local-identical contract)" >&2
+  exit 1
+fi
+
+# NEGATIVE divergence guard: the `dunning.campaign` CONVERGENCE row must NEVER
+# carry a per-provider native/unsupported/bounded label — that would break the
+# local-identical convergence contract (the campaign cadence is Accrue-clock-driven,
+# zero processor calls). The `dunning.smart_retry_alignment` divergence row is exempt
+# by name (the guard only targets the `dunning.campaign` row specifically).
+if grep -Eq '^\| dunning\.campaign \|.*\b(native|unsupported|bounded)\b' "${matrix}"; then
+  echo "verify_processor_support_matrix: dunning.campaign convergence row sprouted a per-provider divergence label (broke the local-identical contract)" >&2
   exit 1
 fi
 
