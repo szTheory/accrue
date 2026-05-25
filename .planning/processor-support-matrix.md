@@ -59,6 +59,7 @@ The first official dual-provider promise is **gateway subscription core**:
 | entitlements.local_mapping | local-identical | local-identical | local-identical | all first-party |
 | entitlements.stripe_native_sync | out of slice | native (advisory) | unsupported | Stripe-native advisory (observational) |
 | dunning.campaign | local-identical | local-identical | local-identical | all first-party |
+| dunning.engine | built-in (Oban) | built-in (Oban) | built-in (Oban) | optional adapter (Chimeway v1.0.0) |
 | dunning.smart_retry_alignment | testing/local-only | native (Smart Retries) | unsupported (clock-driven only) | provider-divergent (see dunning guide) |
 
 The checkout and billing-portal rows stay visible because the public API shape is shared while the provider implementation stays honest: Stripe returns upstream hosted URLs, while Braintree returns mounted first-party local checkout and portal URLs through Accrue-owned local UI.
@@ -72,6 +73,8 @@ The Stripe-native Entitlements API is not wrapped by `lattice_stripe` 1.1, and *
 ## Dunning
 
 The `dunning.campaign` row is the matrix's second **convergence** row. the campaign cadence behaves identically across Stripe, Braintree, and Fake because `Accrue.Dunning.Campaign` drives step sequencing from `dunning_campaign_started_at`, `past_due_since`, and `Accrue.Clock` only — with **zero processor calls**. The campaign schedule, step ordering, and terminal exhaustion signal are all Accrue-clock-driven; no processor API is consulted during campaign progression. The identity is structural, not coincidental: the `Campaign.next_step/3` resolver takes no processor argument, so swapping `:processor` cannot change the campaign cadence. That is why every provider lane reads `local-identical` rather than per-provider divergence labels.
+
+The `dunning.engine` row records the **campaign engine choice**, which is **provider-independent**: the engine you select is orthogonal to the processor. All three provider lanes ship `built-in (Oban)` — the always-on `Accrue.Dunning.Engine.Oban` default. Chimeway is an **off-by-default opt-in adapter** (`Accrue.Integrations.Chimeway`, conditionally compiled), noted in the Public label. See the [Dunning guide](../accrue/guides/dunning.md#upgrading-to-chimeway-orchestration) for the install steps.
 
 The `dunning.smart_retry_alignment` row is a **divergence** row that exposes honest per-provider payment-retry behavior beneath the campaign cadence. Stripe has adaptive Smart Retries that may recover a payment autonomously before the next campaign step fires; those retries run under Stripe's own SMART_RETRIES schedule and can shorten the effective dunning journey for a Stripe subscription. Braintree is not retry-aligned: it has no smart-retry overlay, so Accrue's campaign cadence is the sole retry signal for a Braintree subscription. Fake is the deterministic proof lane: it exercises the full step sequencer locally and in CI with no network access and no external retry signal, making it the merge-blocking proof surface for campaign correctness.
 
