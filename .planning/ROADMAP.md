@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 128: Campaign Engine Foundation + Idempotency Must-Fix** - Config-driven durable Oban dunning campaign with default journey, the `:invoice_payment_failed` email de-dup fix, and cancel-on-recovery campaign keying (completed 2026-05-24)
 - [x] **Phase 129: Customer + Operator Surfaces + Observability** - Portal "update your card" recovery banner, read-only admin dunning-state visibility, and dunning ledger events + telemetry incl. a recovered-vs-lost signal (completed 2026-05-25)
 - [x] **Phase 130: Provider Honesty + Fake-Lane Proof + Example-Host Wiring** - Provider-honest dunning docs with a merge-blocking drift check, the deterministic clock-advanceable Fake-lane journey gate, and the default campaign wired into `examples/accrue_host` (completed 2026-05-25)
-- [ ] **Phase 131: Optional Chimeway Engine Adapter (isolated, off by default)** - `Accrue.Dunning.Engine` behaviour + conditionally-compiled off-by-default `Accrue.Integrations.Chimeway` adapter so a host can swap engines without changing call sites
+- [x] **Phase 131: Optional Chimeway Engine Adapter (isolated, off by default)** - `Accrue.Dunning.Engine` behaviour + conditionally-compiled off-by-default `Accrue.Integrations.Chimeway` adapter so a host can swap engines without changing call sites (completed 2026-05-25)
 - [ ] **Phase 132: Entitlements Adopter-Proof Demo** - Entitlement-gated route/page in `examples/accrue_host` exercising the v1.39 gate API/guards end-to-end, with a matching adoption-proof-matrix row
 
 ## Phase Details
@@ -133,8 +133,8 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 131-05-PLAN.md — `verify_dunning_chimeway_isolation.sh` merge gate + CI wiring (DUN-03)
-- [ ] 131-06-PLAN.md — `guides/dunning.md` opt-in Chimeway section + matrix row + `verify_package_docs.sh` needles + test fixture coupling (DUN-03)
+- [x] 131-05-PLAN.md — `verify_dunning_chimeway_isolation.sh` merge gate + CI wiring (DUN-03)
+- [x] 131-06-PLAN.md — `guides/dunning.md` opt-in Chimeway section + matrix row + `verify_package_docs.sh` needles + test fixture coupling (DUN-03)
 
 > **Carried-forward open question for plan context (verify before coding the adapter):** Chimeway's guide and code disagree on the public surface — the guide uses `Chimeway.Workflow` / `Chimeway.Trigger.trigger`, while the code's public entry is `Chimeway.trigger/3` + a `Chimeway.Notifier` behaviour (`workflow/2` callback) + `Chimeway.Signal.track/4`. Pin to and target the published 1.0.0 API; note the local repo's `mix.exs` version string is stale at `0.1.0` while Hex is at `1.0.0` (2026-05-08).
 
@@ -161,7 +161,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete    | 2026-05-25 |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 4/4 | Complete    | 2026-05-25 |
-| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 4/6 | In Progress|  |
+| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 6/6 | Complete   | 2026-05-25 |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |
 
 ## Notes
