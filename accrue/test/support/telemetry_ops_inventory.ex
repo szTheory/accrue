@@ -23,7 +23,11 @@ defmodule Accrue.TestSupport.TelemetryOpsInventory do
       [:accrue, :ops, :connect_account_deauthorized],
       [:accrue, :ops, :connect_capability_lost],
       [:accrue, :ops, :connect_payout_failed],
-      [:accrue, :ops, :entitlement_summary_truncated]
+      [:accrue, :ops, :entitlement_summary_truncated],
+      [:accrue, :ops, :dunning_campaign_started],
+      [:accrue, :ops, :dunning_step_sent],
+      [:accrue, :ops, :dunning_recovered],
+      [:accrue, :ops, :dunning_exhausted]
     ]
   end
 

@@ -85,7 +85,16 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
         counter("accrue.ops.connect_account_deauthorized.count"),
         counter("accrue.ops.connect_capability_lost.count", tags: [:capability]),
         counter("accrue.ops.connect_payout_failed.count"),
-        counter("accrue.ops.entitlement_summary_truncated.count")
+        counter("accrue.ops.entitlement_summary_truncated.count"),
+        # --- Dunning campaign lifecycle (DUN-08) ---
+        # campaign_started + step_sent declare NO tags: never tag the
+        # high-cardinality subscription_id, and campaign_started has no source
+        # enum (T-129-02 cardinality guard). recovered + exhausted tag only
+        # the 3-value :source enum.
+        counter("accrue.ops.dunning_campaign_started.count"),
+        counter("accrue.ops.dunning_step_sent.count"),
+        counter("accrue.ops.dunning_recovered.count", tags: [:source]),
+        counter("accrue.ops.dunning_exhausted.count", tags: [:source])
       ]
     end
   end

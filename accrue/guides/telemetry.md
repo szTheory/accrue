@@ -87,6 +87,10 @@ they correspond to — they are idempotent under webhook replay via the
 |-------|-------------|----------|---------------|
 | `[:accrue, :ops, :revenue_loss]` | `count`, `amount_minor`, `currency` | `subject_type`, `subject_id`, `reason` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :dunning_exhaustion]` | `count` | `subscription_id`, `from_status`, `to_status`, `source` (`:accrue_sweeper \| :stripe_native \| :manual`) | `Accrue.Webhook.DefaultHandler` |
+| `[:accrue, :ops, :dunning_campaign_started]` | `count` | `subscription_id`, `step_count` (no `source`) | `Accrue.Webhook.DefaultHandler` |
+| `[:accrue, :ops, :dunning_step_sent]` | `count` | `subscription_id`, `step_key`, `step_index` | `Accrue.Workers.DunningStep` |
+| `[:accrue, :ops, :dunning_recovered]` | `count` | `subscription_id`, `source` (`:accrue_sweeper \| :stripe_native \| :manual`) | `Accrue.Webhook.DefaultHandler` |
+| `[:accrue, :ops, :dunning_exhausted]` | `count` | `subscription_id`, `to_status`, `source` (`:accrue_sweeper \| :stripe_native \| :manual`) | `Accrue.Webhook.DefaultHandler` |
 | `[:accrue, :ops, :discount_mapping_invalid]` | `count` | `mapping_id`, `code`, `discount_id`, `reason`, `operation_id` | `Accrue.Billing.SubscriptionActions` |
 | `[:accrue, :ops, :incomplete_expired]` | `count` | `subscription_id` | `Accrue.Telemetry.Ops` |
 | `[:accrue, :ops, :charge_failed]` | `count` | `charge_id`, `customer_id`, `failure_code` | `Accrue.Telemetry.Ops` |
@@ -444,6 +448,10 @@ For **ordered triage**, default **Oban** queue placement (anchor **`#oban-queue-
 | `[:accrue, :ops, :metered_charge_awaiting_payment_method]` | Repair the customer’s default payment method, then replay the same renewal window rather than creating a new charge unit. |
 | `[:accrue, :ops, :metered_charge_failed_exhausted]` | Treat the renewal as terminal until an operator decides whether to retry, refund, or write off the local invoice. |
 | `[:accrue, :ops, :dunning_exhaustion]` | Confirm subscription status transition; notify customer success; verify payment method in Stripe. |
+| `[:accrue, :ops, :dunning_campaign_started]` | A dunning campaign began (first `:past_due` failure). Confirm the day-0 step enqueued; no action needed unless campaign_started rate spikes (payment-processor incident). |
+| `[:accrue, :ops, :dunning_step_sent]` | A dunning step email was delivered. Use `step_key` + `step_index` to confirm cadence progression; investigate if a `final_notice` rate climbs (recovery is failing upstream). |
+| `[:accrue, :ops, :dunning_recovered]` | The subscription recovered out of dunning. Confirm the payment method was updated; the campaign steps are auto-cancelled — no manual cleanup needed. |
+| `[:accrue, :ops, :dunning_exhausted]` | Confirm the terminal transition (`to_status` `:unpaid`/`:canceled`) and notify customer success; this is the canonical recovered-vs-lost loss signal. |
 | `[:accrue, :ops, :revenue_loss]` | Triage `reason` + `subject_*`; fraud vs refund policy; reconcile with Stripe balance transactions; (Oban defaults: [queue topology](operator-runbooks.md#oban-queue-topology)). |
 | `[:accrue, :ops, :charge_failed]` | Map `failure_code`; prompt card update or alternative PM; check Radar rules in Stripe if unexpected. |
 | `[:accrue, :ops, :incomplete_expired]` | Incomplete checkout/subscription expired; clean up local rows; marketing follow-up if abandoned cart. |
