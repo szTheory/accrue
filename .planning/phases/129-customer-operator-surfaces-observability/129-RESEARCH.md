@@ -412,21 +412,26 @@ step_index = Enum.find_index(steps, fn s -> Atom.to_string(Keyword.fetch!(s, :ke
 | A4 | Stripe/other-processor CTA target = the portal `/payment-methods` list (vs a Stripe-hosted update-PM URL) | Pattern 4, Pitfall 5 | MEDIUM — CONTEXT leaves "the precise per-provider CTA destinations (Stripe update-PM path)" to planner discretion. The portal has no Stripe-native add-PM LiveView; `/payment-methods` (list) is the safe in-portal default. Confirm intended Stripe destination. |
 | A5 | Emitting via `Accrue.Telemetry.Ops.emit/3` (vs raw `:telemetry.execute`) is acceptable to the drift gate | Pattern 1 | LOW — verified the contract scanner detects `Ops.emit(:atom, …)` (regex at `ops_event_contract_test.exs:74`). Both forms pass. |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All three were CONTEXT `## Claude's Discretion` items and are concretely settled in the Phase 129 plans (recorded here for the paper trail).
 
 1. **Stripe/non-Braintree CTA destination (A4).**
    - What we know: `/payment-methods/new` is Braintree-only; `/payment-methods` (list) exists for all providers; the email's `@update_pm_url` is host-supplied, not computed in core.
    - What's unclear: whether the intended Stripe target is the in-portal list, a Stripe Billing Portal session URL, or a host-supplied URL (as the emails use).
    - Recommendation: default the banner CTA to the in-portal `/payment-methods` for non-Braintree, mirroring how the emails accept a host-supplied `update_pm_url`; flag for confirmation in plan-checker. (Discretion item per CONTEXT.)
+   - **RESOLVED:** Plan 129-03 dispatches on `subscription.processor` — Braintree → `/payment-methods/new`, non-Braintree (Stripe/other) → in-portal `/payment-methods` list. The email keeps its host-supplied `@update_pm_url`, so banner and email share the CTA *label* verbatim while destinations may differ (acceptable per A4).
 
 2. **`record_multi/3` vs `record/1` per emit site (D-decision, discretion).**
    - What we know: `campaign_started` (in `maybe_start_dunning_campaign`, a sibling `update_all` not inside the reducer's `Repo.transact`), `recovered`/`exhausted` (inside the reducer `Repo.transact`), `step_sent` (in the Oban worker, outside any transaction — `deliver_step/4` is explicitly kept outside `Repo.transact`).
    - What's unclear: nothing blocking — local atomicity dictates each.
    - Recommendation: `recovered`/`exhausted` → `record_multi/3` (already in `Repo.transact`); `step_sent` → `record/1` (post-deliver, no transaction); `campaign_started` → `record/1` (the elector is a standalone `update_all`, not the reducer multi — or fold the ledger write into that branch's own transaction). Planner decides per D-02's "where the emission is inside an existing Multi/transaction."
+   - **RESOLVED:** Plan 129-01 uses `record_multi/3` for `recovered`/`exhausted` (inside the reducer `Repo.transact`) and `record/1` for `step_sent` and `campaign_started` (outside any transaction), exactly per the recommendation.
 
 3. **`step_sent` telemetry cardinality.**
    - What we know: D-01 metadata is `{subscription_id, step_key, step_index}`. `subscription_id` is high-cardinality (never a tag); `step_key` is bounded (`:reminder`/`:action_required`/`:final_notice`).
    - Recommendation: `counter("accrue.ops.dunning_step_sent.count")` with no `tags:` (or `tags: [:step_key]` if per-step breakdown is wanted). Avoid tagging `subscription_id`.
+   - **RESOLVED:** Plan 129-01 Task 2 declares `counter("accrue.ops.dunning_step_sent.count")` with no `tags:`; `subscription_id` is never tagged.
 
 ## Environment Availability
 

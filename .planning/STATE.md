@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
-status: verifying
-stopped_at: Phase 128 context gathered
-last_updated: "2026-05-24T18:48:42.148Z"
-last_activity: 2026-05-24
+status: executing
+stopped_at: Phase 129 UI-SPEC approved
+last_updated: "2026-05-25T06:00:50.209Z"
+last_activity: 2026-05-25 -- Phase 129 planning complete
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 6
+  total_plans: 10
   completed_plans: 6
   percent: 20
 ---
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 128 — campaign-engine-foundation-idempotency-must-fix
+**Current focus:** Phase 129 — customer-operator-surfaces-observability
 
 ## Current Position
 
 Phase: 129
 Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-05-24
+Status: Ready to execute
+Last activity: 2026-05-25 -- Phase 129 planning complete
 
 ## Milestone Progress
 
@@ -144,9 +144,9 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-24T18:13:50.866Z
-Stopped at: Phase 128 context gathered
-Resume file: None
+Last session: 2026-05-25T05:41:03.490Z
+Stopped at: Phase 129 UI-SPEC approved
+Resume file: .planning/phases/129-customer-operator-surfaces-observability/129-UI-SPEC.md
 
 ## Operator Next Steps
 

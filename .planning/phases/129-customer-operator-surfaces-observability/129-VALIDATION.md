@@ -63,7 +63,7 @@ created: 2026-05-25
 ## Wave 0 Requirements
 
 - [ ] Verify `accrue/test/accrue/workers/dunning_step_test.exs` exists; if not, create it for the `step_sent` emit assertion (the worker may currently be exercised only via webhook integration tests).
-- [ ] Add a stable `data-role` attribute to the new portal banner `<section>` (e.g. `data-role="subscription-dunning-banner"`) and the admin dunning `<article>`/`ax-card` (e.g. `data-role="subscription-dunning-state"`) so render tests can `has_element?` them deterministically (mirrors the existing `data-role` convention in admin LiveView).
+- [ ] Add a stable `data-role` attribute to the new portal banner `<section>` (`data-role="subscription-recovery-banner"`, matching the PLAN/UI-SPEC) and the admin dunning `<article>`/`ax-card` (e.g. `data-role="subscription-dunning-state"`) so render tests can `has_element?` them deterministically (mirrors the existing `data-role` convention in admin LiveView).
 - [ ] Property test (extend `dunning_campaign_property_test.exs` or `billing/dunning_test.exs`): recovered-vs-lost fold never counts `terminal_action_requested`, and respects `since:`/`until:` windows (`stream_data` already a dev/test dep).
 - [ ] Confirm `metrics_ops_parity_test` + `ops_event_contract_test` are in the default `mix test` run (they are — both under `test/accrue/telemetry/`).
 
