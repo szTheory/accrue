@@ -874,7 +874,7 @@ defmodule Accrue.Webhook.DefaultHandler do
           # Stash the post-commit bulk-cancel instruction for the dispatch
           # site to run AFTER this transaction commits. Tightly scoped to
           # this synchronous webhook call; consumed-and-deleted once.
-          Process.put(:accrue_dunning_cancel, {updated.id, iso_anchor})
+          Process.put(:accrue_dunning_cancel, {updated, iso_anchor})
 
           if recovery? do
             Accrue.Telemetry.Ops.emit(:dunning_recovered, %{count: 1}, %{
@@ -910,8 +910,8 @@ defmodule Accrue.Webhook.DefaultHandler do
   # committed and the per-step cancel-guard backstops any uncancelled step.
   defp run_post_commit_dunning_cancel({:ok, %Subscription{}}) do
     case Process.delete(:accrue_dunning_cancel) do
-      {sub_id, iso_anchor} when is_binary(sub_id) and is_binary(iso_anchor) ->
-        cancel_dunning_steps(sub_id, iso_anchor)
+      {%Subscription{} = sub, iso_anchor} when is_binary(iso_anchor) ->
+        Accrue.Config.dunning_engine().cancel_campaign(sub, iso_anchor, [])
 
       _ ->
         :ok
@@ -924,27 +924,6 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp run_post_commit_dunning_cancel(_result) do
     _ = Process.delete(:accrue_dunning_cancel)
     :ok
-  end
-
-  defp cancel_dunning_steps(sub_id, iso_anchor) do
-    import Ecto.Query, only: [from: 2]
-
-    from(j in Oban.Job,
-      where: j.worker == "Accrue.Workers.DunningStep",
-      where: fragment("? ->> 'subscription_id' = ?", j.args, ^sub_id),
-      where: fragment("? ->> 'campaign_started_at' = ?", j.args, ^iso_anchor)
-    )
-    |> Oban.cancel_all_jobs()
-
-    :ok
-  rescue
-    e ->
-      # The anchor-clear already committed; the per-step cancel-guard
-      # (D-11) backstops any step we failed to cancel. Log the failure
-      # without undoing the committed recovery (no new telemetry/ledger —
-      # that family is Phase 129).
-      Logger.warning("dunning cancel-on-recovery bulk cancel failed: #{inspect(e)}")
-      :ok
   end
 
   defp dunning_source(nil), do: :stripe_native
@@ -1203,32 +1182,17 @@ defmodule Accrue.Webhook.DefaultHandler do
         |> Repo.update_all(set: [dunning_campaign_started_at: now_usec])
 
       case count do
-        1 -> enqueue_day_zero_step(sub, now_usec, canonical)
-        _ -> :ok
+        1 ->
+          emit_campaign_started(sub)
+          opts = [invoice_id: get(canonical, :id)]
+          Accrue.Config.dunning_engine().start_campaign(sub, now_usec, opts)
+
+        _ ->
+          :ok
       end
     end
 
     :ok
-  end
-
-  # Winner of the first-transition election enqueues exactly one day-0 step
-  # (the `after_days: 0` step from the configured cadence) carrying the
-  # campaign anchor as an ISO8601 string. The D-16 `unique` (keyed on
-  # subscription_id + step_key + campaign_started_at) on the worker's
-  # enqueue helper backstops the atomic elector.
-  defp enqueue_day_zero_step(%Subscription{} = sub, %DateTime{} = anchor, canonical) do
-    case day_zero_step_key() do
-      nil ->
-        :ok
-
-      step_key ->
-        emit_campaign_started(sub)
-
-        Accrue.Workers.DunningStep.enqueue_step(sub.id, step_key, anchor, %{
-          customer_id: sub.customer_id,
-          invoice_id: get(canonical, :id)
-        })
-    end
   end
 
   # DUN-08 observability: the first nil→past_due elector winner records a
@@ -1258,12 +1222,6 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   # The day-0 step is the configured step at `after_days: 0`.
-  defp day_zero_step_key do
-    Enum.find_value(Accrue.Config.dunning_campaign_steps(), fn step ->
-      if Keyword.get(step, :after_days) == 0, do: Keyword.get(step, :key)
-    end)
-  end
-
   defp upsert_invoice(nil, canonical, attrs) do
     # CR-03: Tolerate webhook-first-for-unknown-customer.
     customer_stripe_id = get(canonical, :customer)
