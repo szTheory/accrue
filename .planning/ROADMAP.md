@@ -94,7 +94,12 @@ Plans:
   3. A deterministic, clock-advanceable Fake-lane test proves the full journey — start → step progression → cancel-on-recovery → exhaustion — and runs as a merge-blocking gate (using `Accrue.Clock.utc_now/0`).
   4. The default campaign is wired into `examples/accrue_host` so failed-payment recovery is demonstrated end-to-end, closing the dormant-cron gap (recovery is no longer invisible until an adopter reads a guide and adds a crontab).
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+- [ ] 130-01-PLAN.md — DUN-09 SC#2: `dunning:` capability group (campaign convergence + smart_retry_alignment divergence) in `Capabilities` + 3 adapters + support matrix rows/prose + drift-gate pins & negative convergence guard
+- [ ] 130-02-PLAN.md — DUN-09 SC#1: provider-honest `guides/dunning.md` (per-provider story, over-email warning, Test Clocks note, lifecycle cross-ref) + light guide-side drift pins
+- [ ] 130-03-PLAN.md — DUN-10 SC#3: deterministic full-journey Fake-lane test through the real `DefaultHandler` (start → progression → recovery → exhaustion) + observability assertions + D-09 label mirror
+- [ ] 130-04-PLAN.md — DUN-10 SC#4: example-host Oban wiring (`accrue_dunning` queue + Cron sweeper) + Fake-backed host wiring proof + adoption-proof-matrix row & verifier needle
 
 > **Carried-forward note for plan context:** also surface the over-emailing risk — if a host has Stripe Dashboard dunning emails enabled, Accrue's cadence can double-email; ship the default opt-out posture with a documented warning (open question #2).
 
