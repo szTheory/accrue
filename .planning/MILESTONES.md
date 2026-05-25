@@ -1,5 +1,26 @@
 # Milestones
 
+## v1.40 Dunning depth / notification journeys (Shipped: 2026-05-25)
+
+**Phases completed:** 5 phases (128–132), 23 plans
+**Timeline:** 2026-05-24 → 2026-05-25 (2 days)
+
+**Delivered:** The headline JTBD — a multi-step configurable dunning journey (reminder → wait → escalate → final notice) with a customer recovery surface, admin visibility, and provider-honest + Fake-proven behavior, without new heavy dependencies. Included an optional, isolated Chimeway engine adapter and completed the v1.39 adopter-proof gap by demonstrating entitlements gating in `examples/accrue_host`.
+
+**Milestone audit:** `passed` — definition of done **ACHIEVED**, 11/11 requirements satisfied, all 5 phases verified `passed`, cross-phase integration 10/10, all 3 E2E flows complete. See `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
+
+**Key accomplishments:**
+
+- **Phase 128:** Delivered a durable Oban campaign engine for dunning cadences, solved the `:invoice_payment_failed` idempotency must-fix, and established cancel-on-recovery behavior.
+- **Phase 129:** Built customer portal banner for recovery, admin dunning state components, and implemented comprehensive observability with dunning ledger events and a `recovered_vs_lost` counter.
+- **Phase 130:** Updated `guides/dunning.md` for provider honesty, shipped deterministic Fake-lane merge-blocking proof, and wired the default campaign into `examples/accrue_host`.
+- **Phase 131:** Standardized `Accrue.Dunning.Engine` behaviour, and shipped the off-by-default optional Chimeway engine adapter for multi-channel expansion.
+- **Phase 132:** Implemented an entitlement-gated route/page in `examples/accrue_host` and proved the adopter-proof matrix rows for Entitlements.
+
+**Next after ship:** `v1.40` complete; ready for `v1.41` roadmap or release process.
+
+---
+
 ## v1.39 Entitlements / Plan-Gating (Shipped: 2026-05-24)
 
 **Phases completed:** 5 phases (123–127), 21 plans, 53 tasks

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
-status: executing
-stopped_at: Phase 131 complete — Phase 132 not yet started
-last_updated: "2026-05-25T18:50:00.000Z"
-last_activity: 2026-05-25 -- Phase 131 complete (6/6 plans, all DUN-03 SCs met)
+status: milestone_complete
+stopped_at: Milestone v1.40 complete
+last_updated: "2026-05-25T18:55:00.000Z"
+last_activity: 2026-05-25 -- Milestone v1.40 closed
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 20
-  completed_plans: 20
-  percent: 80
+  completed_phases: 5
+  total_plans: 23
+  completed_plans: 23
+  percent: 100
 ---
 
 # Project State
@@ -22,18 +22,18 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 131 — optional-chimeway-engine-adapter-isolated-off-by-default
+**Current focus:** Next milestone planning
 
 ## Current Position
 
-Phase: 131 (optional-chimeway-engine-adapter-isolated-off-by-default) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 131
-Last activity: 2026-05-25 -- Phase 131 execution started
+Phase: N/A
+Plan: N/A
+Status: Milestone v1.40 Complete
+Last activity: 2026-05-25 -- v1.40 Milestone Audit created
 
 ## Milestone Progress
 
-**v1.40** (planning, opened **2026-05-24**): 5 phases (**128–132**), DUN-01..10 + PROOF-03 (11 requirements, 11/11 mapped). Multi-step dunning journey (campaign engine + idempotency must-fix → customer/operator surfaces + observability → provider honesty + Fake-lane proof + example-host wiring → optional Chimeway adapter, isolated → entitlements adopter-proof). Roadmap: [ROADMAP.md](ROADMAP.md); requirements: [REQUIREMENTS.md](REQUIREMENTS.md).
+**v1.40** (shipped & archived **2026-05-25**): 5 phases (**128–132**), DUN-01..10 + PROOF-03 (11 requirements, 11/11 mapped). Multi-step dunning journey (campaign engine + idempotency must-fix → customer/operator surfaces + observability → provider honesty + Fake-lane proof + example-host wiring → optional Chimeway adapter, isolated → entitlements adopter-proof). Roadmap: [ROADMAP.md](ROADMAP.md); requirements: [REQUIREMENTS.md](REQUIREMENTS.md); audit `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
 **v1.39** (shipped & archived **2026-05-24**): 5 phases (**123–127**), 21 plans, ENT-01..12 (12/12). Headline JTBD — fail-closed local-first plan/feature gating with no new tables and no Stripe dependency — plus the isolated off-by-default Stripe-native advisory sync. Milestone audit `tech_debt` (DoD achieved, zero blockers). Archives: [milestones/v1.39-ROADMAP.md](milestones/v1.39-ROADMAP.md), [milestones/v1.39-REQUIREMENTS.md](milestones/v1.39-REQUIREMENTS.md); audit `.planning/v1.39-v1.39-MILESTONE-AUDIT.md`; planning tag `v1.39`.
 
