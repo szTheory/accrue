@@ -909,6 +909,7 @@ defmodule Accrue.Processor.Stripe do
   @spec translate_resource({:ok, struct() | map()} | {:error, term()}) ::
           {:ok, map()} | {:error, Exception.t()}
   defp translate_resource({:ok, %_{} = result}), do: {:ok, Map.from_struct(result)}
+  defp translate_resource({:ok, result}) when is_map(result), do: {:ok, result}
   defp translate_resource({:error, raw}), do: {:error, ErrorMapper.to_accrue_error(raw)}
 
   # ---------------------------------------------------------------------------
