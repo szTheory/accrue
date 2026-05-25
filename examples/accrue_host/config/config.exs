@@ -39,9 +39,16 @@ config :accrue_host, Oban,
   queues: [
     accrue_webhooks: 10,
     accrue_mailers: 20,
-    accrue_pdf: 5
+    accrue_pdf: 5,
+    accrue_dunning: 2
   ],
-  plugins: [{Oban.Plugins.Pruner, max_age: 60 * 60 * 24}]
+  plugins: [
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24},
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"*/15 * * * *", Accrue.Jobs.DunningSweeper}
+     ]}
+  ]
 
 # Configure the endpoint
 config :accrue_host, AccrueHostWeb.Endpoint,
