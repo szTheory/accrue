@@ -151,6 +151,21 @@ defmodule AccruePortal.Live.SubscriptionLive do
   def render(assigns) do
     ~H"""
     <main class="portal-shell">
+      <section
+        :if={recovery_prompt?(@subscription)}
+        class="portal-card"
+        role="alert"
+        data-role="subscription-recovery-banner"
+      >
+        <h2>{Copy.subscription_recovery_heading()}</h2>
+        <p>{Copy.subscription_recovery_body()}</p>
+        <div class="portal-actions">
+          <a href={update_pm_path(@base_path, @subscription)} class="portal-button-primary">
+            {Copy.subscription_recovery_cta()}
+          </a>
+        </div>
+      </section>
+
       <section class="portal-card">
         <h1>{Copy.subscription_heading()}</h1>
         <ul class="portal-list">
@@ -264,6 +279,15 @@ defmodule AccruePortal.Live.SubscriptionLive do
 
   defp preview_supported?(%Subscription{processor: "braintree"}), do: false
   defp preview_supported?(%Subscription{}), do: true
+
+  defp recovery_prompt?(%Subscription{} = subscription) do
+    Subscription.past_due?(subscription) or Subscription.dunning_campaign_active?(subscription)
+  end
+
+  defp update_pm_path(base, %Subscription{processor: "braintree"}),
+    do: Path.payment_methods_new(base)
+
+  defp update_pm_path(base, %Subscription{}), do: Path.payment_methods(base)
 
   defp preview_plan_change(%Subscription{} = subscription, price_id) do
     normalized_price_id = normalize_price_id(price_id)

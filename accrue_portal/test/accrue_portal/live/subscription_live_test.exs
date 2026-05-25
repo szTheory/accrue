@@ -166,14 +166,27 @@ defmodule AccruePortal.SubscriptionLiveTest do
       subscription = insert_recovery_subscription!(user, processor: "stripe", status: :past_due)
       conn = sign_in_conn(conn, user)
 
-      assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+      assert {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
 
       assert has_element?(view, "[data-role='subscription-recovery-banner']")
-      assert html =~ "Your payment didn't go through"
-      assert html =~ "Update payment method"
 
-      assert html =~
+      assert has_element?(
+               view,
+               "[data-role='subscription-recovery-banner'] h2",
+               "Your payment didn't go through"
+             )
+
+      assert has_element?(
+               view,
+               "[data-role='subscription-recovery-banner'] p",
                "We couldn't process your most recent payment. Update your payment method to keep your subscription active."
+             )
+
+      assert has_element?(
+               view,
+               "[data-role='subscription-recovery-banner'] a.portal-button-primary",
+               "Update payment method"
+             )
     end
 
     test "renders no recovery banner for a healthy subscription with no active campaign", %{

@@ -174,6 +174,14 @@ defmodule AccruePortal.Copy do
     do: "Unable to cancel subscription now."
 
   def subscription_cancel_error(_subscription), do: "Unable to cancel subscription."
+  def subscription_recovery_heading, do: "Your payment didn't go through"
+
+  def subscription_recovery_body do
+    "We couldn't process your most recent payment. Update your payment method to keep your subscription active."
+  end
+
+  def subscription_recovery_cta, do: "Update payment method"
+
   def subscription_not_found_title, do: "Page not found"
   def subscription_not_found_body, do: "We couldn't find that subscription."
   def subscription_back_home_cta, do: "Go to your account home"
