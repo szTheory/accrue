@@ -4,13 +4,13 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
 stopped_at: Phase 130 context gathered
-last_updated: "2026-05-25T13:23:59.502Z"
+last_updated: "2026-05-25T13:29:59.541Z"
 last_activity: 2026-05-25
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 14
-  completed_plans: 11
+  completed_plans: 12
   percent: 40
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 ## Current Position
 
 Phase: 130 (provider-honesty-fake-lane-proof-example-host-wiring) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-25
 
@@ -77,6 +77,7 @@ Last activity: 2026-05-25
 | Phase 129 P04 | 14min | 2 tasks | 4 files |
 | Phase 129 P02 | 3min | 1 tasks | 2 files |
 | Phase 130 P01 | 8min | - tasks | - files |
+| Phase 130 P02 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -151,7 +152,7 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-25T13:23:59.499Z
+Last session: 2026-05-25T13:29:59.537Z
 Stopped at: Phase 130 context gathered
 Resume file: None
 
