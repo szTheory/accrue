@@ -115,7 +115,26 @@ Plans:
   3. With Chimeway absent or the engine unset (the default), the entire dunning surface behaves exactly as after Phase 130 — no Chimeway dependency on the default recovery path.
   4. The Chimeway adapter is documented as an opt-in upgrade (SEED-002 #1), targeting Chimeway's **published 1.0.0** public API (resolving the guide-vs-code surface mismatch before coding).
 
-**Plans**: TBD
+**Plans**: 6 plans (4 waves)
+
+Plans:
+**Wave 0**
+
+- [ ] 131-01-PLAN.md — Wave 0 test stubs (engine_test, engine/oban_test, chimeway_test) (DUN-03)
+
+**Wave 1**
+
+- [ ] 131-02-PLAN.md — `Accrue.Dunning.Engine` behaviour + `dunning: [engine:]` config key + `Config.dunning_engine/0` (DUN-03)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 131-03-PLAN.md — `Accrue.Dunning.Engine.Oban` built-in wrapper + `default_handler.ex` engine dispatch + struct stash (DUN-03)
+- [ ] 131-04-PLAN.md — Conditionally-compiled `Accrue.Integrations.Chimeway` adapter + bundled `DunningNotifier` + optional dep (DUN-03)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 131-05-PLAN.md — `verify_dunning_chimeway_isolation.sh` merge gate + CI wiring (DUN-03)
+- [ ] 131-06-PLAN.md — `guides/dunning.md` opt-in Chimeway section + matrix row + `verify_package_docs.sh` needles + test fixture coupling (DUN-03)
 
 > **Carried-forward open question for plan context (verify before coding the adapter):** Chimeway's guide and code disagree on the public surface — the guide uses `Chimeway.Workflow` / `Chimeway.Trigger.trigger`, while the code's public entry is `Chimeway.trigger/3` + a `Chimeway.Notifier` behaviour (`workflow/2` callback) + `Chimeway.Signal.track/4`. Pin to and target the published 1.0.0 API; note the local repo's `mix.exs` version string is stale at `0.1.0` while Hex is at `1.0.0` (2026-05-08).
 
@@ -142,7 +161,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete    | 2026-05-25 |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 4/4 | Complete    | 2026-05-25 |
-| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
+| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/6 | Not started | - |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |
 
 ## Notes
