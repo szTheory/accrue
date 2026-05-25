@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Copy do
   alias AccrueAdmin.Copy.Connect
   alias AccrueAdmin.Copy.Coupon
   alias AccrueAdmin.Copy.CustomerPaymentMethods
+  alias AccrueAdmin.Copy.Dunning
   alias AccrueAdmin.Copy.Entitlements
   alias AccrueAdmin.Copy.Invoice
   alias AccrueAdmin.Copy.PromotionCode
@@ -37,6 +38,20 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_stripe_guidance(), to: Subscription
   defdelegate subscription_lifecycle_ended_label(), to: Subscription
   defdelegate subscription_page_title(), to: Subscription
+
+  defdelegate dunning_panel_eyebrow(), to: Dunning
+  defdelegate dunning_panel_title(), to: Dunning
+  defdelegate dunning_started_label(), to: Dunning
+  defdelegate dunning_current_step_label(), to: Dunning
+  defdelegate dunning_next_action_label(), to: Dunning
+  defdelegate dunning_empty_state_heading(), to: Dunning
+  defdelegate dunning_empty_state_body(), to: Dunning
+  defdelegate dunning_next_action_done(), to: Dunning
+  defdelegate dunning_next_action_unavailable(), to: Dunning
+  defdelegate dunning_state_label(subscription), to: Dunning
+  defdelegate dunning_state_active(), to: Dunning
+  defdelegate dunning_state_none(), to: Dunning
+  defdelegate dunning_state_recovered(), to: Dunning
 
   defdelegate invoices_index_empty_title(), to: Invoice
   defdelegate invoices_index_empty_copy(), to: Invoice
