@@ -309,7 +309,7 @@ defmodule Accrue.Processor.Braintree do
     amount_str =
       case amount do
         nil -> nil
-        a when is_integer(a) -> :erlang.float_to_binary(a / 100.0, [{:decimals, 2}])
+        a when is_integer(a) -> money_string(a)
         a when is_binary(a) -> a
         _ -> nil
       end
@@ -916,8 +916,10 @@ defmodule Accrue.Processor.Braintree do
 
   defp truthy?(value), do: value in [true, "true", 1, "1"]
 
-  defp money_string(amount_minor) when is_integer(amount_minor) do
-    :erlang.float_to_binary(amount_minor / 100.0, [{:decimals, 2}])
+  defp money_string(amount_minor) when is_integer(amount_minor) and amount_minor >= 0 do
+    dollars = div(amount_minor, 100)
+    cents = amount_minor |> rem(100) |> Integer.to_string() |> String.pad_leading(2, "0")
+    "#{dollars}.#{cents}"
   end
 
   defp stringify_keys(params) do
