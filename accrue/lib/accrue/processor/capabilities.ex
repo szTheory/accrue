@@ -60,6 +60,10 @@ defmodule Accrue.Processor.Capabilities do
     entitlements: %{
       local_mapping: "all first-party",
       stripe_native_sync: "Stripe-native advisory (observational)"
+    },
+    dunning: %{
+      campaign: "all first-party",
+      smart_retry_alignment: "provider-divergent (see dunning guide)"
     }
   }
 
@@ -121,6 +125,30 @@ defmodule Accrue.Processor.Capabilities do
         fake: "out of slice",
         stripe: "native (advisory)",
         braintree: "unsupported"
+      }
+    },
+    # CONVERGENCE row — the dunning campaign cadence is provider-INDEPENDENT local
+    # derivation driven off `dunning_campaign_started_at` / `past_due_since` and
+    # `Accrue.Clock`, with zero processor calls. All three providers carry the same
+    # "local-identical" lane. The campaign schedule, step sequencing, and termination
+    # are all Accrue-clock-driven; no processor API is consulted. This row must NEVER
+    # carry a native/unsupported/bounded label (the drift gate enforces this).
+    dunning: %{
+      campaign: %{
+        fake: "local-identical",
+        stripe: "local-identical",
+        braintree: "local-identical"
+      },
+      # DIVERGENCE row — processor-native payment-retry behavior differs across
+      # providers. Stripe has adaptive Smart Retries that run beneath Accrue's campaign
+      # cadence and may recover a payment before the next step fires. Braintree is
+      # clock-driven only and has no smart-retry overlay — Accrue's cadence is the sole
+      # retry signal. Fake is the deterministic proof lane that exercises the campaign
+      # step sequencer locally and in CI with no network access.
+      smart_retry_alignment: %{
+        fake: "testing/local-only",
+        stripe: "native (Smart Retries)",
+        braintree: "unsupported (clock-driven only)"
       }
     }
   }

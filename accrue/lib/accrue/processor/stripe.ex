@@ -95,7 +95,8 @@ defmodule Accrue.Processor.Stripe do
       billing_portal: %{create: true},
       invoice: %{lifecycle_webhook_projection: true},
       webhook: %{verify: true, parse: true},
-      entitlements: %{local_mapping: true}
+      entitlements: %{local_mapping: true},
+      dunning: %{campaign: true, smart_retry_alignment: true}
     }
   end
 
