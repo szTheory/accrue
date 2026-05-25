@@ -23,6 +23,8 @@ config :accrue,
   plan_resolver: AccrueHost.Billing.PlanResolver,
   braintree_client_token_generator: AccrueHost.BraintreePortalStub.ClientTokenGenerator,
   webhook_handlers: [AccrueHost.BillingHandler],
+  # test.exs — PLACEHOLDER ONLY. Production must use:
+  #   webhook_signing_secrets: %{stripe: System.fetch_env!("STRIPE_WEBHOOK_SECRET")}
   webhook_signing_secrets: %{stripe: "whsec_test_host"},
   branding: [
     from_email: "noreply@example.test",
