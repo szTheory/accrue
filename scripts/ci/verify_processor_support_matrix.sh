@@ -4,9 +4,15 @@ set -euo pipefail
 
 repo_root="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 matrix="${repo_root}/.planning/processor-support-matrix.md"
+guide="${repo_root}/accrue/guides/dunning.md"
 
 if [[ ! -f "${matrix}" ]]; then
   echo "verify_processor_support_matrix: missing ${matrix}" >&2
+  exit 1
+fi
+
+if [[ ! -f "${guide}" ]]; then
+  echo "verify_processor_support_matrix: missing guide ${guide}" >&2
   exit 1
 fi
 
@@ -15,6 +21,15 @@ require_substring() {
   local label="$2"
   if ! grep -Fq "${needle}" "${matrix}"; then
     echo "verify_processor_support_matrix: matrix missing ${label} (expected substring: ${needle})" >&2
+    exit 1
+  fi
+}
+
+require_substring_in_guide() {
+  local needle="$1"
+  local label="$2"
+  if ! grep -Fq "${needle}" "${guide}"; then
+    echo "verify_processor_support_matrix: guide missing ${label} (expected substring: ${needle})" >&2
     exit 1
   fi
 }
@@ -122,6 +137,13 @@ if grep -Eq '^\| entitlements\.local_mapping \|.*\b(native|unsupported|bounded)\
   echo "verify_processor_support_matrix: entitlements.local_mapping convergence row sprouted a per-provider divergence label (broke the local-identical contract)" >&2
   exit 1
 fi
+
+# Guide-side drift pins (D-08): the published dunning guide must keep the
+# per-provider labels aligned with the code labels in capabilities.ex.
+require_substring_in_guide "local-identical" "dunning guide convergence label"
+require_substring_in_guide "native (Smart Retries)" "dunning guide Stripe label"
+require_substring_in_guide "unsupported (clock-driven only)" "dunning guide Braintree not-retry-aligned label"
+require_substring_in_guide "zero processor calls" "dunning guide convergence claim"
 
 # NEGATIVE divergence guard: the `dunning.campaign` CONVERGENCE row must NEVER
 # carry a per-provider native/unsupported/bounded label — that would break the
