@@ -93,6 +93,11 @@ defmodule Accrue.MixProject do
       # `{:sigra, "~> 0.1", optional: true}` line.
       {:opentelemetry, "~> 1.7", optional: true},
       {:telemetry_metrics, "~> 1.1", optional: true},
+      # Optional Chimeway dunning engine (DUN-03) — conditionally compiled via
+      # Code.ensure_loaded?(Chimeway); absent by default; host opts in by adding
+      # {:chimeway, "~> 1.0"} to their own deps and setting
+      # `config :accrue, dunning: [engine: Accrue.Integrations.Chimeway]`.
+      {:chimeway, "~> 1.0", optional: true},
 
       # Dev / test
       {:mox, "~> 1.2", only: :test},
