@@ -157,4 +157,103 @@ defmodule AccruePortal.SubscriptionLiveTest do
     refute html =~ "Cancel renewal"
     refute html =~ "Preview plan change"
   end
+
+  describe "recovery banner (DUN-06)" do
+    test "renders a recovery banner with heading and CTA for a past-due subscription", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      subscription = insert_recovery_subscription!(user, processor: "stripe", status: :past_due)
+      conn = sign_in_conn(conn, user)
+
+      assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      assert has_element?(view, "[data-role='subscription-recovery-banner']")
+      assert html =~ "Your payment didn't go through"
+      assert html =~ "Update payment method"
+
+      assert html =~
+               "We couldn't process your most recent payment. Update your payment method to keep your subscription active."
+    end
+
+    test "renders no recovery banner for a healthy subscription with no active campaign", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      subscription = insert_recovery_subscription!(user, processor: "stripe", status: :active)
+      conn = sign_in_conn(conn, user)
+
+      assert {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      refute has_element?(view, "[data-role='subscription-recovery-banner']")
+      refute html =~ "Your payment didn't go through"
+    end
+
+    test "deep-links a past-due Braintree banner CTA to the in-portal add-payment-method route", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      subscription = insert_recovery_subscription!(user, processor: "braintree", status: :past_due)
+      conn = sign_in_conn(conn, user)
+
+      assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      href = recovery_cta_href(html)
+      assert String.ends_with?(href, "/payment-methods/new")
+    end
+
+    test "deep-links a past-due non-Braintree banner CTA to the in-portal payment-methods list", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      subscription = insert_recovery_subscription!(user, processor: "stripe", status: :past_due)
+      conn = sign_in_conn(conn, user)
+
+      assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      href = recovery_cta_href(html)
+      assert String.ends_with?(href, "/payment-methods")
+      refute String.ends_with?(href, "/payment-methods/new")
+    end
+  end
+
+  defp insert_recovery_subscription!(user, opts) do
+    processor = Keyword.fetch!(opts, :processor)
+    status = Keyword.fetch!(opts, :status)
+
+    customer =
+      %Customer{}
+      |> Customer.changeset(%{
+        owner_type: AccruePortal.Fixtures.TestUser.__accrue__(:billable_type),
+        owner_id: user.id,
+        processor: processor,
+        processor_id: "cus_recovery_#{processor}_#{user.id}",
+        email: "portal-recovery-#{user.id}@example.com",
+        metadata: %{},
+        data: %{}
+      })
+      |> TestRepo.insert!()
+
+    %Subscription{}
+    |> Subscription.changeset(%{
+      customer_id: customer.id,
+      processor: processor,
+      processor_id: "sub_recovery_#{processor}_#{user.id}",
+      status: status,
+      currency: "usd",
+      current_period_start: DateTime.add(DateTime.utc_now(), -86_400, :second),
+      current_period_end: DateTime.add(DateTime.utc_now(), 2_592_000, :second)
+    })
+    |> TestRepo.insert!()
+  end
+
+  defp recovery_cta_href(html) do
+    [_, href] =
+      Regex.run(
+        ~r/data-role="subscription-recovery-banner".*?<a[^>]*href="([^"]+)"/s,
+        html
+      )
+
+    href
+  end
 end
