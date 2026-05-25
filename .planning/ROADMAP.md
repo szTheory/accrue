@@ -73,7 +73,11 @@ Plans:
   3. Dunning campaign lifecycle is observable: `accrue_events` ledger entries (`dunning.campaign_started` / `step_sent` / `recovered` / `exhausted`) plus a `[:accrue, :dunning, *]` telemetry family aligned with `guides/telemetry.md` and the operator runbooks.
   4. A recovered-vs-lost signal is derivable as a ledger-query counter (no new table) — an operator/developer can answer "how much past-due revenue did dunning recover vs. lose to terminal action?".
 
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 129-01-PLAN.md — DUN-08 observability contract: 4 dunning lifecycle ledger + telemetry events at the Phase-128 scope fences + drift-gate triad registration (inventory + metrics + guide)
+- [ ] 129-02-PLAN.md — DUN-08 recovered-vs-lost ledger-fold counter (`Accrue.Billing.Dunning.recovered_vs_lost/1`, no new table)
+- [ ] 129-03-PLAN.md — DUN-06 portal recovery banner (conditional `portal-card` section + provider-aware update-PM CTA)
+- [ ] 129-04-PLAN.md — DUN-07 admin read-only dunning-state `ax-card` (resolver-derived next action, all copy via `AccrueAdmin.Copy`)
 **UI hint**: yes
 
 ### Phase 130: Provider Honesty + Fake-Lane Proof + Example-Host Wiring
