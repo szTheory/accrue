@@ -237,7 +237,7 @@ defmodule Accrue.Processor.Fake do
       invoice: %{lifecycle_webhook_projection: true},
       webhook: %{verify: true, parse: true},
       entitlements: %{local_mapping: true},
-      dunning: %{campaign: true, smart_retry_alignment: true}
+      dunning: %{campaign: true, smart_retry_alignment: false}
     }
   end
 
