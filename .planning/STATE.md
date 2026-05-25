@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
-stopped_at: Phase 131 context gathered
-last_updated: "2026-05-25T16:03:22.802Z"
-last_activity: 2026-05-25 -- Phase 131 execution started
+stopped_at: Phase 131 complete — Phase 132 not yet started
+last_updated: "2026-05-25T18:50:00.000Z"
+last_activity: 2026-05-25 -- Phase 131 complete (6/6 plans, all DUN-03 SCs met)
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 20
-  completed_plans: 14
-  percent: 60
+  completed_plans: 20
+  percent: 80
 ---
 
 # Project State
