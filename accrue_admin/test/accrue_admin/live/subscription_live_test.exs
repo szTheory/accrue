@@ -334,6 +334,84 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
              "Braintree does not expose first-party quantity or subscription-item mutations through Accrue."
   end
 
+  describe "read-only dunning-state panel (DUN-07)" do
+    test "always renders the dunning-state panel as a state surface", %{
+      conn: conn,
+      subscription: subscription
+    } do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      assert has_element?(view, "[data-role='subscription-dunning-state']")
+      assert html =~ Copy.dunning_panel_title()
+      assert html =~ Copy.dunning_panel_eyebrow()
+    end
+
+    test "the dunning-state panel is strictly read-only (no mutating controls)", %{
+      conn: conn,
+      subscription: subscription
+    } do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      {:ok, view, _html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      refute has_element?(view, "[data-role='subscription-dunning-state'] button")
+      refute has_element?(view, "[data-role='subscription-dunning-state'] form")
+      refute has_element?(view, "[data-role='subscription-dunning-state'] [phx-click]")
+      refute has_element?(view, "[data-role='subscription-dunning-state'] [phx-submit]")
+    end
+
+    test "active campaign shows the active badge and a resolver-derived next action", %{
+      conn: conn,
+      subscription: subscription
+    } do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      active =
+        subscription
+        |> Subscription.changeset(%{dunning_campaign_started_at: DateTime.utc_now()})
+        |> TestRepo.update!()
+
+      assert Subscription.dunning_campaign_active?(active)
+
+      {:ok, _view, html} = live(conn, "/billing/subscriptions/#{active.id}")
+
+      assert html =~ Copy.dunning_state_active()
+      assert html =~ Copy.dunning_next_action_label()
+      # Day-0 active campaign resolves the first configured step (key surfaced).
+      assert html =~ "reminder"
+      refute html =~ Copy.dunning_empty_state_body()
+    end
+
+    test "subscription with no campaign renders the empty-state body", %{
+      conn: conn,
+      subscription: subscription
+    } do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      refute Subscription.dunning_campaign_active?(subscription)
+
+      {:ok, view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      assert has_element?(view, "[data-role='subscription-dunning-state']")
+      assert html =~ Copy.dunning_empty_state_body()
+      assert html =~ Copy.dunning_state_none()
+    end
+
+    test "every visible panel string routes through Copy (Started + Next scheduled action)", %{
+      conn: conn,
+      subscription: subscription
+    } do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+      assert html =~ Copy.dunning_started_label()
+      assert html =~ Copy.dunning_next_action_label()
+    end
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",
