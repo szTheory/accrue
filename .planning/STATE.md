@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: executing
-stopped_at: Phase 129 UI-SPEC approved
-last_updated: "2026-05-25T06:36:44.014Z"
+stopped_at: Completed 129-04-PLAN.md (DUN-07 admin dunning-state panel)
+last_updated: "2026-05-25T06:48:10.839Z"
 last_activity: 2026-05-25
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 20
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 ## Current Position
 
 Phase: 129 (customer-operator-surfaces-observability) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-05-25
 
@@ -74,6 +74,7 @@ Last activity: 2026-05-25
 | Phase 128 P05 | 3min | 1 tasks | 2 files |
 | Phase 128 P06 | 10min | 2 tasks | 4 files |
 | Phase 129 P03 | 6min | 1 tasks | 5 files |
+| Phase 129 P04 | 14min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,7 @@ _v1.39 per-plan decision detail (Phases 123–127) is archived — full Key Deci
 - [Phase ?]: 2026-05-24 (128-05): Accrue.Workers.DunningStep chains via the pure resolver by deriving resolver now from anchor + current-step after_days + 1s (NOT raw Clock.utc_now/0) — raw wall-clock at elapsed approx boundary re-resolves to the current step (D-16-suppressed, chain never advances); D-16 unique keys [:subscription_id,:step_key,:campaign_started_at] period :infinity + :completed; cancel-guard FIRST returns {:cancel,:recovered} on not-past_due OR nil anchor; campaign_started_at carried/parsed as ISO8601 string (no atomization); no ledger/telemetry/engine-behaviour (scope-fenced to Phase 128)
 - [Phase 129]: 2026-05-25 (129-03): DUN-06 portal recovery banner. Conditional `<section data-role="subscription-recovery-banner">` inserted before the first portal-card in `SubscriptionLive.render/1`, gated on `recovery_prompt?/1` = `Subscription.past_due?/1` OR `Subscription.dunning_campaign_active?/1` (D-10, canonical predicates — no template status-atom). `update_pm_path/2` dispatches on `subscription.processor` (2-clause, mirroring `cancel_subscription/1`): braintree → `Path.payment_methods_new/1` (`/payment-methods/new`); non-braintree → `Path.payment_methods/1` in-portal list (RESEARCH A4 safe default, never the Braintree-only hosted-fields form = T-129-10). Three jargon-free `AccruePortal.Copy.subscription_recovery_heading/body/cta` defs; CTA label "Update payment method" shared verbatim with the `card_expiring_soon` email. Neutral `.portal-card role=alert` tone (UI-SPEC), zero new CSS. Render tests assert decoded element content via `has_element?/3` (HTML-entity safe). Blocking fix: synced portal `mix.lock` rendro 0.1.0→0.3.0 to match `accrue` core (Rule 3).
 - [Phase ?]: 2026-05-24 (128-06): campaign wired into the REAL webhook path. D-09 atomic update_all WHERE is_nil(anchor) in maybe_bump_past_due_since elects exactly ONE concurrent invoice.payment_failed winner (count==1 enqueues day-0 DunningStep; count==0 no-op; sibling update_all, never touches lock_version). D-12 cancel-on-recovery SPLITS the commit boundary: in-transaction force_status_changeset anchor-clear (durable, atomic with the status write) + POST-commit Oban.cancel_all_jobs keyed on subscription_id+campaign_started_at (run OUTSIDE any Repo.transact at the dispatch site, only on a committed {:ok,%Subscription{}}, handed off via a tightly-scoped process-dict stash). D-15 REPLACE skips the standalone :invoice_payment_failed email when the campaign owns day-0. Cancel-failure is logged via Logger.warning (NOT telemetry/ledger — Phase 129); per-step cancel-guard backstops uncancelled steps. iso_anchor captured from row BEFORE the clear so a stale recovery can't cancel a fresh re-lapse campaign. Stale standalone-dispatch test re-scoped to campaign-disabled (Rule 1).
+- [Phase ?]: 2026-05-25 (129-04): DUN-07 admin read-only dunning-state ax-card. New <article data-role=subscription-dunning-state> cloned from related-billing in SubscriptionLive.render/1, ALWAYS rendered (state surface). next_action_summary/1 derives next action from the PURE Accrue.Dunning.Campaign.next_step/3 resolver (Config.dunning_campaign_steps + Clock.utc_now for Fake-lane determinism), rescuing failure to Copy.dunning_next_action_unavailable (T-129-14). dunning_badge_tone/1 amber (active) / slate (none). Strictly read-only (D-12): zero phx-click/phx-submit/button/form. All operator copy via dedicated AccrueAdmin.Copy.Dunning (D-13). Empty state renders body + Started/Next labels so copy-routing holds. No new CSS. 137 admin tests green.
 
 ### Pending Todos
 
@@ -146,8 +148,8 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-25T06:36:44.014Z
-Stopped at: Completed 129-03-PLAN.md (DUN-06 portal recovery banner)
+Last session: 2026-05-25T06:47:34.364Z
+Stopped at: Completed 129-04-PLAN.md (DUN-07 admin dunning-state panel)
 Resume file: None
 
 ## Operator Next Steps

@@ -27,7 +27,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 ### Customer & Operator Surfaces
 
 - [x] **DUN-06**: A customer with a failed payment sees a recovery prompt ("update your payment method") in `accrue_portal` that deep-links to the existing add/update-payment-method flow.
-- [ ] **DUN-07**: An operator can see a subscription/customer's active dunning state (current step, started-at, next scheduled action) in `accrue_admin`, read-only, with all copy routed through the `AccrueAdmin.Copy` SSOT.
+- [x] **DUN-07**: An operator can see a subscription/customer's active dunning state (current step, started-at, next scheduled action) in `accrue_admin`, read-only, with all copy routed through the `AccrueAdmin.Copy` SSOT.
 
 ### Observability
 
@@ -76,7 +76,7 @@ Which phases cover which requirements. Phases continue from v1.39 (ended at Phas
 | DUN-04 | Phase 128 | Complete |
 | DUN-05 | Phase 128 | Complete |
 | DUN-06 | Phase 129 | Complete |
-| DUN-07 | Phase 129 | Pending |
+| DUN-07 | Phase 129 | Complete |
 | DUN-08 | Phase 129 | Pending |
 | DUN-09 | Phase 130 | Pending |
 | DUN-10 | Phase 130 | Pending |
