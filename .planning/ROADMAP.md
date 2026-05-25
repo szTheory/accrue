@@ -22,7 +22,7 @@ Dunning depth is **net-new product surface over a thin existing baseline** (a si
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 128: Campaign Engine Foundation + Idempotency Must-Fix** - Config-driven durable Oban dunning campaign with default journey, the `:invoice_payment_failed` email de-dup fix, and cancel-on-recovery campaign keying (completed 2026-05-24)
-- [ ] **Phase 129: Customer + Operator Surfaces + Observability** - Portal "update your card" recovery banner, read-only admin dunning-state visibility, and dunning ledger events + telemetry incl. a recovered-vs-lost signal
+- [x] **Phase 129: Customer + Operator Surfaces + Observability** - Portal "update your card" recovery banner, read-only admin dunning-state visibility, and dunning ledger events + telemetry incl. a recovered-vs-lost signal (completed 2026-05-25)
 - [ ] **Phase 130: Provider Honesty + Fake-Lane Proof + Example-Host Wiring** - Provider-honest dunning docs with a merge-blocking drift check, the deterministic clock-advanceable Fake-lane journey gate, and the default campaign wired into `examples/accrue_host`
 - [ ] **Phase 131: Optional Chimeway Engine Adapter (isolated, off by default)** - `Accrue.Dunning.Engine` behaviour + conditionally-compiled off-by-default `Accrue.Integrations.Chimeway` adapter so a host can swap engines without changing call sites
 - [ ] **Phase 132: Entitlements Adopter-Proof Demo** - Entitlement-gated route/page in `examples/accrue_host` exercising the v1.39 gate API/guards end-to-end, with a matching adoption-proof-matrix row
@@ -76,7 +76,7 @@ Plans:
 **Plans**: 4 plans
 
 - [x] 129-01-PLAN.md — DUN-08 observability contract: 4 dunning lifecycle ledger + telemetry events at the Phase-128 scope fences + drift-gate triad registration (inventory + metrics + guide)
-- [ ] 129-02-PLAN.md — DUN-08 recovered-vs-lost ledger-fold counter (`Accrue.Billing.Dunning.recovered_vs_lost/1`, no new table)
+- [x] 129-02-PLAN.md — DUN-08 recovered-vs-lost ledger-fold counter (`Accrue.Billing.Dunning.recovered_vs_lost/1`, no new table)
 - [x] 129-03-PLAN.md — DUN-06 portal recovery banner (conditional `portal-card` section + provider-aware update-PM CTA)
 - [x] 129-04-PLAN.md — DUN-07 admin read-only dunning-state `ax-card` (resolver-derived next action, all copy via `AccrueAdmin.Copy`)
 
@@ -135,7 +135,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
-| 129. Customer + Operator Surfaces + Observability | v1.40 | 3/4 | In Progress|  |
+| 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete   | 2026-05-25 |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 0/TBD | Not started | - |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |

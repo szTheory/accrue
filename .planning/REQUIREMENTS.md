@@ -31,7 +31,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Observability
 
-- [ ] **DUN-08**: Dunning campaign lifecycle is observable — `accrue_events` ledger entries (`dunning.campaign_started` / `step_sent` / `recovered` / `exhausted`) plus `[:accrue, :dunning, *]` telemetry including a recovered-vs-lost signal (ledger-derived counter, no new table) — aligned with `guides/telemetry.md` and the operator runbooks.
+- [x] **DUN-08**: Dunning campaign lifecycle is observable — `accrue_events` ledger entries (`dunning.campaign_started` / `step_sent` / `recovered` / `exhausted`) plus `[:accrue, :dunning, *]` telemetry including a recovered-vs-lost signal (ledger-derived counter, no new table) — aligned with `guides/telemetry.md` and the operator runbooks.
 
 ### Provider Honesty & Proof
 
@@ -77,7 +77,7 @@ Which phases cover which requirements. Phases continue from v1.39 (ended at Phas
 | DUN-05 | Phase 128 | Complete |
 | DUN-06 | Phase 129 | Complete |
 | DUN-07 | Phase 129 | Complete |
-| DUN-08 | Phase 129 | Pending |
+| DUN-08 | Phase 129 | Complete |
 | DUN-09 | Phase 130 | Pending |
 | DUN-10 | Phase 130 | Pending |
 | DUN-03 | Phase 131 | Pending |
