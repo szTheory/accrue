@@ -37,6 +37,7 @@ defmodule Accrue.Webhook.DunningCampaignKeyingTest do
   import Ecto.Query, only: [from: 2]
 
   alias Accrue.Billing.Subscription
+  alias Accrue.Events.Event, as: LedgerEvent
   alias Accrue.Webhook.DefaultHandler
   alias Accrue.Workers.DunningStep
 
@@ -114,6 +115,30 @@ defmodule Accrue.Webhook.DunningCampaignKeyingTest do
       )
 
     DefaultHandler.handle(event)
+  end
+
+  defp attach_telemetry(name, event) do
+    test_pid = self()
+
+    :ok =
+      :telemetry.attach(
+        name,
+        event,
+        fn evt, meas, meta, _ -> send(test_pid, {:telemetry, evt, meas, meta}) end,
+        nil
+      )
+
+    ExUnit.Callbacks.on_exit(fn -> :telemetry.detach(name) end)
+  end
+
+  defp ledger_events(type, subject_id) do
+    Repo.all(
+      from(e in LedgerEvent,
+        where:
+          e.type == ^type and e.subject_type == "Subscription" and
+            e.subject_id == ^subject_id
+      )
+    )
   end
 
   # CR-02: a TERMINAL transition out of `:past_due` (the sub reached the
@@ -325,6 +350,40 @@ defmodule Accrue.Webhook.DunningCampaignKeyingTest do
 
       reloaded = Repo.get_by!(Subscription, processor_id: active_id)
       assert is_nil(reloaded.dunning_campaign_started_at)
+    end
+  end
+
+  # --- DUN-08 observability: dunning.recovered -----------------------
+
+  describe "dunning.recovered observability (DUN-08)" do
+    test "the past_due→active recovery records a ledger event AND fires telemetry",
+         %{sub: sub, sub_id: sub_id} do
+      anchor = %{Accrue.Clock.utc_now() | microsecond: {0, 6}}
+      sub = set_anchor(sub, anchor)
+
+      attach_telemetry("test-dun-recovered", [:accrue, :ops, :dunning_recovered])
+
+      assert {:ok, %Subscription{status: :active}} = fire_recovery(sub_id)
+
+      # Ledger: data carries source (bounded enum), no PII.
+      assert [ledger] = ledger_events("dunning.recovered", sub.id)
+      assert ledger.data["source"] == "stripe_native"
+
+      # Telemetry: %{count: 1}; metadata IDs + bounded enum only.
+      assert_received {:telemetry, [:accrue, :ops, :dunning_recovered], %{count: 1}, meta}
+      assert meta.subscription_id == sub.id
+      assert meta.source == :stripe_native
+    end
+
+    test "does NOT fire dunning.recovered when there was no live campaign anchor",
+         %{sub: sub, sub_id: sub_id} do
+      # No anchor set — recovery is not a dunning-campaign finalization.
+      attach_telemetry("test-dun-recovered-noanchor", [:accrue, :ops, :dunning_recovered])
+
+      assert {:ok, %Subscription{status: :active}} = fire_recovery(sub_id)
+
+      refute_received {:telemetry, [:accrue, :ops, :dunning_recovered], _, _}
+      assert ledger_events("dunning.recovered", sub.id) == []
     end
   end
 end

@@ -28,7 +28,10 @@ defmodule Accrue.Workers.DunningStepTest do
 
   use Oban.Testing, repo: Accrue.TestRepo
 
+  import Ecto.Query, only: [from: 2]
+
   alias Accrue.Billing.{Customer, Subscription}
+  alias Accrue.Events.Event, as: LedgerEvent
   alias Accrue.Workers.DunningStep
 
   @anchor ~U[2026-05-01 00:00:00.000000Z]
@@ -73,6 +76,30 @@ defmodule Accrue.Workers.DunningStepTest do
       "customer_id" => customer.id,
       "invoice_id" => "in_step_test"
     }
+  end
+
+  defp attach_telemetry(name, event) do
+    test_pid = self()
+
+    :ok =
+      :telemetry.attach(
+        name,
+        event,
+        fn evt, meas, meta, _ -> send(test_pid, {:telemetry, evt, meas, meta}) end,
+        nil
+      )
+
+    ExUnit.Callbacks.on_exit(fn -> :telemetry.detach(name) end)
+  end
+
+  defp ledger_events(type, subject_id) do
+    Repo.all(
+      from(e in LedgerEvent,
+        where:
+          e.type == ^type and e.subject_type == "Subscription" and
+            e.subject_id == ^subject_id
+      )
+    )
   end
 
   describe "cancel-guard FIRST (D-11)" do
@@ -227,6 +254,50 @@ defmodule Accrue.Workers.DunningStepTest do
       assert [_only_one] =
                all_enqueued(worker: DunningStep)
                |> Enum.filter(&(&1.args["step_key"] == "action_required"))
+    end
+  end
+
+  # --- DUN-08 observability: dunning.step_sent -----------------------
+
+  describe "dunning.step_sent observability (DUN-08)" do
+    test "a delivered step records a ledger event AND fires telemetry",
+         %{customer: cus} do
+      now = Accrue.Clock.utc_now()
+      sub = seed_sub(cus, %{status: :past_due, dunning_campaign_started_at: now})
+
+      attach_telemetry("test-dun-step-sent", [:accrue, :ops, :dunning_step_sent])
+
+      assert {:ok, _} = perform_job(DunningStep, args(sub, :reminder, now, cus))
+
+      # The step email delivered (existing behaviour).
+      assert_received {:accrue_email_delivered, :invoice_payment_failed, _assigns}
+
+      # Ledger: data carries step_key + step_index (no PII).
+      assert [ledger] = ledger_events("dunning.step_sent", sub.id)
+      assert ledger.data["step_key"] == "reminder"
+      assert ledger.data["step_index"] == 0
+
+      # Telemetry: %{count: 1}; metadata IDs + bounded values only.
+      assert_received {:telemetry, [:accrue, :ops, :dunning_step_sent], %{count: 1}, meta}
+      assert meta.subscription_id == sub.id
+      assert meta.step_key == "reminder"
+      assert meta.step_index == 0
+    end
+
+    test "a later step records the correct step_index", %{customer: cus} do
+      now = Accrue.Clock.utc_now()
+      sub = seed_sub(cus, %{status: :past_due, dunning_campaign_started_at: now})
+
+      attach_telemetry("test-dun-step-sent-2", [:accrue, :ops, :dunning_step_sent])
+
+      assert {:ok, _} = perform_job(DunningStep, args(sub, :action_required, now, cus))
+
+      assert [ledger] = ledger_events("dunning.step_sent", sub.id)
+      assert ledger.data["step_key"] == "action_required"
+      assert ledger.data["step_index"] == 1
+
+      assert_received {:telemetry, [:accrue, :ops, :dunning_step_sent], %{count: 1}, meta}
+      assert meta.step_index == 1
     end
   end
 end

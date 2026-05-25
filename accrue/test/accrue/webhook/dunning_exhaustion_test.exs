@@ -17,7 +17,10 @@ defmodule Accrue.Webhook.DunningExhaustionTest do
   """
   use Accrue.BillingCase, async: false
 
+  import Ecto.Query, only: [from: 2]
+
   alias Accrue.Billing.Subscription
+  alias Accrue.Events.Event, as: LedgerEvent
   alias Accrue.Webhook.DefaultHandler
 
   setup do
@@ -85,18 +88,32 @@ defmodule Accrue.Webhook.DunningExhaustionTest do
   end
 
   defp attach_telemetry(name) do
+    attach_telemetry(name, [:accrue, :ops, :dunning_exhaustion])
+  end
+
+  defp attach_telemetry(name, event) do
     test_pid = self()
 
     :ok =
       :telemetry.attach(
         name,
-        [:accrue, :ops, :dunning_exhaustion],
-        fn event, meas, meta, _ -> send(test_pid, {:telemetry, event, meas, meta}) end,
+        event,
+        fn evt, meas, meta, _ -> send(test_pid, {:telemetry, evt, meas, meta}) end,
         nil
       )
 
     on_exit = fn -> :telemetry.detach(name) end
     ExUnit.Callbacks.on_exit(on_exit)
+  end
+
+  defp ledger_events(type, subject_id) do
+    Repo.all(
+      from(e in LedgerEvent,
+        where:
+          e.type == ^type and e.subject_type == "Subscription" and
+            e.subject_id == ^subject_id
+      )
+    )
   end
 
   # --- invoice.payment_failed → past_due_since -----------------------
@@ -269,6 +286,58 @@ defmodule Accrue.Webhook.DunningExhaustionTest do
       # State is committed.
       reloaded = Repo.reload!(sub)
       assert reloaded.status == :unpaid
+    end
+  end
+
+  # --- DUN-08 observability: dunning.exhausted -----------------------
+
+  describe "dunning.exhausted observability (DUN-08)" do
+    test "the confirmed terminal transition records a ledger event AND fires telemetry",
+         %{sub: sub, sub_id: sub_id} do
+      stub_subscription_fetch(sub_id, :canceled)
+      attach_telemetry("test-dun-exhausted", [:accrue, :ops, :dunning_exhausted])
+
+      event =
+        StripeFixtures.webhook_event(
+          "customer.subscription.updated",
+          StripeFixtures.subscription_created(%{"id" => sub_id, "status" => "canceled"})
+        )
+
+      assert {:ok, %Subscription{status: :canceled}} = DefaultHandler.handle(event)
+
+      # Ledger: data carries to_status + source (bounded enums), no PII.
+      assert [ledger] = ledger_events("dunning.exhausted", sub.id)
+      assert ledger.data["to_status"] == "canceled"
+      assert ledger.data["source"] == "stripe_native"
+
+      # Telemetry: %{count: 1}; metadata IDs + bounded enums only.
+      assert_received {:telemetry, [:accrue, :ops, :dunning_exhausted], %{count: 1}, meta}
+      assert meta.subscription_id == sub.id
+      assert meta.to_status == :canceled
+      assert meta.source == :stripe_native
+    end
+
+    test "does NOT fire dunning.exhausted on a non-dunning transition (:active → :canceled)",
+         %{customer: customer} do
+      active_id = "sub_fake_" <> Integer.to_string(System.unique_integer([:positive]))
+
+      {:ok, active_sub} =
+        %Subscription{customer_id: customer.id, processor: "fake"}
+        |> Subscription.force_status_changeset(%{processor_id: active_id, status: :active})
+        |> Repo.insert()
+
+      stub_subscription_fetch(active_id, :canceled)
+      attach_telemetry("test-dun-exhausted-nonmatch", [:accrue, :ops, :dunning_exhausted])
+
+      event =
+        StripeFixtures.webhook_event(
+          "customer.subscription.updated",
+          StripeFixtures.subscription_created(%{"id" => active_id, "status" => "canceled"})
+        )
+
+      assert {:ok, _} = DefaultHandler.handle(event)
+      refute_received {:telemetry, [:accrue, :ops, :dunning_exhausted], _, _}
+      assert ledger_events("dunning.exhausted", active_sub.id) == []
     end
   end
 end

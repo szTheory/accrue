@@ -29,7 +29,10 @@ defmodule Accrue.Webhook.DunningCampaignStartTest do
   use Accrue.BillingCase, async: false
   use Oban.Testing, repo: Accrue.TestRepo
 
+  import Ecto.Query, only: [from: 2]
+
   alias Accrue.Billing.Subscription
+  alias Accrue.Events.Event, as: LedgerEvent
   alias Accrue.Webhook.DefaultHandler
   alias Accrue.Workers.DunningStep
 
@@ -96,6 +99,30 @@ defmodule Accrue.Webhook.DunningCampaignStartTest do
     canonical = stub_invoice_fetch(invoice_id, sub_id, next_attempt_unix)
     event = StripeFixtures.webhook_event("invoice.payment_failed", canonical)
     DefaultHandler.handle(event)
+  end
+
+  defp attach_telemetry(name, event) do
+    test_pid = self()
+
+    :ok =
+      :telemetry.attach(
+        name,
+        event,
+        fn evt, meas, meta, _ -> send(test_pid, {:telemetry, evt, meas, meta}) end,
+        nil
+      )
+
+    ExUnit.Callbacks.on_exit(fn -> :telemetry.detach(name) end)
+  end
+
+  defp ledger_events(type, subject_id) do
+    Repo.all(
+      from(e in LedgerEvent,
+        where:
+          e.type == ^type and e.subject_type == "Subscription" and
+            e.subject_id == ^subject_id
+      )
+    )
   end
 
   defp disable_campaign! do
@@ -181,6 +208,44 @@ defmodule Accrue.Webhook.DunningCampaignStartTest do
       # by Plan 04 in the real Oban lane; here the Test adapter records the
       # one dispatch).
       assert_received {:accrue_email_delivered, :invoice_payment_failed, _}
+    end
+  end
+
+  # --- DUN-08 observability: dunning.campaign_started ----------------
+
+  describe "campaign_started observability (DUN-08)" do
+    test "the first nil→past_due edge records a ledger event AND fires telemetry",
+         %{sub: sub, sub_id: sub_id} do
+      attach_telemetry(
+        "test-dun-campaign-started",
+        [:accrue, :ops, :dunning_campaign_started]
+      )
+
+      assert {:ok, _} = fire_payment_failed("in_fake_obs_start1", sub_id)
+
+      # Ledger: exactly one dunning.campaign_started for this subscription,
+      # data carries the configured step_count (no PII).
+      step_count = length(Accrue.Config.dunning_campaign_steps())
+      events = ledger_events("dunning.campaign_started", sub.id)
+      assert [event] = events
+      assert event.data["step_count"] == step_count
+
+      # Telemetry: measurements %{count: 1}; metadata IDs + step_count only,
+      # NO :source key (campaign_started has no source).
+      assert_received {:telemetry, [:accrue, :ops, :dunning_campaign_started], %{count: 1}, meta}
+      assert meta.subscription_id == sub.id
+      assert meta.step_count == step_count
+      refute Map.has_key?(meta, :source)
+    end
+
+    test "the second in-window failure (count==0 no-op) records NO second campaign_started",
+         %{sub: sub, sub_id: sub_id} do
+      assert {:ok, _} = fire_payment_failed("in_fake_obs_start2a", sub_id)
+      assert length(ledger_events("dunning.campaign_started", sub.id)) == 1
+
+      assert {:ok, _} = fire_payment_failed("in_fake_obs_start2b", sub_id)
+      # Still exactly one — the no-op winner never re-emits.
+      assert length(ledger_events("dunning.campaign_started", sub.id)) == 1
     end
   end
 end
