@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: verifying
-stopped_at: Completed 129-02-PLAN.md (DUN-08 recovered-vs-lost ledger counter)
-last_updated: "2026-05-25T07:14:33.782Z"
+stopped_at: Phase 130 context gathered
+last_updated: "2026-05-25T07:31:23.203Z"
 last_activity: 2026-05-25
 progress:
   total_phases: 5
@@ -150,9 +150,9 @@ Prior status — None open. (v1.39 blockers resolved at ship: Phase 124 confirme
 
 ## Session Continuity
 
-Last session: 2026-05-25T06:58:32.979Z
-Stopped at: Completed 129-02-PLAN.md (DUN-08 recovered-vs-lost ledger counter)
-Resume file: None
+Last session: 2026-05-25T07:31:23.199Z
+Stopped at: Phase 130 context gathered
+Resume file: .planning/phases/130-provider-honesty-fake-lane-proof-example-host-wiring/130-CONTEXT.md
 
 ## Operator Next Steps
 
