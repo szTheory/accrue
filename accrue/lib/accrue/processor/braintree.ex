@@ -872,9 +872,12 @@ defmodule Accrue.Processor.Braintree do
 
     cards
     |> Enum.map(fn card ->
+      raw_default = Map.get(card, :default) || Map.get(card, "default") || false
+      token = Map.get(card, :token) || Map.get(card, "token")
+
       card
       |> translate_payment_method()
-      |> Map.put(:default, card.default || card.token == default_token)
+      |> Map.put(:default, raw_default || token == default_token)
     end)
   end
 
