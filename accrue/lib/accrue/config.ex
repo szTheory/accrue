@@ -263,7 +263,8 @@ defmodule Accrue.Config do
         grace_days: @default_grace_days,
         terminal_action: :unpaid,
         telemetry_prefix: [:accrue, :ops],
-        campaign: @default_dunning_campaign
+        campaign: @default_dunning_campaign,
+        engine: Accrue.Dunning.Engine.Oban
       ],
       keys: [
         mode: [type: {:in, [:stripe_smart_retries, :disabled]}, default: :stripe_smart_retries],
@@ -286,6 +287,15 @@ defmodule Accrue.Config do
               "The last step's `after_days` MUST be `<= grace_days` (validated " <>
               "loud at boot) so the final notice precedes the sweeper's " <>
               "terminal action."
+        ],
+        engine: [
+          type: :atom,
+          default: Accrue.Dunning.Engine.Oban,
+          doc:
+            "Module implementing `Accrue.Dunning.Engine`. Default: " <>
+              "`Accrue.Dunning.Engine.Oban` (built-in Oban campaign). " <>
+              "Set to `Accrue.Integrations.Chimeway` to delegate orchestration " <>
+              "to Chimeway."
         ]
       ],
       doc:
@@ -867,6 +877,21 @@ defmodule Accrue.Config do
     else
       []
     end
+  end
+
+  @doc """
+  Returns the configured dunning engine module (D-03).
+
+  Defaults to `Accrue.Dunning.Engine.Oban` (built-in Oban campaign).
+  Set `dunning: [engine: Accrue.Integrations.Chimeway]` to opt into
+  Chimeway orchestration.
+
+  The atom is returned as-is without loading the module — resolution happens
+  at dispatch time in the calling code.
+  """
+  @spec dunning_engine() :: module()
+  def dunning_engine do
+    Keyword.get(dunning(), :engine, Accrue.Dunning.Engine.Oban)
   end
 
   @doc """
