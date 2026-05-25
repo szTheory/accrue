@@ -135,7 +135,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
-| 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete   | 2026-05-25 |
+| 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete    | 2026-05-25 |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 0/TBD | Not started | - |
 | 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 0/TBD | Not started | - |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |

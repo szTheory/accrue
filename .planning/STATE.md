@@ -4,7 +4,7 @@ milestone: v1.40
 milestone_name: — Dunning depth / notification journeys
 status: verifying
 stopped_at: Completed 129-02-PLAN.md (DUN-08 recovered-vs-lost ledger counter)
-last_updated: "2026-05-25T06:58:32.983Z"
+last_updated: "2026-05-25T07:14:33.782Z"
 last_activity: 2026-05-25
 progress:
   total_phases: 5
@@ -26,8 +26,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-24 after v1.39 milestone)
 
 ## Current Position
 
-Phase: 129 (customer-operator-surfaces-observability) — EXECUTING
-Plan: 4 of 4
+Phase: 130
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-05-25
 
@@ -44,7 +44,7 @@ Last activity: 2026-05-25
 
 **Velocity:**
 
-- Total plans completed: 27 (v1.39)
+- Total plans completed: 31 (v1.39)
 - Average duration: —
 - Total execution time: —
 
