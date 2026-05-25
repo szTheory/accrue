@@ -3,9 +3,10 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   use Phoenix.LiveView
 
-  alias Accrue.{Actor, Auth, Billing, Events, PlanResolver}
+  alias Accrue.{Actor, Auth, Billing, Clock, Config, Events, PlanResolver}
   alias Accrue.Billing.Subscription
   alias Accrue.Billing.UpcomingInvoice
+  alias Accrue.Dunning.Campaign
   alias Accrue.Repo
 
   alias AccrueAdmin.Components.{
@@ -214,6 +215,42 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </li>
             </ul>
           </nav>
+        </article>
+
+        <article class="ax-card" data-role="subscription-dunning-state">
+          <header class="ax-page-header">
+            <p class="ax-eyebrow"><%= Copy.dunning_panel_eyebrow() %></p>
+            <h3 class="ax-heading"><%= Copy.dunning_panel_title() %></h3>
+          </header>
+
+          <div class="ax-stack-sm">
+            <p class="ax-body">
+              <span class={["ax-status-badge", dunning_badge_tone(@subscription)]}>
+                <span class="ax-status-dot"></span><%= Copy.dunning_state_label(@subscription) %>
+              </span>
+            </p>
+
+            <%= if Subscription.dunning_campaign_active?(@subscription) do %>
+              <p class="ax-body">
+                <strong class="ax-label"><%= Copy.dunning_started_label() %></strong>
+                <%= format_datetime(@subscription.dunning_campaign_started_at) %>
+              </p>
+              <p class="ax-body">
+                <strong class="ax-label"><%= Copy.dunning_next_action_label() %></strong>
+                <%= next_action_summary(@subscription) %>
+              </p>
+            <% else %>
+              <p class="ax-body"><%= Copy.dunning_empty_state_body() %></p>
+              <p class="ax-body">
+                <strong class="ax-label"><%= Copy.dunning_started_label() %></strong>
+                <%= format_datetime(@subscription.dunning_campaign_started_at) %>
+              </p>
+              <p class="ax-body">
+                <strong class="ax-label"><%= Copy.dunning_next_action_label() %></strong>
+                <%= next_action_summary(@subscription) %>
+              </p>
+            <% end %>
+          </div>
         </article>
 
         <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_subscription(@subscription, @customer)} />
@@ -980,6 +1017,52 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
   defp format_datetime(_value), do: "Unknown"
+
+  # Read-only dunning-state panel (DUN-07 / SC#2). Tone is conveyed by the
+  # status-badge variant only — the panel has no accent fill and no actions.
+  # Amber = active dunning in progress; slate = no campaign has ever run.
+  defp dunning_badge_tone(%Subscription{} = subscription) do
+    if Subscription.dunning_campaign_active?(subscription) do
+      "ax-status-badge-amber"
+    else
+      "ax-status-badge-slate"
+    end
+  end
+
+  # "Next scheduled action" derived from the PURE resolver
+  # `Accrue.Dunning.Campaign.next_step/3` (D-14) — decoupled from Oban
+  # internals and deterministic. `Accrue.Clock.utc_now/0` (NOT
+  # `DateTime.utc_now/0`) keeps the Fake-lane deterministic (Pitfall 6).
+  # If the configured steps are unavailable the helper falls back to the
+  # "unavailable" Copy rather than crashing the LiveView (T-129-14).
+  defp next_action_summary(%Subscription{dunning_campaign_started_at: %DateTime{} = anchor}) do
+    case Campaign.next_step(Config.dunning_campaign_steps(), anchor, Clock.utc_now()) do
+      {:next, step, schedule_in} ->
+        step_key = step |> Keyword.fetch!(:key) |> Atom.to_string()
+        "#{step_key} in #{humanize_schedule_in(schedule_in)}"
+
+      :done ->
+        Copy.dunning_next_action_done()
+    end
+  rescue
+    _ -> Copy.dunning_next_action_unavailable()
+  end
+
+  defp next_action_summary(_subscription), do: Copy.dunning_empty_state_body()
+
+  defp humanize_schedule_in(seconds) when is_integer(seconds) and seconds <= 0, do: "now"
+
+  defp humanize_schedule_in(seconds) when is_integer(seconds) do
+    cond do
+      seconds < 60 -> pluralize(seconds, "second")
+      seconds < 3_600 -> pluralize(div(seconds, 60), "minute")
+      seconds < 86_400 -> pluralize(div(seconds, 3_600), "hour")
+      true -> pluralize(div(seconds, 86_400), "day")
+    end
+  end
+
+  defp pluralize(1, unit), do: "1 #{unit}"
+  defp pluralize(count, unit), do: "#{count} #{unit}s"
 
   defp lifecycle_operator_summary(subscription) do
     case predicate_summary(subscription) do
