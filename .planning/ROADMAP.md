@@ -128,8 +128,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 131-03-PLAN.md — `Accrue.Dunning.Engine.Oban` built-in wrapper + `default_handler.ex` engine dispatch + struct stash (DUN-03)
-- [ ] 131-04-PLAN.md — Conditionally-compiled `Accrue.Integrations.Chimeway` adapter + bundled `DunningNotifier` + optional dep (DUN-03)
+- [x] 131-03-PLAN.md — `Accrue.Dunning.Engine.Oban` built-in wrapper + `default_handler.ex` engine dispatch + struct stash (DUN-03)
+- [x] 131-04-PLAN.md — Conditionally-compiled `Accrue.Integrations.Chimeway` adapter + bundled `DunningNotifier` + optional dep (DUN-03)
 
 **Wave 3** *(blocked on Wave 2)*
 
@@ -161,7 +161,7 @@ Phases execute in numeric order: 128 → 129 → 130 → 131 → 132
 | 128. Campaign Engine Foundation + Idempotency Must-Fix | v1.40 | 6/6 | Complete    | 2026-05-24 |
 | 129. Customer + Operator Surfaces + Observability | v1.40 | 4/4 | Complete    | 2026-05-25 |
 | 130. Provider Honesty + Fake-Lane Proof + Example-Host Wiring | v1.40 | 4/4 | Complete    | 2026-05-25 |
-| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 2/6 | In Progress|  |
+| 131. Optional Chimeway Engine Adapter (isolated) | v1.40 | 4/6 | In Progress|  |
 | 132. Entitlements Adopter-Proof Demo | v1.40 | 0/TBD | Not started | - |
 
 ## Notes
