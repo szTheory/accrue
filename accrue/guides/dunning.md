@@ -125,6 +125,92 @@ NimbleOptions schema.
 
 ---
 
+## Upgrading to Chimeway orchestration
+
+The built-in campaign engine — `Accrue.Dunning.Engine.Oban` — is **always on by default**
+and requires no additional dependencies. Core Accrue never requires Chimeway.
+
+If you want to delegate dunning orchestration to [Chimeway](https://hex.pm/packages/chimeway),
+Accrue ships an **optional, off-by-default** adapter (`Accrue.Integrations.Chimeway`) that
+implements the `Accrue.Dunning.Engine` behaviour and routes campaign lifecycle events through
+Chimeway's `trigger/3` + `Notifier` surface. This section is the opt-in upgrade guide.
+
+> **v1.40 scope:** the adapter is email-only with `:immediate` orchestration. Multi-channel
+> and multi-step workflow orchestration are deferred to a future v1.x minor.
+
+### Prerequisites
+
+- Chimeway **1.0.0** (or a compatible `~> 1.0` release) published to Hex.
+- Accrue v1.40 or later (the `Accrue.Dunning.Engine` behaviour and adapter ship together).
+- Chimeway's own migrations must be run in the host database. Accrue does **not** start
+  Chimeway — that is the host app's responsibility.
+
+### Installation
+
+Add `:chimeway` to your host's `mix.exs`:
+
+```elixir
+defp deps do
+  [
+    {:accrue, "~> 1.40"},
+    {:chimeway, "~> 1.0"},   # optional — only needed when upgrading to Chimeway orchestration
+    # ...
+  ]
+end
+```
+
+Follow Chimeway's install guide to add the required Chimeway migrations and start Chimeway in
+your supervision tree. Accrue does not start or supervise Chimeway.
+
+### Configuration
+
+Flip the `engine:` key under `:dunning`:
+
+```elixir
+# config/config.exs  (compile-time is acceptable — engine adapter is stable per-deploy)
+config :accrue,
+  dunning: [engine: Accrue.Integrations.Chimeway]
+```
+
+The `dunning: [engine:` key accepts any module that implements the `Accrue.Dunning.Engine`
+behaviour. The built-in default is `Accrue.Dunning.Engine.Oban`. Switching to
+`Accrue.Integrations.Chimeway` is additive and reversible — remove the key to fall back to the
+built-in engine.
+
+### What changes
+
+- **Orchestration of dunning notifications** delegates to Chimeway. When a campaign starts,
+  Accrue calls `Chimeway.trigger/3` with the bundled `Accrue.Integrations.Chimeway.DunningNotifier`
+  as the notifier module. The `DunningNotifier` implements `Chimeway.Notifier` with
+  `channels/2` returning `[:email]` and `orchestration/2` returning `:immediate` — so
+  Chimeway delivers the dunning email immediately, with no WorkflowRun created.
+- **Cancel-on-recovery** emits a `"payment_recovered"` signal via `Chimeway.Signal.track/4`
+  when the subscription returns to `:active`. With `:immediate` orchestration this signal
+  routes to zero WorkflowRuns (a safe no-op); Accrue's anchor-clear prevents any future
+  `start_campaign` call from the recovered subscription.
+- The adapter is **conditionally compiled**: when `:chimeway` is not present in the host's
+  deps, `Accrue.Integrations.Chimeway` is never defined. There is no runtime overhead in the
+  default (Oban-only) build.
+
+### What stays the same
+
+The following are **not affected** by switching to Chimeway orchestration:
+
+- **Campaign DB state** — `dunning_campaign_started_at` on `accrue_subscriptions` remains the
+  single anchor column; Accrue still owns all dunning DB writes.
+- **Email templates** — the same Accrue dunning email templates (`dunning_step_1`,
+  `dunning_step_2`, `dunning_step_3`) are used; Chimeway routes delivery, Accrue authors the
+  content.
+- **Ledger events** — `dunning.campaign_started`, `dunning.step_sent`, `dunning.recovered`, and
+  `dunning.exhausted` are still written to `accrue_events`.
+- **Telemetry** — the `[:accrue, :ops, :dunning_*]` telemetry family is unchanged.
+- **Customer and admin surfaces** — the portal recovery banner, the admin dunning-state card,
+  and `Accrue.Billing.Dunning.recovered_vs_lost/1` all work identically.
+- **`Accrue.Dunning.Engine` behaviour** — the behaviour is the seam. You can implement your own
+  adapter via `@behaviour Accrue.Dunning.Engine` and configure it under `dunning: [engine:]`.
+
+---
+
 ## Observability
 
 The dunning campaign emits four **ledger events** (written to `accrue_events`):

@@ -134,6 +134,11 @@ require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'entitlements.active_ent
 require_fixed "$ROOT_DIR/accrue/guides/entitlements.md" 'does NOT change `entitled?` /'
 require_fixed "$ROOT_DIR/accrue/guides/telemetry.md" '[:accrue, :entitlements, :sync]'
 
+# Optional Chimeway dunning engine adapter (Phase 131, DUN-03)
+require_fixed "$ROOT_DIR/accrue/guides/dunning.md" 'Accrue.Dunning.Engine'
+require_fixed "$ROOT_DIR/accrue/guides/dunning.md" 'Accrue.Integrations.Chimeway'
+require_fixed "$ROOT_DIR/accrue/guides/dunning.md" 'dunning: [engine:'
+
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"README.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/admin_ui.md"'
 require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/core-admin-parity.md"'
