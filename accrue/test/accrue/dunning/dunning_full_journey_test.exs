@@ -197,18 +197,21 @@ defmodule Accrue.Dunning.DunningFullJourneyTest do
   end
 
   # Attaches a test telemetry handler that sends a message to the calling process.
+  # Handler names are made unique per invocation to prevent duplicate-attach errors
+  # on CI retries or when the process crashes before on_exit cleanup runs.
   defp attach_telemetry(name, event) do
+    unique_name = "#{name}-#{System.unique_integer([:positive])}"
     test_pid = self()
 
     :ok =
       :telemetry.attach(
-        name,
+        unique_name,
         event,
         fn evt, meas, meta, _ -> send(test_pid, {:telemetry, evt, meas, meta}) end,
         nil
       )
 
-    ExUnit.Callbacks.on_exit(fn -> :telemetry.detach(name) end)
+    ExUnit.Callbacks.on_exit(fn -> :telemetry.detach(unique_name) end)
   end
 
   # Queries ledger events for a given type + subscription subject.
