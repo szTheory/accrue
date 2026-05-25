@@ -35,7 +35,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Provider Honesty & Proof
 
-- [ ] **DUN-09**: Dunning behavior is provider-honest and documented — Stripe (Smart Retries timing + Accrue cadence; Test Clocks for the real-Stripe E2E lane), Braintree (Accrue-clock-driven cadence, explicitly not retry-aligned), Fake (deterministic proof lane) — captured in `guides/` with a lifecycle/capability truth note and a merge-blocking drift check where labels are claimed.
+- [x] **DUN-09**: Dunning behavior is provider-honest and documented — Stripe (Smart Retries timing + Accrue cadence; Test Clocks for the real-Stripe E2E lane), Braintree (Accrue-clock-driven cadence, explicitly not retry-aligned), Fake (deterministic proof lane) — captured in `guides/` with a lifecycle/capability truth note and a merge-blocking drift check where labels are claimed.
 - [ ] **DUN-10**: A deterministic, clock-advanceable Fake-lane test proves the full journey (start → step progression → cancel-on-recovery → exhaustion) as a merge-blocking gate, and the default campaign is wired into `examples/accrue_host` so recovery is demonstrated end-to-end (closing the dormant-cron gap).
 
 ### Adopter Proof (folded in from the v1.39 gap)
@@ -78,7 +78,7 @@ Which phases cover which requirements. Phases continue from v1.39 (ended at Phas
 | DUN-06 | Phase 129 | Complete |
 | DUN-07 | Phase 129 | Complete |
 | DUN-08 | Phase 129 | Complete |
-| DUN-09 | Phase 130 | Pending |
+| DUN-09 | Phase 130 | Complete |
 | DUN-10 | Phase 130 | Pending |
 | DUN-03 | Phase 131 | Pending |
 | PROOF-03 | Phase 132 | Pending |
