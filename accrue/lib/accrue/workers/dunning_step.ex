@@ -38,13 +38,20 @@ defmodule Accrue.Workers.DunningStep do
   exhaustion vector on DB-sourced input. All wall-clock reads use
   `Accrue.Clock.utc_now/0` for Fake-lane determinism (Phase 130).
 
+  ## Observability (DUN-08, Phase 129)
+
+  Each delivered step records a `dunning.step_sent` `accrue_events` ledger
+  entry (the audit trail + the substrate the recovered-vs-lost counter folds
+  over) AND fires `[:accrue, :ops, :dunning_step_sent]` telemetry (live
+  operator metrics). Both carry only safe IDs + bounded values
+  (`subscription_id`, `step_key`, `step_index`) — never customer email, card
+  data, or amounts (V7 PII-exclusion contract).
+
   ## Scope fence
 
-  Phase 128 is the engine + correctness only. This worker emits NO ledger
-  events and NO telemetry (DUN-08, Phase 129) and does NOT introduce the
-  `Accrue.Dunning.Engine` behaviour (DUN-03, Phase 131) — step resolution
-  is a direct call to the pure resolver, keeping the future engine seam
-  clean.
+  This worker does NOT introduce the `Accrue.Dunning.Engine` behaviour
+  (DUN-03, Phase 131) — step resolution is a direct call to the pure
+  resolver, keeping the future engine seam clean.
 
   ## Host wiring
 
@@ -58,7 +65,8 @@ defmodule Accrue.Workers.DunningStep do
 
   alias Accrue.Billing.Subscription
   alias Accrue.Dunning.Campaign
-  alias Accrue.{Config, Mailer, Repo}
+  alias Accrue.Telemetry.Ops
+  alias Accrue.{Config, Events, Mailer, Repo}
 
   @doc """
   Delivers one dunning step and chains the next.
@@ -167,6 +175,37 @@ defmodule Accrue.Workers.DunningStep do
     }
 
     Mailer.deliver(email_type(step_key_str), assigns)
+
+    emit_step_sent(sub, step_key_str)
+  end
+
+  # DUN-08 observability: record the `dunning.step_sent` ledger entry AND fire
+  # `[:accrue, :ops, :dunning_step_sent]` telemetry AFTER the step email is
+  # delivered. Outside any transaction (the worker never wraps delivery in
+  # Repo.transact), so we use the post-write `Events.record/1`. `step_index`
+  # is the step's position in the live cadence (the configured list is the
+  # SSOT); `nil` when the host edited the key out mid-flight. Metadata + data
+  # carry only IDs + bounded values — no PII (T-129-01).
+  defp emit_step_sent(%Subscription{} = sub, step_key_str) do
+    step_index =
+      Enum.find_index(Config.dunning_campaign_steps(), fn step ->
+        Atom.to_string(Keyword.fetch!(step, :key)) == step_key_str
+      end)
+
+    Events.record(%{
+      type: "dunning.step_sent",
+      subject_type: "Subscription",
+      subject_id: sub.id,
+      data: %{step_key: step_key_str, step_index: step_index}
+    })
+
+    Ops.emit(:dunning_step_sent, %{count: 1}, %{
+      subscription_id: sub.id,
+      step_key: step_key_str,
+      step_index: step_index
+    })
+
+    :ok
   end
 
   # Resolve the next step from the pure resolver and enqueue it with the

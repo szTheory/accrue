@@ -765,6 +765,8 @@ defmodule Accrue.Webhook.DefaultHandler do
     with true <- Subscription.dunning_sweepable?(row),
          to_status when not is_nil(to_status) <-
            Subscription.dunning_exhausted_status(updated) do
+      source = dunning_source(row.dunning_sweep_attempted_at)
+
       :telemetry.execute(
         [:accrue, :ops, :dunning_exhaustion],
         %{count: 1},
@@ -772,9 +774,30 @@ defmodule Accrue.Webhook.DefaultHandler do
           subscription_id: updated.id,
           from_status: :past_due,
           to_status: to_status,
-          source: dunning_source(row.dunning_sweep_attempted_at)
+          source: source
         }
       )
+
+      # DUN-08 observability: `dunning.exhausted` is the SOLE canonical loss
+      # signal (the recovered-vs-lost counter folds over it — Plan 02). It
+      # fires ONLY on this confirmed transition, covering all loss sources;
+      # the sweeper's request-time `dunning.terminal_action_requested` is left
+      # untouched and excluded so loss can never be double-counted (T-129-04).
+      # The ledger write runs inside the reducer's enclosing Repo.transact, so
+      # it is atomic with the status write. Data + metadata carry only IDs +
+      # bounded enums — no PII (T-129-01).
+      Events.record(%{
+        type: "dunning.exhausted",
+        subject_type: "Subscription",
+        subject_id: updated.id,
+        data: %{to_status: to_status, source: source}
+      })
+
+      Accrue.Telemetry.Ops.emit(:dunning_exhausted, %{count: 1}, %{
+        subscription_id: updated.id,
+        to_status: to_status,
+        source: source
+      })
     end
 
     :ok
@@ -799,8 +822,14 @@ defmodule Accrue.Webhook.DefaultHandler do
   # cancel-guard (Plan 05, D-11) self-cancels any step that races the
   # cancel — so a cancel failure can never leave a zombie campaign.
   #
-  # Scope fence: emits NO `dunning.recovered` ledger event / telemetry
-  # (Phase 129).
+  # DUN-08 observability (recovery edge only): on the `:past_due` → active/paid
+  # recovery transition, a `dunning.recovered` ledger entry is folded into the
+  # SAME multi as the anchor-clear write (atomic with the status write), and
+  # `[:accrue, :ops, :dunning_recovered]` telemetry fires post-commit. The
+  # terminal/exhaustion edge does NOT emit `dunning.recovered` — that loss
+  # signal is the dedicated `dunning.exhausted` event in
+  # `maybe_emit_dunning_exhaustion/2`. Metadata + data carry only IDs +
+  # bounded enums — no PII (T-129-01).
   defp maybe_finalize_dunning_campaign(nil, _updated), do: :ok
 
   defp maybe_finalize_dunning_campaign(%Subscription{} = row, %Subscription{} = updated) do
@@ -817,19 +846,47 @@ defmodule Accrue.Webhook.DefaultHandler do
          true <- finalizing_transition?(updated),
          %DateTime{} = anchor <- row.dunning_campaign_started_at do
       iso_anchor = DateTime.to_iso8601(anchor)
+      recovery? = Subscription.active?(updated)
 
-      case updated
-           |> Subscription.force_status_changeset(%{dunning_campaign_started_at: nil})
-           |> Repo.update() do
-        {:ok, _cleared} ->
+      multi =
+        Ecto.Multi.new()
+        |> Ecto.Multi.update(
+          :clear_anchor,
+          Subscription.force_status_changeset(updated, %{dunning_campaign_started_at: nil})
+        )
+
+      multi =
+        if recovery? do
+          # Fold the `dunning.recovered` ledger record into the SAME
+          # transaction as the anchor-clear (atomic with the status write).
+          Events.record_multi(multi, :dunning_recovered_event, %{
+            type: "dunning.recovered",
+            subject_type: "Subscription",
+            subject_id: updated.id,
+            data: %{source: dunning_source(row.dunning_sweep_attempted_at)}
+          })
+        else
+          multi
+        end
+
+      case Repo.transaction(multi) do
+        {:ok, _changes} ->
           # Stash the post-commit bulk-cancel instruction for the dispatch
           # site to run AFTER this transaction commits. Tightly scoped to
           # this synchronous webhook call; consumed-and-deleted once.
           Process.put(:accrue_dunning_cancel, {updated.id, iso_anchor})
+
+          if recovery? do
+            Accrue.Telemetry.Ops.emit(:dunning_recovered, %{count: 1}, %{
+              subscription_id: updated.id,
+              source: dunning_source(row.dunning_sweep_attempted_at)
+            })
+          end
+
           :ok
 
-        {:error, _} = err ->
-          err
+        {:error, _failed_op, reason, _changes} ->
+          {:error, reason}
       end
     else
       _ -> :ok
@@ -1165,11 +1222,39 @@ defmodule Accrue.Webhook.DefaultHandler do
         :ok
 
       step_key ->
+        emit_campaign_started(sub)
+
         Accrue.Workers.DunningStep.enqueue_step(sub.id, step_key, anchor, %{
           customer_id: sub.customer_id,
           invoice_id: get(canonical, :id)
         })
     end
+  end
+
+  # DUN-08 observability: the first nil→past_due elector winner records a
+  # `dunning.campaign_started` ledger entry AND fires
+  # `[:accrue, :ops, :dunning_campaign_started]` telemetry. This runs in the
+  # campaign-start path, which is a standalone `update_all` (D-09), NOT inside
+  # the reducer's Repo.transact — so we use the post-write `Events.record/1`.
+  # `step_count` is the configured cadence length. There is NO `:source` key
+  # for this event (a campaign start has no loss/recovery source). Metadata +
+  # data carry only IDs + bounded values — no PII (T-129-01).
+  defp emit_campaign_started(%Subscription{} = sub) do
+    step_count = length(Accrue.Config.dunning_campaign_steps())
+
+    Events.record(%{
+      type: "dunning.campaign_started",
+      subject_type: "Subscription",
+      subject_id: sub.id,
+      data: %{step_count: step_count}
+    })
+
+    Accrue.Telemetry.Ops.emit(:dunning_campaign_started, %{count: 1}, %{
+      subscription_id: sub.id,
+      step_count: step_count
+    })
+
+    :ok
   end
 
   # The day-0 step is the configured step at `after_days: 0`.
