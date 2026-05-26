@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-05-26
+reviewed_at: 2026-05-26
 ---
 
 # Phase 139 — UI Design Contract
@@ -67,6 +68,14 @@ Accent reserved for: `Add manual line item` primary button, draft-status emphasi
 
 ---
 
+## Visual Hierarchy
+
+- Focal point: the draft-only add-item card is the first visual anchor inside the invoice-detail content area and should carry the page's single accent-filled primary CTA, `Add manual line item`.
+- Secondary scan target: the existing line-items review card stays adjacent to the add-item card and uses neutral surfaces plus the `Manual adjustment` badge to distinguish operator-added rows without competing with the primary form.
+- Confirmation state: remove confirmation appears inline and local to the affected row or review region so destructive intent stays visually subordinate to creation and never becomes the dominant page affordance.
+
+---
+
 ## Interaction Contract
 
 | Area | Contract |
@@ -115,11 +124,11 @@ Additional copy rules:
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-05-26
