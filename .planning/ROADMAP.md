@@ -6,7 +6,7 @@
 
 ## Phases
 
-- [ ] **Phase 135: Adopter Confidence - Host Demos (Metered & Checkout)** - Demonstrate core billing features in the example host.
+- [x] **Phase 135: Adopter Confidence - Host Demos (Metered & Checkout)** - Demonstrate core billing features in the example host.
 - [ ] **Phase 136: Adopter Confidence - Recovery Wiring** - Wire recovery crons in the example host to prove failure-handling readiness.
 - [ ] **Phase 137: Entitlement Cache Robustness & Fidelity** - Resolve WR-05 race conditions and improve sync fidelity.
 - [ ] **Phase 138: Ad-hoc Invoices - Public API** - Implement first-party API for manual invoice line items.
@@ -23,7 +23,7 @@
   2. `examples/accrue_host` demonstrates calling the `create_checkout_session` facade directly.
   3. Adopters can see these features in action by following the host demo.
 **Plans**: 1 plan
-- [ ] 135-01-PLAN.md — Implement metered usage and checkout facade demos.
+- [x] 135-01-PLAN.md — Implement metered usage and checkout facade demos.
 **UI hint**: yes
 
 ### Phase 136: Adopter Confidence - Recovery Wiring
@@ -33,7 +33,9 @@
 **Success Criteria** (what must be TRUE):
   1. `Accrue.Jobs.DetectExpiringCards` is wired into the `examples/accrue_host` Oban crontab.
   2. The example host documentation explains how to verify card expiration recovery.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 136-01-PLAN.md — Wire recovery crons and verify via smoke tests.
+- [ ] 136-02-PLAN.md — Update host UI and documentation for recovery visibility.
 
 ### Phase 137: Entitlement Cache Robustness & Fidelity
 **Goal**: Resolve WR-05 (StaleEntryError) and IN-01..04 fidelity fixes.
@@ -70,8 +72,8 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 135. Adopter Confidence - Host Demos | 0/1 | Not started | - |
-| 136. Adopter Confidence - Recovery Wiring | 0/0 | Not started | - |
+| 135. Adopter Confidence - Host Demos | 1/1 | Completed | 2026-05-26 |
+| 136. Adopter Confidence - Recovery Wiring | 0/2 | Not started | - |
 | 137. Entitlement Cache Robustness | 0/0 | Not started | - |
 | 138. Ad-hoc Invoices - Public API | 0/0 | Not started | - |
 | 139. Ad-hoc Invoices - Admin UI | 0/0 | Not started | - |
