@@ -35,6 +35,7 @@ defmodule Accrue.Billing do
     MeterEventActions,
     PaymentMethodActions,
     RefundActions,
+    Search,
     SubscriptionActions,
     SubscriptionItems,
     SubscriptionScheduleActions
@@ -1247,6 +1248,43 @@ defmodule Accrue.Billing do
 
   defp span_invoice(action, invoice, opts, delegate) do
     span_billing(:invoice, action, invoice, opts, fn -> delegate.(invoice, opts) end)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Search
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Searches for customers matching the given term.
+  Returns a list of `Accrue.Billing.Customer`.
+  """
+  def search_customers(term) do
+    span_billing(:search, :customers, term, [], fn ->
+      Search.search_customers(Customer, term)
+      |> Repo.all()
+    end)
+  end
+
+  @doc """
+  Searches for subscriptions matching the given term.
+  Returns a list of `Accrue.Billing.Subscription`.
+  """
+  def search_subscriptions(term) do
+    span_billing(:search, :subscriptions, term, [], fn ->
+      Search.search_subscriptions(Accrue.Billing.Subscription, term)
+      |> Repo.all()
+    end)
+  end
+
+  @doc """
+  Searches for invoices matching the given term.
+  Returns a list of `Accrue.Billing.Invoice`.
+  """
+  def search_invoices(term) do
+    span_billing(:search, :invoices, term, [], fn ->
+      Search.search_invoices(Accrue.Billing.Invoice, term)
+      |> Repo.all()
+    end)
   end
 
   defp span_billing(resource, action, subject, opts, fun) do
