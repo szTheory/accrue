@@ -7,7 +7,7 @@
 ## Phases
 
 - [x] **Phase 135: Adopter Confidence - Host Demos (Metered & Checkout)** - Demonstrate core billing features in the example host.
-- [ ] **Phase 136: Adopter Confidence - Recovery Wiring** - Wire recovery crons in the example host to prove failure-handling readiness.
+- [x] **Phase 136: Adopter Confidence - Recovery Wiring** - Wire recovery crons in the example host to prove failure-handling readiness.
 - [ ] **Phase 137: Entitlement Cache Robustness & Fidelity** - Resolve WR-05 race conditions and improve sync fidelity.
 - [ ] **Phase 138: Ad-hoc Invoices - Public API** - Implement first-party API for manual invoice line items.
 - [ ] **Phase 139: Ad-hoc Invoices - Admin UI** - Add operator support for managing ad-hoc line items in the admin dashboard.
@@ -32,10 +32,10 @@
 **Requirements**: PROOF-06
 **Success Criteria** (what must be TRUE):
   1. `Accrue.Jobs.DetectExpiringCards` is wired into the `examples/accrue_host` Oban crontab.
-  2. The example host documentation explains how to verify card expiration recovery.
+  2. The example host documentation (or UI) explains how to verify card expiration recovery.
 **Plans**: 2 plans
-- [ ] 136-01-PLAN.md — Wire recovery crons and verify via smoke tests.
-- [ ] 136-02-PLAN.md — Update host UI and documentation for recovery visibility.
+- [x] 136-01-PLAN.md — Wire recovery crons and verify via smoke tests.
+- [x] 136-02-PLAN.md — Update host UI and documentation for recovery visibility.
 
 ### Phase 137: Entitlement Cache Robustness & Fidelity
 **Goal**: Resolve WR-05 (StaleEntryError) and IN-01..04 fidelity fixes.
@@ -45,7 +45,9 @@
   1. Concurrent webhook deliveries for the same customer's entitlement summary no longer raise `Ecto.StaleEntryError`.
   2. Entitlement advisory cache records include the correct `processor` name.
   3. Default telemetry includes a counter for successful entitlement summary syncs.
-**Plans**: TBD
+**Plans**: 2 plans
+- [x] 137-01-PLAN.md — Implement entitlement sync fidelity fixes.
+- [x] 137-02-PLAN.md — Resolve WR-05 (StaleEntryError) via race-safe upsert.
 
 ### Phase 138: Ad-hoc Invoices - Public API
 **Goal**: Implement the public API for adding/removing items on draft invoices.
@@ -55,7 +57,9 @@
   1. `Accrue.Billing` exposes functions to add and remove ad-hoc line items to a draft invoice.
   2. Manual adjustments are recorded in the event ledger.
   3. Ad-hoc items are correctly projected into the local `Invoice` and reflected in PDFs.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 138-01-PLAN.md — Extend processor layer for invoice item operations.
+- [ ] 138-02-PLAN.md — Implement billing context actions and public API.
 
 ### Phase 139: Ad-hoc Invoices - Admin UI
 **Goal**: Provide an admin interface for managing ad-hoc line items.
@@ -73,7 +77,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 135. Adopter Confidence - Host Demos | 1/1 | Completed | 2026-05-26 |
-| 136. Adopter Confidence - Recovery Wiring | 0/2 | Not started | - |
-| 137. Entitlement Cache Robustness | 0/0 | Not started | - |
-| 138. Ad-hoc Invoices - Public API | 0/0 | Not started | - |
+| 136. Adopter Confidence - Recovery Wiring | 2/2 | Completed | 2026-05-26 |
+| 137. Entitlement Cache Robustness | 2/2 | Completed | 2026-05-26 |
+| 138. Ad-hoc Invoices - Public API | 0/2 | Not started | - |
 | 139. Ad-hoc Invoices - Admin UI | 0/0 | Not started | - |
