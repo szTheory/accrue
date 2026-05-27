@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.44
 milestone_name: milestone
-status: executing
+status: verifying
 stopped_at: Phase 144 Plan 02 complete — campaign_anchor retrofit on dunning.recovered + dunning.exhausted (DAN-02) landed
-last_updated: "2026-05-27T16:45:50.982Z"
+last_updated: "2026-05-27T16:56:15.714Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 20
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 
 Phase: 144 (funnel-query-viz-campaign-anchor-retrofit-money-formatter-po) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-27
 
 ## Milestone Progress
@@ -72,6 +72,7 @@ Last activity: 2026-05-27
 | Phase 144 P01 | 4m | 3 tasks | 3 files |
 | Phase Phase 144 P02 P02 | 6m | 2 tasks | 3 files |
 | Phase 144 P03 | 6m | 2 tasks | 3 files |
+| Phase 144 P04 | 5m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Phase 144 Plan 01 DAN-08+DAN-01 land — Inlined JSONB safe-cast at recovered_vs_lost_mrr/1 single call site; funnel/1 as ONE Repo.one over subquery with mutually-exclusive COUNT FILTER predicates so recovered+exhausted+active<=entered holds by construction; property test uses iteration-tagged subject_id/anchor instead of delete_all because accrue_events immutability trigger SQLSTATE 45A01 forbids inter-iteration cleanup
 - [Phase ?]: Phase 144 Plan 02 DAN-02 retrofit: asymmetric defensive-case at exhausted edge (Subscription.dunning_sweepable?/1 only checks status: :past_due, so Stripe-native immediate-cancel hits with nil anchor) vs reuse-already-in-scope-iso_anchor at recovered edge (with-clause guarantees non-nil); both sites preserve atomicity (Repo.transact at exhausted, Ecto.Multi at recovered); closes Phase 143 emission-boundary test coverage gap
 - [Phase ?]: Phase 144 Plan 03 DAN-09 viz lands — AccrueAdmin.Components.FunnelChart is a Phoenix.Component (LiveView-runtime-free) rendering inline-SVG horizontal proportional bars; tone palette reuses ax-kpi-delta-{slate,moss,amber}; active count owned by the component (not RecoveryLive) per OQ#2; first dedicated component-unit test in accrue_admin/test/accrue_admin/components/ uses stdlib Phoenix.LiveViewTest.render_component/2
+- [Phase ?]: Phase 144 Plan 04 DAN-09 UI half + DAN-13 lands: RecoveryLive.mount/3 calls Dunning.funnel() + renders <FunnelChart> below KPI grid; format_minor/1 helper deleted; KPI values rendered via Render.format_money/3 driven by Accrue.Config.get!(:default_currency) + Accrue.Config.default_locale() runtime accessors; Lost MRR renamed Exhausted MRR with yearly-plan worked-example delta; JPY regression test locks CLDR rendering against USD-only regressions
 
 ### Pending Todos
 
@@ -112,7 +114,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T16:45:24.842Z
+Last session: 2026-05-27T16:56:11.205Z
 Stopped at: Phase 144 Plan 02 complete — campaign_anchor retrofit on dunning.recovered + dunning.exhausted (DAN-02) landed
 Resume file: None
 

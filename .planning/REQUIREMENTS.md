@@ -78,7 +78,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
   - Linked invoice and payment-method context inline.
   - Row-click affordance from DAN-11 at-risk table.
 
-- [ ] **DAN-13** — MoneyFormatter polish (fix USD-only bug).
+- [x] **DAN-13** — MoneyFormatter polish (fix USD-only bug).
   - Replace `RecoveryLive.format_minor/1` (currently `"$" <> :erlang.float_to_binary(...)`, USD-only) with `AccrueAdmin.Components.MoneyFormatter` calls using the event payload's `currency` field.
   - Existing 2 KPI cards + new funnel + new at-risk + new drill-down all render correctly for JPY, EUR, GBP, USD.
   - Regression test: seed a `dunning.recovered` event with `"currency": "jpy"` and assert rendered output uses `¥` (or CLDR's locale-correct rendering), not `$`.
@@ -148,7 +148,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 | DAN-10 | Phase 145 | Pending |
 | DAN-11 | Phase 146 | Pending |
 | DAN-12 | Phase 147 | Pending |
-| DAN-13 | Phase 144 | Pending |
+| DAN-13 | Phase 144 | Complete |
 | DAN-14 | Phase 148 | Pending |
 | DAN-15 | Phase 148 | Pending |
 | DAN-16 | Phase 148 | Pending |

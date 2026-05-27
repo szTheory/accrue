@@ -9,7 +9,7 @@
 
 ## Phases
 
-- [ ] **Phase 144: Funnel query + viz + campaign-anchor retrofit + money formatter polish** — DISTINCT-tuple funnel API, `FunnelChart` HEEx component, Phase 143 forward-fix snapshotting `campaign_anchor` onto recovered/exhausted events, JSONB cast safety, and CLDR-correct money rendering across the dashboard.
+- [x] **Phase 144: Funnel query + viz + campaign-anchor retrofit + money formatter polish** — DISTINCT-tuple funnel API, `FunnelChart` HEEx component, Phase 143 forward-fix snapshotting `campaign_anchor` onto recovered/exhausted events, JSONB cast safety, and CLDR-correct money rendering across the dashboard. (completed 2026-05-27)
 - [ ] **Phase 145: Time-window URL plumbing + window selector** — `?window=7d|30d|90d` URL parameter, three-button selector, threaded `:since`/`:until` through funnel + recovered-vs-lost callers, UTC-only labels.
 - [ ] **Phase 146: At-risk query + at-risk table + last-failure enrichment** — `at_risk_subscriptions/1` public API with ledger-as-tiebreaker against projection lag, `campaign_started` event payload enriched with last failure reason, at-risk table rendered inline below the funnel.
 - [ ] **Phase 147: Per-subscription drill-down route + CampaignLive** — `campaign_timeline/2` public API, `/billing/analytics/recovery/subscriptions/:id` drill-down route inside the admin live_session, vertical timeline rendering with linked invoice/payment context.
@@ -30,7 +30,7 @@
   4. The two existing KPI cards plus the new funnel render currency-correct labels: JPY shows `¥` (or CLDR locale-correct symbol), USD shows `$`, EUR shows `€` — no more USD-only `:erlang.float_to_binary` rendering.
   5. The funnel renames the previously-shipped "Lost MRR" copy to "Exhausted MRR" with a tooltip defining the term and a worked example for yearly-plan customers.
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 **Wave 1**
 
@@ -43,7 +43,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 144-04-PLAN.md — RecoveryLive wiring: funnel call + MoneyFormatter swap + Exhausted-MRR rename + JPY regression (DAN-09, DAN-13)
+- [x] 144-04-PLAN.md — RecoveryLive wiring: funnel call + MoneyFormatter swap + Exhausted-MRR rename + JPY regression (DAN-09, DAN-13)
 
 **UI hint:** yes
 **Note:** This phase owns the Phase 143 forward-fix to the write path — `campaign_anchor` is snapshotted onto `dunning.recovered` (`default_handler.ex:~880`) and `dunning.exhausted` (`default_handler.ex:~805`) event payloads. Required for Pitfall #1 (funnel double-counting) prevention.
@@ -114,7 +114,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 3/4 | In Progress|  |
+| 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 4/4 | Complete   | 2026-05-27 |
 | 145. Time-window URL plumbing + window selector | 0/0 | Not started | - |
 | 146. At-risk query + at-risk table + last-failure enrichment | 0/0 | Not started | - |
 | 147. Per-subscription drill-down route + CampaignLive | 0/0 | Not started | - |
