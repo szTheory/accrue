@@ -782,6 +782,21 @@ defmodule Accrue.Webhook.DefaultHandler do
       mrr_value_cents = calculate_mrr_cents(canonical)
       currency = get(canonical, :currency) || "usd"
 
+      # DAN-02 forward-fix (Phase 144 Plan 02): snapshot the campaign anchor onto
+      # the event payload so the DAN-01 funnel can DISTINCT-tuple by
+      # (subject_id, campaign_anchor) and avoid double-counting cycled dunning.
+      # `row.dunning_campaign_started_at` may be `nil` when a past_due
+      # subscription transitions to canceled/unpaid via a non-Accrue path
+      # (Stripe-native dunning never sets the anchor) — `Subscription.dunning_sweepable?/1`
+      # only checks `status: :past_due`. The defensive `case` prevents a
+      # `KeyError` on bare `DateTime.to_iso8601(nil)`; the funnel's
+      # COALESCE-to-sentinel folds nil-anchor exhaustions into the legacy bucket.
+      iso_anchor =
+        case row.dunning_campaign_started_at do
+          %DateTime{} = dt -> DateTime.to_iso8601(dt)
+          _ -> nil
+        end
+
       :telemetry.execute(
         [:accrue, :ops, :dunning_exhaustion],
         %{count: 1},
@@ -809,7 +824,8 @@ defmodule Accrue.Webhook.DefaultHandler do
           to_status: to_status,
           source: source,
           mrr_value_cents: mrr_value_cents,
-          currency: currency
+          currency: currency,
+          campaign_anchor: iso_anchor
         }
       })
 
