@@ -8,6 +8,23 @@
 
 - Webhook replay confirmations, bulk DLQ prompts, and related operator strings now live in `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Locked` (Phase 27). Hosts that snapshot admin flash or HEEx literals should diff package tests when upgrading.
 
+## [1.2.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.1.2...accrue_admin-v1.2.0) (2026-05-26)
+
+
+### Features
+
+* **126-02:** add Copy.Entitlements submodule, defdelegates, export allowlist ([4fa9094](https://github.com/szTheory/accrue/commit/4fa90942351c810bf62c1103b2823e2c8847e5a5))
+* **126-02:** add read-only entitlements tab to CustomerLive ([474505d](https://github.com/szTheory/accrue/commit/474505d1656a123904a3d42ffb1fcd65f171c17e))
+* **129-04:** add dunning panel Copy strings (defs + delegates) ([d49fe88](https://github.com/szTheory/accrue/commit/d49fe88f9ddbb70ab4f04d09e05db61a821756f1))
+* **129-04:** render read-only dunning-state ax-card + next-action/badge helpers ([b47ed88](https://github.com/szTheory/accrue/commit/b47ed88da333876c0fec3d638e5db18ac366f6e0))
+
+
+### Bug Fixes
+
+* **126:** CR-01 guard entitlements resolution against render-time crash (IN-01) ([0544d73](https://github.com/szTheory/accrue/commit/0544d73347e2910d0ed4fd2bed5e330f195d5fdc))
+* **126:** WR-02 clean empty-state for drift-only customers ([8f9ff9b](https://github.com/szTheory/accrue/commit/8f9ff9bba1993c907951a4f329de5303e09c71ec))
+* **126:** WR-04 compute entitlements result into socket assign for render purity ([63b9596](https://github.com/szTheory/accrue/commit/63b959612e74365b3e4e5ea47aa96a9c24a6c7fc))
+
 ## [1.1.2](https://github.com/szTheory/accrue/compare/accrue_admin-v1.1.1...accrue_admin-v1.1.2) (2026-05-08)
 
 

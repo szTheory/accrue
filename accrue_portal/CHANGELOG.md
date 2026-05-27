@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.1.2...accrue_portal-v1.2.0) (2026-05-26)
+
+
+### Features
+
+* **129-03:** render provider-aware portal recovery banner (DUN-06) ([5113a60](https://github.com/szTheory/accrue/commit/5113a60bce93a02ae5deb12985ee01a4f1d52e87))
+
 ## [1.1.2](https://github.com/szTheory/accrue/compare/accrue_portal-v1.1.1...accrue_portal-v1.1.2) (2026-05-08)
 
 
