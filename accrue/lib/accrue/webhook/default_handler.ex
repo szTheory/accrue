@@ -1233,7 +1233,7 @@ defmodule Accrue.Webhook.DefaultHandler do
 
       case count do
         1 ->
-          emit_campaign_started(sub)
+          emit_campaign_started(sub, canonical)
           opts = [invoice_id: get(canonical, :id)]
           Accrue.Config.dunning_engine().start_campaign(sub, now_usec, opts)
 
@@ -1253,14 +1253,14 @@ defmodule Accrue.Webhook.DefaultHandler do
   # `step_count` is the configured cadence length. There is NO `:source` key
   # for this event (a campaign start has no loss/recovery source). Metadata +
   # data carry only IDs + bounded values — no PII (T-129-01).
-  defp emit_campaign_started(%Subscription{} = sub) do
+  defp emit_campaign_started(%Subscription{} = sub, canonical) do
     step_count = length(Accrue.Config.dunning_campaign_steps())
 
     Events.record(%{
       type: "dunning.campaign_started",
       subject_type: "Subscription",
       subject_id: sub.id,
-      data: %{step_count: step_count}
+      data: %{step_count: step_count, invoice_id: get(canonical, :id)}
     })
 
     Accrue.Telemetry.Ops.emit(:dunning_campaign_started, %{count: 1}, %{
