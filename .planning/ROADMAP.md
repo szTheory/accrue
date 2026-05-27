@@ -30,7 +30,7 @@
   4. The two existing KPI cards plus the new funnel render currency-correct labels: JPY shows `¥` (or CLDR locale-correct symbol), USD shows `$`, EUR shows `€` — no more USD-only `:erlang.float_to_binary` rendering.
   5. The funnel renames the previously-shipped "Lost MRR" copy to "Exhausted MRR" with a tooltip defining the term and a worked example for yearly-plan customers.
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 Plans:
 **Wave 1**
 
@@ -39,7 +39,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 144-03-PLAN.md — FunnelChart Phoenix.Component + .ax-funnel-* CSS + component unit tests (DAN-09)
+- [x] 144-03-PLAN.md — FunnelChart Phoenix.Component + .ax-funnel-* CSS + component unit tests (DAN-09)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -114,7 +114,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 2/4 | In Progress|  |
+| 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 3/4 | In Progress|  |
 | 145. Time-window URL plumbing + window selector | 0/0 | Not started | - |
 | 146. At-risk query + at-risk table + last-failure enrichment | 0/0 | Not started | - |
 | 147. Per-subscription drill-down route + CampaignLive | 0/0 | Not started | - |

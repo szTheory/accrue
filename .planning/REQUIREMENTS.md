@@ -53,7 +53,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 
 ### Admin UI Recovery Dashboard (DAN)
 
-- [ ] **DAN-09** — Funnel visualization on `/billing/analytics/recovery`.
+- [x] **DAN-09** — Funnel visualization on `/billing/analytics/recovery`.
   - `AccrueAdmin.Components.FunnelChart` HEEx component with inline SVG (no JS chart library).
   - Three stacked stages with proportional widths from `funnel/1` result.
   - Stage labels + counts + percentage-of-entered.
@@ -144,7 +144,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 | DAN-06 | Phase 148 | Pending |
 | DAN-07 | Phase 148 | Pending |
 | DAN-08 | Phase 144 | Complete |
-| DAN-09 | Phase 144 | Pending |
+| DAN-09 | Phase 144 | Complete |
 | DAN-10 | Phase 145 | Pending |
 | DAN-11 | Phase 146 | Pending |
 | DAN-12 | Phase 147 | Pending |
