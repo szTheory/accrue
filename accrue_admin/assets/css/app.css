@@ -1273,3 +1273,40 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   white-space: nowrap;
   border: 0;
 }
+
+/* At-risk table — analytics section below funnel */
+.ax-at-risk-table {
+  overflow-x: auto;
+}
+
+.ax-at-risk-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+  margin-bottom: var(--ax-space-md);
+}
+
+.ax-at-risk-grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ax-at-risk-grid th,
+.ax-at-risk-grid td {
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--ax-border);
+}
+
+.ax-at-risk-grid thead th {
+  border-bottom: 1px solid var(--ax-border-strong);
+}
+
+.ax-at-risk-grid tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ax-at-risk-grid tbody tr:hover td {
+  background: color-mix(in srgb, var(--ax-sunken) 50%, var(--ax-elevated));
+}
