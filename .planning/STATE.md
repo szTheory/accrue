@@ -4,13 +4,13 @@ milestone: v1.43
 milestone_name: Linked Release 1.2.0 Truth
 status: completed
 stopped_at: none
-last_updated: "2026-05-27T11:03:43.297Z"
+last_updated: "2026-05-27T12:28:01.185Z"
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
 
  Phase: 143
  Plan: 02
- Status: Complete
- Last activity: 2026-05-27 -- Completed Phase 143 Plan 02.
+ Status: Complete (phase verified passed 4/4 must-haves)
+ Last activity: 2026-05-27 -- Closed out phase 143 via safe-resume: wrote 143-01-SUMMARY.md, verified phase goal.
 
 ## Milestone Progress
 
@@ -46,7 +46,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
 
 **Velocity:**
 
-- Total plans completed: 46 (v1.43)
+- Total plans completed: 48 (v1.43)
 - Average duration: 1m
 - Total execution time: 1m
 
