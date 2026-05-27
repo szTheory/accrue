@@ -4,17 +4,30 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   use Phoenix.LiveView
 
   alias Accrue.Analytics.Dunning
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FunnelChart, KpiCard}
 
   @impl true
   def mount(_params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
     stats = Dunning.recovered_vs_lost_mrr()
+    funnel = Dunning.funnel()
+
+    # DAN-13: format KPI card values via the CLDR-backed Render.format_money/3
+    # driven by Accrue.Config.get!(:default_currency) (runtime read — never
+    # the compile-time accessor; see RESEARCH.md Pitfall #4) plus
+    # Accrue.Config.default_locale().
+    currency = Accrue.Config.get!(:default_currency)
+    locale = Accrue.Config.default_locale()
+    recovered_str = Accrue.Invoices.Render.format_money(stats.recovered_cents, currency, locale)
+    exhausted_str = Accrue.Invoices.Render.format_money(stats.lost_cents, currency, locale)
 
     {:ok,
      socket
      |> assign_shell(admin)
-     |> assign(:stats, stats)}
+     |> assign(:stats, stats)
+     |> assign(:funnel, funnel)
+     |> assign(:recovered_str, recovered_str)
+     |> assign(:exhausted_str, exhausted_str)}
   end
 
   @impl true
@@ -38,7 +51,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         <section class="ax-kpi-grid">
           <KpiCard.kpi_card
             label="Recovered MRR"
-            value={format_minor(@stats.recovered_cents)}
+            value={@recovered_str}
             delta="Amount saved by successful Dunning"
             delta_tone="moss"
           >
@@ -46,14 +59,21 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Lost MRR"
-            value={format_minor(@stats.lost_cents)}
-            delta="Amount lost to terminal Dunning failure"
+            label="Exhausted MRR"
+            value={@exhausted_str}
+            delta="Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
             delta_tone="amber"
           >
             <:meta>Churned Revenue</:meta>
           </KpiCard.kpi_card>
         </section>
+
+        <FunnelChart.funnel_chart
+          entered={@funnel.entered}
+          recovered={@funnel.recovered}
+          exhausted={@funnel.exhausted}
+          active={@funnel.active}
+        />
       </section>
     </AppShell.app_shell>
     """
@@ -72,13 +92,6 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     |> assign(:current_path, (admin["mount_path"] || "/billing") <> "/analytics/recovery")
     |> assign(:active_organization_name, admin["active_organization_name"])
   end
-
-  defp format_minor(amount_minor) when is_integer(amount_minor) do
-    dollars = amount_minor / 100
-    "$" <> :erlang.float_to_binary(dollars, decimals: 2)
-  end
-
-  defp format_minor(_), do: "$0.00"
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
