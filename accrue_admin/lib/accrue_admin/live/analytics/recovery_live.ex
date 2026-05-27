@@ -4,13 +4,21 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   use Phoenix.LiveView
 
   alias Accrue.Analytics.Dunning
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FunnelChart, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FunnelChart, KpiCard, WindowSelector}
 
   @impl true
   def mount(_params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
-    stats = Dunning.recovered_vs_lost_mrr()
-    funnel = Dunning.funnel()
+    {:ok, assign_shell(socket, admin)}
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    window = parse_window(params["window"])
+    {since, until} = window_bounds(window)
+
+    stats = Dunning.recovered_vs_lost_mrr(since: since, until: until)
+    funnel = Dunning.funnel(since: since, until: until)
 
     # DAN-13: format KPI card values via the CLDR-backed Render.format_money/3
     # driven by Accrue.Config.get!(:default_currency) (runtime read — never
@@ -21,9 +29,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     recovered_str = Accrue.Invoices.Render.format_money(stats.recovered_cents, currency, locale)
     exhausted_str = Accrue.Invoices.Render.format_money(stats.lost_cents, currency, locale)
 
-    {:ok,
+    {:noreply,
      socket
-     |> assign_shell(admin)
+     |> assign(:window, window)
      |> assign(:stats, stats)
      |> assign(:funnel, funnel)
      |> assign(:recovered_str, recovered_str)
@@ -46,6 +54,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           <Breadcrumbs.breadcrumbs items={[%{label: "Analytics"}, %{label: "Recovery"}]} />
           <p class="ax-eyebrow">Recovery Dashboard</p>
           <h2 class="ax-display">Revenue Recovery</h2>
+          <WindowSelector.window_selector current_window={@window} base_path={@current_path} />
         </header>
 
         <section class="ax-kpi-grid">
@@ -77,6 +86,24 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
       </section>
     </AppShell.app_shell>
     """
+  end
+
+  defp parse_window(w) when w in ["7d", "30d", "90d"], do: w
+  defp parse_window(_), do: "30d"
+
+  defp window_bounds("7d") do
+    since = DateTime.add(DateTime.utc_now(), -7 * 86_400, :second)
+    {since, DateTime.utc_now()}
+  end
+
+  defp window_bounds("30d") do
+    since = DateTime.add(DateTime.utc_now(), -30 * 86_400, :second)
+    {since, DateTime.utc_now()}
+  end
+
+  defp window_bounds("90d") do
+    since = DateTime.add(DateTime.utc_now(), -90 * 86_400, :second)
+    {since, DateTime.utc_now()}
   end
 
   defp assign_shell(socket, admin) do
