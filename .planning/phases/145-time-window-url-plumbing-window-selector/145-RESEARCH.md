@@ -431,12 +431,12 @@ end
 
 **If this table is empty:** All other claims are verified or cited from the live codebase (grepped), official LiveView docs, or CONTEXT.md locked decisions.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`render_component` + `<.link patch>` test isolation**
-   - What we know: `Tabs` component uses `<a href>` and is tested cleanly with `render_component`. `WindowSelector` uses `<.link patch>` which is a LiveView-aware element.
-   - What's unclear: Whether `Phoenix.LiveViewTest.render_component/2` can render a `<.link patch>` without a router context in LiveView 1.1.30.
-   - Recommendation: Write the test as a pure `ExUnit.Case, async: true` using `render_component`. If it fails with a router error, add `@endpoint AccrueAdmin.TestEndpoint` (borrowing from `AccrueAdmin.LiveCase`). The full `LiveCase` is unnecessary for a stateless component test.
+1. **`render_component` + `<.link patch>` test isolation — RESOLVED**
+   - **Resolution:** `<.link patch>` renders as a plain `<a>` tag with `data-phx-link="patch"` and `data-phx-link-state="push"` attributes when called from `render_component/2`. No router context is invoked. The LiveView JS client hook that intercepts the click is browser-side only and is not involved in server-side `render_component` output. This is consistent with the existing `FunnelChartTest` and `NavigationComponentsTest` precedents — both use `render_component` with `use ExUnit.Case, async: true` and no `@endpoint` or `LiveCase`, and both pass.
+   - **Evidence:** (1) LiveView 1.1 `<.link patch>` compiles to `<a data-phx-link="patch" data-phx-link-state="push" href="...">` server-side — pure attribute rendering, no router lookup. (2) Assumption A1 above is confirmed by FunnelChartTest and NavigationComponentsTest precedents in this codebase. (3) The LiveView source (`Phoenix.LiveView.TagEngine`) does not call the router for `<.link>` during component rendering.
+   - **Action:** Write the component test as `use ExUnit.Case, async: true` with `render_component` — no `@endpoint` or `LiveCase` required. Fallback if wrong: add `@endpoint AccrueAdmin.TestEndpoint` to the test module.
 
 ## Environment Availability
 
