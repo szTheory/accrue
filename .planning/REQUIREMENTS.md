@@ -136,21 +136,28 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DAN-01 | TBD | Pending |
-| DAN-02 | TBD | Pending |
-| DAN-03 | TBD | Pending |
-| DAN-04 | TBD | Pending |
-| DAN-05 | TBD | Pending |
-| DAN-06 | TBD | Pending |
-| DAN-07 | TBD | Pending |
-| DAN-08 | TBD | Pending |
-| DAN-09 | TBD | Pending |
-| DAN-10 | TBD | Pending |
-| DAN-11 | TBD | Pending |
-| DAN-12 | TBD | Pending |
-| DAN-13 | TBD | Pending |
-| DAN-14 | TBD | Pending |
-| DAN-15 | TBD | Pending |
-| DAN-16 | TBD | Pending |
+| DAN-01 | Phase 144 | Pending |
+| DAN-02 | Phase 144 | Pending |
+| DAN-03 | Phase 146 | Pending |
+| DAN-04 | Phase 146 | Pending |
+| DAN-05 | Phase 147 | Pending |
+| DAN-06 | Phase 148 | Pending |
+| DAN-07 | Phase 148 | Pending |
+| DAN-08 | Phase 144 | Pending |
+| DAN-09 | Phase 144 | Pending |
+| DAN-10 | Phase 145 | Pending |
+| DAN-11 | Phase 146 | Pending |
+| DAN-12 | Phase 147 | Pending |
+| DAN-13 | Phase 144 | Pending |
+| DAN-14 | Phase 148 | Pending |
+| DAN-15 | Phase 148 | Pending |
+| DAN-16 | Phase 148 | Pending |
 
-(Phase column populated by gsd-roadmapper.)
+**Phase mapping summary:**
+- Phase 144 (5 reqs): DAN-01, DAN-02, DAN-08, DAN-09, DAN-13 — funnel API + viz + anchor retrofit + JSONB safety + money formatter
+- Phase 145 (1 req): DAN-10 — time-window URL plumbing + selector
+- Phase 146 (3 reqs): DAN-03, DAN-04, DAN-11 — at-risk query + failure-reason enrichment + at-risk table
+- Phase 147 (2 reqs): DAN-05, DAN-12 — campaign_timeline API + drill-down route
+- Phase 148 (5 reqs): DAN-06, DAN-07, DAN-14, DAN-15, DAN-16 — recovery_rate + currency widening + docs + adopter-proof
+
+**Coverage:** 16/16 v1.44 requirements mapped (100%); 0 orphans; 0 duplicates.
