@@ -80,11 +80,11 @@ Plans:
   3. Post-v1.44 active campaigns surface the triggering invoice's `failure_message` in the "Last failure reason" column; pre-v1.44 campaigns show "—" (honest default — no public-query surface).
   4. The LiveView code touching the at-risk table calls ONLY `Accrue.Analytics.Dunning.*` functions — no `Ecto.Query` import, no `Accrue.Repo` call, no `Accrue.Billing.Subscription` alias from `accrue_admin`.
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 146-01-PLAN.md — emit_campaign_started/2 invoice_id enrichment + in_active_dunning_campaign/1 query composer (DAN-03, DAN-04)
+- [x] 146-01-PLAN.md — emit_campaign_started/2 invoice_id enrichment + in_active_dunning_campaign/1 query composer (DAN-03, DAN-04)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -134,6 +134,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 4/4 | Complete    | 2026-05-27 |
 | 145. Time-window URL plumbing + window selector | 1/1 | Complete    | 2026-05-27 |
-| 146. At-risk query + at-risk table + last-failure enrichment | 0/0 | Not started | - |
+| 146. At-risk query + at-risk table + last-failure enrichment | 1/3 | In Progress|  |
 | 147. Per-subscription drill-down route + CampaignLive | 0/0 | Not started | - |
 | 148. Cross-currency widening + recovery-rate API + public docs + adopter-proof | 0/0 | Not started | - |

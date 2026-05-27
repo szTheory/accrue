@@ -22,12 +22,12 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
   - Backward compatible: legacy events without `campaign_anchor` fall through funnel de-dup as "earliest known" (single-row stage attribution).
   - Direct unit assertion at the `Events.record/record_multi` call site (closes the Phase 143 emission-boundary test coverage gap).
 
-- [ ] **DAN-03** — At-risk subscriptions query.
+- [x] **DAN-03** — At-risk subscriptions query.
   - `Accrue.Billing.Query.in_active_dunning_campaign/1` — new query composer in `accrue/lib/accrue/billing/query.ex`, sibling to `dunning_sweep_candidates/2`. Uses schema-side `dunning_campaign_started_at IS NOT NULL` as the source of truth.
   - `Accrue.Analytics.Dunning.at_risk_subscriptions/1` — public wrapper applying the **ledger-as-tiebreaker** filter (exclude subscriptions whose most recent dunning-lifecycle event is `recovered` or `exhausted`) to defeat projection lag.
   - Returns subscriptions with: `subject_id`, `customer_id`, `dunning_campaign_started_at`, `days_in_campaign`, current step (computed from `dunning.step_sent` event count), next-step ETA (derived from active Oban job timing). "Last failure reason" — see DAN-04.
 
-- [ ] **DAN-04** — Last-failure-reason via event-payload enrichment.
+- [x] **DAN-04** — Last-failure-reason via event-payload enrichment.
   - One-line enrichment of `dunning.campaign_started` event payload in `default_handler.ex:~1237` to carry the triggering invoice's `failure_message` (or equivalent canonical field).
   - Surfaced by `at_risk_subscriptions/1` from the most recent `campaign_started` event per active campaign.
   - Pre-v1.44 campaigns show "—" (honest default; no public-query surface needed).
@@ -138,8 +138,8 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 |-------------|-------|--------|
 | DAN-01 | Phase 144 | Complete |
 | DAN-02 | Phase 144 | Complete |
-| DAN-03 | Phase 146 | Pending |
-| DAN-04 | Phase 146 | Pending |
+| DAN-03 | Phase 146 | Complete |
+| DAN-04 | Phase 146 | Complete |
 | DAN-05 | Phase 147 | Pending |
 | DAN-06 | Phase 148 | Pending |
 | DAN-07 | Phase 148 | Pending |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.44
 milestone_name: milestone
 status: executing
-stopped_at: Phase 146 UI-SPEC approved
-last_updated: "2026-05-27T22:37:15.246Z"
-last_activity: 2026-05-27 -- Phase 146 planning complete
+stopped_at: Completed 146-01-PLAN.md
+last_updated: "2026-05-27T22:46:02.703Z"
+last_activity: 2026-05-27
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 6
   percent: 40
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 145 — time-window-url-plumbing-window-selector
+**Current focus:** Phase 146 — at-risk-query-at-risk-table-last-failure-enrichment
 
 ## Current Position
 
-Phase: 146
-Plan: Not started
+Phase: 146 (at-risk-query-at-risk-table-last-failure-enrichment) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 146 planning complete
+Last activity: 2026-05-27
 
 ## Milestone Progress
 
@@ -74,6 +74,7 @@ Last activity: 2026-05-27 -- Phase 146 planning complete
 | Phase 144 P03 | 6m | 2 tasks | 3 files |
 | Phase 144 P04 | 5m | 2 tasks | 3 files |
 | Phase 145 P01 | 3m | 3 tasks | 4 files |
+| Phase 146 P01 | 2m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Phase 144 Plan 03 DAN-09 viz lands — AccrueAdmin.Components.FunnelChart is a Phoenix.Component (LiveView-runtime-free) rendering inline-SVG horizontal proportional bars; tone palette reuses ax-kpi-delta-{slate,moss,amber}; active count owned by the component (not RecoveryLive) per OQ#2; first dedicated component-unit test in accrue_admin/test/accrue_admin/components/ uses stdlib Phoenix.LiveViewTest.render_component/2
 - [Phase ?]: Phase 144 Plan 04 DAN-09 UI half + DAN-13 lands: RecoveryLive.mount/3 calls Dunning.funnel() + renders <FunnelChart> below KPI grid; format_minor/1 helper deleted; KPI values rendered via Render.format_money/3 driven by Accrue.Config.get!(:default_currency) + Accrue.Config.default_locale() runtime accessors; Lost MRR renamed Exhausted MRR with yearly-plan worked-example delta; JPY regression test locks CLDR rendering against USD-only regressions
 - [Phase ?]: Phase 145 DAN-10: WindowSelector component + handle_params data loading
+- [Phase ?]: invoice_id injected into dunning.campaign_started data
+- [Phase ?]: composable predicate WHERE dunning_campaign_started_at IS NOT NULL added to Accrue.Billing.Query
 
 ### Pending Todos
 
@@ -116,9 +119,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T21:51:38.046Z
-Stopped at: Phase 146 UI-SPEC approved
-Resume file: .planning/phases/146-at-risk-query-at-risk-table-last-failure-enrichment/146-UI-SPEC.md
+Last session: 2026-05-27T22:46:02.700Z
+Stopped at: Completed 146-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
