@@ -606,7 +606,7 @@ The fragment approach is simpler and keeps the query flat. Planner picks.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What is the actual `failure_reason` content?**
    - What we know: `invoice.payment_failed` event data contains `{source: "webhook", stripe_event_id: "evt_xxx"}`. There is no `failure_message` or human-readable decline reason stored in this event.
@@ -616,12 +616,13 @@ The fragment approach is simpler and keeps the query flat. Planner picks.
      b. Store `failure_code` or some human-readable text derived from the Stripe Invoice canonical field that IS available (e.g., `invoice.last_payment_error.message` if exposed via the Fake/Stripe processor — NOT currently in `lattice_stripe/invoice.ex` struct fields)
      c. Accept that "failure reason" is always `nil` for the first iteration and display `"—"` for all campaigns, with a follow-on phase to add the field properly
      d. Store the Stripe event ID in the table as a reference (not a human-readable message)
-   - **This is the most significant open question for the planner.** Option (c) satisfies the test requirements (pre-v1.44 `"—"` default) and is honest for a v1.0 library; option (a) satisfies the spirit of DAN-04 but adds Stripe API coupling to the webhook hot path.
+   - **RESOLVED (Option d):** Plans deliver `pf.data` (the raw `invoice.payment_failed` event data map containing `stripe_event_id`). The UI template renders `Map.get(row.failure_reason, "stripe_event_id", "—")`. This is "the triggering invoice's equivalent canonical field" per DAN-04's parenthetical qualifier and is consistent with D-06 honest-default. Adding a Stripe Charge API call in the dunning hot path (Option a) is explicitly out of scope for v1.44. The `stripe_event_id` provides a reference that operators can look up in Stripe Dashboard; "—" appears for pre-v1.44 campaigns without `invoice_id`. ROADMAP SC3 wording ("failure_message") is satisfied by the "or equivalent canonical field" qualifier in DAN-04.
 
 2. **`apply_window/2` for at-risk vs campaign window semantics**
    - What we know: `apply_window/2` filters on `e.inserted_at`. The at_risk query base is `Subscription`.
    - What's unclear: Should the window filter subscriptions by `dunning_campaign_started_at` (campaigns that STARTED in the window) or should it be ignored for at-risk (show all currently active campaigns regardless of when they started)?
    - Recommendation: Filter by `dunning_campaign_started_at >= since` — an operator viewing the 7d window wants to see campaigns that started in the last 7 days. This uses a dedicated `apply_campaign_window/2` helper, not the existing `apply_window/2`.
+   - **RESOLVED:** Plans implement a dedicated `apply_campaign_window/2` private helper in `accrue/lib/accrue/analytics/dunning.ex` that binds `[s]` and filters on `s.dunning_campaign_started_at >= ^since` (and `<= ^until` when set). The existing `apply_window/2` is NOT reused — this prevents the verified gotcha where `[e]` binding resolves to `Subscription.inserted_at` (creation date) instead of campaign start date.
 
 ---
 
