@@ -46,6 +46,44 @@ defmodule Accrue.Analytics.DunningTest do
       assert %{recovered_cents: 3000, lost_cents: 500} = Dunning.recovered_vs_lost_mrr()
     end
 
+    @tag :safe_cast
+    test "does not crash when a malformed string-typed mrr_value_cents row is present (DAN-08)" do
+      # Malformed: mrr_value_cents stored as a JSON string instead of a JSON
+      # number. The DAN-08 safe-cast wraps the cast in
+      # `CASE WHEN jsonb_typeof(...) = 'number' THEN ... ELSE 0 END` so the
+      # malformed row contributes 0 instead of crashing the aggregation.
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: Ecto.UUID.generate(),
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"mrr_value_cents" => "5000", "source" => "webhook"}
+      })
+
+      # Valid integer-typed row sums normally.
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: Ecto.UUID.generate(),
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"mrr_value_cents" => 1000, "source" => "webhook"}
+      })
+
+      # Boundary: missing mrr_value_cents key contributes 0, does not raise.
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: Ecto.UUID.generate(),
+        actor_type: "system",
+        schema_version: 1,
+        data: %{}
+      })
+
+      assert %{recovered_cents: 1000, lost_cents: 0} = Dunning.recovered_vs_lost_mrr()
+    end
+
     test "respects time windows" do
       now = Accrue.Clock.utc_now()
       now_usec = %{now | microsecond: {elem(now.microsecond, 0), 6}}
