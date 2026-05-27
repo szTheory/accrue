@@ -26,11 +26,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
 
 ## Current Position
 
-Phase: 140
-Plan: 01
-Status: Complete
-Last activity: 2025-02-14 -- Completed 140-01-PLAN.md
-
+ Phase: 141
+ Plan: 01
+ Status: Complete
+ Last activity: 2026-05-27 -- Completed Phase 141 Plan 01.
 ## Milestone Progress
 
 **v1.43** (Planning): 3 phases (**140–142**). Theme: Close the linked release-truth gap by locking the three-package contract, shipping the public `1.1.2` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
@@ -95,4 +94,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- **Plan Next Phase:** Review roadmap and run `/gsd-plan-phase 140` to start execution.
+ - **Plan Next Phase:** Review roadmap and run `/gsd-plan-phase 142` to start execution.
