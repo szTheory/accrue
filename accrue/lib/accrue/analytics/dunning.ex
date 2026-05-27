@@ -183,18 +183,20 @@ defmodule Accrue.Analytics.Dunning do
         on: c.id == s.customer_id,
         left_join: cs in Event,
         on:
-          cs.type == "dunning.campaign_started" and cs.subject_id == s.id and
+          cs.type == "dunning.campaign_started" and
+            fragment("? = ?::text", cs.subject_id, s.id) and
             cs.inserted_at >= s.dunning_campaign_started_at,
         left_join: inv in Invoice,
         on: inv.processor_id == fragment("? ->> 'invoice_id'", cs.data),
         left_join: pf in Event,
         on:
-          pf.type == "invoice.payment_failed" and pf.subject_id == inv.id and
+          pf.type == "invoice.payment_failed" and
+            fragment("? = ?::text", pf.subject_id, inv.id) and
             pf.inserted_at >= s.dunning_campaign_started_at,
         left_join: j in Job,
         on:
           j.worker == "Accrue.Workers.DunningStep" and
-            fragment("? ->> 'subscription_id' = ?", j.args, s.id) and
+            fragment("? ->> 'subscription_id' = ?::text", j.args, s.id) and
             fragment(
               "? ->> 'campaign_started_at' = to_char(?, 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')",
               j.args,
@@ -203,7 +205,7 @@ defmodule Accrue.Analytics.Dunning do
         where: not is_nil(s.dunning_campaign_started_at),
         where:
           fragment(
-            "NOT EXISTS (SELECT 1 FROM accrue_events WHERE type IN ('dunning.recovered','dunning.exhausted') AND subject_id = ? AND inserted_at >= ?)",
+            "NOT EXISTS (SELECT 1 FROM accrue_events WHERE type IN ('dunning.recovered','dunning.exhausted') AND subject_id = ?::text AND inserted_at >= ?)",
             s.id,
             s.dunning_campaign_started_at
           ),
@@ -228,7 +230,7 @@ defmodule Accrue.Analytics.Dunning do
             ),
           current_step:
             fragment(
-              "(SELECT COUNT(*) FROM accrue_events WHERE type = 'dunning.step_sent' AND subject_id = ? AND inserted_at >= ?)",
+              "(SELECT COUNT(*) FROM accrue_events WHERE type = 'dunning.step_sent' AND subject_id = ?::text AND inserted_at >= ?)",
               s.id,
               s.dunning_campaign_started_at
             ),
