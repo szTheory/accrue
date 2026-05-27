@@ -30,12 +30,12 @@
   4. The two existing KPI cards plus the new funnel render currency-correct labels: JPY shows `¥` (or CLDR locale-correct symbol), USD shows `$`, EUR shows `€` — no more USD-only `:erlang.float_to_binary` rendering.
   5. The funnel renames the previously-shipped "Lost MRR" copy to "Exhausted MRR" with a tooltip defining the term and a worked example for yearly-plan customers.
 
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 Plans:
 **Wave 1**
 
 - [x] 144-01-PLAN.md — Analytics safe-cast + funnel/1 API + property test (DAN-01, DAN-08)
-- [ ] 144-02-PLAN.md — Campaign-anchor retrofit on dunning.recovered + dunning.exhausted emission (DAN-02)
+- [x] 144-02-PLAN.md — Campaign-anchor retrofit on dunning.recovered + dunning.exhausted emission (DAN-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -114,7 +114,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 1/4 | In Progress|  |
+| 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 2/4 | In Progress|  |
 | 145. Time-window URL plumbing + window selector | 0/0 | Not started | - |
 | 146. At-risk query + at-risk table + last-failure enrichment | 0/0 | Not started | - |
 | 147. Per-subscription drill-down route + CampaignLive | 0/0 | Not started | - |

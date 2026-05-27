@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.44
 milestone_name: milestone
 status: executing
-stopped_at: Phase 144 Plan 01 complete — Dunning.funnel/1 + JSONB safe-cast landed
-last_updated: "2026-05-27T16:32:10.110Z"
+stopped_at: Phase 144 Plan 02 complete — campaign_anchor retrofit on dunning.recovered + dunning.exhausted (DAN-02) landed
+last_updated: "2026-05-27T16:38:15.805Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 ## Current Position
 
 Phase: 144 (funnel-query-viz-campaign-anchor-retrofit-money-formatter-po) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-27
 
@@ -70,6 +70,7 @@ Last activity: 2026-05-27
 | 140 | 01 | 1m | 2 | 0 |
 | 143 | 02 | 2m | 2 | 3 |
 | Phase 144 P01 | 4m | 3 tasks | 3 files |
+| Phase Phase 144 P02 P02 | 6m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-27:** Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). v1.44 selected to prove the v1.40 dunning engine's ROI to adopters via the recovered-revenue dashboard.
 - **2026-05-26:** Open **v1.42 — Ad-hoc Invoices & Adopter Confidence** to address remaining JTBD frontier items and adopter-proof gaps identified during v1.39/v1.40 audits.
 - [Phase ?]: Phase 144 Plan 01 DAN-08+DAN-01 land — Inlined JSONB safe-cast at recovered_vs_lost_mrr/1 single call site; funnel/1 as ONE Repo.one over subquery with mutually-exclusive COUNT FILTER predicates so recovered+exhausted+active<=entered holds by construction; property test uses iteration-tagged subject_id/anchor instead of delete_all because accrue_events immutability trigger SQLSTATE 45A01 forbids inter-iteration cleanup
+- [Phase ?]: Phase 144 Plan 02 DAN-02 retrofit: asymmetric defensive-case at exhausted edge (Subscription.dunning_sweepable?/1 only checks status: :past_due, so Stripe-native immediate-cancel hits with nil anchor) vs reuse-already-in-scope-iso_anchor at recovered edge (with-clause guarantees non-nil); both sites preserve atomicity (Repo.transact at exhausted, Ecto.Multi at recovered); closes Phase 143 emission-boundary test coverage gap
 
 ### Pending Todos
 
@@ -108,8 +110,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T16:32:10.108Z
-Stopped at: Phase 144 Plan 01 complete — Dunning.funnel/1 + JSONB safe-cast landed
+Last session: 2026-05-27T16:38:15.803Z
+Stopped at: Phase 144 Plan 02 complete — campaign_anchor retrofit on dunning.recovered + dunning.exhausted (DAN-02) landed
 Resume file: None
 
 ## Operator Next Steps

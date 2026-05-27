@@ -17,7 +17,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
   - `@spec` declared; `@moduledoc` notes "stable since 1.4.0" + "do not exact-match the return map (open shape)".
   - Property test: `recovered + exhausted + active ≤ entered` (stream_data).
 
-- [ ] **DAN-02** — Campaign-anchor snapshot retrofit (Phase 143 forward-fix).
+- [x] **DAN-02** — Campaign-anchor snapshot retrofit (Phase 143 forward-fix).
   - Snapshot `campaign_anchor = DateTime.to_iso8601(subscription.dunning_campaign_started_at)` onto `dunning.recovered` (`default_handler.ex:~880`) and `dunning.exhausted` (`default_handler.ex:~805`) event payloads, alongside existing `mrr_value_cents` + `currency`.
   - Backward compatible: legacy events without `campaign_anchor` fall through funnel de-dup as "earliest known" (single-row stage attribution).
   - Direct unit assertion at the `Events.record/record_multi` call site (closes the Phase 143 emission-boundary test coverage gap).
@@ -137,7 +137,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DAN-01 | Phase 144 | Complete |
-| DAN-02 | Phase 144 | Pending |
+| DAN-02 | Phase 144 | Complete |
 | DAN-03 | Phase 146 | Pending |
 | DAN-04 | Phase 146 | Pending |
 | DAN-05 | Phase 147 | Pending |
