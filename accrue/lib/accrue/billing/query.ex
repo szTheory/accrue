@@ -143,4 +143,10 @@ defmodule Accrue.Billing.Query do
           is_nil(s.dunning_sweep_attempted_at)
     )
   end
+
+  @doc "Subscriptions currently in an active dunning campaign (anchor column is non-nil). Composable — pipe after any Subscription query to add the campaign-active predicate."
+  @spec in_active_dunning_campaign(Ecto.Queryable.t()) :: Ecto.Query.t()
+  def in_active_dunning_campaign(query \\ Subscription) do
+    from(s in query, where: not is_nil(s.dunning_campaign_started_at))
+  end
 end
