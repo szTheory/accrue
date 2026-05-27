@@ -120,7 +120,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 4/4 | Complete    | 2026-05-27 |
-| 145. Time-window URL plumbing + window selector | 1/1 | Complete   | 2026-05-27 |
+| 145. Time-window URL plumbing + window selector | 1/1 | Complete    | 2026-05-27 |
 | 146. At-risk query + at-risk table + last-failure enrichment | 0/0 | Not started | - |
 | 147. Per-subscription drill-down route + CampaignLive | 0/0 | Not started | - |
 | 148. Cross-currency widening + recovery-rate API + public docs + adopter-proof | 0/0 | Not started | - |
