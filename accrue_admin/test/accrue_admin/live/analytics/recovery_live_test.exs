@@ -60,7 +60,49 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert html =~ "Revenue Recovery"
     assert html =~ "Recovered MRR"
     assert html =~ "$50.00"
-    assert html =~ "Lost MRR"
+    assert html =~ "Exhausted MRR"
+    refute html =~ "Lost MRR"
     assert html =~ "$20.00"
+  end
+
+  describe "funnel rendering (DAN-09)" do
+    test "renders funnel chart below KPI grid", %{conn: conn} do
+      # Seed a cycled-dunning fixture (in addition to the file-level setup) so the
+      # funnel has structural strings to render. Distinct campaign_anchor values
+      # exercise the DISTINCT-(subject_id, campaign_anchor) tuple semantics of
+      # Dunning.funnel/1 at the rendering boundary (ground-truth math is enforced
+      # by Plan 01's unit tests).
+      now = DateTime.utc_now()
+      anchor_a = DateTime.to_iso8601(now)
+      anchor_b = DateTime.to_iso8601(DateTime.add(now, -1, :day))
+
+      Events.record(%{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: "sub_cycle",
+        data: %{campaign_anchor: anchor_a}
+      })
+
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_cycle",
+        data: %{campaign_anchor: anchor_a, mrr_value_cents: 1000, currency: "usd"}
+      })
+
+      Events.record(%{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: "sub_cycle",
+        data: %{campaign_anchor: anchor_b}
+      })
+
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+
+      assert html =~ "Recovery Funnel"
+      assert html =~ "currently in dunning"
+    end
   end
 end
