@@ -146,6 +146,15 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoice_pdf_summary_processor_ready(), to: Invoice
   defdelegate invoice_pdf_summary_hosted_ready(), to: Invoice
   defdelegate invoice_pdf_summary_render_on_demand(), to: Invoice
+  defdelegate invoice_add_manual_item_cta(), to: Invoice
+  defdelegate invoice_empty_manual_items_heading(), to: Invoice
+  defdelegate invoice_empty_manual_items_body(), to: Invoice
+  defdelegate invoice_add_manual_item_error(), to: Invoice
+  defdelegate invoice_remove_manual_item_confirm(), to: Invoice
+  defdelegate invoice_add_manual_item_success(), to: Invoice
+  defdelegate invoice_remove_manual_item_success(), to: Invoice
+  defdelegate invoice_draft_locked_guidance(), to: Invoice
+  defdelegate invoice_manual_row_badge(), to: Invoice
 
   defdelegate coupon_breadcrumb_coupons(), to: Coupon
   defdelegate coupon_index_eyebrow(), to: Coupon

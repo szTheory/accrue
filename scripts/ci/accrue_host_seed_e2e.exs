@@ -24,9 +24,9 @@ defmodule AccrueHostSeedE2E do
   @seeded_emails ["host-user@example.test", "host-admin@example.test", "billing-history@example.test"]
   @fixture_org_customer_emails ["admin-e2e-alpha-customer@example.test"]
   @fixture_processor_event_ids ["evt_host_browser_replay", "evt_host_browser_first_run"]
-  @fixture_customer_processor_ids ["cus_host_browser_replay"]
-  @fixture_subscription_processor_ids ["sub_host_browser_replay"]
-  @fixture_subscription_item_processor_ids ["si_host_browser_replay"]
+  @fixture_customer_processor_ids ["cus_host_browser_replay", "cus_host_premium_replay"]
+  @fixture_subscription_processor_ids ["sub_host_browser_replay", "sub_host_premium_replay"]
+  @fixture_subscription_item_processor_ids ["si_host_browser_replay", "si_host_premium_replay"]
   @fixture_discount_codes ["SPRING25", "BROKEN"]
   @fixture_checkout_operation_ids ["host-browser-portal-checkout"]
 
@@ -524,6 +524,49 @@ defmodule AccrueHostSeedE2E do
       """,
       [Ecto.UUID.dump!(broken_mapping.id), DateTime.utc_now() |> DateTime.truncate(:second)]
     )
+  end
+
+  defp insert_premium_customer!(organization) do
+    %Customer{}
+    |> Customer.changeset(%{
+      owner_type: "Organization",
+      owner_id: to_string(organization.id),
+      processor: "fake",
+      processor_id: "cus_host_premium_replay",
+      email: "premium-e2e-alpha-customer@example.test"
+    })
+    |> Repo.insert!()
+  end
+
+  defp insert_premium_subscription!(customer) do
+    %Subscription{}
+    |> Subscription.changeset(%{
+      customer_id: customer.id,
+      processor: "fake",
+      processor_id: "sub_host_premium_replay",
+      status: :active,
+      data: %{
+        "items" => %{
+          "data" => [
+            %{"price" => %{"id" => "price_premium"}}
+          ]
+        }
+      }
+    })
+    |> Repo.insert!()
+    |> Repo.preload(:subscription_items)
+  end
+
+  defp insert_premium_subscription_item!(subscription) do
+    %SubscriptionItem{}
+    |> SubscriptionItem.changeset(%{
+      subscription_id: subscription.id,
+      processor: "fake",
+      processor_id: "si_host_premium_replay",
+      price_id: "price_premium",
+      quantity: 1
+    })
+    |> Repo.insert!()
   end
 
   defp insert_fixture_subscription!(customer) do

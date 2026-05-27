@@ -11,8 +11,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     AppShell,
     Breadcrumbs,
     FlashGroup,
+    Input,
     KpiCard,
     MoneyFormatter,
+    Select,
     StatusBadge,
     StepUpAuthModal,
     TaxOwnershipCard,
@@ -112,6 +114,66 @@ defmodule AccrueAdmin.Live.InvoiceLive do
            :error,
            Copy.invoice_pdf_render_failed_prefix() <> inspect(reason)
          )}
+    end
+  end
+
+  def handle_event("add_manual_item_change", %{"new_item_form" => params}, socket) do
+    {:noreply, assign(socket, :new_item_form, to_form(params))}
+  end
+
+  def handle_event("add_manual_item", %{"new_item_form" => params}, socket) do
+    amount_minor =
+      case Integer.parse(params["amount_minor"] || "") do
+        {int, ""} -> int
+        _ -> nil
+      end
+
+    attrs = %{
+      description: params["description"],
+      amount_minor: amount_minor,
+      currency: params["currency"]
+    }
+
+    case Billing.add_invoice_item(socket.assigns.invoice, attrs) do
+      {:ok, _item} ->
+        {:noreply,
+         socket
+         |> refresh_invoice(socket.assigns.invoice.id)
+         |> assign(
+           :new_item_form,
+           to_form(%{
+             "description" => "",
+             "amount_minor" => "",
+             "currency" => to_string(socket.assigns.invoice.currency || "usd")
+           })
+         )
+         |> push_flash(:info, Copy.invoice_add_manual_item_success())}
+
+      {:error, _reason} ->
+        {:noreply, push_flash(socket, :error, Copy.invoice_add_manual_item_error())}
+    end
+  end
+
+  def handle_event("stage_remove_item", %{"id" => item_id}, socket) do
+    item = Enum.find(socket.assigns.line_items, &(&1.id == item_id))
+    {:noreply, assign(socket, :pending_remove_item, item)}
+  end
+
+  def handle_event("cancel_remove_item", _params, socket) do
+    {:noreply, assign(socket, :pending_remove_item, nil)}
+  end
+
+  def handle_event("confirm_remove_item", _params, socket) do
+    case Billing.remove_invoice_item(socket.assigns.invoice, socket.assigns.pending_remove_item) do
+      {:ok, _item} ->
+        {:noreply,
+         socket
+         |> refresh_invoice(socket.assigns.invoice.id)
+         |> assign(:pending_remove_item, nil)
+         |> push_flash(:info, Copy.invoice_remove_manual_item_success())}
+
+      {:error, _reason} ->
+        {:noreply, push_flash(socket, :error, "Could not remove line item")}
     end
   end
 
@@ -306,9 +368,52 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             <h3 class="ax-heading"><%= Copy.invoice_line_items_heading() %></h3>
           </header>
 
+          <article :if={@invoice.status == :draft} class="ax-card ax-card-elevated" data-role="add-manual-item-panel">
+            <header class="ax-page-header">
+              <h4 class="ax-heading"><%= Copy.invoice_empty_manual_items_heading() %></h4>
+              <p class="ax-body"><%= Copy.invoice_empty_manual_items_body() %></p>
+            </header>
+            
+            <.form for={@new_item_form} phx-change="add_manual_item_change" phx-submit="add_manual_item" class="ax-stack-xl">
+              <div class="ax-grid ax-grid-3">
+                <Input.input 
+                  id="new-item-desc" 
+                  name={@new_item_form[:description].name} 
+                  value={@new_item_form[:description].value} 
+                  label="Description" 
+                  required 
+                />
+                <Input.input 
+                  id="new-item-amount" 
+                  name={@new_item_form[:amount_minor].name} 
+                  value={@new_item_form[:amount_minor].value} 
+                  type="number" 
+                  label="Amount (minor units)" 
+                  required 
+                />
+                <Select.select 
+                  id="new-item-currency" 
+                  name={@new_item_form[:currency].name} 
+                  value={@new_item_form[:currency].value} 
+                  label="Currency" 
+                  options={[{"USD", "usd"}, {"EUR", "eur"}, {"GBP", "gbp"}, {"CAD", "cad"}]} 
+                  required 
+                />
+              </div>
+              <button type="submit" class="ax-button ax-button-primary"><%= Copy.invoice_add_manual_item_cta() %></button>
+            </.form>
+          </article>
+          
+          <article :if={@invoice.status != :draft} class="ax-card ax-card-elevated">
+            <p class="ax-body"><%= Copy.invoice_draft_locked_guidance() %></p>
+          </article>
+
           <div :for={item <- @line_items} class="ax-list-row">
             <div>
-              <p class="ax-label"><%= item.description || item.price_ref || item.stripe_id || item.id %></p>
+              <p class="ax-label">
+                <%= item.description || item.price_ref || item.stripe_id || item.id %>
+                <span :if={is_nil(item.price_ref)} class="ax-badge"><%= Copy.invoice_manual_row_badge() %></span>
+              </p>
               <p class="ax-body">
                 <%= Copy.invoice_line_item_qty_prefix() %><%= item.quantity || 1 %>
                 <span :if={item.proration}><%= Copy.invoice_line_item_proration_suffix() %></span>
@@ -317,11 +422,31 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                 </span>
               </p>
             </div>
-            <MoneyFormatter.money_formatter
-              amount_minor={item.amount_minor || 0}
-              currency={item.currency || @invoice.currency || "usd"}
-              customer={@customer}
-            />
+            
+            <div class="ax-stack-sm" style="align-items: flex-end;">
+              <MoneyFormatter.money_formatter
+                amount_minor={item.amount_minor || 0}
+                currency={item.currency || @invoice.currency || "usd"}
+                customer={@customer}
+              />
+              
+              <button 
+                :if={@invoice.status == :draft && is_nil(item.price_ref) && @pending_remove_item == nil} 
+                phx-click="stage_remove_item" 
+                phx-value-id={item.id} 
+                class="ax-button ax-button-ghost ax-button-sm"
+              >
+                Remove
+              </button>
+            </div>
+            
+            <div :if={@pending_remove_item && @pending_remove_item.id == item.id} class="ax-card ax-card-elevated" style="grid-column: 1 / -1; margin-top: 1rem;">
+              <p class="ax-body"><%= Copy.invoice_remove_manual_item_confirm() %></p>
+              <div class="ax-stack-sm" style="flex-direction: row; margin-top: 1rem;">
+                <button phx-click="confirm_remove_item" class="ax-button ax-button-primary"><%= Copy.invoice_confirm_action_verb() %></button>
+                <button phx-click="cancel_remove_item" class="ax-button ax-button-ghost"><%= Copy.invoice_confirm_cancel() %></button>
+              </div>
+            </div>
           </div>
 
           <p :if={@line_items == []} class="ax-body"><%= Copy.invoice_line_items_empty() %></p>
@@ -385,6 +510,15 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     |> assign(:customer, invoice.customer)
     |> assign(:line_items, invoice.items || [])
     |> assign(:timeline_events, timeline_events(invoice.id))
+    |> assign(:pending_remove_item, nil)
+    |> assign(
+      :new_item_form,
+      to_form(%{
+        "description" => "",
+        "amount_minor" => "",
+        "currency" => to_string(invoice.currency || "usd")
+      })
+    )
   end
 
   defp load_invoice(invoice_id) do

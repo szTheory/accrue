@@ -73,6 +73,7 @@ defmodule Accrue.Processor.Fake do
   @event_prefix "evt_fake_"
   @meter_event_prefix "mev_fake_"
   @subscription_item_prefix "si_fake_"
+  @invoice_item_prefix "ii_fake_"
   @subscription_schedule_prefix "sub_sched_fake_"
   @coupon_prefix "coupon_fake_"
   @promotion_code_prefix "promo_fake_"
@@ -342,6 +343,17 @@ defmodule Accrue.Processor.Fake do
   @impl Accrue.Processor
   def create_invoice_preview(params, opts \\ []) when is_map(params) and is_list(opts) do
     call({:create_invoice_preview, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def invoice_item_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    call({:invoice_item_create, params, opts})
+  end
+
+  @impl Accrue.Processor
+  def invoice_item_delete(id, params, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    call({:invoice_item_delete, id, params, opts})
   end
 
   # ---------------------------------------------------------------------------
@@ -1092,6 +1104,51 @@ defmodule Accrue.Processor.Fake do
       }
 
       {{:ok, preview}, state}
+    end)
+  end
+
+  def handle_call({:invoice_item_create, params, opts}, _from, state) do
+    with_script_or_stub(state, :invoice_item_create, [params, opts], fn state ->
+      state = bump(state, :invoice_item)
+      id = @invoice_item_prefix <> pad5(state.counters.invoice_item)
+      item = build_invoice_item(state, id, params)
+
+      state =
+        case item[:invoice] do
+          invoice_id when is_binary(invoice_id) ->
+            put_in(state.invoices[invoice_id], update_invoice_with_item(state.invoices[invoice_id], item))
+
+          _ ->
+            state
+        end
+
+      state = %{state | invoice_items: Map.put(state.invoice_items, id, item)}
+      {{:ok, item}, state}
+    end)
+  end
+
+  def handle_call({:invoice_item_delete, id, params, opts}, _from, state) do
+    with_script_or_stub(state, :invoice_item_delete, [id, params, opts], fn state ->
+      case Map.fetch(state.invoice_items, id) do
+        {:ok, item} ->
+          state =
+            case item[:invoice] do
+              invoice_id when is_binary(invoice_id) ->
+                put_in(
+                  state.invoices[invoice_id],
+                  remove_invoice_item_from_invoice(state.invoices[invoice_id], id, item)
+                )
+
+              _ ->
+                state
+            end
+
+          result = %{id: id, object: "invoice_item", deleted: true}
+          {{:ok, result}, %{state | invoice_items: Map.delete(state.invoice_items, id)}}
+
+        :error ->
+          {{:error, resource_missing(id)}, state}
+      end
     end)
   end
 
@@ -2134,6 +2191,8 @@ defmodule Accrue.Processor.Fake do
       customer: customer,
       subscription: params[:subscription] || params["subscription"],
       status: :draft,
+      subtotal: amount_due,
+      total: amount_due,
       amount_due: amount_due,
       amount_paid: 0,
       amount_remaining: amount_due,
@@ -2144,6 +2203,88 @@ defmodule Accrue.Processor.Fake do
       tax: invoice_tax_field(params, amount_tax),
       total_details: %{amount_tax: amount_tax},
       last_finalization_error: last_finalization_error(automatic_tax)
+    }
+  end
+
+  defp build_invoice_item(state, id, params) do
+    amount = params[:amount] || params["amount"] || 0
+    currency = params[:currency] || params["currency"] || "usd"
+    invoice = params[:invoice] || params["invoice"]
+    pricing = params[:pricing] || params["pricing"] || %{}
+
+    period =
+      case params[:period] || params["period"] do
+        %{} = period -> atomize(period)
+        _ -> %{}
+      end
+
+    %{
+      id: id,
+      object: "invoice_item",
+      customer: params[:customer] || params["customer"],
+      invoice: invoice,
+      amount: amount,
+      currency: currency,
+      description: params[:description] || params["description"],
+      quantity: params[:quantity] || params["quantity"] || 1,
+      proration: params[:proration] || params["proration"] || false,
+      period: %{
+        start: period[:start] || DateTime.to_unix(state.clock),
+        end: period[:end] || DateTime.to_unix(state.clock)
+      },
+      pricing: pricing,
+      metadata: params[:metadata] || params["metadata"] || %{},
+      created: DateTime.to_unix(state.clock)
+    }
+  end
+
+  defp update_invoice_with_item(nil, _item), do: nil
+
+  defp update_invoice_with_item(invoice, item) do
+    lines = get_in(invoice, [:lines, :data]) || []
+    amount = item[:amount] || 0
+
+    invoice
+    |> put_in([:lines, :data], lines ++ [invoice_line_from_item(item)])
+    |> Map.update(:subtotal, amount, &(&1 + amount))
+    |> Map.update(:total, amount, &(&1 + amount))
+    |> Map.update(:amount_due, amount, &(&1 + amount))
+    |> Map.update(:amount_remaining, amount, &(&1 + amount))
+  end
+
+  defp remove_invoice_item_from_invoice(nil, _invoice_item_id, _item), do: nil
+
+  defp remove_invoice_item_from_invoice(invoice, invoice_item_id, item) do
+    lines = get_in(invoice, [:lines, :data]) || []
+    amount = item[:amount] || 0
+
+    filtered_lines =
+      Enum.reject(lines, fn line ->
+        (line[:id] || line["id"]) == invoice_item_id
+      end)
+
+    invoice
+    |> put_in([:lines, :data], filtered_lines)
+    |> Map.put(:subtotal, max((invoice[:subtotal] || 0) - amount, 0))
+    |> Map.put(:total, max((invoice[:total] || 0) - amount, 0))
+    |> Map.put(:amount_due, max((invoice[:amount_due] || 0) - amount, 0))
+    |> Map.put(:amount_remaining, max((invoice[:amount_remaining] || 0) - amount, 0))
+  end
+
+  defp invoice_line_from_item(item) do
+    pricing = item[:pricing] || %{}
+    price = pricing[:price_details] || pricing["price_details"]
+
+    %{
+      id: item[:id],
+      object: "line_item",
+      description: item[:description],
+      amount: item[:amount],
+      currency: item[:currency],
+      quantity: item[:quantity] || 1,
+      period: item[:period] || %{},
+      proration: item[:proration] == true,
+      price: price
     }
   end
 

@@ -47,6 +47,14 @@ defmodule AccrueHostWeb.Router do
 
     post("/app/organization-scope", OrganizationScopeController, :update)
 
+    live_session :entitled_reports,
+      on_mount: [
+        {AccrueHostWeb.UserAuth, :require_authenticated},
+        {Accrue.Live.Entitlements, {:require_feature, :advanced_reports}}
+      ] do
+      live("/app/reports/advanced", AdvancedReportsLive, :index)
+    end
+
     live_session :require_authenticated_user,
       on_mount: [{AccrueHostWeb.UserAuth, :require_authenticated}] do
       live("/app/billing", SubscriptionLive, :show)

@@ -337,6 +337,28 @@ defmodule Accrue.Processor.Stripe do
     |> translate_resource()
   end
 
+  @impl Accrue.Processor
+  def invoice_item_create(params, opts) when is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:invoice_item_create, subject_of(params, "ii"), opts)
+
+    client
+    |> LatticeStripe.InvoiceItem.create(stringify_keys(params), stripe_opts)
+    |> translate_resource()
+  end
+
+  @impl Accrue.Processor
+  def invoice_item_delete(id, params, opts)
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    client = build_client!(opts)
+    stripe_opts = stripe_opts(:invoice_item_delete, id, opts)
+    _ = params
+
+    client
+    |> LatticeStripe.InvoiceItem.delete(id, stripe_opts)
+    |> translate_resource()
+  end
+
   # ---------------------------------------------------------------------------
   # PaymentIntent (Phase 3)
   # ---------------------------------------------------------------------------

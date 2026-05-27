@@ -570,7 +570,8 @@ defmodule Accrue.Webhook.DefaultHandler do
       %{
         customer_id: customer.id,
         stripe_customer_id: cus_id,
-        livemode: get(obj, :livemode) == true,
+        processor: processor_name(),
+        livemode: get(obj, :livemode),
         entitlement_count: entitlement_count,
         truncated: has_more,
         synced_at: synced_at_from_event(evt_ts),
@@ -578,7 +579,11 @@ defmodule Accrue.Webhook.DefaultHandler do
       }
       |> stamp_summary_watermark(evt_ts, evt_id, row)
 
-    metadata = %{customer_id: customer.id, has_more: has_more, entitlement_count: entitlement_count}
+    metadata = %{
+      customer_id: customer.id,
+      has_more: has_more,
+      entitlement_count: entitlement_count
+    }
 
     Accrue.Telemetry.span([:accrue, :entitlements, :sync], metadata, fn ->
       with {:ok, saved} <- upsert_entitlement_summary(row, attrs),
@@ -639,16 +644,24 @@ defmodule Accrue.Webhook.DefaultHandler do
 
   defp entitlement_pairs(_), do: []
 
-  defp upsert_entitlement_summary(nil, attrs) do
+  defp upsert_entitlement_summary(_row, attrs) do
+    import Ecto.Query
+
+    # WR-05: move from optimistic_lock with Repo.update to a DB-level atomic
+    # upsert. This prevents Ecto.StaleEntryError during concurrent deliveries
+    # for the same customer. The on_conflict_where clause enforces the
+    # skip-stale watermark at the DB level (D-06).
     %EntitlementSummary{}
     |> EntitlementSummary.force_changeset(attrs)
-    |> Repo.insert()
-  end
-
-  defp upsert_entitlement_summary(%EntitlementSummary{} = row, attrs) do
-    row
-    |> EntitlementSummary.force_changeset(attrs)
-    |> Repo.update()
+    |> Repo.insert(
+      returning: true,
+      conflict_target: :customer_id,
+      on_conflict: {:replace_all_except, [:id, :inserted_at, :customer_id]},
+      on_conflict_where:
+        from(e in EntitlementSummary,
+          where: e.last_stripe_event_ts < fragment("EXCLUDED.last_stripe_event_ts")
+        )
+    )
   end
 
   defp synced_at_from_event(%DateTime{} = evt_ts), do: evt_ts

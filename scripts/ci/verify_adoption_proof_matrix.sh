@@ -64,6 +64,8 @@ require_substring "dunning_wiring_test.exs" "dunning wiring host smoke test path
 require_substring "accrue_dunning" "accrue_dunning queue token in matrix"
 require_substring "Oban.Plugins.Cron" "Oban.Plugins.Cron crontab token in matrix"
 require_substring "dunning_full_journey_test.exs" "dunning full journey test path in matrix"
+require_substring "Entitlement gating" "Entitlement gating row"
+require_substring "Accrue.Live.Entitlements" "Accrue.Live.Entitlements API reference"
 
 if grep -Eq 'Stripe-only|remain Stripe-only' "${matrix}"; then
   echo "verify_adoption_proof_matrix: matrix still contains stale Stripe-only wording" >&2

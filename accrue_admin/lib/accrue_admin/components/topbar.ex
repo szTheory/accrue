@@ -19,6 +19,10 @@ defmodule AccrueAdmin.Components.Topbar do
       </div>
 
       <div class="ax-topbar-actions">
+        <button id="search-trigger" phx-click="open" phx-target="#global-search" type="button" class="ax-search-trigger">
+          Search <kbd>⌘K</kbd>
+        </button>
+
         <button type="button" class="ax-icon-button" data-sidebar-toggle="true">
           <span class="ax-icon-label">Menu</span>
         </button>

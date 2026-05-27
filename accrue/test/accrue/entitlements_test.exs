@@ -74,7 +74,12 @@ defmodule Accrue.EntitlementsTest do
     end
 
     test "fail-closed false when the resolver raises" do
-      Application.put_env(:accrue, :entitlements, Keyword.put(@entitlements, :resolver, RaisingResolver))
+      Application.put_env(
+        :accrue,
+        :entitlements,
+        Keyword.put(@entitlements, :resolver, RaisingResolver)
+      )
+
       assert Entitlements.entitled?(billable_for(Ecto.UUID.generate()), :reports) == false
     end
   end
@@ -169,6 +174,7 @@ defmodule Accrue.EntitlementsTest do
 
     test "raw quantity when no cap" do
       oid = Ecto.UUID.generate()
+
       %{subscription: sub} =
         Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p2"})
 
@@ -226,7 +232,15 @@ defmodule Accrue.EntitlementsTest do
       assert meta.feature == :reports
       assert meta.result == true
       assert meta.resolver == :local_map
-      assert meta.reason in [:entitled, :not_entitled, :unmapped_plan, :no_active_subscription, :error]
+
+      assert meta.reason in [
+               :entitled,
+               :not_entitled,
+               :unmapped_plan,
+               :no_active_subscription,
+               :error
+             ]
+
       assert meta.reason == :entitled
       assert meta.subject_type == "Accrue.EntitlementsTest.TestUser"
       assert meta.subject_id == to_string(oid)

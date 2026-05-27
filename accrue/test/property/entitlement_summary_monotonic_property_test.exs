@@ -19,7 +19,12 @@ defmodule Accrue.Property.EntitlementSummaryMonotonicPropertyTest do
 
   setup do
     prev = Application.get_env(:accrue, :entitlements)
-    Application.put_env(:accrue, :entitlements, Keyword.put(prev || [], :stripe_native_sync, :advisory))
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(prev || [], :stripe_native_sync, :advisory)
+    )
 
     on_exit(fn ->
       if prev do
@@ -77,9 +82,10 @@ defmodule Accrue.Property.EntitlementSummaryMonotonicPropertyTest do
           StripeFixtures.entitlement_summary_event(
             [
               customer: customer.processor_id,
-              entitlements: Enum.map(1..snap.entitlement_count, fn n ->
-                %{"id" => "ent_#{n}", "feature" => "feat_#{n}", "lookup_key" => "lk_#{n}"}
-              end)
+              entitlements:
+                Enum.map(1..snap.entitlement_count, fn n ->
+                  %{"id" => "ent_#{n}", "feature" => "feat_#{n}", "lookup_key" => "lk_#{n}"}
+                end)
             ],
             %{"id" => snap.event_id, "created" => DateTime.to_unix(snap.ts)}
           )

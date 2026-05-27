@@ -274,11 +274,9 @@ defmodule Accrue.Workers.MailerIdempotencyTest do
         # renders cleanly from a hydrated customer + update_pm_url (no invoice
         # struct needed); idempotency_key/2 keys on the TYPE + campaign
         # identity regardless of the template module.
-        Application.put_env(:accrue, :email_overrides,
-          [
-            {String.to_existing_atom(type), Accrue.Emails.CardExpiringSoon}
-          ]
-        )
+        Application.put_env(:accrue, :email_overrides, [
+          {String.to_existing_atom(type), Accrue.Emails.CardExpiringSoon}
+        ])
 
         args = %{
           "type" => type,
@@ -314,7 +312,12 @@ defmodule Accrue.Workers.MailerIdempotencyTest do
 
   describe "no regression: non-:invoice_payment_failed types are NOT deduped" do
     test "two deliveries of :receipt both enqueue (no conflict) and carry no top-level invoice_id" do
-      assigns = %{invoice_id: "in_R", customer_id: "cus_R", charge_id: "ch_R", to: "r@example.test"}
+      assigns = %{
+        invoice_id: "in_R",
+        customer_id: "cus_R",
+        charge_id: "ch_R",
+        to: "r@example.test"
+      }
 
       assert {:ok, %Oban.Job{conflict?: false} = j1} =
                Accrue.Mailer.deliver(:receipt, assigns)

@@ -137,7 +137,10 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
     # feature set subtracts every feature any non-grace plan also grants. Strip
     # the internal accumulator before returning the public resolved map.
     folded
-    |> Map.put(:grace_features, MapSet.difference(folded.grace_features, folded.non_grace_features))
+    |> Map.put(
+      :grace_features,
+      MapSet.difference(folded.grace_features, folded.non_grace_features)
+    )
     |> Map.delete(:non_grace_features)
   end
 
@@ -209,7 +212,9 @@ defmodule Accrue.Entitlements.Resolver.LocalMap do
     |> join(:inner, [s], i in SubscriptionItem, on: i.subscription_id == s.id)
     |> select([s, i], {i.price_id, i.quantity, s})
     |> Accrue.Repo.all()
-    |> Enum.flat_map(fn {price_id, quantity, sub} -> grace_row(price_id, quantity, sub, grace_days) end)
+    |> Enum.flat_map(fn {price_id, quantity, sub} ->
+      grace_row(price_id, quantity, sub, grace_days)
+    end)
   end
 
   # A `:past_due` candidate (per `Subscription.dunning_sweepable?/1`, the

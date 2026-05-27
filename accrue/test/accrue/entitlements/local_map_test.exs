@@ -65,7 +65,9 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
   describe "resolve/2 single active plan" do
     test "active sub maps to features, quantities, and active_plans" do
       oid = Ecto.UUID.generate()
-      %{customer: _c} = Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
+
+      %{customer: _c} =
+        Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
 
       assert {:ok, resolved} = LocalMap.resolve(billable_for(oid), [])
       assert MapSet.member?(resolved.active_plans, :p1)
@@ -76,6 +78,7 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
 
     test "min(cap, quantity) caps the seat quantity" do
       oid = Ecto.UUID.generate()
+
       %{subscription: sub} =
         Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p1"})
 
@@ -93,6 +96,7 @@ defmodule Accrue.Entitlements.Resolver.LocalMapTest do
 
     test "no-cap quota falls back to the raw quantity" do
       oid = Ecto.UUID.generate()
+
       %{subscription: sub} =
         Accrue.Test.Factory.active_subscription(%{owner_id: oid, price_id: "price_p2"})
 

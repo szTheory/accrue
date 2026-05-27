@@ -181,6 +181,39 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert TestRepo.get!(Invoice, invoice.id).status == :void
   end
 
+  test "can add and remove manual line items on draft invoice", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    assert html =~ Copy.invoice_empty_manual_items_heading()
+
+    html =
+      render_submit(
+        element(view, "form[phx-submit='add_manual_item']"),
+        %{
+          "new_item_form" => %{
+            "description" => "Custom setup fee",
+            "amount_minor" => "50000",
+            "currency" => "usd"
+          }
+        }
+      )
+
+    assert html =~ "Custom setup fee"
+    assert html =~ Copy.invoice_manual_row_badge()
+    assert html =~ Copy.invoice_add_manual_item_success()
+
+    html = render_click(element(view, "button", "Remove"))
+    assert html =~ Copy.invoice_remove_manual_item_confirm()
+
+    html = render_click(element(view, "button", "Confirm"))
+    assert html =~ Copy.invoice_remove_manual_item_success()
+  end
+
   test "invoice loader denies rows outside the active organization" do
     allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
     denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})

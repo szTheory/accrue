@@ -444,14 +444,12 @@ defmodule Accrue.Config do
               ]
             ]
           ],
-          doc:
-            "Logical plan name (atom) -> entitlement entry (features/limits/price_ids)"
+          doc: "Logical plan name (atom) -> entitlement entry (features/limits/price_ids)"
         ],
         resolver: [
           type: :atom,
           default: Accrue.Entitlements.Resolver.LocalMap,
-          doc:
-            "Resolver module (Accrue.Entitlements.Resolver behaviour). Default LocalMap."
+          doc: "Resolver module (Accrue.Entitlements.Resolver behaviour). Default LocalMap."
         ],
         unmapped_action: [
           type: {:in, [:deny, :raise]},
@@ -480,8 +478,7 @@ defmodule Accrue.Config do
         deny_path: [
           type: :string,
           default: "/",
-          doc:
-            "LiveView fallback redirect target for `:forbidden` / non-redirectable denies."
+          doc: "LiveView fallback redirect target for `:forbidden` / non-redirectable denies."
         ],
         # --- Phase 125 (ENT-09): past-due grace knob ---
         past_due_grace: [
@@ -1292,8 +1289,11 @@ defmodule Accrue.Config do
   defp validate_each_step(steps) do
     Enum.reduce_while(steps, {:ok, []}, fn step, {:ok, acc} ->
       case NimbleOptions.validate(step, @step_schema) do
-        {:ok, normalized} -> {:cont, {:ok, [normalized | acc]}}
-        {:error, %NimbleOptions.ValidationError{} = err} -> {:halt, {:error, Exception.message(err)}}
+        {:ok, normalized} ->
+          {:cont, {:ok, [normalized | acc]}}
+
+        {:error, %NimbleOptions.ValidationError{} = err} ->
+          {:halt, {:error, Exception.message(err)}}
       end
     end)
     |> case do

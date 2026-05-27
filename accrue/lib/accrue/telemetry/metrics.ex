@@ -86,6 +86,7 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
         counter("accrue.ops.connect_capability_lost.count", tags: [:capability]),
         counter("accrue.ops.connect_payout_failed.count"),
         counter("accrue.ops.entitlement_summary_truncated.count"),
+        counter("accrue.entitlements.summary_synced.count", tags: [:result]),
         # --- Dunning campaign lifecycle (DUN-08) ---
         # campaign_started + step_sent declare NO tags: never tag the
         # high-cardinality subscription_id, and campaign_started has no source

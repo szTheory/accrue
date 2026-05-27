@@ -181,6 +181,10 @@ defmodule Accrue.Processor.Braintree do
   def mark_uncollectible_invoice(_id, _opts), do: {:error, unsupported()}
   @impl Accrue.Processor
   def create_invoice_preview(_params, _opts), do: {:error, unsupported()}
+  @impl Accrue.Processor
+  def invoice_item_create(_params, _opts), do: {:error, unsupported()}
+  @impl Accrue.Processor
+  def invoice_item_delete(_id, _params, _opts), do: {:error, unsupported()}
 
   # PaymentIntent
   @impl Accrue.Processor

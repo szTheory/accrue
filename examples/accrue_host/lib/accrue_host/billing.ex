@@ -156,6 +156,20 @@ defmodule AccrueHost.Billing do
     end
   end
 
+  def report_usage_for_scope(%Scope{} = scope, event_name, opts \\ []) do
+    with {:ok, customer} <- customer_for_scope(scope),
+         :ok <- authorize_billing_mutation(scope) do
+      Billing.report_usage(customer, event_name, opts)
+    end
+  end
+
+  def create_checkout_session_for_scope(%Scope{} = scope, attrs) when is_map(attrs) do
+    with {:ok, customer} <- customer_for_scope(scope),
+         :ok <- authorize_billing_mutation(scope) do
+      Billing.create_checkout_session(customer, attrs)
+    end
+  end
+
   def cancel_active_organization(%Scope{} = scope, %Subscription{} = subscription, opts \\ []) do
     with {:ok, %{subscription: %Subscription{id: current_id}}} <- billing_state_for_scope(scope),
          :ok <- authorize_billing_mutation(scope),

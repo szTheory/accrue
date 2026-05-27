@@ -47,6 +47,9 @@ defmodule Accrue.Processor do
   `send_invoice/2`, `mark_uncollectible_invoice/2`,
   `create_invoice_preview/2`
 
+  ### InvoiceItem
+  `invoice_item_create/2`, `invoice_item_delete/3`
+
   ### Charge and PaymentIntent
   `create_charge/2`, `retrieve_charge/2`, `list_charges/2`,
   `create_payment_intent/2`, `retrieve_payment_intent/2`,
@@ -161,6 +164,8 @@ defmodule Accrue.Processor do
   @callback send_invoice(id(), opts()) :: result()
   @callback mark_uncollectible_invoice(id(), opts()) :: result()
   @callback create_invoice_preview(params(), opts()) :: result()
+  @callback invoice_item_create(params(), opts()) :: result()
+  @callback invoice_item_delete(id(), params(), opts()) :: result()
 
   # ---------------------------------------------------------------------------
   # PaymentIntent
@@ -341,6 +346,23 @@ defmodule Accrue.Processor do
       %{adapter: adapter, operation: :update_customer},
       fn -> adapter.update_customer(id, params, opts) end
     )
+  end
+
+  @doc """
+  Creates an invoice item through the configured processor adapter.
+  """
+  @spec invoice_item_create(params(), opts()) :: result()
+  def invoice_item_create(params, opts \\ []) when is_map(params) and is_list(opts) do
+    __impl__().invoice_item_create(params, opts)
+  end
+
+  @doc """
+  Deletes an invoice item through the configured processor adapter.
+  """
+  @spec invoice_item_delete(id(), params(), opts()) :: result()
+  def invoice_item_delete(id, params \\ %{}, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    __impl__().invoice_item_delete(id, params, opts)
   end
 
   @doc false

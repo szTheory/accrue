@@ -40,5 +40,6 @@ Roughly: **merge-blocking proof and package-doc contracts stay green**, the **po
 
 ## Related
 
+- [Jobs to Be Done — Scope and maturity](jobs_to_be_done.md#scope-and-maturity) — user-facing summary of what's in scope today versus the deliberate non-goals (FIN-03 accounting, MoR processors, Hyperwallet) this posture protects.
 - [First Hour — How to enter](first_hour.md#how-to-enter-this-guide) (H/M/R capsules ↔ host README spine).
 - [Contributing](https://github.com/szTheory/accrue/blob/main/CONTRIBUTING.md) — release gate and doc-contract expectations (monorepo root; not bundled in the Hex tarball).

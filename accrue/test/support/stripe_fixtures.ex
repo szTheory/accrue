@@ -1,6 +1,6 @@
 defmodule Accrue.Test.StripeFixtures do
   @moduledoc """
-  Canned Stripe API response payloads for Phase 3 tests.
+  Canned Stripe API response payloads for Accrue tests.
 
   Each function returns a plain map that looks like what the Stripe API
   would send on the wire: string keys, Unix-seconds timestamps, the

@@ -29,10 +29,10 @@ defmodule Accrue.Billing.SearchTest do
       # "robert" should match both c2 and c3.
       results = Search.search_customers(Customer, "robert") |> Repo.all()
       assert length(results) >= 2
-      
+
       results_specific = Search.search_customers(Customer, "robert tables") |> Repo.all()
       assert hd(results_specific).id == c3.id
-      
+
       results_email = Search.search_customers(Customer, "rob.jones@") |> Repo.all()
       assert hd(results_email).id == c2.id
     end
@@ -41,8 +41,24 @@ defmodule Accrue.Billing.SearchTest do
   describe "search_subscriptions/2" do
     test "returns subscriptions matching by processor_id" do
       customer = insert_customer()
-      s1 = %Subscription{customer_id: customer.id, processor: "fake", processor_id: "sub_12345XYZ", status: :active} |> Repo.insert!()
-      _s2 = %Subscription{customer_id: customer.id, processor: "fake", processor_id: "sub_99999ABC", status: :active} |> Repo.insert!()
+
+      s1 =
+        %Subscription{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "sub_12345XYZ",
+          status: :active
+        }
+        |> Repo.insert!()
+
+      _s2 =
+        %Subscription{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "sub_99999ABC",
+          status: :active
+        }
+        |> Repo.insert!()
 
       results = Search.search_subscriptions(Subscription, "12345XYZ") |> Repo.all()
       assert length(results) == 1
@@ -53,10 +69,37 @@ defmodule Accrue.Billing.SearchTest do
   describe "search_invoices/2" do
     test "returns invoices matching by processor_id or number" do
       customer = insert_customer()
-      sub = %Subscription{customer_id: customer.id, processor: "fake", processor_id: "sub_test", status: :active} |> Repo.insert!()
 
-      i1 = %Invoice{customer_id: customer.id, subscription_id: sub.id, processor: "fake", processor_id: "in_abc123", number: "INV-0001", status: :open} |> Repo.insert!()
-      i2 = %Invoice{customer_id: customer.id, subscription_id: sub.id, processor: "fake", processor_id: "in_def456", number: "INV-0002", status: :open} |> Repo.insert!()
+      sub =
+        %Subscription{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "sub_test",
+          status: :active
+        }
+        |> Repo.insert!()
+
+      i1 =
+        %Invoice{
+          customer_id: customer.id,
+          subscription_id: sub.id,
+          processor: "fake",
+          processor_id: "in_abc123",
+          number: "INV-0001",
+          status: :open
+        }
+        |> Repo.insert!()
+
+      i2 =
+        %Invoice{
+          customer_id: customer.id,
+          subscription_id: sub.id,
+          processor: "fake",
+          processor_id: "in_def456",
+          number: "INV-0002",
+          status: :open
+        }
+        |> Repo.insert!()
 
       results_proc = Search.search_invoices(Invoice, "def456") |> Repo.all()
       assert length(results_proc) == 1

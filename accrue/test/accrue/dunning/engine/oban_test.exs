@@ -64,7 +64,8 @@ defmodule Accrue.Dunning.Engine.ObanTest do
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
         processor: "fake",
-        processor_id: "cus_engine_oban_test_" <> Integer.to_string(System.unique_integer([:positive])),
+        processor_id:
+          "cus_engine_oban_test_" <> Integer.to_string(System.unique_integer([:positive])),
         email: "engine-oban-test@example.com"
       })
       |> Accrue.TestRepo.insert()

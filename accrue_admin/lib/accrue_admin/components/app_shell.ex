@@ -37,6 +37,8 @@ defmodule AccrueAdmin.Components.AppShell do
         </main>
       </div>
 
+      <.live_component module={AccrueAdmin.Components.GlobalSearch} id="global-search" />
+
       <.dev_toolbar current_path={@current_path} mount_path={@mount_path} />
     </div>
     """

@@ -2,6 +2,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
   use AccrueHostWeb.ConnCase, async: false
 
   alias Accrue.Billing.Customer
+  alias Accrue.Billing.MeterEvent
   alias Accrue.Billing.SubscriptionItem
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Billing
@@ -23,6 +24,54 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     organization = AccountsFixtures.organization_fixture(%{owner: user})
 
     %{user: user, organization: organization}
+  end
+
+  test "demonstrates metered usage reporting (PROOF-04)", %{
+    conn: conn,
+    organization: organization,
+    user: user
+  } do
+    assert {:ok, _} = Billing.subscribe(organization, "price_basic")
+
+    {:ok, view, html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live(~p"/app/billing")
+
+    assert html =~ "Metered Usage Demo"
+    assert html =~ "Simulate API Call"
+
+    view
+    |> element("button", "Simulate API Call")
+    |> render_click()
+
+    assert render(view) =~ "Usage reported: 1 API call recorded."
+
+    assert Repo.aggregate(MeterEvent, :count, :id) == 1
+    event = Repo.one(MeterEvent)
+    assert event.event_name == "api_calls"
+  end
+
+  test "demonstrates checkout session creation (PROOF-05)", %{
+    conn: conn,
+    organization: organization,
+    user: user
+  } do
+    {:ok, view, html} =
+      conn
+      |> log_in_user(user, active_organization_id: organization.id)
+      |> live(~p"/app/billing")
+
+    assert html =~ "Checkout Facade Demo"
+    assert html =~ "Create Checkout Session"
+
+    view
+    |> element("button", "Create Checkout Session")
+    |> render_click()
+
+    html = render(view)
+    assert html =~ "Generated Checkout URL"
+    assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
   end
 
   test "repairs tax location through the host facade and starts a tax-enabled subscription", %{
@@ -159,6 +208,8 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
   end
 
   defp cleanup_fake_billing_rows! do
+    Repo.delete_all(MeterEvent)
+
     Repo.delete_all(
       from(item in SubscriptionItem,
         join: subscription in Accrue.Billing.Subscription,

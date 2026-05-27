@@ -106,6 +106,7 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 - **Cross-domain host subscription** (append `Accrue.Telemetry.Metrics.defaults/0`, attach once to `[:accrue, :ops, :webhook_dlq, :dead_lettered]`) is documented in [`../../accrue/guides/telemetry.md`](../../accrue/guides/telemetry.md#cross-domain-host-subscription). The compile-checked mirror in this app is `AccrueHost.AccrueOpsTelemetry`.
 - **Billing checkout facade:** `Accrue.Billing.create_checkout_session/2` emits **`[:accrue, :billing, :checkout_session, :create]`**; span metadata and Fake vs live processor notes live under [`../../accrue/guides/telemetry.md#billing-checkout-session-create`](../../accrue/guides/telemetry.md#billing-checkout-session-create) (ExUnit SSOT: `accrue/test/accrue/billing/checkout_session_facade_test.exs`).
 - **Billing portal facade:** `Accrue.Billing.create_billing_portal_session/2` emits **`[:accrue, :billing, :billing_portal, :create]`**; span notes live under [`../../accrue/guides/telemetry.md#billing-billing-portal-create`](../../accrue/guides/telemetry.md#billing-billing-portal-create) (ExUnit SSOT: `accrue/test/accrue/billing/billing_portal_session_facade_test.exs`).
+- **Recovery & Maintenance:** Background jobs like `Accrue.Jobs.DetectExpiringCards` and `Accrue.Jobs.MeterEventsReconciler` are wired into the host Oban crontab to demonstrate production-grade failure recovery and automated maintenance. Proof of wiring lives in `test/accrue_host/recovery_wiring_test.exs`.
 
 ## Production readiness
 
@@ -300,5 +301,6 @@ For a human screen-recording checklist (OBS / QuickTime), see
 - Host-owned auth and session state gate the mounted admin UI at `/billing`.
 - Signed webhook ingest runs through the installed `/webhooks/stripe` route.
 - Replay actions and billing changes leave persisted audit history.
+- Recovery and reconciliation jobs (`DetectExpiringCards`, `MeterEventsReconciler`) run automatically via Oban crontab.
 - Fake, test, and live Stripe remain distinct modes, but the canonical local
   path is Fake-backed and credential-free.

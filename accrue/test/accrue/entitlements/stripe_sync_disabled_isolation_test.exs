@@ -73,6 +73,7 @@ defmodule Accrue.Entitlements.StripeSyncDisabledIsolationTest do
       [@test_repo_query_event, @canonical_repo_query_event],
       fn _event, _meas, meta, _ ->
         sql = Map.get(meta, :query, "")
+
         if is_binary(sql) and String.contains?(sql, @cache_table) do
           send(test_pid, {:cache_query, sql})
         end

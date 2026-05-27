@@ -4,7 +4,8 @@ defmodule Accrue.Billing.InvoiceActions do
 
   Exposes five user-path invoice actions on `Accrue.Billing` via a
   `defdelegate` facade: `finalize_invoice`, `void_invoice`,
-  `pay_invoice`, `mark_uncollectible`, `send_invoice`.
+  `pay_invoice`, `mark_uncollectible`, `send_invoice`, `add_invoice_item`,
+  `remove_invoice_item`.
 
   Each action follows a consistent pattern: call the Stripe API, decompose
   the response into local schema changes via `InvoiceProjection`, write
@@ -101,6 +102,70 @@ defmodule Accrue.Billing.InvoiceActions do
     end
   end
 
+  @spec add_invoice_item(Invoice.t(), map(), keyword()) ::
+          {:ok, Invoice.t()} | {:error, term()}
+  def add_invoice_item(%Invoice{} = invoice, attrs, opts \\ [])
+      when is_map(attrs) and is_list(opts) do
+    with :ok <- ensure_draft_invoice(invoice) do
+      op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
+      processor_opts = [idempotency_key: Idempotency.key(:invoice_item_create, invoice.id, op_id)] ++ sanitize_opts(opts)
+      params = invoice_item_params(invoice, attrs)
+
+      Repo.transact(fn ->
+        with {:ok, created_item} <- Processor.invoice_item_create(params, processor_opts),
+             {:ok, stripe_invoice} <-
+               Processor.__impl__().retrieve_invoice(invoice.processor_id, sanitize_opts(opts)),
+             {:ok, %{invoice_attrs: invoice_attrs, item_attrs: item_attrs_list}} <-
+               InvoiceProjection.decompose(stripe_invoice),
+             {:ok, updated} <- update_invoice_row(invoice, invoice_attrs),
+             {:ok, _} <- sync_items(updated, item_attrs_list),
+             {:ok, _event} <- record_event("invoice.item_added", updated, event_data(created_item)) do
+          {:ok, Repo.preload(updated, :items, force: true)}
+        end
+      end)
+    end
+  end
+
+  @spec add_invoice_item!(Invoice.t(), map(), keyword()) :: Invoice.t()
+  def add_invoice_item!(invoice, attrs, opts \\ []),
+    do: bang!(add_invoice_item(invoice, attrs, opts), "add_invoice_item!/3")
+
+  @spec remove_invoice_item(Invoice.t(), InvoiceItem.t(), keyword()) ::
+          {:ok, Invoice.t()} | {:error, term()}
+  def remove_invoice_item(%Invoice{} = invoice, %InvoiceItem{} = item, opts \\ [])
+      when is_list(opts) do
+    with :ok <- ensure_draft_invoice(invoice) do
+      op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
+      processor_id = item.stripe_id || item.data["id"] || item.data[:id]
+
+      Repo.transact(fn ->
+        with true <-
+               is_binary(processor_id) ||
+                 {:error, draft_invoice_error(invoice, "invoice item must have a processor id")},
+             {:ok, _deleted} <-
+               Processor.invoice_item_delete(
+                 processor_id,
+                 %{},
+                 [idempotency_key: Idempotency.key(:invoice_item_delete, item.id, op_id)] ++
+                   sanitize_opts(opts)
+               ),
+             {:ok, stripe_invoice} <-
+               Processor.__impl__().retrieve_invoice(invoice.processor_id, sanitize_opts(opts)),
+             {:ok, %{invoice_attrs: invoice_attrs, item_attrs: item_attrs_list}} <-
+               InvoiceProjection.decompose(stripe_invoice),
+             {:ok, updated} <- update_invoice_row(invoice, invoice_attrs),
+             {:ok, _} <- sync_items(updated, item_attrs_list),
+             {:ok, _event} <- record_event("invoice.item_removed", updated, event_data(item)) do
+          {:ok, Repo.preload(updated, :items, force: true)}
+        end
+      end)
+    end
+  end
+
+  @spec remove_invoice_item!(Invoice.t(), InvoiceItem.t(), keyword()) :: Invoice.t()
+  def remove_invoice_item!(invoice, item, opts \\ []),
+    do: bang!(remove_invoice_item(invoice, item, opts), "remove_invoice_item!/3")
+
   defp bang!({:ok, %Invoice{} = v}, _), do: v
   defp bang!({:error, err}, _) when is_exception(err), do: raise(err)
   defp bang!({:error, other}, label), do: raise("#{label} failed: #{inspect(other)}")
@@ -126,7 +191,7 @@ defmodule Accrue.Billing.InvoiceActions do
                    InvoiceProjection.decompose(stripe_inv),
                  {:ok, updated} <- update_invoice_row(inv, attrs),
                  {:ok, _} <- upsert_items(updated, item_attrs_list),
-                 {:ok, _event} <- record_event(event_type, updated) do
+                 {:ok, _event} <- record_event(event_type, updated, %{}) do
               {:ok, Repo.preload(updated, :items, force: true)}
             end
           end)
@@ -180,13 +245,71 @@ defmodule Accrue.Billing.InvoiceActions do
     from(i in InvoiceItem, where: i.stripe_id == ^stripe_id)
   end
 
-  defp record_event(type, %Invoice{} = inv) do
+  defp sync_items(%Invoice{} = invoice, item_attrs_list) when is_list(item_attrs_list) do
+    import Ecto.Query, only: [from: 2]
+
+    stripe_ids =
+      item_attrs_list
+      |> Enum.map(& &1[:stripe_id])
+      |> Enum.filter(&is_binary/1)
+
+    delete_query =
+      case stripe_ids do
+        [] ->
+          from(i in InvoiceItem, where: i.invoice_id == ^invoice.id)
+
+        _ ->
+          from(i in InvoiceItem,
+            where: i.invoice_id == ^invoice.id and (is_nil(i.stripe_id) or i.stripe_id not in ^stripe_ids)
+          )
+      end
+
+    _ = Repo.repo().delete_all(delete_query)
+    upsert_items(invoice, item_attrs_list)
+  end
+
+  defp record_event(type, %Invoice{} = inv, data) do
     Events.record(%{
       type: type,
       subject_type: "Invoice",
       subject_id: inv.id,
-      data: %{source: "api"}
+      data: Map.merge(%{source: "api"}, data)
     })
+  end
+
+  defp ensure_draft_invoice(%Invoice{status: :draft}), do: :ok
+  defp ensure_draft_invoice(%Invoice{} = invoice), do: {:error, draft_invoice_error(invoice)}
+
+  defp draft_invoice_error(%Invoice{} = invoice, message \\ "manual invoice items require a draft invoice") do
+    invoice
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.add_error(:status, message)
+  end
+
+  defp invoice_item_params(%Invoice{} = invoice, attrs) do
+    attrs
+    |> Map.put(:customer, customer_processor_id(invoice))
+    |> Map.put(:invoice, invoice.processor_id)
+  end
+
+  defp customer_processor_id(%Invoice{} = invoice) do
+    invoice
+    |> Repo.preload(:customer)
+    |> Map.fetch!(:customer)
+    |> Map.fetch!(:processor_id)
+  end
+
+  defp event_data(%InvoiceItem{} = item) do
+    %{
+      item_id: item.id,
+      item_processor_id: item.stripe_id
+    }
+  end
+
+  defp event_data(item) when is_map(item) do
+    %{
+      item_processor_id: item[:id] || item["id"]
+    }
   end
 
   defp sanitize_opts(opts) do

@@ -1,5 +1,40 @@
 # Milestones
 
+## v1.42 Ad-hoc Invoices & Adopter Confidence (Shipped: 2026-05-27)
+
+**Phases completed:** 5 phases (135–139)
+**Timeline:** 2026-05-26 → 2026-05-27 (2 days)
+
+**Delivered:** End-to-end adopter demos for checkout and metered usage, recovery wiring in the example host, fixes for entitlement cache robustness and fidelity, and full ad-hoc manual line item support on draft invoices via both API and Admin UI.
+
+**Milestone audit:** `passed` — definition of done **ACHIEVED**, 7/7 requirements satisfied, all 5 phases verified `passed`. See `.planning/v1.42-v1.42-MILESTONE-AUDIT.md`.
+
+**Key accomplishments:**
+
+- **Phase 135:** Demonstrated metered usage and checkout facade in `examples/accrue_host`.
+- **Phase 136:** Wired the `DetectExpiringCards` recovery cron in the example host.
+- **Phase 137:** Resolved `Ecto.StaleEntryError` (WR-05) via race-safe upsert and fixed sync fidelity gaps (IN-01..04).
+- **Phase 138:** Built the `Accrue.Billing` public API and processor extensions to manage manual ad-hoc line items on draft invoices.
+- **Phase 139:** Shipped the admin UI in `accrue_admin` for operators to add and remove ad-hoc line items seamlessly.
+
+---
+
+## v1.41 Admin global search (native Postgres) (Shipped: 2026-05-26)
+
+**Phases completed:** 2 phases (133–134)
+**Timeline:** 2026-05-26 → 2026-05-26 (1 day)
+
+**Delivered:** Ecto-native global search for Customers, Invoices, and Subscriptions in the admin UI using Postgres native text search (`pg_trgm`), approaching the Stripe Dashboard UX without adding a separate sidecar dependency.
+
+**Milestone audit:** `passed` — definition of done **ACHIEVED**, 4/4 requirements satisfied, all 2 phases verified `passed`. See `.planning/v1.41-v1.41-MILESTONE-AUDIT.md`.
+
+**Key accomplishments:**
+
+- **Phase 133:** Implemented `Accrue.Billing.Search` module with `pg_trgm` similarity queries and added GIN indices for fast fuzzy-matching on core billing tables.
+- **Phase 134:** Built the `AccrueAdmin.Components.GlobalSearch` LiveComponent and the `CommandPalette` JS hook, enabling `CMD+K` keyboard-first search navigation across the admin UI.
+
+---
+
 ## v1.40 Dunning depth / notification journeys (Shipped: 2026-05-25)
 
 **Phases completed:** 5 phases (128–132), 23 plans

@@ -101,7 +101,9 @@ defmodule Accrue.Property.DunningCampaignPropertyTest do
   # while its boundary has not yet PASSED (>=), which is what gives day-0
   # its "first step immediately" semantics (must_have truth #2).
   defp expected_next(steps, elapsed) do
-    Enum.find(steps, fn step -> Keyword.fetch!(step, :after_days) * @seconds_per_day >= elapsed end)
+    Enum.find(steps, fn step ->
+      Keyword.fetch!(step, :after_days) * @seconds_per_day >= elapsed
+    end)
   end
 
   # --- properties ------------------------------------------------------------
@@ -189,6 +191,7 @@ defmodule Accrue.Property.DunningCampaignPropertyTest do
 
   test "at-exact-boundary (elapsed == after_days seconds) keeps that step pending, schedule_in 0" do
     anchor = ~U[2026-01-01 00:00:00Z]
+
     steps = [
       [after_days: 0, key: :s0, template: :"Elixir.S0"],
       [after_days: 5, key: :s5, template: :"Elixir.S5"],
@@ -218,9 +221,14 @@ defmodule Accrue.Property.DunningCampaignPropertyTest do
 
   test "default [0,5,12] journey resolves the expected step at each phase" do
     anchor = ~U[2026-01-01 00:00:00Z]
+
     steps = [
       [after_days: 0, key: :reminder, template: :"Elixir.Accrue.Emails.InvoicePaymentFailed"],
-      [after_days: 5, key: :action_required, template: :"Elixir.Accrue.Emails.DunningActionRequired"],
+      [
+        after_days: 5,
+        key: :action_required,
+        template: :"Elixir.Accrue.Emails.DunningActionRequired"
+      ],
       [after_days: 12, key: :final_notice, template: :"Elixir.Accrue.Emails.DunningFinalNotice"]
     ]
 

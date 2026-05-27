@@ -53,7 +53,9 @@ defmodule Accrue.Entitlements.ResolverTest do
         @behaviour Accrue.Entitlements.Resolver
         @impl true
         def resolve(_billable, _opts),
-          do: {:ok, %{plan: nil, active_plans: MapSet.new(), features: MapSet.new(), quantities: %{}}}
+          do:
+            {:ok,
+             %{plan: nil, active_plans: MapSet.new(), features: MapSet.new(), quantities: %{}}}
       end
 
       Application.put_env(:accrue, :entitlements, resolver: CustomResolver)

@@ -189,6 +189,46 @@ defmodule AccrueHostWeb.SubscriptionLive do
     end
   end
 
+  def handle_event("simulate_api_call", _params, socket) do
+    case Billing.report_usage_for_scope(socket.assigns.current_scope, "api_calls", value: 1) do
+      {:ok, _event} ->
+        {:noreply, put_flash(socket, :info, "Usage reported: 1 API call recorded.")}
+
+      {:error, :no_active_organization} ->
+        {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
+
+      {:error, :forbidden} ->
+        {:noreply, put_flash(socket, :error, @member_denial_copy)}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, @error_copy)}
+    end
+  end
+
+  def handle_event("create_checkout_session", _params, socket) do
+    # Demonstrating create_checkout_session facade directly for the Pro plan.
+    # In a real app, this might be triggered from a pricing page.
+    attrs = %{
+      success_url: url(~p"/app/billing?checkout=success"),
+      cancel_url: url(~p"/app/billing?checkout=cancel"),
+      line_items: [%{price: Plans.ids().pro, quantity: 1}]
+    }
+
+    case Billing.create_checkout_session_for_scope(socket.assigns.current_scope, attrs) do
+      {:ok, session} ->
+        {:noreply, assign(socket, :checkout_url, session.url)}
+
+      {:error, :no_active_organization} ->
+        {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
+
+      {:error, :forbidden} ->
+        {:noreply, put_flash(socket, :error, @member_denial_copy)}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, @error_copy)}
+    end
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -305,12 +345,74 @@ defmodule AccrueHostWeb.SubscriptionLive do
                 <% end %>
               </div>
             </section>
+
+            <section style={card_style()} data-role="metered-usage-demo">
+              <div style={section_header_style()}>
+                <div>
+                  <h2 style={section_heading_style()}>Metered Usage Demo (PROOF-04)</h2>
+                  <p style={muted_body_style()}>
+                    Demonstrates <code style={code_style()}>Accrue.report_usage/3</code>. Report usage for an "api_calls" feature.
+                  </p>
+                </div>
+              </div>
+              <div style={action_row_style()}>
+                <button
+                  type="button"
+                  phx-click="simulate_api_call"
+                  style={secondary_button_style()}
+                  disabled={@billing_locked? || !@subscription}
+                >
+                  Simulate API Call
+                </button>
+              </div>
+            </section>
           <% else %>
             <section style={empty_state_style()}>
               <h2 style={section_heading_style()}>{@empty_state_heading}</h2>
               <p style={body_style()}>{@empty_state_body}</p>
             </section>
           <% end %>
+
+          <section style={card_style()} data-role="checkout-facade-demo">
+            <div style={section_header_style()}>
+              <div>
+                <h2 style={section_heading_style()}>Checkout Facade Demo (PROOF-05)</h2>
+                <p style={muted_body_style()}>
+                  Demonstrates <code style={code_style()}>Accrue.Billing.create_checkout_session/2</code> via the host facade.
+                </p>
+              </div>
+            </div>
+            <div style={action_row_style()}>
+              <button
+                type="button"
+                phx-click="create_checkout_session"
+                style={secondary_button_style()}
+                disabled={@billing_locked?}
+              >
+                Create Checkout Session
+              </button>
+            </div>
+            <div :if={@checkout_url} style="margin-top:8px;">
+              <p style={label_style()}>Generated Checkout URL:</p>
+              <a href={@checkout_url} target="_blank" style={link_style()} data-testid="checkout-url">
+                {@checkout_url}
+              </a>
+            </div>
+          </section>
+
+          <section style={card_style()} data-role="recovery-wiring-demo">
+            <div style={section_header_style()}>
+              <div>
+                <h2 style={section_heading_style()}>Recovery Wiring Demo (PROOF-06)</h2>
+                <p style={muted_body_style()}>
+                  Demonstrates active recovery jobs. <code style={code_style()}>Accrue.Jobs.DetectExpiringCards</code> and <code style={code_style()}>Accrue.Jobs.MeterEventsReconciler</code> are wired into the host crontab.
+                </p>
+                <p style={muted_body_style()} style="margin-top:8px;">
+                  These jobs run daily/minutely to detect payment methods nearing expiry, reconcile metered usage gaps, and ensure billing state stays consistent even if webhooks are missed.
+                </p>
+              </div>
+            </div>
+          </section>
 
           <section style={card_style()}>
             <div style={section_header_style()}>
@@ -503,6 +605,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
     |> assign_new(:braintree_client_token, fn -> nil end)
     |> assign_new(:tax_location_error, fn -> nil end)
     |> assign_new(:tax_location_form, fn -> empty_tax_location_form() end)
+    |> assign_new(:checkout_url, fn -> nil end)
     |> assign(:customer, customer)
     |> assign(:subscription, subscription)
     |> assign(:subscription_plan_label, plan_label(subscription))

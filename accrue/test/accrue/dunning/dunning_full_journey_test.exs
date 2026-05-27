@@ -276,6 +276,7 @@ defmodule Accrue.Dunning.DunningFullJourneyTest do
       assert {:ok, _} = fire_payment_failed("in_journey_1", sub_id)
 
       reloaded = Repo.reload!(sub)
+
       assert %DateTime{} = reloaded.dunning_campaign_started_at,
              "dunning_campaign_started_at must be set after invoice.payment_failed"
 
@@ -343,6 +344,7 @@ defmodule Accrue.Dunning.DunningFullJourneyTest do
       # After final step, no more steps are chained — campaign is still active
       # (anchor set) but there are no more scheduled DunningStep jobs.
       remaining_jobs = all_enqueued(worker: DunningStep)
+
       assert remaining_jobs == [] or length(remaining_jobs) == 0,
              "No further DunningStep jobs should be enqueued after the final step"
     end
@@ -374,11 +376,13 @@ defmodule Accrue.Dunning.DunningFullJourneyTest do
 
       # Anchor is cleared.
       reloaded_after = Repo.reload!(sub)
+
       assert is_nil(reloaded_after.dunning_campaign_started_at),
              "dunning_campaign_started_at must be nil after recovery"
 
       # No further DunningStep jobs enqueued (the post-commit cancel ran).
       remaining_jobs = all_enqueued(worker: DunningStep)
+
       assert remaining_jobs == [],
              "All enqueued DunningStep jobs must be cancelled on recovery"
 
@@ -484,6 +488,7 @@ defmodule Accrue.Dunning.DunningFullJourneyTest do
       # Anchor cleared on the terminal transition (maybe_finalize_dunning_campaign
       # covers both recovery AND terminal edges).
       final_sub = Repo.reload!(sub)
+
       assert is_nil(final_sub.dunning_campaign_started_at),
              "anchor must be cleared on terminal transition"
     end

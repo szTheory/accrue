@@ -185,4 +185,27 @@ defmodule AccrueAdmin.Copy.Invoice do
   def invoice_pdf_summary_hosted_ready, do: "hosted invoice ready"
 
   def invoice_pdf_summary_render_on_demand, do: "render on demand"
+
+  # Phase 139: Ad-hoc Invoices Admin UI
+  def invoice_add_manual_item_cta, do: "Add manual line item"
+  def invoice_empty_manual_items_heading, do: "No manual adjustments yet"
+
+  def invoice_empty_manual_items_body,
+    do:
+      "Draft invoices can include one-off charges or credits here. Add a manual line item to preview how it will appear before finalization."
+
+  def invoice_add_manual_item_error,
+    do:
+      "We couldn’t save this invoice adjustment. Check the description, amount, and draft status, then try again."
+
+  def invoice_remove_manual_item_confirm,
+    do:
+      "Remove manual line item: This removes the adjustment from the draft invoice before finalization. Confirm removal to continue."
+
+  def invoice_add_manual_item_success,
+    do: "Manual line item saved. It will appear on the finalized invoice."
+
+  def invoice_remove_manual_item_success, do: "Manual line item removed from the draft invoice."
+  def invoice_draft_locked_guidance, do: "Only draft invoices can be adjusted from admin."
+  def invoice_manual_row_badge, do: "Manual adjustment"
 end

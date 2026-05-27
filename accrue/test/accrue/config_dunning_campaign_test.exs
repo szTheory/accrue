@@ -43,12 +43,14 @@ defmodule Accrue.ConfigDunningCampaignTest do
                Config.validate_dunning_campaign(enabled: true, steps: steps)
 
       assert Enum.map(normalized, &Keyword.fetch!(&1, :after_days)) == [0, 5, 12]
+
       assert Enum.map(normalized, &Keyword.fetch!(&1, :key)) ==
                [:reminder, :action_required, :final_notice]
     end
 
     test "accepts a single-step cadence" do
       steps = [[after_days: 0, key: :only, template: Accrue.Emails.InvoicePaymentFailed]]
+
       assert {:ok, [enabled: true, steps: ^steps]} =
                Config.validate_dunning_campaign(enabled: true, steps: steps)
     end
@@ -102,6 +104,7 @@ defmodule Accrue.ConfigDunningCampaignTest do
 
     test "enabled: false with steps still normalizes (steps preserved when valid)" do
       steps = [[after_days: 0, key: :a, template: M]]
+
       assert {:ok, [enabled: false, steps: ^steps]} =
                Config.validate_dunning_campaign(enabled: false, steps: steps)
     end
@@ -121,6 +124,7 @@ defmodule Accrue.ConfigDunningCampaignTest do
       steps = Config.dunning_campaign_steps()
 
       assert Enum.map(steps, &Keyword.fetch!(&1, :after_days)) == [0, 5, 12]
+
       assert Enum.map(steps, &Keyword.fetch!(&1, :key)) ==
                [:reminder, :action_required, :final_notice]
 
@@ -233,7 +237,11 @@ defmodule Accrue.ConfigDunningCampaignTest do
           offsets
           |> Enum.with_index()
           |> Enum.map(fn {after_days, idx} ->
-            [after_days: after_days, key: :"step_#{idx}", template: Accrue.Emails.InvoicePaymentFailed]
+            [
+              after_days: after_days,
+              key: :"step_#{idx}",
+              template: Accrue.Emails.InvoicePaymentFailed
+            ]
           end)
         end
       )

@@ -40,13 +40,18 @@ config :accrue_host, Oban,
     accrue_webhooks: 10,
     accrue_mailers: 20,
     accrue_pdf: 5,
-    accrue_dunning: 2
+    accrue_dunning: 2,
+    accrue_meters: 5,
+    accrue_scheduled: 5
   ],
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24},
     {Oban.Plugins.Cron,
      crontab: [
-       {"*/15 * * * *", Accrue.Jobs.DunningSweeper}
+       {"*/15 * * * *", Accrue.Jobs.DunningSweeper},
+       {"@daily", Accrue.Jobs.DetectExpiringCards},
+       {"* * * * *", Accrue.Jobs.MeterEventsReconciler},
+       {"*/5 * * * *", Accrue.Jobs.MeteredRenewalReconciler}
      ]}
   ]
 
@@ -98,6 +103,23 @@ config :logger, :default_formatter,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :accrue, :entitlements,
+  billable: fn container ->
+    scope = Map.get(container.assigns, :current_scope)
+
+    if scope do
+      Map.get(scope, :active_organization) || Map.get(scope, :user)
+    else
+      Map.get(container.assigns, :current_user)
+    end
+  end,
+  plans: [
+    premium: [
+      features: [:advanced_reports],
+      price_ids: ["price_premium"]
+    ]
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

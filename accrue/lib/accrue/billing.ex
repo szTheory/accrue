@@ -286,6 +286,30 @@ defmodule Accrue.Billing do
   def send_invoice!(invoice, opts \\ []),
     do: span_invoice(:send, invoice, opts, &InvoiceActions.send_invoice!/2)
 
+  def add_invoice_item(invoice, attrs, opts \\ []) do
+    span_billing(:invoice_item, :add, invoice, opts, fn ->
+      InvoiceActions.add_invoice_item(invoice, attrs, opts)
+    end)
+  end
+
+  def add_invoice_item!(invoice, attrs, opts \\ []) do
+    span_billing(:invoice_item, :add, invoice, opts, fn ->
+      InvoiceActions.add_invoice_item!(invoice, attrs, opts)
+    end)
+  end
+
+  def remove_invoice_item(invoice, item, opts \\ []) do
+    span_billing(:invoice_item, :remove, invoice, opts, fn ->
+      InvoiceActions.remove_invoice_item(invoice, item, opts)
+    end)
+  end
+
+  def remove_invoice_item!(invoice, item, opts \\ []) do
+    span_billing(:invoice_item, :remove, invoice, opts, fn ->
+      InvoiceActions.remove_invoice_item!(invoice, item, opts)
+    end)
+  end
+
   # ── Charges, PaymentIntents, and SetupIntents ─────────────────────
   def charge(customer, amount_or_opts, opts \\ []) do
     span_billing(:charge, :create, customer, opts, fn ->

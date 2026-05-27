@@ -55,6 +55,7 @@ defmodule Accrue.ConfigEntitlementsTest do
 
       ent = Config.entitlements()
       assert Keyword.has_key?(ent, :plans)
+
       assert Keyword.get(Keyword.fetch!(ent, :plans), :pro)[:features] == [
                :basic_reports,
                :api_access,
@@ -65,9 +66,7 @@ defmodule Accrue.ConfigEntitlementsTest do
 
   describe "invalid :entitlements config (ENT-01)" do
     test "a bad feature type (string instead of list) raises NimbleOptions.ValidationError" do
-      Application.put_env(:accrue, :entitlements,
-        plans: [pro: [features: "not-a-list"]]
-      )
+      Application.put_env(:accrue, :entitlements, plans: [pro: [features: "not-a-list"]])
 
       assert_raise NimbleOptions.ValidationError, fn ->
         Config.validate_at_boot!()
@@ -75,9 +74,7 @@ defmodule Accrue.ConfigEntitlementsTest do
     end
 
     test "an unknown inner key raises NimbleOptions.ValidationError" do
-      Application.put_env(:accrue, :entitlements,
-        plans: [pro: [features: [:x], bogus_key: true]]
-      )
+      Application.put_env(:accrue, :entitlements, plans: [pro: [features: [:x], bogus_key: true]])
 
       assert_raise NimbleOptions.ValidationError, fn ->
         Config.validate_at_boot!()

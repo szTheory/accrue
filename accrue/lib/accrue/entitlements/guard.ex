@@ -199,10 +199,17 @@ defmodule Accrue.Entitlements.Guard do
   # Exactly one of :feature / :plan must be present.
   defp guard_target!(opts) do
     case {Keyword.fetch(opts, :feature), Keyword.fetch(opts, :plan)} do
-      {{:ok, feature}, :error} -> {:feature, feature}
-      {:error, {:ok, plan}} -> {:plan, plan}
-      {{:ok, _}, {:ok, _}} -> raise ArgumentError, "guard opts: pass exactly one of :feature or :plan, not both"
-      {:error, :error} -> raise ArgumentError, "guard opts: missing required :feature or :plan"
+      {{:ok, feature}, :error} ->
+        {:feature, feature}
+
+      {:error, {:ok, plan}} ->
+        {:plan, plan}
+
+      {{:ok, _}, {:ok, _}} ->
+        raise ArgumentError, "guard opts: pass exactly one of :feature or :plan, not both"
+
+      {:error, :error} ->
+        raise ArgumentError, "guard opts: missing required :feature or :plan"
     end
   end
 

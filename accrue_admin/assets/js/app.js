@@ -3,6 +3,7 @@ import { LiveSocket } from "../../deps/phoenix_live_view/priv/static/phoenix_liv
 import { initClipboardControls } from "./hooks/clipboard";
 import { initThemeControls } from "./hooks/accrue_theme";
 import { initShellNav } from "./hooks/accrue_shell_nav";
+import { CommandPalette } from "./hooks/command_palette";
 
 function ready(callback) {
   if (document.readyState === "loading") {
@@ -20,7 +21,8 @@ ready(() => {
 
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
-  params: csrfToken ? { _csrf_token: csrfToken } : {}
+  params: csrfToken ? { _csrf_token: csrfToken } : {},
+  hooks: { CommandPalette }
 });
 
 liveSocket.connect();

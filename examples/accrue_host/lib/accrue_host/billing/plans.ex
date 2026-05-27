@@ -3,9 +3,9 @@ defmodule AccrueHost.Billing.Plans do
   Deterministic Fake-backed plan definitions for the host billing UI.
   """
 
-  @ids %{basic: "price_basic", pro: "price_pro"}
-  @labels %{basic: "Basic", pro: "Pro"}
-  @amounts %{basic: 1_500, pro: 3_000}
+  @ids %{basic: "price_basic", pro: "price_pro", metered: "price_metered"}
+  @labels %{basic: "Basic", pro: "Pro", metered: "Metered"}
+  @amounts %{basic: 1_500, pro: 3_000, metered: 0}
 
   def ids, do: @ids
 
@@ -24,6 +24,14 @@ defmodule AccrueHost.Billing.Plans do
         id: @ids.pro,
         label: @labels.pro,
         unit_amount_minor: @amounts.pro,
+        currency: "USD",
+        billing_cycle: %{unit: :month, count: 1}
+      },
+      %{
+        key: :metered,
+        id: @ids.metered,
+        label: @labels.metered,
+        unit_amount_minor: @amounts.metered,
         currency: "USD",
         billing_cycle: %{unit: :month, count: 1}
       }
