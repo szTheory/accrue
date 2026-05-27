@@ -9,9 +9,9 @@ defmodule AccrueAdmin.Components.WindowSelector do
 
   ## Note on `base_path`
 
-  `base_path` must be a clean path with no existing query params (e.g.,
-  `"/billing/analytics/recovery"`). For paths with existing query params,
-  build the URL via `URI.encode_query/1` instead of string concatenation.
+  `base_path` may be a clean path or a path with existing query params. The
+  component uses `URI` to safely replace the `?window=` param, so any existing
+  query string is correctly overwritten rather than producing a double-`?` URL.
   """
 
   use Phoenix.Component
@@ -28,7 +28,7 @@ defmodule AccrueAdmin.Components.WindowSelector do
     <nav class="ax-tabs" aria-label="Time window (UTC)">
       <.link
         :for={{value, label} <- @windows}
-        patch={@base_path <> "?window=" <> value}
+        patch={window_href(@base_path, value)}
         class={["ax-tab", @current_window == value && "ax-tab-active"]}
         aria-current={if @current_window == value, do: "page", else: nil}
       >
@@ -36,5 +36,12 @@ defmodule AccrueAdmin.Components.WindowSelector do
       </.link>
     </nav>
     """
+  end
+
+  defp window_href(base_path, value) do
+    base_path
+    |> URI.parse()
+    |> Map.put(:query, URI.encode_query(%{"window" => value}))
+    |> URI.to_string()
   end
 end
