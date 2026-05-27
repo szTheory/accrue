@@ -43,7 +43,15 @@ defmodule Accrue.Analytics.Dunning do
       from(e in Event,
         where: e.type in [@recovered_type, @exhausted_type],
         group_by: e.type,
-        select: {e.type, sum(fragment("(?->>'mrr_value_cents')::integer", e.data))}
+        select:
+          {e.type,
+           sum(
+             fragment(
+               "CASE WHEN jsonb_typeof((?->'mrr_value_cents')) = 'number' THEN (?->>'mrr_value_cents')::integer ELSE 0 END",
+               e.data,
+               e.data
+             )
+           )}
       )
       |> apply_window(opts)
 
