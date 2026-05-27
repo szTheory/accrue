@@ -6,7 +6,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
   import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.{Breadcrumbs, Button, FlashGroup, StatusBadge}
-  alias AccrueAdmin.Components.{DropdownMenu, Input, Select, Tabs}
+  alias AccrueAdmin.Components.{DropdownMenu, Input, Select, Tabs, WindowSelector}
 
   describe "Breadcrumbs" do
     test "renders linked ancestors and current page" do
@@ -177,6 +177,46 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ ~s(aria-current="page")
       assert html =~ "ax-tab-active"
       assert html =~ ">12<"
+    end
+  end
+
+  describe "WindowSelector" do
+    test "renders 3 preset buttons with correct labels" do
+      html =
+        render_component(&WindowSelector.window_selector/1, %{
+          current_window: "30d",
+          base_path: "/billing/analytics/recovery"
+        })
+
+      assert html =~ "7 days UTC"
+      assert html =~ "30 days UTC"
+      assert html =~ "90 days UTC"
+    end
+
+    test "marks active window with aria-current and ax-tab-active" do
+      html =
+        render_component(&WindowSelector.window_selector/1, %{
+          current_window: "30d",
+          base_path: "/billing/analytics/recovery"
+        })
+
+      assert html =~ ~s(aria-current="page")
+      assert html =~ "ax-tab-active"
+      # Only one button should carry aria-current="page" (the active one)
+      assert 1 == html |> String.split(~s(aria-current="page")) |> length() |> Kernel.-(1)
+    end
+
+    test "constructs correct patch hrefs from base_path" do
+      html =
+        render_component(&WindowSelector.window_selector/1, %{
+          current_window: "7d",
+          base_path: "/billing/analytics/recovery"
+        })
+
+      assert html =~ ~s(?window=7d)
+      assert html =~ ~s(?window=30d)
+      assert html =~ ~s(?window=90d)
+      assert html =~ "/billing/analytics/recovery?window=7d"
     end
   end
 end

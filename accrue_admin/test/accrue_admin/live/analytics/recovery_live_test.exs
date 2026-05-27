@@ -166,4 +166,43 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert html =~ "¥" or html =~ "￥" or html =~ "JPY"
     end
   end
+
+  describe "window parameter (DAN-10)" do
+    test "no ?window= param defaults to 30d window selector active", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+      # 30d button is active; 7d and 90d are not
+      assert html =~ "30 days UTC"
+      assert html =~ ~s(aria-current="page")
+    end
+
+    test "?window=7d renders 7d button as active", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=7d")
+      assert html =~ "7 days UTC"
+      assert html =~ ~s(aria-current="page")
+    end
+
+    test "?window=90d renders 90d button as active", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=90d")
+      assert html =~ "90 days UTC"
+      assert html =~ ~s(aria-current="page")
+    end
+
+    test "invalid ?window= falls back to 30d default", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=bad")
+      assert html =~ "30 days UTC"
+      assert html =~ ~s(aria-current="page")
+    end
+
+    test "window change via render_patch fires handle_params", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
+      html = render_patch(view, "/billing/analytics/recovery?window=7d")
+      assert html =~ "7 days UTC"
+      assert html =~ ~s(aria-current="page")
+    end
+  end
 end
