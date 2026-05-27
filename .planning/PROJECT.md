@@ -346,7 +346,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 Current focus: **Intake-gated maintenance mode / Release posture**. **v1.42 — Ad-hoc Invoices & Adopter Confidence is COMPLETE**. All 5 phases (135-139) have been successfully delivered and validated. See `.planning/v1.42-v1.42-MILESTONE-AUDIT.md` for the full audit.
 
-**Last shipped planning milestone:** **v1.42** — Phases **135–139** (**2026-05-27**); audit `.planning/v1.42-v1.42-MILESTONE-AUDIT.md`.
+**Last shipped planning milestone:** **v1.43** — Phases **140–142** (**2026-05-27**).
 
 ## Requirements
 
@@ -358,5 +358,8 @@ Admin global search — 4/4 satisfied.
 - ✓ **SRCH-02** — CMD+K Keyboard navigation in admin UI.
 - ✓ **SRCH-03** — Unified search results for Customers, Invoices, Subscriptions.
 - ✓ **SRCH-04** — Zero-sidecar search implementation.
+
+... (rest of requirements unchanged) ...
+lementation.
 
 ... (rest of requirements unchanged) ...

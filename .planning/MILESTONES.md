@@ -1,5 +1,20 @@
 # Milestones
 
+## v1.43 Linked Release 1.2.0 Truth (Shipped: 2026-05-27)
+
+**Phases completed:** 3 phases (140–142)
+**Timeline:** 2026-05-27 → 2026-05-27 (1 day)
+
+**Delivered:** Closed the linked release-truth gap by locking the three-package contract for `accrue`, `accrue_admin`, and `accrue_portal`. Published the public `1.2.0` trio to Hex with canonical proof and verified post-publish doc mirrors. Concluded with the final friction inventory maintainer pass and planning closeout.
+
+**Key accomplishments:**
+
+- **Phase 140:** Locked the three-package release contract in release automation and runbooks.
+- **Phase 141:** Shipped the `1.2.0` trio to Hex and passed the post-publish contract sweep.
+- **Phase 142:** Performed planning-mirror alignment and the maintainer friction inventory pass.
+
+---
+
 ## v1.42 Ad-hoc Invoices & Adopter Confidence (Shipped: 2026-05-27)
 
 **Phases completed:** 5 phases (135–139)

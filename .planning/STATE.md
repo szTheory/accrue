@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.43
-milestone_name: Linked Release 1.1.2 Truth
-status: planning
+milestone_name: Linked Release 1.2.0 Truth
+status: completed
 stopped_at: none
-last_updated: "2026-05-27T07:25:00.617Z"
-last_activity: 2026-05-27 -- Planning v1.43 milestone.
+last_updated: "2026-05-27T12:00:00.000Z"
+last_activity: 2026-05-27 -- Completed v1.43 milestone.
 progress:
   total_phases: 17
   completed_phases: 16
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
  Last activity: 2026-05-27 -- Completed Phase 141 Plan 01.
 ## Milestone Progress
 
-**v1.43** (Planning): 3 phases (**140–142**). Theme: Close the linked release-truth gap by locking the three-package contract, shipping the public `1.1.2` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
+**v1.43** (shipped & archived **2026-05-27**): 3 phases (**140–142**). Theme: Close the linked release-truth gap by locking the three-package contract, shipping the public `1.2.0` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
 
 **v1.42** (shipped & archived **2026-05-27**): 5 phases (**135–139**). Progress: 5/5 phases complete. Phase 139 shipped the UI for operator ad-hoc invoice management. Audit: `.planning/v1.42-v1.42-MILESTONE-AUDIT.md`.
 
@@ -94,4 +94,4 @@ Resume file: None
 
 ## Operator Next Steps
 
- - **Plan Next Phase:** Review roadmap and run `/gsd-plan-phase 142` to start execution.
+ - **Plan Next Phase:** Review the `v1.44-NEXT-STEP-ASSESSMENT.md` in `.planning/threads/` and run `/gsd-plan-phase 143` (or the next phase number) to start execution for the Recovered-Revenue Analytics Dashboard.

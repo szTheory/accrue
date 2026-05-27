@@ -751,8 +751,8 @@ defmodule Accrue.Webhook.DefaultHandler do
 
           %Subscription{} = updated ->
             with {:ok, _} <- upsert_subscription_items(updated, canonical),
-                 :ok <- maybe_emit_dunning_exhaustion(row, updated),
-                 :ok <- maybe_finalize_dunning_campaign(row, updated),
+                 :ok <- maybe_emit_dunning_exhaustion(row, updated, canonical),
+                 :ok <- maybe_finalize_dunning_campaign(row, updated, canonical),
                  {:ok, _} <-
                    record_event(
                      subscription_event_type(action),
@@ -772,13 +772,15 @@ defmodule Accrue.Webhook.DefaultHandler do
   # :canceled. Runs inside the enclosing Repo.transact/2 so the write
   # and the signal are atomic (idempotent under webhook replay because
   # dedup at the dispatch layer short-circuits before the reducer body).
-  defp maybe_emit_dunning_exhaustion(nil, _updated), do: :ok
+  defp maybe_emit_dunning_exhaustion(nil, _updated, _canonical), do: :ok
 
-  defp maybe_emit_dunning_exhaustion(%Subscription{} = row, %Subscription{} = updated) do
+  defp maybe_emit_dunning_exhaustion(%Subscription{} = row, %Subscription{} = updated, canonical) do
     with true <- Subscription.dunning_sweepable?(row),
          to_status when not is_nil(to_status) <-
            Subscription.dunning_exhausted_status(updated) do
       source = dunning_source(row.dunning_sweep_attempted_at)
+      mrr_value_cents = calculate_mrr_cents(canonical)
+      currency = get(canonical, :currency) || "usd"
 
       :telemetry.execute(
         [:accrue, :ops, :dunning_exhaustion],
@@ -803,7 +805,12 @@ defmodule Accrue.Webhook.DefaultHandler do
         type: "dunning.exhausted",
         subject_type: "Subscription",
         subject_id: updated.id,
-        data: %{to_status: to_status, source: source}
+        data: %{
+          to_status: to_status,
+          source: source,
+          mrr_value_cents: mrr_value_cents,
+          currency: currency
+        }
       })
 
       Accrue.Telemetry.Ops.emit(:dunning_exhausted, %{count: 1}, %{
@@ -843,9 +850,9 @@ defmodule Accrue.Webhook.DefaultHandler do
   # signal is the dedicated `dunning.exhausted` event in
   # `maybe_emit_dunning_exhaustion/2`. Metadata + data carry only IDs +
   # bounded enums — no PII (T-129-01).
-  defp maybe_finalize_dunning_campaign(nil, _updated), do: :ok
+  defp maybe_finalize_dunning_campaign(nil, _updated, _canonical), do: :ok
 
-  defp maybe_finalize_dunning_campaign(%Subscription{} = row, %Subscription{} = updated) do
+  defp maybe_finalize_dunning_campaign(%Subscription{} = row, %Subscription{} = updated, canonical) do
     # A campaign FINALIZES on EITHER edge out of the live (`:past_due`)
     # window: recovery (the sub is active/paid again) OR terminal exhaustion
     # (CR-02: the sub reached `:unpaid`/`:canceled` via the Accrue sweeper or
@@ -870,13 +877,20 @@ defmodule Accrue.Webhook.DefaultHandler do
 
       multi =
         if recovery? do
+          mrr_value_cents = calculate_mrr_cents(canonical)
+          currency = get(canonical, :currency) || "usd"
+
           # Fold the `dunning.recovered` ledger record into the SAME
           # transaction as the anchor-clear (atomic with the status write).
           Events.record_multi(multi, :dunning_recovered_event, %{
             type: "dunning.recovered",
             subject_type: "Subscription",
             subject_id: updated.id,
-            data: %{source: dunning_source(row.dunning_sweep_attempted_at)}
+            data: %{
+              source: dunning_source(row.dunning_sweep_attempted_at),
+              mrr_value_cents: mrr_value_cents,
+              currency: currency
+            }
           })
         else
           multi
@@ -1878,4 +1892,33 @@ defmodule Accrue.Webhook.DefaultHandler do
     do: {:ok, "customer.subscription.trial_will_end"}
 
   defp normalize_braintree_type(_), do: :ignored
+
+  defp calculate_mrr_cents(canonical) do
+    items = get(canonical, :items) || %{}
+    data_list = get(items, :data) || []
+    data_list = if is_list(data_list), do: data_list, else: []
+
+    Enum.reduce(data_list, 0, fn item, acc ->
+      quantity = get(item, :quantity) || 1
+      plan = get(item, :plan) || %{}
+      price = get(item, :price) || %{}
+
+      amount = get(plan, :amount) || get(price, :unit_amount) || 0
+      
+      recurring = get(price, :recurring) || %{}
+      interval = get(plan, :interval) || get(recurring, :interval) || "month"
+      interval_count = get(plan, :interval_count) || get(recurring, :interval_count) || 1
+
+      mrr_cents = 
+        case interval do
+          "month" -> div(amount * quantity, interval_count)
+          "year" -> div(amount * quantity, interval_count * 12)
+          "week" -> div(amount * quantity * 52, interval_count * 12)
+          "day" -> div(amount * quantity * 365, interval_count * 12)
+          _ -> 0
+        end
+        
+      acc + mrr_cents
+    end)
+  end
 end
