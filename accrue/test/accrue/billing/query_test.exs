@@ -140,4 +140,50 @@ defmodule Accrue.Billing.QueryTest do
                "entitling?/1=#{predicate} but in Query.entitling/1=#{in_fragment}"
     end
   end
+
+  describe "in_active_dunning_campaign/1" do
+    setup %{customer: customer} do
+      now = Accrue.Clock.utc_now()
+
+      # Subscription in an active dunning campaign (non-nil anchor).
+      {:ok, dunning_sub} =
+        %Subscription{}
+        |> Subscription.changeset(%{
+          customer_id: customer.id,
+          processor: "fake",
+          processor_id: "sub_dunning_active_#{Ecto.UUID.generate() |> binary_part(0, 8)}",
+          status: :past_due,
+          dunning_campaign_started_at: now
+        })
+        |> Repo.insert()
+
+      %{dunning_sub: dunning_sub}
+    end
+
+    test "returns subscriptions with non-nil dunning_campaign_started_at", %{dunning_sub: dunning_sub} do
+      result = Query.in_active_dunning_campaign() |> Repo.all()
+
+      # The dunning fixture is in the result.
+      assert Enum.any?(result, &(&1.id == dunning_sub.id))
+
+      # Every element has a non-nil dunning_campaign_started_at.
+      assert Enum.all?(result, &(not is_nil(&1.dunning_campaign_started_at)))
+    end
+
+    test "composes correctly when piped after an existing query", %{dunning_sub: dunning_sub} do
+      import Ecto.Query, only: [from: 2]
+
+      result =
+        from(s in Subscription, where: s.status == :past_due)
+        |> Query.in_active_dunning_campaign()
+        |> Repo.all()
+
+      # The dunning+past_due fixture appears in the result.
+      assert Enum.any?(result, &(&1.id == dunning_sub.id))
+
+      # Every result row is both :past_due AND in an active campaign.
+      assert Enum.all?(result, &(&1.status == :past_due))
+      assert Enum.all?(result, &(not is_nil(&1.dunning_campaign_started_at)))
+    end
+  end
 end
