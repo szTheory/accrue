@@ -1,17 +1,10 @@
-# Architecture Research — Entitlements / Plan-Gating (v1.39)
+# Architecture Research — Recovered-Revenue Dashboard Completion (v1.44)
 
-**Domain:** First-party feature/plan gating layered onto an existing Elixir/Phoenix billing library (Accrue)
-**Researched:** 2026-05-22
-**Confidence:** HIGH (codebase-verified integration points; MEDIUM on Stripe-sync timing since the dep does not yet support it)
+**Domain:** Operator-facing analytics dashboard layered on the `accrue_events` ledger
+**Researched:** 2026-05-27
+**Confidence:** HIGH (Phase 143 foundation is shipped + verified; all integration seams are codebase-grounded)
 
-> Scope note: This is an **integration design** against Accrue's already-feature-complete
-> billing core, not a redesign of that core. Every recommendation below either reuses an
-> existing seam (telemetry `span_billing`, `Events.record`, `Processor.Capabilities`,
-> conditional-compile, `nimble_options` config, `AccrueAdmin.AuthHook`) or adds a thin new
-> module that mirrors one. New-vs-modified is called out per component. The verified
-> central insight: **entitlements resolve entirely from local subscription state Accrue
-> already holds** — `billable → Customer → active Subscriptions → SubscriptionItems →
-> price_id → (plan→feature map)` — so the gate read path needs zero processor API calls.
+> **Scope note.** This is a **completion** design on top of an already-locked architecture (Phase 143). The integration points, JSONB aggregation pattern, public-API module name, and LiveView mount/auth posture are all set. v1.44 only adds new analytical surfaces (funnel, at-risk, time-window, drill-down) and one minimal write-path addition (a single new event type). The verified central insight is that **every new query in v1.44 can reuse `Accrue.Analytics.Dunning`'s pattern**: `from(e in Event, where: e.type in [...], group_by: ..., select: {..., sum(fragment("(?->>'mrr_value_cents')::integer", e.data))})` with optional `:since/:until` parameterized bounds. No new tables. No new dependencies.
 
 ---
 
@@ -19,498 +12,431 @@
 
 | # | Question | Decision | Confidence |
 |---|----------|----------|------------|
-| 1 | Where the model lives | **Hybrid: host-declared static map (nimble_options) is the source of truth; an optional synced cache table layers on for Stripe** | HIGH |
-| 2 | Query/gate core | **New `Accrue.Entitlements` context** + thin convenience delegates on `Accrue`; telemetry-instrumented; ledger records grant/revoke, **not** checks | HIGH |
-| 3 | Plug + LiveView guards | **Plug guard in core (`Accrue.Plug.RequireEntitlement`); LiveView `on_mount` in a thin conditionally-compiled core module (`Accrue.Live.Entitlements`)** guarded by `Code.ensure_loaded?(Phoenix.LiveView)` | HIGH |
-| 4 | Provider-honest dispatch | **Resolver behaviour + capability rows**: Fake/Braintree = local plan→feature map; Stripe = local map by default, native Entitlements as an opt-in source once the dep supports it | HIGH |
-| 5 | Stripe sync | **In-scope-but-OPTIONAL and behind a flag; ship the cache table + webhook plumbing now, defer live Stripe API reads** (lattice_stripe 1.1.0 has no Entitlements module — verified) | MEDIUM |
-| 6 | Admin surface | **New "Entitlements" tab on the existing `CustomerLive`** in `accrue_admin` | HIGH |
-| 7 | Caching vs live-check | **Always read from local state (subscription projection + optional cache table); never call a processor API on the gate path** | HIGH |
+| 1 | Funnel query: one query or `Task.async` per stage? | **ONE query** — single `group_by :type` over a fixed set of event types, returning a `%{stage => count}` map. Same shape as `recovered_vs_lost_mrr/1` extended. | HIGH |
+| 2 | Are step-level events emitted today? | **YES** — `dunning.campaign_started` (default_handler:1237), `dunning.step_sent` (workers/dunning_step.ex:196), `dunning.recovered` and `dunning.exhausted`. The funnel can be built today with **zero write-path changes**. | HIGH |
+| 3 | What about `dunning.terminal_action_requested` (sweeper)? | **EXCLUDE** from funnel — already documented as "request-time intent, may double-count" in `billing/dunning.ex:108-110`. Funnel uses confirmed transitions only. | HIGH |
+| 4 | At-risk subscriptions: derived from events or schema? | **From schema** — `Accrue.Billing.Subscription.dunning_campaign_active?/1` returns true iff `dunning_campaign_started_at` is non-nil. There is no `Accrue.Dunning.Campaign` row schema — "active" = anchor present on the subscription row. Anchor is cleared atomically with the terminal/recovery write. | HIGH |
+| 5 | Where does the at-risk query live? | **Both** — push the *Ecto query composer* into `Accrue.Billing.Query.in_active_dunning_campaign/1` (next to the existing `dunning_sweep_candidates/2`), and expose the *enumeration helper* `Accrue.Analytics.Dunning.at_risk_subscriptions/1` that joins customer + invoice context for dashboard rendering. | HIGH |
+| 6 | Time-window: URL param, assign, or both? | **Both, with URL as SSOT** — `?window=30d` URL param drives `handle_params/3` → assigns. This is consistent with `subscriptions_live.ex:43-45` and the existing `params`-driven `DataTable` shape. URL-shareable, deep-linkable, back-button safe. | HIGH |
+| 7 | Per-campaign drill-down: separate route or live_component? | **Separate route** at `/billing/analytics/recovery/subscriptions/:subscription_id` — leverages the existing `Accrue.Events.timeline_for/3` helper. Drill-down is keyed on `subject_id`, not on a campaign-row PK (there is no campaign-row schema). | HIGH |
+| 8 | LiveView 1.1 streams for at-risk table? | **No** — plain `assign(:at_risk, list)` is correct for the v1.44 scope (10–500 rows typical; never live-mutated mid-session). Streams are for live-mutating lists; this list refreshes only on `handle_params` + manual reload. Crossover ~5k rows or any push-based update — neither applies. | HIGH |
+| 9 | Dashboard-load telemetry? | **Yes** — `[:accrue, :ops, :analytics_dashboard_loaded]` via `Accrue.Telemetry.Ops.emit/3` (the canonical helper). Dimensions: `view` (`:recovery` \| `:campaign_drilldown`), `window_days`, `result_count`. Useful for measuring adoption and tail-latency on the JSONB aggregations. | HIGH |
+| 10 | Public API surface in v1.44 | Lock **`Accrue.Analytics.Dunning`** as the public boundary. Promote `recovered_vs_lost_mrr/1` (already shipped) + four new functions: `funnel/1`, `at_risk_subscriptions/1`, `campaign_timeline/2`, `bucket_recovered_mrr/2`. Everything in `accrue_admin` is internal (no @doc-public for LiveViews). | HIGH |
+| 11 | Cross-package boundary risk? | **None new** — `RecoveryLive` calls only `Accrue.Analytics.Dunning` functions; no schema reach-around. Add a Credo check or doc convention to enforce. Third-party non-admin dashboards reuse the same context. | HIGH |
+| 12 | Build order | **(1) funnel query + funnel UI** → **(2) time-window URL plumbing** → **(3) at-risk query + table** → **(4) per-subscription drill-down route** → **(5) docs + adopter-proof** → **(6) telemetry + bucket-by-day MRR for sparkline** (optional). De-risks compute path before navigation/state. | HIGH |
 
 ---
 
-## Standard Architecture
-
-### System Overview
+## System diagram (v1.44 — annotated against Phase 143 foundation)
 
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│  HOST APP (Phoenix)                                                        │
-│  ┌────────────────────┐   ┌──────────────────────┐   ┌─────────────────┐  │
-│  │ Controller         │   │ LiveView route        │   │ HEEx / business │  │
-│  │ plug RequireEntitl │   │ on_mount {Entitl, …}  │   │ if entitled?    │  │
-│  └─────────┬──────────┘   └──────────┬───────────┘   └────────┬────────┘  │
-└────────────┼─────────────────────────┼────────────────────────┼───────────┘
-             │  (NEW core)              │ (NEW core, cond-compiled)│ (public API)
-┌────────────▼─────────────────────────▼────────────────────────▼───────────┐
-│  accrue (core, LiveView-runtime-free)                                      │
-│                                                                            │
-│  Accrue.Plug.RequireEntitlement     Accrue.Live.Entitlements              │
-│        │  (NEW)                            │  (NEW, if Code.ensure_loaded? │
-│        │                                   │       Phoenix.LiveView)       │
-│        └───────────────┬───────────────────┘                              │
-│                        ▼                                                    │
-│            ┌───────────────────────────┐    thin delegates  ┌───────────┐ │
-│            │  Accrue.Entitlements (NEW) │◄───────────────────┤  Accrue   │ │
-│            │  entitled?/active_plan?/   │                    │ (delegate)│ │
-│            │  features_for/list/        │                    └───────────┘ │
-│            │  grant/revoke (telemetry + │                                   │
-│            │  span_entitlement)         │                                   │
-│            └───┬──────────────┬─────────┘                                   │
-│   resolve plan │              │ record grant/revoke                         │
-│   ▼            │              ▼                                             │
-│ ┌────────────────────────┐  ┌──────────────────────┐  ┌─────────────────┐ │
-│ │ Entitlements.Resolver  │  │ Accrue.Events (EXIST)│  │ Accrue.Telemetry│ │
-│ │ behaviour (NEW)        │  │ tamper-evident ledger│  │ span (EXIST)    │ │
-│ │  • LocalMap (default)  │  └──────────────────────┘  └─────────────────┘ │
-│ │  • StripeNative (opt)  │                                                 │
-│ └───┬────────────┬───────┘                                                 │
-│     │            │ reads                                                    │
-│     ▼            ▼                                                          │
-│ ┌────────────┐  ┌──────────────────────────────────────────────────────┐ │
-│ │ Config     │  │ EXISTING local state (NO processor API on read path)  │ │
-│ │ :plans map │  │  Customer ─< Subscription ─< SubscriptionItem.price_id│ │
-│ │ (nimble)   │  │  Query.active/1 · Subscription.active?/1               │ │
-│ │ (NEW key)  │  │  + OPTIONAL accrue_entitlement_grants cache (NEW tbl) │ │
-│ └────────────┘  └──────────────────────────────────────────────────────┘ │
-│                                                                            │
-│  Stripe-sync (OPTIONAL): Webhook.DefaultHandler clause (MODIFY) →          │
-│     entitlements.active_entitlement_summary.updated → upsert cache table   │
-└────────────────────────────────────────────────────────────────────────────┘
+                  +-------------------------------+
+                  | accrue (LiveView-runtime-free)|
+                  +-------------------------------+
+                                  |
+   write path (UNCHANGED + 0 new types)            read path (4 new functions)
+                                  |                          |
++---------------------------------------------+   +-----------------------------------+
+| Stripe webhook  ->  DefaultHandler          |   | Accrue.Analytics.Dunning          |
+|                                             |   |   (PUBLIC v1.44 API)              |
+|   `dunning.campaign_started`  :1237 (today) |   |                                   |
+|   `dunning.step_sent`         (workers)     |   | recovered_vs_lost_mrr/1   (143)   |
+|   `dunning.exhausted` + MRR   :804 (143)    |   | funnel/1                  NEW     |
+|   `dunning.recovered` + MRR   :885 (143)    |   | at_risk_subscriptions/1   NEW     |
+|                                             |   | campaign_timeline/2       NEW     |
+|   accrue_events (JSONB data)                |   | bucket_recovered_mrr/2    NEW(opt)|
++---------------------------------------------+   +-----------------------------------+
+                                  |                          |
+                                  |                          |  (JSONB aggregations,
+                                  |                          |   :since/:until window)
+                                  v                          v
+                  +---------------------------------------------------+
+                  | Accrue.Billing.Query (existing query composer)    |
+                  |   in_active_dunning_campaign/1   NEW              |
+                  +---------------------------------------------------+
+                                                             |
+                                                             v
+                  +-------------------------------+
+                  | accrue_admin                  |
+                  +-------------------------------+
+                  |                                |
+  Live.Analytics.RecoveryLive           Live.Analytics.CampaignLive   NEW
+  (extends today's KPI page)            (per-subscription drill)
+  /billing/analytics/recovery           /billing/analytics/recovery
+                                          /subscriptions/:id
+                  |
+                  |  reuses: AppShell, Breadcrumbs, KpiCard
+                  |  adds:   FunnelChart (HEEx/SVG),
+                  |          AtRiskTable (LiveComponent or inline list)
+                  +---> Operator browser
 ```
-
-### Component Responsibilities
-
-| Component | Responsibility | New / Modified |
-|-----------|----------------|----------------|
-| `Accrue.Entitlements` | Public context: `entitled?/2`, `has_active_plan?/2`, `features_for/1`, `list_entitlements/1`, `grant/3`, `revoke/3`. Wraps each entry in `span_entitlement`. | **NEW** |
-| `Accrue.Entitlements.Resolver` | Behaviour: `resolve(billable, opts) :: {:ok, %{plan: ..., features: MapSet}} \| {:error, _}`. | **NEW** |
-| `Accrue.Entitlements.LocalMap` | Default resolver — folds active subscriptions' `price_id`s through the host `:plans` config map. | **NEW** |
-| `Accrue.Entitlements.StripeNative` | Opt-in resolver — reads the cache table (and, once the dep supports it, the Stripe Active Entitlements API). | **NEW (cache-only at v1.39)** |
-| `Accrue.Entitlements.Grant` (schema) | Optional cache row: `customer_id`, `feature` (lookup_key), `source` (`:local` / `:stripe`), `active`, `data`, `lock_version`. | **NEW (optional)** |
-| `Accrue.Plug.RequireEntitlement` | Controller-level gate. `plug Accrue.Plug.RequireEntitlement, feature: "api_access"` (or `plan:`). Halts 403 / redirects on deny. | **NEW** |
-| `Accrue.Live.Entitlements` | LiveView `on_mount` gate. Conditionally compiled. `on_mount {Accrue.Live.Entitlements, {:require_feature, "api_access"}}`. | **NEW (cond-compiled)** |
-| `Accrue` | Thin convenience delegates (`Accrue.entitled?/2`, `Accrue.has_active_plan?/2`). | **MODIFIED** (currently moduledoc-only) |
-| `Accrue.Config` | New `:plans` (plan→feature map) + `:entitlements` (resolver/source/sync flags) schema keys + accessors. | **MODIFIED** |
-| `Accrue.Processor.Capabilities` | New `entitlements:` rows in `@support_labels` + `@provider_support_labels`. | **MODIFIED** |
-| `Accrue.Webhook.DefaultHandler` | New clause for `entitlements.active_entitlement_summary.updated` → cache upsert. | **MODIFIED (optional path)** |
-| `AccrueAdmin … CustomerLive` | New "Entitlements" tab listing resolved features for a customer. | **MODIFIED** |
-| `Accrue.Events` | Reused unchanged — records `entitlement.granted` / `entitlement.revoked`. | **REUSED** |
 
 ---
 
-## Recommended Project Structure
+## Architectural responsibility map
 
-```
-accrue/lib/accrue/
-├── entitlements.ex                 # NEW  public context + span_entitlement helper
-├── entitlements/
-│   ├── resolver.ex                 # NEW  @behaviour (resolve/2, capabilities optional)
-│   ├── local_map.ex                # NEW  default resolver (config :plans fold)
-│   ├── stripe_native.ex            # NEW  cache-table resolver (+ future Stripe API)
-│   ├── grant.ex                    # NEW  optional Ecto schema (cache row)
-│   └── plan.ex                     # NEW  small struct: %{plan_id, features :: MapSet}
-├── plug/
-│   └── require_entitlement.ex      # NEW  core Plug guard (lives next to existing plugs)
-├── live/
-│   └── entitlements.ex             # NEW  on_mount guard, Code.ensure_loaded? guarded
-├── config.ex                       # MODIFY  add :plans + :entitlements schema keys
-├── processor/capabilities.ex       # MODIFY  add entitlements rows
-└── webhook/default_handler.ex      # MODIFY  add summary.updated clause (optional)
-
-accrue/priv/repo/migrations/
-└── XXXXXX_create_accrue_entitlement_grants.exs   # NEW (optional cache; gated install)
-
-accrue_admin/lib/accrue_admin/live/
-└── customer_live.ex                # MODIFY  add Entitlements tab
-
-accrue/guides/
-└── entitlements.md                 # NEW  guide + JTBD ⛔→✅ flip
-```
-
-### Structure Rationale
-
-- **`entitlements/` as a sibling of `billing/`, not inside it.** Entitlements is a *read-over-billing* concern with its own context boundary (mirrors how `Accrue.Connect`, `Accrue.Checkout`, `Accrue.BillingPortal` are top-level contexts, not `Billing.*` submodules). It depends on `Billing.Subscription` / `Billing.Query` but billing must never depend on it.
-- **`plug/require_entitlement.ex` next to `put_operation_id.ex` / `put_connected_account.ex`.** The Plug guard belongs in core because `plug` is a hard dep (`~> 1.16`) and Plug guards work with plain controllers — no Phoenix or LiveView required.
-- **`live/entitlements.ex` as a single conditionally-compiled file.** See the LiveView-free reconciliation below — this is the one piece that touches the LiveView socket lifecycle, so it is wrapped exactly like `Accrue.Integrations.Sigra`.
-- **`grant.ex` optional + migration gated.** Hosts on pure local-mapping never need the table. Only Stripe-sync adopters run the migration, matching how Accrue gates other optional install steps.
+| Capability | Primary tier | Secondary | Rationale |
+|------------|-------------|-----------|-----------|
+| Event emission (already complete) | `accrue` backend | — | No new write paths. `dunning.campaign_started`, `dunning.step_sent`, `dunning.recovered`, `dunning.exhausted` all exist. v1.44 is read-only on the ledger. |
+| Funnel aggregation | `Accrue.Analytics.Dunning.funnel/1` | `Accrue.Events` JSONB aggregation pattern | Single `group_by :type` query keeps the round-trip count low and yields a `%{entered: n, step_sent: n, recovered: n, exhausted: n}` map. |
+| At-risk enumeration | `Accrue.Analytics.Dunning.at_risk_subscriptions/1` | `Accrue.Billing.Query.in_active_dunning_campaign/1` (NEW) | Schema-side: anchor (`dunning_campaign_started_at`) is the truth-bearing field. Cleaner to compose at the query layer next to `dunning_sweep_candidates/2`. |
+| Per-campaign timeline | `Accrue.Analytics.Dunning.campaign_timeline/2` | `Accrue.Events.timeline_for/3` (already shipped) | Reuses the ledger's existing per-subject timeline helper. |
+| Dashboard SSR | `AccrueAdmin.Live.Analytics.RecoveryLive` (extends today's page) + `AccrueAdmin.Live.Analytics.CampaignLive` (NEW) | `KpiCard`, `Breadcrumbs`, `AppShell`, NEW `FunnelChart` HEEx component | LiveView is `accrue_admin`-only. `accrue` stays runtime-free. |
+| URL state sync | LiveView `handle_params/3` | — | Mirrors `subscriptions_live.ex` and `events_live.ex`. URL-shareable windows. |
 
 ---
 
-## Architectural Patterns
+## Files: new vs modified (the integration map)
 
-### Pattern 1: Hybrid model — static config is source of truth, cache table is an overlay
+### `accrue` package
 
-**What:** The plan→feature mapping is host-declared **static config** validated by `nimble_options`,
-exactly like the existing `:plan_resolver` / `:branding` keys. An optional `accrue_entitlement_grants`
-table caches Stripe-derived entitlement summaries for the Stripe-native source only.
+| File | Change | What |
+|------|--------|------|
+| `accrue/lib/accrue/analytics/dunning.ex` | **MODIFY** (today 73 LOC → est. ~250 LOC) | Add `funnel/1`, `at_risk_subscriptions/1`, `campaign_timeline/2`, optional `bucket_recovered_mrr/2`. Promote `@doc` blocks to public-API quality. Add `@spec` for all new functions. Keep the same `apply_window/maybe_since/maybe_until` private helpers — extract if duplicated 3+ times. |
+| `accrue/lib/accrue/billing/query.ex` | **MODIFY** (add ~15 LOC) | Add `@spec in_active_dunning_campaign/1 :: Ecto.Query.t()` mirroring `dunning_sweep_candidates/2` style. Filter: `where: not is_nil(s.dunning_campaign_started_at)`. |
+| `accrue/test/accrue/analytics/dunning_test.exs` | **MODIFY** (today 83 LOC → est. ~250 LOC) | Add tests for each new public function: funnel with mixed event types, at-risk excludes nil-anchor and exhausted-recovered, timeline ordering, window filtering on each. Property tests for funnel monotonicity (recovered + exhausted ≤ campaign_started). |
+| `accrue/test/accrue/billing/query_test.exs` | **MODIFY** | One test for `in_active_dunning_campaign/1`. |
+| `accrue/CHANGELOG.md` | **MODIFY** | v1.2.x section: "Analytics: `Accrue.Analytics.Dunning.{funnel, at_risk_subscriptions, campaign_timeline, bucket_recovered_mrr}/1`". |
+| `accrue/lib/accrue/webhook/default_handler.ex` | **NO CHANGE** | All needed events are already emitted. The "funnel needs new events" worry is unfounded. |
+| `accrue/guides/analytics.md` | **NEW** (~150 LOC) | Public guide: "Querying recovered revenue", with full example for the dashboard's three queries + JSONB cookbook for users who want custom rollups. Linked from ExDoc nav. |
 
-**When to use:** Always declare the static map. Add the cache only if the host turns on Stripe sync.
+### `accrue_admin` package
 
-**Trade-offs:** Static config means zero DB hit and zero staleness for the common case; the cost
-is that plan→feature changes require a deploy (acceptable — these are product-shaped, low-churn).
-The cache adds a staleness window for Stripe-managed features but enables Stripe-Dashboard-driven
-catalogs without redeploy.
+| File | Change | What |
+|------|--------|------|
+| `accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex` | **MODIFY** (today 86 LOC → est. ~250 LOC) | Add `handle_params/3` for `?window=`, swap hard-coded `recovered_vs_lost_mrr()` for window-aware call, add funnel section, add at-risk section. Keep AppShell + Breadcrumbs shape. |
+| `accrue_admin/lib/accrue_admin/live/analytics/campaign_live.ex` | **NEW** (~150 LOC) | Per-subscription drill-down. Calls `Accrue.Analytics.Dunning.campaign_timeline/2`. Reuses existing `AccrueAdmin.Components.Timeline` if present. |
+| `accrue_admin/lib/accrue_admin/components/funnel_chart.ex` | **NEW** (~80 LOC) | Stateless `Phoenix.Component`. Pure HEEx + inline SVG (no JS dep). Takes a `%{stages: [{label, count}, ...]}` shape and renders horizontal bar funnel. |
+| `accrue_admin/lib/accrue_admin/components/at_risk_table.ex` | **NEW** (~100 LOC) — OR inline in `recovery_live.ex` | Static table (no `DataTable` LiveComponent — that's heavy for a one-off dashboard list). Plain `<table>` with rows from `assign(:at_risk, ...)`. Drill-down link per row. |
+| `accrue_admin/lib/accrue_admin/router.ex` | **MODIFY** (add 1 line) | Inside the existing `scope "/analytics", ... do` block: `live "/recovery/subscriptions/:id", CampaignLive, :show`. |
+| `accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs` | **MODIFY** (today 66 LOC → est. ~200 LOC) | Add window-filter test, funnel-rendering test, at-risk-row-render test, drill-down link test. |
+| `accrue_admin/test/accrue_admin/live/analytics/campaign_live_test.exs` | **NEW** (~80 LOC) | Mount per-subscription drill-down, assert timeline rendering. |
+| `accrue_admin/test/accrue_admin/components/funnel_chart_test.exs` | **NEW** (~40 LOC) | Render-to-HTML assertions: stage counts, accessibility labels, SVG well-formed. |
+| `accrue_admin/CHANGELOG.md` | **MODIFY** | v1.2.x: "Recovery Dashboard: funnel, time-window filter, at-risk subscriptions, per-subscription drill-down". |
 
-**Why config and not a first-class table for the mapping itself:** This matches the PROJECT.md
-config-vs-runtime boundary. Plan→feature mapping is *adapter/catalog-shaped* (stable per-deploy),
-which the PROJECT.md table places at compile-time-OK / `config/config.exs`. Putting the *mapping*
-in a table would (a) invent a CRUD surface Accrue has deliberately avoided for catalog data, and
-(b) duplicate what `lattice_stripe` Product/Price + Stripe's own feature catalog already own.
-Subscription→plan linkage is the **runtime** half and already lives in the DB (`SubscriptionItem.price_id`).
+### `examples/accrue_host`
 
-**Example (host config — new `:plans` key):**
+| File | Change | What |
+|------|--------|------|
+| `examples/accrue_host/lib/.../seeds.exs` or fake-data helper | **MODIFY** | Seed mixed `dunning.campaign_started` / `dunning.step_sent` / `dunning.recovered` / `dunning.exhausted` events with varied `mrr_value_cents` and varied timestamps so the dashboard demos with realistic shape. |
+| `examples/accrue_host/README.md` | **MODIFY** | One-paragraph adopter pointer: "Visit /billing/analytics/recovery against fake-seeded data". |
+| **Adopter-proof matrix** (per CLAUDE.md milestone goal) | **MODIFY** | Add a row to the public adopter-proof matrix: "Recovered-revenue analytics dashboard → /billing/analytics/recovery (funnel + at-risk + windowed)". |
+
+---
+
+## Pattern 1: Funnel via single `group_by :type` query
+
+**What.** Reuse Phase 143's JSONB aggregation pattern but `group_by e.type` over the full lifecycle event set rather than just two types.
+
+**When to use.** Any "count events of each type within a window" question on `accrue_events`.
+
+**Example.**
+
 ```elixir
-# config/config.exs  (compile-time-OK; product-shaped, low churn)
-config :accrue, :plans, %{
-  "price_pro_monthly"   => %{plan: "pro",  features: ["api_access", "seats", "exports"]},
-  "price_pro_yearly"    => %{plan: "pro",  features: ["api_access", "seats", "exports"]},
-  "price_basic_monthly" => %{plan: "basic", features: ["api_access"]}
-}
+# Accrue.Analytics.Dunning (NEW)
+@campaign_started "dunning.campaign_started"
+@step_sent        "dunning.step_sent"
+@recovered        "dunning.recovered"
+@exhausted        "dunning.exhausted"
 
-# config/runtime.exs  (toggleable)
-config :accrue, :entitlements,
-  resolver: Accrue.Entitlements.LocalMap,   # or .StripeNative
-  stripe_sync: false                         # opt-in cache from webhook
-```
+@spec funnel(keyword()) :: %{
+        entered: non_neg_integer(),
+        step_sent: non_neg_integer(),
+        recovered: non_neg_integer(),
+        exhausted: non_neg_integer()
+      }
+def funnel(opts \\ []) when is_list(opts) do
+  types = [@campaign_started, @step_sent, @recovered, @exhausted]
 
-### Pattern 2: Resolver behaviour mirrors the Processor capability/support-matrix pattern
+  counts =
+    from(e in Event,
+      where: e.type in ^types,
+      group_by: e.type,
+      select: {e.type, count(e.id)}
+    )
+    |> apply_window(opts)
+    |> Repo.all()
+    |> Map.new()
 
-**What:** A new `Accrue.Entitlements.Resolver` behaviour with one required callback
-`resolve/2`, dispatched at runtime via config — identical in shape to how `Accrue.Processor`,
-`Accrue.Auth`, and `Accrue.PlanResolver` resolve their impl via `Application.get_env/3` at call time.
-Provider honesty is expressed through new rows in `Accrue.Processor.Capabilities` rather than
-a parallel matrix.
-
-**When to use:** This is the seam that keeps the gate provider-agnostic. `LocalMap` works for
-every processor (Fake, Braintree, Stripe); `StripeNative` is opt-in for Stripe shops who want
-Stripe to own the feature catalog.
-
-**Trade-offs:** One more behaviour to document, but it buys the exact provider-honest story the
-rest of Accrue ships: "Stripe native where available; local mapping for Braintree/Fake."
-
-**Example (capability rows — added to `Accrue.Processor.Capabilities`):**
-```elixir
-# @support_labels
-entitlements: %{
-  local_mapping:    "all first-party",
-  stripe_native:    "official Stripe-native source",
-  webhook_sync:     "official Stripe-native source"
-}
-
-# @provider_support_labels
-entitlements: %{
-  resolve: %{
-    fake:      "testing/local-only",
-    stripe:    "local mapping (native source optional)",
-    braintree: "local mapping"
-  },
-  webhook_sync: %{
-    fake:      "n/a",
-    stripe:    "native (entitlements.active_entitlement_summary.updated)",
-    braintree: "unsupported"
+  %{
+    entered: Map.get(counts, @campaign_started, 0),
+    step_sent: Map.get(counts, @step_sent, 0),
+    recovered: Map.get(counts, @recovered, 0),
+    exhausted: Map.get(counts, @exhausted, 0)
   }
-}
-```
-
-### Pattern 3: Gate read path folds existing local state — never a processor call
-
-**What:** `entitled?/2` and `has_active_plan?/2` resolve from the subscription projection Accrue
-already maintains via webhook ingest. The resolver loads the customer's **active** subscriptions
-(`Accrue.Billing.Query.active/1`, which already encodes the `:active`+`:trialing` semantics and is
-documented as "active for entitlement purposes"), reads each `SubscriptionItem.price_id`, and folds
-those through the `:plans` map into a `MapSet` of features.
-
-**When to use:** Every gate check. This is the single most important performance decision —
-gate checks happen per-request and per-LiveView-mount, so they must be a local query (or cheaper).
-
-**Trade-offs:** A naive implementation does one subquery per check (customer's active subs + items).
-Mitigations below in Scaling. The benefit is correctness-by-reuse: the same `active?` edge cases
-(`cancel_at_period_end` still active, `incomplete_expired` terminated, trialing entitled) that
-`Subscription`/`Query` already handle apply automatically — no second source of truth for "active."
-
-**Example (resolver core, LocalMap):**
-```elixir
-def resolve(billable, _opts) do
-  with {:ok, customer} <- Accrue.Billing.customer(billable) do
-    plans = Accrue.Config.plans()                       # %{price_id => %{plan, features}}
-    features =
-      Subscription
-      |> Query.active()
-      |> where([s], s.customer_id == ^customer.id)
-      |> join(:inner, [s], i in SubscriptionItem, on: i.subscription_id == s.id)
-      |> select([_s, i], i.price_id)
-      |> Repo.all()
-      |> Enum.flat_map(fn pid -> get_in(plans, [pid, :features]) || [] end)
-      |> MapSet.new()
-    {:ok, %{features: features, plans: ...}}
-  end
 end
 ```
 
----
+**Why not `Task.async` per stage.** Four queries against the same table is strictly slower (round-trip × 4) and adds zero parallelism benefit when Postgres is the bottleneck. The single `group_by` query is the canonical SQL idiom; the planner uses one index scan over `accrue_events.type` (already indexed — confirmed by `bucket_query/1` reliance on `where: type in ...`).
 
-## Reconciling the LiveView-free constraint (the load-bearing question)
-
-**Constraint:** PROJECT.md / CLAUDE.md state core `accrue` is "LiveView-FREE" and `accrue_admin`
-owns LiveView. Yet `accrue/mix.exs` line 80 already declares `{:phoenix_live_view, "~> 1.1"}` as a
-**non-optional** dep — used only for `Phoenix.Component` + the `~H` sigil in the shared invoice
-component library, **not** for the LiveView socket runtime / `on_mount` lifecycle. `:phoenix` itself
-is `optional: true`.
-
-**Reading of the real constraint:** "LiveView-free" means *core must not require a host to run
-LiveView, and must not couple its public APIs to the LiveView socket lifecycle.* It does **not** mean
-"`phoenix_live_view` must be absent from `mix.lock`." So the precise rule for the `on_mount` guard:
-it must compile and load fine in a host that has no LiveView, and must not be referenced by any
-always-compiled core code path.
-
-**Recommendation — ship BOTH guards from core, with the `on_mount` guard conditionally compiled:**
-
-1. **Plug guard → unconditional core module** (`Accrue.Plug.RequireEntitlement`). `plug ~> 1.16`
-   is a hard dep; controllers don't need Phoenix or LiveView. No conditional compile needed.
-
-2. **LiveView guard → conditionally compiled core module** (`Accrue.Live.Entitlements`), wrapped
-   exactly like `Accrue.Integrations.Sigra`:
-   ```elixir
-   if Code.ensure_loaded?(Phoenix.LiveView) do
-     defmodule Accrue.Live.Entitlements do
-       import Phoenix.LiveView, only: [redirect: 2]
-       import Phoenix.Component, only: [assign: 3]
-
-       def on_mount({:require_feature, feature}, _params, _session, socket) do
-         billable = socket.assigns[:current_user] || socket.assigns[:current_scope]
-         if Accrue.Entitlements.entitled?(billable, feature),
-           do: {:cont, socket},
-           else: {:halt, redirect(socket, to: deny_path())}
-       end
-       # {:require_plan, plan} clause analogous
-     end
-   end
-   ```
-   Because the whole `defmodule` is elided when LiveView is absent, a host that does not run
-   LiveView never compiles a reference to `Phoenix.LiveView` from this path. The
-   `@compile {:no_warn_undefined, [Phoenix.LiveView]}` guard (per the existing 4-pattern) silences
-   warnings. This is the *same* pattern the codebase already uses for `:sigra` and `:opentelemetry`.
-
-**Why not put the `on_mount` guard in `accrue_admin`?** Because the guard is for **host** LiveViews
-(the SaaS app's own gated pages), not admin pages. Putting it in `accrue_admin` would force every
-host that wants route-gating to depend on the admin package — wrong layering. The conditional-compile
-keeps it in core, available to any host that runs LiveView, without imposing LiveView on hosts that
-don't.
-
-**Host consumption:**
-- Plug guard: in the host's controller/router pipeline —
-  `plug Accrue.Plug.RequireEntitlement, feature: "api_access"`.
-- `on_mount` guard: in the host's `live_session` —
-  `live_session :app, on_mount: [{Accrue.Live.Entitlements, {:require_feature, "api_access"}}]`.
+**Note on funnel semantics — important.** `step_sent` and `entered` count *events*, not *unique subscriptions*. A single subscription can fire multiple `dunning.step_sent` events (one per cadence step). For a v1.44 dashboard, "events" is the simpler-to-explain shape and matches the Stripe Dashboard's "actions sent" framing. If a future v1.45 wants "unique subscriptions per stage", we add `funnel_unique_subjects/1` — `select: {e.type, count(e.subject_id, :distinct)}` — without breaking v1.44 callers.
 
 ---
 
-## Data Flow
+## Pattern 2: At-risk subscriptions via schema-side query (NOT event-derived)
 
-### Gate-check flow (the hot path — no processor API)
+**What.** "Active dunning campaign" is durably represented as a non-nil `dunning_campaign_started_at` on the subscription row. That anchor is set atomically with the past_due transition (default_handler:1208) and cleared atomically with the recovery/exhaustion transition (default_handler:875). Querying events to derive "active" is **wrong** — it would lag behind the schema by a transaction boundary and re-derive what's already authoritative.
 
-```
-Controller plug / LiveView on_mount / HEEx `if`
-        ↓
-Accrue.entitled?(billable, "api_access")           (delegate)
-        ↓
-Accrue.Entitlements.entitled?/2  → span_entitlement [:accrue, :entitlements, :check, :evaluate]
-        ↓
-Resolver.resolve(billable, opts)   (LocalMap default)
-        ↓
-Accrue.Billing.customer/1 (cached row)
-        ↓
-Query.active/1 + join SubscriptionItem  → [price_id, …]   (LOCAL DB read)
-        ↓
-fold through Config.plans() map → MapSet(features)
-        ↓
-MapSet.member?(features, "api_access")  → boolean
-```
-No event recorded on a check (checks are high-frequency and read-only; recording them would flood
-the tamper-evident ledger and defeat its signal). Telemetry `start/stop` is emitted for observability.
+**When to use.** Any "currently in state X" question where X has a dedicated schema column.
 
-### Grant / revoke flow (low-frequency, ledger-recorded)
+**Example.**
 
-```
-Accrue.Entitlements.grant(billable, "beta_feature", opts)   # comp / manual override
-        ↓ span_entitlement [:accrue, :entitlements, :grant, :create]
-Repo.transact:
-   upsert accrue_entitlement_grants row  (source: :local)
-   Events.record(%{type: "entitlement.granted", subject_type: "Customer", …})
-```
-`grant`/`revoke` exist for manual/comp overrides and (when sync is on) for reflecting Stripe state.
-These DO record to the ledger — they are deliberate state changes, mirroring how every other
-`Accrue.Billing` write records an event in the same `Repo.transact`.
+```elixir
+# Accrue.Billing.Query (NEW function, next to dunning_sweep_candidates/2)
+@doc "Subscriptions currently inside an active dunning campaign (anchor set)."
+@spec in_active_dunning_campaign(Ecto.Queryable.t()) :: Ecto.Query.t()
+def in_active_dunning_campaign(query \\ Subscription) do
+  from(s in query, where: not is_nil(s.dunning_campaign_started_at))
+end
 
-### Optional Stripe-sync flow (webhook-driven cache, behind a flag)
+# Accrue.Analytics.Dunning (NEW)
+@doc "Lists subscriptions currently in an active dunning campaign, with snapshotted MRR."
+@spec at_risk_subscriptions(keyword()) :: [%{...}]
+def at_risk_subscriptions(opts \\ []) do
+  limit = Keyword.get(opts, :limit, 100)
 
+  from(s in Accrue.Billing.Query.in_active_dunning_campaign(),
+    join: c in assoc(s, :customer),
+    order_by: [asc: s.dunning_campaign_started_at],
+    limit: ^limit,
+    select: %{
+      subscription_id: s.id,
+      customer_id: c.id,
+      customer_email: c.email,
+      customer_name: c.name,
+      processor_id: s.processor_id,
+      status: s.status,
+      past_due_since: s.past_due_since,
+      campaign_started_at: s.dunning_campaign_started_at
+    }
+  )
+  |> Repo.all()
+end
 ```
-Stripe → POST /webhooks/stripe  (existing raw-body plug, signature verify, persist, enqueue 200)
-        ↓ existing Webhook.Ingest → DispatchWorker → DefaultHandler
-DefaultHandler.handle_event("entitlements.active_entitlement_summary.updated", event, ctx)  (NEW clause)
-        ↓
-extract customer + entitlements[] (≤10 inline; URL for full paginated list)
-        ↓
-upsert accrue_entitlement_grants rows (source: :stripe, active: true/false)
-        ↓
-Events.record("entitlement.synced")
-```
-**Staleness handling:** Stripe caps the inline `entitlements` array at 10 and provides a pagination
-URL for the rest (verified). For v1.39, persist the inline set and mark the cache row with the
-summary timestamp; if a host has >10 features per customer, the full-list fetch is a documented
-follow-up (requires the Stripe API surface the dep lacks today). The `StripeNative` resolver reads
-the cache, never a live API call on the gate path.
+
+**Why not enrich with per-subscription MRR.** The MRR-at-risk for each row is *not* in `accrue_events` (events only capture MRR at recovery/exhaustion). Computing MRR live from `subscription.data["items"]` per row would re-implement `calculate_mrr_cents/1` (currently private in `DefaultHandler`). **Recommendation for v1.44:** show past-due age and customer identity in the at-risk table, and reserve MRR-at-risk for a v1.45 column once `calculate_mrr_cents/1` is promoted out of `DefaultHandler` into a shared helper. This is the cleaner phase boundary.
 
 ---
 
-## Build Order (dependency-respecting)
+## Pattern 3: Time-window URL parameter as single source of truth
 
-The ordering below is what the roadmapper should phase. Each step is shippable and unblocks the next.
+**What.** A URL query param `?window=30d` drives `handle_params/3` → assigns. Default = 30d.
 
-1. **Config + model foundation** (no behavior yet)
-   `Accrue.Config` `:plans` + `:entitlements` schema keys & accessors; `Entitlements.Plan` struct;
-   `Resolver` behaviour. *Unblocks everything; pure additive config.*
+**When to use.** Any LiveView whose contents change based on a small set of discrete filters that operators want to share/bookmark.
 
-2. **`Accrue.Entitlements` context + `LocalMap` resolver + `Accrue` delegates**
-   `entitled?/2`, `has_active_plan?/2`, `features_for/1`, `list_entitlements/1`, wrapped in
-   `span_entitlement`. Fold over `Query.active/1` + `SubscriptionItem.price_id`. Fake-backed tests.
-   *This is the high-value core — gating works end-to-end with zero new infra.*
+**Example.**
 
-3. **Plug guard** (`Accrue.Plug.RequireEntitlement`)
-   Depends on step 2. Core module next to existing plugs. Halts/redirects; telemetry. Host docs.
+```elixir
+# RecoveryLive
+@windows %{"7d" => 7, "30d" => 30, "90d" => 90}
+@default_window "30d"
 
-4. **LiveView `on_mount` guard** (`Accrue.Live.Entitlements`, conditionally compiled)
-   Depends on step 2. The `Code.ensure_loaded?(Phoenix.LiveView)` wrapper + a `without_live_view`-style
-   CI matrix cell proving it compiles absent LiveView. *This is the constraint-sensitive step — give it
-   its own phase so the "core stays LiveView-free" gate is explicit and verifiable.*
+@impl true
+def handle_params(params, _uri, socket) do
+  window_key = Map.get(params, "window", @default_window)
+  days = Map.get(@windows, window_key, 30)
+  since = DateTime.add(DateTime.utc_now(), -days * 86_400, :second)
 
-5. **Provider-honest matrix wiring** (`Capabilities` rows + support-matrix doc + drift gate)
-   Depends on step 2. Adds `entitlements:` rows to `@support_labels` / `@provider_support_labels`,
-   updates `processor-support-matrix.md`, extends the existing merge-blocking drift verifier.
-   *Mirrors how SCM-06 / PROC-24 closed prior provider-honest contracts.*
+  stats = Dunning.recovered_vs_lost_mrr(since: since)
+  funnel = Dunning.funnel(since: since)
+  at_risk = Dunning.at_risk_subscriptions(limit: 100)
+  # at_risk is point-in-time, not window-filtered — semantically "right now"
 
-6. **`grant`/`revoke` + optional `accrue_entitlement_grants` cache + ledger events**
-   Depends on steps 2 & 5. Adds the optional schema/migration, `StripeNative` resolver (cache-read
-   only), and ledger recording. Gated install step.
+  {:noreply,
+   socket
+   |> assign(:window_key, window_key)
+   |> assign(:window_days, days)
+   |> assign(:stats, stats)
+   |> assign(:funnel, funnel)
+   |> assign(:at_risk, at_risk)}
+end
+```
 
-7. **Optional Stripe webhook sync** (`DefaultHandler` clause)
-   Depends on step 6 (needs the cache table). Behind `stripe_sync: true`. Consume
-   `entitlements.active_entitlement_summary.updated` via the existing ingest pipeline.
-   *Keep IN-SCOPE-BUT-OPTIONAL; document the >10-entitlements pagination limitation as a follow-up.*
+**Why URL not assigns-only.** Operators share links in Slack ("look at the 7-day funnel — recovery rate is up"). Assigns-only would make that impossible. Confirms the codebase convention: every existing list-style admin LiveView (`subscriptions_live.ex:43-45`, `customers_live.ex:66`, `invoices_live.ex:28`, `events_live.ex:27`) uses `handle_params(params, _uri, socket)` for exactly this.
 
-8. **Admin surface** — Entitlements tab on `CustomerLive` in `accrue_admin`
-   Depends on step 2 (read API) and benefits from step 6 (cache rows to show source). Token/Copy
-   discipline + VERIFY-01 per the established admin pattern.
-
-9. **Docs spine** — `guides/entitlements.md`, JTBD ⛔→✅ flip in `jobs_to_be_done.md` +
-   `JTBD-FRONTIER.md` update log, First Hour / README needles, package-doc verifier.
-
-**Critical-path note:** Steps 1→2→(3,4 in parallel)→5 deliver the headline JTBD ("gate a feature
-on a paid subscription") with no new tables and no Stripe dependency. Steps 6–7 are the optional
-Stripe-native depth; they should not block the milestone's core value.
+**Why not Stripe-style "complex filter object in URL".** v1.44's window has 3 discrete values. JSON-encoding a filter object is over-engineering at this scale. Keep it simple: `?window=30d`.
 
 ---
 
-## Scaling Considerations
+## Pattern 4: Per-subscription drill-down as a separate route
 
-| Scale | Gate read-path adjustments |
-|-------|----------------------------|
-| 0–1k customers | LocalMap straight query (`active subs join items`) per check is fine; sub-millisecond on indexed `customer_id`. |
-| 1k–100k | Add a per-request memoization key (process dict, like `Accrue.Actor`) so multiple `entitled?` calls in one request/mount fold the customer's features once. Ensure `accrue_subscriptions(customer_id, status)` and `accrue_subscription_items(subscription_id)` indexes exist (verify in migrations). |
-| 100k+ | For Stripe-sync shops, read the denormalized `accrue_entitlement_grants` cache (single indexed lookup by `customer_id, feature`) instead of the join. For local-map shops, an ETS feature cache keyed by `customer_id` invalidated on subscription webhook is the next lever — but only if profiling shows the join is hot. |
+**What.** Drill-down lives at `/billing/analytics/recovery/subscriptions/:id` and is a sibling LiveView in `live_session :accrue_admin` (inherits admin auth automatically).
 
-### Scaling Priorities
+**When to use.** Any drill-down that (a) has a stable URL worth sharing, (b) has fundamentally different page-content from its parent, (c) doesn't require synchronized state with the parent.
 
-1. **First bottleneck:** repeated `entitled?` calls within one request/mount each re-querying.
-   *Fix:* per-process memoization of the resolved feature set (cheap, no infra).
-2. **Second bottleneck:** the active-subs+items join under high RPS.
-   *Fix:* the optional cache table (already built for Stripe-sync) doubles as the denormalized
-   read model; or ETS with webhook-driven invalidation. **Do not build either preemptively** —
-   the join is correct and fast for the overwhelming majority of Accrue hosts.
+**Example.**
 
----
+```elixir
+# router.ex (modified — single line inside existing scope)
+scope "/analytics", AccrueAdmin.Live.Analytics do
+  live "/recovery", RecoveryLive, :index
+  live "/recovery/subscriptions/:id", CampaignLive, :show  # NEW
+end
+```
 
-## Anti-Patterns
+**Why not `push_patch` + nested live_component.** Three reasons:
+1. Back-button behavior. A push_patch'd drill-down requires custom history management; a separate route gets it free.
+2. Code locality. `RecoveryLive`'s `render/1` is already at ~80 LOC. Adding a 2-state (`:list` / `:drilldown`) conditional render block doubles complexity for nothing.
+3. Test isolation. Each LiveView gets its own focused test file (already the convention in `accrue_admin/test/accrue_admin/live/`).
 
-### Anti-Pattern 1: Calling the processor API on the gate path
-
-**What people do:** Resolve entitlements by hitting Stripe's List Active Entitlements API on each
-`entitled?` check.
-**Why it's wrong:** Per-request external HTTP = latency, rate-limit risk, and an outage in Stripe
-takes down feature access. Stripe itself recommends persisting entitlements locally (verified).
-**Do this instead:** Resolve from local subscription projection (default) or the synced cache table.
-The processor only ever writes to local state asynchronously via webhooks.
-
-### Anti-Pattern 2: A second source of truth for "is the subscription active?"
-
-**What people do:** Re-implement active/trialing/canceled logic inside the entitlements layer.
-**Why it's wrong:** `Subscription.active?/1` and `Query.active/1` already encode the tricky edges
-(`cancel_at_period_end` still active, `incomplete_expired` terminated, trialing entitled) and are
-documented as the entitlement-purposes definition. Forking it guarantees drift.
-**Do this instead:** Always go through `Accrue.Billing.Query.active/1` / `Subscription.active?/1`.
-
-### Anti-Pattern 3: Recording every gate check in the audit ledger
-
-**What people do:** `Events.record("entitlement.checked")` on each `entitled?` call.
-**Why it's wrong:** Checks are extremely high-frequency; this floods the tamper-evident ledger and
-destroys its signal-to-noise (the ledger is for deliberate state changes).
-**Do this instead:** Emit telemetry `start/stop` for checks (observability), record to the ledger
-only for `grant`/`revoke`/`sync` (state changes), exactly as every other `Accrue.Billing` write does.
-
-### Anti-Pattern 4: Making core depend on `phoenix_live_view` runtime for the `on_mount` guard
-
-**What people do:** Add an unconditional `Accrue.Live.Entitlements` referencing `Phoenix.LiveView`,
-or push the guard into `accrue_admin`.
-**Why it's wrong:** Breaks the "host can run Accrue without LiveView" promise, or forces host route
-gating to depend on the admin package.
-**Do this instead:** Conditionally compile the guard in core with
-`Code.ensure_loaded?(Phoenix.LiveView)` + `@compile {:no_warn_undefined, …}`, identical to the
-`Accrue.Integrations.Sigra` pattern, and add a `without_live_view`-style CI matrix cell.
+**Subject ID is the right key, not "campaign ID".** There is no `Accrue.Dunning.Campaign` schema (campaign.ex is a *pure resolver*, not an Ecto schema). A campaign is uniquely identified by `(subscription_id, dunning_campaign_started_at)` — but since at most one campaign per subscription is active at a time, the subscription_id alone is a stable URL key. Historical campaigns for the same subscription appear as multiple `dunning.campaign_started` events in `timeline_for("Subscription", id)` and can be visually grouped client-side if needed (deferred to v1.45+).
 
 ---
 
-## Integration Points
+## Pattern 5: Optional MRR-over-time sparkline (bucket_by reuse)
 
-### Reused (no change)
+**What.** If sparkline shipping is in scope, reuse `Accrue.Events.bucket_by/2` directly — it already supports `:day` / `:week` / `:month` buckets and the `:type, :since, :until, :subject_type` filter shape.
 
-| Seam | How entitlements uses it | Notes |
-|------|--------------------------|-------|
-| `Accrue.Telemetry.span/3` | New `span_entitlement/4` wrapper emits `[:accrue, :entitlements, resource, action, :start/stop/exception]` | Follows the 4-level naming + OTel no-op bridge already in place |
-| `Accrue.Events.record/1` | `entitlement.granted` / `.revoked` / `.synced` events in the same `Repo.transact` | Reuses idempotency + actor/trace auto-capture |
-| `Accrue.Billing.Query.active/1`, `Subscription.active?/1` | Single definition of "active for entitlement purposes" | Already documented for this exact use |
-| `Accrue.Billing.customer/1` | billable → Customer resolution | Lazy fetch-or-create cached row |
-| Conditional-compile pattern (`Code.ensure_loaded?` + `@compile {:no_warn_undefined}`) | LiveView guard | Cloned from `Integrations.Sigra` |
-| `nimble_options` `@schema` in `Accrue.Config` | `:plans` + `:entitlements` keys, docs auto-generated | Cloned from `:plan_resolver` / `:branding` |
-| `Application.get_env/3` runtime dispatch | Resolver impl resolution | Same as `Processor.__impl__/0`, `Auth.impl/0` |
-| Webhook ingest → `DefaultHandler` | Optional Stripe-sync clause | Existing verify→persist→enqueue→200 path untouched |
+**When to use.** Time-series visualizations on the ledger.
 
-### External services
+**Example.**
 
-| Service | Integration pattern | Gotchas |
-|---------|--------------------|---------|
-| Stripe Entitlements API (List/Retrieve Active Entitlements) | **Deferred** — `lattice_stripe` 1.1.0 has **no** Entitlements module (verified: `lib/lattice_stripe/billing/` = meter/meter_event only). Live reads can't be wired until the dep adds the surface. | Until then, "Stripe-native" = consume the webhook summary into the cache; live API reads are a post-v1.39 follow-up dependent on `lattice_stripe` ≥ 1.2. |
-| Stripe webhook `entitlements.active_entitlement_summary.updated` | Existing webhook plug + new `DefaultHandler` clause | Inline `entitlements` array capped at 10; pagination URL for the rest — handle the common (≤10) case now, document the overflow follow-up. |
+```elixir
+def bucket_recovered_mrr(bucket, opts \\ []) when bucket in [:day, :week, :month] do
+  # Note: bucket_by/2 returns counts. For MRR sums, we need a custom query
+  # that mirrors bucket_by's shape but uses sum(fragment(...)) instead of count.
+  # ALTERNATIVE: just return counts via bucket_by and accept "events recovered per day"
+  # as the sparkline metric — simpler, no new query needed.
+  Accrue.Events.bucket_by(
+    [type: "dunning.recovered"] ++ Keyword.take(opts, [:since, :until]),
+    bucket
+  )
+end
+```
 
-### Internal boundaries
+**Tradeoff.** A `sum(mrr)` sparkline is more meaningful than a `count(events)` sparkline for the recovered-revenue story. If we want sum we write a parallel `bucket_sum_by_jsonb/3` helper in `Accrue.Events` (~25 LOC). **Recommendation:** ship the count-based sparkline in v1.44 if time allows; defer sum-based to v1.45 alongside MRR-at-risk-per-row to keep the JSONB-sum helper introduced once with both consumers ready.
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `Accrue.Entitlements` → `Accrue.Billing` | Direct function calls (read-only) | One-way: billing must NOT import entitlements |
-| `Accrue.Plug.RequireEntitlement` → `Accrue.Entitlements` | Direct call | Plug halts/redirects on deny |
-| `Accrue.Live.Entitlements` → `Accrue.Entitlements` | Direct call (cond-compiled) | `{:cont, socket}` / `{:halt, redirect}` |
-| `accrue_admin CustomerLive` → `Accrue.Entitlements.list_entitlements/1` | Public read API | Admin never bypasses the context |
-| Host `:plans` config → `Accrue.Config.plans/0` | Read accessor | Compile-time-OK; product-shaped |
+---
+
+## Anti-patterns to avoid
+
+### 1. Re-deriving "active campaign" from events
+Computing `WHERE EXISTS (dunning.campaign_started without subsequent dunning.recovered or dunning.exhausted)` is **wrong**: it lags the durable schema column by a transaction boundary, and a recovery committed but not yet projected by a worker would show as "still active". The schema column is the SSOT — query it directly.
+
+### 2. Joining events to subscriptions to compute live MRR
+Don't pull live `Subscription.data["items"]` into the analytics context to enrich at-risk rows with MRR-at-risk. This is the **temporal data leakage anti-pattern** explicitly called out in Phase 143's RESEARCH.md (lines 86-88). Hold the line: MRR appears in analytics only at confirmed-transition events where it was snapshotted at emission time.
+
+### 3. Streams for static page data
+LiveView 1.1 streams are for *mutating* lists (chat windows, live feeds, in-place row updates). The at-risk table refreshes only on `handle_params` reload and full `mount`. Use plain `assign(:at_risk, list)`. The LiveView 1.1 docs are explicit about this: streams *replace* assign for large lists where you want to keep DOM under control and apply incremental ops. v1.44's 10–500-row at-risk list at 30s+ refresh cadence is not the target use case.
+
+### 4. Reaching across `accrue` → `accrue_admin` for schema fields
+The `AccrueAdmin.Live.Analytics.*` modules must only call `Accrue.Analytics.Dunning.*`. They must **not** import `Ecto.Query`, alias `Accrue.Billing.Subscription`, or call `Accrue.Repo` directly. (Verify with `grep` in the verification phase.) Reasons: (a) keeps the public-API surface tight, (b) lets third-party non-admin dashboards reuse the context, (c) the context can later add caching/memoization/telemetry transparently.
+
+### 5. Funnel that counts the sweeper's request-time event
+`dunning.terminal_action_requested` (sweeper) is request-time intent and may double-count loss. It must **NEVER** appear in funnel stages. Already documented in `billing/dunning.ex:108-110`; we re-state for emphasis: the funnel is built from `campaign_started` + `step_sent` + `recovered` + `exhausted` only.
+
+### 6. Wrapping the analytics call in `mount/3`
+`mount/3` runs twice on LiveView connect (HTTP dead-render then WebSocket live-render). Put the heavy aggregations in `handle_params/3` so they run once per filter change, not twice per page load. Today's `RecoveryLive.mount/3` calls `Dunning.recovered_vs_lost_mrr()` — that's fine because Phase 143 didn't introduce window filtering. As of v1.44, this call moves into `handle_params/3` driven by the window param.
+
+---
+
+## Public API surface freeze (v1.44 lock-in)
+
+The functions below become **public-stable** in v1.44. Adding new analytical queries in v1.45+ is fine; *changing the signature or semantics* of any of these would be a breaking change.
+
+| Function | Status in 143 | Status after v1.44 | Stability |
+|----------|---------------|--------------------|-----------|
+| `Accrue.Analytics.Dunning.recovered_vs_lost_mrr/1` | Shipped (143) | Stable | **Public-stable** |
+| `Accrue.Analytics.Dunning.funnel/1` | — | New in v1.44 | **Public-stable** |
+| `Accrue.Analytics.Dunning.at_risk_subscriptions/1` | — | New in v1.44 | **Public-stable** |
+| `Accrue.Analytics.Dunning.campaign_timeline/2` | — | New in v1.44 (thin wrapper over `Events.timeline_for/3` with type filter) | **Public-stable** |
+| `Accrue.Analytics.Dunning.bucket_recovered_mrr/2` | — | New in v1.44 if scope permits, else v1.45 | **Public-stable** |
+| `Accrue.Billing.Query.in_active_dunning_campaign/1` | — | New in v1.44 | **Public-stable** (mirrors existing query helpers) |
+| `Accrue.Billing.Dunning.recovered_vs_lost/1` (the *count*-based older sibling) | Shipped | Keep, document the relationship in moduledoc | **Public-stable** |
+
+**Forward-compat hedge.** The `funnel/1` return-map shape uses **string-named atoms** (`:entered`, `:step_sent`, `:recovered`, `:exhausted`). Future multi-channel dunning aggregations (v1.45 `:in_app_sent`, `:sms_sent` etc.) extend this map by adding keys — additive, non-breaking. Callers that pattern-match on `%{entered: _, step_sent: _, recovered: _, exhausted: _} = funnel` continue to work; callers that pattern-match on `^%{} = funnel` (exact shape) would break, so the moduledoc must say "the funnel map is an open shape; do not exact-match".
+
+**What to NOT make public in v1.44.**
+- The funnel's internal `@type` aliases (keep them private — too easy to leak module-internal names).
+- The `apply_window/3` `maybe_since/2` `maybe_until/2` helpers — internal, can be refactored later.
+- Anything in `AccrueAdmin.Live.Analytics.*` — internal admin surfaces, never @doc'd as public.
+- The `AccrueAdmin.Components.FunnelChart` — internal admin component, no @doc'd public attrs beyond what `Phoenix.Component`'s `attr/2` requires for compile-time validation.
+
+---
+
+## Telemetry surface
+
+| Event | When | Measurements | Metadata | Why |
+|-------|------|--------------|----------|-----|
+| `[:accrue, :ops, :analytics_dashboard_loaded]` | After `handle_params/3` finishes the aggregation calls | `%{duration_us: integer, result_count: integer}` (where `result_count` = at-risk row count, useful for tail-latency vs result-size correlation) | `%{view: :recovery \| :campaign, window_days: integer, operation_id: ...}` | Adoption + JSONB perf tail-tracking. Already canonical-namespaced via `Accrue.Telemetry.Ops.emit/3`. |
+| `[:accrue, :ops, :analytics_query_slow]` (optional) | When a single aggregation exceeds a threshold (e.g., >500ms) | `%{duration_us: integer}` | `%{query: :funnel \| :at_risk \| :recovered_vs_lost, window_days: integer}` | Detect when seed data + JSONB pattern starts losing to a host's volume. Operator-actionable signal that they should consider pre-aggregation. |
+
+**Note.** The dashboard does NOT need request-time tracing because `Accrue.Telemetry.span_billing` already wraps the underlying public functions in `accrue` (it's the firehose namespace). Ops events are additive on top — and stay on the canonical `[:accrue, :ops, :*]` prefix verified in `telemetry/ops.ex:32-34` ("the prefix is hardcoded; callers cannot inject events outside the namespace via this helper").
+
+---
+
+## Scalability considerations
+
+| Concern | At 100 subscriptions | At 10K subscriptions | At 1M subscriptions |
+|---------|----------------------|----------------------|---------------------|
+| Funnel query | <5ms (<1k events) | ~20–80ms (cold cache: index scan) | ~200ms–1s; **start considering** pre-aggregation rollup table | Phase v1.44 is target: small/mid SaaS up to ~10k subs. |
+| At-risk query | <5ms (1–20 active campaigns) | ~10ms (50–500 active) | ~50ms (1k–10k active); `limit: 100` already caps the response | Pagination via cursor needed only at the >10k-active tier. |
+| Per-subscription timeline | <5ms (10–50 events per subject) | <10ms | <50ms (clamp by `limit:` in `timeline_for/3`, default 1_000) | Already bounded. |
+
+**Conclusion.** The Phase 143 + v1.44 architecture is sized correctly for the realistic target of an OSS Phoenix billing library: tens-of-thousands of subscriptions per host. Beyond that, a "rollup table" plan should be a documented v2.0 plan, not a v1.44 concern.
+
+---
+
+## Build order (de-risks compute path before navigation)
+
+| Phase # | Sub-area | Why this order | Deliverable |
+|---------|----------|----------------|-------------|
+| 144 | **Funnel query + funnel HEEx component + first render on RecoveryLive** | Pure read-path addition. Proves the JSONB single-`group_by` pattern at scale. Zero write-path changes. If the funnel pattern doesn't compose well, we discover it BEFORE building UI navigation around it. | `funnel/1` + `FunnelChart` component + RecoveryLive renders funnel below KPI cards. |
+| 145 | **Time-window URL plumbing on RecoveryLive** | Smallest-possible navigation change. Validates `handle_params/3` shape + the `:since` option threading through both `recovered_vs_lost_mrr/1` AND `funnel/1`. Once this is shipped, any further analytics function "comes with" window support for free. | `?window=7d \| 30d \| 90d` URL param + assigns + window selector UI. |
+| 146 | **At-risk query + at-risk table** | Schema-side query is the simplest of all new functions (one `where: not is_nil(...)` clause). Table renders are plain HEEx. Validates the cross-package boundary discipline (LiveView must only call `Accrue.Analytics.Dunning`). | `at_risk_subscriptions/1` + at-risk section on RecoveryLive. |
+| 147 | **Per-subscription drill-down route + CampaignLive** | Depends on at-risk table existing (row click navigates to drill-down). Reuses existing `Events.timeline_for/3` so the *backend* is trivially done — this phase is mostly LiveView + routing. | `/billing/analytics/recovery/subscriptions/:id` route + CampaignLive + per-row click affordance. |
+| 148 | **Public docs (`guides/analytics.md`) + adopter-proof matrix row + example_host wiring** | Everything is built; lock the API surface in docs. Adopter-proof row in the public matrix. Seed mixed event data in `examples/accrue_host` so the dashboard demos end-to-end. | `guides/analytics.md`, matrix updated, example_host seeds new event types. |
+| 149 (optional) | **Telemetry emit + bucket_recovered_mrr sparkline** | Polish. Skippable from v1.44 scope if velocity is tight; defer to v1.45 without breaking anything. | `[:accrue, :ops, :analytics_dashboard_loaded]` emission + optional sparkline component. |
+
+**Rationale for ordering**:
+1. **Compute before UI before navigation** — every phase's must-have is testable at the `mix test` level *before* the LiveView wrapper goes in.
+2. **Read-path completion before UI deepening** — at-risk + drill-down are intentionally pushed later because the UX is "interesting" (table interaction, route nav) and shouldn't block the most-visible win (funnel visualization).
+3. **Docs last but never skipped** — locking the public API in `guides/analytics.md` AFTER all functions are stable means we don't churn docs alongside design pivots.
+
+---
+
+## Open architectural questions (FLAGGED for plan-phase clarification)
+
+| # | Question | Why it's a flag |
+|---|----------|-----------------|
+| Q1 | Should `at_risk_subscriptions/1` include MRR-at-risk as a column? | If yes, requires promoting `calculate_mrr_cents/1` out of `DefaultHandler` (private) into a shared module — that's an additional cross-cutting refactor. Recommendation: **defer to v1.45** unless plan-phase explicitly decides this is in-scope. |
+| Q2 | Funnel: count *events* or *unique subscriptions* per stage? | Decision in this doc: **events** for v1.44 (simpler, matches Stripe Dashboard framing). If product wants unique subjects, that's a `funnel_unique_subjects/1` addition. |
+| Q3 | Sparkline in v1.44 or deferred? | Recommended: deferred unless very-easy-to-add. If added, ship as count-based (`Events.bucket_by/2` direct reuse), not sum-based, to avoid introducing a new JSONB-sum helper that has only one caller. |
+| Q4 | Should there be a CSV export of at-risk subscriptions? | Out of scope for v1.44 per the milestone "design constraint" — no general BI scope creep. Defer. |
+| Q5 | Real-time refresh of the dashboard? (LiveView subscriptions to `accrue_events` inserts via PubSub) | Out of scope. v1.44 is manual refresh / handle_params reload. PubSub-driven liveness is a separate v1.45+ phase if any. |
 
 ---
 
 ## Sources
 
-- Accrue codebase (HIGH — read directly 2026-05-22): `accrue/lib/accrue/billing.ex` (`span_billing` pattern, `Repo.transact` + `Events.record` write pattern), `accrue/lib/accrue/processor.ex` + `processor/capabilities.ex` (behaviour + support-matrix + `@provider_support_labels`), `accrue/lib/accrue/integrations/sigra.ex` (4-pattern conditional compile), `accrue/lib/accrue/events.ex` + `telemetry.ex` (ledger + span/OTel no-op), `accrue/lib/accrue/auth.ex` + `plan_resolver.ex` + `config.ex` (runtime dispatch + nimble_options schema), `accrue/lib/accrue/billing/subscription.ex` + `query.ex` + `subscription_item.ex` (active-for-entitlement predicates + `price_id` data path), `accrue/lib/accrue/plug/*` + `router.ex` + `webhook/handler.ex` + `default_handler.ex`, `accrue_admin/lib/accrue_admin/auth_hook.ex` (existing `on_mount`), `accrue/mix.exs` (phoenix optional, phoenix_live_view present for components), `accrue/deps/lattice_stripe/lib/lattice_stripe/billing/` (no Entitlements module — verified absence).
-- `.planning/PROJECT.md` (HIGH): v1.39 goal/scope, config-vs-runtime boundary table, conditional-compilation section, monorepo layout, "ship complete" posture, PROC-08 provider-honest strategy.
-- `.planning/research/JTBD-FRONTIER.md` (HIGH): entitlements as #1 gap, canonical SaaS loop, "gates on subscription state already held locally," SEED-002 #4 adapter-thin identity tie-in.
-- Stripe Entitlements docs + webhook semantics (MEDIUM — official docs, May 2026): Active Entitlement object, `entitlements.active_entitlement_summary.updated` fires on customer entitlement change, ≤10 inline entitlements + pagination URL, Stripe recommends persisting locally. https://docs.stripe.com/billing/entitlements · https://docs.stripe.com/api/entitlements/active-entitlement · https://docs.stripe.com/api/events/types
+### Primary (HIGH confidence — codebase verification)
 
----
-*Architecture research for: Entitlements / Plan-Gating integration into Accrue (v1.39)*
-*Researched: 2026-05-22*
+- `.planning/phases/143/143-RESEARCH.md` — locked architectural decisions for Phase 143 foundation.
+- `.planning/phases/143/143-VERIFICATION.md` — confirmation that 4/4 Phase 143 must-haves shipped.
+- `accrue/lib/accrue/analytics/dunning.ex` (73 LOC) — current public-API module, shipped Phase 143.
+- `accrue/lib/accrue/billing/dunning.ex` (167 LOC) — sibling pure-policy module + the `recovered_vs_lost/1` count function and its documented exclusion of `dunning.terminal_action_requested`.
+- `accrue/lib/accrue/webhook/default_handler.ex` (1924 LOC) — verified emission sites for all four lifecycle event types (`:1237` campaign_started, `:805` exhausted, `:886` recovered).
+- `accrue/lib/accrue/workers/dunning_step.ex:196` — verified `dunning.step_sent` is already emitted.
+- `accrue/lib/accrue/jobs/dunning_sweeper.ex:110` — verified `dunning.terminal_action_requested` exists (and why we exclude it).
+- `accrue/lib/accrue/billing/subscription.ex:240-272` — `dunning_sweepable?/1`, `dunning_exhausted_status/1`, `dunning_campaign_active?/1` predicates.
+- `accrue/lib/accrue/billing/query.ex:117-145` — existing query-composer patterns (`past_due/1`, `dunning_sweep_candidates/2`).
+- `accrue/lib/accrue/events.ex` — `record/1`, `record_multi/3`, `timeline_for/3`, `bucket_by/2`, `state_as_of/3` API surface.
+- `accrue/lib/accrue/telemetry/ops.ex:32-75` — canonical `[:accrue, :ops, :*]` emit helper.
+- `accrue_admin/lib/accrue_admin/router.ex:75-77` — Phase 143's analytics scope inside `live_session :accrue_admin`.
+- `accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex` (86 LOC) — current LiveView shape to be extended.
+- `accrue_admin/lib/accrue_admin/live/subscriptions_live.ex:43-45`, `customers_live.ex:66`, `events_live.ex:27` — `handle_params(params, _uri, socket)` URL-param convention.
+- `accrue_admin/lib/accrue_admin/components/{app_shell,breadcrumbs,kpi_card,data_table}.ex` — existing reusable component surface.
+- `.planning/PROJECT.md:15-29` — v1.44 milestone scope, target features, design constraint.
+
+### Secondary (MEDIUM confidence — Phoenix/LiveView convention)
+
+- LiveView 1.1 streams documentation: streams are designed for mutating lists with incremental ops, not for static page data. Conclusion: don't use streams for v1.44's at-risk table.
+- Ecto JSONB query patterns: `fragment("(?->>'key')::type", column)` is the canonical Postgres jsonb extraction pattern; already validated in 143.
+
+### Confidence breakdown
+
+- Standard stack: HIGH (everything is already in `mix.exs`; nothing new).
+- Architecture: HIGH (every integration seam is named-and-verified in the existing codebase).
+- Public API stability: HIGH (additive, open-shape return maps, no breaking changes).
+- Build order: HIGH (orderable by strict dependency: compute → state → UI → navigation).
+- Scalability ceiling: MEDIUM (target is ~10k subscriptions; beyond that needs a rollup plan that's intentionally out of v1.44 scope).
