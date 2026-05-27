@@ -388,7 +388,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-Current focus: **Polish & Adopter ROI Proof**. **v1.44 — Recovered-Revenue Dashboard Completion is ACTIVE (In Progress — Phase 144 complete 2026-05-27)**. Phase 143 (standalone) shipped the analytics foundation on 2026-05-27; v1.44 completes the dashboard with funnel + drill-down + filters + docs. Phase 144 delivered the 3-stage dunning funnel UI, JSONB safe-cast, campaign-anchor retrofit, and CLDR-correct money rendering (DAN-01, DAN-02, DAN-08, DAN-09, DAN-13). Carryover: CR-01 multi-currency aggregation widening is owned by Phase 148 DAN-07.
+Current focus: **Polish & Adopter ROI Proof**. **v1.44 — Recovered-Revenue Dashboard Completion is ACTIVE (In Progress — Phase 145 complete 2026-05-27)**. Phase 143 (standalone) shipped the analytics foundation; v1.44 completes the dashboard with funnel + drill-down + filters + docs. Phase 144 delivered the 3-stage dunning funnel UI, JSONB safe-cast, campaign-anchor retrofit, and CLDR-correct money rendering (DAN-01, DAN-02, DAN-08, DAN-09, DAN-13). Phase 145 delivered `WindowSelector` component + `?window=7d|30d|90d` URL plumbing through RecoveryLive (DAN-10), setting the live_patch filter idiom for Phases 146 + 148. Carryover: CR-01 multi-currency aggregation widening is owned by Phase 148 DAN-07.
 
 **Last shipped planning milestone:** **v1.43** — Phases **140–142** (**2026-05-27**). **Standalone follow-on:** Phase 143 — Recovered-Revenue Analytics Foundation (verified 2026-05-27).
 
