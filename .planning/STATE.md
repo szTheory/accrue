@@ -4,7 +4,7 @@ milestone: v1.44
 milestone_name: milestone
 status: verifying
 stopped_at: Phase 144 Plan 02 complete — campaign_anchor retrofit on dunning.recovered + dunning.exhausted (DAN-02) landed
-last_updated: "2026-05-27T16:56:15.714Z"
+last_updated: "2026-05-27T17:13:02.064Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
@@ -26,8 +26,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 
 ## Current Position
 
-Phase: 144 (funnel-query-viz-campaign-anchor-retrofit-money-formatter-po) — EXECUTING
-Plan: 4 of 4
+Phase: 145
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-05-27
 
@@ -61,7 +61,7 @@ Last activity: 2026-05-27
 
 **Velocity:**
 
-- Total plans completed: 48 (v1.43) + 2 (Phase 143 standalone)
+- Total plans completed: 52 (v1.43) + 2 (Phase 143 standalone)
 - Average duration: 1m
 - Total execution time: 1m
 
