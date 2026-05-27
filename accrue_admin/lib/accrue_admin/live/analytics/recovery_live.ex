@@ -117,7 +117,6 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, (admin["mount_path"] || "/billing") <> "/analytics/recovery")
-    |> assign(:active_organization_name, admin["active_organization_name"])
   end
 
   defp default_brand do
