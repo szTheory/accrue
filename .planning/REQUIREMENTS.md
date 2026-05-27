@@ -59,7 +59,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
   - Stage labels + counts + percentage-of-entered.
   - Tooltips define each stage; "Exhausted" replaces previously-shipped "Lost MRR" copy.
 
-- [ ] **DAN-10** — Time-window URL plumbing + selector.
+- [x] **DAN-10** — Time-window URL plumbing + selector.
   - `?window=7d|30d|90d` URL parameter threaded via `handle_params/3`; default `30d`.
   - Window selector UI (3 preset buttons; no custom-range picker).
   - URL is single source of truth — sharing a URL preserves the window.
@@ -145,7 +145,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 | DAN-07 | Phase 148 | Pending |
 | DAN-08 | Phase 144 | Complete |
 | DAN-09 | Phase 144 | Complete |
-| DAN-10 | Phase 145 | Pending |
+| DAN-10 | Phase 145 | Complete |
 | DAN-11 | Phase 146 | Pending |
 | DAN-12 | Phase 147 | Pending |
 | DAN-13 | Phase 144 | Complete |

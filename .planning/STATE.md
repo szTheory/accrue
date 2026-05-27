@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.44
 milestone_name: milestone
-status: executing
-stopped_at: Phase 145 UI-SPEC approved
-last_updated: "2026-05-27T20:51:48.214Z"
-last_activity: 2026-05-27 -- Phase 145 planning complete
+status: verifying
+stopped_at: Completed Phase 145 Plan 01 (DAN-10)
+last_updated: "2026-05-27T21:01:28.716Z"
+last_activity: 2026-05-27
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
-  percent: 20
+  completed_plans: 5
+  percent: 40
 ---
 
 # Project State
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 144 — funnel-query-viz-campaign-anchor-retrofit-money-formatter-po
+**Current focus:** Phase 145 — time-window-url-plumbing-window-selector
 
 ## Current Position
 
-Phase: 145
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 145 planning complete
+Phase: 145 (time-window-url-plumbing-window-selector) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-05-27
 
 ## Milestone Progress
 
@@ -73,6 +73,7 @@ Last activity: 2026-05-27 -- Phase 145 planning complete
 | Phase Phase 144 P02 P02 | 6m | 2 tasks | 3 files |
 | Phase 144 P03 | 6m | 2 tasks | 3 files |
 | Phase 144 P04 | 5m | 2 tasks | 3 files |
+| Phase 145 P01 | 3m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Phase 144 Plan 02 DAN-02 retrofit: asymmetric defensive-case at exhausted edge (Subscription.dunning_sweepable?/1 only checks status: :past_due, so Stripe-native immediate-cancel hits with nil anchor) vs reuse-already-in-scope-iso_anchor at recovered edge (with-clause guarantees non-nil); both sites preserve atomicity (Repo.transact at exhausted, Ecto.Multi at recovered); closes Phase 143 emission-boundary test coverage gap
 - [Phase ?]: Phase 144 Plan 03 DAN-09 viz lands — AccrueAdmin.Components.FunnelChart is a Phoenix.Component (LiveView-runtime-free) rendering inline-SVG horizontal proportional bars; tone palette reuses ax-kpi-delta-{slate,moss,amber}; active count owned by the component (not RecoveryLive) per OQ#2; first dedicated component-unit test in accrue_admin/test/accrue_admin/components/ uses stdlib Phoenix.LiveViewTest.render_component/2
 - [Phase ?]: Phase 144 Plan 04 DAN-09 UI half + DAN-13 lands: RecoveryLive.mount/3 calls Dunning.funnel() + renders <FunnelChart> below KPI grid; format_minor/1 helper deleted; KPI values rendered via Render.format_money/3 driven by Accrue.Config.get!(:default_currency) + Accrue.Config.default_locale() runtime accessors; Lost MRR renamed Exhausted MRR with yearly-plan worked-example delta; JPY regression test locks CLDR rendering against USD-only regressions
+- [Phase ?]: Phase 145 DAN-10: WindowSelector component + handle_params data loading
 
 ### Pending Todos
 
@@ -114,9 +116,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T18:04:58.426Z
-Stopped at: Phase 145 UI-SPEC approved
-Resume file: .planning/phases/145-time-window-url-plumbing-window-selector/145-UI-SPEC.md
+Last session: 2026-05-27T21:01:28.712Z
+Stopped at: Completed Phase 145 Plan 01 (DAN-10)
+Resume file: None
 
 ## Operator Next Steps
 
