@@ -1,10 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.44
-milestone_name: Recovered-Revenue Dashboard Completion
+milestone_name: milestone
 status: planning
-last_updated: "2026-05-27T13:01:23.071Z"
-last_activity: 2026-05-27
+stopped_at: Phase 144 context gathered
+last_updated: "2026-05-27T15:35:15.398Z"
+last_activity: 2026-05-27 — Milestone v1.44 roadmap committed (5 phases, 144–148, 16/16 DAN-* requirements mapped)
 progress:
   total_phases: 5
   completed_phases: 0
@@ -105,9 +106,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T13:01:23.071Z
-Stopped at: roadmap committed
-Resume file: None
+Last session: 2026-05-27T15:35:15.396Z
+Stopped at: Phase 144 context gathered
+Resume file: .planning/phases/144-funnel-query-viz-campaign-anchor-retrofit-money-formatter-po/144-CONTEXT.md
 
 ## Operator Next Steps
 
