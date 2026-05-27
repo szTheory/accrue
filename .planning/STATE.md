@@ -4,14 +4,13 @@ milestone: v1.43
 milestone_name: Linked Release 1.2.0 Truth
 status: completed
 stopped_at: none
-last_updated: "2026-05-27T12:00:00.000Z"
-last_activity: 2026-05-27 -- Completed v1.43 milestone.
+last_updated: "2026-05-27T11:03:43.297Z"
 progress:
-  total_phases: 17
-  completed_phases: 16
-  total_plans: 56
-  completed_plans: 56
-  percent: 94
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 0
 ---
 
 # Project State
@@ -26,10 +25,11 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
 
 ## Current Position
 
- Phase: 141
- Plan: 01
+ Phase: 143
+ Plan: 02
  Status: Complete
- Last activity: 2026-05-27 -- Completed Phase 141 Plan 01.
+ Last activity: 2026-05-27 -- Completed Phase 143 Plan 02.
+
 ## Milestone Progress
 
 **v1.43** (shipped & archived **2026-05-27**): 3 phases (**140–142**). Theme: Close the linked release-truth gap by locking the three-package contract, shipping the public `1.2.0` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
@@ -53,7 +53,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 140 | 01 | 1m | 2 | 0 |
-
+| 143 | 02 | 2m | 2 | 3 |
 
 ## Accumulated Context
 
@@ -88,7 +88,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T07:25:00.613Z
+Last session: 2026-05-27T11:03:43.293Z
 Stopped at: none
 Resume file: None
 
