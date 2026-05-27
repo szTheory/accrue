@@ -1,10 +1,11 @@
 ---
 phase: 144
 slug: funnel-query-viz-campaign-anchor-retrofit-money-formatter-polish
-status: draft
+status: approved
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-05-27
+audited: 2026-05-27
 ---
 
 # Phase 144 — Validation Strategy
@@ -40,17 +41,17 @@ created: 2026-05-27
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 144-01-01 | 01 | 1 | DAN-08 | T-144-01 | safe-cast wraps `(?->>'mrr_value_cents')::integer`; malformed-row regression contributes 0 | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs` | ✅ | ⬜ pending |
-| 144-01-02 | 01 | 1 | DAN-01 | T-144-02 | funnel/1 returns DISTINCT-`(subject_id, campaign_anchor)`-tuple stage counts via single Repo.one query | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs` | ✅ | ⬜ pending |
-| 144-01-03 | 01 | 1 | DAN-01, DAN-08 | T-144-02 | property invariant `recovered + exhausted + active ≤ entered` holds across StreamData generations | property | `cd accrue && mix test test/property/dunning_funnel_property_test.exs` | ❌ Wave 0 creates stub (file new in Task 3) | ⬜ pending |
-| 144-02-01 | 02 | 1 | DAN-02 | — | `dunning.exhausted` event payload carries `campaign_anchor` (ISO-8601 binary OR nil) at emission boundary | unit | `cd accrue && mix test test/accrue/webhook/dunning_exhaustion_test.exs` | ✅ | ⬜ pending |
-| 144-02-02 | 02 | 1 | DAN-02 | — | `dunning.recovered` event payload carries `campaign_anchor` (ISO-8601 binary, captured BEFORE anchor clear) at emission boundary | unit | `cd accrue && mix test test/accrue/webhook/dunning_campaign_keying_test.exs` | ✅ | ⬜ pending |
-| 144-03-01 | 03 | 2 | DAN-09 | — | `AccrueAdmin.Components.FunnelChart` Phoenix.Component renders 3 proportional `<rect>` bars + active chip + `<dl>` legend; zero-divide safe at entered=0 | unit (render_component) | `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs` | ❌ Wave 0 creates stub (file new in Task 1) | ⬜ pending |
-| 144-03-02 | 03 | 2 | DAN-09 | — | `.ax-funnel-chart`, `.ax-funnel-row`, `.ax-funnel-row--{slate,moss,amber}`, `.ax-funnel-bar`, `.ax-funnel-legend` present in app.css | unit (CSS presence via component render) | `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs` | ✅ (test file from 144-03-01) | ⬜ pending |
-| 144-04-01 | 04 | 3 | DAN-09, DAN-13 | T-144-02 | RecoveryLive.mount/3 calls `Dunning.funnel/1`, renders `<FunnelChart.funnel_chart>` below `.ax-kpi-grid`, swaps `format_minor/1` for `Render.format_money/3`, renames "Lost MRR" → "Exhausted MRR" | integration (LiveView) | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | ✅ | ⬜ pending |
-| 144-04-02 | 04 | 3 | DAN-09, DAN-13 | — | JPY regression: `Application.put_env(:accrue, :default_currency, :jpy)` + seeded mrr_value_cents/currency renders `¥` (not `$`); funnel HTML present; "Exhausted MRR" label asserted | integration (LiveView) | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | ✅ | ⬜ pending |
+| 144-01-01 | 01 | 1 | DAN-08 | T-144-01 | safe-cast wraps `(?->>'mrr_value_cents')::integer`; malformed-row regression contributes 0 | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs` | ✅ | ✅ green |
+| 144-01-02 | 01 | 1 | DAN-01 | T-144-02 | funnel/1 returns DISTINCT-`(subject_id, campaign_anchor)`-tuple stage counts via single Repo.one query | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs` | ✅ | ✅ green |
+| 144-01-03 | 01 | 1 | DAN-01, DAN-08 | T-144-02 | property invariant `recovered + exhausted + active ≤ entered` holds across StreamData generations | property | `cd accrue && mix test test/property/dunning_funnel_property_test.exs` | ✅ (created by Task 3) | ✅ green |
+| 144-02-01 | 02 | 1 | DAN-02 | — | `dunning.exhausted` event payload carries `campaign_anchor` (ISO-8601 binary OR nil) at emission boundary | unit | `cd accrue && mix test test/accrue/webhook/dunning_exhaustion_test.exs` | ✅ | ✅ green |
+| 144-02-02 | 02 | 1 | DAN-02 | — | `dunning.recovered` event payload carries `campaign_anchor` (ISO-8601 binary, captured BEFORE anchor clear) at emission boundary | unit | `cd accrue && mix test test/accrue/webhook/dunning_campaign_keying_test.exs` | ✅ | ✅ green |
+| 144-03-01 | 03 | 2 | DAN-09 | — | `AccrueAdmin.Components.FunnelChart` Phoenix.Component renders 3 proportional `<rect>` bars + active chip + `<dl>` legend; zero-divide safe at entered=0 | unit (render_component) | `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs` | ✅ (created by Task 1) | ✅ green |
+| 144-03-02 | 03 | 2 | DAN-09 | — | `.ax-funnel-chart`, `.ax-funnel-row`, `.ax-funnel-row--{slate,moss,amber}`, `.ax-funnel-bar`, `.ax-funnel-legend` present in app.css | unit (CSS presence via component render) | `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs` | ✅ (test file from 144-03-01) | ✅ green |
+| 144-04-01 | 04 | 3 | DAN-09, DAN-13 | T-144-02 | RecoveryLive.mount/3 calls `Dunning.funnel/1`, renders `<FunnelChart.funnel_chart>` below `.ax-kpi-grid`, swaps `format_minor/1` for `Render.format_money/3`, renames "Lost MRR" → "Exhausted MRR" | integration (LiveView) | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | ✅ | ✅ green |
+| 144-04-02 | 04 | 3 | DAN-09, DAN-13 | — | JPY regression: `Application.put_env(:accrue, :default_currency, :jpy)` + seeded mrr_value_cents/currency renders `¥` (not `$`); funnel HTML present; "Exhausted MRR" label asserted | integration (LiveView) | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | ✅ | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ✅ green · ✅ green · ❌ red · ⚠️ flaky*
 
 *Task IDs follow the canonical `{phase}-{plan}-{seq}` convention; verify against `144-0{1..4}-PLAN.md` `<task>` order before execution. The only NEW test files created during execution are `accrue/test/property/dunning_funnel_property_test.exs` (Plan 01 Task 3) and `accrue_admin/test/accrue_admin/components/funnel_chart_test.exs` (Plan 03 Task 1) — both stubs are created in-line by the task that implements the behavior, so no separate Wave 0 scaffolding is required.*
 
@@ -91,4 +92,36 @@ created: 2026-05-27
 - [x] Feedback latency < 60s
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved (2026-05-27 — Nyquist audit, all rows ✅ green)
+
+---
+
+## Validation Audit 2026-05-27
+
+| Metric | Count |
+|--------|-------|
+| Rows audited | 9 |
+| COVERED | 9 |
+| PARTIAL | 0 |
+| MISSING | 0 |
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+**Suites executed:**
+
+- `cd accrue && mix test test/accrue/analytics/dunning_test.exs test/property/dunning_funnel_property_test.exs test/accrue/webhook/dunning_exhaustion_test.exs test/accrue/webhook/dunning_campaign_keying_test.exs` → **1 property + 29 tests, 0 failures**
+- `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs test/accrue_admin/live/analytics/recovery_live_test.exs` → **10 tests, 0 failures**
+
+**Semantic-match anchors confirmed (test → row):**
+
+- `test "does not crash when a malformed string-typed mrr_value_cents row is present (DAN-08)"` (dunning_test.exs:50) → 144-01-01
+- `describe "funnel/1"` 5-test block (dunning_test.exs:122) → 144-01-02
+- `property "recovered + exhausted + active <= entered across generated event sequences"` (dunning_funnel_property_test.exs:42) → 144-01-03
+- `test "records campaign_anchor when an anchor was set (DAN-02)"` + nil counterpart (dunning_exhaustion_test.exs:320,348) → 144-02-01
+- `describe "dunning.recovered observability (DUN-08)"` with `is_binary(ledger.data["campaign_anchor"])` + ISO-8601 round-trip (dunning_campaign_keying_test.exs:358) → 144-02-02
+- `describe "funnel_chart/1"` 6 tests including division-by-zero, a11y, tooltip, tone-row classes (funnel_chart_test.exs:8) → 144-03-01, 144-03-02
+- `assert html =~ "Exhausted MRR" / "Recovery Funnel" / "$120/yr" / "$10/mo"` (recovery_live_test.exs:63,104,117,118) → 144-04-01
+- `describe "JPY rendering (DAN-13)"` with `Application.put_env(:accrue, :default_currency, :jpy)` + `¥`/`￥`/`JPY` triple-or (recovery_live_test.exs:122,166) → 144-04-02
+
+**Conclusion:** Phase 144 is Nyquist-compliant. All requirements (DAN-01, DAN-02, DAN-08, DAN-09, DAN-13) have automated verification. No gap fillers needed; auditor agent not spawned.
