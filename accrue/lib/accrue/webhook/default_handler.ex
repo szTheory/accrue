@@ -898,6 +898,12 @@ defmodule Accrue.Webhook.DefaultHandler do
 
           # Fold the `dunning.recovered` ledger record into the SAME
           # transaction as the anchor-clear (atomic with the status write).
+          #
+          # DAN-02 forward-fix (Phase 144 Plan 02): snapshot the anchor that is
+          # about to be cleared onto the event payload, so the DAN-01 funnel
+          # can DISTINCT-tuple by (subject_id, campaign_anchor). `iso_anchor`
+          # is already in lexical scope from line 884 — the `with` clause
+          # guarantees it is a non-nil ISO-8601 string at this point.
           Events.record_multi(multi, :dunning_recovered_event, %{
             type: "dunning.recovered",
             subject_type: "Subscription",
@@ -905,7 +911,8 @@ defmodule Accrue.Webhook.DefaultHandler do
             data: %{
               source: dunning_source(row.dunning_sweep_attempted_at),
               mrr_value_cents: mrr_value_cents,
-              currency: currency
+              currency: currency,
+              campaign_anchor: iso_anchor
             }
           })
         else
