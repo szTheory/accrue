@@ -317,6 +317,55 @@ defmodule Accrue.Webhook.DunningExhaustionTest do
       assert meta.source == :stripe_native
     end
 
+    test "records campaign_anchor when an anchor was set (DAN-02)",
+         %{sub: sub, sub_id: sub_id} do
+      # Set a live anchor on the past_due subscription before the terminal
+      # transition fires. The exhausted-edge retrofit must snapshot this anchor
+      # onto the `dunning.exhausted` ledger event payload.
+      anchor = %{Accrue.Clock.utc_now() | microsecond: {0, 6}}
+
+      {:ok, _sub} =
+        sub
+        |> Subscription.force_status_changeset(%{dunning_campaign_started_at: anchor})
+        |> Repo.update()
+
+      stub_subscription_fetch(sub_id, :canceled)
+
+      event =
+        StripeFixtures.webhook_event(
+          "customer.subscription.updated",
+          StripeFixtures.subscription_created(%{"id" => sub_id, "status" => "canceled"})
+        )
+
+      assert {:ok, %Subscription{status: :canceled}} = DefaultHandler.handle(event)
+
+      assert [ledger] = ledger_events("dunning.exhausted", sub.id)
+      assert is_binary(ledger.data["campaign_anchor"])
+      assert {:ok, %DateTime{}, _} = DateTime.from_iso8601(ledger.data["campaign_anchor"])
+      assert ledger.data["campaign_anchor"] == DateTime.to_iso8601(anchor)
+    end
+
+    test "records campaign_anchor: nil when no anchor was set (Stripe-native path; DAN-02)",
+         %{sub: sub, sub_id: sub_id} do
+      # The past_due subscription has NO anchor — Stripe-native immediate-cancel
+      # path. The defensive `case row.dunning_campaign_started_at` branch must
+      # encode `campaign_anchor: nil` without raising `nil.year`.
+      assert is_nil(sub.dunning_campaign_started_at)
+
+      stub_subscription_fetch(sub_id, :canceled)
+
+      event =
+        StripeFixtures.webhook_event(
+          "customer.subscription.updated",
+          StripeFixtures.subscription_created(%{"id" => sub_id, "status" => "canceled"})
+        )
+
+      assert {:ok, %Subscription{status: :canceled}} = DefaultHandler.handle(event)
+
+      assert [ledger] = ledger_events("dunning.exhausted", sub.id)
+      assert is_nil(ledger.data["campaign_anchor"])
+    end
+
     test "does NOT fire dunning.exhausted on a non-dunning transition (:active → :canceled)",
          %{customer: customer} do
       active_id = "sub_fake_" <> Integer.to_string(System.unique_integer([:positive]))
