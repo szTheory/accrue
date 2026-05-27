@@ -10,7 +10,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 
 ### Public API & Core Math (DAN)
 
-- [ ] **DAN-01** — Funnel public API.
+- [x] **DAN-01** — Funnel public API.
   - `Accrue.Analytics.Dunning.funnel/1` returns `%{entered: N, recovered: N, exhausted: N, active: N}` over a window.
   - Counts DISTINCT `(subject_id, campaign_anchor)` tuples per stage to prevent double-counting when a subscription cycles dunning multiple times.
   - Single `from(e in Event, where: e.type in ^types, group_by: e.type, select: ...)` Ecto query — not `Task.async` per stage.
@@ -46,7 +46,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
   - Updated `RecoveryLive` renders one card per currency (single currency = same UX as today).
   - CHANGELOG entry flagged "BREAKING for pre-1.4.0 callers".
 
-- [ ] **DAN-08** — JSONB cast safety.
+- [x] **DAN-08** — JSONB cast safety.
   - All JSONB-fragment aggregations wrap the `::integer` cast in `CASE WHEN jsonb_typeof((?->>'mrr_value_cents')::jsonb) = 'number' THEN ((?->>'mrr_value_cents')::integer) ELSE 0 END` (or equivalent safe-cast).
   - Single malformed row in `accrue_events` does NOT crash the dashboard mount.
   - Regression test: insert a `dunning.recovered` event with `"mrr_value_cents": "5000"` (string-typed) and assert `recovered_vs_lost_mrr/1` returns successfully (zero contribution from the bad row).
@@ -136,14 +136,14 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DAN-01 | Phase 144 | Pending |
+| DAN-01 | Phase 144 | Complete |
 | DAN-02 | Phase 144 | Pending |
 | DAN-03 | Phase 146 | Pending |
 | DAN-04 | Phase 146 | Pending |
 | DAN-05 | Phase 147 | Pending |
 | DAN-06 | Phase 148 | Pending |
 | DAN-07 | Phase 148 | Pending |
-| DAN-08 | Phase 144 | Pending |
+| DAN-08 | Phase 144 | Complete |
 | DAN-09 | Phase 144 | Pending |
 | DAN-10 | Phase 145 | Pending |
 | DAN-11 | Phase 146 | Pending |
@@ -154,6 +154,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 | DAN-16 | Phase 148 | Pending |
 
 **Phase mapping summary:**
+
 - Phase 144 (5 reqs): DAN-01, DAN-02, DAN-08, DAN-09, DAN-13 — funnel API + viz + anchor retrofit + JSONB safety + money formatter
 - Phase 145 (1 req): DAN-10 — time-window URL plumbing + selector
 - Phase 146 (3 reqs): DAN-03, DAN-04, DAN-11 — at-risk query + failure-reason enrichment + at-risk table

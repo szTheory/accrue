@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.44
 milestone_name: milestone
 status: executing
-stopped_at: Phase 144 context gathered
-last_updated: "2026-05-27T16:19:37.866Z"
-last_activity: 2026-05-27 -- Phase 144 planning complete
+stopped_at: Phase 144 Plan 01 complete — Dunning.funnel/1 + JSONB safe-cast landed
+last_updated: "2026-05-27T16:32:10.110Z"
+last_activity: 2026-05-27
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Polish & Adopter ROI Proof. v1.44 completes the Phase 143 Recovered-Revenue dashboard foundation with funnel, at-risk drill-down, time-window filters, public docs, and adopter-proof.
+**Current focus:** Phase 144 — funnel-query-viz-campaign-anchor-retrofit-money-formatter-po
 
 ## Current Position
 
-Phase: Not started (roadmap committed; ready for `/gsd:plan-phase 144`)
-Plan: —
+Phase: 144 (funnel-query-viz-campaign-anchor-retrofit-money-formatter-po) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 144 planning complete
+Last activity: 2026-05-27
 
 ## Milestone Progress
 
@@ -69,6 +69,7 @@ Last activity: 2026-05-27 -- Phase 144 planning complete
 |-------|------|----------|-------|-------|
 | 140 | 01 | 1m | 2 | 0 |
 | 143 | 02 | 2m | 2 | 3 |
+| Phase 144 P01 | 4m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-27 (v1.44 roadmap):** Phase 144 owns the Phase 143 forward-fix to the write path — `campaign_anchor` snapshot onto `dunning.recovered` / `dunning.exhausted` events in `default_handler.ex`. Required for DAN-01's DISTINCT-tuple funnel de-duplication (Pitfall #1 prevention).
 - **2026-05-27:** Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). v1.44 selected to prove the v1.40 dunning engine's ROI to adopters via the recovered-revenue dashboard.
 - **2026-05-26:** Open **v1.42 — Ad-hoc Invoices & Adopter Confidence** to address remaining JTBD frontier items and adopter-proof gaps identified during v1.39/v1.40 audits.
+- [Phase ?]: Phase 144 Plan 01 DAN-08+DAN-01 land — Inlined JSONB safe-cast at recovered_vs_lost_mrr/1 single call site; funnel/1 as ONE Repo.one over subquery with mutually-exclusive COUNT FILTER predicates so recovered+exhausted+active<=entered holds by construction; property test uses iteration-tagged subject_id/anchor instead of delete_all because accrue_events immutability trigger SQLSTATE 45A01 forbids inter-iteration cleanup
 
 ### Pending Todos
 
@@ -106,9 +108,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T15:35:15.396Z
-Stopped at: Phase 144 context gathered
-Resume file: .planning/phases/144-funnel-query-viz-campaign-anchor-retrofit-money-formatter-po/144-CONTEXT.md
+Last session: 2026-05-27T16:32:10.108Z
+Stopped at: Phase 144 Plan 01 complete — Dunning.funnel/1 + JSONB safe-cast landed
+Resume file: None
 
 ## Operator Next Steps
 
