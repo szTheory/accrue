@@ -229,13 +229,17 @@ defmodule Accrue.Webhook.DunningCampaignStartTest do
       events = ledger_events("dunning.campaign_started", sub.id)
       assert [event] = events
       assert event.data["step_count"] == step_count
+      assert event.data["invoice_id"] == "in_fake_obs_start1"
 
       # Telemetry: measurements %{count: 1}; metadata IDs + step_count only,
       # NO :source key (campaign_started has no source).
+      # NO :invoice_id in telemetry — Stripe IDs are reference data but the
+      # narrow-metadata posture is maintained (T-146-02).
       assert_received {:telemetry, [:accrue, :ops, :dunning_campaign_started], %{count: 1}, meta}
       assert meta.subscription_id == sub.id
       assert meta.step_count == step_count
       refute Map.has_key?(meta, :source)
+      refute Map.has_key?(meta, :invoice_id)
     end
 
     test "the second in-window failure (count==0 no-op) records NO second campaign_started",
