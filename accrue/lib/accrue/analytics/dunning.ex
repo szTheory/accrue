@@ -9,8 +9,10 @@ defmodule Accrue.Analytics.Dunning do
 
   import Ecto.Query, only: [from: 2, subquery: 1, where: 3]
 
+  alias Accrue.Billing.{Customer, Invoice, Subscription}
   alias Accrue.Events.Event
   alias Accrue.Repo
+  alias Oban.Job
 
   @recovered_type "dunning.recovered"
   @exhausted_type "dunning.exhausted"
@@ -142,6 +144,103 @@ defmodule Accrue.Analytics.Dunning do
     Repo.one(query) || %{entered: 0, recovered: 0, exhausted: 0, active: 0}
   end
 
+  @doc """
+  Returns subscriptions currently in an active dunning campaign, enriched
+  with next-step ETA and last-failure reason.
+
+  Window opts (`:since`, `:until`) filter by `dunning_campaign_started_at`.
+  Uses a NOT EXISTS ledger tiebreaker to exclude subscriptions that have
+  recovered even when the schema anchor column hasn't been cleared yet
+  (projection-lag race). Pre-v1.44 campaigns without `invoice_id` in
+  `campaign_started` data return `nil` for `failure_reason`.
+
+  ## Return shape
+
+  Each map contains:
+  - `:subscription_id` — Accrue UUID
+  - `:customer_id` — Accrue UUID
+  - `:customer_label` — customer email (or name, or nil)
+  - `:days_in_campaign` — integer days since campaign start (truncated)
+  - `:current_step` — count of `dunning.step_sent` events for this campaign
+  - `:next_step_eta` — `DateTime.t()` or nil when no pending Oban job
+  - `:failure_reason` — raw `invoice.payment_failed` event data map or nil
+    (pre-v1.44 campaigns and campaigns without a matched invoice return nil)
+
+  ## Options
+
+    * `:since` — `%DateTime{}` lower bound (inclusive on `dunning_campaign_started_at`)
+    * `:until` — `%DateTime{}` upper bound (inclusive on `dunning_campaign_started_at`)
+
+  @since "1.4.0"
+  """
+  @spec at_risk_subscriptions(keyword()) :: [map()]
+  def at_risk_subscriptions(opts \\ []) when is_list(opts) do
+    now = Accrue.Clock.utc_now()
+
+    query =
+      from(s in Subscription,
+        join: c in Customer,
+        on: c.id == s.customer_id,
+        left_join: cs in Event,
+        on:
+          cs.type == "dunning.campaign_started" and cs.subject_id == s.id and
+            cs.inserted_at >= s.dunning_campaign_started_at,
+        left_join: inv in Invoice,
+        on: inv.processor_id == fragment("? ->> 'invoice_id'", cs.data),
+        left_join: pf in Event,
+        on:
+          pf.type == "invoice.payment_failed" and pf.subject_id == inv.id and
+            pf.inserted_at >= s.dunning_campaign_started_at,
+        left_join: j in Job,
+        on:
+          j.worker == "Accrue.Workers.DunningStep" and
+            fragment("? ->> 'subscription_id' = ?", j.args, s.id) and
+            fragment(
+              "? ->> 'campaign_started_at' = to_char(?, 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')",
+              j.args,
+              s.dunning_campaign_started_at
+            ) and j.state in ["available", "scheduled", "retryable"],
+        where: not is_nil(s.dunning_campaign_started_at),
+        where:
+          fragment(
+            "NOT EXISTS (SELECT 1 FROM accrue_events WHERE type IN ('dunning.recovered','dunning.exhausted') AND subject_id = ? AND inserted_at >= ?)",
+            s.id,
+            s.dunning_campaign_started_at
+          ),
+        group_by: [
+          s.id,
+          s.customer_id,
+          c.email,
+          c.name,
+          s.dunning_campaign_started_at,
+          pf.data
+        ],
+        order_by: [desc: s.dunning_campaign_started_at],
+        select: %{
+          subscription_id: s.id,
+          customer_id: s.customer_id,
+          customer_label: fragment("COALESCE(?, ?)", c.email, c.name),
+          days_in_campaign:
+            fragment(
+              "EXTRACT(EPOCH FROM (? - ?))::integer / 86400",
+              ^now,
+              s.dunning_campaign_started_at
+            ),
+          current_step:
+            fragment(
+              "(SELECT COUNT(*) FROM accrue_events WHERE type = 'dunning.step_sent' AND subject_id = ? AND inserted_at >= ?)",
+              s.id,
+              s.dunning_campaign_started_at
+            ),
+          next_step_eta: min(j.scheduled_at),
+          failure_reason: pf.data
+        }
+      )
+      |> apply_campaign_window(opts)
+
+    Repo.all(query)
+  end
+
   defp apply_window(query, opts) do
     query
     |> maybe_since(opts[:since])
@@ -157,4 +256,20 @@ defmodule Accrue.Analytics.Dunning do
     do: where(query, [e], e.inserted_at <= ^until)
 
   defp maybe_until(query, _), do: query
+
+  defp apply_campaign_window(query, opts) do
+    query
+    |> maybe_since_campaign(opts[:since])
+    |> maybe_until_campaign(opts[:until])
+  end
+
+  defp maybe_since_campaign(query, %DateTime{} = since),
+    do: where(query, [s], s.dunning_campaign_started_at >= ^since)
+
+  defp maybe_since_campaign(query, _), do: query
+
+  defp maybe_until_campaign(query, %DateTime{} = until),
+    do: where(query, [s], s.dunning_campaign_started_at <= ^until)
+
+  defp maybe_until_campaign(query, _), do: query
 end
