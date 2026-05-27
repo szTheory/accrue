@@ -29,25 +29,27 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     on_exit(fn -> Application.put_env(:accrue, :auth_adapter, prior) end)
 
     # Seed some events with MRR
-    Events.record(%{
-      type: "dunning.recovered",
-      subject_type: "Subscription",
-      subject_id: "sub_123",
-      data: %{
-        mrr_value_cents: 5000,
-        currency: "usd"
-      }
-    })
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_123",
+        data: %{
+          mrr_value_cents: 5000,
+          currency: "usd"
+        }
+      })
 
-    Events.record(%{
-      type: "dunning.exhausted",
-      subject_type: "Subscription",
-      subject_id: "sub_456",
-      data: %{
-        mrr_value_cents: 2000,
-        currency: "usd"
-      }
-    })
+    {:ok, _} =
+      Events.record(%{
+        type: "dunning.exhausted",
+        subject_type: "Subscription",
+        subject_id: "sub_456",
+        data: %{
+          mrr_value_cents: 2000,
+          currency: "usd"
+        }
+      })
 
     :ok
   end
@@ -76,26 +78,29 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       anchor_a = DateTime.to_iso8601(now)
       anchor_b = DateTime.to_iso8601(DateTime.add(now, -1, :day))
 
-      Events.record(%{
-        type: "dunning.campaign_started",
-        subject_type: "Subscription",
-        subject_id: "sub_cycle",
-        data: %{campaign_anchor: anchor_a}
-      })
+      {:ok, _} =
+        Events.record(%{
+          type: "dunning.campaign_started",
+          subject_type: "Subscription",
+          subject_id: "sub_cycle",
+          data: %{campaign_anchor: anchor_a}
+        })
 
-      Events.record(%{
-        type: "dunning.recovered",
-        subject_type: "Subscription",
-        subject_id: "sub_cycle",
-        data: %{campaign_anchor: anchor_a, mrr_value_cents: 1000, currency: "usd"}
-      })
+      {:ok, _} =
+        Events.record(%{
+          type: "dunning.recovered",
+          subject_type: "Subscription",
+          subject_id: "sub_cycle",
+          data: %{campaign_anchor: anchor_a, mrr_value_cents: 1000, currency: "usd"}
+        })
 
-      Events.record(%{
-        type: "dunning.campaign_started",
-        subject_type: "Subscription",
-        subject_id: "sub_cycle",
-        data: %{campaign_anchor: anchor_b}
-      })
+      {:ok, _} =
+        Events.record(%{
+          type: "dunning.campaign_started",
+          subject_type: "Subscription",
+          subject_id: "sub_cycle",
+          data: %{campaign_anchor: anchor_b}
+        })
 
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
@@ -137,15 +142,16 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
 
       # Replace the file-level USD-denominated fixture with a JPY recovered event
       # so the formatted KPI string is rendered through the :jpy CLDR path.
-      Events.record(%{
-        type: "dunning.recovered",
-        subject_type: "Subscription",
-        subject_id: "sub_jpy",
-        data: %{
-          mrr_value_cents: 5000,
-          currency: "jpy"
-        }
-      })
+      {:ok, _} =
+        Events.record(%{
+          type: "dunning.recovered",
+          subject_type: "Subscription",
+          subject_id: "sub_jpy",
+          data: %{
+            mrr_value_cents: 5000,
+            currency: "jpy"
+          }
+        })
 
       :ok
     end
