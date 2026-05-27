@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.44
 milestone_name: milestone
 status: verifying
-stopped_at: Phase 144 Plan 02 complete — campaign_anchor retrofit on dunning.recovered + dunning.exhausted (DAN-02) landed
-last_updated: "2026-05-27T17:13:02.064Z"
+stopped_at: Phase 145 context gathered
+last_updated: "2026-05-27T17:46:41.987Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
@@ -114,9 +114,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T16:56:11.205Z
-Stopped at: Phase 144 Plan 02 complete — campaign_anchor retrofit on dunning.recovered + dunning.exhausted (DAN-02) landed
-Resume file: None
+Last session: 2026-05-27T17:46:41.984Z
+Stopped at: Phase 145 context gathered
+Resume file: .planning/phases/145-time-window-url-plumbing-window-selector/145-CONTEXT.md
 
 ## Operator Next Steps
 
