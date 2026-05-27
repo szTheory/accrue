@@ -11,7 +11,7 @@
 
 - [x] **Phase 144: Funnel query + viz + campaign-anchor retrofit + money formatter polish** — DISTINCT-tuple funnel API, `FunnelChart` HEEx component, Phase 143 forward-fix snapshotting `campaign_anchor` onto recovered/exhausted events, JSONB cast safety, and CLDR-correct money rendering across the dashboard. (completed 2026-05-27)
 - [x] **Phase 145: Time-window URL plumbing + window selector** — `?window=7d|30d|90d` URL parameter, three-button selector, threaded `:since`/`:until` through funnel + recovered-vs-lost callers, UTC-only labels. (completed 2026-05-27)
-- [ ] **Phase 146: At-risk query + at-risk table + last-failure enrichment** — `at_risk_subscriptions/1` public API with ledger-as-tiebreaker against projection lag, `campaign_started` event payload enriched with last failure reason, at-risk table rendered inline below the funnel.
+- [x] **Phase 146: At-risk query + at-risk table + last-failure enrichment** — `at_risk_subscriptions/1` public API with ledger-as-tiebreaker against projection lag, `campaign_started` event payload enriched with last failure reason, at-risk table rendered inline below the funnel. (completed 2026-05-27)
 - [ ] **Phase 147: Per-subscription drill-down route + CampaignLive** — `campaign_timeline/2` public API, `/billing/analytics/recovery/subscriptions/:id` drill-down route inside the admin live_session, vertical timeline rendering with linked invoice/payment context.
 - [ ] **Phase 148: Cross-currency widening + recovery-rate API + public docs + adopter-proof** — BREAKING `recovered_vs_lost_mrr/1` shape widening to per-currency lists (pre-publish lock-in), `recovery_rate/1` public API, `guides/analytics.md` + expanded `@moduledoc`, adopter-proof matrix row + deterministic-clock seed wiring in `examples/accrue_host`.
 
@@ -80,7 +80,7 @@ Plans:
   3. Post-v1.44 active campaigns surface the triggering invoice's `failure_message` in the "Last failure reason" column; pre-v1.44 campaigns show "—" (honest default — no public-query surface).
   4. The LiveView code touching the at-risk table calls ONLY `Accrue.Analytics.Dunning.*` functions — no `Ecto.Query` import, no `Accrue.Repo` call, no `Accrue.Billing.Subscription` alias from `accrue_admin`.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 **Wave 1**
 
@@ -92,7 +92,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 146-03-PLAN.md — AtRiskTable component + CSS + RecoveryLive wiring + cross-package boundary test (DAN-11)
+- [x] 146-03-PLAN.md — AtRiskTable component + CSS + RecoveryLive wiring + cross-package boundary test (DAN-11)
 
 **UI hint:** yes
 
@@ -134,6 +134,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 4/4 | Complete    | 2026-05-27 |
 | 145. Time-window URL plumbing + window selector | 1/1 | Complete    | 2026-05-27 |
-| 146. At-risk query + at-risk table + last-failure enrichment | 2/3 | In Progress|  |
+| 146. At-risk query + at-risk table + last-failure enrichment | 3/3 | Complete   | 2026-05-27 |
 | 147. Per-subscription drill-down route + CampaignLive | 0/0 | Not started | - |
 | 148. Cross-currency widening + recovery-rate API + public docs + adopter-proof | 0/0 | Not started | - |

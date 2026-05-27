@@ -66,7 +66,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
   - All `Accrue.Analytics.Dunning.*` calls thread `:since` / `:until` derived from the window.
   - UTC-only labels; document outcome-event-timestamp attribution in `analytics.md`.
 
-- [ ] **DAN-11** — At-risk subscriptions table on dashboard.
+- [x] **DAN-11** — At-risk subscriptions table on dashboard.
   - Renders `at_risk_subscriptions/1` result inline below the funnel.
   - Plain `assign/3` (NOT `Phoenix.LiveView.stream/4` — static page data, refresh on `handle_params` only).
   - Columns: customer (with link), days-in-campaign, current step, next-step ETA, last failure reason.
@@ -146,7 +146,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 | DAN-08 | Phase 144 | Complete |
 | DAN-09 | Phase 144 | Complete |
 | DAN-10 | Phase 145 | Complete |
-| DAN-11 | Phase 146 | Pending |
+| DAN-11 | Phase 146 | Complete |
 | DAN-12 | Phase 147 | Pending |
 | DAN-13 | Phase 144 | Complete |
 | DAN-14 | Phase 148 | Pending |

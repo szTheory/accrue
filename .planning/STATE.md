@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.44
 milestone_name: milestone
-status: executing
+status: verifying
 stopped_at: Completed 146-01-PLAN.md
-last_updated: "2026-05-27T22:54:17.796Z"
+last_updated: "2026-05-27T23:00:00.255Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 7
-  percent: 40
+  completed_plans: 8
+  percent: 60
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 
 Phase: 146 (at-risk-query-at-risk-table-last-failure-enrichment) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-27
 
 ## Milestone Progress
@@ -75,6 +75,7 @@ Last activity: 2026-05-27
 | Phase 144 P04 | 5m | 2 tasks | 3 files |
 | Phase 145 P01 | 3m | 3 tasks | 4 files |
 | Phase 146 P01 | 2m | 2 tasks | 4 files |
+| Phase 146 P03 | 3m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: Phase 145 DAN-10: WindowSelector component + handle_params data loading
 - [Phase ?]: invoice_id injected into dunning.campaign_started data
 - [Phase ?]: composable predicate WHERE dunning_campaign_started_at IS NOT NULL added to Accrue.Billing.Query
+- [Phase ?]: AtRiskTable uses section root per UI-SPEC; format_failure extracts stripe_event_id; base_path uses admin_mount_path in RecoveryLive
 
 ### Pending Todos
 
@@ -119,7 +121,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-27T22:54:17.793Z
+Last session: 2026-05-27T23:00:00.253Z
 Stopped at: Completed 146-01-PLAN.md
 Resume file: None
 
