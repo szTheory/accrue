@@ -104,5 +104,66 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert html =~ "Recovery Funnel"
       assert html =~ "currently in dunning"
     end
+
+    test "Exhausted MRR card carries yearly-plan worked example (ROADMAP SC#5)",
+         %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+
+      # Worked-example copy lives in either the Exhausted KpiCard delta string
+      # (recovery_live.ex) or the FunnelChart Exhausted-bar tooltip (DAN-09
+      # component). Both render the $120/yr → $10/mo annualization example.
+      assert html =~ "$120/yr"
+      assert html =~ "$10/mo"
+    end
+  end
+
+  describe "JPY rendering (DAN-13)" do
+    setup do
+      # D-21: drive Render.format_money/3 via runtime config switch to :jpy.
+      # The CLDR backend may render any of ¥ / ￥ / "JPY" depending on locale —
+      # accept all three (D-21 latitude).
+      prior_currency = Application.get_env(:accrue, :default_currency)
+      Application.put_env(:accrue, :default_currency, :jpy)
+
+      on_exit(fn ->
+        if is_nil(prior_currency) do
+          Application.delete_env(:accrue, :default_currency)
+        else
+          Application.put_env(:accrue, :default_currency, prior_currency)
+        end
+      end)
+
+      # Replace the file-level USD-denominated fixture with a JPY recovered event
+      # so the formatted KPI string is rendered through the :jpy CLDR path.
+      Events.record(%{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: "sub_jpy",
+        data: %{
+          mrr_value_cents: 5000,
+          currency: "jpy"
+        }
+      })
+
+      :ok
+    end
+
+    test "renders JPY symbol (not $) for the Recovered KPI value", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+
+      # Locate the Recovered MRR card's value bucket. Under JPY default currency
+      # the USD-only "$50.00" rendering MUST NOT appear in the Recovered/Exhausted
+      # KPI values (the worked-example "$120/yr" delta copy is a static literal
+      # in recovery_live.ex and is preserved — it documents an example USD plan,
+      # not the current tenant's currency).
+      refute html =~ "$50.00"
+      refute html =~ "$20.00"
+
+      assert html =~ "¥" or html =~ "￥" or html =~ "JPY"
+    end
   end
 end
