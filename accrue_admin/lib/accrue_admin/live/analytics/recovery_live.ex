@@ -4,7 +4,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   use Phoenix.LiveView
 
   alias Accrue.Analytics.Dunning
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FunnelChart, KpiCard, WindowSelector}
+  alias AccrueAdmin.Components.{AppShell, AtRiskTable, Breadcrumbs, FunnelChart, KpiCard, WindowSelector}
 
   @impl true
   def mount(_params, session, socket) do
@@ -19,6 +19,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
 
     stats = Dunning.recovered_vs_lost_mrr(since: since, until: until)
     funnel = Dunning.funnel(since: since, until: until)
+    at_risk = Dunning.at_risk_subscriptions(since: since, until: until)
 
     # DAN-13: format KPI card values via the CLDR-backed Render.format_money/3
     # driven by Accrue.Config.get!(:default_currency) (runtime read — never
@@ -35,7 +36,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
      |> assign(:stats, stats)
      |> assign(:funnel, funnel)
      |> assign(:recovered_str, recovered_str)
-     |> assign(:exhausted_str, exhausted_str)}
+     |> assign(:exhausted_str, exhausted_str)
+     |> assign(:at_risk, at_risk)}
   end
 
   @impl true
@@ -83,6 +85,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           exhausted={@funnel.exhausted}
           active={@funnel.active}
         />
+
+        <AtRiskTable.at_risk_table rows={@at_risk} base_path={@admin_mount_path} />
       </section>
     </AppShell.app_shell>
     """
