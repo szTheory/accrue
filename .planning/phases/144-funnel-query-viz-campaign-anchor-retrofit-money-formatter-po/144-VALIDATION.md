@@ -2,8 +2,8 @@
 phase: 144
 slug: funnel-query-viz-campaign-anchor-retrofit-money-formatter-polish
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-05-27
 ---
 
@@ -36,36 +36,40 @@ created: 2026-05-27
 
 ## Per-Task Verification Map
 
-> Filled by the planner after PLAN.md files are generated. Each row maps a task to its automated verification command. Wave 0 rows are infrastructure stubs only.
+> Canonical task IDs sourced from each `144-0{1..4}-PLAN.md` frontmatter (`phase`+`plan`) and task ordering. Each row maps a task to its automated verification command.
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 144-01-01 | 01 | 1 | DAN-08 | — | N/A | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs:safe_cast` | ✅ | ⬜ pending |
-| 144-02-01 | 02 | 1 | DAN-02 | — | campaign_anchor present on dunning.exhausted | unit | `cd accrue && mix test test/accrue/webhook/dunning_exhaustion_test.exs` | ✅ | ⬜ pending |
-| 144-02-02 | 02 | 1 | DAN-02 | — | campaign_anchor present on dunning.recovered | unit | `cd accrue && mix test test/accrue/webhook/dunning_campaign_keying_test.exs` | ✅ | ⬜ pending |
-| 144-03-01 | 03 | 2 | DAN-01 | — | funnel/1 returns DISTINCT-tuple stage counts | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs:funnel` | ✅ | ⬜ pending |
-| 144-03-02 | 03 | 2 | DAN-01 | — | property: recovered+exhausted+active ≤ entered | property | `cd accrue && mix test test/accrue/analytics/dunning_test.exs:funnel_property` | ✅ | ⬜ pending |
-| 144-04-01 | 04 | 3 | DAN-09 | — | FunnelChart renders proportional bars + legend | unit | `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs` | ✅ | ⬜ pending |
-| 144-05-01 | 05 | 3 | DAN-13 | — | RecoveryLive renders ¥ for JPY | live | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs:jpy` | ✅ | ⬜ pending |
-| 144-05-02 | 05 | 3 | DAN-09, DAN-13 | — | Funnel rendered below KPI grid; "Exhausted MRR" label | live | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs:funnel_and_copy` | ✅ | ⬜ pending |
+| 144-01-01 | 01 | 1 | DAN-08 | T-144-01 | safe-cast wraps `(?->>'mrr_value_cents')::integer`; malformed-row regression contributes 0 | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs` | ✅ | ⬜ pending |
+| 144-01-02 | 01 | 1 | DAN-01 | T-144-02 | funnel/1 returns DISTINCT-`(subject_id, campaign_anchor)`-tuple stage counts via single Repo.one query | unit | `cd accrue && mix test test/accrue/analytics/dunning_test.exs` | ✅ | ⬜ pending |
+| 144-01-03 | 01 | 1 | DAN-01, DAN-08 | T-144-02 | property invariant `recovered + exhausted + active ≤ entered` holds across StreamData generations | property | `cd accrue && mix test test/property/dunning_funnel_property_test.exs` | ❌ Wave 0 creates stub (file new in Task 3) | ⬜ pending |
+| 144-02-01 | 02 | 1 | DAN-02 | — | `dunning.exhausted` event payload carries `campaign_anchor` (ISO-8601 binary OR nil) at emission boundary | unit | `cd accrue && mix test test/accrue/webhook/dunning_exhaustion_test.exs` | ✅ | ⬜ pending |
+| 144-02-02 | 02 | 1 | DAN-02 | — | `dunning.recovered` event payload carries `campaign_anchor` (ISO-8601 binary, captured BEFORE anchor clear) at emission boundary | unit | `cd accrue && mix test test/accrue/webhook/dunning_campaign_keying_test.exs` | ✅ | ⬜ pending |
+| 144-03-01 | 03 | 2 | DAN-09 | — | `AccrueAdmin.Components.FunnelChart` Phoenix.Component renders 3 proportional `<rect>` bars + active chip + `<dl>` legend; zero-divide safe at entered=0 | unit (render_component) | `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs` | ❌ Wave 0 creates stub (file new in Task 1) | ⬜ pending |
+| 144-03-02 | 03 | 2 | DAN-09 | — | `.ax-funnel-chart`, `.ax-funnel-row`, `.ax-funnel-row--{slate,moss,amber}`, `.ax-funnel-bar`, `.ax-funnel-legend` present in app.css | unit (CSS presence via component render) | `cd accrue_admin && mix test test/accrue_admin/components/funnel_chart_test.exs` | ✅ (test file from 144-03-01) | ⬜ pending |
+| 144-04-01 | 04 | 3 | DAN-09, DAN-13 | T-144-02 | RecoveryLive.mount/3 calls `Dunning.funnel/1`, renders `<FunnelChart.funnel_chart>` below `.ax-kpi-grid`, swaps `format_minor/1` for `Render.format_money/3`, renames "Lost MRR" → "Exhausted MRR" | integration (LiveView) | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | ✅ | ⬜ pending |
+| 144-04-02 | 04 | 3 | DAN-09, DAN-13 | — | JPY regression: `Application.put_env(:accrue, :default_currency, :jpy)` + seeded mrr_value_cents/currency renders `¥` (not `$`); funnel HTML present; "Exhausted MRR" label asserted | integration (LiveView) | `cd accrue_admin && mix test test/accrue_admin/live/analytics/recovery_live_test.exs` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
-*Note: Final Task IDs, plan numbers, and wave assignments are authoritative in the corresponding `*-PLAN.md` frontmatter. The planner fills the canonical map; this is the validation contract scaffold.*
+*Task IDs follow the canonical `{phase}-{plan}-{seq}` convention; verify against `144-0{1..4}-PLAN.md` `<task>` order before execution. The only NEW test files created during execution are `accrue/test/property/dunning_funnel_property_test.exs` (Plan 01 Task 3) and `accrue_admin/test/accrue_admin/components/funnel_chart_test.exs` (Plan 03 Task 1) — both stubs are created in-line by the task that implements the behavior, so no separate Wave 0 scaffolding is required.*
 
 ---
 
 ## Wave 0 Requirements
 
-> Wave 0 verifies test infrastructure exists before Wave 1 begins. For Phase 144, no new framework install is needed — ExUnit + `stream_data` are already in `mix.exs`. Existing test files cover all target surfaces; no new conftest-equivalent needed.
+> Wave 0 verifies test infrastructure exists before Wave 1 begins. For Phase 144, no separate scaffolding wave is needed — ExUnit + `stream_data` are already in `mix.exs`, and the two new test files are authored in-line by the task that implements the behavior under test.
 
-- [x] `accrue/test/accrue/analytics/dunning_test.exs` — existing; funnel + safe-cast tests append here
-- [x] `accrue/test/accrue/webhook/dunning_exhaustion_test.exs` — existing; campaign_anchor assertion extends `:308-311`
-- [x] `accrue/test/accrue/webhook/dunning_campaign_keying_test.exs` — existing; campaign_anchor assertion on recovered edge
-- [x] `accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs` — existing; JPY regression + funnel render tests append here
-- [ ] `accrue_admin/test/accrue_admin/components/funnel_chart_test.exs` — NEW file (Wave 0 creates the stub before Wave 3 FunnelChart implementation lands)
+- [x] `accrue/test/accrue/analytics/dunning_test.exs` — existing; funnel + safe-cast tests appended by Tasks 144-01-01 and 144-01-02
+- [x] `accrue/test/property/dunning_funnel_property_test.exs` — NEW file created by Task 144-01-03 (file authoring + assertion live in the same task; no separate scaffold needed)
+- [x] `accrue/test/accrue/webhook/dunning_exhaustion_test.exs` — existing; `campaign_anchor` assertion extends `:308-311` (Task 144-02-01)
+- [x] `accrue/test/accrue/webhook/dunning_campaign_keying_test.exs` — existing; `campaign_anchor` assertion on recovered edge (Task 144-02-02)
+- [x] `accrue_admin/test/accrue_admin/components/funnel_chart_test.exs` — NEW file created by Task 144-03-01 (component + tests authored in the same task; no separate scaffold needed)
+- [x] `accrue_admin/test/accrue_admin/live/analytics/recovery_live_test.exs` — existing; JPY regression + funnel render + "Exhausted MRR" copy tests appended by Task 144-04-02
 - [x] `stream_data ~> 1.3` — already in `accrue/mix.exs` per project STACK
 - [x] No new mix deps required
+
+`wave_0_complete: true` — the two new test files are created in-line by their owning tasks. No standalone Wave 0 stub commit is required because the test-and-implementation pairings are co-located by design.
 
 ---
 
@@ -80,11 +84,11 @@ created: 2026-05-27
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references (only `funnel_chart_test.exs` stub needed)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 60s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (both new files authored in-line by owning task)
+- [x] No watch-mode flags
+- [x] Feedback latency < 60s
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending

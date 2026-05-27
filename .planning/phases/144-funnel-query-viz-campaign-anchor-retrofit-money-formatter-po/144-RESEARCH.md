@@ -929,27 +929,31 @@ Pulled directly from `./CLAUDE.md`; the planner must verify P144 complies with e
 
 **Note on C6 (telemetry):** CONTEXT.md does not explicitly list a telemetry-span requirement for `funnel/1`. The planner should decide whether to add `:telemetry.span([:accrue, :analytics, :funnel], …)` around the query body. Recommendation: yes — mirror the existing `recovered_vs_lost_mrr/1` patterns if any exist (currently none, by inspection). Treat as Claude's discretion bullet not yet in CONTEXT.md; surface to user before locking.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `recovered_vs_lost_mrr/1` currently emit `:telemetry`?**
    - What we know: Inspection of `accrue/lib/accrue/analytics/dunning.ex` shows NO `:telemetry.execute` or `:telemetry.span` call. CLAUDE.md Performance section says "all public entry points emit `:telemetry` start/stop/exception events" — `recovered_vs_lost_mrr/1` is a public entry point.
    - What's unclear: Whether Phase 143 was meant to add telemetry and missed it, or whether the analytics tier is exempted.
    - Recommendation: Planner adds `:telemetry.span([:accrue, :analytics, :funnel], %{}, fn -> {query_result, %{}} end)` around `funnel/1` and mirrors the same for `recovered_vs_lost_mrr/1` as a same-PR consistency edit. Flag for user confirmation if they want to defer the `recovered_vs_lost_mrr/1` part to Phase 148's docs-cleanup wave.
+   - **RESOLVED:** Defer telemetry instrumentation. Plan 01 Task 2 explicitly does NOT add `:telemetry.span` around `funnel/1` (no telemetry call in the action). CONTEXT.md decisions (D-01..D-23) do not require telemetry; CLAUDE.md C6 ambiguity is acknowledged and a follow-up observability-tier cleanup (Phase 148+ or later) is the chosen path. Both `funnel/1` and `recovered_vs_lost_mrr/1` remain telemetry-free in P144 for consistency.
 
 2. **Should `FunnelChart` accept ALL four counts including `active`, or should `active` be a separate chip?**
    - What we know: D-13 says three rows (entered, recovered, exhausted). Specifics §"Active count exposure" says active is rendered "adjacent to the funnel (NOT as a 4th bar)".
    - What's unclear: Whether the chip lives INSIDE FunnelChart (component owns it) or OUTSIDE (RecoveryLive owns it).
    - Recommendation: INSIDE the FunnelChart `<header>` (as shown in Example 3) — keeps the visual contract self-contained. Single attr surface for the LiveView.
+   - **RESOLVED:** Active chip lives INSIDE the FunnelChart component. Plan 03 builds `AccrueAdmin.Components.FunnelChart` as a single Phoenix.Component owning all four attrs (`entered`, `recovered`, `exhausted`, `active`) and renders the active chip in the component's `<header>`. RecoveryLive (Plan 04) passes all four counts via one `<FunnelChart.funnel_chart>` slot — no separate chip wiring on the LiveView side.
 
 3. **Does the funnel `since`/`until` window filter by event `inserted_at` or by `campaign_anchor`?**
    - What we know: D-01 doesn't specify. Phase 143's `recovered_vs_lost_mrr/1` filters on `inserted_at` (the event timestamp).
    - What's unclear: For the funnel, "this campaign happened in the window" could mean (a) the campaign started in the window, (b) the campaign concluded in the window, or (c) any lifecycle event of the campaign fell in the window.
    - Recommendation: Filter on `inserted_at` of any event (option c) for P144 to mirror `recovered_vs_lost_mrr/1`. This means a campaign that started outside the window but concluded inside it counts. Document explicitly in the `@doc`. Phase 145 owns more nuanced window semantics if needed.
+   - **RESOLVED:** Filter on `inserted_at` (option c — any lifecycle event in the window). Plan 01 Task 2 applies `apply_window/2` to the inner subquery before grouping, which bounds the inner `where: e.type in ^@dunning_lifecycle_types` query by `inserted_at` — mirroring `recovered_vs_lost_mrr/1`'s precedent. The `@doc` for `funnel/1` (per the action) explicitly documents this window semantics. Phase 145 owns any future campaign-anchor-based window semantics.
 
 4. **`active` count includes legacy `'__legacy__'` campaigns that may never have ended — is that desirable?**
    - What we know: Per D-05, legacy events collapse to one tuple per subject; if there's no recovered/exhausted event for that subject, the tuple lands in `active`.
    - What's unclear: For an adopter with a subscription that recovered LEGACY-style (pre-P144) but has no recovered event in the ledger because the recovered event predates Phase 143's snapshotting (`mrr_value_cents` wasn't added until P143), the funnel may report it as "active" forever.
    - Recommendation: Acknowledge in the `@doc` that the legacy bucket conflates active and pre-snapshot-recovered. This is the under-counting failure mode. Phase 148's `guides/analytics.md` cutoff-date badge handles this in the UI.
+   - **RESOLVED:** Document the legacy-bucket ambiguity in the `@doc`, accept the under-counting failure mode for P144. Plan 01 Task 2's action explicitly requires the `@doc` to document the `'__legacy__'` sentinel as "earliest known single-row stage attribution" — making the conflation explicit. Plan 01 Task 3's property test confirms the invariant `recovered + exhausted + active ≤ entered` still holds because the filter predicates are mutually exclusive. Phase 148's `guides/analytics.md` cutoff-date badge handles the UI-side disclosure.
 
 ## Assumptions Log
 
