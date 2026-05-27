@@ -171,38 +171,42 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     test "no ?window= param defaults to 30d window selector active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
       assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
-      # 30d button is active; 7d and 90d are not
-      assert html =~ "30 days UTC"
-      assert html =~ ~s(aria-current="page")
+      # The 30d button — and only the 30d button — must carry aria-current="page".
+      assert active_window_label(html) =~ "30 days"
     end
 
     test "?window=7d renders 7d button as active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
       assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=7d")
-      assert html =~ "7 days UTC"
-      assert html =~ ~s(aria-current="page")
+      assert active_window_label(html) =~ "7 days"
     end
 
     test "?window=90d renders 90d button as active", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
       assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=90d")
-      assert html =~ "90 days UTC"
-      assert html =~ ~s(aria-current="page")
+      assert active_window_label(html) =~ "90 days"
     end
 
     test "invalid ?window= falls back to 30d default", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
       assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery?window=bad")
-      assert html =~ "30 days UTC"
-      assert html =~ ~s(aria-current="page")
+      assert active_window_label(html) =~ "30 days"
     end
 
     test "window change via render_patch fires handle_params", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
       {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
-      assert html =~ "7 days UTC"
-      assert html =~ ~s(aria-current="page")
+      assert active_window_label(html) =~ "7 days"
     end
+  end
+
+  # Returns the trimmed text content of the link element carrying aria-current="page".
+  # Fails with nil if no active button is found, surfacing the bug immediately.
+  defp active_window_label(html) do
+    ~r/aria-current="page"[^>]*>\s*([^<]+)\s*<\/a>/
+    |> Regex.run(html, capture: :all_but_first)
+    |> List.first()
+    |> String.trim()
   end
 end
