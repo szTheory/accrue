@@ -369,6 +369,17 @@ defmodule Accrue.Webhook.DunningCampaignKeyingTest do
       assert [ledger] = ledger_events("dunning.recovered", sub.id)
       assert ledger.data["source"] == "stripe_native"
 
+      # DAN-02 (Phase 144 Plan 02): the cleared anchor must be snapshotted onto
+      # the ledger event BEFORE the clear_anchor write fires, so the DAN-01
+      # funnel can DISTINCT-tuple by (subject_id, campaign_anchor).
+      assert is_binary(ledger.data["campaign_anchor"])
+      assert {:ok, %DateTime{}, _} = DateTime.from_iso8601(ledger.data["campaign_anchor"])
+      assert ledger.data["campaign_anchor"] == DateTime.to_iso8601(anchor)
+
+      # Atomicity invariant: the anchor was cleared in the same Ecto.Multi as
+      # the ledger record write. Reloading the row must show a nil anchor.
+      assert is_nil(Repo.reload!(sub).dunning_campaign_started_at)
+
       # Telemetry: %{count: 1}; metadata IDs + bounded enum only.
       assert_received {:telemetry, [:accrue, :ops, :dunning_recovered], %{count: 1}, meta}
       assert meta.subscription_id == sub.id
