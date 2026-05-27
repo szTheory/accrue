@@ -33,7 +33,7 @@ In `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:accrue, "~> 1.1.2"}
+    {:accrue, "~> 1.2.0"}
   ]
 end
 ```
