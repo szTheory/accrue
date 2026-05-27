@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.43
-milestone_name: Linked Release 1.2.0 Truth
-status: completed
-stopped_at: none
-last_updated: "2026-05-27T12:28:01.185Z"
+milestone: v1.44
+milestone_name: Recovered-Revenue Dashboard Completion
+status: planning
+last_updated: "2026-05-27T13:01:23.071Z"
+last_activity: 2026-05-27
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
 
 ## Current Position
 
- Phase: 143
- Plan: 02
- Status: Complete (phase verified passed 4/4 must-haves)
- Last activity: 2026-05-27 -- Closed out phase 143 via safe-resume: wrote 143-01-SUMMARY.md, verified phase goal.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-27 — Milestone v1.44 started
 
 ## Milestone Progress
 
@@ -94,4 +94,4 @@ Resume file: None
 
 ## Operator Next Steps
 
- - **Plan Next Phase:** Review the `v1.44-NEXT-STEP-ASSESSMENT.md` in `.planning/threads/` and run `/gsd-plan-phase 143` (or the next phase number) to start execution for the Recovered-Revenue Analytics Dashboard.
+- Start the next milestone with /gsd:new-milestone

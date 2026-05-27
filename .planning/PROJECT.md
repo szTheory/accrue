@@ -12,11 +12,37 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**Active: `v1.43 — Linked Release 1.1.2 Truth`** (Planning)
+**Active: `v1.44 — Recovered-Revenue Dashboard Completion`** (Planning)
 
-**Goal:** Close the linked release-truth gap by locking the three-package contract, shipping the public `1.1.2` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
+**Goal:** Complete the operator-facing Recovered-Revenue Dashboard in `accrue_admin` — funnel, at-risk drill-down, time-window filters, public docs, and an adopter-proof matrix row — building on the Phase 143 foundation (MRR-snapshot event ledger + `Accrue.Analytics.Dunning` aggregator + minimal `/billing/analytics/recovery` KPI page).
+
+**Target features:**
+- Dunning funnel visualization (Entered → Recovered → Exhausted) on `/billing/analytics/recovery`.
+- "At Risk" subscriptions drill-down table (campaigns currently active).
+- Time-window filter (7 / 30 / 90 days) on hero metrics + funnel.
+- Per-campaign drill-down or row-click affordance into specific dunning timelines.
+- Public docs for `Accrue.Analytics.Dunning` (guides + module docs + adoption-proof-matrix row).
+- Example-host wiring so the dashboard is provable end-to-end against fake/seed data.
+
+**Design constraint (carried from Phase 143):** Analytics aggregates the existing `accrue_events` ledger only — no new tables, no new dependencies (no TimescaleDB, no rollup workers). Maintains Accrue's lightweight OSS footprint. Funnel and drill-down must reuse the same JSONB-aggregation pattern (`fragment("(?->>'mrr_value_cents')::integer", e.data)` or equivalents) that Phase 143 established.
+
+**Phase numbering:** continues from Phase 143 → starts at **Phase 144** (default; no `--reset-phase-numbers`). Phase 143 (the foundation) is treated as a standalone post-v1.43 phase, not retroactively folded into v1.44.
 
 ## Last shipped milestone
+
+### v1.43 — Linked Release 1.2.0 Truth (**archived 2026-05-27**)
+
+**Goal:** Close the linked release-truth gap by locking the three-package contract, shipping the public `1.2.0` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
+
+**Delivered:**
+
+- Locked the three-package release contract for `accrue` / `accrue_admin` / `accrue_portal` in release automation and runbooks.
+- Published the linked `1.2.0` trio to Hex with canonical proof.
+- Performed post-publish planning-mirror alignment and the maintainer friction-inventory pass.
+
+**Closeout proof:** Phases 140–142; planning git tag `v1.43`; see `.planning/MILESTONES.md` v1.43 entry.
+
+## Prior shipped milestone
 
 ### v1.42 — Ad-hoc Invoices & Adopter Confidence (**archived 2026-05-27**)
 
@@ -305,20 +331,36 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Most Recent Milestone (shipped & archived)
 
-### v1.41 — Admin global search (native Postgres) (shipped & archived 2026-05-26)
+### v1.43 — Linked Release 1.2.0 Truth (shipped & archived 2026-05-27)
 
-**Goal (ACHIEVED):** Ecto-native global search for Customers, Invoices, and Subscriptions in the admin UI using Postgres native text search (`pg_trgm`), approaching the Stripe Dashboard UX without adding a separate sidecar dependency.
+**Goal (ACHIEVED):** Close the linked release-truth gap by locking the three-package contract, shipping the public `1.2.0` trio (`accrue` / `accrue_admin` / `accrue_portal`) with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
 
-**Delivered (all ✓; SRCH-01..04, 4/4):**
-- Postgres native global search using `pg_trgm` indices and similarity queries.
-- CMD+K global search component in `accrue_admin`.
-- Verified across Customers, Invoices, and Subscriptions.
+**Delivered:**
+- Three-package release contract locked in release automation and runbooks (Phase 140).
+- Linked `1.2.0` trio published to Hex with canonical post-publish contract sweep (Phase 141).
+- Planning-mirror alignment and friction-inventory maintainer pass (Phase 142).
 
-**Milestone audit:** `passed`. See `.planning/v1.41-v1.41-MILESTONE-AUDIT.md`.
+**Phases:** 140–142. **Planning tag:** `v1.43`.
 
-**Phases:** 133–134. **Planning tag:** `v1.41`.
+## Standalone post-v1.43 phase
+
+### Phase 143 — Recovered-Revenue Analytics Foundation (verified 2026-05-27)
+
+**Status:** `passed` (4/4 must-haves verified). Standalone phase — not part of v1.43 milestone scope, but informs v1.44.
+
+**Delivered:**
+- `Accrue.Analytics.Dunning` Ecto context with `recovered_vs_lost_mrr/1` (aggregates the existing `accrue_events` ledger via JSONB `sum(fragment("(?->>'mrr_value_cents')::integer", e.data))` — no new tables).
+- MRR snapshotted into `dunning.recovered` and `dunning.exhausted` event payloads in `Accrue.Webhook.DefaultHandler` (atomic with the existing anchor-clear `Ecto.Multi`).
+- `AccrueAdmin.Live.Analytics.RecoveryLive` at `/billing/analytics/recovery` with two `KpiCard` components ("Recovered MRR" / "Lost MRR"), nested in the admin `live_session` for auth inheritance.
+- Tests: `accrue/test/accrue/analytics/dunning_test.exs` + `accrue_admin/test/.../recovery_live_test.exs`.
+
+**v1.44 builds on this foundation** with funnel visualization, at-risk drill-down, time-window filters, public docs, and adopter-proof.
 
 ## Prior Shipped Milestone
+
+### v1.41 — Admin global search (native Postgres) (shipped & archived 2026-05-26)
+
+**Delivered:** Postgres-native global search (`pg_trgm`) + CMD+K LiveComponent across Customers, Invoices, and Subscriptions. **Phases:** 133–134. **Audit:** `passed`. See `.planning/v1.41-v1.41-MILESTONE-AUDIT.md`.
 
 ### v1.40 — Dunning depth / notification journeys (shipped & archived 2026-05-25)
 
@@ -335,18 +377,20 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **Closeout proof:** `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
-## Next Milestone Goals (post-v1.42)
+## Next Milestone Goals (post-v1.43)
 
-**Assessment (2026-05-27, post-v1.42 next-step review):** Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). Shifted to intake-gated maintenance mode / Release posture. Stop feature building and prepare for a Hex publish.
+**Assessment (2026-05-27, post-v1.43 next-step review — `.planning/threads/v1.44-NEXT-STEP-ASSESSMENT.md`):** With 6 of 6 canonical SaaS loops shipped and `1.2.0` on Hex, the highest-leverage next wedge is proving the v1.40 dunning engine's ROI to adopters. Phase 143 shipped the foundation (event-ledger MRR snapshotting + `Accrue.Analytics.Dunning` aggregator + minimal KPI page). v1.44 completes the dashboard so adopters can see "Accrue saved you $X this month" at a glance.
 
-- **Release `1.1.2`** — **SELECTED for v1.43.** Lock the three-package release contract and ship the linked trio with canonical proof.
+- **v1.44 — Recovered-Revenue Dashboard Completion** — **SELECTED.** Funnel + at-risk drill-down + time-window filters + docs + adopter-proof. Builds on standalone Phase 143 foundation.
+- **v1.45 (suggested)** — Multi-channel dunning (in-app banners first; SMS/push later under host-owned compliance posture).
+- **v1.46+ (parked)** — Rich metered/tiered entitlement math (out of scope unless adopter demand surfaces; risks accounting-territory drift).
 - **Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet.
 
 ## Current State
 
-Current focus: **Intake-gated maintenance mode / Release posture**. **v1.42 — Ad-hoc Invoices & Adopter Confidence is COMPLETE**. All 5 phases (135-139) have been successfully delivered and validated. See `.planning/v1.42-v1.42-MILESTONE-AUDIT.md` for the full audit.
+Current focus: **Polish & Adopter ROI Proof**. **v1.44 — Recovered-Revenue Dashboard Completion is ACTIVE (Planning)**. Phase 143 (standalone) shipped the analytics foundation on 2026-05-27; v1.44 completes the dashboard with funnel + drill-down + filters + docs.
 
-**Last shipped planning milestone:** **v1.43** — Phases **140–142** (**2026-05-27**).
+**Last shipped planning milestone:** **v1.43** — Phases **140–142** (**2026-05-27**). **Standalone follow-on:** Phase 143 — Recovered-Revenue Analytics Foundation (verified 2026-05-27).
 
 ## Requirements
 
@@ -363,3 +407,20 @@ Admin global search — 4/4 satisfied.
 lementation.
 
 ... (rest of requirements unchanged) ...
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
