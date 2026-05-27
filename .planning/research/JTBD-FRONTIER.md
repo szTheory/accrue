@@ -50,7 +50,7 @@ Status legend: **✅ Shipped** · **🟡 Partial** (bounded; note says how) · *
 | Invoice PDFs | ✅ | `render_invoice_pdf/2`, `store_invoice_pdf/2`, `fetch_invoice_pdf/1` | Rendro default (no Chrome); ChromicPDF compat path |
 | Payment methods CRUD + default | ✅ | `add/attach/detach/delete/update/set_default/list/sync_payment_methods` | Stored as processor refs, never PII |
 | Refunds (full + partial + fee reconciliation) | ✅ | `refund/2` `:amount` (Money) | Currency match enforced; tracks fee-refunded + merchant-loss |
-| Manual / ad-hoc invoice line items | ⛔ | `InvoiceItem` schema is read-projection only | No public creator; invoices treated immutable post-finalize |
+| Manual / ad-hoc invoice line items | ✅ | `add_manual_item/4`, `remove_manual_item/2` | v1.42. Draft invoices only |
 
 ### Growth, usage, tax
 | JTBD | Status | Evidence | Notes |
@@ -122,13 +122,13 @@ Benchmarked against the libraries Accrue is positioned next to, plus the commerc
 
 Ranked by **value × fit-with-posture ÷ effort**. None of these are committed — they're the reasoned ordering for when intake or a strategy change pulls one in.
 
-> **~~Entitlements / plan-gating~~ — SHIPPED in v1.39.** The former #1 closed: fail-closed gate API (`Accrue.has_active_plan?(billable, "pro")`, `entitled?`/`features_for`/`entitlement_quantity`), Plug + LiveView `on_mount` guards, admin entitlements view, provider-honest local-identical resolution, lifecycle-truthful `entitling?/1` + `past_due_grace` knob. The only remaining slice is the *optional* Stripe-native sync (consuming `entitlements.active_entitlement_summary.updated`), deliberately deferred and off-by-default (Phase 127, needs-deeper-research) — it does not gate core value.
+> **~~Entitlements / plan-gating~~ — SHIPPED in v1.39.**
+> **~~Dunning depth / notification journeys~~ — SHIPPED in v1.40.**
+> **~~Admin search~~ — SHIPPED in v1.41.**
+> **~~Ad-hoc / manual invoice line items~~ — SHIPPED in v1.42.**
 
-1. **Dunning depth / notification journeys** — move from grace+terminal decision to multi-step recovery (email → wait → escalate). Maps to SEED-002 #1 (Chimeway + Mailglass). Recovers revenue; current state is bounded. *Now the highest-value remaining user-flow candidate.*
-2. **Admin search** — Ecto-native search across Customer/Invoice/Subscription in `accrue_admin`. SEED-002 #5 (Scrypath). Pure operator-JTBD friction that grows with customer count.
-3. **Ad-hoc / manual invoice line items** — let hosts add one-off charges/credits to an invoice before finalize. Fills a real B2B billing edge; small surface.
-4. **Disputes / chargebacks visibility (read-only)** — project `charge.dispute.*` events into the ledger + admin for operator awareness. Read-only keeps it cheap and on-posture.
-5. **Audit bridge** — sink critical events to an external immutable audit platform (SEED-002 #2, Threadline). Low marginal value since Accrue already has its own tamper-evident ledger; mostly for shops standardizing on a separate audit system.
+1. **Disputes / chargebacks visibility (read-only)** — project `charge.dispute.*` events into the ledger + admin for operator awareness. Read-only keeps it cheap and on-posture.
+2. **Audit bridge** — sink critical events to an external immutable audit platform (SEED-002 #2, Threadline). Low marginal value since Accrue already has its own tamper-evident ledger; mostly for shops standardizing on a separate audit system.
 
 ## Diminishing-returns frontier — "definition of done"
 
@@ -151,13 +151,14 @@ Ranked by **value × fit-with-posture ÷ effort**. None of these are committed �
 **Definition of "done" for the user-flow surface:** Accrue is *done* the moment a Phoenix dev can **bill a customer, change/cancel that subscription, recover failed payments, let the customer self-serve, gate access on what they paid for, and operate it all from an admin UI with an audit trail.** All six are now shipped — **6 of 6**. The sixth, gate access, closed in v1.39; the canonical SaaS loop is complete.
 
 Therefore:
-- **Above the line (worth building if pulled in):** dunning depth (#1 now) for revenue-recovery shops; the entitlements loop step is done.
-- **At the line (intake-only):** admin search, ad-hoc invoice items, disputes view — build only on a sourced request, per stop rule S1.
+- **Above the line (worth building if pulled in):** None. The entitlements loop step is done, dunning depth is done, search is done, ad-hoc invoices are done.
+- **At the line (intake-only):** disputes view, audit bridge — build only on a sourced request, per stop rule S1.
 - **Below the line (don't):** anything that turns Accrue into an accounting system (FIN-03), a metrics product, a merchant-of-record, or a marketplace-payouts platform. These are not "more billing" — they are *different products*. Pursuing them is the textbook diminishing-returns trap for a billing library.
 
-The honest summary for the maintainer: **the autopilot did, in fact, build a feature-complete billing library — now 6 of 6 on the canonical SaaS loop.** Entitlements was the one place "basically done" was doing real work; v1.39 closed it. The "we're done / intake-gated" posture is now unqualified for the user-flow surface — remaining items (dunning depth, admin search, ad-hoc items, disputes view, audit bridge) are intake-only or below-the-line.
+The honest summary for the maintainer: **the autopilot did, in fact, build a feature-complete billing library — now 6 of 6 on the canonical SaaS loop.** Entitlements was the one place "basically done" was doing real work; v1.39 closed it. Subsequent milestones (Dunning, Search, Ad-hoc invoices) polished the long tail. The "we're done / intake-gated" posture is now unqualified for the user-flow surface — remaining items (disputes view, audit bridge) are intake-only or below-the-line.
 
 ## Update log
 
 - **2026-05-22** — Initial frontier map. As-of accrue 1.1.1 / v1.38. Verified all status cells against source (`accrue/lib/accrue/billing.ex` et al.) and `.planning/MILESTONES.md`; corrected first-pass errors (Stripe Tax, partial refunds, trials, org billing, webhook customization are all shipped). Benchmarked vs Pay/Cashier/Stripe Billing/Chargebee. Verdict: feature-complete on core; entitlements is the single headline gap.
-- **2026-05-23** — Entitlements flipped ⛔ → ✅ (v1.39, Phases 123–126). Re-verified against shipped code (`Accrue.Entitlements` 4-fn fail-closed gate API on the `Accrue` facade; `Accrue.Plug.RequireEntitlement` + `require_feature`/`require_plan` router macros; cond-compiled `Accrue.Live.Entitlements` `on_mount`; `Accrue.Entitlements.Resolver.LocalMap` provider-honest local-identical resolution; `Accrue.Billing.Subscription.entitling?/1` lifecycle truth + `past_due_grace` knob; admin entitlements tab at `/customers/:id?tab=entitlements`). Updated: TL;DR ("6 of 6 shipped"), coverage-map Operator & platform row (Gap → Shipped), delta table Accrue cell (⛔ → ✅), diminishing-returns prose + ASCII chart, and the future-JTBD list (entitlements struck; dunning depth promoted). Remaining entitlements slice: optional Stripe-native sync, deferred/off-by-default (Phase 127). No public roadmap leakage — deferred items stay here.
+- **2026-05-23** — Entitlements flipped ⛔ → ✅ (v1.39, Phases 123–126).
+- **2026-05-27** — Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). Shifted to intake-gated maintenance mode. Dunning, Admin Search, and Ad-hoc invoices have shipped (v1.40-v1.42).

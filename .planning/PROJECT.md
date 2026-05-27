@@ -12,11 +12,24 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**Active: `v1.42 — Ad-hoc Invoices & Adopter Confidence`** (Planning)
+**Active: `v1.43 — Linked Release 1.1.2 Truth`** (Planning)
+
+**Goal:** Close the linked release-truth gap by locking the three-package contract, shipping the public `1.1.2` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
+
+## Last shipped milestone
+
+### v1.42 — Ad-hoc Invoices & Adopter Confidence (**archived 2026-05-27**)
 
 **Goal:** Enhance adopter confidence through end-to-end demonstrations in the example host and provide support for ad-hoc invoice adjustments, while closing robustness gaps in the entitlement cache.
 
-## Last shipped milestone
+**Delivered:**
+- Ad-hoc invoice line items on Draft invoices.
+- Example host adopter proofs (metered usage, checkout, recovery).
+- Entitlement cache robustness fixes.
+
+**Closeout proof:** `.planning/v1.42-v1.42-MILESTONE-AUDIT.md`.
+
+## Prior shipped milestone
 
 ### v1.41 — Admin global search (native Postgres) (**archived 2026-05-26**)
 
@@ -322,20 +335,18 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **Closeout proof:** `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
-## Next Milestone Goals (post-v1.41)
+## Next Milestone Goals (post-v1.42)
 
-**Assessment (2026-05-26, post-v1.41 next-step review):** Accrue is feature-complete for its core promise (6 of 6 loop shipped). Current posture is intake-gated maintenance.
+**Assessment (2026-05-27, post-v1.42 next-step review):** Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). Shifted to intake-gated maintenance mode / Release posture. Stop feature building and prepare for a Hex publish.
 
-- **Ad-hoc / manual invoice line items** (JTBD-FRONTIER #3) — **SELECTED for v1.42.** Let hosts add one-off charges/credits to an invoice before finalize.
-- **Adopter-proof gaps** — **SELECTED for v1.42.** Close confidence gaps by demonstrating metered usage, checkout facade, and recovery crons in `examples/accrue_host`.
-- **Robustness follow-ups** — **SELECTED for v1.42.** Fix WR-05 StaleEntryError in advisory cache and entitlement sync fidelity (IN-01..IN-04).
+- **Release `1.1.2`** — **SELECTED for v1.43.** Lock the three-package release contract and ship the linked trio with canonical proof.
 - **Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet.
 
 ## Current State
 
-Current focus: **Polish & Adopter Confidence**. **v1.41 — Admin global search is COMPLETE**. All 2 phases (133-134) have been successfully delivered and validated. See `.planning/v1.41-v1.41-MILESTONE-AUDIT.md` for the full audit.
+Current focus: **Intake-gated maintenance mode / Release posture**. **v1.42 — Ad-hoc Invoices & Adopter Confidence is COMPLETE**. All 5 phases (135-139) have been successfully delivered and validated. See `.planning/v1.42-v1.42-MILESTONE-AUDIT.md` for the full audit.
 
-**Last shipped planning milestone:** **v1.41** — Phases **133–134** (**2026-05-26**): **SRCH-01..04**; audit `.planning/v1.41-v1.41-MILESTONE-AUDIT.md`.
+**Last shipped planning milestone:** **v1.42** — Phases **135–139** (**2026-05-27**); audit `.planning/v1.42-v1.42-MILESTONE-AUDIT.md`.
 
 ## Requirements
 

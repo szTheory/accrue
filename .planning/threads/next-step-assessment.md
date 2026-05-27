@@ -1,6 +1,6 @@
 # Milestone Next-Step Assessment
 
-**Date:** 2026-05-25
+**Date:** 2026-05-27
 **Target:** Accrue (Elixir/Phoenix OSS billing library)
 
 ## 1. Framing
@@ -9,28 +9,30 @@ Accrue is a batteries-included Elixir/Phoenix payments and billing library. Its 
 
 "Done" for this project means that the library provides the core user flows, jobs-to-be-done, features, docs, operator/admin surfaces, and proof posture expected of a mature billing library in this ecosystem.
 
-*Confidence level: Very high.* The `.planning` state, particularly `JTBD-FRONTIER.md` (which called out Entitlements as the final gap before it shipped in v1.39) and `STATE.md` (confirming Dunning shipped in v1.40), confirms that the core features are not aspirational—they are shipped and verified.
+*Confidence level: Very high.* The `.planning` state, `JTBD-FRONTIER.md`, and recent milestones confirm all major core loops (including entitlements, dunning, search, and ad-hoc invoices) are now shipped and verified. There is no doc drift—the reality of the codebase matches the milestone wrap-ups.
 
 ## 2. Current State
 
-**Job:** A batteries-included, zero-sidecar (where possible) Phoenix billing and subscription management library with built-in admin tooling and immutable audit logging.
+**Job:** A complete, zero-sidecar Phoenix billing engine with built-in admin tooling and an immutable audit ledger.
 
-**Rough Done-%: 95% (Near-done / Diminishing returns)**
+**Rough Done-%: 98% (Diminishing returns)**
 
-**What's clearly real:** The canonical SaaS loop is completely shipped. This includes the subscription core, dual-provider support (Stripe/Braintree + Fake), webhook processing, local and hosted portal sessions, native invoicing with pure-Elixir PDFs (Rendro), metered usage, coupons, complete operator dashboard (`accrue_admin`), local plan-gating/entitlements (v1.39), and multi-step dunning notification journeys (v1.40).
+**What's clearly real:** The canonical SaaS loop is completely shipped. You have the subscription core, dual-provider support (Stripe/Braintree + Fake), webhook ingestion/DLQ, hosted/local portals, Rendro invoice PDFs, metered usage, coupons, `accrue_admin` LiveView dashboard, fail-closed entitlements (v1.39), multi-step dunning (v1.40), native Postgres admin search (v1.41), and ad-hoc manual invoices (v1.42).
 
 ## 3. Adopter Coverage Map
 
 - **Well-Served (Core JTBD):**
   - Subscription lifecycle (create/swap/cancel/trials).
-  - Money movement (invoices, PDF generation, one-off charges, refunds).
+  - Money movement (invoices, PDF generation, one-off charges, refunds, ad-hoc invoices).
   - Growth/usage (coupons, metered billing).
   - Failure handling (dunning grace/terminal, webhooks, replay).
   - Trust (immutable audit ledger, telemetry).
-  - Operator/Platform (LiveView admin UI, portal sessions, entitlements/plan-gating).
+  - Operator/Platform (LiveView admin UI, global search, portal sessions, entitlements/plan-gating).
 - **Partially-Served (Bounded):**
   - Proration math (relies entirely on the processor).
   - Tax (Stripe automatic tax only).
+- **Still-Rough / Unserved:**
+  - Disputes/chargebacks visibility (absent).
 - **Out-of-Scope (Deliberate non-goals):**
   - Revenue recognition / accounting exports (FIN-03).
   - Merchant-of-Record capabilities (Paddle, Lemon Squeezy).
@@ -38,38 +40,34 @@ Accrue is a batteries-included Elixir/Phoenix payments and billing library. Its 
 
 ## 4. Next-Work Recommendation
 
-With 6 of 6 core SaaS loops shipped, we researched the remaining high-value wedges from the intake/seeds frontier:
+With 6 of 6 core SaaS loops shipped, plus the long-tail polish of Admin Search and Ad-hoc Invoices now completed, the remaining wedges are at the very bottom of the intake list:
 
-1. **Admin search across billing records (Scrypath vs Native Postgres)**
-   - *Why it matters:* Ecto-native global search for Customers/Invoices/Subscriptions in the admin UI is a massive quality-of-life win for operators (approaching the Stripe Dashboard UX).
-   - *Done enough:* Implementing Postgres native search (`pg_trgm`) for the core tables, rather than adopting Scrypath+Meilisearch, to avoid forcing a sidecar infrastructure dependency on host apps.
-2. **Ad-hoc / manual invoice line items**
-   - *Why it matters:* Fills a real B2B edge case for manual adjustments.
-   - *Done enough:* Enabling local-first draft invoices where admins can review, add items, and render PDFs before committing them to the gateway.
-3. **Disputes / chargebacks visibility**
-   - *Why it matters:* Operator awareness of financial disputes.
-   - *Done enough:* A dedicated read-only `Dispute` schema projecting Stripe events into the local DB and surfacing them in the admin UI.
+1. **Hex Release (`v1.43` or standalone publish):** Cut the `1.1.2` or `1.2.0` linked Hex publish.
+   - *Why it matters:* You have massive, shipped value (Entitlements, Dunning, Search, Ad-hoc invoices) sitting on `main` that integrators cannot fetch via `mix.exs`.
+   - *Done enough:* Run Release Please and publish the packages to Hex.
+2. **Disputes / chargebacks visibility (read-only):** Project `charge.dispute.*` into the ledger and admin dashboard.
+   - *Why it matters:* Operator awareness for financial disputes.
+   - *Done enough:* Read-only list in `accrue_admin`.
+3. **Audit bridge (External sinking):** Sink critical events to an external system.
+   - *Why it matters:* Enterprise compliance.
+   - *Done enough:* Simple adapter behaviour.
 
-**The Pick:** **Admin search (Native Postgres)**. If a new milestone must be opened, providing a CMD+K global search experience in `accrue_admin` via native Postgres extensions provides the highest leverage operator win without compromising the project's zero-sidecar philosophy.
-
-*Suggested Ordering:* Admin search -> Ad-hoc invoice items -> Disputes visibility.
+**The Pick:** **Hex Release / Post-Publish Sweep**. Do not build new features. Put what you've built into the hands of adopters.
 
 ## 5. Diminishing-Returns Judgment
 
-The value curve has flattened. Accrue is now feature-complete for its core promise. Further work on major features pushes into diminishing returns, or worse, risks overbuilding into different product domains (like an accounting system or analytics suite). We have officially crossed from "finishing the last important wedges" to **mostly stop / intake-gated maintenance mode**.
+The value curve is now practically horizontal for new feature development. Accrue has dramatically over-delivered on the promise of a Phoenix billing library. You are completely into the realm of diminishing returns for feature work. Adding more features right now risks overbuilding or shifting into accounting territory.
 
 ## 6. Blunt Maintainer Takeaway
 
-**The autopilot did, in fact, build a feature-complete billing library.** You are 6 of 6 on the canonical SaaS loop. Entitlements (v1.39) and Dunning depth (v1.40) were the last two places where "basically done" was doing real work, and they are now closed.
-
-If I were you, I would **build nothing major next.** The library is basically done for its scope. Switch entirely to intake-driven polish, bug fixes, and documentation improvements.
+**Stop building features. Seriously.** Accrue is 100% complete for its stated scope. The only thing left to do is cut a new linked Hex release for the `1.x.x` line so that the community gets the v1.39-v1.42 features (Entitlements, Dunning, Search, Ad-hoc invoices). If I were you, my next step would be a Release Please publishing milestone to put this code on Hex.
 
 ## 7. Bookkeeping Written
 
-- Updated `.planning/STATE.md` to change "Current focus: Next milestone planning" to "Current focus: Intake-gated maintenance mode / Polish (6 of 6 core SaaS loop JTBDs complete)."
-- Appended decision to `.planning/STATE.md`: "2026-05-25: Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). Shifted to intake-gated maintenance mode. Highest-value intake candidate is Admin Search (Postgres native), but no major milestones are strictly necessary."
-- Saved this assessment as `.planning/threads/next-step-assessment.md`.
+- Updated `.planning/STATE.md` to indicate "Intake-gated maintenance mode / Hex Release Prep" and logged the decision to stop feature building.
+- Updated `.planning/research/JTBD-FRONTIER.md` to move Admin Search and Ad-hoc Invoices to ✅ in the coverage map and removed them from the future JTBD list.
+- Wrote this assessment to `.planning/threads/next-step-assessment.md`.
 
 ## 8. Shift-Left Applied
 
-No new auto-applied configuration changes were made as the current `.planning/config.json` already heavily leverages parallelization, research, and rigorous gating mechanisms. The `yolo` mode is currently active, and the default behavior aligns well with the ongoing intake-gated maintenance phase.
+No new auto-applied configuration changes were made as the current `.planning/config.json` already heavily leverages parallelization, research, and rigorous gating mechanisms. The `yolo` mode is currently active, and the default behavior aligns perfectly with the ongoing intake-gated maintenance phase.

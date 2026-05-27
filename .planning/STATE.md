@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: 
-status: idle
-stopped_at: Milestone v1.42 complete
+milestone: v1.43
+milestone_name: Linked Release 1.1.2 Truth
+status: planning
+stopped_at: none
 last_updated: "2026-05-27T00:00:00.000Z"
-last_activity: 2026-05-27 -- Milestone v1.42 (Ad-hoc Invoices & Adopter Confidence) complete.
+last_activity: 2026-05-27 -- Planning v1.43 milestone.
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,20 +18,22 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-26 after v1.41 milestone)
+See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.42 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Polish & Adopter Confidence.
+**Current focus:** Polish & Adopter Confidence. Intake-gated maintenance mode / Release posture.
 
 ## Current Position
 
 Phase: None
 Plan: None
-Status: Idle
-Last activity: 2026-05-27 -- Milestone v1.42 (Ad-hoc Invoices & Adopter Confidence) complete.
+Status: Planning
+Last activity: 2026-05-27 -- Planning v1.43 milestone.
 
 ## Milestone Progress
+
+**v1.43** (Planning): 3 phases (**140–142**). Theme: Close the linked release-truth gap by locking the three-package contract, shipping the public `1.1.2` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
 
 **v1.42** (shipped & archived **2026-05-27**): 5 phases (**135–139**). Progress: 5/5 phases complete. Phase 139 shipped the UI for operator ad-hoc invoice management. Audit: `.planning/v1.42-v1.42-MILESTONE-AUDIT.md`.
 
@@ -55,6 +57,7 @@ Last activity: 2026-05-27 -- Milestone v1.42 (Ad-hoc Invoices & Adopter Confiden
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
+- **2026-05-27:** Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). Shifted to intake-gated maintenance mode / Release posture. Stop feature building and prepare for a Hex publish.
 - **2026-05-26:** Open **v1.42 — Ad-hoc Invoices & Adopter Confidence** to address remaining JTBD frontier items and adopter-proof gaps identified during v1.39/v1.40 audits.
 - **2026-05-26:** Ad-hoc line items (BIL-08) will target **Draft** invoices, allowing hosts to review and adjust before finalization.
 - **2026-05-26:** Adopter-proof work (PROOF-04..06) will focus on `examples/accrue_host` to provide a canonical "see it work" surface for evaluators.
@@ -82,9 +85,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-05-27T00:00:00.000Z
-Stopped at: Milestone v1.42 complete
+Stopped at: none
 Resume file: .planning/PROJECT.md
 
 ## Operator Next Steps
 
-- **Plan Next Milestone:** Assess project context and run `/gsd-new-milestone` to start the next iteration.
+- **Plan Next Phase:** Review roadmap and run `/gsd-plan-phase 140` to start execution.
