@@ -215,4 +215,34 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     |> List.first()
     |> String.trim()
   end
+
+  describe "at-risk table (DAN-11)" do
+    test "renders At-Risk Subscriptions section on recovery dashboard", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+
+      assert html =~ "At-Risk Subscriptions"
+
+      assert html =~ "No active dunning campaigns" or
+               html =~ "active dunning campaigns in this window"
+    end
+
+    test "window change via render_patch re-assigns at-risk list without crash", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      {:ok, view, _html} = live(conn, "/billing/analytics/recovery")
+      html = render_patch(view, "/billing/analytics/recovery?window=7d")
+
+      assert html =~ "At-Risk Subscriptions"
+    end
+
+    test "cross-package boundary: RecoveryLive does not import Ecto.Query, Accrue.Repo, or Accrue.Billing.Subscription" do
+      source = File.read!("lib/accrue_admin/live/analytics/recovery_live.ex")
+
+      refute source =~ "import Ecto.Query"
+      refute source =~ "Accrue.Repo"
+      refute source =~ "Accrue.Billing.Subscription"
+    end
+  end
 end
