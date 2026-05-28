@@ -273,4 +273,156 @@ defmodule Accrue.Analytics.DunningTest do
       assert %{entered: 1, recovered: 0, exhausted: 0, active: 1} = Dunning.funnel()
     end
   end
+
+  describe "campaign_timeline/2" do
+    test "returns [] for subscription with no events" do
+      assert [] = Dunning.campaign_timeline(Ecto.UUID.generate())
+    end
+
+    test "returns only dunning.* events for subject" do
+      subject_id = Ecto.UUID.generate()
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "subscription.updated",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{}
+      })
+
+      event = Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{}
+      })
+
+      assert [returned_event] = Dunning.campaign_timeline(subject_id)
+      assert returned_event.id == event.id
+      assert returned_event.type == "dunning.campaign_started"
+    end
+
+    test "returns events in chronological order (asc inserted_at)" do
+      subject_id = Ecto.UUID.generate()
+      now = ~U[2026-01-01 10:00:00.000000Z]
+
+      event2 = Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{},
+        inserted_at: DateTime.add(now, 1, :hour)
+      })
+
+      event1 = Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.step_sent",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{},
+        inserted_at: now
+      })
+
+      assert [e1, e2] = Dunning.campaign_timeline(subject_id)
+      assert e1.id == event1.id
+      assert e2.id == event2.id
+      assert e1.type == "dunning.step_sent"
+    end
+  end
+
+  describe "campaign_timeline_grouped/2" do
+    test "returns [] for subscription with no events" do
+      assert [] = Dunning.campaign_timeline_grouped(Ecto.UUID.generate())
+    end
+
+    test "groups two campaigns into two arcs" do
+      subject_id = Ecto.UUID.generate()
+      anchor_a = "2026-01-01T00:00:00Z"
+      anchor_b = "2026-02-01T00:00:00Z"
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => anchor_a},
+        inserted_at: ~U[2026-01-01 10:00:00.000000Z]
+      })
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.step_sent",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => anchor_a},
+        inserted_at: ~U[2026-01-01 11:00:00.000000Z]
+      })
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => anchor_a},
+        inserted_at: ~U[2026-01-01 12:00:00.000000Z]
+      })
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => anchor_b},
+        inserted_at: ~U[2026-02-01 10:00:00.000000Z]
+      })
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.step_sent",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => anchor_b},
+        inserted_at: ~U[2026-02-01 11:00:00.000000Z]
+      })
+
+      arcs = Dunning.campaign_timeline_grouped(subject_id)
+      assert length(arcs) == 2
+
+      [{a1, events1}, {a2, events2}] = arcs
+      assert a1 == anchor_a
+      assert length(events1) == 3
+      assert List.last(events1).type == "dunning.recovered"
+
+      assert a2 == anchor_b
+      assert length(events2) == 2
+      assert List.last(events2).type == "dunning.step_sent"
+    end
+
+    test "legacy events before first campaign_started form {nil, events} arc" do
+      subject_id = Ecto.UUID.generate()
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.step_sent",
+        subject_type: "Subscription",
+        subject_id: subject_id,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{},
+        inserted_at: ~U[2026-01-01 10:00:00.000000Z]
+      })
+
+      arcs = Dunning.campaign_timeline_grouped(subject_id)
+      assert length(arcs) == 1
+      assert [{nil, [event]}] = arcs
+      assert event.type == "dunning.step_sent"
+    end
+  end
 end

@@ -278,4 +278,42 @@ defmodule Accrue.Analytics.Dunning do
     do: where(query, [s], s.dunning_campaign_started_at <= ^until)
 
   defp maybe_until_campaign(query, _), do: query
+
+  @doc """
+  Returns all dunning events for a subscription in chronological order.
+  """
+  @since "1.4.0"
+  @spec campaign_timeline(String.t(), keyword()) :: [Event.t()]
+  def campaign_timeline(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
+    Accrue.Events.timeline_for("Subscription", subscription_id, opts)
+    |> Enum.filter(&String.starts_with?(&1.type, "dunning."))
+  end
+
+  @doc """
+  Returns dunning events for a subscription grouped into campaign arcs.
+  """
+  @since "1.4.0"
+  @spec campaign_timeline_grouped(String.t(), keyword()) :: [{String.t() | nil, [Event.t()]}]
+  def campaign_timeline_grouped(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
+    campaign_timeline(subscription_id, opts)
+    |> group_into_arcs()
+  end
+
+  defp group_into_arcs([]), do: []
+  defp group_into_arcs(events) do
+    Enum.reduce(events, [], fn event, acc ->
+      if event.type == "dunning.campaign_started" do
+        acc ++ [{event.data["campaign_anchor"], [event]}]
+      else
+        case acc do
+          [] ->
+            [{nil, [event]}]
+
+          _ ->
+            {anchor, arc_events} = List.last(acc)
+            List.replace_at(acc, -1, {anchor, arc_events ++ [event]})
+        end
+      end
+    end)
+  end
 end
