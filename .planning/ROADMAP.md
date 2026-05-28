@@ -108,7 +108,16 @@ Plans:
   3. Each timeline row shows the linked invoice (status + amount) and payment-method context inline — operators can diagnose "step 2 sent → retry succeeded for $59" as a single narrative.
   4. `Accrue.Analytics.Dunning.campaign_timeline/2` is a public-API thin wrapper around `Accrue.Events.timeline_for/3` filtered to `dunning.*` types and ordered chronologically — re-usable by adopter dashboards.
 
-**Plans:** TBD
+**Plans:** 2 plans
+Plans:
+**Wave 1**
+
+- [ ] 147-01-PLAN.md — campaign_timeline/2 + campaign_timeline_grouped/2 + invoices_for_campaign/2 API + dunning_test.exs cases (DAN-05, DAN-12)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 147-02-PLAN.md — CampaignTimeline component + CampaignLive + router route + campaign_live_test.exs + recovery_live_test.exs row-link assertion (DAN-12)
+
 **UI hint:** yes
 
 ### Phase 148: Cross-currency widening + recovery-rate API + public docs + adopter-proof
@@ -135,5 +144,5 @@ Plans:
 | 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 4/4 | Complete    | 2026-05-27 |
 | 145. Time-window URL plumbing + window selector | 1/1 | Complete    | 2026-05-27 |
 | 146. At-risk query + at-risk table + last-failure enrichment | 3/3 | Complete    | 2026-05-28 |
-| 147. Per-subscription drill-down route + CampaignLive | 0/0 | Not started | - |
+| 147. Per-subscription drill-down route + CampaignLive | 0/2 | Not started | - |
 | 148. Cross-currency widening + recovery-rate API + public docs + adopter-proof | 0/0 | Not started | - |
