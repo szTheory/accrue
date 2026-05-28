@@ -30,30 +30,30 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
 
   describe "Dunning Timeline" do
     test "renders dunning timeline for subscription with 2 campaign arcs", %{conn: conn} do
-      subscription_id = "sub_timeline_123"
+      subscription_id = Ecto.UUID.generate()
       # Seed events via Repo directly or Events
       Accrue.Repo.insert!(%Accrue.Events.Event{
-        id: Ecto.UUID.generate(),
         type: "dunning.campaign_started",
         subject_type: "Subscription",
         subject_id: subscription_id,
         actor_id: Ecto.UUID.generate(),
+        actor_type: "system",
         data: %{"campaign_anchor" => "iso_anchor_1", "invoice_id" => "in_tl1"}
       })
       Accrue.Repo.insert!(%Accrue.Events.Event{
-        id: Ecto.UUID.generate(),
         type: "dunning.step_sent",
         subject_type: "Subscription",
         subject_id: subscription_id,
         actor_id: Ecto.UUID.generate(),
+        actor_type: "system",
         data: %{"campaign_anchor" => "iso_anchor_1", "invoice_id" => "in_tl1", "step" => "email_1"}
       })
       Accrue.Repo.insert!(%Accrue.Events.Event{
-        id: Ecto.UUID.generate(),
         type: "dunning.campaign_started",
         subject_type: "Subscription",
         subject_id: subscription_id,
         actor_id: Ecto.UUID.generate(),
+        actor_type: "system",
         data: %{"campaign_anchor" => "iso_anchor_2", "invoice_id" => "in_tl2"}
       })
 
@@ -70,7 +70,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       {:ok, _view, html} =
         conn
         |> init_test_session(%{"admin_token" => "admin", "accrue_admin" => %{"mount_path" => "/billing"}})
-        |> live("/billing/analytics/recovery/subscriptions/sub_unknown")
+        |> live("/billing/analytics/recovery/subscriptions/#{Ecto.UUID.generate()}")
 
       assert html =~ "No dunning history found"
     end

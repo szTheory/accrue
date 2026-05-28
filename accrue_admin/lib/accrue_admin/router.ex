@@ -74,6 +74,7 @@ defmodule AccrueAdmin.Router do
 
           scope "/analytics", AccrueAdmin.Live.Analytics do
             live("/recovery", RecoveryLive, :index)
+            live("/recovery/subscriptions/:id", CampaignLive, :show)
           end
 
           if dev_routes? do

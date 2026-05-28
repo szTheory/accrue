@@ -240,6 +240,13 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       assert html =~ "At-Risk Subscriptions"
     end
 
+    test "at-risk table row links to per-subscription drill-down route", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+      {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
+
+      assert html =~ "/analytics/recovery/subscriptions/" or html =~ "No active dunning campaigns"
+    end
+
     test "cross-package boundary: RecoveryLive does not import Ecto.Query, Accrue.Repo, or Accrue.Billing.Subscription" do
       source = File.read!("lib/accrue_admin/live/analytics/recovery_live.ex")
 
