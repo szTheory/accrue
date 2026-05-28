@@ -425,4 +425,127 @@ defmodule Accrue.Analytics.DunningTest do
       assert event.type == "dunning.step_sent"
     end
   end
+
+  describe "invoices_for_campaign/2" do
+    test "returns %{} for subscription with no invoices" do
+      assert %{} = Dunning.invoices_for_campaign(Ecto.UUID.generate())
+    end
+
+    test "returns map keyed by Stripe processor_id" do
+      customer = Accrue.Repo.insert!(%Accrue.Billing.Customer{
+        owner_type: "Tenant",
+        owner_id: Ecto.UUID.generate(),
+        processor: "stripe",
+        email: "test@example.com",
+        name: "Test Customer"
+      })
+
+      pm = Accrue.Repo.insert!(%Accrue.Billing.PaymentMethod{
+        processor: "stripe",
+        customer_id: customer.id,
+        processor_id: "pm_test_xyz",
+        type: "card",
+        card_last4: "4242",
+        card_brand: "visa"
+      })
+
+      customer = Accrue.Repo.update!(Ecto.Changeset.change(customer, default_payment_method_id: pm.id))
+
+      subscription = Accrue.Repo.insert!(%Accrue.Billing.Subscription{
+        processor: "stripe",
+        customer_id: customer.id,
+        status: :active,
+        processor_id: "sub_test_abc"
+      })
+
+      Accrue.Repo.insert!(%Accrue.Billing.Invoice{
+        processor: "stripe",
+        customer_id: customer.id,
+        subscription_id: subscription.id,
+        processor_id: "in_test_abc",
+        amount_due_minor: 4999,
+        status: :open
+      })
+
+      result = Dunning.invoices_for_campaign(subscription.id)
+      assert Map.has_key?(result, "in_test_abc")
+      
+      entry = result["in_test_abc"]
+      assert entry.status == :open
+      assert entry.amount_due_cents == 4999
+      assert entry.card_last4 == "4242"
+      assert entry.card_brand == "visa"
+    end
+
+    test "invoice with no default payment method returns nil card fields" do
+      customer = Accrue.Repo.insert!(%Accrue.Billing.Customer{
+        owner_type: "Tenant",
+        owner_id: Ecto.UUID.generate(),
+        processor: "stripe",
+        email: "nocards@example.com",
+        name: "No Card Customer"
+      })
+
+      subscription = Accrue.Repo.insert!(%Accrue.Billing.Subscription{
+        processor: "stripe",
+        customer_id: customer.id,
+        status: :active,
+        processor_id: "sub_test_xyz"
+      })
+
+      Accrue.Repo.insert!(%Accrue.Billing.Invoice{
+        processor: "stripe",
+        customer_id: customer.id,
+        subscription_id: subscription.id,
+        processor_id: "in_test_xyz",
+        amount_due_minor: 1000,
+        status: :open
+      })
+
+      result = Dunning.invoices_for_campaign(subscription.id)
+      entry = result["in_test_xyz"]
+      assert entry.card_last4 == nil
+      assert entry.card_brand == nil
+    end
+
+    test "excludes invoices with nil processor_id" do
+      customer = Accrue.Repo.insert!(%Accrue.Billing.Customer{
+        owner_type: "Tenant",
+        owner_id: Ecto.UUID.generate(),
+        processor: "stripe",
+        email: "nil@example.com",
+        name: "Nil Processor ID Customer"
+      })
+
+      subscription = Accrue.Repo.insert!(%Accrue.Billing.Subscription{
+        processor: "stripe",
+        customer_id: customer.id,
+        status: :active,
+        processor_id: "sub_test_nil"
+      })
+
+      Accrue.Repo.insert!(%Accrue.Billing.Invoice{
+        processor: "stripe",
+        customer_id: customer.id,
+        subscription_id: subscription.id,
+        processor_id: "in_test_valid",
+        amount_due_minor: 1000,
+        status: :open
+      })
+
+      Accrue.Repo.insert!(%Accrue.Billing.Invoice{
+        processor: "stripe",
+        customer_id: customer.id,
+        subscription_id: subscription.id,
+        processor_id: nil,
+        amount_due_minor: 2000,
+        status: :open
+      })
+
+      result = Dunning.invoices_for_campaign(subscription.id)
+      assert Map.has_key?(result, "in_test_valid")
+      refute Map.has_key?(result, nil)
+      assert map_size(result) == 1
+    end
+  end
 end

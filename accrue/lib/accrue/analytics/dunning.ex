@@ -7,9 +7,9 @@ defmodule Accrue.Analytics.Dunning do
   aggregations.
   """
 
-  import Ecto.Query, only: [from: 2, subquery: 1, where: 3]
+  import Ecto.Query, only: [from: 2, left_join: 3, subquery: 1, where: 3]
 
-  alias Accrue.Billing.{Customer, Subscription}
+  alias Accrue.Billing.{Customer, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events.Event
   alias Accrue.Repo
   alias Oban.Job
@@ -315,5 +315,30 @@ defmodule Accrue.Analytics.Dunning do
         end
       end
     end)
+  end
+
+  @doc """
+  Returns a map of invoices for a given subscription, keyed by Stripe processor_id.
+  """
+  @since "1.4.0"
+  @spec invoices_for_campaign(String.t(), keyword()) :: %{String.t() => map()}
+  def invoices_for_campaign(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
+    from(i in Invoice,
+      join: c in Customer,
+      on: c.id == i.customer_id,
+      left_join: pm in PaymentMethod,
+      on: pm.id == c.default_payment_method_id,
+      where: i.subscription_id == type(^subscription_id, :binary_id),
+      where: not is_nil(i.processor_id),
+      select: %{
+        processor_id: i.processor_id,
+        status: i.status,
+        amount_due_cents: i.amount_due_minor,
+        card_last4: pm.card_last4,
+        card_brand: pm.card_brand
+      }
+    )
+    |> Repo.all()
+    |> Map.new(fn row -> {row.processor_id, Map.delete(row, :processor_id)} end)
   end
 end
