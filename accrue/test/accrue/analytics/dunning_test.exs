@@ -4,7 +4,7 @@ defmodule Accrue.Analytics.DunningTest do
   alias Accrue.Analytics.Dunning
 
   describe "recovered_vs_lost_mrr/1" do
-    test "aggregates mrr_value_cents correctly from events" do
+    test "aggregates mrr_value_cents correctly from events and handles currency" do
       # Insert events
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.recovered",
@@ -12,7 +12,7 @@ defmodule Accrue.Analytics.DunningTest do
         subject_id: Ecto.UUID.generate(),
         actor_type: "system",
         schema_version: 1,
-        data: %{"mrr_value_cents" => 1000, "source" => "webhook"}
+        data: %{"mrr_value_cents" => 1000, "source" => "webhook", "currency" => "usd"}
       })
 
       Accrue.Repo.insert!(%Accrue.Events.Event{
@@ -21,7 +21,7 @@ defmodule Accrue.Analytics.DunningTest do
         subject_id: Ecto.UUID.generate(),
         actor_type: "system",
         schema_version: 1,
-        data: %{"mrr_value_cents" => 2000, "source" => "webhook"}
+        data: %{"mrr_value_cents" => 2000, "source" => "webhook", "currency" => "usd"}
       })
 
       Accrue.Repo.insert!(%Accrue.Events.Event{
@@ -30,7 +30,7 @@ defmodule Accrue.Analytics.DunningTest do
         subject_id: Ecto.UUID.generate(),
         actor_type: "system",
         schema_version: 1,
-        data: %{"mrr_value_cents" => 500, "source" => "webhook"}
+        data: %{"mrr_value_cents" => 500, "source" => "webhook", "currency" => "usd"}
       })
 
       # Unrelated events should be ignored
@@ -43,7 +43,19 @@ defmodule Accrue.Analytics.DunningTest do
         data: %{"mrr_value_cents" => 5000}
       })
 
-      assert %{recovered_cents: 3000, lost_cents: 500} = Dunning.recovered_vs_lost_mrr()
+      # Another currency
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: Ecto.UUID.generate(),
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"mrr_value_cents" => 3000, "source" => "webhook", "currency" => "eur"}
+      })
+
+      result = Dunning.recovered_vs_lost_mrr()
+      assert Enum.sort(result.recovered) == [%{cents: 3000, currency: "eur"}, %{cents: 3000, currency: "usd"}]
+      assert result.lost == [%{cents: 500, currency: "usd"}]
     end
 
     @tag :safe_cast
@@ -81,7 +93,9 @@ defmodule Accrue.Analytics.DunningTest do
         data: %{}
       })
 
-      assert %{recovered_cents: 1000, lost_cents: 0} = Dunning.recovered_vs_lost_mrr()
+      result = Dunning.recovered_vs_lost_mrr()
+      assert result.recovered == [%{cents: 1000, currency: "usd"}]
+      assert result.lost == []
     end
 
     test "respects time windows" do
@@ -114,8 +128,80 @@ defmodule Accrue.Analytics.DunningTest do
         inserted_at: now_usec
       })
 
-      assert %{recovered_cents: 2000, lost_cents: 0} = Dunning.recovered_vs_lost_mrr(since: yesterday_usec)
-      assert %{recovered_cents: 1000, lost_cents: 0} = Dunning.recovered_vs_lost_mrr(until: yesterday_usec)
+      result_since = Dunning.recovered_vs_lost_mrr(since: yesterday_usec)
+      assert result_since.recovered == [%{cents: 2000, currency: "usd"}]
+      assert result_since.lost == []
+
+      result_until = Dunning.recovered_vs_lost_mrr(until: yesterday_usec)
+      assert result_until.recovered == [%{cents: 1000, currency: "usd"}]
+      assert result_until.lost == []
+    end
+  end
+
+  describe "recovery_rate/1" do
+    test "returns nil rate if no recovered or exhausted" do
+      assert %{rate: nil, recovered: 0, total_concluded: 0} = Dunning.recovery_rate()
+    end
+
+    test "calculates rate properly" do
+      subject_id_1 = Ecto.UUID.generate()
+      subject_id_2 = Ecto.UUID.generate()
+      subject_id_3 = Ecto.UUID.generate()
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subject_id_1,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => "2026-01-01T00:00:00Z"}
+      })
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: subject_id_1,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => "2026-01-01T00:00:00Z"}
+      })
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subject_id_2,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => "2026-02-01T00:00:00Z"}
+      })
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.recovered",
+        subject_type: "Subscription",
+        subject_id: subject_id_2,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => "2026-02-01T00:00:00Z"}
+      })
+
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.campaign_started",
+        subject_type: "Subscription",
+        subject_id: subject_id_3,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => "2026-03-01T00:00:00Z"}
+      })
+      Accrue.Repo.insert!(%Accrue.Events.Event{
+        type: "dunning.exhausted",
+        subject_type: "Subscription",
+        subject_id: subject_id_3,
+        actor_type: "system",
+        schema_version: 1,
+        data: %{"campaign_anchor" => "2026-03-01T00:00:00Z"}
+      })
+
+      # Recovered: 2, Exhausted: 1 -> Total: 3 -> Rate: 2/3
+      assert %{rate: rate, recovered: 2, total_concluded: 3} = Dunning.recovery_rate()
+      assert_in_delta rate, 2/3, 0.001
     end
   end
 

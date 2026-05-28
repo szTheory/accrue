@@ -60,9 +60,9 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
 
     assert html =~ "Revenue Recovery"
-    assert html =~ "Recovered MRR"
+    assert html =~ "Recovered MRR (USD)"
     assert html =~ "$50.00"
-    assert html =~ "Exhausted MRR"
+    assert html =~ "Exhausted MRR (USD)"
     refute html =~ "Lost MRR"
     assert html =~ "$20.00"
   end
@@ -156,20 +156,18 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       :ok
     end
 
-    test "renders JPY symbol (not $) for the Recovered KPI value", %{conn: conn} do
+    test "renders JPY symbol for the JPY Recovered KPI value", %{conn: conn} do
       conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
       assert {:ok, _view, html} = live(conn, "/billing/analytics/recovery")
 
-      # Locate the Recovered MRR card's value bucket. Under JPY default currency
-      # the USD-only "$50.00" rendering MUST NOT appear in the Recovered/Exhausted
-      # KPI values (the worked-example "$120/yr" delta copy is a static literal
-      # in recovery_live.ex and is preserved — it documents an example USD plan,
-      # not the current tenant's currency).
-      refute html =~ "$50.00"
-      refute html =~ "$20.00"
-
+      # Since we now render cards per currency, both USD and JPY cards will appear.
+      # The JPY card should render ¥/￥/JPY, and the USD card should render $
+      assert html =~ "Recovered MRR (JPY)"
       assert html =~ "¥" or html =~ "￥" or html =~ "JPY"
+
+      assert html =~ "Recovered MRR (USD)"
+      assert html =~ "$50.00"
     end
   end
 

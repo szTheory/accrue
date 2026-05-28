@@ -37,10 +37,12 @@ defmodule Accrue.Dunning.EngineTest do
     end
 
     test "Engine.Oban exports start_campaign/3" do
+      Code.ensure_loaded?(Accrue.Dunning.Engine.Oban)
       assert function_exported?(Accrue.Dunning.Engine.Oban, :start_campaign, 3)
     end
 
     test "Engine.Oban exports cancel_campaign/3" do
+      Code.ensure_loaded?(Accrue.Dunning.Engine.Oban)
       assert function_exported?(Accrue.Dunning.Engine.Oban, :cancel_campaign, 3)
     end
   end

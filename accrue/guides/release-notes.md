@@ -12,6 +12,12 @@ This page is the **story** of what shipped—not a commit list. For every line i
 
 ## accrue
 
+### 1.2.0
+
+**Idempotency foundations, Phase 128-142 rollout, and cross-currency analytics.**
+
+`1.2.0` introduces the full dunning campaign engine, robust idempotency controls, and recovered-revenue analytics that correctly support multi-currency MRR aggregations. Includes major additions to the admin UI and structural foundations for offline proof paths.
+
 ### 1.1.2
 
 **Patch release for linked release-contract alignment and CI stability.**
@@ -62,6 +68,10 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
 
+### 1.2.0
+
+Matches **accrue 1.2.0**: Ships the full Recovered Revenue Analytics dashboard, campaign timelines, and drill-down views, along with global admin search and dunning campaign visibility.
+
 ### 1.1.2
 
 Matches **accrue 1.1.2**: the admin package stays on the same linked three-package release line, with public release notes and CI checks updated so the published version story stays consistent across the core, admin, and portal packages.
@@ -92,5 +102,8 @@ Initial public releases with the admin UI, asset pipeline, and docs wired for th
 
 - **Patch** — safe fixes, docs, and internal quality.
 - **Minor** (pre-1.0) — new capabilities you can adopt incrementally; read the changelog before upgrading production.
+
+When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.
+adopt incrementally; read the changelog before upgrading production.
 
 When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.

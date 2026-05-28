@@ -21,22 +21,33 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     funnel = Dunning.funnel(since: since, until: until)
     at_risk = Dunning.at_risk_subscriptions(since: since, until: until)
 
-    # DAN-13: format KPI card values via the CLDR-backed Render.format_money/3
-    # driven by Accrue.Config.get!(:default_currency) (runtime read — never
-    # the compile-time accessor; see RESEARCH.md Pitfall #4) plus
-    # Accrue.Config.default_locale().
-    currency = Accrue.Config.get!(:default_currency)
     locale = Accrue.Config.default_locale()
-    recovered_str = Accrue.Invoices.Render.format_money(stats.recovered_cents, currency, locale)
-    exhausted_str = Accrue.Invoices.Render.format_money(stats.lost_cents, currency, locale)
+    
+    recovered_currencies = Enum.map(stats.recovered, & &1.currency)
+    lost_currencies = Enum.map(stats.lost, & &1.currency)
+    currencies = Enum.uniq(recovered_currencies ++ lost_currencies)
+    
+    currencies = if currencies == [], do: [to_string(Accrue.Config.get!(:default_currency))], else: currencies
+
+    kpi_pairs = Enum.map(currencies, fn currency ->
+      recovered = Enum.find(stats.recovered, %{cents: 0}, &(&1.currency == currency))
+      lost = Enum.find(stats.lost, %{cents: 0}, &(&1.currency == currency))
+
+      currency_arg = if is_binary(currency), do: String.to_atom(currency), else: currency
+
+      %{
+        currency: to_string(currency),
+        recovered_str: Accrue.Invoices.Render.format_money(recovered.cents, currency_arg, locale),
+        exhausted_str: Accrue.Invoices.Render.format_money(lost.cents, currency_arg, locale)
+      }
+    end)
 
     {:noreply,
      socket
      |> assign(:window, window)
      |> assign(:stats, stats)
      |> assign(:funnel, funnel)
-     |> assign(:recovered_str, recovered_str)
-     |> assign(:exhausted_str, exhausted_str)
+     |> assign(:kpi_pairs, kpi_pairs)
      |> assign(:at_risk, at_risk)}
   end
 
@@ -55,29 +66,36 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs items={[%{label: "Analytics"}, %{label: "Recovery"}]} />
           <p class="ax-eyebrow">Recovery Dashboard</p>
-          <h2 class="ax-display">Revenue Recovery</h2>
+          <div class="flex items-baseline justify-between w-full">
+            <h2 class="ax-display">Revenue Recovery</h2>
+            <a href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics" target="_blank" class="text-xs text-slate-500 hover:text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200 ml-4">
+              Showing data since 2024-01-01
+            </a>
+          </div>
           <WindowSelector.window_selector current_window={@window} base_path={@current_path} />
         </header>
 
-        <section class="ax-kpi-grid">
-          <KpiCard.kpi_card
-            label="Recovered MRR"
-            value={@recovered_str}
-            delta="Amount saved by successful Dunning"
-            delta_tone="moss"
-          >
-            <:meta>Money Saved</:meta>
-          </KpiCard.kpi_card>
+        <%= for kpi <- @kpi_pairs do %>
+          <section class="ax-kpi-grid mb-6">
+            <KpiCard.kpi_card
+              label={"Recovered MRR (#{String.upcase(kpi.currency)})"}
+              value={kpi.recovered_str}
+              delta="Amount saved by successful Dunning"
+              delta_tone="moss"
+            >
+              <:meta>Money Saved</:meta>
+            </KpiCard.kpi_card>
 
-          <KpiCard.kpi_card
-            label="Exhausted MRR"
-            value={@exhausted_str}
-            delta="Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
-            delta_tone="amber"
-          >
-            <:meta>Churned Revenue</:meta>
-          </KpiCard.kpi_card>
-        </section>
+            <KpiCard.kpi_card
+              label={"Exhausted MRR (#{String.upcase(kpi.currency)})"}
+              value={kpi.exhausted_str}
+              delta="Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
+              delta_tone="amber"
+            >
+              <:meta>Churned Revenue</:meta>
+            </KpiCard.kpi_card>
+          </section>
+        <% end %>
 
         <FunnelChart.funnel_chart
           entered={@funnel.entered}

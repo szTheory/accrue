@@ -268,6 +268,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/guides/telemetry.md", tmp_dir)
     copy_fixture!("accrue/guides/testing.md", tmp_dir)
     copy_fixture!("accrue/guides/troubleshooting.md", tmp_dir)
+    copy_fixture!("accrue/guides/analytics.md", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("accrue_portal/mix.exs", tmp_dir)

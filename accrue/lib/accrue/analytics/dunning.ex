@@ -5,9 +5,13 @@ defmodule Accrue.Analytics.Dunning do
   Provides MRR-based recovery vs lost metrics without adding new database
   tables, querying directly against the `accrue_events` ledger via Ecto JSONB
   aggregations.
+
+  For details on cutoff-date semantics, performance thresholds (such as adding
+  expression indexes at ~100k events), and open-shape map contracts, refer
+  to the [Analytics Guide](guides/analytics.md).
   """
 
-  import Ecto.Query, only: [from: 2, left_join: 3, subquery: 1, where: 3]
+  import Ecto.Query, only: [from: 2, subquery: 1, where: 3]
 
   alias Accrue.Billing.{Customer, Invoice, PaymentMethod, Subscription}
   alias Accrue.Events.Event
@@ -20,9 +24,8 @@ defmodule Accrue.Analytics.Dunning do
   @dunning_lifecycle_types ~w[dunning.campaign_started dunning.step_sent dunning.recovered dunning.exhausted]
 
   @doc """
-  Folds the `accrue_events` ledger into a flat
-  `%{recovered_cents: n, lost_cents: n}` map answering the merchant question
-  "how much MRR did dunning recover vs. lose to terminal action?"
+  Folds the `accrue_events` ledger into lists of recovered and lost MRR,
+  grouped by currency.
 
   This adds NO new table: it groups by the two confirmed-transition lifecycle
   ledger types written by the campaign:
@@ -39,16 +42,25 @@ defmodule Accrue.Analytics.Dunning do
   ## Examples
 
       iex> Accrue.Analytics.Dunning.recovered_vs_lost_mrr()
-      %{recovered_cents: 12000, lost_cents: 3000}
+      %{
+        recovered: [%{currency: "usd", cents: 12000}],
+        lost: [%{currency: "usd", cents: 3000}]
+      }
+
+  @since "1.4.0"
   """
-  @spec recovered_vs_lost_mrr(keyword()) :: %{recovered_cents: non_neg_integer(), lost_cents: non_neg_integer()}
+  @spec recovered_vs_lost_mrr(keyword()) :: %{
+          recovered: [%{currency: String.t(), cents: non_neg_integer()}],
+          lost: [%{currency: String.t(), cents: non_neg_integer()}]
+        }
   def recovered_vs_lost_mrr(opts \\ []) when is_list(opts) do
     query =
       from(e in Event,
         where: e.type in [@recovered_type, @exhausted_type],
-        group_by: e.type,
+        group_by: [e.type, fragment("?->>'currency'", e.data)],
         select:
           {e.type,
+           fragment("?->>'currency'", e.data),
            sum(
              fragment(
                "CASE WHEN jsonb_typeof((?->'mrr_value_cents')) = 'number' THEN (?->>'mrr_value_cents')::integer ELSE 0 END",
@@ -59,11 +71,47 @@ defmodule Accrue.Analytics.Dunning do
       )
       |> apply_window(opts)
 
-    results = Repo.all(query) |> Map.new()
+    Repo.all(query)
+    |> Enum.reduce(%{recovered: [], lost: []}, fn {type, currency, cents}, acc ->
+      entry = %{currency: currency || "usd", cents: cents || 0}
+
+      case type do
+        @recovered_type -> Map.update!(acc, :recovered, &[entry | &1])
+        @exhausted_type -> Map.update!(acc, :lost, &[entry | &1])
+        _ -> acc
+      end
+    end)
+  end
+
+  @doc """
+  Computes the arithmetic recovery rate from the dunning funnel.
+
+  Calculates the rate as `recovered / (recovered + exhausted)`.
+  Returns `%{rate: 0.0..1.0 | nil, recovered: N, total_concluded: N}`.
+  If `total_concluded` is 0, `rate` is `nil` to prevent division by zero.
+
+  ## Options
+
+    * `:since` — `%DateTime{}` lower bound (inclusive on `inserted_at`).
+    * `:until` — `%DateTime{}` upper bound (inclusive on `inserted_at`).
+
+  @since "1.4.0"
+  """
+  @spec recovery_rate(keyword()) :: %{
+          rate: float() | nil,
+          recovered: non_neg_integer(),
+          total_concluded: non_neg_integer()
+        }
+  def recovery_rate(opts \\ []) when is_list(opts) do
+    stats = funnel(opts)
+    total = stats.recovered + stats.exhausted
+
+    rate = if total > 0, do: stats.recovered / total, else: nil
 
     %{
-      recovered_cents: Map.get(results, @recovered_type) || 0,
-      lost_cents: Map.get(results, @exhausted_type) || 0
+      rate: rate,
+      recovered: stats.recovered,
+      total_concluded: total
     }
   end
 

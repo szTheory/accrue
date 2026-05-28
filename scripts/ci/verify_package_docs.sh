@@ -123,6 +123,10 @@ require_fixed "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'entitlements ✅ shi
 require_absent_regex "$ROOT_DIR/accrue/guides/jobs_to_be_done.md" 'on the table\*\* is \*\*entitlements'
 require_fixed "$ROOT_DIR/accrue/guides/quickstart.md" '[Entitlements](entitlements.md)'
 
+# Analytics Guide (Phase 148, DAN-15)
+require_fixed "$ROOT_DIR/accrue/guides/analytics.md" '100k events'
+require_fixed "$ROOT_DIR/accrue/guides/analytics.md" 'Cutoff-Date Semantics'
+
 # Optional Stripe-native advisory sync (Phase 127, ENT-10 / D-12)
 # Pins the entitlements.md Stripe-native section + the telemetry.md sync catalog
 # so the observational-disclaimer, enable steps, 10-cap, deferred 1.2 read, and

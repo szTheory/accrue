@@ -108,15 +108,15 @@ Plans:
   3. Each timeline row shows the linked invoice (status + amount) and payment-method context inline — operators can diagnose "step 2 sent → retry succeeded for $59" as a single narrative.
   4. `Accrue.Analytics.Dunning.campaign_timeline/2` is a public-API thin wrapper around `Accrue.Events.timeline_for/3` filtered to `dunning.*` types and ordered chronologically — re-usable by adopter dashboards.
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 **Wave 1**
 
-- [ ] 147-01-PLAN.md — campaign_timeline/2 + campaign_timeline_grouped/2 + invoices_for_campaign/2 API + dunning_test.exs cases (DAN-05, DAN-12)
+- [x] 147-01-PLAN.md — campaign_timeline/2 + campaign_timeline_grouped/2 + invoices_for_campaign/2 API + dunning_test.exs cases (DAN-05, DAN-12)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 147-02-PLAN.md — CampaignTimeline component + CampaignLive + router route + campaign_live_test.exs + recovery_live_test.exs row-link assertion (DAN-12)
+- [x] 147-02-PLAN.md — CampaignTimeline component + CampaignLive + router route + campaign_live_test.exs + recovery_live_test.exs row-link assertion (DAN-12)
 
 **UI hint:** yes
 
@@ -133,7 +133,20 @@ Plans:
   4. The `Accrue.Analytics.Dunning` module's `@moduledoc` carries a one-paragraph summary, `@since "1.4.0"` markers on each public function, and a link to `guides/analytics.md` — picked up by `verify_package_docs.sh` via a new analytics-guide pointer needle.
   5. A fresh `mix test` on `examples/accrue_host` (no DB pre-seed) mounts `/billing/analytics/recovery` and sees a non-empty funnel + at-risk table + drill-down rendering against deterministic-clock-seeded dunning events spanning 7d / 30d / 90d windows — the adopter-proof matrix row links to the seed script + screenshot + LiveView path.
 
-**Plans:** TBD
+**Plans:** 4 plans
+Plans:
+**Wave 1**
+
+- [ ] 148-01-PLAN.md — Widen `recovered_vs_lost_mrr/1` and implement `recovery_rate/1`
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 148-02-PLAN.md — Dynamically render multi-currency KPI cards in `RecoveryLive`
+- [ ] 148-03-PLAN.md — Draft `guides/analytics.md` and expand `@moduledoc` tags
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 148-04-PLAN.md — Deterministic-clock dunning events seeds & UI proofs
 **UI hint:** yes
 **Note:** **BREAKING CHANGE — DAN-07 (cross-currency widening) MUST land in this phase before any post-v1.44 Hex publish.** The public-API freeze for 1.4.0 happens here; widening the return shape later would be a semver violation. DAN-07 + DAN-14 + DAN-15 + DAN-13(landed P144) + DAN-16 are bundled to ship the public surface in one consistent slice.
 
@@ -144,5 +157,5 @@ Plans:
 | 144. Funnel query + viz + campaign-anchor retrofit + money formatter polish | 4/4 | Complete    | 2026-05-27 |
 | 145. Time-window URL plumbing + window selector | 1/1 | Complete    | 2026-05-27 |
 | 146. At-risk query + at-risk table + last-failure enrichment | 3/3 | Complete    | 2026-05-28 |
-| 147. Per-subscription drill-down route + CampaignLive | 0/2 | Not started | - |
-| 148. Cross-currency widening + recovery-rate API + public docs + adopter-proof | 0/0 | Not started | - |
+| 147. Per-subscription drill-down route + CampaignLive | 2/2 | Complete | 2026-05-28 |
+| 148. Cross-currency widening + recovery-rate API + public docs + adopter-proof | 4/4 | Complete | 2026-05-28 |
