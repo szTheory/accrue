@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-27 after v1.43 milestone)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 146 — at-risk-query-at-risk-table-last-failure-enrichment
+**Current focus:** Phase 148 — cross-currency widening
 
 ## Current Position
 
 Phase: 147
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-28 -- Phase 147 planning complete
+Plan: Completed
+Status: Executed
+Last activity: 2026-05-28 -- Phase 147 executed
 
 ## Milestone Progress
 
@@ -128,3 +128,4 @@ Resume file: .planning/phases/147-per-subscription-drill-down-route-campaignlive
 ## Operator Next Steps
 
 - Run `/gsd:plan-phase 144` to begin v1.44 execution (funnel query + viz + campaign-anchor retrofit + money formatter polish).
+ign-anchor retrofit + money formatter polish).

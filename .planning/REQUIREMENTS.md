@@ -72,7 +72,7 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
   - Columns: customer (with link), days-in-campaign, current step, next-step ETA, last failure reason.
   - Cross-package boundary: LiveView calls ONLY `Accrue.Analytics.Dunning.*` — no `Ecto.Query`, no `Accrue.Repo`, no `Accrue.Billing.Subscription` alias.
 
-- [ ] **DAN-12** — Per-subscription drill-down route + view.
+- [x] **DAN-12** — Per-subscription drill-down route + view.
   - New route `/billing/analytics/recovery/subscriptions/:id` inside the existing `live_session :accrue_admin` block (admin-auth inherited).
   - `AccrueAdmin.Live.Analytics.CampaignLive` renders `campaign_timeline/1` as a vertical timeline: `dunning.campaign_started` → `dunning.step_sent` ×N → `dunning.recovered` | `dunning.exhausted`.
   - Linked invoice and payment-method context inline.
@@ -162,3 +162,4 @@ Current focus: **Polish & Adopter ROI Proof**. Build on Phase 143's standalone f
 - Phase 148 (5 reqs): DAN-06, DAN-07, DAN-14, DAN-15, DAN-16 — recovery_rate + currency widening + docs + adopter-proof
 
 **Coverage:** 16/16 v1.44 requirements mapped (100%); 0 orphans; 0 duplicates.
+

@@ -1,5 +1,16 @@
 # Milestones
 
+## v1.43 v1.43 (Shipped: 2026-05-27)
+
+**Phases completed:** 1 phases, 2 plans, 0 tasks
+
+**Key accomplishments:**
+
+- Snapshotted MRR onto dunning lifecycle events and shipped the `Accrue.Analytics.Dunning` Ecto context that folds the `accrue_events` ledger into a flat recovered-vs-lost MRR map without adding new tables.
+- Implemented the AccrueAdmin Recovery Live dashboard and routing to visualize the success of the Dunning Engine.
+
+---
+
 ## v1.43 Linked Release 1.2.0 Truth (Shipped: 2026-05-27)
 
 **Phases completed:** 3 phases (140–142)
