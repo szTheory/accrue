@@ -9,7 +9,7 @@ defmodule Accrue.Analytics.Dunning do
 
   import Ecto.Query, only: [from: 2, subquery: 1, where: 3]
 
-  alias Accrue.Billing.{Customer, Invoice, Subscription}
+  alias Accrue.Billing.{Customer, Subscription}
   alias Accrue.Events.Event
   alias Accrue.Repo
   alias Oban.Job
@@ -163,8 +163,10 @@ defmodule Accrue.Analytics.Dunning do
   - `:days_in_campaign` — integer days since campaign start (truncated)
   - `:current_step` — count of `dunning.step_sent` events for this campaign
   - `:next_step_eta` — `DateTime.t()` or nil when no pending Oban job
-  - `:failure_reason` — raw `invoice.payment_failed` event data map or nil
-    (pre-v1.44 campaigns and campaigns without a matched invoice return nil)
+  - `:failure_reason` — data map from the most-recent `invoice.payment_failed` event
+    for this subscription's campaign, or nil when no matched invoice or payment failure
+    event exists (pre-v1.44 campaigns without `invoice_id` in `campaign_started` data
+    also return nil)
 
   ## Options
 
@@ -181,18 +183,6 @@ defmodule Accrue.Analytics.Dunning do
       from(s in Subscription,
         join: c in Customer,
         on: c.id == s.customer_id,
-        left_join: cs in Event,
-        on:
-          cs.type == "dunning.campaign_started" and
-            fragment("? = ?::text", cs.subject_id, s.id) and
-            cs.inserted_at >= s.dunning_campaign_started_at,
-        left_join: inv in Invoice,
-        on: inv.processor_id == fragment("? ->> 'invoice_id'", cs.data),
-        left_join: pf in Event,
-        on:
-          pf.type == "invoice.payment_failed" and
-            fragment("? = ?::text", pf.subject_id, inv.id) and
-            pf.inserted_at >= s.dunning_campaign_started_at,
         left_join: j in Job,
         on:
           j.worker == "Accrue.Workers.DunningStep" and
@@ -214,8 +204,7 @@ defmodule Accrue.Analytics.Dunning do
           s.customer_id,
           c.email,
           c.name,
-          s.dunning_campaign_started_at,
-          pf.data
+          s.dunning_campaign_started_at
         ],
         order_by: [desc: s.dunning_campaign_started_at],
         select: %{
@@ -235,7 +224,22 @@ defmodule Accrue.Analytics.Dunning do
               s.dunning_campaign_started_at
             ),
           next_step_eta: min(j.scheduled_at),
-          failure_reason: pf.data
+          failure_reason:
+            fragment(
+              """
+              (SELECT e.data FROM accrue_events e
+                 JOIN accrue_invoices i ON i.id::text = e.subject_id
+                 JOIN accrue_events cs ON cs.type = 'dunning.campaign_started'
+                                      AND cs.subject_id = ?::text
+                                      AND cs.data->>'invoice_id' = i.processor_id
+               WHERE e.type = 'invoice.payment_failed'
+                 AND e.inserted_at >= ?
+               ORDER BY e.inserted_at DESC
+               LIMIT 1)
+              """,
+              s.id,
+              s.dunning_campaign_started_at
+            )
         }
       )
       |> apply_campaign_window(opts)

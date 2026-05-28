@@ -14,9 +14,9 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   | `:customer_id` | binary UUID | unused directly (href uses subscription_id) |
   | `:customer_label` | `String.t() | nil` | Customer cell text (name or email) |
   | `:days_in_campaign` | `non_neg_integer()` | displayed as "N days" |
-  | `:current_step` | `non_neg_integer()` | displayed as "Step N" (1-indexed) |
+  | `:current_step` | `non_neg_integer()` | 0 → "Pending"; N → "Step N" |
   | `:next_step_eta` | `%DateTime{} | nil` | formatted as date-time string; nil → "—" |
-  | `:failure_reason` | `map() | nil` | raw `pf.data` jsonb; nil or missing invoice → "—" |
+  | `:failure_reason` | `map() | nil` | most-recent `invoice.payment_failed` data; extracts `failure_code`/`failure_message` keys; nil or missing invoice → "—" |
 
   ## Example
 
@@ -59,7 +59,7 @@ defmodule AccrueAdmin.Components.AtRiskTable do
               </a>
             </td>
             <td class="ax-body">{row.days_in_campaign} days</td>
-            <td class="ax-body">Step {row.current_step}</td>
+            <td class="ax-body">{if row.current_step == 0, do: "Pending", else: "Step #{row.current_step}"}</td>
             <td class="ax-body">{format_eta(row.next_step_eta)}</td>
             <td class="ax-body ax-muted">{format_failure(row.failure_reason)}</td>
           </tr>
@@ -83,6 +83,6 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   defp format_failure(nil), do: "—"
 
   defp format_failure(data) when is_map(data) do
-    Map.get(data, "stripe_event_id", "—") || "—"
+    Map.get(data, "failure_code") || Map.get(data, "failure_message") || "—"
   end
 end

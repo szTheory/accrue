@@ -208,12 +208,15 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   end
 
   # Returns the trimmed text content of the link element carrying aria-current="page".
-  # Fails with nil if no active button is found, surfacing the bug immediately.
+  # Returns nil if no active button is found, surfacing the bug immediately via
+  # a clean assertion failure rather than a FunctionClauseError from List.first(nil).
   defp active_window_label(html) do
-    ~r/aria-current="page"[^>]*>\s*([^<]+)\s*<\/a>/
-    |> Regex.run(html, capture: :all_but_first)
-    |> List.first()
-    |> String.trim()
+    case Regex.run(~r/aria-current="page"[^>]*>\s*([^<]+)\s*<\/a>/, html,
+           capture: :all_but_first
+         ) do
+      [label | _] -> String.trim(label)
+      nil -> nil
+    end
   end
 
   describe "at-risk table (DAN-11)" do
