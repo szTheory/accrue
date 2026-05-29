@@ -18,6 +18,8 @@ alias AccrueHost.Accounts.User
 alias AccrueHost.Organizations
 alias AccrueHost.Repo
 
+import Ecto.Query, only: [from: 2]
+
 now = Accrue.Clock.utc_now()
 now_iso = DateTime.to_iso8601(now)
 
@@ -136,70 +138,102 @@ days_ago = fn days ->
   DateTime.add(now, -days * 86_400, :second)
 end
 
+# `Accrue.Events.record/1` has no `timestamp` (or `inserted_at`) field on the
+# event schema — `inserted_at` is `read_after_writes` and set by the DB at
+# insert, and it is not in the changeset's cast fields. Passing `timestamp:`
+# is silently dropped, collapsing every event to `now()`. The recovery
+# analytics window on `inserted_at`, so we record the event and then
+# explicitly back-date `inserted_at` via `Repo.update_all` to land the event
+# in its intended analytics window.
+record_at = fn attrs, at ->
+  {:ok, %Accrue.Events.Event{id: id}} = Events.record(attrs)
+
+  Repo.update_all(
+    from(e in Accrue.Events.Event, where: e.id == ^id),
+    set: [inserted_at: at]
+  )
+
+  id
+end
+
 # Insert deterministic Dunning events for 7d window (Recovered USD)
 sub_7d = Ecto.UUID.generate()
 anchor_7d = DateTime.to_iso8601(days_ago.(5))
 
-Events.record(%{
-  type: "dunning.campaign_started",
-  subject_type: "Subscription",
-  subject_id: sub_7d,
-  data: %{campaign_anchor: anchor_7d},
-  timestamp: days_ago.(5)
-})
+record_at.(
+  %{
+    type: "dunning.campaign_started",
+    subject_type: "Subscription",
+    subject_id: sub_7d,
+    data: %{campaign_anchor: anchor_7d}
+  },
+  days_ago.(5)
+)
 
-Events.record(%{
-  type: "dunning.step_sent",
-  subject_type: "Subscription",
-  subject_id: sub_7d,
-  data: %{campaign_anchor: anchor_7d},
-  timestamp: days_ago.(4)
-})
+record_at.(
+  %{
+    type: "dunning.step_sent",
+    subject_type: "Subscription",
+    subject_id: sub_7d,
+    data: %{campaign_anchor: anchor_7d}
+  },
+  days_ago.(4)
+)
 
-Events.record(%{
-  type: "dunning.recovered",
-  subject_type: "Subscription",
-  subject_id: sub_7d,
-  data: %{campaign_anchor: anchor_7d, mrr_value_cents: 12000, currency: "usd"},
-  timestamp: days_ago.(3)
-})
+record_at.(
+  %{
+    type: "dunning.recovered",
+    subject_type: "Subscription",
+    subject_id: sub_7d,
+    data: %{campaign_anchor: anchor_7d, mrr_value_cents: 12000, currency: "usd"}
+  },
+  days_ago.(3)
+)
 
 # Insert deterministic Dunning events for 30d window (Exhausted JPY)
 sub_30d = Ecto.UUID.generate()
 anchor_30d = DateTime.to_iso8601(days_ago.(25))
 
-Events.record(%{
-  type: "dunning.campaign_started",
-  subject_type: "Subscription",
-  subject_id: sub_30d,
-  data: %{campaign_anchor: anchor_30d},
-  timestamp: days_ago.(25)
-})
+record_at.(
+  %{
+    type: "dunning.campaign_started",
+    subject_type: "Subscription",
+    subject_id: sub_30d,
+    data: %{campaign_anchor: anchor_30d}
+  },
+  days_ago.(25)
+)
 
-Events.record(%{
-  type: "dunning.exhausted",
-  subject_type: "Subscription",
-  subject_id: sub_30d,
-  data: %{campaign_anchor: anchor_30d, mrr_value_cents: 30000, currency: "jpy"},
-  timestamp: days_ago.(15)
-})
+record_at.(
+  %{
+    type: "dunning.exhausted",
+    subject_type: "Subscription",
+    subject_id: sub_30d,
+    data: %{campaign_anchor: anchor_30d, mrr_value_cents: 30000, currency: "jpy"}
+  },
+  days_ago.(15)
+)
 
 # Insert deterministic Dunning events for Active (90d window)
 sub_90d = Ecto.UUID.generate()
 anchor_90d = DateTime.to_iso8601(days_ago.(60))
 
-Events.record(%{
-  type: "dunning.campaign_started",
-  subject_type: "Subscription",
-  subject_id: sub_90d,
-  data: %{campaign_anchor: anchor_90d},
-  timestamp: days_ago.(60)
-})
+record_at.(
+  %{
+    type: "dunning.campaign_started",
+    subject_type: "Subscription",
+    subject_id: sub_90d,
+    data: %{campaign_anchor: anchor_90d}
+  },
+  days_ago.(60)
+)
 
-Events.record(%{
-  type: "dunning.step_sent",
-  subject_type: "Subscription",
-  subject_id: sub_90d,
-  data: %{campaign_anchor: anchor_90d},
-  timestamp: days_ago.(50)
-})
+record_at.(
+  %{
+    type: "dunning.step_sent",
+    subject_type: "Subscription",
+    subject_id: sub_90d,
+    data: %{campaign_anchor: anchor_90d}
+  },
+  days_ago.(50)
+)
