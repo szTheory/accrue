@@ -49,4 +49,4 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 149. Dunning state API & Headless Banner Component | 0/2 | Planned | |
-| 150. Documentation & Adopter Proof | 2/2 | Complete   | 2026-05-29 |
+| 150. Documentation & Adopter Proof | 2/2 | Complete    | 2026-05-29 |
