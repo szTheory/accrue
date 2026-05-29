@@ -53,3 +53,11 @@
 **Success Criteria:**
 
 1. No critical or high-priority bugs remain unaddressed.
+
+## Standing Backlog (FRG-03 anchors)
+
+These items are tracked in the v1.17 Friction Inventory and carried forward to future milestones:
+
+- [INT-10 Phase 63](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--int-10-phase-63) — Braintree/multi-processor integration
+- [BIL-03 Phase 64](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--bil-03-phase-64) — Billing portal configuration
+- [ADM-12 Phase 65](.planning/research/v1.17-FRICTION-INVENTORY.md#backlog--adm-12-phase-65) — Admin UI role-based access

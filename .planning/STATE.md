@@ -75,6 +75,11 @@ Last activity: 2026-05-29
 
 ## Accumulated Context
 
+### Historical Research Assets
+
+- **v1.17 Friction Inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md` — `v1.17-P1-002` closed 2026-04-24; P0/P1/P2 backlog rows (INT-10, BIL-03, ADM-12) tracked as phase 63/64/65 anchors.
+- **v1.17 North Star:** `.planning/research/v1.17-north-star.md` — stop rules S1–S5.
+
 ### Roadmap Evolution
 
 - Phase 152 added: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
