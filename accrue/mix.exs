@@ -20,6 +20,13 @@ defmodule Accrue.MixProject do
         plt_add_apps: [:mix, :ex_unit, :credo],
         ignore_warnings: ".dialyzer_ignore.exs"
       ],
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       docs: docs()
     ]
   end
@@ -100,6 +107,7 @@ defmodule Accrue.MixProject do
       {:chimeway, "~> 1.0", optional: true},
 
       # Dev / test
+      {:excoveralls, "~> 0.18", only: :test},
       {:mox, "~> 1.2", only: :test},
       {:stream_data, "~> 1.3", only: [:dev, :test]},
       {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},

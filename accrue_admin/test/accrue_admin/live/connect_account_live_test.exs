@@ -60,7 +60,7 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert html =~ "Default policy"
 
     html =
-      render_change(element(view, "form"), %{
+      render_change(element(view, "form[phx-submit=\"save_override\"]"), %{
         "override" => %{
           "percent" => "1.9",
           "fixed_cents" => "30",
@@ -74,7 +74,7 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert html =~ "$2.20"
 
     html =
-      render_submit(element(view, "form"), %{
+      render_submit(element(view, "form[phx-submit=\"save_override\"]"), %{
         "override" => %{
           "percent" => "1.9",
           "fixed_cents" => "30",

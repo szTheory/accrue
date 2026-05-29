@@ -16,7 +16,8 @@ defmodule AccruePortal.MixProject do
       package: package(),
       description: "Customer portal UI for Accrue billing.",
       source_url: @source_url,
-      docs: docs()
+      docs: docs(),
+      test_coverage: [summary: [threshold: 75]]
     ]
   end
 

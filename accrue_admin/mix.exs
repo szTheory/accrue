@@ -16,6 +16,7 @@ defmodule AccrueAdmin.MixProject do
       description: "Admin LiveView UI for Accrue billing.",
       source_url: @source_url,
       docs: docs(),
+      test_coverage: [summary: [threshold: 80]],
       dialyzer: [plt_local_path: "priv/plts", plt_add_apps: [:mix, :ex_unit]]
     ]
   end

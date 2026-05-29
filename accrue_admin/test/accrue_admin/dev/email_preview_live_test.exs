@@ -12,7 +12,7 @@ defmodule AccrueAdmin.EmailPreviewLiveTest do
 
     html =
       view
-      |> element("form")
+      |> element("form[phx-change=\"select_fixture\"]")
       |> render_change(%{"fixture" => "payment_failed"})
 
     assert html =~ "Payment failed"
@@ -38,7 +38,7 @@ defmodule AccrueAdmin.EmailPreviewLiveTest do
     for {key, fixture} <- fixtures do
       html =
         view
-        |> element("form")
+        |> element("form[phx-change=\"select_fixture\"]")
         |> render_change(%{"fixture" => Atom.to_string(key)})
 
       assert html =~ fixture.subject,
