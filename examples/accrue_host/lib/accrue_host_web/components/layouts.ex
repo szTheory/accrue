@@ -63,6 +63,7 @@ defmodule AccrueHostWeb.Layouts do
     </header>
 
     <main class="px-4 py-20 sm:px-6 lg:px-8">
+      <AccrueAdmin.Components.DunningBanner.dunning_banner customer={dunning_customer(@current_scope)} />
       <div class="mx-auto max-w-2xl space-y-4">
         {render_slot(@inner_block)}
       </div>
@@ -71,6 +72,22 @@ defmodule AccrueHostWeb.Layouts do
     <.flash_group flash={@flash} />
     """
   end
+
+  # Resolve the active org's billing Customer strictly from the current scope.
+  #
+  # Reuses `AccrueHost.Billing.customer_for_scope/1` (scope-bound to the active
+  # organization) and returns ONLY a `%Accrue.Billing.Customer{}` or `nil` — never
+  # a raw Organization billable — so mounting the banner never triggers a
+  # get-or-create side effect on a plain render. The banner renders nothing for a
+  # nil/healthy customer.
+  defp dunning_customer(%AccrueHost.Accounts.Scope{} = scope) do
+    case AccrueHost.Billing.customer_for_scope(scope) do
+      {:ok, customer} -> customer
+      {:error, _reason} -> nil
+    end
+  end
+
+  defp dunning_customer(_scope), do: nil
 
   @doc """
   Shows the flash group with standard titles and content.
