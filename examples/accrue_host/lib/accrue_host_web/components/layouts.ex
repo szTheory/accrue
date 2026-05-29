@@ -63,7 +63,9 @@ defmodule AccrueHostWeb.Layouts do
     </header>
 
     <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <AccrueAdmin.Components.DunningBanner.dunning_banner customer={dunning_customer(@current_scope)} />
+      <%= if customer = dunning_customer(@current_scope) do %>
+        <AccrueAdmin.Components.DunningBanner.dunning_banner customer={customer} />
+      <% end %>
       <div class="mx-auto max-w-2xl space-y-4">
         {render_slot(@inner_block)}
       </div>
@@ -75,15 +77,15 @@ defmodule AccrueHostWeb.Layouts do
 
   # Resolve the active org's billing Customer strictly from the current scope.
   #
-  # Reuses `AccrueHost.Billing.customer_for_scope/1` (scope-bound to the active
-  # organization) and returns ONLY a `%Accrue.Billing.Customer{}` or `nil` — never
-  # a raw Organization billable — so mounting the banner never triggers a
-  # get-or-create side effect on a plain render. The banner renders nothing for a
-  # nil/healthy customer.
+  # Returns ONLY an EXISTING `%Accrue.Billing.Customer{}` or `nil` — never a raw
+  # Organization billable. Uses the read-only `billing_state_for_scope/1` lookup
+  # (not `customer_for_scope/1`, which is get-or-create) so mounting the banner on
+  # a plain GET/render never creates a Customer row (T-150-05 / Pitfall 1). The
+  # banner safely renders nothing for a nil/healthy customer.
   defp dunning_customer(%AccrueHost.Accounts.Scope{} = scope) do
-    case AccrueHost.Billing.customer_for_scope(scope) do
-      {:ok, customer} -> customer
-      {:error, _reason} -> nil
+    case AccrueHost.Billing.billing_state_for_scope(scope) do
+      {:ok, %{customer: %Accrue.Billing.Customer{} = customer}} -> customer
+      _ -> nil
     end
   end
 
