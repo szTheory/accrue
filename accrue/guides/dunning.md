@@ -251,6 +251,115 @@ a manual recovery action (logged separately) counts as `lost` at the campaign le
 > cadence that Accrue would overlap with). There is no risk with Fake (local-only, no
 > real sends).
 
+If you would rather surface payment trouble in your app's UI instead of (or in addition
+to) email, see [In-App Banners](#in-app-banners) below — an in-app banner is the
+non-email alternative for getting the customer's attention.
+
+---
+
+## In-App Banners
+
+Email is not the only way to ask a customer to fix a failed payment. You can also
+surface dunning state directly in your Phoenix UI — a persistent banner across the top
+of the app, a callout on the billing page, or any custom markup. There are two
+integration paths, and **the choice depends on which package you pull**:
+
+| Path | Package | Use when |
+|---|---|---|
+| Ready-made component | `accrue_admin` | You already pull `accrue_admin` and want a drop-in banner. |
+| Core-only DIY | `accrue` | You only pull core `accrue` and want to roll your own markup. |
+
+> **Dependency boundary.** The ready-made `dunning_banner` component lives in the
+> **`accrue_admin`** package (which hard-depends on the LiveView runtime). The
+> `Accrue.Dunning.requires_attention?/1` helper used by the DIY path is in **core
+> `accrue`** — core stays LiveView-runtime-free, so the component itself is *not* in
+> core. Pull `accrue_admin` for the component; use the core helper if you don't.
+
+### Component path (requires `accrue_admin`)
+
+`AccrueAdmin.Components.DunningBanner.dunning_banner/1` is a headless
+`Phoenix.Component` that renders **nothing** unless the given customer is in an active
+dunning campaign. It takes a single required `:customer` attr and an optional
+`inner_block` slot.
+
+**Zero-config default** — render with just the customer, and Accrue supplies a default
+red banner:
+
+```heex
+<AccrueAdmin.Components.DunningBanner.dunning_banner customer={@customer} />
+```
+
+When the customer is in an active dunning campaign, this renders the verbatim default
+copy:
+
+> Action Required: We were unable to process your recent payment. Please update your
+> payment method to avoid service interruption.
+
+The wrapper carries the `accrue-dunning-banner-wrapper` class and the default message
+carries `accrue-default-dunning-banner`, so you can restyle either with your own CSS.
+
+**Customized CTA via `inner_block`** — pass an inner block to replace the default copy
+with your own actionable markup. Use the slot form to render an "Update your card" CTA
+that deep-links to your host's payment/subscription route:
+
+```heex
+<AccrueAdmin.Components.DunningBanner.dunning_banner customer={@customer}>
+  <div class="accrue-dunning-banner-wrapper" style="background-color: #fef2f2; color: #991b1b; padding: 1rem; text-align: center;">
+    Your last payment didn't go through.
+    <.link navigate={~p"/app/billing"} class="font-semibold underline">
+      Update your card
+    </.link>
+    to keep your subscription active.
+  </div>
+</AccrueAdmin.Components.DunningBanner.dunning_banner>
+```
+
+The banner still renders nothing when the customer is not in a dunning campaign — the
+`inner_block` is only invoked when attention is required.
+
+> **Pitfall: pass a resolved `%Accrue.Billing.Customer{}`, never a raw billable.**
+> The `:customer` attr accepts either a `%Accrue.Billing.Customer{}` (or `nil`) **or** a
+> raw billable. Passing a raw billable triggers `Accrue.Billing.customer/1`, which has a
+> **get-or-create side effect** — on every render of every request. In a layout banner
+> that is a side-effecting customer-creation call on every page load. Resolve the
+> customer **once**, strictly from the current scope's active organization, and assign
+> it:
+>
+> ```elixir
+> # in your LiveView mount/3 or controller, never from a params-supplied id
+> def mount(_params, _session, socket) do
+>   {:ok, customer} = AccrueHost.Billing.customer_for_scope(socket.assigns.current_scope)
+>   {:ok, assign(socket, :customer, customer)}
+> end
+> ```
+>
+> Resolving from the scope (not from a params-supplied customer id) also prevents a
+> cross-tenant dunning-state leak — the banner only ever reflects the signed-in
+> tenant's own billing state.
+
+### Core-only DIY path (no `accrue_admin`)
+
+If you only pull core `accrue`, use `Accrue.Dunning.requires_attention?/1` to gate your
+own markup. It returns a plain `boolean` and lives in core — no LiveView runtime, no
+`accrue_admin` dependency:
+
+```heex
+<%= if Accrue.Dunning.requires_attention?(@customer) do %>
+  <div class="my-dunning-banner">
+    We couldn't process your last payment.
+    <.link navigate={~p"/app/billing"}>Update your card</.link>
+    to avoid losing access.
+  </div>
+<% end %>
+```
+
+`requires_attention?/1` reads the ledger state as the source of truth (it delegates to
+`Accrue.Billing.Query.in_active_dunning_campaign/1`, whose predicate is
+`where: not is_nil(s.dunning_campaign_started_at)`), so it avoids projection-lag false
+positives. The same get-or-create caveat applies: pass a resolved
+`%Accrue.Billing.Customer{}` from the current scope rather than a raw billable, so you
+don't trigger a customer-creation side effect on every render.
+
 ---
 
 ## Lifecycle and entitlements interaction
