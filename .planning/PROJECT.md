@@ -12,13 +12,12 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**Active: `v1.45`**
+**Active: `v1.46`**
 
-**Goal:** Provide Multi-channel Dunning (In-App Banners).
+**Goal:** Maintenance and closure review (no new capabilities planned).
 
 **Target features:**
-- `Accrue.Dunning.requires_attention?/1` helper.
-- Optional `<Accrue.Components.DunningBanner />`.
+- Routine maintenance and issue triage.
 
 ## Last shipped milestone
 
