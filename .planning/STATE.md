@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.45
-milestone_name: milestone
-status: verifying
-stopped_at: Phase 150 context gathered
-last_updated: "2026-05-29T10:20:14.874Z"
+milestone: None
+milestone_name: None
+status: completed
+stopped_at: v1.45 milestone audited
+last_updated: "2026-05-29T10:35:00.000Z"
 last_activity: 2026-05-29
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 100
 ---
 
@@ -34,6 +34,8 @@ Last activity: 2026-05-29
 ## Milestone Progress
 
 ### Recently shipped milestones
+
+**v1.45** (shipped & archived **2026-05-29**): 2 phases (**149–150**), 4 requirements (BAN-01..BAN-04). Theme: Multi-channel Dunning (In-App Banners). Audit: `.planning/v1.45-v1.45-MILESTONE-AUDIT.md`.
 
 **v1.44** (shipped & archived **2026-05-28**): 5 phases (**144–148**), 16 requirements (DAN-01..DAN-16). Builds on standalone Phase 143 foundation. Audit: `.planning/v1.44-v1.44-MILESTONE-AUDIT.md`.
 

@@ -1,5 +1,21 @@
 # Milestones
 
+## v1.45 Multi-channel Dunning (In-App Banners) (Shipped: 2026-05-29)
+
+**Phases completed:** 2 phases (149–150)
+**Timeline:** 2026-05-28 → 2026-05-29 (2 days)
+
+**Delivered:** Shipped the `Accrue.Dunning.requires_attention?/1` API and the headless `<AccrueAdmin.Components.DunningBanner />` component to provide an idiomatic Phoenix LiveView way for host applications to display "Update your card" banners. Also documented integration steps in `guides/dunning.md` and proved adoption in the `examples/accrue_host` app.
+
+**Milestone audit:** `passed` — definition of done **ACHIEVED**, 4/4 requirements satisfied, all 2 phases verified `passed`. See `.planning/v1.45-v1.45-MILESTONE-AUDIT.md`.
+
+**Key accomplishments:**
+
+- **Phase 149:** Shipped Dunning state API (`requires_attention?/1`) and headless banner component (`DunningBanner`).
+- **Phase 150:** Documented In-App Banners in `guides/dunning.md` and wired adopter proof in `examples/accrue_host`.
+
+---
+
 ## v1.44 Recovered-Revenue Dashboard Completion (Shipped: 2026-05-28)
 
 **Phases completed:** 5 phases (144–148)

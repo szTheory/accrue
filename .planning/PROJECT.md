@@ -381,9 +381,9 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-Current focus: **Multi-channel Dunning (In-App Banners)**. **v1.45 — Multi-channel Dunning (In-App Banners) is ACTIVE (Planned)**. v1.44 completed the Recovered-Revenue Dashboard. v1.45 will focus on shipping an idiomatic LiveView component or helper to display "Update your card" banners in the host application.
+Current focus: **Ready for next milestone**. **v1.45 — Multi-channel Dunning (In-App Banners)** is shipped and archived. The project is ready for the next set of goals.
 
-**Last shipped planning milestone:** **v1.44** — Phases **144–148** (**2026-05-28**).
+**Last shipped planning milestone:** **v1.45** — Phases **149–150** (**2026-05-29**).
 
 ## Requirements
 
@@ -406,6 +406,18 @@ lementation.
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+ each phase transition** (via `/gsd-transition`):
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
