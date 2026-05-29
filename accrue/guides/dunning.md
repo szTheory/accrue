@@ -326,12 +326,22 @@ The banner still renders nothing when the customer is not in a dunning campaign 
 > it:
 >
 > ```elixir
-> # in your LiveView mount/3 or controller, never from a params-supplied id
+> # in your LiveView mount/3 or controller, never from a params-supplied id.
+> # Use a READ-ONLY scope lookup — never `customer_for_scope/1`, which is
+> # get-or-create and would write a Customer row on every authenticated render.
 > def mount(_params, _session, socket) do
->   {:ok, customer} = AccrueHost.Billing.customer_for_scope(socket.assigns.current_scope)
+>   customer =
+>     case AccrueHost.Billing.billing_state_for_scope(socket.assigns.current_scope) do
+>       {:ok, %{customer: %Accrue.Billing.Customer{} = customer}} -> customer
+>       _ -> nil
+>     end
+>
 >   {:ok, assign(socket, :customer, customer)}
 > end
 > ```
+>
+> The banner renders nothing for a `nil` or healthy customer, so the `nil`
+> fallback is safe to assign directly.
 >
 > Resolving from the scope (not from a params-supplied customer id) also prevents a
 > cross-tenant dunning-state leak — the banner only ever reflects the signed-in
