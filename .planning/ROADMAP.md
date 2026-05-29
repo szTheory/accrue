@@ -8,7 +8,7 @@
 
 ## Phases
 
-- [ ] **Phase 149: Dunning state API & Headless Banner Component** — `Accrue.Dunning.requires_attention?/1` API and `<Accrue.Components.DunningBanner />` headless HEEx component.
+- [x] **Phase 149: Dunning state API & Headless Banner Component** — `Accrue.Dunning.requires_attention?/1` API and `<AccrueAdmin.Components.DunningBanner />` headless HEEx component. (completed 2026-05-28)
 - [x] **Phase 150: Documentation & Adopter Proof** — `guides/dunning.md` integration docs and `examples/accrue_host` banner wiring. (completed 2026-05-29)
 
 ## Phase Details
@@ -23,7 +23,7 @@
   1. `Accrue.Dunning.requires_attention?/1` correctly identifies active dunning campaigns without false positives from projection lag.
   2. The headless component correctly renders its inner block or default message when dunning is active, and renders nothing when not.
 
-**Plans:** 0 plans complete
+**Plans:** 2/2 plans complete
 **UI hint:** yes
 
 ### Phase 150: Documentation & Adopter Proof
@@ -48,5 +48,5 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 149. Dunning state API & Headless Banner Component | 0/2 | Planned | |
+| 149. Dunning state API & Headless Banner Component | 2/2 | Complete    | 2026-05-28 |
 | 150. Documentation & Adopter Proof | 2/2 | Complete    | 2026-05-29 |

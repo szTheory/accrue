@@ -6,12 +6,12 @@ Current focus: **In-App Banners**. Expand dunning beyond email by providing an i
 
 ### Public API & Core Math (BAN)
 
-- [ ] **BAN-01** — Dunning state public API.
+- [x] **BAN-01** — Dunning state public API.
   - `Accrue.Dunning.requires_attention?(customer_id)` (or equivalent signature) returns a boolean indicating if the customer is currently in an active dunning campaign that requires action.
   - Optionally returns `{:true, campaign}` to allow the host app to customize the message.
   - Uses the ledger as the source of truth (via `Accrue.Billing.Query.in_active_dunning_campaign/1` or similar, avoiding projection lag false positives).
 
-- [ ] **BAN-02** — Headless Dunning Banner Component.
+- [x] **BAN-02** — Headless Dunning Banner Component.
   - `Accrue.Components.DunningBanner` or `AccrueWeb.Components.DunningBanner` HEEx component.
   - Headless/minimally styled so host apps can drop it into `app.html.heex` or root layouts without dictating CSS.
   - Automatically queries `requires_attention?/1` if a customer is passed in.
@@ -34,7 +34,7 @@ Current focus: **In-App Banners**. Expand dunning beyond email by providing an i
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BAN-01 | Phase 149 | Planned |
-| BAN-02 | Phase 149 | Planned |
-| BAN-03 | Phase 150 | Planned |
-| BAN-04 | Phase 150 | Planned |
+| BAN-01 | Phase 149 | Satisfied |
+| BAN-02 | Phase 149 | Satisfied |
+| BAN-03 | Phase 150 | Satisfied |
+| BAN-04 | Phase 150 | Satisfied |
