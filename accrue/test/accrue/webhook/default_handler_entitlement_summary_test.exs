@@ -33,7 +33,7 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
       |> Customer.changeset(%{
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
-        processor: "fake",
+        processor: "stripe",
         processor_id: "cus_fake_ent_summary",
         email: "ent-summary@example.com"
       })

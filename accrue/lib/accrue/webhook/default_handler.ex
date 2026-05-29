@@ -130,7 +130,7 @@ defmodule Accrue.Webhook.DefaultHandler do
       ) do
     obj = entitlement_summary_object_from_ctx(ctx)
 
-    case dispatch(event.type, event.processor_event_id, event.created_at, obj) do
+    case dispatch(event.type, event.processor_event_id, event.created_at, obj, event.processor) do
       {:ok, _} -> :ok
       other -> other
     end
@@ -303,8 +303,13 @@ defmodule Accrue.Webhook.DefaultHandler do
   # behaves byte-for-byte as Phase 126 — the cache table is never read or
   # written from the webhook path.
   defp dispatch("entitlements.active_entitlement_summary.updated", evt_id, evt_ts, obj) do
+    # Fallback for handle/1 (raw event map path, implies Stripe)
+    dispatch("entitlements.active_entitlement_summary.updated", evt_id, evt_ts, obj, :stripe)
+  end
+
+  defp dispatch("entitlements.active_entitlement_summary.updated", evt_id, evt_ts, obj, processor) do
     if Accrue.Config.stripe_native_sync?() do
-      reduce_entitlement_summary(evt_id, evt_ts, obj)
+      reduce_entitlement_summary(evt_id, evt_ts, obj, processor)
     else
       {:ok, :ignored}
     end
@@ -491,7 +496,7 @@ defmodule Accrue.Webhook.DefaultHandler do
   # (`Accrue.entitled?/2`, `has_active_plan?/2`, `Resolver`, `LocalMap`)
   # NEVER reads it. Truncation (`has_more` → `truncated`) is recorded for
   # operator honesty (D-07) but can never affect a grant decision.
-  defp reduce_entitlement_summary(evt_id, evt_ts, obj) do
+  defp reduce_entitlement_summary(evt_id, evt_ts, obj, processor) do
     cus_id = get(obj, :customer)
     entitlements = get(obj, :entitlements)
     data = get(entitlements, :data)
@@ -506,13 +511,13 @@ defmodule Accrue.Webhook.DefaultHandler do
         {:ok, :ignored}
 
       true ->
-        reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data)
+        reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data, processor)
     end
   end
 
-  defp reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data) do
+  defp reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data, processor) do
     Repo.transact(fn ->
-      case Repo.get_by(Customer, processor_id: cus_id) do
+      case Repo.get_by(Customer, processor_id: cus_id, processor: to_string(processor)) do
         %Customer{} = customer ->
           row = Repo.get_by(EntitlementSummary, customer_id: customer.id)
 
