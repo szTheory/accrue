@@ -9,7 +9,7 @@
 ## Phases
 
 - [ ] **Phase 149: Dunning state API & Headless Banner Component** — `Accrue.Dunning.requires_attention?/1` API and `<Accrue.Components.DunningBanner />` headless HEEx component.
-- [ ] **Phase 150: Documentation & Adopter Proof** — `guides/dunning.md` integration docs and `examples/accrue_host` banner wiring.
+- [x] **Phase 150: Documentation & Adopter Proof** — `guides/dunning.md` integration docs and `examples/accrue_host` banner wiring. (completed 2026-05-29)
 
 ## Phase Details
 
@@ -36,11 +36,11 @@
   1. `guides/dunning.md` contains clear copy/paste instructions for adding the banner to a Phoenix layout.
   2. `examples/accrue_host` displays the banner when the user logs in and their subscription is past due.
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 
 - [x] 150-01-PLAN.md — Add the "In-App Banners" section to guides/dunning.md (BAN-03)
-- [ ] 150-02-PLAN.md — Wire the dunning banner into examples/accrue_host + seed + adoption-proof row (BAN-04)
+- [x] 150-02-PLAN.md — Wire the dunning banner into examples/accrue_host + seed + adoption-proof row (BAN-04)
 
 **UI hint:** no
 
@@ -49,4 +49,4 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 149. Dunning state API & Headless Banner Component | 0/2 | Planned | |
-| 150. Documentation & Adopter Proof | 1/2 | In Progress|  |
+| 150. Documentation & Adopter Proof | 2/2 | Complete   | 2026-05-29 |

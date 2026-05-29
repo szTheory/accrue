@@ -22,7 +22,7 @@ Current focus: **In-App Banners**. Expand dunning beyond email by providing an i
   - `guides/dunning.md` is updated with a section on "In-App Banners".
   - Examples showing how to mount the component or use the helper in a Phoenix app.
 
-- [ ] **BAN-04** — Adopter-proof matrix row + example-host wiring.
+- [x] **BAN-04** — Adopter-proof matrix row + example-host wiring.
   - The `examples/accrue_host` app demonstrates the banner in its UI when the test user is in dunning.
 
 ### Out of Scope
