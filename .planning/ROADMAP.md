@@ -36,10 +36,10 @@
   1. `guides/dunning.md` contains clear copy/paste instructions for adding the banner to a Phoenix layout.
   2. `examples/accrue_host` displays the banner when the user logs in and their subscription is past due.
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 
-- [ ] 150-01-PLAN.md — Add the "In-App Banners" section to guides/dunning.md (BAN-03)
+- [x] 150-01-PLAN.md — Add the "In-App Banners" section to guides/dunning.md (BAN-03)
 - [ ] 150-02-PLAN.md — Wire the dunning banner into examples/accrue_host + seed + adoption-proof row (BAN-04)
 
 **UI hint:** no
@@ -49,4 +49,4 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 149. Dunning state API & Headless Banner Component | 0/2 | Planned | |
-| 150. Documentation & Adopter Proof | 0/2 | Planned | |
+| 150. Documentation & Adopter Proof | 1/2 | In Progress|  |
