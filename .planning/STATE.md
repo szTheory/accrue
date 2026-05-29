@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.46
 milestone_name: Maintenance & Closure
 status: executing
-last_updated: "2026-05-29T17:17:55.235Z"
-last_activity: 2026-05-29 -- Phase 151 planning complete
+last_updated: "2026-05-29T20:51:30.700Z"
+last_activity: 2026-05-29
 progress:
-  total_phases: 1
-  completed_phases: 0
+  total_phases: 2
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 50
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-28 after v1.44 milestone)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
+Phase: 151
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-05-29 -- Phase 151 planning complete
+Last activity: 2026-05-29
 
 ## Milestone Progress
 
@@ -74,6 +74,10 @@ Last activity: 2026-05-29 -- Phase 151 planning complete
 
 ## Accumulated Context
 
+### Roadmap Evolution
+
+- Phase 152 added: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
+
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
@@ -108,9 +112,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-29T16:30:11.759Z
-Stopped at: Phase 151 context gathered
-Resume file: .planning/phases/151-maintenance-triage/151-CONTEXT.md
+Last session: 2026-05-29T20:51:30.696Z
+Stopped at: Phase 152 context gathered
+Resume file: .planning/phases/152-close-v1-46-closure-gaps-since-warnings-verification-hex-pub/152-CONTEXT.md
 
 ## Operator Next Steps
 
