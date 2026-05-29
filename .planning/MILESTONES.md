@@ -1,5 +1,24 @@
 # Milestones
 
+## v1.44 Recovered-Revenue Dashboard Completion (Shipped: 2026-05-28)
+
+**Phases completed:** 5 phases (144–148)
+**Timeline:** 2026-05-27 → 2026-05-28 (2 days)
+
+**Delivered:** The Recovered-Revenue dashboard in AccrueAdmin, visualizing the funnel query and at-risk table. This builds on the Phase 143 MRR snapshotting foundation. Includes cross-currency widening, recovery-rate API, time-window URL plumbing, and drill-down route. **BREAKING change DAN-07 included**, blocking post-v1.44 Hex publish until released.
+
+**Milestone audit:** `passed` — definition of done **ACHIEVED**, 16/16 requirements satisfied, all 5 phases verified `passed`. See `.planning/v1.44-v1.44-MILESTONE-AUDIT.md`.
+
+**Key accomplishments:**
+
+- **Phase 144:** Funnel query + viz + campaign-anchor retrofit + money formatter polish (DAN-01, DAN-02, DAN-08, DAN-09, DAN-13).
+- **Phase 145:** Time-window URL plumbing + window selector (DAN-10).
+- **Phase 146:** At-risk query + at-risk table + last-failure enrichment (DAN-03, DAN-04, DAN-11).
+- **Phase 147:** Per-subscription drill-down route + CampaignLive (DAN-05, DAN-12).
+- **Phase 148:** Cross-currency widening + recovery-rate API + public docs + adopter-proof (DAN-06, DAN-07, DAN-14, DAN-15, DAN-16).
+
+---
+
 ## v1.43 v1.43 (Shipped: 2026-05-27)
 
 **Phases completed:** 1 phases, 2 plans, 0 tasks

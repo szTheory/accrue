@@ -12,41 +12,34 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Current milestone
 
-**Active: `v1.44 — Recovered-Revenue Dashboard Completion`** (Planning)
+**Active: `v1.45`**
 
-**Goal:** Complete the operator-facing Recovered-Revenue Dashboard in `accrue_admin` — funnel, at-risk drill-down, time-window filters, public docs, and an adopter-proof matrix row — building on the Phase 143 foundation (MRR-snapshot event ledger + `Accrue.Analytics.Dunning` aggregator + minimal `/billing/analytics/recovery` KPI page).
+**Goal:** Provide Multi-channel Dunning (In-App Banners).
 
 **Target features:**
-- Dunning funnel visualization (Entered → Recovered → Exhausted) on `/billing/analytics/recovery`.
-- "At Risk" subscriptions drill-down table (campaigns currently active).
-- Time-window filter (7 / 30 / 90 days) on hero metrics + funnel.
-- Per-campaign drill-down or row-click affordance into specific dunning timelines.
-- Public docs for `Accrue.Analytics.Dunning` (guides + module docs + adoption-proof-matrix row).
-- Example-host wiring so the dashboard is provable end-to-end against fake/seed data.
-
-**Design constraint (carried from Phase 143):** Analytics aggregates the existing `accrue_events` ledger only — no new tables, no new dependencies (no TimescaleDB, no rollup workers). Maintains Accrue's lightweight OSS footprint. Funnel and drill-down must reuse the same JSONB-aggregation pattern (`fragment("(?->>'mrr_value_cents')::integer", e.data)` or equivalents) that Phase 143 established.
-
-**Phase numbering:** continues from Phase 143 → starts at **Phase 144** (default; no `--reset-phase-numbers`). Phase 143 (the foundation) is treated as a standalone post-v1.43 phase, not retroactively folded into v1.44.
+- `Accrue.Dunning.requires_attention?/1` helper.
+- Optional `<Accrue.Components.DunningBanner />`.
 
 ## Last shipped milestone
+
+### v1.44 — Recovered-Revenue Dashboard Completion (**archived 2026-05-28**)
+
+**Goal:** Delivered the Recovered-Revenue dashboard in AccrueAdmin, visualizing the funnel query and at-risk table. Built on the Phase 143 MRR snapshotting foundation. Included cross-currency widening, recovery-rate API, time-window URL plumbing, and drill-down route.
+
+**Delivered:**
+- Funnel query + viz + campaign-anchor retrofit + money formatter polish.
+- Time-window URL plumbing + window selector.
+- At-risk query + at-risk table + last-failure enrichment.
+- Per-subscription drill-down route + CampaignLive.
+- Cross-currency widening + recovery-rate API + public docs + adopter-proof.
+
+**Closeout proof:** Phases 144–148; planning git tag `v1.44`; see `.planning/MILESTONES.md` v1.44 entry.
+
+## Prior shipped milestone
 
 ### v1.43 — Linked Release 1.2.0 Truth (**archived 2026-05-27**)
 
 **Goal:** Close the linked release-truth gap by locking the three-package contract, shipping the public `1.2.0` trio with canonical proof, and finishing the post-publish planning-mirror plus inventory closeout.
-
-**Delivered:**
-
-- Locked the three-package release contract for `accrue` / `accrue_admin` / `accrue_portal` in release automation and runbooks.
-- Published the linked `1.2.0` trio to Hex with canonical proof.
-- Performed post-publish planning-mirror alignment and the maintainer friction-inventory pass.
-
-**Closeout proof:** Phases 140–142; planning git tag `v1.43`; see `.planning/MILESTONES.md` v1.43 entry.
-
-## Prior shipped milestone
-
-### v1.42 — Ad-hoc Invoices & Adopter Confidence (**archived 2026-05-27**)
-
-**Goal:** Enhance adopter confidence through end-to-end demonstrations in the example host and provide support for ad-hoc invoice adjustments, while closing robustness gaps in the entitlement cache.
 
 **Delivered:**
 - Ad-hoc invoice line items on Draft invoices.
@@ -377,20 +370,20 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **Closeout proof:** `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
-## Next Milestone Goals (post-v1.43)
+## Next Milestone Goals (post-v1.44)
 
-**Assessment (2026-05-27, post-v1.43 next-step review — `.planning/threads/v1.44-NEXT-STEP-ASSESSMENT.md`):** With 6 of 6 canonical SaaS loops shipped and `1.2.0` on Hex, the highest-leverage next wedge is proving the v1.40 dunning engine's ROI to adopters. Phase 143 shipped the foundation (event-ledger MRR snapshotting + `Accrue.Analytics.Dunning` aggregator + minimal KPI page). v1.44 completes the dashboard so adopters can see "Accrue saved you $X this month" at a glance.
+**Assessment (2026-05-28, post-v1.44 next-step review — `.planning/threads/v1.45-NEXT-STEP-ASSESSMENT.md`):** With the Recovered-Revenue dashboard shipped, the highest-leverage next wedge is completing the dunning story with Multi-channel Dunning (In-App Banners). This drives recovery rates higher without the compliance risks of SMS.
 
-- **v1.44 — Recovered-Revenue Dashboard Completion** — **SELECTED.** Funnel + at-risk drill-down + time-window filters + docs + adopter-proof. Builds on standalone Phase 143 foundation.
-- **v1.45 (suggested)** — Multi-channel dunning (in-app banners first; SMS/push later under host-owned compliance posture).
+- **v1.45 — Multi-channel Dunning (In-App Banners)** — **SELECTED.** Provide a headless `Accrue.Dunning.Banner` component or `Accrue.Dunning.requires_attention?/1` helper that the host app can drop into their root layout.
+- **v1.46+ (parked)** — Multi-channel Dunning (SMS/Push via Chimeway). High compliance risk, better left to host app integration.
 - **v1.46+ (parked)** — Rich metered/tiered entitlement math (out of scope unless adopter demand surfaces; risks accounting-territory drift).
 - **Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet.
 
 ## Current State
 
-Current focus: **Polish & Adopter ROI Proof**. **v1.44 — Recovered-Revenue Dashboard Completion is ACTIVE (In Progress — Phase 146 complete 2026-05-27)**. Phase 143 (standalone) shipped the analytics foundation; v1.44 completes the dashboard with funnel + drill-down + filters + docs. Phase 144 delivered the 3-stage dunning funnel UI, JSONB safe-cast, campaign-anchor retrofit, and CLDR-correct money rendering (DAN-01, DAN-02, DAN-08, DAN-09, DAN-13). Phase 145 delivered `WindowSelector` component + `?window=7d|30d|90d` URL plumbing through RecoveryLive (DAN-10). Phase 146 delivered `at_risk_subscriptions/1` query (NOT EXISTS projection-lag guard, Oban ETA join, correlated failure_reason subquery) + `AtRiskTable` Phoenix.Component + RecoveryLive wiring (DAN-03, DAN-04, DAN-11). Carryover: CR-01 multi-currency aggregation widening is owned by Phase 148 DAN-07; failure_message enrichment deferred post-v1.44 (D-07).
+Current focus: **Multi-channel Dunning (In-App Banners)**. **v1.45 — Multi-channel Dunning (In-App Banners) is ACTIVE (Planned)**. v1.44 completed the Recovered-Revenue Dashboard. v1.45 will focus on shipping an idiomatic LiveView component or helper to display "Update your card" banners in the host application.
 
-**Last shipped planning milestone:** **v1.43** — Phases **140–142** (**2026-05-27**). **Standalone follow-on:** Phase 143 — Recovered-Revenue Analytics Foundation (verified 2026-05-27).
+**Last shipped planning milestone:** **v1.44** — Phases **144–148** (**2026-05-28**).
 
 ## Requirements
 
