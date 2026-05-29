@@ -10,15 +10,12 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Accrue.Events
 alias AccrueHost.Accounts
 alias AccrueHost.Accounts.OrganizationMembership
 alias AccrueHost.Accounts.Scope
 alias AccrueHost.Accounts.User
 alias AccrueHost.Organizations
 alias AccrueHost.Repo
-
-import Ecto.Query, only: [from: 2]
 
 now = Accrue.Clock.utc_now()
 now_iso = DateTime.to_iso8601(now)
@@ -141,31 +138,38 @@ days_ago = fn days ->
   DateTime.add(now, -days * 86_400, :second)
 end
 
-# `Accrue.Events.record/1` has no `timestamp` (or `inserted_at`) field on the
-# event schema — `inserted_at` is `read_after_writes` and set by the DB at
-# insert, and it is not in the changeset's cast fields. Passing `timestamp:`
-# is silently dropped, collapsing every event to `now()`. The recovery
-# analytics window on `inserted_at`, so we record the event and then
-# explicitly back-date `inserted_at` via `Repo.update_all` to land the event
-# in its intended analytics window.
+# The recovery analytics window on `inserted_at`, so seeded events must land at
+# a back-dated `inserted_at` to populate distinct analytics windows. We CANNOT
+# do this via `Events.record/1` + `Repo.update_all`: `accrue_events` carries a
+# `BEFORE UPDATE OR DELETE` immutability trigger (the tamper-evident ledger
+# invariant) that raises SQLSTATE `45A01` on any UPDATE — so back-dating after
+# insert crashes `mix ecto.reset`. INSERT is permitted, so we set `inserted_at`
+# at insert time via `Repo.insert_all/3` against the `Event` schema (which
+# dumps `data` to jsonb and casts the timestamp). We replicate the defaults
+# `Accrue.Events.normalize/1` would apply (`actor_type: "system"`,
+# `schema_version: 1`, `data: %{}`).
 # Each call passes a stable, deterministic `idempotency_key` (independent of
 # the random per-run `subject_id`) so re-running this script — e.g. without a
-# `mix ecto.reset` — collapses to a no-op via the `on_conflict: :nothing`
-# partial-unique path in `Accrue.Events.insert_opts/1` rather than appending a
-# fresh duplicate set of dunning events (which would inflate the dashboard's
-# Recovered/Exhausted MRR roll-ups). On the dedupe path `Events.record/1`
-# returns the pre-existing row, so the back-date below simply re-asserts the
-# same `inserted_at`.
+# `mix ecto.reset` — collapses to a no-op via the same `on_conflict: :nothing`
+# partial-unique conflict target `Accrue.Events.insert_opts/1` uses, rather
+# than appending a fresh duplicate set of dunning events (which would inflate
+# the dashboard's Recovered/Exhausted MRR roll-ups).
 record_at = fn attrs, idempotency_key, at ->
-  {:ok, %Accrue.Events.Event{id: id}} =
-    Events.record(Map.put(attrs, :idempotency_key, idempotency_key))
+  row =
+    attrs
+    |> Map.put(:idempotency_key, idempotency_key)
+    |> Map.put(:inserted_at, at)
+    |> Map.put_new(:actor_type, "system")
+    |> Map.put_new(:schema_version, 1)
+    |> Map.put_new(:data, %{})
 
-  Repo.update_all(
-    from(e in Accrue.Events.Event, where: e.id == ^id),
-    set: [inserted_at: at]
-  )
+  {_count, _} =
+    Repo.insert_all(Accrue.Events.Event, [row],
+      on_conflict: :nothing,
+      conflict_target: {:unsafe_fragment, "(idempotency_key) WHERE idempotency_key IS NOT NULL"}
+    )
 
-  id
+  :ok
 end
 
 # NOTE: `sub_7d` / `sub_30d` / `sub_90d` below are roll-up-only fixtures —
