@@ -12,6 +12,12 @@ This page is the **story** of what shipped—not a commit list. For every line i
 
 ## accrue
 
+### 1.3.0
+
+**Dunning analytics, recovered-revenue dashboard, in-app dunning banners, ENT-10 webhook scoping fix, and dependency maintenance.**
+
+`1.3.0` ships the v1.46 feature batch. The recovered-revenue analytics API is now complete: `recovered_vs_lost_mrr/1`, `recovery_rate/1`, `funnel/1`, `at_risk_subscriptions/1`, `campaign_timeline/2`, `campaign_timeline_grouped/2`, and `invoices_for_campaign/2` are all documented, spec-annotated, and tagged `(since 1.3.0)` in ExDoc. The `/billing/analytics/recovery` LiveView integrates these into an operator-facing recovery funnel dashboard. `Accrue.Analytics.Dunning.current_dunning_context/2` enables host apps to render in-app dunning banners with a single resolver call — the core-only path requires no admin package. The ENT-10 webhook scoping bug is fixed: the webhook cache is now per-entity, not global, eliminating cross-entity contamination for multi-tenant setups. Dependency maintenance: `accrue`, `accrue_admin`, and `accrue_portal` are all current on their upstream package floors.
+
 ### 1.2.0
 
 **Idempotency foundations, Phase 128-142 rollout, and cross-currency analytics.**
@@ -67,6 +73,10 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 ## accrue_admin
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
+
+### 1.3.0
+
+Matches **accrue 1.3.0**: Ships the `FunnelChart` LiveComponent, the recovery dashboard LiveView at `/admin/analytics/recovery`, and the `AccrueAdmin.Components.DunningBanner` component for embedding context-aware in-app dunning notices in operator and portal surfaces. Also includes the `@since 1.3.0` annotation cleanup — all dunning and funnel functions now render `(since 1.3.0)` badges correctly in ExDoc.
 
 ### 1.2.0
 
