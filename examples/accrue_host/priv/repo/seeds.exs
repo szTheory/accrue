@@ -156,6 +156,16 @@ record_at = fn attrs, at ->
   id
 end
 
+# NOTE: `sub_7d` / `sub_30d` / `sub_90d` below are roll-up-only fixtures —
+# freshly generated UUIDs that intentionally do NOT correspond to rows in
+# `accrue_subscriptions`. They drive the MRR roll-up analytics
+# (`recovered_vs_lost_mrr/1`), which read events by `type` + `currency` only.
+# The sibling At-Risk analytics (`Accrue.Analytics.Dunning`, which joins
+# `accrue_subscriptions` by `subject_id`) will therefore find nothing for
+# these IDs — the At-Risk table is intentionally empty for these fixtures.
+# The real `past_due_subscription` seeded above is the only subscription with
+# a live dunning campaign.
+
 # Insert deterministic Dunning events for 7d window (Recovered USD)
 sub_7d = Ecto.UUID.generate()
 anchor_7d = DateTime.to_iso8601(days_ago.(5))
