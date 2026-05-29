@@ -47,8 +47,8 @@ defmodule Accrue.Analytics.Dunning do
         lost: [%{currency: "usd", cents: 3000}]
       }
 
-  @since "1.4.0"
   """
+  @doc since: "1.3.0"
   @spec recovered_vs_lost_mrr(keyword()) :: %{
           recovered: [%{currency: String.t(), cents: non_neg_integer()}],
           lost: [%{currency: String.t(), cents: non_neg_integer()}]
@@ -95,8 +95,8 @@ defmodule Accrue.Analytics.Dunning do
     * `:since` — `%DateTime{}` lower bound (inclusive on `inserted_at`).
     * `:until` — `%DateTime{}` upper bound (inclusive on `inserted_at`).
 
-  @since "1.4.0"
   """
+  @doc since: "1.3.0"
   @spec recovery_rate(keyword()) :: %{
           rate: float() | nil,
           recovered: non_neg_integer(),
@@ -156,8 +156,8 @@ defmodule Accrue.Analytics.Dunning do
       iex> Accrue.Analytics.Dunning.funnel()
       %{entered: 3, recovered: 1, exhausted: 1, active: 1}
 
-  @since "1.4.0"
   """
+  @doc since: "1.3.0"
   @spec funnel(keyword()) :: %{
           entered: non_neg_integer(),
           recovered: non_neg_integer(),
@@ -221,8 +221,8 @@ defmodule Accrue.Analytics.Dunning do
     * `:since` — `%DateTime{}` lower bound (inclusive on `dunning_campaign_started_at`)
     * `:until` — `%DateTime{}` upper bound (inclusive on `dunning_campaign_started_at`)
 
-  @since "1.4.0"
   """
+  @doc since: "1.3.0"
   @spec at_risk_subscriptions(keyword()) :: [map()]
   def at_risk_subscriptions(opts \\ []) when is_list(opts) do
     now = Accrue.Clock.utc_now()
@@ -330,7 +330,7 @@ defmodule Accrue.Analytics.Dunning do
   @doc """
   Returns all dunning events for a subscription in chronological order.
   """
-  @since "1.4.0"
+  @doc since: "1.3.0"
   @spec campaign_timeline(String.t(), keyword()) :: [Event.t()]
   def campaign_timeline(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
     Accrue.Events.timeline_for("Subscription", subscription_id, opts)
@@ -340,7 +340,7 @@ defmodule Accrue.Analytics.Dunning do
   @doc """
   Returns dunning events for a subscription grouped into campaign arcs.
   """
-  @since "1.4.0"
+  @doc since: "1.3.0"
   @spec campaign_timeline_grouped(String.t(), keyword()) :: [{String.t() | nil, [Event.t()]}]
   def campaign_timeline_grouped(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
     campaign_timeline(subscription_id, opts)
@@ -368,7 +368,7 @@ defmodule Accrue.Analytics.Dunning do
   @doc """
   Returns a map of invoices for a given subscription, keyed by Stripe processor_id.
   """
-  @doc since: "1.4.0"
+  @doc since: "1.3.0"
   @spec invoices_for_campaign(String.t(), keyword()) :: %{String.t() => map()}
   def invoices_for_campaign(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
     from(i in Invoice,
