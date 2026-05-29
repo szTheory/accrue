@@ -64,8 +64,6 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
   # tests lock the real path end-to-end (the object travels in `ctx`, exactly
   # as `Accrue.Webhook.DispatchWorker` stows it under `:meter_error_object`).
   describe "real DispatchWorker path (handle_event/3)" do
-    @summary_type "entitlements.active_entitlement_summary.updated"
-
     defp summary_event_and_ctx(customer_processor_id, opts) do
       raw = StripeFixtures.entitlement_summary_event([customer: customer_processor_id] ++ opts)
       summary_object = raw["data"]["object"]

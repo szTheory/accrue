@@ -307,6 +307,8 @@ defmodule Accrue.Webhook.DefaultHandler do
     dispatch("entitlements.active_entitlement_summary.updated", evt_id, evt_ts, obj, :stripe)
   end
 
+  defp dispatch(_type, _evt_id, _evt_ts, _obj), do: {:ok, :ignored}
+
   defp dispatch("entitlements.active_entitlement_summary.updated", evt_id, evt_ts, obj, processor) do
     if Accrue.Config.stripe_native_sync?() do
       reduce_entitlement_summary(evt_id, evt_ts, obj, processor)
@@ -314,8 +316,6 @@ defmodule Accrue.Webhook.DefaultHandler do
       {:ok, :ignored}
     end
   end
-
-  defp dispatch(_type, _evt_id, _evt_ts, _obj), do: {:ok, :ignored}
 
   # ---------------------------------------------------------------------
   # Checkout session reducer (Phase 4 Plan 07, CHKT-06)
@@ -871,6 +871,7 @@ defmodule Accrue.Webhook.DefaultHandler do
   # signal is the dedicated `dunning.exhausted` event in
   # `maybe_emit_dunning_exhaustion/2`. Metadata + data carry only IDs +
   # bounded enums — no PII (T-129-01).
+  @dialyzer {:no_opaque, maybe_finalize_dunning_campaign: 3}
   defp maybe_finalize_dunning_campaign(nil, _updated, _canonical), do: :ok
 
   defp maybe_finalize_dunning_campaign(%Subscription{} = row, %Subscription{} = updated, canonical) do

@@ -22,7 +22,7 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
       |> Customer.changeset(%{
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
-        processor: "fake",
+        processor: "stripe",
         processor_id: @cus_processor_id,
         email: "wr05@example.test"
       })
@@ -37,7 +37,7 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
     # Enable the advisory cache config for the test.
     prev_config = Application.get_env(:accrue, :entitlements, [])
     on_exit(fn -> Application.put_env(:accrue, :entitlements, prev_config) end)
-    Application.put_env(:accrue, :entitlements, [stripe_native_sync: :advisory])
+    Application.put_env(:accrue, :entitlements, Keyword.put(prev_config, :stripe_native_sync, :advisory))
 
     # Pre-seed the cache with an old watermark.
     old_ts = ~U[2026-01-01 10:00:00Z]
@@ -88,7 +88,9 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
     customer: customer
   } do
     # Enable the advisory cache config for the test.
-    Application.put_env(:accrue, :entitlements, [stripe_native_sync: :advisory])
+    prev_config = Application.get_env(:accrue, :entitlements, [])
+    on_exit(fn -> Application.put_env(:accrue, :entitlements, prev_config) end)
+    Application.put_env(:accrue, :entitlements, Keyword.put(prev_config, :stripe_native_sync, :advisory))
 
     # Pre-seed the cache with a newer watermark.
     new_ts = ~U[2026-05-26 10:00:00Z]

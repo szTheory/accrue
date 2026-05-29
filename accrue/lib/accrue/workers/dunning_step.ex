@@ -295,6 +295,7 @@ defmodule Accrue.Workers.DunningStep do
   defp email_type("final_notice"), do: :dunning_final_notice
 
   # ISO8601 scalar coercion for Oban args (only_scalars!-safe).
+  @dialyzer {:nowarn_function, maybe_iso8601: 1}
   defp maybe_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
   defp maybe_iso8601(_), do: nil
 end

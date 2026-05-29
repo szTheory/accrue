@@ -39,7 +39,7 @@ defmodule Accrue.Property.EntitlementSummaryMonotonicPropertyTest do
       |> Customer.changeset(%{
         owner_type: "User",
         owner_id: Ecto.UUID.generate(),
-        processor: "fake",
+        processor: "stripe",
         processor_id: "cus_fake_monotonic",
         email: "monotonic@example.com"
       })

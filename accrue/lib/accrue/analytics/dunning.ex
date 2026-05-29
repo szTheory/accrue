@@ -368,7 +368,7 @@ defmodule Accrue.Analytics.Dunning do
   @doc """
   Returns a map of invoices for a given subscription, keyed by Stripe processor_id.
   """
-  @since "1.4.0"
+  @doc since: "1.4.0"
   @spec invoices_for_campaign(String.t(), keyword()) :: %{String.t() => map()}
   def invoices_for_campaign(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
     from(i in Invoice,

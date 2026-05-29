@@ -928,6 +928,7 @@ defmodule Accrue.Processor.Stripe do
     |> Map.put(:expand, expand)
   end
 
+  @dialyzer {:nowarn_function, translate_resource: 1}
   @spec translate_resource({:ok, struct() | map()} | {:error, term()}) ::
           {:ok, map()} | {:error, Exception.t()}
   defp translate_resource({:ok, %_{} = result}), do: {:ok, Map.from_struct(result)}
