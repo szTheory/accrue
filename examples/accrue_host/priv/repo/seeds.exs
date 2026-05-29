@@ -106,7 +106,7 @@ unless match?(
          {:ok, %{subscription: %Accrue.Billing.Subscription{}}},
          AccrueHost.Billing.billing_state_for(healthy_org)
        ) do
-  {:ok, _healthy_sub} = Accrue.Billing.subscribe(healthy_org, "price_basic")
+  {:ok, _healthy_sub} = AccrueHost.Billing.subscribe(healthy_org, "price_basic")
 end
 
 # 2. PAST-DUE demo account (banner-ON) — subscribed, then flipped into a
@@ -119,7 +119,7 @@ unless match?(
          {:ok, %{subscription: %Accrue.Billing.Subscription{}}},
          AccrueHost.Billing.billing_state_for(past_due_org)
        ) do
-  {:ok, _past_due_sub} = Accrue.Billing.subscribe(past_due_org, "price_basic")
+  {:ok, _past_due_sub} = AccrueHost.Billing.subscribe(past_due_org, "price_basic")
 end
 
 {:ok, %{subscription: past_due_subscription}} = AccrueHost.Billing.billing_state_for(past_due_org)
