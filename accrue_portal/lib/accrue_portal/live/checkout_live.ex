@@ -60,53 +60,51 @@ defmodule AccruePortal.Live.CheckoutLive do
       when is_binary(nonce) and nonce != "" do
     checkout = socket.assigns.checkout_session
 
-    cond do
-      not checkout_ready?(checkout) ->
-        {:noreply, assign_expired_error(socket)}
+    if checkout_ready?(checkout) do
+      case subscribe_with_checkout(socket, checkout, nonce) do
+        {:ok, subscription} ->
+          {:ok, _session} = LocalSession.mark_completed(checkout)
+          maybe_enqueue_completion(checkout, subscription)
 
-      true ->
-        case subscribe_with_checkout(socket, checkout, nonce) do
-          {:ok, subscription} ->
-            {:ok, _session} = LocalSession.mark_completed(checkout)
-            maybe_enqueue_completion(checkout, subscription)
+          case checkout.success_url do
+            url when is_binary(url) and url != "" ->
+              {:noreply, redirect(socket, external: url)}
 
-            case checkout.success_url do
-              url when is_binary(url) and url != "" ->
-                {:noreply, redirect(socket, external: url)}
+            _ ->
+              {:noreply,
+               socket
+               |> assign(:checkout_error, nil)
+               |> assign(:checkout_success, true)}
+          end
 
-              _ ->
-                {:noreply,
-                 socket
-                 |> assign(:checkout_error, nil)
-                 |> assign(:checkout_success, true)}
-            end
+        {:error, %DiscountMappingInvalid{}} ->
+          {:noreply,
+           socket
+           |> assign(:checkout_error, nil)
+           |> assign(:checkout_success, false)
+           |> assign(:promo_preview, nil)
+           |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
+           |> assign_base_checkout_amount()}
 
-          {:error, %DiscountMappingInvalid{}} ->
-            {:noreply,
-             socket
-             |> assign(:checkout_error, nil)
-             |> assign(:checkout_success, false)
-             |> assign(:promo_preview, nil)
-             |> assign(:promo_status, Copy.checkout_promo_temporarily_unavailable())
-             |> assign_base_checkout_amount()}
+        {:error, reason}
+        when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
+          {:noreply,
+           socket
+           |> assign(:checkout_error, nil)
+           |> assign(:checkout_success, false)
+           |> assign(:promotion_code, nil)
+           |> assign(:promo_preview, nil)
+           |> assign(:promo_status, Copy.checkout_promo_invalid())
+           |> assign_base_checkout_amount()}
 
-          {:error, reason}
-          when reason in [:not_found, :inactive, :expired, :max_redemptions_reached] ->
-            {:noreply,
-             socket
-             |> assign(:checkout_error, nil)
-             |> assign(:checkout_success, false)
-             |> assign(:promotion_code, nil)
-             |> assign(:promo_preview, nil)
-             |> assign(:promo_status, Copy.checkout_promo_invalid())
-             |> assign_base_checkout_amount()}
-
-          {:error, _reason} ->
-            {:noreply,
-             socket
-             |> assign(:checkout_error, Copy.checkout_subscription_error())
-             |> assign(:checkout_success, false)}
-        end
+        {:error, _reason} ->
+          {:noreply,
+           socket
+           |> assign(:checkout_error, Copy.checkout_subscription_error())
+           |> assign(:checkout_success, false)}
+      end
+    else
+      {:noreply, assign_expired_error(socket)}
     end
   end
 

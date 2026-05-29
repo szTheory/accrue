@@ -53,7 +53,8 @@ defmodule AccruePortal.MixProject do
       {:jason, "~> 1.4"},
       {:plug_cowboy, "~> 2.7", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
-      {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false}
+      {:ex_doc, "~> 0.40", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 

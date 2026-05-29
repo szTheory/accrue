@@ -3,8 +3,8 @@ defmodule AccruePortal.CheckoutLiveTest do
 
   alias Accrue.Billing.Customer
   alias Accrue.Checkout.LocalSession
-  alias AccruePortal.TestRepo
   alias AccruePortal.BraintreeMox
+  alias AccruePortal.TestRepo
 
   @client_sri "sha384-rNv6rxT4CpVv9Kb8luV4l/GpBwbhHTmZxWbI74/LX+ShrJzh/b9AL7nynSmHDpRC"
   @hosted_fields_sri "sha384-QAzc9uX3XQPGzTESbnMNOUn9hY9jVL/L10Eq3Gxt4NKXIZZWzGlhnEscA3iGj8Jp"

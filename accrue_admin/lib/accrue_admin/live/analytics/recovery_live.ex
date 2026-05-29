@@ -22,11 +22,11 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     at_risk = Dunning.at_risk_subscriptions(since: since, until: until)
 
     locale = Accrue.Config.default_locale()
-    
+
     recovered_currencies = Enum.map(stats.recovered, & &1.currency)
     lost_currencies = Enum.map(stats.lost, & &1.currency)
     currencies = Enum.uniq(recovered_currencies ++ lost_currencies)
-    
+
     currencies = if currencies == [], do: [to_string(Accrue.Config.get!(:default_currency))], else: currencies
 
     kpi_pairs = Enum.map(currencies, fn currency ->
