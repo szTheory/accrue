@@ -19,8 +19,10 @@
 **Depends on:** v1.44
 **Requirements:** BAN-01, BAN-02
 **Success Criteria** (what must be TRUE):
+
   1. `Accrue.Dunning.requires_attention?/1` correctly identifies active dunning campaigns without false positives from projection lag.
   2. The headless component correctly renders its inner block or default message when dunning is active, and renders nothing when not.
+
 **Plans:** 0 plans complete
 **UI hint:** yes
 
@@ -30,13 +32,16 @@
 **Depends on:** Phase 149
 **Requirements:** BAN-03, BAN-04
 **Success Criteria** (what must be TRUE):
+
   1. `guides/dunning.md` contains clear copy/paste instructions for adding the banner to a Phoenix layout.
   2. `examples/accrue_host` displays the banner when the user logs in and their subscription is past due.
-**Plans:** 2 plans
 
+**Plans:** 2 plans
 Plans:
+
 - [ ] 150-01-PLAN.md — Add the "In-App Banners" section to guides/dunning.md (BAN-03)
 - [ ] 150-02-PLAN.md — Wire the dunning banner into examples/accrue_host + seed + adoption-proof row (BAN-04)
+
 **UI hint:** no
 
 ## Progress Table
