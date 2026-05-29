@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.46
 milestone_name: Maintenance & Closure
 status: executing
-last_updated: "2026-05-29T21:34:46.585Z"
+last_updated: "2026-05-29T21:45:38.888Z"
 last_activity: 2026-05-29
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 50
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-28 after v1.44 milestone)
 ## Current Position
 
 Phase: 152 (close-v1-46-closure-gaps-since-warnings-verification-hex-pub) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-29
 
@@ -72,6 +72,7 @@ Last activity: 2026-05-29
 | Phase 150 P01 | 4m | 1 tasks | 1 files |
 | Phase 150 P02 | 7m | 3 tasks | 5 files |
 | Phase 152 P01 | 2m | 3 tasks | 2 files |
+| Phase 152 P02 | 8m | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-26:** Open **v1.42 — Ad-hoc Invoices & Adopter Confidence** to address remaining JTBD frontier items and adopter-proof gaps identified during v1.39/v1.40 audits.
 - [Phase ?]: 2026-05-28: Phase 150 P01 — documented in-app dunning banners (BAN-03): accrue_admin component path + core-only DIY path, with explicit package dependency boundary.
 - [Phase ?]: 2026-05-29: Phase 150 P02 — proved BAN-04 in-app dunning banner in examples/accrue_host; resolver uses read-only billing_state_for_scope/1 to avoid get-or-create on render (T-150-05).
+- [Phase ?]: 2026-05-29: Phase 152 P02 — Three Zeros gate green; accrue_portal credo wired with .credo.exs baseline; pre-existing credo issues fixed in accrue_admin; v1.17 friction inventory pointers restored in STATE.md/ROADMAP.md
 
 ### Pending Todos
 
@@ -118,7 +120,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-29T21:34:46.579Z
+Last session: 2026-05-29T21:45:28.378Z
 Stopped at: Phase 152 context gathered
 Resume file: None
 
