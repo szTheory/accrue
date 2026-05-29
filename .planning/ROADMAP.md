@@ -20,12 +20,19 @@
 **Goal:** Review and address any routine maintenance, dependency updates, or open bugs. Verify that the project remains stable and in a good "done" state.
 
 **Requirements:**
+
 - **MNT-01**: Perform routine issue triage and repository maintenance.
 
 **Plans:** 3 plans
+**Wave 1**
+
 - [ ] 151-01-PLAN.md — Resolve webhook caching code-review feedback (ENT-10)
 - [ ] 151-02-PLAN.md — Update dependencies across the monorepo
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 151-03-PLAN.md — Execute closure criteria validation and publish
 
 **Success Criteria:**
+
 1. No critical or high-priority bugs remain unaddressed.
