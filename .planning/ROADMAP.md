@@ -22,5 +22,10 @@
 **Requirements:**
 - **MNT-01**: Perform routine issue triage and repository maintenance.
 
+**Plans:** 3 plans
+- [ ] 151-01-PLAN.md — Resolve webhook caching code-review feedback (ENT-10)
+- [ ] 151-02-PLAN.md — Update dependencies across the monorepo
+- [ ] 151-03-PLAN.md — Execute closure criteria validation and publish
+
 **Success Criteria:**
 1. No critical or high-priority bugs remain unaddressed.
