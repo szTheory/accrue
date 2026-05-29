@@ -24,9 +24,9 @@ defmodule AccrueAdmin.Components.FunnelChart do
         active={3}
       />
 
-  @since "1.4.0"
   """
 
+  @doc since: "1.3.0"
   use Phoenix.Component
 
   attr(:entered, :integer, required: true)
