@@ -33,7 +33,10 @@ now_iso = DateTime.to_iso8601(now)
 #
 # Both accounts are seeded idempotently (guarded by Repo.get_by on email) so
 # `mix ecto.reset` / re-running this script never crashes on a unique-email or
-# unique-slug constraint. Demo-only credentials — never a production recipe.
+# unique-slug constraint. The dunning ledger events seeded further down are
+# also idempotent via stable `idempotency_key`s, so re-running without a DB
+# reset does not double-count the dashboard MRR roll-ups. Demo-only
+# credentials — never a production recipe.
 # ---------------------------------------------------------------------------
 
 demo_password = "accrue-demo-password"
@@ -145,8 +148,17 @@ end
 # analytics window on `inserted_at`, so we record the event and then
 # explicitly back-date `inserted_at` via `Repo.update_all` to land the event
 # in its intended analytics window.
-record_at = fn attrs, at ->
-  {:ok, %Accrue.Events.Event{id: id}} = Events.record(attrs)
+# Each call passes a stable, deterministic `idempotency_key` (independent of
+# the random per-run `subject_id`) so re-running this script — e.g. without a
+# `mix ecto.reset` — collapses to a no-op via the `on_conflict: :nothing`
+# partial-unique path in `Accrue.Events.insert_opts/1` rather than appending a
+# fresh duplicate set of dunning events (which would inflate the dashboard's
+# Recovered/Exhausted MRR roll-ups). On the dedupe path `Events.record/1`
+# returns the pre-existing row, so the back-date below simply re-asserts the
+# same `inserted_at`.
+record_at = fn attrs, idempotency_key, at ->
+  {:ok, %Accrue.Events.Event{id: id}} =
+    Events.record(Map.put(attrs, :idempotency_key, idempotency_key))
 
   Repo.update_all(
     from(e in Accrue.Events.Event, where: e.id == ^id),
@@ -177,6 +189,7 @@ record_at.(
     subject_id: sub_7d,
     data: %{campaign_anchor: anchor_7d}
   },
+  "seed-dunning-7d-campaign_started",
   days_ago.(5)
 )
 
@@ -187,6 +200,7 @@ record_at.(
     subject_id: sub_7d,
     data: %{campaign_anchor: anchor_7d}
   },
+  "seed-dunning-7d-step_sent",
   days_ago.(4)
 )
 
@@ -197,6 +211,7 @@ record_at.(
     subject_id: sub_7d,
     data: %{campaign_anchor: anchor_7d, mrr_value_cents: 12000, currency: "usd"}
   },
+  "seed-dunning-7d-recovered",
   days_ago.(3)
 )
 
@@ -211,6 +226,7 @@ record_at.(
     subject_id: sub_30d,
     data: %{campaign_anchor: anchor_30d}
   },
+  "seed-dunning-30d-campaign_started",
   days_ago.(25)
 )
 
@@ -221,6 +237,7 @@ record_at.(
     subject_id: sub_30d,
     data: %{campaign_anchor: anchor_30d, mrr_value_cents: 30000, currency: "jpy"}
   },
+  "seed-dunning-30d-exhausted",
   days_ago.(15)
 )
 
@@ -235,6 +252,7 @@ record_at.(
     subject_id: sub_90d,
     data: %{campaign_anchor: anchor_90d}
   },
+  "seed-dunning-90d-campaign_started",
   days_ago.(60)
 )
 
@@ -245,5 +263,6 @@ record_at.(
     subject_id: sub_90d,
     data: %{campaign_anchor: anchor_90d}
   },
+  "seed-dunning-90d-step_sent",
   days_ago.(50)
 )
