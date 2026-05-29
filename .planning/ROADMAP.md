@@ -5,11 +5,28 @@
 
 ## Overview
 
-**1 phases** | **1 requirements mapped** | All covered ✓
+**2 phases** | **1 requirements mapped** | All covered ✓
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
-| 151 | Maintenance & Triage | Address outstanding maintenance and intake-gated issues | MNT-01 | 1 |
+| 151 | Maintenance & Triage | 1/3 | In Progress|  |
+| 152 | Close v1.46 closure gaps | 3/3 | Planned |  |
+
+### Phase 152: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
+
+**Goal:** Fix all malformed @since annotations, run the Three Zeros closure gate green, and cut the linked 1.3.0 Hex release across all three packages (accrue, accrue_admin, accrue_portal).
+**Requirements**: D-01 (target 1.3.0), D-02 (@doc since: fix), D-03 (Three Zeros gate), D-04 (Release Please pipeline)
+**Depends on:** Phase 151
+**Plans:** 3 plans
+
+**Wave 1** *(parallel)*
+
+- [ ] 152-01-PLAN.md — Fix all 8 @since annotations to canonical @doc since: "1.3.0" (dunning.ex ×7, funnel_chart.ex ×1)
+- [ ] 152-02-PLAN.md — Run Three Zeros closure gate: mix test/dialyzer/credo/coveralls + all verify_*.sh scripts
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 152-03-PLAN.md — Release PR reconciliation: release-notes.md + CHANGELOG + Release Please PR merge + linked Hex publish
 
 ---
 
@@ -23,10 +40,10 @@
 
 - **MNT-01**: Perform routine issue triage and repository maintenance.
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 **Wave 1**
 
-- [ ] 151-01-PLAN.md — Resolve webhook caching code-review feedback (ENT-10)
+- [x] 151-01-PLAN.md — Resolve webhook caching code-review feedback (ENT-10)
 - [ ] 151-02-PLAN.md — Update dependencies across the monorepo
 
 **Wave 2** *(blocked on Wave 1 completion)*
