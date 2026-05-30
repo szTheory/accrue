@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
 status: planning
-last_updated: "2026-05-30T17:55:24.052Z"
+last_updated: "2026-05-30T18:00:00.000Z"
 last_activity: 2026-05-30
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,20 +17,30 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-28 after v1.44 milestone)
+See: `.planning/PROJECT.md` (updated 2026-05-30 after v1.47 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Milestone complete
+**Current focus:** v1.47 — ENT-10 Polish + Adopter-Proof Completeness
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 154 (Advisory Cache Core Correctness)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-30 — Milestone v1.47 started
+Status: Planning
+Last activity: 2026-05-30 — Roadmap created for v1.47
 
 ## Milestone Progress
+
+### v1.47 Phase Summary
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 154 | Advisory Cache Core Correctness | ADV-01, ADV-02, ADV-03, ADV-04, POL-01, POL-02 | Not started |
+| 155 | StripeFixtures Polish + Telemetry Counters | POL-03, POL-04 | Not started |
+| 156 | Entitlements Gating Adopter Proof | PRF-01 | Not started |
+| 157 | Metered Usage Adopter Proof | PRF-02 | Not started |
+| 158 | Oban Cron Wiring Adopter Proof | PRF-03 | Not started |
 
 ### Recently shipped milestones
 
@@ -79,26 +89,32 @@ Last activity: 2026-05-30 — Milestone v1.47 started
 
 ## Accumulated Context
 
+### Key Planning Decisions for v1.47
+
+- **2026-05-30:** ADV-01 (optimistic_lock removal) and ADV-02 (NULL watermark fix) must ship together in Phase 154 — fixing one without the other leaves the concurrent-suppress bug alive. Documented in PITFALLS.md.
+- **2026-05-30:** ADV-04 (concurrent test) is mandatory for WR-05 closure — serial tests cannot catch the OCC+upsert interaction. Included in Phase 154 scope.
+- **2026-05-30:** Phase 154 plan must include: verify `optimistic_lock` + `on_conflict_where` interaction at Ecto 3.13 before final implementation (minimal repro in scratch test).
+- **2026-05-30:** No migration required for any v1.47 phase — `lock_version` column stays in DB; only the changeset call is removed.
+- **2026-05-30:** Phases 156, 157, 158 are mutually independent — all depend on Phase 153 (prior milestone close) but not on each other. Can run in any order.
+- **2026-05-30:** `write_entitlement_summary/8` becomes `/9` by adding `processor` as final argument (IN-01); the processor atom is already threaded through every level except this final hop.
+
 ### Historical Research Assets
 
 - **v1.17 Friction Inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md` — `v1.17-P1-002` closed 2026-04-24; P0/P1/P2 backlog rows (INT-10, BIL-03, ADM-12) tracked as phase 63/64/65 anchors.
 - **v1.17 North Star:** `.planning/research/v1.17-north-star.md` — stop rules S1–S5.
+- **v1.47 Research:** `.planning/research/SUMMARY.md` + sibling STACK.md / FEATURES.md / ARCHITECTURE.md / PITFALLS.md — HIGH confidence, sourced 2026-05-30.
 
 ### Roadmap Evolution
 
-- Phase 152 added: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
-- Phase 153 inserted after Phase 152: Close v1.46 audit trail: VERIFICATION.md for Phase 151, ROADMAP + REQUIREMENTS checkbox updates (URGENT)
+- v1.47 roadmap created 2026-05-30: Phases 154–158
 
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
+- **2026-05-30:** v1.47 started. Scope: ENT-10 advisory cache correctness (WR-05 + IN-01..04) and three adopter-proof tracks (entitlements/metering/Oban crons in examples/accrue_host).
 - **2026-05-28:** Milestone Next-Step Assessment complete for v1.45. Selected Multi-channel Dunning (In-App Banners) to complete the dunning story without adding compliance risks.
 - **2026-05-27:** Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). v1.44 selected to prove the v1.40 dunning engine's ROI to adopters via the recovered-revenue dashboard.
-- **2026-05-26:** Open **v1.42 — Ad-hoc Invoices & Adopter Confidence** to address remaining JTBD frontier items and adopter-proof gaps identified during v1.39/v1.40 audits.
-- [Phase ?]: 2026-05-28: Phase 150 P01 — documented in-app dunning banners (BAN-03): accrue_admin component path + core-only DIY path, with explicit package dependency boundary.
-- [Phase ?]: 2026-05-29: Phase 150 P02 — proved BAN-04 in-app dunning banner in examples/accrue_host; resolver uses read-only billing_state_for_scope/1 to avoid get-or-create on render (T-150-05).
-- [Phase ?]: 2026-05-29: Phase 152 P02 — Three Zeros gate green; accrue_portal credo wired with .credo.exs baseline; pre-existing credo issues fixed in accrue_admin; v1.17 friction inventory pointers restored in STATE.md/ROADMAP.md
 
 ### Pending Todos
 
@@ -121,16 +137,14 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | scope | Compensating-event backfill of pre-v1.44 events without `mrr_value_cents` | out of scope v1.44; cutoff-date label is the v1.44 honest answer | 2026-05-27 |
 | scope | Real-time PubSub-driven dashboard refresh | out of scope v1.44; coupled to multi-channel dunning v1.45+ | 2026-05-27 |
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | carried |
-| tech_debt | ENT-10 advisory cache follow-ups (WR-05 concurrency, IN-01..04 polish) — `todos/pending/2026-05-24-ent10-advisory-cache-followups.md` | deferred to v1.47 at v1.46 milestone close | 2026-05-30 |
-| next_milestone_input | adopter-proof-gaps thread — entitlements/metering/crons not exercised in `examples/accrue_host` | open input for v1.47 | 2026-05-30 |
 | seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | dormant; carry to v1.47+ | 2026-05-30 |
 
 ## Session Continuity
 
-Last session: 2026-05-30T15:05:15.194Z
-Stopped at: Phase 153 context gathered
+Last session: 2026-05-30
+Stopped at: Roadmap created for v1.47 — ready for Phase 154 planning
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Run `/gsd:plan-phase 154` to plan Phase 154 (Advisory Cache Core Correctness)

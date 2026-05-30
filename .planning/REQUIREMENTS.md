@@ -56,14 +56,14 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| ADV-01 | TBD (Phase ~154) | Not started |
-| ADV-02 | TBD (Phase ~154) | Not started |
-| ADV-03 | TBD (Phase ~154) | Not started |
-| ADV-04 | TBD (Phase ~154) | Not started |
-| POL-01 | TBD (Phase ~154) | Not started |
-| POL-02 | TBD (Phase ~154) | Not started |
-| POL-03 | TBD (Phase ~155) | Not started |
-| POL-04 | TBD (Phase ~155) | Not started |
-| PRF-01 | TBD (Phase ~156) | Not started |
-| PRF-02 | TBD (Phase ~157) | Not started |
-| PRF-03 | TBD (Phase ~158) | Not started |
+| ADV-01 | Phase 154 | Not started |
+| ADV-02 | Phase 154 | Not started |
+| ADV-03 | Phase 154 | Not started |
+| ADV-04 | Phase 154 | Not started |
+| POL-01 | Phase 154 | Not started |
+| POL-02 | Phase 154 | Not started |
+| POL-03 | Phase 155 | Not started |
+| POL-04 | Phase 155 | Not started |
+| PRF-01 | Phase 156 | Not started |
+| PRF-02 | Phase 157 | Not started |
+| PRF-03 | Phase 158 | Not started |
