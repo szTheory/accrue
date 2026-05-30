@@ -353,9 +353,11 @@ defmodule AccruePortal.Live.CheckoutLive do
   end
 
   defp format_minor_amount(amount_minor) when is_integer(amount_minor) do
-    dollars = div(amount_minor, 100)
-    cents = rem(amount_minor, 100) |> abs() |> Integer.to_string() |> String.pad_leading(2, "0")
-    "$#{dollars}.#{cents}"
+    sign = if amount_minor < 0, do: "-", else: ""
+    abs_minor = abs(amount_minor)
+    dollars = div(abs_minor, 100)
+    cents = abs_minor |> rem(100) |> Integer.to_string() |> String.pad_leading(2, "0")
+    "#{sign}$#{dollars}.#{cents}"
   end
 
   defp checkout_ready?(%LocalSession{expires_at: %DateTime{} = expires_at}) do
