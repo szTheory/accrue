@@ -10,14 +10,14 @@
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 151 | Maintenance & Triage | 1/3 | In Progress|  |
-| 152 | Close v1.46 closure gaps | 3/3 | Complete|  |
+| 152 | Close v1.46 closure gaps | 3/3 | Complete    | 2026-05-30 |
 
 ### Phase 152: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
 
 **Goal:** Fix all malformed @since annotations, run the Three Zeros closure gate green, and cut the linked 1.3.0 Hex release across all three packages (accrue, accrue_admin, accrue_portal).
 **Requirements**: D-01 (target 1.3.0), D-02 (@doc since: fix), D-03 (Three Zeros gate), D-04 (Release Please pipeline)
 **Depends on:** Phase 151
-**Plans:** 3/3 plans executed
+**Plans:** 3/3 plans complete
 
 **Wave 1** *(parallel)*
 
