@@ -11,7 +11,7 @@
 |---|-------|------|--------------|------------------|
 | 151 | Maintenance & Triage | 3/3 | Complete | 2026-05-30 |
 | 152 | Close v1.46 closure gaps | 3/3 | Complete    | 2026-05-30 |
-| 153 | Close v1.46 audit trail | 1/2 | In Progress|  |
+| 153 | Close v1.46 audit trail | 2/2 | Complete | 2026-05-30 |
 
 ### Phase 152: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
 
@@ -42,7 +42,7 @@
 
 **Wave 2** *(blocked on Wave 1 completion — has human checkpoint)*
 
-- [ ] 153-02-PLAN.md — Confirm all gaps closed + archive v1.46 milestone via gsd-sdk query milestone complete v1.46
+- [x] 153-02-PLAN.md — Confirm all gaps closed + archive v1.46 milestone via gsd-sdk query milestone complete v1.46
 
 ---
 
