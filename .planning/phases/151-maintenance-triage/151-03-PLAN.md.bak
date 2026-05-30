@@ -1,0 +1,86 @@
+---
+phase: "151"
+plan: "03"
+type: execute
+wave: 2
+depends_on:
+  - "151-01"
+  - "151-02"
+files_modified: []
+autonomous: false
+requirements:
+  - MNT-01
+must_haves:
+  truths:
+    - "Audit and CI scripts pass successfully"
+  artifacts: []
+  key_links: []
+---
+
+<objective>
+Execute the "Three Zeros" closure criteria validation and prompt for a final Hex publish release.
+
+Purpose: Ensures the repository is in a pristine state before publishing, per D-03.
+Output: Verification of audits and human checkpoint for publishing.
+</objective>
+
+<execution_context>
+@$HOME/.gemini/get-shit-done/workflows/execute-plan.md
+@$HOME/.gemini/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/ROADMAP.md
+@.planning/STATE.md
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: Verify Three Zeros Audits</name>
+  <files></files>
+  <action>Per D-03 (The Three Zeros), verify there are zero audit gaps. Execute `./scripts/ci/verify_adoption_proof_matrix.sh` and `./scripts/ci/verify_package_docs.sh`. Ensure they exit with code 0. If any script fails, fix the underlying documentation or matrix gap.</action>
+  <verify>
+    <automated>./scripts/ci/verify_adoption_proof_matrix.sh && ./scripts/ci/verify_package_docs.sh</automated>
+  </verify>
+  <done>Scripts execute without errors.</done>
+</task>
+
+<task type="checkpoint:human-action" gate="blocking">
+  <name>Task 2: Final Hex Publish</name>
+  <files></files>
+  <action>Triage bug fixes and dependency updates are verified. Per D-03 step 4, perform the final Hex publish patch release and ensure Git tags match. (e.g., merge release PR or run mix hex.publish manually)</action>
+  <verify>
+    <human-check>Type "published" once Hex publish is complete, or "skip" to defer publishing.</human-check>
+  </verify>
+  <done>Hex publish is complete.</done>
+</task>
+
+</tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| Release | Publishing artifacts to external registry |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-151-03 | Tampering | Build Artifacts | mitigate | Require human approval before final Hex publish |
+</threat_model>
+
+<verification>
+CI scripts run and human confirms publish.
+</verification>
+
+<success_criteria>
+The Three Zeros criteria are met and the project is ready for (or has completed) publication.
+</success_criteria>
+
+<output>
+Create `.planning/phases/151-maintenance-triage/151-03-SUMMARY.md` when done
+</output>

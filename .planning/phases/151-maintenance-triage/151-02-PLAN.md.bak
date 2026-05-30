@@ -1,0 +1,86 @@
+---
+phase: "151"
+plan: "02"
+type: execute
+wave: 1
+depends_on: []
+files_modified:
+  - accrue/mix.exs
+  - accrue/mix.lock
+  - accrue_admin/mix.exs
+  - accrue_admin/mix.lock
+  - accrue_portal/mix.exs
+  - accrue_portal/mix.lock
+autonomous: true
+requirements:
+  - MNT-01
+must_haves:
+  truths:
+    - "Dependencies are bumped for all three packages"
+  artifacts:
+    - path: accrue/mix.lock
+      provides: "Updated dependencies"
+    - path: accrue_admin/mix.lock
+      provides: "Updated dependencies"
+    - path: accrue_portal/mix.lock
+      provides: "Updated dependencies"
+  key_links: []
+---
+
+<objective>
+Update dependencies across the monorepo to the latest compatible minor/patch versions, per D-02 "Final Stable Bump & Pin".
+
+Purpose: Maximum compatibility and shelf-life before BitRot sets in.
+Output: Updated mix.lock and mix.exs files across all 3 packages.
+</objective>
+
+<execution_context>
+@$HOME/.gemini/get-shit-done/workflows/execute-plan.md
+@$HOME/.gemini/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/ROADMAP.md
+@.planning/STATE.md
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: Monorepo Dependency Bump</name>
+  <files>accrue/mix.exs, accrue/mix.lock, accrue_admin/mix.exs, accrue_admin/mix.lock, accrue_portal/mix.exs, accrue_portal/mix.lock</files>
+  <action>Per D-02 (Final Stable Bump & Pin), execute a monorepo dependency update. Run `mix deps.update --all` within `accrue/`, `accrue_admin/`, and `accrue_portal/`. If any versions in `mix.exs` need to be relaxed or bumped to reflect the latest compatible ranges for patch/minor updates, update them. Ensure no major version bumps are introduced.</action>
+  <verify>
+    <automated>cd accrue && mix test && mix dialyzer && mix credo --strict</automated>
+  </verify>
+  <done>All dependencies are updated and full test suites pass.</done>
+</task>
+
+</tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| Dependency Supply Chain | External Hex packages brought into the project |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-151-02 | Tampering | Dependencies | mitigate | Lock versions via `mix.lock` |
+</threat_model>
+
+<verification>
+Run `mix test` in `accrue`, `accrue_admin`, and `accrue_portal`.
+</verification>
+
+<success_criteria>
+All packages have updated dependencies and pass their test suites.
+</success_criteria>
+
+<output>
+Create `.planning/phases/151-maintenance-triage/151-02-SUMMARY.md` when done
+</output>
