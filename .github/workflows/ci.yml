@@ -234,6 +234,9 @@ jobs:
       - name: Accrue docs
         run: cd accrue && MIX_ENV=dev mix docs --warnings-as-errors
 
+      - name: Verify ExDoc @doc since: badges
+        run: bash scripts/ci/verify_exdoc_since_badges.sh
+
       - name: Accrue retired package audit
         run: cd accrue && mix hex.audit
 
