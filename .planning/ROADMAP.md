@@ -38,11 +38,11 @@
 
 **Wave 1** *(autonomous)*
 
-- [ ] 153-01-PLAN.md — Create 151-VERIFICATION.md (synthesized from evidence) + update ROADMAP Phase 151 checkboxes + update REQUIREMENTS.md MNT-01 to Complete
+- [ ] 153-01-PLAN.md — Create 151-VERIFICATION.md (synthesized from evidence) + update ROADMAP status + update REQUIREMENTS.md MNT-01 + close MILESTONE-AUDIT.md
 
 **Wave 2** *(blocked on Wave 1 completion — has human checkpoint)*
 
-- [ ] 153-02-PLAN.md — Confirm all gaps closed + archive v1.46 milestone via gsd-complete-milestone
+- [ ] 153-02-PLAN.md — Confirm all gaps closed + archive v1.46 milestone via gsd-sdk query milestone complete v1.46
 
 ---
 

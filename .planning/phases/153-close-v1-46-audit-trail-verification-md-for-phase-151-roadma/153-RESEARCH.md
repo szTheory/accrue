@@ -329,7 +329,7 @@ And top-level field:
 | A2 | ROADMAP.md `Status:` top-level field reads "Planning" | Common Pitfalls #1 | Low — verified by reading lines 1-5 of ROADMAP.md (line 4: `**Status:** Planning`) |
 | A3 | Milestone archive command is `gsd-sdk query milestone complete v1.46` | Don't Hand-Roll, Code Examples | Low — verified by running `gsd-tools.cjs milestone complete` which returns "version required"; `v1.46` is the correct version argument |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `151-VERIFICATION.md` include a "Behavioral Spot-Checks" section?**
    - What we know: `152-VERIFICATION.md` has a Behavioral Spot-Checks table with live commands that the verifier ran. For Phase 151, all commands were run during VALIDATION.md production — outputs are embedded there.
