@@ -1,5 +1,18 @@
 # Milestones
 
+## v1.46 (Shipped: 2026-05-30)
+
+**Phases completed:** 3 phases, 8 plans, 9 tasks
+
+**Key accomplishments:**
+
+- Plan:
+- Plan:
+- All 8 malformed `@since` annotations across two packages fixed to canonical `@doc since: "1.3.0"` form, eliminating the compiler warning in dunning.ex and ExDoc junk text from rendered output
+- accrue/accrue_admin/accrue_portal 1.3.0 published to Hex.pm; v1.46 Maintenance & Closure milestone shipped
+
+---
+
 ## v1.45 Multi-channel Dunning (In-App Banners) (Shipped: 2026-05-29)
 
 **Phases completed:** 2 phases (149–150)

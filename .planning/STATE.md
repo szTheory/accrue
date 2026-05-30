@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.46
 milestone_name: Maintenance & Closure
-status: executing
-last_updated: "2026-05-30T14:58:26.887Z"
-last_activity: 2026-05-30
+status: Awaiting next milestone
+last_updated: "2026-05-30T15:03:39.418Z"
+last_activity: 2026-05-30 — Milestone v1.46 completed and archived
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 7
-  percent: 67
+  completed_plans: 8
+  percent: 100
 ---
 
 # Project State
@@ -25,14 +25,16 @@ See: `.planning/PROJECT.md` (updated 2026-05-28 after v1.44 milestone)
 
 ## Current Position
 
-Phase: 153 (close-v1-46-audit-trail-verification-md-for-phase-151-roadma) — EXECUTING
-Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-05-30
+Phase: Milestone v1.46 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-30 — Milestone v1.46 completed and archived
 
 ## Milestone Progress
 
 ### Recently shipped milestones
+
+**v1.46** (shipped & archived **2026-05-30**): 3 phases (**151–153**), 1 requirement (MNT-01). Theme: Maintenance & Closure — routine issue triage, dependency updates, @since annotation fixes, Three Zeros gate, Hex 1.3.0 publish, and audit trail closure. Audit: `.planning/v1.46-v1.46-MILESTONE-AUDIT.md`.
 
 **v1.45** (shipped & archived **2026-05-29**): 2 phases (**149–150**), 4 requirements (BAN-01..BAN-04). Theme: Multi-channel Dunning (In-App Banners). Audit: `.planning/v1.45-v1.45-MILESTONE-AUDIT.md`.
 
@@ -127,4 +129,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Generate roadmap and requirements for v1.45 (In-App Dunning Banners).
+- Start the next milestone with /gsd-new-milestone
