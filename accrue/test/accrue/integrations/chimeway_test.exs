@@ -55,4 +55,38 @@ defmodule Accrue.Integrations.ChimewayTest do
       assert source =~ "@behaviour Accrue.Dunning.Engine"
     end
   end
+
+  describe "DunningNotifier workflow contract" do
+    @tag :requires_chimeway
+    test "exports workflow/2 and rendering/2 when Chimeway is loaded" do
+      case Code.ensure_loaded(Accrue.Integrations.Chimeway) do
+        {:module, _} ->
+          notifier = Accrue.Integrations.Chimeway.DunningNotifier
+
+          assert {:workflow, 2} in notifier.__info__(:functions)
+          assert {:rendering, 2} in notifier.__info__(:functions)
+
+          assert {:ok, declaration} = notifier.workflow(%{}, %{})
+
+          assert {:ok, normalized} =
+                   Chimeway.Notifier.normalize_workflow_declaration(declaration)
+
+          assert normalized.workflow_key == "accrue.dunning"
+
+          [initial_step | _] = normalized.steps
+          assert initial_step.step_key == "initial_email"
+
+          [%{"cancel_signals" => ["invoice.paid"]} | _] =
+            get_in(initial_step.config, ["progress"])
+
+          assert {:ok, rendering} = notifier.rendering(%{subscription_id: "sub_123"}, %{})
+
+          assert get_in(rendering, [:channels, :email, :render_key]) ==
+                   "accrue.dunning.initial_email"
+
+        {:error, :nofile} ->
+          :ok
+      end
+    end
+  end
 end
