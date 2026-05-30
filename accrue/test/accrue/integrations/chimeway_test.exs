@@ -69,12 +69,23 @@ defmodule Accrue.Integrations.ChimewayTest do
           chimeway_owner =
             Ecto.Adapters.SQL.Sandbox.start_owner!(Chimeway.Repo, shared: not tags[:async])
 
+          prev_dunning = Application.get_env(:accrue, :dunning)
+
           Application.put_env(:accrue, :dunning,
             engine: Accrue.Integrations.Chimeway,
             campaign: [enabled: true]
           )
 
           on_exit(fn ->
+            # Restore the :dunning config — leaving engine: Chimeway / a stepless
+            # enabled campaign in the global app env pollutes later tests
+            # (ApplicationTest boot validation, DunningExhaustion/Keying ownership).
+            if prev_dunning do
+              Application.put_env(:accrue, :dunning, prev_dunning)
+            else
+              Application.delete_env(:accrue, :dunning)
+            end
+
             Ecto.Adapters.SQL.Sandbox.stop_owner(chimeway_owner)
             Ecto.Adapters.SQL.Sandbox.stop_owner(accrue_owner)
           end)
