@@ -56,12 +56,8 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
       <div class="ax-timeline-dot ax-timeline-dot-cobalt"></div>
       <p>Campaign started</p>
       <p>{format_datetime(@event.inserted_at)}</p>
-      <% invoice_ctx = Map.get(@invoice_map, @event.data["invoice_id"]) %>
-      <%= if invoice_ctx do %>
-        <p>{Map.get(invoice_ctx, "failure_code") || Map.get(invoice_ctx, "failure_message") || "—"}</p>
-      <% else %>
-        <p>—</p>
-      <% end %>
+      <% failure = @event.data["failure_reason"] || @event.data["failure_code"] %>
+      <p>{failure || "—"}</p>
     </div>
     """
   end
