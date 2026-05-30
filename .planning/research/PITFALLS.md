@@ -1,477 +1,297 @@
-# PITFALLS — v1.44 Recovered-Revenue Dashboard Completion
+# Pitfalls Research — v1.47
 
-**Domain:** Adding a funnel/drill-down/time-filter analytics dashboard on top of Phase 143's MRR-snapshotting event-ledger foundation.
-**Researched:** 2026-05-27
-**Confidence:** HIGH — every pitfall below is grounded in actual source files (`Accrue.Analytics.Dunning`, `Accrue.Webhook.DefaultHandler`, `Accrue.Events.Event`, the immutable-ledger migration, Phase 143-VERIFICATION). Where industry-pattern advice is cited, it is marked LOW/MEDIUM.
-
-**Scope discipline:** these are pitfalls *specific to extending Phase 143 into a funnel+drill-down dashboard on Accrue's event-ledger SSOT architecture*. Generic "test edge cases" or "validate inputs" advice is intentionally excluded. Each pitfall has: warning signs, prevention, the v1.44 phase that should own it, and a concrete falsifiable check (test name, assertion, doc clause, or ADR).
-
-**Anchor decisions inherited from Phase 143 (do not relitigate):**
-- MRR is snapshotted at emission time into `data.mrr_value_cents` + `data.currency` on `dunning.recovered` and `dunning.exhausted`.
-- `accrue_events` is immutable (Postgres `BEFORE UPDATE/DELETE` trigger raises `SQLSTATE '45A01'`). **Backfill cannot rewrite history — it can only append new compensating events.**
-- The only composite index on `accrue_events` today is `(type, inserted_at)` (per `20260414130500_add_events_type_inserted_at_index.exs`); there is **no GIN index on `data` or expression index on `data->>'mrr_value_cents'`**.
-- Phase 143 has **no test asserting `data["mrr_value_cents"]` at the DefaultHandler emission boundary** (called out in 143-VERIFICATION "Notes"). That gap propagates risk to v1.44.
-- Dunning state is encoded by **two columns on `accrue_subscriptions`** (`dunning_campaign_started_at` is the live anchor; `dunning_sweep_attempted_at` records sweep activity) plus the lifecycle status. There is **no `Accrue.Dunning.Campaign` schema/table** — the module of that name is a *pure step resolver*, not a record. (`Accrue.Dunning.Campaign` in source is 104 LOC, all `defp pending_step?` math.) Any phase plan that references a campaign table is wrong.
+**Scope:** ENT-10 advisory cache upsert/watermark fix (WR-05), field accuracy corrections (IN-01..04), and adopter-proof examples for entitlements gating, metered usage, and Oban crons in `examples/accrue_host`.
+**Researched:** 2026-05-30
+**Confidence:** HIGH — analysis based directly on reading the production source files.
 
 ---
 
-## Critical Pitfalls (correctness-class — would make the dashboard *wrong* in production)
+## WR-05 Upsert / Watermark Pitfalls
 
-### Pitfall 1: Funnel double-counting a single dunning episode across stages
+### Pitfall WR-05-01: `on_conflict_where` NULL comparison short-circuits to no-op on nil watermark
 
-**What goes wrong:**
-A naive funnel renders "Entered → Recovered → Exhausted" by counting events of each type independently:
+**What goes wrong:** The current `upsert_entitlement_summary/2` in `default_handler.ex` uses:
 
 ```elixir
-# WRONG — double-counts
-%{
-  entered:   count(type == "dunning.campaign_started"),
-  recovered: count(type == "dunning.recovered"),
-  exhausted: count(type == "dunning.exhausted")
-}
+on_conflict_where:
+  from(e in EntitlementSummary,
+    where: e.last_stripe_event_ts < fragment("EXCLUDED.last_stripe_event_ts")
+  )
 ```
 
-This counts every event row, but a **single subscription can enter dunning multiple times** (recovers, fails again, recovers again). Worse, a single dunning *episode* emits BOTH `dunning.campaign_started` AND `dunning.recovered` — both are real, both pass `WHERE type IN (...)`. The funnel rendering "entered: 100, recovered: 80, exhausted: 30" leaks: 80 + 30 = 110 > 100. Operator looks at it, can't reconcile, loses trust in the dashboard within minutes.
+When `EXCLUDED.last_stripe_event_ts` is `NULL` (because `stamp_summary_watermark/4` fell through the nil guard and did not stamp a timestamp), the `<` comparison returns `NULL` in SQL — not `TRUE` — so Postgres silently does nothing. The row is not updated, no error is raised, and `returning: true` returns the unchanged stale row as if the write succeeded.
 
-**Why it happens in Accrue specifically:**
-- The ledger is a **flat append-only log**, not a state machine view. There is no episode_id linking `campaign_started → recovered/exhausted` natively (verified: no such field in event schema).
-- The reducer in `default_handler.ex:855-921` already proves that the same `subscription_id` cycles through dunning multiple times (the anchor is nilled on recovery and re-set on the next `past_due`).
-- `Accrue.Analytics.Dunning.recovered_vs_lost_mrr/1` today sums *event-level* MRR cents, not distinct-subscription totals — and that's *correct for the MRR KPI* (total dollars recovered) but **wrong for a funnel where the denominator must be unique entrants**.
+**Why it happens:** `stamp_summary_watermark/4` correctly guards against nil `evt_ts` by carrying the prior row's watermark forward. But the clause `stamp_summary_watermark(attrs, _evt_ts, _evt_id, nil)` (first-ever write with no prior row and no DateTime) returns `attrs` unchanged — `last_stripe_event_ts` is absent from the attrs map entirely. On insert this is fine (column is nullable). On conflict, `EXCLUDED.last_stripe_event_ts` is NULL and the WHERE short-circuits to no-op.
 
-**How to avoid (canonical de-dup approach):**
+**Consequences:** A retry or duplicate delivery where `evt_ts` is nil does not update the row (correct), but the calling code receives `{:ok, stale_row}` and may record a `entitlements.summary.synced` ledger event against a row that was not actually updated. Observability is misleading; `result: :written` telemetry fires against a stale snapshot.
 
-1. **Lock funnel attribution to the campaign anchor, identified by `(subject_id, dunning_campaign_started_at)`.** Every campaign has a unique anchor timestamp; once cleared (recovery) or re-set (re-entry), it's a new episode. Snapshot the anchor onto the recovered/exhausted events:
+**Prevention:** Change the WHERE to handle the NULL case explicitly: `(EXCLUDED.last_stripe_event_ts IS NULL OR e.last_stripe_event_ts < EXCLUDED.last_stripe_event_ts)`. This matches the intent of `check_stale/2` which lets nil timestamps proceed.
 
-   ```elixir
-   # In maybe_emit_dunning_exhaustion/2 and maybe_finalize_dunning_campaign/2
-   Events.record(%{
-     ...
-     data: %{
-       ...,
-       campaign_anchor: DateTime.to_iso8601(row.dunning_campaign_started_at)
-     }
-   })
-   ```
+**Warning signs:** Test that covers "nil timestamp event on existing row" returns `{:ok, row}` but `row.last_stripe_event_ts` still shows the old value, and telemetry shows `result: :written` with stale data.
 
-   This is a **Phase 143 forward-fix** — the anchor is already in scope at both emission sites (verified `default_handler.ex:867,890`).
-
-2. **Funnel query counts DISTINCT `(subject_id, campaign_anchor)` tuples per stage**, not raw event rows. Invariant: `recovered_count + exhausted_count <= entered_count` always holds; any pre-aggregation row where it doesn't is a regression.
-
-3. **The Hero MRR KPI stays as event-sum** (correct — counting dollars, not episodes). The funnel viz uses distinct-episode counts. These are *two different counts* with *two different denominators* and must be documented as such in the module doc.
-
-**Prevention check (concrete):**
-- **Test:** `Accrue.Analytics.DunningTest` — seed 1 subscription with 3 cycles (entered → recovered → entered → exhausted → entered → still-active) and assert `funnel().entered == 3 && funnel().recovered == 1 && funnel().exhausted == 1 && funnel().active == 1`.
-- **Property test (`stream_data`):** for any seeded ledger, `recovered + exhausted + active <= entered`. Hard invariant.
-- **ADR:** "Funnel denominator is distinct `(subject_id, campaign_anchor)` tuples. MRR KPI denominator is event-row sum. These are distinct on purpose."
-
-**Owning phase:** v1.44 funnel-viz phase (the first one that introduces multi-stage rendering). Must precede the at-risk drill-down phase because at-risk count is also part of the funnel.
+**Phase:** WR-05 implementation phase.
 
 ---
 
-### Pitfall 2: Stale dunning state — "at-risk" customers who already paid
+### Pitfall WR-05-02: `optimistic_lock(:lock_version)` in `force_changeset/2` conflicts with the DB-level upsert
 
-**What goes wrong:**
-The "At-Risk Subscriptions" drill-down table renders subscriptions whose `dunning_campaign_started_at IS NOT NULL` (anchor still set) AS "currently in dunning, at risk." But there is a real window where Stripe has marked the invoice paid yet Accrue's projection hasn't caught up:
+**What goes wrong:** `EntitlementSummary.force_changeset/2` still calls `optimistic_lock(:lock_version)`. When `upsert_entitlement_summary/2` calls `Repo.insert/2` with `on_conflict: {:replace_all_except, ...}`, Ecto's optimistic lock mechanism injects a `WHERE lock_version = ?` predicate into the conflict-branch UPDATE. For a concurrent delivery scenario, two Oban workers both read `lock_version: 1`, form changesets with `lock_version: 2`. One succeeds and commits `lock_version: 2`. The second's `on_conflict_where` would pass (newer timestamp), but the `optimistic_lock` WHERE clause `lock_version = 1` is now false — the update is silently suppressed with no error.
 
-1. Customer's retry succeeds at Stripe.
-2. Stripe enqueues `invoice.payment_succeeded` and `customer.subscription.updated` webhooks.
-3. Webhook hits Accrue, plug verifies + persists raw → 200 OK fast path → Oban enqueues the dispatch worker.
-4. Oban worker runs, reducer fires, anchor nilled.
-5. **Between step 2 and step 4** — could be 100ms, could be 10s if `accrue_webhooks` queue is saturated — the dashboard shows the customer as "at risk" while Stripe shows them as paid.
+**Why it happens:** `optimistic_lock/1` in Ecto adds a WHERE clause to UPDATEs and increments the field in the changeset attrs. When the changeset is used in `Repo.insert/2` (not `Repo.update/2`), the WHERE is injected into the conflict-target UPDATE branch. This re-introduces the exact `Ecto.StaleEntryError`-class failure that WR-05 is meant to eliminate, except now it manifests as a silent no-op rather than a raised exception.
 
-This is exactly the "Crucial Footgun" pattern called out in the v1.44 assessment for Candidate B notifications. It applies equally to **visual displays** — an operator looking at the dashboard and contacting a customer to "save the account" creates a bad customer experience.
+**Consequences:** Under concurrent Oban delivery, the second worker's upsert is suppressed and `last_stripe_event_ts` does not advance to the newer value. The row stays partially stale. No error surfaces.
 
-**Why it happens in Accrue specifically:**
-- The path is verify → persist → enqueue → 200 (per CLAUDE.md performance budget). The dispatch is **async by design** — the projection write does not block the webhook response.
-- `Accrue.Billing.Subscription.dunning_campaign_active?/1` (line 270) is a pure local-projection check — it has no notion of "Stripe says paid but we haven't projected yet."
-- The MRR snapshotting is fine (it happens at projection time, so the recovered/exhausted events carry correct values). The lag is purely in the *live* at-risk display.
+**Prevention:** Remove `optimistic_lock(:lock_version)` from `force_changeset/2`, or create a separate `upsert_changeset/2` for the upsert write path that omits the lock. The `lock_version` column may remain in the schema for schema compatibility, but it must not be wired through Ecto's optimistic lock mechanism when the upsert does its own DB-level concurrency guard via `on_conflict_where`. Add `lock_version` to the `{:replace_all_except, [...]}` exclusion list to keep it frozen (or remove it from the schema in a future migration).
 
-**How to avoid:**
+**Warning signs:** A test that inserts two events with different timestamps (one older, one newer) in serial passes, but a concurrent test (two `Task.async` workers, same starting `lock_version`) shows the row's `last_stripe_event_ts` not advancing to the newer value.
 
-1. **Make the at-risk query honest about being a projection, not a live view.** Surface the projection age:
-
-   ```elixir
-   def at_risk_subscriptions(opts \\ []) do
-     # Returns {subs, stale_after: %DateTime{}} where stale_after is
-     # the oldest webhook timestamp Accrue has not yet caught up to.
-     ...
-   end
-   ```
-
-   In the LiveView, show "Last reconciled: 30s ago. Some entries may be stale." This is the Stripe Dashboard's own pattern (LOW confidence — based on Stripe's "Eventually consistent" disclaimer on their analytics tabs).
-
-2. **For the drill-down per-customer view, refresh from `Accrue.Billing.Subscription` at click-time.** Don't rely on the row from the cached query. This is the analog of Candidate B's "fetch live invoice status inside `perform/1`."
-
-3. **Document the convergence window prominently.** "At Risk" is a *projection*, not a *live Stripe call*. If an operator needs real-time truth, they go to Stripe.
-
-4. **Defer "true live" at-risk to v1.45+** by piggybacking on the notification convergence work (assessment Candidate B). Don't try to solve eventual-consistency in v1.44.
-
-**Prevention check (concrete):**
-- **Test:** `AccrueAdmin.Live.Analytics.RecoveryLiveTest` — seed an event-ledger where `dunning.recovered` has been recorded but `dunning_campaign_started_at` is still non-nil (the impossible-but-tested race). Assert the at-risk list **excludes** subscriptions whose **most recent** dunning-lifecycle event is `recovered`/`exhausted`. (Belt-and-suspenders: use the ledger as the tiebreaker, not the projection column.)
-- **Doc clause** in `Accrue.Analytics.Dunning` moduledoc: "`at_risk_subscriptions/1` reflects local projection state. If a customer just paid at Stripe and the corresponding webhook has not yet been processed, they may briefly appear here. For real-time status, query Stripe directly."
-
-**Owning phase:** v1.44 at-risk drill-down phase. Must include the "ledger-trumps-projection" tiebreaker on day one — it's a five-line change and removes a whole class of regression.
+**Phase:** WR-05 implementation phase. Coupled with WR-05-01 — both must be addressed together.
 
 ---
 
-### Pitfall 3: Legacy events have no `mrr_value_cents` — backfill on an immutable ledger
+### Pitfall WR-05-03: `returning: true` on a no-op conflict returns the pre-conflict row as if it were a write
 
-**What goes wrong:**
-Before Phase 143 (~2026-05-27), all `dunning.recovered` and `dunning.exhausted` events in production were emitted WITHOUT `mrr_value_cents`. The aggregation `sum(fragment("(?->>'mrr_value_cents')::integer", e.data))` on Postgres treats `NULL ::integer` as `NULL`, and `sum(NULL, NULL, 5000)` returns `5000` — Postgres `sum` *skips* nulls. So the dashboard **silently undercounts** historical recovered revenue. A SaaS that has been on Accrue for months will see "MRR Recovered: $4,200" when the truth is "$12,400 (only the last 8 days have data)."
+**What goes wrong:** When Postgres evaluates the `on_conflict_where` and decides NOT to update (the existing row's timestamp is already newer), `Repo.insert/2` with `returning: true` returns `{:ok, %EntitlementSummary{}}` populated with the **existing row's values**, not `EXCLUDED`'s. The calling code in `write_entitlement_summary/8` treats any `{:ok, saved}` as a successful write, emits `result: :written` telemetry, and records a ledger event against `saved.id`.
 
-Worse: **the events table is immutable** (Postgres `BEFORE UPDATE/DELETE` trigger raises `SQLSTATE '45A01'` per `20260411000001_create_accrue_events.exs:55-61`). You **cannot** "go back and fill in `mrr_value_cents` on the old rows." Any well-meaning ops engineer who tries will get a hard SQL error — and rightly so, because tamper-evidence is the point.
+**Why it happens:** PostgreSQL's `ON CONFLICT DO UPDATE WHERE <false>` returns 0 rows affected. Ecto with `returning: true` returns the struct using the existing row values from the DB. Callers cannot distinguish "I wrote it" from "I was the stale one and lost" without additional checks.
 
-**Why it happens in Accrue specifically:**
-- The ledger immutability is a design *feature* (D-09, tamper-evidence). It's not a bug to work around — it's a constraint to design within.
-- Postgres' `NULL`-skipping `sum` is well-defined SQL but counter-intuitive to anyone who hasn't burned themselves on it.
-- The 143 verification explicitly flagged "the field's presence is established by reading the production code" — meaning legacy rows have no field and the test suite does not cover them.
+**Consequences:** `material?` check and ledger write run against a row that was not actually updated. `result: :written` fires in telemetry. A spurious `entitlements.summary.synced` event is recorded in `accrue_events`. Not a correctness bug for entitlement state (the cache is observational-only, D-01), but it inflates the ledger and misleads operators.
 
-**How to avoid:**
+**Prevention:** After the `Repo.insert/2` call, compare the returned row's `last_stripe_event_ts` with `attrs[:last_stripe_event_ts]`. If they don't match (and the expected watermark is non-nil), the upsert was a no-op — return `{:ok, :stale}` and let `write_entitlement_summary/8` treat it as unchanged. Emit `result: :unchanged` telemetry and skip the ledger write.
 
-There are three legitimate options. Choose ONE and document the choice via ADR:
+**Warning signs:** Test a "stale second delivery": send event A (newer), then event B (older). After B, the ledger should have one `entitlements.summary.synced` event. If it has two, the pitfall hit.
 
-1. **Cutoff-date label (RECOMMENDED for v1.44, lowest cost, most honest).** The dashboard renders a UI badge: "Showing data since 2026-05-27 — earlier dunning events do not include MRR snapshots." `Accrue.Analytics.Dunning.recovered_vs_lost_mrr/1` accepts (and defaults to) `since: snapshot_floor()` where `snapshot_floor/0` returns a hardcoded cutoff date (the v1.44 release date) read from `Application.compile_env/2`. The window of incomplete data is excluded from the count by default; an operator who wants the full ledger can pass `since: ~U[2020-01-01 00:00:00Z]` and see the partial total with the badge "(partial: pre-snapshot events excluded)."
-
-   **Cost:** ~20 LOC + a config key + one doc paragraph. **Risk:** zero — the cutoff is honest and operator-overridable. **Tradeoff:** small operators with no pre-v1.44 dunning history see no change. Large operators get one sentence of "we started measuring this on X."
-
-2. **Compensating-event backfill (LARGER LIFT, deferred).** Write a Mix task `mix accrue.analytics.backfill_dunning_mrr` that scans pre-cutoff `dunning.recovered/exhausted` events, re-derives MRR by joining the *current* `accrue_subscriptions` row, and **appends** new events of type `dunning.recovered.backfilled` / `dunning.exhausted.backfilled` with `mrr_value_cents` and a `caused_by_event_id` pointer to the original. The aggregation widens its `type in (...)` clause. This is **honest because it preserves immutability** — old events remain unchanged; new compensating events stand alongside.
-
-   **Cost:** ~150 LOC + 1 migration (none — append-only) + 2 new event types + aggregation widening + 30-min documentation. **Risk:** MRR re-derived from current subscription state is *not* the historical MRR (the subscription may have swapped plans since). Documented as upper-bound estimate. **Tradeoff:** ~1 week of work to do honestly; better fits v1.45. **Defer.**
-
-3. **Hand-rolled SQL backfill (REJECT).** Some teams will be tempted to disable the immutability trigger, `UPDATE accrue_events SET data = jsonb_set(data, '{mrr_value_cents}', ...)`, then re-enable. **Reject in PITFALLS as anti-pattern.** It defeats tamper-evidence (D-09). It is not idempotent under multi-environment ops. It will be copy-pasted into adopter runbooks by junior engineers. The trigger exists precisely to prevent this.
-
-**Prevention check (concrete):**
-- **Test:** `Accrue.Analytics.DunningTest` — seed 3 events with `mrr_value_cents` and 2 events WITHOUT (`data: %{}`). Assert `recovered_vs_lost_mrr()` sums only the 3 events' values; assert the response includes `missing_snapshot_count: 2`. (Add this field to the return type — a 3-line change.)
-- **Test:** the snapshot floor default works — calling `recovered_vs_lost_mrr()` with no opts uses the configured `:dunning_mrr_snapshot_floor` and excludes any event with `inserted_at < floor`. Override with explicit `since:` returns the full count.
-- **ADR:** `ADR-v144-001-backfill-strategy.md` — document choice (cutoff-date), reject hand-rolled SQL, note backfill task is v1.45 deferred work.
-- **Doc clause** in `Accrue.Analytics.Dunning` moduledoc: explain `since:` default, point operators at the override.
-
-**Owning phase:** v1.44 backfill/cutoff phase (or fold into the funnel-viz phase — it's a configuration concern, not a feature concern). Must land **before** any operator-facing copy is finalized.
+**Phase:** WR-05 implementation phase. Address alongside WR-05-01 and WR-05-02.
 
 ---
 
-### Pitfall 4: Cross-currency summation produces meaningless totals
+### Pitfall WR-05-04: Serial tests do not exercise the concurrent conflict scenario
 
-**What goes wrong:**
-The Phase 143 implementation stores `currency` per event but the aggregation collapses across all currencies:
+**What goes wrong:** Tests that call `write_entitlement_summary` twice in sequence (older timestamp second) pass regardless of whether the watermark guard is correct — the second call simply sees a more-recent watermark and skips via `check_stale/2` before reaching the upsert. The concurrency failure (WR-05-02) only manifests when two transactions begin simultaneously and both pass `check_stale/2` with the same starting `lock_version`.
 
-```sql
-SELECT type, sum((data->>'mrr_value_cents')::integer) FROM accrue_events GROUP BY type
-```
+**Why it happens:** True concurrent delivery is Oban worker parallelism. Most Accrue tests use `DataCase` with a single connection that is rolled back — a genuine concurrent insert race cannot be simulated within one connection without `Task.async` + sandbox sharing.
 
-If the SaaS has USD, EUR, and GBP customers, this sums **cents-of-different-currencies into one integer**. The KPI card shows `"$157.42"` for `recovered_cents: 15742` — but that 15742 is actually `(USD 8000 + EUR 5000 + GBP 2742)` cents-of-different-things. The dollar sign is a lie.
+**Consequences:** The bug from WR-05-02 can exist without any test catching it. The fix is shipped with false confidence from green serial tests.
 
-**Why it happens in Accrue specifically:**
-- The currency *is* snapshotted on each event (verified `default_handler.ex:783,881`), so the data is correct — it's the *query* that's wrong.
-- The current `recovered_vs_lost_mrr/1` signature returns a single `{:recovered_cents, :lost_cents}` map with no currency field — there's no place to put a per-currency breakdown.
-- Most Phoenix SaaS apps in 2026 are single-currency, so the bug rarely *fires* in test, but does fire for real EU/UK adopters.
+**Prevention:** Write at least one test that spawns two `Task.async` workers, both calling the entitlement summary reducer with different timestamps (one older, one newer), both starting after the customer row exists. Use `Ecto.Adapters.SQL.Sandbox.allow/3` or `checkout: :shared` to share the test connection. Assert that after both tasks complete, the row's `last_stripe_event_ts` equals the newer timestamp.
 
-**How to avoid:**
+**Warning signs:** All existing entitlement summary tests use `DataCase` with a single path — no `Task.async`. No concurrent conflict scenario exists in the test suite.
 
-1. **Group by currency in the aggregation.** Return shape becomes `%{recovered: [%{currency: "usd", cents: 12000}, %{currency: "eur", cents: 4500}], lost: [...]}`. The default LiveView KPI card renders per-currency rows; if only one currency exists, it renders as a single row (no UI regression for single-currency adopters).
-
-2. **For the funnel viz and at-risk table:** add a currency filter (defaults to "all" — sum-of-counts is fine for counts of subscriptions; only the *money* values need currency grouping). At-risk rows show their per-row currency.
-
-3. **DO NOT attempt FX conversion.** Accrue is not an FX library; converting at query-time requires a rate source, snapshot semantics for the rate (which date's rate?), and a whole class of tests. Show per-currency. Document: "If you need a unified-currency view, convert at the BI tier."
-
-**Prevention check (concrete):**
-- **Test:** `Accrue.Analytics.DunningTest` — seed events in `"usd"`, `"eur"`, `"gbp"` and assert the return has three currency entries with correct per-currency sums. Property test: `Enum.sum(per_currency_cents) == old_collapsed_sum` (i.e., the new shape is no less inclusive).
-- **LiveView test:** assert that a 3-currency seed renders 3 KPI rows (one per currency) and that single-currency seed renders 1 row.
-- **Doc clause:** "`recovered_vs_lost_mrr/1` returns per-currency lists. Accrue does not perform FX conversion."
-
-**Owning phase:** v1.44 public-API/docs phase (the one that finalizes `Accrue.Analytics.Dunning`'s shape — this is the last chance to widen the return type without a breaking change). MUST land before "1.4.0 publish" or it locks in the wrong API.
+**Phase:** WR-05 test coverage phase. Without this test, the fix is unverifiable in CI.
 
 ---
 
-## Moderate Pitfalls (would degrade UX or perf, but not corrupt data)
+## IN-01..04 Polish Pitfalls
 
-### Pitfall 5: JSONB cast errors on malformed events
+### Pitfall IN-01-01: `processor_name()` in `write_entitlement_summary` ignores the event's processor argument
 
-**What goes wrong:**
-`fragment("(?->>'mrr_value_cents')::integer", e.data)` raises `Postgrex.Error` if any single row's `data->>'mrr_value_cents'` is not castable to integer (e.g., `"50.00"` instead of `5000`, or a stray `"unknown"` from a future bug, or — common — a snapshot from a partial backfill that wrote a string). One bad row breaks the **entire dashboard mount**.
+**What goes wrong:** `write_entitlement_summary/8` builds attrs with `processor: processor_name()`, where `processor_name/0` dispatches on `Processor.__impl__()` — the globally configured processor (Stripe, Fake, Braintree). The `processor` argument is already threaded into `reduce_entitlement_summary_for_customer/7` as the 7th parameter, but `write_entitlement_summary` does not accept it. Looking at the 8 args: `evt_id, evt_ts, obj, cus_id, customer, row, entitlements, data` — the `processor` variable from the outer function is in scope as a closure variable but is silently replaced by `processor_name()` inside `write_entitlement_summary`.
 
-**Why it happens in Accrue specifically:**
-- The MRR calc in `default_handler.ex:1896-1923` is integer-only (all `div(amount * quantity, ...)`), so production-emitted values are always integers. **But**: the schema column is `jsonb`, accepting anything; future event sources (admin manual entry, backfill scripts, replays from old DBs) could inject strings.
-- One row poisons the entire `Repo.all/1` — there's no partial-fail.
+**Why it happens:** When the entitlement sync was written (Phase 127), only Stripe was in scope. The `processor` argument was threaded into `dispatch/5` and `reduce_entitlement_summary_for_customer/7` for ENT-10 cross-processor correctness but was not forwarded the final step into `write_entitlement_summary`.
 
-**How to avoid:**
+**Consequences:** In Fake-lane tests, the summary row is written with `processor: "fake"` even when the event was synthesized as a Stripe event. In a dual-processor deployment, the persisted `processor` column value is inaccurate. Telemetry metadata (see IN-04) also derives from the wrong processor.
 
-Replace the bare cast with a `CASE` that filters non-numeric values:
+**Prevention:** Add `processor` as the 9th argument to `write_entitlement_summary`, replacing the `processor: processor_name()` line with `processor: to_string(processor)`. Update the call site in `reduce_entitlement_summary_for_customer/7` to forward the bound `processor` variable. This is a 3-line change.
+
+**Warning signs:** In a test that synthesizes a Stripe entitlement summary event while the global config is set to Fake, the row in the DB has `processor: "fake"`. Add an assertion: `assert summary.processor == "stripe"` after the event dispatch.
+
+**Phase:** IN-01 fix phase.
+
+---
+
+### Pitfall IN-02-01: Missing `livemode` key in payload coerces nil over a prior known value
+
+**What goes wrong:** `write_entitlement_summary/8` sets `livemode: get(obj, :livemode)`. The `get/2` helper returns `nil` for any missing key, with no distinction between "payload explicitly set `livemode: false`" and "payload had no `livemode` key." On an upsert with `{:replace_all_except, [...]}`, if the current event's payload lacks the `livemode` key, the upsert writes `livemode: nil` over a previously stored `false` — erasing the known livemode state.
+
+**Why it happens:** The Stripe entitlement summary object spec does not guarantee `livemode` is present on every delivery. The `get/2` helper is designed to handle both atom- and string-keyed maps but cannot distinguish key-absent from key-nil.
+
+**Consequences:** Operators querying `livemode = false` will miss rows that reverted to null after a payload without the key. Dashboard filtering by livemode becomes unreliable.
+
+**Prevention:** Apply a "keep existing" rule for livemode in `write_entitlement_summary`: if `get(obj, :livemode)` is `nil` AND a prior `row` exists with a non-nil `livemode`, carry the prior value forward by setting `livemode: row.livemode` in attrs (or by omitting the key). This mirrors the `stamp_summary_watermark/4` pattern for watermark fields.
+
+**Warning signs:** Test stores a summary with `livemode: false`, then delivers a second event with the `livemode` key absent from the payload. Assert `row.livemode == false`. If it returns `nil`, the pitfall hit.
+
+**Phase:** IN-02 fix phase.
+
+---
+
+### Pitfall IN-03-01: `entitlement_summary_event/2` fixture defaults `livemode: false` — IN-02 nil path is never tested by default
+
+**What goes wrong:** The `entitlement_summary_event/2` fixture in `Accrue.Test.StripeFixtures` always defaults `livemode: false` (line 426). This means every test using the default fixture exercises the testmode code path where `livemode` is explicitly `false`. The IN-02 nil-collapse bug only manifests when the `livemode` key is entirely absent from the payload. There is currently no fixture option that omits the key.
+
+**Consequences:** IN-02 fix tests written using the default fixture will not catch the nil-collapse bug unless the fixture is explicitly built without the `livemode` key. Tests may give false confidence that IN-02 is fixed.
+
+**Prevention (IN-03 scope):** Add an `:omit_livemode` option to `entitlement_summary_event/2` that excludes the key from the summary object map entirely — distinct from `livemode: nil` (which explicitly sets null as a value). Update the `@doc` to document the option. The IN-02 fix should include a test using `omit_livemode: true`.
+
+Also: the `@moduledoc` for `Accrue.Test.StripeFixtures` should clarify that the module lives in `test/support/` and is not part of the published Hex package — adopters who want these fixtures in their own test suites must copy them or use the path-dep pattern documented in the install guide.
+
+**Phase:** IN-03 is doc-only for the `@moduledoc` clarification; the `:omit_livemode` option is a small behavior addition. Safe to bundle with IN-02 test coverage.
+
+---
+
+### Pitfall IN-04-01: `processor` absent from `[:accrue, :entitlements, :summary_synced]` telemetry metadata
+
+**What goes wrong:** The `[:accrue, :entitlements, :summary_synced]` telemetry event emitted in `write_entitlement_summary/8` carries `customer_id`, `has_more`, `entitlement_count`, and `result` in metadata, but not `processor`. In a dual-provider deployment, operators cannot segment entitlement sync events by processor from telemetry alone.
+
+**Why it happens:** When the entitlement sync was written (Phase 127), only Stripe was in scope. The processor argument was not threaded through to the telemetry metadata (same root cause as IN-01).
+
+**Consequences (documented omission option):** If IN-04 scope is "metrics counter or documented omission," the documented omission path is: add a code comment at the telemetry call noting that `processor` metadata is absent and will be added when IN-01 threads `processor` into `write_entitlement_summary`. The counter itself fires correctly; the omission is only observable in multi-provider deployments.
+
+**Prevention if fixing (not just documenting):** Once IN-01 threads `processor` into `write_entitlement_summary/9`, add `processor: to_string(processor)` to the `metadata` map before the `Accrue.Telemetry.span` call. This is a 1-line addition after the IN-01 fix.
+
+**Phase:** If bundled with IN-01, the processor threading fix serves both IN-01 and IN-04 simultaneously. If IN-04 scope is documentation-only, add the comment in the IN-04 fix phase and resolve the real fix in the same PR as IN-01.
+
+---
+
+## Adopter-Proof Example Pitfalls
+
+### Pitfall PROOF-01: Entitlements guard `on_mount` returns "no access" when the real problem is no active organization
+
+**What goes wrong:** The existing example router wires:
 
 ```elixir
-fragment(
-  "CASE WHEN jsonb_typeof(?->'mrr_value_cents') = 'number' " <>
-    "THEN (?->>'mrr_value_cents')::integer ELSE 0 END",
-  e.data, e.data
-)
+live_session :entitled_reports,
+  on_mount: [
+    {AccrueHostWeb.UserAuth, :require_authenticated},
+    {Accrue.Live.Entitlements, {:require_feature, :advanced_reports}}
+  ] do
+  live("/app/reports/advanced", AdvancedReportsLive, :index)
+end
 ```
 
-This treats any non-number (string, null, missing) as `0`, and emits a `:telemetry` warning when a non-number is encountered for an operator to investigate.
+If the socket has no `active_organization` (the user has no org membership, or the session's `active_organization_id` is stale), `Accrue.Live.Entitlements` resolves the billable from the scope, finds nil, evaluates `Accrue.entitled?/2` against a nil billable, returns `false`, and redirects with "You don't have access to this page." The user sees an access-denied flash when the real issue is "no organization selected." This misleads users in multi-tenant apps.
 
-**Prevention check (concrete):**
-- **Test:** seed an event with `data: %{"mrr_value_cents" => "5000"}` (string-as-number). The aggregation runs without raising and skips that row. Telemetry `[:accrue, :analytics, :dunning, :malformed_event]` fires once.
-- **Doc clause:** "Events with non-numeric `mrr_value_cents` are skipped silently with a telemetry warning."
+**Consequences for adopters:** Adopters copy the example and their users see a confusing access-denied flash when they haven't selected an organization. The pitfall is specific to multi-tenant billing where the billable is an organization, not the user.
 
-**Owning phase:** v1.44 funnel-viz phase (any phase that touches the aggregation query). One-line change at low cost.
+**Prevention:** In the adopter-proof example, document (as a code comment in the router) that the auth guard order matters and the organization scope must be resolved and loaded before the entitlements guard fires. If the host app uses a scope-loading `on_mount` hook that sets `active_organization`, that hook must precede `Accrue.Live.Entitlements` in the list. Alternatively, add a separate `on_mount` that checks for active organization and redirects with a "please select an organization" message before the entitlement check runs.
 
----
-
-### Pitfall 6: LiveView socket memory blow-up on the at-risk table
-
-**What goes wrong:**
-The at-risk drill-down table assigns the full list of at-risk subscriptions to the socket (`assign(socket, :at_risk, subs)`). With 500+ at-risk customers × auto-refresh every 10s × time-window filter requerying the list × each customer struct carrying ~2KB of nested Stripe data → ~1MB resident per socket × 50 concurrent operator sessions = 50MB+ of BEAM heap, plus full re-renders pushing 500-row DOM diffs over the wire.
-
-**Why it happens in Accrue specifically:**
-- LiveView 1.1 (our pinned version) ships `Phoenix.LiveView.stream/4`, which exists *specifically* for this — but the Phase 143 LiveView at `recovery_live.ex` uses plain `assign/3` for stats. Easy to copy that pattern into the drill-down. (`stream/4` is the correct abstraction, not `assign/3`, for collections that are appended/inserted.)
-- The auto-refresh temptation: a `Process.send_after(self(), :refresh, 10_000)` loop is one line, looks innocent, but compounds the memory issue.
-
-**How to avoid:**
-
-1. **At-risk table uses `Phoenix.LiveView.stream/4`**, not `assign/3`. Each row is a stream member; replacements happen by `stream_insert/4` keyed on subscription_id. Memory is freed on row removal.
-
-2. **Paginate by default (50 per page)**, with explicit "Show all" override. The default `at_risk_subscriptions/1` function takes `limit:` and `offset:` opts.
-
-3. **No auto-refresh in v1.44.** The operator hits the "Refresh" button if they want fresh data. Auto-refresh is a v1.45 concern coupled with PubSub-from-webhook (live updates pushed by the dispatcher), which is a separate design.
-
-4. **Defer to streams + pagination, not virtual scrolling.** Virtual scrolling LiveView libs (e.g., `live_view_native_virtual_list`) are heavyweight and not justified at 500-row scale.
-
-**Prevention check (concrete):**
-- **Test:** `AccrueAdmin.Live.Analytics.RecoveryLiveTest` — seed 200 at-risk subscriptions, assert that only 50 are rendered by default and pagination controls exist.
-- **Assertion in the LiveView module:** `use Phoenix.LiveView` followed by `stream(socket, :at_risk, [])` in mount; assert at code-review time that the at-risk table uses `<.row :for={{id, sub} <- @streams.at_risk} id={id}>` not `<.row :for={sub <- @at_risk}>`.
-- **ADR:** "Auto-refresh deferred to v1.45 with PubSub-from-dispatcher."
-
-**Owning phase:** v1.44 at-risk drill-down phase. The streams choice is foundational — switching from `assign/3` to `stream/4` after the fact requires re-testing every interaction.
+**Phase:** Entitlements gating adopter-proof phase.
 
 ---
 
-### Pitfall 7: Time-window math: timezone, DST, and rolling-vs-calendar confusion
+### Pitfall PROOF-02: `LocalMap` not configured for the fixture price ID — entitled org test fails with a redirect
 
-**What goes wrong:**
-Three distinct subpitfalls, all in one bucket because they share a prevention:
+**What goes wrong:** `entitlements_guard_test.exs` calls `Billing.subscribe(entitled_org, "price_premium", trial_end: {:days, 14})`. In Fake-lane, `subscribe/3` creates a local subscription row with `processor_plan_id: "price_premium"`. The entitlement resolver then calls `Accrue.Entitlements.LocalMap` to map `"price_premium"` to features. If the host's resolver configuration does not include `"price_premium"` → `[:advanced_reports]`, the guard will deny even the "entitled" org and the test will assert a redirect — a false failure.
 
-(a) **Server-time vs operator-local.** `inserted_at` is stored as UTC (per `Accrue.Events.Event` schema: `:utc_datetime_usec`). The dashboard's "Last 30 days" filter computes `since: DateTime.utc_now() |> DateTime.add(-30, :day)`. An operator in PST viewing the dashboard at 11pm on May 31 sees "May" data ending at "May 31 23:59 UTC" = "May 31 16:59 PST" — the last 7 hours of their day are missing. They reload at midnight, see the same thing, lose trust.
+**Why it happens:** The example test assumes the `PlanResolver` is configured with the correct price-to-feature mapping. This is not self-evident from the test file alone.
 
-(b) **DST transitions.** A 7-day rolling window crossing a DST boundary is 7×24×3600 seconds in UTC but the operator may experience it as "7 days minus 1 hour" or "7 days plus 1 hour." Math is correct (we use UTC throughout) but the *operator's mental model* is "last week's data" which is locally biased.
+**Consequences:** Adopters copy the example test, run it without configuring their own `LocalMap` or `PlanResolver`, and see the entitled-org test fail with a redirect. They conclude entitlements gating is broken. The actual issue is a missing config entry.
 
-(c) **Rolling vs calendar.** "Last 30 days" (rolling: now-30d to now) is NOT the same as "May" (calendar). Baremetrics defaults to rolling; Stripe Dashboard defaults to calendar. Operators routinely confuse the two ("but my chart says $4k recovered in May, why does the email summary say $3.7k?").
+**Prevention:** Add an explicit assertion in the `AccrueCase` setup or at the top of the test: `assert :advanced_reports in Accrue.entitled_features_for_plan("price_premium")` (or equivalent), with a clear error message if the config is wrong. Add a code comment in the test: "This test requires `PlanResolver` to map `price_premium` to `[:advanced_reports]` — see `AccrueHost.Billing.PlanResolver`."
 
-**Why it happens in Accrue specifically:**
-- `accrue_events.inserted_at` is `:utc_datetime_usec`. Good — there's no ambiguity at the storage layer.
-- Phase 143's `recovered_vs_lost_mrr/1` accepts arbitrary `since:`/`until:` `DateTime{}` values, so the API is correct. The bug is **in the UI** where the rolling/calendar choice and timezone is made.
-- LiveView has no notion of the connecting browser's timezone unless explicitly fetched (`Phoenix.LiveView.JS` push or `Intl.DateTimeFormat().resolvedOptions().timeZone`).
-
-**How to avoid:**
-
-1. **Display all times in UTC, labeled "UTC".** Don't try to localize. The dashboard is operator-facing, not customer-facing — operators understand UTC. (Baremetrics: localized. Stripe: UTC labeled. We pick Stripe's pattern — less surface area, no timezone library, no DST bugs.)
-
-2. **Default window is calendar-current-month**, with explicit "Last 7d" / "Last 30d" / "Custom range" buttons. Both modes are clearly labeled ("May 2026 (UTC)" vs "Last 30 days (UTC)").
-
-3. **DST is moot** because we never present local time. UTC has no DST.
-
-4. **"Spanning" subscriptions** (entered dunning before window, recovered inside) — the funnel attributes by **the event timestamp**, not the campaign start. An event `dunning.recovered` at 2026-05-15 is part of the May funnel regardless of when its campaign started. This is the same convention Stripe uses for refunds and chargebacks. Document explicitly: "Counts reflect the time the *outcome event* was recorded, not the time the campaign started."
-
-**Prevention check (concrete):**
-- **Test:** seed a `dunning.recovered` event with `inserted_at: ~U[2026-05-31 23:59:00Z]`. Assert that the May calendar window includes it, the June calendar window does not.
-- **Test:** seed two events 7 days 1 hour apart; assert the 7-day rolling window contains exactly one.
-- **UI assertion:** "UTC" label appears next to every time-range selector. Snapshot test catches removal.
-- **Doc clause:** "All times in UTC. Spanning campaigns are attributed by the outcome event's timestamp."
-
-**Owning phase:** v1.44 time-window filter phase. Set the convention on day one; do not let it drift across follow-on phases.
+**Phase:** Entitlements gating adopter-proof phase.
 
 ---
 
-### Pitfall 8: Operator misinterpretation of "Recovered MRR"
+### Pitfall PROOF-03: Metered usage `report_usage/3` succeeds in Fake-lane for any plan — adopters miss the "metered price" requirement
 
-**What goes wrong:**
-Operators read "Recovered MRR: $14,200" and think "$14,200 hit our bank account this month." Truth: `dunning.recovered` fires when the campaign *concludes successfully* (subscription transitions back to active/paid). The MRR snapshotted is the **monthly contract value** — a customer on a $100/yr plan contributes ~$8.33 to MRR but has only one invoice of $100 cleared in the month. Conversely a customer on a 3-month $300 plan contributes ~$100/mo MRR. The number is *correct as MRR* but *misleading as cashflow*.
+**What goes wrong:** In the existing `subscription_live_test.exs` PROOF-04 test, `simulate_api_call` calls `Billing.report_usage_for_scope(scope, "api_calls", value: 1)`. In Fake-lane, `report_usage/3` creates a `MeterEvent` row and returns `{:ok, event}` regardless of whether the org has a subscription with a metered price. The test asserts `Repo.aggregate(MeterEvent, :count) == 1` and passes.
 
-Also: a recovered $50/mo customer might still churn next month — "Recovered MRR" is a measure of dunning's success at THIS recovery, not annualized retained revenue.
+In production (Stripe), `report_usage/3` requires that the subscription item has `billing_scheme: "per_unit"` and a metered price ID. Calling it on a flat-rate plan returns a Stripe `400` error. The adopter-proof example does not demonstrate this distinction.
 
-Also: "Lost MRR" carries negative framing. The v1.44 assessment Lesson from Baremetrics is "Frame positively — say 'Recovered Revenue', not 'Failed Payments'." Applies symmetrically: don't say "Lost MRR" — call it "Exhausted MRR" (the dunning campaign was *exhausted* — neutral, accurate) or "Unrecovered MRR" (also accurate, less framing-laden than "Lost").
+**Consequences:** Adopters see `report_usage/3` working in tests against any plan, then get Stripe API errors in production when their plan is not metered. The example silently hides a "wrong plan type" failure mode that is one of the most common adopter mistakes with metered billing.
 
-**Why it happens in Accrue specifically:**
-- The Phase 143 LiveView renders the KPI as `"Lost MRR"` (143-VERIFICATION confirms: `<KpiCard ... label="Lost MRR">`).
-- The MRR value is correctly snapshotted at recovery time, but the *label* is the wrong word.
+**Prevention:** Add a comment in the `SubscriptionLive` PROOF-04 section and in `billing_facade_test.exs` documenting that `report_usage/3` requires a metered price ID (`billing_scheme: "per_unit"`) configured on the Stripe plan. If a dedicated metered adopter proof is added in v1.47, wire it against `"price_metered"` (already in `Plans.ids/0` in the example host) and include a comment: "In production, `price_metered` must be a Stripe price with billing_scheme: per_unit. The Fake processor does not enforce this."
 
-**How to avoid:**
-
-1. **Rename "Lost MRR" → "Exhausted MRR"** in the LiveView. Tiny copy change, big trust signal.
-
-2. **Add a tooltip / "What's this?" affordance on the KPI cards:**
-   - Recovered MRR: "Sum of MRR for subscriptions that re-activated after entering dunning. This is monthly recurring value — actual cash collected may differ if the plan is yearly or has prorations."
-   - Exhausted MRR: "Sum of MRR for subscriptions that did not recover and were marked unpaid or canceled."
-
-3. **Do NOT add "Annualized Recovered MRR" as a second KPI in v1.44.** It compounds confusion. If demand emerges, add it in v1.45 with a documented `* 12` and an explicit "annualized" tag.
-
-4. **Do NOT show "Money in the Bank" — that's a different question** (it's settled-invoice cashflow, owned by `Accrue.Billing.Invoice` queries, not the dunning analytics).
-
-**Prevention check (concrete):**
-- **LiveView snapshot test:** assert the rendered HTML contains `"Exhausted MRR"`, NOT `"Lost MRR"`.
-- **Doc clause:** define "Recovered MRR" and "Exhausted MRR" in the guide with a concrete worked example: customer on $50/mo enters dunning, recovers → contributes $50 to Recovered MRR. Customer on $600/yr enters dunning, exhausts → contributes $50 to Exhausted MRR (`$600 / 12`).
-- **Tooltip presence asserted in test.**
-
-**Owning phase:** v1.44 funnel-viz phase or whichever phase finalizes operator-facing copy. Should be done in the same PR as ANY copy work — single source of truth for terminology.
+**Phase:** Metered usage adopter-proof phase.
 
 ---
 
-### Pitfall 9: Public-API guarantees over-commit on event shape and query signature
+### Pitfall PROOF-04: `value:` vs `quantity:` — wrong option key sends default silently
 
-**What goes wrong:**
-Phase 143's `Accrue.Analytics.Dunning.recovered_vs_lost_mrr/1` is becoming part of the *public Accrue API* in v1.44. Once it ships in 1.4.0 on Hex, the return shape and event-field reliance are **stability commitments** under semver. Mistakes that lock in:
+**What goes wrong:** `Billing.report_usage/3` accepts `value:` as the option key for usage quantity (as used in the existing example: `value: 1`). If an adopter uses `quantity: 1` (the Stripe API field name), the option is silently ignored — the internal `Keyword.get(opts, :value, default)` returns the default. No error is raised. The meter event is recorded with the wrong quantity. Stripe receives the incorrect value.
 
-- Return type `%{recovered_cents: int, lost_cents: int}` — single-currency assumption baked in (see Pitfall 4). Changing to per-currency in 1.5 is a breaking change.
-- Reading `data["mrr_value_cents"]` — implies that field is part of the *public event schema*. Future event-shape changes (e.g., switching to `data["mrr_minor_units"]` to match `Decimal` conventions, or breaking out `mrr_value_cents_by_item`) become breaking changes for adopters who wrote their own analytics on top.
-- Performance characteristics: if the dashboard works at 10k events on a customer's DB, they'll write blog posts saying "Accrue analytics scales to 10k events." If it doesn't work at 1M events, that's *our* commitment.
+**Why it happens:** The public API uses `value:` as the Accrue-idiomatic key to avoid leaking Stripe terminology into the host-facing API surface. Adopters coming from the Stripe Billing Meter docs will reach for `quantity:` by reflex.
 
-**Why it happens in Accrue specifically:**
-- Accrue is post-1.0 (1.2.0 published per gitStatus). The community now treats public modules as covered by semver.
-- The "no new tables" constraint means the event ledger itself is the schema; widening the funnel API later may require schema-version bumps on the events.
+**Consequences:** Adopters ship metered billing that under-reports usage. Revenue impact. This is a "wrong mental model from Stripe docs" trap that adopters hit reliably.
 
-**How to avoid:**
+**Prevention:** In the adopter-proof example call site, add an inline comment: `# NOTE: use value: not quantity: — quantity: is silently ignored`. Optionally, add a defensive `if Keyword.has_key?(opts, :quantity), do: Logger.warning(...)` in `report_usage/3` to surface the mistake at runtime.
 
-1. **Widen `recovered_vs_lost_mrr/1` return shape NOW to per-currency** (per Pitfall 4). One-time cost; locked-in benefit.
-
-2. **Document the public-API contract explicitly:**
-   - `Accrue.Analytics.Dunning.recovered_vs_lost_mrr/1` IS public; signature is stable across 1.x.
-   - The shape of `data` on `dunning.recovered`/`dunning.exhausted` events is *internal* — the analytics module is the public interface. Adopters who query the events table directly are off-roading.
-   - Document this distinction in the moduledoc *and* in `guides/upgrade.md`.
-
-3. **Add a `schema_version` semantic to dunning events.** The events already carry a `schema_version` integer column (per `Accrue.Events.Event`). Phase 143 sets it implicitly to 1. v1.44 should *explicitly* set `schema_version: 1` on emission and document the migration story for v2 events ("read both; aggregate over union; document migration in CHANGELOG").
-
-4. **Performance commitment: state it as an SLO with an `EXPLAIN`-backed receipt, not a marketing promise.** "Tested with up to 100,000 `dunning.*` events on Postgres 14 with the composite `(type, inserted_at)` index. Query time <250ms p95. At higher volumes consider an expression index — see [Pitfall 11]."
-
-**Prevention check (concrete):**
-- **Documentation:** `Accrue.Analytics.Dunning` moduledoc names every function as `@spec` + "public/private" status + semver commitment.
-- **CHANGELOG entry** for 1.4.0 includes "stable since 1.4.0" markers on the analytics functions.
-- **`mix.exs`** package documentation lists `Accrue.Analytics.Dunning` in the official ExDoc groups.
-
-**Owning phase:** v1.44 public-API/docs phase. MUST happen before publish.
+**Phase:** Metered usage adopter-proof phase. Also a candidate for a callout in `guides/metered-billing.md`.
 
 ---
 
-## Minor Pitfalls (paper cuts, but each removes a real DX wart)
+### Pitfall PROOF-05: Adopter replaces their existing Oban crontab instead of merging Accrue's entries
 
-### Pitfall 10: Adopter-proof seeds produce flaky, time-dependent tests
+**What goes wrong:** The `recovery_wiring_test.exs` asserts that `DetectExpiringCards`, `MeterEventsReconciler`, and `MeteredRenewalReconciler` are in the host's Oban `Cron` plugin. If an adopter already has a `Cron` plugin configured with their own crontab entries and they add Accrue's entries by directly assigning `crontab: accrue_entries`, their own cron jobs are silently dropped. Oban's `Cron` plugin accepts a single `crontab:` list with no merge/append API.
 
-**What goes wrong:**
-Seeding realistic dunning data in `examples/accrue_host` requires events with `inserted_at` timestamps that exercise "last 7 days", "last 30 days", and "last year" buckets. The naive seed (`DateTime.utc_now() |> DateTime.add(-3, :day)`) produces tests that pass today and fail in 90 days when the seed is "outside" the test's assumed window.
+**Why it happens:** The adopter-proof example owns the entire Oban config (it is a standalone example app). Adopters copy the `config.exs` crontab block and replace their existing configuration.
 
-**How to avoid:**
+**Consequences:** An adopter who copies the config block replaces their existing cron jobs. Background jobs for their own business logic stop running. No error is raised; jobs just never fire. This is a subtle drop that may not surface until the next billing cycle.
 
-1. Use `Accrue.Clock` (the project's mockable clock) in all seed scripts. Tests freeze the clock; seeds use absolute dates relative to the frozen clock.
-2. Document the seed pattern: "All seed timestamps are relative to `Accrue.Clock.utc_now()` at seed-script invocation time, not to wall-clock `DateTime.utc_now()`."
-3. Adopter-proof tests assert *relative* counts ("3 in last 7d, 5 in last 30d") rather than absolute dollar values that drift.
+**Prevention:** In the adopter-proof example's `config.exs` comment block, include an explicit note: "If your application already has an Oban Cron plugin, **append** these entries to your existing crontab list. Do not replace — replacing silently drops your existing cron jobs." Show a merge pattern:
 
-**Prevention check:** the host `mix accrue.seed.dunning_demo` task runs successfully and produces a dashboard that renders ≥ 1 recovered, ≥ 1 exhausted, ≥ 1 at-risk in the last 30 days, no flakes across 100 successive invocations.
+```elixir
+crontab: your_existing_cron_jobs() ++ [
+  {"0 8 * * *", Accrue.Jobs.DetectExpiringCards},
+  {"* * * * *", Accrue.Jobs.MeterEventsReconciler},
+  {"*/5 * * * *", Accrue.Jobs.MeteredRenewalReconciler}
+]
+```
 
-**Owning phase:** v1.44 adopter-proof phase (the one that updates `examples/accrue_host`).
-
----
-
-### Pitfall 11: No expression index on `(data->>'mrr_value_cents')::integer` — perf cliff at scale
-
-**What goes wrong:**
-The current `(type, inserted_at)` composite index lets the dunning aggregation filter rows fast, but the `sum((data->>'mrr_value_cents')::integer)` is computed per-row in memory. At 100k+ `dunning.*` events, the aggregation goes from ~50ms to ~2s. The dashboard mount blocks the LiveView for 2s. Operator sees a frozen page.
-
-**Why it happens in Accrue specifically:**
-- No expression index on `data` exists in the migration set (verified — only `(subject_type, subject_id, inserted_at)` and `(type, inserted_at)`).
-- Postgres GIN indexes on `jsonb` cover containment queries, NOT aggregations. The right index is a *btree expression index*: `CREATE INDEX ... ON accrue_events ((data->>'mrr_value_cents')) WHERE type IN (...)`.
-
-**How to avoid:**
-
-1. **DO NOT add the expression index in v1.44.** Document the threshold ("at >100k `dunning.*` events, add an expression index — see guide") and ship a migration *template* in `priv/accrue/templates/migrations/` for the adopter to run if they hit it.
-2. Reason: the index has write-cost on every event insert; most adopters have <1k dunning events lifetime and don't need it. Premature optimization for the rare adopter is a cost on every adopter.
-3. **DO add a guide section** in `accrue/guides/analytics.md`: "Performance: when to add the dunning MRR expression index." With actual `EXPLAIN ANALYZE` excerpts demonstrating the with/without difference.
-
-**Prevention check:**
-- Performance test (in a perf-tagged suite, not default `mix test`): seed 50k events, assert aggregation < 500ms.
-- Guide section exists and is cross-linked from the `Accrue.Analytics.Dunning` moduledoc.
-
-**Owning phase:** v1.44 public-API/docs phase. Pure documentation, no code change.
+**Phase:** Oban cron adopter-proof phase.
 
 ---
 
-### Pitfall 12: Permission scope assumes single admin role
+### Pitfall PROOF-06: Missing Oban queue silently stalls all webhook processing
 
-**What goes wrong:**
-The Phase 143 route is nested inside `live_session :accrue_admin` (verified `router.ex:75-77`), gated by `AccrueAdmin.AuthHook` `:ensure_admin`. Any admin can view recovered-revenue data. A SaaS with "billing-readonly" support staff (who should see at-risk customers but not, e.g., issue refunds) has to grant them full admin to see the dashboard.
+**What goes wrong:** Accrue's workers are enqueued into named queues (`accrue_webhooks`, `accrue_mailers`, `accrue_meters`, `accrue_scheduled`). If an adopter configures Oban with only `queues: [default: 10]`, jobs enqueued to `accrue_webhooks` are inserted into `oban_jobs` but never dequeued — no worker is consuming them. No error is raised at enqueue time. Oban silently accumulates pending jobs.
 
-**Why it happens in Accrue specifically:**
-- `accrue_admin` ships a binary admin/not-admin auth model (verified `auth_hook.ex:11`). There is no role granularity.
-- This is consistent with the rest of `accrue_admin` — adding a role just for analytics would create inconsistent surface area.
+**Why it happens:** Oban does not validate at job-insert time that the target queue is declared in the consumer configuration. Job insertion succeeds regardless of whether the queue has an active consumer.
 
-**How to avoid:**
+**Consequences:** Webhooks are received, the ingest plug verifies + persists + returns 200, `DispatchWorker` jobs are inserted, but `DefaultHandler` never runs. Billing state is never reconciled. Adopters see webhook confirmations in the Stripe dashboard but no state changes in AccrueAdmin. This is the top reported confusion point for new Accrue adopters and is invisible until the admin is checked.
 
-1. **For v1.44: do nothing.** Binary admin gate is consistent with the rest of the package and is the right call at this stage. Defer role-granularity to a future "operator roles" milestone (not on the v1.44-v1.46 roadmap).
-2. **Document the limitation explicitly:** "Recovered-revenue analytics inherit the standard admin auth. Granular billing-readonly roles are not yet supported; if you need this, gate the route in your host app's pipeline."
-3. **Provide an escape hatch in the guide:** show how to wrap the route in the host app's own pipeline to add a role check before falling through to Accrue's admin hook. This is a 10-line host-app code sample.
+**Prevention:** The adopter-proof example `config.exs` must show the complete required queue list. The existing `recovery_wiring_test.exs` already asserts `accrue_meters` and `accrue_scheduled` — extend it to also assert `accrue_webhooks` and `accrue_mailers`. Add a comment in `config.exs`: "Missing queue = jobs enqueue but never execute. If billing state stops updating after webhooks, check that all four Accrue queues are declared here."
 
-**Prevention check:** doc section exists; escape-hatch code sample is `mix test`-verified by a host-app integration test.
-
-**Owning phase:** v1.44 public-API/docs phase. No code change in Accrue.
+**Phase:** Oban cron adopter-proof phase. High priority — this is a silent failure mode with significant UX impact.
 
 ---
 
-### Pitfall 13: `subject_id` is `:string`, not `:binary_id` — joining to `accrue_subscriptions` is ergonomic-soft
+### Pitfall PROOF-07: LiveView entitlement guard fires before `active_organization` association is preloaded — crashes instead of redirecting
 
-**What goes wrong:**
-The at-risk drill-down wants to join from event-derived subject_ids to subscription rows for display ("show the customer name, plan, MRR"). `Accrue.Events.Event` defines `subject_id: :string` (verified line 42 of `event.ex`); `Accrue.Billing.Subscription.id` is `:binary_id` (UUID). The join works (UUIDs are strings in jsonb-friendly form) but type-mismatches in Ecto `join: e in Event, on: e.subject_id == s.id` will need a `type/2` cast or a fragment cast. Easy to get wrong.
+**What goes wrong:** `Accrue.Live.Entitlements` calls `Accrue.entitled?/2` with the billable from the socket's current scope. If `scope.active_organization` is an unloaded Ecto association (`%Ecto.Association.NotLoaded{}`), the entitlement resolver pattern matches on the struct and may crash or silently return `false` without a clear error. LiveView `on_mount` callbacks run before `mount/3`, and the scope is loaded by `AccrueHostWeb.UserAuth`'s `mount_current_scope` — which must preload `active_organization` before the entitlements guard runs.
 
-**How to avoid:**
+**Why it happens:** The order of `on_mount` callbacks is critical. If the auth hook that loads the scope runs without preloading `active_organization`, and the entitlements guard fires immediately after, the guard receives a partial scope. The existing example router chains both in order and works correctly, but adopters who rearrange the `on_mount` list or use a different auth module may not preload the organization.
 
-1. Provide a helper in `Accrue.Analytics.Dunning`:
-   ```elixir
-   def at_risk_with_subscriptions(opts \\ []) do
-     # Encapsulates the cast; returns enriched rows.
-   end
-   ```
-2. Document the cast in a guide and link from the moduledoc.
+**Consequences:** `Accrue.entitled?/2` raises `ArgumentError` or encounters `Ecto.Association.NotLoaded` at mount time. The LiveView renders a 500 error instead of a clean 302 redirect. This is not caught by the existing entitlements guard test because `log_in_user/3` in the test support preloads the organization.
 
-**Prevention check:** a `mix test` that seeds events + subscriptions and joins them through the helper without `Ecto.Query.CastError`.
+**Prevention:** Add a comment in the router documenting the preload dependency: "`require_authenticated` must ensure `active_organization` is preloaded before the entitlements guard fires." Add a defensive check in `Accrue.Live.Entitlements` (if not already present): if the billable resolves to `%Ecto.Association.NotLoaded{}`, emit a Logger warning and redirect rather than crash. Add a test case with an unloaded scope to assert the redirect path.
 
-**Owning phase:** v1.44 at-risk drill-down phase.
+**Phase:** Entitlements gating adopter-proof phase.
 
 ---
 
-## Phase-to-Pitfall Map (gsd-roadmapper consumption)
+## Phase-Specific Summary
 
-| v1.44 Phase (proposed) | Pitfalls owned | Concrete must-do |
-|------------------------|----------------|------------------|
-| **Funnel viz** | #1, #5, #8 | DISTINCT (subject_id, campaign_anchor) test; CASE-in-fragment; rename "Lost" → "Exhausted"; Anchor snapshot retrofit to DefaultHandler |
-| **At-risk drill-down** | #2, #6, #13 | Ledger-trumps-projection tiebreaker; `Phoenix.LiveView.stream/4` + pagination; `at_risk_with_subscriptions/1` helper |
-| **Time-window filters** | #7 | UTC-only labels; default calendar-current-month; explicit "outcome timestamp" attribution |
-| **Backfill / cutoff** | #3 | Cutoff-date label approach (option 1); `:dunning_mrr_snapshot_floor` config; ADR-v144-001 |
-| **Public API & docs** | #4, #9, #11, #12 | Per-currency return shape; explicit semver markers; perf threshold guide; admin-role limitation doc |
-| **Adopter-proof** | #10 | `Accrue.Clock`-based seeds; relative-count assertions; demo task |
-
-## Pitfalls Deferred to v1.45+ (gsd-roadmapper: do not put these in v1.44)
-
-| Deferred pitfall | Reason | When |
-|------------------|--------|------|
-| Compensating-event backfill (Pitfall 3, option 2) | Larger lift; v1.44 cutoff-date label is honest interim | v1.45 if adopter demand |
-| Auto-refresh via PubSub-from-dispatcher (Pitfall 6) | Coupled to notification convergence work | v1.45 with multi-channel dunning |
-| Granular operator roles (Pitfall 12) | Cross-cutting; not analytics-specific | Future "operator roles" milestone |
-| FX conversion (Pitfall 4) | Out of scope — Accrue is not an FX library | Never (this is a downstream BI concern) |
-| Annualized Recovered MRR KPI (Pitfall 8) | Compounds operator confusion; defer to adopter demand | v1.45+ behind a flag |
-
-## What I Could Not Verify (HONEST GAPS)
-
-1. **Baremetrics / Stripe Dashboard exact framing** — the recommendation to label "UTC" comes from my reading of how Stripe Dashboard *currently* displays times (LOW confidence, training-data based). Worth confirming with a screenshot capture before locking the UI convention.
-2. **Postgres expression-index threshold** — the "100k events" threshold is a rule-of-thumb, not benchmarked on Accrue's schema specifically. The benchmark should be run on a representative adopter DB (or on the demo host) to anchor the guide section's numbers.
-3. **LiveView 1.1 `stream/4` performance ceiling** — assumed to be "thousands of rows OK." If a real adopter has 50k+ at-risk subscriptions (probably means their dunning campaign is broken, but possible), pagination alone may not suffice. Out of scope for v1.44.
-4. **Whether `mix phx.routes` will work in v1.44** — the 143-VERIFICATION flagged that `accrue_admin/router.ex` is a macro builder. If v1.44 verification plans use that command, they'll hit the same wall.
+| Phase Topic | Pitfall | Mitigation |
+|-------------|---------|------------|
+| WR-05 upsert implementation | `on_conflict_where` NULL short-circuit (WR-05-01) | Change WHERE to handle NULL EXCLUDED timestamp explicitly |
+| WR-05 upsert implementation | `optimistic_lock` conflicts with upsert WHERE (WR-05-02) | Remove `optimistic_lock` from `force_changeset/2`; add `lock_version` to exclude list |
+| WR-05 upsert implementation | `returning: true` no-op returns stale row as write (WR-05-03) | Compare returned vs expected `last_stripe_event_ts` after insert; emit `:unchanged` |
+| WR-05 test coverage | Serial tests don't exercise concurrent conflict (WR-05-04) | Write `Task.async` concurrent test with `Sandbox.allow/3` |
+| IN-01 processor field | `processor_name()` ignores event processor arg (IN-01-01) | Thread `processor` arg into `write_entitlement_summary/9` |
+| IN-02 livemode null | Missing key overwrites prior known value with nil (IN-02-01) | Carry prior row's livemode forward when incoming is nil |
+| IN-03 docs/fixtures | Default fixture always uses `livemode: false` (IN-03-01) | Add `:omit_livemode` option; clarify `@moduledoc` reuse boundary |
+| IN-04 metrics | `processor` missing from telemetry metadata (IN-04-01) | Document omission or add `processor:` to metadata (same PR as IN-01) |
+| Entitlements gating proof | Scope resolution fails silently without org (PROOF-01) | Document `on_mount` order; per-cause flash messages |
+| Entitlements gating proof | `LocalMap` not configured for fixture price ID (PROOF-02) | Setup assertion; code comment in test |
+| Metered usage proof | Fake-lane hides "wrong plan type" failure (PROOF-03) | Document metered price requirement; use `"price_metered"` in proof |
+| Metered usage proof | `quantity:` vs `value:` silent wrong key (PROOF-04) | Inline comment; optional `Logger.warning` for `quantity:` opt |
+| Oban cron proof | Adopter replaces existing crontab (PROOF-05) | Show merge pattern in config comment |
+| Oban cron proof | Missing queue silently stalls webhook processing (PROOF-06) | Show full queue list; extend recovery_wiring_test assertions |
+| Entitlements gating proof | `active_organization` not preloaded before guard (PROOF-07) | Document `on_mount` order; defensive check in guard |
 
 ## Sources
 
-- `/Users/jon/projects/accrue/.planning/phases/143/143-RESEARCH.md` — HIGH (codebase-grounded, this milestone's foundation)
-- `/Users/jon/projects/accrue/.planning/phases/143/143-VERIFICATION.md` — HIGH (verified test outcomes + known gaps)
-- `/Users/jon/projects/accrue/accrue/lib/accrue/analytics/dunning.ex` — HIGH (current query shape)
-- `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex` (lines 770-921, 1896-1923) — HIGH (MRR calculation, emission sites, anchor handling)
-- `/Users/jon/projects/accrue/accrue/lib/accrue/dunning/campaign.ex` — HIGH (confirmed pure resolver, no schema)
-- `/Users/jon/projects/accrue/accrue/lib/accrue/events/event.ex` — HIGH (subject_id is `:string`, data is `:map`)
-- `/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260411000001_create_accrue_events.exs` — HIGH (immutability trigger)
-- `/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260414130500_add_events_type_inserted_at_index.exs` — HIGH (current indexes)
-- `/Users/jon/projects/accrue/.planning/threads/v1.44-NEXT-STEP-ASSESSMENT.md` — HIGH (the "Crucial Footgun" pattern explicitly applies)
-- Postgres `NULL`-in-`sum` semantics — HIGH (Postgres docs, longstanding behavior)
-- LiveView `stream/4` recommendation — MEDIUM (Phoenix LiveView 1.1 docs, common pattern)
-- Baremetrics / Stripe UI conventions — LOW (training-data based; verify with screenshots before locking copy)
+All findings are HIGH confidence based on direct source reading:
+- `/Users/jon/projects/accrue/accrue/lib/accrue/billing/entitlement_summary.ex` — schema with `optimistic_lock`, `force_changeset/2`
+- `/Users/jon/projects/accrue/accrue/lib/accrue/webhook/default_handler.ex` — `upsert_entitlement_summary/2`, `write_entitlement_summary/8`, `processor_name/0`, `stamp_summary_watermark/4`
+- `/Users/jon/projects/accrue/accrue/priv/repo/migrations/20260524120000_create_accrue_entitlement_summaries.exs` — column definitions, `lock_version` present
+- `/Users/jon/projects/accrue/accrue/test/support/stripe_fixtures.ex` — `entitlement_summary_event/2`, livemode default always `false`
+- `/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/router.ex` — `on_mount` chain for entitlements guard
+- `/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host_web/live/entitlements_guard_test.exs` — current guard test coverage
+- `/Users/jon/projects/accrue/examples/accrue_host/test/accrue_host/recovery_wiring_test.exs` — Oban cron wiring assertions; existing queue assertions
+- `/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host_web/live/subscription_live.ex` — metered usage demo (PROOF-04 card), recovery wiring demo (PROOF-06 card)
+- `/Users/jon/projects/accrue/examples/accrue_host/lib/accrue_host/billing.ex` — `report_usage_for_scope/3` delegation chain
+- Ecto `optimistic_lock/1` + `Repo.insert/2` + `on_conflict_where` interaction: HIGH confidence — `optimistic_lock/1` injects a `WHERE lock_version = ?` predicate into the UPDATE branch of an upsert, not only into `Repo.update/2`. This is documented Ecto behavior applicable to `Repo.insert/2` with `on_conflict: :replace`. Verify with a minimal repro in the WR-05 phase.
+- PostgreSQL `ON CONFLICT DO UPDATE WHERE <false>` behavior: HIGH confidence — returns 0 rows affected; `returning` with 0 affected rows returns existing row values in postgrex/Ecto. Verify against the specific Ecto + postgrex version pinned in this project.
