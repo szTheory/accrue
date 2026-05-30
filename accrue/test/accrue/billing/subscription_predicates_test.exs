@@ -5,7 +5,7 @@ defmodule Accrue.Billing.SubscriptionPredicatesTest do
   subscription X?". Raw `.status == :active` access is banned elsewhere
   (enforced by Accrue.Credo.NoRawStatusAccess).
   """
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Accrue.Billing.Subscription
 

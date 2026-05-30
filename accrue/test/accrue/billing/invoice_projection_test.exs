@@ -10,7 +10,7 @@ defmodule Accrue.Billing.InvoiceProjectionTest do
   inputs, extracts every D3-14 rollup column, and preserves the full
   upstream map in the `data` jsonb column.
   """
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Accrue.Billing.InvoiceProjection
   alias Accrue.Test.StripeFixtures

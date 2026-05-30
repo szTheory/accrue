@@ -1,5 +1,5 @@
 defmodule Accrue.Plug.PutConnectedAccountTest do
-  use Accrue.ConnectCase, async: true
+  use Accrue.ConnectCase, async: false
 
   alias Accrue.Connect
   alias Accrue.Connect.Account

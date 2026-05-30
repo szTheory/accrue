@@ -1,5 +1,5 @@
 defmodule Accrue.Processor.BehaviourTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   describe "Accrue.Processor behaviour" do
     test "defines the Phase 1 callbacks" do

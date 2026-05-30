@@ -1,5 +1,5 @@
 defmodule Accrue.Billing.SearchTest do
-  use Accrue.BillingCase, async: true
+  use Accrue.BillingCase, async: false
 
   alias Accrue.Billing.Search
   alias Accrue.Billing.Customer

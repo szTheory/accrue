@@ -4,7 +4,7 @@ defmodule Accrue.Billing.CustomerLocaleTimezoneTest do
   (D6-03). Columns are free-form strings with no validate_inclusion; the
   library cannot know which locales the host's CLDR backend compiled in.
   """
-  use Accrue.BillingCase, async: true
+  use Accrue.BillingCase, async: false
 
   alias Accrue.Billing.Customer
 

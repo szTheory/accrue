@@ -1,5 +1,5 @@
 defmodule Accrue.DunningTest do
-  use Accrue.BillingCase, async: true
+  use Accrue.BillingCase, async: false
 
   alias Accrue.Dunning
   alias Accrue.Test.Factory

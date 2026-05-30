@@ -4,7 +4,7 @@ defmodule Accrue.Connect.AccountTest.FakeStripeAccount do
 end
 
 defmodule Accrue.Connect.AccountTest do
-  use Accrue.ConnectCase, async: true
+  use Accrue.ConnectCase, async: false
 
   alias Accrue.Connect.{Account, Projection}
 

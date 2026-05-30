@@ -1,5 +1,5 @@
 defmodule Accrue.Processor.CapabilitiesTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Accrue.Processor
   alias Accrue.Processor.Capabilities

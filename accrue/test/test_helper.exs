@@ -17,6 +17,25 @@
 Code.ensure_loaded!(UUIDv7)
 Code.ensure_loaded!(Phoenix.HTML.Safe.BitString)
 
+# Same flake class for the native Rendro PDF path: rendro shapes text by calling
+# into several UnicodeData.* submodules (Script, Bidi, ...) and harfbuzz_ex, but
+# :unicode_data is a transitive dep that only auto-loads its (large, generated)
+# modules on first reference. Under random seeds the Chrome-free PDF test
+# (Accrue.Billing.PdfTest) runs before anything else has referenced them and hits
+# `module UnicodeData.<X> is not available`. Eagerly load every module of the PDF
+# text-shaping chain before any async test runs so ordering can't surface it.
+for app <- [:unicode_data, :harfbuzz_ex, :rendro] do
+  _ = Application.load(app)
+
+  case :application.get_key(app, :modules) do
+    {:ok, mods} -> Enum.each(mods, &Code.ensure_loaded/1)
+    _ -> :ok
+  end
+end
+
+Code.ensure_loaded!(UnicodeData.Script)
+Code.ensure_loaded!(UnicodeData.Bidi)
+
 Accrue.MoxSetup.define_mocks()
 
 # Configure webhook signing secrets for test fixtures (Plan 06).
