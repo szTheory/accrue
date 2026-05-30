@@ -257,6 +257,55 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
     end
   end
 
+  # ENT-10 scoping isolation: Plan 01, Task 1, Behavior 2.
+  # Verifies that a customer row with the same processor_id but a DIFFERENT
+  # processor value is NOT matched — the strict two-column scope
+  # (processor_id + processor) prevents cross-processor ID collisions.
+  describe "ENT-10 cross-processor isolation (processor differs -> no match)" do
+    setup do
+      enable_advisory_sync()
+      :ok
+    end
+
+    test "same processor_id under 'fake' processor is invisible to a :stripe webhook", %{
+      customer: _stripe_customer
+    } do
+      # The shared setup already inserted a customer with processor: "stripe",
+      # processor_id: "cus_fake_ent_summary". Insert a SECOND customer row
+      # with processor: "fake" and the SAME processor_id — this simulates
+      # the pre-ENT-10 collision scenario.
+      {:ok, fake_customer} =
+        %Customer{}
+        |> Customer.changeset(%{
+          owner_type: "User",
+          owner_id: Ecto.UUID.generate(),
+          processor: "fake",
+          processor_id: "cus_fake_ent_summary",
+          email: "ent-summary-fake@example.com"
+        })
+        |> Repo.insert()
+
+      # Fire a Stripe webhook carrying "cus_fake_ent_summary". The handle/1
+      # path defaults to :stripe — so the lookup must match processor: "stripe",
+      # not processor: "fake". The stripe customer exists, so the result should
+      # be {:ok, %EntitlementSummary{}} associated with the stripe customer, NOT
+      # with fake_customer.
+      event =
+        StripeFixtures.entitlement_summary_event(
+          customer: "cus_fake_ent_summary",
+          entitlements: [%{"id" => "ent_x", "feature" => "feat_x", "lookup_key" => "x"}]
+        )
+
+      assert {:ok, %EntitlementSummary{} = saved} = Accrue.Webhook.DefaultHandler.handle(event)
+
+      # The saved row must be linked to the STRIPE customer, not the fake one.
+      assert saved.customer_id != fake_customer.id
+
+      # The fake customer must have NO entitlement summary row.
+      refute Repo.get_by(EntitlementSummary, customer_id: fake_customer.id)
+    end
+  end
+
   # Remove a key from the summary `data.object` to model a malformed payload.
   defp pop_in_object(event, key) do
     update_in(event, ["data", "object"], &Map.delete(&1, key))
