@@ -85,7 +85,8 @@ defmodule Accrue.Integrations.ChimewayTest do
               owner_type: "User",
               owner_id: Ecto.UUID.generate(),
               processor: "fake",
-              processor_id: "cus_chimeway_" <> Integer.to_string(System.unique_integer([:positive])),
+              processor_id:
+                "cus_chimeway_" <> Integer.to_string(System.unique_integer([:positive])),
               email: "cancel-signal@example.com",
               name: "Cancel Signal Customer"
             })
@@ -94,7 +95,8 @@ defmodule Accrue.Integrations.ChimewayTest do
           subscription =
             %Accrue.Billing.Subscription{customer_id: customer.id, processor: "fake"}
             |> Accrue.Billing.Subscription.force_status_changeset(%{
-              processor_id: "sub_chimeway_" <> Integer.to_string(System.unique_integer([:positive])),
+              processor_id:
+                "sub_chimeway_" <> Integer.to_string(System.unique_integer([:positive])),
               status: :past_due,
               past_due_since: DateTime.utc_now() |> DateTime.truncate(:second)
             })
@@ -132,6 +134,7 @@ defmodule Accrue.Integrations.ChimewayTest do
       assert signal.tenant_id == subscription.customer_id
       assert signal.actor_id == customer.email
       assert signal.event_name == "invoice.paid"
+
       assert signal.payload[:subscription_id] == subscription.id or
                signal.payload["subscription_id"] == subscription.id
 
