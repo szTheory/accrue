@@ -5,12 +5,13 @@
 
 ## Overview
 
-**2 phases** | **1 requirements mapped** | All covered ✓
+**3 phases** | **1 requirements mapped** | All covered ✓
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
-| 151 | Maintenance & Triage | 1/3 | In Progress|  |
+| 151 | Maintenance & Triage | 3/3 | Complete | 2026-05-30 |
 | 152 | Close v1.46 closure gaps | 3/3 | Complete    | 2026-05-30 |
+| 153 | Close v1.46 audit trail | 2/2 | In Progress  |  |
 
 ### Phase 152: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
 
@@ -28,6 +29,21 @@
 
 - [x] 152-03-PLAN.md — Release PR reconciliation: release-notes.md + CHANGELOG + Release Please PR merge + linked Hex publish
 
+### Phase 153: Close v1.46 audit trail: VERIFICATION.md for Phase 151, ROADMAP + REQUIREMENTS checkbox updates
+
+**Goal:** Close the three documentation gaps identified in v1.46-MILESTONE-AUDIT.md: produce 151-VERIFICATION.md from committed evidence, update ROADMAP.md Phase 151 plan checkboxes, update REQUIREMENTS.md MNT-01 to Complete, and archive the v1.46 milestone.
+**Requirements**: MNT-01
+**Depends on:** Phase 152
+**Plans:** 2 plans
+
+**Wave 1** *(autonomous)*
+
+- [ ] 153-01-PLAN.md — Create 151-VERIFICATION.md (synthesized from evidence) + update ROADMAP Phase 151 checkboxes + update REQUIREMENTS.md MNT-01 to Complete
+
+**Wave 2** *(blocked on Wave 1 completion — has human checkpoint)*
+
+- [ ] 153-02-PLAN.md — Confirm all gaps closed + archive v1.46 milestone via gsd-complete-milestone
+
 ---
 
 ## Phase Details
@@ -40,15 +56,15 @@
 
 - **MNT-01**: Perform routine issue triage and repository maintenance.
 
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 **Wave 1**
 
 - [x] 151-01-PLAN.md — Resolve webhook caching code-review feedback (ENT-10)
-- [ ] 151-02-PLAN.md — Update dependencies across the monorepo
+- [x] 151-02-PLAN.md — Update dependencies across the monorepo
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 151-03-PLAN.md — Execute closure criteria validation and publish
+- [x] 151-03-PLAN.md — Execute closure criteria validation and publish
 
 **Success Criteria:**
 
