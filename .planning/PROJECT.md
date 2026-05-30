@@ -380,9 +380,9 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-Current focus: **Ready for next milestone**. **v1.45 — Multi-channel Dunning (In-App Banners)** is shipped and archived. The project is ready for the next set of goals.
+Current focus: **Ready for next milestone**. **v1.46 — Maintenance & Closure** is shipped and archived. The project is ready for the next set of goals.
 
-**Last shipped planning milestone:** **v1.45** — Phases **149–150** (**2026-05-29**).
+**Last shipped planning milestone:** **v1.46** — Phases **151–153** (**2026-05-30**).
 
 ## Requirements
 
