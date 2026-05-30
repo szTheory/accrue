@@ -351,20 +351,24 @@ defmodule Accrue.Analytics.Dunning do
   defp group_into_arcs([]), do: []
 
   defp group_into_arcs(events) do
-    Enum.reduce(events, [], fn event, acc ->
-      if event.type == "dunning.campaign_started" do
-        acc ++ [{event.data["campaign_anchor"], [event]}]
-      else
-        case acc do
-          [] ->
-            [{nil, [event]}]
-
-          _ ->
-            {anchor, arc_events} = List.last(acc)
-            List.replace_at(acc, -1, {anchor, arc_events ++ [event]})
+    {arcs, current} =
+      Enum.reduce(events, {[], nil}, fn event, {arcs, current} ->
+        if event.type == "dunning.campaign_started" do
+          arcs = if current, do: [current | arcs], else: arcs
+          {arcs, {event.data["campaign_anchor"], [event]}}
+        else
+          case current do
+            nil -> {arcs, {nil, [event]}}
+            {anchor, evts} -> {arcs, {anchor, [event | evts]}}
+          end
         end
-      end
-    end)
+      end)
+
+    arcs = if current, do: [current | arcs], else: arcs
+
+    arcs
+    |> Enum.reverse()
+    |> Enum.map(fn {anchor, evts} -> {anchor, Enum.reverse(evts)} end)
   end
 
   @doc """
