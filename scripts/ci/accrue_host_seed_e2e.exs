@@ -526,49 +526,6 @@ defmodule AccrueHostSeedE2E do
     )
   end
 
-  defp insert_premium_customer!(organization) do
-    %Customer{}
-    |> Customer.changeset(%{
-      owner_type: "Organization",
-      owner_id: to_string(organization.id),
-      processor: "fake",
-      processor_id: "cus_host_premium_replay",
-      email: "premium-e2e-alpha-customer@example.test"
-    })
-    |> Repo.insert!()
-  end
-
-  defp insert_premium_subscription!(customer) do
-    %Subscription{}
-    |> Subscription.changeset(%{
-      customer_id: customer.id,
-      processor: "fake",
-      processor_id: "sub_host_premium_replay",
-      status: :active,
-      data: %{
-        "items" => %{
-          "data" => [
-            %{"price" => %{"id" => "price_premium"}}
-          ]
-        }
-      }
-    })
-    |> Repo.insert!()
-    |> Repo.preload(:subscription_items)
-  end
-
-  defp insert_premium_subscription_item!(subscription) do
-    %SubscriptionItem{}
-    |> SubscriptionItem.changeset(%{
-      subscription_id: subscription.id,
-      processor: "fake",
-      processor_id: "si_host_premium_replay",
-      price_id: "price_premium",
-      quantity: 1
-    })
-    |> Repo.insert!()
-  end
-
   defp insert_fixture_subscription!(customer) do
     %Subscription{}
     |> Subscription.changeset(%{

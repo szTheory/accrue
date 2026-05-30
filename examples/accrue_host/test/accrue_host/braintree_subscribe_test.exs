@@ -111,6 +111,8 @@ defmodule AccrueHost.BraintreeSubscribeTest do
     def send_invoice(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def mark_uncollectible_invoice(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def create_invoice_preview(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
+    def invoice_item_create(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
+    def invoice_item_delete(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def create_payment_intent(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def retrieve_payment_intent(_, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
     def confirm_payment_intent(_, _, _), do: {:error, %Accrue.APIError{message: "Unsupported"}}
