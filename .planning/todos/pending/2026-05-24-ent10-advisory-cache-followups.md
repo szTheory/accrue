@@ -2,6 +2,7 @@
 created: 2026-05-24T00:00:00Z
 title: ENT-10 advisory-cache code-review follow-ups (WR-05 + INFO)
 area: webhooks
+resolves_phase: 154
 files:
   - accrue/lib/accrue/webhook/default_handler.ex:613-623
   - accrue/lib/accrue/billing/entitlement_summary.ex:82-88
