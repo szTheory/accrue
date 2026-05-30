@@ -42,7 +42,7 @@ defmodule Accrue.Analytics.AtRiskSubscriptionsTest do
     |> Repo.insert!()
   end
 
-  defp insert_event(type, subject_id, data \\ %{}, opts \\ []) do
+  defp insert_event(type, subject_id, data, opts \\ []) do
     attrs =
       %{
         type: type,

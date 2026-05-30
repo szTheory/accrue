@@ -11,7 +11,6 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
 
   alias Accrue.Billing.Customer
   alias Accrue.Billing.EntitlementSummary
-  alias Accrue.Repo
   alias Accrue.Webhook.DefaultHandler
 
   @cus_processor_id "cus_wr05_race"
