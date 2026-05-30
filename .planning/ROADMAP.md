@@ -57,7 +57,10 @@
   3. A stale (out-of-order) write returns `{:ok, :stale}`, emits `result: :unchanged` telemetry, and does not write a ledger event.
   4. A non-Stripe processor's entitlement summary row shows the correct `:processor` value, not the global config default.
   5. A follow-up event that omits the `livemode` key carries forward the prior row's `livemode` rather than overwriting with `nil`.
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 154-01-PLAN.md — OCC removal, NULL watermark fix, stale skip path, processor arg threading, livemode carry-forward, concurrent delivery test
 
 ### Phase 155: StripeFixtures Polish + Telemetry Counters
 
@@ -116,7 +119,10 @@
   3. A stale (out-of-order) write returns `{:ok, :stale}`, emits `result: :unchanged` telemetry, and does not write a ledger event.
   4. A non-Stripe processor's entitlement summary row shows the correct `:processor` value, not the global config default.
   5. A follow-up event that omits the `livemode` key carries forward the prior row's `livemode` rather than overwriting with `nil`.
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 154-01-PLAN.md — OCC removal, NULL watermark fix, stale skip path, processor arg threading, livemode carry-forward, concurrent delivery test
 
 ### Phase 155: StripeFixtures Polish + Telemetry Counters
 **Goal:** Test authors can exercise the livemode-absent code path via a fixture option, and operators can include the two previously-missing malformed/orphan entitlement counters in their telemetry reporter.
