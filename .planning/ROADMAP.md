@@ -11,7 +11,7 @@
 |---|-------|------|--------------|------------------|
 | 151 | Maintenance & Triage | 3/3 | Complete | 2026-05-30 |
 | 152 | Close v1.46 closure gaps | 3/3 | Complete    | 2026-05-30 |
-| 153 | Close v1.46 audit trail | 2/2 | Complete | 2026-05-30 |
+| 153 | Close v1.46 audit trail | 1/2 | In Progress|  |
 
 ### Phase 152: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
 
@@ -34,11 +34,11 @@
 **Goal:** Close the three documentation gaps identified in v1.46-MILESTONE-AUDIT.md: produce 151-VERIFICATION.md from committed evidence, update ROADMAP.md Phase 151 plan checkboxes, update REQUIREMENTS.md MNT-01 to Complete, and archive the v1.46 milestone.
 **Requirements**: MNT-01
 **Depends on:** Phase 152
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 **Wave 1** *(autonomous)*
 
-- [ ] 153-01-PLAN.md — Create 151-VERIFICATION.md (synthesized from evidence) + update ROADMAP status + update REQUIREMENTS.md MNT-01 + close MILESTONE-AUDIT.md
+- [x] 153-01-PLAN.md — Create 151-VERIFICATION.md (synthesized from evidence) + update ROADMAP status + update REQUIREMENTS.md MNT-01 + close MILESTONE-AUDIT.md
 
 **Wave 2** *(blocked on Wave 1 completion — has human checkpoint)*
 
