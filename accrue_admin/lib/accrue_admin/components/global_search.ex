@@ -102,8 +102,9 @@ defmodule AccrueAdmin.Components.GlobalSearch do
         phx-hook="CommandPalette" 
         id="command-palette-container"
         data-target={@myself}
-        role="dialog" 
-        aria-modal="true">
+        role="dialog"
+        aria-modal="true"
+        aria-label="Global search">
         
         <form phx-change="search" phx-target={@myself} onsubmit="return false;">
           <div class="ax-command-palette-input-group">
