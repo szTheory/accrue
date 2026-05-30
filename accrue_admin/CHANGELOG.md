@@ -1,15 +1,12 @@
 # Changelog
 
-## Unreleased
+## [1.3.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.2.0...accrue_admin-v1.3.0) (2026-05-30)
 
 **1.0.0 — Stable.** Released in lockstep with `accrue` 1.0.0. The supported integration surface for the admin package is `AccrueAdmin.Router` and the documented mount/scope helpers; see `accrue/CHANGELOG.md` and `accrue/guides/maturity-and-maintenance.md` for the v1.x stability commitment that governs both packages.
 
 ### Host-visible copy (accrue_admin)
 
 - Webhook replay confirmations, bulk DLQ prompts, and related operator strings now live in `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Locked` (Phase 27). Hosts that snapshot admin flash or HEEx literals should diff package tests when upgrading.
-
-## [1.3.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.2.0...accrue_admin-v1.3.0) (2026-05-30)
-
 
 ### Features
 

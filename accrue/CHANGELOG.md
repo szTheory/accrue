@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.3.0](https://github.com/szTheory/accrue/compare/accrue-v1.2.0...accrue-v1.3.0) (2026-05-30)
 
 **1.0.0 — Stable.** This release commits Accrue to v1.x API stability for the documented integration surface: generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `Accrue.Auth`, and `Accrue.ConfigError`. Breaking changes on that surface go through deprecation, not silent reshuffles. Internal schemas, workers, and demo helpers are not part of the contract. See `accrue/README.md` Stability, `accrue/guides/upgrade.md`, `accrue/guides/maturity-and-maintenance.md`, and root `RELEASING.md` for the v1.x stability commitment and post-1.0 cadence.
 
@@ -26,9 +26,6 @@ Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` sh
 
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for **billing portal** facade literals (**`create_billing_portal_session/2`**, **`[:accrue, :billing, :billing_portal, :create]`**, **`billing-billing-portal-create`** / **`billing_portal_session_facade_test.exs`**) alongside checkout.
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for checkout facade + billing-span literals co-evolving with golden-path docs.
-
-## [1.3.0](https://github.com/szTheory/accrue/compare/accrue-v1.2.0...accrue-v1.3.0) (2026-05-30)
-
 
 ### Features
 
