@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
 status: planning
-last_updated: "2026-05-30T18:00:00.000Z"
-last_activity: 2026-05-30
+last_updated: "2026-05-30T18:41:03.989Z"
+last_activity: 2026-05-30 — Roadmap created for v1.47
 progress:
   total_phases: 5
   completed_phases: 0
@@ -141,9 +141,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-30
-Stopped at: Roadmap created for v1.47 — ready for Phase 154 planning
-Resume file: None
+Last session: 2026-05-30T18:41:03.986Z
+Stopped at: Phase 154 context gathered
+Resume file: .planning/phases/154-advisory-cache-core-correctness/154-CONTEXT.md
 
 ## Operator Next Steps
 
