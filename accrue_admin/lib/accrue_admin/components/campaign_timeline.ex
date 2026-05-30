@@ -67,7 +67,7 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
       <% tone = if @event.type == "dunning.recovered", do: "moss", else: "amber" %>
       <% label = if @event.type == "dunning.recovered", do: "Recovered", else: "Exhausted" %>
       <div class={["ax-timeline-dot", "ax-timeline-dot-#{tone}"]}></div>
-      <StatusBadge.status_badge tone={tone} label={label} />
+      <StatusBadge.status_badge status={@event.type} tone={tone} label={label} />
       <p>{format_datetime(@event.inserted_at)}</p>
       <p>{format_amount(@event.data["mrr_value_cents"])}</p>
     </div>

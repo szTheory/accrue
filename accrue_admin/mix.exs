@@ -80,7 +80,7 @@ defmodule AccrueAdmin.MixProject do
       skip_code_autolink_to: fn term ->
         is_binary(term) and
           (term =~
-             ~r/^AccrueAdmin\.Copy\.(BillingEvent|Connect|Coupon|CustomerPaymentMethods|Invoice|PromotionCode|Subscription)\b/ or
+             ~r/^AccrueAdmin\.Copy\.(BillingEvent|Connect|Coupon|CustomerPaymentMethods|Dunning|Entitlements|Invoice|PromotionCode|Subscription)\b/ or
              term =~ ~r/^AccrueAdmin\.Live\./ or
              term =~ ~r/^AccrueAdmin\.Dev\./)
       end,
