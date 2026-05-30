@@ -7,7 +7,7 @@
 
 ### Maintenance & Closure
 
-- [ ] **MNT-01**: Perform routine issue triage and repository maintenance.
+- [x] **MNT-01**: Perform routine issue triage and repository maintenance.
 
 ## Future Requirements
 
@@ -29,7 +29,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MNT-01 | Phase 151 | Pending |
+| MNT-01 | Phase 151 | Complete |
 
 **Coverage:**
 - Active requirements: 1 total
@@ -38,4 +38,4 @@
 
 ---
 *Requirements defined: 2026-05-29*
-*Last updated: 2026-05-29 after milestone v1.46 start*
+*Last updated: 2026-05-30 after Phase 153 closed MNT-01*

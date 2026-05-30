@@ -1,7 +1,7 @@
 # Roadmap: Accrue v1.46
 
 **Milestone:** v1.46 Maintenance & Closure
-**Status:** Planning
+**Status:** Complete
 
 ## Overview
 
@@ -11,7 +11,7 @@
 |---|-------|------|--------------|------------------|
 | 151 | Maintenance & Triage | 3/3 | Complete | 2026-05-30 |
 | 152 | Close v1.46 closure gaps | 3/3 | Complete    | 2026-05-30 |
-| 153 | Close v1.46 audit trail | 2/2 | In Progress  |  |
+| 153 | Close v1.46 audit trail | 2/2 | Complete | 2026-05-30 |
 
 ### Phase 152: Close v1.46 closure gaps: @since warnings, verification, Hex publish + tag
 
@@ -62,7 +62,7 @@
 - [x] 151-01-PLAN.md — Resolve webhook caching code-review feedback (ENT-10)
 - [x] 151-02-PLAN.md — Update dependencies across the monorepo
 
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2**
 
 - [x] 151-03-PLAN.md — Execute closure criteria validation and publish
 
