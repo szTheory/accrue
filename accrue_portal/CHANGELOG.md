@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.2.0...accrue_portal-v1.3.0) (2026-05-30)
+
+
+### Bug Fixes
+
+* **151-03:** resolve test coverage blockers ([21f5d6e](https://github.com/szTheory/accrue/commit/21f5d6e205eef2ad523f5d621338c5f1e6118838))
+* **152-02:** resolve pre-existing credo issues blocking Three Zeros gate ([bd72ec1](https://github.com/szTheory/accrue/commit/bd72ec15058507eab6657db412612caf80ac9698))
+
 ## [1.2.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.1.2...accrue_portal-v1.2.0) (2026-05-26)
 
 

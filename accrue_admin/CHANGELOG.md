@@ -1,12 +1,42 @@
 # Changelog
 
-## Unreleased
+## [1.3.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.2.0...accrue_admin-v1.3.0) (2026-05-30)
 
 **1.0.0 — Stable.** Released in lockstep with `accrue` 1.0.0. The supported integration surface for the admin package is `AccrueAdmin.Router` and the documented mount/scope helpers; see `accrue/CHANGELOG.md` and `accrue/guides/maturity-and-maintenance.md` for the v1.x stability commitment that governs both packages.
 
 ### Host-visible copy (accrue_admin)
 
 - Webhook replay confirmations, bulk DLQ prompts, and related operator strings now live in `AccrueAdmin.Copy` / `AccrueAdmin.Copy.Locked` (Phase 27). Hosts that snapshot admin flash or HEEx literals should diff package tests when upgrading.
+
+### Features
+
+* **143-02:** create RecoveryLive component ([4e3973a](https://github.com/szTheory/accrue/commit/4e3973a5e297f287213aad04aa637be2530b0d30))
+* **143-02:** register recovery route in router ([dea3420](https://github.com/szTheory/accrue/commit/dea342026eccafe0d652027de2ffdf147233d01d))
+* **144-03:** add .ax-funnel-* CSS block to app.css (DAN-09) ([2ec7bc2](https://github.com/szTheory/accrue/commit/2ec7bc22f4ef4c60e7b65d628fce5a83a073f7dc))
+* **144-03:** add AccrueAdmin.Components.FunnelChart (DAN-09) ([7e50ed4](https://github.com/szTheory/accrue/commit/7e50ed412585651755f06dea6f99edc2883b94df))
+* **144-04:** wire funnel + MoneyFormatter + Exhausted-MRR rename in RecoveryLive (DAN-09, DAN-13) ([410caeb](https://github.com/szTheory/accrue/commit/410caebcf7f38b032f62646e968990b0b57810ee))
+* **145-01:** create AccrueAdmin.Components.WindowSelector ([a4e0e47](https://github.com/szTheory/accrue/commit/a4e0e47eda59dfada5d097d268607faccb97853a))
+* **145-01:** refactor RecoveryLive — data loading to handle_params ([f8c1ece](https://github.com/szTheory/accrue/commit/f8c1eceacb2863e35828a3be6e10409ed320e584))
+* **146-03:** AtRiskTable component + ax-at-risk-* CSS classes ([e199cd4](https://github.com/szTheory/accrue/commit/e199cd4aec5d9e1146b0952bec9482e8c2b89326))
+* **146-03:** wire RecoveryLive to render AtRiskTable (DAN-11 GREEN) ([f097ab6](https://github.com/szTheory/accrue/commit/f097ab62a5a645db8cca9636377d64b1a0ed783a))
+* **147-02:** implement CampaignLive and drill-down routing ([060c704](https://github.com/szTheory/accrue/commit/060c704e06d1aa849a97e440f432b4e3a6671856))
+* **149-02:** add DunningBanner headless component ([0ea7b08](https://github.com/szTheory/accrue/commit/0ea7b08fd70f5b99da62ab60b17b1b228743d07e))
+* **v1.42:** complete Ad-hoc Invoices & Adopter Confidence milestone ([452995e](https://github.com/szTheory/accrue/commit/452995e3327220ff3b50023f82871354ec3d0f2c))
+
+
+### Bug Fixes
+
+* **145:** CR-01 remove stale active_organization_name assign from assign_shell/2 ([3698f84](https://github.com/szTheory/accrue/commit/3698f84a43d807ede37bf76ecc032dfd3ef26533))
+* **145:** CR-02 capture DateTime.utc_now/0 once in window_bounds/1 clauses ([29ae506](https://github.com/szTheory/accrue/commit/29ae506717f40fa65a303480962617a2b1bd3b1d))
+* **145:** WR-01 use URI to build window patch URLs safely in window_selector ([6ca402f](https://github.com/szTheory/accrue/commit/6ca402fbc32de53e79872c97547eb22c2e13265e))
+* **145:** WR-02 assert correct button carries aria-current in window parameter tests ([e4fd410](https://github.com/szTheory/accrue/commit/e4fd4101b263ee44f9d2096f53f615d218964053))
+* **145:** WR-03 pattern-match Events.record/1 return values in test setup blocks ([b430647](https://github.com/szTheory/accrue/commit/b4306477253547d6ca6443de73977787d3ef647a))
+* **146:** resolve CR-01 GROUP BY bug, CR-02 failure reason display, WR-01/02/03 ([142f21b](https://github.com/szTheory/accrue/commit/142f21baa8b45a92f81f5c0b6c99c41ffe973e3a))
+* **151-03:** resolve test coverage blockers ([21f5d6e](https://github.com/szTheory/accrue/commit/21f5d6e205eef2ad523f5d621338c5f1e6118838))
+* **152-01:** correct [@since](https://github.com/since) annotation in funnel_chart.ex to canonical [@doc](https://github.com/doc) since: "1.3.0" ([5af7b87](https://github.com/szTheory/accrue/commit/5af7b87e833f4599d6ae9e6952a50b832d596762))
+* **152-02:** resolve pre-existing credo issues blocking Three Zeros gate ([bd72ec1](https://github.com/szTheory/accrue/commit/bd72ec15058507eab6657db412612caf80ac9698))
+* **152-03:** close accrue_admin --warnings-as-errors gaps ([01c8e32](https://github.com/szTheory/accrue/commit/01c8e32a7298fc297202204b6a983f3fdaf3ff66))
+* **152-03:** give command-palette dialog an accessible name (a11y) ([de7a3fe](https://github.com/szTheory/accrue/commit/de7a3fef53247619d96a26eea60197d74fd14634))
 
 ## [1.2.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.1.2...accrue_admin-v1.2.0) (2026-05-26)
 

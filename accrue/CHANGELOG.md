@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.3.0](https://github.com/szTheory/accrue/compare/accrue-v1.2.0...accrue-v1.3.0) (2026-05-30)
 
 **1.0.0 — Stable.** This release commits Accrue to v1.x API stability for the documented integration surface: generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `Accrue.Auth`, and `Accrue.ConfigError`. Breaking changes on that surface go through deprecation, not silent reshuffles. Internal schemas, workers, and demo helpers are not part of the contract. See `accrue/README.md` Stability, `accrue/guides/upgrade.md`, `accrue/guides/maturity-and-maintenance.md`, and root `RELEASING.md` for the v1.x stability commitment and post-1.0 cadence.
 
@@ -26,6 +26,34 @@ Observability and integrator docs for **Stripe Checkout** on `Accrue.Billing` sh
 
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for **billing portal** facade literals (**`create_billing_portal_session/2`**, **`[:accrue, :billing, :billing_portal, :create]`**, **`billing-billing-portal-create`** / **`billing_portal_session_facade_test.exs`**) alongside checkout.
 * Extend **`verify_package_docs.sh`** and **`verify_adoption_proof_matrix.sh`** merge-blocking needles for checkout facade + billing-span literals co-evolving with golden-path docs.
+
+### Features
+
+* **144-01:** add Dunning.funnel/1 with DISTINCT-tuple GROUP BY (DAN-01) ([146680f](https://github.com/szTheory/accrue/commit/146680f7274cad8df1e2d45d39d88483122ddcdf))
+* **144-01:** wrap recovered_vs_lost_mrr/1 cast in JSONB safe-cast (DAN-08) ([02b7e93](https://github.com/szTheory/accrue/commit/02b7e93d7768acf7a6c34dda348d660e764a812b))
+* **144-02:** snapshot campaign_anchor onto dunning.exhausted payload (DAN-02) ([891e22e](https://github.com/szTheory/accrue/commit/891e22e10c72d8f0f71f5ad034d20578aa614f6b))
+* **144-02:** snapshot campaign_anchor onto dunning.recovered payload (DAN-02) ([d384c47](https://github.com/szTheory/accrue/commit/d384c475decdc6e56dceb492bab7322ec685987b))
+* **146-01:** add in_active_dunning_campaign/1 query composer to Accrue.Billing.Query ([e1a4895](https://github.com/szTheory/accrue/commit/e1a48959d80177ba2f2aa106e26492eb693c78bf))
+* **146-01:** refactor emit_campaign_started/1 to /2 with invoice_id enrichment ([f97105d](https://github.com/szTheory/accrue/commit/f97105df68099664b402f85d46c6d5d16d1261ab))
+* **146-02:** add at_risk_subscriptions tests + fix UUID::text casts in query ([9573961](https://github.com/szTheory/accrue/commit/9573961111b113ce1c02ee7b61793dbde5bfaec4))
+* **146-02:** implement at_risk_subscriptions/1 + apply_campaign_window/2 ([e930854](https://github.com/szTheory/accrue/commit/e93085487faaae22815f61f6562e6ffefba602f6))
+* **147-01:** implement campaign_timeline and campaign_timeline_grouped with tests ([96bcae2](https://github.com/szTheory/accrue/commit/96bcae22f941b684bc8c648e7008ce6a8606522e))
+* **149-01:** add Accrue.Dunning.requires_attention?/1 ([eb24c1d](https://github.com/szTheory/accrue/commit/eb24c1d271599a79659a4c032165792d62437d2a))
+* **58-02:** add DunningNotifier workflow/2 and rendering/2 for 48h escalation ([ad9ff10](https://github.com/szTheory/accrue/commit/ad9ff10b32f42f7a55258019bf69b394e4f37778))
+* **58-03:** emit invoice.paid Outcome Signal and wire recovery path ([0e95e5f](https://github.com/szTheory/accrue/commit/0e95e5f54039b30609fbf542838ae5d0c79b9273))
+* **analytics:** implement invoices_for_campaign/2 for dunning timeline ([244e6da](https://github.com/szTheory/accrue/commit/244e6da15a7e3410ddca11a4089cef441c8304e7))
+* **analytics:** phase 143 - MRR calculation and dunning analytics context ([57ce35b](https://github.com/szTheory/accrue/commit/57ce35b4ac99834b011c2c5824aa76deff5ed71d))
+* **v1.42:** complete Ad-hoc Invoices & Adopter Confidence milestone ([452995e](https://github.com/szTheory/accrue/commit/452995e3327220ff3b50023f82871354ec3d0f2c))
+
+
+### Bug Fixes
+
+* **146:** resolve CR-01 GROUP BY bug, CR-02 failure reason display, WR-01/02/03 ([142f21b](https://github.com/szTheory/accrue/commit/142f21baa8b45a92f81f5c0b6c99c41ffe973e3a))
+* **151-01:** resolve ENT-10 scoping collisions in webhook handler ([209dce9](https://github.com/szTheory/accrue/commit/209dce983aff2047975fd1cf0dd5334762187b24))
+* **151-03:** resolve test coverage blockers ([21f5d6e](https://github.com/szTheory/accrue/commit/21f5d6e205eef2ad523f5d621338c5f1e6118838))
+* **152-01:** correct 7 [@since](https://github.com/since) annotations in dunning.ex to canonical [@doc](https://github.com/doc) since: "1.3.0" ([88d1646](https://github.com/szTheory/accrue/commit/88d16460a9d09c776046e3c3ead9ccc13dfef8cb))
+* **152-03:** clear accrue test-file compile warnings for --warnings-as-errors ([b206aa7](https://github.com/szTheory/accrue/commit/b206aa7abba587388daef2ce08d3611280667a9b))
+* **152-03:** drop obsolete cancel_signals key from Chimeway dunning workflow ([f4acb4b](https://github.com/szTheory/accrue/commit/f4acb4b94ad1f47603eb20b93f56ebd66f53807a))
 
 ## [1.2.0](https://github.com/szTheory/accrue/compare/accrue-v1.1.2...accrue-v1.2.0) (2026-05-26)
 
