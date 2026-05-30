@@ -67,13 +67,23 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
     # Before the fix, running these concurrently would often raise StaleEntryError
     # due to the optimistic lock check failing in the second job.
 
-    # We use a task for each to simulate concurrency. 
+    # We use a task for each to simulate concurrency.
+    # D-06: explicit Sandbox.allow/3 grants the spawned tasks access to the
+    # shared test DB connection — required for deterministic concurrent testing.
+    parent = self()
+
     tasks = [
-      Task.async(fn -> DefaultHandler.handle(event1) end),
-      Task.async(fn -> DefaultHandler.handle(event2) end)
+      Task.async(fn ->
+        Ecto.Adapters.SQL.Sandbox.allow(Accrue.TestRepo, parent, self())
+        DefaultHandler.handle(event1)
+      end),
+      Task.async(fn ->
+        Ecto.Adapters.SQL.Sandbox.allow(Accrue.TestRepo, parent, self())
+        DefaultHandler.handle(event2)
+      end)
     ]
 
-    results = Enum.map(tasks, &Task.await/1)
+    results = Task.await_many(tasks)
 
     # Both should return {:ok, _} (either :written, :unchanged, or :stale).
     # Crucially, neither should raise StaleEntryError.

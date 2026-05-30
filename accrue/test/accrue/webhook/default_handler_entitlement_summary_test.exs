@@ -306,6 +306,168 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
     end
   end
 
+  # -----------------------------------------------------------------------
+  # Phase 154 — ADV-02, ADV-03, POL-01, POL-02 correctness tests
+  # -----------------------------------------------------------------------
+
+  describe "ADV-02: nil last_stripe_event_ts event updates the row (not a silent no-op)" do
+    setup do
+      enable_advisory_sync()
+      :ok
+    end
+
+    test "first-ever event with no created timestamp writes the row", %{customer: customer} do
+      # Seed a row with no last_stripe_event_ts (nil watermark — first-ever state).
+      {:ok, _} =
+        %EntitlementSummary{}
+        |> EntitlementSummary.force_changeset(%{
+          customer_id: customer.id,
+          stripe_customer_id: customer.processor_id,
+          entitlement_count: 0
+          # deliberately absent: last_stripe_event_ts stays nil
+        })
+        |> Repo.insert()
+
+      # Build a fixture event where the envelope `created` field is absent (nil evt_ts path).
+      # Pass the event through with no `created` override so the fixture omits it.
+      # Then strip the `created` key from the envelope via overrides.
+      raw =
+        StripeFixtures.entitlement_summary_event(
+          [customer: customer.processor_id],
+          %{"created" => nil}
+        )
+
+      # Deliver the nil-timestamp event.
+      # Before ADV-02 fix: on_conflict_where `e.last_stripe_event_ts < EXCLUDED.last_stripe_event_ts`
+      # compares NULL < NULL → NULL (falsy) → 0 rows updated → silent no-op / stale.
+      # After fix: EXCLUDED.last_stripe_event_ts IS NULL → condition true → update proceeds.
+      assert {:ok, %EntitlementSummary{}} = Accrue.Webhook.DefaultHandler.handle(raw)
+    end
+  end
+
+  describe "ADV-03: DB-level stale skip emits result: :unchanged, no ledger event" do
+    setup do
+      enable_advisory_sync()
+      :ok
+    end
+
+    test "second delivery of same-timestamp event returns {:ok, :stale} and emits :unchanged telemetry",
+         %{customer: customer} do
+      test_pid = self()
+      ref = System.unique_integer([:positive])
+
+      :telemetry.attach(
+        "test-adv03-synced-#{ref}",
+        [:accrue, :entitlements, :summary_synced],
+        fn _evt, _meas, meta, _ -> send(test_pid, {:synced, meta}) end,
+        nil
+      )
+
+      ts = DateTime.truncate(Accrue.Clock.utc_now(), :second)
+      event_id = "evt_adv03_#{ref}"
+
+      # First delivery — writes the row, watermarks it at `ts`.
+      event =
+        StripeFixtures.entitlement_summary_event(
+          [customer: customer.processor_id],
+          %{"id" => event_id, "created" => DateTime.to_unix(ts)}
+        )
+
+      assert {:ok, %EntitlementSummary{}} = Accrue.Webhook.DefaultHandler.handle(event)
+
+      # Flush the first telemetry message.
+      assert_received {:synced, _}
+
+      events_before =
+        Repo.aggregate(Accrue.Events.Event, :count)
+
+      # Second delivery — same event_id, same timestamp.
+      # check_stale passes (:eq timestamp is not stale), but the DB-level
+      # on_conflict_where guard: existing.ts (T) NOT < EXCLUDED.ts (T) → false → 0 rows updated.
+      # Before ADV-03 fix: Ecto.StaleEntryError propagates out of upsert_entitlement_summary/2.
+      # After fix: rescue converts to {:ok, :stale}, write_entitlement_summary/9 returns {:ok, :stale}.
+      assert {:ok, :stale} = Accrue.Webhook.DefaultHandler.handle(event)
+
+      # result: :unchanged telemetry must be emitted.
+      assert_received {:synced, %{result: :unchanged}}
+
+      # No new ledger event should be written for the second delivery.
+      assert Repo.aggregate(Accrue.Events.Event, :count) == events_before
+    end
+  end
+
+  describe "POL-01: processor field reflects event processor, not global config" do
+    setup do
+      enable_advisory_sync()
+      :ok
+    end
+
+    test "entitlement summary row has processor: 'stripe', not 'fake' (global config in BillingCase)",
+         %{customer: customer} do
+      # BillingCase wires the Fake processor; processor_name() returns "fake" in test env.
+      # The Stripe webhook arrives with processor: :stripe on the Accrue.Webhook.Event.
+      # The handle/1 path defaults to :stripe (the Stripe webhook path).
+      # After POL-01 fix: the row's processor field must be "stripe" (from the event arg),
+      # not "fake" (from processor_name() global config lookup).
+      event =
+        StripeFixtures.entitlement_summary_event(
+          customer: customer.processor_id,
+          entitlements: [%{"id" => "ent_pol01", "feature" => "feat_pol01", "lookup_key" => "pol01"}]
+        )
+
+      assert {:ok, %EntitlementSummary{} = saved} = Accrue.Webhook.DefaultHandler.handle(event)
+
+      # Before POL-01 fix: processor_name() returns "fake" in BillingCase → row.processor == "fake".
+      # After fix: to_string(processor) where processor = :stripe → row.processor == "stripe".
+      assert saved.processor == "stripe"
+    end
+  end
+
+  describe "POL-02: follow-up event with absent livemode key carries forward prior row livemode" do
+    setup do
+      enable_advisory_sync()
+      :ok
+    end
+
+    test "second event missing livemode key preserves existing livemode: true", %{
+      customer: customer
+    } do
+      ts_first = DateTime.truncate(Accrue.Clock.utc_now(), :second)
+
+      # Seed a row with livemode: true and a known watermark.
+      {:ok, _} =
+        %EntitlementSummary{}
+        |> EntitlementSummary.force_changeset(%{
+          customer_id: customer.id,
+          stripe_customer_id: customer.processor_id,
+          livemode: true,
+          entitlement_count: 1,
+          last_stripe_event_ts: ts_first,
+          last_stripe_event_id: "evt_pol02_first"
+        })
+        |> Repo.insert()
+
+      # Build a second event with a newer timestamp.
+      ts_second = DateTime.add(ts_first, 60, :second)
+
+      raw =
+        StripeFixtures.entitlement_summary_event(
+          [customer: customer.processor_id],
+          %{"id" => "evt_pol02_second", "created" => DateTime.to_unix(ts_second)}
+        )
+
+      # Strip the livemode key from the summary object so it is absent (not nil — absent).
+      event_without_livemode = update_in(raw, ["data", "object"], &Map.delete(&1, "livemode"))
+
+      # Before POL-02 fix: get(obj, :livemode) returns nil when key absent → livemode overwritten with nil.
+      # After fix: nil incoming + non-nil row → carry forward row.livemode (true).
+      assert {:ok, %EntitlementSummary{} = saved} =
+               Accrue.Webhook.DefaultHandler.handle(event_without_livemode)
+
+      assert saved.livemode == true
+    end
+  end
+
   # Remove a key from the summary `data.object` to model a malformed payload.
   defp pop_in_object(event, key) do
     update_in(event, ["data", "object"], &Map.delete(&1, key))
