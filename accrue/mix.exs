@@ -104,7 +104,8 @@ defmodule Accrue.MixProject do
       # Code.ensure_loaded?(Chimeway); absent by default; host opts in by adding
       # {:chimeway, "~> 1.0"} to their own deps and setting
       # `config :accrue, dunning: [engine: Accrue.Integrations.Chimeway]`.
-      {:chimeway, "~> 1.0", optional: true},
+      # Cross-repo dev: CHIMEWAY_PATH=/path/to/chimeway mix deps.get
+      chimeway_dep(),
 
       # Dev / test
       {:excoveralls, "~> 0.18", only: :test},
@@ -114,6 +115,13 @@ defmodule Accrue.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
+  end
+
+  defp chimeway_dep do
+    case System.get_env("CHIMEWAY_PATH") do
+      nil -> {:chimeway, "~> 1.0", optional: true}
+      path -> {:chimeway, path: path, optional: true}
+    end
   end
 
   defp aliases do

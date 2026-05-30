@@ -23,13 +23,10 @@
 #      resolves the adapter via `Application.get_env/3` at call time,
 #      so this module only needs to exist; wiring is host-owned.
 #
-# v1.40 scope: email-only, :immediate orchestration path.
-# `workflow/2` is intentionally OMITTED — with `orchestration/2 -> {:ok, :immediate}`
-# and no `workflow/2`, `Chimeway.trigger/3` delivers the email immediately,
-# creates no WorkflowRun, and `Signal.track("payment_recovered")` routes to
-# zero runs (a safe no-op). Cancel-on-recovery is already guaranteed by
-# Accrue's anchor-clear preventing future `start_campaign` calls.
-# The workflow/2 optional callback is intentionally omitted for the v1.40 email-only path.
+# Phase 58 scope: multi-step dunning workflow + Signal bridge (D-01).
+# `DunningNotifier.workflow/2` declares Email 1 → 48h wait_until → Email 2
+# escalation with `cancel_signals: ["invoice.paid"]`. `orchestration/2` remains
+# `{:ok, :immediate}` — workflow runs are created independently via `workflow/2`.
 
 if Code.ensure_loaded?(Chimeway) do
   defmodule Accrue.Integrations.Chimeway do
@@ -54,16 +51,16 @@ if Code.ensure_loaded?(Chimeway) do
     The host must also start Chimeway in their supervision tree and run
     Chimeway's own migrations per Chimeway's install guide.
 
-    ## v1.40 scope
+    ## Phase 58 workflow + Signal bridge
 
-    Email-only, `:immediate` orchestration. `DunningNotifier.workflow/2` is
-    intentionally omitted — with `:immediate` orchestration, `Chimeway.trigger/3`
-    delivers the dunning email immediately with no WorkflowRun created.
-    `Signal.track("payment_recovered")` is a safe no-op in this mode
-    (correct because Accrue's anchor-clear prevents future `start_campaign` calls).
+    Email-only dunning with a two-step Chimeway workflow (initial email → 48h
+    `wait_until` → escalation email). `DunningNotifier` implements `workflow/2`
+    and `rendering/2` so `Chimeway.trigger/3` creates a durable `WorkflowRun`
+    with explainable progression. Outcome Signal termination (`invoice.paid`)
+    cancels escalation via `cancel_signals` on the wait step.
 
-    Multi-channel and multi-step workflow orchestration are deferred to a
-    future v1.x minor.
+    `orchestration/2` remains `{:ok, :immediate}` — email delivery planning is
+    unchanged; workflow progression is driven by `workflow/2`.
     """
 
     @behaviour Accrue.Dunning.Engine
@@ -114,11 +111,9 @@ if Code.ensure_loaded?(Chimeway) do
       Bundled `Chimeway.Notifier` implementation for Accrue dunning notifications.
 
       Resolves Accrue domain models (Subscription → Customer) to produce
-      email-channel recipient maps. Implements only the 4 required callbacks
-      plus `channels/2` (email-only) and `orchestration/2` (:immediate).
-
-      `workflow/2` is intentionally omitted for the v1.40 email-only :immediate
-      path — see `Accrue.Integrations.Chimeway` moduledoc for rationale.
+      email-channel recipient maps. Implements required callbacks plus
+      `channels/2` (email-only), `orchestration/2` (`:immediate`), `workflow/2`
+      (48h escalation per SEED-003), and `rendering/2` (email render keys).
       """
 
       @behaviour Chimeway.Notifier
@@ -154,6 +149,60 @@ if Code.ensure_loaded?(Chimeway) do
 
       @impl Chimeway.Notifier
       def orchestration(_params, _recipient), do: {:ok, :immediate}
+
+      @impl Chimeway.Notifier
+      def rendering(params, _recipient) do
+        sub_id = params[:subscription_id] || params["subscription_id"]
+
+        {:ok,
+         %{
+           assigns: %{
+             "subscription_id" => sub_id,
+             "subject" => "Payment reminder",
+             "html_body" => "<p>Please update your payment method.</p>",
+             "text_body" => "Please update your payment method."
+           },
+           channels: %{
+             email: %{
+               render_key: "accrue.dunning.initial_email",
+               render_version: 1
+             }
+           }
+         }}
+      end
+
+      @impl true
+      def workflow(_params, _recipient) do
+        {:ok,
+         %{
+           workflow_key: "accrue.dunning",
+           workflow_version: 1,
+           steps: [
+             %{
+               step_key: "initial_email",
+               step_order: 1,
+               channel: :email,
+               config: %{
+                 "progress" => [
+                   %{
+                     "kind" => "wait_until",
+                     "anchor" => "prior_delivery_terminal_at",
+                     "delay_seconds" => 172_800,
+                     "to_step" => "escalation_email",
+                     "cancel_signals" => ["invoice.paid"]
+                   }
+                 ]
+               }
+             },
+             %{
+               step_key: "escalation_email",
+               step_order: 2,
+               channel: :email,
+               config: %{}
+             }
+           ]
+         }}
+      end
     end
   end
 end
