@@ -160,8 +160,13 @@ defmodule Accrue.Integrations.ChimewayTest do
           [initial_step | _] = normalized.steps
           assert initial_step.step_key == "initial_email"
 
-          [%{"cancel_signals" => ["invoice.paid"]} | _] =
-            get_in(initial_step.config, ["progress"])
+          # Chimeway 1.0.0 wait_until rules carry only kind/anchor/delay_seconds/to_step;
+          # cancellation is driven at runtime by an invoice.paid Signal (cancel_campaign/3),
+          # not a declared cancel_signals key (which normalize rejects as :mixed_rule_shape).
+          [wait_rule | _] = get_in(initial_step.config, ["progress"])
+          assert wait_rule["kind"] == "wait_until"
+          assert wait_rule["to_step"] == "escalation_email"
+          refute Map.has_key?(wait_rule, "cancel_signals")
 
           assert {:ok, rendering} = notifier.rendering(%{subscription_id: "sub_123"}, %{})
 

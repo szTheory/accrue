@@ -25,8 +25,10 @@
 #
 # Phase 58 scope: multi-step dunning workflow + Signal bridge (D-01).
 # `DunningNotifier.workflow/2` declares Email 1 → 48h wait_until → Email 2
-# escalation with `cancel_signals: ["invoice.paid"]`. `orchestration/2` remains
-# `{:ok, :immediate}` — workflow runs are created independently via `workflow/2`.
+# escalation. A waiting run is cancelled at runtime by an `invoice.paid` Signal
+# (see `cancel_campaign/3`), not a declared key on the wait_until rule — Chimeway
+# 1.0.0 rejects extra keys on `wait_until` (`:mixed_rule_shape`). `orchestration/2`
+# remains `{:ok, :immediate}` — workflow runs are created independently via `workflow/2`.
 
 if Code.ensure_loaded?(Chimeway) do
   defmodule Accrue.Integrations.Chimeway do
@@ -60,8 +62,8 @@ if Code.ensure_loaded?(Chimeway) do
 
     Outcome Signal termination: `cancel_campaign/3` emits `Chimeway.Signal.track/4`
     with `event_name: "invoice.paid"` and `actor_id` equal to the customer email
-    (`recipient_identity` from `DunningNotifier.recipients/1`). That matches
-    `cancel_signals` on the wait step and routes to waiting runs via
+    (`recipient_identity` from `DunningNotifier.recipients/1`). Chimeway routes
+    that `invoice.paid` signal to runs waiting on the wait step via
     `Workflows.route_signal/1` — no host callback glue.
 
     `orchestration/2` remains `{:ok, :immediate}` — email delivery planning is
@@ -98,8 +100,8 @@ if Code.ensure_loaded?(Chimeway) do
       customer = Accrue.Repo.repo().get!(Customer, sub.customer_id)
 
       # D-09: actor_id MUST match DunningNotifier.recipients/1 recipient_identity
-      # (customer email); event_name MUST match cancel_signals on the wait_until
-      # rule ("invoice.paid") so find_runs_waiting_for_signal/3 can route.
+      # (customer email); event_name MUST be "invoice.paid" so route_signal/1 can
+      # match runs waiting on the wait_until step.
       case Chimeway.Signal.track(
              sub.customer_id,
              customer.email,
@@ -193,8 +195,7 @@ if Code.ensure_loaded?(Chimeway) do
                      "kind" => "wait_until",
                      "anchor" => "prior_delivery_terminal_at",
                      "delay_seconds" => 172_800,
-                     "to_step" => "escalation_email",
-                     "cancel_signals" => ["invoice.paid"]
+                     "to_step" => "escalation_email"
                    }
                  ]
                }
