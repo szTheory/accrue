@@ -45,7 +45,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         recovered = Enum.find(stats.recovered, %{cents: 0}, &(&1.currency == currency))
         lost = Enum.find(stats.lost, %{cents: 0}, &(&1.currency == currency))
 
-        currency_arg = if is_binary(currency), do: String.to_atom(currency), else: currency
+        currency_arg = if is_binary(currency), do: String.to_existing_atom(currency), else: currency
 
         %{
           currency: to_string(currency),
