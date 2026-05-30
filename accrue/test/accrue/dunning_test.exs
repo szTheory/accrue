@@ -20,12 +20,15 @@ defmodule Accrue.DunningTest do
     test "returns true when customer has an active dunning campaign" do
       %{customer: customer, subscription: sub} = Factory.active_subscription()
       owner_id = customer.owner_id
-        
+
       now = Accrue.Clock.utc_now()
-      Repo.update_all(from(s in Subscription, where: s.id == ^sub.id), set: [dunning_campaign_started_at: now])
+
+      Repo.update_all(from(s in Subscription, where: s.id == ^sub.id),
+        set: [dunning_campaign_started_at: now]
+      )
 
       assert Dunning.requires_attention?(customer) == true
-      
+
       billable = %TestUser{id: owner_id}
       assert Dunning.requires_attention?(billable) == true
     end
@@ -34,10 +37,12 @@ defmodule Accrue.DunningTest do
       %{customer: customer, subscription: sub} = Factory.active_subscription()
       owner_id = customer.owner_id
 
-      Repo.update_all(from(s in Subscription, where: s.id == ^sub.id), set: [dunning_campaign_started_at: nil])
+      Repo.update_all(from(s in Subscription, where: s.id == ^sub.id),
+        set: [dunning_campaign_started_at: nil]
+      )
 
       assert Dunning.requires_attention?(customer) == false
-      
+
       billable = %TestUser{id: owner_id}
       assert Dunning.requires_attention?(billable) == false
     end

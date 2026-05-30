@@ -1116,7 +1116,10 @@ defmodule Accrue.Processor.Fake do
       state =
         case item[:invoice] do
           invoice_id when is_binary(invoice_id) ->
-            put_in(state.invoices[invoice_id], update_invoice_with_item(state.invoices[invoice_id], item))
+            put_in(
+              state.invoices[invoice_id],
+              update_invoice_with_item(state.invoices[invoice_id], item)
+            )
 
           _ ->
             state

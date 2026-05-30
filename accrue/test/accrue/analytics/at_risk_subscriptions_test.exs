@@ -206,6 +206,7 @@ defmodule Accrue.Analytics.AtRiskSubscriptionsTest do
       row = Enum.find(rows, &(&1.subscription_id == sub_old.id))
 
       assert row != nil, "expected pre-v1.44 subscription to appear in results"
+
       assert row.failure_reason == nil,
              "expected nil failure_reason for pre-v1.44 campaign without invoice_id"
     end

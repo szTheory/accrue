@@ -59,8 +59,7 @@ defmodule Accrue.Analytics.Dunning do
         where: e.type in [@recovered_type, @exhausted_type],
         group_by: [e.type, fragment("?->>'currency'", e.data)],
         select:
-          {e.type,
-           fragment("?->>'currency'", e.data),
+          {e.type, fragment("?->>'currency'", e.data),
            sum(
              fragment(
                "CASE WHEN jsonb_typeof((?->'mrr_value_cents')) = 'number' THEN (?->>'mrr_value_cents')::integer ELSE 0 END",
@@ -332,7 +331,8 @@ defmodule Accrue.Analytics.Dunning do
   """
   @doc since: "1.3.0"
   @spec campaign_timeline(String.t(), keyword()) :: [Event.t()]
-  def campaign_timeline(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
+  def campaign_timeline(subscription_id, opts \\ [])
+      when is_binary(subscription_id) and is_list(opts) do
     Accrue.Events.timeline_for("Subscription", subscription_id, opts)
     |> Enum.filter(&String.starts_with?(&1.type, "dunning."))
   end
@@ -342,12 +342,14 @@ defmodule Accrue.Analytics.Dunning do
   """
   @doc since: "1.3.0"
   @spec campaign_timeline_grouped(String.t(), keyword()) :: [{String.t() | nil, [Event.t()]}]
-  def campaign_timeline_grouped(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
+  def campaign_timeline_grouped(subscription_id, opts \\ [])
+      when is_binary(subscription_id) and is_list(opts) do
     campaign_timeline(subscription_id, opts)
     |> group_into_arcs()
   end
 
   defp group_into_arcs([]), do: []
+
   defp group_into_arcs(events) do
     Enum.reduce(events, [], fn event, acc ->
       if event.type == "dunning.campaign_started" do
@@ -370,7 +372,8 @@ defmodule Accrue.Analytics.Dunning do
   """
   @doc since: "1.3.0"
   @spec invoices_for_campaign(String.t(), keyword()) :: %{String.t() => map()}
-  def invoices_for_campaign(subscription_id, opts \\ []) when is_binary(subscription_id) and is_list(opts) do
+  def invoices_for_campaign(subscription_id, opts \\ [])
+      when is_binary(subscription_id) and is_list(opts) do
     from(i in Invoice,
       join: c in Customer,
       on: c.id == i.customer_id,

@@ -202,11 +202,15 @@ defmodule AccruePortal.SubscriptionLiveTest do
       refute html =~ "Your payment didn't go through"
     end
 
-    test "deep-links a past-due Braintree banner CTA to the in-portal add-payment-method route", %{
-      conn: conn
-    } do
+    test "deep-links a past-due Braintree banner CTA to the in-portal add-payment-method route",
+         %{
+           conn: conn
+         } do
       user = user_fixture()
-      subscription = insert_recovery_subscription!(user, processor: "braintree", status: :past_due)
+
+      subscription =
+        insert_recovery_subscription!(user, processor: "braintree", status: :past_due)
+
       conn = sign_in_conn(conn, user)
 
       assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
@@ -215,9 +219,10 @@ defmodule AccruePortal.SubscriptionLiveTest do
       assert String.ends_with?(href, "/payment-methods/new")
     end
 
-    test "deep-links a past-due non-Braintree banner CTA to the in-portal payment-methods list", %{
-      conn: conn
-    } do
+    test "deep-links a past-due non-Braintree banner CTA to the in-portal payment-methods list",
+         %{
+           conn: conn
+         } do
       user = user_fixture()
       subscription = insert_recovery_subscription!(user, processor: "stripe", status: :past_due)
       conn = sign_in_conn(conn, user)

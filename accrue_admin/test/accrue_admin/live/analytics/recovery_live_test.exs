@@ -209,9 +209,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
   # Returns nil if no active button is found, surfacing the bug immediately via
   # a clean assertion failure rather than a FunctionClauseError from List.first(nil).
   defp active_window_label(html) do
-    case Regex.run(~r/aria-current="page"[^>]*>\s*([^<]+)\s*<\/a>/, html,
-           capture: :all_but_first
-         ) do
+    case Regex.run(~r/aria-current="page"[^>]*>\s*([^<]+)\s*<\/a>/, html, capture: :all_but_first) do
       [label | _] -> String.trim(label)
       nil -> nil
     end

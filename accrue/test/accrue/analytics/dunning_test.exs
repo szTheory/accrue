@@ -54,7 +54,12 @@ defmodule Accrue.Analytics.DunningTest do
       })
 
       result = Dunning.recovered_vs_lost_mrr()
-      assert Enum.sort(result.recovered) == [%{cents: 3000, currency: "eur"}, %{cents: 3000, currency: "usd"}]
+
+      assert Enum.sort(result.recovered) == [
+               %{cents: 3000, currency: "eur"},
+               %{cents: 3000, currency: "usd"}
+             ]
+
       assert result.lost == [%{cents: 500, currency: "usd"}]
     end
 
@@ -156,6 +161,7 @@ defmodule Accrue.Analytics.DunningTest do
         schema_version: 1,
         data: %{"campaign_anchor" => "2026-01-01T00:00:00Z"}
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.recovered",
         subject_type: "Subscription",
@@ -173,6 +179,7 @@ defmodule Accrue.Analytics.DunningTest do
         schema_version: 1,
         data: %{"campaign_anchor" => "2026-02-01T00:00:00Z"}
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.recovered",
         subject_type: "Subscription",
@@ -190,6 +197,7 @@ defmodule Accrue.Analytics.DunningTest do
         schema_version: 1,
         data: %{"campaign_anchor" => "2026-03-01T00:00:00Z"}
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.exhausted",
         subject_type: "Subscription",
@@ -201,7 +209,7 @@ defmodule Accrue.Analytics.DunningTest do
 
       # Recovered: 2, Exhausted: 1 -> Total: 3 -> Rate: 2/3
       assert %{rate: rate, recovered: 2, total_concluded: 3} = Dunning.recovery_rate()
-      assert_in_delta rate, 2/3, 0.001
+      assert_in_delta rate, 2 / 3, 0.001
     end
   end
 
@@ -377,14 +385,15 @@ defmodule Accrue.Analytics.DunningTest do
         data: %{}
       })
 
-      event = Accrue.Repo.insert!(%Accrue.Events.Event{
-        type: "dunning.campaign_started",
-        subject_type: "Subscription",
-        subject_id: subject_id,
-        actor_type: "system",
-        schema_version: 1,
-        data: %{}
-      })
+      event =
+        Accrue.Repo.insert!(%Accrue.Events.Event{
+          type: "dunning.campaign_started",
+          subject_type: "Subscription",
+          subject_id: subject_id,
+          actor_type: "system",
+          schema_version: 1,
+          data: %{}
+        })
 
       assert [returned_event] = Dunning.campaign_timeline(subject_id)
       assert returned_event.id == event.id
@@ -395,25 +404,27 @@ defmodule Accrue.Analytics.DunningTest do
       subject_id = Ecto.UUID.generate()
       now = ~U[2026-01-01 10:00:00.000000Z]
 
-      event2 = Accrue.Repo.insert!(%Accrue.Events.Event{
-        type: "dunning.campaign_started",
-        subject_type: "Subscription",
-        subject_id: subject_id,
-        actor_type: "system",
-        schema_version: 1,
-        data: %{},
-        inserted_at: DateTime.add(now, 1, :hour)
-      })
+      event2 =
+        Accrue.Repo.insert!(%Accrue.Events.Event{
+          type: "dunning.campaign_started",
+          subject_type: "Subscription",
+          subject_id: subject_id,
+          actor_type: "system",
+          schema_version: 1,
+          data: %{},
+          inserted_at: DateTime.add(now, 1, :hour)
+        })
 
-      event1 = Accrue.Repo.insert!(%Accrue.Events.Event{
-        type: "dunning.step_sent",
-        subject_type: "Subscription",
-        subject_id: subject_id,
-        actor_type: "system",
-        schema_version: 1,
-        data: %{},
-        inserted_at: now
-      })
+      event1 =
+        Accrue.Repo.insert!(%Accrue.Events.Event{
+          type: "dunning.step_sent",
+          subject_type: "Subscription",
+          subject_id: subject_id,
+          actor_type: "system",
+          schema_version: 1,
+          data: %{},
+          inserted_at: now
+        })
 
       assert [e1, e2] = Dunning.campaign_timeline(subject_id)
       assert e1.id == event1.id
@@ -441,6 +452,7 @@ defmodule Accrue.Analytics.DunningTest do
         data: %{"campaign_anchor" => anchor_a},
         inserted_at: ~U[2026-01-01 10:00:00.000000Z]
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.step_sent",
         subject_type: "Subscription",
@@ -450,6 +462,7 @@ defmodule Accrue.Analytics.DunningTest do
         data: %{"campaign_anchor" => anchor_a},
         inserted_at: ~U[2026-01-01 11:00:00.000000Z]
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.recovered",
         subject_type: "Subscription",
@@ -469,6 +482,7 @@ defmodule Accrue.Analytics.DunningTest do
         data: %{"campaign_anchor" => anchor_b},
         inserted_at: ~U[2026-02-01 10:00:00.000000Z]
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.step_sent",
         subject_type: "Subscription",
@@ -518,31 +532,35 @@ defmodule Accrue.Analytics.DunningTest do
     end
 
     test "returns map keyed by Stripe processor_id" do
-      customer = Accrue.Repo.insert!(%Accrue.Billing.Customer{
-        owner_type: "Tenant",
-        owner_id: Ecto.UUID.generate(),
-        processor: "stripe",
-        email: "test@example.com",
-        name: "Test Customer"
-      })
+      customer =
+        Accrue.Repo.insert!(%Accrue.Billing.Customer{
+          owner_type: "Tenant",
+          owner_id: Ecto.UUID.generate(),
+          processor: "stripe",
+          email: "test@example.com",
+          name: "Test Customer"
+        })
 
-      pm = Accrue.Repo.insert!(%Accrue.Billing.PaymentMethod{
-        processor: "stripe",
-        customer_id: customer.id,
-        processor_id: "pm_test_xyz",
-        type: "card",
-        card_last4: "4242",
-        card_brand: "visa"
-      })
+      pm =
+        Accrue.Repo.insert!(%Accrue.Billing.PaymentMethod{
+          processor: "stripe",
+          customer_id: customer.id,
+          processor_id: "pm_test_xyz",
+          type: "card",
+          card_last4: "4242",
+          card_brand: "visa"
+        })
 
-      customer = Accrue.Repo.update!(Ecto.Changeset.change(customer, default_payment_method_id: pm.id))
+      customer =
+        Accrue.Repo.update!(Ecto.Changeset.change(customer, default_payment_method_id: pm.id))
 
-      subscription = Accrue.Repo.insert!(%Accrue.Billing.Subscription{
-        processor: "stripe",
-        customer_id: customer.id,
-        status: :active,
-        processor_id: "sub_test_abc"
-      })
+      subscription =
+        Accrue.Repo.insert!(%Accrue.Billing.Subscription{
+          processor: "stripe",
+          customer_id: customer.id,
+          status: :active,
+          processor_id: "sub_test_abc"
+        })
 
       Accrue.Repo.insert!(%Accrue.Billing.Invoice{
         processor: "stripe",
@@ -555,7 +573,7 @@ defmodule Accrue.Analytics.DunningTest do
 
       result = Dunning.invoices_for_campaign(subscription.id)
       assert Map.has_key?(result, "in_test_abc")
-      
+
       entry = result["in_test_abc"]
       assert entry.status == :open
       assert entry.amount_due_cents == 4999
@@ -564,20 +582,22 @@ defmodule Accrue.Analytics.DunningTest do
     end
 
     test "invoice with no default payment method returns nil card fields" do
-      customer = Accrue.Repo.insert!(%Accrue.Billing.Customer{
-        owner_type: "Tenant",
-        owner_id: Ecto.UUID.generate(),
-        processor: "stripe",
-        email: "nocards@example.com",
-        name: "No Card Customer"
-      })
+      customer =
+        Accrue.Repo.insert!(%Accrue.Billing.Customer{
+          owner_type: "Tenant",
+          owner_id: Ecto.UUID.generate(),
+          processor: "stripe",
+          email: "nocards@example.com",
+          name: "No Card Customer"
+        })
 
-      subscription = Accrue.Repo.insert!(%Accrue.Billing.Subscription{
-        processor: "stripe",
-        customer_id: customer.id,
-        status: :active,
-        processor_id: "sub_test_xyz"
-      })
+      subscription =
+        Accrue.Repo.insert!(%Accrue.Billing.Subscription{
+          processor: "stripe",
+          customer_id: customer.id,
+          status: :active,
+          processor_id: "sub_test_xyz"
+        })
 
       Accrue.Repo.insert!(%Accrue.Billing.Invoice{
         processor: "stripe",
@@ -595,20 +615,22 @@ defmodule Accrue.Analytics.DunningTest do
     end
 
     test "excludes invoices with nil processor_id" do
-      customer = Accrue.Repo.insert!(%Accrue.Billing.Customer{
-        owner_type: "Tenant",
-        owner_id: Ecto.UUID.generate(),
-        processor: "stripe",
-        email: "nil@example.com",
-        name: "Nil Processor ID Customer"
-      })
+      customer =
+        Accrue.Repo.insert!(%Accrue.Billing.Customer{
+          owner_type: "Tenant",
+          owner_id: Ecto.UUID.generate(),
+          processor: "stripe",
+          email: "nil@example.com",
+          name: "Nil Processor ID Customer"
+        })
 
-      subscription = Accrue.Repo.insert!(%Accrue.Billing.Subscription{
-        processor: "stripe",
-        customer_id: customer.id,
-        status: :active,
-        processor_id: "sub_test_nil"
-      })
+      subscription =
+        Accrue.Repo.insert!(%Accrue.Billing.Subscription{
+          processor: "stripe",
+          customer_id: customer.id,
+          status: :active,
+          processor_id: "sub_test_nil"
+        })
 
       Accrue.Repo.insert!(%Accrue.Billing.Invoice{
         processor: "stripe",

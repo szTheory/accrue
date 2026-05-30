@@ -3,9 +3,9 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
 
   alias AccrueAdmin.Components.StatusBadge
 
-  attr :arcs, :list, required: true
-  attr :invoice_map, :map, required: true
-  attr :class, :string, default: nil
+  attr(:arcs, :list, required: true)
+  attr(:invoice_map, :map, required: true)
+  attr(:class, :string, default: nil)
 
   def campaign_timeline(assigns) do
     ~H"""
@@ -92,6 +92,7 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
   end
 
   defp format_amount(nil), do: "—"
+
   defp format_amount(cents) do
     currency = Accrue.Config.get!(:default_currency)
     locale = Accrue.Config.default_locale()
@@ -101,5 +102,6 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
   defp format_datetime(%DateTime{} = value) do
     Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
   end
+
   defp format_datetime(_), do: "—"
 end

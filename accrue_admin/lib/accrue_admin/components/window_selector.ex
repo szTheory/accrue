@@ -16,8 +16,10 @@ defmodule AccrueAdmin.Components.WindowSelector do
 
   use Phoenix.Component
 
-  attr :current_window, :string, required: true  # "7d" | "30d" | "90d"
-  attr :base_path, :string, required: true        # e.g. "/billing/analytics/recovery"
+  # "7d" | "30d" | "90d"
+  attr(:current_window, :string, required: true)
+  # e.g. "/billing/analytics/recovery"
+  attr(:base_path, :string, required: true)
 
   @windows [{"7d", "7 days"}, {"30d", "30 days"}, {"90d", "90 days"}]
 

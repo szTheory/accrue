@@ -511,11 +511,27 @@ defmodule Accrue.Webhook.DefaultHandler do
         {:ok, :ignored}
 
       true ->
-        reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data, processor)
+        reduce_entitlement_summary_for_customer(
+          evt_id,
+          evt_ts,
+          obj,
+          cus_id,
+          entitlements,
+          data,
+          processor
+        )
     end
   end
 
-  defp reduce_entitlement_summary_for_customer(evt_id, evt_ts, obj, cus_id, entitlements, data, processor) do
+  defp reduce_entitlement_summary_for_customer(
+         evt_id,
+         evt_ts,
+         obj,
+         cus_id,
+         entitlements,
+         data,
+         processor
+       ) do
     Repo.transact(fn ->
       case Repo.get_by(Customer, processor_id: cus_id, processor: to_string(processor)) do
         %Customer{} = customer ->
@@ -874,7 +890,11 @@ defmodule Accrue.Webhook.DefaultHandler do
   @dialyzer {:no_opaque, maybe_finalize_dunning_campaign: 3}
   defp maybe_finalize_dunning_campaign(nil, _updated, _canonical), do: :ok
 
-  defp maybe_finalize_dunning_campaign(%Subscription{} = row, %Subscription{} = updated, canonical) do
+  defp maybe_finalize_dunning_campaign(
+         %Subscription{} = row,
+         %Subscription{} = updated,
+         canonical
+       ) do
     # A campaign FINALIZES on EITHER edge out of the live (`:past_due`)
     # window: recovery (the sub is active/paid again) OR terminal exhaustion
     # (CR-02: the sub reached `:unpaid`/`:canceled` via the Accrue sweeper or
@@ -1933,12 +1953,12 @@ defmodule Accrue.Webhook.DefaultHandler do
       price = get(item, :price) || %{}
 
       amount = get(plan, :amount) || get(price, :unit_amount) || 0
-      
+
       recurring = get(price, :recurring) || %{}
       interval = get(plan, :interval) || get(recurring, :interval) || "month"
       interval_count = get(plan, :interval_count) || get(recurring, :interval_count) || 1
 
-      mrr_cents = 
+      mrr_cents =
         case interval do
           "month" -> div(amount * quantity, interval_count)
           "year" -> div(amount * quantity, interval_count * 12)
@@ -1946,7 +1966,7 @@ defmodule Accrue.Webhook.DefaultHandler do
           "day" -> div(amount * quantity * 365, interval_count * 12)
           _ -> 0
         end
-        
+
       acc + mrr_cents
     end)
   end

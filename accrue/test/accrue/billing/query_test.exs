@@ -160,7 +160,9 @@ defmodule Accrue.Billing.QueryTest do
       %{dunning_sub: dunning_sub}
     end
 
-    test "returns subscriptions with non-nil dunning_campaign_started_at", %{dunning_sub: dunning_sub} do
+    test "returns subscriptions with non-nil dunning_campaign_started_at", %{
+      dunning_sub: dunning_sub
+    } do
       result = Query.in_active_dunning_campaign() |> Repo.all()
 
       # The dunning fixture is in the result.

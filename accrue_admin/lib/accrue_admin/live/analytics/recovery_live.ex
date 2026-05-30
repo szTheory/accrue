@@ -4,7 +4,15 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   use Phoenix.LiveView
 
   alias Accrue.Analytics.Dunning
-  alias AccrueAdmin.Components.{AppShell, AtRiskTable, Breadcrumbs, FunnelChart, KpiCard, WindowSelector}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    AtRiskTable,
+    Breadcrumbs,
+    FunnelChart,
+    KpiCard,
+    WindowSelector
+  }
 
   @impl true
   def mount(_params, session, socket) do
@@ -27,20 +35,25 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     lost_currencies = Enum.map(stats.lost, & &1.currency)
     currencies = Enum.uniq(recovered_currencies ++ lost_currencies)
 
-    currencies = if currencies == [], do: [to_string(Accrue.Config.get!(:default_currency))], else: currencies
+    currencies =
+      if currencies == [],
+        do: [to_string(Accrue.Config.get!(:default_currency))],
+        else: currencies
 
-    kpi_pairs = Enum.map(currencies, fn currency ->
-      recovered = Enum.find(stats.recovered, %{cents: 0}, &(&1.currency == currency))
-      lost = Enum.find(stats.lost, %{cents: 0}, &(&1.currency == currency))
+    kpi_pairs =
+      Enum.map(currencies, fn currency ->
+        recovered = Enum.find(stats.recovered, %{cents: 0}, &(&1.currency == currency))
+        lost = Enum.find(stats.lost, %{cents: 0}, &(&1.currency == currency))
 
-      currency_arg = if is_binary(currency), do: String.to_atom(currency), else: currency
+        currency_arg = if is_binary(currency), do: String.to_atom(currency), else: currency
 
-      %{
-        currency: to_string(currency),
-        recovered_str: Accrue.Invoices.Render.format_money(recovered.cents, currency_arg, locale),
-        exhausted_str: Accrue.Invoices.Render.format_money(lost.cents, currency_arg, locale)
-      }
-    end)
+        %{
+          currency: to_string(currency),
+          recovered_str:
+            Accrue.Invoices.Render.format_money(recovered.cents, currency_arg, locale),
+          exhausted_str: Accrue.Invoices.Render.format_money(lost.cents, currency_arg, locale)
+        }
+      end)
 
     {:noreply,
      socket

@@ -36,10 +36,16 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
     # Enable the advisory cache config for the test.
     prev_config = Application.get_env(:accrue, :entitlements, [])
     on_exit(fn -> Application.put_env(:accrue, :entitlements, prev_config) end)
-    Application.put_env(:accrue, :entitlements, Keyword.put(prev_config, :stripe_native_sync, :advisory))
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(prev_config, :stripe_native_sync, :advisory)
+    )
 
     # Pre-seed the cache with an old watermark.
     old_ts = ~U[2026-01-01 10:00:00Z]
+
     {:ok, _} =
       %EntitlementSummary{}
       |> EntitlementSummary.force_changeset(%{
@@ -52,14 +58,15 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
 
     # Prepare two concurrent events: one slightly newer than the other.
     ts1 = ~U[2026-05-26 10:00:00Z]
-    ts2 = ~U[2026-05-26 10:00:01Z] # ts2 is newer
+    # ts2 is newer
+    ts2 = ~U[2026-05-26 10:00:01Z]
 
     event1 = make_summary_event("evt_1", ts1, ["feat_1"])
     event2 = make_summary_event("evt_2", ts2, ["feat_2"])
 
     # Before the fix, running these concurrently would often raise StaleEntryError
     # due to the optimistic lock check failing in the second job.
-    
+
     # We use a task for each to simulate concurrency. 
     tasks = [
       Task.async(fn -> DefaultHandler.handle(event1) end),
@@ -78,7 +85,7 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
     row = TestRepo.get_by(EntitlementSummary, customer_id: customer.id)
     assert DateTime.compare(row.last_stripe_event_ts, ts2) == :eq
     assert row.last_stripe_event_id == "evt_2"
-    
+
     # Verify the data corresponds to ts2.
     assert [%{"feature" => "feat_2"}] = row.data["entitlements"]["data"]
   end
@@ -89,10 +96,16 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
     # Enable the advisory cache config for the test.
     prev_config = Application.get_env(:accrue, :entitlements, [])
     on_exit(fn -> Application.put_env(:accrue, :entitlements, prev_config) end)
-    Application.put_env(:accrue, :entitlements, Keyword.put(prev_config, :stripe_native_sync, :advisory))
+
+    Application.put_env(
+      :accrue,
+      :entitlements,
+      Keyword.put(prev_config, :stripe_native_sync, :advisory)
+    )
 
     # Pre-seed the cache with a newer watermark.
     new_ts = ~U[2026-05-26 10:00:00Z]
+
     {:ok, _} =
       %EntitlementSummary{}
       |> EntitlementSummary.force_changeset(%{
@@ -134,14 +147,15 @@ defmodule Accrue.Webhook.WR05ConcurrencyTest do
             "object" => "list",
             "has_more" => false,
             "url" => "/v1/customers/#{@cus_processor_id}/entitlements",
-            "data" => Enum.map(features, fn f -> 
-              %{
-                "id" => "ent_" <> Ecto.UUID.generate(),
-                "object" => "entitlements.active_entitlement",
-                "feature" => f,
-                "lookup_key" => f
-              }
-            end)
+            "data" =>
+              Enum.map(features, fn f ->
+                %{
+                  "id" => "ent_" <> Ecto.UUID.generate(),
+                  "object" => "entitlements.active_entitlement",
+                  "feature" => f,
+                  "lookup_key" => f
+                }
+              end)
           }
         }
       }

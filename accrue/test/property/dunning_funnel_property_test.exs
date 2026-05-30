@@ -29,8 +29,7 @@ defmodule Accrue.Property.DunningFunnelPropertyTest do
 
   defp event_gen do
     StreamData.tuple(
-      {StreamData.member_of(~w[sub_a sub_b sub_c]),
-       StreamData.member_of(@types),
+      {StreamData.member_of(~w[sub_a sub_b sub_c]), StreamData.member_of(@types),
        StreamData.string(:alphanumeric, min_length: 1, max_length: 16)}
     )
   end

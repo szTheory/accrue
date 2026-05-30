@@ -40,14 +40,20 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
         actor_type: "system",
         data: %{"campaign_anchor" => "iso_anchor_1", "invoice_id" => "in_tl1"}
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.step_sent",
         subject_type: "Subscription",
         subject_id: subscription_id,
         actor_id: Ecto.UUID.generate(),
         actor_type: "system",
-        data: %{"campaign_anchor" => "iso_anchor_1", "invoice_id" => "in_tl1", "step" => "email_1"}
+        data: %{
+          "campaign_anchor" => "iso_anchor_1",
+          "invoice_id" => "in_tl1",
+          "step" => "email_1"
+        }
       })
+
       Accrue.Repo.insert!(%Accrue.Events.Event{
         type: "dunning.campaign_started",
         subject_type: "Subscription",
@@ -59,7 +65,10 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
 
       {:ok, _view, html} =
         conn
-        |> init_test_session(%{"admin_token" => "admin", "accrue_admin" => %{"mount_path" => "/billing"}})
+        |> init_test_session(%{
+          "admin_token" => "admin",
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
         |> live("/billing/analytics/recovery/subscriptions/#{subscription_id}")
 
       assert html =~ "Campaign History" || html =~ "Dunning Timeline"
@@ -69,7 +78,10 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
     test "renders empty state for unknown subscription_id", %{conn: conn} do
       {:ok, _view, html} =
         conn
-        |> init_test_session(%{"admin_token" => "admin", "accrue_admin" => %{"mount_path" => "/billing"}})
+        |> init_test_session(%{
+          "admin_token" => "admin",
+          "accrue_admin" => %{"mount_path" => "/billing"}
+        })
         |> live("/billing/analytics/recovery/subscriptions/#{Ecto.UUID.generate()}")
 
       assert html =~ "No dunning history found"

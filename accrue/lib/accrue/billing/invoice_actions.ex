@@ -108,7 +108,11 @@ defmodule Accrue.Billing.InvoiceActions do
       when is_map(attrs) and is_list(opts) do
     with :ok <- ensure_draft_invoice(invoice) do
       op_id = Keyword.get(opts, :operation_id) || Actor.current_operation_id!()
-      processor_opts = [idempotency_key: Idempotency.key(:invoice_item_create, invoice.id, op_id)] ++ sanitize_opts(opts)
+
+      processor_opts =
+        [idempotency_key: Idempotency.key(:invoice_item_create, invoice.id, op_id)] ++
+          sanitize_opts(opts)
+
       params = invoice_item_params(invoice, attrs)
 
       Repo.transact(fn ->
@@ -119,7 +123,8 @@ defmodule Accrue.Billing.InvoiceActions do
                InvoiceProjection.decompose(stripe_invoice),
              {:ok, updated} <- update_invoice_row(invoice, invoice_attrs),
              {:ok, _} <- sync_items(updated, item_attrs_list),
-             {:ok, _event} <- record_event("invoice.item_added", updated, event_data(created_item)) do
+             {:ok, _event} <-
+               record_event("invoice.item_added", updated, event_data(created_item)) do
           {:ok, Repo.preload(updated, :items, force: true)}
         end
       end)
@@ -260,7 +265,9 @@ defmodule Accrue.Billing.InvoiceActions do
 
         _ ->
           from(i in InvoiceItem,
-            where: i.invoice_id == ^invoice.id and (is_nil(i.stripe_id) or i.stripe_id not in ^stripe_ids)
+            where:
+              i.invoice_id == ^invoice.id and
+                (is_nil(i.stripe_id) or i.stripe_id not in ^stripe_ids)
           )
       end
 
@@ -280,7 +287,10 @@ defmodule Accrue.Billing.InvoiceActions do
   defp ensure_draft_invoice(%Invoice{status: :draft}), do: :ok
   defp ensure_draft_invoice(%Invoice{} = invoice), do: {:error, draft_invoice_error(invoice)}
 
-  defp draft_invoice_error(%Invoice{} = invoice, message \\ "manual invoice items require a draft invoice") do
+  defp draft_invoice_error(
+         %Invoice{} = invoice,
+         message \\ "manual invoice items require a draft invoice"
+       ) do
     invoice
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.add_error(:status, message)
