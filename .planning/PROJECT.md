@@ -390,19 +390,22 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **Closeout proof:** `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
-## Next Milestone Goals (post-v1.46)
+## Current Milestone: v1.47 ENT-10 Polish + Adopter-Proof Completeness
 
-**Status (2026-05-30):** v1.46 — Maintenance & Closure is shipped. All three packages at **1.3.0** on Hex.pm. Ready for next milestone assessment. Run `/gsd-new-milestone` to kick off requirements definition.
+**Goal:** Close all ENT-10 advisory-cache follow-up items and prove entitlements gating, metered usage, and Oban crons in `examples/accrue_host`.
 
-**Open next-milestone inputs (see deferred items in STATE.md):**
-- ENT-10 advisory cache follow-ups (WR-05 concurrency robustness, IN-01..04 polish) — deferred to v1.47
-- Adopter-proof gaps: entitlements/metering/crons not exercised in `examples/accrue_host`
-- SEED-002: Chimeway/Mailglass ecosystem integrations (dormant)
+**Target features:**
+- WR-05 concurrency fix: replace optimistic-lock path with DB upsert in entitlement summary writes (eliminates `Ecto.StaleEntryError` on concurrent Oban delivery)
+- IN-01: set `:processor` in `write_entitlement_summary/8` for non-Stripe accuracy
+- IN-02: pass raw boolean-or-nil for livemode (preserve "unknown" state)
+- IN-03/IN-04: stripe_fixtures moduledoc polish + metrics counter or documented omission
+- Entitlements gating adopter-proof in `examples/accrue_host`
+- Metered usage adopter-proof in `examples/accrue_host`
+- Oban cron adopter-proof in `examples/accrue_host` (dunning sweeper or MRR cron)
 
-**Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet, multi-channel SMS/push dunning.
 ## Current State
 
-**Ready for next milestone.** v1.46 — Maintenance & Closure shipped and archived **2026-05-30**. All three packages at **1.3.0** on Hex.pm (accrue, accrue_admin, accrue_portal). The canonical six-step SaaS loop remains complete. Run `/gsd-new-milestone` to define v1.47 requirements.
+**Active milestone v1.47.** Defining requirements and roadmap. Last shipped: **v1.46** — Phases **151–153** — **2026-05-30**. All three packages at **1.3.0** on Hex.pm (accrue, accrue_admin, accrue_portal).
 
 **Last shipped:** **v1.46** — Phases **151–153** — **2026-05-30**
 **Hex.pm:** accrue 1.3.0 · accrue_admin 1.3.0 · accrue_portal 1.3.0
@@ -444,4 +447,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-30 after v1.46 milestone*
+*Last updated: 2026-05-30 — milestone v1.47 started*

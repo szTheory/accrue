@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.46
-milestone_name: Maintenance & Closure
-status: milestone_complete
-last_updated: 2026-05-30T15:09:43.297Z
-last_activity: 2026-05-30 — Milestone v1.46 completed and archived
+milestone: v1.47
+milestone_name: ENT-10 Polish + Adopter-Proof Completeness
+status: planning
+last_updated: "2026-05-30T17:55:24.052Z"
+last_activity: 2026-05-30
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 8
-  completed_plans: 71
-  percent: 100
-stopped_at: Milestone complete (Phase 153 was final phase)
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -26,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-28 after v1.44 milestone)
 
 ## Current Position
 
-Phase: 153
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-05-30
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-30 — Milestone v1.47 started
 
 ## Milestone Progress
 
