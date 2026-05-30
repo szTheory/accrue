@@ -55,6 +55,13 @@ defmodule AccruePortal.Live.CheckoutLive do
     end
   end
 
+  # Fallback: "accrue_portal" session key absent (misconfigured router,
+  # expired session after deploy, or direct navigation outside live_session).
+  # Redirect to root rather than raising FunctionClauseError.
+  def mount(_params, _session, socket) do
+    {:ok, redirect(socket, to: "/")}
+  end
+
   @impl true
   def handle_event("checkout_tokenized", %{"nonce" => nonce}, socket)
       when is_binary(nonce) and nonce != "" do
