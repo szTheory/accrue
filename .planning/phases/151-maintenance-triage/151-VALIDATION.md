@@ -122,3 +122,15 @@ passes with the current implementation and its SQL trace confirms the two-column
 - `accrue/test/accrue/webhook/default_handler_entitlement_summary_test.exs`
   — Added `describe "ENT-10 cross-processor isolation"` block with 1 new test.
   Test count: 10 → 11. All pass.
+
+---
+
+## Validation Audit 2026-05-30
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+Re-audit confirmed ongoing compliance. All 11 tests pass (`mix test ...entitlement_summary_test.exs --seed 0: 11 tests, 0 failures`). Both CI scripts exit 0 (`verify_adoption_proof_matrix.sh`, `verify_package_docs.sh`). No new gaps detected.
