@@ -16,7 +16,7 @@ defmodule Accrue.Integrations.ChimewayTest do
   lib/accrue/integrations/chimeway.ex exists (Plan 04).
   """
 
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   describe "conditional compile" do
     test "Accrue.Integrations.Chimeway is either loaded OR :nofile — never a crash" do
@@ -53,6 +53,90 @@ defmodule Accrue.Integrations.ChimewayTest do
 
       # Pattern 3 — behaviour declaration.
       assert source =~ "@behaviour Accrue.Dunning.Engine"
+    end
+  end
+
+  describe "cancel_campaign/3 Outcome Signal (ECOS-06)" do
+    @describetag :requires_chimeway
+    setup tags do
+      case Code.ensure_loaded(Accrue.Integrations.Chimeway) do
+        {:module, _} ->
+          Accrue.ChimewayTestSupport.ensure_repo_started!()
+
+          accrue_owner =
+            Ecto.Adapters.SQL.Sandbox.start_owner!(Accrue.TestRepo, shared: not tags[:async])
+
+          chimeway_owner =
+            Ecto.Adapters.SQL.Sandbox.start_owner!(Chimeway.Repo, shared: not tags[:async])
+
+          Application.put_env(:accrue, :dunning,
+            engine: Accrue.Integrations.Chimeway,
+            campaign: [enabled: true]
+          )
+
+          on_exit(fn ->
+            Ecto.Adapters.SQL.Sandbox.stop_owner(chimeway_owner)
+            Ecto.Adapters.SQL.Sandbox.stop_owner(accrue_owner)
+          end)
+
+          customer =
+            %Accrue.Billing.Customer{}
+            |> Accrue.Billing.Customer.changeset(%{
+              owner_type: "User",
+              owner_id: Ecto.UUID.generate(),
+              processor: "fake",
+              processor_id: "cus_chimeway_" <> Integer.to_string(System.unique_integer([:positive])),
+              email: "cancel-signal@example.com",
+              name: "Cancel Signal Customer"
+            })
+            |> Accrue.TestRepo.insert!()
+
+          subscription =
+            %Accrue.Billing.Subscription{customer_id: customer.id, processor: "fake"}
+            |> Accrue.Billing.Subscription.force_status_changeset(%{
+              processor_id: "sub_chimeway_" <> Integer.to_string(System.unique_integer([:positive])),
+              status: :past_due,
+              past_due_since: DateTime.utc_now() |> DateTime.truncate(:second)
+            })
+            |> Accrue.TestRepo.insert!()
+
+          %{customer: customer, subscription: subscription}
+
+        {:error, :nofile} ->
+          :ok
+      end
+    end
+
+    @tag :requires_chimeway
+    test "emits invoice.paid signal with customer email actor_id", %{
+      customer: customer,
+      subscription: subscription
+    } do
+      iso_anchor = DateTime.utc_now() |> DateTime.to_iso8601()
+
+      assert :ok =
+               Accrue.Integrations.Chimeway.cancel_campaign(subscription, iso_anchor, [])
+
+      import Ecto.Query
+
+      signals =
+        Chimeway.Repo.all(
+          from(s in Chimeway.Signals.Signal,
+            where: s.tenant_id == ^subscription.customer_id
+          )
+        )
+
+      assert length(signals) == 1
+
+      [signal] = signals
+      assert signal.tenant_id == subscription.customer_id
+      assert signal.actor_id == customer.email
+      assert signal.event_name == "invoice.paid"
+      assert signal.payload[:subscription_id] == subscription.id or
+               signal.payload["subscription_id"] == subscription.id
+
+      refute signal.event_name == "payment_recovered"
+      refute signal.actor_id == "accrue.dunning"
     end
   end
 

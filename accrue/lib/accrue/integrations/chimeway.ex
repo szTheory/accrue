@@ -56,8 +56,13 @@ if Code.ensure_loaded?(Chimeway) do
     Email-only dunning with a two-step Chimeway workflow (initial email → 48h
     `wait_until` → escalation email). `DunningNotifier` implements `workflow/2`
     and `rendering/2` so `Chimeway.trigger/3` creates a durable `WorkflowRun`
-    with explainable progression. Outcome Signal termination (`invoice.paid`)
-    cancels escalation via `cancel_signals` on the wait step.
+    with explainable progression.
+
+    Outcome Signal termination: `cancel_campaign/3` emits `Chimeway.Signal.track/4`
+    with `event_name: "invoice.paid"` and `actor_id` equal to the customer email
+    (`recipient_identity` from `DunningNotifier.recipients/1`). That matches
+    `cancel_signals` on the wait step and routes to waiting runs via
+    `Workflows.route_signal/1` — no host callback glue.
 
     `orchestration/2` remains `{:ok, :immediate}` — email delivery planning is
     unchanged; workflow progression is driven by `workflow/2`.
@@ -66,7 +71,7 @@ if Code.ensure_loaded?(Chimeway) do
     @behaviour Accrue.Dunning.Engine
     @compile {:no_warn_undefined, [Chimeway, Chimeway.Signal]}
 
-    alias Accrue.Billing.Subscription
+    alias Accrue.Billing.{Customer, Subscription}
 
     @impl Accrue.Dunning.Engine
     def start_campaign(%Subscription{} = sub, %DateTime{} = anchor, _opts) do
@@ -89,16 +94,16 @@ if Code.ensure_loaded?(Chimeway) do
     end
 
     @impl Accrue.Dunning.Engine
-    def cancel_campaign(%Subscription{} = sub, iso_anchor, _opts) when is_binary(iso_anchor) do
-      # Signal.track/4 arg order: (tenant_id, actor_id, event_name, payload)
-      # sub.customer_id is the tenant_id; "accrue.dunning" is the system actor_id.
-      # With :immediate orchestration and no workflow/2, this signal routes to
-      # zero WorkflowRuns — a safe no-op. Anchor-clear in Accrue prevents
-      # future start_campaign calls (T-131-08, T-131-09).
+    def cancel_campaign(%Subscription{} = sub, _iso_anchor, _opts) do
+      customer = Accrue.Repo.repo().get!(Customer, sub.customer_id)
+
+      # D-09: actor_id MUST match DunningNotifier.recipients/1 recipient_identity
+      # (customer email); event_name MUST match cancel_signals on the wait_until
+      # rule ("invoice.paid") so find_runs_waiting_for_signal/3 can route.
       case Chimeway.Signal.track(
              sub.customer_id,
-             "accrue.dunning",
-             "payment_recovered",
+             customer.email,
+             "invoice.paid",
              %{subscription_id: sub.id}
            ) do
         {:ok, _signal} -> :ok

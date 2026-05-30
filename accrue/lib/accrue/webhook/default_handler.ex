@@ -248,6 +248,7 @@ defmodule Accrue.Webhook.DefaultHandler do
        when action in ~w(created updated finalized finalization_failed paid payment_failed voided marked_uncollectible sent) do
     result = reduce_invoice(action, evt_id, evt_ts, obj)
     maybe_dispatch_invoice_email(action, result, obj)
+    if action == "paid", do: run_post_commit_dunning_cancel_from_stash()
     result
   end
 
@@ -985,13 +986,7 @@ defmodule Accrue.Webhook.DefaultHandler do
   # cancel error/raise does NOT propagate: the anchor-clear is already
   # committed and the per-step cancel-guard backstops any uncancelled step.
   defp run_post_commit_dunning_cancel({:ok, %Subscription{}}) do
-    case Process.delete(:accrue_dunning_cancel) do
-      {%Subscription{} = sub, iso_anchor} when is_binary(iso_anchor) ->
-        Accrue.Config.dunning_engine().cancel_campaign(sub, iso_anchor, [])
-
-      _ ->
-        :ok
-    end
+    run_post_commit_dunning_cancel_from_stash()
   end
 
   # Reducer did not commit a subscription success (rolled back / deferred /
@@ -1000,6 +995,16 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp run_post_commit_dunning_cancel(_result) do
     _ = Process.delete(:accrue_dunning_cancel)
     :ok
+  end
+
+  defp run_post_commit_dunning_cancel_from_stash do
+    case Process.delete(:accrue_dunning_cancel) do
+      {%Subscription{} = sub, iso_anchor} when is_binary(iso_anchor) ->
+        Accrue.Config.dunning_engine().cancel_campaign(sub, iso_anchor, [])
+
+      _ ->
+        :ok
+    end
   end
 
   defp dunning_source(nil), do: :stripe_native
@@ -1185,6 +1190,7 @@ defmodule Accrue.Webhook.DefaultHandler do
           %Invoice{} = updated ->
             with {:ok, _} <- upsert_invoice_items(updated, item_attrs),
                  :ok <- maybe_bump_past_due_since(action, canonical),
+                 :ok <- maybe_recover_dunning_on_invoice_paid(action, canonical),
                  {:ok, _} <- record_event("invoice." <> action, "Invoice", updated.id, evt_id) do
               {:ok, updated}
             end
@@ -1210,6 +1216,25 @@ defmodule Accrue.Webhook.DefaultHandler do
   end
 
   defp maybe_bump_past_due_since(_action, _canonical), do: :ok
+
+  # invoice.paid recovery: when the linked subscription is active again,
+  # finalize the dunning campaign (anchor clear + post-commit cancel stash)
+  # so cancel_campaign/3 emits the invoice.paid Outcome Signal (ECOS-06).
+  defp maybe_recover_dunning_on_invoice_paid("paid", canonical) do
+    with sub_stripe_id when is_binary(sub_stripe_id) <- get(canonical, :subscription),
+         %Subscription{} = row <- Repo.get_by(Subscription, processor_id: sub_stripe_id),
+         {:ok, sub_canonical} <- Processor.__impl__().fetch(:subscription, sub_stripe_id),
+         true <- get(sub_canonical, :status) in ["active", "trialing"],
+         {:ok, attrs} <- SubscriptionProjection.decompose(sub_canonical),
+         {:ok, %Subscription{} = updated} <-
+           row |> Subscription.force_status_changeset(attrs) |> Repo.update() do
+      maybe_finalize_dunning_campaign(row, updated, sub_canonical)
+    else
+      _ -> :ok
+    end
+  end
+
+  defp maybe_recover_dunning_on_invoice_paid(_action, _canonical), do: :ok
 
   # Bump past_due_since from Stripe's next_payment_attempt (UNCHANGED from
   # the Phase 4 behaviour). Never clears it (nil attempt = Stripe stopped
