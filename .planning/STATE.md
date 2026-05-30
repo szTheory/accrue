@@ -122,6 +122,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | scope | Compensating-event backfill of pre-v1.44 events without `mrr_value_cents` | out of scope v1.44; cutoff-date label is the v1.44 honest answer | 2026-05-27 |
 | scope | Real-time PubSub-driven dashboard refresh | out of scope v1.44; coupled to multi-channel dunning v1.45+ | 2026-05-27 |
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | carried |
+| tech_debt | ENT-10 advisory cache follow-ups (WR-05 concurrency, IN-01..04 polish) — `todos/pending/2026-05-24-ent10-advisory-cache-followups.md` | deferred to v1.47 at v1.46 milestone close | 2026-05-30 |
+| next_milestone_input | adopter-proof-gaps thread — entitlements/metering/crons not exercised in `examples/accrue_host` | open input for v1.47 | 2026-05-30 |
+| seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | dormant; carry to v1.47+ | 2026-05-30 |
 
 ## Session Continuity
 

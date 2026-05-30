@@ -10,16 +10,37 @@ Tagline: *"Billing state, modeled clearly."*
 
 **A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one** — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
-## Current milestone
-
-**Active: `v1.46`**
-
-**Goal:** Maintenance and closure review (no new capabilities planned).
-
-**Target features:**
-- Routine maintenance and issue triage.
-
 ## Last shipped milestone
+
+### v1.46 — Maintenance & Closure (**archived 2026-05-30**)
+
+**Goal:** Routine maintenance, dependency updates, ENT-10 scoping fix, @since annotation cleanup, and shipping the linked 1.3.0 Hex publish across all three packages.
+
+**Delivered:**
+- ENT-10 webhook scoping fix: `customer` lookups now strictly scope by `processor_id + processor` to prevent cross-processor ID collisions.
+- Dependency updates across accrue / accrue_admin / accrue_portal.
+- All 8 malformed `@since` annotations fixed to canonical `@doc since: "1.3.0"` (dunning.ex ×7, funnel_chart.ex ×1).
+- Three Zeros gate: all 13 `verify_*.sh` scripts + mix test/dialyzer/credo/coveralls green across all packages.
+- `accrue_portal` credo baseline established (`.credo.exs` mirroring accrue_admin).
+- `accrue / accrue_admin / accrue_portal` **1.3.0** published to Hex.pm via Release Please; git tags pushed.
+
+**Closeout proof:** Phases 151–153; planning tag `v1.46`; see `.planning/MILESTONES.md` v1.46 entry.
+
+## Prior shipped milestone
+
+### v1.45 — Multi-channel Dunning (In-App Banners) (**archived 2026-05-29**)
+
+**Goal:** Ship `Accrue.Dunning.requires_attention?/1` API and headless `<AccrueAdmin.Components.DunningBanner />` component for Phoenix LiveView host apps. Document integration in guides/dunning.md and prove adoption in examples/accrue_host.
+
+**Delivered:**
+- `Accrue.Dunning.requires_attention?/1` — billing-state-aware API for banner visibility.
+- `AccrueAdmin.Components.DunningBanner` — headless LiveView component (core-only DIY path documented).
+- In-app dunning banner documented in `guides/dunning.md` with explicit package dependency boundary.
+- Adopter proof in `examples/accrue_host` (resolver uses `billing_state_for_scope/1`).
+
+**Closeout proof:** Phases 149–150; planning tag `v1.45`; see `.planning/MILESTONES.md` v1.45 entry.
+
+## Prior shipped milestone (v1.44)
 
 ### v1.44 — Recovered-Revenue Dashboard Completion (**archived 2026-05-28**)
 
@@ -369,22 +390,30 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **Closeout proof:** `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
-## Next Milestone Goals (post-v1.44)
+## Next Milestone Goals (post-v1.46)
 
-**Assessment (2026-05-28, post-v1.44 next-step review — `.planning/threads/v1.45-NEXT-STEP-ASSESSMENT.md`):** With the Recovered-Revenue dashboard shipped, the highest-leverage next wedge is completing the dunning story with Multi-channel Dunning (In-App Banners). This drives recovery rates higher without the compliance risks of SMS.
+**Status (2026-05-30):** v1.46 — Maintenance & Closure is shipped. All three packages at **1.3.0** on Hex.pm. Ready for next milestone assessment. Run `/gsd-new-milestone` to kick off requirements definition.
 
-- **v1.45 — Multi-channel Dunning (In-App Banners)** — **SELECTED.** Provide a headless `Accrue.Dunning.Banner` component or `Accrue.Dunning.requires_attention?/1` helper that the host app can drop into their root layout.
-- **v1.46+ (parked)** — Multi-channel Dunning (SMS/Push via Chimeway). High compliance risk, better left to host app integration.
-- **v1.46+ (parked)** — Rich metered/tiered entitlement math (out of scope unless adopter demand surfaces; risks accounting-territory drift).
-- **Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet.
+**Open next-milestone inputs (see deferred items in STATE.md):**
+- ENT-10 advisory cache follow-ups (WR-05 concurrency robustness, IN-01..04 polish) — deferred to v1.47
+- Adopter-proof gaps: entitlements/metering/crons not exercised in `examples/accrue_host`
+- SEED-002: Chimeway/Mailglass ecosystem integrations (dormant)
 
+**Standing non-goals:** FIN-03 accounting, MRR/ARR analytics product, MoR processors, Hyperwallet, multi-channel SMS/push dunning.
 ## Current State
 
-Current focus: **Ready for next milestone**. **v1.46 — Maintenance & Closure** is shipped and archived. The project is ready for the next set of goals.
+**Ready for next milestone.** v1.46 — Maintenance & Closure shipped and archived **2026-05-30**. All three packages at **1.3.0** on Hex.pm (accrue, accrue_admin, accrue_portal). The canonical six-step SaaS loop remains complete. Run `/gsd-new-milestone` to define v1.47 requirements.
 
-**Last shipped planning milestone:** **v1.46** — Phases **151–153** (**2026-05-30**).
+**Last shipped:** **v1.46** — Phases **151–153** — **2026-05-30**
+**Hex.pm:** accrue 1.3.0 · accrue_admin 1.3.0 · accrue_portal 1.3.0
 
 ## Requirements
+
+### Validated v1.46 (archived in `.planning/milestones/v1.46-REQUIREMENTS.md`; milestone shipped & archived 2026-05-30)
+
+Maintenance & Closure — 1/1 satisfied.
+
+- ✓ **MNT-01** — Routine issue triage and repository maintenance — v1.46
 
 ### Validated v1.41 (archived in `.planning/milestones/v1.41-REQUIREMENTS.md`; milestone shipped & archived 2026-05-26)
 
@@ -394,9 +423,6 @@ Admin global search — 4/4 satisfied.
 - ✓ **SRCH-02** — CMD+K Keyboard navigation in admin UI.
 - ✓ **SRCH-03** — Unified search results for Customers, Invoices, Subscriptions.
 - ✓ **SRCH-04** — Zero-sidecar search implementation.
-
-... (rest of requirements unchanged) ...
-lementation.
 
 ... (rest of requirements unchanged) ...
 
@@ -416,15 +442,6 @@ This document evolves at phase transitions and milestone boundaries.
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
- each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
 
-**After each milestone** (via `/gsd:complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
+---
+*Last updated: 2026-05-30 after v1.46 milestone*

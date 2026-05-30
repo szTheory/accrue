@@ -1,7 +1,8 @@
 ---
 slug: dunning-depth-milestone-prep
 title: "Dunning depth / notification journeys — next-milestone prep"
-status: open
+status: closed
+closed_reason: "v1.40 (Dunning Depth) shipped 2026-05-25; this prep thread is now stale and served its purpose."
 created: 2026-05-24
 updated: 2026-05-24
 ---

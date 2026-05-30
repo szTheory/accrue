@@ -1,8 +1,8 @@
 ---
-status: investigating
+status: resolved
 trigger: "5 test failures appear ONLY in full suite (mix test --seed 0), PASS in isolation. Cross-suite test-isolation / shared-state bug from phase 128 dunning work. All 5 are 'email expected but not delivered' (mailbox empty)."
 created: 2026-05-24T00:00:00Z
-updated: 2026-05-24T00:00:00Z
+updated: 2026-05-30T00:00:00Z
 ---
 
 ## Current Focus

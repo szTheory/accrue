@@ -1126,6 +1126,58 @@ Closed the last open step of the canonical SaaS loop — gate features/access on
 
 ---
 
+## Milestone: v1.46 — Maintenance & Closure
+
+**Shipped:** 2026-05-30
+**Phases:** 3 (151–153) | **Plans:** 8
+
+### What Was Built
+
+- ENT-10 webhook scoping fix: `customer` lookups now strictly scope by `processor_id + processor` to prevent cross-processor ID collisions; `dispatch/4` fallback preserved for legacy `handle/1` test interface.
+- Dependency updates across accrue / accrue_admin / accrue_portal.
+- All 8 malformed `@since` annotations fixed to canonical `@doc since: "1.3.0"` (dunning.ex ×7, funnel_chart.ex ×1) — eliminating compiler warnings and ExDoc junk text.
+- Three Zeros gate fully green: all 13 `verify_*.sh` scripts + mix test/dialyzer/credo/coveralls exit 0 across all three packages.
+- `accrue_portal` credo baseline established (`.credo.exs` mirroring accrue_admin).
+- `accrue / accrue_admin / accrue_portal` 1.3.0 published to Hex.pm via Release Please.
+- Phase 151 VERIFICATION.md synthesized retroactively from committed evidence (Phase 152 Three Zeros gate served as independent corroboration).
+- Milestone audit trail closed (all documentation gaps from v1.46-MILESTONE-AUDIT.md resolved by Phase 153).
+
+### What Worked
+
+- The "close the audit gaps with follow-on phases" pattern (152 + 153 added after the original audit) worked cleanly — the audit enumerated the exact gaps, and the closure phases were mechanical.
+- Release Please computed the 1.3.0 version automatically from accumulated `feat:` commits — no `Release-As:` trailer needed.
+- Three Zeros gate (all 13 verify scripts + test/dialyzer/credo/coveralls) gave a crisp merge gate for the release.
+- Retroactive VERIFICATION.md synthesis from committed evidence (D-01 pattern) worked well for a maintenance phase that ran before the formal verification workflow was in place.
+
+### What Was Inefficient
+
+- Phase 151 ran without producing a VERIFICATION.md or updating ROADMAP plan checkboxes — required Phase 153 to close retroactively. The maintenance/triage phase context should have prompted both during execution.
+- `@since` annotations were using the wrong version (1.4.0) when 1.3.0 was the target — a review step at the time of annotation would have caught this.
+- Several pre-publish blockers (chimeway cancel_signals key, stale asset bundle, host-integration warnings) emerged during the Task 2 pre-publish gate rather than being caught by Three Zeros in Phase 152 — suggests the pre-publish gate should run earlier in the release phase.
+- MILESTONES.md v1.46 entry had empty "Plan:" lines (SDK couldn't extract accomplishments) — needed manual editing at close.
+
+### Patterns Established
+
+- `@doc since: "VERSION"` is the canonical ExDoc since-badge form — separate attribute after closing `"""`, before `@spec`. Never embed `@since` inside a heredoc body.
+- `accrue_portal` now has a `.credo.exs` baseline mirroring accrue_admin. All three packages are credo --strict green.
+- Retroactive VERIFICATION.md synthesis from VALIDATION.md + SUMMARY files + subsequent gate evidence is an acceptable D-01 pattern when a phase completes before formal verification runs.
+- Audit-gap closure phases (Phase 152 + 153) are the right vehicle for addressing milestone audit findings — insert them after the original milestone phases, close cleanly, then archive.
+
+### Key Lessons
+
+1. Maintenance phases need the same documentation hygiene as feature phases: VERIFICATION.md, ROADMAP checkbox updates, and REQUIREMENTS traceability should be done at phase completion, not retroactively.
+2. Version numbers in doc annotations should match the current release target — a `@doc since:` with the wrong version is worse than no badge (it silently ships wrong metadata to HexDocs).
+3. Pre-publish CI gates (--warnings-as-errors, host-integration) should run as early as possible in the release phase, not only at the final gate.
+4. The audit-gap closure pattern is lightweight and works: enumerate gaps precisely in the audit, close each with a targeted plan, archive.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: 3 phases over ~2 days; phase execution times 2–25 min/plan (per STATE.md velocity notes).
+- Notable: Phase 152-03 (release) was multi-session due to human checkpoint gates (Release Please PR merge + Hex publish confirmation) — these are expected and non-avoidable.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -1133,6 +1185,7 @@ Closed the last open step of the canonical SaaS loop — gate features/access on
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
 | v1.29 | short | 3 | **MG-01..MG-07** — Mailglass framework integration replacing `mjml_eex` + `phoenix_swoosh`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`; 13 templates ported, 26 MJML/text assets deleted; `mailglass_cleanup_test` enforces non-regression in CI; phases **88–90** under **`milestones/v1.29-phases/`**; archives **`milestones/v1.29-*`**. |
+| v1.46 | ~2 days | 3 | **MNT-01** — maintenance release: ENT-10 dual-column webhook scope fix, dep updates, @since annotation cleanup, credo wired in accrue_portal, Three Zeros gate green across all 3 packages, 1.3.0 Hex publish. Audit-gap closure phases (152+153) added retroactively to close VERIFICATION.md + REQUIREMENTS gaps. |
 | v1.39 | ~3 days | 5 | **ENT-01..12** — closed the canonical SaaS loop's last step (entitlements/plan-gating), local-first with no new tables / no Stripe dependency on the gate path. Correctness contracts (fail-closed + lifecycle-predicate reuse) baked into the first phase's exit criteria; risky Stripe-native sync isolated last + off-by-default behind a machine-enforced isolation gate; three new merge-blocking static gates (runtime-LiveView-free, support-matrix drift, sync isolation). Closed at `tech_debt` (DoD achieved, deferred non-fail-open follow-ups + partial Nyquist 123–125). Phases **123–127** under **`milestones/v1.39-*`**. |
 | v1.27 | short | 2 | **CLS-01..03** + **INV-05** — pre-1.0 closure narrative on README / **`RELEASING`** / **`upgrade`** + post-touch friction certification **(b)**; **`*-VERIFICATION.md`** only (inline); phases **84–85** under **`milestones/v1.27-phases/`**; **`milestones/v1.27-*`** archives. |
 | v1.26 | short | 2 | **INT-13** + **INV-04** — billing portal on First Hour + matrix + CI needles; post-touch friction certification **(b)**; **`*-VERIFICATION.md`** + **3** plan summaries; phases **82–83** under **`milestones/v1.26-phases/`**. |
