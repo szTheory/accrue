@@ -352,6 +352,10 @@ defmodule AccruePortal.Live.CheckoutLive do
     |> Decimal.to_integer()
   end
 
+  defp parse_amount_minor(amount) when is_integer(amount), do: amount
+
+  defp parse_amount_minor(_), do: 0
+
   defp format_minor_amount(amount_minor) when is_integer(amount_minor) do
     sign = if amount_minor < 0, do: "-", else: ""
     abs_minor = abs(amount_minor)
