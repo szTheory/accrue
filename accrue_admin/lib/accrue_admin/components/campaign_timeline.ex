@@ -36,7 +36,12 @@ defmodule AccrueAdmin.Components.CampaignTimeline do
         <.step_row
           event={event}
           invoice_map={@invoice_map}
-          attempt={elem(Enum.find(@step_events_indexed, fn {e, _idx} -> e.id == event.id end), 1)}
+          attempt={
+            case Enum.find(@step_events_indexed, fn {e, _idx} -> e.id == event.id end) do
+              {_e, idx} -> idx
+              nil -> "?"
+            end
+          }
         />
       <% else %>
         <.campaign_row event={event} invoice_map={@invoice_map} />
