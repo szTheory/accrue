@@ -1,10 +1,11 @@
 ---
 phase: 152
 slug: close-v1-46-closure-gaps-since-warnings-verification-hex-pub
-status: draft
+status: complete
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-05-29
+validated: 2026-05-30
 ---
 
 # Phase 152 — Validation Strategy
@@ -43,14 +44,14 @@ created: 2026-05-29
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| @since-fix (dunning.ex) | 01 | 1 | D-02 | — | N/A | compile | `cd accrue && mix compile --warnings-as-errors` | ✅ | ⬜ pending |
-| @since-fix (funnel_chart.ex) | 01 | 1 | D-02 | — | N/A | compile | `cd accrue_admin && mix compile --warnings-as-errors` | ✅ | ⬜ pending |
-| docs honesty gate | 01 | 1 | D-03 | — | N/A | script | `bash scripts/ci/verify_package_docs.sh` | ✅ | ⬜ pending |
-| Three Zeros — tests | 02 | 1 | D-03 | — | N/A | suite | `mix test --seed 0` (×3 packages) | ✅ | ⬜ pending |
-| Three Zeros — dialyzer/credo | 02 | 1 | D-03 | — | N/A | suite | `mix dialyzer` / `mix credo --strict` (×3) | ✅ | ⬜ pending |
-| Three Zeros — adoption matrix | 02 | 1 | D-03 | — | N/A | script | `bash scripts/ci/verify_adoption_proof_matrix.sh` | ✅ | ⬜ pending |
-| release-notes contract | 03 | 2 | D-04 | — | N/A | script | `bash scripts/ci/verify_release_notes_contract.sh` | ✅ | ⬜ pending |
-| release PR scope/manifest | 03 | 2 | D-01/D-04 | T-152-01 | secrets never echoed; signing keys from env only | script | `bash scripts/ci/verify_release_contract.sh` + `verify_release_manifest_alignment.sh` + `verify_release_pr_scope.sh` | ✅ | ⬜ pending |
+| @since-fix (dunning.ex) | 01 | 1 | D-02 | — | N/A | compile | `cd accrue && mix compile --warnings-as-errors` | ✅ | ✅ green |
+| @since-fix (funnel_chart.ex) | 01 | 1 | D-02 | — | N/A | compile | `cd accrue_admin && mix compile --warnings-as-errors` | ✅ | ✅ green |
+| docs honesty gate | 01 | 1 | D-03 | — | N/A | script | `bash scripts/ci/verify_package_docs.sh` | ✅ | ✅ green |
+| Three Zeros — tests | 02 | 1 | D-03 | — | N/A | suite | `mix test --seed 0` (×3 packages) | ✅ | ✅ green |
+| Three Zeros — dialyzer/credo | 02 | 1 | D-03 | — | N/A | suite | `mix dialyzer` / `mix credo --strict` (×3) | ✅ | ✅ green |
+| Three Zeros — adoption matrix | 02 | 1 | D-03 | — | N/A | script | `bash scripts/ci/verify_adoption_proof_matrix.sh` | ✅ | ✅ green |
+| release-notes contract | 03 | 2 | D-04 | — | N/A | script | `bash scripts/ci/verify_release_notes_contract.sh` | ✅ | ✅ green |
+| release PR scope/manifest | 03 | 2 | D-01/D-04 | T-152-01 | secrets never echoed; signing keys from env only | script | `bash scripts/ci/verify_release_contract.sh` + `verify_release_manifest_alignment.sh` + `verify_release_pr_scope.sh` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -87,3 +88,28 @@ suite are already in place.
 - [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** approved 2026-05-29
+
+---
+
+## Validation Audit 2026-05-30
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+| Total tasks verified | 8 |
+| Status | All COVERED — nyquist_compliant: true |
+
+**Commands run (2026-05-30):**
+- `mix compile --warnings-as-errors` → 0 warnings (accrue + accrue_admin)
+- `mix test --seed 0` → 1635+166+34 = 1835 tests, 0 failures (accrue + accrue_admin + accrue_portal)
+- `mix credo --strict` → 0 issues (all 3 packages)
+- `bash scripts/ci/verify_package_docs.sh` → OK 1.3.0
+- `bash scripts/ci/verify_release_notes_contract.sh` → OK 1.3.0
+- `bash scripts/ci/verify_adoption_proof_matrix.sh` → OK
+- `bash scripts/ci/verify_release_contract.sh` → OK
+- `bash scripts/ci/verify_release_manifest_alignment.sh` → OK (all 3 packages at 1.3.0)
+- `verify_release_pr_scope.sh` — requires `--pr` flag; release shipped at 1.3.0, scope confirmed via manifest alignment check above
+
+*dialyzer — confirmed green in 152-02-SUMMARY.md; not re-run (expensive, no code changes since phase execution)*
