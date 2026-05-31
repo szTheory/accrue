@@ -77,11 +77,20 @@ Plans:
   1. Public package docs and READMEs explain that Accrue is stable-core and demand-driven, not broad feature-chasing.
   2. Adopter-facing docs show the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without requiring planning context.
   3. Release notes, package docs, support matrix, adoption proof docs, and planning mirrors describe the same stable-core posture.
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] 160-01-PLAN.md — Align public docs, package docs, proof mirrors, release notes, and the maintainer support matrix around stable-core positioning
-- [ ] 160-02-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
+**Wave 1**
+
+- [ ] 160-01-PLAN.md — Refresh the root/core docs spine and canonical guides for stable-core positioning
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 160-02-PLAN.md — Align thin mirrors, release notes, and the maintainer-facing processor matrix to the public docs spine
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 160-03-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
 
 ### Phase 161: Backlog Anchor Closure + Pause Rule
 
@@ -123,11 +132,12 @@ Plans:
   1. Public package docs and READMEs explain that Accrue is stable-core and demand-driven, not broad feature-chasing.
   2. Adopter-facing docs show the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without requiring planning context.
   3. Release notes, package docs, support matrix, adoption proof docs, and planning mirrors describe the same stable-core posture.
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] 160-01-PLAN.md — Align public docs, package docs, proof mirrors, release notes, and the maintainer support matrix around stable-core positioning
-- [ ] 160-02-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
+- [ ] 160-01-PLAN.md — Refresh the root/core docs spine and canonical guides for stable-core positioning
+- [ ] 160-02-PLAN.md — Align thin mirrors, release notes, and the maintainer-facing processor matrix to the public docs spine
+- [ ] 160-03-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
 
 ### Phase 161: Backlog Anchor Closure + Pause Rule
 **Goal:** Retire stale roadmap pressure, classify remaining seeds/deferred ideas with revisit triggers, and close the milestone with an explicit pause rule for broad feature work.
@@ -155,7 +165,7 @@ Plans:
 | 157. Metered Usage Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 159. Linked Release Readiness + Publish Proof | v1.48 | 2/2 | Blocked on external release state | — |
-| 160. Stable-Core Public Positioning | v1.48 | 0/1 | Pending | — |
+| 160. Stable-Core Public Positioning | v1.48 | 0/3 | Pending | — |
 | 161. Backlog Anchor Closure + Pause Rule | v1.48 | 0/1 | Pending | — |
 
 ## Historical Backlog Anchors (not active scope)
