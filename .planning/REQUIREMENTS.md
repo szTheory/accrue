@@ -22,7 +22,7 @@
 
 ## Adopter-Proof: Entitlements Gating
 
-- [ ] **PRF-01** — Developer adopting Accrue can see a working `Accrue.Live.Entitlements` `on_mount` guard in `examples/accrue_host` that gracefully handles an unloaded billable association (defensive `NotLoaded` guard + router comment documenting `on_mount` order); existing positive + negative test cases verified passing
+- [x] **PRF-01** — Developer adopting Accrue can see a working `Accrue.Live.Entitlements` `on_mount` guard in `examples/accrue_host` that gracefully handles an unloaded billable association (defensive `NotLoaded` guard + router comment documenting `on_mount` order); existing positive + negative test cases verified passing
 
 ## Adopter-Proof: Metered Usage
 

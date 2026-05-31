@@ -88,7 +88,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 156-01-PLAN.md — Harden the shared NotLoaded fail-closed path, make the example host ordering contract explicit, and prove the real `/app/reports/advanced` route
+- [x] 156-01-PLAN.md — Harden the shared NotLoaded fail-closed path, make the example host ordering contract explicit, and prove the real `/app/reports/advanced` route
 
 ### Phase 157: Metered Usage Adopter Proof
 
@@ -151,10 +151,10 @@ Plans:
   1. The `Accrue.Live.Entitlements` `on_mount` guard in `examples/accrue_host` handles an unloaded billable association without raising, failing closed in the safe direction.
   2. The router comment documents the required `on_mount` ordering so adopters know where `Accrue.Live.Entitlements` must appear relative to other guards.
   3. Existing positive and negative test cases in `entitlements_guard_test.exs` pass without modification.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 156-01-PLAN.md — Harden the shared NotLoaded fail-closed path, make the example host ordering contract explicit, and prove the real `/app/reports/advanced` route
+- [x] 156-01-PLAN.md — Harden the shared NotLoaded fail-closed path, make the example host ordering contract explicit, and prove the real `/app/reports/advanced` route
 
 ### Phase 157: Metered Usage Adopter Proof
 **Goal:** An adopter reading `examples/accrue_host` can see and run a full end-to-end metered usage test — subscribe to a metered price, trigger a usage event, assert the meter row was recorded — with an inline comment clarifying the `value:` vs `quantity:` distinction.
@@ -184,7 +184,7 @@ Plans:
 | 153. Close v1.46 audit trail | v1.46 | 2/2 | Complete | 2026-05-30 |
 | 154. Advisory Cache Core Correctness | v1.47 | 1/1 | Complete   | 2026-05-31 |
 | 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 1/1 | Complete    | 2026-05-31 |
-| 156. Entitlements Gating Adopter Proof | v1.47 | 0/1 | Not started | - |
+| 156. Entitlements Gating Adopter Proof | v1.47 | 1/1 | Complete   | 2026-05-31 |
 | 157. Metered Usage Adopter Proof | v1.47 | 0/? | Not started | - |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 0/? | Not started | - |
 
