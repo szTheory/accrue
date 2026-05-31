@@ -177,7 +177,7 @@ Stderr lines from `verify_package_docs.sh` are prefixed with `[verify_package_do
 ### Triage: verify_release_pr_scope.sh
 
 - `verify_release_pr_scope:` failures mean the live Release Please PR does not satisfy the locked three-package contract. The PR must update `.release-please-manifest.json`, all three package `mix.exs` files, and all three package `CHANGELOG.md` files before merge.
-- Use `bash scripts/ci/verify_release_pr_scope.sh --pr <number-or-url> [--version <x.y.z>]` before merge. A passing result is the REL-10 pre-merge gate.
+- Use `bash scripts/ci/verify_release_pr_scope.sh --pr <number-or-url> [--version <x.y.z>]` before merge. A passing result is the REL-01 pre-merge gate.
 - Record the passing identifier pair in `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` as `PR_NUMBER:` and `TARGET_VERSION:` and stop using “latest release PR” shortcuts after that.
 - If the Release Please branch is stale relative to `main`, force-sync `release-please--branches--main` back to `main`, rerun Release Please, and only then apply the portal repair on the regenerated branch.
 - If Release Please leaves `accrue_portal` behind while `accrue` and `accrue_admin` advance together, run `bash scripts/ci/repair_linked_release_pr.sh --version <x.y.z>` on the checked-out release branch and push the repaired branch before merge.

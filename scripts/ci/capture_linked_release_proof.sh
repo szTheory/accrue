@@ -36,6 +36,10 @@ normalize_pr() {
   local value=$1
 
   if [[ "$value" =~ ^https?://github\.com/[^/]+/[^/]+/pull/([0-9]+) ]]; then
+    local pr_repo="${BASH_REMATCH[0]#https://github.com/}"
+    pr_repo="${pr_repo#http://github.com/}"
+    pr_repo="${pr_repo%/pull/*}"
+    [[ "$pr_repo" == "$REPO" ]] || fail "PR URL repo mismatch: expected $REPO, found $pr_repo"
     printf '%s\n' "${BASH_REMATCH[1]}"
   elif [[ "$value" =~ ^[0-9]+$ ]]; then
     printf '%s\n' "$value"
@@ -91,6 +95,14 @@ require_cmd jq
 require_cmd curl
 require_cmd git
 
+if command -v shasum >/dev/null 2>&1; then
+  sha256_file() { shasum -a 256 "$1" | awk '{print $1}'; }
+elif command -v sha256sum >/dev/null 2>&1; then
+  sha256_file() { sha256sum "$1" | awk '{print $1}'; }
+else
+  fail "shasum or sha256sum is required but not installed"
+fi
+
 PR_NUMBER=$(normalize_pr "$PR_ARG")
 OUTPUT_PATH=$OUTPUT
 [[ "$OUTPUT_PATH" = /* ]] || OUTPUT_PATH="$ROOT_DIR/$OUTPUT_PATH"
@@ -98,10 +110,22 @@ OUTPUT_PATH=$OUTPUT
 
 git -C "$ROOT_DIR" fetch --tags --force origin
 
-RUN_JSON=$(gh run view "$RUN_ID" --repo "$REPO" --json databaseId,url,workflowName,conclusion,jobs)
+RUN_JSON=$(gh run view "$RUN_ID" --repo "$REPO" --json databaseId,url,workflowName,headSha,conclusion,jobs)
 RUN_URL=$(jq -r '.url' <<<"$RUN_JSON")
+RUN_WORKFLOW_NAME=$(jq -r '.workflowName // empty' <<<"$RUN_JSON")
+RUN_HEAD_SHA=$(jq -r '.headSha // empty' <<<"$RUN_JSON")
 RUN_CONCLUSION=$(jq -r '.conclusion' <<<"$RUN_JSON")
+[[ "$RUN_WORKFLOW_NAME" == "release-please" || "$RUN_WORKFLOW_NAME" == "Release Please" ]] ||
+  fail "run $RUN_ID is not the release workflow (workflowName=${RUN_WORKFLOW_NAME:-<empty>})"
 [[ "$RUN_CONCLUSION" == "success" ]] || fail "workflow run $RUN_ID did not succeed (conclusion=$RUN_CONCLUSION)"
+
+PR_JSON=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json number,mergeCommit,url)
+PR_FOUND_NUMBER=$(jq -r '.number // empty' <<<"$PR_JSON")
+PR_MERGE_SHA=$(jq -r '.mergeCommit.oid // empty' <<<"$PR_JSON")
+[[ "$PR_FOUND_NUMBER" == "$PR_NUMBER" ]] || fail "PR not found in $REPO: #$PR_NUMBER"
+[[ -n "$PR_MERGE_SHA" ]] || fail "PR #$PR_NUMBER does not have a merge commit"
+[[ "$RUN_HEAD_SHA" == "$PR_MERGE_SHA" ]] ||
+  fail "workflow run $RUN_ID head SHA ($RUN_HEAD_SHA) is not bound to PR #$PR_NUMBER merge commit ($PR_MERGE_SHA)"
 
 job_names=( "Release Please" "Publish accrue" "Publish accrue_admin" "Publish accrue_portal" )
 job_ids=( "release" "publish-accrue" "publish-accrue-admin" "publish-accrue-portal" )
@@ -110,7 +134,7 @@ job_lines=()
 for i in "${!job_names[@]}"; do
   job_name=${job_names[$i]}
   job_id=${job_ids[$i]}
-  job_json=$(jq -c --arg name "$job_name" '.jobs[] | select(.name == $name)' <<<"$RUN_JSON")
+  job_json=$(jq -c --arg name "$job_name" '[.jobs[] | select(.name == $name)] | sort_by(.startedAt) | last // empty' <<<"$RUN_JSON")
   [[ -n "$job_json" ]] || fail "workflow run $RUN_ID is missing job: $job_name"
   job_conclusion=$(jq -r '.conclusion' <<<"$job_json")
   job_started=$(jq -r '.startedAt' <<<"$job_json")
@@ -160,7 +184,7 @@ for file in \
   "accrue_portal/CHANGELOG.md"; do
   abs="$ROOT_DIR/$file"
   [[ -f "$abs" ]] || fail "release snapshot file missing: $file"
-  sha=$(shasum -a 256 "$abs" | awk '{print $1}')
+  sha=$(sha256_file "$abs")
   snapshot_lines+=( "| $file | $sha |" )
 done
 

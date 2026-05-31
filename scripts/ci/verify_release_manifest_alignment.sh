@@ -24,9 +24,9 @@ m_portal=$(jq -r '.accrue_portal // empty' "$MANIFEST")
 [[ -n "$m_admin" ]] || fail "manifest missing non-empty .accrue_admin version"
 [[ -n "$m_portal" ]] || fail "manifest missing non-empty .accrue_portal version"
 
-mix_accrue=$(sed -n 's/^  @version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue/mix.exs" | head -n 1)
-mix_admin=$(sed -n 's/^  @version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue_admin/mix.exs" | head -n 1)
-mix_portal=$(sed -n 's/^  @version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue_portal/mix.exs" | head -n 1)
+mix_accrue=$(sed -n 's/^[[:space:]]*@version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue/mix.exs" | head -n 1)
+mix_admin=$(sed -n 's/^[[:space:]]*@version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue_admin/mix.exs" | head -n 1)
+mix_portal=$(sed -n 's/^[[:space:]]*@version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue_portal/mix.exs" | head -n 1)
 
 [[ -n "$mix_accrue" ]] || fail "could not parse @version from accrue/mix.exs"
 [[ -n "$mix_admin" ]] || fail "could not parse @version from accrue_admin/mix.exs"
