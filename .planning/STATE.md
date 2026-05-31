@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
-status: verifying
-last_updated: "2026-05-31T14:37:27.351Z"
+status: ready_to_plan
+last_updated: 2026-05-31T14:42:49.214Z
 last_activity: 2026-05-31
 progress:
   total_phases: 5
@@ -11,6 +11,7 @@ progress:
   total_plans: 2
   completed_plans: 2
   percent: 40
+stopped_at: Phase 155 complete (1/1) — ready to discuss Phase 156
 ---
 
 # Project State
@@ -21,13 +22,13 @@ See: `.planning/PROJECT.md` (updated 2026-05-30 after v1.47 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 155 — stripefixtures-polish-telemetry-counters
+**Current focus:** Phase 156 — entitlements gating adopter proof
 
 ## Current Position
 
-Phase: 155 (stripefixtures-polish-telemetry-counters) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
+Phase: 156
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-05-31
 
 ## Milestone Progress
@@ -66,7 +67,7 @@ Last activity: 2026-05-31
 
 **Velocity:**
 
-- Total plans completed: 63 (v1.43) + 2 (Phase 143 standalone)
+- Total plans completed: 64 (v1.43) + 2 (Phase 143 standalone)
 - Average duration: 1m
 - Total execution time: 1m
 

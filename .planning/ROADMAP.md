@@ -177,7 +177,7 @@ Plans:
 | 152. Close v1.46 closure gaps | v1.46 | 3/3 | Complete | 2026-05-30 |
 | 153. Close v1.46 audit trail | v1.46 | 2/2 | Complete | 2026-05-30 |
 | 154. Advisory Cache Core Correctness | v1.47 | 1/1 | Complete   | 2026-05-31 |
-| 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 1/1 | Complete   | 2026-05-31 |
+| 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 1/1 | Complete    | 2026-05-31 |
 | 156. Entitlements Gating Adopter Proof | v1.47 | 0/? | Not started | - |
 | 157. Metered Usage Adopter Proof | v1.47 | 0/? | Not started | - |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 0/? | Not started | - |
