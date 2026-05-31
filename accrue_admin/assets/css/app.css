@@ -181,8 +181,11 @@ button {
 
 .ax-display,
 .ax-kpi-value {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   line-height: 1.2;
+  min-width: 0;
+  width: 100%;
+  max-width: calc(100vw - 2.5rem);
   overflow-wrap: anywhere;
 }
 
@@ -788,6 +791,11 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 @media (min-width: 768px) {
+  .ax-display,
+  .ax-kpi-value {
+    font-size: 1.75rem;
+  }
+
   .ax-detail-drawer {
     inset: 0 0 0 auto;
     width: min(42rem, 100vw);
@@ -951,6 +959,8 @@ a.ax-kpi-card--linked:focus-visible {
   display: grid;
   gap: var(--ax-space-xl);
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Detail stacks inside cards (UX-02) — not page shells; avoids nested ax-page */
@@ -969,8 +979,10 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-page-header {
   display: grid;
   gap: var(--ax-space-sm);
-  max-width: 52rem;
+  width: 100%;
+  max-width: min(52rem, calc(100vw - 2.5rem));
   min-width: 0;
+  box-sizing: border-box;
 }
 
 .ax-card {
