@@ -87,7 +87,7 @@ proof, mounted admin inspection, and a focused verification pass.
 
 1. The fenced `~>` pins below track the **Hex-published** SemVer line for the `@version` pair this branch ships with.
 2. **`path:`** / monorepo installs must keep **`accrue`** and **`accrue_admin`** on the **same three-part `~>`** (lockstep trains).
-3. Pre-1.0 **`~>`** minors may still ship breaking API changes—treat **`mix.lock`** as the production stability boundary, not semver intuition alone.
+3. For the post-1.0 line, treat **`mix.lock`** as the production stability boundary and follow the documented deprecation cycle for breaking changes.
 
 ```elixir
 defp deps do

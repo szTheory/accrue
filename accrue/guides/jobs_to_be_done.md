@@ -1,6 +1,6 @@
 # Jobs to Be Done: A Tour of What You Can Actually Build
 
-**As of:** accrue 1.1.x (v1.38 milestone) · last reviewed 2026-05-22
+**As of:** accrue 1.3.x (v1.48 milestone) · last reviewed 2026-05-31
 
 Most billing docs hand you a wall of functions and let you assemble the picture
 yourself. This guide does the opposite. It walks the **life of a paying
