@@ -163,7 +163,7 @@ Failures on **`host-integration`** start from **`bash scripts/ci/accrue_host_uat
 - **`[host-integration] phase=dev_boot_smoke`** — bounded **`mix phx.server`** boot check.
 - **`[host-integration] phase=browser_playwright`** — headless Playwright gate.
 
-Normative VERIFY-01 detail lives in the host README: [**Proof and verification**](examples/accrue_host/README.md#proof-and-verification).
+Normative VERIFY-01 detail lives in the host README: [**Proof and verification**](../../examples/accrue_host/README.md#proof-and-verification).
 
 ## When package docs verification fails
 

@@ -7,7 +7,7 @@ This matrix is refreshed for the linked `1.0.0` pair: the same merge-blocking ho
 
 ## Public guides handoff
 
-This matrix is a proof mirror. Canonical support-boundary semantics and stable-core policy live in the public guides, especially [`../../accrue/guides/first_hour.md`](../../accrue/guides/first_hour.md), [`../../accrue/guides/jobs_to_be_done.md#scope-and-maturity`](../../accrue/guides/jobs_to_be_done.md#scope-and-maturity), and [`../../accrue/guides/maturity-and-maintenance.md`](../../accrue/guides/maturity-and-maintenance.md). Use this file for adoption-proof coverage and lane realism, not as the policy authority.
+This matrix is a proof mirror. Canonical support-boundary semantics and stable-core policy live in the public guides, especially [`../../../accrue/guides/first_hour.md`](../../../accrue/guides/first_hour.md), [`../../../accrue/guides/jobs_to_be_done.md#scope-and-maturity`](../../../accrue/guides/jobs_to_be_done.md#scope-and-maturity), and [`../../../accrue/guides/maturity-and-maintenance.md`](../../../accrue/guides/maturity-and-maintenance.md). Use this file for adoption-proof coverage and lane realism, not as the policy authority.
 
 ## Layering note (local proof vs merge-blocking CI)
 
@@ -44,7 +44,7 @@ This matrix is a proof mirror. Canonical support-boundary semantics and stable-c
 
 | Concern | Proof | Where |
 |--------|--------|--------|
-| **non-Sigra** mainline: **`phx.gen.auth`** + membership-gated **`Organization`** with **`use Accrue.Billable`** (ORG-05/ORG-06 alignment) | `scripts/ci/verify_adoption_proof_matrix.sh` (runs in **`docs-contracts-shift-left`**) | [`../../../../accrue/guides/organization_billing.md`](../../../../accrue/guides/organization_billing.md) |
+| **non-Sigra** mainline: **`phx.gen.auth`** + membership-gated **`Organization`** with **`use Accrue.Billable`** (ORG-05/ORG-06 alignment) | `scripts/ci/verify_adoption_proof_matrix.sh` (runs in **`docs-contracts-shift-left`**) | [`../../../accrue/guides/organization_billing.md`](../../../accrue/guides/organization_billing.md) |
 
 ### Recipe lanes (advisory by default)
 
@@ -68,7 +68,7 @@ Requires repository secrets; failures do not block merge (`continue-on-error: tr
 - **Planning labels:** Milestone tags like **`v1.16`** under **`.planning/`** are planning artifacts only; they do not substitute for install pins or resolver output.
 - **Demo / optional adapters:** **Sigra** (or similar) in this checked-in host is **host wiring**, not a global production requirement — stay aligned with **`non-Sigra`** ORG-09 framing elsewhere in this file.
 - **Advisory Stripe:** Stripe test mode and scheduled **`live-stripe`**-class jobs remain **advisory** per **`## Advisory: Stripe test mode`** — not merge-blocking for contributors.
-- **First-hour SSOT:** Longer install + verification ordering narrative lives in [`../../../../accrue/guides/first_hour.md`](../../../../accrue/guides/first_hour.md).
+- **First-hour SSOT:** Longer install + verification ordering narrative lives in [`../../../accrue/guides/first_hour.md`](../../../accrue/guides/first_hour.md).
 - **Host SSOT:** Example host setup and VERIFY-01 detail live in [`../README.md`](../README.md).
 
 ## Evaluator narrative
