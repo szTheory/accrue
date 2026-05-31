@@ -35,6 +35,42 @@ defmodule Accrue.Telemetry.MetricsTest do
              end)
     end
 
+    test "includes entitlement summary webhook counters with bounded tags" do
+      defs = M.defaults()
+
+      assert Enum.any?(
+               defs,
+               &(&1.event_name == [:accrue, :webhooks, :malformed_entitlement_summary])
+             )
+
+      assert Enum.any?(
+               defs,
+               &(&1.event_name == [:accrue, :webhooks, :orphan_entitlement_summary])
+             )
+
+      assert malformed =
+               find_metric_by_event(defs, [
+                 :accrue,
+                 :webhooks,
+                 :malformed_entitlement_summary
+               ])
+
+      assert orphan =
+               find_metric_by_event(defs, [
+                 :accrue,
+                 :webhooks,
+                 :orphan_entitlement_summary
+               ])
+
+      assert metric_name_to_string(malformed.name) ==
+               "accrue.webhooks.malformed_entitlement_summary.count"
+
+      assert malformed.tags == [:reason]
+
+      assert metric_name_to_string(orphan.name) ==
+               "accrue.webhooks.orphan_entitlement_summary.count"
+    end
+
     test "includes ops counters for revenue_loss, incomplete_expired, charge_failed" do
       assert has_metric?("accrue.ops.revenue_loss.count")
       assert has_metric?("accrue.ops.incomplete_expired.count")
@@ -52,6 +88,10 @@ defmodule Accrue.Telemetry.MetricsTest do
 
   defp has_metric?(name) do
     Enum.any?(M.defaults(), fn d -> metric_name_to_string(d.name) == name end)
+  end
+
+  defp find_metric_by_event(defs, event_name) do
+    Enum.find(defs, &(&1.event_name == event_name))
   end
 
   defp metric_name_to_string(name) when is_list(name),

@@ -60,6 +60,8 @@ if Code.ensure_loaded?(Telemetry.Metrics) do
         # --- Webhook pipeline ---
         counter("accrue.webhooks.received.count", tags: [:type]),
         counter("accrue.webhooks.dispatched.count", tags: [:status]),
+        counter("accrue.webhooks.malformed_entitlement_summary.count", tags: [:reason]),
+        counter("accrue.webhooks.orphan_entitlement_summary.count"),
         last_value("accrue.webhooks.queue_depth"),
         summary("accrue.webhooks.dispatch.duration",
           unit: {:native, :millisecond}
