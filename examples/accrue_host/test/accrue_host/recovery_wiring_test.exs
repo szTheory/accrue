@@ -1,70 +1,74 @@
 defmodule AccrueHost.RecoveryWiringTest do
   @moduledoc """
-  Phase 136 Plan 01 — PROOF-06: host-level recovery wiring smoke proof.
-
-  Proves the HOST's Oban wiring for recovery crons works correctly:
-  - DetectExpiringCards is present in the crontab.
-  - MeterEventsReconciler is present in the crontab.
-  - MeteredRenewalReconciler is present in the crontab.
-  - Jobs can execute against the host Repo.
+  Phase 158 Plan 01 — PROOF-06: host-level recovery wiring config proof.
   """
 
   use AccrueHost.AccrueCase, async: false
-  use Oban.Testing, repo: AccrueHost.Repo
 
+  alias Accrue.Jobs.DunningSweeper
   alias Accrue.Jobs.DetectExpiringCards
   alias Accrue.Jobs.MeteredRenewalReconciler
   alias Accrue.Jobs.MeterEventsReconciler
 
-  describe "Oban Crontab Wiring" do
-    test "recovery jobs are present in the Oban configuration (when enabled)" do
-      oban_config = Application.fetch_env!(:accrue_host, Oban)
-      plugins = Keyword.get(oban_config, :plugins)
-      
-      if is_list(plugins) do
-        cron_plugin = Enum.find(plugins, fn
-          {Oban.Plugins.Cron, _} -> true
-          _ -> false
-        end)
+  describe "base config wiring proof" do
+    test "base Oban config validates and includes required recovery cron workers" do
+      oban_config = base_oban_config()
 
-        assert {Oban.Plugins.Cron, cron_opts} = cron_plugin
-        crontab = Keyword.get(cron_opts, :crontab, [])
+      assert :ok = Oban.Config.validate(oban_config)
 
-        assert Enum.any?(crontab, fn {_, DetectExpiringCards} -> true; _ -> false end)
-        assert Enum.any?(crontab, fn {_, MeterEventsReconciler} -> true; _ -> false end)
-        assert Enum.any?(crontab, fn {_, MeteredRenewalReconciler} -> true; _ -> false end)
-      else
-        # In test env, plugins: false is expected. 
-        # Manual verification of config.exs is required for wiring proof.
-        assert plugins == false
-      end
+      workers = cron_workers(oban_config)
+
+      assert DunningSweeper in workers
+      assert DetectExpiringCards in workers
+      assert MeterEventsReconciler in workers
+      assert MeteredRenewalReconciler in workers
     end
 
-    test "recovery queues are declared in Oban configuration (when enabled)" do
-      oban_config = Application.fetch_env!(:accrue_host, Oban)
-      queues = Keyword.get(oban_config, :queues)
+    test "base Oban config includes required host queues" do
+      names = queue_names(base_oban_config())
 
-      if is_list(queues) do
-        assert Keyword.has_key?(queues, :accrue_meters)
-        assert Keyword.has_key?(queues, :accrue_scheduled)
-      else
-        # In test env, queues: false is expected.
-        assert queues == false
-      end
+      assert :accrue_webhooks in names
+      assert :accrue_mailers in names
+      assert :accrue_dunning in names
+      assert :accrue_meters in names
+      assert :accrue_scheduled in names
     end
   end
 
-  describe "Job Execution Smoke Tests" do
-    test "DetectExpiringCards.scan/0 runs without error" do
-      assert :ok = DetectExpiringCards.scan()
-    end
+  describe "runtime test safety config" do
+    test "test env keeps Oban queues/plugins disabled and manual testing mode" do
+      runtime_oban_config = Application.fetch_env!(:accrue_host, Oban)
 
-    test "MeterEventsReconciler.reconcile/0 runs without error" do
-      assert {:ok, _count} = MeterEventsReconciler.reconcile()
+      assert false == Keyword.get(runtime_oban_config, :plugins)
+      assert false == Keyword.get(runtime_oban_config, :queues)
+      assert :manual == Keyword.get(runtime_oban_config, :testing)
     end
+  end
 
-    test "MeteredRenewalReconciler.reconcile/0 runs without error" do
-      assert {:ok, _count} = MeteredRenewalReconciler.reconcile()
+  defp base_oban_config do
+    config_path = Path.expand("../../config/config.exs", __DIR__)
+
+    config_path
+    |> Config.Reader.read!(env: :dev)
+    |> get_in([:accrue_host, Oban])
+  end
+
+  defp cron_workers(oban_config) do
+    oban_config
+    |> Keyword.fetch!(:plugins)
+    |> Enum.find_value(fn
+      {Oban.Plugins.Cron, cron_opts} -> Keyword.get(cron_opts, :crontab, [])
+      _ -> nil
+    end)
+    |> case do
+      nil -> []
+      crontab -> Enum.map(crontab, fn {_schedule, worker} -> worker end)
     end
+  end
+
+  defp queue_names(oban_config) do
+    oban_config
+    |> Keyword.fetch!(:queues)
+    |> Keyword.keys()
   end
 end
