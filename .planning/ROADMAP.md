@@ -4,16 +4,17 @@
 
 - ✅ **v1.46 Maintenance & Closure** — Phases 151-153 (shipped 2026-05-30) — [archive](milestones/v1.46-ROADMAP.md)
 - ✅ **v1.47 ENT-10 Polish + Adopter-Proof Completeness** — Phases 154-158 (shipped 2026-05-31) — [archive](milestones/v1.47-ROADMAP.md)
-- 📋 **Recommended next milestone: Release Readiness + Stable Core Posture** — not started; publish post-1.3.0 v1.47 work, harden release truth, then pause broad feature work
+- 🔄 **v1.48 Release Readiness + Stable Core Posture** — Phases 159-161
 
 ## Planning Doctrine
 
-Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31. The default next milestone should be release-readiness or maintenance, not feature expansion.
+Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31. This milestone publishes the post-1.3.0 / v1.47 correctness work, makes that posture clear to adopters, closes stale planning anchors, and records a pause rule for broad feature work.
 
 Future feature milestones require at least one of:
 - a concrete adopter failure mode,
 - a correctness/security/data-loss risk,
 - a repeated support issue,
+- an operational release/support failure,
 - or an explicit strategy change recorded in `.planning/PROJECT.md` / `.planning/STRATEGY.md`.
 
 Stop rule: if proposed work is polish-only with a documented workaround and no release/adopter failure mode, record it as deferred with a revisit trigger and do not create a milestone for it.
@@ -44,6 +45,94 @@ Full details: [v1.47 roadmap archive](milestones/v1.47-ROADMAP.md)
 
 </details>
 
+<details open>
+<summary>🔄 v1.48 Release Readiness + Stable Core Posture (Phases 159-161) — READY</summary>
+
+### Phase 159: Linked Release Readiness + Publish Proof
+
+**Goal:** Verify and publish the next linked release line after `1.3.0` with one coherent release-truth artifact across all three packages.
+**Depends on:** Phase 158
+**Requirements:** REL-01, REL-02, REL-03
+**Success Criteria** (what must be TRUE):
+  1. Package versions, changelog entries, Release Please state, release notes, tags, and runbook instructions agree across `accrue`, `accrue_admin`, and `accrue_portal`.
+  2. The deterministic release gate is run and documented for tests, docs, dialyzer, credo, package docs, support-matrix drift, adoption proof, and host integration checks.
+  3. The linked Hex release is published in documented order and canonical proof is recorded in planning, changelogs, and release notes.
+**Plans:** 1 plan
+
+Plans:
+- [ ] 159-01-PLAN.md — Audit release truth, run deterministic gates, publish the linked package line, and record canonical proof
+
+### Phase 160: Stable-Core Public Positioning
+
+**Goal:** Make the stable-core / demand-driven expansion posture explicit and consistent across public docs, package READMEs, support boundaries, release notes, and planning mirrors.
+**Depends on:** Phase 159
+**Requirements:** POS-01, POS-02, POS-03
+**Success Criteria** (what must be TRUE):
+  1. Public package docs and READMEs explain that Accrue is stable-core and demand-driven, not broad feature-chasing.
+  2. Adopter-facing docs show the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without requiring planning context.
+  3. Release notes, package docs, support matrix, adoption proof docs, and planning mirrors describe the same stable-core posture.
+**Plans:** 1 plan
+
+Plans:
+- [ ] 160-01-PLAN.md — Align public docs, package docs, support matrix, release notes, and planning mirrors around stable-core positioning
+
+### Phase 161: Backlog Anchor Closure + Pause Rule
+
+**Goal:** Retire stale roadmap pressure, classify remaining seeds/deferred ideas with revisit triggers, and close the milestone with an explicit pause rule for broad feature work.
+**Depends on:** Phase 160
+**Requirements:** BAK-01, BAK-02, PAU-01
+**Success Criteria** (what must be TRUE):
+  1. v1.17 friction anchors, resolved seeds, dormant seeds, and deferred ideas are archived, reclassified, or given explicit revisit triggers.
+  2. A planning hygiene proof shows no active roadmap pointer suggests broad feature work is currently active.
+  3. PROJECT/STATE/ROADMAP closeout text records that broad feature milestones remain closed unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+**Plans:** 1 plan
+
+Plans:
+- [ ] 161-01-PLAN.md — Close stale backlog anchors, record revisit triggers, and write the post-v1.48 pause rule
+
+</details>
+
+## Phase Details
+
+### Phase 159: Linked Release Readiness + Publish Proof
+**Goal:** Verify and publish the next linked release line after `1.3.0` with one coherent release-truth artifact across all three packages.
+**Depends on:** Phase 158
+**Requirements:** REL-01, REL-02, REL-03
+**Success Criteria** (what must be TRUE):
+  1. Package versions, changelog entries, Release Please state, release notes, tags, and runbook instructions agree across `accrue`, `accrue_admin`, and `accrue_portal`.
+  2. The deterministic release gate is run and documented for tests, docs, dialyzer, credo, package docs, support-matrix drift, adoption proof, and host integration checks.
+  3. The linked Hex release is published in documented order and canonical proof is recorded in planning, changelogs, and release notes.
+**Plans:** 1 plan
+
+Plans:
+- [ ] 159-01-PLAN.md — Audit release truth, run deterministic gates, publish the linked package line, and record canonical proof
+
+### Phase 160: Stable-Core Public Positioning
+**Goal:** Make the stable-core / demand-driven expansion posture explicit and consistent across public docs, package READMEs, support boundaries, release notes, and planning mirrors.
+**Depends on:** Phase 159
+**Requirements:** POS-01, POS-02, POS-03
+**Success Criteria** (what must be TRUE):
+  1. Public package docs and READMEs explain that Accrue is stable-core and demand-driven, not broad feature-chasing.
+  2. Adopter-facing docs show the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without requiring planning context.
+  3. Release notes, package docs, support matrix, adoption proof docs, and planning mirrors describe the same stable-core posture.
+**Plans:** 1 plan
+
+Plans:
+- [ ] 160-01-PLAN.md — Align public docs, package docs, support matrix, release notes, and planning mirrors around stable-core positioning
+
+### Phase 161: Backlog Anchor Closure + Pause Rule
+**Goal:** Retire stale roadmap pressure, classify remaining seeds/deferred ideas with revisit triggers, and close the milestone with an explicit pause rule for broad feature work.
+**Depends on:** Phase 160
+**Requirements:** BAK-01, BAK-02, PAU-01
+**Success Criteria** (what must be TRUE):
+  1. v1.17 friction anchors, resolved seeds, dormant seeds, and deferred ideas are archived, reclassified, or given explicit revisit triggers.
+  2. A planning hygiene proof shows no active roadmap pointer suggests broad feature work is currently active.
+  3. PROJECT/STATE/ROADMAP closeout text records that broad feature milestones remain closed unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+**Plans:** 1 plan
+
+Plans:
+- [ ] 161-01-PLAN.md — Close stale backlog anchors, record revisit triggers, and write the post-v1.48 pause rule
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -56,6 +145,9 @@ Full details: [v1.47 roadmap archive](milestones/v1.47-ROADMAP.md)
 | 156. Entitlements Gating Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 157. Metered Usage Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
+| 159. Linked Release Readiness + Publish Proof | v1.48 | 0/1 | Ready | — |
+| 160. Stable-Core Public Positioning | v1.48 | 0/1 | Pending | — |
+| 161. Backlog Anchor Closure + Pause Rule | v1.48 | 0/1 | Pending | — |
 
 ## Historical Backlog Anchors (not active scope)
 

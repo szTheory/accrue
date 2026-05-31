@@ -6,9 +6,9 @@ status: planning
 last_updated: "2026-05-31T17:30:37.715Z"
 last_activity: 2026-05-31
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
   percent: 0
 ---
@@ -17,20 +17,28 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-31 after v1.47 milestone close)
+See: `.planning/PROJECT.md` (updated 2026-05-31 after v1.48 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Planning next milestone
+**Current focus:** v1.48 release readiness and stable-core posture
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 159 — Linked Release Readiness + Publish Proof
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-31 — Milestone v1.48 started
+Status: Roadmap ready; next step is phase planning
+Last activity: 2026-05-31 — Milestone v1.48 roadmap created
 
 ## Milestone Progress
+
+### v1.48 Phase Summary
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 159 | Linked Release Readiness + Publish Proof | REL-01, REL-02, REL-03 | Ready |
+| 160 | Stable-Core Public Positioning | POS-01, POS-02, POS-03 | Pending |
+| 161 | Backlog Anchor Closure + Pause Rule | BAK-01, BAK-02, PAU-01 | Pending |
 
 ### v1.47 Phase Summary
 
@@ -113,12 +121,14 @@ Last activity: 2026-05-31 — Milestone v1.48 started
 
 - v1.47 roadmap created 2026-05-30: Phases 154–158
 - v1.47 shipped and archived 2026-05-31: Phases 154–158, 5 plans, 11 requirements satisfied
+- v1.48 roadmap created 2026-05-31: Phases 159–161
 
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 - **2026-05-31:** Stable-core posture recorded. Accrue is considered done enough for its declared scope; future milestones should default to release-readiness, maintenance, support-contract hardening, or explicitly justified strategic expansion. New feature work now requires a concrete adopter failure mode, correctness/security risk, repeated support issue, or explicit strategy change.
+- **2026-05-31:** v1.48 roadmap created. Scope: linked release readiness/publish proof, stable-core public positioning, stale backlog anchor closure, and a post-release pause rule.
 - **2026-05-31:** Recommended next milestone is Release Readiness + Stable Core Posture: publish the post-1.3.0 v1.47 correctness/adopter-proof work, clarify stable-core positioning, archive stale backlog anchors, and then pause broad feature work.
 - **2026-05-30:** v1.47 started. Scope: ENT-10 advisory cache correctness (WR-05 + IN-01..04) and three adopter-proof tracks (entitlements/metering/Oban crons in examples/accrue_host).
 - **2026-05-28:** Milestone Next-Step Assessment complete for v1.45. Selected Multi-channel Dunning (In-App Banners) to complete the dunning story without adding compliance risks.
@@ -164,5 +174,5 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Start a narrow release-readiness milestone, likely `v1.48 — Release Readiness + Stable Core Posture`.
-- Do not start another feature milestone unless it satisfies the Milestone Intake Rules above.
+- Run `$gsd-discuss-phase 159` to gather context for linked release readiness and publish proof.
+- Also available: `$gsd-plan-phase 159` to plan Phase 159 directly.

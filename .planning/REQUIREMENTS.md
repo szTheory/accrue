@@ -2,7 +2,7 @@
 
 **Defined:** 2026-05-31
 **Core Value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version.
-**Status:** Draft pending confirmation
+**Status:** Active
 
 ## v1.48 Requirements
 
@@ -49,21 +49,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-01 | TBD | Pending |
-| REL-02 | TBD | Pending |
-| REL-03 | TBD | Pending |
-| POS-01 | TBD | Pending |
-| POS-02 | TBD | Pending |
-| POS-03 | TBD | Pending |
-| BAK-01 | TBD | Pending |
-| BAK-02 | TBD | Pending |
-| PAU-01 | TBD | Pending |
+| REL-01 | Phase 159 | Pending |
+| REL-02 | Phase 159 | Pending |
+| REL-03 | Phase 159 | Pending |
+| POS-01 | Phase 160 | Pending |
+| POS-02 | Phase 160 | Pending |
+| POS-03 | Phase 160 | Pending |
+| BAK-01 | Phase 161 | Pending |
+| BAK-02 | Phase 161 | Pending |
+| PAU-01 | Phase 161 | Pending |
 
 **Coverage:**
 - v1.48 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 after v1.48 requirements draft*
+*Last updated: 2026-05-31 after v1.48 roadmap creation*
