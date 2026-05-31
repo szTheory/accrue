@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
-status: ready_to_plan
-last_updated: 2026-05-31T16:08:08.968Z
+status: planning
+last_updated: "2026-05-31T16:23:48.798Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 5
@@ -11,7 +11,6 @@ progress:
   total_plans: 4
   completed_plans: 4
   percent: 80
-stopped_at: Phase 157 complete (1/1) — ready to discuss Phase 158
 ---
 
 # Project State
@@ -146,9 +145,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-31T16:01:41.408Z
-Stopped at: Completed 157-01-PLAN.md
-Resume file: None
+Last session: 2026-05-31T16:23:48.795Z
+Stopped at: Phase 158 context gathered
+Resume file: .planning/phases/158-oban-cron-wiring-adopter-proof/158-CONTEXT.md
 
 ## Operator Next Steps
 
