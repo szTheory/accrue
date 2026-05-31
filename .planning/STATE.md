@@ -38,7 +38,7 @@ Last activity: 2026-05-31
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 159 | Linked Release Readiness + Publish Proof | REL-01, REL-02, REL-03 | Ready |
-| 160 | Stable-Core Public Positioning | POS-01, POS-02, POS-03 | Pending |
+| 160 | Stable-Core Public Positioning | POS-01, POS-02, POS-03 | Complete |
 | 161 | Backlog Anchor Closure + Pause Rule | BAK-01, BAK-02, PAU-01 | Pending |
 
 ### v1.47 Phase Summary
