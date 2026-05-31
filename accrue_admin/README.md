@@ -65,6 +65,14 @@ The first-time host setup path for the core package lives in the Accrue First Ho
 
 - <https://hexdocs.pm/accrue/first_hour.html>
 
+### Ownership boundary (thin mirror)
+
+- `accrue_admin` owns mounted operator UI routes/components and package-level admin configuration.
+- Host apps own Repo wiring, migrations, Oban supervision, auth/session, routing policy, runtime secrets, and app-domain membership rules.
+- Canonical setup sequence and support-boundary semantics live in `accrue/guides/first_hour.md`.
+- Stable-core posture and maturity policy live in `accrue/guides/maturity-and-maintenance.md`.
+- Full billing-loop scope lives in `accrue/guides/jobs_to_be_done.md#scope-and-maturity`.
+
 The canonical local demo path lives in the checked-in host app:
 
 - `examples/accrue_host/README.md`

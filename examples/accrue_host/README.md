@@ -119,6 +119,10 @@ This checked-in proof surface is the linked `accrue` / `accrue_admin` `1.0.0` re
 
 For **`Accrue.Billing.create_checkout_session/2`** and **`Accrue.Billing.create_billing_portal_session/2`**, the teaching path and telemetry tuples live in [**First Hour**](../../accrue/guides/first_hour.md); span anchors and ExUnit SSOT paths are under [**#observability**](#observability).
 
+## Public guides handoff
+
+This host README stays proof-lane focused. Canonical semantics, support boundaries, and stable-core posture live in public guides: [First Hour](../../accrue/guides/first_hour.md), [Jobs to Be Done](../../accrue/guides/jobs_to_be_done.md#scope-and-maturity), and [Maturity and maintenance](../../accrue/guides/maturity-and-maintenance.md). Treat this file as adoption proof vocabulary, not policy authority.
+
 ### Verification modes
 
 - `mix verify` is the focused local proof suite for installer boundary,

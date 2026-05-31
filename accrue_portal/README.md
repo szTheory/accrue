@@ -52,3 +52,11 @@ This README stays concise by design. Use
 [`accrue/guides/braintree-local-portal.md`](../accrue/guides/braintree-local-portal.md)
 for the deeper mounted-path contract, failure semantics, sibling scope
 expectations, and the hand-rolled escape hatch.
+
+## Ownership boundary (thin mirror)
+
+- `accrue_portal` owns mounted self-serve billing UI plus package-local checkout/portal flows.
+- Host apps own Repo wiring, migrations, Oban supervision, auth/session continuity, routing policy, runtime secrets, and app-domain membership policy.
+- Canonical setup and mount order live in [`accrue/guides/first_hour.md`](../accrue/guides/first_hour.md).
+- Scope and maturity framing live in [`accrue/guides/jobs_to_be_done.md#scope-and-maturity`](../accrue/guides/jobs_to_be_done.md#scope-and-maturity).
+- Stable-core posture policy lives in [`accrue/guides/maturity-and-maintenance.md`](../accrue/guides/maturity-and-maintenance.md).
