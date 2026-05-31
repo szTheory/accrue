@@ -207,12 +207,12 @@ Source: `ci.yml` and script contracts. [VERIFIED: codebase grep]
 |---|-------|---------|---------------|
 | A1 | `release-please@17.6.0` pinned in workflow remains acceptable for this phase without version bump. [ASSUMED] | Standard Stack | Low; plan may need tiny update if maintainers require latest action/CLI sync. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. Should `verify_release_manifest_alignment.sh` be expanded to include `accrue_portal` in this phase, or replaced by a new three-package alignment script?
+1. RESOLVED: Expand `verify_release_manifest_alignment.sh` in place to include first-class `accrue_portal` coverage rather than adding a second three-package alignment script.
    - What we know: current script checks only `accrue` + `accrue_admin`. [VERIFIED: codebase grep]
-   - What's unclear: whether maintainers want strict in-place edit vs additive new script.
-   - Recommendation: lock this in plan task 1 as an explicit decision checkpoint.
+   - Why this resolution: CI and existing runbooks already depend on `verify_release_manifest_alignment.sh` as the release-manifest source-of-truth gate, so changing it in place preserves the existing gate name while closing the two-package drift risk.
+   - Plan contract: Task 1 of `159-01-PLAN.md` expands this script to parse `.accrue_portal`, read `accrue_portal/mix.exs`, enforce one lockstep version across all three packages, and emit an `OK:` line naming `accrue`, `accrue_admin`, and `accrue_portal`.
 
 ## Environment Availability
 
@@ -250,7 +250,7 @@ Missing dependencies with no fallback:
 
 ### Wave 0 Gaps
 - [ ] `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` scaffold with fixed schema for script append.
-- [ ] Decision task on expanding `verify_release_manifest_alignment.sh` to three-package coverage.
+- [ ] Expand `verify_release_manifest_alignment.sh` in place to three-package coverage for `accrue`, `accrue_admin`, and `accrue_portal`.
 
 ## Security Domain
 
