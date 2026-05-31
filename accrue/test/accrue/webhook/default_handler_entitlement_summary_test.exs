@@ -457,17 +457,17 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
 
       raw =
         StripeFixtures.entitlement_summary_event(
-          [customer: customer.processor_id],
+          [customer: customer.processor_id, omit_livemode: true],
           %{"id" => "evt_pol02_second", "created" => DateTime.to_unix(ts_second)}
         )
 
-      # Strip the livemode key from the summary object so it is absent (not nil — absent).
-      event_without_livemode = update_in(raw, ["data", "object"], &Map.delete(&1, "livemode"))
+      # The fixture models the key as absent (not nil — absent).
+      refute Map.has_key?(raw["data"]["object"], "livemode")
 
       # Before POL-02 fix: get(obj, :livemode) returns nil when key absent → livemode overwritten with nil.
       # After fix: nil incoming + non-nil row → carry forward row.livemode (true).
       assert {:ok, %EntitlementSummary{} = saved} =
-               Accrue.Webhook.DefaultHandler.handle(event_without_livemode)
+               Accrue.Webhook.DefaultHandler.handle(raw)
 
       assert saved.livemode == true
     end

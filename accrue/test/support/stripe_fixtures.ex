@@ -2,6 +2,12 @@ defmodule Accrue.Test.StripeFixtures do
   @moduledoc """
   Canned Stripe API response payloads for Accrue tests.
 
+  This module lives under `test/support` as repository-local test support.
+  It is not part of the published Hex package, and it is not part of
+  Accrue's runtime or public support contract. Applications that want
+  similar fixtures should copy the needed payload shapes into their own
+  test support, or inspect this repository directly while iterating.
+
   Each function returns a plain map that looks like what the Stripe API
   would send on the wire: string keys, Unix-seconds timestamps, the
   `"object"` discriminator. Every fixture accepts an `overrides` map so
@@ -412,6 +418,8 @@ defmodule Accrue.Test.StripeFixtures do
     * `:has_more` — truncation flag mapping to `entitlements.has_more`
       (default `false`)
     * `:livemode` — default `false`
+    * `:omit_livemode` — when `true`, omits the summary object's
+      `"livemode"` key entirely and takes precedence over `:livemode`
     * `:url` — the deferred-1.2 pagination handle in `entitlements.url`
     * `:created` — event-envelope `created` (Unix seconds)
     * `:id` — event-envelope id (the `evt_...`, NOT an object id)
@@ -424,6 +432,7 @@ defmodule Accrue.Test.StripeFixtures do
 
     customer = Map.get(opts, :customer, "cus_test_" <> rand())
     livemode = Map.get(opts, :livemode, false)
+    omit_livemode = Map.get(opts, :omit_livemode, false)
     has_more = Map.get(opts, :has_more, false)
     url = Map.get(opts, :url, "/v1/customers/#{customer}/entitlements")
 
@@ -438,17 +447,19 @@ defmodule Accrue.Test.StripeFixtures do
 
     # The summary object intentionally has NO top-level "id" (A4): identity
     # is the customer. Inline list capped at 10 inline by Stripe.
-    summary_object = %{
-      "object" => "entitlements.active_entitlement_summary",
-      "customer" => customer,
-      "livemode" => livemode,
-      "entitlements" => %{
-        "object" => "list",
-        "data" => Enum.map(entitlements, &normalize_entitlement/1),
-        "has_more" => has_more,
-        "url" => url
+    summary_object =
+      %{
+        "object" => "entitlements.active_entitlement_summary",
+        "customer" => customer,
+        "livemode" => livemode,
+        "entitlements" => %{
+          "object" => "list",
+          "data" => Enum.map(entitlements, &normalize_entitlement/1),
+          "has_more" => has_more,
+          "url" => url
+        }
       }
-    }
+      |> maybe_delete("livemode", omit_livemode)
 
     envelope_overrides =
       %{}
@@ -469,6 +480,9 @@ defmodule Accrue.Test.StripeFixtures do
 
   defp maybe_put(map, _key, nil), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
+
+  defp maybe_delete(map, key, true), do: Map.delete(map, key)
+  defp maybe_delete(map, _key, _false), do: map
 
   # --- Phase 5 Connect fixtures --------------------------------------
 
