@@ -557,7 +557,8 @@ defmodule Accrue.Webhook.DefaultHandler do
                 customer,
                 row,
                 entitlements,
-                data
+                data,
+                processor
               )
           end
 
@@ -576,7 +577,17 @@ defmodule Accrue.Webhook.DefaultHandler do
     end)
   end
 
-  defp write_entitlement_summary(evt_id, evt_ts, obj, cus_id, customer, row, entitlements, data) do
+  defp write_entitlement_summary(
+         evt_id,
+         evt_ts,
+         obj,
+         cus_id,
+         customer,
+         row,
+         entitlements,
+         data,
+         processor
+       ) do
     has_more = get(entitlements, :has_more) == true
     entitlement_count = length(data)
     new_pairs = entitlement_pairs(data)
@@ -592,8 +603,8 @@ defmodule Accrue.Webhook.DefaultHandler do
       %{
         customer_id: customer.id,
         stripe_customer_id: cus_id,
-        processor: processor_name(),
-        livemode: get(obj, :livemode),
+        processor: to_string(processor),
+        livemode: livemode_for_upsert(get(obj, :livemode), row),
         entitlement_count: entitlement_count,
         truncated: has_more,
         synced_at: synced_at_from_event(evt_ts),
@@ -608,23 +619,40 @@ defmodule Accrue.Webhook.DefaultHandler do
     }
 
     Accrue.Telemetry.span([:accrue, :entitlements, :sync], metadata, fn ->
-      with {:ok, saved} <- upsert_entitlement_summary(row, attrs),
-           {:ok, _} <- maybe_record_summary_event(material?, saved, evt_id) do
-        :telemetry.execute(
-          [:accrue, :entitlements, :summary_synced],
-          %{count: 1, entitlement_count: entitlement_count},
-          Map.put(metadata, :result, if(material?, do: :written, else: :unchanged))
-        )
-
-        if has_more do
-          Accrue.Telemetry.Ops.emit(
-            :entitlement_summary_truncated,
-            %{count: 1},
-            %{customer_id: customer.id}
+      case upsert_entitlement_summary(row, attrs) do
+        {:ok, :stale} ->
+          # ADV-03: DB-level on_conflict_where guard rejected the write (stale).
+          # Emit result: :unchanged telemetry and return {:ok, :stale} without
+          # calling maybe_record_summary_event/3.
+          :telemetry.execute(
+            [:accrue, :entitlements, :summary_synced],
+            %{count: 1, entitlement_count: entitlement_count},
+            Map.put(metadata, :result, :unchanged)
           )
-        end
 
-        {:ok, saved}
+          {:ok, :stale}
+
+        {:ok, saved} ->
+          with {:ok, _} <- maybe_record_summary_event(material?, saved, evt_id) do
+            :telemetry.execute(
+              [:accrue, :entitlements, :summary_synced],
+              %{count: 1, entitlement_count: entitlement_count},
+              Map.put(metadata, :result, if(material?, do: :written, else: :unchanged))
+            )
+
+            if has_more do
+              Accrue.Telemetry.Ops.emit(
+                :entitlement_summary_truncated,
+                %{count: 1},
+                %{customer_id: customer.id}
+              )
+            end
+
+            {:ok, saved}
+          end
+
+        error ->
+          error
       end
     end)
   end
@@ -669,21 +697,54 @@ defmodule Accrue.Webhook.DefaultHandler do
   defp upsert_entitlement_summary(_row, attrs) do
     import Ecto.Query
 
-    # WR-05: move from optimistic_lock with Repo.update to a DB-level atomic
-    # upsert. This prevents Ecto.StaleEntryError during concurrent deliveries
-    # for the same customer. The on_conflict_where clause enforces the
-    # skip-stale watermark at the DB level (D-06).
+    # WR-05: DB-level atomic upsert with a monotonic watermark guard.
+    #
+    # ADV-01: `on_conflict_where` is NOT a valid Ecto option — it is silently
+    # ignored. The watermark guard must be expressed as an Ecto Query passed to
+    # `on_conflict:`, which generates `ON CONFLICT ... DO UPDATE SET ... WHERE`.
+    # This also removes the need for `optimistic_lock` in force_changeset/2 —
+    # OCC is incompatible with upsert paths.
+    #
+    # ADV-02: The guard is NULL-safe: `EXCLUDED.last_stripe_event_ts IS NULL`
+    # covers the case where the incoming attrs carry no watermark (nil). Without
+    # this, `NULL < some_ts` evaluates to SQL NULL (falsy), silently no-oping
+    # first-ever-watermark writes.
+    #
+    # ADV-03: When the guard is false (DB-level stale write), Postgres returns
+    # 0 rows from RETURNING, which Ecto surfaces as Ecto.StaleEntryError.
+    # The rescue below converts this to {:ok, :stale} so the worker does not
+    # crash, and the caller emits result: :unchanged telemetry.
+    conflict_query =
+      from(e in EntitlementSummary,
+        where:
+          fragment("EXCLUDED.last_stripe_event_ts IS NULL") or
+            e.last_stripe_event_ts < fragment("EXCLUDED.last_stripe_event_ts"),
+        update: [
+          set: [
+            processor: fragment("EXCLUDED.processor"),
+            stripe_customer_id: fragment("EXCLUDED.stripe_customer_id"),
+            livemode: fragment("EXCLUDED.livemode"),
+            entitlement_count: fragment("EXCLUDED.entitlement_count"),
+            truncated: fragment("EXCLUDED.truncated"),
+            data: fragment("EXCLUDED.data"),
+            synced_at: fragment("EXCLUDED.synced_at"),
+            last_stripe_event_ts: fragment("EXCLUDED.last_stripe_event_ts"),
+            last_stripe_event_id: fragment("EXCLUDED.last_stripe_event_id"),
+            updated_at: fragment("EXCLUDED.updated_at")
+          ]
+        ]
+      )
+
     %EntitlementSummary{}
     |> EntitlementSummary.force_changeset(attrs)
     |> Repo.insert(
       returning: true,
       conflict_target: :customer_id,
-      on_conflict: {:replace_all_except, [:id, :inserted_at, :customer_id]},
-      on_conflict_where:
-        from(e in EntitlementSummary,
-          where: e.last_stripe_event_ts < fragment("EXCLUDED.last_stripe_event_ts")
-        )
+      on_conflict: conflict_query
     )
+  rescue
+    # ADV-03: rescue Ecto.StaleEntryError from the DB-level guard firing.
+    Ecto.StaleEntryError -> {:ok, :stale}
   end
 
   defp synced_at_from_event(%DateTime{} = evt_ts), do: evt_ts
@@ -708,6 +769,17 @@ defmodule Accrue.Webhook.DefaultHandler do
       last_stripe_event_id: row.last_stripe_event_id
     })
   end
+
+  # POL-02: nil-guard for livemode carry-forward. Mirrors the
+  # stamp_summary_watermark/4 pattern for timestamps.
+  # When the incoming event's livemode key is absent (nil) and a prior row
+  # exists with a known livemode value, carry the prior value forward rather
+  # than overwriting with nil. On a first-ever write (no prior row), livemode
+  # stays nil if the key is absent — acceptable.
+  defp livemode_for_upsert(nil, %EntitlementSummary{livemode: prior}) when not is_nil(prior),
+    do: prior
+
+  defp livemode_for_upsert(incoming, _row), do: incoming
 
   defp emit_summary_malformed(evt_id, reason) do
     :telemetry.execute(

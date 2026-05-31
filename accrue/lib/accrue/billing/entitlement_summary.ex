@@ -67,7 +67,7 @@ defmodule Accrue.Billing.EntitlementSummary do
 
   @cast_fields ~w[
     processor customer_id stripe_customer_id livemode entitlement_count
-    truncated data synced_at lock_version
+    truncated data synced_at
     last_stripe_event_ts last_stripe_event_id
   ]a
 
@@ -75,14 +75,22 @@ defmodule Accrue.Billing.EntitlementSummary do
   Webhook-path changeset. Stripe is canonical for entitlement-summary
   state; this path skips any status allowlist (there is none) so
   out-of-order events can settle arbitrary state without validation
-  failing. Carries the optimistic lock, the one-per-customer unique
-  constraint, and the customer foreign-key constraint.
+  failing. Carries the one-per-customer unique constraint and the
+  customer foreign-key constraint.
+
+  ADV-01: `optimistic_lock/1` is intentionally absent. The DB-level
+  `ON CONFLICT DO UPDATE WHERE` in `upsert_entitlement_summary/2` is the
+  sole concurrency guard; mixing OCC with an upsert `on_conflict_where`
+  causes Ecto to suppress the WHERE clause, silently bypassing the
+  monotonicity guard under concurrent delivery. The `lock_version` column
+  stays in the schema (no migration required) but is excluded from
+  `@cast_fields` so the upsert's `{:replace_all_except, [...]}` does not
+  overwrite it.
   """
   @spec force_changeset(%__MODULE__{} | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
   def force_changeset(summary_or_changeset, attrs \\ %{}) do
     summary_or_changeset
     |> cast(attrs, @cast_fields)
-    |> optimistic_lock(:lock_version)
     |> unique_constraint(:customer_id)
     |> foreign_key_constraint(:customer_id)
   end

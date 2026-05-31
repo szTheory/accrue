@@ -13,7 +13,8 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
     * **stale-skip (`:lt`)** — an older event (strict `:lt` on the watermark)
       is skipped and emits `[:accrue, :webhooks, :stale_event]` with
       `object_type: :entitlement_summary`; no clobber.
-    * **tie (`:eq`)** — equal timestamps proceed (no skip).
+    * **tie (`:eq`)** — equal timestamps pass the pre-check, then the DB
+      monotonicity guard treats them as stale and leaves the row unchanged.
     * **orphan customer** — customer-not-found returns `{:ok, :deferred}` and
       emits `[:accrue, :webhooks, :orphan_entitlement_summary]`, never raises,
       never creates a customer, writes no row.
@@ -184,7 +185,9 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
       assert unchanged.last_stripe_event_id == "evt_new"
     end
 
-    test "tie on equal timestamps processes the event (no skip)", %{customer: customer} do
+    test "tie on equal timestamps reaches the DB gate and leaves the row unchanged", %{
+      customer: customer
+    } do
       ts = DateTime.truncate(Accrue.Clock.utc_now(), :second)
 
       {:ok, _} =
@@ -204,9 +207,9 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
           %{"id" => "evt_b", "created" => DateTime.to_unix(ts)}
         )
 
-      assert {:ok, %EntitlementSummary{}} = Accrue.Webhook.DefaultHandler.handle(equal_event)
+      assert {:ok, :stale} = Accrue.Webhook.DefaultHandler.handle(equal_event)
       updated = Repo.get_by(EntitlementSummary, customer_id: customer.id)
-      assert updated.last_stripe_event_id == "evt_b"
+      assert updated.last_stripe_event_id == "evt_a"
     end
 
     test "orphan customer -> {:ok, :deferred} + orphan telemetry, no raise, no row" do
@@ -412,7 +415,9 @@ defmodule Accrue.Webhook.DefaultHandlerEntitlementSummaryTest do
       event =
         StripeFixtures.entitlement_summary_event(
           customer: customer.processor_id,
-          entitlements: [%{"id" => "ent_pol01", "feature" => "feat_pol01", "lookup_key" => "pol01"}]
+          entitlements: [
+            %{"id" => "ent_pol01", "feature" => "feat_pol01", "lookup_key" => "pol01"}
+          ]
         )
 
       assert {:ok, %EntitlementSummary{} = saved} = Accrue.Webhook.DefaultHandler.handle(event)
