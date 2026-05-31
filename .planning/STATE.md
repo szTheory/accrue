@@ -118,6 +118,8 @@ Last activity: 2026-05-31 — Milestone v1.47 completed and archived
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
+- **2026-05-31:** Stable-core posture recorded. Accrue is considered done enough for its declared scope; future milestones should default to release-readiness, maintenance, support-contract hardening, or explicitly justified strategic expansion. New feature work now requires a concrete adopter failure mode, correctness/security risk, repeated support issue, or explicit strategy change.
+- **2026-05-31:** Recommended next milestone is Release Readiness + Stable Core Posture: publish the post-1.3.0 v1.47 correctness/adopter-proof work, clarify stable-core positioning, archive stale backlog anchors, and then pause broad feature work.
 - **2026-05-30:** v1.47 started. Scope: ENT-10 advisory cache correctness (WR-05 + IN-01..04) and three adopter-proof tracks (entitlements/metering/Oban crons in examples/accrue_host).
 - **2026-05-28:** Milestone Next-Step Assessment complete for v1.45. Selected Multi-channel Dunning (In-App Banners) to complete the dunning story without adding compliance risks.
 - **2026-05-27:** Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). v1.44 selected to prove the v1.40 dunning engine's ROI to adopters via the recovered-revenue dashboard.
@@ -131,6 +133,13 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - None open.
+
+### Milestone Intake Rules
+
+- Default to maintenance/release-readiness unless new work has a sourced adopter, correctness, security, operational, or strategic reason.
+- Do not create a milestone for polish-only work with a documented workaround.
+- Any processor-surface change must update runtime behavior, support matrix, docs, examples/verifiers, and release notes together.
+- Broad finance/accounting, merchant-of-record, marketplace-payout, and processor-breadth expansions remain non-goals unless PROJECT/STRATEGY explicitly reopen them.
 
 ## Deferred Items
 
@@ -155,4 +164,5 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with `$gsd-new-milestone`.
+- Start a narrow release-readiness milestone, likely `v1.48 — Release Readiness + Stable Core Posture`.
+- Do not start another feature milestone unless it satisfies the Milestone Intake Rules above.

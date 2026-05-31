@@ -71,3 +71,36 @@ The value curve is now practically horizontal for new feature development. Accru
 ## 8. Shift-Left Applied
 
 No new auto-applied configuration changes were made as the current `.planning/config.json` already heavily leverages parallelization, research, and rigorous gating mechanisms. The `yolo` mode is currently active, and the default behavior aligns perfectly with the ongoing intake-gated maintenance phase.
+
+---
+
+## 2026-05-31 Refresh: Stable Core / Demand-Driven Expansion
+
+**Trigger:** After v1.47 shipped and archived, maintainer asked whether Accrue is approaching "done," whether future milestone planning should stop repeatedly re-litigating that question, and how to make future context resets remember the answer.
+
+**Updated assessment:** Accrue is **90-95% done for its declared scope** and should now be treated as **stable core / demand-driven expansion**. The remaining useful work is not broad feature discovery; it is release readiness, maintenance, support-contract hardening, verifier/doc truth, and occasional strategic expansion when explicitly justified.
+
+**Default next milestone:** `v1.48 — Release Readiness + Stable Core Posture`
+
+Scope should include:
+- full linked three-package release verification,
+- release notes/changelog alignment for post-1.3.0 v1.47 work,
+- stable-core positioning in public docs,
+- support-matrix / docs / examples / verifier consistency,
+- stale backlog-anchor archival,
+- and linked Hex publish.
+
+Scope should exclude:
+- new billing primitives,
+- new processor breadth,
+- finance/accounting ownership,
+- merchant-of-record or marketplace payout support,
+- and polish that does not remove a real adopter, operational, correctness, security, or release failure mode.
+
+**Intake rule for future milestones:** Do not ask "are we done?" again by default. Assume Accrue is done enough until new evidence appears. New feature work requires at least one of:
+- a concrete adopter failure mode,
+- a correctness/security/data-loss risk,
+- a repeated support issue,
+- or an explicit strategy change recorded in `.planning/PROJECT.md` / `.planning/STRATEGY.md`.
+
+**Backlog posture:** Deferred items should remain demand-driven or explicit non-goals. Historical FRG anchors (`INT-10`, `BIL-03`, `ADM-12`) are traceability entries, not active scope.

@@ -10,6 +10,19 @@ Tagline: *"Billing state, modeled clearly."*
 
 **A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one** — complete, production-grade, with idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain for at least the first major version. Everything else is in service of that.
 
+## Development Posture
+
+**Stable core / demand-driven expansion.** As of **2026-05-31**, Accrue is considered **done enough for its declared scope**: the canonical SaaS billing loop is complete, the dual-provider gateway subscription core is bounded and documented, and the remaining work is release readiness, maintenance, support-contract hardening, or explicitly justified strategic expansion.
+
+Default future milestone posture:
+- Prefer **release-readiness, maintenance, documentation truth, verifier hardening, and adopter-proof closure** over new product surface.
+- Do **not** start broad feature milestones because a deferred idea exists. Require a concrete adopter failure mode, correctness/security risk, repeated support issue, or explicit strategy change.
+- Treat polish as backlog unless it removes a real onboarding, operational, verifier, or support-contract failure mode.
+- Keep Stripe / Braintree / Fake support **capability-explicit**. Any processor-surface change must update behavior, support matrix, docs, examples/verifiers, and release notes together.
+- Preserve the architectural boundary: `accrue` owns billing domain and public facades; `accrue_admin` owns operator UI; `accrue_portal` owns customer self-serve UI; host apps own Repo, migrations, Oban supervision, auth, session, runtime secrets, and app-domain membership policy.
+
+Recommended next default milestone: **Release Readiness + Stable Core Posture** — publish the post-1.3.0 v1.47 correctness/adopter-proof work, clarify stable-core positioning, archive stale backlog anchors, and then pause broad feature work.
+
 ## Last shipped milestone
 
 ### v1.47 — ENT-10 Polish + Adopter-Proof Completeness (**archived 2026-05-31**)
@@ -463,4 +476,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after v1.47 milestone*
+*Last updated: 2026-05-31 after stable-core posture assessment*
