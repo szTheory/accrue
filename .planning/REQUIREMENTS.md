@@ -8,15 +8,15 @@
 
 ## Advisory Cache Correctness (WR-05)
 
-- [ ] **ADV-01** — User (webhook consumer) can deliver concurrent Stripe entitlement events for the same customer without triggering `Ecto.StaleEntryError` or silent upsert suppression (`optimistic_lock(:lock_version)` removed from `EntitlementSummary.force_changeset/2`; `lock_version` removed from `@cast_fields`)
-- [ ] **ADV-02** — User (webhook consumer) can deliver an entitlement event with no `last_stripe_event_ts` without silently no-oping the row update (`on_conflict_where` handles `NULL` via `(EXCLUDED.last_stripe_event_ts IS NULL OR e.last_stripe_event_ts < EXCLUDED.last_stripe_event_ts)`)
-- [ ] **ADV-03** — User (operator) can observe whether an entitlement summary write was a live update or a stale skip via telemetry (`result: :unchanged` emitted on stale; `maybe_record_summary_event/3` not called on stale skip)
-- [ ] **ADV-04** — Developer can verify concurrent delivery correctness via automated test: two `Task.async` workers competing to write the same customer summary, `Sandbox.allow/3` wired, assert the newer event's watermark wins
+- [x] **ADV-01** — User (webhook consumer) can deliver concurrent Stripe entitlement events for the same customer without triggering `Ecto.StaleEntryError` or silent upsert suppression (`optimistic_lock(:lock_version)` removed from `EntitlementSummary.force_changeset/2`; `lock_version` removed from `@cast_fields`)
+- [x] **ADV-02** — User (webhook consumer) can deliver an entitlement event with no `last_stripe_event_ts` without silently no-oping the row update (`on_conflict_where` handles `NULL` via `(EXCLUDED.last_stripe_event_ts IS NULL OR e.last_stripe_event_ts < EXCLUDED.last_stripe_event_ts)`)
+- [x] **ADV-03** — User (operator) can observe whether an entitlement summary write was a live update or a stale skip via telemetry (`result: :unchanged` emitted on stale; `maybe_record_summary_event/3` not called on stale skip)
+- [x] **ADV-04** — Developer can verify concurrent delivery correctness via automated test: two `Task.async` workers competing to write the same customer summary, `Sandbox.allow/3` wired, assert the newer event's watermark wins
 
 ## Advisory Cache Polish (IN-01..04)
 
-- [ ] **POL-01** — User (non-Stripe processor) can see accurate `:processor` field in their entitlement summary row (`write_entitlement_summary/9` uses `to_string(processor)` arg, not `processor_name()` global config)
-- [ ] **POL-02** — User (operator) can trust that a summary row's `livemode` reflects the most recently known state, not `nil` when a follow-up event omits the key (carry prior `livemode` forward when payload key absent; mirrors `stamp_summary_watermark/4` pattern)
+- [x] **POL-01** — User (non-Stripe processor) can see accurate `:processor` field in their entitlement summary row (`write_entitlement_summary/9` uses `to_string(processor)` arg, not `processor_name()` global config)
+- [x] **POL-02** — User (operator) can trust that a summary row's `livemode` reflects the most recently known state, not `nil` when a follow-up event omits the key (carry prior `livemode` forward when payload key absent; mirrors `stamp_summary_watermark/4` pattern)
 - [ ] **POL-03** — Developer can write a test exercising the livemode-absent code path via a `:omit_livemode` fixture option on `entitlement_summary_event/2`; `StripeFixtures` `@moduledoc` clarifies the module is test-only
 - [ ] **POL-04** — Operator can include `[:accrue, :webhooks, :malformed_entitlement_summary]` and `[:accrue, :webhooks, :orphan_entitlement_summary]` in their Telemetry Metrics reporter by calling `Accrue.Telemetry.Metrics.defaults/0` (both counters added)
 
@@ -56,12 +56,12 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| ADV-01 | Phase 154 | Not started |
-| ADV-02 | Phase 154 | Not started |
-| ADV-03 | Phase 154 | Not started |
-| ADV-04 | Phase 154 | Not started |
-| POL-01 | Phase 154 | Not started |
-| POL-02 | Phase 154 | Not started |
+| ADV-01 | Phase 154 | Complete |
+| ADV-02 | Phase 154 | Complete |
+| ADV-03 | Phase 154 | Complete |
+| ADV-04 | Phase 154 | Complete |
+| POL-01 | Phase 154 | Complete |
+| POL-02 | Phase 154 | Complete |
 | POL-03 | Phase 155 | Not started |
 | POL-04 | Phase 155 | Not started |
 | PRF-01 | Phase 156 | Not started |

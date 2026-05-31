@@ -60,7 +60,7 @@
 **Plans:** 1 plan
 
 Plans:
-- [ ] 154-01-PLAN.md — OCC removal, NULL watermark fix, stale skip path, processor arg threading, livemode carry-forward, concurrent delivery test
+- [x] 154-01-PLAN.md — OCC removal, NULL watermark fix, stale skip path, processor arg threading, livemode carry-forward, concurrent delivery test
 
 ### Phase 155: StripeFixtures Polish + Telemetry Counters
 
@@ -119,10 +119,10 @@ Plans:
   3. A stale (out-of-order) write returns `{:ok, :stale}`, emits `result: :unchanged` telemetry, and does not write a ledger event.
   4. A non-Stripe processor's entitlement summary row shows the correct `:processor` value, not the global config default.
   5. A follow-up event that omits the `livemode` key carries forward the prior row's `livemode` rather than overwriting with `nil`.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 154-01-PLAN.md — OCC removal, NULL watermark fix, stale skip path, processor arg threading, livemode carry-forward, concurrent delivery test
+- [x] 154-01-PLAN.md — OCC removal, NULL watermark fix, stale skip path, processor arg threading, livemode carry-forward, concurrent delivery test
 
 ### Phase 155: StripeFixtures Polish + Telemetry Counters
 **Goal:** Test authors can exercise the livemode-absent code path via a fixture option, and operators can include the two previously-missing malformed/orphan entitlement counters in their telemetry reporter.
@@ -170,7 +170,7 @@ Plans:
 | 151. Maintenance & Triage | v1.46 | 3/3 | Complete | 2026-05-30 |
 | 152. Close v1.46 closure gaps | v1.46 | 3/3 | Complete | 2026-05-30 |
 | 153. Close v1.46 audit trail | v1.46 | 2/2 | Complete | 2026-05-30 |
-| 154. Advisory Cache Core Correctness | v1.47 | 0/? | Not started | - |
+| 154. Advisory Cache Core Correctness | v1.47 | 1/1 | Complete   | 2026-05-31 |
 | 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 0/? | Not started | - |
 | 156. Entitlements Gating Adopter Proof | v1.47 | 0/? | Not started | - |
 | 157. Metered Usage Adopter Proof | v1.47 | 0/? | Not started | - |
