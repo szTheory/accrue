@@ -405,12 +405,18 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**Active milestone v1.47.** Defining requirements and roadmap. Last shipped: **v1.46** — Phases **151–153** — **2026-05-30**. All three packages at **1.3.0** on Hex.pm (accrue, accrue_admin, accrue_portal).
+**Active milestone v1.47.** Phases **154–157** complete; Phase **158** remains. Last shipped: **v1.46** — Phases **151–153** — **2026-05-30**. All three packages at **1.3.0** on Hex.pm (accrue, accrue_admin, accrue_portal).
 
 **Last shipped:** **v1.46** — Phases **151–153** — **2026-05-30**
 **Hex.pm:** accrue 1.3.0 · accrue_admin 1.3.0 · accrue_portal 1.3.0
 
 ## Requirements
+
+### Validated v1.47 (active milestone)
+
+Advisory cache correctness, StripeFixtures polish, and adopter-proof coverage are partially complete.
+
+- ✓ **PRF-02** — Metered usage adopter proof in `examples/accrue_host` — validated in Phase 157.
 
 ### Validated v1.46 (archived in `.planning/milestones/v1.46-REQUIREMENTS.md`; milestone shipped & archived 2026-05-30)
 
@@ -447,4 +453,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-30 — milestone v1.47 started*
+*Last updated: 2026-05-31 — Phase 157 validated PRF-02*
