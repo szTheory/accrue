@@ -47,13 +47,12 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         recovered = Enum.find(stats.recovered, %{cents: 0}, &(&1.currency == currency))
         lost = Enum.find(stats.lost, %{cents: 0}, &(&1.currency == currency))
 
-        currency_arg = currency_atom(currency)
+        currency_arg = known_currency_atom(currency)
 
         %{
           currency: to_string(currency),
-          recovered_str:
-            Accrue.Invoices.Render.format_money(recovered.cents, currency_arg, locale),
-          exhausted_str: Accrue.Invoices.Render.format_money(lost.cents, currency_arg, locale)
+          recovered_str: format_recovery_money(recovered.cents, currency_arg, currency, locale),
+          exhausted_str: format_recovery_money(lost.cents, currency_arg, currency, locale)
         }
       end)
 
@@ -66,14 +65,24 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
      |> assign(:at_risk, at_risk)}
   end
 
-  defp currency_atom(currency) when is_atom(currency), do: currency
-
-  defp currency_atom(currency) when is_binary(currency) do
-    normalized = String.downcase(currency)
-    Enum.find(@known_currency_atoms, :usd, &(Atom.to_string(&1) == normalized))
+  defp known_currency_atom(currency) when is_atom(currency) do
+    if currency in @known_currency_atoms, do: currency
   end
 
-  defp currency_atom(_currency), do: :usd
+  defp known_currency_atom(currency) when is_binary(currency) do
+    normalized = String.downcase(currency)
+    Enum.find(@known_currency_atoms, &(Atom.to_string(&1) == normalized))
+  end
+
+  defp known_currency_atom(_currency), do: nil
+
+  defp format_recovery_money(cents, nil, currency, _locale) do
+    "#{cents} #{currency |> to_string() |> String.upcase()}"
+  end
+
+  defp format_recovery_money(cents, currency, _original_currency, locale) do
+    Accrue.Invoices.Render.format_money(cents, currency, locale)
+  end
 
   @impl true
   def render(assigns) do
@@ -92,7 +101,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
           <p class="ax-eyebrow">Recovery Dashboard</p>
           <div class="flex items-baseline justify-between w-full">
             <h2 class="ax-display">Revenue Recovery</h2>
-            <a href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics" target="_blank" class="text-xs text-slate-500 hover:text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200 ml-4">
+            <a href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics" target="_blank" rel="noopener noreferrer" class="text-xs text-slate-500 hover:text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200 ml-4">
               Showing data since 2024-01-01
             </a>
           </div>

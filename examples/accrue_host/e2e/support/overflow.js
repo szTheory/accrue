@@ -31,6 +31,12 @@ async function expectVisibleInViewport(locator, label) {
   expect(box.y, `${label} should not be clipped above the viewport`).toBeGreaterThanOrEqual(
     -SUBPIXEL_TOLERANCE_PX
   );
+  expect(box.x + box.width, `${label} should not be clipped on the right`).toBeLessThanOrEqual(
+    viewport.width + SUBPIXEL_TOLERANCE_PX
+  );
+  expect(box.y + box.height, `${label} should not be clipped below the viewport`).toBeLessThanOrEqual(
+    viewport.height + SUBPIXEL_TOLERANCE_PX
+  );
 }
 
 /**
