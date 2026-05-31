@@ -196,12 +196,11 @@ counter("accrue.webhooks.orphan_entitlement_summary.count"),
 |---|-------|---------|---------------|
 | A1 | Count/order-coupled test failures are likely as defaults grow | Common Pitfalls | Low; tests can still be updated to tuple-presence checks |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should `StripeFixtures` moduledoc use `@moduledoc false` or explicit warning text?**
+1. **RESOLVED: Should `StripeFixtures` moduledoc use `@moduledoc false` or explicit warning text?**
    - What we know: Elixir supports hidden modules via `@moduledoc false`. [CITED: https://elixir.hexdocs.pm/writing-documentation.html]
-   - What's unclear: project preference between hidden docs vs visible warning prose in test support.
-   - Recommendation: follow locked D-05 text requirement; keep module visible but explicit test-only/non-Hex-contract wording unless maintainers prefer full hide.
+   - Resolution: follow locked D-05 text requirement; keep module visible but explicit test-only/non-Hex-contract wording. Do not use `@moduledoc false` for Phase 155.
 
 ## Environment Availability
 
@@ -282,4 +281,3 @@ Step 2.6: SKIPPED (no new external runtime/tool dependencies identified for this
 
 **Research date:** 2026-05-31  
 **Valid until:** 2026-06-30
-
