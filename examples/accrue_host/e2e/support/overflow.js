@@ -1,6 +1,8 @@
 // @ts-check
 const { expect } = require("@playwright/test");
 
+const SUBPIXEL_TOLERANCE_PX = 0.5;
+
 /**
  * @param {import('@playwright/test').Locator} locator
  * @param {string} label
@@ -23,8 +25,12 @@ async function expectVisibleInViewport(locator, label) {
     return;
   }
 
-  expect(box.x, `${label} should not be clipped on the left`).toBeGreaterThanOrEqual(0);
-  expect(box.y, `${label} should not be clipped above the viewport`).toBeGreaterThanOrEqual(0);
+  expect(box.x, `${label} should not be clipped on the left`).toBeGreaterThanOrEqual(
+    -SUBPIXEL_TOLERANCE_PX
+  );
+  expect(box.y, `${label} should not be clipped above the viewport`).toBeGreaterThanOrEqual(
+    -SUBPIXEL_TOLERANCE_PX
+  );
 }
 
 /**
