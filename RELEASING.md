@@ -42,11 +42,13 @@ automation semantics change.
 4. **Default (primary path):** merge the combined Release Please PR manually on GitHub when required checks are green. Merge after checklist sign-off, **or** after review dispatch **Actions → Release PR automation → Run workflow**
    with the PR number so auto-merge queues **only** via **`workflow_dispatch`** (not on PR open/sync).
    Use `scripts/ci/gh_merge_release_pr.sh` if you need the Release Please PR number before dispatching.
+   Record `PR_NUMBER` and `TARGET_VERSION` in the active release-phase verification ledger before starting publish follow-through.
 5. Confirm Hex package availability for **`accrue`** before relying on **`accrue_admin`** or **`accrue_portal`** consumers.
 6. Let `.github/workflows/release-please.yml` publish **`accrue_admin`** when the workflow gates
    (`needs.release.outputs.*`, `ACCRUE_ADMIN_HEX_RELEASE=1`) say it is safe — **`accrue` publishes first**.
 7. Let `.github/workflows/release-please.yml` publish **`accrue_portal`** only after the same-workflow gates say both upstream packages are safe.
 8. Verify HexDocs for all three packages, tags, and GitHub releases as appropriate.
+   Record the successful Release Please workflow `RUN_ID` in the same active release-phase verification ledger.
 
 ### Rendro publish handoff
 
@@ -168,7 +170,7 @@ Keep provider-backed checks out of the required release lane. In real integratio
 
 If Release Please dry-run cannot produce a combined release PR when you need one, use the manual fallback only after creating and reviewing a manual release PR that sets all package versions and all package changelogs consistently.
 
-Use `.github/workflows/publish-hex.yml` only as a manual fallback or recovery path:
+Use `.github/workflows/publish-hex.yml` only as a manual fallback or recovery path after the primary `.github/workflows/release-please.yml` publish path fails or is unavailable:
 
 - `package`: choose `accrue`, `accrue_admin`, or `accrue_portal`
 - `tag`: reviewed tag or commit ref to publish from
