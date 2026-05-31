@@ -14,9 +14,9 @@
 
 ### Stable-Core Positioning
 
-- [ ] **POS-01**: Developer evaluating Accrue can read the public docs and package READMEs and understand that Accrue is stable-core / demand-driven expansion, not a broad feature-chasing billing product.
-- [ ] **POS-02**: Developer adopting Accrue can see the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without reading planning internals.
-- [ ] **POS-03**: Maintainer can verify that release notes, package docs, support matrix, adoption proof docs, and planning mirrors all describe the same stable-core posture.
+- [x] **POS-01**: Developer evaluating Accrue can read the public docs and package READMEs and understand that Accrue is stable-core / demand-driven expansion, not a broad feature-chasing billing product.
+- [x] **POS-02**: Developer adopting Accrue can see the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without reading planning internals.
+- [x] **POS-03**: Maintainer can verify that release notes, package docs, support matrix, adoption proof docs, and planning mirrors all describe the same stable-core posture.
 
 ### Backlog Anchor Closure
 
@@ -52,9 +52,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REL-01 | Phase 159 | Pending |
 | REL-02 | Phase 159 | Pending |
 | REL-03 | Phase 159 | Pending |
-| POS-01 | Phase 160 | Pending |
-| POS-02 | Phase 160 | Pending |
-| POS-03 | Phase 160 | Pending |
+| POS-01 | Phase 160 | Complete |
+| POS-02 | Phase 160 | Complete |
+| POS-03 | Phase 160 | Complete |
 | BAK-01 | Phase 161 | Pending |
 | BAK-02 | Phase 161 | Pending |
 | PAU-01 | Phase 161 | Pending |
