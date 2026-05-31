@@ -6,6 +6,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
   alias Accrue.Billing.SubscriptionItem
   alias AccrueHost.AccountsFixtures
   alias AccrueHost.Billing
+  alias AccrueHost.Billing.Plans
   alias AccrueHost.Repo
 
   import Ecto.Query
@@ -31,7 +32,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     organization: organization,
     user: user
   } do
-    assert {:ok, _} = Billing.subscribe(organization, "price_basic")
+    assert {:ok, _} = Billing.subscribe(organization, Plans.ids().metered)
 
     {:ok, view, html} =
       conn
@@ -50,6 +51,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert Repo.aggregate(MeterEvent, :count, :id) == 1
     event = Repo.one(MeterEvent)
     assert event.event_name == "api_calls"
+    assert event.value == 1
   end
 
   test "demonstrates checkout session creation (PROOF-05)", %{
