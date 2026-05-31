@@ -135,8 +135,8 @@ defmodule Accrue.Entitlements.Guard do
   @spec resolve_billable(:plug | :live, container(), keyword()) :: term() | nil
   def resolve_billable(_surface, container, opts) do
     case billable_fn(opts) do
-      fun when is_function(fun, 1) -> safe_apply(fun, container)
-      _ -> default_probe(container)
+      fun when is_function(fun, 1) -> fun |> safe_apply(container) |> normalize_billable()
+      _ -> container |> default_probe() |> normalize_billable()
     end
   end
 
@@ -283,6 +283,9 @@ defmodule Accrue.Entitlements.Guard do
     _ -> nil
     _, _ -> nil
   end
+
+  defp normalize_billable(%Ecto.Association.NotLoaded{}), do: nil
+  defp normalize_billable(billable), do: billable
 
   # Default probe (D-15): server-side assigns only, nil-safe — current_scope.user
   # then current_user then nil. Never raises (no `.field` on a possible nil).
