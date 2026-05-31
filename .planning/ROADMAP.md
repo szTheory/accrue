@@ -77,10 +77,11 @@ Plans:
   1. Public package docs and READMEs explain that Accrue is stable-core and demand-driven, not broad feature-chasing.
   2. Adopter-facing docs show the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without requiring planning context.
   3. Release notes, package docs, support matrix, adoption proof docs, and planning mirrors describe the same stable-core posture.
-**Plans:** 1 plan
+**Plans:** 2 plans
 
 Plans:
-- [ ] 160-01-PLAN.md — Align public docs, package docs, support matrix, release notes, and planning mirrors around stable-core positioning
+- [ ] 160-01-PLAN.md — Align public docs, package docs, proof mirrors, release notes, and the maintainer support matrix around stable-core positioning
+- [ ] 160-02-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
 
 ### Phase 161: Backlog Anchor Closure + Pause Rule
 
@@ -122,10 +123,11 @@ Plans:
   1. Public package docs and READMEs explain that Accrue is stable-core and demand-driven, not broad feature-chasing.
   2. Adopter-facing docs show the complete supported SaaS billing loop, processor support boundaries, and package ownership boundaries without requiring planning context.
   3. Release notes, package docs, support matrix, adoption proof docs, and planning mirrors describe the same stable-core posture.
-**Plans:** 1 plan
+**Plans:** 2 plans
 
 Plans:
-- [ ] 160-01-PLAN.md — Align public docs, package docs, support matrix, release notes, and planning mirrors around stable-core positioning
+- [ ] 160-01-PLAN.md — Align public docs, package docs, proof mirrors, release notes, and the maintainer support matrix around stable-core positioning
+- [ ] 160-02-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
 
 ### Phase 161: Backlog Anchor Closure + Pause Rule
 **Goal:** Retire stale roadmap pressure, classify remaining seeds/deferred ideas with revisit triggers, and close the milestone with an explicit pause rule for broad feature work.

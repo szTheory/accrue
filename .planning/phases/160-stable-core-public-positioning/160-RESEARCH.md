@@ -211,12 +211,12 @@ Source: existing `docs-contracts-shift-left` step style in `.github/workflows/ci
 |---|-------|---------|---------------|
 | A1 | Existing repository grep-based verification style remains preferred over parser-heavy alternatives for docs contracts. [ASSUMED] | Standard Stack | Low; if style changes, implementation can still satisfy POS requirements with another deterministic gate. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should public docs add a standalone support-boundaries guide?**
-   - What we know: locked decisions allow it only if no second hand-maintained SSOT is created. [VERIFIED: codebase grep]
-   - What's unclear: whether current thin-mirror coverage is sufficient after copy alignment. [VERIFIED: codebase grep]
-   - Recommendation: default to thin mirrors in this phase; only add a guide if planner identifies a concrete adopter-comprehension gap. [VERIFIED: codebase grep]
+   - Resolved decision: No for Phase 160. Use thin mirrors plus canonical matrix pointers only. [VERIFIED: codebase grep]
+   - Why: D-15, D-17, and D-18 require one canonical capability SSOT and explicitly discourage a second hand-maintained public table or broad duplicated posture prose. [VERIFIED: codebase grep]
+   - Implementation consequence: Plan public docs as short mirrors that point to the existing guides and canonical matrix rather than creating a new standalone guide in this phase. [VERIFIED: codebase grep]
 
 ## Environment Availability
 
