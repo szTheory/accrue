@@ -71,10 +71,10 @@ Plans:
   1. A test can call `entitlement_summary_event/2` with `:omit_livemode` and receive a fixture without the `livemode` key, enabling direct coverage of the IN-02 carry-forward path.
   2. Calling `Accrue.Telemetry.Metrics.defaults/0` includes `[:accrue, :webhooks, :malformed_entitlement_summary]` and `[:accrue, :webhooks, :orphan_entitlement_summary]` counters, so operators can wire them into any `telemetry_metrics` reporter.
   3. `StripeFixtures` `@moduledoc` makes clear the module is test-only and not part of the published Hex package.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 155-01-PLAN.md — Add `omit_livemode` fixture support, test-only `StripeFixtures` docs, and missing entitlement-summary webhook default counters
+- [x] 155-01-PLAN.md — Add `omit_livemode` fixture support, test-only `StripeFixtures` docs, and missing entitlement-summary webhook default counters
 
 ### Phase 156: Entitlements Gating Adopter Proof
 
@@ -135,10 +135,10 @@ Plans:
   1. A test can call `entitlement_summary_event/2` with `:omit_livemode` and receive a fixture without the `livemode` key, enabling direct coverage of the IN-02 carry-forward path.
   2. Calling `Accrue.Telemetry.Metrics.defaults/0` includes `[:accrue, :webhooks, :malformed_entitlement_summary]` and `[:accrue, :webhooks, :orphan_entitlement_summary]` counters, so operators can wire them into any `telemetry_metrics` reporter.
   3. `StripeFixtures` `@moduledoc` makes clear the module is test-only and not part of the published Hex package.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 155-01-PLAN.md — Add `omit_livemode` fixture support, test-only `StripeFixtures` docs, and missing entitlement-summary webhook default counters
+- [x] 155-01-PLAN.md — Add `omit_livemode` fixture support, test-only `StripeFixtures` docs, and missing entitlement-summary webhook default counters
 
 ### Phase 156: Entitlements Gating Adopter Proof
 **Goal:** An adopter reading `examples/accrue_host` can see a complete, safe `on_mount` entitlement guard — including the defensive `NotLoaded` case — and understand the required `on_mount` ordering from the router comment.
@@ -177,7 +177,7 @@ Plans:
 | 152. Close v1.46 closure gaps | v1.46 | 3/3 | Complete | 2026-05-30 |
 | 153. Close v1.46 audit trail | v1.46 | 2/2 | Complete | 2026-05-30 |
 | 154. Advisory Cache Core Correctness | v1.47 | 1/1 | Complete   | 2026-05-31 |
-| 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 0/1 | Not started | - |
+| 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 1/1 | Complete   | 2026-05-31 |
 | 156. Entitlements Gating Adopter Proof | v1.47 | 0/? | Not started | - |
 | 157. Metered Usage Adopter Proof | v1.47 | 0/? | Not started | - |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 0/? | Not started | - |

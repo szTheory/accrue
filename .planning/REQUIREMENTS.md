@@ -17,8 +17,8 @@
 
 - [x] **POL-01** — User (non-Stripe processor) can see accurate `:processor` field in their entitlement summary row (`write_entitlement_summary/9` uses `to_string(processor)` arg, not `processor_name()` global config)
 - [x] **POL-02** — User (operator) can trust that a summary row's `livemode` reflects the most recently known state, not `nil` when a follow-up event omits the key (carry prior `livemode` forward when payload key absent; mirrors `stamp_summary_watermark/4` pattern)
-- [ ] **POL-03** — Developer can write a test exercising the livemode-absent code path via a `:omit_livemode` fixture option on `entitlement_summary_event/2`; `StripeFixtures` `@moduledoc` clarifies the module is test-only
-- [ ] **POL-04** — Operator can include `[:accrue, :webhooks, :malformed_entitlement_summary]` and `[:accrue, :webhooks, :orphan_entitlement_summary]` in their Telemetry Metrics reporter by calling `Accrue.Telemetry.Metrics.defaults/0` (both counters added)
+- [x] **POL-03** — Developer can write a test exercising the livemode-absent code path via a `:omit_livemode` fixture option on `entitlement_summary_event/2`; `StripeFixtures` `@moduledoc` clarifies the module is test-only
+- [x] **POL-04** — Operator can include `[:accrue, :webhooks, :malformed_entitlement_summary]` and `[:accrue, :webhooks, :orphan_entitlement_summary]` in their Telemetry Metrics reporter by calling `Accrue.Telemetry.Metrics.defaults/0` (both counters added)
 
 ## Adopter-Proof: Entitlements Gating
 
