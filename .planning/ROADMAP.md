@@ -101,7 +101,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 157-01-PLAN.md — Upgrade the host metered usage proof to the metered plan, assert durable meter-event value, and add the inline `value:` vs `quantity:` comment
+- [x] 157-01-PLAN.md — Upgrade the host metered usage proof to the metered plan, assert durable meter-event value, and add the inline `value:` vs `quantity:` comment
 
 ### Phase 158: Oban Cron Wiring Adopter Proof
 
@@ -166,10 +166,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. A test in `examples/accrue_host` exercises the full path: subscribe to a metered price → trigger Simulate API Call → assert flash confirmation + exactly one `MeterEvent` row.
   2. An inline code comment explains that `value:` must be used (not `quantity:`, which is silently ignored) when submitting meter events.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 157-01-PLAN.md — Upgrade the host metered usage proof to the metered plan, assert durable meter-event value, and add the inline `value:` vs `quantity:` comment
+- [x] 157-01-PLAN.md — Upgrade the host metered usage proof to the metered plan, assert durable meter-event value, and add the inline `value:` vs `quantity:` comment
 
 ### Phase 158: Oban Cron Wiring Adopter Proof
 **Goal:** An adopter running `recovery_wiring_test.exs` gets a deterministic pass/fail signal that all four required Oban cron workers and all four required Oban queues are wired in their host config — with a `config.exs` comment showing the safe append-merge pattern for adopters who already have a crontab.
@@ -191,7 +191,7 @@ Plans:
 | 154. Advisory Cache Core Correctness | v1.47 | 1/1 | Complete   | 2026-05-31 |
 | 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 1/1 | Complete    | 2026-05-31 |
 | 156. Entitlements Gating Adopter Proof | v1.47 | 1/1 | Complete    | 2026-05-31 |
-| 157. Metered Usage Adopter Proof | v1.47 | 0/? | Not started | - |
+| 157. Metered Usage Adopter Proof | v1.47 | 1/1 | Complete   | 2026-05-31 |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 0/? | Not started | - |
 
 ## Standing Backlog (FRG-03 anchors)

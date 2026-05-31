@@ -26,7 +26,7 @@
 
 ## Adopter-Proof: Metered Usage
 
-- [ ] **PRF-02** — Developer adopting Accrue can see and run a full-path metered usage test in `examples/accrue_host`: subscribe to a metered price → trigger Simulate API Call → assert flash confirmation + exactly one `MeterEvent` row; inline `value:` vs `quantity:` comment present
+- [x] **PRF-02** — Developer adopting Accrue can see and run a full-path metered usage test in `examples/accrue_host`: subscribe to a metered price → trigger Simulate API Call → assert flash confirmation + exactly one `MeterEvent` row; inline `value:` vs `quantity:` comment present
 
 ## Adopter-Proof: Oban Crons
 
@@ -65,5 +65,5 @@
 | POL-03 | Phase 155 | Complete |
 | POL-04 | Phase 155 | Complete |
 | PRF-01 | Phase 156 | Complete |
-| PRF-02 | Phase 157 | Not started |
+| PRF-02 | Phase 157 | Complete |
 | PRF-03 | Phase 158 | Not started |
