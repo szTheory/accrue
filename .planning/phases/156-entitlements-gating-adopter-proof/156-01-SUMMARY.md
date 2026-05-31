@@ -30,6 +30,8 @@ key-files:
     - accrue/guides/entitlements.md
     - accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex
     - examples/accrue_host/e2e/support/overflow.js
+    - accrue_admin/assets/css/app.css
+    - accrue_admin/priv/static/accrue_admin.css
 
 key-decisions:
   - "Normalize `%Ecto.Association.NotLoaded{}` in the shared guard seam rather than the LiveView surface adapter."
@@ -56,7 +58,7 @@ completed: 2026-05-31
 - **Started:** 2026-05-31T15:14:55Z
 - **Completed:** 2026-05-31T15:23:09Z
 - **Tasks:** 2
-- **Files modified:** 7
+- **Files modified:** 9
 
 ## Accomplishments
 
@@ -71,7 +73,9 @@ Each task was committed atomically:
 1. **Task 1: Harden guard and prove route fail-closed behavior** - `0deb0c9d` (test), `47ab4bb3` (fix), `0514c174` (test format)
 2. **Task 2: Make example host pattern explicit** - `e78eeb7c` (docs/config)
 
-**Verification unblockers:** `76beb474` (recovery analytics bounded currency mapping), `4517fc9b` (subpixel viewport tolerance)
+**Verification unblockers:** `76beb474` (recovery analytics bounded currency mapping), `4517fc9b` (subpixel viewport tolerance), `05e201c6` (mobile admin display bounds), `46e62b0c` (dark admin contrast)
+
+**Code review fixes:** `c6273bdf` resolved one blocker and two warnings from `156-REVIEW.md`; `f472db62` recorded the clean review report.
 
 ## Files Created/Modified
 
@@ -82,12 +86,14 @@ Each task was committed atomically:
 - `accrue/guides/entitlements.md` - documents unloaded billables denying instead of raising in the LiveView gating recipe.
 - `accrue_admin/lib/accrue_admin/live/analytics/recovery_live.ex` - bounds recovery KPI currency atom conversion for suite stability.
 - `examples/accrue_host/e2e/support/overflow.js` - adds half-pixel tolerance for viewport bounds assertions.
+- `accrue_admin/assets/css/app.css` - constrains mobile admin display copy and pins dark-mode topbar/action contrast for axe.
+- `accrue_admin/priv/static/accrue_admin.css` - rebuilt packaged admin stylesheet.
 
 ## Decisions Made
 
 - Kept `Accrue.Live.Entitlements` unchanged so the LiveView module remains only a transport adapter.
 - Matched `Ecto.Association.NotLoaded` in `examples/accrue_host/config/config.exs` via `__struct__` to avoid expanding Ecto structs during config compilation.
-- Fixed two unrelated verification blockers as explicit deviations because they prevented the required full host verification gate from passing.
+- Fixed unrelated verification blockers as explicit deviations because they prevented the required full host verification gate from passing.
 
 ## Deviations from Plan
 
@@ -109,10 +115,26 @@ Each task was committed atomically:
 - **Verification:** `npm run e2e -- e2e/phase13-canonical-demo.spec.js --project=chromium-desktop`; `mix verify.full`
 - **Committed in:** `4517fc9b`
 
+**3. [Rule 3 - Blocking] Mobile admin display overflow**
+- **Found during:** Plan verification (`mix verify.full`) after strengthening right/bottom viewport checks.
+- **Issue:** The canonical mobile demo exposed an admin dashboard heading that exceeded viewport bounds.
+- **Fix:** Constrained admin page/header/display widths and reduced mobile display/KPI font size while preserving desktop sizing.
+- **Files modified:** `accrue_admin/assets/css/app.css`, `accrue_admin/priv/static/accrue_admin.css`
+- **Verification:** `npm run e2e -- e2e/phase13-canonical-demo.spec.js --project=chromium-mobile`; `mix verify.full`
+- **Committed in:** `05e201c6`
+
+**4. [Rule 3 - Blocking] Dark admin contrast regression**
+- **Found during:** Plan verification (`mix verify.full`) in the desktop admin axe suite.
+- **Issue:** Theme toggle, topbar brand chip, and ghost action buttons inherited insufficient contrast in dark mode under host theme tokens.
+- **Fix:** Added narrow dark/system@dark color overrides for the reported controls and rebuilt the packaged admin stylesheet.
+- **Files modified:** `accrue_admin/assets/css/app.css`, `accrue_admin/priv/static/accrue_admin.css`
+- **Verification:** `npm run e2e -- e2e/verify01-admin-a11y.spec.js --project=chromium-desktop`; `mix verify.full`
+- **Committed in:** `46e62b0c`
+
 ---
 
-**Total deviations:** 2 auto-fixed blocking verification issues.
-**Impact on plan:** Phase 156 scope was preserved; both fixes were required only to make the mandated verification gate trustworthy and green.
+**Total deviations:** 4 auto-fixed blocking verification issues.
+**Impact on plan:** Phase 156 scope was preserved; these fixes were required only to make the mandated verification gate trustworthy and green.
 
 ## Issues Encountered
 
@@ -122,7 +144,9 @@ Each task was committed atomically:
 
 - `cd examples/accrue_host && mix test test/accrue_host_web/live/entitlements_guard_test.exs --seed 0` - 3 tests, 0 failures
 - `cd examples/accrue_host && mix test --seed 0` - 187 tests, 0 failures
-- `cd examples/accrue_host && mix verify.full` - bounded tests, full tests, boot smoke, and Playwright checks passed
+- `cd examples/accrue_host && npm run e2e -- e2e/verify01-admin-a11y.spec.js --project=chromium-desktop` - 11 tests, 0 failures
+- `cd examples/accrue_host && npm run e2e -- e2e/phase13-canonical-demo.spec.js --project=chromium-mobile` - 1 test, 0 failures
+- `cd examples/accrue_host && mix verify.full` - bounded tests, full tests, boot smoke, and Playwright checks passed; browser phase reported 29 passed, 16 skipped
 - Source assertions for `Ecto.Association.NotLoaded`, router ordering contract, and route redirect proof passed with `rg`
 
 ## Self-Check: PASSED
@@ -138,7 +162,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-Phase 156 is ready for phase-level verification and completion. PRF-01 is closed by shared guard behavior, example-host proof, and copyable adopter documentation.
+Phase 156 passed phase-level verification and completion. PRF-01 is closed by shared guard behavior, example-host proof, and copyable adopter documentation.
 
 ---
 *Phase: 156-entitlements-gating-adopter-proof*

@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
-status: executing
-last_updated: "2026-05-31T15:24:15.631Z"
-last_activity: 2026-05-31 -- Phase 156 planning complete
+status: ready_to_plan
+last_updated: 2026-05-31T15:37:18.316Z
+last_activity: 2026-05-31 -- Phase 156 completed and verified
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 3
   completed_plans: 3
   percent: 60
+stopped_at: Phase 156 complete (1/1) — ready to discuss Phase 157
 ---
 
 # Project State
@@ -21,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-30 after v1.47 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 156 — entitlements gating adopter proof
+**Current focus:** Phase 157 — metered usage adopter proof
 
 ## Current Position
 
-Phase: 156
+Phase: 157
 Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-31 -- Phase 156 planning complete
+Status: Ready to plan
+Last activity: 2026-05-31
 
 ## Milestone Progress
 
@@ -38,7 +39,7 @@ Last activity: 2026-05-31 -- Phase 156 planning complete
 |-------|------|--------------|--------|
 | 154 | Advisory Cache Core Correctness | ADV-01, ADV-02, ADV-03, ADV-04, POL-01, POL-02 | Complete |
 | 155 | StripeFixtures Polish + Telemetry Counters | POL-03, POL-04 | Not started |
-| 156 | Entitlements Gating Adopter Proof | PRF-01 | Not started |
+| 156 | Entitlements Gating Adopter Proof | PRF-01 | Complete |
 | 157 | Metered Usage Adopter Proof | PRF-02 | Not started |
 | 158 | Oban Cron Wiring Adopter Proof | PRF-03 | Not started |
 
@@ -66,7 +67,7 @@ Last activity: 2026-05-31 -- Phase 156 planning complete
 
 **Velocity:**
 
-- Total plans completed: 64 (v1.43) + 2 (Phase 143 standalone)
+- Total plans completed: 65 (v1.43) + 2 (Phase 143 standalone)
 - Average duration: 1m
 - Total execution time: 1m
 
