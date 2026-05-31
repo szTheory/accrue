@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
-status: ready_to_plan
-last_updated: 2026-05-31T14:42:49.214Z
+status: planning
+last_updated: "2026-05-31T14:55:16.050Z"
 last_activity: 2026-05-31
 progress:
   total_phases: 5
@@ -11,7 +11,6 @@ progress:
   total_plans: 2
   completed_plans: 2
   percent: 40
-stopped_at: Phase 155 complete (1/1) — ready to discuss Phase 156
 ---
 
 # Project State
@@ -144,9 +143,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-31T14:37:27.347Z
-Stopped at: Completed 155-01-PLAN.md
-Resume file: None
+Last session: 2026-05-31T14:55:16.047Z
+Stopped at: Phase 156 context gathered
+Resume file: .planning/phases/156-entitlements-gating-adopter-proof/156-CONTEXT.md
 
 ## Operator Next Steps
 
