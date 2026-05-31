@@ -190,6 +190,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   def handle_event("simulate_api_call", _params, socket) do
+    # Meter events use value:; quantity: belongs to subscription/invoice line items.
     case Billing.report_usage_for_scope(socket.assigns.current_scope, "api_calls", value: 1) do
       {:ok, _event} ->
         {:noreply, put_flash(socket, :info, "Usage reported: 1 API call recorded.")}
