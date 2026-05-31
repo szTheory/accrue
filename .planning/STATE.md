@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
-status: executing
-last_updated: "2026-05-31T16:30:58.057Z"
-last_activity: 2026-05-31 -- Phase 158 planning complete
+status: verifying
+last_updated: "2026-05-31T16:36:21.060Z"
+last_activity: 2026-05-31
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-30 after v1.47 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 158 — oban cron wiring adopter proof
+**Current focus:** Phase 158 — oban-cron-wiring-adopter-proof
 
 ## Current Position
 
-Phase: 158
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-31 -- Phase 158 planning complete
+Phase: 158 (oban-cron-wiring-adopter-proof) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-05-31
 
 ## Milestone Progress
 
@@ -90,6 +90,7 @@ Last activity: 2026-05-31 -- Phase 158 planning complete
 | Phase 155 P01 | 8min | 2 tasks | 4 files |
 | Phase 156 P01 | 8min | 2 tasks | 7 files |
 | Phase 157 P01 | 3 min | 2 tasks | 2 files |
+| Phase 158 P01 | 2m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-05-30:** v1.47 started. Scope: ENT-10 advisory cache correctness (WR-05 + IN-01..04) and three adopter-proof tracks (entitlements/metering/Oban crons in examples/accrue_host).
 - **2026-05-28:** Milestone Next-Step Assessment complete for v1.45. Selected Multi-channel Dunning (In-App Banners) to complete the dunning story without adding compliance risks.
 - **2026-05-27:** Milestone Next-Step Assessment complete. Accrue is 6 of 6 on the canonical SaaS loop (feature-complete core). v1.44 selected to prove the v1.40 dunning engine's ROI to adopters via the recovered-revenue dashboard.
+- [Phase ?]: Phase 158 recovery wiring proof now validates base config/config.exs with Config.Reader + Oban.Config.validate
+- [Phase ?]: Recovery proof queue contract explicitly includes accrue_dunning with cron worker DunningSweeper
 
 ### Pending Todos
 
@@ -145,9 +148,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-31T16:23:48.795Z
+Last session: 2026-05-31T16:36:05.033Z
 Stopped at: Phase 158 context gathered
-Resume file: .planning/phases/158-oban-cron-wiring-adopter-proof/158-CONTEXT.md
+Resume file: None
 
 ## Operator Next Steps
 

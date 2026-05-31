@@ -179,7 +179,7 @@ Plans:
   1. `recovery_wiring_test.exs` asserts the presence of all four cron workers: `DunningSweeper`, `DetectExpiringCards`, `MeterEventsReconciler`, and `MeteredRenewalReconciler`.
   2. `recovery_wiring_test.exs` asserts all four required Oban queues (`accrue_webhooks`, `accrue_mailers`, `accrue_meters`, `accrue_scheduled`) are declared in host config.
   3. The host `config.exs` includes a comment showing the append-merge pattern, so adopters with an existing crontab know how to add Accrue's workers safely.
-**Plans:** TBD
+**Plans:** 1/1 plans complete
 
 ## Progress
 
@@ -192,7 +192,7 @@ Plans:
 | 155. StripeFixtures Polish + Telemetry Counters | v1.47 | 1/1 | Complete    | 2026-05-31 |
 | 156. Entitlements Gating Adopter Proof | v1.47 | 1/1 | Complete    | 2026-05-31 |
 | 157. Metered Usage Adopter Proof | v1.47 | 1/1 | Complete    | 2026-05-31 |
-| 158. Oban Cron Wiring Adopter Proof | v1.47 | 0/? | Not started | - |
+| 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete   | 2026-05-31 |
 
 ## Standing Backlog (FRG-03 anchors)
 

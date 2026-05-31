@@ -30,7 +30,7 @@
 
 ## Adopter-Proof: Oban Crons
 
-- [ ] **PRF-03** — Developer adopting Accrue can verify their host app has all required Oban cron workers and queues wired by running `recovery_wiring_test.exs` — assertions cover all four cron workers (`DunningSweeper`, `DetectExpiringCards`, `MeterEventsReconciler`, `MeteredRenewalReconciler`) and all four required Oban queues (`accrue_webhooks`, `accrue_mailers`, `accrue_meters`, `accrue_scheduled`); `config.exs` includes append-merge comment for adopters with existing crontab
+- [x] **PRF-03** — Developer adopting Accrue can verify their host app has all required Oban cron workers and queues wired by running `recovery_wiring_test.exs` — assertions cover all four cron workers (`DunningSweeper`, `DetectExpiringCards`, `MeterEventsReconciler`, `MeteredRenewalReconciler`) and all four required Oban queues (`accrue_webhooks`, `accrue_mailers`, `accrue_meters`, `accrue_scheduled`); `config.exs` includes append-merge comment for adopters with existing crontab
 
 ---
 
