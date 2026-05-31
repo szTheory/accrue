@@ -60,7 +60,7 @@ Full details: [v1.47 roadmap archive](milestones/v1.47-ROADMAP.md)
 **Plans:** 1 plan
 
 Plans:
-- [ ] 159-01-PLAN.md — Audit release truth, run deterministic gates, publish the linked package line, and record canonical proof
+- [x] 159-01-PLAN.md — Audit release truth, run deterministic gates, publish the linked package line, and record canonical proof
 
 ### Phase 160: Stable-Core Public Positioning
 
@@ -102,7 +102,7 @@ Plans:
   1. Package versions, changelog entries, Release Please state, release notes, tags, and runbook instructions agree across `accrue`, `accrue_admin`, and `accrue_portal`.
   2. The deterministic release gate is run and documented for tests, docs, dialyzer, credo, package docs, support-matrix drift, adoption proof, and host integration checks.
   3. The linked Hex release is published in documented order and canonical proof is recorded in planning, changelogs, and release notes.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 159-01-PLAN.md — Audit release truth, run deterministic gates, publish the linked package line, and record canonical proof
@@ -145,7 +145,7 @@ Plans:
 | 156. Entitlements Gating Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 157. Metered Usage Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
-| 159. Linked Release Readiness + Publish Proof | v1.48 | 0/1 | Ready | — |
+| 159. Linked Release Readiness + Publish Proof | v1.48 | 1/1 | Complete   | 2026-05-31 |
 | 160. Stable-Core Public Positioning | v1.48 | 0/1 | Pending | — |
 | 161. Backlog Anchor Closure + Pause Rule | v1.48 | 0/1 | Pending | — |
 
