@@ -57,10 +57,16 @@ Full details: [v1.47 roadmap archive](milestones/v1.47-ROADMAP.md)
   1. Package versions, changelog entries, Release Please state, release notes, tags, and runbook instructions agree across `accrue`, `accrue_admin`, and `accrue_portal`.
   2. The deterministic release gate is run and documented for tests, docs, dialyzer, credo, package docs, support-matrix drift, adoption proof, and host integration checks.
   3. The linked Hex release is published in documented order and canonical proof is recorded in planning, changelogs, and release notes.
-**Plans:** 1 plan
+**Plans:** 2 plans
 
 Plans:
-- [x] 159-01-PLAN.md — Audit release truth, run deterministic gates, publish the linked package line, and record canonical proof
+**Wave 1**
+
+- [x] 159-01-PLAN.md — Preserve the completed readiness scaffolding, deterministic gate proof, and blocker truth for the missing post-`1.3.0` line
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 159-02-PLAN.md — When a real combined Release Please PR and successful publish run exist, capture live linked publish proof and close REL-01/REL-03
 
 ### Phase 160: Stable-Core Public Positioning
 
@@ -102,10 +108,11 @@ Plans:
   1. Package versions, changelog entries, Release Please state, release notes, tags, and runbook instructions agree across `accrue`, `accrue_admin`, and `accrue_portal`.
   2. The deterministic release gate is run and documented for tests, docs, dialyzer, credo, package docs, support-matrix drift, adoption proof, and host integration checks.
   3. The linked Hex release is published in documented order and canonical proof is recorded in planning, changelogs, and release notes.
-**Plans:** 1/1 plans complete
+**Plans:** 1/2 plans complete
 
 Plans:
-- [ ] 159-01-PLAN.md — Audit release truth, run deterministic gates, publish the linked package line, and record canonical proof
+- [x] 159-01-PLAN.md — Preserve the completed readiness scaffolding, deterministic gate proof, and blocker truth for the missing post-`1.3.0` line
+- [ ] 159-02-PLAN.md — When a real combined Release Please PR and successful publish run exist, capture live linked publish proof and close REL-01/REL-03
 
 ### Phase 160: Stable-Core Public Positioning
 **Goal:** Make the stable-core / demand-driven expansion posture explicit and consistent across public docs, package READMEs, support boundaries, release notes, and planning mirrors.
@@ -145,7 +152,7 @@ Plans:
 | 156. Entitlements Gating Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 157. Metered Usage Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
-| 159. Linked Release Readiness + Publish Proof | v1.48 | 1/1 | Complete   | 2026-05-31 |
+| 159. Linked Release Readiness + Publish Proof | v1.48 | 1/2 | Blocked on external release state | — |
 | 160. Stable-Core Public Positioning | v1.48 | 0/1 | Pending | — |
 | 161. Backlog Anchor Closure + Pause Rule | v1.48 | 0/1 | Pending | — |
 
