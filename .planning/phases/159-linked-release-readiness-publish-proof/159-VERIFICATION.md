@@ -77,6 +77,13 @@ _Populated by `scripts/ci/capture_linked_release_proof.sh`._
 | accrue_admin | https://hexdocs.pm/accrue_admin/readme.html | pending |
 | accrue_portal | https://hexdocs.pm/accrue_portal/readme.html | pending |
 
+### Host Hex smoke
+
+- Command: `bash scripts/ci/accrue_host_hex_smoke.sh`
+- Timestamp (UTC): `2026-05-31T18:16:54Z`
+- Result: `FAIL`
+- Reason: local host workspace compile conflict (`attempting to redefine live_session :accrue_admin` in `examples/accrue_host/lib/accrue_host_web/router.ex`) after installer dry-run overlay; release proof remains blocked until clean publish run context is available.
+
 ## Notes
 
 - Append-only ledger: add new dated blocks; do not rewrite prior proof rows.
@@ -87,6 +94,7 @@ _Populated by `scripts/ci/capture_linked_release_proof.sh`._
     - `bash scripts/ci/capture_linked_release_proof.sh --version <target-version> --run-id <run-id> --pr <pr> --output .planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md`
     - `bash scripts/ci/accrue_host_hex_smoke.sh`
     - `bash scripts/ci/verify_release_notes_contract.sh`
+  - Run host Hex smoke from a clean host route state that does not redefine `live_session :accrue_admin`.
 
 ## Sign-off
 
