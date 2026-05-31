@@ -118,6 +118,3 @@ Initial public releases with the admin UI, asset pipeline, and docs wired for th
 - **Minor** (pre-1.0) — new capabilities you can adopt incrementally; read the changelog before upgrading production.
 
 When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.
-adopt incrementally; read the changelog before upgrading production.
-
-When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.

@@ -39,8 +39,21 @@ grep -Eq "stable-core[^[:cntrl:]]*posture" "$notes" ||
 grep -Eq "maturity-and-maintenance\\.md|first_hour\\.md|jobs_to_be_done\\.md" "$notes" ||
   fail "release-notes.md must link to maturity-and-maintenance.md, first_hour.md, or jobs_to_be_done.md"
 
-version_heading_count=$(grep -Ec "^### ${accrue_version}$" "$notes" || true)
-[[ "$version_heading_count" -ge 2 ]] ||
-  fail "release-notes.md must describe ${accrue_version} for both accrue and accrue_admin"
+section_has_version() {
+  local start_heading=$1
+  local stop_heading=$2
+
+  awk -v start="$start_heading" -v stop="$stop_heading" -v version="$accrue_version" '
+    $0 == start { in_section = 1; next }
+    stop != "" && $0 == stop { in_section = 0 }
+    in_section && $0 == "### " version { found = 1 }
+    END { exit found ? 0 : 1 }
+  ' "$notes"
+}
+
+section_has_version "## accrue" "## accrue_admin" ||
+  fail "release-notes.md must describe ${accrue_version} in the accrue section"
+section_has_version "## accrue_admin" "## How we version" ||
+  fail "release-notes.md must describe ${accrue_version} in the accrue_admin section"
 
 echo "verify_release_notes_contract: OK (${accrue_version})"
