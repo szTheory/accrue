@@ -3,6 +3,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
 
   use Phoenix.LiveView
 
+  @known_currency_atoms ~w(usd eur gbp jpy kwd)a
+
   alias Accrue.Analytics.Dunning
 
   alias AccrueAdmin.Components.{
@@ -45,7 +47,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         recovered = Enum.find(stats.recovered, %{cents: 0}, &(&1.currency == currency))
         lost = Enum.find(stats.lost, %{cents: 0}, &(&1.currency == currency))
 
-        currency_arg = if is_binary(currency), do: String.to_existing_atom(currency), else: currency
+        currency_arg = currency_atom(currency)
 
         %{
           currency: to_string(currency),
@@ -63,6 +65,15 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
      |> assign(:kpi_pairs, kpi_pairs)
      |> assign(:at_risk, at_risk)}
   end
+
+  defp currency_atom(currency) when is_atom(currency), do: currency
+
+  defp currency_atom(currency) when is_binary(currency) do
+    normalized = String.downcase(currency)
+    Enum.find(@known_currency_atoms, :usd, &(Atom.to_string(&1) == normalized))
+  end
+
+  defp currency_atom(_currency), do: :usd
 
   @impl true
   def render(assigns) do
