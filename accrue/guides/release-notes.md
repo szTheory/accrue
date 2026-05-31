@@ -10,6 +10,10 @@ This page is the **story** of what shipped—not a commit list. For every line i
 
 ---
 
+## Stable-core posture
+
+Accrue follows a **stable-core / demand-driven expansion** posture. Release notes are a change story, not the static support contract. For canonical posture and boundaries, use [`maturity-and-maintenance.md`](maturity-and-maintenance.md), [`first_hour.md`](first_hour.md), and [`jobs_to_be_done.md`](jobs_to_be_done.md#scope-and-maturity).
+
 ## accrue
 
 ### 1.3.0

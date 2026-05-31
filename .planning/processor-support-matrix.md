@@ -4,6 +4,8 @@ This matrix answers: **what does Accrue mean by official multi-processor support
 
 This file is the canonical support SSOT for Accrue's official dual-provider track. It records the finalized `gateway subscription core` contract and the provider-honest boundaries that ship with it.
 
+This is the maintainer-facing capability SSOT. Public docs intentionally mirror only short, capability-explicit summaries and link back here for the full contract.
+
 Accrue intentionally splits processor truth into a **deterministic Fake-first lane** and **provider-backed fidelity lanes**. `Fake` is the required local and CI proof surface. `Stripe` remains the default first-user path. `Braintree` is the locked second-provider target because it best matches Accrue's Stripe-shaped direct-gateway facade without pulling the repo into a merchant-of-record or finance-system strategy.
 
 ## Lane framing
