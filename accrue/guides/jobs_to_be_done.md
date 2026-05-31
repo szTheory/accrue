@@ -356,11 +356,13 @@ merge-blocking proof lane the library itself ships on.
 
 *What's in, what's deliberately out.*
 
-Accrue is **feature-complete for its core promise**: launch a real SaaS with
-subscription billing, operate it, and trust it. On the subscription-billing core
-it matches or exceeds the libraries it's modeled after (Pay for Rails, Laravel
-Cashier), and it ships things they don't — the admin UI, the audit ledger,
-first-class telemetry, metered billing, and Connect.
+Accrue follows a **stable-core / demand-driven expansion** posture. The
+**canonical SaaS billing loop** is complete for declared scope: launch a real
+SaaS with subscription billing, operate it, and trust it. On the
+subscription-billing core it matches or exceeds the libraries it's modeled
+after (Pay for Rails, Laravel Cashier), and it ships things they don't — the
+admin UI, the audit ledger, first-class telemetry, metered billing, and
+Connect.
 
 A few things are **intentionally not Accrue's job**, by written decision — not
 oversight:
@@ -385,9 +387,12 @@ knob). The *optional* Stripe-native sync (consuming
 add-on (Phase 127) — the core gate needs no Stripe dependency. See
 [Entitlements](entitlements.md).
 
-Accrue runs in **intake-gated maintenance mode** — stable, with new work driven by
-real adopter needs rather than speculative expansion. The full reasoning, and the
-stop rules behind it, are in [Maturity and maintenance](maturity-and-maintenance.md).
+Accrue runs in **intake-gated maintenance mode** — stable, with new work driven
+by real adopter needs rather than speculative expansion. Expansion reopens only
+with evidence: a **concrete adopter failure mode** tied to a
+**correctness/security/data-loss risk**, a **repeated support issue**, an
+**operational failure**, or an **explicit strategy change**. The full doctrine
+lives in [Maturity and maintenance](maturity-and-maintenance.md).
 
 ---
 

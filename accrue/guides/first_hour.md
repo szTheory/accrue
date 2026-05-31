@@ -29,7 +29,7 @@ This guide mirrors only the setup-critical needles from the processor support ma
 
 This guide is one **spine** with three **entry capsules** — pick where you are starting, then follow the same ordered story (deps → install → runtime → migrations → Oban → webhooks → admin → proof). Public wording and step order stay aligned with [`examples/accrue_host/README.md`](../../examples/accrue_host/README.md#proof-and-verification); when the spine or command vocabulary changes, update that README in the same pull request. Same-PR capsule discipline lives in the contributor map [`scripts/ci/README.md`](../../scripts/ci/README.md).
 
-For **maintenance posture** (when to stop speculative doc work, how friction is intake-gated), see [Maturity and maintenance](maturity-and-maintenance.md).
+For **Maturity and maintenance** posture (when to stop speculative doc work, how friction is intake-gated, and what reopens expansion), see [Maturity and maintenance](maturity-and-maintenance.md).
 
 ### Capsule H — Hex consumer
 

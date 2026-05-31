@@ -2,6 +2,10 @@
 
 How Accrue thinks about **“done enough”** for the core library and companion admin, and **when new work should start** — without duplicating the deep guides.
 
+Accrue uses a **stable-core / demand-driven expansion** posture: the
+**canonical SaaS billing loop** is complete for declared scope, and expansion
+only reopens when evidence shows a concrete adopter-facing need.
+
 ## Who this is for
 
 - **Maintainers** triaging issues and doc PRs.
@@ -37,6 +41,19 @@ Roughly: **merge-blocking proof and package-doc contracts stay green**, the **po
 
 - Next **linked Hex publish** for **`accrue` / `accrue_admin`**.
 - Intentional **adoption proof matrix** / **`verify_adoption_proof_matrix.sh`** taxonomy edits.
+- A **concrete adopter failure mode** tied to a **correctness/security/data-loss risk**.
+- A **repeated support issue** that the documented facade cannot absorb.
+- An **operational failure** that threatens day-two reliability.
+- An **explicit strategy change** with documented maintainer rationale.
+
+## Explicit non-goals in this posture
+
+Stable core does not mean abandoned; it means we avoid broad speculative
+surface growth until evidence crosses the bar above. Non-goals remain:
+
+- expansion without a concrete adopter failure mode
+- shipping broad new capability before correctness/security/data-loss risk is addressed
+- using maintenance cycles for feature-chasing rather than support-contract hardening
 
 ## Related
 
