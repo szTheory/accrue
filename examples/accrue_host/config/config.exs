@@ -108,10 +108,14 @@ config :accrue, :entitlements,
   billable: fn container ->
     scope = Map.get(container.assigns, :current_scope)
 
-    if scope do
-      Map.get(scope, :active_organization) || Map.get(scope, :user)
-    else
+    if is_nil(scope) do
       Map.get(container.assigns, :current_user)
+    else
+      case Map.get(scope, :active_organization) do
+        %{__struct__: Ecto.Association.NotLoaded} -> nil
+        nil -> Map.get(scope, :user)
+        organization -> organization
+      end
     end
   end,
   plans: [

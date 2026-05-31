@@ -180,6 +180,12 @@ degrades to a flash plus a redirect to the configured `deny_path` (default
 nested live navigations don't re-probe. As with the plug, the only path to a
 granted mount is an affirmative resolved match.
 
+For organization-scoped gates, make your host auth/scope loader populate the
+organization billable before `Accrue.Live.Entitlements` runs. If the resolver
+returns `%Ecto.Association.NotLoaded{}` or another unloaded billable, Accrue
+normalizes it to a fail-closed deny instead of raising; preload the organization
+in your auth hook when the route should be grantable.
+
 ---
 
 ## Lifecycle truth

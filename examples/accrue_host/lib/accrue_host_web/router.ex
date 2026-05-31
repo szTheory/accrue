@@ -47,6 +47,10 @@ defmodule AccrueHostWeb.Router do
 
     post("/app/organization-scope", OrganizationScopeController, :update)
 
+    # Ordering contract: AccrueHostWeb.UserAuth loads scope/auth first, then
+    # Accrue.Live.Entitlements checks access; keep the deny target outside this
+    # gated session, and see guides/entitlements.md for why missing or unloaded
+    # billables fail closed instead of raising.
     live_session :entitled_reports,
       on_mount: [
         {AccrueHostWeb.UserAuth, :require_authenticated},
@@ -91,11 +95,11 @@ defmodule AccrueHostWeb.Router do
 
   scope "/webhooks" do
     pipe_through(:accrue_webhook_raw_body)
-    accrue_webhook "/stripe", :stripe
+    accrue_webhook("/stripe", :stripe)
   end
 
   # Protect these mounts with package auth hooks via accrue_admin/2 and accrue_portal/2.
   # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
-  accrue_admin "/admin", session_keys: [:user_token], allow_live_reload: false
+  accrue_admin("/admin", session_keys: [:user_token], allow_live_reload: false)
   accrue_portal("/billing", session_keys: [:user_token])
 end
