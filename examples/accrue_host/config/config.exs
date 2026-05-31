@@ -47,7 +47,7 @@ config :accrue_host, Oban,
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24},
     {Oban.Plugins.Cron,
-     # If your host already has cron jobs, append Accrue entries instead of replacing:
+     # append-merge: if your host already has cron jobs, append Accrue entries instead of replacing:
      # crontab: existing_cron_jobs() ++ [ ...Accrue entries... ]
      crontab: [
        {"*/15 * * * *", Accrue.Jobs.DunningSweeper},
