@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Resolves accrue + accrue_admin from Hex (see examples/accrue_host ACCRUE_HOST_HEX_RELEASE).
+# Resolves accrue + accrue_admin + accrue_portal from Hex (see examples/accrue_host ACCRUE_HOST_HEX_RELEASE).
 #
 # On GitHub Actions, after a release merge, this job can start before Hex publish finishes.
-# We poll hex.pm until both sibling @version releases exist (or timeout), so CI does not
+# We poll hex.pm until all linked @version releases exist (or timeout), so CI does not
 # need a manual re-run. Opt out: ACCRUE_HOST_HEX_SMOKE_WAIT_HEX=0
 #
 # Release Please PRs still skip this script in ci.yml: the version is not published until
@@ -35,11 +35,12 @@ maybe_wait_for_sibling_releases_on_hex() {
     return 0
   fi
 
-  local accrue_ver accrue_admin_ver
+  local accrue_ver accrue_admin_ver accrue_portal_ver
   accrue_ver="$(parse_mix_version "$repo_root/accrue/mix.exs")"
   accrue_admin_ver="$(parse_mix_version "$repo_root/accrue_admin/mix.exs")"
+  accrue_portal_ver="$(parse_mix_version "$repo_root/accrue_portal/mix.exs")"
 
-  if [[ -z "$accrue_ver" || -z "$accrue_admin_ver" ]]; then
+  if [[ -z "$accrue_ver" || -z "$accrue_admin_ver" || -z "$accrue_portal_ver" ]]; then
     echo "accrue_host_hex_smoke: could not parse @version from sibling mix.exs" >&2
     exit 1
   fi
@@ -49,18 +50,19 @@ maybe_wait_for_sibling_releases_on_hex() {
   local deadline=$(( $(date +%s) + max_s ))
 
   while true; do
-    local accrue_ok=0 admin_ok=0
+    local accrue_ok=0 admin_ok=0 portal_ok=0
     if hex_release_exists accrue "$accrue_ver"; then accrue_ok=1; fi
     if hex_release_exists accrue_admin "$accrue_admin_ver"; then admin_ok=1; fi
-    if [[ "$accrue_ok" == 1 && "$admin_ok" == 1 ]]; then
-      echo "accrue_host_hex_smoke: Hex has accrue ${accrue_ver} and accrue_admin ${accrue_admin_ver}."
+    if hex_release_exists accrue_portal "$accrue_portal_ver"; then portal_ok=1; fi
+    if [[ "$accrue_ok" == 1 && "$admin_ok" == 1 && "$portal_ok" == 1 ]]; then
+      echo "accrue_host_hex_smoke: Hex has accrue ${accrue_ver}, accrue_admin ${accrue_admin_ver}, and accrue_portal ${accrue_portal_ver}."
       return 0
     fi
     if [[ $(date +%s) -ge $deadline ]]; then
-      echo "accrue_host_hex_smoke: timed out after ${max_s}s waiting for Hex (accrue ok=${accrue_ok}, accrue_admin ok=${admin_ok})." >&2
+      echo "accrue_host_hex_smoke: timed out after ${max_s}s waiting for Hex (accrue ok=${accrue_ok}, accrue_admin ok=${admin_ok}, accrue_portal ok=${portal_ok})." >&2
       exit 1
     fi
-    echo "accrue_host_hex_smoke: waiting for Hex releases (accrue ${accrue_ver} ok=${accrue_ok}, accrue_admin ${accrue_admin_ver} ok=${admin_ok}); sleeping ${poll_s}s…" >&2
+    echo "accrue_host_hex_smoke: waiting for Hex releases (accrue ${accrue_ver} ok=${accrue_ok}, accrue_admin ${accrue_admin_ver} ok=${admin_ok}, accrue_portal ${accrue_portal_ver} ok=${portal_ok}); sleeping ${poll_s}s..." >&2
     sleep "$poll_s"
   done
 }

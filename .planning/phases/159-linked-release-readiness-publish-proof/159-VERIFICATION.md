@@ -239,3 +239,22 @@ _Populated by `scripts/ci/capture_linked_release_proof.sh`._
 - [x] REL-02 complete
 - [ ] REL-03 complete
 ```
+
+## Plan 02 Automation Handoff (2026-05-31)
+
+Phase 159 Plan 02 moved the remaining live publish proof from manual UAT into the
+primary Release Please workflow. When a real post-`1.3.0` linked release is created,
+`.github/workflows/release-please.yml` now runs `linked-release-proof` after
+`release`, `publish-accrue`, `publish-accrue-admin`, and `publish-accrue-portal`
+all succeed.
+
+The job writes `linked-release-proof.md` as both a workflow summary and a GitHub
+Actions artifact. That artifact is the canonical source for the next live proof
+block: exact `PR_NUMBER`, `TARGET_VERSION`, `RUN_ID`, workflow job ordering, tags,
+GitHub releases, Hex API truth, HexDocs availability, host Hex smoke, and release
+notes contract output.
+
+REL-01 and REL-03 remain incomplete until that CI artifact exists for one real
+post-`1.3.0` linked line. The new automation intentionally fails CI if identifiers
+or public proof surfaces disagree, instead of converting the prior blocker rows
+into a false completion claim.

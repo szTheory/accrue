@@ -11,6 +11,7 @@ on:
         default: '1.0.0'
 
 permissions:
+  actions: read
   contents: write
   issues: write
   pull-requests: write
@@ -300,3 +301,88 @@ jobs:
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
           ACCRUE_PORTAL_HEX_RELEASE: ${{ env.ACCRUE_PORTAL_HEX_RELEASE }}
+
+  linked-release-proof:
+    name: Linked release proof
+    needs: [release, publish-accrue, publish-accrue-admin, publish-accrue-portal]
+    if: ${{ always() && needs.release.outputs.accrue_release_created == 'true' && needs.release.outputs.accrue_admin_release_created == 'true' && needs.release.outputs.accrue_portal_release_created == 'true' && needs.publish-accrue.result == 'success' && needs.publish-accrue-admin.result == 'success' && needs.publish-accrue-portal.result == 'success' }}
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      GH_TOKEN: ${{ github.token }}
+      ACCRUE_HOST_HEX_SMOKE_WAIT_SECONDS: "900"
+      LINKED_RELEASE_PROOF: linked-release-proof.md
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+
+      - name: Install Hex
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Capture linked release proof
+        run: bash scripts/ci/capture_linked_release_proof.sh --auto --output "$LINKED_RELEASE_PROOF"
+
+      - name: Run host Hex smoke
+        run: |
+          set -euo pipefail
+          {
+            echo
+            echo "#### Host Hex smoke"
+            echo
+            echo '```text'
+          } >> "$LINKED_RELEASE_PROOF"
+          bash scripts/ci/accrue_host_hex_smoke.sh 2>&1 | tee -a "$LINKED_RELEASE_PROOF"
+          echo '```' >> "$LINKED_RELEASE_PROOF"
+
+      - name: Verify release notes contract
+        run: |
+          set -euo pipefail
+          {
+            echo
+            echo "#### Release notes contract"
+            echo
+            echo '```text'
+          } >> "$LINKED_RELEASE_PROOF"
+          bash scripts/ci/verify_release_notes_contract.sh 2>&1 | tee -a "$LINKED_RELEASE_PROOF"
+          echo '```' >> "$LINKED_RELEASE_PROOF"
+
+      - name: Publish proof summary
+        if: always()
+        run: |
+          if [ -f "$LINKED_RELEASE_PROOF" ]; then
+            cat "$LINKED_RELEASE_PROOF" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload linked release proof
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linked-release-proof
+          path: linked-release-proof.md
+          if-no-files-found: error

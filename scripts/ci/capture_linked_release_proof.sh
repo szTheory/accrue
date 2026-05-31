@@ -15,7 +15,9 @@ fail() {
 
 usage() {
   cat <<'EOF'
-Usage: bash scripts/ci/capture_linked_release_proof.sh --version <x.y.z> --run-id <id> --pr <number-or-url> --output <path>
+Usage:
+  bash scripts/ci/capture_linked_release_proof.sh --auto [--output <path>]
+  bash scripts/ci/capture_linked_release_proof.sh --version <x.y.z> --run-id <id> --pr <number-or-url> --output <path>
 
 Append a deterministic linked-release proof block keyed to one PR number, one target
 version, and one Release Please workflow run id. The appended block captures:
@@ -25,6 +27,11 @@ version, and one Release Please workflow run id. The appended block captures:
 - Release Please workflow job conclusions and ordering
 - release file snapshot for manifest + package mix/changelog files
 - HexDocs availability for all three packages
+
+With --auto, derive the proof identifiers from GitHub Actions:
+- RUN_ID from GITHUB_RUN_ID
+- PR_NUMBER from the pull request associated with GITHUB_SHA
+- TARGET_VERSION from the lockstep .release-please-manifest.json
 EOF
 }
 
@@ -48,6 +55,63 @@ normalize_pr() {
   fi
 }
 
+version_gt() {
+  local lower=$1
+  local candidate=$2
+  [[ "$candidate" != "$lower" ]] &&
+    [[ "$(printf '%s\n%s\n' "$lower" "$candidate" | sort -V | tail -n 1)" == "$candidate" ]]
+}
+
+derive_version_from_manifest() {
+  local manifest="$ROOT_DIR/.release-please-manifest.json"
+  [[ -f "$manifest" ]] || fail "release manifest does not exist: $manifest"
+
+  local accrue_version admin_version portal_version
+  accrue_version=$(jq -r '.accrue // empty' "$manifest")
+  admin_version=$(jq -r '.accrue_admin // empty' "$manifest")
+  portal_version=$(jq -r '.accrue_portal // empty' "$manifest")
+
+  [[ -n "$accrue_version" && -n "$admin_version" && -n "$portal_version" ]] ||
+    fail "manifest must contain accrue, accrue_admin, and accrue_portal versions"
+  [[ "$accrue_version" == "$admin_version" && "$accrue_version" == "$portal_version" ]] ||
+    fail "manifest versions are not lockstep: accrue=$accrue_version accrue_admin=$admin_version accrue_portal=$portal_version"
+
+  local min_version="${LINKED_RELEASE_MIN_VERSION:-1.3.0}"
+  version_gt "$min_version" "$accrue_version" ||
+    fail "target version must be greater than $min_version for linked proof (found $accrue_version)"
+
+  printf '%s\n' "$accrue_version"
+}
+
+derive_pr_from_commit() {
+  local sha=$1
+  local prs_json pr_number
+
+  prs_json=$(gh api \
+    -H "Accept: application/vnd.github+json" \
+    "repos/$REPO/commits/$sha/pulls?per_page=100")
+
+  pr_number=$(jq -r '
+    [
+      .[]
+      | select((.merged_at // "") != "")
+      | select(
+          ((.head.ref // "") | startswith("release-please--"))
+          or ((.title // "") | test("release"; "i"))
+        )
+    ]
+    | sort_by(.number)
+    | last
+    | .number // empty
+  ' <<<"$prs_json")
+
+  [[ -n "$pr_number" ]] ||
+    fail "could not derive a merged Release Please PR associated with commit $sha"
+
+  printf '%s\n' "$pr_number"
+}
+
+AUTO_MODE=false
 VERSION=""
 RUN_ID=""
 PR_ARG=""
@@ -55,6 +119,10 @@ OUTPUT=""
 
 while (($# > 0)); do
   case "$1" in
+    --auto)
+      AUTO_MODE=true
+      shift
+      ;;
     --version)
       (($# >= 2)) || fail "--version requires a value"
       VERSION=$2
@@ -85,11 +153,6 @@ while (($# > 0)); do
   esac
 done
 
-[[ -n "$VERSION" ]] || fail "--version is required"
-[[ -n "$RUN_ID" ]] || fail "--run-id is required"
-[[ -n "$PR_ARG" ]] || fail "--pr is required"
-[[ -n "$OUTPUT" ]] || fail "--output is required"
-
 require_cmd gh
 require_cmd jq
 require_cmd curl
@@ -103,10 +166,27 @@ else
   fail "shasum or sha256sum is required but not installed"
 fi
 
+if [[ "$AUTO_MODE" == "true" ]]; then
+  [[ -n "${GITHUB_ACTIONS:-}" ]] || fail "--auto requires GitHub Actions environment"
+  [[ -n "${GITHUB_RUN_ID:-}" ]] || fail "--auto requires GITHUB_RUN_ID"
+  [[ -n "${GITHUB_SHA:-}" ]] || fail "--auto requires GITHUB_SHA"
+
+  VERSION=${VERSION:-$(derive_version_from_manifest)}
+  RUN_ID=${RUN_ID:-$GITHUB_RUN_ID}
+  PR_ARG=${PR_ARG:-$(derive_pr_from_commit "$GITHUB_SHA")}
+  OUTPUT=${OUTPUT:-linked-release-proof.md}
+fi
+
+[[ -n "$VERSION" ]] || fail "--version is required"
+[[ -n "$RUN_ID" ]] || fail "--run-id is required"
+[[ -n "$PR_ARG" ]] || fail "--pr is required"
+[[ -n "$OUTPUT" ]] || fail "--output is required"
+
 PR_NUMBER=$(normalize_pr "$PR_ARG")
 OUTPUT_PATH=$OUTPUT
 [[ "$OUTPUT_PATH" = /* ]] || OUTPUT_PATH="$ROOT_DIR/$OUTPUT_PATH"
-[[ -f "$OUTPUT_PATH" ]] || fail "output ledger does not exist: $OUTPUT_PATH"
+mkdir -p "$(dirname "$OUTPUT_PATH")"
+touch "$OUTPUT_PATH"
 
 git -C "$ROOT_DIR" fetch --tags --force origin
 
@@ -117,7 +197,11 @@ RUN_HEAD_SHA=$(jq -r '.headSha // empty' <<<"$RUN_JSON")
 RUN_CONCLUSION=$(jq -r '.conclusion' <<<"$RUN_JSON")
 [[ "$RUN_WORKFLOW_NAME" == "release-please" || "$RUN_WORKFLOW_NAME" == "Release Please" ]] ||
   fail "run $RUN_ID is not the release workflow (workflowName=${RUN_WORKFLOW_NAME:-<empty>})"
-[[ "$RUN_CONCLUSION" == "success" ]] || fail "workflow run $RUN_ID did not succeed (conclusion=$RUN_CONCLUSION)"
+if [[ "$RUN_CONCLUSION" != "success" ]]; then
+  if [[ "$AUTO_MODE" != "true" || "${GITHUB_RUN_ID:-}" != "$RUN_ID" || ! "$RUN_CONCLUSION" =~ ^(|null)$ ]]; then
+    fail "workflow run $RUN_ID did not succeed (conclusion=$RUN_CONCLUSION)"
+  fi
+fi
 
 PR_JSON=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json number,mergeCommit,url)
 PR_FOUND_NUMBER=$(jq -r '.number // empty' <<<"$PR_JSON")
