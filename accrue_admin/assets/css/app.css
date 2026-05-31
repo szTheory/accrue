@@ -376,6 +376,25 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   font-weight: 600;
 }
 
+/* Dark + system@dark: keep topbar controls readable even when host theme tokens are present. */
+html.accrue-admin[data-theme="dark"] .ax-theme-button,
+html.accrue-admin[data-theme="dark"] .ax-theme-button.ax-theme-button-active,
+html.accrue-admin[data-theme="dark"] .ax-topbar-brand-chip,
+html.accrue-admin[data-theme="dark"] .ax-topbar-brand-chip .ax-label,
+html.accrue-admin[data-theme="dark"] .ax-topbar-brand-name {
+  color: #f4f7fa !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.accrue-admin[data-theme="system"] .ax-theme-button,
+  html.accrue-admin[data-theme="system"] .ax-theme-button.ax-theme-button-active,
+  html.accrue-admin[data-theme="system"] .ax-topbar-brand-chip,
+  html.accrue-admin[data-theme="system"] .ax-topbar-brand-chip .ax-label,
+  html.accrue-admin[data-theme="system"] .ax-topbar-brand-name {
+    color: #f4f7fa !important;
+  }
+}
+
 .ax-shell-content {
   padding: 1.25rem;
   min-width: 0;
@@ -912,6 +931,16 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: var(--ax-border);
   background: var(--ax-elevated);
   color: var(--ax-primary);
+}
+
+html.accrue-admin[data-theme="dark"] .ax-button-ghost {
+  color: #f4f7fa !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.accrue-admin[data-theme="system"] .ax-button-ghost {
+    color: #f4f7fa !important;
+  }
 }
 
 .ax-button-danger {
