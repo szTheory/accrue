@@ -420,11 +420,19 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current Milestone
 
-No active milestone. Run `$gsd-new-milestone` to define the next requirements and roadmap.
+### v1.48 — Release Readiness + Stable Core Posture
+
+**Goal:** Publish the post-1.3.0 / v1.47 correctness and adopter-proof work, make the stable-core posture explicit across public and planning surfaces, archive stale backlog anchors, and then pause broad feature work.
+
+**Target features:**
+- Linked release readiness: verify package versions, changelogs, release automation, docs, and deterministic gates are coherent for the next public package line after `1.3.0`.
+- Stable-core positioning: update public docs, package docs, planning mirrors, and release notes so adopters understand Accrue is stable-core / demand-driven expansion rather than broad feature-chasing.
+- Backlog anchor closure: retire or reclassify stale planning seeds, friction anchors, and historical backlog pointers that no longer represent active milestone scope.
+- Pause rule: record the maintainer decision that broad feature work should stop after this milestone unless reopened by concrete adopter, correctness, security, operational, support, or strategy evidence.
 
 ## Current State
 
-**Awaiting next milestone.** v1.47 shipped and archived on **2026-05-31**. Last public Hex release remains **1.3.0** across accrue, accrue_admin, and accrue_portal until the next release milestone publishes packages.
+**Planning v1.48.** v1.47 shipped and archived on **2026-05-31**. Last public Hex release remains **1.3.0** across accrue, accrue_admin, and accrue_portal until this release-readiness milestone publishes the next coherent package line.
 
 **Last shipped planning milestone:** **v1.47** — Phases **154–158** — **2026-05-31**
 **Hex.pm:** accrue 1.3.0 · accrue_admin 1.3.0 · accrue_portal 1.3.0
@@ -476,4 +484,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after stable-core posture assessment*
+*Last updated: 2026-05-31 after v1.48 milestone start*

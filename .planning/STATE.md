@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.47
-milestone_name: ENT-10 Polish + Adopter-Proof Completeness
-status: Awaiting next milestone
-last_updated: "2026-05-31T17:08:52.280Z"
-last_activity: 2026-05-31 — Milestone v1.47 completed and archived
+milestone: v1.48
+milestone_name: Release Readiness + Stable Core Posture
+status: planning
+last_updated: "2026-05-31T17:30:37.715Z"
+last_activity: 2026-05-31
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-31 after v1.47 milestone close)
 
 ## Current Position
 
-Phase: Milestone v1.47 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-05-31 — Milestone v1.47 completed and archived
+Status: Defining requirements
+Last activity: 2026-05-31 — Milestone v1.48 started
 
 ## Milestone Progress
 
