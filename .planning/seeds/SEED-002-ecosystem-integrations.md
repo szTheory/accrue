@@ -1,7 +1,17 @@
+---
+seed_id: SEED-002-ecosystem-integrations
+status: backlogged
+updated: 2026-05-31
+---
+
 # Ecosystem Integrations (High-Value Wins)
 
 **Domain:** Interoperability with sztheory ecosystem libraries
-**Status:** Seed / Future Roadmap
+**Status:** Backlogged / Future Roadmap
+
+This is a strategic future-roadmap seed, not an unimplemented commitment for the
+current milestone. Keep it available for future milestone selection, but do not
+treat it as a v1.47 closeout blocker.
 
 Accrue provides the canonical billing state and lifecycle events. To provide a true "SaaS-in-a-box" experience, Accrue should provide seamless integration blueprints with the following sztheory libraries:
 

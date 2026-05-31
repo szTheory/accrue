@@ -2,34 +2,33 @@
 gsd_state_version: 1.0
 milestone: v1.47
 milestone_name: ENT-10 Polish + Adopter-Proof Completeness
-status: milestone_complete
-last_updated: 2026-05-31T16:43:02.716Z
-last_activity: 2026-05-31
+status: Awaiting next milestone
+last_updated: "2026-05-31T17:08:52.280Z"
+last_activity: 2026-05-31 — Milestone v1.47 completed and archived
 progress:
   total_phases: 5
   completed_phases: 5
   total_plans: 5
   completed_plans: 5
   percent: 100
-stopped_at: Milestone complete (Phase 158 was final phase)
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-30 after v1.47 milestone start)
+See: `.planning/PROJECT.md` (updated 2026-05-31 after v1.47 milestone close)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Milestone complete
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 158
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-05-31
+Phase: Milestone v1.47 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-31 — Milestone v1.47 completed and archived
 
 ## Milestone Progress
 
@@ -38,10 +37,10 @@ Last activity: 2026-05-31
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 154 | Advisory Cache Core Correctness | ADV-01, ADV-02, ADV-03, ADV-04, POL-01, POL-02 | Complete |
-| 155 | StripeFixtures Polish + Telemetry Counters | POL-03, POL-04 | Not started |
+| 155 | StripeFixtures Polish + Telemetry Counters | POL-03, POL-04 | Complete |
 | 156 | Entitlements Gating Adopter Proof | PRF-01 | Complete |
-| 157 | Metered Usage Adopter Proof | PRF-02 | Not started |
-| 158 | Oban Cron Wiring Adopter Proof | PRF-03 | Not started |
+| 157 | Metered Usage Adopter Proof | PRF-02 | Complete |
+| 158 | Oban Cron Wiring Adopter Proof | PRF-03 | Complete |
 
 ### Recently shipped milestones
 
@@ -113,6 +112,7 @@ Last activity: 2026-05-31
 ### Roadmap Evolution
 
 - v1.47 roadmap created 2026-05-30: Phases 154–158
+- v1.47 shipped and archived 2026-05-31: Phases 154–158, 5 plans, 11 requirements satisfied
 
 ### Decisions
 
@@ -145,7 +145,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | scope | Compensating-event backfill of pre-v1.44 events without `mrr_value_cents` | out of scope v1.44; cutoff-date label is the v1.44 honest answer | 2026-05-27 |
 | scope | Real-time PubSub-driven dashboard refresh | out of scope v1.44; coupled to multi-channel dunning v1.45+ | 2026-05-27 |
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | carried |
-| seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | dormant; carry to v1.47+ | 2026-05-30 |
+| seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | backlogged; future-roadmap seed, not a closeout blocker | 2026-05-31 |
 
 ## Session Continuity
 
@@ -155,4 +155,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Run `/gsd:verify-work 154` for manual UAT, or continue with `/gsd:plan-phase 155`.
+- Start the next milestone with `$gsd-new-milestone`.

@@ -12,6 +12,21 @@ Tagline: *"Billing state, modeled clearly."*
 
 ## Last shipped milestone
 
+### v1.47 — ENT-10 Polish + Adopter-Proof Completeness (**archived 2026-05-31**)
+
+**Goal:** Close the ENT-10 advisory-cache follow-up set and prove entitlements gating, metered usage, and Oban cron wiring in the checked-in example host.
+
+**Delivered:**
+- Advisory entitlement cache writes now use a DB-level monotonic upsert guard with stale handling, accurate processor attribution, and livemode carry-forward.
+- Stripe entitlement-summary fixtures can model absent `livemode` directly, and default metrics expose malformed/orphan entitlement-summary webhook signals.
+- Fail-closed LiveView entitlement gating for unloaded organization billables is proven through the example host route.
+- Example host metered usage proof subscribes to the metered plan, clicks the visible LiveView action, and asserts the durable meter event value.
+- Base host Oban config wiring is validated directly for required cron workers and queues, with append-merge guidance anchored at the host crontab callsite.
+
+**Closeout proof:** Phases 154–158; planning tag `v1.47`; see `.planning/MILESTONES.md` v1.47 entry, `.planning/milestones/v1.47-ROADMAP.md`, `.planning/milestones/v1.47-REQUIREMENTS.md`, and `.planning/milestones/v1.47-MILESTONE-AUDIT.md`.
+
+## Prior shipped milestone
+
 ### v1.46 — Maintenance & Closure (**archived 2026-05-30**)
 
 **Goal:** Routine maintenance, dependency updates, ENT-10 scoping fix, @since annotation cleanup, and shipping the linked 1.3.0 Hex publish across all three packages.
@@ -390,33 +405,28 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **Closeout proof:** `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
-## Current Milestone: v1.47 ENT-10 Polish + Adopter-Proof Completeness
+## Current Milestone
 
-**Goal:** Close all ENT-10 advisory-cache follow-up items and prove entitlements gating, metered usage, and Oban crons in `examples/accrue_host`.
-
-**Target features:**
-- WR-05 concurrency fix: replace optimistic-lock path with DB upsert in entitlement summary writes (eliminates `Ecto.StaleEntryError` on concurrent Oban delivery)
-- IN-01: set `:processor` in `write_entitlement_summary/8` for non-Stripe accuracy
-- IN-02: pass raw boolean-or-nil for livemode (preserve "unknown" state)
-- IN-03/IN-04: stripe_fixtures moduledoc polish + metrics counter or documented omission
-- Entitlements gating adopter-proof in `examples/accrue_host`
-- Metered usage adopter-proof in `examples/accrue_host`
-- Oban cron adopter-proof in `examples/accrue_host` (dunning sweeper or MRR cron)
+No active milestone. Run `$gsd-new-milestone` to define the next requirements and roadmap.
 
 ## Current State
 
-**Active milestone v1.47.** Phases **154–157** complete; Phase **158** remains. Last shipped: **v1.46** — Phases **151–153** — **2026-05-30**. All three packages at **1.3.0** on Hex.pm (accrue, accrue_admin, accrue_portal).
+**Awaiting next milestone.** v1.47 shipped and archived on **2026-05-31**. Last public Hex release remains **1.3.0** across accrue, accrue_admin, and accrue_portal until the next release milestone publishes packages.
 
-**Last shipped:** **v1.46** — Phases **151–153** — **2026-05-30**
+**Last shipped planning milestone:** **v1.47** — Phases **154–158** — **2026-05-31**
 **Hex.pm:** accrue 1.3.0 · accrue_admin 1.3.0 · accrue_portal 1.3.0
 
 ## Requirements
 
-### Validated v1.47 (active milestone)
+### Validated v1.47 (archived in `.planning/milestones/v1.47-REQUIREMENTS.md`; milestone shipped & archived 2026-05-31)
 
-Advisory cache correctness, StripeFixtures polish, and adopter-proof coverage are partially complete.
+ENT-10 Polish + Adopter-Proof Completeness — 11/11 satisfied.
 
-- ✓ **PRF-02** — Metered usage adopter proof in `examples/accrue_host` — validated in Phase 157.
+- ✓ **ADV-01..ADV-04** — Advisory cache concurrency, NULL watermark, stale telemetry, and concurrent delivery proof — v1.47
+- ✓ **POL-01..POL-04** — Advisory cache processor/livemode fidelity, fixture polish, and telemetry metrics polish — v1.47
+- ✓ **PRF-01** — Entitlements gating adopter proof in `examples/accrue_host` — v1.47
+- ✓ **PRF-02** — Metered usage adopter proof in `examples/accrue_host` — v1.47
+- ✓ **PRF-03** — Oban cron and queue wiring adopter proof in `examples/accrue_host` — v1.47
 
 ### Validated v1.46 (archived in `.planning/milestones/v1.46-REQUIREMENTS.md`; milestone shipped & archived 2026-05-30)
 
@@ -453,4 +463,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 — Phase 157 validated PRF-02*
+*Last updated: 2026-05-31 after v1.47 milestone*

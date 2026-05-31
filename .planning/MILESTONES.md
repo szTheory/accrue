@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.47 ENT-10 Polish + Adopter-Proof Completeness (Shipped: 2026-05-31)
+
+**Phases completed:** 5 phases, 5 plans, 11 tasks
+
+**Key accomplishments:**
+
+- Advisory entitlement cache writes now use a DB-level monotonic upsert guard with stale handling, accurate processor attribution, and livemode carry-forward.
+- Stripe entitlement-summary fixtures can model absent `livemode` directly, and default metrics now expose the malformed/orphan entitlement-summary webhook signals.
+- Fail-closed LiveView entitlement gating for unloaded organization billables, proven through the checked-in example host route.
+- Example host metered usage proof now subscribes to the metered plan, clicks the visible LiveView action, and asserts the durable meter event value.
+- Base host Oban config wiring is now validated directly for required cron workers and queues, with append-merge guidance anchored at the host crontab callsite.
+
+---
+
 ## v1.46 (Shipped: 2026-05-30)
 
 **Phases completed:** 3 phases, 8 plans, 9 tasks

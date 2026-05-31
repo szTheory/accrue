@@ -1178,6 +1178,51 @@ Closed the last open step of the canonical SaaS loop — gate features/access on
 
 ---
 
+## Milestone: v1.47 — ENT-10 Polish + Adopter-Proof Completeness
+
+**Shipped:** 2026-05-31
+**Phases:** 5 | **Plans:** 5 | **Tasks:** 11
+
+### What Was Built
+
+- Advisory entitlement cache writes now use a DB-level monotonic upsert guard with stale handling, accurate processor attribution, and livemode carry-forward.
+- Stripe entitlement-summary fixtures can model absent `livemode` directly, and default metrics now expose malformed/orphan entitlement-summary webhook signals.
+- Fail-closed LiveView entitlement gating for unloaded organization billables, proven through the checked-in example host route.
+- Example host metered usage proof now subscribes to the metered plan, clicks the visible LiveView action, and asserts the durable meter event value.
+- Base host Oban config wiring is now validated directly for required cron workers and queues, with append-merge guidance anchored at the host crontab callsite.
+
+### What Worked
+
+- Closing the old ENT-10 todo through phases 154 and 155 made the advisory-cache fixes traceable instead of leaving them as code-review residue.
+- The adopter-proof phases used the example host as the proof surface, which turned prior "built in core but not demonstrated" concerns into executable host checks.
+- The milestone audit caught stale planning artifacts before archive: missing Phase 154 verification recognition, PRF-03 traceability, and queue wording drift.
+
+### What Was Inefficient
+
+- The audit command was not registered in this runtime, so the audit rerun had to be performed inline from the workflow contract and written manually.
+- `milestone.complete` did not archive the doubled audit filename convention (`v1.47-v1.47-MILESTONE-AUDIT.md`), requiring a manual move to the milestone archive.
+- `STATE.md` still carried stale "Not started" rows after phase completion, so closeout needed another planning hygiene pass.
+
+### Patterns Established
+
+- Treat example-host adopter proof as a closeout requirement for headline JTBDs, not a later documentation nicety.
+- Keep required queue sets explicit in requirements, roadmap, host config proof, and adoption matrix so drift is easy to spot.
+- Move future-roadmap seeds to `status: backlogged` when they are not active commitments, keeping `audit-open` focused on actual blockers.
+
+### Key Lessons
+
+1. Phase verification should be present before milestone audit, and audit reruns need a reliable CLI entry point.
+2. Archive handlers should support the repo's actual audit filename convention or closeout will report false `audit: false`.
+3. A clear adoption-proof matrix makes it possible to close old confidence threads with evidence rather than opinion.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: one concentrated closeout plus prior phase execution sessions.
+- Notable: highest-signal checks were targeted Phase 154 entitlement-summary tests, Phase 158 host recovery wiring test, `audit-open`, and `roadmap.analyze`.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -1186,6 +1231,7 @@ Closed the last open step of the canonical SaaS loop — gate features/access on
 |-----------|----------|--------|------------|
 | v1.29 | short | 3 | **MG-01..MG-07** — Mailglass framework integration replacing `mjml_eex` + `phoenix_swoosh`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`; 13 templates ported, 26 MJML/text assets deleted; `mailglass_cleanup_test` enforces non-regression in CI; phases **88–90** under **`milestones/v1.29-phases/`**; archives **`milestones/v1.29-*`**. |
 | v1.46 | ~2 days | 3 | **MNT-01** — maintenance release: ENT-10 dual-column webhook scope fix, dep updates, @since annotation cleanup, credo wired in accrue_portal, Three Zeros gate green across all 3 packages, 1.3.0 Hex publish. Audit-gap closure phases (152+153) added retroactively to close VERIFICATION.md + REQUIREMENTS gaps. |
+| v1.47 | short | 5 | **ADV/POL/PRF** — closed ENT-10 advisory-cache correctness and polish, then made entitlements gating, metered usage, and Oban recovery wiring executable in `examples/accrue_host`; closed old adopter-proof thread and moved SEED-002 to future-roadmap backlog. |
 | v1.39 | ~3 days | 5 | **ENT-01..12** — closed the canonical SaaS loop's last step (entitlements/plan-gating), local-first with no new tables / no Stripe dependency on the gate path. Correctness contracts (fail-closed + lifecycle-predicate reuse) baked into the first phase's exit criteria; risky Stripe-native sync isolated last + off-by-default behind a machine-enforced isolation gate; three new merge-blocking static gates (runtime-LiveView-free, support-matrix drift, sync isolation). Closed at `tech_debt` (DoD achieved, deferred non-fail-open follow-ups + partial Nyquist 123–125). Phases **123–127** under **`milestones/v1.39-*`**. |
 | v1.27 | short | 2 | **CLS-01..03** + **INV-05** — pre-1.0 closure narrative on README / **`RELEASING`** / **`upgrade`** + post-touch friction certification **(b)**; **`*-VERIFICATION.md`** only (inline); phases **84–85** under **`milestones/v1.27-phases/`**; **`milestones/v1.27-*`** archives. |
 | v1.26 | short | 2 | **INT-13** + **INV-04** — billing portal on First Hour + matrix + CI needles; post-touch friction certification **(b)**; **`*-VERIFICATION.md`** + **3** plan summaries; phases **82–83** under **`milestones/v1.26-phases/`**. |
