@@ -34,6 +34,10 @@ grep -Fq "## accrue" "$notes" || fail "release-notes.md missing accrue section"
 grep -Fq "## accrue_admin" "$notes" || fail "release-notes.md missing accrue_admin section"
 grep -Fq "GitHub releases" "$notes" || fail "release-notes.md missing GitHub releases link"
 grep -Fq "accrue_portal" "$notes" || fail "release-notes.md must mention accrue_portal version-family context"
+grep -Eq "stable-core[^[:cntrl:]]*posture" "$notes" ||
+  fail "release-notes.md missing stable-core posture token"
+grep -Eq "maturity-and-maintenance\\.md|first_hour\\.md|jobs_to_be_done\\.md" "$notes" ||
+  fail "release-notes.md must link to maturity-and-maintenance.md, first_hour.md, or jobs_to_be_done.md"
 
 version_heading_count=$(grep -Ec "^### ${accrue_version}$" "$notes" || true)
 [[ "$version_heading_count" -ge 2 ]] ||
