@@ -98,7 +98,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. A test in `examples/accrue_host` exercises the full path: subscribe to a metered price → trigger Simulate API Call → assert flash confirmation + exactly one `MeterEvent` row.
   2. An inline code comment explains that `value:` must be used (not `quantity:`, which is silently ignored) when submitting meter events.
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 157-01-PLAN.md — Upgrade the host metered usage proof to the metered plan, assert durable meter-event value, and add the inline `value:` vs `quantity:` comment
 
 ### Phase 158: Oban Cron Wiring Adopter Proof
 
@@ -163,7 +166,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. A test in `examples/accrue_host` exercises the full path: subscribe to a metered price → trigger Simulate API Call → assert flash confirmation + exactly one `MeterEvent` row.
   2. An inline code comment explains that `value:` must be used (not `quantity:`, which is silently ignored) when submitting meter events.
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 157-01-PLAN.md — Upgrade the host metered usage proof to the metered plan, assert durable meter-event value, and add the inline `value:` vs `quantity:` comment
 
 ### Phase 158: Oban Cron Wiring Adopter Proof
 **Goal:** An adopter running `recovery_wiring_test.exs` gets a deterministic pass/fail signal that all four required Oban cron workers and all four required Oban queues are wired in their host config — with a `config.exs` comment showing the safe append-merge pattern for adopters who already have a crontab.
