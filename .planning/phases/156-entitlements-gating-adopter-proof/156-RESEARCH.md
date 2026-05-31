@@ -223,12 +223,12 @@ end
 |---|-------|---------|---------------|
 | A1 | Entitled users are likely to mis-order `on_mount` without explicit comment guidance | Common Pitfalls | Medium; may still pass internal tests but degrade adopter DX |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should `NotLoaded` normalization also be asserted in `accrue/test/accrue/live/entitlements_test.exs`?**
+1. **RESOLVED: Should `NotLoaded` normalization also be asserted in `accrue/test/accrue/live/entitlements_test.exs`?**
    - What we know: Host route regression is mandatory proof; core live test file already exists and is non-async. [VERIFIED: codebase grep]
-   - What's unclear: Whether one additional unit assertion improves maintainability enough to justify extra scope.
-   - Recommendation: Keep optional; only add if implementation introduces a new helper that benefits from direct unit coverage.
+   - Decision: Do not add duplicate core LiveView coverage in Phase 156. The required proof is the adopter-facing real-route regression in `examples/accrue_host/test/accrue_host_web/live/entitlements_guard_test.exs`, paired with shared guard normalization in `Accrue.Entitlements.Guard`.
+   - Rationale: D-07 through D-09 prefer one focused host regression and explicitly avoid broad duplicate unit coverage unless a new helper requires it. The generated plan keeps that boundary by adding only the host route regression and source assertions against the shared guard seam.
 
 ## Environment Availability
 
