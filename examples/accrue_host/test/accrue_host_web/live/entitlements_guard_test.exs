@@ -22,7 +22,9 @@ defmodule AccrueHostWeb.EntitlementsGuardTest do
     assert html =~ "You have access to this premium feature"
   end
 
-  test "non-entitled organization is denied access to the gated advanced reports route", %{conn: conn} do
+  test "non-entitled organization is denied access to the gated advanced reports route", %{
+    conn: conn
+  } do
     user = AccrueHost.AccountsFixtures.user_fixture()
     basic_org = AccrueHost.AccountsFixtures.organization_fixture(%{owner: user})
 
@@ -35,6 +37,7 @@ defmodule AccrueHostWeb.EntitlementsGuardTest do
       |> Plug.Conn.put_session(:active_organization_slug, basic_org.slug)
 
     result = live(conn, "/app/reports/advanced")
+
     assert {:error,
             {:redirect,
              %{
