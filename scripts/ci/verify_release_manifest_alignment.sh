@@ -18,23 +18,31 @@ MANIFEST="$ROOT_DIR/.release-please-manifest.json"
 
 m_accrue=$(jq -r '.accrue // empty' "$MANIFEST")
 m_admin=$(jq -r '.accrue_admin // empty' "$MANIFEST")
+m_portal=$(jq -r '.accrue_portal // empty' "$MANIFEST")
 
 [[ -n "$m_accrue" ]] || fail "manifest missing non-empty .accrue version"
 [[ -n "$m_admin" ]] || fail "manifest missing non-empty .accrue_admin version"
+[[ -n "$m_portal" ]] || fail "manifest missing non-empty .accrue_portal version"
 
 mix_accrue=$(sed -n 's/^  @version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue/mix.exs" | head -n 1)
 mix_admin=$(sed -n 's/^  @version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue_admin/mix.exs" | head -n 1)
+mix_portal=$(sed -n 's/^  @version "\([^"]*\)"/\1/p' "$ROOT_DIR/accrue_portal/mix.exs" | head -n 1)
 
 [[ -n "$mix_accrue" ]] || fail "could not parse @version from accrue/mix.exs"
 [[ -n "$mix_admin" ]] || fail "could not parse @version from accrue_admin/mix.exs"
+[[ -n "$mix_portal" ]] || fail "could not parse @version from accrue_portal/mix.exs"
 
 [[ "$m_accrue" == "$m_admin" ]] ||
   fail "manifest lockstep violated: accrue=$m_accrue accrue_admin=$m_admin"
+[[ "$m_accrue" == "$m_portal" ]] ||
+  fail "manifest lockstep violated: accrue=$m_accrue accrue_portal=$m_portal"
 
 [[ "$m_accrue" == "$mix_accrue" ]] ||
   fail "accrue: manifest version $m_accrue != mix.exs @version $mix_accrue"
 
 [[ "$m_admin" == "$mix_admin" ]] ||
   fail "accrue_admin: manifest version $m_admin != mix.exs @version $mix_admin"
+[[ "$m_portal" == "$mix_portal" ]] ||
+  fail "accrue_portal: manifest version $m_portal != mix.exs @version $mix_portal"
 
-echo "OK: release manifest and mix.exs @version aligned at $m_accrue"
+echo "OK: release manifest and mix.exs @version aligned at $m_accrue (accrue, accrue_admin, accrue_portal)"

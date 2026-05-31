@@ -17,12 +17,14 @@ usage() {
   cat <<'EOF'
 Usage: bash scripts/ci/capture_linked_release_proof.sh --version <x.y.z> --run-id <id> --pr <number-or-url> --output <path>
 
-Append a deterministic Phase 121 proof block keyed to one PR number, one target
+Append a deterministic linked-release proof block keyed to one PR number, one target
 version, and one Release Please workflow run id. The appended block captures:
 - git tags for accrue, accrue_admin, accrue_portal
 - GitHub release URLs and publish timestamps
 - Hex API latest_version and updated_at for all three packages
 - Release Please workflow job conclusions and ordering
+- release file snapshot for manifest + package mix/changelog files
+- HexDocs availability for all three packages
 EOF
 }
 
@@ -120,6 +122,8 @@ done
 release_lines=()
 hex_lines=()
 tag_lines=()
+snapshot_lines=()
+hexdocs_lines=()
 
 for package in accrue accrue_admin accrue_portal; do
   tag="${package}-v${VERSION}"
@@ -138,6 +142,26 @@ for package in accrue accrue_admin accrue_portal; do
   [[ "$hex_version" == "$VERSION" ]] ||
     fail "Hex latest_version mismatch for $package: expected $VERSION, found ${hex_version:-<empty>}"
   hex_lines+=( "| $package | $hex_version | $hex_updated | https://hex.pm/api/packages/$package |" )
+
+  hexdocs_url="https://hexdocs.pm/${package}/readme.html"
+  hexdocs_status=$(curl -fsSIL -o /dev/null -w "%{http_code}" "$hexdocs_url" || true)
+  [[ -n "$hexdocs_status" ]] || hexdocs_status="000"
+  [[ "$hexdocs_status" == "200" ]] || fail "HexDocs availability check failed for $package (status=$hexdocs_status url=$hexdocs_url)"
+  hexdocs_lines+=( "| $package | $hexdocs_url | $hexdocs_status |" )
+done
+
+for file in \
+  ".release-please-manifest.json" \
+  "accrue/mix.exs" \
+  "accrue_admin/mix.exs" \
+  "accrue_portal/mix.exs" \
+  "accrue/CHANGELOG.md" \
+  "accrue_admin/CHANGELOG.md" \
+  "accrue_portal/CHANGELOG.md"; do
+  abs="$ROOT_DIR/$file"
+  [[ -f "$abs" ]] || fail "release snapshot file missing: $file"
+  sha=$(shasum -a 256 "$abs" | awk '{print $1}')
+  snapshot_lines+=( "| $file | $sha |" )
 done
 
 captured_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -174,6 +198,20 @@ captured_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   printf '| Package | latest_version | updated_at | API |\n'
   printf '|---------|----------------|------------|-----|\n'
   for line in "${hex_lines[@]}"; do
+    printf '%s\n' "$line"
+  done
+
+  printf '\n#### Release file snapshot\n\n'
+  printf '| File | sha256 |\n'
+  printf '|------|--------|\n'
+  for line in "${snapshot_lines[@]}"; do
+    printf '%s\n' "$line"
+  done
+
+  printf '\n#### HexDocs availability\n\n'
+  printf '| Package | URL | HTTP |\n'
+  printf '|---------|-----|------|\n'
+  for line in "${hexdocs_lines[@]}"; do
     printf '%s\n' "$line"
   done
 } >>"$OUTPUT_PATH"

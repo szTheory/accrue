@@ -166,23 +166,25 @@ Stderr lines from `verify_package_docs.sh` are prefixed with `[verify_package_do
 - `ADOPT-05` — failures on `accrue/guides/troubleshooting.md` (`mix accrue.install --check`), RELEASING/provider-parity phrasing, or other `require_fixed` clusters added in Phase 33.
 - `ADOPT-06` — failures involving `.github/workflows/ci.yml` (not directly read here but referenced by docs), `CONTRIBUTING.md` UAT wording, or `guides/testing-live-stripe.md` / `RELEASING.md` keys such as `STRIPE_TEST_SECRET_KEY` / `release-gate` / `retain-on-failure`.
 
-## REL gates (v1.38 linked publish proof)
+## REL gates (v1.48 linked release readiness + publish proof)
 
 | REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
 |--------|-------------------------------|-------------------------|--------------------------|
-| REL-10 | `scripts/ci/verify_release_pr_scope.sh`; `scripts/ci/repair_linked_release_pr.sh`; `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md` (`PR_NUMBER`, `TARGET_VERSION`) | — | `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md` |
-| REL-11 | `scripts/ci/capture_linked_release_proof.sh`; `.github/workflows/release-please.yml`; `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md` (`RUN_ID`) | — | `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md` |
+| REL-01 | `scripts/ci/verify_release_pr_scope.sh`; `scripts/ci/verify_release_manifest_alignment.sh`; `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` (`PR_NUMBER`, `TARGET_VERSION`) | — | `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` |
+| REL-02 | `scripts/ci/verify_release_manifest_alignment.sh`; deterministic CI bundle evidence rows in `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` | — | `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` |
+| REL-03 | `scripts/ci/capture_linked_release_proof.sh`; `scripts/ci/accrue_host_hex_smoke.sh`; `.github/workflows/release-please.yml`; `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` (`RUN_ID`) | — | `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` |
 
 ### Triage: verify_release_pr_scope.sh
 
 - `verify_release_pr_scope:` failures mean the live Release Please PR does not satisfy the locked three-package contract. The PR must update `.release-please-manifest.json`, all three package `mix.exs` files, and all three package `CHANGELOG.md` files before merge.
 - Use `bash scripts/ci/verify_release_pr_scope.sh --pr <number-or-url> [--version <x.y.z>]` before merge. A passing result is the REL-10 pre-merge gate.
-- Record the passing identifier pair in `.planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md` as `PR_NUMBER:` and `TARGET_VERSION:` and stop using “latest release PR” shortcuts after that.
+- Record the passing identifier pair in `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` as `PR_NUMBER:` and `TARGET_VERSION:` and stop using “latest release PR” shortcuts after that.
 - If the Release Please branch is stale relative to `main`, force-sync `release-please--branches--main` back to `main`, rerun Release Please, and only then apply the portal repair on the regenerated branch.
 - If Release Please leaves `accrue_portal` behind while `accrue` and `accrue_admin` advance together, run `bash scripts/ci/repair_linked_release_pr.sh --version <x.y.z>` on the checked-out release branch and push the repaired branch before merge.
 
 ### Triage: capture_linked_release_proof.sh
 
 - `capture_linked_release_proof:` failures mean the shipped linked release is not publicly proven yet. The script requires one exact PR number, one exact `TARGET_VERSION`, and one exact Release Please `RUN_ID`.
-- Use `bash scripts/ci/capture_linked_release_proof.sh --version <x.y.z> --run-id <id> --pr <number-or-url> --output .planning/phases/121-linked-publish-proof-sweep/121-VERIFICATION.md` after merge and after the Release Please workflow finishes.
+- Use `bash scripts/ci/capture_linked_release_proof.sh --version <x.y.z> --run-id <id> --pr <number-or-url> --output .planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` after merge and after the Release Please workflow finishes.
 - The ledger is append-only: the script records workflow ordering, git tags, GitHub release URLs, and Hex API truth for `accrue`, `accrue_admin`, and `accrue_portal`.
+- The current proof chain is `verify_release_manifest_alignment.sh` -> `capture_linked_release_proof.sh` -> `accrue_host_hex_smoke.sh`, with all outcomes recorded in the Phase 159 ledger.
