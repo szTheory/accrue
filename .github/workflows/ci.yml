@@ -70,6 +70,9 @@ jobs:
       - name: Core admin invoice VERIFY flow id drift guard
         run: bash scripts/ci/verify_core_admin_invoice_verify_ids.sh
 
+      - name: Stable-core posture contract
+        run: bash scripts/ci/verify_stable_core_posture.sh
+
       - name: Release notes freshness contract
         run: bash scripts/ci/verify_release_notes_contract.sh
 
@@ -234,7 +237,7 @@ jobs:
       - name: Accrue docs
         run: cd accrue && MIX_ENV=dev mix docs --warnings-as-errors
 
-      - name: Verify ExDoc @doc since: badges
+      - name: "Verify ExDoc @doc since: badges"
         run: bash scripts/ci/verify_exdoc_since_badges.sh
 
       - name: Accrue retired package audit

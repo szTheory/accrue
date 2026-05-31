@@ -96,6 +96,7 @@ bundle membership is:
 - `bash scripts/ci/verify_package_docs.sh` — package-facing mirrors in `accrue/README.md`, `accrue/guides/first_hour.md`, `accrue/guides/testing.md`, and `guides/testing-live-stripe.md`
 - `bash scripts/ci/verify_verify01_readme_contract.sh` — thin host README proof wording in `examples/accrue_host/README.md`
 - `bash scripts/ci/verify_adoption_proof_matrix.sh` — thin host proof taxonomy in `examples/accrue_host/docs/adoption-proof-matrix.md`
+- `bash scripts/ci/verify_stable_core_posture.sh` — stable-core posture alignment across public docs and planning mirrors
 
 Run the full bundle from the repo root when you touch support wording:
 
@@ -103,7 +104,8 @@ Run the full bundle from the repo root when you touch support wording:
 bash scripts/ci/verify_processor_support_matrix.sh && \
   bash scripts/ci/verify_package_docs.sh && \
   bash scripts/ci/verify_verify01_readme_contract.sh && \
-  bash scripts/ci/verify_adoption_proof_matrix.sh
+  bash scripts/ci/verify_adoption_proof_matrix.sh && \
+  bash scripts/ci/verify_stable_core_posture.sh
 ```
 
 Surface-to-script map:
@@ -134,6 +136,16 @@ Surface-to-script map:
 - **`verify_release_notes_contract:`** (stderr prefix on failure) — treat as the plain-language release-notes freshness gate for `accrue/guides/release-notes.md`.
 - The script requires the current lockstep package version from `accrue/mix.exs`, `accrue_admin/mix.exs`, and `accrue_portal/mix.exs` to appear in release-notes headings for both `accrue` and `accrue_admin`.
 - If this fails during a release, update `accrue/guides/release-notes.md` in the same PR as the version bump so HexDocs does not stall on an older story while changelogs and package versions advance.
+
+### Triage: verify_stable_core_posture.sh
+
+- **`verify_stable_core_posture:`** (stderr prefix on failure) is the dedicated stable-core posture gate for POS-01..03.
+- Expected anchor categories:
+  - canonical posture surfaces (`README.md`, `accrue/README.md`, `maturity-and-maintenance.md`, `jobs_to_be_done.md`, `release-notes.md`),
+  - maintainer mirrors (`.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/processor-support-matrix.md`, adoption-proof matrix),
+  - thin package/proof mirrors (`first_hour.md`, `accrue_admin/README.md`, `accrue_portal/README.md`, `examples/accrue_host/README.md`).
+- Negative guards block retired public posture terms: `feature freeze`, `no new features ever`, and `maintenance only`.
+- If this gate fails, update canonical public guides first and keep package/proof mirrors thin. Do not create a second support matrix or move policy authority away from public guides.
 
 ### Triage: verify_adoption_proof_matrix.sh
 
@@ -173,6 +185,14 @@ Stderr lines from `verify_package_docs.sh` are prefixed with `[verify_package_do
 | REL-01 | `scripts/ci/verify_release_pr_scope.sh`; `scripts/ci/verify_release_manifest_alignment.sh`; `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` (`PR_NUMBER`, `TARGET_VERSION`) | — | `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` |
 | REL-02 | `scripts/ci/verify_release_manifest_alignment.sh`; deterministic CI bundle evidence rows in `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` | — | `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` |
 | REL-03 | `scripts/ci/capture_linked_release_proof.sh`; `scripts/ci/accrue_host_hex_smoke.sh`; `.github/workflows/release-please.yml`; `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` (`RUN_ID`) | — | `.planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md` |
+
+## POS gates (v1.48 stable-core public positioning)
+
+| REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
+|--------|-------------------------------|-------------------------|--------------------------|
+| POS-01 | `scripts/ci/verify_stable_core_posture.sh`; root `README.md`; `accrue/README.md`; `accrue/guides/maturity-and-maintenance.md`; `accrue/guides/jobs_to_be_done.md` | — | `.planning/phases/160-stable-core-public-positioning/160-03-SUMMARY.md` |
+| POS-02 | `scripts/ci/verify_stable_core_posture.sh`; `accrue/guides/first_hour.md`; `accrue_admin/README.md`; `accrue_portal/README.md`; `examples/accrue_host/README.md` | — | `.planning/phases/160-stable-core-public-positioning/160-03-SUMMARY.md` |
+| POS-03 | `scripts/ci/verify_stable_core_posture.sh`; `scripts/ci/verify_release_notes_contract.sh`; `accrue/guides/release-notes.md`; `.planning/processor-support-matrix.md`; `examples/accrue_host/docs/adoption-proof-matrix.md` | — | `.planning/phases/160-stable-core-public-positioning/160-03-SUMMARY.md` |
 
 ### Triage: verify_release_pr_scope.sh
 
