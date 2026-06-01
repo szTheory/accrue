@@ -48,5 +48,10 @@ defmodule AccrueHostWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+
+  if Application.compile_env(:accrue_host, :sql_sandbox) do
+    plug Phoenix.Ecto.SQL.Sandbox
+  end
+
   plug AccrueHostWeb.Router
 end

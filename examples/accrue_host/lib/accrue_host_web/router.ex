@@ -31,6 +31,15 @@ defmodule AccrueHostWeb.Router do
   #   pipe_through :api
   # end
 
+  if Mix.env() == :test do
+    scope "/api/sandbox", AccrueHostWeb do
+      pipe_through(:api)
+
+      post("/", SandboxController, :create)
+      delete("/:metadata", SandboxController, :delete)
+    end
+  end
+
   # Enable Swoosh mailbox preview in development
   if Application.compile_env(:accrue_host, :dev_routes) do
     scope "/dev" do
