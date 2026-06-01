@@ -18,6 +18,9 @@ usage() {
 Usage:
   bash scripts/ci/capture_linked_release_proof.sh --auto [--output <path>]
   bash scripts/ci/capture_linked_release_proof.sh --version <x.y.z> --run-id <id> --pr <number-or-url> --output <path>
+  bash scripts/ci/capture_linked_release_proof.sh --recovery --version <x.y.z> --run-id <id> --pr <number> \
+      --accrue-public-state <state> --accrue-admin-public-state <state> --accrue-portal-public-state <state> \
+      --failed-step <step> --recovery-path <path> --next-command <command> --output <path>
 
 Append a deterministic linked-release proof block keyed to one PR number, one target
 version, and one Release Please workflow run id. The appended block captures:
@@ -27,6 +30,11 @@ version, and one Release Please workflow run id. The appended block captures:
 - Release Please workflow job conclusions and ordering
 - release file snapshot for manifest + package mix/changelog files
 - HexDocs availability for all three packages
+
+With --recovery, append a partial publish recovery block instead:
+- Records public state of each package
+- Documents the failed step and intended recovery path
+- Recommends the exact next command
 
 With --auto, derive the proof identifiers from GitHub Actions:
 - RUN_ID from GITHUB_RUN_ID
@@ -112,15 +120,26 @@ derive_pr_from_commit() {
 }
 
 AUTO_MODE=false
+RECOVERY_MODE=false
 VERSION=""
 RUN_ID=""
 PR_ARG=""
 OUTPUT=""
+ACCRUE_PUBLIC_STATE=""
+ACCRUE_ADMIN_PUBLIC_STATE=""
+ACCRUE_PORTAL_PUBLIC_STATE=""
+FAILED_STEP=""
+RECOVERY_PATH=""
+NEXT_COMMAND=""
 
 while (($# > 0)); do
   case "$1" in
     --auto)
       AUTO_MODE=true
+      shift
+      ;;
+    --recovery)
+      RECOVERY_MODE=true
       shift
       ;;
     --version)
@@ -141,6 +160,36 @@ while (($# > 0)); do
     --output)
       (($# >= 2)) || fail "--output requires a value"
       OUTPUT=$2
+      shift 2
+      ;;
+    --accrue-public-state)
+      (($# >= 2)) || fail "--accrue-public-state requires a value"
+      ACCRUE_PUBLIC_STATE=$2
+      shift 2
+      ;;
+    --accrue-admin-public-state)
+      (($# >= 2)) || fail "--accrue-admin-public-state requires a value"
+      ACCRUE_ADMIN_PUBLIC_STATE=$2
+      shift 2
+      ;;
+    --accrue-portal-public-state)
+      (($# >= 2)) || fail "--accrue-portal-public-state requires a value"
+      ACCRUE_PORTAL_PUBLIC_STATE=$2
+      shift 2
+      ;;
+    --failed-step)
+      (($# >= 2)) || fail "--failed-step requires a value"
+      FAILED_STEP=$2
+      shift 2
+      ;;
+    --recovery-path)
+      (($# >= 2)) || fail "--recovery-path requires a value"
+      RECOVERY_PATH=$2
+      shift 2
+      ;;
+    --next-command)
+      (($# >= 2)) || fail "--next-command requires a value"
+      NEXT_COMMAND=$2
       shift 2
       ;;
     -h|--help)
@@ -187,6 +236,34 @@ OUTPUT_PATH=$OUTPUT
 [[ "$OUTPUT_PATH" = /* ]] || OUTPUT_PATH="$ROOT_DIR/$OUTPUT_PATH"
 mkdir -p "$(dirname "$OUTPUT_PATH")"
 touch "$OUTPUT_PATH"
+
+if [[ "$RECOVERY_MODE" == "true" ]]; then
+  [[ -n "$ACCRUE_PUBLIC_STATE" ]] || fail "--accrue-public-state is required in recovery mode"
+  [[ -n "$ACCRUE_ADMIN_PUBLIC_STATE" ]] || fail "--accrue-admin-public-state is required in recovery mode"
+  [[ -n "$ACCRUE_PORTAL_PUBLIC_STATE" ]] || fail "--accrue-portal-public-state is required in recovery mode"
+  [[ -n "$FAILED_STEP" ]] || fail "--failed-step is required in recovery mode"
+  [[ -n "$RECOVERY_PATH" ]] || fail "--recovery-path is required in recovery mode"
+  [[ -n "$NEXT_COMMAND" ]] || fail "--next-command is required in recovery mode"
+
+  captured_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  {
+    printf '\n### Recovery attempt %s\n\n' "$captured_at"
+    printf 'target_version: %s\n' "$VERSION"
+    printf 'run_id: %s\n' "$RUN_ID"
+    printf 'pr_number: %s\n' "$PR_NUMBER"
+    printf 'accrue_public_state: %s\n' "$ACCRUE_PUBLIC_STATE"
+    printf 'accrue_admin_public_state: %s\n' "$ACCRUE_ADMIN_PUBLIC_STATE"
+    printf 'accrue_portal_public_state: %s\n' "$ACCRUE_PORTAL_PUBLIC_STATE"
+    printf 'failed_step: %s\n' "$FAILED_STEP"
+    printf 'recovery_path: %s\n' "$RECOVERY_PATH"
+    printf 'next_command: %s\n' "$NEXT_COMMAND"
+    printf 'recorded_at: %s\n' "$captured_at"
+  } >>"$OUTPUT_PATH"
+
+  echo "OK: appended recovery block for PR #$PR_NUMBER version $VERSION run $RUN_ID to $OUTPUT_PATH"
+  exit 0
+fi
 
 git -C "$ROOT_DIR" fetch --tags --force origin
 
