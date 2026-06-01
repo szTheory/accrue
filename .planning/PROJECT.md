@@ -426,26 +426,54 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current Milestone
 
-### v1.48 — Release Readiness + Stable Core Posture
+### v1.49 — Realistic Demo App & Adoption Evidence
 
-**Goal:** Publish the post-1.3.0 / v1.47 correctness and adopter-proof work, make the stable-core posture explicit across public and planning surfaces, archive stale backlog anchors, and then pause broad feature work.
+**Goal:** Transform the example host into a highly realistic, "click-around" adoption evidence demo with rich seeds, E2E automation, and frictionless Docker DX.
 
 **Target features:**
-- Linked release readiness: verify package versions, changelogs, release automation, docs, and deterministic gates are coherent for the next public package line after `1.3.0`.
-- Stable-core positioning: update public docs, package docs, planning mirrors, and release notes so adopters understand Accrue is stable-core / demand-driven expansion rather than broad feature-chasing.
-- Backlog anchor closure: retire or reclassify stale planning seeds, friction anchors, and historical backlog pointers that no longer represent active milestone scope.
-- Pause rule: record the maintainer decision that broad feature work should stop after this milestone unless reopened by concrete adopter, correctness, security, operational, support, or strategy evidence.
+- **Realistic Domain & Rich Seeds:** Define a concrete cohort persona/JTBD and populate the demo app with realistic fixtures (users, plans, subscriptions).
+- **Docker DX:** Seamless Docker setup with optimized caching (e.g. Tailwind) for rapid local iteration.
+- **E2E Automation:** Comprehensive, non-flakey Playwright tests covering the happy-path journey (install, onboarding, checkout).
+- **Adoption DX Docs:** Clear guides with a simple "Start Here" DX summary at the top.
 
 ## Current State
 
-**Planning v1.48 complete.** v1.48 closed on **2026-06-01** with linked release-readiness proof, stable-core public positioning, backlog-anchor closure, and the post-v1.48 pause rule. Phase 162 subsequently closed the post-publish proof gap, reconciling the true post-1.3.0 release line.
+**Planning v1.49 started.** v1.49 focuses on adoption evidence, demoing existing features, and DX.
 
 **Last shipped planning milestone:** **v1.48** — Phases **159–162** — **2026-06-01**
 **Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0
 
+## Last shipped milestone
+
+### v1.48 — Release Readiness + Stable Core Posture (**archived 2026-06-01**)
+
+**Goal:** Publish the post-1.3.0 / v1.47 correctness and adopter-proof work, make the stable-core posture explicit across public and planning surfaces, archive stale backlog anchors, and then pause broad feature work.
+
+**Delivered:**
+- Linked release readiness: verified package versions, changelogs, release automation, docs, and deterministic gates.
+- Stable-core positioning: updated public docs, package docs, planning mirrors.
+- Backlog anchor closure: retired stale planning seeds and friction anchors.
+- Pause rule: recorded the maintainer decision that broad feature work should stop unless reopened by concrete evidence.
+
+**Closeout proof:** Phases 159–162; planning tag `v1.48`; see `.planning/MILESTONES.md` v1.48 entry.
+
 ## Requirements
 
-### Validated v1.48 (archived in `.planning/REQUIREMENTS.md`; milestone completed 2026-06-01)
+### Active
+
+- [ ] **EVD-01**: Define realistic SaaS cohort persona and JTBD domain.
+- [ ] **EVD-02**: Implement rich database seeds.
+- [ ] **EVD-03**: Create Docker-based local dev env.
+- [ ] **EVD-04**: Optimize Docker caching layers.
+- [ ] **E2E-01**: Playwright E2E for onboarding/checkout.
+- [ ] **E2E-02**: Playwright E2E for billing management.
+- [ ] **E2E-03**: Integrate tests into CI.
+- [ ] **E2E-04**: Ensure tests are deterministic and flake-free.
+- [ ] **DOC-01**: "Start Here" DX summary in README.
+- [ ] **DOC-02**: Docker setup documentation.
+- [ ] **DOC-03**: Persona-framed documentation.
+
+### Validated v1.48 (archived in `.planning/milestones/v1.48-REQUIREMENTS.md`; milestone completed 2026-06-01)
 
 Release Readiness + Stable Core Posture — 9/9 satisfied.
 
