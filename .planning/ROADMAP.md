@@ -24,13 +24,13 @@ Future feature milestones require at least one of:
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 163 | Realistic Domain & Rich Seeds | Define persona and populate rich database seeds for demo app | EVD-01, EVD-02 | 3 |
-| 164 | Docker DX & Optimized Caching | 2/2 | Complete    | 2026-06-01 |
-| 165 | E2E Automation & Shift-Left CI | Automate happy paths with Playwright and integrate to CI | E2E-01, E2E-02, E2E-03, E2E-04 | 4 |
+| 164 | Docker DX & Optimized Caching | Create a seamless, fast Docker local dev environment | EVD-03, EVD-04 | 3 |
+| 165 | E2E Automation & Shift-Left CI | 1/4 | In Progress|  |
 | 166 | Adoption DX Docs | Write simple, persona-framed "Start Here" guides | DOC-01, DOC-02, DOC-03 | 3 |
 
 ### Phase Details
 
-**Phase 163: Realistic Domain & Rich Seeds**
+### Phase 163: Realistic Domain & Rich Seeds
 Goal: Define persona and populate rich database seeds for demo app
 **Plans:** 1 plans
 
@@ -43,7 +43,7 @@ Success criteria:
 2. Seed scripts generate a realistic set of users, plans, and subscriptions.
 3. Seeded data successfully showcases the Admin UI features.
 
-**Phase 164: Docker DX & Optimized Caching**
+### Phase 164: Docker DX & Optimized Caching
 Goal: Create a seamless, fast Docker local dev environment
 **Plans:** 2 plans
 
@@ -57,7 +57,7 @@ Success criteria:
 2. Tailwind and Hex dependencies are effectively cached.
 3. Developer can spin up the app with one simple command.
 
-**Phase 165: E2E Automation & Shift-Left CI**
+### Phase 165: E2E Automation & Shift-Left CI
 Goal: Automate happy paths with Playwright and integrate to CI
 Requirements: E2E-01, E2E-02, E2E-03, E2E-04
 Success criteria:
@@ -66,7 +66,7 @@ Success criteria:
 3. Tests run reliably in CI against seeded data.
 4. Zero flake in deterministic tests.
 
-**Phase 166: Adoption DX Docs**
+### Phase 166: Adoption DX Docs
 Goal: Write simple, persona-framed "Start Here" guides
 Requirements: DOC-01, DOC-02, DOC-03
 Success criteria:

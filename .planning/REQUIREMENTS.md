@@ -17,7 +17,7 @@
 - [ ] **E2E-01**: Implement robust Playwright E2E tests for the primary onboarding and checkout happy paths.
 - [ ] **E2E-02**: Implement robust Playwright E2E tests for billing management (upgrade, downgrade, cancel, payment methods).
 - [ ] **E2E-03**: Integrate these tests into CI to run automatically, demonstrating a shift-left devops mindset.
-- [ ] **E2E-04**: Ensure tests are deterministic and flake-free when run against the rich seed data.
+- [x] **E2E-04**: Ensure tests are deterministic and flake-free when run against the rich seed data.
 
 ### DX Documentation (DOC)
 
@@ -46,7 +46,7 @@
 | E2E-01 | Phase 165 | Pending |
 | E2E-02 | Phase 165 | Pending |
 | E2E-03 | Phase 165 | Pending |
-| E2E-04 | Phase 165 | Pending |
+| E2E-04 | Phase 165 | Complete |
 | DOC-01 | Phase 166 | Pending |
 | DOC-02 | Phase 166 | Pending |
 | DOC-03 | Phase 166 | Pending |
