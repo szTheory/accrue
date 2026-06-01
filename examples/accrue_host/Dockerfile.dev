@@ -1,0 +1,20 @@
+FROM elixir:1.17-slim
+
+# Install OS dependencies
+RUN apt-get update && \
+    apt-get install -y build-essential inotify-tools git postgresql-client nodejs npm && \
+    apt-get clean && \
+    rm -f /var/lib/apt/lists/*_*
+
+# Install hex and rebar
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+# Set working directory
+WORKDIR /workspace/examples/accrue_host
+
+# Expose Phoenix port
+EXPOSE 4000
+
+# Start command
+CMD ["bash", "-c", "mix setup && mix phx.server"]
