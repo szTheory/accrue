@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.49
 milestone_name: Realistic Demo App & Adoption Evidence
-status: planning
-last_updated: "2026-06-01T18:00:00.000Z"
-last_activity: 2026-06-01
+status: Defining requirements
+last_updated: "2026-06-01T18:30:45.706Z"
+last_activity: 2026-06-01 — Milestone v1.49 started
 progress:
   total_phases: 4
   completed_phases: 0
@@ -121,9 +121,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-01T18:00:00.000Z
-Stopped at: v1.49 Milestone Initialized
-Resume file: None
+Last session: 2026-06-01T18:30:45.702Z
+Stopped at: Phase 163 context gathered
+Resume file: .planning/phases/163-realistic-domain-rich-seeds/163-CONTEXT.md
 
 ## Operator Next Steps
 
