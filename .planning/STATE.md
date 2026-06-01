@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.48
 milestone_name: Release Readiness + Stable Core Posture
 status: executing
-last_updated: "2026-06-01T00:52:43.955Z"
-last_activity: 2026-06-01 -- Phase 161 planning complete
+last_updated: "2026-06-01T01:00:51.600Z"
+last_activity: 2026-06-01 -- Phase 161 execution started
 progress:
   total_phases: 3
   completed_phases: 2
@@ -21,14 +21,20 @@ See: `.planning/PROJECT.md` (updated 2026-05-31 after v1.48 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 161 — backlog anchor closure + pause rule
+**Current focus:** Phase 161 — backlog-anchor-closure-pause-rule
 
 ## Current Position
 
-Phase: 161
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-01 -- Phase 161 planning complete
+Phase: 161 (backlog-anchor-closure-pause-rule) — EXECUTING
+Plan: 1 of 1
+Status: Executing Phase 161
+Last activity: 2026-06-01 -- Phase 161 execution started
+
+## Post-v1.48 Pause Rule
+
+After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+
+No broad feature milestone is currently open.
 
 ## Milestone Progress
 
@@ -157,18 +163,18 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Deferred Items
 
-| Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| scope | Rich metered/tiered/range entitlement math (beyond seat counts) | out of scope v1.39 | 2026-05-22 |
-| scope | Atomic seat enforcement / membership management | host-owned; documented recipe, not core API | 2026-05-22 |
-| scope | Typed upstream Stripe Entitlements resources + live API reads | deferred to `lattice_stripe ≥ 1.2` | 2026-05-22 |
-| scope | Multi-channel (SMS/push) dunning via Chimeway | out of scope v1.45; deferred | 2026-05-28 |
-| scope | Per-step funnel breakdown in recovery dashboard | out of scope v1.44; deferred to v1.45+ if demanded | 2026-05-27 |
-| scope | MRR-at-risk column on at-risk table | out of scope v1.44; requires extracting `calculate_mrr_cents/1` from `DefaultHandler` | 2026-05-27 |
-| scope | Compensating-event backfill of pre-v1.44 events without `mrr_value_cents` | out of scope v1.44; cutoff-date label is the v1.44 honest answer | 2026-05-27 |
-| scope | Real-time PubSub-driven dashboard refresh | out of scope v1.44; coupled to multi-channel dunning v1.45+ | 2026-05-27 |
-| strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | carried |
-| seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | backlogged; future-roadmap seed, not a closeout blocker | 2026-05-31 |
+| Category | Item | Status | Reason | Future owner/category | revisit_trigger | Deferred At |
+|----------|------|--------|--------|-----------------------|-----------------|-------------|
+| scope | Rich metered/tiered/range entitlement math (beyond seat counts) | out of scope v1.39 | Current entitlement support intentionally covers local plan and seat-style quantities without a sourced adopter contract for richer math. | Entitlements extension | concrete adopter failure or explicit adopter contract requiring richer entitlement math | 2026-05-22 |
+| scope | Atomic seat enforcement / membership management | host-owned; documented recipe, not core API | Membership ownership remains app-specific and Accrue does not own host user/team schemas. | Host integration recipe | concrete adopter failure showing documented host-owned enforcement is insufficient | 2026-05-22 |
+| scope | Typed upstream Stripe Entitlements resources + live API reads | deferred to `lattice_stripe >= 1.2` | Local entitlement truth is canonical; typed upstream reads wait on dependency capability. | Stripe advisory overlay | correctness/security/data-loss risk in advisory cache truth or explicit dependency capability change | 2026-05-22 |
+| scope | Multi-channel (SMS/push) dunning via Chimeway | out of scope v1.45; deferred | In-app and email dunning closed the current story without adding extra compliance and channel-delivery scope. | Dunning ecosystem integration | repeated support issue or concrete adopter failure requiring SMS/push orchestration | 2026-05-28 |
+| scope | Per-step funnel breakdown in recovery dashboard | out of scope v1.44; deferred to v1.45+ if demanded | Recovery dashboard shipped the core recovered/lost MRR story; per-step analytics lacked immediate adopter demand. | Analytics enhancement | concrete adopter failure or repeated support issue requiring per-step funnel diagnosis | 2026-05-27 |
+| scope | MRR-at-risk column on at-risk table | out of scope v1.44; requires extracting `calculate_mrr_cents/1` from `DefaultHandler` | Useful polish, but the existing dashboard can operate without exposing at-risk MRR in that table. | Analytics enhancement | concrete adopter failure or operational failure proving at-risk prioritization needs this column | 2026-05-27 |
+| scope | Compensating-event backfill of pre-v1.44 events without `mrr_value_cents` | out of scope v1.44; cutoff-date label is the v1.44 honest answer | Historical event gaps are honestly labeled and do not affect new lifecycle capture. | Analytics data repair | correctness/data-loss risk or explicit strategy change requiring historical normalized MRR backfill | 2026-05-27 |
+| scope | Real-time PubSub-driven dashboard refresh | out of scope v1.44; coupled to multi-channel dunning v1.45+ | Poll/manual refresh is sufficient for the current operator workflow. | Admin analytics UX | concrete adopter failure or repeated support issue requiring real-time recovery monitoring | 2026-05-27 |
+| strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | Accrue is a billing/subscription library, not an accounting, merchant-of-record, or payout product. | Strategy non-goal | explicit strategy change or correctness/security/data-loss risk that cannot be handled by host-owned exports | carried |
+| seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | backlogged; future-roadmap seed, not a closeout blocker | Ecosystem blueprints are dormant future-roadmap material and do not open milestone scope by themselves. | Future roadmap / ecosystem integrations | concrete adopter failure requiring an integration, repeated support issue, or explicit strategy change | 2026-05-31 |
 
 ## Session Continuity
 

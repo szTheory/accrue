@@ -21,7 +21,13 @@ Default future milestone posture:
 - Keep Stripe / Braintree / Fake support **capability-explicit**. Any processor-surface change must update behavior, support matrix, docs, examples/verifiers, and release notes together.
 - Preserve the architectural boundary: `accrue` owns billing domain and public facades; `accrue_admin` owns operator UI; `accrue_portal` owns customer self-serve UI; host apps own Repo, migrations, Oban supervision, auth, session, runtime secrets, and app-domain membership policy.
 
-Recommended next default milestone: **Release Readiness + Stable Core Posture** — publish the post-1.3.0 v1.47 correctness/adopter-proof work, clarify stable-core positioning, archive stale backlog anchors, and then pause broad feature work.
+### Post-v1.48 pause rule
+
+After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+
+A historical anchor, dormant seed, or deferred idea never opens milestone scope by itself; any reopen decision must be recorded in `.planning/PROJECT.md` or a future strategy artifact before `.planning/ROADMAP.md` or `.planning/STATE.md` changes.
+
+Default next work after v1.48: no broad feature milestone is currently open; future work defaults to release-readiness, maintenance, verifier hardening, support-contract hardening, or explicitly justified strategy change.
 
 ## Last shipped milestone
 
