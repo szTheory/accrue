@@ -212,12 +212,12 @@ Source: [scripts/ci/capture_linked_release_proof.sh](scripts/ci/capture_linked_r
 |---|-------|---------|---------------|
 | A1 | `RELEASING.md` “Last verified” date (`2026-05-07`) is stale relative to proof-job wiring and may need mirror reconciliation. [ASSUMED] | Common Pitfalls / Mirror reconciliation | Low-medium; could leave runbook/date mirror inconsistent. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 162 update `RELEASING.md` “Last verified against” date?**
    - What we know: Current line is `2026-05-07`; workflow proof job wiring was added later. [VERIFIED: codebase grep]
-   - What's unclear: Whether maintainers want date-only refresh in this phase or defer to a release-process maintenance phase.
-   - Recommendation: Treat as conditional mirror update only if Phase 162 edits release-process semantics or if audit requires this specific mirror correction.
+   - Resolution: Phase 162 should update `RELEASING.md` only as part of proof-backed mirror reconciliation after the real linked release proof exists. This is not a standalone date-only refresh.
+   - Planning impact: Plan 03 owns the conditional `RELEASING.md` mirror update after Plan 01 proof intake. The executor should set the date to the proof-backed release date or workflow-change date that actually shipped, and should leave the line unchanged if no proof-backed release or release-process semantic change exists.
 
 ## Environment Availability
 
@@ -305,4 +305,3 @@ None -- existing release scripts/workflow already cover required verifier surfac
 
 **Research date:** 2026-06-01  
 **Valid until:** 2026-07-01
-
