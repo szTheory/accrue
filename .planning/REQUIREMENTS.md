@@ -8,9 +8,9 @@
 
 ### Release Readiness
 
-- [ ] **REL-01**: Maintainer can verify the next linked release line after `1.3.0` has coherent package versions, changelog entries, Release Please state, git tags, and release-runbook instructions across `accrue`, `accrue_admin`, and `accrue_portal`.
-- [ ] **REL-02**: Maintainer can run the deterministic release gate for all three packages and get one documented pass/fail artifact covering tests, docs, dialyzer, credo, package docs, support-matrix drift, adoption proof, and host integration checks.
-- [ ] **REL-03**: Maintainer can publish the linked Hex release in the documented order with canonical proof recorded in planning, changelogs, and release notes.
+- [x] **REL-01**: Maintainer can verify the next linked release line after `1.3.0` has coherent package versions, changelog entries, Release Please state, git tags, and release-runbook instructions across `accrue`, `accrue_admin`, and `accrue_portal`.
+- [x] **REL-02**: Maintainer can run the deterministic release gate for all three packages and get one documented pass/fail artifact covering tests, docs, dialyzer, credo, package docs, support-matrix drift, adoption proof, and host integration checks.
+- [x] **REL-03**: Maintainer can publish the linked Hex release in the documented order with canonical proof recorded in planning, changelogs, and release notes.
 
 ### Stable-Core Positioning
 
@@ -49,9 +49,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-01 | Phase 159 | Pending |
-| REL-02 | Phase 159 | Pending |
-| REL-03 | Phase 159 | Pending |
+| REL-01 | Phase 162 | Complete |
+| REL-02 | Phase 159 | Complete |
+| REL-03 | Phase 162 | Complete |
 | POS-01 | Phase 160 | Complete |
 | POS-02 | Phase 160 | Complete |
 | POS-03 | Phase 160 | Complete |

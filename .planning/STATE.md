@@ -26,8 +26,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-31 after v1.48 milestone start)
 ## Current Position
 
 Phase: 162
-Plan: Not started
-Status: Not planned
+Plan: 02
+Status: In progress
 Last activity: 2026-06-01
 
 ## Post-v1.48 Pause Rule
@@ -42,10 +42,10 @@ No broad feature milestone is currently open.
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 159 | Linked Release Readiness + Publish Proof | REL-01, REL-02, REL-03 | Ready |
+| 159 | Linked Release Readiness + Publish Proof | REL-01, REL-02, REL-03 | Complete |
 | 160 | Stable-Core Public Positioning | POS-01, POS-02, POS-03 | Complete |
 | 161 | Backlog Anchor Closure + Pause Rule | BAK-01, BAK-02, PAU-01 | Complete |
-| 162 | Close gap: REL-01/REL-03 — linked release proof | REL-01, REL-03 | Not planned |
+| 162 | Close gap: REL-01/REL-03 — linked release proof | REL-01, REL-03 | In progress |
 
 ### v1.47 Phase Summary
 

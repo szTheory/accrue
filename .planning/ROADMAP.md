@@ -124,11 +124,11 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 162-01-PLAN.md — Establish the real post-`1.3.0` release line and append canonical proof or recovery state to the Phase 159 ledger
+- [x] 162-01-PLAN.md — Establish the real post-`1.3.0` release line and append canonical proof or recovery state to the Phase 159 ledger
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 162-02-PLAN.md — Create the Phase 162 pointer verification and reconcile requirements, roadmap, and state mirrors
+- [x] 162-02-PLAN.md — Create the Phase 162 pointer verification and reconcile requirements, roadmap, and state mirrors
 - [ ] 162-03-PLAN.md — Reconcile public release mirrors and maintainer release docs to the proof-backed target version
 
 **Wave 3** *(blocked on Waves 1-2 completion)*
@@ -151,7 +151,7 @@ Plans:
 
 Plans:
 - [x] 159-01-PLAN.md — Preserve the completed readiness scaffolding, deterministic gate proof, and blocker truth for the missing post-`1.3.0` line
-- [ ] 159-02-PLAN.md — When a real combined Release Please PR and successful publish run exist, capture live linked publish proof and close REL-01/REL-03
+- [x] 159-02-PLAN.md — When a real combined Release Please PR and successful publish run exist, capture live linked publish proof and close REL-01/REL-03
 
 ### Phase 160: Stable-Core Public Positioning
 **Goal:** Make the stable-core / demand-driven expansion posture explicit and consistent across public docs, package READMEs, support boundaries, release notes, and planning mirrors.
@@ -164,9 +164,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 160-01-PLAN.md — Refresh the root/core docs spine and canonical guides for stable-core positioning
-- [ ] 160-02-PLAN.md — Align thin mirrors, release notes, and the maintainer-facing processor matrix to the public docs spine
-- [ ] 160-03-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
+- [x] 160-01-PLAN.md — Refresh the root/core docs spine and canonical guides for stable-core positioning
+- [x] 160-02-PLAN.md — Align thin mirrors, release notes, and the maintainer-facing processor matrix to the public docs spine
+- [x] 160-03-PLAN.md — Add the stable-core posture verifier, extend release-note checks, and wire the docs contract into CI
 
 ### Phase 161: Backlog Anchor Closure + Pause Rule
 **Goal:** Retire stale roadmap pressure, classify remaining seeds/deferred ideas with revisit triggers, and close the milestone with an explicit pause rule for broad feature work.
@@ -192,8 +192,8 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 162-01-PLAN.md — Establish the real post-`1.3.0` release line and append canonical proof or recovery state to the Phase 159 ledger
-- [ ] 162-02-PLAN.md — Create the Phase 162 pointer verification and reconcile requirements, roadmap, and state mirrors
+- [x] 162-01-PLAN.md — Establish the real post-`1.3.0` release line and append canonical proof or recovery state to the Phase 159 ledger
+- [x] 162-02-PLAN.md — Create the Phase 162 pointer verification and reconcile requirements, roadmap, and state mirrors
 - [ ] 162-03-PLAN.md — Reconcile public release mirrors and maintainer release docs to the proof-backed target version
 - [ ] 162-04-PLAN.md — Refresh project-level closeout mirrors and rerun the v1.48 milestone audit against final proof
 
@@ -209,7 +209,7 @@ Plans:
 | 156. Entitlements Gating Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 157. Metered Usage Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
-| 159. Linked Release Readiness + Publish Proof | v1.48 | 2/2 | Blocked on external release state | — |
+| 159. Linked Release Readiness + Publish Proof | v1.48 | 2/2 | Complete | 2026-06-01 |
 | 160. Stable-Core Public Positioning | v1.48 | 3/3 | Complete    | 2026-05-31 |
 | 161. Backlog Anchor Closure + Pause Rule | v1.48 | 1/1 | Complete    | 2026-06-01 |
 | 162. Close gap: REL-01/REL-03 — linked release proof | v1.48 | 0/4 | Planned | — |
