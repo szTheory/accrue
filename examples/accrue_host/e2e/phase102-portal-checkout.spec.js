@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("./support/test.js");
 const AxeBuilder = require("@axe-core/playwright").default;
 const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 

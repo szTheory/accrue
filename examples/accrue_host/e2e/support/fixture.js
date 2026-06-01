@@ -17,20 +17,8 @@ function readFixture() {
 }
 
 function reseedFixture() {
-  const fixturePath = process.env.ACCRUE_HOST_E2E_FIXTURE || defaultFixturePath;
-  const repoRoot = path.resolve(process.cwd(), "..", "..");
-
-  execFileSync("mix", ["run", path.join(repoRoot, "scripts/ci/accrue_host_seed_e2e.exs")], {
-    cwd: process.cwd(),
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      MIX_ENV: "test",
-      ACCRUE_HOST_E2E_FIXTURE: fixturePath
-    }
-  });
-
-  process.env.ACCRUE_HOST_E2E_FIXTURE = fixturePath;
+  // No-op: tests now use Ecto Sandbox for isolation.
+  // The database is seeded once globally in global-setup.js.
 }
 
 /**

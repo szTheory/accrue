@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login } = require("./support/fixture.js");
 
 // Skipped: Playwright webServer currently serves 500 on this deep-link; host ExUnit

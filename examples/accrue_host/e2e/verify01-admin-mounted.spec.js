@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 
 test("mounted admin customers index shows tenant chrome and billing signals", async ({ page }, testInfo) => {

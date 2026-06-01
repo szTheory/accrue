@@ -1,7 +1,7 @@
 // @ts-check
 const fs = require("node:fs");
 const path = require("node:path");
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 const { expectNoHorizontalOverflow, expectVisibleInViewport } = require("./support/overflow.js");
 const { DASHBOARD_DISPLAY_HEADLINE } = require("./support/copy_dashboard.js");

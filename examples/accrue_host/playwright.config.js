@@ -16,8 +16,8 @@ module.exports = defineConfig({
   globalSetup: path.join(__dirname, "e2e/global-setup.js"),
   timeout: 30_000,
   expect: { timeout: 5_000 },
-  fullyParallel: false,
-  workers: 1,
+  fullyParallel: true,
+  workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI
     ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]
     : [["list"]],

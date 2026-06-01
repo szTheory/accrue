@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require("./support/test.js");
 
 // Non-blocking hook so `npx playwright test --project=chromium-mobile-tagged` has a stable target.
 test("@mobile placeholder reaches host root", async ({ page }) => {
