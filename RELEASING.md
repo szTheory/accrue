@@ -24,7 +24,7 @@ The `1.0.x` line treats the documented public facade as the SemVer boundary: gen
 10. **Last verified line.** Update the line below whenever `release-please-config.json`, `.release-please-manifest.json`, or `.github/workflows/release-please.yml` change.
 
 **Last verified against** `release-please-config.json`, `.release-please-manifest.json`,
-and `.github/workflows/release-please.yml` on **2026-05-07** (UTC). Update this line when
+and `.github/workflows/release-please.yml` on **2026-06-01** (UTC). Update this line when
 automation semantics change.
 
 ## Routine linked releases (Release Please + Hex)
@@ -202,6 +202,7 @@ Each recovery run checks out the explicit ref, verifies the package `@version`, 
 
 When the dual publish is not one atomic transaction, prefer the smallest corrective step first:
 
+- **Follow the canonical-ledger recovery flow:** before taking action, use `capture_linked_release_proof.sh` to record a failed recovery block in the active phase verification ledger (e.g., `159-VERIFICATION.md` or as used in Phase 162 Plan 01). Document the failure, the fix, and the retry command.
 - **Retry `accrue_admin` or `accrue_portal`** for the **same** version if upstream `accrue` at **V** is already correct on Hex — token, metadata, or transient CI issues often clear on a focused re-run.
 - **`mix hex.publish --revert`** only for a **clear mistake** on **`accrue`** and **only** inside Hex’s short post-publish window; see [Hex immutability / retire FAQ](https://hex.pm/docs/faq).
 - **Otherwise** use **`mix hex.retire`** on the bad release and ship a **new linked version** forward (new combined release PR), with changelog honesty about what not to use.
