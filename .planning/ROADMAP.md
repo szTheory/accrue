@@ -32,6 +32,11 @@ Future feature milestones require at least one of:
 
 **Phase 163: Realistic Domain & Rich Seeds**
 Goal: Define persona and populate rich database seeds for demo app
+**Plans:** 1 plans
+
+Plans:
+- [ ] 163-01-PLAN.md — Extract and seed PingPal persona and background data
+
 Requirements: EVD-01, EVD-02
 Success criteria:
 1. Persona and JTBD are documented.
@@ -83,7 +88,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 160. Stable-Core Public Positioning | v1.48 | 3/3 | Complete | 2026-05-31 |
 | 161. Backlog Anchor Closure + Pause Rule | v1.48 | 1/1 | Complete | 2026-06-01 |
 | 162. Close gap: REL-01/REL-03 | v1.48 | 4/4 | Complete | 2026-06-01 |
-| 163. Realistic Domain & Rich Seeds | v1.49 | 0/2 | Pending | |
+| 163. Realistic Domain & Rich Seeds | v1.49 | 0/1 | Pending | |
 | 164. Docker DX & Optimized Caching | v1.49 | 0/2 | Pending | |
 | 165. E2E Automation & Shift-Left CI | v1.49 | 0/4 | Pending | |
 | 166. Adoption DX Docs | v1.49 | 0/3 | Pending | |
