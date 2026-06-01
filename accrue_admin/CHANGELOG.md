@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.3.0...accrue_admin-v1.4.0) (2026-06-01)
+
+
+### Bug Fixes
+
+* **152:** CR-01 replace String.to_atom with String.to_existing_atom for currency ([2fd2683](https://github.com/szTheory/accrue/commit/2fd268362701427760107718c8e036c56e8f8901))
+* **152:** CR-02 guard elem/2 call in CampaignTimeline arc_rows ([512b6db](https://github.com/szTheory/accrue/commit/512b6db642dd5df4eb5baaed1559bb7fe96e9bb1))
+* **152:** WR-03 read failure info from event data not invoice_map in campaign_row ([43b2179](https://github.com/szTheory/accrue/commit/43b21791265f8a288ed348f3ce51284430c63ef7))
+* **156-01:** address code review findings ([c6273bd](https://github.com/szTheory/accrue/commit/c6273bdfa6f92281b08adfa01a3c1ffb2d246828))
+* **156-01:** constrain admin display copy on mobile ([05e201c](https://github.com/szTheory/accrue/commit/05e201c663808b24c310f76790887e13266beee3))
+* **156-01:** keep recovery analytics currency formatting bounded ([76beb47](https://github.com/szTheory/accrue/commit/76beb4740e8604e8f26074ca308209e7c0b27733))
+* **156-01:** restore dark admin contrast ([46e62b0](https://github.com/szTheory/accrue/commit/46e62b0ce2143a52e08a2169845f60850452f0db))
+
 ## [1.3.0](https://github.com/szTheory/accrue/compare/accrue_admin-v1.2.0...accrue_admin-v1.3.0) (2026-05-30)
 
 **1.0.0 — Stable.** Released in lockstep with `accrue` 1.0.0. The supported integration surface for the admin package is `AccrueAdmin.Router` and the documented mount/scope helpers; see `accrue/CHANGELOG.md` and `accrue/guides/maturity-and-maintenance.md` for the v1.x stability commitment that governs both packages.

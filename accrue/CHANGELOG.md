@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.4.0](https://github.com/szTheory/accrue/compare/accrue-v1.3.0...accrue-v1.4.0) (2026-06-01)
+
+
+### Features
+
+* **155-01:** add livemode omission fixture option ([e808e4c](https://github.com/szTheory/accrue/commit/e808e4c2e920fbfc45630c92618119382d755df6))
+* **155-01:** expose entitlement summary webhook metrics ([d659bba](https://github.com/szTheory/accrue/commit/d659bbaa0faa8578bf0668f84c11ebcf44dfc4c9))
+
+
+### Bug Fixes
+
+* **152:** WR-04 rewrite group_into_arcs/1 from O(n²) to O(n) ([e14a2a0](https://github.com/szTheory/accrue/commit/e14a2a08e202974ba5ecdea79f27c1a2b3494b1b))
+* **154-01:** correct advisory cache write path ([443f303](https://github.com/szTheory/accrue/commit/443f3035f271b7a6f4447b363806aab29e0ac741))
+* **156-01:** normalize unloaded entitlement billables ([47ab4bb](https://github.com/szTheory/accrue/commit/47ab4bb330715725e01155f84dc0e088c739a5bf))
+* **160:** close stable-core review findings ([cf06e16](https://github.com/szTheory/accrue/commit/cf06e167aa5ddea3bbaf6f346dd53473ad5fe2a1))
+* **160:** close version posture review findings ([ff16407](https://github.com/szTheory/accrue/commit/ff164071931fd994ab0ee6acd5fa00f607ffa61e))
+
 ## [1.3.0](https://github.com/szTheory/accrue/compare/accrue-v1.2.0...accrue-v1.3.0) (2026-05-30)
 
 **1.0.0 — Stable.** This release commits Accrue to v1.x API stability for the documented integration surface: generated `MyApp.Billing`, `use Accrue.Webhook.Handler`, `use Accrue.Test`, `Accrue.Auth`, and `Accrue.ConfigError`. Breaking changes on that surface go through deprecation, not silent reshuffles. Internal schemas, workers, and demo helpers are not part of the contract. See `accrue/README.md` Stability, `accrue/guides/upgrade.md`, `accrue/guides/maturity-and-maintenance.md`, and root `RELEASING.md` for the v1.x stability commitment and post-1.0 cadence.

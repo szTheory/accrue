@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.3.0...accrue_portal-v1.4.0) (2026-06-01)
+
+
+### Bug Fixes
+
+* **152:** CR-03 add fallback mount/3 clause in CheckoutLive ([117c4ce](https://github.com/szTheory/accrue/commit/117c4ce4f6cb086f0686bcf82eec48f7aaddefdb))
+* **152:** WR-01 fix format_minor_amount sign loss for sub-dollar negatives ([285a03f](https://github.com/szTheory/accrue/commit/285a03f9c5b1dc908931106d23add241f064df72))
+* **152:** WR-02 add integer and catch-all clauses to parse_amount_minor/1 ([a91c2cd](https://github.com/szTheory/accrue/commit/a91c2cdf5e9bd1c2bded0aa1b18faee6075aada4))
+
 ## [1.3.0](https://github.com/szTheory/accrue/compare/accrue_portal-v1.2.0...accrue_portal-v1.3.0) (2026-05-30)
 
 
