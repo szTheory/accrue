@@ -62,6 +62,7 @@ defmodule AccrueHost.MixProject do
       {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.1"},
       {:telemetry_poller, "~> 1.0"},
+      {:faker, "~> 0.18", only: [:dev, :test]},
       accrue_dep(),
       accrue_admin_dep(),
       {:mailglass_admin, "~> 1.0", only: [:dev, :test], runtime: false},
