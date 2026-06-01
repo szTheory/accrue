@@ -438,10 +438,10 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**Planning v1.48 complete.** v1.48 closed on **2026-06-01** with linked release-readiness proof, stable-core public positioning, backlog-anchor closure, and the post-v1.48 pause rule. Last public Hex release remains **1.3.0** across accrue, accrue_admin, and accrue_portal until the external release state supports the next coherent package line.
+**Planning v1.48 complete.** v1.48 closed on **2026-06-01** with linked release-readiness proof, stable-core public positioning, backlog-anchor closure, and the post-v1.48 pause rule. Phase 162 subsequently closed the post-publish proof gap, reconciling the true post-1.3.0 release line.
 
-**Last shipped planning milestone:** **v1.48** — Phases **159–161** — **2026-06-01**
-**Hex.pm:** accrue 1.3.0 · accrue_admin 1.3.0 · accrue_portal 1.3.0
+**Last shipped planning milestone:** **v1.48** — Phases **159–162** — **2026-06-01**
+**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0
 
 ## Requirements
 
@@ -449,7 +449,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 Release Readiness + Stable Core Posture — 9/9 satisfied.
 
-- ✓ **REL-01..REL-03** — Linked release readiness, deterministic gate evidence, and publish-proof blocker truth — v1.48
+- ✓ **REL-01..REL-03** — Linked release readiness, deterministic gate evidence, and canonical post-publish proof of the 1.4.0 line — v1.48
 - ✓ **POS-01..POS-03** — Stable-core public positioning, package/doc mirrors, and CI posture contract — v1.48
 - ✓ **BAK-01..BAK-02** — Historical backlog anchors and dormant/deferred planning surfaces no longer imply active broad-feature scope — v1.48
 - ✓ **PAU-01** — Post-v1.48 broad-feature pause rule with concrete reopen criteria — v1.48
