@@ -4,7 +4,7 @@ import Config
 config :accrue_host, AccrueHost.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("PGHOST") || "localhost",
   database: "accrue_host_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
