@@ -438,7 +438,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**Planning v1.49 started.** v1.49 focuses on adoption evidence, demoing existing features, and DX.
+**Planning v1.49 started.** v1.49 focuses on adoption evidence, demoing existing features, and DX. Phase 164 complete — Created a seamless, fast Docker local dev environment.
 
 **Last shipped planning milestone:** **v1.48** — Phases **159–162** — **2026-06-01**
 **Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0
@@ -463,8 +463,6 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 - [ ] **EVD-01**: Define realistic SaaS cohort persona and JTBD domain.
 - [ ] **EVD-02**: Implement rich database seeds.
-- [ ] **EVD-03**: Create Docker-based local dev env.
-- [ ] **EVD-04**: Optimize Docker caching layers.
 - [ ] **E2E-01**: Playwright E2E for onboarding/checkout.
 - [ ] **E2E-02**: Playwright E2E for billing management.
 - [ ] **E2E-03**: Integrate tests into CI.
@@ -472,6 +470,10 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 - [ ] **DOC-01**: "Start Here" DX summary in README.
 - [ ] **DOC-02**: Docker setup documentation.
 - [ ] **DOC-03**: Persona-framed documentation.
+
+### Validated v1.49 (in progress)
+
+- ✓ **EVD-03..EVD-04** — Docker DX & Optimized Caching — Validated in Phase 164
 
 ### Validated v1.48 (archived in `.planning/milestones/v1.48-REQUIREMENTS.md`; milestone completed 2026-06-01)
 
