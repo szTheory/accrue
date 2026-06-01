@@ -83,3 +83,5 @@ defmodule AccrueHost.Seeds.Helpers do
 end
 
 Code.require_file("seeds/hero_accounts.exs", __DIR__)
+Code.require_file("seeds/background_data.exs", __DIR__)
+
