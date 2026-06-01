@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accrue_host_dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: ../..
+      dockerfile: examples/accrue_host/Dockerfile.dev
+    ports:
+      - "4000:4000"
+    environment:
+      PGHOST: db
+    volumes:
+      - ../..:/workspace
+      - mix_deps:/workspace/examples/accrue_host/deps
+      - mix_build:/workspace/examples/accrue_host/_build
+      - assets_node_modules:/workspace/examples/accrue_host/assets/node_modules
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
+  mix_deps:
+  mix_build:
+  assets_node_modules:
