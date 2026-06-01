@@ -20,12 +20,12 @@
 
 ### Backlog Anchor Closure
 
-- [ ] **BAK-01**: Maintainer can distinguish stale historical backlog anchors from active scope because v1.17 friction anchors, resolved seeds, dormant seeds, and deferred ideas are archived, reclassified, or given explicit revisit triggers.
-- [ ] **BAK-02**: Maintainer can run or inspect a planning hygiene proof that no stale roadmap pointer suggests broad feature work is currently active.
+- [x] **BAK-01**: Maintainer can distinguish stale historical backlog anchors from active scope because v1.17 friction anchors, resolved seeds, dormant seeds, and deferred ideas are archived, reclassified, or given explicit revisit triggers.
+- [x] **BAK-02**: Maintainer can run or inspect a planning hygiene proof that no stale roadmap pointer suggests broad feature work is currently active.
 
 ### Pause Rule
 
-- [ ] **PAU-01**: Maintainer can close v1.48 with an explicit pause rule: after release readiness, broad feature milestones remain closed unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
+- [x] **PAU-01**: Maintainer can close v1.48 with an explicit pause rule: after release readiness, broad feature milestones remain closed unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
 ## Future Requirements
 
@@ -55,9 +55,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POS-01 | Phase 160 | Complete |
 | POS-02 | Phase 160 | Complete |
 | POS-03 | Phase 160 | Complete |
-| BAK-01 | Phase 161 | Pending |
-| BAK-02 | Phase 161 | Pending |
-| PAU-01 | Phase 161 | Pending |
+| BAK-01 | Phase 161 | Complete |
+| BAK-02 | Phase 161 | Complete |
+| PAU-01 | Phase 161 | Complete |
 
 **Coverage:**
 - v1.48 requirements: 9 total

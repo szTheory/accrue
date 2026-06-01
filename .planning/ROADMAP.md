@@ -105,10 +105,10 @@ Plans:
   1. v1.17 friction anchors, resolved seeds, dormant seeds, and deferred ideas are archived, reclassified, or given explicit revisit triggers.
   2. A planning hygiene proof shows no active roadmap pointer suggests broad feature work is currently active.
   3. PROJECT/STATE/ROADMAP closeout text records that broad feature milestones remain closed unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 161-01-PLAN.md — Close stale backlog anchors, record revisit triggers, and write the post-v1.48 pause rule
+- [x] 161-01-PLAN.md — Close stale backlog anchors, record revisit triggers, and write the post-v1.48 pause rule
 
 </details>
 
@@ -151,10 +151,10 @@ Plans:
   1. v1.17 friction anchors, resolved seeds, dormant seeds, and deferred ideas are archived, reclassified, or given explicit revisit triggers.
   2. A planning hygiene proof shows no active roadmap pointer suggests broad feature work is currently active.
   3. PROJECT/STATE/ROADMAP closeout text records that broad feature milestones remain closed unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 161-01-PLAN.md — Close stale backlog anchors, record revisit triggers, and write the post-v1.48 pause rule
+- [x] 161-01-PLAN.md — Close stale backlog anchors, record revisit triggers, and write the post-v1.48 pause rule
 
 ## Progress
 
@@ -170,7 +170,7 @@ Plans:
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 159. Linked Release Readiness + Publish Proof | v1.48 | 2/2 | Blocked on external release state | — |
 | 160. Stable-Core Public Positioning | v1.48 | 3/3 | Complete    | 2026-05-31 |
-| 161. Backlog Anchor Closure + Pause Rule | v1.48 | 0/1 | Pending | — |
+| 161. Backlog Anchor Closure + Pause Rule | v1.48 | 1/1 | Complete   | 2026-06-01 |
 
 ## Historical Backlog Anchors (not active scope)
 
