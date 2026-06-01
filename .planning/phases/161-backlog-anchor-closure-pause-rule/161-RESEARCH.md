@@ -185,12 +185,12 @@ require_absent_regex "$ROOT_DIR/.planning/ROADMAP.md" "feature freeze|maintenanc
 |---|-------|---------|---------------|
 | A1 | Manual edits are the primary source of policy drift | Common Pitfalls | Verifier may miss real drift vectors |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Verifier placement choice**
+1. **Verifier placement choice — RESOLVED**
    - What we know: Context allows either extending v1.17 verifier or creating a dedicated hygiene verifier, with dedicated script preferred. [VERIFIED: codebase grep]
-   - What's unclear: Maintainer preference for script count vs script scope.
-   - Recommendation: Use dedicated `verify_roadmap_hygiene.sh` unless maintainers request consolidation.
+   - Resolution: Use dedicated `scripts/ci/verify_roadmap_hygiene.sh`, as encoded in `161-01-PLAN.md` Task 1.
+   - Rationale: A dedicated script keeps Phase 161 roadmap hygiene checks separate from the v1.17 friction-inventory contract and avoids overloading historical-anchor invariants.
 
 ## Environment Availability
 
