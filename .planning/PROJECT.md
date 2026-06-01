@@ -438,12 +438,21 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**Planning v1.48.** v1.47 shipped and archived on **2026-05-31**. Last public Hex release remains **1.3.0** across accrue, accrue_admin, and accrue_portal until this release-readiness milestone publishes the next coherent package line.
+**Planning v1.48 complete.** v1.48 closed on **2026-06-01** with linked release-readiness proof, stable-core public positioning, backlog-anchor closure, and the post-v1.48 pause rule. Last public Hex release remains **1.3.0** across accrue, accrue_admin, and accrue_portal until the external release state supports the next coherent package line.
 
-**Last shipped planning milestone:** **v1.47** — Phases **154–158** — **2026-05-31**
+**Last shipped planning milestone:** **v1.48** — Phases **159–161** — **2026-06-01**
 **Hex.pm:** accrue 1.3.0 · accrue_admin 1.3.0 · accrue_portal 1.3.0
 
 ## Requirements
+
+### Validated v1.48 (archived in `.planning/REQUIREMENTS.md`; milestone completed 2026-06-01)
+
+Release Readiness + Stable Core Posture — 9/9 satisfied.
+
+- ✓ **REL-01..REL-03** — Linked release readiness, deterministic gate evidence, and publish-proof blocker truth — v1.48
+- ✓ **POS-01..POS-03** — Stable-core public positioning, package/doc mirrors, and CI posture contract — v1.48
+- ✓ **BAK-01..BAK-02** — Historical backlog anchors and dormant/deferred planning surfaces no longer imply active broad-feature scope — v1.48
+- ✓ **PAU-01** — Post-v1.48 broad-feature pause rule with concrete reopen criteria — v1.48
 
 ### Validated v1.47 (archived in `.planning/milestones/v1.47-REQUIREMENTS.md`; milestone shipped & archived 2026-05-31)
 
@@ -490,4 +499,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after v1.48 milestone start*
+*Last updated: 2026-06-01 after v1.48 milestone completion*
