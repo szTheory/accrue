@@ -24,7 +24,7 @@ Future feature milestones require at least one of:
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 163 | Realistic Domain & Rich Seeds | Define persona and populate rich database seeds for demo app | EVD-01, EVD-02 | 3 |
-| 164 | Docker DX & Optimized Caching | 2/2 | Complete   | 2026-06-01 |
+| 164 | Docker DX & Optimized Caching | 2/2 | Complete    | 2026-06-01 |
 | 165 | E2E Automation & Shift-Left CI | Automate happy paths with Playwright and integrate to CI | E2E-01, E2E-02, E2E-03, E2E-04 | 4 |
 | 166 | Adoption DX Docs | Write simple, persona-framed "Start Here" guides | DOC-01, DOC-02, DOC-03 | 3 |
 
