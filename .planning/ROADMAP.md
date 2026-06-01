@@ -129,7 +129,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 162-02-PLAN.md — Create the Phase 162 pointer verification and reconcile requirements, roadmap, and state mirrors
-- [ ] 162-03-PLAN.md — Reconcile public release mirrors and maintainer release docs to the proof-backed target version
+- [x] 162-03-PLAN.md — Reconcile public release mirrors and maintainer release docs to the proof-backed target version
 
 **Wave 3** *(blocked on Waves 1-2 completion)*
 
@@ -189,7 +189,7 @@ Plans:
   1. A real combined Release Please PR targets a version greater than `1.3.0` across `accrue`, `accrue_admin`, and `accrue_portal`.
   2. The linked publish run produces canonical proof for PR number, target version, run id, tags, GitHub releases, Hex packages, HexDocs, host Hex smoke, and release-notes contract output.
   3. Phase 159/162 verification and v1.48 planning mirrors reconcile `REL-01`, `REL-02`, and `REL-03` without fabricated proof.
-**Plans:** 4 plans
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 162-01-PLAN.md — Establish the real post-`1.3.0` release line and append canonical proof or recovery state to the Phase 159 ledger
@@ -212,7 +212,7 @@ Plans:
 | 159. Linked Release Readiness + Publish Proof | v1.48 | 2/2 | Complete | 2026-06-01 |
 | 160. Stable-Core Public Positioning | v1.48 | 3/3 | Complete    | 2026-05-31 |
 | 161. Backlog Anchor Closure + Pause Rule | v1.48 | 1/1 | Complete    | 2026-06-01 |
-| 162. Close gap: REL-01/REL-03 — linked release proof | v1.48 | 0/4 | Planned | — |
+| 162. Close gap: REL-01/REL-03 — linked release proof | v1.48 | 3/4 | In Progress|  |
 
 ## Historical Backlog Anchors (not active scope)
 
