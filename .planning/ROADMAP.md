@@ -45,6 +45,12 @@ Success criteria:
 
 **Phase 164: Docker DX & Optimized Caching**
 Goal: Create a seamless, fast Docker local dev environment
+**Plans:** 2 plans
+
+Plans:
+- [ ] 164-01-PLAN.md — Create Docker environment config and volume masking
+- [ ] 164-02-PLAN.md — Update app config to support Docker Postgres host
+
 Requirements: EVD-03, EVD-04
 Success criteria:
 1. Dockerfile and docker-compose.yml are created/updated.
