@@ -73,6 +73,9 @@ jobs:
       - name: Stable-core posture contract
         run: bash scripts/ci/verify_stable_core_posture.sh
 
+      - name: Roadmap hygiene contract
+        run: bash scripts/ci/verify_roadmap_hygiene.sh
+
       - name: Release notes freshness contract
         run: bash scripts/ci/verify_release_notes_contract.sh
 

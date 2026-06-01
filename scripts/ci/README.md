@@ -147,6 +147,20 @@ Surface-to-script map:
 - Negative guards block retired public posture terms: `feature freeze`, `no new features ever`, and `maintenance only`.
 - If this gate fails, update canonical public guides first and keep package/proof mirrors thin. Do not create a second support matrix or move policy authority away from public guides.
 
+## BAK/PAU gates (v1.48 backlog anchor closure + pause rule)
+
+| REQ-ID | Primary script(s) or artifact | Package ExUnit (if any) | Phase VERIFICATION owner |
+|--------|-------------------------------|-------------------------|--------------------------|
+| BAK-01 | `scripts/ci/verify_roadmap_hygiene.sh`; `.planning/ROADMAP.md` historical anchors and deferred ledger | — | `.planning/phases/161-backlog-anchor-closure-pause-rule/161-01-SUMMARY.md` |
+| BAK-02 | `scripts/ci/verify_roadmap_hygiene.sh`; `.planning/ROADMAP.md`; `.planning/STATE.md` | — | `.planning/phases/161-backlog-anchor-closure-pause-rule/161-01-SUMMARY.md` |
+| PAU-01 | `scripts/ci/verify_roadmap_hygiene.sh`; `.planning/PROJECT.md`; `.planning/ROADMAP.md`; `.planning/STATE.md` | — | `.planning/phases/161-backlog-anchor-closure-pause-rule/161-01-SUMMARY.md` |
+
+### Triage: verify_roadmap_hygiene.sh
+
+- **`verify_roadmap_hygiene:`** (stderr prefix on failure) is the dedicated roadmap hygiene gate for BAK-01, BAK-02, and PAU-01.
+- Expected governed surfaces: `.planning/PROJECT.md` owns the canonical pause rule, `.planning/ROADMAP.md` owns the historical-anchor and dormant/deferred ledger, and `.planning/STATE.md` mirrors session-continuity deferred rows.
+- Fix failures in the canonical surface first, then update mirrors. Do not loosen verifier needles unless an intentional planning-doctrine change moves the source of truth.
+
 ### Triage: verify_adoption_proof_matrix.sh
 
 - **`verify_adoption_proof_matrix:`** (stderr prefix on failure) — treat as **ORG-09**: missing ORG-09 headings, primary/recipe lane markers, `phx.gen.auth` / `use Accrue.Billable` / `non-Sigra` literals, **ORG-05** / **ORG-06** / **ORG-07** / **ORG-08** rows, Layer C script names (including **`verify_core_admin_invoice_verify_ids.sh`**), or the self-referential script path in `adoption-proof-matrix.md`. Fix the matrix doc first; only change needles in the script after an intentional taxonomy edit.
