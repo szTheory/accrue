@@ -16,6 +16,12 @@ Accrue follows a **stable-core / demand-driven expansion** posture. Release note
 
 ## accrue
 
+### 1.4.0
+
+**Phase 162 Linked Release Proof.**
+
+`1.4.0` completes the linked release readiness and proof closure for v1.48, making the stable-core posture explicit and ensuring full artifact alignment across all packages.
+
 ### 1.3.0
 
 **Dunning analytics, recovered-revenue dashboard, in-app dunning banners, ENT-10 webhook scoping fix, and dependency maintenance.**
@@ -78,6 +84,10 @@ Early **CI and release pipeline** stabilization so public automation and docs pu
 
 The admin package is the **LiveView dashboard** that mounts into your Phoenix router. It tracks `accrue` closely—install the same version family for both.
 
+### 1.4.0
+
+Matches **accrue 1.4.0**: Stays aligned with the linked release proof and stable-core positioning updates.
+
 ### 1.3.0
 
 Matches **accrue 1.3.0**: Ships the `FunnelChart` LiveComponent, the recovery dashboard LiveView at `/admin/analytics/recovery`, and the `AccrueAdmin.Components.DunningBanner` component for embedding context-aware in-app dunning notices in operator and portal surfaces. Also includes the `@since 1.3.0` annotation cleanup — all dunning and funnel functions now render `(since 1.3.0)` badges correctly in ExDoc.
@@ -116,5 +126,8 @@ Initial public releases with the admin UI, asset pipeline, and docs wired for th
 
 - **Patch** — safe fixes, docs, and internal quality.
 - **Minor** (pre-1.0) — new capabilities you can adopt incrementally; read the changelog before upgrading production.
+
+When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.
+ production.
 
 When in doubt, read **[Upgrade](upgrade.md)** and run your usual test and staging passes.
