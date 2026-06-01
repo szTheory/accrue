@@ -170,7 +170,7 @@ Plans:
 | 158. Oban Cron Wiring Adopter Proof | v1.47 | 1/1 | Complete | 2026-05-31 |
 | 159. Linked Release Readiness + Publish Proof | v1.48 | 2/2 | Blocked on external release state | — |
 | 160. Stable-Core Public Positioning | v1.48 | 3/3 | Complete    | 2026-05-31 |
-| 161. Backlog Anchor Closure + Pause Rule | v1.48 | 1/1 | Complete   | 2026-06-01 |
+| 161. Backlog Anchor Closure + Pause Rule | v1.48 | 1/1 | Complete    | 2026-06-01 |
 
 ## Historical Backlog Anchors (not active scope)
 
