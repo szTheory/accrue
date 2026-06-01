@@ -9,8 +9,8 @@
 
 - [ ] **EVD-01**: Define a realistic SaaS cohort persona and JTBD domain for `examples/accrue_host`.
 - [ ] **EVD-02**: Implement rich, realistic database seeds (users, plans, subscriptions, usage) that populate the demo app to immediately demonstrate the Admin UI value.
-- [ ] **EVD-03**: Create a seamless Docker-based local development environment for the demo app.
-- [ ] **EVD-04**: Optimize Docker caching layers (e.g., Tailwind, Hex deps) to ensure rapid local iteration without redownloading dependencies.
+- [x] **EVD-03**: Create a seamless Docker-based local development environment for the demo app.
+- [x] **EVD-04**: Optimize Docker caching layers (e.g., Tailwind, Hex deps) to ensure rapid local iteration without redownloading dependencies.
 
 ### E2E Automation & Shift-Left (E2E)
 
@@ -41,8 +41,8 @@
 |-------------|-------|--------|
 | EVD-01 | Phase 163 | Pending |
 | EVD-02 | Phase 163 | Pending |
-| EVD-03 | Phase 164 | Pending |
-| EVD-04 | Phase 164 | Pending |
+| EVD-03 | Phase 164 | Complete |
+| EVD-04 | Phase 164 | Complete |
 | E2E-01 | Phase 165 | Pending |
 | E2E-02 | Phase 165 | Pending |
 | E2E-03 | Phase 165 | Pending |
