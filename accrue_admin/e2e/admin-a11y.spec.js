@@ -16,17 +16,14 @@ async function login(page, target = "/billing") {
   await page.goto(`/__e2e__/login?to=${encodeURIComponent(target)}`);
 }
 
-// Scan in a theme. We run full axe (incl. color-contrast) in light, where the
-// canvas is deterministic; in dark we disable `color-contrast` because axe can't
-// resolve our themed/layered backgrounds through the snapshot (it falls back to a
-// white canvas and reports phantom ratios). Dark contrast is governed instead by
-// the deliberate `--ax-*-readable` token pairs + manual review; every other a11y
-// rule (names, roles, labels, landmarks, focus order) still runs in both themes.
-async function scan(page, theme, { contrast }) {
+// Scan in a theme with full axe (incl. color-contrast) in BOTH light and dark.
+// Theme surfaces animate `background`, so toggling data-theme mid-fade would make
+// axe snapshot blended (false-grey) colours — we kill transitions/animations for
+// the scan so it reads settled token colours.
+async function scan(page, theme) {
   await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
-  let builder = new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]);
-  if (!contrast) builder = builder.disableRules(["color-contrast"]);
-  const results = await builder.analyze();
+  await page.waitForTimeout(50);
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
   return results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 }
 
@@ -36,6 +33,10 @@ test.describe("Admin accessibility (axe)", () => {
   });
 
   test("no critical/serious axe violations across primary surfaces", async ({ page, request }) => {
+    // Reduced-motion zeroes the admin's theme transition (see theme.css), so a
+    // data-theme toggle is instant and axe reads settled colours instead of a
+    // mid-fade blend. CSP forbids injecting a style tag, so emulate the media query.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     const data = await seed(request, "operator-flows");
 
     const surfaces = [
@@ -59,15 +60,12 @@ test.describe("Admin accessibility (axe)", () => {
       await login(page, path);
       await expect(page.locator("#main-content")).toBeVisible();
 
-      const passes = [
-        ["light", { contrast: true }],
-        ["dark", { contrast: false }]
-      ];
-
-      for (const [theme, opts] of passes) {
-        const violations = await scan(page, theme, opts);
+      for (const theme of ["light", "dark"]) {
+        const violations = await scan(page, theme);
         for (const v of violations) {
-          failures.push(`${name} [${theme}] ${v.id} (${v.impact}): ${v.nodes[0]?.target.join(" ")}`);
+          const d = v.nodes[0] && (v.nodes[0].any[0] || v.nodes[0].all[0]);
+          const detail = d && d.data ? ` fg=${d.data.fgColor} bg=${d.data.bgColor} r=${d.data.contrastRatio}` : "";
+          failures.push(`${name} [${theme}] ${v.id}: ${v.nodes[0]?.target.join(" ")}${detail}`);
         }
       }
     }

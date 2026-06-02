@@ -1372,6 +1372,9 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   grid-auto-columns: max-content;
   overflow-x: auto;
   padding-bottom: 0.25rem;
+  /* Solid surface so the (scroll-container) tab bar has a deterministic background
+     for contrast — inactive tabs are muted text and need a known backdrop. */
+  background: var(--ax-elevated);
 }
 
 .ax-tab,
@@ -1384,7 +1387,8 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 .ax-tab {
   padding: 0.75rem 1rem;
   border-bottom: 2px solid transparent;
-  color: var(--ax-muted);
+  background: var(--ax-elevated);
+  color: var(--ax-subtle);
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.4;
