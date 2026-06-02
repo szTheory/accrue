@@ -2,12 +2,13 @@ name: CI
 
 # Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
 # `release-manifest-ssot`, `release-gate`, `phase18-tax-gate`, `admin-drift-docs`,
-# `host-integration`, `annotation-sweep`, `live-stripe`.
+# `host-integration`, `playwright-e2e`, `host-docker-smoke`,
+# `annotation-sweep`, `live-stripe`.
 # Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
 # `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `host-integration`,
-# `annotation-sweep`.
-# Advisory: `live-stripe` (Stripe test-mode parity) runs on `workflow_dispatch` and
-# `schedule` only — not merge-blocking for PRs.
+# `playwright-e2e`, `host-docker-smoke`, `annotation-sweep`.
+# Mandatory periodic: `live-stripe` (Stripe test-mode parity) runs on
+# `workflow_dispatch` and `schedule` only to catch upstream Stripe API drift.
 
 on:
   push:
@@ -16,8 +17,8 @@ on:
     branches: [main]
   workflow_dispatch: {}
   schedule:
-    # Daily 06:00 UTC — runs the advisory live-stripe job only, not the
-    # default test matrix. See the `live-stripe` job below and
+    # Daily 06:00 UTC — runs the mandatory periodic live-stripe job only,
+    # not the default test matrix. See the `live-stripe` job below and
     # `guides/testing-live-stripe.md`.
     - cron: '0 6 * * *'
 
@@ -125,7 +126,6 @@ jobs:
             opentelemetry: 'off'
             compatibility: 'Floor'
             support: 'required'
-            continue-on-error: false
           # Primary dev target compatibility cell.
           # Required deterministic gate: high-severity trust findings block release here.
           - elixir: '1.18.0'
@@ -134,7 +134,6 @@ jobs:
             opentelemetry: 'off'
             compatibility: 'Primary dev target'
             support: 'required'
-            continue-on-error: false
           # Forward-compat smoke compatibility cell (advisory canary for upstream compatibility drift).
           # Advisory cells stay visible, but they do not block merge/release while upstream packages lag.
           - elixir: '1.18.4'
@@ -143,7 +142,6 @@ jobs:
             opentelemetry: 'off'
             compatibility: 'Forward-compat smoke'
             support: 'advisory'
-            continue-on-error: true
           # Advisory compatibility cell: unpublished optional :sigra integration.
           # Advisory cells stay visibly non-blocking through matrix continue-on-error.
           - elixir: '1.18.0'
@@ -152,7 +150,6 @@ jobs:
             opentelemetry: 'off'
             compatibility: 'Primary dev target'
             support: 'advisory'
-            continue-on-error: true
           # Required compatibility cell: optional OpenTelemetry integration is supported and stays blocking.
           - elixir: '1.18.0'
             otp: '27.0'
@@ -160,7 +157,6 @@ jobs:
             opentelemetry: 'on'
             compatibility: 'Primary dev target'
             support: 'required'
-            continue-on-error: false
 
     env:
       MIX_ENV: test
@@ -172,7 +168,7 @@ jobs:
       ACCRUE_OTEL_MATRIX: ${{ matrix.opentelemetry == 'on' && 'with_opentelemetry' || 'without_opentelemetry' }}
 
     # Required cells remain release-blocking; only clearly labeled advisory cells may use continue-on-error.
-    continue-on-error: ${{ matrix.continue-on-error }}
+    continue-on-error: ${{ matrix.support == 'advisory' }}
 
     steps:
       - uses: actions/checkout@v6
@@ -533,6 +529,144 @@ jobs:
           path: ${{ github.workspace }}/accrue-host-server.log
           if-no-files-found: ignore
 
+  playwright-e2e:
+    name: Playwright E2E shard ${{ matrix.shard }}/${{ strategy.job-total }}
+    if: github.event_name != 'schedule'
+    needs: [host-integration]
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_HOST_BROWSER_PORT: 4101
+      ACCRUE_HOST_E2E_FIXTURE: /tmp/accrue-host-e2e-fixture-${{ matrix.shard }}.json
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.18.0'
+
+      - name: Install Hex
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            examples/accrue_host/package-lock.json
+            examples/accrue_host/assets/package-lock.json
+
+      - name: Restore host deps cache
+        uses: actions/cache@v5
+        with:
+          path: examples/accrue_host/deps
+          key: ${{ runner.os }}-otp27-elixir118-accrue-host-playwright-deps-${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock', 'accrue_portal/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp27-elixir118-accrue-host-playwright-deps-
+
+      - name: Install host deps
+        run: cd examples/accrue_host && mix deps.get
+
+      - name: Install browser deps
+        run: |
+          cd examples/accrue_host && npm ci
+          cd assets && npm ci
+
+      - name: Compile host
+        run: cd examples/accrue_host && mix compile --warnings-as-errors
+
+      - name: Build host assets
+        run: cd examples/accrue_host && mix assets.build
+
+      - name: Prepare E2E database fixture
+        run: |
+          cd examples/accrue_host
+          mix ecto.create --quiet
+          mix ecto.migrate --quiet
+          mix run ../../scripts/ci/accrue_host_seed_e2e.exs
+
+      - name: Install Chromium
+        run: cd examples/accrue_host && npm run e2e:install
+
+      - name: Run Playwright shard
+        env:
+          ACCRUE_HOST_SKIP_PLAYWRIGHT_GLOBAL_SEED: "1"
+        run: cd examples/accrue_host && npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-e2e-report-shard-${{ matrix.shard }}
+          path: examples/accrue_host/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-e2e-traces-shard-${{ matrix.shard }}
+          path: examples/accrue_host/test-results
+          if-no-files-found: ignore
+
+  host-docker-smoke:
+    name: Host Docker boot smoke
+    if: github.event_name != 'schedule'
+    needs: [docs-contracts-shift-left]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build and boot Docker host app
+        run: cd examples/accrue_host && docker compose up --build -d
+
+      - name: Wait for Docker host app
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:4000/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          docker compose -f examples/accrue_host/docker-compose.yml logs
+          exit 1
+
+      - name: Stop Docker host app
+        if: always()
+        run: cd examples/accrue_host && docker compose down --volumes --remove-orphans
+
   annotation-sweep:
     name: Annotation sweep
     if: github.event_name != 'schedule'
@@ -544,6 +678,8 @@ jobs:
         phase18-tax-gate,
         admin-drift-docs,
         host-integration,
+        playwright-e2e,
+        host-docker-smoke,
       ]
     runs-on: ubuntu-24.04
 
@@ -557,14 +693,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: >-
           bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
-          release-gate phase18-tax-gate admin-drift-docs host-integration
+          release-gate phase18-tax-gate admin-drift-docs host-integration playwright-e2e
+          host-docker-smoke
 
   # ---------------------------------------------------------------------
-  # Advisory live-Stripe fidelity job (quick task 260414-l9q).
+  # Mandatory periodic live-Stripe fidelity job (quick task 260414-l9q).
   #
   # Runs ONLY on manual workflow_dispatch and on the 06:00 UTC cron.
-  # Never runs on push or pull_request. `continue-on-error: true` makes
-  # it advisory so Stripe API flakes do not block main CI.
+  # Never runs on push or pull_request. Scheduled/API-drift failures are
+  # intentionally blocking for this job so maintainers see upstream parity
+  # regressions instead of silently accepting them.
   #
   # Requires STRIPE_TEST_SECRET_KEY to be configured as a repository
   # secret. Individual tests skip cleanly in setup_all when the secret
@@ -575,10 +713,9 @@ jobs:
   live-stripe:
     # Job id stays `live-stripe` for `act -j live-stripe` compatibility; display
     # name reflects Stripe *test mode* keys (`STRIPE_TEST_SECRET_KEY`), not live mode.
-    name: Stripe test-mode parity (advisory)
+    name: Stripe test-mode parity (mandatory periodic)
     runs-on: ubuntu-24.04
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
-    continue-on-error: true
 
     services:
       postgres:
