@@ -143,27 +143,42 @@ Use this when you want replay-ready webhook history, browser coverage, or other
 pre-seeded admin states that would be awkward to create in a short walkthrough.
 Keep cancellation and other secondary proofs here instead of in the main story.
 
-## Observability
-
-- **Cross-domain host subscription** (append `Accrue.Telemetry.Metrics.defaults/0`, attach once to `[:accrue, :ops, :webhook_dlq, :dead_lettered]`) is documented in [`../../accrue/guides/telemetry.md`](../../accrue/guides/telemetry.md#cross-domain-host-subscription). The compile-checked mirror in this app is `AccrueHost.AccrueOpsTelemetry`.
-- **Billing checkout facade:** `Accrue.Billing.create_checkout_session/2` emits **`[:accrue, :billing, :checkout_session, :create]`**; span metadata and Fake vs live processor notes live under [`../../accrue/guides/telemetry.md#billing-checkout-session-create`](../../accrue/guides/telemetry.md#billing-checkout-session-create) (ExUnit SSOT: `accrue/test/accrue/billing/checkout_session_facade_test.exs`).
-- **Billing portal facade:** `Accrue.Billing.create_billing_portal_session/2` emits **`[:accrue, :billing, :billing_portal, :create]`**; span notes live under [`../../accrue/guides/telemetry.md#billing-billing-portal-create`](../../accrue/guides/telemetry.md#billing-billing-portal-create) (ExUnit SSOT: `accrue/test/accrue/billing/billing_portal_session_facade_test.exs`).
-- **Recovery & Maintenance:** Background jobs like `Accrue.Jobs.DetectExpiringCards` and `Accrue.Jobs.MeterEventsReconciler` are wired into the host Oban crontab to demonstrate production-grade failure recovery and automated maintenance. Proof of wiring lives in `test/accrue_host/recovery_wiring_test.exs`.
-
-## Production readiness
-
-Before promoting billing to a live Stripe account, use the package checklist [`../../accrue/guides/production-readiness.md`](../../accrue/guides/production-readiness.md). It is the same host-owned story as **First Hour**, ordered for **ship** rather than **evaluate**.
-
 ## Proof and verification
 
-Pull requests are merge-blocked on GitHub Actions jobs `docs-contracts-shift-left` and `host-integration` (see `.github/workflows/ci.yml`). This README only names the host-facing checks it directly depends on: `bash scripts/ci/verify_adoption_proof_matrix.sh` keeps the adoption-proof contract aligned, and `bash scripts/ci/accrue_host_uat.sh` runs the full host stack (`cd examples/accrue_host && mix verify.full`). Use `mix verify` for a faster bounded Fake slice that is not CI-complete. For the exact support-contract bundle membership and CI-home truth, see `scripts/ci/README.md` together with `.github/workflows/ci.yml`.
-This checked-in proof surface is the linked `accrue` / `accrue_admin` `1.0.0` release slice: the same host README, shift-left scripts, and wrapper UAT prove the public pair before and after publish.
+Use the smallest proof that answers your question:
 
-For **`Accrue.Billing.create_checkout_session/2`** and **`Accrue.Billing.create_billing_portal_session/2`**, the teaching path and telemetry tuples live in [**First Hour**](../../accrue/guides/first_hour.md); span anchors and ExUnit SSOT paths are under [**#observability**](#observability).
+- **Explore:** `docker compose up --build` runs the demo app and Postgres
+  locally so you can inspect the Fake-backed `/app/billing` to `/billing` loop
+  in a browser.
+- **Focused proof:** `mix verify` is the bounded Fake-backed proof for installer
+  boundary, subscription flow, signed `/webhooks/stripe` ingest, mounted
+  `/billing` inspection, and replay visibility.
+- **Full local gate:** `mix verify.full` is the CI-equivalent local host gate. It
+  layers compile, asset-build, dev-boot, regression, and browser smoke on top of
+  `mix verify`.
+- **CI wrapper:** `bash scripts/ci/accrue_host_uat.sh` is the repo-root wrapper
+  used by GitHub Actions job `host-integration` for the full host stack.
+- **Maintainer contracts:** `scripts/ci/README.md` owns maintainer triage and the
+  support-contract bundle map; this README only names the host-facing checks it
+  directly depends on.
+- **Provider parity:** live Stripe parity is scheduled/manual provider drift
+  detection. It is not required for local evaluation or Start Here.
 
-## Public guides handoff
+Pull requests are merge-blocked on GitHub Actions jobs
+`docs-contracts-shift-left` and `host-integration` (see
+`.github/workflows/ci.yml`). This README directly depends on
+`bash scripts/ci/verify_adoption_proof_matrix.sh` for the adoption-proof
+contract and on `bash scripts/ci/accrue_host_uat.sh` for the full host stack
+(`cd examples/accrue_host && mix verify.full`). For exact CI bundle membership
+and triage ownership, use `scripts/ci/README.md` with `.github/workflows/ci.yml`.
+This checked-in proof surface is the linked `accrue` / `accrue_admin` `1.0.0`
+release slice: the same host README, shift-left scripts, and wrapper UAT prove
+the public pair before and after publish.
 
-This host README stays proof-lane focused. Canonical semantics, support boundaries, and stable-core posture live in public guides: [First Hour](../../accrue/guides/first_hour.md), [Jobs to Be Done](../../accrue/guides/jobs_to_be_done.md#scope-and-maturity), and [Maturity and maintenance](../../accrue/guides/maturity-and-maintenance.md). Treat this file as adoption proof vocabulary, not policy authority.
+For **`Accrue.Billing.create_checkout_session/2`** and
+**`Accrue.Billing.create_billing_portal_session/2`**, the teaching path and
+telemetry tuples live in [**First Hour**](../../accrue/guides/first_hour.md);
+span anchors and ExUnit SSOT paths are under [**#observability**](#observability).
 
 ### Verification modes
 
@@ -178,6 +193,21 @@ This host README stays proof-lane focused. Canonical semantics, support boundari
   from the canonical checked-in host tutorial.
 - `mix accrue.install` is production setup inside your own Phoenix app, not the
   shortcut for this demo app.
+
+## Observability
+
+- **Cross-domain host subscription** (append `Accrue.Telemetry.Metrics.defaults/0`, attach once to `[:accrue, :ops, :webhook_dlq, :dead_lettered]`) is documented in [`../../accrue/guides/telemetry.md`](../../accrue/guides/telemetry.md#cross-domain-host-subscription). The compile-checked mirror in this app is `AccrueHost.AccrueOpsTelemetry`.
+- **Billing checkout facade:** `Accrue.Billing.create_checkout_session/2` emits **`[:accrue, :billing, :checkout_session, :create]`**; span metadata and Fake vs live processor notes live under [`../../accrue/guides/telemetry.md#billing-checkout-session-create`](../../accrue/guides/telemetry.md#billing-checkout-session-create) (ExUnit SSOT: `accrue/test/accrue/billing/checkout_session_facade_test.exs`).
+- **Billing portal facade:** `Accrue.Billing.create_billing_portal_session/2` emits **`[:accrue, :billing, :billing_portal, :create]`**; span notes live under [`../../accrue/guides/telemetry.md#billing-billing-portal-create`](../../accrue/guides/telemetry.md#billing-billing-portal-create) (ExUnit SSOT: `accrue/test/accrue/billing/billing_portal_session_facade_test.exs`).
+- **Recovery & Maintenance:** Background jobs like `Accrue.Jobs.DetectExpiringCards` and `Accrue.Jobs.MeterEventsReconciler` are wired into the host Oban crontab to demonstrate production-grade failure recovery and automated maintenance. Proof of wiring lives in `test/accrue_host/recovery_wiring_test.exs`.
+
+## Production readiness
+
+Before promoting billing to a live Stripe account, use the package checklist [`../../accrue/guides/production-readiness.md`](../../accrue/guides/production-readiness.md). It is the same host-owned story as **First Hour**, ordered for **ship** rather than **evaluate**.
+
+## Public guides handoff
+
+This host README stays proof-lane focused. Canonical semantics, support boundaries, and stable-core posture live in public guides: [First Hour](../../accrue/guides/first_hour.md), [Jobs to Be Done](../../accrue/guides/jobs_to_be_done.md#scope-and-maturity), and [Maturity and maintenance](../../accrue/guides/maturity-and-maintenance.md). Treat this file as adoption proof vocabulary, not policy authority.
 
 ### VERIFY-01 (Phase 21)
 

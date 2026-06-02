@@ -182,6 +182,10 @@ require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/fi
 # D-07 audit: no removals; release-gate retains full host structural pins
 
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## First run"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Start Here"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "docker compose up --build"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "http://localhost:4000"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Accrue.Processor.Fake"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Seeded history"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Proof and verification"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "### Verification modes"
