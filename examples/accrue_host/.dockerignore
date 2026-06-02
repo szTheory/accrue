@@ -1,0 +1,11 @@
+deps/
+_build/
+assets/node_modules/
+test-results/
+playwright-report/
+doc/
+cover/
+.env
+*.log
+node_modules/
+.git
