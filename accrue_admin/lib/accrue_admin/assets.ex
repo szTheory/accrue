@@ -10,26 +10,37 @@ defmodule AccrueAdmin.Assets do
   @brand_file Application.app_dir(:accrue, "priv/static/brand.css")
   @css_file Application.app_dir(:accrue_admin, "priv/static/accrue_admin.css")
   @js_file Application.app_dir(:accrue_admin, "priv/static/accrue_admin.js")
+  @font_sans_file Application.app_dir(:accrue_admin, "priv/static/fonts/geist-sans-vf.woff2")
+  @font_mono_file Application.app_dir(:accrue_admin, "priv/static/fonts/geist-mono-vf.woff2")
 
   @external_resource @brand_file
   @external_resource @css_file
   @external_resource @js_file
+  @external_resource @font_sans_file
+  @external_resource @font_mono_file
 
   @brand_body File.read!(@brand_file)
   @css_body File.read!(@css_file)
   @js_body File.read!(@js_file)
+  @font_sans_body File.read!(@font_sans_file)
+  @font_mono_body File.read!(@font_mono_file)
 
   @brand_hash :md5 |> :crypto.hash(@brand_body) |> Base.encode16(case: :lower)
   @css_hash :md5 |> :crypto.hash(@css_body) |> Base.encode16(case: :lower)
   @js_hash :md5 |> :crypto.hash(@js_body) |> Base.encode16(case: :lower)
+  @font_sans_hash :md5 |> :crypto.hash(@font_sans_body) |> Base.encode16(case: :lower)
+  @font_mono_hash :md5 |> :crypto.hash(@font_mono_body) |> Base.encode16(case: :lower)
 
-  @type kind :: :brand | :css | :js
+  # Variable WOFF2 faces (Geist Sans/Mono, OFL). Referenced via a relative `url()`
+  # from the admin stylesheet, so they resolve to `<mount>/assets/geist-*.woff2`
+  # regardless of host mount path — no runtime mount-path threading required.
+  @type kind :: :brand | :css | :js | :font_sans | :font_mono
 
   @spec init(kind()) :: kind()
-  def init(kind) when kind in [:brand, :css, :js], do: kind
+  def init(kind) when kind in [:brand, :css, :js, :font_sans, :font_mono], do: kind
 
   @spec call(Plug.Conn.t(), kind()) :: Plug.Conn.t()
-  def call(conn, kind) when kind in [:brand, :css, :js] do
+  def call(conn, kind) when kind in [:brand, :css, :js, :font_sans, :font_mono] do
     {body, content_type, etag} = asset(kind)
 
     conn
@@ -85,4 +96,6 @@ defmodule AccrueAdmin.Assets do
   def asset(:brand), do: {@brand_body, "text/css", @brand_hash}
   def asset(:css), do: {@css_body, "text/css", @css_hash}
   def asset(:js), do: {@js_body, "application/javascript", @js_hash}
+  def asset(:font_sans), do: {@font_sans_body, "font/woff2", @font_sans_hash}
+  def asset(:font_mono), do: {@font_mono_body, "font/woff2", @font_mono_hash}
 end

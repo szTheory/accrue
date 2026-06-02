@@ -39,6 +39,7 @@ defmodule AccrueAdmin.Layouts do
         <script nonce={@csp_nonce}><%= Phoenix.HTML.raw(@anti_fouc_script) %></script>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title><%= @page_title %></title>
+        <link rel="icon" href={favicon_data_uri()} type="image/svg+xml" />
         <link :if={@brand_css_path} rel="stylesheet" href={@brand_css_path} />
         <link :if={@assets_css_path} rel="stylesheet" href={@assets_css_path} />
       </head>
@@ -66,6 +67,14 @@ defmodule AccrueAdmin.Layouts do
     })();
     """
   end
+
+  # Inline SVG favicon: an "A" monogram on the brand ink square. Inlined as a data
+  # URI (CSP `img-src` allows `data:`) so no extra route or static file is needed.
+  @favicon_svg ~s(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#111418"/><path d="M16 6.5 23 25.5h-3.4l-1.45-4.1h-4.3L12.4 25.5H9L16 6.5Zm0 6.4-1.5 4.3h3L16 12.9Z" fill="#FAFBFC"/></svg>)
+  @favicon_data_uri "data:image/svg+xml;base64," <> Base.encode64(@favicon_svg)
+
+  @spec favicon_data_uri() :: String.t()
+  def favicon_data_uri, do: @favicon_data_uri
 
   defp runtime_theme_style(brand) do
     """

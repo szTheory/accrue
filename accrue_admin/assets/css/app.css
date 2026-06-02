@@ -1,5 +1,23 @@
 @import "./theme.css";
 
+/* Self-hosted Geist variable faces (OFL). Relative url() resolves against the
+   served stylesheet at `<mount>/assets/css-<hash>`, i.e. `<mount>/assets/geist-*.woff2`,
+   which AccrueAdmin.Assets serves — mount-path independent, no host wiring. */
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("geist-sans-vf.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("geist-mono-vf.woff2") format("woff2");
+}
+
 html,
 body {
   margin: 0;
@@ -9,7 +27,23 @@ body {
 html.accrue-admin {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Tabular figures everywhere — this is a data tool; numbers must align across
+     tables, KPIs, deltas, money, and IDs. Geist + Geist Mono both ship tnum. */
+  font-variant-numeric: tabular-nums;
 }
+
+/* Inline icon primitive (AccrueAdmin.Components.Icon): inherits color via
+   currentColor, sized by token. `flex: none` keeps icons from squashing in rows. */
+.ax-icon {
+  width: var(--ax-icon-md);
+  height: var(--ax-icon-md);
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+.ax-icon-sm { width: var(--ax-icon-sm); height: var(--ax-icon-sm); }
+.ax-icon-md { width: var(--ax-icon-md); height: var(--ax-icon-md); }
+.ax-icon-lg { width: var(--ax-icon-lg); height: var(--ax-icon-lg); }
 
 body {
   background:

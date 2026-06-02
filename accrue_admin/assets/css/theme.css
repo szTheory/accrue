@@ -10,8 +10,8 @@
    Defining these only on `:root` can lose against host `:root` ordering; `html.accrue-admin`
    scopes Accrue admin surfaces deterministically. */
 html.accrue-admin {
-  --ax-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --ax-font-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+  --ax-font-sans: "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ax-font-mono: "Geist Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
 
   /* Type scale (+3xl display step for dashboard hero numbers) */
   --ax-type-xs: 0.75rem;
@@ -38,6 +38,11 @@ html.accrue-admin {
   --ax-radius-md: 0.625rem;  /* 10px — cards, panels */
   --ax-radius-lg: 0.875rem;  /* 14px — drawers, modals */
   --ax-radius-pill: 999px;
+
+  /* Icon sizing — heroicons rendered inline; sized via currentColor + these tokens */
+  --ax-icon-sm: 1rem;     /* 16px — inline with sm text, in-table */
+  --ax-icon-md: 1.25rem;  /* 20px — default control/nav icon */
+  --ax-icon-lg: 1.5rem;   /* 24px — launcher tiles, empty-state glyphs */
 
   /* Shadows — small, close-range, dual-layer. Resting cards use borders; shadow = elevation. */
   --ax-shadow-sm: 0 1px 2px rgba(17, 20, 24, 0.06), 0 1px 1px rgba(17, 20, 24, 0.04);
