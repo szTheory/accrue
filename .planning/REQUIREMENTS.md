@@ -21,9 +21,9 @@
 
 ### DX Documentation (DOC)
 
-- [ ] **DOC-01**: Write/update a clear "Start Here" DX summary at the top of the demo app's README.
+- [x] **DOC-01**: Write/update a clear "Start Here" DX summary at the top of the demo app's README.
 - [x] **DOC-02**: Document the Docker setup and commands needed to spin up the demo and explore the Admin UI.
-- [ ] **DOC-03**: Ensure documentation is framed around the user persona and their goals, rather than just technical implementation details.
+- [x] **DOC-03**: Ensure documentation is framed around the user persona and their goals, rather than just technical implementation details.
 
 ## v2 Requirements
 
@@ -47,9 +47,9 @@
 | E2E-02 | Phase 165 | Complete |
 | E2E-03 | Phase 165 | Complete |
 | E2E-04 | Phase 165 | Complete |
-| DOC-01 | Phase 166 | Pending |
+| DOC-01 | Phase 166 | Complete |
 | DOC-02 | Phase 166 | Complete |
-| DOC-03 | Phase 166 | Pending |
+| DOC-03 | Phase 166 | Complete |
 
 **Coverage:**
 - v1 requirements: 11 total

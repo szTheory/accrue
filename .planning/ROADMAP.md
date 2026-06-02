@@ -26,7 +26,7 @@ Future feature milestones require at least one of:
 | 163 | Realistic Domain & Rich Seeds | Define persona and populate rich database seeds for demo app | EVD-01, EVD-02 | 3 |
 | 164 | Docker DX & Optimized Caching | Create a seamless, fast Docker local dev environment | EVD-03, EVD-04 | 3 |
 | 165 | E2E Automation & Shift-Left CI | 4/4 | Complete    | 2026-06-02 |
-| 166 | Adoption DX Docs | 1/3 | In Progress|  |
+| 166 | Adoption DX Docs | 2/3 | In Progress|  |
 
 ### Phase Details
 
