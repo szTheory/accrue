@@ -1,5 +1,18 @@
 # Milestones
 
+## v1.49 Realistic Demo App & Adoption Evidence (Shipped: 2026-06-02)
+
+**Phases completed:** 4 phases, 10 plans, 10 tasks
+
+**Key accomplishments:**
+
+- Native Playwright shards, Docker boot smoke, and mandatory periodic Stripe parity now enforce E2E adoption evidence in CI
+- Phoenix dev endpoint now binds through Docker Compose while native development remains loopback-only
+- Docker-first host README flow now leads evaluators from localhost boot to Fake-backed billing inspection
+- Host README proof depth now maps each command to its confidence level, with Start Here claims shift-left protected
+
+---
+
 ## v1.48 Release Readiness + Stable Core Posture (Shipped: 2026-06-01)
 
 **Phases completed:** 4 phases (159–162), 10 plans

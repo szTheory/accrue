@@ -1,7 +1,7 @@
 ---
 phase: 166
 slug: adoption-dx-docs
-status: draft
+status: complete
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-06-02
@@ -38,10 +38,10 @@ created: 2026-06-02
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 166-01-01 | 01 | 1 | DOC-02 | T-166-01 | Do not publish a false Docker browser-access claim | source + compose | `cd examples/accrue_host && docker compose config` | yes | pending |
-| 166-01-02 | 01 | 1 | DOC-02 | T-166-01 | Docker Start Here command remains reachable at published localhost port | smoke | `cd examples/accrue_host && docker compose up --build -d && for i in $(seq 1 30); do curl -fsS http://localhost:4000/ && break; sleep 1; done; docker compose down --volumes --remove-orphans` | yes | pending |
-| 166-02-01 | 02 | 2 | DOC-01,DOC-02,DOC-03 | T-166-02 | Start Here copy stays honest about Fake/local proof and no live keys | doc contract | `bash scripts/ci/verify_package_docs.sh && bash scripts/ci/verify_verify01_readme_contract.sh` | yes | pending |
-| 166-03-01 | 03 | 3 | DOC-01,DOC-03 | T-166-02 | Proof ladder preserves maintainer/support contract guardrails | doc contract | `bash scripts/ci/verify_package_docs.sh && bash scripts/ci/verify_verify01_readme_contract.sh && bash scripts/ci/verify_adoption_proof_matrix.sh` | yes | pending |
+| 166-01-01 | 01 | 1 | DOC-02 | T-166-01 | Do not publish a false Docker browser-access claim | source + compose | `cd examples/accrue_host && docker compose config` | yes | green |
+| 166-01-02 | 01 | 1 | DOC-02 | T-166-01 | Docker Start Here command remains reachable at published localhost port | smoke | `cd examples/accrue_host && docker compose up --build -d && for i in $(seq 1 30); do curl -fsS http://localhost:4000/ && break; sleep 1; done; docker compose down --volumes --remove-orphans` | yes | green in CI; local attempt environment-blocked by port 4000 collision |
+| 166-02-01 | 02 | 2 | DOC-01,DOC-02,DOC-03 | T-166-02 | Start Here copy stays honest about Fake/local proof and no live keys | doc contract | `bash scripts/ci/verify_package_docs.sh && bash scripts/ci/verify_verify01_readme_contract.sh` | yes | green |
+| 166-03-01 | 03 | 3 | DOC-01,DOC-03 | T-166-02 | Proof ladder preserves maintainer/support contract guardrails | doc contract | `bash scripts/ci/verify_package_docs.sh && bash scripts/ci/verify_verify01_readme_contract.sh && bash scripts/ci/verify_adoption_proof_matrix.sh` | yes | green |
 
 ---
 
@@ -75,4 +75,4 @@ Existing infrastructure covers all phase requirements:
 - [x] Feedback latency target documented
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** complete 2026-06-02

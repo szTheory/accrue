@@ -27,9 +27,23 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 
 A historical anchor, dormant seed, or deferred idea never opens milestone scope by itself; any reopen decision must be recorded in `.planning/PROJECT.md` or a future strategy artifact before `.planning/ROADMAP.md` or `.planning/STATE.md` changes.
 
-Current milestone after v1.48: **v1.49 Realistic Demo App & Adoption Evidence** is open for adoption evidence, Docker DX, E2E automation, and docs. Phase 165 is complete as of 2026-06-02: CI now enforces native sharded Playwright E2E, Docker Compose boot smoke, and mandatory periodic live-Stripe parity. Phase 166 remains the next active planning target for Adoption DX Docs.
+v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
 ## Last shipped milestone
+
+### v1.49 — Realistic Demo App & Adoption Evidence (**archived 2026-06-02**)
+
+**Goal:** Turn `examples/accrue_host` into a realistic adoption-evidence demo app with rich seeds, deterministic E2E automation, frictionless Docker DX, and clear evaluator documentation.
+
+**Delivered:**
+- PingPal-style seeded host data with deterministic hero accounts, realistic background accounts, subscriptions, events, and time-series history.
+- Docker-first local development path with dependency/build volume isolation and Docker-aware Phoenix endpoint binding.
+- Native sharded Playwright CI, checked-in Docker boot smoke, and mandatory periodic live-Stripe parity.
+- Host README Start Here flow and proof ladder that guide adopters from Docker boot to Fake-backed billing inspection.
+
+**Closeout proof:** Phases 163–166; planning tag `v1.49`; see `.planning/MILESTONES.md` v1.49 entry, `.planning/milestones/v1.49-ROADMAP.md`, `.planning/milestones/v1.49-REQUIREMENTS.md`, `.planning/milestones/v1.49-MILESTONE-AUDIT.md`, and `.planning/milestones/v1.49-phases/`.
+
+## Prior shipped milestone
 
 ### v1.47 — ENT-10 Polish + Adopter-Proof Completeness (**archived 2026-05-31**)
 
@@ -424,7 +438,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **Closeout proof:** `.planning/v1.40-v1.40-MILESTONE-AUDIT.md`.
 
-## Current Milestone
+## Recently Completed Milestone
 
 ### v1.49 — Realistic Demo App & Adoption Evidence
 
@@ -438,12 +452,12 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**Planning v1.49 started.** v1.49 focuses on adoption evidence, demoing existing features, and DX. Phase 164 complete — Created a seamless, fast Docker local dev environment.
+**v1.49 shipped and archived on 2026-06-02.** Accrue remains in stable-core / demand-driven expansion posture. The next milestone should only open for release-readiness, maintenance, documentation truth, verifier hardening, adopter-proof closure, or a concrete adopter/correctness/security/operational failure mode.
 
-**Last shipped planning milestone:** **v1.48** — Phases **159–162** — **2026-06-01**
+**Last shipped planning milestone:** **v1.49** — Phases **163–166** — **2026-06-02**
 **Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0
 
-## Last shipped milestone
+## Prior shipped milestone
 
 ### v1.48 — Release Readiness + Stable Core Posture (**archived 2026-06-01**)
 
@@ -461,19 +475,16 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ### Active
 
-- [ ] **EVD-01**: Define realistic SaaS cohort persona and JTBD domain.
-- [ ] **EVD-02**: Implement rich database seeds.
-- [ ] **E2E-01**: Playwright E2E for onboarding/checkout.
-- [ ] **E2E-02**: Playwright E2E for billing management.
-- [ ] **E2E-03**: Integrate tests into CI.
-- [ ] **E2E-04**: Ensure tests are deterministic and flake-free.
-- [ ] **DOC-01**: "Start Here" DX summary in README.
-- [ ] **DOC-02**: Docker setup documentation.
-- [ ] **DOC-03**: Persona-framed documentation.
+(None. Start the next milestone with `$gsd-new-milestone`.)
 
-### Validated v1.49 (in progress)
+### Validated v1.49 (archived in `.planning/milestones/v1.49-REQUIREMENTS.md`; milestone shipped & archived 2026-06-02)
 
-- ✓ **EVD-03..EVD-04** — Docker DX & Optimized Caching — Validated in Phase 164
+Realistic Demo App & Adoption Evidence — 11/11 satisfied.
+
+- ✓ **EVD-01..EVD-02** — Realistic SaaS cohort persona and rich database seeds — v1.49
+- ✓ **EVD-03..EVD-04** — Docker DX & optimized caching — v1.49
+- ✓ **E2E-01..E2E-04** — Deterministic Playwright E2E coverage and CI integration — v1.49
+- ✓ **DOC-01..DOC-03** — Docker-first, persona-framed Start Here documentation — v1.49
 
 ### Validated v1.48 (archived in `.planning/milestones/v1.48-REQUIREMENTS.md`; milestone completed 2026-06-01)
 
@@ -529,4 +540,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-01 after v1.48 milestone completion*
+*Last updated: 2026-06-02 after v1.49 milestone completion*

@@ -19,6 +19,7 @@ key_files:
     - examples/accrue_host/config/dev.exs
 decisions:
   - "Use `System.get_env(\"PGHOST\") || \"localhost\"` for the database hostname in dev.exs to allow seamless dual-mode execution (Docker vs Bare Metal)."
+requirements-completed: [EVD-03]
 metrics:
   duration: 3
   completed_date: "2026-06-01"

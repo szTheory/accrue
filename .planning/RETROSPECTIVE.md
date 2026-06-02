@@ -1223,6 +1223,51 @@ Closed the last open step of the canonical SaaS loop — gate features/access on
 
 ---
 
+## Milestone: v1.49 — Realistic Demo App & Adoption Evidence
+
+**Shipped:** 2026-06-02
+**Phases:** 4 | **Plans:** 10 | **Tasks:** 10
+
+### What Was Built
+
+- Rich PingPal-style demo data for `examples/accrue_host`, including deterministic hero accounts, realistic background accounts, subscriptions, events, and historical trend data.
+- Docker-first local development and evaluation path with optimized dependency/build volume isolation and Docker-aware Phoenix endpoint binding.
+- Deterministic Playwright coverage for onboarding, subscription start, upgrade, downgrade, cancellation, payment methods, and metered usage.
+- CI enforcement through native Playwright shards, checked-in Docker boot smoke, and mandatory periodic live-Stripe parity.
+- Host README Start Here and proof ladder that point adopters from local Docker boot to Fake-backed billing and admin inspection.
+
+### What Worked
+
+- The fresh milestone audit quickly distinguished real implementation gaps from stale planning metadata.
+- Keeping the host README claims pinned in shell verifiers prevented the new evaluator path from becoming unenforced prose.
+- Splitting native Playwright shards from Docker boot smoke kept CI fast while preserving the Docker DX contract.
+
+### What Was Inefficient
+
+- `REQUIREMENTS.md`, summary frontmatter, `ROADMAP.md`, and `STATE.md` lagged behind verified implementation and needed mechanical cleanup at close.
+- The milestone archive handler created roadmap and requirements archives but did not move the audit file, phase directories, or fully collapse the active roadmap.
+- Local Docker smoke was blocked by an occupied host port, so final proof relied on Compose config plus the CI smoke contract.
+
+### Patterns Established
+
+- Treat the example host as the adoption-evidence front door: realistic data, browser proof, Docker boot, and documentation all point to the same loop.
+- Use `PGHOST=db` as the Docker-specific signal for dev endpoint behavior rather than introducing extra evaluator configuration.
+- Keep subscription-mutating browser flows serial while allowing CI-level sharding around the suite.
+
+### Key Lessons
+
+1. Requirement checkboxes and summary frontmatter should be updated during phase verification, not deferred to milestone close.
+2. Audit artifacts can become stale within hours; closeout should compare audit timestamps against phase verification timestamps before trusting status.
+3. Local Docker smoke should either reserve a non-default port for verification or explicitly rely on CI for clean-host proof.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: one concentrated closeout session after Phase 166 verification.
+- Notable: most closeout time was spent repairing planning metadata, not verifying product behavior.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

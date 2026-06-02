@@ -17,6 +17,7 @@ key-files:
     - examples/accrue_host/lib/accrue_host_web/router.ex
 decisions:
   - Configure Phoenix.Ecto.SQL.Sandbox at /api/sandbox in test so Playwright tests can get dedicated Ecto sandboxes and release them through the built-in POST/DELETE lifecycle.
+requirements-completed: [E2E-04]
 metrics:
   duration_minutes: 1
   completed_date: "2026-06-01"
@@ -32,4 +33,5 @@ The original implementation used a custom sandbox controller. Phase review repla
 ## Threat Flags
 
 None - the Sandbox endpoint is conditionally bound to the `:test` environment.
-\n## Self-Check: PASSED
+
+## Self-Check: PASSED

@@ -20,6 +20,7 @@ key_files_modified: []
 key_decisions:
   - Use `elixir:1.17-slim` for standard glibc environment to avoid bcrypt_elixir NIF issues on Alpine
   - Use named volumes `mix_deps`, `mix_build`, and `assets_node_modules` to isolate container binaries from host OS binaries when mapping the monorepo path
+requirements-completed: [EVD-03, EVD-04]
 duration: 5 minutes
 completed_date: "2024-06-01"
 ---

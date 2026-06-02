@@ -1,3 +1,9 @@
+---
+phase: 165-e2e-automation-shift-left-ci
+plan: 02
+requirements-completed: [E2E-04]
+---
+
 # 165-02 Plan Summary
 
 ## Objective

@@ -1,6 +1,7 @@
 ---
 phase: "163"
 plan: "01"
+requirements-completed: [EVD-01, EVD-02]
 ---
 
 # Plan 01 Summary

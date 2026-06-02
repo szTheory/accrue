@@ -2,33 +2,33 @@
 gsd_state_version: 1.0
 milestone: v1.49
 milestone_name: Realistic Demo App & Adoption Evidence
-status: verifying
-last_updated: "2026-06-02T07:45:50.433Z"
-last_activity: 2026-06-02
+status: Awaiting next milestone
+last_updated: "2026-06-02T08:07:09.287Z"
+last_activity: 2026-06-02 — Milestone v1.49 completed and archived
 progress:
-  total_phases: 8
+  total_phases: 4
   completed_phases: 4
   total_plans: 10
   completed_plans: 10
-  percent: 50
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-01 after v1.49 milestone start)
+See: `.planning/PROJECT.md` (updated 2026-06-02 after v1.49 milestone completion)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 166 — adoption-dx-docs
+**Current focus:** Awaiting next milestone
 
 ## Current Position
 
-Phase: 166 (adoption-dx-docs) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-06-02
+Phase: Milestone v1.49 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-02 — Milestone v1.49 completed and archived
 
 ## Post-v1.48 Pause Rule
 
@@ -45,9 +45,11 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 | 163 | Realistic Domain & Rich Seeds | EVD-01, EVD-02 | Complete |
 | 164 | Docker DX & Optimized Caching | EVD-03, EVD-04 | Complete |
 | 165 | E2E Automation & Shift-Left CI | E2E-01, E2E-02, E2E-03, E2E-04 | Complete |
-| 166 | Adoption DX Docs | DOC-01, DOC-02, DOC-03 | Pending |
+| 166 | Adoption DX Docs | DOC-01, DOC-02, DOC-03 | Complete |
 
 ### Recently shipped milestones
+
+**v1.49** (shipped & archived **2026-06-02**): 4 phases (**163–166**), 11 requirements. Theme: Realistic Demo App & Adoption Evidence. Audit: `.planning/milestones/v1.49-MILESTONE-AUDIT.md`.
 
 **v1.48** (shipped & archived **2026-06-01**): 4 phases (**159–162**), 9 requirements. Theme: Release Readiness + Stable Core Posture. Audit: `.planning/v1.48-v1.48-MILESTONE-AUDIT.md` (or equivalent closeout proof).
 
@@ -74,6 +76,7 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 - **2026-06-01:** Docker DX must be seamless with optimized cache layers to allow maintainers and adopters to iterate quickly without redownloading dependencies (Tailwind, Hex deps).
 - **2026-06-02:** Core onboarding and billing Playwright coverage is consolidated into a single serial spec because the Fake processor is shared process state; CI must preserve serial execution for sensitive subscription-mutating flows.
 - **2026-06-02:** CI now enforces Phase 165 through native sharded Playwright E2E, Docker Compose boot smoke, and mandatory periodic live-Stripe parity.
+- **2026-06-02:** v1.49 shipped and archived. Future milestones return to stable-core / demand-driven expansion posture unless reopened by concrete adopter, correctness, security, operational, or strategy evidence.
 
 ### Historical Research Assets
 
@@ -84,13 +87,14 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 ### Roadmap Evolution
 
 - v1.48 shipped and archived 2026-06-01: Phases 159–162
-- v1.49 roadmap created 2026-06-01: Phases 163–166
+- v1.49 shipped and archived 2026-06-02: Phases 163–166
 
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 - **2026-06-01:** Opened v1.49 "Realistic Demo App & Adoption Evidence". This explicitly does not open new broad feature scope, but rather provides realistic E2E coverage, rich fixtures, and Docker DX for the existing application to prove the value proposition and ease maintainer ramp-up.
+- **2026-06-02:** Closed v1.49 after fresh audit passed 11/11 requirements and archived ROADMAP, REQUIREMENTS, MILESTONE-AUDIT, and phase artifacts under `.planning/milestones/`.
 
 ### Pending Todos
 
@@ -120,17 +124,12 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | scope | Real-time PubSub-driven dashboard refresh | out of scope v1.44; coupled to multi-channel dunning v1.45+ | Poll/manual refresh is sufficient for the current operator workflow. | Admin analytics UX | concrete adopter failure or repeated support issue requiring real-time recovery monitoring | 2026-05-27 |
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | Accrue is a billing/subscription library, not an accounting, merchant-of-record, or payout product. | Strategy non-goal | explicit strategy change or correctness/security/data-loss risk that cannot be handled by host-owned exports | carried |
 | seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | backlogged; future-roadmap seed, not a closeout blocker | Ecosystem blueprints are dormant future-roadmap material and do not open milestone scope by themselves. | Future roadmap / ecosystem integrations | concrete adopter failure requiring an integration, repeated support issue, or explicit strategy change | 2026-05-31 |
-| Phase 166 P01 | 2 min | 2 tasks | 1 files |
-| Phase 166 P02 | 4 min | 2 tasks | 4 files |
-| Phase 166 P03 | 3 min | 3 tasks | 2 files |
-
 ## Session Continuity
 
-Last session: 2026-06-02T07:45:50.429Z
-Stopped at: Completed 166-03-PLAN.md
+Last session: 2026-06-02T08:07:09.287Z
+Stopped at: Completed and archived v1.49
 Resume file: None
 
 ## Operator Next Steps
 
-- Run `$gsd-verify-work 165` to verify Phase 165 end-to-end.
-- Then run `$gsd-plan-phase 166` for Adoption DX Docs.
+- Start the next milestone with `$gsd-new-milestone`.

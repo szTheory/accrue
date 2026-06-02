@@ -17,6 +17,7 @@ key-files:
 decisions:
   - Consolidate onboarding and billing management coverage into one serial Playwright spec because Accrue.Processor.Fake is a singleton GenServer and shared mutable processor state made parallel flows flaky.
   - Disable full Playwright parallelism for the host suite to avoid Postgres connection exhaustion and Fake processor races during subscription mutations.
+requirements-completed: [E2E-01, E2E-02, E2E-04]
 metrics:
   completed_date: "2026-06-01"
 ---
