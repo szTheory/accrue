@@ -117,12 +117,18 @@ jobs:
             accrue_portal_release_before="false"
           fi
 
-          $release_please github-release \
-            --repo-url "$repo" \
-            --target-branch "$target_branch" \
-            --config-file release-please-config.json \
-            --manifest-file .release-please-manifest.json \
-            --token "$RELEASE_PLEASE_TOKEN"
+          if [ "$accrue_release_before" = "true" ] && \
+             [ "$accrue_admin_release_before" = "true" ] && \
+             [ "$accrue_portal_release_before" = "true" ]; then
+            echo "All manifest releases already exist; skipping duplicate GitHub release creation." >> "$GITHUB_STEP_SUMMARY"
+          else
+            $release_please github-release \
+              --repo-url "$repo" \
+              --target-branch "$target_branch" \
+              --config-file release-please-config.json \
+              --manifest-file .release-please-manifest.json \
+              --token "$RELEASE_PLEASE_TOKEN"
+          fi
 
           write_release_outputs "accrue" "accrue" "$accrue_release_before"
           write_release_outputs "accrue_admin" "accrue_admin" "$accrue_admin_release_before"

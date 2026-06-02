@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.48 Release Readiness + Stable Core Posture (Shipped: 2026-06-01)
+
+**Phases completed:** 4 phases (159–162), 10 plans
+
+**Key accomplishments:**
+
+- Established and published the linked release line post-1.3.0 with unified changelog entries, version tags, and release notes across `accrue`, `accrue_admin`, and `accrue_portal`.
+- Enforced a deterministic, single-artifact release gate spanning tests, documentation, Dialyzer, Credo, and adoption matrix contracts to assure stability.
+- Explicitly positioned Accrue's stable-core / demand-driven strategy in all public READMEs and host integration paths to set clear adopter boundaries.
+- Archived stale `.planning/research/` anchors (v1.17 items) and implemented explicit trigger bounds for dormant ecosystem seeds.
+- Recorded a post-v1.48 broad-feature pause rule: new milestones only open on concrete, tracked failure or risk events.
+
+---
+
 ## v1.47 ENT-10 Polish + Adopter-Proof Completeness (Shipped: 2026-05-31)
 
 **Phases completed:** 5 phases, 5 plans, 11 tasks

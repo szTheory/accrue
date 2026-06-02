@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-06-02T00:54:33.466Z",
+  "phase": "165",
+  "phase_name": "e2e-automation-shift-left-ci",
+  "phase_dir": ".planning/phases/165-e2e-automation-shift-left-ci",
+  "plan": "165-03",
+  "task": 2,
+  "total_tasks": 2,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "165-01", "name": "Setup Ecto Sandbox infrastructure", "status": "done", "commit": "cb1af621"},
+    {"id": "165-02", "name": "Configure Playwright for Sandbox", "status": "done", "commit": "55360a24"},
+    {"id": "165-03", "name": "Write core functional E2E tests", "status": "in_progress", "progress": "Tests implemented and verified in onboarding_and_billing.spec.js; SUMMARY and STATE update pending."}
+  ],
+  "remaining_tasks": [
+    {"id": "165-04", "name": "Integrate E2E testing into CI", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "Postgres FATAL 53300 (too_many_connections) when running many tests in parallel", "type": "technical", "workaround": "Set fullyParallel: false and workers: 1 for sensitive tests."}
+  ],
+  "human_actions_pending": [],
+  "decisions": [
+    {"decision": "Consolidated tests into onboarding_and_billing.spec.js", "rationale": "Ensures deterministic execution on the shared Fake Processor state by running as a single serial flow.", "phase": "165"},
+    {"decision": "Disabled fullyParallel in Playwright", "rationale": "Prevents Postgres connection exhaustion and state race conditions.", "phase": "165"}
+  ],
+  "uncommitted_files": [
+    "examples/accrue_host/e2e/onboarding_and_billing.spec.js",
+    "examples/accrue_host/playwright.config.js"
+  ],
+  "next_action": "Create 165-03-SUMMARY.md and update STATE.md to mark Plan 03 complete, then proceed to CI integration in 165-04.",
+  "context_notes": "The tests are now robust and passing reliably in a consolidated serial spec. The Sandbox works for DB isolation, but the Fake Processor GenServer is still a singleton, necessitating serial execution for flows that mutate it."
+}

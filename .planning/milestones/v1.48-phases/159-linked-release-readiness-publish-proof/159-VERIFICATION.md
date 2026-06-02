@@ -258,3 +258,125 @@ REL-01 and REL-03 remain incomplete until that CI artifact exists for one real
 post-`1.3.0` linked line. The new automation intentionally fails CI if identifiers
 or public proof surfaces disagree, instead of converting the prior blocker rows
 into a false completion claim.
+
+## Closeout Resolution Attempt (2026-06-01)
+
+Milestone closeout selected "resolve gaps" for the open Phase 159 verification
+gap. The live release state was rechecked:
+
+- `gh pr list --repo szTheory/accrue --state open --json number,title,headRefName,url` returned `[]`.
+- `.release-please-manifest.json` and all three package `mix.exs` files still
+  report `1.3.0`.
+- The latest `release-please.yml` run (`26683503845`) failed while trying to
+  create duplicate GitHub releases for existing tags `accrue-v1.3.0`,
+  `accrue_admin-v1.3.0`, and `accrue_portal-v1.3.0`.
+- `.github/workflows/release-please.yml` was patched to skip duplicate GitHub
+  release creation when all three manifest releases already exist, allowing the
+  release-PR path to continue on future pushes.
+- `actionlint .github/workflows/release-please.yml` passed.
+- `bash scripts/ci/verify_release_manifest_alignment.sh &&
+  bash scripts/ci/verify_release_contract.sh &&
+  bash scripts/ci/verify_release_notes_contract.sh` passed for the current
+  `1.3.0` line.
+- `release-please release-pr --dry-run` with an authenticated token would open
+  `0` pull requests because remote `main` has `0` releasable commits after the
+  existing `1.3.0` releases.
+
+Outcome: the duplicate-release workflow blocker is fixed locally, but REL-01
+and REL-03 remain blocked. There is still no real post-`1.3.0` linked Release
+Please PR, publish run, or `linked-release-proof.md` artifact to verify. This
+ledger therefore remains `status: gaps_found`; changing it to pass would be a
+false release claim.
+
+## Pre-merge proof row (2026-06-01)
+
+PR_NUMBER: 30
+TARGET_VERSION: 1.4.0
+
+### Recovery attempt 2026-06-01T17:19:35Z
+
+target_version: 1.4.0
+run_id: 26769626329
+pr_number: 30
+accrue_public_state: 1.4.0 published
+accrue_admin_public_state: 1.4.0 published
+accrue_portal_public_state: 1.4.0 published
+failed_step: accrue_host_hex_smoke.sh
+recovery_path: Fix accrue.install to not double-inject accrue_admin live_session when it already exists
+next_command: bash scripts/ci/accrue_host_hex_smoke.sh && bash scripts/ci/capture_linked_release_proof.sh --version 1.4.0 --run-id 26769626329 --pr 30 --output .planning/phases/159-linked-release-readiness-publish-proof/159-VERIFICATION.md
+recorded_at: 2026-06-01T17:19:35Z
+
+### Proof capture 2026-06-01T17:23:26Z
+
+PR_NUMBER: 30
+TARGET_VERSION: 1.4.0
+RUN_ID: 26769626329
+
+Workflow run: https://github.com/szTheory/accrue/actions/runs/26769626329
+
+#### Workflow job ordering
+
+| Job | Conclusion | Started | Completed |
+|-----|------------|---------|-----------|
+| release | success | 2026-06-01T17:03:47Z | 2026-06-01T17:04:22Z |
+| publish-accrue | success | 2026-06-01T17:04:25Z | 2026-06-01T17:07:58Z |
+| publish-accrue-admin | success | 2026-06-01T17:08:00Z | 2026-06-01T17:11:46Z |
+| publish-accrue-portal | success | 2026-06-01T17:11:49Z | 2026-06-01T17:15:03Z |
+
+#### Git tags
+
+| Package | Tag | Commit |
+|---------|-----|--------|
+| accrue | accrue-v1.4.0 | 3b375b3154953505c7edb603a3441514a049e945 |
+| accrue_admin | accrue_admin-v1.4.0 | 3b375b3154953505c7edb603a3441514a049e945 |
+| accrue_portal | accrue_portal-v1.4.0 | 3b375b3154953505c7edb603a3441514a049e945 |
+
+#### GitHub releases
+
+| Package | Tag | Release URL | Published |
+|---------|-----|-------------|-----------|
+| accrue | accrue-v1.4.0 | https://github.com/szTheory/accrue/releases/tag/accrue-v1.4.0 | 2026-06-01T17:04:07Z |
+| accrue_admin | accrue_admin-v1.4.0 | https://github.com/szTheory/accrue/releases/tag/accrue_admin-v1.4.0 | 2026-06-01T17:04:09Z |
+| accrue_portal | accrue_portal-v1.4.0 | https://github.com/szTheory/accrue/releases/tag/accrue_portal-v1.4.0 | 2026-06-01T17:04:10Z |
+
+#### Hex API truth
+
+| Package | latest_version | updated_at | API |
+|---------|----------------|------------|-----|
+| accrue | 1.4.0 | 2026-06-01T17:07:56.785209Z | https://hex.pm/api/packages/accrue |
+| accrue_admin | 1.4.0 | 2026-06-01T17:11:44.432303Z | https://hex.pm/api/packages/accrue_admin |
+| accrue_portal | 1.4.0 | 2026-06-01T17:15:01.250875Z | https://hex.pm/api/packages/accrue_portal |
+
+#### Release file snapshot
+
+| File | sha256 |
+|------|--------|
+| .release-please-manifest.json | ea634938bc7d6c6ee40ef57604ac217b4b12c011d67403869ae4ff9717a6485f |
+| accrue/mix.exs | b1f5a5aa6574706f420314d966a64063f61c39e7e75562e720caf06da50b71af |
+| accrue_admin/mix.exs | ea778163942270cefee57add559bc77bd19f1f6f73b4fe8cefed8ab140986e05 |
+| accrue_portal/mix.exs | 657c371bf98cda27bb16c3197c026e199a9d9f0efac6a8756ebef8dfcfd988ad |
+| accrue/CHANGELOG.md | a97f2367e8274943f9982812ae15c5fce687c2ca36a69f7095bef5f9f58f6767 |
+| accrue_admin/CHANGELOG.md | 1fce8bf7228d6a66f27b0ba5d47be593ca9899b8cfe947f790779be1943cd737 |
+| accrue_portal/CHANGELOG.md | e32f5718bcb058934badbc51651ce23e59da2eaaa42e6cafaddb9092b5f26eb1 |
+
+#### HexDocs availability
+
+| Package | URL | HTTP |
+|---------|-----|------|
+| accrue | https://hexdocs.pm/accrue/readme.html | 200 |
+| accrue_admin | https://hexdocs.pm/accrue_admin/readme.html | 200 |
+| accrue_portal | https://hexdocs.pm/accrue_portal/readme.html | 200 |
+
+#### Host Hex smoke
+
+```text
+OK: accrue_host_hex_smoke.sh passed successfully
+
+```
+
+#### Release notes contract
+
+```text
+verify_release_notes_contract: OK (1.4.0)
+
+```

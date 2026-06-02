@@ -73,7 +73,7 @@ mix deps.get
 mix accrue.install --yes \
   --billable AccrueHost.Accounts.User \
   --billing-context AccrueHost.Billing \
-  --admin-mount /billing \
+  --admin-mount /admin \
   --webhook-path /webhooks/stripe
 mix compile --warnings-as-errors
 MIX_ENV=test mix ecto.create

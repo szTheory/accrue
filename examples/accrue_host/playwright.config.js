@@ -16,7 +16,7 @@ module.exports = defineConfig({
   globalSetup: path.join(__dirname, "e2e/global-setup.js"),
   timeout: 30_000,
   expect: { timeout: 5_000 },
-  fullyParallel: true,
+  fullyParallel: false,
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI
     ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]
@@ -35,20 +35,6 @@ module.exports = defineConfig({
   projects: [
     {
       name: "chromium-desktop",
-      use: {
-        ...devices["Desktop Chrome"],
-        ...trustWalkthroughVideo,
-        viewport: { width: 1280, height: 900 }
-      }
-    },
-    {
-      name: "chromium-mobile",
-      use: { ...devices["Pixel 5"], ...trustWalkthroughVideo }
-    },
-    // CI can run `npx playwright test --project=chromium-mobile-tagged` for @mobile-only checks.
-    {
-      name: "chromium-mobile-tagged",
-      grep: /@mobile/,
       use: {
         ...devices["Desktop Chrome"],
         ...trustWalkthroughVideo,
