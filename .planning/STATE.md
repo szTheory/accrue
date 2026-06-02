@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.49
 milestone_name: Realistic Demo App & Adoption Evidence
 status: executing
-last_updated: "2026-06-02T07:30:28.266Z"
-last_activity: 2026-06-02 -- Phase 166 planning complete
+last_updated: "2026-06-02T07:41:08.552Z"
+last_activity: 2026-06-02
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 8
   percent: 38
 ---
 
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-01 after v1.49 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 166 — adoption dx docs
+**Current focus:** Phase 166 — adoption-dx-docs
 
 ## Current Position
 
-Phase: 166
-Plan: Not started
+Phase: 166 (adoption-dx-docs) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-06-02 -- Phase 166 planning complete
+Last activity: 2026-06-02
 
 ## Post-v1.48 Pause Rule
 
@@ -120,12 +120,13 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | scope | Real-time PubSub-driven dashboard refresh | out of scope v1.44; coupled to multi-channel dunning v1.45+ | Poll/manual refresh is sufficient for the current operator workflow. | Admin analytics UX | concrete adopter failure or repeated support issue requiring real-time recovery monitoring | 2026-05-27 |
 | strategy_non_goal | FIN-03 finance exports · MRR/ARR product · MoR processors · Hyperwallet | explicit standing non-goals | Accrue is a billing/subscription library, not an accounting, merchant-of-record, or payout product. | Strategy non-goal | explicit strategy change or correctness/security/data-loss risk that cannot be handled by host-owned exports | carried |
 | seed | SEED-002-ecosystem-integrations — Chimeway/Mailglass ecosystem integrations | backlogged; future-roadmap seed, not a closeout blocker | Ecosystem blueprints are dormant future-roadmap material and do not open milestone scope by themselves. | Future roadmap / ecosystem integrations | concrete adopter failure requiring an integration, repeated support issue, or explicit strategy change | 2026-05-31 |
+| Phase 166 P01 | 2 min | 2 tasks | 1 files |
 
 ## Session Continuity
 
-Last session: 2026-06-02T07:01:40.688Z
-Stopped at: Phase 166 context gathered
-Resume file: .planning/phases/166-adoption-dx-docs/166-CONTEXT.md
+Last session: 2026-06-02T07:41:08.548Z
+Stopped at: Completed 166-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
