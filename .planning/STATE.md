@@ -2,16 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.49
 milestone_name: Realistic Demo App & Adoption Evidence
-status: ready_to_plan
-last_updated: 2026-06-02T01:12:11.576Z
+status: planning
+last_updated: "2026-06-02T07:01:40.692Z"
 last_activity: 2026-06-02
 progress:
-  total_phases: 4
+  total_phases: 8
   completed_phases: 3
   total_plans: 7
   completed_plans: 7
-  percent: 75
-stopped_at: Phase 165 complete (4/4) — ready to discuss Phase 166
+  percent: 38
 ---
 
 # Project State
@@ -124,9 +123,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-02T01:05:34.686Z
-Stopped at: Completed 165-04-PLAN.md
-Resume file: None
+Last session: 2026-06-02T07:01:40.688Z
+Stopped at: Phase 166 context gathered
+Resume file: .planning/phases/166-adoption-dx-docs/166-CONTEXT.md
 
 ## Operator Next Steps
 
