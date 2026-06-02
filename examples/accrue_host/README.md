@@ -1,11 +1,45 @@
 # Accrue Host Example
 
-> **Accrue does not require Sigra.** Production integrations use your host’s **`Accrue.Auth`** adapter (Sigra is one supported option). **This demo app** depends on Sigra so the checked-in story can show **signed-in org billing** and stay reproducible in CI — if you are **not** using Sigra, treat the demo as optional and follow **[First Hour](../../accrue/guides/first_hour.md)** plus **[Organization billing (non-Sigra)](../../accrue/guides/organization_billing.md)** in your own Phoenix app (**Capsule H** below).
-
 This checked-in Phoenix app is the canonical local evaluation path for `accrue`
-and `accrue_admin`. The primary story stays Fake-backed: start one
-subscription, post one signed webhook through the real endpoint, inspect the
-result in the mounted admin UI, then run the focused proof command.
+and `accrue_admin`: a realistic B2B devtool SaaS host with seeded accounts,
+`Accrue.Processor.Fake` billing, signed webhook ingest, and mounted admin
+inspection.
+
+## Start Here
+
+Use Docker for the fastest evaluator path:
+
+```bash
+cd examples/accrue_host
+docker compose up --build
+```
+
+Open [`http://localhost:4000`](http://localhost:4000). Sign in, visit
+`/app/billing`, start a Fake-backed subscription through `AccrueHost.Billing`,
+then inspect `/billing` to see billing state, webhook ingest, replay visibility,
+and the mounted admin UI. No live Stripe keys are required for this path.
+
+Run the focused proof after the walkthrough:
+
+```bash
+cd examples/accrue_host
+mix verify
+```
+
+For native Phoenix contributor work, use the same app without Docker:
+
+```bash
+cd examples/accrue_host
+mix setup
+mix phx.server
+```
+
+> **Accrue does not require Sigra.** Production integrations use your host’s
+> **`Accrue.Auth`** adapter. This demo app uses Sigra so the checked-in story can
+> show reproducible signed-in organization billing. If you are not using Sigra,
+> follow **[First Hour](../../accrue/guides/first_hour.md)** plus
+> **[Organization billing (non-Sigra)](../../accrue/guides/organization_billing.md)**
+> in your own Phoenix app.
 
 ## Prerequisites
 
@@ -13,6 +47,14 @@ result in the mounted admin UI, then run the focused proof command.
 - By default the app connects to `localhost:5432`.
 - Override `PGHOST`, `PGPORT`, `PGUSER`, or `PGPASSWORD` if your local database
   uses different values.
+- Docker Compose sets `PGHOST=db` for the web container and publishes
+  `5432:5432`; stop any local Postgres already using that port before running
+  the Docker path.
+- Docker uses named volumes for container `deps`, `_build`, and
+  `assets/node_modules`, so container dependencies stay isolated from native
+  development.
+- Use `docker compose down --volumes` only when you want to reset Docker data and
+  dependency volumes, not as the normal stop command.
 
 The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live
