@@ -5,6 +5,7 @@ defmodule AccrueAdmin.Components.DataTable do
 
   use Phoenix.LiveComponent
 
+  alias AccrueAdmin.Components.Icon
   alias AccrueAdmin.Copy
 
   @default_limit 25
@@ -151,9 +152,18 @@ defmodule AccrueAdmin.Components.DataTable do
         </button>
       </div>
 
-      <div :if={Enum.empty?(@rows)} class="ax-card ax-data-table-empty" data-role="empty-state">
-        <p class="ax-heading"><%= @empty_title %></p>
-        <p class="ax-body"><%= @empty_copy %></p>
+      <div :if={Enum.empty?(@rows)} class="ax-card ax-empty ax-data-table-empty" data-role="empty-state">
+        <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
+        <p class="ax-empty-title"><%= @empty_title %></p>
+        <p class="ax-body ax-empty-copy"><%= @empty_copy %></p>
+        <a
+          :if={any_filter_active?(@filter_params)}
+          href={@path}
+          class="ax-button ax-button-secondary"
+          data-role="clear-filters"
+        >
+          <%= Copy.data_table_clear_filters_label() %>
+        </a>
       </div>
 
       <div :if={!Enum.empty?(@rows) and @selectable} class="ax-data-table-selection" data-role="selection-bar">
@@ -418,6 +428,14 @@ defmodule AccrueAdmin.Components.DataTable do
   defp stringify_value(value), do: value
 
   defp signature(params), do: params |> Enum.sort() |> :erlang.term_to_binary()
+
+  # True when any filter param carries a value — distinguishes "filtered to zero"
+  # (offer Clear filters) from a genuinely empty first-use list.
+  defp any_filter_active?(filter_params) when is_map(filter_params) do
+    Enum.any?(filter_params, fn {_key, value} -> value not in [nil, ""] end)
+  end
+
+  defp any_filter_active?(_filter_params), do: false
 
   defp field_id(table_id, field), do: "#{table_id}-filter-#{field_param(field)}"
   defp field_param(field), do: Map.get(field, :param, Map.get(field, :id) |> to_string())

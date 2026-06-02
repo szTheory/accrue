@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
+    Detail,
     FlashGroup,
     JsonViewer,
     KpiCard,
@@ -105,28 +106,52 @@ defmodule AccrueAdmin.Live.ChargeLive do
         phx-window-keydown="step_up_escape"
         phx-key="escape"
       >
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{
-                label: "Dashboard",
-                href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
-              },
-              %{
-                label: "Charges",
-                href: ScopedPath.build(@admin_mount_path, "/charges", @current_owner_scope)
-              },
-              %{label: @charge.processor_id || @charge.id}
-            ]}
-          />
-          <p class="ax-eyebrow">Charge detail</p>
-          <h2 class="ax-display"><%= @charge.processor_id || @charge.id %></h2>
-          <p class="ax-body ax-page-copy">
-            <%= customer_label(@customer) %> · payment status <%= humanize(@charge.status) %> · inserted <%= format_datetime(@charge.inserted_at) %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{
+              label: "Dashboard",
+              href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
+            },
+            %{
+              label: "Charges",
+              href: ScopedPath.build(@admin_mount_path, "/charges", @current_owner_scope)
+            },
+            %{label: @charge.processor_id || @charge.id}
+          ]}
+        />
+
+        <Detail.summary_card eyebrow="Charge detail" title={@charge.processor_id || @charge.id}>
+          <:status><StatusBadge.status_badge status={status_badge(@charge.status)} /></:status>
+          <:facts>
+            <span><%= money_text(@charge.amount_cents, @charge.currency) %></span>
+            <span><%= customer_label(@customer) %></span>
+            <span>Payment status <%= humanize(@charge.status) %></span>
+            <span>Inserted <%= format_datetime(@charge.inserted_at) %></span>
+          </:facts>
+          <:actions>
+            <button
+              type="submit"
+              form="charge-refund-form"
+              class="ax-button ax-button-primary"
+            >
+              Refund charge
+            </button>
+          </:actions>
+        </Detail.summary_card>
 
         <FlashGroup.flash_group flashes={@flashes} />
+
+        <Detail.detail_section title="Charge details">
+          <Detail.detail_field_list fields={[
+            %{label: "Charge ID", value: @charge.processor_id || @charge.id},
+            %{label: "Status", value: humanize(@charge.status)},
+            %{label: "Amount", value: money_text(@charge.amount_cents, @charge.currency)},
+            %{label: "Currency", value: String.upcase(to_string(@charge.currency))},
+            %{label: "Customer", value: customer_label(@customer)},
+            %{label: "Processor", value: humanize(@charge.processor)},
+            %{label: "Inserted", value: format_datetime(@charge.inserted_at)}
+          ]} />
+        </Detail.detail_section>
 
         <section class="ax-kpi-grid" aria-label="Charge summary">
           <KpiCard.kpi_card label="Status" value={humanize(@charge.status)}>
@@ -195,7 +220,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
               </div>
             </header>
 
-            <form phx-submit="prepare_refund" class="ax-stack-xl" data-role="refund-form">
+            <form id="charge-refund-form" phx-submit="prepare_refund" class="ax-stack-xl" data-role="refund-form">
               <label class="ax-label" for="refund-amount-minor">Amount in minor units</label>
               <input
                 id="refund-amount-minor"
@@ -210,8 +235,6 @@ defmodule AccrueAdmin.Live.ChargeLive do
               <input id="refund-reason" type="text" name="reason" value="" class="ax-input" placeholder="requested_by_customer" />
 
               <.source_event_select events={@timeline_events} />
-
-              <button type="submit" class="ax-button ax-button-primary">Refund charge</button>
             </form>
 
             <section :if={@pending_refund} class="ax-card" data-role="confirm-panel">
@@ -227,12 +250,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
           </article>
         </section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow">Refunds</p>
-            <h3 class="ax-heading">Refund fee outcomes</h3>
-          </header>
-
+        <Detail.detail_section title="Refunds">
           <div :for={refund <- @refunds} class="ax-list-row">
             <div>
               <p class="ax-label"><%= refund.processor_id || refund.stripe_id || refund.id %></p>
@@ -253,22 +271,19 @@ defmodule AccrueAdmin.Live.ChargeLive do
           </div>
 
           <p :if={@refunds == []} class="ax-body">No refunds have been issued for this charge yet.</p>
-        </section>
+        </Detail.detail_section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow">Timeline</p>
-            <h3 class="ax-heading">Charge events</h3>
-          </header>
-
+        <Detail.detail_section title="Timeline">
           <Timeline.timeline
             label="Charge events"
             empty_label="No charge-scoped events yet"
             items={timeline_items(@timeline_events)}
           />
-        </section>
+        </Detail.detail_section>
 
-        <JsonViewer.json_viewer id="charge-data" label="Charge payload" payload={charge_payload(@charge, @refunds)} />
+        <Detail.detail_section title="Raw payload">
+          <JsonViewer.json_viewer id="charge-data" label="Charge payload" payload={charge_payload(@charge, @refunds)} />
+        </Detail.detail_section>
 
         <RelatedResources.related_resources items={related_items(@charge, @customer, @admin_mount_path, @current_owner_scope)} />
 

@@ -394,6 +394,10 @@ defmodule AccrueAdmin.Copy do
     do:
       "Billing records appear here when they match this view. If you expected rows, check filters or organization scope."
 
+  # Filtered-to-zero affordance (Phase 171): keep the screen's tailored empty copy,
+  # but offer a way back when a filter is what emptied the list.
+  def data_table_clear_filters_label, do: "Clear filters"
+
   def customers_index_empty_title, do: "No customers for this organization yet"
 
   def customers_index_empty_copy,

@@ -2113,3 +2113,142 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-muted);
   flex: none;
 }
+
+/* ============================================================================
+   Phase 171 (v1.50 AUI-05) — shared detail components + empty/loading primitives
+   ========================================================================== */
+.ax-empty-icon-muted {
+  color: var(--ax-muted);
+}
+
+/* Detail summary header */
+.ax-summary-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ax-space-lg);
+  flex-wrap: wrap;
+}
+
+.ax-summary-main {
+  display: grid;
+  gap: var(--ax-space-sm);
+  min-width: 0;
+}
+
+.ax-summary-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-md);
+  flex-wrap: wrap;
+}
+
+.ax-summary-title {
+  margin: 0;
+  font-size: var(--ax-type-2xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.ax-summary-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-sm) var(--ax-space-lg);
+  color: var(--ax-muted);
+  font-size: var(--ax-type-sm);
+}
+
+.ax-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  flex-wrap: wrap;
+}
+
+/* Detail section */
+.ax-detail-section {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-detail-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+}
+
+.ax-detail-section-title {
+  margin: 0;
+  font-size: var(--ax-type-md);
+  font-weight: 600;
+}
+
+.ax-detail-section-actions {
+  display: flex;
+  gap: var(--ax-space-sm);
+}
+
+/* Label -> value field list */
+.ax-field-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ax-space-md);
+  margin: 0;
+}
+
+.ax-field {
+  display: grid;
+  gap: var(--ax-space-2xs);
+  min-width: 0;
+}
+
+.ax-field-label {
+  margin: 0;
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+  color: var(--ax-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ax-field-value {
+  margin: 0;
+  font-size: var(--ax-type-sm);
+  color: var(--ax-primary);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .ax-field-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Skeleton loading primitive (reduced-motion: static, no shimmer) */
+.ax-skeleton {
+  display: block;
+  height: 0.875rem;
+  border-radius: var(--ax-radius-2xs);
+  background:
+    linear-gradient(
+      90deg,
+      var(--ax-sunken) 25%,
+      color-mix(in srgb, var(--ax-sunken) 60%, var(--ax-elevated)) 50%,
+      var(--ax-sunken) 75%
+    );
+  background-size: 200% 100%;
+  animation: ax-skeleton-shimmer 1.4s var(--ax-ease-inout) infinite;
+}
+
+@keyframes ax-skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-skeleton {
+    animation: none;
+    background: var(--ax-sunken);
+  }
+}
