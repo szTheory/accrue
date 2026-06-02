@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
+    Detail,
     FlashGroup,
     Input,
     KpiCard,
@@ -197,24 +198,26 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         phx-window-keydown="step_up_escape"
         phx-key="escape"
       >
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
-              %{label: Copy.invoice_breadcrumb_invoices(), href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
-              %{
-                label: customer_label(@customer),
-                href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
-              },
-              %{label: invoice_label(@invoice)}
-            ]}
-          />
-          <p class="ax-eyebrow"><%= Copy.invoice_detail_eyebrow() %></p>
-          <h2 class="ax-display"><%= invoice_label(@invoice) %></h2>
-          <p class="ax-body ax-page-copy">
-            <%= customer_label(@customer) %> · <%= @invoice.processor_id || @invoice.id %> · <%= Copy.invoice_detail_due_prefix() %><%= format_datetime(@invoice.due_date) %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{label: Copy.dashboard_breadcrumb_home(), href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)},
+            %{label: Copy.invoice_breadcrumb_invoices(), href: ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)},
+            %{
+              label: customer_label(@customer),
+              href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
+            },
+            %{label: invoice_label(@invoice)}
+          ]}
+        />
+
+        <Detail.summary_card eyebrow={Copy.invoice_detail_eyebrow()} title={invoice_label(@invoice)}>
+          <:status><StatusBadge.status_badge status={@invoice.status} /></:status>
+          <:facts>
+            <span><%= customer_label(@customer) %></span>
+            <span><%= @invoice.processor_id || @invoice.id %></span>
+            <span><%= Copy.invoice_detail_due_prefix() %><%= format_datetime(@invoice.due_date) %></span>
+          </:facts>
+        </Detail.summary_card>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -365,12 +368,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           </article>
         </section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= Copy.invoice_line_items_eyebrow() %></p>
-            <h3 class="ax-heading"><%= Copy.invoice_line_items_heading() %></h3>
-          </header>
-
+        <Detail.detail_section title={Copy.invoice_line_items_heading()}>
           <article :if={@invoice.status == :draft} class="ax-card ax-card-elevated" data-role="add-manual-item-panel">
             <header class="ax-page-header">
               <h4 class="ax-heading"><%= Copy.invoice_empty_manual_items_heading() %></h4>
@@ -453,20 +451,15 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           </div>
 
           <p :if={@line_items == []} class="ax-body"><%= Copy.invoice_line_items_empty() %></p>
-        </section>
+        </Detail.detail_section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= Copy.invoice_timeline_eyebrow() %></p>
-            <h3 class="ax-heading"><%= Copy.invoice_timeline_heading() %></h3>
-          </header>
-
+        <Detail.detail_section title={Copy.invoice_timeline_heading()}>
           <Timeline.timeline
             label={Copy.invoice_timeline_label()}
             empty_label={Copy.invoice_timeline_empty()}
             items={timeline_items(@timeline_events)}
           />
-        </section>
+        </Detail.detail_section>
 
         <StepUpAuthModal.step_up_auth_modal
           pending={@step_up_pending}
