@@ -14,6 +14,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
     Input,
     KpiCard,
     MoneyFormatter,
+    RelatedResources,
     Select,
     StatusBadge,
     StepUpAuthModal,
@@ -244,6 +245,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         </section>
 
         <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_invoice(@invoice, @customer)} />
+
+        <RelatedResources.related_resources items={related_items(@invoice, @customer, @admin_mount_path, @current_owner_scope)} />
 
         <section class="ax-grid ax-grid-2">
           <article class="ax-card">
@@ -641,6 +644,40 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp refresh_invoice(socket, invoice_id) do
     invoice = load_invoice(invoice_id)
     assign_invoice(socket, invoice)
+  end
+
+  defp related_items(invoice, customer, mount_path, scope) do
+    customer_items =
+      if customer do
+        [
+          %{
+            icon: :users,
+            label: "Customer",
+            value: customer.name || customer.email,
+            href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+          },
+          %{
+            icon: :payments,
+            label: "Charges for this customer",
+            href: ScopedPath.build(mount_path, "/charges", scope, %{"customer_id" => customer.id})
+          }
+        ]
+      else
+        []
+      end
+
+    customer_items ++
+      [
+        %{
+          icon: :events,
+          label: "Invoice events",
+          href:
+            ScopedPath.build(mount_path, "/events", scope, %{
+              "subject_type" => "Invoice",
+              "subject_id" => invoice.id
+            })
+        }
+      ]
   end
 
   defp invoice_label(invoice), do: invoice.number || invoice.processor_id || invoice.id

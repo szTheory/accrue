@@ -14,6 +14,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
     JsonViewer,
     KpiCard,
     MoneyFormatter,
+    RelatedResources,
     StatusBadge,
     StepUpAuthModal,
     TaxOwnershipCard,
@@ -21,6 +22,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
   }
 
   alias AccrueAdmin.Copy
+  alias AccrueAdmin.ScopedPath
   alias AccrueAdmin.{StepUp, TaxOwnershipRow}
 
   @impl true
@@ -106,8 +108,14 @@ defmodule AccrueAdmin.Live.ChargeLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs
             items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: "Charges", href: @admin_mount_path <> "/charges"},
+              %{
+                label: "Dashboard",
+                href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
+              },
+              %{
+                label: "Charges",
+                href: ScopedPath.build(@admin_mount_path, "/charges", @current_owner_scope)
+              },
               %{label: @charge.processor_id || @charge.id}
             ]}
           />
@@ -261,6 +269,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
         </section>
 
         <JsonViewer.json_viewer id="charge-data" label="Charge payload" payload={charge_payload(@charge, @refunds)} />
+
+        <RelatedResources.related_resources items={related_items(@charge, @customer, @admin_mount_path, @current_owner_scope)} />
 
         <StepUpAuthModal.step_up_auth_modal
           pending={@step_up_pending}
@@ -527,6 +537,40 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   defp platform_fee_summary(amount_minor, currency),
     do: money_text(amount_minor, currency) <> " platform fee"
+
+  defp related_items(charge, customer, mount_path, scope) do
+    customer_items =
+      if customer do
+        [
+          %{
+            icon: :users,
+            label: "Customer",
+            value: customer.name || customer.email,
+            href: ScopedPath.build(mount_path, "/customers/#{customer.id}", scope)
+          },
+          %{
+            icon: :payments,
+            label: "Other charges for this customer",
+            href: ScopedPath.build(mount_path, "/charges", scope, %{"customer_id" => customer.id})
+          }
+        ]
+      else
+        []
+      end
+
+    customer_items ++
+      [
+        %{
+          icon: :events,
+          label: "Charge events",
+          href:
+            ScopedPath.build(mount_path, "/events", scope, %{
+              "subject_type" => "Charge",
+              "subject_id" => charge.id
+            })
+        }
+      ]
+  end
 
   defp customer_label(customer),
     do: customer.name || customer.email || customer.processor_id || customer.id

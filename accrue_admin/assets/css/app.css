@@ -2033,3 +2033,83 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* ============================================================================
+   Phase 170 (v1.50 AUI-04) — cross-screen threading: related-resources card
+   ========================================================================== */
+.ax-related {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-related-title {
+  margin: 0;
+  font-size: var(--ax-type-md);
+  font-weight: 600;
+}
+
+.ax-related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--ax-space-2xs);
+}
+
+.ax-related-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  padding: var(--ax-space-sm);
+  border: 1px solid transparent;
+  border-radius: var(--ax-radius-sm);
+  color: var(--ax-primary);
+  text-decoration: none;
+  transition:
+    background var(--ax-dur-1) var(--ax-ease-out),
+    border-color var(--ax-dur-1) var(--ax-ease-out);
+}
+
+.ax-related-item:hover,
+.ax-related-item:focus-visible {
+  background: var(--ax-sunken);
+  border-color: var(--ax-border);
+  outline: none;
+}
+
+.ax-related-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  border-radius: var(--ax-radius-2xs);
+  background: var(--ax-accent-subtle);
+  color: var(--ax-accent-readable);
+}
+
+.ax-related-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.ax-related-label {
+  font-weight: 600;
+  font-size: var(--ax-type-sm);
+}
+
+.ax-related-value {
+  font-size: var(--ax-type-xs);
+  color: var(--ax-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-related-chevron {
+  color: var(--ax-muted);
+  flex: none;
+}

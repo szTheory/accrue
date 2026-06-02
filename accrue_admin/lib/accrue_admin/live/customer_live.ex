@@ -21,6 +21,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     JsonViewer,
     KpiCard,
     MoneyFormatter,
+    RelatedResources,
     StatusBadge,
     Tabs,
     TaxOwnershipCard,
@@ -222,6 +223,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
         </section>
 
         <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_customer(@customer)} />
+
+        <RelatedResources.related_resources items={related_items(@customer, @admin_mount_path, @current_owner_scope)} />
 
         <Tabs.tabs tabs={tabs(@customer, @admin_mount_path, @tab_counts, @current_owner_scope)} active={@tab} />
 
@@ -470,6 +473,36 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/customers"))
+  end
+
+  defp related_items(customer, mount_path, scope) do
+    [
+      %{
+        icon: :subscriptions,
+        label: "Subscriptions",
+        href:
+          ScopedPath.build(mount_path, "/subscriptions", scope, %{"customer_id" => customer.id})
+      },
+      %{
+        icon: :invoices,
+        label: "Invoices",
+        href: ScopedPath.build(mount_path, "/invoices", scope, %{"customer_id" => customer.id})
+      },
+      %{
+        icon: :payments,
+        label: "Charges",
+        href: ScopedPath.build(mount_path, "/charges", scope, %{"customer_id" => customer.id})
+      },
+      %{
+        icon: :events,
+        label: "Activity",
+        href:
+          ScopedPath.build(mount_path, "/events", scope, %{
+            "subject_type" => "Customer",
+            "subject_id" => customer.id
+          })
+      }
+    ]
   end
 
   defp tab_counts(customer) do
