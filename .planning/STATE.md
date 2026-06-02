@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.49
 milestone_name: Realistic Demo App & Adoption Evidence
-status: In Progress
-last_updated: "2026-06-02T01:05:34.690Z"
+status: ready_to_plan
+last_updated: 2026-06-02T01:12:11.576Z
 last_activity: 2026-06-02
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 7
   completed_plans: 7
-  percent: 88
+  percent: 75
+stopped_at: Phase 165 complete (4/4) — ready to discuss Phase 166
 ---
 
 # Project State
@@ -21,13 +22,13 @@ See: `.planning/PROJECT.md` (updated 2026-06-01 after v1.49 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 165 complete; ready for verification and Phase 166 planning
+**Current focus:** Phase 166 — adoption dx docs
 
 ## Current Position
 
-Phase: 165
-Plan: Complete
-Status: Phase complete
+Phase: 166
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-06-02
 
 ## Post-v1.48 Pause Rule
@@ -61,7 +62,7 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 
 **Velocity:**
 
-- Total plans completed: 85
+- Total plans completed: 89
 - Average duration: 1m
 - Total execution time: 1m
 

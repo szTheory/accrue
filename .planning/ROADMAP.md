@@ -25,7 +25,7 @@ Future feature milestones require at least one of:
 |---|-------|------|--------------|------------------|
 | 163 | Realistic Domain & Rich Seeds | Define persona and populate rich database seeds for demo app | EVD-01, EVD-02 | 3 |
 | 164 | Docker DX & Optimized Caching | Create a seamless, fast Docker local dev environment | EVD-03, EVD-04 | 3 |
-| 165 | E2E Automation & Shift-Left CI | 4/4 | Complete   | 2026-06-02 |
+| 165 | E2E Automation & Shift-Left CI | 4/4 | Complete    | 2026-06-02 |
 | 166 | Adoption DX Docs | Write simple, persona-framed "Start Here" guides | DOC-01, DOC-02, DOC-03 | 3 |
 
 ### Phase Details
@@ -59,7 +59,7 @@ Success criteria:
 
 ### Phase 165: E2E Automation & Shift-Left CI
 Goal: Automate happy paths with Playwright and integrate to CI
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 165-01-PLAN.md — Setup Ecto Sandbox infrastructure
