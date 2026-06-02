@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.49
 milestone_name: Realistic Demo App & Adoption Evidence
-status: Pending
-last_updated: "2026-06-01T22:23:39.699Z"
-last_activity: 2026-06-01
+status: In Progress
+last_updated: "2026-06-02T01:05:34.690Z"
+last_activity: 2026-06-02
 progress:
-  total_phases: 8
-  completed_phases: 2
+  total_phases: 4
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 4
-  percent: 25
+  completed_plans: 7
+  percent: 88
 ---
 
 # Project State
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-01 after v1.49 milestone start)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Milestone complete
+**Current focus:** Phase 165 complete; ready for verification and Phase 166 planning
 
 ## Current Position
 
 Phase: 165
-Plan: Not started
-Status: Pending
-Last activity: 2026-06-01
+Plan: Complete
+Status: Phase complete
+Last activity: 2026-06-02
 
 ## Post-v1.48 Pause Rule
 
@@ -44,7 +44,7 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 |-------|------|--------------|--------|
 | 163 | Realistic Domain & Rich Seeds | EVD-01, EVD-02 | Complete |
 | 164 | Docker DX & Optimized Caching | EVD-03, EVD-04 | Complete |
-| 165 | E2E Automation & Shift-Left CI | E2E-01, E2E-02, E2E-03, E2E-04 | Pending |
+| 165 | E2E Automation & Shift-Left CI | E2E-01, E2E-02, E2E-03, E2E-04 | Complete |
 | 166 | Adoption DX Docs | DOC-01, DOC-02, DOC-03 | Pending |
 
 ### Recently shipped milestones
@@ -72,6 +72,8 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 - **2026-06-01:** Focus on a highly realistic click-around demo for `examples/accrue_host` to serve as adoption evidence.
 - **2026-06-01:** E2E Playwright tests must be deterministic, flake-free, and integrated into CI (shift-left devops mindset).
 - **2026-06-01:** Docker DX must be seamless with optimized cache layers to allow maintainers and adopters to iterate quickly without redownloading dependencies (Tailwind, Hex deps).
+- **2026-06-02:** Core onboarding and billing Playwright coverage is consolidated into a single serial spec because the Fake processor is shared process state; CI must preserve serial execution for sensitive subscription-mutating flows.
+- **2026-06-02:** CI now enforces Phase 165 through native sharded Playwright E2E, Docker Compose boot smoke, and mandatory periodic live-Stripe parity.
 
 ### Historical Research Assets
 
@@ -121,11 +123,11 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-01T22:23:39.696Z
-Stopped at: Phase 165 context gathered
+Last session: 2026-06-02T01:05:34.686Z
+Stopped at: Completed 165-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
 
-- Run `/gsd:discuss-phase 163` to gather context for Realistic Domain & Rich Seeds.
-- Also available: `/gsd:plan-phase 163` to plan Phase 163 directly.
+- Run `$gsd-verify-work 165` to verify Phase 165 end-to-end.
+- Then run `$gsd-plan-phase 166` for Adoption DX Docs.

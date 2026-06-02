@@ -25,7 +25,7 @@ Future feature milestones require at least one of:
 |---|-------|------|--------------|------------------|
 | 163 | Realistic Domain & Rich Seeds | Define persona and populate rich database seeds for demo app | EVD-01, EVD-02 | 3 |
 | 164 | Docker DX & Optimized Caching | Create a seamless, fast Docker local dev environment | EVD-03, EVD-04 | 3 |
-| 165 | E2E Automation & Shift-Left CI | 1/4 | In Progress|  |
+| 165 | E2E Automation & Shift-Left CI | 4/4 | Complete   | 2026-06-02 |
 | 166 | Adoption DX Docs | Write simple, persona-framed "Start Here" guides | DOC-01, DOC-02, DOC-03 | 3 |
 
 ### Phase Details
@@ -59,6 +59,14 @@ Success criteria:
 
 ### Phase 165: E2E Automation & Shift-Left CI
 Goal: Automate happy paths with Playwright and integrate to CI
+**Plans:** 4 plans
+
+Plans:
+- [x] 165-01-PLAN.md — Setup Ecto Sandbox infrastructure
+- [x] 165-02-PLAN.md — Configure Playwright for Sandbox
+- [x] 165-03-PLAN.md — Write core functional E2E tests
+- [x] 165-04-PLAN.md — Integrate E2E testing into CI
+
 Requirements: E2E-01, E2E-02, E2E-03, E2E-04
 Success criteria:
 1. Playwright tests cover onboarding and checkout.
@@ -95,6 +103,6 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 161. Backlog Anchor Closure + Pause Rule | v1.48 | 1/1 | Complete | 2026-06-01 |
 | 162. Close gap: REL-01/REL-03 | v1.48 | 4/4 | Complete | 2026-06-01 |
 | 163. Realistic Domain & Rich Seeds | v1.49 | 1/1 | Complete | 2026-06-01 |
-| 164. Docker DX & Optimized Caching | v1.49 | 0/2 | Pending | |
-| 165. E2E Automation & Shift-Left CI | v1.49 | 0/4 | Pending | |
+| 164. Docker DX & Optimized Caching | v1.49 | 2/2 | Complete | 2026-06-01 |
+| 165. E2E Automation & Shift-Left CI | v1.49 | 4/4 | Complete | 2026-06-02 |
 | 166. Adoption DX Docs | v1.49 | 0/3 | Pending | |
