@@ -652,8 +652,11 @@ jobs:
         run: cd examples/accrue_host && docker compose up --build -d
 
       - name: Wait for Docker host app
+        # Cold first boot runs `mix setup` (deps fetch + compile of all three
+        # packages and the host, plus assets) before `mix phx.server`, which
+        # takes minutes on an empty named-volume cache — far longer than 30s.
         run: |
-          for _ in $(seq 1 30); do
+          for _ in $(seq 1 600); do
             if curl -fsS http://localhost:4000/ >/dev/null; then
               exit 0
             fi
