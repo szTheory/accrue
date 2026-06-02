@@ -10,25 +10,24 @@ tech-stack:
   added: ["Phoenix.Ecto.SQL.Sandbox"]
   patterns: ["conditional-compilation", "test-api"]
 key-files:
-  created:
-    - examples/accrue_host/lib/accrue_host_web/controllers/sandbox_controller.ex
+  created: []
   modified:
     - examples/accrue_host/config/test.exs
     - examples/accrue_host/lib/accrue_host_web/endpoint.ex
     - examples/accrue_host/lib/accrue_host_web/router.ex
 decisions:
-  - Add /api/sandbox conditional routes to examples/accrue_host to allow Playwright tests to get dedicated Ecto sandboxes and achieve transaction isolation.
+  - Configure Phoenix.Ecto.SQL.Sandbox at /api/sandbox in test so Playwright tests can get dedicated Ecto sandboxes and release them through the built-in POST/DELETE lifecycle.
 metrics:
   duration_minutes: 1
   completed_date: "2026-06-01"
 ---
 # Phase 165 Plan 01: E2E Automation Shift Left CI Summary
 
-Ecto Sandbox infrastructure has been set up to allow deterministic, fully parallel E2E testing in Playwright via a new `/api/sandbox` endpoint.
+Ecto Sandbox infrastructure has been set up to allow deterministic E2E testing in Playwright via the built-in `Phoenix.Ecto.SQL.Sandbox` `/api/sandbox` endpoint.
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+The original implementation used a custom sandbox controller. Phase review replaced it with the built-in `Phoenix.Ecto.SQL.Sandbox` route because the custom DELETE route did not match the Playwright helper and could not stop the owner pid safely.
 
 ## Threat Flags
 

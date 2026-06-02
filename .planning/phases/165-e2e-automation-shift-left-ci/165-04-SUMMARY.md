@@ -21,6 +21,9 @@ key-files:
   created: []
   modified:
     - .github/workflows/ci.yml
+    - examples/accrue_host/lib/accrue_host_web/endpoint.ex
+    - examples/accrue_host/lib/accrue_host_web/router.ex
+    - examples/accrue_host/lib/accrue_host_web/controllers/sandbox_controller.ex
 key-decisions:
   - "Use /tmp shard-specific E2E fixture files because runner.temp is not available in job-level env expressions."
   - "Poll localhost:4000 for the Docker smoke because examples/accrue_host/docker-compose.yml maps 4000:4000."
@@ -49,18 +52,23 @@ completed: 2026-06-02
 - Added `playwright-e2e`, a merge-blocking Ubuntu 24.04 matrix job that installs BEAM/Node dependencies, compiles the host app, builds assets, prepares the seeded E2E fixture, installs Chromium, and runs `npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}`.
 - Added `host-docker-smoke`, a separate Docker Compose boot check that builds the demo host stack and polls the actual compose-mapped `http://localhost:4000/` endpoint.
 - Promoted `live-stripe` from advisory to mandatory for scheduled and manual runs by removing its job-level `continue-on-error` and updating comments/name to describe periodic API-drift enforcement.
+- Replaced the custom sandbox controller with the built-in Phoenix sandbox plug route after review found the custom DELETE lifecycle could leak owner processes in the new all-E2E CI lane.
 
 ## Task Commits
 
 Each task was committed atomically:
 
 1. **Tasks 1-3: Integrate E2E checks into CI** - `c1ea350a` (feat)
+2. **Post-review fix: Use built-in sandbox lifecycle route** - `f1909812` (fix)
 
 **Plan metadata:** committed during closeout.
 
 ## Files Created/Modified
 
 - `.github/workflows/ci.yml` - Adds the native Playwright shard job, Docker smoke job, live-Stripe mandatory periodic behavior, and updated annotation sweep dependencies.
+- `examples/accrue_host/lib/accrue_host_web/endpoint.ex` - Configures `Phoenix.Ecto.SQL.Sandbox` to own `/api/sandbox` in test.
+- `examples/accrue_host/lib/accrue_host_web/router.ex` - Removes the custom sandbox routes now handled by the endpoint plug.
+- `examples/accrue_host/lib/accrue_host_web/controllers/sandbox_controller.ex` - Removed because owner lifecycle is handled by the Phoenix sandbox session plug.
 
 ## Decisions Made
 
@@ -88,14 +96,23 @@ Each task was committed atomically:
 - **Verification:** `grep -c "continue-on-error: true" .github/workflows/ci.yml || true` returned `0`; `actionlint .github/workflows/ci.yml` passed.
 - **Committed in:** `c1ea350a`
 
+**3. [Rule 2 - Missing Critical] Replaced custom sandbox lifecycle with built-in Phoenix sandbox route**
+- **Found during:** Code review gate after Task 3
+- **Issue:** `e2e/support/test.js` deletes `/api/sandbox`, while the custom router only matched `DELETE /api/sandbox/:metadata`; the custom controller also called `Ecto.Adapters.SQL.Sandbox.stop_owner/1` with `AccrueHost.Repo` instead of the owner pid.
+- **Fix:** Configure `Phoenix.Ecto.SQL.Sandbox` with `at: "/api/sandbox"`, `repo: AccrueHost.Repo`, and `header: "x-sandbox-id"`; remove the custom controller/routes.
+- **Files modified:** `examples/accrue_host/lib/accrue_host_web/endpoint.ex`, `examples/accrue_host/lib/accrue_host_web/router.ex`, `examples/accrue_host/lib/accrue_host_web/controllers/sandbox_controller.ex`
+- **Verification:** `cd examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors` passed. Focused Playwright was attempted but local Postgres was saturated by existing Phoenix server processes and timed out after being redirected to login.
+- **Committed in:** `f1909812`
+
 ---
 
-**Total deviations:** 2 auto-fixed (2 blocking)
+**Total deviations:** 3 auto-fixed (2 blocking, 1 missing critical)
 **Impact on plan:** Both fixes preserve the intended CI behavior and prevent false or invalid checks. No scope creep.
 
 ## Issues Encountered
 
 - `ruby -e 'require "yaml"; YAML.load_file(...)'` could not run because no Ruby version is configured in `.tool-versions`; `actionlint` was available and passed.
+- Focused Playwright verification hit local Postgres `too_many_connections` from existing server processes and timed out on the billing page. Compile and workflow lint passed; the browser rerun should be performed in a clean local DB/server environment or CI.
 
 ## User Setup Required
 
@@ -108,6 +125,8 @@ None - no external service configuration required beyond the existing live-Strip
 - `grep -c "continue-on-error: true" .github/workflows/ci.yml || true` -> `0`
 - `actionlint .github/workflows/ci.yml` -> passed
 - `git diff --check -- .github/workflows/ci.yml` -> passed
+- `cd examples/accrue_host && MIX_ENV=test mix compile --warnings-as-errors` -> passed
+- `cd examples/accrue_host && npm run e2e -- onboarding_and_billing.spec.js --workers=1` -> inconclusive: local Postgres `too_many_connections`, then Playwright timeout after redirect to login
 
 ## Next Phase Readiness
 
