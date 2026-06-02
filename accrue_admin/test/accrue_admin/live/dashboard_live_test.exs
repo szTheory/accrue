@@ -88,35 +88,50 @@ defmodule AccrueAdmin.DashboardLiveTest do
     :ok
   end
 
-  test "renders KPI cards and recent local activity", %{conn: conn} do
+  test "renders attention rail, task launchers, demoted KPIs, and activity", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing")
 
+    # Page chrome + attention rail heading
+    assert html =~ Copy.home_intro_headline()
     assert html =~ Copy.dashboard_display_headline()
+
+    # Zone 1 — attention rail surfaces the seeded exceptions (dead webhook + meter failure)
+    assert html =~ Copy.home_attention_webhooks_label()
+    assert html =~ Copy.home_attention_action_review()
+    assert html =~ Copy.home_attention_meter_label()
+    assert html =~ Copy.home_attention_action_investigate()
+    assert html =~ ~s(href="/billing/events?q=meter_event")
+    assert html =~ ~s(href="/billing/webhooks?status=dead")
+
+    # Zone 2 — task launchers (the JTBD doors)
+    assert html =~ Copy.home_launcher_customers_title()
+    assert html =~ Copy.home_launcher_invoices_title()
+    assert html =~ Copy.home_launcher_recovery_title()
+    # Title contains "&" which HEEx escapes to &amp;; assert the ampersand-free prefix.
+    assert html =~ "Debug webhooks"
+
+    # Zone 3 — demoted KPI strip
     assert html =~ Copy.dashboard_kpi_customers_label()
     assert html =~ Copy.dashboard_kpi_active_subscriptions_label()
     assert html =~ Copy.dashboard_kpi_open_invoice_balance_label()
     assert html =~ "$42.50"
     assert html =~ Copy.dashboard_kpi_webhook_backlog_label()
+    assert html =~ Copy.dashboard_kpi_customers_aria_label()
+    assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
+    assert html =~ Copy.dashboard_kpi_invoices_aria_label()
+    assert html =~ Copy.dashboard_kpi_webhooks_aria_label()
+
+    # Zone 4 — recent activity timelines
     assert html =~ "invoice.payment_failed"
     assert html =~ "customer.updated"
 
+    # Regrouped sidebar nav still threads to every section (exact, query-free hrefs)
     assert html =~ ~s(href="/billing/customers")
     assert html =~ ~s(href="/billing/subscriptions")
     assert html =~ ~s(href="/billing/invoices")
     assert html =~ ~s(href="/billing/webhooks")
     assert html =~ ~s(href="/billing/events")
-    assert html =~ Copy.dashboard_meter_reporting_failures_label()
-    assert html =~ Copy.dashboard_meter_reporting_failures_aria_label()
-
-    meter_idx = :binary.match(html, Copy.dashboard_meter_reporting_failures_label()) |> elem(0)
-    meter_segment = String.slice(html, meter_idx, 900)
-    assert meter_segment =~ ~s(ax-kpi-value">1</p>)
-
-    assert html =~ Copy.dashboard_kpi_customers_aria_label()
-    assert html =~ Copy.dashboard_kpi_subscriptions_aria_label()
-    assert html =~ Copy.dashboard_kpi_invoices_aria_label()
-    assert html =~ Copy.dashboard_kpi_webhooks_aria_label()
   end
 end

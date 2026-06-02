@@ -5,6 +5,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   use Phoenix.LiveComponent
 
   alias Accrue.Billing
+  alias AccrueAdmin.Components.Icon
 
   @impl true
   def mount(socket) do
@@ -109,32 +110,40 @@ defmodule AccrueAdmin.Components.GlobalSearch do
         
         <form phx-change="search" phx-target={@myself} onsubmit="return false;">
           <div class="ax-command-palette-input-group">
-            <span class="ax-icon">🔍</span>
-            <input 
-              type="text" 
-              name="q" 
+            <Icon.icon name={:search} size="md" class="ax-command-palette-search-icon" />
+            <input
+              type="text"
+              name="q"
               value={@query}
-              placeholder="Search customers, invoices, subscriptions..." 
-              autocomplete="off" 
-              spellcheck="false" 
+              placeholder="Search customers, invoices, subscriptions..."
+              autocomplete="off"
+              spellcheck="false"
               autofocus
               phx-debounce="150"
               class="ax-command-palette-input"
               id="global-search-input"
             />
-            <span id="search-spinner" class={if @loading, do: "ax-spinner", else: "hidden"}>⏳</span>
+            <span id="search-spinner" class={if @loading, do: "ax-spinner", else: "hidden"} aria-hidden="true"></span>
           </div>
         </form>
 
         <div class="ax-command-palette-body">
           <%= if @query == "" do %>
             <div class="ax-command-palette-empty">
-              <p class="ax-eyebrow">Quick Links</p>
+              <p class="ax-eyebrow">Jump to</p>
               <ul class="ax-command-palette-list">
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/customers")}>Investigate customers</li>
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/invoices?status=open")}>Open invoices</li>
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/webhooks?status=dead")}>Dead webhooks</li>
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/analytics/recovery")}>Recovery dashboard</li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/customers")}>
+                  <Icon.icon name={:users} size="sm" /> <span>Find a customer</span>
+                </li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/invoices?status=open")}>
+                  <Icon.icon name={:invoices} size="sm" /> <span>Work open invoices</span>
+                </li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/analytics/recovery")}>
+                  <Icon.icon name={:recovery} size="sm" /> <span>Recover failed payments</span>
+                </li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/webhooks?status=dead")}>
+                  <Icon.icon name={:webhooks} size="sm" /> <span>Debug dead-letter webhooks</span>
+                </li>
               </ul>
             </div>
           <% else %>

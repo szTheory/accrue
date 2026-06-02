@@ -55,9 +55,9 @@ defmodule AccrueAdmin.Components.AppShellTest do
         %{}
       )
 
-    assert html =~ "Command"
-    assert html =~ "Investigate"
-    assert html =~ "Revenue"
+    assert html =~ "Billing"
+    assert html =~ "Recovery"
+    assert html =~ "Developer"
     assert html =~ ~s(href="/billing/analytics/recovery")
     assert html =~ "Payments"
   end

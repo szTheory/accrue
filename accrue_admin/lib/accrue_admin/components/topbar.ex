@@ -5,6 +5,8 @@ defmodule AccrueAdmin.Components.Topbar do
 
   use Phoenix.Component
 
+  alias AccrueAdmin.Components.Icon
+
   attr(:brand, :map, required: true)
   attr(:page_title, :string, required: true)
   attr(:theme, :string, default: "system")
@@ -19,11 +21,21 @@ defmodule AccrueAdmin.Components.Topbar do
       </div>
 
       <div class="ax-topbar-actions">
-        <button id="search-trigger" phx-click="open" phx-target="#global-search" type="button" class="ax-search-trigger">
-          Search <kbd>⌘K</kbd>
+        <button
+          id="search-trigger"
+          phx-click="open"
+          phx-target="#global-search"
+          type="button"
+          class="ax-search-trigger"
+          aria-label="Search (Command or Control K)"
+        >
+          <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
+          <span class="ax-search-trigger-text">Search customers, invoices, events…</span>
+          <kbd class="ax-kbd">⌘K</kbd>
         </button>
 
-        <button type="button" class="ax-icon-button" data-sidebar-toggle="true">
+        <button type="button" class="ax-icon-button" data-sidebar-toggle="true" aria-label="Toggle navigation">
+          <Icon.icon name={:events} size="md" />
           <span class="ax-icon-label">Menu</span>
         </button>
 

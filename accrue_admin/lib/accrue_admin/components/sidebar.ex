@@ -5,6 +5,8 @@ defmodule AccrueAdmin.Components.Sidebar do
 
   use Phoenix.Component
 
+  alias AccrueAdmin.Components.Icon
+
   attr(:brand, :map, required: true)
   attr(:current_path, :string, required: true)
   attr(:items, :list, required: true)
@@ -16,21 +18,21 @@ defmodule AccrueAdmin.Components.Sidebar do
         <%= if @brand.logo_url do %>
           <img src={@brand.logo_url} alt={@brand.app_name} class="ax-sidebar-logo" />
         <% else %>
-          <span class="ax-sidebar-mark" aria-hidden="true">AX</span>
+          <span class="ax-sidebar-mark" aria-hidden="true">A</span>
         <% end %>
 
         <div>
-          <p class="ax-label">Accrue Admin</p>
           <p class="ax-sidebar-name"><%= @brand.app_name %></p>
+          <p class="ax-sidebar-brand-sub">Accrue Admin</p>
         </div>
       </div>
 
       <nav class="ax-sidebar-nav">
         <section :for={{group, items} <- grouped_items(@items)} class="ax-sidebar-nav-group">
-          <p class="ax-sidebar-group-label"><%= group %></p>
+          <p :if={group} class="ax-sidebar-group-label"><%= group %></p>
           <a :for={item <- items} href={item.href} class={nav_class(item, @current_path)}>
+            <Icon.icon name={item.icon} size="sm" class="ax-sidebar-link-icon" />
             <span class="ax-sidebar-link-label"><%= item.label %></span>
-            <span class="ax-sidebar-link-meta"><%= item.eyebrow %></span>
           </a>
         </section>
       </nav>
@@ -38,12 +40,11 @@ defmodule AccrueAdmin.Components.Sidebar do
     """
   end
 
+  # Preserve group order and keep `nil` groups (e.g. Home) so they render without a label.
   defp grouped_items(items) do
     items
-    |> Enum.chunk_by(&Map.get(&1, :group, "Admin"))
-    |> Enum.map(fn [first | _] = group_items ->
-      {Map.get(first, :group, "Admin"), group_items}
-    end)
+    |> Enum.chunk_by(&Map.get(&1, :group))
+    |> Enum.map(fn [first | _] = group_items -> {Map.get(first, :group), group_items} end)
   end
 
   defp nav_class(item, current_path) do

@@ -197,9 +197,10 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  font-weight: 600;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--ax-radius-sm);
+  font-weight: 700;
 }
 
 .ax-sidebar-logo {
@@ -269,13 +270,30 @@ button {
 }
 
 .ax-sidebar-link {
-  display: grid;
-  gap: 0.125rem;
-  padding: 0.875rem 1rem;
-  border-radius: var(--ax-radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--ax-radius-sm);
+  border-color: transparent;
   background: transparent;
   color: var(--ax-primary);
   text-decoration: none;
+}
+
+.ax-sidebar-link-icon {
+  color: var(--ax-muted);
+  transition: color var(--ax-theme-transition);
+}
+
+.ax-sidebar-link-active .ax-sidebar-link-icon {
+  color: var(--ax-accent-readable);
+}
+
+.ax-sidebar-brand-sub {
+  margin: 0;
+  font-size: var(--ax-type-xs);
+  color: var(--ax-muted);
 }
 
 .ax-sidebar-link:visited {
@@ -1480,7 +1498,8 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   border-bottom: 1px solid var(--ax-border);
 }
 
-.ax-icon {
+/* .ax-icon color inherits currentColor (matches its context); set per-context below. */
+.ax-command-palette-search-icon {
   color: var(--ax-muted);
 }
 
@@ -1718,4 +1737,299 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background-color: var(--ax-danger-surface);
   color: var(--ax-danger-readable);
   border-bottom-color: var(--ax-danger-border);
+}
+
+/* ============================================================================
+   Phase 169 (v1.50 AUI-03) — IA: home start page, nav icons, elevated search
+   ========================================================================== */
+
+/* Topbar search rendered as a search-input affordance (not a pill button). */
+.ax-search-trigger {
+  justify-content: flex-start;
+  width: 16rem;
+  max-width: 16rem;
+  min-width: 0;
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-base);
+  font-weight: 500;
+}
+
+.ax-search-trigger-icon {
+  color: var(--ax-muted);
+}
+
+.ax-search-trigger-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  color: var(--ax-muted);
+  font-weight: 500;
+}
+
+.ax-search-trigger .ax-kbd {
+  margin-left: auto;
+}
+
+@media (max-width: 599.98px) {
+  .ax-search-trigger {
+    width: auto;
+    max-width: none;
+  }
+
+  .ax-search-trigger-text {
+    display: none;
+  }
+}
+
+/* Home page vertical rhythm + section headers */
+.ax-home {
+  gap: var(--ax-space-xl);
+}
+
+.ax-home-section {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+}
+
+/* Quiet inline link (label + trailing arrow) */
+.ax-link-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  color: var(--ax-accent-readable);
+  font-size: var(--ax-type-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ax-link-quiet:hover,
+.ax-link-quiet:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  outline: none;
+}
+
+/* Attention rail — exception rows */
+.ax-attention {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ax-attention-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-md);
+  padding: var(--ax-space-md) var(--ax-space-lg);
+  border-bottom: 1px solid var(--ax-border);
+  color: var(--ax-primary);
+  text-decoration: none;
+  transition: background var(--ax-dur-1) var(--ax-ease-out);
+}
+
+.ax-attention-row:last-child {
+  border-bottom: none;
+}
+
+.ax-attention-row:hover,
+.ax-attention-row:focus-visible {
+  background: var(--ax-sunken);
+  outline: none;
+}
+
+.ax-attention-dot {
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-radius: 999px;
+  flex: none;
+}
+
+.ax-attention-dot-danger {
+  background: var(--ax-danger);
+}
+
+.ax-attention-dot-warning {
+  background: var(--ax-warning);
+}
+
+.ax-attention-dot-info {
+  background: var(--ax-info);
+}
+
+.ax-attention-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-attention-text strong {
+  font-weight: 600;
+}
+
+.ax-attention-pill {
+  flex: none;
+  padding: 0.05rem var(--ax-space-sm);
+  border-radius: 999px;
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+}
+
+.ax-attention-pill-danger {
+  background: color-mix(in srgb, var(--ax-danger) 14%, var(--ax-elevated));
+  color: var(--ax-danger-readable);
+}
+
+.ax-attention-pill-warning {
+  background: color-mix(in srgb, var(--ax-warning) 18%, var(--ax-elevated));
+  color: var(--ax-warning-readable);
+}
+
+.ax-attention-pill-info {
+  background: color-mix(in srgb, var(--ax-info) 16%, var(--ax-elevated));
+  color: var(--ax-info-readable);
+}
+
+.ax-attention-action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  color: var(--ax-accent-readable);
+  font-weight: 600;
+  font-size: var(--ax-type-sm);
+  white-space: nowrap;
+}
+
+@media (max-width: 599.98px) {
+  .ax-attention-pill {
+    display: none;
+  }
+}
+
+/* Empty state (home attention zero; reused by slice D) */
+.ax-empty {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: var(--ax-space-xs);
+  padding: var(--ax-space-2xl) var(--ax-space-lg);
+}
+
+.ax-empty-icon {
+  color: var(--ax-success);
+  margin-bottom: var(--ax-space-xs);
+}
+
+.ax-empty-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.ax-empty-copy {
+  max-width: 28rem;
+}
+
+/* Task launchers — JTBD doors */
+.ax-launchers {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ax-space-md);
+}
+
+.ax-launcher {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--ax-space-xs);
+  padding: var(--ax-space-lg);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  text-decoration: none;
+  transition:
+    transform var(--ax-dur-2) var(--ax-ease-out),
+    box-shadow var(--ax-dur-2) var(--ax-ease-out),
+    border-color var(--ax-dur-2) var(--ax-ease-out);
+}
+
+.ax-launcher:hover,
+.ax-launcher:focus-visible {
+  transform: translateY(calc(-1 * var(--ax-rise-sm)));
+  box-shadow: var(--ax-shadow-md);
+  border-color: var(--ax-accent-border);
+  outline: none;
+}
+
+.ax-launcher-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: var(--ax-space-xs);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-accent-subtle);
+  color: var(--ax-accent-readable);
+}
+
+.ax-launcher-title {
+  font-weight: 600;
+}
+
+.ax-launcher-copy {
+  color: var(--ax-muted);
+  font-size: var(--ax-type-sm);
+}
+
+.ax-launcher-meta {
+  margin-top: var(--ax-space-sm);
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+  color: var(--ax-muted);
+}
+
+.ax-launcher-meta-warn {
+  color: var(--ax-warning-readable);
+}
+
+/* Demoted KPI strip on home: explicit responsive 4-up */
+.ax-kpi-grid-4 {
+  grid-template-columns: 1fr;
+  gap: var(--ax-space-md);
+}
+
+/* Command-palette items become icon + label rows */
+.ax-command-palette-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+}
+
+@media (min-width: 640px) {
+  .ax-launchers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ax-kpi-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .ax-launchers {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ax-kpi-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
