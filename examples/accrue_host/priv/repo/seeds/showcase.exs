@@ -58,7 +58,11 @@ sub_for_customer = fn
 
   %Customer{id: cid} ->
     Repo.one(
-      from(s in Subscription, where: s.customer_id == ^cid, order_by: [desc: s.inserted_at], limit: 1)
+      from(s in Subscription,
+        where: s.customer_id == ^cid,
+        order_by: [desc: s.inserted_at],
+        limit: 1
+      )
     )
 end
 

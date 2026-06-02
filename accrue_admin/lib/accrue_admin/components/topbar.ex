@@ -34,7 +34,7 @@ defmodule AccrueAdmin.Components.Topbar do
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 
-        <button type="button" class="ax-icon-button" data-sidebar-toggle="true" aria-label="Toggle navigation">
+        <button type="button" class="ax-icon-button" data-sidebar-toggle="true">
           <Icon.icon name={:events} size="md" />
           <span class="ax-icon-label">Menu</span>
         </button>

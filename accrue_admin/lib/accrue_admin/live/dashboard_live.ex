@@ -24,7 +24,11 @@ defmodule AccrueAdmin.Live.DashboardLive do
      |> assign(:stats, stats)
      |> assign(
        :attention,
-       attention_items(stats, socket.assigns.admin_mount_path, socket.assigns[:current_owner_scope])
+       attention_items(
+         stats,
+         socket.assigns.admin_mount_path,
+         socket.assigns[:current_owner_scope]
+       )
      )
      |> assign(:recent_events, recent_events())
      |> assign(:webhook_health, webhook_health())}

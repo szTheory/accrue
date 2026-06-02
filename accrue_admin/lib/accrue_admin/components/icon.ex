@@ -105,7 +105,8 @@ defmodule AccrueAdmin.Components.Icon do
       ~s(<path d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/>)
 
   defp paths(:search),
-    do: ~s(<path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>)
+    do:
+      ~s(<path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>)
 
   defp paths(:arrow_right), do: ~s(<path d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>)
 
@@ -115,7 +116,8 @@ defmodule AccrueAdmin.Components.Icon do
 
   defp paths(:chevron_down), do: ~s(<path d="m19.5 8.25-7.5 7.5-7.5-7.5"/>)
 
-  defp paths(:chevron_up_down), do: ~s(<path d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>)
+  defp paths(:chevron_up_down),
+    do: ~s(<path d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>)
 
   defp paths(:x_mark), do: ~s(<path d="M6 18 18 6M6 6l12 12"/>)
 
