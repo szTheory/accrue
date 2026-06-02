@@ -84,4 +84,5 @@ end
 
 Code.require_file("seeds/hero_accounts.exs", __DIR__)
 Code.require_file("seeds/background_data.exs", __DIR__)
+Code.require_file("seeds/showcase.exs", __DIR__)
 
