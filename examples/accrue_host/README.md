@@ -11,26 +11,50 @@ Use Docker for the fastest evaluator path:
 
 ```bash
 cd examples/accrue_host
-docker compose up --build
+make build
 ```
 
-Open [`http://localhost:4000`](http://localhost:4000). Sign in, visit
-`/app/billing`, start a Fake-backed subscription through `AccrueHost.Billing`,
-then inspect `/billing` to see billing state, webhook ingest, replay visibility,
-and the mounted admin UI. No live Stripe keys are required for this path.
+Open [`http://127.0.0.1:4000`](http://127.0.0.1:4000). Sign in, visit `/app/billing`,
+start a Fake-backed subscription through `AccrueHost.Billing`, then inspect `/billing`
+to see billing state, webhook ingest, replay visibility, and the mounted admin UI.
+No live Stripe keys are required for this path.
 
-If another Phoenix app or local Postgres is already using the default ports,
-keep the container ports the same and move only the host bindings:
+**Daily use after the first run:** `make up` (not `make build`) — this reuses the
+cached image and named-volume deps (Hex packages, assets). No redownload, no rebuild.
+Reserve `make build` for when `Dockerfile.dev` or OS-level dependencies change.
+
+Editing `.heex`, CSS, or JS files while the container runs **hot-reloads with no
+restart** (live_reload + Tailwind/esbuild watchers are active inside the container).
+
+To run multiple demos concurrently or avoid port conflicts:
 
 ```bash
-cd examples/accrue_host
-ACCRUE_HOST_DOCKER_PORT=4200 ACCRUE_HOST_DOCKER_PGPORT=55432 docker compose up --build
+cp .env.example .env
+# Edit .env: set ACCRUE_HOST_DOCKER_PORT and ACCRUE_HOST_COMPOSE_PROJECT
+# Cross-lib port convention: accrue web 4000, otherlib web 4010, thirdlib web 4020
+make up
 ```
 
-Open `http://localhost:4200` for that run. To keep multiple Compose projects
-separate, also set `ACCRUE_HOST_COMPOSE_PROJECT=accrue-host-ui` or pass
-`docker compose -p accrue-host-ui ...`; project names isolate networks and
-volumes, while the `*_PORT` variables avoid host-port conflicts.
+The `ACCRUE_HOST_COMPOSE_PROJECT` variable isolates the Compose project name
+(separate networks, volumes, and container names); `ACCRUE_HOST_DOCKER_PORT` avoids
+the Phoenix host-port conflict.
+
+> **Advanced (optional):** For many demos at once on a single machine, a host-level
+> [Traefik reverse proxy](https://doc.traefik.io/traefik/) can route
+> `accrue.localhost`, `otherlib.localhost`, etc. on one `:80` — `*.localhost`
+> auto-resolves to `127.0.0.1` on macOS without `/etc/hosts` edits. This is an
+> optional escape hatch and is not shipped.
+
+| Command | When to use |
+|---------|-------------|
+| `make build` | First run, or after changing `Dockerfile.dev` / OS-level deps |
+| `make up` | Every other day — fast boot, reuses cached image and named volumes |
+| `make down` | Stop the stack |
+| `make logs` | Stream Phoenix logs |
+| `make psql` | Open a psql session in the running db container |
+| `make sh` | Open a bash shell in the running web container |
+| `make reset` | Nuke volumes and reseed from scratch (seeds are idempotent) |
+| `make ps` | List all Compose projects running on this machine |
 
 Run the focused proof after the walkthrough:
 
@@ -60,17 +84,17 @@ mix phx.server
 - By default the app connects to `localhost:5432`.
 - Override `PGHOST`, `PGPORT`, `PGUSER`, or `PGPASSWORD` if your local database
   uses different values.
-- Docker Compose sets `PGHOST=db` for the web container and publishes Phoenix
-  and Postgres on `4000` and `5432` by default. Override
-  `ACCRUE_HOST_DOCKER_PORT` or `ACCRUE_HOST_DOCKER_PGPORT` when those host ports
-  are already in use.
-- Docker uses named volumes for container `deps`, `_build`, and
-  `assets/node_modules`, so container dependencies stay isolated from native
-  development.
-- Use `docker compose down --volumes` only when you want to reset Docker data and
-  dependency volumes, not as the normal stop command. For a namespaced UI loop,
-  reset just this project with
-  `ACCRUE_HOST_COMPOSE_PROJECT=accrue-host-ui docker compose down --volumes`.
+- Docker Compose sets `PGHOST=db` for the web container. Postgres is **internal-only by
+  default** (no host port binding) — web reaches it over the internal Docker network.
+  If you need to connect a GUI client (psql, DBeaver, TablePlus), copy
+  `docker-compose.override.yml.example` to `docker-compose.override.yml` (gitignored,
+  auto-merged); it exposes `${PGPORT:-5432}` on `127.0.0.1`.
+- Override `ACCRUE_HOST_DOCKER_PORT` or `ACCRUE_HOST_COMPOSE_PROJECT` via `.env`
+  (copy `.env.example` to `.env`) when running multiple demo stacks concurrently.
+  Cross-lib convention: accrue web 4000, otherlib web 4010, thirdlib web 4020.
+- Docker uses named volumes for `deps`, `_build`, and `assets/node_modules`.
+  `make up` reuses them every run — no dep redownload. Use `make reset` only when you
+  want to nuke volumes and reseed from scratch.
 
 The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live
@@ -163,9 +187,9 @@ Keep cancellation and other secondary proofs here instead of in the main story.
 
 Use the smallest proof that answers your question:
 
-- **Explore:** `docker compose up --build` runs the demo app and Postgres
-  locally so you can inspect the Fake-backed `/app/billing` to `/billing` loop
-  in a browser.
+- **Explore:** `make build` (first run) / `make up` (daily) runs the demo app and
+  Postgres locally so you can inspect the Fake-backed `/app/billing` to `/billing`
+  loop in a browser.
 - **Focused proof:** `mix verify` is the bounded Fake-backed proof for installer
   boundary, subscription flow, signed `/webhooks/stripe` ingest, mounted
   `/billing` inspection, and replay visibility.

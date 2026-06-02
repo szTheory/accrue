@@ -183,8 +183,9 @@ require_regex "$ROOT_DIR/accrue_admin/README.md" 'https://hexdocs\.pm/accrue(/fi
 
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## First run"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Start Here"
-require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "docker compose up --build"
-require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "http://localhost:4000"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "make build"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "make up"
+require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "http://127.0.0.1:4000"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "Accrue.Processor.Fake"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Seeded history"
 require_fixed "$ROOT_DIR/examples/accrue_host/README.md" "## Proof and verification"
