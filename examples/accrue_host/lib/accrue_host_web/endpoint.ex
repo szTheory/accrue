@@ -50,7 +50,10 @@ defmodule AccrueHostWeb.Endpoint do
   plug Plug.Session, @session_options
 
   if Application.compile_env(:accrue_host, :sql_sandbox) do
-    plug Phoenix.Ecto.SQL.Sandbox, header: "x-sandbox-id"
+    plug Phoenix.Ecto.SQL.Sandbox,
+      at: "/api/sandbox",
+      repo: AccrueHost.Repo,
+      header: "x-sandbox-id"
   end
 
   plug AccrueHostWeb.Router
