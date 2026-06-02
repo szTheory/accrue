@@ -4,9 +4,11 @@
   "scripts": {
     "e2e": "env -u NO_COLOR playwright test",
     "e2e:visuals:png-only": "env -u NO_COLOR playwright test e2e/admin-visuals.spec.js",
+    "e2e:a11y": "env -u NO_COLOR playwright test e2e/admin-a11y.spec.js",
     "e2e:install": "playwright install chromium"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.57.0"
   }
 }
