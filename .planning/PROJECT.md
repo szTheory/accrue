@@ -27,7 +27,7 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 
 A historical anchor, dormant seed, or deferred idea never opens milestone scope by itself; any reopen decision must be recorded in `.planning/PROJECT.md` or a future strategy artifact before `.planning/ROADMAP.md` or `.planning/STATE.md` changes.
 
-Default next work after v1.48: no broad feature milestone is currently open; future work defaults to release-readiness, maintenance, verifier hardening, support-contract hardening, or explicitly justified strategy change.
+Current milestone after v1.48: **v1.49 Realistic Demo App & Adoption Evidence** is open for adoption evidence, Docker DX, E2E automation, and docs. Phase 165 is complete as of 2026-06-02: CI now enforces native sharded Playwright E2E, Docker Compose boot smoke, and mandatory periodic live-Stripe parity. Phase 166 remains the next active planning target for Adoption DX Docs.
 
 ## Last shipped milestone
 
