@@ -81,6 +81,10 @@ html.accrue-admin {
   --ax-warning-readable: #7a4b00;
   --ax-danger: #d64b4b;
   --ax-danger-readable: #9b1c1c;
+  /* Danger surface + border (theme-aware via --ax-elevated; auto-adapts in dark).
+     Used by the headless dunning banner with hex fallbacks for bare host apps. */
+  --ax-danger-surface: color-mix(in srgb, var(--ax-danger) 8%, var(--ax-elevated));
+  --ax-danger-border: color-mix(in srgb, var(--ax-danger) 24%, var(--ax-elevated));
   /* Info now has its own hue (a calm teal-blue) so info surfaces are not mistaken for
      interactive/accent surfaces. */
   --ax-info: #3878a6;

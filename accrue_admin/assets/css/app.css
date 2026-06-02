@@ -1654,3 +1654,34 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-at-risk-grid tbody tr:hover td {
   background: color-mix(in srgb, var(--ax-sunken) 50%, var(--ax-elevated));
 }
+
+/* Phase 167 (v1.50): layout utilities replacing inline styles (invoice_live.ex) +
+   token-based banner classes (dunning_banner.ex), killing the last token bypasses. */
+.ax-items-end {
+  align-items: flex-end;
+}
+
+.ax-stack-row {
+  flex-direction: row;
+}
+
+.ax-col-span-full {
+  grid-column: 1 / -1;
+}
+
+.ax-mt-md {
+  margin-top: var(--ax-space-md);
+}
+
+.ax-banner {
+  padding: var(--ax-space-md);
+  text-align: center;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+}
+
+.ax-banner-danger {
+  background-color: var(--ax-danger-surface);
+  color: var(--ax-danger-readable);
+  border-bottom-color: var(--ax-danger-border);
+}

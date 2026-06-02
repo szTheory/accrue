@@ -423,7 +423,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               </p>
             </div>
             
-            <div class="ax-stack-sm" style="align-items: flex-end;">
+            <div class="ax-stack-sm ax-items-end">
               <MoneyFormatter.money_formatter
                 amount_minor={item.amount_minor || 0}
                 currency={item.currency || @invoice.currency || "usd"}
@@ -440,9 +440,9 @@ defmodule AccrueAdmin.Live.InvoiceLive do
               </button>
             </div>
             
-            <div :if={@pending_remove_item && @pending_remove_item.id == item.id} class="ax-card ax-card-elevated" style="grid-column: 1 / -1; margin-top: 1rem;">
+            <div :if={@pending_remove_item && @pending_remove_item.id == item.id} class="ax-card ax-card-elevated ax-col-span-full ax-mt-md">
               <p class="ax-body"><%= Copy.invoice_remove_manual_item_confirm() %></p>
-              <div class="ax-stack-sm" style="flex-direction: row; margin-top: 1rem;">
+              <div class="ax-stack-sm ax-stack-row ax-mt-md">
                 <button phx-click="confirm_remove_item" class="ax-button ax-button-primary"><%= Copy.invoice_confirm_action_verb() %></button>
                 <button phx-click="cancel_remove_item" class="ax-button ax-button-ghost"><%= Copy.invoice_confirm_cancel() %></button>
               </div>
