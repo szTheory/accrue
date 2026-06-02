@@ -51,7 +51,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
           <KpiCard.kpi_card
             label={Copy.dashboard_meter_reporting_failures_label()}
             value={Integer.to_string(@stats.failed_meter_event_count)}
-            href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope)}
+            href={ScopedPath.build(@admin_mount_path, "/events", @current_owner_scope, %{"q" => "meter_event"})}
             aria_label={Copy.dashboard_meter_reporting_failures_aria_label()}
           >
             <:meta><%= Copy.dashboard_meter_reporting_failures_meta() %></:meta>
@@ -74,7 +74,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 Copy.dashboard_kpi_active_subscriptions_canceling_suffix()
             }
             delta_tone="amber"
-            href={ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)}
+            href={ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope, %{"status" => "canceling"})}
             aria_label={Copy.dashboard_kpi_subscriptions_aria_label()}
           >
             <:meta><%= Copy.dashboard_kpi_active_subscriptions_meta() %></:meta>
@@ -88,7 +88,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 Copy.dashboard_kpi_open_invoice_delta_suffix()
             }
             delta_tone="cobalt"
-            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope)}
+            href={ScopedPath.build(@admin_mount_path, "/invoices", @current_owner_scope, %{"status" => "open"})}
             aria_label={Copy.dashboard_kpi_invoices_aria_label()}
           >
             <:meta><%= Copy.dashboard_kpi_open_invoice_balance_meta() %></:meta>
@@ -102,10 +102,21 @@ defmodule AccrueAdmin.Live.DashboardLive do
                 Copy.dashboard_kpi_webhook_events_suffix()
             }
             delta_tone={if(@stats.blocked_webhook_count > 0, do: "amber", else: "moss")}
-            href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope)}
+            href={ScopedPath.build(@admin_mount_path, "/webhooks", @current_owner_scope, %{"status" => "dead"})}
             aria_label={Copy.dashboard_kpi_webhooks_aria_label()}
           >
             <:meta><%= Copy.dashboard_kpi_webhook_backlog_meta() %></:meta>
+          </KpiCard.kpi_card>
+
+          <KpiCard.kpi_card
+            label={Copy.dashboard_kpi_recovery_risk_label()}
+            value={Integer.to_string(@stats.past_due_subscription_count)}
+            delta="past due"
+            delta_tone={if(@stats.past_due_subscription_count > 0, do: "amber", else: "moss")}
+            href={ScopedPath.build(@admin_mount_path, "/analytics/recovery", @current_owner_scope)}
+            aria_label={Copy.dashboard_kpi_recovery_aria_label()}
+          >
+            <:meta><%= Copy.dashboard_kpi_recovery_risk_meta() %></:meta>
           </KpiCard.kpi_card>
         </section>
 
@@ -162,6 +173,8 @@ defmodule AccrueAdmin.Live.DashboardLive do
       active_subscription_count: Subscription |> Query.active() |> Repo.aggregate(:count, :id),
       canceling_subscription_count:
         Subscription |> Query.canceling() |> Repo.aggregate(:count, :id),
+      past_due_subscription_count:
+        Subscription |> Query.past_due() |> Repo.aggregate(:count, :id),
       open_invoice_count:
         Invoice
         |> where([invoice], invoice.status in ^open_invoice_statuses)

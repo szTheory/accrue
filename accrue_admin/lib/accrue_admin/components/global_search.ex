@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   def mount(socket) do
     {:ok,
      assign(socket,
+       mount_path: "/billing",
        query: "",
        results: %{customers: [], invoices: [], subscriptions: []},
        is_open: false,
@@ -130,9 +131,10 @@ defmodule AccrueAdmin.Components.GlobalSearch do
             <div class="ax-command-palette-empty">
               <p class="ax-eyebrow">Quick Links</p>
               <ul class="ax-command-palette-list">
-                <li class="ax-command-palette-item" data-path="/admin/customers">Go to Customers</li>
-                <li class="ax-command-palette-item" data-path="/admin/invoices">Go to Invoices</li>
-                <li class="ax-command-palette-item" data-path="/admin/subscriptions">Go to Subscriptions</li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/customers")}>Investigate customers</li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/invoices?status=open")}>Open invoices</li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/webhooks?status=dead")}>Dead webhooks</li>
+                <li class="ax-command-palette-item" data-path={path(@mount_path, "/analytics/recovery")}>Recovery dashboard</li>
               </ul>
             </div>
           <% else %>
@@ -146,7 +148,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <p class="ax-eyebrow">Customers</p>
                   <ul class="ax-command-palette-list">
                     <%= for customer <- @results.customers do %>
-                      <li class="ax-command-palette-item" data-path={"/admin/customers/#{customer.id}"}>
+                      <li class="ax-command-palette-item" data-path={path(@mount_path, "/customers/#{customer.id}")}>
                         <%= customer.name || customer.email %>
                       </li>
                     <% end %>
@@ -157,7 +159,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <p class="ax-eyebrow">Invoices</p>
                   <ul class="ax-command-palette-list">
                     <%= for invoice <- @results.invoices do %>
-                      <li class="ax-command-palette-item" data-path={"/admin/invoices/#{invoice.id}"}>
+                      <li class="ax-command-palette-item" data-path={path(@mount_path, "/invoices/#{invoice.id}")}>
                         <%= invoice.number %> - <%= invoice.amount_due %>
                       </li>
                     <% end %>
@@ -168,7 +170,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   <p class="ax-eyebrow">Subscriptions</p>
                   <ul class="ax-command-palette-list">
                     <%= for sub <- @results.subscriptions do %>
-                      <li class="ax-command-palette-item" data-path={"/admin/subscriptions/#{sub.id}"}>
+                      <li class="ax-command-palette-item" data-path={path(@mount_path, "/subscriptions/#{sub.id}")}>
                         <%= sub.id %> - <%= sub.status %>
                       </li>
                     <% end %>
@@ -188,4 +190,6 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     </div>
     """
   end
+
+  defp path(mount_path, suffix), do: mount_path <> suffix
 end

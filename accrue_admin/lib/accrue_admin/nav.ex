@@ -5,24 +5,67 @@ defmodule AccrueAdmin.Nav do
     org = org_slug(current_path)
 
     [
-      %{label: "Home", href: nav_href(mount_path, "", org), eyebrow: "Overview"},
-      %{label: "Customers", href: nav_href(mount_path, "/customers", org), eyebrow: "Directory"},
+      %{label: "Home", href: nav_href(mount_path, "", org), eyebrow: "Triage", group: "Command"},
+      %{
+        label: "Customers",
+        href: nav_href(mount_path, "/customers", org),
+        eyebrow: "Account 360",
+        group: "Investigate"
+      },
       %{
         label: "Subscriptions",
         href: nav_href(mount_path, "/subscriptions", org),
-        eyebrow: "Lifecycle"
+        eyebrow: "Lifecycle",
+        group: "Investigate"
       },
-      %{label: "Invoices", href: nav_href(mount_path, "/invoices", org), eyebrow: "Receivables"},
-      %{label: "Charges", href: nav_href(mount_path, "/charges", org), eyebrow: "Payments"},
-      %{label: "Webhooks", href: nav_href(mount_path, "/webhooks", org), eyebrow: "Pipeline"},
-      %{label: "Event log", href: nav_href(mount_path, "/events", org), eyebrow: "Audit trail"},
-      %{label: "Coupons", href: nav_href(mount_path, "/coupons", org), eyebrow: "Discounts"},
+      %{
+        label: "Invoices",
+        href: nav_href(mount_path, "/invoices", org),
+        eyebrow: "Receivables",
+        group: "Revenue"
+      },
+      %{
+        label: "Payments",
+        href: nav_href(mount_path, "/charges", org),
+        eyebrow: "Charges & refunds",
+        group: "Revenue"
+      },
+      %{
+        label: "Recovery",
+        href: nav_href(mount_path, "/analytics/recovery", org),
+        eyebrow: "Dunning",
+        group: "Revenue"
+      },
+      %{
+        label: "Webhooks",
+        href: nav_href(mount_path, "/webhooks", org),
+        eyebrow: "Pipeline",
+        group: "Operations"
+      },
+      %{
+        label: "Event log",
+        href: nav_href(mount_path, "/events", org),
+        eyebrow: "Audit trail",
+        group: "Operations"
+      },
+      %{
+        label: "Coupons",
+        href: nav_href(mount_path, "/coupons", org),
+        eyebrow: "Catalog",
+        group: "Discounts"
+      },
       %{
         label: "Promotion codes",
         href: nav_href(mount_path, "/promotion-codes", org),
-        eyebrow: "Codes"
+        eyebrow: "Redemption",
+        group: "Discounts"
       },
-      %{label: "Connect", href: nav_href(mount_path, "/connect", org), eyebrow: "Payouts"}
+      %{
+        label: "Connect",
+        href: nav_href(mount_path, "/connect", org),
+        eyebrow: "Payouts",
+        group: "Platform"
+      }
     ]
   end
 

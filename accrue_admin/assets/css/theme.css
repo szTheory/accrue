@@ -6,6 +6,12 @@
 html.accrue-admin {
   --ax-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --ax-font-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+  --ax-type-xs: 0.75rem;
+  --ax-type-sm: 0.875rem;
+  --ax-type-md: 1rem;
+  --ax-type-lg: 1.25rem;
+  --ax-type-xl: 1.5rem;
+  --ax-type-2xl: 1.75rem;
   --ax-space-xs: 0.25rem;
   --ax-space-sm: 0.5rem;
   --ax-space-md: 1rem;
@@ -15,9 +21,17 @@ html.accrue-admin {
   --ax-radius-sm: 0.75rem;
   --ax-radius-md: 1rem;
   --ax-radius-lg: 1.5rem;
+  --ax-radius-pill: 999px;
   --ax-shadow-sm: 0 16px 40px rgba(17, 20, 24, 0.06);
+  --ax-shadow-md: 0 18px 48px rgba(17, 20, 24, 0.09);
   --ax-shadow-lg: 0 24px 60px rgba(17, 20, 24, 0.12);
-  --ax-theme-transition: 180ms ease;
+  --ax-motion-fast: 120ms cubic-bezier(0.2, 0, 0, 1);
+  --ax-motion-standard: 180ms cubic-bezier(0.2, 0, 0, 1);
+  --ax-theme-transition: var(--ax-motion-standard);
+  --ax-z-topbar: 10;
+  --ax-z-popover: 20;
+  --ax-z-drawer: 30;
+  --ax-z-modal: 40;
   --ax-base: var(--accrue-paper);
   --ax-elevated: #ffffff;
   --ax-sunken: #f1f5f8;
@@ -30,6 +44,10 @@ html.accrue-admin {
   --ax-success-readable: #2f6b4f;
   --ax-warning: var(--accrue-amber);
   --ax-warning-readable: #7a4b00;
+  --ax-danger: #d64b4b;
+  --ax-danger-readable: #9b1c1c;
+  --ax-info: var(--ax-accent);
+  --ax-info-readable: var(--ax-accent-readable);
   --ax-accent-readable: #174ea6;
   --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, white);
   color-scheme: light;
@@ -46,6 +64,8 @@ html.accrue-admin[data-theme="dark"] {
   --ax-border-strong: rgba(233, 238, 242, 0.2);
   --ax-success-readable: #8ed6ac;
   --ax-warning-readable: #f0c36a;
+  --ax-danger-readable: #ffaaaa;
+  --ax-info-readable: #9bb5ff;
   --ax-accent-readable: #9bb5ff;
   --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, black);
   color-scheme: dark;
@@ -63,6 +83,8 @@ html.accrue-admin[data-theme="dark"] {
     --ax-border-strong: rgba(233, 238, 242, 0.2);
     --ax-success-readable: #8ed6ac;
     --ax-warning-readable: #f0c36a;
+    --ax-danger-readable: #ffaaaa;
+    --ax-info-readable: #9bb5ff;
     --ax-accent-readable: #9bb5ff;
     --ax-focus-ring: color-mix(in oklch, var(--ax-accent) 70%, black);
     color-scheme: dark;
@@ -71,6 +93,8 @@ html.accrue-admin[data-theme="dark"] {
 
 @media (prefers-reduced-motion: reduce) {
   html.accrue-admin {
+    --ax-motion-fast: 0ms linear;
+    --ax-motion-standard: 0ms linear;
     --ax-theme-transition: 0ms linear;
   }
 }

@@ -584,13 +584,13 @@ defmodule AccrueAdmin.Copy do
 
   def dashboard_breadcrumb_home, do: "Dashboard"
 
-  def dashboard_chrome_eyebrow, do: "Billing health"
+  def dashboard_chrome_eyebrow, do: "Command center"
 
-  def dashboard_display_headline, do: "Local billing projections at a glance"
+  def dashboard_display_headline, do: "What needs attention now"
 
   def dashboard_page_copy_primary,
     do:
-      "Dashboard KPIs are sourced from `accrue_*` tables, the event ledger, and webhook projections already stored locally."
+      "Start with the highest-signal billing exceptions, then jump into the customer, revenue, recovery, or operations queue that can resolve them."
 
   def dashboard_kpi_section_aria_label, do: "Billing KPI summary"
 
@@ -604,6 +604,8 @@ defmodule AccrueAdmin.Copy do
 
   def dashboard_kpi_webhook_backlog_label, do: "Webhook backlog"
 
+  def dashboard_kpi_recovery_risk_label, do: "Recovery risk"
+
   def dashboard_kpi_customers_meta, do: "Total local customer records"
 
   def dashboard_kpi_active_subscriptions_meta, do: "Canonical active + trialing predicates"
@@ -613,6 +615,9 @@ defmodule AccrueAdmin.Copy do
 
   def dashboard_kpi_webhook_backlog_meta,
     do: "Failed + dead webhook rows waiting for operator attention"
+
+  def dashboard_kpi_recovery_risk_meta,
+    do: "Past-due subscriptions that may need dunning or support follow-up"
 
   def dashboard_meter_reporting_failures_label, do: "Meter reporting failures"
 
@@ -630,6 +635,8 @@ defmodule AccrueAdmin.Copy do
   def dashboard_kpi_invoices_aria_label, do: "Open invoices list"
 
   def dashboard_kpi_webhooks_aria_label, do: "Open webhooks list"
+
+  def dashboard_kpi_recovery_aria_label, do: "Open recovery dashboard"
 
   def dashboard_kpi_active_subscriptions_canceling_suffix, do: " canceling"
 

@@ -19,6 +19,19 @@ Open [`http://localhost:4000`](http://localhost:4000). Sign in, visit
 then inspect `/billing` to see billing state, webhook ingest, replay visibility,
 and the mounted admin UI. No live Stripe keys are required for this path.
 
+If another Phoenix app or local Postgres is already using the default ports,
+keep the container ports the same and move only the host bindings:
+
+```bash
+cd examples/accrue_host
+ACCRUE_HOST_DOCKER_PORT=4200 ACCRUE_HOST_DOCKER_PGPORT=55432 docker compose up --build
+```
+
+Open `http://localhost:4200` for that run. To keep multiple Compose projects
+separate, also set `ACCRUE_HOST_COMPOSE_PROJECT=accrue-host-ui` or pass
+`docker compose -p accrue-host-ui ...`; project names isolate networks and
+volumes, while the `*_PORT` variables avoid host-port conflicts.
+
 Run the focused proof after the walkthrough:
 
 ```bash
@@ -47,14 +60,17 @@ mix phx.server
 - By default the app connects to `localhost:5432`.
 - Override `PGHOST`, `PGPORT`, `PGUSER`, or `PGPASSWORD` if your local database
   uses different values.
-- Docker Compose sets `PGHOST=db` for the web container and publishes
-  `5432:5432`; stop any local Postgres already using that port before running
-  the Docker path.
+- Docker Compose sets `PGHOST=db` for the web container and publishes Phoenix
+  and Postgres on `4000` and `5432` by default. Override
+  `ACCRUE_HOST_DOCKER_PORT` or `ACCRUE_HOST_DOCKER_PGPORT` when those host ports
+  are already in use.
 - Docker uses named volumes for container `deps`, `_build`, and
   `assets/node_modules`, so container dependencies stay isolated from native
   development.
 - Use `docker compose down --volumes` only when you want to reset Docker data and
-  dependency volumes, not as the normal stop command.
+  dependency volumes, not as the normal stop command. For a namespaced UI loop,
+  reset just this project with
+  `ACCRUE_HOST_COMPOSE_PROJECT=accrue-host-ui docker compose down --volumes`.
 
 The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live

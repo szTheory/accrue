@@ -26,17 +26,38 @@ defmodule AccrueAdmin.Components.Sidebar do
       </div>
 
       <nav class="ax-sidebar-nav">
-        <a :for={item <- @items} href={item.href} class={nav_class(item, @current_path)}>
-          <span class="ax-sidebar-link-label"><%= item.label %></span>
-          <span class="ax-sidebar-link-meta"><%= item.eyebrow %></span>
-        </a>
+        <section :for={{group, items} <- grouped_items(@items)} class="ax-sidebar-nav-group">
+          <p class="ax-sidebar-group-label"><%= group %></p>
+          <a :for={item <- items} href={item.href} class={nav_class(item, @current_path)}>
+            <span class="ax-sidebar-link-label"><%= item.label %></span>
+            <span class="ax-sidebar-link-meta"><%= item.eyebrow %></span>
+          </a>
+        </section>
       </nav>
     </aside>
     """
   end
 
+  defp grouped_items(items) do
+    items
+    |> Enum.chunk_by(&Map.get(&1, :group, "Admin"))
+    |> Enum.map(fn [first | _] = group_items ->
+      {Map.get(first, :group, "Admin"), group_items}
+    end)
+  end
+
   defp nav_class(item, current_path) do
-    if current_path == item.href or String.starts_with?(current_path, item.href <> "/") do
+    current_path_root = current_path |> URI.parse() |> Map.get(:path) |> Kernel.||("")
+    item_root = item.href |> URI.parse() |> Map.get(:path) |> Kernel.||("")
+
+    active? =
+      if item.label == "Home" do
+        current_path_root == item_root
+      else
+        current_path_root == item_root or String.starts_with?(current_path_root, item_root <> "/")
+      end
+
+    if active? do
       "ax-sidebar-link ax-sidebar-link-active"
     else
       "ax-sidebar-link"

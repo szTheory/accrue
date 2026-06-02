@@ -99,9 +99,14 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs items={[%{label: "Analytics"}, %{label: "Recovery"}]} />
           <p class="ax-eyebrow">Recovery Dashboard</p>
-          <div class="flex items-baseline justify-between w-full">
+          <div class="ax-heading-row">
             <h2 class="ax-display">Revenue Recovery</h2>
-            <a href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics" target="_blank" rel="noopener noreferrer" class="text-xs text-slate-500 hover:text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200 ml-4">
+            <a
+              href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="ax-help-link"
+            >
               Showing data since 2024-01-01
             </a>
           </div>
@@ -109,7 +114,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
         </header>
 
         <%= for kpi <- @kpi_pairs do %>
-          <section class="ax-kpi-grid mb-6">
+          <section class="ax-kpi-grid ax-section-gap">
             <KpiCard.kpi_card
               label={"Recovered MRR (#{String.upcase(kpi.currency)})"}
               value={kpi.recovered_str}

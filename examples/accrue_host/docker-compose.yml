@@ -1,10 +1,10 @@
-version: '3.8'
+name: ${ACCRUE_HOST_COMPOSE_PROJECT:-accrue-host}
 
 services:
   db:
     image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - "${ACCRUE_HOST_DOCKER_PGPORT:-5432}:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -17,7 +17,7 @@ services:
       context: ../..
       dockerfile: examples/accrue_host/Dockerfile.dev
     ports:
-      - "4000:4000"
+      - "${ACCRUE_HOST_DOCKER_PORT:-4000}:4000"
     environment:
       PGHOST: db
     volumes:

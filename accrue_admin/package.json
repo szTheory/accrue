@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "e2e": "env -u NO_COLOR playwright test",
+    "e2e:visuals:png-only": "env -u NO_COLOR playwright test e2e/admin-visuals.spec.js",
     "e2e:install": "playwright install chromium"
   },
   "devDependencies": {
