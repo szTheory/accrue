@@ -2,14 +2,14 @@
 const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 
-test("host billing switches active organization between fixture orgs", async ({ page }) => {
+test("host billing switches active organization between fixture orgs", async ({ page, sandboxId }) => {
   reseedFixture();
   const fixture = readFixture();
 
   expect(fixture.org_alpha_slug).toBeTruthy();
   expect(fixture.org_beta_slug).toBeTruthy();
 
-  await login(page, fixture, fixture.normal_email);
+  await login(page, fixture, fixture.normal_email, sandboxId);
   await page.getByRole("link", { name: "Go to billing" }).click();
   await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
   await waitForLiveView(page);

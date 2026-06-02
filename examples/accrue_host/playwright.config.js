@@ -4,6 +4,11 @@ const { defineConfig, devices } = require("@playwright/test");
 
 const port = process.env.ACCRUE_HOST_BROWSER_PORT || "4101";
 const baseURL = `http://127.0.0.1:${port}`;
+const workers = process.env.ACCRUE_HOST_PLAYWRIGHT_WORKERS
+  ? Number.parseInt(process.env.ACCRUE_HOST_PLAYWRIGHT_WORKERS, 10)
+  : process.env.CI
+    ? 1
+    : 1;
 
 /** Full-session recordings for maintainer demos (`npm run e2e:visuals`). CI leaves this unset. */
 const trustWalkthroughVideo =
@@ -17,7 +22,7 @@ module.exports = defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: false,
-  workers: process.env.CI ? 2 : undefined,
+  workers,
   reporter: process.env.CI
     ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]
     : [["list"]],

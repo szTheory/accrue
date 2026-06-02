@@ -77,7 +77,8 @@ function replayAuditEventLocator(page, testInfo) {
 
 test("@phase15-trust canonical first-run and admin replay walkthrough stays release-blocking", async ({
   page,
-  context
+  context,
+  sandboxId
 }, testInfo) => {
   reseedFixture();
   const fixture = readFixture();
@@ -96,7 +97,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
     console.error(`browser request failed: ${request.method()} ${request.url()} ${request.failure()?.errorText}`);
   });
 
-  await login(page, fixture, fixture.normal_email);
+  await login(page, fixture, fixture.normal_email, sandboxId);
   await expect(page.getByRole("link", { name: "Go to billing" })).toBeVisible();
   await page.getByRole("link", { name: "Go to billing" }).click();
   await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
@@ -156,7 +157,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   await captureState(page, testInfo, "first-run-subscription-started");
 
   await context.clearCookies();
-  await login(page, fixture, fixture.admin_email);
+  await login(page, fixture, fixture.admin_email, sandboxId);
 
   const billingElapsedMs = await measureVisibleTransition(
     page,

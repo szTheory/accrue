@@ -441,6 +441,8 @@ jobs:
       PGHOST: localhost
       ACCRUE_HOST_PORT: 4100
       ACCRUE_HOST_BROWSER_PORT: 4101
+      ACCRUE_HOST_TEST_POOL_SIZE: 8
+      ACCRUE_HOST_PLAYWRIGHT_WORKERS: 1
       ACCRUE_HOST_BROWSER_LOG: ${{ github.workspace }}/accrue-host-server.log
 
     steps:
@@ -561,6 +563,8 @@ jobs:
       PGPASSWORD: postgres
       PGHOST: localhost
       ACCRUE_HOST_BROWSER_PORT: 4101
+      ACCRUE_HOST_TEST_POOL_SIZE: 8
+      ACCRUE_HOST_PLAYWRIGHT_WORKERS: 1
       ACCRUE_HOST_E2E_FIXTURE: /tmp/accrue-host-e2e-fixture-${{ matrix.shard }}.json
 
     steps:

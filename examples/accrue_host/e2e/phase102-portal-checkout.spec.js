@@ -31,11 +31,11 @@ async function applyPromoCode(page, code) {
   await input.blur();
 }
 
-test("portal checkout promo preview updates totals in a real browser", async ({ page }) => {
+test("portal checkout promo preview updates totals in a real browser", async ({ page, sandboxId }) => {
   reseedFixtureIfNeeded();
   const fixture = readFixture();
 
-  await login(page, fixture, fixture.normal_email);
+  await login(page, fixture, fixture.normal_email, sandboxId);
   await page.goto(fixture.portal_checkout_url, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 
@@ -52,11 +52,11 @@ test("portal checkout promo preview updates totals in a real browser", async ({ 
   await expect(page.getByRole("button", { name: "Pay $24.00" })).toBeVisible();
 });
 
-test("portal checkout promo invalid and drift copy stays accessible and customer-safe", async ({ page }) => {
+test("portal checkout promo invalid and drift copy stays accessible and customer-safe", async ({ page, sandboxId }) => {
   reseedFixtureIfNeeded();
   const fixture = readFixture();
 
-  await login(page, fixture, fixture.normal_email);
+  await login(page, fixture, fixture.normal_email, sandboxId);
   await page.goto(fixture.portal_checkout_url, { waitUntil: "domcontentloaded" });
   await waitForLiveView(page);
 

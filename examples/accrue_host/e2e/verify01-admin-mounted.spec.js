@@ -2,13 +2,13 @@
 const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 
-test("mounted admin customers index shows tenant chrome and billing signals", async ({ page }, testInfo) => {
+test("mounted admin customers index shows tenant chrome and billing signals", async ({ page, sandboxId }, testInfo) => {
   reseedFixture();
   const fixture = readFixture();
 
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
-  await login(page, fixture, fixture.admin_email);
+  await login(page, fixture, fixture.admin_email, sandboxId);
   await page.getByRole("link", { name: "Go to billing" }).click();
   await waitForLiveView(page);
 

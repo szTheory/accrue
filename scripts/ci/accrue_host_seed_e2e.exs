@@ -21,7 +21,11 @@ defmodule AccrueHostSeedE2E do
 
   @password "hello world!"
   @webhook_secret "whsec_test_host"
-  @seeded_emails ["host-user@example.test", "host-admin@example.test", "billing-history@example.test"]
+  @seeded_emails [
+    "host-user@example.test",
+    "host-admin@example.test",
+    "billing-history@example.test"
+  ]
   @fixture_org_customer_emails ["admin-e2e-alpha-customer@example.test"]
   @fixture_processor_event_ids ["evt_host_browser_replay", "evt_host_browser_first_run"]
   @fixture_customer_processor_ids ["cus_host_browser_replay", "cus_host_premium_replay"]
@@ -63,7 +67,12 @@ defmodule AccrueHostSeedE2E do
 
     admin_denial_customer = insert_org_customer!(admin_org_alpha)
     admin_denial_payment_methods = insert_org_payment_methods!(admin_denial_customer)
-    insert_org_fixture_subscription!(admin_denial_customer, admin_denial_payment_methods.in_use_blocked)
+
+    insert_org_fixture_subscription!(
+      admin_denial_customer,
+      admin_denial_payment_methods.in_use_blocked
+    )
+
     fixture_invoice = insert_fixture_invoice!(admin_denial_customer)
     connect_account = insert_fixture_connect_account!(admin_org_alpha)
 
@@ -72,6 +81,7 @@ defmodule AccrueHostSeedE2E do
     insert_fixture_subscription_item!(subscription)
     webhook = insert_fixture_webhook!(customer, subscription)
     portal_customer = insert_portal_checkout_customer!(normal_user)
+    portal_payment_methods = insert_portal_payment_methods!(portal_customer)
     checkout_session = insert_portal_checkout_session!(portal_customer)
     seed_portal_discount_mappings!()
 
@@ -117,11 +127,16 @@ defmodule AccrueHostSeedE2E do
       admin_denial_customer_id: admin_denial_customer.id,
       admin_denial_payment_method_ids: %{
         in_use_blocked: admin_denial_payment_methods.in_use_blocked.id,
-        replacement_required_default: admin_denial_payment_methods.replacement_required_default.id,
+        replacement_required_default:
+          admin_denial_payment_methods.replacement_required_default.id,
         deletable: admin_denial_payment_methods.deletable.id
       },
       connect_account_id: connect_account.id,
       invoice_id: to_string(fixture_invoice.id),
+      portal_payment_method_ids: %{
+        default: portal_payment_methods.default.id,
+        backup: portal_payment_methods.backup.id
+      },
       portal_checkout_token: checkout_session.session_token,
       portal_checkout_url: "/billing/checkout/#{checkout_session.session_token}"
     }
@@ -157,7 +172,9 @@ defmodule AccrueHostSeedE2E do
       try do
         Repo.delete_all(
           from(event in Event,
-            where: event.subject_type == "Subscription" and event.subject_id in ^fake_browser_subscription_ids
+            where:
+              event.subject_type == "Subscription" and
+                event.subject_id in ^fake_browser_subscription_ids
           )
         )
       after
@@ -228,7 +245,8 @@ defmodule AccrueHostSeedE2E do
           where:
             event.actor_id in ^@fixture_processor_event_ids or
               event.caused_by_webhook_event_id in ^fixture_webhook_ids or
-              (event.subject_type == "Subscription" and event.subject_id in ^fixture_subscription_ids)
+              (event.subject_type == "Subscription" and
+                 event.subject_id in ^fixture_subscription_ids)
         )
       )
     after
@@ -320,7 +338,9 @@ defmodule AccrueHostSeedE2E do
       if User.valid_password?(user, @password) do
         user
       else
-        {:ok, {user, _expired_tokens}} = Accounts.update_user_password(user, %{password: @password})
+        {:ok, {user, _expired_tokens}} =
+          Accounts.update_user_password(user, %{password: @password})
+
         user
       end
 
@@ -479,6 +499,39 @@ defmodule AccrueHostSeedE2E do
       email: user.email
     })
     |> Repo.insert!()
+  end
+
+  defp insert_portal_payment_methods!(customer) do
+    default =
+      insert_payment_method!(customer, %{
+        processor_id: "pm_host_portal_default_4242",
+        fingerprint: "fp_host_portal_default_4242",
+        card_brand: "visa",
+        card_last4: "4242",
+        card_exp_month: 12,
+        card_exp_year: 2030,
+        exp_month: 12,
+        exp_year: 2030,
+        is_default: true
+      })
+
+    backup =
+      insert_payment_method!(customer, %{
+        processor_id: "pm_host_portal_backup_4444",
+        fingerprint: "fp_host_portal_backup_4444",
+        card_brand: "mastercard",
+        card_last4: "4444",
+        card_exp_month: 1,
+        card_exp_year: 2031,
+        exp_month: 1,
+        exp_year: 2031
+      })
+
+    customer
+    |> Customer.changeset(%{default_payment_method_id: default.id})
+    |> Repo.update!()
+
+    %{default: default, backup: backup}
   end
 
   defp insert_portal_checkout_session!(customer) do

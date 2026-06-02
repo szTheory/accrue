@@ -181,7 +181,7 @@ defmodule AccrueAdmin.Router do
     [
       mount_path: normalized_path,
       session_keys: session_keys,
-      on_mount: @default_on_mount ++ List.wrap(extra_hooks),
+      on_mount: List.wrap(extra_hooks) ++ @default_on_mount,
       allow_live_reload: allow_live_reload
     ]
   end

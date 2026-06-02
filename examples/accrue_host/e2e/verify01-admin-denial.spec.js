@@ -4,11 +4,11 @@ const { readFixture, reseedFixture, login } = require("./support/fixture.js");
 
 // Skipped: Playwright webServer currently serves 500 on this deep-link; host ExUnit
 // `AccrueHostWeb.OrgBillingAccessTest` locks the redirect + flash contract.
-test.skip("admin customer detail denies out-of-scope organization rows", async ({ page }) => {
+test.skip("admin customer detail denies out-of-scope organization rows", async ({ page, sandboxId }) => {
   reseedFixture();
   const fixture = readFixture();
 
-  await login(page, fixture, fixture.admin_email);
+  await login(page, fixture, fixture.admin_email, sandboxId);
 
   await page.goto("/admin", { waitUntil: "domcontentloaded" });
 

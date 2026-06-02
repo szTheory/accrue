@@ -26,7 +26,7 @@ function reseedFixture() {
  * @param {Record<string, unknown>} fixture
  * @param {string} email
  */
-async function login(page, fixture, email) {
+async function login(page, fixture, email, sandboxId = null) {
   await page.goto("/users/log-in");
 
   const csrfToken = await page.locator("meta[name='csrf-token']").getAttribute("content");
@@ -36,6 +36,7 @@ async function login(page, fixture, email) {
   }
 
   const response = await page.request.post("/users/log-in", {
+    headers: sandboxId ? { "x-sandbox-id": sandboxId } : undefined,
     form: {
       _csrf_token: csrfToken,
       "user[email]": email,

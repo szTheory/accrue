@@ -17,16 +17,40 @@ fi
 port="${ACCRUE_HOST_PORT:-4100}"
 log_file="$(mktemp)"
 
+describe_port_owner() {
+  lsof -nP -iTCP:"$1" -sTCP:LISTEN 2>/dev/null || true
+}
+
+ensure_port_available() {
+  local port="$1"
+
+  if describe_port_owner "$port" | grep -q .; then
+    echo "Port ${port} is already in use; set ACCRUE_HOST_PORT to another port or stop the listener." >&2
+    describe_port_owner "$port" >&2
+    exit 1
+  fi
+}
+
+stop_process_tree() {
+  local pid="$1"
+
+  pkill -TERM -P "$pid" >/dev/null 2>&1 || true
+  kill "$pid" >/dev/null 2>&1 || true
+  wait "$pid" >/dev/null 2>&1 || true
+}
+
 cleanup() {
   if [ -n "${server_pid:-}" ] && kill -0 "$server_pid" >/dev/null 2>&1; then
-    kill "$server_pid" >/dev/null 2>&1 || true
-    wait "$server_pid" >/dev/null 2>&1 || true
+    stop_process_tree "$server_pid"
   fi
 
   rm -f "$log_file"
 }
 
 trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+ensure_port_available "$port"
 
 MIX_ENV=dev mix ecto.create --quiet
 MIX_ENV=dev mix ecto.migrate --quiet

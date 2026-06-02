@@ -16,7 +16,7 @@ config :accrue_host, AccrueHost.Repo,
   hostname: System.get_env("PGHOST", "localhost"),
   database: "accrue_host_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+  pool_size: String.to_integer(System.get_env("ACCRUE_HOST_TEST_POOL_SIZE", "10"))
 
 config :accrue,
   env: :test,

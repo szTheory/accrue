@@ -2,11 +2,11 @@
 const { test, expect } = require("./support/test.js");
 const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
 
-test("tax-enabled subscribe surfaces tax location recovery copy", async ({ page }) => {
+test("tax-enabled subscribe surfaces tax location recovery copy", async ({ page, sandboxId }) => {
   reseedFixture();
   const fixture = readFixture();
 
-  await login(page, fixture, fixture.normal_email);
+  await login(page, fixture, fixture.normal_email, sandboxId);
   await page.getByRole("link", { name: "Go to billing" }).click();
   await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
   await waitForLiveView(page);

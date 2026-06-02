@@ -6,6 +6,13 @@ defmodule AccrueHostWeb.Router do
   import Accrue.Router
   import AccrueHostWeb.UserAuth
 
+  @live_acceptance_hooks (if Application.compile_env(:accrue_host, :sql_sandbox) do
+                            [AccrueHostWeb.LiveAcceptance]
+                          else
+                            []
+                          end)
+  @host_live_session_keys [:user_token, :active_organization_id]
+
   pipeline :browser do
     plug(:accepts, ["html"])
     plug(:fetch_session)
@@ -52,15 +59,19 @@ defmodule AccrueHostWeb.Router do
     # gated session, and see guides/entitlements.md for why missing or unloaded
     # billables fail closed instead of raising.
     live_session :entitled_reports,
-      on_mount: [
-        {AccrueHostWeb.UserAuth, :require_authenticated},
-        {Accrue.Live.Entitlements, {:require_feature, :advanced_reports}}
-      ] do
+      session: {__MODULE__, :__live_session__, [@host_live_session_keys]},
+      on_mount:
+        @live_acceptance_hooks ++
+          [
+            {AccrueHostWeb.UserAuth, :require_authenticated},
+            {Accrue.Live.Entitlements, {:require_feature, :advanced_reports}}
+          ] do
       live("/app/reports/advanced", AdvancedReportsLive, :index)
     end
 
     live_session :require_authenticated_user,
-      on_mount: [{AccrueHostWeb.UserAuth, :require_authenticated}] do
+      session: {__MODULE__, :__live_session__, [@host_live_session_keys]},
+      on_mount: @live_acceptance_hooks ++ [{AccrueHostWeb.UserAuth, :require_authenticated}] do
       live("/app/billing", SubscriptionLive, :show)
       live("/users/settings", UserLive.Settings, :edit)
       live("/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email)
@@ -73,7 +84,8 @@ defmodule AccrueHostWeb.Router do
     pipe_through([:browser])
 
     live_session :current_user,
-      on_mount: [{AccrueHostWeb.UserAuth, :mount_current_scope}] do
+      session: {__MODULE__, :__live_session__, [@host_live_session_keys]},
+      on_mount: @live_acceptance_hooks ++ [{AccrueHostWeb.UserAuth, :mount_current_scope}] do
       live("/users/register", UserLive.Registration, :new)
       live("/users/log-in", UserLive.Login, :new)
       live("/users/log-in/:token", UserLive.Confirmation, :new)
@@ -100,6 +112,25 @@ defmodule AccrueHostWeb.Router do
 
   # Protect these mounts with package auth hooks via accrue_admin/2 and accrue_portal/2.
   # Hosts with custom routers may also pipe through Accrue.Auth.require_admin_plug().
-  accrue_admin("/admin", session_keys: [:user_token], allow_live_reload: false)
-  accrue_portal("/billing", session_keys: [:user_token])
+  if Application.compile_env(:accrue_host, :sql_sandbox) do
+    accrue_admin("/admin",
+      session_keys: [:user_token],
+      on_mount: AccrueHostWeb.LiveAcceptance,
+      allow_live_reload: false
+    )
+
+    accrue_portal("/billing",
+      session_keys: [:user_token],
+      on_mount: AccrueHostWeb.LiveAcceptance
+    )
+  else
+    accrue_admin("/admin", session_keys: [:user_token], allow_live_reload: false)
+    accrue_portal("/billing", session_keys: [:user_token])
+  end
+
+  def __live_session__(conn, session_keys) when is_list(session_keys) do
+    Map.new(session_keys, fn key ->
+      {to_string(key), Plug.Conn.get_session(conn, key)}
+    end)
+  end
 end
