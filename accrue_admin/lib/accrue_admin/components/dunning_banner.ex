@@ -22,10 +22,7 @@ defmodule AccrueAdmin.Components.DunningBanner do
         <%= if @inner_block != [] do %>
           <%= render_slot(@inner_block) %>
         <% else %>
-          <div
-            class="accrue-default-dunning-banner ax-banner ax-banner-danger"
-            style="background-color: var(--ax-danger-surface, #fef2f2); color: var(--ax-danger-readable, #991b1b); padding: var(--ax-space-md, 1rem); text-align: center; border-bottom: 1px solid var(--ax-danger-border, #fecaca); font-weight: 500;"
-          >
+          <div class="accrue-default-dunning-banner ax-banner ax-banner-danger">
             Action Required: We were unable to process your recent payment. Please update your payment method to avoid service interruption.
           </div>
         <% end %>
