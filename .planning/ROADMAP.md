@@ -66,7 +66,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 Plans:
 **Wave 1**
 
-- [ ] 174-01-PLAN.md — Add type micro-tokens and transition-bundle tokens to theme.css (DSY-01 substrate)
+- [x] 174-01-PLAN.md — Add type micro-tokens and transition-bundle tokens to theme.css (DSY-01 substrate)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -210,7 +210,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 171. Shared Detail Components & Refactor | v1.50 | ✓ | Complete | 2026-06-02 |
 | 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
-| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 0/? | Not started | - |
+| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 1/4 | In Progress|  |
 | 175. B — Persona-Driven IA Spine | v1.51 | 0/? | Not started | - |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/? | Not started | - |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |

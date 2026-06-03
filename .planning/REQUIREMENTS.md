@@ -29,7 +29,7 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 
 ### Design-System Completeness (DSY) — Phase 174 (A)
 
-- [ ] **DSY-01**: Operator-facing admin CSS resolves every spacing, type, radius, shadow, line-height, letter-spacing, breakpoint, and transition value from a named `ax-*` token — no hardcoded px/em for these remain in `app.css` or components.
+- [x] **DSY-01**: Operator-facing admin CSS resolves every spacing, type, radius, shadow, line-height, letter-spacing, breakpoint, and transition value from a named `ax-*` token — no hardcoded px/em for these remain in `app.css` or components.
 - [ ] **DSY-02**: The dunning banner and invoice screens render brand colors via tokens with zero inline-hex fallbacks; no surface bypasses the token system.
 - [ ] **DSY-03**: A maintainer can open `/dev/components` and see a component-variants reference enumerating every button / badge / status / card variant with its token mapping.
 
@@ -73,7 +73,7 @@ Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DSY-01 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Pending |
+| DSY-01 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
 | DSY-02 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Pending |
 | DSY-03 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Pending |
 | IA-01 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
