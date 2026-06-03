@@ -29,22 +29,40 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
-## Current Milestone: v1.50 Admin UI Foundation
+## Current Milestone: v1.51 Admin UI — Depth Pass (IA + Systematic Polish)
 
-**Goal:** Systematically raise the design-system, information-architecture, and usability baseline of the already-shipped `accrue_admin` UI to a coherent, distinctly-branded, best-in-class standard — so reuse pays dividends and the operator experience is intuitive and a joy to use.
+**Goal:** Take the already-shipped `accrue_admin` UI from *consistent* (v1.50) to *considered* — re-map its information architecture from entity-shaped to job/persona-shaped (the "disjoint" fix), close the remaining design-token gaps, bring every under-iterated screen up to one rubric baseline, add restrained purposeful motion, make seed data express every state on a single click-through, and prove it with a screenshot-driven visual-QA loop.
 
-**Posture justification:** This is a **quality / polish + adopter-facing DX investment in an existing surface**, not a broad feature milestone — it adds no new billing primitives. It is justified under the post-v1.48 pause rule as adopter-facing DX (the admin UI is a primary evaluation and operation surface) and was explicitly requested. "No broad feature milestone is currently open" remains true.
+**Posture justification:** Same as v1.50 — a **quality / polish + adopter-facing DX investment in an existing surface**, not a broad feature milestone (no new billing primitives). Justified under the post-v1.48 pause rule as adopter-facing operator DX (the admin UI is a primary evaluation and operation surface) and was explicitly requested. "No broad feature milestone is currently open" remains true.
 
-**Target features (Phases 167-173):**
-- Tightened `ax-*` design tokens (radii, shadows, spacing, info/money color) + token-based motion; no token bypasses
-- Distinct brand typography (self-hosted display + body, tabular numerals) + heroicons sprite + favicon
-- uk.gov-style task-launcher home, job-aligned nav regroup, always-on `Cmd-K` search
-- Cross-screen threading (no dead ends), path-aware breadcrumbs, plain-language microcopy
-- Shared `<.detail_section>` components refactoring the 6 large detail screens; skeleton/empty states
-- Seed enrichment so every screen fully expresses itself (+ fix host seed dunning-event bug); rebuilt component kitchen
-- 10-dimension rubric audit; screenshot coverage (desktop + mobile + dark) + automated axe a11y
+**Target features (Phases 174-179, ordered A→F, deps A→B→C→{D,E}→F):**
+- **A** Design-system gap closure: line-height/letter-spacing/breakpoint tokens, transition bundles, reading-measure container; kill remaining token bypasses; component-variants reference
+- **B** Persona-driven IA spine: cordoned-hybrid nav (weighty Billing + recessed specialist zones w/ attention badges), verb launchers + visible Cmd-K, Customer-360 tab tiering, mandatory bidirectional threading (incl. Webhook→Event→entity), work-queue list defaults, redirects
+- **C** Systematic per-screen rubric uplift: enumerate every touchpoint, score vs the 10-dimension rubric, lift the under-iterated tail to baseline; mobile-first rewrite
+- **D** Restrained, purposeful motion/micro-interaction (Emil Kowalski principles; token-based; reduced-motion honored)
+- **E** Seed expressiveness: every screen/state/edge-case reachable on a single click-through
+- **F** Screenshot-driven LLM visual-QA loop + axe sign-off across {desktop,mobile}×{light,dark}
 
-Authoritative design source: `/Users/jon/.claude/plans/heres-what-we-were-majestic-spindle.md`.
+**Anti-churn guardrail:** every change cites a rubric dimension below bar, a failed persona-job, or a token bypass killed — never taste. Frozen screens (Home, primary nav, global search) touched only on a flagged regression. **No Tailwind migration** (double down on custom `ax-*` CSS + tokens). Demo host app, new billing primitives, and breaking changes are out of scope.
+
+Authoritative design source: `.planning/research/v1.51-admin-ui-depth-design.md` (builds on the v1.50 source `/Users/jon/.claude/plans/heres-what-we-were-majestic-spindle.md`).
+
+## Last shipped milestone
+
+### v1.50 — Admin UI Foundation (**built & merged 2026-06-02**; formal archive deferred to maintainer ritual)
+
+**Goal:** Systematically raise the design-system, information-architecture, and usability baseline of the already-shipped `accrue_admin` UI to a coherent, distinctly-branded standard.
+
+**Delivered (Phases 167-173, merged via PR #32):**
+- Tightened `ax-*` design tokens (radii, shadows, spacing, info/money color) + token-based motion.
+- Distinct brand typography (self-hosted Geist display + body, tabular numerals) + heroicons + favicon.
+- uk.gov-style task-launcher home, job-aligned nav regroup, always-on `Cmd-K` search.
+- Cross-screen threading, path-aware breadcrumbs, plain-language microcopy.
+- Shared `<.detail_section>` components across the 6 large detail screens; skeleton/empty states.
+- Seed enrichment (+ host seed dunning-event bug fix); rebuilt component kitchen.
+- 10-dimension rubric audit; screenshot coverage (desktop + mobile + dark) + automated axe a11y.
+
+**v1.51 builds directly on this** — it is the second, depth-oriented pass on the same surface.
 
 ## Last shipped milestone
 
@@ -492,7 +510,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ### Active
 
-(None. Start the next milestone with `$gsd-new-milestone`.)
+**v1.51 — Admin UI Depth Pass** (see `.planning/REQUIREMENTS.md`). Categories: DSY (design-system completeness), IA (persona-driven architecture), SCR (per-screen rubric uplift), MOT (motion), SEED (seed expressiveness), QA (visual-QA loop). Mapped across Phases 174–179.
 
 ### Validated v1.49 (archived in `.planning/milestones/v1.49-REQUIREMENTS.md`; milestone shipped & archived 2026-06-02)
 
@@ -557,4 +575,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-02 after v1.49 milestone completion*
+*Last updated: 2026-06-03 — opened milestone v1.51 (Admin UI Depth Pass); v1.50 demoted to last shipped.*

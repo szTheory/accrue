@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.50
-milestone_name: Admin UI Foundation
-status: complete
-last_updated: "2026-06-02T00:00:00.000Z"
-last_activity: 2026-06-02
+milestone: v1.51
+milestone_name: Admin UI Depth Pass
+status: planning
+last_updated: "2026-06-03T21:54:12.105Z"
+last_activity: 2026-06-03
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,12 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-06-02 after v1.49 milestone completion
 
 ## Current Position
 
-Phase: v1.50 Phases 167–173 all built & merged to `main` via PR #32 (2026-06-02)
+Phase: Not started (defining requirements)
 Plan: —
-Status: Built & merged; CI green on `main`. Formal milestone audit/archive deferred
-  to the user's milestone-assessment ritual (`prompts/MILESTONE-NEXT-STEP-ASSESSMENT.md`).
-Last activity: 2026-06-02 — v1.50 Admin UI Foundation merged; host-integration CI gate
-  restored to green (Phase-165 LiveView-sandbox E2E bridge + seed idempotency fix)
+Status: Defining requirements
+Last activity: 2026-06-03 — Milestone v1.51 started
 
 ## Post-v1.48 Pause Rule
 
