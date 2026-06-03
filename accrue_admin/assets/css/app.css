@@ -18,6 +18,16 @@
   src: url("geist-mono-vf.woff2") format("woff2");
 }
 
+/* === AX BREAKPOINT REGISTRY ===
+   CSS @media cannot read var(), so values live here as documented constants.
+   Every @media below carries an inline token comment so it is grep-able.
+   --ax-bp-content : 640px  (intrinsic content step, not a layout tier)
+   --ax-bp-md      : 768px
+   --ax-bp-lg      : 1024px
+   --ax-bp-sm ↓    : 599.98px  (max-width guard = bp-sm - 0.02px)
+   --ax-bp-lg ↓    : 1023.98px (max-width guard = bp-lg - 0.02px)
+   =========================== */
+
 html,
 body {
   margin: 0;
@@ -111,7 +121,7 @@ button {
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--ax-tracking-caps);
   text-transform: uppercase;
   color: var(--ax-muted);
 }
@@ -225,13 +235,13 @@ button {
 .ax-sidebar-name,
 .ax-heading {
   font-size: 1.25rem;
-  line-height: 1.2;
+  line-height: var(--ax-leading-tight);
 }
 
 .ax-display,
 .ax-kpi-value {
   font-size: 1.5rem;
-  line-height: 1.2;
+  line-height: var(--ax-leading-tight);
   min-width: 0;
   width: 100%;
   max-width: calc(100vw - 2.5rem);
@@ -257,7 +267,7 @@ button {
   color: var(--ax-muted);
   font-size: var(--ax-type-xs);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--ax-tracking-caps);
   text-transform: uppercase;
 }
 
@@ -267,11 +277,7 @@ button {
 .ax-icon-button,
 .ax-topbar-brand-chip {
   border: 1px solid var(--ax-border);
-  transition:
-    border-color var(--ax-theme-transition),
-    background var(--ax-theme-transition),
-    color var(--ax-theme-transition),
-    transform var(--ax-theme-transition);
+  transition: var(--ax-transition-base);
 }
 
 .ax-sidebar-link {
@@ -370,7 +376,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 .ax-icon-label {
   font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
 }
 
 /* Inline table chips (UX-01) — shell pairs with .ax-label for 14px/600 signal text */
@@ -386,16 +392,18 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-eyebrow {
   margin: 0 0 var(--ax-space-xs);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--ax-tracking-wide);
   text-transform: uppercase;
 }
 
 .ax-body {
   margin: 0;
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: var(--ax-leading-relaxed);
   overflow-wrap: anywhere;
 }
+
+.ax-measure { max-width: var(--ax-measure); }
 
 .ax-topbar {
   position: sticky;
@@ -580,7 +588,7 @@ a.ax-kpi-card--linked:focus-visible {
   border: 1px solid var(--ax-border);
   font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-filter-chip-cobalt {
@@ -844,7 +852,7 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-primary);
   font-family: var(--ax-font-mono);
   font-size: 0.875rem;
-  line-height: 1.5;
+  line-height: var(--ax-leading-relaxed);
 }
 
 .ax-timeline-meta {
@@ -893,7 +901,7 @@ a.ax-kpi-card--linked:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
   .ax-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -930,7 +938,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-breadcrumbs-current,
 .ax-breadcrumbs-separator {
   font-size: 0.875rem;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-breadcrumbs-link,
@@ -983,17 +991,13 @@ a.ax-kpi-card--linked:focus-visible {
   border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-button {
   min-height: 2.75rem;
   padding: 0.625rem 1rem;
-  transition:
-    border-color var(--ax-theme-transition),
-    background var(--ax-theme-transition),
-    color var(--ax-theme-transition),
-    transform var(--ax-theme-transition);
+  transition: var(--ax-transition-base);
 }
 
 .ax-button:hover,
@@ -1187,7 +1191,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   color: var(--ax-accent-readable);
   font-size: var(--ax-type-sm);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: var(--ax-leading-tight);
 }
 
 .ax-button-sm {
@@ -1243,7 +1247,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   gap: var(--ax-space-md);
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
   .ax-data-table-shell {
     display: block;
   }
@@ -1263,7 +1267,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 .ax-field-label {
   font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-field-control {
@@ -1292,7 +1296,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 .ax-dropdown-item-description {
   margin: 0;
   font-size: 0.875rem;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-field-help,
@@ -1360,7 +1364,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 .ax-dropdown-item-label {
   font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
 }
 
 .ax-dropdown-item-danger .ax-dropdown-item-label {
@@ -1391,7 +1395,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   color: var(--ax-subtle);
   font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--ax-leading-normal);
   white-space: nowrap;
 }
 
@@ -1443,6 +1447,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   color: var(--ax-primary);
   font-size: var(--ax-type-sm);
   font-weight: 700;
+  /* Phase D: asymmetric speed — collapse pending (colors use --ax-theme-transition; transform uses --ax-motion-fast) */
   transition:
     border-color var(--ax-theme-transition),
     background var(--ax-theme-transition),
@@ -1617,7 +1622,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-accent-contrast);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
   .ax-shell-content,
   .ax-topbar {
     padding-left: 1.5rem;
@@ -1634,7 +1639,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
   .ax-shell {
     grid-template-columns: 15rem minmax(0, 1fr);
   }
@@ -1652,7 +1657,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 }
 
-@media (max-width: 1023.98px) {
+@media (max-width: 1023.98px) { /* --ax-bp-lg ↓ */
   html.accrue-admin.ax-shell-nav-open .ax-sidebar {
     display: flex;
     flex-direction: column;
@@ -1782,7 +1787,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   margin-left: auto;
 }
 
-@media (max-width: 599.98px) {
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
   .ax-search-trigger {
     width: auto;
     max-width: none;
@@ -1918,7 +1923,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   white-space: nowrap;
 }
 
-@media (max-width: 599.98px) {
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
   .ax-attention-pill {
     display: none;
   }
@@ -1964,10 +1969,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   background: var(--ax-elevated);
   color: var(--ax-primary);
   text-decoration: none;
-  transition:
-    transform var(--ax-dur-2) var(--ax-ease-out),
-    box-shadow var(--ax-dur-2) var(--ax-ease-out),
-    border-color var(--ax-dur-2) var(--ax-ease-out);
+  transition: var(--ax-transition-base);
 }
 
 .ax-launcher:hover,
@@ -2023,7 +2025,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   gap: var(--ax-space-sm);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 640px) { /* --ax-bp-content ↑ */
   .ax-launchers {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2033,7 +2035,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
   .ax-launchers {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -2074,9 +2076,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   border-radius: var(--ax-radius-sm);
   color: var(--ax-primary);
   text-decoration: none;
-  transition:
-    background var(--ax-dur-1) var(--ax-ease-out),
-    border-color var(--ax-dur-1) var(--ax-ease-out);
+  transition: var(--ax-transition-colors);
 }
 
 .ax-related-item:hover,
@@ -2156,7 +2156,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   margin: 0;
   font-size: var(--ax-type-2xl);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--ax-tracking-tight);
 }
 
 .ax-summary-facts {
@@ -2218,7 +2218,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font-weight: 600;
   color: var(--ax-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--ax-tracking-wide);
 }
 
 .ax-field-value {
@@ -2228,7 +2228,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   overflow-wrap: anywhere;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 640px) { /* --ax-bp-content ↑ */
   .ax-field-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
