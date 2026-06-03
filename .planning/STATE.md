@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.51
 milestone_name: Admin UI Depth Pass
 status: planning
-last_updated: "2026-06-03T21:54:12.105Z"
+last_updated: "2026-06-03T22:30:00.000Z"
 last_activity: 2026-06-03
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-02 after v1.49 milestone completion
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** v1.50 built & merged — awaiting milestone audit/archive ritual
+**Current focus:** v1.51 Admin UI: Depth Pass — roadmap drafted (Phases 174–179); next: plan Phase 174 (A — Design-System Gap Closure)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 174 (A — Design-System Gap Closure & Token Completeness) — not started
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-03 — Milestone v1.51 started
+Status: Roadmap created; awaiting phase planning
+Last activity: 2026-06-03 — v1.51 roadmap created (6 phases, 174–179; 22/22 requirements mapped)
 
 ## Post-v1.48 Pause Rule
 
@@ -37,6 +37,19 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and shift-left automation, not broad new feature capabilities.
 
 ## Milestone Progress
+
+### v1.51 Phase Summary (planning 2026-06-03 — Admin UI: Depth Pass; deps A→B→C→{D,E}→F)
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 174 | A — Design-System Gap Closure & Token Completeness | DSY-01, DSY-02, DSY-03 | Not started |
+| 175 | B — Persona-Driven IA Spine | IA-01, IA-02, IA-03, IA-04, IA-05, IA-06, IA-07 | Not started |
+| 176 | C — Systematic Per-Screen Rubric Uplift | SCR-01, SCR-02, SCR-03, SCR-04 | Not started |
+| 177 | D — Motion & Micro-interaction Design | MOT-01, MOT-02, MOT-03 | Not started |
+| 178 | E — Seed Expressiveness & State Coverage | SEED-01, SEED-02 | Not started |
+| 179 | F — Screenshot-Driven Visual QA Loop & Sign-off | QA-01, QA-02, QA-03 | Not started |
+
+Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). Design source: `.planning/research/v1.51-admin-ui-depth-design.md`.
 
 ### v1.50 Phase Summary (built & merged 2026-06-02 via PR #32; audit/archive pending)
 

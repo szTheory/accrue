@@ -78,6 +78,35 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 - [ ] **QA-02**: An LLM-analysis step scores each screenshot against the 10-dimension rubric and emits structured findings (screen, dimension, score, defect, suggested fix).
 - [ ] **QA-03**: A final scorecard shows every dimension ≥2 across all four matrix cells with before/after evidence, and axe passes in both light and dark themes.
 
+## Traceability — v1.51 Admin UI: Depth Pass
+
+Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DSY-01 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Pending |
+| DSY-02 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Pending |
+| DSY-03 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Pending |
+| IA-01 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-02 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-03 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-04 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-05 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-06 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-07 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| SCR-01 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
+| SCR-02 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
+| SCR-03 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
+| SCR-04 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
+| MOT-01 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
+| MOT-02 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
+| MOT-03 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
+| SEED-01 | Phase 178 (E — Seed Expressiveness & State Coverage) | Pending |
+| SEED-02 | Phase 178 (E — Seed Expressiveness & State Coverage) | Pending |
+| QA-01 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
+| QA-02 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
+| QA-03 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
+
 ## Out of Scope
 
 Broad feature milestones remain closed by default unless reopened by a concrete adopter
