@@ -70,7 +70,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 174-02-PLAN.md — Migrate app.css literals→tokens + breakpoint registry + dunning bypass kill + guard needle + asset rebuild (DSY-01, DSY-02)
+- [x] 174-02-PLAN.md — Migrate app.css literals→tokens + breakpoint registry + dunning bypass kill + guard needle + asset rebuild (DSY-01, DSY-02)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -210,7 +210,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 171. Shared Detail Components & Refactor | v1.50 | ✓ | Complete | 2026-06-02 |
 | 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
-| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 1/4 | In Progress|  |
+| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 2/4 | In Progress|  |
 | 175. B — Persona-Driven IA Spine | v1.51 | 0/? | Not started | - |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/? | Not started | - |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
