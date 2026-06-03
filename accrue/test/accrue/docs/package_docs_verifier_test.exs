@@ -238,6 +238,35 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "auth_adapters.md"
   end
 
+  test "package docs verifier rejects unguarded breakpoint @media in app.css" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    original = File.read!(app_css_path)
+
+    drifted =
+      original <>
+        "\n@media (min-width: 900px) { .ax-drift { display: block; } }\n"
+
+    File.write!(app_css_path, drifted)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "app.css"
+    assert output =~ "--ax-bp-"
+  end
+
   defp copy_fixture!(relative_path, tmp_dir) do
     destination = Path.join(tmp_dir, relative_path)
     File.mkdir_p!(Path.dirname(destination))
@@ -247,6 +276,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
   defp seed_tmp_dir!(tmp_dir) do
     File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
     File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/assets/css"))
     File.mkdir_p!(Path.join(tmp_dir, "accrue_portal"))
     File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
     File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
@@ -271,6 +301,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue/guides/analytics.md", tmp_dir)
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
+    copy_fixture!("accrue_admin/assets/css/app.css", tmp_dir)
     copy_fixture!("accrue_portal/mix.exs", tmp_dir)
     copy_fixture!("accrue_portal/README.md", tmp_dir)
     copy_fixture!("examples/accrue_host/README.md", tmp_dir)
