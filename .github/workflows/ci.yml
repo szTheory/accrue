@@ -95,7 +95,7 @@ jobs:
         run: bash scripts/ci/verify_release_contract.sh
 
   release-gate:
-    name: Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})
+    name: Release gate (${{ matrix.compatibility }}; elixir=${{ matrix.elixir }} otp=${{ matrix.otp }} sigra=${{ matrix.sigra }} opentelemetry=${{ matrix.opentelemetry }})${{ matrix.support == 'advisory' && ' [advisory]' || '' }}
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
 
@@ -698,6 +698,11 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           GH_TOKEN: ${{ github.token }}
+          # Advisory release-gate cells (continue-on-error: matrix.support == 'advisory',
+          # name-tagged "[advisory]") are non-blocking by design, so their warning/failure
+          # annotations must not fail this release-facing sweep. Keep in sync with the
+          # release-gate matrix `support: 'advisory'` cells.
+          ANNOTATION_SWEEP_EXCLUDE: advisory
         run: >-
           bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
           release-gate phase18-tax-gate admin-drift-docs host-integration playwright-e2e

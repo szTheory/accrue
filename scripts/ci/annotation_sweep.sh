@@ -13,6 +13,8 @@
 #   - Requires one or more job-name selectors on the command line.
 #   - Requires GITHUB_REPOSITORY and GITHUB_RUN_ID.
 #   - Requires GH_TOKEN or GITHUB_TOKEN with read access to Actions/checks data.
+#   - Optional ANNOTATION_SWEEP_EXCLUDE: comma-separated job-name fragments to skip
+#     (e.g. "advisory"), so non-blocking advisory matrix cells never fail the sweep.
 #   - Exits 2 for missing explicit CI inputs, 1 for API/query/annotation failures.
 
 set -euo pipefail
@@ -133,6 +135,7 @@ fetch_paginated_array "${repo_path}/actions/runs/${GITHUB_RUN_ID}/jobs?filter=la
 matched_jobs="$tmp_dir/matched-jobs.ndjson"
 python3 - "$jobs_ndjson" "$matched_jobs" "$@" <<'PY'
 import json
+import os
 import re
 import sys
 
@@ -144,6 +147,16 @@ def normalize(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
 
 needles = [normalize(selector) for selector in selectors]
+
+# Advisory matrix cells (continue-on-error: matrix.support == 'advisory') are
+# non-blocking by design — their job names are tagged "[advisory]" in ci.yml.
+# ANNOTATION_SWEEP_EXCLUDE is a comma-separated list of name fragments to skip,
+# so an advisory cell's warning/failure annotations never block the release sweep.
+exclude_needles = [
+    normalize(fragment)
+    for fragment in os.environ.get("ANNOTATION_SWEEP_EXCLUDE", "").split(",")
+    if fragment.strip()
+]
 matched = []
 
 with open(jobs_path, "r", encoding="utf-8") as handle:
@@ -152,8 +165,11 @@ with open(jobs_path, "r", encoding="utf-8") as handle:
             continue
         job = json.loads(line)
         haystack = normalize(job.get("name", ""))
-        if any(needle and needle in haystack for needle in needles):
-            matched.append(job)
+        if not any(needle and needle in haystack for needle in needles):
+            continue
+        if any(ex and ex in haystack for ex in exclude_needles):
+            continue
+        matched.append(job)
 
 seen = set()
 with open(output_path, "w", encoding="utf-8") as handle:
