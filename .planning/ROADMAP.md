@@ -58,7 +58,13 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
   1. A maintainer can grep `app.css` + components and find no hardcoded px/em line-height, letter-spacing, breakpoint, or transition literals — every such value resolves from an `ax-*` token (including a reading-measure max-width container token and pre-composed transition bundles).
   2. The dunning banner and invoice screens render every brand color through tokens with zero inline-hex fallbacks and zero inline styles; no admin surface bypasses the token system.
   3. A maintainer opening `/dev/components` sees a component-variants reference enumerating every button / badge / status / card variant alongside its token mapping.
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 174-01-PLAN.md — Add type micro-tokens and transition-bundle tokens to theme.css (DSY-01 substrate)
+- [ ] 174-02-PLAN.md — Migrate app.css literals→tokens + breakpoint registry + dunning bypass kill + guard needle + asset rebuild (DSY-01, DSY-02)
+- [ ] 174-03-PLAN.md — ComponentRegistry data module + kitchen variant reference extension (DSY-03)
+- [ ] 174-04-PLAN.md — ComponentRegistryTest drift-prevention test + full suite gate (DSY-03)
 **UI hint**: yes
 
 ### Phase 175: B — Persona-Driven IA Spine
