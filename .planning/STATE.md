@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.50
 milestone_name: Admin UI Foundation
-status: planning
-last_updated: "2026-06-02T16:01:12.647Z"
+status: complete
+last_updated: "2026-06-02T00:00:00.000Z"
 last_activity: 2026-06-02
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 7
+  completed_phases: 7
+  total_plans: 7
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,16 @@ See: `.planning/PROJECT.md` (updated 2026-06-02 after v1.49 milestone completion
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Awaiting next milestone
+**Current focus:** v1.50 built & merged — awaiting milestone audit/archive ritual
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: v1.50 Phases 167–173 all built & merged to `main` via PR #32 (2026-06-02)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-02 — Milestone v1.50 started
+Status: Built & merged; CI green on `main`. Formal milestone audit/archive deferred
+  to the user's milestone-assessment ritual (`prompts/MILESTONE-NEXT-STEP-ASSESSMENT.md`).
+Last activity: 2026-06-02 — v1.50 Admin UI Foundation merged; host-integration CI gate
+  restored to green (Phase-165 LiveView-sandbox E2E bridge + seed idempotency fix)
 
 ## Post-v1.48 Pause Rule
 
@@ -37,6 +39,18 @@ After v1.48, broad feature milestones remain closed by default unless reopened b
 v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and shift-left automation, not broad new feature capabilities.
 
 ## Milestone Progress
+
+### v1.50 Phase Summary (built & merged 2026-06-02 via PR #32; audit/archive pending)
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 167 | Design Tokens & Motion Foundation | AUI-01 | Complete |
+| 168 | Typography & Icon System | AUI-02 | Complete |
+| 169 | Information Architecture — Home, Nav & Search | AUI-03 | Complete |
+| 170 | Cross-Screen Threading & Microcopy | AUI-04 | Complete |
+| 171 | Shared Detail Components & Screen Refactor | AUI-05 | Complete |
+| 172 | Seed Enrichment & Component Kitchen | AUI-06 | Complete |
+| 173 | Rubric Audit & Visual/A11y Coverage | AUI-07 | Complete |
 
 ### v1.49 Phase Summary
 

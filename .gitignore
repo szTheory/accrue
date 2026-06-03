@@ -39,3 +39,6 @@ hostlog.txt
 # The committed template lives at `accrue/.secrets.example`.
 .secrets
 accrue/.secrets
+
+# Internal brand working doc — local-only, not part of the published repo.
+prompts/accrue-brand-book.md

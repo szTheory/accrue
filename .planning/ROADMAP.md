@@ -5,7 +5,7 @@
 - ✅ **v1.47 ENT-10 Polish + Adopter-Proof Completeness** — Phases 154-158 (shipped 2026-05-31) — [archive](milestones/v1.47-ROADMAP.md)
 - ✅ **v1.48 Release Readiness + Stable Core Posture** — Phases 159-162 (shipped 2026-06-01) — [archive](milestones/v1.48-ROADMAP.md)
 - ✅ **v1.49 Realistic Demo App & Adoption Evidence** — Phases 163-166 (shipped 2026-06-02) — [archive](milestones/v1.49-ROADMAP.md)
-- 🔄 **v1.50 Admin UI Foundation** — Phases 167-173 (quality / adopter-facing DX investment in the shipped `accrue_admin` UI; not a broad feature milestone)
+- ✅ **v1.50 Admin UI Foundation** — Phases 167-173 (built & merged 2026-06-02 via PR #32; quality / adopter-facing DX investment in the shipped `accrue_admin` UI; milestone audit/archive pending)
 
 ## Planning Doctrine
 
@@ -26,7 +26,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 ## Phases
 
 <details open>
-<summary>🔄 v1.50 Admin UI Foundation (Phases 167-173) — IN PROGRESS</summary>
+<summary>✅ v1.50 Admin UI Foundation (Phases 167-173) — BUILT & MERGED 2026-06-02 (PR #32; audit/archive pending)</summary>
 
 ### Phase 167: Design Tokens & Motion Foundation
 **Goal:** Tighten the `ax-*` token system (radii, shadows, spacing rungs, real `--ax-info`, money-state aliases, named accent-mix steps, `--ax-type-3xl`) and split duration/easing motion tokens with tiered reduced-motion; kill the two token bypasses (`dunning_banner.ex` hardcoded hex, `invoice_live.ex` inline styles) and the dark-theme `!important` literals.
@@ -90,13 +90,13 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 164. Docker DX & Optimized Caching | v1.49 | 2/2 | Complete | 2026-06-01 |
 | 165. E2E Automation & Shift-Left CI | v1.49 | 4/4 | Complete | 2026-06-02 |
 | 166. Adoption DX Docs | v1.49 | 3/3 | Complete | 2026-06-02 |
-| 167. Design Tokens & Motion Foundation | v1.50 | 0/? | Pending | — |
-| 168. Typography & Icon System | v1.50 | 0/? | Pending | — |
-| 169. IA — Home, Nav & Search | v1.50 | 0/? | Pending | — |
-| 170. Cross-Screen Threading & Microcopy | v1.50 | 0/? | Pending | — |
-| 171. Shared Detail Components & Refactor | v1.50 | 0/? | Pending | — |
-| 172. Seed Enrichment & Component Kitchen | v1.50 | 0/? | Pending | — |
-| 173. Rubric Audit & Visual/A11y Coverage | v1.50 | 0/? | Pending | — |
+| 167. Design Tokens & Motion Foundation | v1.50 | ✓ | Complete | 2026-06-02 |
+| 168. Typography & Icon System | v1.50 | ✓ | Complete | 2026-06-02 |
+| 169. IA — Home, Nav & Search | v1.50 | ✓ | Complete | 2026-06-02 |
+| 170. Cross-Screen Threading & Microcopy | v1.50 | ✓ | Complete | 2026-06-02 |
+| 171. Shared Detail Components & Refactor | v1.50 | ✓ | Complete | 2026-06-02 |
+| 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
+| 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 
 ## Historical Backlog Anchors (not active scope)
 
