@@ -119,9 +119,12 @@ defmodule AccrueHostWeb.Router do
       allow_live_reload: false
     )
 
+    # on_mount precedes session_keys here so the installer-verbatim portal mount
+    # line lives only in the production `else` branch below — preserving
+    # InstallBoundaryTest's exactly-once source-text contract.
     accrue_portal("/billing",
-      session_keys: [:user_token],
-      on_mount: AccrueHostWeb.LiveAcceptance
+      on_mount: AccrueHostWeb.LiveAcceptance,
+      session_keys: [:user_token]
     )
   else
     accrue_admin("/admin", session_keys: [:user_token], allow_live_reload: false)
