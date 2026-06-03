@@ -15,6 +15,8 @@
 #   - Requires GH_TOKEN or GITHUB_TOKEN with read access to Actions/checks data.
 #   - Optional ANNOTATION_SWEEP_EXCLUDE: comma-separated job-name fragments to skip
 #     (e.g. "advisory"), so non-blocking advisory matrix cells never fail the sweep.
+#   - Optional ANNOTATION_SWEEP_IGNORE_MESSAGE: regex of annotation messages to skip
+#     (e.g. a non-actionable upstream-dependency compiler deprecation).
 #   - Exits 2 for missing explicit CI inputs, 1 for API/query/annotation failures.
 
 set -euo pipefail
@@ -207,10 +209,20 @@ while IFS= read -r job_json; do
 
   python3 - "$job_name" "$annotations_ndjson" "$failures_file" <<'PY'
 import json
+import os
+import re
 import sys
 
 job_name, annotations_path, failures_path = sys.argv[1:4]
 levels = {"warning", "failure", "error"}
+
+# ANNOTATION_SWEEP_IGNORE_MESSAGE: optional regex of annotation messages to skip.
+# Used for non-actionable upstream-dependency compiler warnings (e.g. an Oban
+# `first..last inside match is deprecated` deprecation) that Accrue cannot fix
+# and that its own `--warnings-as-errors` gates already enforce for first-party
+# code. Failure/error annotations from first-party code are unaffected.
+ignore_raw = os.environ.get("ANNOTATION_SWEEP_IGNORE_MESSAGE", "").strip()
+ignore_re = re.compile(ignore_raw) if ignore_raw else None
 rows = []
 
 with open(annotations_path, "r", encoding="utf-8") as handle:
@@ -223,6 +235,8 @@ with open(annotations_path, "r", encoding="utf-8") as handle:
             continue
         path = annotation.get("path") or "[no path]"
         message = " ".join(str(annotation.get("message", "")).split())
+        if ignore_re and ignore_re.search(message):
+            continue
         rows.append(f"{job_name}\t{path}\t{level}\t{message}")
 
 if rows:

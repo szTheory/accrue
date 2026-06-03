@@ -703,6 +703,11 @@ jobs:
           # annotations must not fail this release-facing sweep. Keep in sync with the
           # release-gate matrix `support: 'advisory'` cells.
           ANNOTATION_SWEEP_EXCLUDE: advisory
+          # Non-actionable upstream-dependency compiler deprecation (Oban emits
+          # `first..last inside match is deprecated` on Elixir 1.18+). Accrue cannot fix
+          # third-party source; first-party warnings are still enforced via the gates'
+          # own `--warnings-as-errors`. Drop this once Oban ships a fix and is bumped.
+          ANNOTATION_SWEEP_IGNORE_MESSAGE: 'first\.\.last inside match is deprecated'
         run: >-
           bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
           release-gate phase18-tax-gate admin-drift-docs host-integration playwright-e2e
