@@ -394,6 +394,10 @@ defmodule AccrueAdmin.Copy do
     do:
       "Billing records appear here when they match this view. If you expected rows, check filters or organization scope."
 
+  # Filtered-to-zero affordance (Phase 171): keep the screen's tailored empty copy,
+  # but offer a way back when a filter is what emptied the list.
+  def data_table_clear_filters_label, do: "Clear filters"
+
   def customers_index_empty_title, do: "No customers for this organization yet"
 
   def customers_index_empty_copy,
@@ -659,4 +663,59 @@ defmodule AccrueAdmin.Copy do
   def dashboard_timeline_webhooks_label, do: "Recent webhook processing rows"
 
   def dashboard_timeline_webhooks_empty, do: "No webhook rows recorded yet"
+
+  # --- Home start page (DashboardLive IA — Phase 169 / v1.50 AUI-03)
+  # Task-launcher home: attention rail → JTBD launchers → demoted KPIs → activity.
+
+  def home_intro_headline, do: "Billing operations"
+
+  def home_intro_copy,
+    do: "Start with what needs you, then jump straight to the task that resolves it."
+
+  def home_tasks_heading, do: "Jump to a task"
+
+  def home_attention_all_signals, do: "Review all signals"
+
+  def home_attention_empty_title, do: "You're all caught up"
+
+  def home_attention_empty_copy,
+    do: "No billing exceptions need attention right now. Pick up a task below."
+
+  def home_attention_action_review, do: "Review"
+
+  def home_attention_action_recover, do: "Recover"
+
+  def home_attention_action_investigate, do: "Investigate"
+
+  def home_attention_action_work, do: "Work queue"
+
+  def home_attention_webhooks_label, do: "dead-lettered — failed every retry"
+
+  def home_attention_past_due_label, do: "past due — at risk of churn"
+
+  def home_attention_meter_label, do: "failed to report — usage not billed"
+
+  def home_launcher_customers_title, do: "Find a customer"
+
+  def home_launcher_customers_copy,
+    do: "Search by name, email, or ID, then open their billing 360."
+
+  def home_launcher_invoices_title, do: "Work open invoices"
+
+  def home_launcher_invoices_copy, do: "Review, void, or chase open receivables."
+
+  def home_launcher_recovery_title, do: "Recover failed payments"
+
+  def home_launcher_recovery_copy, do: "Work the dunning funnel and at-risk subscriptions."
+
+  def home_launcher_developer_title, do: "Debug webhooks & events"
+
+  def home_launcher_developer_copy,
+    do: "Inspect payloads, replay dead-letters, and trace events."
+
+  def home_kpi_heading, do: "At a glance"
+
+  def home_activity_events_link, do: "Open event log"
+
+  def home_activity_webhooks_link, do: "Open webhooks"
 end

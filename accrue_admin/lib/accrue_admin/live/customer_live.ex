@@ -17,10 +17,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
+    Detail,
     FlashGroup,
     JsonViewer,
     KpiCard,
     MoneyFormatter,
+    RelatedResources,
     StatusBadge,
     Tabs,
     TaxOwnershipCard,
@@ -168,23 +170,24 @@ defmodule AccrueAdmin.Live.CustomerLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
-              %{
-                label: "Customers",
-                href: scoped_mount_path(@admin_mount_path, "/customers", @current_owner_scope)
-              },
-              %{label: customer_label(@customer)}
-            ]}
-          />
-          <p class="ax-eyebrow">Customer detail</p>
-          <h2 class="ax-display"><%= customer_label(@customer) %></h2>
-          <p class="ax-body ax-page-copy">
-            <%= @customer.processor_id %> · locale <%= @customer.preferred_locale || "--" %> · timezone <%= @customer.preferred_timezone || "--" %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope)},
+            %{
+              label: "Customers",
+              href: scoped_mount_path(@admin_mount_path, "/customers", @current_owner_scope)
+            },
+            %{label: customer_label(@customer)}
+          ]}
+        />
+
+        <Detail.summary_card eyebrow="Customer detail" title={customer_label(@customer)}>
+          <:facts>
+            <span><%= @customer.processor_id %></span>
+            <span>locale <%= @customer.preferred_locale || "--" %></span>
+            <span>timezone <%= @customer.preferred_timezone || "--" %></span>
+          </:facts>
+        </Detail.summary_card>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -223,12 +226,13 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
         <TaxOwnershipCard.tax_ownership_card row={TaxOwnershipRow.from_customer(@customer)} />
 
+        <RelatedResources.related_resources items={related_items(@customer, @admin_mount_path, @current_owner_scope)} />
+
         <Tabs.tabs tabs={tabs(@customer, @admin_mount_path, @tab_counts, @current_owner_scope)} active={@tab} />
 
         <%= case @tab do %>
           <% "subscriptions" -> %>
-            <section class="ax-card">
-              <h3 class="ax-heading">Subscriptions</h3>
+            <Detail.detail_section title="Subscriptions">
               <div :for={subscription <- subscriptions(@customer)} class="ax-list-row">
                 <a
                   href={scoped_mount_path(@admin_mount_path, "/subscriptions/" <> subscription.id, @current_owner_scope)}
@@ -239,11 +243,10 @@ defmodule AccrueAdmin.Live.CustomerLive do
                 <span class="ax-body"><%= predicate_summary(subscription) %></span>
               </div>
               <p :if={subscriptions(@customer) == []} class="ax-body"><%= Copy.customer_detail_no_subscriptions() %></p>
-            </section>
+            </Detail.detail_section>
 
           <% "invoices" -> %>
-            <section class="ax-card">
-              <h3 class="ax-heading">Invoices</h3>
+            <Detail.detail_section title="Invoices">
               <div :for={invoice <- invoices(@customer)} class="ax-list-row">
                 <a
                   href={ScopedPath.build(@admin_mount_path, "/invoices/#{invoice.id}", @current_owner_scope)}
@@ -254,25 +257,20 @@ defmodule AccrueAdmin.Live.CustomerLive do
                 <MoneyFormatter.money_formatter amount_minor={invoice.amount_remaining_minor || 0} currency={invoice.currency || "usd"} customer={@customer} />
               </div>
               <p :if={invoices(@customer) == []} class="ax-body"><%= Copy.customer_detail_no_invoices() %></p>
-            </section>
+            </Detail.detail_section>
 
           <% "charges" -> %>
-            <section class="ax-card">
-              <h3 class="ax-heading">Charges</h3>
+            <Detail.detail_section title="Charges">
               <div :for={charge <- charges(@customer)} class="ax-list-row">
                 <span class="ax-body"><%= charge.processor_id || charge.id %> · <%= charge.status %></span>
                 <MoneyFormatter.money_formatter amount_minor={charge.amount_cents || 0} currency={charge.currency || "usd"} customer={@customer} />
               </div>
               <p :if={charges(@customer) == []} class="ax-body">No charges projected yet.</p>
-            </section>
+            </Detail.detail_section>
 
           <% "payment_methods" -> %>
-            <section class="ax-card">
-              <header class="ax-page-header">
-                <div>
-                  <h3 class="ax-heading"><%= Copy.customer_payment_methods_section_heading() %></h3>
-                  <p class="ax-body"><%= Copy.customer_payment_methods_section_body() %></p>
-                </div>
+            <Detail.detail_section title={Copy.customer_payment_methods_section_heading()}>
+              <:actions>
                 <button
                   type="button"
                   class="ax-button ax-button-primary"
@@ -281,7 +279,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
                 >
                   <%= Copy.customer_payment_methods_sync_action() %>
                 </button>
-              </header>
+              </:actions>
+              <p class="ax-body"><%= Copy.customer_payment_methods_section_body() %></p>
               <div :for={payment_method <- @payment_methods} class="ax-list-row">
                 <div>
                   <p class="ax-body">
@@ -356,7 +355,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   </button>
                 </div>
               </section>
-            </section>
+            </Detail.detail_section>
 
           <% "entitlements" -> %>
             <%= case @entitlements_view do %>
@@ -373,9 +372,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                 <% grace_features = resolved.grace_features |> MapSet.to_list() |> Enum.sort() %>
                 <% expired_grace_plans = resolved.expired_grace_plans |> MapSet.to_list() |> Enum.sort() %>
                 <% any_grace? = grace_plans != [] or grace_features != [] or expired_grace_plans != [] %>
-                <section class="ax-card">
-                  <h3 class="ax-heading"><%= Copy.entitlements_section_title() %></h3>
-
+                <Detail.detail_section title={Copy.entitlements_section_title()}>
                   <div :if={active_plans != []} class="ax-stack-sm">
                     <p class="ax-label"><%= Copy.entitlements_active_plans_label() %></p>
                     <div :for={plan <- active_plans} class="ax-list-row">
@@ -417,10 +414,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
                   <p :if={active_plans == [] and features == []} class="ax-body">
                     <%= Copy.entitlements_empty_title() %> · <%= Copy.entitlements_empty_copy() %>
                   </p>
-                </section>
+                </Detail.detail_section>
 
-                <section class="ax-card">
-                  <h3 class="ax-heading"><%= Copy.entitlements_drift_section_title() %></h3>
+                <Detail.detail_section title={Copy.entitlements_drift_section_title()}>
                   <div :for={price_id <- unmapped} class="ax-list-row">
                     <div>
                       <StatusBadge.status_badge
@@ -432,7 +428,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
                     </div>
                   </div>
                   <p :if={unmapped == []} class="ax-body"><%= Copy.entitlements_no_drift_copy() %></p>
-                </section>
+                </Detail.detail_section>
 
                 <JsonViewer.json_viewer
                   id="customer-entitlements"
@@ -442,14 +438,13 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <% end %>
 
           <% "events" -> %>
-            <section class="ax-card">
-              <h3 class="ax-heading">Events</h3>
+            <Detail.detail_section title="Events">
               <Timeline.timeline
                 label="Customer events"
                 empty_label="No customer-scoped events yet"
                 items={timeline_items(@customer)}
               />
-            </section>
+            </Detail.detail_section>
 
           <% "metadata" -> %>
             <JsonViewer.json_viewer id="customer-metadata" label="Customer metadata" payload={metadata_payload(@customer)} />
@@ -470,6 +465,36 @@ defmodule AccrueAdmin.Live.CustomerLive do
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/customers"))
+  end
+
+  defp related_items(customer, mount_path, scope) do
+    [
+      %{
+        icon: :subscriptions,
+        label: "Subscriptions",
+        href:
+          ScopedPath.build(mount_path, "/subscriptions", scope, %{"customer_id" => customer.id})
+      },
+      %{
+        icon: :invoices,
+        label: "Invoices",
+        href: ScopedPath.build(mount_path, "/invoices", scope, %{"customer_id" => customer.id})
+      },
+      %{
+        icon: :payments,
+        label: "Charges",
+        href: ScopedPath.build(mount_path, "/charges", scope, %{"customer_id" => customer.id})
+      },
+      %{
+        icon: :events,
+        label: "Activity",
+        href:
+          ScopedPath.build(mount_path, "/events", scope, %{
+            "subject_type" => "Customer",
+            "subject_id" => customer.id
+          })
+      }
+    ]
   end
 
   defp tab_counts(customer) do

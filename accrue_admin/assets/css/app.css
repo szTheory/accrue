@@ -1,5 +1,23 @@
 @import "./theme.css";
 
+/* Self-hosted Geist variable faces (OFL). Relative url() resolves against the
+   served stylesheet at `<mount>/assets/css-<hash>`, i.e. `<mount>/assets/geist-*.woff2`,
+   which AccrueAdmin.Assets serves — mount-path independent, no host wiring. */
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("geist-sans-vf.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("geist-mono-vf.woff2") format("woff2");
+}
+
 html,
 body {
   margin: 0;
@@ -9,12 +27,33 @@ body {
 html.accrue-admin {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Tabular figures everywhere — this is a data tool; numbers must align across
+     tables, KPIs, deltas, money, and IDs. Geist + Geist Mono both ship tnum. */
+  font-variant-numeric: tabular-nums;
+  /* Solid root canvas so the theme background is deterministic (the body paints a
+     gradient on top). Without this the page has no solid background-color, which
+     breaks contrast tooling and risks a flash of the wrong base. */
+  background-color: var(--ax-base);
 }
 
+/* Inline icon primitive (AccrueAdmin.Components.Icon): inherits color via
+   currentColor, sized by token. `flex: none` keeps icons from squashing in rows. */
+.ax-icon {
+  width: var(--ax-icon-md);
+  height: var(--ax-icon-md);
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+.ax-icon-sm { width: var(--ax-icon-sm); height: var(--ax-icon-sm); }
+.ax-icon-md { width: var(--ax-icon-md); height: var(--ax-icon-md); }
+.ax-icon-lg { width: var(--ax-icon-lg); height: var(--ax-icon-lg); }
+
 body {
-  background:
+  background-color: var(--ax-base);
+  background-image:
     radial-gradient(circle at top left, color-mix(in srgb, var(--ax-accent) 10%, transparent), transparent 30%),
-    linear-gradient(180deg, var(--ax-base), color-mix(in srgb, var(--ax-base) 94%, var(--ax-sunken)));
+    linear-gradient(180deg, transparent, color-mix(in srgb, var(--ax-base) 94%, var(--ax-sunken)));
   color: var(--ax-primary);
   font-family: var(--ax-font-sans);
   transition: background var(--ax-theme-transition), color var(--ax-theme-transition);
@@ -163,9 +202,10 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  font-weight: 600;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--ax-radius-sm);
+  font-weight: 700;
 }
 
 .ax-sidebar-logo {
@@ -235,13 +275,30 @@ button {
 }
 
 .ax-sidebar-link {
-  display: grid;
-  gap: 0.125rem;
-  padding: 0.875rem 1rem;
-  border-radius: var(--ax-radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--ax-radius-sm);
+  border-color: transparent;
   background: transparent;
   color: var(--ax-primary);
   text-decoration: none;
+}
+
+.ax-sidebar-link-icon {
+  color: var(--ax-muted);
+  transition: color var(--ax-theme-transition);
+}
+
+.ax-sidebar-link-active .ax-sidebar-link-icon {
+  color: var(--ax-accent-readable);
+}
+
+.ax-sidebar-brand-sub {
+  margin: 0;
+  font-size: var(--ax-type-xs);
+  color: var(--ax-muted);
 }
 
 .ax-sidebar-link:visited {
@@ -350,7 +407,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   padding: 1rem 1.25rem;
   min-height: 3.5rem;
   border-bottom: 1px solid var(--ax-border);
-  background: color-mix(in srgb, var(--ax-base) 88%, transparent);
+  background: var(--ax-base);
   backdrop-filter: blur(18px);
   box-sizing: border-box;
 }
@@ -455,7 +512,7 @@ html.accrue-admin[data-theme="dark"] .ax-topbar-brand-name {
 .ax-timeline-card,
 .ax-kpi-card {
   border: 1px solid var(--ax-border);
-  background: color-mix(in srgb, var(--ax-elevated) 96%, transparent);
+  background: var(--ax-elevated);
 }
 
 .ax-filter-chip-bar,
@@ -952,7 +1009,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-button-primary {
-  background: var(--ax-accent);
+  background: var(--ax-accent-strong);
   color: var(--ax-accent-contrast);
 }
 
@@ -1315,6 +1372,9 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   grid-auto-columns: max-content;
   overflow-x: auto;
   padding-bottom: 0.25rem;
+  /* Solid surface so the (scroll-container) tab bar has a deterministic background
+     for contrast — inactive tabs are muted text and need a known backdrop. */
+  background: var(--ax-elevated);
 }
 
 .ax-tab,
@@ -1327,7 +1387,8 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 .ax-tab {
   padding: 0.75rem 1rem;
   border-bottom: 2px solid transparent;
-  color: var(--ax-muted);
+  background: var(--ax-elevated);
+  color: var(--ax-subtle);
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.4;
@@ -1446,7 +1507,8 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   border-bottom: 1px solid var(--ax-border);
 }
 
-.ax-icon {
+/* .ax-icon color inherits currentColor (matches its context); set per-context below. */
+.ax-command-palette-search-icon {
   color: var(--ax-muted);
 }
 
@@ -1653,4 +1715,549 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-at-risk-grid tbody tr:hover td {
   background: color-mix(in srgb, var(--ax-sunken) 50%, var(--ax-elevated));
+}
+
+/* Phase 167 (v1.50): layout utilities replacing inline styles (invoice_live.ex) +
+   token-based banner classes (dunning_banner.ex), killing the last token bypasses. */
+.ax-items-end {
+  align-items: flex-end;
+}
+
+.ax-stack-row {
+  flex-direction: row;
+}
+
+.ax-col-span-full {
+  grid-column: 1 / -1;
+}
+
+.ax-mt-md {
+  margin-top: var(--ax-space-md);
+}
+
+.ax-banner {
+  padding: var(--ax-space-md);
+  text-align: center;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+}
+
+.ax-banner-danger {
+  background-color: var(--ax-danger-surface);
+  color: var(--ax-danger-readable);
+  border-bottom-color: var(--ax-danger-border);
+}
+
+/* ============================================================================
+   Phase 169 (v1.50 AUI-03) — IA: home start page, nav icons, elevated search
+   ========================================================================== */
+
+/* Topbar search rendered as a search-input affordance (not a pill button). */
+.ax-search-trigger {
+  justify-content: flex-start;
+  width: 16rem;
+  max-width: 16rem;
+  min-width: 0;
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-base);
+  font-weight: 500;
+}
+
+.ax-search-trigger-icon {
+  color: var(--ax-muted);
+}
+
+.ax-search-trigger-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  color: var(--ax-muted);
+  font-weight: 500;
+}
+
+.ax-search-trigger .ax-kbd {
+  margin-left: auto;
+}
+
+@media (max-width: 599.98px) {
+  .ax-search-trigger {
+    width: auto;
+    max-width: none;
+  }
+
+  .ax-search-trigger-text {
+    display: none;
+  }
+}
+
+/* Home page vertical rhythm + section headers */
+.ax-home {
+  gap: var(--ax-space-xl);
+}
+
+.ax-home-section {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+}
+
+/* Quiet inline link (label + trailing arrow) */
+.ax-link-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  color: var(--ax-accent-readable);
+  font-size: var(--ax-type-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ax-link-quiet:hover,
+.ax-link-quiet:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  outline: none;
+}
+
+/* Attention rail — exception rows */
+.ax-attention {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ax-attention-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-md);
+  padding: var(--ax-space-md) var(--ax-space-lg);
+  border-bottom: 1px solid var(--ax-border);
+  color: var(--ax-primary);
+  text-decoration: none;
+  transition: background var(--ax-dur-1) var(--ax-ease-out);
+}
+
+.ax-attention-row:last-child {
+  border-bottom: none;
+}
+
+.ax-attention-row:hover,
+.ax-attention-row:focus-visible {
+  background: var(--ax-sunken);
+  outline: none;
+}
+
+.ax-attention-dot {
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-radius: 999px;
+  flex: none;
+}
+
+.ax-attention-dot-danger {
+  background: var(--ax-danger);
+}
+
+.ax-attention-dot-warning {
+  background: var(--ax-warning);
+}
+
+.ax-attention-dot-info {
+  background: var(--ax-info);
+}
+
+.ax-attention-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-attention-text strong {
+  font-weight: 600;
+}
+
+.ax-attention-pill {
+  flex: none;
+  padding: 0.05rem var(--ax-space-sm);
+  border-radius: 999px;
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+}
+
+.ax-attention-pill-danger {
+  background: color-mix(in srgb, var(--ax-danger) 14%, var(--ax-elevated));
+  color: var(--ax-danger-readable);
+}
+
+.ax-attention-pill-warning {
+  background: color-mix(in srgb, var(--ax-warning) 18%, var(--ax-elevated));
+  color: var(--ax-warning-readable);
+}
+
+.ax-attention-pill-info {
+  background: color-mix(in srgb, var(--ax-info) 16%, var(--ax-elevated));
+  color: var(--ax-info-readable);
+}
+
+.ax-attention-action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  color: var(--ax-accent-readable);
+  font-weight: 600;
+  font-size: var(--ax-type-sm);
+  white-space: nowrap;
+}
+
+@media (max-width: 599.98px) {
+  .ax-attention-pill {
+    display: none;
+  }
+}
+
+/* Empty state (home attention zero; reused by slice D) */
+.ax-empty {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: var(--ax-space-xs);
+  padding: var(--ax-space-2xl) var(--ax-space-lg);
+}
+
+.ax-empty-icon {
+  color: var(--ax-success);
+  margin-bottom: var(--ax-space-xs);
+}
+
+.ax-empty-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.ax-empty-copy {
+  max-width: 28rem;
+}
+
+/* Task launchers — JTBD doors */
+.ax-launchers {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ax-space-md);
+}
+
+.ax-launcher {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--ax-space-xs);
+  padding: var(--ax-space-lg);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  text-decoration: none;
+  transition:
+    transform var(--ax-dur-2) var(--ax-ease-out),
+    box-shadow var(--ax-dur-2) var(--ax-ease-out),
+    border-color var(--ax-dur-2) var(--ax-ease-out);
+}
+
+.ax-launcher:hover,
+.ax-launcher:focus-visible {
+  transform: translateY(calc(-1 * var(--ax-rise-sm)));
+  box-shadow: var(--ax-shadow-md);
+  border-color: var(--ax-accent-border);
+  outline: none;
+}
+
+.ax-launcher-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: var(--ax-space-xs);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-accent-subtle);
+  color: var(--ax-accent-readable);
+}
+
+.ax-launcher-title {
+  font-weight: 600;
+}
+
+.ax-launcher-copy {
+  color: var(--ax-muted);
+  font-size: var(--ax-type-sm);
+}
+
+.ax-launcher-meta {
+  margin-top: var(--ax-space-sm);
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+  color: var(--ax-muted);
+}
+
+.ax-launcher-meta-warn {
+  color: var(--ax-warning-readable);
+}
+
+/* Demoted KPI strip on home: explicit responsive 4-up */
+.ax-kpi-grid-4 {
+  grid-template-columns: 1fr;
+  gap: var(--ax-space-md);
+}
+
+/* Command-palette items become icon + label rows */
+.ax-command-palette-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+}
+
+@media (min-width: 640px) {
+  .ax-launchers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ax-kpi-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .ax-launchers {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ax-kpi-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================================
+   Phase 170 (v1.50 AUI-04) — cross-screen threading: related-resources card
+   ========================================================================== */
+.ax-related {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-related-title {
+  margin: 0;
+  font-size: var(--ax-type-md);
+  font-weight: 600;
+}
+
+.ax-related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--ax-space-2xs);
+}
+
+.ax-related-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  padding: var(--ax-space-sm);
+  border: 1px solid transparent;
+  border-radius: var(--ax-radius-sm);
+  color: var(--ax-primary);
+  text-decoration: none;
+  transition:
+    background var(--ax-dur-1) var(--ax-ease-out),
+    border-color var(--ax-dur-1) var(--ax-ease-out);
+}
+
+.ax-related-item:hover,
+.ax-related-item:focus-visible {
+  background: var(--ax-sunken);
+  border-color: var(--ax-border);
+  outline: none;
+}
+
+.ax-related-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  border-radius: var(--ax-radius-2xs);
+  background: var(--ax-accent-subtle);
+  color: var(--ax-accent-readable);
+}
+
+.ax-related-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.ax-related-label {
+  font-weight: 600;
+  font-size: var(--ax-type-sm);
+}
+
+.ax-related-value {
+  font-size: var(--ax-type-xs);
+  color: var(--ax-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-related-chevron {
+  color: var(--ax-muted);
+  flex: none;
+}
+
+/* ============================================================================
+   Phase 171 (v1.50 AUI-05) — shared detail components + empty/loading primitives
+   ========================================================================== */
+.ax-empty-icon-muted {
+  color: var(--ax-muted);
+}
+
+/* Detail summary header */
+.ax-summary-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ax-space-lg);
+  flex-wrap: wrap;
+}
+
+.ax-summary-main {
+  display: grid;
+  gap: var(--ax-space-sm);
+  min-width: 0;
+}
+
+.ax-summary-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-md);
+  flex-wrap: wrap;
+}
+
+.ax-summary-title {
+  margin: 0;
+  font-size: var(--ax-type-2xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.ax-summary-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-space-sm) var(--ax-space-lg);
+  color: var(--ax-muted);
+  font-size: var(--ax-type-sm);
+}
+
+.ax-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  flex-wrap: wrap;
+}
+
+/* Detail section */
+.ax-detail-section {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-detail-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+}
+
+.ax-detail-section-title {
+  margin: 0;
+  font-size: var(--ax-type-md);
+  font-weight: 600;
+}
+
+.ax-detail-section-actions {
+  display: flex;
+  gap: var(--ax-space-sm);
+}
+
+/* Label -> value field list */
+.ax-field-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ax-space-md);
+  margin: 0;
+}
+
+.ax-field {
+  display: grid;
+  gap: var(--ax-space-2xs);
+  min-width: 0;
+}
+
+.ax-field-label {
+  margin: 0;
+  font-size: var(--ax-type-xs);
+  font-weight: 600;
+  color: var(--ax-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ax-field-value {
+  margin: 0;
+  font-size: var(--ax-type-sm);
+  color: var(--ax-primary);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .ax-field-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Skeleton loading primitive (reduced-motion: static, no shimmer) */
+.ax-skeleton {
+  display: block;
+  height: 0.875rem;
+  border-radius: var(--ax-radius-2xs);
+  background:
+    linear-gradient(
+      90deg,
+      var(--ax-sunken) 25%,
+      color-mix(in srgb, var(--ax-sunken) 60%, var(--ax-elevated)) 50%,
+      var(--ax-sunken) 75%
+    );
+  background-size: 200% 100%;
+  animation: ax-skeleton-shimmer 1.4s var(--ax-ease-inout) infinite;
+}
+
+@keyframes ax-skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-skeleton {
+    animation: none;
+    background: var(--ax-sunken);
+  }
 }

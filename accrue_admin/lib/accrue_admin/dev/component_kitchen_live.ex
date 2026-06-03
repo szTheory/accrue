@@ -8,8 +8,11 @@ if Mix.env() != :prod do
       AppShell,
       Breadcrumbs,
       Button,
+      Detail,
       FlashGroup,
+      Icon,
       KpiCard,
+      RelatedResources,
       StatusBadge,
       Tabs
     }
@@ -96,6 +99,55 @@ if Mix.env() != :prod do
               <StatusBadge.status_badge status={:paid} />
               <StatusBadge.status_badge status={:past_due} />
               <StatusBadge.status_badge status={:failed} />
+            </div>
+          </section>
+
+          <%!-- Icon gallery (every glyph in the inline icon set) --%>
+          <section :if={@available?} class="ax-card ax-dev-stack">
+            <p class="ax-label">Icons (AccrueAdmin.Components.Icon)</p>
+            <div class="ax-dev-grid">
+              <span :for={name <- Icon.names()} title={to_string(name)}>
+                <Icon.icon name={name} size="md" />
+              </span>
+            </div>
+          </section>
+
+          <%!-- Detail skeleton: summary card + section + field list --%>
+          <section :if={@available?} class="ax-dev-stack">
+            <Detail.summary_card eyebrow="Component kitchen" title="sub_demo_00042">
+              <:status><StatusBadge.status_badge status={:active} /></:status>
+              <:facts>
+                <span>$42.00 / month</span>
+                <span>Acme Corp</span>
+                <span>Started Jan 1, 2026</span>
+              </:facts>
+              <:actions>
+                <Button.button variant="secondary" type="button">Manage</Button.button>
+              </:actions>
+            </Detail.summary_card>
+
+            <Detail.detail_section title="Key fields">
+              <Detail.detail_field_list fields={[
+                %{label: "Status", value: "Active"},
+                %{label: "Amount", value: "$42.00"},
+                %{label: "Customer", value: "Acme Corp"},
+                %{label: "Next invoice", value: "Feb 1, 2026"}
+              ]} />
+            </Detail.detail_section>
+          </section>
+
+          <%!-- Related-resources card + empty state --%>
+          <section :if={@available?} class="ax-dev-stack">
+            <RelatedResources.related_resources items={[
+              %{icon: :users, label: "Customer", value: "Acme Corp", href: @admin_mount_path <> "/customers"},
+              %{icon: :invoices, label: "Invoices", value: "3 open", href: @admin_mount_path <> "/invoices"},
+              %{icon: :payments, label: "Charges", href: @admin_mount_path <> "/charges"}
+            ]} />
+
+            <div class="ax-card ax-empty">
+              <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
+              <p class="ax-empty-title">No rows in this list yet</p>
+              <p class="ax-body ax-empty-copy">Empty-state pattern: state glyph, headline, one line of context.</p>
             </div>
           </section>
         </section>

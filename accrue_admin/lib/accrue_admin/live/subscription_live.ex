@@ -12,6 +12,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   alias AccrueAdmin.Components.{
     AppShell,
     Breadcrumbs,
+    Detail,
     FlashGroup,
     JsonViewer,
     KpiCard,
@@ -124,33 +125,35 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
         phx-window-keydown="step_up_escape"
         phx-key="escape"
       >
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{
-                label: Copy.dashboard_breadcrumb_home(),
-                href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
-              },
-              %{
-                label: Copy.subscription_breadcrumb_subscriptions(),
-                href: ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)
-              },
-              %{
-                label: customer_label(@customer),
-                href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
-              },
-              %{label: @subscription.processor_id || @subscription.id}
-            ]}
-          />
-          <p class="ax-eyebrow"><%= Copy.subscription_detail_eyebrow() %></p>
-          <h2 class="ax-display"><%= @subscription.processor_id || @subscription.id %></h2>
-          <p class="ax-body ax-page-copy">
-            <%= @customer.name || @customer.email || @customer.id %> · period ends <%= format_datetime(@subscription.current_period_end) %>
-          </p>
-          <p class="ax-body ax-page-copy">
-            <%= lifecycle_operator_summary(@subscription) %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{
+              label: Copy.dashboard_breadcrumb_home(),
+              href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
+            },
+            %{
+              label: Copy.subscription_breadcrumb_subscriptions(),
+              href: ScopedPath.build(@admin_mount_path, "/subscriptions", @current_owner_scope)
+            },
+            %{
+              label: customer_label(@customer),
+              href: ScopedPath.build(@admin_mount_path, "/customers/#{@customer.id}", @current_owner_scope)
+            },
+            %{label: @subscription.processor_id || @subscription.id}
+          ]}
+        />
+
+        <Detail.summary_card
+          eyebrow={Copy.subscription_detail_eyebrow()}
+          title={@subscription.processor_id || @subscription.id}
+        >
+          <:status><StatusBadge.status_badge status={@subscription.status} /></:status>
+          <:facts>
+            <span><%= @customer.name || @customer.email || @customer.id %></span>
+            <span>period ends <%= format_datetime(@subscription.current_period_end) %></span>
+            <span><%= lifecycle_operator_summary(@subscription) %></span>
+          </:facts>
+        </Detail.summary_card>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -483,18 +486,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
             </section>
           </article>
 
-          <article class="ax-card">
-            <header class="ax-page-header">
-              <p class="ax-eyebrow">Ledger timeline</p>
-              <h3 class="ax-heading">Subscription events</h3>
-            </header>
-
+          <Detail.detail_section title="Subscription events">
             <Timeline.timeline
               label="Subscription events"
               empty_label="No subscription events yet"
               items={timeline_items(@timeline_events)}
             />
-          </article>
+          </Detail.detail_section>
         </section>
 
         <JsonViewer.json_viewer id="subscription-data" label="Subscription payload" payload={subscription_payload(@subscription)} />

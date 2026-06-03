@@ -29,6 +29,23 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
+## Current Milestone: v1.50 Admin UI Foundation
+
+**Goal:** Systematically raise the design-system, information-architecture, and usability baseline of the already-shipped `accrue_admin` UI to a coherent, distinctly-branded, best-in-class standard — so reuse pays dividends and the operator experience is intuitive and a joy to use.
+
+**Posture justification:** This is a **quality / polish + adopter-facing DX investment in an existing surface**, not a broad feature milestone — it adds no new billing primitives. It is justified under the post-v1.48 pause rule as adopter-facing DX (the admin UI is a primary evaluation and operation surface) and was explicitly requested. "No broad feature milestone is currently open" remains true.
+
+**Target features (Phases 167-173):**
+- Tightened `ax-*` design tokens (radii, shadows, spacing, info/money color) + token-based motion; no token bypasses
+- Distinct brand typography (self-hosted display + body, tabular numerals) + heroicons sprite + favicon
+- uk.gov-style task-launcher home, job-aligned nav regroup, always-on `Cmd-K` search
+- Cross-screen threading (no dead ends), path-aware breadcrumbs, plain-language microcopy
+- Shared `<.detail_section>` components refactoring the 6 large detail screens; skeleton/empty states
+- Seed enrichment so every screen fully expresses itself (+ fix host seed dunning-event bug); rebuilt component kitchen
+- 10-dimension rubric audit; screenshot coverage (desktop + mobile + dark) + automated axe a11y
+
+Authoritative design source: `/Users/jon/.claude/plans/heres-what-we-were-majestic-spindle.md`.
+
 ## Last shipped milestone
 
 ### v1.49 — Realistic Demo App & Adoption Evidence (**archived 2026-06-02**)

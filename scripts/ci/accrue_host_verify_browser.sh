@@ -20,10 +20,31 @@ fixture_file="$(mktemp)"
 browser_log_file="${ACCRUE_HOST_BROWSER_LOG:-$(mktemp)}"
 browser_failed=0
 
+describe_port_owner() {
+  lsof -nP -iTCP:"$1" -sTCP:LISTEN 2>/dev/null || true
+}
+
+ensure_port_available() {
+  local port="$1"
+
+  if describe_port_owner "$port" | grep -q .; then
+    echo "Port ${port} is already in use; set ACCRUE_HOST_BROWSER_PORT to another port or stop the listener." >&2
+    describe_port_owner "$port" >&2
+    exit 1
+  fi
+}
+
+stop_process_tree() {
+  local pid="$1"
+
+  pkill -TERM -P "$pid" >/dev/null 2>&1 || true
+  kill "$pid" >/dev/null 2>&1 || true
+  wait "$pid" >/dev/null 2>&1 || true
+}
+
 cleanup() {
   if [ -n "${browser_server_pid:-}" ] && kill -0 "$browser_server_pid" >/dev/null 2>&1; then
-    kill "$browser_server_pid" >/dev/null 2>&1 || true
-    wait "$browser_server_pid" >/dev/null 2>&1 || true
+    stop_process_tree "$browser_server_pid"
   fi
 
   rm -f "$fixture_file"
@@ -34,6 +55,9 @@ cleanup() {
 }
 
 trap cleanup EXIT
+trap 'browser_failed=1; exit 130' INT TERM
+
+ensure_port_available "$browser_port"
 
 MIX_ENV=test mix ecto.drop --quiet || true
 MIX_ENV=test mix ecto.create --quiet

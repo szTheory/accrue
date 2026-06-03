@@ -46,6 +46,11 @@ defmodule AccrueAdmin.Router do
         get("/assets/brand-#{AccrueAdmin.Assets.brand_hash()}", AccrueAdmin.Assets, :brand)
         get("/assets/css-#{AccrueAdmin.Assets.css_hash()}", AccrueAdmin.Assets, :css)
         get("/assets/js-#{AccrueAdmin.Assets.js_hash()}", AccrueAdmin.Assets, :js)
+        # Self-hosted Geist variable faces. Fixed filenames (content is stable) so the
+        # admin stylesheet can reference them with a relative `url()` that resolves to
+        # `<mount>/assets/geist-*.woff2` under any host mount path.
+        get("/assets/geist-sans-vf.woff2", AccrueAdmin.Assets, :font_sans)
+        get("/assets/geist-mono-vf.woff2", AccrueAdmin.Assets, :font_mono)
 
         pipe_through(:accrue_admin_browser)
 
@@ -176,7 +181,7 @@ defmodule AccrueAdmin.Router do
     [
       mount_path: normalized_path,
       session_keys: session_keys,
-      on_mount: @default_on_mount ++ List.wrap(extra_hooks),
+      on_mount: List.wrap(extra_hooks) ++ @default_on_mount,
       allow_live_reload: allow_live_reload
     ]
   end

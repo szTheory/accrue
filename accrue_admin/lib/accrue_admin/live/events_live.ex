@@ -10,6 +10,7 @@ defmodule AccrueAdmin.Live.EventsLive do
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Events
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(_params, session, socket) do
@@ -91,14 +92,20 @@ defmodule AccrueAdmin.Live.EventsLive do
           filter_submit_label={AccrueAdmin.Copy.billing_events_apply_filters()}
           columns={[
             %{id: :type, label: AccrueAdmin.Copy.billing_events_table_column_event()},
-            %{label: AccrueAdmin.Copy.billing_events_table_column_subject(), render: &subject_summary/1},
+            %{
+              label: AccrueAdmin.Copy.billing_events_table_column_subject(),
+              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
+            },
             %{label: AccrueAdmin.Copy.billing_events_table_column_actor(), render: &actor_summary/1},
             %{label: AccrueAdmin.Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
             %{label: AccrueAdmin.Copy.billing_events_table_column_when(), render: &when_summary/1}
           ]}
           card_title={&card_title/1}
           card_fields={[
-            %{label: AccrueAdmin.Copy.billing_events_table_column_subject(), render: &subject_summary/1},
+            %{
+              label: AccrueAdmin.Copy.billing_events_table_column_subject(),
+              render: fn row -> subject_cell(row, @admin_mount_path, @current_owner_scope) end
+            },
             %{label: AccrueAdmin.Copy.billing_events_table_column_actor(), render: &actor_summary/1},
             %{label: AccrueAdmin.Copy.billing_events_table_column_webhook_source(), render: &webhook_source_summary/1},
             %{label: AccrueAdmin.Copy.billing_events_table_column_when(), render: &when_summary/1}
@@ -220,7 +227,35 @@ defmodule AccrueAdmin.Live.EventsLive do
     )
   end
 
-  defp subject_summary(row), do: "#{row.subject_type} #{row.subject_id}"
+  defp subject_cell(row, mount_path, owner_scope) do
+    label = "#{row.subject_type} #{row.subject_id}"
+
+    case subject_href(row, mount_path, owner_scope) do
+      nil ->
+        label
+
+      href ->
+        escaped = label |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+        Phoenix.HTML.raw(~s(<a href="#{href}" class="ax-link">#{escaped}</a>))
+    end
+  end
+
+  defp subject_href(%{subject_type: "Customer", subject_id: id}, mount_path, scope),
+    do: ScopedPath.build(mount_path, "/customers/#{id}", scope)
+
+  defp subject_href(%{subject_type: "Subscription", subject_id: id}, mount_path, scope),
+    do: ScopedPath.build(mount_path, "/subscriptions/#{id}", scope)
+
+  defp subject_href(%{subject_type: "Invoice", subject_id: id}, mount_path, scope),
+    do: ScopedPath.build(mount_path, "/invoices/#{id}", scope)
+
+  defp subject_href(%{subject_type: "Charge", subject_id: id}, mount_path, scope),
+    do: ScopedPath.build(mount_path, "/charges/#{id}", scope)
+
+  defp subject_href(%{subject_type: "WebhookEvent", subject_id: id}, mount_path, scope),
+    do: ScopedPath.build(mount_path, "/webhooks/#{id}", scope)
+
+  defp subject_href(_row, _mount_path, _scope), do: nil
 
   defp actor_summary(row) do
     case row.actor_id do

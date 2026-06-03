@@ -36,7 +36,7 @@ async function openDeleteConfirmation(page, paymentMethodId) {
   await expect(page.locator("[data-role='payment-method-delete-confirmation']")).toBeVisible();
 }
 
-test("mounted admin customers index passes axe in light and dark themes", async ({ page }, testInfo) => {
+test("mounted admin customers index passes axe in light and dark themes", async ({ page, sandboxId }, testInfo) => {
   test.skip(
     testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
     "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -47,7 +47,7 @@ test("mounted admin customers index passes axe in light and dark themes", async 
 
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
-  await login(page, fixture, fixture.admin_email);
+  await login(page, fixture, fixture.admin_email, sandboxId);
   await page.getByRole("link", { name: "Go to billing" }).click();
   await waitForLiveView(page);
 
@@ -89,7 +89,7 @@ test("mounted admin customers index passes axe in light and dark themes", async 
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
 });
 
-test("mounted admin subscriptions index passes axe in light theme", async ({ page }, testInfo) => {
+test("mounted admin subscriptions index passes axe in light theme", async ({ page, sandboxId }, testInfo) => {
   test.skip(
     testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
     "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -100,7 +100,7 @@ test("mounted admin subscriptions index passes axe in light theme", async ({ pag
 
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
-  await login(page, fixture, fixture.admin_email);
+  await login(page, fixture, fixture.admin_email, sandboxId);
   await page.getByRole("link", { name: "Go to billing" }).click();
   await waitForLiveView(page);
 
@@ -124,7 +124,7 @@ test("mounted admin subscriptions index passes axe in light theme", async ({ pag
 });
 
 test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
-  test("mounted admin Connect index passes axe in light theme", async ({ page }, testInfo) => {
+  test("mounted admin Connect index passes axe in light theme", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -135,7 +135,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -163,7 +163,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
 });
 
 test.describe("VERIFY-01 admin Connect account detail (auxiliary)", () => {
-  test("mounted admin Connect account detail passes axe in light theme", async ({ page }, testInfo) => {
+  test("mounted admin Connect account detail passes axe in light theme", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -174,7 +174,7 @@ test.describe("VERIFY-01 admin Connect account detail (auxiliary)", () => {
 
     expect(fixture.connect_account_id).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -202,7 +202,7 @@ test.describe("VERIFY-01 admin Connect account detail (auxiliary)", () => {
 });
 
 test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
-  test("mounted admin events index passes axe in light theme", async ({ page }, testInfo) => {
+  test("mounted admin events index passes axe in light theme", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -213,7 +213,7 @@ test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -240,7 +240,7 @@ test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
 });
 
 test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
-  test("mounted admin coupons index passes axe in light theme", async ({ page }, testInfo) => {
+  test("mounted admin coupons index passes axe in light theme", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -251,7 +251,7 @@ test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -278,7 +278,7 @@ test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
 });
 
 test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
-  test("mounted admin promotion codes index passes axe in light theme", async ({ page }, testInfo) => {
+  test("mounted admin promotion codes index passes axe in light theme", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -289,7 +289,7 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
 
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -316,7 +316,7 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
 });
 
 test.describe("core-admin-invoices-index", () => {
-  test("invoice index passes axe in light and dark themes", async ({ page }, testInfo) => {
+  test("invoice index passes axe in light and dark themes", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -328,7 +328,7 @@ test.describe("core-admin-invoices-index", () => {
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
     expect(fixture.invoice_id).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -374,7 +374,7 @@ test.describe("core-admin-invoices-index", () => {
 });
 
 test.describe("core-admin-invoices-detail", () => {
-  test("invoice detail shows PDF control enabled (D-07)", async ({ page }, testInfo) => {
+  test("invoice detail shows PDF control enabled (D-07)", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -385,7 +385,7 @@ test.describe("core-admin-invoices-detail", () => {
 
     expect(fixture.invoice_id).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -408,7 +408,7 @@ test.describe("core-admin-invoices-detail", () => {
 });
 
 test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15)", () => {
-  test("passes axe in light and dark themes on desktop", async ({ page }, testInfo) => {
+  test("passes axe in light and dark themes on desktop", async ({ page, sandboxId }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
       "theme toggle is hidden below the md breakpoint; A11Y gate runs on desktop only"
@@ -420,7 +420,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
     expect(fixture.admin_denial_customer_id).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -475,7 +475,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
   });
 
-  test("enforces host-owned capture boundary and guarded delete states", async ({ page }) => {
+  test("enforces host-owned capture boundary and guarded delete states", async ({ page, sandboxId }) => {
     reseedFixtureIfNeeded();
     const fixture = readFixture();
 
@@ -483,7 +483,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     expect(fixture.admin_denial_customer_id).toBeTruthy();
     expect(fixture.admin_denial_payment_method_ids).toBeTruthy();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 

@@ -18,22 +18,29 @@ defmodule AccrueAdmin.NavTest do
     assert webhooks_idx < events_idx
   end
 
-  test "items include href and eyebrow keys expected by Sidebar" do
+  test "items include label, href, icon, and group keys expected by Sidebar" do
     [first | _] = Nav.items("/billing", "/billing")
 
     assert Map.has_key?(first, :label)
     assert Map.has_key?(first, :href)
-    assert Map.has_key?(first, :eyebrow)
+    assert Map.has_key?(first, :icon)
     assert Map.has_key?(first, :group)
     assert first.href == "/billing"
+    # Home stands alone with no group label.
+    assert first.group == nil
   end
 
-  test "groups discounts and revenue surfaces for the sidebar" do
+  test "groups follow the operator's mental model (Phase 169 regroup)" do
     items = Nav.items("/billing", "/billing")
 
-    assert Enum.find(items, &(&1.label == "Coupons")).group == "Discounts"
-    assert Enum.find(items, &(&1.label == "Promotion codes")).group == "Discounts"
-    assert Enum.find(items, &(&1.label == "Invoices")).group == "Revenue"
+    assert Enum.find(items, &(&1.label == "Customers")).group == "Billing"
+    assert Enum.find(items, &(&1.label == "Invoices")).group == "Billing"
+    assert Enum.find(items, &(&1.label == "Recovery")).group == "Recovery"
+    assert Enum.find(items, &(&1.label == "Webhooks")).group == "Developer"
+    assert Enum.find(items, &(&1.label == "Event log")).group == "Developer"
+    assert Enum.find(items, &(&1.label == "Coupons")).group == "Catalog"
+    assert Enum.find(items, &(&1.label == "Promotion codes")).group == "Catalog"
+    assert Enum.find(items, &(&1.label == "Connect")).group == "Connect"
     assert Enum.find(items, &(&1.label == "Payments")).href == "/billing/charges"
     assert Enum.find(items, &(&1.label == "Recovery")).href == "/billing/analytics/recovery"
   end

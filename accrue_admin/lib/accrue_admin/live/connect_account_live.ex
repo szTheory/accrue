@@ -6,7 +6,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   alias Accrue.{Auth, Config, Connect, Events, Money}
   alias Accrue.Connect.Account
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FlashGroup, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, FlashGroup, KpiCard}
 
   @default_preview_amount_minor 10_000
   @default_preview_currency "usd"
@@ -78,21 +78,24 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: AccrueAdmin.Copy.dashboard_breadcrumb_home(), href: @admin_mount_path},
-              %{label: AccrueAdmin.Copy.connect_account_breadcrumb_connect(), href: @admin_mount_path <> "/connect"},
-              %{label: @account.stripe_account_id || @account.id}
-            ]}
-          />
-          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_eyebrow() %></p>
-          <h2 class="ax-display"><%= @account.stripe_account_id %></h2>
-          <p class="ax-body ax-page-copy">
-            <%= @account.type |> humanize() %> · <%= owner_summary(@account) %> ·
-            <%= account_status(@account) %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{label: AccrueAdmin.Copy.dashboard_breadcrumb_home(), href: @admin_mount_path},
+            %{label: AccrueAdmin.Copy.connect_account_breadcrumb_connect(), href: @admin_mount_path <> "/connect"},
+            %{label: @account.stripe_account_id || @account.id}
+          ]}
+        />
+
+        <Detail.summary_card
+          eyebrow={AccrueAdmin.Copy.connect_account_eyebrow()}
+          title={@account.stripe_account_id}
+        >
+          <:facts>
+            <span><%= @account.type |> humanize() %></span>
+            <span><%= owner_summary(@account) %></span>
+            <span><%= account_status(@account) %></span>
+          </:facts>
+        </Detail.summary_card>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -111,43 +114,29 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         </section>
 
         <section class="ax-grid ax-grid-2">
-          <article class="ax-card">
-            <header class="ax-page-header">
-              <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_section_capabilities_eyebrow() %></p>
-              <h3 class="ax-heading"><%= AccrueAdmin.Copy.connect_account_section_capabilities_heading() %></h3>
-            </header>
+          <Detail.detail_section title={AccrueAdmin.Copy.connect_account_section_capabilities_heading()}>
+            <Detail.detail_field_list fields={[
+              %{label: AccrueAdmin.Copy.connect_account_detail_label_owner(), value: owner_summary(@account)},
+              %{label: AccrueAdmin.Copy.connect_account_detail_label_email(), value: @account.email || "--"},
+              %{label: AccrueAdmin.Copy.connect_account_detail_label_capabilities(), value: capabilities_summary(@account.capabilities)},
+              %{label: AccrueAdmin.Copy.connect_account_detail_label_requirements(), value: requirements_summary(@account.requirements)}
+            ]} />
+          </Detail.detail_section>
 
-            <div class="ax-page">
-              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_owner() %> <%= owner_summary(@account) %></p>
-              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_email() %> <%= @account.email || "--" %></p>
-              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_capabilities() %> <%= capabilities_summary(@account.capabilities) %></p>
-              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_requirements() %> <%= requirements_summary(@account.requirements) %></p>
-            </div>
-          </article>
-
-          <article class="ax-card">
-            <header class="ax-page-header">
-              <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_section_effective_fee_eyebrow() %></p>
-              <h3 class="ax-heading"><%= AccrueAdmin.Copy.connect_account_section_effective_fee_heading() %></h3>
-            </header>
-
-            <div class="ax-page">
-              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_stored_override() %> <%= describe_override(@account) %></p>
-              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_preview_gross() %> <%= preview_gross_summary(@override_preview.form) %></p>
-              <p class="ax-body"><%= AccrueAdmin.Copy.connect_account_detail_label_computed_fee() %> <%= @override_preview.fee_label %></p>
-              <p :if={@override_preview.error} class="ax-body"><%= @override_preview.error %></p>
-            </div>
-          </article>
+          <Detail.detail_section title={AccrueAdmin.Copy.connect_account_section_effective_fee_heading()}>
+            <Detail.detail_field_list fields={[
+              %{label: AccrueAdmin.Copy.connect_account_detail_label_stored_override(), value: describe_override(@account)},
+              %{label: AccrueAdmin.Copy.connect_account_detail_label_preview_gross(), value: preview_gross_summary(@override_preview.form)},
+              %{label: AccrueAdmin.Copy.connect_account_detail_label_computed_fee(), value: @override_preview.fee_label}
+            ]} />
+            <p :if={@override_preview.error} class="ax-body"><%= @override_preview.error %></p>
+          </Detail.detail_section>
         </section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_account_section_platform_fee_eyebrow() %></p>
-            <h3 class="ax-heading"><%= AccrueAdmin.Copy.connect_account_section_platform_fee_heading() %></h3>
-            <p class="ax-body">
-              <%= AccrueAdmin.Copy.connect_account_section_platform_fee_body() %>
-            </p>
-          </header>
+        <Detail.detail_section title={AccrueAdmin.Copy.connect_account_section_platform_fee_heading()}>
+          <p class="ax-body">
+            <%= AccrueAdmin.Copy.connect_account_section_platform_fee_body() %>
+          </p>
 
           <form phx-change="validate_override" phx-submit="save_override">
             <div class="ax-grid ax-grid-2">
@@ -218,7 +207,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
               </button>
             </div>
           </form>
-        </section>
+        </Detail.detail_section>
       </section>
     </AppShell.app_shell>
     """

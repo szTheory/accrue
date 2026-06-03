@@ -5,6 +5,7 @@
 - ✅ **v1.47 ENT-10 Polish + Adopter-Proof Completeness** — Phases 154-158 (shipped 2026-05-31) — [archive](milestones/v1.47-ROADMAP.md)
 - ✅ **v1.48 Release Readiness + Stable Core Posture** — Phases 159-162 (shipped 2026-06-01) — [archive](milestones/v1.48-ROADMAP.md)
 - ✅ **v1.49 Realistic Demo App & Adoption Evidence** — Phases 163-166 (shipped 2026-06-02) — [archive](milestones/v1.49-ROADMAP.md)
+- 🔄 **v1.50 Admin UI Foundation** — Phases 167-173 (quality / adopter-facing DX investment in the shipped `accrue_admin` UI; not a broad feature milestone)
 
 ## Planning Doctrine
 
@@ -18,11 +19,44 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-No broad feature milestone is currently open.
+No broad feature milestone is currently open. (v1.50 Admin UI Foundation is a quality / design-system / usability investment in an already-shipped surface, justified as adopter-facing DX — it adds no new billing primitives and does not reopen broad feature scope.)
 
 Stop rule: if proposed work is polish-only with a documented workaround and no release/adopter failure mode, record it as deferred with a revisit trigger and do not create a milestone for it.
 
 ## Phases
+
+<details open>
+<summary>🔄 v1.50 Admin UI Foundation (Phases 167-173) — IN PROGRESS</summary>
+
+### Phase 167: Design Tokens & Motion Foundation
+**Goal:** Tighten the `ax-*` token system (radii, shadows, spacing rungs, real `--ax-info`, money-state aliases, named accent-mix steps, `--ax-type-3xl`) and split duration/easing motion tokens with tiered reduced-motion; kill the two token bypasses (`dunning_banner.ex` hardcoded hex, `invoice_live.ex` inline styles) and the dark-theme `!important` literals.
+**Requirements:** AUI-01
+
+### Phase 168: Typography & Icon System
+**Goal:** Self-host display + body variable typefaces (tabular numerals on all figures), add a heroicons inline-SVG sprite with size tokens, add a favicon, and wire it all through the committed asset pipeline.
+**Requirements:** AUI-02
+
+### Phase 169: Information Architecture — Home, Nav & Search
+**Goal:** Rebuild the home into a task-launcher start page (attention rail → launchers → demoted KPIs), regroup nav (Billing / Recovery / Developer / Catalog / Connect, drop eyebrows), and elevate global search to an always-on top-bar `Cmd-K` with recents/pins.
+**Requirements:** AUI-03
+
+### Phase 170: Cross-Screen Threading & Microcopy
+**Goal:** Add a shared "Related billing" component to every detail screen (no dead ends), path-aware breadcrumbs, event↔resource backlinks, and plain-language glosses for domain jargon.
+**Requirements:** AUI-04
+
+### Phase 171: Shared Detail Components & Screen Refactor
+**Goal:** Extract `<.detail_section>` / `<.detail_field_list>` / `<.summary_card>` and refactor the 6 large detail screens onto them; add `.ax-skeleton` + DataTable loading variant + entity-specific empty states; consolidate badge systems.
+**Requirements:** AUI-05
+
+### Phase 172: Seed Enrichment & Component Kitchen
+**Goal:** Enrich seed data so every admin screen fully expresses itself (past-due/dunning, refunds, varied statuses, coupons/promo in use, Connect states), fix the host seed dunning-event precision bug, and rebuild the component kitchen to exercise every component × every state.
+**Requirements:** AUI-06
+
+### Phase 173: Rubric Audit & Visual/A11y Coverage
+**Goal:** Run the 10-dimension visual/UX rubric across all screens/components and burn down gaps; extend screenshot coverage to all ~20 screens (desktop + mobile + dark) and wire automated axe a11y into the admin e2e.
+**Requirements:** AUI-07
+
+</details>
 
 <details>
 <summary>✅ v1.49 Realistic Demo App & Adoption Evidence (Phases 163-166) — SHIPPED 2026-06-02</summary>
@@ -56,6 +90,13 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 164. Docker DX & Optimized Caching | v1.49 | 2/2 | Complete | 2026-06-01 |
 | 165. E2E Automation & Shift-Left CI | v1.49 | 4/4 | Complete | 2026-06-02 |
 | 166. Adoption DX Docs | v1.49 | 3/3 | Complete | 2026-06-02 |
+| 167. Design Tokens & Motion Foundation | v1.50 | 0/? | Pending | — |
+| 168. Typography & Icon System | v1.50 | 0/? | Pending | — |
+| 169. IA — Home, Nav & Search | v1.50 | 0/? | Pending | — |
+| 170. Cross-Screen Threading & Microcopy | v1.50 | 0/? | Pending | — |
+| 171. Shared Detail Components & Refactor | v1.50 | 0/? | Pending | — |
+| 172. Seed Enrichment & Component Kitchen | v1.50 | 0/? | Pending | — |
+| 173. Rubric Audit & Visual/A11y Coverage | v1.50 | 0/? | Pending | — |
 
 ## Historical Backlog Anchors (not active scope)
 

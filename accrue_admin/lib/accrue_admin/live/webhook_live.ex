@@ -10,7 +10,17 @@ defmodule AccrueAdmin.Live.WebhookLive do
   alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
   alias Accrue.Webhooks.DLQ
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, FlashGroup, JsonViewer, KpiCard, Timeline}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    Breadcrumbs,
+    Detail,
+    FlashGroup,
+    JsonViewer,
+    KpiCard,
+    Timeline
+  }
+
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
 
@@ -103,21 +113,21 @@ defmodule AccrueAdmin.Live.WebhookLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope, %{})},
-              %{label: "Webhooks", href: scoped_mount_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{})},
-              %{label: breadcrumb_label(assigns)}
-            ]}
-          />
-          <p class="ax-eyebrow">Webhook inspector</p>
-          <h2 class="ax-display"><%= webhook_heading(assigns) %></h2>
-          <p :if={@webhook} class="ax-body ax-page-copy">
-            <%= @webhook.processor_event_id %> · <%= humanize(@webhook.status) %> · received
-            <%= format_datetime(@webhook.received_at) %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{label: "Dashboard", href: scoped_mount_path(@admin_mount_path, "", @current_owner_scope, %{})},
+            %{label: "Webhooks", href: scoped_mount_path(@admin_mount_path, "/webhooks", @current_owner_scope, %{})},
+            %{label: breadcrumb_label(assigns)}
+          ]}
+        />
+
+        <Detail.summary_card eyebrow="Webhook inspector" title={webhook_heading(assigns)}>
+          <:facts :if={@webhook}>
+            <span><%= @webhook.processor_event_id %></span>
+            <span><%= humanize(@webhook.status) %></span>
+            <span>received <%= format_datetime(@webhook.received_at) %></span>
+          </:facts>
+        </Detail.summary_card>
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -140,12 +150,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
           </KpiCard.kpi_card>
         </section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow">Replay</p>
-            <h3 class="ax-heading"><%= replay_heading(assigns) %></h3>
-            <p class="ax-body"><%= replay_copy(assigns) %></p>
-          </header>
+        <Detail.detail_section title={replay_heading(assigns)}>
+          <p class="ax-body"><%= replay_copy(assigns) %></p>
 
           <button
             :if={@webhook}
@@ -182,34 +188,24 @@ defmodule AccrueAdmin.Live.WebhookLive do
               </button>
             </div>
           </section>
-        </section>
+        </Detail.detail_section>
 
         <section :if={@webhook} class="ax-grid ax-grid-2">
-          <article class="ax-card">
-            <header class="ax-page-header">
-              <p class="ax-eyebrow">Attempt history</p>
-              <h3 class="ax-heading">Dispatch and retry lifecycle</h3>
-            </header>
-
+          <Detail.detail_section title="Dispatch and retry lifecycle">
             <Timeline.timeline
               label="Webhook attempt history"
               empty_label="No dispatch attempts recorded yet"
               items={attempt_timeline(@attempt_history)}
             />
-          </article>
+          </Detail.detail_section>
 
-          <article class="ax-card">
-            <header class="ax-page-header">
-              <p class="ax-eyebrow">Derived events</p>
-              <h3 class="ax-heading">Ledger rows caused by this webhook</h3>
-            </header>
-
+          <Detail.detail_section title="Ledger rows caused by this webhook">
             <Timeline.timeline
               label="Derived events"
               empty_label="No derived event rows linked to this webhook yet"
               items={derived_event_timeline(@derived_events, @admin_mount_path, @current_owner_scope)}
             />
-          </article>
+          </Detail.detail_section>
         </section>
 
         <section :if={@webhook} class="ax-card">

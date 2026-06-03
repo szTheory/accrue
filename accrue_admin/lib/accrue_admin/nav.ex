@@ -4,67 +4,70 @@ defmodule AccrueAdmin.Nav do
   def items(mount_path, current_path) do
     org = org_slug(current_path)
 
+    # Grouped by the operator's mental model, not by internal module. Home stands
+    # alone (group: nil → no label). Eyebrow sublabels dropped (Phase 169): they
+    # added jargon without prediction value. Icons via AccrueAdmin.Components.Icon.
     [
-      %{label: "Home", href: nav_href(mount_path, "", org), eyebrow: "Triage", group: "Command"},
+      %{label: "Home", href: nav_href(mount_path, "", org), icon: :home, group: nil},
       %{
         label: "Customers",
         href: nav_href(mount_path, "/customers", org),
-        eyebrow: "Account 360",
-        group: "Investigate"
+        icon: :users,
+        group: "Billing"
       },
       %{
         label: "Subscriptions",
         href: nav_href(mount_path, "/subscriptions", org),
-        eyebrow: "Lifecycle",
-        group: "Investigate"
+        icon: :subscriptions,
+        group: "Billing"
       },
       %{
         label: "Invoices",
         href: nav_href(mount_path, "/invoices", org),
-        eyebrow: "Receivables",
-        group: "Revenue"
+        icon: :invoices,
+        group: "Billing"
       },
       %{
         label: "Payments",
         href: nav_href(mount_path, "/charges", org),
-        eyebrow: "Charges & refunds",
-        group: "Revenue"
+        icon: :payments,
+        group: "Billing"
       },
       %{
         label: "Recovery",
         href: nav_href(mount_path, "/analytics/recovery", org),
-        eyebrow: "Dunning",
-        group: "Revenue"
+        icon: :recovery,
+        group: "Recovery"
       },
       %{
         label: "Webhooks",
         href: nav_href(mount_path, "/webhooks", org),
-        eyebrow: "Pipeline",
-        group: "Operations"
+        icon: :webhooks,
+        group: "Developer"
       },
       %{
         label: "Event log",
         href: nav_href(mount_path, "/events", org),
-        eyebrow: "Audit trail",
-        group: "Operations"
+        icon: :events,
+        group: "Developer"
       },
       %{
         label: "Coupons",
         href: nav_href(mount_path, "/coupons", org),
-        eyebrow: "Catalog",
-        group: "Discounts"
+        icon: :coupons,
+        group: "Catalog"
       },
       %{
         label: "Promotion codes",
         href: nav_href(mount_path, "/promotion-codes", org),
-        eyebrow: "Redemption",
-        group: "Discounts"
+        icon: :promotions,
+        group: "Catalog"
       },
       %{
         label: "Connect",
         href: nav_href(mount_path, "/connect", org),
-        eyebrow: "Payouts",
-        group: "Platform"
+        icon: :connect,
+        group: "Connect"
       }
     ]
   end

@@ -18,10 +18,10 @@ test.describe("@mobile mounted admin shell and customers", () => {
     }
   });
 
-  test("MOB-01 MOB-03 org-scoped customers journey without horizontal overflow", async ({ page }) => {
+  test("MOB-01 MOB-03 org-scoped customers journey without horizontal overflow", async ({ page, sandboxId }) => {
     const fixture = readFixture();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
@@ -45,10 +45,10 @@ test.describe("@mobile mounted admin shell and customers", () => {
     await expectNoHorizontalOverflow(page, "customer detail");
   });
 
-  test("MOB-02 Menu opens primary nav links; Escape closes drawer", async ({ page }) => {
+  test("MOB-02 Menu opens primary nav links; Escape closes drawer", async ({ page, sandboxId }) => {
     const fixture = readFixture();
 
-    await login(page, fixture, fixture.admin_email);
+    await login(page, fixture, fixture.admin_email, sandboxId);
     await page.getByRole("link", { name: "Go to billing" }).click();
     await waitForLiveView(page);
 
