@@ -16,6 +16,7 @@ if Mix.env() != :prod do
       StatusBadge,
       Tabs
     }
+    alias AccrueAdmin.Dev.ComponentRegistry
 
     @impl true
     def mount(_params, session, socket) do
@@ -148,6 +149,112 @@ if Mix.env() != :prod do
               <Icon.icon name={:inbox} size="lg" class="ax-empty-icon ax-empty-icon-muted" />
               <p class="ax-empty-title">No rows in this list yet</p>
               <p class="ax-body ax-empty-copy">Empty-state pattern: state glyph, headline, one line of context.</p>
+            </div>
+          </section>
+
+          <%!-- Component variants reference — every button, badge, status, and card with its token map --%>
+
+          <%!-- Buttons variant reference --%>
+          <section :if={@available?} class="ax-card ax-dev-stack">
+            <p class="ax-label">Buttons</p>
+            <div class="ax-dev-grid">
+              <%= for entry <- ComponentRegistry.variants_for("button") do %>
+                <div class="ax-dev-variant-row">
+                  <div data-ax-theme="light">
+                    <Button.button variant={entry.variant} type="button">
+                      <%= String.capitalize(entry.variant) %>
+                    </Button.button>
+                  </div>
+                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
+                    <Button.button variant={entry.variant} type="button">
+                      <%= String.capitalize(entry.variant) %>
+                    </Button.button>
+                  </div>
+                  <dl class="ax-dev-token-dl">
+                    <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
+                    <%= for token <- entry.tokens do %>
+                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                    <% end %>
+                  </dl>
+                </div>
+              <% end %>
+            </div>
+          </section>
+
+          <%!-- Badges variant reference (tone axis: moss/cobalt/amber/slate/ink) --%>
+          <section :if={@available?} class="ax-card ax-dev-stack">
+            <p class="ax-label">Badges</p>
+            <div class="ax-dev-grid">
+              <%= for entry <- ComponentRegistry.variants_for("status") do %>
+                <div class="ax-dev-variant-row">
+                  <div data-ax-theme="light">
+                    <StatusBadge.status_badge tone={entry.variant} status={:active} />
+                  </div>
+                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
+                    <StatusBadge.status_badge tone={entry.variant} status={:active} />
+                  </div>
+                  <dl class="ax-dev-token-dl">
+                    <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
+                    <%= for token <- entry.tokens do %>
+                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                    <% end %>
+                  </dl>
+                </div>
+              <% end %>
+            </div>
+          </section>
+
+          <%!-- Status variant reference (all 5 tones via representative status atoms) --%>
+          <section :if={@available?} class="ax-card ax-dev-stack">
+            <p class="ax-label">Status</p>
+            <div class="ax-dev-grid">
+              <%= for {entry, status} <- Enum.zip(ComponentRegistry.variants_for("status"), [:paid, :processing, :past_due, :canceled, :failed]) do %>
+                <div class="ax-dev-variant-row">
+                  <div data-ax-theme="light">
+                    <StatusBadge.status_badge status={status} tone={entry.variant} />
+                  </div>
+                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
+                    <StatusBadge.status_badge status={status} tone={entry.variant} />
+                  </div>
+                  <dl class="ax-dev-token-dl">
+                    <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
+                    <%= for token <- entry.tokens do %>
+                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                    <% end %>
+                  </dl>
+                </div>
+              <% end %>
+            </div>
+          </section>
+
+          <%!-- Cards variant reference (base card + delta tones) --%>
+          <section :if={@available?} class="ax-card ax-dev-stack">
+            <p class="ax-label">Cards</p>
+            <div class="ax-dev-grid">
+              <%= for entry <- ComponentRegistry.variants_for("card") do %>
+                <div class="ax-dev-variant-row">
+                  <div data-ax-theme="light">
+                    <%= if entry.variant == "base" do %>
+                      <KpiCard.kpi_card label="MRR" value="$4,200" />
+                    <% else %>
+                      <KpiCard.kpi_card label="Delta" value="$420" delta={"+" <> entry.variant} delta_tone={entry.variant} />
+                    <% end %>
+                  </div>
+                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
+                    <%= if entry.variant == "base" do %>
+                      <KpiCard.kpi_card label="MRR" value="$4,200" />
+                    <% else %>
+                      <KpiCard.kpi_card label="Delta" value="$420" delta={"+" <> entry.variant} delta_tone={entry.variant} />
+                    <% end %>
+                  </div>
+                  <dl class="ax-dev-token-dl">
+                    <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
+                    <%= for token <- entry.tokens do %>
+                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                    <% end %>
+                  </dl>
+                </div>
+              <% end %>
             </div>
           </section>
         </section>
