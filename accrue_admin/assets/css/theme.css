@@ -67,6 +67,36 @@ html.accrue-admin {
   --ax-motion-standard: var(--ax-dur-2) var(--ax-ease-out);
   --ax-theme-transition: var(--ax-motion-standard);
 
+  /* Line-height — unitless (inherits as a ratio) */
+  --ax-leading-tight: 1.2;     /* display, headings */
+  --ax-leading-normal: 1.4;    /* body, labels — the default */
+  --ax-leading-relaxed: 1.5;   /* prose / long-form copy */
+  /* Letter-spacing — em (scales with font-size) */
+  --ax-tracking-tight: -0.02em; /* large display tightening */
+  --ax-tracking-normal: 0;
+  --ax-tracking-wide: 0.04em;   /* smaller uppercase labels */
+  --ax-tracking-caps: 0.08em;   /* uppercase eyebrows / section labels */
+  /* Reading measure — ch ≈ one "0" advance; 68ch ≈ 66 chars (60–75 sweet spot) */
+  --ax-measure: 68ch;
+
+  /* Transition bundles — property-bundles composed from dur/ease atoms.
+     Use background-color (not background shorthand) to never conflict with
+     skeleton shimmer's background-position animation. */
+  --ax-transition-colors:
+    color var(--ax-dur-2) var(--ax-ease-out),
+    background-color var(--ax-dur-2) var(--ax-ease-out),
+    border-color var(--ax-dur-2) var(--ax-ease-out);
+  --ax-transition-transform:
+    transform var(--ax-dur-2) var(--ax-ease-out);
+  --ax-transition-shadow:
+    box-shadow var(--ax-dur-2) var(--ax-ease-out);
+  --ax-transition-base:
+    color var(--ax-dur-2) var(--ax-ease-out),
+    background-color var(--ax-dur-2) var(--ax-ease-out),
+    border-color var(--ax-dur-2) var(--ax-ease-out),
+    transform var(--ax-dur-2) var(--ax-ease-out),
+    box-shadow var(--ax-dur-2) var(--ax-ease-out);
+
   --ax-z-topbar: 10;
   --ax-z-popover: 20;
   --ax-z-drawer: 30;
@@ -167,5 +197,16 @@ html.accrue-admin[data-theme="dark"] {
     --ax-motion-fast: 0ms linear;
     --ax-motion-standard: 0ms linear;
     --ax-theme-transition: 0ms linear;
+    /* New: bundle overrides — consumers collapse for free */
+    --ax-transition-colors: color var(--ax-dur-instant) linear,
+      background-color var(--ax-dur-instant) linear,
+      border-color var(--ax-dur-instant) linear;
+    --ax-transition-transform: transform var(--ax-dur-instant) linear;
+    --ax-transition-shadow: box-shadow var(--ax-dur-instant) linear;
+    --ax-transition-base: color var(--ax-dur-instant) linear,
+      background-color var(--ax-dur-instant) linear,
+      border-color var(--ax-dur-instant) linear,
+      transform var(--ax-dur-instant) linear,
+      box-shadow var(--ax-dur-instant) linear;
   }
 }
