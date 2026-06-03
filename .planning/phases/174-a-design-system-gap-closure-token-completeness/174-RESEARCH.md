@@ -747,7 +747,7 @@ Step 2.5 SKIPPED — Phase 174 is not a rename/refactor/migration phase. No runt
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`.ax-search-trigger` transition block (line 1446)**
    - What we know: Currently uses a 4-property block mixing `--ax-theme-transition` (3 props) and `--ax-motion-fast` (transform). D-14 says single-property sites using `--ax-motion-*` may stay as-is; the question is whether this 4-property mixed block qualifies as a "multi-line collapse target" or a "stay as-is" case.
