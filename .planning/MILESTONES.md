@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.50 Admin UI Foundation (Shipped: 2026-06-02; archived 2026-06-03)
+
+**Phases completed:** 7 phases (167–173). Built & merged to `main` via PR #32 (merge `da95c205`).
+
+**Key accomplishments:**
+
+- Tightened the `ax-*` design-token system (radii, shadows, spacing, `--ax-info`, money-state aliases) plus split duration/easing motion tokens with tiered reduced-motion — zero token bypasses remain.
+- Gave the admin UI a distinct brand identity: self-hosted Geist display + body variable typefaces with tabular numerals, a heroicons inline-SVG system, and a favicon.
+- Rebuilt the home as a uk.gov-style task-launcher start page (attention rail → launchers → demoted KPIs), regrouped nav (Billing / Recovery / Developer / Catalog / Connect), and made `Cmd-K` global search always-on.
+- Threaded every detail screen with a shared "Related billing" component (no dead ends), path-aware breadcrumbs, and plain-language microcopy; refactored the 6 large detail screens onto shared `<.detail_section>` components.
+- Enriched seed data so every screen expresses itself (fixing the host seed dunning-event bug), rebuilt the component kitchen, and ran a 10-dimension visual/UX rubric audit with desktop/mobile/dark screenshot coverage plus automated axe a11y.
+
+**Verification:** 7/7 requirements (AUI-01..07). Evidence is merged PR #32 + the in-repo rubric/screenshot/axe harness (`accrue_admin/e2e/`) + main CI green on `30ff29f3` — see `milestones/v1.50-MILESTONE-AUDIT.md`.
+
+**Known deferred/process gaps at close:** per-phase SUMMARY/VERIFICATION trees were not committed to `main` (v1.50 ran on the feature branch with the design source in `~/.claude/plans/`), so there is no `milestones/v1.50-phases/` archive; the formal audit was produced retroactively on 2026-06-03. Delivery is complete and live; these are archival-process gaps only.
+
+**Archives:** [`milestones/v1.50-ROADMAP.md`](milestones/v1.50-ROADMAP.md), [`milestones/v1.50-REQUIREMENTS.md`](milestones/v1.50-REQUIREMENTS.md), [`milestones/v1.50-MILESTONE-AUDIT.md`](milestones/v1.50-MILESTONE-AUDIT.md). Planning git tag `v1.50`.
+
+---
+
 ## v1.49 Realistic Demo App & Adoption Evidence (Shipped: 2026-06-02)
 
 **Phases completed:** 4 phases, 10 plans, 10 tasks

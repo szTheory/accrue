@@ -5,7 +5,7 @@
 - ✅ **v1.47 ENT-10 Polish + Adopter-Proof Completeness** — Phases 154-158 (shipped 2026-05-31) — [archive](milestones/v1.47-ROADMAP.md)
 - ✅ **v1.48 Release Readiness + Stable Core Posture** — Phases 159-162 (shipped 2026-06-01) — [archive](milestones/v1.48-ROADMAP.md)
 - ✅ **v1.49 Realistic Demo App & Adoption Evidence** — Phases 163-166 (shipped 2026-06-02) — [archive](milestones/v1.49-ROADMAP.md)
-- ✅ **v1.50 Admin UI Foundation** — Phases 167-173 (built & merged 2026-06-02 via PR #32; quality / adopter-facing DX investment in the shipped `accrue_admin` UI; milestone audit/archive pending)
+- ✅ **v1.50 Admin UI Foundation** — Phases 167-173 (shipped 2026-06-02 via PR #32; archived 2026-06-03) — [archive](milestones/v1.50-ROADMAP.md)
 - 🚧 **v1.51 Admin UI: Depth Pass (IA + Systematic Polish)** — Phases 174-179 (planning 2026-06-03; second, depth-oriented pass on the same `accrue_admin` surface; persona-driven IA reshape + token gap-closure + systematic rubric uplift + motion + seed expressiveness + screenshot-driven visual-QA; no new billing primitives)
 
 ## Planning Doctrine
@@ -121,35 +121,17 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 </details>
 
 <details>
-<summary>✅ v1.50 Admin UI Foundation (Phases 167-173) — BUILT & MERGED 2026-06-02 (PR #32; audit/archive pending)</summary>
+<summary>✅ v1.50 Admin UI Foundation (Phases 167-173) — SHIPPED 2026-06-02 (PR #32; archived 2026-06-03)</summary>
 
-### Phase 167: Design Tokens & Motion Foundation
-**Goal:** Tighten the `ax-*` token system (radii, shadows, spacing rungs, real `--ax-info`, money-state aliases, named accent-mix steps, `--ax-type-3xl`) and split duration/easing motion tokens with tiered reduced-motion; kill the two token bypasses (`dunning_banner.ex` hardcoded hex, `invoice_live.ex` inline styles) and the dark-theme `!important` literals.
-**Requirements:** AUI-01
+- [x] Phase 167: Design Tokens & Motion Foundation — completed 2026-06-02 (AUI-01)
+- [x] Phase 168: Typography & Icon System — completed 2026-06-02 (AUI-02)
+- [x] Phase 169: IA — Home, Nav & Search — completed 2026-06-02 (AUI-03)
+- [x] Phase 170: Cross-Screen Threading & Microcopy — completed 2026-06-02 (AUI-04)
+- [x] Phase 171: Shared Detail Components & Refactor — completed 2026-06-02 (AUI-05)
+- [x] Phase 172: Seed Enrichment & Component Kitchen — completed 2026-06-02 (AUI-06)
+- [x] Phase 173: Rubric Audit & Visual/A11y Coverage — completed 2026-06-02 (AUI-07)
 
-### Phase 168: Typography & Icon System
-**Goal:** Self-host display + body variable typefaces (tabular numerals on all figures), add a heroicons inline-SVG sprite with size tokens, add a favicon, and wire it all through the committed asset pipeline.
-**Requirements:** AUI-02
-
-### Phase 169: Information Architecture — Home, Nav & Search
-**Goal:** Rebuild the home into a task-launcher start page (attention rail → launchers → demoted KPIs), regroup nav (Billing / Recovery / Developer / Catalog / Connect, drop eyebrows), and elevate global search to an always-on top-bar `Cmd-K` with recents/pins.
-**Requirements:** AUI-03
-
-### Phase 170: Cross-Screen Threading & Microcopy
-**Goal:** Add a shared "Related billing" component to every detail screen (no dead ends), path-aware breadcrumbs, event↔resource backlinks, and plain-language glosses for domain jargon.
-**Requirements:** AUI-04
-
-### Phase 171: Shared Detail Components & Screen Refactor
-**Goal:** Extract `<.detail_section>` / `<.detail_field_list>` / `<.summary_card>` and refactor the 6 large detail screens onto them; add `.ax-skeleton` + DataTable loading variant + entity-specific empty states; consolidate badge systems.
-**Requirements:** AUI-05
-
-### Phase 172: Seed Enrichment & Component Kitchen
-**Goal:** Enrich seed data so every admin screen fully expresses itself (past-due/dunning, refunds, varied statuses, coupons/promo in use, Connect states), fix the host seed dunning-event precision bug, and rebuild the component kitchen to exercise every component × every state.
-**Requirements:** AUI-06
-
-### Phase 173: Rubric Audit & Visual/A11y Coverage
-**Goal:** Run the 10-dimension visual/UX rubric across all screens/components and burn down gaps; extend screenshot coverage to all ~20 screens (desktop + mobile + dark) and wire automated axe a11y into the admin e2e.
-**Requirements:** AUI-07
+Full details: [v1.50 roadmap archive](milestones/v1.50-ROADMAP.md)
 
 </details>
 

@@ -1268,6 +1268,44 @@ Closed the last open step of the canonical SaaS loop — gate features/access on
 
 ---
 
+## Milestone: v1.50 — Admin UI Foundation
+
+**Shipped:** 2026-06-02 (merged via PR #32) | **Archived:** 2026-06-03 (retroactive)
+**Phases:** 7 (167–173) | **Requirements:** 7/7 (AUI-01..07)
+
+### What Was Built
+
+Raised the already-shipped `accrue_admin` UI to a coherent, distinctly-branded design system: tightened `ax-*` tokens + token-based motion (zero bypasses), self-hosted Geist display/body typefaces with tabular numerals, a uk.gov-style task-launcher home with regrouped nav and always-on Cmd-K, cross-screen "Related billing" threading (no dead ends), shared `<.detail_section>` components across the 6 large detail screens, enriched seeds + rebuilt component kitchen, and a 10-dimension rubric audit with desktop/mobile/dark screenshots + automated axe a11y.
+
+### What Worked
+
+- Foundation-first sequencing (tokens → typography → IA → threading → shared components → seeds → rubric audit) meant later phases inherited a stable substrate.
+- A design source held outside `.planning/` (`~/.claude/plans/heres-what-we-were-majestic-spindle.md`) kept the milestone's intent legible across an autonomous multi-phase run.
+- The screenshot + axe harness (`accrue_admin/e2e/`) gave objective, re-runnable visual/a11y evidence in lieu of manual review.
+
+### What Was Inefficient
+
+- v1.50 ran on a feature branch with per-phase planning trees never committed to `main`, and the GSD state was reconciled in a separate hygiene session rather than at merge. The formal milestone audit/archive then had to be produced **retroactively** (2026-06-03), and `gsd-sdk milestone.complete` was unusable because STATE had already advanced to v1.51 — archival had to be done by hand.
+- Restoring main CI to green after merge required peeling several pre-existing, non-v1.50 gate layers (seed idempotency under `Code.require_file`, LiveView-sandbox E2E enrollment, advisory OTP-28 forward-compat, an upstream Oban deprecation annotation).
+
+### Patterns Established
+
+- **Archive at merge, not later.** Run `/gsd-complete-milestone` (or its manual equivalent) before opening the next milestone, while STATE still points at the milestone being closed — otherwise archival must be reconstructed by hand.
+- **Custom `ax-*` CSS + design tokens** is the locked admin CSS architecture (Tailwind configured but inert); carried forward into v1.51 as an explicit non-decision.
+
+### Key Lessons
+
+- Building on a feature branch is fine, but the planning trees + a milestone tag should land on `main` at merge so the historical record isn't lossy (v1.50's phase SUMMARY/VERIFICATION trees are not recoverable on `main`).
+- A demand-driven "stable core" project still benefits from completing the bookkeeping ritual promptly — deferring it compounds into manual reconstruction.
+
+### Cost Observations
+
+- Model mix: not tracked.
+- Sessions: built autonomously across the v1.50 branch; merged + CI-repaired in a hygiene session; archived retroactively alongside opening v1.51.
+- Notable: the retroactive archive was cheap because the design source and PR history were intact — the lesson is to not rely on that.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution

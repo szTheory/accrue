@@ -17,7 +17,7 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-02 after v1.49 milestone completion)
+See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
@@ -51,7 +51,7 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 
 Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). Design source: `.planning/research/v1.51-admin-ui-depth-design.md`.
 
-### v1.50 Phase Summary (built & merged 2026-06-02 via PR #32; audit/archive pending)
+### v1.50 Phase Summary (shipped 2026-06-02 via PR #32; archived 2026-06-03 — see milestones/v1.50-*)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|

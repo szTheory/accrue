@@ -49,7 +49,7 @@ Authoritative design source: `.planning/research/v1.51-admin-ui-depth-design.md`
 
 ## Last shipped milestone
 
-### v1.50 — Admin UI Foundation (**built & merged 2026-06-02**; formal archive deferred to maintainer ritual)
+### v1.50 — Admin UI Foundation (**shipped 2026-06-02 via PR #32; archived 2026-06-03**)
 
 **Goal:** Systematically raise the design-system, information-architecture, and usability baseline of the already-shipped `accrue_admin` UI to a coherent, distinctly-branded standard.
 
@@ -511,6 +511,15 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 ### Active
 
 **v1.51 — Admin UI Depth Pass** (see `.planning/REQUIREMENTS.md`). Categories: DSY (design-system completeness), IA (persona-driven architecture), SCR (per-screen rubric uplift), MOT (motion), SEED (seed expressiveness), QA (visual-QA loop). Mapped across Phases 174–179.
+
+### Validated v1.50 (archived in `.planning/milestones/v1.50-REQUIREMENTS.md`; milestone shipped 2026-06-02 via PR #32, archived 2026-06-03)
+
+Admin UI Foundation — 7/7 satisfied.
+
+- ✓ **AUI-01..AUI-02** — Tightened `ax-*` design tokens + token-based motion (zero bypasses); distinct brand typography (Geist), heroicons, favicon — v1.50
+- ✓ **AUI-03..AUI-04** — uk.gov-style task-launcher home, job-aligned nav regroup, always-on `Cmd-K` search; cross-screen threading (no dead ends), breadcrumbs, plain-language microcopy — v1.50
+- ✓ **AUI-05..AUI-06** — Shared `<.detail_section>` components + skeleton/empty states; seed enrichment + rebuilt component kitchen (host seed dunning bug fixed) — v1.50
+- ✓ **AUI-07** — 10-dimension rubric audit; desktop/mobile/dark screenshot coverage + automated axe a11y — v1.50
 
 ### Validated v1.49 (archived in `.planning/milestones/v1.49-REQUIREMENTS.md`; milestone shipped & archived 2026-06-02)
 
