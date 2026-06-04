@@ -3,7 +3,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
   import Ecto.Query
 
-  alias Accrue.Billing.{Charge, Customer, Invoice, Refund, Subscription}
+  alias Accrue.Billing.{Charge, Coupon, Customer, Invoice, PromotionCode, Refund, Subscription}
+  alias Accrue.Connect.Account
   alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
@@ -133,6 +134,108 @@ defmodule AccrueAdmin.E2E.Fixtures do
     }
   end
 
+  def seed_edge_states! do
+    owner_id = Ecto.UUID.generate()
+
+    customer =
+      insert_customer(%{
+        owner_id: owner_id,
+        name: "E2E Dunning Customer",
+        email: "dunning-e2e@example.com"
+      })
+
+    at_risk_sub =
+      %Subscription{}
+      |> Subscription.force_status_changeset(%{
+        customer_id: customer.id,
+        processor: "fake",
+        processor_id: "sub_e2e_dunning_at_risk",
+        status: :past_due,
+        past_due_since: DateTime.add(DateTime.utc_now(), -5 * 86_400, :second),
+        dunning_campaign_started_at: DateTime.add(DateTime.utc_now(), -5 * 86_400, :second),
+        cancel_at_period_end: false,
+        lock_version: 1,
+        metadata: %{},
+        data: %{}
+      })
+      |> TestRepo.insert!()
+
+    canceling_sub =
+      insert_subscription(customer, %{
+        processor_id: "sub_e2e_canceling",
+        status: :active,
+        cancel_at_period_end: true,
+        current_period_end: DateTime.add(DateTime.utc_now(), 7 * 86_400, :second)
+      })
+
+    jpy_invoice =
+      insert_invoice(customer, at_risk_sub, %{
+        processor_id: "in_e2e_jpy",
+        currency: "jpy",
+        total_minor: 55_000,
+        amount_due_minor: 55_000,
+        amount_remaining_minor: 55_000,
+        status: :open,
+        number: "E2E-JPY-001"
+      })
+
+    jpy_charge =
+      insert_charge(customer, at_risk_sub, %{
+        processor_id: "ch_e2e_jpy",
+        currency: "jpy",
+        amount_cents: 55_000,
+        status: "succeeded"
+      })
+
+    long_name_customer =
+      insert_customer(%{
+        name: String.duplicate("A", 100) <> " LongNameCo",
+        email: "long-name-e2e@example.com"
+      })
+
+    coupon = insert_coupon(%{processor_id: "coupon_e2e_edge"})
+
+    promo_code =
+      insert_promo_code(coupon, %{
+        processor_id: "promo_e2e_edge",
+        code: "E2E-EDGE"
+      })
+
+    connect_account = insert_connect_account(owner_id, %{stripe_account_id: "acct_e2e_edge"})
+
+    %{
+      at_risk_sub_id: at_risk_sub.id,
+      canceling_sub_id: canceling_sub.id,
+      jpy_invoice_id: jpy_invoice.id,
+      jpy_charge_id: jpy_charge.id,
+      dunning_customer_id: customer.id,
+      long_name_customer_id: long_name_customer.id,
+      coupon_id: coupon.id,
+      promo_code_id: promo_code.id,
+      connect_account_id: connect_account.id
+    }
+  end
+
+  def seed_overflow! do
+    customers =
+      Enum.map(1..26, fn i ->
+        insert_customer(%{
+          name: "E2E Overflow Customer #{i}",
+          email: "overflow-e2e-#{i}@example.com",
+          processor_id: "cus_e2e_overflow_#{i}"
+        })
+      end)
+
+    Enum.each(customers, fn customer ->
+      insert_subscription(customer, %{
+        processor_id: "sub_e2e_overflow_#{customer.processor_id}",
+        status: :active
+      })
+    end)
+
+    %{first_customer_id: List.first(customers).id}
+  end
+
   def current_counts do
     %{
       webhook_replayed:
@@ -234,6 +337,63 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %Refund{}
     |> Refund.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_coupon(attrs) do
+    defaults = %{
+      processor: "fake",
+      processor_id: "coupon_" <> Integer.to_string(System.unique_integer([:positive])),
+      name: "E2E Edge Coupon",
+      duration: "once",
+      percent_off: Decimal.new("10.0"),
+      currency: "usd",
+      valid: true,
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %Coupon{}
+    |> Coupon.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_promo_code(coupon, attrs) do
+    defaults = %{
+      processor: "fake",
+      processor_id: "promo_" <> Integer.to_string(System.unique_integer([:positive])),
+      code: "E2E-" <> Integer.to_string(System.unique_integer([:positive])),
+      coupon_id: coupon.id,
+      active: true,
+      metadata: %{},
+      data: %{},
+      lock_version: 1
+    }
+
+    %PromotionCode{}
+    |> PromotionCode.changeset(Map.merge(defaults, attrs))
+    |> TestRepo.insert!()
+  end
+
+  defp insert_connect_account(owner_id, attrs) do
+    defaults = %{
+      stripe_account_id: "acct_e2e_" <> Integer.to_string(System.unique_integer([:positive])),
+      type: "standard",
+      owner_type: "User",
+      owner_id: owner_id,
+      email: "connect-e2e@example.com",
+      country: "us",
+      charges_enabled: true,
+      payouts_enabled: true,
+      details_submitted: true,
+      capabilities: %{},
+      requirements: %{},
+      data: %{}
+    }
+
+    %Account{}
+    |> Account.changeset(Map.merge(defaults, attrs))
     |> TestRepo.insert!()
   end
 
