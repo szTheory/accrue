@@ -132,6 +132,32 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
     end
   end
 
+  # (d) Token render + phantom absence: every token in ComponentRegistry.entries() appears
+  # in the rendered /dev/components page HTML, and no phantom token names appear.
+  #
+  # Automating Phase 174 human-UAT item 1: "Visit /dev/components and verify token <dl>
+  # metadata for slate/ink/cobalt variants shows corrected tokens."
+  #
+  # This test mounts the live page and checks the full rendered HTML. If a registry entry
+  # references a token that fails to render (e.g. template bug or wrong field name), the
+  # token string will be absent from the HTML. If a phantom token sneaks back into the
+  # registry it will appear in the page but must not.
+  test "rendered /dev/components page contains every registry token and no phantom tokens", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+
+    for %{tokens: tokens} <- ComponentRegistry.entries(),
+        token <- tokens do
+      assert html =~ token,
+             "token #{inspect(token)} from ComponentRegistry was not found in the /dev/components page HTML"
+    end
+
+    refute html =~ "--ax-neutral", "phantom token --ax-neutral must not appear on the /dev/components page"
+    refute html =~ "--ax-ink", "phantom token --ax-ink must not appear on the /dev/components page"
+    refute html =~ "--ax-info", "--ax-info is defined in theme.css but must not appear on the components page (not a registry token)"
+  end
+
   defp theme_css_path do
     Path.expand("../../../assets/css/theme.css", __DIR__)
   end

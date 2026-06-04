@@ -257,6 +257,14 @@ if Mix.env() != :prod do
               <% end %>
             </div>
           </section>
+
+          <%!-- Banners showcase (danger/dunning) — stable locator for Playwright --%>
+          <section :if={@available?} class="ax-card ax-dev-stack">
+            <p class="ax-label">Banners</p>
+            <div data-ax-kitchen-banner="danger" class="ax-banner ax-banner-danger">
+              Action Required — danger banner (dunning), token-driven styling.
+            </div>
+          </section>
         </section>
       </AppShell.app_shell>
       """

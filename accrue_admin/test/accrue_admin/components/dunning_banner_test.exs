@@ -62,5 +62,35 @@ defmodule AccrueAdmin.Components.DunningBannerTest do
       refute html =~ "Action Required"
       assert String.trim(html) == ""
     end
+
+    # Automating Phase 174 human-UAT item 2: "Confirm dunning banner renders correctly in dev
+    # without inline style override — the ax-banner-danger class applies background and text
+    # colors via CSS tokens with no inline style= fallback."
+    #
+    # This test reads app.css and theme.css at test-time to assert the token cascade is wired.
+    # No browser required — CSS file assertions guarantee that whenever the rendered HTML carries
+    # ax-banner-danger, the CSS class resolves background-color and color from the danger tokens.
+    test "ax-banner-danger CSS class wires background and text to danger tokens (no browser needed)" do
+      app_css = File.read!(app_css_path())
+      theme_css = File.read!(theme_css_path())
+
+      assert app_css =~ "background-color: var(--ax-danger-surface)",
+             "ax-banner-danger must wire background-color to var(--ax-danger-surface)"
+
+      assert app_css =~ "color: var(--ax-danger-readable)",
+             "ax-banner-danger must wire color to var(--ax-danger-readable)"
+
+      assert theme_css =~ "--ax-danger:",
+             "--ax-danger must be defined in theme.css"
+
+      assert theme_css =~ "--ax-danger-readable:",
+             "--ax-danger-readable must be defined in theme.css"
+
+      assert theme_css =~ "--ax-danger-surface:",
+             "--ax-danger-surface must be defined in theme.css"
+    end
   end
+
+  defp app_css_path, do: Path.expand("../../../assets/css/app.css", __DIR__)
+  defp theme_css_path, do: Path.expand("../../../assets/css/theme.css", __DIR__)
 end
