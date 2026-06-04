@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.EventsLive do
 
   alias Accrue.Events.Event
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, KpiCard}
   alias AccrueAdmin.OwnerScope
   alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
@@ -82,6 +82,11 @@ defmodule AccrueAdmin.Live.EventsLive do
           </KpiCard.kpi_card>
         </section>
 
+        <FilterChipBar.filter_chip_bar
+          items={compliance_chips(@params, @table_path)}
+          label="Quick filters"
+        />
+
         <.live_component
           module={DataTable}
           id="events"
@@ -123,6 +128,35 @@ defmodule AccrueAdmin.Live.EventsLive do
       </section>
     </AppShell.app_shell>
     """
+  end
+
+  # Compliance actor-lens chip — IA-07.
+  # Always rendered (active: true) so Compliance persona sees the lens at all times.
+  # When actor_type param is set, chip is cobalt + shows Clear (remove_href clears filter).
+  # When actor_type param is absent, chip is slate + has activation href via ScopedPath.build/4
+  # so the label renders as <a href> (filter_chip_bar :href extension, Plan 175-06).
+  defp compliance_chips(params, table_path) do
+    actor_active = Map.get(params, "actor_type") not in [nil, ""]
+    # Build activation href using the table_path as the base plus actor_type=admin param.
+    # ScopedPath.build appends org= automatically; for events_live table_path already includes
+    # mount_path so we append query params via URI.
+    activation_href = append_query(table_path, %{"actor_type" => "admin"})
+
+    [
+      %{
+        id: :by_actor,
+        label: "By actor",
+        tone: if(actor_active, do: :cobalt, else: :slate),
+        active: true,
+        value: if(actor_active, do: params["actor_type"], else: nil),
+        remove_href: if(actor_active, do: table_path, else: nil),
+        href: if(actor_active, do: nil, else: activation_href)
+      }
+    ]
+  end
+
+  defp append_query(base_path, params) do
+    base_path <> "?" <> URI.encode_query(params)
   end
 
   defp assign_shell(socket, admin) do

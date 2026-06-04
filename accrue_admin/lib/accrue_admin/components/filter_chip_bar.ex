@@ -41,9 +41,18 @@ defmodule AccrueAdmin.Components.FilterChipBar do
       |> assign(:label_text, chip_label(assigns.item))
       |> assign(:value_text, chip_value(assigns.item))
 
+    assigns =
+      assign(assigns, :activation_href, chip_activation_href(assigns.item))
+
     ~H"""
     <span class={["ax-filter-chip", "ax-filter-chip-" <> @tone]} data-filter={Map.get(@item, :id)}>
-      <span class="ax-filter-chip-label"><%= @label_text %></span>
+      <a
+        :if={@activation_href}
+        href={@activation_href}
+        class="ax-filter-chip-label ax-filter-chip-activation"
+        aria-label={"Apply #{chip_accessible_label(@item)} filter"}
+      ><%= @label_text %></a>
+      <span :if={!@activation_href} class="ax-filter-chip-label"><%= @label_text %></span>
       <span :if={@value_text} class="ax-filter-chip-value"><%= @value_text %></span>
       <a
         :if={Map.get(@item, :remove_href)}
@@ -55,6 +64,15 @@ defmodule AccrueAdmin.Components.FilterChipBar do
       </a>
     </span>
     """
+  end
+
+  # Returns activation href only when the chip has an :href and no :remove_href.
+  # When :remove_href is set, the Clear link already provides navigation — the :href is not rendered.
+  defp chip_activation_href(item) do
+    case {Map.get(item, :href), Map.get(item, :remove_href)} do
+      {href, nil} when is_binary(href) -> href
+      _ -> nil
+    end
   end
 
   defp chip_active?(item), do: Map.get(item, :active, true)
