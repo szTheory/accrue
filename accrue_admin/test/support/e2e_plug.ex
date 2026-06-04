@@ -38,6 +38,22 @@ defmodule AccrueAdmin.E2E.Plug do
     json(conn, 200, Fixtures.seed_operator_flows!())
   end
 
+  post "/seed/edge-states" do
+    json(conn, 200, Fixtures.seed_edge_states!())
+  end
+
+  post "/__e2e__/seed/edge-states" do
+    json(conn, 200, Fixtures.seed_edge_states!())
+  end
+
+  post "/seed/overflow" do
+    json(conn, 200, Fixtures.seed_overflow!())
+  end
+
+  post "/__e2e__/seed/overflow" do
+    json(conn, 200, Fixtures.seed_overflow!())
+  end
+
   get "/counts" do
     json(conn, 200, Fixtures.current_counts())
   end
