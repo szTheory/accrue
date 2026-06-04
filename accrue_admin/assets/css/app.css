@@ -1447,7 +1447,9 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   color: var(--ax-primary);
   font-size: var(--ax-type-sm);
   font-weight: 700;
-  /* Phase D: asymmetric speed — collapse pending (colors use --ax-theme-transition; transform uses --ax-motion-fast) */
+  /* Intentional exception: two-token asymmetric transition — not collapsible to a single bundle.
+     Color/border/background use --ax-theme-transition (180ms); transform uses --ax-motion-fast (120ms).
+     Collapsing would lose the enter/exit speed difference. See Phase 174 Gap 3 resolution. */
   transition:
     border-color var(--ax-theme-transition),
     background var(--ax-theme-transition),
