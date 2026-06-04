@@ -114,6 +114,37 @@ defmodule AccrueAdmin.EventLiveTest do
              live(conn, "/billing/events/#{unknown_id}")
   end
 
+  test "renders semantic dl/dt/dd facts inside summary_card", %{conn: conn, event: event} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+
+    # Summary card facts slot must use dl/dt/dd — not bare <span>Actor: ...
+    assert html =~ ~s(class="ax-label")
+    assert html =~ ~s(class="ax-body")
+    # The dl wrapper must be present inside the facts slot
+    assert html =~ "<dl"
+  end
+
+  test "renders a detail_section body with event type, actor, subject, recorded fields", %{
+    conn: conn,
+    event: event
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")
+
+    # Detail.detail_section renders ax-detail-section class
+    assert html =~ "ax-detail-section"
+    # Field list should be rendered with ax-field-list
+    assert html =~ "ax-field-list"
+    # Known field labels and values from the event fixture
+    assert html =~ "Type"
+    assert html =~ "Actor type"
+    assert html =~ "Subject type"
+    assert html =~ "Recorded"
+  end
+
   # --- helpers ---
 
   defp insert_webhook(attrs) do

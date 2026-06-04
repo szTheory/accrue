@@ -64,11 +64,27 @@ defmodule AccrueAdmin.Live.EventLive do
 
         <Detail.summary_card eyebrow="Event detail" title={@event.type}>
           <:facts>
-            <span>Actor: <%= @event.actor_type %></span>
-            <span>Subject: <%= @event.subject_type %> <%= @event.subject_id %></span>
-            <span>Recorded: <%= format_datetime(@event.inserted_at) %></span>
+            <dl class="ax-summary-facts-dl">
+              <dt class="ax-label">Actor</dt>
+              <dd class="ax-body"><%= @event.actor_type %> <%= @event.actor_id || "" %></dd>
+              <dt class="ax-label">Subject</dt>
+              <dd class="ax-body"><%= @event.subject_type %> <%= @event.subject_id %></dd>
+              <dt class="ax-label">Recorded</dt>
+              <dd class="ax-body"><%= format_datetime(@event.inserted_at) %></dd>
+            </dl>
           </:facts>
         </Detail.summary_card>
+
+        <Detail.detail_section title="Event details">
+          <Detail.detail_field_list fields={[
+            %{label: "Type", value: @event.type},
+            %{label: "Actor type", value: @event.actor_type || "--"},
+            %{label: "Actor ID", value: @event.actor_id || "--"},
+            %{label: "Subject type", value: @event.subject_type || "--"},
+            %{label: "Subject ID", value: @event.subject_id || "--"},
+            %{label: "Recorded", value: format_datetime(@event.inserted_at)}
+          ]} />
+        </Detail.detail_section>
 
         <RelatedResources.related_resources items={@related_items} />
       </section>
