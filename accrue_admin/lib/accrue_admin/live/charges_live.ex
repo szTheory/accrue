@@ -129,8 +129,8 @@ defmodule AccrueAdmin.Live.ChargesLive do
               options: [{"true", "Yes"}, {"false", "No"}]
             }
           ]}
-          empty_title={Copy.charges_index_empty_title()}
-          empty_copy={Copy.charges_index_empty_copy()}
+          empty_title={queue_empty_title(@params)}
+          empty_copy={queue_empty_copy(@params)}
         />
       </section>
     </AppShell.app_shell>
@@ -277,6 +277,22 @@ defmodule AccrueAdmin.Live.ChargesLive do
   defp build_default_params(_scope, status), do: %{"status" => status}
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  # Queue-context-aware empty states (IA-03 contract).
+  defp queue_active?(params),
+    do: Map.get(params, "status") == @default_queue_status and Map.get(params, "view") != "all"
+
+  defp queue_empty_title(params) do
+    if queue_active?(params),
+      do: "No failed payments",
+      else: Copy.charges_index_empty_title()
+  end
+
+  defp queue_empty_copy(params) do
+    if queue_active?(params),
+      do: "Nothing failed in this view. View All to see every payment.",
+      else: Copy.charges_index_empty_copy()
+  end
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

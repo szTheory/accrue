@@ -142,8 +142,8 @@ defmodule AccrueAdmin.Live.InvoicesLive do
               ]
             }
           ]}
-          empty_title={Copy.invoices_index_empty_title()}
-          empty_copy={Copy.invoices_index_empty_copy()}
+          empty_title={queue_empty_title(@params)}
+          empty_copy={queue_empty_copy(@params)}
         />
       </section>
     </AppShell.app_shell>
@@ -287,6 +287,24 @@ defmodule AccrueAdmin.Live.InvoicesLive do
   defp build_default_params(_scope, status), do: %{"status" => status}
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  # Queue-context-aware empty states (IA-03 contract).
+  # When the persona work-queue filter is active and returns zero rows, show
+  # a task-complete message rather than the generic "no data" copy.
+  defp queue_active?(params),
+    do: Map.get(params, "status") == @default_queue_status and Map.get(params, "view") != "all"
+
+  defp queue_empty_title(params) do
+    if queue_active?(params),
+      do: "Queue clear",
+      else: Copy.invoices_index_empty_title()
+  end
+
+  defp queue_empty_copy(params) do
+    if queue_active?(params),
+      do: "No open or uncollectible invoices. View All to see every invoice.",
+      else: Copy.invoices_index_empty_copy()
+  end
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

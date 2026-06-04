@@ -153,8 +153,8 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             },
             %{id: :customer_id, label: "Customer id"}
           ]}
-          empty_title={Copy.subscriptions_index_empty_title()}
-          empty_copy={Copy.subscriptions_index_empty_copy()}
+          empty_title={queue_empty_title(@params)}
+          empty_copy={queue_empty_copy(@params)}
         />
       </section>
     </AppShell.app_shell>
@@ -286,6 +286,22 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   defp build_default_params(_scope, status), do: %{"status" => status}
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
+
+  # Queue-context-aware empty states (IA-03 contract).
+  defp queue_active?(params),
+    do: Map.get(params, "status") == @default_queue_status and Map.get(params, "view") != "all"
+
+  defp queue_empty_title(params) do
+    if queue_active?(params),
+      do: "Nothing at risk",
+      else: Copy.subscriptions_index_empty_title()
+  end
+
+  defp queue_empty_copy(params) do
+    if queue_active?(params),
+      do: "No past-due or canceling subscriptions. View All to see every subscription.",
+      else: Copy.subscriptions_index_empty_copy()
+  end
 
   defp scoped_path(mount_path, suffix, %{mode: :organization, organization_slug: slug})
        when is_binary(slug) do
