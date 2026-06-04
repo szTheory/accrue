@@ -210,14 +210,14 @@ async function seedAll(request) {
 | coupon-detail | `/billing/coupons/:coupon_id` | edge-states.coupon_id |
 | promotion-codes | `/billing/promotion-codes` | edge-states.promo_code_id |
 | promo-code-detail | `/billing/promotion-codes/:promo_code_id` | edge-states.promo_code_id |
-| connect | `/billing/connect-accounts` | edge-states.connect_account_id |
-| connect-detail | `/billing/connect-accounts/:connect_account_id` | edge-states.connect_account_id |
+| connect | `/billing/connect` | edge-states.connect_account_id |
+| connect-detail | `/billing/connect/:connect_account_id` | edge-states.connect_account_id |
 | events | `/billing/events` | operator-flows.source_event_id |
 | event-detail | `/billing/events/:source_event_id` | operator-flows.source_event_id |
 | webhooks | `/billing/webhooks` | operator-flows.single_webhook_id |
 | webhook-detail | `/billing/webhooks/:single_webhook_id` | operator-flows.single_webhook_id |
 | recovery | `/billing/analytics/recovery` | edge-states |
-| campaign-detail | `/billing/analytics/recovery/campaigns/:at_risk_sub_id` | edge-states.at_risk_sub_id |
+| campaign-detail | `/billing/analytics/recovery/subscriptions/:at_risk_sub_id` | edge-states.at_risk_sub_id |
 
 **Note on coupons/promo-codes:** The `edge-states` fixture inserts one coupon and one promo code so list screens will be populated. The `host:showcase.exs` note in STATE-MATRIX refers to dev-only seeds; for E2E test context `edge-states` is sufficient.
 
@@ -456,14 +456,14 @@ test("captures every primary admin surface in light and dark", async ({ page, re
     ["coupon-detail",      `/billing/coupons/${edge.coupon_id}`],
     ["promotion-codes",    "/billing/promotion-codes"],
     ["promo-code-detail",  `/billing/promotion-codes/${edge.promo_code_id}`],
-    ["connect",            "/billing/connect-accounts"],
-    ["connect-detail",     `/billing/connect-accounts/${edge.connect_account_id}`],
+    ["connect",            "/billing/connect"],
+    ["connect-detail",     `/billing/connect/${edge.connect_account_id}`],
     ["events",             "/billing/events"],
     ["event-detail",       `/billing/events/${opFlows.source_event_id}`],
     ["webhooks",           "/billing/webhooks"],
     ["webhook-detail",     `/billing/webhooks/${opFlows.single_webhook_id}`],
     ["recovery",           "/billing/analytics/recovery"],
-    ["campaign-detail",    `/billing/analytics/recovery/campaigns/${edge.at_risk_sub_id}`],
+    ["campaign-detail",    `/billing/analytics/recovery/subscriptions/${edge.at_risk_sub_id}`],
   ];
 
   for (const [name, path] of shots) {
@@ -648,11 +648,11 @@ The `score-visuals.mjs` script reads the `ANTHROPIC_API_KEY` from environment �
    - Nav-collapse: `[data-collapse-toggle="true"]`
    - Webhook replay drawer: `data-role="replay-single"`
 
-2. **`connect-accounts` route slug** — RESOLVED: route is `/billing/connect-accounts` (confirmed from router.ex grep; shots array uses this path).
+2. **`connect-accounts` route slug** — RESOLVED: route is `/billing/connect` (confirmed from router.ex grep; shots array uses this path).
 
 3. **Scoring script model recommendation** — RESOLVED: default `claude-sonnet-4-5` with `SCORE_MODEL` env var override; `@anthropic-ai/sdk` 0.100.1 selected (Anthropic official npm package, verified in Package Legitimacy Audit).
 
-4. **Campaign-detail route** — RESOLVED: route is `/billing/analytics/recovery/campaigns/:at_risk_sub_id` (confirmed from router.ex; shots array uses this pattern).
+4. **Campaign-detail route** — RESOLVED: route is `/billing/analytics/recovery/subscriptions/:at_risk_sub_id` (confirmed from router.ex; shots array uses this pattern).
 
 ---
 
@@ -661,7 +661,7 @@ The `score-visuals.mjs` script reads the `ANTHROPIC_API_KEY` from environment �
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
 | A1 | The `coupons` and `promotion-codes` list screens will be populated by the `edge-states` fixture (which inserts 1 coupon + 1 promo code) | Standard Stack — shots array | List screens may show with only 1 row; still "populated" per rubric; low risk |
-| A2 | The campaign-detail route accepts a subscription UUID directly: `/billing/analytics/recovery/campaigns/:at_risk_sub_id` | Code Examples | If route accepts a different param, the URL pattern is wrong; verify from router.ex |
+| A2 | The campaign-detail route accepts a subscription UUID directly: `/billing/analytics/recovery/subscriptions/:at_risk_sub_id` | Code Examples | If route accepts a different param, the URL pattern is wrong; verify from router.ex |
 | A3 | `claude-sonnet-4-5` is available in the Anthropic messages API for vision | Code Examples | If not, use `claude-opus-4-5` or check current model availability |
 | A4 | The motion-trace spec can trigger the detail drawer via `data-role="action-drawer-trigger"` | Code Examples | The actual selector may differ; must verify from component templates |
 
