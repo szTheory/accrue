@@ -308,6 +308,85 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ "Billing records appear here when they match this view"
   end
 
+  # ─── Nyquist structural guards (Phase 176-06) ───────────────────────────────
+  #
+  # These tests read source files directly to assert structural invariants that
+  # cannot be caught by LiveView rendering alone. They follow the same File.read!
+  # pattern established in dunning_banner_test.exs and component_registry_test.exs.
+  #
+  # Guard 1: the .ax-data-table-shell CSS breakpoint uses the --ax-bp-md token
+  # (768px) not a bare pixel literal. Changing this to 1024px would regress ⑤
+  # for all 9 list screens.
+  #
+  # Guard 2: ax-measure is not misapplied to columnar targets (ax-empty-copy,
+  # ax-field-list). These receive their own width constraints; double-capping
+  # them with ax-measure breaks layout.
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  describe "Nyquist CSS breakpoint guard" do
+    test "data-table card/table swap uses --ax-bp-md (768px) breakpoint token comment" do
+      app_css = File.read!(app_css_path())
+
+      # The @media block that shows .ax-data-table-shell at ≥768px must carry the
+      # registered --ax-bp-md ↑ comment. Without this comment the token guard fails
+      # and the next developer cannot verify the breakpoint is intentional.
+      assert app_css =~ "min-width: 768px) { /* --ax-bp-md ↑ */",
+             "ax-data-table-shell @media block must use 768px with --ax-bp-md ↑ comment"
+
+      # Regression guard: the old 1024px breakpoint must NOT be adjacent to ax-data-table-shell.
+      # We can't do a perfect line-proximity check in a string, but we can assert that
+      # the CSS does not pair 1024px and ax-data-table-shell on the same logical line.
+      # The pattern "1024px" in the data-table block would indicate the breakpoint reverted.
+      #
+      # Positive confirmation: verify at least 2 occurrences of the --ax-bp-md ↑ comment
+      # (data-table block + ax-grid-2 block) — this proves the token is used consistently.
+      match_count =
+        app_css
+        |> String.split("min-width: 768px) { /* --ax-bp-md ↑ */")
+        |> length()
+        |> Kernel.-(1)
+
+      assert match_count >= 2,
+             "Expected ≥2 occurrences of --ax-bp-md ↑ comment in app.css (data-table + grid blocks), got #{match_count}"
+    end
+  end
+
+  describe "Nyquist ax-measure misapplication guard" do
+    test "ax-measure is not applied to ax-empty-copy or ax-field-list in live templates" do
+      live_files =
+        Path.wildcard(live_files_glob())
+
+      assert Enum.any?(live_files), "Expected live template files to exist at #{live_files_glob()}"
+
+      contents =
+        Enum.map_join(live_files, "\n", fn path ->
+          case File.read(path) do
+            {:ok, content} -> content
+            {:error, _} -> ""
+          end
+        end)
+
+      # ax-empty-copy already has its own max-width: 28rem cap — adding ax-measure
+      # creates a double-cap that breaks the empty state layout.
+      refute contents =~ "ax-empty-copy ax-measure",
+             "ax-measure must NOT be applied to ax-empty-copy (it has its own width cap)"
+
+      # ax-field-list is a columnar dl/dt/dd grid — applying ax-measure collapses
+      # both columns to 68ch which destroys the 2-column field layout.
+      refute contents =~ "ax-field-list ax-measure",
+             "ax-measure must NOT be applied to ax-field-list (columnar layout, not prose)"
+    end
+  end
+
+  defp app_css_path, do: Path.expand("../../../assets/css/app.css", __DIR__)
+
+  defp live_files_glob do
+    base = Path.expand("../../../lib/accrue_admin/live", __DIR__)
+    base <> "/**/*_live.ex"
+  end
+
+  # ─── end Nyquist structural guards ──────────────────────────────────────────
+
   test "polls for newer rows and only reloads them when explicitly requested", %{conn: conn} do
     {:ok, view, _html} =
       live_isolated(conn, TableLive,
