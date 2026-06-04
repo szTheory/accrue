@@ -4,6 +4,7 @@ import { initClipboardControls } from "./hooks/clipboard";
 import { initThemeControls } from "./hooks/accrue_theme";
 import { initShellNav } from "./hooks/accrue_shell_nav";
 import { CommandPalette } from "./hooks/command_palette";
+import { SidebarCollapse } from "./hooks/sidebar_collapse";
 
 function ready(callback) {
   if (document.readyState === "loading") {
@@ -22,7 +23,7 @@ ready(() => {
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   params: csrfToken ? { _csrf_token: csrfToken } : {},
-  hooks: { CommandPalette }
+  hooks: { CommandPalette, SidebarCollapse }
 });
 
 liveSocket.connect();

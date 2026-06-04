@@ -30,7 +30,7 @@ defmodule AccrueAdmin.Components.Topbar do
           aria-label="Search (Command or Control K)"
         >
           <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
-          <span class="ax-search-trigger-text">Search customers, invoices, events…</span>
+          <span class="ax-search-trigger-text">Search customers, invoices… ⌘K</span>
           <kbd class="ax-kbd">⌘K</kbd>
         </button>
 

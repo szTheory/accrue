@@ -109,8 +109,8 @@ defmodule AccrueAdmin.DashboardLiveTest do
     assert html =~ Copy.home_launcher_customers_title()
     assert html =~ Copy.home_launcher_invoices_title()
     assert html =~ Copy.home_launcher_recovery_title()
-    # Title contains "&" which HEEx escapes to &amp;; assert the ampersand-free prefix.
-    assert html =~ "Debug webhooks"
+    # Title relabeled in Phase 175-02 (IA-01 verb relabels); use Copy function directly.
+    assert html =~ Copy.home_launcher_developer_title()
 
     # Zone 3 — demoted KPI strip
     assert html =~ Copy.dashboard_kpi_customers_label()

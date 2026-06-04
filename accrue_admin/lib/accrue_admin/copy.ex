@@ -695,20 +695,20 @@ defmodule AccrueAdmin.Copy do
 
   def home_attention_meter_label, do: "failed to report — usage not billed"
 
-  def home_launcher_customers_title, do: "Find a customer"
+  def home_launcher_customers_title, do: "Look up a customer"
 
   def home_launcher_customers_copy,
     do: "Search by name, email, or ID, then open their billing 360."
 
-  def home_launcher_invoices_title, do: "Work open invoices"
+  def home_launcher_invoices_title, do: "Clear the invoice queue"
 
   def home_launcher_invoices_copy, do: "Review, void, or chase open receivables."
 
-  def home_launcher_recovery_title, do: "Recover failed payments"
+  def home_launcher_recovery_title, do: "Recover at-risk revenue"
 
   def home_launcher_recovery_copy, do: "Work the dunning funnel and at-risk subscriptions."
 
-  def home_launcher_developer_title, do: "Debug webhooks & events"
+  def home_launcher_developer_title, do: "Investigate an incident"
 
   def home_launcher_developer_copy,
     do: "Inspect payloads, replay dead-letters, and trace events."

@@ -133,16 +133,16 @@ defmodule AccrueAdmin.Components.GlobalSearch do
               <p class="ax-eyebrow">Jump to</p>
               <ul class="ax-command-palette-list">
                 <li class="ax-command-palette-item" data-path={path(@mount_path, "/customers")}>
-                  <Icon.icon name={:users} size="sm" /> <span>Find a customer</span>
+                  <Icon.icon name={:users} size="sm" /> <span>Look up a customer</span>
                 </li>
                 <li class="ax-command-palette-item" data-path={path(@mount_path, "/invoices?status=open")}>
-                  <Icon.icon name={:invoices} size="sm" /> <span>Work open invoices</span>
+                  <Icon.icon name={:invoices} size="sm" /> <span>Clear the invoice queue</span>
                 </li>
                 <li class="ax-command-palette-item" data-path={path(@mount_path, "/analytics/recovery")}>
-                  <Icon.icon name={:recovery} size="sm" /> <span>Recover failed payments</span>
+                  <Icon.icon name={:recovery} size="sm" /> <span>Recover at-risk revenue</span>
                 </li>
                 <li class="ax-command-palette-item" data-path={path(@mount_path, "/webhooks?status=dead")}>
-                  <Icon.icon name={:webhooks} size="sm" /> <span>Debug dead-letter webhooks</span>
+                  <Icon.icon name={:webhooks} size="sm" /> <span>Investigate an incident</span>
                 </li>
               </ul>
             </div>
