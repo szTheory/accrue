@@ -220,7 +220,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 — host dev seed)*
 
-- [ ] 178-04-PLAN.md — edge_states.exs (canceling sub, JPY charge, long-name customer) + seeds.exs wire (SEED-01, SEED-02)
+- [x] 178-04-PLAN.md — edge_states.exs (canceling sub, JPY charge, long-name customer) + seeds.exs wire (SEED-01, SEED-02)
 
 **UI hint**: yes
 
@@ -298,7 +298,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete   | 2026-06-04 |
-| 178. E — Seed Expressiveness & State Coverage | v1.51 | 3/4 | In Progress|  |
+| 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
