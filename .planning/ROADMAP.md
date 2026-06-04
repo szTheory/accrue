@@ -117,7 +117,7 @@ Plans:
 **Wave 3** *(parallel — blocked on Wave 2)*
 
 - [x] 175-05-PLAN.md — EventLive (/events/:id) + WebhookLive Related card + Webhook→Event→entity threading (IA-04, IA-06)
-- [ ] 175-06-PLAN.md — Customer-360 tab tiering (More ▾) + compliance actor-lens chip on events (IA-05, IA-07)
+- [x] 175-06-PLAN.md — Customer-360 tab tiering (More ▾) + compliance actor-lens chip on events (IA-05, IA-07)
 
 **Wave 4** *(blocked on Wave 3)*
 
@@ -238,7 +238,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 175. B — Persona-Driven IA Spine | v1.51 | 5/7 | In Progress|  |
+| 175. B — Persona-Driven IA Spine | v1.51 | 6/7 | In Progress|  |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/? | Not started | - |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
