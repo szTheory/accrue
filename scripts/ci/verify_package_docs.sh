@@ -325,5 +325,25 @@ if grep -E '@media \((min|max)-width: [0-9.]+px\)' "$app_css" | grep -qv '\-\-ax
   fail "$app_css must not have bare breakpoint @media without an --ax-bp-* annotation comment (DSY-01 — add a /* --ax-bp-NAME ↑/↓ */ comment to every breakpoint @media)"
 fi
 
+# Motion antipattern guards (Phase 177, MOT-01)
+if grep -qE 'transition:\s*all\b' "$app_css"; then
+  fail "$app_css must not use 'transition: all' (MOT-01/A1) — name the exact properties or use an --ax-transition-* bundle"
+fi
+
+if grep -qE 'cubic-bezier\(' "$app_css"; then
+  fail "$app_css must not contain raw cubic-bezier() literals (MOT-01/A3) — use --ax-ease-* atoms from theme.css"
+fi
+
+if grep -E '(transition|animation):[^;]*[0-9]+(ms|s)\b' "$app_css" | grep -qv 'ax-skeleton-shimmer'; then
+  fail "$app_css must not have raw ms/s duration literals in transition/animation rules (MOT-01/A3) — use --ax-dur-* tokens; exception: ax-skeleton-shimmer 1.4s is allowlisted"
+fi
+
+if grep -qE 'transition:[^;]*\b(height|width|margin|padding|top|left|right|bottom)\b' "$app_css"; then
+  fail "$app_css must not animate layout-triggering properties in transition lists (MOT-01/A2) — use only opacity/transform (composited)"
+fi
+
+# Motion guide existence (Phase 177, MOT-01)
+require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/motion.md"'
+
 echo "package docs verified for accrue $accrue_version, accrue_admin $accrue_admin_version, and accrue_portal $accrue_portal_version"
 echo "fixed invariants checked: README.md, RELEASING.md, CONTRIBUTING.md, quickstart.md, 15-TRUST-REVIEW.md, STRIPE_TEST_SECRET_KEY, release-gate, host-integration, retain-on-failure, only-on-failure, First run, Seeded history, mix verify, mix verify.full"
