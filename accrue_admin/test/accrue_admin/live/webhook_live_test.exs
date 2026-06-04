@@ -148,6 +148,38 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "Replay requested for the active organization."
   end
 
+  test "forensic payload section uses Detail.detail_section not hand-rolled ax-card", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    # Detail.detail_section renders ax-detail-section class
+    assert html =~ "ax-detail-section"
+    # The forensic section content should be present
+    assert html =~ "Stored raw payload and metadata"
+    # Endpoint and processed fields should appear via detail_field_list
+    assert html =~ "Endpoint"
+    assert html =~ "Processed"
+  end
+
+  test "applies ax-measure to Activity-feed prose paragraph in forensic section", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    # ax-measure on the activity-feed prose paragraph
+    assert html =~ ~s(class="ax-body ax-measure")
+    # The activity feed link must still be present
+    assert html =~ "View linked activity"
+    assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
+  end
+
   test "webhook loader distinguishes in-scope, out-of-scope, and ambiguous ownership" do
     in_scope_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
     out_scope_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})

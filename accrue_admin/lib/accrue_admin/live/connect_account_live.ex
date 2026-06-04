@@ -141,7 +141,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         </section>
 
         <Detail.detail_section title={AccrueAdmin.Copy.connect_account_section_platform_fee_heading()}>
-          <p class="ax-body">
+          <p class="ax-body ax-measure">
             <%= AccrueAdmin.Copy.connect_account_section_platform_fee_body() %>
           </p>
 

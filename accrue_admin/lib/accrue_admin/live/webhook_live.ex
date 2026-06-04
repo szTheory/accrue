@@ -213,30 +213,25 @@ defmodule AccrueAdmin.Live.WebhookLive do
           </Detail.detail_section>
         </section>
 
-        <section :if={@webhook} class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow">Forensic payload</p>
-            <h3 class="ax-heading">Stored raw payload and metadata</h3>
-          </header>
-
-          <div class="ax-stack-xl">
-            <p class="ax-body">Endpoint: <%= humanize(@webhook.endpoint) %></p>
-            <p class="ax-body">Processed: <%= format_datetime(@webhook.processed_at) %></p>
-            <p class="ax-body">
-              Activity feed:
-              <a
-                class="ax-link"
-                href={
-                  scoped_mount_path(@admin_mount_path, "/events", @current_owner_scope, %{
-                    "source_webhook_event_id" => @webhook.id
-                  })
-                }
-              >
-                View linked activity
-              </a>
-            </p>
-          </div>
-        </section>
+        <Detail.detail_section :if={@webhook} title="Stored raw payload and metadata">
+          <Detail.detail_field_list fields={[
+            %{label: "Endpoint", value: humanize(@webhook.endpoint)},
+            %{label: "Processed", value: format_datetime(@webhook.processed_at)}
+          ]} />
+          <p class="ax-body ax-measure">
+            Activity feed:
+            <a
+              class="ax-link"
+              href={
+                scoped_mount_path(@admin_mount_path, "/events", @current_owner_scope, %{
+                  "source_webhook_event_id" => @webhook.id
+                })
+              }
+            >
+              View linked activity
+            </a>
+          </p>
+        </Detail.detail_section>
 
         <JsonViewer.json_viewer
           :if={@webhook}

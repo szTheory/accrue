@@ -118,6 +118,31 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     assert audit_event.actor_type == "admin"
   end
 
+  test "applies ax-measure to platform-fee description prose", %{
+    conn: conn,
+    account: account
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/connect/#{account.id}")
+
+    # ax-measure must appear on the platform-fee description paragraph
+    assert html =~ ~s(class="ax-body ax-measure")
+  end
+
+  test "preserves save_override form phx-submit and data-role button after prose change", %{
+    conn: conn,
+    account: account
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/connect/#{account.id}")
+
+    # Both the form event and the button role must be present unchanged
+    assert html =~ ~s(phx-submit="save_override")
+    assert html =~ ~s(data-role="save-override")
+  end
+
   defp insert_account(attrs) do
     defaults = %{
       owner_type: "User",
