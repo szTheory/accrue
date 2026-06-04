@@ -215,8 +215,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
                 the refund is created.
               </p>
               <div :if={@charge.processor == "braintree"} class="ax-stack-sm">
-                <p class="ax-body"><%= Copy.charge_refund_braintree_eligibility_info() %></p>
-                <p class="ax-body"><%= Copy.charge_refund_not_final_truth_warning() %></p>
+                <p class="ax-body ax-measure"><%= Copy.charge_refund_braintree_eligibility_info() %></p>
+                <p class="ax-body ax-measure"><%= Copy.charge_refund_not_final_truth_warning() %></p>
               </div>
             </header>
 
@@ -239,7 +239,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
             <section :if={@pending_refund} class="ax-card" data-role="confirm-panel">
               <p class="ax-label">Confirm refund</p>
-              <p class="ax-body"><%= refund_copy(@pending_refund, @charge.currency) %></p>
+              <p class="ax-body ax-measure"><%= refund_copy(@pending_refund, @charge.currency) %></p>
               <div class="ax-page-header">
                 <button phx-click="confirm_refund" class="ax-button ax-button-primary" data-role="confirm-refund">
                   Confirm refund

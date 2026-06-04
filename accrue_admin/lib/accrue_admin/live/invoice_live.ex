@@ -260,13 +260,13 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             >
               <p class="ax-eyebrow"><%= Copy.invoice_tax_risk_eyebrow() %></p>
               <h3 class="ax-heading"><%= Copy.invoice_tax_risk_heading() %></h3>
-              <p :if={present?(@invoice.automatic_tax_disabled_reason)} class="ax-body">
+              <p :if={present?(@invoice.automatic_tax_disabled_reason)} class="ax-body ax-measure">
                 <%= Copy.invoice_tax_disabled_reason_label() %> <%= humanize(@invoice.automatic_tax_disabled_reason) %>.
               </p>
-              <p :if={present?(@invoice.last_finalization_error_code)} class="ax-body">
+              <p :if={present?(@invoice.last_finalization_error_code)} class="ax-body ax-measure">
                 <%= Copy.invoice_tax_finalization_failure_label() %> <%= @invoice.last_finalization_error_code %>.
               </p>
-              <p class="ax-body">
+              <p class="ax-body ax-measure">
                 <%= Copy.invoice_tax_recovery_body() %>
               </p>
             </section>
@@ -274,7 +274,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
             <header class="ax-page-header">
               <p class="ax-eyebrow"><%= Copy.invoice_actions_eyebrow() %></p>
               <h3 class="ax-heading"><%= Copy.invoice_actions_heading() %></h3>
-              <p class="ax-body"><%= Copy.invoice_actions_body() %></p>
+              <p class="ax-body ax-measure"><%= Copy.invoice_actions_body() %></p>
             </header>
 
             <div class="ax-stack-xl">

@@ -103,15 +103,30 @@ defmodule AccrueAdmin.EventLiveTest do
     assert html =~ "/billing/invoices/#{invoice.id}"
   end
 
-  test "GET /events/:id with unknown ID redirects to /events", %{conn: conn} do
+  test "GET /events/:id with unknown ID redirects to /events with flash", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     unknown_id = 9_999_999
 
     # The initial HTTP GET does not include query string params in conn.params
     # (Phoenix LiveView static render uses path params only). So the redirect
     # goes to the base /billing/events path without an org qualifier.
-    assert {:error, {:redirect, %{to: "/billing/events"}}} =
-             live(conn, "/billing/events/#{unknown_id}")
+    result = live(conn, "/billing/events/#{unknown_id}")
+    assert {:error, {:redirect, redirect_info}} = result
+    assert redirect_info.to =~ "/billing/events"
+    # Flash must carry a not-found error message (dim ④ = 2 requirement)
+    flash =
+      case redirect_info[:flash] do
+        flash when is_map(flash) ->
+          flash
+
+        token when is_binary(token) ->
+          Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, token)
+
+        _ ->
+          %{}
+      end
+
+    assert flash["error"] != nil
   end
 
   test "renders semantic dl/dt/dd facts inside summary_card", %{conn: conn, event: event} do

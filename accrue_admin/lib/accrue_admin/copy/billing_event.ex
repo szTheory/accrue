@@ -71,4 +71,6 @@ defmodule AccrueAdmin.Copy.BillingEvent do
   def billing_events_webhook_source_direct, do: "Direct"
 
   def billing_events_when_unknown, do: "Unknown"
+
+  def billing_event_not_found, do: "Event not found."
 end

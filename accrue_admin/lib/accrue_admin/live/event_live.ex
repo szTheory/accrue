@@ -23,6 +23,7 @@ defmodule AccrueAdmin.Live.EventLive do
       nil ->
         {:ok,
          socket
+         |> put_flash(:error, AccrueAdmin.Copy.billing_event_not_found())
          |> redirect(
            to: scoped_admin_path(admin, socket.assigns.current_owner_scope, "/events")
          )}

@@ -207,6 +207,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate coupon_promotion_code_status_active(), to: Coupon
   defdelegate coupon_promotion_code_status_inactive(), to: Coupon
   defdelegate coupon_promotion_code_status_active_until_prefix(), to: Coupon
+  defdelegate coupon_not_found(), to: Coupon
 
   defdelegate promotion_codes_breadcrumb_index(), to: PromotionCode
   defdelegate promotion_codes_index_eyebrow(), to: PromotionCode
@@ -385,6 +386,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate billing_events_copy_global(), to: BillingEvent
   defdelegate billing_events_webhook_source_direct(), to: BillingEvent
   defdelegate billing_events_when_unknown(), to: BillingEvent
+  defdelegate billing_event_not_found(), to: BillingEvent
 
   def data_table_default_empty_title, do: "Nothing in this list yet"
 

@@ -16,7 +16,10 @@ defmodule AccrueAdmin.Live.CouponLive do
 
     case Repo.get(Coupon, coupon_id) do
       nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/coupons"))}
+        {:ok,
+         socket
+         |> put_flash(:error, AccrueAdmin.Copy.coupon_not_found())
+         |> redirect(to: admin_path(admin, "/coupons"))}
 
       coupon ->
         mount_path = admin["mount_path"] || "/billing"

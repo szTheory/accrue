@@ -133,6 +133,31 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert html =~ "ANNUAL15"
   end
 
+  test "redirects with flash when coupon id is not found", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    nonexistent_id = Ecto.UUID.generate()
+    result = live(conn, "/billing/coupons/#{nonexistent_id}")
+
+    # Should redirect (not render)
+    assert {:error, {:redirect, redirect_info}} = result
+    assert redirect_info.to =~ "/billing/coupons"
+    # Flash must carry a not-found error message
+    flash =
+      case redirect_info[:flash] do
+        flash when is_map(flash) ->
+          flash
+
+        token when is_binary(token) ->
+          Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, token)
+
+        _ ->
+          %{}
+      end
+
+    assert flash["error"] != nil
+  end
+
   defp insert_coupon(attrs) do
     defaults = %{
       processor: "stripe",
