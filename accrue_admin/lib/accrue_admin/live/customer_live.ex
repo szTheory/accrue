@@ -220,12 +220,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
-            label="Charges"
+            label="Payments"
             value={Integer.to_string(@tab_counts.charges)}
             delta={Integer.to_string(@tab_counts.invoices) <> " invoices"}
             delta_tone="slate"
           >
-            <:meta>Charges and invoices tied to this customer</:meta>
+            <:meta>Payments and invoices tied to this customer</:meta>
           </KpiCard.kpi_card>
 
           <KpiCard.kpi_card
@@ -315,7 +315,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
             </Detail.detail_section>
 
           <% "charges" -> %>
-            <Detail.detail_section title="Charges">
+            <Detail.detail_section title="Payments">
               <div :for={charge <- charges(@customer)} class="ax-list-row">
                 <span class="ax-body"><%= charge.processor_id || charge.id %> · <%= charge.status %></span>
                 <MoneyFormatter.money_formatter amount_minor={charge.amount_cents || 0} currency={charge.currency || "usd"} customer={@customer} />
@@ -537,7 +537,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
       },
       %{
         icon: :payments,
-        label: "Charges",
+        label: "Payments",
         href: ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
       },
       %{
