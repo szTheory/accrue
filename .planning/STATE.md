@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.51
 milestone_name: Admin UI Depth Pass
 status: executing
-last_updated: "2026-06-04T08:31:12.012Z"
+last_updated: "2026-06-04T09:01:30.661Z"
 last_activity: 2026-06-04
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 14
-  completed_plans: 11
+  completed_plans: 12
   percent: 17
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 ## Current Position
 
 Phase: 175 (B — Persona-Driven IA Spine) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-06-04
 
@@ -123,6 +123,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: AttentionCounts extracted into shared context fn; NavBadgeHook post-auth with DB-error rescue; Nav.items/3 backward-compat via default arg; SidebarCollapse localStorage key prefixed with mount_path
 - [Phase ?]: URI.encode/1 applied to :id in RedirectController for path traversal prevention
 - [Phase ?]: live('/events/:id') route stub in router.ex; EventLive ships in Wave 3; warning-not-error compile status confirmed
+- [Phase ?]: EventLive not-found redirect omits put_flash (fetch_flash missing from accrue_admin_browser pipeline)
 
 ### Pending Todos
 
@@ -145,6 +146,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 175 P02 | 18min | 2 tasks | 11 files |
 | Phase 175 P03 | 4 | 2 tasks | 6 files |
 | Phase 175 P04 | 15m | 2 tasks | 10 files |
+| Phase 175 P05 | 62 | 2 tasks | 4 files |
 
 ### Milestone Intake Rules
 
@@ -169,8 +171,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-04T08:31:12.009Z
-Stopped at: Phase 174 UI-SPEC approved
+Last session: 2026-06-04T09:01:30.658Z
+Stopped at: Completed 175-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
