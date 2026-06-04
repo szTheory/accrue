@@ -45,10 +45,10 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 
 ### Per-Screen Rubric Uplift (SCR) — Phase 176 (C)
 
-- [ ] **SCR-01**: Every admin screen scores ≥2 on all 10 rubric dimensions in both light and dark themes.
-- [ ] **SCR-02**: Every admin screen scores ≥2 on all 10 rubric dimensions at both desktop and mobile (usable @360px) widths.
-- [ ] **SCR-03**: The under-iterated tail (charges, coupons, promotion-codes, connect, events, webhooks, invoice detail) is lifted to the rubric baseline, with documented before/after scores per screen.
-- [ ] **SCR-04**: Dense text/detail screens apply a reading-measure max-width container and a mobile-first responsive layout built on the DSY breakpoint tokens.
+- [x] **SCR-01**: Every admin screen scores ≥2 on all 10 rubric dimensions in both light and dark themes.
+- [x] **SCR-02**: Every admin screen scores ≥2 on all 10 rubric dimensions at both desktop and mobile (usable @360px) widths.
+- [x] **SCR-03**: The under-iterated tail (charges, coupons, promotion-codes, connect, events, webhooks, invoice detail) is lifted to the rubric baseline, with documented before/after scores per screen.
+- [x] **SCR-04**: Dense text/detail screens apply a reading-measure max-width container and a mobile-first responsive layout built on the DSY breakpoint tokens.
 
 ### Motion & Micro-interaction (MOT) — Phase 177 (D)
 
@@ -83,10 +83,10 @@ Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
 | IA-05 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
 | IA-06 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
 | IA-07 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| SCR-01 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
-| SCR-02 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
-| SCR-03 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
-| SCR-04 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
+| SCR-01 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
+| SCR-02 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
+| SCR-03 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
+| SCR-04 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
 | MOT-01 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
 | MOT-02 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
 | MOT-03 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
