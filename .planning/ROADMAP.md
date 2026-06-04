@@ -206,7 +206,22 @@ Plans:
   1. Every admin screen's empty, populated, overflow/pagination, error, and loading states are reachable from seeded data on a single click-through (via E2E seed fixtures at `/__e2e__/seed/<fixture>` + host `seeds.exs`).
   2. Each edge state (dunning/at-risk, multi-currency, long strings, dark-only contrast traps) has a seeded instance; no screen depends on hand-picked IDs to look right.
 
-**Plans:** TBD
+**Plans:** 4 plans across 3 waves
+
+Plans:
+**Wave 1** *(foundation — matrix + test scaffold)*
+
+- [ ] 178-01-PLAN.md — STATE-MATRIX.md (21 screens × 8 state dims) + e2e_fixtures_test.exs RED scaffold (SEED-01, SEED-02)
+
+**Wave 2** *(parallel — E2E fixtures + host dunning bug fix)*
+
+- [ ] 178-02-PLAN.md — seed_edge_states!/0 + seed_overflow!/0 + e2e_plug routes (SEED-01, SEED-02)
+- [ ] 178-03-PLAN.md — host dunning bug fix (hero_accounts.exs phantom UUIDs) + regression test + CI runner allowlists (SEED-02)
+
+**Wave 3** *(blocked on Wave 2 — host dev seed)*
+
+- [ ] 178-04-PLAN.md — edge_states.exs (canceling sub, JPY charge, long-name customer) + seeds.exs wire (SEED-01, SEED-02)
+
 **UI hint**: yes
 
 ### Phase 179: F — Screenshot-Driven Visual QA Loop & Sign-off
