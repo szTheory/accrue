@@ -67,7 +67,7 @@ if Mix.env() != :prod do
           family: "status",
           variant: "cobalt",
           ax_class: "ax-status-badge ax-status-badge-cobalt",
-          tokens: ["--ax-info", "--ax-info-readable", "--ax-elevated"]
+          tokens: ["--ax-accent", "--ax-accent-readable", "--ax-elevated"]
         },
         %{
           family: "status",
@@ -79,13 +79,13 @@ if Mix.env() != :prod do
           family: "status",
           variant: "slate",
           ax_class: "ax-status-badge ax-status-badge-slate",
-          tokens: ["--ax-neutral", "--ax-neutral-readable", "--ax-elevated"]
+          tokens: ["--ax-border", "--ax-muted", "--ax-elevated"]
         },
         %{
           family: "status",
           variant: "ink",
           ax_class: "ax-status-badge ax-status-badge-ink",
-          tokens: ["--ax-ink", "--ax-ink-readable", "--ax-elevated"]
+          tokens: ["--ax-primary", "--ax-elevated"]
         },
 
         # ── Card family — base + 5 delta tones from normalize_tone/1 ───────────────
@@ -108,7 +108,7 @@ if Mix.env() != :prod do
           family: "card",
           variant: "cobalt",
           ax_class: "ax-kpi-delta ax-kpi-delta-cobalt",
-          tokens: ["--ax-info", "--ax-transition-colors"]
+          tokens: ["--ax-accent", "--ax-accent-readable", "--ax-transition-colors"]
         },
         %{
           family: "card",
@@ -120,13 +120,13 @@ if Mix.env() != :prod do
           family: "card",
           variant: "slate",
           ax_class: "ax-kpi-delta ax-kpi-delta-slate",
-          tokens: ["--ax-neutral", "--ax-transition-colors"]
+          tokens: ["--ax-primary", "--ax-muted", "--ax-transition-colors"]
         },
         %{
           family: "card",
           variant: "ink",
           ax_class: "ax-kpi-delta ax-kpi-delta-ink",
-          tokens: ["--ax-ink", "--ax-transition-colors"]
+          tokens: ["--ax-primary", "--ax-muted", "--ax-transition-colors"]
         }
       ]
     end
