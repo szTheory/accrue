@@ -11,7 +11,10 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   def mount(socket) do
     {:ok,
      assign(socket,
-       mount_path: "/billing",
+       # mount_path is provided by update/2 from app_shell; nil here avoids
+       # silently building broken navigation links if update/2 is not called
+       # (e.g. during a hot-reload partial update or future refactors).
+       mount_path: nil,
        query: "",
        results: %{customers: [], invoices: [], subscriptions: []},
        is_open: false,
