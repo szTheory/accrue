@@ -643,17 +643,15 @@ No missing dependencies.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Poll-banner screenshot timing**
+1. **Poll-banner screenshot timing** — RESOLVED
    - What we know: The poll-banner appears when `newer_count > 0`, which is set after a 5s poll interval fires.
-   - What's unclear: Whether Phase 179's Playwright sweep will handle the 5s wait, or whether Phase 178 should add a `post "/seed/trigger-poll-banner"` endpoint that directly sets `newer_count` via a LiveView inject.
-   - Recommendation: Document in STATE-MATRIX as "requires double-seed + 5s wait" for now; Phase 179 can decide whether to add a toggle.
+   - Resolution: Documented in STATE-MATRIX as "no-fixture: POST /seed/operator-flows twice (no reset between) + wait 5s for poll_interval → newer_count banner appears". Phase 179 owns the actual screenshot timing and will decide whether to add a test-only toggle (out of scope for Phase 178).
 
-2. **Dark-only contrast traps — which specific CSS classes need seeded instances**
+2. **Dark-only contrast traps — which specific CSS classes need seeded instances** — RESOLVED
    - What we know: `ax-badge-warning` / `ax-badge-danger` (sidebar badges), status chips on subscription/invoice/webhook detail.
-   - What's unclear: Whether any tinted surfaces have failing contrast in dark mode that require specific data to exercise (vs. being visible on any populated screen).
-   - Recommendation: Phase 179's axe pass will surface the specific failures; Phase 178 only needs to ensure every tinted state is seeded (e.g., a `:past_due` subscription ensures the danger-tone badge renders).
+   - Resolution: seed_edge_states! seeds a `:past_due` subscription (triggers `ax-badge-danger` / tinted-status chip on SubscriptionLive, SubscriptionsLive work-queue, DashboardLive badge) and an `:open` invoice (status chip on InvoiceLive). STATE-MATRIX records these as "seed_edge_states — :past_due status triggers tinted chip" per the dark-contrast column. Phase 179's axe pass will surface any specific failures; Phase 178 ensures the seeded instances are present.
 
 ---
 
