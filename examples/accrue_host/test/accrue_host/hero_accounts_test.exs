@@ -3,11 +3,11 @@ defmodule AccrueHost.HeroAccountsTest do
 
   setup do
     Application.put_env(:accrue, :env, :dev)
-    
+
     Code.compiler_options(ignore_module_conflict: true)
     Code.eval_file("priv/repo/seeds.exs")
     Code.compiler_options(ignore_module_conflict: false)
-    
+
     Application.put_env(:accrue, :env, :test)
     :ok
   end
@@ -30,5 +30,24 @@ defmodule AccrueHost.HeroAccountsTest do
 
     org_canceled = Repo.get_by!(Organization, slug: "canceled-co")
     assert {:ok, %{subscription: %Accrue.Billing.Subscription{status: :canceled}}} = Billing.billing_state_for(org_canceled)
+  end
+
+  test "dunning campaign_started events have subject_ids that match real subscriptions" do
+    alias Accrue.Billing.Subscription
+    alias Accrue.Events.Event
+    import Ecto.Query
+
+    events =
+      Repo.all(
+        from e in Event,
+          where: e.type == "dunning.campaign_started" and e.subject_type == "Subscription"
+      )
+
+    assert length(events) >= 1, "Expected at least 1 dunning.campaign_started event"
+
+    Enum.each(events, fn event ->
+      assert Repo.get(Subscription, event.subject_id) != nil,
+             "dunning.campaign_started event #{event.idempotency_key} has phantom subject_id #{event.subject_id}"
+    end)
   end
 end
