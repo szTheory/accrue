@@ -136,6 +136,10 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     customer = TestRepo.get!(Customer, invoice.customer_id)
     assert html =~ ~s(href="/billing/customers/#{customer.id}")
 
+    # Related card must use /payments not /charges
+    assert html =~ "/billing/payments"
+    refute html =~ ~s(href="/billing/charges)
+
     html = render_click(element(view, "button", "Open PDF"))
     assert html =~ "Open rendered PDF"
     assert html =~ "Download rendered PDF"

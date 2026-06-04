@@ -77,6 +77,25 @@ defmodule AccrueAdmin.SubscriptionLiveTest do
      source_event: source_event}
   end
 
+  test "renders RelatedResources card with customer and events links", %{
+    conn: conn,
+    subscription: subscription
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions/#{subscription.id}")
+
+    # Related resources card must be present
+    assert html =~ ~s(class="ax-card ax-related")
+    # Customer link in related resources
+    assert html =~ "/billing/customers/#{subscription.customer_id}"
+    # Invoices filtered by subscription_id in related resources
+    assert html =~ "subscription_id=#{subscription.id}"
+    # Events filtered by Subscription subject in related resources
+    assert html =~ "subject_type=Subscription"
+    assert html =~ "subject_id=#{subscription.id}"
+  end
+
   test "renders canonical predicate summary and subscription timeline", %{
     conn: conn,
     subscription: subscription

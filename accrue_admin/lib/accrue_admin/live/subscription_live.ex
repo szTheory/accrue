@@ -16,6 +16,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
     FlashGroup,
     JsonViewer,
     KpiCard,
+    RelatedResources,
     StatusBadge,
     StepUpAuthModal,
     TaxOwnershipCard,
@@ -44,6 +45,9 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          )}
 
       {:ok, subscription} ->
+        mount_path = admin["mount_path"] || "/billing"
+        scope = socket.assigns.current_owner_scope
+
         {:ok,
          socket
          |> assign_shell(admin)
@@ -56,6 +60,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
          |> assign(:timeline_events, timeline_events(subscription.id))
          |> assign(:proration_options, proration_options())
          |> assign(:swap_plan_available, swap_plan_available?(subscription))
+         |> assign(:related_items, related_items(subscription, mount_path, scope))
          |> assign(:flashes, [])
          |> assign(:pending_action, nil)}
     end
@@ -155,6 +160,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
           </:facts>
         </Detail.summary_card>
 
+        <RelatedResources.related_resources items={@related_items} />
+
         <FlashGroup.flash_group flashes={@flashes} />
 
         <section class="ax-kpi-grid" aria-label={Copy.subscription_kpi_section_aria_label()}>
@@ -202,7 +209,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
               </li>
               <li>
                 <a
-                  href={ScopedPath.build(@admin_mount_path, "/charges", @current_owner_scope, %{"customer_id" => @customer.id})}
+                  href={ScopedPath.build(@admin_mount_path, "/payments", @current_owner_scope, %{"customer_id" => @customer.id})}
                   class="ax-link"
                 >
                   <%= Copy.subscription_drill_link_charges_for_customer() %>
@@ -1187,6 +1194,46 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp money_or_dash(%Accrue.Money{} = money) do
     "#{money.amount_minor} #{money.currency}"
+  end
+
+  defp related_items(subscription, mount_path, scope) do
+    customer_items =
+      if subscription.customer do
+        customer = subscription.customer
+        label = customer.name || customer.email || customer.id
+
+        [
+          %{
+            icon: :users,
+            label: "Customer",
+            value: label,
+            href: ScopedPath.build(mount_path, "/customers/#{subscription.customer_id}", scope)
+          }
+        ]
+      else
+        []
+      end
+
+    customer_items ++
+      [
+        %{
+          icon: :invoices,
+          label: "Invoices",
+          href:
+            ScopedPath.build(mount_path, "/invoices", scope, %{
+              "subscription_id" => subscription.id
+            })
+        },
+        %{
+          icon: :events,
+          label: "Events",
+          href:
+            ScopedPath.build(mount_path, "/events", scope, %{
+              "subject_type" => "Subscription",
+              "subject_id" => subscription.id
+            })
+        }
+      ]
   end
 
   defp default_brand do

@@ -565,8 +565,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
           },
           %{
             icon: :payments,
-            label: "Other charges for this customer",
-            href: ScopedPath.build(mount_path, "/charges", scope, %{"customer_id" => customer.id})
+            label: "Other payments for this customer",
+            href: ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
           }
         ]
       else

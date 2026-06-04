@@ -7,7 +7,8 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   alias Accrue.Billing.{Coupon, PromotionCode}
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, JsonViewer, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, JsonViewer, KpiCard, RelatedResources}
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(%{"id" => coupon_id}, session, socket) do
@@ -18,11 +19,15 @@ defmodule AccrueAdmin.Live.CouponLive do
         {:ok, redirect(socket, to: admin_path(admin, "/coupons"))}
 
       coupon ->
+        mount_path = admin["mount_path"] || "/billing"
+        scope = socket.assigns.current_owner_scope
+
         {:ok,
          socket
          |> assign_shell(admin)
          |> assign(:coupon, coupon)
-         |> assign(:promotion_codes, promotion_codes(coupon.id))}
+         |> assign(:promotion_codes, promotion_codes(coupon.id))
+         |> assign(:related_items, related_items(coupon, mount_path, scope))}
     end
   end
 
@@ -104,6 +109,8 @@ defmodule AccrueAdmin.Live.CouponLive do
             <p class="ax-body"><%= AccrueAdmin.Copy.coupon_detail_label_processor() %> <%= @coupon.processor || "--" %></p>
           </div>
         </section>
+
+        <RelatedResources.related_resources items={@related_items} />
 
         <JsonViewer.json_viewer id="coupon-payload" label={AccrueAdmin.Copy.coupon_json_payload_label()} payload={payload(@coupon)} />
       </section>
@@ -202,6 +209,25 @@ defmodule AccrueAdmin.Live.CouponLive do
   end
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+
+  defp related_items(coupon, mount_path, scope) do
+    [
+      %{
+        icon: :promotions,
+        label: "Promotion codes",
+        href: ScopedPath.build(mount_path, "/promotion-codes", scope)
+      },
+      %{
+        icon: :events,
+        label: "Events",
+        href:
+          ScopedPath.build(mount_path, "/events", scope, %{
+            "subject_type" => "Coupon",
+            "subject_id" => coupon.id
+          })
+      }
+    ]
+  end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

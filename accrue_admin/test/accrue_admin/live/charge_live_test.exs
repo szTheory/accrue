@@ -90,7 +90,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
   test "renders fee breakdown and existing refund fee fields", %{conn: conn, charge: charge} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/charges/#{charge.id}")
+    assert {:ok, _view, html} = live(conn, "/billing/payments/#{charge.id}")
 
     # UX-02: single ax-page on charge detail
     assert Regex.scan(~r/class="ax-page"/, html) |> length() == 1
@@ -108,7 +108,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    {:ok, view, _html} = live(conn, "/billing/charges/#{charge.id}")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
 
     html =
       render_submit(
@@ -160,7 +160,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    {:ok, view, _html} = live(conn, "/billing/charges/#{charge.id}")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
 
     _ =
       render_submit(
@@ -190,7 +190,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    {:ok, view, _html} = live(conn, "/billing/charges/#{charge.id}")
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
 
     _ =
       render_submit(
@@ -240,7 +240,7 @@ defmodule AccrueAdmin.ChargeLiveTest do
     })
 
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
-    {:ok, view, html} = live(conn, "/billing/charges/#{charge.id}")
+    {:ok, view, html} = live(conn, "/billing/payments/#{charge.id}")
 
     assert html =~ Copy.charge_refund_braintree_eligibility_info()
     assert html =~ Copy.charge_refund_not_final_truth_warning()
