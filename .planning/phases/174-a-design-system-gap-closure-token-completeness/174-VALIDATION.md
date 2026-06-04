@@ -1,10 +1,11 @@
 ---
 phase: 174
 slug: a-design-system-gap-closure-token-completeness
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-03
+validated: 2026-06-04
 ---
 
 # Phase 174 — Validation Strategy
@@ -40,11 +41,12 @@ created: 2026-06-03
 
 > Populated by the planner/executor. Source signals (from RESEARCH.md §Validation Architecture):
 
-| Success Criterion | Observable signal that proves it TRUE |
-|-------------------|----------------------------------------|
-| SC1 — every line-height/letter-spacing/breakpoint/transition value resolves from `ax-*` | Grep guard returns ZERO un-tokenized `line-height:`/`letter-spacing:`/`min-width:`/`max-width:`/multi-line `transition:` literals in `app.css` not registered or token-commented; the new breakpoint needle present in BOTH `verify_package_docs.sh` AND `PackageDocsVerifierTest` seed |
-| SC2 — zero inline-hex fallbacks / zero inline styles on dunning + invoice render paths | `grep -rn 'style=' accrue_admin/lib/accrue_admin/components/dunning_banner.ex` returns zero; exhaustive `style=` sweep on invoice surfaces returns zero; banner still renders via `.ax-banner.ax-banner-danger` |
-| SC3 — `/dev/components` enumerates every button/badge/status/card variant + token mapping | `ComponentRegistryTest` renders the page, asserts every registry variant appears, asserts registry `ax_class` set == component class outputs (adding a 5th variant without a registry entry fails CI). Must include `Button` `danger` variant |
+| Success Criterion | Status | Observable signal that proves it TRUE |
+|-------------------|--------|----------------------------------------|
+| SC1 — every line-height/letter-spacing/breakpoint/transition value resolves from `ax-*` | ✅ green | Grep guard returns ZERO un-tokenized `line-height:`/`letter-spacing:`/`min-width:`/`max-width:`/multi-line `transition:` literals in `app.css` not registered or token-commented; the new breakpoint needle present in BOTH `verify_package_docs.sh` AND `PackageDocsVerifierTest` seed. **Tests:** `verify_package_docs.sh:324` breakpoint guard + `component_registry_test.exs` token-validity (test c) + `package_docs_verifier_test.exs` coupling (10 tests) |
+| SC2 — zero inline-hex fallbacks / zero inline styles on dunning + invoice render paths | ✅ green | `grep -rn 'style=' accrue_admin/lib/accrue_admin/components/dunning_banner.ex` returns zero; exhaustive `style=` sweep on invoice surfaces returns zero; banner still renders via `.ax-banner.ax-banner-danger`. **Tests:** `dunning_banner_test.exs` (refute `style=` + CSS wiring) + `e2e/kitchen-banner.spec.js` (computed-style, both themes) |
+| SC3 — `/dev/components` enumerates every button/badge/status/card variant + token mapping | ✅ green | `ComponentRegistryTest` renders the page, asserts every registry variant appears, asserts registry `ax_class` set == component class outputs (adding a 5th variant without a registry entry fails CI). Includes `Button` `danger` variant. **Tests:** `component_registry_test.exs` (3 tests: render coverage, MapSet drift-guard, definition-anchored token validity) |
+| D-15 — `prefers-reduced-motion` collapses the `--ax-transition-*` bundles to instant | ✅ green | Under `emulateMedia({reducedMotion:"reduce"})`, every comma-segment of `getComputedStyle('.ax-button').transitionDuration` is `0s`; negative control proves a non-zero duration without the override. **Test:** `e2e/reduced-motion.spec.js` (2 cases, green) — *promoted from Manual-Only in the 2026-06-04 audit* |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -52,8 +54,8 @@ created: 2026-06-03
 
 ## Wave 0 Requirements
 
-- [ ] `accrue_admin/test/accrue_admin/dev/component_registry_test.exs` — drift-prevention test stub for DSY-03 (D-21)
-- [ ] New breakpoint/token needle added to `PackageDocsVerifierTest` `seed_tmp_dir!` fixture in the SAME change as the `verify_package_docs.sh` guard needle (verify_package_docs ↔ test coupling)
+- [x] `accrue_admin/test/accrue_admin/dev/component_registry_test.exs` — drift-prevention test stub for DSY-03 (D-21) — 3 tests green
+- [x] New breakpoint/token needle added to `PackageDocsVerifierTest` `seed_tmp_dir!` fixture in the SAME change as the `verify_package_docs.sh` guard needle (verify_package_docs ↔ test coupling) — 10 tests green
 
 *Otherwise: existing ExUnit + LiveViewTest infrastructure covers all phase requirements.*
 
@@ -63,8 +65,9 @@ created: 2026-06-03
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Light/dark side-by-side token resolution on `/dev/components` reads correctly (D-20) | DSY-03 | Visual fidelity not fully assertable in unit test | Open `/dev/components` in dev; confirm each row shows live swatch + copy-paste `ax-*` class + resolved `--ax-*` tokens in both themes |
-| Reduced-motion bundle override collapses transitions (D-15) | DSY-01 | Requires OS-level prefers-reduced-motion | Enable reduced motion; confirm color/shadow cross-fades go instant, transform-lift collapses to 0ms |
+| Light/dark side-by-side token resolution on `/dev/components` reads correctly (D-20) | DSY-03 | Visual swatch fidelity not fully assertable — the *token cascade* in both themes is automated (`kitchen-banner.spec.js` proves painted color differs light vs dark; `component_registry_test.exs` asserts the `<dl>` token data), but a human still confirms each row's live swatch renders correctly | Open `/dev/components` in dev; confirm each row shows live swatch + copy-paste `ax-*` class + resolved `--ax-*` tokens in both themes |
+
+*Reduced-motion bundle collapse (D-15) was promoted from Manual-Only to automated in the 2026-06-04 audit — see `e2e/reduced-motion.spec.js`.*
 
 *Screenshot regression of `/dev/components` is deferred to Phase F (noted as intent only).*
 
@@ -72,11 +75,23 @@ created: 2026-06-03
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 60s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 60s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** validated 2026-06-04
+
+---
+
+## Validation Audit 2026-06-04
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 1 |
+| Resolved | 1 |
+| Escalated | 0 |
+
+**Detail:** SC1, SC2, SC3 confirmed COVERED against the green automated suite (per 174-VERIFICATION.md, 13/13). Manual item M-1 (light/dark token resolution) found partially automated via `kitchen-banner.spec.js` + `component_registry_test.exs`; residual visual-swatch check kept manual-only. One genuine MISSING gap closed: **D-15 reduced-motion bundle collapse** — `gsd-nyquist-auditor` wrote `e2e/reduced-motion.spec.js` (positive + negative-control, executed green) and the item was promoted out of Manual-Only. Phase is now Nyquist-compliant.
