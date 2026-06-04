@@ -39,9 +39,13 @@ export const SidebarCollapse = {
   },
 
   setExpanded(expanded) {
-    this.el.setAttribute("aria-expanded", String(expanded));
+    // Guard before any mutation: if the controlled list is missing (e.g. during
+    // a LiveView reconnect where data-controls id has not yet stabilised), skip
+    // so aria-expanded never diverges from visible DOM state.
     const list = document.getElementById(this.el.dataset.controls);
     if (!list) return;
+
+    this.el.setAttribute("aria-expanded", String(expanded));
 
     if (expanded) {
       // Expand: reveal first so the CSS opacity transition can run 0→1
@@ -51,14 +55,29 @@ export const SidebarCollapse = {
       // Collapse: trigger exit opacity transition, then set hidden on transitionend
       // so assistive technology skips the content once the animation completes.
       list.classList.add("ax-collapsed");
-      list.addEventListener(
-        "transitionend",
-        () => {
-          list.hidden = true;
-          list.classList.remove("ax-collapsed");
-        },
-        { once: true }
+
+      // Under prefers-reduced-motion, --ax-dur-exit is 0ms. A zero-duration
+      // CSS transition does not fire transitionend on most browsers, leaving
+      // the list permanently visible (opacity 0, pointer-events: none) but
+      // announced to screen readers as un-hidden content. Read back the computed
+      // duration and apply hidden state synchronously on the reduced-motion path.
+      const duration = parseFloat(
+        getComputedStyle(list).getPropertyValue("transition-duration")
       );
+      if (!duration || duration <= 0.001) {
+        // Reduced-motion path: apply immediately.
+        list.hidden = true;
+        list.classList.remove("ax-collapsed");
+      } else {
+        list.addEventListener(
+          "transitionend",
+          () => {
+            list.hidden = true;
+            list.classList.remove("ax-collapsed");
+          },
+          { once: true }
+        );
+      }
     }
   },
 
