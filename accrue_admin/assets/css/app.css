@@ -776,6 +776,68 @@ a.ax-kpi-card--linked:focus-visible {
   border-top: 1px solid var(--ax-border);
 }
 
+/* ============================================================================
+   Phase 177 (v1.51 MOT-02) — Detail drawer enter/exit transition classes
+   Used by detail_drawer.ex as phx-mounted/phx-remove JS.show/hide tuples.
+   Enter: JS.show(transition: {"ax-drawer-entering","ax-drawer-enter-from","ax-drawer-enter-to"}, time: 240)
+   Exit:  JS.hide(transition: {"ax-drawer-leaving","ax-drawer-leave-from","ax-drawer-leave-to"}, time: 140)
+   All durations reference --ax-dur-* tokens; zero raw ms literals.
+   ========================================================================== */
+.ax-drawer-enter-from {
+  opacity: 0;
+  transform: translateX(var(--ax-rise-md));
+}
+
+.ax-drawer-entering {
+  transition:
+    opacity var(--ax-dur-3) var(--ax-ease-out),
+    transform var(--ax-dur-3) var(--ax-ease-out);
+}
+
+.ax-drawer-enter-to {
+  opacity: 1;
+  transform: translateX(0px);
+}
+
+/* Exit fade-only (no travel out) — snappy dismiss per MOT-02 enter/exit asymmetry.
+   JS.hide time: 140 (--ax-dur-exit). */
+.ax-drawer-leave-from {
+  opacity: 1;
+}
+
+.ax-drawer-leaving {
+  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
+}
+
+.ax-drawer-leave-to {
+  opacity: 0;
+}
+
+/* Backdrop transition classes — fade in sync with drawer shell */
+.ax-drawer-backdrop-enter-from {
+  opacity: 0;
+}
+
+.ax-drawer-backdrop-entering {
+  transition: opacity var(--ax-dur-3) var(--ax-ease-out);
+}
+
+.ax-drawer-backdrop-enter-to {
+  opacity: 1;
+}
+
+.ax-drawer-backdrop-leave-from {
+  opacity: 1;
+}
+
+.ax-drawer-backdrop-leaving {
+  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
+}
+
+.ax-drawer-backdrop-leave-to {
+  opacity: 0;
+}
+
 .ax-timeline-list,
 .ax-json-tree-root,
 .ax-json-children {
@@ -978,6 +1040,43 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-flash-error {
   border-color: color-mix(in srgb, var(--ax-primary) 55%, var(--ax-border));
+}
+
+/* ============================================================================
+   Phase 177 (v1.51 MOT-02) — Flash enter/exit transition classes
+   Used by flash_group.ex as phx-mounted/phx-remove JS.show/hide tuples per article.
+   Enter: JS.show(transition: {"ax-flash-entering","ax-flash-enter-from","ax-flash-enter-to"}, time: 180)
+   Exit:  JS.hide(transition: {"ax-flash-leaving","ax-flash-leave-from","ax-flash-leave-to"}, time: 140)
+   All durations reference --ax-dur-* tokens; zero raw ms literals.
+   ========================================================================== */
+.ax-flash-enter-from {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--ax-rise-sm)));
+}
+
+.ax-flash-entering {
+  transition:
+    opacity var(--ax-dur-2) var(--ax-ease-out),
+    transform var(--ax-dur-2) var(--ax-ease-out);
+}
+
+.ax-flash-enter-to {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+/* Exit fade-only — snappy dismiss per MOT-02 asymmetry.
+   JS.hide time: 140 (--ax-dur-exit). */
+.ax-flash-leave-from {
+  opacity: 1;
+}
+
+.ax-flash-leaving {
+  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
+}
+
+.ax-flash-leave-to {
+  opacity: 0;
 }
 
 .ax-button,
