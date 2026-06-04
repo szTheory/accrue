@@ -1,13 +1,16 @@
 export const CommandPalette = {
   mounted() {
     this.activeIndex = 0;
+    // Track previous focus to restore on close (WCAG 2.4.3 Focus Order)
+    this.previousFocus = null;
+    this.wasOpen = this.el.parentElement.dataset.open === "true";
     this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
     this.handleInputKeydown = this.handleInputKeydown.bind(this);
-    
+
     window.addEventListener("keydown", this.handleGlobalKeydown);
-    
+
     this.el.addEventListener("keydown", this.handleInputKeydown);
-    
+
     // Initial setup if already open
     this.setupItems();
   },
@@ -15,14 +18,27 @@ export const CommandPalette = {
   updated() {
     this.activeIndex = 0;
     this.setupItems();
-    // Focus the input if we just opened
-    if (this.el.parentElement.dataset.open === "true") {
+
+    const isOpen = this.el.parentElement.dataset.open === "true";
+
+    if (isOpen && !this.wasOpen) {
+      // Palette just opened: save focus before moving it to the input
+      this.previousFocus = document.activeElement;
       const input = this.el.querySelector("input");
       if (input && document.activeElement !== input) {
         // setTimeout to ensure it's visible after LiveView patch
         setTimeout(() => input.focus(), 0);
       }
+    } else if (!isOpen && this.wasOpen) {
+      // Palette just closed: restore focus to the trigger element
+      if (this.previousFocus && typeof this.previousFocus.focus === "function") {
+        // Defer past the CSS exit transition so the focus ring appears after the palette is gone
+        setTimeout(() => this.previousFocus.focus(), 0);
+      }
+      this.previousFocus = null;
     }
+
+    this.wasOpen = isOpen;
   },
 
   destroyed() {
