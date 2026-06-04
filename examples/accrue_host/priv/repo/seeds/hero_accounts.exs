@@ -98,7 +98,7 @@ unless match?(
 end
 
 # Insert deterministic Dunning events for 7d window (Recovered USD)
-sub_7d = Ecto.UUID.generate()
+sub_7d = past_due_subscription.id
 anchor_7d = DateTime.to_iso8601(days_ago.(5))
 
 record_at(
@@ -135,7 +135,7 @@ record_at(
 )
 
 # Insert deterministic Dunning events for 30d window (Exhausted JPY)
-sub_30d = Ecto.UUID.generate()
+sub_30d = canceled_subscription.id
 anchor_30d = DateTime.to_iso8601(days_ago.(25))
 
 record_at(
@@ -161,7 +161,7 @@ record_at(
 )
 
 # Insert deterministic Dunning events for Active (90d window)
-sub_90d = Ecto.UUID.generate()
+sub_90d = past_due_subscription.id
 anchor_90d = DateTime.to_iso8601(days_ago.(60))
 
 record_at(
