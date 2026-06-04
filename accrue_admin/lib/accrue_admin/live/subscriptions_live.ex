@@ -8,9 +8,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   alias Accrue.Billing.{Query, Subscription}
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FlashGroup, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, FlashGroup, KpiCard}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Subscriptions
+
+  @default_queue_status "past_due,canceling"
 
   @impl true
   def mount(_params, session, socket) do
@@ -40,6 +42,19 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   end
 
   @impl true
+  def handle_params(%{"view" => "all"} = params, _uri, socket) do
+    {:noreply, assign(socket, :params, params)}
+  end
+
+  def handle_params(params, _uri, socket) when map_size(params) == 0 do
+    if connected?(socket) do
+      default = build_default_params(socket.assigns[:current_owner_scope], @default_queue_status)
+      {:noreply, push_patch(socket, to: socket.assigns.table_path <> "?" <> URI.encode_query(default))}
+    else
+      {:noreply, assign(socket, :params, params)}
+    end
+  end
+
   def handle_params(params, _uri, socket) do
     {:noreply, assign(socket, :params, params)}
   end
@@ -91,6 +106,11 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
             <:meta>Subscriptions in dunning territory</:meta>
           </KpiCard.kpi_card>
         </section>
+
+        <FilterChipBar.filter_chip_bar
+          items={work_queue_chips(@params, @table_path)}
+          label="Work queue"
+        />
 
         <.live_component
           module={DataTable}
@@ -234,6 +254,36 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
       end
     end)
   end
+
+  defp work_queue_chips(params, table_path) do
+    queue_active = Map.get(params, "status") == @default_queue_status
+    all_active = Map.get(params, "view") == "all"
+
+    [
+      %{
+        id: :status_queue,
+        label: "Queue",
+        value: "past due · canceling",
+        tone: :cobalt,
+        active: queue_active,
+        remove_href: if(queue_active, do: table_path <> "?view=all", else: nil)
+      },
+      %{
+        id: :view_all,
+        label: "All",
+        tone: :slate,
+        active: queue_active or all_active,
+        remove_href: if(all_active, do: table_path, else: nil)
+      }
+    ]
+  end
+
+  defp build_default_params(%{mode: :organization, organization_slug: slug}, status)
+       when is_binary(slug) do
+    %{"status" => status, "org" => slug}
+  end
+
+  defp build_default_params(_scope, status), do: %{"status" => status}
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 
