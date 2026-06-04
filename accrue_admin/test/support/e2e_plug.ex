@@ -54,6 +54,19 @@ defmodule AccrueAdmin.E2E.Plug do
     json(conn, 200, Fixtures.seed_overflow!())
   end
 
+  post "/__e2e__/reset" do
+    Fixtures.reset!()
+    json(conn, 200, %{ok: true})
+  end
+
+  post "/__e2e__/seed/dashboard" do
+    json(conn, 200, Fixtures.seed_dashboard!())
+  end
+
+  post "/__e2e__/seed/operator-flows" do
+    json(conn, 200, Fixtures.seed_operator_flows!())
+  end
+
   get "/counts" do
     json(conn, 200, Fixtures.current_counts())
   end
