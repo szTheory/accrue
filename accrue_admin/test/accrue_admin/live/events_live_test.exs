@@ -79,6 +79,32 @@ defmodule AccrueAdmin.EventsLiveTest do
      out_scope_invoice: out_scope_invoice}
   end
 
+  # --- Plan 175-06: Compliance actor-lens chip tests ---
+
+  test "events list always renders a 'By actor' chip element", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/events")
+    assert html =~ "By actor"
+  end
+
+  test "By actor chip is slate (inactive) when actor_type param is absent", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/events")
+    # chip rendered with slate tone and an activation href
+    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "actor_type"
+  end
+
+  test "By actor chip is cobalt (active) when actor_type=admin in params", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/events?actor_type=admin")
+    assert html =~ "ax-filter-chip-cobalt"
+    # should have Clear remove_href
+    assert html =~ "Clear"
+  end
+
+  # --- end Plan 175-06 tests ---
+
   test "renders the active-organization event feed without out-of-scope rows", %{
     conn: conn,
     webhook_id: webhook_id,
