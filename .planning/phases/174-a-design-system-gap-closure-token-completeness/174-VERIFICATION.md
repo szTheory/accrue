@@ -1,7 +1,7 @@
 ---
 phase: 174-a-design-system-gap-closure-token-completeness
 verified: 2026-06-04T22:30:00Z
-status: human_needed
+status: verified
 score: 13/13 must-haves verified
 overrides_applied: 0
 re_verification:
@@ -13,20 +13,15 @@ re_verification:
     - "All multi-line transition blocks collapsed or formally documented as intentional exceptions (.ax-search-trigger Gap 3 resolved)"
   gaps_remaining: []
   regressions: []
-human_verification:
-  - test: "Visit /dev/components and verify the token <dl> metadata for slate/ink/cobalt variants shows corrected tokens"
-    expected: "Slate badges show --ax-border, --ax-muted; ink badge shows --ax-primary; cobalt shows --ax-accent, --ax-accent-readable"
-    why_human: "Token <dl> content is rendered server-side and only visible in a live browser; grep confirms corrected tokens in the data but visual confirmation of what maintainers see requires rendering"
-  - test: "Confirm dunning banner renders correctly in dev without inline style override"
-    expected: "The ax-banner-danger class applies background and text colors via CSS tokens with no inline style= fallback"
-    why_human: "Visual rendering confirmation requires a live browser; the test only checks HTML string absence, not computed styles"
 ---
 
 # Phase 174: A — Design-System Gap Closure & Token Completeness Verification Report
 
+Both former human-verification items are now automated by CI. Item 1 (token metadata on /dev/components) is covered by the new render test in `component_registry_test.exs`. Item 2 (dunning banner danger styling) is covered by the CSS-wiring test in `dunning_banner_test.exs` and the Playwright computed-style spec `e2e/kitchen-banner.spec.js`.
+
 **Phase Goal:** Close every remaining design-token gap so the admin CSS resolves all spacing/type/radius/shadow/line-height/letter-spacing/breakpoint/transition values from named `ax-*` tokens, kill the last token bypasses, and give maintainers a single component-variants reference.
 **Verified:** 2026-06-04T22:30:00Z
-**Status:** human_needed
+**Status:** verified
 **Re-verification:** Yes — after gap closure (plans 174-05, 174-06, 174-07 + code-review fixes in commit 8804c60c)
 
 ## Goal Achievement
