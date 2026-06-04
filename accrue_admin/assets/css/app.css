@@ -1179,6 +1179,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   border-bottom: 0;
 }
 
+/* Phase 177 (v1.51 MOT-02) — badge color transition */
 .ax-badge {
   display: inline-flex;
   align-items: center;
@@ -1192,6 +1193,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   font-size: var(--ax-type-sm);
   font-weight: 700;
   line-height: var(--ax-leading-tight);
+  transition: var(--ax-transition-colors);
 }
 
 /* ============================================================================
@@ -1212,8 +1214,20 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   color: var(--ax-danger-readable);
 }
 
+/* Phase 177 (v1.51 MOT-02) — Badge first-appear pop (nice-to-have; degrades to no-op
+   when @starting-style is unsupported). Primary deliverable is --ax-transition-colors
+   on .ax-badge above. */
+@supports (@starting-style {}) {
+  .ax-badge-appear {
+    transition: var(--ax-transition-transform);
+    @starting-style {
+      transform: scale(var(--ax-press-scale));
+    }
+  }
+}
+
 /* Chevron icon inside a collapsible sidebar group toggle.
-   Rotates 90deg (instant — no transition in this phase; motion is Phase D)
+   Rotates 90deg via --ax-transition-transform bundle (Phase D — wired)
    when the parent [aria-expanded="true"] is set by the SidebarCollapse JS hook. */
 .ax-sidebar-group-chevron {
   color: var(--ax-muted);
@@ -1303,6 +1317,29 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 .ax-tab-more-item:focus-visible {
   outline: 2px solid var(--ax-focus-ring);
   outline-offset: var(--ax-space-2xs);
+}
+
+/* ============================================================================
+   Phase 177 (v1.51 MOT-02) — More ▾ overflow motion
+   Plan 03 will toggle .ax-tab-more-open on the .ax-tab-more-wrapper when
+   showing/hiding, wiring this CSS. translateY uses --ax-rise-sm (4px) which
+   collapses to 0px under prefers-reduced-motion automatically.
+   ========================================================================== */
+.ax-tab-more-menu {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--ax-rise-sm)));
+  pointer-events: none;
+  transition:
+    opacity var(--ax-dur-2) var(--ax-ease-out),
+    transform var(--ax-dur-2) var(--ax-ease-out);
+}
+
+/* Exit is instant when :if={@more_tabs_open} removes the element — no JS toggle yet.
+   Plan 03 upgrades to JS.transition for full enter/exit. */
+.ax-tab-more-open .ax-tab-more-menu {
+  opacity: 1;
+  transform: translateY(0px);
+  pointer-events: auto;
 }
 
 .ax-button-sm {
@@ -1483,6 +1520,29 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   color: var(--ax-primary);
 }
 
+/* ============================================================================
+   Phase 177 (v1.51 MOT-02) — Dropdown motion
+   Native <details> removes [open] synchronously on close — exit transition does
+   NOT fire. This gives a symmetric 180ms enter; close is instant.
+   translateY uses --ax-rise-sm (4px) which collapses to 0px under
+   prefers-reduced-motion automatically.
+   ========================================================================== */
+details.ax-dropdown .ax-dropdown-panel {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--ax-rise-sm)));
+  pointer-events: none;
+  transition:
+    opacity var(--ax-dur-2) var(--ax-ease-out),
+    transform var(--ax-dur-2) var(--ax-ease-out);
+}
+
+/* Exit is instant (native details[open] removes synchronously — no exit transition; accepted per Phase 177 scope) */
+details[open].ax-dropdown .ax-dropdown-panel {
+  opacity: 1;
+  transform: translateY(0px);
+  pointer-events: auto;
+}
+
 .ax-tabs {
   grid-auto-flow: column;
   grid-auto-columns: max-content;
@@ -1509,6 +1569,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   font-weight: 600;
   line-height: var(--ax-leading-normal);
   white-space: nowrap;
+  transition: var(--ax-transition-colors); /* Phase 177 (v1.51 MOT-02) — color + border crossfade */
 }
 
 .ax-tab-active {
