@@ -187,7 +187,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 177-04-PLAN.md — global_search data-open refactor + command_palette.js hook update (MOT-02/MOT-03)
+- [x] 177-04-PLAN.md — global_search data-open refactor + command_palette.js hook update (MOT-02/MOT-03)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -282,7 +282,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
-| 177. D — Motion & Micro-interaction Design | v1.51 | 3/6 | In Progress|  |
+| 177. D — Motion & Micro-interaction Design | v1.51 | 4/6 | In Progress|  |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
 
