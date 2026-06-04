@@ -37,10 +37,10 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 
 - [ ] **IA-01**: From Home, each of the six personas can reach their primary job in ≤2 clicks via a verb-labeled task launcher or a visible (not hotkey-only) global search field.
 - [ ] **IA-02**: The sidebar presents a weighted primary **Billing** zone with **Recovery / Developer / Catalog** as visually-recessed, collapsible specialist zones that surface attention-count badges (e.g. dead-letters, at-risk) only when work exists.
-- [ ] **IA-03**: List screens open pre-filtered to the persona work-queue (e.g. invoices → open/uncollectible), with an "All" view one filter-chip away.
-- [ ] **IA-04**: Every detail screen renders a Related-billing card with no dead ends; a dead-lettered webhook threads to its event(s) and onward to the affected entity.
+- [x] **IA-03**: List screens open pre-filtered to the persona work-queue (e.g. invoices → open/uncollectible), with an "All" view one filter-chip away.
+- [x] **IA-04**: Every detail screen renders a Related-billing card with no dead ends; a dead-lettered webhook threads to its event(s) and onward to the affected entity.
 - [ ] **IA-05**: Customer-360 presents primary tabs (Subscriptions, Invoices, Payments) with advanced tabs (Payment methods, Entitlements, Events, Metadata) recessed under a quieter "More" grouping.
-- [ ] **IA-06**: Routes changed by the IA reshape redirect from their old paths, so existing bookmarks and links never break.
+- [x] **IA-06**: Routes changed by the IA reshape redirect from their old paths, so existing bookmarks and links never break.
 - [ ] **IA-07**: A compliance/audit user can reach an actor-filtered view of the event log via a saved lens (without it occupying a top-level nav group).
 
 ### Per-Screen Rubric Uplift (SCR) — Phase 176 (C)
@@ -78,10 +78,10 @@ Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
 | DSY-03 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
 | IA-01 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
 | IA-02 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
-| IA-03 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
-| IA-04 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-03 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
+| IA-04 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
 | IA-05 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
-| IA-06 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-06 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
 | IA-07 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
 | SCR-01 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |
 | SCR-02 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Pending |

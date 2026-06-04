@@ -106,7 +106,7 @@ Plans:
 Plans:
 **Wave 1** *(parallel — foundation data + query fixes)*
 
-- [ ] 175-01-PLAN.md — Query multi-status extension + Wave-0 test scaffolds (IA-03, IA-04, IA-06)
+- [x] 175-01-PLAN.md — Query multi-status extension + Wave-0 test scaffolds (IA-03, IA-04, IA-06)
 - [ ] 175-02-PLAN.md — AttentionCounts + NavBadgeHook + Nav/AppShell extension + copy relabels + sidebar_collapse.js (IA-01, IA-02)
 
 **Wave 2** *(parallel — blocked on Wave 1)*
@@ -238,7 +238,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 175. B — Persona-Driven IA Spine | v1.51 | 0/? | Not started | - |
+| 175. B — Persona-Driven IA Spine | v1.51 | 1/7 | In Progress|  |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/? | Not started | - |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
