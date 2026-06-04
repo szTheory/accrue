@@ -5,7 +5,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   alias Accrue.Billing.PromotionCode
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, JsonViewer, KpiCard, RelatedResources}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, JsonViewer, KpiCard, RelatedResources}
   alias AccrueAdmin.ScopedPath
 
   @impl true
@@ -14,7 +14,10 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
     case Repo.get(PromotionCode, promotion_code_id) |> maybe_preload_coupon() do
       nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/promotion-codes"))}
+        {:ok,
+         socket
+         |> put_flash(:error, AccrueAdmin.Copy.promotion_code_not_found())
+         |> redirect(to: admin_path(admin, "/promotion-codes"))}
 
       promotion_code ->
         mount_path = admin["mount_path"] || "/billing"
@@ -40,20 +43,23 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: AccrueAdmin.Copy.promotion_codes_breadcrumb_index(), href: @admin_mount_path <> "/promotion-codes"},
-              %{label: @promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
-            ]}
-          />
-          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.promotion_code_detail_eyebrow() %></p>
-          <h2 class="ax-display"><%= @promotion_code.code || @promotion_code.processor_id %></h2>
-          <p class="ax-body ax-page-copy">
-            <%= status_summary(@promotion_code) %> · <%= redemption_summary(@promotion_code) %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{label: "Dashboard", href: @admin_mount_path},
+            %{label: AccrueAdmin.Copy.promotion_codes_breadcrumb_index(), href: @admin_mount_path <> "/promotion-codes"},
+            %{label: @promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
+          ]}
+        />
+
+        <Detail.summary_card
+          eyebrow={AccrueAdmin.Copy.promotion_code_detail_eyebrow()}
+          title={@promotion_code.code || @promotion_code.processor_id || @promotion_code.id}
+        >
+          <:facts>
+            <span><%= status_summary(@promotion_code) %></span>
+            <span><%= redemption_summary(@promotion_code) %></span>
+          </:facts>
+        </Detail.summary_card>
 
         <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.promotion_code_detail_kpi_section_aria_label()}>
           <KpiCard.kpi_card label={AccrueAdmin.Copy.promotion_code_kpi_label_coupon()} value={coupon_label(@promotion_code)}>
@@ -69,12 +75,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           </KpiCard.kpi_card>
         </section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.promotion_code_section_parent_coupon_eyebrow() %></p>
-            <h3 class="ax-heading"><%= AccrueAdmin.Copy.promotion_code_section_navigate_heading() %></h3>
-          </header>
-
+        <Detail.detail_section title={AccrueAdmin.Copy.promotion_code_section_navigate_heading()}>
           <p :if={@promotion_code.coupon} class="ax-body">
             <a href={@admin_mount_path <> "/coupons/" <> @promotion_code.coupon.id} class="ax-link">
               <%= @promotion_code.coupon.name || @promotion_code.coupon.processor_id || @promotion_code.coupon.id %>
@@ -84,7 +85,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
           <p :if={!@promotion_code.coupon} class="ax-body">
             <%= AccrueAdmin.Copy.promotion_code_detail_no_coupon_projection() %>
           </p>
-        </section>
+        </Detail.detail_section>
 
         <RelatedResources.related_resources items={@related_items} />
 

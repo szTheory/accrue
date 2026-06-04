@@ -253,6 +253,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate promotion_code_redeem_by_no_expiry(), to: PromotionCode
   defdelegate promotion_codes_expires_summary_no_expiry(), to: PromotionCode
   defdelegate promotion_code_kpi_meta_unlimited_cap(), to: PromotionCode
+  defdelegate promotion_code_not_found(), to: PromotionCode
 
   defdelegate connect_accounts_page_title(), to: Connect
   defdelegate connect_accounts_breadcrumb_connect(), to: Connect

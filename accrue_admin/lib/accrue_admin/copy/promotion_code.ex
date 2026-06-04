@@ -94,4 +94,6 @@ defmodule AccrueAdmin.Copy.PromotionCode do
   def promotion_codes_expires_summary_no_expiry, do: "No expiry"
 
   def promotion_code_kpi_meta_unlimited_cap, do: "Unlimited cap"
+
+  def promotion_code_not_found, do: "Promotion code not found."
 end

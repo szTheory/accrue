@@ -38,8 +38,11 @@ defmodule AccrueAdmin.Router do
             on_mount: on_mount,
             dev_routes?: dev_routes?
           ] do
+      import Phoenix.LiveView.Router, only: [fetch_live_flash: 2]
+
       pipeline :accrue_admin_browser do
         plug(:fetch_session)
+        plug(:fetch_live_flash)
         plug(:protect_from_forgery)
         plug(AccrueAdmin.CSPPlug)
         plug(AccrueAdmin.BrandPlug)

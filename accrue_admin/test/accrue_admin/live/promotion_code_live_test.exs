@@ -81,6 +81,63 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert html =~ "subject_id=#{promotion_code.id}"
   end
 
+  test "renders Detail.summary_card hero not a hand-rolled page header", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
+
+    # Detail.summary_card renders ax-summary-card — not a raw ax-page-header standalone element
+    assert html =~ "ax-summary-card"
+    # Title is rendered in the summary card
+    assert html =~ "REFER15"
+    # Eyebrow present (from promotion_code_detail_eyebrow)
+    assert html =~ Copy.promotion_code_detail_eyebrow()
+  end
+
+  test "renders parent coupon section in Detail.detail_section wrapper", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
+
+    # Detail.detail_section renders ax-detail-section class
+    assert html =~ "ax-detail-section"
+    # Parent coupon navigate heading
+    assert html =~ Copy.promotion_code_section_navigate_heading()
+    # Parent coupon link
+    assert html =~ "Referral coupon"
+  end
+
+  test "redirects with flash when promotion_code id is not found", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    nonexistent_id = Ecto.UUID.generate()
+    result = live(conn, "/billing/promotion-codes/#{nonexistent_id}")
+
+    # Should redirect (not render)
+    assert {:error, {:redirect, redirect_info}} = result
+    assert redirect_info.to =~ "/billing/promotion-codes"
+    # Flash must carry a not-found error message — may be a decoded map or a signed token
+    flash =
+      case redirect_info[:flash] do
+        flash when is_map(flash) ->
+          flash
+
+        token when is_binary(token) ->
+          Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, token)
+
+        _ ->
+          %{}
+      end
+
+    assert flash["error"] != nil
+  end
+
   defp insert_coupon(attrs) do
     defaults = %{
       processor: "stripe",
