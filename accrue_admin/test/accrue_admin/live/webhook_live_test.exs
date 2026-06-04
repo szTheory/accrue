@@ -88,6 +88,21 @@ defmodule AccrueAdmin.WebhookLiveTest do
     assert html =~ "/billing/events?source_webhook_event_id=#{webhook.id}"
   end
 
+  test "WebhookLive Related card renders event links pointing to /events/:id", %{
+    conn: conn,
+    webhook: webhook
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+
+    # Related card is rendered (ax-related section)
+    assert html =~ "ax-related"
+    # Contains a link to the derived event at /events/:id
+    # The event was created in setup with caused_by_webhook_event_id = webhook.id
+    assert html =~ "/billing/events/"
+  end
+
   test "in-scope replay uses the exact confirmation and success copy", %{conn: conn} do
     conn =
       conn

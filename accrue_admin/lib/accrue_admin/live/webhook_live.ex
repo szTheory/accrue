@@ -18,11 +18,13 @@ defmodule AccrueAdmin.Live.WebhookLive do
     FlashGroup,
     JsonViewer,
     KpiCard,
+    RelatedResources,
     Timeline
   }
 
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Webhooks
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(%{"id" => webhook_id}, session, socket) do
@@ -53,6 +55,7 @@ defmodule AccrueAdmin.Live.WebhookLive do
          |> assign(:webhook, nil)
          |> assign(:attempt_history, [])
          |> assign(:derived_events, [])
+         |> assign(:related_items, [])
          |> assign(:flashes, [])
          |> assign(:pending_replay, false)
          |> assign(:replay_state, {:ambiguous, proof_context})}
@@ -190,6 +193,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
           </section>
         </Detail.detail_section>
 
+        <RelatedResources.related_resources :if={@webhook} items={@related_items} />
+
         <section :if={@webhook} class="ax-grid ax-grid-2">
           <Detail.detail_section title="Dispatch and retry lifecycle">
             <Timeline.timeline
@@ -261,6 +266,8 @@ defmodule AccrueAdmin.Live.WebhookLive do
   end
 
   defp assign_webhook(socket, webhook) do
+    events = derived_events(webhook.id)
+
     socket
     |> assign(:webhook, webhook)
     |> assign(
@@ -273,7 +280,16 @@ defmodule AccrueAdmin.Live.WebhookLive do
       )
     )
     |> assign(:attempt_history, attempt_history(webhook.id))
-    |> assign(:derived_events, derived_events(webhook.id))
+    |> assign(:derived_events, events)
+    |> assign(
+      :related_items,
+      related_items(
+        webhook,
+        events,
+        socket.assigns.admin_mount_path,
+        socket.assigns.current_owner_scope
+      )
+    )
     |> assign(:replay_state, :allowed)
   end
 
@@ -305,6 +321,17 @@ defmodule AccrueAdmin.Live.WebhookLive do
       order_by: [asc: job.inserted_at, asc: job.id]
     )
     |> Repo.all()
+  end
+
+  defp related_items(_webhook, derived_events, mount_path, scope) do
+    Enum.map(Enum.take(derived_events, 3), fn event ->
+      %{
+        icon: :events,
+        label: "Event",
+        value: event.type,
+        href: ScopedPath.build(mount_path, "/events/#{event.id}", scope)
+      }
+    end)
   end
 
   defp derived_events(webhook_id) do
