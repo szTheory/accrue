@@ -32,26 +32,41 @@ test.describe("Admin accessibility (axe)", () => {
     await reset(request);
   });
 
+  // Full 21-screen inventory including seeded edge states in both light and dark.
+  // Three fixtures are seeded without intermediate reset() — processor IDs use
+  // System.unique_integer so accumulation is safe (same pattern as admin-visuals.spec.js).
   test("no critical/serious axe violations across primary surfaces", async ({ page, request }) => {
     // Reduced-motion zeroes the admin's theme transition (see theme.css), so a
     // data-theme toggle is instant and axe reads settled colours instead of a
     // mid-fade blend. CSP forbids injecting a style tag, so emulate the media query.
     await page.emulateMedia({ reducedMotion: "reduce" });
-    const data = await seed(request, "operator-flows");
+
+    const opFlows = await seed(request, "operator-flows");
+    const dash = await seed(request, "dashboard");
+    const edge = await seed(request, "edge-states");
 
     const surfaces = [
-      ["dashboard", "/billing"],
-      ["customers", "/billing/customers"],
-      ["subscriptions", "/billing/subscriptions"],
-      ["invoices", "/billing/invoices"],
-      ["payments", "/billing/charges"],
-      ["recovery", "/billing/analytics/recovery"],
-      ["coupons", "/billing/coupons"],
-      ["promotion-codes", "/billing/promotion-codes"],
-      ["connect", "/billing/connect"],
-      ["events", "/billing/events"],
-      ["webhooks", "/billing/webhooks"],
-      ["webhook-detail", `/billing/webhooks/${data.single_webhook_id}`]
+      ["dashboard",           "/billing"],
+      ["customers",           "/billing/customers"],
+      ["customer-detail",     `/billing/customers/${dash.customer_id}`],
+      ["subscriptions",       "/billing/subscriptions"],
+      ["subscription-detail", `/billing/subscriptions/${dash.subscription_id}`],
+      ["invoices",            "/billing/invoices"],
+      ["invoice-detail",      `/billing/invoices/${edge.jpy_invoice_id}`],
+      ["payments",            "/billing/payments"],
+      ["charge-detail",       `/billing/payments/${opFlows.charge_id}`],
+      ["coupons",             "/billing/coupons"],
+      ["coupon-detail",       `/billing/coupons/${edge.coupon_id}`],
+      ["promotion-codes",     "/billing/promotion-codes"],
+      ["promo-code-detail",   `/billing/promotion-codes/${edge.promo_code_id}`],
+      ["connect",             "/billing/connect"],
+      ["connect-detail",      `/billing/connect/${edge.connect_account_id}`],
+      ["events",              "/billing/events"],
+      ["event-detail",        `/billing/events/${opFlows.source_event_id}`],
+      ["webhooks",            "/billing/webhooks"],
+      ["webhook-detail",      `/billing/webhooks/${opFlows.single_webhook_id}`],
+      ["recovery",            "/billing/analytics/recovery"],
+      ["campaign-detail",     `/billing/analytics/recovery/subscriptions/${edge.at_risk_sub_id}`]
     ];
 
     const failures = [];
