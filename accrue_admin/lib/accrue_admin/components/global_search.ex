@@ -109,7 +109,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id={@id} class={if @is_open, do: "ax-command-palette-wrapper", else: "hidden"}>
+    <div id={@id} class="ax-command-palette-wrapper" data-open={to_string(@is_open)}>
       <div 
         class="ax-command-palette-backdrop" 
         phx-click="close" 

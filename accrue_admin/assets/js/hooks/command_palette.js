@@ -16,7 +16,7 @@ export const CommandPalette = {
     this.activeIndex = 0;
     this.setupItems();
     // Focus the input if we just opened
-    if (!this.el.parentElement.classList.contains("hidden")) {
+    if (this.el.parentElement.dataset.open === "true") {
       const input = this.el.querySelector("input");
       if (input && document.activeElement !== input) {
         // setTimeout to ensure it's visible after LiveView patch
@@ -36,7 +36,7 @@ export const CommandPalette = {
       this.pushEventTo(this.el.dataset.target, "toggle", {});
     }
     
-    if (e.key === "Escape" && !this.el.parentElement.classList.contains("hidden")) {
+    if (e.key === "Escape" && this.el.parentElement.dataset.open === "true") {
       e.preventDefault();
       this.pushEventTo(this.el.dataset.target, "close", {});
     }
