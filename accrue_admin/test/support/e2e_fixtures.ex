@@ -226,12 +226,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
         })
       end)
 
-    Enum.each(customers, fn customer ->
-      insert_subscription(customer, %{
-        processor_id: "sub_e2e_overflow_#{customer.processor_id}",
-        status: :active
-      })
-    end)
+    _subscriptions =
+      Enum.map(customers, fn customer ->
+        insert_subscription(customer, %{
+          processor_id: "sub_e2e_overflow_#{customer.processor_id}",
+          status: :active
+        })
+      end)
 
     %{first_customer_id: List.first(customers).id}
   end
