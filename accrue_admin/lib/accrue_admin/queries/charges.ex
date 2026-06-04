@@ -91,7 +91,7 @@ defmodule AccrueAdmin.Queries.Charges do
         )
 
       {:status, status}, query ->
-        where(query, [charge, _customer], charge.status == ^status)
+        filter_status(query, status)
 
       {:customer_id, customer_id}, query ->
         where(query, [charge, _customer], charge.customer_id == ^customer_id)
@@ -105,5 +105,17 @@ defmodule AccrueAdmin.Queries.Charges do
       {_unknown, _value}, query ->
         query
     end)
+  end
+
+  defp filter_status(query, status) when is_binary(status) do
+    values = String.split(status, ",", trim: true)
+
+    case values do
+      [single] ->
+        where(query, [charge, _customer], charge.status == ^single)
+
+      multiple ->
+        where(query, [charge, _customer], charge.status in ^multiple)
+    end
   end
 end

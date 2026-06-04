@@ -121,7 +121,7 @@ defmodule AccrueAdmin.Queries.Invoices do
         )
 
       {:status, status}, query ->
-        where(query, [invoice, _customer], invoice.status == ^String.to_existing_atom(status))
+        filter_status(query, status)
 
       {:customer_id, customer_id}, query ->
         where(query, [invoice, _customer], invoice.customer_id == ^customer_id)
@@ -132,6 +132,19 @@ defmodule AccrueAdmin.Queries.Invoices do
       {_unknown, _value}, query ->
         query
     end)
+  end
+
+  defp filter_status(query, status) when is_binary(status) do
+    values = String.split(status, ",", trim: true)
+
+    case values do
+      [single] ->
+        where(query, [invoice, _customer], invoice.status == ^String.to_existing_atom(single))
+
+      multiple ->
+        atoms = Enum.map(multiple, &String.to_existing_atom/1)
+        where(query, [invoice, _customer], invoice.status in ^atoms)
+    end
   rescue
     ArgumentError -> query
   end

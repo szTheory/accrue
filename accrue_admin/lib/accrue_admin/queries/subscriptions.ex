@@ -126,14 +126,43 @@ defmodule AccrueAdmin.Queries.Subscriptions do
     end)
   end
 
-  defp filter_status(query, "active"), do: Billing.Query.active(query)
-  defp filter_status(query, "trialing"), do: Billing.Query.trialing(query)
-  defp filter_status(query, "canceling"), do: Billing.Query.canceling(query)
-  defp filter_status(query, "canceled"), do: Billing.Query.canceled(query)
-  defp filter_status(query, "past_due"), do: Billing.Query.past_due(query)
-  defp filter_status(query, "paused"), do: Billing.Query.paused(query)
+  defp filter_status(query, status) when is_binary(status) do
+    values = String.split(status, ",", trim: true)
 
-  defp filter_status(query, status) do
+    case values do
+      [single] ->
+        filter_single_status(query, single)
+
+      multiple ->
+        # Build a dynamic OR expression across all requested statuses.
+        # Each status_dynamic/1 returns an Ecto.Query.dynamic fragment.
+        dyn =
+          Enum.reduce(multiple, nil, fn s, acc ->
+            d = status_dynamic(s)
+
+            case acc do
+              nil -> d
+              prev -> dynamic(^prev or ^d)
+            end
+          end)
+
+        case dyn do
+          nil -> query
+          d -> where(query, [subscription, _customer], ^d)
+        end
+    end
+  rescue
+    ArgumentError -> query
+  end
+
+  defp filter_single_status(query, "active"), do: Billing.Query.active(query)
+  defp filter_single_status(query, "trialing"), do: Billing.Query.trialing(query)
+  defp filter_single_status(query, "canceling"), do: Billing.Query.canceling(query)
+  defp filter_single_status(query, "canceled"), do: Billing.Query.canceled(query)
+  defp filter_single_status(query, "past_due"), do: Billing.Query.past_due(query)
+  defp filter_single_status(query, "paused"), do: Billing.Query.paused(query)
+
+  defp filter_single_status(query, status) do
     where(
       query,
       [subscription, _customer],
@@ -141,6 +170,34 @@ defmodule AccrueAdmin.Queries.Subscriptions do
     )
   rescue
     ArgumentError -> query
+  end
+
+  # Returns an Ecto.Query.dynamic fragment for a single status value.
+  # Used in multi-value OR filtering so each status contributes a fragment
+  # that can be composed with `dynamic(^prev or ^d)`.
+  defp status_dynamic("active"), do: dynamic([s, _], s.status in [:active, :trialing])
+  defp status_dynamic("trialing"), do: dynamic([s, _], s.status == :trialing)
+
+  defp status_dynamic("canceling") do
+    now = Accrue.Clock.utc_now()
+    dynamic([s, _], s.status == :active and s.cancel_at_period_end == true and s.current_period_end > ^now)
+  end
+
+  defp status_dynamic("canceled") do
+    dynamic([s, _], s.status in [:canceled, :incomplete_expired] or not is_nil(s.ended_at))
+  end
+
+  defp status_dynamic("past_due"), do: dynamic([s, _], s.status in [:past_due, :unpaid])
+
+  defp status_dynamic("paused") do
+    dynamic([s, _], s.status == :paused or not is_nil(s.pause_collection))
+  end
+
+  defp status_dynamic(status) do
+    atom = String.to_existing_atom(status)
+    dynamic([s, _], s.status == ^atom)
+  rescue
+    ArgumentError -> dynamic([_s, _], false)
   end
 
   defp scope_query(query, nil), do: query
