@@ -284,7 +284,7 @@ defmodule AccrueAdmin.Live.EventsLive do
     do: ScopedPath.build(mount_path, "/invoices/#{id}", scope)
 
   defp subject_href(%{subject_type: "Charge", subject_id: id}, mount_path, scope),
-    do: ScopedPath.build(mount_path, "/charges/#{id}", scope)
+    do: ScopedPath.build(mount_path, "/payments/#{id}", scope)
 
   defp subject_href(%{subject_type: "WebhookEvent", subject_id: id}, mount_path, scope),
     do: ScopedPath.build(mount_path, "/webhooks/#{id}", scope)

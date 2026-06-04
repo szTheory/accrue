@@ -113,8 +113,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
               href: ScopedPath.build(@admin_mount_path, "", @current_owner_scope)
             },
             %{
-              label: "Charges",
-              href: ScopedPath.build(@admin_mount_path, "/charges", @current_owner_scope)
+              label: "Payments",
+              href: ScopedPath.build(@admin_mount_path, "/payments", @current_owner_scope)
             },
             %{label: @charge.processor_id || @charge.id}
           ]}
@@ -323,7 +323,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
-    |> assign(:current_path, admin_path(admin, "/charges"))
+    |> assign(:current_path, admin_path(admin, "/payments"))
   end
 
   defp assign_charge(socket, charge) do
