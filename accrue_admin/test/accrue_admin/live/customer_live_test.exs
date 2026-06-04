@@ -210,7 +210,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=charges")
-    assert html =~ "Charges"
+    assert html =~ "Payments"
   end
 
   test "?tab=payments normalizes to charges tab via normalize_tab/1", %{
@@ -219,7 +219,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
     assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=payments")
-    assert html =~ "Charges"
+    assert html =~ "Payments"
   end
 
   test "related_items uses /payments href not /charges", %{conn: conn, customer: customer} do
