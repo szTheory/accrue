@@ -795,9 +795,12 @@ defmodule AccrueAdmin.Live.CustomerLive do
       {:ok, _deleted_payment_method} = Repo.delete(persisted_payment_method)
 
       if socket.assigns.customer.default_payment_method_id == payment_method.id do
+        # Best-effort update: the payment method is already deleted on Stripe,
+        # so we don't let a changeset failure here crash the LiveView process.
         socket.assigns.customer
         |> Accrue.Billing.Customer.changeset(%{default_payment_method_id: nil})
-        |> Repo.update!()
+        |> Repo.update()
+        # intentionally ignoring {:error, _changeset} — best effort
       end
     end
 
