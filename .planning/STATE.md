@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.51
 milestone_name: Admin UI Depth Pass
 status: executing
-last_updated: "2026-06-04T08:12:30.054Z"
+last_updated: "2026-06-04T08:20:39.413Z"
 last_activity: 2026-06-04
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 14
-  completed_plans: 9
+  completed_plans: 10
   percent: 17
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 ## Current Position
 
 Phase: 175 (B — Persona-Driven IA Spine) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-06-04
 
@@ -121,6 +121,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-06-01:** Opened v1.49 "Realistic Demo App & Adoption Evidence". This explicitly does not open new broad feature scope, but rather provides realistic E2E coverage, rich fixtures, and Docker DX for the existing application to prove the value proposition and ease maintainer ramp-up.
 - **2026-06-02:** Closed v1.49 after fresh audit passed 11/11 requirements and archived ROADMAP, REQUIREMENTS, MILESTONE-AUDIT, and phase artifacts under `.planning/milestones/`.
 - [Phase ?]: AttentionCounts extracted into shared context fn; NavBadgeHook post-auth with DB-error rescue; Nav.items/3 backward-compat via default arg; SidebarCollapse localStorage key prefixed with mount_path
+- [Phase ?]: URI.encode/1 applied to :id in RedirectController for path traversal prevention
+- [Phase ?]: live('/events/:id') route stub in router.ex; EventLive ships in Wave 3; warning-not-error compile status confirmed
 
 ### Pending Todos
 
@@ -141,6 +143,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 174 P05 | 8 | 2 tasks | 2 files |
 | Phase 175 P01 | 4m | 2 tasks | 6 files |
 | Phase 175 P02 | 18min | 2 tasks | 11 files |
+| Phase 175 P03 | 4 | 2 tasks | 6 files |
 
 ### Milestone Intake Rules
 
@@ -165,7 +168,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-04T08:12:30.049Z
+Last session: 2026-06-04T08:20:36.025Z
 Stopped at: Phase 174 UI-SPEC approved
 Resume file: None
 
