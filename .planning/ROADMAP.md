@@ -101,7 +101,28 @@ Plans:
   4. Every detail screen renders a Related-billing card with no dead ends, and a dead-lettered webhook threads Webhook → Event → affected entity; Customer-360 shows primary tabs (Subscriptions, Invoices, Payments) with advanced tabs recessed under a quieter "More" grouping.
   5. Every route changed by the IA reshape redirects from its old path (no broken bookmarks), and a compliance/audit user can reach an actor-filtered view of the event log via a saved lens without it occupying a top-level nav group.
 
-**Plans:** TBD
+**Plans:** 7 plans across 4 waves
+
+Plans:
+**Wave 1** *(parallel — foundation data + query fixes)*
+
+- [ ] 175-01-PLAN.md — Query multi-status extension + Wave-0 test scaffolds (IA-03, IA-04, IA-06)
+- [ ] 175-02-PLAN.md — AttentionCounts + NavBadgeHook + Nav/AppShell extension + copy relabels + sidebar_collapse.js (IA-01, IA-02)
+
+**Wave 2** *(parallel — blocked on Wave 1)*
+
+- [ ] 175-03-PLAN.md — Sidebar rewrite (collapse + badges) + CSS token-gap classes + RedirectController + route reshaping (IA-02, IA-06)
+- [ ] 175-04-PLAN.md — Work-queue default filters (invoices/subscriptions/payments) + visible Home search field (IA-01, IA-03)
+
+**Wave 3** *(parallel — blocked on Wave 2)*
+
+- [ ] 175-05-PLAN.md — EventLive (/events/:id) + WebhookLive Related card + Webhook→Event→entity threading (IA-04, IA-06)
+- [ ] 175-06-PLAN.md — Customer-360 tab tiering (More ▾) + compliance actor-lens chip on events (IA-05, IA-07)
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 175-07-PLAN.md — Related cards on 4 missing detail screens + /charges→/payments href fixes + full suite gate (IA-04)
+
 **UI hint**: yes
 
 ### Phase 176: C — Systematic Per-Screen Rubric Uplift
