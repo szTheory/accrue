@@ -155,6 +155,82 @@ defmodule AccrueAdmin.CustomerLiveTest do
      deletable_payment_method: deletable_payment_method}
   end
 
+  # --- Plan 175-06: Customer-360 tab tiering tests ---
+
+  test "renders 3 primary tab links (Subscriptions, Invoices, Payments)", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
+
+    assert html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Subscriptions<\/span>/
+    assert html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Invoices<\/span>/
+    assert html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Payments<\/span>/
+    refute html =~ ~r/class="[^"]*ax-tab[^"]*"[^>]*>\s*<span>Payment methods<\/span>/
+  end
+
+  test "renders More button with aria-haspopup=menu", %{conn: conn, customer: customer} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
+
+    assert html =~ ~s(aria-haspopup="menu")
+    assert html =~ ~s(aria-expanded="false")
+    assert html =~ "More"
+  end
+
+  test "toggle_more_tabs event reveals 4 recessed tab links", %{conn: conn, customer: customer} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, html} = live(conn, "/billing/customers/#{customer.id}")
+    refute html =~ "Payment methods"
+    render_click(view, "toggle_more_tabs")
+    html = render(view)
+    assert html =~ "Payment methods"
+    assert html =~ "Entitlements"
+    assert html =~ "Events"
+    assert html =~ "Metadata"
+  end
+
+  test "handle_params resets more_tabs_open to false on tab navigation", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, view, _html} = live(conn, "/billing/customers/#{customer.id}")
+    render_click(view, "toggle_more_tabs")
+    html = render(view)
+    assert html =~ ~s(aria-expanded="true")
+    assert {:ok, _view, html2} = live(conn, "/billing/customers/#{customer.id}?tab=invoices")
+    assert html2 =~ ~s(aria-expanded="false")
+  end
+
+  test "?tab=charges uses charges tab (Payments label), normalize_tab compat", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=charges")
+    assert html =~ "Charges"
+  end
+
+  test "?tab=payments normalizes to charges tab via normalize_tab/1", %{
+    conn: conn,
+    customer: customer
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}?tab=payments")
+    assert html =~ "Charges"
+  end
+
+  test "related_items uses /payments href not /charges", %{conn: conn, customer: customer} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    assert {:ok, _view, html} = live(conn, "/billing/customers/#{customer.id}")
+    assert html =~ ~s(/payments)
+    refute html =~ ~s(href="/billing/charges)
+  end
+
+  # --- end Plan 175-06 tests ---
+
   test "renders customer tabs for subscriptions, events, and metadata", %{
     conn: conn,
     customer: customer
