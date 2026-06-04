@@ -61,7 +61,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
   2. The dunning banner and invoice screens render every brand color through tokens with zero inline-hex fallbacks and zero inline styles; no admin surface bypasses the token system.
   3. A maintainer opening `/dev/components` sees a component-variants reference enumerating every button / badge / status / card variant alongside its token mapping.
 
-**Plans:** 4 plans
+**Plans:** 7 plans (4 executed + 3 gap-closure)
 
 Plans:
 **Wave 1**
@@ -79,6 +79,12 @@ Plans:
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [x] 174-04-PLAN.md — ComponentRegistryTest drift-prevention test + full suite gate (DSY-03)
+
+**Wave 5 — Gap Closure** *(after verification; closes VERIFICATION.md gaps)*
+
+- [ ] 174-05-PLAN.md — Fix phantom tokens in ComponentRegistry + add token-validity test (DSY-03, Gap 1)
+- [ ] 174-06-PLAN.md — Seed adoption-proof-matrix.md in PackageDocsVerifierTest + Stripe-only negative test (DSY-01, Gap 2)
+- [ ] 174-07-PLAN.md — Resolve .ax-search-trigger stale deferral comment + asset rebuild (DSY-01, Gap 3)
 
 **UI hint**: yes
 
