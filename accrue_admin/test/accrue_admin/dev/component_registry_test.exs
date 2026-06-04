@@ -69,6 +69,44 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
            """
   end
 
+  # (c) token-validity: all tokens listed in the registry are defined in the design system.
+  #
+  # Reads theme.css and app.css at test time. Each token in each entry's `tokens` field must
+  # appear as a substring in at least one of those files, OR be explicitly allowlisted below
+  # (for tokens defined via the server-rendered style tag in layouts.ex rather than in a
+  # static CSS file). A phantom token reintroduced into a future PR will cause this test to
+  # fail before merge, enforcing D-21 going forward.
+  #
+  # known_in_layouts allowlist: --ax-accent and --ax-accent-readable are injected at runtime
+  # via the <style> tag in AccrueAdmin.Layouts.root/1 (layouts.ex line ~82). They are real
+  # tokens; they just cannot be grepped from static files.
+  test "all tokens listed in ComponentRegistry.entries() are defined in the design system" do
+    theme_css = File.read!(theme_css_path())
+    app_css = File.read!(app_css_path())
+
+    known_in_layouts = ["--ax-accent", "--ax-accent-readable"]
+
+    phantom_tokens =
+      for entry <- ComponentRegistry.entries(),
+          token <- entry.tokens,
+          token not in known_in_layouts,
+          not String.contains?(theme_css, token),
+          not String.contains?(app_css, token) do
+        {entry.family, entry.variant, token}
+      end
+
+    assert phantom_tokens == [],
+           """
+           Found tokens in ComponentRegistry that are not defined in theme.css or app.css:
+
+           #{Enum.map_join(phantom_tokens, "\n", fn {family, variant, token} -> "  #{family}/#{variant}: #{token}" end)}
+
+           Fix: either correct the token name in component_registry.ex to match an actual
+           CSS custom property, or add --ax-accent/--ax-accent-readable to known_in_layouts
+           if the token is legitimately defined via the server-rendered style tag in layouts.ex.
+           """
+  end
+
   # Extract the full class string from the outermost ax-button bearing element.
   # Anchors on "ax-button" to skip any inner child elements (pitfall 5 from RESEARCH.md).
   # Calls flunk/1 with the raw html on no-match so silent false-positives are impossible.
@@ -83,5 +121,13 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
             "Raw HTML:\n#{html}"
         )
     end
+  end
+
+  defp theme_css_path do
+    Path.expand("../../../assets/css/theme.css", __DIR__)
+  end
+
+  defp app_css_path do
+    Path.expand("../../../assets/css/app.css", __DIR__)
   end
 end
