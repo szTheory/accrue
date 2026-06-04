@@ -7,7 +7,7 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   alias Accrue.Billing.{Coupon, PromotionCode}
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, JsonViewer, KpiCard, RelatedResources}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, JsonViewer, KpiCard, RelatedResources}
   alias AccrueAdmin.ScopedPath
 
   @impl true
@@ -43,22 +43,24 @@ defmodule AccrueAdmin.Live.CouponLive do
     active_organization_name={@active_organization_name}
     >
       <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs
-            items={[
-              %{label: "Dashboard", href: @admin_mount_path},
-              %{label: AccrueAdmin.Copy.coupon_breadcrumb_coupons(), href: @admin_mount_path <> "/coupons"},
-              %{label: coupon_label(@coupon)}
-            ]}
-          />
-          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_detail_eyebrow() %></p>
-          <h2 class="ax-display"><%= coupon_label(@coupon) %></h2>
-          <p class="ax-body ax-page-copy">
-            <%= @coupon.processor_id || @coupon.id %> ·
-            <%= discount_summary(@coupon) %> ·
-            <%= status_summary(@coupon) %>
-          </p>
-        </header>
+        <Breadcrumbs.breadcrumbs
+          items={[
+            %{label: "Dashboard", href: @admin_mount_path},
+            %{label: AccrueAdmin.Copy.coupon_breadcrumb_coupons(), href: @admin_mount_path <> "/coupons"},
+            %{label: coupon_label(@coupon)}
+          ]}
+        />
+
+        <Detail.summary_card
+          eyebrow={AccrueAdmin.Copy.coupon_detail_eyebrow()}
+          title={coupon_label(@coupon)}
+        >
+          <:facts>
+            <span><%= @coupon.processor_id || @coupon.id %></span>
+            <span><%= discount_summary(@coupon) %></span>
+            <span><%= status_summary(@coupon) %></span>
+          </:facts>
+        </Detail.summary_card>
 
         <section class="ax-kpi-grid" aria-label={AccrueAdmin.Copy.coupon_detail_kpi_section_aria_label()}>
           <KpiCard.kpi_card label={AccrueAdmin.Copy.coupon_kpi_label_redemptions()} value={Integer.to_string(@coupon.times_redeemed || 0)}>
@@ -74,12 +76,7 @@ defmodule AccrueAdmin.Live.CouponLive do
           </KpiCard.kpi_card>
         </section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_detail_section_promotion_codes_eyebrow() %></p>
-            <h3 class="ax-heading"><%= AccrueAdmin.Copy.coupon_detail_section_codes_heading() %></h3>
-          </header>
-
+        <Detail.detail_section title={AccrueAdmin.Copy.coupon_detail_section_codes_heading()}>
           <div :for={promotion_code <- @promotion_codes} class="ax-list-row">
             <a
               href={@admin_mount_path <> "/promotion-codes/" <> promotion_code.id}
@@ -95,20 +92,15 @@ defmodule AccrueAdmin.Live.CouponLive do
           <p :if={@promotion_codes == []} class="ax-body">
             <%= AccrueAdmin.Copy.coupon_detail_promotion_codes_empty() %>
           </p>
-        </section>
+        </Detail.detail_section>
 
-        <section class="ax-card">
-          <header class="ax-page-header">
-            <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_detail_section_projection_eyebrow() %></p>
-            <h3 class="ax-heading"><%= AccrueAdmin.Copy.coupon_detail_section_projection_heading() %></h3>
-          </header>
-
-          <div class="ax-page">
-            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_detail_label_duration() %> <%= duration_summary(@coupon) %></p>
-            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_detail_label_currency() %> <%= @coupon.currency || "--" %></p>
-            <p class="ax-body"><%= AccrueAdmin.Copy.coupon_detail_label_processor() %> <%= @coupon.processor || "--" %></p>
-          </div>
-        </section>
+        <Detail.detail_section title={AccrueAdmin.Copy.coupon_detail_section_projection_heading()}>
+          <Detail.detail_field_list fields={[
+            %{label: AccrueAdmin.Copy.coupon_detail_label_duration(), value: duration_summary(@coupon)},
+            %{label: AccrueAdmin.Copy.coupon_detail_label_currency(), value: @coupon.currency || "--"},
+            %{label: AccrueAdmin.Copy.coupon_detail_label_processor(), value: @coupon.processor || "--"}
+          ]} />
+        </Detail.detail_section>
 
         <RelatedResources.related_resources items={@related_items} />
 

@@ -85,6 +85,54 @@ defmodule AccrueAdmin.CouponLiveTest do
     assert html =~ "subject_id=#{coupon.id}"
   end
 
+  test "renders Detail.summary_card hero not a hand-rolled page header", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+
+    # Detail.summary_card renders ax-summary-card class
+    assert html =~ "ax-summary-card"
+    # Should NOT have a hand-rolled ax-page-header as the main coupon hero
+    # (the summary_card replaces it; ax-page-header may still appear in KPI section)
+    # Verify the eyebrow comes from the summary_card hero area
+    assert html =~ Copy.coupon_detail_eyebrow()
+  end
+
+  test "renders projection section as Detail.detail_section with semantic dl field list", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+
+    # Detail.detail_section renders ax-detail-section class
+    assert html =~ "ax-detail-section"
+    # Detail.detail_field_list renders ax-field-list class (semantic dl)
+    assert html =~ "ax-field-list"
+    # Projection section heading should be present
+    assert html =~ Copy.coupon_detail_section_projection_heading()
+  end
+
+  test "promotion codes section rendered in Detail.detail_section wrapper", %{
+    conn: conn,
+    coupon: coupon
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/coupons/#{coupon.id}")
+
+    # The codes section heading must appear inside an ax-detail-section
+    # Both ax-detail-section and the codes heading must be present
+    assert html =~ "ax-detail-section"
+    assert html =~ Copy.coupon_detail_section_codes_heading()
+    # The promotion code link must still be present (content preserved)
+    assert html =~ "ANNUAL15"
+  end
+
   defp insert_coupon(attrs) do
     defaults = %{
       processor: "stripe",

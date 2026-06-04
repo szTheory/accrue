@@ -310,13 +310,13 @@ Priority is given to screens with the lowest minimum dimension score, then by nu
 | ChargesLive | `charges_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | ChargeLive | `charge_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W3 |
 | CouponsLive | `coupons_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
-| CouponLive | `coupon_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
+| CouponLive | `coupon_live.ex` | 3 | 2 | 2 | 1 | 3 | 2 | 2 | 2 | 2 | 2 | 1 | NO (④) | W2 |
 | PromotionCodesLive | `promotion_codes_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | PromotionCodeLive | `promotion_code_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
 | ConnectAccountsLive | `connect_accounts_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | ConnectAccountLive | `connect_account_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
 | EventsLive | `events_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
-| EventLive | `event_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
+| EventLive | `event_live.ex` | 3 | 2 | 3 | 1 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | NO (④) | W2 |
 | WebhooksLive | `webhooks_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | WebhookLive | `webhook_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
 | RecoveryLive | `analytics/recovery_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | skip |
@@ -359,6 +359,31 @@ failed / dead-letter) is the primary decision field on mobile; type is secondary
 **Before order:** type, status, endpoint, received
 **After order:** status, type, endpoint, received
 **File:** `accrue_admin/lib/accrue_admin/live/webhooks_live.ex`
+
+---
+
+## Wave 2a After-Score Rationale (EventLive + CouponLive — Plan 176-03)
+
+**Scored by:** Wave 2a executor (2026-06-04)
+
+### EventLive (3-2-3-1-2-2-2-2-2-2 = min 1 — was 3-1-3-1-2-2-1-2-2-1)
+
+- ② 1→2: Added `Detail.detail_section` body ("Event details") with `Detail.detail_field_list` for type, actor_type, actor_id, subject_type, subject_id, recorded fields.
+- ⑦ 1→2: Replaced bare `<span>Actor: ...` in `:facts` slot with `<dl class="ax-summary-facts-dl"><dt class="ax-label">/<dd class="ax-body">` semantic pairs.
+- ⑩ 1→2: Now uses `Detail.detail_section` + `Detail.detail_field_list` in addition to `Detail.summary_card` (already present).
+- ④ remains 1: Nil redirect on mount is silent — no flash shown to user (STATE.md note: `put_flash` omitted because `fetch_flash` is missing from `accrue_admin_browser` pipeline). Deferred to Wave 2b or a targeted fix.
+- ③ remains 3: No literal spacing, ax-page/ax-body only.
+- All other dims unchanged.
+
+### CouponLive (3-2-2-1-3-2-2-2-2-2 = min 1 — was 3-1-1-1-3-2-1-2-2-1)
+
+- ② 1→2: Hand-rolled `<header class="ax-page-header">` hero replaced with `Detail.summary_card` (eyebrow + title + facts).
+- ③ 1→2: Projection section `<div class="ax-page">` (semantic mismatch) replaced with `Detail.detail_section` + `Detail.detail_field_list`.
+- ⑦ 1→2: Projection section now uses `Detail.detail_field_list` which renders `<dl class="ax-field-list">/<dt class="ax-field-label">/<dd class="ax-field-value">` — semantic dl/dt/dd structure.
+- ⑩ 1→2: `Detail` alias added; hand-rolled `<section class="ax-card">` + `<div class="ax-page">` key/value replaced with `Detail.detail_section` + `Detail.detail_field_list`; codes list wrapped in `Detail.detail_section`.
+- ④ remains 1: Nil redirect on mount is silent — no user-facing flash/not-found state. Same pipeline constraint as EventLive. Deferred.
+- ⑤ remains 3: Single-column layout is correct for this screen; no layout regression.
+- All other dims unchanged.
 
 ### Screens with no code changes (anti-churn confirmed):
 
