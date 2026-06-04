@@ -4,7 +4,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
   use Phoenix.LiveView
 
   alias Accrue.Analytics.Dunning
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, CampaignTimeline}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, CampaignTimeline, Detail}
 
   @impl true
   def mount(%{"id" => subscription_id}, session, socket) do
@@ -31,16 +31,18 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLive do
       theme={@theme}
       active_organization_name={@active_organization_name}
     >
-      <section class="ax-page">
-        <header class="ax-page-header">
-          <Breadcrumbs.breadcrumbs items={[
-            %{label: "Analytics"},
-            %{label: "Recovery", href: @current_path},
-            %{label: "Subscription"}
-          ]} />
-          <h1 class="ax-heading">Dunning Timeline</h1>
-          <p class="ax-body ax-muted">{@subscription_id}</p>
-        </header>
+      <section class="ax-page" aria-label="Dunning timeline for subscription">
+        <Breadcrumbs.breadcrumbs items={[
+          %{label: "Analytics"},
+          %{label: "Recovery", href: @current_path},
+          %{label: "Subscription"}
+        ]} />
+
+        <Detail.summary_card eyebrow="Campaign history" title="Dunning Timeline">
+          <:facts>
+            <span>{@subscription_id}</span>
+          </:facts>
+        </Detail.summary_card>
 
         <CampaignTimeline.campaign_timeline arcs={@arcs} invoice_map={@invoice_map} />
       </section>
