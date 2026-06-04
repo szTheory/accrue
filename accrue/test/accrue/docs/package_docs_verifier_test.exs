@@ -267,6 +267,32 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "--ax-bp-"
   end
 
+  test "package docs verifier rejects Stripe-only language in adoption-proof-matrix.md" do
+    tmp_dir =
+      Path.join(
+        System.tmp_dir!(),
+        "accrue-docs-verifier-apm-#{System.unique_integer([:positive])}"
+      )
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    seed_tmp_dir!(tmp_dir)
+
+    apm_path = Path.join(tmp_dir, "examples/accrue_host/docs/adoption-proof-matrix.md")
+    original = File.read!(apm_path)
+    File.write!(apm_path, original <> "This is Stripe-only content.\n")
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "adoption-proof-matrix.md"
+  end
+
   defp copy_fixture!(relative_path, tmp_dir) do
     destination = Path.join(tmp_dir, relative_path)
     File.mkdir_p!(Path.dirname(destination))
@@ -279,6 +305,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/assets/css"))
     File.mkdir_p!(Path.join(tmp_dir, "accrue_portal"))
     File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
+    File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host/docs"))
     File.mkdir_p!(Path.join(tmp_dir, "scripts/ci"))
 
     copy_fixture!("README.md", tmp_dir)
@@ -308,6 +335,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
     copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
     copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    copy_fixture!("examples/accrue_host/docs/adoption-proof-matrix.md", tmp_dir)
   end
 
   defp extract_version!(relative_path) do
