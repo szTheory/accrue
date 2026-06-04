@@ -137,7 +137,30 @@ Plans:
   3. The under-iterated tail (charges, coupons, promotion-codes, connect, events, webhooks, invoice detail) is lifted to baseline with documented before/after scores per screen.
   4. Dense text/detail screens apply a reading-measure max-width container and a mobile-first responsive layout built on the Phase 174 breakpoint tokens.
 
-**Plans:** TBD
+**Plans:** 6 plans (5 execution + 1 human checkpoint)
+
+Plans:
+**Wave 1** *(dependency root — SCORECARD baseline + CSS fix)*
+
+- [ ] 176-01-PLAN.md — Capture 176-SCORECARD.md baseline (all 21 screens × 10 dims) + fix data-table breakpoint --ax-bp-lg→--ax-bp-md + asset rebuild (SCR-01, SCR-02, SCR-03, SCR-04)
+
+**Wave 2** *(blocked on Wave 1 — list screen audit)*
+
+- [ ] 176-02-PLAN.md — Audit all 9 list screens card_fields/card_title quality against persona criteria; update SCORECARD Wave 1 after-scores (SCR-01, SCR-02, SCR-03)
+
+**Wave 3** *(parallel — blocked on Wave 2 — catalog/specialist detail; 03 and 04 run in parallel)*
+
+- [ ] 176-03-PLAN.md — Uplift event_live (semantic dl/dt/dd facts, detail_section body, not-found state) + coupon_live (Detail alias, summary_card hero, DRY projection section) (SCR-01, SCR-02, SCR-03, SCR-04)
+- [ ] 176-04-PLAN.md — Uplift promotion_code_live (Detail alias, summary_card hero, detail_section parent-coupon) + connect_account_live (.ax-measure prose) + webhook_live (DRY forensic section, .ax-measure) (SCR-01, SCR-02, SCR-03, SCR-04)
+
+**Wave 4** *(blocked on Wave 3 — dense financial detail)*
+
+- [ ] 176-05-PLAN.md — Apply .ax-measure to invoice_live prose (4 regions) + charge_live prose (3 regions) + audit subscription_live; complete SCORECARD final after-scores (SCR-01, SCR-02, SCR-03, SCR-04)
+
+**Wave 5** *(blocked on Wave 4 — Nyquist gate + final verification)*
+
+- [ ] 176-06-PLAN.md — Nyquist breakpoint guard assertions in data_table_test.exs + ax-measure misapplication guard + full suite gate + human spot-check checkpoint (SCR-01, SCR-02, SCR-03, SCR-04)
+
 **UI hint**: yes
 
 ### Phase 177: D — Motion & Micro-interaction Design
@@ -239,7 +262,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/? | Not started | - |
+| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/6 | Not started | - |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
