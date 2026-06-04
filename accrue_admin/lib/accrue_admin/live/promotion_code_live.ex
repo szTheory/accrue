@@ -5,7 +5,8 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   alias Accrue.Billing.PromotionCode
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, JsonViewer, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, JsonViewer, KpiCard, RelatedResources}
+  alias AccrueAdmin.ScopedPath
 
   @impl true
   def mount(%{"id" => promotion_code_id}, session, socket) do
@@ -16,10 +17,14 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
         {:ok, redirect(socket, to: admin_path(admin, "/promotion-codes"))}
 
       promotion_code ->
+        mount_path = admin["mount_path"] || "/billing"
+        scope = socket.assigns.current_owner_scope
+
         {:ok,
          socket
          |> assign_shell(admin)
-         |> assign(:promotion_code, promotion_code)}
+         |> assign(:promotion_code, promotion_code)
+         |> assign(:related_items, related_items(promotion_code, mount_path, scope))}
     end
   end
 
@@ -80,6 +85,8 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
             <%= AccrueAdmin.Copy.promotion_code_detail_no_coupon_projection() %>
           </p>
         </section>
+
+        <RelatedResources.related_resources items={@related_items} />
 
         <JsonViewer.json_viewer
           id="promotion-code-payload"
@@ -147,6 +154,43 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
   defp expires_summary(_promotion_code), do: AccrueAdmin.Copy.promotion_code_redeem_by_no_expiry()
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
+
+  defp related_items(promotion_code, mount_path, scope) do
+    coupon_items =
+      if promotion_code.coupon_id do
+        value =
+          case promotion_code.coupon do
+            %{name: name} when is_binary(name) -> name
+            %{processor_id: pid} when is_binary(pid) -> pid
+            _ -> promotion_code.coupon_id
+          end
+
+        [
+          %{
+            icon: :coupons,
+            label: "Coupon",
+            value: value,
+            href:
+              ScopedPath.build(mount_path, "/coupons/#{promotion_code.coupon_id}", scope)
+          }
+        ]
+      else
+        []
+      end
+
+    coupon_items ++
+      [
+        %{
+          icon: :events,
+          label: "Events",
+          href:
+            ScopedPath.build(mount_path, "/events", scope, %{
+              "subject_type" => "PromotionCode",
+              "subject_id" => promotion_code.id
+            })
+        }
+      ]
+  end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix
 

@@ -6,7 +6,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   alias Accrue.{Auth, Config, Connect, Events, Money}
   alias Accrue.Connect.Account
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, FlashGroup, KpiCard}
+  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, FlashGroup, KpiCard, RelatedResources}
+  alias AccrueAdmin.ScopedPath
 
   @default_preview_amount_minor 10_000
   @default_preview_currency "usd"
@@ -20,10 +21,14 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
         {:ok, redirect(socket, to: admin_path(admin, "/connect"))}
 
       account ->
+        mount_path = admin["mount_path"] || "/billing"
+        scope = socket.assigns.current_owner_scope
+
         {:ok,
          socket
          |> assign_shell(admin)
          |> assign_account(account)
+         |> assign(:related_items, related_items(account, mount_path, scope))
          |> assign(:flashes, [])}
     end
   end
@@ -96,6 +101,8 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
             <span><%= account_status(@account) %></span>
           </:facts>
         </Detail.summary_card>
+
+        <RelatedResources.related_resources items={@related_items} />
 
         <FlashGroup.flash_group flashes={@flashes} />
 
@@ -559,6 +566,20 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
     changeset.errors
     |> Enum.map(fn {field, {message, _meta}} -> "#{field} #{message}" end)
     |> Enum.join(", ")
+  end
+
+  defp related_items(account, mount_path, scope) do
+    [
+      %{
+        icon: :events,
+        label: "Events",
+        href:
+          ScopedPath.build(mount_path, "/events", scope, %{
+            "subject_type" => "ConnectAccount",
+            "subject_id" => account.id
+          })
+      }
+    ]
   end
 
   defp admin_path(admin, suffix), do: (admin["mount_path"] || "/billing") <> suffix

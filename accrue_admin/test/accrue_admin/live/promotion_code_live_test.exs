@@ -64,6 +64,23 @@ defmodule AccrueAdmin.PromotionCodeLiveTest do
     assert html =~ "processor"
   end
 
+  test "renders RelatedResources card with coupon link and events link", %{
+    conn: conn,
+    promotion_code: promotion_code
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/promotion-codes/#{promotion_code.id}")
+
+    # Related resources card must be present
+    assert html =~ ~s(class="ax-card ax-related")
+    # Source coupon link in related resources
+    assert html =~ "/billing/coupons/#{promotion_code.coupon_id}"
+    # Events filtered by PromotionCode subject in related resources
+    assert html =~ "subject_type=PromotionCode"
+    assert html =~ "subject_id=#{promotion_code.id}"
+  end
+
   defp insert_coupon(attrs) do
     defaults = %{
       processor: "stripe",

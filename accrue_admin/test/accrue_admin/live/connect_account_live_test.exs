@@ -48,6 +48,21 @@ defmodule AccrueAdmin.ConnectAccountLiveTest do
     {:ok, account: account}
   end
 
+  test "renders RelatedResources card with events link", %{
+    conn: conn,
+    account: account
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/connect/#{account.id}")
+
+    # Related resources card must be present
+    assert html =~ ~s(class="ax-card ax-related")
+    # Events filtered by ConnectAccount subject in related resources
+    assert html =~ "subject_type=ConnectAccount"
+    assert html =~ "subject_id=#{account.id}"
+  end
+
   test "previews and saves a platform fee override on the local account data", %{
     conn: conn,
     account: account
