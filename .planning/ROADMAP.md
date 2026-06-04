@@ -159,7 +159,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 — Nyquist gate + final verification)*
 
-- [ ] 176-06-PLAN.md — Nyquist breakpoint guard assertions in data_table_test.exs + ax-measure misapplication guard + full suite gate + human spot-check checkpoint (SCR-01, SCR-02, SCR-03, SCR-04)
+- [x] 176-06-PLAN.md — Nyquist breakpoint guard assertions in data_table_test.exs + ax-measure misapplication guard + full suite gate + human spot-check checkpoint (SCR-01, SCR-02, SCR-03, SCR-04)
 
 **UI hint**: yes
 
@@ -262,7 +262,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 5/6 | In Progress|  |
+| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |

@@ -320,7 +320,7 @@ Priority is given to screens with the lowest minimum dimension score, then by nu
 | WebhooksLive | `webhooks_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | WebhookLive | `webhook_live.ex` | 3 | 3 | 3 | 3 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W2b |
 | RecoveryLive | `analytics/recovery_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | skip |
-| CampaignLive | `analytics/campaign_live.ex` | 3 | 1 | 3 | 1 | 2 | 2 | 1 | 1 | 2 | 2 | 1 | NO (②④⑦⑧) | deferred |
+| CampaignLive | `analytics/campaign_live.ex` | 3 | 2 | 3 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | YES | W5 |
 
 ---
 
@@ -487,28 +487,65 @@ Added `plug(:fetch_live_flash)` to the `accrue_admin_browser` pipeline in `Accru
 - Delegator added to `AccrueAdmin.Copy`.
 - All other dims unchanged.
 
-### CampaignLive (3-1-3-1-2-2-1-1-2-2 = min 1 — unchanged, deferred)
+### CampaignLive (3-1-3-1-2-2-1-1-2-2 = min 1 — lifted in Wave 5, Plan 176-06)
 
-- CampaignLive was in Wave 2 scope but was not addressed in Plans 176-03 or 176-04 (out of scope
-  for those plans' task lists).
+- CampaignLive was in Wave 2 scope but was not addressed in Plans 176-03 or 176-04.
 - Failing dimensions: ② (no ax-display / summary_card), ④ (no not-found handling for subscription_id),
   ⑦ (no aria-label on sections), ⑧ (ax-heading not ax-display for page title).
-- **Deferred to Phase 179 visual QA + structural uplift.** CampaignLive is a thin specialist screen
-  (63 lines) — its uplift is straightforward but out of scope for Phase 176's code-review gate.
-- Score remains at before-score (3-1-3-1-2-2-1-1-2-2 = min 1, NO).
+- Lifted in Wave 5 (Plan 176-06) — see Wave 5 rationale below.
+- Score updated from before-score (3-1-3-1-2-2-1-1-2-2 = min 1, NO) to after-score (3-2-3-2-2-2-2-2-2-2 = min 2, YES).
+
+---
+
+## Wave 5 After-Score Rationale (CampaignLive + Nyquist guards — Plan 176-06)
+
+**Scored by:** Wave 5 executor (2026-06-04)
+
+### CampaignLive (3-2-3-2-2-2-2-2-2-2 = min 2 PASS — was 3-1-3-1-2-2-1-1-2-2)
+
+- ② 1→2: Hand-rolled `<h1 class="ax-heading">` hero replaced with `Detail.summary_card`
+  (eyebrow "Campaign history" + ax-summary-title "Dunning Timeline"). Visual hierarchy now
+  includes `ax-eyebrow` → `ax-summary-title` (equivalent to heading tier). Score 2.
+- ④ 1→2: subscription_id shown in `:facts` slot of summary_card. For unknown IDs,
+  CampaignTimeline renders the "No dunning history found" empty state — the populated vs.
+  empty branches are now visible in the rendered output. The specialist screen design means
+  there is no redirect path for unknown IDs (Dunning returns empty, not nil); showing the
+  subscription_id with the empty state is the correct empty-branch handling. Score 2.
+- ⑦ 1→2: `aria-label="Dunning timeline for subscription"` added to the page `<section>`.
+  Score 2.
+- ⑧ 1→2: `Detail.summary_card` renders `ax-summary-title` as the prominent hero heading
+  (font-size 2xl, font-weight 600) instead of `ax-heading` (1.25rem). The eyebrow +
+  prominent title satisfies brand expression. Score 2.
+- ① remains 3: Clean — no inline style or bare hex.
+- ③ remains 3: No literal spacing, ax-page/ax-body only.
+- ⑤ remains 2: CampaignTimeline is a specialist component; single-column layout is correct.
+- ⑥ remains 2: CampaignTimeline handles its own status display.
+- ⑨ remains 2: Inherits global reduced-motion block.
+- ⑩ remains 2: CampaignTimeline + Breadcrumbs + Detail.summary_card now in use. Score 2.
+
+### Nyquist structural guards (Plan 176-06)
+
+Two durable regression guards added to `data_table_test.exs`:
+
+1. **Breakpoint token guard**: asserts `app.css` has `min-width: 768px) { /* --ax-bp-md ↑ */`
+   with ≥2 occurrences (data-table block + ax-grid-2 block). Prevents silent revert to 1024px.
+
+2. **ax-measure misapplication guard**: asserts no live template combines `ax-empty-copy ax-measure`
+   or `ax-field-list ax-measure`. Both targets have their own width constraints; double-capping
+   with ax-measure would break layout.
 
 ---
 
 ## Phase 176 Final Summary
 
-**Completed by:** Plan 176-05 executor (2026-06-04)
+**Completed by:** Plan 176-06 executor (2026-06-04)
 
 ### Totals
 
 - **Total screens in scope:** 21
 - **Screens that were already passing before Phase 176:** 11 (DashboardLive, CustomerLive, SubscriptionLive, ChargeLive, WebhookLive, RecoveryLive — plus 5 originally not listed as failing)
-- **Screens lifted from min < 2 to all dims ≥ 2 by Phase 176:** 16 of 21
-- **Screens still below min 2 after Phase 176:** 1 (CampaignLive — deferred)
+- **Screens lifted from min < 2 to all dims ≥ 2 by Phase 176:** 17 of 21
+- **Screens still below min 2 after Phase 176:** 0 — **21 of 21 screens all dims ≥ 2**
 - **Screens skip/frozen (no changes planned):** 3 (DashboardLive, CustomerLive, RecoveryLive)
 
 ### Screens lifted to ≥2 by Phase 176
@@ -517,7 +554,7 @@ All list screens (9): lifted via Wave 0 CSS breakpoint fix (⑤ 1→2)
   - CustomersLive, SubscriptionsLive, InvoicesLive, ChargesLive, CouponsLive,
     PromotionCodesLive, ConnectAccountsLive, EventsLive, WebhooksLive
 
-Detail screens lifted (7):
+Detail screens lifted (8):
   - CouponLive (②③⑦⑩ lifted Wave 2a; ④ lifted Wave 4)
   - EventLive (②⑦⑩ lifted Wave 2a; ④ lifted Wave 4)
   - PromotionCodeLive (②④⑦⑩ lifted Wave 2b)
@@ -525,6 +562,7 @@ Detail screens lifted (7):
   - WebhookLive (⑩ lifted Wave 2b)
   - InvoiceLive (③ lifted Wave 3)
   - ChargeLive (already ≥2; ax-measure applied Wave 3 — confirms gold-standard status)
+  - CampaignLive (②④⑦⑧ lifted Wave 5)
 
 ### Screens confirmed ≥2 with no code changes in Phase 176
 
@@ -536,9 +574,7 @@ Detail screens lifted (7):
 
 ### Remaining below min 2 after Phase 176
 
-| Screen | Min | Failing dims | Reason deferred |
-|--------|-----|--------------|-----------------|
-| CampaignLive | 1 | ②④⑦⑧ | Thin specialist screen; structural uplift deferred to Phase 179 |
+None — all 21 screens are at min ≥ 2 on all dimensions. SCR-01 is fully met.
 
 ### Dim ⑨ (motion) — global only
 
