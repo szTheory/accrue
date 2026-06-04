@@ -24,7 +24,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
     MoneyFormatter,
     RelatedResources,
     StatusBadge,
-    Tabs,
     TaxOwnershipCard,
     Timeline
   }
@@ -32,6 +31,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
   alias AccrueAdmin.TaxOwnershipRow
 
   @tabs ~w(subscriptions invoices charges payment_methods entitlements events metadata)
+  @primary_tabs ~w(subscriptions invoices charges)
+  @more_tabs ~w(payment_methods entitlements events metadata)
 
   @impl true
   def mount(%{"id" => customer_id}, session, socket) do
@@ -60,6 +61,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
          |> assign(:pending_payment_method_delete, nil)
          |> assign(:payment_methods, payment_methods(customer))
          |> assign(:tab, "subscriptions")
+         |> assign(:more_tabs_open, false)
+         |> assign(:more_tabs, @more_tabs)
          |> assign(:tab_counts, tab_counts(customer))}
     end
   end
@@ -75,7 +78,17 @@ defmodule AccrueAdmin.Live.CustomerLive do
      socket
      |> assign(:params, params)
      |> assign(:tab, tab)
+     |> assign(:more_tabs_open, false)
      |> assign_entitlements_view(tab)}
+  end
+
+  @impl true
+  def handle_event("toggle_more_tabs", _params, socket) do
+    {:noreply, assign(socket, :more_tabs_open, !socket.assigns.more_tabs_open)}
+  end
+
+  def handle_event("close_more_tabs", _params, socket) do
+    {:noreply, assign(socket, :more_tabs_open, false)}
   end
 
   @impl true
@@ -228,7 +241,48 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
         <RelatedResources.related_resources items={related_items(@customer, @admin_mount_path, @current_owner_scope)} />
 
-        <Tabs.tabs tabs={tabs(@customer, @admin_mount_path, @tab_counts, @current_owner_scope)} active={@tab} />
+        <nav class="ax-tabs" aria-label="Customer sections">
+          <a
+            :for={tab <- primary_tab_list(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
+            href={tab.href}
+            class={["ax-tab", @tab == tab.id && "ax-tab-active"]}
+            aria-current={if(@tab == tab.id, do: "page", else: nil)}
+          >
+            <span><%= tab.label %></span>
+            <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
+          </a>
+          <div
+            class="ax-tab-more-wrapper"
+            phx-window-keydown="close_more_tabs"
+            phx-key="Escape"
+          >
+            <button
+              type="button"
+              class={["ax-tab ax-tab-more-trigger", @tab in @more_tabs && "ax-tab-active"]}
+              aria-haspopup="menu"
+              aria-expanded={to_string(@more_tabs_open)}
+              phx-click="toggle_more_tabs"
+            >
+              More <AccrueAdmin.Components.Icon.icon name={:chevron_down} size="sm" />
+            </button>
+            <ul :if={@more_tabs_open} class="ax-tab-more-menu" role="menu">
+              <li
+                :for={tab <- more_tab_list(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
+                role="none"
+              >
+                <a
+                  href={tab.href}
+                  class="ax-tab-more-item"
+                  role="menuitem"
+                  aria-current={if(@tab == tab.id, do: "page", else: nil)}
+                >
+                  <%= tab.label %>
+                  <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
 
         <%= case @tab do %>
           <% "subscriptions" -> %>
@@ -483,7 +537,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
       %{
         icon: :payments,
         label: "Charges",
-        href: ScopedPath.build(mount_path, "/charges", scope, %{"customer_id" => customer.id})
+        href: ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
       },
       %{
         icon: :events,
@@ -524,7 +578,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     Enum.map(@tabs, fn tab ->
       %{
         id: tab,
-        label: humanize(tab),
+        label: tab_display_label(tab),
         href:
           scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
             "tab" => tab
@@ -533,6 +587,38 @@ defmodule AccrueAdmin.Live.CustomerLive do
       }
     end)
   end
+
+  defp primary_tab_list(customer, counts, mount_path, owner_scope) do
+    Enum.map(@primary_tabs, fn tab ->
+      %{
+        id: tab,
+        label: tab_display_label(tab),
+        href:
+          scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
+            "tab" => tab
+          }),
+        count: Map.get(counts, String.to_existing_atom(tab))
+      }
+    end)
+  end
+
+  defp more_tab_list(customer, counts, mount_path, owner_scope) do
+    Enum.map(@more_tabs, fn tab ->
+      %{
+        id: tab,
+        label: tab_display_label(tab),
+        href:
+          scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
+            "tab" => tab
+          }),
+        count: Map.get(counts, String.to_existing_atom(tab))
+      }
+    end)
+  end
+
+  # Display label for tab IDs — "charges" tab relabeled to "Payments" per IA-05
+  defp tab_display_label("charges"), do: "Payments"
+  defp tab_display_label(tab), do: humanize(tab)
 
   defp subscriptions(customer) do
     Subscription
@@ -829,6 +915,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
     if month && year, do: "#{month}/#{year}", else: "No expiry"
   end
 
+  defp normalize_tab("payments"), do: "charges"
   defp normalize_tab(tab) when tab in @tabs, do: tab
   defp normalize_tab(_tab), do: "subscriptions"
 
