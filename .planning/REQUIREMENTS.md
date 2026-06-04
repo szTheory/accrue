@@ -63,7 +63,7 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 
 ### Visual-QA Loop & Sign-off (QA) — Phase 179 (F)
 
-- [ ] **QA-01**: The Playwright screenshot harness sweeps the full screen inventory (all ~20 screens incl. detail pages) across {desktop, mobile} × {light, dark}.
+- [x] **QA-01**: The Playwright screenshot harness sweeps the full screen inventory (all ~20 screens incl. detail pages) across {desktop, mobile} × {light, dark}.
 - [ ] **QA-02**: An LLM-analysis step scores each screenshot against the 10-dimension rubric and emits structured findings (screen, dimension, score, defect, suggested fix).
 - [ ] **QA-03**: A final scorecard shows every dimension ≥2 across all four matrix cells with before/after evidence, and axe passes in both light and dark themes.
 
@@ -92,7 +92,7 @@ Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
 | MOT-03 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
 | SEED-01 | Phase 178 (E — Seed Expressiveness & State Coverage) | Complete |
 | SEED-02 | Phase 178 (E — Seed Expressiveness & State Coverage) | Complete |
-| QA-01 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
+| QA-01 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Complete |
 | QA-02 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
 | QA-03 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
 

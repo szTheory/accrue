@@ -240,7 +240,7 @@ Plans:
 Plans:
 **Wave 1** *(parallel — independent files)*
 
-- [ ] 179-01-PLAN.md — Expand admin-visuals.spec.js shots[] 12→21 (3 fixtures, corrected routes) + @anthropic-ai/sdk devDep + score-visuals npm script (QA-01)
+- [x] 179-01-PLAN.md — Expand admin-visuals.spec.js shots[] 12→21 (3 fixtures, corrected routes) + @anthropic-ai/sdk devDep + score-visuals npm script (QA-01)
 - [ ] 179-02-PLAN.md — score-visuals.mjs (LLM scoring, no-op without key, findings schema) + admin-motion-trace.spec.js (4 motion surfaces, trace: "on") (QA-02, QA-03)
 
 **Wave 2** *(blocked on Wave 1)*
@@ -310,7 +310,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
-| 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/3 | Not started | - |
+| 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 1/3 | In Progress|  |
 
 ## Historical Backlog Anchors (not active scope)
 
