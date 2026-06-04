@@ -228,8 +228,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           ]}
           card_title={&card_title/1}
           card_fields={[
-            %{id: :type, label: "Type"},
             %{label: "Status", render: &status_summary/1},
+            %{id: :type, label: "Type"},
             %{label: "Endpoint", render: &endpoint_summary/1},
             %{label: "Received", render: &received_summary/1}
           ]}
