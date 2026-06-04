@@ -198,10 +198,26 @@ defmodule AccrueAdmin.Live.CouponLive do
     do: "#{used || 0} of #{max}"
 
   defp format_minor(amount_minor, currency) when is_integer(amount_minor) do
-    dollars = amount_minor / 100
-    code = currency |> to_string() |> String.upcase()
-    :erlang.float_to_binary(dollars, decimals: 2) <> " " <> code
+    Accrue.Invoices.Render.format_money(
+      amount_minor,
+      normalize_currency(currency),
+      Accrue.Config.default_locale()
+    )
   end
+
+  defp normalize_currency(currency) when is_atom(currency), do: currency
+
+  defp normalize_currency(currency) when is_binary(currency) do
+    code = String.downcase(currency)
+
+    try do
+      String.to_existing_atom(code)
+    rescue
+      ArgumentError -> :usd
+    end
+  end
+
+  defp normalize_currency(_currency), do: :usd
 
   defp format_datetime(%DateTime{} = value), do: Calendar.strftime(value, "%b %d, %Y %H:%M UTC")
 
