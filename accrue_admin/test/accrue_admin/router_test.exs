@@ -70,4 +70,46 @@ defmodule AccrueAdmin.RouterTest do
 
     assert conn.status == 200
   end
+
+  # Wave 2 gate: these tests assert /charges redirects to /payments.
+  # They are tagged :pending until Wave 2 ships the RedirectController and router changes.
+  # Wave 2 plan removes the :pending tag — do NOT permanently skip these.
+  describe "/charges redirects" do
+    @tag :pending
+    @tag :skip
+    test "GET /billing/charges redirects 302 to /billing/payments" do
+      # Wave 2 implementation required:
+      # - AccrueAdmin.RedirectController must exist.
+      # - Router must have: get("/charges", AccrueAdmin.RedirectController, :charges_index)
+      #   outside the live_session block.
+      conn =
+        :get
+        |> build_conn("/billing/charges")
+        |> Plug.Test.init_test_session(%{})
+        |> AccrueAdmin.TestRouter.call([])
+
+      assert conn.status == 302
+      location = conn |> get_resp_header("location") |> List.first()
+      assert location =~ "/payments"
+    end
+
+    @tag :pending
+    @tag :skip
+    test "GET /billing/charges/:id redirects 302 to /billing/payments/:id" do
+      # Wave 2 implementation required:
+      # - Router must have: get("/charges/:id", AccrueAdmin.RedirectController, :charges_show)
+      #   outside the live_session block.
+      charge_id = "charge_abc123"
+
+      conn =
+        :get
+        |> build_conn("/billing/charges/#{charge_id}")
+        |> Plug.Test.init_test_session(%{})
+        |> AccrueAdmin.TestRouter.call([])
+
+      assert conn.status == 302
+      location = conn |> get_resp_header("location") |> List.first()
+      assert location =~ "/payments/#{charge_id}"
+    end
+  end
 end
