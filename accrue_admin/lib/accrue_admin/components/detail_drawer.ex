@@ -5,6 +5,7 @@ defmodule AccrueAdmin.Components.DetailDrawer do
 
   use Phoenix.Component
 
+  attr(:id, :string, default: "detail-drawer")
   attr(:open, :boolean, default: false)
   attr(:title, :string, required: true)
   attr(:subtitle, :string, default: nil)
@@ -21,13 +22,13 @@ defmodule AccrueAdmin.Components.DetailDrawer do
     ~H"""
     <section
       :if={@open}
+      id={@id}
       class={["ax-detail-drawer-shell", @class]}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="detail-drawer-title"
+      aria-labelledby={"#{@id}-title"}
       phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-drawer-entering", "ax-drawer-enter-from", "ax-drawer-enter-to"}, time: 240)}
       phx-remove={Phoenix.LiveView.JS.hide(transition: {"ax-drawer-leaving", "ax-drawer-leave-from", "ax-drawer-leave-to"}, time: 140)}
-      {@rest}
     >
       <%!-- enter: --ax-dur-3 (240ms); exit: --ax-dur-exit (140ms) --%>
       <div
@@ -40,7 +41,7 @@ defmodule AccrueAdmin.Components.DetailDrawer do
         <header class="ax-detail-drawer-header">
           <div>
             <p class="ax-eyebrow"><%= @eyebrow %></p>
-            <h2 id="detail-drawer-title" class="ax-heading"><%= @title %></h2>
+            <h2 id={"#{@id}-title"} class="ax-heading"><%= @title %></h2>
             <p :if={@subtitle} class="ax-body"><%= @subtitle %></p>
           </div>
 
@@ -49,7 +50,7 @@ defmodule AccrueAdmin.Components.DetailDrawer do
             <a :if={@close_href} href={@close_href} class="ax-button ax-button-ghost">
               <%= @close_label %>
             </a>
-            <button :if={!@close_href} type="button" class="ax-button ax-button-ghost">
+            <button :if={!@close_href} type="button" class="ax-button ax-button-ghost" {@rest}>
               <%= @close_label %>
             </button>
           </div>
