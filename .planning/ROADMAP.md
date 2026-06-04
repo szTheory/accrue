@@ -176,12 +176,24 @@ Plans:
 
 **Plans:** 6 plans across 4 waves
 Plans:
+**Wave 1**
+
 - [ ] 177-01-PLAN.md — motion.md guide + accrue_admin/mix.exs ExDoc registration (MOT-01)
 - [ ] 177-02-PLAN.md — CSS transitions for dropdown, More ▾, tabs, badge, skeleton classes + sidebar_collapse.js two-step (MOT-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 177-03-PLAN.md — JS.transition for detail_drawer, flash_group, customer_live More ▾, data_table (MOT-02)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 177-04-PLAN.md — global_search data-open refactor + command_palette.js hook update (MOT-02/MOT-03)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 177-05-PLAN.md — antipattern guard script + paired negative-test fixture coupling (MOT-01)
 - [ ] 177-06-PLAN.md — Playwright reduced-motion e2e extensions + /dev/components motion section (MOT-01/MOT-03)
+
 **UI hint**: yes
 
 ### Phase 178: E — Seed Expressiveness & State Coverage
