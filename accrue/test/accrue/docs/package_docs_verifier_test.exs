@@ -267,6 +267,122 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "--ax-bp-"
   end
 
+  test "package docs verifier rejects 'transition: all' in app.css" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    original = File.read!(app_css_path)
+
+    drifted =
+      original <>
+        "\n.ax-drift { transition: all 180ms; }\n"
+
+    File.write!(app_css_path, drifted)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "app.css"
+    assert output =~ "transition: all"
+  end
+
+  test "package docs verifier rejects raw cubic-bezier() in app.css" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    original = File.read!(app_css_path)
+
+    drifted =
+      original <>
+        "\n.ax-drift { transition: opacity cubic-bezier(0.4,0,1,1); }\n"
+
+    File.write!(app_css_path, drifted)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "app.css"
+    assert output =~ "cubic-bezier"
+  end
+
+  test "package docs verifier rejects raw ms duration literal in app.css" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    original = File.read!(app_css_path)
+
+    drifted =
+      original <>
+        "\n.ax-drift { transition: opacity 200ms ease; }\n"
+
+    File.write!(app_css_path, drifted)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "app.css"
+    assert output =~ "ms"
+  end
+
+  test "package docs verifier rejects layout-thrash property in transition list in app.css" do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    original = File.read!(app_css_path)
+
+    drifted =
+      original <>
+        "\n.ax-drift { transition: height var(--ax-dur-2) ease; }\n"
+
+    File.write!(app_css_path, drifted)
+
+    {output, status} =
+      System.cmd("bash", [@script_path],
+        stderr_to_stdout: true,
+        env: [{"ROOT_DIR", tmp_dir}]
+      )
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "app.css"
+    assert output =~ "layout"
+  end
+
   test "package docs verifier rejects Stripe-only language in adoption-proof-matrix.md" do
     tmp_dir =
       Path.join(
@@ -329,6 +445,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("accrue_admin/assets/css/app.css", tmp_dir)
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/guides"))
+    copy_fixture!("accrue_admin/guides/motion.md", tmp_dir)
     copy_fixture!("accrue_portal/mix.exs", tmp_dir)
     copy_fixture!("accrue_portal/README.md", tmp_dir)
     copy_fixture!("examples/accrue_host/README.md", tmp_dir)
