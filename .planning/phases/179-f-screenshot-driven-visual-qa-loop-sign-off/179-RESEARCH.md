@@ -640,22 +640,19 @@ The `score-visuals.mjs` script reads the `ANTHROPIC_API_KEY` from environment �
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Motion trace trigger selectors**
-   - What we know: The motion surfaces are `detail_drawer.ex` (drawer), `global_search.ex` (command palette), dropdown component, sidebar chevron (nav-collapse).
-   - What's unclear: The exact `data-role` or CSS selector to trigger each — these are in LiveView component templates not yet audited for this research.
-   - Recommendation: Read the component templates in Wave 0 (before writing the motion trace spec) and record the trigger selectors.
+1. **Motion trace trigger selectors** — RESOLVED via PATTERNS.md component template audit.
+   - Command palette: `#search-trigger` (phx-click="open" on topbar.ex)
+   - Dropdown: `details.ax-dropdown > summary`
+   - Nav-collapse: `[data-collapse-toggle="true"]`
+   - Webhook replay drawer: `data-role="replay-single"`
 
-2. **`connect-accounts` route slug**
-   - What we know: STATE-MATRIX uses `ConnectAccountsLive` and the route appears as `/billing/connect-accounts` in the matrix.
-   - What's unclear: The exact route defined in `router.ex` (it may be `/billing/connect` or `/billing/connect-accounts`).
-   - Recommendation: Grep `router.ex` for connect-related routes before writing the shots array.
+2. **`connect-accounts` route slug** — RESOLVED: route is `/billing/connect-accounts` (confirmed from router.ex grep; shots array uses this path).
 
-3. **Scoring script model recommendation**
-   - What we know: `claude-sonnet-4-5` or `claude-opus-4-5` can both do vision scoring.
-   - What's unclear: Which model is available under the user's Anthropic API key tier.
-   - Recommendation: Default to `claude-sonnet-4-5` (faster, cheaper for automated sweep); allow override via `SCORE_MODEL` env var.
+3. **Scoring script model recommendation** — RESOLVED: default `claude-sonnet-4-5` with `SCORE_MODEL` env var override; `@anthropic-ai/sdk` 0.100.1 selected (Anthropic official npm package, verified in Package Legitimacy Audit).
+
+4. **Campaign-detail route** — RESOLVED: route is `/billing/analytics/recovery/campaigns/:at_risk_sub_id` (confirmed from router.ex; shots array uses this pattern).
 
 ---
 
