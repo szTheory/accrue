@@ -191,7 +191,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 177-05-PLAN.md — antipattern guard script + paired negative-test fixture coupling (MOT-01)
+- [x] 177-05-PLAN.md — antipattern guard script + paired negative-test fixture coupling (MOT-01)
 - [ ] 177-06-PLAN.md — Playwright reduced-motion e2e extensions + /dev/components motion section (MOT-01/MOT-03)
 
 **UI hint**: yes
@@ -282,7 +282,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
-| 177. D — Motion & Micro-interaction Design | v1.51 | 4/6 | In Progress|  |
+| 177. D — Motion & Micro-interaction Design | v1.51 | 5/6 | In Progress|  |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
 
