@@ -521,22 +521,25 @@ Not applicable — this phase is purely CSS/JS motion and documentation. No auth
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **detail_drawer enter/exit mechanism choice: `:if` + JS.transition vs always-render + CSS**
    - What we know: step_up_auth_modal uses `:if` + `phx-mounted`/`phx-remove` for focus management; detail_drawer uses `:if={@open}` today
    - What's unclear: whether detail_drawer is ever used in contexts where always-rendering would cause issues (hidden form fields, inaccessible tab stops)
    - Recommendation: keep `:if={@open}` and add `phx-mounted={JS.show(...)} phx-remove={JS.hide(...)}` — matches the existing step_up_auth_modal pattern, no architectural change required
+   - **RESOLVED:** Keep `:if={@open}`; add `phx-mounted` / `phx-remove` JS.show/hide transition attrs on the `:if`-gated section (Plan 03 Task 2, EDIT 1).
 
 2. **`<details>` exit transition for dropdown**
    - What we know: native `[open]` removal is synchronous; CSS transitions don't fire on exit
    - What's unclear: whether the planner should add a minimal JS hook to support exit asymmetry, or accept symmetric duration for dropdown close
    - Recommendation: accept symmetric 180ms for dropdown (enter and exit same speed) in Phase 177. Exit asymmetry is a nice-to-have; the functional justification (affordance) is met by the enter alone. Flag as discretionary.
+   - **RESOLVED:** Accept symmetric 180ms for Phase 177 (Plan 02 Task 1, CHANGE 2). JS-hook upgrade for exit asymmetry is flagged discretionary and deferred.
 
 3. **SidebarCollapse hook: `list.hidden` vs CSS class for transition**
    - What we know: `list.hidden = true` kills CSS transitions immediately
    - What's unclear: the planner needs to decide whether to modify `sidebar_collapse.js` to use a CSS class toggle instead of `hidden`, or use the `transitionend` callback approach
    - Recommendation: replace `list.hidden = !expanded` with a two-step approach: (a) add `ax-collapsing` class, (b) on `transitionend`, set `list.hidden = !expanded`. This keeps `hidden` for structural semantics while allowing CSS transitions to run.
+   - **RESOLVED:** CSS class (`ax-collapsed`) two-step with transitionend listener: add `ax-collapsed` class to trigger exit opacity transition, then set `list.hidden = true` + remove class on `transitionend` (Plan 02 Task 2, SUB-CHANGE B).
 
 ---
 
