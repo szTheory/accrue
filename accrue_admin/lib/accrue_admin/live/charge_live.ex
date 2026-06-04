@@ -213,7 +213,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
             <header class="ax-page-header">
               <p class="ax-eyebrow">Refund</p>
               <h3 class="ax-heading">Initiate a fee-aware refund</h3>
-              <p class="ax-body">
+              <p class="ax-body ax-measure">
                 Leave the amount blank to refund the full charge. Existing fee fields surface after
                 the refund is created.
               </p>
