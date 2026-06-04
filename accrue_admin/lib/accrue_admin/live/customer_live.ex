@@ -63,7 +63,8 @@ defmodule AccrueAdmin.Live.CustomerLive do
          |> assign(:tab, "subscriptions")
          |> assign(:more_tabs_open, false)
          |> assign(:more_tabs, @more_tabs)
-         |> assign(:tab_counts, tab_counts(customer))}
+         |> assign(:tab_counts, tab_counts(customer))
+         |> assign(:tax_risk, tax_risk_summary(customer))}
     end
   end
 
@@ -229,9 +230,9 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
           <KpiCard.kpi_card
             label="Tax risk"
-            value={tax_risk_summary(@customer).headline}
-            delta={tax_risk_summary(@customer).detail}
-            delta_tone={tax_risk_summary(@customer).tone}
+            value={@tax_risk.headline}
+            delta={@tax_risk.detail}
+            delta_tone={@tax_risk.tone}
           >
             <:meta>Derived from projected subscriptions and invoices only</:meta>
           </KpiCard.kpi_card>
@@ -768,6 +769,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
         |> assign(:customer, customer)
         |> assign(:payment_methods, payment_methods(customer))
         |> assign(:tab_counts, tab_counts(customer))
+        |> assign(:tax_risk, tax_risk_summary(customer))
 
       :not_found ->
         socket
