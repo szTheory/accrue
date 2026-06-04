@@ -312,13 +312,13 @@ Priority is given to screens with the lowest minimum dimension score, then by nu
 | CouponsLive | `coupons_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | CouponLive | `coupon_live.ex` | 3 | 2 | 2 | 1 | 3 | 2 | 2 | 2 | 2 | 2 | 1 | NO (④) | W2 |
 | PromotionCodesLive | `promotion_codes_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
-| PromotionCodeLive | `promotion_code_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
+| PromotionCodeLive | `promotion_code_live.ex` | 3 | 2 | 3 | 2 | 3 | 2 | 2 | 2 | 2 | 2 | 2 | YES | W2b |
 | ConnectAccountsLive | `connect_accounts_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
-| ConnectAccountLive | `connect_account_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
+| ConnectAccountLive | `connect_account_live.ex` | 3 | 2 | 3 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | 2 | YES | W2b |
 | EventsLive | `events_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | EventLive | `event_live.ex` | 3 | 2 | 3 | 1 | 2 | 2 | 2 | 2 | 2 | 2 | 1 | NO (④) | W2 |
 | WebhooksLive | `webhooks_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
-| WebhookLive | `webhook_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
+| WebhookLive | `webhook_live.ex` | 3 | 3 | 3 | 3 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W2b |
 | RecoveryLive | `analytics/recovery_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | skip |
 | CampaignLive | `analytics/campaign_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
 
@@ -397,3 +397,35 @@ failed / dead-letter) is the primary decision field on mobile; type is secondary
 | PromotionCodesLive | All dims ≥2. card_fields=coupon/status/redemptions/expires — correct for catalog persona. |
 | ConnectAccountsLive | All dims ≥2. card_fields=owner/readiness/override/status — correct for developer persona. |
 | EventsLive | All dims ≥2. card_fields=subject/actor/webhook_source/when — correct for compliance/developer persona. KPI aria-label already present. |
+
+---
+
+## Wave 2b After-Score Rationale (PromotionCodeLive + ConnectAccountLive + WebhookLive — Plan 176-04)
+
+**Scored by:** Wave 2b executor (2026-06-04)
+
+### PromotionCodeLive (3-2-3-2-3-2-2-2-2-2 = min 2 PASS — was 3-1-3-1-3-2-1-2-2-1)
+
+- ② 1→2: Hand-rolled `<header class="ax-page-header">` hero replaced with `Detail.summary_card` (eyebrow + title + facts with status + redemption spans).
+- ④ 1→2: Added `put_flash(:error, ...)` before nil redirect + `fetch_live_flash` added to `accrue_admin_browser` pipeline. Not-found redirects now carry a flash error message.
+- ⑦ 1→2: summary_card hero uses the component's built-in semantic structure. No bare hand-rolled heading.
+- ⑩ 1→2: `Detail` alias added; hand-rolled `<section class="ax-card">` parent-coupon section replaced with `Detail.detail_section`. `Detail.summary_card` used for hero.
+- ③ remains 3: No literal px spacing. ax-body, ax-link used.
+- ⑤ remains 3: Single-column layout is correct for this screen.
+- All other dims unchanged.
+
+### ConnectAccountLive (3-2-3-2-2-2-2-2-2-2 = min 2 PASS — was 3-2-2-2-2-2-2-2-2-2)
+
+- ③ 2→3: Added `ax-measure` to platform-fee description prose `<p>` (line 144). All prose regions now constrained to 68ch reading width.
+- All other dims unchanged (already ≥2).
+- Note: form phx-submit="save_override" and data-role="save-override" button preserved unchanged.
+
+### WebhookLive (3-3-3-3-2-2-2-3-2-3 = min 2 PASS — was 3-3-3-3-2-2-2-3-2-2)
+
+- ⑩ 2→3: Last hand-rolled `<section class="ax-card">` forensic payload section replaced with `Detail.detail_section` + `Detail.detail_field_list` for Endpoint/Processed fields. All primitives now in use.
+- SCR-04: Added `ax-measure` to Activity-feed prose paragraph (previously bare `ax-body`).
+- All other dims unchanged (already ≥2 or 3).
+
+### Cross-cutting pipeline fix (Plan 176-04)
+
+Added `plug(:fetch_live_flash)` to the `accrue_admin_browser` pipeline in `AccrueAdmin.Router`. This fix is required for `put_flash/3` to work correctly on LiveView socket redirects from the HTTP initial request phase. Prior to this fix, nil-case redirects with `put_flash` would produce a 500 error. This fix enables dim ④ upgrades for any screen that adds `put_flash` to its nil-case redirect. CouponLive and EventLive remain at dim ④ = 1 (they still use bare `redirect` without `put_flash`) and are out of scope for this plan.
