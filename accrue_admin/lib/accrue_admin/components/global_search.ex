@@ -132,7 +132,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
               type="text"
               name="q"
               value={@query}
-              placeholder="Search customers, invoices, subscriptions..."
+              placeholder="Search customers, invoices… ⌘K"
               autocomplete="off"
               spellcheck="false"
               autofocus
