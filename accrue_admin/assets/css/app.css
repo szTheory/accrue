@@ -1421,24 +1421,49 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 
 /* ============================================================================
    Phase 177 (v1.51 MOT-02) — More ▾ overflow motion
-   Plan 03 will toggle .ax-tab-more-open on the .ax-tab-more-wrapper when
-   showing/hiding, wiring this CSS. translateY uses --ax-rise-sm (4px) which
-   collapses to 0px under prefers-reduced-motion automatically.
+   JS.show/hide tuples on phx-mounted/phx-remove drive enter/exit.
+   translateY uses --ax-rise-sm (4px) which collapses to 0px under
+   prefers-reduced-motion automatically via the bundle tokens.
    ========================================================================== */
-.ax-tab-more-menu {
+
+/* Enter: from-state (initial) — opacity 0 + small rise-up offset */
+.ax-tab-more-enter-from {
   opacity: 0;
   transform: translateY(calc(-1 * var(--ax-rise-sm)));
-  pointer-events: none;
+}
+
+/* Enter: transition class — fires while JS.show moves from-state → to-state */
+.ax-tab-more-entering {
   transition:
     opacity var(--ax-dur-2) var(--ax-ease-out),
     transform var(--ax-dur-2) var(--ax-ease-out);
 }
 
-/* Exit is instant when :if={@more_tabs_open} removes the element — no JS toggle yet.
-   Plan 03 upgrades to JS.transition for full enter/exit. */
+/* Enter: to-state (fully visible) */
+.ax-tab-more-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Exit: from-state (currently visible) */
+.ax-tab-more-leave-from {
+  opacity: 1;
+}
+
+/* Exit: transition class — fires while JS.hide moves from-state → to-state */
+.ax-tab-more-leaving {
+  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
+}
+
+/* Exit: to-state (invisible) */
+.ax-tab-more-leave-to {
+  opacity: 0;
+}
+
+/* .ax-tab-more-open CSS-class toggle kept harmless for any future CSS-only usage */
 .ax-tab-more-open .ax-tab-more-menu {
   opacity: 1;
-  transform: translateY(0px);
+  transform: translateY(0);
   pointer-events: auto;
 }
 

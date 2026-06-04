@@ -266,7 +266,13 @@ defmodule AccrueAdmin.Live.CustomerLive do
             >
               More <AccrueAdmin.Components.Icon.icon name={:chevron_down} size="sm" />
             </button>
-            <ul :if={@more_tabs_open} class="ax-tab-more-menu" role="menu">
+            <ul
+              :if={@more_tabs_open}
+              class="ax-tab-more-menu"
+              role="menu"
+              phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-tab-more-entering", "ax-tab-more-enter-from", "ax-tab-more-enter-to"}, time: 180)}
+              phx-remove={Phoenix.LiveView.JS.hide(transition: {"ax-tab-more-leaving", "ax-tab-more-leave-from", "ax-tab-more-leave-to"}, time: 140)}
+            >
               <li
                 :for={tab <- more_tab_list(@customer, @tab_counts, @admin_mount_path, @current_owner_scope)}
                 role="none"
