@@ -71,17 +71,9 @@ defmodule AccrueAdmin.RouterTest do
     assert conn.status == 200
   end
 
-  # Wave 2 gate: these tests assert /charges redirects to /payments.
-  # They are tagged :pending until Wave 2 ships the RedirectController and router changes.
-  # Wave 2 plan removes the :pending tag — do NOT permanently skip these.
+  # Wave 2: RedirectController and router changes shipped in 175-03.
   describe "/charges redirects" do
-    @tag :pending
-    @tag :skip
     test "GET /billing/charges redirects 302 to /billing/payments" do
-      # Wave 2 implementation required:
-      # - AccrueAdmin.RedirectController must exist.
-      # - Router must have: get("/charges", AccrueAdmin.RedirectController, :charges_index)
-      #   outside the live_session block.
       conn =
         :get
         |> build_conn("/billing/charges")
@@ -93,12 +85,7 @@ defmodule AccrueAdmin.RouterTest do
       assert location =~ "/payments"
     end
 
-    @tag :pending
-    @tag :skip
     test "GET /billing/charges/:id redirects 302 to /billing/payments/:id" do
-      # Wave 2 implementation required:
-      # - Router must have: get("/charges/:id", AccrueAdmin.RedirectController, :charges_show)
-      #   outside the live_session block.
       charge_id = "charge_abc123"
 
       conn =

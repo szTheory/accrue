@@ -57,6 +57,11 @@ defmodule AccrueAdmin.Router do
 
         pipe_through(:accrue_admin_browser)
 
+        # Redirect /charges → /payments for bookmark preservation (IA-06).
+        # Must be outside the live_session block so Phoenix controller routing applies.
+        get("/charges", AccrueAdmin.RedirectController, :charges_index)
+        get("/charges/:id", AccrueAdmin.RedirectController, :charges_show)
+
         live_session :accrue_admin,
           root_layout: {AccrueAdmin.Layouts, :root},
           on_mount: on_mount,
@@ -68,8 +73,8 @@ defmodule AccrueAdmin.Router do
           live("/subscriptions/:id", AccrueAdmin.Live.SubscriptionLive, :show)
           live("/invoices", AccrueAdmin.Live.InvoicesLive, :index)
           live("/invoices/:id", AccrueAdmin.Live.InvoiceLive, :show)
-          live("/charges", AccrueAdmin.Live.ChargesLive, :index)
-          live("/charges/:id", AccrueAdmin.Live.ChargeLive, :show)
+          live("/payments", AccrueAdmin.Live.ChargesLive, :index)
+          live("/payments/:id", AccrueAdmin.Live.ChargeLive, :show)
           live("/coupons", AccrueAdmin.Live.CouponsLive, :index)
           live("/coupons/:id", AccrueAdmin.Live.CouponLive, :show)
           live("/promotion-codes", AccrueAdmin.Live.PromotionCodesLive, :index)
@@ -77,6 +82,7 @@ defmodule AccrueAdmin.Router do
           live("/connect", AccrueAdmin.Live.ConnectAccountsLive, :index)
           live("/connect/:id", AccrueAdmin.Live.ConnectAccountLive, :show)
           live("/events", AccrueAdmin.Live.EventsLive, :index)
+          live("/events/:id", AccrueAdmin.Live.EventLive, :show)
           live("/webhooks", AccrueAdmin.Live.WebhooksLive, :index)
           live("/webhooks/:id", AccrueAdmin.Live.WebhookLive, :show)
 
