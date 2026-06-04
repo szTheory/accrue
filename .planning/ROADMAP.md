@@ -82,7 +82,7 @@ Plans:
 
 **Wave 5 — Gap Closure** *(after verification; closes VERIFICATION.md gaps)*
 
-- [ ] 174-05-PLAN.md — Fix phantom tokens in ComponentRegistry + add token-validity test (DSY-03, Gap 1)
+- [x] 174-05-PLAN.md — Fix phantom tokens in ComponentRegistry + add token-validity test (DSY-03, Gap 1)
 - [ ] 174-06-PLAN.md — Seed adoption-proof-matrix.md in PackageDocsVerifierTest + Stripe-only negative test (DSY-01, Gap 2)
 - [ ] 174-07-PLAN.md — Resolve .ax-search-trigger stale deferral comment + asset rebuild (DSY-01, Gap 3)
 
@@ -216,7 +216,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 171. Shared Detail Components & Refactor | v1.50 | ✓ | Complete | 2026-06-02 |
 | 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
-| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 4/4 | Complete   | 2026-06-03 |
+| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 5/7 | In Progress|  |
 | 175. B — Persona-Driven IA Spine | v1.51 | 0/? | Not started | - |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/? | Not started | - |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
