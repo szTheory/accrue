@@ -728,7 +728,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
         :in_use
 
       default_payment_method?(customer, payment_method) and
-          has_other_payment_methods?(customer, payment_method) ->
+          not has_other_payment_methods?(customer, payment_method) ->
         :replacement_required
 
       true ->
@@ -792,15 +792,22 @@ defmodule AccrueAdmin.Live.CustomerLive do
 
   defp reconcile_deleted_payment_method(socket, payment_method) do
     if persisted_payment_method = Repo.get(PaymentMethod, payment_method.id) do
-      {:ok, _deleted_payment_method} = Repo.delete(persisted_payment_method)
+      case Repo.delete(persisted_payment_method) do
+        {:ok, _deleted} ->
+          if socket.assigns.customer.default_payment_method_id == payment_method.id do
+            # Best-effort update: the payment method is already deleted on Stripe,
+            # so we don't let a changeset failure here crash the LiveView process.
+            socket.assigns.customer
+            |> Accrue.Billing.Customer.changeset(%{default_payment_method_id: nil})
+            |> Repo.update()
+            # intentionally ignoring {:error, _changeset} — best effort
+          end
 
-      if socket.assigns.customer.default_payment_method_id == payment_method.id do
-        # Best-effort update: the payment method is already deleted on Stripe,
-        # so we don't let a changeset failure here crash the LiveView process.
-        socket.assigns.customer
-        |> Accrue.Billing.Customer.changeset(%{default_payment_method_id: nil})
-        |> Repo.update()
-        # intentionally ignoring {:error, _changeset} — best effort
+        {:error, _changeset} ->
+          # Local DB delete failed (e.g. constraint, concurrent deletion). The
+          # payment method was already deleted on Stripe; log and continue so
+          # the LiveView process does not crash.
+          :ok
       end
     end
 
