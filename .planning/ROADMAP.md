@@ -150,7 +150,7 @@ Plans:
 
 **Wave 3** *(parallel — blocked on Wave 2 — catalog/specialist detail; 03 and 04 run in parallel)*
 
-- [ ] 176-03-PLAN.md — Uplift event_live (semantic dl/dt/dd facts, detail_section body, not-found state) + coupon_live (Detail alias, summary_card hero, DRY projection section) (SCR-01, SCR-02, SCR-03, SCR-04)
+- [x] 176-03-PLAN.md — Uplift event_live (semantic dl/dt/dd facts, detail_section body, not-found state) + coupon_live (Detail alias, summary_card hero, DRY projection section) (SCR-01, SCR-02, SCR-03, SCR-04)
 - [ ] 176-04-PLAN.md — Uplift promotion_code_live (Detail alias, summary_card hero, detail_section parent-coupon) + connect_account_live (.ax-measure prose) + webhook_live (DRY forensic section, .ax-measure) (SCR-01, SCR-02, SCR-03, SCR-04)
 
 **Wave 4** *(blocked on Wave 3 — dense financial detail)*
@@ -262,7 +262,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 2/6 | In Progress|  |
+| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 3/6 | In Progress|  |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
