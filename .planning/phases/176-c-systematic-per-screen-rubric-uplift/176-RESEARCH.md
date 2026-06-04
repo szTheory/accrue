@@ -676,22 +676,22 @@ This phase installs **no new packages**. All work is CSS + HEEx template edits w
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`Detail.detail_field_list` component API**
+1. **`Detail.detail_field_list` component API** — RESOLVED
    - What we know: `Detail.detail_section` is used in `webhook_live.ex` and `invoice_live.ex`; `Detail.detail_field_list` appears in the UI-SPEC component library list
    - What's unclear: The exact slot name(s) and attrs (`:field` with `label` attr is assumed from community Phoenix convention)
-   - Recommendation: Executor reads `accrue_admin/lib/accrue_admin/components/detail.ex` in the first Wave 2 task before writing any `detail_field_list` calls
+   - Resolution: Executor reads `accrue_admin/lib/accrue_admin/components/detail.ex` in the first Wave 2 task (Plan 03 `read_first`) before writing any `detail_field_list` calls. The exact API is confirmed at execution time from the source file; Plans 03/04 include `detail.ex` as a required `read_first` item.
 
-2. **`analytics/recovery` and `analytics/campaign` rubric scores**
+2. **`analytics/recovery` and `analytics/campaign` rubric scores** — RESOLVED
    - What we know: These screens were not in the Phase 21 focus; they have an `at_risk_table` component and `campaign_timeline` component not in the kitchen
    - What's unclear: Their actual rubric scores (not inspected in this research pass)
-   - Recommendation: Include both in the Wave 0 baseline SCORECARD.md sweep; assign to Wave 1 or Wave 2 if any dimension < 2
+   - Resolution: Both screens are included in the Plan 01 Wave 0 SCORECARD sweep (Task 1 `read_first` explicitly includes `accrue_admin/lib/accrue_admin/live/analytics/`). Scores are captured in the same pass as all other screens.
 
-3. **Horizontal overflow at 768px after breakpoint change**
+3. **Horizontal overflow at 768px after breakpoint change** — RESOLVED
    - What we know: The widest tables are invoices (many columns: number, customer, status, amount, due_at, etc.) and webhooks (type, status, endpoint, received)
    - What's unclear: Whether these tables overflow their container at exactly 768px width
-   - Recommendation: Add an `overflow-x: auto` guard to `.ax-data-table-shell` as a defensive measure before testing, or test at 768px and add only if overflow is observed
+   - Resolution: Plan 01 Task 2 proactively adds `overflow-x: auto` to `.ax-data-table-shell` in the same CSS edit (per RESEARCH.md §Pitfall 3 recommendation). This is a defensive guard that prevents overflow before it can be observed, so no separate verification step is needed.
 
 ---
 
