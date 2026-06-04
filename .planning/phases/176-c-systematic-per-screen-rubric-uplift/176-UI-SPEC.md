@@ -1,10 +1,11 @@
 ---
 phase: 176
 slug: c-systematic-per-screen-rubric-uplift
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-04
+reviewed_at: 2026-06-04
 ---
 
 # Phase 176 — UI Design Contract
