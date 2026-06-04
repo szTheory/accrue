@@ -66,13 +66,15 @@ defmodule AccrueAdmin.MixProject do
         "README.md",
         "guides/admin_ui.md",
         "guides/core-admin-parity.md",
-        "guides/theme-exceptions.md"
+        "guides/theme-exceptions.md",
+        "guides/motion.md"
       ],
       groups_for_extras: [
         Guides: [
           "guides/admin_ui.md",
           "guides/core-admin-parity.md",
-          "guides/theme-exceptions.md"
+          "guides/theme-exceptions.md",
+          "guides/motion.md"
         ]
       ],
       # `AccrueAdmin.Copy` defdelegates and README route tables mention implementation/hidden
@@ -88,7 +90,7 @@ defmodule AccrueAdmin.MixProject do
       # `.planning/milestones/...` paths sit outside the package tarball but
       # add operator-discoverable context for repo readers. Skip the warning
       # rather than break the link or duplicate the SSOT inside the package.
-      skip_undefined_reference_warnings_on: ["guides/admin_ui.md", "guides/core-admin-parity.md"]
+      skip_undefined_reference_warnings_on: ["guides/admin_ui.md", "guides/core-admin-parity.md", "guides/motion.md"]
     ]
   end
 
