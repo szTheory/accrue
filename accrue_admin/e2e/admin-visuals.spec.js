@@ -36,25 +36,37 @@ test.describe("Admin visual inventory", () => {
     page,
     request
   }, testInfo) => {
-    const data = await seed(request, "operator-flows");
+    // Three merged fixtures — operator-flows, dashboard, edge-states — seeded
+    // without intermediate reset(). Fixtures use System.unique_integer processor
+    // IDs and accumulate safely. Detail surfaces use ids returned from each fixture.
+    const opFlows = await seed(request, "operator-flows");
+    const dash    = await seed(request, "dashboard");
+    const edge    = await seed(request, "edge-states");
     const project = testInfo.project.name;
 
-    // Index surfaces render regardless of seed volume (empty states included),
-    // so the full nav inventory is safe to sweep. Detail surfaces use only ids
-    // the fixture is known to provide.
     const shots = [
-      ["dashboard", "/billing"],
-      ["customers", "/billing/customers"],
-      ["subscriptions", "/billing/subscriptions"],
-      ["invoices", "/billing/invoices"],
-      ["payments", "/billing/charges"],
-      ["recovery", "/billing/analytics/recovery"],
-      ["coupons", "/billing/coupons"],
-      ["promotion-codes", "/billing/promotion-codes"],
-      ["connect", "/billing/connect"],
-      ["events", "/billing/events"],
-      ["webhooks", "/billing/webhooks"],
-      ["webhook-detail", `/billing/webhooks/${data.single_webhook_id}`]
+      ["dashboard",           "/billing"],
+      ["customers",           "/billing/customers"],
+      ["customer-detail",     `/billing/customers/${dash.customer_id}`],
+      ["subscriptions",       "/billing/subscriptions"],
+      ["subscription-detail", `/billing/subscriptions/${dash.subscription_id}`],
+      ["invoices",            "/billing/invoices"],
+      ["invoice-detail",      `/billing/invoices/${edge.jpy_invoice_id}`],
+      ["payments",            "/billing/payments"],           // NOTE: /payments not /charges
+      ["charge-detail",       `/billing/payments/${opFlows.charge_id}`],
+      ["coupons",             "/billing/coupons"],
+      ["coupon-detail",       `/billing/coupons/${edge.coupon_id}`],
+      ["promotion-codes",     "/billing/promotion-codes"],
+      ["promo-code-detail",   `/billing/promotion-codes/${edge.promo_code_id}`],
+      ["connect",             "/billing/connect"],             // NOTE: /connect not /connect-accounts
+      ["connect-detail",      `/billing/connect/${edge.connect_account_id}`],
+      ["events",              "/billing/events"],
+      ["event-detail",        `/billing/events/${opFlows.source_event_id}`],
+      ["webhooks",            "/billing/webhooks"],
+      ["webhook-detail",      `/billing/webhooks/${opFlows.single_webhook_id}`],
+      ["recovery",            "/billing/analytics/recovery"],
+      ["campaign-detail",     `/billing/analytics/recovery/subscriptions/${edge.at_risk_sub_id}`],
+      // NOTE: route is /analytics/recovery/subscriptions/:id (not /campaigns/:id)
     ];
 
     for (const [name, path] of shots) {
