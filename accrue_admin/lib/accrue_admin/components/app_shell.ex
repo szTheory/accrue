@@ -14,11 +14,16 @@ defmodule AccrueAdmin.Components.AppShell do
   attr(:page_title, :string, required: true)
   attr(:theme, :string, default: "system")
   attr(:active_organization_name, :any, default: nil)
+  attr(:nav_attention_counts, :map, default: %{})
   slot(:inner_block, required: true)
 
   def app_shell(assigns) do
     assigns =
-      assign(assigns, :nav_items, Nav.items(assigns.mount_path, assigns.current_path))
+      assign(
+        assigns,
+        :nav_items,
+        Nav.items(assigns.mount_path, assigns.current_path, assigns.nav_attention_counts)
+      )
 
     ~H"""
     <div class="ax-shell" data-mount-path={@mount_path}>

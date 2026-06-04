@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
   alias Accrue.Events.Event
   alias Accrue.Repo
   alias Accrue.Webhook.WebhookEvent
+  alias AccrueAdmin.AttentionCounts
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Icon, KpiCard, Timeline}
   alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
@@ -240,7 +241,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       canceling_subscription_count:
         Subscription |> Query.canceling() |> Repo.aggregate(:count, :id),
       past_due_subscription_count:
-        Subscription |> Query.past_due() |> Repo.aggregate(:count, :id),
+        AttentionCounts.compute(nil).recovery,
       open_invoice_count:
         Invoice
         |> where([invoice], invoice.status in ^open_invoice_statuses)
@@ -252,9 +253,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         |> Repo.one()
         |> Kernel.||(0),
       blocked_webhook_count:
-        WebhookEvent
-        |> where([event], event.status in [:failed, :dead])
-        |> Repo.aggregate(:count, :id),
+        AttentionCounts.compute(nil).developer,
       failed_meter_event_count:
         MeterEvent
         |> where([m], m.stripe_status == "failed")

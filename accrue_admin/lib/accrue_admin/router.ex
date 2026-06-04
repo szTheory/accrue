@@ -6,7 +6,10 @@ defmodule AccrueAdmin.Router do
   import Phoenix.LiveView.Router
   import Plug.Conn, only: [get_session: 2]
 
-  @default_on_mount [{AccrueAdmin.AuthHook, :ensure_admin}]
+  @default_on_mount [
+    {AccrueAdmin.AuthHook, :ensure_admin},
+    {AccrueAdmin.NavBadgeHook, :default}
+  ]
   @default_session_keys []
   @owner_scope_session_keys AccrueAdmin.OwnerScope.session_keys()
 
