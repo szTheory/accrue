@@ -1755,6 +1755,8 @@ details[open].ax-dropdown .ax-dropdown-panel {
   display: grid;
   place-items: start center;
   padding: 10vh var(--ax-space-md) var(--ax-space-md);
+  /* Closed state: invisible + non-interactive (no display:none so CSS transitions can fire) */
+  pointer-events: none;
 }
 
 .ax-command-palette-backdrop {
@@ -1762,6 +1764,8 @@ details[open].ax-dropdown .ax-dropdown-panel {
   inset: 0;
   background: color-mix(in srgb, var(--accrue-ink) 34%, transparent);
   backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity var(--ax-dur-2) var(--ax-ease-out);
 }
 
 .ax-command-palette {
@@ -1775,6 +1779,32 @@ details[open].ax-dropdown .ax-dropdown-panel {
   border-radius: var(--ax-radius-lg);
   background: var(--ax-elevated);
   box-shadow: var(--ax-shadow-lg);
+  /* Closed state: invisible + subtle scale-down; transition fires when data-open flips */
+  opacity: 0;
+  transform: scale(0.98);
+  pointer-events: none;
+  transition:
+    opacity var(--ax-dur-2) var(--ax-ease-out),
+    transform var(--ax-dur-2) var(--ax-ease-emphasis);
+}
+
+/* Phase 177 (v1.51 MOT-02) — Command palette enter/exit transitions (data-open attr approach) */
+
+/* Open state: restore pointer-events on wrapper */
+.ax-command-palette-wrapper[data-open="true"] {
+  pointer-events: auto;
+}
+
+/* Open state: fade backdrop in */
+.ax-command-palette-wrapper[data-open="true"] .ax-command-palette-backdrop {
+  opacity: 1;
+}
+
+/* Open state: palette panel scale-in + opacity; --ax-ease-emphasis is the one earned overshoot */
+.ax-command-palette-wrapper[data-open="true"] .ax-command-palette {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
 }
 
 .ax-command-palette-input-group {
