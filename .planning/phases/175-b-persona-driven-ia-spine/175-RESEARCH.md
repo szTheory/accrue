@@ -917,22 +917,25 @@ All gaps resolve from existing tokens — no raw hex or px values permitted.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Multi-status filter in DataTable query modules**
    - What we know: `DataTable` passes `socket.assigns.params` to `query_module.list/1`; current filter fields accept single `:status` values.
    - What's unclear: Whether `Invoices.list/1` and `Subscriptions.list/1` support multi-value status filtering (comma-joined string or list-format param).
    - Recommendation: Planner should read `accrue_admin/lib/accrue_admin/queries/invoices.ex` and `subscriptions.ex` before writing the work-queue default implementation. If multi-status is unsupported, a query-module extension task must be added to Wave 1.
+   - RESOLVED: Plan 01 Task 1 extends Invoices, Subscriptions, and Charges query modules to split comma-separated status strings into OR clauses, unblocking work-queue defaults in Wave 2.
 
 2. **Related-resources coverage on 6 unread detail screens**
    - What we know: `customer_live.ex`, `webhook_live.ex` fully read. 6 others (subscription, invoice, charge, coupon, promotion_code, connect_account) assumed to have varying Related card coverage.
    - What's unclear: Current state of Related cards on each of those 6.
    - Recommendation: Planner should read all 6 detail LiveViews in Wave 1 to audit existing Related card items and determine the delta needed for IA-04.
+   - RESOLVED: Plan 07 reads each of the 6 detail LiveViews in full (via `<read_first>` directives in Task 1 and Task 2) before modifying them, closing the coverage gap for IA-04.
 
 3. **`localStorage` key collision risk**
    - What we know: JS hook will use keys like `ax-sidebar-recovery`, `ax-sidebar-developer`, `ax-sidebar-catalog`.
    - What's unclear: Whether hosts with multiple accrue_admin mounts (e.g., `/billing` and `/billing-org`) share localStorage and would have unexpected collapse state cross-contamination.
    - Recommendation: Prefix the localStorage key with `mount_path` (e.g., `ax-sidebar-billing-recovery`) using `this.el.closest("[data-mount-path]").dataset.mountPath`. The `ax-shell` div already has `data-mount-path={@mount_path}` (confirmed in `app_shell.ex` line 24).
+   - RESOLVED: Plan 02 Task 2 implements `storageKey()` in `sidebar_collapse.js` using `this.el.closest("[data-mount-path]")` — key format is `ax-sidebar-{mountPath}-{group}`, preventing cross-mount collision.
 
 ---
 
