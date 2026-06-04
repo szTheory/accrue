@@ -58,8 +58,8 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 
 ### Seed Expressiveness & State Coverage (SEED) — Phase 178 (E)
 
-- [ ] **SEED-01**: Every admin screen's empty, populated, overflow/pagination, error, and loading states are reachable from seeded data on a single click-through.
-- [ ] **SEED-02**: Edge states (dunning/at-risk, multi-currency, long strings, dark-only contrast traps) each have a seeded instance; no screen looks good only with hand-picked IDs.
+- [x] **SEED-01**: Every admin screen's empty, populated, overflow/pagination, error, and loading states are reachable from seeded data on a single click-through.
+- [x] **SEED-02**: Edge states (dunning/at-risk, multi-currency, long strings, dark-only contrast traps) each have a seeded instance; no screen looks good only with hand-picked IDs.
 
 ### Visual-QA Loop & Sign-off (QA) — Phase 179 (F)
 
@@ -90,8 +90,8 @@ Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
 | MOT-01 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
 | MOT-02 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
 | MOT-03 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
-| SEED-01 | Phase 178 (E — Seed Expressiveness & State Coverage) | Pending |
-| SEED-02 | Phase 178 (E — Seed Expressiveness & State Coverage) | Pending |
+| SEED-01 | Phase 178 (E — Seed Expressiveness & State Coverage) | Complete |
+| SEED-02 | Phase 178 (E — Seed Expressiveness & State Coverage) | Complete |
 | QA-01 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
 | QA-02 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
 | QA-03 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |

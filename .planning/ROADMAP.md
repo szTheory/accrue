@@ -211,7 +211,7 @@ Plans:
 Plans:
 **Wave 1** *(foundation — matrix + test scaffold)*
 
-- [ ] 178-01-PLAN.md — STATE-MATRIX.md (21 screens × 8 state dims) + e2e_fixtures_test.exs RED scaffold (SEED-01, SEED-02)
+- [x] 178-01-PLAN.md — STATE-MATRIX.md (21 screens × 8 state dims) + e2e_fixtures_test.exs RED scaffold (SEED-01, SEED-02)
 
 **Wave 2** *(parallel — E2E fixtures + host dunning bug fix)*
 
@@ -298,7 +298,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete   | 2026-06-04 |
-| 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
+| 178. E — Seed Expressiveness & State Coverage | v1.51 | 1/4 | In Progress|  |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
