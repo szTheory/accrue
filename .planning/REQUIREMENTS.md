@@ -35,8 +35,8 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 
 ### Persona-Driven Information Architecture (IA) — Phase 175 (B)
 
-- [ ] **IA-01**: From Home, each of the six personas can reach their primary job in ≤2 clicks via a verb-labeled task launcher or a visible (not hotkey-only) global search field.
-- [ ] **IA-02**: The sidebar presents a weighted primary **Billing** zone with **Recovery / Developer / Catalog** as visually-recessed, collapsible specialist zones that surface attention-count badges (e.g. dead-letters, at-risk) only when work exists.
+- [x] **IA-01**: From Home, each of the six personas can reach their primary job in ≤2 clicks via a verb-labeled task launcher or a visible (not hotkey-only) global search field.
+- [x] **IA-02**: The sidebar presents a weighted primary **Billing** zone with **Recovery / Developer / Catalog** as visually-recessed, collapsible specialist zones that surface attention-count badges (e.g. dead-letters, at-risk) only when work exists.
 - [x] **IA-03**: List screens open pre-filtered to the persona work-queue (e.g. invoices → open/uncollectible), with an "All" view one filter-chip away.
 - [x] **IA-04**: Every detail screen renders a Related-billing card with no dead ends; a dead-lettered webhook threads to its event(s) and onward to the affected entity.
 - [ ] **IA-05**: Customer-360 presents primary tabs (Subscriptions, Invoices, Payments) with advanced tabs (Payment methods, Entitlements, Events, Metadata) recessed under a quieter "More" grouping.
@@ -76,8 +76,8 @@ Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
 | DSY-01 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
 | DSY-02 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
 | DSY-03 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
-| IA-01 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
-| IA-02 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
+| IA-01 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
+| IA-02 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
 | IA-03 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
 | IA-04 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
 | IA-05 | Phase 175 (B — Persona-Driven IA Spine) | Pending |
