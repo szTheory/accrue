@@ -155,6 +155,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate invoice_remove_manual_item_success(), to: Invoice
   defdelegate invoice_draft_locked_guidance(), to: Invoice
   defdelegate invoice_manual_row_badge(), to: Invoice
+  defdelegate invoice_not_found(), to: Invoice
 
   defdelegate coupon_breadcrumb_coupons(), to: Coupon
   defdelegate coupon_index_eyebrow(), to: Coupon
@@ -353,6 +354,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate connect_account_error_preview_currency_unknown(), to: Connect
   defdelegate connect_account_error_field_must_be_decimal(field_label), to: Connect
   defdelegate connect_account_error_field_must_be_integer_minor(field_label), to: Connect
+  defdelegate connect_account_not_found(), to: Connect
 
   defdelegate billing_events_page_title(), to: BillingEvent
   defdelegate billing_events_breadcrumb_events(), to: BillingEvent
@@ -443,6 +445,8 @@ defmodule AccrueAdmin.Copy do
 
   def payment_processor_action_warning(payment_intent),
     do: "Processor requires action: " <> inspect(payment_intent)
+
+  def charge_not_found, do: "Charge not found."
 
   def charge_prepare_refund_warning, do: "Prepare a refund before confirming."
 

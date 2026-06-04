@@ -208,4 +208,6 @@ defmodule AccrueAdmin.Copy.Invoice do
   def invoice_remove_manual_item_success, do: "Manual line item removed from the draft invoice."
   def invoice_draft_locked_guidance, do: "Only draft invoices can be adjusted from admin."
   def invoice_manual_row_badge, do: "Manual adjustment"
+
+  def invoice_not_found, do: "Invoice not found."
 end

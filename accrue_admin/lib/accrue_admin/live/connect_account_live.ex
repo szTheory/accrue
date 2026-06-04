@@ -7,6 +7,7 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   alias Accrue.Connect.Account
   alias Accrue.Repo
   alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, FlashGroup, KpiCard, RelatedResources}
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
 
   @default_preview_amount_minor 10_000
@@ -18,7 +19,10 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
 
     case Repo.get(Account, account_id) do
       nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/connect"))}
+        {:ok,
+         socket
+         |> put_flash(:error, Copy.connect_account_not_found())
+         |> redirect(to: admin_path(admin, "/connect"))}
 
       account ->
         mount_path = admin["mount_path"] || "/billing"

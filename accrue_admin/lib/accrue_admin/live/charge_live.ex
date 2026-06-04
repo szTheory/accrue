@@ -32,7 +32,10 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
     case load_charge(charge_id) do
       nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/payments"))}
+        {:ok,
+         socket
+         |> put_flash(:error, Copy.charge_not_found())
+         |> redirect(to: admin_path(admin, "/payments"))}
 
       charge ->
         {:ok,

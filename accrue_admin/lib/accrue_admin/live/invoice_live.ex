@@ -35,7 +35,10 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
     case load_invoice(invoice_id) do
       nil ->
-        {:ok, redirect(socket, to: admin_path(admin, "/invoices"))}
+        {:ok,
+         socket
+         |> put_flash(:error, Copy.invoice_not_found())
+         |> redirect(to: admin_path(admin, "/invoices"))}
 
       invoice ->
         {:ok,
