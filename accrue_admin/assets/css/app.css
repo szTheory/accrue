@@ -1869,6 +1869,43 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 }
 
+/* Home visible search field (IA-01: Support entry discoverability) */
+.ax-home-search {
+  margin-bottom: var(--ax-space-md);
+}
+
+/* Search-styled button — uses .ax-input base for sizing + border, then layered */
+.ax-input-search {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  padding-inline: var(--ax-space-md);
+  cursor: pointer;
+  color: var(--ax-muted);
+  text-align: start;
+}
+
+.ax-input-search:hover,
+.ax-input-search:focus-visible {
+  border-color: var(--ax-focus-ring);
+  outline: none;
+}
+
+.ax-input-icon {
+  flex: none;
+  color: var(--ax-muted);
+}
+
+.ax-input-placeholder {
+  font-size: var(--ax-type-sm);
+  color: var(--ax-muted);
+}
+
 /* Home page vertical rhythm + section headers */
 .ax-home {
   gap: var(--ax-space-xl);
