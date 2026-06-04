@@ -10,7 +10,7 @@ if Mix.env() != :prod do
           }
 
     @doc """
-    Returns all curated component variant entries across the four DSY-03 families:
+    Returns all curated component variant entries across the three DSY-03 families:
     button (4), status (5), card (6 = base + 5 delta tones).
 
     The `ax_class` field in each entry is the full class string as rendered in the HTML
