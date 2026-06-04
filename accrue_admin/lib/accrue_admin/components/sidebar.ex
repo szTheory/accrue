@@ -86,11 +86,24 @@ defmodule AccrueAdmin.Components.Sidebar do
 
   # Returns {group, items, group_meta} 3-tuples. group_meta is derived from the first item
   # in each group (all items in a group share :collapsible and :badge per nav.ex convention).
+  #
+  # Uses Enum.group_by (order-independent) followed by a deterministic sort so
+  # duplicate groups are merged even if Nav.items/3 ever returns them
+  # non-contiguously (e.g. from a plugin-injected item list).  Group ordering
+  # follows the first occurrence of each group key in the original list, which
+  # preserves the Nav.items/3 document order.
   defp grouped_items(items) do
-    items
-    |> Enum.chunk_by(&Map.get(&1, :group))
-    |> Enum.map(fn [first | _] = group_items ->
-      group = Map.get(first, :group)
+    grouped = Enum.group_by(items, &Map.get(&1, :group))
+
+    # Determine group ordering from first-occurrence position in the original list.
+    group_order =
+      items
+      |> Enum.map(&Map.get(&1, :group))
+      |> Enum.uniq()
+
+    Enum.map(group_order, fn group ->
+      group_items = Map.fetch!(grouped, group)
+      [first | _] = group_items
       collapsible = Map.get(first, :collapsible, false)
       badge = Map.get(first, :badge)
       tone = badge_tone(group)
