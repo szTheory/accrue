@@ -179,7 +179,7 @@ Plans:
 **Wave 1**
 
 - [x] 177-01-PLAN.md — motion.md guide + accrue_admin/mix.exs ExDoc registration (MOT-01)
-- [ ] 177-02-PLAN.md — CSS transitions for dropdown, More ▾, tabs, badge, skeleton classes + sidebar_collapse.js two-step (MOT-02)
+- [x] 177-02-PLAN.md — CSS transitions for dropdown, More ▾, tabs, badge, skeleton classes + sidebar_collapse.js two-step (MOT-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -282,7 +282,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
-| 177. D — Motion & Micro-interaction Design | v1.51 | 1/6 | In Progress|  |
+| 177. D — Motion & Micro-interaction Design | v1.51 | 2/6 | In Progress|  |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
 

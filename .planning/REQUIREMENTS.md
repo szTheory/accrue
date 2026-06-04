@@ -53,8 +53,8 @@ Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing
 ### Motion & Micro-interaction (MOT) — Phase 177 (D)
 
 - [x] **MOT-01**: A documented motion/interaction spec defines what animates, why, which token, and reduced-motion behavior, including an antipattern list grounded in researched best practice.
-- [ ] **MOT-02**: Drawers, dropdowns, the command palette, tabs, flash/toasts, and skeleton→content transitions animate via design-token transition bundles — functional, not decorative.
-- [ ] **MOT-03**: All admin motion honors `prefers-reduced-motion` (no travel/overshoot; crossfades retained), verified by an automated check.
+- [x] **MOT-02**: Drawers, dropdowns, the command palette, tabs, flash/toasts, and skeleton→content transitions animate via design-token transition bundles — functional, not decorative.
+- [x] **MOT-03**: All admin motion honors `prefers-reduced-motion` (no travel/overshoot; crossfades retained), verified by an automated check.
 
 ### Seed Expressiveness & State Coverage (SEED) — Phase 178 (E)
 
@@ -88,8 +88,8 @@ Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
 | SCR-03 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
 | SCR-04 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
 | MOT-01 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
-| MOT-02 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
-| MOT-03 | Phase 177 (D — Motion & Micro-interaction Design) | Pending |
+| MOT-02 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
+| MOT-03 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
 | SEED-01 | Phase 178 (E — Seed Expressiveness & State Coverage) | Pending |
 | SEED-02 | Phase 178 (E — Seed Expressiveness & State Coverage) | Pending |
 | QA-01 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Pending |
