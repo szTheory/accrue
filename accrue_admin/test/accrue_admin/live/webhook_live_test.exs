@@ -333,6 +333,28 @@ defmodule AccrueAdmin.WebhookLiveTest do
            )
   end
 
+  test "safe_utf8/1 returns :error for invalid-UTF-8 raw_body and does not crash Jason.decode",
+       %{conn: conn} do
+    # <<0xFF, 0xFE>> is valid Erlang binary but illegal UTF-8 — :unicode.characters_to_binary/1
+    # returns {:error, "", rest} rather than raising; the fixed guard must catch it.
+    invalid_utf8_body = <<0xFF, 0xFE, 0x41, 0x42>>
+
+    webhook =
+      insert_webhook(%{
+        processor_event_id: "evt_invalid_utf8",
+        type: "invoice.payment_failed",
+        status: :received,
+        raw_body: invalid_utf8_body,
+        data: %{"id" => "evt_invalid_utf8", "type" => "invoice.payment_failed"}
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    # The page must render without crashing; it falls back to the :data field
+    assert {:ok, _view, html} = live(conn, "/billing/webhooks/#{webhook.id}")
+    assert html =~ "invoice.payment_failed"
+  end
+
   defp insert_webhook(attrs) do
     defaults = %{
       processor: "stripe",

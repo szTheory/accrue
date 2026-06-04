@@ -453,7 +453,10 @@ defmodule AccrueAdmin.Live.WebhookLive do
 
   defp safe_utf8(raw_body) do
     try do
-      {:ok, :unicode.characters_to_binary(raw_body)}
+      case :unicode.characters_to_binary(raw_body) do
+        text when is_binary(text) -> {:ok, text}
+        _error_or_incomplete -> :error
+      end
     rescue
       ArgumentError -> :error
     end
