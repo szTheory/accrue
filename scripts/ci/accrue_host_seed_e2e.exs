@@ -30,21 +30,16 @@ defmodule AccrueHostSeedE2E do
   @fixture_processor_event_ids ["evt_host_browser_replay", "evt_host_browser_first_run"]
   @fixture_customer_processor_ids [
     "cus_host_browser_replay",
-    "cus_host_premium_replay",
     # Plan 04 host edge_states.exs: long-name customer
     "cus_e2e_edge_1"
   ]
   @fixture_subscription_processor_ids [
     "sub_host_browser_replay",
-    "sub_host_premium_replay",
-    # Plan 02 admin e2e_fixtures.ex: edge-state subscriptions
-    "sub_e2e_dunning_at_risk",
-    "sub_e2e_canceling",
     # Plan 04 host edge_states.exs: at-risk and canceling subscriptions
     "sub_e2e_edge_at_risk",
     "sub_e2e_edge_canceling"
   ]
-  @fixture_subscription_item_processor_ids ["si_host_browser_replay", "si_host_premium_replay"]
+  @fixture_subscription_item_processor_ids ["si_host_browser_replay"]
   @fixture_discount_codes ["SPRING25", "BROKEN"]
   @fixture_checkout_operation_ids ["host-browser-portal-checkout"]
 
