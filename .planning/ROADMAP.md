@@ -155,7 +155,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 — dense financial detail)*
 
-- [ ] 176-05-PLAN.md — Apply .ax-measure to invoice_live prose (4 regions) + charge_live prose (3 regions) + audit subscription_live; complete SCORECARD final after-scores (SCR-01, SCR-02, SCR-03, SCR-04)
+- [x] 176-05-PLAN.md — Apply .ax-measure to invoice_live prose (4 regions) + charge_live prose (3 regions) + audit subscription_live; complete SCORECARD final after-scores (SCR-01, SCR-02, SCR-03, SCR-04)
 
 **Wave 5** *(blocked on Wave 4 — Nyquist gate + final verification)*
 
@@ -262,7 +262,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 4/6 | In Progress|  |
+| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 5/6 | In Progress|  |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
