@@ -134,10 +134,22 @@ defmodule AccrueAdmin.Queries.Invoices do
     end)
   end
 
+  # Allowlist of known invoice statuses — only these values are accepted from
+  # the URL status param.  Anything outside this list is silently dropped,
+  # preventing String.to_existing_atom/1 from accepting arbitrary atoms that
+  # happen to exist in the BEAM atom table (e.g. OTP module names).
+  @valid_invoice_statuses ~w(draft open paid uncollectible void)
+
   defp filter_status(query, status) when is_binary(status) do
-    values = String.split(status, ",", trim: true)
+    values =
+      status
+      |> String.split(",", trim: true)
+      |> Enum.filter(&(&1 in @valid_invoice_statuses))
 
     case values do
+      [] ->
+        query
+
       [single] ->
         where(query, [invoice, _customer], invoice.status == ^String.to_existing_atom(single))
 
@@ -145,8 +157,6 @@ defmodule AccrueAdmin.Queries.Invoices do
         atoms = Enum.map(multiple, &String.to_existing_atom/1)
         where(query, [invoice, _customer], invoice.status in ^atoms)
     end
-  rescue
-    ArgumentError -> query
   end
 
   defp scope_query(query, nil), do: query
