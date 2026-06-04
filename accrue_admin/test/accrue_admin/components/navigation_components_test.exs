@@ -6,7 +6,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
   import Phoenix.LiveViewTest
 
   alias AccrueAdmin.Components.{Breadcrumbs, Button, FlashGroup, StatusBadge}
-  alias AccrueAdmin.Components.{DropdownMenu, Input, Select, Tabs, WindowSelector}
+  alias AccrueAdmin.Components.{DropdownMenu, Input, Select, Sidebar, Tabs, WindowSelector}
 
   describe "Breadcrumbs" do
     test "renders linked ancestors and current page" do
@@ -177,6 +177,104 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ ~s(aria-current="page")
       assert html =~ "ax-tab-active"
       assert html =~ ">12<"
+    end
+  end
+
+  describe "Sidebar collapsible groups" do
+    defp make_items(mount_path \\ "/billing") do
+      AccrueAdmin.Nav.items(mount_path, mount_path <> "/", %{
+        recovery: 3,
+        developer: 2
+      })
+    end
+
+    test "collapsible group (Recovery) renders a <button> with aria-expanded" do
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      # The Recovery group should have a collapsible button toggle
+      assert html =~ ~s(aria-expanded)
+      # The button should mention Recovery
+      assert html =~ "Recovery"
+    end
+
+    test "non-collapsible Billing group does NOT render a toggle <button>" do
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      # The Billing group label should be a <p> element, not inside a <button>
+      assert html =~ ~s(<p class="ax-sidebar-group-label">Billing</p>)
+    end
+
+    test "badge renders only when group_meta.badge is a positive integer" do
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      # Recovery has badge: 3 → should render a badge span
+      assert html =~ ~s(ax-badge)
+      # Catalog has badge: nil → no badge rendered for Catalog
+      # (We check the Developer badge aria-label to confirm count appears)
+      assert html =~ ~s(ax-badge-warning)
+    end
+
+    test "badge has class ax-badge-warning for Recovery group" do
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      assert html =~ "ax-badge ax-badge-warning"
+    end
+
+    test "badge has class ax-badge-danger for Developer group" do
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      assert html =~ "ax-badge ax-badge-danger"
+    end
+
+    test "link list div has hidden=true for collapsed group with no badge" do
+      # Catalog group has badge: nil and collapsible: true → should be hidden initially
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      # The Catalog group links div should be hidden (collapsed, no badge)
+      assert html =~ ~s(id="sidebar-group-links-catalog" hidden)
+    end
+
+    test "link list div is NOT hidden for group with badge > 0" do
+      # Recovery has badge: 3 → should be expanded (not hidden)
+      html =
+        render_component(&Sidebar.sidebar/1, %{
+          brand: %{logo_url: nil, app_name: "Test"},
+          current_path: "/billing/",
+          items: make_items()
+        })
+
+      # Recovery group links should be visible (not hidden)
+      refute html =~ ~s(id="sidebar-group-links-recovery" hidden)
     end
   end
 

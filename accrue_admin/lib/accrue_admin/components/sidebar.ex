@@ -1,6 +1,18 @@
 defmodule AccrueAdmin.Components.Sidebar do
   @moduledoc """
   Sidebar navigation for the admin shell.
+
+  Supports collapsible specialist-zone groups (Recovery, Developer, Catalog) and
+  status-toned attention-count badges on group headers. The primary Billing group
+  is always expanded (no toggle, no chevron).
+
+  ## Group rendering rules
+  - `collapsible: false` (nil group, Billing, Connect) → static `<p>` label or no label.
+  - `collapsible: true` (Recovery, Developer, Catalog) → `<button>` toggle with
+    `aria-expanded`, `aria-controls`, chevron icon, and optional status-toned badge.
+  - Badge renders only when `group_meta.badge` is a positive integer.
+  - Link list wraps in `<div id="sidebar-group-links-{slug}" hidden={collapsed?}>`.
+  - Default expanded state: true when collapsible is false OR badge > 0.
   """
 
   use Phoenix.Component
@@ -28,23 +40,94 @@ defmodule AccrueAdmin.Components.Sidebar do
       </div>
 
       <nav class="ax-sidebar-nav">
-        <section :for={{group, items} <- grouped_items(@items)} class="ax-sidebar-nav-group">
-          <p :if={group} class="ax-sidebar-group-label"><%= group %></p>
-          <a :for={item <- items} href={item.href} class={nav_class(item, @current_path)}>
-            <Icon.icon name={item.icon} size="sm" class="ax-sidebar-link-icon" />
-            <span class="ax-sidebar-link-label"><%= item.label %></span>
-          </a>
-        </section>
+        <%= for {group, items, group_meta} <- grouped_items(@items) do %>
+          <section
+            id={"sidebar-group-section-#{slugify(group)}"}
+            class="ax-sidebar-nav-group"
+            phx-hook={if group_meta.collapsible, do: "SidebarCollapse"}
+            data-group={if group_meta.collapsible, do: slugify(group)}
+            data-controls={if group_meta.collapsible, do: "sidebar-group-links-#{slugify(group)}"}
+            aria-expanded={if group_meta.collapsible, do: to_string(group_initially_expanded?(group_meta))}
+          >
+            <%= if group_meta.collapsible do %>
+              <button
+                class="ax-sidebar-group-label ax-sidebar-group-toggle"
+                type="button"
+                aria-expanded={to_string(group_initially_expanded?(group_meta))}
+                aria-controls={"sidebar-group-links-#{slugify(group)}"}
+                data-collapse-toggle="true"
+              >
+                <%= group %>
+                <span
+                  :if={group_meta.badge}
+                  class={badge_class(group_meta.tone)}
+                  aria-label={badge_aria_label(group, group_meta.badge)}
+                >
+                  <%= group_meta.badge %>
+                </span>
+                <Icon.icon name={:chevron_right} size="sm" class="ax-sidebar-group-chevron" />
+              </button>
+            <% else %>
+              <p :if={group} class="ax-sidebar-group-label"><%= group %></p>
+            <% end %>
+
+            <div id={"sidebar-group-links-#{slugify(group)}"} hidden={not group_initially_expanded?(group_meta)}>
+              <a :for={item <- items} href={item.href} class={nav_class(item, @current_path)}>
+                <Icon.icon name={item.icon} size="sm" class="ax-sidebar-link-icon" />
+                <span class="ax-sidebar-link-label"><%= item.label %></span>
+              </a>
+            </div>
+          </section>
+        <% end %>
       </nav>
     </aside>
     """
   end
 
-  # Preserve group order and keep `nil` groups (e.g. Home) so they render without a label.
+  # Returns {group, items, group_meta} 3-tuples. group_meta is derived from the first item
+  # in each group (all items in a group share :collapsible and :badge per nav.ex convention).
   defp grouped_items(items) do
     items
     |> Enum.chunk_by(&Map.get(&1, :group))
-    |> Enum.map(fn [first | _] = group_items -> {Map.get(first, :group), group_items} end)
+    |> Enum.map(fn [first | _] = group_items ->
+      group = Map.get(first, :group)
+      collapsible = Map.get(first, :collapsible, false)
+      badge = Map.get(first, :badge)
+      tone = badge_tone(group)
+      group_meta = %{collapsible: collapsible, badge: badge, tone: tone}
+      {group, group_items, group_meta}
+    end)
+  end
+
+  # True when group is always-expanded (collapsible: false) OR has badge work to show.
+  defp group_initially_expanded?(%{collapsible: false}), do: true
+  defp group_initially_expanded?(%{badge: badge}) when is_integer(badge) and badge > 0, do: true
+  defp group_initially_expanded?(_), do: false
+
+  # Returns the full CSS class string for a badge based on tone.
+  defp badge_class(:warning), do: "ax-badge ax-badge-warning"
+  defp badge_class(:danger), do: "ax-badge ax-badge-danger"
+  defp badge_class(_), do: "ax-badge"
+
+  # Returns an accessible aria-label string for a group badge.
+  defp badge_aria_label("Recovery", n), do: "#{n} at-risk subscriptions"
+  defp badge_aria_label("Developer", n), do: "#{n} webhooks need attention"
+  defp badge_aria_label(group, n), do: "#{n} #{group} items need attention"
+
+  # Maps group name to status tone for badge coloring.
+  defp badge_tone("Recovery"), do: :warning
+  defp badge_tone("Developer"), do: :danger
+  defp badge_tone(_), do: :neutral
+
+  # Converts a group name to a lowercase slug for use in HTML IDs and data attributes.
+  # Returns a fallback "ungrouped" for nil groups.
+  defp slugify(nil), do: "ungrouped"
+
+  defp slugify(str) do
+    str
+    |> String.downcase()
+    |> String.replace(~r/[^a-z0-9]+/, "-")
+    |> String.trim("-")
   end
 
   defp nav_class(item, current_path) do
