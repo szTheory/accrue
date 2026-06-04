@@ -73,4 +73,10 @@ defmodule AccrueAdmin.Copy.BillingEvent do
   def billing_events_when_unknown, do: "Unknown"
 
   def billing_event_not_found, do: "Event not found."
+
+  # --- Event detail (EventLive) — prefix event_detail_*
+
+  def event_detail_eyebrow, do: "Event detail"
+
+  def event_detail_section_heading, do: "Event details"
 end

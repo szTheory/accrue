@@ -13,6 +13,7 @@ defmodule AccrueAdmin.Live.EventLive do
     RelatedResources
   }
 
+  alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
 
   @impl true
@@ -63,7 +64,7 @@ defmodule AccrueAdmin.Live.EventLive do
           ]}
         />
 
-        <Detail.summary_card eyebrow="Event detail" title={@event.type}>
+        <Detail.summary_card eyebrow={Copy.event_detail_eyebrow()} title={@event.type}>
           <:facts>
             <dl class="ax-summary-facts-dl">
               <dt class="ax-label">Actor</dt>
@@ -76,7 +77,7 @@ defmodule AccrueAdmin.Live.EventLive do
           </:facts>
         </Detail.summary_card>
 
-        <Detail.detail_section title="Event details">
+        <Detail.detail_section title={Copy.event_detail_section_heading()}>
           <Detail.detail_field_list fields={[
             %{label: "Type", value: @event.type},
             %{label: "Actor type", value: @event.actor_type || "--"},

@@ -389,6 +389,8 @@ defmodule AccrueAdmin.Copy do
   defdelegate billing_events_webhook_source_direct(), to: BillingEvent
   defdelegate billing_events_when_unknown(), to: BillingEvent
   defdelegate billing_event_not_found(), to: BillingEvent
+  defdelegate event_detail_eyebrow(), to: BillingEvent
+  defdelegate event_detail_section_heading(), to: BillingEvent
 
   def data_table_default_empty_title, do: "Nothing in this list yet"
 
