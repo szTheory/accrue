@@ -1145,6 +1145,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 
 .ax-status-badge {
   padding: 0.4rem 0.7rem;
+  transition: var(--ax-transition-colors);
 }
 
 .ax-status-dot {
