@@ -1348,9 +1348,10 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   accent-color: var(--ax-accent);
 }
 
-/* Data table: one layout at a time — cards below lg, grid table from lg (avoids duplicate DOM in a11y scans). */
+/* Data table: one layout at a time — cards below md, grid table from md (avoids duplicate DOM in a11y scans). */
 .ax-data-table-shell {
   display: none;
+  overflow-x: auto;
 }
 
 .ax-data-table-cards {
@@ -1358,7 +1359,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   gap: var(--ax-space-md);
 }
 
-@media (min-width: 1024px) { /* --ax-bp-lg ↑ */
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
   .ax-data-table-shell {
     display: block;
   }
