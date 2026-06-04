@@ -265,6 +265,58 @@ defmodule AccrueAdmin.ChargeLiveTest do
     assert html =~ Copy.charge_refund_created_info()
   end
 
+  test "applies ax-measure to Braintree eligibility and warning prose", %{conn: conn} do
+    customer =
+      insert_customer(%{
+        name: "Braintree Measure Test",
+        processor: "braintree",
+        processor_id: "cus_bt_measure"
+      })
+
+    subscription = insert_subscription(customer |> Map.put(:processor, "braintree"))
+
+    charge =
+      insert_charge(customer, subscription, %{
+        processor: "braintree",
+        processor_id: "ch_bt_measure",
+        status: "succeeded",
+        amount_cents: 5_000
+      })
+
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+    {:ok, _view, html} = live(conn, "/billing/payments/#{charge.id}")
+
+    # Braintree prose paragraphs must have ax-measure applied
+    assert html =~ ~s(class="ax-body ax-measure")
+    assert html =~ Copy.charge_refund_braintree_eligibility_info()
+    assert html =~ Copy.charge_refund_not_final_truth_warning()
+  end
+
+  test "applies ax-measure to refund confirm prose", %{
+    conn: conn,
+    charge: charge,
+    source_event: source_event
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, view, _html} = live(conn, "/billing/payments/#{charge.id}")
+
+    # Submit refund to trigger pending_refund state
+    html =
+      render_submit(
+        element(view, "[data-role='refund-form']"),
+        %{
+          "amount_minor" => "4000",
+          "reason" => "requested_by_customer",
+          "source_event_id" => Integer.to_string(source_event.id)
+        }
+      )
+
+    # Confirm panel must show and its prose must have ax-measure
+    assert html =~ "Confirm refund"
+    assert html =~ ~s(class="ax-body ax-measure")
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",

@@ -218,6 +218,45 @@ defmodule AccrueAdmin.InvoiceLiveTest do
     assert html =~ Copy.invoice_remove_manual_item_success()
   end
 
+  test "applies ax-measure to tax-risk prose paragraphs", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, _view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    # tax-risk panel prose paragraphs must have ax-measure for reading-width constraint
+    assert html =~ ~s(class="ax-body ax-measure")
+  end
+
+  test "applies ax-measure to actions body paragraph", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, _view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    # The actions-body paragraph in the actions header must use ax-body ax-measure
+    assert html =~ AccrueAdmin.Copy.Invoice.invoice_actions_body()
+    # It must be wrapped with ax-measure
+    assert html =~ ~s(class="ax-body ax-measure")
+  end
+
+  test "does NOT apply ax-measure to field-lists or json_viewer", %{
+    conn: conn,
+    invoice: invoice
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    {:ok, _view, html} = live(conn, "/billing/invoices/#{invoice.id}")
+
+    # ax-measure must NEVER be applied to ax-field-list containers or json_viewer
+    refute html =~ ~s(ax-field-list ax-measure)
+    refute html =~ ~s(json_viewer ax-measure)
+  end
+
   test "invoice loader denies rows outside the active organization" do
     allowed_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_allowed"})
     denied_customer = insert_customer(%{owner_type: "Organization", owner_id: "org_denied"})
