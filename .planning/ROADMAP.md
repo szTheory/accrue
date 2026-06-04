@@ -146,7 +146,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 — list screen audit)*
 
-- [ ] 176-02-PLAN.md — Audit all 9 list screens card_fields/card_title quality against persona criteria; update SCORECARD Wave 1 after-scores (SCR-01, SCR-02, SCR-03)
+- [x] 176-02-PLAN.md — Audit all 9 list screens card_fields/card_title quality against persona criteria; update SCORECARD Wave 1 after-scores (SCR-01, SCR-02, SCR-03)
 
 **Wave 3** *(parallel — blocked on Wave 2 — catalog/specialist detail; 03 and 04 run in parallel)*
 
@@ -262,7 +262,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 1/6 | In Progress|  |
+| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 2/6 | In Progress|  |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 0/? | Not started | - |
