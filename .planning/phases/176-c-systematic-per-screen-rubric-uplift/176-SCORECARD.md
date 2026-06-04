@@ -301,23 +301,74 @@ Priority is given to screens with the lowest minimum dimension score, then by nu
 | Screen | File | ① | ② | ③ | ④ | ⑤ | ⑥ | ⑦ | ⑧ | ⑨ | ⑩ | Min | Pass? | Wave |
 |--------|------|---|---|---|---|---|---|---|---|---|---|-----|-------|------|
 | DashboardLive | `dashboard_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | skip |
-| CustomersLive | `customers_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| CustomersLive | `customers_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | CustomerLive | `customer_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | skip |
-| SubscriptionsLive | `subscriptions_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| SubscriptionsLive | `subscriptions_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | SubscriptionLive | `subscription_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | skip |
-| InvoicesLive | `invoices_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| InvoicesLive | `invoices_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | InvoiceLive | `invoice_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W3 |
-| ChargesLive | `charges_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| ChargesLive | `charges_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | ChargeLive | `charge_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W3 |
-| CouponsLive | `coupons_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| CouponsLive | `coupons_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | CouponLive | `coupon_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
-| PromotionCodesLive | `promotion_codes_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| PromotionCodesLive | `promotion_codes_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | PromotionCodeLive | `promotion_code_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
-| ConnectAccountsLive | `connect_accounts_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| ConnectAccountsLive | `connect_accounts_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | ConnectAccountLive | `connect_account_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
-| EventsLive | `events_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| EventsLive | `events_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | EventLive | `event_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
-| WebhooksLive | `webhooks_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W0/1 |
+| WebhooksLive | `webhooks_live.ex` | 3 | 3 | 3 | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 2 | YES | W0/1 |
 | WebhookLive | `webhook_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
 | RecoveryLive | `analytics/recovery_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | skip |
 | CampaignLive | `analytics/campaign_live.ex` | — | — | — | — | — | — | — | — | — | — | — | — | W2 |
+
+---
+
+## Wave 1 After-Score Rationale (9 List Screens — Plan 176-02)
+
+**Scored by:** Wave 1 executor (2026-06-04)
+
+All 9 list screens move from ⑤=1 (before Wave 0 CSS fix) to ⑤=2 (after CSS fix). All other
+dimensions were already ≥2. No HEEx changes needed for any list screen except one card_fields
+reorder in webhooks_live.
+
+### All 9 list screens: ① ② ③ ④ ⑥ ⑦ ⑧ ⑨ ⑩ — unchanged from before-scores (all ≥2)
+
+- ① Token compliance: all clean — no inline style= or bare hex in templates.
+- ② Visual hierarchy: all list screens use ax-eyebrow → ax-display → ax-body in page header.
+- ③ Spacing rhythm: all list screens use ax-* spacing classes only.
+- ④ State coverage: data_table handles empty states; KPI sections show counts; queue-aware
+  empty_title/copy wired on charges, invoices, subscriptions.
+- ⑥ Contrast: status chips/text present; billing_signals chips use text labels.
+- ⑦ Focus & semantics: aria-label present on all KPI grid sections.
+- ⑧ Brand expression: ax-display on page header; KpiCards handle display values.
+- ⑨ Motion: inherits global reduced-motion block.
+- ⑩ Reuse/DRY: DataTable component + KpiCard used on all screens.
+
+### ⑤ Responsive/mobile-first: 1 → 2 for all 9 list screens (Wave 0 CSS fix)
+
+The CSS breakpoint in `app.css` was changed from `min-width: 1024px` to `min-width: 768px`
+(Plan 176-01). All 9 list screens already had card_title + card_fields wired — the breakpoint
+was the only reason they scored ⑤=1. After the CSS fix, all 9 move to ⑤=2 automatically.
+
+### WebhooksLive: card_fields reordered (persona-job fix, dim ⑩)
+
+**Change:** Status moved before Type in card_fields.
+**Justification:** Developer debugging persona needs failure triage first; status (delivered /
+failed / dead-letter) is the primary decision field on mobile; type is secondary context.
+**Before order:** type, status, endpoint, received
+**After order:** status, type, endpoint, received
+**File:** `accrue_admin/lib/accrue_admin/live/webhooks_live.ex`
+
+### Screens with no code changes (anti-churn confirmed):
+
+| Screen | Reason no change |
+|--------|-----------------|
+| CustomersLive | All dims ≥2. card_title=name/email/processor_id/id, card_fields=owner_type/owner_id/signals/default_pm — correct for Support persona. |
+| SubscriptionsLive | All dims ≥2. card_fields=customer/signals/lifecycle/current_period_end — correct for Finance Ops persona. Work-queue default filters not regressed. |
+| InvoicesLive | All dims ≥2. card_fields=customer/signals/status/balance/collection_method, card_title=number/processor_id/id — correct for Finance Ops persona. KPI aria-label present. |
+| ChargesLive | All dims ≥2. 5 card_fields (customer, signals, status, amount, fees) — all genuinely decision-critical for payment-support persona. Signals = ownership + tax health, both decision-critical for support triage. |
+| CouponsLive | All dims ≥2. card_fields=discount/redemptions/status/redeem_by — correct for catalog persona. |
+| PromotionCodesLive | All dims ≥2. card_fields=coupon/status/redemptions/expires — correct for catalog persona. |
+| ConnectAccountsLive | All dims ≥2. card_fields=owner/readiness/override/status — correct for developer persona. |
+| EventsLive | All dims ≥2. card_fields=subject/actor/webhook_source/when — correct for compliance/developer persona. KPI aria-label already present. |
