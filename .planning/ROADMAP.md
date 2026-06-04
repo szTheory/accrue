@@ -174,7 +174,14 @@ Plans:
   2. Drawers, dropdowns, the command palette, tabs, flash/toasts, and skeleton→content transitions animate via Phase 174 design-token transition bundles — functional, not decorative — and badge/state changes transition through tokens.
   3. All admin motion honors `prefers-reduced-motion` (no travel/overshoot; crossfades retained), verified by an automated check.
 
-**Plans:** TBD
+**Plans:** 6 plans across 4 waves
+Plans:
+- [ ] 177-01-PLAN.md — motion.md guide + accrue_admin/mix.exs ExDoc registration (MOT-01)
+- [ ] 177-02-PLAN.md — CSS transitions for dropdown, More ▾, tabs, badge, skeleton classes + sidebar_collapse.js two-step (MOT-02)
+- [ ] 177-03-PLAN.md — JS.transition for detail_drawer, flash_group, customer_live More ▾, data_table (MOT-02)
+- [ ] 177-04-PLAN.md — global_search data-open refactor + command_palette.js hook update (MOT-02/MOT-03)
+- [ ] 177-05-PLAN.md — antipattern guard script + paired negative-test fixture coupling (MOT-01)
+- [ ] 177-06-PLAN.md — Playwright reduced-motion e2e extensions + /dev/components motion section (MOT-01/MOT-03)
 **UI hint**: yes
 
 ### Phase 178: E — Seed Expressiveness & State Coverage
