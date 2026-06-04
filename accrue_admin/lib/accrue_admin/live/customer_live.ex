@@ -253,7 +253,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
             <span :if={tab.count} class="ax-tab-count"><%= tab.count %></span>
           </a>
           <div
-            class="ax-tab-more-wrapper"
+            class={["ax-tab-more-wrapper", @more_tabs_open && "ax-tab-more-open"]}
             phx-window-keydown="close_more_tabs"
             phx-key="Escape"
           >

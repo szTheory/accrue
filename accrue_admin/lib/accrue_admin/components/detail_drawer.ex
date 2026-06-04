@@ -25,9 +25,17 @@ defmodule AccrueAdmin.Components.DetailDrawer do
       role="dialog"
       aria-modal="true"
       aria-labelledby="detail-drawer-title"
+      phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-drawer-entering", "ax-drawer-enter-from", "ax-drawer-enter-to"}, time: 240)}
+      phx-remove={Phoenix.LiveView.JS.hide(transition: {"ax-drawer-leaving", "ax-drawer-leave-from", "ax-drawer-leave-to"}, time: 140)}
       {@rest}
     >
-      <div class="ax-detail-drawer-backdrop" aria-hidden="true"></div>
+      <%!-- enter: --ax-dur-3 (240ms); exit: --ax-dur-exit (140ms) --%>
+      <div
+        class="ax-detail-drawer-backdrop"
+        aria-hidden="true"
+        phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-drawer-backdrop-entering", "ax-drawer-backdrop-enter-from", "ax-drawer-backdrop-enter-to"}, time: 240)}
+        phx-remove={Phoenix.LiveView.JS.hide(transition: {"ax-drawer-backdrop-leaving", "ax-drawer-backdrop-leave-from", "ax-drawer-backdrop-leave-to"}, time: 140)}
+      ></div>
       <aside class="ax-detail-drawer">
         <header class="ax-detail-drawer-header">
           <div>

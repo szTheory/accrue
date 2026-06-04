@@ -14,6 +14,8 @@ defmodule AccrueAdmin.Components.FlashGroup do
         :for={flash <- @flashes}
         class={["ax-flash", flash_class(flash[:kind])]}
         role="status"
+        phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-flash-entering", "ax-flash-enter-from", "ax-flash-enter-to"}, time: 180)}
+        phx-remove={Phoenix.LiveView.JS.hide(transition: {"ax-flash-leaving", "ax-flash-leave-from", "ax-flash-leave-to"}, time: 140)}
       >
         <p class="ax-label"><%= flash_title(flash) %></p>
         <p class="ax-body"><%= flash[:message] %></p>

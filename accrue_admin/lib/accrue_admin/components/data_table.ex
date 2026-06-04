@@ -179,7 +179,11 @@ defmodule AccrueAdmin.Components.DataTable do
         </button>
       </div>
 
-      <div :if={!Enum.empty?(@rows)} class="ax-card ax-data-table-shell">
+      <div
+        :if={!Enum.empty?(@rows)}
+        class="ax-card ax-data-table-shell"
+        phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-content-entering", "ax-content-enter-from", "ax-content-enter-to"}, time: 180)}
+      >
         <table class="ax-data-table-grid">
           <caption :if={@table_caption} class="ax-visually-hidden"><%= @table_caption %></caption>
           <thead>
