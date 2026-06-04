@@ -69,41 +69,50 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
            """
   end
 
-  # (c) token-validity: all tokens listed in the registry are defined in the design system.
+  # (c) token-validity: all tokens listed in the registry are *defined* in the design system.
   #
   # Reads theme.css and app.css at test time. Each token in each entry's `tokens` field must
-  # appear as a substring in at least one of those files, OR be explicitly allowlisted below
-  # (for tokens defined via the server-rendered style tag in layouts.ex rather than in a
-  # static CSS file). A phantom token reintroduced into a future PR will cause this test to
-  # fail before merge, enforcing D-21 going forward.
+  # appear as a custom-property DEFINITION — i.e. as `--token:` (token followed by a colon) —
+  # in at least one of those files, OR be explicitly allowlisted below (for tokens defined via
+  # the server-rendered <style> tag in layouts.ex rather than in a static CSS file).
   #
-  # known_in_layouts allowlist: --ax-accent and --ax-accent-readable are injected at runtime
-  # via the <style> tag in AccrueAdmin.Layouts.root/1 (layouts.ex line ~82). They are real
-  # tokens; they just cannot be grepped from static files.
+  # We anchor on `token <> ":"` rather than a bare substring on purpose. A bare substring match
+  # is satisfied by any `var(--token)` *usage*, so a token that is referenced but never defined
+  # would pass — defeating the whole point of this gate (e.g. --ax-accent-contrast is used in
+  # var() at several call sites but has no static definition). Matching the definition form
+  # closes that hole. A phantom token reintroduced into a future PR will fail this test before
+  # merge, enforcing D-21 going forward.
+  #
+  # known_in_layouts allowlist: --ax-accent and --ax-accent-contrast are injected at runtime via
+  # the <style> tag in AccrueAdmin.Layouts.root/1 (layouts.ex ~lines 82-83). They have no static
+  # `--token:` definition in any CSS file, so they are allowlisted here. --ax-accent-readable is
+  # NOT allowlisted — it is statically defined in theme.css and must be matched the normal way.
   test "all tokens listed in ComponentRegistry.entries() are defined in the design system" do
     theme_css = File.read!(theme_css_path())
     app_css = File.read!(app_css_path())
 
-    known_in_layouts = ["--ax-accent", "--ax-accent-readable"]
+    known_in_layouts = ["--ax-accent", "--ax-accent-contrast"]
 
     phantom_tokens =
       for entry <- ComponentRegistry.entries(),
           token <- entry.tokens,
           token not in known_in_layouts,
-          not String.contains?(theme_css, token),
-          not String.contains?(app_css, token) do
+          definition = token <> ":",
+          not String.contains?(theme_css, definition),
+          not String.contains?(app_css, definition) do
         {entry.family, entry.variant, token}
       end
 
     assert phantom_tokens == [],
            """
-           Found tokens in ComponentRegistry that are not defined in theme.css or app.css:
+           Found tokens in ComponentRegistry with no `--token:` definition in theme.css or app.css:
 
            #{Enum.map_join(phantom_tokens, "\n", fn {family, variant, token} -> "  #{family}/#{variant}: #{token}" end)}
 
            Fix: either correct the token name in component_registry.ex to match an actual
-           CSS custom property, or add --ax-accent/--ax-accent-readable to known_in_layouts
-           if the token is legitimately defined via the server-rendered style tag in layouts.ex.
+           CSS custom-property definition, or add the token to known_in_layouts if it is
+           legitimately injected via the server-rendered <style> tag in layouts.ex (only
+           --ax-accent / --ax-accent-contrast qualify today).
            """
   end
 
