@@ -220,5 +220,6 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     """
   end
 
+  defp path(nil, _suffix), do: "#"
   defp path(mount_path, suffix), do: mount_path <> suffix
 end
