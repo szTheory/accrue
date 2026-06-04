@@ -1791,7 +1791,8 @@ details[open].ax-dropdown .ax-dropdown-panel {
   background: color-mix(in srgb, var(--accrue-ink) 34%, transparent);
   backdrop-filter: blur(8px);
   opacity: 0;
-  transition: opacity var(--ax-dur-2) var(--ax-ease-out);
+  /* Exit transition (base/closed state): snappy --ax-dur-exit + --ax-ease-in */
+  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
 }
 
 .ax-command-palette {
@@ -1805,32 +1806,41 @@ details[open].ax-dropdown .ax-dropdown-panel {
   border-radius: var(--ax-radius-lg);
   background: var(--ax-elevated);
   box-shadow: var(--ax-shadow-lg);
-  /* Closed state: invisible + subtle scale-down; transition fires when data-open flips */
+  /* Closed state: invisible + subtle scale-down */
   opacity: 0;
   transform: scale(0.98);
   pointer-events: none;
-  transition:
-    opacity var(--ax-dur-2) var(--ax-ease-out),
-    transform var(--ax-dur-2) var(--ax-ease-emphasis);
+  /* Exit transition (base/closed state): snappy fade --ax-dur-exit + --ax-ease-in (no scale-out) */
+  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
 }
 
-/* Phase 177 (v1.51 MOT-02) — Command palette enter/exit transitions (data-open attr approach) */
+/* Phase 177 (v1.51 MOT-02) — Command palette enter/exit transitions (data-open attr approach)
+   Asymmetric enter/exit: enter = --ax-dur-2 --ax-ease-out (gentle),
+   exit = --ax-dur-exit --ax-ease-in (snappy). The base/closed state carries
+   the exit transition so it fires when data-open is removed; the open state
+   overrides with the enter transition so it fires on open. */
 
 /* Open state: restore pointer-events on wrapper */
 .ax-command-palette-wrapper[data-open="true"] {
   pointer-events: auto;
 }
 
-/* Open state: fade backdrop in */
+/* Open state: enter transition override for backdrop (--ax-dur-2 enter) */
 .ax-command-palette-wrapper[data-open="true"] .ax-command-palette-backdrop {
   opacity: 1;
+  transition: opacity var(--ax-dur-2) var(--ax-ease-out);
 }
 
-/* Open state: palette panel scale-in + opacity; --ax-ease-emphasis is the one earned overshoot */
+/* Open state: palette panel scale-in + opacity;
+   enter transition overrides base exit transition;
+   --ax-ease-emphasis is the one earned overshoot (scale only) */
 .ax-command-palette-wrapper[data-open="true"] .ax-command-palette {
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
+  transition:
+    opacity var(--ax-dur-2) var(--ax-ease-out),
+    transform var(--ax-dur-2) var(--ax-ease-emphasis);
 }
 
 .ax-command-palette-input-group {
