@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Components.Sidebar do
               <p :if={group} class="ax-sidebar-group-label"><%= group %></p>
             <% end %>
 
-            <div id={"sidebar-group-links-#{slugify(group)}"} hidden={not group_initially_expanded?(group_meta)}>
+            <div id={"sidebar-group-links-#{slugify(group)}"} class="ax-sidebar-group-links" hidden={not group_initially_expanded?(group_meta)}>
               <a :for={item <- items} href={item.href} class={nav_class(item, @current_path)}>
                 <Icon.icon name={item.icon} size="sm" class="ax-sidebar-link-icon" />
                 <span class="ax-sidebar-link-label"><%= item.label %></span>

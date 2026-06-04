@@ -261,7 +261,11 @@ defmodule AccrueAdmin.NavigationComponentsTest do
         })
 
       # The Catalog group links div should be hidden (collapsed, no badge)
-      assert html =~ ~s(id="sidebar-group-links-catalog" hidden)
+      # ax-sidebar-group-links class is now present between id and hidden attrs
+      assert html =~ ~s(id="sidebar-group-links-catalog")
+      assert html =~ ~s(ax-sidebar-group-links)
+      # Check the catalog section is present with hidden (attribute may appear after class)
+      assert html =~ ~r/id="sidebar-group-links-catalog"[^>]*hidden/
     end
 
     test "link list div is NOT hidden for group with badge > 0" do

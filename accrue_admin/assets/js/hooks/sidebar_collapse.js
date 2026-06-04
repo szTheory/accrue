@@ -41,8 +41,24 @@ export const SidebarCollapse = {
   setExpanded(expanded) {
     this.el.setAttribute("aria-expanded", String(expanded));
     const list = document.getElementById(this.el.dataset.controls);
-    if (list) {
-      list.hidden = !expanded;
+    if (!list) return;
+
+    if (expanded) {
+      // Expand: reveal first so the CSS opacity transition can run 0→1
+      list.removeAttribute("hidden");
+      list.classList.remove("ax-collapsed");
+    } else {
+      // Collapse: trigger exit opacity transition, then set hidden on transitionend
+      // so assistive technology skips the content once the animation completes.
+      list.classList.add("ax-collapsed");
+      list.addEventListener(
+        "transitionend",
+        () => {
+          list.hidden = true;
+          list.classList.remove("ax-collapsed");
+        },
+        { once: true }
+      );
     }
   },
 

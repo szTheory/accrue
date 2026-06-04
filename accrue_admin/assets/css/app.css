@@ -2473,3 +2473,39 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     background: var(--ax-sunken);
   }
 }
+
+/* ============================================================================
+   Phase 177 (v1.51 MOT-02) — Collapsible nav link list reveal
+   .ax-sidebar-group-links always has an opacity transition. The JS hook
+   (sidebar_collapse.js) adds .ax-collapsed to trigger the exit animation and
+   removes it (+ unhides) to trigger the enter. set list.hidden only fires
+   AFTER the exit transitionend so assistive technology still skips it when
+   closed.
+   ========================================================================== */
+.ax-sidebar-group-links {
+  transition: opacity var(--ax-dur-2) var(--ax-ease-out);
+}
+
+.ax-collapsed {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ax-dur-exit) var(--ax-ease-in);
+}
+
+/* ============================================================================
+   Phase 177 (v1.51 MOT-02) — Skeleton → content fade-in
+   Used by data_table.ex (Plan 03) as a phx-mounted JS.show transition tuple:
+     JS.show(transition: {"ax-content-entering", "ax-content-enter-from", "ax-content-enter-to"}, time: 180)
+   All classes route through --ax-dur-2/--ax-ease-out atoms; no raw literals.
+   ========================================================================== */
+.ax-content-enter-from {
+  opacity: 0;
+}
+
+.ax-content-entering {
+  transition: opacity var(--ax-dur-2) var(--ax-ease-out);
+}
+
+.ax-content-enter-to {
+  opacity: 1;
+}
