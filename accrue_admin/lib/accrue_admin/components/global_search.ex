@@ -60,19 +60,33 @@ defmodule AccrueAdmin.Components.GlobalSearch do
      )}
   end
 
+  # Maximum query length accepted before hitting the DB — prevents expensive
+  # ilike patterns on arbitrarily large input pasted into the search box.
+  @max_query_length 100
+
   def handle_event("search", %{"q" => query}, socket) do
-    if String.trim(query) == "" do
-      {:noreply,
-       assign(socket,
-         query: "",
-         results: %{customers: [], invoices: [], subscriptions: []},
-         loading: false
-       )}
-    else
-      results = fetch_results(query)
-      {:noreply, assign(socket, query: query, results: results, loading: false)}
+    trimmed = String.trim(query)
+
+    cond do
+      trimmed == "" ->
+        {:noreply,
+         assign(socket,
+           query: "",
+           results: empty_results(),
+           loading: false
+         )}
+
+      String.length(trimmed) > @max_query_length ->
+        # Reject absurdly long queries before hitting the DB.
+        {:noreply, assign(socket, query: trimmed, results: empty_results(), loading: false)}
+
+      true ->
+        results = fetch_results(trimmed)
+        {:noreply, assign(socket, query: trimmed, results: results, loading: false)}
     end
   end
+
+  defp empty_results, do: %{customers: [], invoices: [], subscriptions: []}
 
   defp fetch_results(query) do
     tasks = [
@@ -82,10 +96,13 @@ defmodule AccrueAdmin.Components.GlobalSearch do
     ]
 
     tasks
-    |> Task.async_stream(fn {key, func} -> {key, func.()} end)
-    |> Enum.reduce(%{customers: [], invoices: [], subscriptions: []}, fn {:ok, {key, data}},
-                                                                         acc ->
-      Map.put(acc, key, data)
+    |> Task.async_stream(fn {key, func} -> {key, func.()} end,
+      on_timeout: :kill_task,
+      timeout: 3_000
+    )
+    |> Enum.reduce(empty_results(), fn
+      {:ok, {key, data}}, acc -> Map.put(acc, key, data)
+      {:exit, _}, acc -> acc
     end)
   end
 
