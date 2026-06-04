@@ -121,7 +121,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3)*
 
-- [ ] 175-07-PLAN.md — Related cards on 4 missing detail screens + /charges→/payments href fixes + full suite gate (IA-04)
+- [x] 175-07-PLAN.md — Related cards on 4 missing detail screens + /charges→/payments href fixes + full suite gate (IA-04)
 
 **UI hint**: yes
 
@@ -238,7 +238,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
 | 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 175. B — Persona-Driven IA Spine | v1.51 | 6/7 | In Progress|  |
+| 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 0/? | Not started | - |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 0/? | Not started | - |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 0/? | Not started | - |
