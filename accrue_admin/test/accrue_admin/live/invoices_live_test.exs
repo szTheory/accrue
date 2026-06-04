@@ -77,6 +77,28 @@ defmodule AccrueAdmin.InvoicesLiveTest do
     assert html =~ Copy.invoices_index_empty_copy()
   end
 
+  test "bare navigation push_patches to default queue status", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?status=open,uncollectible")
+
+    # FilterChipBar renders queue chip (cobalt) and All chip (slate)
+    assert html =~ "ax-filter-chip-cobalt"
+    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "?view=all"
+  end
+
+  test "view=all sentinel shows All chip active without redirect", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    # ?view=all must not redirect — the sentinel prevents a push_patch loop
+    assert {:ok, _view, html} = live(conn, "/billing/invoices?view=all")
+
+    # All chip is active (slate) — not the queue chip (cobalt)
+    assert html =~ "ax-filter-chip-slate"
+    refute html =~ "ax-filter-chip-cobalt"
+  end
+
   defp insert_customer(attrs) do
     defaults = %{
       owner_type: "User",

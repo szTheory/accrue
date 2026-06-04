@@ -62,4 +62,15 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ Copy.subscriptions_index_empty_title()
     assert html =~ Copy.subscriptions_index_empty_copy()
   end
+
+  test "bare navigation push_patches to default queue status past_due,canceling", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/subscriptions?status=past_due,canceling")
+
+    # FilterChipBar renders queue chip (cobalt) and All chip (slate)
+    assert html =~ "ax-filter-chip-cobalt"
+    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "?view=all"
+  end
 end

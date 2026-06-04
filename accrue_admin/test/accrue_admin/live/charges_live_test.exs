@@ -55,11 +55,11 @@ defmodule AccrueAdmin.ChargesLiveTest do
   test "filters charge rows and renders fee summaries", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
-    assert {:ok, _view, html} = live(conn, "/billing/charges?fees_settled=true")
+    assert {:ok, _view, html} = live(conn, "/billing/payments?fees_settled=true")
 
     assert html =~ "Payment and refund review"
     assert html =~ "Succeeded"
-    assert html =~ "/billing/charges/"
+    assert html =~ "/billing/payments/"
     assert html =~ "ax-chip ax-label"
     refute html =~ "ax-text-12"
   end
@@ -68,10 +68,21 @@ defmodule AccrueAdmin.ChargesLiveTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} =
-             live(conn, "/billing/charges?q=___accrue_empty_fixture___")
+             live(conn, "/billing/payments?q=___accrue_empty_fixture___")
 
     assert html =~ Copy.charges_index_empty_title()
     assert html =~ Copy.charges_index_empty_copy()
+  end
+
+  test "bare navigation push_patches to default queue status failed", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/payments?status=failed")
+
+    # FilterChipBar renders queue chip (cobalt) and All chip (slate)
+    assert html =~ "ax-filter-chip-cobalt"
+    assert html =~ "ax-filter-chip-slate"
+    assert html =~ "?view=all"
   end
 
   defp insert_customer(attrs) do
