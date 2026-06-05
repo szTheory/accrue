@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.51
 milestone_name: Admin UI Depth Pass
 status: idle
-last_updated: "2026-06-05T15:49:26.000Z"
+last_updated: "2026-06-05T12:23:00.000Z"
 last_activity: 2026-06-05
 progress:
   total_phases: 6
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 
 Milestone: v1.51 Admin UI: Depth Pass — SHIPPED & ARCHIVED 2026-06-04 (Phases 174–179, 33/33 plans). Phase dirs in `milestones/v1.51-phases/`.
 Status: Idle — between milestones.
-Last activity: 2026-06-05 - Completed quick task 260605-dkx: native Docker boot (Apple Silicon: native arch + Rust-built harfbuzz NIF) + accrue_host joins the shared dev_proxy Traefik (stable http://accrue.localhost); committed on main.
+Last activity: 2026-06-05 - Completed quick task 260605-gys: added admin@example.com billing-admin operator seed (ensure_demo_admin/1), OPERATOR/CUSTOMERS banner split, hero_accounts_test persona assertions locked, Docker live verify confirmed. /admin is now structurally reachable.
 
 ## Post-v1.48 Pause Rule
 
@@ -142,6 +142,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260604-3cg | Automate Phase 174 human-UAT items into CI (0 human verification) | 2026-06-04 | a228bda5 | [260604-3cg-automate-phase-174-human-uat-items-into-](./quick/260604-3cg-automate-phase-174-human-uat-items-into-/) |
 | 260604-tjz | Docker DX for accrue_host admin UI: ephemeral ports, launch banner, lean entrypoint+caches, docs | 2026-06-05 | 9f435936 | [260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem](./quick/260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem/) |
 | 260605-dkx | Native Docker boot (Apple Silicon: native arch + Rust-built harfbuzz NIF) + accrue_host joins shared dev_proxy Traefik (stable accrue.localhost, zero port conflicts); docs/docker-dx.md | 2026-06-05 | 38f5e29d | [260605-dkx-docker-native-boot-shared-traefik-proxy](./quick/260605-dkx-docker-native-boot-shared-traefik-proxy/) |
+| 260605-gys | Add admin@example.com billing-admin operator seed — /admin now structurally reachable; ensure_demo_admin/1 helper, OPERATOR/CUSTOMERS banner split, hero_accounts_test persona assertions locked | 2026-06-05 | 730d9dd9 | [260605-gys-add-dedicated-admin-example-com-billing-](./quick/260605-gys-add-dedicated-admin-example-com-billing-/) |
 | Phase 174 P02 | 15m | 4 tasks | 6 files |
 | Phase 174 P04 | 5m | 1 tasks | 1 files |
 | Phase 174 P05 | 8 | 2 tasks | 2 files |
@@ -184,7 +185,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-06-05T15:49:26.000Z
-Stopped at: Quick task 260605-dkx complete — accrue_host demo now boots in Docker on Apple Silicon (native arch, NOT amd64 emulation, which corrupts the BEAM compiler) with the harfbuzz_ex NIF built from Rust source; joins the shared dev_proxy Traefik for a stable http://accrue.localhost (zero port conflicts across sibling lib demos). 4 commits on main (38f5e29d…4b7f9adb), verified live. v1.51 shipped & archived 2026-06-04.
+Stopped at: Quick task 260605-gys complete — admin@example.com seeded with billing_admin: true via ensure_demo_admin/1; banners and README updated with OPERATOR/CUSTOMERS split; hero_accounts_test persona assertions locked; Docker live DB confirmed (admin@example.com | t). 3 commits on main (7b86751f, 8c38ed3c, 730d9dd9). v1.51 shipped & archived 2026-06-04.
 Resume file: none — between milestones.
 
 ## Operator Next Steps
