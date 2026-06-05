@@ -19,7 +19,7 @@ defmodule AccrueHostWeb.DevBanner do
   """
   @spec maybe_print() :: :ok
   def maybe_print do
-    if Application.get_env(:accrue_host, :dev_routes) and System.get_env("PGHOST") != "db" do
+    if Application.get_env(:accrue_host, :dev_routes) == true and System.get_env("PGHOST") != "db" do
       try do
         print()
       catch

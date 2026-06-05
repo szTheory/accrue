@@ -4,6 +4,12 @@ import AccrueHost.Seeds.Helpers
 now = Accrue.Clock.utc_now()
 days_ago = fn days -> DateTime.add(now, -days * 86_400, :second) end
 
+# OPERATOR / SaaS-admin persona — grants access to the /admin console.
+# This is NOT a customer account. It has no org, no subscription, no dunning events.
+# The 5 accounts below are customer billing-lifecycle personas (tenant-facing flows only).
+# Adding zero dunning events here keeps seeds_idempotency_test.exs "exactly 7" assertion intact.
+ensure_demo_admin("admin@example.com")
+
 # 1. HEALTHY demo account (banner-OFF) — subscribed, no dunning anchor.
 healthy_user = ensure_demo_user("healthy@example.com")
 healthy_org = ensure_demo_org(healthy_user, "Healthy Co", "healthy-co")

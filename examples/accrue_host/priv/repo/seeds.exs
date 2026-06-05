@@ -28,6 +28,14 @@ defmodule AccrueHost.Seeds.Helpers do
     end
   end
 
+  def ensure_demo_admin(email) do
+    user = ensure_demo_user(email)
+    # Unconditionally set billing_admin: true — this field is not cast by any
+    # User changeset, so we use Ecto.Changeset.change/2 directly. Safe to apply
+    # on every re-seed (idempotent: true stays true, false becomes true).
+    Ecto.Changeset.change(user, billing_admin: true) |> Repo.update!()
+  end
+
   def ensure_demo_org(owner, name, slug) do
     case Repo.get_by(AccrueHost.Accounts.Organization, slug: slug) do
       %AccrueHost.Accounts.Organization{} = organization ->
