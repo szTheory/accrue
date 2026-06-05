@@ -11,26 +11,28 @@ backed by `Accrue.Processor.Fake`, so the whole story runs credential-free.
 ```bash
 git clone https://github.com/szTheory/accrue
 cd accrue/examples/accrue_host
-make build      # once
+make proxy      # once per machine — starts the shared local proxy
 make up         # boots and prints a launch banner
 ```
 
-Open the URL the banner prints, sign in as `healthy@example.com` with password
-`accrue-demo-password`, and visit `/admin`. That's the operator surface.
+Open **http://accrue.localhost/admin**, sign in as `healthy@example.com` with password
+`accrue-demo-password`. That's the operator surface.
 
 ## 1. Start it
 
-From the repo, `cd examples/accrue_host` and run `make build` once, then `make up`.
-The web container binds to a **free ephemeral host port**, so you can run as many
-library demos as you like without any port conflicts. `make open` jumps straight to
-the live URL once it's up.
+From the repo, `cd examples/accrue_host`, run `make proxy` once (it starts a small
+shared reverse proxy), then `make up`. The demo comes up at a **stable URL** —
+`http://accrue.localhost` — that never changes and never collides with your other
+running lib demos (each gets its own `*.localhost` name). `make open` jumps straight
+there once it's up.
 
 ## 2. Read the banner
 
-`make up` prints a copy-pasteable launch banner: the live
-`http://127.0.0.1:<random-port>` URL, the real mounted routes, and every seeded demo
-login with its password. You never have to guess a port or hunt for credentials —
-the banner is the single source of truth for this run.
+`make up` prints a copy-pasteable launch banner: the stable
+`http://accrue.localhost/admin` URL (with a `http://127.0.0.1:<port>` fallback for
+when the proxy is off), the real mounted routes, and every seeded demo login with its
+password. You never have to guess a port or hunt for credentials — the banner is the
+single source of truth for this run.
 
 ## 3. Sign in
 

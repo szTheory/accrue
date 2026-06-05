@@ -11,20 +11,29 @@ The whole happy path is three steps:
 
 ```bash
 cd examples/accrue_host
-make build      # once (or after Dockerfile.dev / OS-level deps change)
-make up         # every time after that — then read the banner
+make proxy      # ONCE per machine — starts the shared Traefik proxy (skip if it's already up)
+make up         # every time after that — builds on first run, then read the banner
 ```
 
-**No port picking.** Every `make up` auto-grabs a free ephemeral host port and the
-launch banner prints the live URL. Want several library demos running at once? Just
-run `make up` in each — ephemeral host ports mean they can't collide. (To run two
-checkouts of *this same* lib, give each a distinct `ACCRUE_HOST_COMPOSE_PROJECT` in
-`.env`.)
+Then open **http://accrue.localhost/admin**. That URL is stable — bookmark it.
+
+**One stable URL, zero port juggling.** `make proxy` starts a small shared Traefik
+reverse proxy (once, fleet-wide). Every demo that joins it gets its own
+`*.localhost` name on port 80 — so this lib lives at `http://accrue.localhost` while
+your other lib demos sit at `http://scoria.localhost`, `http://parapet.localhost`,
+and so on. **They can never collide**, and you never pick or remember a port. See
+[docs/docker-dx.md](docs/docker-dx.md) for the why and the fleet picture.
+
+> **Running alongside your other lib demos?** The proxy is shared infrastructure.
+> Run `make proxy` from *any* one repo and they all route through it — `make down`
+> only stops *this* demo, never the proxy. `*.localhost` resolves automatically in
+> Chrome/Firefox; on Safari/curl use the fallback URL the banner prints.
 
 **Read the banner.** After `make up`, `bin/dev-banner.sh` waits for the server, then
 prints a copy-pasteable block with:
 
-- the live URL (`http://127.0.0.1:<random-port>`),
+- the stable URL (`http://accrue.localhost/admin`) — plus an ephemeral
+  `http://127.0.0.1:<port>` **fallback** for when the proxy isn't running,
 - the key routes — `/admin` (mounted Accrue Admin UI), `/billing` (mounted portal),
   `/app/billing` (host billing screen), `/app/reports/advanced` (entitlement-gated
   reports), `/users/log-in` (sign in), `/dev/mailbox` (sent-email preview), and
@@ -32,8 +41,9 @@ prints a copy-pasteable block with:
   `canceled@example.com`, `enterprise@example.com`, `trialing@example.com`, all with
   password **`accrue-demo-password`**.
 
-`make open` jumps straight to the live URL in your browser. No live Stripe keys are
-required for any of this — billing is `Accrue.Processor.Fake`-backed.
+`make open` jumps straight to the running demo in your browser; `make url` reprints
+the stable + fallback URLs without the full banner. No live Stripe keys are required
+for any of this — billing is `Accrue.Processor.Fake`-backed.
 
 **What's instant vs. what costs a moment.**
 
@@ -49,19 +59,25 @@ required for any of this — billing is `Accrue.Processor.Fake`-backed.
 
 **Troubleshooting.**
 
-- Need a stable URL (e.g. for OAuth callbacks)? Pin a port with
-  `ACCRUE_HOST_DOCKER_PORT` in `.env`.
+- `accrue.localhost` won't load? Either the shared proxy isn't running (`make proxy`)
+  or your browser won't resolve `*.localhost` (Safari, `curl`) — use the
+  `http://127.0.0.1:<port>` fallback the banner prints. The Traefik dashboard at
+  http://localhost:8080 shows exactly what's routed where.
+- Running two checkouts of *this same* lib? `make up INSTANCE=accrue-foo` gives the
+  second one its own route at `http://accrue-foo.localhost` and isolated volumes.
 - `make up` follows the web logs; **Ctrl-C only detaches the log follow** — the stack
-  keeps running. Use `make down` to actually stop it.
+  keeps running. Use `make down` to actually stop it (the shared proxy stays up).
 - Want a clean slate? `make reset` nukes the volumes and reseeds (seeds are
   idempotent).
 
 | Command | When to use |
 |---------|-------------|
-| `make build` | First run, or after changing `Dockerfile.dev` / OS-level deps |
-| `make up` | Every other day — fast boot, prints the banner, follows logs |
-| `make open` | Open the running demo in your browser at the live URL |
-| `make down` | Stop the stack |
+| `make proxy` | Once per machine — start the shared Traefik proxy (skip if already up) |
+| `make up` | Every day — builds on first run, prints the banner, follows logs |
+| `make open` | Open the running demo in your browser |
+| `make url` | Reprint the stable + fallback URLs |
+| `make build` | Force a rebuild after changing `Dockerfile.dev` / OS-level deps |
+| `make down` | Stop *this* demo's stack (leaves the shared proxy running) |
 | `make logs` | Stream Phoenix logs |
 | `make psql` | Open a psql session in the running db container |
 | `make sh` | Open a bash shell in the running web container |
