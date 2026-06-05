@@ -23,7 +23,16 @@ defmodule AccrueHost.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: AccrueHost.Supervisor]
-    Supervisor.start_link(children, opts)
+
+    case Supervisor.start_link(children, opts) do
+      {:ok, _pid} = ok ->
+        # Dev-only native launch banner; suppressed under Docker. Best-effort.
+        AccrueHostWeb.DevBanner.maybe_print()
+        ok
+
+      other ->
+        other
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration
