@@ -25,10 +25,11 @@ services:
       - mix_deps:/workspace/examples/accrue_host/deps
       - mix_build:/workspace/examples/accrue_host/_build
       - assets_node_modules:/workspace/examples/accrue_host/assets/node_modules
-      # Host-bind hex/mix/npm caches survive `docker compose down --volumes`, so
-      # `make reset` re-LINKS from cache instead of re-downloading over the network.
+      # Host-bind hex + npm download caches survive `down --volumes`, so
+      # `make reset` re-links instead of re-downloading. NOTE: do NOT also mount
+      # /root/.mix — it holds the baked Hex/rebar archives and mounting over it
+      # breaks boot.
       - ${HOME}/.cache/accrue-docker/hex:/root/.hex
-      - ${HOME}/.cache/accrue-docker/mix:/root/.mix
       - ${HOME}/.cache/accrue-docker/npm:/root/.npm
     depends_on:
       - db

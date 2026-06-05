@@ -9,11 +9,11 @@ set -euo pipefail
 
 cd /workspace/examples/accrue_host
 
-echo "[entrypoint] assets.setup (skipped if node_modules warm)"
-[ -d assets/node_modules/.bin ] || mix assets.setup
-
 echo "[entrypoint] deps.get"
 mix deps.get
+
+echo "[entrypoint] assets.setup (skipped if node_modules warm)"
+[ -d assets/node_modules/.bin ] || mix assets.setup
 
 echo "[entrypoint] ecto.create"
 mix ecto.create --quiet
