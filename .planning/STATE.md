@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.51
 milestone_name: Admin UI Depth Pass
-status: executing
-last_updated: "2026-06-04T22:27:07.297Z"
-last_activity: 2026-06-04
+status: verifying
+last_updated: "2026-06-05T00:33:33.677Z"
+last_activity: 2026-06-05
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 33
-  completed_plans: 32
-  percent: 83
+  completed_plans: 33
+  percent: 100
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 
 Phase: 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-06-04
+Status: Phase complete — ready for verification
+Last activity: 2026-06-05
 
 ## Post-v1.48 Pause Rule
 
@@ -125,6 +125,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: live('/events/:id') route stub in router.ex; EventLive ships in Wave 3; warning-not-error compile status confirmed
 - [Phase ?]: EventLive not-found redirect omits put_flash (fetch_flash missing from accrue_admin_browser pipeline)
 - [Phase ?]: motion.md is the authoritative justification record for Phase 177 — no entry means no animation permitted; all 9 surfaces catalogued with enter/exit asymmetry
+- [Phase ?]: SIGN-OFF.md photographic gate uses [PENDING] placeholders; before-column sourced from 176-SCORECARD after-scores (21/21 ≥2)
 
 ### Pending Todos
 
@@ -156,6 +157,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 177 P177-03 | 2m | 2 tasks | 6 files |
 | Phase 178 P178-01 | 7min | 2 tasks | 2 files |
 | Phase 178 P02 | 12 | 2 tasks | 2 files |
+| Phase 179 P03 | 15min | 2 tasks | 2 files |
 
 ### Milestone Intake Rules
 
@@ -180,7 +182,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-04T22:27:07.294Z
+Last session: 2026-06-05T00:33:26.313Z
 Stopped at: Phase 178 executed; STATE-MATRIX 21x9 + edge/overflow E2E fixtures + host dunning bug fix + idempotent edge_states seed; 262 admin+host tests green; code review security-clean (3 fixes); verification human_needed (3 items deferred to Phase 179)
 Resume file: None
 

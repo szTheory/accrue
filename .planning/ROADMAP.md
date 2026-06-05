@@ -245,7 +245,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 179-03-PLAN.md — Extend admin-a11y.spec.js to 21 surfaces (full inventory, edge states) + SIGN-OFF.md scaffold aggregating 176/177/178 evidence + axe + before/after scorecard (QA-01, QA-02, QA-03)
+- [x] 179-03-PLAN.md — Extend admin-a11y.spec.js to 21 surfaces (full inventory, edge states) + SIGN-OFF.md scaffold aggregating 176/177/178 evidence + axe + before/after scorecard (QA-01, QA-02, QA-03)
 
 **UI hint**: yes
 
@@ -310,7 +310,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
-| 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 2/3 | In Progress|  |
+| 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
 
 ## Historical Backlog Anchors (not active scope)
 
