@@ -14,8 +14,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    # Empty host port => Docker assigns a free ephemeral port (no collisions, ever).
+    # Pin a fixed port by setting ACCRUE_HOST_DOCKER_PORT in .env (e.g. for OAuth callbacks).
     ports:
-      - "${ACCRUE_HOST_DOCKER_BIND:-127.0.0.1}:${ACCRUE_HOST_DOCKER_PORT:-4000}:4000"
+      - "${ACCRUE_HOST_DOCKER_BIND:-127.0.0.1}:${ACCRUE_HOST_DOCKER_PORT:-}:4000"
     environment:
       PGHOST: db
     volumes:
