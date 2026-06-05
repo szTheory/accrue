@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 Phase: 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) — EXECUTING
 Plan: 3 of 3
 Status: Phase complete — ready for verification
-Last activity: 2026-06-05
+Last activity: 2026-06-05 - Completed quick task 260604-tjz: Docker DX for accrue_host admin UI (ephemeral ports, launch banner, lean entrypoint+caches, docs)
 
 ## Post-v1.48 Pause Rule
 
@@ -141,6 +141,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 |---|-------------|------|--------|-----------|
 | 260602-6xv | Seamless multi-project Docker DX for examples/accrue_host | 2026-06-02 | 85477a1b | [260602-6xv-seamless-multi-project-docker-dx-for-exa](./quick/260602-6xv-seamless-multi-project-docker-dx-for-exa/) |
 | 260604-3cg | Automate Phase 174 human-UAT items into CI (0 human verification) | 2026-06-04 | a228bda5 | [260604-3cg-automate-phase-174-human-uat-items-into-](./quick/260604-3cg-automate-phase-174-human-uat-items-into-/) |
+| 260604-tjz | Docker DX for accrue_host admin UI: ephemeral ports, launch banner, lean entrypoint+caches, docs | 2026-06-05 | 9f435936 | [260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem](./quick/260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem/) |
 | Phase 174 P02 | 15m | 4 tasks | 6 files |
 | Phase 174 P04 | 5m | 1 tasks | 1 files |
 | Phase 174 P05 | 8 | 2 tasks | 2 files |
