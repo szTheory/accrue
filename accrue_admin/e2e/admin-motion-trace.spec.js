@@ -91,14 +91,15 @@ test.describe("Motion trace — animated surface capture", () => {
     await login(page, "/billing/customers");
     await expect(page.locator("#main-content")).toBeVisible();
 
-    const dropdownSummary = page.locator("details.ax-dropdown > summary").first();
+    const dropdown = page.locator("details.ax-dropdown").first();
+    const dropdownSummary = dropdown.locator("summary");
+    const panel = dropdown.locator(".ax-dropdown-panel");
     await expect(dropdownSummary).toBeVisible();
 
     // Open the dropdown via the native summary element
     await dropdownSummary.click();
 
     // The panel becomes visible when the parent <details> is open
-    const panel = page.locator(".ax-dropdown-panel").first();
     await expect(panel).toBeVisible();
 
     // Close by clicking the summary again (native <details> toggle)
