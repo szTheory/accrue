@@ -7,48 +7,60 @@ inspection.
 
 ## Start Here
 
-Use Docker for the fastest evaluator path:
+The whole happy path is three steps:
 
 ```bash
 cd examples/accrue_host
-make build
+make build      # once (or after Dockerfile.dev / OS-level deps change)
+make up         # every time after that — then read the banner
 ```
 
-Open [`http://127.0.0.1:4000`](http://127.0.0.1:4000). Sign in, visit `/app/billing`,
-start a Fake-backed subscription through `AccrueHost.Billing`, then inspect `/billing`
-to see billing state, webhook ingest, replay visibility, and the mounted admin UI.
-No live Stripe keys are required for this path.
+**No port picking.** Every `make up` auto-grabs a free ephemeral host port and the
+launch banner prints the live URL. Want several library demos running at once? Just
+run `make up` in each — ephemeral host ports mean they can't collide. (To run two
+checkouts of *this same* lib, give each a distinct `ACCRUE_HOST_COMPOSE_PROJECT` in
+`.env`.)
 
-**Daily use after the first run:** `make up` (not `make build`) — this reuses the
-cached image and named-volume deps (Hex packages, assets). No redownload, no rebuild.
-Reserve `make build` for when `Dockerfile.dev` or OS-level dependencies change.
+**Read the banner.** After `make up`, `bin/dev-banner.sh` waits for the server, then
+prints a copy-pasteable block with:
 
-Editing `.heex`, CSS, or JS files while the container runs **hot-reloads with no
-restart** (live_reload + Tailwind/esbuild watchers are active inside the container).
+- the live URL (`http://127.0.0.1:<random-port>`),
+- the key routes — `/admin` (mounted Accrue Admin UI), `/billing` (mounted portal),
+  `/app/billing` (host billing screen), `/app/reports/advanced` (entitlement-gated
+  reports), `/users/log-in` (sign in), `/dev/mailbox` (sent-email preview), and
+- the seeded demo logins — `healthy@example.com`, `past-due@example.com`,
+  `canceled@example.com`, `enterprise@example.com`, `trialing@example.com`, all with
+  password **`accrue-demo-password`**.
 
-To run multiple demos concurrently or avoid port conflicts:
+`make open` jumps straight to the live URL in your browser. No live Stripe keys are
+required for any of this — billing is `Accrue.Processor.Fake`-backed.
 
-```bash
-cp .env.example .env
-# Edit .env: set ACCRUE_HOST_DOCKER_PORT and ACCRUE_HOST_COMPOSE_PROJECT
-# Cross-lib port convention: accrue web 4000, otherlib web 4010, thirdlib web 4020
-make up
-```
+**What's instant vs. what costs a moment.**
 
-The `ACCRUE_HOST_COMPOSE_PROJECT` variable isolates the Compose project name
-(separate networks, volumes, and container names); `ACCRUE_HOST_DOCKER_PORT` avoids
-the Phoenix host-port conflict.
+- *Instant:* editing `.heex`, CSS, or JS hot-reloads with no restart (live_reload +
+  Tailwind/esbuild watchers run inside the container).
+- *A few seconds:* `make up` runs the lean entrypoint — `mix deps.get` + migrate +
+  seed + boot — skipping npm install and the first-paint asset build when the named
+  volumes are already warm. Adding a hex dep just re-runs `deps.get`.
+- *A full rebuild:* `make build` (image changed) or `make reset` (wipe volumes and
+  reseed). `make reset` re-**links** Hex/mix/npm from the host-bind caches under
+  `~/.cache/accrue-docker/*` instead of re-downloading over the network — those
+  caches survive `docker compose down --volumes`.
 
-> **Advanced (optional):** For many demos at once on a single machine, a host-level
-> [Traefik reverse proxy](https://doc.traefik.io/traefik/) can route
-> `accrue.localhost`, `otherlib.localhost`, etc. on one `:80` — `*.localhost`
-> auto-resolves to `127.0.0.1` on macOS without `/etc/hosts` edits. This is an
-> optional escape hatch and is not shipped.
+**Troubleshooting.**
+
+- Need a stable URL (e.g. for OAuth callbacks)? Pin a port with
+  `ACCRUE_HOST_DOCKER_PORT` in `.env`.
+- `make up` follows the web logs; **Ctrl-C only detaches the log follow** — the stack
+  keeps running. Use `make down` to actually stop it.
+- Want a clean slate? `make reset` nukes the volumes and reseeds (seeds are
+  idempotent).
 
 | Command | When to use |
 |---------|-------------|
 | `make build` | First run, or after changing `Dockerfile.dev` / OS-level deps |
-| `make up` | Every other day — fast boot, reuses cached image and named volumes |
+| `make up` | Every other day — fast boot, prints the banner, follows logs |
+| `make open` | Open the running demo in your browser at the live URL |
 | `make down` | Stop the stack |
 | `make logs` | Stream Phoenix logs |
 | `make psql` | Open a psql session in the running db container |
@@ -89,9 +101,10 @@ mix phx.server
   If you need to connect a GUI client (psql, DBeaver, TablePlus), copy
   `docker-compose.override.yml.example` to `docker-compose.override.yml` (gitignored,
   auto-merged); it exposes `${PGPORT:-5432}` on `127.0.0.1`.
-- Override `ACCRUE_HOST_DOCKER_PORT` or `ACCRUE_HOST_COMPOSE_PROJECT` via `.env`
-  (copy `.env.example` to `.env`) when running multiple demo stacks concurrently.
-  Cross-lib convention: accrue web 4000, otherlib web 4010, thirdlib web 4020.
+- Host ports are ephemeral by default, so concurrent demos never collide — no port
+  picking needed. Copy `.env.example` to `.env` only to pin a fixed port
+  (`ACCRUE_HOST_DOCKER_PORT`, e.g. for OAuth callbacks) or to isolate two checkouts
+  of this same lib (`ACCRUE_HOST_COMPOSE_PROJECT`).
 - Docker uses named volumes for `deps`, `_build`, and `assets/node_modules`.
   `make up` reuses them every run — no dep redownload. Use `make reset` only when you
   want to nuke volumes and reseed from scratch.
