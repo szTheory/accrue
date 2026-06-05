@@ -16,6 +16,7 @@ make up         # every time after that — builds on first run, then read the b
 ```
 
 Then open **http://accrue.localhost/admin**. That URL is stable — bookmark it.
+You must be logged in as `admin@example.com` (password `accrue-demo-password`) to access `/admin` — the 5 customer logins below are for the tenant-facing billing flows.
 
 **One stable URL, zero port juggling.** `make proxy` starts a small shared Traefik
 reverse proxy (once, fleet-wide). Every demo that joins it gets its own
@@ -37,9 +38,10 @@ prints a copy-pasteable block with:
 - the key routes — `/admin` (mounted Accrue Admin UI), `/billing` (mounted portal),
   `/app/billing` (host billing screen), `/app/reports/advanced` (entitlement-gated
   reports), `/users/log-in` (sign in), `/dev/mailbox` (sent-email preview), and
-- the seeded demo logins — `healthy@example.com`, `past-due@example.com`,
-  `canceled@example.com`, `enterprise@example.com`, `trialing@example.com`, all with
-  password **`accrue-demo-password`**.
+- the seeded demo logins — `admin@example.com` (billing-admin operator — required to
+  open `/admin`), and the 5 customer personas (tenant-facing billing flows only, not
+  admin-capable): `healthy@example.com`, `past-due@example.com`, `canceled@example.com`,
+  `enterprise@example.com`, `trialing@example.com`, all with password **`accrue-demo-password`**.
 
 `make open` jumps straight to the running demo in your browser; `make url` reprints
 the stable + fallback URLs without the full banner. No live Stripe keys are required

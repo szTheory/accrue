@@ -86,11 +86,15 @@ Key routes (append to the URL above):
   /dev/mailbox            sent-email preview
 
 Seeded demo logins (password for ALL: accrue-demo-password):
-  healthy@example.com      clean, subscribed (no dunning banner)
-  past-due@example.com     past_due, dunning campaign active
-  canceled@example.com     canceled subscription
-  enterprise@example.com   premium plan + JPY invoice showcase
-  trialing@example.com     trialing subscription
+  OPERATOR (billing-admin — use this to open /admin):
+    admin@example.com        billing_admin, no subscription — /admin only
+
+  CUSTOMERS (tenant-facing /app/billing + /billing portal — NOT admin):
+    healthy@example.com      clean, subscribed (no dunning banner)
+    past-due@example.com     past_due, dunning campaign active
+    canceled@example.com     canceled subscription
+    enterprise@example.com   premium plan + JPY invoice showcase
+    trialing@example.com     trialing subscription
 
 Handy commands:
   make open   make url   make logs   make psql   make sh   make down
