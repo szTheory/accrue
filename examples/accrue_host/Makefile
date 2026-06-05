@@ -1,4 +1,22 @@
-.PHONY: up open build down logs psql sh reset ps
+.PHONY: proxy up open url build down logs psql sh reset ps
+
+# --- Per-instance identity ---------------------------------------------------
+# Default to a single clean instance: project `accrue-host`, stable URL
+# http://accrue.localhost. Run a second checkout side by side without any
+# collision by overriding INSTANCE:
+#   make up INSTANCE=accrue-foo   -> http://accrue-foo.localhost
+INSTANCE     ?= accrue-host
+ACCRUE_HOST  ?= $(if $(filter accrue-host,$(INSTANCE)),accrue.localhost,$(INSTANCE).localhost)
+export COMPOSE_PROJECT_NAME = $(INSTANCE)
+export ACCRUE_HOST
+
+proxy:  ## one-time (shared by ALL lib demos): start the Traefik proxy + its network
+	@docker network create proxy >/dev/null 2>&1 || true
+	# Force project `dev_proxy` with -p so the shared proxy is the SAME container
+	# no matter which lib (or which INSTANCE) runs this — our exported
+	# COMPOSE_PROJECT_NAME would otherwise spawn a second Traefik that collides on :80.
+	docker compose -p dev_proxy -f docker/traefik/compose.yml up -d
+	@echo "Traefik dashboard: http://localhost:8080  (routes every *.localhost demo)"
 
 up:     ## daily: boot detached, print the launch banner, then follow web logs
 	docker compose up -d --remove-orphans
@@ -6,13 +24,18 @@ up:     ## daily: boot detached, print the launch banner, then follow web logs
 	# Ctrl-C only detaches this log follow — the stack keeps running. Use `make down` to stop.
 	docker compose logs -f web
 
-open:   ## open the running demo in the browser at its live ephemeral URL
+open:   ## open the running demo in the browser at its stable URL
 	open "$$(./bin/dev-banner.sh --url-only)"
+
+url:    ## print this instance's stable URL + the ephemeral fallback
+	@echo "Instance:  $(COMPOSE_PROJECT_NAME)"
+	@echo "Stable:    http://$(ACCRUE_HOST)/admin  (needs \`make proxy\` once)"
+	@echo "Fallback:  http://$$(docker compose port web 4000 2>/dev/null)/admin"
 
 build:  ## first run or when Dockerfile.dev / OS-level deps change
 	docker compose up --build
 
-down:
+down:   ## stop THIS demo's stack (never touches the shared proxy)
 	docker compose down
 
 logs:
