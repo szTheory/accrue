@@ -163,9 +163,8 @@ async function main() {
     findingsOutput = process.stdout;
   } else {
     findingsPath = path.join(RESULTS_DIR, "findings.ndjson");
-    // Truncate/create the output file
+    // Truncate/create the output file so reruns don't concatenate stale findings
     fs.writeFileSync(findingsPath, "");
-    findingsOutput = fs.createWriteStream(findingsPath, { flags: "a" });
   }
 
   let totalFindings = 0;
