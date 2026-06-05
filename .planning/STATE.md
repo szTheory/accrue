@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.51
 milestone_name: Admin UI Depth Pass
-status: verifying
-last_updated: "2026-06-05T00:48:01.390Z"
+status: idle
+last_updated: "2026-06-05T15:49:26.000Z"
 last_activity: 2026-06-05
 progress:
   total_phases: 6
@@ -21,14 +21,13 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 179 — F — Screenshot-Driven Visual QA Loop & Sign-off
+**Current focus:** Between milestones — v1.51 shipped & archived 2026-06-04. No milestone open (stable core / demand-driven posture).
 
 ## Current Position
 
-Phase: 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-06-05 - Completed quick task 260604-tjz: Docker DX for accrue_host admin UI (ephemeral ports, launch banner, lean entrypoint+caches, docs)
+Milestone: v1.51 Admin UI: Depth Pass — SHIPPED & ARCHIVED 2026-06-04 (Phases 174–179, 33/33 plans). Phase dirs in `milestones/v1.51-phases/`.
+Status: Idle — between milestones.
+Last activity: 2026-06-05 - Completed quick task 260605-dkx: native Docker boot (Apple Silicon: native arch + Rust-built harfbuzz NIF) + accrue_host joins the shared dev_proxy Traefik (stable http://accrue.localhost); committed on main.
 
 ## Post-v1.48 Pause Rule
 
@@ -38,16 +37,16 @@ v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and
 
 ## Milestone Progress
 
-### v1.51 Phase Summary (planning 2026-06-03 — Admin UI: Depth Pass; deps A→B→C→{D,E}→F)
+### v1.51 Phase Summary (SHIPPED & ARCHIVED 2026-06-04 — Admin UI: Depth Pass; deps A→B→C→{D,E}→F; phase dirs in milestones/v1.51-phases/)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 174 | A — Design-System Gap Closure & Token Completeness | DSY-01, DSY-02, DSY-03 | Not started |
-| 175 | B — Persona-Driven IA Spine | IA-01, IA-02, IA-03, IA-04, IA-05, IA-06, IA-07 | Not started |
-| 176 | C — Systematic Per-Screen Rubric Uplift | SCR-01, SCR-02, SCR-03, SCR-04 | Not started |
-| 177 | D — Motion & Micro-interaction Design | MOT-01, MOT-02, MOT-03 | Not started |
-| 178 | E — Seed Expressiveness & State Coverage | SEED-01, SEED-02 | Not started |
-| 179 | F — Screenshot-Driven Visual QA Loop & Sign-off | QA-01, QA-02, QA-03 | Not started |
+| 174 | A — Design-System Gap Closure & Token Completeness | DSY-01, DSY-02, DSY-03 | Complete |
+| 175 | B — Persona-Driven IA Spine | IA-01, IA-02, IA-03, IA-04, IA-05, IA-06, IA-07 | Complete |
+| 176 | C — Systematic Per-Screen Rubric Uplift | SCR-01, SCR-02, SCR-03, SCR-04 | Complete |
+| 177 | D — Motion & Micro-interaction Design | MOT-01, MOT-02, MOT-03 | Complete |
+| 178 | E — Seed Expressiveness & State Coverage | SEED-01, SEED-02 | Complete |
+| 179 | F — Screenshot-Driven Visual QA Loop & Sign-off | QA-01, QA-02, QA-03 | Complete |
 
 Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). Design source: `.planning/research/v1.51-admin-ui-depth-design.md`.
 
@@ -142,6 +141,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260602-6xv | Seamless multi-project Docker DX for examples/accrue_host | 2026-06-02 | 85477a1b | [260602-6xv-seamless-multi-project-docker-dx-for-exa](./quick/260602-6xv-seamless-multi-project-docker-dx-for-exa/) |
 | 260604-3cg | Automate Phase 174 human-UAT items into CI (0 human verification) | 2026-06-04 | a228bda5 | [260604-3cg-automate-phase-174-human-uat-items-into-](./quick/260604-3cg-automate-phase-174-human-uat-items-into-/) |
 | 260604-tjz | Docker DX for accrue_host admin UI: ephemeral ports, launch banner, lean entrypoint+caches, docs | 2026-06-05 | 9f435936 | [260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem](./quick/260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem/) |
+| 260605-dkx | Native Docker boot (Apple Silicon: native arch + Rust-built harfbuzz NIF) + accrue_host joins shared dev_proxy Traefik (stable accrue.localhost, zero port conflicts); docs/docker-dx.md | 2026-06-05 | 38f5e29d | [260605-dkx-docker-native-boot-shared-traefik-proxy](./quick/260605-dkx-docker-native-boot-shared-traefik-proxy/) |
 | Phase 174 P02 | 15m | 4 tasks | 6 files |
 | Phase 174 P04 | 5m | 1 tasks | 1 files |
 | Phase 174 P05 | 8 | 2 tasks | 2 files |
@@ -183,10 +183,10 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-05T00:48:01.386Z
-Stopped at: Phase 179 executed; 21-shot 4-cell sweep + score-visuals.mjs (no-op w/o key) + motion trace + axe full inventory + SIGN-OFF.md (13 deferred UATs consolidated, photographic cells PENDING); 262 tests green; code review 0 critical/4 warnings fixed; verification human_needed (photographic sign-off = milestone visual gate)
-Resume file: .planning/phases/179-f-screenshot-driven-visual-qa-loop-sign-off/SIGN-OFF.md
+Last session: 2026-06-05T15:49:26.000Z
+Stopped at: Quick task 260605-dkx complete — accrue_host demo now boots in Docker on Apple Silicon (native arch, NOT amd64 emulation, which corrupts the BEAM compiler) with the harfbuzz_ex NIF built from Rust source; joins the shared dev_proxy Traefik for a stable http://accrue.localhost (zero port conflicts across sibling lib demos). 4 commits on main (38f5e29d…4b7f9adb), verified live. v1.51 shipped & archived 2026-06-04.
+Resume file: none — between milestones.
 
 ## Operator Next Steps
 
-- Start the next milestone with `$gsd-new-milestone`.
+- No milestone open (v1.51 shipped & archived). Start the next milestone with `$gsd-new-milestone`, or run the milestone-assessment ritual (`prompts/MILESTONE-NEXT-STEP-ASSESSMENT.md`) first.
