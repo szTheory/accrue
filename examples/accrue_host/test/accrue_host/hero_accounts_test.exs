@@ -22,6 +22,16 @@ defmodule AccrueHost.HeroAccountsTest do
     assert %User{} = Repo.get_by(User, email: "enterprise@example.com")
     assert %User{} = Repo.get_by(User, email: "trialing@example.com")
 
+    # Operator / billing-admin persona
+    admin_user = Repo.get_by(User, email: "admin@example.com")
+    assert %User{billing_admin: true} = admin_user,
+           "admin@example.com must have billing_admin: true — required to reach /admin"
+
+    # Lock: customer personas must NOT have admin access
+    healthy_user = Repo.get_by(User, email: "healthy@example.com")
+    assert %User{billing_admin: false} = healthy_user,
+           "healthy@example.com must remain billing_admin: false (customer persona)"
+
     org = Repo.get_by!(Organization, slug: "healthy-co")
     assert {:ok, %{subscription: %Accrue.Billing.Subscription{status: :active}}} = Billing.billing_state_for(org)
 
