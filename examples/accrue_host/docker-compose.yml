@@ -1,4 +1,7 @@
-name: ${ACCRUE_HOST_COMPOSE_PROJECT:-accrue-host}
+# Project name comes from COMPOSE_PROJECT_NAME (the Makefile exports it as
+# $INSTANCE, default `accrue-host`). Run two checkouts side by side with
+# `make up INSTANCE=accrue-foo` — separate networks, volumes, containers, AND a
+# separate Traefik route at accrue-foo.localhost.
 
 services:
   db:
@@ -9,22 +12,47 @@ services:
       POSTGRES_DB: accrue_host_dev
     volumes:
       - pgdata:/var/lib/postgresql/data
+    # No published port — reached by service name `db` on the internal network.
+    # (Publishing 5432 collides across lib demos.) For a DB GUI, copy
+    # docker-compose.override.yml.example to docker-compose.override.yml.
 
   web:
+    # Runs on the host's native architecture (no amd64 emulation — that corrupts
+    # the BEAM compiler on Apple Silicon). harfbuzz_ex lacks an aarch64-linux
+    # precompiled NIF, so Dockerfile.dev builds it from Rust source instead.
     build:
       context: .
       dockerfile: Dockerfile.dev
-    # Empty host port => Docker assigns a free ephemeral port (no collisions, ever).
-    # Pin a fixed port by setting ACCRUE_HOST_DOCKER_PORT in .env (e.g. for OAuth callbacks).
-    ports:
-      - "${ACCRUE_HOST_DOCKER_BIND:-127.0.0.1}:${ACCRUE_HOST_DOCKER_PORT:-}:4000"
     environment:
       PGHOST: db
+      # Stable hostname Traefik routes to (see labels below). The Makefile
+      # exports ACCRUE_HOST (default accrue.localhost); Phoenix reads PHX_HOST
+      # so generated links match.
+      PHX_HOST: ${ACCRUE_HOST:-accrue.localhost}
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME:-accrue-host}
+    # Ephemeral loopback FALLBACK so the demo is reachable even when the shared
+    # Traefik proxy isn't running. An empty host port => Docker assigns a free
+    # one (never collides). The banner prints it. Pin a fixed port by setting
+    # ACCRUE_HOST_DOCKER_PORT in .env (e.g. for OAuth callbacks that need it).
+    ports:
+      - "${ACCRUE_HOST_DOCKER_BIND:-127.0.0.1}:${ACCRUE_HOST_DOCKER_PORT:-}:4000"
     volumes:
       - ../..:/workspace
       - mix_deps:/workspace/examples/accrue_host/deps
       - mix_build:/workspace/examples/accrue_host/_build
       - assets_node_modules:/workspace/examples/accrue_host/assets/node_modules
+      # accrue_host path-depends on the sibling packages, so the bind mount above
+      # drags in THEIR deps/_build too. Those are compiled by your host's native
+      # Elixir/OTP (often a newer version than this image), which corrupts the
+      # in-container build ("module ... already compiled"). Shadow them with named
+      # volumes so the container compiles every path dep fresh and Linux-native,
+      # fully isolated from host artifacts.
+      - accrue_deps:/workspace/accrue/deps
+      - accrue_build:/workspace/accrue/_build
+      - accrue_admin_deps:/workspace/accrue_admin/deps
+      - accrue_admin_build:/workspace/accrue_admin/_build
+      - accrue_portal_deps:/workspace/accrue_portal/deps
+      - accrue_portal_build:/workspace/accrue_portal/_build
       # Host-bind hex + npm download caches survive `down --volumes`, so
       # `make reset` re-links instead of re-downloading. NOTE: do NOT also mount
       # /root/.mix — it holds the baked Hex/rebar archives and mounting over it
@@ -33,9 +61,34 @@ services:
       - ${HOME}/.cache/accrue-docker/npm:/root/.npm
     depends_on:
       - db
+    networks:
+      - default
+      - proxy
+    labels:
+      # Stable URL via the shared Traefik proxy: http://accrue.localhost/admin
+      # (no host-port juggling, zero collisions across lib demos). Router/service
+      # ids carry ${COMPOSE_PROJECT_NAME} so two checkouts don't collide on one
+      # route. Both fall back to the single-instance default.
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-accrue-host}.rule=Host(`${ACCRUE_HOST:-accrue.localhost}`)
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-accrue-host}.loadbalancer.server.port=4000
 
 volumes:
   pgdata:
   mix_deps:
   mix_build:
   assets_node_modules:
+  accrue_deps:
+  accrue_build:
+  accrue_admin_deps:
+  accrue_admin_build:
+  accrue_portal_deps:
+  accrue_portal_build:
+
+networks:
+  # Shared, externally-created proxy network that Traefik also joins. Create once
+  # with `make proxy` (or `docker network create proxy`).
+  proxy:
+    external: true
+  default:

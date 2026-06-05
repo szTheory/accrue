@@ -1,0 +1,46 @@
+# Shared local reverse proxy for ALL your dockerized lib demos.
+#
+# This is fleet infrastructure, not part of the Accrue demo. Run it ONCE
+# (long-lived), independent of any single project:
+#
+#   docker network create proxy                          # one time
+#   docker compose -f docker/traefik/compose.yml up -d   # or: make proxy
+#
+# Then every project that joins the external `proxy` network and carries traefik
+# labels (see this demo's docker-compose.yml) is reachable by a stable name —
+# e.g. http://accrue.localhost/admin and http://scoria.localhost/scoria — with NO
+# host-port juggling and zero collisions between libs. `*.localhost` resolves to
+# 127.0.0.1 automatically in Chrome/Firefox; add a dnsmasq wildcard if you also
+# need Safari/curl (or use the ephemeral fallback URL the banner prints).
+#
+# The project name (`dev_proxy`) and network (`proxy`) are intentionally shared
+# with the sibling lib demos, so bringing this up from any one repo is a no-op
+# when it's already running. Don't `down` it from a single lib — it routes them all.
+#
+# Dashboard (which app is routed where): http://localhost:8080
+name: dev_proxy
+
+services:
+  traefik:
+    # v3.7+: older Traefik (v3.1) bundles a Docker client that can't talk to
+    # Docker 29.x (API 1.54) — provider init fails with an empty "Error response
+    # from daemon". A current Traefik resolves it.
+    image: traefik:v3.7.1
+    restart: unless-stopped
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --api.insecure=true
+    ports:
+      - "127.0.0.1:80:80"     # routes *.localhost by Host header
+      - "127.0.0.1:8080:8080" # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

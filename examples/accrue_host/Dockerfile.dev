@@ -1,11 +1,25 @@
 # syntax=docker/dockerfile:1
-FROM elixir:1.17-slim
+# Native-arch image (built and run on the host's own architecture — NOT amd64).
+# amd64 emulation (Rosetta/QEMU) corrupts the BEAM compiler on Apple Silicon.
+# elixir:1.19 matches the host toolchain and is stable natively.
+FROM elixir:1.19-slim
 
-# Install OS dependencies
+# OS deps + a Rust toolchain. harfbuzz_ex (pulled by rendro, the default invoice
+# PDF renderer) ships no aarch64-linux precompiled NIF, so we compile it from
+# source. It uses rustybuzz (a pure-Rust HarfBuzz port) — no system HarfBuzz or
+# C++ libs needed, just cargo.
 RUN apt-get update && \
-    apt-get install -y build-essential inotify-tools git postgresql-client nodejs npm && \
+    apt-get install -y build-essential inotify-tools git postgresql-client nodejs npm curl && \
     apt-get clean && \
     rm -f /var/lib/apt/lists/*_*
+
+# Rust via rustup (stable) — Debian's packaged cargo can be too old for the crates.
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+ENV PATH="/root/.cargo/bin:${PATH}"
+# Force rustler to build harfbuzz_ex's NIF locally instead of fetching a
+# precompiled artifact (which doesn't exist for aarch64-linux). This is the env
+# var harfbuzz_ex's RustlerPrecompiled config checks.
+ENV RUSTLER_PRECOMPILATION_EXAMPLE_BUILD=1
 
 # Install hex and rebar
 RUN mix local.hex --force && \

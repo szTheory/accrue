@@ -18,8 +18,13 @@ config :accrue_host, AccrueHost.Repo,
 # to bundle .js and .css sources.
 endpoint_ip = if System.get_env("PGHOST") == "db", do: {0, 0, 0, 0}, else: {127, 0, 0, 1}
 
+# Under the shared Traefik proxy the public host is PHX_HOST (e.g. accrue.localhost)
+# on port 80; native dev stays localhost:4000. Keeps generated links/emails correct.
+endpoint_host = System.get_env("PHX_HOST")
+
 config :accrue_host, AccrueHostWeb.Endpoint,
   http: [ip: endpoint_ip],
+  url: [host: endpoint_host || "localhost", port: if(endpoint_host, do: 80, else: 4000)],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
