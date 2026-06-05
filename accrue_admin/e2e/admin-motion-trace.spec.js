@@ -125,23 +125,19 @@ test.describe("Motion trace — animated surface capture", () => {
 
     // Read which list element this toggle controls
     const controlledId = await toggleButton.getAttribute("data-controls");
+    // Fail loudly if the attribute is absent rather than silently skipping assertions
+    expect(controlledId, "collapse toggle must have data-controls attribute").toBeTruthy();
 
     // Collapse the group (first click hides the link list)
     await toggleButton.click();
 
     // The controlled sidebar group links div should now be hidden
-    if (controlledId) {
-      const groupLinks = page.locator(`#${controlledId}`);
-      await expect(groupLinks).toBeHidden();
-    }
+    await expect(page.locator(`#${controlledId}`)).toBeHidden();
 
     // Re-expand the group (second click reveals the link list)
     await toggleButton.click();
 
-    if (controlledId) {
-      const groupLinks = page.locator(`#${controlledId}`);
-      await expect(groupLinks).toBeVisible();
-    }
+    await expect(page.locator(`#${controlledId}`)).toBeVisible();
   });
 
   // --------------------------------------------------------------------------
