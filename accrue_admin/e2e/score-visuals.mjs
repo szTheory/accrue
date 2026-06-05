@@ -214,13 +214,21 @@ async function main() {
 
       let findings;
       try {
-        findings = JSON.parse(rawText);
+        const parsed = JSON.parse(rawText);
+        findings = Array.isArray(parsed) ? parsed : null;
       } catch (parseErr) {
         console.error(
           `[score-visuals] Failed to parse model response for ${screen} (${viewport}/${theme}): ${parseErr.message}`
         );
         console.error("[score-visuals] Raw response:", rawText.slice(0, 500));
         continue;
+      }
+
+      if (!findings) {
+        console.error(
+          `[score-visuals] Model returned non-array for ${screen} (${viewport}/${theme}): ${rawText.slice(0, 200)}`
+        );
+        continue; // skip this image, don't abort the run
       }
 
       // Enrich findings with authoritative metadata (override model-supplied values)
