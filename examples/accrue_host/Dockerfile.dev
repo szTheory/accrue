@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM elixir:1.17-slim
 
 # Install OS dependencies
@@ -13,8 +14,12 @@ RUN mix local.hex --force && \
 # Set working directory
 WORKDIR /workspace/examples/accrue_host
 
+# Copy the dev boot/banner scripts into the image and ensure they are executable
+COPY bin/ /workspace/examples/accrue_host/bin/
+RUN chmod +x bin/dev-entrypoint.sh bin/dev-banner.sh
+
 # Expose Phoenix port
 EXPOSE 4000
 
-# Start command
-CMD ["bash", "-c", "mix setup && mix phx.server"]
+# Lean idempotent boot (replaces `mix setup && mix phx.server`); execs phx.server itself
+ENTRYPOINT ["bin/dev-entrypoint.sh"]
