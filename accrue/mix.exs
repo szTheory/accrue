@@ -66,7 +66,7 @@ defmodule Accrue.MixProject do
       {:oban, "~> 2.21"},
       {:swoosh, "~> 1.25"},
       {:mailglass, "~> 1.0"},
-      {:rendro, "~> 0.3.0"},
+      {:rendro, "~> 1.0"},
       {:chromic_pdf, "~> 1.17"},
       {:nimble_options, "~> 1.1"},
       {:telemetry, "~> 1.3"},
