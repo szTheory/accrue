@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 
 Milestone: v1.51 Admin UI: Depth Pass — SHIPPED & ARCHIVED 2026-06-04 (Phases 174–179, 33/33 plans). Phase dirs in `milestones/v1.51-phases/`.
 Status: Idle — between milestones.
-Last activity: 2026-06-05 - Completed quick task 260605-gys: added admin@example.com billing-admin operator seed (ensure_demo_admin/1), OPERATOR/CUSTOMERS banner split, hero_accounts_test persona assertions locked, Docker live verify confirmed. /admin is now structurally reachable.
+Last activity: 2026-06-05 - Bumped rendro dep to ~> 1.0 (1.0.0) across accrue/accrue_admin/accrue_portal locks (host stays on 0.3.0 per published accrue 1.4.0 floor); compile clean, 63 PDF/renderer tests green. Commit 6fdd0059.
 
 ## Post-v1.48 Pause Rule
 
@@ -143,6 +143,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260604-tjz | Docker DX for accrue_host admin UI: ephemeral ports, launch banner, lean entrypoint+caches, docs | 2026-06-05 | 9f435936 | [260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem](./quick/260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem/) |
 | 260605-dkx | Native Docker boot (Apple Silicon: native arch + Rust-built harfbuzz NIF) + accrue_host joins shared dev_proxy Traefik (stable accrue.localhost, zero port conflicts); docs/docker-dx.md | 2026-06-05 | 38f5e29d | [260605-dkx-docker-native-boot-shared-traefik-proxy](./quick/260605-dkx-docker-native-boot-shared-traefik-proxy/) |
 | 260605-gys | Add admin@example.com billing-admin operator seed — /admin now structurally reachable; ensure_demo_admin/1 helper, OPERATOR/CUSTOMERS banner split, hero_accounts_test persona assertions locked | 2026-06-05 | 730d9dd9 | [260605-gys-add-dedicated-admin-example-com-billing-](./quick/260605-gys-add-dedicated-admin-example-com-billing-/) |
+| fast | Bump rendro dep to ~> 1.0 (1.0.0) across accrue/accrue_admin/accrue_portal locks; host stays on 0.3.0 (published accrue 1.4.0 floor); compile clean + 63 PDF/renderer tests green | 2026-06-05 | 6fdd0059 | (inline /gsd-fast) |
 | Phase 174 P02 | 15m | 4 tasks | 6 files |
 | Phase 174 P04 | 5m | 1 tasks | 1 files |
 | Phase 174 P05 | 8 | 2 tasks | 2 files |
