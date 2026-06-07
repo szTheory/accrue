@@ -21,10 +21,78 @@ parse_mix_version() {
   sed -n 's/^[[:space:]]*@version "\([^"]*\)".*/\1/p' "$1" | head -1
 }
 
+current_head_sha() {
+  git -C "$repo_root" rev-parse HEAD
+}
+
+current_head_subject() {
+  git -C "$repo_root" log -1 --format=%s
+}
+
+remote_tag_sha() {
+  local tag="$1"
+  git -C "$repo_root" ls-remote --tags origin "refs/tags/${tag}" 2>/dev/null | awk 'NR == 1 { print $1 }' || true
+}
+
 hex_release_exists() {
   local pkg="$1"
   local ver="$2"
   curl -fsS -o /dev/null --max-time 30 "https://hex.pm/api/packages/${pkg}/releases/${ver}"
+}
+
+maybe_skip_unreleased_checkout() {
+  if [[ "${ACCRUE_HOST_HEX_SMOKE_FORCE:-}" == "1" ]]; then
+    return 0
+  fi
+
+  local accrue_ver accrue_admin_ver accrue_portal_ver
+  accrue_ver="$(parse_mix_version "$repo_root/accrue/mix.exs")"
+  accrue_admin_ver="$(parse_mix_version "$repo_root/accrue_admin/mix.exs")"
+  accrue_portal_ver="$(parse_mix_version "$repo_root/accrue_portal/mix.exs")"
+
+  if [[ -z "$accrue_ver" || -z "$accrue_admin_ver" || -z "$accrue_portal_ver" ]]; then
+    echo "accrue_host_hex_smoke: could not parse @version from sibling mix.exs" >&2
+    exit 1
+  fi
+
+  local head_sha
+  head_sha="$(current_head_sha)"
+
+  local missing_tags=()
+  local mismatched_tags=()
+  local tag tag_sha
+
+  for package_version in \
+    "accrue:${accrue_ver}" \
+    "accrue_admin:${accrue_admin_ver}" \
+    "accrue_portal:${accrue_portal_ver}"
+  do
+    tag="${package_version/:/-v}"
+    tag_sha="$(remote_tag_sha "$tag")"
+
+    if [[ -z "$tag_sha" ]]; then
+      missing_tags+=("$tag")
+    elif [[ "$tag_sha" != "$head_sha" ]]; then
+      mismatched_tags+=("${tag}@${tag_sha}")
+    fi
+  done
+
+  if ((${#mismatched_tags[@]} > 0)); then
+    echo "accrue_host_hex_smoke: skipping; published release tag(s) do not point at this checkout (${head_sha}): ${mismatched_tags[*]}."
+    echo "accrue_host_hex_smoke: path-based host integration already validated this unreleased branch; set ACCRUE_HOST_HEX_SMOKE_FORCE=1 to force."
+    exit 0
+  fi
+
+  if ((${#missing_tags[@]} > 0)); then
+    if [[ "$(current_head_subject)" == chore:\ release* ]]; then
+      echo "accrue_host_hex_smoke: release commit tags are not visible yet (${missing_tags[*]}); continuing and waiting for Hex."
+      return 0
+    fi
+
+    echo "accrue_host_hex_smoke: skipping; release tag(s) are not published for this checkout: ${missing_tags[*]}."
+    echo "accrue_host_hex_smoke: path-based host integration already validated this unreleased branch; set ACCRUE_HOST_HEX_SMOKE_FORCE=1 to force."
+    exit 0
+  fi
 }
 
 maybe_wait_for_sibling_releases_on_hex() {
@@ -67,8 +135,19 @@ maybe_wait_for_sibling_releases_on_hex() {
   done
 }
 
+restore_mix_lock() {
+  cp "$mix_lock_backup" mix.lock
+  rm -f "$mix_lock_backup"
+}
+
+maybe_skip_unreleased_checkout
 maybe_wait_for_sibling_releases_on_hex
 
+mix_lock_backup="$(mktemp)"
+cp mix.lock "$mix_lock_backup"
+trap restore_mix_lock EXIT
+
+mix deps.unlock accrue accrue_admin accrue_portal rendro
 mix deps.get
 mix accrue.install --yes \
   --billable AccrueHost.Accounts.User \
