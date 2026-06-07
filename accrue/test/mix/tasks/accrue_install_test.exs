@@ -87,6 +87,12 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              "config/runtime.exs",
              "System.get_env(\"STRIPE_WEBHOOK_SECRET\")"
            )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "priv/repo/migrations/99999999999999_revoke_accrue_events_writes.exs",
+             ~S[to_regrole('#{@app_role}') IS NOT NULL]
+           )
   end
 
   @tag :install_patches

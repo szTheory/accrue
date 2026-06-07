@@ -68,8 +68,12 @@ mix ecto.create --quiet
 echo "[entrypoint] ecto.migrate"
 mix ecto.migrate
 
-echo "[entrypoint] seeds (idempotent)"
-mix run priv/repo/seeds.exs
+if [ "${ACCRUE_HOST_SKIP_SEEDS:-}" = "1" ]; then
+  echo "[entrypoint] seeds skipped (ACCRUE_HOST_SKIP_SEEDS=1)"
+else
+  echo "[entrypoint] seeds (idempotent)"
+  mix run priv/repo/seeds.exs
+fi
 
 if asset_build_current; then
   echo "[entrypoint] assets.build (first-paint assets current)"

@@ -36,6 +36,30 @@ async function openDeleteConfirmation(page, paymentMethodId) {
   await expect(page.locator("[data-role='payment-method-delete-confirmation']")).toBeVisible();
 }
 
+/**
+ * @param {import('@playwright/test').Page} page
+ */
+async function waitForDarkThemeSettled(page) {
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+  await page.waitForFunction(
+    () => {
+      const search = document.querySelector(".ax-search-trigger");
+      const darkButton = document.querySelector('button[data-theme-target="dark"]');
+      const activeNav = document.querySelector("a.ax-sidebar-link-active");
+
+      if (!search || !darkButton || !activeNav) return false;
+
+      return (
+        getComputedStyle(search).backgroundColor === "rgb(15, 19, 24)" &&
+        getComputedStyle(darkButton).color === "rgb(244, 247, 250)" &&
+        getComputedStyle(activeNav).backgroundColor === "rgb(31, 40, 61)"
+      );
+    },
+    { timeout: 5_000 }
+  );
+}
+
 test("mounted admin customers index passes axe in light and dark themes", async ({ page, sandboxId }, testInfo) => {
   test.skip(
     testInfo.project.name === "chromium-mobile" || testInfo.project.name === "chromium-mobile-tagged",
@@ -73,17 +97,7 @@ test("mounted admin customers index passes axe in light and dark themes", async 
   await expect(darkBtn).toBeVisible();
   await darkBtn.click();
   await waitForLiveView(page);
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-
-  await page.waitForFunction(
-    () => {
-      const el = document.querySelector("a.ax-sidebar-link-active");
-      if (!el) return false;
-      const bg = getComputedStyle(el).backgroundColor;
-      return bg.includes("31") && bg.includes("40") && bg.includes("61");
-    },
-    { timeout: 5000 }
-  );
+  await waitForDarkThemeSettled(page);
 
   violations = await scanAxe(page);
   expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -356,17 +370,7 @@ test.describe("core-admin-invoices-index", () => {
     await expect(darkBtn).toBeVisible();
     await darkBtn.click();
     await waitForLiveView(page);
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-
-    await page.waitForFunction(
-      () => {
-        const el = document.querySelector("a.ax-sidebar-link-active");
-        if (!el) return false;
-        const bg = getComputedStyle(el).backgroundColor;
-        return bg.includes("31") && bg.includes("40") && bg.includes("61");
-      },
-      { timeout: 5000 }
-    );
+    await waitForDarkThemeSettled(page);
 
     violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
@@ -459,17 +463,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     await expect(darkBtn).toBeVisible();
     await darkBtn.click();
     await waitForLiveView(page);
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-
-    await page.waitForFunction(
-      () => {
-        const el = document.querySelector("a.ax-sidebar-link-active");
-        if (!el) return false;
-        const bg = getComputedStyle(el).backgroundColor;
-        return bg.includes("31") && bg.includes("40") && bg.includes("61");
-      },
-      { timeout: 5000 }
-    );
+    await waitForDarkThemeSettled(page);
 
     violations = await scanAxe(page);
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);

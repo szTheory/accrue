@@ -411,6 +411,7 @@ defmodule AccrueAdmin.CustomerLiveTest do
     conn: conn,
     customer: customer,
     blocked_payment_method: blocked_payment_method,
+    default_payment_method: default_payment_method,
     deletable_payment_method: deletable_payment_method
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
@@ -425,6 +426,17 @@ defmodule AccrueAdmin.CustomerLiveTest do
       )
 
     assert html =~ "This payment method still funds an active subscription."
+    refute html =~ ~s(data-role="confirm-delete-payment-method")
+
+    html =
+      render_click(
+        element(
+          view,
+          "[data-role='prepare-delete-payment-method'][data-payment-method-id='#{default_payment_method.id}']"
+        )
+      )
+
+    assert html =~ "Set another default payment method before deleting this one."
     refute html =~ ~s(data-role="confirm-delete-payment-method")
 
     html =

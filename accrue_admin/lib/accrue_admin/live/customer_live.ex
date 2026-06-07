@@ -720,7 +720,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
         :in_use
 
       default_payment_method?(customer, payment_method) and
-          not has_other_payment_methods?(customer, payment_method) ->
+          has_other_payment_methods?(customer, payment_method) ->
         :replacement_required
 
       true ->

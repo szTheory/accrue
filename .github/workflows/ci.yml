@@ -643,6 +643,9 @@ jobs:
     if: github.event_name != 'schedule'
     needs: [docs-contracts-shift-left]
     runs-on: ubuntu-24.04
+    env:
+      ACCRUE_HOST_DOCKER_PORT: 4000
+      ACCRUE_HOST_SKIP_SEEDS: "1"
 
     steps:
       - uses: actions/checkout@v6
@@ -654,9 +657,8 @@ jobs:
         run: cd examples/accrue_host && docker compose up --build -d
 
       - name: Wait for Docker host app
-        # Cold first boot runs `mix setup` (deps fetch + compile of all three
-        # packages and the host, plus assets) before `mix phx.server`, which
-        # can exceed 10 minutes on an empty named-volume cache.
+        # Cold first boot still fetches deps, compiles all path deps, migrates,
+        # and builds first-paint assets before `mix phx.server`.
         run: |
           for _ in $(seq 1 900); do
             if curl -fsS http://localhost:4000/ >/dev/null; then

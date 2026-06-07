@@ -30,6 +30,7 @@ services:
       # so generated links match.
       PHX_HOST: ${ACCRUE_HOST:-accrue.localhost}
       COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME:-accrue-host}
+      ACCRUE_HOST_SKIP_SEEDS: ${ACCRUE_HOST_SKIP_SEEDS:-}
     # Ephemeral loopback FALLBACK so the demo is reachable even when the shared
     # Traefik proxy isn't running. An empty host port => Docker assigns a free
     # one (never collides). The banner prints it. Pin a fixed port by setting
