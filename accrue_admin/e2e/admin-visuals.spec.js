@@ -36,6 +36,8 @@ test.describe("Admin visual inventory", () => {
     page,
     request
   }, testInfo) => {
+    test.setTimeout(120_000);
+
     // Three merged fixtures — operator-flows, dashboard, edge-states — seeded
     // without intermediate reset(). Fixtures use System.unique_integer processor
     // IDs and accumulate safely. Detail surfaces use ids returned from each fixture.

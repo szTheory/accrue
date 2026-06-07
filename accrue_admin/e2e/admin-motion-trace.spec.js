@@ -116,6 +116,11 @@ test.describe("Motion trace — animated surface capture", () => {
     await expect(page.locator("#main-content")).toBeVisible();
 
     const toggleButton = page.locator('[data-collapse-toggle="true"]').first();
+    if (!(await toggleButton.isVisible())) {
+      await page.locator('[data-sidebar-toggle="true"]').click();
+      await expect(page.locator(".ax-sidebar")).toBeVisible();
+    }
+
     await expect(toggleButton).toBeVisible();
 
     // Read which list element this toggle controls

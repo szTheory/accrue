@@ -9,6 +9,7 @@ if Mix.env() != :prod do
       Breadcrumbs,
       Button,
       Detail,
+      DropdownMenu,
       FlashGroup,
       Icon,
       KpiCard,
@@ -95,6 +96,13 @@ if Mix.env() != :prod do
               <Button.button variant="primary" type="button">Primary action</Button.button>
               <Button.button variant="secondary" type="button">Secondary action</Button.button>
               <Button.button variant="ghost" href={@admin_mount_path <> "/webhooks"}>Ghost link</Button.button>
+              <DropdownMenu.dropdown_menu
+                label="More actions"
+                items={[
+                  %{label: "Open webhooks", href: @admin_mount_path <> "/webhooks", description: "Inspect event delivery"},
+                  %{label: "Open events", href: @admin_mount_path <> "/events", description: "Review audit timeline"}
+                ]}
+              />
             </div>
 
             <div class="ax-dev-grid">

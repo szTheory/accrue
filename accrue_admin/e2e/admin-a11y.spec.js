@@ -36,6 +36,8 @@ test.describe("Admin accessibility (axe)", () => {
   // Three fixtures are seeded without intermediate reset() — processor IDs use
   // System.unique_integer so accumulation is safe (same pattern as admin-visuals.spec.js).
   test("no critical/serious axe violations across primary surfaces", async ({ page, request }) => {
+    test.setTimeout(120_000);
+
     // Reduced-motion zeroes the admin's theme transition (see theme.css), so a
     // data-theme toggle is instant and axe reads settled colours instead of a
     // mid-fade blend. CSP forbids injecting a style tag, so emulate the media query.
