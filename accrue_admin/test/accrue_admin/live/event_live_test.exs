@@ -76,11 +76,12 @@ defmodule AccrueAdmin.EventLiveTest do
     assert html =~ "webhook"
   end
 
-  test "EventLive Related card links to source webhook when caused_by_webhook_event_id present", %{
-    conn: conn,
-    event: event,
-    webhook: webhook
-  } do
+  test "EventLive Related card links to source webhook when caused_by_webhook_event_id present",
+       %{
+         conn: conn,
+         event: event,
+         webhook: webhook
+       } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/events/#{event.id}")

@@ -48,11 +48,14 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
       ["primary", "secondary", "ghost", "danger"]
       |> MapSet.new(fn variant ->
         html =
-          render_component(fn assigns ->
-            ~H"""
-            <Button.button variant={assigns.variant} type="button">Label</Button.button>
-            """
-          end, %{variant: variant})
+          render_component(
+            fn assigns ->
+              ~H"""
+              <Button.button variant={assigns.variant} type="button">Label</Button.button>
+              """
+            end,
+            %{variant: variant}
+          )
 
         extract_button_class(html)
       end)
@@ -142,7 +145,9 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
   # references a token that fails to render (e.g. template bug or wrong field name), the
   # token string will be absent from the HTML. If a phantom token sneaks back into the
   # registry it will appear in the page but must not.
-  test "rendered /dev/components page contains every registry token and no phantom tokens", %{conn: conn} do
+  test "rendered /dev/components page contains every registry token and no phantom tokens", %{
+    conn: conn
+  } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
@@ -153,9 +158,14 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
              "token #{inspect(token)} from ComponentRegistry was not found in the /dev/components page HTML"
     end
 
-    refute html =~ "--ax-neutral", "phantom token --ax-neutral must not appear on the /dev/components page"
-    refute html =~ "--ax-ink", "phantom token --ax-ink must not appear on the /dev/components page"
-    refute html =~ "--ax-info", "--ax-info is defined in theme.css but must not appear on the components page (not a registry token)"
+    refute html =~ "--ax-neutral",
+           "phantom token --ax-neutral must not appear on the /dev/components page"
+
+    refute html =~ "--ax-ink",
+           "phantom token --ax-ink must not appear on the /dev/components page"
+
+    refute html =~ "--ax-info",
+           "--ax-info is defined in theme.css but must not appear on the components page (not a registry token)"
   end
 
   defp theme_css_path do

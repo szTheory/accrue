@@ -5,7 +5,16 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
 
   alias Accrue.Billing.PromotionCode
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, JsonViewer, KpiCard, RelatedResources}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    Breadcrumbs,
+    Detail,
+    JsonViewer,
+    KpiCard,
+    RelatedResources
+  }
+
   alias AccrueAdmin.ScopedPath
 
   @impl true
@@ -171,8 +180,7 @@ defmodule AccrueAdmin.Live.PromotionCodeLive do
             icon: :coupons,
             label: "Coupon",
             value: value,
-            href:
-              ScopedPath.build(mount_path, "/coupons/#{promotion_code.coupon_id}", scope)
+            href: ScopedPath.build(mount_path, "/coupons/#{promotion_code.coupon_id}", scope)
           }
         ]
       else

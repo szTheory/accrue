@@ -8,7 +8,7 @@ defmodule AccrueAdmin.MixProject do
     [
       app: :accrue_admin,
       version: @version,
-      elixir: "~> 1.17",
+      elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
@@ -92,7 +92,12 @@ defmodule AccrueAdmin.MixProject do
       # `.planning/milestones/...` paths sit outside the package tarball but
       # add operator-discoverable context for repo readers. Skip the warning
       # rather than break the link or duplicate the SSOT inside the package.
-      skip_undefined_reference_warnings_on: ["guides/admin_ui.md", "guides/local_demo.md", "guides/core-admin-parity.md", "guides/motion.md"]
+      skip_undefined_reference_warnings_on: [
+        "guides/admin_ui.md",
+        "guides/local_demo.md",
+        "guides/core-admin-parity.md",
+        "guides/motion.md"
+      ]
     ]
   end
 

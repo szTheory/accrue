@@ -27,7 +27,9 @@ defmodule AccrueAdmin.Components.DunningBannerTest do
       assert html =~ "accrue-dunning-banner-wrapper"
       assert html =~ "accrue-default-dunning-banner"
       assert html =~ "Action Required"
-      refute html =~ ~s(style=), "inline style= attribute must not appear in dunning banner (DSY-02)"
+
+      refute html =~ ~s(style=),
+             "inline style= attribute must not appear in dunning banner (DSY-02)"
     end
 
     test "renders custom inner_block content and suppresses the default message when dunning is active" do

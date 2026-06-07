@@ -225,8 +225,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex --force
       - name: Install accrue deps
@@ -256,8 +256,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex --force
       - name: Install accrue_admin deps
@@ -289,8 +289,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex --force
       - name: Install accrue_portal deps
@@ -343,8 +343,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
 
       - name: Install Hex
         run: |

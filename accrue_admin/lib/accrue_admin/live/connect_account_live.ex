@@ -6,7 +6,16 @@ defmodule AccrueAdmin.Live.ConnectAccountLive do
   alias Accrue.{Auth, Config, Connect, Events, Money}
   alias Accrue.Connect.Account
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, FlashGroup, KpiCard, RelatedResources}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    Breadcrumbs,
+    Detail,
+    FlashGroup,
+    KpiCard,
+    RelatedResources
+  }
+
   alias AccrueAdmin.Copy
   alias AccrueAdmin.ScopedPath
 

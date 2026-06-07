@@ -356,7 +356,8 @@ defmodule AccrueAdmin.DataTableTest do
       live_files =
         Path.wildcard(live_files_glob())
 
-      assert Enum.any?(live_files), "Expected live template files to exist at #{live_files_glob()}"
+      assert Enum.any?(live_files),
+             "Expected live template files to exist at #{live_files_glob()}"
 
       contents =
         Enum.map_join(live_files, "\n", fn path ->

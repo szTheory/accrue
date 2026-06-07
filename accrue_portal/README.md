@@ -49,7 +49,7 @@ portal path, and the checkout page completes the subscription using the same
 core `Accrue.Billing.subscribe/3` flow as the rest of the library.
 
 This README stays concise by design. Use
-[`accrue/guides/braintree-local-portal.md`](../accrue/guides/braintree-local-portal.md)
+[`accrue/guides/braintree-local-portal.md`](https://github.com/szTheory/accrue/blob/main/accrue/guides/braintree-local-portal.md)
 for the deeper mounted-path contract, failure semantics, sibling scope
 expectations, and the hand-rolled escape hatch.
 
@@ -57,6 +57,6 @@ expectations, and the hand-rolled escape hatch.
 
 - `accrue_portal` owns mounted self-serve billing UI plus package-local checkout/portal flows.
 - Host apps own Repo wiring, migrations, Oban supervision, auth/session continuity, routing policy, runtime secrets, and app-domain membership policy.
-- Canonical setup and mount order live in [`accrue/guides/first_hour.md`](../accrue/guides/first_hour.md).
-- Scope and maturity framing live in [`accrue/guides/jobs_to_be_done.md#scope-and-maturity`](../accrue/guides/jobs_to_be_done.md#scope-and-maturity).
-- Stable-core posture policy lives in [`accrue/guides/maturity-and-maintenance.md`](../accrue/guides/maturity-and-maintenance.md).
+- Canonical setup and mount order live in [`accrue/guides/first_hour.md`](https://github.com/szTheory/accrue/blob/main/accrue/guides/first_hour.md).
+- Scope and maturity framing live in [`accrue/guides/jobs_to_be_done.md#scope-and-maturity`](https://github.com/szTheory/accrue/blob/main/accrue/guides/jobs_to_be_done.md#scope-and-maturity).
+- Stable-core posture policy lives in [`accrue/guides/maturity-and-maintenance.md`](https://github.com/szTheory/accrue/blob/main/accrue/guides/maturity-and-maintenance.md).

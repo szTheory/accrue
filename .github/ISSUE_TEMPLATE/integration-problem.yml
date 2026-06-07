@@ -47,6 +47,6 @@ body:
     attributes:
       label: Local environment
       description: Share versions and environment details relevant to the blocker.
-      placeholder: Elixir 1.17+, OTP 27+, Phoenix 1.8+, PostgreSQL 14+
+      placeholder: Elixir 1.19+, OTP 28+, Phoenix 1.8+, PostgreSQL 14+
     validations:
       required: true

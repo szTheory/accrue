@@ -8,7 +8,7 @@ defmodule AccruePortal.MixProject do
     [
       app: :accrue_portal,
       version: @version,
-      elixir: "~> 1.17",
+      elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),

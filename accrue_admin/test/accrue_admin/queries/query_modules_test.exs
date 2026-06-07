@@ -239,12 +239,16 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
 
     test "Invoices.list/1 with comma-separated status does not raise ArgumentError" do
       # The query module must not blow up — result may be empty but no crash.
-      assert {rows, _cursor} = Invoices.list(filter: Invoices.decode_filter(%{"status" => "open,uncollectible"}))
+      assert {rows, _cursor} =
+               Invoices.list(filter: Invoices.decode_filter(%{"status" => "open,uncollectible"}))
+
       assert is_list(rows)
     end
 
     test "Invoices.list/1 with multi-status returns matching rows (open present in setup)" do
-      {rows, _cursor} = Invoices.list(filter: Invoices.decode_filter(%{"status" => "open,uncollectible"}))
+      {rows, _cursor} =
+        Invoices.list(filter: Invoices.decode_filter(%{"status" => "open,uncollectible"}))
+
       # Setup inserts one :open invoice (INV-0002) and one :draft invoice (INV-0001).
       # Only :open should appear.
       assert Enum.any?(rows, &(&1.status == :open))
@@ -257,12 +261,18 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     end
 
     test "Subscriptions.list/1 with comma-separated status does not raise" do
-      assert {rows, _cursor} = Subscriptions.list(filter: Subscriptions.decode_filter(%{"status" => "past_due,canceling"}))
+      assert {rows, _cursor} =
+               Subscriptions.list(
+                 filter: Subscriptions.decode_filter(%{"status" => "past_due,canceling"})
+               )
+
       assert is_list(rows)
     end
 
     test "Subscriptions.list/1 single-status path still works after refactor" do
-      {rows, _cursor} = Subscriptions.list(filter: Subscriptions.decode_filter(%{"status" => "active"}))
+      {rows, _cursor} =
+        Subscriptions.list(filter: Subscriptions.decode_filter(%{"status" => "active"}))
+
       assert Enum.all?(rows, &(&1.status in [:active, :trialing]))
     end
 
@@ -272,13 +282,17 @@ defmodule AccrueAdmin.Queries.QueryModulesTest do
     end
 
     test "Charges.list/1 with multi-value status does not raise" do
-      assert {rows, _cursor} = Charges.list(filter: Charges.decode_filter(%{"status" => "failed,pending"}))
+      assert {rows, _cursor} =
+               Charges.list(filter: Charges.decode_filter(%{"status" => "failed,pending"}))
+
       assert is_list(rows)
     end
 
     test "Charges.list/1 with multi-value status returns matching rows" do
       # Setup inserts "pending" charge (ch_old) and "succeeded" charge (ch_new).
-      {rows, _cursor} = Charges.list(filter: Charges.decode_filter(%{"status" => "pending,succeeded"}))
+      {rows, _cursor} =
+        Charges.list(filter: Charges.decode_filter(%{"status" => "pending,succeeded"}))
+
       statuses = Enum.map(rows, & &1.status)
       assert "pending" in statuses
       assert "succeeded" in statuses

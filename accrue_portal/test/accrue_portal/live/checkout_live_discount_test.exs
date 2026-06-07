@@ -7,6 +7,8 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
   alias AccruePortal.BraintreeMox
   alias AccruePortal.TestRepo
 
+  @discount_mappings_table Accrue.Migration.qualified_table(:accrue_discount_mappings)
+
   defmodule TestUser do
     use Ecto.Schema
     use Accrue.Billable
@@ -199,7 +201,7 @@ defmodule AccruePortal.CheckoutLiveDiscountTest do
              Ecto.Adapters.SQL.query(
                AccruePortal.TestRepo,
                """
-               UPDATE accrue_discount_mappings
+               UPDATE #{@discount_mappings_table}
                SET discount_id = '', updated_at = $2
                WHERE id = $1
                """,

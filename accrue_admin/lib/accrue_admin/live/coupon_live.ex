@@ -7,7 +7,16 @@ defmodule AccrueAdmin.Live.CouponLive do
 
   alias Accrue.Billing.{Coupon, PromotionCode}
   alias Accrue.Repo
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, Detail, JsonViewer, KpiCard, RelatedResources}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    Breadcrumbs,
+    Detail,
+    JsonViewer,
+    KpiCard,
+    RelatedResources
+  }
+
   alias AccrueAdmin.ScopedPath
 
   @impl true

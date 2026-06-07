@@ -32,8 +32,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex --force
       - name: Verify accrue release version
@@ -62,8 +62,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex --force
       - name: Verify accrue_admin release version
@@ -94,8 +94,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
       - name: Install Hex
         run: mix local.hex --force
       - name: Verify accrue_portal release version

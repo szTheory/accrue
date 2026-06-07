@@ -123,39 +123,31 @@ jobs:
         include:
           # Floor — minimum supported compatibility cell.
           # Required deterministic gate: high-severity trust findings block release here.
-          - elixir: '1.17.3'
-            otp: '27.0'
+          - elixir: '1.19.0'
+            otp: '28.0'
             sigra: 'off'
             opentelemetry: 'off'
             compatibility: 'Floor'
             support: 'required'
           # Primary dev target compatibility cell.
           # Required deterministic gate: high-severity trust findings block release here.
-          - elixir: '1.18.0'
-            otp: '27.0'
+          - elixir: '1.19.5'
+            otp: '28.0'
             sigra: 'off'
             opentelemetry: 'off'
             compatibility: 'Primary dev target'
             support: 'required'
-          # Forward-compat smoke compatibility cell (advisory canary for upstream compatibility drift).
-          # Advisory cells stay visible, but they do not block merge/release while upstream packages lag.
-          - elixir: '1.18.4'
-            otp: '28.0'
-            sigra: 'off'
-            opentelemetry: 'off'
-            compatibility: 'Forward-compat smoke'
-            support: 'advisory'
           # Advisory compatibility cell: unpublished optional :sigra integration.
           # Advisory cells stay visibly non-blocking through matrix continue-on-error.
-          - elixir: '1.18.0'
-            otp: '27.0'
+          - elixir: '1.19.5'
+            otp: '28.0'
             sigra: 'on'
             opentelemetry: 'off'
             compatibility: 'Primary dev target'
             support: 'advisory'
           # Required compatibility cell: optional OpenTelemetry integration is supported and stays blocking.
-          - elixir: '1.18.0'
-            otp: '27.0'
+          - elixir: '1.19.5'
+            otp: '28.0'
             sigra: 'off'
             opentelemetry: 'on'
             compatibility: 'Primary dev target'
@@ -356,8 +348,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
 
       - name: Install Hex
         run: mix local.hex --force
@@ -366,9 +358,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: accrue/deps
-          key: ${{ runner.os }}-otp27-elixir118-phase18-tax-deps-${{ hashFiles('accrue/mix.lock') }}
+          key: ${{ runner.os }}-otp28-elixir119-phase18-tax-deps-${{ hashFiles('accrue/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp27-elixir118-phase18-tax-deps-
+            ${{ runner.os }}-otp28-elixir119-phase18-tax-deps-
 
       - name: Install accrue deps
         run: cd accrue && mix deps.get
@@ -388,8 +380,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
 
       - name: Install Hex
         run: mix local.hex --force
@@ -454,8 +446,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
 
       - name: Install Hex
         run: |
@@ -473,9 +465,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: examples/accrue_host/deps
-          key: ${{ runner.os }}-otp27-elixir118-accrue-host-deps-${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock') }}
+          key: ${{ runner.os }}-otp28-elixir119-accrue-host-deps-${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp27-elixir118-accrue-host-deps-
+            ${{ runner.os }}-otp28-elixir119-accrue-host-deps-
 
       - name: Install host deps
         run: cd examples/accrue_host && mix deps.get
@@ -576,8 +568,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
 
       - name: Install Hex
         run: |
@@ -597,9 +589,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: examples/accrue_host/deps
-          key: ${{ runner.os }}-otp27-elixir118-accrue-host-playwright-deps-${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock', 'accrue_portal/mix.lock') }}
+          key: ${{ runner.os }}-otp28-elixir119-accrue-host-playwright-deps-${{ hashFiles('examples/accrue_host/mix.lock', 'accrue/mix.lock', 'accrue_admin/mix.lock', 'accrue_portal/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp27-elixir118-accrue-host-playwright-deps-
+            ${{ runner.os }}-otp28-elixir119-accrue-host-playwright-deps-
 
       - name: Install host deps
         run: cd examples/accrue_host && mix deps.get
@@ -655,6 +647,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Ensure Docker proxy network exists
+        run: docker network create proxy || true
+
       - name: Build and boot Docker host app
         run: cd examples/accrue_host && docker compose up --build -d
 
@@ -707,7 +702,7 @@ jobs:
           # release-gate matrix `support: 'advisory'` cells.
           ANNOTATION_SWEEP_EXCLUDE: advisory
           # Non-actionable upstream-dependency compiler deprecation (Oban emits
-          # `first..last inside match is deprecated` on Elixir 1.18+). Accrue cannot fix
+          # `first..last inside match is deprecated` on Elixir 1.19+). Accrue cannot fix
           # third-party source; first-party warnings are still enforced via the gates'
           # own `--warnings-as-errors`. Drop this once Oban ships a fix and is bumped.
           ANNOTATION_SWEEP_IGNORE_MESSAGE: 'first\.\.last inside match is deprecated'
@@ -767,8 +762,8 @@ jobs:
       - name: Set up BEAM
         uses: erlef/setup-beam@v1
         with:
-          otp-version: '27.0'
-          elixir-version: '1.18.0'
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
 
       - name: Install Hex
         run: mix local.hex --force

@@ -84,8 +84,10 @@ defmodule AccrueAdmin.NavTest do
     items = Nav.items("/billing", "/billing", %{recovery: 5, developer: 3})
     billing_items = Enum.filter(items, &(&1.group == "Billing"))
     assert length(billing_items) > 0
+
     Enum.each(billing_items, fn item ->
-      assert item.collapsible == false, "Expected Billing item '#{item.label}' to have collapsible: false"
+      assert item.collapsible == false,
+             "Expected Billing item '#{item.label}' to have collapsible: false"
     end)
   end
 end

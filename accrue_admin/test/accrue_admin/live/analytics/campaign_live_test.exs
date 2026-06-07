@@ -155,7 +155,9 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       assert html =~ "No dunning history found"
     end
 
-    test "uses Detail.summary_card component (ax-summary-card) for the page hero (dim ②)", %{conn: conn} do
+    test "uses Detail.summary_card component (ax-summary-card) for the page hero (dim ②)", %{
+      conn: conn
+    } do
       subscription_id = Ecto.UUID.generate()
 
       {:ok, _view, html} =
@@ -170,6 +172,7 @@ defmodule AccrueAdmin.Live.Analytics.CampaignLiveTest do
       assert html =~ "ax-summary-card"
       # The subscription_id is shown as detail info inside the facts slot
       assert html =~ subscription_id
+
       # The page hero title must use ax-summary-title (Detail.summary_card renders h2.ax-summary-title)
       assert html =~ "ax-summary-title"
     end

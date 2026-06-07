@@ -180,7 +180,11 @@ defmodule AccrueAdmin.Queries.Subscriptions do
 
   defp status_dynamic("canceling") do
     now = Accrue.Clock.utc_now()
-    dynamic([s, _], s.status == :active and s.cancel_at_period_end == true and s.current_period_end > ^now)
+
+    dynamic(
+      [s, _],
+      s.status == :active and s.cancel_at_period_end == true and s.current_period_end > ^now
+    )
   end
 
   defp status_dynamic("canceled") do

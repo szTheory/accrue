@@ -581,20 +581,6 @@ defmodule AccrueAdmin.Live.CustomerLive do
     }
   end
 
-  defp tabs(customer, mount_path, counts, owner_scope) do
-    Enum.map(@tabs, fn tab ->
-      %{
-        id: tab,
-        label: tab_display_label(tab),
-        href:
-          scoped_mount_path(mount_path, "/customers/#{customer.id}", owner_scope, %{
-            "tab" => tab
-          }),
-        count: Map.get(counts, String.to_existing_atom(tab))
-      }
-    end)
-  end
-
   defp primary_tab_list(customer, counts, mount_path, owner_scope) do
     Enum.map(@primary_tabs, fn tab ->
       %{
@@ -806,6 +792,7 @@ defmodule AccrueAdmin.Live.CustomerLive do
             socket.assigns.customer
             |> Accrue.Billing.Customer.changeset(%{default_payment_method_id: nil})
             |> Repo.update()
+
             # intentionally ignoring {:error, _changeset} — best effort
           end
 

@@ -8,7 +8,16 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   alias Accrue.Billing.{Query, Subscription}
   alias Accrue.Repo
   alias AccrueAdmin.BillingPresentation
-  alias AccrueAdmin.Components.{AppShell, Breadcrumbs, DataTable, FilterChipBar, FlashGroup, KpiCard}
+
+  alias AccrueAdmin.Components.{
+    AppShell,
+    Breadcrumbs,
+    DataTable,
+    FilterChipBar,
+    FlashGroup,
+    KpiCard
+  }
+
   alias AccrueAdmin.Copy
   alias AccrueAdmin.Queries.Subscriptions
 
@@ -49,7 +58,9 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
   def handle_params(params, _uri, socket) when map_size(params) == 0 do
     if connected?(socket) do
       default = build_default_params(socket.assigns[:current_owner_scope], @default_queue_status)
-      {:noreply, push_patch(socket, to: socket.assigns.table_path <> "?" <> URI.encode_query(default))}
+
+      {:noreply,
+       push_patch(socket, to: socket.assigns.table_path <> "?" <> URI.encode_query(default))}
     else
       {:noreply, assign(socket, :params, params)}
     end

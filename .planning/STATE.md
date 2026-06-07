@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.51
 milestone_name: Admin UI Depth Pass
 status: idle
-last_updated: "2026-06-05T12:23:00.000Z"
-last_activity: 2026-06-05
+last_updated: "2026-06-07T03:33:15.000Z"
+last_activity: 2026-06-07
 progress:
   total_phases: 6
   completed_phases: 6
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 
 Milestone: v1.51 Admin UI: Depth Pass — SHIPPED & ARCHIVED 2026-06-04 (Phases 174–179, 33/33 plans). Phase dirs in `milestones/v1.51-phases/`.
 Status: Idle — between milestones.
-Last activity: 2026-06-05 - Bumped rendro dep to ~> 1.0 (1.0.0) across accrue/accrue_admin/accrue_portal locks (host stays on 0.3.0 per published accrue 1.4.0 floor); compile clean, 63 PDF/renderer tests green. Commit 6fdd0059.
+Last activity: 2026-06-07 - Billing schema-prefix rework committed and pushed at 0dd7dada; repo hygiene pass aligned CI/package support to Elixir 1.19 + OTP 28, cleaned admin formatting drift, and kept GSD idle with no active milestone/worktree blockers.
 
 ## Post-v1.48 Pause Rule
 

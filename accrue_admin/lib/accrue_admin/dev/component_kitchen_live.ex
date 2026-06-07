@@ -16,6 +16,7 @@ if Mix.env() != :prod do
       StatusBadge,
       Tabs
     }
+
     alias AccrueAdmin.Dev.ComponentRegistry
 
     @impl true

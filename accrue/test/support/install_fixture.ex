@@ -32,7 +32,7 @@ defmodule Accrue.Test.InstallFixture do
         [
           app: :my_app,
           version: "0.1.0",
-          elixir: "~> 1.17",
+          elixir: "~> 1.19",
           deps: deps()
         ]
       end
