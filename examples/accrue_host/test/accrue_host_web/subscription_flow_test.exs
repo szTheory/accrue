@@ -25,7 +25,7 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     home_html = html_response(home_conn, 200)
 
     assert home_html =~ ~p"/app/billing"
-    assert home_html =~ "Go to billing"
+    assert home_html =~ "Workspace billing"
 
     assert Repo.one(
              from(customer in Customer,
@@ -36,9 +36,9 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
 
     {:ok, view, html} = live(conn, ~p"/app/billing")
 
-    assert html =~ "Active organization"
-    assert html =~ "Start organization subscription"
-    assert html =~ "price_basic"
+    assert html =~ "Active workspace"
+    assert html =~ "Choose Launch"
+    assert html =~ "First paid cohort"
 
     view
     |> form("#tax-location-form", %{
@@ -57,7 +57,7 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     start_log =
       capture_log(fn ->
         view
-        |> element("[data-plan-id='price_basic'] button", "Start organization subscription")
+        |> element("[data-plan-id='price_basic'] button", "Choose Launch")
         |> render_click()
       end)
 
@@ -81,14 +81,13 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     assert item.price_id == "price_basic"
 
     assert render(view) =~ "Current subscription"
-    assert render(view) =~ "price_basic"
+    assert render(view) =~ "Launch"
 
     view
-    |> element("button", "Cancel now for this organization")
+    |> element("button", "Cancel workspace subscription")
     |> render_click()
 
-    assert render(view) =~
-             "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
+    assert render(view) =~ "Cancel now for this workspace only. Access can end immediately."
 
     cancel_log =
       capture_log(fn ->
@@ -104,7 +103,7 @@ defmodule AccrueHostWeb.SubscriptionFlowTest do
     assert Subscription.canceled?(canceled_subscription) or
              Subscription.canceling?(canceled_subscription)
 
-    assert render(view) =~ "Subscription canceled now. Organization access may end immediately."
+    assert render(view) =~ "Subscription canceled now. Workspace access may end immediately."
   end
 
   defp latest_subscription!(%Customer{id: customer_id}) do

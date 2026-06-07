@@ -34,14 +34,14 @@ defmodule AccrueHostWeb.DevBanner do
     Logger.info("""
 
     ==============================================================================
-    Accrue admin-UI demo is up:
+    CohortFlow example app is up:
 
       http://localhost:4000
 
     Key routes:
       /admin                  mounted Accrue Admin UI
-      /billing                mounted billing portal
-      /app/billing            host billing screen
+      /billing                CohortFlow customer billing portal
+      /app/billing            CohortFlow workspace billing
       /app/reports/advanced   entitlement-gated reports
       /users/log-in           sign in
       /dev/mailbox            sent-email preview
@@ -51,11 +51,11 @@ defmodule AccrueHostWeb.DevBanner do
         admin@example.com        billing_admin, no subscription — /admin only
 
       CUSTOMERS (tenant-facing /app/billing + /billing portal — NOT admin):
-        healthy@example.com      clean, subscribed (no dunning banner)
-        past-due@example.com     past_due, dunning campaign active
+        healthy@example.com      Northstar Academy, subscribed
+        past-due@example.com     Summit Workshop, recovery state
         canceled@example.com     canceled subscription
-        enterprise@example.com   premium plan + JPY invoice showcase
-        trialing@example.com     trialing subscription
+        enterprise@example.com   Atlas Learning Group, scale account
+        trialing@example.com     Pilot Cohort Studio, trialing subscription
     ==============================================================================
     """)
   end

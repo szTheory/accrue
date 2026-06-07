@@ -7,10 +7,17 @@ defmodule AccrueHostWeb.AdvancedReportsLive do
 
   def render(assigns) do
     ~H"""
-    <div>
-      <h1>Advanced Reports</h1>
-      <p>You have access to this premium feature.</p>
-    </div>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
+      <section class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+        <p class="text-sm font-semibold uppercase text-primary">
+          {AccrueHost.DemoBrand.product_name()} reports
+        </p>
+        <h1 class="mt-2 text-3xl font-semibold">Cohort performance</h1>
+        <p class="mt-3 max-w-2xl text-sm leading-6 text-base-content/65">
+          This workspace has access to advanced cohort reporting through its active plan.
+        </p>
+      </section>
+    </Layouts.app>
     """
   end
 end

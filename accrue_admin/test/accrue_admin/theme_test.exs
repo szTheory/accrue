@@ -1,7 +1,28 @@
 defmodule AccrueAdmin.ThemeTest do
-  use AccrueAdmin.ConnCase, async: true
+  use AccrueAdmin.ConnCase, async: false
 
   import Phoenix.LiveViewTest
+
+  setup do
+    branding = Application.get_env(:accrue, :branding)
+    admin_branding = Application.get_env(:accrue, :admin_branding)
+
+    on_exit(fn ->
+      if is_nil(branding) do
+        Application.delete_env(:accrue, :branding)
+      else
+        Application.put_env(:accrue, :branding, branding)
+      end
+
+      if is_nil(admin_branding) do
+        Application.delete_env(:accrue, :admin_branding)
+      else
+        Application.put_env(:accrue, :admin_branding, admin_branding)
+      end
+    end)
+
+    :ok
+  end
 
   test "brand plug sanitizes theme cookie and resolves runtime brand values" do
     Application.put_env(:accrue, :branding,
@@ -22,6 +43,28 @@ defmodule AccrueAdmin.ThemeTest do
     assert conn.assigns.accrue_admin_brand.logo_url == "https://example.test/logo.svg"
     assert conn.assigns.accrue_admin_brand.accent_hex == "#5D79F6"
     assert conn.assigns.accrue_admin_brand.accent_contrast_hex == "#FFFFFF"
+  end
+
+  test "brand plug can keep admin chrome separate from customer billing branding" do
+    Application.put_env(:accrue, :branding,
+      business_name: "CohortFlow",
+      from_email: "billing@cohortflow.test",
+      support_email: "support@cohortflow.test",
+      accent_color: "#26785F"
+    )
+
+    Application.put_env(:accrue, :admin_branding,
+      app_name: "Accrue Admin",
+      accent_color: "#5D79F6"
+    )
+
+    conn =
+      build_conn()
+      |> AccrueAdmin.BrandPlug.call([])
+
+    assert conn.assigns.accrue_admin_brand.app_name == "Accrue Admin"
+    assert conn.assigns.accrue_admin_brand.logo_url == nil
+    assert conn.assigns.accrue_admin_brand.accent_hex == "#5D79F6"
   end
 
   test "router session includes theme, brand, nonce, and brand stylesheet path" do

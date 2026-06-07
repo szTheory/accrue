@@ -24,7 +24,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
     %{owner: owner, organization: organization, outsider_org: outsider_org}
   end
 
-  test "owner can start organization billing for the active organization only", %{
+  test "owner can start workspace billing for the active workspace only", %{
     conn: conn,
     owner: owner,
     organization: organization,
@@ -34,13 +34,13 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
 
     {:ok, view, html} = live(conn, ~p"/app/billing")
 
-    assert html =~ "Active organization"
+    assert html =~ "Active workspace"
     assert html =~ organization.name
-    assert html =~ "Billing actions apply to the active organization only."
-    assert html =~ "No organization billing activity yet"
+    assert html =~ "Plan changes and payment actions apply to this workspace only."
+    assert html =~ "No workspace subscription yet"
 
     assert html =~
-             "Billing records appear after an organization starts a subscription or a webhook is processed. Start the organization subscription or review webhook activity for this organization."
+             "Choose a plan to start billing for this cohort workspace."
 
     html =
       render_click(view, "start_subscription", %{
@@ -50,7 +50,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       })
 
     refute html =~
-             "We couldn't complete that billing action for the active organization. Check organization access, billing setup, or webhook processing, then try again."
+             "We couldn't complete that billing action for the active workspace. Check access, billing setup, or payment state, then try again."
 
     customer =
       Repo.one!(
@@ -85,7 +85,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       |> log_in_user(owner)
       |> live(~p"/app/billing")
 
-    assert html =~ "Select an active organization before managing billing."
+    assert html =~ "Select an active workspace before managing billing."
 
     html =
       render_click(view, "start_subscription", %{
@@ -94,7 +94,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
         "operation_id" => "missing-org"
       })
 
-    assert html =~ "Select an active organization before managing billing."
+    assert html =~ "Select an active workspace before managing billing."
 
     assert organization_customer_count() == customer_count_before
     assert organization_subscription_count() == subscription_count_before
@@ -121,7 +121,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       |> log_in_user(member, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    assert html =~ "Billing is managed by organization admins."
+    assert html =~ "Billing is managed by workspace admins."
     assert html =~ "you can&#39;t change it."
 
     html =
@@ -131,10 +131,10 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
         "operation_id" => "member-blocked"
       })
 
-    assert html =~ "Billing is managed by organization admins."
+    assert html =~ "Billing is managed by workspace admins."
     assert html =~ "you can&#39;t change it."
 
-    assert render(view) =~ "Billing is managed by organization admins."
+    assert render(view) =~ "Billing is managed by workspace admins."
     assert render(view) =~ "you can&#39;t change it."
 
     assert organization_customer_count() == customer_count_before
@@ -170,7 +170,7 @@ defmodule AccrueHostWeb.OrgBillingLiveTest do
       })
 
     refute html =~
-             "We couldn't complete that billing action for the active organization. Check organization access, billing setup, or webhook processing, then try again."
+             "We couldn't complete that billing action for the active workspace. Check access, billing setup, or payment state, then try again."
 
     customer =
       Repo.one!(

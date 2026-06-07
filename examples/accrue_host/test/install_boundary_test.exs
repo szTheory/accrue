@@ -9,7 +9,7 @@ defmodule AccrueHost.InstallBoundaryTest do
   @runtime_path Path.join(@host_root, "config/runtime.exs")
   @webhook_route ~r/accrue_webhook\s*\(?\s*"\/stripe",\s*:stripe\s*\)?/
   @admin_mount ~r/accrue_admin\s*\(?\s*"\/admin",\s*session_keys:\s*\[:user_token\],\s*allow_live_reload:\s*false\s*\)?/
-  @portal_mount ~r/accrue_portal\s*\(?\s*"\/billing",\s*session_keys:\s*\[:user_token\]\s*\)?/
+  @portal_mount ~r/accrue_portal\s*\(?\s*"\/billing",\s*session_keys:\s*\[:user_token\],\s*login_path:\s*"\/users\/log-in"\s*\)?/
 
   test "installer-generated billing facade stays at the public boundary" do
     billing = File.read!(@billing_path)

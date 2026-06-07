@@ -54,7 +54,7 @@ defmodule AccruePortal.AuthHookTest do
     conn = Plug.Test.init_test_session(conn, %{"user_token" => "customer-token"})
 
     assert {:ok, _view, html} = live(conn, "/billing")
-    assert html =~ "Billing portal"
+    assert html =~ AccruePortal.Copy.home_heading()
 
     assert {:ok, %Customer{} = customer} = Billing.customer(user)
     assert customer.owner_type == "TestUser"
@@ -66,7 +66,7 @@ defmodule AccruePortal.AuthHookTest do
 
     session = %{
       "user_token" => "customer-token",
-      "accrue_portal" => %{"mount_path" => "/billing"}
+      "accrue_portal" => %{"mount_path" => "/billing", "login_path" => "/users/log-in"}
     }
 
     socket = %Phoenix.LiveView.Socket{}
@@ -84,6 +84,13 @@ defmodule AccruePortal.AuthHookTest do
   end
 
   test "unauthenticated access redirects before render", %{conn: conn} do
-    assert {:error, {:redirect, %{to: "/billing"}}} = live(conn, "/billing")
+    assert {:error, {:redirect, %{to: "/users/log-in"}}} = live(conn, "/billing")
+  end
+
+  test "unauthenticated initial GET stores return path before login redirect", %{conn: conn} do
+    conn = get(conn, "/billing")
+
+    assert redirected_to(conn) == "/users/log-in"
+    assert get_session(conn, :user_return_to) == "/billing"
   end
 end

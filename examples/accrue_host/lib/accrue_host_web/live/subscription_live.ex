@@ -11,27 +11,27 @@ defmodule AccrueHostWeb.SubscriptionLive do
   alias AccrueHost.Billing.Plans
   alias AccrueHost.Repo
 
-  @active_organization_label "Active organization"
-  @active_organization_helper "Billing actions apply to the active organization only."
-  @empty_state_heading "No organization billing activity yet"
-  @empty_state_body "Billing records appear after an organization starts a subscription or a webhook is processed. Start the organization subscription or review webhook activity for this organization."
-  @error_copy "We couldn't complete that billing action for the active organization. Check organization access, billing setup, or webhook processing, then try again."
-  @cancel_copy "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
-  @cancel_heading "Need to stop renewal?"
-  @cancel_body "Default customer self-serve guidance should prefer cancel renewal at period end. This example host still makes the immediate path explicit instead of hiding it behind a generic cancel label, and any softer Braintree end-of-term policy stays host-owned."
-  @cancel_cta "Cancel now for this organization"
-  @cancel_keep_cta "Keep organization subscription"
+  @active_organization_label "Active workspace"
+  @active_organization_helper "Plan changes and payment actions apply to this workspace only."
+  @empty_state_heading "No workspace subscription yet"
+  @empty_state_body "Choose a plan to start billing for this cohort workspace. Subscription and invoice records will appear here after checkout or webhook updates."
+  @error_copy "We couldn't complete that billing action for the active workspace. Check access, billing setup, or payment state, then try again."
+  @cancel_copy "Cancel now for this workspace only. Access can end immediately."
+  @cancel_heading "Need to stop access?"
+  @cancel_body "Use immediate cancellation when the workspace should stop billing and access right away."
+  @cancel_cta "Cancel workspace subscription"
+  @cancel_keep_cta "Keep subscription"
   @tax_location_repair_copy "Please update customer address or shipping before enabling automatic tax."
-  @tax_location_success_copy "Tax location saved. Start the subscription again when you're ready."
-  @member_denial_copy "Billing is managed by organization admins. You can review the current billing state, but you can't change it."
-  @no_active_organization_copy "Select an active organization before managing billing."
-  @start_subscription_copy "Start organization subscription"
+  @tax_location_success_copy "Tax location saved. Choose a plan again when you're ready."
+  @member_denial_copy "Billing is managed by workspace admins. You can review the current billing state, but you can't change it."
+  @no_active_organization_copy "Select an active workspace before managing billing."
+  @start_subscription_copy "Choose plan"
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Billing")
+     |> assign(:page_title, "Workspace billing")
      |> assign(:confirm_cancel, false)
      |> load_state()}
   end
@@ -169,7 +169,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
              socket
              |> put_flash(
                :info,
-               "Subscription canceled now. Organization access may end immediately."
+               "Subscription canceled now. Workspace access may end immediately."
              )
              |> assign(:confirm_cancel, false)
              |> load_state()}
@@ -193,7 +193,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
     # Meter events use value:; quantity: belongs to subscription/invoice line items.
     case Billing.report_usage_for_scope(socket.assigns.current_scope, "api_calls", value: 1) do
       {:ok, _event} ->
-        {:noreply, put_flash(socket, :info, "Usage reported: 1 API call recorded.")}
+        {:noreply, put_flash(socket, :info, "Learner activity recorded for this period.")}
 
       {:error, :no_active_organization} ->
         {:noreply, put_flash(socket, :error, @no_active_organization_copy)}
@@ -207,8 +207,6 @@ defmodule AccrueHostWeb.SubscriptionLive do
   end
 
   def handle_event("create_checkout_session", _params, socket) do
-    # Demonstrating create_checkout_session facade directly for the Pro plan.
-    # In a real app, this might be triggered from a pricing page.
     attrs = %{
       success_url: url(~p"/app/billing?checkout=success"),
       cancel_url: url(~p"/app/billing?checkout=cancel"),
@@ -234,333 +232,365 @@ defmodule AccrueHostWeb.SubscriptionLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <section style={page_style()}>
-        <div style={shell_style()}>
-          <div style={header_style()}>
-            <div>
-              <p style={eyebrow_style()}>Account billing</p>
-              <h1 style={heading_style()}>Choose a plan</h1>
-              <p style={body_style()}>
-                Billing for the signed-in host follows the active organization only.
-              </p>
-            </div>
-            <.link navigate={~p"/"} style={link_style()}>Back home</.link>
+      <section class="mx-auto flex max-w-5xl flex-col gap-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-primary">
+              {AccrueHost.DemoBrand.product_name()} billing
+            </p>
+            <h1 class="mt-2 text-3xl font-semibold">Workspace billing</h1>
+            <p class="mt-2 max-w-3xl text-base leading-7 text-base-content/70">
+              Review the active cohort workspace, subscription status, usage, and payment recovery path.
+            </p>
+          </div>
+          <.link navigate={~p"/"} class="btn btn-ghost btn-sm self-start rounded-lg sm:self-auto">
+            Back home
+          </.link>
+        </div>
+
+        <section class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+          <div>
+            <p class="text-sm font-semibold text-base-content/60">{@active_organization_label}</p>
+            <h2 class="mt-1 text-2xl font-semibold">{active_organization_name(@current_scope)}</h2>
+            <p class="mt-1 text-base leading-7 text-base-content/65">
+              {@active_organization_helper}
+            </p>
           </div>
 
-          <section style={card_style()}>
-            <div style={section_header_style()}>
+          <div
+            :if={@switchable_organizations != []}
+            class="flex flex-wrap items-center gap-2"
+            data-testid="organization-switcher"
+          >
+            <p class="text-sm font-semibold text-base-content/60">Switch organization</p>
+            <%= for org <- @switchable_organizations do %>
+              <form action={~p"/app/organization-scope"} method="post" class="inline">
+                <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                <input type="hidden" name="organization_slug" value={org.slug} />
+                <button
+                  type="submit"
+                  class="btn btn-outline btn-sm rounded-lg"
+                  data-organization-slug={org.slug}
+                >
+                  {org.name}
+                </button>
+              </form>
+            <% end %>
+          </div>
+
+          <p :if={@access_message} class="text-sm font-semibold text-warning">
+            {@access_message}
+          </p>
+        </section>
+
+        <%= if @subscription do %>
+          <section class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+            <div>
+              <h2 class="text-2xl font-semibold">Current subscription</h2>
+              <p class="mt-1 text-base leading-7 text-base-content/65">
+                This workspace is subscribed and can keep cohort access active.
+              </p>
+            </div>
+
+            <dl class="grid gap-4 sm:grid-cols-3">
               <div>
-                <p style={label_style()}>{@active_organization_label}</p>
-                <h2 style={section_heading_style()}>{active_organization_name(@current_scope)}</h2>
-                <p style={muted_body_style()}>{@active_organization_helper}</p>
+                <dt class="text-sm font-semibold text-base-content/60">Plan</dt>
+                <dd class="mt-1 text-base">{@subscription_plan_label}</dd>
               </div>
-            </div>
-
-            <div
-              :if={@switchable_organizations != []}
-              style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;"
-              data-testid="organization-switcher"
-            >
-              <p style={label_style()}>Switch organization</p>
-              <%= for org <- @switchable_organizations do %>
-                <form action={~p"/app/organization-scope"} method="post" style="display:inline;">
-                  <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-                  <input type="hidden" name="organization_slug" value={org.slug} />
-                  <button
-                    type="submit"
-                    style={secondary_button_style()}
-                    data-organization-slug={org.slug}
-                  >
-                    {org.name}
-                  </button>
-                </form>
-              <% end %>
-            </div>
-
-            <p :if={@access_message} style={warning_copy_style()}>
-              {@access_message}
-            </p>
-          </section>
-
-          <%= if @subscription do %>
-            <section style={card_style()}>
-              <div style={section_header_style()}>
-                <div>
-                  <h2 style={section_heading_style()}>Current subscription</h2>
-                  <p style={muted_body_style()}>
-                    Organization billing state is resolved through <code style={code_style()}>AccrueHost.Billing</code>.
-                  </p>
-                </div>
+              <div>
+                <dt class="text-sm font-semibold text-base-content/60">Status</dt>
+                <dd class="mt-1 text-base">{humanize_status(@subscription.status)}</dd>
               </div>
+              <div>
+                <dt class="text-sm font-semibold text-base-content/60">Billing reference</dt>
+                <dd class="mt-1 break-all text-base">{@customer.id}</dd>
+              </div>
+            </dl>
 
-              <dl style={details_grid_style()}>
-                <div>
-                  <dt style={label_style()}>Plan</dt>
-                  <dd style={value_style()}>{@subscription_plan_label}</dd>
-                </div>
-                <div>
-                  <dt style={label_style()}>Status</dt>
-                  <dd style={value_style()}>{humanize_status(@subscription.status)}</dd>
-                </div>
-                <div>
-                  <dt style={label_style()}>Customer</dt>
-                  <dd style={value_style()}>{@customer.id}</dd>
-                </div>
-              </dl>
+            <div :if={!Subscription.canceled?(@subscription)} class="border-t border-base-300 pt-4">
+              <h3 class="text-xl font-semibold">{@cancel_heading}</h3>
+              <p class="mt-1 text-base leading-7 text-base-content/65">{@cancel_body}</p>
 
-              <div :if={!Subscription.canceled?(@subscription)} style={danger_zone_style()}>
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                  <h3 style={section_heading_style()}>{@cancel_heading}</h3>
-                  <p style={muted_body_style()}>{@cancel_body}</p>
-                </div>
-                <%= if @confirm_cancel do %>
-                  <p style={warning_copy_style()}>{@cancel_copy}</p>
-                  <div style={action_row_style()}>
-                    <button
-                      type="button"
-                      phx-click="confirm_cancel"
-                      phx-value-operation_id={@cancel_operation_id}
-                      style={destructive_button_style()}
-                      disabled={@billing_locked?}
-                    >
-                      Confirm cancellation
-                    </button>
-                    <button
-                      type="button"
-                      phx-click="dismiss_cancel"
-                      style={secondary_button_style()}
-                      disabled={@billing_locked?}
-                    >
-                      {@cancel_keep_cta}
-                    </button>
-                  </div>
-                <% else %>
+              <%= if @confirm_cancel do %>
+                <p class="mt-4 text-sm font-semibold text-warning">{@cancel_copy}</p>
+                <div class="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
-                    phx-click="request_cancel"
-                    style={secondary_button_style()}
+                    phx-click="confirm_cancel"
+                    phx-value-operation_id={@cancel_operation_id}
+                    class="btn btn-error rounded-lg"
                     disabled={@billing_locked?}
                   >
-                    {@cancel_cta}
+                    Confirm cancellation
                   </button>
-                <% end %>
-              </div>
-            </section>
-
-            <section style={card_style()} data-role="metered-usage-demo">
-              <div style={section_header_style()}>
-                <div>
-                  <h2 style={section_heading_style()}>Metered Usage Demo (PROOF-04)</h2>
-                  <p style={muted_body_style()}>
-                    Demonstrates <code style={code_style()}>Accrue.report_usage/3</code>. Report usage for an "api_calls" feature.
-                  </p>
-                </div>
-              </div>
-              <div style={action_row_style()}>
-                <button
-                  type="button"
-                  phx-click="simulate_api_call"
-                  style={secondary_button_style()}
-                  disabled={@billing_locked? || !@subscription}
-                >
-                  Simulate API Call
-                </button>
-              </div>
-            </section>
-          <% else %>
-            <section style={empty_state_style()}>
-              <h2 style={section_heading_style()}>{@empty_state_heading}</h2>
-              <p style={body_style()}>{@empty_state_body}</p>
-            </section>
-          <% end %>
-
-          <section style={card_style()} data-role="checkout-facade-demo">
-            <div style={section_header_style()}>
-              <div>
-                <h2 style={section_heading_style()}>Checkout Facade Demo (PROOF-05)</h2>
-                <p style={muted_body_style()}>
-                  Demonstrates
-                  <code style={code_style()}>Accrue.Billing.create_checkout_session/2</code>
-                  via the host facade.
-                </p>
-              </div>
-            </div>
-            <div style={action_row_style()}>
-              <button
-                type="button"
-                phx-click="create_checkout_session"
-                style={secondary_button_style()}
-                disabled={@billing_locked?}
-              >
-                Create Checkout Session
-              </button>
-            </div>
-            <div :if={@checkout_url} style="margin-top:8px;">
-              <p style={label_style()}>Generated Checkout URL:</p>
-              <a href={@checkout_url} target="_blank" style={link_style()} data-testid="checkout-url">
-                {@checkout_url}
-              </a>
-            </div>
-          </section>
-
-          <section style={card_style()} data-role="recovery-wiring-demo">
-            <div style={section_header_style()}>
-              <div>
-                <h2 style={section_heading_style()}>Recovery Wiring Demo (PROOF-06)</h2>
-                <p style={muted_body_style()}>
-                  Demonstrates active recovery jobs.
-                  <code style={code_style()}>Accrue.Jobs.DetectExpiringCards</code>
-                  and <code style={code_style()}>Accrue.Jobs.MeterEventsReconciler</code>
-                  are wired into the host crontab.
-                </p>
-                <p style={muted_body_style()} style="margin-top:8px;">
-                  These jobs run daily/minutely to detect payment methods nearing expiry, reconcile metered usage gaps, and ensure billing state stays consistent even if webhooks are missed.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section style={card_style()}>
-            <div style={section_header_style()}>
-              <div>
-                <p style={eyebrow_style()}>Tax location</p>
-                <h2 style={section_heading_style()}>Repair automatic tax input</h2>
-                <p style={muted_body_style()}>
-                  Save the customer billing address before starting a tax-enabled organization subscription.
-                </p>
-                <p style={muted_body_style()}>
-                  {@tax_location_repair_copy}
-                </p>
-              </div>
-            </div>
-
-            <div :if={@tax_location_error} style="display:flex;flex-direction:column;gap:8px;">
-              <h3 style={section_heading_style()} data-testid="e2e-tax-invalid-headline">
-                Tax location needs attention
-              </h3>
-              <p style={muted_body_style()} data-testid="e2e-tax-invalid-body">
-                Update the customer tax location before tax-enabled charges can proceed.
-              </p>
-              <p style={warning_copy_style()}>{@tax_location_error}</p>
-            </div>
-
-            <p :if={tax_location_status(@subscription)} style={muted_body_style()}>
-              {tax_location_status(@subscription)}
-            </p>
-
-            <.form
-              for={%{}}
-              as={:tax_location}
-              id="tax-location-form"
-              phx-submit="update_tax_location"
-              style={tax_location_form_style()}
-            >
-              <input type="hidden" name="organization_id" value="ignored-client-org" />
-              <label style={field_label_style()}>
-                Street address
-                <input
-                  type="text"
-                  name="tax_location[line1]"
-                  value={@tax_location_form.line1}
-                  style={input_style()}
-                />
-              </label>
-
-              <label style={field_label_style()}>
-                City
-                <input
-                  type="text"
-                  name="tax_location[city]"
-                  value={@tax_location_form.city}
-                  style={input_style()}
-                />
-              </label>
-
-              <label style={field_label_style()}>
-                State
-                <input
-                  type="text"
-                  name="tax_location[state]"
-                  value={@tax_location_form.state}
-                  style={input_style()}
-                />
-              </label>
-
-              <label style={field_label_style()}>
-                Postal code
-                <input
-                  type="text"
-                  name="tax_location[postal_code]"
-                  value={@tax_location_form.postal_code}
-                  style={input_style()}
-                />
-              </label>
-
-              <label style={field_label_style()}>
-                Country
-                <input
-                  type="text"
-                  name="tax_location[country]"
-                  value={@tax_location_form.country}
-                  style={input_style()}
-                />
-              </label>
-
-              <button type="submit" style={secondary_button_style()} disabled={@billing_locked?}>
-                Save tax location
-              </button>
-            </.form>
-          </section>
-
-          <section style={plans_grid_style()}>
-            <article :for={plan <- @plans} data-plan-id={plan.id} style={card_style()}>
-              <div style={plan_header_style()}>
-                <div>
-                  <h2 style={section_heading_style()}>{plan.label}</h2>
-                  <p style={muted_body_style()}>{plan.id}</p>
-                </div>
-                <span style={pill_style(plan.id == active_plan_id(@subscription))}>
-                  {plan_badge(plan.id, @subscription)}
-                </span>
-              </div>
-
-              <%= if !@billing_locked? && plan.id != active_plan_id(@subscription) && @braintree_client_token do %>
-                <div
-                  id={"braintree-container-#{plan.id}"}
-                  phx-hook="BraintreeVaultAcquisition"
-                  phx-update="ignore"
-                  data-client-token={@braintree_client_token}
-                  data-plan-id={plan.id}
-                  data-operation-id={Map.fetch!(@plan_operation_ids, plan.id)}
-                >
-                  <div id="braintree-dropin-container"></div>
                   <button
-                    id="braintree-submit-button"
                     type="button"
-                    style={primary_button_style(false)}
+                    phx-click="dismiss_cancel"
+                    class="btn btn-outline rounded-lg"
+                    disabled={@billing_locked?}
                   >
-                    {@start_subscription_copy}
+                    {@cancel_keep_cta}
                   </button>
                 </div>
               <% else %>
                 <button
                   type="button"
-                  phx-click="start_subscription"
-                  phx-value-plan={plan.id}
-                  phx-value-operation_id={Map.fetch!(@plan_operation_ids, plan.id)}
-                  style={primary_button_style(plan.id == active_plan_id(@subscription))}
-                  disabled={
-                    @billing_locked? ||
-                      (plan.id == active_plan_id(@subscription) &&
-                         !Subscription.canceled?(@subscription))
-                  }
+                  phx-click="request_cancel"
+                  class="btn btn-outline mt-4 w-full rounded-lg"
+                  disabled={@billing_locked?}
                 >
-                  {@start_subscription_copy}
+                  {@cancel_cta}
                 </button>
               <% end %>
-            </article>
+            </div>
           </section>
-        </div>
+
+          <section
+            class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm"
+            data-role="metered-usage-demo"
+          >
+            <div>
+              <h2 class="text-2xl font-semibold">Usage this period</h2>
+              <p class="mt-1 text-base leading-7 text-base-content/65">
+                Record learner activity for usage-based capacity on larger cohort programs.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                phx-click="simulate_api_call"
+                class="btn btn-outline rounded-lg"
+                disabled={@billing_locked? || !@subscription}
+              >
+                Record learner activity
+              </button>
+            </div>
+          </section>
+        <% else %>
+          <section class="flex flex-col gap-4 rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center shadow-sm">
+            <h2 class="text-2xl font-semibold">{@empty_state_heading}</h2>
+            <p class="text-base leading-7 text-base-content/70">{@empty_state_body}</p>
+          </section>
+        <% end %>
+
+        <section
+          class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm"
+          data-role="checkout-facade-demo"
+        >
+          <div>
+            <h2 class="text-2xl font-semibold">Checkout handoff</h2>
+            <p class="mt-1 text-base leading-7 text-base-content/65">
+              Create a hosted checkout link for the Studio plan when a buyer needs to complete payment outside this screen.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              phx-click="create_checkout_session"
+              class="btn btn-outline rounded-lg"
+              disabled={@billing_locked?}
+            >
+              Create checkout link
+            </button>
+          </div>
+          <div :if={@checkout_url} class="space-y-1">
+            <p class="text-sm font-semibold text-base-content/60">Checkout link</p>
+            <a
+              href={@checkout_url}
+              target="_blank"
+              class="break-all text-sm font-semibold text-primary hover:underline"
+              data-testid="checkout-url"
+            >
+              {@checkout_url}
+            </a>
+          </div>
+        </section>
+
+        <section
+          class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm"
+          data-role="recovery-wiring-demo"
+        >
+          <h2 class="text-2xl font-semibold">Payment recovery</h2>
+          <div class="mt-1 space-y-1 text-base leading-7 text-base-content/65">
+            <p>
+              CohortFlow keeps recovery checks active for expiring cards, missed usage events, and payment states that need follow-up.
+            </p>
+            <p>
+              Operators can review the underlying billing events and recovery analytics in Accrue Admin.
+            </p>
+          </div>
+        </section>
+
+        <section class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+          <div>
+            <p class="text-sm font-semibold text-primary">Tax location</p>
+            <h2 class="mt-1 text-2xl font-semibold">Repair automatic tax input</h2>
+            <div class="mt-1 space-y-1 text-base leading-7 text-base-content/65">
+              <p>Save the workspace billing address before starting a tax-enabled subscription.</p>
+              <p>{@tax_location_repair_copy}</p>
+            </div>
+          </div>
+
+          <div :if={@tax_location_error} class="flex flex-col gap-2">
+            <h3 class="text-xl font-semibold" data-testid="e2e-tax-invalid-headline">
+              Tax location needs attention
+            </h3>
+            <p class="text-base leading-7 text-base-content/65" data-testid="e2e-tax-invalid-body">
+              Update the customer tax location before tax-enabled charges can proceed.
+            </p>
+            <p class="text-sm font-semibold text-warning">{@tax_location_error}</p>
+          </div>
+
+          <p :if={tax_location_status(@subscription)} class="text-base leading-7 text-base-content/65">
+            {tax_location_status(@subscription)}
+          </p>
+
+          <.form
+            for={%{}}
+            as={:tax_location}
+            id="tax-location-form"
+            phx-submit="update_tax_location"
+            class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <input type="hidden" name="organization_id" value="ignored-client-org" />
+            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
+              Street address
+              <input
+                type="text"
+                name="tax_location[line1]"
+                value={@tax_location_form.line1}
+                class="input input-bordered w-full rounded-lg"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
+              City
+              <input
+                type="text"
+                name="tax_location[city]"
+                value={@tax_location_form.city}
+                class="input input-bordered w-full rounded-lg"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
+              State
+              <input
+                type="text"
+                name="tax_location[state]"
+                value={@tax_location_form.state}
+                class="input input-bordered w-full rounded-lg"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
+              Postal code
+              <input
+                type="text"
+                name="tax_location[postal_code]"
+                value={@tax_location_form.postal_code}
+                class="input input-bordered w-full rounded-lg"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1 text-sm font-semibold text-base-content/70">
+              Country
+              <input
+                type="text"
+                name="tax_location[country]"
+                value={@tax_location_form.country}
+                class="input input-bordered w-full rounded-lg"
+              />
+            </label>
+
+            <button
+              type="submit"
+              class="btn btn-outline self-end rounded-lg"
+              disabled={@billing_locked?}
+            >
+              Save tax location
+            </button>
+          </.form>
+        </section>
+
+        <section class="grid gap-4 lg:grid-cols-3">
+          <article
+            :for={plan <- @plans}
+            data-plan-id={plan.id}
+            class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-sm font-semibold uppercase text-base-content/60">{plan.eyebrow}</p>
+                <h2 class="mt-1 text-2xl font-semibold">{plan.label}</h2>
+                <p class="mt-1 text-base leading-7 text-base-content/65">{plan.summary}</p>
+              </div>
+              <span class={[
+                "shrink-0 rounded-md px-2 py-1 text-xs font-semibold",
+                plan.id == active_plan_id(@subscription) &&
+                  "bg-primary/15 text-primary",
+                plan.id != active_plan_id(@subscription) &&
+                  "bg-base-200 text-base-content/70"
+              ]}>
+                {plan_badge(plan.id, @subscription)}
+              </span>
+            </div>
+
+            <p class="text-3xl font-bold">{plan_price(plan)}</p>
+
+            <ul class="flex flex-1 flex-col gap-2 text-sm leading-6 text-base-content/75">
+              <li :for={feature <- plan.features} class="flex items-start gap-2">
+                <span
+                  aria-hidden="true"
+                  class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold text-primary"
+                >
+                  &check;
+                </span>
+                <span>{feature}</span>
+              </li>
+            </ul>
+
+            <%= if !@billing_locked? && plan.id != active_plan_id(@subscription) && @braintree_client_token do %>
+              <div
+                id={"braintree-container-#{plan.id}"}
+                phx-hook="BraintreeVaultAcquisition"
+                phx-update="ignore"
+                data-client-token={@braintree_client_token}
+                data-plan-id={plan.id}
+                data-operation-id={Map.fetch!(@plan_operation_ids, plan.id)}
+                class="mt-auto"
+              >
+                <div id="braintree-dropin-container"></div>
+                <button
+                  id="braintree-submit-button"
+                  type="button"
+                  class="btn btn-primary w-full rounded-lg"
+                >
+                  Choose {plan.label}
+                </button>
+              </div>
+            <% else %>
+              <button
+                type="button"
+                phx-click="start_subscription"
+                phx-value-plan={plan.id}
+                phx-value-operation_id={Map.fetch!(@plan_operation_ids, plan.id)}
+                class={[
+                  "btn mt-auto w-full rounded-lg",
+                  plan.id == active_plan_id(@subscription) && "btn-outline",
+                  plan.id != active_plan_id(@subscription) && "btn-primary"
+                ]}
+                disabled={
+                  @billing_locked? ||
+                    (plan.id == active_plan_id(@subscription) &&
+                       !Subscription.canceled?(@subscription))
+                }
+              >
+                Choose {plan.label}
+              </button>
+            <% end %>
+          </article>
+        </section>
       </section>
     </Layouts.app>
     """
@@ -646,7 +676,7 @@ defmodule AccrueHostWeb.SubscriptionLive do
   defp billing_locked?(_state), do: true
 
   defp active_organization_name(%{active_organization: %{name: name}}), do: name
-  defp active_organization_name(_scope), do: "No active organization selected"
+  defp active_organization_name(_scope), do: "No active workspace selected"
 
   defp active_plan_id(nil), do: nil
 
@@ -680,8 +710,24 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
     Plans.all()
     |> Enum.find_value(id, fn plan ->
-      if plan.id == id, do: "#{plan.label} (#{plan.id})"
+      if plan.id == id, do: plan.label
     end)
+  end
+
+  defp plan_price(%{unit_amount_minor: 0}), do: "Usage based"
+
+  defp plan_price(%{unit_amount_minor: cents}) when is_integer(cents) do
+    dollars = div(cents, 100)
+    remainder = rem(cents, 100)
+
+    amount =
+      if remainder == 0 do
+        "$#{dollars}"
+      else
+        "$#{dollars}.#{String.pad_leading(Integer.to_string(remainder), 2, "0")}"
+      end
+
+    amount <> "/mo"
   end
 
   defp plan_badge(_plan_id, nil), do: "Available"
@@ -748,124 +794,4 @@ defmodule AccrueHostWeb.SubscriptionLive do
 
   defp blank_to_nil(value) when value in [nil, ""], do: nil
   defp blank_to_nil(value), do: value
-
-  defp page_style do
-    "background:#FAFBFC;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;padding:32px 0;"
-  end
-
-  defp shell_style do
-    "margin:0 auto;max-width:880px;display:flex;flex-direction:column;gap:24px;"
-  end
-
-  defp header_style do
-    "display:flex;justify-content:space-between;align-items:flex-start;gap:16px;"
-  end
-
-  defp eyebrow_style do
-    "margin:0 0 8px;color:#2644C5;font-size:14px;font-weight:600;line-height:1.4;"
-  end
-
-  defp heading_style do
-    "margin:0 0 8px;color:#111418;font-size:28px;font-weight:600;line-height:1.2;"
-  end
-
-  defp body_style do
-    "margin:0;color:#24303B;font-size:16px;font-weight:400;line-height:1.5;"
-  end
-
-  defp muted_body_style do
-    "margin:0;color:#5F6B76;font-size:16px;font-weight:400;line-height:1.5;"
-  end
-
-  defp card_style do
-    "background:#FFFFFF;border:1px solid #E9EEF2;border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:16px;"
-  end
-
-  defp empty_state_style do
-    "background:#FFFFFF;border:1px dashed #E9EEF2;border-radius:8px;padding:48px 24px;display:flex;flex-direction:column;gap:16px;"
-  end
-
-  defp section_header_style do
-    "display:flex;justify-content:space-between;align-items:flex-start;gap:16px;"
-  end
-
-  defp section_heading_style do
-    "margin:0;color:#111418;font-size:20px;font-weight:600;line-height:1.2;"
-  end
-
-  defp details_grid_style do
-    "display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:0;"
-  end
-
-  defp tax_location_form_style do
-    "display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end;"
-  end
-
-  defp label_style do
-    "margin:0 0 4px;color:#5F6B76;font-size:14px;font-weight:600;line-height:1.4;"
-  end
-
-  defp field_label_style do
-    "display:flex;flex-direction:column;gap:6px;margin:0;color:#24303B;font-size:14px;font-weight:600;line-height:1.4;"
-  end
-
-  defp value_style do
-    "margin:0;color:#111418;font-size:16px;font-weight:400;line-height:1.5;"
-  end
-
-  defp plans_grid_style do
-    "display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;"
-  end
-
-  defp plan_header_style do
-    "display:flex;justify-content:space-between;align-items:flex-start;gap:16px;"
-  end
-
-  defp link_style do
-    "color:#2644C5;font-size:14px;font-weight:600;line-height:1.4;text-decoration:none;padding:8px 0;"
-  end
-
-  defp input_style do
-    "border:1px solid #D3DCE4;border-radius:8px;padding:10px 12px;color:#111418;font-size:16px;line-height:1.4;background:#FFFFFF;"
-  end
-
-  defp code_style do
-    "font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;"
-  end
-
-  defp pill_style(true) do
-    "background:#EEF2FF;color:#2644C5;border-radius:8px;padding:4px 8px;font-size:14px;font-weight:600;line-height:1.4;"
-  end
-
-  defp pill_style(false) do
-    "background:#F3F5F7;color:#24303B;border-radius:8px;padding:4px 8px;font-size:14px;font-weight:600;line-height:1.4;"
-  end
-
-  defp action_row_style do
-    "display:flex;flex-wrap:wrap;gap:8px;"
-  end
-
-  defp danger_zone_style do
-    "display:flex;flex-direction:column;gap:16px;padding-top:8px;border-top:1px solid #E9EEF2;"
-  end
-
-  defp warning_copy_style do
-    "margin:0;color:#111418;font-size:14px;font-weight:600;line-height:1.4;"
-  end
-
-  defp primary_button_style(true) do
-    primary_button_style(false) <> "opacity:0.6;cursor:not-allowed;"
-  end
-
-  defp primary_button_style(false) do
-    "background:#2644C5;color:#FFFFFF;border:none;border-radius:8px;padding:12px 16px;font-size:16px;font-weight:600;line-height:1.5;cursor:pointer;"
-  end
-
-  defp secondary_button_style do
-    "background:#FFFFFF;color:#24303B;border:1px solid #E9EEF2;border-radius:8px;padding:12px 16px;font-size:16px;font-weight:600;line-height:1.5;cursor:pointer;"
-  end
-
-  defp destructive_button_style do
-    "background:#111418;color:#FFFFFF;border:none;border-radius:8px;padding:12px 16px;font-size:16px;font-weight:600;line-height:1.5;cursor:pointer;"
-  end
 end

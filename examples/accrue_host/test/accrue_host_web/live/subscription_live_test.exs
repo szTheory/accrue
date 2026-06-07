@@ -27,7 +27,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     %{user: user, organization: organization}
   end
 
-  test "demonstrates metered usage reporting (PROOF-04)", %{
+  test "records metered learner activity from the workspace billing screen", %{
     conn: conn,
     organization: organization,
     user: user
@@ -39,14 +39,14 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
       |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    assert html =~ "Metered Usage Demo"
-    assert html =~ "Simulate API Call"
+    assert html =~ "Usage this period"
+    assert html =~ "Record learner activity"
 
     view
-    |> element("button", "Simulate API Call")
+    |> element("button", "Record learner activity")
     |> render_click()
 
-    assert render(view) =~ "Usage reported: 1 API call recorded."
+    assert render(view) =~ "Learner activity recorded for this period."
 
     assert Repo.aggregate(MeterEvent, :count, :id) == 1
     event = Repo.one(MeterEvent)
@@ -54,7 +54,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert event.value == 1
   end
 
-  test "demonstrates checkout session creation (PROOF-05)", %{
+  test "creates a checkout handoff link from workspace billing", %{
     conn: conn,
     organization: organization,
     user: user
@@ -64,15 +64,15 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
       |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    assert html =~ "Checkout Facade Demo"
-    assert html =~ "Create Checkout Session"
+    assert html =~ "Checkout handoff"
+    assert html =~ "Create checkout link"
 
     view
-    |> element("button", "Create Checkout Session")
+    |> element("button", "Create checkout link")
     |> render_click()
 
     html = render(view)
-    assert html =~ "Generated Checkout URL"
+    assert html =~ "Checkout link"
     assert html =~ "https://checkout.stripe.test/c/pay/cs_fake_"
   end
 
@@ -144,7 +144,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     refute html =~ "We couldn't complete that billing action."
   end
 
-  test "organization billing copy references AccrueHost.Billing", %{
+  test "workspace billing copy stays customer-facing", %{
     conn: conn,
     organization: organization,
     user: user
@@ -156,8 +156,12 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
       |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    assert html =~ "Organization billing state"
-    assert html =~ "AccrueHost.Billing"
+    assert html =~ "Workspace billing"
+    assert html =~ "This workspace is subscribed"
+    assert html =~ "Launch"
+    refute html =~ "Organization billing state"
+    refute html =~ "AccrueHost.Billing"
+    refute html =~ "PROOF-"
   end
 
   test "host billing facade exposes preview-before-commit helpers for local plan changes", %{
@@ -178,7 +182,7 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
     assert Enum.any?(updated.subscription_items, &(&1.price_id == "price_pro"))
   end
 
-  test "organization billing renders explicit hard-stop cancellation copy instead of a generic cancel label",
+  test "workspace billing renders explicit immediate cancellation copy",
        %{
          conn: conn,
          organization: organization,
@@ -191,22 +195,18 @@ defmodule AccrueHostWeb.SubscriptionLiveTest do
       |> log_in_user(user, active_organization_id: organization.id)
       |> live(~p"/app/billing")
 
-    assert html =~ "Need to stop renewal?"
-    assert html =~ "Cancel now for this organization"
+    assert html =~ "Need to stop access?"
+    assert html =~ "Cancel workspace subscription"
 
     assert html =~
-             "Default customer self-serve guidance should prefer cancel renewal at period end."
-
-    assert html =~ "any softer Braintree end-of-term policy stays host-owned."
-    refute html =~ "Cancel organization subscription"
+             "Use immediate cancellation when the workspace should stop billing and access right away."
 
     html =
       view
       |> element("button[phx-click='request_cancel']")
       |> render_click()
 
-    assert html =~
-             "Cancel now for this organization only. This is the hard-stop path and can end access immediately."
+    assert html =~ "Cancel now for this workspace only. Access can end immediately."
   end
 
   defp cleanup_fake_billing_rows! do

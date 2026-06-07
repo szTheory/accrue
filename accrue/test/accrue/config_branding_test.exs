@@ -8,15 +8,22 @@ defmodule Accrue.ConfigBrandingTest do
   alias Accrue.Config
 
   setup do
-    # Snapshot + restore the :accrue :branding app env so per-test
+    # Snapshot + restore brand-related app env so per-test
     # manipulation doesn't bleed into other suites running in the same BEAM.
     branding = Application.get_env(:accrue, :branding)
+    admin_branding = Application.get_env(:accrue, :admin_branding)
 
     on_exit(fn ->
       if is_nil(branding) do
         Application.delete_env(:accrue, :branding)
       else
         Application.put_env(:accrue, :branding, branding)
+      end
+
+      if is_nil(admin_branding) do
+        Application.delete_env(:accrue, :admin_branding)
+      else
+        Application.put_env(:accrue, :admin_branding, admin_branding)
       end
     end)
 
@@ -68,6 +75,43 @@ defmodule Accrue.ConfigBrandingTest do
 
     test "reply_to_email default is nil" do
       assert Config.branding(:reply_to_email) == nil
+    end
+  end
+
+  describe "admin_branding/0 and admin_branding/1" do
+    test "falls back to customer billing branding when no admin override is configured" do
+      Application.put_env(:accrue, :branding,
+        business_name: "Acme Billing",
+        from_email: "billing@acme.test",
+        support_email: "support@acme.test",
+        logo_url: "https://example.test/logo.svg",
+        accent_color: "#5E9E84"
+      )
+
+      Application.delete_env(:accrue, :admin_branding)
+
+      assert Config.admin_branding(:app_name) == "Acme Billing"
+      assert Config.admin_branding(:logo_url) == "https://example.test/logo.svg"
+      assert Config.admin_branding(:accent_color) == "#5E9E84"
+    end
+
+    test "uses explicit admin branding without changing customer billing branding" do
+      Application.put_env(:accrue, :branding,
+        business_name: "CohortFlow",
+        from_email: "billing@cohortflow.test",
+        support_email: "support@cohortflow.test",
+        accent_color: "#26785F"
+      )
+
+      Application.put_env(:accrue, :admin_branding,
+        app_name: "Accrue Admin",
+        accent_color: "#5D79F6"
+      )
+
+      assert Config.branding(:business_name) == "CohortFlow"
+      assert Config.admin_branding(:app_name) == "Accrue Admin"
+      assert Config.admin_branding(:logo_url) == nil
+      assert Config.admin_branding(:accent_color) == "#5D79F6"
     end
   end
 
@@ -130,6 +174,17 @@ defmodule Accrue.ConfigBrandingTest do
         from_email: "noreply@example.test",
         support_email: "support@example.test",
         accent_color: "red"
+      )
+
+      assert_raise NimbleOptions.ValidationError, ~r/hex/, fn ->
+        Config.validate_at_boot!()
+      end
+    end
+
+    test "fails loud when admin accent_color is not hex" do
+      Application.put_env(:accrue, :admin_branding,
+        app_name: "Accrue Admin",
+        accent_color: "cobalt"
       )
 
       assert_raise NimbleOptions.ValidationError, ~r/hex/, fn ->

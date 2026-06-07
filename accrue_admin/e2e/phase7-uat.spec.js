@@ -61,7 +61,7 @@ test.describe("Phase 7 browser UAT", () => {
       await expect(page.getByRole("button", { name: "Menu" })).toBeVisible();
     } else {
       await expect(page.getByRole("complementary", { name: "Admin navigation" })).toBeVisible();
-      await expect(page.getByText("Internal billing operations")).toBeVisible();
+      await expect(page.getByText("Accrue Admin")).toBeVisible();
     }
   });
 

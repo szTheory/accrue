@@ -11,7 +11,7 @@ defmodule AccruePortal.TestRouter do
 
   import Accrue.Portal.Router
 
-  accrue_portal("/billing", session_keys: [:user_token])
+  accrue_portal("/billing", session_keys: [:user_token], login_path: "/users/log-in")
 end
 
 defmodule AccruePortal.TestEndpoint do

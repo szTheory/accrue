@@ -1,267 +1,189 @@
-<% dev_routes? = Application.get_env(:accrue_host, :dev_routes) == true %>
-<% signed_in? = @current_scope && @current_scope.user %>
-<% admin_routes = [
-  {"Dashboard", "/admin", "Operator overview and billing activity"},
-  {"Customers", "/admin/customers", "Customer records and drilldowns"},
-  {"Subscriptions", "/admin/subscriptions", "Plans, states, and lifecycle actions"},
-  {"Invoices", "/admin/invoices", "Invoice records and related billing events"},
-  {"Payments", "/admin/payments", "Payment and charge history"},
-  {"Webhooks", "/admin/webhooks", "Webhook ingest, dead rows, and replay"},
-  {"Events", "/admin/events", "Append-only billing and admin activity"},
-  {"Recovery", "/admin/analytics/recovery", "Dunning and recovery analytics"}
-] %>
-<% customer_routes = [
-  {"Host billing", "/app/billing",
-   "Subscribe, cancel, report usage, and inspect the active organization"},
-  {"Portal home", "/billing", "Mounted customer billing portal"},
-  {"Portal subscriptions", "/billing/subscriptions", "Customer-facing subscription history"},
-  {"Payment methods", "/billing/payment-methods", "Saved payment methods and default card flow"},
-  {"Portal invoices", "/billing/invoices", "Customer-facing invoice history"},
-  {"Advanced reports", "/app/reports/advanced", "Entitlement-gated app route"}
-] %>
-<% dev_routes = [
-  {"Sign in", "/users/log-in", "Use one of the seeded demo accounts"},
-  {"Register", "/users/register", "Create a fresh local user"},
-  {"Mailbox", "/dev/mailbox", "Preview sent sign-in and account emails"},
-  {"Traefik", "http://localhost:8080/dashboard/", "Local proxy dashboard"}
-] %>
-<% customer_accounts = [
-  {"healthy@example.com", "Subscribed; no dunning banner"},
-  {"past-due@example.com", "Past due; dunning campaign active"},
-  {"canceled@example.com", "Canceled subscription"},
-  {"enterprise@example.com", "Premium plan and JPY invoice showcase"},
-  {"trialing@example.com", "Trialing subscription"}
-] %>
+<% current_user = assigns[:current_scope] && assigns.current_scope.user %>
+<% product_name = AccrueHost.DemoBrand.product_name() %>
+<% tagline = AccrueHost.DemoBrand.tagline() %>
+<% demo_password = AccrueHost.DemoBrand.demo_password() %>
+<% primary_personas = Enum.take(@personas, 3) %>
 
 <Layouts.flash_group flash={@flash} />
 
-<main class="min-h-screen bg-base-100 text-base-content">
-  <section class="border-b border-base-300 bg-base-200/60">
-    <div class="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-      <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div class="max-w-3xl">
-          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/60">
-            Accrue host demo
-          </p>
-          <h1 class="mt-3 text-4xl font-semibold leading-tight text-base-content sm:text-5xl">
-            Local billing demo command center
-          </h1>
-          <p class="mt-4 max-w-2xl text-base leading-7 text-base-content/70">
-            This homepage maps the example app's admin, customer, portal, auth, and
-            dev routes so
-            <code class="rounded bg-base-300 px-1.5 py-0.5 text-sm">
-              http://accrue.localhost/
-            </code>
-            is useful the moment the Docker stack boots.
-          </p>
-        </div>
+<div class="min-h-screen bg-base-100 text-base-content">
+  <section class="border-b border-base-300 bg-base-100">
+    <div class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_25rem] lg:px-8">
+      <div class="max-w-3xl">
+        <p class="text-sm font-semibold uppercase text-primary">Cohort SaaS workspace</p>
+        <h1 class="mt-3 text-4xl font-semibold leading-tight text-base-content sm:text-5xl">
+          {product_name}
+        </h1>
+        <p class="mt-5 max-w-2xl text-lg leading-8 text-base-content/70">
+          {tagline}
+        </p>
 
-        <div class="flex items-center gap-3">
-          <%= if signed_in? do %>
-            <span class="rounded border border-success/30 bg-success/10 px-3 py-2 text-sm font-medium text-success">
-              Signed in as {@current_scope.user.email}
-            </span>
-          <% else %>
-            <.link
-              href="/users/log-in"
-              class="rounded border border-base-content bg-base-content px-4 py-2 text-sm font-semibold text-base-100 hover:bg-base-content/80"
-            >
-              Sign in
-            </.link>
-          <% end %>
-          <Layouts.theme_toggle />
-        </div>
-      </div>
-
-      <div class="grid gap-4 lg:grid-cols-3">
-        <div class="rounded border border-base-300 bg-base-100 p-5">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-            Admin access
-          </p>
-          <h2 class="mt-2 text-lg font-semibold">Why /admin redirects</h2>
-          <p class="mt-2 text-sm leading-6 text-base-content/70">
-            Anonymous users and non-admin customer accounts are intentionally redirected to <code class="rounded bg-base-200 px-1 py-0.5">/</code>. Sign in as the seeded
-            billing admin before opening <code class="rounded bg-base-200 px-1 py-0.5">/admin</code>.
-          </p>
-        </div>
-        <div class="rounded border border-base-300 bg-base-100 p-5">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-            Stable URL
-          </p>
-          <h2 class="mt-2 text-lg font-semibold">Use accrue.localhost</h2>
-          <p class="mt-2 text-sm leading-6 text-base-content/70">
-            The Docker DX path is <a
-              href="http://accrue.localhost"
-              class="font-semibold underline underline-offset-4"
-            >
-              http://accrue.localhost
-            </a>. If the proxy is down, run
-            <code class="rounded bg-base-200 px-1 py-0.5">make url</code>
-            for the fallback port.
-          </p>
-        </div>
-        <div class="rounded border border-base-300 bg-base-100 p-5">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-            Fast path
-          </p>
-          <h2 class="mt-2 text-lg font-semibold">Open the working surface</h2>
-          <div class="mt-4 flex flex-wrap gap-2">
-            <.link
-              href="/admin"
-              class="rounded bg-base-content px-3 py-2 text-sm font-semibold text-base-100 hover:bg-base-content/80"
-            >
-              Admin
-            </.link>
-            <.link
-              href="/app/billing"
-              class="rounded border border-base-300 px-3 py-2 text-sm font-semibold hover:bg-base-200"
-            >
-              Go to billing
-            </.link>
-            <.link
-              href="/billing"
-              class="rounded border border-base-300 px-3 py-2 text-sm font-semibold hover:bg-base-200"
-            >
-              Portal
-            </.link>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_22rem] lg:px-8">
-    <div class="space-y-8">
-      <section>
-        <div class="mb-3 flex items-end justify-between gap-4">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-              Operator routes
-            </p>
-            <h2 class="mt-1 text-2xl font-semibold">Mounted admin UI</h2>
-          </div>
-          <.link href="/users/log-in" class="text-sm font-semibold underline underline-offset-4">
-            Login first
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <.link href={~p"/pricing"} class="btn btn-primary rounded-lg">
+            View pricing
+          </.link>
+          <.link href={~p"/users/log-in"} class="btn btn-outline rounded-lg">
+            Sign in as program owner
+          </.link>
+          <.link href={~p"/admin"} class="btn btn-ghost rounded-lg">
+            Open Accrue Admin
           </.link>
         </div>
-        <div class="grid gap-3 md:grid-cols-2">
-          <a
-            :for={{label, path, description} <- admin_routes}
-            href={path}
-            class="group rounded border border-base-300 bg-base-100 p-4 transition hover:border-base-content/50 hover:bg-base-200/70"
-          >
-            <span class="block font-semibold group-hover:underline group-hover:underline-offset-4">
-              {label}
-            </span>
-            <code class="mt-1 block text-sm text-base-content/60">{path}</code>
-            <span class="mt-3 block text-sm leading-6 text-base-content/70">{description}</span>
-          </a>
-        </div>
-      </section>
 
-      <section>
-        <div class="mb-3">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-            Customer routes
-          </p>
-          <h2 class="mt-1 text-2xl font-semibold">Host app and portal</h2>
-        </div>
-        <div class="grid gap-3 md:grid-cols-2">
-          <a
-            :for={{label, path, description} <- customer_routes}
-            href={path}
-            class="group rounded border border-base-300 bg-base-100 p-4 transition hover:border-base-content/50 hover:bg-base-200/70"
-          >
-            <span class="block font-semibold group-hover:underline group-hover:underline-offset-4">
-              {label}
-            </span>
-            <code class="mt-1 block text-sm text-base-content/60">{path}</code>
-            <span class="mt-3 block text-sm leading-6 text-base-content/70">{description}</span>
-          </a>
-        </div>
-      </section>
+        <p class="mt-5 text-sm text-base-content/60">
+          {if current_user,
+            do: "Signed in as #{current_user.email}.",
+            else: "Seeded accounts use password #{demo_password}."}
+        </p>
+      </div>
 
-      <section>
-        <div class="mb-3">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-            Auth and dev tools
-          </p>
-          <h2 class="mt-1 text-2xl font-semibold">Support routes</h2>
+      <aside class="rounded-lg border border-base-300 bg-base-200 p-5 shadow-sm">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-sm font-semibold text-base-content/60">Live cohort snapshot</p>
+            <h2 class="mt-1 text-2xl font-semibold">Spring Strategy Lab</h2>
+          </div>
+          <span class="rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-content">
+            Studio
+          </span>
         </div>
-        <div class="grid gap-3 md:grid-cols-2">
-          <a
-            :for={{label, path, description} <- dev_routes}
-            href={path}
-            class="group rounded border border-base-300 bg-base-100 p-4 transition hover:border-base-content/50 hover:bg-base-200/70"
-          >
-            <span class="block font-semibold group-hover:underline group-hover:underline-offset-4">
-              {label}
+
+        <div class="mt-6 grid gap-3">
+          <div class="flex items-center justify-between border-b border-base-300 pb-3">
+            <span class="text-sm text-base-content/60">Active learners</span>
+            <span class="text-lg font-semibold">148</span>
+          </div>
+          <div class="flex items-center justify-between border-b border-base-300 pb-3">
+            <span class="text-sm text-base-content/60">Facilitator seats</span>
+            <span class="text-lg font-semibold">6</span>
+          </div>
+          <div class="flex items-center justify-between border-b border-base-300 pb-3">
+            <span class="text-sm text-base-content/60">Next invoice</span>
+            <span class="text-lg font-semibold">$30.00</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-base-content/60">Payment health</span>
+            <span class="rounded-md bg-success px-2 py-1 text-xs font-semibold text-success-content">
+              Current
             </span>
-            <code class="mt-1 block text-sm text-base-content/60">{path}</code>
-            <span class="mt-3 block text-sm leading-6 text-base-content/70">{description}</span>
-          </a>
+          </div>
         </div>
-      </section>
+      </aside>
     </div>
-
-    <aside class="space-y-4 lg:sticky lg:top-4 lg:self-start">
-      <section class="rounded border border-base-300 bg-base-100 p-5">
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-          Seeded accounts
-        </p>
-        <h2 class="mt-2 text-xl font-semibold">Demo logins</h2>
-        <%= if dev_routes? do %>
-          <p class="mt-3 text-sm text-base-content/70">
-            Password for all seeded users:
-          </p>
-          <code class="mt-2 block rounded bg-base-200 px-3 py-2 text-sm font-semibold">
-            accrue-demo-password
-          </code>
-
-          <div class="mt-5">
-            <p class="text-sm font-semibold">Operator</p>
-            <div class="mt-2 rounded border border-base-300 p-3">
-              <code class="text-sm font-semibold">admin@example.com</code>
-              <p class="mt-1 text-sm leading-6 text-base-content/70">
-                Billing admin; use this account for <code>/admin</code>.
-              </p>
-            </div>
-          </div>
-
-          <div class="mt-5">
-            <p class="text-sm font-semibold">Customers</p>
-            <div class="mt-2 space-y-2">
-              <div
-                :for={{email, description} <- customer_accounts}
-                class="rounded border border-base-300 p-3"
-              >
-                <code class="text-sm font-semibold">{email}</code>
-                <p class="mt-1 text-sm leading-6 text-base-content/70">{description}</p>
-              </div>
-            </div>
-          </div>
-        <% else %>
-          <p class="mt-3 text-sm leading-6 text-base-content/70">
-            Seeded credentials are shown on this page in local dev. Use
-            <code class="rounded bg-base-200 px-1 py-0.5">bin/dev-banner.sh</code>
-            or the example README when running a non-dev build.
-          </p>
-        <% end %>
-      </section>
-
-      <section class="rounded border border-base-300 bg-base-100 p-5">
-        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-base-content/50">
-          Commands
-        </p>
-        <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-          <code class="rounded bg-base-200 px-3 py-2">make open</code>
-          <code class="rounded bg-base-200 px-3 py-2">make url</code>
-          <code class="rounded bg-base-200 px-3 py-2">make logs</code>
-          <code class="rounded bg-base-200 px-3 py-2">make psql</code>
-          <code class="rounded bg-base-200 px-3 py-2">make sh</code>
-          <code class="rounded bg-base-200 px-3 py-2">make down</code>
-        </div>
-      </section>
-    </aside>
   </section>
-</main>
+
+  <main>
+    <section class="bg-base-200">
+      <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="text-sm font-semibold uppercase text-secondary">Evaluator paths</p>
+            <h2 class="mt-2 text-2xl font-semibold">Three realistic billing roles</h2>
+          </div>
+          <p class="max-w-xl text-sm leading-6 text-base-content/65">
+            Start from a product role, then move between workspace billing, the customer portal, and the operator console.
+          </p>
+        </div>
+
+        <div class="mt-7 grid gap-4 lg:grid-cols-3">
+          <article
+            :for={persona <- primary_personas}
+            class="rounded-lg border border-base-300 bg-base-100 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold uppercase text-base-content/50">
+                  {persona.state}
+                </p>
+                <h3 class="mt-2 text-xl font-semibold">{persona.label}</h3>
+              </div>
+              <span class="rounded-md border border-base-300 px-2 py-1 text-xs font-semibold text-base-content/60">
+                {persona.workspace}
+              </span>
+            </div>
+            <p class="mt-4 min-h-24 text-sm leading-6 text-base-content/65">
+              {persona.description}
+            </p>
+            <div class="mt-5 rounded-md bg-base-200 px-3 py-2 text-sm">
+              <p class="font-semibold">{persona.email}</p>
+              <p class="text-base-content/60">{demo_password}</p>
+            </div>
+            <.link href={persona.route} class="btn btn-sm btn-outline mt-5 rounded-lg">
+              Open path
+            </.link>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="border-y border-base-300 bg-base-100">
+      <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+        <div>
+          <p class="text-sm font-semibold text-base-content/60">
+            Customer-facing billing uses CohortFlow. Operator billing uses Accrue Admin.
+          </p>
+          <h2 class="mt-1 text-xl font-semibold">
+            The brand split mirrors a real Phoenix SaaS using a mounted billing library.
+          </h2>
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <.link href={~p"/app/billing"} class="btn btn-secondary rounded-lg">
+            Workspace billing
+          </.link>
+          <.link href={~p"/billing"} class="btn btn-outline rounded-lg">
+            Customer portal
+          </.link>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-base-200">
+      <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <details class="rounded-lg border border-base-300 bg-base-100 p-5">
+          <summary class="cursor-pointer text-sm font-semibold">
+            Developer routes
+          </summary>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <.link
+              href={~p"/billing/payment-methods"}
+              class="rounded-md border border-base-300 p-3 text-sm hover:bg-base-200"
+            >
+              Portal payment methods
+            </.link>
+            <.link
+              href={~p"/billing/invoices"}
+              class="rounded-md border border-base-300 p-3 text-sm hover:bg-base-200"
+            >
+              Portal invoices
+            </.link>
+            <.link
+              href={~p"/admin/webhooks"}
+              class="rounded-md border border-base-300 p-3 text-sm hover:bg-base-200"
+            >
+              Webhook events
+            </.link>
+            <.link
+              href={~p"/admin/analytics/recovery"}
+              class="rounded-md border border-base-300 p-3 text-sm hover:bg-base-200"
+            >
+              Recovery analytics
+            </.link>
+            <.link
+              href={~p"/app/reports/advanced"}
+              class="rounded-md border border-base-300 p-3 text-sm hover:bg-base-200"
+            >
+              Entitled report
+            </.link>
+            <.link
+              href="/dev/mailbox"
+              class="rounded-md border border-base-300 p-3 text-sm hover:bg-base-200"
+            >
+              Dev mailbox
+            </.link>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+</div>

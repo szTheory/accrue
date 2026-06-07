@@ -8,6 +8,7 @@ defmodule Accrue.Portal.Router do
 
   @default_on_mount [{Accrue.Portal.AuthHook, :ensure_customer}]
   @default_session_keys []
+  @default_login_path "/"
 
   @doc """
   Mounts the portal package at `path`.
@@ -16,6 +17,8 @@ defmodule Accrue.Portal.Router do
 
     * `:session_keys` - explicit host session keys to thread into the portal
       LiveView session
+    * `:login_path` - local host-app path used when unauthenticated visitors
+      request protected portal pages
     * `:on_mount` - additional LiveView `on_mount` hooks
   """
   defmacro accrue_portal(path, opts \\ []) do
@@ -23,22 +26,35 @@ defmodule Accrue.Portal.Router do
     validated = validate_opts!(path, opts)
     mount_path = validated[:mount_path]
     session_keys = validated[:session_keys]
+    login_path = validated[:login_path]
     on_mount = validated[:on_mount]
 
     quote bind_quoted: [
             mount_path: mount_path,
             session_keys: session_keys,
+            login_path: login_path,
             on_mount: on_mount
           ] do
+      import Phoenix.LiveView.Router, only: [fetch_live_flash: 2]
+
       pipeline :accrue_portal_browser do
         plug(:fetch_session)
+        plug(:fetch_live_flash)
         plug(:protect_from_forgery)
         plug(Accrue.Portal.CSPPlug)
         plug(Accrue.Portal.BrandPlug)
       end
 
       pipeline :accrue_portal_authenticated do
-        plug(Accrue.Portal.AuthPlug)
+        plug(Accrue.Portal.AuthPlug, mount_path: mount_path, login_path: login_path)
+      end
+
+      pipeline :accrue_portal_live_authenticated do
+        plug(Accrue.Portal.AuthPlug,
+          mount_path: mount_path,
+          login_path: login_path,
+          customer_required: false
+        )
       end
 
       scope mount_path, as: :accrue_portal do
@@ -78,12 +94,12 @@ defmodule Accrue.Portal.Router do
       end
 
       scope mount_path, as: :accrue_portal do
-        pipe_through(:accrue_portal_browser)
+        pipe_through([:accrue_portal_browser, :accrue_portal_live_authenticated])
 
         live_session :accrue_portal,
           root_layout: {AccruePortal.Layouts, :root},
           on_mount: on_mount,
-          session: {Accrue.Portal.Router, :__session__, [session_keys, mount_path]} do
+          session: {Accrue.Portal.Router, :__session__, [session_keys, mount_path, login_path]} do
           live("/", AccruePortal.Live.HomeLive, :index)
           live("/subscriptions", AccruePortal.Live.SubscriptionsLive, :index)
           live("/subscriptions/:id", AccruePortal.Live.SubscriptionLive, :show)
@@ -97,7 +113,11 @@ defmodule Accrue.Portal.Router do
   end
 
   @spec __session__(Plug.Conn.t(), [atom() | String.t()], String.t()) :: map()
-  def __session__(conn, session_keys, mount_path)
+  def __session__(conn, session_keys, mount_path),
+    do: __session__(conn, session_keys, mount_path, @default_login_path)
+
+  @spec __session__(Plug.Conn.t(), [atom() | String.t()], String.t(), String.t()) :: map()
+  def __session__(conn, session_keys, mount_path, login_path)
       when is_list(session_keys) and is_binary(mount_path) do
     host_session =
       Map.new(session_keys, fn key ->
@@ -108,6 +128,7 @@ defmodule Accrue.Portal.Router do
     Map.merge(host_session, %{
       "accrue_portal" => %{
         "mount_path" => Accrue.Config.normalize_mount_path(mount_path),
+        "login_path" => normalize_login_path!(login_path),
         "brand_css_path" => AccruePortal.Assets.hashed_path(:brand, mount_path),
         "assets_css_path" => AccruePortal.Assets.hashed_path(:css, mount_path),
         "assets_js_path" => AccruePortal.Assets.hashed_path(:js, mount_path),
@@ -128,10 +149,15 @@ defmodule Accrue.Portal.Router do
   defp validate_opts!(path, opts) when is_binary(path) and is_list(opts) do
     normalized_path = Accrue.Config.normalize_mount_path(path)
     session_keys = Keyword.get(opts, :session_keys, @default_session_keys)
+    login_path = opts |> Keyword.get(:login_path, @default_login_path) |> normalize_login_path!()
     extra_hooks = Keyword.get(opts, :on_mount, [])
 
     unless is_list(session_keys) and Enum.all?(session_keys, &(is_atom(&1) or is_binary(&1))) do
       raise ArgumentError, ":session_keys must be a list of atoms or strings"
+    end
+
+    if login_path == normalized_path do
+      raise ArgumentError, ":login_path must not point at the protected portal mount path"
     end
 
     unless valid_on_mount?(extra_hooks) do
@@ -142,6 +168,7 @@ defmodule Accrue.Portal.Router do
     [
       mount_path: normalized_path,
       session_keys: session_keys,
+      login_path: login_path,
       on_mount: List.wrap(extra_hooks) ++ @default_on_mount
     ]
   end
@@ -157,6 +184,18 @@ defmodule Accrue.Portal.Router do
   defp valid_hook?(hook) when is_atom(hook), do: true
   defp valid_hook?({mod, arg}) when is_atom(mod), do: is_atom(arg) or is_binary(arg)
   defp valid_hook?(_), do: false
+
+  defp normalize_login_path!(path) when is_binary(path) do
+    if String.starts_with?(path, "/") and not String.starts_with?(path, "//") do
+      path
+    else
+      raise ArgumentError, ":login_path must be a local path beginning with /"
+    end
+  end
+
+  defp normalize_login_path!(path) do
+    raise ArgumentError, ":login_path must be a string, got: #{inspect(path)}"
+  end
 end
 
 defmodule AccruePortal.Router do
@@ -170,5 +209,6 @@ defmodule AccruePortal.Router do
   end
 
   defdelegate __session__(conn, session_keys, mount_path), to: Accrue.Portal.Router
+  defdelegate __session__(conn, session_keys, mount_path, login_path), to: Accrue.Portal.Router
   defdelegate assets_path(kind, mount_path), to: Accrue.Portal.Router
 end

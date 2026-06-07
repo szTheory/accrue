@@ -7,6 +7,32 @@ defmodule AccrueAdmin.Components.AppShellTest do
 
   alias AccrueAdmin.Components.AppShell
 
+  test "topbar renders configured admin brand name" do
+    html =
+      render_component(
+        fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <AppShell.app_shell
+            brand={%{app_name: "Accrue Admin", logo_url: nil}}
+            current_path="/billing"
+            mount_path="/billing"
+            page_title="Dashboard"
+            theme="system"
+            active_organization_name={nil}
+          >
+            <p class="ax-body">Inner</p>
+          </AppShell.app_shell>
+          """
+        end,
+        %{}
+      )
+
+    assert html =~ "Accrue Admin"
+    refute html =~ "Internal billing operations"
+  end
+
   test "renders Active organization banner when name assign is present" do
     html =
       render_component(

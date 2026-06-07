@@ -3,13 +3,14 @@ defmodule AccrueHost.Accounts.UserNotifier do
 
   alias AccrueHost.Mailer
   alias AccrueHost.Accounts.User
+  alias AccrueHost.DemoBrand
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
     email =
       new()
       |> to(recipient)
-      |> from({"AccrueHost", "contact@example.com"})
+      |> from({DemoBrand.product_name(), DemoBrand.billing_email()})
       |> subject(subject)
       |> text_body(body)
 

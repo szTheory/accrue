@@ -97,3 +97,26 @@ Stripe Connect platform branding always wins over per-connected-account
 overrides today. Accrue does not ship first-class per-account branding;
 use a rung-3 template override (see `guides/email.md`) that dispatches on
 the Connect account id at render time if you need it.
+
+## Admin chrome override
+
+`branding` remains the customer-facing billing identity for emails, PDFs, and
+the mounted customer portal. If the mounted operator UI should keep a separate
+admin identity, set `:admin_branding`:
+
+```elixir
+config :accrue,
+  branding: [
+    business_name: "Acme",
+    from_email: "billing@acme.example",
+    support_email: "support@acme.example",
+    accent_color: "#26785F"
+  ],
+  admin_branding: [
+    app_name: "Accrue Admin",
+    accent_color: "#5D79F6"
+  ]
+```
+
+When `:admin_branding` is unset, Accrue Admin derives its label, logo, and accent
+from `branding` for backwards compatibility.

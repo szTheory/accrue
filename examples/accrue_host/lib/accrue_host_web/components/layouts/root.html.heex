@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="AccrueHost" suffix=" · Phoenix Framework">
+    <.live_title default={AccrueHost.DemoBrand.product_name()} suffix="">
       {assigns[:page_title]}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
@@ -30,27 +30,66 @@
       })();
     </script>
   </head>
-  <body>
-    <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-      <%= if @current_scope do %>
-        <li>
-          {@current_scope.user.email}
-        </li>
-        <li>
-          <.link href={~p"/users/settings"}>Settings</.link>
-        </li>
-        <li>
-          <.link href={~p"/users/log-out"} method="delete">Log out</.link>
-        </li>
-      <% else %>
-        <li>
-          <.link href={~p"/users/register"}>Register</.link>
-        </li>
-        <li>
-          <.link href={~p"/users/log-in"}>Log in</.link>
-        </li>
-      <% end %>
-    </ul>
+  <body class="bg-base-100 text-base-content antialiased">
+    <% current_user = assigns[:current_scope] && assigns.current_scope.user %>
+    <header class="relative z-10 border-b border-base-300 bg-base-100/95">
+      <nav class="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <.link href={~p"/"} class="flex min-w-0 items-center gap-3">
+          <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-sm font-bold text-primary-content">
+            CF
+          </span>
+          <span class="min-w-0">
+            <span class="block truncate text-sm font-semibold">
+              {AccrueHost.DemoBrand.product_name()}
+            </span>
+            <span class="hidden text-xs text-base-content/60 sm:block">
+              Cohort operations
+            </span>
+          </span>
+        </.link>
+
+        <div class="flex min-w-0 items-center gap-2">
+          <.link href={~p"/pricing"} class="btn btn-ghost btn-sm rounded-lg">
+            Pricing
+          </.link>
+          <.theme_toggle />
+          <%= if current_user do %>
+            <.link
+              href={~p"/app/billing"}
+              class="btn btn-ghost btn-sm hidden rounded-lg sm:inline-flex"
+            >
+              Billing
+            </.link>
+            <span class="hidden max-w-44 truncate text-sm text-base-content/65 md:block">
+              {current_user.email}
+            </span>
+            <.link
+              href={~p"/users/settings"}
+              class="btn btn-ghost btn-sm hidden rounded-lg sm:inline-flex"
+            >
+              Settings
+            </.link>
+            <.link
+              href={~p"/users/log-out"}
+              method="delete"
+              class="btn btn-outline btn-sm rounded-lg"
+            >
+              Log out
+            </.link>
+          <% else %>
+            <.link
+              href={~p"/users/register"}
+              class="btn btn-ghost btn-sm hidden rounded-lg sm:inline-flex"
+            >
+              Register
+            </.link>
+            <.link href={~p"/users/log-in"} class="btn btn-primary btn-sm rounded-lg">
+              Log in
+            </.link>
+          <% end %>
+        </div>
+      </nav>
+    </header>
     {@inner_content}
   </body>
 </html>

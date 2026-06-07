@@ -12,7 +12,7 @@ defmodule AccrueHost.HeroAccountsTest do
     :ok
   end
 
-  test "pingpal hero accounts are created with correct subscriptions" do
+  test "CohortFlow hero accounts are created with correct subscriptions" do
     alias AccrueHost.Accounts.{User, Organization}
     alias AccrueHost.Billing
 
@@ -35,16 +35,19 @@ defmodule AccrueHost.HeroAccountsTest do
            "healthy@example.com must remain billing_admin: false (customer persona)"
 
     org = Repo.get_by!(Organization, slug: "healthy-co")
+    assert org.name == "Northstar Academy"
 
     assert {:ok, %{subscription: %Accrue.Billing.Subscription{status: :active}}} =
              Billing.billing_state_for(org)
 
     org_past_due = Repo.get_by!(Organization, slug: "past-due-co")
+    assert org_past_due.name == "Summit Workshop"
 
     assert {:ok, %{subscription: %Accrue.Billing.Subscription{status: :past_due}}} =
              Billing.billing_state_for(org_past_due)
 
     org_canceled = Repo.get_by!(Organization, slug: "canceled-co")
+    assert org_canceled.name == "Archive Fellows"
 
     assert {:ok, %{subscription: %Accrue.Billing.Subscription{status: :canceled}}} =
              Billing.billing_state_for(org_canceled)

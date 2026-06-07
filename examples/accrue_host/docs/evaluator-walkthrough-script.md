@@ -1,6 +1,6 @@
 # Evaluator walkthrough script (screen recording)
 
-Use this as a **checklist** when recording a short demo for stakeholders. It mirrors the same Fake-backed paths CI exercises; no Stripe keys required.
+Use this as a **checklist** when recording a short demo for stakeholders. It mirrors the same Fake-backed paths CI exercises; no Stripe keys required. The customer-facing app is **CohortFlow**; the operator surface is **Accrue Admin**.
 
 **Prep (once per machine):** Follow `examples/accrue_host/README.md` setup through `mix setup` / DB migrate as documented.
 
@@ -16,12 +16,12 @@ Use this as a **checklist** when recording a short demo for stakeholders. It mir
 2. Run `mix verify` (bounded slice) — mention it includes **user-billable** facade tests and **org** billing tests.
 3. Optionally run full `mix verify.full` if you want the complete maintainer story (longer).
 
-## C. Browser story — org billing + admin (~5–8 min)
+## C. Browser story — CohortFlow + Accrue Admin (~5–8 min)
 
 1. `npm ci` then `npm run e2e:install` (if not already done).
 2. Run the VERIFY-01 Playwright entrypoint from the README (or `npm run e2e:visuals` for screenshots only).
-3. Show: log in → **Go to billing** → tax location → start/cancel org subscription path as documented.
-4. Open mounted **admin** path used in specs (see `verify01-admin-mounted.spec.js` / README) and show subscription + webhook inspection briefly.
+3. Show: CohortFlow home → pricing → sign in → workspace billing → tax location → choose/cancel a workspace plan.
+4. Open the mounted **Accrue Admin** path used in specs (see `verify01-admin-mounted.spec.js` / README) and show subscription + webhook inspection briefly.
 
 ## D. Artifacts
 
@@ -30,7 +30,7 @@ Use this as a **checklist** when recording a short demo for stakeholders. It mir
 
 ## E. What to say about “real Stripe”
 
-- **Default story:** Fake processor proves Phoenix wiring, webhooks, DB reducers, admin LiveView — what most regressions break.
+- **Default story:** Fake processor proves Phoenix wiring, webhooks, DB reducers, customer portal, and admin LiveView — what most regressions break.
 - **Stripe test mode:** Maintainer/advisory lane (`mix test.live`, scheduled `live-stripe` job) for API drift — not required for every contributor.
 
 **Lane honesty:** Stripe test mode stays **advisory** for contributors, matching the matrix heading **`## Advisory: Stripe test mode`** — it does not replace the Fake-backed merge contract and must not be described as merge-blocking on camera.

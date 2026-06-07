@@ -375,6 +375,24 @@ defmodule Accrue.Config do
           "`:from_email` and `:support_email` are required for any real deploy. " <>
           "See guides/branding.md."
     ],
+    admin_branding: [
+      type: :keyword_list,
+      required: false,
+      default: [],
+      keys: [
+        app_name: [type: :string, default: "Billing"],
+        logo_url: [type: {:or, [:string, nil]}, default: nil],
+        accent_color: [
+          type: {:custom, __MODULE__, :validate_hex, []},
+          default: "#5D79F6"
+        ]
+      ],
+      doc:
+        "Optional Accrue Admin chrome branding. When unset, admin chrome keeps the " <>
+          "legacy behavior and derives its app name, logo, and accent from " <>
+          "`:branding`. Set this when customer-facing billing should use one brand " <>
+          "while the mounted operator UI keeps an Accrue/admin identity."
+    ],
 
     # --- Locale / timezone defaults (enrich/2 precedence) ----------------
     default_locale: [
@@ -998,12 +1016,63 @@ defmodule Accrue.Config do
   @spec branding(atom()) :: term()
   def branding(key) when is_atom(key), do: Keyword.fetch!(branding(), key)
 
+  @doc """
+  Returns branding for the mounted Accrue Admin operator chrome.
+
+  Backwards compatible default: when `:admin_branding` is unset, derive the
+  admin label, logo, and accent from the customer billing `:branding` config.
+  Hosts that need a split identity can set `:admin_branding` explicitly.
+  """
+  @spec admin_branding() :: keyword()
+  def admin_branding do
+    case get!(:admin_branding) do
+      [] ->
+        customer_branding = branding()
+
+        [
+          app_name: Keyword.get(customer_branding, :business_name, "Billing"),
+          logo_url: Keyword.get(customer_branding, :logo_url),
+          accent_color: Keyword.get(customer_branding, :accent_color, "#5D79F6")
+        ]
+
+      raw when is_list(raw) ->
+        merge_admin_branding_defaults(raw)
+
+      other ->
+        raise Accrue.ConfigError,
+          key: :admin_branding,
+          message: "expected :admin_branding to be a keyword list, got: #{inspect(other)}"
+    end
+  end
+
+  @doc """
+  Returns a single admin branding key. Raises if the key is unknown.
+  """
+  @spec admin_branding(atom()) :: term()
+  def admin_branding(key) when is_atom(key), do: Keyword.fetch!(admin_branding(), key)
+
   defp branding_defaults do
     # Pull the nested :branding schema's inner :keys list and extract
     # `{atom, default}` pairs so callers get a fully-populated keyword
     # list with the same shape the validated schema would yield.
     @schema
     |> Keyword.fetch!(:branding)
+    |> Keyword.fetch!(:keys)
+    |> Enum.map(fn {k, spec} -> {k, Keyword.get(spec, :default)} end)
+  end
+
+  defp merge_admin_branding_defaults(user_kw) do
+    Enum.reduce(admin_branding_defaults(), user_kw, fn {k, default}, acc ->
+      case Keyword.fetch(acc, k) do
+        :error -> Keyword.put(acc, k, default)
+        {:ok, _} -> acc
+      end
+    end)
+  end
+
+  defp admin_branding_defaults do
+    @schema
+    |> Keyword.fetch!(:admin_branding)
     |> Keyword.fetch!(:keys)
     |> Enum.map(fn {k, spec} -> {k, Keyword.get(spec, :default)} end)
   end

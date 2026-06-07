@@ -93,8 +93,8 @@ defmodule AccruePortal.SubscriptionsLiveTest do
     assert {:ok, _view, html} = live(conn, "/billing/subscriptions")
 
     assert html =~ subscription.processor_id
-    assert html =~ "Braintree immediate cancellation can end access now."
-    assert html =~ "Plan changes stay host-managed for this Braintree subscription."
+    assert html =~ "Immediate cancellation can end access now."
+    assert html =~ "Plan changes for this subscription are handled by your account team."
     assert html =~ ~s(href="/billing/subscriptions/#{subscription.id}")
     refute html =~ ~s(phx-value-id="#{subscription.id}")
     refute html =~ "Cancel now"

@@ -54,7 +54,9 @@ end
 
 ## Branding
 
-The package reads its brand chrome from `Accrue.Config.branding/0` through the package branding plug. Configure the host app's billing identity once and the admin shell inherits it:
+By default, the package derives its brand chrome from `Accrue.Config.branding/0`
+through the package branding plug. Configure the host app's billing identity once
+and the admin shell inherits it:
 
 ```elixir
 config :accrue,
@@ -64,6 +66,25 @@ config :accrue,
     support_email: "support@acme.test",
     logo_url: "https://example.test/logo.svg",
     accent_color: "#5E9E84"
+  ]
+```
+
+When the customer-facing billing brand should differ from the operator surface,
+configure `:admin_branding` as a small override. This preserves `:branding` for
+emails, PDFs, and the customer portal while keeping the mounted admin chrome under
+an Accrue/operator identity:
+
+```elixir
+config :accrue,
+  branding: [
+    business_name: "CohortFlow",
+    from_email: "billing@cohortflow.test",
+    support_email: "support@cohortflow.test",
+    accent_color: "#26785F"
+  ],
+  admin_branding: [
+    app_name: "Accrue Admin",
+    accent_color: "#5D79F6"
   ]
 ```
 

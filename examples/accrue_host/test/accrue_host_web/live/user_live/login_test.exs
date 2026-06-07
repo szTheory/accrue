@@ -8,9 +8,9 @@ defmodule AccrueHostWeb.UserLive.LoginTest do
     test "renders login page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
-      assert html =~ "Log in"
-      assert html =~ "Register"
-      assert html =~ "Log in with email"
+      assert html =~ "Sign in to your workspace"
+      assert html =~ "Create a workspace account"
+      assert html =~ "Email me a sign-in link"
     end
   end
 
@@ -81,11 +81,11 @@ defmodule AccrueHostWeb.UserLive.LoginTest do
 
       {:ok, _login_live, login_html} =
         lv
-        |> element("main a", "Sign up")
+        |> element("main a", "Create a workspace account")
         |> render_click()
         |> follow_redirect(conn, ~p"/users/register")
 
-      assert login_html =~ "Register"
+      assert login_html =~ "Create a workspace account"
     end
   end
 
@@ -98,9 +98,9 @@ defmodule AccrueHostWeb.UserLive.LoginTest do
     test "shows login page with email filled in", %{conn: conn, user: user} do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
-      assert html =~ "You need to reauthenticate"
+      assert html =~ "Reauthenticate before changing sensitive account settings."
       refute html =~ "Register"
-      assert html =~ "Log in with email"
+      assert html =~ "Email me a sign-in link"
 
       assert html =~
                ~s(<input type="email" name="user[email]" id="login_form_magic_email" value="#{user.email}")

@@ -1,9 +1,9 @@
-# Accrue Host Example
+# CohortFlow Example Host
 
 This checked-in Phoenix app is the canonical local evaluation path for `accrue`
-and `accrue_admin`: a realistic B2B devtool SaaS host with seeded accounts,
-`Accrue.Processor.Fake` billing, signed webhook ingest, and mounted admin
-inspection.
+and `accrue_admin`. It presents a fictional cohort SaaS called **CohortFlow** so
+the customer-facing app feels like a real Phoenix product using Accrue, while the
+operator surface remains **Accrue Admin**.
 
 ## Start Here
 
@@ -15,8 +15,14 @@ make proxy      # ONCE per machine — starts the shared Traefik proxy (skip if 
 make up         # every time after that — builds on first run, then read the banner
 ```
 
-Then open **http://accrue.localhost/admin**. That URL is stable — bookmark it.
-You must be logged in as `admin@example.com` (password `accrue-demo-password`) to access `/admin` — the 5 customer logins below are for the tenant-facing billing flows.
+Then open **http://accrue.localhost/**. That URL is stable — bookmark it. Start
+from the CohortFlow home page to choose pricing, customer billing, or the Accrue
+Admin operator path. You must be logged in as `admin@example.com` (password
+`accrue-demo-password`) to access `/admin`; customer logins are for
+tenant-facing billing flows only.
+
+Operator deep link: **http://accrue.localhost/admin** opens the mounted Accrue
+Admin UI after sign-in.
 
 `make up` creates the shared Docker `proxy` network if it is missing, so a fresh
 machine fails less mysteriously. `make proxy` is still the step that starts Traefik
@@ -38,11 +44,13 @@ and so on. **They can never collide**, and you never pick or remember a port. Se
 **Read the banner.** After `make up`, `bin/dev-banner.sh` waits for the server, then
 prints a copy-pasteable block with:
 
-- the stable URL (`http://accrue.localhost/admin`) — plus an ephemeral
+- the stable URL (`http://accrue.localhost/`) — plus an ephemeral
   `http://127.0.0.1:<port>` **fallback** for when the proxy isn't running,
-- the key routes — `/admin` (mounted Accrue Admin UI), `/billing` (mounted portal),
-  `/app/billing` (host billing screen), `/app/reports/advanced` (entitlement-gated
-  reports), `/users/log-in` (sign in), `/dev/mailbox` (sent-email preview), and
+- the key routes — `/` (CohortFlow app home), `/pricing` (CohortFlow plans),
+  `/billing` (CohortFlow customer portal), `/app/billing` (workspace billing),
+  `/admin` (mounted Accrue Admin UI), `/app/reports/advanced`
+  (entitlement-gated reports), `/users/log-in` (sign in), `/dev/mailbox`
+  (sent-email preview), and
 - the seeded demo logins — `admin@example.com` (billing-admin operator — required to
   open `/admin`), and the 5 customer personas (tenant-facing billing flows only, not
   admin-capable): `healthy@example.com`, `past-due@example.com`, `canceled@example.com`,
@@ -196,16 +204,17 @@ mix setup
 mix phx.server
 ```
 
-Then walk the public host story in this order:
+Then walk the public CohortFlow story in this order:
 
-1. Sign in, open the host-owned billing screen, and use `Start subscription`
+1. Sign in, open workspace billing, and choose the Launch plan
    on `/app/billing` to create one Fake-backed subscription through
    `AccrueHost.Billing`.
 2. Post one signed webhook through the real `/webhooks/stripe` endpoint. The
    focused proof suite uses `customer.subscription.created` for this step.
    If ingest fails, see [`../../accrue/guides/troubleshooting.md`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-raw-body) (**`ACCRUE-DX-WEBHOOK-RAW-BODY`**) and [`../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing) (**`ACCRUE-DX-WEBHOOK-SECRET-MISSING`**) for stable fix paths — VERIFY-01 authority stays under [**#proof-and-verification**](#proof-and-verification).
-3. Visit `/billing` as a billing admin and confirm the mounted admin UI shows
-   the billing state, webhook ingest, and replay visibility.
+3. Visit `/billing` as a customer to confirm the CohortFlow-branded portal shows
+   subscription, invoice, and payment method state. Visit `/admin` as the
+   operator to inspect billing state, webhook ingest, and replay visibility.
 4. Run the focused proof suite after you have walked the story yourself:
 
 ```bash
@@ -401,13 +410,13 @@ For a **human screen-recording checklist** (evaluators / stakeholders), see
 
 ## Visual walkthrough (Fake-backed)
 
-To **see** the mounted admin + host billing story (no live Stripe), use the
+To **see** the CohortFlow + Accrue Admin story (no live Stripe), use the
 **`@phase15-trust`** Playwright spec. This lane is **trust/demo visuals only**; it
 does not substitute for the VERIFY-01 merge-blocking checklist under
 [Proof and verification](#proof-and-verification) above. It uses the same Fake-backed
-fixture as the rest of the browser suite (scrubs prior `sub_fake_%` host rows so Fake
-ids cannot collide): org billing on the host app, then mounted **admin** at `/billing`
-(webhook detail, replay, audit).
+fixture as the rest of the browser suite (scrubs prior `sub_fake_%` host rows so
+Fake ids cannot collide): CohortFlow workspace billing and customer portal first,
+then mounted **Accrue Admin** for webhook detail, replay, and audit.
 
 **Artifacts (local, gitignored under `test-results/`):**
 

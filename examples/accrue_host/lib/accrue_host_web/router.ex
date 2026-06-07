@@ -31,6 +31,7 @@ defmodule AccrueHostWeb.Router do
     pipe_through(:browser)
 
     get("/", PageController, :home)
+    get("/pricing", PageController, :pricing)
   end
 
   # Other scopes may use custom stacks.
@@ -124,11 +125,12 @@ defmodule AccrueHostWeb.Router do
     # InstallBoundaryTest's exactly-once source-text contract.
     accrue_portal("/billing",
       on_mount: AccrueHostWeb.LiveAcceptance,
-      session_keys: [:user_token]
+      session_keys: [:user_token],
+      login_path: "/users/log-in"
     )
   else
     accrue_admin("/admin", session_keys: [:user_token], allow_live_reload: false)
-    accrue_portal("/billing", session_keys: [:user_token])
+    accrue_portal("/billing", session_keys: [:user_token], login_path: "/users/log-in")
   end
 
   def __live_session__(conn, session_keys) when is_list(session_keys) do

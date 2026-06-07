@@ -51,6 +51,16 @@ defmodule AccrueHostWeb.PortalColdStartTest do
       body = html_response(conn, 200)
       assert body =~ AccruePortal.Copy.home_heading()
       assert body =~ AccruePortal.Copy.home_body()
+      assert body =~ "CohortFlow billing"
+    end
+
+    test "anonymous GET /billing redirects to host login and stores the return path", %{
+      conn: conn
+    } do
+      conn = get(conn, ~p"/billing")
+
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert get_session(conn, :user_return_to) == ~p"/billing"
     end
   end
 end

@@ -10,7 +10,7 @@ defmodule AccruePortal.Copy do
   def checkout_missing_nonce_error, do: "Secure card entry did not finish loading. Try again."
   def checkout_session_missing_error, do: "Checkout session not found."
   def checkout_session_expired_title, do: "This checkout link has expired"
-  def checkout_session_expired_body, do: "Return to Accrue and start a new subscription."
+  def checkout_session_expired_body, do: "Return to your account and start a new subscription."
   def checkout_retry_help, do: "Check the card number, expiration, and CVV, then try again."
   def checkout_promo_label, do: "Promotion code"
   def checkout_promo_hint, do: "Preview savings before you pay."
@@ -36,10 +36,13 @@ defmodule AccruePortal.Copy do
     "Your card was charged but we couldn't activate the subscription."
   end
 
-  def home_page_title, do: "Billing portal"
+  def home_page_title, do: "#{brand_name()} billing"
   def home_eyebrow, do: "Customer billing"
-  def home_heading, do: "Billing portal"
-  def home_body, do: "Review your account and manage subscriptions from one place."
+  def home_heading, do: "#{brand_name()} billing"
+
+  def home_body,
+    do: "Review your #{brand_name()} account and manage subscriptions from one place."
+
   def home_manage_subscriptions_cta, do: "Manage subscriptions"
   def home_manage_payment_methods_cta, do: "Payment methods"
   def home_manage_invoices_cta, do: "Invoices"
@@ -69,15 +72,15 @@ defmodule AccruePortal.Copy do
     do: "Preview supported plan changes from details before you confirm."
 
   def subscriptions_plan_change_host_managed(%Subscription{processor: "braintree"}) do
-    "Plan changes stay host-managed for this Braintree subscription."
+    "Plan changes for this subscription are handled by your account team."
   end
 
   def subscriptions_plan_change_host_managed(_subscription) do
-    "Open details to review supported plan-change options."
+    "Open details to review available plan-change options."
   end
 
   def subscriptions_cancel_success(%Subscription{processor: "braintree"}),
-    do: "Subscription canceled now. Review access changes in your host app."
+    do: "Subscription canceled now. Review access changes in your account."
 
   def subscriptions_cancel_success(_subscription),
     do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
@@ -97,14 +100,14 @@ defmodule AccruePortal.Copy do
   def subscription_plan_change_heading, do: "Need to change plans?"
 
   def subscription_plan_change_body(_subscription) do
-    "Preview the next invoice before you confirm a supported plan change. Quantity, item management, and other billing policy still stay outside this portal."
+    "Preview the next invoice before you confirm a supported plan change."
   end
 
   def subscription_plan_change_current_label, do: "Current plan"
   def subscription_plan_change_target_label, do: "New plan reference"
 
   def subscription_plan_change_target_hint,
-    do: "Use the host app's plan reference, such as price_pro."
+    do: "Use the plan reference from your workspace billing screen."
 
   def subscription_plan_change_preview_cta, do: "Preview plan change"
   def subscription_plan_change_commit_cta, do: "Confirm plan change"
@@ -117,10 +120,10 @@ defmodule AccruePortal.Copy do
   end
 
   def subscription_plan_change_preview_unavailable_heading,
-    do: "Plan changes stay host-managed here"
+    do: "Plan changes are not self-serve here"
 
   def subscription_plan_change_preview_unavailable_body(%Subscription{processor: "braintree"}) do
-    "Braintree plan changes can stay bounded to host-managed next steps. This mounted portal does not preview upcoming invoices for Braintree or offer direct self-serve swaps here."
+    "This subscription does not offer direct self-serve invoice previews in the portal."
   end
 
   def subscription_plan_change_preview_unavailable_body(_subscription) do
@@ -128,7 +131,7 @@ defmodule AccruePortal.Copy do
   end
 
   def subscription_plan_change_preview_error do
-    "We couldn't preview that plan change. Check the plan reference in your host app and try again."
+    "We couldn't preview that plan change. Check the plan reference and try again."
   end
 
   def subscription_plan_change_commit_success do
@@ -144,7 +147,7 @@ defmodule AccruePortal.Copy do
   end
 
   def subscription_plan_change_missing_reference do
-    "Enter the host app's plan reference to preview the change."
+    "Enter a plan reference to preview the change."
   end
 
   def subscription_cancel_heading(%Subscription{processor: "braintree"}),
@@ -153,7 +156,7 @@ defmodule AccruePortal.Copy do
   def subscription_cancel_heading(_subscription), do: "Need to stop renewing?"
 
   def subscription_cancel_body(%Subscription{processor: "braintree"}) do
-    "Braintree supports Cancel now through Accrue.Billing.cancel/2. If you need end-of-term non-renewal instead, keep that softer policy in your host app."
+    "Cancel now can end access immediately. If you need end-of-term non-renewal instead, contact support."
   end
 
   def subscription_cancel_body(_subscription),
@@ -165,7 +168,7 @@ defmodule AccruePortal.Copy do
   def subscription_keep_cta, do: "Keep subscription"
 
   def subscription_cancel_success(%Subscription{processor: "braintree"}),
-    do: "Subscription canceled now. Review access changes in your host app."
+    do: "Subscription canceled now. Review access changes in your account."
 
   def subscription_cancel_success(_subscription),
     do: "Cancel renewal scheduled. Access stays on until the current billing period ends."
@@ -268,7 +271,7 @@ defmodule AccruePortal.Copy do
   def subscription_access_timing(%Subscription{} = subscription) do
     cond do
       subscription.processor == "braintree" and not Subscription.canceled?(subscription) ->
-        "Braintree immediate cancellation can end access now. Softer end-of-term handling belongs in your host app."
+        "Immediate cancellation can end access now. Contact support if you need end-of-term handling instead."
 
       Subscription.canceling?(subscription) ->
         "Access ends on the current period end date shown below."
@@ -279,5 +282,11 @@ defmodule AccruePortal.Copy do
       true ->
         "Changes can take a moment to converge across local projection and provider updates."
     end
+  end
+
+  defp brand_name do
+    Accrue.Config.branding(:business_name)
+  rescue
+    _ -> "Billing"
   end
 end

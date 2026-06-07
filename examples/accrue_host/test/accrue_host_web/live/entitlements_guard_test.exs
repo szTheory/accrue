@@ -19,7 +19,10 @@ defmodule AccrueHostWeb.EntitlementsGuardTest do
 
     {:ok, _view, html} = live(conn, "/app/reports/advanced")
     assert html =~ "Advanced Reports"
-    assert html =~ "You have access to this premium feature"
+    assert html =~ "Cohort performance"
+
+    assert html =~
+             "This workspace has access to advanced cohort reporting through its active plan."
   end
 
   test "non-entitled organization is denied access to the gated advanced reports route", %{

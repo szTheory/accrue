@@ -8,35 +8,68 @@ defmodule AccrueHostWeb.UserLive.Registration do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-sm">
-        <div class="text-center">
-          <.header>
-            Register for an account
-            <:subtitle>
-              Already registered?
-              <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">
-                Log in
-              </.link>
-              to your account now.
-            </:subtitle>
-          </.header>
-        </div>
+      <div class="mx-auto grid max-w-4xl gap-6 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+        <section class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+          <p class="text-sm font-semibold uppercase text-primary">
+            {AccrueHost.DemoBrand.product_name()}
+          </p>
+          <h1 class="mt-2 text-3xl font-semibold">Create a workspace account</h1>
+          <p class="mt-3 text-sm leading-6 text-base-content/65">
+            Already registered?
+            <.link navigate={~p"/users/log-in"} class="font-semibold text-primary hover:underline">
+              Sign in to your workspace
+            </.link>
+          </p>
 
-        <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
-          <.input
-            field={@form[:email]}
-            type="email"
-            label="Email"
-            autocomplete="username"
-            spellcheck="false"
-            required
-            phx-mounted={JS.focus()}
-          />
+          <.form
+            for={@form}
+            id="registration_form"
+            phx-submit="save"
+            phx-change="validate"
+            class="mt-6"
+          >
+            <.input
+              field={@form[:email]}
+              type="email"
+              label="Email"
+              autocomplete="username"
+              spellcheck="false"
+              required
+              phx-mounted={JS.focus()}
+            />
 
-          <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
-            Create an account
-          </.button>
-        </.form>
+            <.button phx-disable-with="Creating account..." class="btn btn-primary w-full rounded-lg">
+              Create account
+            </.button>
+          </.form>
+        </section>
+
+        <aside class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+          <p class="text-sm font-semibold uppercase text-secondary">Workspace model</p>
+          <h2 class="mt-2 text-2xl font-semibold">
+            Cohorts, seats, and billing state stay together.
+          </h2>
+          <dl class="mt-6 grid gap-4">
+            <div class="border-b border-base-300 pb-4">
+              <dt class="text-sm font-semibold text-base-content/60">Organization billing</dt>
+              <dd class="mt-1 text-sm leading-6">
+                Every seeded account owns or operates a workspace with its own subscription lifecycle.
+              </dd>
+            </div>
+            <div class="border-b border-base-300 pb-4">
+              <dt class="text-sm font-semibold text-base-content/60">Customer portal</dt>
+              <dd class="mt-1 text-sm leading-6">
+                Members review payment methods, invoices, and subscription details under the CohortFlow brand.
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-semibold text-base-content/60">Operator console</dt>
+              <dd class="mt-1 text-sm leading-6">
+                Billing operators use Accrue Admin for events, invoices, recovery, and webhook inspection.
+              </dd>
+            </div>
+          </dl>
+        </aside>
       </div>
     </Layouts.app>
     """

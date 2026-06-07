@@ -33,11 +33,11 @@ defmodule AccrueAdmin.BrandPlug do
   end
 
   defp build_brand do
-    branding = Config.branding()
+    branding = Config.admin_branding()
     accent_hex = branding[:accent_color] || "#5D79F6"
 
     %{
-      app_name: present_or(branding[:business_name], "Billing"),
+      app_name: present_or(branding[:app_name], "Billing"),
       logo_url: present_or_nil(branding[:logo_url]),
       accent_hex: accent_hex,
       accent_contrast_hex: pick_contrast(accent_hex)

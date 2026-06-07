@@ -40,9 +40,9 @@ defmodule Accrue.Portal.AuthHook do
     end
   end
 
-  defp redirect_path(%{"accrue_portal" => %{"mount_path" => mount_path}})
-       when is_binary(mount_path) do
-    mount_path
+  defp redirect_path(%{"accrue_portal" => %{"login_path" => login_path}})
+       when is_binary(login_path) do
+    login_path
   end
 
   defp redirect_path(_session), do: "/"

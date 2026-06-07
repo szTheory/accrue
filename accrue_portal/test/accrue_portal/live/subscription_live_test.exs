@@ -143,16 +143,16 @@ defmodule AccruePortal.SubscriptionLiveTest do
 
     assert html =~ "Need to stop now?"
     assert html =~ "Cancel now"
-    assert html =~ "Plan changes stay host-managed here"
+    assert html =~ "Plan changes are not self-serve here"
 
     assert html =~
-             "Braintree supports Cancel now through Accrue.Billing.cancel/2. If you need end-of-term non-renewal instead, keep that softer policy in your host app."
+             "Cancel now can end access immediately. If you need end-of-term non-renewal instead, contact support."
 
     assert html =~
-             "Braintree immediate cancellation can end access now. Softer end-of-term handling belongs in your host app."
+             "Immediate cancellation can end access now. Contact support if you need end-of-term handling instead."
 
     assert html =~
-             "Braintree plan changes can stay bounded to host-managed next steps. This mounted portal does not preview upcoming invoices for Braintree or offer direct self-serve swaps here."
+             "This subscription does not offer direct self-serve invoice previews in the portal."
 
     refute html =~ "Cancel renewal"
     refute html =~ "Preview plan change"

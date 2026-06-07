@@ -3,10 +3,11 @@ defmodule AccrueHost.Seeds.Helpers do
   alias AccrueHost.Accounts.OrganizationMembership
   alias AccrueHost.Accounts.Scope
   alias AccrueHost.Accounts.User
+  alias AccrueHost.DemoBrand
   alias AccrueHost.Organizations
   alias AccrueHost.Repo
 
-  def demo_password, do: "accrue-demo-password"
+  def demo_password, do: DemoBrand.demo_password()
 
   def ensure_demo_user(email) do
     case Repo.get_by(User, email: email) do
@@ -39,7 +40,13 @@ defmodule AccrueHost.Seeds.Helpers do
   def ensure_demo_org(owner, name, slug) do
     case Repo.get_by(AccrueHost.Accounts.Organization, slug: slug) do
       %AccrueHost.Accounts.Organization{} = organization ->
-        organization
+        if organization.name == name do
+          organization
+        else
+          organization
+          |> Ecto.Changeset.change(name: name)
+          |> Repo.update!()
+        end
 
       nil ->
         {:ok, organization} =

@@ -29,8 +29,16 @@ config :accrue,
   #   webhook_signing_secrets: %{stripe: System.fetch_env!("STRIPE_WEBHOOK_SECRET")}
   webhook_signing_secrets: %{stripe: "whsec_test_host"},
   branding: [
-    from_email: "noreply@example.test",
-    support_email: "support@example.test"
+    business_name: "CohortFlow",
+    from_name: "CohortFlow Billing",
+    from_email: "billing@cohortflow.test",
+    support_email: "support@cohortflow.test",
+    accent_color: "#26785F",
+    secondary_color: "#3E6E91"
+  ],
+  admin_branding: [
+    app_name: "Accrue Admin",
+    accent_color: "#5D79F6"
   ]
 
 config :accrue_host, Oban,

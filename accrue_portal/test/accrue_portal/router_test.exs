@@ -56,7 +56,22 @@ defmodule AccruePortal.RouterTest do
     assert session["user_token"] == "token-123"
     refute Map.has_key?(session, "ignored")
     assert session["accrue_portal"]["mount_path"] == "/billing"
+    assert session["accrue_portal"]["login_path"] == "/"
     assert session["accrue_portal"]["theme"] == "system"
+  end
+
+  test "session callback includes configured login path" do
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Test.init_test_session(%{"user_token" => "token-123"})
+
+    session =
+      conn
+      |> Accrue.Portal.CSPPlug.call([])
+      |> Accrue.Portal.BrandPlug.call([])
+      |> Accrue.Portal.Router.__session__([:user_token], "/billing", "/users/log-in")
+
+    assert session["accrue_portal"]["login_path"] == "/users/log-in"
   end
 
   test "prod-like compilation keeps the portal shell mounted" do

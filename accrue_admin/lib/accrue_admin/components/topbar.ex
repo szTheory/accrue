@@ -16,7 +16,7 @@ defmodule AccrueAdmin.Components.Topbar do
     <header class="ax-topbar">
       <div class="ax-topbar-copy">
         <a href="#main-content" class="ax-skip-link">Skip to content</a>
-        <p class="ax-eyebrow">Internal billing operations</p>
+        <p class="ax-eyebrow"><%= @brand.app_name %></p>
         <h1 class="ax-heading"><%= @page_title %></h1>
       </div>
 

@@ -171,7 +171,7 @@ defmodule AccruePortal.CheckoutLiveTest do
              render_hook(expired_view, "checkout_tokenized", %{"nonce" => "fake-valid-nonce"})
 
     assert expired_html_after =~ "This checkout link has expired"
-    assert expired_html_after =~ "Return to Accrue and start a new subscription."
+    assert expired_html_after =~ "Return to your account and start a new subscription."
     assert LocalSession.by_id(expired.id).status == "open"
 
     assert {:error, {:redirect, %{to: "/billing"}}} =
