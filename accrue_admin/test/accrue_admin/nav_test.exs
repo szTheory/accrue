@@ -65,7 +65,7 @@ defmodule AccrueAdmin.NavTest do
   test "items/2 backward compat call still works" do
     items = Nav.items("/billing", "/billing")
     assert is_list(items)
-    assert length(items) > 0
+    assert [_ | _] = items
     # All items must have badge and collapsible keys
     Enum.each(items, fn item ->
       assert Map.has_key?(item, :badge)
@@ -83,7 +83,7 @@ defmodule AccrueAdmin.NavTest do
   test "Billing group items have collapsible: false" do
     items = Nav.items("/billing", "/billing", %{recovery: 5, developer: 3})
     billing_items = Enum.filter(items, &(&1.group == "Billing"))
-    assert length(billing_items) > 0
+    assert [_ | _] = billing_items
 
     Enum.each(billing_items, fn item ->
       assert item.collapsible == false,

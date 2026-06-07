@@ -9,8 +9,8 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
   # Required for ~H sigil used in render_component wrapping function (test b).
   use Phoenix.Component
 
-  alias AccrueAdmin.Dev.ComponentRegistry
   alias AccrueAdmin.Components.Button
+  alias AccrueAdmin.Dev.ComponentRegistry
 
   # (a) Every registry variant appears in the rendered /dev/components page.
   #

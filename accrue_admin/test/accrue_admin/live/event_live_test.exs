@@ -3,8 +3,8 @@ defmodule AccrueAdmin.EventLiveTest do
 
   use AccrueAdmin.LiveCase, async: false
 
-  alias Accrue.Events
   alias Accrue.Billing.{Customer, Invoice}
+  alias Accrue.Events
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
 
