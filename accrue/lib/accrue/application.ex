@@ -206,7 +206,7 @@ defmodule Accrue.Application do
       repo = Accrue.Repo
 
       locales =
-        from(c in "accrue_customers",
+        from(c in Accrue.Billing.Customer,
           where: not is_nil(c.preferred_locale),
           group_by: c.preferred_locale,
           limit: 100,

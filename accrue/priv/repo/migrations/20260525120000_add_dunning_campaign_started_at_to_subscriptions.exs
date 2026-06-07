@@ -20,8 +20,8 @@ defmodule Accrue.Repo.Migrations.AddDunningCampaignStartedAtToSubscriptions do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_subscriptions) do
-      add :dunning_campaign_started_at, :utc_datetime_usec, null: true
+    alter Accrue.Migration.table(:accrue_subscriptions) do
+      add(:dunning_campaign_started_at, :utc_datetime_usec, null: true)
     end
   end
 end

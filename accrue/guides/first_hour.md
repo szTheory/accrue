@@ -103,6 +103,18 @@ mix deps.get
 mix accrue.install --billable MyApp.Accounts.User --billing-context MyApp.Billing
 ```
 
+`mix accrue.install` writes compile-time billing schema config to
+`config/config.exs`:
+
+```elixir
+config :accrue, :billing_schema, "billing"
+```
+
+That keeps Accrue-owned billing tables in the Postgres `billing` schema by
+default. Use `mix accrue.install --billing-schema public` or set
+`config :accrue, :billing_schema, "public"` only when you intentionally want
+Accrue tables in the default schema.
+
 The checked-in host example is the canonical local evaluation loop:
 
 ```bash

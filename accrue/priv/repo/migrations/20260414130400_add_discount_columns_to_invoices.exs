@@ -17,8 +17,8 @@ defmodule Accrue.Repo.Migrations.AddDiscountColumnsToInvoices do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_invoices) do
-      add :total_discount_amounts, :map, null: false, default: %{}
+    alter Accrue.Migration.table(:accrue_invoices) do
+      add(:total_discount_amounts, :map, null: false, default: %{})
     end
   end
 end

@@ -9,11 +9,11 @@ defmodule Accrue.Repo.Migrations.AddTaxRolloutSafetyColumns do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_subscriptions) do
+    alter Accrue.Migration.table(:accrue_subscriptions) do
       add(:automatic_tax_disabled_reason, :string)
     end
 
-    alter table(:accrue_invoices) do
+    alter Accrue.Migration.table(:accrue_invoices) do
       add(:automatic_tax_disabled_reason, :string)
       add(:last_finalization_error_code, :string)
     end

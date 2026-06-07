@@ -10,7 +10,7 @@ defmodule Accrue.Billing.Charge do
   `fees_settled_at`) needed by the refund fee-reconciliation path (D3-45).
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

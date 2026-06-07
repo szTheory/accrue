@@ -20,36 +20,43 @@ defmodule Accrue.Repo.Migrations.CreateAccrueSubscriptionSchedules do
   use Ecto.Migration
 
   def change do
-    create table(:accrue_subscription_schedules, primary_key: false) do
-      add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
-      add :processor, :string, null: false, default: "stripe"
-      add :processor_id, :string, null: false
+    create Accrue.Migration.table(:accrue_subscription_schedules, primary_key: false) do
+      add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
+      add(:processor, :string, null: false, default: "stripe")
+      add(:processor_id, :string, null: false)
 
-      add :customer_id,
-          references(:accrue_customers, type: :binary_id, on_delete: :nilify_all),
-          null: true
+      add(
+        :customer_id,
+        Accrue.Migration.references(:accrue_customers, type: :binary_id, on_delete: :nilify_all),
+        null: true
+      )
 
-      add :subscription_id,
-          references(:accrue_subscriptions, type: :binary_id, on_delete: :nilify_all),
-          null: true
+      add(
+        :subscription_id,
+        Accrue.Migration.references(:accrue_subscriptions,
+          type: :binary_id,
+          on_delete: :nilify_all
+        ),
+        null: true
+      )
 
-      add :status, :string, null: false
-      add :current_phase_index, :integer, null: true
-      add :phases_count, :integer, null: true
-      add :next_phase_at, :utc_datetime_usec, null: true
-      add :released_at, :utc_datetime_usec, null: true
-      add :canceled_at, :utc_datetime_usec, null: true
-      add :data, :map, null: false, default: %{}
-      add :metadata, :map, null: false, default: %{}
-      add :lock_version, :integer, null: false, default: 1
-      add :last_stripe_event_ts, :utc_datetime_usec, null: true
-      add :last_stripe_event_id, :string, null: true
+      add(:status, :string, null: false)
+      add(:current_phase_index, :integer, null: true)
+      add(:phases_count, :integer, null: true)
+      add(:next_phase_at, :utc_datetime_usec, null: true)
+      add(:released_at, :utc_datetime_usec, null: true)
+      add(:canceled_at, :utc_datetime_usec, null: true)
+      add(:data, :map, null: false, default: %{})
+      add(:metadata, :map, null: false, default: %{})
+      add(:lock_version, :integer, null: false, default: 1)
+      add(:last_stripe_event_ts, :utc_datetime_usec, null: true)
+      add(:last_stripe_event_id, :string, null: true)
 
       timestamps(type: :utc_datetime_usec)
     end
 
-    create unique_index(:accrue_subscription_schedules, [:processor_id])
-    create index(:accrue_subscription_schedules, [:customer_id])
-    create index(:accrue_subscription_schedules, [:subscription_id])
+    create(Accrue.Migration.unique_index(:accrue_subscription_schedules, [:processor_id]))
+    create(Accrue.Migration.index(:accrue_subscription_schedules, [:customer_id]))
+    create(Accrue.Migration.index(:accrue_subscription_schedules, [:subscription_id]))
   end
 end

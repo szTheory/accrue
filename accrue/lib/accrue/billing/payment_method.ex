@@ -15,7 +15,7 @@ defmodule Accrue.Billing.PaymentMethod do
       (Plan 06) when fingerprint matches an existing row on the customer
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

@@ -4,7 +4,7 @@ defmodule Accrue.Checkout.LocalSession do
   through a first-party Accrue portal.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
   import Ecto.Query, only: [from: 2]

@@ -20,7 +20,7 @@ defmodule Accrue.Repo.Migrations.AddLocaleAndTimezoneToCustomers do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_customers) do
+    alter Accrue.Migration.table(:accrue_customers) do
       add(:preferred_locale, :string, size: 35)
       add(:preferred_timezone, :string, size: 64)
     end

@@ -7,34 +7,38 @@ defmodule Accrue.Repo.Migrations.AddAdminCausalityToEvents do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_events) do
+    alter Accrue.Migration.table(:accrue_events) do
       add(
         :caused_by_event_id,
-        references(:accrue_events, column: :id, type: :bigint, on_delete: :nothing)
+        Accrue.Migration.references(:accrue_events,
+          column: :id,
+          type: :bigint,
+          on_delete: :nothing
+        )
       )
 
       add(
         :caused_by_webhook_event_id,
-        references(:accrue_webhook_events, type: :binary_id, on_delete: :nothing)
+        Accrue.Migration.references(:accrue_webhook_events, type: :binary_id, on_delete: :nothing)
       )
     end
 
     create(
-      index(:accrue_events, [:caused_by_event_id],
+      Accrue.Migration.index(:accrue_events, [:caused_by_event_id],
         where: "caused_by_event_id IS NOT NULL",
         name: :accrue_events_caused_by_event_id_idx
       )
     )
 
     create(
-      index(:accrue_events, [:caused_by_webhook_event_id],
+      Accrue.Migration.index(:accrue_events, [:caused_by_webhook_event_id],
         where: "caused_by_webhook_event_id IS NOT NULL",
         name: :accrue_events_caused_by_webhook_event_id_idx
       )
     )
 
     create(
-      index(:accrue_events, [:actor_type, :caused_by_event_id, :inserted_at],
+      Accrue.Migration.index(:accrue_events, [:actor_type, :caused_by_event_id, :inserted_at],
         where: "actor_type = 'admin' AND caused_by_event_id IS NOT NULL",
         name: :accrue_events_admin_causality_idx
       )

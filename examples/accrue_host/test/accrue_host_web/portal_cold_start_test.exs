@@ -15,9 +15,11 @@ defmodule AccrueHostWeb.PortalColdStartTest do
   alias AccrueHost.Repo
   alias AccrueHostWeb.Router
 
+  @checkout_sessions_table Accrue.Migration.qualified_table(:accrue_checkout_sessions)
+
   describe "phase 101 cold start" do
     test "accrue_checkout_sessions schema is applied" do
-      result = Repo.query!("SELECT 1 FROM accrue_checkout_sessions LIMIT 1")
+      result = Repo.query!("SELECT 1 FROM #{@checkout_sessions_table} LIMIT 1")
       assert %Postgrex.Result{} = result
     end
 

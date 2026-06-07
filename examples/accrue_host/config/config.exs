@@ -12,6 +12,7 @@ config :ex_money, default_cldr_backend: Accrue.Cldr
 
 config :accrue,
   repo: AccrueHost.Repo,
+  billing_schema: "billing",
   branding: [
     from_email: "noreply@example.test",
     support_email: "support@example.test"

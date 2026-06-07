@@ -9,8 +9,11 @@ defmodule AccrueAdmin.E2E.Fixtures do
   alias Accrue.Webhook.WebhookEvent
   alias AccrueAdmin.TestRepo
 
-  @tables ~w(
+  @public_tables ~w(
     oban_jobs
+  )
+
+  @accrue_tables ~w(
     accrue_events
     accrue_refunds
     accrue_charges
@@ -27,7 +30,11 @@ defmodule AccrueAdmin.E2E.Fixtures do
   )
 
   def reset! do
-    TestRepo.query!("TRUNCATE TABLE #{Enum.join(@tables, ", ")} RESTART IDENTITY CASCADE", [])
+    tables =
+      @public_tables ++
+        Enum.map(@accrue_tables, &Accrue.Migration.qualified_table/1)
+
+    TestRepo.query!("TRUNCATE TABLE #{Enum.join(tables, ", ")} RESTART IDENTITY CASCADE", [])
     :ok = Accrue.Processor.Fake.reset()
     :ok = Accrue.Actor.put_operation_id("e2e-" <> Ecto.UUID.generate())
     :ok

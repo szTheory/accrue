@@ -3,7 +3,7 @@ defmodule Accrue.Billing.DiscountMapping do
   Canonical local discount mapping for Braintree promotion-code resolution.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

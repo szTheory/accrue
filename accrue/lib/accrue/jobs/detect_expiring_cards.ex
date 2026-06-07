@@ -28,6 +28,7 @@ defmodule Accrue.Jobs.DetectExpiringCards do
 
   alias Accrue.{Clock, Config, Events, Repo}
   alias Accrue.Billing.{Customer, PaymentMethod}
+  alias Accrue.Events.Event
 
   @impl Oban.Worker
   def perform(%Oban.Job{} = job) do
@@ -91,7 +92,7 @@ defmodule Accrue.Jobs.DetectExpiringCards do
     one_year_ago = DateTime.add(Clock.utc_now(), -365 * 86_400, :second)
 
     query =
-      from(e in "accrue_events",
+      from(e in Event,
         where:
           e.subject_id == ^pm_id and
             e.type == "card.expiring_soon" and

@@ -42,6 +42,8 @@ defmodule AccrueHostSeedE2E do
   @fixture_subscription_item_processor_ids ["si_host_browser_replay"]
   @fixture_discount_codes ["SPRING25", "BROKEN"]
   @fixture_checkout_operation_ids ["host-browser-portal-checkout"]
+  @events_table Accrue.Migration.qualified_table(:accrue_events)
+  @discount_mappings_table Accrue.Migration.qualified_table(:accrue_discount_mappings)
 
   def run!(fixture_path \\ System.fetch_env!("ACCRUE_HOST_E2E_FIXTURE")) do
     cleanup_fixture_footprint!()
@@ -176,7 +178,7 @@ defmodule AccrueHostSeedE2E do
       )
 
     unless fake_browser_subscription_ids == [] do
-      Repo.query!("ALTER TABLE accrue_events DISABLE TRIGGER accrue_events_immutable_trigger")
+      Repo.query!("ALTER TABLE #{@events_table} DISABLE TRIGGER accrue_events_immutable_trigger")
 
       try do
         Repo.delete_all(
@@ -187,7 +189,7 @@ defmodule AccrueHostSeedE2E do
           )
         )
       after
-        Repo.query!("ALTER TABLE accrue_events ENABLE TRIGGER accrue_events_immutable_trigger")
+        Repo.query!("ALTER TABLE #{@events_table} ENABLE TRIGGER accrue_events_immutable_trigger")
       end
 
       Repo.delete_all(
@@ -246,7 +248,7 @@ defmodule AccrueHostSeedE2E do
       )
     )
 
-    Repo.query!("ALTER TABLE accrue_events DISABLE TRIGGER accrue_events_immutable_trigger")
+    Repo.query!("ALTER TABLE #{@events_table} DISABLE TRIGGER accrue_events_immutable_trigger")
 
     try do
       Repo.delete_all(
@@ -259,7 +261,7 @@ defmodule AccrueHostSeedE2E do
         )
       )
     after
-      Repo.query!("ALTER TABLE accrue_events ENABLE TRIGGER accrue_events_immutable_trigger")
+      Repo.query!("ALTER TABLE #{@events_table} ENABLE TRIGGER accrue_events_immutable_trigger")
     end
 
     Repo.delete_all(
@@ -580,7 +582,7 @@ defmodule AccrueHostSeedE2E do
 
     Repo.query!(
       """
-      UPDATE accrue_discount_mappings
+      UPDATE #{@discount_mappings_table}
       SET discount_id = '', updated_at = $2
       WHERE id = $1
       """,

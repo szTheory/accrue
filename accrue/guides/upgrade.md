@@ -50,6 +50,20 @@ If you are upgrading from a legacy Chrome-backed invoice setup, review
 migration contract lives there, including when to set
 `:invoice_pdf_adapter` explicitly and how it now differs from `:pdf_adapter`.
 
+If you are upgrading an app that already has Accrue tables in `public`, decide
+the billing schema before recompiling the dependency:
+
+```elixir
+config :accrue, :billing_schema, "public"
+```
+
+Keep that explicit `public` setting when you want existing table placement to
+stay unchanged. New installer runs default to `billing`, and Accrue migrations
+schema-qualify Accrue-owned tables there. Moving an existing production install
+from `public` to `billing` is host-owned data migration work: schedule it like
+any other table move, verify foreign keys/triggers/backups, then recompile with
+`config :accrue, :billing_schema, "billing"`.
+
 When upgrading, review the package-local docs for the package you consume:
 
 - `accrue/CHANGELOG.md`

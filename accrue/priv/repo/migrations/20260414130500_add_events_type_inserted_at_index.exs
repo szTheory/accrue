@@ -12,10 +12,12 @@ defmodule Accrue.Repo.Migrations.AddEventsTypeInsertedAtIndex do
   use Ecto.Migration
 
   def change do
-    create index(
-             :accrue_events,
-             [:type, :inserted_at],
-             name: :accrue_events_type_inserted_at_idx
-           )
+    create(
+      Accrue.Migration.index(
+        :accrue_events,
+        [:type, :inserted_at],
+        name: :accrue_events_type_inserted_at_idx
+      )
+    )
   end
 end

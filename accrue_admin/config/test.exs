@@ -20,6 +20,7 @@ config :accrue_admin, AccrueAdmin.TestEndpoint,
 config :accrue,
   env: :test,
   repo: AccrueAdmin.TestRepo,
+  billing_schema: "billing",
   branding: [
     from_email: "noreply@example.test",
     support_email: "support@example.test"

@@ -35,6 +35,7 @@ defmodule AccrueHost.HostFlowProofCase do
     "billing-history@example.test",
     "billing-history@example.com"
   ]
+  @events_table Accrue.Migration.qualified_table(:accrue_events)
 
   using do
     quote do
@@ -97,7 +98,7 @@ defmodule AccrueHost.HostFlowProofCase do
   end
 
   defp delete_proof_events! do
-    Repo.query!("ALTER TABLE accrue_events DISABLE TRIGGER accrue_events_immutable_trigger")
+    Repo.query!("ALTER TABLE #{@events_table} DISABLE TRIGGER accrue_events_immutable_trigger")
 
     try do
       Repo.delete_all(
@@ -106,7 +107,7 @@ defmodule AccrueHost.HostFlowProofCase do
         )
       )
     after
-      Repo.query!("ALTER TABLE accrue_events ENABLE TRIGGER accrue_events_immutable_trigger")
+      Repo.query!("ALTER TABLE #{@events_table} ENABLE TRIGGER accrue_events_immutable_trigger")
     end
   end
 

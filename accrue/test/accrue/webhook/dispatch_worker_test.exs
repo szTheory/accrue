@@ -6,6 +6,8 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
   alias Accrue.Billing.{Customer, MeterEvent}
   alias Accrue.Webhook.{DispatchWorker, WebhookEvent, Pruner}
 
+  @webhook_events_table Accrue.Migration.qualified_table(:accrue_webhook_events)
+
   # A test handler that succeeds
   defmodule SuccessHandler do
     use Accrue.Webhook.Handler
@@ -257,7 +259,7 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
       {:ok, uuid_bin} = Ecto.UUID.dump(old_event.id)
 
       Accrue.TestRepo.query!(
-        "UPDATE accrue_webhook_events SET inserted_at = $1 WHERE id = $2",
+        "UPDATE #{@webhook_events_table} SET inserted_at = $1 WHERE id = $2",
         [DateTime.utc_now() |> DateTime.add(-15 * 86400, :second), uuid_bin]
       )
 
@@ -285,7 +287,7 @@ defmodule Accrue.Webhook.DispatchWorkerTest do
       {:ok, uuid_bin} = Ecto.UUID.dump(old_dead.id)
 
       Accrue.TestRepo.query!(
-        "UPDATE accrue_webhook_events SET inserted_at = $1 WHERE id = $2",
+        "UPDATE #{@webhook_events_table} SET inserted_at = $1 WHERE id = $2",
         [DateTime.utc_now() |> DateTime.add(-91 * 86400, :second), uuid_bin]
       )
 

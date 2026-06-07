@@ -2,7 +2,7 @@ defmodule Accrue.Repo.Migrations.CreateAccrueDiscountMappings do
   use Ecto.Migration
 
   def change do
-    create table(:accrue_discount_mappings, primary_key: false) do
+    create Accrue.Migration.table(:accrue_discount_mappings, primary_key: false) do
       add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
       add(:processor, :string, null: false, default: "braintree")
       add(:code, :string, null: false)
@@ -21,7 +21,7 @@ defmodule Accrue.Repo.Migrations.CreateAccrueDiscountMappings do
       timestamps(type: :utc_datetime_usec)
     end
 
-    create(unique_index(:accrue_discount_mappings, [:processor, :code]))
-    create(index(:accrue_discount_mappings, [:processor, :discount_id]))
+    create(Accrue.Migration.unique_index(:accrue_discount_mappings, [:processor, :code]))
+    create(Accrue.Migration.index(:accrue_discount_mappings, [:processor, :discount_id]))
   end
 end

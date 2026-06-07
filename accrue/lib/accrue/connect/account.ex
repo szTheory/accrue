@@ -25,7 +25,7 @@ defmodule Accrue.Connect.Account do
       can settle arbitrary state without tripping the strict gate.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

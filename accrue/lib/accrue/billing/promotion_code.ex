@@ -12,7 +12,7 @@ defmodule Accrue.Billing.PromotionCode do
   is the processor; Accrue denormalizes only what the admin UI touches.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

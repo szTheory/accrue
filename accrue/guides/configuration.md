@@ -14,6 +14,30 @@ config :accrue,
 
 The runtime-only keys you must supply for the Stripe processor are `:stripe_secret_key` and `:webhook_signing_secret`.
 
+## Billing schema
+
+By default, `mix accrue.install` configures Accrue-owned billing tables under a
+Postgres schema named `billing` instead of placing them in `public`.
+
+Keep this setting in `config/config.exs`, not `config/runtime.exs`: Ecto schema
+prefixes are compile-time configuration.
+
+```elixir
+config :accrue, :billing_schema, "billing"
+```
+
+Set `"public"` explicitly only when you intentionally want Accrue tables in the
+default schema:
+
+```elixir
+config :accrue, :billing_schema, "public"
+```
+
+Accrue migrations create the configured schema when needed and schema-qualify
+Accrue-owned tables, indexes, foreign keys, and raw SQL helpers. Host-owned
+tables such as users, organizations, Oban jobs, and your app tables remain under
+your app's normal migration conventions.
+
 ## Optional adapters
 
 Accrue keeps host integration points explicit. The most common optional adapters are:

@@ -27,6 +27,7 @@ defmodule Mix.Tasks.Accrue.InstallTest do
     assert output =~ "--manual"
     assert output =~ "--force"
     assert output =~ "--check"
+    assert output =~ "--billing-schema"
   end
 
   @tag :install_templates
@@ -61,6 +62,12 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              app,
              "config/config.exs",
              "config :accrue, :auth_adapter, Accrue.Auth.Default"
+           )
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/config.exs",
+             "config :accrue, :billing_schema, \"billing\""
            )
 
     assert InstallFixture.assert_contains!(
@@ -157,6 +164,27 @@ defmodule Mix.Tasks.Accrue.InstallTest do
              app,
              "config/config.exs",
              "config :accrue, :auth_adapter, Accrue.Auth.Default"
+           )
+  end
+
+  @tag :install_patches
+  test "supports explicit public billing schema opt-out" do
+    app = InstallFixture.tmp_app!(:public_billing_schema)
+
+    InstallFixture.write_mix_project!(app, [
+      "{:phoenix, \"~> 1.8\"}",
+      "{:accrue, path: \"../accrue\"}"
+    ])
+
+    InstallFixture.write_router!(app)
+    InstallFixture.write_config!(app)
+
+    run_install(app, ["--yes", "--billing-schema", "public"])
+
+    assert InstallFixture.assert_contains!(
+             app,
+             "config/config.exs",
+             "config :accrue, :billing_schema, \"public\""
            )
   end
 

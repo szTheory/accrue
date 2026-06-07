@@ -41,6 +41,12 @@ defmodule Accrue.Install.Patches do
         apply: &patch_auth_config/3
       },
       %{
+        name: "Patches.billing_schema",
+        path: project.config_path,
+        snippet: billing_schema_snippet(opts),
+        apply: &patch_billing_schema_config/3
+      },
+      %{
         name: "Patches.test_support",
         path: Path.join(project.root, "test/support/accrue_case.ex"),
         snippet: test_support_snippet(),
@@ -119,6 +125,14 @@ defmodule Accrue.Install.Patches do
     # prod-safety: Accrue.Auth.Default is dev/test friendly and fails closed in prod.
     # Replace with a host or community auth adapter before production.
     config :accrue, :auth_adapter, Accrue.Auth.Default
+    """
+  end
+
+  def billing_schema_snippet(opts) do
+    """
+    # Compile-time: Accrue Ecto schemas and generated migrations use this prefix.
+    # Use "public" only when you intentionally want Accrue tables in the default schema.
+    config :accrue, :billing_schema, "#{opts.billing_schema}"
     """
   end
 
@@ -220,6 +234,18 @@ defmodule Accrue.Install.Patches do
       File.mkdir_p!(Path.dirname(path))
       File.write!(path, content <> "\n" <> snippet)
       {:changed, path, "auth adapter"}
+    end
+  end
+
+  defp patch_billing_schema_config(_project, _opts, %{path: path, snippet: snippet}) do
+    content = if File.exists?(path), do: File.read!(path), else: "import Config\n"
+
+    if content =~ "config :accrue, :billing_schema" or content =~ "billing_schema:" do
+      {:skipped, path, "billing schema already configured"}
+    else
+      File.mkdir_p!(Path.dirname(path))
+      File.write!(path, content <> "\n" <> snippet)
+      {:changed, path, "billing schema"}
     end
   end
 

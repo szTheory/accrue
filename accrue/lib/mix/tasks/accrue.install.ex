@@ -6,6 +6,7 @@ defmodule Mix.Tasks.Accrue.Install do
   ## Flags
 
     * `--billable MyApp.Accounts.User`
+    * `--billing-schema billing`
     * `--billing-context MyApp.Billing`
     * `--webhook-path /webhooks/stripe`
     * `--admin-mount /billing`
@@ -28,7 +29,7 @@ defmodule Mix.Tasks.Accrue.Install do
 
     opts = Accrue.Install.Options.parse!(argv)
     project = Accrue.Install.Project.discover!(opts)
-    validate_planned_config!(project)
+    validate_planned_config!(project, opts)
 
     print_intro(opts)
     print_orchestration(project)
@@ -70,9 +71,12 @@ defmodule Mix.Tasks.Accrue.Install do
     report("Accrue installer")
     report("dependency: {:igniter, \"~> 0.7.9\", runtime: false}")
 
-    report("flags: --check --dry-run --yes --non-interactive --manual --force --write-conflicts")
+    report(
+      "flags: --check --dry-run --yes --non-interactive --manual --force --write-conflicts --billing-schema"
+    )
 
     report("billing_context: #{opts.billing_context}")
+    report("billing_schema: #{opts.billing_schema}")
     report("webhook_path: #{opts.webhook_path}")
     report("admin_mount: #{opts.admin_mount}")
 
@@ -267,9 +271,10 @@ defmodule Mix.Tasks.Accrue.Install do
   defp patch_label(:changed, _reason), do: "created"
   defp patch_label(:skipped, reason) when is_binary(reason), do: "skipped exists"
 
-  defp validate_planned_config!(project) do
+  defp validate_planned_config!(project, opts) do
     Accrue.Config.validate!(
       repo: project.repo || Module.concat([project.app_module, Repo]),
+      billing_schema: opts.billing_schema,
       processor: Accrue.Processor.Stripe,
       auth_adapter:
         if(project.has_sigra?, do: Accrue.Integrations.Sigra, else: Accrue.Auth.Default),

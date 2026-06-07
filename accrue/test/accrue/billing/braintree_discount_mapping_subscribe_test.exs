@@ -8,6 +8,8 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
   alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Events.Event
 
+  @discount_mappings_table Accrue.Migration.qualified_table(:accrue_discount_mappings)
+
   defmodule SubscriptionGatewayStub do
     def create(params, _opts) do
       send(self(), {:gateway_create, params})
@@ -227,7 +229,7 @@ defmodule Accrue.Billing.BraintreeDiscountMappingSubscribeTest do
         Ecto.Adapters.SQL.query(
           Repo,
           """
-          INSERT INTO accrue_discount_mappings
+          INSERT INTO #{@discount_mappings_table}
             (id, processor, code, discount_id, active, amount_off_minor, currency, metadata, data,
              lock_version, inserted_at, updated_at)
           VALUES

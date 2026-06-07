@@ -1,5 +1,5 @@
 # accrue:generated
-# accrue:fingerprint: phase19-19-rollout-safety
+# accrue:fingerprint: 00226d12736a9f6e9adcb908a086465dfe95c11d77799506d05fc83adfba0e55
 defmodule Accrue.Repo.Migrations.AddTaxRolloutSafetyColumns do
   @moduledoc """
   Adds narrow observability columns for recurring tax-location rollback states.
@@ -11,11 +11,11 @@ defmodule Accrue.Repo.Migrations.AddTaxRolloutSafetyColumns do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_subscriptions) do
+    alter Accrue.Migration.table(:accrue_subscriptions) do
       add(:automatic_tax_disabled_reason, :string)
     end
 
-    alter table(:accrue_invoices) do
+    alter Accrue.Migration.table(:accrue_invoices) do
       add(:automatic_tax_disabled_reason, :string)
       add(:last_finalization_error_code, :string)
     end

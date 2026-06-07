@@ -2,16 +2,19 @@ defmodule Accrue.Repo.Migrations.CreateAccrueMeteredChargeAttempts do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_metered_renewals) do
+    alter Accrue.Migration.table(:accrue_metered_renewals) do
       add(:paid_at, :utc_datetime_usec)
     end
 
-    create table(:accrue_metered_charge_attempts, primary_key: false) do
+    create Accrue.Migration.table(:accrue_metered_charge_attempts, primary_key: false) do
       add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
 
       add(
         :metered_renewal_id,
-        references(:accrue_metered_renewals, type: :binary_id, on_delete: :delete_all),
+        Accrue.Migration.references(:accrue_metered_renewals,
+          type: :binary_id,
+          on_delete: :delete_all
+        ),
         null: false
       )
 
@@ -35,8 +38,8 @@ defmodule Accrue.Repo.Migrations.CreateAccrueMeteredChargeAttempts do
       timestamps(type: :utc_datetime_usec)
     end
 
-    create(unique_index(:accrue_metered_charge_attempts, [:metered_renewal_id]))
-    create(unique_index(:accrue_metered_charge_attempts, [:subject_uuid]))
-    create(index(:accrue_metered_charge_attempts, [:status, :retry_at]))
+    create(Accrue.Migration.unique_index(:accrue_metered_charge_attempts, [:metered_renewal_id]))
+    create(Accrue.Migration.unique_index(:accrue_metered_charge_attempts, [:subject_uuid]))
+    create(Accrue.Migration.index(:accrue_metered_charge_attempts, [:status, :retry_at]))
   end
 end

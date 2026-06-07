@@ -10,7 +10,7 @@ defmodule Accrue.Events.Event do
   production.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

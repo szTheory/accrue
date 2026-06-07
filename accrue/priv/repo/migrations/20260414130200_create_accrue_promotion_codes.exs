@@ -16,31 +16,33 @@ defmodule Accrue.Repo.Migrations.CreateAccruePromotionCodes do
   use Ecto.Migration
 
   def change do
-    create table(:accrue_promotion_codes, primary_key: false) do
-      add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
-      add :processor, :string, null: false, default: "stripe"
-      add :processor_id, :string, null: false
-      add :code, :string, null: false
+    create Accrue.Migration.table(:accrue_promotion_codes, primary_key: false) do
+      add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
+      add(:processor, :string, null: false, default: "stripe")
+      add(:processor_id, :string, null: false)
+      add(:code, :string, null: false)
 
-      add :coupon_id,
-          references(:accrue_coupons, type: :binary_id, on_delete: :nilify_all),
-          null: true
+      add(
+        :coupon_id,
+        Accrue.Migration.references(:accrue_coupons, type: :binary_id, on_delete: :nilify_all),
+        null: true
+      )
 
-      add :active, :boolean, null: false, default: true
-      add :max_redemptions, :integer, null: true
-      add :times_redeemed, :integer, null: false, default: 0
-      add :expires_at, :utc_datetime_usec, null: true
-      add :data, :map, null: false, default: %{}
-      add :metadata, :map, null: false, default: %{}
-      add :lock_version, :integer, null: false, default: 1
-      add :last_stripe_event_ts, :utc_datetime_usec, null: true
-      add :last_stripe_event_id, :string, null: true
+      add(:active, :boolean, null: false, default: true)
+      add(:max_redemptions, :integer, null: true)
+      add(:times_redeemed, :integer, null: false, default: 0)
+      add(:expires_at, :utc_datetime_usec, null: true)
+      add(:data, :map, null: false, default: %{})
+      add(:metadata, :map, null: false, default: %{})
+      add(:lock_version, :integer, null: false, default: 1)
+      add(:last_stripe_event_ts, :utc_datetime_usec, null: true)
+      add(:last_stripe_event_id, :string, null: true)
 
       timestamps(type: :utc_datetime_usec)
     end
 
-    create unique_index(:accrue_promotion_codes, [:processor_id])
-    create unique_index(:accrue_promotion_codes, [:code])
-    create index(:accrue_promotion_codes, [:coupon_id])
+    create(Accrue.Migration.unique_index(:accrue_promotion_codes, [:processor_id]))
+    create(Accrue.Migration.unique_index(:accrue_promotion_codes, [:code]))
+    create(Accrue.Migration.index(:accrue_promotion_codes, [:coupon_id]))
   end
 end

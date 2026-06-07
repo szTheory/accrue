@@ -8,7 +8,7 @@ defmodule Accrue.Billing.Coupon do
   Full lifecycle changesets arrive in Phase 4.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

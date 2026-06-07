@@ -20,9 +20,9 @@ defmodule Accrue.Repo.Migrations.AddMissingCouponColumns do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_coupons) do
-      add :amount_off_minor, :bigint
-      add :redeem_by, :utc_datetime_usec
+    alter Accrue.Migration.table(:accrue_coupons) do
+      add(:amount_off_minor, :bigint)
+      add(:redeem_by, :utc_datetime_usec)
     end
   end
 end

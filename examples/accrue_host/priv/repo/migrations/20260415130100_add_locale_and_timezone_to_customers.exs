@@ -1,5 +1,5 @@
 # accrue:generated
-# accrue:fingerprint: 0328ed90901019d2f8a3e22b8df55bf9e5e95ce9113fe451195184901e3991a9
+# accrue:fingerprint: 1cc338aa50eeed322098a78a4a3eccb992761a0ccbca4c575517e4beb27051c5
 defmodule Accrue.Repo.Migrations.AddLocaleAndTimezoneToCustomers do
   @moduledoc """
   Phase 6 (06-01) — per-customer locale + timezone columns (D6-03).
@@ -22,7 +22,7 @@ defmodule Accrue.Repo.Migrations.AddLocaleAndTimezoneToCustomers do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_customers) do
+    alter Accrue.Migration.table(:accrue_customers) do
       add(:preferred_locale, :string, size: 35)
       add(:preferred_timezone, :string, size: 64)
     end

@@ -33,7 +33,7 @@ defmodule Accrue.Billing.Customer do
     * `last_stripe_event_ts` / `last_stripe_event_id` — webhook watermark
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

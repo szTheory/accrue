@@ -1,5 +1,5 @@
 # accrue:generated
-# accrue:fingerprint: 6d7a4ad4893b5693d8f04f8f3d11f6de770f64b411a43986af6bbfe67cf55651
+# accrue:fingerprint: 6bd72b751b7438ca33691f2c3706f3d839740cb0cdbebc0727a54bf1ed85c904
 defmodule Accrue.Repo.Migrations.AddEndpointToAccrueWebhookEvents do
   @moduledoc """
   Phase 5 (05-01) — closes the webhook endpoint persistence gap
@@ -22,15 +22,17 @@ defmodule Accrue.Repo.Migrations.AddEndpointToAccrueWebhookEvents do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_webhook_events) do
-      add :endpoint, :string, null: false, default: "default"
+    alter Accrue.Migration.table(:accrue_webhook_events) do
+      add(:endpoint, :string, null: false, default: "default")
     end
 
-    create index(
-             :accrue_webhook_events,
-             [:endpoint],
-             where: "endpoint = 'connect'",
-             name: :accrue_webhook_events_connect_idx
-           )
+    create(
+      Accrue.Migration.index(
+        :accrue_webhook_events,
+        [:endpoint],
+        where: "endpoint = 'connect'",
+        name: :accrue_webhook_events_connect_idx
+      )
+    )
   end
 end

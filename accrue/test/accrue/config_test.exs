@@ -16,8 +16,20 @@ defmodule Accrue.ConfigTest do
     test "happy path with required :repo" do
       opts = Config.validate!(with_branding(repo: SomeApp.Repo))
       assert opts[:repo] == SomeApp.Repo
+      assert opts[:billing_schema] == "billing"
       assert opts[:processor] == Accrue.Processor.Fake
       assert opts[:default_currency] == :usd
+    end
+
+    test ":billing_schema accepts explicit public escape hatch" do
+      opts = Config.validate!(with_branding(repo: SomeApp.Repo, billing_schema: "public"))
+      assert opts[:billing_schema] == "public"
+    end
+
+    test ":billing_schema rejects invalid PostgreSQL identifiers" do
+      assert_raise NimbleOptions.ValidationError, ~r/billing_schema/, fn ->
+        Config.validate!(with_branding(repo: SomeApp.Repo, billing_schema: "billing;DROP"))
+      end
     end
 
     test "missing :repo raises" do
@@ -62,6 +74,7 @@ defmodule Accrue.ConfigTest do
         :invoice_pdf_adapter,
         :pdf_adapter,
         :auth_adapter,
+        :billing_schema,
         :mailer,
         :mailer_adapter
       ]
@@ -113,6 +126,11 @@ defmodule Accrue.ConfigTest do
     test ":business_name defaults to \"Accrue\"" do
       Application.delete_env(:accrue, :business_name)
       assert "Accrue" == Config.get!(:business_name)
+    end
+
+    test ":billing_schema defaults to \"billing\"" do
+      Application.delete_env(:accrue, :billing_schema)
+      assert "billing" == Config.get!(:billing_schema)
     end
 
     test "adapter defaults resolve to module atoms" do

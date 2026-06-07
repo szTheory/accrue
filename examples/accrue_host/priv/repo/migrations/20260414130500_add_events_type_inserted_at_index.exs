@@ -1,5 +1,5 @@
 # accrue:generated
-# accrue:fingerprint: 68f139ca07adef3611a0224865c3688a89b4164d98ab15d71852d571dec07e8c
+# accrue:fingerprint: e36ae82b923df72ccfca7e1a9502f3c5203891b521a68199ab2c673ee05e5f71
 defmodule Accrue.Repo.Migrations.AddEventsTypeInsertedAtIndex do
   @moduledoc """
   Phase 4 (04-01) — composite index on `accrue_events (type, inserted_at)`
@@ -14,10 +14,12 @@ defmodule Accrue.Repo.Migrations.AddEventsTypeInsertedAtIndex do
   use Ecto.Migration
 
   def change do
-    create index(
-             :accrue_events,
-             [:type, :inserted_at],
-             name: :accrue_events_type_inserted_at_idx
-           )
+    create(
+      Accrue.Migration.index(
+        :accrue_events,
+        [:type, :inserted_at],
+        name: :accrue_events_type_inserted_at_idx
+      )
+    )
   end
 end

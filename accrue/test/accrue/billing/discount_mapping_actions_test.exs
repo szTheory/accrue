@@ -6,6 +6,8 @@ defmodule Accrue.Billing.DiscountMappingActionsTest do
   alias Accrue.Error.DiscountMappingInvalid
   alias Accrue.Processor.Fake
 
+  @discount_mappings_table Accrue.Migration.qualified_table(:accrue_discount_mappings)
+
   describe "upsert_discount_mapping/2" do
     test "stores one canonical braintree code to discount mapping row" do
       assert {:ok, %DiscountMapping{} = mapping} =
@@ -159,7 +161,7 @@ defmodule Accrue.Billing.DiscountMappingActionsTest do
         Ecto.Adapters.SQL.query(
           Repo,
           """
-          INSERT INTO accrue_discount_mappings
+          INSERT INTO #{@discount_mappings_table}
             (id, processor, code, discount_id, active, amount_off_minor, currency, metadata, data,
              lock_version, inserted_at, updated_at)
           VALUES

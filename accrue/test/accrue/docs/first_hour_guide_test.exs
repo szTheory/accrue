@@ -8,6 +8,8 @@ defmodule Accrue.Docs.FirstHourGuideTest do
     "use Accrue.Test",
     "AccrueAdmin.Router.accrue_admin/2",
     "Accrue.ConfigError",
+    "config :accrue, :billing_schema, \"billing\"",
+    "mix accrue.install --billing-schema public",
     "config :accrue, :webhook_signing_secrets, %{",
     ~s|stripe: System.get_env("STRIPE_WEBHOOK_SECRET", "whsec_test_host")|
   ]

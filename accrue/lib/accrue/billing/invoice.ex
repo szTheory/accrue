@@ -29,7 +29,7 @@ defmodule Accrue.Billing.Invoice do
       from the webhook reconcile path where Stripe is canonical.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

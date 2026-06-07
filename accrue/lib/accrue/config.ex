@@ -38,6 +38,12 @@ defmodule Accrue.Config do
       doc:
         "Host `Ecto.Repo` module that Accrue writes to (event ledger, webhook events, billing tables)."
     ],
+    billing_schema: [
+      type: {:custom, __MODULE__, :validate_billing_schema, []},
+      default: "billing",
+      doc:
+        "PostgreSQL schema where Accrue-owned billing tables are stored. Defaults to `billing`; set to `public` explicitly to keep Accrue tables in the default schema. This is compile-time configuration for Ecto schemas and migration generation."
+    ],
     processor: [
       type: :atom,
       default: Accrue.Processor.Fake,
@@ -569,6 +575,26 @@ defmodule Accrue.Config do
   """
   @spec schema() :: keyword()
   def schema, do: @schema
+
+  @doc """
+  Compile-time billing schema prefix used by Accrue Ecto schemas.
+  """
+  @spec compile_time_billing_schema() :: String.t()
+  def compile_time_billing_schema do
+    :accrue
+    |> Application.get_env(:billing_schema, "billing")
+    |> validate_billing_schema!()
+  end
+
+  @doc """
+  Runtime billing schema prefix used by migration and raw SQL helpers.
+  """
+  @spec billing_schema() :: String.t()
+  def billing_schema do
+    :accrue
+    |> Application.get_env(:billing_schema, "billing")
+    |> validate_billing_schema!()
+  end
 
   @doc """
   Reads the current `:accrue` application env at boot time, filters it to
@@ -1383,6 +1409,41 @@ defmodule Accrue.Config do
 
   def validate_hex(other) do
     {:error, "expected a hex color string (#rgb, #rrggbb, or #rrggbbaa), got: #{inspect(other)}"}
+  end
+
+  @doc false
+  def validate_billing_schema!(schema) when is_binary(schema) do
+    if Regex.match?(~r/^[A-Za-z_][A-Za-z0-9_]*$/, schema) do
+      schema
+    else
+      raise Accrue.ConfigError,
+        key: :billing_schema,
+        message:
+          "invalid accrue config key: :billing_schema " <>
+            "(expected a PostgreSQL identifier such as \"billing\" or \"public\")"
+    end
+  end
+
+  def validate_billing_schema!(schema) do
+    raise Accrue.ConfigError,
+      key: :billing_schema,
+      message:
+        "invalid accrue config key: :billing_schema " <>
+          "(expected a string such as \"billing\" or \"public\", got: #{inspect(schema)})"
+  end
+
+  @doc false
+  @spec validate_billing_schema(term()) :: {:ok, String.t()} | {:error, String.t()}
+  def validate_billing_schema(schema) when is_binary(schema) do
+    if Regex.match?(~r/^[A-Za-z_][A-Za-z0-9_]*$/, schema) do
+      {:ok, schema}
+    else
+      {:error, "expected a PostgreSQL identifier such as \"billing\" or \"public\""}
+    end
+  end
+
+  def validate_billing_schema(schema) do
+    {:error, "expected a string such as \"billing\" or \"public\", got: #{inspect(schema)}"}
   end
 
   defp strictly_descending?([_]), do: true

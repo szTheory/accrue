@@ -12,6 +12,7 @@ config :accrue, :env, Mix.env()
 # Placeholder keys so Plan 02's NimbleOptions schema has something to validate.
 # Plan 02 will ship the full schema; Plans 04/05 READ these, never WRITE them.
 config :accrue,
+  billing_schema: "billing",
   processor: Accrue.Processor.Fake,
   mailer: Accrue.Mailer.Default,
   mailer_adapter: Accrue.Mailer.Swoosh,

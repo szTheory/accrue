@@ -136,7 +136,7 @@ defmodule Accrue.Billing.ChargeTest do
 
     count =
       Repo.aggregate(
-        from(e in "accrue_events",
+        from(e in Accrue.Events.Event,
           where: e.subject_id == ^charge_id and e.type == "charge.succeeded"
         ),
         :count

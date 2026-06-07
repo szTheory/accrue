@@ -2,10 +2,12 @@ defmodule Accrue.Repo.Migrations.CreateAccrueCheckoutSessions do
   use Ecto.Migration
 
   def change do
-    create table(:accrue_checkout_sessions, primary_key: false) do
+    create Accrue.Migration.table(:accrue_checkout_sessions, primary_key: false) do
       add(:id, :binary_id, primary_key: true)
 
-      add(:customer_id, references(:accrue_customers, type: :binary_id, on_delete: :delete_all),
+      add(
+        :customer_id,
+        Accrue.Migration.references(:accrue_customers, type: :binary_id, on_delete: :delete_all),
         null: false
       )
 
@@ -27,8 +29,8 @@ defmodule Accrue.Repo.Migrations.CreateAccrueCheckoutSessions do
       timestamps(type: :utc_datetime_usec)
     end
 
-    create(unique_index(:accrue_checkout_sessions, [:session_token]))
-    create(unique_index(:accrue_checkout_sessions, [:operation_id]))
-    create(index(:accrue_checkout_sessions, [:customer_id, :inserted_at]))
+    create(Accrue.Migration.unique_index(:accrue_checkout_sessions, [:session_token]))
+    create(Accrue.Migration.unique_index(:accrue_checkout_sessions, [:operation_id]))
+    create(Accrue.Migration.index(:accrue_checkout_sessions, [:customer_id, :inserted_at]))
   end
 end

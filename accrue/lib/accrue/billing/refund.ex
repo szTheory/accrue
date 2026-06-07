@@ -12,7 +12,7 @@ defmodule Accrue.Billing.Refund do
   See `Accrue.Billing.Refund.fees_settled?/1`.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

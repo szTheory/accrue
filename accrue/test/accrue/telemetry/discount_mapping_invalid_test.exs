@@ -5,6 +5,8 @@ defmodule Accrue.Telemetry.DiscountMappingInvalidTest do
   alias Accrue.Billing.Customer
   alias Accrue.Error.DiscountMappingInvalid
 
+  @discount_mappings_table Accrue.Migration.qualified_table(:accrue_discount_mappings)
+
   setup do
     parent = self()
     handler_id = {__MODULE__, make_ref()}
@@ -42,7 +44,7 @@ defmodule Accrue.Telemetry.DiscountMappingInvalidTest do
       Ecto.Adapters.SQL.query(
         Repo,
         """
-        INSERT INTO accrue_discount_mappings
+        INSERT INTO #{@discount_mappings_table}
           (id, processor, code, discount_id, active, amount_off_minor, currency, metadata, data,
            lock_version, inserted_at, updated_at)
         VALUES

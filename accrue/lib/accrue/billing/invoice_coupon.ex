@@ -8,7 +8,7 @@ defmodule Accrue.Billing.InvoiceCoupon do
   application.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

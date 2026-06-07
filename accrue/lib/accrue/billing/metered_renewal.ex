@@ -3,7 +3,7 @@ defmodule Accrue.Billing.MeteredRenewal do
   Immutable local renewal-window anchor for one metered billing period.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

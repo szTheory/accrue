@@ -3,7 +3,7 @@ defmodule Accrue.Billing.MeteredChargeAttempt do
   Durable settlement ledger for one metered renewal window.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

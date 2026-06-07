@@ -207,7 +207,7 @@ defmodule Accrue.Billing.MeterEventsReportUsageTest do
       assert {:ok, row} = Billing.report_usage(customer, "api_call", value: 7)
 
       query =
-        from(e in "accrue_events",
+        from(e in Accrue.Events.Event,
           where: e.subject_id == ^row.id and e.type == "meter_event.reported",
           select: count()
         )

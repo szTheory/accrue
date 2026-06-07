@@ -21,7 +21,7 @@ defmodule Accrue.Billing.MeterEvent do
   the raw Stripe payload.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

@@ -13,57 +13,77 @@ defmodule Accrue.Repo.Migrations.CreateAccrueEvents do
   use Ecto.Migration
 
   def up do
-    create table(:accrue_events, primary_key: false) do
-      add :id, :bigserial, primary_key: true
-      add :type, :string, null: false
-      add :schema_version, :integer, null: false, default: 1
-      add :actor_type, :string, null: false
-      add :actor_id, :string
-      add :subject_type, :string, null: false
-      add :subject_id, :string, null: false
-      add :data, :map, null: false, default: %{}
-      add :trace_id, :string
-      add :idempotency_key, :string
-      add :inserted_at, :utc_datetime_usec, null: false, default: fragment("now()")
+    Accrue.Migration.create_billing_schema()
+
+    events_table = Accrue.Migration.qualified_table(:accrue_events)
+
+    immutable_function =
+      Accrue.Migration.qualified_name(Accrue.Migration.billing_prefix(), :accrue_events_immutable)
+
+    create Accrue.Migration.table(:accrue_events, primary_key: false) do
+      add(:id, :bigserial, primary_key: true)
+      add(:type, :string, null: false)
+      add(:schema_version, :integer, null: false, default: 1)
+      add(:actor_type, :string, null: false)
+      add(:actor_id, :string)
+      add(:subject_type, :string, null: false)
+      add(:subject_id, :string, null: false)
+      add(:data, :map, null: false, default: %{})
+      add(:trace_id, :string)
+      add(:idempotency_key, :string)
+      add(:inserted_at, :utc_datetime_usec, null: false, default: fragment("now()"))
     end
 
-    create index(:accrue_events, [:subject_type, :subject_id, :inserted_at])
+    create(Accrue.Migration.index(:accrue_events, [:subject_type, :subject_id, :inserted_at]))
 
-    create unique_index(:accrue_events, [:idempotency_key],
-             where: "idempotency_key IS NOT NULL",
-             name: :accrue_events_idempotency_key_index
-           )
+    create(
+      Accrue.Migration.unique_index(:accrue_events, [:idempotency_key],
+        where: "idempotency_key IS NOT NULL",
+        name: :accrue_events_idempotency_key_index
+      )
+    )
 
-    execute """
-            ALTER TABLE accrue_events
-              ADD CONSTRAINT accrue_events_actor_type_check
-              CHECK (actor_type IN ('user','system','webhook','oban','admin'))
-            """,
-            "ALTER TABLE accrue_events DROP CONSTRAINT IF EXISTS accrue_events_actor_type_check"
+    execute(
+      """
+      ALTER TABLE #{events_table}
+        ADD CONSTRAINT accrue_events_actor_type_check
+        CHECK (actor_type IN ('user','system','webhook','oban','admin'))
+      """,
+      "ALTER TABLE #{events_table} DROP CONSTRAINT IF EXISTS accrue_events_actor_type_check"
+    )
 
-    execute """
-            CREATE OR REPLACE FUNCTION accrue_events_immutable()
-            RETURNS trigger
-            LANGUAGE plpgsql AS $$
-            BEGIN
-              RAISE SQLSTATE '45A01'
-                USING MESSAGE = 'accrue_events is append-only; UPDATE and DELETE are forbidden';
-            END;
-            $$;
-            """,
-            "DROP FUNCTION IF EXISTS accrue_events_immutable()"
+    execute(
+      """
+      CREATE OR REPLACE FUNCTION #{immutable_function}()
+      RETURNS trigger
+      LANGUAGE plpgsql AS $$
+      BEGIN
+        RAISE SQLSTATE '45A01'
+          USING MESSAGE = 'accrue_events is append-only; UPDATE and DELETE are forbidden';
+      END;
+      $$;
+      """,
+      "DROP FUNCTION IF EXISTS #{immutable_function}()"
+    )
 
-    execute """
-            CREATE TRIGGER accrue_events_immutable_trigger
-              BEFORE UPDATE OR DELETE ON accrue_events
-              FOR EACH ROW EXECUTE FUNCTION accrue_events_immutable();
-            """,
-            "DROP TRIGGER IF EXISTS accrue_events_immutable_trigger ON accrue_events"
+    execute(
+      """
+      CREATE TRIGGER accrue_events_immutable_trigger
+        BEFORE UPDATE OR DELETE ON #{events_table}
+        FOR EACH ROW EXECUTE FUNCTION #{immutable_function}();
+      """,
+      "DROP TRIGGER IF EXISTS accrue_events_immutable_trigger ON #{events_table}"
+    )
   end
 
   def down do
-    execute "DROP TRIGGER IF EXISTS accrue_events_immutable_trigger ON accrue_events"
-    execute "DROP FUNCTION IF EXISTS accrue_events_immutable()"
-    drop table(:accrue_events)
+    events_table = Accrue.Migration.qualified_table(:accrue_events)
+
+    immutable_function =
+      Accrue.Migration.qualified_name(Accrue.Migration.billing_prefix(), :accrue_events_immutable)
+
+    execute("DROP TRIGGER IF EXISTS accrue_events_immutable_trigger ON #{events_table}")
+    execute("DROP FUNCTION IF EXISTS #{immutable_function}()")
+    drop(Accrue.Migration.table(:accrue_events))
   end
 end

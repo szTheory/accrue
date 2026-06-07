@@ -9,7 +9,7 @@ defmodule Accrue.Billing.InvoiceItem do
   haven't projected locally yet.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

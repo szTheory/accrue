@@ -44,6 +44,7 @@ defmodule Accrue.Install.Templates do
   def validate_planned_config!(project) do
     Accrue.Config.validate!(
       repo: project.repo || Module.concat([project.app_module, Repo]),
+      billing_schema: "billing",
       processor: Accrue.Processor.Stripe,
       auth_adapter: auth_adapter(project),
       stripe_secret_key: "sk_test_install_validation",
@@ -93,6 +94,7 @@ defmodule Accrue.Install.Templates do
     [
       app_module: project.app_module,
       repo: project.repo || Module.concat([project.app_module, Repo]),
+      billing_schema: opts.billing_schema,
       billing_context: opts.billing_context,
       billing_handler: "#{opts.billing_context}Handler",
       webhook_path: opts.webhook_path,

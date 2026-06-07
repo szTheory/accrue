@@ -2,12 +2,15 @@ defmodule Accrue.Repo.Migrations.CreateAccrueMeterDefinitionsAndMeteredRenewals 
   use Ecto.Migration
 
   def change do
-    create table(:accrue_meter_definitions, primary_key: false) do
+    create Accrue.Migration.table(:accrue_meter_definitions, primary_key: false) do
       add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
 
       add(
         :subscription_item_id,
-        references(:accrue_subscription_items, type: :binary_id, on_delete: :restrict),
+        Accrue.Migration.references(:accrue_subscription_items,
+          type: :binary_id,
+          on_delete: :restrict
+        ),
         null: false
       )
 
@@ -23,17 +26,24 @@ defmodule Accrue.Repo.Migrations.CreateAccrueMeterDefinitionsAndMeteredRenewals 
       timestamps(type: :utc_datetime_usec)
     end
 
-    create(unique_index(:accrue_meter_definitions, [:processor, :event_name]))
-    create(index(:accrue_meter_definitions, [:subscription_item_id]))
+    create(Accrue.Migration.unique_index(:accrue_meter_definitions, [:processor, :event_name]))
+    create(Accrue.Migration.index(:accrue_meter_definitions, [:subscription_item_id]))
 
-    create table(:accrue_metered_renewals, primary_key: false) do
+    create Accrue.Migration.table(:accrue_metered_renewals, primary_key: false) do
       add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
 
       add(
         :subscription_id,
-        references(:accrue_subscriptions, type: :binary_id, on_delete: :restrict), null: false)
+        Accrue.Migration.references(:accrue_subscriptions,
+          type: :binary_id,
+          on_delete: :restrict
+        ),
+        null: false
+      )
 
-      add(:customer_id, references(:accrue_customers, type: :binary_id, on_delete: :restrict),
+      add(
+        :customer_id,
+        Accrue.Migration.references(:accrue_customers, type: :binary_id, on_delete: :restrict),
         null: false
       )
 
@@ -52,12 +62,12 @@ defmodule Accrue.Repo.Migrations.CreateAccrueMeterDefinitionsAndMeteredRenewals 
     end
 
     create(
-      unique_index(
+      Accrue.Migration.unique_index(
         :accrue_metered_renewals,
         [:subscription_id, :period_start, :period_end]
       )
     )
 
-    create(index(:accrue_metered_renewals, [:customer_id, :state]))
+    create(Accrue.Migration.index(:accrue_metered_renewals, [:customer_id, :state]))
   end
 end

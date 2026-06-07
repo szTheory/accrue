@@ -26,7 +26,7 @@ defmodule Accrue.Webhook.WebhookEvent do
   existing row without re-enqueuing.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

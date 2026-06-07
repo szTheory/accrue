@@ -3,7 +3,7 @@ defmodule Accrue.Billing.MeterDefinition do
   Accrue-owned billability contract for one raw usage event name.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

@@ -10,6 +10,7 @@ defmodule Accrue.Install.Options do
 
   @type t :: %__MODULE__{
           billable: String.t() | nil,
+          billing_schema: String.t(),
           billing_context: String.t(),
           webhook_path: String.t(),
           admin_mount: String.t(),
@@ -24,6 +25,7 @@ defmodule Accrue.Install.Options do
         }
 
   defstruct billable: nil,
+            billing_schema: "billing",
             billing_context: "MyApp.Billing",
             webhook_path: "/webhooks/stripe",
             admin_mount: "/billing",
@@ -38,6 +40,7 @@ defmodule Accrue.Install.Options do
 
   @switches [
     billable: :string,
+    billing_schema: :string,
     billing_context: :string,
     webhook_path: :string,
     admin_mount: :string,
@@ -72,6 +75,7 @@ defmodule Accrue.Install.Options do
 
     %__MODULE__{
       billable: opts[:billable],
+      billing_schema: validate_billing_schema!(Keyword.get(opts, :billing_schema, "billing")),
       billing_context: Keyword.get(opts, :billing_context, "MyApp.Billing"),
       webhook_path: Keyword.get(opts, :webhook_path, "/webhooks/stripe"),
       admin_mount: Keyword.get(opts, :admin_mount, "/billing"),
@@ -84,6 +88,16 @@ defmodule Accrue.Install.Options do
       write_conflicts: opts[:write_conflicts] || false,
       accept?: opts[:yes] || opts[:non_interactive] || false
     }
+  end
+
+  defp validate_billing_schema!(schema) when is_binary(schema) do
+    if Regex.match?(~r/^[A-Za-z_][A-Za-z0-9_]*$/, schema) do
+      schema
+    else
+      Mix.raise(
+        "Invalid --billing-schema #{inspect(schema)}. Expected a PostgreSQL identifier such as billing or public."
+      )
+    end
   end
 
   defp format_invalid(invalid) do

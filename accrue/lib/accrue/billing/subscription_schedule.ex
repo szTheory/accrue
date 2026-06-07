@@ -20,7 +20,7 @@ defmodule Accrue.Billing.SubscriptionSchedule do
   because Stripe is the source of truth for schedule state.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

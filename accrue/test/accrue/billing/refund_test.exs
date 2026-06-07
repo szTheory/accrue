@@ -133,7 +133,7 @@ defmodule Accrue.Billing.RefundTest do
 
     count =
       Repo.aggregate(
-        from(e in "accrue_events",
+        from(e in Accrue.Events.Event,
           where: e.subject_id == ^refund.id and e.type == "refund.created"
         ),
         :count

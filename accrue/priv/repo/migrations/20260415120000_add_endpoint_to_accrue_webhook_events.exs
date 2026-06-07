@@ -20,15 +20,17 @@ defmodule Accrue.Repo.Migrations.AddEndpointToAccrueWebhookEvents do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_webhook_events) do
-      add :endpoint, :string, null: false, default: "default"
+    alter Accrue.Migration.table(:accrue_webhook_events) do
+      add(:endpoint, :string, null: false, default: "default")
     end
 
-    create index(
-             :accrue_webhook_events,
-             [:endpoint],
-             where: "endpoint = 'connect'",
-             name: :accrue_webhook_events_connect_idx
-           )
+    create(
+      Accrue.Migration.index(
+        :accrue_webhook_events,
+        [:endpoint],
+        where: "endpoint = 'connect'",
+        name: :accrue_webhook_events_connect_idx
+      )
+    )
   end
 end

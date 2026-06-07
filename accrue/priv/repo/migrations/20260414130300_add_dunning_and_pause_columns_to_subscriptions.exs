@@ -18,19 +18,21 @@ defmodule Accrue.Repo.Migrations.AddDunningAndPauseColumnsToSubscriptions do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_subscriptions) do
-      add :past_due_since, :utc_datetime_usec, null: true
-      add :dunning_sweep_attempted_at, :utc_datetime_usec, null: true
-      add :paused_at, :utc_datetime_usec, null: true
-      add :pause_behavior, :string, null: true
-      add :discount_id, :string, null: true
+    alter Accrue.Migration.table(:accrue_subscriptions) do
+      add(:past_due_since, :utc_datetime_usec, null: true)
+      add(:dunning_sweep_attempted_at, :utc_datetime_usec, null: true)
+      add(:paused_at, :utc_datetime_usec, null: true)
+      add(:pause_behavior, :string, null: true)
+      add(:discount_id, :string, null: true)
     end
 
-    create index(
-             :accrue_subscriptions,
-             [:past_due_since],
-             where: "past_due_since IS NOT NULL",
-             name: :accrue_subscriptions_past_due_since_idx
-           )
+    create(
+      Accrue.Migration.index(
+        :accrue_subscriptions,
+        [:past_due_since],
+        where: "past_due_since IS NOT NULL",
+        name: :accrue_subscriptions_past_due_since_idx
+      )
+    )
   end
 end

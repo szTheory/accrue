@@ -19,39 +19,45 @@ defmodule Accrue.Repo.Migrations.CreateAccrueMeterEvents do
   use Ecto.Migration
 
   def change do
-    create table(:accrue_meter_events, primary_key: false) do
-      add :id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()")
+    create Accrue.Migration.table(:accrue_meter_events, primary_key: false) do
+      add(:id, :binary_id, primary_key: true, default: fragment("gen_random_uuid()"))
 
-      add :customer_id,
-          references(:accrue_customers, type: :binary_id, on_delete: :nilify_all),
-          null: true
+      add(
+        :customer_id,
+        Accrue.Migration.references(:accrue_customers, type: :binary_id, on_delete: :nilify_all),
+        null: true
+      )
 
-      add :stripe_customer_id, :string, null: false
-      add :event_name, :string, null: false
-      add :value, :bigint, null: false
-      add :identifier, :string, null: false
-      add :occurred_at, :utc_datetime_usec, null: false
-      add :reported_at, :utc_datetime_usec, null: true
-      add :stripe_status, :string, null: false, default: "pending"
-      add :stripe_error, :map, null: true
-      add :operation_id, :string, null: true
+      add(:stripe_customer_id, :string, null: false)
+      add(:event_name, :string, null: false)
+      add(:value, :bigint, null: false)
+      add(:identifier, :string, null: false)
+      add(:occurred_at, :utc_datetime_usec, null: false)
+      add(:reported_at, :utc_datetime_usec, null: true)
+      add(:stripe_status, :string, null: false, default: "pending")
+      add(:stripe_error, :map, null: true)
+      add(:operation_id, :string, null: true)
 
       timestamps(type: :utc_datetime_usec)
     end
 
-    create unique_index(:accrue_meter_events, [:identifier])
+    create(Accrue.Migration.unique_index(:accrue_meter_events, [:identifier]))
 
-    create index(
-             :accrue_meter_events,
-             [:customer_id, :event_name, :occurred_at],
-             name: :accrue_meter_events_customer_event_occurred_idx
-           )
+    create(
+      Accrue.Migration.index(
+        :accrue_meter_events,
+        [:customer_id, :event_name, :occurred_at],
+        name: :accrue_meter_events_customer_event_occurred_idx
+      )
+    )
 
-    create index(
-             :accrue_meter_events,
-             [:stripe_status],
-             where: "stripe_status = 'failed'",
-             name: :accrue_meter_events_failed_idx
-           )
+    create(
+      Accrue.Migration.index(
+        :accrue_meter_events,
+        [:stripe_status],
+        where: "stripe_status = 'failed'",
+        name: :accrue_meter_events_failed_idx
+      )
+    )
   end
 end

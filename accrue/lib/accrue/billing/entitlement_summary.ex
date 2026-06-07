@@ -40,7 +40,7 @@ defmodule Accrue.Billing.EntitlementSummary do
   truncation can never affect a gate decision.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

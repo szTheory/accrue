@@ -1,5 +1,5 @@
 # accrue:generated
-# accrue:fingerprint: 32e4c5d33a3103e37e134a579c01abaa16ab0119c5f9522466ac45901598eebd
+# accrue:fingerprint: 95af0cdf58a4471f13562f55b67171f1c7006cb1449edbc5f39b0861214bcae9
 defmodule Accrue.Repo.Migrations.AddDiscountColumnsToInvoices do
   @moduledoc """
   Phase 4 (04-01) — BILL-28 discount breakdown column on
@@ -19,8 +19,8 @@ defmodule Accrue.Repo.Migrations.AddDiscountColumnsToInvoices do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_invoices) do
-      add :total_discount_amounts, :map, null: false, default: %{}
+    alter Accrue.Migration.table(:accrue_invoices) do
+      add(:total_discount_amounts, :map, null: false, default: %{})
     end
   end
 end

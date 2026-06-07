@@ -22,10 +22,12 @@ defmodule Accrue.Repo.Migrations.RevokeAccrueEventsWrites do
   @app_role "accrue_app"
 
   def up do
-    execute "REVOKE UPDATE, DELETE, TRUNCATE ON accrue_events FROM #{@app_role}"
+    events_table = Accrue.Migration.qualified_table(:accrue_events)
+    execute "REVOKE UPDATE, DELETE, TRUNCATE ON #{events_table} FROM #{@app_role}"
   end
 
   def down do
-    execute "GRANT UPDATE, DELETE, TRUNCATE ON accrue_events TO #{@app_role}"
+    events_table = Accrue.Migration.qualified_table(:accrue_events)
+    execute "GRANT UPDATE, DELETE, TRUNCATE ON #{events_table} TO #{@app_role}"
   end
 end

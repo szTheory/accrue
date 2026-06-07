@@ -20,6 +20,21 @@ defmodule Accrue.Analytics.Dunning do
 
   @recovered_type "dunning.recovered"
   @exhausted_type "dunning.exhausted"
+  @events_table Accrue.Migration.qualified_table(:accrue_events)
+  @invoices_table Accrue.Migration.qualified_table(:accrue_invoices)
+  @terminal_exists_sql "NOT EXISTS (SELECT 1 FROM #{@events_table} WHERE type IN ('dunning.recovered','dunning.exhausted') AND subject_id = ?::text AND inserted_at >= ?)"
+  @step_count_sql "(SELECT COUNT(*) FROM #{@events_table} WHERE type = 'dunning.step_sent' AND subject_id = ?::text AND inserted_at >= ?)"
+  @failure_reason_sql """
+  (SELECT e.data FROM #{@events_table} e
+     JOIN #{@invoices_table} i ON i.id::text = e.subject_id
+     JOIN #{@events_table} cs ON cs.type = 'dunning.campaign_started'
+                          AND cs.subject_id = ?::text
+                          AND cs.data->>'invoice_id' = i.processor_id
+   WHERE e.type = 'invoice.payment_failed'
+     AND e.inserted_at >= ?
+   ORDER BY e.inserted_at DESC
+   LIMIT 1)
+  """
 
   @dunning_lifecycle_types ~w[dunning.campaign_started dunning.step_sent dunning.recovered dunning.exhausted]
 
@@ -240,12 +255,7 @@ defmodule Accrue.Analytics.Dunning do
               s.dunning_campaign_started_at
             ) and j.state in ["available", "scheduled", "retryable"],
         where: not is_nil(s.dunning_campaign_started_at),
-        where:
-          fragment(
-            "NOT EXISTS (SELECT 1 FROM accrue_events WHERE type IN ('dunning.recovered','dunning.exhausted') AND subject_id = ?::text AND inserted_at >= ?)",
-            s.id,
-            s.dunning_campaign_started_at
-          ),
+        where: fragment(@terminal_exists_sql, s.id, s.dunning_campaign_started_at),
         group_by: [
           s.id,
           s.customer_id,
@@ -264,29 +274,9 @@ defmodule Accrue.Analytics.Dunning do
               ^now,
               s.dunning_campaign_started_at
             ),
-          current_step:
-            fragment(
-              "(SELECT COUNT(*) FROM accrue_events WHERE type = 'dunning.step_sent' AND subject_id = ?::text AND inserted_at >= ?)",
-              s.id,
-              s.dunning_campaign_started_at
-            ),
+          current_step: fragment(@step_count_sql, s.id, s.dunning_campaign_started_at),
           next_step_eta: min(j.scheduled_at),
-          failure_reason:
-            fragment(
-              """
-              (SELECT e.data FROM accrue_events e
-                 JOIN accrue_invoices i ON i.id::text = e.subject_id
-                 JOIN accrue_events cs ON cs.type = 'dunning.campaign_started'
-                                      AND cs.subject_id = ?::text
-                                      AND cs.data->>'invoice_id' = i.processor_id
-               WHERE e.type = 'invoice.payment_failed'
-                 AND e.inserted_at >= ?
-               ORDER BY e.inserted_at DESC
-               LIMIT 1)
-              """,
-              s.id,
-              s.dunning_campaign_started_at
-            )
+          failure_reason: fragment(@failure_reason_sql, s.id, s.dunning_campaign_started_at)
         }
       )
       |> apply_campaign_window(opts)

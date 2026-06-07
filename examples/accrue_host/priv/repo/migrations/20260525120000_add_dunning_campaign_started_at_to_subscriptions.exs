@@ -1,5 +1,5 @@
 # accrue:generated
-# accrue:fingerprint: 20260525120000-dunning-campaign-started-at
+# accrue:fingerprint: 29ff64e8311d62a65bd42bd447485896d673d61907c4ccb49cfbb3a0c8caa48a
 defmodule Accrue.Repo.Migrations.AddDunningCampaignStartedAtToSubscriptions do
   @moduledoc """
   Phase 128 (128-02) — campaign anchor column (D-08) on `accrue_subscriptions`.
@@ -22,8 +22,8 @@ defmodule Accrue.Repo.Migrations.AddDunningCampaignStartedAtToSubscriptions do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_subscriptions) do
-      add :dunning_campaign_started_at, :utc_datetime_usec, null: true
+    alter Accrue.Migration.table(:accrue_subscriptions) do
+      add(:dunning_campaign_started_at, :utc_datetime_usec, null: true)
     end
   end
 end

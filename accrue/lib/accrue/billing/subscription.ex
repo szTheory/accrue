@@ -29,7 +29,7 @@ defmodule Accrue.Billing.Subscription do
   are in `Accrue.Billing.Query`.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

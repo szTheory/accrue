@@ -7,7 +7,7 @@ defmodule Accrue.Billing.SubscriptionItem do
   processor plan/product refs and per-item period bounds per D3-31.
   """
 
-  use Ecto.Schema
+  use Accrue.Schema
 
   import Ecto.Changeset
 

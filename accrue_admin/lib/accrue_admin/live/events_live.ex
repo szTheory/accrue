@@ -12,6 +12,38 @@ defmodule AccrueAdmin.Live.EventsLive do
   alias AccrueAdmin.Queries.Events
   alias AccrueAdmin.ScopedPath
 
+  @customers_table Accrue.Migration.qualified_table(:accrue_customers)
+  @subscriptions_table Accrue.Migration.qualified_table(:accrue_subscriptions)
+  @invoices_table Accrue.Migration.qualified_table(:accrue_invoices)
+  @organization_scope_sql """
+  EXISTS (
+    SELECT 1
+    FROM #{@customers_table} customers
+    WHERE ? = 'Customer'
+      AND customers.id::text = ?
+      AND customers.owner_type = 'Organization'
+      AND customers.owner_id = ?
+  )
+  OR EXISTS (
+    SELECT 1
+    FROM #{@subscriptions_table} subscriptions
+    JOIN #{@customers_table} customers ON customers.id = subscriptions.customer_id
+    WHERE ? = 'Subscription'
+      AND subscriptions.id::text = ?
+      AND customers.owner_type = 'Organization'
+      AND customers.owner_id = ?
+  )
+  OR EXISTS (
+    SELECT 1
+    FROM #{@invoices_table} invoices
+    JOIN #{@customers_table} customers ON customers.id = invoices.customer_id
+    WHERE ? = 'Invoice'
+      AND invoices.id::text = ?
+      AND customers.owner_type = 'Organization'
+      AND customers.owner_id = ?
+  )
+  """
+
   @impl true
   def mount(_params, session, socket) do
     admin = Map.get(session, "accrue_admin", %{})
@@ -220,34 +252,7 @@ defmodule AccrueAdmin.Live.EventsLive do
       Event,
       [event],
       fragment(
-        """
-        EXISTS (
-          SELECT 1
-          FROM accrue_customers customers
-          WHERE ? = 'Customer'
-            AND customers.id::text = ?
-            AND customers.owner_type = 'Organization'
-            AND customers.owner_id = ?
-        )
-        OR EXISTS (
-          SELECT 1
-          FROM accrue_subscriptions subscriptions
-          JOIN accrue_customers customers ON customers.id = subscriptions.customer_id
-          WHERE ? = 'Subscription'
-            AND subscriptions.id::text = ?
-            AND customers.owner_type = 'Organization'
-            AND customers.owner_id = ?
-        )
-        OR EXISTS (
-          SELECT 1
-          FROM accrue_invoices invoices
-          JOIN accrue_customers customers ON customers.id = invoices.customer_id
-          WHERE ? = 'Invoice'
-            AND invoices.id::text = ?
-            AND customers.owner_type = 'Organization'
-            AND customers.owner_id = ?
-        )
-        """,
+        @organization_scope_sql,
         event.subject_type,
         event.subject_id,
         ^organization_id,

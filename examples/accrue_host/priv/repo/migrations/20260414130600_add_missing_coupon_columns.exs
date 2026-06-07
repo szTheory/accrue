@@ -1,5 +1,5 @@
 # accrue:generated
-# accrue:fingerprint: fec7d9c77742234308da6c2ac5c133e7bdde318516be88a8d554bce5dd334dea
+# accrue:fingerprint: 5a764d5f3c147a4ce2bb0e41b678a4cac71c1257b3eda29d8eefdcc52f667fd2
 defmodule Accrue.Repo.Migrations.AddMissingCouponColumns do
   @moduledoc """
   Phase 4 (04-05) — Rule 1 bug fix: close Phase 3 `accrue_coupons`
@@ -22,9 +22,9 @@ defmodule Accrue.Repo.Migrations.AddMissingCouponColumns do
   use Ecto.Migration
 
   def change do
-    alter table(:accrue_coupons) do
-      add :amount_off_minor, :bigint
-      add :redeem_by, :utc_datetime_usec
+    alter Accrue.Migration.table(:accrue_coupons) do
+      add(:amount_off_minor, :bigint)
+      add(:redeem_by, :utc_datetime_usec)
     end
   end
 end

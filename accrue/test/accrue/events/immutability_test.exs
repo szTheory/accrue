@@ -4,6 +4,8 @@ defmodule Accrue.Events.ImmutabilityTest do
   alias Accrue.Events
   alias Accrue.Events.Event
 
+  @events_table Accrue.Migration.qualified_table(:accrue_events)
+
   @valid_attrs %{
     type: "subscription.created",
     subject_type: "Subscription",
@@ -16,7 +18,7 @@ defmodule Accrue.Events.ImmutabilityTest do
 
       assert {:error, %Postgrex.Error{postgres: pg}} =
                Accrue.TestRepo.query(
-                 "UPDATE accrue_events SET type = 'mutated' WHERE id = $1",
+                 "UPDATE #{@events_table} SET type = 'mutated' WHERE id = $1",
                  [id]
                )
 
@@ -32,7 +34,7 @@ defmodule Accrue.Events.ImmutabilityTest do
 
       assert {:error, %Postgrex.Error{postgres: pg}} =
                Accrue.TestRepo.query(
-                 "DELETE FROM accrue_events WHERE id = $1",
+                 "DELETE FROM #{@events_table} WHERE id = $1",
                  [id]
                )
 
@@ -55,7 +57,7 @@ defmodule Accrue.Events.ImmutabilityTest do
       assert {:error, %Postgrex.Error{postgres: pg}} =
                Accrue.TestRepo.query(
                  """
-                 INSERT INTO accrue_events
+                 INSERT INTO #{@events_table}
                    (type, schema_version, actor_type, subject_type, subject_id)
                  VALUES ($1, $2, $3, $4, $5)
                  """,
