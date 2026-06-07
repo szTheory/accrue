@@ -262,7 +262,9 @@ defmodule AccrueHost.DunningWiringTest do
       # Stub update_subscription so the sweeper does not fail if it
       # finds a past_due candidate that is not registered in Fake's store.
       :ok =
-        Fake.stub(:update_subscription, fn _id, _params, _opts -> {:ok, %{"status" => "unpaid"}} end)
+        Fake.stub(:update_subscription, fn _id, _params, _opts ->
+          {:ok, %{"status" => "unpaid"}}
+        end)
 
       # sweep/0 always returns {:ok, count} — count may be 0 if no candidates.
       assert {:ok, _count} = DunningSweeper.sweep()

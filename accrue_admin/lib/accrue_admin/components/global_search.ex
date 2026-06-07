@@ -54,13 +54,20 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   end
 
   @impl true
+  def handle_event("toggle", _, socket) do
+    if socket.assigns.is_open do
+      {:noreply, close(socket)}
+    else
+      {:noreply, assign(socket, is_open: true)}
+    end
+  end
+
+  def handle_event("open", _, socket) do
+    {:noreply, assign(socket, is_open: true)}
+  end
+
   def handle_event("close", _, socket) do
-    {:noreply,
-     assign(socket,
-       is_open: false,
-       query: "",
-       results: %{customers: [], invoices: [], subscriptions: []}
-     )}
+    {:noreply, close(socket)}
   end
 
   # Maximum query length accepted before hitting the DB — prevents expensive
@@ -90,6 +97,14 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   end
 
   defp empty_results, do: %{customers: [], invoices: [], subscriptions: []}
+
+  defp close(socket) do
+    assign(socket,
+      is_open: false,
+      query: "",
+      results: empty_results()
+    )
+  end
 
   defp fetch_results(query) do
     tasks = [

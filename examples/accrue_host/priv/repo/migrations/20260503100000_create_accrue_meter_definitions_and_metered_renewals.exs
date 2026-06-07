@@ -33,7 +33,9 @@ defmodule Accrue.Repo.Migrations.CreateAccrueMeterDefinitionsAndMeteredRenewals 
 
       add(
         :subscription_id,
-        references(:accrue_subscriptions, type: :binary_id, on_delete: :restrict), null: false)
+        references(:accrue_subscriptions, type: :binary_id, on_delete: :restrict),
+        null: false
+      )
 
       add(:customer_id, references(:accrue_customers, type: :binary_id, on_delete: :restrict),
         null: false

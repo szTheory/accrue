@@ -6,8 +6,10 @@ export const CommandPalette = {
     this.wasOpen = this.el.parentElement.dataset.open === "true";
     this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
     this.handleInputKeydown = this.handleInputKeydown.bind(this);
+    this.handleDocumentClick = this.handleDocumentClick.bind(this);
 
     window.addEventListener("keydown", this.handleGlobalKeydown);
+    document.addEventListener("click", this.handleDocumentClick);
 
     this.el.addEventListener("keydown", this.handleInputKeydown);
 
@@ -43,6 +45,7 @@ export const CommandPalette = {
 
   destroyed() {
     window.removeEventListener("keydown", this.handleGlobalKeydown);
+    document.removeEventListener("click", this.handleDocumentClick);
     this.el.removeEventListener("keydown", this.handleInputKeydown);
   },
 
@@ -69,6 +72,14 @@ export const CommandPalette = {
       e.preventDefault();
       this.selectActive();
     }
+  },
+
+  handleDocumentClick(e) {
+    const trigger = e.target.closest("[data-command-palette-trigger]");
+    if (!trigger) return;
+
+    e.preventDefault();
+    this.pushEventTo(this.el.dataset.target, "open", {});
   },
 
   setupItems() {

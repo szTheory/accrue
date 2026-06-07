@@ -82,7 +82,9 @@ defmodule AccrueHost.SeedsIdempotencyTest do
 
       # Demo accounts are still unique (no second user / org on re-run).
       assert Repo.aggregate(from(u in User, where: u.email == "healthy@example.com"), :count) == 1
-      assert Repo.aggregate(from(u in User, where: u.email == "past-due@example.com"), :count) == 1
+
+      assert Repo.aggregate(from(u in User, where: u.email == "past-due@example.com"), :count) ==
+               1
     end
   end
 

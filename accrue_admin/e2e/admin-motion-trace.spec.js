@@ -78,32 +78,27 @@ test.describe("Motion trace — animated surface capture", () => {
   });
 
   // --------------------------------------------------------------------------
-  // 2. Dropdown open/close
-  // Surface: dropdown_menu.ex — details.ax-dropdown disclosure + .ax-dropdown-panel
-  // Trigger: details.ax-dropdown > summary (native <details> semantics)
+  // 2. Customer overflow menu open/close
+  // Surface: customer_live.ex — .ax-tab-more-menu
+  // Trigger: .ax-tab-more-trigger
   // --------------------------------------------------------------------------
-  test("motion trace — dropdown open/close", async ({ page, request }) => {
-    // Trace artifact: test-results/motion-trace-dropdown-open-close/trace.zip
+  test("motion trace — customer more menu open/close", async ({ page, request }) => {
+    // Trace artifact: test-results/motion-trace-customer-more-menu-open-close/trace.zip
     // Review with: npx playwright show-trace test-results/.../trace.zip
 
-    await seed(request, "operator-flows");
-    // Any page that renders a dropdown — the customer detail has action dropdowns
-    await login(page, "/billing/customers");
+    const dash = await seed(request, "dashboard");
+    await login(page, `/billing/customers/${dash.customer_id}`);
     await expect(page.locator("#main-content")).toBeVisible();
 
-    const dropdown = page.locator("details.ax-dropdown").first();
-    const dropdownSummary = dropdown.locator("summary");
-    const panel = dropdown.locator(".ax-dropdown-panel");
-    await expect(dropdownSummary).toBeVisible();
+    const trigger = page.locator(".ax-tab-more-trigger");
+    await expect(trigger).toBeVisible();
 
-    // Open the dropdown via the native summary element
-    await dropdownSummary.click();
+    await trigger.click();
 
-    // The panel becomes visible when the parent <details> is open
+    const panel = page.locator(".ax-tab-more-menu");
     await expect(panel).toBeVisible();
 
-    // Close by clicking the summary again (native <details> toggle)
-    await dropdownSummary.click();
+    await page.keyboard.press("Escape");
     await expect(panel).toBeHidden();
   });
 
@@ -124,34 +119,38 @@ test.describe("Motion trace — animated surface capture", () => {
     await expect(toggleButton).toBeVisible();
 
     // Read which list element this toggle controls
-    const controlledId = await toggleButton.getAttribute("data-controls");
+    const controlledId = await toggleButton.getAttribute("aria-controls");
     // Fail loudly if the attribute is absent rather than silently skipping assertions
     expect(controlledId, "collapse toggle must have data-controls attribute").toBeTruthy();
 
-    // Collapse the group (first click hides the link list)
-    await toggleButton.click();
+    const controlledList = page.locator(`#${controlledId}`);
 
-    // The controlled sidebar group links div should now be hidden
-    await expect(page.locator(`#${controlledId}`)).toBeHidden();
+    if ((await toggleButton.getAttribute("aria-expanded")) !== "true") {
+      await toggleButton.click();
+      await expect(toggleButton).toHaveAttribute("aria-expanded", "true");
+      await expect(controlledList).toBeVisible();
+    }
+
+    // Collapse the group; the hook applies hidden after the short opacity
+    // transition so assistive technology skips the links once closed.
+    await toggleButton.click();
+    await expect(toggleButton).toHaveAttribute("aria-expanded", "false");
+    await expect(controlledList).toBeHidden();
 
     // Re-expand the group (second click reveals the link list)
     await toggleButton.click();
 
-    await expect(page.locator(`#${controlledId}`)).toBeVisible();
+    await expect(controlledList).toBeVisible();
   });
 
   // --------------------------------------------------------------------------
-  // 4. Webhook replay drawer open
-  // Surface: detail_drawer.ex — .ax-detail-drawer-shell with phx-mounted JS.show transition
+  // 4. Webhook replay confirmation open
+  // Surface: webhook_live.ex — [data-role="replay-confirm"]
   // Trigger: [data-role="replay-single"] (webhook_live.ex line 162-164, phx-click="prepare_replay")
-  // The drawer uses ax-drawer-entering / ax-drawer-enter-from / ax-drawer-enter-to transitions
-  // with --ax-dur-3 (240ms enter, 140ms leave). Under reduced-motion, --ax-dur-3 → 0ms.
   // --------------------------------------------------------------------------
-  test("motion trace — webhook replay drawer open", async ({ page, request }) => {
-    // Trace artifact: test-results/motion-trace-webhook-replay-drawer-open/trace.zip
+  test("motion trace — webhook replay confirmation open", async ({ page, request }) => {
+    // Trace artifact: test-results/motion-trace-webhook-replay-confirmation-open/trace.zip
     // Review with: npx playwright show-trace test-results/.../trace.zip
-    // detail_drawer.ex uses JS.show/JS.hide on .ax-detail-drawer-shell; the trace
-    // captures the enter transition frames (ax-drawer-entering CSS class applied for 240ms).
 
     const opFlows = await seed(request, "operator-flows");
     await login(page, `/billing/webhooks/${opFlows.single_webhook_id}`);
@@ -162,9 +161,7 @@ test.describe("Motion trace — animated surface capture", () => {
     await expect(replayTrigger).toBeVisible();
     await replayTrigger.click();
 
-    // The drawer shell is conditionally rendered (:if={@open}) and uses phx-mounted
-    // JS.show with ax-drawer-entering transition (--ax-dur-3: 240ms)
-    const drawerShell = page.locator(".ax-detail-drawer-shell");
-    await expect(drawerShell).toBeVisible();
+    const confirmation = page.locator('[data-role="replay-confirm"]');
+    await expect(confirmation).toBeVisible();
   });
 });

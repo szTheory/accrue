@@ -525,11 +525,18 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   attr(:events, :list, required: true)
 
   defp source_event_select(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :input_id,
+        "source-event-" <> Integer.to_string(System.unique_integer([:positive]))
+      )
+
     ~H"""
-    <label class="ax-label" for={"source-event-" <> Integer.to_string(System.unique_integer([:positive]))}>
+    <label class="ax-label" for={@input_id}>
       Source event
     </label>
-    <select name="source_event_id" class="ax-select">
+    <select id={@input_id} name="source_event_id" class="ax-select">
       <option value="">None</option>
       <option :for={event <- @events} value={event.id}>
         <%= "#{event.type} ##{event.id}" %>

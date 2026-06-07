@@ -1,11 +1,11 @@
 # v1.51 Admin UI: Depth Pass — SIGN-OFF
 
 **Phase scope:** 174–179 (A through F)
-**Date:** [PENDING — fill when photographic run completes]
+**Date:** 2026-06-05 20:58 EDT (partial live gate run; vision scoring pending)
 **Produced by:** Phase 179 plan execution (2026-06-04)
 
 **Gate status:**
-Vision-scoring photographic run: [PENDING — run `npm run score-visuals` with ANTHROPIC_API_KEY + live server]
+Partial: screenshot capture, axe sweep, and motion trace capture passed on the live Playwright harness. Vision scoring remains [PENDING] because `ANTHROPIC_API_KEY` was not set and `npm run score-visuals` skipped.
 
 This scaffold marks the v1.51 build complete. All code-level requirements (DSY-01–03, IA-01–07, SCR-01–04, MOT-01–03, SEED-01–02, QA-01–03) are satisfied by prior phase execution. The photographic run and motion-trace review close the final QA gate before declaring the milestone DONE.
 
@@ -24,7 +24,7 @@ This scaffold marks the v1.51 build complete. All code-level requirements (DSY-0
 ## Section 2 — Rubric Scorecard
 
 **Before-column source:** 176-SCORECARD.md after-scores (all 21 screens at min ≥ 2 after Phase 176 Wave 0–5 uplift).
-**After-column source:** [PENDING — vision-LLM scoring from `npm run score-visuals`]
+**After-column source:** [PENDING — vision-LLM scoring from `npm run score-visuals`; 2026-06-05 run skipped with `ANTHROPIC_API_KEY not set`]
 
 Scoring rubric (10 dimensions, ① through ⑩, scored 0–3 each; ≥ 2 = pass on every dimension):
 ① Token compliance · ② Visual hierarchy · ③ Spacing rhythm · ④ State coverage
@@ -67,30 +67,30 @@ Run: `cd accrue_admin && npm run e2e:a11y`
 
 | Surface | Light violations | Dark violations | Mobile (Pixel5) | Status |
 |---------|-----------------|-----------------|-----------------|--------|
-| dashboard | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| customers | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| customer-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| subscriptions | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| subscription-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| invoices | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| invoice-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| payments | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| charge-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| coupons | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| coupon-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| promotion-codes | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| promo-code-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| connect | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| connect-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| events | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| event-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| webhooks | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| webhook-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| recovery | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
-| campaign-detail | [PENDING] | [PENDING] | [PENDING] | [PENDING — run npm run e2e:a11y] |
+| dashboard | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| customers | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| customer-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| subscriptions | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| subscription-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| invoices | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| invoice-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| payments | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| charge-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| coupons | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| coupon-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| promotion-codes | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| promo-code-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| connect | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| connect-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| events | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| event-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| webhooks | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| webhook-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| recovery | 0 critical/serious | 0 critical/serious | PASS | PASS |
+| campaign-detail | 0 critical/serious | 0 critical/serious | PASS | PASS |
 
 **Axe spec:** `accrue_admin/e2e/admin-a11y.spec.js` — 21 surfaces, 3 fixtures (operator-flows + dashboard + edge-states), light + dark scan via `scan(page, theme)` helper. Asserts `failures.toEqual([])`.
-**Expected result:** 0 critical/serious violations per surface per theme.
+**Run result:** `cd accrue_admin && npm run e2e:a11y` passed on 2026-06-05 20:58 EDT: 2 projects passed, 0 critical/serious violations reported.
 
 ---
 
@@ -100,17 +100,18 @@ Phase 177 shipped `accrue_admin/e2e/reduced-motion.spec.js` — the automated re
 
 | Surface | Trace captured | Quality reviewed | Reduced-motion spec | Status |
 |---------|---------------|-----------------|---------------------|--------|
-| Command palette open | [PENDING — run npx playwright test e2e/admin-motion-trace.spec.js] | [PENDING — npx playwright show-trace test-results/.../trace.zip] | PASS (CI, Phase 177) | [PENDING] |
-| Dropdown open | [PENDING — run npx playwright test e2e/admin-motion-trace.spec.js] | [PENDING — npx playwright show-trace test-results/.../trace.zip] | PASS (CI, Phase 177) | [PENDING] |
-| Nav-collapse toggle | [PENDING — run npx playwright test e2e/admin-motion-trace.spec.js] | [PENDING — npx playwright show-trace test-results/.../trace.zip] | PASS (CI, Phase 177) | [PENDING] |
-| Webhook replay drawer | [PENDING — run npx playwright test e2e/admin-motion-trace.spec.js] | [PENDING — npx playwright show-trace test-results/.../trace.zip] | PASS (CI, Phase 177) | [PENDING] |
+| Command palette open/close | PASS — trace zip preserved | [PENDING — qualitative Trace Viewer review] | PASS (CI, Phase 177) | CAPTURED |
+| Customer More menu open/close | PASS — trace zip preserved | [PENDING — qualitative Trace Viewer review] | PASS (CI, Phase 177) | CAPTURED |
+| Nav-collapse toggle | PASS — trace zip preserved | [PENDING — qualitative Trace Viewer review] | PASS (CI, Phase 177) | CAPTURED |
+| Webhook replay confirmation open | PASS — trace zip preserved | [PENDING — qualitative Trace Viewer review] | PASS (CI, Phase 177) | CAPTURED |
 
 **Run command:** `cd accrue_admin && npx playwright test e2e/admin-motion-trace.spec.js --project chromium-desktop`
-**Trace review:** `npx playwright show-trace test-results/<test-name>-chromium-desktop/trace.zip`
+**Trace review:** `npx playwright show-trace <trace.zip>` from `.planning/ui-reviews/179-20260605-2058/motion-traces/**/trace.zip`
+**Run result:** 4/4 motion trace tests passed on 2026-06-05 20:58 EDT; 4 trace zips preserved.
 
 **Deferred 177 HUMAN-UAT items closed by this section:**
 - **177 UAT #1** (Playwright reduced-motion spec runtime): Spec `e2e/reduced-motion.spec.js` passes in CI. PASS confirmed by Phase 177. The trace spec additionally exercises the surfaces at full animation for live quality review.
-- **177 UAT #2** (Live motion quality pass — all 9 surfaces): Requires human review of the Playwright trace artifacts produced by `admin-motion-trace.spec.js`. [PENDING — open traces in Playwright Trace Viewer and confirm 150–300ms, no jank, restrained motion].
+- **177 UAT #2** (Live motion quality pass — all 9 surfaces): Trace artifacts were produced for the 4 primary live surfaces. [PENDING — open preserved traces in Playwright Trace Viewer and confirm 150–300ms, no jank, restrained motion].
 
 ---
 
@@ -125,8 +126,8 @@ SEED-01 and SEED-02 requirements verified by Phase 178 execution:
 
 **Deferred 178 HUMAN-UAT items closed by this section and the photographic sweep:**
 - **178 UAT #1** (Loading / poll-banner state visual): [PENDING — double-seed + 5s wait in photographic sweep]. The mechanism is documented in STATE-MATRIX.md "Loading State Mechanism" section.
-- **178 UAT #2** (Dark-contrast axe pass on seeded edge states): Closed by the axe spec (Section 3 above) — `admin-a11y.spec.js` sweeps all 21 surfaces including edge-state screens in dark theme. [PENDING — run `npm run e2e:a11y` against live server].
-- **178 UAT #3** (Single click-through across all 21 screens — STATE-MATRIX cells reachable): [PENDING — photographic sweep run confirms reachability of all STATE-MATRIX cells].
+- **178 UAT #2** (Dark-contrast axe pass on seeded edge states): PASS — `admin-a11y.spec.js` swept all 21 surfaces including edge-state screens in dark theme with 0 critical/serious violations.
+- **178 UAT #3** (Single click-through across all 21 screens — STATE-MATRIX cells reachable): PASS at route/render level — photographic sweep produced all 84 expected PNGs.
 
 ---
 
@@ -183,6 +184,7 @@ Screenshots are gitignored artifacts produced by the visual capture command. The
 **Output locations:**
 - `accrue_admin/test-results/admin-visuals/chromium-desktop/` — 21 light PNGs + 21 dark PNGs = 42 files
 - `accrue_admin/test-results/admin-visuals/chromium-mobile/` — 21 light PNGs + 21 dark PNGs = 42 files
+- `.planning/ui-reviews/179-20260605-2058/admin-visuals/` — preserved copy of the 84-PNG run because later Playwright runs clear `test-results/`
 
 **Expected:** 21 screens × 2 themes × 2 projects = **84 PNGs total**
 
@@ -190,7 +192,7 @@ Screenshots are gitignored artifacts produced by the visual capture command. The
 - Light: `<screen-name>.png` (e.g., `dashboard.png`, `coupon-detail.png`)
 - Dark: `<screen-name>-dark.png` (e.g., `dashboard-dark.png`, `coupon-detail-dark.png`)
 
-**Status: [PENDING — run capture command against live server]**
+**Status:** PASS — `npm run e2e:visuals:png-only` passed on 2026-06-05 20:58 EDT and produced 84 PNGs (42 desktop, 42 mobile).
 
 **Gitignore entry:** `accrue_admin/test-results/` is already in `.gitignore` — screenshots are local/CI-only artifacts. Do not commit PNGs to the repository.
 
@@ -200,16 +202,16 @@ Screenshots are gitignored artifacts produced by the visual capture command. The
 
 These items must all be completed before this SIGN-OFF is finalized and the v1.51 milestone is declared DONE.
 
-- [ ] Full 4-cell screenshot capture (84 PNGs) — `npm run e2e:visuals:png-only`
+- [x] Full 4-cell screenshot capture (84 PNGs) — `npm run e2e:visuals:png-only`
 - [ ] Vision-LLM scoring all dimensions ≥ 2 — `ANTHROPIC_API_KEY=... npm run score-visuals` → review `findings.ndjson`
 - [ ] Remediation loop complete (≤ 3 rounds; Phase 176 confirmed ≥ 2 at code level, minimal expected)
-- [ ] Axe 0 critical/serious in light + dark across all 21 screens — `npm run e2e:a11y`
-- [ ] Motion traces reviewed in Playwright Trace Viewer for 4 surfaces (command palette, dropdown, nav-collapse, webhook replay drawer)
+- [x] Axe 0 critical/serious in light + dark across all 21 screens — `npm run e2e:a11y`
+- [ ] Motion traces reviewed in Playwright Trace Viewer for 4 surfaces (command palette, customer More menu, nav-collapse, webhook replay confirmation)
 - [ ] SIGN-OFF scorecard After-column filled from `findings.ndjson`
 - [ ] Deferred 175 HUMAN-UAT items confirmed via photographic evidence (UAT #1–#5 in Section 7)
 - [ ] Deferred 176 HUMAN-UAT items confirmed via photographic evidence (UAT #1–#3 in Section 7)
 - [ ] Deferred 177 HUMAN-UAT items confirmed via motion trace review (UAT #1–#2 in Section 4)
-- [ ] Deferred 178 HUMAN-UAT items confirmed via axe dark-contrast pass + photographic evidence (UAT #1–#3 in Section 5)
+- [ ] Deferred 178 HUMAN-UAT items confirmed via axe dark-contrast pass + photographic evidence (UAT #1–#3 in Section 5; UAT #2 and #3 passed, UAT #1 still needs targeted poll-banner visual)
 - [ ] v1.51 milestone CLOSED: all QA-01, QA-02, QA-03 requirements satisfied
 
 **QA requirement mapping:**

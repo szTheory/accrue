@@ -379,7 +379,9 @@ defmodule AccrueHostWeb.SubscriptionLive do
               <div>
                 <h2 style={section_heading_style()}>Checkout Facade Demo (PROOF-05)</h2>
                 <p style={muted_body_style()}>
-                  Demonstrates <code style={code_style()}>Accrue.Billing.create_checkout_session/2</code> via the host facade.
+                  Demonstrates
+                  <code style={code_style()}>Accrue.Billing.create_checkout_session/2</code>
+                  via the host facade.
                 </p>
               </div>
             </div>
@@ -406,7 +408,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
               <div>
                 <h2 style={section_heading_style()}>Recovery Wiring Demo (PROOF-06)</h2>
                 <p style={muted_body_style()}>
-                  Demonstrates active recovery jobs. <code style={code_style()}>Accrue.Jobs.DetectExpiringCards</code> and <code style={code_style()}>Accrue.Jobs.MeterEventsReconciler</code> are wired into the host crontab.
+                  Demonstrates active recovery jobs.
+                  <code style={code_style()}>Accrue.Jobs.DetectExpiringCards</code>
+                  and <code style={code_style()}>Accrue.Jobs.MeterEventsReconciler</code>
+                  are wired into the host crontab.
                 </p>
                 <p style={muted_body_style()} style="margin-top:8px;">
                   These jobs run daily/minutely to detect payment methods nearing expiry, reconcile metered usage gaps, and ensure billing state stays consistent even if webhooks are missed.

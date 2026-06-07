@@ -102,8 +102,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
               class="ax-input-search"
               role="search"
               aria-label="Search"
-              phx-click="open"
-              phx-target="#global-search"
+              data-command-palette-trigger="true"
             >
               <AccrueAdmin.Components.Icon.icon name={:search} size="md" class="ax-input-icon" />
               <span class="ax-input-placeholder">Search customers, invoices… ⌘K</span>
@@ -255,8 +254,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       active_subscription_count: Subscription |> Query.active() |> Repo.aggregate(:count, :id),
       canceling_subscription_count:
         Subscription |> Query.canceling() |> Repo.aggregate(:count, :id),
-      past_due_subscription_count:
-        AttentionCounts.compute(nil).recovery,
+      past_due_subscription_count: AttentionCounts.compute(nil).recovery,
       open_invoice_count:
         Invoice
         |> where([invoice], invoice.status in ^open_invoice_statuses)
@@ -267,8 +265,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
         |> select([invoice], coalesce(sum(invoice.amount_remaining_minor), 0))
         |> Repo.one()
         |> Kernel.||(0),
-      blocked_webhook_count:
-        AttentionCounts.compute(nil).developer,
+      blocked_webhook_count: AttentionCounts.compute(nil).developer,
       failed_meter_event_count:
         MeterEvent
         |> where([m], m.stripe_status == "failed")

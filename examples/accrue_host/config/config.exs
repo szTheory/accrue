@@ -46,15 +46,17 @@ config :accrue_host, Oban,
   ],
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24},
-    {Oban.Plugins.Cron,
-     # append-merge: if your host already has cron jobs, append Accrue entries instead of replacing:
-     # crontab: existing_cron_jobs() ++ [ ...Accrue entries... ]
-     crontab: [
-       {"*/15 * * * *", Accrue.Jobs.DunningSweeper},
-       {"@daily", Accrue.Jobs.DetectExpiringCards},
-       {"* * * * *", Accrue.Jobs.MeterEventsReconciler},
-       {"*/5 * * * *", Accrue.Jobs.MeteredRenewalReconciler}
-     ]}
+    {
+      Oban.Plugins.Cron,
+      # append-merge: if your host already has cron jobs, append Accrue entries instead of replacing:
+      # crontab: existing_cron_jobs() ++ [ ...Accrue entries... ]
+      crontab: [
+        {"*/15 * * * *", Accrue.Jobs.DunningSweeper},
+        {"@daily", Accrue.Jobs.DetectExpiringCards},
+        {"* * * * *", Accrue.Jobs.MeterEventsReconciler},
+        {"*/5 * * * *", Accrue.Jobs.MeteredRenewalReconciler}
+      ]
+    }
   ]
 
 # Configure the endpoint

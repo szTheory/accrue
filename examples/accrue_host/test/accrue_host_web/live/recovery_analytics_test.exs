@@ -35,7 +35,7 @@ defmodule AccrueHostWeb.RecoveryAnalyticsTest do
   test "renders recovery dashboard with deterministic seeded data", %{conn: conn} do
     user = user_fixture()
     user = Repo.update!(Ecto.Changeset.change(user, billing_admin: true))
-    
+
     conn = log_in_user(conn, user)
 
     assert {:ok, _view, html} = live(conn, "/admin/analytics/recovery")
@@ -44,9 +44,11 @@ defmodule AccrueHostWeb.RecoveryAnalyticsTest do
     assert html =~ "Recovered MRR (USD)"
     assert html =~ "Exhausted MRR (JPY)"
 
-    assert html =~ "$120.00" # 12000 cents in USD
-    assert html =~ "¥30,000" # 30000 cents in JPY
-    
+    # 12000 cents in USD
+    assert html =~ "$120.00"
+    # 30000 cents in JPY
+    assert html =~ "¥30,000"
+
     # Assert funnel chart
     assert html =~ "Recovery Funnel"
 

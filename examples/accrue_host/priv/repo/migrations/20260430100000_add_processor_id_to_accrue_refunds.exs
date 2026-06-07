@@ -8,7 +8,9 @@ defmodule Accrue.Repo.Migrations.AddProcessorIdToAccrueRefunds do
       add(:processor_id, :string)
     end
 
-    execute("UPDATE accrue_refunds SET processor_id = stripe_id WHERE processor_id IS NULL AND stripe_id IS NOT NULL")
+    execute(
+      "UPDATE accrue_refunds SET processor_id = stripe_id WHERE processor_id IS NULL AND stripe_id IS NOT NULL"
+    )
 
     create(
       unique_index(:accrue_refunds, [:processor_id],
@@ -19,7 +21,9 @@ defmodule Accrue.Repo.Migrations.AddProcessorIdToAccrueRefunds do
   end
 
   def down do
-    drop_if_exists(index(:accrue_refunds, [:processor_id], name: :accrue_refunds_processor_id_index))
+    drop_if_exists(
+      index(:accrue_refunds, [:processor_id], name: :accrue_refunds_processor_id_index)
+    )
 
     alter table(:accrue_refunds) do
       remove(:processor_id)

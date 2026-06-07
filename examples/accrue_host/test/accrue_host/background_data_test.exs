@@ -3,11 +3,11 @@ defmodule AccrueHost.BackgroundDataTest do
 
   setup do
     Application.put_env(:accrue, :env, :dev)
-    
+
     Code.compiler_options(ignore_module_conflict: true)
     Code.eval_file("priv/repo/seeds.exs")
     Code.compiler_options(ignore_module_conflict: false)
-    
+
     Application.put_env(:accrue, :env, :test)
     :ok
   end
@@ -35,12 +35,12 @@ defmodule AccrueHost.BackgroundDataTest do
     # Ensure backdated data exists (at least 1 day old)
     now = DateTime.utc_now()
     one_day_ago = DateTime.add(now, -86_400, :second)
-    
-    old_events_count = 
+
+    old_events_count =
       Event
       |> where([e], e.inserted_at < ^one_day_ago)
       |> Repo.aggregate(:count)
-      
+
     assert old_events_count > 0
   end
 end

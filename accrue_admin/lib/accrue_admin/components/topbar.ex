@@ -23,11 +23,10 @@ defmodule AccrueAdmin.Components.Topbar do
       <div class="ax-topbar-actions">
         <button
           id="search-trigger"
-          phx-click="open"
-          phx-target="#global-search"
           type="button"
           class="ax-search-trigger"
           aria-label="Search (Command or Control K)"
+          data-command-palette-trigger="true"
         >
           <Icon.icon name={:search} size="sm" class="ax-search-trigger-icon" />
           <span class="ax-search-trigger-text">Search customers, invoices… ⌘K</span>

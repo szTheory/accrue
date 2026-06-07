@@ -47,7 +47,6 @@ defmodule AccrueAdmin.Components.Sidebar do
             phx-hook={if group_meta.collapsible, do: "SidebarCollapse"}
             data-group={if group_meta.collapsible, do: slugify(group)}
             data-controls={if group_meta.collapsible, do: "sidebar-group-links-#{slugify(group)}"}
-            aria-expanded={if group_meta.collapsible, do: to_string(group_initially_expanded?(group_meta))}
           >
             <%= if group_meta.collapsible do %>
               <button

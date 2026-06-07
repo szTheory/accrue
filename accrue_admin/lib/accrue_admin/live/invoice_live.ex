@@ -477,11 +477,18 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   attr(:events, :list, required: true)
 
   defp source_event_select(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :input_id,
+        "invoice-source-event-" <> Integer.to_string(System.unique_integer([:positive]))
+      )
+
     ~H"""
-    <label class="ax-label" for={"invoice-source-event-" <> Integer.to_string(System.unique_integer([:positive]))}>
+    <label class="ax-label" for={@input_id}>
       <%= Copy.invoice_source_event_label() %>
     </label>
-    <select name="source_event_id" class="ax-select">
+    <select id={@input_id} name="source_event_id" class="ax-select">
       <option value=""><%= Copy.invoice_source_event_none() %></option>
       <option :for={event <- @events} value={event.id}>
         <%= "#{event.type} ##{event.id}" %>
@@ -655,7 +662,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
           %{
             icon: :payments,
             label: "Payments for this customer",
-            href: ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
+            href:
+              ScopedPath.build(mount_path, "/payments", scope, %{"customer_id" => customer.id})
           }
         ]
       else

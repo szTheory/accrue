@@ -8,7 +8,7 @@
  * Expected element attributes (on hook element = the <section> or collapsible wrapper):
  *   data-group       — group slug (e.g. "recovery", "developer")
  *   data-controls    — id of the <div> containing the link list to show/hide
- *   aria-expanded    — server-rendered initial state (overridden by localStorage)
+ *   [data-collapse-toggle][aria-expanded] — server-rendered initial state
  *
  * Reads mount_path from closest [data-mount-path] ancestor (set on ax-shell div).
  * localStorage key format: "ax-sidebar-{mountPath}-{group}"
@@ -32,7 +32,7 @@ export const SidebarCollapse = {
   handleClick(e) {
     if (e.target.closest("[data-collapse-toggle]")) {
       e.preventDefault();
-      const expanded = this.el.getAttribute("aria-expanded") === "true";
+      const expanded = this.toggle().getAttribute("aria-expanded") === "true";
       this.setExpanded(!expanded);
       localStorage.setItem(this.storageKey(), String(!expanded));
     }
@@ -45,7 +45,7 @@ export const SidebarCollapse = {
     const list = document.getElementById(this.el.dataset.controls);
     if (!list) return;
 
-    this.el.setAttribute("aria-expanded", String(expanded));
+    this.toggle().setAttribute("aria-expanded", String(expanded));
 
     if (expanded) {
       // Expand: reveal first so the CSS opacity transition can run 0→1
@@ -79,6 +79,10 @@ export const SidebarCollapse = {
         );
       }
     }
+  },
+
+  toggle() {
+    return this.el.querySelector("[data-collapse-toggle]");
   },
 
   storageKey() {
