@@ -62,6 +62,9 @@ jobs:
       - name: VERIFY-01 README contract
         run: bash scripts/ci/verify_verify01_readme_contract.sh
 
+      - name: Docker DX contract
+        run: bash scripts/ci/verify_docker_dx_contract.sh
+
       - name: Production readiness discoverability contract
         run: bash scripts/ci/verify_production_readiness_discoverability.sh
 

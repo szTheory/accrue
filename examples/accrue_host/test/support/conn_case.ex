@@ -63,14 +63,20 @@ defmodule AccrueHostWeb.ConnCase do
   It returns an updated `conn`.
   """
   def log_in_user(conn, user, opts \\ []) do
-    token = AccrueHost.Accounts.generate_user_session_token(user)
+    active_organization_id = opts[:active_organization_id]
+
+    token =
+      AccrueHost.Accounts.generate_user_session_token(user,
+        active_organization_id: active_organization_id,
+        select_active_organization: not is_nil(active_organization_id)
+      )
 
     maybe_set_token_authenticated_at(token, opts[:token_authenticated_at])
 
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user_token, token)
-    |> maybe_put_active_organization_id(opts[:active_organization_id])
+    |> maybe_put_active_organization_id(active_organization_id)
   end
 
   defp maybe_set_token_authenticated_at(_token, nil), do: nil

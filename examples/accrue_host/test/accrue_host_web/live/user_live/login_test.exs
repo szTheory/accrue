@@ -28,7 +28,7 @@ defmodule AccrueHostWeb.UserLive.LoginTest do
       assert html =~ "If your email is in our system"
 
       assert AccrueHost.Repo.get_by!(AccrueHost.Accounts.UserToken, user_id: user.id).context ==
-               "login"
+               "magic_link"
     end
 
     test "does not disclose if user is registered", %{conn: conn} do

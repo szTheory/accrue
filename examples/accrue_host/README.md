@@ -18,6 +18,11 @@ make up         # every time after that — builds on first run, then read the b
 Then open **http://accrue.localhost/admin**. That URL is stable — bookmark it.
 You must be logged in as `admin@example.com` (password `accrue-demo-password`) to access `/admin` — the 5 customer logins below are for the tenant-facing billing flows.
 
+`make up` creates the shared Docker `proxy` network if it is missing, so a fresh
+machine fails less mysteriously. `make proxy` is still the step that starts Traefik
+and makes the stable `*.localhost` URL route; without it, the banner prints the
+automatic `http://127.0.0.1:<port>/admin` fallback.
+
 **One stable URL, zero port juggling.** `make proxy` starts a small shared Traefik
 reverse proxy (once, fleet-wide). Every demo that joins it gets its own
 `*.localhost` name on port 80 — so this lib lives at `http://accrue.localhost` while
@@ -55,7 +60,7 @@ for any of this — billing is `Accrue.Processor.Fake`-backed.
   seed + boot — skipping npm install and the first-paint asset build when the named
   volumes are already warm. Adding a hex dep just re-runs `deps.get`.
 - *A full rebuild:* `make build` (image changed) or `make reset` (wipe volumes and
-  reseed). `make reset` re-**links** Hex/mix/npm from the host-bind caches under
+  reseed). `make reset` re-**links** Hex/npm from the host-bind caches under
   `~/.cache/accrue-docker/*` instead of re-downloading over the network — those
   caches survive `docker compose down --volumes`.
 
@@ -64,9 +69,13 @@ for any of this — billing is `Accrue.Processor.Fake`-backed.
 - `accrue.localhost` won't load? Either the shared proxy isn't running (`make proxy`)
   or your browser won't resolve `*.localhost` (Safari, `curl`) — use the
   `http://127.0.0.1:<port>` fallback the banner prints. The Traefik dashboard at
-  http://localhost:8080 shows exactly what's routed where.
+  http://localhost:8080/dashboard/ shows exactly what's routed where.
 - Running two checkouts of *this same* lib? `make up INSTANCE=accrue-foo` gives the
   second one its own route at `http://accrue-foo.localhost` and isolated volumes.
+  `INSTANCE` must be DNS-safe lowercase: letters, numbers, and hyphens only.
+- On Apple Silicon, unset `DOCKER_DEFAULT_PLATFORM=linux/amd64` before using this
+  demo. Forced amd64 emulation is known to corrupt BEAM/NIF builds here; the image
+  builds native arm64 and compiles the HarfBuzz NIF from Rust source.
 - `make up` follows the web logs; **Ctrl-C only detaches the log follow** — the stack
   keeps running. Use `make down` to actually stop it (the shared proxy stays up).
 - Want a clean slate? `make reset` nukes the volumes and reseeds (seeds are
@@ -110,22 +119,30 @@ mix phx.server
 
 ## Prerequisites
 
-- PostgreSQL 14+ must already be running.
-- By default the app connects to `localhost:5432`.
-- Override `PGHOST`, `PGPORT`, `PGUSER`, or `PGPASSWORD` if your local database
-  uses different values.
-- Docker Compose sets `PGHOST=db` for the web container. Postgres is **internal-only by
-  default** (no host port binding) — web reaches it over the internal Docker network.
-  If you need to connect a GUI client (psql, DBeaver, TablePlus), copy
-  `docker-compose.override.yml.example` to `docker-compose.override.yml` (gitignored,
-  auto-merged); it exposes `${PGPORT:-5432}` on `127.0.0.1`.
-- Host ports are ephemeral by default, so concurrent demos never collide — no port
-  picking needed. Copy `.env.example` to `.env` only to pin a fixed port
-  (`ACCRUE_HOST_DOCKER_PORT`, e.g. for OAuth callbacks) or to isolate two checkouts
-  of this same lib (`ACCRUE_HOST_COMPOSE_PROJECT`).
-- Docker uses named volumes for `deps`, `_build`, and `assets/node_modules`.
-  `make up` reuses them every run — no dep redownload. Use `make reset` only when you
-  want to nuke volumes and reseed from scratch.
+For Docker evaluation, you need Docker with Compose. You do **not** need a host
+Postgres server: Compose sets `PGHOST=db`, keeps Postgres internal-only by default,
+and the web container reaches it over the private Compose network.
+
+If you need a GUI client such as DBeaver or TablePlus, copy
+`docker-compose.override.yml.example` to `docker-compose.override.yml` (gitignored,
+auto-merged). By default Docker assigns a free loopback DB port; run
+`docker compose port db 5432` to see it. Set `PGPORT=55432` only when your GUI needs
+a stable port for this one instance.
+
+Host ports are ephemeral by default, so concurrent demos never collide — no port
+picking needed. Copy `.env.example` to `.env` only to pin a fixed fallback port
+(`ACCRUE_HOST_DOCKER_PORT`, e.g. for OAuth callbacks) or to override
+`COMPOSE_PROJECT_NAME` / `ACCRUE_HOST` directly. For normal side-by-side checkouts,
+prefer `make up INSTANCE=accrue-foo`.
+
+Docker uses named volumes for `deps`, `_build`, and `assets/node_modules`.
+`make up` reuses them every run — no dep redownload. Use `make reset` only when you
+want to nuke volumes and reseed from scratch; the Hex/npm download caches under
+`~/.cache/accrue-docker/*` survive the reset.
+
+For native Phoenix contributor work (`mix setup && mix phx.server`), run your own
+Postgres and override `PGHOST`, `PGPORT`, `PGUSER`, or `PGPASSWORD` if your local
+database uses non-default values.
 
 The default local setup uses `Accrue.Processor.Fake` and the local webhook
 signing secret `whsec_test_host`. You can exercise the full path without live

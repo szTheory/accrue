@@ -70,12 +70,12 @@ defmodule AccrueHostWeb.UserAuth do
   """
   def fetch_current_scope_for_user(conn, _opts) do
     with {token, conn} <- ensure_user_token(conn),
-         {user, token_inserted_at} <- Accounts.get_user_by_session_token(token) do
-      {conn, current_scope} = load_current_scope(conn, user)
+         {user, sigra_session} <- Accounts.get_user_and_session_by_token(token) do
+      {conn, current_scope} = load_current_scope(conn, user, sigra_session)
 
       conn
       |> assign(:current_scope, current_scope)
-      |> maybe_reissue_user_session_token(user, token_inserted_at)
+      |> maybe_reissue_user_session_token(user, sigra_session.inserted_at)
     else
       nil -> assign(conn, :current_scope, Scope.for_user(nil))
     end
@@ -115,7 +115,14 @@ defmodule AccrueHostWeb.UserAuth do
   # function will clear the session to avoid fixation attacks. See the
   # renew_session function to customize this behaviour.
   defp create_or_extend_session(conn, user, params) do
-    token = Accounts.generate_user_session_token(user)
+    token =
+      Accounts.generate_user_session_token(user,
+        type: session_type(params),
+        ip: client_ip(conn),
+        user_agent: get_req_header(conn, "user-agent") |> List.first(),
+        active_organization_id: get_session(conn, :active_organization_id)
+      )
+
     remember_me = get_session(conn, :user_remember_me)
 
     conn
@@ -124,6 +131,15 @@ defmodule AccrueHostWeb.UserAuth do
     |> maybe_write_remember_me_cookie(token, params, remember_me)
     |> maybe_assign_default_organization_scope(user)
   end
+
+  defp session_type(%{"remember_me" => "true"}), do: :remember_me
+  defp session_type(_params), do: :standard
+
+  defp client_ip(%Plug.Conn{remote_ip: remote_ip}) when is_tuple(remote_ip) do
+    remote_ip |> :inet.ntoa() |> to_string()
+  end
+
+  defp client_ip(_conn), do: nil
 
   # Do not renew session if the user is already logged in
   # to prevent CSRF errors or data being lost in tabs that are still open
@@ -224,8 +240,16 @@ defmodule AccrueHostWeb.UserAuth do
   Disconnects existing sockets for the given tokens.
   """
   def disconnect_sessions(tokens) do
-    Enum.each(tokens, fn %{token: token} ->
-      AccrueHostWeb.Endpoint.broadcast(user_session_topic(token), "disconnect", %{})
+    Enum.each(tokens, fn
+      %Sigra.Session{hashed_token: hashed_token} when is_binary(hashed_token) ->
+        live_socket_id = "users_sessions:#{Base.url_encode64(hashed_token)}"
+        AccrueHostWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+
+      %{token: token} ->
+        AccrueHostWeb.Endpoint.broadcast(user_session_topic(token), "disconnect", %{})
+
+      _ ->
+        :ok
     end)
   end
 
@@ -299,24 +323,24 @@ defmodule AccrueHostWeb.UserAuth do
 
   defp mount_current_scope(socket, session) do
     Phoenix.Component.assign_new(socket, :current_scope, fn ->
-      {user, _} =
+      {user, sigra_session} =
         if user_token = session["user_token"] do
-          Accounts.get_user_by_session_token(user_token)
+          Accounts.get_user_and_session_by_token(user_token)
         end || {nil, nil}
 
       scope = Scope.for_user(user)
 
-      case hydrate_scope(scope, sigra_session_from_session(session)) do
+      case hydrate_scope(scope, merge_session_org(sigra_session, session)) do
         {:ok, hydrated_scope, _sigra_session} -> hydrated_scope
         {:error, fallback_scope, _sigra_session} -> fallback_scope
       end
     end)
   end
 
-  defp load_current_scope(conn, user) do
+  defp load_current_scope(conn, user, sigra_session) do
     scope = Scope.for_user(user)
 
-    case hydrate_scope(scope, sigra_session_for_conn(conn)) do
+    case hydrate_scope(scope, merge_conn_org(sigra_session, conn)) do
       {:ok, hydrated_scope, sigra_session} ->
         {conn |> put_private(:sigra_session, sigra_session), hydrated_scope}
 
@@ -342,21 +366,35 @@ defmodule AccrueHostWeb.UserAuth do
     end
   end
 
-  defp sigra_session_for_conn(conn) do
+  defp merge_conn_org(%Sigra.Session{} = sigra_session, conn) do
+    case get_session(conn, :active_organization_id) || sigra_session.active_organization_id do
+      nil -> sigra_session
+      active_organization_id -> %{sigra_session | active_organization_id: active_organization_id}
+    end
+  end
+
+  defp merge_conn_org(_sigra_session, conn) do
     conn
     |> get_session(:active_organization_id)
     |> build_sigra_session()
   end
 
-  defp sigra_session_from_session(session) when is_map(session) do
+  defp merge_session_org(%Sigra.Session{} = sigra_session, session) when is_map(session) do
+    active_organization_id =
+      Map.get(session, "active_organization_id", Map.get(session, :active_organization_id)) ||
+        sigra_session.active_organization_id
+
+    %{sigra_session | active_organization_id: active_organization_id}
+  end
+
+  defp merge_session_org(_sigra_session, session) when is_map(session) do
     session
     |> Map.get("active_organization_id", Map.get(session, :active_organization_id))
     |> build_sigra_session()
   end
 
-  defp build_sigra_session(active_organization_id) do
-    %Sigra.Session{active_organization_id: active_organization_id}
-  end
+  defp build_sigra_session(active_organization_id),
+    do: %Sigra.Session{active_organization_id: active_organization_id}
 
   @doc "Returns the path to redirect to after log in."
   # the user was already logged in, redirect to settings

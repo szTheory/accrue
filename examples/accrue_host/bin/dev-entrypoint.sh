@@ -9,11 +9,58 @@ set -euo pipefail
 
 cd /workspace/examples/accrue_host
 
+hash_files() {
+  find "$@" -type f -print0 \
+    | sort -z \
+    | xargs -0 -r sha256sum \
+    | sha256sum \
+    | awk '{print $1}'
+}
+
+asset_setup_hash() {
+  hash_files assets/package.json assets/package-lock.json
+}
+
+asset_build_hash() {
+  hash_files assets/package.json assets/package-lock.json assets/css assets/js assets/vendor config/config.exs config/dev.exs mix.exs
+}
+
+asset_setup_current() {
+  local marker="assets/node_modules/.accrue-assets-setup.sha256"
+  local current
+
+  current="$(asset_setup_hash)"
+  [ -d assets/node_modules/.bin ] && [ -f "$marker" ] && [ "$(cat "$marker")" = "$current" ]
+}
+
+asset_build_current() {
+  local marker="priv/static/assets/.accrue-assets-build.sha256"
+  local current
+
+  current="$(asset_build_hash)"
+  [ -d priv/static/assets ] && [ -f "$marker" ] && [ "$(cat "$marker")" = "$current" ]
+}
+
+mark_asset_setup_current() {
+  mkdir -p assets/node_modules
+  asset_setup_hash > assets/node_modules/.accrue-assets-setup.sha256
+}
+
+mark_asset_build_current() {
+  mkdir -p priv/static/assets
+  asset_build_hash > priv/static/assets/.accrue-assets-build.sha256
+}
+
 echo "[entrypoint] deps.get"
 mix deps.get
 
-echo "[entrypoint] assets.setup (skipped if node_modules warm)"
-[ -d assets/node_modules/.bin ] || mix assets.setup
+if asset_setup_current; then
+  echo "[entrypoint] assets.setup (package manifests unchanged)"
+else
+  echo "[entrypoint] assets.setup"
+  mix assets.setup
+  mark_asset_setup_current
+fi
 
 echo "[entrypoint] ecto.create"
 mix ecto.create --quiet
@@ -24,8 +71,13 @@ mix ecto.migrate
 echo "[entrypoint] seeds (idempotent)"
 mix run priv/repo/seeds.exs
 
-echo "[entrypoint] assets.build (first paint only; watchers rebuild after)"
-[ -d priv/static/assets ] || mix assets.build
+if asset_build_current; then
+  echo "[entrypoint] assets.build (first-paint assets current)"
+else
+  echo "[entrypoint] assets.build"
+  mix assets.build
+  mark_asset_build_current
+fi
 
 echo "[entrypoint] starting Phoenix"
 exec mix phx.server

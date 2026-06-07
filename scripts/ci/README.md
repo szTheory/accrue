@@ -168,6 +168,12 @@ Surface-to-script map:
 - **CI job:** this gate runs under GitHub Actions job id **`docs-contracts-shift-left`** (see `.github/workflows/ci.yml`).
 - **Co-update rule:** any intentional change to adoption-proof matrix taxonomy, archetype labels, or row-level text that affects verifier needles **must** ship in the **same PR / commit** as edits to **`scripts/ci/verify_adoption_proof_matrix.sh`** and to **any ExUnit file that embeds matrix literals** — today that thin harness is **`accrue/test/accrue/docs/organization_billing_org09_matrix_test.exs`** (shell-out only; it does not duplicate bash needles). **`verify_adoption_proof_matrix.sh`** remains the **canonical substring list** for this contract.
 
+### Triage: verify_docker_dx_contract.sh
+
+- **`verify_docker_dx_contract:`** (stderr prefix on failure) — treat as the `examples/accrue_host` Docker DX contract: stable `http://accrue.localhost/admin`, shared Traefik `dev_proxy`, external `proxy` network, DNS-safe `INSTANCE`, loopback-only ephemeral fallback ports, no default DB host port, native Apple Silicon boot, path-dep volume shadows, and warm-cache asset markers.
+- Fix the canonical surfaces first: `examples/accrue_host/Makefile`, `docker-compose.yml`, `docker-compose.override.yml.example`, `bin/dev-entrypoint.sh`, `bin/dev-banner.sh`, `README.md`, and `docs/docker-dx.md`. Only relax verifier needles when the Docker contract intentionally changes.
+- The script renders Compose config for the default instance and `INSTANCE=accrue-foo`; it does not start containers. Live Docker route/boot proof still belongs in host UAT or a local smoke note.
+
 ### Triage: host-integration / `accrue_host_uat.sh`
 
 Failures on **`host-integration`** start from **`bash scripts/ci/accrue_host_uat.sh`**, which runs **`mix verify.full`** inside **`examples/accrue_host`**.

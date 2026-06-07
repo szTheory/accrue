@@ -12,8 +12,27 @@ defmodule AccrueHost.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :failed_login_attempts, :integer, default: 0
+    field :locked_at, :utc_datetime
+    field :password_changed_at, :utc_datetime
+    field :pending_email, :string
+    field :deleted_at, :utc_datetime
+    field :scheduled_deletion_at, :utc_datetime
+    field :original_email, :string
+    field :must_change_password, :boolean, default: false
+    field :mfa_trust_epoch, :integer, default: 0
 
     timestamps(type: :utc_datetime)
+  end
+
+  def registration_changeset(attrs) do
+    registration_changeset(%__MODULE__{}, attrs)
+  end
+
+  def registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> email_changeset(attrs, opts)
+    |> password_changeset(attrs, opts)
   end
 
   @doc """
@@ -30,7 +49,36 @@ defmodule AccrueHost.Accounts.User do
   def email_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email])
+    |> update_change(:email, &Sigra.Email.normalize/1)
     |> validate_email(opts)
+  end
+
+  def pending_email_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:pending_email])
+    |> update_change(:pending_email, fn
+      nil -> nil
+      email -> Sigra.Email.normalize(email)
+    end)
+    |> validate_length(:pending_email, max: 160)
+    |> maybe_validate_pending_email(opts)
+  end
+
+  defp maybe_validate_pending_email(changeset, opts) do
+    if Keyword.get(opts, :validate_unique, true) do
+      changeset
+      |> unsafe_validate_unique(:pending_email, AccrueHost.Repo)
+      |> unique_constraint(:pending_email)
+    else
+      changeset
+    end
+  end
+
+  def email_change_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :pending_email, :confirmed_at])
+    |> update_change(:email, &Sigra.Email.normalize/1)
+    |> validate_email(Keyword.put(opts, :validate_changed, false))
   end
 
   defp validate_email(changeset, opts) do
@@ -46,7 +94,15 @@ defmodule AccrueHost.Accounts.User do
       changeset
       |> unsafe_validate_unique(:email, AccrueHost.Repo)
       |> unique_constraint(:email)
-      |> validate_email_changed()
+      |> maybe_validate_email_changed(opts)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_email_changed(changeset, opts) do
+    if Keyword.get(opts, :validate_changed, true) do
+      validate_email_changed(changeset)
     else
       changeset
     end
@@ -85,11 +141,7 @@ defmodule AccrueHost.Accounts.User do
   defp validate_password(changeset, opts) do
     changeset
     |> validate_required([:password])
-    |> validate_length(:password, min: 12, max: 72)
-    # Examples of additional password validation:
-    # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
-    # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
+    |> Sigra.PasswordPolicy.validate(min_length: 12, check_common: false)
     |> maybe_hash_password(opts)
   end
 
@@ -99,11 +151,7 @@ defmodule AccrueHost.Accounts.User do
 
     if hash_password? && password && changeset.valid? do
       changeset
-      # If using Bcrypt, then further validate it is at most 72 bytes long
-      |> validate_length(:password, max: 72, count: :bytes)
-      # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
-      # would keep the database transaction open longer and hurt performance.
-      |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
+      |> put_change(:hashed_password, Sigra.Crypto.hash_password(password))
       |> delete_change(:password)
     else
       changeset
@@ -126,11 +174,14 @@ defmodule AccrueHost.Accounts.User do
   """
   def valid_password?(%AccrueHost.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
-    Bcrypt.verify_pass(password, hashed_password)
+    case Sigra.Crypto.verify_with_upgrade(password, hashed_password) do
+      {:ok, :valid} -> true
+      {:ok, :valid, _new_hash} -> true
+      {:error, :invalid} -> false
+    end
   end
 
   def valid_password?(_, _) do
-    Bcrypt.no_user_verify()
-    false
+    Sigra.Crypto.no_user_verify()
   end
 end

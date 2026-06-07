@@ -98,5 +98,6 @@ Seeded demo logins (password for ALL: accrue-demo-password):
 
 Handy commands:
   make open   make url   make logs   make psql   make sh   make down
+  Traefik dashboard: http://localhost:8080/dashboard/
 ==============================================================================
 BANNER

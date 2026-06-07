@@ -100,10 +100,8 @@ defmodule AccrueHost.MixProject do
   end
 
   defp sigra_dep do
-    # Sigra is on Hex (~> 0.2). Default to the Hex package so dep resolution
-    # stays clean — Mailglass declares `{:sigra, "~> 0.2", optional: true}`
-    # and would conflict with a non-versioned `github:` source. To point at a
-    # local Sigra working tree for development:
+    # Sigra is on Hex (~> 1.20). Default to the Hex package so dep resolution
+    # stays clean while still allowing local dogfooding:
     #   export ACCRUE_SIGRA_PATH=../../../sigra
     # (path is relative to this `mix.exs` unless absolute).
     path =
@@ -112,7 +110,7 @@ defmodule AccrueHost.MixProject do
       |> String.trim()
 
     if path == "" do
-      {:sigra, "~> 0.2"}
+      {:sigra, "~> 1.20"}
     else
       {:sigra, path: Path.expand(path, __DIR__)}
     end
@@ -165,7 +163,11 @@ defmodule AccrueHost.MixProject do
         verify_dev_boot_command(),
         verify_browser_command()
       ],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing", "cmd --cd assets npm install"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing",
+        "cmd --cd assets npm install"
+      ],
       "assets.build": ["compile", "tailwind accrue_host", "esbuild accrue_host"],
       "assets.deploy": [
         "tailwind accrue_host --minify",

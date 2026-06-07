@@ -298,10 +298,8 @@ defmodule AccrueHostWeb.UserAuthTest do
 
     test "redirects when authentication is too old", %{conn: conn, user: user} do
       eleven_minutes_ago = DateTime.utc_now(:second) |> DateTime.add(-11, :minute)
-      user = %{user | authenticated_at: eleven_minutes_ago}
       user_token = Accounts.generate_user_session_token(user)
-      {user, token_inserted_at} = Accounts.get_user_by_session_token(user_token)
-      assert DateTime.compare(token_inserted_at, user.authenticated_at) == :gt
+      override_token_authenticated_at(user_token, eleven_minutes_ago)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       socket = %LiveView.Socket{

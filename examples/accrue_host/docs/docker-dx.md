@@ -6,8 +6,11 @@ a stable `*.localhost` name on port 80 — `http://accrue.localhost`,
 `http://scoria.localhost`, `http://parapet.localhost` — with **zero port conflicts,
 ever**, and nothing to configure per demo. `make up` joins accrue to that proxy; if
 the proxy isn't running it still boots on an auto-picked ephemeral port and the
-banner prints the fallback URL. Source is bind-mounted with warm caches, so editing
-a `.heex`/CSS file hot-reloads instantly and **never re-downloads or rebuilds deps**.
+banner prints the fallback URL. On a fresh machine, `make up` creates the shared
+Docker `proxy` network before Compose starts, so skipping `make proxy` degrades to
+the fallback URL instead of a cryptic external-network error. Source is bind-mounted
+with warm caches, so editing a `.heex`/CSS file hot-reloads instantly and **never
+re-downloads or rebuilds deps**.
 
 If you just want to run the demo, the [README "Start Here"](../README.md#start-here)
 is all you need. This doc is the *why* and the fleet-operations picture.
@@ -63,7 +66,11 @@ Traefik watches Docker, sees those labels, and routes any request whose `Host:`
 header is `accrue.localhost` to the container's port 4000. Browsers resolve
 `*.localhost` to `127.0.0.1` automatically ([RFC 6761](https://www.rfc-editor.org/rfc/rfc6761)),
 so `http://accrue.localhost` just works — no `/etc/hosts` editing. The Traefik
-dashboard at **http://localhost:8080** shows every route live.
+dashboard at **http://localhost:8080/dashboard/** shows every route live.
+
+The dashboard uses Traefik's insecure API mode because this is local-only developer
+infrastructure. Its ports are bound to `127.0.0.1`, and the Docker socket is mounted
+read-only. Do not publish this proxy on `0.0.0.0` or reuse it as production ingress.
 
 The proxy is the same `dev_proxy` project the sibling demos use, so bringing it up
 from any one repo is shared, fleet-wide infrastructure.
@@ -89,6 +96,13 @@ make up INSTANCE=accrue-foo   # -> http://accrue-foo.localhost, isolated volumes
 
 `INSTANCE` sets the Compose project name *and* the Traefik host, so the two
 checkouts get separate networks, volumes, containers, and routes — no collision.
+INSTANCE must be DNS-safe lowercase: letters, numbers, and hyphens only, starting
+and ending with a letter or number. Compose permits underscores, but hostnames such
+as `foo_bar.localhost` are a DNS footgun, so the Makefile rejects them.
+
+Use the Makefile as the fleet-safe interface. Direct `docker compose up` is fine for
+debugging, but if you bypass `make`, set both `COMPOSE_PROJECT_NAME` and
+`ACCRUE_HOST`; otherwise two checkouts with the same directory name can collide.
 
 ## The caching mental model
 
@@ -101,12 +115,14 @@ exactly what each action costs, and why:
   network.
 - **A few seconds — `make up` (warm).** The lean entrypoint runs `mix deps.get` →
   migrate → seed → boot, and **skips** `npm install` and the first-paint
-  `assets.build` because the named volumes (`mix_deps`, `mix_build`,
-  `assets_node_modules`) are already populated. Adding a hex dep just re-runs
-  `deps.get` for the one new package.
+  `assets.build` when the manifest hashes still match. Changing
+  `assets/package.json` or `assets/package-lock.json` reruns `assets.setup`; changing
+  CSS/JS/vendor/config inputs reruns the first-paint `assets.build`. Adding a hex dep
+  just re-runs `deps.get` for the one new package.
 - **A full build — `make build` or `make reset`.** Only when `Dockerfile.dev` /
-  OS-level deps change, or you want a clean slate. Even then, `make reset`
-  **re-links** Hex and npm packages from the host-bind caches
+  OS-level deps change, or you want a clean slate. `make reset` wipes the named
+  Compose volumes, rebuilds detached, prints the same banner as `make up`, and then
+  follows logs. Even then, it **re-links** Hex and npm packages from the host-bind caches
   (`~/.cache/accrue-docker/{hex,npm}`) instead of re-downloading them — those caches
   survive `docker compose down --volumes`.
 
@@ -131,6 +147,8 @@ gymnastics here.
   toolchain and sets `RUSTLER_PRECOMPILATION_EXAMPLE_BUILD=1`. `harfbuzz_ex` uses
   `rustybuzz` (pure Rust), so this needs **no system HarfBuzz/C++ libs** — just
   `cargo`. The NIF compiles once and is cached in the `mix_deps`/`mix_build` volumes.
+  If `DOCKER_DEFAULT_PLATFORM=linux/amd64` is set on Apple Silicon, the Makefile
+  fails before Compose starts; unset it for this repo.
 - **Host build artifacts must not leak into the container.** `accrue_host`
   `path:`-depends on the sibling packages (`accrue`, `accrue_admin`, `accrue_portal`),
   so the `../..:/workspace` bind mount drags in *their* `deps/` and `_build/` too —
@@ -147,15 +165,24 @@ gymnastics here.
 - **Safari / `curl` don't resolve `*.localhost`.** Chrome and Firefox do. For Safari
   or scripts, use the `http://127.0.0.1:<port>` fallback the banner prints, or add a
   dnsmasq wildcard (`address=/localhost/127.0.0.1`).
+- **Port 80 or 8080 can be owned by another local proxy.** `make proxy` is shared
+  fleet infrastructure and binds `127.0.0.1:80` plus
+  `127.0.0.1:8080`. If it fails, check `docker ps` and stop the other local proxy or
+  standardize that repo on the same `dev_proxy` stack.
 - **The proxy is shared — don't `down` it from one lib.** `make down` is scoped to
   this demo's project. To actually stop the proxy (rare):
-  `docker compose -f docker/traefik/compose.yml down`.
+  `docker compose -p dev_proxy -f docker/traefik/compose.yml down`.
 - **Renaming services leaves orphans.** `make up` runs with `--remove-orphans` so a
   renamed/removed container is cleaned up instead of lingering on the network.
 - **`db` is intentionally unpublished.** Postgres is reached by service name on the
   internal network, so port 5432 never collides across demos. Need a DB GUI? Copy
-  `docker-compose.override.yml.example` to `docker-compose.override.yml` to publish
-  it locally.
+  `docker-compose.override.yml.example` to `docker-compose.override.yml`; Docker
+  picks a free loopback port by default, and `docker compose port db 5432` prints it.
+  Set `PGPORT=55432` only when a tool needs a stable port for this instance.
+- **A changed path dependency needs new volume shadows.** If `mix.exs` gains another
+  sibling `path:` dependency under `/workspace`, add matching `deps` and `_build`
+  named-volume shadows in `docker-compose.yml`; otherwise host build artifacts can
+  leak into the Linux container.
 
 ## References
 

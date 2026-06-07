@@ -1,3 +1,6 @@
 services:
   db:
-    ports: ["127.0.0.1:${PGPORT:-5432}:5432"]
+    # Optional host access for GUI tools. Empty PGPORT lets Docker choose a free
+    # loopback port; run `docker compose port db 5432` to see it. Pin PGPORT only
+    # when a tool needs a stable local port.
+    ports: ["127.0.0.1:${PGPORT:-}:5432"]

@@ -150,26 +150,41 @@ defmodule AccrueHost.AccountsFixtures do
   end
 
   def override_token_authenticated_at(token, authenticated_at) when is_binary(token) do
-    AccrueHost.Repo.update_all(
-      from(t in Accounts.UserToken,
-        where: t.token == ^token
-      ),
-      set: [authenticated_at: authenticated_at]
-    )
+    with {:ok, hashed_token} <- hash_raw_session_token(token) do
+      AccrueHost.Repo.update_all(
+        from(s in Accounts.UserSession, where: s.hashed_token == ^hashed_token),
+        set: [inserted_at: authenticated_at, last_active_at: authenticated_at]
+      )
+    end
   end
 
   def generate_user_magic_link_token(user) do
-    {encoded_token, user_token} = Accounts.UserToken.build_email_token(user, "login")
-    AccrueHost.Repo.insert!(user_token)
-    {encoded_token, user_token.token}
+    {:ok, {encoded_token, _url}} =
+      Sigra.Auth.request_magic_link(AccrueHost.Repo, user.email,
+        user_schema: Accounts.User,
+        user_token_schema: Accounts.UserToken,
+        url_fun: & &1
+      )
+
+    {:ok, decoded_token} = Base.url_decode64(encoded_token, padding: false)
+    {encoded_token, Sigra.Token.hash_token(decoded_token)}
   end
 
   def offset_user_token(token, amount_to_add, unit) do
     dt = DateTime.add(DateTime.utc_now(:second), amount_to_add, unit)
 
-    AccrueHost.Repo.update_all(
-      from(ut in Accounts.UserToken, where: ut.token == ^token),
-      set: [inserted_at: dt, authenticated_at: dt]
-    )
+    with {:ok, hashed_token} <- hash_raw_session_token(token) do
+      AccrueHost.Repo.update_all(
+        from(s in Accounts.UserSession, where: s.hashed_token == ^hashed_token),
+        set: [inserted_at: dt, last_active_at: dt]
+      )
+    end
+  end
+
+  defp hash_raw_session_token(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} -> {:ok, Sigra.Token.hash_token(decoded_token)}
+      :error -> :error
+    end
   end
 end

@@ -6,7 +6,39 @@ defmodule AccrueHost.Accounts do
   import Ecto.Query, warn: false
   alias AccrueHost.Repo
 
-  alias AccrueHost.Accounts.{User, UserToken, UserNotifier}
+  alias AccrueHost.Accounts.{Scope, User, UserNotifier, UserSession, UserToken}
+  alias AccrueHost.Organizations
+
+  @session_validity_in_days 14
+  @magic_link_ttl_seconds 15 * 60
+
+  def sigra_config(opts \\ []) do
+    organizations_module =
+      if Keyword.get(opts, :organizations, true) do
+        Organizations
+      end
+
+    Sigra.Config.new!(
+      repo: Repo,
+      user_schema: User,
+      scope_module: Scope,
+      organizations_module: organizations_module,
+      session: [
+        store: Sigra.SessionStores.Ecto,
+        session_schema: UserSession,
+        remember_me_max_age: @session_validity_in_days * 24 * 60 * 60
+      ],
+      mfa: [enabled: false],
+      passkeys: [enabled: false],
+      oauth: [enabled: false],
+      suspicious_login: [enabled: false],
+      lockout: [notify: false]
+    )
+  end
+
+  defp session_store_opts do
+    [repo: Repo, session_schema: UserSession]
+  end
 
   ## Database getters
 
@@ -23,7 +55,7 @@ defmodule AccrueHost.Accounts do
 
   """
   def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+    Repo.get_by(User, email: Sigra.Email.normalize(email))
   end
 
   @doc """
@@ -40,8 +72,11 @@ defmodule AccrueHost.Accounts do
   """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password), do: user
+    case Sigra.Auth.authenticate(sigra_config(), %{email: email, password: password}) do
+      {:ok, user} -> user
+      {:ok, user, _metadata} -> user
+      {:error, _reason} -> nil
+    end
   end
 
   @doc """
@@ -75,9 +110,19 @@ defmodule AccrueHost.Accounts do
 
   """
   def register_user(attrs) do
-    %User{}
-    |> User.email_changeset(attrs)
-    |> Repo.insert()
+    Sigra.Auth.register(Repo, attrs,
+      changeset_fn: &User.email_changeset(%User{}, &1),
+      scope_module: Scope
+    )
+    |> case do
+      {:error, :email_taken} ->
+        {:error,
+         User.email_changeset(%User{}, attrs)
+         |> Ecto.Changeset.add_error(:email, "has already been taken")}
+
+      other ->
+        other
+    end
   end
 
   ## Settings
@@ -162,9 +207,19 @@ defmodule AccrueHost.Accounts do
 
   """
   def update_user_password(user, attrs) do
-    user
-    |> User.password_changeset(attrs)
-    |> update_user_and_delete_all_tokens()
+    case Sigra.Account.set_password(Repo, user, attrs,
+           changeset_fn: &User.password_changeset/2,
+           config: sigra_config()
+         ) do
+      {:ok, user} ->
+        expired_sessions = list_user_sessions(user.id)
+        {_count, _} = Sigra.Auth.delete_all_sessions(sigra_config(), user.id)
+        delete_all_legacy_tokens(user.id)
+        {:ok, {user, expired_sessions}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   ## Session
@@ -172,10 +227,24 @@ defmodule AccrueHost.Accounts do
   @doc """
   Generates a session token.
   """
-  def generate_user_session_token(user) do
-    {token, user_token} = UserToken.build_session_token(user)
-    Repo.insert!(user_token)
-    token
+  def generate_user_session_token(user, opts \\ []) do
+    select_active_organization? = Keyword.get(opts, :select_active_organization, true)
+
+    metadata = %{
+      type: Keyword.get(opts, :type, :standard),
+      ip: Keyword.get(opts, :ip),
+      user_agent: Keyword.get(opts, :user_agent),
+      active_organization_id: Keyword.get(opts, :active_organization_id)
+    }
+
+    {:ok, session} =
+      Sigra.Auth.create_session(
+        sigra_config(organizations: select_active_organization?),
+        user,
+        metadata
+      )
+
+    session.token
   end
 
   @doc """
@@ -184,21 +253,67 @@ defmodule AccrueHost.Accounts do
   If the token is valid `{user, token_inserted_at}` is returned, otherwise `nil` is returned.
   """
   def get_user_by_session_token(token) do
-    {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+    case get_user_and_session_by_token(token) do
+      {user, session} -> {user, session.inserted_at}
+      nil -> nil
+    end
+  end
+
+  def get_user_and_session_by_token(token) when is_binary(token) do
+    with {:ok, hashed_token} <- hash_session_token(token),
+         {:ok, session} <- Sigra.SessionStores.Ecto.fetch(hashed_token, session_store_opts()),
+         true <- valid_session?(session),
+         %User{} = user <- Repo.get(User, session.user_id) do
+      authenticated_at = session.sudo_at || DateTime.truncate(session.inserted_at, :second)
+      {%{user | authenticated_at: authenticated_at}, session}
+    else
+      _ -> nil
+    end
+  end
+
+  def get_user_and_session_by_token(_), do: nil
+
+  defp hash_session_token(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} -> {:ok, Sigra.Token.hash_token(decoded_token)}
+      :error -> :error
+    end
+  end
+
+  defp valid_session?(%Sigra.Session{inserted_at: %DateTime{} = inserted_at}) do
+    DateTime.after?(
+      inserted_at,
+      DateTime.utc_now() |> DateTime.add(-@session_validity_in_days, :day)
+    )
+  end
+
+  defp valid_session?(_), do: false
+
+  defp list_user_sessions(user_id) do
+    Sigra.SessionStores.Ecto.list_by_user(user_id, session_store_opts())
   end
 
   @doc """
   Gets the user with the given magic link token.
   """
   def get_user_by_magic_link_token(token) do
-    with {:ok, query} <- UserToken.verify_magic_link_token_query(token),
-         {user, _token} <- Repo.one(query) do
-      user
+    with {:ok, hashed_token} <- hash_session_token(token),
+         %UserToken{inserted_at: inserted_at, user_id: user_id} <-
+           Repo.get_by(UserToken, token: hashed_token, context: "magic_link"),
+         true <- magic_link_fresh?(inserted_at) do
+      Repo.get(User, user_id)
     else
       _ -> nil
     end
   end
+
+  defp magic_link_fresh?(%DateTime{} = inserted_at),
+    do: DateTime.diff(DateTime.utc_now(), inserted_at, :second) <= @magic_link_ttl_seconds
+
+  defp magic_link_fresh?(%NaiveDateTime{} = inserted_at),
+    do: inserted_at |> DateTime.from_naive!("Etc/UTC") |> magic_link_fresh?()
+
+  defp magic_link_fresh?(_), do: false
 
   @doc """
   Logs the user in by magic link.
@@ -219,30 +334,14 @@ defmodule AccrueHost.Accounts do
      `mix help phx.gen.auth`.
   """
   def login_user_by_magic_link(token) do
-    {:ok, query} = UserToken.verify_magic_link_token_query(token)
-
-    case Repo.one(query) do
-      # Prevent session fixation attacks by disallowing magic links for unconfirmed users with password
-      {%User{confirmed_at: nil, hashed_password: hash}, _token} when not is_nil(hash) ->
-        raise """
-        magic link log in is not allowed for unconfirmed users with a password set!
-
-        This cannot happen with the default implementation, which indicates that you
-        might have adapted the code to a different use case. Please make sure to read the
-        "Mixing magic link and password registration" section of `mix help phx.gen.auth`.
-        """
-
-      {%User{confirmed_at: nil} = user, _token} ->
-        user
-        |> User.confirm_changeset()
-        |> update_user_and_delete_all_tokens()
-
-      {user, token} ->
-        Repo.delete!(token)
-        {:ok, {user, []}}
-
-      nil ->
-        {:error, :not_found}
+    case Sigra.Auth.verify_magic_link(Repo, token,
+           user_schema: User,
+           user_token_schema: UserToken,
+           magic_link_ttl: @magic_link_ttl_seconds,
+           scope_module: Scope
+         ) do
+      {:ok, user} -> {:ok, {user, []}}
+      {:error, _reason} -> {:error, :not_found}
     end
   end
 
@@ -268,30 +367,29 @@ defmodule AccrueHost.Accounts do
   """
   def deliver_login_instructions(%User{} = user, magic_link_url_fun)
       when is_function(magic_link_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "login")
-    Repo.insert!(user_token)
-    UserNotifier.deliver_login_instructions(user, magic_link_url_fun.(encoded_token))
+    {:ok, {_raw_token, url}} =
+      Sigra.Auth.request_magic_link(Repo, user.email,
+        user_schema: User,
+        user_token_schema: UserToken,
+        url_fun: magic_link_url_fun,
+        scope_module: Scope
+      )
+
+    UserNotifier.deliver_login_instructions(user, url)
   end
 
   @doc """
   Deletes the signed token with the given context.
   """
   def delete_user_session_token(token) do
-    Repo.delete_all(from(UserToken, where: [token: ^token, context: "session"]))
+    with {:ok, hashed_token} <- hash_session_token(token) do
+      Sigra.Auth.delete_session(sigra_config(), hashed_token)
+    end
+
     :ok
   end
 
-  ## Token helper
-
-  defp update_user_and_delete_all_tokens(changeset) do
-    Repo.transact(fn ->
-      with {:ok, user} <- Repo.update(changeset) do
-        tokens_to_expire = Repo.all_by(UserToken, user_id: user.id)
-
-        Repo.delete_all(from(t in UserToken, where: t.id in ^Enum.map(tokens_to_expire, & &1.id)))
-
-        {:ok, {user, tokens_to_expire}}
-      end
-    end)
+  defp delete_all_legacy_tokens(user_id) do
+    Repo.delete_all(from(t in UserToken, where: t.user_id == ^user_id))
   end
 end

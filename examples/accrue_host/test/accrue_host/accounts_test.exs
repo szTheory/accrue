@@ -4,7 +4,7 @@ defmodule AccrueHost.AccountsTest do
   alias AccrueHost.Accounts
 
   import AccrueHost.AccountsFixtures
-  alias AccrueHost.Accounts.{User, UserToken}
+  alias AccrueHost.Accounts.{User, UserSession, UserToken}
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -237,7 +237,7 @@ defmodule AccrueHost.AccountsTest do
       {:error, changeset} =
         Accounts.update_user_password(user, %{password: too_long})
 
-      assert "should be at most 72 character(s)" in errors_on(changeset).password
+      assert "should be at most 72 byte(s)" in errors_on(changeset).password
     end
 
     test "updates the password", %{user: user} do
@@ -270,26 +270,34 @@ defmodule AccrueHost.AccountsTest do
 
     test "generates a token", %{user: user} do
       token = Accounts.generate_user_session_token(user)
-      assert user_token = Repo.get_by(UserToken, token: token)
-      assert user_token.context == "session"
-      assert user_token.authenticated_at != nil
+      {:ok, decoded_token} = Base.url_decode64(token, padding: false)
+
+      assert user_session =
+               Repo.get_by(UserSession, hashed_token: :crypto.hash(:sha256, decoded_token))
+
+      assert user_session.type == "standard"
+      assert user_session.last_active_at != nil
 
       # Creating the same token for another user should fail
       assert_raise Ecto.ConstraintError, fn ->
-        Repo.insert!(%UserToken{
-          token: user_token.token,
+        Repo.insert!(%UserSession{
+          hashed_token: user_session.hashed_token,
           user_id: user_fixture().id,
-          context: "session"
+          last_active_at: DateTime.utc_now()
         })
       end
     end
 
-    test "duplicates the authenticated_at of given user in new token", %{user: user} do
+    test "stores a Sigra session for the given user", %{user: user} do
       user = %{user | authenticated_at: DateTime.add(DateTime.utc_now(:second), -3600)}
       token = Accounts.generate_user_session_token(user)
-      assert user_token = Repo.get_by(UserToken, token: token)
-      assert user_token.authenticated_at == user.authenticated_at
-      assert DateTime.compare(user_token.inserted_at, user.authenticated_at) == :gt
+      {:ok, decoded_token} = Base.url_decode64(token, padding: false)
+
+      assert user_session =
+               Repo.get_by(UserSession, hashed_token: :crypto.hash(:sha256, decoded_token))
+
+      assert user_session.user_id == user.id
+      assert DateTime.compare(user_session.inserted_at, user.authenticated_at) == :gt
     end
   end
 
@@ -341,7 +349,7 @@ defmodule AccrueHost.AccountsTest do
 
       {count, nil} =
         Repo.update_all(
-          from(t in UserToken, where: t.context == "login" and t.token == ^hashed_token),
+          from(t in UserToken, where: t.context == "magic_link" and t.token == ^hashed_token),
           set: [inserted_at: ~N[2020-01-01 00:00:00]]
         )
 
@@ -354,10 +362,9 @@ defmodule AccrueHost.AccountsTest do
     test "confirms user and expires tokens" do
       user = unconfirmed_user_fixture()
       refute user.confirmed_at
-      {encoded_token, hashed_token} = generate_user_magic_link_token(user)
+      {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
 
-      assert {:ok, {user, [%{token: ^hashed_token}]}} =
-               Accounts.login_user_by_magic_link(encoded_token)
+      assert {:ok, {user, []}} = Accounts.login_user_by_magic_link(encoded_token)
 
       assert user.confirmed_at
     end
@@ -371,21 +378,14 @@ defmodule AccrueHost.AccountsTest do
       assert {:error, :not_found} = Accounts.login_user_by_magic_link(encoded_token)
     end
 
-    test "raises when unconfirmed user has password set" do
-      user = unconfirmed_user_fixture()
-
-      {count, nil} =
-        Repo.update_all(
-          from(u in User, where: u.id == ^user.id),
-          set: [hashed_password: "hashed"]
-        )
-
-      assert count == 1
+    test "confirms unconfirmed users with or without password set" do
+      user = unconfirmed_user_fixture() |> set_password()
       {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
 
-      assert_raise RuntimeError, ~r/magic link log in is not allowed/, fn ->
-        Accounts.login_user_by_magic_link(encoded_token)
-      end
+      assert {:ok, {%User{id: user_id, confirmed_at: %DateTime{}}, []}} =
+               Accounts.login_user_by_magic_link(encoded_token)
+
+      assert user_id == user.id
     end
   end
 
@@ -413,7 +413,7 @@ defmodule AccrueHost.AccountsTest do
       assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
       assert user_token.user_id == user.id
       assert user_token.sent_to == user.email
-      assert user_token.context == "login"
+      assert user_token.context == "magic_link"
     end
   end
 

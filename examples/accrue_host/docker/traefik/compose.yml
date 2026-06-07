@@ -17,7 +17,7 @@
 # with the sibling lib demos, so bringing this up from any one repo is a no-op
 # when it's already running. Don't `down` it from a single lib — it routes them all.
 #
-# Dashboard (which app is routed where): http://localhost:8080
+# Dashboard (which app is routed where): http://localhost:8080/dashboard/
 name: dev_proxy
 
 services:
