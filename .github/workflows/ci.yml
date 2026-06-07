@@ -656,9 +656,9 @@ jobs:
       - name: Wait for Docker host app
         # Cold first boot runs `mix setup` (deps fetch + compile of all three
         # packages and the host, plus assets) before `mix phx.server`, which
-        # takes minutes on an empty named-volume cache — far longer than 30s.
+        # can exceed 10 minutes on an empty named-volume cache.
         run: |
-          for _ in $(seq 1 600); do
+          for _ in $(seq 1 900); do
             if curl -fsS http://localhost:4000/ >/dev/null; then
               exit 0
             fi
