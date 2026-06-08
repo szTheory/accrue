@@ -284,7 +284,10 @@ defmodule AccrueHostWeb.SubscriptionLive do
         </section>
 
         <%= if @subscription do %>
-          <section class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+          <section
+            class="flex flex-col gap-4 rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm"
+            data-testid="current-subscription"
+          >
             <div>
               <h2 class="text-2xl font-semibold">Current subscription</h2>
               <p class="mt-1 text-base leading-7 text-base-content/65">

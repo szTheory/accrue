@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require("./support/test.js");
-const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
+const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 
 test("mounted admin customers index shows tenant chrome and billing signals", async ({ page, sandboxId }, testInfo) => {
   reseedFixture();
@@ -9,7 +9,7 @@ test("mounted admin customers index shows tenant chrome and billing signals", as
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
   await login(page, fixture, fixture.admin_email, sandboxId);
-  await page.getByRole("link", { name: "Go to billing" }).click();
+  await workspaceBillingLink(page).click();
   await waitForLiveView(page);
 
   await expect(page.getByTestId("organization-switcher")).toBeVisible();

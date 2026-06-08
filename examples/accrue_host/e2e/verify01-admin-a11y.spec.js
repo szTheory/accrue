@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const { test, expect } = require("./support/test.js");
 const AxeBuilder = require("@axe-core/playwright").default;
-const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
+const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 
 const copyStrings = JSON.parse(
   fs.readFileSync(path.join(__dirname, "generated", "copy_strings.json"), "utf8")
@@ -72,7 +72,7 @@ test("mounted admin customers index passes axe in light and dark themes", async 
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
   await login(page, fixture, fixture.admin_email, sandboxId);
-  await page.getByRole("link", { name: "Go to billing" }).click();
+  await workspaceBillingLink(page).click();
   await waitForLiveView(page);
 
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -115,7 +115,7 @@ test("mounted admin subscriptions index passes axe in light theme", async ({ pag
   expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
   await login(page, fixture, fixture.admin_email, sandboxId);
-  await page.getByRole("link", { name: "Go to billing" }).click();
+  await workspaceBillingLink(page).click();
   await waitForLiveView(page);
 
   await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -150,7 +150,7 @@ test.describe("VERIFY-01 admin Connect index (auxiliary)", () => {
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -189,7 +189,7 @@ test.describe("VERIFY-01 admin Connect account detail (auxiliary)", () => {
     expect(fixture.connect_account_id).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -228,7 +228,7 @@ test.describe("VERIFY-01 admin billing events index (auxiliary)", () => {
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -266,7 +266,7 @@ test.describe("VERIFY-01 admin coupons index (auxiliary)", () => {
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -304,7 +304,7 @@ test.describe("VERIFY-01 admin promotion codes index (auxiliary)", () => {
     expect(fixture.admin_org_alpha_slug).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -343,7 +343,7 @@ test.describe("core-admin-invoices-index", () => {
     expect(fixture.invoice_id).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -390,7 +390,7 @@ test.describe("core-admin-invoices-detail", () => {
     expect(fixture.invoice_id).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -425,7 +425,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     expect(fixture.admin_denial_customer_id).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();
@@ -478,7 +478,7 @@ test.describe("VERIFY-01 admin customer detail payment_methods tab (v1.24 ADM-15
     expect(fixture.admin_denial_payment_method_ids).toBeTruthy();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     await page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`).click();

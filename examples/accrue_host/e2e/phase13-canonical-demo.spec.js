@@ -2,7 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { test, expect } = require("./support/test.js");
-const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
+const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 const { expectNoHorizontalOverflow, expectVisibleInViewport } = require("./support/overflow.js");
 const { DASHBOARD_DISPLAY_HEADLINE } = require("./support/copy_dashboard.js");
 
@@ -98,18 +98,19 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   });
 
   await login(page, fixture, fixture.normal_email, sandboxId);
-  await expect(page.getByRole("link", { name: "Go to billing" })).toBeVisible();
-  await page.getByRole("link", { name: "Go to billing" }).click();
-  await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
+  await expect(workspaceBillingLink(page)).toBeVisible();
+  await workspaceBillingLink(page).click();
+  await expect(page.getByRole("heading", { name: "Workspace billing" })).toBeVisible();
   await waitForLiveView(page);
-  await expect(page.getByText("No organization billing activity yet")).toBeVisible();
+  await expect(page.getByText("No workspace subscription yet")).toBeVisible();
+  const currentSubscription = page.getByTestId("current-subscription");
   await assertResponsiveState(page, "first-run billing empty state", [
     {
-      locator: page.getByRole("button", { name: "Start organization subscription" }).first(),
+      locator: page.getByRole("button", { name: "Choose Launch" }),
       label: "primary action"
     },
     {
-      locator: page.getByText("No organization billing activity yet"),
+      locator: page.getByText("No workspace subscription yet"),
       label: "empty state copy"
     }
   ]);
@@ -129,7 +130,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
 
   await page
     .locator("[data-plan-id='price_basic']")
-    .getByRole("button", { name: "Start organization subscription" })
+    .getByRole("button", { name: "Choose Launch" })
     .click();
 
   try {
@@ -142,7 +143,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   }
 
   await expect(page.getByRole("heading", { name: "Current subscription" })).toBeVisible();
-  await expect(page.getByText("Basic (price_basic)")).toBeVisible();
+  await expect(currentSubscription.getByText("Launch", { exact: true })).toBeVisible();
   await postSignedWebhook(page, fixture);
   await assertResponsiveState(page, "first-run subscription started state", [
     {
@@ -150,7 +151,7 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
       label: "subscription started heading"
     },
     {
-      locator: page.getByText("Basic (price_basic)"),
+      locator: currentSubscription.getByText("Launch", { exact: true }),
       label: "subscription started details"
     }
   ]);

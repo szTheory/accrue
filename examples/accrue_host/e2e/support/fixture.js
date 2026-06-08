@@ -23,6 +23,13 @@ function reseedFixture() {
 
 /**
  * @param {import('@playwright/test').Page} page
+ */
+function workspaceBillingLink(page) {
+  return page.getByTestId("workspace-billing-link");
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
  * @param {Record<string, unknown>} fixture
  * @param {string} email
  */
@@ -51,7 +58,7 @@ async function login(page, fixture, email, sandboxId = null) {
   await page.goto("/");
 
   try {
-    await page.getByRole("link", { name: "Go to billing" }).waitFor({ state: "visible", timeout: 10_000 });
+    await workspaceBillingLink(page).waitFor({ state: "visible", timeout: 10_000 });
   } catch (error) {
     console.error(`login did not reach authenticated home for ${email}`);
     console.error(`url: ${page.url()}`);
@@ -100,5 +107,6 @@ module.exports = {
   readFixture,
   reseedFixture,
   login,
+  workspaceBillingLink,
   waitForLiveView
 };

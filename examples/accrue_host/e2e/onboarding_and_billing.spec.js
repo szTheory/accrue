@@ -1,5 +1,5 @@
 const { test, expect } = require("./support/test.js");
-const { readFixture, login, waitForLiveView } = require("./support/fixture.js");
+const { readFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 
 test.describe("Core User Journeys", () => {
   // Use serial mode to prevent any possible collision between browser runs
@@ -7,9 +7,12 @@ test.describe("Core User Journeys", () => {
 
   test("onboarding, subscribe, upgrade, cancel", async ({ page, sandboxId }) => {
     const fixture = readFixture();
+    const currentSubscription = page.getByTestId("current-subscription");
+
     await login(page, fixture, fixture.normal_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
+    await expect(page.getByRole("heading", { name: "Workspace billing" })).toBeVisible();
 
     // 1. Setup tax location
     const taxForm = page.locator("#tax-location-form");
@@ -25,22 +28,22 @@ test.describe("Core User Journeys", () => {
     }
 
     // 2. Start basic subscription
-    const startBasic = page.locator("[data-plan-id='price_basic']").getByRole("button", { name: "Start organization subscription" });
+    const startBasic = page.locator("[data-plan-id='price_basic']").getByRole("button", { name: "Choose Launch" });
     await startBasic.click();
     await expect(page.getByText("Subscription started.")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Basic (price_basic)")).toBeVisible();
+    await expect(currentSubscription.getByText("Launch", { exact: true })).toBeVisible();
     await waitForLiveView(page);
 
     // 3. Cancel subscription
-    await page.getByRole("button", { name: "Cancel now for this organization" }).click();
+    await page.getByRole("button", { name: "Cancel workspace subscription" }).click();
     await expect(page.getByRole("button", { name: "Confirm cancellation" })).toBeVisible();
     await page.getByRole("button", { name: "Confirm cancellation" }).click();
     await expect(page.getByText(/Subscription canceled now/)).toBeVisible({ timeout: 15_000 });
     await waitForLiveView(page);
 
-    // 4. Upgrade to Pro
-    const startPro = page.locator("[data-plan-id='price_pro']").getByRole("button", { name: "Start organization subscription" });
-    await startPro.click();
+    // 4. Upgrade to Studio
+    const chooseStudio = page.locator("[data-plan-id='price_pro']").getByRole("button", { name: "Choose Studio" });
+    await chooseStudio.click();
     
     // Check for potential confirmation button
     const confirmButton = page.getByRole("button", { name: "Confirm plan change" });
@@ -49,11 +52,11 @@ test.describe("Core User Journeys", () => {
     }
     
     await expect(page.getByText("Subscription started.")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Pro (price_pro)")).toBeVisible();
+    await expect(currentSubscription.getByText("Studio", { exact: true })).toBeVisible();
     await waitForLiveView(page);
 
-    // 5. Downgrade back to Basic
-    await page.locator("[data-plan-id='price_basic']").getByRole("button", { name: "Start organization subscription" }).click();
+    // 5. Downgrade back to Launch
+    await page.locator("[data-plan-id='price_basic']").getByRole("button", { name: "Choose Launch" }).click();
 
     const confirmDowngradeButton = page.getByRole("button", { name: "Confirm plan change" });
     if (await confirmDowngradeButton.isVisible()) {
@@ -61,7 +64,7 @@ test.describe("Core User Journeys", () => {
     }
 
     await expect(page.getByText("Subscription started.")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Basic (price_basic)")).toBeVisible();
+    await expect(currentSubscription.getByText("Launch", { exact: true })).toBeVisible();
     await waitForLiveView(page);
 
     // 6. Payment method management surface
@@ -82,11 +85,11 @@ test.describe("Core User Journeys", () => {
     await page.goto("/app/billing", { waitUntil: "domcontentloaded" });
     await waitForLiveView(page);
 
-    // 7. Test Metered Usage Demo
-    const simulateButton = page.getByRole("button", { name: "Simulate API Call" });
+    // 7. Test metered usage demo.
+    const simulateButton = page.getByRole("button", { name: "Record learner activity" });
     await expect(simulateButton).toBeVisible();
     await simulateButton.click();
-    await expect(page.getByText("Usage reported: 1 API call recorded.")).toBeVisible();
+    await expect(page.getByText("Learner activity recorded for this period.")).toBeVisible();
 
   });
 });

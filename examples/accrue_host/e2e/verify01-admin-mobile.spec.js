@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require("./support/test.js");
-const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
+const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 const { expectNoHorizontalOverflow } = require("./support/overflow.js");
 
 test.describe("@mobile mounted admin shell and customers", () => {
@@ -22,7 +22,7 @@ test.describe("@mobile mounted admin shell and customers", () => {
     const fixture = readFixture();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     const orgButton = page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`);
@@ -49,7 +49,7 @@ test.describe("@mobile mounted admin shell and customers", () => {
     const fixture = readFixture();
 
     await login(page, fixture, fixture.admin_email, sandboxId);
-    await page.getByRole("link", { name: "Go to billing" }).click();
+    await workspaceBillingLink(page).click();
     await waitForLiveView(page);
 
     const orgButton = page.locator(`button[data-organization-slug="${fixture.admin_org_alpha_slug}"]`);

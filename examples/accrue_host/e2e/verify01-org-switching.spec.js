@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require("./support/test.js");
-const { readFixture, reseedFixture, login, waitForLiveView } = require("./support/fixture.js");
+const { readFixture, reseedFixture, login, workspaceBillingLink, waitForLiveView } = require("./support/fixture.js");
 
 test("host billing switches active organization between fixture orgs", async ({ page, sandboxId }) => {
   reseedFixture();
@@ -10,8 +10,8 @@ test("host billing switches active organization between fixture orgs", async ({ 
   expect(fixture.org_beta_slug).toBeTruthy();
 
   await login(page, fixture, fixture.normal_email, sandboxId);
-  await page.getByRole("link", { name: "Go to billing" }).click();
-  await expect(page.getByRole("heading", { name: "Choose a plan" })).toBeVisible();
+  await workspaceBillingLink(page).click();
+  await expect(page.getByRole("heading", { name: "Workspace billing" })).toBeVisible();
   await waitForLiveView(page);
 
   await expect(page.getByTestId("organization-switcher")).toBeVisible();
