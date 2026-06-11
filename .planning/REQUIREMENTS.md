@@ -15,86 +15,60 @@ remain closed by default per the post-v1.48 pause rule.
 
 Shipped 7/7 (AUI-01..07). Archived to `.planning/milestones/v1.50-REQUIREMENTS.md`; validated summary in `PROJECT.md`.
 
-## Milestone v1.51 Requirements — Admin UI: Depth Pass
+## Milestone v1.51 Requirements — Admin UI: Depth Pass (shipped & archived 2026-06-04)
 
-The second, depth-oriented pass on the same `accrue_admin` surface. Still **not a broad
-feature milestone** (no new billing primitives) — it re-maps information architecture from
-entity-shaped to job/persona-shaped, closes design-token gaps, lifts under-iterated screens
-to one rubric baseline, adds restrained motion, makes seed data express every state, and
-proves it with a screenshot-driven visual-QA loop. Design source:
-`.planning/research/v1.51-admin-ui-depth-design.md`. **Anti-churn rule:** every change cites a
-rubric dimension below bar, a failed persona-job, or a token bypass killed — never taste.
-Rubric (0–3, pass ≥2): ① token compliance ② visual hierarchy ③ spacing rhythm ④ state coverage
-⑤ responsive/mobile-first ⑥ contrast ⑦ focus & semantics ⑧ brand expression ⑨ motion ⑩ reuse/DRY.
+Shipped 22/22 (DSY-01..03, IA-01..07, SCR-01..04, MOT-01..03, SEED-01..02, QA-01..03).
+Archived to `.planning/milestones/v1.51-REQUIREMENTS.md`; validated summary in `PROJECT.md`.
 
-### Design-System Completeness (DSY) — Phase 174 (A)
+## Milestone v1.52 Requirements — Brand System
 
-- [x] **DSY-01**: Operator-facing admin CSS resolves every spacing, type, radius, shadow, line-height, letter-spacing, breakpoint, and transition value from a named `ax-*` token — no hardcoded px/em for these remain in `app.css` or components.
-- [x] **DSY-02**: The dunning banner and invoice screens render brand colors via tokens with zero inline-hex fallbacks; no surface bypasses the token system.
-- [x] **DSY-03**: A maintainer can open `/dev/components` and see a component-variants reference enumerating every button / badge / status / card variant with its token mapping.
+Pressure-test the brand book seed, run a user-judged SVG logo tournament to a locked winner,
+and ship a committed, self-contained `brandbook/` (standalone HTML brand book, full SVG logo
+system, design tokens, voice/microcopy/marketing copy). **Not a broad feature milestone** (no
+billing primitives) — brand/DX investment in adopter-facing presentation surfaces; reopen
+decision recorded in `PROJECT.md`. Design source: `.planning/research/v1.52-brand-system-design.md`.
 
-### Persona-Driven Information Architecture (IA) — Phase 175 (B)
+**Hard logo constraints (binding on every candidate):** no rectangular background/container
+shape behind the mark; logotype optically close to the mark; main lockup carries no subtitle
+(separate with-subtitle variant ships); fully-integrated custom typemark options required.
+**Seed latitude is evidence-gated:** Geist + existing palette are defaults; changes require a
+cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 
-- [x] **IA-01**: From Home, each of the six personas can reach their primary job in ≤2 clicks via a verb-labeled task launcher or a visible (not hotkey-only) global search field.
-- [x] **IA-02**: The sidebar presents a weighted primary **Billing** zone with **Recovery / Developer / Catalog** as visually-recessed, collapsible specialist zones that surface attention-count badges (e.g. dead-letters, at-risk) only when work exists.
-- [x] **IA-03**: List screens open pre-filtered to the persona work-queue (e.g. invoices → open/uncollectible), with an "All" view one filter-chip away.
-- [x] **IA-04**: Every detail screen renders a Related-billing card with no dead ends; a dead-lettered webhook threads to its event(s) and onward to the affected entity.
-- [x] **IA-05**: Customer-360 presents primary tabs (Subscriptions, Invoices, Payments) with advanced tabs (Payment methods, Entitlements, Events, Metadata) recessed under a quieter "More" grouping.
-- [x] **IA-06**: Routes changed by the IA reshape redirect from their old paths, so existing bookmarks and links never break.
-- [x] **IA-07**: A compliance/audit user can reach an actor-filtered view of the event log via a saved lens (without it occupying a top-level nav group).
+### Brand Audit & DNA (AUD) — Phase 180
 
-### Per-Screen Rubric Uplift (SCR) — Phase 176 (C)
+- [ ] **AUD-01**: Maintainer can read a 14-section pressure-test audit of `prompts/accrue-brand-book.md` where every verdict is tagged KEEP/TIGHTEN/REWORK/ADD/REMOVE with a cited justification — no churn without a cited failure.
+- [ ] **AUD-02**: Maintainer ratifies a locked `BRAND-DNA.md` and a binding logo design brief (including the 4 hard logo constraints) at an explicit checkpoint before any logo work begins.
+- [ ] **AUD-03**: Any proposed palette or font change cites a concrete failure (contrast, distinctiveness, 16px rendering) and is user-ratified at the audit checkpoint.
 
-- [x] **SCR-01**: Every admin screen scores ≥2 on all 10 rubric dimensions in both light and dark themes.
-- [x] **SCR-02**: Every admin screen scores ≥2 on all 10 rubric dimensions at both desktop and mobile (usable @360px) widths.
-- [x] **SCR-03**: The under-iterated tail (charges, coupons, promotion-codes, connect, events, webhooks, invoice detail) is lifted to the rubric baseline, with documented before/after scores per screen.
-- [x] **SCR-04**: Dense text/detail screens apply a reading-measure max-width container and a mobile-first responsive layout built on the DSY breakpoint tokens.
+### Logo Tournament & System (LOGO) — Phases 181–183
 
-### Motion & Micro-interaction (MOT) — Phase 177 (D)
+- [ ] **LOGO-01**: A reproducible SVG generation pipeline emits exact Geist letterform outlines (opentype.js, one path per glyph) and runs automated pre-gate lints — valid SVG parse, no-rect-background, lockup gap ratio within spec, 16px legibility screenshot, monochrome derivable, no subtitle in main lockup — before any candidate reaches the user.
+- [ ] **LOGO-02**: User picks 1–3 round-1 winners from a self-contained, file://-openable HTML gallery of 12–16 candidates across 4 conceptual directions (accumulation strata, stepped interval, layered arcs, fully-integrated typemarks), each rendered in a fixed context matrix (paper-light, ink-dark, 32px + 16px favicon, avatar circle-crop, README header, social card, monochrome).
+- [ ] **LOGO-03**: Refinement rounds iterate on winners via a monotonic `TOURNAMENT.md` feedback ledger (verdicts recorded verbatim, constraints never re-litigated) until the user locks one winner — default 3-round cap with an explicit extend-or-settle question.
+- [ ] **LOGO-04**: The locked winner is derived into a complete committed logo system in `brandbook/logo/` — primary lockup, integrated typemark, icon-only mark, monochrome positive/negative, dark/light versions, favicon (SVG/.ico/PNG), social card (SVG + PNG), with-subtitle variant, clearspace/minimum-size spec — all finals outlined paths (no text elements), svgo-optimized, with accessible title/desc and OFL provenance documented.
 
-- [x] **MOT-01**: A documented motion/interaction spec defines what animates, why, which token, and reduced-motion behavior, including an antipattern list grounded in researched best practice.
-- [x] **MOT-02**: Drawers, dropdowns, the command palette, tabs, flash/toasts, and skeleton→content transitions animate via design-token transition bundles — functional, not decorative.
-- [x] **MOT-03**: All admin motion honors `prefers-reduced-motion` (no travel/overshoot; crossfades retained), verified by an automated check.
+### Design Tokens & Specimens (TOK) — Phase 184
 
-### Seed Expressiveness & State Coverage (SEED) — Phase 178 (E)
+- [ ] **TOK-01**: `brandbook/tokens/tokens.json` and `tokens.css` define raw palette, semantic color roles, typography, spacing, radius, focus-ring, and state tokens per the audit token spec.
+- [ ] **TOK-02**: An automated consistency check verifies brandbook token values against the admin `ax-*` SSOT in `accrue_admin/assets/css/theme.css`, with the mapping documented — zero admin code changes this milestone.
+- [ ] **TOK-03**: Palette and typography specimen artifacts exist in `brandbook/examples/`.
 
-- [x] **SEED-01**: Every admin screen's empty, populated, overflow/pagination, error, and loading states are reachable from seeded data on a single click-through.
-- [x] **SEED-02**: Edge states (dunning/at-risk, multi-currency, long strings, dark-only contrast traps) each have a seeded instance; no screen looks good only with hand-picked IDs.
+### Voice, Microcopy & Marketing Copy (COPY) — Phase 185
 
-### Visual-QA Loop & Sign-off (QA) — Phase 179 (F)
+- [ ] **COPY-01**: A committed voice system defines voice principles, tone sliders, vocabulary to use/avoid, and say-this/not-this examples consistent with the ratified brand DNA.
+- [ ] **COPY-02**: Ready-to-paste copy blocks exist for GitHub repo description + topics, Hex.pm package description, HexDocs intro, README hero, landing-page sections (hero/problem/solution/install/benefits/comparison/CTAs), release-note templates, and error/empty/success-state microcopy — reviewed by the user in one batch.
 
-- [x] **QA-01**: The Playwright screenshot harness sweeps the full screen inventory (all ~20 screens incl. detail pages) across {desktop, mobile} × {light, dark}.
-- [x] **QA-02**: An LLM-analysis step scores each screenshot against the 10-dimension rubric and emits structured findings (screen, dimension, score, defect, suggested fix).
-- [x] **QA-03**: A final scorecard shows every dimension ≥2 across all four matrix cells with before/after evidence, and axe passes in both light and dark themes.
+### HTML Brand Book & Quality Gate (BOOK) — Phase 186
 
-## Traceability — v1.51 Admin UI: Depth Pass
+- [ ] **BOOK-01**: `brandbook/index.html` is a self-contained, professional, standalone brand book — inline CSS from the v1.52 tokens, inlined SVGs, zero build step, zero JS frameworks, file://-openable — consuming the audit structure, logo system, tokens/specimens, and voice/copy.
+- [ ] **BOOK-02**: The committed `brandbook/` passes the Phase-180 quality-gate checklist, stays within a ≤2 MB size budget, and passes final human UAT.
 
-Every v1.51 requirement maps to exactly one phase. Coverage: 22/22.
+## Traceability — v1.52 Brand System
+
+Filled by the roadmap. Coverage target: 13/13, each REQ-ID mapped to exactly one phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DSY-01 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
-| DSY-02 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
-| DSY-03 | Phase 174 (A — Design-System Gap Closure & Token Completeness) | Complete |
-| IA-01 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| IA-02 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| IA-03 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| IA-04 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| IA-05 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| IA-06 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| IA-07 | Phase 175 (B — Persona-Driven IA Spine) | Complete |
-| SCR-01 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
-| SCR-02 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
-| SCR-03 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
-| SCR-04 | Phase 176 (C — Systematic Per-Screen Rubric Uplift) | Complete |
-| MOT-01 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
-| MOT-02 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
-| MOT-03 | Phase 177 (D — Motion & Micro-interaction Design) | Complete |
-| SEED-01 | Phase 178 (E — Seed Expressiveness & State Coverage) | Complete |
-| SEED-02 | Phase 178 (E — Seed Expressiveness & State Coverage) | Complete |
-| QA-01 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Complete |
-| QA-02 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Complete |
-| QA-03 | Phase 179 (F — Screenshot-Driven Visual QA Loop & Sign-off) | Complete |
 
 ## Out of Scope
 
@@ -103,8 +77,8 @@ failure mode, correctness/security/data-loss risk, repeated support issue, opera
 failure, or explicit strategy change. Historical backlog anchors and deferred seeds are
 tracked as non-active planning context in `.planning/ROADMAP.md`.
 
-**v1.51-specific exclusions:** no Tailwind migration (double down on custom `ax-*` CSS + tokens);
-no churn on frozen screens (Home, primary nav, global search) absent a rubric-flagged regression;
-the demo/host app (`examples/accrue_host`) UI is not a design target (only the screenshot substrate);
-no new billing primitives; no breaking changes (route reshaping ships with redirects, component
-public APIs stay backward-compatible).
+**v1.52-specific exclusions:** no admin `ax-*` token changes (admin `theme.css` stays SSOT;
+brandbook documents the brand layer); no PDF brand book; no website/landing-page build (copy
+blocks only); no binary-heavy assets beyond platform-required PNG/.ico; exploration artifacts
+(galleries, rejected candidates, tournament ledger) stay in `.planning/`, not `brandbook/`;
+no new billing primitives; no breaking changes.
