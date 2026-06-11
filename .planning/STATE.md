@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.51
-milestone_name: Admin UI Depth Pass
-status: idle
-last_updated: "2026-06-07T03:33:15.000Z"
-last_activity: 2026-06-07
+milestone: v1.52
+milestone_name: Brand System
+status: planning
+last_updated: "2026-06-11T21:27:02.968Z"
+last_activity: 2026-06-11
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 33
-  completed_plans: 33
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,9 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened
 
 ## Current Position
 
-Milestone: v1.51 Admin UI: Depth Pass — SHIPPED & ARCHIVED 2026-06-04 (Phases 174–179, 33/33 plans). Phase dirs in `milestones/v1.51-phases/`.
-Status: Idle — between milestones.
-Last activity: 2026-06-07 - Billing schema-prefix rework committed and pushed at 0dd7dada; repo hygiene pass aligned CI/package support to Elixir 1.19 + OTP 28, cleaned admin formatting drift, and kept GSD idle with no active milestone/worktree blockers.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-06-11 — Milestone v1.52 started
 
 ## Post-v1.48 Pause Rule
 

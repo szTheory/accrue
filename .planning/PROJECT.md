@@ -29,25 +29,36 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
-## Current Milestone: v1.51 Admin UI — Depth Pass (IA + Systematic Polish)
+## Current Milestone: v1.52 Brand System
 
-**Goal:** Take the already-shipped `accrue_admin` UI from *consistent* (v1.50) to *considered* — re-map its information architecture from entity-shaped to job/persona-shaped (the "disjoint" fix), close the remaining design-token gaps, bring every under-iterated screen up to one rubric baseline, add restrained purposeful motion, make seed data express every state on a single click-through, and prove it with a screenshot-driven visual-QA loop.
+**Goal:** Pressure-test the brand book seed (`prompts/accrue-brand-book.md`) through a 14-section critical audit, run a user-judged SVG logo tournament to a locked winner, and ship a committed, self-contained `brandbook/` — standalone HTML brand book, full SVG logo system, design tokens, and voice/microcopy/marketing copy.
 
-**Posture justification:** Same as v1.50 — a **quality / polish + adopter-facing DX investment in an existing surface**, not a broad feature milestone (no new billing primitives). Justified under the post-v1.48 pause rule as adopter-facing operator DX (the admin UI is a primary evaluation and operation surface) and was explicitly requested. "No broad feature milestone is currently open" remains true.
+**Posture justification:** Brand/DX investment in adopter-facing presentation surfaces (README, Hex.pm, HexDocs, social previews, admin UI identity) — no new billing primitives; same justification class as v1.50/v1.51 and explicitly requested by the maintainer. This paragraph is the recorded reopen decision required by the post-v1.48 pause rule.
 
-**Target features (Phases 174-179, ordered A→F, deps A→B→C→{D,E}→F):**
-- **A** Design-system gap closure: line-height/letter-spacing/breakpoint tokens, transition bundles, reading-measure container; kill remaining token bypasses; component-variants reference
-- **B** Persona-driven IA spine: cordoned-hybrid nav (weighty Billing + recessed specialist zones w/ attention badges), verb launchers + visible Cmd-K, Customer-360 tab tiering, mandatory bidirectional threading (incl. Webhook→Event→entity), work-queue list defaults, redirects
-- **C** Systematic per-screen rubric uplift: enumerate every touchpoint, score vs the 10-dimension rubric, lift the under-iterated tail to baseline; mobile-first rewrite
-- **D** Restrained, purposeful motion/micro-interaction (Emil Kowalski principles; token-based; reduced-motion honored)
-- **E** Seed expressiveness: every screen/state/edge-case reachable on a single click-through
-- **F** Screenshot-driven LLM visual-QA loop + axe sign-off across {desktop,mobile}×{light,dark}
+**Target features (Phases 180–186, deps 180→181→182→183→186, with 180→{184,185}→186 side-rails):**
+- **180** Brand audit & DNA lock — 14-section pressure test with KEEP/TIGHTEN/REWORK/ADD/REMOVE verdicts; locked BRAND-DNA + binding logo design brief (✋ user ratifies)
+- **181** SVG pipeline + tournament round 1 — opentype.js Geist-outline harness, pre-gate lints, Playwright QA; 12–16 candidates across 4 directions incl. fully-integrated typemarks; context-matrix gallery (✋ user picks winners)
+- **182** Convergent refinement — variation rounds on winners via monotonic `TOURNAMENT.md` ledger until user settles (✋ looping checkpoint); locked winner
+- **183** Logo system production — full derived suite in `brandbook/logo/` (primary lockup, typemark, icon-only, monochrome, dark/light, favicon, social card, subtitle variant, clearspace spec); outlined paths only, svgo-optimized
+- **184** Design tokens & specimens — `brandbook/tokens/` with documented mapping + automated consistency check against admin `ax-*` tokens (admin `theme.css` stays SSOT, untouched)
+- **185** Voice, microcopy & marketing copy — ready-to-paste blocks for GitHub/Hex.pm/HexDocs/README/landing/release notes (✋ batch copy review)
+- **186** Standalone HTML brand book at `brandbook/index.html` (self-contained, no build step, no JS frameworks) + quality gate (≤2 MB `brandbook/` budget, ✋ final UAT)
 
-**Anti-churn guardrail:** every change cites a rubric dimension below bar, a failed persona-job, or a token bypass killed — never taste. Frozen screens (Home, primary nav, global search) touched only on a flagged regression. **No Tailwind migration** (double down on custom `ax-*` CSS + tokens). Demo host app, new billing primitives, and breaking changes are out of scope.
+**Hard logo constraints (binding on every candidate):** no rectangular background/container shape behind the mark; logotype optically close to the mark; main lockup carries no subtitle (a separate with-subtitle variant ships); fully-integrated custom typemark options required. **Seed latitude is evidence-gated:** Geist + the existing palette are defaults; changes only with a cited failure (contrast, distinctiveness, 16px rendering) and user ratification at the audit checkpoint.
 
-Authoritative design source: `.planning/research/v1.51-admin-ui-depth-design.md` (builds on the v1.50 source `/Users/jon/.claude/plans/heres-what-we-were-majestic-spindle.md`).
+Authoritative design source: `.planning/research/v1.52-brand-system-design.md` (user-approved 2026-06-11).
 
 ## Last shipped milestone
+
+### v1.51 — Admin UI: Depth Pass (**shipped & archived 2026-06-04**)
+
+**Goal:** Take the already-shipped `accrue_admin` UI from *consistent* (v1.50) to *considered* — persona-shaped IA, design-token gap closure, per-screen rubric uplift, restrained motion, seed expressiveness, screenshot-driven visual QA.
+
+**Delivered (Phases 174–179, 33/33 plans, 22/22 requirements):** design-system gap closure (DSY), cordoned-hybrid persona-driven nav + threading (IA), systematic per-screen rubric uplift (SCR), token-based motion (MOT), single-click-through seed state coverage (SEED), and the screenshot/axe visual-QA loop (QA). Audit: `tech_debt` (photographic sign-off run is a standing human/CI gate; code-level compliance 100%) — see `.planning/v1.51-MILESTONE-AUDIT.md`.
+
+Authoritative design source: `.planning/research/v1.51-admin-ui-depth-design.md`.
+
+## Prior shipped milestone
 
 ### v1.50 — Admin UI Foundation (**shipped 2026-06-02 via PR #32; archived 2026-06-03**)
 
@@ -510,7 +521,11 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ### Active
 
-**v1.51 — Admin UI Depth Pass** (see `.planning/REQUIREMENTS.md`). Categories: DSY (design-system completeness), IA (persona-driven architecture), SCR (per-screen rubric uplift), MOT (motion), SEED (seed expressiveness), QA (visual-QA loop). Mapped across Phases 174–179.
+**v1.52 — Brand System** (see `.planning/REQUIREMENTS.md`). Categories: AUD (brand audit & DNA), LOGO (tournament + logo system), TOK (design tokens & specimens), COPY (voice/microcopy/marketing), BOOK (HTML brand book & quality gate). Mapped across Phases 180–186.
+
+### Validated v1.51 (archived in `.planning/milestones/v1.51-REQUIREMENTS.md`; milestone shipped & archived 2026-06-04)
+
+Admin UI Depth Pass — 22/22 satisfied (DSY-01..03, IA-01..07, SCR-01..04, MOT-01..03, SEED-01..02, QA-01..03) across Phases 174–179.
 
 ### Validated v1.50 (archived in `.planning/milestones/v1.50-REQUIREMENTS.md`; milestone shipped 2026-06-02 via PR #32, archived 2026-06-03)
 
@@ -584,4 +599,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-03 — opened milestone v1.51 (Admin UI Depth Pass); v1.50 demoted to last shipped.*
+*Last updated: 2026-06-11 — opened milestone v1.52 (Brand System); v1.51 demoted to last shipped.*
