@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
 status: planning
-last_updated: "2026-06-11T21:27:02.968Z"
+last_updated: "2026-06-11T00:00:00.000Z"
 last_activity: 2026-06-11
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,26 +17,46 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-03 — v1.50 archived, v1.51 opened)
+See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Between milestones — v1.51 shipped & archived 2026-06-04. No milestone open (stable core / demand-driven posture).
+**Current focus:** v1.52 Brand System — pressure-test the brand book seed, run a user-judged SVG logo tournament, ship a committed self-contained `brandbook/` (standalone HTML brand book, full SVG logo system, design tokens, voice/microcopy/marketing copy).
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 180 not started / roadmap created
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-11 — Milestone v1.52 started
+Status: Roadmap created — awaiting `/gsd-plan-phase 180`
+Last activity: 2026-06-11 — Roadmap created for v1.52 Brand System (Phases 180–186)
 
 ## Post-v1.48 Pause Rule
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-v1.49 is an Adoption Evidence milestone focusing on realistic demo apps, DX, and shift-left automation, not broad new feature capabilities.
+v1.52 is a brand/DX investment in adopter-facing presentation surfaces (README, Hex.pm, HexDocs, social previews, admin UI identity) — not a broad feature milestone (no new billing primitives). Reopen decision recorded in `PROJECT.md`. Justification class: same as v1.50/v1.51.
 
 ## Milestone Progress
+
+### v1.52 Phase Summary (OPEN — Brand System; deps 180→181→182→183→186, with 180→{184,185}→186 side-rails)
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 180 | Brand Audit & DNA Lock | AUD-01, AUD-02, AUD-03 | Not started |
+| 181 | SVG Pipeline + Tournament Round 1 — Divergent | LOGO-01, LOGO-02 | Not started |
+| 182 | Tournament Convergent Refinement | LOGO-03 | Not started |
+| 183 | Logo System Production | LOGO-04 | Not started |
+| 184 | Design Tokens & Specimens | TOK-01, TOK-02, TOK-03 | Not started |
+| 185 | Voice, Microcopy & Marketing Copy | COPY-01, COPY-02 | Not started |
+| 186 | HTML Brand Book Assembly & Quality Gate | BOOK-01, BOOK-02 | Not started |
+
+Coverage: 14/14 v1.52 requirements mapped (each REQ-ID → exactly one phase). Design source: `.planning/research/v1.52-brand-system-design.md`.
+
+**Hard logo constraints (binding on every candidate):** no rectangular background/container shape behind the logomark; logotype sits optically close to the mark; main lockup carries no subtitle (with-subtitle variant ships separately); fully-integrated custom typemark options required. **Seed latitude is evidence-gated:** Geist + existing palette are defaults; changes require a cited failure (contrast, distinctiveness, 16px rendering) and user ratification at Phase 180 checkpoint.
+
+**Dependency shape:** 180 → 181 → 182 → 183 → 186, with 180 → {184, 185} → 186 as parallel side-rails (tokens and copy can execute while tournament rounds await user verdicts).
+
+**Human checkpoints:** Phase 180 (audit verdicts + DNA ratification + logo brief), Phase 181 (round-1 winner picks), Phase 182 (looping — one checkpoint per refinement round until winner locked), Phase 183 (light: derivative-sheet eyeball), Phase 185 (light: batch copy review), Phase 186 (final UAT).
 
 ### v1.51 Phase Summary (SHIPPED & ARCHIVED 2026-06-04 — Admin UI: Depth Pass; deps A→B→C→{D,E}→F; phase dirs in milestones/v1.51-phases/)
 
@@ -74,6 +94,8 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 ### Recently shipped milestones
 
+**v1.51** (shipped & archived **2026-06-04**): 6 phases (**174–179**), 22 requirements. Theme: Admin UI Depth Pass. Audit: `.planning/milestones/v1.51-MILESTONE-AUDIT.md`.
+
 **v1.49** (shipped & archived **2026-06-02**): 4 phases (**163–166**), 11 requirements. Theme: Realistic Demo App & Adoption Evidence. Audit: `.planning/milestones/v1.49-MILESTONE-AUDIT.md`.
 
 **v1.48** (shipped & archived **2026-06-01**): 4 phases (**159–162**), 9 requirements. Theme: Release Readiness + Stable Core Posture. Audit: `.planning/v1.48-v1.48-MILESTONE-AUDIT.md` (or equivalent closeout proof).
@@ -94,6 +116,15 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 ## Accumulated Context
 
+### Key Planning Decisions for v1.52
+
+- **2026-06-11:** Opened v1.52 "Brand System". Reopen decision: brand/DX investment in adopter-facing presentation surfaces — same justification class as v1.50/v1.51; no billing primitives. Recorded in `PROJECT.md`.
+- **2026-06-11:** User decisions ratified (via AskUserQuestion in design phase): full checkpoint set; round 1 = 12–16 concepts across 4 directions; seed latitude is evidence-gated (Geist + palette are defaults).
+- **2026-06-11:** Hard logo constraints locked (binding on every candidate): no rect background/container shape; logotype optically close to mark; main lockup no subtitle (with-subtitle variant ships separately); fully-integrated custom typemark options required.
+- **2026-06-11:** Admin `ax-*` tokens in `accrue_admin/assets/css/theme.css` stay SSOT and are untouched this milestone — brandbook documents the brand layer only.
+- **2026-06-11:** Exploration artifacts (galleries, rejected candidates, TOURNAMENT.md) stay in `.planning/milestones/v1.52-phases/` — not in `brandbook/`.
+- **2026-06-11:** `brandbook/` size budget ≤ 2 MB enforced at Phase 186 verification.
+
 ### Key Planning Decisions for v1.49
 
 - **2026-06-01:** Focus on a highly realistic click-around demo for `examples/accrue_host` to serve as adoption evidence.
@@ -108,17 +139,21 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - **v1.17 Friction Inventory (FRG-01):** `.planning/research/v1.17-FRICTION-INVENTORY.md`
 - **v1.17 North Star:** `.planning/research/v1.17-north-star.md` — stop rules S1–S5.
 - **v1.47 Research:** `.planning/research/SUMMARY.md`
+- **v1.52 Brand System Design:** `.planning/research/v1.52-brand-system-design.md` (authoritative design source)
 
 ### Roadmap Evolution
 
 - v1.48 shipped and archived 2026-06-01: Phases 159–162
 - v1.49 shipped and archived 2026-06-02: Phases 163–166
+- v1.50 shipped and archived 2026-06-03: Phases 167–173
+- v1.51 shipped and archived 2026-06-04: Phases 174–179
+- v1.52 opened 2026-06-11: Phases 180–186
 
 ### Decisions
 
 Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
-- **2026-06-01:** Opened v1.49 "Realistic Demo App & Adoption Evidence". This explicitly does not open new broad feature scope, but rather provides realistic E2E coverage, rich fixtures, and Docker DX for the existing application to prove the value proposition and ease maintainer ramp-up.
+- **2026-06-11:** Opened v1.52 "Brand System". This explicitly does not open new broad feature scope, but rather invests in adopter-facing brand presentation surfaces (logo, brand book, design tokens, voice/copy). Roadmap created with 7 phases (180–186).
 - **2026-06-02:** Closed v1.49 after fresh audit passed 11/11 requirements and archived ROADMAP, REQUIREMENTS, MILESTONE-AUDIT, and phase artifacts under `.planning/milestones/`.
 - [Phase ?]: AttentionCounts extracted into shared context fn; NavBadgeHook post-auth with DB-error rescue; Nav.items/3 backward-compat via default arg; SidebarCollapse localStorage key prefixed with mount_path
 - [Phase ?]: URI.encode/1 applied to :id in RedirectController for path traversal prevention
@@ -186,10 +221,13 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-05T15:49:26.000Z
-Stopped at: Quick task 260605-gys complete — admin@example.com seeded with billing_admin: true via ensure_demo_admin/1; banners and README updated with OPERATOR/CUSTOMERS split; hero_accounts_test persona assertions locked; Docker live DB confirmed (admin@example.com | t). 3 commits on main (7b86751f, 8c38ed3c, 730d9dd9). v1.51 shipped & archived 2026-06-04.
-Resume file: none — between milestones.
+Last session: 2026-06-11
+Stopped at: Roadmap created for v1.52 Brand System — Phases 180–186 defined, ROADMAP.md + STATE.md + REQUIREMENTS.md traceability table updated. Awaiting `/gsd-plan-phase 180`.
+Resume file: none — roadmap created, ready to plan.
 
 ## Operator Next Steps
 
-- No milestone open (v1.51 shipped & archived). Start the next milestone with `$gsd-new-milestone`, or run the milestone-assessment ritual (`prompts/MILESTONE-NEXT-STEP-ASSESSMENT.md`) first.
+- Roadmap created. Run `/gsd-plan-phase 180` to begin Phase 180: Brand Audit & DNA Lock.
+- Phase 180 is the human-checkpoint phase — user ratifies audit verdicts, BRAND-DNA, and logo brief before any logo work begins.
+- After Phase 180 checkpoint: Phase 181 begins the SVG pipeline + tournament round 1.
+- Phases 184 and 185 can run in parallel with Phase 182's tournament rounds (they depend only on Phase 180).

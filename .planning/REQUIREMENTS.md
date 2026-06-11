@@ -45,7 +45,7 @@ cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 - [ ] **LOGO-01**: A reproducible SVG generation pipeline emits exact Geist letterform outlines (opentype.js, one path per glyph) and runs automated pre-gate lints — valid SVG parse, no-rect-background, lockup gap ratio within spec, 16px legibility screenshot, monochrome derivable, no subtitle in main lockup — before any candidate reaches the user.
 - [ ] **LOGO-02**: User picks 1–3 round-1 winners from a self-contained, file://-openable HTML gallery of 12–16 candidates across 4 conceptual directions (accumulation strata, stepped interval, layered arcs, fully-integrated typemarks), each rendered in a fixed context matrix (paper-light, ink-dark, 32px + 16px favicon, avatar circle-crop, README header, social card, monochrome).
 - [ ] **LOGO-03**: Refinement rounds iterate on winners via a monotonic `TOURNAMENT.md` feedback ledger (verdicts recorded verbatim, constraints never re-litigated) until the user locks one winner — default 3-round cap with an explicit extend-or-settle question.
-- [ ] **LOGO-04**: The locked winner is derived into a complete committed logo system in `brandbook/logo/` — primary lockup, integrated typemark, icon-only mark, monochrome positive/negative, dark/light versions, favicon (SVG/.ico/PNG), social card (SVG + PNG), with-subtitle variant, clearspace/minimum-size spec — all finals outlined paths (no text elements), svgo-optimized, with accessible title/desc and OFL provenance documented.
+- [ ] **LOGO-04**: The locked winner is derived into a complete committed logo system in `brandbook/logo/` — primary lockup, integrated typemark, icon-only mark, monochrome positive/negative, dark/light versions, favicon (SVG/.ico/PNG), social card (SVG + PNG), with-subtitle variant, clearspace/minimum-size spec sheet — all finals outlined paths (no text elements), svgo-optimized, with accessible title/desc and OFL provenance documented.
 
 ### Design Tokens & Specimens (TOK) — Phase 184
 
@@ -65,10 +65,24 @@ cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 
 ## Traceability — v1.52 Brand System
 
-Filled by the roadmap. Coverage target: 13/13, each REQ-ID mapped to exactly one phase.
+Filled by the roadmap. Coverage target: 14/14, each REQ-ID mapped to exactly one phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| AUD-01 | Phase 180 | Pending |
+| AUD-02 | Phase 180 | Pending |
+| AUD-03 | Phase 180 | Pending |
+| LOGO-01 | Phase 181 | Pending |
+| LOGO-02 | Phase 181 | Pending |
+| LOGO-03 | Phase 182 | Pending |
+| LOGO-04 | Phase 183 | Pending |
+| TOK-01 | Phase 184 | Pending |
+| TOK-02 | Phase 184 | Pending |
+| TOK-03 | Phase 184 | Pending |
+| COPY-01 | Phase 185 | Pending |
+| COPY-02 | Phase 185 | Pending |
+| BOOK-01 | Phase 186 | Pending |
+| BOOK-02 | Phase 186 | Pending |
 
 ## Out of Scope
 
