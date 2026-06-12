@@ -1,0 +1,20 @@
+{
+  "name": "accrue-logo-harness",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.mjs",
+    "smoke": "node generate.mjs --smoke",
+    "lint-test": "node lint.mjs --test",
+    "spine-test": "node geist-spine.mjs --test"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "^0.9.0",
+    "geist": "^1.7.2",
+    "opentype.js": "^2.0.0",
+    "playwright": "^1.59.1",
+    "pngjs": "^7.0.0",
+    "svgo": "^4.0.1",
+    "wawoff2": "^2.0.1"
+  }
+}
