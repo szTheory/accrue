@@ -1,5 +1,5 @@
 # Accrue Brand DNA
-*Ratified: 2026-06-11 — Phase 180 checkpoint*
+*Ratified: 2026-06-12 — Phase 180 Plan 4 checkpoint (all verdicts accepted; §4.23 VS Code icon flipped ADD → KEEP; BRAND-DNA.md approved as written)*
 
 ## Positioning
 Accrue is the Elixir-native billing library for Phoenix apps.
