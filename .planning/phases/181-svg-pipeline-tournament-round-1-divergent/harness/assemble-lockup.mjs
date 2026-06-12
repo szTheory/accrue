@@ -11,7 +11,8 @@
  *
  * Config shape:
  *   {
- *     markWidth: number,        — width of the mark element in SVG units
+ *     markWidth: number,        — width of the mark element in mark-local units
+ *     markHeight: number,       — height of the mark element in mark-local units
  *     capHeight: number,        — cap height in font units (from getCapHeight())
  *     gapRatio?: number,        — gap as fraction of capHeight (default 0.15)
  *     fontSize?: number,        — font size used for glyph extraction (default 1000)
@@ -22,6 +23,15 @@
  *       paper: string,
  *     }
  *   }
+ *
+ * Coordinate-space contract (post-fix):
+ *   - extractGlyphs(font, text, fontSize) bakes ABSOLUTE X positions into each glyph
+ *     path, with the baseline at y=0 (ascenders at negative y, descenders at positive y).
+ *   - assembleLockup places all glyph paths inside a SINGLE <g> translated to
+ *     (markScaledWidth + gap, BASELINE) so ascenders/descenders land in the viewBox.
+ *   - The mark is scaled from its local unit space (markHeight ≈ 40) to cap height
+ *     (capHeight ≈ 714–730) and placed at the top-left of the lockup sitting on BASELINE.
+ *   - No per-glyph translate loops — the glyph paths already carry their x layout.
  */
 
 // ---------------------------------------------------------------------------
@@ -73,11 +83,27 @@ function computeMarkBbox(pathD) {
 /**
  * Assemble a mark path and extracted glyph paths into a single lockup SVG.
  *
+ * Coordinate-space design:
+ *   extractGlyphs() bakes absolute X positions into each path (x accumulates over
+ *   advance widths). Baseline is at y=0; ascenders are at negative Y.
+ *
+ *   To render correctly inside a viewBox="0 0 W H":
+ *   1. The mark is scaled: s = capHeight / markHeight, so it occupies one cap-height.
+ *      It is translated to (0, BASELINE - capHeight) so it sits atop the baseline.
+ *   2. All glyph paths are placed inside ONE <g transform="translate(markScaledWidth+gap, BASELINE)">.
+ *      The single translate moves the baseline from y=0 to y=BASELINE, pushing
+ *      ascenders (negative-y ink) into positive viewBox space.
+ *   3. BASELINE = capHeight * 1.1 inside viewboxH = capHeight * 1.4
+ *      → 0.1×capHeight headroom above cap top, 0.3×capHeight below baseline for
+ *        descenders and breathing room (Geist "accrue" has no descenders).
+ *   No per-glyph translate loops — each path already carries its x layout from extractGlyphs.
+ *
  * @param {string} markPathD — SVG path `d` attribute value for the mark
  * @param {Array<{ char: string, d: string, advanceWidth: number }>} glyphs
  *   — from geist-spine.mjs extractGlyphs()
  * @param {{
  *   markWidth: number,
+ *   markHeight: number,
  *   capHeight: number,
  *   gapRatio?: number,
  *   fontSize?: number,
@@ -92,9 +118,9 @@ function computeMarkBbox(pathD) {
 function assembleLockup(markPathD, glyphs, config) {
   const {
     markWidth,
+    markHeight,
     capHeight,
     gapRatio = 0.15,
-    fontSize = 1000,
     viewboxH,
     markIsTypemark = false,
     palette = { ink: "#111418", paper: "#FAFBFC" },
@@ -110,33 +136,54 @@ function assembleLockup(markPathD, glyphs, config) {
   }
 
   // Standard mode: discrete mark + logotype with gap enforcement
+  //
+  // BASELINE: where the text baseline sits in viewBox coords (y-down).
+  // We use 1.1× cap height as baseline → 0.1×capH headroom above caps,
+  // 0.3×capH below (descenders + breathing room).
+  const BASELINE = capHeight * 1.1;
+
+  // Mark scale: fit mark to exactly one cap-height (top sits at BASELINE - capHeight).
+  // markHeight is the mark's local coordinate height (e.g. ~40 for Direction A).
+  const effectiveMarkHeight = (markHeight != null && markHeight > 0) ? markHeight : capHeight;
+  const s = capHeight / effectiveMarkHeight;
+
+  // Scaled mark dimensions in viewBox coordinate space
+  const markScaledW = markWidth * s;
+
+  // Gap in font units between mark right edge and logotype left edge
   const gap = capHeight * gapRatio;
-  const scale = fontSize / 1000; // glyph advanceWidths are at fontSize units
 
-  // Build per-glyph path elements using translate() transform
-  // This avoids raw path coordinate parsing; each glyph is wrapped in a <g>
-  // with a translate transform, which is correct for already-extracted glyph paths.
-  let xOffset = markWidth + gap;
-  const glyphElements = [];
+  // Total width = scaled-mark width + gap + glyph run width (glyphs already at fontSize units)
+  const glyphRunWidth = glyphs.reduce((sum, g) => sum + g.advanceWidth, 0);
+  const totalW = markScaledW + gap + glyphRunWidth;
 
-  for (let i = 0; i < glyphs.length; i++) {
-    const { char, d, advanceWidth } = glyphs[i];
-    const safeChar = char.replace(/[^a-zA-Z0-9]/g, "_");
-    const id = `glyph-${safeChar}-${i}`;
-    glyphElements.push(
-      `<g transform="translate(${xOffset.toFixed(3)},0)">` +
-        `<path id="${id}" d="${d}" fill="${palette.ink}"/>` +
-      `</g>`
-    );
-    xOffset += advanceWidth * scale;
-  }
+  // Mark: translate so it sits on the baseline (top at BASELINE - capHeight)
+  // mark-local y=0 is the mark's top edge, so translate(0, BASELINE - capHeight)
+  // then scale(s) to expand to cap height
+  const markTx = (0).toFixed(3);
+  const markTy = (BASELINE - capHeight).toFixed(3);
 
-  const totalW = xOffset;
+  // Single group for all glyphs: translate baseline from y=0 to y=BASELINE,
+  // and shift horizontally past the scaled mark + gap.
+  const glyphTx = (markScaledW + gap).toFixed(3);
+  const glyphTy = BASELINE.toFixed(3);
+
+  // Glyph paths concatenated (no per-glyph wrapping needed — x is already baked in)
+  const glyphPaths = glyphs
+    .map((g, i) => {
+      const safeChar = g.char.replace(/[^a-zA-Z0-9]/g, "_");
+      return `    <path id="glyph-${safeChar}-${i}" d="${g.d}" fill="${palette.ink}"/>`;
+    })
+    .join("\n");
 
   const svg = [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW.toFixed(3)} ${viewboxH}">`,
-    `  <path id="mark" d="${markPathD}" fill="${palette.ink}"/>`,
-    ...glyphElements.map((el) => `  ${el}`),
+    `  <g id="mark" transform="translate(${markTx},${markTy}) scale(${s.toFixed(6)})">`,
+    `    <path d="${markPathD}" fill="${palette.ink}"/>`,
+    `  </g>`,
+    `  <g id="logotype" transform="translate(${glyphTx},${glyphTy})">`,
+    glyphPaths,
+    `  </g>`,
     `</svg>`,
   ].join("\n");
 

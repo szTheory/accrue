@@ -83,16 +83,17 @@ function writeRejected(candidateId, svgString, failures) {
  * @param {string} markPathD
  * @param {{ advanceWidth: number }[]} glyphs
  * @param {number} markWidth
+ * @param {number} markHeight — mark's local coordinate height (e.g. ~40 for Direction A)
  * @param {number} capHeight
  * @returns {string} SVG string
  */
-function buildLockupSvg(markPathD, glyphs, markWidth, capHeight) {
+function buildLockupSvg(markPathD, glyphs, markWidth, markHeight, capHeight) {
   const viewboxH = capHeight * 1.4;
   const result = assembleLockup(markPathD, glyphs, {
     markWidth,
+    markHeight,
     capHeight,
     gapRatio: 0.15,
-    fontSize: 1000,
     viewboxH,
     markIsTypemark: false,
     palette: { ink: "#181818", paper: "#FAFBFC" },
@@ -151,13 +152,16 @@ function buildStandardCandidate(direction, generatorFn, config, accrueGlyphs, ca
     const { markPathD, markWidth, markHeight } = generatorFn(config);
 
     // Build lockup SVG
-    const lockupSvg = buildLockupSvg(markPathD, accrueGlyphs, markWidth, capHeight);
+    const lockupSvg = buildLockupSvg(markPathD, accrueGlyphs, markWidth, markHeight, capHeight);
 
-    // Approximate mark bbox from path data
-    const markBbox = computeMarkBbox(markPathD);
-    // Logotype starts at markWidth + gap
+    // Approximate mark bbox in SCALED viewBox coordinates.
+    // The mark is scaled by s = capHeight / markHeight in the new assembly.
+    // markBbox.xMax in scaled space = markWidth * s (mark occupies [0, markWidth*s]).
+    const s = capHeight / (markHeight > 0 ? markHeight : capHeight);
+    const markBbox = { xMin: 0, xMax: markWidth * s, yMin: 0, yMax: capHeight };
+    // Logotype starts at markScaledW + gap (gap = capHeight * gapRatio)
     const gap = capHeight * 0.15;
-    const logotypeBbox = { xMin: markWidth + gap };
+    const logotypeBbox = { xMin: markWidth * s + gap };
 
     return {
       id: config.id,
