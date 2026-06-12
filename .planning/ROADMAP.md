@@ -40,7 +40,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 ### Phase Summary
 
-- [ ] **Phase 180: Brand Audit & DNA Lock** — 14-section pressure test, KEEP/TIGHTEN/REWORK/ADD/REMOVE verdicts, locked BRAND-DNA + binding logo brief (✋ user checkpoint)
+- [x] **Phase 180: Brand Audit & DNA Lock** — 14-section pressure test, KEEP/TIGHTEN/REWORK/ADD/REMOVE verdicts, locked BRAND-DNA + binding logo brief (✋ user checkpoint) (completed 2026-06-12)
 - [ ] **Phase 181: SVG Pipeline + Tournament Round 1 — Divergent** — opentype.js Geist-outline harness, pre-gate lints, Playwright QA, 12–16 candidates across 4 directions, context-matrix gallery (✋ user picks winners)
 - [ ] **Phase 182: Tournament Convergent Refinement** — variation rounds on winners via monotonic TOURNAMENT.md ledger, 3-round default cap, extend-or-settle question (✋ looping checkpoint)
 - [ ] **Phase 183: Logo System Production** — full derived suite in `brandbook/logo/`, outlined paths, svgo-optimized (light checkpoint: derivative-sheet eyeball)
@@ -62,7 +62,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
   3. A binding logo design brief exists in the planning artifacts, explicitly recording the 4 hard constraints (no rect background, optically-close logotype, no subtitle in main lockup, fully-integrated typemark options required) plus the Phase-186 quality-gate checklist.
   4. Any proposed palette or font change references a concrete cited failure (contrast ratio, distinctiveness, 16px rendering) and is explicitly ratified or rejected by the user at this checkpoint.
 
-**Plans:** 4 plans across 4 waves
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -453,7 +453,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
-| 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete   | 2026-06-12 |
+| 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 0/? | Not started | - |
 | 182. Tournament Convergent Refinement | v1.52 | 0/? | Not started | - |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |
