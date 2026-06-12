@@ -79,7 +79,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 180-04-PLAN.md — Ratification checkpoint (AUD-01, AUD-02, AUD-03) ✋
+- [x] 180-04-PLAN.md — Ratification checkpoint (AUD-01, AUD-02, AUD-03) ✋
 
 ### Phase 181: SVG Pipeline + Tournament Round 1 — Divergent
 
@@ -453,7 +453,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete   | 2026-06-04 |
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
-| 180. Brand Audit & DNA Lock | v1.52 | 3/4 | In Progress|  |
+| 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete   | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 0/? | Not started | - |
 | 182. Tournament Convergent Refinement | v1.52 | 0/? | Not started | - |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |

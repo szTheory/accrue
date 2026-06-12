@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
-status: executing
-last_updated: "2026-06-12T01:43:24.299Z"
+status: verifying
+last_updated: "2026-06-12T01:57:23.062Z"
 last_activity: 2026-06-12
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 14
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 
 Phase: 180 (brand-audit-dna-lock) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-12
 
 ## Post-v1.48 Pause Rule
@@ -163,6 +163,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: SIGN-OFF.md photographic gate uses [PENDING] placeholders; before-column sourced from 176-SCORECARD after-scores (21/21 ≥2)
 - [Phase ?]: contrast.js uses WCAG 2.0 normative threshold 0.03928; 21-pair table committed as canonical evidence for all Phase 180 palette audit verdicts
 - **2026-06-12 (180-02):** All palette verdicts in BRAND-AUDIT.md §1–§8 are TIGHTEN (usage-rule restrictions) — no REWORK; no hex changes proposed; --accrue-fog and --accrue-cobalt are brand-only tokens with no current --ax-* semantic binding; §8 four hard logo constraints authored verbatim with four Phase 181 conceptual directions
+- [Phase ?]: 2026-06-12 (180-04): ADD-6 (§4.23 VS Code extension icon) flipped ADD → KEEP: VS Code extension out of scope for v1.52; all other Phase 180 verdicts accepted as written; BRAND-DNA.md, logo-brief.md, quality-gate-checklist.md ratified; Phase 181 unblocked
 
 ### Pending Todos
 
@@ -202,6 +203,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 180 P01 | 2m | 2 tasks | 2 files |
 | Phase 180 P02 | 5m | 2 tasks | 1 files |
 | Phase 180 P03 | 7m | 2 tasks | 4 files |
+| Phase 180 P04 | 15min | 3 tasks | 3 files |
 
 ### Milestone Intake Rules
 
@@ -226,8 +228,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-12T01:43:24.294Z
-Stopped at: Completed 180-02 BRAND-AUDIT.md §1–§8
+Last session: 2026-06-12T01:57:23.057Z
+Stopped at: Completed 180-04 Phase 180 Plan 4 — ratification applied, VALIDATION.md created, Phase 180 complete
 Resume file: None
 
 ## Operator Next Steps
