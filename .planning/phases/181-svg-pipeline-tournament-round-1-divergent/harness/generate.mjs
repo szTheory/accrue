@@ -415,18 +415,52 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  // Step 6 — Cull to target gallery size (12–16)
+  // Step 6 — Cull to target gallery size (12–16), direction-balanced (D-05)
+  //
+  // Never drop a direction below MIN_PER_DIRECTION while other directions
+  // still have candidates above the floor.  Round-robin culls from the
+  // largest direction first so no single direction is over-penalised.
   // -------------------------------------------------------------------------
   if (!SMOKE && passing.length > TARGET_GALLERY_SIZE.max) {
     const excess = passing.length - TARGET_GALLERY_SIZE.max;
     console.log(
       `[generate] Gallery size ${passing.length} exceeds max ${TARGET_GALLERY_SIZE.max} — ` +
-        `culling ${excess} by insertion order`
+        `culling ${excess} direction-balanced (D-05 floor preserved)`
     );
-    const culledExtra = passing.splice(TARGET_GALLERY_SIZE.max);
-    for (const c of culledExtra) {
+
+    for (let i = 0; i < excess; i++) {
+      // Build a per-direction bucket (preserve insertion order within each direction)
+      const buckets = {};
+      for (const c of passing) {
+        (buckets[c.direction] = buckets[c.direction] ?? []).push(c);
+      }
+
+      // Find the direction with the most candidates that is still above the floor
+      const eligible = Object.entries(buckets)
+        .filter(([, arr]) => arr.length > MIN_PER_DIRECTION)
+        .sort(([, a], [, b]) => b.length - a.length);
+
+      if (eligible.length === 0) {
+        // All directions are at or below the floor — cannot cull further without
+        // violating D-05.  Log a warning and stop culling.
+        console.warn(
+          `[generate] WARN: Cannot cull further — all directions are at or below ` +
+            `MIN_PER_DIRECTION (${MIN_PER_DIRECTION}).  Gallery will have ${passing.length} candidates.`
+        );
+        break;
+      }
+
+      // Cull the last candidate from the largest eligible direction
+      const [, targetBucket] = eligible[0];
+      const toCull = targetBucket[targetBucket.length - 1];
+      const idx = passing.indexOf(toCull);
+      passing.splice(idx, 1);
       culled++;
-      writeRejected(c.id, c.lockupSvg, ["gallery-size-cull"]);
+      writeRejected(toCull.id, toCull.lockupSvg, ["gallery-size-cull"]);
+      console.log(
+        `[generate] Gallery-size cull: ${toCull.id} (Direction ${toCull.direction}, ` +
+          `bucket size was ${targetBucket.length})`
+      );
     }
   }
 
