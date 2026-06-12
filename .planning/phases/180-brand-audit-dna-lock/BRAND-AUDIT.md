@@ -2,12 +2,12 @@
 milestone: v1.52
 phase: 180
 audited: 2026-06-11
-status: draft
+status: ratified
 ---
 
 # Accrue Brand Audit
 
-*Phase 180 — Brand Audit & DNA Lock. Sections §1–§8 authored here; §9–§14 authored in Plan 3. Status: draft (ratified after Plan 4 checkpoint).*
+*Phase 180 — Brand Audit & DNA Lock. Sections §1–§8 authored in Plan 2; §9–§14 authored in Plan 3. Status: ratified (pending Plan 4 checkpoint).*
 
 ---
 
@@ -449,34 +449,319 @@ Phase 181 candidates should position themselves relative to this exemplar spectr
 
 ## §9 Visual-Example Guidance
 
-*(Authored in Plan 3)*
+This section translates the four Phase 181 conceptual directions (§8) into concrete visual terms — what "good execution" looks like, what the state/lifecycle metaphor vocabulary means for each direction, and do/avoid pairs.
+
+### Reference Exemplar Family
+
+**Aim for:** Prisma, Vercel. Both achieve a minimal-geometric posture — a single flat-path concept with no container shape, high precision, no gradient, works at any size in any color. The mark breathes in open space. The wordmark is optically unified with the mark.
+
+**Contrast with:**
+- **Supabase:** vibrant, high-velocity, product-speed energy. The "electric bolt" metaphor communicates activation and speed — appropriate for a hosted database platform, wrong register for a billing library. Accrue should be calm, not energized.
+- **Phoenix:** mascot-driven identity. Works because the mark names the framework directly (the phoenix bird). Accrue's name is more abstract ("accrue" as a verb/concept), so a mascot would detach meaning. Avoid figurative/organic marks.
+
+**Unique differentiator:** The state/lifecycle metaphor vocabulary — accumulation, timelines, layered records, intervals — is specific to billing infrastructure. No Vercel or Prisma concept needs a lifecycle reading. This is Accrue's competitive moat in logo design space, immediately legible to backend developers who think in subscription periods, billing cycles, and invoice states.
+
+### Direction A — Accumulation Strata: Do/Avoid
+
+**Good execution:** 2–4 horizontal bands with clear, intentional height differences — the bands increase in a step pattern (accumulating upward or rightward, not decreasing). Each band is a flat path. The proportions feel structural, like ledger rows or statement periods built up over time. The mark is a recognizable unit at 16×16 — the stacking direction reads as deliberate, not decorative. Weight and spacing are calibrated so the mark doesn't flatten into a striped rectangle.
+
+**Avoid:** Bands of equal height with uniform spacing (reads as a bar chart or generic striped logo, no lifecycle implication); gradient fills between bands (defeats the "flat, structural" register); more than 4 bands (loses legibility at small sizes, looks decorative not semantic).
+
+### Direction B — Stepped Interval / Timeline Tick: Do/Avoid
+
+**Good execution:** A geometric step function or interval marker — a shape that reads as a moment on a timeline or a billing-period boundary. Clean angles, minimal path count (2–4 paths). The geometric step should feel like a timeline cross-section, not a staircase. Related visual: a Recharts step-line chart cross-section, abstracted to its essential geometry. The mark should suggest precision and repeatability — the same interval, reliably.
+
+**Avoid:** Clock faces or calendar grids (consumer-time metaphors, not billing-period precision); arrow shapes (implies direction/navigation, not state measurement); overly complex path counts that lose the "single clean moment" reading at 16px.
+*[DEFERRED: Phase 181 screenshot pipeline — legibility at 16px not asserted here]*
+
+### Direction C — Layered Arcs / State Transition: Do/Avoid
+
+**Good execution:** Two or three arcs in a precise geometric arrangement suggesting a lifecycle state change — a transaction completing, a billing period rolling over, a state transitioning. The arcs should be offset or irregular in their center points, not concentric. The arc-and-endpoint motif differentiates from generic "wi-fi / connectivity" arcs through non-symmetric geometry and through the endpoint mark (the start/end of the state transition is explicitly marked, not implied by an open arc tail).
+
+**Avoid:** Concentric symmetric arcs that read as wi-fi or signal bars — the similarity to connectivity iconography is fatal for a billing library (wrong domain metaphor entirely). Equal-weight arcs without endpoint distinction (reads as generic "connection" not "state transition"). More than three arcs (loses the precision of a single lifecycle moment).
+
+### Direction D — Integrated Typemark: Do/Avoid
+
+**Good execution:** The word "Accrue" is the mark, with a motif or flourish integrated into one or two letterforms. The integration must be subtle enough that the word remains immediately legible — the motif reinforces meaning without competing. Strong candidates: the "A" crossbar as an interval tick (a small upward extension or stepped cut at the crossbar); the "cc" pair as echoed layers with a subtle offset suggesting accumulation; the "e" terminal as a small geometric accent reading as a recurring interval. The motif should survive at small sizes — at 16px, the integration dissolves gracefully rather than creating visual noise.
+
+**Avoid:** Motifs that interrupt the visual flow of reading the word (legibility is the baseline); motifs applied to all letters simultaneously (fragmented, not integrated); custom letterform proportions that look broken at body text sizes rather than intentional at logo sizes. The typemark is a logo, not a display font — design for the mark context.
+*[DEFERRED: Phase 181 screenshot pipeline — legibility at 16px not asserted here]*
 
 ---
 
 ## §10 Voice & Microcopy
 
-*(Authored in Plan 3)*
+### 10.1 Seed Assessment
+
+The seed's voice section (section 5 of `prompts/accrue-brand-book.md`) provides:
+
+- **Brand personality:** Measured, Exact, Native, Durable. Clear, well-chosen adjectives with no overlap or contradiction.
+- **Voice characteristics:** direct, calm, precise, practical, literate, generous. Six adjectives with consistent register.
+- **Avoidance list:** hype, sales language, consumer-finance wording, "monetize fast" language, "big aspirational platform talk."
+- **Good/bad example pairs:** four good examples and four bad examples. Immediately usable; the contrast is stark and unambiguous.
+- **Memorable direction:** "The voice should sound like a maintainer you trust." — this is an effective identity anchor.
+
+**Present and strong:** personality adjectives, voice characteristics, avoidance list, concrete examples, identity anchor phrase.
+
+**Missing:** canonical copy blocks for the primary surfaces (GitHub repo description, Hex.pm listing, HexDocs landing, README hero, social card tagline). The voice principles are clear; the voice expressions are not yet authored. Phase 185 resolves this (GAP-S3).
+
+### 10.2 Voice Adjectives
+
+**Primary adjectives (locked):** measured, exact, native, durable.
+
+These are the four brand-personality adjectives from the seed. They represent a coherent cluster: "measured" and "exact" are precision signals; "native" and "durable" are ecosystem and longevity signals. No redundancy; no contradiction. Lock in BRAND-DNA.md §Voice.
+
+**Voice characteristics (do-list):** direct, calm, precise, practical, literate, generous.
+
+These six characteristics describe how the adjectives manifest in writing. "Direct" + "precise" + "practical" cover clarity. "Calm" covers tone. "Literate" + "generous" cover depth and attitude toward the reader.
+
+### 10.3 Do/Don't Pairs
+
+Three do/don't pairs locked as concrete voice values:
+
+**Pair 1 — Description register:**
+- Do: "Accrue models subscription billing as a first-class concern in your Phoenix application."
+- Don't: "Supercharge your revenue engine with Accrue's powerful billing platform."
+
+The "do" example is a plain declarative sentence about what the library does. The "don't" is hype — verbs ("supercharge"), superlatives ("powerful"), and product-category inflation ("platform") that misrepresent a library as a commercial service.
+
+**Pair 2 — Technical precision:**
+- Do: "Webhook events are persisted before processing and retried via Oban — no lost events."
+- Don't: "Reliable, enterprise-grade webhook handling you can count on."
+
+The "do" example names the mechanism (persist before process, Oban). The "don't" uses reliability as a vague assertion with no mechanism — the "enterprise-grade" qualifier is consumer-finance register.
+
+**Pair 3 — Error/state messaging:**
+- Do: "Invoice payment failed. See `Accrue.Billing.retry_payment/2` for retry options."
+- Don't: "Oops! Something went wrong with this payment."
+
+The "do" example names the state and provides a concrete code pointer. The "don't" uses consumer-product casual register ("Oops!") inappropriate for a backend billing library; developers need the specific API reference, not reassurance.
+
+### 10.4 Tagline Assessment
+
+**Tagline:** "Billing state, modeled clearly."
+
+**Clarity score: 4/5.** The phrase is immediately parseable. "Billing state" is the domain; "modeled clearly" is the value proposition. No jargon; no ambiguity.
+
+**Distinctiveness score: 4/5.** The phrase contains "modeled" — a rare word in billing product copy, but immediately meaningful to Ecto/Phoenix developers who think in terms of Ecto schemas and domain modeling. This is the right ecosystem signal.
+
+**Dev-tooling register fit: 5/5.** No hype verbs, no aspirational language, no consumer-finance connotations. The register is neutral-precise, matching the seed's "measured, exact" personality.
+
+**Verdict: KEEP** for headline/hero contexts. Specific usage: README hero headline, social card tagline, HexDocs landing hero. Short-form "Billing for Elixir apps" is the scannable variant for GitHub description field and Hex.pm listing where character limits and context-switch speed matter more than resonance.
+
+### 10.5 Surface-to-Tagline Mapping
+
+| Surface | Use | Rationale |
+|---------|-----|-----------|
+| README hero headline | "Billing state, modeled clearly." | Full impact version; reader is already on the repo page |
+| Social card (1200×630) | "Billing state, modeled clearly." | Wordmark + headline; dark background |
+| HexDocs landing hero | "Billing state, modeled clearly." | Same reasoning as README |
+| GitHub repo description | "Billing for Elixir apps" | 255-char limit; one-line scan context; ecosystem SEO keyword density |
+| Hex.pm package description | Starts with "Billing for Elixir apps, ..." | Short-form anchor + one longer sentence |
+| Social card (light/alt) | "Billing state, modeled clearly." | Second variant; same wording |
+| Conference slide title | "Billing state, modeled clearly." | Resonance over scannability |
+
+### 10.6 Phase 185 Gap
+
+The seed lacks ready-to-paste copy blocks for:
+- GitHub repo description (≤255 chars, with "Elixir billing library" qualifier)
+- Hex.pm description (≤300 chars, keyword-optimized)
+- HexDocs landing paragraph (3–5 sentences)
+- README hero block (headline + subhead + 1-sentence positioning)
+- Landing-page section copy (hero → problem → solution → install → benefits → comparison → CTAs)
+- Release-note and changelog voice template
+- Error/empty/success-state microcopy examples
+
+Phase 185 authors all of these. This section's assessment provides the seed input for Phase 185 to avoid re-litigating voice decisions already made here.
 
 ---
 
 ## §11 Landing/Docs Blueprint
 
-*(Authored in Plan 3)*
+This section specifies the content architecture for Accrue's adopter-facing copy surfaces. It is a structural specification, not authored copy — Phase 185 authors the copy from this specification.
+
+### 11.1 GitHub Repository Metadata
+
+| Field | Specification |
+|-------|--------------|
+| Repository description | ≤255 chars. Must include "Elixir billing library" (D-03 tactic 1). Canonical form: "Billing for Elixir apps — subscriptions, invoices, webhooks, and billing state modeled as first-class Ecto concerns. Phoenix-idiomatic." |
+| Repository topics | elixir, phoenix, billing, subscriptions, stripe, ecto, billing-library, saas, webhooks, invoices |
+| Social preview | 1200×630 dark variant; Accrue wordmark + "Billing state, modeled clearly." tagline |
+
+### 11.2 Hex.pm Package Description
+
+**Character limit:** ~300 chars.
+**Required elements:** "Elixir billing library" keyword, positioning against stripity_stripe (addresses adopter migration context), Oban + Swoosh mention (ecosystem fit signal), batteries-included signal.
+**Canonical structure:** [short descriptor]. [mechanism sentence]. [ecosystem signal]. [link or note].
+Phase 185 authors the final copy from this structure.
+
+### 11.3 HexDocs Landing Paragraph
+
+**Target length:** 3–5 sentences.
+**Structure:** (1) positioning sentence — what Accrue is; (2) contrast sentence — what problem it solves vs. direct Stripe calls; (3) key capabilities sentence (subscriptions, invoices, webhooks, dunning, entitlements); (4) optional: ecosystem integration sentence (Oban, Swoosh, chromic_pdf, LiveView posture).
+Phase 185 authors the final copy.
+
+### 11.4 README Hero Block
+
+**Structure:**
+1. **Headline** — "Billing state, modeled clearly."
+2. **Subhead** — 1 sentence: positioning statement with capabilities enumeration
+3. **Quick-start code snippet frame** — a 5–8 line Elixir example showing the install line + a representative call (subscribe, create customer, or handle webhook)
+4. **5 key-benefits line** — a concise list: idiomatic Ecto domain model; batteries-included (invoices, dunning, entitlements, PDF, email); production-grade Oban async; tamper-evident audit ledger; zero breaking changes through v1.x
+
+Phase 185 authors the final copy. The code snippet frame content is locked to public API calls already in the library.
+
+### 11.5 Landing-Page Section Sequence
+
+For a future accrue.run or docs landing page — not a committed artifact yet, but specified here so Phase 185 knows the content scope.
+
+| # | Section | What it communicates |
+|---|---------|---------------------|
+| 1 | Hero | Positioning: "Billing state, modeled clearly." + "Billing for Elixir apps" subhead |
+| 2 | Problem | The pain: direct Stripe calls leave billing state scattered across webhook glue; ad hoc schemas drift; no audit trail |
+| 3 | Solution | The Accrue model: customers, subscriptions, invoices, webhook events as first-class Ecto schemas; lifecycle events in an append-only ledger |
+| 4 | Quick install | `mix.exs` dep + 3-command bootstrap (`mix accrue.install`, `mix ecto.migrate`, point to Stripe keys) |
+| 5 | 5 key benefits | Idiomatic Ecto; batteries-included; Oban-backed async; audit ledger; zero breaking changes through v1.x |
+| 6 | Comparison | Why not stripity_stripe or Bling: Accrue is a billing domain model, not an API wrapper; contrast with prior-art gaps |
+| 7 | CTAs | Hex.pm install badge + link; HexDocs link; GitHub link |
+
+Phase 185 authors copy for all sections from this specification.
 
 ---
 
 ## §12 Repo Artifact Plan
 
-*(Authored in Plan 3)*
+### 12.1 Committed Artifact Targets
+
+The `brandbook/` directory at repo root is the Phase 186 target. Expected layout (from v1.52 design source):
+
+```
+brandbook/
+  README.md                  # index + usage rules + provenance/license notes
+  index.html                 # standalone HTML brand book
+  LICENSE-FONTS.txt          # OFL 1.1 + Geist provenance note
+  logo/
+    logo-primary.svg         # mark + close-set logotype, no subtitle
+    logo-typemark.svg        # fully-integrated type treatment
+    logo-mark.svg            # icon-only
+    logo-monochrome.svg      # black on white
+    logo-monochrome-inverse.svg  # white on black
+    logo-dark.svg            # optimized for Ink/dark surfaces
+    logo-light.svg           # optimized for Paper/light surfaces
+    logo-with-subtitle.svg   # with-subtitle variant
+    favicon.svg              # 32×32 icon-only
+    favicon.ico              # 16×16 multi-resolution
+    favicon-192.png          # web app manifest
+    favicon-512.png          # web app manifest
+    social-card.svg          # 1200×630 dark variant
+    social-card.png          # 1200×630 PNG (only required binary)
+    clearspace-spec.svg      # minimum clear zone specification
+  tokens/
+    tokens.json              # W3C DTCG format
+    tokens.css               # CSS custom properties
+  examples/
+    palette.svg              # palette specimen
+    typography.svg           # type scale specimen
+    readme-header.svg        # mocked README header
+```
+
+### 12.2 Phase-to-Artifact Mapping
+
+| Artifact | Authoring Phase |
+|----------|----------------|
+| `brandbook/` directory structure + `README.md` | Phase 186 |
+| `logo/logo-primary.svg` and full logo suite | Phase 183 |
+| `tokens/tokens.json` and `tokens.css` | Phase 184 |
+| `examples/palette.svg`, `examples/typography.svg` | Phase 184 |
+| `examples/readme-header.svg` | Phase 185 or 186 |
+| `index.html` | Phase 186 |
+| `LICENSE-FONTS.txt` | Phase 183 (alongside logo finals) |
+
+Exploration artifacts (galleries, rejected candidates, `TOURNAMENT.md`, round-1 and round-2 gallery HTML files) stay in `.planning/milestones/v1.52-phases/` and are never committed to `brandbook/`.
+
+### 12.3 Guardrails
+
+1. **No `accrue_admin` token changes:** `accrue_admin/assets/css/theme.css` is READ-ONLY this milestone. The brand-layer `tokens.css` documents the brand layer; Phase 184 adds `--accrue-*` raw tokens in a separate file. Zero `--ax-*` changes.
+2. **Exploration stays in `.planning/`:** All SVG exploration, rejected candidates, and tournament artifacts live in `.planning/milestones/v1.52-phases/` — never committed to `brandbook/`.
+3. **Size budget:** `brandbook/` must be ≤ 2 MB at Phase 186 final gate (`du -sh brandbook/ <= 2MB`). SVG-first, lean on binaries; only `social-card.png` is a required binary.
+4. **Font licensing:** Geist is OFL 1.1 (Vercel). Phase 183 commits a `LICENSE-FONTS.txt` with the full OFL 1.1 text and provenance note. Logo finals are outlined paths — no `<text>` or `@font-face` dependency in SVG finals.
 
 ---
 
 ## §13 Prioritized Actions
 
-*(Authored in Plan 3)*
+Actions are numbered in execution-dependency order. Each action maps to a phase, with its dependency, and expected output.
+
+### Action 1 — Ratify audit verdicts, BRAND-DNA.md, and logo brief (Phase 180 Plan 4)
+
+**Dependency:** Plans 1–3 of Phase 180 (this audit).
+**Phase:** 180 Plan 4.
+**Action:** Present the complete audit to the user at the D-07 single-checkpoint sitting. Accept/reject each contested item (REWORK/ADD verdicts if any; BRAND-DNA.md as whole document; logo brief as whole document). KEEP/TIGHTEN verdicts are batch-approved.
+**Expected output:** Ratified BRAND-AUDIT.md (status: ratified), ratified BRAND-DNA.md, ratified logo-brief.md. If any verdict flips, DNA and brief are revised inline in the same sitting.
+
+### Action 2 — Build SVG pipeline and run tournament round 1 (Phase 181)
+
+**Dependency:** Action 1 (ratified logo brief with 4 hard constraints).
+**Phase:** 181.
+**Action:** Build the Geist-outline Node harness (opentype.js → exact letterform paths), automated pre-gate lints (valid SVG, no-rect-background check, lockup gap ratio, 16px legibility screenshot, no subtitle in main lockup), gallery renderer. Generate 12–16 concepts across 4 directions. Present round-1 gallery to user.
+**Expected output:** `round-1-gallery.html` with all candidates in context matrix; `TOURNAMENT.md` ledger with user's picks, kills, and keep/change notes.
+
+### Action 3 — Converge tournament to locked winner (Phase 182)
+
+**Dependency:** Action 2 (round-1 picks from user).
+**Phase:** 182 (1 plan per round, elastic, default cap 3 rounds).
+**Action:** Iterative refinement of winning candidates. Each round presents 6–9 variants. Constraints are monotonic — once recorded in TOURNAMENT.md, no later round violates them. Loop until user settles on a winner.
+**Expected output:** Locked winner — mark + lockup geometry frozen in `TOURNAMENT.md`.
+
+### Action 4 — Produce full logo system from locked winner (Phase 183)
+
+**Dependency:** Action 3 (locked winner).
+**Phase:** 183.
+**Action:** Mechanically derive all derived-suite artifacts (primary lockup, integrated typemark, icon-only mark, monochrome pos/neg, dark/light versions, favicon suite, social card, with-subtitle variant, clearspace spec sheet). All finals are outlined paths, svgo-optimized, with accessible `<title>`/`<desc>`.
+**Expected output:** Complete `brandbook/logo/` directory committed to repo.
+
+### Action 5 — Define design token vocabulary (Phase 184)
+
+**Dependency:** Action 1 (ratified palette + usage rules from BRAND-DNA.md and §7 of this audit).
+**Phase:** 184 (parallel with Phase 182 tournament rounds — depends only on Phase 180).
+**Action:** Author `brandbook/tokens/tokens.json` (W3C DTCG format) and `tokens.css` (seven `--accrue-*` raw tokens + semantic roles + typography + spacing + radius + focus-ring + state tokens). Palette + typography specimen pages. Zero changes to `accrue_admin/assets/css/theme.css`.
+**Expected output:** `brandbook/tokens/tokens.json`, `brandbook/tokens/tokens.css`, `brandbook/examples/palette.svg`, `brandbook/examples/typography.svg`.
+
+### Action 6 — Author canonical voice and copy blocks (Phase 185)
+
+**Dependency:** Action 1 (ratified voice system from BRAND-DNA.md §Voice and §10 of this audit).
+**Phase:** 185 (parallel with Phase 182 tournament rounds — depends only on Phase 180).
+**Action:** Author ready-to-paste copy blocks for all primary surfaces (GitHub description, Hex.pm listing, HexDocs landing, README hero, landing-page sections, release-note template, microcopy examples). Also update GitHub repo description and Hex.pm metadata with "Elixir billing library" qualifier (GAP-M3 / Rec 6).
+**Expected output:** `brandbook/voice/copy-blocks.md`; updated repo metadata.
+
+### Action 7 — Assemble HTML brand book and pass quality gate (Phase 186)
+
+**Dependency:** Actions 4, 5, and 6 (logo suite, tokens, copy — all three must be complete).
+**Phase:** 186.
+**Action:** Assemble `brandbook/index.html` (standalone static page, no server, no build step, no JS framework; inline CSS from Phase 184 tokens; all SVGs inlined). Verify against §14 quality-gate checklist. Run final UAT.
+**Expected output:** `brandbook/index.html`; `brandbook/README.md`; quality gate all 8 items passing.
 
 ---
 
 ## §14 Final Quality Gate
 
-*(Authored in Plan 3)*
+Phase 186 must pass all 8 gate dimensions in `quality-gate-checklist.md` before the v1.52 milestone closes. The checklist is authored here (Phase 180) and consumed as a success criterion by BOOK-02 (Phase 186).
+
+### Gate Dimensions
+
+| # | Gate | Phase that satisfies it | Evidence |
+|---|------|------------------------|----------|
+| 1 | Designer-buildable: each brandbook section could be rebuilt from its token/artifact inputs alone | Phase 186 (assembly) + Phases 183–185 (inputs complete) | Phase 186 reviewer can walk each section and trace every element to a committed artifact |
+| 2 | Engineer-implementable: every CSS token has a documented role + usage rule; no magic values | Phase 184 (tokens) | `tokens.css` role+rule table; no undocumented hex values |
+| 3 | Dark-mode: all color surfaces pass WCAG AA-large (≥ 3:1) in dark theme; accent usage rules honored | Phases 183 (logo on dark surfaces) and 184 (tokens) | Contrast computations for dark-mode token pairings; accent usage rules from BRAND-DNA.md §Palette |
+| 4 | Small-size: primary lockup readable at 32px; icon mark recognizable at 16px (screenshot evidence) | Phase 181 (screenshot pipeline) and 183 (final sizes) | Screenshot artifacts from Phase 181 pre-gate pipeline; Phase 183 size-matrix |
+| 5 | Specific-to-Accrue: no element of the identity could plausibly be mistaken for another billing or fintech brand | Phase 182 (tournament convergence verdict) | TOURNAMENT.md distinctiveness notes; Phase 182 final verdict |
+| 6 | No-thrash: zero changes to `accrue_admin/assets/css/theme.css`; zero new billing primitives; no breaking changes | Standing invariant from §12 guardrail 1; enforced by CI | `git diff main..v1.52 -- accrue_admin/assets/css/theme.css` exits clean |
+| 7 | Size budget: `du -sh brandbook/` ≤ 2 MB | Phase 186 (final assembly gate) | `du -sh brandbook/` output in Phase 186 verification |
+| 8 | Standalone: `brandbook/index.html` opens via `file://` with no server, no build step, no JS framework | Phase 186 (assembly) | Manual verification: open `file://path/to/brandbook/index.html` in browser with no server running |
+
+### Gate Sign-Off
+
+Gate authored Phase 180. Consumed by BOOK-02 success criterion (Phase 186).
+
+The quality-gate checklist (`quality-gate-checklist.md`, co-authored in Phase 180 Plan 3) is the binding gate document. Phase 186 cannot close the v1.52 milestone until all 8 checklist items are checked.
