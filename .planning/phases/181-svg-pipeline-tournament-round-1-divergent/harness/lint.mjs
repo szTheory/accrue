@@ -256,17 +256,16 @@ function edgeDensity(png) {
  * Requires two PNG files: 16px render and 32px render of the same candidate.
  *
  * Thresholds (D-07 — tuned empirically):
- *   - Contrast ratio >= 1.75 (icon legibility threshold, measured against darkest anti-aliased
- *     pixel; WCAG AA-large 3:1 is too strict for thin parametric marks at 16px — anti-aliasing
- *     reduces darkest pixel luminance to ~0.22 for most candidates regardless of fill color)
+ *   - Contrast ratio >= 3.0 (WCAG AA-large threshold; re-instated after coordinate-space
+ *     bugs caused all candidates to render as "a few dots" — the 1.75 tuning was based
+ *     on broken renders and is now invalidated. Post-fix renders produce full glyph+mark
+ *     ink, so CR 3.0 is achievable for all well-formed candidates.)
  *   - Edge density ratio (16px / 32px) >= 0.35 (structure must survive downscale)
  *
- * Tuning note: The threshold was lowered from 3.0 to 1.75 during Plan 06 implementation
- * after empirical measurement showed all parametric mark candidates produced darkest-pixel
- * CR of 1.72–3.76 due to thin-stroke anti-aliasing at 16px. 3.0 culled 14/16 candidates
- * (including visually legible marks), making the gallery criterion of ≥12 impossible.
- * Empirical CR distribution: [1.72, 1.72, 1.78, 1.82, 1.96, 2.03..3.76]. 1.75 correctly
- * culls the truly thin/faint marks (CR ≤ 1.72 — A1, A2, C3) while retaining all others.
+ * Threshold history: lowered 3.0 → 1.75 during Plan 06 to explain "thin marks" that were
+ * actually near-invisible due to the coordinate-space bugs. Reverted to 3.0 in post-completion
+ * fix once the root cause was identified and fixed. If the re-run still culls a large fraction
+ * at CR 3.0, report numbers honestly — do NOT silently re-tune again.
  *
  * @param {string} png16Path  path to 16px PNG
  * @param {string} png32Path  path to 32px PNG
@@ -279,8 +278,8 @@ function lint16pxLegibility(png16Path, png32Path) {
   const ed16 = edgeDensity(png16);
   const ed32 = edgeDensity(png32);
   const edRatio = ed32 > 0 ? ed16 / ed32 : 1;
-  // Threshold: 1.75 contrast ratio (empirically tuned — see jsdoc above)
-  const CR_THRESHOLD = 1.75;
+  // Threshold: 3.0 contrast ratio (WCAG AA-large; reverted from 1.75 — see jsdoc above)
+  const CR_THRESHOLD = 3.0;
   const pass = cr >= CR_THRESHOLD && edRatio >= 0.35;
   let reason;
   if (cr < CR_THRESHOLD) {

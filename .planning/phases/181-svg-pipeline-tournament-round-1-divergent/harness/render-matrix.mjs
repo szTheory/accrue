@@ -19,6 +19,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { chromium } from "playwright";
+import { PNG } from "pngjs";
 import { lint16pxLegibility } from "./lint.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -51,9 +52,42 @@ const TILES = [
   { id: "mono",          w: 320,  h: 80,  bg: "#FAFBFC", dpr: 1, mono: true  },
 ];
 
+/**
+ * Minimum fraction of "dark" pixels in the paper-light or 32px-favicon tile.
+ * A render with < 0.5% dark coverage is considered blank (coordinate-space bug
+ * or invisible mark). Distinct from the 16px legibility cull — reported as
+ * "blank-render" rejection reason so it is unambiguous in diagnostics.
+ */
+const BLANK_RENDER_MIN_DARK_COVERAGE = 0.005; // 0.5%
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Fraction of pixels that are "dark" (luminance < 0.5) in a PNG file.
+ * Used as blank-render guard: a near-empty render indicates the SVG ink is
+ * outside the viewBox (coordinate-space bug) rather than a legibility issue.
+ *
+ * @param {string} pngPath — path to the PNG file
+ * @returns {number} fraction of dark pixels (0.0–1.0)
+ */
+function darkPixelCoverage(pngPath) {
+  const png = PNG.sync.read(fs.readFileSync(pngPath));
+  const { data, width, height } = png;
+  let darkCount = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    const a = data[i + 3];
+    if (a < 64) continue; // skip near-transparent pixels
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    // Simple luminance threshold (no need for linear conversion here)
+    const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    if (lum < 0.5) darkCount++;
+  }
+  return darkCount / (width * height);
+}
 
 /**
  * Build a minimal HTML wrapper for an SVG in a tile context.
@@ -183,7 +217,35 @@ async function main() {
           await renderTile(browser, svgContent, tile, id);
         }
 
-        // Step 3 — 16px legibility lint (unless smoke mode)
+        // Step 3a — Blank-render guard (always, even in smoke mode)
+        // If the paper-light tile has < 0.5% dark pixels, the SVG ink is almost
+        // certainly outside the viewBox (coordinate-space bug). Reject as
+        // "blank-render" — distinct from the legibility cull — before further checks.
+        {
+          const paperLightPath = path.join(SCREENSHOTS_DIR, id, "paper-light.png");
+          if (fs.existsSync(paperLightPath)) {
+            const coverage = darkPixelCoverage(paperLightPath);
+            if (coverage < BLANK_RENDER_MIN_DARK_COVERAGE) {
+              console.error(
+                `[render] BLANK-RENDER ${id}: paper-light dark coverage=${(coverage * 100).toFixed(3)}% ` +
+                  `< ${(BLANK_RENDER_MIN_DARK_COVERAGE * 100).toFixed(1)}% threshold — SVG ink is outside viewBox`
+              );
+              const rejectedSvgPath = path.join(REJECTED_DIR, `${id}.svg`);
+              fs.copyFileSync(svgPath, rejectedSvgPath);
+              const reasonText = [
+                `Lint: blank-render`,
+                `Reason: paper-light dark coverage=${(coverage * 100).toFixed(3)}% < ${(BLANK_RENDER_MIN_DARK_COVERAGE * 100).toFixed(1)}% (SVG ink outside viewBox)`,
+                `Culled: ${new Date().toISOString()}`,
+              ].join("\n");
+              fs.writeFileSync(path.join(REJECTED_DIR, `${id}.reason.txt`), reasonText + "\n");
+              culledIds.add(id);
+              culled16px++; // reuse counter for tracking; also logged as blank-render
+              continue;
+            }
+          }
+        }
+
+        // Step 3b — 16px legibility lint (unless smoke mode)
         if (!SMOKE) {
           const path16 = path.join(SCREENSHOTS_DIR, id, "16px-favicon.png");
           const path32 = path.join(SCREENSHOTS_DIR, id, "32px-favicon.png");
