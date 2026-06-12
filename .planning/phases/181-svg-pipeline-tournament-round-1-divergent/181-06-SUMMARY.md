@@ -145,27 +145,43 @@ None — all functionality is fully implemented. The gallery renders correctly a
 
 ## Post-completion fix
 
+### Fix 1 — Direction-balanced gallery-size cull (commit `4b1bc48c`)
+
 **Defect:** The gallery-size cull in `generate.mjs` Step 6 used `passing.splice(TARGET_GALLERY_SIZE.max)` — a simple insertion-order truncation. Because candidates are appended A→B→C→D, the 3 excess candidates (19 raw - 16 cap) were always the last 3 in the array: D2, D3, D4. This left Direction D with only 1 candidate (D1), violating the D-05 per-direction floor of ≥3. The D-05 floor check in Step 5 fires only for lint failures, not for the Step 6 size cap — so the floor was bypassed entirely for gallery-size culls.
 
-**Fix:** Replaced insertion-order splice with a direction-balanced round-robin cull. The new algorithm:
-1. Builds per-direction buckets from the current `passing` array.
-2. Finds the direction with the most candidates that still has `count > MIN_PER_DIRECTION (3)`.
-3. Removes the last candidate from that direction's bucket.
-4. Repeats until the target size is reached, or halts with a warning if all directions are at/below the floor.
-
-This makes the gallery-size cull respect the D-05 floor as a hard lower bound. Committed in `4b1bc48c`.
+**Fix:** Replaced insertion-order splice with a direction-balanced round-robin cull. The new algorithm builds per-direction buckets, finds the direction with the most candidates still above MIN_PER_DIRECTION (3), and removes the last candidate from that bucket — repeating until the target size is reached. This makes the gallery-size cull respect the D-05 floor as a hard lower bound.
 
 **Pipeline re-run result (2026-06-12):**
 
-After the fix, `generate.mjs` full run produces **16 candidates: A:4, B:4, C:4, D:4** — the cull correctly removes A5, B5, C5 (last from 5-deep directions) instead of D2/D3/D4.
-
-`render-matrix.mjs` then applies the 16px legibility lint (CR threshold 1.75 — unchanged per constraints):
-- **Culled:** A1, A2 (CR=1.72) — same as prior run
-- **Culled:** C3 (CR=1.72) — same as prior run
-- **Culled:** D2, D3 (CR=1.72) — newly exposed; these Direction D typemark variants are thin-stroke and fail 16px legibility at the same CR as A1/A2/C3
-
-**Final gallery: 11 candidates — A:2, B:4, C:3, D:2.**
-
-D-05 floor (≥3 per direction) is satisfied after the gallery-size cull step (all directions at 4), but is still violated for A and D after the 16px legibility lint. D4 passes legibility (it differs from D2/D3 in weight/layout) and remains in the gallery. The CR threshold (1.75) was not changed per task constraints — the correct fix for the remaining A/D floor violation is to add additional Direction A/D configs with heavier strokes that render legibly at 16px, which is a planner-level decision for Phase 182 divergence continuation.
+`generate.mjs` produced **16 candidates: A:4, B:4, C:4, D:4** — cull removed A5, B5, C5 (last from 5-deep directions) instead of D2/D3/D4. `render-matrix.mjs` then culled A1, A2, C3, D2, D3 by 16px legibility (CR=1.72 < 1.75) — **final gallery: 11 candidates (A:2, B:4, C:3, D:2).**
 
 **Commits:** `4b1bc48c` (generate.mjs fix), `392fbec3` (regenerated artifacts)
+
+---
+
+### Fix 2 — Gallery cap moved after legibility cull (commit `654ceb02`)
+
+**Defect (root cause):** The gallery-size cap (16) was enforced by `generate.mjs` BEFORE `render-matrix.mjs` ran legibility culling. This discarded legible candidates (A5, B5, C5) for no reason — only 5 of 19 raw candidates fail legibility, leaving 14 legible candidates, which is already under the 16-cap. The pre-legibility size cull threw away 3 legible candidates and pushed the final count below D-04's 12–16 range.
+
+**Fix:**
+- `generate.mjs`: Removed Step 6 gallery-size cull entirely. All 19 pre-gate-passing candidates now flow downstream to `render-matrix.mjs` without any size cap at generate time.
+- `render-matrix.mjs`: Added Step 5 — direction-balanced gallery-size cull (reusing the same round-robin algorithm from Fix 1) that runs AFTER the legibility culling step. The cap only fires when post-legibility survivors exceed 16. Added Step 6 — per-direction floor warning that logs a message when any direction drops below MIN_PER_DIRECTION=3 after legibility culling.
+
+**Why this is correct:** The cap's purpose is to keep the gallery reviewer-manageable (≤16 tiles). It should never discard a legible candidate just to hit that ceiling; it should only trim if there are more legible candidates than needed.
+
+**Pipeline re-run result (2026-06-12):**
+
+`generate.mjs`: **19 candidates pass pre-gate lints (0 culled)** — no size cull.
+
+`render-matrix.mjs` applies 16px legibility lint (CR threshold 1.75 — unchanged):
+- Culled: A1, A2, C3, D2, D3 (CR=1.72 < 1.75)
+- Remaining: 14 candidates (14 < 16 cap → gallery-size cull does NOT fire)
+- Direction D below-floor warning fires: `Direction D has 2 candidates (D-05 floor is 3) — too few legible configs at 16px; add heavier-stroke variants to fix in Phase 182`
+
+**Final gallery: 14 candidates — A:3, B:5, C:4, D:2.**
+
+`rejected/` contains exactly 5 legibility failures (A1, A2, C3, D2, D3) with correct reason sidecars. No gallery-size-cull rejections remain.
+
+**Direction D below-floor condition (2 < 3) is a known, accepted limitation:** D2 and D3 are thin-stroke typemark variants that fail 16px legibility at the same CR as A1/A2/C3. The correct fix is to add heavier-stroke Direction D configs — a planner-level decision for Phase 182.
+
+**Commits:** `654ceb02` (cull-reorder code), `d93ee0ca` (regenerated artifacts)
