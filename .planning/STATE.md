@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
 status: executing
-last_updated: "2026-06-12T01:28:20.873Z"
+last_updated: "2026-06-12T01:35:24.823Z"
 last_activity: 2026-06-12
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 ## Current Position
 
 Phase: 180 (brand-audit-dna-lock) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-06-12
 
@@ -162,6 +162,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: motion.md is the authoritative justification record for Phase 177 — no entry means no animation permitted; all 9 surfaces catalogued with enter/exit asymmetry
 - [Phase ?]: SIGN-OFF.md photographic gate uses [PENDING] placeholders; before-column sourced from 176-SCORECARD after-scores (21/21 ≥2)
 - [Phase ?]: contrast.js uses WCAG 2.0 normative threshold 0.03928; 21-pair table committed as canonical evidence for all Phase 180 palette audit verdicts
+- **2026-06-12 (180-02):** All palette verdicts in BRAND-AUDIT.md §1–§8 are TIGHTEN (usage-rule restrictions) — no REWORK; no hex changes proposed; --accrue-fog and --accrue-cobalt are brand-only tokens with no current --ax-* semantic binding; §8 four hard logo constraints authored verbatim with four Phase 181 conceptual directions
 
 ### Pending Todos
 
@@ -199,6 +200,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 178 P02 | 12 | 2 tasks | 2 files |
 | Phase 179 P03 | 15min | 2 tasks | 2 files |
 | Phase 180 P01 | 2m | 2 tasks | 2 files |
+| Phase 180 P02 | 5m | 2 tasks | 1 files |
 
 ### Milestone Intake Rules
 
@@ -223,9 +225,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-12T01:28:20.868Z
-Stopped at: Completed 180-01 WCAG contrast script and evidence table
-Resume file: .planning/phases/180-brand-audit-dna-lock/180-02-PLAN.md
+Last session: 2026-06-12T01:35:00Z
+Stopped at: Completed 180-02 BRAND-AUDIT.md §1–§8
+Resume file: .planning/phases/180-brand-audit-dna-lock/180-03-PLAN.md
 
 ## Operator Next Steps
 

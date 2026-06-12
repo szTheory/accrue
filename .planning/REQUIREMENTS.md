@@ -36,7 +36,7 @@ cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 
 ### Brand Audit & DNA (AUD) — Phase 180
 
-- [ ] **AUD-01**: Maintainer can read a 14-section pressure-test audit of `prompts/accrue-brand-book.md` where every verdict is tagged KEEP/TIGHTEN/REWORK/ADD/REMOVE with a cited justification — no churn without a cited failure.
+- [x] **AUD-01**: Maintainer can read a 14-section pressure-test audit of `prompts/accrue-brand-book.md` where every verdict is tagged KEEP/TIGHTEN/REWORK/ADD/REMOVE with a cited justification — no churn without a cited failure.
 - [ ] **AUD-02**: Maintainer ratifies a locked `BRAND-DNA.md` and a binding logo design brief (including the 4 hard logo constraints) at an explicit checkpoint before any logo work begins.
 - [x] **AUD-03**: Any proposed palette or font change cites a concrete failure (contrast, distinctiveness, 16px rendering) and is user-ratified at the audit checkpoint.
 
@@ -69,7 +69,7 @@ Filled by the roadmap. Coverage target: 14/14, each REQ-ID mapped to exactly one
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUD-01 | Phase 180 | Pending |
+| AUD-01 | Phase 180 | Complete |
 | AUD-02 | Phase 180 | Pending |
 | AUD-03 | Phase 180 | Complete |
 | LOGO-01 | Phase 181 | Pending |
