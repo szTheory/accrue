@@ -1,0 +1,23 @@
+{
+  "id": "D4",
+  "direction": "D",
+  "config": {
+    "id": "D4",
+    "motif": "all-three",
+    "markIsTypemark": true,
+    "echoOffset": {
+      "dx": 3,
+      "dy": 3
+    },
+    "echoOpacity": 0.3,
+    "stepDepth": 24,
+    "stepWidth": 56,
+    "stepOffset": 0.45,
+    "fillLevel": 0.5,
+    "fillColor": "#E9EEF2",
+    "skipGapRatio": true,
+    "rationale": "all three motifs combined: cc echo + stepped e crossbar + u filling interval — maximum brand-motif density in a single typemark"
+  },
+  "rationale": "all three motifs combined: cc echo + stepped e crossbar + u filling interval — maximum brand-motif density in a single typemark",
+  "skipGapRatio": true
+}

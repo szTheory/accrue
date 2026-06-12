@@ -1,0 +1,16 @@
+{
+  "id": "D2",
+  "direction": "D",
+  "config": {
+    "id": "D2",
+    "motif": "stepped-e-crossbar",
+    "markIsTypemark": true,
+    "stepDepth": 28,
+    "stepWidth": 60,
+    "stepOffset": 0.45,
+    "skipGapRatio": true,
+    "rationale": "stepped e crossbar: the e's horizontal crossbar carries a staircase notch — interval and state-transition imagery built into the letterform"
+  },
+  "rationale": "stepped e crossbar: the e's horizontal crossbar carries a staircase notch — interval and state-transition imagery built into the letterform",
+  "skipGapRatio": true
+}

@@ -1,0 +1,15 @@
+{
+  "id": "D3",
+  "direction": "D",
+  "config": {
+    "id": "D3",
+    "motif": "u-filling-interval",
+    "markIsTypemark": true,
+    "fillLevel": 0.55,
+    "fillColor": "#E9EEF2",
+    "skipGapRatio": true,
+    "rationale": "u filling interval: the u counter reads as a vessel at 55% fill — accumulation/capacity metaphor without adding any separate mark element"
+  },
+  "rationale": "u filling interval: the u counter reads as a vessel at 55% fill — accumulation/capacity metaphor without adding any separate mark element",
+  "skipGapRatio": true
+}

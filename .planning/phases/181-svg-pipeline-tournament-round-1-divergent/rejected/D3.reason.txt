@@ -1,3 +1,4 @@
-Candidate: D3
-Lint failures: gallery-size-cull
-Culled: 2026-06-12T15:32:12.102Z
+Lint: 16px-legibility
+Reason: contrast ratio 1.72 < 1.75 (icon legibility threshold)
+Measured: {"contrastRatio":1.7217912272065163,"edgeDensityRatio":1}
+Culled: 2026-06-12T15:39:23.519Z
