@@ -523,6 +523,8 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 **v1.52 — Brand System** (see `.planning/REQUIREMENTS.md`). Categories: AUD (brand audit & DNA), LOGO (tournament + logo system), TOK (design tokens & specimens), COPY (voice/microcopy/marketing), BOOK (HTML brand book & quality gate). Mapped across Phases 180–186.
 
+Validated in Phase 180: AUD-01, AUD-02, AUD-03 — 14-section BRAND-AUDIT.md (status: ratified), locked BRAND-DNA.md, binding logo-brief.md, quality-gate-checklist.md, and committed WCAG contrast evidence (`artifacts/contrast-table.txt`). User ratified all verdicts at the D-07 checkpoint (ADD-6 flipped to KEEP); Phase 181 unblocked.
+
 ### Validated v1.51 (archived in `.planning/milestones/v1.51-REQUIREMENTS.md`; milestone shipped & archived 2026-06-04)
 
 Admin UI Depth Pass — 22/22 satisfied (DSY-01..03, IA-01..07, SCR-01..04, MOT-01..03, SEED-01..02, QA-01..03) across Phases 174–179.
@@ -599,4 +601,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-11 — opened milestone v1.52 (Brand System); v1.51 demoted to last shipped.*
+*Last updated: 2026-06-12 — Phase 180 complete: brand audit ratified, BRAND-DNA locked, logo brief binding (AUD-01..03 validated).*
