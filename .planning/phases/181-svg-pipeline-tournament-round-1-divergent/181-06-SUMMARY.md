@@ -140,6 +140,14 @@ None — all functionality is fully implemented. The gallery renders correctly a
 - Commits e6e2cc7c, 6b5e29fa exist in git log
 
 ---
+
+### Fix 4 — ink-dark tile renders light variant (commit `e91ca74a`)
+
+**Defect:** The ink-dark tile rendered each candidate's dark fill (`#181818`) directly on the dark background (`#111418`), producing a near-invisible dark-on-dark tile for every candidate — zero judging signal.
+
+**Fix:** Added `INK_DARK_COLOR_MAP` and `applyInkDarkColors()` to `render-matrix.mjs`. For the ink-dark tile only, a single-pass regex swaps colors before the SVG is written to the tile HTML: `#181818→#FAFBFC` (dark ink to paper), `#FAFBFC→#111418` (paper knockouts stay knockouts on dark bg), `#E9EEF2→#2A333C` (Direction D fog knockouts to dark mid-tone). All other tiles are unchanged. Regenerated 16 ink-dark PNGs; gallery composition unchanged: 16 candidates, A:4 B:4 C:4 D:4.
+
+---
 *Phase: 181-svg-pipeline-tournament-round-1-divergent*
 *Completed: 2026-06-12*
 
