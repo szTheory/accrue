@@ -1,0 +1,56 @@
+{"candidateId":"A3","dimension":"legibility-16px","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A3","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A3","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"three bars occupy roughly square footprint but text glyphs dominate the full lockup crop; mark alone is not always centered in avatar viewport","suggested_fix":"consider mark-only avatar variant"}
+{"candidateId":"A3","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A4","dimension":"legibility-16px","score":2,"pass":true,"defect":"6 bars at strokeWeight=1 and spacing=0.15 are thin and tightly packed; individual bars may blur into a grey block at 16px","suggested_fix":"favour this candidate at 32px and above; mark detail lost below that"}
+{"candidateId":"A4","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A4","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"dense 6-bar silhouette fills crop but is less immediately distinctive than 3-bar variants","suggested_fix":null}
+{"candidateId":"A4","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A5","dimension":"legibility-16px","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A5","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A5","dimension":"avatar-crop-integrity","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"A5","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B1","dimension":"legibility-16px","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B1","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B1","dimension":"avatar-crop-integrity","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B1","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B2","dimension":"legibility-16px","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B2","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B2","dimension":"avatar-crop-integrity","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B2","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B3","dimension":"legibility-16px","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B3","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B3","dimension":"avatar-crop-integrity","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B3","dimension":"brand-fit","score":2,"pass":true,"defect":"3 steps with wide rounded corners reads as generic progress-bar or loading indicator; risks overlap with common UI component language rather than a distinct brand mark","suggested_fix":"consider sharper corners or asymmetric proportions to increase distinctiveness"}
+{"candidateId":"B4","dimension":"legibility-16px","score":2,"pass":true,"defect":"6 steps at stepWidth=0.18 produce very fine columns (7.2px each); at 16px the columns may merge into a single featureless band","suggested_fix":"use at 32px+ only; below that visual weight is too fine"}
+{"candidateId":"B4","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B4","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"six fine columns at 16px in avatar crop produce a near-indistinct rectangular mass","suggested_fix":null}
+{"candidateId":"B4","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B5","dimension":"legibility-16px","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B5","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B5","dimension":"avatar-crop-integrity","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"B5","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C1","dimension":"legibility-16px","score":2,"pass":true,"defect":"3 arcs at strokeWidth=2 with staggered offset; at 16px the arcs are thin enough to lose individual ring distinctiveness and read as a noisy arc cluster","suggested_fix":"strokeWidth 2.5+ would improve ring visibility at favicon scale"}
+{"candidateId":"C1","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C1","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"three staggered arcs produce an open/unbalanced silhouette in a tight circle crop; mark reads as asymmetric noise rather than a coherent symbol","suggested_fix":"tighter radii spread or increased stroke weight would improve crop legibility"}
+{"candidateId":"C1","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C2","dimension":"legibility-16px","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C2","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C2","dimension":"avatar-crop-integrity","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C2","dimension":"brand-fit","score":2,"pass":true,"defect":"two concentric arcs with 270° sweep and no offset reads as a loading spinner or progress ring — very common UI metaphor; risks being read as a loading state rather than a brand mark","suggested_fix":"consider rotation offset or a third arc to differentiate from progress-circle tropes"}
+{"candidateId":"C4","dimension":"legibility-16px","score":2,"pass":true,"defect":"3 arcs at strokeWidth=2.5 with generous radii spread; the outermost arc occupies the full 40px bounding box while innermost is 6px radius — at 16px the inner arc may be invisible","suggested_fix":"reduce radiiSpread or increase inner arc radius for favicon scale"}
+{"candidateId":"C4","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C4","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"the wide radii spread means the inner arc may be too small to read in a 96×96 circle crop","suggested_fix":"tighten radiiSpread for avatar-crop context"}
+{"candidateId":"C4","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C5","dimension":"legibility-16px","score":2,"pass":true,"defect":"2 arcs at strokeWidth=2 with wide radii gap (radiiSpread=0.4); at 16px the inner arc's radius is very small (6px) and the stroke may not render visibly","suggested_fix":"increase strokeWidth to 2.5+ or reduce radiiSpread for favicon scale"}
+{"candidateId":"C5","dimension":"monochrome-survival","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"C5","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"two arcs with very wide gap; inner arc is small in the crop viewport","suggested_fix":null}
+{"candidateId":"C5","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"D1","dimension":"legibility-16px","score":2,"pass":true,"defect":"typemark is entire 'accrue' wordmark with cc-echo at opacity=0.35; at 16px the letterforms are below readable size and the echo effect merges with primary glyphs","suggested_fix":"Direction D candidates are lockup-only marks; 16px favicon should show mark-only variant; echo dx/dy=4 at favicon scale is imperceptible"}
+{"candidateId":"D1","dimension":"monochrome-survival","score":2,"pass":true,"defect":"cc-echo uses opacity=0.35 which produces a grey ghost; in monochrome this reduces to a lighter-grey duplicate that may lack sufficient contrast from background","suggested_fix":"use opacity >= 0.5 or switch to a stroked echo for better monochrome contrast"}
+{"candidateId":"D1","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"the full typemark 'accrue' in a circle crop results in very small letterforms and the echo effect is essentially invisible in a 96px diameter viewport","suggested_fix":"crop should show only the 'cc' portion for avatar use"}
+{"candidateId":"D1","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
+{"candidateId":"D4","dimension":"legibility-16px","score":2,"pass":true,"defect":"all-three motifs: cc echo + stepped-e crossbar + u fill-interval; at 16px the combined motif density makes the letterforms indistinct; stepDepth=24 and fillColor=#E9EEF2 (Fog) contribute low-contrast fill on light background","suggested_fix":"Fog fill (#E9EEF2) on Paper (#FAFBFC) background produces very low contrast at small sizes"}
+{"candidateId":"D4","dimension":"monochrome-survival","score":1,"pass":false,"defect":"fillColor=#E9EEF2 (Fog) renders as near-white in monochrome context — the u-fill interval detail is lost entirely; the stepped-e crossbar may also be too fine to survive monochrome at small size","suggested_fix":"replace Fog fill with a mid-grey (#AAAAAA or similar) for monochrome-safe operation; or remove the fill interval detail entirely"}
+{"candidateId":"D4","dimension":"avatar-crop-integrity","score":2,"pass":true,"defect":"full typemark in avatar crop; detail density is high and individual motifs (echo+stepped+fill) compound into visual noise at 96px","suggested_fix":null}
+{"candidateId":"D4","dimension":"brand-fit","score":3,"pass":true,"defect":null,"suggested_fix":null}
