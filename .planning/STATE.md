@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
 status: executing
-last_updated: "2026-06-12T15:14:13.662Z"
+last_updated: "2026-06-12T15:22:43.651Z"
 last_activity: 2026-06-12
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 11
-  completed_plans: 8
+  completed_plans: 9
   percent: 14
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 ## Current Position
 
 Phase: 181 (svg-pipeline-tournament-round-1-divergent) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-06-12
 
@@ -164,6 +164,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: contrast.js uses WCAG 2.0 normative threshold 0.03928; 21-pair table committed as canonical evidence for all Phase 180 palette audit verdicts
 - **2026-06-12 (180-02):** All palette verdicts in BRAND-AUDIT.md §1–§8 are TIGHTEN (usage-rule restrictions) — no REWORK; no hex changes proposed; --accrue-fog and --accrue-cobalt are brand-only tokens with no current --ax-* semantic binding; §8 four hard logo constraints authored verbatim with four Phase 181 conceptual directions
 - [Phase ?]: 2026-06-12 (180-04): ADD-6 (§4.23 VS Code extension icon) flipped ADD → KEEP: VS Code extension out of scope for v1.52; all other Phase 180 verdicts accepted as written; BRAND-DNA.md, logo-brief.md, quality-gate-checklist.md ratified; Phase 181 unblocked
+- **2026-06-12 (181-05):** lint.mjs CLI main() must be guarded by import.meta direct-exec check — raw `await main()` at module bottom runs as import side-effect; generate.mjs import triggers lint CLI otherwise
+- **2026-06-12 (181-05):** assembleLockup palette.ink must be #181818 (greyscale, sat=0) — default #111418 has HSV sat=0.29 which fails lintMonochromeDeriv; all lockup SVGs in pipeline use greyscale fills
+- **2026-06-12 (181-05):** Full pipeline produces 19 raw → 16 gallery; D2/D3/D4 gallery-size culled (excess beyond 16 cap); D1 is the only Direction D candidate in final gallery
 
 ### Pending Todos
 
@@ -206,6 +209,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 180 P04 | 15min | 3 tasks | 3 files |
 | Phase 181-svg-pipeline-tournament-round-1-divergent P01 | 3 | 1 tasks | 3 files |
 | Phase 181 P04 | 4min | 1 tasks | 1 files |
+| Phase 181-svg-pipeline-tournament-round-1-divergent P05 | 6 | 2 tasks | 37 files |
 
 ### Milestone Intake Rules
 
@@ -230,7 +234,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-12T15:14:13.657Z
+Last session: 2026-06-12T15:22:43.645Z
 Stopped at: Phase 181 context gathered
 Resume file: None
 
