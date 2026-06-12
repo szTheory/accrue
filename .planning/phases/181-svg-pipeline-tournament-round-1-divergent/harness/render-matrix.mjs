@@ -90,13 +90,42 @@ function darkPixelCoverage(pngPath) {
 }
 
 /**
+ * Color map for the ink-dark tile: swap dark ink to paper, and paper/fog knockouts
+ * to the dark bg and a dark mid-tone respectively — so the logo reads light-on-dark.
+ * Keys are exact hex values as they appear in generated SVGs (case-sensitive).
+ */
+const INK_DARK_COLOR_MAP = {
+  "#181818": "#FAFBFC", // dark ink → paper (visible on dark bg)
+  "#FAFBFC": "#111418", // paper knockout → dark bg (knockout still knocks out)
+  "#E9EEF2": "#2A333C", // fog knockout → dark mid-tone (Direction D stepped/fill motifs)
+};
+
+/**
+ * Apply INK_DARK_COLOR_MAP to an SVG string by simple string replacement.
+ * Uses a two-pass approach to avoid A→B, B→A flip conflicts.
+ */
+function applyInkDarkColors(svgContent) {
+  // Replace using a placeholder pass to avoid collision between swapped pairs.
+  // All three keys are distinct hex values so a single-pass regex replace is safe
+  // as long as we replace all at once (no key is a substring of another key here).
+  const replacements = Object.entries(INK_DARK_COLOR_MAP);
+  const pattern = new RegExp(
+    replacements.map(([k]) => k.replace(/#/g, "\\#")).join("|"),
+    "g"
+  );
+  return svgContent.replace(pattern, (match) => INK_DARK_COLOR_MAP[match] ?? match);
+}
+
+/**
  * Build a minimal HTML wrapper for an SVG in a tile context.
  * For the mono tile, adds a CSS grayscale filter.
+ * For the ink-dark tile, inverts ink/paper colors so the logo is light-on-dark.
  */
 function buildTileHtml(svgContent, tile) {
   const monoStyle = tile.mono
     ? `<style>svg { filter: grayscale(1); }</style>`
     : "";
+  const effectiveSvg = tile.id === "ink-dark" ? applyInkDarkColors(svgContent) : svgContent;
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -120,7 +149,7 @@ ${monoStyle}
 </style>
 </head>
 <body>
-${svgContent}
+${effectiveSvg}
 </body>
 </html>`;
 }
