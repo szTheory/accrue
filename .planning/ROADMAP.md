@@ -98,7 +98,7 @@ Plans:
 Plans:
 **Wave 1** *(package legitimacy gate + font spine bootstrap)*
 
-- [ ] 181-01-PLAN.md — Package legitimacy checkpoint + harness/package.json + geist-spine.mjs (LOGO-01) ✋
+- [x] 181-01-PLAN.md — Package legitimacy checkpoint + harness/package.json + geist-spine.mjs (LOGO-01) ✋
 
 **Wave 2** *(blocked on Wave 1 — lint suite + lockup assembler)*
 
@@ -480,7 +480,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
-| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 0/? | Not started | - |
+| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 1/7 | In Progress|  |
 | 182. Tournament Convergent Refinement | v1.52 | 0/? | Not started | - |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
