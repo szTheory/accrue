@@ -33,6 +33,12 @@ const SCREENSHOTS_DIR = path.join(PHASE_DIR, "screenshots");
 const REJECTED_DIR = path.join(PHASE_DIR, "rejected");
 const SMOKE = process.argv.includes("--smoke");
 
+/** Target gallery size range (D-04). Gallery cap is enforced HERE, after legibility culling. */
+const TARGET_GALLERY_SIZE = { min: 12, max: 16 };
+
+/** Per-direction minimum in final gallery (D-05 floor). */
+const MIN_PER_DIRECTION = 3;
+
 /** 8 context tiles per candidate */
 const TILES = [
   { id: "paper-light",   w: 320,  h: 80,  bg: "#FAFBFC", dpr: 1, mono: false },
@@ -218,11 +224,93 @@ async function main() {
     await browser.close();
   }
 
-  // Step 4 — Update candidates/index.json (remove culled candidates)
+  // Step 4 — Update candidates/index.json (remove legibility-culled candidates)
+  let surviving = candidates.filter(c => !culledIds.has(c.id));
   if (culledIds.size > 0) {
-    const surviving = candidates.filter(c => !culledIds.has(c.id));
     fs.writeFileSync(indexPath, JSON.stringify(surviving, null, 2));
-    console.log(`[render] Updated index.json — removed ${culledIds.size} culled candidate(s)`);
+    console.log(`[render] Updated index.json — removed ${culledIds.size} legibility-culled candidate(s)`);
+  }
+
+  // Step 5 — Gallery-size cap: direction-balanced cull if survivors exceed max (D-04 / D-05)
+  //
+  // This runs AFTER legibility culling so no legible candidate is discarded while
+  // the post-legibility count is already within (or below) the 16-cap ceiling.
+  if (!SMOKE && surviving.length > TARGET_GALLERY_SIZE.max) {
+    const excess = surviving.length - TARGET_GALLERY_SIZE.max;
+    console.log(
+      `[render] Gallery size ${surviving.length} exceeds max ${TARGET_GALLERY_SIZE.max} — ` +
+        `culling ${excess} direction-balanced (D-05 floor preserved)`
+    );
+
+    for (let i = 0; i < excess; i++) {
+      // Build per-direction buckets (preserve insertion order within each direction)
+      const buckets = {};
+      for (const c of surviving) {
+        (buckets[c.direction] = buckets[c.direction] ?? []).push(c);
+      }
+
+      // Find the direction with the most candidates that is still above the floor
+      const eligible = Object.entries(buckets)
+        .filter(([, arr]) => arr.length > MIN_PER_DIRECTION)
+        .sort(([, a], [, b]) => b.length - a.length);
+
+      if (eligible.length === 0) {
+        console.warn(
+          `[render] WARN: Cannot cull further — all directions are at or below ` +
+            `MIN_PER_DIRECTION (${MIN_PER_DIRECTION}).  Gallery will have ${surviving.length} candidates.`
+        );
+        break;
+      }
+
+      // Cull the last candidate from the largest eligible direction
+      const [, targetBucket] = eligible[0];
+      const toCull = targetBucket[targetBucket.length - 1];
+
+      // Write to rejected/ with gallery-size-cull reason
+      const svgSrc = path.join(CANDIDATES_DIR, `${toCull.id}.svg`);
+      const rejectedSvgPath = path.join(REJECTED_DIR, `${toCull.id}.svg`);
+      if (fs.existsSync(svgSrc)) fs.copyFileSync(svgSrc, rejectedSvgPath);
+      const reasonText = [
+        `Candidate: ${toCull.id}`,
+        `Lint failures: gallery-size-cull`,
+        `Culled: ${new Date().toISOString()}`,
+      ].join("\n");
+      fs.writeFileSync(path.join(REJECTED_DIR, `${toCull.id}.reason.txt`), reasonText + "\n");
+
+      surviving = surviving.filter(c => c.id !== toCull.id);
+      console.log(
+        `[render] Gallery-size cull: ${toCull.id} (Direction ${toCull.direction}, ` +
+          `bucket size was ${targetBucket.length})`
+      );
+    }
+
+    // Write updated index after gallery-size cull
+    fs.writeFileSync(indexPath, JSON.stringify(surviving, null, 2));
+    console.log(`[render] Updated index.json — ${surviving.length} candidates after gallery-size cull`);
+  }
+
+  // Step 6 — Per-direction floor warning (D-05) — informational only, does not block
+  if (!SMOKE) {
+    const dirCounts = {};
+    for (const c of surviving) {
+      dirCounts[c.direction] = (dirCounts[c.direction] ?? 0) + 1;
+    }
+    for (const dir of ["A", "B", "C", "D"]) {
+      const count = dirCounts[dir] ?? 0;
+      if (count < MIN_PER_DIRECTION) {
+        console.warn(
+          `[render] WARN: Direction ${dir} has ${count} candidate(s) in final gallery ` +
+            `(D-05 floor is ${MIN_PER_DIRECTION}) — ` +
+            `too few legible configs at 16px; add heavier-stroke variants to fix in Phase 182`
+        );
+      }
+    }
+    const total = surviving.length;
+    if (total < TARGET_GALLERY_SIZE.min) {
+      console.warn(
+        `[render] WARN: Final gallery has ${total} candidates — below D-04 minimum ${TARGET_GALLERY_SIZE.min}`
+      );
+    }
   }
 
   console.log(
