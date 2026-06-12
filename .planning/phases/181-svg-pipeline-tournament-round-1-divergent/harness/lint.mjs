@@ -536,4 +536,9 @@ async function main() {
 // Named exports — importable by generate.mjs and other harness scripts
 export { lintCandidate, lintValidParse, lintNoRectBackground, lintNoSubtitle, lintMonochromeDeriv, lintLockupGapRatio, lint16pxLegibility };
 
-await main();
+// Only run main() when executed directly (not when imported as a module).
+// This guards against the CLI side-effect running on import by generate.mjs.
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+if (isMain) {
+  await main();
+}
