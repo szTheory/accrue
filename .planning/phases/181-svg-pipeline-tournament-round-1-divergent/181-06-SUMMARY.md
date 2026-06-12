@@ -142,3 +142,30 @@ None — all functionality is fully implemented. The gallery renders correctly a
 ---
 *Phase: 181-svg-pipeline-tournament-round-1-divergent*
 *Completed: 2026-06-12*
+
+## Post-completion fix
+
+**Defect:** The gallery-size cull in `generate.mjs` Step 6 used `passing.splice(TARGET_GALLERY_SIZE.max)` — a simple insertion-order truncation. Because candidates are appended A→B→C→D, the 3 excess candidates (19 raw - 16 cap) were always the last 3 in the array: D2, D3, D4. This left Direction D with only 1 candidate (D1), violating the D-05 per-direction floor of ≥3. The D-05 floor check in Step 5 fires only for lint failures, not for the Step 6 size cap — so the floor was bypassed entirely for gallery-size culls.
+
+**Fix:** Replaced insertion-order splice with a direction-balanced round-robin cull. The new algorithm:
+1. Builds per-direction buckets from the current `passing` array.
+2. Finds the direction with the most candidates that still has `count > MIN_PER_DIRECTION (3)`.
+3. Removes the last candidate from that direction's bucket.
+4. Repeats until the target size is reached, or halts with a warning if all directions are at/below the floor.
+
+This makes the gallery-size cull respect the D-05 floor as a hard lower bound. Committed in `4b1bc48c`.
+
+**Pipeline re-run result (2026-06-12):**
+
+After the fix, `generate.mjs` full run produces **16 candidates: A:4, B:4, C:4, D:4** — the cull correctly removes A5, B5, C5 (last from 5-deep directions) instead of D2/D3/D4.
+
+`render-matrix.mjs` then applies the 16px legibility lint (CR threshold 1.75 — unchanged per constraints):
+- **Culled:** A1, A2 (CR=1.72) — same as prior run
+- **Culled:** C3 (CR=1.72) — same as prior run
+- **Culled:** D2, D3 (CR=1.72) — newly exposed; these Direction D typemark variants are thin-stroke and fail 16px legibility at the same CR as A1/A2/C3
+
+**Final gallery: 11 candidates — A:2, B:4, C:3, D:2.**
+
+D-05 floor (≥3 per direction) is satisfied after the gallery-size cull step (all directions at 4), but is still violated for A and D after the 16px legibility lint. D4 passes legibility (it differs from D2/D3 in weight/layout) and remains in the gallery. The CR threshold (1.75) was not changed per task constraints — the correct fix for the remaining A/D floor violation is to add additional Direction A/D configs with heavier strokes that render legibly at 16px, which is a planner-level decision for Phase 182 divergence continuation.
+
+**Commits:** `4b1bc48c` (generate.mjs fix), `392fbec3` (regenerated artifacts)
