@@ -1,0 +1,14 @@
+{
+  "id": "A1",
+  "direction": "A",
+  "config": {
+    "id": "A1",
+    "layers": 4,
+    "amplitude": 0.3,
+    "strokeWeight": 1.5,
+    "spacing": 0.25,
+    "rationale": "Balanced four-bar stack with moderate taper — readable at all sizes and clearly accumulative without feeling dense"
+  },
+  "rationale": "Balanced four-bar stack with moderate taper — readable at all sizes and clearly accumulative without feeling dense",
+  "skipGapRatio": false
+}

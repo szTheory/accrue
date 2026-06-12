@@ -1,0 +1,22 @@
+[
+  {
+    "id": "A1",
+    "direction": "A",
+    "rationale": "Balanced four-bar stack with moderate taper — readable at all sizes and clearly accumulative without feeling dense"
+  },
+  {
+    "id": "B1",
+    "direction": "B",
+    "rationale": "Four balanced steps with slight rounding — reads clearly as a staircase / billing-interval progression at all sizes"
+  },
+  {
+    "id": "C1",
+    "direction": "C",
+    "rationale": "Three arcs with staggered rotation — layered state-transition rings with balanced spread; legible at both favicon and social-card sizes"
+  },
+  {
+    "id": "D1",
+    "direction": "D",
+    "rationale": "cc echoed layers: the double-c pair gains a shifted shadow echo — depth-through-layering signals the ledger/audit metaphor"
+  }
+]

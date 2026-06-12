@@ -1,0 +1,14 @@
+{
+  "id": "B1",
+  "direction": "B",
+  "config": {
+    "id": "B1",
+    "steps": 4,
+    "stepHeight": 0.25,
+    "stepWidth": 0.25,
+    "curvature": 0.05,
+    "rationale": "Four balanced steps with slight rounding — reads clearly as a staircase / billing-interval progression at all sizes"
+  },
+  "rationale": "Four balanced steps with slight rounding — reads clearly as a staircase / billing-interval progression at all sizes",
+  "skipGapRatio": false
+}

@@ -1,0 +1,18 @@
+{
+  "id": "D1",
+  "direction": "D",
+  "config": {
+    "id": "D1",
+    "motif": "cc-echo",
+    "markIsTypemark": true,
+    "echoOffset": {
+      "dx": 4,
+      "dy": 4
+    },
+    "echoOpacity": 0.35,
+    "skipGapRatio": true,
+    "rationale": "cc echoed layers: the double-c pair gains a shifted shadow echo — depth-through-layering signals the ledger/audit metaphor"
+  },
+  "rationale": "cc echoed layers: the double-c pair gains a shifted shadow echo — depth-through-layering signals the ledger/audit metaphor",
+  "skipGapRatio": true
+}

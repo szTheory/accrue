@@ -1,0 +1,15 @@
+{
+  "id": "C1",
+  "direction": "C",
+  "config": {
+    "id": "C1",
+    "arcCount": 3,
+    "sweep": 200,
+    "radiiSpread": 0.25,
+    "strokeWidth": 2,
+    "offset": 30,
+    "rationale": "Three arcs with staggered rotation — layered state-transition rings with balanced spread; legible at both favicon and social-card sizes"
+  },
+  "rationale": "Three arcs with staggered rotation — layered state-transition rings with balanced spread; legible at both favicon and social-card sizes",
+  "skipGapRatio": false
+}
