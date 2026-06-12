@@ -136,6 +136,11 @@ Ink/Slate on Paper surfaces all pass AAA. Voice style ("direct, calm, precise") 
 **§4.4 GitHub avatar / org icon (circular crop at 20px) — ADD**
 No logo mark exists. The circular crop context demands an icon-only mark that survives at 20px. Add requirement: Phase 181 must produce an icon-only mark as part of the derived suite. Until Phase 183 ships the final mark, a typographic placeholder (wordmark initial "A" at brand weight) is acceptable for the avatar slot.
 *[DEFERRED: Phase 181 screenshot pipeline — legibility at 16px not asserted here]*
+<!-- FLIP-VARIANT: If user rejects the typographic placeholder interim approach:
+     Alternative: Leave the GitHub avatar slot empty or use the repo default until Phase 183 ships the final mark. No interim placeholder committed.
+     DNA impact: None — the icon-only mark requirement in BRAND-DNA.md §Logo Constraints is unchanged.
+     Brief impact: None — logo-brief.md derived suite already lists "icon-only mark" as a Phase 183 target.
+-->
 
 **§4.5 Hex.pm package listing — TIGHTEN**
 Hex.pm surfaces show package name, description, and version on a white/light background. Ink text passes AAA. TIGHTEN: description field must include "Elixir billing library" qualifier (D-03 tactic 1) — current default description may lack this. Cobalt links (Paper vs Cobalt 3.66:1) are AA-large only and acceptable for link text at typical heading sizes on Hex.pm listings.
@@ -194,10 +199,20 @@ No logo mark exists. Dock icons need a rounded-rect silhouette with a clear mark
 **§4.22 iOS Safari pinned tab — ADD**
 Pinned tabs use a 2-color SVG (mask-based). Phase 181/183 must produce a pinned-tab SVG derivative. This is a Phase 183 derived suite item; not a blocker for Phase 181.
 *[DEFERRED: Phase 181 screenshot pipeline — legibility at 16px not asserted here]*
+<!-- FLIP-VARIANT: If user wants to defer or drop this derived suite item:
+     Alternative: Change to TIGHTEN (defer to post-v1.52; note in logo-brief.md as "optional derived suite item").
+     DNA impact: None — no BRAND-DNA.md §Logo Constraints change needed.
+     Brief impact: Move "Favicon (SVG + .ico + minimal PNG set)" note to exclude pinned-tab SVG from the Phase 183 target list, or add a parenthetical "(pinned-tab SVG: optional, post-v1.52)" to the derived suite list in logo-brief.md.
+-->
 
 **§4.23 VS Code extension icon — ADD**
 VS Code marketplace icons appear at 128×128px and 48×48px. No icon exists. If an Accrue VS Code extension is ever created (currently out of scope), Phase 181/183's icon-only mark should be sized appropriately. Mark at this size: contrast math applies; legibility at small icon size deferred.
 *[DEFERRED: Phase 181 screenshot pipeline — legibility at 16px not asserted here]*
+<!-- FLIP-VARIANT: If user wants to drop this verdict (VS Code extension is explicitly out of scope):
+     Alternative: Change to KEEP (no action required; note that if a VS Code extension is created post-v1.52, the icon-only mark from Phase 183 is the source).
+     DNA impact: None.
+     Brief impact: None — logo-brief.md derived suite does not list VS Code icon explicitly; this is already an implicit downstream use of the icon-only mark artifact.
+-->
 
 **§4.24 GitHub Actions badge — KEEP**
 GitHub Actions badges use system-rendered text at small sizes on white backgrounds. Accrue's palette is not applied to CI badge content (Shields.io controls colors). Status: badge text is outside brand scope; the Shields.io label area can use Ink-on-Paper equivalent. No brand change required.
