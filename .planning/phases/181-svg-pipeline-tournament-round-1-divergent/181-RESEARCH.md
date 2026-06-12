@@ -210,7 +210,7 @@ wawoff2      2.0.1  (2022-ish)    ✓
          │                                                     │
          │  Playwright: page.goto('file://' + htmlPath)       │
          │  page.locator('#candidate-A1').screenshot()        │
-         │  7 tiles per candidate × 12-16 candidates          │
+         │  8 tiles per candidate × 12-16 candidates          │
          │  → screenshots/ dir                                 │
          └─────────┬───────────────────────────────────────────┘
                    │
@@ -786,7 +786,7 @@ async function renderSVGToPNG(svgString, outputPath, { w, h, dpr = 1, bg = '#FAF
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Harness location: phase dir vs milestone dir**
    - What we know: CONTEXT.md says "exploration artifacts in `.planning/milestones/v1.52-phases/`" (design source), but also "active-phase artifacts conventionally live in the phase dir." Phase dir is `.planning/phases/181-...`; milestone dir would be `.planning/milestones/v1.52-phases/181-harness/`.
