@@ -93,7 +93,33 @@ Plans:
   3. Every candidate in the gallery carries a stable ID (A1…D4) and a one-line rationale; the agent has screenshot-reviewed and self-scored each candidate before the user sees them.
   4. User picks 1–3 winners and records per-winner keep/change notes in `TOURNAMENT.md`; the round-1 ledger entry is verbatim.
 
-**Plans:** TBD
+**Plans:** 7 plans across 6 waves
+
+Plans:
+**Wave 1** *(package legitimacy gate + font spine bootstrap)*
+
+- [ ] 181-01-PLAN.md — Package legitimacy checkpoint + harness/package.json + geist-spine.mjs (LOGO-01) ✋
+
+**Wave 2** *(blocked on Wave 1 — lint suite + lockup assembler)*
+
+- [ ] 181-02-PLAN.md — lint.mjs (6 pre-gate checks) + assemble-lockup.mjs (LOGO-01)
+
+**Wave 3** *(parallel — blocked on Wave 2; 03 and 04 run in parallel)*
+
+- [ ] 181-03-PLAN.md — Direction A/B/C generators (strata, step, arcs) (LOGO-01)
+- [ ] 181-04-PLAN.md — Direction D integrated typemark generator (path surgery) (LOGO-01)
+
+**Wave 4** *(blocked on Wave 3 — orchestrator + TOURNAMENT.md scaffold)*
+
+- [ ] 181-05-PLAN.md — generate.mjs orchestrator + TOURNAMENT.md scaffold (LOGO-01, LOGO-02)
+
+**Wave 5** *(blocked on Wave 4 — screenshots + gallery)*
+
+- [ ] 181-06-PLAN.md — render-matrix.mjs + build-gallery.mjs + round-1-gallery.html (LOGO-01, LOGO-02)
+
+**Wave 6** *(blocked on Wave 5 — self-review + user checkpoint)*
+
+- [ ] 181-07-PLAN.md — Agent self-review → self-review.ndjson + user picks winners → TOURNAMENT.md (LOGO-02) ✋
 
 ### Phase 182: Tournament Convergent Refinement
 
