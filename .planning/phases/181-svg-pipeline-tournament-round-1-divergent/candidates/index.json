@@ -1,5 +1,15 @@
 [
   {
+    "id": "A1",
+    "direction": "A",
+    "rationale": "Balanced four-bar stack with moderate taper — readable at all sizes and clearly accumulative without feeling dense"
+  },
+  {
+    "id": "A2",
+    "direction": "A",
+    "rationale": "Five thin bars with strong taper give a pronounced data-building wedge — emphasises the accumulation metaphor"
+  },
+  {
     "id": "A3",
     "direction": "A",
     "rationale": "Three chunky bars with gentle taper — bold and clean, maximises legibility at 16px favicon size"
@@ -8,11 +18,6 @@
     "id": "A4",
     "direction": "A",
     "rationale": "Six fine bars with compact spacing — layered-record richness, good for social-card context at larger sizes"
-  },
-  {
-    "id": "A5",
-    "direction": "A",
-    "rationale": "Four wide bars with aggressive taper and generous breathing room — striking wedge shape with strong baseline anchor"
   },
   {
     "id": "B1",
@@ -35,11 +40,6 @@
     "rationale": "Six fine steps — dense interval grid, signals precision billing cadence; best at medium/large sizes"
   },
   {
-    "id": "B5",
-    "direction": "B",
-    "rationale": "Four steps with generous height and soft corners — balanced between clarity and approachability, good for avatar crop"
-  },
-  {
     "id": "C1",
     "direction": "C",
     "rationale": "Three arcs with staggered rotation — layered state-transition rings with balanced spread; legible at both favicon and social-card sizes"
@@ -50,19 +50,29 @@
     "rationale": "Two concentric wide arcs with no offset — minimal and bold, strong favicon silhouette; sweep communicates progress/completion"
   },
   {
+    "id": "C3",
+    "direction": "C",
+    "rationale": "Four short arcs with maximum rotational spread — layered records with distinct lifecycle stages visible as separate arcs"
+  },
+  {
     "id": "C4",
     "direction": "C",
     "rationale": "Three wide arcs with generous radii spread and slight rotation — open, confident mark expressing sustained state transitions"
   },
   {
-    "id": "C5",
-    "direction": "C",
-    "rationale": "Two sweeping arcs with wide radii gap — nearly-complete rings with subtle rotation; reads clearly as a continuous cycle at all sizes"
-  },
-  {
     "id": "D1",
     "direction": "D",
     "rationale": "cc echoed layers: the double-c pair gains a shifted shadow echo — depth-through-layering signals the ledger/audit metaphor"
+  },
+  {
+    "id": "D2",
+    "direction": "D",
+    "rationale": "stepped e crossbar: the e's horizontal crossbar carries a staircase notch — interval and state-transition imagery built into the letterform"
+  },
+  {
+    "id": "D3",
+    "direction": "D",
+    "rationale": "u filling interval: the u counter reads as a vessel at 55% fill — accumulation/capacity metaphor without adding any separate mark element"
   },
   {
     "id": "D4",
