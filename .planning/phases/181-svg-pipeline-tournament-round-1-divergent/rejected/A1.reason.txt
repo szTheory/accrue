@@ -1,4 +1,4 @@
 Lint: 16px-legibility
 Reason: contrast ratio 1.72 < 1.75 (icon legibility threshold)
 Measured: {"contrastRatio":1.7217912272065163,"edgeDensityRatio":3.2291666666666665}
-Culled: 2026-06-12T15:39:14.081Z
+Culled: 2026-06-12T15:45:19.110Z

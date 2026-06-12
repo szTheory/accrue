@@ -1,3 +1,0 @@
-Candidate: C5
-Lint failures: gallery-size-cull
-Culled: 2026-06-12T15:39:00.485Z

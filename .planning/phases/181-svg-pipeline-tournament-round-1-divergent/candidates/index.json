@@ -10,6 +10,11 @@
     "rationale": "Six fine bars with compact spacing — layered-record richness, good for social-card context at larger sizes"
   },
   {
+    "id": "A5",
+    "direction": "A",
+    "rationale": "Four wide bars with aggressive taper and generous breathing room — striking wedge shape with strong baseline anchor"
+  },
+  {
     "id": "B1",
     "direction": "B",
     "rationale": "Four balanced steps with slight rounding — reads clearly as a staircase / billing-interval progression at all sizes"
@@ -30,6 +35,11 @@
     "rationale": "Six fine steps — dense interval grid, signals precision billing cadence; best at medium/large sizes"
   },
   {
+    "id": "B5",
+    "direction": "B",
+    "rationale": "Four steps with generous height and soft corners — balanced between clarity and approachability, good for avatar crop"
+  },
+  {
     "id": "C1",
     "direction": "C",
     "rationale": "Three arcs with staggered rotation — layered state-transition rings with balanced spread; legible at both favicon and social-card sizes"
@@ -43,6 +53,11 @@
     "id": "C4",
     "direction": "C",
     "rationale": "Three wide arcs with generous radii spread and slight rotation — open, confident mark expressing sustained state transitions"
+  },
+  {
+    "id": "C5",
+    "direction": "C",
+    "rationale": "Two sweeping arcs with wide radii gap — nearly-complete rings with subtle rotation; reads clearly as a continuous cycle at all sizes"
   },
   {
     "id": "D1",
