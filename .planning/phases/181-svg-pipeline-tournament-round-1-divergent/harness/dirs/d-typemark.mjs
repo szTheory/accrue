@@ -89,10 +89,16 @@ export const CONFIGS = [
 // ---------------------------------------------------------------------------
 
 const FONT_SIZE = 1000;
-// Full viewBox height: cap height (≈730) + descender depth below baseline (≈270)
-// At fontSize=1000, baseline sits at y=730 (since glyph paths use y-down SVG coords
-// and getPath() was called with y=0 which maps the baseline to y=capHeight).
-// We use 1100 as a safe total height covering ascenders + descenders.
+// Full viewBox height: total canvas in SVG y-down units.
+// extractGlyphs(font, text, FONT_SIZE) places the baseline at y=0; ascenders
+// are at NEGATIVE y (above 0), descenders at positive y. To render all ink
+// inside viewBox="0 0 W VIEW_H", we add a BASELINE translate to every
+// innerElements group so glyph ink shifts into positive-y space.
+//
+// BASELINE = 800 → 800 units of headroom above baseline for cap/ascenders
+//   (Geist cap height ≈ 714–730 at FONT_SIZE=1000, plus ~60 extra for overshoot).
+// VIEW_H = 1100 → 800 baseline + 300 below baseline (descenders + breathing).
+const BASELINE = 800;
 const VIEW_H = 1100;
 
 // ---------------------------------------------------------------------------
@@ -116,14 +122,18 @@ export function generate(config, font) {
   const totalWidth = glyphs.reduce((sum, g) => sum + g.advanceWidth, 0);
   const totalHeight = VIEW_H;
 
-  // Build the SVG inner elements based on the motif config
+  // Build the SVG inner elements based on the motif config.
+  // extractGlyphs places the baseline at y=0 (ascenders at negative y).
+  // We wrap everything in translate(0, BASELINE) so all ink sits in positive-y space.
   const innerElements = buildMotifElements(config, glyphs, capHeight);
 
   const fullSvg =
     `<svg xmlns="http://www.w3.org/2000/svg" ` +
     `viewBox="0 0 ${totalWidth.toFixed(3)} ${totalHeight}">\n` +
+    `<g transform="translate(0,${BASELINE})">\n` +
     innerElements +
-    `\n</svg>`;
+    `\n</g>\n` +
+    `</svg>`;
 
   // T-181-08: assert no NaN in generated SVG
   if (fullSvg.includes("NaN")) {
