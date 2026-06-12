@@ -1,0 +1,15 @@
+{
+  "id": "C2",
+  "direction": "C",
+  "config": {
+    "id": "C2",
+    "arcCount": 2,
+    "sweep": 270,
+    "radiiSpread": 0.3,
+    "strokeWidth": 3,
+    "offset": 0,
+    "rationale": "Two concentric wide arcs with no offset — minimal and bold, strong favicon silhouette; sweep communicates progress/completion"
+  },
+  "rationale": "Two concentric wide arcs with no offset — minimal and bold, strong favicon silhouette; sweep communicates progress/completion",
+  "skipGapRatio": false
+}

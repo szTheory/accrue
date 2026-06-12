@@ -1,0 +1,3 @@
+Candidate: D4
+Lint failures: gallery-size-cull
+Culled: 2026-06-12T15:19:28.675Z

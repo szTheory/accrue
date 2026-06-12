@@ -1,0 +1,14 @@
+{
+  "id": "B5",
+  "direction": "B",
+  "config": {
+    "id": "B5",
+    "steps": 4,
+    "stepHeight": 0.28,
+    "stepWidth": 0.3,
+    "curvature": 0.08,
+    "rationale": "Four steps with generous height and soft corners — balanced between clarity and approachability, good for avatar crop"
+  },
+  "rationale": "Four steps with generous height and soft corners — balanced between clarity and approachability, good for avatar crop",
+  "skipGapRatio": false
+}

@@ -1,0 +1,15 @@
+{
+  "id": "C3",
+  "direction": "C",
+  "config": {
+    "id": "C3",
+    "arcCount": 4,
+    "sweep": 150,
+    "radiiSpread": 0.2,
+    "strokeWidth": 1.5,
+    "offset": 45,
+    "rationale": "Four short arcs with maximum rotational spread — layered records with distinct lifecycle stages visible as separate arcs"
+  },
+  "rationale": "Four short arcs with maximum rotational spread — layered records with distinct lifecycle stages visible as separate arcs",
+  "skipGapRatio": false
+}

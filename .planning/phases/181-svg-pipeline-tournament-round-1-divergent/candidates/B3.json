@@ -1,0 +1,14 @@
+{
+  "id": "B3",
+  "direction": "B",
+  "config": {
+    "id": "B3",
+    "steps": 3,
+    "stepHeight": 0.3,
+    "stepWidth": 0.35,
+    "curvature": 0.1,
+    "rationale": "Three wide rounded steps — bold and approachable, maximises legibility at 16px favicon with chunky proportions"
+  },
+  "rationale": "Three wide rounded steps — bold and approachable, maximises legibility at 16px favicon with chunky proportions",
+  "skipGapRatio": false
+}

@@ -1,0 +1,14 @@
+{
+  "id": "A5",
+  "direction": "A",
+  "config": {
+    "id": "A5",
+    "layers": 4,
+    "amplitude": 0.6,
+    "strokeWeight": 1.8,
+    "spacing": 0.35,
+    "rationale": "Four wide bars with aggressive taper and generous breathing room — striking wedge shape with strong baseline anchor"
+  },
+  "rationale": "Four wide bars with aggressive taper and generous breathing room — striking wedge shape with strong baseline anchor",
+  "skipGapRatio": false
+}

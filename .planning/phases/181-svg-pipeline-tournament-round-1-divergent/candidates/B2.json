@@ -1,0 +1,14 @@
+{
+  "id": "B2",
+  "direction": "B",
+  "config": {
+    "id": "B2",
+    "steps": 5,
+    "stepHeight": 0.2,
+    "stepWidth": 0.2,
+    "curvature": 0,
+    "rationale": "Five sharp-cornered steps — crisp timeline-tick geometry, strong technical character with no softening"
+  },
+  "rationale": "Five sharp-cornered steps — crisp timeline-tick geometry, strong technical character with no softening",
+  "skipGapRatio": false
+}

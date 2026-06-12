@@ -1,0 +1,15 @@
+{
+  "id": "C4",
+  "direction": "C",
+  "config": {
+    "id": "C4",
+    "arcCount": 3,
+    "sweep": 240,
+    "radiiSpread": 0.35,
+    "strokeWidth": 2.5,
+    "offset": 20,
+    "rationale": "Three wide arcs with generous radii spread and slight rotation — open, confident mark expressing sustained state transitions"
+  },
+  "rationale": "Three wide arcs with generous radii spread and slight rotation — open, confident mark expressing sustained state transitions",
+  "skipGapRatio": false
+}

@@ -1,0 +1,14 @@
+{
+  "id": "A2",
+  "direction": "A",
+  "config": {
+    "id": "A2",
+    "layers": 5,
+    "amplitude": 0.5,
+    "strokeWeight": 1.2,
+    "spacing": 0.2,
+    "rationale": "Five thin bars with strong taper give a pronounced data-building wedge — emphasises the accumulation metaphor"
+  },
+  "rationale": "Five thin bars with strong taper give a pronounced data-building wedge — emphasises the accumulation metaphor",
+  "skipGapRatio": false
+}

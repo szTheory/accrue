@@ -1,0 +1,14 @@
+{
+  "id": "A3",
+  "direction": "A",
+  "config": {
+    "id": "A3",
+    "layers": 3,
+    "amplitude": 0.2,
+    "strokeWeight": 2,
+    "spacing": 0.3,
+    "rationale": "Three chunky bars with gentle taper — bold and clean, maximises legibility at 16px favicon size"
+  },
+  "rationale": "Three chunky bars with gentle taper — bold and clean, maximises legibility at 16px favicon size",
+  "skipGapRatio": false
+}

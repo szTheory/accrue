@@ -1,0 +1,14 @@
+{
+  "id": "A4",
+  "direction": "A",
+  "config": {
+    "id": "A4",
+    "layers": 6,
+    "amplitude": 0.4,
+    "strokeWeight": 1,
+    "spacing": 0.15,
+    "rationale": "Six fine bars with compact spacing — layered-record richness, good for social-card context at larger sizes"
+  },
+  "rationale": "Six fine bars with compact spacing — layered-record richness, good for social-card context at larger sizes",
+  "skipGapRatio": false
+}

@@ -1,0 +1,15 @@
+{
+  "id": "C5",
+  "direction": "C",
+  "config": {
+    "id": "C5",
+    "arcCount": 2,
+    "sweep": 300,
+    "radiiSpread": 0.4,
+    "strokeWidth": 2,
+    "offset": 15,
+    "rationale": "Two sweeping arcs with wide radii gap — nearly-complete rings with subtle rotation; reads clearly as a continuous cycle at all sizes"
+  },
+  "rationale": "Two sweeping arcs with wide radii gap — nearly-complete rings with subtle rotation; reads clearly as a continuous cycle at all sizes",
+  "skipGapRatio": false
+}

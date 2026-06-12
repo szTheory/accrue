@@ -1,0 +1,14 @@
+{
+  "id": "B4",
+  "direction": "B",
+  "config": {
+    "id": "B4",
+    "steps": 6,
+    "stepHeight": 0.18,
+    "stepWidth": 0.18,
+    "curvature": 0,
+    "rationale": "Six fine steps — dense interval grid, signals precision billing cadence; best at medium/large sizes"
+  },
+  "rationale": "Six fine steps — dense interval grid, signals precision billing cadence; best at medium/large sizes",
+  "skipGapRatio": false
+}
