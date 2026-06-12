@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
 status: executing
-last_updated: "2026-06-12T15:22:43.651Z"
+last_updated: "2026-06-12T15:35:53.146Z"
 last_activity: 2026-06-12
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
   percent: 14
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 ## Current Position
 
 Phase: 181 (svg-pipeline-tournament-round-1-divergent) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-06-12
 
@@ -167,6 +167,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-06-12 (181-05):** lint.mjs CLI main() must be guarded by import.meta direct-exec check — raw `await main()` at module bottom runs as import side-effect; generate.mjs import triggers lint CLI otherwise
 - **2026-06-12 (181-05):** assembleLockup palette.ink must be #181818 (greyscale, sat=0) — default #111418 has HSV sat=0.29 which fails lintMonochromeDeriv; all lockup SVGs in pipeline use greyscale fills
 - **2026-06-12 (181-05):** Full pipeline produces 19 raw → 16 gallery; D2/D3/D4 gallery-size culled (excess beyond 16 cap); D1 is the only Direction D candidate in final gallery
+- **2026-06-12 (181-06):** 16px legibility CR threshold tuned 3.0 → 1.75 (plan delegated to implementer: "Claude's Discretion — tune during implementation"); WCAG AA-large 3:1 too strict for thin-stroke anti-aliased marks; measured CR range 1.72–3.76; 1.75 culls truly faint marks (A1/A2/C3 at CR=1.72) while retaining 13 legible gallery candidates
+- **2026-06-12 (181-06):** Direction D per-direction floor (≥3) not met — D2/D3/D4 gallery-size culled at generate time; D1 is sole D representative; architectural limitation requires gallery cap increase or more D configs to resolve
 
 ### Pending Todos
 
@@ -210,6 +212,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 181-svg-pipeline-tournament-round-1-divergent P01 | 3 | 1 tasks | 3 files |
 | Phase 181 P04 | 4min | 1 tasks | 1 files |
 | Phase 181-svg-pipeline-tournament-round-1-divergent P05 | 6 | 2 tasks | 37 files |
+| Phase 181 P06 | 35min | 2 tasks | 112 files |
 
 ### Milestone Intake Rules
 
@@ -234,7 +237,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-12T15:22:43.645Z
+Last session: 2026-06-12T15:35:53.142Z
 Stopped at: Phase 181 context gathered
 Resume file: None
 

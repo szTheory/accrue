@@ -115,7 +115,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 — screenshots + gallery)*
 
-- [ ] 181-06-PLAN.md — render-matrix.mjs + build-gallery.mjs + round-1-gallery.html (LOGO-01, LOGO-02)
+- [x] 181-06-PLAN.md — render-matrix.mjs + build-gallery.mjs + round-1-gallery.html (LOGO-01, LOGO-02)
 
 **Wave 6** *(blocked on Wave 5 — self-review + user checkpoint)*
 
@@ -480,7 +480,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
-| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 5/7 | In Progress|  |
+| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 6/7 | In Progress|  |
 | 182. Tournament Convergent Refinement | v1.52 | 0/? | Not started | - |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
