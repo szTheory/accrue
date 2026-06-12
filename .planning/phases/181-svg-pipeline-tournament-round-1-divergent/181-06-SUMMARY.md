@@ -185,3 +185,52 @@ None — all functionality is fully implemented. The gallery renders correctly a
 **Direction D below-floor condition (2 < 3) is a known, accepted limitation:** D2 and D3 are thin-stroke typemark variants that fail 16px legibility at the same CR as A1/A2/C3. The correct fix is to add heavier-stroke Direction D configs — a planner-level decision for Phase 182.
 
 **Commits:** `654ceb02` (cull-reorder code), `d93ee0ca` (regenerated artifacts)
+
+---
+
+### Fix 3 — Coordinate-space bugs in lockup assembly (commits `1f5cf8bd`, `c761e2cf`, `be281e84`, `8c353824`)
+
+**Root cause:** Three bugs in the mark+logotype assembly layer caused all candidates to render as near-invisible (a few dots/pixels):
+
+1. **Glyph X double-offset:** `extractGlyphs()` bakes absolute X positions into each glyph path (accumulating from x=0). `assemble-lockup.mjs` then wrapped each glyph in a per-glyph `<g transform="translate(xOffset,0)">` AND added mark+gap to xOffset again → letters spread ~2×, tail glyphs overflow the viewBox right edge.
+
+2. **Glyphs rendered above the canvas:** Glyph paths extracted with `glyph.getPath(x, 0, fontSize)` place the baseline at y=0; ascenders are at NEGATIVE y values (correct in opentype.js SVG convention). The lockup viewBox was `0 0 W H` with no baseline translate, so all ascender ink was at negative y — outside the viewBox. Only tiny positive-y descender fragments were visible ("a few dots at the top").
+
+3. **Mark never scaled:** Generator marks are in local units (~36–40 wide/tall). The mark path was embedded raw into a font-unit viewBox (~3300×994) → mark was ~1/25 of intended size (~1% of canvas area).
+
+4. **Latent double-scale:** `scale = fontSize / 1000` (= 1.0 since fontSize=1000) applied to advance widths that `extractGlyphs()` already returns at fontSize units — no actual effect at fontSize=1000, but wrong conceptually.
+
+**Fixes applied:**
+
+- `assemble-lockup.mjs`: Rewrote standard-mode assembly. Mark scaled by `s = capHeight / markHeight` (e.g. s≈17.75 for Direction A) and translated to `(0, BASELINE - capHeight)`. ALL glyph paths placed in ONE `<g transform="translate(markScaledW+gap, BASELINE)">` — no per-glyph translate loops. `BASELINE = capHeight * 1.1` inside `viewboxH = capHeight * 1.4`. Added `markHeight` to config shape; removed `fontSize / 1000` scale.
+
+- `generate.mjs`: Thread `markHeight` through `buildStandardCandidate` → `buildLockupSvg` → `assembleLockup`. Fix lint bboxes to use scaled coordinates (`markWidth * s`, not raw mark path bbox).
+
+- `d-typemark.mjs` (Direction D): Add `BASELINE = 800` constant; wrap all motif `innerElements` in `<g transform="translate(0,800)">`. All motif overlay coordinates (stepped e crossbar, u fill rect) are in glyph-local space and shift uniformly with the outer translate.
+
+- `lint.mjs`: Revert CR threshold 1.75 → 3.0. The 1.75 tuning was based on broken renders — all prior legibility measurements were taken from near-blank images, invalidating the entire empirical CR distribution used to justify 1.75.
+
+- `render-matrix.mjs`: Added blank-render guard (step 3a, before legibility check). If the paper-light tile has < 0.5% dark pixel coverage, the candidate is rejected as `blank-render` (not a legibility cull). This guard would have caught the coordinate-space bug deterministically on the first run.
+
+**Invalidated prior conclusions:** The 5 "legibility failures" (A1, A2, C3, D2, D3) in Fix 2's pipeline run, the 14-candidate gallery composition, and all `self-review.ndjson` scores were based on broken renders. All three artifacts have been regenerated from scratch.
+
+**Pipeline re-run result (2026-06-12):**
+
+`generate.mjs`: **19 candidates pass pre-gate lints (0 culled)**.
+
+`render-matrix.mjs`:
+- Blank-render guard: 0 culled (all candidates now have full ink in viewBox)
+- 16px legibility (CR threshold 3.0): 0 culled (all 19 candidates pass)
+- Gallery-size cap: A5/B5/C5 direction-balanced culled (5→4 in each of A/B/C)
+
+**Final gallery: 16 candidates — A:4, B:4, C:4, D:4 (all above D-05 floor of 3).**
+
+`self-review.ndjson`: Re-scored from scratch against the corrected screenshot PNGs (64 lines, 16 candidates × 4 dimensions). All prior scores are superseded.
+
+**Verification spot-checks (visual):**
+- A3 paper-light: three strata bars (mark) + "accrue" logotype — both plainly visible ✓
+- B2 readme-header: staircase mark + "accrue" — bold and clean ✓
+- D1 paper-light: "accrue" typemark (Direction D, no separate mark) — readable ✓
+- C2 paper-light: solid dome arc + "accrue" — clean ✓
+
+**Commits:** `1f5cf8bd` (assemble-lockup + generate), `c761e2cf` (d-typemark baseline), `be281e84` (lint revert + blank-render guard), `8c353824` (regenerated artifacts + self-review)
