@@ -38,7 +38,7 @@ cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 
 - [ ] **AUD-01**: Maintainer can read a 14-section pressure-test audit of `prompts/accrue-brand-book.md` where every verdict is tagged KEEP/TIGHTEN/REWORK/ADD/REMOVE with a cited justification — no churn without a cited failure.
 - [ ] **AUD-02**: Maintainer ratifies a locked `BRAND-DNA.md` and a binding logo design brief (including the 4 hard logo constraints) at an explicit checkpoint before any logo work begins.
-- [ ] **AUD-03**: Any proposed palette or font change cites a concrete failure (contrast, distinctiveness, 16px rendering) and is user-ratified at the audit checkpoint.
+- [x] **AUD-03**: Any proposed palette or font change cites a concrete failure (contrast, distinctiveness, 16px rendering) and is user-ratified at the audit checkpoint.
 
 ### Logo Tournament & System (LOGO) — Phases 181–183
 
@@ -71,7 +71,7 @@ Filled by the roadmap. Coverage target: 14/14, each REQ-ID mapped to exactly one
 |-------------|-------|--------|
 | AUD-01 | Phase 180 | Pending |
 | AUD-02 | Phase 180 | Pending |
-| AUD-03 | Phase 180 | Pending |
+| AUD-03 | Phase 180 | Complete |
 | LOGO-01 | Phase 181 | Pending |
 | LOGO-02 | Phase 181 | Pending |
 | LOGO-03 | Phase 182 | Pending |
