@@ -56,16 +56,29 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 **Depends on:** Nothing (foundation phase)
 **Requirements:** AUD-01, AUD-02, AUD-03
 **Success Criteria** (what must be TRUE):
+
   1. Maintainer can open `BRAND-AUDIT.md` and read a 14-section pressure-test of `prompts/accrue-brand-book.md` where every verdict is tagged KEEP / TIGHTEN / REWORK / ADD / REMOVE with a cited justification — no churn entry lacks a failure citation.
   2. Maintainer reads a locked `BRAND-DNA.md` summarising the ratified positioning, palette (with any evidence-gated changes documented), typography, voice tone, and visual personality — and confirms it before Phase 181 begins.
   3. A binding logo design brief exists in the planning artifacts, explicitly recording the 4 hard constraints (no rect background, optically-close logotype, no subtitle in main lockup, fully-integrated typemark options required) plus the Phase-186 quality-gate checklist.
   4. Any proposed palette or font change references a concrete cited failure (contrast ratio, distinctiveness, 16px rendering) and is explicitly ratified or rejected by the user at this checkpoint.
+
 **Plans:** 4 plans across 4 waves
 
 Plans:
+**Wave 1**
+
 - [ ] 180-01-PLAN.md — Contrast script + evidence table (AUD-03 substrate)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 180-02-PLAN.md — BRAND-AUDIT.md §1–§8 authoring (AUD-01, AUD-03)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 180-03-PLAN.md — BRAND-AUDIT.md §9–§14 + BRAND-DNA.md + logo-brief.md + quality-gate-checklist.md (AUD-01, AUD-02, AUD-03)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 180-04-PLAN.md — Ratification checkpoint (AUD-01, AUD-02, AUD-03) ✋
 
 ### Phase 181: SVG Pipeline + Tournament Round 1 — Divergent
@@ -74,10 +87,12 @@ Plans:
 **Depends on:** Phase 180
 **Requirements:** LOGO-01, LOGO-02
 **Success Criteria** (what must be TRUE):
+
   1. A reproducible Node harness uses opentype.js to emit exact Geist letterform outlines (one `<path>` per glyph, with IDs) and runs automated pre-gate lints (valid SVG parse, no-rect-background, lockup gap ratio within spec, 16px legibility screenshot, monochrome derivable, no subtitle in main lockup) — no candidate that fails a lint reaches the user.
   2. User can open `round-1-gallery.html` via `file://` in a browser and see 12–16 candidates across 4 conceptual directions (accumulation strata, stepped interval, layered arcs, fully-integrated typemarks), each rendered in a fixed context matrix (paper-light, ink-dark, 32px favicon, 16px favicon, avatar circle-crop, README header mock, social card mock, monochrome row).
   3. Every candidate in the gallery carries a stable ID (A1…D4) and a one-line rationale; the agent has screenshot-reviewed and self-scored each candidate before the user sees them.
   4. User picks 1–3 winners and records per-winner keep/change notes in `TOURNAMENT.md`; the round-1 ledger entry is verbatim.
+
 **Plans:** TBD
 
 ### Phase 182: Tournament Convergent Refinement
@@ -86,10 +101,12 @@ Plans:
 **Depends on:** Phase 181
 **Requirements:** LOGO-03
 **Success Criteria** (what must be TRUE):
+
   1. Each refinement round is authored from the latest `TOURNAMENT.md` ledger entry and shows 6–9 variants of ≤2 finalists (weight, motif amplitude, lockup spacing/kerning, terminal treatments) in the same context matrix plus increasingly real contexts (actual social-card copy, actual README header text).
   2. The `TOURNAMENT.md` ledger is monotonic — every round appends verdicts verbatim and no constraint recorded in an earlier round is violated or omitted in a later round.
   3. The loop concludes when the user locks a single winner; if 3 rounds complete without a lock, the agent surfaces an explicit "extend one more round or settle on [candidate]?" question.
   4. The final `TOURNAMENT.md` entry records the locked winner with its candidate ID and the ratified mark + lockup geometry frozen.
+
 **Plans:** TBD
 *(This phase is elastic: 2–4 plans depending on how many rounds are needed. One plan per round.)*
 
@@ -99,10 +116,12 @@ Plans:
 **Depends on:** Phase 182
 **Requirements:** LOGO-04
 **Success Criteria** (what must be TRUE):
+
   1. `brandbook/logo/` contains the complete required file set: primary lockup, integrated typemark, icon-only mark, monochrome positive/negative, dark/light versions, favicon (SVG + .ico + PNG), social card (SVG + PNG), with-subtitle variant, and clearspace/minimum-size spec sheet — all committed to the repo.
   2. Every final SVG contains outlined paths only (no `<text>` elements, no `@font-face` dependency), passes `svgo` optimization, and includes accessible `<title>` and `<desc>` elements.
   3. A `LICENSE-FONTS.txt` documents OFL 1.1 provenance for any Geist letterform outlines incorporated into the logo finals.
   4. A size-matrix screenshot (all variants at representative sizes and both themes) confirms visual fidelity of every derived file — eyeball checkpoint passed.
+
 **Plans:** TBD
 **UI hint**: yes
 
@@ -112,9 +131,11 @@ Plans:
 **Depends on:** Phase 180
 **Requirements:** TOK-01, TOK-02, TOK-03
 **Success Criteria** (what must be TRUE):
+
   1. `brandbook/tokens/tokens.json` and `tokens.css` define raw palette, semantic color roles, typography scale, spacing, radius, focus-ring, code-block, callout, and state tokens per the audit token spec — fully committed to the repo.
   2. An automated consistency check script verifies that every brandbook token value that corresponds to an `ax-*` token in `accrue_admin/assets/css/theme.css` matches (or is explicitly documented as a brand-layer divergence) — the script exits non-zero on undocumented drift.
   3. `brandbook/examples/` contains palette and typography specimen artifacts (SVG or HTML) that render every color swatch, type scale, and spacing step visually.
+
 **Plans:** TBD
 
 ### Phase 185: Voice, Microcopy & Marketing Copy
@@ -123,9 +144,11 @@ Plans:
 **Depends on:** Phase 180
 **Requirements:** COPY-01, COPY-02
 **Success Criteria** (what must be TRUE):
+
   1. A committed voice system document defines voice principles, tone sliders (formal↔casual, precise↔evocative), vocabulary to use/avoid, and say-this/not-this examples — all consistent with the ratified BRAND-DNA.
   2. Ready-to-paste copy blocks exist (committed to `brandbook/`) for: GitHub repo description + topics, Hex.pm package description, HexDocs intro paragraph, README hero, landing-page sections (hero / problem / solution / install / benefits / comparison / CTAs), release-note and changelog voice templates, and error/empty/success-state microcopy examples.
   3. User reviews all copy blocks in one batch and approves or requests revisions; the final committed copy reflects the approved batch.
+
 **Plans:** TBD
 
 ### Phase 186: HTML Brand Book Assembly & Quality Gate
@@ -134,10 +157,12 @@ Plans:
 **Depends on:** Phase 183, Phase 184, Phase 185
 **Requirements:** BOOK-01, BOOK-02
 **Success Criteria** (what must be TRUE):
+
   1. `brandbook/index.html` opens via `file://` in a browser with no build step, no JS frameworks, and no external network requests — all CSS is inlined from the Phase-184 tokens, all SVGs are inlined, and all copy is present.
   2. The brand book renders correctly in both light and dark color schemes and at small viewport widths (≥360px); Playwright screenshots confirm rendering across the matrix.
   3. `du -sh brandbook/` reports ≤2 MB total committed weight.
   4. The Phase-180 quality-gate checklist passes: designer-buildable / engineer-implementable / dark-mode / small-size / specific-to-Accrue / no-thrash — all criteria satisfied and signed off by the user.
+
 **Plans:** TBD
 **UI hint**: yes
 

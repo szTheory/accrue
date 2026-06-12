@@ -686,14 +686,16 @@ All palette contrast claims are VERIFIED via direct computation. All WCAG thresh
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Contrast script language: Node vs Elixir?**
+> Both questions were CONTEXT.md "Claude's Discretion" items, resolved by the plans: Plan 180-01 uses Node (CJS) per the recommendation below; Plan 180-02 Task 1 enumerates the ~25 stress-test surfaces in its `<action>`.
+
+1. **Contrast script language: Node vs Elixir?** — RESOLVED: Node (Plan 180-01)
    - What we know: Both are capable (~30 lines each). Node is available in all environments where Phase 181's opentype.js pipeline will also run. Elixir is the project's primary language.
    - What's unclear: Whether there's a preference for consistency with Phase 181 (Node) vs. language-nativeness (Elixir).
    - Recommendation: Claude's discretion per CONTEXT.md — Node is recommended for consistency with Phase 181's toolchain.
 
-2. **Exact 14-section sub-structure for stress-test surfaces (§4)**
+2. **Exact 14-section sub-structure for stress-test surfaces (§4)** — RESOLVED: enumerated in Plan 180-02 Task 1
    - What we know: ~25 surfaces per design source; examples include GitHub header, README hero, Hex.pm, HexDocs, favicon, dark/light, social card, slides.
    - What's unclear: Exact ordering and whether any surfaces should be split into sub-entries.
    - Recommendation: Planner specifies ~25 named surfaces as a `<files>` or `<action>` enumeration in the §4 authoring task; executor enumerates them during writing.
