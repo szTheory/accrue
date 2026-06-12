@@ -1,15 +1,5 @@
 [
   {
-    "id": "A1",
-    "direction": "A",
-    "rationale": "Balanced four-bar stack with moderate taper — readable at all sizes and clearly accumulative without feeling dense"
-  },
-  {
-    "id": "A2",
-    "direction": "A",
-    "rationale": "Five thin bars with strong taper give a pronounced data-building wedge — emphasises the accumulation metaphor"
-  },
-  {
     "id": "A3",
     "direction": "A",
     "rationale": "Three chunky bars with gentle taper — bold and clean, maximises legibility at 16px favicon size"
@@ -58,11 +48,6 @@
     "id": "C2",
     "direction": "C",
     "rationale": "Two concentric wide arcs with no offset — minimal and bold, strong favicon silhouette; sweep communicates progress/completion"
-  },
-  {
-    "id": "C3",
-    "direction": "C",
-    "rationale": "Four short arcs with maximum rotational spread — layered records with distinct lifecycle stages visible as separate arcs"
   },
   {
     "id": "C4",

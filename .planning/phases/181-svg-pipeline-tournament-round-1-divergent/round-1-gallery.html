@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accrue Round 1 Gallery</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #F5F7FA;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 0 0 80px;
+}
+header {
+  background: #fff;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 24px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+header p {
+  font-size: 0.875rem;
+  color: #555;
+  margin: 0;
+}
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
+}
+h2.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  margin: 40px 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(640px, 1fr));
+  gap: 24px;
+}
+.candidate {
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 24px;
+  transition: border-color 0.15s;
+}
+.candidate.selected {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.candidate-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.candidate-id {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+.direction-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+.rationale {
+  font-size: 0.875rem;
+  color: #555;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.svg-preview {
+  background: #FAFBFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+.svg-preview svg {
+  max-width: 100%;
+  max-height: 120px;
+}
+.context-matrix {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tile-label {
+  font-size: 0.7rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tile img {
+  width: 100%;
+  height: auto;
+  border: 1px solid #E2E8F0;
+  border-radius: 3px;
+  background: #FAFBFC;
+  image-rendering: pixelated;
+}
+.tile-missing .tile-placeholder {
+  font-size: 0.7rem;
+  color: #ccc;
+  padding: 8px 0;
+}
+.verdict-controls {
+  border-top: 1px solid #E9EEF2;
+  padding-top: 16px;
+}
+.winner-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+.winner-label input[type=checkbox] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3B82F6;
+}
+.notes-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.note-label {
+  font-size: 0.8rem;
+  color: #555;
+  font-weight: 500;
+}
+.keep-note, .change-note {
+  width: 100%;
+  font-size: 0.8rem;
+  font-family: inherit;
+  border: 1px solid #D1D5DB;
+  border-radius: 4px;
+  padding: 6px 8px;
+  resize: vertical;
+  margin-top: 4px;
+  color: #1a1a1a;
+}
+.keep-note:focus, .change-note:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+.verdict-section {
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 28px 32px;
+  margin-top: 40px;
+}
+.verdict-section h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+.verdict-section p {
+  font-size: 0.875rem;
+  color: #555;
+  margin: 0 0 16px;
+}
+#copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 16px;
+}
+#copy-btn:hover { background: #333; }
+#copy-btn.copied { background: #16A34A; }
+#verdict-pre {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 16px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #1a1a1a;
+  min-height: 120px;
+  cursor: text;
+  user-select: all;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Accrue Logo Tournament — Round 1</h1>
+  <p>
+    13 candidates across 4 directions.
+    Check the winners below, add keep/change notes, then click <strong>Copy verdict block</strong>.
+    Paste the result into TOURNAMENT.md at the <code>&lt;!-- ROUND-1-PASTE-BELOW --&gt;</code> marker.
+  </p>
+</header>
+
+<main>
+
+  <h2 class="section-title">Direction A — Accumulation Strata</h2>
+  <div class="candidate-grid">
+    <section class="candidate" data-id="A3">
+  <div class="candidate-header">
+    <h2 class="candidate-id">A3</h2>
+    <span class="direction-badge">Direction A</span>
+  </div>
+  <p class="rationale">Three chunky bars with gentle taper — bold and clean, maximises legibility at 16px favicon size</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3300.500 993.9999999999999">
+  <path id="mark" d="M 1.200,0.000 h 4.800 a 1.2,1.2 0 0 1 1.2,1.2 v 8.711 a 1.2,1.2 0 0 1 -1.2,1.2 h -4.800 a 1.2,1.2 0 0 1 -1.2,-1.2 v -8.711 a 1.2,1.2 0 0 1 1.2,-1.2 Z M 1.200,14.444 h 19.200 a 1.2,1.2 0 0 1 1.2,1.2 v 8.711 a 1.2,1.2 0 0 1 -1.2,1.2 h -19.200 a 1.2,1.2 0 0 1 -1.2,-1.2 v -8.711 a 1.2,1.2 0 0 1 1.2,-1.2 Z M 1.200,28.889 h 33.600 a 1.2,1.2 0 0 1 1.2,1.2 v 8.711 a 1.2,1.2 0 0 1 -1.2,1.2 h -33.600 a 1.2,1.2 0 0 1 -1.2,-1.2 v -8.711 a 1.2,1.2 0 0 1 1.2,-1.2 Z" fill="#181818"/>
+  <g transform="translate(142.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(693.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1239.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1785.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2164.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2739.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/A3/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/A3/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/A3/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/A3/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/A3/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/A3/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/A3/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/A3/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="A4">
+  <div class="candidate-header">
+    <h2 class="candidate-id">A4</h2>
+    <span class="direction-badge">Direction A</span>
+  </div>
+  <p class="rationale">Six fine bars with compact spacing — layered-record richness, good for social-card context at larger sizes</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3300.500 993.9999999999999">
+  <path id="mark" d="M 0.600,0.000 h 13.200 a 0.6,0.6 0 0 1 0.6,0.6 v 4.726 a 0.6,0.6 0 0 1 -0.6,0.6 h -13.200 a 0.6,0.6 0 0 1 -0.6,-0.6 v -4.726 a 0.6,0.6 0 0 1 0.6,-0.6 Z M 0.600,6.815 h 17.520 a 0.6,0.6 0 0 1 0.6,0.6 v 4.726 a 0.6,0.6 0 0 1 -0.6,0.6 h -17.520 a 0.6,0.6 0 0 1 -0.6,-0.6 v -4.726 a 0.6,0.6 0 0 1 0.6,-0.6 Z M 0.600,13.630 h 21.840 a 0.6,0.6 0 0 1 0.6,0.6 v 4.726 a 0.6,0.6 0 0 1 -0.6,0.6 h -21.840 a 0.6,0.6 0 0 1 -0.6,-0.6 v -4.726 a 0.6,0.6 0 0 1 0.6,-0.6 Z M 0.600,20.444 h 26.160 a 0.6,0.6 0 0 1 0.6,0.6 v 4.726 a 0.6,0.6 0 0 1 -0.6,0.6 h -26.160 a 0.6,0.6 0 0 1 -0.6,-0.6 v -4.726 a 0.6,0.6 0 0 1 0.6,-0.6 Z M 0.600,27.259 h 30.480 a 0.6,0.6 0 0 1 0.6,0.6 v 4.726 a 0.6,0.6 0 0 1 -0.6,0.6 h -30.480 a 0.6,0.6 0 0 1 -0.6,-0.6 v -4.726 a 0.6,0.6 0 0 1 0.6,-0.6 Z M 0.600,34.074 h 34.800 a 0.6,0.6 0 0 1 0.6,0.6 v 4.726 a 0.6,0.6 0 0 1 -0.6,0.6 h -34.800 a 0.6,0.6 0 0 1 -0.6,-0.6 v -4.726 a 0.6,0.6 0 0 1 0.6,-0.6 Z" fill="#181818"/>
+  <g transform="translate(142.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(693.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1239.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1785.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2164.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2739.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/A4/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/A4/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/A4/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/A4/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/A4/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/A4/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/A4/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/A4/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="A5">
+  <div class="candidate-header">
+    <h2 class="candidate-id">A5</h2>
+    <span class="direction-badge">Direction A</span>
+  </div>
+  <p class="rationale">Four wide bars with aggressive taper and generous breathing room — striking wedge shape with strong baseline anchor</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3300.500 993.9999999999999">
+  <path id="mark" d="M 1.080,0.000 h 19.440 a 1.08,1.08 0 0 1 1.08,1.08 v 5.761 a 1.08,1.08 0 0 1 -1.08,1.08 h -19.440 a 1.08,1.08 0 0 1 -1.08,-1.08 v -5.761 a 1.08,1.08 0 0 1 1.08,-1.08 Z M 1.080,10.693 h 24.240 a 1.08,1.08 0 0 1 1.08,1.08 v 5.761 a 1.08,1.08 0 0 1 -1.08,1.08 h -24.240 a 1.08,1.08 0 0 1 -1.08,-1.08 v -5.761 a 1.08,1.08 0 0 1 1.08,-1.08 Z M 1.080,21.386 h 29.040 a 1.08,1.08 0 0 1 1.08,1.08 v 5.761 a 1.08,1.08 0 0 1 -1.08,1.08 h -29.040 a 1.08,1.08 0 0 1 -1.08,-1.08 v -5.761 a 1.08,1.08 0 0 1 1.08,-1.08 Z M 1.080,32.079 h 33.840 a 1.08,1.08 0 0 1 1.08,1.08 v 5.761 a 1.08,1.08 0 0 1 -1.08,1.08 h -33.840 a 1.08,1.08 0 0 1 -1.08,-1.08 v -5.761 a 1.08,1.08 0 0 1 1.08,-1.08 Z" fill="#181818"/>
+  <g transform="translate(142.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(693.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1239.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1785.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2164.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2739.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/A5/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/A5/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/A5/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/A5/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/A5/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/A5/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/A5/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/A5/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+  </div>
+  <h2 class="section-title">Direction B — Stepped Intervals</h2>
+  <div class="candidate-grid">
+    <section class="candidate" data-id="B1">
+  <div class="candidate-header">
+    <h2 class="candidate-id">B1</h2>
+    <span class="direction-badge">Direction B</span>
+  </div>
+  <p class="rationale">Four balanced steps with slight rounding — reads clearly as a staircase / billing-interval progression at all sizes</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3304.500 993.9999999999999">
+  <path id="mark" d="M 0.500,30.000 h 9.000 a 0.5,0.5 0 0 1 0.5,0.5 v 9.000 a 0.5,0.5 0 0 1 -0.5,0.5 h -9.000 a 0.5,0.5 0 0 1 -0.5,-0.5 v -9.000 a 0.5,0.5 0 0 1 0.5,-0.5 Z M 10.500,20.000 h 9.000 a 0.5,0.5 0 0 1 0.5,0.5 v 19.000 a 0.5,0.5 0 0 1 -0.5,0.5 h -9.000 a 0.5,0.5 0 0 1 -0.5,-0.5 v -19.000 a 0.5,0.5 0 0 1 0.5,-0.5 Z M 20.500,10.000 h 9.000 a 0.5,0.5 0 0 1 0.5,0.5 v 29.000 a 0.5,0.5 0 0 1 -0.5,0.5 h -9.000 a 0.5,0.5 0 0 1 -0.5,-0.5 v -29.000 a 0.5,0.5 0 0 1 0.5,-0.5 Z M 30.500,0.000 h 9.000 a 0.5,0.5 0 0 1 0.5,0.5 v 39.000 a 0.5,0.5 0 0 1 -0.5,0.5 h -9.000 a 0.5,0.5 0 0 1 -0.5,-0.5 v -39.000 a 0.5,0.5 0 0 1 0.5,-0.5 Z" fill="#181818"/>
+  <g transform="translate(146.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(697.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1243.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1789.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2168.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2743.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/B1/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/B1/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/B1/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/B1/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/B1/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/B1/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/B1/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/B1/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="B2">
+  <div class="candidate-header">
+    <h2 class="candidate-id">B2</h2>
+    <span class="direction-badge">Direction B</span>
+  </div>
+  <p class="rationale">Five sharp-cornered steps — crisp timeline-tick geometry, strong technical character with no softening</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3304.500 993.9999999999999">
+  <path id="mark" d="M 0.000,32.000 h 8.000 v 8.000 h -8.000 Z M 8.000,24.000 h 8.000 v 16.000 h -8.000 Z M 16.000,16.000 h 8.000 v 24.000 h -8.000 Z M 24.000,8.000 h 8.000 v 32.000 h -8.000 Z M 32.000,0.000 h 8.000 v 40.000 h -8.000 Z" fill="#181818"/>
+  <g transform="translate(146.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(697.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1243.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1789.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2168.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2743.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/B2/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/B2/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/B2/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/B2/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/B2/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/B2/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/B2/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/B2/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="B3">
+  <div class="candidate-header">
+    <h2 class="candidate-id">B3</h2>
+    <span class="direction-badge">Direction B</span>
+  </div>
+  <p class="rationale">Three wide rounded steps — bold and approachable, maximises legibility at 16px favicon with chunky proportions</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3306.500 993.9999999999999">
+  <path id="mark" d="M 1.200,24.000 h 11.600 a 1.2,1.2 0 0 1 1.2,1.2 v 9.600 a 1.2,1.2 0 0 1 -1.2,1.2 h -11.600 a 1.2,1.2 0 0 1 -1.2,-1.2 v -9.600 a 1.2,1.2 0 0 1 1.2,-1.2 Z M 15.200,12.000 h 11.600 a 1.2,1.2 0 0 1 1.2,1.2 v 21.600 a 1.2,1.2 0 0 1 -1.2,1.2 h -11.600 a 1.2,1.2 0 0 1 -1.2,-1.2 v -21.600 a 1.2,1.2 0 0 1 1.2,-1.2 Z M 29.200,0.000 h 11.600 a 1.2,1.2 0 0 1 1.2,1.2 v 33.600 a 1.2,1.2 0 0 1 -1.2,1.2 h -11.600 a 1.2,1.2 0 0 1 -1.2,-1.2 v -33.600 a 1.2,1.2 0 0 1 1.2,-1.2 Z" fill="#181818"/>
+  <g transform="translate(148.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(699.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1245.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1791.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2170.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2745.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/B3/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/B3/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/B3/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/B3/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/B3/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/B3/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/B3/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/B3/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="B4">
+  <div class="candidate-header">
+    <h2 class="candidate-id">B4</h2>
+    <span class="direction-badge">Direction B</span>
+  </div>
+  <p class="rationale">Six fine steps — dense interval grid, signals precision billing cadence; best at medium/large sizes</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3307.700 993.9999999999999">
+  <path id="mark" d="M 0.000,36.000 h 7.200 v 7.200 h -7.200 Z M 7.200,28.800 h 7.200 v 14.400 h -7.200 Z M 14.400,21.600 h 7.200 v 21.600 h -7.200 Z M 21.600,14.400 h 7.200 v 28.800 h -7.200 Z M 28.800,7.200 h 7.200 v 36.000 h -7.200 Z M 36.000,0.000 h 7.200 v 43.200 h -7.200 Z" fill="#181818"/>
+  <g transform="translate(149.700,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(700.700,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1246.700,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1792.700,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2171.700,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2746.700,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/B4/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/B4/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/B4/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/B4/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/B4/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/B4/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/B4/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/B4/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="B5">
+  <div class="candidate-header">
+    <h2 class="candidate-id">B5</h2>
+    <span class="direction-badge">Direction B</span>
+  </div>
+  <p class="rationale">Four steps with generous height and soft corners — balanced between clarity and approachability, good for avatar crop</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3312.500 993.9999999999999">
+  <path id="mark" d="M 0.896,33.600 h 10.208 a 0.896,0.896 0 0 1 0.896,0.896 v 9.408 a 0.896,0.896 0 0 1 -0.896,0.896 h -10.208 a 0.896,0.896 0 0 1 -0.896,-0.896 v -9.408 a 0.896,0.896 0 0 1 0.896,-0.896 Z M 12.896,22.400 h 10.208 a 0.896,0.896 0 0 1 0.896,0.896 v 20.608 a 0.896,0.896 0 0 1 -0.896,0.896 h -10.208 a 0.896,0.896 0 0 1 -0.896,-0.896 v -20.608 a 0.896,0.896 0 0 1 0.896,-0.896 Z M 24.896,11.200 h 10.208 a 0.896,0.896 0 0 1 0.896,0.896 v 31.808 a 0.896,0.896 0 0 1 -0.896,0.896 h -10.208 a 0.896,0.896 0 0 1 -0.896,-0.896 v -31.808 a 0.896,0.896 0 0 1 0.896,-0.896 Z M 36.896,0.000 h 10.208 a 0.896,0.896 0 0 1 0.896,0.896 v 43.008 a 0.896,0.896 0 0 1 -0.896,0.896 h -10.208 a 0.896,0.896 0 0 1 -0.896,-0.896 v -43.008 a 0.896,0.896 0 0 1 0.896,-0.896 Z" fill="#181818"/>
+  <g transform="translate(154.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(705.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1251.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1797.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2176.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2751.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/B5/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/B5/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/B5/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/B5/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/B5/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/B5/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/B5/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/B5/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+  </div>
+  <h2 class="section-title">Direction C — Layered Arcs</h2>
+  <div class="candidate-grid">
+    <section class="candidate" data-id="C1">
+  <div class="candidate-header">
+    <h2 class="candidate-id">C1</h2>
+    <span class="direction-badge">Direction C</span>
+  </div>
+  <p class="rationale">Three arcs with staggered rotation — layered state-transition rings with balanced spread; legible at both favicon and social-card sizes</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3304.500 993.9999999999999">
+  <path id="mark" d="M 0.304,23.473 A 20,20 0 1 1 39.696,23.473 M 5.905,14.87 A 15,15 0 1 1 31.491,29.642 M 13.572,12.34 A 10,10 0 1 1 23.42,29.397" fill="#181818"/>
+  <g transform="translate(146.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(697.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1243.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1789.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2168.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2743.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/C1/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/C1/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/C1/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/C1/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/C1/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/C1/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/C1/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/C1/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="C2">
+  <div class="candidate-header">
+    <h2 class="candidate-id">C2</h2>
+    <span class="direction-badge">Direction C</span>
+  </div>
+  <p class="rationale">Two concentric wide arcs with no offset — minimal and bold, strong favicon silhouette; sweep communicates progress/completion</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3304.500 993.9999999999999">
+  <path id="mark" d="M 5.858,34.142 A 20,20 0 1 1 34.142,34.142 M 10.101,29.899 A 14,14 0 1 1 29.899,29.899" fill="#181818"/>
+  <g transform="translate(146.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(697.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1243.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1789.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2168.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2743.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/C2/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/C2/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/C2/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/C2/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/C2/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/C2/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/C2/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/C2/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="C4">
+  <div class="candidate-header">
+    <h2 class="candidate-id">C4</h2>
+    <span class="direction-badge">Direction C</span>
+  </div>
+  <p class="rationale">Three wide arcs with generous radii spread and slight rotation — open, confident mark expressing sustained state transitions</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3304.500 993.9999999999999">
+  <path id="mark" d="M 2.679,30 A 20,20 0 1 1 37.321,30 M 7.197,22.257 A 13,13 0 1 1 28.356,29.959 M 14.091,18.958 A 6,6 0 1 1 22.052,25.638" fill="#181818"/>
+  <g transform="translate(146.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(697.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1243.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1789.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2168.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2743.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/C4/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/C4/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/C4/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/C4/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/C4/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/C4/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/C4/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/C4/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+<section class="candidate" data-id="C5">
+  <div class="candidate-header">
+    <h2 class="candidate-id">C5</h2>
+    <span class="direction-badge">Direction C</span>
+  </div>
+  <p class="rationale">Two sweeping arcs with wide radii gap — nearly-complete rings with subtle rotation; reads clearly as a continuous cycle at all sizes</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3304.500 993.9999999999999">
+  <path id="mark" d="M 10,37.321 A 20,20 0 1 1 30,37.321 M 11.515,28.485 A 12,12 0 1 1 23.106,31.591" fill="#181818"/>
+  <g transform="translate(146.500,0)"><path id="glyph-a-0" d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/></g>
+  <g transform="translate(697.500,0)"><path id="glyph-c-1" d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/></g>
+  <g transform="translate(1243.500,0)"><path id="glyph-c-2" d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/></g>
+  <g transform="translate(1789.500,0)"><path id="glyph-r-3" d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/></g>
+  <g transform="translate(2168.500,0)"><path id="glyph-u-4" d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/></g>
+  <g transform="translate(2743.500,0)"><path id="glyph-e-5" d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/></g>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/C5/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/C5/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/C5/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/C5/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/C5/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/C5/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/C5/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/C5/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+  </div>
+  <h2 class="section-title">Direction D — Integrated Typemark</h2>
+  <div class="candidate-grid">
+    <section class="candidate" data-id="D1">
+  <div class="candidate-header">
+    <h2 class="candidate-id">D1</h2>
+    <span class="direction-badge">Direction D</span>
+  </div>
+  <p class="rationale">cc echoed layers: the double-c pair gains a shifted shadow echo — depth-through-layering signals the ledger/audit metaphor</p>
+
+  <div class="svg-preview">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3158.000 1100">
+  <g opacity="0.35" transform="translate(4,4)">
+    <path d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/>
+    <path d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/>
+  </g>
+  <path d="M223 12Q141 12 92.500-26Q44-64 44-132Q44-200 84-239Q124-278 211-294L399-329Q399-462 273-462Q218-462 186-437.500Q154-413 142-367L53-374Q68-449 125.500-495.500Q183-542 273-542Q375-542 429-484.500Q483-427 483-326L483-107Q483-74 511-74L532-74L532 0Q520 2 500 2Q454 2 430.500-16.500Q407-35 401-77L400-82Q380-41 331-14.500Q282 12 223 12M231-62Q311-62 355-107Q399-152 399-218L399-256L227-224Q173-214 152.500-193.500Q132-173 132-140Q132-103 158.500-82.500Q185-62 231-62" fill="#181818"/>
+  <path d="M838 12Q764 12 709.500-22Q655-56 625-118.500Q595-181 595-265Q595-349 625-411Q655-473 709.500-507.500Q764-542 838-542Q930-542 990-494.500Q1050-447 1063-358L975-352Q966-405 929-433.500Q892-462 838-462Q765-462 724-409.500Q683-357 683-265Q683-173 724-120.500Q765-68 838-68Q892-68 929-98Q966-128 975-188L1063-182Q1050-94 990-41Q930 12 838 12" fill="#181818"/>
+  <path d="M1384 12Q1310 12 1255.500-22Q1201-56 1171-118.500Q1141-181 1141-265Q1141-349 1171-411Q1201-473 1255.500-507.500Q1310-542 1384-542Q1476-542 1536-494.500Q1596-447 1609-358L1521-352Q1512-405 1475-433.500Q1438-462 1384-462Q1311-462 1270-409.500Q1229-357 1229-265Q1229-173 1270-120.500Q1311-68 1384-68Q1438-68 1475-98Q1512-128 1521-188L1609-182Q1596-94 1536-41Q1476 12 1384 12" fill="#181818"/>
+  <path d="M1807 0L1723 0L1723-530L1797-530L1800-432Q1827-530 1926-530L1978-530L1978-450L1927-450Q1807-450 1807-320" fill="#181818"/>
+  <path d="M2276 12Q2197 12 2149.500-41.500Q2102-95 2102-189L2102-530L2186-530L2186-212Q2186-135 2213.500-98.500Q2241-62 2298-62Q2361-62 2397-102.500Q2433-143 2433-214L2433-530L2517-530L2517 0L2437 0L2437-86Q2393 12 2276 12" fill="#181818"/>
+  <path d="M2884 12Q2809 12 2754.500-22Q2700-56 2670.500-118.500Q2641-181 2641-265Q2641-349 2670.500-411Q2700-473 2753.500-507.500Q2807-542 2880-542Q2949-542 3002-509.500Q3055-477 3084.500-415Q3114-353 3114-264L3114-239L2729-239Q2734-154 2774.500-111Q2815-68 2884-68Q2936-68 2969.500-92.500Q3003-117 3016-157L3106-150Q3085-79 3026.500-33.500Q2968 12 2884 12M2729-313L3022-313Q3016-390 2977.500-426Q2939-462 2880-462Q2819-462 2779.500-424.500Q2740-387 2729-313" fill="#181818"/>
+</svg>
+  </div>
+
+  <div class="context-matrix">
+    <div class="tile">
+      <div class="tile-label">Paper (light)</div>
+      <img src="screenshots/D1/paper-light.png" alt="Paper (light)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Ink (dark)</div>
+      <img src="screenshots/D1/ink-dark.png" alt="Ink (dark)" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">32px favicon</div>
+      <img src="screenshots/D1/32px-favicon.png" alt="32px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">16px favicon</div>
+      <img src="screenshots/D1/16px-favicon.png" alt="16px favicon" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Avatar circle</div>
+      <img src="screenshots/D1/avatar-circle.png" alt="Avatar circle" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">README header</div>
+      <img src="screenshots/D1/readme-header.png" alt="README header" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Social card</div>
+      <img src="screenshots/D1/social-card.png" alt="Social card" loading="lazy">
+    </div>
+      <div class="tile">
+      <div class="tile-label">Monochrome</div>
+      <img src="screenshots/D1/mono.png" alt="Monochrome" loading="lazy">
+    </div>
+  </div>
+
+  <div class="verdict-controls">
+    <label class="winner-label">
+      <input type="checkbox" class="winner-cb">
+      Pick as winner
+    </label>
+    <div class="notes-row">
+      <label class="note-label">
+        keep:<br>
+        <textarea class="keep-note" rows="2" placeholder="What to keep from this candidate…"></textarea>
+      </label>
+      <label class="note-label">
+        change:<br>
+        <textarea class="change-note" rows="2" placeholder="What to change or refine…"></textarea>
+      </label>
+    </div>
+  </div>
+</section>
+  </div>
+
+  <div class="verdict-section">
+    <h2>Verdict Block</h2>
+    <p>
+      Select winners above, add notes, then copy. If the Copy button fails (some browsers
+      restrict clipboard on file:// pages), select all text from the box below.
+    </p>
+    <button id="copy-btn">Copy verdict block</button>
+    <p>Or select all from the box below (click to select):</p>
+    <pre id="verdict-pre" onclick="this.select()" title="Click to select all">Click 'Copy verdict block' above — or click here to select the text manually.</pre>
+  </div>
+</main>
+
+<script>
+
+function buildVerdictBlock() {
+  var winners = [], killed = [], notes = {};
+  document.querySelectorAll('.candidate').forEach(function(el) {
+    var id = el.dataset.id;
+    if (el.querySelector('.winner-cb').checked) {
+      winners.push(id);
+      notes[id] = {
+        keep: el.querySelector('.keep-note').value.trim(),
+        change: el.querySelector('.change-note').value.trim()
+      };
+    } else {
+      killed.push(id);
+    }
+  });
+
+  var today = new Date().toISOString().split('T')[0];
+  var lines = [];
+  lines.push('## Round 1 — ' + today);
+  lines.push('**Winners:** ' + winners.join(', '));
+  lines.push('**Killed:** ' + killed.join(' '));
+  lines.push('');
+
+  for (var i = 0; i < winners.length; i++) {
+    var id = winners[i];
+    lines.push('### ' + id);
+    lines.push('- keep: "' + (notes[id].keep || '') + '"');
+    lines.push('- change: "' + (notes[id].change || '') + '"');
+    lines.push('');
+  }
+
+  lines.push('### Constraints (extracted by agent, user-confirmed)');
+  lines.push('(leave blank — agent fills after round)');
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+document.getElementById('copy-btn').addEventListener('click', function() {
+  var block = buildVerdictBlock();
+  document.getElementById('verdict-pre').textContent = block;
+
+  var btn = document.getElementById('copy-btn');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(block).then(function() {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copy verdict block';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(function() {
+      // Clipboard API denied — pre fallback is always visible
+    });
+  }
+});
+
+// Highlight winner candidates as user checks them
+document.querySelectorAll('.winner-cb').forEach(function(cb) {
+  cb.addEventListener('change', function() {
+    var section = cb.closest('.candidate');
+    if (cb.checked) {
+      section.classList.add('selected');
+    } else {
+      section.classList.remove('selected');
+    }
+  });
+});
+
+</script>
+</body>
+</html>
