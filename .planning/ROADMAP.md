@@ -60,7 +60,13 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
   2. Maintainer reads a locked `BRAND-DNA.md` summarising the ratified positioning, palette (with any evidence-gated changes documented), typography, voice tone, and visual personality — and confirms it before Phase 181 begins.
   3. A binding logo design brief exists in the planning artifacts, explicitly recording the 4 hard constraints (no rect background, optically-close logotype, no subtitle in main lockup, fully-integrated typemark options required) plus the Phase-186 quality-gate checklist.
   4. Any proposed palette or font change references a concrete cited failure (contrast ratio, distinctiveness, 16px rendering) and is explicitly ratified or rejected by the user at this checkpoint.
-**Plans:** TBD
+**Plans:** 4 plans across 4 waves
+
+Plans:
+- [ ] 180-01-PLAN.md — Contrast script + evidence table (AUD-03 substrate)
+- [ ] 180-02-PLAN.md — BRAND-AUDIT.md §1–§8 authoring (AUD-01, AUD-03)
+- [ ] 180-03-PLAN.md — BRAND-AUDIT.md §9–§14 + BRAND-DNA.md + logo-brief.md + quality-gate-checklist.md (AUD-01, AUD-02, AUD-03)
+- [ ] 180-04-PLAN.md — Ratification checkpoint (AUD-01, AUD-02, AUD-03) ✋
 
 ### Phase 181: SVG Pipeline + Tournament Round 1 — Divergent
 
