@@ -43,7 +43,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 180: Brand Audit & DNA Lock** — 14-section pressure test, KEEP/TIGHTEN/REWORK/ADD/REMOVE verdicts, locked BRAND-DNA + binding logo brief (✋ user checkpoint) (completed 2026-06-12)
 - [x] **Phase 181: SVG Pipeline + Tournament Round 1 — Divergent** — opentype.js Geist-outline harness, pre-gate lints, Playwright QA, 12–16 candidates across 4 directions, context-matrix gallery (✋ user picks winners) (completed 2026-06-13)
 - [x] **Phase 182: Tournament Convergent Refinement** — variation rounds on winners via monotonic TOURNAMENT.md ledger, 3-round default cap, extend-or-settle question (✋ looping checkpoint) (completed 2026-06-13)
-- [ ] **Phase 183: Logo System Production** — full derived suite in `brandbook/logo/`, outlined paths, svgo-optimized (light checkpoint: derivative-sheet eyeball)
+- [x] **Phase 183: Logo System Production** — full derived suite in `brandbook/logo/`, outlined paths, svgo-optimized (light checkpoint: derivative-sheet eyeball) (completed 2026-06-13)
 - [ ] **Phase 184: Design Tokens & Specimens** — `brandbook/tokens/` with documented mapping + automated consistency check vs admin `ax-*` tokens (no checkpoint; depends only on 180)
 - [ ] **Phase 185: Voice, Microcopy & Marketing Copy** — ready-to-paste copy blocks for all adopter-facing surfaces (light checkpoint: batch copy review; depends only on 180)
 - [ ] **Phase 186: HTML Brand Book Assembly & Quality Gate** — self-contained `brandbook/index.html`, ≤2 MB budget, Phase-180 quality-gate checklist (✋ final UAT)
@@ -162,7 +162,7 @@ Plans:
   3. A `LICENSE-FONTS.txt` documents OFL 1.1 provenance for any Geist letterform outlines incorporated into the logo finals.
   4. A size-matrix screenshot (all variants at representative sizes and both themes) confirms visual fidelity of every derived file — eyeball checkpoint passed.
 
-**Plans:** 4 plans across 4 waves
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 1** *(harness bootstrap — package.json, svgo.config.mjs, geist-spine-mono.mjs, ico-packer.mjs)*
@@ -514,7 +514,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
 | 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
-| 183. Logo System Production | v1.52 | 4/4 | Complete   | 2026-06-13 |
+| 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
