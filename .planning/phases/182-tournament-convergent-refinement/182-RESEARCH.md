@@ -756,25 +756,28 @@ If harness is copied to 182 dir: `npm ci` in the new dir is required. Avoid.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **accentStep: single top step vs. configurable step index**
    - What we know: the user said "is monochrome our style?" suggesting color accent, not full Moss
    - What's unclear: should the accent be always the topmost step, or configurable per config?
    - Recommendation: hardcode to topmost step (last in pathParts array, rightmost column) for
      Round 2. If the user wants a different accent position in Round 3, add the knob then.
+   - RESOLVED: accentStep is always the single topmost step, hardcoded as `pathParts[steps - 1]` in generate(). No configurable step-index knob in Round 2.
 
 2. **Social-card tile copy — should it render text via SVG `<text>` or HTML overlay?**
    - What we know: the current tile renders only the lockup SVG in a 600×315 box
    - What's unclear: adding HTML text requires a more complex tile HTML template
    - Recommendation: add a CSS overlay in the tile HTML (`position: absolute` text over the
      centered SVG). Keep it simple for Round 2; the point is to see the mark at realistic scale.
+   - RESOLVED: social-card tile copy is implemented as a CSS/HTML overlay (position: absolute div over the SVG), not SVG `<text>` elements. See 182-02 Task 1 D-182-08 implementation.
 
 3. **Should R2 ID scheme be R2-1..R2-7 or a semantic scheme like B4-ink, B4a-moss?**
    - What we know: the CONTEXT.md leaves this as Claude's Discretion
    - What's unclear: semantic names are more readable in TOURNAMENT.md; numeric are simpler to code
    - Recommendation: use `R2-{N}` for pipeline IDs (CONFIGS id field), include the semantic name
      in the rationale string. `data-id` in the gallery HTML becomes `R2-1` etc.
+   - RESOLVED: R2 ID scheme is R2-1..R2-7 (numeric pipeline IDs). Semantic description is in each config's rationale string.
 
 ---
 
