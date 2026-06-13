@@ -109,7 +109,8 @@ function computeMarkBbox(pathD) {
  *   fontSize?: number,
  *   viewboxH: number,
  *   markIsTypemark?: boolean,
- *   palette?: { ink: string, paper: string }
+ *   accentPathD?: string,
+ *   palette?: { ink: string, paper: string, accentFill?: string }
  * }} config
  * @returns {string | { svg: string, markIsTypemark: true }}
  *   In standard mode: returns the SVG string directly.
@@ -123,7 +124,8 @@ function assembleLockup(markPathD, glyphs, config) {
     gapRatio = 0.15,
     viewboxH,
     markIsTypemark = false,
-    palette = { ink: "#111418", paper: "#FAFBFC" },
+    accentPathD,
+    palette = { ink: "#181818", paper: "#FAFBFC" },
   } = config;
 
   // Direction D: mark IS the integrated typemark — no separate logotype, no gap
@@ -180,6 +182,7 @@ function assembleLockup(markPathD, glyphs, config) {
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalW.toFixed(3)} ${viewboxH}">`,
     `  <g id="mark" transform="translate(${markTx},${markTy}) scale(${s.toFixed(6)})">`,
     `    <path d="${markPathD}" fill="${palette.ink}"/>`,
+    (accentPathD && palette.accentFill) ? `    <path d="${accentPathD}" fill="${palette.accentFill}"/>` : "",
     `  </g>`,
     `  <g id="logotype" transform="translate(${glyphTx},${glyphTy})">`,
     glyphPaths,
