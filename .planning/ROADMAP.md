@@ -194,7 +194,13 @@ Plans:
   2. An automated consistency check script verifies that every brandbook token value that corresponds to an `ax-*` token in `accrue_admin/assets/css/theme.css` matches (or is explicitly documented as a brand-layer divergence) — the script exits non-zero on undocumented drift.
   3. `brandbook/examples/` contains palette and typography specimen artifacts (SVG or HTML) that render every color swatch, type scale, and spacing step visually.
 
-**Plans:** TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 184-01-PLAN.md — Harness scaffold + gated dep install + tokens.json SSOT + lib.mjs helpers
+- [ ] 184-02-PLAN.md — tokens.css generator + reference-only README + completeness check (TOK-01)
+- [ ] 184-03-PLAN.md — brand↔admin parity check + injected-drift --test (TOK-02)
+- [ ] 184-04-PLAN.md — palette/typography/spacing specimen SVGs + coverage check (TOK-03)
+- [ ] 184-05-PLAN.md — CI determinism + parity gates (TOK-01/02/03)
 
 ### Phase 185: Voice, Microcopy & Marketing Copy
 
