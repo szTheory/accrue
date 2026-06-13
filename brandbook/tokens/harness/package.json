@@ -1,0 +1,17 @@
+{
+  "name": "accrue-tokens-harness",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node generate-tokens-css.mjs",
+    "specimens": "node generate-specimens.mjs",
+    "parity": "node parity-check.mjs",
+    "parity-test": "node parity-check.mjs --test"
+  },
+  "dependencies": {
+    "culori": "^4.0.2",
+    "postcss": "^8.5.15",
+    "postcss-value-parser": "^4.2.0",
+    "svgo": "^4.0.1"
+  }
+}
