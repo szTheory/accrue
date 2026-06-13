@@ -21,7 +21,7 @@ created: 2026-06-13
 | **Config file** | {path or "none — Wave 0 installs"} |
 | **Quick run command** | `{quick command}` |
 | **Full suite command** | `{full command}` |
-| **Estimated runtime** | ~182 seconds |
+| **Estimated runtime** | ~{N} seconds |
 
 ---
 
@@ -30,7 +30,7 @@ created: 2026-06-13
 - **After every task commit:** Run `{quick run command}`
 - **After every plan wave:** Run `{full suite command}`
 - **Before `/gsd:verify-work`:** Full suite must be green
-- **Max feedback latency:** 182 seconds
+- **Max feedback latency:** {N} seconds
 
 ---
 
@@ -38,7 +38,7 @@ created: 2026-06-13
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 182-01-01 | 01 | 1 | REQ-{XX} | T-182-01 / — | {expected secure behavior or "N/A"} | unit | `{command}` | ✅ / ❌ W0 | ⬜ pending |
+| {N}-01-01 | 01 | 1 | REQ-{XX} | T-{N}-01 / — | {expected secure behavior or "N/A"} | unit | `{command}` | ✅ / ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -70,7 +70,7 @@ created: 2026-06-13
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verify
 - [ ] Wave 0 covers all MISSING references
 - [ ] No watch-mode flags
-- [ ] Feedback latency < 182s
+- [ ] Feedback latency < {N}s
 - [ ] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** {pending / approved YYYY-MM-DD}
