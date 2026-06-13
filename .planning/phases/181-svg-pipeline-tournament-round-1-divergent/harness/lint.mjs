@@ -31,7 +31,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Paths
 // ---------------------------------------------------------------------------
 
-const PHASE_DIR = path.resolve(__dirname, "..");
+const argOutputDir = (() => {
+  const i = process.argv.indexOf("--output-dir");
+  return i !== -1 ? path.resolve(process.argv[i + 1]) : null;
+})();
+const PHASE_DIR = argOutputDir ?? path.resolve(__dirname, "..");
 const CANDIDATES_DIR = path.join(PHASE_DIR, "candidates");
 const REJECTED_DIR = path.join(PHASE_DIR, "rejected");
 const LINT_LOG = path.join(PHASE_DIR, "lint-results.ndjson");
@@ -121,8 +125,10 @@ function lintNoSubtitle(svgString) {
 
 /**
  * Fail if any hex color in the SVG has HSV saturation > 0.15.
- * Brand colors (#111418, #24303B, #FAFBFC, #E9EEF2) all have saturation < 0.15.
- * Saturated fills (e.g., #5E9E84) cannot be mapped to Ink/Paper grayscale.
+ * NOTE: #111418 (sat≈0.29) and #24303B (sat≈0.39) exceed this threshold.
+ * Generated SVGs use #181818 (sat=0) for Ink. Color variants (e.g. Moss #5E9E84,
+ * sat≈0.40) must pass this lint via their mono-derived SVG (monoSvgString override),
+ * not the color SVG itself.
  * @param {string} svgString
  * @returns {boolean} true = pass
  */
@@ -303,6 +309,7 @@ function lint16pxLegibility(png16Path, png32Path) {
  *   id: string,
  *   direction: string,
  *   svgString: string,
+ *   monoSvgString?: string,
  *   skipGapRatio?: boolean,
  *   markBbox?: { xMax: number },
  *   logotypeBbox?: { xMin: number },
@@ -314,7 +321,7 @@ function lint16pxLegibility(png16Path, png32Path) {
  * @returns {{ pass: boolean, failures: string[] }}
  */
 function lintCandidate(candidate, opts = {}) {
-  const { id, svgString, skipGapRatio, markBbox, logotypeBbox, capHeight, png16Path, png32Path } = candidate;
+  const { id, svgString, monoSvgString, skipGapRatio, markBbox, logotypeBbox, capHeight, png16Path, png32Path } = candidate;
   const { writeLog = false } = opts;
   const failures = [];
 
@@ -341,8 +348,11 @@ function lintCandidate(candidate, opts = {}) {
   if (!subtitlePassed) failures.push("no-subtitle");
 
   // 4. Monochrome-derivable
-  const monoPassed = lintMonochromeDeriv(svgString);
-  record("monochrome-derivable", monoPassed, "saturated fill color (HSV saturation > 0.15)");
+  // For color variants, lint against the mono-derived SVG (monoSvgString override)
+  // rather than the color SVG itself — the color SVG is intentionally saturated.
+  const svgForMonoLint = monoSvgString ?? svgString;
+  const monoPassed = lintMonochromeDeriv(svgForMonoLint);
+  record("monochrome-derivable", monoPassed, "saturated fill — if color variant, check monoMap config produces a low-saturation SVG");
   if (!monoPassed) failures.push("monochrome-derivable");
 
   // 5. Lockup gap ratio — skip for Direction D integrated typemarks

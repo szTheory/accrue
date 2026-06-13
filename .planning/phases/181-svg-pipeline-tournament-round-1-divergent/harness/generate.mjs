@@ -38,7 +38,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Config constants
 // ---------------------------------------------------------------------------
 
-const PHASE_DIR = path.resolve(__dirname, "..");
+const argOutputDir = (() => {
+  const i = process.argv.indexOf("--output-dir");
+  return i !== -1 ? path.resolve(process.argv[i + 1]) : null;
+})();
+const PHASE_DIR = argOutputDir ?? path.resolve(__dirname, "..");
 const CANDIDATES_DIR = path.join(PHASE_DIR, "candidates");
 const REJECTED_DIR = path.join(PHASE_DIR, "rejected");
 const SCREENSHOTS_DIR = path.join(PHASE_DIR, "screenshots");
@@ -78,16 +82,24 @@ function writeRejected(candidateId, svgString, failures) {
 
 /**
  * Build a lockup SVG string from a mark + assembled glyphs.
- * Uses greyscale palette (#181818) to pass monochrome lint.
+ * Derives ink color and accentFill from config.colorTreatment.
  *
  * @param {string} markPathD
+ * @param {string | undefined} accentPathD — for two-tone marks (top step)
  * @param {{ advanceWidth: number }[]} glyphs
  * @param {number} markWidth
  * @param {number} markHeight — mark's local coordinate height (e.g. ~40 for Direction A)
  * @param {number} capHeight
+ * @param {{ colorTreatment?: string }} config — candidate config for color derivation
  * @returns {string} SVG string
  */
-function buildLockupSvg(markPathD, glyphs, markWidth, markHeight, capHeight) {
+function buildLockupSvg(markPathD, accentPathD, glyphs, markWidth, markHeight, capHeight, config) {
+  const colorTreatment = config?.colorTreatment;
+  // Derive ink color from colorTreatment
+  const ink = colorTreatment === "moss" ? "#5E9E84" : "#181818";
+  // Derive accentFill for two-tone marks
+  const accentFill = colorTreatment === "two-tone" ? "#5E9E84" : undefined;
+
   const viewboxH = capHeight * 1.4;
   const result = assembleLockup(markPathD, glyphs, {
     markWidth,
@@ -96,10 +108,28 @@ function buildLockupSvg(markPathD, glyphs, markWidth, markHeight, capHeight) {
     gapRatio: 0.15,
     viewboxH,
     markIsTypemark: false,
-    palette: { ink: "#181818", paper: "#FAFBFC" },
+    accentPathD,
+    palette: { ink, paper: "#FAFBFC", accentFill },
   });
   // assembleLockup returns SVG string in standard mode
   return typeof result === "string" ? result : result.svg;
+}
+
+/**
+ * Build a monochrome-derived SVG by replacing saturated colors per monoMap.
+ * Returns undefined for empty or missing monoMap (no color to swap).
+ *
+ * @param {string} svgString
+ * @param {Record<string, string>} monoMap — e.g. { "#5E9E84": "#818181" }
+ * @returns {string | undefined}
+ */
+export function buildMonoSvg(svgString, monoMap) {
+  if (!monoMap || Object.keys(monoMap).length === 0) return undefined;
+  let mono = svgString;
+  for (const [from, to] of Object.entries(monoMap)) {
+    mono = mono.replaceAll(from, to);
+  }
+  return mono;
 }
 
 /**
@@ -125,6 +155,7 @@ function runLint(candidate) {
     id: candidate.id,
     direction: candidate.direction,
     svgString: candidate.lockupSvg,
+    monoSvgString: candidate.monoSvgString,
     skipGapRatio: candidate.skipGapRatio,
     markBbox: candidate.markBbox,
     logotypeBbox: candidate.logotypeBbox,
@@ -149,10 +180,13 @@ function runLint(candidate) {
  */
 function buildStandardCandidate(direction, generatorFn, config, accrueGlyphs, capHeight) {
   try {
-    const { markPathD, markWidth, markHeight } = generatorFn(config);
+    const { markPathD, accentPathD, markWidth, markHeight } = generatorFn(config);
 
-    // Build lockup SVG
-    const lockupSvg = buildLockupSvg(markPathD, accrueGlyphs, markWidth, markHeight, capHeight);
+    // Build lockup SVG (threads colorTreatment and accentPathD for R2 two-tone support)
+    const lockupSvg = buildLockupSvg(markPathD, accentPathD, accrueGlyphs, markWidth, markHeight, capHeight, config);
+
+    // Build mono-derived SVG for color variants (used by lintCandidate monoSvgString override)
+    const monoSvgString = buildMonoSvg(lockupSvg, config.monoMap);
 
     // Approximate mark bbox in SCALED viewBox coordinates.
     // The mark is scaled by s = capHeight / markHeight in the new assembly.
@@ -168,9 +202,11 @@ function buildStandardCandidate(direction, generatorFn, config, accrueGlyphs, ca
       direction,
       config,
       markPathD,
+      accentPathD,
       markWidth,
       markHeight,
       lockupSvg,
+      monoSvgString,
       markBbox,
       logotypeBbox,
       capHeight,
@@ -463,10 +499,14 @@ async function main() {
   // Summary line
   // -------------------------------------------------------------------------
   const passed = passing.length;
-  const failed = rawCandidates.length - (rawCandidates.length - culled);
+  const failed = culled;
   console.log(
-    `[generate] Done: ${passed} passed / ${culled} culled → ${passing.length} gallery candidates in ${CANDIDATES_DIR}`
+    `[generate] Done: ${passed} passed / ${failed} culled → ${passing.length} gallery candidates in ${CANDIDATES_DIR}`
   );
 }
 
-await main();
+// Only run main() when executed directly (not when imported as a module).
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+if (isMain) {
+  await main();
+}
