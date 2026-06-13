@@ -525,6 +525,8 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 Validated in Phase 180: AUD-01, AUD-02, AUD-03 — 14-section BRAND-AUDIT.md (status: ratified), locked BRAND-DNA.md, binding logo-brief.md, quality-gate-checklist.md, and committed WCAG contrast evidence (`artifacts/contrast-table.txt`). User ratified all verdicts at the D-07 checkpoint (ADD-6 flipped to KEEP); Phase 181 unblocked.
 
+Validated in Phase 183: LOGO-04 — complete production logo system at `brandbook/logo/` (13 SVGs + 8 rasters = 21 committed files): primary/on-dark/with-subtitle lockups, wordmark, mark + mark-on-dark, mono + mono-inverse (lockup & mark), clearspace diagram, social card (SVG+PNG), favicon (SVG+.ico+PNG 16/32/48), apple-touch-icon, PWA icons 192/512. All finals outlined paths, svgo-optimized, with `<title>`/`<desc>` metadata; `brandbook/README.md` is the min-size SSOT and `brandbook/LICENSE-FONTS.txt` documents OFL/Geist provenance. Two defects caught at the derivative-sheet checkpoint and fixed (SVGO dropping a tiny outlined glyph in the social-card subtitle; subtitle viewBox width clipping). Verified 7/7 must-haves.
+
 ### Validated v1.51 (archived in `.planning/milestones/v1.51-REQUIREMENTS.md`; milestone shipped & archived 2026-06-04)
 
 Admin UI Depth Pass — 22/22 satisfied (DSY-01..03, IA-01..07, SCR-01..04, MOT-01..03, SEED-01..02, QA-01..03) across Phases 174–179.
@@ -601,4 +603,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-13 — Phase 182 complete: logo tournament converged — winner R2-7 locked (two-tone B1: 4 rounded steps, Ink base + Moss #5E9E84 accent top step); monotonic TOURNAMENT.md ledger preserved; 182-FREEZE.md ready for Phase 183 (LOGO-03 validated).*
+*Last updated: 2026-06-13 — Phase 183 complete: locked R2-7 winner mechanically derived into the full production logo system at `brandbook/logo/` (21 committed files), README min-size SSOT + OFL/Geist license; two checkpoint-caught defects fixed; verified 7/7 (LOGO-04 validated). Next: Phase 184 (Design Tokens & Specimens).*
