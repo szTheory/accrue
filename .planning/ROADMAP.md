@@ -133,8 +133,22 @@ Plans:
   3. The loop concludes when the user locks a single winner; if 3 rounds complete without a lock, the agent surfaces an explicit "extend one more round or settle on [candidate]?" question.
   4. The final `TOURNAMENT.md` entry records the locked winner with its candidate ID and the ratified mark + lockup geometry frozen.
 
-**Plans:** TBD
-*(This phase is elastic: 2–4 plans depending on how many rounds are needed. One plan per round.)*
+**Plans:** 3 plans (+ optional additional rounds per user verdict)
+
+Plans:
+**Wave 1**
+
+- [ ] 182-01-PLAN.md — Harness adaptation: --output-dir parameterization, two-tone assemble-lockup, b-step-r2.mjs, REVIEW fixes WR-01/WR-05/WR-07/IN-04d (LOGO-03)
+
+**Wave 2** *(blocked on Wave 1 — pipeline run + checkpoint)*
+
+- [ ] 182-02-PLAN.md — Round 2 pipeline run: 7 variants (R2-1..R2-7), render gallery, agent self-review, user verdict → TOURNAMENT.md append (LOGO-03) ✋
+
+**Wave 3** *(blocked on Wave 2 — LOCK/SETTLE path only)*
+
+- [ ] 182-03-PLAN.md — Winner freeze: verify TOURNAMENT.md integrity + write 182-FREEZE.md for Phase 183 (LOGO-03)
+
+*(EXTEND path: planner re-invoked for Round 3 before 182-03 executes; max 3 rounds per ROADMAP.)*
 
 ### Phase 183: Logo System Production
 
