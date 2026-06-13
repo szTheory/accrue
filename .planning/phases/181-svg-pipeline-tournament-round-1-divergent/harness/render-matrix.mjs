@@ -69,28 +69,39 @@ const BLANK_RENDER_MIN_DARK_COVERAGE = 0.005; // 0.5%
 // ---------------------------------------------------------------------------
 
 /**
- * Fraction of pixels that are "dark" (luminance < 0.5) in a PNG file.
+ * Fraction of pixels that are "ink-colored" (differ from the paper-light bg) in a PNG file.
  * Used as blank-render guard: a near-empty render indicates the SVG ink is
  * outside the viewBox (coordinate-space bug) rather than a legibility issue.
  *
+ * Uses color-distance from the paper-light background (#FAFBFC = 250, 251, 252)
+ * rather than a luminance threshold — this correctly handles Moss (#5E9E84) ink,
+ * which has luminance ~0.56 (above the old 0.5 threshold) but is clearly visible.
+ *
  * @param {string} pngPath — path to the PNG file
- * @returns {number} fraction of dark pixels (0.0–1.0)
+ * @returns {number} fraction of ink-colored pixels (0.0–1.0)
  */
 function darkPixelCoverage(pngPath) {
   const png = PNG.sync.read(fs.readFileSync(pngPath));
   const { data, width, height } = png;
-  let darkCount = 0;
+  // Paper-light background: #FAFBFC = rgb(250, 251, 252)
+  const BG_R = 250, BG_G = 251, BG_B = 252;
+  // Pixel is "ink" if its color distance from the bg exceeds this threshold
+  // (Euclidean RGB distance; threshold ~30 excludes JPEG/anti-alias noise)
+  const COLOR_DIST_THRESHOLD = 30;
+  let inkCount = 0;
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
     if (a < 64) continue; // skip near-transparent pixels
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
-    // Simple luminance threshold (no need for linear conversion here)
-    const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-    if (lum < 0.5) darkCount++;
+    const dr = r - BG_R;
+    const dg = g - BG_G;
+    const db = b - BG_B;
+    const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+    if (dist > COLOR_DIST_THRESHOLD) inkCount++;
   }
-  return darkCount / (width * height);
+  return inkCount / (width * height);
 }
 
 /**
@@ -123,19 +134,55 @@ function applyInkDarkColors(svgContent) {
 
 /**
  * Build a minimal HTML wrapper for an SVG in a tile context.
- * For the mono tile, adds a CSS grayscale filter.
- * For the ink-dark tile, inverts ink/paper colors so the logo is light-on-dark.
+ * For the mono tile: uses monoSvgString if available (monoMap-derived grey), else CSS grayscale.
+ * For the ink-dark tile: inverts ink/paper colors so the logo is light-on-dark.
+ * For the social-card tile: adds a "real context" text overlay (D-182-08).
+ *
+ * @param {string} svgContent — the candidate's lockup SVG string
+ * @param {object} tile — tile config from TILES array
+ * @param {string | undefined} monoSvgString — monoMap-derived SVG for Moss/two-tone candidates
  */
-function buildTileHtml(svgContent, tile) {
-  const monoStyle = tile.mono
+function buildTileHtml(svgContent, tile, monoSvgString) {
+  // Mono tile: prefer monoSvgString (exact grey-swap) over CSS grayscale filter
+  let effectiveSvg;
+  if (tile.mono && monoSvgString) {
+    effectiveSvg = monoSvgString; // grey paths from monoMap; no filter needed
+  } else if (tile.id === "ink-dark") {
+    effectiveSvg = applyInkDarkColors(svgContent);
+  } else {
+    effectiveSvg = svgContent;
+  }
+
+  // CSS grayscale filter only when mono tile but no monoSvgString available
+  const monoStyle = (tile.mono && !monoSvgString)
     ? `<style>svg { filter: grayscale(1); }</style>`
     : "";
+
   // WR-07: avatar-circle tile renders with border-radius:50% on body so the
   // circular clip is visible in the screenshot (screenshotted via page.locator("body")).
   const circleStyle = tile.id === "avatar-circle"
     ? `<style>body { border-radius: 50%; overflow: hidden; }</style>`
     : "";
-  const effectiveSvg = tile.id === "ink-dark" ? applyInkDarkColors(svgContent) : svgContent;
+
+  // D-182-08: social-card "real context" text overlay — exercises actual social-card use case
+  const socialCardOverlay = tile.id === "social-card"
+    ? `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:32px;font-family:'Geist','GeistSans',system-ui,sans-serif;pointer-events:none;">
+        <div style="flex-shrink:0;">${effectiveSvg}</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="font-size:28px;font-weight:700;color:#181818;white-space:nowrap;">accrue</div>
+          <div style="font-size:16px;font-weight:400;color:#5E9E84;white-space:nowrap;">Elixir billing library for Phoenix</div>
+          <div style="font-size:12px;font-weight:400;color:#6B7280;white-space:nowrap;">hex.pm/packages/accrue</div>
+        </div>
+      </div>`
+    : "";
+
+  const bodyContent = tile.id === "social-card"
+    ? socialCardOverlay
+    : effectiveSvg;
+
+  // For social-card tile: body uses position:relative so the overlay div can be absolute.
+  const bodyPositionStyle = tile.id === "social-card" ? "position: relative;" : "";
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -152,6 +199,7 @@ ${circleStyle}
     display: flex;
     align-items: center;
     justify-content: center;
+    ${bodyPositionStyle}
   }
   svg {
     max-width: 100%;
@@ -160,7 +208,7 @@ ${circleStyle}
 </style>
 </head>
 <body>
-${effectiveSvg}
+${bodyContent}
 </body>
 </html>`;
 }
@@ -168,14 +216,18 @@ ${effectiveSvg}
 /**
  * Render one tile for one candidate using Playwright.
  * Reuses the already-open browser (one browser per candidate).
+ * @param {string} svgContent — the candidate's lockup SVG string
+ * @param {object} tile — tile config from TILES array
+ * @param {string} candidateId
+ * @param {string | undefined} monoSvgString — monoMap-derived SVG for mono tile (Moss/two-tone)
  * @returns {string} outputPath
  */
-async function renderTile(browser, svgContent, tile, candidateId) {
+async function renderTile(browser, svgContent, tile, candidateId, monoSvgString) {
   const candidateDir = path.join(SCREENSHOTS_DIR, candidateId);
   const outputPath = path.join(candidateDir, `${tile.id}.png`);
   const tmpPath = path.join(candidateDir, `_tmp_${tile.id}.html`);
 
-  const html = buildTileHtml(svgContent, tile);
+  const html = buildTileHtml(svgContent, tile, monoSvgString);
   fs.writeFileSync(tmpPath, html);
 
   try {
@@ -185,10 +237,14 @@ async function renderTile(browser, svgContent, tile, candidateId) {
     });
     const page = await ctx.newPage();
     await page.goto("file://" + tmpPath);
-    // WR-07: avatar-circle uses body locator to capture the circular clip
-    const screenshotTarget = tile.id === "avatar-circle"
-      ? page.locator("body")
-      : page.locator("svg");
+    // WR-07: avatar-circle uses body locator to capture the circular clip.
+    // D-182-08: social-card tile uses body locator too — the SVG is nested inside the
+    // text-overlay div and isn't the direct body child, so page.locator("svg") would
+    // fail to screenshot the full tile context (the copy overlay).
+    const screenshotTarget =
+      tile.id === "avatar-circle" || tile.id === "social-card"
+        ? page.locator("body")
+        : page.locator("svg");
     await screenshotTarget.screenshot({ path: outputPath });
     await ctx.close();
   } finally {
@@ -252,13 +308,15 @@ async function main() {
       }
 
       const svgContent = fs.readFileSync(svgPath, "utf8");
+      // monoSvgString from index.json — for Moss/two-tone candidates, renders true grey (not CSS filter)
+      const monoSvgString = candidate.monoSvgString ?? undefined;
       const candidateDir = path.join(SCREENSHOTS_DIR, id);
       fs.mkdirSync(candidateDir, { recursive: true });
 
       try {
         // Render all 8 tiles
         for (const tile of TILES) {
-          await renderTile(browser, svgContent, tile, id);
+          await renderTile(browser, svgContent, tile, id, monoSvgString);
         }
 
         // Step 3a — Blank-render guard (always, even in smoke mode)
