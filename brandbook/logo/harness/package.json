@@ -1,0 +1,22 @@
+{
+  "name": "accrue-logo-production-harness",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node generate-logo-suite.mjs",
+    "rasters": "node generate-rasters.mjs",
+    "qa": "node size-matrix-qa.mjs",
+    "ico-test": "node ico-packer.mjs --test",
+    "spine-test": "node geist-spine-mono.mjs --test"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.0",
+    "@xmldom/xmldom": "^0.9.0",
+    "geist": "^1.7.2",
+    "opentype.js": "^2.0.0",
+    "playwright": "^1.59.1",
+    "pngjs": "^7.0.0",
+    "svgo": "^4.0.1",
+    "wawoff2": "^2.0.1"
+  }
+}
