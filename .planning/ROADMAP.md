@@ -138,7 +138,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 182-01-PLAN.md — Harness adaptation: --output-dir parameterization, two-tone assemble-lockup, b-step-r2.mjs, REVIEW fixes WR-01/WR-05/WR-07/IN-04d (LOGO-03)
+- [x] 182-01-PLAN.md — Harness adaptation: --output-dir parameterization, two-tone assemble-lockup, b-step-r2.mjs, REVIEW fixes WR-01/WR-05/WR-07/IN-04d (LOGO-03)
 
 **Wave 2** *(blocked on Wave 1 — pipeline run + checkpoint)*
 
@@ -495,7 +495,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
-| 182. Tournament Convergent Refinement | v1.52 | 0/? | Not started | - |
+| 182. Tournament Convergent Refinement | v1.52 | 1/3 | In Progress|  |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
