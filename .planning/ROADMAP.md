@@ -167,7 +167,7 @@ Plans:
 Plans:
 **Wave 1** *(harness bootstrap — package.json, svgo.config.mjs, geist-spine-mono.mjs, ico-packer.mjs)*
 
-- [ ] 183-01-PLAN.md — Harness bootstrap: package.json (@resvg/resvg-js), svgo.config.mjs, geist-spine-mono.mjs, ico-packer.mjs + unit tests (LOGO-04)
+- [x] 183-01-PLAN.md — Harness bootstrap: package.json (@resvg/resvg-js), svgo.config.mjs, geist-spine-mono.mjs, ico-packer.mjs + unit tests (LOGO-04)
 
 **Wave 2** *(blocked on Wave 1 — SVG suite generation)*
 
@@ -514,7 +514,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
 | 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
-| 183. Logo System Production | v1.52 | 0/? | Not started | - |
+| 183. Logo System Production | v1.52 | 1/4 | In Progress|  |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
