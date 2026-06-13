@@ -42,7 +42,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 - [x] **Phase 180: Brand Audit & DNA Lock** — 14-section pressure test, KEEP/TIGHTEN/REWORK/ADD/REMOVE verdicts, locked BRAND-DNA + binding logo brief (✋ user checkpoint) (completed 2026-06-12)
 - [x] **Phase 181: SVG Pipeline + Tournament Round 1 — Divergent** — opentype.js Geist-outline harness, pre-gate lints, Playwright QA, 12–16 candidates across 4 directions, context-matrix gallery (✋ user picks winners) (completed 2026-06-13)
-- [ ] **Phase 182: Tournament Convergent Refinement** — variation rounds on winners via monotonic TOURNAMENT.md ledger, 3-round default cap, extend-or-settle question (✋ looping checkpoint)
+- [x] **Phase 182: Tournament Convergent Refinement** — variation rounds on winners via monotonic TOURNAMENT.md ledger, 3-round default cap, extend-or-settle question (✋ looping checkpoint) (completed 2026-06-13)
 - [ ] **Phase 183: Logo System Production** — full derived suite in `brandbook/logo/`, outlined paths, svgo-optimized (light checkpoint: derivative-sheet eyeball)
 - [ ] **Phase 184: Design Tokens & Specimens** — `brandbook/tokens/` with documented mapping + automated consistency check vs admin `ax-*` tokens (no checkpoint; depends only on 180)
 - [ ] **Phase 185: Voice, Microcopy & Marketing Copy** — ready-to-paste copy blocks for all adopter-facing surfaces (light checkpoint: batch copy review; depends only on 180)
@@ -133,7 +133,7 @@ Plans:
   3. The loop concludes when the user locks a single winner; if 3 rounds complete without a lock, the agent surfaces an explicit "extend one more round or settle on [candidate]?" question.
   4. The final `TOURNAMENT.md` entry records the locked winner with its candidate ID and the ratified mark + lockup geometry frozen.
 
-**Plans:** 3 plans (+ optional additional rounds per user verdict)
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**
@@ -495,7 +495,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
-| 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete   | 2026-06-13 |
+| 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
