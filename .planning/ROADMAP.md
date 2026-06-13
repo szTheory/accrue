@@ -41,7 +41,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 ### Phase Summary
 
 - [x] **Phase 180: Brand Audit & DNA Lock** — 14-section pressure test, KEEP/TIGHTEN/REWORK/ADD/REMOVE verdicts, locked BRAND-DNA + binding logo brief (✋ user checkpoint) (completed 2026-06-12)
-- [ ] **Phase 181: SVG Pipeline + Tournament Round 1 — Divergent** — opentype.js Geist-outline harness, pre-gate lints, Playwright QA, 12–16 candidates across 4 directions, context-matrix gallery (✋ user picks winners)
+- [x] **Phase 181: SVG Pipeline + Tournament Round 1 — Divergent** — opentype.js Geist-outline harness, pre-gate lints, Playwright QA, 12–16 candidates across 4 directions, context-matrix gallery (✋ user picks winners) (completed 2026-06-13)
 - [ ] **Phase 182: Tournament Convergent Refinement** — variation rounds on winners via monotonic TOURNAMENT.md ledger, 3-round default cap, extend-or-settle question (✋ looping checkpoint)
 - [ ] **Phase 183: Logo System Production** — full derived suite in `brandbook/logo/`, outlined paths, svgo-optimized (light checkpoint: derivative-sheet eyeball)
 - [ ] **Phase 184: Design Tokens & Specimens** — `brandbook/tokens/` with documented mapping + automated consistency check vs admin `ax-*` tokens (no checkpoint; depends only on 180)
@@ -93,7 +93,7 @@ Plans:
   3. Every candidate in the gallery carries a stable ID (A1…D4) and a one-line rationale; the agent has screenshot-reviewed and self-scored each candidate before the user sees them.
   4. User picks 1–3 winners and records per-winner keep/change notes in `TOURNAMENT.md`; the round-1 ledger entry is verbatim.
 
-**Plans:** 7 plans across 6 waves
+**Plans:** 7/7 plans complete
 
 Plans:
 **Wave 1** *(package legitimacy gate + font spine bootstrap)*
@@ -119,7 +119,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 — self-review + user checkpoint)*
 
-- [ ] 181-07-PLAN.md — Agent self-review → self-review.ndjson + user picks winners → TOURNAMENT.md (LOGO-02) ✋
+- [x] 181-07-PLAN.md — Agent self-review → self-review.ndjson + user picks winners → TOURNAMENT.md (LOGO-02) ✋
 
 ### Phase 182: Tournament Convergent Refinement
 
@@ -480,7 +480,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
-| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 6/7 | In Progress|  |
+| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
 | 182. Tournament Convergent Refinement | v1.52 | 0/? | Not started | - |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |

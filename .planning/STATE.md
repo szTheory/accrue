@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
-status: executing
-last_updated: "2026-06-12T15:35:53.146Z"
+status: ready_to_plan
+last_updated: 2026-06-13T01:23:44.519Z
 last_activity: 2026-06-12
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 14
+  completed_plans: 11
+  percent: 29
+stopped_at: Phase 181 complete (7/7) — ready to discuss Phase 182
 ---
 
 # Project State
@@ -21,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 181 — svg-pipeline-tournament-round-1-divergent
+**Current focus:** Phase 182 — tournament convergent refinement
 
 ## Current Position
 
-Phase: 181 (svg-pipeline-tournament-round-1-divergent) — EXECUTING
-Plan: 7 of 7
-Status: Ready to execute
-Last activity: 2026-06-12
+Phase: 182
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-13
 
 ## Post-v1.48 Pause Rule
 
@@ -42,8 +43,8 @@ v1.52 is a brand/DX investment in adopter-facing presentation surfaces (README, 
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 180 | Brand Audit & DNA Lock | AUD-01, AUD-02, AUD-03 | Not started |
-| 181 | SVG Pipeline + Tournament Round 1 — Divergent | LOGO-01, LOGO-02 | Not started |
+| 180 | Brand Audit & DNA Lock | AUD-01, AUD-02, AUD-03 | Complete (2026-06-12) |
+| 181 | SVG Pipeline + Tournament Round 1 — Divergent | LOGO-01, LOGO-02 | Complete (2026-06-12) |
 | 182 | Tournament Convergent Refinement | LOGO-03 | Not started |
 | 183 | Logo System Production | LOGO-04 | Not started |
 | 184 | Design Tokens & Specimens | TOK-01, TOK-02, TOK-03 | Not started |
@@ -110,7 +111,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 93
+- Total plans completed: 100
 - Average duration: 1m
 - Total execution time: 1m
 
@@ -167,8 +168,10 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-06-12 (181-05):** lint.mjs CLI main() must be guarded by import.meta direct-exec check — raw `await main()` at module bottom runs as import side-effect; generate.mjs import triggers lint CLI otherwise
 - **2026-06-12 (181-05):** assembleLockup palette.ink must be #181818 (greyscale, sat=0) — default #111418 has HSV sat=0.29 which fails lintMonochromeDeriv; all lockup SVGs in pipeline use greyscale fills
 - **2026-06-12 (181-05):** Full pipeline produces 19 raw → 16 gallery; D2/D3/D4 gallery-size culled (excess beyond 16 cap); D1 is the only Direction D candidate in final gallery
-- **2026-06-12 (181-06):** 16px legibility CR threshold tuned 3.0 → 1.75 (plan delegated to implementer: "Claude's Discretion — tune during implementation"); WCAG AA-large 3:1 too strict for thin-stroke anti-aliased marks; measured CR range 1.72–3.76; 1.75 culls truly faint marks (A1/A2/C3 at CR=1.72) while retaining 13 legible gallery candidates
-- **2026-06-12 (181-06):** Direction D per-direction floor (≥3) not met — D2/D3/D4 gallery-size culled at generate time; D1 is sole D representative; architectural limitation requires gallery cap increase or more D configs to resolve
+- **2026-06-12 (181-06, SUPERSEDED by Fix 3):** 16px legibility CR threshold was tuned 3.0 → 1.75 to explain "thin marks" — root cause was actually coordinate-space bugs rendering all candidates near-blank. After the fix, threshold reverted to 3.0 and all 19 raw candidates pass (CR ≈ 17). Lesson: visually inspect renders before tuning thresholds; blank-render guard added to render-matrix.mjs.
+- **2026-06-12 (181-06, RESOLVED by Fixes 1–3):** Direction D floor — final gallery is 16 candidates at 4/4/4/4 (direction-balanced cull moved after legibility cull); D-05 floor satisfied for all directions.
+- **2026-06-12 (181-07):** Round 1 verdict recorded in TOURNAMENT.md: Winners B4 (primary) + B1 (runner-up); A/C/D killed. Constraints R1-C1 (direction B locked), R1-C2 (preserve "stepping up toward the type" gesture), R1-C3 (Geist logotype locked), R1-C4 (Round 2 shows real color, monochrome-derivable). Verdict arrived conversationally; transcribed verbatim.
+- **2026-06-13 (181 review):** Code review CR-01 (Critical, advisory): Direction C arcs rendered fill-not-stroke — `markGroupSvg` contract never consumed by assembleLockup; user judged "solid domes," not intended stroked arcs. Doesn't invalidate the verdict (user affirmatively chose B) but Phase 182 harness work must not inherit the unused-contract pattern.
 
 ### Pending Todos
 
