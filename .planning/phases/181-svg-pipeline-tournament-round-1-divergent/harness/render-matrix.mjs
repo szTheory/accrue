@@ -28,7 +28,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Config
 // ---------------------------------------------------------------------------
 
-const PHASE_DIR = path.resolve(__dirname, "..");
+const argOutputDir = (() => {
+  const i = process.argv.indexOf("--output-dir");
+  return i !== -1 ? path.resolve(process.argv[i + 1]) : null;
+})();
+const PHASE_DIR = argOutputDir ?? path.resolve(__dirname, "..");
 const CANDIDATES_DIR = path.join(PHASE_DIR, "candidates");
 const SCREENSHOTS_DIR = path.join(PHASE_DIR, "screenshots");
 const REJECTED_DIR = path.join(PHASE_DIR, "rejected");
@@ -53,7 +57,7 @@ const TILES = [
 ];
 
 /**
- * Minimum fraction of "dark" pixels in the paper-light or 32px-favicon tile.
+ * Minimum fraction of "dark" pixels in the paper-light tile.
  * A render with < 0.5% dark coverage is considered blank (coordinate-space bug
  * or invisible mark). Distinct from the 16px legibility cull — reported as
  * "blank-render" rejection reason so it is unambiguous in diagnostics.
@@ -98,6 +102,7 @@ const INK_DARK_COLOR_MAP = {
   "#181818": "#FAFBFC", // dark ink → paper (visible on dark bg)
   "#FAFBFC": "#111418", // paper knockout → dark bg (knockout still knocks out)
   "#E9EEF2": "#2A333C", // fog knockout → dark mid-tone (Direction D stepped/fill motifs)
+  "#5E9E84": "#5E9E84", // Moss → Moss (identity; 5.89:1 on Ink-dark per contrast-table.txt; no swap needed)
 };
 
 /**
@@ -125,12 +130,18 @@ function buildTileHtml(svgContent, tile) {
   const monoStyle = tile.mono
     ? `<style>svg { filter: grayscale(1); }</style>`
     : "";
+  // WR-07: avatar-circle tile renders with border-radius:50% on body so the
+  // circular clip is visible in the screenshot (screenshotted via page.locator("body")).
+  const circleStyle = tile.id === "avatar-circle"
+    ? `<style>body { border-radius: 50%; overflow: hidden; }</style>`
+    : "";
   const effectiveSvg = tile.id === "ink-dark" ? applyInkDarkColors(svgContent) : svgContent;
   return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 ${monoStyle}
+${circleStyle}
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -174,7 +185,11 @@ async function renderTile(browser, svgContent, tile, candidateId) {
     });
     const page = await ctx.newPage();
     await page.goto("file://" + tmpPath);
-    await page.locator("svg").screenshot({ path: outputPath });
+    // WR-07: avatar-circle uses body locator to capture the circular clip
+    const screenshotTarget = tile.id === "avatar-circle"
+      ? page.locator("body")
+      : page.locator("svg");
+    await screenshotTarget.screenshot({ path: outputPath });
     await ctx.close();
   } finally {
     // Always remove the temp HTML after screenshot (T-181-15 mitigation)
@@ -316,7 +331,10 @@ async function main() {
   }
 
   // Step 4 — Update candidates/index.json (remove legibility-culled candidates)
-  let surviving = candidates.filter(c => !culledIds.has(c.id));
+  // WR-01: read the FULL index from disk (smoke mode may have only rendered a subset;
+  // surviving must start from the full set to avoid clobbering unrendered candidates).
+  const fullIndex = JSON.parse(fs.readFileSync(indexPath, "utf8"));
+  let surviving = fullIndex.filter(c => !culledIds.has(c.id));
   if (culledIds.size > 0) {
     fs.writeFileSync(indexPath, JSON.stringify(surviving, null, 2));
     console.log(`[render] Updated index.json — removed ${culledIds.size} legibility-culled candidate(s)`);

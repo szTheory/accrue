@@ -27,10 +27,26 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Config
 // ---------------------------------------------------------------------------
 
-const PHASE_DIR = path.resolve(__dirname, "..");
+const argOutputDir = (() => {
+  const i = process.argv.indexOf("--output-dir");
+  return i !== -1 ? path.resolve(process.argv[i + 1]) : null;
+})();
+const argGalleryName = (() => {
+  const i = process.argv.indexOf("--gallery-name");
+  return i !== -1 ? process.argv[i + 1] : null;
+})();
+
+const PHASE_DIR = argOutputDir ?? path.resolve(__dirname, "..");
 const CANDIDATES_DIR = path.join(PHASE_DIR, "candidates");
 const SCREENSHOTS_DIR = path.join(PHASE_DIR, "screenshots");
-const GALLERY_PATH = path.join(PHASE_DIR, "round-1-gallery.html");
+const GALLERY_PATH = path.join(PHASE_DIR, argGalleryName ?? "round-1-gallery.html");
+
+// Derive round label from gallery name (e.g. "round-2-gallery.html" → "Round 2")
+const ROUND_LABEL = (() => {
+  const name = argGalleryName ?? "";
+  const m = name.match(/round-(\d+)/i);
+  return m ? `Round ${m[1]}` : "Round 1";
+})();
 
 const TILES = [
   { id: "paper-light",   label: "Paper (light)" },
@@ -49,7 +65,10 @@ const TILES = [
 
 /** Render a single candidate section */
 function renderCandidate(candidate, svgContent) {
-  const { id, direction, rationale } = candidate;
+  const { id, direction, rationale, colorTreatment } = candidate;
+
+  // Badge: show color treatment when available, otherwise direction
+  const badgeLabel = colorTreatment ? `Color: ${colorTreatment}` : `Direction ${direction}`;
 
   // Build tile images (relative paths from gallery at phase root)
   const tilesHtml = TILES.map(tile => {
@@ -71,7 +90,7 @@ function renderCandidate(candidate, svgContent) {
   return `<section class="candidate" data-id="${id}">
   <div class="candidate-header">
     <h2 class="candidate-id">${id}</h2>
-    <span class="direction-badge">Direction ${direction}</span>
+    <span class="direction-badge">${badgeLabel}</span>
   </div>
   <p class="rationale">${escapeHtml(rationale || "")}</p>
 
@@ -361,7 +380,7 @@ function buildVerdictBlock() {
 
   var today = new Date().toISOString().split('T')[0];
   var lines = [];
-  lines.push('## Round 1 — ' + today);
+  lines.push('## ROUND_LABEL_PLACEHOLDER — ' + today);
   lines.push('**Winners:** ' + winners.join(', '));
   lines.push('**Killed:** ' + killed.join(' '));
   lines.push('');
@@ -418,57 +437,95 @@ document.querySelectorAll('.winner-cb').forEach(function(cb) {
 // ---------------------------------------------------------------------------
 
 function buildGallery(candidates) {
-  // Group by direction for visual organisation
-  const byDirection = {};
-  for (const c of candidates) {
-    if (!byDirection[c.direction]) byDirection[c.direction] = [];
-    byDirection[c.direction].push(c);
-  }
-
-  const directionNames = {
-    A: "Direction A — Accumulation Strata",
-    B: "Direction B — Stepped Intervals",
-    C: "Direction C — Layered Arcs",
-    D: "Direction D — Integrated Typemark",
-  };
+  // Determine if any candidate uses colorTreatment (Round 2 grouping)
+  const hasColorTreatment = candidates.some(c => c.colorTreatment);
 
   let sections = "";
-  for (const dir of ["A", "B", "C", "D"]) {
-    const dirCandidates = byDirection[dir];
-    if (!dirCandidates || dirCandidates.length === 0) continue;
+  const totalCount = candidates.length;
 
-    const cards = dirCandidates.map(c => {
-      const svgPath = path.join(CANDIDATES_DIR, `${c.id}.svg`);
-      const svgContent = fs.existsSync(svgPath)
-        ? fs.readFileSync(svgPath, "utf8")
-        : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80"><text x="10" y="50" fill="#ccc">SVG missing</text></svg>`;
-      return renderCandidate(c, svgContent);
-    }).join("\n");
+  if (hasColorTreatment) {
+    // Round 2: group by colorTreatment — ink → moss → two-tone
+    const colorTreatmentNames = {
+      "ink":      "Ink — Monochrome Baseline",
+      "moss":     "Full Moss (#5E9E84)",
+      "two-tone": "Two-tone: Ink + Moss Accent",
+    };
 
-    sections += `
+    const byColorTreatment = {};
+    for (const c of candidates) {
+      const key = c.colorTreatment ?? "ink";
+      if (!byColorTreatment[key]) byColorTreatment[key] = [];
+      byColorTreatment[key].push(c);
+    }
+
+    for (const treatment of ["ink", "moss", "two-tone"]) {
+      const treatmentCandidates = byColorTreatment[treatment];
+      if (!treatmentCandidates || treatmentCandidates.length === 0) continue;
+
+      const cards = treatmentCandidates.map(c => {
+        const svgPath = path.join(CANDIDATES_DIR, `${c.id}.svg`);
+        const svgContent = fs.existsSync(svgPath)
+          ? fs.readFileSync(svgPath, "utf8")
+          : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80"><text x="10" y="50" fill="#ccc">SVG missing</text></svg>`;
+        return renderCandidate(c, svgContent);
+      }).join("\n");
+
+      sections += `
+  <h2 class="section-title">${colorTreatmentNames[treatment] || treatment}</h2>
+  <div class="candidate-grid">
+    ${cards}
+  </div>`;
+    }
+  } else {
+    // Round 1 (backward compatibility): group by direction letter
+    const byDirection = {};
+    for (const c of candidates) {
+      if (!byDirection[c.direction]) byDirection[c.direction] = [];
+      byDirection[c.direction].push(c);
+    }
+
+    const directionNames = {
+      A: "Direction A — Accumulation Strata",
+      B: "Direction B — Stepped Intervals",
+      C: "Direction C — Layered Arcs",
+      D: "Direction D — Integrated Typemark",
+    };
+
+    for (const dir of ["A", "B", "C", "D"]) {
+      const dirCandidates = byDirection[dir];
+      if (!dirCandidates || dirCandidates.length === 0) continue;
+
+      const cards = dirCandidates.map(c => {
+        const svgPath = path.join(CANDIDATES_DIR, `${c.id}.svg`);
+        const svgContent = fs.existsSync(svgPath)
+          ? fs.readFileSync(svgPath, "utf8")
+          : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80"><text x="10" y="50" fill="#ccc">SVG missing</text></svg>`;
+        return renderCandidate(c, svgContent);
+      }).join("\n");
+
+      sections += `
   <h2 class="section-title">${directionNames[dir] || `Direction ${dir}`}</h2>
   <div class="candidate-grid">
     ${cards}
   </div>`;
+    }
   }
-
-  const totalCount = candidates.length;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Accrue Round 1 Gallery</title>
+<title>Accrue ${ROUND_LABEL} Gallery</title>
 <style>${CSS}</style>
 </head>
 <body>
 <header>
-  <h1>Accrue Logo Tournament — Round 1</h1>
+  <h1>Accrue Logo Tournament — ${ROUND_LABEL}</h1>
   <p>
-    ${totalCount} candidates across 4 directions.
+    ${totalCount} candidates.
     Check the winners below, add keep/change notes, then click <strong>Copy verdict block</strong>.
-    Paste the result into TOURNAMENT.md at the <code>&lt;!-- ROUND-1-PASTE-BELOW --&gt;</code> marker.
+    Paste the result into TOURNAMENT.md at the <code>&lt;!-- ROUND-2-APPEND-BELOW --&gt;</code> marker.
   </p>
 </header>
 
@@ -488,7 +545,7 @@ ${sections}
 </main>
 
 <script>
-${VERDICT_JS}
+${VERDICT_JS.replace("ROUND_LABEL_PLACEHOLDER", ROUND_LABEL)}
 </script>
 </body>
 </html>`;
