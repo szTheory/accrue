@@ -146,7 +146,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 — LOCK/SETTLE path only)*
 
-- [ ] 182-03-PLAN.md — Winner freeze: verify TOURNAMENT.md integrity + write 182-FREEZE.md for Phase 183 (LOGO-03)
+- [x] 182-03-PLAN.md — Winner freeze: verify TOURNAMENT.md integrity + write 182-FREEZE.md for Phase 183 (LOGO-03)
 
 *(EXTEND path: planner re-invoked for Round 3 before 182-03 executes; max 3 rounds per ROADMAP.)*
 
@@ -495,7 +495,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
-| 182. Tournament Convergent Refinement | v1.52 | 2/3 | In Progress|  |
+| 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete   | 2026-06-13 |
 | 183. Logo System Production | v1.52 | 0/? | Not started | - |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
