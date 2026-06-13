@@ -179,7 +179,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 — QA + docs + human checkpoint)*
 
-- [ ] 183-04-PLAN.md — size-matrix-qa.mjs, brandbook/README.md, brandbook/LICENSE-FONTS.txt, determinism gate, eyeball checkpoint (LOGO-04) ✋
+- [x] 183-04-PLAN.md — size-matrix-qa.mjs, brandbook/README.md, brandbook/LICENSE-FONTS.txt, determinism gate, eyeball checkpoint (LOGO-04) ✋
 
 **UI hint**: yes
 
@@ -514,7 +514,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
 | 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
-| 183. Logo System Production | v1.52 | 3/4 | In Progress|  |
+| 183. Logo System Production | v1.52 | 4/4 | Complete   | 2026-06-13 |
 | 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
