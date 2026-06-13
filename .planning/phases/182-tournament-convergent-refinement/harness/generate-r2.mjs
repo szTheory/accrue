@@ -143,6 +143,21 @@ async function main() {
     // Build mono-derived SVG using the imported buildMonoSvg (do NOT re-implement)
     const monoSvgString = buildMonoSvg(lockupSvg, config.monoMap);
 
+    // Build mark-only SVG for square/small tiles (16px-favicon, 32px-favicon, avatar-circle).
+    // A favicon is the MARK alone — rendering the full lockup into a square viewport
+    // stretches the wordmark and makes the icon impossible to judge.
+    // viewBox is mark-local coordinate space: 0 0 markWidth markHeight.
+    const markSvgLines = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${markWidth} ${markHeight}">`,
+      `  <path d="${markPathD}" fill="${ink}"/>`,
+    ];
+    if (accentPathD && accentFill) {
+      // Two-tone: overlay the accent step in Moss (#5E9E84)
+      markSvgLines.push(`  <path d="${accentPathD}" fill="${accentFill}"/>`);
+    }
+    markSvgLines.push(`</svg>`);
+    const markSvgString = markSvgLines.join("\n");
+
     // Build candidate object
     const candidate = {
       id: config.id,
@@ -154,6 +169,7 @@ async function main() {
       markWidth,
       markHeight,
       lockupSvg,
+      markSvgString,
       monoSvgString,
       capHeight,
       skipGapRatio: false,
@@ -163,6 +179,8 @@ async function main() {
     // Write SVG for lint (lintCandidate reads from PHASE_DIR, needs CANDIDATES_DIR)
     const svgPath = path.join(CANDIDATES_DIR, `${config.id}.svg`);
     fs.writeFileSync(svgPath, lockupSvg);
+    // Write mark-only SVG (used by render-matrix for square tiles)
+    fs.writeFileSync(path.join(CANDIDATES_DIR, `${config.id}-mark.svg`), markSvgString);
     if (monoSvgString) {
       fs.writeFileSync(path.join(CANDIDATES_DIR, `${config.id}-mono.svg`), monoSvgString);
     }
@@ -229,6 +247,7 @@ async function main() {
     colorTreatment: c.colorTreatment,
     rationale: c.rationale,
     skipGapRatio: c.skipGapRatio,
+    markSvgString: c.markSvgString,
     monoSvgString: c.monoSvgString,
   }));
   fs.writeFileSync(path.join(CANDIDATES_DIR, "index.json"), JSON.stringify(index, null, 2));

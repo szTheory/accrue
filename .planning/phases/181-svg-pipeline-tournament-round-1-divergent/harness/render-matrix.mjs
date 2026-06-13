@@ -44,16 +44,22 @@ const TARGET_GALLERY_SIZE = { min: 12, max: 16 };
 /** Per-direction minimum in final gallery (D-05 floor). */
 const MIN_PER_DIRECTION = 3;
 
-/** 8 context tiles per candidate */
+/** 8 context tiles per candidate.
+ * source: "lockup" — renders the full mark+logotype lockup SVG (default for wide tiles).
+ * source: "mark"   — renders the mark-only SVG (for square favicon / avatar tiles so the
+ *                     wordmark is not squeezed into a square viewport and the icon can be
+ *                     judged on its own merits). Uses candidate.markSvgString when available;
+ *                     falls back to full lockupSvg only if markSvgString is absent.
+ */
 const TILES = [
-  { id: "paper-light",   w: 320,  h: 80,  bg: "#FAFBFC", dpr: 1, mono: false },
-  { id: "ink-dark",      w: 320,  h: 80,  bg: "#111418", dpr: 1, mono: false },
-  { id: "32px-favicon",  w: 32,   h: 32,  bg: "#FAFBFC", dpr: 2, mono: false },
-  { id: "16px-favicon",  w: 16,   h: 16,  bg: "#FAFBFC", dpr: 4, mono: false },
-  { id: "avatar-circle", w: 96,   h: 96,  bg: "#FAFBFC", dpr: 2, mono: false },
-  { id: "readme-header", w: 800,  h: 120, bg: "#FAFBFC", dpr: 1, mono: false },
-  { id: "social-card",   w: 600,  h: 315, bg: "#FAFBFC", dpr: 1, mono: false },
-  { id: "mono",          w: 320,  h: 80,  bg: "#FAFBFC", dpr: 1, mono: true  },
+  { id: "paper-light",   w: 320,  h: 80,  bg: "#FAFBFC", dpr: 1, mono: false, source: "lockup" },
+  { id: "ink-dark",      w: 320,  h: 80,  bg: "#111418", dpr: 1, mono: false, source: "lockup" },
+  { id: "32px-favicon",  w: 32,   h: 32,  bg: "#FAFBFC", dpr: 2, mono: false, source: "mark"   },
+  { id: "16px-favicon",  w: 16,   h: 16,  bg: "#FAFBFC", dpr: 4, mono: false, source: "mark"   },
+  { id: "avatar-circle", w: 96,   h: 96,  bg: "#FAFBFC", dpr: 2, mono: false, source: "mark"   },
+  { id: "readme-header", w: 800,  h: 120, bg: "#FAFBFC", dpr: 1, mono: false, source: "lockup" },
+  { id: "social-card",   w: 600,  h: 315, bg: "#FAFBFC", dpr: 1, mono: false, source: "lockup" },
+  { id: "mono",          w: 320,  h: 80,  bg: "#FAFBFC", dpr: 1, mono: true,  source: "lockup" },
 ];
 
 /**
@@ -136,21 +142,34 @@ function applyInkDarkColors(svgContent) {
  * Build a minimal HTML wrapper for an SVG in a tile context.
  * For the mono tile: uses monoSvgString if available (monoMap-derived grey), else CSS grayscale.
  * For the ink-dark tile: inverts ink/paper colors so the logo is light-on-dark.
- * For the social-card tile: adds a "real context" text overlay (D-182-08).
+ * For the social-card tile: adds a "real context" text overlay (D-182-08) with prominent sizing.
+ * For mark-source tiles (32px-favicon, 16px-favicon, avatar-circle): renders the mark-only SVG
+ * so the wordmark is not squeezed into a square viewport and the icon can be judged alone.
  *
  * @param {string} svgContent — the candidate's lockup SVG string
  * @param {object} tile — tile config from TILES array
  * @param {string | undefined} monoSvgString — monoMap-derived SVG for Moss/two-tone candidates
+ * @param {string | undefined} markSvgString — mark-only SVG (for square/favicon tiles)
  */
-function buildTileHtml(svgContent, tile, monoSvgString) {
-  // Mono tile: prefer monoSvgString (exact grey-swap) over CSS grayscale filter
+function buildTileHtml(svgContent, tile, monoSvgString, markSvgString) {
+  // Resolve the base SVG source.
+  // Mark-source tiles (32px-favicon, 16px-favicon, avatar-circle): use the mark-only SVG so
+  // the favicon/avatar shows the icon alone. Falls back to full lockup only if markSvgString
+  // is absent (e.g. old index.json without the markSvgString field).
+  const isMarkTile = tile.source === "mark";
+  const baseSvg = (isMarkTile && markSvgString) ? markSvgString : svgContent;
+
+  // Mono tile (source: "lockup"): prefer monoSvgString (exact grey-swap) over CSS grayscale.
+  // Ink-dark tile (source: "lockup"): apply INK_DARK_COLOR_MAP to the lockup SVG.
+  // Mark-source tiles: just use the mark SVG as-is (all mark tiles have paper-light bg).
   let effectiveSvg;
   if (tile.mono && monoSvgString) {
-    effectiveSvg = monoSvgString; // grey paths from monoMap; no filter needed
+    effectiveSvg = monoSvgString; // grey paths from monoMap; lockup tile only
   } else if (tile.id === "ink-dark") {
-    effectiveSvg = applyInkDarkColors(svgContent);
+    // Ink-dark is always a lockup tile; apply color swap to the full lockup SVG
+    effectiveSvg = applyInkDarkColors(baseSvg);
   } else {
-    effectiveSvg = svgContent;
+    effectiveSvg = baseSvg;
   }
 
   // CSS grayscale filter only when mono tile but no monoSvgString available
@@ -165,17 +184,18 @@ function buildTileHtml(svgContent, tile, monoSvgString) {
     : "";
 
   // D-182-08: social-card "real context" text overlay — exercises actual social-card use case.
-  // The SVG is placed at a fixed height (60px, scaled proportionally) next to the copy text.
-  // Using <img> src approach would require base64; instead inline SVG with explicit dimensions.
+  // The logo lockup is rendered at a prominent scale (200px height out of 315px card height)
+  // so both the mark and the accompanying copy are clearly readable at 600×315.
+  // Layout: logo centered top-half, copy text below — a real Open Graph card pattern.
   const socialCardOverlay = tile.id === "social-card"
-    ? `<div style="display:flex;align-items:center;gap:24px;font-family:system-ui,sans-serif;">
-        <div style="width:160px;height:40px;flex-shrink:0;overflow:hidden;">
+    ? `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;gap:20px;font-family:system-ui,sans-serif;padding:32px;">
+        <div style="height:80px;max-width:520px;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;">
           ${effectiveSvg}
         </div>
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <div style="font-size:24px;font-weight:700;color:#181818;white-space:nowrap;">accrue</div>
-          <div style="font-size:14px;font-weight:400;color:#5E9E84;white-space:nowrap;">Elixir billing library for Phoenix</div>
-          <div style="font-size:11px;font-weight:400;color:#6B7280;white-space:nowrap;">hex.pm/packages/accrue</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+          <div style="font-size:22px;font-weight:700;color:#181818;letter-spacing:-0.01em;">accrue</div>
+          <div style="font-size:15px;font-weight:400;color:#5E9E84;">Elixir billing library for Phoenix</div>
+          <div style="font-size:12px;font-weight:400;color:#6B7280;">hex.pm/packages/accrue</div>
         </div>
       </div>`
     : "";
@@ -183,9 +203,6 @@ function buildTileHtml(svgContent, tile, monoSvgString) {
   const bodyContent = tile.id === "social-card"
     ? socialCardOverlay
     : effectiveSvg;
-
-  // For social-card tile: body uses position:relative so the overlay div can be absolute.
-  const bodyPositionStyle = tile.id === "social-card" ? "position: relative;" : "";
 
   return `<!DOCTYPE html>
 <html>
@@ -203,7 +220,6 @@ ${circleStyle}
     display: flex;
     align-items: center;
     justify-content: center;
-    ${bodyPositionStyle}
   }
   svg {
     max-width: 100%;
@@ -225,14 +241,15 @@ ${bodyContent}
  * @param {object} tile — tile config from TILES array
  * @param {string} candidateId
  * @param {string | undefined} monoSvgString — monoMap-derived SVG for mono tile (Moss/two-tone)
+ * @param {string | undefined} markSvgString — mark-only SVG for square/favicon tiles
  * @returns {string} outputPath
  */
-async function renderTile(browser, svgContent, tile, candidateId, monoSvgString) {
+async function renderTile(browser, svgContent, tile, candidateId, monoSvgString, markSvgString) {
   const candidateDir = path.join(SCREENSHOTS_DIR, candidateId);
   const outputPath = path.join(candidateDir, `${tile.id}.png`);
   const tmpPath = path.join(candidateDir, `_tmp_${tile.id}.html`);
 
-  const html = buildTileHtml(svgContent, tile, monoSvgString);
+  const html = buildTileHtml(svgContent, tile, monoSvgString, markSvgString);
   fs.writeFileSync(tmpPath, html);
 
   try {
@@ -315,13 +332,23 @@ async function main() {
       const svgContent = fs.readFileSync(svgPath, "utf8");
       // monoSvgString from index.json — for Moss/two-tone candidates, renders true grey (not CSS filter)
       const monoSvgString = candidate.monoSvgString ?? undefined;
+      // markSvgString from index.json — mark-only SVG for square/favicon tiles so the wordmark
+      // is not squeezed into a square viewport and the icon can be judged alone.
+      // Falls back to reading the -mark.svg file from disk if not embedded in index.json.
+      let markSvgString = candidate.markSvgString ?? undefined;
+      if (!markSvgString) {
+        const markSvgPath = path.join(CANDIDATES_DIR, `${id}-mark.svg`);
+        if (fs.existsSync(markSvgPath)) {
+          markSvgString = fs.readFileSync(markSvgPath, "utf8");
+        }
+      }
       const candidateDir = path.join(SCREENSHOTS_DIR, id);
       fs.mkdirSync(candidateDir, { recursive: true });
 
       try {
         // Render all 8 tiles
         for (const tile of TILES) {
-          await renderTile(browser, svgContent, tile, id, monoSvgString);
+          await renderTile(browser, svgContent, tile, id, monoSvgString, markSvgString);
         }
 
         // Step 3a — Blank-render guard (always, even in smoke mode)

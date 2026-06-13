@@ -1,3 +1,4 @@
-Lint: blank-render
-Reason: paper-light dark coverage=0.000% < 0.5% (SVG ink outside viewBox)
-Culled: 2026-06-13T05:56:13.093Z
+Lint: 16px-legibility
+Reason: contrast ratio 1.51 < 3 (icon legibility threshold)
+Measured: {"contrastRatio":1.5063328864936814,"edgeDensityRatio":1}
+Culled: 2026-06-13T06:30:30.081Z
