@@ -162,7 +162,25 @@ Plans:
   3. A `LICENSE-FONTS.txt` documents OFL 1.1 provenance for any Geist letterform outlines incorporated into the logo finals.
   4. A size-matrix screenshot (all variants at representative sizes and both themes) confirms visual fidelity of every derived file — eyeball checkpoint passed.
 
-**Plans:** TBD
+**Plans:** 4 plans across 4 waves
+
+Plans:
+**Wave 1** *(harness bootstrap — package.json, svgo.config.mjs, geist-spine-mono.mjs, ico-packer.mjs)*
+
+- [ ] 183-01-PLAN.md — Harness bootstrap: package.json (@resvg/resvg-js), svgo.config.mjs, geist-spine-mono.mjs, ico-packer.mjs + unit tests (LOGO-04)
+
+**Wave 2** *(blocked on Wave 1 — SVG suite generation)*
+
+- [ ] 183-02-PLAN.md — generate-logo-suite.mjs: all 13 committed SVG brand artifacts + BLOCKING render-fidelity checkpoint (LOGO-04) ✋
+
+**Wave 3** *(blocked on Wave 2 — raster production)*
+
+- [ ] 183-03-PLAN.md — generate-rasters.mjs: resvg PNG + ico-packer .ico + determinism assertion (LOGO-04)
+
+**Wave 4** *(blocked on Wave 3 — QA + docs + human checkpoint)*
+
+- [ ] 183-04-PLAN.md — size-matrix-qa.mjs, brandbook/README.md, brandbook/LICENSE-FONTS.txt, determinism gate, eyeball checkpoint (LOGO-04) ✋
+
 **UI hint**: yes
 
 ### Phase 184: Design Tokens & Specimens
