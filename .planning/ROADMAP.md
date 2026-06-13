@@ -196,10 +196,18 @@ Plans:
 
 **Plans:** 5 plans
 Plans:
+**Wave 1**
+
 - [ ] 184-01-PLAN.md — Harness scaffold + gated dep install + tokens.json SSOT + lib.mjs helpers
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 184-02-PLAN.md — tokens.css generator + reference-only README + completeness check (TOK-01)
 - [ ] 184-03-PLAN.md — brand↔admin parity check + injected-drift --test (TOK-02)
 - [ ] 184-04-PLAN.md — palette/typography/spacing specimen SVGs + coverage check (TOK-03)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 184-05-PLAN.md — CI determinism + parity gates (TOK-01/02/03)
 
 ### Phase 185: Voice, Microcopy & Marketing Copy
