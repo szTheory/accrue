@@ -164,14 +164,18 @@ function buildTileHtml(svgContent, tile, monoSvgString) {
     ? `<style>body { border-radius: 50%; overflow: hidden; }</style>`
     : "";
 
-  // D-182-08: social-card "real context" text overlay — exercises actual social-card use case
+  // D-182-08: social-card "real context" text overlay — exercises actual social-card use case.
+  // The SVG is placed at a fixed height (60px, scaled proportionally) next to the copy text.
+  // Using <img> src approach would require base64; instead inline SVG with explicit dimensions.
   const socialCardOverlay = tile.id === "social-card"
-    ? `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:32px;font-family:'Geist','GeistSans',system-ui,sans-serif;pointer-events:none;">
-        <div style="flex-shrink:0;">${effectiveSvg}</div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <div style="font-size:28px;font-weight:700;color:#181818;white-space:nowrap;">accrue</div>
-          <div style="font-size:16px;font-weight:400;color:#5E9E84;white-space:nowrap;">Elixir billing library for Phoenix</div>
-          <div style="font-size:12px;font-weight:400;color:#6B7280;white-space:nowrap;">hex.pm/packages/accrue</div>
+    ? `<div style="display:flex;align-items:center;gap:24px;font-family:system-ui,sans-serif;">
+        <div style="width:160px;height:40px;flex-shrink:0;overflow:hidden;">
+          ${effectiveSvg}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <div style="font-size:24px;font-weight:700;color:#181818;white-space:nowrap;">accrue</div>
+          <div style="font-size:14px;font-weight:400;color:#5E9E84;white-space:nowrap;">Elixir billing library for Phoenix</div>
+          <div style="font-size:11px;font-weight:400;color:#6B7280;white-space:nowrap;">hex.pm/packages/accrue</div>
         </div>
       </div>`
     : "";
@@ -204,6 +208,7 @@ ${circleStyle}
   svg {
     max-width: 100%;
     max-height: 100%;
+    display: block;
   }
 </style>
 </head>
