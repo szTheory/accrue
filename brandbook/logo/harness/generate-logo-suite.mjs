@@ -380,6 +380,8 @@ async function main() {
       subtitleX += advWidth + trackingExtra;
       return `    <path d="${d}" fill="${PALETTE.slate}"/>`;
     });
+    // subtitleX now holds the total run width (in subtitleFontSize units)
+    const subtitleRunWidth = subtitleX;
 
     const subtitleGroup = [
       `  <g id="subtitle" transform="translate(${wordmarkLeftX.toFixed(3)},${subtitleBaselineY.toFixed(3)})">`,
@@ -387,19 +389,21 @@ async function main() {
       `  </g>`,
     ].join("\n");
 
-    // Total subtitle run width for expanded viewBox height check
-    const subtitleRunH = subtitleBaselineY; // already below baseline; viewBox needs to accommodate
     // Expand viewBox height to fit subtitle (add 0.3× subtitleFontSize below baseline)
     const expandedViewboxH = Math.max(viewboxH, subtitleBaselineY + subtitleFontSize * 0.3);
 
-    // Get lockup viewBox width
+    // FIX (Defect 2): Expand viewBox WIDTH to fit subtitle run if it overflows the lockup width.
+    // The subtitle left edge is at wordmarkLeftX; its right edge is at wordmarkLeftX + subtitleRunWidth.
+    // Add a small right padding (0.5× trackingExtra) so the subtitle doesn't clip at the right edge.
     const vb = extractViewBox(lockupRaw);
     const lockupW = vb ? vb.w : (markScaledW + gap + glyphs.reduce((s, g) => s + g.advanceWidth, 0));
+    const subtitleRightEdge = wordmarkLeftX + subtitleRunWidth + trackingExtra * 0.5;
+    const expandedViewboxW = Math.max(lockupW, subtitleRightEdge);
 
-    // Reconstruct lockup SVG with expanded viewBox
+    // Reconstruct lockup SVG with expanded viewBox (width AND height expanded as needed)
     const baseLockupExpanded = lockupRaw.replace(
       /viewBox="[^"]+"/,
-      `viewBox="0 0 ${lockupW.toFixed(3)} ${expandedViewboxH.toFixed(3)}"`
+      `viewBox="0 0 ${expandedViewboxW.toFixed(3)} ${expandedViewboxH.toFixed(3)}"`
     );
 
     // Insert subtitle group before closing </svg>
@@ -614,28 +618,40 @@ async function main() {
     const darkLockup = applyInkDarkColors(lockupRaw);
 
     // Subtitle in social card: "Billing for Elixir apps" in Geist Mono paths
-    // At the social card scale: subtitle font size ~ 28px equivalent in SVG units
-    const scSubtitleFontSize = 28;
-    const scSubtitleGlyphs = extractMonoGlyphs(monoFont, SUBTITLE_TEXT, scSubtitleFontSize);
+    // FIX (Defect 1): Render glyphs at a LARGE font size so SVGO's mergePaths/convertPathData
+    // sees large coordinates and does not collapse near-degenerate small contours (like the
+    // dot + stem of "i"). Then wrap the subtitle group in a scale() transform to achieve the
+    // intended ~28px visual size. Centering X is computed in the LARGE font space, then
+    // scaled down by the same factor so it lands correctly in the 1200×630 card.
+    //
+    // Target visual size = 28px. Render at the same large size as the standalone subtitle
+    // (subtitleFontSize = capHeight * 0.42 ≈ 294 font units) to guarantee glyph survival.
+    // scSubtitleScale = targetVisual / renderFontSize brings it down to 28px equivalent.
+    const scSubtitleTargetPx = 28; // visual size in SVG units in the 1200×630 card
+    const scSubtitleRenderSize = subtitleFontSize; // large render size (same as standalone)
+    const scSubtitleScale = scSubtitleTargetPx / scSubtitleRenderSize;
 
-    // Calculate subtitle run width for centering
-    const scSubtitleRunW = scSubtitleGlyphs.reduce((sum, g) => sum + g.advanceWidth, 0)
-      + trackingExtra * (scSubtitleGlyphs.length - 1);
+    // Re-lay subtitle glyphs at large render size with tracking (tracking also at large size)
+    const scTrackingExtra = 0.02 * scSubtitleRenderSize; // tracking at render size
+    let scSubX = 0;
+    const scSubtitlePaths = [];
+    for (let i = 0; i < SUBTITLE_TEXT.length; i++) {
+      const monoGlyph = monoFont.charToGlyph(SUBTITLE_TEXT[i]);
+      const glyphPath = monoGlyph.getPath(scSubX, 0, scSubtitleRenderSize);
+      const d = glyphPath.toPathData({ decimalPlaces: 3, flipY: false });
+      const advWidth = (monoGlyph.advanceWidth / monoFont.unitsPerEm) * scSubtitleRenderSize;
+      scSubtitlePaths.push(`    <path d="${d}" fill="#FAFBFC" opacity="0.7"/>`);
+      scSubX += advWidth + scTrackingExtra;
+    }
+    // scSubX now holds the total run width in large (render) font units
+    const scSubtitleRunWLarge = scSubX;
+
+    // Center: scale the run width back to card units for centering arithmetic
+    const scSubtitleRunW = scSubtitleRunWLarge * scSubtitleScale;
     const scSubtitleX = (SC_W - scSubtitleRunW) / 2;
 
-    // Subtitle Y: below the lockup
-    const scSubtitleY = lockupCenterY + scaledLockupH + scSubtitleFontSize * 1.8;
-
-    // Re-lay subtitle glyphs with tracking for social card
-    let scSubX = 0;
-    const scSubtitlePaths = scSubtitleGlyphs.map((g, i) => {
-      const monoGlyph = monoFont.charToGlyph(SUBTITLE_TEXT[i]);
-      const glyphPath = monoGlyph.getPath(scSubX, 0, scSubtitleFontSize);
-      const d = glyphPath.toPathData({ decimalPlaces: 3, flipY: false });
-      const advWidth = (monoGlyph.advanceWidth / monoFont.unitsPerEm) * scSubtitleFontSize;
-      scSubX += advWidth + (0.02 * scSubtitleFontSize);
-      return `    <path d="${d}" fill="#FAFBFC" opacity="0.7"/>`;
-    });
+    // Subtitle Y: below the lockup (in card SVG units, unaffected by inner scale)
+    const scSubtitleY = lockupCenterY + scaledLockupH + scSubtitleTargetPx * 1.8;
 
     // Subtle grid motif (brand book direction)
     const gridLines = [];
@@ -663,8 +679,8 @@ async function main() {
       `  <g transform="translate(${lockupCenterX.toFixed(3)},${lockupCenterY.toFixed(3)}) scale(${lockupScale.toFixed(6)})">`,
       darkLockupInner,
       `  </g>`,
-      `  <!-- Subtitle: "Billing for Elixir apps" -->`,
-      `  <g transform="translate(${scSubtitleX.toFixed(3)},${scSubtitleY.toFixed(3)})">`,
+      `  <!-- Subtitle: "Billing for Elixir apps" (rendered at large size, scaled down to preserve glyph contours under SVGO) -->`,
+      `  <g transform="translate(${scSubtitleX.toFixed(3)},${scSubtitleY.toFixed(3)}) scale(${scSubtitleScale.toFixed(6)})">`,
       ...scSubtitlePaths,
       `  </g>`,
       `</svg>`,
