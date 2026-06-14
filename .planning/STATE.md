@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-last_updated: "2026-06-14T22:20:38.542Z"
+last_updated: "2026-06-14T22:30:23.760Z"
 last_activity: 2026-06-14
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 187 (audit-baseline) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-06-14
 
@@ -134,6 +134,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 187 P01 | 4m 12s | 2 tasks | 3 files |
+| Phase 187 P02 | 6m | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -190,6 +191,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 187]: Layer/z-index is an overlay tag, not a thirteenth rubric dimension. — Plan 187-01 preserves the 12-dimension contract and keeps layer failures searchable without double-counting.
 - [Phase 187]: Structured baseline and defect artifacts are canonical when markdown disagrees. — Plan 187-01 schemas make baseline.cells.json and defects.ndjson the Phase 192 comparison source of truth.
 - [Phase 187]: Phase 187 defects route to owner phases 188, 189, 190, or 191. — Plan 187-01 fixed downstream remediation ownership before manifest and harness work.
+- [Phase 187]: Phase 187 matrix identity is manifest-owned; model and raw evidence metadata are advisory. — Plan 187-02 uses the manifest as the source of truth for cell IDs and enrichment.
+- [Phase 187]: Targeted breakpoint rows use mode targeted plus numeric viewport_width/breakpoint and targeted_label. — Plan 187-02 rejects legacy targeted-320 mode strings.
+- [Phase 187]: Evidence artifacts stay under accrue_admin/test-results with checksums; committed planning artifacts store references only. — Plan 187-02 avoids committing screenshots, traces, or external artifacts.
 
 ### Pending Todos
 
@@ -236,8 +240,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-14T22:20:38.292Z
-Stopped at: Completed 187-01-PLAN.md; ready for 187-02-PLAN.md
+Last session: 2026-06-14T22:30:23.698Z
+Stopped at: Completed 187-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

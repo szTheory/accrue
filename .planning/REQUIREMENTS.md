@@ -86,7 +86,7 @@ and the contributor working in the component system. 33 requirements across 8 th
 
 ### VER — Idempotent verification & sign-off
 
-- [ ] **VER-01**: A severity-ranked defect ledger plus a scored baseline (the refreshed rubric across viewport × theme × state, including live interaction testing) exists and is the only-forward reference point.
+- [x] **VER-01**: A severity-ranked defect ledger plus a scored baseline (the refreshed rubric across viewport × theme × state, including live interaction testing) exists and is the only-forward reference point.
 - [ ] **VER-02**: Each level (component / group / page) is scored by an adversarial multi-lens judge (correctness, a11y, brand, interaction), and the final scorecard is ≥ baseline on every dimension/cell with zero regressions.
 - [ ] **VER-03**: Regression guardrails (interaction e2e, axe a11y, reduced-motion, and a component-lab coverage check) run in CI so re-running the milestone only ever finds new gaps.
 - [ ] **VER-04**: The maintainer signs off on screenshots at each phase boundary, closing v1.51's open photographic-sign-off tech-debt.
@@ -95,7 +95,7 @@ and the contributor working in the component system. 33 requirements across 8 th
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VER-01 | 187 | Pending |
+| VER-01 | 187 | Complete |
 | FND-01 | 188 | Pending |
 | FND-02 | 188 | Pending |
 | FND-03 | 188 | Pending |
