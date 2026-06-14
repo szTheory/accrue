@@ -7,7 +7,7 @@
 - ✅ **v1.49 Realistic Demo App & Adoption Evidence** — Phases 163-166 (shipped 2026-06-02) — [archive](milestones/v1.49-ROADMAP.md)
 - ✅ **v1.50 Admin UI Foundation** — Phases 167-173 (shipped 2026-06-02 via PR #32; archived 2026-06-03) — [archive](milestones/v1.50-ROADMAP.md)
 - ✅ **v1.51 Admin UI: Depth Pass [SHIPPED 2026-06-04 — see milestones/v1.51-ROADMAP.md] (IA + Systematic Polish)** — Phases 174-179 (planning 2026-06-03; second, depth-oriented pass on the same `accrue_admin` surface; persona-driven IA reshape + token gap-closure + systematic rubric uplift + motion + seed expressiveness + screenshot-driven visual-QA; no new billing primitives)
-- 🔄 **v1.52 Brand System** — Phases 180-186 (opened 2026-06-11; brand audit + DNA lock, SVG logo tournament, design tokens, voice/copy, standalone HTML brand book; no billing primitives)
+- ✅ **v1.52 Brand System** — Phases 180-186 (opened 2026-06-11; completed 2026-06-14; brand audit + DNA lock, SVG logo tournament, design tokens, voice/copy, standalone HTML brand book; no billing primitives)
 
 ## Planning Doctrine
 
@@ -28,7 +28,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 ## Phases
 
 <details open>
-<summary>🔄 v1.52 Brand System (Phases 180-186) — OPENED 2026-06-11 (deps 180→181→182→183→186, with 180→{184,185}→186 side-rails)</summary>
+<summary>✅ v1.52 Brand System (Phases 180-186) — COMPLETED 2026-06-14 (deps 180→181→182→183→186, with 180→{184,185}→186 side-rails)</summary>
 
 **Posture:** Brand/DX investment in adopter-facing presentation surfaces (README, Hex.pm, HexDocs, social previews, admin UI identity) — **not** a broad feature milestone (no new billing primitives). Reopen decision recorded in `PROJECT.md`. Justification class: same as v1.50/v1.51.
 
@@ -45,8 +45,8 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 182: Tournament Convergent Refinement** — variation rounds on winners via monotonic TOURNAMENT.md ledger, 3-round default cap, extend-or-settle question (✋ looping checkpoint) (completed 2026-06-13)
 - [x] **Phase 183: Logo System Production** — full derived suite in `brandbook/logo/`, outlined paths, svgo-optimized (light checkpoint: derivative-sheet eyeball) (completed 2026-06-13)
 - [x] **Phase 184: Design Tokens & Specimens** — `brandbook/tokens/` with documented mapping + automated consistency check vs admin `ax-*` tokens (no checkpoint; depends only on 180) (completed 2026-06-14)
-- [ ] **Phase 185: Voice, Microcopy & Marketing Copy** — ready-to-paste copy blocks for all adopter-facing surfaces (light checkpoint: batch copy review; depends only on 180)
-- [ ] **Phase 186: HTML Brand Book Assembly & Quality Gate** — self-contained `brandbook/index.html`, ≤2 MB budget, Phase-180 quality-gate checklist (✋ final UAT)
+- [x] **Phase 185: Voice, Microcopy & Marketing Copy** — ready-to-paste copy blocks for all adopter-facing surfaces (light checkpoint: batch copy review; depends only on 180) (completed 2026-06-14)
+- [x] **Phase 186: HTML Brand Book Assembly & Quality Gate** — self-contained `brandbook/index.html`, ≤2 MB budget, Phase-180 quality-gate checklist (✋ final UAT) (completed 2026-06-14)
 
 ### Phase Details
 
@@ -256,7 +256,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 — human UAT sign-off)*
 
-- [ ] 186-03-PLAN.md — Quality-gate checklist sign-off + BOOK-02-SIGN-OFF.md + Phase 186 closure (BOOK-02) ✋
+- [x] 186-03-PLAN.md — Quality-gate checklist sign-off + BOOK-02-SIGN-OFF.md + Phase 186 closure (BOOK-02) ✋
 **UI hint**: yes
 
 </details>
@@ -552,7 +552,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete    | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete   | 2026-06-14 |
-| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 2/3 | In Progress|  |
+| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete   | 2026-06-14 |
 
 ## Historical Backlog Anchors (not active scope)
 
