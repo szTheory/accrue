@@ -89,12 +89,16 @@ function mdToHtml(text) {
   }
 
   function inlineMarkdown(str) {
+    // Escape raw & < > first (before inserting any <strong>/<em> tags),
+    // so literal angle brackets in prose can never inject raw HTML.
+    str = str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
     // **bold**
     str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     // *italic* (not **)
     str = str.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
-    // escape < > that are not HTML tags we just inserted
-    // (We do not escape since we're producing HTML; trust source content)
     return str;
   }
 
