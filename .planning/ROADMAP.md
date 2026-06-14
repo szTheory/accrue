@@ -55,81 +55,111 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 ### Phase Details
 
 ### Phase 187: Audit & Baseline
+
 **Goal:** Establish the only-forward baseline for the milestone — refresh the v1.51 10-dimension rubric with researched additions (interaction-integrity, layer/z-index, microcopy), then run the full matrix (viewport × theme × state) AND live interaction-test the running admin UI (open every modal/drawer/dropdown, scroll every container, keyboard-nav every flow, force empty/error/permission/disconnected states) to produce a severity-ranked defect ledger and a scored baseline that every later phase must beat.
 **Depends on:** Nothing (first phase of milestone)
 **Requirements:** VER-01
 **Success Criteria** (what must be TRUE):
+
   1. The refreshed rubric is documented with its new interaction-integrity, layer/z-index, and microcopy dimensions defined and scored alongside the carried v1.51 dimensions, and a maintainer can read why each new dimension exists.
   2. A severity-ranked defect ledger exists in which every entry names the surface, the reproduction, the severity, and the rubric dimension it fails — covering both static-matrix findings (viewport × theme × state) and live-interaction findings (modal/scroll/focus/overlay/z-index/empty-state/disabled).
   3. A scored baseline captures every audited cell (component / group / page across viewport × theme × state) so it can be re-run idempotently and compared in Phase 192.
   4. The defect ledger and baseline are committed as the single only-forward reference point that Phases 188–191 remediate against and Phase 192 verifies ≥.
+
 **Plans:** 5 plans
 Plans:
+**Wave 1**
+
 - [ ] 187-01-PLAN.md — Rubric and schema contract
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 187-02-PLAN.md — Manifest, artifact generator, and 12-dimension scorer pipeline
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 187-03-PLAN.md — Static matrix baseline capture
 - [ ] 187-04-PLAN.md — Live interaction probes and test-only state forcing
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 187-05-PLAN.md — Audit run and canonical baseline ledger
+
 **UI hint**: yes
 
 ### Phase 188: Foundations hardening
+
 **Goal:** Fix the design-system roots so every downstream component and page inherits correctness: introduce composed typography bundles, apply the reading-measure token to prose and dense surfaces, formalize and tokenize the z-index/layer system, close motion-token gaps, resolve the inert Tailwind config into one unambiguous styling SSOT, and make every semantic role correct in both light and dark (focus rings, scrollbars, disabled states included). Root-level fixes only — no per-page patching.
 **Depends on:** Phase 187
 **Requirements:** FND-01, FND-02, FND-03, FND-04, FND-05, FND-06
 **Success Criteria** (what must be TRUE):
+
   1. Composed typography bundles exist as `ax-*` tokens (family + size + weight + line-height + tracking) and primitives consume the bundles instead of ad-hoc per-property utility soup.
   2. A maintainer can grep the admin CSS and find no ad-hoc z-index literals: a formal tokenized layer system (base → sticky → dropdown → popover → drawer → modal → toast) exists and every overlay and sticky element references it; the reading-measure token (`--ax-measure`) is applied so long prose and wide tables stay readable at every breakpoint.
   3. There is one unambiguous styling source of truth — the inert Tailwind config is removed or explicitly documented as reference-only — and motion-token coverage is complete for every animated surface with `prefers-reduced-motion` collapsing travel/overshoot while preserving crossfades.
   4. In dark mode, every semantic role — including focus rings, scrollbars, and disabled states — renders with a correct, contrast-passing value (no role renders wrong or invisible).
+
 **Plans:** TBD
 **UI hint**: yes
 
 ### Phase 189: Primitive & form components + component lab
+
 **Goal:** Systematize every primitive and form component in isolation — exercise each across its full state matrix (default / hover / focus / active / pressed / disabled / loading / selected / empty / error / overflow) in both themes and across viewports, verify a11y (role, keyboard, focus, accessible name), fix every defect at the component root so it propagates to every consuming page, and grow `/dev/components` into the systematic gallery that proves it (no PhoenixStorybook dependency).
 **Depends on:** Phase 188
 **Requirements:** CMP-01, CMP-02, CMP-03, CMP-04, CMP-05
 **Success Criteria** (what must be TRUE):
+
   1. Every component is exercised in the `/dev/components` lab across its full state matrix (default / hover / focus / active / pressed / disabled / loading / selected / empty / error / overflow) in both light and dark, and the lab is the systematic gallery proving it (extended in-app kitchen, no new dependency).
   2. Each component renders correctly with long/overflowing content (long IDs, names, URLs, module names) without clipping, overlap, or layout break.
   3. Each interactive component has the correct accessible role, full keyboard operation, visible focus, and accessible name; non-interactive elements expose no misleading affordances (e.g. no hover state on empty-state heroes).
   4. Disabled and read-only states are visually unmistakable (disabled looks disabled; enabled never looks disabled) and button text never collides with its background color.
   5. Every component-level visual/brand fix is made at the component root so it propagates to every consuming page (no per-page patching).
+
 **Plans:** TBD
 **UI hint**: yes
 
 ### Phase 190: Navigation, data-display & meta-component cohesion
+
 **Goal:** Audit the recurring component *groups* as units — app shell / nav / tabs / pagination, plus tables / cards / detail / timeline / KPI, plus the recurring meta-component clusters (page-header + actions + breadcrumbs; toolbar + search + filters + sort; table + empty/loading/error/pagination; KPI + chart + table; detail-header + metadata + actions; modal-confirm; drawer + form; tabs + subviews) — for spacing rhythm, hierarchy, obvious next action, responsive degradation, and operator-stress states. Builds on the hardened foundations and systematized primitives.
 **Depends on:** Phase 189
 **Requirements:** GRP-01, GRP-02, GRP-03, GRP-04
 **Success Criteria** (what must be TRUE):
+
   1. Each recurring component group (page-header + actions + breadcrumbs; toolbar + search + filters + sort; table + empty/loading/error/pagination; KPI + chart + table; detail-header + metadata + actions; modal-confirm; drawer + form; tabs + subviews) is audited as a unit for spacing rhythm, hierarchy, and obvious next action.
   2. Tables degrade to readable cards/lists (not squished columns) at narrow widths, and a list/card pattern is used wherever it fits the data better than a table.
   3. Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen.
   4. Pagination and similar affordances disappear or de-emphasize when there is nothing to paginate, and filter/sort/active/selected states are unmistakable.
+
 **Plans:** TBD
 **UI hint**: yes
 
 ### Phase 191: Page & flow interaction pass + fixture stress + microcopy
+
 **Goal:** Walk every admin page against its primary persona/JTBD across all paths (happy, empty, loading, error, permission-denied, boundary, advanced, disconnected/reconnecting), fix the behavioral interaction defects recorded in the Phase-187 ledger (modal-behind-scrim, scroll traps, focus loss after LiveView patch, overlay z-index/position) and cover each with a regression test, expand `examples/accrue_host` seeds so every matrix cell is reachable in one click, and run an on-brand microcopy pass. This is the page/flow integration of the foundations, primitives, and groups hardened in 188–190.
 **Depends on:** Phase 190
 **Requirements:** IXN-01, IXN-02, IXN-03, IXN-04, IXN-05, PAGE-01, PAGE-02, PAGE-03, PAGE-04, CPY-01, CPY-02, CPY-03, SEED-01, SEED-02
 **Success Criteria** (what must be TRUE):
+
   1. Every modal/drawer renders above its scrim, fully visible and interactive, traps focus, restores focus to its trigger on close, and dismisses via Escape and click-outside; scrolling works on every page/container with no traps or unreachable content; focus is never lost after a LiveView patch and keyboard-only operation completes every primary flow; floating elements (dropdowns, popovers, tooltips, toasts) position correctly and never obscure their controls — and each Phase-187 interaction defect is fixed and covered by a regression test so it cannot silently return.
   2. Every admin page is walked against its primary persona/JTBD across happy, empty, loading, error, permission-denied, boundary, and advanced paths and renders correctly in each; empty states explain the next useful action and distinguish "no data" from "data unavailable" from "permission denied."
   3. LiveView disconnected/reconnecting state is communicated to the operator and disables actions that cannot be performed while stale; every page is verified at 320 / 375 / 768 / 1024 / 1440 widths in light and dark with no layout break, clipping, or off-screen content.
   4. Microcopy is corrected across the surface: error messages state what happened and how to recover (no bare "oops / invalid / failed / forbidden"); destructive-action confirmations name the specific object and its consequence; domain vocabulary is consistent across headings, tabs, filters, buttons, and alerts.
   5. `examples/accrue_host` seeds reach every matrix cell in one click — null/missing optional fields, permission-denied, boundary pagination, high counts, non-ASCII names, disconnected/reconnecting state (in addition to existing long-name / multi-currency / dunning edges) — and the seed expansion is idempotent (re-runnable) and deterministic, consistent with the existing keyed-insert seed contract.
+
 **Plans:** TBD
 **UI hint**: yes
 
 ### Phase 192: Idempotent verification & sign-off
+
 **Goal:** Prove the milestone is done and lock it forever-forward: re-run the full audit, score every level (component / group / page) with an adversarial multi-lens judge (correctness, a11y, brand, interaction), confirm the final scorecard is ≥ the Phase-187 baseline on every dimension/cell with zero regressions, wire regression guardrails (interaction e2e, axe a11y, reduced-motion, component-lab coverage) into CI so re-running the milestone only ever finds new gaps, and obtain the maintainer screenshot sign-off that closes v1.51's open photographic-sign-off tech-debt.
 **Depends on:** Phase 191
 **Requirements:** VER-02, VER-03, VER-04
 **Success Criteria** (what must be TRUE):
+
   1. Each level (component / group / page) is scored by an adversarial multi-lens judge (correctness, a11y, brand, interaction), and the final scorecard is ≥ the Phase-187 baseline on every dimension/cell with zero regressions.
   2. Regression guardrails — interaction e2e, axe a11y, reduced-motion, and a component-lab coverage check — run in CI so re-running the milestone only ever finds new gaps.
   3. The maintainer signs off on screenshots at each phase boundary, and the milestone-final sign-off closes v1.51's open photographic-sign-off tech-debt.
+
 **Plans:** TBD
 **UI hint**: yes
 
