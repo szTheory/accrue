@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
 status: executing
-last_updated: "2026-06-14T04:54:52.149Z"
-last_activity: 2026-06-14 -- Phase 185 planning complete
+last_updated: "2026-06-14T05:11:24.075Z"
+last_activity: 2026-06-14
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 26
-  completed_plans: 23
+  completed_plans: 24
   percent: 71
 ---
 
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 185 — voice, microcopy & marketing copy
+**Current focus:** Phase 185 — voice-microcopy-marketing-copy
 
 ## Current Position
 
-Phase: 185
-Plan: Not started
+Phase: 185 (voice-microcopy-marketing-copy) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-06-14 -- Phase 185 planning complete
+Last activity: 2026-06-14
 
 ## Post-v1.48 Pause Rule
 
@@ -175,6 +175,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase ?]: generate-tokens-css.mjs imports flattenTokens from lib.mjs (D-03 ≤60 lines)
 - [Phase ?]: README mints zero --accrue-scale-* tokens (D-11 compliance)
 - [Phase ?]: verify-tokens.mjs accepts CSS_PATH_OVERRIDE env var for TDD negative check
+- [Phase ?]: Voice system D-07 surface dispatch rule: tagline leads on-page; descriptor leads out-of-context/search-indexed
+- [Phase ?]: Tone slider anchors: Formal-Casual=3, Precise-Evocative=4 per D-08
 
 ### Pending Todos
 
@@ -225,6 +227,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 184-design-tokens-specimens P02 | 20 | 3 tasks | 6 files |
 | Phase 184 P03 | 20m | 2 tasks | 1 files |
 | Phase 184-design-tokens-specimens P05 | 87 | 1 tasks | 1 files |
+| Phase 185 P01 | 94 | 1 tasks | 1 files |
 
 ### Milestone Intake Rules
 
@@ -249,9 +252,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-14T04:37:57.357Z
+Last session: 2026-06-14T05:11:18.441Z
 Stopped at: Phase 185 context gathered
-Resume file: .planning/phases/185-voice-microcopy-marketing-copy/185-CONTEXT.md
+Resume file: None
 
 ## Operator Next Steps
 

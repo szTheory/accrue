@@ -55,7 +55,7 @@ cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 
 ### Voice, Microcopy & Marketing Copy (COPY) — Phase 185
 
-- [ ] **COPY-01**: A committed voice system defines voice principles, tone sliders, vocabulary to use/avoid, and say-this/not-this examples consistent with the ratified brand DNA.
+- [x] **COPY-01**: A committed voice system defines voice principles, tone sliders, vocabulary to use/avoid, and say-this/not-this examples consistent with the ratified brand DNA.
 - [ ] **COPY-02**: Ready-to-paste copy blocks exist for GitHub repo description + topics, Hex.pm package description, HexDocs intro, README hero, landing-page sections (hero/problem/solution/install/benefits/comparison/CTAs), release-note templates, and error/empty/success-state microcopy — reviewed by the user in one batch.
 
 ### HTML Brand Book & Quality Gate (BOOK) — Phase 186
@@ -79,7 +79,7 @@ Filled by the roadmap. Coverage target: 14/14, each REQ-ID mapped to exactly one
 | TOK-01 | Phase 184 | Complete |
 | TOK-02 | Phase 184 | Complete |
 | TOK-03 | Phase 184 | Complete |
-| COPY-01 | Phase 185 | Pending |
+| COPY-01 | Phase 185 | Complete |
 | COPY-02 | Phase 185 | Pending |
 | BOOK-01 | Phase 186 | Pending |
 | BOOK-02 | Phase 186 | Pending |
