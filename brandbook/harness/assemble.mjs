@@ -260,9 +260,15 @@ function main() {
     specimenSvgs[f] = readSvg(path.join(EXAMPLES_DIR, f));
   }
 
-  // Convert markdown content to HTML
-  const voiceHtml = mdToHtml(voiceMd);
-  const copyHtml = mdToHtml(copyMd);
+  // Convert markdown content to HTML.
+  // voice.md and copy.md each open with a `# Title` (h1) heading. These are
+  // embedded inside sections that already supply their own <h2> page heading,
+  // so demote the leading document-title <h1> to <h2> to keep exactly one
+  // <h1> on the assembled page (IN-01).
+  const demoteLeadingH1 = (html) =>
+    html.replace(/^<h1>([\s\S]*?)<\/h1>/, "<h2>$1</h2>");
+  const voiceHtml = demoteLeadingH1(mdToHtml(voiceMd));
+  const copyHtml = demoteLeadingH1(mdToHtml(copyMd));
 
   // Extract logo usage section from README.md (from "## Logo System" through "## Regenerating")
   const readmeLogoSection = readmeMd
