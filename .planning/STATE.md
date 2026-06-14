@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-last_updated: "2026-06-14T22:13:14.418Z"
-last_activity: 2026-06-14 -- Phase 187 execution started
+last_updated: "2026-06-14T22:20:38.542Z"
+last_activity: 2026-06-14
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,9 +26,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 187 (audit-baseline) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 187
-Last activity: 2026-06-14 -- Phase 187 execution started
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-06-14
 
 ## Post-v1.48 Pause Rule
 
@@ -131,6 +131,10 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 - Average duration: 1m
 - Total execution time: 1m
 
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 187 P01 | 4m 12s | 2 tasks | 3 files |
+
 ## Accumulated Context
 
 ### Key Planning Decisions for v1.53
@@ -183,6 +187,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-06-14:** Opened v1.53 "Admin UI Design-System Hardening" (Phases 187–192). Quality / interaction-correctness investment in the already-shipped `accrue_admin` surface; no new billing primitives. Roadmap created with 6 phases, 33/33 requirements mapped.
 - **2026-06-11:** Opened v1.52 "Brand System". This explicitly does not open new broad feature scope, but rather invests in adopter-facing brand presentation surfaces (logo, brand book, design tokens, voice/copy). Roadmap created with 7 phases (180–186).
 - **2026-06-02:** Closed v1.49 after fresh audit passed 11/11 requirements and archived ROADMAP, REQUIREMENTS, MILESTONE-AUDIT, and phase artifacts under `.planning/milestones/`.
+- [Phase 187]: Layer/z-index is an overlay tag, not a thirteenth rubric dimension. — Plan 187-01 preserves the 12-dimension contract and keeps layer failures searchable without double-counting.
+- [Phase 187]: Structured baseline and defect artifacts are canonical when markdown disagrees. — Plan 187-01 schemas make baseline.cells.json and defects.ndjson the Phase 192 comparison source of truth.
+- [Phase 187]: Phase 187 defects route to owner phases 188, 189, 190, or 191. — Plan 187-01 fixed downstream remediation ownership before manifest and harness work.
 
 ### Pending Todos
 
@@ -229,9 +236,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-14T21:21:24.525Z
-Stopped at: Phase 187 UI-SPEC approved
-Resume file: .planning/phases/187-audit-baseline/187-UI-SPEC.md
+Last session: 2026-06-14T22:20:38.292Z
+Stopped at: Completed 187-01-PLAN.md; ready for 187-02-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

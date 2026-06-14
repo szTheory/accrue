@@ -70,7 +70,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 Plans:
 **Wave 1**
 
-- [ ] 187-01-PLAN.md — Rubric and schema contract
+- [x] 187-01-PLAN.md — Rubric and schema contract
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -254,7 +254,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
-| 187. Audit & Baseline | v1.53 | 0/TBD | Not started | - |
+| 187. Audit & Baseline | v1.53 | 1/5 | In Progress | - |
 | 188. Foundations hardening | v1.53 | 0/TBD | Not started | - |
 | 189. Primitive & form components + component lab | v1.53 | 0/TBD | Not started | - |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
