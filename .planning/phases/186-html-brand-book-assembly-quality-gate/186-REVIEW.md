@@ -12,7 +12,15 @@ findings:
   warning: 4
   info: 2
   total: 6
-status: issues_found
+status: fixed
+fixed:
+  - "WR-01 (c83eb502): sync dark-mode toggle label on initial load"
+  - "WR-02 (021eef0c): strip self-closing <script/> tags in SVG cleaner"
+  - "WR-03 (af735126): remove dead size-budget subprocess"
+  - "WR-04 (c76568f8): HTML-escape angle brackets in inlineMarkdown"
+deferred:
+  - "IN-01: multiple <h1> elements (info, out of --fix scope)"
+  - "IN-02: '<= 2 MB' label vs strict-< check (info, out of --fix scope)"
 ---
 
 # Phase 186: Code Review Report
