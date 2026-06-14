@@ -49,7 +49,7 @@ cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 
 ### Design Tokens & Specimens (TOK) — Phase 184
 
-- [ ] **TOK-01**: `brandbook/tokens/tokens.json` and `tokens.css` define raw palette, semantic color roles, typography, spacing, radius, focus-ring, and state tokens per the audit token spec.
+- [x] **TOK-01**: `brandbook/tokens/tokens.json` and `tokens.css` define raw palette, semantic color roles, typography, spacing, radius, focus-ring, and state tokens per the audit token spec.
 - [ ] **TOK-02**: An automated consistency check verifies brandbook token values against the admin `ax-*` SSOT in `accrue_admin/assets/css/theme.css`, with the mapping documented — zero admin code changes this milestone.
 - [ ] **TOK-03**: Palette and typography specimen artifacts exist in `brandbook/examples/`.
 
@@ -76,7 +76,7 @@ Filled by the roadmap. Coverage target: 14/14, each REQ-ID mapped to exactly one
 | LOGO-02 | Phase 181 | Complete |
 | LOGO-03 | Phase 182 | Complete |
 | LOGO-04 | Phase 183 | Complete |
-| TOK-01 | Phase 184 | Pending |
+| TOK-01 | Phase 184 | Complete |
 | TOK-02 | Phase 184 | Pending |
 | TOK-03 | Phase 184 | Pending |
 | COPY-01 | Phase 185 | Pending |

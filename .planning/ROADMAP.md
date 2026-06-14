@@ -198,7 +198,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 184-01-PLAN.md — Harness scaffold + gated dep install + tokens.json SSOT + lib.mjs helpers
+- [x] 184-01-PLAN.md — Harness scaffold + gated dep install + tokens.json SSOT + lib.mjs helpers
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -529,7 +529,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
 | 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
 | 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
-| 184. Design Tokens & Specimens | v1.52 | 0/? | Not started | - |
+| 184. Design Tokens & Specimens | v1.52 | 1/5 | In Progress|  |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
 
