@@ -428,7 +428,7 @@ grep -o 'https\?://[^"'"'"'> ]*' brandbook/index.html
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the assembly script go in a new `brandbook/harness/` or be co-located in `brandbook/logo/harness/`?**
    - What we know: `brandbook/logo/harness/` already has Playwright; `brandbook/tokens/harness/` has the token generators; a separate `brandbook/harness/` would be the natural third sibling.
