@@ -208,7 +208,11 @@ function stripXmlDecl(svgStr) {
  * Logo SVGs are path-only, but defensive strip is cheap and correct.
  */
 function stripScriptElements(svgStr) {
-  return svgStr.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+  // Strip paired <script>...</script>
+  svgStr = svgStr.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+  // Strip self-closing <script ... /> (valid in SVG/XML)
+  svgStr = svgStr.replace(/<script\b[^>]*\/>/gi, "");
+  return svgStr;
 }
 
 function cleanSvg(svgStr) {
