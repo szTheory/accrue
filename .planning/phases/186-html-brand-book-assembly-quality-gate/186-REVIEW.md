@@ -18,9 +18,9 @@ fixed:
   - "WR-02 (021eef0c): strip self-closing <script/> tags in SVG cleaner"
   - "WR-03 (af735126): remove dead size-budget subprocess"
   - "WR-04 (c76568f8): HTML-escape angle brackets in inlineMarkdown"
-deferred:
-  - "IN-01: multiple <h1> elements (info, out of --fix scope)"
-  - "IN-02: '<= 2 MB' label vs strict-< check (info, out of --fix scope)"
+  - "IN-01 (90c67f78): demote embedded document-title <h1> to <h2> (single <h1> per page)"
+  - "IN-02 (2e4fe606): make size-budget check inclusive to match <= 2 MB label"
+deferred: []
 ---
 
 # Phase 186: Code Review Report
