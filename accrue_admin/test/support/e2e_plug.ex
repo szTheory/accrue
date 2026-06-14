@@ -25,6 +25,14 @@ defmodule AccrueAdmin.E2E.Plug do
     |> send_resp(302, "")
   end
 
+  get "/login-member" do
+    login_member(conn)
+  end
+
+  get "/__e2e__/login-member" do
+    login_member(conn)
+  end
+
   post "/reset" do
     Fixtures.reset!()
     json(conn, 200, %{ok: true})
@@ -81,5 +89,15 @@ defmodule AccrueAdmin.E2E.Plug do
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(status, body)
+  end
+
+  defp login_member(conn) do
+    target = conn.params["to"] || "/billing"
+
+    conn
+    |> fetch_session()
+    |> put_session(:admin_token, "member")
+    |> put_resp_header("location", target)
+    |> send_resp(302, "")
   end
 end

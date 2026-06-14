@@ -5,6 +5,7 @@ defmodule AccrueAdmin.E2E.AuthAdapter do
 
   @impl Accrue.Auth
   def current_user(%{"admin_token" => "admin"}), do: %{id: "e2e_admin", role: :admin}
+  def current_user(%{"admin_token" => "member"}), do: %{id: "e2e_member", role: :member}
   def current_user(_session), do: nil
 
   @impl Accrue.Auth

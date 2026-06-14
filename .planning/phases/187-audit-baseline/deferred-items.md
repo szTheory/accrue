@@ -1,0 +1,1 @@
+- [187-04 Task 1] `cd accrue_admin && mix test --warnings-as-errors test/accrue_admin` is currently blocked by pre-existing `test/accrue_admin/live/dashboard_live_test.exs:91` expecting `$42.50`; Task 1 only changed E2E auth support files.
