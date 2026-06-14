@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-last_updated: "2026-06-14T22:53:22.825Z"
+last_updated: "2026-06-14T23:02:27.477Z"
 last_activity: 2026-06-14
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 187 (audit-baseline) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-06-14
 
@@ -42,7 +42,7 @@ v1.53 Admin UI Design-System Hardening is open as a quality / interaction-correc
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 187 | Audit & Baseline | VER-01 | Not started |
+| 187 | Audit & Baseline | VER-01 | In Progress |
 | 188 | Foundations hardening | FND-01, FND-02, FND-03, FND-04, FND-05, FND-06 | Not started |
 | 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Not started |
 | 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Not started |
@@ -127,7 +127,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 
 **Velocity:**
 
-- Total plans completed: 115
+- Total plans completed: 116
 - Average duration: 1m
 - Total execution time: 1m
 
@@ -136,6 +136,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 187 P01 | 4m 12s | 2 tasks | 3 files |
 | Phase 187 P02 | 6m | 3 tasks | 8 files |
 | Phase 187 P03 | 19m | 2 tasks | 1 files |
+| Phase 187 P04 | 9m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -196,6 +197,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 187]: Targeted breakpoint rows use mode targeted plus numeric viewport_width/breakpoint and targeted_label. — Plan 187-02 rejects legacy targeted-320 mode strings.
 - [Phase 187]: Evidence artifacts stay under accrue_admin/test-results with checksums; committed planning artifacts store references only. — Plan 187-02 avoids committing screenshots, traces, or external artifacts.
 - [Phase 187]: Static baseline component rows resolve manifest /dev/components to the actual /billing/dev/components route. — The admin dev component kitchen is mounted under the /billing admin scope, and resolving it in the harness keeps component/component-group evidence reachable without changing manifest identity.
+- [Phase 187]: Permission-denied forcing stays inside E2E test support. — Plan 187-04 uses an explicit `member` token and `login-member` helper route without changing production admin auth.
+- [Phase 187]: Live interaction probes record observations instead of corrected-behavior regressions. — Plan 187-04 writes trace-backed NDJSON rows for current behavior and leaves permanent regression tests to Phase 191 fixes.
 
 ### Pending Todos
 
@@ -242,8 +245,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-14T22:53:13.555Z
-Stopped at: Completed 187-02-PLAN.md
+Last session: 2026-06-14T23:02:27.472Z
+Stopped at: Completed 187-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
