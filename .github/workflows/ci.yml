@@ -83,6 +83,28 @@ jobs:
       - name: Release notes freshness contract
         run: bash scripts/ci/verify_release_notes_contract.sh
 
+      - name: Set up Node (tokens harness)
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: brandbook/tokens/harness/package-lock.json
+
+      - name: Install tokens harness
+        run: cd brandbook/tokens/harness && npm ci
+
+      - name: Regenerate tokens + specimens
+        run: cd brandbook/tokens/harness && npm run generate && npm run specimens
+
+      - name: Tokens/specimens are reproducible (determinism gate, D-17)
+        run: git diff --exit-code -- brandbook/tokens/tokens.css brandbook/examples/palette.svg brandbook/examples/typography.svg brandbook/examples/spacing.svg
+
+      - name: Brand↔admin token parity (SC#2)
+        run: cd brandbook/tokens/harness && npm run parity
+
+      - name: Parity drift detection proof (SC#2 both directions)
+        run: cd brandbook/tokens/harness && npm run parity-test
+
   release-manifest-ssot:
     name: Release manifest SSOT (REL-02)
     if: github.event_name != 'schedule'
