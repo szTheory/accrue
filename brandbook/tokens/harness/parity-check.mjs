@@ -195,9 +195,12 @@ function buildDriftFixture(realCss) {
 }
 
 /**
- * Inject a $extensions divergesFrom+reason on the first ax-mapped token that
- * maps to driftedProp (color.feedback.success → --ax-success) so the parity
- * engine tolerates the mutation in case (c).
+ * Inject a $extensions divergesFrom+reason on ALL tokens that map to driftedProp
+ * so the parity engine tolerates the mutation in case (c).
+ *
+ * Multiple tokens may share the same axMap (e.g. color.brand.moss and
+ * color.feedback.success both map to --ax-success). The divergence must be
+ * declared on ALL of them for the tolerance to apply.
  *
  * @param {object} realTokens - The committed tokens JSON (deep-copied internally)
  * @param {string} driftedProp - The --ax-* property that carries injected drift
@@ -206,18 +209,26 @@ function buildDriftFixture(realCss) {
 function buildDivergenceFixture(realTokens, driftedProp) {
   // Deep copy to avoid mutating the original object
   const tokens = JSON.parse(JSON.stringify(realTokens));
-  // Inject divergesFrom+reason on color.feedback.success (maps --ax-success)
-  const target = tokens?.color?.feedback?.success;
-  if (!target) {
-    throw new Error(`[parity-check] fixture setup: color.feedback.success not found in tokens`);
+  // Walk the entire token tree and inject divergesFrom+reason on every token
+  // whose axMap matches driftedProp.
+  function injectDivergence(node) {
+    if (node == null || typeof node !== "object") return;
+    if ("$value" in node) {
+      const ext = node.$extensions?.["org.accrue.ax"];
+      if (ext && ext.axMap === driftedProp) {
+        node.$extensions["org.accrue.ax"] = {
+          ...ext,
+          divergesFrom: driftedProp,
+          reason: "test-fixture: intentional injected divergence for SC#2 validation",
+        };
+      }
+    } else {
+      for (const [key, val] of Object.entries(node)) {
+        if (!key.startsWith("$")) injectDivergence(val);
+      }
+    }
   }
-  target.$extensions = {
-    "org.accrue.ax": {
-      axMap: driftedProp,
-      divergesFrom: driftedProp,
-      reason: "test-fixture: intentional injected divergence for SC#2 validation",
-    },
-  };
+  injectDivergence(tokens);
   return tokens;
 }
 
