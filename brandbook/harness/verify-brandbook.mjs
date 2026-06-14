@@ -151,7 +151,7 @@ function runStructuralAssertions() {
   if (totalBytes > 0) {
     const MB = totalBytes / (1024 * 1024);
     assert(
-      totalBytes < 2097152,
+      totalBytes <= 2097152,
       `committed weight <= 2 MB (found ${MB.toFixed(2)} MB — ${totalBytes} bytes via git ls-files)`
     );
   } else {
