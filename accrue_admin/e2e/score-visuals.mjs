@@ -3,7 +3,7 @@
  *
  * Reads PNG screenshots captured by `npm run e2e:visuals:png-only` from
  * test-results/admin-visuals/{chromium-desktop,chromium-mobile}/, sends each
- * to the Anthropic messages API with the 10-dimension rubric, and emits
+ * to the Anthropic messages API with the Phase 187 rubric, and emits
  * structured NDJSON findings.
  *
  * REMEDIATION LOOP (cap 3 rounds):
@@ -37,6 +37,8 @@ if (!process.env.ANTHROPIC_API_KEY) {
   process.exit(0);
 }
 
+const { default: manifest } = await import("./baseline-manifest.js");
+
 // Dynamic import of the Anthropic SDK — only executed when key IS present.
 const { default: Anthropic } = await import("@anthropic-ai/sdk");
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY from env
@@ -50,45 +52,22 @@ const MAX_B64_BYTES = 5 * 1024 * 1024; // 5 MB — skip oversized images with a 
 const TO_STDOUT = process.argv.includes("--stdout");
 
 // ----------------------------------------------------------------------------
-// 10-dimension rubric (locked schema from CONTEXT.md D-01/QA-02)
-// Dimensions: 1-10. Score 0-3; pass threshold ≥ 2.
+// 12-dimension rubric (Phase 187 manifest contract)
+// Dimensions: 1-12. Score 0-3; pass threshold ≥ 2.
 // ----------------------------------------------------------------------------
-const DIMENSIONS = [
-  { id: 1, name: "token-compliance" },
-  { id: 2, name: "visual-hierarchy" },
-  { id: 3, name: "spacing-rhythm" },
-  { id: 4, name: "state-coverage" },
-  { id: 5, name: "responsive-mobile-first" },
-  { id: 6, name: "contrast" },
-  { id: 7, name: "focus-semantics" },
-  { id: 8, name: "brand-expression" },
-  { id: 9, name: "motion" },
-  { id: 10, name: "reuse-dry" },
-];
+const { DIMENSIONS, SURFACES, PROJECTS, cellId } = manifest;
+const EXPECTED_DIMENSION_IDS = DIMENSIONS.map((dimension) => dimension.id);
+const DIMENSION_PROMPT = DIMENSIONS
+  .map((dimension) => `${dimension.id}. ${dimension.name}`)
+  .join("\n");
 
-const RUBRIC_PROMPT = `You are a senior UI/UX reviewer for a Phoenix/LiveView admin billing dashboard called Accrue Admin. You will evaluate a screenshot against a 10-dimension rubric and return a JSON array of findings.
+const RUBRIC_PROMPT = `You are a senior UI/UX reviewer for a Phoenix/LiveView admin billing dashboard called Accrue Admin. You will evaluate a screenshot against a 12-dimension rubric and return a JSON array of findings.
 
 DIMENSIONS AND SCORING (0–3, pass ≥ 2):
 
-1. token-compliance — All colors, spacing, radii, shadows, and typography use design-system tokens (no hardcoded hex/px overrides). 0=many violations, 1=some, 2=mostly compliant, 3=fully compliant.
+${DIMENSION_PROMPT}
 
-2. visual-hierarchy — Primary actions, headings, and data are visually prioritized; secondary content recedes appropriately. 0=no clear hierarchy, 1=weak, 2=clear, 3=excellent.
-
-3. spacing-rhythm — Consistent vertical and horizontal rhythm; gutters, padding, and section spacing feel intentional. 0=chaotic, 1=inconsistent, 2=mostly consistent, 3=polished rhythm.
-
-4. state-coverage — Empty, loading, error, and populated states are handled gracefully with appropriate feedback. 0=only happy path visible, 1=partial, 2=good coverage, 3=all states well-handled.
-
-5. responsive-mobile-first — On mobile viewport, content is readable and actionable without horizontal scroll; touch targets ≥ 44px. 0=broken on mobile, 1=barely usable, 2=functional, 3=polished.
-
-6. contrast — Text and interactive element contrast ratios meet WCAG AA (4.5:1 for body text, 3:1 for large/UI). 0=multiple failures, 1=one failure, 2=all passing, 3=exceeds AA.
-
-7. focus-semantics — Focus indicators are clearly visible; interactive elements have appropriate ARIA roles/labels visible in the screenshot. 0=no visible focus indicators, 1=partial, 2=present, 3=exemplary.
-
-8. brand-expression — The screen feels like polished developer tooling (well-made, not fintech-flashy); quiet confidence through typography and whitespace. 0=generic/off-brand, 1=neutral, 2=on-brand, 3=exemplary.
-
-9. motion — Animations and transitions (if visible in screenshot context) are purposeful and not distracting. For static screenshots, evaluate whether motion affordances (hover states, transition indicators) are appropriate. 0=jarring/absent, 1=mediocre, 2=good, 3=excellent.
-
-10. reuse-dry — Common patterns (tables, badges, cards, drawers) use the same component shapes across screens; no one-off inline styles. 0=significant duplication visible, 1=some, 2=mostly DRY, 3=fully consistent.
+Use the Phase 187 rubric meanings: tokenized implementation, hierarchy, spacing rhythm, state coverage, responsive behavior, contrast, focus semantics, brand expression, motion safety, reuse, interaction-integrity, and microcopy.
 
 OUTPUT INSTRUCTIONS:
 Return a JSON array only — no markdown, no explanation, no code fences. Each element must be an object with exactly these fields:
@@ -96,14 +75,38 @@ Return a JSON array only — no markdown, no explanation, no code fences. Each e
   "screen": "<screen name derived from filename>",
   "viewport": "<chromium-desktop or chromium-mobile>",
   "theme": "<light or dark>",
-  "dimension": <integer 1-10>,
+  "dimension": <integer 1-12>,
   "dimension_name": "<dimension name from the list above>",
   "score": <integer 0-3>,
   "defect": <string describing the issue, or null if score >= 2>,
   "suggested_fix": <string with actionable fix, or null if score >= 2>
 }
 
-Include one object per dimension per screenshot. Return exactly 10 objects for each image evaluated.`;
+Include one object per dimension per screenshot. Return exactly 12 objects for each image evaluated.`;
+
+function metadataForImage(screen, viewport, theme, dimensionId) {
+  const surface = SURFACES.find((entry) => entry.surface === screen);
+  const project = PROJECTS.find((entry) => entry.name === viewport || entry.mode === viewport);
+  const dimension = DIMENSIONS.find((entry) => entry.id === dimensionId);
+  if (!surface || !project || !dimension || !surface.themes.includes(theme)) return null;
+
+  return {
+    cell_id: cellId(surface.surface, project.name, theme, "default-populated", dimension.id),
+    surface: surface.surface,
+    surface_type: surface.surface_type,
+    state: "default-populated",
+    persona_job: surface.persona_job,
+    coverage_status: "covered",
+    dimension: dimension.id,
+    dimension_name: dimension.name,
+  };
+}
+
+function hasExpectedDimensions(findings) {
+  if (!Array.isArray(findings) || findings.length !== EXPECTED_DIMENSION_IDS.length) return false;
+  const ids = findings.map((finding) => Number(finding.dimension)).sort((a, b) => a - b);
+  return EXPECTED_DIMENSION_IDS.every((id, index) => ids[index] === id);
+}
 
 // ----------------------------------------------------------------------------
 // PNG discovery helpers
@@ -230,17 +233,29 @@ async function main() {
         continue; // skip this image, don't abort the run
       }
 
+      if (!hasExpectedDimensions(findings)) {
+        console.warn(
+          `[score-visuals] Skipping ${screen} (${viewport}/${theme}) — model response did not contain dimension ids 1-12 exactly once`
+        );
+        skipped++;
+        continue;
+      }
+
       // Enrich findings with authoritative metadata (override model-supplied values)
       for (const finding of findings) {
+        const dimensionId = Number(finding.dimension);
+        const metadata = metadataForImage(screen, viewport, theme, dimensionId);
         const enriched = {
           screen,
           viewport,
           theme,
-          dimension: finding.dimension,
-          dimension_name: finding.dimension_name,
+          dimension: dimensionId,
+          dimension_name:
+            DIMENSIONS.find((dimension) => dimension.id === dimensionId)?.name || finding.dimension_name,
           score: finding.score,
           defect: finding.defect ?? null,
           suggested_fix: finding.suggested_fix ?? null,
+          ...(metadata || {}),
         };
 
         const line = JSON.stringify(enriched) + "\n";
