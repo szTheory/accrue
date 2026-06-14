@@ -230,7 +230,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 185-03-PLAN.md — One-batch human review + approval + revision incorporation
+- [x] 185-03-PLAN.md — One-batch human review + approval + revision incorporation
 
 ### Phase 186: HTML Brand Book Assembly & Quality Gate
 
@@ -249,7 +249,7 @@ Plans:
 **Wave 1** *(parallel — no dependencies)*
 
 - [x] 185-01-PLAN.md — Voice system doc: principles, tone sliders, vocabulary, surface dispatch rule, claims posture, CTA canon (COPY-01)
-- [ ] 185-02-PLAN.md — Copy blocks for all surfaces: GitHub, Hex.pm, HexDocs, README hero, landing page, release notes, microcopy (COPY-02)
+- [x] 185-02-PLAN.md — Copy blocks for all surfaces: GitHub, Hex.pm, HexDocs, README hero, landing page, release notes, microcopy (COPY-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -548,7 +548,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
 | 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete    | 2026-06-14 |
-| 185. Voice, Microcopy & Marketing Copy | v1.52 | 2/3 | In Progress|  |
+| 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete   | 2026-06-14 |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
