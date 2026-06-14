@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-06-14T22:27:22.245Z",
+  "phase": "187-audit-baseline",
+  "outputs": {
+    "cells": ".planning/phases/187-audit-baseline/baseline.cells.json",
+    "defects": ".planning/phases/187-audit-baseline/defects.ndjson",
+    "manifest": ".planning/phases/187-audit-baseline/artifacts.manifest.json",
+    "markdown": ".planning/phases/187-audit-baseline/187-BASELINE.md"
+  },
+  "evidence": [
+    {
+      "path": "accrue_admin/test-results/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "bytes": 45
+    }
+  ],
+  "observations": [],
+  "harness_failures": [
+    {
+      "kind": "harness-error",
+      "evidence_ref": "accrue_admin/test-results/admin-visuals/findings.ndjson",
+      "message": "Required vision findings evidence is missing; run score-visuals when credentials are available."
+    }
+  ]
+}

@@ -6,7 +6,9 @@
     "e2e:visuals:png-only": "env -u NO_COLOR playwright test e2e/admin-visuals.spec.js",
     "e2e:a11y": "env -u NO_COLOR playwright test e2e/admin-a11y.spec.js",
     "e2e:install": "playwright install chromium",
-    "score-visuals": "node e2e/score-visuals.mjs"
+    "score-visuals": "node e2e/score-visuals.mjs",
+    "baseline:artifacts": "node e2e/baseline-artifacts.mjs",
+    "baseline:parse": "node -e 'const fs=require(\"fs\"), path=require(\"path\"); const root=path.resolve(\"..\"); JSON.parse(fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/baseline.cells.json\"),\"utf8\")); const nd=fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/defects.ndjson\"),\"utf8\").split(/\\r?\\n/).filter(Boolean); for (const line of nd) JSON.parse(line); JSON.parse(fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/artifacts.manifest.json\"),\"utf8\")); console.log(\"baseline artifacts parse ok\")'"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
