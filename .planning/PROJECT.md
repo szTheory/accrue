@@ -29,9 +29,13 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
-## Current Milestone: v1.52 Brand System
+## Most recently shipped milestone: v1.52 Brand System (**shipped & archived 2026-06-14**)
 
-**Goal:** Pressure-test the brand book seed (`prompts/accrue-brand-book.md`) through a 14-section critical audit, run a user-judged SVG logo tournament to a locked winner, and ship a committed, self-contained `brandbook/` — standalone HTML brand book, full SVG logo system, design tokens, and voice/microcopy/marketing copy.
+**Goal (ACHIEVED):** Pressure-test the brand book seed (`prompts/accrue-brand-book.md`) through a 14-section critical audit, run a user-judged SVG logo tournament to a locked winner, and ship a committed, self-contained `brandbook/` — standalone HTML brand book, full SVG logo system, design tokens, and voice/microcopy/marketing copy.
+
+**Delivered (Phases 180–186, 29/29 plans, 14/14 requirements):** ratified `BRAND-DNA.md` + binding logo brief from a 14-section audit; an opentype.js Geist-outline SVG harness with 6 pre-gate lints; a user-judged tournament to locked winner **R2-7** (two-tone stepped mark); the full production logo system at `brandbook/logo/` (21 outlined-path, svgo-optimized files); `brandbook/tokens/` with admin `ax-*` parity check (zero admin changes) + specimens; a committed voice system + ready-to-paste copy for every adopter-facing surface; and a self-contained, file://-openable `brandbook/index.html` passing the quality gate within the ≤2 MB budget (~656K git-tracked).
+
+**Closeout proof:** Phases 180–186; planning tag `v1.52`; see `.planning/MILESTONES.md` v1.52 entry, `.planning/milestones/v1.52-ROADMAP.md`, and `.planning/milestones/v1.52-REQUIREMENTS.md`. No formal milestone audit was produced — maintainer accepted the de-facto-complete state (14/14 requirements, all human checkpoints passed) and skipped the audit gate.
 
 **Posture justification:** Brand/DX investment in adopter-facing presentation surfaces (README, Hex.pm, HexDocs, social previews, admin UI identity) — no new billing primitives; same justification class as v1.50/v1.51 and explicitly requested by the maintainer. This paragraph is the recorded reopen decision required by the post-v1.48 pause rule.
 
@@ -498,10 +502,12 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.49 shipped and archived on 2026-06-02.** Accrue remains in stable-core / demand-driven expansion posture. The next milestone should only open for release-readiness, maintenance, documentation truth, verifier hardening, adopter-proof closure, or a concrete adopter/correctness/security/operational failure mode.
+**v1.52 shipped and archived on 2026-06-14.** Accrue remains in stable-core / demand-driven expansion posture. The next milestone should only open for release-readiness, maintenance, documentation truth, verifier hardening, adopter-proof closure, or a concrete adopter/correctness/security/operational failure mode.
 
-**Last shipped planning milestone:** **v1.49** — Phases **163–166** — **2026-06-02**
-**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0
+The v1.50→v1.52 arc (Admin UI Foundation → Admin UI Depth Pass → Brand System) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
+
+**Last shipped planning milestone:** **v1.52** — Phases **180–186** — **2026-06-14** (Brand System)
+**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.52 shipped no new package code)
 
 ## Prior shipped milestone
 
@@ -521,11 +527,18 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ### Active
 
-**v1.52 — Brand System** (see `.planning/REQUIREMENTS.md`). Categories: AUD (brand audit & DNA), LOGO (tournament + logo system), TOK (design tokens & specimens), COPY (voice/microcopy/marketing), BOOK (HTML brand book & quality gate). Mapped across Phases 180–186.
+**None — no milestone open.** Accrue remains in stable-core / demand-driven expansion posture (post-v1.48 pause rule). The next milestone opens only for release-readiness, maintenance, documentation truth, verifier hardening, adopter-proof closure, or a concrete adopter/correctness/security/operational failure mode — recorded in this file before `.planning/ROADMAP.md` / `.planning/STATE.md` change.
 
-Validated in Phase 180: AUD-01, AUD-02, AUD-03 — 14-section BRAND-AUDIT.md (status: ratified), locked BRAND-DNA.md, binding logo-brief.md, quality-gate-checklist.md, and committed WCAG contrast evidence (`artifacts/contrast-table.txt`). User ratified all verdicts at the D-07 checkpoint (ADD-6 flipped to KEEP); Phase 181 unblocked.
+### Validated v1.52 (archived in `.planning/milestones/v1.52-REQUIREMENTS.md`; milestone shipped & archived 2026-06-14)
 
-Validated in Phase 183: LOGO-04 — complete production logo system at `brandbook/logo/` (13 SVGs + 8 rasters = 21 committed files): primary/on-dark/with-subtitle lockups, wordmark, mark + mark-on-dark, mono + mono-inverse (lockup & mark), clearspace diagram, social card (SVG+PNG), favicon (SVG+.ico+PNG 16/32/48), apple-touch-icon, PWA icons 192/512. All finals outlined paths, svgo-optimized, with `<title>`/`<desc>` metadata; `brandbook/README.md` is the min-size SSOT and `brandbook/LICENSE-FONTS.txt` documents OFL/Geist provenance. Two defects caught at the derivative-sheet checkpoint and fixed (SVGO dropping a tiny outlined glyph in the social-card subtitle; subtitle viewBox width clipping). Verified 7/7 must-haves.
+Brand System — 14/14 satisfied (AUD-01..03, LOGO-01..04, TOK-01..03, COPY-01..02, BOOK-01..02) across Phases 180–186.
+
+- ✓ **AUD-01..AUD-03** — 14-section ratified `BRAND-AUDIT.md`, locked `BRAND-DNA.md` + binding `logo-brief.md` + quality-gate checklist, committed WCAG contrast evidence; user ratified all verdicts at the audit checkpoint — v1.52
+- ✓ **LOGO-01..LOGO-03** — opentype.js Geist-outline harness with 6 pre-gate lints; file://-openable round-1 gallery (16 candidates × 4 directions); monotonic `TOURNAMENT.md` tournament to locked winner **R2-7** (two-tone stepped mark) — v1.52
+- ✓ **LOGO-04** — complete production logo system at `brandbook/logo/` (21 committed files): lockups, wordmark, mark, mono/inverse, clearspace, social card (SVG+PNG), favicon (SVG+.ico+PNG), with-subtitle variant, PWA/apple-touch icons; all outlined paths, svgo-optimized, `<title>`/`<desc>` metadata, OFL/Geist provenance — v1.52
+- ✓ **TOK-01..TOK-03** — `brandbook/tokens/` (palette, semantic roles, type/spacing/radius/focus/state) + automated `ax-*` parity check (zero admin changes) + palette/typography/spacing specimens — v1.52
+- ✓ **COPY-01..COPY-02** — committed voice system + ready-to-paste copy for GitHub/Hex.pm/HexDocs/README/landing/release-notes/microcopy, reviewed in one batch — v1.52
+- ✓ **BOOK-01..BOOK-02** — self-contained, file://-openable `brandbook/index.html` (inline CSS/SVG, no build step); passes the Phase-180 quality gate within the ≤2 MB budget — v1.52
 
 ### Validated v1.51 (archived in `.planning/milestones/v1.51-REQUIREMENTS.md`; milestone shipped & archived 2026-06-04)
 
@@ -603,4 +616,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-13 — Phase 183 complete: locked R2-7 winner mechanically derived into the full production logo system at `brandbook/logo/` (21 committed files), README min-size SSOT + OFL/Geist license; two checkpoint-caught defects fixed; verified 7/7 (LOGO-04 validated). Next: Phase 184 (Design Tokens & Specimens).*
+*Last updated: 2026-06-14 after v1.52 Brand System milestone — shipped & archived (Phases 180–186, 14/14 requirements). Committed standalone `brandbook/` (HTML brand book, R2-7 logo system, design tokens, voice/copy). No milestone open; stable-core / demand-driven expansion posture holds.*

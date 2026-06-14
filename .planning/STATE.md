@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
 status: milestone_complete
-last_updated: 2026-06-14T15:04:49.898Z
-last_activity: 2026-06-14 -- Phase 186 marked complete; v1.52 Brand System milestone closed
+last_updated: 2026-06-14T15:30:00.000Z
+last_activity: 2026-06-14 -- v1.52 Brand System archived (ROADMAP+REQUIREMENTS snapshots, MILESTONES.md + RETROSPECTIVE.md entries, PROJECT.md evolution, git tag v1.52)
 progress:
   total_phases: 7
   completed_phases: 7
@@ -18,11 +18,11 @@ stopped_at: Milestone complete (Phase 186 was final phase)
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
+See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.52 Brand System shipped & archived)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Milestone complete
+**Current focus:** No milestone open — stable-core / demand-driven expansion posture (post-v1.48 pause rule)
 
 ## Current Position
 
@@ -239,6 +239,23 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Deferred Items
 
+### Acknowledged at v1.52 milestone close (2026-06-14)
+
+8 open artifact-audit items were acknowledged and deferred when closing v1.52 (maintainer chose "archive now" over resolving). All benign:
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | admin-shared-detail-components | done (scanner can't locate SUMMARY) |
+| quick_task | 260602-6xv-seamless-multi-project-docker-dx-for-exa | done (logged in Quick Tasks Completed) |
+| quick_task | 260604-3cg-automate-phase-174-human-uat-items-into- | done (logged) |
+| quick_task | 260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem | done (logged) |
+| quick_task | 260605-dkx-docker-native-boot-shared-traefik-proxy | done (logged) |
+| quick_task | 260605-gys-add-dedicated-admin-example-com-billing- | done (logged) |
+| uat_gap | 182-HUMAN-UAT.md | partial — de facto satisfied by user's R2-7 lock; confirmed transitively by 183/186 checkpoints |
+| verification_gap | 182-VERIFICATION.md | human_needed — same; downstream phases passed their human gates |
+
+### Standing scope deferrals
+
 | Category | Item | Status | Reason | Future owner/category | revisit_trigger | Deferred At |
 |----------|------|--------|--------|-----------------------|-----------------|-------------|
 | scope | Rich metered/tiered/range entitlement math (beyond seat counts) | out of scope v1.39 | Current entitlement support intentionally covers local plan and seat-style quantities without a sourced adopter contract for richer math. | Entitlements extension | concrete adopter failure or explicit adopter contract requiring richer entitlement math | 2026-05-22 |
@@ -260,7 +277,7 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Roadmap created. Run `/gsd-plan-phase 180` to begin Phase 180: Brand Audit & DNA Lock.
-- Phase 180 is the human-checkpoint phase — user ratifies audit verdicts, BRAND-DNA, and logo brief before any logo work begins.
-- After Phase 180 checkpoint: Phase 181 begins the SVG pipeline + tournament round 1.
-- Phases 184 and 185 can run in parallel with Phase 182's tournament rounds (they depend only on Phase 180).
+- v1.52 Brand System is **shipped & archived** (2026-06-14). No milestone is open.
+- Planning git tag `v1.52` created; push with `git push origin v1.52` if/when desired.
+- To start the next milestone: `/clear` then `/gsd-new-milestone` — but only with a sourced reason (release-readiness, maintenance, doc truth, verifier hardening, adopter-proof closure, or a concrete adopter/correctness/security/operational failure mode), per the post-v1.48 pause rule.
+- Optional hygiene: add a gitignore rule for the untracked harness `node_modules` under `brandbook/logo/` and `brandbook/tokens/` (~375M on disk, not committed).

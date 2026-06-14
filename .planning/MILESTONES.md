@@ -1,5 +1,44 @@
 # Milestones
 
+## v1.52 Brand System (Shipped: 2026-06-14; archived 2026-06-14)
+
+**Phases completed:** 7 phases (180–186), 29 plans. Brand/DX investment in adopter-facing presentation surfaces — **not** a broad feature milestone (no new billing primitives).
+
+**Key accomplishments:**
+
+- Pressure-tested the brand book seed through a 14-section critical audit (KEEP/TIGHTEN/REWORK/ADD/REMOVE verdicts, each with a cited justification), then locked a ratified `BRAND-DNA.md` + binding logo brief at an explicit maintainer checkpoint.
+- Built a reproducible opentype.js SVG logo harness emitting exact Geist outlines with 6 automated pre-gate lints (no-rect-background, lockup gap ratio, 16px legibility, monochrome-derivable, no-subtitle), then ran a user-judged tournament — 16 round-1 candidates across 4 directions → locked winner **R2-7** (two-tone stepped mark: 3 charcoal steps + 1 Moss green `#5E9E84` top step) via a monotonic `TOURNAMENT.md` ledger.
+- Mechanically derived the full production logo system at `brandbook/logo/` (21 committed files: lockups, wordmark, mark, monochrome, favicon SVG/.ico/PNG, social card, with-subtitle variant, clearspace spec) — all outlined paths, svgo-optimized, with `<title>`/`<desc>` metadata and documented OFL/Geist provenance.
+- Shipped `brandbook/tokens/` (raw palette, semantic roles, type/spacing/radius/focus/state) with an automated parity check against the admin `ax-*` SSOT (zero admin code changes), plus palette/typography/spacing specimens.
+- Authored a committed voice system + ready-to-paste copy blocks for every adopter-facing surface (GitHub, Hex.pm, HexDocs, README hero, landing sections, release-note templates, microcopy), reviewed in one batch.
+- Assembled it all into a self-contained, file://-openable `brandbook/index.html` (inline CSS/SVG, no build step, no JS frameworks) that passes the Phase-180 quality-gate checklist within the ≤2 MB budget (git-tracked weight ~656K).
+
+**Verification:** 14/14 requirements (AUD-01..03, LOGO-01..04, TOK-01..03, COPY-01..02, BOOK-01..02). All human checkpoints passed (180 ratification, 181 winner pick, 182 lock, 183 derivative eyeball, 185 copy review, 186 final UAT).
+
+**Known deferred items at close (8, all benign):** 6 completed quick-tasks flagged "missing" by the artifact scanner (work done, logged in STATE.md); Phase 182 UAT/verification trackers left `partial`/`human_needed` (both items de facto satisfied by the user's R2-7 lock + transitively confirmed by 183/186 checkpoints); plus 4 advisory harness warnings and a cosmetic POS-01/02/03 traceability gap (POS rows are standing requirements, all checked). No milestone audit (`v1.52-MILESTONE-AUDIT.md`) was produced — maintainer accepted the de-facto-complete state and skipped the formal audit gate.
+
+**Archives:** [`milestones/v1.52-ROADMAP.md`](milestones/v1.52-ROADMAP.md), [`milestones/v1.52-REQUIREMENTS.md`](milestones/v1.52-REQUIREMENTS.md). Phase trees remain in `.planning/phases/180-*..186-*`. Planning git tag `v1.52`.
+
+---
+
+## v1.51 Admin UI: Depth Pass (Shipped: 2026-06-04; archived 2026-06-04)
+
+**Phases completed:** 6 phases (174–179), 33 plans. Quality / operator-DX depth pass on the already-shipped `accrue_admin` surface — **not** a broad feature milestone (no new billing primitives). *(Entry added retroactively 2026-06-14 — the v1.51 close archived its ROADMAP/REQUIREMENTS but did not write a MILESTONES.md entry.)*
+
+**Key accomplishments:**
+
+- Closed design-system token gaps (line-height, letter-spacing, breakpoint, transition-bundle, reading-measure tokens) and killed the remaining token bypasses (DSY).
+- Re-mapped information architecture from entity-shaped to job/persona-shaped: weighty Billing zone + recessed specialist rooms with attention badges, verb launchers, visible search, bidirectional threading, work-queue defaults, redirected route reshaping (IA).
+- Lifted the under-iterated screen tail to a 10-dimension rubric baseline (≥2 on all dims, light/dark, desktop/mobile @360px) with documented before/after scores (SCR).
+- Added restrained, token-based, reduced-motion-honoring motion to drawers, dropdowns, command palette, tabs, flash, and skeleton→content (MOT).
+- Made every screen state reachable from seeded data on a single click-through (SEED) and proved it with a screenshot-driven visual-QA loop + axe sign-off (QA).
+
+**Verification:** 22/22 requirements (DSY-01..03, IA-01..07, SCR-01..04, MOT-01..03, SEED-01..02, QA-01..03). Audit: `.planning/v1.51-MILESTONE-AUDIT.md` (`tech_debt` — photographic sign-off is a standing human/CI gate; code-level compliance 100%).
+
+**Archives:** [`milestones/v1.51-ROADMAP.md`](milestones/v1.51-ROADMAP.md), [`milestones/v1.51-REQUIREMENTS.md`](milestones/v1.51-REQUIREMENTS.md), [`milestones/v1.51-MILESTONE-AUDIT.md`](milestones/v1.51-MILESTONE-AUDIT.md). Phase trees in `milestones/v1.51-phases/`. Planning git tag `v1.51`.
+
+---
+
 ## v1.50 Admin UI Foundation (Shipped: 2026-06-02; archived 2026-06-03)
 
 **Phases completed:** 7 phases (167–173). Built & merged to `main` via PR #32 (merge `da95c205`).

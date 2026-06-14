@@ -1306,6 +1306,67 @@ Raised the already-shipped `accrue_admin` UI to a coherent, distinctly-branded d
 
 ---
 
+## Milestone: v1.51 — Admin UI: Depth Pass
+
+**Shipped:** 2026-06-04
+**Phases:** 6 (174–179) | **Plans:** 33
+
+*(Section added retroactively 2026-06-14 — the v1.51 close archived ROADMAP/REQUIREMENTS but skipped the MILESTONES.md and RETROSPECTIVE.md entries.)*
+
+### What Was Built
+
+The second, depth-oriented pass on the v1.50 `accrue_admin` foundation: design-system token gap-closure (DSY), persona-driven IA reshape with attention badges + threading (IA), systematic per-screen rubric uplift to a 10-dimension baseline (SCR), restrained token-based motion (MOT), single-click-through seed state coverage (SEED), and a screenshot-driven visual-QA + axe loop (QA). 22/22 requirements.
+
+### What Worked
+
+- The anti-churn rule (every change cites a justification token: a below-bar rubric dimension, a failed persona-job, or an eliminated token bypass) kept a subjective "make it nicer" milestone disciplined and auditable.
+- A frozen-screens list (Home, primary nav, global search) prevented re-thrashing already-good surfaces.
+
+### Key Lessons
+
+- A depth/polish milestone needs an explicit admissibility bar for changes, or it never converges. The justification-token rule is reusable.
+
+---
+
+## Milestone: v1.52 — Brand System
+
+**Shipped:** 2026-06-14
+**Phases:** 7 (180–186) | **Plans:** 29
+
+### What Was Built
+
+A brand/DX milestone (no billing primitives): a 14-section critical audit of the brand-book seed → ratified `BRAND-DNA.md` + binding logo brief; a reproducible opentype.js Geist-outline SVG harness with 6 automated pre-gate lints; a user-judged logo tournament (16 round-1 candidates × 4 directions → monotonic `TOURNAMENT.md` → locked winner R2-7, a two-tone stepped mark); the full production logo system at `brandbook/logo/` (21 outlined-path, svgo-optimized files); `brandbook/tokens/` with an automated admin `ax-*` parity check + specimens; a committed voice system + ready-to-paste copy for every adopter-facing surface; and a self-contained, file://-openable `brandbook/index.html` passing the quality gate within the ≤2 MB budget. 14/14 requirements.
+
+### What Worked
+
+- **Front-loading the disagreement** into Phase 180 (audit → ratified DNA → binding brief with 4 hard logo constraints) before any pixel was drawn meant the tournament judged against a fixed contract rather than re-litigating taste each round.
+- **Automated pre-gate lints** (no-rect-background, 16px legibility, monochrome-derivable, no-subtitle) kept the human in the loop only for genuine aesthetic verdicts — no candidate that violated a hard constraint ever reached the user.
+- **Monotonic `TOURNAMENT.md` ledger** — verdicts transcribed verbatim, constraints never re-opened — converged the tournament in 2 rounds (under the 3-round cap).
+- **Evidence-gated seed latitude** (Geist + palette as defaults, changes only on a cited contrast/distinctiveness/16px failure) prevented scope-creep into a full rebrand.
+
+### What Was Inefficient
+
+- A coordinate-space bug in 181-06 rendered candidates near-blank; the first instinct was to *tune the legibility threshold* (3.0 → 1.75) to explain "thin marks" rather than look at the renders. The fix was a blank-render guard + reverting the threshold. **Lesson: visually inspect renders before tuning thresholds.**
+- Two derivative-sheet defects (SVGO dropping a tiny outlined glyph; subtitle viewBox clipping) only surfaced at the Phase 183 eyeball checkpoint — caught, but late.
+- Harness `node_modules` (~375M) accumulated untracked under `brandbook/logo/` and `brandbook/tokens/` without a gitignore rule.
+
+### Patterns Established
+
+- **Tournament-to-lock with a monotonic ledger** for any subjective single-winner selection (logo, naming, layout): pre-gate-lint → divergent gallery → user picks → convergent refinement rounds → explicit settle-or-extend cap.
+- **Brand layer documents, never mutates, the app SSOT** — `brandbook/tokens/` mirrors admin `ax-*` via an automated parity check; admin `theme.css` stayed untouched.
+
+### Key Lessons
+
+- For generated visual artifacts, *always view the rendered output* before trusting a numeric quality gate — a green/red threshold is worthless if the renderer is broken.
+- Skipping the formal milestone audit is defensible when requirements are 14/14 with all human checkpoints passed and downstream phases transitively confirm upstream gates — but the decision should be recorded (it is, in the MILESTONES.md entry).
+
+### Cost Observations
+
+- Model mix: not tracked (GSD model routing: mechanical agents on Sonnet, planning/verifier on inherited Opus).
+- Notable: front-loaded human checkpoints (181 pick, 182 lock, 183/185/186 reviews) meant cheap autonomous execution between gates — the cost was concentrated at the conversational verdict points, not the harness runs.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
