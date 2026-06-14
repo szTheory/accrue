@@ -204,7 +204,7 @@ Plans:
 
 - [x] 184-02-PLAN.md — tokens.css generator + reference-only README + completeness check (TOK-01)
 - [x] 184-03-PLAN.md — brand↔admin parity check + injected-drift --test (TOK-02)
-- [ ] 184-04-PLAN.md — palette/typography/spacing specimen SVGs + coverage check (TOK-03)
+- [x] 184-04-PLAN.md — palette/typography/spacing specimen SVGs + coverage check (TOK-03)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -529,7 +529,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
 | 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
 | 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
-| 184. Design Tokens & Specimens | v1.52 | 3/5 | In Progress|  |
+| 184. Design Tokens & Specimens | v1.52 | 4/5 | In Progress|  |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
 
