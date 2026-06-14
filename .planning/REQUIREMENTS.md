@@ -25,6 +25,91 @@ Archived to `.planning/milestones/v1.51-REQUIREMENTS.md`; validated summary in `
 Shipped 14/14 (AUD-01..03, LOGO-01..04, TOK-01..03, COPY-01..02, BOOK-01..02) across Phases
 180–186. Archived to `.planning/milestones/v1.52-REQUIREMENTS.md`; validated summary in `PROJECT.md`.
 
+## Milestone v1.53 Requirements — Admin UI Design-System Hardening (OPEN; Phases 187–192)
+
+**Defined:** 2026-06-14. Reopened under the post-v1.48 pause rule (explicit strategy change +
+firsthand-observed interaction defects; recorded in `PROJECT.md`). Hardening pass on the
+`accrue_admin` operator UI: fractal design-system audit (foundations → primitives → groups →
+pages → flows), interaction-defect remediation, component-level systematization, idempotent
+only-forward verification. **"User"** = the operator using the UI, the maintainer extending it,
+and the contributor working in the component system. 33 requirements across 8 themes.
+
+### FND — Foundations (tokens, layers, type, dark mode)
+
+- [ ] **FND-01**: Composed typography bundles exist as tokens (family + size + weight + line-height + tracking) and primitives consume them instead of ad-hoc per-property utility soup.
+- [ ] **FND-02**: A formal z-index/layer system (base → sticky → dropdown → popover → drawer → modal → toast) is tokenized; every overlay and sticky element references it and no ad-hoc z-index literals remain.
+- [ ] **FND-03**: The reading-measure token (`--ax-measure`) is applied to prose and dense surfaces so long text and wide tables stay readable at every breakpoint.
+- [ ] **FND-04**: The inert Tailwind config is resolved (removed or explicitly documented as reference-only) so there is one unambiguous styling source of truth.
+- [ ] **FND-05**: Every semantic role — including focus rings, scrollbars, and disabled states — has a correct, contrast-passing value in both light and dark (no role renders wrong or invisible in dark mode).
+- [ ] **FND-06**: Motion-token coverage is complete for every animated surface, with `prefers-reduced-motion` collapsing travel/overshoot while preserving crossfades.
+
+### CMP — Component systematization (the "Storybook lens")
+
+- [ ] **CMP-01**: Every component is exercised in the `/dev/components` lab across its full state matrix (default / hover / focus / active / pressed / disabled / loading / selected / empty / error / overflow) in both light and dark.
+- [ ] **CMP-02**: Each component renders correctly with long/overflowing content (long IDs, names, URLs, module names) without clipping, overlap, or layout break.
+- [ ] **CMP-03**: Each interactive component has the correct accessible role, full keyboard operation, visible focus, and accessible name; non-interactive elements expose no misleading affordances (e.g. no hover state on empty-state heroes).
+- [ ] **CMP-04**: Disabled and read-only states are visually unmistakable (disabled looks disabled; enabled never looks disabled), and button text never collides with its background color.
+- [ ] **CMP-05**: Component-level visual/brand fixes are made at the component root so they propagate to every consuming page (no per-page patching).
+
+### GRP — Meta-component cohesion (groups of components)
+
+- [ ] **GRP-01**: Each recurring component group (page-header + actions + breadcrumbs; toolbar + search + filters + sort; table + empty/loading/error/pagination; KPI + chart + table; detail-header + metadata + actions; modal-confirm; drawer + form; tabs + subviews) is audited as a unit for spacing rhythm, hierarchy, and obvious next action.
+- [ ] **GRP-02**: Tables degrade to readable cards/lists (not squished columns) at narrow widths, and tables are not used where a list/card pattern fits the data better.
+- [ ] **GRP-03**: Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen.
+- [ ] **GRP-04**: Pagination and similar affordances disappear or de-emphasize when there is nothing to paginate; filter/sort/active/selected states are unmistakable.
+
+### IXN — Interaction integrity (the defects screenshots miss)
+
+- [ ] **IXN-01**: Every modal and drawer renders above its scrim and is fully visible and interactive (never hidden behind the overlay), traps focus, restores focus to its trigger on close, and dismisses predictably via Escape and click-outside.
+- [ ] **IXN-02**: Scrolling works correctly on every page and container — no scroll traps, no nested-scroll dead-ends, no content left unreachable behind sticky regions.
+- [ ] **IXN-03**: Focus is never lost or hidden after a LiveView patch, and keyboard-only operation completes every primary flow.
+- [ ] **IXN-04**: Floating/overlay elements (dropdowns, popovers, tooltips, toasts) appear in the correct position relative to their trigger and never obscure the controls they relate to.
+- [ ] **IXN-05**: Each interaction defect recorded in the Phase-187 ledger is fixed and covered by a regression test so it cannot silently return.
+
+### PAGE — Page/flow JTBD coverage
+
+- [ ] **PAGE-01**: Every admin page is walked against its primary persona/JTBD across happy, empty, loading, error, permission-denied, boundary, and advanced paths, and renders correctly in each.
+- [ ] **PAGE-02**: Empty states explain the next useful action and distinguish "no data" from "data unavailable" from "permission denied."
+- [ ] **PAGE-03**: LiveView disconnected/reconnecting state is communicated to the operator and disables actions that cannot be performed while stale.
+- [ ] **PAGE-04**: Every page is verified at 320 / 375 / 768 / 1024 / 1440 widths in light and dark with no layout break, clipping, or off-screen content.
+
+### CPY — Microcopy
+
+- [ ] **CPY-01**: Error messages state what happened and how to recover (no bare "oops / invalid / failed / forbidden").
+- [ ] **CPY-02**: Destructive-action confirmations name the specific object and its consequence.
+- [ ] **CPY-03**: Domain vocabulary is consistent across headings, tabs, filters, buttons, and alerts.
+
+### SEED — Fixture stress (exercise the matrix)
+
+- [ ] **SEED-01**: `examples/accrue_host` seeds reach every matrix cell in one click — null/missing optional fields, permission-denied, boundary pagination, high counts, non-ASCII names, and disconnected/reconnecting state — in addition to the existing long-name / multi-currency / dunning edge states.
+- [ ] **SEED-02**: Seed expansion is idempotent (re-runnable) and deterministic, consistent with the existing keyed-insert seed contract.
+
+### VER — Idempotent verification & sign-off
+
+- [ ] **VER-01**: A severity-ranked defect ledger plus a scored baseline (the refreshed rubric across viewport × theme × state, including live interaction testing) exists and is the only-forward reference point.
+- [ ] **VER-02**: Each level (component / group / page) is scored by an adversarial multi-lens judge (correctness, a11y, brand, interaction), and the final scorecard is ≥ baseline on every dimension/cell with zero regressions.
+- [ ] **VER-03**: Regression guardrails (interaction e2e, axe a11y, reduced-motion, and a component-lab coverage check) run in CI so re-running the milestone only ever finds new gaps.
+- [ ] **VER-04**: The maintainer signs off on screenshots at each phase boundary, closing v1.51's open photographic-sign-off tech-debt.
+
+### v1.53 Traceability (finalized by the roadmapper)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| VER-01 | 187 | Pending |
+| FND-01..06 | 188 | Pending |
+| CMP-01..05 | 189 | Pending |
+| GRP-01..04 | 190 | Pending |
+| IXN-01..05 · PAGE-01..04 · CPY-01..03 · SEED-01..02 | 191 | Pending |
+| VER-02..04 | 192 | Pending |
+
+**Coverage:** 33 v1 requirements · 33 mapped · 0 unmapped ✓
+
+### v1.53 Deferred (v2)
+
+- **TOOL-01**: Adopt PhoenixStorybook (deferred — v1.53 extends the in-app `/dev/components` kitchen to avoid a shipped-lib dependency).
+- **TOOL-02**: Pixel-diff visual-regression tooling (Percy/Applitools-style) replacing the screenshot + adversarial-judge loop.
+- **TOOL-03**: Publish `brandbook/tokens/tokens.css` as a standalone distributable (npm/CDN) for external doc/marketing-site consumption.
+
 ## Out of Scope
 
 Broad feature milestones remain closed by default unless reopened by a concrete adopter
@@ -37,3 +122,12 @@ brandbook documents the brand layer); no PDF brand book; no website/landing-page
 blocks only); no binary-heavy assets beyond platform-required PNG/.ico; exploration artifacts
 (galleries, rejected candidates, tournament ledger) stay in `.planning/`, not `brandbook/`;
 no new billing primitives; no breaking changes.
+
+**v1.53-specific exclusions:** no Tailwind *migration* (custom `ax-*` CSS + tokens stay SSOT;
+FND-04 is a *resolution* of the inert config, not a migration); no new billing primitives or
+domain features (no new package code expected); no breaking API/route changes (internal moves
+ship with redirects, component public APIs stay backward-compatible); no PhoenixStorybook
+dependency (extend the in-app `/dev/components` kitchen — deferred as TOOL-01); no demo/host
+chrome redesign (`examples/accrue_host` UI is not a design target — only its seed/fixture data,
+SEED-01/02); no `accrue_portal` work (separate package); no re-churn of the v1.51 motion spec or
+v1.52 brand tokens absent a rubric regression or new interaction pattern.
