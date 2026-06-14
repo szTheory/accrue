@@ -254,6 +254,14 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | uat_gap | 182-HUMAN-UAT.md | partial — de facto satisfied by user's R2-7 lock; confirmed transitively by 183/186 checkpoints |
 | verification_gap | 182-VERIFICATION.md | human_needed — same; downstream phases passed their human gates |
 
+### Known CI issue — nightly live-stripe canary red (deferred 2026-06-14)
+
+The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode parity (mandatory periodic)", 06:00 UTC cron + manual dispatch) fails every night. **Not merge-blocking** — it never runs on push/PR, so the main matrix stays green; this is the only red on the repo.
+
+- **Root cause:** the job's `env:` block sets only PG + `STRIPE_TEST_SECRET_KEY` + `ACCRUE_LIVE_*`. With the Stripe secret absent the tests are *supposed* to skip cleanly, but the `accrue` app crashes earlier at boot — `** (Accrue.ConfigError) ACCRUE-DX-WEBHOOK-SECRET-MISSING` from `Accrue.Application.start/2` — because the job omits the webhook signing secret env the rest of the test matrix supplies. So `mix test.live` exits 1 before any test can skip.
+- **Fix shape (when picked up):** add the webhook-secret env var to the `live-stripe` job, mirroring how the green matrix jobs provide it; then re-run via `gh workflow run` / dispatch to confirm green. Small, isolated CI-config change — good `/gsd-quick` or `/gsd-debug` candidate.
+- **revisit_trigger:** wanting an all-green CI dashboard, or before relying on the live-Stripe parity canary to catch upstream Stripe API drift.
+
 ### Standing scope deferrals
 
 | Category | Item | Status | Reason | Future owner/category | revisit_trigger | Deferred At |
