@@ -1,35 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.52
-milestone_name: Brand System
-status: milestone_complete
-last_updated: 2026-06-14T15:30:00.000Z
-last_activity: 2026-06-14 -- v1.52 Brand System archived (ROADMAP+REQUIREMENTS snapshots, MILESTONES.md + RETROSPECTIVE.md entries, PROJECT.md evolution, git tag v1.52)
+milestone: v1.53
+milestone_name: Admin UI Design-System Hardening
+status: planning
+last_updated: "2026-06-14T19:10:28.320Z"
+last_activity: 2026-06-14
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 29
-  completed_plans: 29
-  percent: 100
-stopped_at: Milestone complete (Phase 186 was final phase)
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.52 Brand System shipped & archived)
+See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System Hardening opened)
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** No milestone open — stable-core / demand-driven expansion posture (post-v1.48 pause rule)
+**Current focus:** v1.53 Admin UI Design-System Hardening (Phases 187–192) — fractal design-system audit + interaction-defect remediation on `accrue_admin`; reopened under the post-v1.48 pause rule (explicit strategy change + firsthand-observed interaction defects).
 
 ## Current Position
 
-Phase: 186
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-06-14
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-06-14 — Milestone v1.53 started
 
 ## Post-v1.48 Pause Rule
 

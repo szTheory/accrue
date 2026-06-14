@@ -29,6 +29,24 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
+## Current Milestone: v1.53 — Admin UI Design-System Hardening
+
+**Goal:** Take the already-shipped `accrue_admin` operator UI from *considered* (v1.51) to *interaction-correct and component-systematic* — audit the design system fractally (foundations → primitives → component groups → pages → flows), catch and fix the behavioral defects screenshot scoring can't see (modal-behind-scrim, scroll traps, focus loss, overlay z-index, hover-on-empty-state, disabled-looks-enabled), formalize every component in isolation across its full state matrix, and lock it all behind an idempotent only-forward verification loop.
+
+**Reopen decision (required by the post-v1.48 pause rule, recorded here before STATE/ROADMAP change):** Justification class is **explicit strategy change** (design quality of the flagship adopter-facing surface elevated to a strategic priority — same class accepted for v1.50/v1.51/v1.52) **plus firsthand-observed interaction defects** in the running demo (concrete failure evidence, not speculative polish). This is a hardening pass on the existing admin UI surface — **no new billing primitives, no breaking API/route changes, no Tailwind migration**; the demo/host chrome and `accrue_portal` are out of scope.
+
+**Differentiated value over v1.50–v1.52** (which shipped the token system, per-screen rubric, motion spec, brand book): v1.51 audited *screens*, not *components in isolation* (only 7 of 28 components are formally specced), its sign-off was LLM-scored stills (logged `tech_debt`) blind to interaction bugs, and component-*group* cohesion plus a few foundation gaps (typography bundles, z-index/layer formalization, inert-Tailwind decision) were left open.
+
+**Target features (Phases 187–192):**
+- **187** Audit & Baseline — refreshed rubric (adds interaction-integrity, layer/z-index, microcopy dimensions); full matrix (viewport × theme × state) + live interaction testing; severity-ranked defect ledger = the only-forward baseline.
+- **188** Foundations hardening — typography bundles, reading-measure application, formal z-index/layer system, motion-gap closure, inert-Tailwind resolution, dark-mode role/focus/scrollbar/disabled completeness.
+- **189** Primitive & form components + component lab — every component in isolation × full state matrix × theme × viewport × a11y; root-level (DRY) fixes; `/dev/components` grown into the systematic gallery (no PhoenixStorybook dep).
+- **190** Navigation, data-display & meta-component cohesion — app shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component *groups*; spacing rhythm, hierarchy, responsive, operator-stress states.
+- **191** Page & flow interaction pass + fixture stress + microcopy — every page against its JTBD across all paths; fix the Phase-187 behavioral defects; expand `examples/accrue_host` seeds for missing cells; on-brand microcopy.
+- **192** Idempotent verification & sign-off — full re-run + adversarial multi-lens judge; only-forward scorecard ≥ baseline (no regressions); regression guardrails (interaction e2e, a11y, reduced-motion, lab coverage); maintainer UAT.
+
+**Key context:** Component lab = extend the in-app `/dev/components` kitchen (no new dependency). Sign-off = adversarial multi-agent judge loop + maintainer screenshot checkpoints at phase boundaries (closes v1.51's open photographic-sign-off tech-debt). Standing constraints carried forward: custom `ax-*` CSS + tokens stay SSOT; backward-compatible APIs/routes. Authoritative scope source: the approved scoping plan; prior design source `.planning/research/v1.51-admin-ui-depth-design.md`.
+
 ## Most recently shipped milestone: v1.52 Brand System (**shipped & archived 2026-06-14**)
 
 **Goal (ACHIEVED):** Pressure-test the brand book seed (`prompts/accrue-brand-book.md`) through a 14-section critical audit, run a user-judged SVG logo tournament to a locked winner, and ship a committed, self-contained `brandbook/` — standalone HTML brand book, full SVG logo system, design tokens, and voice/microcopy/marketing copy.
@@ -502,12 +520,12 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.52 shipped and archived on 2026-06-14.** Accrue remains in stable-core / demand-driven expansion posture. The next milestone should only open for release-readiness, maintenance, documentation truth, verifier hardening, adopter-proof closure, or a concrete adopter/correctness/security/operational failure mode.
+**v1.53 — Admin UI Design-System Hardening is OPEN (opened 2026-06-14, Phases 187–192).** Reopened under the post-v1.48 pause rule via explicit strategy change + firsthand-observed interaction defects (see Current Milestone section above). This is the fourth pass on the `accrue_admin` surface, building forward on the v1.50→v1.52 arc.
 
-The v1.50→v1.52 arc (Admin UI Foundation → Admin UI Depth Pass → Brand System) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
+The v1.50→v1.52 arc (Admin UI Foundation → Admin UI Depth Pass → Brand System) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy. v1.53 hardens the *interaction correctness* and *component-level systematization* of that surface.
 
 **Last shipped planning milestone:** **v1.52** — Phases **180–186** — **2026-06-14** (Brand System)
-**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.52 shipped no new package code)
+**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.52 shipped no new package code; v1.53 is admin-UI-only, no core package code expected)
 
 ## Prior shipped milestone
 
@@ -527,7 +545,7 @@ The v1.50→v1.52 arc (Admin UI Foundation → Admin UI Depth Pass → Brand Sys
 
 ### Active
 
-**None — no milestone open.** Accrue remains in stable-core / demand-driven expansion posture (post-v1.48 pause rule). The next milestone opens only for release-readiness, maintenance, documentation truth, verifier hardening, adopter-proof closure, or a concrete adopter/correctness/security/operational failure mode — recorded in this file before `.planning/ROADMAP.md` / `.planning/STATE.md` change.
+**Milestone v1.53 — Admin UI Design-System Hardening (OPEN, Phases 187–192).** Requirements grouped by theme in `.planning/REQUIREMENTS.md`: **FND** (foundations), **CMP** (component systematization), **GRP** (meta-component cohesion), **IXN** (interaction integrity), **PAGE** (page/flow JTBD coverage), **CPY** (microcopy), **SEED** (fixture stress), **VER** (idempotent verification). See the Current Milestone section above for the recorded reopen decision.
 
 ### Validated v1.52 (archived in `.planning/milestones/v1.52-REQUIREMENTS.md`; milestone shipped & archived 2026-06-14)
 
@@ -616,4 +634,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-14 after v1.52 Brand System milestone — shipped & archived (Phases 180–186, 14/14 requirements). Committed standalone `brandbook/` (HTML brand book, R2-7 logo system, design tokens, voice/copy). No milestone open; stable-core / demand-driven expansion posture holds.*
+*Last updated: 2026-06-14 — opened milestone v1.53 Admin UI Design-System Hardening (Phases 187–192). Reopen recorded under post-v1.48 pause rule (explicit strategy change + firsthand-observed interaction defects). Hardening pass on the `accrue_admin` surface: component-level systematization, interaction-defect remediation, meta-component cohesion, foundation gap-closure, idempotent only-forward verification. Prior: v1.52 Brand System shipped & archived (Phases 180–186).*
