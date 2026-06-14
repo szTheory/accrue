@@ -221,7 +221,16 @@ Plans:
   2. Ready-to-paste copy blocks exist (committed to `brandbook/`) for: GitHub repo description + topics, Hex.pm package description, HexDocs intro paragraph, README hero, landing-page sections (hero / problem / solution / install / benefits / comparison / CTAs), release-note and changelog voice templates, and error/empty/success-state microcopy examples.
   3. User reviews all copy blocks in one batch and approves or requests revisions; the final committed copy reflects the approved batch.
 
-**Plans:** TBD
+**Plans:** 3 plans
+Plans:
+**Wave 1** *(parallel — no dependencies)*
+
+- [ ] 185-01-PLAN.md — Voice system doc: principles, tone sliders, vocabulary, surface dispatch rule, claims posture, CTA canon (COPY-01)
+- [ ] 185-02-PLAN.md — Copy blocks for all surfaces: GitHub, Hex.pm, HexDocs, README hero, landing page, release notes, microcopy (COPY-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 185-03-PLAN.md — One-batch human review + approval + revision incorporation
 
 ### Phase 186: HTML Brand Book Assembly & Quality Gate
 
@@ -235,7 +244,16 @@ Plans:
   3. `du -sh brandbook/` reports ≤2 MB total committed weight.
   4. The Phase-180 quality-gate checklist passes: designer-buildable / engineer-implementable / dark-mode / small-size / specific-to-Accrue / no-thrash — all criteria satisfied and signed off by the user.
 
-**Plans:** TBD
+**Plans:** 3 plans
+Plans:
+**Wave 1** *(parallel — no dependencies)*
+
+- [ ] 185-01-PLAN.md — Voice system doc: principles, tone sliders, vocabulary, surface dispatch rule, claims posture, CTA canon (COPY-01)
+- [ ] 185-02-PLAN.md — Copy blocks for all surfaces: GitHub, Hex.pm, HexDocs, README hero, landing page, release notes, microcopy (COPY-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 185-03-PLAN.md — One-batch human review + approval + revision incorporation
 **UI hint**: yes
 
 </details>
