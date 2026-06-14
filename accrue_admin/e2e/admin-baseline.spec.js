@@ -14,6 +14,9 @@ const {
 const RESULTS_ROOT = "test-results/admin-baseline";
 const THEMES = ["light", "dark"];
 const COVERED_STATES = new Set(["default-populated", "overflow", "long-content"]);
+const TARGETED_BREAKPOINTS = [320, 375, 768, 1024, 1440];
+const TARGETED_RISK_PATTERN =
+  /table|card|long|overflow|drawer|form|page-header|actions|breadcrumbs|toolbar|search|filter|sort/i;
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -90,10 +93,10 @@ function coverageForCell(cell, surface, visible) {
 
 function observationFromCell({ cell, surface, coverage, evidenceRefs, axeViolations, extra = {} }) {
   return {
-    cell_id: cell.cell_id,
+    cell_id: extra.cell_id || cell.cell_id,
     surface: cell.surface,
     surface_type: cell.surface_type,
-    mode: cell.mode,
+    mode: extra.mode || cell.mode,
     viewport_width: Number(extra.viewport_width ?? cell.viewport_width),
     theme: cell.theme,
     state: cell.state,
@@ -106,6 +109,8 @@ function observationFromCell({ cell, surface, coverage, evidenceRefs, axeViolati
     axe_violations: coverage.coverage_status === "covered" ? axeViolations : [],
     ...(coverage.reason ? { reason: coverage.reason } : {}),
     ...(coverage.defect_candidate ? { defect_candidate: coverage.defect_candidate } : {}),
+    ...(extra.breakpoint ? { breakpoint: Number(extra.breakpoint) } : {}),
+    ...(extra.targeted_label ? { targeted_label: extra.targeted_label } : {}),
     ...(extra.notes ? { notes: extra.notes } : {}),
     ...(surface ? { seed: surface.seed } : {}),
   };
@@ -159,6 +164,35 @@ async function writeScreenshotCopies(page, projectName, cells) {
   return evidenceRefs;
 }
 
+async function writeTargetedScreenshotCopies(page, projectName, cells, breakpoint) {
+  const buffer = await page.screenshot({ fullPage: true });
+  const evidenceRefs = [];
+
+  for (const cell of cells) {
+    const relativePath = path.join(
+      RESULTS_ROOT,
+      projectName,
+      `${cell.cell_id}__targeted-${breakpoint}.png`
+    );
+    fs.mkdirSync(path.dirname(relativePath), { recursive: true });
+    fs.writeFileSync(relativePath, buffer);
+    evidenceRefs.push(path.join("accrue_admin", relativePath).split(path.sep).join("/"));
+  }
+
+  return evidenceRefs;
+}
+
+function targetedRisk(surface) {
+  const manifestRiskMetadata = [
+    surface.surface_type,
+    surface.surface,
+    surface.persona_job,
+    surface.seed,
+  ].join(" ");
+
+  return surface.surface_type === "component-group" || TARGETED_RISK_PATTERN.test(manifestRiskMetadata);
+}
+
 async function captureCanonicalSurface(page, surface, route, projectName, observations) {
   await login(page, route);
   await expect(page.locator("#main-content")).toBeVisible();
@@ -190,6 +224,61 @@ async function captureCanonicalSurface(page, surface, route, projectName, observ
   }
 }
 
+async function captureTargetedSurface(page, surface, route, projectName, observations) {
+  if (!targetedRisk(surface)) return;
+
+  const mode = projectMode(projectName);
+  const cells = cellsForSurface(surface).filter(
+    (cell) =>
+      cell.mode === mode &&
+      cell.theme === "light" &&
+      cell.state === "default-populated" &&
+      cell.dimension === 5
+  );
+
+  if (cells.length === 0) return;
+
+  for (const breakpoint of TARGETED_BREAKPOINTS) {
+    await page.setViewportSize({ width: breakpoint, height: 900 });
+    await login(page, route);
+    await expect(page.locator("#main-content")).toBeVisible();
+    await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
+    await page.waitForTimeout(50);
+
+    const visible = await visibleSurface(page, surface);
+    const coverage = visible
+      ? { coverage_status: "covered" }
+      : {
+          coverage_status: "gap",
+          reason: "Risk-marked manifest surface was not visible during targeted breakpoint probe.",
+          defect_candidate: "targeted-breakpoint-coverage-gap",
+        };
+    const evidenceRefs = visible ? await writeTargetedScreenshotCopies(page, projectName, cells, breakpoint) : [];
+    const violations = visible ? await axeViolations(page) : [];
+
+    for (const cell of cells) {
+      const targetedLabel = `targeted-${breakpoint}`;
+      observations.push(
+        observationFromCell({
+          cell,
+          surface,
+          coverage,
+          evidenceRefs: evidenceRefs.filter((ref) => ref.endsWith(`${cell.cell_id}__${targetedLabel}.png`)),
+          axeViolations: violations,
+          extra: {
+            cell_id: `${cell.cell_id}__${targetedLabel}`,
+            mode: "targeted",
+            viewport_width: breakpoint,
+            breakpoint,
+            targeted_label: targetedLabel,
+            notes: `Risk probe for ${surface.surface}: layout-risk/responsive-risk at ${breakpoint}px.`,
+          },
+        })
+      );
+    }
+  }
+}
+
 test.describe("Admin static baseline", () => {
   test.beforeEach(async ({ request }) => {
     await reset(request);
@@ -213,6 +302,7 @@ test.describe("Admin static baseline", () => {
     for (const surface of selectedSurfaces) {
       const route = routeForSurface(surface, fixtureData);
       await captureCanonicalSurface(page, surface, route, projectName, observations);
+      await captureTargetedSurface(page, surface, route, projectName, observations);
     }
 
     const outputPath = path.join(RESULTS_ROOT, projectName, "cells.json");
