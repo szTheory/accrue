@@ -1,0 +1,44 @@
+/* GENERATED from tokens.json — do not edit. Run: npm run generate */
+:root {
+  --accrue-amber: #c8923b;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-callout-surface: #f1f5f8;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-callout-text: #111418;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-cobalt: #5d79f6;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-code-block-surface: #e9eef2;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-code-block-text: #24303b;
+  --accrue-content-muted: #5d6a73;
+  --accrue-content-primary: #111418;
+  --accrue-content-subtle: #24303b;
+  --accrue-feedback-danger: #d64b4b;
+  --accrue-feedback-info: #3878a6;
+  --accrue-feedback-success: #5e9e84;
+  --accrue-feedback-warning: #c8923b;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-fog: #e9eef2;
+  --accrue-ink: #111418;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-interactive-accent: #5d79f6;
+  /* brand-only: no --ax-* counterpart */
+  --accrue-interactive-focus-ring: #5d79f6;
+  --accrue-moss: #5e9e84;
+  --accrue-paper: #fafbfc;
+  --accrue-slate: #24303b;
+  --accrue-surface-base: #fafbfc;
+  --accrue-surface-elevated: #ffffff;
+  --accrue-surface-sunken: #f1f5f8;
+}
+
+:root[data-theme="dark"] {
+  --accrue-dark-base: #0f1318;
+  --accrue-dark-elevated: #171d24;
+  --accrue-dark-info: #4a90b8;
+  --accrue-dark-muted: #a8b2bc;
+  --accrue-dark-primary: #f4f7fa;
+  --accrue-dark-subtle: #d7dde3;
+  --accrue-dark-sunken: #0b1015;
+}
