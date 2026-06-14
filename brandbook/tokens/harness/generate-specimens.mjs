@@ -142,16 +142,18 @@ function buildPaletteSvg(tokens) {
 
   const allLightTokens = [...rawTokens, ...semanticTokens];
 
-  // Layout constants
-  const SWATCH_W = 120;
-  const SWATCH_H = 60;
-  const COL_GAP = 8;
-  const ROW_GAP = 90;  // total height per row (swatch + labels)
-  const COLS = 4;
-  const BAND_PAD_X = 24;
-  const BAND_PAD_TOP = 48;
-  const BAND_PAD_BOT = 24;
-  const BAND_LABEL_H = 24;
+  // Layout constants. 3 wide columns so the longest token name
+  // (--accrue-interactive-focus-ring, 31 chars) fits inside its cell instead of
+  // bleeding into the neighbour; rows are tall enough for the 4 stacked text lines.
+  const SWATCH_W = 240;
+  const SWATCH_H = 64;
+  const COL_GAP = 24;
+  const ROW_GAP = 148;  // total height per row (swatch + 4 label lines + breathing room)
+  const COLS = 3;
+  const BAND_PAD_X = 28;
+  const BAND_PAD_TOP = 52;
+  const BAND_PAD_BOT = 28;
+  const BAND_LABEL_H = 28;
 
   const numRows = Math.ceil(allLightTokens.length / COLS);
   const bandW = COLS * SWATCH_W + (COLS - 1) * COL_GAP + BAND_PAD_X * 2;
@@ -186,11 +188,11 @@ function buildPaletteSvg(tokens) {
     const displayName = token.cssVar;
 
     return `<g>` +
-      `<rect x="${x}" y="${y}" width="${SWATCH_W.toFixed(3)}" height="${SWATCH_H.toFixed(3)}" fill="${token.hex}" rx="4" stroke="${mutedColor}" stroke-width="0.5"/>` +
-      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 13).toFixed(3)}" font-family="${FONT_MONO}" font-size="9" fill="${textColor}">${displayName}</text>` +
-      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 24).toFixed(3)}" font-family="${FONT_MONO}" font-size="9" fill="${mutedColor}">${token.hex}</text>` +
-      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 35).toFixed(3)}" font-family="${FONT_SANS}" font-size="8" fill="${mutedColor}">${role}</text>` +
-      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 46).toFixed(3)}" font-family="${FONT_SANS}" font-size="8" fill="${aaColor}">${aaStatus}</text>` +
+      `<rect x="${x}" y="${y}" width="${SWATCH_W.toFixed(3)}" height="${SWATCH_H.toFixed(3)}" fill="${token.hex}" rx="6" stroke="${mutedColor}" stroke-width="0.75"/>` +
+      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 18).toFixed(3)}" font-family="${FONT_MONO}" font-size="12" fill="${textColor}">${displayName}</text>` +
+      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 34).toFixed(3)}" font-family="${FONT_MONO}" font-size="11" fill="${mutedColor}">${token.hex}</text>` +
+      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 50).toFixed(3)}" font-family="${FONT_SANS}" font-size="10.5" fill="${mutedColor}">${role}</text>` +
+      `<text x="${x}" y="${(parseFloat(y) + SWATCH_H + 65).toFixed(3)}" font-family="${FONT_SANS}" font-size="10.5" fill="${aaColor}">${aaStatus}</text>` +
       `</g>`;
   }
 
@@ -206,13 +208,13 @@ function buildPaletteSvg(tokens) {
     // Light band
     `<g id="band-light">` +
     `<rect x="0" y="${lightBandY.toFixed(3)}" width="${SVG_W.toFixed(3)}" height="${bandH.toFixed(3)}" fill="#fafbfc"/>` +
-    `<text x="${BAND_PAD_X.toFixed(3)}" y="18.000" font-family="${FONT_SANS}" font-size="12" font-weight="600" fill="#111418">Light surface (Paper #fafbfc)</text>` +
+    `<text x="${BAND_PAD_X.toFixed(3)}" y="20.000" font-family="${FONT_SANS}" font-size="14" font-weight="600" fill="#111418">Light surface (Paper #fafbfc)</text>` +
     lightSwatches +
     `</g>` +
     // Dark band
     `<g id="band-dark">` +
     `<rect x="0" y="${darkBandY.toFixed(3)}" width="${SVG_W.toFixed(3)}" height="${bandH.toFixed(3)}" fill="#0f1318"/>` +
-    `<text x="${BAND_PAD_X.toFixed(3)}" y="${(darkBandY + 18).toFixed(3)}" font-family="${FONT_SANS}" font-size="12" font-weight="600" fill="#f4f7fa">Dark surface (Ink #0f1318)</text>` +
+    `<text x="${BAND_PAD_X.toFixed(3)}" y="${(darkBandY + 20).toFixed(3)}" font-family="${FONT_SANS}" font-size="14" font-weight="600" fill="#f4f7fa">Dark surface (Ink #0f1318)</text>` +
     `<g transform="translate(0,${darkBandY.toFixed(3)})">` +
     darkSwatches +
     `</g>` +
@@ -247,62 +249,64 @@ function buildTypographySvg() {
   const FONT_MONO = "Geist Mono, monospace";
   const PAD_X = 32;
   const PAD_TOP = 40;
-  const LABEL_COL_X = 340;
-  const ROW_GAP = 56;
-  const BG = "#fafbfc";
-  const INK = "#111418";
-  const MUTED = "#5d6a73";
-  const SECTION_GAP = 48;
+  // Transparent background + currentColor text so the specimen adopts the page's
+  // light/dark theme when inlined in the brand book (no baked-in white slab).
+  const INK = "currentColor";
+  const MUTED = "currentColor";
+  const SECTION_GAP = 40;
+  const SECTION_LABEL_H = 32;
 
-  // Sans rows
+  // Sans rows + mono rows (same scale, different font)
   const sansRows = TYPE_SCALE;
-  // Mono rows (same scale, different font)
   const monoRows = TYPE_SCALE;
 
-  const sansH = sansRows.length * ROW_GAP;
-  const monoH = monoRows.length * ROW_GAP;
-  const SECTION_LABEL_H = 28;
+  // 760px wide so the largest (36px) sample line fits without clipping.
+  const SVG_W = 760;
 
-  const SVG_W = 520;
-  const SVG_H = PAD_TOP + SECTION_LABEL_H + sansH + SECTION_GAP + SECTION_LABEL_H + monoH + 32;
+  // Each row's height scales with its own font-size: the mono spec label sits on
+  // top, then a generous gap, then the sample rendered at its true px. This stops
+  // big samples (xl/2xl/3xl) from colliding with their label or the next row.
+  function typeRow(step, rem, px, font, yTop, color) {
+    const fontPx = parseInt(px, 10);
+    const labelY = yTop + 13;
+    const sampleY = yTop + 25 + fontPx;          // baseline below the label + ascent room
+    const rowH = 25 + fontPx + Math.ceil(fontPx * 0.32) + 18;  // + descent + bottom padding
 
-  function typeRow(step, rem, px, font, yBase, color) {
-    // Approximate font-size in px for rendering (we use a fixed layout size for the row)
-    const labelY = yBase + 16;
-    const sampleY = yBase + 38;
-
-    return `<g>` +
-      `<text x="${PAD_X}" y="${labelY.toFixed(3)}" font-family="${FONT_MONO}" font-size="10" fill="${MUTED}">--ax-type-${step} ${px} / ${rem}</text>` +
+    const svg = `<g>` +
+      `<text x="${PAD_X}" y="${labelY.toFixed(3)}" font-family="${FONT_MONO}" font-size="10.5" fill="${MUTED}" fill-opacity="0.62">--ax-type-${step} ${px} / ${rem}</text>` +
       `<text x="${PAD_X}" y="${sampleY.toFixed(3)}" font-family="${font}" font-size="${px}" fill="${color}">Billing state, modeled clearly.</text>` +
       `</g>`;
+    return { svg, rowH };
   }
 
   let y = PAD_TOP;
 
   // Section: Geist sans
-  let sansSvg = `<text x="${PAD_X}" y="${(y + 18).toFixed(3)}" font-family="${FONT_SANS}" font-size="13" font-weight="600" fill="${INK}">Geist (sans) — type scale</text>`;
+  let body = `<text x="${PAD_X}" y="${(y + 18).toFixed(3)}" font-family="${FONT_SANS}" font-size="14" font-weight="600" fill="${INK}">Geist (sans) — type scale</text>`;
   y += SECTION_LABEL_H;
 
   for (const { step, rem, px } of sansRows) {
-    sansSvg += typeRow(step, rem, px, FONT_SANS, y, INK);
-    y += ROW_GAP;
+    const { svg, rowH } = typeRow(step, rem, px, FONT_SANS, y, INK);
+    body += svg;
+    y += rowH;
   }
 
   y += SECTION_GAP;
 
   // Section: Geist Mono
-  let monoSvg = `<text x="${PAD_X}" y="${(y + 18).toFixed(3)}" font-family="${FONT_MONO}" font-size="13" font-weight="600" fill="${INK}">Geist Mono — type scale</text>`;
+  body += `<text x="${PAD_X}" y="${(y + 18).toFixed(3)}" font-family="${FONT_MONO}" font-size="14" font-weight="600" fill="${INK}">Geist Mono — type scale</text>`;
   y += SECTION_LABEL_H;
 
   for (const { step, rem, px } of monoRows) {
-    monoSvg += typeRow(step, rem, px, FONT_MONO, y, INK);
-    y += ROW_GAP;
+    const { svg, rowH } = typeRow(step, rem, px, FONT_MONO, y, INK);
+    body += svg;
+    y += rowH;
   }
 
+  const SVG_H = y + 24;
+
   const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SVG_W.toFixed(3)} ${SVG_H.toFixed(3)}" width="${SVG_W.toFixed(3)}" height="${SVG_H.toFixed(3)}">` +
-    `<rect width="${SVG_W.toFixed(3)}" height="${SVG_H.toFixed(3)}" fill="${BG}"/>` +
-    sansSvg +
-    monoSvg +
+    body +
     `</svg>`;
 
   const withMeta = injectMeta(
@@ -327,43 +331,45 @@ function buildSpacingSvg() {
   const FONT_SANS = "Geist, system-ui, sans-serif";
   const FONT_MONO = "Geist Mono, monospace";
   const PAD_X = 32;
-  const PAD_TOP = 48;
-  const LABEL_W = 200;
-  const BAR_OFFSET_X = PAD_X + LABEL_W;
-  const BAR_H = 20;
-  const ROW_GAP = 36;
-  const SCALE = 4; // px-per-px-unit (scale bar widths to be visible)
-  const MAX_BAR_W = 260;
-  const BG = "#fafbfc";
-  const INK = "#111418";
-  const MUTED = "#5d6a73";
+  const PAD_TOP = 56;
+  // Three clean columns: token name | px/rem value | proportional bar.
+  // The bar column starts well clear of the value text so they never overlap.
+  const NAME_X = PAD_X;
+  const VALUE_X = 180;
+  const BAR_OFFSET_X = 300;
+  const BAR_H = 22;
+  const ROW_GAP = 40;
+  const MAX_BAR_W = 300;
+  // Transparent background + currentColor text so the specimen adopts the page's
+  // light/dark theme when inlined in the brand book (no baked-in white slab).
+  const INK = "currentColor";
+  const MUTED = "currentColor";
   const MOSS = "#5e9e84";
 
   const maxPx = Math.max(...SPACE_SCALE.map(s => s.pxNum));
 
-  const SVG_W = BAR_OFFSET_X + MAX_BAR_W + 80;
-  const SVG_H = PAD_TOP + SPACE_SCALE.length * ROW_GAP + 40;
+  const SVG_W = BAR_OFFSET_X + MAX_BAR_W + 40;
+  const SVG_H = PAD_TOP + SPACE_SCALE.length * ROW_GAP + 32;
 
   let rows = "";
   for (let i = 0; i < SPACE_SCALE.length; i++) {
     const { step, rem, px, pxNum } = SPACE_SCALE[i];
     const y = PAD_TOP + i * ROW_GAP;
     const barW = Math.max(2, (pxNum / maxPx) * MAX_BAR_W);
-    const centerY = (y + BAR_H / 2).toFixed(3);
+    const textY = (y + BAR_H / 2 + 4).toFixed(3);  // vertically centred against the bar
 
     rows += `<g>` +
-      `<text x="${PAD_X}" y="${(y + 14).toFixed(3)}" font-family="${FONT_MONO}" font-size="10" fill="${INK}">--ax-space-${step}</text>` +
-      `<text x="${(PAD_X + 130).toFixed(3)}" y="${(y + 14).toFixed(3)}" font-family="${FONT_MONO}" font-size="10" fill="${MUTED}">${px} / ${rem}</text>` +
+      `<text x="${NAME_X}" y="${textY}" font-family="${FONT_MONO}" font-size="11" fill="${INK}">--ax-space-${step}</text>` +
+      `<text x="${VALUE_X.toFixed(3)}" y="${textY}" font-family="${FONT_MONO}" font-size="11" fill="${MUTED}" fill-opacity="0.62">${px} / ${rem}</text>` +
       `<rect x="${BAR_OFFSET_X.toFixed(3)}" y="${y.toFixed(3)}" width="${barW.toFixed(3)}" height="${BAR_H.toFixed(3)}" fill="${MOSS}" rx="2"/>` +
       `</g>`;
   }
 
   // Title
-  const titleSvg = `<text x="${PAD_X}" y="28.000" font-family="${FONT_SANS}" font-size="14" font-weight="600" fill="${INK}">Accrue spacing scale</text>`;
-  const subSvg = `<text x="${(BAR_OFFSET_X).toFixed(3)}" y="28.000" font-family="${FONT_SANS}" font-size="10" fill="${MUTED}">(bars proportional to px value)</text>`;
+  const titleSvg = `<text x="${PAD_X}" y="30.000" font-family="${FONT_SANS}" font-size="15" font-weight="600" fill="${INK}">Accrue spacing scale</text>`;
+  const subSvg = `<text x="${(BAR_OFFSET_X).toFixed(3)}" y="30.000" font-family="${FONT_SANS}" font-size="11" fill="${MUTED}" fill-opacity="0.62">(bars proportional to px value)</text>`;
 
   const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SVG_W.toFixed(3)} ${SVG_H.toFixed(3)}" width="${SVG_W.toFixed(3)}" height="${SVG_H.toFixed(3)}">` +
-    `<rect width="${SVG_W.toFixed(3)}" height="${SVG_H.toFixed(3)}" fill="${BG}"/>` +
     titleSvg +
     subSvg +
     rows +

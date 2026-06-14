@@ -95,10 +95,17 @@ function mdToHtml(text) {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+    // Pull inline `code` spans out into placeholders BEFORE bold/italic, so their
+    // contents (which may contain `*`, e.g. --accrue-*) aren't mangled by the
+    // italic regex or joined across two adjacent spans. Content is already escaped.
+    const codeSpans = [];
+    str = str.replace(/`([^`]+)`/g, (_, c) => "@@C" + (codeSpans.push(c) - 1) + "@@");
     // **bold**
     str = str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     // *italic* (not **)
     str = str.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
+    // Restore inline code spans as <code> (styled as chips via the page CSS).
+    str = str.replace(/@@C(\d+)@@/g, (_, i) => `<code>${codeSpans[Number(i)]}</code>`);
     return str;
   }
 
@@ -260,6 +267,13 @@ function main() {
     specimenSvgs[f] = readSvg(path.join(EXAMPLES_DIR, f));
   }
 
+  // Hero lockup: recolor the ink fill (#181818) to currentColor so the wordmark +
+  // mark follow the page text colour and stay visible in dark mode (the moss accent
+  // #5E9E84 is left literal — it reads on both surfaces). The logo-card embeds in §2
+  // keep the literal source files so they demonstrate the real assets.
+  const heroLogoSvg = (logoSvgs["accrue-logo.svg"] || "<!-- accrue-logo.svg not found -->")
+    .replace(/#181818/gi, "currentColor");
+
   // Convert markdown content to HTML.
   // voice.md and copy.md each open with a `# Title` (h1) heading. These are
   // embedded inside sections that already supply their own <h2> page heading,
@@ -382,7 +396,10 @@ h3 { font-size: 1.125rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
 p { margin: 0 0 0.75rem; }
 pre { background: var(--accrue-code-block-surface); color: var(--accrue-code-block-text); border-radius: 6px; padding: 1rem; overflow-x: auto; font-family: "Geist Mono", ui-monospace, monospace; font-size: 0.875rem; }
 [data-theme="dark"] pre { background: var(--accrue-dark-elevated); color: var(--accrue-dark-primary); }
-code { font-family: "Geist Mono", ui-monospace, monospace; font-size: 0.875em; }
+code { font-family: "Geist Mono", ui-monospace, monospace; font-size: 0.875em; background: var(--accrue-callout-surface); color: var(--accrue-content-primary); border: 1px solid var(--accrue-fog); border-radius: 4px; padding: 0.1em 0.35em; }
+[data-theme="dark"] code { background: var(--accrue-dark-elevated); color: var(--accrue-dark-primary); border-color: var(--accrue-dark-elevated); }
+/* Code blocks and table cells opt out of the inline chip treatment */
+pre code, .token-table code { background: none; border: 0; padding: 0; color: inherit; }
 table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
 th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid var(--accrue-fog); }
 [data-theme="dark"] th, [data-theme="dark"] td { border-color: var(--accrue-dark-elevated); }
@@ -397,6 +414,8 @@ hr { border: none; border-top: 1px solid var(--accrue-fog); margin: 2rem 0; }
 
 /* ---- SVG responsive ---- */
 svg { max-width: 100%; height: auto; }
+/* Specimen SVGs scale up to fill the content column (not their small intrinsic px) */
+#section-color svg, #section-typography svg, #section-spacing svg { display: block; width: 100%; height: auto; }
 
 /* ---- Nav / TOC ---- */
 .site-header {
@@ -460,11 +479,16 @@ svg { max-width: 100%; height: auto; }
 section { padding-top: 1rem; }
 
 /* ---- Hero / Cover ---- */
-.hero-logo { max-width: 280px; margin: 2rem auto; display: block; }
+.hero-logo { max-width: 280px; margin: 2rem auto; display: block; color: var(--accrue-content-primary); }
+[data-theme="dark"] .hero-logo { color: var(--accrue-dark-primary); }
 .hero-tagline { font-size: 1.375rem; text-align: center; color: var(--accrue-content-subtle); margin: 0 0 2rem; font-style: italic; }
 [data-theme="dark"] .hero-tagline { color: var(--accrue-dark-muted); }
 
 /* ---- Logo grid ---- */
+/* Demo tiles are FIXED swatches: each asset sits on the surface it was designed
+   for, independent of the brand-book's light/dark theme. Light (ink) assets always
+   get a paper tile; dark/inverse assets (which carry their own dark bg rect) always
+   get an ink tile. So these surfaces deliberately do NOT follow [data-theme]. */
 .logo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 1rem 0; }
 .logo-card {
   border: 1px solid var(--accrue-fog);
@@ -476,14 +500,16 @@ section { padding-top: 1rem; }
   gap: 8px;
   background: var(--accrue-surface-elevated);
 }
-[data-theme="dark"] .logo-card { border-color: var(--accrue-dark-elevated); background: var(--accrue-dark-elevated); }
+.logo-card .label { font-size: 0.75rem; color: var(--accrue-content-muted); text-align: center; }
 .logo-card.dark-bg {
   background: var(--accrue-dark-base);
   border-color: var(--accrue-dark-elevated);
 }
-[data-theme="dark"] .logo-card.dark-bg { background: var(--accrue-dark-sunken); }
-.logo-card .label { font-size: 0.75rem; color: var(--accrue-content-muted); text-align: center; }
-[data-theme="dark"] .logo-card .label { color: var(--accrue-dark-muted); }
+.logo-card.dark-bg .label { color: var(--accrue-dark-muted); }
+
+/* Paper stage for stray light-surface assets shown outside a logo-card
+   (clearspace diagram, favicon previews) so they stay readable in dark mode. */
+.logo-stage { background: var(--accrue-surface-elevated); border: 1px solid var(--accrue-fog); border-radius: 8px; padding: 16px; }
 
 /* ---- Color swatches ---- */
 .swatch {
@@ -500,10 +526,13 @@ section { padding-top: 1rem; }
 .token-table code { font-size: 0.8125rem; }
 
 /* ---- Favicon grid ---- */
-.favicon-grid { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 1rem 0; }
-.favicon-grid figure { text-align: center; margin: 0; }
-.favicon-grid figcaption { font-size: 0.75rem; color: var(--accrue-content-muted); margin-top: 4px; }
-[data-theme="dark"] .favicon-grid figcaption { color: var(--accrue-dark-muted); }
+/* Favicons are transparent/ink light-surface assets — each preview gets a fixed
+   paper stage so it stays readable on the dark page. */
+.favicon-grid { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin: 1rem 0; }
+.favicon-grid figure { text-align: center; margin: 0; background: var(--accrue-surface-elevated); border: 1px solid var(--accrue-fog); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.favicon-grid figure img, .favicon-grid figure svg { display: block; }
+.favicon-grid figure svg { width: 48px; height: 48px; }
+.favicon-grid figcaption { font-size: 0.75rem; color: var(--accrue-content-muted); margin-top: 0; }
 
 /* ---- Provenance / footer ---- */
 .provenance pre { white-space: pre-wrap; word-break: break-word; font-size: 0.8125rem; }
@@ -533,10 +562,10 @@ section { padding-top: 1rem; }
 <section id="section-cover">
   <div style="text-align:center; padding: 2rem 0 1rem;">
     <div class="hero-logo">
-      ${logoSvgs["accrue-logo.svg"] || "<!-- accrue-logo.svg not found -->"}
+      ${heroLogoSvg}
     </div>
     <p class="hero-tagline">Billing state, modeled clearly.</p>
-    <p style="color: var(--accrue-content-muted); font-size:0.875rem;">Accrue v1.52 Brand Book — the locked visual identity for the Accrue billing library.</p>
+    <p style="color: var(--accrue-content-muted); font-size:0.875rem;">The Accrue brand book — the visual identity we locked in v1.52. Logo, color, type, and voice, in one place you can reach for.</p>
   </div>
 </section>
 
@@ -545,7 +574,7 @@ section { padding-top: 1rem; }
      ===================================================================== -->
 <section id="section-logo">
   <h2>Logo System</h2>
-  <p>The Accrue logo system consists of 13 SVG source files and 8 raster exports. All logo SVGs use fully outlined paths — no live text elements, no embedded fonts.</p>
+  <p>The mark is a four-step staircase — billing state, accruing. You get 13 SVG sources and 8 raster exports, enough to cover every place a logo lands, from a 16px favicon to a social card. Every SVG ships as outlined paths, so there's no font to load and nothing shifts if Geist isn't installed.</p>
 
   <h3>Primary Lockups</h3>
   <div class="logo-grid">
@@ -600,7 +629,7 @@ section { padding-top: 1rem; }
   </div>
 
   <h3>Clearspace Specification</h3>
-  <div style="max-width:480px; margin:0 auto;">
+  <div class="logo-stage" style="max-width:480px; margin:1rem auto;">
     ${logoSvgs["accrue-clearspace.svg"] || ""}
   </div>
   <p style="font-size:0.875rem; color: var(--accrue-content-muted); margin-top:0.5rem;">Clearspace equals one step-height of the mark on all four sides.</p>
@@ -616,7 +645,7 @@ section { padding-top: 1rem; }
      ===================================================================== -->
 <section id="section-color">
   <h2>Color Palette</h2>
-  <p>The Accrue color palette is documented in the specimen SVG below. Light-surface tokens use <code>--accrue-*</code> names; dark-surface tokens use <code>--accrue-dark-*</code> names and must be referenced explicitly in dark-mode CSS.</p>
+  <p>Here's the Accrue palette on the two surfaces it has to work on — light and dark. Reach for tokens, not hex: light-surface roles use <code>--accrue-*</code> names, and dark surfaces have their own <code>--accrue-dark-*</code> set you reference explicitly (the dark values don't override the light names). Each swatch carries its contrast check, so you can see at a glance where a color is safe for text.</p>
   <div style="overflow-x:auto; margin:1rem 0;">
     ${specimenSvgs["palette.svg"] || "<!-- palette.svg not found -->"}
   </div>
@@ -630,7 +659,7 @@ section { padding-top: 1rem; }
      ===================================================================== -->
 <section id="section-typography">
   <h2>Typography</h2>
-  <p>Accrue uses the Geist font family. All logo SVGs use fully outlined paths derived from Geist Sans Regular and Geist Mono Regular — no embedded font data. For body copy and UI text, declare <code>font-family: Geist, system-ui, sans-serif</code>.</p>
+  <p>Accrue is set in Geist — Geist Sans for copy and UI, Geist Mono for code and data. The logos don't depend on it being installed: their letterforms are outlined paths drawn from Geist Sans Regular and Geist Mono Regular, with no embedded font data. For everything else, declare <code>font-family: Geist, system-ui, sans-serif</code> and let it fall back gracefully.</p>
   <div style="overflow-x:auto; margin:1rem 0;">
     ${specimenSvgs["typography.svg"] || "<!-- typography.svg not found -->"}
   </div>
@@ -642,7 +671,7 @@ section { padding-top: 1rem; }
      ===================================================================== -->
 <section id="section-spacing">
   <h2>Spacing</h2>
-  <p>Spacing scale for layout and component composition. Admin <code>--ax-space-*</code> tokens are the implementation reference; brand-layer spacing is reference-only.</p>
+  <p>One spacing scale, used everywhere, so layouts line up without guesswork. The admin <code>--ax-space-*</code> tokens are the real implementation reference; the brand layer mirrors them here for sizing. Each step below is drawn to scale.</p>
   <div style="overflow-x:auto; margin:1rem 0;">
     ${specimenSvgs["spacing.svg"] || "<!-- spacing.svg not found -->"}
   </div>

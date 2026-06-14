@@ -227,15 +227,19 @@ async function main() {
     path.join(__dirname, "geist-spine-mono.mjs")
   );
 
-  // Step 2 — Generate mark from frozen R2-7 config (NEVER modify these params)
-  console.log("[generate-logo-suite] Generating mark from frozen R2-7 config…");
+  // Step 2 — Generate mark from R2-7 config. Geometry params (steps/stepHeight/
+  // stepWidth/accentStep) stay frozen; curvature was flattened to 0 per maintainer
+  // direction (brand-book QA, 2026-06-14) so the bars are crisp squares sitting flat
+  // on a shared baseline — the rounded corners read as sloppy/floating at large sizes
+  // and offered no benefit at 16px favicon scale.
+  console.log("[generate-logo-suite] Generating mark from R2-7 config (square bars)…");
   let markResult;
   try {
     markResult = generate({
       steps: 4,
       stepHeight: 0.25,
       stepWidth: 0.25,
-      curvature: 0.05,
+      curvature: 0,
       accentStep: true,
     });
   } catch (err) {
