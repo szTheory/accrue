@@ -248,7 +248,7 @@ Plans:
 Plans:
 **Wave 1** *(assembler + verifier harness)*
 
-- [ ] 186-01-PLAN.md — brandbook/harness/package.json + assemble.mjs + verify-brandbook.mjs (BOOK-01, BOOK-02)
+- [x] 186-01-PLAN.md — brandbook/harness/package.json + assemble.mjs + verify-brandbook.mjs (BOOK-01, BOOK-02)
 
 **Wave 2** *(blocked on Wave 1 — assembly run + automated quality gates)*
 
@@ -552,7 +552,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete    | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete   | 2026-06-14 |
-| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
+| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 1/3 | In Progress|  |
 
 ## Historical Backlog Anchors (not active scope)
 

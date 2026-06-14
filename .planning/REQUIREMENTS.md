@@ -60,8 +60,8 @@ cited failure (contrast, distinctiveness, 16px rendering) and user ratification.
 
 ### HTML Brand Book & Quality Gate (BOOK) — Phase 186
 
-- [ ] **BOOK-01**: `brandbook/index.html` is a self-contained, professional, standalone brand book — inline CSS from the v1.52 tokens, inlined SVGs, zero build step, zero JS frameworks, file://-openable — consuming the audit structure, logo system, tokens/specimens, and voice/copy.
-- [ ] **BOOK-02**: The committed `brandbook/` passes the Phase-180 quality-gate checklist, stays within a ≤2 MB size budget, and passes final human UAT.
+- [x] **BOOK-01**: `brandbook/index.html` is a self-contained, professional, standalone brand book — inline CSS from the v1.52 tokens, inlined SVGs, zero build step, zero JS frameworks, file://-openable — consuming the audit structure, logo system, tokens/specimens, and voice/copy.
+- [x] **BOOK-02**: The committed `brandbook/` passes the Phase-180 quality-gate checklist, stays within a ≤2 MB size budget, and passes final human UAT.
 
 ## Traceability — v1.52 Brand System
 
@@ -81,8 +81,8 @@ Filled by the roadmap. Coverage target: 14/14, each REQ-ID mapped to exactly one
 | TOK-03 | Phase 184 | Complete |
 | COPY-01 | Phase 185 | Complete |
 | COPY-02 | Phase 185 | Complete |
-| BOOK-01 | Phase 186 | Pending |
-| BOOK-02 | Phase 186 | Pending |
+| BOOK-01 | Phase 186 | Complete |
+| BOOK-02 | Phase 186 | Complete |
 
 ## Out of Scope
 
