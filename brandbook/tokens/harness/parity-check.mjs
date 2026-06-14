@@ -97,6 +97,25 @@ export function runParity({ themeCss, tokens, verbose = true }) {
 
   let failures = 0;
 
+  // Audit: every ax-mapped token that lives in the light scope MUST be declared in
+  // the light selector block. Missing declarations (i.e. deleted lines) are failures.
+  // Dark-scope omissions are intentionally tolerated — the dark block only overrides
+  // a subset of tokens, and the value-comparison loop below already skips absent dark
+  // declarations. (D-10 false-negative fix)
+  const expectedLightAxMaps = new Set(
+    [...iterAxMappedTokens(tokens)]
+      .filter(t => t.axMap != null && t.scope === "light")
+      .map(t => t.axMap)
+  );
+  for (const axMap of expectedLightAxMaps) {
+    if (lightScope[axMap] == null) {
+      if (verbose) {
+        console.error(`MISSING  ${axMap}: defined in tokens.json but absent from light scope in theme.css`);
+      }
+      failures++;
+    }
+  }
+
   for (const { axMap, brandHex, divergesFrom, reason, name, scope } of iterAxMappedTokens(tokens)) {
     // Skip brand-only tokens (D-09b)
     if (axMap == null) continue;
@@ -110,7 +129,9 @@ export function runParity({ themeCss, tokens, verbose = true }) {
     for (const [label, adminScope] of scopePairs) {
       const adminRaw = adminScope[axMap];
 
-      // Token not defined in this scope — skip (not an error; dark block omits some tokens)
+      // Token not defined in this scope — skip.
+      // For light scope, missing tokens are already caught by the expectedLightAxMaps audit above.
+      // For dark scope, omission is intentional (dark block only overrides a subset).
       if (adminRaw == null) continue;
 
       let adminHex;
@@ -297,6 +318,38 @@ async function runTests() {
     );
     const failures = runParity({ themeCss: harmlessMutatedCss, tokens: realTokens, verbose: false });
     assertCase("(d) sanity — unrelated mutation causes 0 failures", failures, 0);
+  }
+
+  // (e) Deleted light-scope token: remove --ax-success declaration → >0 failures
+  // This proves the false-negative (CR-02) is fixed: a deleted ax-mapped light declaration
+  // is now caught by the expectedLightAxMaps audit even though the value loop skips absent entries.
+  {
+    // Remove the --ax-success line from the light scope block.
+    // The line looks like: "  --ax-success: var(--accrue-moss);"
+    const deletedCss = realCss.replace(/[ \t]*--ax-success:[ \t][^\n]+\n/, "");
+    if (deletedCss === realCss) {
+      console.error("CASE FAIL  (e) setup: could not find --ax-success line to delete in theme.css");
+      testFailures++;
+    } else {
+      const capturedErrors = [];
+      const origConsoleError = console.error;
+      console.error = (...args) => {
+        capturedErrors.push(args.join(" "));
+        origConsoleError(...args);
+      };
+      const failures = runParity({ themeCss: deletedCss, tokens: realTokens, verbose: true });
+      console.error = origConsoleError;
+
+      assertCase("(e) deleted-light-token — non-zero failures", failures, "nonzero");
+      // Verify --ax-success is named in the error output
+      const propNamed = capturedErrors.some(line => line.includes("--ax-success"));
+      if (propNamed) {
+        console.log(`CASE PASS  (e) deleted-prop-named — error output names --ax-success`);
+      } else {
+        console.error(`CASE FAIL  (e) deleted-prop-named — error output did NOT name --ax-success`);
+        testFailures++;
+      }
+    }
   }
 
   // Verify committed files are untouched (enforced at the verify command level via git diff)
