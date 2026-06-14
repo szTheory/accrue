@@ -244,7 +244,7 @@ Plans:
   3. `du -sh brandbook/` reports ≤2 MB total committed weight.
   4. The Phase-180 quality-gate checklist passes: designer-buildable / engineer-implementable / dark-mode / small-size / specific-to-Accrue / no-thrash — all criteria satisfied and signed off by the user.
 
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
 **Wave 1** *(assembler + verifier harness)*
 
@@ -552,7 +552,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete    | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete   | 2026-06-14 |
-| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete   | 2026-06-14 |
+| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete    | 2026-06-14 |
 
 ## Historical Backlog Anchors (not active scope)
 
