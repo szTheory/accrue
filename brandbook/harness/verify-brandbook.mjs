@@ -134,14 +134,9 @@ function runStructuralAssertions() {
   // 8. Size budget check — committed weight <= 2 MB
   let totalBytes = 0;
   try {
-    // git ls-files for committed files only (excludes node_modules and untracked files)
-    const output = execSync(
-      "git ls-files brandbook/ | xargs du -c 2>/dev/null | tail -1",
-      { encoding: "utf8", cwd: path.resolve(__dirname, "../..") }
-    ).trim();
-    // Output format: "<bytes>\ttotal" (on macOS, du -c uses 512-byte blocks by default)
-    // Use -k flag gives KB; without flag on macOS = 512-byte blocks
-    // Re-run with -k to get KB for reliable parse
+    // git ls-files for committed files only (excludes node_modules and untracked files).
+    // du -ck reports KB (1024-byte blocks) for a reliable, portable parse
+    // (without -k, macOS du uses 512-byte blocks).
     const outputK = execSync(
       "git ls-files brandbook/ | xargs du -ck 2>/dev/null | tail -1",
       { encoding: "utf8", cwd: path.resolve(__dirname, "../..") }
