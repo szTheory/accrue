@@ -134,11 +134,11 @@ function buildPaletteSvg(tokens) {
   // Separate raw brand tokens from semantic roles (light scope only for the main display)
   const rawTokens = rows
     .filter(r => r.scope === "light" && r.name.startsWith("color.brand."))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "variant" }));
 
   const semanticTokens = rows
     .filter(r => r.scope === "light" && !r.name.startsWith("color.brand.") && !r.name.startsWith("color.dark."))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "variant" }));
 
   const allLightTokens = [...rawTokens, ...semanticTokens];
 

@@ -31,7 +31,7 @@ const BRAND_ONLY = "/* brand-only: no --ax-* counterpart */";
 function buildBlock(rows) {
   return rows
     .slice()
-    .sort((a, b) => a.cssVar.localeCompare(b.cssVar))
+    .sort((a, b) => a.cssVar.localeCompare(b.cssVar, "en", { sensitivity: "variant" }))
     .map(r => {
       const note = r.axMap === null ? `  ${BRAND_ONLY}\n` : "";
       return `${note}  ${r.cssVar}: ${r.hex};`;
