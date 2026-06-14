@@ -163,17 +163,37 @@ function _resolveColorMix(node, vars, brandRaw) {
   };
 
   // Detect if second-to-last or last node is a word ending in "%"
-  // Structure: [colorA, "p%", colorB] or [colorA, colorB] (50/50)
-  // We look for a word/function pattern: first color may be a function node (var()) or word
+  // Supported structures:
+  //   [colorA, "p%", colorB]             → firstPercent=p, secondColorStr=colorB
+  //   [colorA, "p%", colorB, "q%"]       → firstPercent=p, secondColorStr=colorB (q% ignored — implied)
+  //   [colorA, colorB, "q%"]             → secondPercent=q, firstPercent=100-q, secondColorStr=colorB
+  //   [colorA, colorB]                   → 50/50
   if (rest.length >= 3 && rest[1].type === "word" && rest[1].value.endsWith("%")) {
-    // [colorA, "p%", colorB]
+    // [colorA, "p%", colorB] or [colorA, "p%", colorB, "q%"] (two-sided)
     firstPercent = parseFloat(rest[1].value);
     firstColorStr = stringifyNode(rest[0]);
-    secondColorStr = rest.slice(2).map(stringifyNode).join(" ").trim();
+    // Build secondColorStr from rest[2..], then strip a trailing percentage word if present.
+    // This handles both "blue" and "blue 60%" as the second color part.
+    const secondParts = rest.slice(2).map(stringifyNode);
+    const lastPart = secondParts[secondParts.length - 1];
+    if (lastPart && /^\d+(\.\d+)?%$/.test(lastPart)) {
+      secondParts.pop(); // discard explicit second percentage (100-firstPercent implied)
+    }
+    secondColorStr = secondParts.join(" ").trim();
   } else if (rest.length >= 2) {
-    // [colorA, colorB] — 50/50
-    firstColorStr = stringifyNode(rest[0]);
-    secondColorStr = rest.slice(1).map(stringifyNode).join(" ").trim();
+    // [colorA, colorB] (50/50) or [colorA, colorB, "q%"] (second-only percentage)
+    const restParts = rest.map(stringifyNode);
+    const lastPart = restParts[restParts.length - 1];
+    if (restParts.length >= 3 && /^\d+(\.\d+)?%$/.test(lastPart)) {
+      // e.g. [A, B, "60%"] — interpret as A (100-60)%, B 60%
+      const secondPercent = parseFloat(lastPart);
+      firstPercent = 100 - secondPercent;
+      firstColorStr = restParts[0];
+      secondColorStr = restParts.slice(1, -1).join(" ").trim();
+    } else {
+      firstColorStr = restParts[0];
+      secondColorStr = restParts.slice(1).join(" ").trim();
+    }
   } else {
     throw new Error(`[lib.mjs] resolveColorMix: unexpected color-mix argument structure`);
   }
@@ -384,6 +404,22 @@ async function main() {
   // Verified in-session: interpolate(["#ffffff","#5D79F6"],"rgb")(0.08) ≈ #f2f4fe
   const mixResult = resolveColor("color-mix(in srgb, #5D79F6 8%, #ffffff)", {}, {});
   check(typeof mixResult === "string" && /^#[0-9a-f]{6}$/.test(mixResult), 'resolveColor: color-mix → #rrggbb');
+
+  // --- resolveColor: color-mix two-sided percentage form (WR-01) ---
+  // color-mix(in srgb, red 40%, blue 60%) — both sides carry explicit percentages
+  const mixTwoSided = resolveColor("color-mix(in srgb, red 40%, blue 60%)", {}, {});
+  check(typeof mixTwoSided === "string" && /^#[0-9a-f]{6}$/.test(mixTwoSided), 'resolveColor: color-mix two-sided % → #rrggbb');
+
+  // --- resolveColor: color-mix second-only percentage form (WR-01) ---
+  // color-mix(in srgb, red, blue 60%) — only second color carries an explicit percentage
+  const mixSecondOnly = resolveColor("color-mix(in srgb, red, blue 60%)", {}, {});
+  check(typeof mixSecondOnly === "string" && /^#[0-9a-f]{6}$/.test(mixSecondOnly), 'resolveColor: color-mix second-only % → #rrggbb');
+
+  // Both forms should produce the same result as the equivalent first-only form:
+  // color-mix(in srgb, red 40%, blue 60%) == color-mix(in srgb, red 40%, blue)
+  const mixFirstOnly = resolveColor("color-mix(in srgb, red 40%, blue)", {}, {});
+  check(mixTwoSided === mixFirstOnly, 'resolveColor: two-sided % equals first-only % form');
+  check(mixSecondOnly === mixFirstOnly, 'resolveColor: second-only % equals first-only % form (40%+60% symmetric)');
 
   // --- resolveColor: throw-on-unresolved (THREAT T-184-01) ---
   checkThrows(
