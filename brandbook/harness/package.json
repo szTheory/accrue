@@ -1,0 +1,9 @@
+{
+  "name": "accrue-brandbook-harness",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assemble": "node assemble.mjs",
+    "verify": "node verify-brandbook.mjs"
+  }
+}
