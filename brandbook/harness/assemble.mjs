@@ -295,6 +295,7 @@ function main() {
 
     var btn = document.getElementById('theme-toggle');
     if (btn) {
+      btn.textContent = root.dataset.theme === 'dark' ? 'Switch to light' : 'Switch to dark';
       btn.addEventListener('click', function() {
         var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
         root.dataset.theme = next;
