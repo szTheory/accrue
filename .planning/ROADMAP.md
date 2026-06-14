@@ -78,7 +78,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 187-03-PLAN.md — Static matrix baseline capture
+- [x] 187-03-PLAN.md — Static matrix baseline capture
 - [ ] 187-04-PLAN.md — Live interaction probes and test-only state forcing
 
 **Wave 4** *(blocked on Wave 3 completion)*
@@ -254,7 +254,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
-| 187. Audit & Baseline | v1.53 | 2/5 | In Progress|  |
+| 187. Audit & Baseline | v1.53 | 3/5 | In Progress|  |
 | 188. Foundations hardening | v1.53 | 0/TBD | Not started | - |
 | 189. Primitive & form components + component lab | v1.53 | 0/TBD | Not started | - |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |

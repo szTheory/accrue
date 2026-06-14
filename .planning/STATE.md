@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-last_updated: "2026-06-14T22:30:23.760Z"
+last_updated: "2026-06-14T22:53:22.825Z"
 last_activity: 2026-06-14
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 187 (audit-baseline) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-06-14
 
@@ -135,6 +135,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 |------|----------|-------|-------|
 | Phase 187 P01 | 4m 12s | 2 tasks | 3 files |
 | Phase 187 P02 | 6m | 3 tasks | 8 files |
+| Phase 187 P03 | 19m | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -194,6 +195,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 187]: Phase 187 matrix identity is manifest-owned; model and raw evidence metadata are advisory. — Plan 187-02 uses the manifest as the source of truth for cell IDs and enrichment.
 - [Phase 187]: Targeted breakpoint rows use mode targeted plus numeric viewport_width/breakpoint and targeted_label. — Plan 187-02 rejects legacy targeted-320 mode strings.
 - [Phase 187]: Evidence artifacts stay under accrue_admin/test-results with checksums; committed planning artifacts store references only. — Plan 187-02 avoids committing screenshots, traces, or external artifacts.
+- [Phase 187]: Static baseline component rows resolve manifest /dev/components to the actual /billing/dev/components route. — The admin dev component kitchen is mounted under the /billing admin scope, and resolving it in the harness keeps component/component-group evidence reachable without changing manifest identity.
 
 ### Pending Todos
 
@@ -240,7 +242,7 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-14T22:30:23.698Z
+Last session: 2026-06-14T22:53:13.555Z
 Stopped at: Completed 187-02-PLAN.md
 Resume file: None
 
