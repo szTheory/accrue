@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.52
 milestone_name: Brand System
 status: executing
-last_updated: "2026-06-14T00:38:11.269Z"
+last_updated: "2026-06-14T00:45:14.145Z"
 last_activity: 2026-06-14
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 20
   percent: 57
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-11 — v1.52 Brand System opened)
 ## Current Position
 
 Phase: 184 (design-tokens-specimens) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-06-14
 
@@ -172,6 +172,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - **2026-06-12 (181-07):** Round 1 verdict recorded in TOURNAMENT.md: Winners B4 (primary) + B1 (runner-up); A/C/D killed. Constraints R1-C1 (direction B locked), R1-C2 (preserve "stepping up toward the type" gesture), R1-C3 (Geist logotype locked), R1-C4 (Round 2 shows real color, monochrome-derivable). Verdict arrived conversationally; transcribed verbatim.
 - **2026-06-13 (181 review):** Code review CR-01 (Critical, advisory): Direction C arcs rendered fill-not-stroke — `markGroupSvg` contract never consumed by assembleLockup; user judged "solid domes," not intended stroked arcs. Doesn't invalidate the verdict (user affirmatively chose B) but Phase 182 harness work must not inherit the unused-contract pattern.
 - **2026-06-13 (183-04):** Human-verify checkpoint (Task 3) approved — orchestrator QA of 29 screenshot tiles and brandbook docs found NO defects; user confirmed "approved"; Phase 183 Logo System Production complete.
+- [Phase ?]: generate-tokens-css.mjs imports flattenTokens from lib.mjs (D-03 ≤60 lines)
+- [Phase ?]: README mints zero --accrue-scale-* tokens (D-11 compliance)
+- [Phase ?]: verify-tokens.mjs accepts CSS_PATH_OVERRIDE env var for TDD negative check
 
 ### Pending Todos
 
@@ -219,6 +222,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | Phase 182-tournament-convergent-refinement P01 | 6m | 3 tasks | 6 files |
 | Phase 183 P183-02 | 35 | 2 tasks | 3 files |
 | Phase 183 P04 | 12min | 2 tasks | 3 files |
+| Phase 184-design-tokens-specimens P02 | 20 | 3 tasks | 6 files |
 
 ### Milestone Intake Rules
 
@@ -243,7 +247,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-06-14T00:38:11.264Z
+Last session: 2026-06-14T00:44:59.720Z
 Stopped at: Phase 184 context gathered
 Resume file: None
 
