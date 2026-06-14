@@ -226,7 +226,13 @@ function _resolveColorMix(node, vars, brandRaw) {
  * @param {object} root - the full tokens JSON root
  * @returns {string|null} lowercase hex or null if unresolvable
  */
-function _resolveAlias(aliasStr, root) {
+function _resolveAlias(aliasStr, root, seen = new Set()) {
+  if (seen.has(aliasStr)) {
+    throw new Error(
+      `[lib.mjs] _resolveAlias: circular alias detected: ${[...seen, aliasStr].join(" → ")}`
+    );
+  }
+  seen.add(aliasStr);
   const path = aliasStr.slice(1, -1).split("."); // strip { } and split
   let node = root;
   for (const seg of path) {
@@ -236,7 +242,7 @@ function _resolveAlias(aliasStr, root) {
   if (node == null || !node.$value) return null;
   const v = node.$value;
   if (typeof v === "string" && v.startsWith("{")) {
-    return _resolveAlias(v, root); // nested alias
+    return _resolveAlias(v, root, seen); // nested alias — pass seen set for cycle detection
   }
   if (typeof v === "object" && v.hex) return v.hex.toLowerCase();
   return null;
@@ -429,6 +435,22 @@ async function main() {
   checkThrows(
     () => resolveColor("notavalidcolor", {}, {}),
     'resolveColor THROWS on unparseable color'
+  );
+
+  // --- _resolveAlias: cycle detection (WR-02) ---
+  // Build a synthetic token tree with a circular alias: A → {B}, B → {A}
+  checkThrows(
+    () => {
+      const cyclicTokens = {
+        color: {
+          $type: "color",
+          a: { $value: "{color.b}", $type: "color" },
+          b: { $value: "{color.a}", $type: "color" },
+        },
+      };
+      flattenTokens(cyclicTokens); // _resolveAlias is called inside flattenTokens
+    },
+    '_resolveAlias THROWS on circular alias A→B→A'
   );
 
   // --- flattenTokens ---
