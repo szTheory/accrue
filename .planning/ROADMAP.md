@@ -246,14 +246,17 @@ Plans:
 
 **Plans:** 3 plans
 Plans:
-**Wave 1** *(parallel — no dependencies)*
+**Wave 1** *(assembler + verifier harness)*
 
-- [x] 185-01-PLAN.md — Voice system doc: principles, tone sliders, vocabulary, surface dispatch rule, claims posture, CTA canon (COPY-01)
-- [x] 185-02-PLAN.md — Copy blocks for all surfaces: GitHub, Hex.pm, HexDocs, README hero, landing page, release notes, microcopy (COPY-02)
+- [ ] 186-01-PLAN.md — brandbook/harness/package.json + assemble.mjs + verify-brandbook.mjs (BOOK-01, BOOK-02)
 
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2** *(blocked on Wave 1 — assembly run + automated quality gates)*
 
-- [ ] 185-03-PLAN.md — One-batch human review + approval + revision incorporation
+- [ ] 186-02-PLAN.md — Run assemble.mjs → brandbook/index.html; run verify-brandbook.mjs → VERIFY_BRANDBOOK_OK + 4 screenshots (BOOK-01, BOOK-02)
+
+**Wave 3** *(blocked on Wave 2 — human UAT sign-off)*
+
+- [ ] 186-03-PLAN.md — Quality-gate checklist sign-off + BOOK-02-SIGN-OFF.md + Phase 186 closure (BOOK-02) ✋
 **UI hint**: yes
 
 </details>
