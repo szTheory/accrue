@@ -63,7 +63,13 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
   2. A severity-ranked defect ledger exists in which every entry names the surface, the reproduction, the severity, and the rubric dimension it fails — covering both static-matrix findings (viewport × theme × state) and live-interaction findings (modal/scroll/focus/overlay/z-index/empty-state/disabled).
   3. A scored baseline captures every audited cell (component / group / page across viewport × theme × state) so it can be re-run idempotently and compared in Phase 192.
   4. The defect ledger and baseline are committed as the single only-forward reference point that Phases 188–191 remediate against and Phase 192 verifies ≥.
-**Plans:** TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 187-01-PLAN.md — Rubric and schema contract
+- [ ] 187-02-PLAN.md — Manifest, artifact generator, and 12-dimension scorer pipeline
+- [ ] 187-03-PLAN.md — Static matrix baseline capture
+- [ ] 187-04-PLAN.md — Live interaction probes and test-only state forcing
+- [ ] 187-05-PLAN.md — Audit run and canonical baseline ledger
 **UI hint**: yes
 
 ### Phase 188: Foundations hardening
