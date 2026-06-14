@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://accrue.dev/planning/phase-187/defect.schema.json",
+  "title": "Phase 187 Defect",
+  "description": "Canonical NDJSON row contract for .planning/phases/187-audit-baseline/defects.ndjson.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "severity",
+    "surface",
+    "surface_type",
+    "persona_job",
+    "reproduction",
+    "expected",
+    "actual",
+    "rubric_dimension",
+    "overlay_tags",
+    "cell_id",
+    "evidence_refs",
+    "owner_phase",
+    "status",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^AX187-[0-9]{3}$"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"]
+    },
+    "surface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "surface_type": {
+      "type": "string",
+      "enum": ["component", "component-group", "page-flow"]
+    },
+    "persona_job": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reproduction": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actual": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rubric_dimension": {
+      "type": "string",
+      "enum": [
+        "token-compliance",
+        "visual-hierarchy",
+        "spacing-rhythm",
+        "state-coverage",
+        "responsive-mobile-first",
+        "contrast",
+        "focus-semantics",
+        "brand-expression",
+        "motion",
+        "reuse-dry",
+        "interaction-integrity",
+        "microcopy"
+      ]
+    },
+    "overlay_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "layer-z-index",
+          "live-focus",
+          "focus-restore",
+          "focus-trap",
+          "scroll-reachability",
+          "overlay-position",
+          "actionability",
+          "disabled-affordance",
+          "hover-affordance",
+          "copy-recovery",
+          "copy-vocabulary",
+          "copy-specificity",
+          "dark-mode-role",
+          "reduced-motion"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "cell_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "owner_phase": {
+      "type": "string",
+      "enum": ["188", "189", "190", "191"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "confirmed", "gap", "n/a"]
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://accrue.dev/planning/phase-187/baseline-cell.schema.json",
+  "title": "Phase 187 Baseline Cell",
+  "description": "Canonical row contract for .planning/phases/187-audit-baseline/baseline.cells.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cell_id",
+    "surface",
+    "surface_type",
+    "mode",
+    "viewport_width",
+    "theme",
+    "state",
+    "dimension",
+    "dimension_name",
+    "score",
+    "coverage_status",
+    "evidence_refs",
+    "notes"
+  ],
+  "properties": {
+    "cell_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "surface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "surface_type": {
+      "type": "string",
+      "enum": ["component", "component-group", "page-flow"]
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["chromium-desktop", "chromium-mobile", "targeted"]
+    },
+    "viewport_width": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "theme": {
+      "type": "string",
+      "enum": ["light", "dark"]
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "default-populated",
+        "empty",
+        "loading",
+        "error",
+        "permission-denied",
+        "disconnected-reconnecting",
+        "overflow",
+        "long-content",
+        "disabled-readonly",
+        "interactive-open"
+      ]
+    },
+    "dimension": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    },
+    "dimension_name": {
+      "type": "string",
+      "enum": [
+        "token-compliance",
+        "visual-hierarchy",
+        "spacing-rhythm",
+        "state-coverage",
+        "responsive-mobile-first",
+        "contrast",
+        "focus-semantics",
+        "brand-expression",
+        "motion",
+        "reuse-dry",
+        "interaction-integrity",
+        "microcopy"
+      ]
+    },
+    "score": {
+      "type": ["integer", "null"],
+      "enum": [0, 1, 2, 3, null]
+    },
+    "coverage_status": {
+      "type": "string",
+      "enum": ["covered", "gap", "n/a"]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "notes": {
+      "type": "string"
+    },
+    "targeted_label": {
+      "type": ["string", "null"],
+      "enum": [
+        "targeted-320",
+        "targeted-375",
+        "targeted-768",
+        "targeted-1024",
+        "targeted-1440",
+        null
+      ]
+    },
+    "breakpoint": {
+      "type": ["integer", "null"],
+      "enum": [320, 375, 768, 1024, 1440, null]
+    }
+  },
+  "if": {
+    "properties": {
+      "mode": {
+        "const": "targeted"
+      }
+    },
+    "required": ["mode"]
+  },
+  "then": {
+    "required": ["targeted_label", "breakpoint"],
+    "properties": {
+      "targeted_label": {
+        "type": "string",
+        "enum": [
+          "targeted-320",
+          "targeted-375",
+          "targeted-768",
+          "targeted-1024",
+          "targeted-1440"
+        ]
+      },
+      "breakpoint": {
+        "type": "integer",
+        "enum": [320, 375, 768, 1024, 1440]
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "targeted_label": {
+        "type": ["string", "null"],
+        "enum": [
+          "targeted-320",
+          "targeted-375",
+          "targeted-768",
+          "targeted-1024",
+          "targeted-1440",
+          null
+        ]
+      },
+      "breakpoint": {
+        "type": ["integer", "null"],
+        "enum": [320, 375, 768, 1024, 1440, null]
+      }
+    }
+  }
+}
