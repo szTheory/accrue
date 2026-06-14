@@ -99,6 +99,12 @@ jobs:
       - name: Tokens/specimens are reproducible (determinism gate, D-17)
         run: git diff --exit-code -- brandbook/tokens/tokens.css brandbook/examples/palette.svg brandbook/examples/typography.svg brandbook/examples/spacing.svg
 
+      - name: Verify tokens completeness (SC#1)
+        run: cd brandbook/tokens/harness && npm run verify
+
+      - name: Verify specimen content coverage (SC#3)
+        run: cd brandbook/tokens/harness && npm run verify-specimens
+
       - name: Brand↔admin token parity (SC#2)
         run: cd brandbook/tokens/harness && npm run parity
 

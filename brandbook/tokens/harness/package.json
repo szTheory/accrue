@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "generate": "node generate-tokens-css.mjs",
+    "verify": "node verify-tokens.mjs",
     "specimens": "node generate-specimens.mjs",
+    "verify-specimens": "node verify-specimens.mjs",
     "parity": "node parity-check.mjs",
     "parity-test": "node parity-check.mjs --test"
   },
