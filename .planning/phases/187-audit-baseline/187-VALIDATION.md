@@ -1,9 +1,9 @@
 ---
 phase: 187
 slug: audit-baseline
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: ready
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-14
 ---
 
@@ -21,16 +21,16 @@ created: 2026-06-14
 | **Config file** | `accrue_admin/playwright.config.js`; `accrue_admin/test/test_helper.exs` |
 | **Quick run command** | `cd accrue_admin && npm run e2e -- e2e/admin-interactions.spec.js --project=chromium-desktop -x` after the spec exists |
 | **Full suite command** | `cd accrue_admin && npm run e2e` plus `cd accrue_admin && mix test --warnings-as-errors` |
-| **Estimated runtime** | TBD after Wave 0 specs exist |
+| **Estimated runtime** | Recorded by execution in `accrue_admin/test-results/phase187-command-status.json`; planning verification commands are task-scoped and non-watch-mode. |
 
 ---
 
 ## Sampling Rate
 
 - **After every task commit:** Run the narrow Playwright spec or artifact parser touched by that task.
-- **After every plan wave:** Run `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js e2e/admin-interactions.spec.js` after both files exist.
-- **Before `$gsd-verify-work`:** Run `cd accrue_admin && npm run e2e`, `cd accrue_admin && mix test --warnings-as-errors`, and parse all committed Phase 187 JSON/NDJSON artifacts.
-- **Max feedback latency:** TBD after baseline and interaction specs exist.
+- **After every plan wave:** Run the narrow verification commands declared in the completed plan files for that wave; after Wave 3, run both baseline and interaction specs in their project-specific narrow modes.
+- **Before `$gsd-verify-work`:** Run the Plan 05 non-aborting audit wrapper, `cd accrue_admin && mix test --warnings-as-errors`, `cd accrue_admin && npm run baseline:parse`, and parse all committed Phase 187 JSON/NDJSON artifacts.
+- **Max feedback latency:** One task. Every behavior-producing task has an `<automated>` verification command; Plan 05 preserves evidence generation when UI/a11y/interaction defects are discovered.
 
 ---
 
@@ -38,24 +38,41 @@ created: 2026-06-14
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 187-W0-01 | TBD | 0 | VER-01 | T-187-01 | N/A | artifact smoke | `test -f .planning/phases/187-audit-baseline/187-RUBRIC.md && test -f .planning/phases/187-audit-baseline/baseline.cells.json && test -f .planning/phases/187-audit-baseline/defects.ndjson` | no | pending |
-| 187-W0-02 | TBD | 0 | VER-01 | T-187-02 | E2E routes remain test-only | Playwright E2E | `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --project=chromium-desktop -x` | no | pending |
-| 187-W0-03 | TBD | 0 | VER-01 | T-187-03 | Trace evidence contains deterministic test data only | Playwright E2E | `cd accrue_admin && npm run e2e -- e2e/admin-interactions.spec.js -x` | no | pending |
-| 187-W0-04 | TBD | 0 | VER-01 | T-187-04 | NDJSON and JSON parsing use standard JSON APIs | Node smoke | `node -e 'const fs=require("fs"); JSON.parse(fs.readFileSync(".planning/phases/187-audit-baseline/baseline.cells.json","utf8")); const s=fs.readFileSync(".planning/phases/187-audit-baseline/defects.ndjson","utf8").trim(); if (s) for (const l of s.split("\\n")) JSON.parse(l);'` | no | pending |
-| 187-W0-05 | TBD | 0 | VER-01 | T-187-05 | Existing accessibility scan remains runnable | Playwright axe | `cd accrue_admin && npm run e2e:a11y` | yes | pending |
+| 187-01-T1 | 187-01 | 1 | VER-01 | T-187-01 | Rubric dimensions and overlay tags are explicit | source + grep gate | `test -f .planning/phases/187-audit-baseline/187-RUBRIC.md && grep -q "11 interaction-integrity" .planning/phases/187-audit-baseline/187-RUBRIC.md && grep -q "12 microcopy" .planning/phases/187-audit-baseline/187-RUBRIC.md` | planned | pending |
+| 187-01-T2 | 187-01 | 1 | VER-01 | T-187-01, T-187-04 | Schemas require canonical baseline and defect fields | Node parse | `node -e 'const fs=require("fs"); const base=JSON.parse(fs.readFileSync(".planning/phases/187-audit-baseline/schemas/baseline-cell.schema.json","utf8")); const defect=JSON.parse(fs.readFileSync(".planning/phases/187-audit-baseline/schemas/defect.schema.json","utf8")); if (!base.required.includes("coverage_status")) throw new Error("missing coverage_status"); if (!defect.required.includes("owner_phase")) throw new Error("missing owner_phase");'` | planned | pending |
+| 187-02-T1 | 187-02 | 2 | VER-01 | T-187-04 | Manifest exports dimensions, states, overlays, and surfaces | Node require | `node -e 'const m=require("./accrue_admin/e2e/baseline-manifest.js"); for (const k of ["DIMENSIONS","STATE_TAXONOMY","OVERLAY_TAGS","PROJECTS","THEMES","SURFACES"]) if (!m[k]) throw new Error("missing export "+k);'` | planned | pending |
+| 187-02-T2 | 187-02 | 2 | VER-01 | T-187-01, T-187-04 | Artifact generator parses canonical JSON/NDJSON and classifies harness failures separately from UI findings | npm script + Node parse | `cd accrue_admin && npm run baseline:artifacts -- --dry-run && npm run baseline:parse` | planned | pending |
+| 187-02-T3 | 187-02 | 2 | VER-01 | T-187-05 | Optional vision scorer handles missing credentials cleanly | Node script + grep gate | `cd accrue_admin && node e2e/score-visuals.mjs >/tmp/score-visuals-no-key.log && grep -q "ANTHROPIC_API_KEY not set" /tmp/score-visuals-no-key.log` | planned | pending |
+| 187-03-T1 | 187-03 | 3 | VER-01 | T-187-03, T-187-04 | Static baseline writes evidence without committing generated binaries | Playwright E2E | `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --project=chromium-desktop -x` | planned | pending |
+| 187-03-T2 | 187-03 | 3 | VER-01 | T-187-03 | Targeted breakpoint probes are risk-gated | grep + Playwright E2E | `grep -q "320" accrue_admin/e2e/admin-baseline.spec.js && grep -q "1440" accrue_admin/e2e/admin-baseline.spec.js && cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --project=chromium-mobile -x` | planned | pending |
+| 187-04-T1 | 187-04 | 3 | VER-01 | T-187-02 | Permission-denied route remains E2E-only | grep + ExUnit | `grep -q "e2e_member" accrue_admin/test/support/e2e_auth_adapter.ex && grep -q "login-member" accrue_admin/test/support/e2e_plug.ex && cd accrue_admin && mix test --warnings-as-errors test/accrue_admin` | planned | pending |
+| 187-04-T2 | 187-04 | 3 | VER-01 | T-187-03, T-187-05 | Live interaction observations cover D-13/D-14 with trace-backed evidence | source assertion + Playwright E2E + NDJSON parse | `cd accrue_admin && npm run e2e -- e2e/admin-interactions.spec.js --project=chromium-desktop -x` plus Plan 04 source/NDJSON assertions | planned | pending |
+| 187-05-T1 | 187-05 | 4 | VER-01 | T-187-01, T-187-03, T-187-04, T-187-05 | Audit execution always reaches artifact generation unless harness/parser/runtime failure prevents evidence | non-aborting audit wrapper + parse | Plan 05 Task 1 `<automated>` command | planned | pending |
+| 187-05-T2 | 187-05 | 4 | VER-01 | T-187-01, T-187-04 | Canonical baseline and defect ledger parse and route owner phases | Node parse + grep gate | Plan 05 Task 2 `<automated>` command | planned | pending |
 
 *Status: pending, green, red, flaky*
 
 ---
 
-## Wave 0 Requirements
+## Wave Structure
 
-- [ ] `accrue_admin/e2e/baseline-manifest.js` or `.json` - canonical cells for VER-01.
-- [ ] `accrue_admin/e2e/admin-baseline.spec.js` - manifest-driven static matrix and evidence generation.
-- [ ] `accrue_admin/e2e/admin-interactions.spec.js` - modal/drawer/dropdown/scroll/focus/actionability probes with traces.
-- [ ] Artifact generator script - emits `baseline.cells.json`, `defects.ndjson`, `artifacts.manifest.json`, and optional schemas.
-- [ ] `accrue_admin/e2e/score-visuals.mjs` extension or wrapper - 12 dimensions and stable cell IDs.
-- [ ] Permission-denied and disconnected/reconnecting reachability decision - add minimum fixture/probe support or mark explicit gaps.
+| Wave | Plans | Validation Focus |
+|------|-------|------------------|
+| 1 | 187-01 | Rubric, overlay tags, severity/owner routing, and schemas exist before harness work. |
+| 2 | 187-02 | Manifest, artifact generator, scorer, and package scripts create the data pipeline. |
+| 3 | 187-03, 187-04 | Static evidence and live interaction evidence run independently from the shared manifest. |
+| 4 | 187-05 | Audit execution reaches committed baseline artifacts and parses canonical outputs. |
+
+## Wave 0 Status
+
+No separate Wave 0 scaffold remains. The previous placeholders are covered by task-level automated verification in Plans 01-05:
+
+- `accrue_admin/e2e/baseline-manifest.js` - Plan 02 Task 1.
+- `accrue_admin/e2e/admin-baseline.spec.js` - Plan 03 Tasks 1-2.
+- `accrue_admin/e2e/admin-interactions.spec.js` - Plan 04 Task 2.
+- Artifact generator script and canonical outputs - Plan 02 Task 2 and Plan 05 Tasks 1-2.
+- `accrue_admin/e2e/score-visuals.mjs` 12-dimension support - Plan 02 Task 3.
+- Permission-denied and disconnected/reconnecting reachability - Plan 04 Tasks 1-2; remaining unreachable cells become explicit `gap` / `n/a` observations.
 
 ---
 
@@ -82,11 +99,11 @@ created: 2026-06-14
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all missing references
-- [ ] No watch-mode flags
-- [ ] Feedback latency recorded after baseline specs exist
-- [ ] `nyquist_compliant: true` set in frontmatter after plans map tasks to this strategy
+- [x] All tasks have `<automated>` verify commands
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 placeholders removed and mapped to concrete plan tasks
+- [x] No watch-mode flags
+- [x] Feedback latency set to one task
+- [x] `nyquist_compliant: true` set in frontmatter after plans map tasks to this strategy
 
-**Approval:** pending
+**Approval:** ready for execution

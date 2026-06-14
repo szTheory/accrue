@@ -439,22 +439,19 @@ export function appendDefect(path, defect) {
 | A1 | JSON Schema should be used if cheap for artifact validation. | Standard Stack | Planner may add more tooling than needed; mitigate by making schemas optional per D-18. |
 | A2 | Warning signs listed for drift, axe-only coverage, force-click usage, and committed binary assets are inferred planning heuristics. | Common Pitfalls | Low; these are planner guardrails, not implementation facts. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 187 run the optional Anthropic vision scorer during execution?**
    - What we know: `score-visuals.mjs` skips cleanly when `ANTHROPIC_API_KEY` is absent. [VERIFIED: codebase grep]
-   - What's unclear: Whether the execution environment for the phase will have the key and model access. [ASSUMED]
-   - Recommendation: Plan the scorer update as required, but make the actual vision API run a human/CI gate that records `gap` if credentials are absent. [VERIFIED: codebase grep + CONTEXT.md]
+   - **RESOLVED:** Plan 02 updates the scorer contract, and Plan 05 runs `npm run score-visuals` during baseline execution. If credentials/model access are absent, the run records `vision-scoring-unavailable` / `gap` evidence through `baseline:artifacts` instead of blocking VER-01. [VERIFIED: codebase grep + CONTEXT.md; PLANNED: 187-02 Task 3, 187-05 Task 1]
 
 2. **How much fixture expansion is required for permission-denied and disconnected-reconnecting?**
    - What we know: Existing fixtures cover dashboard, operator-flows, edge-states, and overflow. [VERIFIED: codebase grep]
-   - What's unclear: Current E2E support does not obviously expose named permission-denied or LiveView disconnected/reconnecting fixture routes. [VERIFIED: codebase grep]
-   - Recommendation: Planner should include a Wave 0 gap task to either add minimal E2E controls for these states or mark cells as `gap` defects with explicit seed/tooling ownership. [VERIFIED: CONTEXT.md]
+   - **RESOLVED:** Plan 04 adds only the minimum E2E-only member login route needed for permission-denied reachability and uses Playwright network interruption for disconnected/reconnecting probes. Any remaining state that cannot be reached honestly is written as a `gap` or `n/a` observation with a reason, then routed into `baseline.cells.json` / `defects.ndjson` by Plan 05. [VERIFIED: codebase grep + CONTEXT.md; PLANNED: 187-04 Tasks 1-2, 187-05 Task 2]
 
 3. **Should package versions be upgraded?**
    - What we know: npm latest for Playwright is 1.60.0, but the repo lockfile installs 1.59.1 and Phase 187 is not a dependency-upgrade phase. [VERIFIED: npm registry + npm ls + git diff]
-   - What's unclear: Whether a later dependency maintenance pass wants the latest Playwright. [ASSUMED]
-   - Recommendation: Do not upgrade in Phase 187 unless a locked Playwright bug blocks trustworthy evidence. [VERIFIED: CONTEXT.md]
+   - **RESOLVED:** Do not upgrade package versions in Phase 187. Use the locked dependency set and only revisit versions in a later dependency-maintenance phase or if a locked Playwright bug prevents collecting trustworthy evidence. [VERIFIED: CONTEXT.md; PLANNED: all Phase 187 plans avoid package installs]
 
 ## Environment Availability
 
