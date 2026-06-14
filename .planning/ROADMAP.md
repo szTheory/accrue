@@ -44,7 +44,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 181: SVG Pipeline + Tournament Round 1 — Divergent** — opentype.js Geist-outline harness, pre-gate lints, Playwright QA, 12–16 candidates across 4 directions, context-matrix gallery (✋ user picks winners) (completed 2026-06-13)
 - [x] **Phase 182: Tournament Convergent Refinement** — variation rounds on winners via monotonic TOURNAMENT.md ledger, 3-round default cap, extend-or-settle question (✋ looping checkpoint) (completed 2026-06-13)
 - [x] **Phase 183: Logo System Production** — full derived suite in `brandbook/logo/`, outlined paths, svgo-optimized (light checkpoint: derivative-sheet eyeball) (completed 2026-06-13)
-- [ ] **Phase 184: Design Tokens & Specimens** — `brandbook/tokens/` with documented mapping + automated consistency check vs admin `ax-*` tokens (no checkpoint; depends only on 180)
+- [x] **Phase 184: Design Tokens & Specimens** — `brandbook/tokens/` with documented mapping + automated consistency check vs admin `ax-*` tokens (no checkpoint; depends only on 180) (completed 2026-06-14)
 - [ ] **Phase 185: Voice, Microcopy & Marketing Copy** — ready-to-paste copy blocks for all adopter-facing surfaces (light checkpoint: batch copy review; depends only on 180)
 - [ ] **Phase 186: HTML Brand Book Assembly & Quality Gate** — self-contained `brandbook/index.html`, ≤2 MB budget, Phase-180 quality-gate checklist (✋ final UAT)
 
@@ -194,7 +194,7 @@ Plans:
   2. An automated consistency check script verifies that every brandbook token value that corresponds to an `ax-*` token in `accrue_admin/assets/css/theme.css` matches (or is explicitly documented as a brand-layer divergence) — the script exits non-zero on undocumented drift.
   3. `brandbook/examples/` contains palette and typography specimen artifacts (SVG or HTML) that render every color swatch, type scale, and spacing step visually.
 
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 Plans:
 **Wave 1**
 
@@ -529,7 +529,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
 | 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
 | 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
-| 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete   | 2026-06-14 |
+| 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete    | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 0/? | Not started | - |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 0/? | Not started | - |
 
