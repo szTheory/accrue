@@ -91,18 +91,49 @@ and the contributor working in the component system. 33 requirements across 8 th
 - [ ] **VER-03**: Regression guardrails (interaction e2e, axe a11y, reduced-motion, and a component-lab coverage check) run in CI so re-running the milestone only ever finds new gaps.
 - [ ] **VER-04**: The maintainer signs off on screenshots at each phase boundary, closing v1.51's open photographic-sign-off tech-debt.
 
-### v1.53 Traceability (finalized by the roadmapper)
+### v1.53 Traceability (finalized by the roadmapper 2026-06-14)
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | VER-01 | 187 | Pending |
-| FND-01..06 | 188 | Pending |
-| CMP-01..05 | 189 | Pending |
-| GRP-01..04 | 190 | Pending |
-| IXN-01..05 · PAGE-01..04 · CPY-01..03 · SEED-01..02 | 191 | Pending |
-| VER-02..04 | 192 | Pending |
+| FND-01 | 188 | Pending |
+| FND-02 | 188 | Pending |
+| FND-03 | 188 | Pending |
+| FND-04 | 188 | Pending |
+| FND-05 | 188 | Pending |
+| FND-06 | 188 | Pending |
+| CMP-01 | 189 | Pending |
+| CMP-02 | 189 | Pending |
+| CMP-03 | 189 | Pending |
+| CMP-04 | 189 | Pending |
+| CMP-05 | 189 | Pending |
+| GRP-01 | 190 | Pending |
+| GRP-02 | 190 | Pending |
+| GRP-03 | 190 | Pending |
+| GRP-04 | 190 | Pending |
+| IXN-01 | 191 | Pending |
+| IXN-02 | 191 | Pending |
+| IXN-03 | 191 | Pending |
+| IXN-04 | 191 | Pending |
+| IXN-05 | 191 | Pending |
+| PAGE-01 | 191 | Pending |
+| PAGE-02 | 191 | Pending |
+| PAGE-03 | 191 | Pending |
+| PAGE-04 | 191 | Pending |
+| CPY-01 | 191 | Pending |
+| CPY-02 | 191 | Pending |
+| CPY-03 | 191 | Pending |
+| SEED-01 | 191 | Pending |
+| SEED-02 | 191 | Pending |
+| VER-02 | 192 | Pending |
+| VER-03 | 192 | Pending |
+| VER-04 | 192 | Pending |
 
 **Coverage:** 33 v1 requirements · 33 mapped · 0 unmapped ✓
+
+Per-phase counts: 187 → 1 (VER-01) · 188 → 6 (FND-01..06) · 189 → 5 (CMP-01..05) ·
+190 → 4 (GRP-01..04) · 191 → 14 (IXN-01..05 · PAGE-01..04 · CPY-01..03 · SEED-01..02) ·
+192 → 3 (VER-02..04). Total = 1 + 6 + 5 + 4 + 14 + 3 = 33. No requirement maps to two phases.
 
 ### v1.53 Deferred (v2)
 
@@ -131,3 +162,4 @@ dependency (extend the in-app `/dev/components` kitchen — deferred as TOOL-01)
 chrome redesign (`examples/accrue_host` UI is not a design target — only its seed/fixture data,
 SEED-01/02); no `accrue_portal` work (separate package); no re-churn of the v1.51 motion spec or
 v1.52 brand tokens absent a rubric regression or new interaction pattern.
+</content>

@@ -8,6 +8,7 @@
 - ✅ **v1.50 Admin UI Foundation** — Phases 167-173 (shipped 2026-06-02 via PR #32; archived 2026-06-03) — [archive](milestones/v1.50-ROADMAP.md)
 - ✅ **v1.51 Admin UI: Depth Pass [SHIPPED 2026-06-04 — see milestones/v1.51-ROADMAP.md] (IA + Systematic Polish)** — Phases 174-179 (planning 2026-06-03; second, depth-oriented pass on the same `accrue_admin` surface; persona-driven IA reshape + token gap-closure + systematic rubric uplift + motion + seed expressiveness + screenshot-driven visual-QA; no new billing primitives)
 - ✅ **v1.52 Brand System** — Phases 180-186 (shipped 2026-06-14; brand audit + DNA lock, SVG logo tournament, design tokens, voice/copy, standalone HTML brand book; no billing primitives) — [archive](milestones/v1.52-ROADMAP.md)
+- 🟢 **v1.53 Admin UI Design-System Hardening** — Phases 187-192 (OPEN; planning 2026-06-14; fractal design-system audit foundations→primitives→groups→pages→flows + interaction-defect remediation + component-level systematization + idempotent only-forward verification on `accrue_admin`; no new billing primitives, no breaking API/route changes, no Tailwind migration) — **active inline section below**
 
 ## Planning Doctrine
 
@@ -21,11 +22,112 @@ Accrue is in **stable core / demand-driven expansion** posture as of 2026-05-31.
 
 After v1.48, broad feature milestones remain closed by default unless reopened by concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change.
 
-No broad feature milestone is currently open. (v1.50 Admin UI Foundation is a quality / design-system / usability investment in an already-shipped surface, justified as adopter-facing DX — it adds no new billing primitives and does not reopen broad feature scope.)
+v1.53 Admin UI Design-System Hardening is open as a quality / design-system / interaction-correctness investment in the already-shipped `accrue_admin` surface. Reopen justification (recorded in `PROJECT.md`): explicit strategy change (design quality of the flagship adopter-facing surface elevated to a strategic priority — same class as v1.50/v1.51/v1.52) **plus firsthand-observed interaction defects** in the running demo (concrete failure evidence). It adds no new billing primitives and does not reopen broad feature scope.
 
 Stop rule: if proposed work is polish-only with a documented workaround and no release/adopter failure mode, record it as deferred with a revisit trigger and do not create a milestone for it.
 
 ## Phases
+
+<details open>
+<summary>🟢 v1.53 Admin UI Design-System Hardening (Phases 187-192) — OPEN (deps strictly linear 187→188→189→190→191→192)</summary>
+
+**Posture:** Quality / interaction-correctness / design-system investment in the already-shipped `accrue_admin` operator UI — **not** a broad feature milestone (no new billing primitives, no breaking API/route changes). Takes the admin UI from *considered* (v1.51) to *interaction-correct and component-systematic*: audit the design system fractally (foundations → primitives → component groups → pages → flows), catch and fix the behavioral defects screenshot scoring can't see (modal-behind-scrim, scroll traps, focus loss, overlay z-index, hover-on-empty-state, disabled-looks-enabled), formalize every component in isolation across its full state matrix, and lock it all behind an idempotent only-forward verification loop. Reopen decision recorded in `PROJECT.md`; justification class: explicit strategy change + firsthand-observed interaction defects.
+
+**Differentiated value over v1.50–v1.52:** v1.51 audited *screens*, not *components in isolation* (only 7 of 28 components are formally specced); its sign-off was LLM-scored stills (logged `tech_debt`) blind to interaction bugs; component-*group* cohesion plus a few foundation gaps (typography bundles, z-index/layer formalization, inert-Tailwind decision) were left open. v1.53 closes all of these and discharges v1.51's open photographic-sign-off tech-debt.
+
+**Guardrails (out of scope):** no Tailwind *migration* (custom `ax-*` CSS + tokens stay SSOT; FND-04 is a *resolution* of the inert config, not a migration); no new billing primitives or domain features; no breaking API/route changes (internal moves ship with redirects, component public APIs stay backward-compatible); no PhoenixStorybook dependency (extend the in-app `/dev/components` kitchen — deferred as TOOL-01); no demo/host chrome redesign (`examples/accrue_host` UI is not a design target — only its seed/fixture data, SEED-01/02); no `accrue_portal` work; no re-churn of the v1.51 motion spec or v1.52 brand tokens absent a rubric regression or new interaction pattern.
+
+**Refreshed rubric:** the v1.51 10-dimension rubric extended with researched additions — **interaction-integrity**, **layer/z-index**, **microcopy** — and scored across viewport × theme × state with live interaction testing. The Phase-187 severity-ranked defect ledger + scored baseline is the only-forward reference point; Phase 192 must score ≥ baseline on every dimension/cell with zero regressions.
+
+**Execution model:** each phase is executed research-backed and verified via the GSD UI workflow (`/gsd-ui-phase` design-contract + `/gsd-ui-review`), with an adversarial multi-lens judge (correctness, a11y, brand, interaction) and a **maintainer screenshot checkpoint at every phase boundary** (this is what closes v1.51's open photographic-sign-off tech-debt).
+
+**Authoritative scope source:** the approved scoping plan; prior design source `.planning/research/v1.51-admin-ui-depth-design.md`.
+
+### Phase Summary
+
+- [ ] **Phase 187: Audit & Baseline** — Refresh the rubric (adds interaction-integrity, layer/z-index, microcopy); run the full matrix (viewport × theme × state) + live interaction testing of the running admin UI; produce a severity-ranked defect ledger + scored baseline = the only-forward reference point.
+- [ ] **Phase 188: Foundations hardening** — Typography bundles, reading-measure application, formal z-index/layer system, motion-gap closure, inert-Tailwind resolution, and dark-mode role/focus/scrollbar/disabled completeness — root-level fixes.
+- [ ] **Phase 189: Primitive & form components + component lab** — Every component in isolation × full state matrix × theme × viewport × a11y; root-level (DRY) fixes; grow `/dev/components` into the systematic gallery (no PhoenixStorybook dep).
+- [ ] **Phase 190: Navigation, data-display & meta-component cohesion** — App shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component groups; spacing rhythm, hierarchy, responsive behavior, operator-stress states.
+- [ ] **Phase 191: Page & flow interaction pass + fixture stress + microcopy** — Walk every page against its JTBD across all paths; fix the Phase-187 behavioral defects; expand `examples/accrue_host` seeds for missing matrix cells; on-brand microcopy pass.
+- [ ] **Phase 192: Idempotent verification & sign-off** — Full re-run + adversarial multi-lens judge; only-forward scorecard ≥ baseline (zero regressions); regression guardrails in CI; maintainer screenshot UAT.
+
+### Phase Details
+
+### Phase 187: Audit & Baseline
+**Goal:** Establish the only-forward baseline for the milestone — refresh the v1.51 10-dimension rubric with researched additions (interaction-integrity, layer/z-index, microcopy), then run the full matrix (viewport × theme × state) AND live interaction-test the running admin UI (open every modal/drawer/dropdown, scroll every container, keyboard-nav every flow, force empty/error/permission/disconnected states) to produce a severity-ranked defect ledger and a scored baseline that every later phase must beat.
+**Depends on:** Nothing (first phase of milestone)
+**Requirements:** VER-01
+**Success Criteria** (what must be TRUE):
+  1. The refreshed rubric is documented with its new interaction-integrity, layer/z-index, and microcopy dimensions defined and scored alongside the carried v1.51 dimensions, and a maintainer can read why each new dimension exists.
+  2. A severity-ranked defect ledger exists in which every entry names the surface, the reproduction, the severity, and the rubric dimension it fails — covering both static-matrix findings (viewport × theme × state) and live-interaction findings (modal/scroll/focus/overlay/z-index/empty-state/disabled).
+  3. A scored baseline captures every audited cell (component / group / page across viewport × theme × state) so it can be re-run idempotently and compared in Phase 192.
+  4. The defect ledger and baseline are committed as the single only-forward reference point that Phases 188–191 remediate against and Phase 192 verifies ≥.
+**Plans:** TBD
+**UI hint**: yes
+
+### Phase 188: Foundations hardening
+**Goal:** Fix the design-system roots so every downstream component and page inherits correctness: introduce composed typography bundles, apply the reading-measure token to prose and dense surfaces, formalize and tokenize the z-index/layer system, close motion-token gaps, resolve the inert Tailwind config into one unambiguous styling SSOT, and make every semantic role correct in both light and dark (focus rings, scrollbars, disabled states included). Root-level fixes only — no per-page patching.
+**Depends on:** Phase 187
+**Requirements:** FND-01, FND-02, FND-03, FND-04, FND-05, FND-06
+**Success Criteria** (what must be TRUE):
+  1. Composed typography bundles exist as `ax-*` tokens (family + size + weight + line-height + tracking) and primitives consume the bundles instead of ad-hoc per-property utility soup.
+  2. A maintainer can grep the admin CSS and find no ad-hoc z-index literals: a formal tokenized layer system (base → sticky → dropdown → popover → drawer → modal → toast) exists and every overlay and sticky element references it; the reading-measure token (`--ax-measure`) is applied so long prose and wide tables stay readable at every breakpoint.
+  3. There is one unambiguous styling source of truth — the inert Tailwind config is removed or explicitly documented as reference-only — and motion-token coverage is complete for every animated surface with `prefers-reduced-motion` collapsing travel/overshoot while preserving crossfades.
+  4. In dark mode, every semantic role — including focus rings, scrollbars, and disabled states — renders with a correct, contrast-passing value (no role renders wrong or invisible).
+**Plans:** TBD
+**UI hint**: yes
+
+### Phase 189: Primitive & form components + component lab
+**Goal:** Systematize every primitive and form component in isolation — exercise each across its full state matrix (default / hover / focus / active / pressed / disabled / loading / selected / empty / error / overflow) in both themes and across viewports, verify a11y (role, keyboard, focus, accessible name), fix every defect at the component root so it propagates to every consuming page, and grow `/dev/components` into the systematic gallery that proves it (no PhoenixStorybook dependency).
+**Depends on:** Phase 188
+**Requirements:** CMP-01, CMP-02, CMP-03, CMP-04, CMP-05
+**Success Criteria** (what must be TRUE):
+  1. Every component is exercised in the `/dev/components` lab across its full state matrix (default / hover / focus / active / pressed / disabled / loading / selected / empty / error / overflow) in both light and dark, and the lab is the systematic gallery proving it (extended in-app kitchen, no new dependency).
+  2. Each component renders correctly with long/overflowing content (long IDs, names, URLs, module names) without clipping, overlap, or layout break.
+  3. Each interactive component has the correct accessible role, full keyboard operation, visible focus, and accessible name; non-interactive elements expose no misleading affordances (e.g. no hover state on empty-state heroes).
+  4. Disabled and read-only states are visually unmistakable (disabled looks disabled; enabled never looks disabled) and button text never collides with its background color.
+  5. Every component-level visual/brand fix is made at the component root so it propagates to every consuming page (no per-page patching).
+**Plans:** TBD
+**UI hint**: yes
+
+### Phase 190: Navigation, data-display & meta-component cohesion
+**Goal:** Audit the recurring component *groups* as units — app shell / nav / tabs / pagination, plus tables / cards / detail / timeline / KPI, plus the recurring meta-component clusters (page-header + actions + breadcrumbs; toolbar + search + filters + sort; table + empty/loading/error/pagination; KPI + chart + table; detail-header + metadata + actions; modal-confirm; drawer + form; tabs + subviews) — for spacing rhythm, hierarchy, obvious next action, responsive degradation, and operator-stress states. Builds on the hardened foundations and systematized primitives.
+**Depends on:** Phase 189
+**Requirements:** GRP-01, GRP-02, GRP-03, GRP-04
+**Success Criteria** (what must be TRUE):
+  1. Each recurring component group (page-header + actions + breadcrumbs; toolbar + search + filters + sort; table + empty/loading/error/pagination; KPI + chart + table; detail-header + metadata + actions; modal-confirm; drawer + form; tabs + subviews) is audited as a unit for spacing rhythm, hierarchy, and obvious next action.
+  2. Tables degrade to readable cards/lists (not squished columns) at narrow widths, and a list/card pattern is used wherever it fits the data better than a table.
+  3. Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen.
+  4. Pagination and similar affordances disappear or de-emphasize when there is nothing to paginate, and filter/sort/active/selected states are unmistakable.
+**Plans:** TBD
+**UI hint**: yes
+
+### Phase 191: Page & flow interaction pass + fixture stress + microcopy
+**Goal:** Walk every admin page against its primary persona/JTBD across all paths (happy, empty, loading, error, permission-denied, boundary, advanced, disconnected/reconnecting), fix the behavioral interaction defects recorded in the Phase-187 ledger (modal-behind-scrim, scroll traps, focus loss after LiveView patch, overlay z-index/position) and cover each with a regression test, expand `examples/accrue_host` seeds so every matrix cell is reachable in one click, and run an on-brand microcopy pass. This is the page/flow integration of the foundations, primitives, and groups hardened in 188–190.
+**Depends on:** Phase 190
+**Requirements:** IXN-01, IXN-02, IXN-03, IXN-04, IXN-05, PAGE-01, PAGE-02, PAGE-03, PAGE-04, CPY-01, CPY-02, CPY-03, SEED-01, SEED-02
+**Success Criteria** (what must be TRUE):
+  1. Every modal/drawer renders above its scrim, fully visible and interactive, traps focus, restores focus to its trigger on close, and dismisses via Escape and click-outside; scrolling works on every page/container with no traps or unreachable content; focus is never lost after a LiveView patch and keyboard-only operation completes every primary flow; floating elements (dropdowns, popovers, tooltips, toasts) position correctly and never obscure their controls — and each Phase-187 interaction defect is fixed and covered by a regression test so it cannot silently return.
+  2. Every admin page is walked against its primary persona/JTBD across happy, empty, loading, error, permission-denied, boundary, and advanced paths and renders correctly in each; empty states explain the next useful action and distinguish "no data" from "data unavailable" from "permission denied."
+  3. LiveView disconnected/reconnecting state is communicated to the operator and disables actions that cannot be performed while stale; every page is verified at 320 / 375 / 768 / 1024 / 1440 widths in light and dark with no layout break, clipping, or off-screen content.
+  4. Microcopy is corrected across the surface: error messages state what happened and how to recover (no bare "oops / invalid / failed / forbidden"); destructive-action confirmations name the specific object and its consequence; domain vocabulary is consistent across headings, tabs, filters, buttons, and alerts.
+  5. `examples/accrue_host` seeds reach every matrix cell in one click — null/missing optional fields, permission-denied, boundary pagination, high counts, non-ASCII names, disconnected/reconnecting state (in addition to existing long-name / multi-currency / dunning edges) — and the seed expansion is idempotent (re-runnable) and deterministic, consistent with the existing keyed-insert seed contract.
+**Plans:** TBD
+**UI hint**: yes
+
+### Phase 192: Idempotent verification & sign-off
+**Goal:** Prove the milestone is done and lock it forever-forward: re-run the full audit, score every level (component / group / page) with an adversarial multi-lens judge (correctness, a11y, brand, interaction), confirm the final scorecard is ≥ the Phase-187 baseline on every dimension/cell with zero regressions, wire regression guardrails (interaction e2e, axe a11y, reduced-motion, component-lab coverage) into CI so re-running the milestone only ever finds new gaps, and obtain the maintainer screenshot sign-off that closes v1.51's open photographic-sign-off tech-debt.
+**Depends on:** Phase 191
+**Requirements:** VER-02, VER-03, VER-04
+**Success Criteria** (what must be TRUE):
+  1. Each level (component / group / page) is scored by an adversarial multi-lens judge (correctness, a11y, brand, interaction), and the final scorecard is ≥ the Phase-187 baseline on every dimension/cell with zero regressions.
+  2. Regression guardrails — interaction e2e, axe a11y, reduced-motion, and a component-lab coverage check — run in CI so re-running the milestone only ever finds new gaps.
+  3. The maintainer signs off on screenshots at each phase boundary, and the milestone-final sign-off closes v1.51's open photographic-sign-off tech-debt.
+**Plans:** TBD
+**UI hint**: yes
+
+</details>
 
 <details>
 <summary>✅ v1.52 Brand System (Phases 180-186) — SHIPPED 2026-06-14 (deps 180→181→182→183→186, with 180→{184,185}→186 side-rails)</summary>
@@ -49,223 +151,7 @@ Full details: [v1.52 roadmap archive](milestones/v1.52-ROADMAP.md)
 
 **Posture:** Quality / adopter-facing operator-DX investment in the already-shipped `accrue_admin` surface — **not** a broad feature milestone (no new billing primitives). The second, depth-oriented pass on v1.50's foundation: re-map IA from entity-shaped to job/persona-shaped, close design-token gaps, lift the under-iterated screen tail to one rubric baseline, add restrained motion, make seed data express every state, and prove it with a screenshot-driven visual-QA loop.
 
-**Anti-churn rule:** every change cites a justification token — (a) a rubric dimension below bar with a before-score, (b) a named persona-job the screen fails to serve, or (c) a concrete token bypass / hardcode eliminated. *"Looks nicer / my taste" is not admissible.* Frozen screens (Home, primary nav, global search) touched only on a rubric-flagged regression or a persona-job miss.
-
-**10-dimension rubric (0–3, pass ≥2):** ① token compliance ② visual hierarchy ③ spacing rhythm ④ state coverage ⑤ responsive/mobile-first (@360px) ⑥ contrast ⑦ focus & semantics ⑧ brand expression ⑨ motion ⑩ reuse/DRY.
-
-**Guardrails (out of scope):** no Tailwind migration (double down on custom `ax-*` CSS + tokens); no churn on frozen screens absent a flagged regression; the demo/host app (`examples/accrue_host`) UI is not a design target (only the screenshot/seed substrate); no new billing primitives; no breaking changes (route reshaping ships with redirects, component public APIs stay backward-compatible).
-
-**Authoritative design source:** `.planning/research/v1.51-admin-ui-depth-design.md`.
-
-### Phase Summary
-
-- [ ] **Phase 174: A — Design-System Gap Closure & Token Completeness** — Add line-height / letter-spacing / breakpoint / transition-bundle / reading-measure tokens, kill the remaining token bypasses, and publish a component-variants reference.
-- [ ] **Phase 175: B — Persona-Driven IA Spine** — Re-tier nav into a weighty Billing zone + recessed specialist rooms with attention badges, verb launchers + visible search, Customer-360 tab tiering, mandatory bidirectional threading, work-queue list defaults, and redirected route reshaping.
-- [ ] **Phase 176: C — Systematic Per-Screen Rubric Uplift** — Enumerate every screen × 10 dimensions × {light,dark} × {desktop,mobile}, baseline it, and lift the under-iterated tail worst-first with a mobile-first rewrite.
-- [ ] **Phase 177: D — Motion & Micro-interaction Design** — Document a token-based interaction spec + antipattern list and apply restrained, reduced-motion-honoring motion to drawers, dropdowns, the command palette, tabs, flash, and skeleton→content.
-- [ ] **Phase 178: E — Seed Expressiveness & State Coverage** — Extend E2E seed fixtures + host seeds so every screen's empty/populated/overflow/error/loading and edge states are reachable on a single click-through.
-- [ ] **Phase 179: F — Screenshot-Driven Visual QA Loop & Sign-off** — Sweep the full inventory across {desktop,mobile}×{light,dark}, LLM-score each PNG against the 10 dimensions, remediate until no dimension <2, and produce the final scorecard + axe sign-off.
-
-### Phase Details
-
-### Phase 174: A — Design-System Gap Closure & Token Completeness
-
-**Goal:** Close every remaining design-token gap so the admin CSS resolves all spacing/type/radius/shadow/line-height/letter-spacing/breakpoint/transition values from named `ax-*` tokens, kill the last token bypasses, and give maintainers a single component-variants reference. This is the substrate the rubric uplift, motion, and seed work all build on.
-**Depends on:** Nothing (foundation phase)
-**Requirements:** DSY-01, DSY-02, DSY-03
-**Success Criteria** (what must be TRUE):
-
-  1. A maintainer can grep `app.css` + components and find no hardcoded px/em line-height, letter-spacing, breakpoint, or transition literals — every such value resolves from an `ax-*` token (including a reading-measure max-width container token and pre-composed transition bundles).
-  2. The dunning banner and invoice screens render every brand color through tokens with zero inline-hex fallbacks and zero inline styles; no admin surface bypasses the token system.
-  3. A maintainer opening `/dev/components` sees a component-variants reference enumerating every button / badge / status / card variant alongside its token mapping.
-
-**Plans:** 7 plans (4 executed + 3 gap-closure)
-
-Plans:
-**Wave 1**
-
-- [x] 174-01-PLAN.md — Add type micro-tokens and transition-bundle tokens to theme.css (DSY-01 substrate)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 174-02-PLAN.md — Migrate app.css literals→tokens + breakpoint registry + dunning bypass kill + guard needle + asset rebuild (DSY-01, DSY-02)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 174-03-PLAN.md — ComponentRegistry data module + kitchen variant reference extension (DSY-03)
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
-- [x] 174-04-PLAN.md — ComponentRegistryTest drift-prevention test + full suite gate (DSY-03)
-
-**Wave 5 — Gap Closure** *(after verification; closes VERIFICATION.md gaps)*
-
-- [x] 174-05-PLAN.md — Fix phantom tokens in ComponentRegistry + add token-validity test (DSY-03, Gap 1)
-- [x] 174-06-PLAN.md — Seed adoption-proof-matrix.md in PackageDocsVerifierTest + Stripe-only negative test (DSY-01, Gap 2)
-- [x] 174-07-PLAN.md — Resolve .ax-search-trigger stale deferral comment + asset rebuild (DSY-01, Gap 3)
-
-**UI hint**: yes
-
-### Phase 175: B — Persona-Driven IA Spine
-
-**Goal:** Replace the entity-shaped interior with a job/persona-shaped spine — one weighty primary Billing zone plus quiet specialist rooms that light up only when they have work — so each of the six personas reaches its job fast, no detail screen dead-ends, and no existing bookmark breaks. This resolves the v1.50 "disjoint" seam between a job-shaped Home and an entity-shaped interior.
-**Depends on:** Phase 174
-**Requirements:** IA-01, IA-02, IA-03, IA-04, IA-05, IA-06, IA-07
-**Success Criteria** (what must be TRUE):
-
-  1. From Home, each of the six personas can reach their primary job in ≤2 clicks via a verb-labeled task launcher ("Look up a customer," "Clear the invoice queue," "Recover at-risk revenue," "Investigate an incident") or a visible (not hotkey-only) global search field.
-  2. The sidebar shows a weighted primary **Billing** zone (Customers · Subscriptions · Invoices · Payments) with **Recovery / Developer / Catalog** as visually-recessed, collapsible specialist zones that surface attention-count badges (dead-letters, at-risk) only when work exists; **Connect** stands alone.
-  3. Each work-queue list opens pre-filtered to the persona queue (e.g. invoices → open/uncollectible) with an "All" view one filter-chip away.
-  4. Every detail screen renders a Related-billing card with no dead ends, and a dead-lettered webhook threads Webhook → Event → affected entity; Customer-360 shows primary tabs (Subscriptions, Invoices, Payments) with advanced tabs recessed under a quieter "More" grouping.
-  5. Every route changed by the IA reshape redirects from its old path (no broken bookmarks), and a compliance/audit user can reach an actor-filtered view of the event log via a saved lens without it occupying a top-level nav group.
-
-**Plans:** 7 plans across 4 waves
-
-Plans:
-**Wave 1** *(parallel — foundation data + query fixes)*
-
-- [x] 175-01-PLAN.md — Query multi-status extension + Wave-0 test scaffolds (IA-03, IA-04, IA-06)
-- [x] 175-02-PLAN.md — AttentionCounts + NavBadgeHook + Nav/AppShell extension + copy relabels + sidebar_collapse.js (IA-01, IA-02)
-
-**Wave 2** *(parallel — blocked on Wave 1)*
-
-- [x] 175-03-PLAN.md — Sidebar rewrite (collapse + badges) + CSS token-gap classes + RedirectController + route reshaping (IA-02, IA-06)
-- [x] 175-04-PLAN.md — Work-queue default filters (invoices/subscriptions/payments) + visible Home search field (IA-01, IA-03)
-
-**Wave 3** *(parallel — blocked on Wave 2)*
-
-- [x] 175-05-PLAN.md — EventLive (/events/:id) + WebhookLive Related card + Webhook→Event→entity threading (IA-04, IA-06)
-- [x] 175-06-PLAN.md — Customer-360 tab tiering (More ▾) + compliance actor-lens chip on events (IA-05, IA-07)
-
-**Wave 4** *(blocked on Wave 3)*
-
-- [x] 175-07-PLAN.md — Related cards on 4 missing detail screens + /charges→/payments href fixes + full suite gate (IA-04)
-
-**UI hint**: yes
-
-### Phase 176: C — Systematic Per-Screen Rubric Uplift
-
-**Goal:** Bring every under-iterated screen up to one consistent rubric baseline by enumerating the full touchpoint matrix, capturing baseline scores, and lifting the worst screens first — eliminating the uneven depth left after v1.50. The heavy phase; wave-split per screen-group.
-**Depends on:** Phase 174, Phase 175
-**Requirements:** SCR-01, SCR-02, SCR-03, SCR-04
-**Success Criteria** (what must be TRUE):
-
-  1. Every admin screen scores ≥2 on all 10 rubric dimensions in both light and dark themes.
-  2. Every admin screen scores ≥2 on all 10 rubric dimensions at both desktop and mobile (usable @360px) widths.
-  3. The under-iterated tail (charges, coupons, promotion-codes, connect, events, webhooks, invoice detail) is lifted to baseline with documented before/after scores per screen.
-  4. Dense text/detail screens apply a reading-measure max-width container and a mobile-first responsive layout built on the Phase 174 breakpoint tokens.
-
-**Plans:** 6 plans (5 execution + 1 human checkpoint)
-
-Plans:
-**Wave 1** *(dependency root — SCORECARD baseline + CSS fix)*
-
-- [x] 176-01-PLAN.md — Capture 176-SCORECARD.md baseline (all 21 screens × 10 dims) + fix data-table breakpoint --ax-bp-lg→--ax-bp-md + asset rebuild (SCR-01, SCR-02, SCR-03, SCR-04)
-
-**Wave 2** *(blocked on Wave 1 — list screen audit)*
-
-- [x] 176-02-PLAN.md — Audit all 9 list screens card_fields/card_title quality against persona criteria; update SCORECARD Wave 1 after-scores (SCR-01, SCR-02, SCR-03)
-
-**Wave 3** *(parallel — blocked on Wave 2 — catalog/specialist detail; 03 and 04 run in parallel)*
-
-- [x] 176-03-PLAN.md — Uplift event_live (semantic dl/dt/dd facts, detail_section body, not-found state) + coupon_live (Detail alias, summary_card hero, DRY projection section) (SCR-01, SCR-02, SCR-03, SCR-04)
-- [x] 176-04-PLAN.md — Uplift promotion_code_live (Detail alias, summary_card hero, detail_section parent-coupon) + connect_account_live (.ax-measure prose) + webhook_live (DRY forensic section, .ax-measure) (SCR-01, SCR-02, SCR-03, SCR-04)
-
-**Wave 4** *(blocked on Wave 3 — dense financial detail)*
-
-- [x] 176-05-PLAN.md — Apply .ax-measure to invoice_live prose (4 regions) + charge_live prose (3 regions) + audit subscription_live; complete SCORECARD final after-scores (SCR-01, SCR-02, SCR-03, SCR-04)
-
-**Wave 5** *(blocked on Wave 4 — Nyquist gate + final verification)*
-
-- [x] 176-06-PLAN.md — Nyquist breakpoint guard assertions in data_table_test.exs + ax-measure misapplication guard + full suite gate + human spot-check checkpoint (SCR-01, SCR-02, SCR-03, SCR-04)
-
-**UI hint**: yes
-
-### Phase 177: D — Motion & Micro-interaction Design
-
-**Goal:** Add restrained, purposeful, token-based motion to the now-stable layouts — functional feedback, never decoration — governed by a documented spec and a researched antipattern list, and fully honoring reduced-motion. Depends on stable layouts so motion is applied once, not re-thrashed.
-**Depends on:** Phase 174, Phase 176
-**Requirements:** MOT-01, MOT-02, MOT-03
-**Success Criteria** (what must be TRUE):
-
-  1. A documented motion/interaction spec defines what animates, why, which token, and reduced-motion behavior, including an antipattern list grounded in researched best practice (Emil Kowalski principles).
-  2. Drawers, dropdowns, the command palette, tabs, flash/toasts, and skeleton→content transitions animate via Phase 174 design-token transition bundles — functional, not decorative — and badge/state changes transition through tokens.
-  3. All admin motion honors `prefers-reduced-motion` (no travel/overshoot; crossfades retained), verified by an automated check.
-
-**Plans:** 6 plans across 4 waves
-Plans:
-**Wave 1**
-
-- [x] 177-01-PLAN.md — motion.md guide + accrue_admin/mix.exs ExDoc registration (MOT-01)
-- [x] 177-02-PLAN.md — CSS transitions for dropdown, More ▾, tabs, badge, skeleton classes + sidebar_collapse.js two-step (MOT-02)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 177-03-PLAN.md — JS.transition for detail_drawer, flash_group, customer_live More ▾, data_table (MOT-02)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 177-04-PLAN.md — global_search data-open refactor + command_palette.js hook update (MOT-02/MOT-03)
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
-- [x] 177-05-PLAN.md — antipattern guard script + paired negative-test fixture coupling (MOT-01)
-- [x] 177-06-PLAN.md — Playwright reduced-motion e2e extensions + /dev/components motion section (MOT-01/MOT-03)
-
-**UI hint**: yes
-
-### Phase 178: E — Seed Expressiveness & State Coverage
-
-**Goal:** Make every screen state and edge case reachable from seeded data on a single click-through, so no screen looks good only with hand-picked IDs — and so the visual-QA loop can actually photograph every state. Feeds the QA loop.
-**Depends on:** Phase 175, Phase 176
-**Requirements:** SEED-01, SEED-02
-**Success Criteria** (what must be TRUE):
-
-  1. Every admin screen's empty, populated, overflow/pagination, error, and loading states are reachable from seeded data on a single click-through (via E2E seed fixtures at `/__e2e__/seed/<fixture>` + host `seeds.exs`).
-  2. Each edge state (dunning/at-risk, multi-currency, long strings, dark-only contrast traps) has a seeded instance; no screen depends on hand-picked IDs to look right.
-
-**Plans:** 4 plans across 3 waves
-
-Plans:
-**Wave 1** *(foundation — matrix + test scaffold)*
-
-- [x] 178-01-PLAN.md — STATE-MATRIX.md (21 screens × 8 state dims) + e2e_fixtures_test.exs RED scaffold (SEED-01, SEED-02)
-
-**Wave 2** *(parallel — E2E fixtures + host dunning bug fix)*
-
-- [x] 178-02-PLAN.md — seed_edge_states!/0 + seed_overflow!/0 + e2e_plug routes (SEED-01, SEED-02)
-- [x] 178-03-PLAN.md — host dunning bug fix (hero_accounts.exs phantom UUIDs) + regression test + CI runner allowlists (SEED-02)
-
-**Wave 3** *(blocked on Wave 2 — host dev seed)*
-
-- [x] 178-04-PLAN.md — edge_states.exs (canceling sub, JPY charge, long-name customer) + seeds.exs wire (SEED-01, SEED-02)
-
-**UI hint**: yes
-
-### Phase 179: F — Screenshot-Driven Visual QA Loop & Sign-off
-
-**Goal:** Prove the milestone's "done" with evidence: sweep the full screen inventory across all four matrix cells, score each screenshot against the 10 dimensions, remediate until nothing is below bar, and sign off with a scorecard + before/after evidence + axe in both themes.
-**Depends on:** Phase 174, Phase 175, Phase 176, Phase 177, Phase 178
-**Requirements:** QA-01, QA-02, QA-03
-**Success Criteria** (what must be TRUE):
-
-  1. The Playwright screenshot harness sweeps the full screen inventory (all ~20 screens incl. detail pages) across {desktop, mobile} × {light, dark}.
-  2. An LLM-analysis step scores each screenshot against the 10-dimension rubric and emits structured findings (screen, dimension, score, defect, suggested fix), driving a remediation loop until no dimension scores below 2.
-  3. A final scorecard shows every dimension ≥2 across all four matrix cells with before/after evidence, and axe passes in both light and dark themes.
-
-**Plans:** 3 plans across 2 waves
-
-Plans:
-**Wave 1** *(parallel — independent files)*
-
-- [x] 179-01-PLAN.md — Expand admin-visuals.spec.js shots[] 12→21 (3 fixtures, corrected routes) + @anthropic-ai/sdk devDep + score-visuals npm script (QA-01)
-- [x] 179-02-PLAN.md — score-visuals.mjs (LLM scoring, no-op without key, findings schema) + admin-motion-trace.spec.js (4 motion surfaces, trace: "on") (QA-02, QA-03)
-
-**Wave 2** *(blocked on Wave 1)*
-
-- [x] 179-03-PLAN.md — Extend admin-a11y.spec.js to 21 surfaces (full inventory, edge states) + SIGN-OFF.md scaffold aggregating 176/177/178 evidence + axe + before/after scorecard (QA-01, QA-02, QA-03)
-
-**UI hint**: yes
+Full details: [v1.51 roadmap archive](milestones/v1.51-ROADMAP.md)
 
 </details>
 
@@ -312,10 +198,6 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 163. Realistic Domain & Rich Seeds | v1.49 | 1/1 | Complete | 2026-06-01 |
-| 164. Docker DX & Optimized Caching | v1.49 | 2/2 | Complete | 2026-06-01 |
-| 165. E2E Automation & Shift-Left CI | v1.49 | 4/4 | Complete | 2026-06-02 |
-| 166. Adoption DX Docs | v1.49 | 3/3 | Complete | 2026-06-02 |
 | 167. Design Tokens & Motion Foundation | v1.50 | ✓ | Complete | 2026-06-02 |
 | 168. Typography & Icon System | v1.50 | ✓ | Complete | 2026-06-02 |
 | 169. IA — Home, Nav & Search | v1.50 | ✓ | Complete | 2026-06-02 |
@@ -323,19 +205,25 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 171. Shared Detail Components & Refactor | v1.50 | ✓ | Complete | 2026-06-02 |
 | 172. Seed Enrichment & Component Kitchen | v1.50 | ✓ | Complete | 2026-06-02 |
 | 173. Rubric Audit & Visual/A11y Coverage | v1.50 | ✓ | Complete | 2026-06-02 |
-| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete   | 2026-06-04 |
-| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete   | 2026-06-04 |
-| 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete   | 2026-06-04 |
-| 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete   | 2026-06-04 |
-| 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete   | 2026-06-05 |
-| 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete    | 2026-06-12 |
-| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete    | 2026-06-13 |
-| 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete    | 2026-06-13 |
-| 183. Logo System Production | v1.52 | 4/4 | Complete    | 2026-06-13 |
-| 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete    | 2026-06-14 |
-| 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete   | 2026-06-14 |
-| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete    | 2026-06-14 |
+| 174. A — Design-System Gap Closure & Token Completeness | v1.51 | 7/7 | Complete | 2026-06-04 |
+| 175. B — Persona-Driven IA Spine | v1.51 | 7/7 | Complete | 2026-06-04 |
+| 176. C — Systematic Per-Screen Rubric Uplift | v1.51 | 6/6 | Complete | 2026-06-04 |
+| 177. D — Motion & Micro-interaction Design | v1.51 | 6/6 | Complete | 2026-06-04 |
+| 178. E — Seed Expressiveness & State Coverage | v1.51 | 4/4 | Complete | 2026-06-04 |
+| 179. F — Screenshot-Driven Visual QA Loop & Sign-off | v1.51 | 3/3 | Complete | 2026-06-05 |
+| 180. Brand Audit & DNA Lock | v1.52 | 4/4 | Complete | 2026-06-12 |
+| 181. SVG Pipeline + Tournament Round 1 — Divergent | v1.52 | 7/7 | Complete | 2026-06-13 |
+| 182. Tournament Convergent Refinement | v1.52 | 3/3 | Complete | 2026-06-13 |
+| 183. Logo System Production | v1.52 | 4/4 | Complete | 2026-06-13 |
+| 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete | 2026-06-14 |
+| 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
+| 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
+| 187. Audit & Baseline | v1.53 | 0/TBD | Not started | - |
+| 188. Foundations hardening | v1.53 | 0/TBD | Not started | - |
+| 189. Primitive & form components + component lab | v1.53 | 0/TBD | Not started | - |
+| 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
+| 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
+| 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
 
@@ -349,7 +237,12 @@ These v1.17 FRG anchors are retained for traceability only as historical, non-ac
 
 | Item | Status | Reason | Future owner/category | Revisit trigger |
 |------|--------|--------|-----------------------|-----------------|
+| TOOL-01 (PhoenixStorybook) | deferred (v1.53) | v1.53 extends the in-app `/dev/components` kitchen to avoid a shipped-lib dependency. | Component-lab tooling | concrete adopter/contributor failure where the in-app kitchen is insufficient, or explicit strategy change |
+| TOOL-02 (pixel-diff visual-regression) | deferred (v1.53) | Percy/Applitools-style pixel-diff tooling deferred in favor of the screenshot + adversarial-judge loop. | Visual-regression tooling | flaky/insufficient screenshot+judge loop, or explicit strategy change |
+| TOOL-03 (publish tokens.css distributable) | deferred (v1.53) | Standalone npm/CDN token distributable not needed for the admin hardening pass. | Brand/token distribution | external doc/marketing-site need for distributable tokens |
 | SEED-001 | resolved historical context | Linked-release purpose was superseded by later linked publish work and Phase 159 release-readiness proof. | Release readiness / archive traceability | operational failure in linked release proof or explicit strategy change in release process |
 | SEED-002 | dormant future roadmap | Ecosystem integrations are useful blueprints but are not v1.48 closeout blockers and do not create default milestone scope. | Future roadmap / ecosystem integrations | concrete adopter failure requiring one listed integration, repeated support issue, or explicit strategy change |
 | ENT-EXT-01 | deferred | Rich metered, tiered, and range entitlement math is beyond current seat-count support and lacks a sourced adopter contract. | Entitlements extension | concrete adopter failure or explicit adopter contract requiring richer entitlement math |
 | FIN-03 | standing non-goal | App-owned finance exports remain outside Accrue's declared billing-library scope. | Strategy non-goal / finance exports | explicit strategy change or correctness/security/data-loss risk that cannot be solved by host-owned exports |
+</content>
+</invoke>
