@@ -108,6 +108,7 @@ function parseEvidenceFile(absPath) {
 function evidenceInventory() {
   return listFiles(testResultsRoot)
     .filter((absPath) => fs.statSync(absPath).isFile())
+    .filter((absPath) => path.basename(absPath) !== ".DS_Store")
     .map((absPath) => ({
       path: assertEvidencePath(absPath),
       sha256: sha256(absPath),
@@ -189,6 +190,34 @@ function screenshotEvidenceByCell(inventory) {
   return refs;
 }
 
+function baselineCellContract(cell) {
+  const contracted = {
+    cell_id: cell.cell_id,
+    surface: cell.surface,
+    surface_type: cell.surface_type,
+    mode: cell.mode,
+    viewport_width: Number(cell.viewport_width),
+    theme: cell.theme,
+    state: cell.state,
+    dimension: Number(cell.dimension),
+    dimension_name: cell.dimension_name,
+    score: cell.score ?? null,
+    coverage_status: cell.coverage_status,
+    evidence_refs: Array.from(new Set(cell.evidence_refs || [])),
+    notes: cell.notes || cell.reason || "",
+  };
+
+  if (cell.mode === "targeted") {
+    contracted.targeted_label = cell.targeted_label;
+    contracted.breakpoint = Number(cell.breakpoint);
+  } else {
+    contracted.targeted_label = cell.targeted_label ?? null;
+    contracted.breakpoint = cell.breakpoint ?? null;
+  }
+
+  return contracted;
+}
+
 function buildBaselineCells(inventory, rawRows, harnessFailures) {
   const evidenceByCell = screenshotEvidenceByCell(inventory);
   const cells = SURFACES.flatMap((surface) => cellsForSurface(surface));
@@ -235,7 +264,12 @@ function buildBaselineCells(inventory, rawRows, harnessFailures) {
         score: normalized.score ?? null,
         coverage_status: normalized.coverage_status || "covered",
         evidence_refs: normalized.evidence_refs || [evidence_ref],
-        notes: normalized.notes || "Imported from raw Phase 187 baseline evidence.",
+        notes:
+          normalized.notes ||
+          normalized.reason ||
+          normalized.failure_kind ||
+          normalized.defect_candidate ||
+          "Imported from raw Phase 187 baseline evidence.",
         ...(normalized.mode === "targeted"
           ? {
               targeted_label: normalized.targeted_label,
@@ -252,7 +286,9 @@ function buildBaselineCells(inventory, rawRows, harnessFailures) {
     }
   }
 
-  return Array.from(byId.values()).sort((a, b) => a.cell_id.localeCompare(b.cell_id));
+  return Array.from(byId.values())
+    .map(baselineCellContract)
+    .sort((a, b) => a.cell_id.localeCompare(b.cell_id));
 }
 
 function overlayTagsForFinding(finding) {
@@ -280,7 +316,34 @@ function severityForScore(score) {
   return "low";
 }
 
-function defectFromFinding(finding, evidenceRef, index) {
+function severityForGap(cell) {
+  const text = [
+    cell.reason,
+    cell.notes,
+    cell.defect_candidate,
+    cell.failure_kind,
+    cell.dimension_name,
+    cell.state,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (/intercepted|focus-escaped|escape-not-dismissed|missing-dismissal|permission|disconnected/.test(text)) {
+    return "high";
+  }
+  if (/missing-selector|fixture-gap|state-fixture-gap|not forced|unreachable|loading|error/.test(text)) {
+    return "medium";
+  }
+  return "low";
+}
+
+function normalizeDimensionName(value) {
+  const dimension = dimensionFor(value);
+  return dimension ? dimension.name : "state-coverage";
+}
+
+function defectFromFinding(finding, evidenceRef) {
   const surface = surfaceForName(finding.screen || finding.surface);
   const project = projectForMode(finding.viewport || finding.mode || "chromium-desktop");
   const dimension = dimensionFor(finding.dimension ?? finding.dimension_name);
@@ -290,7 +353,6 @@ function defectFromFinding(finding, evidenceRef, index) {
 
   const theme = finding.theme || "light";
   return {
-    id: `AX187-${String(index).padStart(3, "0")}`,
     severity: severityForScore(finding.score),
     surface: surface.surface,
     surface_type: surface.surface_type,
@@ -306,6 +368,138 @@ function defectFromFinding(finding, evidenceRef, index) {
     status: "open",
     notes: finding.suggested_fix || "",
   };
+}
+
+function defectFromGapCell(cell) {
+  if (cell.coverage_status !== "gap") return null;
+
+  const surface = surfaceForName(cell.surface);
+  if (!surface) return null;
+
+  const reason = cell.reason || cell.notes || cell.failure_kind || "Baseline gap was recorded by Phase 187 evidence.";
+  const dimensionName = normalizeDimensionName(cell.dimension ?? cell.dimension_name);
+  return {
+    severity: severityForGap({ ...cell, dimension_name: dimensionName }),
+    surface: surface.surface,
+    surface_type: surface.surface_type,
+    persona_job: surface.persona_job,
+    reproduction: `Inspect ${cell.evidence_refs?.[0] || "the Phase 187 baseline evidence"} for ${surface.surface} (${cell.mode}/${cell.theme}/${cell.state}).`,
+    expected: `${surface.surface} has covered evidence or an explicit remediation path for ${dimensionName} in ${cell.state}.`,
+    actual: reason,
+    rubric_dimension: dimensionName,
+    overlay_tags: Array.from(new Set([...(cell.overlay_tags || []), ...overlayTagsForFinding(cell)])),
+    cell_id: cell.cell_id,
+    evidence_refs: Array.from(new Set(cell.evidence_refs?.length ? cell.evidence_refs : ["accrue_admin/test-results/phase187-command-status.json"])),
+    owner_phase: String(cell.owner_phase || surface.owner_phase),
+    status: "gap",
+    notes: cell.defect_candidate || cell.failure_kind || "",
+  };
+}
+
+function representativeDefectsFromCells(cells) {
+  const byKey = new Map();
+
+  for (const cell of cells) {
+    const defect = defectFromGapCell(cell);
+    if (!defect) continue;
+
+    const key = [
+      defect.surface_type,
+      defect.rubric_dimension,
+      cell.state,
+      cell.mode,
+      defect.actual,
+      defect.owner_phase,
+    ].join("|");
+
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, { defect, count: 1 });
+      continue;
+    }
+
+    existing.count += 1;
+    existing.defect.evidence_refs = Array.from(
+      new Set([...existing.defect.evidence_refs, ...defect.evidence_refs])
+    ).slice(0, 8);
+    if (!existing.defect.notes.includes("Representative surface:")) {
+      existing.defect.notes = [existing.defect.notes, `Representative surface: ${existing.defect.surface}.`]
+        .filter(Boolean)
+        .join(" ");
+    }
+  }
+
+  return Array.from(byKey.values()).map(({ defect, count }) => ({
+    ...defect,
+    notes: [defect.notes, count > 1 ? `Represents ${count} baseline cells with the same surface/dimension/state gap.` : ""]
+      .filter(Boolean)
+      .join(" "),
+  }));
+}
+
+function evidenceRefsForCommand(status, name) {
+  const refs = [];
+  const roots = Array.isArray(status.evidence_roots) ? status.evidence_roots : [];
+  for (const root of roots) {
+    const absRoot = path.join(adminRoot, root.replace(/^accrue_admin\//, ""));
+    if (fs.existsSync(absRoot)) {
+      for (const file of listFiles(absRoot)) refs.push(assertEvidencePath(file));
+    }
+  }
+
+  const logPath = status.log_path || status.stderr_log_path || status.stdout_log_path;
+  if (logPath) {
+    const absLog = path.join(adminRoot, logPath.replace(/^accrue_admin\//, ""));
+    if (fs.existsSync(absLog)) refs.push(assertEvidencePath(absLog));
+  }
+
+  for (const file of listFiles(testResultsRoot)) {
+    const rel = assertEvidencePath(file);
+    if (rel.includes(`/${name}`) || rel.includes(`${name}-`)) refs.push(rel);
+  }
+
+  return Array.from(new Set(refs)).sort();
+}
+
+function defectFromCommandStatus(status, evidenceRefs) {
+  const name = status.name || status.command || "unknown producer";
+  const dimension = name.includes("a11y") ? "focus-semantics" : "state-coverage";
+  return {
+    severity: name.includes("a11y") ? "high" : "medium",
+    surface: `${name} producer`,
+    surface_type: "page-flow",
+    persona_job: "Produce Phase 187 audit evidence without hiding collection failures.",
+    reproduction: `Run producer command "${name}" from the Phase 187 non-aborting audit wrapper.`,
+    expected: "Producer either exits cleanly or records parseable evidence that the baseline generator can route.",
+    actual: status.error || status.message || `Producer exited ${Number(status.exit_code ?? status.exitCode ?? status.status ?? 0)} with trace/log evidence.`,
+    rubric_dimension: dimension,
+    overlay_tags: name.includes("a11y") ? ["focus-trap", "actionability"] : [],
+    cell_id: `phase187__${name}__producer-status`,
+    evidence_refs: evidenceRefs.length ? evidenceRefs.slice(0, 8) : ["accrue_admin/test-results/phase187-command-status.json"],
+    owner_phase: "191",
+    status: "gap",
+    notes: "Producer failure preserved as audit evidence; it does not block artifact generation because trace/log evidence exists.",
+  };
+}
+
+function sortAndNumberDefects(defects) {
+  const rank = { critical: 0, high: 1, medium: 2, low: 3 };
+  return defects
+    .filter(Boolean)
+    .sort((a, b) => {
+      const bySeverity = (rank[a.severity] ?? 99) - (rank[b.severity] ?? 99);
+      if (bySeverity !== 0) return bySeverity;
+      const byOwner = String(a.owner_phase).localeCompare(String(b.owner_phase));
+      if (byOwner !== 0) return byOwner;
+      return String(a.surface).localeCompare(String(b.surface));
+    })
+    .map((defect, index) => ({
+      ...defect,
+      id: `AX187-${String(index + 1).padStart(3, "0")}`,
+      overlay_tags: Array.from(new Set(defect.overlay_tags || [])),
+      evidence_refs: Array.from(new Set(defect.evidence_refs || [])),
+      owner_phase: String(defect.owner_phase),
+    }));
 }
 
 function collectRawEvidence(harnessFailures) {
@@ -330,8 +524,15 @@ function collectRawEvidence(harnessFailures) {
   return { rawRows, findings };
 }
 
-function classifyCommandStatus(rawRows, findings, harnessFailures, observations) {
-  if (!fs.existsSync(INPUTS.commandStatus)) return;
+function classifyCommandStatus(rawRows, findings, harnessFailures, observations, commandDefects) {
+  if (!fs.existsSync(INPUTS.commandStatus)) {
+    harnessFailures.push({
+      kind: "harness-error",
+      evidence_ref: "accrue_admin/test-results/phase187-command-status.json",
+      message: "Command status file is missing; run the Phase 187 non-aborting audit wrapper.",
+    });
+    return;
+  }
 
   const evidenceRef = assertEvidencePath(INPUTS.commandStatus);
   const parsed = readJsonFile(INPUTS.commandStatus);
@@ -346,14 +547,17 @@ function classifyCommandStatus(rawRows, findings, harnessFailures, observations)
     const name = status.name || status.command || "unknown producer";
     if (exitCode === 0) continue;
 
-    const parseableEvidence = rawRows.length > 0 || findings.length > 0;
+    const evidenceRefs = evidenceRefsForCommand(status, name);
+    const parseableEvidence = rawRows.length > 0 || findings.length > 0 || evidenceRefs.length > 0;
     if (parseableEvidence && !status.crashed && !status.parser_error) {
       observations.push({
         kind: "defects-found",
         producer: name,
         exit_code: exitCode,
         evidence_ref: evidenceRef,
+        evidence_refs: evidenceRefs,
       });
+      commandDefects.push(defectFromCommandStatus(status, evidenceRefs));
     } else {
       harnessFailures.push({
         kind: "harness-error",
@@ -376,25 +580,109 @@ function writeText(absPath, value) {
   fs.writeFileSync(absPath, value);
 }
 
+function countBy(items, keyFn) {
+  const counts = new Map();
+  for (const item of items) {
+    const key = keyFn(item) ?? "unknown";
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return Array.from(counts.entries()).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+}
+
+function markdownTable(rows, headers) {
+  if (rows.length === 0) return "_None._\n";
+  return [
+    `| ${headers.join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...rows.map((row) => `| ${row.join(" | ")} |`),
+  ].join("\n") + "\n";
+}
+
 function markdownSummary(cells, defects, artifactManifest) {
   const covered = cells.filter((cell) => cell.coverage_status === "covered").length;
+  const gaps = cells.filter((cell) => cell.coverage_status === "gap").length;
+  const notApplicable = cells.filter((cell) => cell.coverage_status === "n/a").length;
+  const coverageRows = countBy(cells, (cell) => cell.coverage_status);
+  const surfaceRows = countBy(cells, (cell) => cell.surface_type);
+  const modeRows = countBy(cells, (cell) =>
+    cell.mode === "targeted" ? `${cell.mode}/${cell.targeted_label}` : cell.mode
+  );
+  const themeRows = countBy(cells, (cell) => cell.theme);
+  const stateRows = countBy(cells, (cell) => cell.state);
+  const ownerRows = countBy(defects, (defect) => defect.owner_phase);
+  const severityRows = countBy(defects, (defect) => defect.severity);
+  const topDefects = defects.slice(0, 40).map((defect) => [
+    defect.id,
+    defect.severity,
+    defect.owner_phase,
+    defect.surface,
+    defect.rubric_dimension,
+    defect.actual.replace(/\|/g, "/").slice(0, 120),
+  ]);
+
   return `# Phase 187 Baseline
 
-Structured artifacts are canonical for Phase 187 and Phase 192 comparison.
+Only-forward baseline for v1.53 Admin UI Design-System Hardening.
+
+Structured artifacts are canonical for Phase 187 and Phase 192 comparison:
+baseline.cells.json and defects.ndjson are canonical. If this markdown disagrees
+with those files, regenerate the markdown from the structured artifacts.
 
 ## Artifact Counts
 
 - Baseline cells: ${cells.length}
 - Covered cells: ${covered}
+- Gap cells: ${gaps}
+- N/A cells: ${notApplicable}
 - Defects: ${defects.length}
 - Evidence files referenced: ${artifactManifest.evidence.length}
 - Harness failures: ${artifactManifest.harness_failures.length}
 
+## Coverage Summary
+
+### By Coverage Status
+
+${markdownTable(coverageRows.map(([key, count]) => [key, count]), ["Status", "Cells"])}
+### By Surface Type
+
+${markdownTable(surfaceRows.map(([key, count]) => [key, count]), ["Surface type", "Cells"])}
+### By Mode / Targeted Label
+
+${markdownTable(modeRows.map(([key, count]) => [key, count]), ["Mode", "Cells"])}
+### By Theme
+
+${markdownTable(themeRows.map(([key, count]) => [key, count]), ["Theme", "Cells"])}
+### By State
+
+${markdownTable(stateRows.map(([key, count]) => [key, count]), ["State", "Cells"])}
+## Severity-Ranked Defect Ledger
+
+### By Severity
+
+${markdownTable(severityRows.map(([key, count]) => [key, count]), ["Severity", "Defects"])}
+### By Owner Phase
+
+${markdownTable(ownerRows.map(([key, count]) => [key, count]), ["Owner phase", "Defects"])}
+### Top Defects
+
+${markdownTable(topDefects, ["ID", "Severity", "Owner", "Surface", "Dimension", "Actual"])}
 ## Outputs
 
 - \`baseline.cells.json\` - schema-shaped baseline matrix cells
 - \`defects.ndjson\` - severity-ranked defect ledger rows
 - \`artifacts.manifest.json\` - evidence references, checksums, observations, and harness failures
+
+## Phase 192 Rerun Commands
+
+\`\`\`bash
+cd accrue_admin
+npm run e2e -- e2e/admin-baseline.spec.js
+npm run e2e -- e2e/admin-interactions.spec.js
+npm run e2e:a11y
+npm run score-visuals
+npm run baseline:artifacts
+npm run baseline:parse
+\`\`\`
 
 Generated by \`npm run baseline:artifacts\`.
 `;
@@ -403,23 +691,25 @@ Generated by \`npm run baseline:artifacts\`.
 export function main() {
   const harnessFailures = [];
   const observations = [];
+  const commandDefects = [];
   const inventory = evidenceInventory();
   const { rawRows, findings } = collectRawEvidence(harnessFailures);
-  classifyCommandStatus(rawRows, findings, harnessFailures, observations);
+  classifyCommandStatus(rawRows, findings, harnessFailures, observations, commandDefects);
 
   if (!fs.existsSync(INPUTS.findings)) {
-    harnessFailures.push({
-      kind: "harness-error",
+    observations.push({
+      kind: "vision-scoring-unavailable",
       evidence_ref: "accrue_admin/test-results/admin-visuals/findings.ndjson",
-      message: "Required vision findings evidence is missing; run score-visuals when credentials are available.",
+      message: "Vision findings are unavailable; score-visuals skipped or produced no findings. This is a baseline gap unless credentials are available.",
     });
   }
 
   const cells = buildBaselineCells(inventory, rawRows, harnessFailures);
-  let defectIndex = 1;
-  const defects = findings
-    .map(({ row, evidence_ref }) => defectFromFinding(row, evidence_ref, defectIndex++))
-    .filter(Boolean);
+  const defects = sortAndNumberDefects([
+    ...findings.map(({ row, evidence_ref }) => defectFromFinding(row, evidence_ref)),
+    ...representativeDefectsFromCells(cells),
+    ...commandDefects,
+  ]);
 
   const artifactManifest = {
     generated_at: new Date().toISOString(),
