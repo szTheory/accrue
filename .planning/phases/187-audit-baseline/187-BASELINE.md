@@ -8,12 +8,12 @@ with those files, regenerate the markdown from the structured artifacts.
 
 ## Artifact Counts
 
-- Baseline cells: 21076
-- Covered cells: 2118
-- Gap cells: 18958
+- Baseline cells: 21176
+- Covered cells: 4236
+- Gap cells: 16940
 - N/A cells: 0
-- Defects: 743
-- Evidence files referenced: 4250
+- Defects: 766
+- Evidence files referenced: 4248
 - Harness failures: 0
 
 ## Coverage Summary
@@ -22,16 +22,16 @@ with those files, regenerate the markdown from the structured artifacts.
 
 | Status | Cells |
 | --- | --- |
-| covered | 2118 |
-| gap | 18958 |
+| covered | 4236 |
+| gap | 16940 |
 
 ### By Surface Type
 
 | Surface type | Cells |
 | --- | --- |
-| component | 8119 |
-| component-group | 3880 |
-| page-flow | 9077 |
+| component | 8174 |
+| component-group | 3920 |
+| page-flow | 9082 |
 
 ### By Mode / Targeted Label
 
@@ -39,24 +39,24 @@ with those files, regenerate the markdown from the structured artifacts.
 | --- | --- |
 | chromium-desktop | 10488 |
 | chromium-mobile | 10488 |
-| targeted/targeted-1024 | 20 |
-| targeted/targeted-1440 | 20 |
-| targeted/targeted-320 | 20 |
-| targeted/targeted-375 | 20 |
-| targeted/targeted-768 | 20 |
+| targeted/targeted-1024 | 40 |
+| targeted/targeted-1440 | 40 |
+| targeted/targeted-320 | 40 |
+| targeted/targeted-375 | 40 |
+| targeted/targeted-768 | 40 |
 
 ### By Theme
 
 | Theme | Cells |
 | --- | --- |
 | dark | 10488 |
-| light | 10588 |
+| light | 10688 |
 
 ### By State
 
 | State | Cells |
 | --- | --- |
-| default-populated | 2500 |
+| default-populated | 2600 |
 | disabled-readonly | 1392 |
 | disconnected-reconnecting | 1392 |
 | empty | 2400 |
@@ -74,16 +74,16 @@ with those files, regenerate the markdown from the structured artifacts.
 | Severity | Defects |
 | --- | --- |
 | high | 96 |
-| low | 413 |
-| medium | 234 |
+| low | 353 |
+| medium | 317 |
 
 ### By Owner Phase
 
 | Owner phase | Defects |
 | --- | --- |
-| 189 | 282 |
+| 189 | 342 |
 | 190 | 280 |
-| 191 | 181 |
+| 191 | 144 |
 
 ### Top Defects
 
@@ -113,22 +113,22 @@ with those files, regenerate the markdown from the structured artifacts.
 | AX187-022 | high | 190 | detail-header/metadata/actions | reuse-dry | Surface was not visible in the DOM during static capture. |
 | AX187-023 | high | 190 | detail-header/metadata/actions | interaction-integrity | Surface was not visible in the DOM during static capture. |
 | AX187-024 | high | 190 | detail-header/metadata/actions | microcopy | Surface was not visible in the DOM during static capture. |
-| AX187-025 | high | 190 | detail-header/metadata/actions | token-compliance | Awaiting Phase 187 evidence capture. |
-| AX187-026 | high | 190 | detail-header/metadata/actions | visual-hierarchy | Awaiting Phase 187 evidence capture. |
-| AX187-027 | high | 190 | detail-header/metadata/actions | spacing-rhythm | Awaiting Phase 187 evidence capture. |
-| AX187-028 | high | 190 | detail-header/metadata/actions | state-coverage | Awaiting Phase 187 evidence capture. |
-| AX187-029 | high | 190 | detail-header/metadata/actions | responsive-mobile-first | Awaiting Phase 187 evidence capture. |
-| AX187-030 | high | 190 | detail-header/metadata/actions | contrast | Awaiting Phase 187 evidence capture. |
-| AX187-031 | high | 190 | detail-header/metadata/actions | focus-semantics | Awaiting Phase 187 evidence capture. |
-| AX187-032 | high | 190 | detail-header/metadata/actions | brand-expression | Awaiting Phase 187 evidence capture. |
-| AX187-033 | high | 190 | detail-header/metadata/actions | motion | Awaiting Phase 187 evidence capture. |
-| AX187-034 | high | 190 | detail-header/metadata/actions | reuse-dry | Awaiting Phase 187 evidence capture. |
-| AX187-035 | high | 190 | detail-header/metadata/actions | interaction-integrity | Awaiting Phase 187 evidence capture. |
-| AX187-036 | high | 190 | detail-header/metadata/actions | microcopy | Awaiting Phase 187 evidence capture. |
-| AX187-037 | high | 190 | detail-header/metadata/actions | token-compliance | Awaiting Phase 187 evidence capture. |
-| AX187-038 | high | 190 | detail-header/metadata/actions | visual-hierarchy | Awaiting Phase 187 evidence capture. |
-| AX187-039 | high | 190 | detail-header/metadata/actions | spacing-rhythm | Awaiting Phase 187 evidence capture. |
-| AX187-040 | high | 190 | detail-header/metadata/actions | state-coverage | Awaiting Phase 187 evidence capture. |
+| AX187-025 | high | 190 | detail-header/metadata/actions | token-compliance | Surface was not visible in the DOM during static capture. |
+| AX187-026 | high | 190 | detail-header/metadata/actions | visual-hierarchy | Surface was not visible in the DOM during static capture. |
+| AX187-027 | high | 190 | detail-header/metadata/actions | spacing-rhythm | Surface was not visible in the DOM during static capture. |
+| AX187-028 | high | 190 | detail-header/metadata/actions | state-coverage | Surface was not visible in the DOM during static capture. |
+| AX187-029 | high | 190 | detail-header/metadata/actions | responsive-mobile-first | Surface was not visible in the DOM during static capture. |
+| AX187-030 | high | 190 | detail-header/metadata/actions | contrast | Surface was not visible in the DOM during static capture. |
+| AX187-031 | high | 190 | detail-header/metadata/actions | focus-semantics | Surface was not visible in the DOM during static capture. |
+| AX187-032 | high | 190 | detail-header/metadata/actions | brand-expression | Surface was not visible in the DOM during static capture. |
+| AX187-033 | high | 190 | detail-header/metadata/actions | motion | Surface was not visible in the DOM during static capture. |
+| AX187-034 | high | 190 | detail-header/metadata/actions | reuse-dry | Surface was not visible in the DOM during static capture. |
+| AX187-035 | high | 190 | detail-header/metadata/actions | interaction-integrity | Surface was not visible in the DOM during static capture. |
+| AX187-036 | high | 190 | detail-header/metadata/actions | microcopy | Surface was not visible in the DOM during static capture. |
+| AX187-037 | high | 190 | detail-header/metadata/actions | token-compliance | Surface was not visible in the DOM during static capture. |
+| AX187-038 | high | 190 | detail-header/metadata/actions | visual-hierarchy | Surface was not visible in the DOM during static capture. |
+| AX187-039 | high | 190 | detail-header/metadata/actions | spacing-rhythm | Surface was not visible in the DOM during static capture. |
+| AX187-040 | high | 190 | detail-header/metadata/actions | state-coverage | Surface was not visible in the DOM during static capture. |
 
 ## Outputs
 

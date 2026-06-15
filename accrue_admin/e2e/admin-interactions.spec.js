@@ -58,7 +58,7 @@ function makeRecorder(projectName) {
   const rows = [];
   let sequence = 0;
   const evidenceRefs = [
-    `accrue_admin/test-results/admin-interactions/${projectName}/trace.zip`,
+    `accrue_admin/test-results/admin-interactions/${projectName}/observations.ndjson`,
     `playwright-trace:${projectName}:admin-interactions.spec.js`,
   ];
 

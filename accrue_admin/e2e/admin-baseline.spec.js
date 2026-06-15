@@ -227,6 +227,7 @@ async function captureCanonicalSurface(page, surface, route, projectName, observ
 async function captureTargetedSurface(page, surface, route, projectName, observations) {
   if (!targetedRisk(surface)) return;
 
+  const originalViewport = page.viewportSize();
   const mode = projectMode(projectName);
   const cells = cellsForSurface(surface).filter(
     (cell) =>
@@ -238,43 +239,49 @@ async function captureTargetedSurface(page, surface, route, projectName, observa
 
   if (cells.length === 0) return;
 
-  for (const breakpoint of TARGETED_BREAKPOINTS) {
-    await page.setViewportSize({ width: breakpoint, height: 900 });
-    await login(page, route);
-    await expect(page.locator("#main-content")).toBeVisible();
-    await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
-    await page.waitForTimeout(50);
+  try {
+    for (const breakpoint of TARGETED_BREAKPOINTS) {
+      await page.setViewportSize({ width: breakpoint, height: 900 });
+      await login(page, route);
+      await expect(page.locator("#main-content")).toBeVisible();
+      await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
+      await page.waitForTimeout(50);
 
-    const visible = await visibleSurface(page, surface);
-    const coverage = visible
-      ? { coverage_status: "covered" }
-      : {
-          coverage_status: "gap",
-          reason: "Risk-marked manifest surface was not visible during targeted breakpoint probe.",
-          defect_candidate: "targeted-breakpoint-coverage-gap",
-        };
-    const evidenceRefs = visible ? await writeTargetedScreenshotCopies(page, projectName, cells, breakpoint) : [];
-    const violations = visible ? await axeViolations(page) : [];
+      const visible = await visibleSurface(page, surface);
+      const coverage = visible
+        ? { coverage_status: "covered" }
+        : {
+            coverage_status: "gap",
+            reason: "Risk-marked manifest surface was not visible during targeted breakpoint probe.",
+            defect_candidate: "targeted-breakpoint-coverage-gap",
+          };
+      const evidenceRefs = visible ? await writeTargetedScreenshotCopies(page, projectName, cells, breakpoint) : [];
+      const violations = visible ? await axeViolations(page) : [];
 
-    for (const cell of cells) {
-      const targetedLabel = `targeted-${breakpoint}`;
-      observations.push(
-        observationFromCell({
-          cell,
-          surface,
-          coverage,
-          evidenceRefs: evidenceRefs.filter((ref) => ref.endsWith(`${cell.cell_id}__${targetedLabel}.png`)),
-          axeViolations: violations,
-          extra: {
-            cell_id: `${cell.cell_id}__${targetedLabel}`,
-            mode: "targeted",
-            viewport_width: breakpoint,
-            breakpoint,
-            targeted_label: targetedLabel,
-            notes: `Risk probe for ${surface.surface}: layout-risk/responsive-risk at ${breakpoint}px.`,
-          },
-        })
-      );
+      for (const cell of cells) {
+        const targetedLabel = `targeted-${breakpoint}`;
+        observations.push(
+          observationFromCell({
+            cell,
+            surface,
+            coverage,
+            evidenceRefs: evidenceRefs.filter((ref) => ref.endsWith(`${cell.cell_id}__${targetedLabel}.png`)),
+            axeViolations: violations,
+            extra: {
+              cell_id: `${cell.cell_id}__${targetedLabel}`,
+              mode: "targeted",
+              viewport_width: breakpoint,
+              breakpoint,
+              targeted_label: targetedLabel,
+              notes: `Risk probe for ${surface.surface}: layout-risk/responsive-risk at ${breakpoint}px.`,
+            },
+          })
+        );
+      }
+    }
+  } finally {
+    if (originalViewport) {
+      await page.setViewportSize(originalViewport);
     }
   }
 }

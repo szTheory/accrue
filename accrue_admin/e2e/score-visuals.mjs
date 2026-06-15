@@ -173,6 +173,7 @@ async function main() {
   let totalFindings = 0;
   let belowBar = 0;
   let skipped = 0;
+  let failedImages = 0;
 
   try {
     for (const { pngPath, screen, viewport, theme } of pngs) {
@@ -223,6 +224,7 @@ async function main() {
           `[score-visuals] Failed to parse model response for ${screen} (${viewport}/${theme}): ${parseErr.message}`
         );
         console.error("[score-visuals] Raw response:", rawText.slice(0, 500));
+        failedImages++;
         continue;
       }
 
@@ -230,21 +232,49 @@ async function main() {
         console.error(
           `[score-visuals] Model returned non-array for ${screen} (${viewport}/${theme}): ${rawText.slice(0, 200)}`
         );
-        continue; // skip this image, don't abort the run
+        failedImages++;
+        continue;
       }
 
       if (!hasExpectedDimensions(findings)) {
-        console.warn(
+        console.error(
           `[score-visuals] Skipping ${screen} (${viewport}/${theme}) — model response did not contain dimension ids 1-12 exactly once`
         );
-        skipped++;
+        failedImages++;
         continue;
       }
 
       // Enrich findings with authoritative metadata (override model-supplied values)
+      const enrichedFindings = [];
+      let invalidFinding = false;
       for (const finding of findings) {
         const dimensionId = Number(finding.dimension);
+        const score = Number(finding.score);
         const metadata = metadataForImage(screen, viewport, theme, dimensionId);
+        if (!metadata) {
+          console.error(
+            `[score-visuals] Missing manifest metadata for ${screen} (${viewport}/${theme}) dimension ${finding.dimension}`
+          );
+          invalidFinding = true;
+          break;
+        }
+        if (!Number.isInteger(score) || score < 0 || score > 3) {
+          console.error(
+            `[score-visuals] Invalid score for ${screen} (${viewport}/${theme}) dimension ${dimensionId}: ${finding.score}`
+          );
+          invalidFinding = true;
+          break;
+        }
+        if (
+          (score < 2 && typeof finding.defect !== "string") ||
+          (score < 2 && typeof finding.suggested_fix !== "string")
+        ) {
+          console.error(
+            `[score-visuals] Missing defect/suggested_fix text for below-bar ${screen} (${viewport}/${theme}) dimension ${dimensionId}`
+          );
+          invalidFinding = true;
+          break;
+        }
         const enriched = {
           screen,
           viewport,
@@ -252,12 +282,21 @@ async function main() {
           dimension: dimensionId,
           dimension_name:
             DIMENSIONS.find((dimension) => dimension.id === dimensionId)?.name || finding.dimension_name,
-          score: finding.score,
+          score,
           defect: finding.defect ?? null,
           suggested_fix: finding.suggested_fix ?? null,
           ...(metadata || {}),
         };
 
+        enrichedFindings.push(enriched);
+      }
+
+      if (invalidFinding) {
+        failedImages++;
+        continue;
+      }
+
+      for (const enriched of enrichedFindings) {
         const line = JSON.stringify(enriched) + "\n";
         if (TO_STDOUT) {
           findingsOutput.write(line);
@@ -289,6 +328,11 @@ async function main() {
     console.log(
       `[score-visuals] ${belowBar} finding(s) scored < 2 — review findings.ndjson and follow the remediation loop (≤3 rounds).`
     );
+  }
+
+  if (failedImages > 0) {
+    console.error(`[score-visuals] ${failedImages} image(s) could not be scored completely`);
+    process.exit(1);
   }
 }
 
