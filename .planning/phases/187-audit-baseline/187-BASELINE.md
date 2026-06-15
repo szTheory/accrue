@@ -8,11 +8,11 @@ with those files, regenerate the markdown from the structured artifacts.
 
 ## Artifact Counts
 
-- Baseline cells: 21176
-- Covered cells: 4236
-- Gap cells: 16940
-- N/A cells: 0
-- Defects: 767
+- Baseline cells: 21276
+- Covered cells: 4303
+- Gap cells: 16967
+- N/A cells: 6
+- Defects: 800
 - Evidence files referenced: 4248
 - Harness failures: 0
 
@@ -22,8 +22,9 @@ with those files, regenerate the markdown from the structured artifacts.
 
 | Status | Cells |
 | --- | --- |
-| covered | 4236 |
-| gap | 16940 |
+| covered | 4303 |
+| gap | 16967 |
+| n/a | 6 |
 
 ### By Surface Type
 
@@ -31,14 +32,14 @@ with those files, regenerate the markdown from the structured artifacts.
 | --- | --- |
 | component | 8174 |
 | component-group | 3920 |
-| page-flow | 9082 |
+| page-flow | 9182 |
 
 ### By Mode / Targeted Label
 
 | Mode | Cells |
 | --- | --- |
-| chromium-desktop | 10488 |
-| chromium-mobile | 10488 |
+| chromium-desktop | 10538 |
+| chromium-mobile | 10538 |
 | targeted/targeted-1024 | 40 |
 | targeted/targeted-1440 | 40 |
 | targeted/targeted-320 | 40 |
@@ -50,22 +51,22 @@ with those files, regenerate the markdown from the structured artifacts.
 | Theme | Cells |
 | --- | --- |
 | dark | 10488 |
-| light | 10688 |
+| light | 10788 |
 
 ### By State
 
 | State | Cells |
 | --- | --- |
-| default-populated | 2600 |
-| disabled-readonly | 1392 |
-| disconnected-reconnecting | 1392 |
-| empty | 2400 |
-| error | 2400 |
-| interactive-open | 2400 |
-| loading | 2400 |
-| long-content | 2400 |
-| overflow | 2400 |
-| permission-denied | 1392 |
+| default-populated | 2612 |
+| disabled-readonly | 1398 |
+| disconnected-reconnecting | 1394 |
+| empty | 2402 |
+| error | 2402 |
+| interactive-open | 2460 |
+| loading | 2402 |
+| long-content | 2402 |
+| overflow | 2410 |
+| permission-denied | 1394 |
 
 ## Severity-Ranked Defect Ledger
 
@@ -73,9 +74,9 @@ with those files, regenerate the markdown from the structured artifacts.
 
 | Severity | Defects |
 | --- | --- |
-| high | 97 |
+| high | 118 |
 | low | 353 |
-| medium | 317 |
+| medium | 329 |
 
 ### By Owner Phase
 
@@ -83,7 +84,7 @@ with those files, regenerate the markdown from the structured artifacts.
 | --- | --- |
 | 189 | 342 |
 | 190 | 280 |
-| 191 | 145 |
+| 191 | 178 |
 
 ### Top Defects
 

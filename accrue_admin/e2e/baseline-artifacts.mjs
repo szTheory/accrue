@@ -40,6 +40,21 @@ function relativeFromRepo(absPath) {
   return path.relative(repoRoot, absPath).split(path.sep).join("/");
 }
 
+function slug(value) {
+  return String(value || "unknown")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function evidenceRefFromStatusPath(value) {
+  if (!value) return null;
+  const normalized = String(value).split(path.sep).join("/");
+  if (normalized.startsWith("accrue_admin/test-results/")) return normalized;
+  if (normalized.startsWith("test-results/")) return `accrue_admin/${normalized}`;
+  return normalized;
+}
+
 function assertEvidencePath(absPath) {
   const rel = relativeFromRepo(absPath);
   if (!rel.startsWith("accrue_admin/test-results/")) {
@@ -127,6 +142,65 @@ function dimensionFor(value) {
 
 function surfaceForName(name) {
   return SURFACES.find((surface) => surface.surface === name);
+}
+
+function projectNameForEvidence(evidenceRef) {
+  const match = evidenceRef.match(/admin-(?:baseline|interactions)\/([^/]+)/);
+  return match ? match[1] : "chromium-desktop";
+}
+
+function isInteractionRow(row) {
+  return Boolean(row && row.interaction_class && row.rubric_dimension);
+}
+
+function validState(value) {
+  const state = String(value || "interactive-open");
+  return [
+    "default-populated",
+    "empty",
+    "loading",
+    "error",
+    "permission-denied",
+    "disconnected-reconnecting",
+    "overflow",
+    "long-content",
+    "disabled-readonly",
+    "interactive-open",
+  ].includes(state)
+    ? state
+    : "interactive-open";
+}
+
+function interactionEvidenceRefs(row, evidenceRef) {
+  return Array.from(new Set([...(row.evidence_refs || []), evidenceRef].filter(Boolean)));
+}
+
+function interactionCellFromRow(row, evidenceRef) {
+  const project = projectForMode(projectNameForEvidence(evidenceRef));
+  const dimension = dimensionFor(row.rubric_dimension) || dimensionFor("interaction-integrity");
+  const state = validState(row.state);
+  const coverage = ["covered", "gap", "n/a"].includes(row.coverage_status)
+    ? row.coverage_status
+    : "covered";
+  const probeId = row.probe_id || slug(row.interaction_class);
+
+  return {
+    cell_id: `p187__ixn__${slug(row.surface || row.interaction_class)}__${project.name}__${slug(state)}__d${String(dimension.id).padStart(2, "0")}__${slug(probeId)}`,
+    surface: row.surface || row.interaction_class,
+    surface_type: ["component", "component-group", "page-flow"].includes(row.surface_type)
+      ? row.surface_type
+      : "page-flow",
+    mode: project.mode,
+    viewport_width: project.viewport_width,
+    theme: "light",
+    state,
+    dimension: dimension.id,
+    dimension_name: dimension.name,
+    score: null,
+    coverage_status: coverage,
+    evidence_refs: interactionEvidenceRefs(row, evidenceRef),
+    notes: row.notes || row.failure_kind || row.actual || "Imported from live interaction observation.",
+  };
 }
 
 function normalizeRawBaselineRow(row, evidenceRef) {
@@ -234,6 +308,12 @@ function buildBaselineCells(inventory, rawRows, harnessFailures) {
 
   for (const { row, evidence_ref } of rawRows) {
     try {
+      if (isInteractionRow(row)) {
+        const interactionCell = interactionCellFromRow(row, evidence_ref);
+        byId.set(interactionCell.cell_id, interactionCell);
+        continue;
+      }
+
       const normalized = normalizeRawBaselineRow(row, evidence_ref);
       if (!normalized) continue;
 
@@ -394,6 +474,61 @@ function defectFromGapCell(cell) {
     status: "gap",
     notes: cell.defect_candidate || cell.failure_kind || "",
   };
+}
+
+function severityForInteraction(row) {
+  const text = [
+    row.failure_kind,
+    row.actual,
+    row.expected,
+    row.interaction_class,
+    ...(row.overlay_tags || []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (/intercepted|focus-escaped|escape-not-dismissed|missing-dismissal|permission|disconnected|actionability|layer/.test(text)) {
+    return "high";
+  }
+  if (/missing-selector|fixture-gap|loading|error|empty|scroll|overflow/.test(text)) {
+    return "medium";
+  }
+  return "low";
+}
+
+function defectFromInteractionRow(row, evidenceRef) {
+  const coverage = ["covered", "gap", "n/a"].includes(row.coverage_status)
+    ? row.coverage_status
+    : "covered";
+  const hasFailure = Boolean(row.failure_kind);
+  const hasGap = coverage === "gap";
+  if (!hasFailure && !hasGap) return null;
+
+  const cell = interactionCellFromRow(row, evidenceRef);
+  const dimension = dimensionFor(row.rubric_dimension) || dimensionFor("interaction-integrity");
+  return {
+    severity: severityForInteraction(row),
+    surface: row.surface || row.interaction_class,
+    surface_type: cell.surface_type,
+    persona_job: "Verify live admin interaction behavior under real browser actionability, focus, scroll, and state conditions.",
+    reproduction: `Run npm run e2e -- e2e/admin-interactions.spec.js and inspect ${evidenceRef} row ${row.probe_id || row.interaction_class}.`,
+    expected: row.expected || `${row.interaction_class} satisfies the Phase 187 live interaction contract.`,
+    actual: row.actual || row.failure_kind || "Live interaction probe recorded a gap.",
+    rubric_dimension: dimension.name,
+    overlay_tags: Array.from(new Set(row.overlay_tags || [])),
+    cell_id: cell.cell_id,
+    evidence_refs: interactionEvidenceRefs(row, evidenceRef),
+    owner_phase: "191",
+    status: "gap",
+    notes: [row.failure_kind, row.notes].filter(Boolean).join(" "),
+  };
+}
+
+function defectsFromInteractions(rawRows) {
+  return rawRows
+    .filter(({ row }) => isInteractionRow(row))
+    .map(({ row, evidence_ref }) => defectFromInteractionRow(row, evidence_ref));
 }
 
 function representativeDefectsFromCells(cells) {
@@ -595,6 +730,29 @@ function classifyCommandStatus(rawRows, findings, harnessFailures, observations,
   }
 }
 
+function readCommandStatuses() {
+  if (!fs.existsSync(INPUTS.commandStatus)) return [];
+
+  const parsed = readJsonFile(INPUTS.commandStatus);
+  if (!parsed.ok) return [];
+
+  const statuses = Array.isArray(parsed.value) ? parsed.value : parsed.value.commands || [parsed.value];
+  return statuses.map((status) => {
+    const command = status.name || status.command || "unknown producer";
+    const exitCode = Number(status.exit_code ?? status.exitCode ?? status.status ?? 0);
+    const evidenceRefs = evidenceRefsForCommand(status, command);
+    return {
+      command,
+      exit_code: exitCode,
+      status: exitCode === 0 ? "passed" : "failed",
+      started_at: status.started_at || status.startedAt || null,
+      finished_at: status.finished_at || status.finishedAt || null,
+      log_ref: evidenceRefFromStatusPath(status.log_path || status.stderr_log_path || status.stdout_log_path),
+      evidence_refs: evidenceRefs,
+    };
+  });
+}
+
 function writeJson(absPath, value) {
   fs.mkdirSync(path.dirname(absPath), { recursive: true });
   fs.writeFileSync(absPath, `${JSON.stringify(value, null, 2)}\n`);
@@ -733,9 +891,11 @@ export function main() {
   const cells = buildBaselineCells(inventory, rawRows, harnessFailures);
   const defects = sortAndNumberDefects([
     ...findings.map(({ row, evidence_ref }) => defectFromFinding(row, evidence_ref)),
+    ...defectsFromInteractions(rawRows),
     ...representativeDefectsFromCells(cells),
     ...commandDefects,
   ]);
+  const commandStatuses = readCommandStatuses();
 
   const artifactManifest = {
     generated_at: new Date().toISOString(),
@@ -744,6 +904,7 @@ export function main() {
       Object.entries(OUTPUTS).map(([key, absPath]) => [key, relativeFromRepo(absPath)])
     ),
     evidence: inventory,
+    command_statuses: commandStatuses,
     observations,
     harness_failures: harnessFailures,
   };
@@ -756,6 +917,7 @@ export function main() {
           cells: cells.length,
           defects: defects.length,
           evidence: inventory.length,
+          command_statuses: commandStatuses.length,
           harness_failures: harnessFailures.length,
         },
         null,

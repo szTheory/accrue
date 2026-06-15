@@ -45,7 +45,7 @@ completed: 2026-06-15
 
 # Phase 187 Plan 05: Audit Run and Canonical Baseline Ledger Summary
 
-**Only-forward admin UI audit baseline with 21,176 scored cells, 767 AX187 defect rows, and a checksum-backed evidence manifest**
+**Only-forward admin UI audit baseline with 21,276 scored cells, 800 AX187 defect rows, and a checksum-backed evidence manifest**
 
 ## Performance
 
@@ -58,8 +58,8 @@ completed: 2026-06-15
 ## Accomplishments
 
 - Ran the Phase 187 producer set and preserved evidence for all required commands: static baseline, live interactions, a11y, and optional visual scoring.
-- Generated `.planning/phases/187-audit-baseline/baseline.cells.json` with 21,176 cells, including 200 targeted breakpoint rows using `mode: "targeted"` plus numeric `viewport_width` and `breakpoint`.
-- Generated `.planning/phases/187-audit-baseline/defects.ndjson` with 767 schema-shaped AX187 rows routed to owner phases 189, 190, and 191.
+- Generated `.planning/phases/187-audit-baseline/baseline.cells.json` with 21,276 cells, including 200 targeted breakpoint rows and 100 live-interaction rows.
+- Generated `.planning/phases/187-audit-baseline/defects.ndjson` with 800 schema-shaped AX187 rows, including 33 live-interaction defects and 31 rows with overlay tags.
 - Generated `.planning/phases/187-audit-baseline/artifacts.manifest.json` with 4,250 evidence references and zero harness failures.
 - Expanded `.planning/phases/187-audit-baseline/187-BASELINE.md` with maintainer-readable coverage, severity, owner-phase, and rerun-command summaries.
 
@@ -119,8 +119,8 @@ Each task was committed atomically:
 
 - `cd accrue_admin && npm run baseline:artifacts && npm run baseline:parse` passed.
 - Manifest check passed: `harness_failures` is empty and command status includes `admin-baseline`, `admin-interactions`, `admin-a11y`, and `score-visuals`.
-- Baseline cell check passed: 21,176 cells, 200 targeted rows, no legacy `targeted-*` mode values, and every gap/n/a row has notes.
-- Defect ledger check passed: 767 rows, IDs `AX187-001` through `AX187-767`, owner phases limited to `188`-`191`, and required D-19 fields present.
+- Baseline cell check passed: 21,276 cells, 200 targeted rows, 100 interaction rows, no legacy `targeted-*` mode values, and every gap/n/a row has notes.
+- Defect ledger check passed: 800 rows, IDs `AX187-001` through `AX187-800`, owner phases limited to `188`-`191`, and required D-19 fields present.
 - Schema-key sanity passed for `baseline.cells.json` and `defects.ndjson`.
 - Git check passed: no `.png` or `.zip` generated evidence is staged or committed.
 

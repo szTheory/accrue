@@ -231810,6 +231810,2006 @@
     "breakpoint": null
   },
   {
+    "cell_id": "p187__ixn__charge-refund__chromium-desktop__interactive-open__d11__ixn-006",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-desktop__interactive-open__d11__ixn-007",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-desktop__interactive-open__d11__ixn-009",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-desktop__interactive-open__d11__ixn-010",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-desktop__interactive-open__d11__ixn-011",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-desktop__interactive-open__d11__ixn-012",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-mobile__interactive-open__d11__ixn-006",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-mobile__interactive-open__d11__ixn-007",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-mobile__interactive-open__d11__ixn-009",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-mobile__interactive-open__d11__ixn-010",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-mobile__interactive-open__d11__ixn-011",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__charge-refund__chromium-mobile__interactive-open__d11__ixn-012",
+    "surface": "charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette__chromium-desktop__interactive-open__d11__ixn-018",
+    "surface": "command palette",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette__chromium-desktop__interactive-open__d11__ixn-019",
+    "surface": "command palette",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "data-open=false; top={\"top\":\"li.ax-command-palette-item\",\"receivesEvents\":true}",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette__chromium-desktop__interactive-open__d11__ixn-020",
+    "surface": "command palette",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "before=#global-search-input; afterTab=a.ax-dev-toolbar-link; afterShiftTab=#global-search-input; inside=true; trigger=#search-trigger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette__chromium-mobile__interactive-open__d11__ixn-018",
+    "surface": "command palette",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette__chromium-mobile__interactive-open__d11__ixn-019",
+    "surface": "command palette",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "data-open=false; top={\"top\":\"li.ax-command-palette-item\",\"receivesEvents\":true}",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette__chromium-mobile__interactive-open__d11__ixn-020",
+    "surface": "command palette",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "before=#global-search-input; afterTab=a.ax-dev-toolbar-link; afterShiftTab=#global-search-input; inside=true; trigger=#search-trigger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette-search-result-activation__chromium-desktop__interactive-open__d11__ixn-033",
+    "surface": "command palette search/result activation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette-search-result-activation__chromium-desktop__interactive-open__d11__ixn-034",
+    "surface": "command palette search/result activation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "url=http://127.0.0.1:4017/billing/customers; active=#global-search-input",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette-search-result-activation__chromium-mobile__interactive-open__d11__ixn-033",
+    "surface": "command palette search/result activation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__command-palette-search-result-activation__chromium-mobile__interactive-open__d11__ixn-034",
+    "surface": "command palette search/result activation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "url=http://127.0.0.1:4017/billing/customers; active=#global-search-input",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__customer-detail-drawer__chromium-desktop__interactive-open__d11__ixn-004",
+    "surface": "customer detail drawer",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__customer-detail-drawer__chromium-mobile__interactive-open__d11__ixn-004",
+    "surface": "customer detail drawer",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__customer-more-menu__chromium-desktop__interactive-open__d11__ixn-021",
+    "surface": "customer more menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__customer-more-menu__chromium-desktop__interactive-open__d11__ixn-022",
+    "surface": "customer more menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "menuVisible=false; top={\"top\":\"missing\",\"receivesEvents\":false}",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__customer-more-menu__chromium-mobile__interactive-open__d11__ixn-021",
+    "surface": "customer more menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__customer-more-menu__chromium-mobile__interactive-open__d11__ixn-022",
+    "surface": "customer more menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "menuVisible=false; top={\"top\":\"div.ax-dev-toolbar-links\",\"receivesEvents\":false}",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__detail-drawer__chromium-desktop__interactive-open__d11__ixn-005",
+    "surface": "detail drawer",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__detail-drawer__chromium-mobile__interactive-open__d11__ixn-005",
+    "surface": "detail drawer",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__disabled-controls__chromium-desktop__disabled-readonly__d11__ixn-040",
+    "surface": "disabled controls",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "disabled-readonly",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__disabled-controls__chromium-mobile__disabled-readonly__d11__ixn-040",
+    "surface": "disabled controls",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "disabled-readonly",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__disabled-readonly-state-observation__chromium-desktop__disabled-readonly__d11__ixn-047",
+    "surface": "disabled-readonly state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "disabled-readonly",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__disabled-readonly-state-observation__chromium-mobile__disabled-readonly__d11__ixn-047",
+    "surface": "disabled-readonly state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "disabled-readonly",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__disconnected-reconnecting-state__chromium-desktop__disconnected-reconnecting__d04__ixn-046",
+    "surface": "disconnected/reconnecting state",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "disconnected-reconnecting",
+    "dimension": 4,
+    "dimension_name": "state-coverage",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "setOffline=true; url=http://127.0.0.1:4017/billing/customers?status=no-records",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__disconnected-reconnecting-state__chromium-mobile__disconnected-reconnecting__d04__ixn-046",
+    "surface": "disconnected/reconnecting state",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "disconnected-reconnecting",
+    "dimension": 4,
+    "dimension_name": "state-coverage",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "setOffline=true; url=http://127.0.0.1:4017/billing/customers?status=no-records",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__drawer-body__chromium-desktop__overflow__d11__ixn-028",
+    "surface": "drawer body",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "n/a",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "drawer body scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__drawer-body__chromium-mobile__overflow__d11__ixn-028",
+    "surface": "drawer body",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "n/a",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "drawer body scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__dropdown-panel__chromium-desktop__overflow__d11__ixn-030",
+    "surface": "dropdown panel",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "n/a",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "dropdown panel scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__dropdown-panel__chromium-mobile__overflow__d11__ixn-030",
+    "surface": "dropdown panel",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "n/a",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "dropdown panel scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__empty-state__chromium-desktop__empty__d12__ixn-043",
+    "surface": "empty state",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "empty",
+    "dimension": 12,
+    "dimension_name": "microcopy",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__empty-state__chromium-mobile__empty__d12__ixn-043",
+    "surface": "empty state",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "empty",
+    "dimension": 12,
+    "dimension_name": "microcopy",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__error-state__chromium-desktop__error__d12__ixn-045",
+    "surface": "error state",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "error",
+    "dimension": 12,
+    "dimension_name": "microcopy",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "fixture-gap",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__error-state__chromium-mobile__error__d12__ixn-045",
+    "surface": "error state",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "error",
+    "dimension": 12,
+    "dimension_name": "microcopy",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "fixture-gap",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__flash-toast-containers__chromium-desktop__interactive-open__d11__ixn-025",
+    "surface": "flash/toast containers",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "flashVisible=true",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__flash-toast-containers__chromium-mobile__interactive-open__d11__ixn-025",
+    "surface": "flash/toast containers",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "flashVisible=true",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__interactive-open-state-observation__chromium-desktop__interactive-open__d11__ixn-050",
+    "surface": "interactive-open state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__interactive-open-state-observation__chromium-mobile__interactive-open__d11__ixn-050",
+    "surface": "interactive-open state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__invoice-destructive-action-path__chromium-desktop__interactive-open__d11__ixn-014",
+    "surface": "invoice destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__invoice-destructive-action-path__chromium-desktop__interactive-open__d11__ixn-015",
+    "surface": "invoice destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "Invoice path is probed through existing edge-state fixtures; a gap names unreachable destructive action if absent.",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__invoice-destructive-action-path__chromium-mobile__interactive-open__d11__ixn-014",
+    "surface": "invoice destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__invoice-destructive-action-path__chromium-mobile__interactive-open__d11__ixn-015",
+    "surface": "invoice destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "Invoice path is probed through existing edge-state fixtures; a gap names unreachable destructive action if absent.",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__liveview-patch-focus__chromium-desktop__interactive-open__d11__ixn-036",
+    "surface": "LiveView patch focus",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "active=[data-role=\"replay-single\"]; url=http://127.0.0.1:4017/billing/webhooks/b6ba37a7-bf62-46fb-9517-fe0d8540db40",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__liveview-patch-focus__chromium-mobile__interactive-open__d11__ixn-036",
+    "surface": "LiveView patch focus",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "active=[data-role=\"replay-single\"]; url=http://127.0.0.1:4017/billing/webhooks/01251b71-1506-4c7d-b012-c5ccdfd640f6",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__loading-state__chromium-desktop__loading__d04__ixn-044",
+    "surface": "loading state",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "loading",
+    "dimension": 4,
+    "dimension_name": "state-coverage",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "Current manifest seeds do not provide a stable loading hold; row preserves the baseline gap.",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__loading-state__chromium-mobile__loading__d04__ixn-044",
+    "surface": "loading state",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "loading",
+    "dimension": 4,
+    "dimension_name": "state-coverage",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "Current manifest seeds do not provide a stable loading hold; row preserves the baseline gap.",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__long-content-rows__chromium-desktop__default-populated__d11__ixn-032",
+    "surface": "long-content rows",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "long-content row scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__long-content-rows__chromium-mobile__default-populated__d11__ixn-032",
+    "surface": "long-content rows",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "long-content row scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__long-content-state-observation__chromium-desktop__long-content__d11__ixn-049",
+    "surface": "long-content state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "long-content",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__long-content-state-observation__chromium-mobile__long-content__d11__ixn-049",
+    "surface": "long-content state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "long-content",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__main-content__chromium-desktop__default-populated__d11__ixn-027",
+    "surface": "main content",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "main content scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__main-content__chromium-mobile__overflow__d11__ixn-027",
+    "surface": "main content",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "main content scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__modal-panel__chromium-desktop__overflow__d11__ixn-029",
+    "surface": "modal/panel",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "n/a",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "modal/panel scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__modal-panel__chromium-mobile__overflow__d11__ixn-029",
+    "surface": "modal/panel",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "n/a",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "modal/panel scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__native-dropdown-menu__chromium-desktop__interactive-open__d11__ixn-023",
+    "surface": "native dropdown menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__native-dropdown-menu__chromium-desktop__interactive-open__d11__ixn-024",
+    "surface": "native dropdown menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "open=1; panelVisible=true",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__native-dropdown-menu__chromium-mobile__interactive-open__d11__ixn-023",
+    "surface": "native dropdown menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__native-dropdown-menu__chromium-mobile__interactive-open__d11__ixn-024",
+    "surface": "native dropdown menu",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "open=1; panelVisible=true",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__non-interactive-cards__chromium-desktop__default-populated__d11__ixn-037",
+    "surface": "non-interactive cards",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "visible=true; active=#global-search-input",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__non-interactive-cards__chromium-mobile__default-populated__d11__ixn-037",
+    "surface": "non-interactive cards",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "visible=true; active=#global-search-input",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__overflow-state-observation__chromium-desktop__overflow__d11__ixn-048",
+    "surface": "overflow state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__overflow-state-observation__chromium-mobile__overflow__d11__ixn-048",
+    "surface": "overflow state observation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "recorded through live interaction probe ledger",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__page-scroll__chromium-desktop__default-populated__d11__ixn-026",
+    "surface": "page scroll",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "page scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__page-scroll__chromium-mobile__overflow__d11__ixn-026",
+    "surface": "page scroll",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "overflow",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "page scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__permission-denied-state__chromium-desktop__permission-denied__d12__ixn-042",
+    "surface": "permission denied state",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "permission-denied",
+    "dimension": 12,
+    "dimension_name": "microcopy",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "url=http://127.0.0.1:4017/; body=",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__permission-denied-state__chromium-mobile__permission-denied__d12__ixn-042",
+    "surface": "permission denied state",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "permission-denied",
+    "dimension": 12,
+    "dimension_name": "microcopy",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "url=http://127.0.0.1:4017/; body=",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__read-only-controls__chromium-desktop__disabled-readonly__d11__ixn-041",
+    "surface": "read-only controls",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "disabled-readonly",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__read-only-controls__chromium-mobile__disabled-readonly__d11__ixn-041",
+    "surface": "read-only controls",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "disabled-readonly",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__replay-confirm-open-confirm-cancel__chromium-desktop__interactive-open__d11__ixn-035",
+    "surface": "replay-confirm open/confirm/cancel",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "replayConfirm=true; active=[data-role=\"replay-single\"]",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__replay-confirm-open-confirm-cancel__chromium-mobile__interactive-open__d11__ixn-035",
+    "surface": "replay-confirm open/confirm/cancel",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "replayConfirm=true; active=[data-role=\"replay-single\"]",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__rows__chromium-desktop__default-populated__d11__ixn-038",
+    "surface": "rows",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "visible=true; active=#global-search-input",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__rows__chromium-mobile__default-populated__d11__ixn-038",
+    "surface": "rows",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "visible=true; active=#global-search-input",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__status-chips__chromium-desktop__default-populated__d11__ixn-039",
+    "surface": "status chips",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__status-chips__chromium-mobile__default-populated__d11__ixn-039",
+    "surface": "status chips",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__stepupauthmodal-charge-refund__chromium-desktop__interactive-open__d11__ixn-008",
+    "surface": "StepUpAuthModal charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__stepupauthmodal-charge-refund__chromium-mobile__interactive-open__d11__ixn-008",
+    "surface": "StepUpAuthModal charge refund",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-selector",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__stepupauthmodal-click-outside-dismissal__chromium-desktop__interactive-open__d11__ixn-013",
+    "surface": "StepUpAuthModal click-outside dismissal",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "missing-dismissal-contract",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__stepupauthmodal-click-outside-dismissal__chromium-mobile__interactive-open__d11__ixn-013",
+    "surface": "StepUpAuthModal click-outside dismissal",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "missing-dismissal-contract",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__subscription-destructive-action-path__chromium-desktop__interactive-open__d11__ixn-016",
+    "surface": "subscription destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__subscription-destructive-action-path__chromium-desktop__interactive-open__d11__ixn-017",
+    "surface": "subscription destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "Subscription path is probed through existing edge-state fixtures; a gap names unreachable destructive action if absent.",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__subscription-destructive-action-path__chromium-mobile__interactive-open__d11__ixn-016",
+    "surface": "subscription destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "intercepted-click",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__subscription-destructive-action-path__chromium-mobile__interactive-open__d11__ixn-017",
+    "surface": "subscription destructive action path",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "Subscription path is probed through existing edge-state fixtures; a gap names unreachable destructive action if absent.",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__table-overflow__chromium-desktop__default-populated__d11__ixn-031",
+    "surface": "table overflow",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "table overflow region scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__table-overflow__chromium-mobile__default-populated__d11__ixn-031",
+    "surface": "table overflow",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "default-populated",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "table overflow region scroll reachability",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__webhook-replay-confirmation__chromium-desktop__interactive-open__d11__ixn-001",
+    "surface": "webhook replay confirmation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__webhook-replay-confirmation__chromium-desktop__interactive-open__d11__ixn-002",
+    "surface": "webhook replay confirmation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "{\"top\":\"missing\",\"receivesEvents\":false}",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__webhook-replay-confirmation__chromium-desktop__interactive-open__d11__ixn-003",
+    "surface": "webhook replay confirmation",
+    "surface_type": "page-flow",
+    "mode": "chromium-desktop",
+    "viewport_width": 1440,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-desktop/observations.ndjson",
+      "playwright-trace:chromium-desktop:admin-interactions.spec.js"
+    ],
+    "notes": "escape-not-dismissed",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__webhook-replay-confirmation__chromium-mobile__interactive-open__d11__ixn-001",
+    "surface": "webhook replay confirmation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "click completed without Playwright actionability interception",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__webhook-replay-confirmation__chromium-mobile__interactive-open__d11__ixn-002",
+    "surface": "webhook replay confirmation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "covered",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "{\"top\":\"div.ax-page-header\",\"receivesEvents\":true}",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
+    "cell_id": "p187__ixn__webhook-replay-confirmation__chromium-mobile__interactive-open__d11__ixn-003",
+    "surface": "webhook replay confirmation",
+    "surface_type": "page-flow",
+    "mode": "chromium-mobile",
+    "viewport_width": 390,
+    "theme": "light",
+    "state": "interactive-open",
+    "dimension": 11,
+    "dimension_name": "interaction-integrity",
+    "score": null,
+    "coverage_status": "gap",
+    "evidence_refs": [
+      "accrue_admin/test-results/admin-interactions/chromium-mobile/observations.ndjson",
+      "playwright-trace:chromium-mobile:admin-interactions.spec.js"
+    ],
+    "notes": "escape-not-dismissed",
+    "targeted_label": null,
+    "breakpoint": null
+  },
+  {
     "cell_id": "p187__json-viewer__chromium-desktop__dark__default-populated__d01",
     "surface": "json-viewer",
     "surface_type": "component",
