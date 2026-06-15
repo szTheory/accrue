@@ -99,7 +99,36 @@ Plans:
   3. There is one unambiguous styling source of truth — the inert Tailwind config is removed or explicitly documented as reference-only — and motion-token coverage is complete for every animated surface with `prefers-reduced-motion` collapsing travel/overshoot while preserving crossfades.
   4. In dark mode, every semantic role — including focus rings, scrollbars, and disabled states — renders with a correct, contrast-passing value (no role renders wrong or invisible).
 
-**Plans:** TBD
+**Plans:** 7 plans
+Plans:
+**Wave 1**
+
+- [ ] 188-01-PLAN.md — Tailwind SSOT and package asset build contract
+- [ ] 188-02-PLAN.md — Typography bundles and reading-measure foundation
+
+**Wave 2** *(blocked on Wave 1 CSS completion)*
+
+- [ ] 188-03-PLAN.md — Semantic layer stack and motion-token closure
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 188-04-PLAN.md — Semantic role tokens, focus, scrollbars, and disabled behavior
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 188-05-PLAN.md — Foundation kitchen specimens and computed-style browser checks
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 188-06-PLAN.md — Static verifier guards and negative fixtures
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 188-07-PLAN.md — Full automated verification and maintainer foundation-kitchen checkpoint
+
+Cross-cutting constraints:
+- Composed type, layer, semantic role, motion, and Tailwind SSOT fixes stay at root `accrue_admin` design-system surfaces; no per-page patching.
+- `/billing/dev/components` is the maintainer proof surface for foundation specimens in light and dark modes.
 **UI hint**: yes
 
 ### Phase 189: Primitive & form components + component lab
