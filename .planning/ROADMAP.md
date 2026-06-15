@@ -83,7 +83,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 187-05-PLAN.md — Audit run and canonical baseline ledger
+- [x] 187-05-PLAN.md — Audit run and canonical baseline ledger
 
 **UI hint**: yes
 
@@ -254,7 +254,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
-| 187. Audit & Baseline | v1.53 | 4/5 | In Progress|  |
+| 187. Audit & Baseline | v1.53 | 5/5 | Complete   | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 0/TBD | Not started | - |
 | 189. Primitive & form components + component lab | v1.53 | 0/TBD | Not started | - |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
