@@ -45,7 +45,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 
 ### Phase Summary
 
-- [ ] **Phase 187: Audit & Baseline** — Refresh the rubric (adds interaction-integrity, layer/z-index, microcopy); run the full matrix (viewport × theme × state) + live interaction testing of the running admin UI; produce a severity-ranked defect ledger + scored baseline = the only-forward reference point.
+- [x] **Phase 187: Audit & Baseline** — Refresh the rubric (adds interaction-integrity, layer/z-index, microcopy); run the full matrix (viewport × theme × state) + live interaction testing of the running admin UI; produce a severity-ranked defect ledger + scored baseline = the only-forward reference point. (completed 2026-06-15)
 - [ ] **Phase 188: Foundations hardening** — Typography bundles, reading-measure application, formal z-index/layer system, motion-gap closure, inert-Tailwind resolution, and dark-mode role/focus/scrollbar/disabled completeness — root-level fixes.
 - [ ] **Phase 189: Primitive & form components + component lab** — Every component in isolation × full state matrix × theme × viewport × a11y; root-level (DRY) fixes; grow `/dev/components` into the systematic gallery (no PhoenixStorybook dep).
 - [ ] **Phase 190: Navigation, data-display & meta-component cohesion** — App shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component groups; spacing rhythm, hierarchy, responsive behavior, operator-stress states.
@@ -66,7 +66,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
   3. A scored baseline captures every audited cell (component / group / page across viewport × theme × state) so it can be re-run idempotently and compared in Phase 192.
   4. The defect ledger and baseline are committed as the single only-forward reference point that Phases 188–191 remediate against and Phase 192 verifies ≥.
 
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 Plans:
 **Wave 1**
 
@@ -254,7 +254,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 184. Design Tokens & Specimens | v1.52 | 5/5 | Complete | 2026-06-14 |
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
-| 187. Audit & Baseline | v1.53 | 5/5 | Complete   | 2026-06-15 |
+| 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 0/TBD | Not started | - |
 | 189. Primitive & form components + component lab | v1.53 | 0/TBD | Not started | - |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
