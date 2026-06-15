@@ -482,6 +482,31 @@ function defectFromCommandStatus(status, evidenceRefs) {
   };
 }
 
+function visionScoringUnavailableDefect() {
+  const evidenceRefs = [
+    "accrue_admin/test-results/phase187-command-status.json",
+    "accrue_admin/test-results/phase187-logs/score-visuals.log",
+    "accrue_admin/test-results/admin-visuals/findings.ndjson",
+  ];
+
+  return {
+    severity: "high",
+    surface: "score-visuals producer",
+    surface_type: "page-flow",
+    persona_job: "Produce Phase 187 visual rubric evidence for only-forward comparison.",
+    reproduction: "Run `ANTHROPIC_API_KEY=... npm run score-visuals` before `npm run baseline:artifacts`.",
+    expected: "Every captured visual screenshot has 12 scored rubric dimensions, or the missing scorer is routed as an explicit baseline defect.",
+    actual: "Vision scoring was unavailable, so screenshots are present but rubric score findings are absent.",
+    rubric_dimension: "state-coverage",
+    overlay_tags: [],
+    cell_id: "phase187__score-visuals__producer-status",
+    evidence_refs: evidenceRefs,
+    owner_phase: "191",
+    status: "gap",
+    notes: "No ANTHROPIC_API_KEY path is non-blocking by plan, but remains a routeable baseline gap.",
+  };
+}
+
 function sortAndNumberDefects(defects) {
   const rank = { critical: 0, high: 1, medium: 2, low: 3 };
   return defects
@@ -702,6 +727,7 @@ export function main() {
       evidence_ref: "accrue_admin/test-results/admin-visuals/findings.ndjson",
       message: "Vision findings are unavailable; score-visuals skipped or produced no findings. This is a baseline gap unless credentials are available.",
     });
+    commandDefects.push(visionScoringUnavailableDefect());
   }
 
   const cells = buildBaselineCells(inventory, rawRows, harnessFailures);

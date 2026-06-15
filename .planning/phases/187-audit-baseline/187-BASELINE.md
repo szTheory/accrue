@@ -12,7 +12,7 @@ with those files, regenerate the markdown from the structured artifacts.
 - Covered cells: 4236
 - Gap cells: 16940
 - N/A cells: 0
-- Defects: 766
+- Defects: 767
 - Evidence files referenced: 4248
 - Harness failures: 0
 
@@ -73,7 +73,7 @@ with those files, regenerate the markdown from the structured artifacts.
 
 | Severity | Defects |
 | --- | --- |
-| high | 96 |
+| high | 97 |
 | low | 353 |
 | medium | 317 |
 
@@ -83,7 +83,7 @@ with those files, regenerate the markdown from the structured artifacts.
 | --- | --- |
 | 189 | 342 |
 | 190 | 280 |
-| 191 | 144 |
+| 191 | 145 |
 
 ### Top Defects
 
