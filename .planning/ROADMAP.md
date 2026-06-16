@@ -116,7 +116,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 188-05-PLAN.md — Foundation kitchen specimens and computed-style browser checks
+- [x] 188-05-PLAN.md — Foundation kitchen specimens and computed-style browser checks
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -284,7 +284,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
-| 188. Foundations hardening | v1.53 | 4/7 | In Progress|  |
+| 188. Foundations hardening | v1.53 | 5/7 | In Progress|  |
 | 189. Primitive & form components + component lab | v1.53 | 0/TBD | Not started | - |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
