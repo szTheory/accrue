@@ -6,8 +6,8 @@ Start with the package quickstart in [`README.md`](../README.md), then return he
 
 ## UI stack and polish direction
 
-- **Build:** Tailwind CSS v3 compiles [`assets/css/app.css`](../assets/css/app.css) into `priv/static/accrue_admin.css` via `mix accrue_admin.assets.build`. [`assets/tailwind.config.js`](../assets/tailwind.config.js) scans `lib/**/*.{ex,heex}`; [`assets/tailwind_preset.js`](../assets/tailwind_preset.js) maps CSS variables to Tailwind theme colors so utilities stay on the same tokens as `ax-*` rules.
-- **Authoring:** Prefer **`ax-*` classes** in `app.css` / `theme.css` for layout, surfaces, and reusable blocks. Add **Tailwind utilities in HEEx** when they reduce duplication (spacing, responsive tweaks) without fighting the preset.
+- **Build:** Tailwind CSS v3 compiles [`assets/css/app.css`](../assets/css/app.css) into `priv/static/accrue_admin.css` via `mix accrue_admin.assets.build`. The package does not ship a Tailwind config or preset; Tailwind is the CSS compiler and minifier for the committed bundle.
+- **Authoring:** AccrueAdmin styles are authored in [`assets/css/theme.css`](../assets/css/theme.css) and [`assets/css/app.css`](../assets/css/app.css) using `--ax-*` tokens and `ax-*` classes. Tailwind utilities are not an authoring path, and host apps never configure Tailwind for `accrue_admin`.
 - **Principles:** least surprise for billing operators; clear hierarchy (context → KPIs → primary work area); visible focus states; explicit empty, loading, and error states on lists; microcopy that matches host and Stripe language (subscription, invoice, webhook) unless the screen is intentionally abstracted.
 - **Motion:** light CSS transitions on shells, drawers, and modals; honor `prefers-reduced-motion`; reach for LiveView `JS` only when CSS cannot carry the interaction.
 - **Responsive:** keep the mounted shell usable on small viewports first; avoid wide horizontal scroll for primary tables unless unavoidable—prefer column discipline and secondary detail surfaces.
