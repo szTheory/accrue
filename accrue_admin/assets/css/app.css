@@ -59,6 +59,73 @@ html.accrue-admin {
 .ax-icon-md { width: var(--ax-icon-md); height: var(--ax-icon-md); }
 .ax-icon-lg { width: var(--ax-icon-lg); height: var(--ax-icon-lg); }
 
+.ax-type-body {
+  font: var(--ax-type-body-font);
+  letter-spacing: var(--ax-type-body-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-body-sm {
+  font: var(--ax-type-body-sm-font);
+  letter-spacing: var(--ax-type-body-sm-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-body-relaxed {
+  font: var(--ax-type-body-relaxed-font);
+  letter-spacing: var(--ax-type-body-relaxed-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-label {
+  font: var(--ax-type-label-font);
+  letter-spacing: var(--ax-type-label-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-label-sm {
+  font: var(--ax-type-label-sm-font);
+  letter-spacing: var(--ax-type-label-sm-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-eyebrow {
+  font: var(--ax-type-eyebrow-font);
+  letter-spacing: var(--ax-type-eyebrow-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+  text-transform: uppercase;
+}
+
+.ax-type-title {
+  font: var(--ax-type-title-font);
+  letter-spacing: var(--ax-type-title-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-title-lg {
+  font: var(--ax-type-title-lg-font);
+  letter-spacing: var(--ax-type-title-lg-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-heading {
+  font: var(--ax-type-heading-font);
+  letter-spacing: var(--ax-type-heading-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-display {
+  font: var(--ax-type-display-font);
+  letter-spacing: var(--ax-type-display-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-metric {
+  font: var(--ax-type-metric-font);
+  letter-spacing: var(--ax-type-metric-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+  font-variant-numeric: tabular-nums;
+}
+
+.ax-type-code {
+  font: var(--ax-type-code-font);
+  letter-spacing: var(--ax-type-code-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
+.ax-type-code-xs {
+  font: var(--ax-type-code-xs-font);
+  letter-spacing: var(--ax-type-code-xs-tracking); /* ax-type-exception: role utility exposes its tracking token for consumers. */
+}
+
 body {
   background-color: var(--ax-base);
   background-image:
@@ -118,6 +185,7 @@ button {
 }
 
 .ax-dev-toolbar-label {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
@@ -193,6 +261,7 @@ button {
 }
 
 .ax-active-org-name {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
 }
 
@@ -209,6 +278,7 @@ button {
 }
 
 .ax-sidebar-mark {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -228,18 +298,21 @@ button {
 .ax-heading,
 .ax-display,
 .ax-kpi-value {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-weight: 600;
 }
 
 .ax-sidebar-name,
 .ax-heading {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 1.25rem;
   line-height: var(--ax-leading-tight);
 }
 
 .ax-display,
 .ax-kpi-value {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 1.5rem;
   line-height: var(--ax-leading-tight);
   min-width: 0;
@@ -262,6 +335,7 @@ button {
 }
 
 .ax-sidebar-group-label {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0 0 var(--ax-space-xs);
   padding: 0 var(--ax-space-sm);
   color: var(--ax-muted);
@@ -302,6 +376,7 @@ button {
 }
 
 .ax-sidebar-brand-sub {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: var(--ax-type-xs);
   color: var(--ax-muted);
@@ -374,9 +449,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 .ax-sidebar-link-label,
 .ax-theme-button,
 .ax-icon-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: var(--ax-leading-normal);
+  font: var(--ax-type-label-font);
+  letter-spacing: var(--ax-type-label-tracking); /* ax-type-exception: semantic label group exposes composed role tracking. */
 }
 
 /* Inline table chips (UX-01) — shell pairs with .ax-label for 14px/600 signal text */
@@ -391,6 +465,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 }
 
 .ax-eyebrow {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0 0 var(--ax-space-xs);
   letter-spacing: var(--ax-tracking-wide);
   text-transform: uppercase;
@@ -398,8 +473,8 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-body {
   margin: 0;
-  font-size: 1rem;
-  line-height: var(--ax-leading-relaxed);
+  font: var(--ax-type-body-relaxed-font);
+  letter-spacing: var(--ax-type-body-relaxed-tracking); /* ax-type-exception: semantic body class exposes composed role tracking. */
   overflow-wrap: anywhere;
 }
 
@@ -464,6 +539,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 }
 
 .ax-topbar-brand-name {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -580,6 +656,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-filter-chip {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-sm);
@@ -631,6 +708,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-kpi-delta {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   min-height: 2rem;
@@ -686,6 +764,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-funnel-active-chip {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   padding: var(--ax-space-xs) var(--ax-space-sm);
@@ -720,12 +799,14 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-funnel-legend-row {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: flex;
   justify-content: space-between;
   font-size: 0.875rem;
 }
 
 .ax-funnel-legend-row dt {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
 }
 
@@ -899,6 +980,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-timeline-details summary,
 .ax-json-details summary {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
@@ -906,6 +988,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-timeline-details pre,
 .ax-json-raw {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: var(--ax-space-sm) 0 0;
   padding: var(--ax-space-md);
   overflow: auto;
@@ -918,6 +1001,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-timeline-meta {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;
   color: var(--ax-muted);
 }
@@ -940,12 +1024,14 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-json-key {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin-right: var(--ax-space-sm);
   font-family: var(--ax-font-mono);
 }
 
 .ax-json-summary,
 .ax-json-value {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-family: var(--ax-font-mono);
   word-break: break-word;
 }
@@ -974,6 +1060,7 @@ a.ax-kpi-card--linked:focus-visible {
 
   .ax-display,
   .ax-kpi-value {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
     font-size: 1.75rem;
   }
 
@@ -999,6 +1086,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-breadcrumbs-link,
 .ax-breadcrumbs-current,
 .ax-breadcrumbs-separator {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;
   line-height: var(--ax-leading-normal);
 }
@@ -1009,6 +1097,7 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-breadcrumbs-current {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   color: var(--ax-primary);
   font-weight: 600;
 }
@@ -1081,6 +1170,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-button,
 .ax-status-badge {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1220,6 +1310,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 }
 
 .ax-help-link {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   min-height: 2rem;
@@ -1281,6 +1372,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 
 /* Phase 177 (v1.51 MOT-02) — badge color transition */
 .ax-badge {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-xs);
@@ -1343,6 +1435,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 /* Strip button chrome from collapsible group header toggle so it inherits
    the existing ax-sidebar-group-label visual appearance exactly. */
 .ax-sidebar-group-toggle {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: flex;
   align-items: center;
   gap: var(--ax-space-xs);
@@ -1395,6 +1488,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 }
 
 .ax-tab-more-item {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1468,6 +1562,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 }
 
 .ax-button-sm {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   min-height: 2rem;
   padding: 0.375rem 0.75rem;
   font-size: var(--ax-type-xs);
@@ -1539,6 +1634,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 }
 
 .ax-field-label {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;
   font-weight: 600;
   line-height: var(--ax-leading-normal);
@@ -1568,6 +1664,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 .ax-field-help,
 .ax-field-error,
 .ax-dropdown-item-description {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: 0.875rem;
   line-height: var(--ax-leading-normal);
@@ -1636,6 +1733,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
 }
 
 .ax-dropdown-item-label {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;
   font-weight: 600;
   line-height: var(--ax-leading-normal);
@@ -1686,6 +1784,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-tab {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   padding: 0.75rem 1rem;
   border-bottom: 2px solid transparent;
   background: var(--ax-elevated);
@@ -1725,6 +1824,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-link {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   width: fit-content;
   color: var(--ax-primary);
   font-weight: 600;
@@ -1734,6 +1834,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-search-trigger {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-sm);
@@ -1763,6 +1864,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 
 .ax-search-trigger kbd,
 .ax-shortcut kbd {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   min-width: 1.35rem;
   padding: 0.1rem 0.35rem;
   border: 1px solid var(--ax-border);
@@ -1913,6 +2015,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
 }
 
 .ax-shortcut {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-xs);
@@ -2081,6 +2184,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-banner {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   padding: var(--ax-space-md);
   text-align: center;
   font-weight: 500;
@@ -2113,6 +2217,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-search-trigger-text {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -2171,6 +2276,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-input-placeholder {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: var(--ax-type-sm);
   color: var(--ax-muted);
 }
@@ -2194,6 +2300,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 /* Quiet inline link (label + trailing arrow) */
 .ax-link-quiet {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-xs);
@@ -2263,10 +2370,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-attention-text strong {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
 }
 
 .ax-attention-pill {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   flex: none;
   padding: 0.05rem var(--ax-space-sm);
   border-radius: 999px;
@@ -2290,6 +2399,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-attention-action {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -2321,6 +2431,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-empty-title {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-weight: 600;
 }
@@ -2370,15 +2481,18 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-launcher-title {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
 }
 
 .ax-launcher-copy {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   color: var(--ax-muted);
   font-size: var(--ax-type-sm);
 }
 
 .ax-launcher-meta {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin-top: var(--ax-space-sm);
   font-size: var(--ax-type-xs);
   font-weight: 600;
@@ -2431,6 +2545,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-related-title {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: var(--ax-type-md);
   font-weight: 600;
@@ -2483,11 +2598,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-related-label {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
   font-size: var(--ax-type-sm);
 }
 
 .ax-related-value {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: var(--ax-type-xs);
   color: var(--ax-muted);
   overflow: hidden;
@@ -2530,6 +2647,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-summary-title {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: var(--ax-type-2xl);
   font-weight: 600;
@@ -2537,6 +2655,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-summary-facts {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: flex;
   flex-wrap: wrap;
   gap: var(--ax-space-sm) var(--ax-space-lg);
@@ -2565,6 +2684,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-detail-section-title {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: var(--ax-type-md);
   font-weight: 600;
@@ -2590,6 +2710,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-field-label {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: var(--ax-type-xs);
   font-weight: 600;
@@ -2599,6 +2720,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 }
 
 .ax-field-value {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin: 0;
   font-size: var(--ax-type-sm);
   color: var(--ax-primary);

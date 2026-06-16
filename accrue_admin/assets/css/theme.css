@@ -79,6 +79,34 @@ html.accrue-admin {
   /* Reading measure — ch ≈ one "0" advance; 68ch ≈ 66 chars (60–75 sweet spot) */
   --ax-measure: 68ch;
 
+  /* Composed typography roles — semantic bundles consumed by app.css utilities. */
+  --ax-type-body-font: 400 var(--ax-type-md)/var(--ax-leading-normal) var(--ax-font-sans);
+  --ax-type-body-tracking: var(--ax-tracking-normal);
+  --ax-type-body-sm-font: 400 var(--ax-type-sm)/var(--ax-leading-normal) var(--ax-font-sans);
+  --ax-type-body-sm-tracking: var(--ax-tracking-normal);
+  --ax-type-body-relaxed-font: 400 var(--ax-type-md)/var(--ax-leading-relaxed) var(--ax-font-sans);
+  --ax-type-body-relaxed-tracking: var(--ax-tracking-normal);
+  --ax-type-label-font: 600 var(--ax-type-sm)/var(--ax-leading-normal) var(--ax-font-sans);
+  --ax-type-label-tracking: var(--ax-tracking-normal);
+  --ax-type-label-sm-font: 600 var(--ax-type-xs)/var(--ax-leading-normal) var(--ax-font-sans);
+  --ax-type-label-sm-tracking: var(--ax-tracking-normal);
+  --ax-type-eyebrow-font: 600 var(--ax-type-xs)/var(--ax-leading-normal) var(--ax-font-sans);
+  --ax-type-eyebrow-tracking: var(--ax-tracking-caps);
+  --ax-type-title-font: 600 var(--ax-type-lg)/var(--ax-leading-tight) var(--ax-font-sans);
+  --ax-type-title-tracking: var(--ax-tracking-normal);
+  --ax-type-title-lg-font: 600 var(--ax-type-xl)/var(--ax-leading-tight) var(--ax-font-sans);
+  --ax-type-title-lg-tracking: var(--ax-tracking-normal);
+  --ax-type-heading-font: 600 var(--ax-type-2xl)/var(--ax-leading-tight) var(--ax-font-sans);
+  --ax-type-heading-tracking: var(--ax-tracking-normal);
+  --ax-type-display-font: 600 var(--ax-type-3xl)/var(--ax-leading-tight) var(--ax-font-sans);
+  --ax-type-display-tracking: var(--ax-tracking-normal);
+  --ax-type-metric-font: 600 var(--ax-type-2xl)/var(--ax-leading-tight) var(--ax-font-sans);
+  --ax-type-metric-tracking: var(--ax-tracking-normal);
+  --ax-type-code-font: 400 var(--ax-type-sm)/var(--ax-leading-normal) var(--ax-font-mono);
+  --ax-type-code-tracking: var(--ax-tracking-normal);
+  --ax-type-code-xs-font: 400 var(--ax-type-xs)/var(--ax-leading-normal) var(--ax-font-mono);
+  --ax-type-code-xs-tracking: var(--ax-tracking-normal);
+
   /* Transition bundles — property-bundles composed from dur/ease atoms.
      Use background-color (not background shorthand) to never conflict with
      skeleton shimmer's background-position animation. */
