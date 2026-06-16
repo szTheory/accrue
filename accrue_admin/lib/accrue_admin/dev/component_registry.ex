@@ -127,6 +127,78 @@ if Mix.env() != :prod do
           variant: "ink",
           ax_class: "ax-kpi-delta ax-kpi-delta-ink",
           tokens: ["--ax-primary", "--ax-muted", "--ax-transition-colors"]
+        },
+
+        # ── Phase 188 foundation specimens ────────────────────────────────────────
+        %{
+          family: "foundation-type",
+          variant: "roles",
+          ax_class: "ax-foundation ax-foundation-type",
+          tokens: ["--ax-type-body-font", "--ax-type-display-font", "--ax-type-body-tracking"]
+        },
+        %{
+          family: "foundation-measure",
+          variant: "prose",
+          ax_class: "ax-foundation ax-foundation-measure",
+          tokens: ["--ax-measure"]
+        },
+        %{
+          family: "foundation-layer",
+          variant: "stack",
+          ax_class: "ax-foundation ax-foundation-layer",
+          tokens: [
+            "--ax-z-sticky",
+            "--ax-z-dropdown",
+            "--ax-z-popover",
+            "--ax-z-drawer",
+            "--ax-z-modal",
+            "--ax-z-toast"
+          ]
+        },
+        %{
+          family: "foundation-focus",
+          variant: "control",
+          ax_class: "ax-foundation ax-foundation-focus",
+          tokens: ["--ax-focus-ring", "--ax-focus-ring-offset", "--ax-focus-shadow"]
+        },
+        %{
+          family: "foundation-disabled-readonly",
+          variant: "states",
+          ax_class: "ax-foundation ax-foundation-disabled-readonly",
+          tokens: [
+            "--ax-disabled-bg",
+            "--ax-disabled-text",
+            "--ax-readonly-bg",
+            "--ax-readonly-text"
+          ]
+        },
+        %{
+          family: "foundation-interactive",
+          variant: "states",
+          ax_class: "ax-foundation ax-foundation-interactive",
+          tokens: [
+            "--ax-interactive-hover",
+            "--ax-interactive-active",
+            "--ax-interactive-selected"
+          ]
+        },
+        %{
+          family: "foundation-scrollbar",
+          variant: "root",
+          ax_class: "ax-foundation ax-foundation-scrollbar",
+          tokens: ["--ax-scrollbar-thumb", "--ax-scrollbar-track", "--ax-scrollbar-thumb-hover"]
+        },
+        %{
+          family: "foundation-status",
+          variant: "roles",
+          ax_class: "ax-foundation ax-foundation-status",
+          tokens: [
+            "--ax-status-success-bg",
+            "--ax-status-warning-bg",
+            "--ax-status-danger-bg",
+            "--ax-status-info-bg",
+            "--ax-status-neutral-bg"
+          ]
         }
       ]
     end

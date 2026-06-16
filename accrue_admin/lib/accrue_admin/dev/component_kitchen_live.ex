@@ -267,6 +267,76 @@ if Mix.env() != :prod do
             </div>
           </section>
 
+          <%!-- Phase 188 — Foundation token specimens --%>
+          <section :if={@available?} class="ax-card ax-dev-stack ax-foundation ax-foundation-type">
+            <p class="ax-label">Review foundations</p>
+            <h3 class="ax-heading">Foundation Tokens</h3>
+
+            <div class="ax-dev-grid">
+              <div class="ax-foundation ax-foundation-type" data-ax-foundation-specimen="type-body">
+                <p class="ax-type-body">Typography roles · body</p>
+                <code class="ax-type-code-xs">--ax-type-body-font</code>
+              </div>
+              <div class="ax-foundation ax-foundation-type" data-ax-foundation-specimen="type-display">
+                <p class="ax-type-display">Display</p>
+                <code class="ax-type-code-xs">--ax-type-display-font</code>
+              </div>
+              <div class="ax-foundation ax-foundation-measure" data-ax-foundation-specimen="measure-prose">
+                <p class="ax-body ax-prose">Reading measure keeps explanatory copy to a durable line length without capping tables.</p>
+                <code class="ax-type-code-xs">--ax-measure</code>
+              </div>
+            </div>
+
+            <div class="ax-dev-grid">
+              <%= for {layer, token} <- [{"sticky", "--ax-z-sticky"}, {"dropdown", "--ax-z-dropdown"}, {"popover", "--ax-z-popover"}, {"drawer", "--ax-z-drawer"}, {"modal", "--ax-z-modal"}, {"toast", "--ax-z-toast"}] do %>
+                <div class="ax-foundation ax-foundation-layer ax-card" data-ax-foundation-layer={layer} style={"position: relative; z-index: var(#{token});"}>
+                  <p class="ax-label"><%= layer %></p>
+                  <code class="ax-type-code-xs"><%= token %></code>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="ax-dev-grid">
+              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-focus" data-ax-foundation-specimen="focus-control" type="button">Focus</button>
+              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="disabled-control" type="button" disabled>Disabled</button>
+              <input class="ax-input ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="readonly-control" readonly value="Readonly" />
+            </div>
+
+            <div class="ax-dev-grid">
+              <button class="ax-button ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-hover" type="button">Hover</button>
+              <button class="ax-button ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-active" type="button">Active</button>
+              <a class="ax-sidebar-link ax-sidebar-link-active ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-selected" aria-current="page">Selected</a>
+            </div>
+
+            <div class="ax-dev-grid">
+              <div class="ax-card ax-foundation ax-foundation-scrollbar" data-ax-foundation-specimen="scrollbar" style="max-height: 5rem; overflow: auto;">
+                <p class="ax-body">Scrollbars</p>
+                <p class="ax-body">Root scrollbar tokens: --ax-scrollbar-thumb, --ax-scrollbar-track, --ax-scrollbar-thumb-hover.</p>
+                <p class="ax-body">Overflow sample</p>
+              </div>
+
+              <%= for status <- ["success", "warning", "danger", "info", "neutral"] do %>
+                <div
+                  class={"ax-status-badge ax-foundation ax-foundation-status ax-foundation-status-#{status}"}
+                  data-ax-foundation-status={status}
+                  style={"background: var(--ax-status-#{status}-bg); color: var(--ax-status-#{status}-text); border-color: var(--ax-status-#{status}-border);"}
+                >
+                  <span><%= status %></span>
+                  <code class="ax-type-code-xs"><%= "--ax-status-#{status}-bg" %></code>
+                </div>
+              <% end %>
+            </div>
+
+            <dl class="ax-dev-token-dl">
+              <%= for entry <- ComponentRegistry.entries(), String.starts_with?(entry.family, "foundation-") do %>
+                <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
+                <%= for token <- entry.tokens do %>
+                  <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                <% end %>
+              <% end %>
+            </dl>
+          </section>
+
           <%!-- Banners showcase (danger/dunning) — stable locator for Playwright --%>
           <section :if={@available?} class="ax-card ax-dev-stack">
             <p class="ax-label">Banners</p>
