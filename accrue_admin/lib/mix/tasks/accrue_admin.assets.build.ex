@@ -64,8 +64,6 @@ defmodule Mix.Tasks.AccrueAdmin.Assets.Build do
     [
       "--yes",
       @tailwind_version,
-      "--config",
-      Path.join(root, "assets/tailwind.config.js"),
       "--input",
       Path.join(root, "assets/css/app.css"),
       "--output",

@@ -71,7 +71,13 @@ defmodule Mix.Tasks.AccrueAdmin.Assets.BuildTest do
 
     assert_received {:runner_call, "tailwindcss@3.4.17", tailwind_args, cwd}
     assert_received {:runner_call, "esbuild@0.25.3", esbuild_args, ^cwd}
+    assert Enum.member?(tailwind_args, "--input")
     assert Enum.member?(tailwind_args, Path.join(cwd, "assets/css/app.css"))
+    assert Enum.member?(tailwind_args, "--output")
+    assert Enum.member?(tailwind_args, Path.join(cwd, "priv/static/accrue_admin.css"))
+    assert Enum.member?(tailwind_args, "--minify")
+    refute Enum.member?(tailwind_args, "--config")
+    refute Enum.any?(tailwind_args, &String.contains?(&1, "tailwind.config.js"))
     assert Enum.any?(esbuild_args, &String.starts_with?(&1, "--outfile="))
     assert File.read!(Path.join(cwd, "priv/static/accrue_admin.css")) =~ "tailwindcss"
     assert File.read!(Path.join(cwd, "priv/static/accrue_admin.js")) =~ "esbuild"
