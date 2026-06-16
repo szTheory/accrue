@@ -480,6 +480,21 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 
 .ax-measure { max-width: var(--ax-measure); }
 
+.ax-page-description,
+.ax-card-description,
+.ax-empty-state-body,
+.ax-field-help,
+.ax-field-error,
+.ax-description,
+.ax-banner-body,
+.ax-callout-body,
+.ax-prose,
+.ax-cell-narrative,
+.ax-dropdown-item-description {
+  max-width: var(--ax-measure);
+  overflow-wrap: anywhere;
+}
+
 .ax-topbar {
   position: sticky;
   top: 0;
