@@ -2916,6 +2916,65 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   color: var(--ax-status-neutral-text);
 }
 
+[data-ax-foundation-layer] {
+  position: relative;
+}
+
+[data-ax-foundation-layer="sticky"] { z-index: var(--ax-z-sticky); }
+[data-ax-foundation-layer="dropdown"] { z-index: var(--ax-z-dropdown); }
+[data-ax-foundation-layer="popover"] { z-index: var(--ax-z-popover); }
+[data-ax-foundation-layer="drawer"] { z-index: var(--ax-z-drawer); }
+[data-ax-foundation-layer="modal"] { z-index: var(--ax-z-modal); }
+[data-ax-foundation-layer="toast"] { z-index: var(--ax-z-toast); }
+
+[data-ax-foundation-specimen="interactive-active"] {
+  background: var(--ax-interactive-active);
+}
+
+[data-ax-foundation-specimen="interactive-selected"] {
+  background-color: var(--ax-interactive-selected) !important;
+}
+
+html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active[data-ax-foundation-specimen="interactive-selected"],
+html.accrue-admin[data-theme="system"] .ax-sidebar-link.ax-sidebar-link-active[data-ax-foundation-specimen="interactive-selected"] {
+  background-color: var(--ax-interactive-selected) !important;
+}
+
+[data-ax-foundation-specimen="scrollbar"] {
+  max-height: 5rem;
+  overflow: auto;
+}
+
+[data-ax-foundation-status="success"] {
+  background: var(--ax-status-success-bg);
+  border-color: var(--ax-status-success-border);
+  color: var(--ax-status-success-text);
+}
+
+[data-ax-foundation-status="warning"] {
+  background: var(--ax-status-warning-bg);
+  border-color: var(--ax-status-warning-border);
+  color: var(--ax-status-warning-text);
+}
+
+[data-ax-foundation-status="danger"] {
+  background: var(--ax-status-danger-bg);
+  border-color: var(--ax-status-danger-border);
+  color: var(--ax-status-danger-text);
+}
+
+[data-ax-foundation-status="info"] {
+  background: var(--ax-status-info-bg);
+  border-color: var(--ax-status-info-border);
+  color: var(--ax-status-info-text);
+}
+
+[data-ax-foundation-status="neutral"] {
+  background: var(--ax-status-neutral-bg);
+  border-color: var(--ax-status-neutral-border);
+  color: var(--ax-status-neutral-text);
+}
+
 /* ============================================================================
    Phase 177 (v1.51 MOT-02) — Collapsible nav link list reveal
    .ax-sidebar-group-links always has an opacity transition. The JS hook
