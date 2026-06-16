@@ -2778,6 +2778,144 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 }
 
+/* Phase 188 foundation state-role consumers. */
+html.accrue-admin {
+  scrollbar-color: var(--ax-scrollbar-thumb) var(--ax-scrollbar-track);
+}
+
+html.accrue-admin::-webkit-scrollbar {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+html.accrue-admin::-webkit-scrollbar-track {
+  background: var(--ax-scrollbar-track);
+}
+
+html.accrue-admin::-webkit-scrollbar-thumb {
+  background: var(--ax-scrollbar-thumb);
+  border: 2px solid var(--ax-scrollbar-track);
+  border-radius: var(--ax-radius-pill);
+}
+
+html.accrue-admin::-webkit-scrollbar-thumb:hover {
+  background: var(--ax-scrollbar-thumb-hover);
+}
+
+.ax-button:focus-visible,
+.ax-sidebar-link:focus-visible,
+.ax-theme-button:focus-visible,
+.ax-icon-button:focus-visible,
+.ax-link:focus-visible,
+.ax-dropdown-item:focus-visible,
+.ax-tab-more-item:focus-visible,
+.ax-input:focus-visible,
+.ax-select:focus-visible,
+.ax-field-control:focus-visible,
+.ax-select-control:focus-visible,
+.ax-search-trigger:focus-visible,
+.ax-attention-row:focus-visible,
+.ax-launcher:focus-visible,
+.ax-related-item:focus-visible {
+  border-color: var(--ax-focus-ring);
+  outline: 2px solid var(--ax-focus-ring);
+  outline-offset: 2px;
+  box-shadow: var(--ax-focus-shadow);
+}
+
+.ax-button[aria-disabled="true"],
+.ax-button:disabled,
+.ax-disabled,
+[aria-disabled="true"] {
+  color: var(--ax-disabled-text);
+  background: var(--ax-disabled-bg);
+  border-color: var(--ax-disabled-border);
+  opacity: var(--ax-disabled-opacity);
+  cursor: var(--ax-disabled-cursor);
+  pointer-events: none;
+}
+
+.ax-input[readonly],
+.ax-select[readonly],
+.ax-field-control[readonly],
+.ax-readonly {
+  color: var(--ax-readonly-text);
+  background: var(--ax-readonly-bg);
+  border-color: var(--ax-readonly-border);
+}
+
+.ax-button:hover,
+.ax-dropdown-item:hover,
+.ax-sidebar-link:hover,
+.ax-theme-button:hover,
+.ax-icon-button:hover,
+.ax-tab-more-item:hover,
+.ax-search-trigger:hover,
+.ax-attention-row:hover,
+.ax-launcher:hover,
+.ax-related-item:hover {
+  background: var(--ax-interactive-hover);
+}
+
+.ax-button:active,
+.ax-dropdown-item:active,
+.ax-tab-more-item:active,
+.ax-search-trigger:active,
+.ax-attention-row:active {
+  background: var(--ax-interactive-active);
+}
+
+.ax-sidebar-link-active,
+.ax-tab-active,
+[aria-current="page"],
+[aria-selected="true"],
+.ax-filter-chip-active,
+.ax-theme-button.ax-theme-button-active {
+  background: var(--ax-interactive-selected);
+}
+
+.ax-status-badge-moss,
+.ax-badge-success,
+.ax-flash-success {
+  background: var(--ax-status-success-bg);
+  border-color: var(--ax-status-success-border);
+  color: var(--ax-status-success-text);
+}
+
+.ax-status-badge-amber,
+.ax-badge-warning,
+.ax-flash-warning {
+  background: var(--ax-status-warning-bg);
+  border-color: var(--ax-status-warning-border);
+  color: var(--ax-status-warning-text);
+}
+
+.ax-status-badge-ink,
+.ax-badge-danger,
+.ax-flash-error,
+.ax-banner-danger,
+.ax-attention-pill-danger {
+  background: var(--ax-status-danger-bg);
+  border-color: var(--ax-status-danger-border);
+  color: var(--ax-status-danger-text);
+}
+
+.ax-status-badge-cobalt,
+.ax-flash-info,
+.ax-attention-pill-info {
+  background: var(--ax-status-info-bg);
+  border-color: var(--ax-status-info-border);
+  color: var(--ax-status-info-text);
+}
+
+.ax-status-badge-slate,
+.ax-badge,
+.ax-attention-pill {
+  background: var(--ax-status-neutral-bg);
+  border-color: var(--ax-status-neutral-border);
+  color: var(--ax-status-neutral-text);
+}
+
 /* ============================================================================
    Phase 177 (v1.51 MOT-02) — Collapsible nav link list reveal
    .ax-sidebar-group-links always has an opacity transition. The JS hook

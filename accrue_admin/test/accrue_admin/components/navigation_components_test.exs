@@ -71,6 +71,38 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert link_html =~ ~s(href="/billing/webhooks")
       assert link_html =~ "ax-button-ghost"
     end
+
+    test "renders disabled link buttons without activation behavior" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <Button.button href="/billing/webhooks" disabled>View webhooks</Button.button>
+          """
+        end)
+
+      assert html =~ ~s(<a)
+      assert html =~ ~s(aria-disabled="true")
+      assert html =~ ~s(tabindex="-1")
+      refute html =~ ~s(href="/billing/webhooks")
+      assert html =~ "View webhooks"
+    end
+
+    test "renders disabled native buttons with the disabled attribute" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <Button.button disabled>Save changes</Button.button>
+          """
+        end)
+
+      assert html =~ ~s(<button)
+      assert html =~ ~s(disabled)
+      assert html =~ "Save changes"
+    end
   end
 
   describe "StatusBadge" do

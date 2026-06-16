@@ -22,7 +22,10 @@ defmodule AccrueAdmin.Components.Button do
     assigns = assign(assigns, :classes, classes)
 
     ~H"""
-    <a :if={@href} href={@href} class={@classes} aria-disabled={if(@disabled, do: "true", else: nil)} {@rest}>
+    <a :if={@href && !@disabled} href={@href} class={@classes} {@rest}>
+      <%= render_slot(@inner_block) %>
+    </a>
+    <a :if={@href && @disabled} class={@classes} aria-disabled="true" tabindex="-1" {@rest}>
       <%= render_slot(@inner_block) %>
     </a>
     <button :if={!@href} type={@type} class={@classes} disabled={@disabled} {@rest}>
