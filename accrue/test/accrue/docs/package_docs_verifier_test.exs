@@ -383,6 +383,195 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "layout"
   end
 
+  test "package docs verifier rejects Tailwind config files in accrue_admin assets" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    File.write!(
+      Path.join(tmp_dir, "accrue_admin/assets/tailwind.config.js"),
+      "module.exports = {}\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "tailwind.config.js"
+  end
+
+  test "package docs verifier rejects Tailwind --config in the asset build task" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    task_path = Path.join(tmp_dir, "accrue_admin/lib/mix/tasks/accrue_admin.assets.build.ex")
+    original = File.read!(task_path)
+
+    File.write!(
+      task_path,
+      String.replace(original, ~s("--minify"), ~s("--config", "tailwind.config.js", "--minify"),
+        global: false
+      )
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "--config"
+  end
+
+  test "package docs verifier rejects Tailwind directives in package CSS" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+
+    File.write!(
+      app_css_path,
+      File.read!(app_css_path) <> "\n@tailwind components;\n.ax-drift { @apply flex; }\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "@tailwind" or output =~ "@apply"
+  end
+
+  test "package docs verifier rejects positive Tailwind authoring guidance while allowing the D-14 sentence" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    guide_path = Path.join(tmp_dir, "accrue_admin/guides/admin_ui.md")
+    original = File.read!(guide_path)
+    assert original =~ "Tailwind utilities are not an authoring path"
+    File.write!(guide_path, original <> "\nAdd Tailwind utilities in HEEx for spacing.\n")
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "Tailwind authoring"
+  end
+
+  test "package docs verifier rejects z-index literals in package CSS" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    File.write!(app_css_path, File.read!(app_css_path) <> "\n.ax-drift { z-index: 999; }\n")
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "z-index literals"
+  end
+
+  test "package docs verifier rejects raw type declarations in package CSS" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+    File.write!(app_css_path, File.read!(app_css_path) <> "\n.ax-drift { font-size: 13px; }\n")
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "raw type declarations"
+  end
+
+  test "package docs verifier rejects missing semantic role tokens" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    theme_path = Path.join(tmp_dir, "accrue_admin/assets/css/theme.css")
+
+    File.write!(
+      theme_path,
+      String.replace(File.read!(theme_path), "  --ax-focus-ring-offset: var(--ax-base);\n", "",
+        global: false
+      )
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "semantic role tokens"
+    assert output =~ "--ax-focus-ring-offset"
+  end
+
+  test "package docs verifier rejects missing interactive role consumption in app.css" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+
+    drifted =
+      app_css_path
+      |> File.read!()
+      |> String.replace("var(--ax-interactive-hover)", "var(--ax-sunken)")
+      |> String.replace("var(--ax-interactive-active)", "var(--ax-sunken)")
+      |> String.replace("var(--ax-interactive-selected)", "var(--ax-sunken)")
+
+    File.write!(app_css_path, drifted)
+
+    assert File.read!(Path.join(tmp_dir, "accrue_admin/assets/css/theme.css")) =~
+             "--ax-interactive-hover"
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "interactive role consumption"
+  end
+
+  test "package docs verifier rejects low semantic role contrast while token names remain present" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    theme_path = Path.join(tmp_dir, "accrue_admin/assets/css/theme.css")
+
+    drifted =
+      theme_path
+      |> File.read!()
+      |> String.replace("--ax-disabled-text: #5d6a73;", "--ax-disabled-text: #eef3f7;",
+        global: false
+      )
+      |> String.replace("--ax-readonly-text: #5d6a73;", "--ax-readonly-text: #f1f5f8;",
+        global: false
+      )
+      |> String.replace(
+        "--ax-status-success-text: #2f6b4f;",
+        "--ax-status-success-text: #e9f5ee;", global: false)
+      |> String.replace(
+        "--ax-status-danger-on-solid: #fff;",
+        "--ax-status-danger-on-solid: #9b1c1c;", global: false)
+      |> String.replace("--ax-focus-ring: #174ea6;", "--ax-focus-ring: #fafbfc;", global: false)
+      |> String.replace("--ax-scrollbar-thumb: #5d6a73;", "--ax-scrollbar-thumb: #fff;",
+        global: false
+      )
+      |> String.replace("--ax-interactive-hover: #eef3ff;", "--ax-interactive-hover: #111418;",
+        global: false
+      )
+
+    File.write!(theme_path, drifted)
+
+    assert File.read!(theme_path) =~ "--ax-disabled-text:"
+    assert File.read!(theme_path) =~ "--ax-status-success-text:"
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "semantic role contrast" or output =~ "[foundation_contrast]"
+
+    assert output =~ "disabled" or output =~ "readonly" or output =~ "status" or output =~ "focus" or
+             output =~ "scrollbar" or output =~ "interactive"
+  end
+
   test "package docs verifier rejects Stripe-only language in adoption-proof-matrix.md" do
     tmp_dir =
       Path.join(
@@ -409,6 +598,22 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "adoption-proof-matrix.md"
   end
 
+  defp tmp_dir! do
+    tmp_dir =
+      Path.join(System.tmp_dir!(), "accrue-docs-verifier-#{System.unique_integer([:positive])}")
+
+    File.rm_rf!(tmp_dir)
+    on_exit(fn -> File.rm_rf(tmp_dir) end)
+    tmp_dir
+  end
+
+  defp run_verifier(tmp_dir) do
+    System.cmd("bash", [@script_path],
+      stderr_to_stdout: true,
+      env: [{"ROOT_DIR", tmp_dir}]
+    )
+  end
+
   defp copy_fixture!(relative_path, tmp_dir) do
     destination = Path.join(tmp_dir, relative_path)
     File.mkdir_p!(Path.dirname(destination))
@@ -419,6 +624,9 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     File.mkdir_p!(Path.join(tmp_dir, "accrue/guides"))
     File.mkdir_p!(Path.join(tmp_dir, "accrue_admin"))
     File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/assets/css"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/assets"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/lib/accrue_admin/dev"))
+    File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/lib/mix/tasks"))
     File.mkdir_p!(Path.join(tmp_dir, "accrue_portal"))
     File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host"))
     File.mkdir_p!(Path.join(tmp_dir, "examples/accrue_host/docs"))
@@ -445,7 +653,11 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("accrue_admin/mix.exs", tmp_dir)
     copy_fixture!("accrue_admin/README.md", tmp_dir)
     copy_fixture!("accrue_admin/assets/css/app.css", tmp_dir)
+    copy_fixture!("accrue_admin/assets/css/theme.css", tmp_dir)
+    copy_fixture!("accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex", tmp_dir)
+    copy_fixture!("accrue_admin/lib/mix/tasks/accrue_admin.assets.build.ex", tmp_dir)
     File.mkdir_p!(Path.join(tmp_dir, "accrue_admin/guides"))
+    copy_fixture!("accrue_admin/guides/admin_ui.md", tmp_dir)
     copy_fixture!("accrue_admin/guides/motion.md", tmp_dir)
     copy_fixture!("accrue_portal/mix.exs", tmp_dir)
     copy_fixture!("accrue_portal/README.md", tmp_dir)
@@ -453,6 +665,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("examples/accrue_host/playwright.config.js", tmp_dir)
     copy_fixture!("guides/testing-live-stripe.md", tmp_dir)
     copy_fixture!("scripts/ci/accrue_host_uat.sh", tmp_dir)
+    copy_fixture!("scripts/ci/verify_foundation_contrast.mjs", tmp_dir)
     copy_fixture!("examples/accrue_host/docs/adoption-proof-matrix.md", tmp_dir)
   end
 
