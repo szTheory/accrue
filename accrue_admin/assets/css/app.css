@@ -2220,6 +2220,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 /* Topbar search rendered as a search-input affordance (not a pill button). */
 .ax-search-trigger {
+  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   justify-content: flex-start;
   width: 16rem;
   max-width: 16rem;

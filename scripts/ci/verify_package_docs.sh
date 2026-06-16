@@ -24,21 +24,21 @@ require_fixed() {
   local file=$1
   local needle=$2
 
-  grep -Fq "$needle" "$file" || fail "$file is missing: $needle"
+  grep -Fq -- "$needle" "$file" || fail "$file is missing: $needle"
 }
 
 require_regex() {
   local file=$1
   local pattern=$2
 
-  grep -Eq "$pattern" "$file" || fail "$file does not match: $pattern"
+  grep -Eq -- "$pattern" "$file" || fail "$file does not match: $pattern"
 }
 
 require_absent_regex() {
   local file=$1
   local pattern=$2
 
-  if grep -Eq "$pattern" "$file"; then
+  if grep -Eq -- "$pattern" "$file"; then
     fail "$file must not match: $pattern"
   fi
 }
@@ -48,7 +48,7 @@ require_any_fixed() {
   shift
 
   for needle in "$@"; do
-    if grep -Fq "$needle" "$file"; then
+    if grep -Fq -- "$needle" "$file"; then
       return 0
     fi
   done
@@ -324,6 +324,135 @@ app_css="$ROOT_DIR/accrue_admin/assets/css/app.css"
 if grep -E '@media \((min|max)-width: [0-9.]+px\)' "$app_css" | grep -qv '\-\-ax-bp-'; then
   fail "$app_css must not have bare breakpoint @media without an --ax-bp-* annotation comment (DSY-01 — add a /* --ax-bp-NAME ↑/↓ */ comment to every breakpoint @media)"
 fi
+
+# Phase 188 foundation guards (FND-01..FND-06)
+theme_css="$ROOT_DIR/accrue_admin/assets/css/theme.css"
+admin_ui_md="$ROOT_DIR/accrue_admin/guides/admin_ui.md"
+asset_build_task="$ROOT_DIR/accrue_admin/lib/mix/tasks/accrue_admin.assets.build.ex"
+
+[[ ! -e "$ROOT_DIR/accrue_admin/assets/tailwind.config.js" ]] || fail "tailwind.config.js must stay absent (FND-04 Tailwind SSOT)"
+[[ ! -e "$ROOT_DIR/accrue_admin/assets/tailwind_preset.js" ]] || fail "tailwind_preset.js must stay absent (FND-04 Tailwind SSOT)"
+
+require_absent_regex "$asset_build_task" '--config'
+require_absent_regex "$app_css" '@tailwind|@apply'
+require_fixed "$admin_ui_md" "Tailwind utilities are not an authoring path"
+
+if grep -Eiq 'Add Tailwind utilities|Prefer Tailwind utilities|Use Tailwind utilities|Tailwind utilities in HEEx|utility-first|class="[^"]*(mt-|mb-|mx-|my-|p-|px-|py-|flex|grid|rounded|shadow|text-|bg-)|tailwind_preset|tailwind\.config\.js|host apps? configure Tailwind' "$admin_ui_md"; then
+  fail "$admin_ui_md contains positive Tailwind authoring guidance (FND-04 Tailwind authoring)"
+fi
+
+heex_utility_hit=$(
+  find "$ROOT_DIR/accrue_admin/lib" -type f \( -name '*.ex' -o -name '*.heex' \) -print0 |
+    xargs -0 perl -0ne '
+      while (/~H"""(.*?)"""/sg) {
+        my $template = $1;
+        while ($template =~ /class="([^"]*)"/g) {
+          my $class = $1;
+          next if $class =~ /\bax-/;
+          if ($class =~ /(^|\s)(mt-|mb-|mx-|my-|p-|px-|py-|flex\b|grid\b|hidden\b|block\b|rounded\b|shadow\b|text-|bg-)/) {
+            print "$ARGV: $class\n";
+          }
+        }
+      }
+    ' |
+    head -n 1
+)
+[[ -z "$heex_utility_hit" ]] || fail "HEEx Tailwind utility authoring is not allowed in accrue_admin/lib: $heex_utility_hit"
+
+z_index_hit=$(
+  perl -0ne '
+    s{/\*.*?\*/}{}gs;
+    while (/z-index\s*:\s*(-?[0-9]+)/gi) {
+      my $value = $1;
+      next if $value eq "-1" || $value eq "0" || $value eq "1";
+      print "$value\n";
+      last;
+    }
+  ' "$app_css"
+)
+[[ -z "$z_index_hit" ]] || fail "$app_css must not contain z-index literals outside micro-stacking exceptions (FND-02 z-index literals)"
+
+raw_type_hit=$(
+  awk '
+    /@font-face/ { in_font_face = 1 }
+    in_font_face && /\}/ { in_font_face = 0; next }
+    /ax-type-exception:/ { in_type_exception = 1; next }
+    /(font-size|font-weight|line-height|letter-spacing|font-family)[[:space:]]*:/ {
+      if (!in_font_face && !in_type_exception && $0 !~ /font-family:[[:space:]]*var\(--ax-font-sans\)/) {
+        print FNR ":" $0
+        exit
+      }
+    }
+    in_type_exception && /\}/ { in_type_exception = 0 }
+  ' "$app_css"
+)
+[[ -z "$raw_type_hit" ]] || fail "$app_css contains raw type declarations outside ax-type-exception allowlist (FND-01 raw type declarations): $raw_type_hit"
+
+semantic_tokens=(
+  --ax-focus-ring
+  --ax-focus-ring-offset
+  --ax-focus-shadow
+  --ax-scrollbar-thumb
+  --ax-scrollbar-track
+  --ax-scrollbar-thumb-hover
+  --ax-disabled-bg
+  --ax-disabled-border
+  --ax-disabled-text
+  --ax-disabled-opacity
+  --ax-disabled-cursor
+  --ax-readonly-bg
+  --ax-readonly-border
+  --ax-readonly-text
+  --ax-interactive-hover
+  --ax-interactive-active
+  --ax-interactive-selected
+  --ax-status-success-bg
+)
+
+for status in success warning danger info neutral; do
+  semantic_tokens+=(
+    "--ax-status-$status-bg"
+    "--ax-status-$status-border"
+    "--ax-status-$status-text"
+    "--ax-status-$status-solid"
+    "--ax-status-$status-on-solid"
+  )
+done
+
+for token in "${semantic_tokens[@]}"; do
+  count=$(grep -Ec "^[[:space:]]*$token:" "$theme_css" || true)
+  [[ "$count" -ge 3 ]] || fail "$theme_css is missing semantic role tokens in root/dark/system-dark scopes: $token"
+done
+
+if ! ROOT_DIR="$ROOT_DIR" node "$ROOT_DIR/scripts/ci/verify_foundation_contrast.mjs"; then
+  fail "semantic role contrast failed (FND-05); see [foundation_contrast] output above"
+fi
+
+require_css_rule_consumes() {
+  local file=$1
+  local token=$2
+  local selector_pattern=$3
+  local label=$4
+
+  perl -0e '
+    my ($file, $token, $selector_re) = @ARGV;
+    open my $fh, "<", $file or die "open $file: $!";
+    local $/;
+    my $css = <$fh>;
+    $css =~ s{/\*.*?\*/}{}gs;
+    while ($css =~ /([^{}]+)\{([^{}]*)\}/g) {
+      my ($selector, $body) = ($1, $2);
+      if ($selector =~ /$selector_re/ && $body =~ /\Q$token\E/) {
+        exit 0;
+      }
+    }
+    exit 1;
+  ' "$file" "$token" "$selector_pattern" || fail "$file is missing interactive role consumption for $label ($token)"
+}
+
+require_css_rule_consumes "$app_css" "--ax-interactive-hover" ':hover' "interactive role consumption hover"
+require_css_rule_consumes "$app_css" "--ax-interactive-active" ':active' "interactive role consumption active"
+require_css_rule_consumes "$app_css" "--ax-interactive-selected" 'aria-current|aria-selected|active|selected' "interactive role consumption selected/current"
 
 # Motion antipattern guards (Phase 177, MOT-01)
 if grep -qE 'transition:\s*all\b' "$app_css"; then
