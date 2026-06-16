@@ -37,11 +37,11 @@ and the contributor working in the component system. 33 requirements across 8 th
 ### FND — Foundations (tokens, layers, type, dark mode)
 
 - [x] **FND-01**: Composed typography bundles exist as tokens (family + size + weight + line-height + tracking) and primitives consume them instead of ad-hoc per-property utility soup.
-- [ ] **FND-02**: A formal z-index/layer system (base → sticky → dropdown → popover → drawer → modal → toast) is tokenized; every overlay and sticky element references it and no ad-hoc z-index literals remain.
+- [x] **FND-02**: A formal z-index/layer system (base → sticky → dropdown → popover → drawer → modal → toast) is tokenized; every overlay and sticky element references it and no ad-hoc z-index literals remain.
 - [x] **FND-03**: The reading-measure token (`--ax-measure`) is applied to prose and dense surfaces so long text and wide tables stay readable at every breakpoint.
 - [x] **FND-04**: The inert Tailwind config is resolved (removed or explicitly documented as reference-only) so there is one unambiguous styling source of truth.
 - [ ] **FND-05**: Every semantic role — including focus rings, scrollbars, and disabled states — has a correct, contrast-passing value in both light and dark (no role renders wrong or invisible in dark mode).
-- [ ] **FND-06**: Motion-token coverage is complete for every animated surface, with `prefers-reduced-motion` collapsing travel/overshoot while preserving crossfades.
+- [x] **FND-06**: Motion-token coverage is complete for every animated surface, with `prefers-reduced-motion` collapsing travel/overshoot while preserving crossfades.
 
 ### CMP — Component systematization (the "Storybook lens")
 
@@ -97,11 +97,11 @@ and the contributor working in the component system. 33 requirements across 8 th
 |-------------|-------|--------|
 | VER-01 | 187 | Complete |
 | FND-01 | 188 | Complete |
-| FND-02 | 188 | Pending |
+| FND-02 | 188 | Complete |
 | FND-03 | 188 | Complete |
 | FND-04 | 188 | Complete |
 | FND-05 | 188 | Pending |
-| FND-06 | 188 | Pending |
+| FND-06 | 188 | Complete |
 | CMP-01 | 189 | Pending |
 | CMP-02 | 189 | Pending |
 | CMP-03 | 189 | Pending |
