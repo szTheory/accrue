@@ -498,7 +498,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 .ax-topbar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: var(--ax-z-sticky);
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -833,7 +833,7 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-detail-drawer-shell {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: var(--ax-z-drawer);
 }
 
 .ax-detail-drawer-backdrop {
@@ -1119,6 +1119,8 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-flash-group {
   display: grid;
+  position: relative;
+  z-index: var(--ax-z-toast);
 }
 
 .ax-flash {
@@ -1730,7 +1732,7 @@ html.accrue-admin[data-theme="dark"] .ax-button-ghost {
   border-radius: var(--ax-radius-md);
   background: var(--ax-elevated);
   box-shadow: var(--ax-shadow-sm);
-  z-index: 20;
+  z-index: var(--ax-z-dropdown);
 }
 
 .ax-dropdown-item {
@@ -2073,7 +2075,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-skip-link:focus {
   left: 1rem;
   top: 1rem;
-  z-index: 20;
+  z-index: var(--ax-z-sticky);
   padding: 0.5rem 0.75rem;
   border-radius: var(--ax-radius-sm);
   background: var(--ax-accent);
@@ -2124,7 +2126,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     width: min(18rem, 85vw);
     height: 100vh;
     max-height: 100dvh;
-    z-index: 40;
+    z-index: var(--ax-z-sticky);
     overflow-y: auto;
     margin: 0;
     box-sizing: border-box;

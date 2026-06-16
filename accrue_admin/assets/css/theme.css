@@ -125,10 +125,14 @@ html.accrue-admin {
     transform var(--ax-dur-2) var(--ax-ease-out),
     box-shadow var(--ax-dur-2) var(--ax-ease-out);
 
-  --ax-z-topbar: 10;
-  --ax-z-popover: 20;
-  --ax-z-drawer: 30;
-  --ax-z-modal: 40;
+  --ax-z-base: 0;
+  --ax-z-sticky: 100;
+  --ax-z-dropdown: 200;
+  --ax-z-popover: 300;
+  --ax-z-drawer: 400;
+  --ax-z-modal: 500;
+  --ax-z-toast: 600;
+  --ax-z-topbar: var(--ax-z-sticky); /* deprecated compatibility alias; use --ax-z-sticky */
 
   --ax-base: var(--accrue-paper);
   --ax-elevated: #ffffff;
