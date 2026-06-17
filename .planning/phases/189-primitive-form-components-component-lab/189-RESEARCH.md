@@ -894,22 +894,25 @@ This phase contains no authentication, secrets handling, webhook processing, or 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Spinner/skeleton/tooltip/checkbox/radio/toggle component existence**
    - What we know: no `.ex` files found in `accrue_admin/lib/accrue_admin/components/` for these families.
    - What's unclear: Are they defined elsewhere? Inline patterns only? Or genuinely missing?
    - Recommendation: Wave 0 task — run `grep -rn "ax-skeleton\|ax-spinner\|ax-toggle\|ax-checkbox" accrue_admin/lib/` to confirm and make the component-existence decision.
+   - **RESOLVED (planning):** Plan 02 creates the 8 missing primitive modules unconditionally; Plan 01 Wave 0 step runs the audit grep first.
 
 2. **NDJSON cell-id surface slug for kitchen observations**
    - What we know: the grammar is `p187__{surface}__{mode}__{theme}__{state}__{dXX}`; existing component rows use surface names like `button`, `app-shell`.
    - What's unclear: should Phase 189 kitchen observations use `component-kitchen` (the route slug) or per-family (`button`, `input`, etc.)?
    - Recommendation: Use per-family surface slugs matching the existing Phase-187 component surface names. This allows Phase 192 to diff individual family rows rather than a monolithic kitchen row.
+   - **RESOLVED (planning):** Plan 06 keys observations to the frozen `p187__{surface}__…` grammar with the Phase-187 state-vocabulary mapping (`disabled`→`disabled-readonly`, etc.).
 
 3. **Mobile state-grid layout at 390px**
    - What we know: the UI-SPEC says "stack columns vertically OR show light only with a Dark tab toggle."
    - What's unclear: which is preferred?
    - Recommendation: Stack vertically (simpler, no JS, dark column still rendered and accessible). Add `@media (max-width: 599.98px)` breakpoint with `grid-template-columns: 1fr`.
+   - **RESOLVED (planning):** Plan 01 Task 1 adds the `@media (max-width: 599.98px)` rule stacking columns vertically (no JS).
 
 ---
 
