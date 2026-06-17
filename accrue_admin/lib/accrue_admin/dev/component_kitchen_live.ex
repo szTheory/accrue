@@ -178,7 +178,7 @@ if Mix.env() != :prod do
                   <dl class="ax-dev-token-dl">
                     <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
                     <%= for token <- entry.tokens do %>
-                      <dd class="ax-dev-token"><span class="ax-token-swatch" style={"background: var(#{token})"}></span><code class="ax-type-code-xs"><%= token %></code></dd>
+                      <dd class="ax-dev-token"><span :if={color_token?(token)} class="ax-token-swatch" style={"background: var(#{token})"}></span><code :if={!color_token?(token)} class="ax-type-code-xs ax-token-kind"><%= token_kind(token) %></code><code class="ax-type-code-xs"><%= token %></code></dd>
                     <% end %>
                   </dl>
                 </div>
@@ -200,7 +200,7 @@ if Mix.env() != :prod do
                   <dl class="ax-dev-token-dl">
                     <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
                     <%= for token <- entry.tokens do %>
-                      <dd class="ax-dev-token"><span class="ax-token-swatch" style={"background: var(#{token})"}></span><code class="ax-type-code-xs"><%= token %></code></dd>
+                      <dd class="ax-dev-token"><span :if={color_token?(token)} class="ax-token-swatch" style={"background: var(#{token})"}></span><code :if={!color_token?(token)} class="ax-type-code-xs ax-token-kind"><%= token_kind(token) %></code><code class="ax-type-code-xs"><%= token %></code></dd>
                     <% end %>
                   </dl>
                 </div>
@@ -223,7 +223,7 @@ if Mix.env() != :prod do
                   <dl class="ax-dev-token-dl">
                     <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
                     <%= for token <- entry.tokens do %>
-                      <dd class="ax-dev-token"><span class="ax-token-swatch" style={"background: var(#{token})"}></span><code class="ax-type-code-xs"><%= token %></code></dd>
+                      <dd class="ax-dev-token"><span :if={color_token?(token)} class="ax-token-swatch" style={"background: var(#{token})"}></span><code :if={!color_token?(token)} class="ax-type-code-xs ax-token-kind"><%= token_kind(token) %></code><code class="ax-type-code-xs"><%= token %></code></dd>
                     <% end %>
                   </dl>
                 </div>
@@ -324,7 +324,7 @@ if Mix.env() != :prod do
 
             <div class="ax-dev-stack">
               <p class="ax-label">Token reference</p>
-              <p class="ax-body ax-dev-caption">Every foundation token behind the specimens above. The chip shows the resolved color where the token is a color; structural tokens (z-index, measure, fonts) leave it empty.</p>
+              <p class="ax-body ax-dev-caption">Every foundation token behind the specimens above. Color tokens show a resolved-color chip; structural tokens (z-index, measure, fonts, shadows, motion) show their kind instead.</p>
               <dl class="ax-dev-token-dl">
                 <%= for entry <- ComponentRegistry.entries(), String.starts_with?(entry.family, "foundation-") do %>
                   <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
@@ -467,6 +467,32 @@ if Mix.env() != :prod do
 
     defp default_brand do
       %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}
+    end
+
+    # Token-swatch classification. Color tokens get a resolved-color chip; structural
+    # tokens (fonts, lengths, z-index, shadows, motion) can't render as a background,
+    # so they get a small "kind" tag instead of a misleading empty chip.
+    defp color_token?(token), do: not non_color_token?(token)
+
+    defp non_color_token?(token) do
+      String.contains?(token, "-font") or
+        String.contains?(token, "tracking") or
+        String.contains?(token, "shadow") or
+        String.contains?(token, "transition") or
+        String.starts_with?(token, "--ax-z-") or
+        token == "--ax-measure"
+    end
+
+    defp token_kind(token) do
+      cond do
+        String.contains?(token, "-font") -> "font"
+        String.contains?(token, "tracking") -> "tracking"
+        String.contains?(token, "shadow") -> "shadow"
+        String.contains?(token, "transition") -> "motion"
+        String.starts_with?(token, "--ax-z-") -> "z-index"
+        token == "--ax-measure" -> "measure"
+        true -> "color"
+      end
     end
   end
 end

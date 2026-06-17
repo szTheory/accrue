@@ -3,6 +3,7 @@ import { LiveSocket } from "../../deps/phoenix_live_view/priv/static/phoenix_liv
 import { initClipboardControls } from "./hooks/clipboard";
 import { initThemeControls } from "./hooks/accrue_theme";
 import { initShellNav } from "./hooks/accrue_shell_nav";
+import { initDropdowns } from "./hooks/dropdown";
 import { CommandPalette } from "./hooks/command_palette";
 import { SidebarCollapse } from "./hooks/sidebar_collapse";
 
@@ -18,6 +19,7 @@ ready(() => {
   initClipboardControls();
   initThemeControls();
   initShellNav();
+  initDropdowns();
 });
 
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");

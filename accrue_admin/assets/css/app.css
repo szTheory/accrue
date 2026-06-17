@@ -247,9 +247,8 @@ button {
   max-width: var(--ax-measure);
 }
 
-/* Resolved-color chip beside a token name. Color tokens fill the chip; structural
-   tokens (z-index, measure, fonts, transitions) leave it empty — an honest cue
-   that the token isn't a color. */
+/* Resolved-color chip beside a token name — rendered only for color-valued tokens,
+   so it always shows a real color rather than an empty (broken-looking) box. */
 .ax-token-swatch {
   display: inline-block;
   flex: none;
@@ -258,6 +257,15 @@ button {
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-xs, 3px);
   vertical-align: middle;
+}
+
+/* Stands in for the swatch on structural tokens (font/length/z-index/shadow/motion):
+   a small muted tag naming the token's kind. Sizing comes from ax-type-code-xs. */
+.ax-token-kind {
+  flex: none;
+  min-width: 3.5rem;
+  color: var(--ax-muted);
+  text-transform: uppercase;
 }
 
 .ax-sidebar {
@@ -1158,6 +1166,12 @@ a.ax-kpi-card--linked:focus-visible {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   color: var(--ax-primary);
   font-weight: 600;
+}
+
+/* Current crumb reads as bold primary text, not a selected pill — opt out of the
+   global [aria-current="page"] selected-background utility (higher specificity wins). */
+.ax-breadcrumbs .ax-breadcrumbs-current {
+  background: none;
 }
 
 .ax-flash-group {
