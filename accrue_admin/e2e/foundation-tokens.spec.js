@@ -93,6 +93,11 @@ test.describe("foundation tokens - computed styles", () => {
         await expect(page.locator(`[data-ax-foundation-layer="${layer}"]`).first()).toHaveCSS("z-index", value);
       }
 
+      // Establish keyboard input modality before focusing the specimen. The focus
+      // ring is gated on :focus-visible, which only engages for keyboard-originated
+      // focus; prior mouse interactions in this iteration (the active-state specimen
+      // uses mouse.down) otherwise leave a programmatic .focus() without :focus-visible.
+      await page.keyboard.press("Tab");
       await focus.focus();
       await expect(focus).toHaveCSS("outline-width", "2px");
       expect(await styleOf(focus, "outlineStyle")).not.toBe("none");
