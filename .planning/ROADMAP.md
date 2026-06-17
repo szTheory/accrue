@@ -159,7 +159,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 189-06-PLAN.md — Verification harness: axe sweep on kitchen + getComputedStyle/theme-delta/overflow/cursor/disabled probes
+- [x] 189-06-PLAN.md — Verification harness: axe sweep on kitchen + getComputedStyle/theme-delta/overflow/cursor/disabled probes
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -309,7 +309,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
-| 189. Primitive & form components + component lab | v1.53 | 5/7 | In Progress|  |
+| 189. Primitive & form components + component lab | v1.53 | 6/7 | In Progress|  |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
 | 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
