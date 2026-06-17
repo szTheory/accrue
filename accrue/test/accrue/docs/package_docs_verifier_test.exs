@@ -669,6 +669,51 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("examples/accrue_host/docs/adoption-proof-matrix.md", tmp_dir)
   end
 
+  test "package docs verifier rejects per-page CSS overrides of primitive ax-* classes (CMP-05)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    # Inject a violating page-specific CSS file (NOT app.css / theme.css)
+    page_css_dir = Path.join(tmp_dir, "accrue_admin/assets/css")
+    File.mkdir_p!(page_css_dir)
+
+    File.write!(
+      Path.join(page_css_dir, "page-overrides.css"),
+      ".ax-button { font-size: 1rem; }\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "CMP-05"
+  end
+
+  test "package docs verifier rejects raw inline style= on primitive ax-* elements (CMP-05)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    kitchen_path = Path.join(tmp_dir, "accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex")
+    original = File.read!(kitchen_path)
+
+    # Inject a style= attribute on an element that also carries ax-button (inside a ~H""" heredoc)
+    drifted =
+      String.replace(
+        original,
+        ~s(<Button.button variant="primary" type="button">Primary action</Button.button>),
+        ~s(<button class="ax-button ax-button-primary" style="color: red;" type="button">Primary action</button>),
+        global: false
+      )
+
+    File.write!(kitchen_path, drifted)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "CMP-05"
+  end
+
   defp extract_version!(relative_path) do
     "../../../../#{relative_path}"
     |> Path.expand(__DIR__)

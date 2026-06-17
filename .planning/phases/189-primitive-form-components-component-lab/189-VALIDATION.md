@@ -1,10 +1,11 @@
 ---
 phase: 189
 slug: primitive-form-components-component-lab
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: approved
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-17
+approval_date: 2026-06-17
 ---
 
 # Phase 189 — Validation Strategy
@@ -56,11 +57,11 @@ each task must reference one row above or a Wave 0 dependency.*
 
 ## Wave 0 Requirements
 
-- [ ] Audit missing primitive modules before writing registry entries — `grep -rn "ax-skeleton\|ax-spinner\|ax-toggle\|ax-checkbox\|ax-tooltip" accrue_admin/lib/` (textarea, checkbox, radio, toggle, spinner, skeleton, tooltip, inline-id, empty-state); decide create-module vs canonize-CSS-only per family.
-- [ ] `accrue_admin/test/accrue_admin/dev/component_registry_test.exs` — extend with state-matrix structure test (e) and theme-column data-attribute test (f), in lockstep with the registry schema change (D-08).
-- [ ] `accrue_admin/e2e/admin-interactions.spec.js` — add component-kitchen probe block (focus ring, overflow, resolved-color theme delta, disabled-affordance, cursor) writing the frozen `p187__{surface}__{mode}__{theme}__{state}__{dXX}` grammar.
-- [ ] `accrue_admin/assets/css/app.css` — add `.ax-dev-state-grid` rules (no existing definition).
-- [ ] `accrue_admin/assets/css/theme.css` — add sub-tree `.accrue-admin [data-theme="dark"]` descendant selector with the FULL dark token block (D-07 critical path).
+- [x] Audit missing primitive modules before writing registry entries — `grep -rn "ax-skeleton\|ax-spinner\|ax-toggle\|ax-checkbox\|ax-tooltip" accrue_admin/lib/` (textarea, checkbox, radio, toggle, spinner, skeleton, tooltip, inline-id, empty-state); decide create-module vs canonize-CSS-only per family. *(Done: Plan 02)*
+- [x] `accrue_admin/test/accrue_admin/dev/component_registry_test.exs` — extend with state-matrix structure test (e) and theme-column data-attribute test (f), in lockstep with the registry schema change (D-08). *(Done: Plan 03)*
+- [x] `accrue_admin/e2e/admin-interactions.spec.js` — add component-kitchen probe block (focus ring, overflow, resolved-color theme delta, disabled-affordance, cursor) writing the frozen `p187__{surface}__{mode}__{theme}__{state}__{dXX}` grammar. *(Done: Plan 06)*
+- [x] `accrue_admin/assets/css/app.css` — add `.ax-dev-state-grid` rules (no existing definition). *(Done: Plan 01)*
+- [x] `accrue_admin/assets/css/theme.css` — add sub-tree `.accrue-admin [data-theme="dark"]` descendant selector with the FULL dark token block (D-07 critical path). *(Done: Plan 01)*
 
 ---
 
@@ -74,11 +75,22 @@ each task must reference one row above or a Wave 0 dependency.*
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references (missing-primitive audit + harness extensions)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (missing-primitive audit + harness extensions)
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** 2026-06-17
+
+## Phase 189 Complete
+
+Phase 189 completed across Plans 01–07. Evidence:
+- Plan 01: CSS foundations (ax-dev-state-grid, D-07 sub-tree dark selector, structural tests (e)/(f))
+- Plan 02: 8 new primitive component modules (textarea, checkbox, radio, toggle, spinner, tooltip, empty_state, inline_id)
+- Plan 03: Registry-driven two-column state-matrix renderer in ComponentKitchenLive; test (g) as mounted HTML assertion
+- Plan 04: Button/input/select/field CSS root fixes (focus ring, error tokens, disabled tokens, type exceptions)
+- Plan 05: StatusBadge status-token migration + remaining primitive CSS (inline-id, tooltip, toggle, spinner, empty-state)
+- Plan 06: Verification harness extensions (axe sweep on kitchen, getComputedStyle probes, NDJSON observations, D-07 definitive themeColumnDeltaProbe)
+- Plan 07: CMP-05 verifier guard (per-page CSS override detection + inline style= detection) + negative fixtures + VALIDATION.md close-out
