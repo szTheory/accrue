@@ -2976,6 +2976,22 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 [data-ax-foundation-layer="modal"] { z-index: var(--ax-z-modal); }
 [data-ax-foundation-layer="toast"] { z-index: var(--ax-z-toast); }
 
+/* Elevation specimen — a diagonal cascade so the --ax-z-* order reads at a glance:
+   sticky sits at the back, toast on top. The cards are emitted in REVERSED DOM order
+   (toast first), so it is the z-index above — not source order — that keeps each higher
+   layer painted over the one beneath it. Without the tokens, the last-painted (sticky)
+   would win; the cascade is the visible proof the scale is doing the work. */
+.ax-foundation-layer-stack {
+  position: relative;
+  min-height: 13.5rem;
+  margin-top: var(--ax-space-sm);
+}
+
+.ax-foundation-layer-stack .ax-foundation-layer {
+  position: absolute;
+  width: 12rem;
+}
+
 /* Interactive-state specimens render all three roles at rest so the maintainer
    can compare them side by side on one consistent control (a secondary button). */
 [data-ax-foundation-specimen="interactive-hover"] {

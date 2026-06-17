@@ -289,13 +289,21 @@ if Mix.env() != :prod do
               </div>
             </div>
 
-            <div class="ax-dev-grid">
-              <%= for {layer, token} <- [{"sticky", "--ax-z-sticky"}, {"dropdown", "--ax-z-dropdown"}, {"popover", "--ax-z-popover"}, {"drawer", "--ax-z-drawer"}, {"modal", "--ax-z-modal"}, {"toast", "--ax-z-toast"}] do %>
-                <div class="ax-foundation ax-foundation-layer ax-card" data-ax-foundation-layer={layer} style={"position: relative; z-index: var(#{token});"}>
-                  <p class="ax-label"><%= layer %></p>
-                  <code class="ax-type-code-xs"><%= token %></code>
-                </div>
-              <% end %>
+            <%!-- Elevation scale: a diagonal cascade that makes the z-index order visible —
+                  sticky at the back, toast on top. Emitted in reversed DOM order (toast first)
+                  so the --ax-z-* tokens, not source order, decide what paints on top. Each card
+                  keeps data-ax-foundation-layer + a var()-based z-index (the contract the
+                  foundation-tokens spec asserts). --%>
+            <div class="ax-dev-stack">
+              <p class="ax-label">Elevation · z-index scale</p>
+              <div class="ax-foundation-layer-stack">
+                <%= for {{layer, token}, i} <- Enum.reverse(Enum.with_index([{"sticky", "--ax-z-sticky"}, {"dropdown", "--ax-z-dropdown"}, {"popover", "--ax-z-popover"}, {"drawer", "--ax-z-drawer"}, {"modal", "--ax-z-modal"}, {"toast", "--ax-z-toast"}])) do %>
+                  <div class="ax-foundation ax-foundation-layer ax-card" data-ax-foundation-layer={layer} style={"top: #{i * 1.85}rem; left: #{i * 2.1}rem; z-index: var(#{token});"}>
+                    <p class="ax-label"><%= layer %></p>
+                    <code class="ax-type-code-xs"><%= token %></code>
+                  </div>
+                <% end %>
+              </div>
             </div>
 
             <div class="ax-dev-grid">
