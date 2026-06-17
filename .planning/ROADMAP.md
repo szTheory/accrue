@@ -154,7 +154,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 189-03-PLAN.md — Registry-driven two-column state-matrix renderer in ComponentKitchenLive + all 14 family entries
-- [ ] 189-04-PLAN.md — Button/input/select/field CSS root fixes (focus ring, error tokens, disabled/readonly tokens, type exceptions)
+- [x] 189-04-PLAN.md — Button/input/select/field CSS root fixes (focus ring, error tokens, disabled/readonly tokens, type exceptions)
 - [ ] 189-05-PLAN.md — StatusBadge status-token migration + remaining primitive CSS (inline-id, tooltip, toggle, spinner, empty-state)
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -309,7 +309,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
-| 189. Primitive & form components + component lab | v1.53 | 3/7 | In Progress|  |
+| 189. Primitive & form components + component lab | v1.53 | 4/7 | In Progress|  |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
 | 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
