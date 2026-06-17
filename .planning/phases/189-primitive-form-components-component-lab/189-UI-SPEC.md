@@ -36,9 +36,18 @@ No new design system tooling in scope (TOOL-01 deferred, v1.53 guardrails).
 All spacing consumed via `--ax-space-*` tokens in `theme.css`. The token layer
 is frozen. Phase 189 adds no new spacing values.
 
+### Pre-existing frozen foundation exception
+
+`--ax-space-2xs` (2px) is a **frozen Phase-187/188 foundation token** declared in
+`theme.css` lines 26-33. It is NOT introduced or modified by Phase 189. It exists
+for dense micro-gaps (table cell internals, chip internals) that operate below the
+grid-alignment concern WCAG applies to layout spacing. Phase 189 consumes this
+token unchanged and declares no new sub-4px spacing values.
+
+**Phase-189 spacing contract (values this phase adds or applies — all are multiples of 4):**
+
 | Token | px equivalent | Usage in this phase |
 |-------|---------------|---------------------|
-| `--ax-space-2xs` | 2px | Dense table/chip micro-gaps inside primitive internals |
 | `--ax-space-xs` | 4px | Icon-to-label gap inside buttons; checkbox/radio internal gap |
 | `--ax-space-sm` | 8px | Field help/error text margin-top; badge dot-to-label gap |
 | `--ax-space-md` | 16px | Field stacking gap; state-grid cell internal padding |
@@ -46,6 +55,19 @@ is frozen. Phase 189 adds no new spacing values.
 | `--ax-space-xl` | 32px | Family-to-family gap in the `.ax-dev-state-grid` renderer |
 | `--ax-space-2xl` | 48px | Page-level lab section breaks |
 | `--ax-space-3xl` | 64px | (unused in this phase) |
+
+**Complete frozen token reference (for consumption traceability):**
+
+| Token | px equivalent | Phase-189 status |
+|-------|---------------|-----------------|
+| `--ax-space-2xs` | 2px | Pre-existing frozen exception — Phase 187/188 origin; consumed unchanged; not declared by this phase |
+| `--ax-space-xs` | 4px | Phase-189 contract — 4px multiple |
+| `--ax-space-sm` | 8px | Phase-189 contract — 4px multiple |
+| `--ax-space-md` | 16px | Phase-189 contract — 4px multiple |
+| `--ax-space-lg` | 24px | Phase-189 contract — 4px multiple |
+| `--ax-space-xl` | 32px | Phase-189 contract — 4px multiple |
+| `--ax-space-2xl` | 48px | Phase-189 contract — 4px multiple |
+| `--ax-space-3xl` | 64px | Phase-189 contract — 4px multiple |
 
 **Touch target exception:** interactive controls (buttons, checkboxes, radio,
 toggle, icon-buttons) must reach a 44px minimum touch-target height or width.
