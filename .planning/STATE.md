@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-last_updated: "2026-06-17T20:52:30.175Z"
-last_activity: 2026-06-17 -- Phase 189 planning complete
+last_updated: "2026-06-17T21:11:11.978Z"
+last_activity: 2026-06-17
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 19
-  completed_plans: 12
+  completed_plans: 13
   percent: 33
 ---
 
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 189 — primitive & form components + component lab (next to plan)
+**Current focus:** Phase 189 — primitive-form-components-component-lab
 
 ## Current Position
 
-Phase: 188 (foundations-hardening) — COMPLETE (2026-06-17, human_review: approved)
-Plan: 7 of 7 complete
+Phase: 189 (primitive-form-components-component-lab) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-06-17 -- Phase 189 planning complete
+Last activity: 2026-06-17
 
 ## Post-v1.48 Pause Rule
 
@@ -143,6 +143,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 188 P04 | 5 min | 2 tasks | 5 files |
 | Phase 188 P05 | 9 min | 2 tasks | 5 files |
 | Phase 188 P06 | 38 min | 2 tasks | 3 files |
+| Phase 189 P01 | 3 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -205,6 +206,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 187]: Static baseline component rows resolve manifest /dev/components to the actual /billing/dev/components route. — The admin dev component kitchen is mounted under the /billing admin scope, and resolving it in the harness keeps component/component-group evidence reachable without changing manifest identity.
 - [Phase 187]: Permission-denied forcing stays inside E2E test support. — Plan 187-04 uses an explicit `member` token and `login-member` helper route without changing production admin auth.
 - [Phase 187]: Live interaction probes record observations instead of corrected-behavior regressions. — Plan 187-04 writes trace-backed NDJSON rows for current behavior and leaves permanent regression tests to Phase 191 fixes.
+- [Phase 189]: D-07 CSS gate: sub-tree .accrue-admin [data-theme='dark'] selector with FULL dark token set is the CSS prerequisite; browser-level color delta verified in Plan 06 themeColumnDeltaProbe
+- [Phase 189]: Structural tests (e) and (f) are data-contract-only (no page mount); HTML mount assertions for data-ax-state and data-theme attributes are Plan 03 test (g)
 
 ### Pending Todos
 
@@ -251,9 +254,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-17T18:54:34.038Z
+Last session: 2026-06-17T21:11:11.973Z
 Stopped at: Phase 189 UI-SPEC approved
-Resume file: .planning/phases/189-primitive-form-components-component-lab/189-UI-SPEC.md
+Resume file: None
 
 ## Operator Next Steps
 
