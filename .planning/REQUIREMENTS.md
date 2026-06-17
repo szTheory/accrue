@@ -47,8 +47,8 @@ and the contributor working in the component system. 33 requirements across 8 th
 
 - [x] **CMP-01**: Every component is exercised in the `/dev/components` lab across its full state matrix (default / hover / focus / active / pressed / disabled / loading / selected / empty / error / overflow) in both light and dark.
 - [x] **CMP-02**: Each component renders correctly with long/overflowing content (long IDs, names, URLs, module names) without clipping, overlap, or layout break.
-- [ ] **CMP-03**: Each interactive component has the correct accessible role, full keyboard operation, visible focus, and accessible name; non-interactive elements expose no misleading affordances (e.g. no hover state on empty-state heroes).
-- [ ] **CMP-04**: Disabled and read-only states are visually unmistakable (disabled looks disabled; enabled never looks disabled), and button text never collides with its background color.
+- [x] **CMP-03**: Each interactive component has the correct accessible role, full keyboard operation, visible focus, and accessible name; non-interactive elements expose no misleading affordances (e.g. no hover state on empty-state heroes).
+- [x] **CMP-04**: Disabled and read-only states are visually unmistakable (disabled looks disabled; enabled never looks disabled), and button text never collides with its background color.
 - [ ] **CMP-05**: Component-level visual/brand fixes are made at the component root so they propagate to every consuming page (no per-page patching).
 
 ### GRP — Meta-component cohesion (groups of components)
@@ -104,8 +104,8 @@ and the contributor working in the component system. 33 requirements across 8 th
 | FND-06 | 188 | Complete |
 | CMP-01 | 189 | Complete |
 | CMP-02 | 189 | Complete |
-| CMP-03 | 189 | Pending |
-| CMP-04 | 189 | Pending |
+| CMP-03 | 189 | Complete |
+| CMP-04 | 189 | Complete |
 | CMP-05 | 189 | Pending |
 | GRP-01 | 190 | Pending |
 | GRP-02 | 190 | Pending |
