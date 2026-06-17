@@ -37,21 +37,23 @@ if Mix.env() != :prod do
           family: "button",
           variant: "secondary",
           ax_class: "ax-button ax-button-secondary",
-          tokens: ["--ax-border", "--ax-elevated", "--ax-transition-colors"]
+          tokens: ["--ax-border-strong", "--ax-elevated", "--ax-primary"]
         },
         %{
           family: "button",
           variant: "ghost",
           ax_class: "ax-button ax-button-ghost",
-          tokens: ["--ax-border", "--ax-elevated", "--ax-transition-colors"]
+          tokens: ["--ax-primary", "--ax-interactive-hover", "--ax-transition-colors"]
         },
         # danger is the essential variant: exists in button_variant_class/1 but was
         # absent from the kitchen before DSY-03. Registry must include it (RESEARCH #4).
+        # Filled destructive control uses the status-danger-solid pair (AA-tuned per
+        # theme); the old --ax-danger/--ax-base mapping rendered a white button in dark.
         %{
           family: "button",
           variant: "danger",
           ax_class: "ax-button ax-button-danger",
-          tokens: ["--ax-danger", "--ax-danger-readable", "--ax-transition-colors"]
+          tokens: ["--ax-status-danger-solid", "--ax-status-danger-on-solid", "--ax-transition-colors"]
         },
 
         # ── StatusBadge family — 5 tone variants from status_tone/1 ────────────────

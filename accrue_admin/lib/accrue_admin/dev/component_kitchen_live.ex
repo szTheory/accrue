@@ -272,14 +272,14 @@ if Mix.env() != :prod do
             <p class="ax-label">Review foundations</p>
             <h3 class="ax-heading">Foundation Tokens</h3>
 
-            <div class="ax-dev-grid">
-              <div class="ax-foundation ax-foundation-type" data-ax-foundation-specimen="type-body">
-                <p class="ax-type-body">Typography roles · body</p>
-                <code class="ax-type-code-xs">--ax-type-body-font</code>
-              </div>
+            <div class="ax-foundation-type-stack">
               <div class="ax-foundation ax-foundation-type" data-ax-foundation-specimen="type-display">
                 <p class="ax-type-display">Display</p>
                 <code class="ax-type-code-xs">--ax-type-display-font</code>
+              </div>
+              <div class="ax-foundation ax-foundation-type" data-ax-foundation-specimen="type-body">
+                <p class="ax-type-body">Body — the resting role for paragraphs, descriptions, and table copy.</p>
+                <code class="ax-type-code-xs">--ax-type-body-font</code>
               </div>
               <div class="ax-foundation ax-foundation-measure" data-ax-foundation-specimen="measure-prose">
                 <p class="ax-body ax-prose">Reading measure keeps explanatory copy to a durable line length without capping tables.</p>
@@ -303,9 +303,9 @@ if Mix.env() != :prod do
             </div>
 
             <div class="ax-dev-grid">
-              <button class="ax-button ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-hover" type="button">Hover</button>
-              <button class="ax-button ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-active" type="button">Active</button>
-              <a class="ax-sidebar-link ax-sidebar-link-active ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-selected" aria-current="page">Selected</a>
+              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-hover" type="button">Hover</button>
+              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-active" type="button">Active</button>
+              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-selected" type="button" aria-pressed="true">Selected</button>
             </div>
 
             <div class="ax-dev-grid">
@@ -317,7 +317,7 @@ if Mix.env() != :prod do
 
               <%= for status <- ["success", "warning", "danger", "info", "neutral"] do %>
                 <div
-                  class={"ax-status-badge ax-foundation ax-foundation-status ax-foundation-status-#{status}"}
+                  class={"ax-foundation-swatch ax-foundation ax-foundation-status ax-foundation-status-#{status}"}
                   data-ax-foundation-status={status}
                   style={"background: var(--ax-status-#{status}-bg); color: var(--ax-status-#{status}-text); border-color: var(--ax-status-#{status}-border);"}
                 >

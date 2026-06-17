@@ -260,8 +260,8 @@ html.accrue-admin[data-theme="dark"] {
   --ax-status-danger-bg: #2b1719;
   --ax-status-danger-border: #874346;
   --ax-status-danger-text: #ffaaaa;
-  --ax-status-danger-solid: #ffaaaa;
-  --ax-status-danger-on-solid: #0f1318;
+  --ax-status-danger-solid: #c0392b;
+  --ax-status-danger-on-solid: #ffffff;
   --ax-status-info-bg: #112331;
   --ax-status-info-border: #426f8d;
   --ax-status-info-text: #9fcbe6;
@@ -321,8 +321,8 @@ html.accrue-admin[data-theme="dark"] {
     --ax-status-danger-bg: #2b1719;
     --ax-status-danger-border: #874346;
     --ax-status-danger-text: #ffaaaa;
-    --ax-status-danger-solid: #ffaaaa;
-    --ax-status-danger-on-solid: #0f1318;
+    --ax-status-danger-solid: #c0392b;
+    --ax-status-danger-on-solid: #ffffff;
     --ax-status-info-bg: #112331;
     --ax-status-info-border: #426f8d;
     --ax-status-info-text: #9fcbe6;
