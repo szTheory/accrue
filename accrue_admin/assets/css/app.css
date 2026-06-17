@@ -1292,7 +1292,6 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-status-badge {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1300,9 +1299,8 @@ a.ax-kpi-card--linked:focus-visible {
   width: fit-content;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: var(--ax-leading-normal);
+  font: var(--ax-type-label-sm-font);
+  letter-spacing: var(--ax-type-label-sm-tracking); /* ax-type-exception: letter-spacing supplements the composed label-sm font shorthand. */
 }
 
 /* Buttons are rounded rectangles, never pills — pill radius is reserved for
@@ -1395,28 +1393,33 @@ a.ax-kpi-card--linked:focus-visible {
 }
 
 .ax-status-badge-moss {
-  background: color-mix(in srgb, var(--ax-success) 14%, var(--ax-elevated));
-  color: var(--ax-success-readable);
+  background: var(--ax-status-success-bg);
+  color: var(--ax-status-success-text);
+  border-color: var(--ax-status-success-border);
 }
 
 .ax-status-badge-cobalt {
-  background: color-mix(in srgb, var(--ax-accent) 14%, var(--ax-elevated));
-  color: var(--ax-accent-readable);
+  background: var(--ax-status-info-bg);
+  color: var(--ax-status-info-text);
+  border-color: var(--ax-status-info-border);
 }
 
 .ax-status-badge-amber {
-  background: color-mix(in srgb, var(--ax-warning) 18%, var(--ax-elevated));
-  color: var(--ax-warning-readable);
+  background: var(--ax-status-warning-bg);
+  color: var(--ax-status-warning-text);
+  border-color: var(--ax-status-warning-border);
 }
 
 .ax-status-badge-slate {
-  background: color-mix(in srgb, var(--ax-border) 50%, var(--ax-elevated));
-  color: var(--ax-muted);
+  background: var(--ax-status-neutral-bg);
+  color: var(--ax-status-neutral-text);
+  border-color: var(--ax-status-neutral-border);
 }
 
 .ax-status-badge-ink {
-  background: color-mix(in srgb, var(--ax-primary) 10%, var(--ax-elevated));
-  color: var(--ax-primary);
+  background: var(--ax-status-neutral-bg);
+  color: var(--ax-status-neutral-text);
+  border-color: var(--ax-status-neutral-border);
 }
 
 .ax-page {
@@ -3046,7 +3049,6 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   color: var(--ax-status-warning-text);
 }
 
-.ax-status-badge-ink,
 .ax-badge-danger,
 .ax-flash-error,
 .ax-banner-danger,
