@@ -38,7 +38,9 @@ defmodule AccrueAdmin.Components.Input do
       />
 
       <p :if={@help_text} id={@id <> "-help"} class="ax-field-help"><%= @help_text %></p>
-      <p :for={error <- @errors} id={@id <> "-error"} class="ax-field-error"><%= error %></p>
+      <div :if={@errors != []} id={@id <> "-errors"}>
+        <p :for={error <- @errors} class="ax-field-error"><%= error %></p>
+      </div>
     </div>
     """
   end
@@ -46,7 +48,7 @@ defmodule AccrueAdmin.Components.Input do
   defp described_by(id, help_text, errors) do
     []
     |> maybe_add(help_text && id <> "-help")
-    |> maybe_add(errors != [] && id <> "-error")
+    |> maybe_add(errors != [] && id <> "-errors")
     |> Enum.join(" ")
     |> case do
       "" -> nil

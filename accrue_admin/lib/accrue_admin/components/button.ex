@@ -9,6 +9,7 @@ defmodule AccrueAdmin.Components.Button do
   attr(:type, :string, default: "button")
   attr(:href, :string, default: nil)
   attr(:disabled, :boolean, default: false)
+  attr(:loading, :boolean, default: false)
   attr(:class, :string, default: nil)
 
   attr(:rest, :global,
@@ -28,7 +29,14 @@ defmodule AccrueAdmin.Components.Button do
     <a :if={@href && @disabled} class={@classes} aria-disabled="true" tabindex="-1" {@rest}>
       <%= render_slot(@inner_block) %>
     </a>
-    <button :if={!@href} type={@type} class={@classes} disabled={@disabled} {@rest}>
+    <button
+      :if={!@href}
+      type={@type}
+      class={@classes}
+      disabled={@disabled || @loading}
+      aria-busy={if @loading, do: "true"}
+      {@rest}
+    >
       <%= render_slot(@inner_block) %>
     </button>
     """
