@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-last_updated: "2026-06-17T21:55:14.868Z"
+last_updated: "2026-06-17T22:02:46.258Z"
 last_activity: 2026-06-17
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 19
-  completed_plans: 16
+  completed_plans: 17
   percent: 33
 ---
 
@@ -26,7 +26,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 189 (primitive-form-components-component-lab) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-06-17
 
@@ -146,6 +146,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 189 P01 | 3 min | 2 tasks | 4 files |
 | Phase 189 P02 | 3 min | 2 tasks | 8 files |
 | Phase 189-primitive-form-components-component-lab P03 | 25min | 2 tasks | 3 files |
+| Phase 189-primitive-form-components-component-lab P05 | 8min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -210,6 +211,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 187]: Live interaction probes record observations instead of corrected-behavior regressions. — Plan 187-04 writes trace-backed NDJSON rows for current behavior and leaves permanent regression tests to Phase 191 fixes.
 - [Phase 189]: D-07 CSS gate: sub-tree .accrue-admin [data-theme='dark'] selector with FULL dark token set is the CSS prerequisite; browser-level color delta verified in Plan 06 themeColumnDeltaProbe
 - [Phase 189]: Structural tests (e) and (f) are data-contract-only (no page mount); HTML mount assertions for data-ax-state and data-theme attributes are Plan 03 test (g)
+- [Phase ?]: StatusBadge ink tone maps to neutral (not danger) — ax-status-badge-ink removed from Plan 04 danger grouping; ink is catch-all unknown status
 
 ### Pending Todos
 
@@ -256,8 +258,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-17T21:55:14.863Z
-Stopped at: Phase 189 UI-SPEC approved
+Last session: 2026-06-17T22:02:46.253Z
+Stopped at: Completed 189-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
