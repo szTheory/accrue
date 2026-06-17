@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# Launch the accrue_admin component kitchen in one command.
+#
+# The kitchen — and the other /dev/* LiveViews — only exist when accrue_admin is
+# its OWN project in a non-:prod env. They are compiled out of host apps (deps
+# build as :prod), so the kitchen cannot be served from a host like accrue_host.
+# This runs the package's e2e server (MIX_ENV=test) and opens the kitchen once
+# the server is healthy.
+#
+#   bin/kitchen                          # start on :4017 and open the browser
+#   ACCRUE_ADMIN_E2E_PORT=4020 bin/kitchen
+#
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
+port="${ACCRUE_ADMIN_E2E_PORT:-4017}"
+health="http://127.0.0.1:${port}/__e2e__/health"
+kitchen="http://127.0.0.1:${port}/__e2e__/login?to=/billing/dev/components"
+
+open_url() {
+  if command -v open >/dev/null 2>&1; then
+    open "$1"                       # macOS
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$1"                   # Linux
+  else
+    echo "Open the kitchen at: $1"
+  fi
+}
+
+# Reuse an already-running server rather than colliding on the port.
+if curl -fsS --max-time 1 "$health" >/dev/null 2>&1; then
+  echo "e2e server already up on :${port} — opening the kitchen."
+  open_url "$kitchen"
+  exit 0
+fi
+
+# Open the kitchen as soon as the server we are about to start is healthy.
+(
+  for _ in $(seq 1 120); do
+    if curl -fsS --max-time 1 "$health" >/dev/null 2>&1; then
+      open_url "$kitchen"
+      exit 0
+    fi
+    sleep 1
+  done
+  echo "kitchen: server did not become healthy on :${port} within 120s" >&2
+) &
+
+echo "Starting accrue_admin e2e server on :${port} (Ctrl-C to stop)…"
+exec env MIX_ENV=test ACCRUE_ADMIN_E2E_PORT="$port" mix accrue_admin.e2e.server
