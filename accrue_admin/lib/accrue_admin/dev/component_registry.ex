@@ -6,16 +6,24 @@ if Mix.env() != :prod do
             family: String.t(),
             variant: String.t(),
             ax_class: String.t(),
-            tokens: [String.t()]
+            tokens: [String.t()],
+            applicable_states: [String.t()] | nil,
+            na_states: [%{state: String.t(), reason: String.t()}] | nil,
+            specimens: [%{label: String.t(), props: map(), content: String.t() | nil}] | nil
           }
 
     @doc """
     Returns all curated component variant entries across the three DSY-03 families:
-    button (4), status (5), card (6 = base + 5 delta tones).
+    button (4), status (5), card (6 = base + 5 delta tones), plus foundation entries.
 
     The `ax_class` field in each entry is the full class string as rendered in the HTML
     class attribute (e.g. `"ax-button ax-button-primary"`). Plan 04's drift test
     extracts rendered class attributes and compares them against these strings.
+
+    Phase 189 additions: `button` and `status` families carry three new schema fields:
+    - `applicable_states` — list of state names from the 11-state taxonomy
+    - `na_states` — list of `%{state: string, reason: string}` maps for states that don't apply
+    - `specimens` — list of `%{label: string, props: map, content: string | nil}` maps
     """
     @spec entries() :: [entry()]
     def entries do
@@ -31,19 +39,57 @@ if Mix.env() != :prod do
           family: "button",
           variant: "primary",
           ax_class: "ax-button ax-button-primary",
-          tokens: ["--ax-accent-strong", "--ax-accent-contrast", "--ax-transition-colors"]
+          tokens: ["--ax-accent-strong", "--ax-accent-contrast", "--ax-transition-colors"],
+          # Phase 189 — state-matrix schema additions
+          applicable_states: ["default", "hover", "focus", "active", "pressed", "disabled", "loading", "overflow"],
+          na_states: [
+            %{state: "selected", reason: "button has no selection state — use aria-pressed for toggle buttons separately"},
+            %{state: "empty", reason: "button always has a label"},
+            %{state: "error", reason: "button conveys intent via variant, not validation state"}
+          ],
+          specimens: [
+            %{label: "Default", props: %{variant: "primary", type: "button"}, content: "Save changes"},
+            %{label: "Short", props: %{variant: "primary", type: "button"}, content: "Go"},
+            %{label: "Long label (overflow)", props: %{variant: "primary", type: "button"}, content: "Export all subscription events to CSV"},
+            %{label: "Disabled", props: %{variant: "primary", type: "button", disabled: true}, content: "Archived"},
+            %{label: "Loading", props: %{variant: "primary", type: "button"}, content: "Saving…"}
+          ]
         },
         %{
           family: "button",
           variant: "secondary",
           ax_class: "ax-button ax-button-secondary",
-          tokens: ["--ax-border-strong", "--ax-elevated", "--ax-primary"]
+          tokens: ["--ax-border-strong", "--ax-elevated", "--ax-primary"],
+          applicable_states: ["default", "hover", "focus", "active", "pressed", "disabled", "loading", "overflow"],
+          na_states: [
+            %{state: "selected", reason: "button has no selection state — use aria-pressed for toggle buttons separately"},
+            %{state: "empty", reason: "button always has a label"},
+            %{state: "error", reason: "button conveys intent via variant, not validation state"}
+          ],
+          specimens: [
+            %{label: "Default", props: %{variant: "secondary", type: "button"}, content: "Cancel"},
+            %{label: "Long label (overflow)", props: %{variant: "secondary", type: "button"}, content: "Export all subscription events to CSV"},
+            %{label: "Disabled", props: %{variant: "secondary", type: "button", disabled: true}, content: "Archived"},
+            %{label: "Loading", props: %{variant: "secondary", type: "button"}, content: "Saving…"}
+          ]
         },
         %{
           family: "button",
           variant: "ghost",
           ax_class: "ax-button ax-button-ghost",
-          tokens: ["--ax-primary", "--ax-interactive-hover", "--ax-transition-colors"]
+          tokens: ["--ax-primary", "--ax-interactive-hover", "--ax-transition-colors"],
+          applicable_states: ["default", "hover", "focus", "active", "pressed", "disabled", "loading", "overflow"],
+          na_states: [
+            %{state: "selected", reason: "button has no selection state — use aria-pressed for toggle buttons separately"},
+            %{state: "empty", reason: "button always has a label"},
+            %{state: "error", reason: "button conveys intent via variant, not validation state"}
+          ],
+          specimens: [
+            %{label: "Default", props: %{variant: "ghost", type: "button"}, content: "View details"},
+            %{label: "Long label (overflow)", props: %{variant: "ghost", type: "button"}, content: "Export all subscription events to CSV"},
+            %{label: "Disabled", props: %{variant: "ghost", type: "button", disabled: true}, content: "Archived"},
+            %{label: "Loading", props: %{variant: "ghost", type: "button"}, content: "Saving…"}
+          ]
         },
         # danger is the essential variant: exists in button_variant_class/1 but was
         # absent from the kitchen before DSY-03. Registry must include it (RESEARCH #4).
@@ -53,7 +99,19 @@ if Mix.env() != :prod do
           family: "button",
           variant: "danger",
           ax_class: "ax-button ax-button-danger",
-          tokens: ["--ax-status-danger-solid", "--ax-status-danger-on-solid", "--ax-transition-colors"]
+          tokens: ["--ax-status-danger-solid", "--ax-status-danger-on-solid", "--ax-transition-colors"],
+          applicable_states: ["default", "hover", "focus", "active", "pressed", "disabled", "loading", "overflow"],
+          na_states: [
+            %{state: "selected", reason: "button has no selection state — use aria-pressed for toggle buttons separately"},
+            %{state: "empty", reason: "button always has a label"},
+            %{state: "error", reason: "button conveys intent via variant, not validation state"}
+          ],
+          specimens: [
+            %{label: "Default", props: %{variant: "danger", type: "button"}, content: "Delete subscription"},
+            %{label: "Long label (overflow)", props: %{variant: "danger", type: "button"}, content: "Export all subscription events to CSV"},
+            %{label: "Disabled", props: %{variant: "danger", type: "button", disabled: true}, content: "Archived"},
+            %{label: "Loading", props: %{variant: "danger", type: "button"}, content: "Deleting…"}
+          ]
         },
 
         # ── StatusBadge family — 5 tone variants from status_tone/1 ────────────────
@@ -63,31 +121,113 @@ if Mix.env() != :prod do
           family: "status",
           variant: "moss",
           ax_class: "ax-status-badge ax-status-badge-moss",
-          tokens: ["--ax-success", "--ax-success-readable", "--ax-elevated"]
+          tokens: ["--ax-success", "--ax-success-readable", "--ax-elevated"],
+          # Phase 189 — state-matrix schema additions
+          # StatusBadge is non-interactive: only default and overflow apply.
+          applicable_states: ["default", "overflow"],
+          na_states: [
+            %{state: "hover", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "focus", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "active", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "pressed", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "disabled", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "loading", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "selected", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "empty", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "error", reason: "non-interactive display element — no interactive state applies"}
+          ],
+          specimens: [
+            %{label: "Active", props: %{tone: "moss"}, content: "Active"},
+            %{label: "Long label (overflow)", props: %{tone: "moss"}, content: "Requires additional customer authentication step"}
+          ]
         },
         %{
           family: "status",
           variant: "cobalt",
           ax_class: "ax-status-badge ax-status-badge-cobalt",
-          tokens: ["--ax-accent", "--ax-accent-readable", "--ax-elevated"]
+          tokens: ["--ax-accent", "--ax-accent-readable", "--ax-elevated"],
+          applicable_states: ["default", "overflow"],
+          na_states: [
+            %{state: "hover", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "focus", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "active", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "pressed", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "disabled", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "loading", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "selected", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "empty", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "error", reason: "non-interactive display element — no interactive state applies"}
+          ],
+          specimens: [
+            %{label: "Processing", props: %{tone: "cobalt"}, content: "Processing"},
+            %{label: "Long label (overflow)", props: %{tone: "cobalt"}, content: "Requires additional customer authentication step"}
+          ]
         },
         %{
           family: "status",
           variant: "amber",
           ax_class: "ax-status-badge ax-status-badge-amber",
-          tokens: ["--ax-warning", "--ax-warning-readable", "--ax-elevated"]
+          tokens: ["--ax-warning", "--ax-warning-readable", "--ax-elevated"],
+          applicable_states: ["default", "overflow"],
+          na_states: [
+            %{state: "hover", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "focus", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "active", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "pressed", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "disabled", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "loading", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "selected", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "empty", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "error", reason: "non-interactive display element — no interactive state applies"}
+          ],
+          specimens: [
+            %{label: "Past due", props: %{tone: "amber"}, content: "Past due"},
+            %{label: "Long label (overflow)", props: %{tone: "amber"}, content: "Requires additional customer authentication step"}
+          ]
         },
         %{
           family: "status",
           variant: "slate",
           ax_class: "ax-status-badge ax-status-badge-slate",
-          tokens: ["--ax-border", "--ax-muted", "--ax-elevated"]
+          tokens: ["--ax-border", "--ax-muted", "--ax-elevated"],
+          applicable_states: ["default", "overflow"],
+          na_states: [
+            %{state: "hover", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "focus", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "active", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "pressed", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "disabled", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "loading", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "selected", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "empty", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "error", reason: "non-interactive display element — no interactive state applies"}
+          ],
+          specimens: [
+            %{label: "Canceled", props: %{tone: "slate"}, content: "Canceled"},
+            %{label: "Long label (overflow)", props: %{tone: "slate"}, content: "Requires additional customer authentication step"}
+          ]
         },
         %{
           family: "status",
           variant: "ink",
           ax_class: "ax-status-badge ax-status-badge-ink",
-          tokens: ["--ax-primary", "--ax-elevated"]
+          tokens: ["--ax-primary", "--ax-elevated"],
+          applicable_states: ["default", "overflow"],
+          na_states: [
+            %{state: "hover", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "focus", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "active", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "pressed", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "disabled", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "loading", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "selected", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "empty", reason: "non-interactive display element — no interactive state applies"},
+            %{state: "error", reason: "non-interactive display element — no interactive state applies"}
+          ],
+          specimens: [
+            %{label: "Unknown", props: %{tone: "ink"}, content: "Unknown"},
+            %{label: "Long label (overflow)", props: %{tone: "ink"}, content: "Requires additional customer authentication step"}
+          ]
         },
 
         # ── Card family — base + 5 delta tones from normalize_tone/1 ───────────────

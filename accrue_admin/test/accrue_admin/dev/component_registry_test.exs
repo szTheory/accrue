@@ -168,6 +168,63 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
            "--ax-info is defined in theme.css but must not appear on the components page (not a registry token)"
   end
 
+  # (e) Structural data-contract test: button and status entries carry applicable_states.
+  #
+  # Structural data-contract test. HTML mount assertions for state-matrix cells
+  # (data-ax-state attributes) are in Plan 03 as test (g), after the renderer exists.
+  #
+  # This test asserts that the registry data shape is correct — specifically that
+  # every button and status family entry has a non-empty applicable_states list.
+  # It does NOT mount the /dev/components page or check rendered HTML.
+  test "button and status registry entries each carry a non-empty applicable_states list" do
+    for entry <- ComponentRegistry.entries(),
+        entry.family in ["button", "status"] do
+      assert Map.has_key?(entry, :applicable_states),
+             "registry entry #{entry.family}/#{entry.variant} is missing the :applicable_states field (Phase 189 schema)"
+
+      assert is_list(entry.applicable_states) and entry.applicable_states != [],
+             "registry entry #{entry.family}/#{entry.variant} has an empty or non-list :applicable_states"
+    end
+  end
+
+  # (f) Structural data-contract test: entries with applicable_states also carry na_states and specimens.
+  #
+  # Structural data-contract test. The mounted-page data-theme HTML assertion (Plan 03
+  # test (g)) verifies the renderer emits data-theme='light' and data-theme='dark' attributes.
+  #
+  # This test checks the registry data shape only — that every entry carrying applicable_states
+  # also has na_states and specimens, and that na_states entries have non-nil state/reason keys.
+  # It does NOT mount the /dev/components page or check rendered HTML.
+  test "entries with applicable_states also carry na_states and specimens with valid shapes" do
+    for entry <- ComponentRegistry.entries(),
+        Map.has_key?(entry, :applicable_states) do
+      assert Map.has_key?(entry, :na_states),
+             "registry entry #{entry.family}/#{entry.variant} has :applicable_states but is missing :na_states"
+
+      assert Map.has_key?(entry, :specimens),
+             "registry entry #{entry.family}/#{entry.variant} has :applicable_states but is missing :specimens"
+
+      for %{state: state, reason: reason} <- entry.na_states do
+        assert is_binary(state) and state != "",
+               "registry entry #{entry.family}/#{entry.variant}: na_states entry has nil or empty :state"
+
+        assert is_binary(reason) and reason != "",
+               "registry entry #{entry.family}/#{entry.variant}: na_states entry has nil or empty :reason"
+      end
+
+      for %{label: label, props: props, content: content} <- entry.specimens do
+        assert is_binary(label) and label != "",
+               "registry entry #{entry.family}/#{entry.variant}: specimens entry has nil or empty :label"
+
+        assert is_map(props),
+               "registry entry #{entry.family}/#{entry.variant}: specimens entry :props is not a map"
+
+        assert is_nil(content) or is_binary(content),
+               "registry entry #{entry.family}/#{entry.variant}: specimens entry :content is not a string or nil"
+      end
+    end
+  end
+
   defp theme_css_path do
     Path.expand("../../../assets/css/theme.css", __DIR__)
   end
