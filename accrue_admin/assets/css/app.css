@@ -228,6 +228,49 @@ button {
   gap: var(--ax-space-sm);
 }
 
+/* Phase 189 — state-matrix lab renderer (two-column light/dark grid per family) */
+.ax-dev-state-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  overflow: hidden;
+  background: var(--ax-border);
+}
+
+.ax-dev-state-grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--ax-border);
+}
+
+.ax-dev-state-grid-col-header {
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  background: var(--ax-sunken);
+}
+
+.ax-dev-state-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-space-sm);
+  padding: var(--ax-space-md);
+  background: var(--ax-base);
+  min-height: 4rem;
+}
+
+.ax-dev-state-cell-na {
+  background: var(--ax-sunken);
+  opacity: 0.6;
+}
+
+@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
+  .ax-dev-state-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ax-dev-token-dl {
   margin: 0;
   display: flex;
