@@ -2181,9 +2181,15 @@ details[open].ax-dropdown .ax-dropdown-panel {
   font-weight: 600;
 }
 
-.ax-spinner {
-  color: var(--ax-muted);
-}
+/* Phase 189 (CMP-01) — Spinner: token-consuming animation. Size modifiers use
+   token-sized rem values for sm/md/lg. Reduced-motion collapses animation-duration
+   to 0ms while keeping the visual (border) indicator. */
+.ax-spinner { display: inline-block; border-radius: 50%; border: 2px solid var(--ax-border); border-top-color: var(--ax-accent-strong); animation: ax-spin var(--ax-dur-3) linear infinite; }
+.ax-spinner-sm { width: 1rem; height: 1rem; }
+.ax-spinner-md { width: 1.25rem; height: 1.25rem; }
+.ax-spinner-lg { width: 1.5rem; height: 1.5rem; }
+@keyframes ax-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ax-spinner { animation-duration: 0ms; border-top-color: var(--ax-accent-strong); opacity: 0.7; } }
 
 .ax-data-table-shell .ax-link {
   color: var(--ax-accent-readable);
@@ -2579,29 +2585,13 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   }
 }
 
-/* Empty state (home attention zero; reused by slice D) */
-.ax-empty {
-  display: grid;
-  justify-items: center;
-  text-align: center;
-  gap: var(--ax-space-xs);
-  padding: var(--ax-space-2xl) var(--ax-space-lg);
-}
-
-.ax-empty-icon {
-  color: var(--ax-success);
-  margin-bottom: var(--ax-space-xs);
-}
-
-.ax-empty-title {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  margin: 0;
-  font-weight: 600;
-}
-
-.ax-empty-copy {
-  max-width: 28rem;
-}
+/* Empty state (home attention zero; reused by slice D) — Phase 189 (CMP-01):
+   token-consuming replacement. No cursor:pointer, no :hover rule on .ax-empty. */
+.ax-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--ax-space-md); padding: var(--ax-space-2xl) var(--ax-space-lg); }
+.ax-empty-icon { color: var(--ax-muted); }
+.ax-empty-title { font: var(--ax-type-title-font); color: var(--ax-primary); }
+.ax-empty-copy { font: var(--ax-type-body-sm-font); color: var(--ax-muted); max-width: 28rem; }
+.ax-empty-actions { margin-top: var(--ax-space-sm); }
 
 /* Task launchers — JTBD doors */
 .ax-launchers {
@@ -3227,3 +3217,66 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
     min-height: 2.75rem;
   }
 }
+
+/* ============================================================================
+   Phase 189 (CMP-01) — New primitive CSS additions (Fixes 4–6)
+   All rules consume Phase-188 tokens only — no raw ms, px, or color literals
+   except structural sizing (em/rem geometry from the design spec).
+   ========================================================================== */
+
+/* FIX 4 — Inline ID: monospace chip with overflow protection (CMP-01). */
+.ax-inline-id {
+  display: inline-block;
+  font: var(--ax-type-code-font);
+  letter-spacing: var(--ax-type-code-tracking); /* ax-type-exception: letter-spacing supplements the composed code font shorthand. */
+  color: var(--ax-primary);
+  background: var(--ax-sunken);
+  border-radius: var(--ax-radius-sm);
+  padding: 0.1em var(--ax-space-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* FIX 5 — Tooltip: z-layer via --ax-z-popover; opacity-driven show/hide
+   so CSS transitions can fire (no display:none toggle). */
+.ax-tooltip-wrapper { position: relative; display: inline-flex; }
+.ax-tooltip-content {
+  position: absolute;
+  z-index: var(--ax-z-popover);
+  background: var(--ax-primary);
+  color: var(--ax-base);
+  font: var(--ax-type-body-sm-font);
+  padding: var(--ax-space-xs) var(--ax-space-sm);
+  border-radius: var(--ax-radius-sm);
+  white-space: nowrap;
+  max-width: 16rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: var(--ax-transition-colors);
+}
+.ax-tooltip-wrapper:hover .ax-tooltip-content,
+.ax-tooltip-wrapper:focus-within .ax-tooltip-content { opacity: 1; }
+.ax-tooltip-above .ax-tooltip-content { bottom: calc(100% + var(--ax-space-xs)); left: 50%; transform: translateX(-50%); }
+.ax-tooltip-below .ax-tooltip-content { top: calc(100% + var(--ax-space-xs)); left: 50%; transform: translateX(-50%); }
+
+/* FIX 6 — Toggle: binary on/off control. Thumb slides via transform; track
+   changes background via --ax-transition-colors. No raw ms or cubic-bezier. */
+.ax-toggle {
+  position: relative; display: inline-flex; align-items: center;
+  width: 2.25rem; height: 1.25rem;
+  background: var(--ax-border); border-radius: 9999px;
+  border: none; padding: 0; cursor: pointer;
+  transition: var(--ax-transition-colors);
+}
+.ax-toggle[aria-checked="true"] { background: var(--ax-accent-strong); }
+.ax-toggle:disabled { background: var(--ax-disabled-bg); cursor: var(--ax-disabled-cursor); opacity: var(--ax-disabled-opacity); }
+.ax-toggle-track { width: 100%; height: 100%; border-radius: 9999px; }
+.ax-toggle-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: calc(1.25rem - 4px); height: calc(1.25rem - 4px);
+  background: var(--ax-elevated); border-radius: 50%;
+  transition: var(--ax-transition-base);
+}
+.ax-toggle[aria-checked="true"] .ax-toggle-thumb { transform: translateX(1rem); }
