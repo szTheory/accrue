@@ -68,7 +68,8 @@ test.describe("Admin accessibility (axe)", () => {
       ["webhooks",            "/billing/webhooks"],
       ["webhook-detail",      `/billing/webhooks/${opFlows.single_webhook_id}`],
       ["recovery",            "/billing/analytics/recovery"],
-      ["campaign-detail",     `/billing/analytics/recovery/subscriptions/${edge.at_risk_sub_id}`]
+      ["campaign-detail",     `/billing/analytics/recovery/subscriptions/${edge.at_risk_sub_id}`],
+      ["component-kitchen",   "/billing/dev/components"]
     ];
 
     const failures = [];

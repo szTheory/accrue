@@ -69,6 +69,7 @@ test.describe("Admin visual inventory", () => {
       ["recovery",            "/billing/analytics/recovery"],
       ["campaign-detail",     `/billing/analytics/recovery/subscriptions/${edge.at_risk_sub_id}`],
       // NOTE: route is /analytics/recovery/subscriptions/:id (not /campaigns/:id)
+      ["component-kitchen",   "/billing/dev/components"],
     ];
 
     for (const [name, path] of shots) {
