@@ -220,6 +220,46 @@ button {
   flex-direction: column;
 }
 
+/* Component-kitchen specimen rows: the live component once, then its token map
+   below it (no light/dark duplication — review themes via the page toggle). */
+.ax-dev-variant-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-space-sm);
+}
+
+.ax-dev-token-dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-space-2xs, 0.25rem);
+}
+
+.ax-dev-token {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-2xs, 0.25rem);
+  color: var(--ax-muted);
+}
+
+.ax-dev-caption {
+  color: var(--ax-muted);
+  max-width: var(--ax-measure);
+}
+
+/* Resolved-color chip beside a token name. Color tokens fill the chip; structural
+   tokens (z-index, measure, fonts, transitions) leave it empty — an honest cue
+   that the token isn't a color. */
+.ax-token-swatch {
+  display: inline-block;
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-xs, 3px);
+  vertical-align: middle;
+}
+
 .ax-sidebar {
   display: none;
   padding: var(--ax-space-xl);
@@ -726,11 +766,14 @@ a.ax-kpi-card--linked:focus-visible {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   display: inline-flex;
   align-items: center;
-  min-height: 2rem;
-  padding: 0 0.75rem;
+  width: fit-content;
+  min-height: 1.75rem;
+  padding: 0.125rem 0.6875rem;
   border-radius: 999px;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .ax-kpi-delta-moss {
@@ -2983,13 +3026,13 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
    would win; the cascade is the visible proof the scale is doing the work. */
 .ax-foundation-layer-stack {
   position: relative;
-  min-height: 13.5rem;
+  min-height: 11.5rem;
   margin-top: var(--ax-space-sm);
 }
 
 .ax-foundation-layer-stack .ax-foundation-layer {
   position: absolute;
-  width: 12rem;
+  width: 10rem;
 }
 
 /* Interactive-state specimens render all three roles at rest so the maintainer

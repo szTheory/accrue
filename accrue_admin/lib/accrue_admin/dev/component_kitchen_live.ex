@@ -163,26 +163,22 @@ if Mix.env() != :prod do
 
           <%!-- Component variants reference — every button, badge, status, and card with its token map --%>
 
-          <%!-- Buttons variant reference --%>
+          <%!-- Buttons variant reference. Each component is shown ONCE; review light vs
+               dark with the page theme toggle (the per-specimen light/dark wrappers used to
+               be inert — no CSS re-themed them — so they only looked like duplicates). --%>
           <section :if={@available?} class="ax-card ax-dev-stack">
             <p class="ax-label">Buttons</p>
+            <p class="ax-body ax-dev-caption">Four button roles. Toggle the page theme (top bar) to check each in light and dark.</p>
             <div class="ax-dev-grid">
               <%= for entry <- ComponentRegistry.variants_for("button") do %>
                 <div class="ax-dev-variant-row">
-                  <div data-ax-theme="light">
-                    <Button.button variant={entry.variant} type="button">
-                      <%= String.capitalize(entry.variant) %>
-                    </Button.button>
-                  </div>
-                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
-                    <Button.button variant={entry.variant} type="button">
-                      <%= String.capitalize(entry.variant) %>
-                    </Button.button>
-                  </div>
+                  <Button.button variant={entry.variant} type="button">
+                    <%= String.capitalize(entry.variant) %>
+                  </Button.button>
                   <dl class="ax-dev-token-dl">
                     <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
                     <%= for token <- entry.tokens do %>
-                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                      <dd class="ax-dev-token"><span class="ax-token-swatch" style={"background: var(#{token})"}></span><code class="ax-type-code-xs"><%= token %></code></dd>
                     <% end %>
                   </dl>
                 </div>
@@ -190,24 +186,21 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <%!-- Badges variant reference (tone axis: moss/cobalt/amber/slate/ink). Each tone
-               carries a representative status so the label reads true to its color rather than
-               a constant "Active" — a warning/amber badge labelled "Active" sends mixed signals. --%>
+          <%!-- Status badges — the five semantic tones (moss/cobalt/amber/slate/ink) shown
+               with representative lifecycle statuses so each label reads true to its color.
+               (Previously split into redundant "Badges" + "Status" sections that rendered the
+               same component in the same tones.) --%>
           <section :if={@available?} class="ax-card ax-dev-stack">
-            <p class="ax-label">Badges</p>
+            <p class="ax-label">Status badges</p>
+            <p class="ax-body ax-dev-caption">One badge per semantic tone, labelled with a representative subscription/invoice status.</p>
             <div class="ax-dev-grid">
-              <%= for {entry, status} <- Enum.zip(ComponentRegistry.variants_for("status"), [:active, :trialing, :grace_period, :archived, :incomplete]) do %>
+              <%= for {entry, status} <- Enum.zip(ComponentRegistry.variants_for("status"), [:active, :trialing, :past_due, :canceled, :failed]) do %>
                 <div class="ax-dev-variant-row">
-                  <div data-ax-theme="light">
-                    <StatusBadge.status_badge tone={entry.variant} status={status} />
-                  </div>
-                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
-                    <StatusBadge.status_badge tone={entry.variant} status={status} />
-                  </div>
+                  <StatusBadge.status_badge tone={entry.variant} status={status} />
                   <dl class="ax-dev-token-dl">
                     <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
                     <%= for token <- entry.tokens do %>
-                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                      <dd class="ax-dev-token"><span class="ax-token-swatch" style={"background: var(#{token})"}></span><code class="ax-type-code-xs"><%= token %></code></dd>
                     <% end %>
                   </dl>
                 </div>
@@ -215,53 +208,22 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <%!-- Status variant reference (all 5 tones via representative status atoms) --%>
-          <section :if={@available?} class="ax-card ax-dev-stack">
-            <p class="ax-label">Status</p>
-            <div class="ax-dev-grid">
-              <%= for {entry, status} <- Enum.zip(ComponentRegistry.variants_for("status"), [:paid, :processing, :past_due, :canceled, :failed]) do %>
-                <div class="ax-dev-variant-row">
-                  <div data-ax-theme="light">
-                    <StatusBadge.status_badge status={status} tone={entry.variant} />
-                  </div>
-                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
-                    <StatusBadge.status_badge status={status} tone={entry.variant} />
-                  </div>
-                  <dl class="ax-dev-token-dl">
-                    <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
-                    <%= for token <- entry.tokens do %>
-                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
-                    <% end %>
-                  </dl>
-                </div>
-              <% end %>
-            </div>
-          </section>
-
-          <%!-- Cards variant reference (base card + delta tones) --%>
+          <%!-- Cards variant reference (base card + delta tones), each shown once. --%>
           <section :if={@available?} class="ax-card ax-dev-stack">
             <p class="ax-label">Cards</p>
+            <p class="ax-body ax-dev-caption">Base KPI card plus the five delta-pill tones.</p>
             <div class="ax-dev-grid">
               <%= for entry <- ComponentRegistry.variants_for("card") do %>
                 <div class="ax-dev-variant-row">
-                  <div data-ax-theme="light">
-                    <%= if entry.variant == "base" do %>
-                      <KpiCard.kpi_card label="MRR" value="$4,200" />
-                    <% else %>
-                      <KpiCard.kpi_card label="Delta" value="$420" delta={"+" <> entry.variant} delta_tone={entry.variant} />
-                    <% end %>
-                  </div>
-                  <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
-                    <%= if entry.variant == "base" do %>
-                      <KpiCard.kpi_card label="MRR" value="$4,200" />
-                    <% else %>
-                      <KpiCard.kpi_card label="Delta" value="$420" delta={"+" <> entry.variant} delta_tone={entry.variant} />
-                    <% end %>
-                  </div>
+                  <%= if entry.variant == "base" do %>
+                    <KpiCard.kpi_card label="MRR" value="$4,200" />
+                  <% else %>
+                    <KpiCard.kpi_card label="Delta" value="$420" delta={"+" <> entry.variant} delta_tone={entry.variant} />
+                  <% end %>
                   <dl class="ax-dev-token-dl">
                     <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
                     <%= for token <- entry.tokens do %>
-                      <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+                      <dd class="ax-dev-token"><span class="ax-token-swatch" style={"background: var(#{token})"}></span><code class="ax-type-code-xs"><%= token %></code></dd>
                     <% end %>
                   </dl>
                 </div>
@@ -285,7 +247,7 @@ if Mix.env() != :prod do
               </div>
               <div class="ax-foundation ax-foundation-measure" data-ax-foundation-specimen="measure-prose">
                 <p class="ax-body ax-prose">Reading measure keeps explanatory copy to a durable line length without capping tables.</p>
-                <code class="ax-type-code-xs">--ax-measure</code>
+                <p class="ax-body ax-dev-caption">The paragraph above is capped to <code class="ax-type-code-xs">--ax-measure</code> (~66 characters) so long copy stays readable instead of running edge-to-edge.</p>
               </div>
             </div>
 
@@ -296,9 +258,10 @@ if Mix.env() != :prod do
                   foundation-tokens spec asserts). --%>
             <div class="ax-dev-stack">
               <p class="ax-label">Elevation · z-index scale</p>
+              <p class="ax-body ax-dev-caption">Higher layers paint on top: toast sits over modal, over drawer, over popover, over dropdown, over sticky. Nothing to click — the cascade itself shows the order.</p>
               <div class="ax-foundation-layer-stack">
                 <%= for {{layer, token}, i} <- Enum.reverse(Enum.with_index([{"sticky", "--ax-z-sticky"}, {"dropdown", "--ax-z-dropdown"}, {"popover", "--ax-z-popover"}, {"drawer", "--ax-z-drawer"}, {"modal", "--ax-z-modal"}, {"toast", "--ax-z-toast"}])) do %>
-                  <div class="ax-foundation ax-foundation-layer ax-card" data-ax-foundation-layer={layer} style={"top: #{i * 1.85}rem; left: #{i * 2.1}rem; z-index: var(#{token});"}>
+                  <div class="ax-foundation ax-foundation-layer ax-card" data-ax-foundation-layer={layer} style={"top: #{i * 1.6}rem; left: #{i * 1.5}rem; z-index: var(#{token});"}>
                     <p class="ax-label"><%= layer %></p>
                     <code class="ax-type-code-xs"><%= token %></code>
                   </div>
@@ -306,45 +269,71 @@ if Mix.env() != :prod do
               </div>
             </div>
 
-            <div class="ax-dev-grid">
-              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-focus" data-ax-foundation-specimen="focus-control" type="button">Focus</button>
-              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="disabled-control" type="button" disabled>Disabled</button>
-              <input class="ax-input ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="readonly-control" readonly value="Readonly" />
-            </div>
-
-            <div class="ax-dev-grid">
-              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-hover" type="button">Hover</button>
-              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-active" type="button">Active</button>
-              <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-selected" type="button" aria-pressed="true">Selected</button>
-            </div>
-
-            <div class="ax-dev-grid">
-              <div class="ax-card ax-foundation ax-foundation-scrollbar" data-ax-foundation-specimen="scrollbar" style="max-height: 5rem; overflow: auto;">
-                <p class="ax-body">Scrollbars</p>
-                <p class="ax-body">Root scrollbar tokens: --ax-scrollbar-thumb, --ax-scrollbar-track, --ax-scrollbar-thumb-hover.</p>
-                <p class="ax-body">Overflow sample</p>
+            <div class="ax-dev-stack">
+              <p class="ax-body ax-dev-caption">Focus ring — press <kbd>Tab</kbd> to move keyboard focus onto this control; a visible ring should appear (mouse clicks intentionally don't show it).</p>
+              <div class="ax-dev-grid">
+                <button class="ax-button ax-button-secondary ax-foundation ax-foundation-focus" data-ax-foundation-specimen="focus-control" type="button">Focus</button>
               </div>
-
-              <%= for status <- ["success", "warning", "danger", "info", "neutral"] do %>
-                <div
-                  class={"ax-foundation-swatch ax-foundation ax-foundation-status ax-foundation-status-#{status}"}
-                  data-ax-foundation-status={status}
-                  style={"background: var(--ax-status-#{status}-bg); color: var(--ax-status-#{status}-text); border-color: var(--ax-status-#{status}-border);"}
-                >
-                  <span><%= status %></span>
-                  <code class="ax-type-code-xs"><%= "--ax-status-#{status}-bg" %></code>
-                </div>
-              <% end %>
             </div>
 
-            <dl class="ax-dev-token-dl">
-              <%= for entry <- ComponentRegistry.entries(), String.starts_with?(entry.family, "foundation-") do %>
-                <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
-                <%= for token <- entry.tokens do %>
-                  <dd class="ax-body ax-dev-token"><code><%= token %></code></dd>
+            <div class="ax-dev-stack">
+              <p class="ax-body ax-dev-caption">Control states — disabled (blocked, dimmed), readonly (locked value, copyable), and a normal editable input for contrast.</p>
+              <div class="ax-dev-grid">
+                <button class="ax-button ax-button-secondary ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="disabled-control" type="button" disabled>Disabled</button>
+                <input class="ax-input ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="readonly-control" readonly value="Readonly" />
+                <input class="ax-input ax-foundation" data-ax-foundation-specimen="editable-control" type="text" value="Editable" aria-label="Editable input" />
+              </div>
+            </div>
+
+            <div class="ax-dev-stack">
+              <p class="ax-body ax-dev-caption">Interactive fills shown at rest — hover, active (pressed), and selected.</p>
+              <div class="ax-dev-grid">
+                <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-hover" type="button">Hover</button>
+                <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-active" type="button">Active</button>
+                <button class="ax-button ax-button-secondary ax-foundation ax-foundation-interactive" data-ax-foundation-specimen="interactive-selected" type="button" aria-pressed="true">Selected</button>
+              </div>
+            </div>
+
+            <div class="ax-dev-stack">
+              <p class="ax-body ax-dev-caption">Scrollbar — scroll inside the box to reveal the themed thumb and track.</p>
+              <div class="ax-card ax-foundation ax-foundation-scrollbar" data-ax-foundation-specimen="scrollbar" style="max-height: 5rem; overflow: auto;">
+                <p class="ax-body">Tokens: --ax-scrollbar-thumb, --ax-scrollbar-track, --ax-scrollbar-thumb-hover.</p>
+                <p class="ax-body">Overflow line 1 — keep scrolling to see the thumb travel.</p>
+                <p class="ax-body">Overflow line 2 — keep scrolling.</p>
+                <p class="ax-body">Overflow line 3 — keep scrolling.</p>
+                <p class="ax-body">Overflow line 4 — keep scrolling.</p>
+                <p class="ax-body">Overflow line 5 — bottom of the sample.</p>
+              </div>
+            </div>
+
+            <div class="ax-dev-stack">
+              <p class="ax-body ax-dev-caption">Status colors — each role's background/text/border token trio, rendered as a swatch.</p>
+              <div class="ax-dev-grid">
+                <%= for status <- ["success", "warning", "danger", "info", "neutral"] do %>
+                  <div
+                    class={"ax-foundation-swatch ax-foundation ax-foundation-status ax-foundation-status-#{status}"}
+                    data-ax-foundation-status={status}
+                    style={"background: var(--ax-status-#{status}-bg); color: var(--ax-status-#{status}-text); border-color: var(--ax-status-#{status}-border);"}
+                  >
+                    <span><%= status %></span>
+                    <code class="ax-type-code-xs"><%= "--ax-status-#{status}-bg" %></code>
+                  </div>
                 <% end %>
-              <% end %>
-            </dl>
+              </div>
+            </div>
+
+            <div class="ax-dev-stack">
+              <p class="ax-label">Token reference</p>
+              <p class="ax-body ax-dev-caption">Every foundation token behind the specimens above. The chip shows the resolved color where the token is a color; structural tokens (z-index, measure, fonts) leave it empty.</p>
+              <dl class="ax-dev-token-dl">
+                <%= for entry <- ComponentRegistry.entries(), String.starts_with?(entry.family, "foundation-") do %>
+                  <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
+                  <%= for token <- entry.tokens do %>
+                    <dd class="ax-dev-token"><span class="ax-token-swatch" style={"background: var(#{token})"}></span><code class="ax-type-code-xs"><%= token %></code></dd>
+                  <% end %>
+                <% end %>
+              </dl>
+            </div>
           </section>
 
           <%!-- Banners showcase (danger/dunning) — stable locator for Playwright --%>
