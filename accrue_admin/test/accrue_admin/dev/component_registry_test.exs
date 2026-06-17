@@ -225,6 +225,42 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
     end
   end
 
+  # (g) Mounted-page HTML assertion (introduced in Plan 03 after the renderer exists).
+  #
+  # Tests (e) and (f) remain structural data-contract tests — do not collapse them into
+  # this test. This test verifies the live-rendered /dev/components page contains the
+  # data-theme column wrappers and data-ax-state cell attributes that the registry-driven
+  # matrix renderer must emit.
+  #
+  # D-07 note: HTML attribute presence (data-theme='light'/'dark') is verified here.
+  # Browser-level resolved-color delta is the definitive D-07 proof — verified in Plan 06
+  # (themeColumnDeltaProbe). Do not mark D-07 fully resolved before Plan 06 passes.
+  test "mounted /dev/components page has data-theme columns and data-ax-state cells", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+
+    # Column wrappers: the registry-driven renderer emits both light and dark columns.
+    assert html =~ ~s(data-theme="light"),
+           "no .ax-dev-state-grid-col[data-theme=\"light\"] found in /dev/components HTML"
+
+    assert html =~ ~s(data-theme="dark"),
+           "no .ax-dev-state-grid-col[data-theme=\"dark\"] found in /dev/components HTML"
+
+    # State cells: the renderer emits data-ax-state attributes for each applicable state.
+    assert html =~ ~s(data-ax-state="default"),
+           "data-ax-state=\"default\" not found in /dev/components HTML"
+
+    assert html =~ ~s(data-ax-state="disabled"),
+           "data-ax-state=\"disabled\" not found in /dev/components HTML"
+
+    # N/a state cells: the renderer emits data-ax-na-reason for n/a states.
+    assert html =~ "data-ax-na-reason",
+           "data-ax-na-reason attribute not found in /dev/components HTML (n/a state cells missing)"
+  end
+
   defp theme_css_path do
     Path.expand("../../../assets/css/theme.css", __DIR__)
   end

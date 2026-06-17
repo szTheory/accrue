@@ -8,14 +8,26 @@ if Mix.env() != :prod do
       AppShell,
       Breadcrumbs,
       Button,
+      Checkbox,
       Detail,
       DropdownMenu,
+      EmptyState,
       FlashGroup,
       Icon,
+      InlineId,
+      Input,
+      JsonViewer,
       KpiCard,
+      MoneyFormatter,
+      Radio,
       RelatedResources,
+      Select,
+      Spinner,
       StatusBadge,
-      Tabs
+      Tabs,
+      Textarea,
+      Toggle,
+      Tooltip
     }
 
     alias AccrueAdmin.Dev.ComponentRegistry
@@ -161,56 +173,80 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <%!-- Component variants reference — every button, badge, status, and card with its token map --%>
+          <%!-- Component variants reference — registry-driven state-matrix renderer.
+               State-matrix renderer: light and dark columns are genuine theme scopes via
+               .accrue-admin [data-theme='dark'] sub-tree selector in theme.css (Phase 189).
+               Each column independently inherits --ax-* token values — not merely duplicates
+               with a class toggle.
+               NOTE: HTML attribute presence (data-theme='light'/'dark') is verified by test (g);
+               browser-level resolved-color delta is verified by Plan 06's themeColumnDeltaProbe —
+               that is the definitive D-07 sign-off. --%>
+          <%= for {family, entries} <- registry_families() do %>
+            <section :if={@available?} class="ax-card ax-dev-stack" data-ax-family={family}>
+              <div class="ax-dev-family-header">
+                <h3 class="ax-type-eyebrow"><%= String.upcase(family) %></h3>
+                <p class="ax-body-sm ax-muted">
+                  <%= length(entries) %> variant(s) ·
+                  <%= entries |> hd() |> Map.get(:applicable_states, []) |> length() %> applicable states
+                </p>
+              </div>
 
-          <%!-- Buttons variant reference. Each component is shown ONCE; review light vs
-               dark with the page theme toggle (the per-specimen light/dark wrappers used to
-               be inert — no CSS re-themed them — so they only looked like duplicates). --%>
-          <section :if={@available?} class="ax-card ax-dev-stack">
-            <p class="ax-label">Buttons</p>
-            <p class="ax-body ax-dev-caption">Four button roles. Toggle the page theme (top bar) to check each in light and dark.</p>
-            <div class="ax-dev-grid">
-              <%= for entry <- ComponentRegistry.variants_for("button") do %>
-                <div class="ax-dev-variant-row">
-                  <Button.button variant={entry.variant} type="button">
-                    <%= String.capitalize(entry.variant) %>
-                  </Button.button>
-                  <dl class="ax-dev-token-dl">
-                    <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
-                    <%= for token <- entry.tokens do %>
-                      <dd class="ax-dev-token"><span :if={color_token?(token)} class="ax-token-swatch" style={"background: var(#{token})"}></span><code :if={!color_token?(token)} class="ax-type-code-xs ax-token-kind"><%= token_kind(token) %></code><code class="ax-type-code-xs"><%= token %></code></dd>
+              <div class="ax-dev-state-grid">
+                <div class="ax-dev-state-grid-col" data-theme="light">
+                  <p class="ax-dev-state-grid-col-header ax-label">Light</p>
+                  <%= for entry <- entries do %>
+                    <%= for state <- Map.get(entry, :applicable_states, []) do %>
+                      <div class="ax-dev-state-cell" data-ax-state={state}>
+                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %></span>
+                        <%= render_specimen(entry, state, "light") %>
+                      </div>
                     <% end %>
-                  </dl>
-                </div>
-              <% end %>
-            </div>
-          </section>
-
-          <%!-- Status badges — the five semantic tones (moss/cobalt/amber/slate/ink) shown
-               with representative lifecycle statuses so each label reads true to its color.
-               (Previously split into redundant "Badges" + "Status" sections that rendered the
-               same component in the same tones.) --%>
-          <section :if={@available?} class="ax-card ax-dev-stack">
-            <p class="ax-label">Status badges</p>
-            <p class="ax-body ax-dev-caption">One badge per semantic tone, labelled with a representative subscription/invoice status.</p>
-            <div class="ax-dev-grid">
-              <%= for {entry, status} <- Enum.zip(ComponentRegistry.variants_for("status"), [:active, :trialing, :past_due, :canceled, :failed]) do %>
-                <div class="ax-dev-variant-row">
-                  <StatusBadge.status_badge tone={entry.variant} status={status} />
-                  <dl class="ax-dev-token-dl">
-                    <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
-                    <%= for token <- entry.tokens do %>
-                      <dd class="ax-dev-token"><span :if={color_token?(token)} class="ax-token-swatch" style={"background: var(#{token})"}></span><code :if={!color_token?(token)} class="ax-type-code-xs ax-token-kind"><%= token_kind(token) %></code><code class="ax-type-code-xs"><%= token %></code></dd>
+                    <%= for %{state: state, reason: reason} <- Map.get(entry, :na_states, []) do %>
+                      <div class="ax-dev-state-cell ax-dev-state-cell-na" data-ax-state={state} data-ax-na-reason={reason}>
+                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %> (n/a)</span>
+                        <span class="ax-type-code-xs ax-muted"><%= reason %></span>
+                      </div>
                     <% end %>
-                  </dl>
+                  <% end %>
                 </div>
-              <% end %>
-            </div>
-          </section>
+                <div class="ax-dev-state-grid-col" data-theme="dark">
+                  <p class="ax-dev-state-grid-col-header ax-label">Dark</p>
+                  <%= for entry <- entries do %>
+                    <%= for state <- Map.get(entry, :applicable_states, []) do %>
+                      <div class="ax-dev-state-cell" data-ax-state={state}>
+                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %></span>
+                        <%= render_specimen(entry, state, "dark") %>
+                      </div>
+                    <% end %>
+                    <%= for %{state: state, reason: reason} <- Map.get(entry, :na_states, []) do %>
+                      <div class="ax-dev-state-cell ax-dev-state-cell-na" data-ax-state={state} data-ax-na-reason={reason}>
+                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %> (n/a)</span>
+                        <span class="ax-type-code-xs ax-muted"><%= reason %></span>
+                      </div>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
 
-          <%!-- Cards variant reference (base card + delta tones), each shown once. --%>
+              <%!-- Token reference for this family — ensures tokens appear in the rendered HTML
+                   so test (d) can verify all registry tokens are visible on the page. --%>
+              <dl class="ax-dev-token-dl">
+                <%= for entry <- entries do %>
+                  <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
+                  <%= for token <- entry.tokens do %>
+                    <dd class="ax-dev-token"><span :if={color_token?(token)} class="ax-token-swatch" style={"background: var(#{token})"}></span><code :if={!color_token?(token)} class="ax-type-code-xs ax-token-kind"><%= token_kind(token) %></code><code class="ax-type-code-xs"><%= token %></code></dd>
+                  <% end %>
+                <% end %>
+              </dl>
+            </section>
+          <% end %>
+
+          <%!-- Card and legacy variant reference — base KPI card + delta tones.
+               These entries have no applicable_states (not Phase-189 primitives) so they
+               are not part of the state-matrix renderer above. Token reference is preserved
+               so test (d) can verify card registry tokens appear in the page HTML. --%>
           <section :if={@available?} class="ax-card ax-dev-stack">
-            <p class="ax-label">Cards</p>
+            <p class="ax-label">Cards (KPI + Delta tones)</p>
             <p class="ax-body ax-dev-caption">Base KPI card plus the five delta-pill tones.</p>
             <div class="ax-dev-grid">
               <%= for entry <- ComponentRegistry.variants_for("card") do %>
@@ -448,6 +484,501 @@ if Mix.env() != :prod do
       """
     end
 
+    # Returns all Phase-189 primitive families (those with applicable_states) grouped by family name.
+    # Card and foundation entries (without applicable_states) are excluded — they are rendered
+    # in their own hand-authored sections above and below the registry-driven matrix.
+    defp registry_families do
+      ComponentRegistry.entries()
+      |> Enum.filter(&Map.has_key?(&1, :applicable_states))
+      |> Enum.group_by(& &1.family)
+    end
+
+    # Renders the appropriate specimen for a given registry entry, state, and theme column.
+    # The `theme` parameter ("light" or "dark") is used to scope element IDs so that the
+    # same component rendered in both columns has unique DOM IDs (required by LiveView).
+    defp render_specimen(entry, state, theme) do
+      specimen = pick_specimen(entry.specimens, state)
+      do_render_specimen(entry.family, state, specimen, theme)
+    end
+
+    # Pick the best specimen for the given state: prefer one whose label mentions the state,
+    # fall back to the first specimen.
+    defp pick_specimen(specimens, state) do
+      state_label = String.downcase(state)
+
+      Enum.find(specimens, List.first(specimens), fn s ->
+        String.downcase(s.label) =~ state_label
+      end)
+    end
+
+    # ── Button ──────────────────────────────────────────────────────────────────
+    defp do_render_specimen("button", "disabled", %{props: props, content: content}, _theme) do
+      variant = Map.get(props, :variant, "primary")
+      assigns = %{variant: variant, content: content || "Archived", __changed__: %{}}
+
+      ~H"""
+      <Button.button variant={@variant} type="button" disabled={true}><%= @content %></Button.button>
+      """
+    end
+
+    defp do_render_specimen("button", _state, %{props: props, content: content}, _theme) do
+      variant = Map.get(props, :variant, "primary")
+      assigns = %{variant: variant, content: content || "Action", __changed__: %{}}
+
+      ~H"""
+      <Button.button variant={@variant} type="button"><%= @content %></Button.button>
+      """
+    end
+
+    # ── Input ───────────────────────────────────────────────────────────────────
+    defp do_render_specimen("input", "error", _specimen, theme) do
+      assigns = %{id: "#{theme}-inp-error", __changed__: %{}}
+
+      ~H"""
+      <Input.input
+        id={@id}
+        name={"#{@id}n"}
+        label="Email"
+        errors={["is not a valid email address"]}
+        value="not-an-email"
+      />
+      """
+    end
+
+    defp do_render_specimen("input", "disabled", _specimen, theme) do
+      assigns = %{id: "#{theme}-inp-disabled", __changed__: %{}}
+
+      ~H"""
+      <Input.input
+        id={@id}
+        name={"#{@id}n"}
+        label="Email"
+        value="locked@example.com"
+        disabled
+      />
+      """
+    end
+
+    defp do_render_specimen("input", "overflow", _specimen, theme) do
+      assigns = %{id: "#{theme}-inp-overflow", __changed__: %{}}
+
+      ~H"""
+      <Input.input
+        id={@id}
+        name={"#{@id}n"}
+        label="Customer ID"
+        value="cus_1234567890abcdefghijklmnopqrstuvwxyz"
+      />
+      """
+    end
+
+    defp do_render_specimen("input", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-inp-#{state}", __changed__: %{}}
+
+      ~H"""
+      <Input.input
+        id={@id}
+        name={"#{@id}n"}
+        label="Email"
+        placeholder="name@example.com"
+      />
+      """
+    end
+
+    # ── Textarea ─────────────────────────────────────────────────────────────────
+    defp do_render_specimen("textarea", "error", _specimen, theme) do
+      assigns = %{id: "#{theme}-ta-error", __changed__: %{}}
+
+      ~H"""
+      <Textarea.textarea
+        id={@id}
+        name={"#{@id}n"}
+        label="Notes"
+        errors={["is too short (minimum is 10 characters)"]}
+        value="Too short"
+      />
+      """
+    end
+
+    defp do_render_specimen("textarea", "disabled", _specimen, theme) do
+      assigns = %{id: "#{theme}-ta-disabled", __changed__: %{}}
+
+      ~H"""
+      <Textarea.textarea
+        id={@id}
+        name={"#{@id}n"}
+        label="Notes"
+        value="This field is locked."
+        disabled
+      />
+      """
+    end
+
+    defp do_render_specimen("textarea", "overflow", _specimen, theme) do
+      assigns = %{id: "#{theme}-ta-overflow", __changed__: %{}}
+
+      ~H"""
+      <Textarea.textarea
+        id={@id}
+        name={"#{@id}n"}
+        label="Notes"
+        value={"Line one.\nLine two.\nLine three — a very long line that demonstrates how the textarea handles content beyond normal line length.\nLine four."}
+      />
+      """
+    end
+
+    defp do_render_specimen("textarea", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-ta-#{state}", __changed__: %{}}
+
+      ~H"""
+      <Textarea.textarea
+        id={@id}
+        name={"#{@id}n"}
+        label="Notes"
+        placeholder="Add notes here…"
+      />
+      """
+    end
+
+    # ── Checkbox ─────────────────────────────────────────────────────────────────
+    defp do_render_specimen("checkbox", "selected", _specimen, theme) do
+      assigns = %{id: "#{theme}-cb-selected", __changed__: %{}}
+
+      ~H"""
+      <Checkbox.checkbox
+        id={@id}
+        name={"#{@id}n"}
+        label="Accept terms and conditions"
+        checked={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("checkbox", "disabled", _specimen, theme) do
+      assigns = %{id: "#{theme}-cb-disabled", __changed__: %{}}
+
+      ~H"""
+      <Checkbox.checkbox
+        id={@id}
+        name={"#{@id}n"}
+        label="Accept terms and conditions"
+        disabled={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("checkbox", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-cb-#{state}", __changed__: %{}}
+
+      ~H"""
+      <Checkbox.checkbox
+        id={@id}
+        name={"#{@id}n"}
+        label="Accept terms and conditions"
+      />
+      """
+    end
+
+    # ── Radio ────────────────────────────────────────────────────────────────────
+    defp do_render_specimen("radio", "selected", _specimen, theme) do
+      assigns = %{id: "#{theme}-rb-selected", __changed__: %{}}
+
+      ~H"""
+      <Radio.radio
+        id={@id}
+        name={"#{@id}n"}
+        label="Starter plan"
+        value="starter"
+        checked={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("radio", "disabled", _specimen, theme) do
+      assigns = %{id: "#{theme}-rb-disabled", __changed__: %{}}
+
+      ~H"""
+      <Radio.radio
+        id={@id}
+        name={"#{@id}n"}
+        label="Enterprise plan (contact sales)"
+        value="enterprise"
+        disabled={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("radio", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-rb-#{state}", __changed__: %{}}
+
+      ~H"""
+      <Radio.radio
+        id={@id}
+        name={"#{@id}n"}
+        label="Starter plan"
+        value="starter"
+      />
+      """
+    end
+
+    # ── Toggle ───────────────────────────────────────────────────────────────────
+    defp do_render_specimen("toggle", "selected", _specimen, theme) do
+      assigns = %{id: "#{theme}-tg-selected", __changed__: %{}}
+
+      ~H"""
+      <Toggle.toggle
+        id={@id}
+        name={"#{@id}n"}
+        label="Email notifications"
+        on={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("toggle", "disabled", _specimen, theme) do
+      assigns = %{id: "#{theme}-tg-disabled", __changed__: %{}}
+
+      ~H"""
+      <Toggle.toggle
+        id={@id}
+        name={"#{@id}n"}
+        label="Email notifications"
+        disabled={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("toggle", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-tg-#{state}", __changed__: %{}}
+
+      ~H"""
+      <Toggle.toggle
+        id={@id}
+        name={"#{@id}n"}
+        label="Email notifications"
+      />
+      """
+    end
+
+    # ── Select ───────────────────────────────────────────────────────────────────
+    defp do_render_specimen("select", "error", _specimen, theme) do
+      assigns = %{id: "#{theme}-sel-error", __changed__: %{}}
+
+      ~H"""
+      <Select.select
+        id={@id}
+        name={"#{@id}n"}
+        label="Country"
+        errors={["is required"]}
+        prompt="Select a country"
+        options={[{"United States", "us"}, {"United Kingdom", "gb"}]}
+      />
+      """
+    end
+
+    defp do_render_specimen("select", "disabled", _specimen, theme) do
+      assigns = %{id: "#{theme}-sel-disabled", __changed__: %{}}
+
+      ~H"""
+      <Select.select
+        id={@id}
+        name={"#{@id}n"}
+        label="Country"
+        value="us"
+        disabled
+        options={[{"United States", "us"}]}
+      />
+      """
+    end
+
+    defp do_render_specimen("select", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-sel-#{state}", __changed__: %{}}
+
+      ~H"""
+      <Select.select
+        id={@id}
+        name={"#{@id}n"}
+        label="Country"
+        prompt="Select a country"
+        options={[{"United States", "us"}, {"United Kingdom", "gb"}, {"Canada", "ca"}]}
+      />
+      """
+    end
+
+    # ── Form-field ───────────────────────────────────────────────────────────────
+    defp do_render_specimen("form-field", "error", _specimen, theme) do
+      assigns = %{id: "#{theme}-ff-error", __changed__: %{}}
+
+      ~H"""
+      <div class="ax-field ax-form-field">
+        <label class="ax-field-label" for={@id}>Email address</label>
+        <input id={@id} name={"#{@id}n"} type="email" class="ax-field-control ax-field-control-error" aria-invalid="true" value="not-an-email" />
+        <p class="ax-field-error">Please enter a valid email address.</p>
+      </div>
+      """
+    end
+
+    defp do_render_specimen("form-field", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-ff-#{state}", __changed__: %{}}
+
+      ~H"""
+      <div class="ax-field ax-form-field">
+        <label class="ax-field-label" for={@id}>Email address</label>
+        <input id={@id} name={"#{@id}n"} type="email" class="ax-field-control" placeholder="name@example.com" />
+        <p class="ax-field-help">We will send billing notifications to this address.</p>
+      </div>
+      """
+    end
+
+    # ── Status badge ─────────────────────────────────────────────────────────────
+    defp do_render_specimen("status", "overflow", %{props: props}, _theme) do
+      tone = Map.get(props, :tone, "moss")
+      assigns = %{tone: tone, __changed__: %{}}
+
+      ~H"""
+      <StatusBadge.status_badge tone={@tone} status={:active} label="Requires additional customer authentication step" />
+      """
+    end
+
+    defp do_render_specimen("status", _state, %{props: props}, _theme) do
+      tone = Map.get(props, :tone, "moss")
+      {status, _label} = tone_to_status(tone)
+      assigns = %{tone: tone, status: status, __changed__: %{}}
+
+      ~H"""
+      <StatusBadge.status_badge tone={@tone} status={@status} />
+      """
+    end
+
+    # ── Icon ─────────────────────────────────────────────────────────────────────
+    defp do_render_specimen("icon", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <Icon.icon name={:invoices} size="md" />
+      """
+    end
+
+    # ── MoneyFormatter ────────────────────────────────────────────────────────────
+    defp do_render_specimen("money", "overflow", _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <MoneyFormatter.money_formatter amount_minor={99_999_999_999} currency={:usd} class="ax-money-display" />
+      """
+    end
+
+    defp do_render_specimen("money", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <MoneyFormatter.money_formatter amount_minor={4200} currency={:usd} class="ax-money-display" />
+      """
+    end
+
+    # ── JsonViewer ────────────────────────────────────────────────────────────────
+    defp do_render_specimen("json-viewer", "empty", _specimen, theme) do
+      assigns = %{id: "#{theme}-jv-empty", __changed__: %{}}
+
+      ~H"""
+      <JsonViewer.json_viewer id={@id} payload={%{}} label="Empty payload" />
+      """
+    end
+
+    defp do_render_specimen("json-viewer", "overflow", _specimen, theme) do
+      assigns = %{id: "#{theme}-jv-overflow", __changed__: %{}}
+
+      ~H"""
+      <JsonViewer.json_viewer
+        id={@id}
+        payload={%{"subscription" => %{"id" => "sub_1234567890abcdefghijklmnopqrstuvwxyz", "customer" => %{"id" => "cus_1234567890abcdefghijklmnopqrstuvwxyz", "email" => "customer.with.very.long.email@example-domain-quite-long.com"}}}}
+        label="Nested payload"
+      />
+      """
+    end
+
+    defp do_render_specimen("json-viewer", state, _specimen, theme) do
+      assigns = %{id: "#{theme}-jv-#{state}", __changed__: %{}}
+
+      ~H"""
+      <JsonViewer.json_viewer
+        id={@id}
+        payload={%{"id" => "evt_1234", "type" => "payment_intent.succeeded", "amount" => 4200}}
+        label="Webhook payload"
+      />
+      """
+    end
+
+    # ── Spinner ──────────────────────────────────────────────────────────────────
+    defp do_render_specimen("spinner", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <Spinner.spinner size="sm" label="Loading subscription data…" />
+      """
+    end
+
+    # ── Tooltip ──────────────────────────────────────────────────────────────────
+    defp do_render_specimen("tooltip", "overflow", _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <Tooltip.tooltip content="This action will permanently delete the subscription and all associated invoice history from the billing record" position="above">
+        <Button.button variant="ghost" type="button">Delete</Button.button>
+      </Tooltip.tooltip>
+      """
+    end
+
+    defp do_render_specimen("tooltip", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <Tooltip.tooltip content="Copy to clipboard" position="above">
+        <Button.button variant="ghost" type="button">Copy</Button.button>
+      </Tooltip.tooltip>
+      """
+    end
+
+    # ── InlineId ──────────────────────────────────────────────────────────────────
+    defp do_render_specimen("inline-id", "overflow", _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <InlineId.inline_id id_value="cus_1234567890abcdefghijklmnopqrstuvwxyz" class="ax-inline-id-short" />
+      """
+    end
+
+    defp do_render_specimen("inline-id", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <InlineId.inline_id id_value="cus_ABC123" class="ax-inline-id-short" />
+      """
+    end
+
+    # ── EmptyState ────────────────────────────────────────────────────────────────
+    defp do_render_specimen("empty-state", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <EmptyState.empty_state
+        icon={:inbox}
+        title="No subscriptions yet"
+        body="Create a subscription to start billing your customers."
+        class="ax-empty-no-data"
+      />
+      """
+    end
+
+    # ── Fallback ──────────────────────────────────────────────────────────────────
+    defp do_render_specimen(family, state, _specimen, _theme) do
+      assigns = %{family: family, state: state, __changed__: %{}}
+
+      ~H"""
+      <span class="ax-type-code-xs ax-muted">[@<%= @family %>/<%= @state %>]</span>
+      """
+    end
+
     defp assign_shell(socket, admin, path, title) do
       socket
       |> assign(:page_title, title)
@@ -459,6 +990,7 @@ if Mix.env() != :prod do
       |> assign(:assets_js_path, admin["assets_js_path"])
       |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
       |> assign(:current_path, (admin["mount_path"] || "/billing") <> path)
+      |> assign(:active_organization_name, admin["active_organization_name"])
     end
 
     defp fake_processor? do
@@ -494,5 +1026,13 @@ if Mix.env() != :prod do
         true -> "color"
       end
     end
+
+    # Maps a status badge tone to a representative status atom and label.
+    defp tone_to_status("moss"), do: {:active, "Active"}
+    defp tone_to_status("cobalt"), do: {:trialing, "Trialing"}
+    defp tone_to_status("amber"), do: {:past_due, "Past due"}
+    defp tone_to_status("slate"), do: {:canceled, "Canceled"}
+    defp tone_to_status("ink"), do: {:failed, "Failed"}
+    defp tone_to_status(_), do: {:active, "Active"}
   end
 end
