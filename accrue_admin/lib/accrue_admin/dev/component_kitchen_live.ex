@@ -190,17 +190,19 @@ if Mix.env() != :prod do
             </div>
           </section>
 
-          <%!-- Badges variant reference (tone axis: moss/cobalt/amber/slate/ink) --%>
+          <%!-- Badges variant reference (tone axis: moss/cobalt/amber/slate/ink). Each tone
+               carries a representative status so the label reads true to its color rather than
+               a constant "Active" — a warning/amber badge labelled "Active" sends mixed signals. --%>
           <section :if={@available?} class="ax-card ax-dev-stack">
             <p class="ax-label">Badges</p>
             <div class="ax-dev-grid">
-              <%= for entry <- ComponentRegistry.variants_for("status") do %>
+              <%= for {entry, status} <- Enum.zip(ComponentRegistry.variants_for("status"), [:active, :trialing, :grace_period, :archived, :incomplete]) do %>
                 <div class="ax-dev-variant-row">
                   <div data-ax-theme="light">
-                    <StatusBadge.status_badge tone={entry.variant} status={:active} />
+                    <StatusBadge.status_badge tone={entry.variant} status={status} />
                   </div>
                   <div data-ax-theme="dark" style="background: var(--ax-base); padding: var(--ax-space-sm);">
-                    <StatusBadge.status_badge tone={entry.variant} status={:active} />
+                    <StatusBadge.status_badge tone={entry.variant} status={status} />
                   </div>
                   <dl class="ax-dev-token-dl">
                     <dt class="ax-label"><code><%= entry.ax_class %></code></dt>
