@@ -25,9 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 ## Current Position
 
-Phase: 189 (primitive-form-components-component-lab) — EXECUTION COMPLETE, VERIFICATION PENDING
+Phase: 189 (primitive-form-components-component-lab) — EXECUTION + GATES COMPLETE; minor UI polish + 1 follow-up open
 Plan: 7 of 7 complete
-Status: All 7 plans done + code review resolved (1 a11y BLOCKER + 7 WARNINGs fixed). Verifier verdict human_needed: CMP-01..05 pass on automated evidence; outstanding = Playwright e2e run (npm run e2e:a11y && npm run e2e from accrue_admin) + maintainer screenshot review of /billing/dev/components — the milestone's required phase-boundary gate (run /gsd-ui-review).
+Status: All 7 plans done. Gates run: code review (resolved — 1 a11y BLOCKER + 7 WARNINGs fixed); verifier (CMP-01..05 verified on automated evidence); e2e (a11y 2/2 GREEN + Phase-189 probe block 10/10 GREEN after fixes); secure-phase (threats_open: 0, SECURE); ui-review (17/24, committed). CRITICAL gap found+fixed during e2e: Phase 189 edited source app.css but never rebuilt the served Tailwind bundle priv/static/accrue_admin.css (was last built 188-07) — none of the CSS root fixes were live until rebuilt. Also fixed live: kitchen a11y (readonly label, scrollbar focusable, n/a-cell contrast), D-07 dark-column text color, overflow probe (input text-scroll exemption). UI-review "mobile dark column invisible" BLOCKER is a FALSE POSITIVE (auditor couldn't load mobile PNGs; grid 1fr stacks both columns vertically — mobile PNG is 1084x195616, both present). Remaining UI-review WARNINGs = dev-lab copy/format polish (heading should be "Component Kitchen"; n/a label format "n/a — {reason}").
+Open follow-up (NOT a 189 acceptance gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
 Last activity: 2026-06-18
 
 ## Post-v1.48 Pause Rule
