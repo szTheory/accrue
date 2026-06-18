@@ -25,6 +25,21 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ ~s(aria-current="page")
       assert html =~ "INV-0001"
     end
+
+    test "keeps breadcrumb current-page state without claiming page-header ownership" do
+      html =
+        render_component(&Breadcrumbs.breadcrumbs/1, %{
+          items: [
+            %{label: "Billing", href: "/billing"},
+            %{label: "Invoices", href: "/billing/invoices"},
+            %{label: "INV-0001"}
+          ]
+        })
+
+      assert html =~ ~s(<nav class="ax-breadcrumbs" aria-label="Breadcrumb">)
+      assert html =~ ~s(class="ax-breadcrumbs-current" aria-current="page")
+      refute html =~ ~s(data-component-group="page-header-actions-breadcrumbs")
+    end
   end
 
   describe "FlashGroup" do
@@ -210,6 +225,27 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ "ax-tab-active"
       assert html =~ ">12<"
     end
+
+    test "keeps route navigation semantics without same-page tab-panel roles" do
+      html =
+        render_component(&Tabs.tabs/1, %{
+          active: "events",
+          tabs: [
+            %{id: "overview", label: "Overview", href: "/billing/customers/cus_123"},
+            %{id: "events", label: "Events", href: "/billing/customers/cus_123/events", count: 12},
+            %{id: "invoices", label: "Invoices", href: "/billing/customers/cus_123/invoices"}
+          ]
+        })
+
+      assert html =~ ~s(<nav class="ax-tabs")
+      assert html =~ ~s(data-component-group="tabs-subviews")
+      assert html =~ ~s(href="/billing/customers/cus_123/events")
+      assert html =~ ~s(aria-current="page")
+      assert 1 == html |> String.split(~s(aria-current="page")) |> length() |> Kernel.-(1)
+      refute html =~ ~s(role="tablist")
+      refute html =~ ~s(role="tab")
+      refute html =~ ~s(role="tabpanel")
+    end
   end
 
   describe "Sidebar collapsible groups" do
@@ -338,6 +374,22 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ "ax-tab-active"
       # Only one button should carry aria-current="page" (the active one)
       assert 1 == html |> String.split(~s(aria-current="page")) |> length() |> Kernel.-(1)
+    end
+
+    test "uses the tabs-subviews group locator while remaining patch navigation" do
+      html =
+        render_component(&WindowSelector.window_selector/1, %{
+          current_window: "90d",
+          base_path: "/billing/analytics/recovery"
+        })
+
+      assert html =~ ~s(data-component-group="tabs-subviews")
+      assert html =~ ~s(data-phx-link="patch")
+      assert html =~ ~s(href="/billing/analytics/recovery?window=90d")
+      assert html =~ ~s(aria-current="page")
+      assert 1 == html |> String.split(~s(aria-current="page")) |> length() |> Kernel.-(1)
+      refute html =~ ~s(role="tablist")
+      refute html =~ ~s(role="tabpanel")
     end
 
     test "constructs correct patch hrefs from base_path" do
