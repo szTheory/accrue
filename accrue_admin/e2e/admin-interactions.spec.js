@@ -922,13 +922,33 @@ async function overflowProbe(page, selector, recorder, surface) {
     return;
   }
 
-  const metrics = await locator.evaluate((el) => ({
-    scrollWidth: el.scrollWidth,
-    clientWidth: el.clientWidth,
-  }));
+  const metrics = await locator.evaluate((el) => {
+    const tag = el.tagName.toLowerCase();
+    // Form controls clip + scroll their value internally by design, so
+    // scrollWidth > clientWidth is expected and is NOT a layout break (CMP-02).
+    // For them the meaningful escape is the control's BOX exceeding its cell.
+    const scrolls = tag === "input" || tag === "textarea" || tag === "select";
+    const parent = el.parentElement;
+    const elRect = el.getBoundingClientRect();
+    const parentRect = parent ? parent.getBoundingClientRect() : elRect;
+    const escapesContainer =
+      elRect.right > Math.ceil(parentRect.right) + 1 ||
+      elRect.left < Math.floor(parentRect.left) - 1;
+    const contentOverflows = !scrolls && el.scrollWidth > el.clientWidth;
+    return {
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+      tag,
+      scrolls,
+      escapesContainer,
+      contentOverflows,
+    };
+  });
 
-  const { scrollWidth, clientWidth } = metrics;
-  const contained = scrollWidth <= clientWidth;
+  const { scrollWidth, clientWidth, escapesContainer, contentOverflows } = metrics;
+  // "Escape" = element's box breaks out of its container, or (for non-scrolling
+  // elements) its own content overflows its box. Native input text-scroll is fine.
+  const contained = !escapesContainer && !contentOverflows;
 
   recorder.observe({
     interaction_class: "overflow-clip",
@@ -938,9 +958,9 @@ async function overflowProbe(page, selector, recorder, surface) {
     state: "overflow",
     rubric_dimension: "responsive-mobile-first",
     target_selector: selector,
-    expected: "scrollWidth <= clientWidth — content does not overflow horizontally",
+    expected: "element box stays within its container; non-scrolling content does not overflow its box (native input text-scroll exempt)",
     actual: JSON.stringify(metrics),
-    assertions: ["scrollWidth <= clientWidth"],
+    assertions: ["!escapesContainer", "!contentOverflows (non-form-control)"],
     overlay_tags: ["scroll-reachability"],
     coverage_status: contained ? "covered" : "gap",
     failure_kind: !contained ? "content-overflow-escape" : null,
