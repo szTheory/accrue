@@ -183,7 +183,28 @@ Cross-cutting constraints:
   3. Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen.
   4. Pagination and similar affordances disappear or de-emphasize when there is nothing to paginate, and filter/sort/active/selected states are unmistakable.
 
-**Plans:** TBD
+**Plans:** 5 plans
+Plans:
+**Wave 0**
+
+- [ ] 190-01-PLAN.md — Group contract source and validation scaffold
+
+**Wave 1** *(blocked on Wave 0 completion)*
+
+- [ ] 190-02-PLAN.md — Component-kitchen group proof surface
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 190-03-PLAN.md — Data-display group cohesion
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 190-04-PLAN.md — Navigation and meta-component group cohesion
+
+**Wave 4** *(blocked on Waves 1-3 completion)*
+
+- [ ] 190-05-PLAN.md — Browser probes, representative live checks, and Phase 191 handoff
+
 **UI hint**: yes
 
 ### Phase 191: Page & flow interaction pass + fixture stress + microcopy
@@ -310,7 +331,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
 | 189. Primitive & form components + component lab | v1.53 | 7/7 | Complete   | 2026-06-18 |
-| 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/TBD | Not started | - |
+| 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/5 | Not started | - |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
 | 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
 
