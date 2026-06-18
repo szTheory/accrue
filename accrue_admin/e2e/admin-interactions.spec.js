@@ -852,46 +852,6 @@ async function focusRingProbe(page, selector, recorder, surface, state) {
 }
 
 /**
- * themeColumnDeltaProbe — asserts --ax-base differs between the light and dark
- * theme columns, proving the sub-tree theme selector added in Plan 01 resolves
- * different token values in the browser (D-07 DEFINITIVE sign-off, CMP-01).
- *
- * @param {import('@playwright/test').Page} page
- * @param {ReturnType<typeof makeRecorder>} recorder
- * @param {string} projectName - Playwright project name (e.g. "chromium-desktop")
- */
-async function themeColumnDeltaProbe(page, recorder, projectName) {
-  const result = await page.evaluate(() => {
-    const lightCol = document.querySelector('.ax-dev-state-grid-col[data-theme="light"]');
-    const darkCol  = document.querySelector('.ax-dev-state-grid-col[data-theme="dark"]');
-    if (!lightCol || !darkCol) return { lightBase: null, darkBase: null, error: "columns not found" };
-    const lightBase = window.getComputedStyle(lightCol).getPropertyValue("--ax-base").trim();
-    const darkBase  = window.getComputedStyle(darkCol).getPropertyValue("--ax-base").trim();
-    return { lightBase, darkBase, error: null };
-  });
-
-  const { lightBase, darkBase, error } = result;
-  const hasDelta = lightBase && darkBase && lightBase !== darkBase;
-
-  recorder.observe({
-    interaction_class: "theme-column-delta",
-    cell_id: `p187__component-kitchen__${slug(projectName)}__light__default-populated__d01`,
-    surface: "component-kitchen",
-    surface_type: "component",
-    state: "default-populated",
-    rubric_dimension: "color-theme",
-    target_selector: '.ax-dev-state-grid-col[data-theme="light"], .ax-dev-state-grid-col[data-theme="dark"]',
-    expected: "--ax-base resolved value differs between light and dark theme columns (D-07 resolved-color delta)",
-    actual: error ? `ERROR: ${error}` : `lightBase=${lightBase}; darkBase=${darkBase}`,
-    assertions: ["lightBase !== darkBase", "sub-tree theme selector resolves distinct token values"],
-    overlay_tags: ["dark-mode-role"],
-    coverage_status: hasDelta ? "covered" : "gap",
-    failure_kind: !hasDelta ? "theme-column-inert" : null,
-    notes: "D-07 definitive sign-off: sub-tree .accrue-admin [data-theme='dark'] selector resolves different --ax-base in browser, not just emits a different attribute name.",
-  });
-}
-
-/**
  * overflowProbe — asserts scrollWidth <= clientWidth on overflow specimens,
  * confirming content does not escape its bounding box (CMP-02).
  *
@@ -1095,33 +1055,25 @@ test.describe("Phase 189: component-kitchen probes", () => {
     await expect(page.locator("#main-content")).toBeVisible();
   });
 
-  test("theme column delta: light and dark columns resolve different --ax-base", async ({ page }, testInfo) => {
-    const recorder = makeRecorder(testInfo.project.name);
-
-    await themeColumnDeltaProbe(page, recorder, testInfo.project.name);
-    recorder.write();
-
-    const row = recorder.rows[0];
-    expect(
-      row.coverage_status,
-      `themeColumnDeltaProbe gap — --ax-base identical in light and dark columns (D-07 broken): ${row.actual}`
-    ).toBe("covered");
-  });
+  // NOTE: the two-column light/dark "theme column delta" probe was removed when the
+  // lab moved to a single column following the global theme toggle (D-05/D-07
+  // superseded 2026-06-18). Dark-mode rendering is covered by admin-a11y.spec.js
+  // (scans every surface in both themes via the global toggle) and admin-visuals.
 
   test("focus ring: interactive primitives have outline >= 2px on :focus-visible", async ({ page }, testInfo) => {
     const recorder = makeRecorder(testInfo.project.name);
 
-    // Probe the light-theme column for each interactive primitive
+    // Probe each interactive primitive in the (single) state-matrix column.
     await focusRingProbe(
       page,
-      '.ax-dev-state-grid-col[data-theme="light"] .ax-button',
+      '.ax-dev-state-grid-col .ax-button',
       recorder,
       "component-kitchen",
       "interactive-open"
     );
     await focusRingProbe(
       page,
-      '.ax-dev-state-grid-col[data-theme="light"] .ax-field-control',
+      '.ax-dev-state-grid-col .ax-field-control',
       recorder,
       "component-kitchen",
       "interactive-open"

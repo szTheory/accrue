@@ -228,10 +228,11 @@ button {
   gap: var(--ax-space-sm);
 }
 
-/* Phase 189 — state-matrix lab renderer (two-column light/dark grid per family) */
+/* Phase 189 — single-column state-matrix lab renderer (follows the global
+   topbar theme toggle; D-05/D-07 two-column design superseded 2026-06-18). */
 .ax-dev-state-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1px;
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-md);
@@ -244,16 +245,6 @@ button {
   flex-direction: column;
   gap: 1px;
   background: var(--ax-border);
-  /* D-07: re-declare text color so it re-resolves against THIS column's
-     data-theme token scope. `color` is otherwise computed once on
-     html.accrue-admin and inherited as a fixed value, leaving dark-column
-     text at the light-theme color (axe color-contrast on the lab). */
-  color: var(--ax-primary);
-}
-
-.ax-dev-state-grid-col-header {
-  padding: var(--ax-space-sm) var(--ax-space-md);
-  background: var(--ax-sunken);
 }
 
 .ax-dev-state-cell {
@@ -270,12 +261,6 @@ button {
      opacity blends the muted label toward the background and drops its
      contrast below WCAG AA (axe color-contrast on the lab itself, CMP-01). */
   background: var(--ax-sunken);
-}
-
-@media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
-  .ax-dev-state-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .ax-dev-token-dl {

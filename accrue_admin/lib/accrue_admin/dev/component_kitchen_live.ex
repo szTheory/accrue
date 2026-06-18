@@ -76,7 +76,7 @@ if Mix.env() != :prod do
               ]}
             />
             <h2 class="ax-display">Component Kitchen</h2>
-            <p class="ax-page-description">Primitive and form components — full state matrix across light and dark.</p>
+            <p class="ax-page-description">Primitive and form components — full state matrix. Use the topbar theme toggle to review light and dark.</p>
           </header>
 
           <FlashGroup.flash_group flashes={@flashes} />
@@ -191,31 +191,16 @@ if Mix.env() != :prod do
                 </p>
               </div>
 
+              <%!-- Single-column state matrix. The lab follows the global topbar
+                   theme toggle (html.accrue-admin[data-theme]) like every other admin
+                   page — see D-05/D-07 supersede note in 189-CONTEXT.md. --%>
               <div class="ax-dev-state-grid">
-                <div class="ax-dev-state-grid-col" data-theme="light">
-                  <p class="ax-dev-state-grid-col-header ax-label">Light</p>
+                <div class="ax-dev-state-grid-col">
                   <%= for entry <- entries do %>
                     <%= for state <- Map.get(entry, :applicable_states, []) do %>
                       <div class="ax-dev-state-cell" data-ax-state={state}>
                         <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %></span>
-                        <%= render_specimen(entry, state, "light") %>
-                      </div>
-                    <% end %>
-                    <%= for %{state: state, reason: reason} <- Map.get(entry, :na_states, []) do %>
-                      <div class="ax-dev-state-cell ax-dev-state-cell-na" data-ax-state={state} data-ax-na-reason={reason}>
-                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %></span>
-                        <span class="ax-type-code-xs ax-muted">n/a — <%= reason %></span>
-                      </div>
-                    <% end %>
-                  <% end %>
-                </div>
-                <div class="ax-dev-state-grid-col" data-theme="dark">
-                  <p class="ax-dev-state-grid-col-header ax-label">Dark</p>
-                  <%= for entry <- entries do %>
-                    <%= for state <- Map.get(entry, :applicable_states, []) do %>
-                      <div class="ax-dev-state-cell" data-ax-state={state}>
-                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %></span>
-                        <%= render_specimen(entry, state, "dark") %>
+                        <%= render_specimen(entry, state) %>
                       </div>
                     <% end %>
                     <%= for %{state: state, reason: reason} <- Map.get(entry, :na_states, []) do %>
@@ -496,9 +481,12 @@ if Mix.env() != :prod do
     # Renders the appropriate specimen for a given registry entry, state, and theme column.
     # The `theme` parameter ("light" or "dark") is used to scope element IDs so that the
     # same component rendered in both columns has unique DOM IDs (required by LiveView).
-    defp render_specimen(entry, state, theme) do
+    # Single-column lab: specimens render once and follow the global theme.
+    # "lab" is a fixed id-namespace passed through to do_render_specimen/4 so
+    # specimen element ids stay unique on the page (no light/dark duplication).
+    defp render_specimen(entry, state) do
       specimen = pick_specimen(entry.specimens, state)
-      do_render_specimen(entry.family, state, specimen, theme)
+      do_render_specimen(entry.family, state, specimen, "lab")
     end
 
     # Pick the best specimen for the given state: prefer one whose label mentions the state,

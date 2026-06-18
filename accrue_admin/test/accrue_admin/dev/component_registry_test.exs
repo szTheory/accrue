@@ -228,26 +228,23 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
   # (g) Mounted-page HTML assertion (introduced in Plan 03 after the renderer exists).
   #
   # Tests (e) and (f) remain structural data-contract tests — do not collapse them into
-  # this test. This test verifies the live-rendered /dev/components page contains the
-  # data-theme column wrappers and data-ax-state cell attributes that the registry-driven
-  # matrix renderer must emit.
+  # this test. This test verifies the live-rendered /dev/components page emits the
+  # registry-driven state grid and data-ax-state cell attributes.
   #
-  # D-07 note: HTML attribute presence (data-theme='light'/'dark') is verified here.
-  # Browser-level resolved-color delta is the definitive D-07 proof — verified in Plan 06
-  # (themeColumnDeltaProbe). Do not mark D-07 fully resolved before Plan 06 passes.
-  test "mounted /dev/components page has data-theme columns and data-ax-state cells", %{
+  # Note: the lab renders a SINGLE state-matrix column following the global topbar
+  # theme toggle (D-05/D-07 two-column design superseded 2026-06-18). Dark-mode
+  # rendering is covered by admin-a11y.spec.js (scans every surface in both themes)
+  # and admin-visuals — not by side-by-side data-theme columns here.
+  test "mounted /dev/components page has the state grid and data-ax-state cells", %{
     conn: conn
   } do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
 
-    # Column wrappers: the registry-driven renderer emits both light and dark columns.
-    assert html =~ ~s(data-theme="light"),
-           "no .ax-dev-state-grid-col[data-theme=\"light\"] found in /dev/components HTML"
-
-    assert html =~ ~s(data-theme="dark"),
-           "no .ax-dev-state-grid-col[data-theme=\"dark\"] found in /dev/components HTML"
+    # The registry-driven renderer emits the single-column state grid.
+    assert html =~ "ax-dev-state-grid",
+           "no .ax-dev-state-grid found in /dev/components HTML"
 
     # State cells: the renderer emits data-ax-state attributes for each applicable state.
     assert html =~ ~s(data-ax-state="default"),
