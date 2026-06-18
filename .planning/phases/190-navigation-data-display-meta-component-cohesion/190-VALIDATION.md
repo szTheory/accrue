@@ -20,17 +20,17 @@ created: 2026-06-18
 | **Framework** | ExUnit with Phoenix component rendering, Playwright 1.59.1, and `@axe-core/playwright` 4.11.3 |
 | **Config file** | `accrue_admin/mix.exs`, `accrue_admin/package.json`, `accrue_admin/playwright.config.js` |
 | **Quick run command** | `cd accrue_admin && mix test test/accrue_admin/components/data_table_test.exs test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/display_components_test.exs` |
-| **Full suite command** | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && mix test && npm run e2e:a11y && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js` |
+| **Full suite command** | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && mix test && npm run e2e:a11y && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js && npm run e2e:visuals:png-only` |
 | **Estimated runtime** | Quick checks: under 30 seconds expected. Full suite: project-dependent; run at wave and phase gates. |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `cd accrue_admin && mix test test/accrue_admin/components/data_table_test.exs test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/display_components_test.exs`.
+- **After every task commit:** Run the applicable changed-file ExUnit command from the per-task verification map. Once Plan 03 creates AtRiskTable coverage, include `test/accrue_admin/components/at_risk_table_test.exs` in the quick data-display set.
 - **After every CSS-affecting task:** Run `cd accrue_admin && mix accrue_admin.assets.build` before browser checks so source CSS reaches `priv/static/accrue_admin.css`.
 - **After every plan wave:** Run `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors && mix test && npm run e2e:a11y && npm run e2e -- e2e/admin-baseline.spec.js`.
-- **Before `/gsd:verify-work`:** Run the full suite command, including `e2e/admin-interactions.spec.js`.
+- **Before `/gsd:verify-work`:** Run the full suite command, including `e2e/admin-interactions.spec.js` and `e2e/admin-visuals.spec.js` through `npm run e2e:visuals:png-only`.
 - **Max feedback latency:** Keep per-task feedback under 30 seconds where possible; defer full browser sweeps to wave and phase gates.
 
 ---
@@ -39,21 +39,22 @@ created: 2026-06-18
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 190-01-01 | TBD | 0 | GRP-01 | T-190-01 / T-190-02 | Group locators and proof surfaces expose no duplicate focus targets or misleading roles. | unit | `cd accrue_admin && mix test test/accrue_admin/dev/component_group_registry_test.exs` | No - Wave 0 | pending |
-| 190-01-02 | TBD | 0 | GRP-02 | T-190-03 | Inactive desktop/mobile duplicate markup is hidden from assistive tech and keyboard focus. | unit + e2e | `cd accrue_admin && mix test test/accrue_admin/components/data_table_test.exs test/accrue_admin/components/display_components_test.exs && npm run e2e -- e2e/admin-baseline.spec.js` | Partial | pending |
-| 190-01-03 | TBD | 0 | GRP-03 | T-190-04 | KPI/detail/timeline groups keep hierarchy and tokenized spacing without nested card traps. | unit + e2e | `cd accrue_admin && mix test test/accrue_admin/components/display_components_test.exs && npm run e2e:a11y` | Partial | pending |
-| 190-01-04 | TBD | 0 | GRP-04 | T-190-05 | Pagination, filter, sort, active, and selected states are visible, distinct, and absent/de-emphasized when unavailable. | unit + interaction e2e | `cd accrue_admin && mix test test/accrue_admin/components/data_table_test.exs && npm run e2e -- e2e/admin-interactions.spec.js` | Partial | pending |
+| 190-01-01 | 190-01 | 0 | GRP-01 | T-190-01 / T-190-02 | Group contract slugs, proof IDs, state inventory, and Phase 191 handoff tags are scaffolded before implementation waves. | unit | `cd accrue_admin && mix test test/accrue_admin/dev/component_group_registry_test.exs` | No - Wave 0 | pending |
+| 190-03-01 | 190-03 | 2 | GRP-02, GRP-04 | T-190-09 / T-190-11 / T-190-12 | DataTable pagination, filtered-empty, selected/filter-active state, and inactive responsive DOM behavior are verified with same-task TDD. | unit | `cd accrue_admin && mix test test/accrue_admin/components/data_table_test.exs` | Partial | pending |
+| 190-03-02 | 190-03 | 2 | GRP-02 | T-190-10 / T-190-11 | AtRiskTable mobile card/list behavior plus empty/loading/error/no-pagination/has-pagination states are verified with same-task TDD. | unit | `cd accrue_admin && mix test test/accrue_admin/components/at_risk_table_test.exs` | No - Plan 03 creates or expands | pending |
+| 190-03-03 | 190-03 | 2 | GRP-03 | T-190-13 | KPI/detail/timeline groups keep hierarchy and tokenized spacing without nested card traps. | unit + e2e | `cd accrue_admin && mix test test/accrue_admin/components/display_components_test.exs && npm run e2e:a11y` | Partial | pending |
+| 190-04-02 | 190-04 | 3 | GRP-01, GRP-04 | T-190-15 / T-190-16 | DropdownMenu disclosure semantics, navigation current state, search active state, and flash/toast layer behavior are verified with same-task TDD. | unit + interaction e2e | `cd accrue_admin && mix test test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/global_search_test.exs && npm run e2e -- e2e/admin-interactions.spec.js` | Partial | pending |
 
 *Status: pending, green, red, flaky.*
 
 ---
 
-## Wave 0 Requirements
+## Wave 0 Scaffold Requirements and Same-Task TDD Rationale
 
 - [ ] Add `test/accrue_admin/dev/component_group_registry_test.exs`, or extend the existing registry tests, to cover Phase 187 group slugs, state inventory, proof IDs, and Phase 191 handoff tags for GRP-01.
-- [ ] Add `test/accrue_admin/components/at_risk_table_test.exs`, or expand `display_components_test.exs`, to cover GRP-02 mobile card/list behavior plus empty/loading/error/no-pagination states.
-- [ ] Add `e2e/admin-group-contracts.spec.js`, or a narrow block in existing baseline/interactions specs, to cover group locator visibility, mobile/desktop inactive DOM, duplicate focus-target prevention, and selected/filter-active proof.
-- [ ] Update `navigation_components_test.exs` if `DropdownMenu` changes from menu-button semantics to disclosure semantics; existing expectations currently assert `role="menu"`.
+- [ ] Add `e2e/admin-group-contracts.spec.js` as the Wave 0 harness scaffold with source-level contract checks and reusable helper names. Full DOM probes run in Plan 05 after the kitchen and component roots exist.
+- [ ] Plan 03 intentionally owns AtRiskTable component tests with `tdd="true"` because the test file must lock the final assigns/API added in the same task: mobile cards, empty/loading/error, no-pagination, and has-pagination states. This is accepted as same-task TDD rather than Wave 0 pre-scaffolding, and Plan 03 Task 2 carries the required automated `mix test test/accrue_admin/components/at_risk_table_test.exs` gate.
+- [ ] Plan 04 intentionally owns DropdownMenu/navigation expectation changes with `tdd="true"` because the semantics change from overclaimed menu roles to native disclosure semantics in the same component task. This is accepted as same-task TDD rather than Wave 0 pre-scaffolding, and Plan 04 Task 2 carries the required automated `mix test test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/global_search_test.exs` gate.
 
 ---
 
@@ -70,7 +71,7 @@ created: 2026-06-18
 
 - [ ] All tasks have `<automated>` verify steps or Wave 0 dependencies.
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verification.
-- [ ] Wave 0 covers all missing test references.
+- [ ] Wave 0 covers registry and browser-harness scaffolds; Plan 03 and Plan 04 same-task TDD exceptions are mapped above with automated gates.
 - [ ] No watch-mode flags in verification commands.
 - [ ] Per-task feedback latency stays below 30 seconds where possible.
 - [ ] Set `nyquist_compliant: true` in frontmatter after Wave 0 gaps are closed and all tasks map to automated or justified manual checks.

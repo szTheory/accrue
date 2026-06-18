@@ -567,17 +567,21 @@ end
 |---|-------|---------|---------------|
 | none | No `[ASSUMED]` claims were used. | All sections | No user confirmation required for assumed claims. |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+These items were open during research because the exact implementation shape was
+left to the agent's discretion in `190-CONTEXT.md`. They are resolved for the
+current plans and are retained here only as traceable decision records.
 
 1. **Should the canonical group contract live inside `ComponentRegistry` or a sibling dev module?**
    - What we know: Phase 189 already uses `ComponentRegistry` as a dev-only registry-as-SSOT, and 190-CONTEXT allows registry entries, a planning artifact, kitchen sections, or a combination. [VERIFIED: accrue_admin/lib/accrue_admin/dev/component_registry.ex] [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-CONTEXT.md]
    - What's unclear: The exact implementation file is discretionary. [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-CONTEXT.md]
-   - Recommendation: Put `group_contracts/0` in `ComponentRegistry` unless the function becomes large enough to justify `ComponentGroupRegistry`; the kitchen and tests must consume the same source either way. [VERIFIED: accrue_admin/lib/accrue_admin/dev/component_registry.ex]
+   - **RESOLVED:** Use `AccrueAdmin.Dev.ComponentRegistry.group_contracts/0` as the canonical source. Plans 01 and 02 depend on that helper and keep the kitchen, registry tests, group contract ledger, and Playwright probes reading the same source. [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-01-PLAN.md] [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-02-PLAN.md]
 
 2. **Which live routes should be representative probes?**
    - What we know: Context requires one list/table, one detail, one recovery/KPI, one overlay path, and shell/nav. [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-CONTEXT.md]
    - What's unclear: Exact routes are discretionary. [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-CONTEXT.md]
-   - Recommendation: Use `/billing/invoices` or `/billing/subscriptions` for list/table, a matching detail page for detail, `/billing/analytics/recovery` for KPI/chart/table, the drawer/modal path already covered by admin interactions, and `/billing/dev/components` for shell/nav/tabs specimen proof. [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-CONTEXT.md]
+   - **RESOLVED:** Use `/billing/invoices` or `/billing/subscriptions` for list/table, a matching detail route for detail, `/billing/analytics/recovery` for KPI/chart/table, the existing drawer/modal path covered by admin interactions, and `/billing/dev/components` for shell/nav/tabs proof. Plan 05 owns the representative live-probe wiring and must keep the probe set narrow per D-07. [VERIFIED: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-05-PLAN.md]
 
 ## Environment Availability
 
