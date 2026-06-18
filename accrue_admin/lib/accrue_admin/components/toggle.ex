@@ -33,6 +33,7 @@ defmodule AccrueAdmin.Components.Toggle do
         class="ax-toggle"
         role="switch"
         aria-checked={if @on, do: "true", else: "false"}
+        aria-labelledby={@id <> "-label"}
         disabled={@disabled}
         {@rest}
       >
@@ -41,7 +42,7 @@ defmodule AccrueAdmin.Components.Toggle do
         </span>
       </button>
       <input type="hidden" name={@name} value={if @on, do: "true", else: "false"} />
-      <span class="ax-field-label"><%= @label %></span>
+      <span id={@id <> "-label"} class="ax-field-label"><%= @label %></span>
     </label>
     """
   end
