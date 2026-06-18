@@ -490,9 +490,7 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     File.write!(
       theme_path,
-      String.replace(File.read!(theme_path), "  --ax-focus-ring-offset: var(--ax-base);\n", "",
-        global: false
-      )
+      String.replace(File.read!(theme_path), "--ax-focus-ring-offset: var(--ax-base);", "")
     )
 
     {output, status} = run_verifier(tmp_dir)
