@@ -2,15 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
+current_phase: 190
+current_phase_name: navigation-data-display-meta-component-cohesion
 status: executing
-stopped_at: Phase 190 planning complete
-last_updated: "2026-06-18T15:03:34.120Z"
-last_activity: 2026-06-18 -- Phase 190 planning complete
+stopped_at: Completed 190-01-PLAN.md
+last_updated: "2026-06-18T15:23:39.474Z"
+last_activity: 2026-06-18
+last_activity_desc: Completed 190-01-PLAN.md
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 24
-  completed_plans: 19
+  completed_plans: 20
   percent: 50
 ---
 
@@ -26,11 +29,11 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 ## Current Position
 
-Phase: 190 (navigation-data-display-meta-component-cohesion) — PLANNED; ready to execute
-Plan: 5 of 5 planned; 0 of 5 executed
-Status: Planning complete. Five waves are ready: 190-01 group contract + validation scaffold; 190-02 component-kitchen group proof surface; 190-03 data-display group cohesion; 190-04 navigation/meta-component group cohesion; 190-05 browser probes + Phase 191 handoff. Plan checker passed; decision coverage gate passed 30/30; GRP-01..04 are covered.
+Phase: 190 (navigation-data-display-meta-component-cohesion) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
 Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
-Last activity: 2026-06-18 -- Phase 190 planning complete
+Last activity: 2026-06-18
 
 ## Post-v1.48 Pause Rule
 
@@ -149,6 +152,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 189 P02 | 3 min | 2 tasks | 8 files |
 | Phase 189-primitive-form-components-component-lab P03 | 25min | 2 tasks | 3 files |
 | Phase 189-primitive-form-components-component-lab P05 | 8min | 3 tasks | 1 files |
+| Phase 190 P01 | 7 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -215,6 +219,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 189]: D-07 CSS gate: sub-tree .accrue-admin [data-theme='dark'] selector with FULL dark token set is the CSS prerequisite; browser-level color delta verified in Plan 06 themeColumnDeltaProbe
 - [Phase 189]: Structural tests (e) and (f) are data-contract-only (no page mount); HTML mount assertions for data-ax-state and data-theme attributes are Plan 03 test (g)
 - [Phase ?]: StatusBadge ink tone maps to neutral (not danger) — ax-status-badge-ink removed from Plan 04 danger grouping; ink is catch-all unknown status
+- [Phase 190]: Plan 01 uses AccrueAdmin.Dev.ComponentRegistry.group_contracts/0 as the canonical Wave 0 group contract source.
+- [Phase 190]: Plan 01 keeps the Playwright Wave 0 harness source-level only until later plans render data-component-group DOM specimens.
+- [Phase 190]: Plan 01 records Phase 191 handoff tags in contracts and the ledger without implementing focus, Escape, click-outside, fixture, or microcopy behavior in Wave 0.
 
 ### Pending Todos
 
@@ -268,9 +275,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-18T15:03:34.120Z
-Stopped at: Phase 190 planning complete
-Resume file: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-01-PLAN.md
+Last session: 2026-06-18T15:23:00.862Z
+Stopped at: Completed 190-01-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 

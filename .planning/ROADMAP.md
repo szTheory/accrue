@@ -187,7 +187,7 @@ Cross-cutting constraints:
 Plans:
 **Wave 0**
 
-- [ ] 190-01-PLAN.md — Group contract source and validation scaffold
+- [x] 190-01-PLAN.md — Group contract source and validation scaffold
 
 **Wave 1** *(blocked on Wave 0 completion)*
 
@@ -331,7 +331,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
 | 189. Primitive & form components + component lab | v1.53 | 7/7 | Complete   | 2026-06-18 |
-| 190. Navigation, data-display & meta-component cohesion | v1.53 | 0/5 | Not started | - |
+| 190. Navigation, data-display & meta-component cohesion | v1.53 | 1/5 | In Progress|  |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
 | 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
 

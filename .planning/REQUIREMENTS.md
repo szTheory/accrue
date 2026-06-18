@@ -53,10 +53,10 @@ and the contributor working in the component system. 33 requirements across 8 th
 
 ### GRP — Meta-component cohesion (groups of components)
 
-- [ ] **GRP-01**: Each recurring component group (page-header + actions + breadcrumbs; toolbar + search + filters + sort; table + empty/loading/error/pagination; KPI + chart + table; detail-header + metadata + actions; modal-confirm; drawer + form; tabs + subviews) is audited as a unit for spacing rhythm, hierarchy, and obvious next action.
-- [ ] **GRP-02**: Tables degrade to readable cards/lists (not squished columns) at narrow widths, and tables are not used where a list/card pattern fits the data better.
-- [ ] **GRP-03**: Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen.
-- [ ] **GRP-04**: Pagination and similar affordances disappear or de-emphasize when there is nothing to paginate; filter/sort/active/selected states are unmistakable.
+- [x] **GRP-01**: Each recurring component group (page-header + actions + breadcrumbs; toolbar + search + filters + sort; table + empty/loading/error/pagination; KPI + chart + table; detail-header + metadata + actions; modal-confirm; drawer + form; tabs + subviews) is audited as a unit for spacing rhythm, hierarchy, and obvious next action.
+- [x] **GRP-02**: Tables degrade to readable cards/lists (not squished columns) at narrow widths, and tables are not used where a list/card pattern fits the data better.
+- [x] **GRP-03**: Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen.
+- [x] **GRP-04**: Pagination and similar affordances disappear or de-emphasize when there is nothing to paginate; filter/sort/active/selected states are unmistakable.
 
 ### IXN — Interaction integrity (the defects screenshots miss)
 
@@ -107,10 +107,10 @@ and the contributor working in the component system. 33 requirements across 8 th
 | CMP-03 | 189 | Complete |
 | CMP-04 | 189 | Complete |
 | CMP-05 | 189 | Complete |
-| GRP-01 | 190 | Pending |
-| GRP-02 | 190 | Pending |
-| GRP-03 | 190 | Pending |
-| GRP-04 | 190 | Pending |
+| GRP-01 | 190 | Complete |
+| GRP-02 | 190 | Complete |
+| GRP-03 | 190 | Complete |
+| GRP-04 | 190 | Complete |
 | IXN-01 | 191 | Pending |
 | IXN-02 | 191 | Pending |
 | IXN-03 | 191 | Pending |
