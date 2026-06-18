@@ -75,8 +75,8 @@ if Mix.env() != :prod do
                 %{label: "Component kitchen"}
               ]}
             />
-            <p class="ax-eyebrow">Shared primitives</p>
-            <h2 class="ax-display">One dev page to sanity-check the admin component layer</h2>
+            <h2 class="ax-display">Component Kitchen</h2>
+            <p class="ax-page-description">Primitive and form components — full state matrix across light and dark.</p>
           </header>
 
           <FlashGroup.flash_group flashes={@flashes} />
@@ -203,8 +203,8 @@ if Mix.env() != :prod do
                     <% end %>
                     <%= for %{state: state, reason: reason} <- Map.get(entry, :na_states, []) do %>
                       <div class="ax-dev-state-cell ax-dev-state-cell-na" data-ax-state={state} data-ax-na-reason={reason}>
-                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %> (n/a)</span>
-                        <span class="ax-type-code-xs ax-muted"><%= reason %></span>
+                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %></span>
+                        <span class="ax-type-code-xs ax-muted">n/a — <%= reason %></span>
                       </div>
                     <% end %>
                   <% end %>
@@ -220,8 +220,8 @@ if Mix.env() != :prod do
                     <% end %>
                     <%= for %{state: state, reason: reason} <- Map.get(entry, :na_states, []) do %>
                       <div class="ax-dev-state-cell ax-dev-state-cell-na" data-ax-state={state} data-ax-na-reason={reason}>
-                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %> (n/a)</span>
-                        <span class="ax-type-code-xs ax-muted"><%= reason %></span>
+                        <span class="ax-dev-state-cell-label ax-type-code-xs ax-muted"><%= state %></span>
+                        <span class="ax-type-code-xs ax-muted">n/a — <%= reason %></span>
                       </div>
                     <% end %>
                   <% end %>
