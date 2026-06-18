@@ -10,7 +10,7 @@ defmodule AccrueAdmin.Components.AtRiskTableTest do
       html = render_component(&AtRiskTable.at_risk_table/1, rows: rows(), base_path: "/billing")
 
       assert html =~ ~s(data-component-group="table-empty-loading-error-pagination")
-      assert html =~ ~s(data-state="has-pagination")
+      assert html =~ ~s(data-state="no-pagination")
       assert html =~ ~s(class="ax-at-risk-grid")
       assert html =~ ~s(class="ax-at-risk-cards")
 

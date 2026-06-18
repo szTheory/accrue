@@ -2529,7 +2529,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 /* At-risk table — analytics section below funnel */
 .ax-at-risk-table {
-  overflow-x: auto;
+  display: grid;
+  gap: var(--ax-space-md);
 }
 
 .ax-at-risk-header {
@@ -2537,10 +2538,11 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--ax-space-md);
-  margin-bottom: var(--ax-space-md);
+  flex-wrap: wrap;
 }
 
 .ax-at-risk-grid {
+  display: none;
   width: 100%;
   border-collapse: collapse;
 }
@@ -2562,6 +2564,89 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 
 .ax-at-risk-grid tbody tr:hover td {
   background: color-mix(in srgb, var(--ax-sunken) 50%, var(--ax-elevated));
+}
+
+.ax-at-risk-cards,
+.ax-at-risk-card,
+.ax-at-risk-card-facts,
+.ax-at-risk-state {
+  display: grid;
+  gap: var(--ax-space-md);
+  min-width: 0;
+}
+
+.ax-at-risk-card {
+  padding: var(--ax-space-md);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+}
+
+.ax-at-risk-card-header,
+.ax-at-risk-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ax-space-md);
+  flex-wrap: wrap;
+}
+
+.ax-at-risk-card-identity {
+  min-width: 0;
+}
+
+.ax-at-risk-card-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ax-space-xl);
+  padding: var(--ax-space-xs) var(--ax-space-sm);
+  border: 1px solid var(--ax-status-warning-border);
+  border-radius: var(--ax-radius-pill);
+  background: var(--ax-status-warning-bg);
+  color: var(--ax-status-warning-text);
+  font: var(--ax-type-label-font);
+}
+
+.ax-at-risk-card-facts {
+  grid-template-columns: 1fr;
+  margin: 0;
+}
+
+.ax-at-risk-card-facts div {
+  min-width: 0;
+}
+
+.ax-at-risk-card-facts dt,
+.ax-at-risk-card-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ax-at-risk-state {
+  padding: var(--ax-space-lg);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-sunken);
+}
+
+.ax-at-risk-state-error {
+  border-color: var(--ax-status-danger-border);
+  background: var(--ax-status-danger-bg);
+  color: var(--ax-status-danger-text);
+}
+
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
+  .ax-at-risk-grid {
+    display: table;
+  }
+
+  .ax-at-risk-cards {
+    display: none;
+  }
+
+  .ax-at-risk-card-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* Phase 167 (v1.50): layout utilities replacing inline styles (invoice_live.ex) +
