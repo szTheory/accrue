@@ -36,6 +36,8 @@ const DECISION_IDS = Array.from({ length: 30 }, (_value, index) => {
   return `D-${String(index + 1).padStart(2, "0")}`;
 });
 
+const UI_SPEC_WIDTHS = [320, 375, 768, 1024, 1440];
+
 const representativeRoutes = [
   { group: "page-header-actions-breadcrumbs", path: "/billing" },
   { group: "toolbar-search-filter-sort", path: "/billing/invoices" },
@@ -49,6 +51,34 @@ const representativeRoutes = [
 
 function groupLocator(page, slug) {
   return page.locator(`[data-component-group="${slug}"]`);
+}
+
+async function openComponentKitchen(_page) {
+  throw new Error("TODO: open the authenticated component kitchen before browser probes");
+}
+
+async function setTheme(_page, _theme) {
+  throw new Error("TODO: set the global data-theme value before locator checks");
+}
+
+async function assertAllGroupRootsVisible(_page) {
+  throw new Error("TODO: assert all required data-component-group roots are visible exactly once");
+}
+
+async function assertResponsiveModeContract(_page, _width) {
+  throw new Error("TODO: assert table/card responsive modes do not expose duplicate active DOM");
+}
+
+async function assertPaginationStates(_page) {
+  throw new Error("TODO: assert no-pagination and has-pagination controls differ");
+}
+
+async function assertNamedActiveStates(_page) {
+  throw new Error("TODO: assert filter, selected row, tab/window, and sort cues are visible and named");
+}
+
+async function assertNoOffscreenActions(_page, _width) {
+  throw new Error("TODO: assert long-content group actions stay inside the viewport");
 }
 
 async function visibleFocusableCount(locator) {
@@ -115,6 +145,39 @@ test("group contract ledger lists required slugs, decisions, and Phase 191 hando
   for (const decisionId of DECISION_IDS) {
     expect(ledger, `missing decision citation ${decisionId}`).toContain(decisionId);
   }
+});
+
+test.describe("Phase 190 group contract browser probes", () => {
+  test.beforeEach(async ({ page }) => {
+    await openComponentKitchen(page);
+  });
+
+  test("exposes every group locator in light and dark themes", async ({ page }) => {
+    for (const theme of ["light", "dark"]) {
+      await setTheme(page, theme);
+      await assertAllGroupRootsVisible(page);
+    }
+  });
+
+  test("table and card responsive roots expose one active mode at each breakpoint", async ({ page }) => {
+    for (const width of [375, 1024]) {
+      await assertResponsiveModeContract(page, width);
+    }
+  });
+
+  test("pagination states expose load-more only when more data exists", async ({ page }) => {
+    await assertPaginationStates(page);
+  });
+
+  test("active filter, selection, sort, and subview cues are visible and named", async ({ page }) => {
+    await assertNamedActiveStates(page);
+  });
+
+  test("long-content actions stay reachable at UI-spec widths", async ({ page }) => {
+    for (const width of UI_SPEC_WIDTHS) {
+      await assertNoOffscreenActions(page, width);
+    }
+  });
 });
 
 module.exports = {
