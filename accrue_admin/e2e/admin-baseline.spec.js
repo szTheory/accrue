@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const { test, expect } = require("@playwright/test");
 const AxeBuilder = require("@axe-core/playwright").default;
@@ -150,36 +151,78 @@ async function axeViolations(page) {
   }));
 }
 
-async function writeScreenshotCopies(page, projectName, cells) {
-  const buffer = await page.screenshot({ fullPage: true });
-  const evidenceRefs = [];
-
-  for (const cell of cells) {
-    const relativePath = path.join(RESULTS_ROOT, projectName, `${cell.cell_id}.png`);
-    fs.mkdirSync(path.dirname(relativePath), { recursive: true });
-    fs.writeFileSync(relativePath, buffer);
-    evidenceRefs.push(path.join("accrue_admin", relativePath).split(path.sep).join("/"));
-  }
-
-  return evidenceRefs;
+function evidenceRef(relativePath) {
+  return path.join("accrue_admin", relativePath).split(path.sep).join("/");
 }
 
-async function writeTargetedScreenshotCopies(page, projectName, cells, breakpoint) {
-  const buffer = await page.screenshot({ fullPage: true });
-  const evidenceRefs = [];
+function elapsedMs(startedAt) {
+  return Math.max(0, Date.now() - startedAt);
+}
 
-  for (const cell of cells) {
-    const relativePath = path.join(
-      RESULTS_ROOT,
-      projectName,
-      `${cell.cell_id}__targeted-${breakpoint}.png`
-    );
-    fs.mkdirSync(path.dirname(relativePath), { recursive: true });
-    fs.writeFileSync(relativePath, buffer);
-    evidenceRefs.push(path.join("accrue_admin", relativePath).split(path.sep).join("/"));
+function groupSurfacesByRoute(surfaces, fixtureData) {
+  const groups = new Map();
+
+  for (const surface of surfaces) {
+    const route = routeForSurface(surface, fixtureData);
+    if (!groups.has(route)) groups.set(route, { route, surfaces: [] });
+    groups.get(route).surfaces.push(surface);
   }
 
-  return evidenceRefs;
+  return Array.from(groups.values());
+}
+
+function evidenceFileStem(keyParts) {
+  const safeParts = keyParts.map((part) => slug(part) || "root").join("-");
+  const digest = crypto.createHash("sha256").update(JSON.stringify(keyParts)).digest("hex").slice(0, 12);
+  return `${safeParts.slice(0, 120)}-${digest}`;
+}
+
+async function writeSharedScreenshotEvidence(page, projectName, keyParts) {
+  const relativePath = path.join(
+    RESULTS_ROOT,
+    projectName,
+    "evidence",
+    `${evidenceFileStem(keyParts)}.png`
+  );
+  fs.mkdirSync(path.dirname(relativePath), { recursive: true });
+  fs.writeFileSync(relativePath, await page.screenshot({ fullPage: true }));
+  return evidenceRef(relativePath);
+}
+
+function recordBaselineProgress(projectName, row) {
+  const relativePath = path.join(RESULTS_ROOT, projectName, "progress.ndjson");
+  fs.mkdirSync(path.dirname(relativePath), { recursive: true });
+  fs.appendFileSync(
+    relativePath,
+    `${JSON.stringify({
+      ...row,
+      timestamp: row.timestamp || new Date().toISOString(),
+      project: projectName,
+      route: row.route ?? null,
+      surface_count: Number(row.surface_count ?? 0),
+      elapsed_ms: Number(row.elapsed_ms ?? 0),
+    })}\n`
+  );
+}
+
+function cacheKey(projectName, keyParts) {
+  return JSON.stringify([projectName, ...keyParts]);
+}
+
+async function cachedScreenshotEvidence(page, projectName, evidenceState, keyParts) {
+  const key = cacheKey(projectName, keyParts);
+  if (!evidenceState.screenshots.has(key)) {
+    evidenceState.screenshots.set(key, await writeSharedScreenshotEvidence(page, projectName, keyParts));
+  }
+  return evidenceState.screenshots.get(key);
+}
+
+async function cachedAxeViolations(page, projectName, evidenceState, keyParts) {
+  const key = cacheKey(projectName, keyParts);
+  if (!evidenceState.axe.has(key)) {
+    evidenceState.axe.set(key, await axeViolations(page));
+  }
+  return evidenceState.axe.get(key);
 }
 
 function targetedRisk(surface) {
@@ -193,90 +236,176 @@ function targetedRisk(surface) {
   return surface.surface_type === "component-group" || TARGETED_RISK_PATTERN.test(manifestRiskMetadata);
 }
 
-async function captureCanonicalSurface(page, surface, route, projectName, observations) {
-  await login(page, route);
+async function captureCanonicalRouteGroup(page, routeGroup, projectName, observations, evidenceState) {
+  await login(page, routeGroup.route);
   await expect(page.locator("#main-content")).toBeVisible();
 
-  const visible = await visibleSurface(page, surface);
-  const cells = cellsForSurface(surface).filter((cell) => cell.mode === projectMode(projectName));
+  const mode = projectMode(projectName);
+  const surfaceEntries = [];
+
+  for (const surface of routeGroup.surfaces) {
+    surfaceEntries.push({
+      surface,
+      visible: await visibleSurface(page, surface),
+      cells: cellsForSurface(surface).filter((cell) => cell.mode === mode),
+    });
+  }
 
   for (const theme of THEMES) {
-    await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
-    await page.waitForTimeout(50);
+    const themeStartedAt = Date.now();
+    recordBaselineProgress(projectName, {
+      event: "theme-start",
+      route: routeGroup.route,
+      surface_count: routeGroup.surfaces.length,
+      theme,
+      elapsed_ms: 0,
+    });
 
-    const themeCells = cells.filter((cell) => cell.theme === theme);
-    const coveredCells = themeCells.filter((cell) => coverageForCell(cell, surface, visible).coverage_status === "covered");
-    const evidenceRefs = await writeScreenshotCopies(page, projectName, coveredCells);
-    const violations = visible ? await axeViolations(page) : [];
+    try {
+      await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
+      await page.waitForTimeout(50);
 
-    for (const cell of themeCells) {
-      const coverage = coverageForCell(cell, surface, visible);
-      observations.push(
-        observationFromCell({
-          cell,
-          surface,
-          coverage,
-          evidenceRefs: evidenceRefs.filter((ref) => ref.endsWith(`${cell.cell_id}.png`)),
-          axeViolations: violations,
-        })
-      );
+      const hasCoveredCells = surfaceEntries.some(({ surface, visible, cells }) => {
+        return cells
+          .filter((cell) => cell.theme === theme)
+          .some((cell) => coverageForCell(cell, surface, visible).coverage_status === "covered");
+      });
+      const keyParts = ["canonical", routeGroup.route, theme];
+      const sharedEvidenceRef = hasCoveredCells
+        ? await cachedScreenshotEvidence(page, projectName, evidenceState, keyParts)
+        : null;
+      const violations = hasCoveredCells
+        ? await cachedAxeViolations(page, projectName, evidenceState, keyParts)
+        : [];
+
+      for (const { surface, visible, cells } of surfaceEntries) {
+        const themeCells = cells.filter((cell) => cell.theme === theme);
+
+        for (const cell of themeCells) {
+          const coverage = coverageForCell(cell, surface, visible);
+          observations.push(
+            observationFromCell({
+              cell,
+              surface,
+              coverage,
+              evidenceRefs: coverage.coverage_status === "covered" ? [sharedEvidenceRef] : [],
+              axeViolations: violations,
+            })
+          );
+        }
+      }
+    } catch (error) {
+      recordBaselineProgress(projectName, {
+        event: "stage-error",
+        stage: "theme",
+        route: routeGroup.route,
+        surface_count: routeGroup.surfaces.length,
+        theme,
+        elapsed_ms: elapsedMs(themeStartedAt),
+        message: error.message,
+      });
+      throw error;
     }
   }
 }
 
-async function captureTargetedSurface(page, surface, route, projectName, observations) {
-  if (!targetedRisk(surface)) return;
-
+async function captureTargetedRouteGroup(page, routeGroup, projectName, observations, evidenceState) {
   const originalViewport = page.viewportSize();
   const mode = projectMode(projectName);
-  const cells = cellsForSurface(surface).filter(
-    (cell) =>
-      cell.mode === mode &&
-      cell.theme === "light" &&
-      cell.state === "default-populated" &&
-      cell.dimension === 5
-  );
+  const surfaceEntries = routeGroup.surfaces
+    .filter(targetedRisk)
+    .map((surface) => ({
+      surface,
+      cells: cellsForSurface(surface).filter(
+        (cell) =>
+          cell.mode === mode &&
+          cell.theme === "light" &&
+          cell.state === "default-populated" &&
+          cell.dimension === 5
+      ),
+    }))
+    .filter((entry) => entry.cells.length > 0);
 
-  if (cells.length === 0) return;
+  if (surfaceEntries.length === 0) return;
 
   try {
     for (const breakpoint of TARGETED_BREAKPOINTS) {
+      const targetedLabel = `targeted-${breakpoint}`;
+      const targetedStartedAt = Date.now();
+      recordBaselineProgress(projectName, {
+        event: "targeted-start",
+        route: routeGroup.route,
+        surface_count: surfaceEntries.length,
+        breakpoint,
+        targeted_label: targetedLabel,
+        elapsed_ms: 0,
+      });
+
       await page.setViewportSize({ width: breakpoint, height: 900 });
-      await login(page, route);
+      await login(page, routeGroup.route);
       await expect(page.locator("#main-content")).toBeVisible();
       await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light"));
       await page.waitForTimeout(50);
 
-      const visible = await visibleSurface(page, surface);
-      const coverage = visible
-        ? { coverage_status: "covered" }
-        : {
-            coverage_status: "gap",
-            reason: "Risk-marked manifest surface was not visible during targeted breakpoint probe.",
-            defect_candidate: "targeted-breakpoint-coverage-gap",
-          };
-      const evidenceRefs = visible ? await writeTargetedScreenshotCopies(page, projectName, cells, breakpoint) : [];
-      const violations = visible ? await axeViolations(page) : [];
+      try {
+        const entries = [];
+        for (const entry of surfaceEntries) {
+          entries.push({
+            ...entry,
+            visible: await visibleSurface(page, entry.surface),
+          });
+        }
 
-      for (const cell of cells) {
-        const targetedLabel = `targeted-${breakpoint}`;
-        observations.push(
-          observationFromCell({
-            cell,
-            surface,
-            coverage,
-            evidenceRefs: evidenceRefs.filter((ref) => ref.endsWith(`${cell.cell_id}__${targetedLabel}.png`)),
-            axeViolations: violations,
-            extra: {
-              cell_id: `${cell.cell_id}__${targetedLabel}`,
-              mode: "targeted",
-              viewport_width: breakpoint,
-              breakpoint,
-              targeted_label: targetedLabel,
-              notes: `Risk probe for ${surface.surface}: layout-risk/responsive-risk at ${breakpoint}px.`,
-            },
-          })
-        );
+        const hasCoveredCells = entries.some((entry) => entry.visible);
+        const keyParts = ["targeted", routeGroup.route, targetedLabel, breakpoint];
+        const sharedEvidenceRef = hasCoveredCells
+          ? await cachedScreenshotEvidence(page, projectName, evidenceState, keyParts)
+          : null;
+        const violations = hasCoveredCells
+          ? await cachedAxeViolations(page, projectName, evidenceState, keyParts)
+          : [];
+
+        for (const { surface, cells, visible } of entries) {
+          const coverage = visible
+            ? { coverage_status: "covered" }
+            : {
+                coverage_status: "gap",
+                reason: "Risk-marked manifest surface was not visible during targeted breakpoint probe.",
+                defect_candidate: "targeted-breakpoint-coverage-gap",
+              };
+
+          for (const cell of cells) {
+            observations.push(
+              observationFromCell({
+                cell,
+                surface,
+                coverage,
+                evidenceRefs: coverage.coverage_status === "covered" ? [sharedEvidenceRef] : [],
+                axeViolations: violations,
+                extra: {
+                  cell_id: `${cell.cell_id}__${targetedLabel}`,
+                  mode: "targeted",
+                  viewport_width: breakpoint,
+                  breakpoint,
+                  targeted_label: targetedLabel,
+                  notes: `Risk probe for ${surface.surface}: layout-risk/responsive-risk at ${breakpoint}px.`,
+                },
+              })
+            );
+          }
+        }
+      } catch (error) {
+        recordBaselineProgress(projectName, {
+          event: "stage-error",
+          stage: "targeted",
+          route: routeGroup.route,
+          surface_count: surfaceEntries.length,
+          breakpoint,
+          targeted_label: targetedLabel,
+          elapsed_ms: elapsedMs(targetedStartedAt),
+          message: error.message,
+        });
+        throw error;
       }
     }
   } finally {
@@ -350,39 +479,92 @@ test.describe("Admin static baseline", () => {
   });
 
   test("captures manifest-driven static cells", async ({ page, request }, testInfo) => {
-    test.setTimeout(240_000);
-    await page.emulateMedia({ reducedMotion: "reduce" });
-
-    const fixtureData = {
-      "operator-flows": await seed(request, "operator-flows"),
-      dashboard: await seed(request, "dashboard"),
-      "edge-states": await seed(request, "edge-states"),
-      overflow: await seed(request, "overflow"),
-    };
-
     const projectName = testInfo.project.name;
-    const observations = [];
-    const selectedSurfaces = SURFACES.filter((surface) => surface.projects.includes(projectName));
-
-    for (const surface of selectedSurfaces) {
-      const route = routeForSurface(surface, fixtureData);
-      await captureCanonicalSurface(page, surface, route, projectName, observations);
-      await captureTargetedSurface(page, surface, route, projectName, observations);
-    }
-
-    const outputPath = path.join(RESULTS_ROOT, projectName, "cells.json");
-    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    fs.writeFileSync(outputPath, `${JSON.stringify(observations, null, 2)}\n`);
-
-    const gaps = observations.filter((row) => row.coverage_status === "gap");
-    const invalid = observations.filter((row) => {
-      if (!["covered", "gap", "n/a"].includes(row.coverage_status)) return true;
-      if (row.coverage_status === "covered") return row.evidence_refs.length === 0 || !Array.isArray(row.axe_violations);
-      return !row.reason;
+    const suiteStartedAt = Date.now();
+    recordBaselineProgress(projectName, {
+      event: "suite-start",
+      route: null,
+      surface_count: 0,
+      elapsed_ms: 0,
     });
 
-    expect(invalid, "all baseline observations must carry coverage evidence or a reason").toEqual([]);
-    expect(observations.length).toBeGreaterThan(DIMENSIONS.length);
-    expect(gaps.every((gap) => gap.defect_candidate || gap.reason)).toBeTruthy();
+    try {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+
+      const fixtureData = {
+        "operator-flows": await seed(request, "operator-flows"),
+        dashboard: await seed(request, "dashboard"),
+        "edge-states": await seed(request, "edge-states"),
+        overflow: await seed(request, "overflow"),
+      };
+
+      const observations = [];
+      const selectedSurfaces = SURFACES.filter((surface) => surface.projects.includes(projectName));
+      const routeGroups = groupSurfacesByRoute(selectedSurfaces, fixtureData);
+      const evidenceState = { screenshots: new Map(), axe: new Map() };
+
+      for (const routeGroup of routeGroups) {
+        const routeStartedAt = Date.now();
+        recordBaselineProgress(projectName, {
+          event: "route-start",
+          route: routeGroup.route,
+          surface_count: routeGroup.surfaces.length,
+          elapsed_ms: 0,
+        });
+
+        try {
+          await captureCanonicalRouteGroup(page, routeGroup, projectName, observations, evidenceState);
+          await captureTargetedRouteGroup(page, routeGroup, projectName, observations, evidenceState);
+          recordBaselineProgress(projectName, {
+            event: "route-complete",
+            route: routeGroup.route,
+            surface_count: routeGroup.surfaces.length,
+            elapsed_ms: elapsedMs(routeStartedAt),
+          });
+        } catch (error) {
+          recordBaselineProgress(projectName, {
+            event: "stage-error",
+            stage: "route",
+            route: routeGroup.route,
+            surface_count: routeGroup.surfaces.length,
+            elapsed_ms: elapsedMs(routeStartedAt),
+            message: error.message,
+          });
+          throw error;
+        }
+      }
+
+      const outputPath = path.join(RESULTS_ROOT, projectName, "cells.json");
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      fs.writeFileSync(outputPath, `${JSON.stringify(observations, null, 2)}\n`);
+
+      const gaps = observations.filter((row) => row.coverage_status === "gap");
+      const invalid = observations.filter((row) => {
+        if (!["covered", "gap", "n/a"].includes(row.coverage_status)) return true;
+        if (row.coverage_status === "covered") return row.evidence_refs.length === 0 || !Array.isArray(row.axe_violations);
+        return !row.reason;
+      });
+
+      expect(invalid, "all baseline observations must carry coverage evidence or a reason").toEqual([]);
+      expect(observations.length).toBeGreaterThan(DIMENSIONS.length);
+      expect(gaps.every((gap) => gap.defect_candidate || gap.reason)).toBeTruthy();
+      recordBaselineProgress(projectName, {
+        event: "suite-complete",
+        route: null,
+        surface_count: selectedSurfaces.length,
+        route_count: routeGroups.length,
+        elapsed_ms: elapsedMs(suiteStartedAt),
+      });
+    } catch (error) {
+      recordBaselineProgress(projectName, {
+        event: "stage-error",
+        stage: "suite",
+        route: null,
+        surface_count: 0,
+        elapsed_ms: elapsedMs(suiteStartedAt),
+        message: error.message,
+      });
+      throw error;
+    }
   });
 });
