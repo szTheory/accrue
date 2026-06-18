@@ -1753,6 +1753,30 @@ a.ax-kpi-card--linked:focus-visible {
   accent-color: var(--ax-accent);
 }
 
+/* Radio mirrors checkbox sizing/accent so it consumes the Accrue accent
+   instead of the browser default (WR-03). */
+.ax-radio {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  accent-color: var(--ax-accent);
+}
+
+/* Inline controls (checkbox/radio/toggle) lay out as a horizontal
+   control+label row, overriding .ax-field's grid stacking (WR-01). */
+.ax-field-inline {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--ax-space-sm);
+}
+
+/* Disabled inline wrapper dims and blocks the whole control+label row,
+   matching the inner control's native disabled affordance (WR-02). */
+.ax-field-disabled {
+  opacity: var(--ax-disabled-opacity);
+  cursor: var(--ax-disabled-cursor);
+}
+
 /* Data table: one layout at a time — cards below md, grid table from md (avoids duplicate DOM in a11y scans). */
 .ax-data-table-shell {
   display: none;
