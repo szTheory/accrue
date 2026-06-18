@@ -1,7 +1,7 @@
 ---
 phase: 190
 slug: navigation-data-display-meta-component-cohesion
-status: pending-e2e-evidence
+status: pending-baseline-evidence
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-06-18
@@ -44,8 +44,8 @@ created: 2026-06-18
 | 190-03-02 | 190-03 | 2 | GRP-02 | T-190-10 / T-190-11 | AtRiskTable mobile card/list behavior plus empty/loading/error/no-pagination/has-pagination states are verified with same-task TDD. | unit | `cd accrue_admin && mix test test/accrue_admin/components/at_risk_table_test.exs` | No - Plan 03 creates or expands | pending |
 | 190-03-03 | 190-03 | 2 | GRP-03 | T-190-13 | KPI/detail/timeline groups keep hierarchy and tokenized spacing without nested card traps. | unit + e2e | `cd accrue_admin && mix test test/accrue_admin/components/display_components_test.exs && npm run e2e:a11y` | Partial | pending |
 | 190-04-02 | 190-04 | 3 | GRP-01, GRP-04 | T-190-15 / T-190-16 | DropdownMenu disclosure semantics, navigation current state, search active state, and flash/toast layer behavior are verified with same-task TDD. | unit + interaction e2e | `cd accrue_admin && mix test test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/global_search_test.exs && npm run e2e -- e2e/admin-interactions.spec.js` | Partial | pending |
-| 190-05-01 | 190-05 | 4 | GRP-01, GRP-02, GRP-03, GRP-04 | T-190-19 / T-190-20 / T-190-23 | Browser probes assert group locators, responsive active DOM, pagination states, active state labels, and off-screen action reachability. | e2e | `cd accrue_admin && node --check e2e/admin-group-contracts.spec.js && npm run e2e -- e2e/admin-group-contracts.spec.js` | Yes | static-green / e2e-startup-blocked |
-| 190-05-02 | 190-05 | 4 | GRP-01, GRP-04 | T-190-19 / T-190-20 / T-190-23 | Representative live probes sample list/table, detail, recovery/KPI, overlay, and shell/nav/tabs routes without claiming Phase 191 behavior. | e2e | `cd accrue_admin && npm run e2e:a11y && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js && npm run e2e:visuals:png-only` | Yes | static-green / e2e-startup-blocked |
+| 190-05-01 | 190-05 | 4 | GRP-01, GRP-02, GRP-03, GRP-04 | T-190-19 / T-190-20 / T-190-23 | Browser probes assert group locators, responsive active DOM, pagination states, active state labels, and off-screen action reachability. | e2e | `cd accrue_admin && node --check e2e/admin-group-contracts.spec.js && npm run e2e -- e2e/admin-group-contracts.spec.js` | Yes | green |
+| 190-05-02 | 190-05 | 4 | GRP-01, GRP-04 | T-190-19 / T-190-20 / T-190-23 | Representative live probes sample list/table, detail, recovery/KPI, overlay, and shell/nav/tabs routes without claiming Phase 191 behavior. | e2e | `cd accrue_admin && npm run e2e:a11y && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js && npm run e2e:visuals:png-only` | Yes | partial - baseline bounded-hung |
 | 190-05-03 | 190-05 | 4 | GRP-01, GRP-04 | T-190-21 / T-190-22 | Phase 191 receives AX187- and overlay-tag keyed handoff while validation status stays tied to actual automated evidence. | source + docs | `node -e "...handoff token check..."` | Yes | green |
 
 *Status: pending, green, red, flaky.*
@@ -85,9 +85,15 @@ Date: 2026-06-18.
 
 | Command | Result | Notes |
 |---------|--------|-------|
-| `cd accrue_admin && node --check e2e/admin-group-contracts.spec.js` | pass | JavaScript syntax check passed after Task 1 and Task 2 changes. |
-| `cd accrue_admin && npm run e2e -- e2e/admin-group-contracts.spec.js --grep "exposes every group locator"` | blocked before tests | Playwright webServer failed during e2e server migration startup with `CaseClauseError no case clause matching {:error, "killed"}` in `test/support/e2e_server.ex:51`. |
-| `cd accrue_admin && npm run e2e -- e2e/admin-group-contracts.spec.js` | blocked before tests | Same startup failure before browser assertions ran. |
-| `cd accrue_admin && npm run e2e -- e2e/admin-group-contracts.spec.js --grep "samples one list"` | blocked before tests | Same startup failure before representative live probe assertions ran. |
+| `cd accrue_admin && node --check e2e/admin-group-contracts.spec.js` | pass | JavaScript syntax check passed after final selector/proof-root fixes. |
+| `cd accrue_admin && mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs test/accrue_admin/components/data_table_test.exs test/accrue_admin/components/at_risk_table_test.exs test/accrue_admin/components/display_components_test.exs test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/global_search_test.exs` | pass | 72 tests, 0 failures. The run logged an existing Postgrex `too_many_connections` message, but tests completed green. |
+| `bash scripts/ci/verify_package_docs.sh` | pass | Package docs verified for accrue, accrue_admin, and accrue_portal 1.4.0. |
+| `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors` | pass | Compile completed with warnings treated as errors. |
+| `cd accrue_admin && npm run e2e:a11y` | pass | 2 tests passed in the full browser gate. |
+| `cd accrue_admin && npm run e2e -- e2e/admin-group-contracts.spec.js` | pass | 14 tests passed across desktop and mobile after proof-root selector stabilization. |
+| `cd accrue_admin && npm run e2e -- e2e/admin-interactions.spec.js --timeout=60000 --workers=1` | pass | 12 tests passed across desktop and mobile. |
+| `cd accrue_admin && npm run e2e:visuals:png-only -- --timeout=60000 --workers=1` | pass | 2 tests passed across desktop and mobile. |
+| `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1` | blocked | Standalone bounded retry printed `Running 2 tests using 1 worker` and produced no test result before manual interrupt; Playwright reported `2 did not run`. |
+| `cd accrue_admin && npm run e2e:a11y && npm run e2e -- e2e/admin-group-contracts.spec.js && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js && npm run e2e:visuals:png-only` | partial | Axe and group contracts passed, then the chain hung during `admin-baseline.spec.js`; interrupted to keep the command bounded. |
 
-**Approval:** pending e2e evidence. `status: approved` is intentionally not set until the Playwright/axe/baseline evidence can run past local e2e server startup.
+**Approval:** pending baseline evidence. `status: approved` is intentionally not set until `admin-baseline.spec.js` completes with automated evidence.
