@@ -203,6 +203,17 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLiveTest do
       html = render_patch(view, "/billing/analytics/recovery?window=7d")
       assert active_window_label(html) =~ "7 days"
     end
+
+    test "window links preserve unrelated query params on the live route", %{conn: conn} do
+      conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+      assert {:ok, _view, html} =
+               live(conn, "/billing/analytics/recovery?owner=platform&window=30d")
+
+      assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=7d/
+      assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=30d/
+      assert html =~ ~r/href="\/billing\/analytics\/recovery\?[^"]*owner=platform[^"]*window=90d/
+    end
   end
 
   # Returns the trimmed text content of the link element carrying aria-current="page".

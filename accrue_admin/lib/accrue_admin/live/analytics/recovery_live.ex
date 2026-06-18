@@ -23,7 +23,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
   end
 
   @impl true
-  def handle_params(params, _uri, socket) do
+  def handle_params(params, uri, socket) do
     window = parse_window(params["window"])
     {since, until} = window_bounds(window)
 
@@ -59,6 +59,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     {:noreply,
      socket
      |> assign(:window, window)
+     |> assign(:window_selector_base_path, window_selector_base_path(uri))
      |> assign(:stats, stats)
      |> assign(:funnel, funnel)
      |> assign(:kpi_pairs, kpi_pairs)
@@ -110,7 +111,10 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
               Showing data since 2024-01-01
             </a>
           </div>
-          <WindowSelector.window_selector current_window={@window} base_path={@current_path} />
+          <WindowSelector.window_selector
+            current_window={@window}
+            base_path={@window_selector_base_path}
+          />
         </header>
 
         <%= for kpi <- @kpi_pairs do %>
@@ -171,7 +175,27 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     {since, now}
   end
 
+  defp window_selector_base_path(uri) do
+    parsed = URI.parse(uri)
+
+    query =
+      parsed.query
+      |> decode_query()
+      |> Map.delete("window")
+      |> URI.encode_query()
+
+    case query do
+      "" -> parsed.path
+      _ -> parsed.path <> "?" <> query
+    end
+  end
+
+  defp decode_query(nil), do: %{}
+  defp decode_query(query), do: URI.decode_query(query)
+
   defp assign_shell(socket, admin) do
+    current_path = (admin["mount_path"] || "/billing") <> "/analytics/recovery"
+
     socket
     |> assign(:page_title, "Recovery Dashboard")
     |> assign(:brand, admin["brand"] || default_brand())
@@ -181,7 +205,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
     |> assign(:assets_css_path, admin["assets_css_path"])
     |> assign(:assets_js_path, admin["assets_js_path"])
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
-    |> assign(:current_path, (admin["mount_path"] || "/billing") <> "/analytics/recovery")
+    |> assign(:current_path, current_path)
+    |> assign(:window_selector_base_path, current_path)
   end
 
   defp default_brand do
