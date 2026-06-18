@@ -200,15 +200,20 @@ the established `admin-interactions.spec.js` pattern.
 
 ### State-grid lab renderer contract (`.ax-dev-state-grid`)
 
+> **SUPERSEDED 2026-06-18 (post-execution):** the two-column light/dark layout
+> below is reversed. The lab now renders a **single state-matrix column that
+> follows the global topbar theme toggle** — no `data-theme` columns, no
+> "Light"/"Dark" headers, no sub-tree re-scoping, no `getComputedStyle` delta
+> test. Dark-mode coverage is provided by `admin-a11y.spec.js` (scans every
+> surface in both themes via the global toggle) and `admin-visuals`. See the
+> D-05/D-07 supersede note in 189-CONTEXT.md. The rest of this layout contract
+> (rows-per-state, padding, labels, n/a format) still applies to the single column.
+
 The new lab renderer replaces the current hand-authored sections for primitives.
 Layout contract:
 - One grid per component family
-- Columns: 2 — left column is light theme scope, right column is dark theme scope
-- Column theme scoping: each column wraps its cells in a `data-theme="light"` /
-  `data-theme="dark"` container that genuinely re-scopes `--ax-*` tokens. The
-  existing per-specimen `data-theme` wrappers were previously inert (D-07 gotcha)
-  — the new renderer must resolve to different computed colors in each column,
-  verified by the drift test's `getComputedStyle` delta assertion.
+- Columns: 1 — a single state-matrix column that inherits the page's global theme
+  (`html.accrue-admin[data-theme]`), switched via the topbar toggle
 - Rows: one per applicable state; `n/a` rows rendered with muted label and stated
   reason
 - Cell internal padding: `--ax-space-md` (16px) all sides
@@ -479,8 +484,10 @@ assert a computed-color delta (not merely class presence) between columns.
 
 ### Column header labels
 
-- Left column: "Light" (`.ax-type-eyebrow`, centered)
-- Right column: "Dark" (`.ax-type-eyebrow`, centered)
+> SUPERSEDED 2026-06-18: single column, no "Light"/"Dark" headers — the page
+> follows the global theme toggle. (Original two-column spec retained below.)
+- ~~Left column: "Light" (`.ax-type-eyebrow`, centered)~~
+- ~~Right column: "Dark" (`.ax-type-eyebrow`, centered)~~
 
 ### Family section structure
 
@@ -509,7 +516,7 @@ end-user feature. Copywriting requirements are limited to:
 | Element | Copy |
 |---------|------|
 | Lab page heading | "Component Kitchen" (existing, keep) |
-| Lab page sub-description | "Primitive and form components — full state matrix across light and dark." |
+| Lab page sub-description | "Primitive and form components — full state matrix. Use the topbar theme toggle to review light and dark." (updated 2026-06-18 for single-column lab) |
 | Family section labels | Component family name in eyebrow case: "Button", "Input", "Textarea", "Checkbox", "Radio", "Toggle switch", "Select", "Form field", "Status badge", "Icon", "Money", "JSON viewer", "Loading", "Tooltip", "Inline code / ID", "Empty state" |
 | State label format | Lowercase state name: "default", "hover", "focus", "active", "disabled", "loading", "selected", "empty", "error", "overflow" |
 | N/a state label | "n/a — {reason}" (example: "n/a — non-interactive display element") |
@@ -596,11 +603,10 @@ Two frozen viewports from `baseline-manifest.js` PROJECTS (Phase 187, D-11):
 | Desktop | 1440px | Primary review; state grid full two-column layout |
 | Mobile | 390px | Second review; state grid collapses to single column (light column only) OR stacks vertically |
 
-**Mobile state-grid rule:** At 390px, the two-column state grid must not
-squish components below their minimum functional width. The grid MUST either
-stack columns vertically (light above dark) OR show light only with a "Dark"
-tab toggle. Implementation choice is left to the planner (Claude's discretion),
-but the mobile render must not break or clip any component specimen.
+**Mobile state-grid rule (SUPERSEDED 2026-06-18):** No longer applies — the lab
+is a single column that follows the global theme toggle, so there is no
+two-column squish/stack/tab problem at 390px. The mobile render must still not
+clip any component specimen (covered by the overflow probe + visual capture).
 
 No additional breakpoints are introduced in this phase.
 

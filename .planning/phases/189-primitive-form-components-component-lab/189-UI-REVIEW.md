@@ -21,6 +21,13 @@ resolution: >
 > a11y suite re-run green. The mobile "BLOCKER" was a false positive (CSS-only
 > inference; both columns stack vertically on mobile — confirmed via the actual
 > 1084x195616 PNG). See `resolution` in frontmatter.
+>
+> **Update 2026-06-18 (lab redesign):** the entire two-column light/dark layout
+> was subsequently **replaced with a single column following the global theme
+> toggle** (D-05/D-07 superseded — see 189-CONTEXT.md). This moots the mobile
+> two-column concern entirely and removes the D-07 mechanism the BLOCKER/D-07
+> findings referenced. Dark-mode coverage now via the global-toggle a11y/visual
+> sweeps.
 
 **Audited:** 2026-06-17
 **Baseline:** 189-UI-SPEC.md (approved design contract)

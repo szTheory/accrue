@@ -80,6 +80,22 @@ forks.
   `.ax-dev-state-grid` theme columns MUST genuinely re-scope the token layer, and
   the drift test MUST assert a **resolved-color delta** between the light and dark
   cells — never merely that both theme classes are present.
+- **D-05 / D-07 SUPERSEDED (2026-06-18, post-execution):** The side-by-side
+  **two-column light/dark** layout (D-05) and its **sub-tree token re-scoping**
+  mechanism (D-07) are reversed. The lab now renders a **single state-matrix
+  column that follows the global topbar theme toggle**, like every other admin
+  page. Rationale: (1) dark-mode verification is redundant — `admin-a11y.spec.js`
+  already toggles the global `data-theme` and scans every surface, incl. the
+  kitchen, in **both** themes; (2) the D-07 `.accrue-admin [data-theme="dark"]`
+  sub-tree mechanism was the source of a dark-column text-contrast bug and added
+  real complexity; (3) the two-column layout produced a broken mobile render
+  (~195,000px — both columns stacked). Removed: the dark column + "Light"/"Dark"
+  headers, the `.ax-dev-state-grid-col` `color` re-declaration, the mobile
+  collapse rule, and the `themeColumnDeltaProbe` e2e. The `.accrue-admin
+  [data-theme="dark"]` block in `theme.css` is retained (now unused by the lab;
+  harmless) to avoid frozen-foundation churn and the FND-05 verifier coupling.
+  "tested ⇔ shown" still holds for the state list; theme coverage moves to the
+  global-toggle a11y/visual sweeps.
 - **D-08 (coupling gotcha):** Adding the `states`/`specimens` registry fields
   requires lockstep updates to `component_registry_test.exs`, or the existing
   drift/negative tests break. This mirrors the established verifier ↔

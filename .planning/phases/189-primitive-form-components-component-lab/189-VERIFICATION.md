@@ -253,6 +253,23 @@ The Playwright e2e suite was executed during follow-up. Running it surfaced — 
 
 ---
 
+## Lab redesign (2026-06-18, post-verification)
+
+The component lab was changed from the two-column light/dark state matrix to a
+**single column that follows the global topbar theme toggle** (D-05/D-07
+superseded — see 189-CONTEXT.md). This does not affect the CMP-01..05 verdicts:
+the full state matrix, overflow handling, a11y roles/focus, disabled/readonly
+tokens, and root-fix-only constraint all still hold for the single column.
+Dark-theme coverage is now provided by `admin-a11y.spec.js` (scans every surface
+in both themes via the global toggle) and `admin-visuals`, replacing the removed
+`themeColumnDeltaProbe`. The D-07 sub-tree mechanism and the (false-positive)
+mobile two-column BLOCKER are no longer relevant. Re-verified after the change:
+`mix compile --warnings-as-errors` clean, registry tests 7/7, `e2e:a11y` green,
+Phase-189 probe block green, `verify_package_docs.sh` exit 0.
+
+---
+
 _Verified: 2026-06-17_
 _Verifier: Claude (gsd-verifier)_
 _E2E follow-up: Claude (execute-phase orchestrator), 2026-06-17_
+_Lab redesign: Claude, 2026-06-18_
