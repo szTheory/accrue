@@ -70,7 +70,7 @@ export const CommandPalette = {
       this.moveActive(-1);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      this.selectActive();
+      this.selectActive(e);
     }
   },
 
@@ -112,14 +112,14 @@ export const CommandPalette = {
     }
   },
 
-  selectActive() {
+  selectActive(e) {
     if (!this.items || this.items.length === 0) return;
     
     const activeItem = this.items[this.activeIndex];
     if (activeItem) {
       if (activeItem.dataset.path) {
         this.pushEventTo(this.el.dataset.target, "close", {});
-        window.liveSocket.pushHistoryPatch(activeItem.dataset.path, "push", this.el);
+        window.liveSocket.pushHistoryPatch(e, activeItem.dataset.path, "push", activeItem);
       } else if (activeItem.dataset.action) {
         this.pushEventTo(this.el.dataset.target, activeItem.dataset.action, {});
       }
