@@ -239,5 +239,20 @@ No automated gaps. All 5 CMP requirements have verified implementation evidence 
 
 ---
 
+## E2E Execution Results (2026-06-17, post-verification follow-up)
+
+The Playwright e2e suite was executed during follow-up. Running it surfaced — and led to fixes for — real defects that unit tests and static review had masked:
+
+**Critical process gap fixed:** Phase 189 edited the *source* `assets/css/app.css` (189-01/04/05) but never regenerated the served Tailwind bundle `priv/static/accrue_admin.css` (last built in 188-07), so none of the phase's CSS root fixes were actually live (e.g. `.ax-field-error` stayed amber). Rebuilt via `mix accrue_admin.assets.build` and committed.
+
+**`npm run e2e:a11y` → PASS (2/2, both viewports).** Fixes applied this pass: toggle accessible-name confirmed live; kitchen readonly-input `aria-label`; scrollbar specimen `tabindex`/`role`; `.ax-dev-state-cell-na` opacity removed (was dropping muted-label contrast below AA); **D-07** `.ax-dev-state-grid-col` now re-declares `color: var(--ax-primary)` so dark-column text re-resolves to its theme scope (was 1.03 contrast).
+
+**Phase 189 interaction probe block → PASS (10/10, both viewports).** `overflowProbe` refined to exempt native input text-scroll (CMP-02 = container escape, not internal scroll).
+
+**Open follow-up (NOT a Phase-189 acceptance gate):** the Phase-187 observation test `Admin live interaction baseline › records trace-backed live interaction observations` times out (>300s) in `probeAffordanceAndStates`, which loads `/billing/dev/components` and iterates the DOM. Phase 189 grew that page ~10×, so the probe's per-node iteration hangs. Needs a dedicated fix (scope/skip the kitchen in that baseline observer) — `/gsd-debug` candidate, tracked for Phase 192 sign-off.
+
+---
+
 _Verified: 2026-06-17_
 _Verifier: Claude (gsd-verifier)_
+_E2E follow-up: Claude (execute-phase orchestrator), 2026-06-17_
