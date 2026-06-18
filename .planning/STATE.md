@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
-status: verifying
-stopped_at: Phase 190 UI-SPEC approved
-last_updated: "2026-06-18T14:03:23.065Z"
-last_activity: "2026-06-18 - Completed quick task 260618-3pu: Component-lab family-label map"
+status: executing
+stopped_at: Phase 190 planning complete
+last_updated: "2026-06-18T15:03:34.120Z"
+last_activity: 2026-06-18 -- Phase 190 planning complete
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 19
+  total_plans: 24
   completed_plans: 19
   percent: 50
 ---
@@ -22,15 +22,15 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 189 — primitive-form-components-component-lab
+**Current focus:** Phase 190 — navigation-data-display-meta-component-cohesion
 
 ## Current Position
 
-Phase: 189 (primitive-form-components-component-lab) — EXECUTION + GATES COMPLETE; lab redesigned to single-column; 1 follow-up open
-Plan: 7 of 7 complete
-Status: All 7 plans done. POST-EXEC REDESIGN (2026-06-18): component lab switched from two-column light/dark to a SINGLE column following the global topbar theme toggle (D-05/D-07 superseded) — two-column was redundant (a11y sweep already scans both themes via global toggle), carried the D-07 sub-tree bug class, and broke mobile (~195k px). Gates run: code review (resolved — 1 a11y BLOCKER + 7 WARNINGs fixed); verifier (CMP-01..05 verified on automated evidence); e2e (a11y 2/2 GREEN + Phase-189 probe block GREEN after fixes); secure-phase (threats_open: 0, SECURE); ui-review (17/24, committed; 2 copy WARNINGs fixed, mobile BLOCKER was a false positive). CRITICAL gap found+fixed during e2e: Phase 189 edited source app.css but never rebuilt the served Tailwind bundle priv/static/accrue_admin.css (was last built 188-07) — none of the CSS root fixes were live until rebuilt. CRITICAL gap found+fixed during e2e: Phase 189 edited source app.css but never rebuilt the served Tailwind bundle priv/static/accrue_admin.css (was last built 188-07) — none of the CSS root fixes were live until rebuilt. Also fixed live: kitchen a11y (readonly label, scrollbar focusable, n/a-cell contrast), D-07 dark-column text color, overflow probe (input text-scroll exemption). UI-review "mobile dark column invisible" BLOCKER is a FALSE POSITIVE (auditor couldn't load mobile PNGs; grid 1fr stacks both columns vertically — mobile PNG is 1084x195616, both present). Remaining UI-review WARNINGs = dev-lab copy/format polish (heading should be "Component Kitchen"; n/a label format "n/a — {reason}").
-Open follow-up (NOT a 189 acceptance gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
-Last activity: 2026-06-18 - Completed quick task 260618-3pu: Component-lab family-label map
+Phase: 190 (navigation-data-display-meta-component-cohesion) — PLANNED; ready to execute
+Plan: 5 of 5 planned; 0 of 5 executed
+Status: Planning complete. Five waves are ready: 190-01 group contract + validation scaffold; 190-02 component-kitchen group proof surface; 190-03 data-display group cohesion; 190-04 navigation/meta-component group cohesion; 190-05 browser probes + Phase 191 handoff. Plan checker passed; decision coverage gate passed 30/30; GRP-01..04 are covered.
+Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
+Last activity: 2026-06-18 -- Phase 190 planning complete
 
 ## Post-v1.48 Pause Rule
 
@@ -47,7 +47,7 @@ v1.53 Admin UI Design-System Hardening is open as a quality / interaction-correc
 | 187 | Audit & Baseline | VER-01 | Complete (2026-06-15) |
 | 188 | Foundations hardening | FND-01, FND-02, FND-03, FND-04, FND-05, FND-06 | Complete (2026-06-17, approved) |
 | 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Execution complete — verification pending (e2e + screenshot) |
-| 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Not started |
+| 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Planned — ready to execute (5 plans) |
 | 191 | Page & flow interaction pass + fixture stress + microcopy | IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02 | Not started |
 | 192 | Idempotent verification & sign-off | VER-02, VER-03, VER-04 | Not started |
 
@@ -268,14 +268,14 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-18T14:03:23.060Z
-Stopped at: Phase 190 UI-SPEC approved
-Resume file: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-UI-SPEC.md
+Last session: 2026-06-18T15:03:34.120Z
+Stopped at: Phase 190 planning complete
+Resume file: .planning/phases/190-navigation-data-display-meta-component-cohesion/190-01-PLAN.md
 
 ## Operator Next Steps
 
 - v1.53 Admin UI Design-System Hardening is **open** with a created roadmap (Phases 187–192, strictly linear).
-- Phase 187 is complete and verified; next gate is Phase 188 planning.
+- Phase 190 is planned and verified; next gate is Phase 190 execution.
 - Each phase is executed research-backed and verified via the GSD UI workflow (`/gsd-ui-phase` design-contract + `/gsd-ui-review`), with an adversarial multi-lens judge and a maintainer screenshot checkpoint at every phase boundary.
 
 </content>
