@@ -16,6 +16,7 @@ const RESULTS_ROOT = "test-results/admin-baseline";
 const THEMES = ["light", "dark"];
 const COVERED_STATES = new Set(["default-populated", "overflow", "long-content"]);
 const TARGETED_BREAKPOINTS = [320, 375, 768, 1024, 1440];
+const COMPONENT_KITCHEN_ROUTE = "/billing/dev/components";
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -167,6 +168,31 @@ function groupSurfacesByRoute(surfaces, fixtureData) {
   }
 
   return Array.from(groups.values());
+}
+
+function baselineStateFor(projectName) {
+  if (!baselineStateFor.states) baselineStateFor.states = new Map();
+  if (!baselineStateFor.states.has(projectName)) {
+    fs.rmSync(path.join(RESULTS_ROOT, projectName), { recursive: true, force: true });
+    baselineStateFor.states.set(projectName, {
+      observations: [],
+      routeCount: 0,
+      surfaceCount: 0,
+      suiteStartedAt: Date.now(),
+      failed: false,
+    });
+    recordBaselineProgress(projectName, {
+      event: "suite-start",
+      route: null,
+      surface_count: 0,
+      elapsed_ms: 0,
+    });
+  }
+  return baselineStateFor.states.get(projectName);
+}
+
+function baselineStates() {
+  return baselineStateFor.states || new Map();
 }
 
 function evidenceFileStem(keyParts) {
@@ -467,98 +493,115 @@ test.describe("baseline helper contracts", () => {
   });
 });
 
-test.describe("Admin static baseline", () => {
-  test.beforeEach(async ({ request }) => {
-    await reset(request);
-  });
+async function captureBaselineRouteSet({ page, request, projectName, includeComponentKitchen }) {
+  const state = baselineStateFor(projectName);
 
-  test("captures manifest-driven static cells", async ({ page, request }, testInfo) => {
-    const projectName = testInfo.project.name;
-    const suiteStartedAt = Date.now();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  const fixtureData = {
+    "operator-flows": await seed(request, "operator-flows"),
+    dashboard: await seed(request, "dashboard"),
+    "edge-states": await seed(request, "edge-states"),
+    overflow: await seed(request, "overflow"),
+  };
+
+  const selectedSurfaces = SURFACES.filter((surface) => surface.projects.includes(projectName));
+  const routeGroups = groupSurfacesByRoute(selectedSurfaces, fixtureData).filter((routeGroup) =>
+    includeComponentKitchen
+      ? routeGroup.route === COMPONENT_KITCHEN_ROUTE
+      : routeGroup.route !== COMPONENT_KITCHEN_ROUTE
+  );
+  const evidenceState = { screenshots: new Map(), axe: new Map() };
+  state.routeCount += routeGroups.length;
+  state.surfaceCount += routeGroups.reduce((count, routeGroup) => count + routeGroup.surfaces.length, 0);
+
+  for (const routeGroup of routeGroups) {
+    const routeStartedAt = Date.now();
     recordBaselineProgress(projectName, {
-      event: "suite-start",
-      route: null,
-      surface_count: 0,
+      event: "route-start",
+      route: routeGroup.route,
+      surface_count: routeGroup.surfaces.length,
       elapsed_ms: 0,
     });
 
     try {
-      await page.emulateMedia({ reducedMotion: "reduce" });
-
-      const fixtureData = {
-        "operator-flows": await seed(request, "operator-flows"),
-        dashboard: await seed(request, "dashboard"),
-        "edge-states": await seed(request, "edge-states"),
-        overflow: await seed(request, "overflow"),
-      };
-
-      const observations = [];
-      const selectedSurfaces = SURFACES.filter((surface) => surface.projects.includes(projectName));
-      const routeGroups = groupSurfacesByRoute(selectedSurfaces, fixtureData);
-      const evidenceState = { screenshots: new Map(), axe: new Map() };
-
-      for (const routeGroup of routeGroups) {
-        const routeStartedAt = Date.now();
-        recordBaselineProgress(projectName, {
-          event: "route-start",
-          route: routeGroup.route,
-          surface_count: routeGroup.surfaces.length,
-          elapsed_ms: 0,
-        });
-
-        try {
-          await captureCanonicalRouteGroup(page, routeGroup, projectName, observations, evidenceState);
-          await captureTargetedRouteGroup(page, routeGroup, projectName, observations, evidenceState);
-          recordBaselineProgress(projectName, {
-            event: "route-complete",
-            route: routeGroup.route,
-            surface_count: routeGroup.surfaces.length,
-            elapsed_ms: elapsedMs(routeStartedAt),
-          });
-        } catch (error) {
-          recordBaselineProgress(projectName, {
-            event: "stage-error",
-            stage: "route",
-            route: routeGroup.route,
-            surface_count: routeGroup.surfaces.length,
-            elapsed_ms: elapsedMs(routeStartedAt),
-            message: error.message,
-          });
-          throw error;
-        }
-      }
-
-      const outputPath = path.join(RESULTS_ROOT, projectName, "cells.json");
-      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-      fs.writeFileSync(outputPath, `${JSON.stringify(observations, null, 2)}\n`);
-
-      const gaps = observations.filter((row) => row.coverage_status === "gap");
-      const invalid = observations.filter((row) => {
-        if (!["covered", "gap", "n/a"].includes(row.coverage_status)) return true;
-        if (row.coverage_status === "covered") return row.evidence_refs.length === 0 || !Array.isArray(row.axe_violations);
-        return !row.reason;
-      });
-
-      expect(invalid, "all baseline observations must carry coverage evidence or a reason").toEqual([]);
-      expect(observations.length).toBeGreaterThan(DIMENSIONS.length);
-      expect(gaps.every((gap) => gap.defect_candidate || gap.reason)).toBeTruthy();
+      await captureCanonicalRouteGroup(page, routeGroup, projectName, state.observations, evidenceState);
+      await captureTargetedRouteGroup(page, routeGroup, projectName, state.observations, evidenceState);
       recordBaselineProgress(projectName, {
-        event: "suite-complete",
-        route: null,
-        surface_count: selectedSurfaces.length,
-        route_count: routeGroups.length,
-        elapsed_ms: elapsedMs(suiteStartedAt),
+        event: "route-complete",
+        route: routeGroup.route,
+        surface_count: routeGroup.surfaces.length,
+        elapsed_ms: elapsedMs(routeStartedAt),
       });
     } catch (error) {
+      state.failed = true;
       recordBaselineProgress(projectName, {
         event: "stage-error",
-        stage: "suite",
-        route: null,
-        surface_count: 0,
-        elapsed_ms: elapsedMs(suiteStartedAt),
+        stage: "route",
+        route: routeGroup.route,
+        surface_count: routeGroup.surfaces.length,
+        elapsed_ms: elapsedMs(routeStartedAt),
         message: error.message,
       });
       throw error;
+    }
+  }
+}
+
+function writeBaselineResults(projectName, state) {
+  if (state.failed) return;
+
+  const outputPath = path.join(RESULTS_ROOT, projectName, "cells.json");
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, `${JSON.stringify(state.observations, null, 2)}\n`);
+
+  const gaps = state.observations.filter((row) => row.coverage_status === "gap");
+  const invalid = state.observations.filter((row) => {
+    if (!["covered", "gap", "n/a"].includes(row.coverage_status)) return true;
+    if (row.coverage_status === "covered") return row.evidence_refs.length === 0 || !Array.isArray(row.axe_violations);
+    return !row.reason;
+  });
+
+  expect(invalid, "all baseline observations must carry coverage evidence or a reason").toEqual([]);
+  expect(state.observations.length).toBeGreaterThan(DIMENSIONS.length);
+  expect(gaps.every((gap) => gap.defect_candidate || gap.reason)).toBeTruthy();
+  recordBaselineProgress(projectName, {
+    event: "suite-complete",
+    route: null,
+    surface_count: state.surfaceCount,
+    route_count: state.routeCount,
+    elapsed_ms: elapsedMs(state.suiteStartedAt),
+  });
+}
+
+test.describe("Admin static baseline", () => {
+  test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ request }) => {
+    await reset(request);
+  });
+
+  test("captures manifest-driven static cells for admin routes", async ({ page, request }, testInfo) => {
+    await captureBaselineRouteSet({
+      page,
+      request,
+      projectName: testInfo.project.name,
+      includeComponentKitchen: false,
+    });
+  });
+
+  test("captures manifest-driven static cells for the component kitchen", async ({ page, request }, testInfo) => {
+    await captureBaselineRouteSet({
+      page,
+      request,
+      projectName: testInfo.project.name,
+      includeComponentKitchen: true,
+    });
+  });
+
+  test.afterAll(() => {
+    for (const [projectName, state] of baselineStates()) {
+      writeBaselineResults(projectName, state);
     }
   });
 });

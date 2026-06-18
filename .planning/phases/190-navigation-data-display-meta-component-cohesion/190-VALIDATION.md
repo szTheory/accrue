@@ -105,7 +105,7 @@ Date: 2026-06-18.
 | Check | Result | Evidence |
 |-------|--------|----------|
 | Stale generated baseline output removed | pass | Removed `accrue_admin/test-results/admin-baseline` before the final proof run. |
-| Exact bounded baseline command | pass | `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1`; 6 passed in 1.6m, including `chromium-desktop` static baseline in 39.8s and `chromium-mobile` static baseline in 58.0s. |
+| Exact bounded baseline command | pass | `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1`; 8 passed in 1.8m. Static baseline capture is split into admin-route and component-kitchen tests per project so each test stays under the 60s limit: desktop routes 22.0s, desktop kitchen 20.0s, mobile routes 39.0s, mobile kitchen 27.7s. |
 | Desktop cells evidence | pass | `accrue_admin/test-results/admin-baseline/chromium-desktop/cells.json`; 10,528 rows, non-empty JSON array, 616 covered Phase 190 component-group rows with generated evidence refs. |
 | Mobile cells evidence | pass | `accrue_admin/test-results/admin-baseline/chromium-mobile/cells.json`; 10,528 rows, non-empty JSON array, 616 covered Phase 190 component-group rows with generated evidence refs. |
 | Desktop progress evidence | pass | `accrue_admin/test-results/admin-baseline/chromium-desktop/progress.ndjson`; 95 rows, one `suite-complete`, zero `stage-error`. |
@@ -120,5 +120,6 @@ Date: 2026-06-18.
 |---------|--------|-------------------|
 | Initial exact bounded baseline command after route grouping | failed | Mobile timed out on `/billing/dev/components` during targeted breakpoint capture; `accrue_admin/test-results/admin-baseline/chromium-mobile/progress.ndjson` recorded `stage-error` before the generated directory was removed for the final proof run. |
 | Exact bounded baseline command after viewport-only targeted screenshots | failed | Mobile reached `targeted-1440` for `/billing/dev/components` but still exceeded 60 seconds; progress recorded `stage-error` before the generated directory was removed for the final proof run. |
+| Exact bounded baseline command after targeted fan-out scoping | failed | Mobile wrote `suite-complete` but the single static-baseline test still exceeded Playwright's 60s per-test timeout on a slower rerun; progress recorded 64.6s before the generated directory was removed for the final split-test proof run. |
 
-The failed attempts did not approve validation. They drove the Phase 190-06 harness fix that limits targeted breakpoint fan-out to Phase 190 component-group rows while preserving canonical capture for all selected manifest surfaces.
+The failed attempts did not approve validation. They drove the Phase 190-06 harness fixes that limit targeted breakpoint fan-out to Phase 190 component-group rows, preserve canonical capture for all selected manifest surfaces, and split the static baseline into admin-route and component-kitchen tests so the exact verifier command has stable per-test timeout margin.
