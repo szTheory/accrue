@@ -53,32 +53,173 @@ function groupLocator(page, slug) {
   return page.locator(`[data-component-group="${slug}"]`);
 }
 
-async function openComponentKitchen(_page) {
-  throw new Error("TODO: open the authenticated component kitchen before browser probes");
+function proofRoot(page, slug) {
+  return page.locator(`#grp190-${slug}[data-component-group="${slug}"]`);
 }
 
-async function setTheme(_page, _theme) {
-  throw new Error("TODO: set the global data-theme value before locator checks");
+function focusableSelector() {
+  return [
+    "a[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "summary",
+    "textarea:not([disabled])",
+    "[tabindex]:not([tabindex='-1'])",
+  ].join(", ");
 }
 
-async function assertAllGroupRootsVisible(_page) {
-  throw new Error("TODO: assert all required data-component-group roots are visible exactly once");
+function scopedProofFocusableSelector() {
+  return focusableSelector()
+    .split(", ")
+    .map((selector) => `[id^='grp190-'][data-component-group] ${selector}`)
+    .join(", ");
 }
 
-async function assertResponsiveModeContract(_page, _width) {
-  throw new Error("TODO: assert table/card responsive modes do not expose duplicate active DOM");
+async function openComponentKitchen(page) {
+  await page.goto(`/__e2e__/login?to=${encodeURIComponent("/billing/dev/components")}`);
+  await expect(page.locator("#main-content")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Component Groups" })).toBeVisible();
 }
 
-async function assertPaginationStates(_page) {
-  throw new Error("TODO: assert no-pagination and has-pagination controls differ");
+async function setTheme(page, theme) {
+  await page.evaluate((value) => {
+    document.documentElement.setAttribute("data-theme", value);
+    document.documentElement.dataset.theme = value;
+  }, theme);
+
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.getAttribute("data-theme")))
+    .toBe(theme);
+  await page.waitForTimeout(50);
 }
 
-async function assertNamedActiveStates(_page) {
-  throw new Error("TODO: assert filter, selected row, tab/window, and sort cues are visible and named");
+async function assertAllGroupRootsVisible(page) {
+  for (const slug of REQUIRED_SLUGS) {
+    const root = proofRoot(page, slug);
+    await expect(root, `${slug} proof root`).toHaveCount(1);
+    await expect(root, `${slug} proof root`).toBeVisible();
+    await expect(root.locator("[data-group-state]").first(), `${slug} state chips`).toBeVisible();
+  }
 }
 
-async function assertNoOffscreenActions(_page, _width) {
-  throw new Error("TODO: assert long-content group actions stay inside the viewport");
+async function assertResponsiveModeContract(page, width) {
+  await page.setViewportSize({ width, height: 900 });
+  await page.waitForTimeout(50);
+
+  const tableRoot = proofRoot(page, "table-empty-loading-error-pagination");
+  await tableRoot.scrollIntoViewIfNeeded();
+  await assertSingleResponsiveMode(page, tableRoot);
+
+  const desktopShell = tableRoot.locator(".ax-data-table-shell");
+  const mobileCards = tableRoot.locator("[data-role='card-list']");
+
+  if (width < 768) {
+    await expect(desktopShell, "desktop table shell is inactive below md").not.toBeVisible();
+    expect(await visibleFocusableCount(desktopShell), "inactive desktop table focusables").toBe(0);
+    await expect(mobileCards, "mobile cards are active below md").toBeVisible();
+  } else {
+    await expect(desktopShell, "desktop table shell is active at md and above").toBeVisible();
+    await expect(mobileCards, "mobile card list is inactive at md and above").not.toBeVisible();
+    expect(await visibleFocusableCount(mobileCards), "inactive mobile card focusables").toBe(0);
+  }
+}
+
+async function assertPaginationStates(page) {
+  const tableRoot = proofRoot(page, "table-empty-loading-error-pagination");
+  const noPagination = tableRoot.locator('[data-group-state="no-pagination"]');
+  const hasPagination = tableRoot.locator('[data-group-state="has-pagination"]');
+
+  await expect(noPagination).toBeVisible();
+  await expect(hasPagination).toBeVisible();
+  await expect(noPagination.getByRole("button", { name: /load more/i })).toHaveCount(0);
+  await expect(hasPagination.getByRole("button", { name: /load more/i })).toBeVisible();
+  expect(await visibleFocusableCount(noPagination), "no-pagination row has no load-more focus target").toBe(0);
+  expect(await visibleFocusableCount(hasPagination), "has-pagination row exposes load-more").toBeGreaterThan(0);
+}
+
+async function assertNamedActiveStates(page) {
+  const toolbarRoot = proofRoot(page, "toolbar-search-filter-sort");
+  await expect(toolbarRoot.getByLabel("Search")).toHaveValue(/enterprise annual renewal/);
+  await expect(toolbarRoot.getByLabel("Status")).toHaveValue("Open");
+  await expect(toolbarRoot.locator('.ax-filter-chip[data-filter="status"]')).toContainText("Open");
+  await expect(toolbarRoot.locator('.ax-filter-chip[data-filter="sort"]')).toContainText("Oldest first");
+  await expect(toolbarRoot.locator("details.ax-dropdown summary")).toContainText("Sort");
+  await expect(toolbarRoot.getByText("Filtered empty")).toBeVisible();
+
+  const tableRoot = proofRoot(page, "table-empty-loading-error-pagination");
+  const selectedRow = tableRoot.locator('[aria-selected="true"][data-group-state="selected-filter-active"]');
+  await expect(selectedRow).toBeVisible();
+  await expect(selectedRow).toContainText("Past due");
+
+  const tabsRoot = proofRoot(page, "tabs-subviews");
+  const currentSubview = tabsRoot.locator('nav[aria-label="Page sections"] [aria-current="page"]');
+  const currentWindow = tabsRoot.locator('nav[aria-label="Time window (UTC)"] [aria-current="page"]');
+  await expect(currentSubview).toBeVisible();
+  await expect(currentSubview).toContainText("Webhook delivery attempts");
+  await expect(currentWindow).toBeVisible();
+  await expect(currentWindow).toContainText("30 days UTC");
+}
+
+async function assertNoOffscreenActions(page, width) {
+  await page.setViewportSize({ width, height: 900 });
+  await page.waitForTimeout(50);
+
+  const result = await page.evaluate((selector) => {
+    const failures = [];
+    const roots = Array.from(document.querySelectorAll("[id^='grp190-'][data-component-group]"));
+    const rootSlugs = roots.map((root) => root.getAttribute("data-component-group"));
+
+    for (const root of roots) {
+      for (const element of root.querySelectorAll(selector)) {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        const visible =
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          rect.width > 0 &&
+          rect.height > 0;
+        if (!visible) continue;
+        if (rect.left < -1 || rect.right > window.innerWidth + 1) {
+          failures.push({
+            group: root.getAttribute("data-component-group"),
+            label: element.textContent.trim().replace(/\s+/g, " ").slice(0, 80),
+            left: rect.left,
+            right: rect.right,
+            viewport: window.innerWidth,
+          });
+        }
+      }
+    }
+
+    return {
+      rootSlugs,
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+      failures,
+    };
+  }, focusableSelector());
+
+  expect(result.rootSlugs.sort(), "proof roots exist before width probe").toEqual([...REQUIRED_SLUGS].sort());
+  expect(result.scrollWidth, `document overflow at ${width}px`).toBeLessThanOrEqual(result.clientWidth + 1);
+  expect(result.failures, `offscreen focusable actions at ${width}px`).toEqual([]);
+
+  const focusables = page.locator(scopedProofFocusableSelector());
+  const total = await focusables.count();
+  const focusFailures = [];
+
+  for (let index = 0; index < total; index += 1) {
+    const focusable = focusables.nth(index);
+    if (!(await focusable.isVisible().catch(() => false))) continue;
+
+    try {
+      await focusable.focus({ timeout: 500 });
+    } catch (error) {
+      focusFailures.push(`${index}: ${error.message}`);
+    }
+  }
+
+  expect(focusFailures, `focusable action failures at ${width}px`).toEqual([]);
 }
 
 async function visibleFocusableCount(locator) {
@@ -88,6 +229,7 @@ async function visibleFocusableCount(locator) {
       "button:not([disabled])",
       "input:not([disabled])",
       "select:not([disabled])",
+      "summary",
       "textarea:not([disabled])",
       "[tabindex]:not([tabindex='-1'])",
     ].join(", ")
