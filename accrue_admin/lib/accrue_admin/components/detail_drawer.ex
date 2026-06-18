@@ -19,14 +19,23 @@ defmodule AccrueAdmin.Components.DetailDrawer do
   slot(:footer)
 
   def detail_drawer(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :description_id,
+        if(assigns.subtitle, do: "#{assigns.id}-description", else: nil)
+      )
+
     ~H"""
     <section
       :if={@open}
       id={@id}
       class={["ax-detail-drawer-shell", @class]}
+      data-component-group="drawer-form"
       role="dialog"
       aria-modal="true"
       aria-labelledby={"#{@id}-title"}
+      aria-describedby={@description_id}
       phx-mounted={Phoenix.LiveView.JS.show(transition: {"ax-drawer-entering", "ax-drawer-enter-from", "ax-drawer-enter-to"}, time: 240)}
       phx-remove={Phoenix.LiveView.JS.hide(transition: {"ax-drawer-leaving", "ax-drawer-leave-from", "ax-drawer-leave-to"}, time: 140)}
     >
@@ -42,7 +51,7 @@ defmodule AccrueAdmin.Components.DetailDrawer do
           <div>
             <p class="ax-eyebrow"><%= @eyebrow %></p>
             <h2 id={"#{@id}-title"} class="ax-heading"><%= @title %></h2>
-            <p :if={@subtitle} class="ax-body"><%= @subtitle %></p>
+            <p :if={@subtitle} id={@description_id} class="ax-body"><%= @subtitle %></p>
           </div>
 
           <div class="ax-detail-drawer-actions">

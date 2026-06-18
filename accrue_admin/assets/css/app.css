@@ -1132,9 +1132,12 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-detail-drawer {
   position: absolute;
   inset: auto 0 0 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 100vh;
+  max-height: 100vh;
   padding: var(--ax-space-lg);
-  overflow: auto;
+  overflow: hidden;
   background: var(--ax-base);
   box-shadow: -16px 0 60px color-mix(in srgb, var(--accrue-ink) 24%, transparent);
 }
@@ -1150,12 +1153,38 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-detail-drawer-body {
   display: grid;
   gap: var(--ax-space-lg);
+  min-height: 0;
+  overflow: auto;
 }
 
 .ax-detail-drawer-footer {
   margin-top: var(--ax-space-xl);
   padding-top: var(--ax-space-md);
   border-top: 1px solid var(--ax-border);
+}
+
+.ax-step-up-modal {
+  position: fixed;
+  inset: var(--ax-space-lg);
+  z-index: var(--ax-z-modal);
+  display: grid;
+  gap: var(--ax-space-lg);
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: min(42rem, calc(100vh - 2rem));
+  margin: auto;
+  overflow: auto;
+}
+
+.ax-step-up-modal-form {
+  display: grid;
+  gap: var(--ax-space-md);
+}
+
+.ax-step-up-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--ax-space-sm);
 }
 
 /* ============================================================================
