@@ -12,6 +12,266 @@ if Mix.env() != :prod do
             specimens: [%{label: String.t(), props: map(), content: String.t() | nil}] | nil
           }
 
+    @type group_contract :: %{
+            name: String.t(),
+            slug: String.t(),
+            proof_id: String.t(),
+            required_states: [String.t()],
+            primary_components: [String.t()],
+            locators: [String.t()],
+            phase191_handoff_tags: [String.t()],
+            behavior_contracts: [String.t()],
+            hierarchy: [String.t()],
+            representative_route_category: String.t(),
+            decisions: [String.t()]
+          }
+
+    @doc """
+    Returns the canonical Phase 190 component-group contracts.
+
+    These mirror the frozen Phase 187 COMPONENT_GROUPS names and provide the
+    `data-component-group` slugs later kitchen/probe plans consume.
+    """
+    @spec group_contracts() :: [group_contract()]
+    def group_contracts do
+      [
+        %{
+          name: "page-header/actions/breadcrumbs",
+          slug: "page-header-actions-breadcrumbs",
+          proof_id: "grp190-page-header-actions-breadcrumbs",
+          required_states: ["long-content", "overflow", "mobile-wrap", "dark-mode"],
+          primary_components: ["Breadcrumbs", "Button", "AppShell page header"],
+          locators: group_locators("page-header-actions-breadcrumbs"),
+          phase191_handoff_tags: ["liveview-patch-focus", "microcopy"],
+          behavior_contracts: [
+            "Breadcrumbs orient before the task heading.",
+            "Primary action remains in the same visual band as the task.",
+            "Mobile wraps actions below the title without separating context."
+          ],
+          hierarchy: [
+            "orientation",
+            "task heading",
+            "supporting copy",
+            "primary and secondary actions"
+          ],
+          representative_route_category: "admin page header",
+          decisions: ["D-01", "D-02", "D-05", "D-16", "D-17", "D-20", "D-21"]
+        },
+        %{
+          name: "toolbar/search/filter/sort",
+          slug: "toolbar-search-filter-sort",
+          proof_id: "grp190-toolbar-search-filter-sort",
+          required_states: [
+            "long-content",
+            "overflow",
+            "filtered-empty",
+            "selected-filter-active",
+            "mobile-wrap",
+            "dark-mode"
+          ],
+          primary_components: ["DataTable filters", "FilterChipBar", "GlobalSearch", "DropdownMenu"],
+          locators: group_locators("toolbar-search-filter-sort"),
+          phase191_handoff_tags: ["liveview-patch-focus", "fixture-gaps", "microcopy"],
+          behavior_contracts: [
+            "Filters sit with the table/list they constrain.",
+            "Active filters remain visible as chips or selected controls.",
+            "Search, filter, sort, apply, and clear actions stack below 768px."
+          ],
+          hierarchy: [
+            "filter label",
+            "search/filter/sort controls",
+            "active constraints",
+            "apply or clear action"
+          ],
+          representative_route_category: "list toolbar",
+          decisions: ["D-01", "D-02", "D-06", "D-12", "D-13", "D-17", "D-23", "D-24"]
+        },
+        %{
+          name: "table/empty/loading/error/pagination",
+          slug: "table-empty-loading-error-pagination",
+          proof_id: "grp190-table-empty-loading-error-pagination",
+          required_states: [
+            "long-content",
+            "overflow",
+            "empty",
+            "filtered-empty",
+            "loading",
+            "error",
+            "no-pagination",
+            "has-pagination",
+            "selected-filter-active",
+            "mobile-card-list-degradation",
+            "dark-mode"
+          ],
+          primary_components: ["DataTable", "EmptyState", "Spinner", "StatusBadge", "Button"],
+          locators: group_locators("table-empty-loading-error-pagination"),
+          phase191_handoff_tags: ["scroll-reachability", "fixture-gaps", "microcopy"],
+          behavior_contracts: [
+            "Entity queues use DataTable desktop table plus mobile cards.",
+            "Only one responsive mode is accessible and focusable at a time.",
+            "Load more appears only when a next cursor or equivalent exists."
+          ],
+          hierarchy: [
+            "table caption or label",
+            "column or card identity",
+            "row facts and status",
+            "row actions",
+            "cursor-gated footer"
+          ],
+          representative_route_category: "list and table page",
+          decisions: [
+            "D-02",
+            "D-06",
+            "D-08",
+            "D-10",
+            "D-11",
+            "D-12",
+            "D-13",
+            "D-14",
+            "D-29"
+          ]
+        },
+        %{
+          name: "KPI/chart/table",
+          slug: "kpi-chart-table",
+          proof_id: "grp190-kpi-chart-table",
+          required_states: [
+            "long-content",
+            "overflow",
+            "empty",
+            "loading",
+            "error",
+            "no-pagination",
+            "has-pagination",
+            "mobile-card-list-degradation",
+            "dark-mode"
+          ],
+          primary_components: ["KpiCard", "FunnelChart", "AtRiskTable", "DataTable"],
+          locators: group_locators("kpi-chart-table"),
+          phase191_handoff_tags: ["fixture-gaps", "microcopy"],
+          behavior_contracts: [
+            "Summary KPIs precede trend or chart evidence.",
+            "Trend or chart evidence precedes row-level drill-down.",
+            "Specialized tables honor the shared data-display state contract."
+          ],
+          hierarchy: ["summary metrics", "trend evidence", "row evidence", "drill-down actions"],
+          representative_route_category: "recovery analytics",
+          decisions: ["D-06", "D-09", "D-15", "D-17", "D-18", "D-19", "D-21"]
+        },
+        %{
+          name: "detail-header/metadata/actions",
+          slug: "detail-header-metadata-actions",
+          proof_id: "grp190-detail-header-metadata-actions",
+          required_states: ["long-content", "overflow", "loading", "error", "mobile-wrap", "dark-mode"],
+          primary_components: ["Detail", "RelatedResources", "StatusBadge", "InlineId", "Button"],
+          locators: group_locators("detail-header-metadata-actions"),
+          phase191_handoff_tags: ["fixture-gaps", "microcopy"],
+          behavior_contracts: [
+            "Object identity appears before metadata and actions.",
+            "Metadata wraps IDs and external identifiers intentionally.",
+            "Actions stay adjacent to object identity across breakpoints."
+          ],
+          hierarchy: ["eyebrow", "title or ID", "status", "primary facts", "actions"],
+          representative_route_category: "detail page",
+          decisions: ["D-02", "D-03", "D-06", "D-16", "D-17", "D-18", "D-19", "D-21"]
+        },
+        %{
+          name: "modal-confirm",
+          slug: "modal-confirm",
+          proof_id: "grp190-modal-confirm",
+          required_states: ["long-content", "overflow", "loading", "error", "mobile-stack", "dark-mode"],
+          primary_components: ["StepUpAuthModal", "Button", "Icon"],
+          locators: group_locators("modal-confirm"),
+          phase191_handoff_tags: [
+            "focus-trap",
+            "focus-restore",
+            "escape",
+            "click-outside",
+            "scroll-reachability",
+            "overlay-position",
+            "microcopy"
+          ],
+          behavior_contracts: [
+            "Dialog exposes title and description IDs.",
+            "Footer keeps cancel neutral and confirm visually unmistakable.",
+            "Panel consumes modal layer tokens and mobile action stacking."
+          ],
+          hierarchy: ["title", "description", "object consequence", "cancel action", "confirm action"],
+          representative_route_category: "overlay confirmation",
+          decisions: ["D-23", "D-24", "D-25", "D-26", "D-30"]
+        },
+        %{
+          name: "drawer/form",
+          slug: "drawer-form",
+          proof_id: "grp190-drawer-form",
+          required_states: [
+            "long-content",
+            "overflow",
+            "loading",
+            "error",
+            "selected-filter-active",
+            "mobile-fullscreen",
+            "dark-mode"
+          ],
+          primary_components: ["DetailDrawer", "Input", "Select", "Textarea", "Button"],
+          locators: group_locators("drawer-form"),
+          phase191_handoff_tags: [
+            "focus-trap",
+            "focus-restore",
+            "escape",
+            "click-outside",
+            "scroll-reachability",
+            "overlay-position",
+            "fixture-gaps",
+            "microcopy"
+          ],
+          behavior_contracts: [
+            "Drawer header, body, and footer keep visible action rhythm.",
+            "Scrollable body cannot strand footer actions.",
+            "Form errors sit directly below the field they describe."
+          ],
+          hierarchy: ["title", "description", "form body", "field errors", "footer actions"],
+          representative_route_category: "drawer edit flow",
+          decisions: ["D-20", "D-23", "D-24", "D-25", "D-26", "D-30"]
+        },
+        %{
+          name: "tabs/subviews",
+          slug: "tabs-subviews",
+          proof_id: "grp190-tabs-subviews",
+          required_states: [
+            "long-content",
+            "overflow",
+            "selected-filter-active",
+            "mobile-scroll",
+            "dark-mode"
+          ],
+          primary_components: ["Tabs", "WindowSelector", "Breadcrumbs"],
+          locators: group_locators("tabs-subviews"),
+          phase191_handoff_tags: ["liveview-patch-focus", "microcopy"],
+          behavior_contracts: [
+            "Route and patch navigation use links with aria-current.",
+            "Active tab uses text, border, and selected state.",
+            "Long tab rows remain horizontally reachable without hiding active state."
+          ],
+          hierarchy: ["current route label", "tab labels", "counts", "active indicator"],
+          representative_route_category: "route subnavigation",
+          decisions: ["D-02", "D-06", "D-17", "D-23", "D-28", "D-30"]
+        }
+      ]
+    end
+
+    @doc "Ordered Phase 190 component-group slugs for data-component-group locators."
+    @spec component_group_slugs() :: [String.t()]
+    def component_group_slugs do
+      Enum.map(group_contracts(), & &1.slug)
+    end
+
+    @doc "Looks up a group contract by its static Phase 190 slug."
+    @spec group_contract_by_slug(String.t()) :: group_contract() | nil
+    def group_contract_by_slug(slug) when is_binary(slug) do
+      Enum.find(group_contracts(), &(&1.slug == slug))
+    end
+
     @doc """
     Returns all curated component variant entries across the three DSY-03 families:
     button (4), status (5), card (6 = base + 5 delta tones), plus foundation entries.
@@ -704,6 +964,14 @@ if Mix.env() != :prod do
     @spec variants_for(String.t()) :: [entry()]
     def variants_for(family) do
       Enum.filter(entries(), &(&1.family == family))
+    end
+
+    defp group_locators(slug) do
+      [
+        ~s([data-component-group="#{slug}"]),
+        "##{slug}",
+        "/billing/dev/components?group=#{slug}"
+      ]
     end
   end
 end
