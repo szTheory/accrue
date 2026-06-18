@@ -16,6 +16,7 @@ defmodule AccrueAdmin.Components.KpiCard do
   attr(:class, :string, default: nil)
   attr(:href, :string, default: nil)
   attr(:aria_label, :string, default: nil)
+  attr(:component_group, :string, default: nil)
   slot(:meta)
   slot(:sparkline)
 
@@ -26,11 +27,12 @@ defmodule AccrueAdmin.Components.KpiCard do
         href={@href}
         class={["ax-card ax-kpi-card ax-kpi-card--linked", @class]}
         aria-label={@aria_label}
+        data-component-group={@component_group}
       >
         <.kpi_inner {assigns} />
       </a>
     <% else %>
-      <article class={["ax-card ax-kpi-card", @class]}>
+      <article class={["ax-card ax-kpi-card", @class]} data-component-group={@component_group}>
         <.kpi_inner {assigns} />
       </article>
     <% end %>

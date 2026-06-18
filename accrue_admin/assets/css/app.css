@@ -3126,6 +3126,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   font-size: var(--ax-type-2xl);
   font-weight: 600;
   letter-spacing: var(--ax-tracking-tight);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ax-summary-facts {
@@ -3135,6 +3137,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   gap: var(--ax-space-sm) var(--ax-space-lg);
   color: var(--ax-muted);
   font-size: var(--ax-type-sm);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ax-summary-actions {

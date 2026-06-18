@@ -11,7 +11,7 @@ defmodule AccrueAdmin.Components.Detail do
   use Phoenix.Component
 
   @doc """
-  A titled section wrapper (card). Optional `:actions` slot renders on the right
+  A titled section wrapper. Optional `:actions` slot renders on the right
   of the section header.
 
       <Detail.detail_section title="Line items">
@@ -26,7 +26,7 @@ defmodule AccrueAdmin.Components.Detail do
 
   def detail_section(assigns) do
     ~H"""
-    <section class={["ax-card", "ax-detail-section", @class]}>
+    <section class={["ax-detail-section", @class]}>
       <header class="ax-detail-section-head">
         <h3 class="ax-detail-section-title"><%= @title %></h3>
         <div :if={@actions != []} class="ax-detail-section-actions"><%= render_slot(@actions) %></div>
@@ -67,7 +67,7 @@ defmodule AccrueAdmin.Components.Detail do
 
   def summary_card(assigns) do
     ~H"""
-    <header class="ax-card ax-summary-card">
+    <header class="ax-card ax-summary-card" data-component-group="detail-header-metadata-actions">
       <div class="ax-summary-main">
         <p :if={@eyebrow} class="ax-eyebrow"><%= @eyebrow %></p>
         <div class="ax-summary-title-row">
