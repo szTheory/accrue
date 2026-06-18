@@ -39,14 +39,11 @@ const DECISION_IDS = Array.from({ length: 30 }, (_value, index) => {
 const UI_SPEC_WIDTHS = [320, 375, 768, 1024, 1440];
 
 const representativeRoutes = [
-  { group: "page-header-actions-breadcrumbs", path: "/billing" },
-  { group: "toolbar-search-filter-sort", path: "/billing/invoices" },
-  { group: "table-empty-loading-error-pagination", path: "/billing/invoices" },
-  { group: "kpi-chart-table", path: "/billing/analytics/recovery" },
-  { group: "detail-header-metadata-actions", path: "/billing/invoices/:invoice_id" },
-  { group: "modal-confirm", path: "/billing/webhooks/:webhook_id" },
-  { group: "drawer-form", path: "/billing/dev/components" },
-  { group: "tabs-subviews", path: "/billing/customers/:customer_id" },
+  { category: "shell-nav-tabs", group: "page-header-actions-breadcrumbs", path: "/billing/dev/components" },
+  { category: "list-table", group: "table-empty-loading-error-pagination", path: "/billing/invoices" },
+  { category: "detail", group: "detail-header-metadata-actions", path: "/billing/invoices/:invoice_id" },
+  { category: "recovery-kpi", group: "table-empty-loading-error-pagination", path: "/billing/analytics/recovery" },
+  { category: "overlay-path", group: "detail-header-metadata-actions", path: "/billing/webhooks/:webhook_id" },
 ];
 
 function groupLocator(page, slug) {
@@ -77,9 +74,41 @@ function scopedProofFocusableSelector() {
 }
 
 async function openComponentKitchen(page) {
-  await page.goto(`/__e2e__/login?to=${encodeURIComponent("/billing/dev/components")}`);
+  await login(page, "/billing/dev/components");
   await expect(page.locator("#main-content")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Component Groups" })).toBeVisible();
+}
+
+async function reset(request) {
+  const response = await request.post("/__e2e__/reset");
+  expect(response.ok()).toBeTruthy();
+}
+
+async function seed(request, fixture) {
+  const response = await request.post(`/__e2e__/seed/${fixture}`);
+  expect(response.ok()).toBeTruthy();
+  return response.json();
+}
+
+async function login(page, target = "/billing") {
+  await page.goto(`/__e2e__/login?to=${encodeURIComponent(target)}`);
+}
+
+function resolveRepresentativeRoutes(fixtureData) {
+  const edge = fixtureData["edge-states"];
+  const opFlows = fixtureData["operator-flows"];
+
+  return representativeRoutes.map((route) => {
+    if (route.path.includes(":invoice_id")) {
+      return { ...route, path: route.path.replace(":invoice_id", encodeURIComponent(edge.jpy_invoice_id)) };
+    }
+
+    if (route.path.includes(":webhook_id")) {
+      return { ...route, path: route.path.replace(":webhook_id", encodeURIComponent(opFlows.single_webhook_id)) };
+    }
+
+    return route;
+  });
 }
 
 async function setTheme(page, theme) {
@@ -222,6 +251,48 @@ async function assertNoOffscreenActions(page, width) {
   expect(focusFailures, `focusable action failures at ${width}px`).toEqual([]);
 }
 
+async function assertRepresentativeRoute(page, route) {
+  await login(page, route.path);
+  await expect(page.locator("#main-content")).toBeVisible();
+
+  if (route.category === "shell-nav-tabs") {
+    await expect(proofRoot(page, "page-header-actions-breadcrumbs")).toBeVisible();
+    await expect(proofRoot(page, "tabs-subviews")).toBeVisible();
+    await expect(groupLocator(page, "toolbar-search-filter-sort").first()).toBeVisible();
+    return;
+  }
+
+  if (route.category === "list-table") {
+    await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();
+    await expect(page.locator('[data-role="filter-form"]').first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Invoices/i }).first()).toBeVisible();
+    return;
+  }
+
+  if (route.category === "detail") {
+    await expect(groupLocator(page, "detail-header-metadata-actions").first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Invoice/i }).first()).toBeVisible();
+    return;
+  }
+
+  if (route.category === "recovery-kpi") {
+    await expect(page.locator(".ax-kpi-card").first()).toBeVisible();
+    await expect(page.locator(".ax-funnel-chart").first()).toBeVisible();
+    await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();
+    await expect(groupLocator(page, "tabs-subviews").first()).toBeVisible();
+    return;
+  }
+
+  if (route.category === "overlay-path") {
+    await expect(groupLocator(page, "detail-header-metadata-actions").first()).toBeVisible();
+    await expect(page.locator('[data-role="replay-single"]').first()).toBeVisible();
+    await expect(page.getByText(/Requeue this webhook row|Replay is unavailable/i).first()).toBeVisible();
+    return;
+  }
+
+  throw new Error(`Unhandled representative route category: ${route.category}`);
+}
+
 async function visibleFocusableCount(locator) {
   const focusable = locator.locator(
     [
@@ -318,6 +389,29 @@ test.describe("Phase 190 group contract browser probes", () => {
   test("long-content actions stay reachable at UI-spec widths", async ({ page }) => {
     for (const width of UI_SPEC_WIDTHS) {
       await assertNoOffscreenActions(page, width);
+    }
+  });
+});
+
+test.describe("Phase 190 representative live probes", () => {
+  test.beforeEach(async ({ request }) => {
+    await reset(request);
+  });
+
+  test("samples one list, detail, recovery, overlay, and shell/tabs surface", async ({ page, request }) => {
+    const fixtureData = {
+      "operator-flows": await seed(request, "operator-flows"),
+      dashboard: await seed(request, "dashboard"),
+      "edge-states": await seed(request, "edge-states"),
+    };
+
+    const routes = resolveRepresentativeRoutes(fixtureData);
+    expect(routes.map((route) => route.category).sort()).toEqual(
+      ["detail", "list-table", "overlay-path", "recovery-kpi", "shell-nav-tabs"].sort()
+    );
+
+    for (const route of routes) {
+      await assertRepresentativeRoute(page, route);
     }
   });
 });
