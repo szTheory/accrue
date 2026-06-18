@@ -50,12 +50,13 @@ Declared values for Phase 190 group layouts (all multiples of 4):
 | `--ax-space-3xl` | 64px | Rare page-level separations only; do not use inside dense groups |
 
 Exceptions:
-- `--ax-space-2xs` is a frozen foundation token equal to 2px. It may be consumed
-  only inside dense micro-gaps already covered by Phase 188/189 (table cell
-  internals, field label/value micro-gaps, chip internals). Do not add new
-  sub-4px tokens.
+- New or changed Phase 190 group-layout CSS, proof specimens, padding, margins,
+  and gaps must use 4px as the minimum spacing value and only the declared scale
+  above. Existing legacy sub-4px CSS outside touched group layouts is outside
+  this contract; do not propagate or reuse it for group-level work.
 - Icon-only, tab overflow, filter-clear, drawer-close, pagination/load-more, and
-  row-selection controls must reach a 44px minimum touch target at mobile widths.
+  row-selection controls must reach a 44px minimum touch target at mobile widths
+  and must follow the accessible action-label rules in the copywriting contract.
 
 Group rhythm:
 - Page-level group stacks use `--ax-space-xl` between siblings.
@@ -165,6 +166,22 @@ Empty-state distinction:
   the next useful action.
 - Data unavailable/error: state what failed and how to retry or where to inspect
   evidence. Do not use bare "failed", "forbidden", "invalid", or "oops".
+
+Accessible action labels:
+- Single-word visible labels are allowed only when the accessible name supplies
+  the object context. Row selection controls that visibly read `Select` or
+  `Selected` must expose names such as `Select invoice {id}`, `Select customer
+  {name}`, or `Selected subscription {id}`. Bulk controls must expose `Select
+  visible {resource plural}` or `Clear visible {resource plural}` when the table
+  context is not already programmatic.
+- Drawer and modal close controls that visibly read `Close`, or render as an
+  icon-only close button, must expose `Close {drawer name}` or `Close {object}
+  drawer` unless an associated dialog/drawer title already provides equivalent
+  programmatic context.
+- Every icon-only action must have an accessible name through `aria-label` or
+  `aria-labelledby`. If the icon is not universally understood in this admin
+  context, provide a tooltip or adjacent text label with the same action and
+  object; do not rely on the `title` attribute alone.
 
 ---
 
