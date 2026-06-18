@@ -282,6 +282,206 @@ button {
   max-width: var(--ax-measure);
 }
 
+/* Phase 190 — component-group proof surface. These selectors style only the
+   deterministic /billing/dev/components group specimens; production page group
+   hardening happens in later Phase 190 plans. */
+.ax-dev-group-stack {
+  display: grid;
+  gap: var(--ax-space-xl);
+  padding-block: var(--ax-space-2xl);
+}
+
+.ax-dev-group-intro,
+.ax-dev-group-body,
+.ax-dev-group-header-copy,
+.ax-dev-group-drawer {
+  display: grid;
+  gap: var(--ax-space-md);
+  min-width: 0;
+}
+
+.ax-dev-group-specimen {
+  display: grid;
+  gap: var(--ax-space-lg);
+  scroll-margin-top: var(--ax-space-3xl);
+}
+
+.ax-dev-group-header,
+.ax-dev-group-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ax-space-lg);
+  min-width: 0;
+}
+
+.ax-dev-group-header {
+  padding-bottom: var(--ax-space-lg);
+  border-bottom: 1px solid var(--ax-border);
+}
+
+.ax-dev-group-header-row {
+  flex-wrap: wrap;
+}
+
+.ax-dev-group-state-list,
+.ax-dev-group-actions,
+.ax-dev-group-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  flex-wrap: wrap;
+}
+
+.ax-dev-group-state-list {
+  justify-content: flex-end;
+  max-width: var(--ax-measure);
+}
+
+.ax-dev-group-state-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: var(--ax-space-xs) var(--ax-space-sm);
+  border: 1px solid var(--ax-accent-border);
+  border-radius: var(--ax-radius-pill);
+  background: var(--ax-interactive-selected);
+  color: var(--ax-primary);
+  font: var(--ax-type-label-font);
+}
+
+.ax-dev-group-toolbar,
+.ax-dev-group-kpi,
+.ax-dev-group-tabs,
+.ax-dev-group-table,
+.ax-dev-group-state-grid {
+  display: grid;
+  gap: var(--ax-space-md);
+  min-width: 0;
+}
+
+.ax-dev-group-toolbar .ax-data-table-filters {
+  display: grid;
+  gap: var(--ax-space-md);
+  align-items: end;
+}
+
+.ax-dev-group-state-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ax-dev-group-state-row {
+  display: grid;
+  gap: var(--ax-space-sm);
+  min-width: 0;
+  padding: var(--ax-space-md);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-elevated);
+}
+
+.ax-dev-group-state-error {
+  border-color: var(--ax-status-danger-border);
+  background: var(--ax-status-danger-bg);
+  color: var(--ax-status-danger-text);
+}
+
+.ax-dev-group-table .ax-data-table-grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ax-dev-group-table .ax-data-table-grid th,
+.ax-dev-group-table .ax-data-table-grid td {
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  border-bottom: 1px solid var(--ax-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ax-dev-group-mobile-card,
+.ax-dev-group-table .ax-data-table-card {
+  display: grid;
+  gap: var(--ax-space-sm);
+}
+
+.ax-dev-group-modal {
+  position: relative;
+  z-index: var(--ax-z-modal);
+  display: grid;
+  gap: var(--ax-space-md);
+  max-width: min(42rem, 100%);
+  padding: var(--ax-space-lg);
+  border: 1px solid var(--ax-border-strong);
+  border-radius: var(--ax-radius-lg);
+  background: var(--ax-elevated);
+  box-shadow: var(--ax-shadow-lg);
+}
+
+.ax-dev-group-modal-header,
+.ax-dev-group-modal-body {
+  display: grid;
+  gap: var(--ax-space-sm);
+}
+
+.ax-dev-group-drawer-specimen {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-lg);
+  background: var(--ax-sunken);
+}
+
+.ax-dev-group-drawer-specimen .ax-detail-drawer-shell {
+  position: relative;
+  inset: auto;
+  z-index: var(--ax-z-drawer);
+}
+
+.ax-dev-group-drawer-specimen .ax-detail-drawer-backdrop {
+  display: none;
+}
+
+.ax-dev-group-drawer-specimen .ax-detail-drawer {
+  position: relative;
+  inset: auto;
+  min-height: auto;
+  padding: var(--ax-space-lg);
+  box-shadow: none;
+}
+
+.ax-dev-group-drawer-specimen .ax-detail-drawer-body {
+  max-height: min(26rem, 70vh);
+}
+
+@media (min-width: 768px) { /* --ax-bp-md ↑ */
+  .ax-dev-group-toolbar .ax-data-table-filters {
+    grid-template-columns: repeat(2, minmax(14rem, 1fr)) auto auto;
+  }
+}
+
+@media (max-width: 767.98px) { /* --ax-bp-md ↓ */
+  .ax-dev-group-header,
+  .ax-dev-group-header-row {
+    display: grid;
+  }
+
+  .ax-dev-group-state-list {
+    justify-content: flex-start;
+  }
+
+  .ax-dev-group-state-grid,
+  .ax-dev-group-toolbar .ax-data-table-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .ax-dev-group-actions,
+  .ax-dev-group-modal-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 /* Resolved-color chip beside a token name — rendered only for color-valued tokens,
    so it always shows a real color rather than an empty (broken-looking) box. */
 .ax-token-swatch {
