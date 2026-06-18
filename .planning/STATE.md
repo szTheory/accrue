@@ -2,13 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
-current_phase: 190
-current_phase_name: navigation-data-display-meta-component-cohesion
-status: executing
-stopped_at: Phase 190 human verification pending
-last_updated: "2026-06-18T19:26:37Z"
-last_activity: 2026-06-18
-last_activity_desc: Phase 190 execution complete; human verification pending
+status: planning
+stopped_at: Phase 191 context gathered
+last_updated: "2026-06-18T20:43:48.285Z"
+last_activity: 2026-06-18 — Phase 190 UAT shifted left to deterministic automation
 progress:
   total_phases: 6
   completed_phases: 4
@@ -25,15 +22,15 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 190 — navigation-data-display-meta-component-cohesion
+**Current focus:** Phase 191 — page-flow-interaction-fixture-microcopy
 
 ## Current Position
 
-Phase: 190 (navigation-data-display-meta-component-cohesion) — EXECUTING
-Plan: 6 of 6
-Status: Execution complete — human verification pending (2 UAT checks in `190-UAT.md`)
+Phase: 191 (page-flow-interaction-fixture-microcopy) — READY FOR PLANNING
+Plan: 0 of TBD
+Status: Phase 190 complete; next gate is Phase 191 planning
 Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
-Last activity: 2026-06-18 — Phase 190 execution complete; human verification pending
+Last activity: 2026-06-18 — Phase 190 UAT shifted left to deterministic automation
 
 ## Post-v1.48 Pause Rule
 
@@ -50,8 +47,8 @@ v1.53 Admin UI Design-System Hardening is open as a quality / interaction-correc
 | 187 | Audit & Baseline | VER-01 | Complete (2026-06-15) |
 | 188 | Foundations hardening | FND-01, FND-02, FND-03, FND-04, FND-05, FND-06 | Complete (2026-06-17, approved) |
 | 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Execution complete — verification pending (e2e + screenshot) |
-| 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Execution complete — human verification pending (2 UAT checks) |
-| 191 | Page & flow interaction pass + fixture stress + microcopy | IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02 | Not started |
+| 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Complete — shift-left UAT automated (0 human steps) |
+| 191 | Page & flow interaction pass + fixture stress + microcopy | IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02 | Ready for planning |
 | 192 | Idempotent verification & sign-off | VER-02, VER-03, VER-04 | Not started |
 
 Coverage: 33/33 v1.53 requirements mapped (each REQ-ID → exactly one phase). Per-phase counts: 187→1 · 188→6 · 189→5 · 190→4 · 191→14 · 192→3 = 33. Authoritative scope source: the approved scoping plan; prior design source `.planning/research/v1.51-admin-ui-depth-design.md`.
@@ -291,14 +288,14 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-18T19:26:37Z
-Stopped at: Phase 190 human verification pending
-Resume file: None
+Last session: 2026-06-18T20:43:48.280Z
+Stopped at: Phase 191 context gathered
+Resume file: .planning/phases/191-page-flow-interaction-pass-fixture-stress-microcopy/191-CONTEXT.md
 
 ## Operator Next Steps
 
 - v1.53 Admin UI Design-System Hardening is **open** with a created roadmap (Phases 187–192, strictly linear).
-- Phase 190 execution and automated verification are complete; next gate is `/gsd:verify-work 190` for the 2 pending UAT checks.
+- Phase 190 execution, automated verification, and shift-left UAT are complete; next gate is Phase 191 planning.
 - Each phase is executed research-backed and verified via the GSD UI workflow (`/gsd-ui-phase` design-contract + `/gsd-ui-review`), with an adversarial multi-lens judge and a maintainer screenshot checkpoint at every phase boundary.
 
 </content>
