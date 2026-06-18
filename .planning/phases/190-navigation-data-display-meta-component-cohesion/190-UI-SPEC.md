@@ -88,11 +88,16 @@ Phase 190 role usage:
 |---------------|--------------------|
 | Page headings, detail object titles | `--ax-type-heading-font` or existing `.ax-heading`/`.ax-summary-title` equivalent |
 | KPI metric values | `--ax-type-metric-font`; numeric text keeps tabular figures |
-| Group section titles | `--ax-type-title-font` for empty states, `--ax-type-md` semibold for compact section headers |
+| Group section titles | Heading role at 28px for primary group and empty-state titles; 16px semibold for compact section headers |
 | Toolbar/filter labels | `--ax-type-label-font` |
-| Filter chips, tab counts, metadata labels | `--ax-type-label-sm-font` or `--ax-type-xs` semibold where already established |
-| IDs, cursor/debug values, specimen slugs | `--ax-type-code-font` or `--ax-type-code-xs-font` |
+| Filter chips, tab counts, metadata labels | Label role at 14px (`--ax-type-sm`) with semibold weight |
+| IDs, cursor/debug values, specimen slugs | Code role at 14px using the mono family; wrap long values intentionally |
 | Empty/error/help copy | `--ax-type-body-sm-font`; use `--ax-measure` for explanatory copy |
+
+New or changed Phase 190 group CSS may use only the four declared sizes above:
+14px, 16px, 28px, and 36px. Compact labels, tab counts, metadata, code values,
+and specimen slugs must not introduce smaller type; group titles and empty-state
+titles must not introduce intermediate title sizes.
 
 Long object names, IDs, URLs, customer emails, failure reasons, and raw payload
 snippets must wrap or truncate intentionally. Use `overflow-wrap: anywhere` for
