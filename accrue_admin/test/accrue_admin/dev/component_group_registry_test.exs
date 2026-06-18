@@ -139,10 +139,15 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
     document = Floki.parse_document!(html)
 
-    assert length(Floki.find(document, "[data-component-group]")) == 8
+    proof_roots = Floki.find(document, "section.ax-dev-group-specimen[data-component-group]")
+    assert length(proof_roots) == length(ComponentRegistry.group_contracts())
 
     for contract <- ComponentRegistry.group_contracts() do
-      nodes = Floki.find(document, ~s([data-component-group="#{contract.slug}"]))
+      nodes =
+        Floki.find(
+          document,
+          ~s([id="#{contract.proof_id}"][data-component-group="#{contract.slug}"])
+        )
 
       assert length(nodes) == 1,
              "expected exactly one mounted group proof root for #{contract.slug}"
@@ -211,7 +216,13 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
 
   defp group_node(html, slug) do
     document = Floki.parse_document!(html)
-    nodes = Floki.find(document, ~s([data-component-group="#{slug}"]))
+    contract = ComponentRegistry.group_contract_by_slug(slug)
+
+    nodes =
+      Floki.find(
+        document,
+        ~s([id="#{contract.proof_id}"][data-component-group="#{slug}"])
+      )
 
     assert length(nodes) == 1,
            "expected exactly one mounted group proof root for #{slug}"
