@@ -127,7 +127,12 @@ defmodule AccrueAdmin.Components.GlobalSearch do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id={@id} class="ax-command-palette-wrapper" data-open={to_string(@is_open)}>
+    <div
+      id={@id}
+      class="ax-command-palette-wrapper"
+      data-open={to_string(@is_open)}
+      data-component-group="toolbar-search-filter-sort"
+    >
       <div 
         class="ax-command-palette-backdrop" 
         phx-click="close" 

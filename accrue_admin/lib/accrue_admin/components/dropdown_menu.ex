@@ -10,18 +10,17 @@ defmodule AccrueAdmin.Components.DropdownMenu do
 
   def dropdown_menu(assigns) do
     ~H"""
-    <details class="ax-dropdown">
+    <details class="ax-dropdown" data-component-group="toolbar-search-filter-sort">
       <summary class="ax-button ax-button-secondary ax-dropdown-trigger">
         <span><%= @label %></span>
         <span aria-hidden="true">▾</span>
       </summary>
 
-      <div class="ax-dropdown-panel" role="menu" aria-label={@label}>
+      <div class="ax-dropdown-panel" aria-label={@label}>
         <a
           :for={item <- @items}
           href={item[:href] || "#"}
           class={["ax-dropdown-item", item[:danger] && "ax-dropdown-item-danger"]}
-          role="menuitem"
         >
           <span class="ax-dropdown-item-label"><%= item[:label] %></span>
           <span :if={item[:description]} class="ax-dropdown-item-description"><%= item[:description] %></span>
