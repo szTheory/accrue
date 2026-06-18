@@ -12,6 +12,56 @@ defmodule AccrueAdmin.Dev.ComponentRegistryTest do
   alias AccrueAdmin.Components.Button
   alias AccrueAdmin.Dev.ComponentRegistry
 
+  @phase187_component_groups [
+    "page-header/actions/breadcrumbs",
+    "toolbar/search/filter/sort",
+    "table/empty/loading/error/pagination",
+    "KPI/chart/table",
+    "detail-header/metadata/actions",
+    "modal-confirm",
+    "drawer/form",
+    "tabs/subviews"
+  ]
+
+  @phase190_group_slugs [
+    "page-header-actions-breadcrumbs",
+    "toolbar-search-filter-sort",
+    "table-empty-loading-error-pagination",
+    "kpi-chart-table",
+    "detail-header-metadata-actions",
+    "modal-confirm",
+    "drawer-form",
+    "tabs-subviews"
+  ]
+
+  test "group contracts enumerate Phase 187 component groups with static UI-SPEC slugs" do
+    contracts = ComponentRegistry.group_contracts()
+
+    assert Enum.map(contracts, & &1.name) == @phase187_component_groups
+    assert Enum.map(contracts, & &1.slug) == @phase190_group_slugs
+    assert ComponentRegistry.component_group_slugs() == @phase190_group_slugs
+
+    for contract <- contracts do
+      assert is_binary(contract.proof_id) and contract.proof_id != ""
+      assert is_list(contract.required_states) and contract.required_states != []
+      assert is_list(contract.primary_components) and contract.primary_components != []
+      assert is_list(contract.locators) and contract.locators != []
+      assert is_list(contract.phase191_handoff_tags) and contract.phase191_handoff_tags != []
+      assert String.match?(contract.slug, ~r/^[a-z0-9-]+$/)
+
+      refute Regex.match?(
+               ~r/(account|acct|customer|cus_|invoice|in_|subscription|sub_|webhook|event|evt_)/i,
+               contract.slug
+             )
+    end
+
+    for slug <- @phase190_group_slugs do
+      assert %{slug: ^slug} = ComponentRegistry.group_contract_by_slug(slug)
+    end
+
+    assert is_nil(ComponentRegistry.group_contract_by_slug("missing-group"))
+  end
+
   # (a) Every registry variant appears in the rendered /dev/components page.
   #
   # Drift vector: if a section fails to render, or a registry entry has a wrong
