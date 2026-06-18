@@ -8,6 +8,7 @@ defmodule AccrueAdmin.DisplayComponentsTest do
   alias Accrue.Money
   alias AccrueAdmin.Components.{Detail, DetailDrawer, FilterChipBar, JsonViewer, KpiCard}
   alias AccrueAdmin.Components.{MoneyFormatter, RelatedResources, Timeline}
+  alias AccrueAdmin.Components.StepUpAuthModal
 
   describe "FilterChipBar" do
     test "renders active server-driven filter chips and clear links" do
@@ -67,6 +68,87 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "Webhook payload content"
       assert html =~ "Footer actions"
       assert html =~ ~s(href="/billing/webhooks")
+    end
+
+    test "defines drawer/form dialog structure with title description body and footer" do
+      html =
+        render_component(fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <DetailDrawer.detail_drawer
+            id="webhook-drawer"
+            open
+            title="Webhook event"
+            subtitle="evt_123 queued for retry"
+            close_href="/billing/webhooks"
+          >
+            Drawer payload content
+            <:footer>
+              <button type="button" class="ax-button ax-button-ghost">Cancel</button>
+              <button type="submit" class="ax-button ax-button-primary">Save webhook</button>
+            </:footer>
+          </DetailDrawer.detail_drawer>
+          """
+        end)
+
+      assert html =~ ~s(data-component-group="drawer-form")
+      assert html =~ ~s(role="dialog")
+      assert html =~ ~s(aria-modal="true")
+      assert html =~ ~s(aria-labelledby="webhook-drawer-title")
+      assert html =~ ~s(aria-describedby="webhook-drawer-description")
+      assert html =~ ~s(id="webhook-drawer-title")
+      assert html =~ ~s(id="webhook-drawer-description")
+      assert html =~ ~s(class="ax-detail-drawer-body")
+      assert html =~ ~s(class="ax-detail-drawer-footer")
+
+      app_css = File.read!(app_css_path())
+      assert app_css =~ ".ax-detail-drawer-shell"
+      assert app_css =~ "z-index: var(--ax-z-drawer)"
+      assert app_css =~ "grid-template-rows: auto minmax(0, 1fr) auto"
+      assert app_css =~ ".ax-detail-drawer-body"
+      assert app_css =~ "overflow: auto"
+    end
+  end
+
+  describe "StepUpAuthModal" do
+    test "defines modal-confirm dialog structure and neutral-before-primary actions" do
+      html =
+        render_component(&StepUpAuthModal.step_up_auth_modal/1, %{
+          pending: true,
+          challenge: %{kind: :password, message: "Re-enter your password to void invoice in_123."},
+          error: nil
+        })
+
+      assert html =~ ~s(data-component-group="modal-confirm")
+      assert html =~ ~s(role="dialog")
+      assert html =~ ~s(aria-modal="true")
+      assert html =~ ~s(aria-labelledby="step-up-title")
+      assert html =~ ~s(aria-describedby="step-up-description")
+      assert html =~ ~s(id="step-up-title")
+      assert html =~ ~s(id="step-up-description")
+      assert html =~ ~s(class="ax-step-up-modal-actions")
+      assert html =~ "Re-enter your password to void invoice in_123."
+      assert String.match?(html, ~r/step_up_dismiss.*type="submit"/s)
+
+      app_css = File.read!(app_css_path())
+      assert app_css =~ ".ax-step-up-modal"
+      assert app_css =~ "z-index: var(--ax-z-modal)"
+      assert app_css =~ "width: min(42rem, calc(100vw - 2rem))"
+    end
+
+    test "keeps Phase 191 dismissal and page-flow behavior out of this phase" do
+      drawer_source = File.read!("lib/accrue_admin/components/detail_drawer.ex")
+      modal_source = File.read!("lib/accrue_admin/components/step_up_auth_modal.ex")
+      app_css = File.read!(app_css_path())
+
+      refute drawer_source =~ "phx-window-keydown"
+      refute drawer_source =~ "phx-click-away"
+      refute modal_source =~ "phx-window-keydown"
+      refute modal_source =~ "phx-click-away"
+      refute app_css =~ "overflow: hidden !important"
+      refute app_css =~ "data-scroll-lock"
+      refute app_css =~ "focus-trap"
     end
   end
 
