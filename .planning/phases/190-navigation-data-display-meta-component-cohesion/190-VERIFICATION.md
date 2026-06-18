@@ -1,40 +1,36 @@
 ---
 phase: 190-navigation-data-display-meta-component-cohesion
-verified: 2026-06-18T17:37:40Z
-status: gaps_found
-score: 2/5 must-haves verified
+verified: 2026-06-18T19:23:19Z
+status: human_needed
+score: "3/5 must-haves verified"
 behavior_unverified: 0
 overrides_applied: 0
-gaps:
-  - truth: "Phase validation records Wave 0 and Nyquist completion from passing automated browser baseline evidence."
-    status: failed
-    reason: "`190-VALIDATION.md` remains `status: pending-baseline-evidence`, and verifier rerun of `admin-baseline.spec.js` timed out without test results."
-    artifacts:
-      - path: ".planning/phases/190-navigation-data-display-meta-component-cohesion/190-VALIDATION.md"
-        issue: "Frontmatter intentionally remains `status: pending-baseline-evidence`; approval is explicitly withheld until baseline evidence exists."
-      - path: "accrue_admin/e2e/admin-baseline.spec.js"
-        issue: "Bounded verifier run printed `Running 2 tests using 1 worker` and exited by timeout with no pass/fail result."
-    missing:
-      - "Make `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1` complete with recorded evidence, or add an accepted verification override/deferral."
+re_verification:
+  previous_status: gaps_found
+  previous_score: "2/5"
+  gaps_closed:
+    - "Phase validation now records Wave 0 and Nyquist completion from passing automated browser baseline evidence."
+  gaps_remaining: []
+  regressions: []
 deferred:
   - truth: "Full overlay focus trap, focus restore, Escape/click-outside, scroll reachability, overlay positioning, LiveView patch focus, fixture expansion, and broad microcopy behavior."
     addressed_in: "Phase 191"
-    evidence: "ROADMAP Phase 191 success criteria own interaction defects, page/flow paths, fixtures, and microcopy; `190-PHASE-191-HANDOFF.md` keys these by AX187 IDs and overlay tags."
+    evidence: "ROADMAP Phase 191 success criteria own IXN/PAGE/CPY/SEED scope; 190-PHASE-191-HANDOFF.md keys the deferred categories by AX187 IDs and overlay tags."
 human_verification:
-  - test: "Open `/billing/dev/components`; inspect the Phase 190 group section at desktop and mobile widths in light and dark using the global theme toggle."
-    expected: "Identity, status, primary action, filters, pagination state, and recovery action are immediately findable for every group specimen."
-    why_human: "Automated tests assert structure and visibility, but final spacing rhythm, hierarchy, and obvious-next-action judgment is visual/operator review."
-  - test: "Review `190-PHASE-191-HANDOFF.md` against the Phase 187 defect ledger and Phase 191 roadmap scope."
-    expected: "Every deferred focus, dismissal, scroll, overlay-position, fixture, and microcopy item is correctly assigned to Phase 191, not silently claimed by Phase 190."
-    why_human: "The artifact is present and keyed, but scope quality and downstream planning usefulness require maintainer judgment."
+  - test: "Open /billing/dev/components and inspect the Phase 190 group section at desktop and mobile widths in light and dark using the global theme toggle."
+    expected: "Identity, status, primary action, filters, pagination state, and recovery action are immediately findable for every group specimen; spacing rhythm and visual hierarchy do not require code-reader context."
+    why_human: "Automated tests assert structure, visibility, responsive modes, and reachability, but final spacing rhythm, hierarchy, and obvious-next-action judgment is visual/operator review."
+  - test: "Review 190-PHASE-191-HANDOFF.md against the Phase 187 defect ledger and current 190-06 proof."
+    expected: "Every deferred focus, dismissal, scroll, overlay-position, fixture, and microcopy item is assigned to Phase 191, and the stale line 13 browser-blocked note is either refreshed or explicitly accepted as superseded by this verification."
+    why_human: "The handoff categories are present and keyed, but downstream planning usefulness and whether to update the stale execution note require maintainer judgment."
 ---
 
 # Phase 190: Navigation, Data-Display & Meta-Component Cohesion Verification Report
 
-**Phase Goal:** Navigation, data-display & meta-component cohesion -- App shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component groups; spacing rhythm, hierarchy, responsive behavior, operator-stress states.
-**Verified:** 2026-06-18T17:37:40Z
-**Status:** gaps_found
-**Re-verification:** No -- initial verification
+**Phase Goal:** Audit the recurring component groups as units: app shell / nav / tabs / pagination, tables / cards / detail / timeline / KPI, and recurring meta-component clusters for spacing rhythm, hierarchy, obvious next action, responsive degradation, and operator-stress states.
+**Verified:** 2026-06-18T19:23:19Z
+**Status:** human_needed
+**Re-verification:** Yes - after gap closure plan 190-06.
 
 ## Goal Achievement
 
@@ -42,65 +38,70 @@ human_verification:
 
 | # | Truth | Status | Evidence |
 |---|---|---|---|
-| 1 | Each recurring component group is audited as a unit for spacing rhythm, hierarchy, and obvious next action. | UNCERTAIN - HUMAN NEEDED | `ComponentRegistry.group_contracts/0` defines all eight Phase 187 groups with hierarchy, states, proof IDs, and handoff tags; `/billing/dev/components` renders one `grp190-*` proof root per contract; tests verify locator, state, active-cue, and live representative coverage. Final spacing rhythm/hierarchy/next-action quality is a declared manual check. |
-| 2 | Tables degrade to readable cards/lists at narrow widths, and list/card patterns are used where they fit better than tables. | VERIFIED | `DataTable` renders desktop `.ax-data-table-shell` and mobile `.ax-data-table-cards`; `AtRiskTable` renders `.ax-at-risk-grid` and `.ax-at-risk-cards`; CSS switches at the md breakpoint; browser suite verifies one active responsive mode and zero focusable inactive mode. |
-| 3 | Nested containers do not read as accidental box prison, and stat/KPI cards are visually consistent. | UNCERTAIN - HUMAN NEEDED | `KpiCard`, `Detail.summary_card`, `Timeline`, and `RelatedResources` tests verify group locators, slot preservation, wrapping hooks, and no decorative nested `ax-card` wrappers for detail/related item rhythm. Final box-prison/KPI consistency judgment is a declared manual check. |
-| 4 | Pagination disappears/de-emphasizes when there is nothing to paginate; filter/sort/active/selected states are unmistakable. | VERIFIED | `DataTable` renders `Load more` only when `@next_cursor` exists, distinguishes true-empty from filtered-empty with `Clear filters`, and exposes selected counts/contextual selection labels; `AtRiskTable` has distinct no/has-pagination states; browser probes verify no-pagination has no load-more focus target and active filter/selection/sort/subview cues are visible. |
-| 5 | Phase validation closes on passing automated browser baseline evidence. | FAILED | `190-VALIDATION.md` is `pending-baseline-evidence`; verifier command `timeout 75s zsh -lc 'cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1'` timed out after starting 2 tests with no result. |
+| 1 | Each recurring component group is audited as a unit for spacing rhythm, hierarchy, and obvious next action. | HUMAN NEEDED | `ComponentRegistry.group_contracts/0` defines all eight frozen Phase 187 groups with states, hierarchy, proof IDs, and Phase 191 tags. `ComponentKitchenLive` renders one `section.ax-dev-group-specimen#grp190-*` per contract. `admin-group-contracts.spec.js` passed 14/14 and verifies group roots, active cues, reachability, and representative live routes. Final visual/operator judgment remains manual. |
+| 2 | Tables degrade to readable cards/lists at narrow widths, and a list/card pattern is used wherever it fits better than a table. | VERIFIED | `DataTable` renders desktop `.ax-data-table-shell` and mobile `.ax-data-table-cards`; `AtRiskTable` renders `.ax-at-risk-grid` and `.ax-at-risk-cards`. CSS switches at the 768px breakpoint. ExUnit and Playwright checks passed. |
+| 3 | Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen. | HUMAN NEEDED | `KpiCard`, `Detail.summary_card`, `Detail.detail_section`, and related display tests verify group locators, consistent KPI structure, unframed detail sections, and wrapping. Final "box prison" and KPI consistency judgment is visual and remains a declared manual check. |
+| 4 | Pagination and similar affordances disappear/de-emphasize when there is nothing to paginate, and filter/sort/active/selected states are unmistakable. | VERIFIED | `DataTable` renders `Load more` only when `@next_cursor` exists, distinguishes filtered-empty with `Clear filters`, and exposes selection labels/counts. `AtRiskTable` has no/has-pagination states. Browser probes verify no-pagination has no load-more focus target and active filter/selection/sort/subview cues are visible. |
+| 5 | Phase validation closes on passing automated browser baseline evidence. | VERIFIED | `190-VALIDATION.md` frontmatter is `status: approved`. Verifier reran `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1`: 8 passed in 1.6m. Generated desktop/mobile evidence parsed cleanly. |
 
-**Score:** 2/5 truths verified (0 present-but-behavior-unverified)
+**Score:** 3/5 truths verified; 2 truths require human visual/operator verification; 0 behavior-unverified state-transition truths.
 
 ### Deferred Items
 
 | # | Item | Addressed In | Evidence |
 |---|---|---|---|
-| 1 | Overlay focus/dismiss/scroll/position behavior, LiveView patch focus, fixture expansion, and broad microcopy. | Phase 191 | ROADMAP Phase 191 owns IXN/PAGE/CPY/SEED criteria; `190-PHASE-191-HANDOFF.md` includes D-30 sections for focus trap, focus restore, Escape, click outside, scroll reachability, overlay position, LiveView patch focus, fixture gaps, and microcopy. |
+| 1 | Overlay focus/dismiss/scroll/position behavior, LiveView patch focus, fixture expansion, broad page-flow microcopy, disconnected/reconnecting coverage, and full page-flow matrix coverage. | Phase 191 | ROADMAP Phase 191 owns IXN-01..05, PAGE-01..04, CPY-01..03, and SEED-01..02. `190-PHASE-191-HANDOFF.md` lists D-30 categories with AX187 IDs and overlay tags. |
+| 2 | Final adversarial scorecard, CI guardrails, and milestone screenshot sign-off. | Phase 192 | ROADMAP Phase 192 owns VER-02..04. These are milestone closeout criteria, not Phase 190 deliverables. |
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 |---|---|---|---|
-| `accrue_admin/lib/accrue_admin/dev/component_registry.ex` | Canonical group contract source | VERIFIED | `group_contracts/0`, `component_group_slugs/0`, and `group_contract_by_slug/1` exist; contracts mirror Phase 187 group names and static slugs. |
-| `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` | Registry-driven group proof surface | VERIFIED | Iterates `ComponentRegistry.group_contracts/0` and renders `section.ax-dev-group-specimen` with `id={proof_id}` and `data-component-group={slug}`. |
-| `accrue_admin/lib/accrue_admin/components/data_table.ex` | Canonical queue data-display behavior | VERIFIED | Root locator, card fields, selected state labels, filtered-empty action, and cursor-gated load-more are implemented. |
-| `accrue_admin/lib/accrue_admin/components/at_risk_table.ex` | Specialized table exemplar | VERIFIED | Mobile cards, loading/error/empty/no-pagination/has-pagination states, group locator, and action context are implemented. |
-| `accrue_admin/e2e/admin-group-contracts.spec.js` | Browser group probe suite | VERIFIED | Reran successfully: 14 passed across desktop and mobile. |
-| `.planning/phases/190-navigation-data-display-meta-component-cohesion/190-PHASE-191-HANDOFF.md` | Phase 191 handoff | VERIFIED | Contains AX187 rows and all required D-30 categories. |
-| `.planning/phases/190-navigation-data-display-meta-component-cohesion/190-VALIDATION.md` | Approved validation closeout | FAILED | Exists, but intentionally remains `status: pending-baseline-evidence`. |
+| `accrue_admin/lib/accrue_admin/dev/component_registry.ex` | Canonical Phase 190 group contracts | VERIFIED | Defines `group_contracts/0`, `component_group_slugs/0`, and `group_contract_by_slug/1`; all eight group names/slugs are present in Phase 187 order with required states and handoff tags. |
+| `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` | Registry-driven group proof surface | VERIFIED | Iterates `ComponentRegistry.group_contracts()` and renders `id={@contract.proof_id}` plus `data-component-group={@contract.slug}` for each proof root. |
+| `accrue_admin/e2e/admin-group-contracts.spec.js` | Browser group probes and representative live checks | VERIFIED | Syntax check passed; verifier rerun passed 14 tests across desktop and mobile projects. |
+| `accrue_admin/e2e/admin-baseline.spec.js` | Route-grouped baseline capture with shared evidence and progress ledger | VERIFIED | Defines and uses `groupSurfacesByRoute`, `captureCanonicalRouteGroup`, `captureTargetedRouteGroup`, `recordBaselineProgress`, and `writeSharedScreenshotEvidence`; no local 240s timeout override remains. |
+| `accrue_admin/test-results/admin-baseline/{project}/cells.json` | Generated desktop/mobile baseline observations | VERIFIED | Actual paths `chromium-desktop/cells.json` and `chromium-mobile/cells.json` both contain 10,528 rows, 1,960 Phase 190 component-group rows, and 616 covered Phase 190 component-group rows with evidence refs. |
+| `accrue_admin/test-results/admin-baseline/{project}/progress.ndjson` | Generated progress ledgers | VERIFIED | Actual desktop/mobile progress files each contain 95 rows, exactly one `suite-complete`, and zero `stage-error` rows. |
+| `.planning/phases/190-navigation-data-display-meta-component-cohesion/190-VALIDATION.md` | Approved validation closeout | VERIFIED | Frontmatter `status: approved`; includes "Phase 190-06 Baseline Closeout Evidence" table tying approval to exact command, parser, PNG guard, and artifact dry-run. |
+| `.planning/phases/190-navigation-data-display-meta-component-cohesion/190-PHASE-191-HANDOFF.md` | Phase 191 handoff | WARNING | Handoff categories and AX187 tags are present, but line 13 still says local Playwright was blocked before tests. That note is stale after this verifier run and should be human-reviewed. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 |---|---|---|---|---|
-| `baseline-manifest.js` | `component_registry.ex` | Phase 187 group names mirrored as contracts | WIRED | Manifest `COMPONENT_GROUPS` names map to registry `name`/`slug` entries without changing cell-id grammar. |
-| `component_registry.ex` | `component_group_registry_test.exs` | Tests consume registry APIs | WIRED | Tests call `ComponentRegistry.group_contracts/0`, `component_group_slugs/0`, and `group_contract_by_slug/1`. |
-| `component_registry.ex` | `component_kitchen_live.ex` | Registry drives kitchen specimens | WIRED | Kitchen loops over `ComponentRegistry.group_contracts()` and calls `render_group_contract/2`. |
-| `component_kitchen_live.ex` | `admin-baseline.spec.js` | Baseline locates component groups by slug | WIRED, execution blocked | `admin-baseline.spec.js` locates `[data-component-group="${id}"]`; command did not complete under timeout. |
-| `data_table.ex` | `app.css` | Desktop/mobile table modes | WIRED | `.ax-data-table-shell` and `.ax-data-table-cards` are paired with md breakpoint CSS and tested. |
-| `at_risk_table.ex` | `at_risk_table_test.exs` | Mobile/state contract tests | WIRED | Tests cover cards, loading/error/empty/no-pagination/has-pagination, and CSS mode switching. |
-| `tabs.ex` / `dropdown_menu.ex` | `navigation_components_test.exs` | Navigation semantics and disclosure semantics | WIRED | Tests assert `aria-current`, no tablist/menu overclaiming, and group locators. |
-| `admin-group-contracts.spec.js` | `190-PHASE-191-HANDOFF.md` | Browser probes and handoff categories | WIRED | Suite checks ledger/handoff tags; handoff cites AX187 IDs and overlay tags. |
+| `component_registry.ex` | `component_kitchen_live.ex` | `ComponentRegistry.group_contracts()` loop | WIRED | Kitchen renders every registry contract into a proof root with matching `grp190-*` ID and `data-component-group`. |
+| `component_kitchen_live.ex` | `admin-group-contracts.spec.js` | Proof-root locators | WIRED | Browser suite asserts all eight roots in light/dark, responsive modes, pagination states, active cues, action reachability, and representative live routes. |
+| `DataTable` / `AtRiskTable` | `app.css` | Desktop/mobile mode classes | WIRED | `.ax-data-table-shell`, `.ax-data-table-cards`, `.ax-at-risk-grid`, and `.ax-at-risk-cards` are paired with breakpoint CSS and tested. |
+| `RecoveryLive` | `AtRiskTable` | `Dunning.at_risk_subscriptions(...)` result assigned to `rows` | WIRED | `RecoveryLive.handle_params/3` queries real Dunning analytics and renders `<AtRiskTable.at_risk_table rows={@at_risk} ... />`. |
+| `baseline-manifest.js` | `admin-baseline.spec.js` | `SURFACES` grouped by resolved route | WIRED | Spec consumes `SURFACES`, `PROJECTS`, and `cellsForSurface`; route grouping preserves manifest cell output while reducing duplicate browser work. |
+| `admin-baseline.spec.js` | generated `cells.json` / `progress.ndjson` | `writeBaselineResults` and `recordBaselineProgress` | WIRED | Verifier-owned run produced both generated outputs for desktop/mobile. |
+| generated baseline evidence | `190-VALIDATION.md` | validation approval evidence table | WIRED | Validation records the exact passing command, generated paths, parser counts, PNG count, and artifact dry-run. |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data Variable | Source | Produces Real Data | Status |
 |---|---|---|---|---|
-| `component_kitchen_live.ex` | `contract` | `ComponentRegistry.group_contracts/0` | Static canonical contract list with eight non-empty entries | FLOWING |
-| `data_table.ex` | `@rows`, `@next_cursor`, `@filter_params` | `socket.assigns.query_module.list(...)` and URL/filter params | Query-module data flows into table/cards/footer render paths | FLOWING |
-| `at_risk_table.ex` | `@rows` | `RecoveryLive` assigns `Dunning.at_risk_subscriptions(...)` result into `<AtRiskTable.at_risk_table rows={@at_risk} ... />` | Recovery data flows into specialized table/card rendering | FLOWING |
-| `admin-group-contracts.spec.js` | representative routes | E2E seed helpers for operator-flows/dashboard/edge-states | Browser suite resolves list/detail/recovery/overlay/shell routes and passed | FLOWING |
-| `190-VALIDATION.md` | baseline evidence status | `admin-baseline.spec.js` command evidence | No completed result in bounded verifier run | BLOCKED |
+| `component_kitchen_live.ex` | `contract` | `ComponentRegistry.group_contracts/0` | Static canonical list with eight non-empty contracts | FLOWING |
+| `admin-group-contracts.spec.js` | group proof roots | `/billing/dev/components` DOM from registry-driven kitchen | Browser tests observed every proof root in both Playwright projects | FLOWING |
+| `admin-baseline.spec.js` | `state.observations` | `SURFACES` plus `cellsForSurface(surface)` and route capture | Verifier run wrote 21,056 total rows and evidence refs for covered cells | FLOWING |
+| `DataTable` | `@rows`, `@next_cursor`, `@filter_params` | caller `query_module.list(...)` and URL/filter params | Query-module rows flow into desktop table, mobile cards, empty state, selection, and footer render paths | FLOWING |
+| `AtRiskTable` | `@rows` | `Accrue.Analytics.Dunning.at_risk_subscriptions/1` via `RecoveryLive` | Ecto query returns campaign rows; `RecoveryLive` assigns them into the table component | FLOWING |
+| `KpiCard` / `Detail` | group locators and content | LiveView assigns / slots | Components expose group locator hooks and consistent card/detail structure for live pages and lab specimens | FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 |---|---|---|---|
-| JS syntax for group suite and command palette hook | `cd accrue_admin && node --check e2e/admin-group-contracts.spec.js && node --check assets/js/hooks/command_palette.js` | exit 0 | PASS |
-| Compile with warnings as errors | `cd accrue_admin && MIX_ENV=test mix compile --warnings-as-errors` | exit 0 | PASS |
-| Targeted Phase 190 ExUnit coverage | `cd accrue_admin && mix test test/accrue_admin/dev/component_group_registry_test.exs test/accrue_admin/components/data_table_test.exs test/accrue_admin/components/at_risk_table_test.exs test/accrue_admin/components/display_components_test.exs test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/global_search_test.exs` | 68 tests, 0 failures | PASS |
-| Package docs guard | `bash scripts/ci/verify_package_docs.sh` | package docs verified | PASS |
-| Phase 190 browser group suite | `cd accrue_admin && npm run e2e -- e2e/admin-group-contracts.spec.js --timeout=60000 --workers=1` | 14 passed | PASS |
-| Baseline evidence closeout | `timeout 75s zsh -lc 'cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1'` | timed out after `Running 2 tests using 1 worker` | FAIL |
+| Baseline spec syntax | `cd accrue_admin && node --check e2e/admin-baseline.spec.js` | exit 0 | PASS |
+| Baseline helper source contracts | `rg -q "groupSurfacesByRoute|captureCanonicalRouteGroup|captureTargetedRouteGroup|recordBaselineProgress|writeSharedScreenshotEvidence" accrue_admin/e2e/admin-baseline.spec.js && ! rg -q "test\\.setTimeout\\(240_000\\)|writeScreenshotCopies|writeTargetedScreenshotCopies|captureCanonicalSurface|captureTargetedSurface" accrue_admin/e2e/admin-baseline.spec.js` | exit 0 | PASS |
+| Group spec syntax | `cd accrue_admin && node --check e2e/admin-group-contracts.spec.js` | exit 0 | PASS |
+| Exact bounded baseline command | `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1` | 8 passed in 1.6m | PASS |
+| Generated evidence parser | `node - <<'NODE' ...` parser over desktop/mobile `cells.json` and `progress.ndjson` | desktop/mobile: 10,528 cells, 616 covered Phase 190 group rows, one `suite-complete`, zero `stage-error` | PASS |
+| PNG duplication guard | `test "$(find accrue_admin/test-results/admin-baseline -name '*.png' | wc -l | tr -d ' ')" -lt 1000` | 98 PNGs | PASS |
+| Baseline artifact generator | `cd accrue_admin && npm run baseline:artifacts -- --dry-run` | exit 0; `cells: 21056`, `evidence: 103`, `command_statuses: 0` | PASS |
+| Browser group suite | `cd accrue_admin && npm run e2e -- e2e/admin-group-contracts.spec.js --timeout=60000 --workers=1` | 14 passed in 21.3s | PASS |
+| Targeted Phase 190 ExUnit coverage | `cd accrue_admin && mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs test/accrue_admin/components/data_table_test.exs test/accrue_admin/components/at_risk_table_test.exs test/accrue_admin/components/display_components_test.exs test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/global_search_test.exs` | 76 tests, 0 failures | PASS |
 
 ### Probe Execution
 
@@ -112,19 +113,20 @@ human_verification:
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |---|---|---|---|---|
-| GRP-01 | Plans 01, 02, 04, 05 | Recurring component groups audited as units for spacing rhythm, hierarchy, and obvious next action | IMPLEMENTED; human visual check pending | Registry contract rows, kitchen proof roots, navigation/meta tests, and browser group suite all pass; validation declares manual operator-stress scan. |
-| GRP-02 | Plans 03, 05 | Tables degrade to readable cards/lists and avoid table use where list/card fits better | VERIFIED | DataTable and AtRiskTable render card/list modes with md breakpoint CSS; ExUnit and browser tests verify responsive mode and inactive focus safety. |
-| GRP-03 | Plans 03, 04, 05 | Avoid box-prison nesting; stat/KPI cards visually consistent | IMPLEMENTED; human visual check pending | KPI/detail/timeline/related-resource component tests assert tokenized rhythm and avoid decorative nested card wrappers; final visual judgment remains manual. |
-| GRP-04 | Plans 03, 04, 05 | Pagination absent/de-emphasized when unnecessary; filter/sort/active/selected states unmistakable | VERIFIED | DataTable/AtRiskTable pagination gates, filtered-empty/clear filters, selection labels/counts, tabs/window current state, dropdown/search active cues, and browser probes pass. |
+| GRP-01 | Plans 190-01, 190-02, 190-04, 190-05, 190-06 | Recurring component groups audited as units for spacing rhythm, hierarchy, and obvious next action | HUMAN NEEDED | Registry, kitchen proof roots, browser probes, representative routes, and generated baseline evidence are verified; final spacing/hierarchy/obvious-action visual review remains manual. |
+| GRP-02 | Plans 190-03, 190-05, 190-06 | Tables degrade to readable cards/lists and avoid table use where list/card fits better | SATISFIED | `DataTable` and `AtRiskTable` desktop/mobile implementations, CSS breakpoint rules, ExUnit tests, and Playwright responsive probes passed. |
+| GRP-03 | Plans 190-03, 190-04, 190-05, 190-06 | Avoid accidental box-prison nesting; stat/KPI cards visually consistent | HUMAN NEEDED | Component structure and tests support the requirement, but "reads as box prison" and cross-screen KPI consistency are visual judgments requiring human inspection. |
+| GRP-04 | Plans 190-03, 190-04, 190-05, 190-06 | Pagination absent/de-emphasized when unnecessary; filter/sort/active/selected states unmistakable | SATISFIED | Pagination gates, filtered-empty action, selection labels/counts, active filters/sort/subview cues, group browser probes, and generated baseline evidence all passed. |
 
-No orphaned Phase 190 requirements were found: `.planning/REQUIREMENTS.md` maps only GRP-01..GRP-04 to Phase 190, and all five plans declare the applicable GRP IDs.
+No orphaned Phase 190 requirements were found. `.planning/REQUIREMENTS.md` maps only GRP-01..GRP-04 to Phase 190, and all four IDs are claimed by phase plans.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
-|---|---|---|---|---|
-| `component_kitchen_live.ex` | 825 | `Group proof specimen not available.` fallback | INFO | Defensive fallback for unknown future group contracts. Current registry slugs all have concrete renderers and tests enforce coverage. |
-| Various component/specimen files | n/a | HTML placeholder attributes and bounded `.catch(() => {})` probe calls | INFO | Not implementation stubs; they are input placeholders or bounded optional browser-probe actions. |
+|---|---:|---|---|---|
+| `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` | 825 | `Group proof specimen not available.` fallback | INFO | Defensive fallback for an unknown future group contract. Current registry slugs all have concrete renderers and tests enforce coverage. |
+| `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` / `component_registry.ex` | n/a | placeholder attributes in form specimens | INFO | These are deliberate form placeholder examples, not implementation stubs or missing data. |
+| `.planning/phases/190-navigation-data-display-meta-component-cohesion/190-PHASE-191-HANDOFF.md` | 13 | stale browser-blocked note | WARNING | Current verifier run passed the group browser suite, so the handoff note is outdated. It does not reopen the baseline gap, but should be reviewed before Phase 191 planning. |
 
 No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in the reviewed Phase 190 files.
 
@@ -133,20 +135,20 @@ No unreferenced `TBD`, `FIXME`, or `XXX` markers were found in the reviewed Phas
 #### 1. Operator-Stress Group Visual Scan
 
 **Test:** Open `/billing/dev/components`; inspect the Phase 190 group section at desktop and mobile widths in light and dark using the global theme toggle.
-**Expected:** Identity, status, primary action, filters, pagination state, and recovery action are immediately findable for every group specimen.
-**Why human:** Automated checks prove structure and visibility, but final spacing rhythm, hierarchy, and obvious-next-action quality need visual/operator review.
+**Expected:** Identity, status, primary action, filters, pagination state, and recovery action are immediately findable for every group specimen; spacing rhythm and hierarchy hold without reading code.
+**Why human:** Automated checks prove structure, responsive modes, visibility, and reachability, but final hierarchy and obvious-next-action quality are visual/operator judgments.
 
-#### 2. Phase 191 Handoff Quality
+#### 2. Phase 191 Handoff Quality and Stale Note Review
 
-**Test:** Review `190-PHASE-191-HANDOFF.md` against the Phase 187 defect ledger and Phase 191 roadmap scope.
-**Expected:** Deferred focus, dismissal, scroll, overlay-position, fixture, and microcopy items are correctly assigned to Phase 191 and not silently claimed by Phase 190.
-**Why human:** The handoff is present and keyed, but scope quality and downstream planning usefulness require maintainer judgment.
+**Test:** Review `190-PHASE-191-HANDOFF.md` against the Phase 187 defect ledger and the Phase 190-06 proof.
+**Expected:** Deferred focus, dismissal, scroll, overlay-position, fixture, and microcopy items are correctly assigned to Phase 191. The stale line 13 browser-blocked note is refreshed or explicitly accepted as superseded by this verification.
+**Why human:** The artifact is present and keyed, but downstream planning quality and whether to edit stale prose require maintainer judgment.
 
 ### Gaps Summary
 
-The Phase 190 implementation is substantively present and wired: the registry, kitchen specimens, reusable components, CSS, unit tests, and Phase 190 group browser suite verify the automatable GRP behavior. GRP-01 and GRP-03 still have declared human visual checks for hierarchy/box-prison judgment. The blocking gap is automated verification closeout: `admin-baseline.spec.js` still does not complete under a bounded run, so `190-VALIDATION.md` correctly remains `pending-baseline-evidence`. Because GSD cannot route a phase as passed while required automated evidence is pending, the report status is `gaps_found`.
+No blocking automated gaps remain. The prior `admin-baseline.spec.js` timeout gap is closed by a verifier-owned rerun of the exact bounded command, generated desktop/mobile evidence parsing, PNG guard, and baseline artifact dry-run. The phase should route to human verification because GRP-01 and GRP-03 include qualitative visual/operator checks that automation cannot fully certify.
 
 ---
 
-_Verified: 2026-06-18T17:37:40Z_
+_Verified: 2026-06-18T19:23:19Z_
 _Verifier: the agent (gsd-verifier)_
