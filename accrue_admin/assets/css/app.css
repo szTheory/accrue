@@ -1158,6 +1158,15 @@ a.ax-kpi-card--linked:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* Display variant: right-aligns the amount so columns of money line up on
+   the decimal (WR-05 — gives the registry's `money/display` variant real
+   styling rather than a phantom class hook). */
+.ax-money-display {
+  display: inline-block;
+  text-align: end;
+  white-space: nowrap;
+}
+
 @media (min-width: 768px) { /* --ax-bp-md ↑ */
   .ax-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3264,6 +3273,14 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
+}
+
+/* Short variant: caps the inline-id at a compact width so short IDs
+   (e.g. cus_ABC123) sit tightly inline and longer values truncate to the
+   same envelope (WR-05 — gives the registry's `inline-id/short` variant
+   real styling rather than a phantom class hook). */
+.ax-inline-id-short {
+  max-inline-size: 12ch;
 }
 
 /* FIX 5 — Tooltip: z-layer via --ax-z-popover; opacity-driven show/hide
