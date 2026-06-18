@@ -207,7 +207,7 @@ Plans:
 
 **Wave 5** *(gap closure; blocked on Wave 4 completion)*
 
-- [ ] 190-06-PLAN.md — Baseline evidence closeout for validation approval
+- [x] 190-06-PLAN.md — Baseline evidence closeout for validation approval
 
 **UI hint**: yes
 
@@ -335,7 +335,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
 | 189. Primitive & form components + component lab | v1.53 | 7/7 | Complete   | 2026-06-18 |
-| 190. Navigation, data-display & meta-component cohesion | v1.53 | 5/5 | Complete   | 2026-06-18 |
+| 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Complete   | 2026-06-18 |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
 | 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
 
