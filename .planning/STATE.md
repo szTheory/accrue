@@ -2,18 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
-current_phase: 190
-current_phase_name: navigation-data-display-meta-component-cohesion
 status: executing
-stopped_at: Completed 190-02-PLAN.md
-last_updated: "2026-06-18T15:43:19.557Z"
+stopped_at: Completed 190-03-PLAN.md
+last_updated: "2026-06-18T16:00:06.382Z"
 last_activity: 2026-06-18
-last_activity_desc: Completed 190-02-PLAN.md
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 24
-  completed_plans: 21
+  completed_plans: 22
   percent: 50
 ---
 
@@ -30,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 190 (navigation-data-display-meta-component-cohesion) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
 Last activity: 2026-06-18
@@ -154,6 +151,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 189-primitive-form-components-component-lab P05 | 8min | 3 tasks | 1 files |
 | Phase 190 P01 | 7 min | 3 tasks | 5 files |
 | Phase 190 P02 | 11m32s | 3 tasks | 5 files |
+| Phase 190 P03 | 10m32s | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -226,6 +224,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 190]: 190-02: Component groups render from ComponentRegistry.group_contracts/0 rather than duplicated kitchen data. — Keeps the proof surface coupled to the authoritative registry from 190-01.
 - [Phase 190]: 190-02: Drawer proof styling is contained in the kitchen specimen while Phase 191 owns full drawer interaction behavior. — Allows visual proof without expanding this plan into flow interaction work.
 - [Phase 190]: 190-02: Mounted coverage uses Floki-scoped group-root assertions so unrelated page text cannot satisfy detail/table proof requirements. — Makes registry proof tests robust against incidental labels elsewhere in the kitchen.
+- [Phase 190]: 190-03: DataTable selection controls derive aria labels from row content for contextual row actions. — Improves accessibility while preserving existing LiveComponent selection behavior.
+- [Phase 190]: 190-03: AtRiskTable accepts optional amount fields and falls back when existing recovery rows omit money data. — Keeps the new component compatible with current call sites without widening query scope in this plan.
+- [Phase 190]: 190-03: Detail sections are unframed while summary headers remain framed. — Avoids card-in-card page rhythm while keeping object identity headers visually grouped.
 
 ### Pending Todos
 
@@ -279,8 +280,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-18T15:43:19.549Z
-Stopped at: Completed 190-02-PLAN.md
+Last session: 2026-06-18T16:00:06.371Z
+Stopped at: Completed 190-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
