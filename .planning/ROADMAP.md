@@ -183,7 +183,7 @@ Cross-cutting constraints:
   3. Nested containers do not read as an accidental "box prison," and stat/KPI cards are visually consistent across every screen.
   4. Pagination and similar affordances disappear or de-emphasize when there is nothing to paginate, and filter/sort/active/selected states are unmistakable.
 
-**Plans:** 5 plans
+**Plans:** 6 plans
 Plans:
 **Wave 0**
 
@@ -204,6 +204,10 @@ Plans:
 **Wave 4** *(blocked on Waves 1-3 completion)*
 
 - [x] 190-05-PLAN.md — Browser probes, representative live checks, and Phase 191 handoff
+
+**Wave 5** *(gap closure; blocked on Wave 4 completion)*
+
+- [ ] 190-06-PLAN.md — Baseline evidence closeout for validation approval
 
 **UI hint**: yes
 
