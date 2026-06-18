@@ -1732,8 +1732,9 @@ a.ax-kpi-card--linked:focus-visible {
   box-sizing: border-box;
 }
 
-/* Focus ring for .ax-input, .ax-select, .ax-checkbox is owned by the
-   consolidated :focus-visible block below (line ~2941). Stale local rule removed. */
+/* Focus ring for .ax-input, .ax-select, .ax-checkbox, and .ax-radio is owned
+   by the consolidated :focus-visible block below (line ~2941, which lists each
+   of these selectors). Stale local rule removed. */
 
 .ax-select {
   appearance: none;
@@ -2973,6 +2974,8 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-select:focus-visible,
 .ax-field-control:focus-visible,
 .ax-select-control:focus-visible,
+.ax-checkbox:focus-visible,
+.ax-radio:focus-visible,
 .ax-search-trigger:focus-visible,
 .ax-attention-row:focus-visible,
 .ax-launcher:focus-visible,
