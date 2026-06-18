@@ -119,7 +119,12 @@ defmodule AccrueAdmin.Components.DataTable do
   @impl true
   def render(assigns) do
     ~H"""
-    <section id={@id} class="ax-data-table" data-role="data-table">
+    <section
+      id={@id}
+      class="ax-data-table"
+      data-role="data-table"
+      data-component-group="table-empty-loading-error-pagination"
+    >
       <header class="ax-data-table-header">
         <form action={@path} method="get" class="ax-data-table-filters" data-role="filter-form">
           <div :for={field <- @filter_fields} class="ax-data-table-filter">
@@ -204,6 +209,7 @@ defmodule AccrueAdmin.Components.DataTable do
                   data-role="toggle-row"
                   data-row-id={row_identity(row, @row_id)}
                   aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
+                  aria-label={selection_label(@selected_ids, row, @row_id, @card_title, @columns)}
                 >
                   <%= if selected?(@selected_ids, row_identity(row, @row_id)), do: "Selected", else: "Select" %>
                 </button>
@@ -231,6 +237,7 @@ defmodule AccrueAdmin.Components.DataTable do
               data-role="toggle-row"
               data-row-id={row_identity(row, @row_id)}
               aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
+              aria-label={selection_label(@selected_ids, row, @row_id, @card_title, @columns)}
             >
               <%= if selected?(@selected_ids, row_identity(row, @row_id)), do: "Selected", else: "Select" %>
             </button>
@@ -354,6 +361,21 @@ defmodule AccrueAdmin.Components.DataTable do
   end
 
   defp selected?(selected_ids, row_id), do: MapSet.member?(selected_ids, to_string(row_id))
+
+  defp selection_label(selected_ids, row, row_id, card_title, columns) do
+    action = if selected?(selected_ids, row_identity(row, row_id)), do: "Selected", else: "Select"
+    "#{action} #{row_accessible_name(row, row_id, card_title, columns)}"
+  end
+
+  defp row_accessible_name(row, row_id, card_title, columns) do
+    case card_title(card_title, row, columns) do
+      value when is_binary(value) -> value
+      value when is_atom(value) -> Atom.to_string(value)
+      value when is_integer(value) -> Integer.to_string(value)
+      value when is_float(value) -> :erlang.float_to_binary(value, [:compact])
+      _value -> row_identity(row, row_id)
+    end
+  end
 
   defp toggle_id(selected_ids, row_id) do
     row_id = to_string(row_id)
