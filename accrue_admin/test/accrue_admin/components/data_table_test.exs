@@ -155,6 +155,7 @@ defmodule AccrueAdmin.DataTableTest do
           %{label: "Summary", render: &"#{&1.label} / #{&1.category}"}
         ]}
         card_title={& &1.label}
+        resource_plural="fixture rows"
         card_fields={[
           %{id: :status, label: "Status"},
           %{id: :category, label: "Category"}
@@ -323,10 +324,13 @@ defmodule AccrueAdmin.DataTableTest do
     assert html =~ "alpha"
     refute html =~ "do-not-render"
     assert html =~ ~s(aria-label="Select Newest open")
+    assert html =~ "Clear filters"
+    assert html =~ ~s(aria-label="Select visible fixture rows")
 
     html = render_click(element(view, "[data-role='toggle-all']"))
     assert html =~ ~s(data-role="selected-count">2 selected<)
     assert html =~ ~s(aria-label="Selected Newest open")
+    assert html =~ ~s(aria-label="Clear visible fixture rows")
 
     html =
       render_click(

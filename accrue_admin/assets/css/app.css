@@ -2418,6 +2418,7 @@ details[open].ax-dropdown .ax-dropdown-panel {
   border-radius: var(--ax-radius-md);
   color: var(--ax-primary);
   cursor: pointer;
+  text-decoration: none;
 }
 
 .ax-command-palette-item:hover {

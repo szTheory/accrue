@@ -41,9 +41,19 @@ defmodule AccrueAdmin.Components.WindowSelector do
   end
 
   defp window_href(base_path, value) do
-    base_path
-    |> URI.parse()
-    |> Map.put(:query, URI.encode_query(%{"window" => value}))
+    uri = URI.parse(base_path)
+
+    query =
+      uri.query
+      |> decode_query()
+      |> Map.put("window", value)
+      |> URI.encode_query()
+
+    uri
+    |> Map.put(:query, query)
     |> URI.to_string()
   end
+
+  defp decode_query(nil), do: %{}
+  defp decode_query(query), do: URI.decode_query(query)
 end

@@ -120,6 +120,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
               value={kpi.recovered_str}
               delta="Amount saved by successful Dunning"
               delta_tone="moss"
+              component_group="kpi-chart-table"
             >
               <:meta>Money Saved</:meta>
             </KpiCard.kpi_card>
@@ -129,6 +130,7 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
               value={kpi.exhausted_str}
               delta="Annualized MRR snapshot at the exhaustion event — e.g., a $120/yr plan contributes $10/mo to Exhausted MRR."
               delta_tone="amber"
+              component_group="kpi-chart-table"
             >
               <:meta>Churned Revenue</:meta>
             </KpiCard.kpi_card>

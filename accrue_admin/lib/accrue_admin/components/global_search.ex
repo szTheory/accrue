@@ -133,109 +133,126 @@ defmodule AccrueAdmin.Components.GlobalSearch do
       data-open={to_string(@is_open)}
       data-component-group="toolbar-search-filter-sort"
     >
-      <div 
-        class="ax-command-palette-backdrop" 
-        phx-click="close" 
-        phx-target={@myself}>
-      </div>
-      
-      <div 
-        class="ax-command-palette" 
-        phx-hook="CommandPalette" 
-        id="command-palette-container"
-        data-target={@myself}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Global search">
-        
-        <form phx-change="search" phx-target={@myself} onsubmit="return false;">
-          <div class="ax-command-palette-input-group">
-            <Icon.icon name={:search} size="md" class="ax-command-palette-search-icon" />
-            <input
-              type="text"
-              name="q"
-              value={@query}
-              placeholder="Search customers, invoices… ⌘K"
-              autocomplete="off"
-              spellcheck="false"
-              autofocus
-              phx-debounce="150"
-              class="ax-command-palette-input"
-              id="global-search-input"
-            />
-            <span id="search-spinner" class={if @loading, do: "ax-spinner", else: "hidden"} aria-hidden="true"></span>
+      <div id={"#{@id}-controller"} phx-hook="CommandPalette" data-target={@myself}>
+        <%= if @is_open do %>
+          <div
+            class="ax-command-palette-backdrop"
+            phx-click="close"
+            phx-target={@myself}
+          >
           </div>
-        </form>
 
-        <div class="ax-command-palette-body">
-          <%= if @query == "" do %>
-            <div class="ax-command-palette-empty">
-              <p class="ax-eyebrow">Jump to</p>
-              <ul class="ax-command-palette-list">
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/customers")}>
-                  <Icon.icon name={:users} size="sm" /> <span>Look up a customer</span>
-                </li>
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/invoices?status=open")}>
-                  <Icon.icon name={:invoices} size="sm" /> <span>Clear the invoice queue</span>
-                </li>
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/analytics/recovery")}>
-                  <Icon.icon name={:recovery} size="sm" /> <span>Recover at-risk revenue</span>
-                </li>
-                <li class="ax-command-palette-item" data-path={path(@mount_path, "/webhooks?status=dead")}>
-                  <Icon.icon name={:webhooks} size="sm" /> <span>Investigate an incident</span>
-                </li>
-              </ul>
-            </div>
-          <% else %>
-            <div class="ax-command-palette-results">
-              <%= if Enum.empty?(@results.customers) and Enum.empty?(@results.invoices) and Enum.empty?(@results.subscriptions) do %>
-                <div class="ax-command-palette-no-results">
-                  <p>No results found for "<%= @query %>"</p>
+          <div
+            class="ax-command-palette"
+            id="command-palette-container"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Global search"
+          >
+            <form phx-change="search" phx-target={@myself} onsubmit="return false;">
+              <div class="ax-command-palette-input-group">
+                <Icon.icon name={:search} size="md" class="ax-command-palette-search-icon" />
+                <input
+                  type="text"
+                  name="q"
+                  value={@query}
+                  placeholder="Search customers, invoices… ⌘K"
+                  autocomplete="off"
+                  spellcheck="false"
+                  autofocus
+                  phx-debounce="150"
+                  class="ax-command-palette-input"
+                  id="global-search-input"
+                />
+                <span id="search-spinner" class={if @loading, do: "ax-spinner", else: "hidden"} aria-hidden="true"></span>
+              </div>
+            </form>
+
+            <div class="ax-command-palette-body">
+              <%= if @query == "" do %>
+                <div class="ax-command-palette-empty">
+                  <p class="ax-eyebrow">Jump to</p>
+                  <ul class="ax-command-palette-list">
+                    <li class="ax-command-palette-list-item">
+                      <a class="ax-command-palette-item" href={path(@mount_path, "/customers")} data-path={path(@mount_path, "/customers")}>
+                        <Icon.icon name={:users} size="sm" /> <span>Look up a customer</span>
+                      </a>
+                    </li>
+                    <li class="ax-command-palette-list-item">
+                      <a class="ax-command-palette-item" href={path(@mount_path, "/invoices?status=open")} data-path={path(@mount_path, "/invoices?status=open")}>
+                        <Icon.icon name={:invoices} size="sm" /> <span>Clear the invoice queue</span>
+                      </a>
+                    </li>
+                    <li class="ax-command-palette-list-item">
+                      <a class="ax-command-palette-item" href={path(@mount_path, "/analytics/recovery")} data-path={path(@mount_path, "/analytics/recovery")}>
+                        <Icon.icon name={:recovery} size="sm" /> <span>Recover at-risk revenue</span>
+                      </a>
+                    </li>
+                    <li class="ax-command-palette-list-item">
+                      <a class="ax-command-palette-item" href={path(@mount_path, "/webhooks?status=dead")} data-path={path(@mount_path, "/webhooks?status=dead")}>
+                        <Icon.icon name={:webhooks} size="sm" /> <span>Investigate an incident</span>
+                      </a>
+                    </li>
+                  </ul>
                 </div>
               <% else %>
-                <%= if not Enum.empty?(@results.customers) do %>
-                  <p class="ax-eyebrow">Customers</p>
-                  <ul class="ax-command-palette-list">
-                    <%= for customer <- @results.customers do %>
-                      <li class="ax-command-palette-item" data-path={path(@mount_path, "/customers/#{customer.id}")}>
-                        <%= customer.name || customer.email %>
-                      </li>
+                <div class="ax-command-palette-results">
+                  <%= if Enum.empty?(@results.customers) and Enum.empty?(@results.invoices) and Enum.empty?(@results.subscriptions) do %>
+                    <div class="ax-command-palette-no-results">
+                      <p>No results found for "<%= @query %>"</p>
+                    </div>
+                  <% else %>
+                    <%= if not Enum.empty?(@results.customers) do %>
+                      <p class="ax-eyebrow">Customers</p>
+                      <ul class="ax-command-palette-list">
+                        <%= for customer <- @results.customers do %>
+                          <li class="ax-command-palette-list-item">
+                            <a class="ax-command-palette-item" href={path(@mount_path, "/customers/#{customer.id}")} data-path={path(@mount_path, "/customers/#{customer.id}")}>
+                              <%= customer.name || customer.email %>
+                            </a>
+                          </li>
+                        <% end %>
+                      </ul>
                     <% end %>
-                  </ul>
-                <% end %>
 
-                <%= if not Enum.empty?(@results.invoices) do %>
-                  <p class="ax-eyebrow">Invoices</p>
-                  <ul class="ax-command-palette-list">
-                    <%= for invoice <- @results.invoices do %>
-                      <li class="ax-command-palette-item" data-path={path(@mount_path, "/invoices/#{invoice.id}")}>
-                        <%= invoice.number %> - <%= invoice.amount_due %>
-                      </li>
+                    <%= if not Enum.empty?(@results.invoices) do %>
+                      <p class="ax-eyebrow">Invoices</p>
+                      <ul class="ax-command-palette-list">
+                        <%= for invoice <- @results.invoices do %>
+                          <li class="ax-command-palette-list-item">
+                            <a class="ax-command-palette-item" href={path(@mount_path, "/invoices/#{invoice.id}")} data-path={path(@mount_path, "/invoices/#{invoice.id}")}>
+                              <%= invoice.number %> - <%= invoice.amount_due %>
+                            </a>
+                          </li>
+                        <% end %>
+                      </ul>
                     <% end %>
-                  </ul>
-                <% end %>
 
-                <%= if not Enum.empty?(@results.subscriptions) do %>
-                  <p class="ax-eyebrow">Subscriptions</p>
-                  <ul class="ax-command-palette-list">
-                    <%= for sub <- @results.subscriptions do %>
-                      <li class="ax-command-palette-item" data-path={path(@mount_path, "/subscriptions/#{sub.id}")}>
-                        <%= sub.id %> - <%= sub.status %>
-                      </li>
+                    <%= if not Enum.empty?(@results.subscriptions) do %>
+                      <p class="ax-eyebrow">Subscriptions</p>
+                      <ul class="ax-command-palette-list">
+                        <%= for sub <- @results.subscriptions do %>
+                          <li class="ax-command-palette-list-item">
+                            <a class="ax-command-palette-item" href={path(@mount_path, "/subscriptions/#{sub.id}")} data-path={path(@mount_path, "/subscriptions/#{sub.id}")}>
+                              <%= sub.id %> - <%= sub.status %>
+                            </a>
+                          </li>
+                        <% end %>
+                      </ul>
                     <% end %>
-                  </ul>
-                <% end %>
+                  <% end %>
+                </div>
               <% end %>
             </div>
-          <% end %>
-        </div>
 
-        <div class="ax-command-palette-footer">
-          <span class="ax-shortcut"><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
-          <span class="ax-shortcut"><kbd>↵</kbd> Select</span>
-          <span class="ax-shortcut"><kbd>esc</kbd> Close</span>
+            <div class="ax-command-palette-footer">
+              <span class="ax-shortcut"><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+              <span class="ax-shortcut"><kbd>↵</kbd> Select</span>
+              <span class="ax-shortcut"><kbd>esc</kbd> Close</span>
+            </div>
+          </div>
+        <% end %>
         </div>
-      </div>
     </div>
     """
   end

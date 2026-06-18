@@ -3,7 +3,7 @@ export const CommandPalette = {
     this.activeIndex = 0;
     // Track previous focus to restore on close (WCAG 2.4.3 Focus Order)
     this.previousFocus = null;
-    this.wasOpen = this.el.parentElement.dataset.open === "true";
+    this.wasOpen = this.isOpen();
     this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
     this.handleInputKeydown = this.handleInputKeydown.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
@@ -21,7 +21,7 @@ export const CommandPalette = {
     this.activeIndex = 0;
     this.setupItems();
 
-    const isOpen = this.el.parentElement.dataset.open === "true";
+    const isOpen = this.isOpen();
 
     if (isOpen && !this.wasOpen) {
       // Palette just opened: save focus before moving it to the input
@@ -55,7 +55,7 @@ export const CommandPalette = {
       this.pushEventTo(this.el.dataset.target, "toggle", {});
     }
     
-    if (e.key === "Escape" && this.el.parentElement.dataset.open === "true") {
+    if (e.key === "Escape" && this.isOpen()) {
       e.preventDefault();
       this.pushEventTo(this.el.dataset.target, "close", {});
     }
@@ -83,8 +83,15 @@ export const CommandPalette = {
   },
 
   setupItems() {
-    this.items = Array.from(this.el.querySelectorAll("li[data-path], li[data-action]"));
+    this.items = Array.from(
+      this.el.querySelectorAll(".ax-command-palette-item[data-path], .ax-command-palette-item[data-action]")
+    );
     this.updateActiveItem();
+  },
+
+  isOpen() {
+    const wrapper = this.el.closest(".ax-command-palette-wrapper");
+    return wrapper && wrapper.dataset.open === "true";
   },
 
   moveActive(step) {

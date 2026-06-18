@@ -127,6 +127,10 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ ~s(aria-describedby="step-up-description")
       assert html =~ ~s(id="step-up-title")
       assert html =~ ~s(id="step-up-description")
+      assert html =~ ~s(<label class="ax-visually-hidden" for="step-up-code">)
+      assert html =~ ~s(id="step-up-code")
+      assert html =~ ~s(aria-invalid="false")
+      assert html =~ ~s(aria-describedby="step-up-description")
       assert html =~ ~s(class="ax-step-up-modal-actions")
       assert html =~ "Re-enter your password to void invoice in_123."
       assert String.match?(html, ~r/step_up_dismiss.*type="submit"/s)
@@ -135,6 +139,22 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert app_css =~ ".ax-step-up-modal"
       assert app_css =~ "z-index: var(--ax-z-modal)"
       assert app_css =~ "width: min(42rem, calc(100vw - 2rem))"
+    end
+
+    test "connects challenge errors to the modal input" do
+      html =
+        render_component(&StepUpAuthModal.step_up_auth_modal/1, %{
+          pending: true,
+          challenge: %{kind: :totp, message: "Enter a current verification code."},
+          error: "The verification code expired."
+        })
+
+      assert html =~ ~s(id="step-up-error")
+      assert html =~ "The verification code expired."
+      assert html =~ ~s(aria-invalid="true")
+      assert html =~ ~s(aria-describedby="step-up-description step-up-error")
+      assert html =~ ~s(<label class="ax-visually-hidden" for="step-up-code">)
+      assert html =~ "Verification code"
     end
 
     test "keeps Phase 191 dismissal and page-flow behavior out of this phase" do

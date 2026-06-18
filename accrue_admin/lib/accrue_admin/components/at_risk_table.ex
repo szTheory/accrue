@@ -165,7 +165,8 @@ defmodule AccrueAdmin.Components.AtRiskTable do
     base_path <> "/analytics/recovery/subscriptions/" <> row.subscription_id
   end
 
-  defp load_more_href(_base_path, _next_cursor, href) when is_binary(href) and href != "", do: href
+  defp load_more_href(_base_path, _next_cursor, href) when is_binary(href) and href != "",
+    do: href
 
   defp load_more_href(base_path, next_cursor, _href) do
     base_path <> "/analytics/recovery?cursor=" <> URI.encode_www_form(next_cursor)
@@ -177,7 +178,9 @@ defmodule AccrueAdmin.Components.AtRiskTable do
   defp step_label(row), do: "Step #{row.current_step}"
 
   defp error_message(message) when is_binary(message), do: message
-  defp error_message(_message), do: "Retry the query; if it persists, inspect logs for the active owner scope."
+
+  defp error_message(_message),
+    do: "Retry the query; if it persists, inspect logs for the active owner scope."
 
   defp format_amount(%{amount_due_minor: amount_minor, currency: currency})
        when is_integer(amount_minor) do

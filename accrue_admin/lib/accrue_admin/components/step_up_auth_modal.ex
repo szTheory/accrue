@@ -37,15 +37,21 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
         </p>
       </header>
 
-      <p :if={@error} class="ax-body" data-role="step-up-error"><%= @error %></p>
+      <p :if={@error} id="step-up-error" class="ax-body" data-role="step-up-error"><%= @error %></p>
 
       <form phx-submit="step_up_submit" class="ax-step-up-modal-form">
+        <label :if={input_name(@challenge) != nil} class="ax-visually-hidden" for="step-up-code">
+          <%= input_placeholder(@challenge) %>
+        </label>
         <input
           :if={input_name(@challenge) != nil}
+          id="step-up-code"
           type={input_type(@challenge)}
           name={input_name(@challenge)}
           value=""
           placeholder={input_placeholder(@challenge)}
+          aria-invalid={if @error, do: "true", else: "false"}
+          aria-describedby={step_up_input_describedby(@error)}
         />
 
         <div class="ax-step-up-modal-actions">
@@ -70,4 +76,8 @@ defmodule AccrueAdmin.Components.StepUpAuthModal do
   defp input_placeholder(%{kind: :password}), do: "Password"
   defp input_placeholder(%{kind: :webauthn}), do: "Assertion payload"
   defp input_placeholder(_), do: "Verification code"
+
+  defp step_up_input_describedby(nil), do: "step-up-description"
+  defp step_up_input_describedby(""), do: "step-up-description"
+  defp step_up_input_describedby(_error), do: "step-up-description step-up-error"
 end

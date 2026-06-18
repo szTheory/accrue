@@ -18,9 +18,7 @@ defmodule AccrueAdmin.Components.Textarea do
   attr(:help_text, :string, default: nil)
   attr(:errors, :list, default: [])
 
-  attr(:rest, :global,
-    include: ~w(disabled placeholder readonly phx-debounce phx-hook required)
-  )
+  attr(:rest, :global, include: ~w(disabled placeholder readonly phx-debounce phx-hook required))
 
   def textarea(assigns) do
     assigns = assign(assigns, :has_errors, assigns.errors != [])

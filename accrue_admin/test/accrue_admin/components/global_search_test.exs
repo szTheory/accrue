@@ -27,6 +27,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
 
       # All four shortcut links should fall back to "#"
       assert html =~ ~s(data-path="#")
+      assert html =~ ~s(href="#")
     end
 
     test "builds correct paths when mount_path is set" do
@@ -41,6 +42,7 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
         })
 
       assert html =~ ~s(data-path="/billing/customers")
+      assert html =~ ~s(href="/billing/customers")
       assert html =~ ~s(data-path="/billing/invoices?status=open")
       assert html =~ ~s(data-path="/billing/analytics/recovery")
       assert html =~ ~s(data-path="/billing/webhooks?status=dead")
@@ -69,6 +71,41 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert css =~ "z-index: var(--ax-z-modal)"
       assert css =~ ".ax-command-palette-item.ax-active"
       assert css =~ "var(--ax-interactive-selected)"
+    end
+
+    test "does not expose modal dialog semantics while closed" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: false,
+          loading: false
+        })
+
+      assert html =~ ~s(data-component-group="toolbar-search-filter-sort")
+      refute html =~ ~s(role="dialog")
+      refute html =~ ~s(aria-modal="true")
+      refute html =~ "Jump to"
+    end
+
+    test "renders command rows as native pointer-activatable links" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: false
+        })
+
+      assert html =~
+               ~s(<a class="ax-command-palette-item" href="/billing/customers" data-path="/billing/customers")
+
+      assert html =~
+               ~s(<a class="ax-command-palette-item" href="/billing/invoices?status=open" data-path="/billing/invoices?status=open")
     end
   end
 end

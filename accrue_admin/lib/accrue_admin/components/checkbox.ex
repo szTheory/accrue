@@ -21,9 +21,7 @@ defmodule AccrueAdmin.Components.Checkbox do
   attr(:disabled, :boolean, default: false)
   attr(:class, :string, default: nil)
 
-  attr(:rest, :global,
-    include: ~w(phx-click phx-value-id value form phx-hook)
-  )
+  attr(:rest, :global, include: ~w(phx-click phx-value-id value form phx-hook))
 
   def checkbox(assigns) do
     ~H"""

@@ -256,7 +256,12 @@ defmodule AccrueAdmin.NavigationComponentsTest do
           active: "events",
           tabs: [
             %{id: "overview", label: "Overview", href: "/billing/customers/cus_123"},
-            %{id: "events", label: "Events", href: "/billing/customers/cus_123/events", count: 12},
+            %{
+              id: "events",
+              label: "Events",
+              href: "/billing/customers/cus_123/events",
+              count: 12
+            },
             %{id: "invoices", label: "Invoices", href: "/billing/customers/cus_123/invoices"}
           ]
         })
@@ -427,6 +432,18 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ ~s(?window=30d)
       assert html =~ ~s(?window=90d)
       assert html =~ "/billing/analytics/recovery?window=7d"
+    end
+
+    test "preserves unrelated query params while replacing window" do
+      html =
+        render_component(&WindowSelector.window_selector/1, %{
+          current_window: "30d",
+          base_path: "/billing/analytics/recovery?owner=platform&window=7d"
+        })
+
+      assert html =~ "/billing/analytics/recovery?owner=platform&amp;window=7d"
+      assert html =~ "/billing/analytics/recovery?owner=platform&amp;window=30d"
+      assert html =~ "/billing/analytics/recovery?owner=platform&amp;window=90d"
     end
   end
 end

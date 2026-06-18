@@ -42,7 +42,7 @@ const representativeRoutes = [
   { category: "shell-nav-tabs", group: "page-header-actions-breadcrumbs", path: "/billing/dev/components" },
   { category: "list-table", group: "table-empty-loading-error-pagination", path: "/billing/invoices" },
   { category: "detail", group: "detail-header-metadata-actions", path: "/billing/invoices/:invoice_id" },
-  { category: "recovery-kpi", group: "table-empty-loading-error-pagination", path: "/billing/analytics/recovery" },
+  { category: "recovery-kpi", group: "kpi-chart-table", path: "/billing/analytics/recovery" },
   { category: "overlay-path", group: "detail-header-metadata-actions", path: "/billing/webhooks/:webhook_id" },
 ];
 
@@ -294,6 +294,7 @@ async function assertRepresentativeRoute(page, route) {
   }
 
   if (route.category === "recovery-kpi") {
+    await expect(groupLocator(page, "kpi-chart-table").first()).toBeVisible();
     await expect(page.locator(".ax-kpi-card").first()).toBeVisible();
     await expect(page.locator(".ax-funnel-chart").first()).toBeVisible();
     await expect(groupLocator(page, "table-empty-loading-error-pagination").first()).toBeVisible();

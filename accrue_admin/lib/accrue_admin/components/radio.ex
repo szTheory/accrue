@@ -16,9 +16,7 @@ defmodule AccrueAdmin.Components.Radio do
   attr(:checked, :boolean, default: false)
   attr(:disabled, :boolean, default: false)
 
-  attr(:rest, :global,
-    include: ~w(phx-click phx-value-id form phx-hook)
-  )
+  attr(:rest, :global, include: ~w(phx-click phx-value-id form phx-hook))
 
   def radio(assigns) do
     ~H"""

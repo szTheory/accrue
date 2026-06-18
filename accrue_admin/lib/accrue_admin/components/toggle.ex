@@ -20,9 +20,7 @@ defmodule AccrueAdmin.Components.Toggle do
   attr(:on, :boolean, default: false)
   attr(:disabled, :boolean, default: false)
 
-  attr(:rest, :global,
-    include: ~w(phx-click phx-value-id form phx-hook)
-  )
+  attr(:rest, :global, include: ~w(phx-click phx-value-id form phx-hook))
 
   def toggle(assigns) do
     ~H"""

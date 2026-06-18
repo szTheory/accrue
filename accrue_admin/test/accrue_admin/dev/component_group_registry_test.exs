@@ -67,7 +67,7 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
     for contract <- ComponentRegistry.group_contracts() do
       assert is_binary(contract.proof_id) and String.starts_with?(contract.proof_id, "grp190-")
       assert Enum.any?(contract.locators, &(&1 == ~s([data-component-group="#{contract.slug}"])))
-      assert Enum.any?(contract.locators, &(&1 == "##{contract.slug}"))
+      assert Enum.any?(contract.locators, &(&1 == "##{contract.proof_id}"))
       assert contract.primary_components != []
       assert contract.required_states != []
       assert contract.behavior_contracts != []

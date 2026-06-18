@@ -33,6 +33,7 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:empty_copy, fn -> Copy.data_table_default_empty_copy() end)
       |> assign_new(:cursor_field, fn -> :inserted_at end)
       |> assign_new(:row_id, fn -> :id end)
+      |> assign_new(:resource_plural, fn -> "rows" end)
       |> assign_new(:selectable, fn -> true end)
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
@@ -135,7 +136,7 @@ defmodule AccrueAdmin.Components.DataTable do
             <input type="hidden" name={key} value={value} />
           </div>
           <button type="submit" class="ax-button ax-button-primary"><%= @filter_submit_label %></button>
-          <a href={@path} class="ax-button ax-button-ghost">Clear</a>
+          <a href={@path} class="ax-button ax-button-ghost"><%= Copy.data_table_clear_filters_label() %></a>
         </form>
       </header>
 
@@ -179,6 +180,7 @@ defmodule AccrueAdmin.Components.DataTable do
           phx-target={@myself}
           class="ax-button ax-button-ghost"
           data-role="toggle-all"
+          aria-label={toggle_all_label(assigns)}
         >
           <%= if all_visible_selected?(assigns), do: "Clear visible", else: "Select visible" %>
         </button>
@@ -358,6 +360,11 @@ defmodule AccrueAdmin.Components.DataTable do
     assigns = extract_assigns(source)
     ids = visible_row_ids(assigns)
     ids != [] and Enum.all?(ids, &MapSet.member?(assigns.selected_ids, &1))
+  end
+
+  defp toggle_all_label(assigns) do
+    action = if all_visible_selected?(assigns), do: "Clear visible", else: "Select visible"
+    "#{action} #{assigns.resource_plural}"
   end
 
   defp selected?(selected_ids, row_id), do: MapSet.member?(selected_ids, to_string(row_id))
