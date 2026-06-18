@@ -137,10 +137,17 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+    document = Floki.parse_document!(html)
+
+    assert length(Floki.find(document, "[data-component-group]")) == 8
 
     for contract <- ComponentRegistry.group_contracts() do
-      assert occurrence_count(html, ~s(data-component-group="#{contract.slug}")) == 1
-      assert html =~ ~s(id="#{contract.proof_id}")
+      nodes = Floki.find(document, ~s([data-component-group="#{contract.slug}"]))
+
+      assert length(nodes) == 1,
+             "expected exactly one mounted group proof root for #{contract.slug}"
+
+      assert Floki.attribute(nodes, "id") == [contract.proof_id]
     end
   end
 
@@ -148,19 +155,25 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+    detail = group_node(html, "detail-header-metadata-actions")
+    detail_html = Floki.raw_html(detail)
 
-    assert html =~ ~s(data-component-group="detail-header-metadata-actions")
-    assert html =~ "Subscription sub_group_visibility_demo"
-    assert html =~ "Status"
-    assert html =~ "Owner scope"
-    assert html =~ "Open invoices"
-    assert html =~ "Review subscription"
+    assert detail_html =~ "Subscription sub_group_visibility_demo"
+    assert detail_html =~ "Status"
+    assert detail_html =~ "Owner scope"
+    assert detail_html =~ "Open invoices"
+    assert detail_html =~ "Review subscription"
+    assert detail_html =~ ~s(<dt class="ax-field-label">Owner scope</dt>)
+    assert detail_html =~ ~s(<dd class="ax-field-value">platform-demo</dd>)
+    assert Floki.find(detail, "a.ax-button, button.ax-button") != []
   end
 
   test "mounted group specimens expose deterministic operator-stress states", %{conn: conn} do
     conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
 
     assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+    table = group_node(html, "table-empty-loading-error-pagination")
+    table_html = Floki.raw_html(table)
 
     for state <- [
           "long-content",
@@ -176,20 +189,33 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
       assert html =~ ~s(data-group-state="#{state}")
     end
 
-    assert html =~ ~s(data-component-group="table-empty-loading-error-pagination")
-    assert html =~ "True empty"
-    assert html =~ "Filtered empty"
-    assert html =~ "Loading billing records"
-    assert html =~ "This data display could not load"
-    assert html =~ "No pagination control is shown"
-    assert html =~ "Load more"
-    assert html =~ "Mobile card degradation"
+    for state <- [
+          "empty",
+          "filtered-empty",
+          "loading",
+          "error",
+          "no-pagination",
+          "has-pagination"
+        ] do
+      assert Floki.find(table, ~s([data-group-state="#{state}"])) != []
+    end
+
+    assert table_html =~ "True empty"
+    assert table_html =~ "Filtered empty"
+    assert table_html =~ "Loading billing records"
+    assert table_html =~ "This data display could not load"
+    assert table_html =~ "No pagination control is shown"
+    assert table_html =~ "Load more"
+    assert table_html =~ "Mobile card degradation"
   end
 
-  defp occurrence_count(haystack, needle) do
-    haystack
-    |> String.split(needle)
-    |> length()
-    |> Kernel.-(1)
+  defp group_node(html, slug) do
+    document = Floki.parse_document!(html)
+    nodes = Floki.find(document, ~s([data-component-group="#{slug}"]))
+
+    assert length(nodes) == 1,
+           "expected exactly one mounted group proof root for #{slug}"
+
+    nodes
   end
 end
