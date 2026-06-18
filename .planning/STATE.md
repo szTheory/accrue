@@ -29,7 +29,7 @@ Phase: 189 (primitive-form-components-component-lab) — EXECUTION + GATES COMPL
 Plan: 7 of 7 complete
 Status: All 7 plans done. POST-EXEC REDESIGN (2026-06-18): component lab switched from two-column light/dark to a SINGLE column following the global topbar theme toggle (D-05/D-07 superseded) — two-column was redundant (a11y sweep already scans both themes via global toggle), carried the D-07 sub-tree bug class, and broke mobile (~195k px). Gates run: code review (resolved — 1 a11y BLOCKER + 7 WARNINGs fixed); verifier (CMP-01..05 verified on automated evidence); e2e (a11y 2/2 GREEN + Phase-189 probe block GREEN after fixes); secure-phase (threats_open: 0, SECURE); ui-review (17/24, committed; 2 copy WARNINGs fixed, mobile BLOCKER was a false positive). CRITICAL gap found+fixed during e2e: Phase 189 edited source app.css but never rebuilt the served Tailwind bundle priv/static/accrue_admin.css (was last built 188-07) — none of the CSS root fixes were live until rebuilt. CRITICAL gap found+fixed during e2e: Phase 189 edited source app.css but never rebuilt the served Tailwind bundle priv/static/accrue_admin.css (was last built 188-07) — none of the CSS root fixes were live until rebuilt. Also fixed live: kitchen a11y (readonly label, scrollbar focusable, n/a-cell contrast), D-07 dark-column text color, overflow probe (input text-scroll exemption). UI-review "mobile dark column invisible" BLOCKER is a FALSE POSITIVE (auditor couldn't load mobile PNGs; grid 1fr stacks both columns vertically — mobile PNG is 1084x195616, both present). Remaining UI-review WARNINGs = dev-lab copy/format polish (heading should be "Component Kitchen"; n/a label format "n/a — {reason}").
 Open follow-up (NOT a 189 acceptance gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
-Last activity: 2026-06-18
+Last activity: 2026-06-18 - Completed quick task 260618-3pu: Component-lab family-label map
 
 ## Post-v1.48 Pause Rule
 
@@ -218,11 +218,17 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 ### Pending Todos
 
 - **[RESOLVED 2026-06-18 via `/gsd-debug`] Phase-187 `Admin live interaction baseline` e2e times out (>300s).** Root cause was NOT DOM-size/per-node iteration (disproven — selectors resolve in 10–80ms): `probeAffordanceAndStates` called unbounded `await locator.hover()` on a disabled `.ax-button` (Phase 189 added disabled specimens to the kitchen); `.ax-button:disabled` has `pointer-events: none` (app.css:1332), so Playwright's hover actionability check never resolves and inherits the 180s test budget — ×2 serial projects → >300s. Fix: bound `hover()`/`focus()` with `{ timeout: 1_000 }` in `accrue_admin/e2e/admin-interactions.spec.js`. Re-verified: 2 passed (25.7s) both projects. Session: `.planning/debug/resolved/phase-187-baseline-timeout.md`.
-- **[Phase 189 follow-up] Component-lab family headers use `String.upcase(family)`** in `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` (renders "BUTTON") instead of the UI-SPEC copywriting labels ("Button", "Toggle switch", "Form field", "Inline code / ID", "Empty state", "JSON viewer", "Money", "Loading"). Needs a family→label map. Small, mechanical. Idiomatic handling: `/gsd-quick`. Surfaced as a WARNING in `189-UI-REVIEW.md`.
+- **[RESOLVED 2026-06-18 via `/gsd-quick` 260618-3pu] Component-lab family headers used `String.upcase(family)`** (rendered "BUTTON"/"FORM-FIELD"). Replaced with a `family_label/1` map in `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` covering all 16 `applicable_states` families with the approved Phase-189 UI-SPEC `####` copywriting labels + a humanizing catch-all for future families. `189-UI-REVIEW.md` WARNING discharged.
 
 ### Blockers/Concerns
 
 - None open.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260618-3pu | Component-lab family-label map (replace `String.upcase(family)` with UI-SPEC labels) | 2026-06-18 | b5cf3527 | [260618-3pu-component-lab-family-label-map](./quick/260618-3pu-component-lab-family-label-map/) |
 
 ### Milestone Intake Rules
 

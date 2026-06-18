@@ -184,7 +184,7 @@ if Mix.env() != :prod do
           <%= for {family, entries} <- registry_families() do %>
             <section :if={@available?} class="ax-card ax-dev-stack" data-ax-family={family}>
               <div class="ax-dev-family-header">
-                <h3 class="ax-type-eyebrow"><%= String.upcase(family) %></h3>
+                <h3 class="ax-type-eyebrow"><%= family_label(family) %></h3>
                 <p class="ax-body-sm ax-muted">
                   <%= length(entries) %> variant(s) ·
                   <%= entries |> hd() |> Map.get(:applicable_states, []) |> length() %> applicable states
@@ -476,6 +476,34 @@ if Mix.env() != :prod do
       ComponentRegistry.entries()
       |> Enum.filter(&Map.has_key?(&1, :applicable_states))
       |> Enum.group_by(& &1.family)
+    end
+
+    # Human-facing display label for a registry family header, sourced from the
+    # approved Phase-189 UI-SPEC `####` component section headings (replaces the
+    # earlier `String.upcase/1`, which rendered raw tokens like "FORM-FIELD").
+    # The catch-all humanizes any future/unmapped family so a newly registered
+    # primitive can never regress to an unstyled token.
+    defp family_label("button"), do: "Button"
+    defp family_label("input"), do: "Input"
+    defp family_label("textarea"), do: "Textarea"
+    defp family_label("checkbox"), do: "Checkbox"
+    defp family_label("radio"), do: "Radio"
+    defp family_label("toggle"), do: "Toggle switch"
+    defp family_label("select"), do: "Select"
+    defp family_label("form-field"), do: "Form field"
+    defp family_label("status"), do: "Status badge"
+    defp family_label("icon"), do: "Icon"
+    defp family_label("money"), do: "Money"
+    defp family_label("json-viewer"), do: "JSON viewer"
+    defp family_label("spinner"), do: "Loading"
+    defp family_label("tooltip"), do: "Tooltip"
+    defp family_label("inline-id"), do: "Inline code / ID"
+    defp family_label("empty-state"), do: "Empty state"
+
+    defp family_label(family) when is_binary(family) do
+      family
+      |> String.split("-")
+      |> Enum.map_join(" ", &String.capitalize/1)
     end
 
     # Renders the appropriate specimen for a given registry entry, state, and theme column.
