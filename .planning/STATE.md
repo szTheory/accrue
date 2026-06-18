@@ -217,7 +217,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ### Pending Todos
 
-- None open.
+- **[Phase 189 follow-up] Phase-187 `Admin live interaction baseline` e2e times out (>300s).** `probeAffordanceAndStates` in `accrue_admin/e2e/admin-interactions.spec.js` navigates to `/billing/dev/components` and iterates the DOM per-node; Phase 189 grew that page ~10×, so it hangs. Fix: scope/skip the kitchen in that baseline observer (or paginate its node iteration). Not a 189 acceptance gate. Idiomatic handling: `/gsd-debug` (scientific-method bug session). Tracked for Phase 192 sign-off.
+- **[Phase 189 follow-up] Component-lab family headers use `String.upcase(family)`** in `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` (renders "BUTTON") instead of the UI-SPEC copywriting labels ("Button", "Toggle switch", "Form field", "Inline code / ID", "Empty state", "JSON viewer", "Money", "Loading"). Needs a family→label map. Small, mechanical. Idiomatic handling: `/gsd-quick`. Surfaced as a WARNING in `189-UI-REVIEW.md`.
 
 ### Blockers/Concerns
 
