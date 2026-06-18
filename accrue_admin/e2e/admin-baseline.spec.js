@@ -286,6 +286,64 @@ async function captureTargetedSurface(page, surface, route, projectName, observa
   }
 }
 
+test.describe("baseline helper contracts", () => {
+  test("groups selected manifest surfaces by resolved route", () => {
+    const surfaces = [
+      { surface: "button", surface_type: "component", routeBuilder: { anchor: "component-button" } },
+      { surface: "drawer/form", surface_type: "component-group", routeBuilder: { group: "drawer-form" } },
+      { surface: "invoice-detail", surface_type: "page-flow", route: "/billing/invoices/:invoice_id", routeBuilder: { fixture: "edge-states", params: ["invoice_id"] } },
+      { surface: "invoices", surface_type: "page-flow", route: "/billing/invoices" },
+    ];
+    const fixtureData = { "edge-states": { invoice_id: "inv_test_123" } };
+
+    expect(groupSurfacesByRoute(surfaces, fixtureData)).toEqual([
+      { route: "/billing/dev/components", surfaces: [surfaces[0], surfaces[1]] },
+      { route: "/billing/invoices/inv_test_123", surfaces: [surfaces[2]] },
+      { route: "/billing/invoices", surfaces: [surfaces[3]] },
+    ]);
+  });
+
+  test("writes shared screenshot evidence and progress rows under generated baseline output", async () => {
+    const projectName = "helper-contract";
+    const projectRoot = path.join(RESULTS_ROOT, projectName);
+    fs.rmSync(projectRoot, { recursive: true, force: true });
+
+    const fakePage = {
+      screenshotCalls: 0,
+      async screenshot() {
+        this.screenshotCalls += 1;
+        return Buffer.from("png");
+      },
+    };
+
+    const evidenceRef = await writeSharedScreenshotEvidence(fakePage, projectName, [
+      "canonical",
+      "/billing/dev/components",
+      "dark",
+    ]);
+    recordBaselineProgress(projectName, {
+      event: "route-start",
+      route: "/billing/dev/components",
+      surface_count: 2,
+      elapsed_ms: 7,
+    });
+
+    expect(fakePage.screenshotCalls).toBe(1);
+    expect(evidenceRef).toMatch(
+      /^accrue_admin\/test-results\/admin-baseline\/helper-contract\/evidence\/canonical-billing-dev-components-dark-[a-f0-9]{12}\.png$/
+    );
+    expect(JSON.parse(fs.readFileSync(path.join(projectRoot, "progress.ndjson"), "utf8"))).toMatchObject({
+      event: "route-start",
+      project: projectName,
+      route: "/billing/dev/components",
+      surface_count: 2,
+      elapsed_ms: 7,
+    });
+
+    fs.rmSync(projectRoot, { recursive: true, force: true });
+  });
+});
+
 test.describe("Admin static baseline", () => {
   test.beforeEach(async ({ request }) => {
     await reset(request);
