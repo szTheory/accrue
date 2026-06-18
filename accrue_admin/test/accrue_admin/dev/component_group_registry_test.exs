@@ -50,7 +50,9 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
     assert Enum.map(contracts, & &1.name) == Enum.map(@phase187_groups, &elem(&1, 0))
     assert ComponentRegistry.component_group_slugs() == Enum.map(@phase187_groups, &elem(&1, 1))
     assert length(ComponentRegistry.component_group_slugs()) == 8
-    assert Enum.uniq(ComponentRegistry.component_group_slugs()) == ComponentRegistry.component_group_slugs()
+
+    assert Enum.uniq(ComponentRegistry.component_group_slugs()) ==
+             ComponentRegistry.component_group_slugs()
 
     for {name, slug} <- @phase187_groups do
       assert %{name: ^name, slug: ^slug} = ComponentRegistry.group_contract_by_slug(slug)

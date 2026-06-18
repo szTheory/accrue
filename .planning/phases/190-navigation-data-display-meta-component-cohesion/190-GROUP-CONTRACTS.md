@@ -19,6 +19,21 @@ Locator contract: each proof specimen and representative probe uses a static `da
 | `drawer/form` | `drawer-form` | `grp190-drawer-form` | long-content, overflow, loading, error, selected-filter-active, mobile-fullscreen, dark-mode | DetailDrawer, Input, Select, Textarea, Button | drawer edit flow | focus-trap, focus-restore, escape, click-outside, scroll-reachability, overlay-position, fixture-gaps, microcopy | D-01, D-02, D-04, D-05, D-06, D-20, D-23, D-24, D-25, D-26, D-30 |
 | `tabs/subviews` | `tabs-subviews` | `grp190-tabs-subviews` | long-content, overflow, selected-filter-active, mobile-scroll, dark-mode | Tabs, WindowSelector, Breadcrumbs | route subnavigation | liveview-patch-focus, microcopy | D-01, D-02, D-04, D-05, D-06, D-17, D-23, D-24, D-28, D-30 |
 
+## Rendered Lab Status
+
+Implemented in Plan `190-02`: `/billing/dev/components` renders one proof root per contract using `id="{Proof ID}"` and `data-component-group="{Slug}"`. Each proof root is registry-driven from `ComponentRegistry.group_contracts/0` and exposes its implemented states through `data-group-state` chips plus concrete specimen markup.
+
+| Slug | Proof ID | Rendered Lab Status | Implemented Specimen States |
+| --- | --- | --- | --- |
+| `page-header-actions-breadcrumbs` | `grp190-page-header-actions-breadcrumbs` | implemented | long-content, overflow, mobile-wrap, dark-mode |
+| `toolbar-search-filter-sort` | `grp190-toolbar-search-filter-sort` | implemented | long-content, overflow, filtered-empty, selected-filter-active, mobile-wrap, dark-mode |
+| `table-empty-loading-error-pagination` | `grp190-table-empty-loading-error-pagination` | implemented | long-content, overflow, empty, filtered-empty, loading, error, no-pagination, has-pagination, selected-filter-active, mobile-card-list-degradation, dark-mode |
+| `kpi-chart-table` | `grp190-kpi-chart-table` | implemented | long-content, overflow, empty, loading, error, no-pagination, has-pagination, mobile-card-list-degradation, dark-mode |
+| `detail-header-metadata-actions` | `grp190-detail-header-metadata-actions` | implemented | long-content, overflow, loading, error, mobile-wrap, dark-mode |
+| `modal-confirm` | `grp190-modal-confirm` | implemented | long-content, overflow, loading, error, mobile-stack, dark-mode |
+| `drawer-form` | `grp190-drawer-form` | implemented | long-content, overflow, loading, error, selected-filter-active, mobile-fullscreen, dark-mode |
+| `tabs-subviews` | `grp190-tabs-subviews` | implemented | long-content, overflow, selected-filter-active, mobile-scroll, dark-mode |
+
 ## Hierarchy Rules
 
 | Group | Required Order |

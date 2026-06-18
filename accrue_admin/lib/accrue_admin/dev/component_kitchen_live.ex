@@ -10,9 +10,12 @@ if Mix.env() != :prod do
       Button,
       Checkbox,
       Detail,
+      DetailDrawer,
       DropdownMenu,
       EmptyState,
+      FilterChipBar,
       FlashGroup,
+      FunnelChart,
       Icon,
       InlineId,
       Input,
@@ -27,7 +30,8 @@ if Mix.env() != :prod do
       Tabs,
       Textarea,
       Toggle,
-      Tooltip
+      Tooltip,
+      WindowSelector
     }
 
     alias AccrueAdmin.Dev.ComponentRegistry
@@ -225,6 +229,23 @@ if Mix.env() != :prod do
               </dl>
             </section>
           <% end %>
+
+          <%!-- Phase 190 — Component-group proof specimens.
+               Contract-driven roots close Phase 187 component-group visibility gaps and
+               expose stable data-component-group locators for deterministic lab probes. --%>
+          <section :if={@available?} class="ax-dev-group-stack" aria-labelledby="component-groups-title">
+            <div class="ax-dev-group-intro">
+              <p class="ax-label">Component groups</p>
+              <h3 id="component-groups-title" class="ax-heading">Component Groups</h3>
+              <p class="ax-body ax-dev-caption">
+                Canonical Phase 190 proof specimens. Each root is driven by <code class="ax-type-code-xs">ComponentRegistry.group_contracts/0</code> and follows the global topbar theme toggle.
+              </p>
+            </div>
+
+            <%= for contract <- ComponentRegistry.group_contracts() do %>
+              <%= render_group_contract(contract, @admin_mount_path) %>
+            <% end %>
+          </section>
 
           <%!-- Card and legacy variant reference — base KPI card + delta tones.
                These entries have no applicable_states (not Phase-189 primitives) so they
@@ -469,6 +490,361 @@ if Mix.env() != :prod do
       """
     end
 
+    defp render_group_contract(contract, admin_mount_path) do
+      assigns = %{contract: contract, admin_mount_path: admin_mount_path, __changed__: %{}}
+
+      ~H"""
+      <section id={@contract.proof_id} class="ax-card ax-dev-group-specimen" data-component-group={@contract.slug}>
+        <header class="ax-dev-group-header">
+          <div>
+            <p class="ax-type-code-xs ax-muted"><%= @contract.name %></p>
+            <h4 class="ax-heading"><%= group_title(@contract.slug) %></h4>
+            <p class="ax-body ax-dev-caption"><%= @contract.representative_route_category %></p>
+          </div>
+          <div class="ax-dev-group-state-list" aria-label={"States proven for #{group_title(@contract.slug)}"}>
+            <span :for={state <- @contract.required_states} class="ax-dev-group-state-chip" data-group-state={state}>
+              <%= state_label(state) %>
+            </span>
+          </div>
+        </header>
+
+        <%= render_group_body(@contract, @admin_mount_path) %>
+      </section>
+      """
+    end
+
+    defp render_group_body(%{slug: "page-header-actions-breadcrumbs"}, admin_mount_path) do
+      assigns = %{admin_mount_path: admin_mount_path, __changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body ax-dev-group-page-header">
+        <header class="ax-page-header ax-dev-group-page-header-specimen">
+          <Breadcrumbs.breadcrumbs
+            items={[
+              %{label: "Dashboard", href: @admin_mount_path},
+              %{label: "Subscriptions", href: @admin_mount_path <> "/subscriptions"},
+              %{label: "Quarter close review"}
+            ]}
+          />
+          <div class="ax-dev-group-header-row">
+            <div class="ax-dev-group-header-copy">
+              <p class="ax-eyebrow">Quarter close</p>
+              <h4 class="ax-heading">Review subscriptions with unusually long dunning and payment recovery context</h4>
+              <p class="ax-body ax-dev-caption">
+                Breadcrumbs orient the operator before the task heading; primary and secondary actions stay adjacent to the identity band.
+              </p>
+            </div>
+            <div class="ax-dev-group-actions">
+              <Button.button variant="primary" type="button">Export review</Button.button>
+              <Button.button variant="secondary" type="button">Open runbook</Button.button>
+            </div>
+          </div>
+        </header>
+      </div>
+      """
+    end
+
+    defp render_group_body(%{slug: "toolbar-search-filter-sort"}, admin_mount_path) do
+      assigns = %{admin_mount_path: admin_mount_path, __changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body ax-dev-group-toolbar">
+        <form class="ax-data-table-filters" action={@admin_mount_path <> "/invoices"} method="get">
+          <div class="ax-data-table-filter">
+            <label class="ax-label" for="grp190-toolbar-search">Search</label>
+            <input id="grp190-toolbar-search" class="ax-field-control" name="q" value="enterprise annual renewal with long customer name" />
+          </div>
+          <div class="ax-data-table-filter">
+            <label class="ax-label" for="grp190-toolbar-status">Status</label>
+            <select id="grp190-toolbar-status" class="ax-field-control ax-select-control" name="status">
+              <option>Open</option>
+              <option>Past due</option>
+            </select>
+          </div>
+          <Button.button variant="primary" type="submit">Apply filters</Button.button>
+          <a class="ax-button ax-button-ghost" href={@admin_mount_path <> "/invoices"}>Clear filters</a>
+        </form>
+
+        <FilterChipBar.filter_chip_bar
+          label="Invoice queue"
+          items={[
+            %{id: :status, label: "Status", value: "Open", remove_href: @admin_mount_path <> "/invoices"},
+            %{id: :sort, label: "Sort", value: "Oldest first", remove_href: @admin_mount_path <> "/invoices?status=open"}
+          ]}
+        />
+
+        <DropdownMenu.dropdown_menu
+          label="Sort"
+          items={[
+            %{label: "Newest first", href: @admin_mount_path <> "/invoices?sort=newest", description: "Show recent invoice activity first"},
+            %{label: "Largest balance", href: @admin_mount_path <> "/invoices?sort=balance", description: "Prioritize invoice recovery by amount"}
+          ]}
+        />
+
+        <div class="ax-card ax-empty ax-dev-group-state-row" data-group-state="filtered-empty">
+          <p class="ax-empty-title">Filtered empty</p>
+          <p class="ax-body ax-empty-copy">No invoices match the active status and sort constraints.</p>
+          <a class="ax-button ax-button-secondary" href={@admin_mount_path <> "/invoices"}>Clear filters</a>
+        </div>
+      </div>
+      """
+    end
+
+    defp render_group_body(%{slug: "table-empty-loading-error-pagination"}, _admin_mount_path) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body ax-dev-group-table">
+        <div class="ax-data-table-shell" data-group-state="long-content">
+          <table class="ax-data-table-grid">
+            <caption class="ax-label">Invoice queue proof table</caption>
+            <thead>
+              <tr>
+                <th>Invoice</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="ax-data-table-row-selected" aria-selected="true" data-group-state="selected-filter-active">
+                <td>Invoice for enterprise annual renewal with very long purchase-order context</td>
+                <td>Northstar Operations and Billing Systems Group</td>
+                <td><StatusBadge.status_badge status={:past_due} /></td>
+                <td>$24,000.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ax-data-table-cards" data-group-state="mobile-card-list-degradation">
+          <article class="ax-card ax-data-table-card">
+            <p class="ax-label">Mobile card degradation</p>
+            <h5 class="ax-heading">Northstar Operations</h5>
+            <dl class="ax-field-list">
+              <div class="ax-field">
+                <dt class="ax-field-label">Status</dt>
+                <dd class="ax-field-value">Past due</dd>
+              </div>
+              <div class="ax-field">
+                <dt class="ax-field-label">Balance</dt>
+                <dd class="ax-field-value">$24,000.00</dd>
+              </div>
+            </dl>
+          </article>
+        </div>
+
+        <div class="ax-dev-group-state-grid">
+          <div class="ax-card ax-empty ax-dev-group-state-row" data-group-state="empty">
+            <p class="ax-empty-title">True empty</p>
+            <p class="ax-body ax-empty-copy">Billing records appear here when they match this view.</p>
+          </div>
+          <div class="ax-card ax-empty ax-dev-group-state-row" data-group-state="filtered-empty">
+            <p class="ax-empty-title">Filtered empty</p>
+            <p class="ax-body ax-empty-copy">No rows match the active filters. Clear filters is the next useful action.</p>
+            <button class="ax-button ax-button-secondary" type="button">Clear filters</button>
+          </div>
+          <div class="ax-card ax-dev-group-state-row" data-group-state="loading">
+            <Spinner.spinner size="sm" label="Loading billing records" />
+          </div>
+          <div class="ax-card ax-dev-group-state-row ax-dev-group-state-error" data-group-state="error">
+            <p class="ax-label">Error</p>
+            <p class="ax-body">This data display could not load. Retry the query; if it persists, inspect logs for the active owner scope.</p>
+            <button class="ax-button ax-button-secondary" type="button">Retry</button>
+          </div>
+          <div class="ax-card ax-dev-group-state-row" data-group-state="no-pagination">
+            <p class="ax-label">No pagination</p>
+            <p class="ax-body">No pagination control is shown when there is no <code class="ax-type-code-xs">next_cursor</code> or equivalent more-data signal.</p>
+          </div>
+          <div class="ax-card ax-dev-group-state-row" data-group-state="has-pagination">
+            <p class="ax-label">Has pagination</p>
+            <button class="ax-button ax-button-secondary" type="button">Load more</button>
+          </div>
+        </div>
+      </div>
+      """
+    end
+
+    defp render_group_body(%{slug: "kpi-chart-table"}, admin_mount_path) do
+      assigns = %{admin_mount_path: admin_mount_path, __changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body ax-dev-group-kpi">
+        <div class="ax-kpi-grid ax-kpi-grid-4">
+          <KpiCard.kpi_card label="Recovered MRR" value="$12,450" delta="+12.5%" delta_tone="moss">
+            <:meta>Money recovered this window</:meta>
+          </KpiCard.kpi_card>
+          <KpiCard.kpi_card label="At risk" value="$3,100" delta="5 campaigns" delta_tone="amber">
+            <:meta>Needs operator review</:meta>
+          </KpiCard.kpi_card>
+        </div>
+
+        <FunnelChart.funnel_chart entered={24} recovered={17} exhausted={4} active={3} />
+
+        <div class="ax-card ax-dev-group-state-row" data-group-state="empty">
+          <p class="ax-label">At-risk table empty state</p>
+          <p class="ax-body">No active dunning campaigns are in this window.</p>
+        </div>
+
+        <table class="ax-data-table-grid">
+          <caption class="ax-label">At-risk subscriptions</caption>
+          <tbody>
+            <tr>
+              <td><a class="ax-link" href={@admin_mount_path <> "/subscriptions"}>Annual enterprise renewal</a></td>
+              <td><StatusBadge.status_badge status={:retrying} /></td>
+              <td>Retry scheduled</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      """
+    end
+
+    defp render_group_body(%{slug: "detail-header-metadata-actions"}, admin_mount_path) do
+      assigns = %{admin_mount_path: admin_mount_path, __changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body ax-dev-group-detail">
+        <Detail.summary_card eyebrow="Subscription" title="Subscription sub_group_visibility_demo">
+          <:status><StatusBadge.status_badge status={:active} label="Status active" /></:status>
+          <:facts>
+            <span><strong>Status</strong> active</span>
+            <span><strong>Owner scope</strong> platform-demo</span>
+            <span><strong>Open invoices</strong> 2</span>
+          </:facts>
+          <:actions>
+            <Button.button variant="primary" href={@admin_mount_path <> "/subscriptions"}>Review subscription</Button.button>
+            <Button.button variant="secondary" type="button">Copy link</Button.button>
+          </:actions>
+        </Detail.summary_card>
+
+        <Detail.detail_section title="Metadata">
+          <Detail.detail_field_list fields={[
+            %{label: "Owner scope", value: "platform-demo"},
+            %{label: "External reference", value: "group-proof-reference-with-long-wrapping-value"},
+            %{label: "Open invoices", value: "2"}
+          ]} />
+        </Detail.detail_section>
+      </div>
+      """
+    end
+
+    defp render_group_body(%{slug: "modal-confirm"}, _admin_mount_path) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body">
+        <div
+          class="ax-dev-group-modal"
+          role="dialog"
+          aria-labelledby="grp190-modal-title"
+          aria-describedby="grp190-modal-desc"
+          data-group-state="mobile-stack"
+        >
+          <header class="ax-dev-group-modal-header">
+            <p class="ax-eyebrow">Confirm action</p>
+            <h5 id="grp190-modal-title" class="ax-heading">Cancel renewal schedule</h5>
+            <p id="grp190-modal-desc" class="ax-body">Cancel renewal schedule will execute against the subscription projection. Continue?</p>
+          </header>
+          <div class="ax-dev-group-modal-body">
+            <p class="ax-body">This action changes billing recovery evidence and cannot be presented as a color-only warning.</p>
+          </div>
+          <footer class="ax-dev-group-modal-footer">
+            <Button.button variant="ghost" type="button">Cancel</Button.button>
+            <Button.button variant="danger" type="button">Cancel renewal</Button.button>
+          </footer>
+        </div>
+      </div>
+      """
+    end
+
+    defp render_group_body(%{slug: "drawer-form"}, _admin_mount_path) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body ax-dev-group-drawer-specimen">
+        <DetailDrawer.detail_drawer id="grp190-drawer-form-shell" open title="Edit billing contact" subtitle="Drawer/form proof specimen" close_label="Close drawer">
+          <:actions>
+            <Button.button variant="secondary" type="button">Preview</Button.button>
+          </:actions>
+
+          <div class="ax-dev-group-drawer">
+            <Input.input id="grp190-drawer-email" name="billing_email" label="Billing email" value="operations@example.test" />
+            <Select.select
+              id="grp190-drawer-cadence"
+              name="cadence"
+              label="Review cadence"
+              value="monthly"
+              options={[{"Monthly", "monthly"}, {"Quarterly", "quarterly"}]}
+            />
+            <Textarea.textarea
+              id="grp190-drawer-notes"
+              name="notes"
+              label="Operator notes"
+              value="Long drawer content wraps without hiding the footer actions or stranding validation copy."
+            />
+            <Input.input id="grp190-drawer-error" name="owner_scope" label="Owner scope" value="" errors={["Owner scope is required before saving."]} />
+          </div>
+
+          <:footer>
+            <Button.button variant="ghost" type="button">Cancel</Button.button>
+            <Button.button variant="primary" type="button">Save contact</Button.button>
+          </:footer>
+        </DetailDrawer.detail_drawer>
+      </div>
+      """
+    end
+
+    defp render_group_body(%{slug: "tabs-subviews"}, admin_mount_path) do
+      assigns = %{admin_mount_path: admin_mount_path, __changed__: %{}}
+
+      ~H"""
+      <div class="ax-dev-group-body ax-dev-group-tabs">
+        <Tabs.tabs
+          active="events"
+          tabs={[
+            %{id: "overview", label: "Overview", href: @admin_mount_path <> "/customers"},
+            %{id: "events", label: "Webhook delivery attempts with long label", href: @admin_mount_path <> "/events", count: 12},
+            %{id: "invoices", label: "Invoices", href: @admin_mount_path <> "/invoices", count: 3}
+          ]}
+        />
+
+        <WindowSelector.window_selector current_window="30d" base_path={@admin_mount_path <> "/analytics/recovery"} />
+
+        <p class="ax-body ax-dev-caption">
+          Active tabs use link navigation with <code class="ax-type-code-xs">aria-current="page"</code>, visible count pills, and horizontally reachable long labels.
+        </p>
+      </div>
+      """
+    end
+
+    defp render_group_body(_contract, _admin_mount_path) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <p class="ax-body ax-muted">Group proof specimen not available.</p>
+      """
+    end
+
+    defp group_title("page-header-actions-breadcrumbs"), do: "Page header + actions + breadcrumbs"
+    defp group_title("toolbar-search-filter-sort"), do: "Toolbar + search + filters + sort"
+
+    defp group_title("table-empty-loading-error-pagination"),
+      do: "Table + empty/loading/error/pagination"
+
+    defp group_title("kpi-chart-table"), do: "KPI + chart + table"
+    defp group_title("detail-header-metadata-actions"), do: "Detail header + metadata + actions"
+    defp group_title("modal-confirm"), do: "Modal confirm"
+    defp group_title("drawer-form"), do: "Drawer + form"
+    defp group_title("tabs-subviews"), do: "Tabs + subviews"
+    defp group_title(slug), do: state_label(slug)
+
+    defp state_label(state) do
+      state
+      |> String.replace("-", " ")
+      |> String.capitalize()
+    end
+
     # Returns all Phase-189 primitive families (those with applicable_states) grouped by family name.
     # Card and foundation entries (without applicable_states) are excluded — they are rendered
     # in their own hand-authored sections above and below the registry-driven matrix.
@@ -557,7 +933,13 @@ if Mix.env() != :prod do
     defp do_render_specimen("button", state, %{props: props, content: content}, _theme)
          when state in ["hover", "focus", "active", "pressed"] do
       variant = Map.get(props, :variant, "primary")
-      assigns = %{variant: variant, content: content || "Action", force: force_token(state), __changed__: %{}}
+
+      assigns = %{
+        variant: variant,
+        content: content || "Action",
+        force: force_token(state),
+        __changed__: %{}
+      }
 
       ~H"""
       <Button.button variant={@variant} type="button" data-ax-force={@force}><%= @content %></Button.button>
