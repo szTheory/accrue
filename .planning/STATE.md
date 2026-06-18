@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-stopped_at: Completed 190-03-PLAN.md
-last_updated: "2026-06-18T16:00:06.382Z"
+stopped_at: Completed 190-04-PLAN.md
+last_updated: "2026-06-18T16:14:03.146Z"
 last_activity: 2026-06-18
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
   percent: 50
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 190 (navigation-data-display-meta-component-cohesion) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
 Last activity: 2026-06-18
@@ -152,6 +152,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 190 P01 | 7 min | 3 tasks | 5 files |
 | Phase 190 P02 | 11m32s | 3 tasks | 5 files |
 | Phase 190 P03 | 10m32s | 3 tasks | 10 files |
+| Phase 190 P04 | 6m28s | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -227,6 +228,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 190]: 190-03: DataTable selection controls derive aria labels from row content for contextual row actions. — Improves accessibility while preserving existing LiveComponent selection behavior.
 - [Phase 190]: 190-03: AtRiskTable accepts optional amount fields and falls back when existing recovery rows omit money data. — Keeps the new component compatible with current call sites without widening query scope in this plan.
 - [Phase 190]: 190-03: Detail sections are unframed while summary headers remain framed. — Avoids card-in-card page rhythm while keeping object identity headers visually grouped.
+- [Phase 190-04]: Breadcrumbs remain breadcrumb-only; page-header/actions/breadcrumbs is a composed page-header proof surface. — The Breadcrumbs component owns orientation and current crumb semantics, not the full page-header/action band.
+- [Phase 190-04]: DropdownMenu uses native disclosure semantics and does not claim menu/menuitem roles until true menu-button keyboard behavior is implemented. — The component is built on details/summary and Phase 191 owns true menu keyboard behavior if needed.
+- [Phase 190-04]: Drawer/modal group contracts define structure, IDs, action order, sizing, scrollable bodies, and layer tokens while Phase 191 owns full trap/restore/dismissal behavior. — This keeps Phase 190 bounded to reusable group structure and tokenized layers.
 
 ### Pending Todos
 
@@ -280,8 +284,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-18T16:00:06.371Z
-Stopped at: Completed 190-03-PLAN.md
+Last session: 2026-06-18T16:12:47.484Z
+Stopped at: Completed 190-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
