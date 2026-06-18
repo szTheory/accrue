@@ -316,7 +316,7 @@ if Mix.env() != :prod do
               <p class="ax-body ax-dev-caption">Control states — disabled (blocked, dimmed), readonly (locked value, copyable), and a normal editable input for contrast.</p>
               <div class="ax-dev-grid">
                 <button class="ax-button ax-button-secondary ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="disabled-control" type="button" disabled>Disabled</button>
-                <input class="ax-input ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="readonly-control" readonly value="Readonly" />
+                <input class="ax-input ax-foundation ax-foundation-disabled-readonly" data-ax-foundation-specimen="readonly-control" readonly value="Readonly" aria-label="Readonly input" />
                 <input class="ax-input ax-foundation" data-ax-foundation-specimen="editable-control" type="text" value="Editable" aria-label="Editable input" />
               </div>
             </div>
@@ -332,7 +332,7 @@ if Mix.env() != :prod do
 
             <div class="ax-dev-stack">
               <p class="ax-body ax-dev-caption">Scrollbar — scroll inside the box to reveal the themed thumb and track.</p>
-              <div class="ax-card ax-foundation ax-foundation-scrollbar" data-ax-foundation-specimen="scrollbar" style="max-height: 5rem; overflow: auto;">
+              <div class="ax-card ax-foundation ax-foundation-scrollbar" data-ax-foundation-specimen="scrollbar" style="max-height: 5rem; overflow: auto;" tabindex="0" role="region" aria-label="Scrollbar token specimen">
                 <p class="ax-body">Tokens: --ax-scrollbar-thumb, --ax-scrollbar-track, --ax-scrollbar-thumb-hover.</p>
                 <p class="ax-body">Overflow line 1 — keep scrolling to see the thumb travel.</p>
                 <p class="ax-body">Overflow line 2 — keep scrolling.</p>

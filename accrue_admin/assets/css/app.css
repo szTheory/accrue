@@ -244,6 +244,11 @@ button {
   flex-direction: column;
   gap: 1px;
   background: var(--ax-border);
+  /* D-07: re-declare text color so it re-resolves against THIS column's
+     data-theme token scope. `color` is otherwise computed once on
+     html.accrue-admin and inherited as a fixed value, leaving dark-column
+     text at the light-theme color (axe color-contrast on the lab). */
+  color: var(--ax-primary);
 }
 
 .ax-dev-state-grid-col-header {
@@ -261,8 +266,10 @@ button {
 }
 
 .ax-dev-state-cell-na {
+  /* Distinguished by the sunken background, not by opacity — a cell-wide
+     opacity blends the muted label toward the background and drops its
+     contrast below WCAG AA (axe color-contrast on the lab itself, CMP-01). */
   background: var(--ax-sunken);
-  opacity: 0.6;
 }
 
 @media (max-width: 599.98px) { /* --ax-bp-sm ↓ */
