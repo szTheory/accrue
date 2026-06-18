@@ -279,16 +279,54 @@ defmodule AccrueAdmin.DataTableTest do
     assert {:ok, {~U[2026-04-15 17:00:04Z], "row-4"}} = Cursor.decode(pagination_call[:cursor])
   end
 
-  test "renders card mode markup and supports visible-row bulk selection", %{conn: conn} do
+  test "exposes Phase 190 data-display group contract and cursor-gated pagination", %{
+    conn: conn
+  } do
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
+
+    assert html =~ ~s(data-component-group="table-empty-loading-error-pagination")
+    assert html =~ ~s(data-role="load-more")
+
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
+
+    assert html =~ ~s(data-role="row-count">2 rows loaded<)
+    refute html =~ ~s(data-role="load-more")
+  end
+
+  test "distinguishes true-empty from filtered-empty recovery actions", %{conn: conn} do
+    FixtureStore.put_rows([])
+
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{}})
+
+    assert html =~ "Nothing in this list yet"
+    refute html =~ ~s(data-role="clear-filters")
+
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
+
+    assert html =~ "Nothing in this list yet"
+    assert html =~ ~s(data-role="clear-filters")
+    assert html =~ "Clear filters"
+  end
+
+  test "renders card mode fields and contextual selection controls", %{conn: conn} do
     {:ok, view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
 
     assert html =~ ~s(data-role="card-list")
+    assert html =~ ~s(class="ax-card ax-data-table-shell")
+    assert html =~ ~s(class="ax-data-table-cards")
     assert html =~ "Category"
     assert html =~ "alpha"
+    refute html =~ "do-not-render"
+    assert html =~ ~s(aria-label="Select Newest open")
 
     html = render_click(element(view, "[data-role='toggle-all']"))
     assert html =~ ~s(data-role="selected-count">2 selected<)
+    assert html =~ ~s(aria-label="Selected Newest open")
 
     html =
       render_click(
