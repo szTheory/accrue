@@ -96,6 +96,13 @@ forks.
   harmless) to avoid frozen-foundation churn and the FND-05 verifier coupling.
   "tested ⇔ shown" still holds for the state list; theme coverage moves to the
   global-toggle a11y/visual sweeps.
+- **Force-displayed pseudo-states (2026-06-18):** the lab now renders the pure-CSS
+  pseudo-states (`hover`, `focus`, `active`, `pressed`) visibly at rest via a
+  `data-ax-force` attribute whose companion selectors are appended to the real
+  `:hover`/`:active`/`:focus-visible` rules in `app.css` (forced == real,
+  faithful by construction; inert in production). `loading` now shows a spinner
+  (`.ax-button-spinner`) so it is distinct from `disabled`. Guarded by the
+  `forcedStateProbe` e2e (forced bg/outline must differ from default).
 - **D-08 (coupling gotcha):** Adding the `states`/`specimens` registry fields
   requires lockstep updates to `component_registry_test.exs`, or the existing
   drift/negative tests break. This mirrors the established verifier ↔

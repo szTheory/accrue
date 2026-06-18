@@ -489,6 +489,11 @@ if Mix.env() != :prod do
       do_render_specimen(entry.family, state, specimen, "lab")
     end
 
+    # Map a state name to its data-ax-force token. "pressed" has no distinct
+    # visual in the design system, so it reuses the active treatment.
+    defp force_token("pressed"), do: "active"
+    defp force_token(state), do: state
+
     # Pick the best specimen for the given state: prefer one whose label mentions the state,
     # fall back to the first specimen.
     defp pick_specimen(specimens, state) do
@@ -506,6 +511,28 @@ if Mix.env() != :prod do
 
       ~H"""
       <Button.button variant={@variant} type="button" disabled={true}><%= @content %></Button.button>
+      """
+    end
+
+    defp do_render_specimen("button", "loading", %{props: props, content: content}, _theme) do
+      variant = Map.get(props, :variant, "primary")
+      assigns = %{variant: variant, content: content || "Saving…", __changed__: %{}}
+
+      ~H"""
+      <Button.button variant={@variant} type="button" loading={true}><%= @content %></Button.button>
+      """
+    end
+
+    # hover / focus / active / pressed are pure-CSS pseudo-states — force them to
+    # render visibly via data-ax-force (companion selectors in app.css). pressed
+    # maps to the active visual (no separate pressed style exists).
+    defp do_render_specimen("button", state, %{props: props, content: content}, _theme)
+         when state in ["hover", "focus", "active", "pressed"] do
+      variant = Map.get(props, :variant, "primary")
+      assigns = %{variant: variant, content: content || "Action", force: force_token(state), __changed__: %{}}
+
+      ~H"""
+      <Button.button variant={@variant} type="button" data-ax-force={@force}><%= @content %></Button.button>
       """
     end
 
@@ -556,6 +583,20 @@ if Mix.env() != :prod do
         name={"#{@id}n"}
         label="Customer ID"
         value="cus_1234567890abcdefghijklmnopqrstuvwxyz"
+      />
+      """
+    end
+
+    defp do_render_specimen("input", "focus", _specimen, theme) do
+      assigns = %{id: "#{theme}-inp-focus", __changed__: %{}}
+
+      ~H"""
+      <Input.input
+        id={@id}
+        name={"#{@id}n"}
+        label="Email"
+        placeholder="name@example.com"
+        data-ax-force="focus"
       />
       """
     end
@@ -615,6 +656,20 @@ if Mix.env() != :prod do
       """
     end
 
+    defp do_render_specimen("textarea", "focus", _specimen, theme) do
+      assigns = %{id: "#{theme}-ta-focus", __changed__: %{}}
+
+      ~H"""
+      <Textarea.textarea
+        id={@id}
+        name={"#{@id}n"}
+        label="Notes"
+        placeholder="Add notes here…"
+        data-ax-force="focus"
+      />
+      """
+    end
+
     defp do_render_specimen("textarea", state, _specimen, theme) do
       assigns = %{id: "#{theme}-ta-#{state}", __changed__: %{}}
 
@@ -651,6 +706,19 @@ if Mix.env() != :prod do
         name={"#{@id}n"}
         label="Accept terms and conditions"
         disabled={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("checkbox", "focus", _specimen, theme) do
+      assigns = %{id: "#{theme}-cb-focus", __changed__: %{}}
+
+      ~H"""
+      <Checkbox.checkbox
+        id={@id}
+        name={"#{@id}n"}
+        label="Accept terms and conditions"
+        data-ax-force="focus"
       />
       """
     end
@@ -696,6 +764,20 @@ if Mix.env() != :prod do
       """
     end
 
+    defp do_render_specimen("radio", "focus", _specimen, theme) do
+      assigns = %{id: "#{theme}-rb-focus", __changed__: %{}}
+
+      ~H"""
+      <Radio.radio
+        id={@id}
+        name={"#{@id}n"}
+        label="Starter plan"
+        value="starter"
+        data-ax-force="focus"
+      />
+      """
+    end
+
     defp do_render_specimen("radio", state, _specimen, theme) do
       assigns = %{id: "#{theme}-rb-#{state}", __changed__: %{}}
 
@@ -732,6 +814,19 @@ if Mix.env() != :prod do
         name={"#{@id}n"}
         label="Email notifications"
         disabled={true}
+      />
+      """
+    end
+
+    defp do_render_specimen("toggle", "focus", _specimen, theme) do
+      assigns = %{id: "#{theme}-tg-focus", __changed__: %{}}
+
+      ~H"""
+      <Toggle.toggle
+        id={@id}
+        name={"#{@id}n"}
+        label="Email notifications"
+        data-ax-force="focus"
       />
       """
     end
@@ -775,6 +870,21 @@ if Mix.env() != :prod do
         value="us"
         disabled
         options={[{"United States", "us"}]}
+      />
+      """
+    end
+
+    defp do_render_specimen("select", "focus", _specimen, theme) do
+      assigns = %{id: "#{theme}-sel-focus", __changed__: %{}}
+
+      ~H"""
+      <Select.select
+        id={@id}
+        name={"#{@id}n"}
+        label="Country"
+        prompt="Select a country"
+        options={[{"United States", "us"}, {"United Kingdom", "gb"}, {"Canada", "ca"}]}
+        data-ax-force="focus"
       />
       """
     end

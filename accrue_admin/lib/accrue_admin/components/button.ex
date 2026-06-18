@@ -34,6 +34,7 @@ defmodule AccrueAdmin.Components.Button do
       tabindex="-1"
       {@rest}
     >
+      <span :if={@loading} class="ax-button-spinner" aria-hidden="true"></span>
       <%= render_slot(@inner_block) %>
     </a>
     <button
@@ -44,6 +45,7 @@ defmodule AccrueAdmin.Components.Button do
       aria-busy={if @loading, do: "true"}
       {@rest}
     >
+      <span :if={@loading} class="ax-button-spinner" aria-hidden="true"></span>
       <%= render_slot(@inner_block) %>
     </button>
     """

@@ -1134,6 +1134,37 @@ test.describe("Phase 189: component-kitchen probes", () => {
     // actual CSS resolution evidence is captured in the NDJSON ledger for
     // Phase 192 sign-off scoring.
   });
+
+  // Regression guard for "hover/focus/active/pressed all look like a normal
+  // button": forced pseudo-states (data-ax-force) must render visibly distinct
+  // from default. Same-variant comparison — the first cell of each state row is
+  // the first registry entry (renderer loops entries, then states).
+  test("forced states: hover/active/pressed/focus render visibly distinct from default", async ({ page }) => {
+    const m = await page.evaluate(() => {
+      const bg = (sel) => {
+        const el = document.querySelector(sel);
+        return el ? window.getComputedStyle(el).backgroundColor : null;
+      };
+      const focusEl = document.querySelector('.ax-dev-state-cell[data-ax-state="focus"] .ax-button');
+      const fs = focusEl ? window.getComputedStyle(focusEl) : null;
+      return {
+        def: bg('.ax-dev-state-cell[data-ax-state="default"] .ax-button'),
+        hover: bg('.ax-dev-state-cell[data-ax-state="hover"] .ax-button'),
+        active: bg('.ax-dev-state-cell[data-ax-state="active"] .ax-button'),
+        pressed: bg('.ax-dev-state-cell[data-ax-state="pressed"] .ax-button'),
+        focusRing: fs ? { width: fs.outlineWidth, style: fs.outlineStyle } : null,
+      };
+    });
+
+    expect(m.def, "default button background not found").toBeTruthy();
+    expect(m.hover, `forced hover bg should differ from default (${m.def})`).not.toBe(m.def);
+    expect(m.active, `forced active bg should differ from default (${m.def})`).not.toBe(m.def);
+    expect(m.pressed, `forced pressed bg should differ from default (${m.def})`).not.toBe(m.def);
+    expect(
+      Boolean(m.focusRing && m.focusRing.style !== "none" && m.focusRing.width !== "0px"),
+      `forced focus should show an outline ring, got ${JSON.stringify(m.focusRing)}`
+    ).toBe(true);
+  });
 });
 
 test.describe("Admin live interaction baseline", () => {

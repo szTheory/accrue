@@ -1340,11 +1340,13 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: transparent;
 }
 
-.ax-button.ax-button-primary:hover {
+.ax-button.ax-button-primary:hover,
+.ax-button.ax-button-primary[data-ax-force~="hover"] {
   background: color-mix(in srgb, var(--ax-accent-strong) 90%, black);
 }
 
-.ax-button.ax-button-primary:active {
+.ax-button.ax-button-primary:active,
+.ax-button.ax-button-primary[data-ax-force~="active"] {
   background: color-mix(in srgb, var(--ax-accent-strong) 84%, black);
 }
 
@@ -1373,11 +1375,13 @@ a.ax-kpi-card--linked:focus-visible {
   border-color: transparent;
 }
 
-.ax-button.ax-button-danger:hover {
+.ax-button.ax-button-danger:hover,
+.ax-button.ax-button-danger[data-ax-force~="hover"] {
   background: color-mix(in srgb, var(--ax-status-danger-solid) 90%, black);
 }
 
-.ax-button.ax-button-danger:active {
+.ax-button.ax-button-danger:active,
+.ax-button.ax-button-danger[data-ax-force~="active"] {
   background: color-mix(in srgb, var(--ax-status-danger-solid) 82%, black);
 }
 
@@ -2217,6 +2221,12 @@ details[open].ax-dropdown .ax-dropdown-panel {
 @keyframes ax-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .ax-spinner { animation-duration: 0ms; border-top-color: var(--ax-accent-strong); opacity: 0.7; } }
 
+/* In-button loading spinner — currentColor so it matches any variant's text.
+   The loading button keeps its disabled non-interactivity (prevents double
+   submit) but the spinner makes "loading" visually distinct from "disabled". */
+.ax-button-spinner { display: inline-block; inline-size: 1em; block-size: 1em; flex: none; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: ax-spin var(--ax-dur-3) linear infinite; }
+@media (prefers-reduced-motion: reduce) { .ax-button-spinner { animation-duration: 0ms; } }
+
 .ax-data-table-shell .ax-link {
   color: var(--ax-accent-readable);
 }
@@ -2980,7 +2990,8 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-search-trigger:focus-visible,
 .ax-attention-row:focus-visible,
 .ax-launcher:focus-visible,
-.ax-related-item:focus-visible {
+.ax-related-item:focus-visible,
+[data-ax-force~="focus"] {
   border-color: var(--ax-focus-ring);
   outline: 2px solid var(--ax-focus-ring);
   outline-offset: 2px;
@@ -3022,6 +3033,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 }
 
 .ax-button:hover,
+.ax-button[data-ax-force~="hover"],
 .ax-dropdown-item:hover,
 .ax-sidebar-link:hover,
 .ax-theme-button:hover,
@@ -3035,6 +3047,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 }
 
 .ax-button:active,
+.ax-button[data-ax-force~="active"],
 .ax-dropdown-item:active,
 .ax-tab-more-item:active,
 .ax-search-trigger:active,
