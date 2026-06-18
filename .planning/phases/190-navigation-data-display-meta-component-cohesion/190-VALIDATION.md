@@ -1,7 +1,7 @@
 ---
 phase: 190
 slug: navigation-data-display-meta-component-cohesion
-status: pending-baseline-evidence
+status: approved
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-06-18
@@ -45,7 +45,7 @@ created: 2026-06-18
 | 190-03-03 | 190-03 | 2 | GRP-03 | T-190-13 | KPI/detail/timeline groups keep hierarchy and tokenized spacing without nested card traps. | unit + e2e | `cd accrue_admin && mix test test/accrue_admin/components/display_components_test.exs && npm run e2e:a11y` | Partial | pending |
 | 190-04-02 | 190-04 | 3 | GRP-01, GRP-04 | T-190-15 / T-190-16 | DropdownMenu disclosure semantics, navigation current state, search active state, and flash/toast layer behavior are verified with same-task TDD. | unit + interaction e2e | `cd accrue_admin && mix test test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/global_search_test.exs && npm run e2e -- e2e/admin-interactions.spec.js` | Partial | pending |
 | 190-05-01 | 190-05 | 4 | GRP-01, GRP-02, GRP-03, GRP-04 | T-190-19 / T-190-20 / T-190-23 | Browser probes assert group locators, responsive active DOM, pagination states, active state labels, and off-screen action reachability. | e2e | `cd accrue_admin && node --check e2e/admin-group-contracts.spec.js && npm run e2e -- e2e/admin-group-contracts.spec.js` | Yes | green |
-| 190-05-02 | 190-05 | 4 | GRP-01, GRP-04 | T-190-19 / T-190-20 / T-190-23 | Representative live probes sample list/table, detail, recovery/KPI, overlay, and shell/nav/tabs routes without claiming Phase 191 behavior. | e2e | `cd accrue_admin && npm run e2e:a11y && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js && npm run e2e:visuals:png-only` | Yes | partial - baseline bounded-hung |
+| 190-05-02 | 190-05 | 4 | GRP-01, GRP-04 | T-190-19 / T-190-20 / T-190-23 | Representative live probes sample list/table, detail, recovery/KPI, overlay, and shell/nav/tabs routes without claiming Phase 191 behavior. | e2e | `cd accrue_admin && npm run e2e:a11y && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js && npm run e2e:visuals:png-only` | Yes | green |
 | 190-05-03 | 190-05 | 4 | GRP-01, GRP-04 | T-190-21 / T-190-22 | Phase 191 receives AX187- and overlay-tag keyed handoff while validation status stays tied to actual automated evidence. | source + docs | `node -e "...handoff token check..."` | Yes | green |
 
 *Status: pending, green, red, flaky.*
@@ -96,4 +96,29 @@ Date: 2026-06-18.
 | `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1` | blocked | Standalone bounded retry printed `Running 2 tests using 1 worker` and produced no test result before manual interrupt; Playwright reported `2 did not run`. |
 | `cd accrue_admin && npm run e2e:a11y && npm run e2e -- e2e/admin-group-contracts.spec.js && npm run e2e -- e2e/admin-baseline.spec.js && npm run e2e -- e2e/admin-interactions.spec.js && npm run e2e:visuals:png-only` | partial | Axe and group contracts passed, then the chain hung during `admin-baseline.spec.js`; interrupted to keep the command bounded. |
 
-**Approval:** pending baseline evidence. `status: approved` is intentionally not set until `admin-baseline.spec.js` completes with automated evidence.
+**Approval:** approved from Phase 190-06 baseline closeout evidence. `status: approved` was set only after the exact bounded baseline command, generated evidence parser, progress parser, PNG-count guard, and artifact dry-run passed.
+
+## Phase 190-06 Baseline Closeout Evidence
+
+Date: 2026-06-18.
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Stale generated baseline output removed | pass | Removed `accrue_admin/test-results/admin-baseline` before the final proof run. |
+| Exact bounded baseline command | pass | `cd accrue_admin && npm run e2e -- e2e/admin-baseline.spec.js --timeout=60000 --workers=1`; 6 passed in 1.6m, including `chromium-desktop` static baseline in 39.8s and `chromium-mobile` static baseline in 58.0s. |
+| Desktop cells evidence | pass | `accrue_admin/test-results/admin-baseline/chromium-desktop/cells.json`; 10,528 rows, non-empty JSON array, 616 covered Phase 190 component-group rows with generated evidence refs. |
+| Mobile cells evidence | pass | `accrue_admin/test-results/admin-baseline/chromium-mobile/cells.json`; 10,528 rows, non-empty JSON array, 616 covered Phase 190 component-group rows with generated evidence refs. |
+| Desktop progress evidence | pass | `accrue_admin/test-results/admin-baseline/chromium-desktop/progress.ndjson`; 95 rows, one `suite-complete`, zero `stage-error`. |
+| Mobile progress evidence | pass | `accrue_admin/test-results/admin-baseline/chromium-mobile/progress.ndjson`; 95 rows, one `suite-complete`, zero `stage-error`. |
+| Coverage row parser | pass | Parser rejected empty cells, invalid `coverage_status`, covered rows without refs, and gap/n/a rows without reasons; output: `baseline evidence ok`. |
+| PNG duplication guard | pass | 98 generated PNGs under `accrue_admin/test-results/admin-baseline`, below the 1000-file guard. |
+| Artifact generator dry-run | pass | `cd accrue_admin && npm run baseline:artifacts -- --dry-run`; exit 0 with `cells: 21056`, `defects: 625`, `evidence: 103`, `command_statuses: 0`, `harness_failures: 1`. The remaining harness-failure count is the existing artifact-generator command-status input notice, not a baseline progress `stage-error`. |
+
+### Prior Failed Closeout Attempts
+
+| Attempt | Result | Progress Evidence |
+|---------|--------|-------------------|
+| Initial exact bounded baseline command after route grouping | failed | Mobile timed out on `/billing/dev/components` during targeted breakpoint capture; `accrue_admin/test-results/admin-baseline/chromium-mobile/progress.ndjson` recorded `stage-error` before the generated directory was removed for the final proof run. |
+| Exact bounded baseline command after viewport-only targeted screenshots | failed | Mobile reached `targeted-1440` for `/billing/dev/components` but still exceeded 60 seconds; progress recorded `stage-error` before the generated directory was removed for the final proof run. |
+
+The failed attempts did not approve validation. They drove the Phase 190-06 harness fix that limits targeted breakpoint fan-out to Phase 190 component-group rows while preserving canonical capture for all selected manifest surfaces.

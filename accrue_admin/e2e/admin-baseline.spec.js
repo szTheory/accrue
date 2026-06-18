@@ -16,8 +16,6 @@ const RESULTS_ROOT = "test-results/admin-baseline";
 const THEMES = ["light", "dark"];
 const COVERED_STATES = new Set(["default-populated", "overflow", "long-content"]);
 const TARGETED_BREAKPOINTS = [320, 375, 768, 1024, 1440];
-const TARGETED_RISK_PATTERN =
-  /table|card|long|overflow|drawer|form|page-header|actions|breadcrumbs|toolbar|search|filter|sort/i;
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -177,7 +175,7 @@ function evidenceFileStem(keyParts) {
   return `${safeParts.slice(0, 120)}-${digest}`;
 }
 
-async function writeSharedScreenshotEvidence(page, projectName, keyParts) {
+async function writeSharedScreenshotEvidence(page, projectName, keyParts, options = {}) {
   const relativePath = path.join(
     RESULTS_ROOT,
     projectName,
@@ -185,7 +183,7 @@ async function writeSharedScreenshotEvidence(page, projectName, keyParts) {
     `${evidenceFileStem(keyParts)}.png`
   );
   fs.mkdirSync(path.dirname(relativePath), { recursive: true });
-  fs.writeFileSync(relativePath, await page.screenshot({ fullPage: true }));
+  fs.writeFileSync(relativePath, await page.screenshot({ fullPage: options.fullPage ?? true }));
   return evidenceRef(relativePath);
 }
 
@@ -205,14 +203,17 @@ function recordBaselineProgress(projectName, row) {
   );
 }
 
-function cacheKey(projectName, keyParts) {
-  return JSON.stringify([projectName, ...keyParts]);
+function cacheKey(projectName, keyParts, options = {}) {
+  return JSON.stringify([projectName, options.fullPage ?? true, ...keyParts]);
 }
 
-async function cachedScreenshotEvidence(page, projectName, evidenceState, keyParts) {
-  const key = cacheKey(projectName, keyParts);
+async function cachedScreenshotEvidence(page, projectName, evidenceState, keyParts, options = {}) {
+  const key = cacheKey(projectName, keyParts, options);
   if (!evidenceState.screenshots.has(key)) {
-    evidenceState.screenshots.set(key, await writeSharedScreenshotEvidence(page, projectName, keyParts));
+    evidenceState.screenshots.set(
+      key,
+      await writeSharedScreenshotEvidence(page, projectName, keyParts, options)
+    );
   }
   return evidenceState.screenshots.get(key);
 }
@@ -226,14 +227,7 @@ async function cachedAxeViolations(page, projectName, evidenceState, keyParts) {
 }
 
 function targetedRisk(surface) {
-  const manifestRiskMetadata = [
-    surface.surface_type,
-    surface.surface,
-    surface.persona_job,
-    surface.seed,
-  ].join(" ");
-
-  return surface.surface_type === "component-group" || TARGETED_RISK_PATTERN.test(manifestRiskMetadata);
+  return surface.surface_type === "component-group" && surface.owner_phase === "190";
 }
 
 async function captureCanonicalRouteGroup(page, routeGroup, projectName, observations, evidenceState) {
@@ -359,7 +353,7 @@ async function captureTargetedRouteGroup(page, routeGroup, projectName, observat
         const hasCoveredCells = entries.some((entry) => entry.visible);
         const keyParts = ["targeted", routeGroup.route, targetedLabel, breakpoint];
         const sharedEvidenceRef = hasCoveredCells
-          ? await cachedScreenshotEvidence(page, projectName, evidenceState, keyParts)
+          ? await cachedScreenshotEvidence(page, projectName, evidenceState, keyParts, { fullPage: false })
           : null;
         const violations = hasCoveredCells
           ? await cachedAxeViolations(page, projectName, evidenceState, keyParts)
