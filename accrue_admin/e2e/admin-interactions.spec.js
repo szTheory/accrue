@@ -641,8 +641,14 @@ async function probeAffordanceAndStates(page, recorder) {
   ]) {
     const locator = page.locator(selector).first();
     if (await visible(locator)) {
-      await locator.hover().catch(() => {});
-      await locator.focus().catch(() => {});
+      // Bounded actionability: disabled/non-interactive specimens in the Component
+      // Kitchen use `pointer-events: none` (e.g. `.ax-button:disabled`), so hover()'s
+      // "receives pointer events" check never resolves. Without an explicit timeout it
+      // inherits the 180s test budget and hangs the baseline observer. A short timeout
+      // lets the actionability retry give up quickly — a hover that does not land is
+      // itself the affordance signal this probe is recording.
+      await locator.hover({ timeout: 1_000 }).catch(() => {});
+      await locator.focus({ timeout: 1_000 }).catch(() => {});
     }
     recorder.observe({
       interaction_class: "hover-focus-affordance",
