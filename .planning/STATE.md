@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
-status: executing
-stopped_at: Completed 190-04-PLAN.md
-last_updated: "2026-06-18T16:14:03.146Z"
+status: verifying
+stopped_at: Completed 190-05-PLAN.md
+last_updated: "2026-06-18T16:46:11.602Z"
 last_activity: 2026-06-18
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 24
-  completed_plans: 23
-  percent: 50
+  completed_plans: 24
+  percent: 67
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 Phase: 190 (navigation-data-display-meta-component-cohesion) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
 Last activity: 2026-06-18
 
@@ -153,6 +153,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 190 P02 | 11m32s | 3 tasks | 5 files |
 | Phase 190 P03 | 10m32s | 3 tasks | 10 files |
 | Phase 190 P04 | 6m28s | 3 tasks | 11 files |
+| Phase 190 P05 | serial | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -231,6 +232,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 190-04]: Breadcrumbs remain breadcrumb-only; page-header/actions/breadcrumbs is a composed page-header proof surface. — The Breadcrumbs component owns orientation and current crumb semantics, not the full page-header/action band.
 - [Phase 190-04]: DropdownMenu uses native disclosure semantics and does not claim menu/menuitem roles until true menu-button keyboard behavior is implemented. — The component is built on details/summary and Phase 191 owns true menu keyboard behavior if needed.
 - [Phase 190-04]: Drawer/modal group contracts define structure, IDs, action order, sizing, scrollable bodies, and layer tokens while Phase 191 owns full trap/restore/dismissal behavior. — This keeps Phase 190 bounded to reusable group structure and tokenized layers.
+- [Phase 190]: 190-05: Use grp190 proof roots rather than generic data-component-group selectors because nested reusable components also expose group locators. — Browser and ExUnit probes both found nested component group attributes; proof IDs are the stable root contract.
+- [Phase 190]: 190-05: Keep validation pending-baseline-evidence until admin-baseline.spec.js completes. — All other automated gates passed, but baseline hung under bounded retry and cannot support approved validation status.
 
 ### Pending Todos
 
@@ -239,7 +242,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-- None open.
+- 190-05: admin-baseline.spec.js hung before reporting either test under bounded retry; rerun or debug before approving Phase 190 validation.
 
 ### Quick Tasks Completed
 
@@ -284,8 +287,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-18T16:12:47.484Z
-Stopped at: Completed 190-04-PLAN.md
+Last session: 2026-06-18T16:46:11.596Z
+Stopped at: Completed 190-05-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
