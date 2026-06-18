@@ -27,7 +27,7 @@ defmodule AccrueAdmin.Components.WindowSelector do
     assigns = assign(assigns, :windows, @windows)
 
     ~H"""
-    <nav class="ax-tabs" aria-label="Time window (UTC)">
+    <nav class="ax-tabs" aria-label="Time window (UTC)" data-component-group="tabs-subviews">
       <.link
         :for={{value, label} <- @windows}
         patch={window_href(@base_path, value)}

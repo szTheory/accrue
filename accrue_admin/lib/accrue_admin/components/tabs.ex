@@ -10,7 +10,7 @@ defmodule AccrueAdmin.Components.Tabs do
 
   def tabs(assigns) do
     ~H"""
-    <nav class="ax-tabs" aria-label="Page sections">
+    <nav class="ax-tabs" aria-label="Page sections" data-component-group="tabs-subviews">
       <a
         :for={tab <- @tabs}
         href={tab[:href]}
