@@ -1,7 +1,7 @@
 defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
   @moduledoc false
 
-  use ExUnit.Case, async: true
+  use AccrueAdmin.LiveCase, async: false
 
   alias AccrueAdmin.Dev.ComponentRegistry
 
@@ -129,5 +129,65 @@ defmodule AccrueAdmin.Dev.ComponentGroupRegistryTest do
       refute String.contains?(slug, "{")
       refute String.contains?(slug, "}")
     end
+  end
+
+  test "mounted kitchen renders exactly one proof root for each group contract", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+
+    for contract <- ComponentRegistry.group_contracts() do
+      assert occurrence_count(html, ~s(data-component-group="#{contract.slug}")) == 1
+      assert html =~ ~s(id="#{contract.proof_id}")
+    end
+  end
+
+  test "mounted detail group closes the Phase 187 static-capture visibility gap", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+
+    assert html =~ ~s(data-component-group="detail-header-metadata-actions")
+    assert html =~ "Subscription sub_group_visibility_demo"
+    assert html =~ "Status"
+    assert html =~ "Owner scope"
+    assert html =~ "Open invoices"
+    assert html =~ "Review subscription"
+  end
+
+  test "mounted group specimens expose deterministic operator-stress states", %{conn: conn} do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, _view, html} = live(conn, "/billing/dev/components")
+
+    for state <- [
+          "long-content",
+          "empty",
+          "filtered-empty",
+          "loading",
+          "error",
+          "no-pagination",
+          "has-pagination",
+          "selected-filter-active",
+          "mobile-card-list-degradation"
+        ] do
+      assert html =~ ~s(data-group-state="#{state}")
+    end
+
+    assert html =~ ~s(data-component-group="table-empty-loading-error-pagination")
+    assert html =~ "True empty"
+    assert html =~ "Filtered empty"
+    assert html =~ "Loading billing records"
+    assert html =~ "This data display could not load"
+    assert html =~ "No pagination control is shown"
+    assert html =~ "Load more"
+    assert html =~ "Mobile card degradation"
+  end
+
+  defp occurrence_count(haystack, needle) do
+    haystack
+    |> String.split(needle)
+    |> length()
+    |> Kernel.-(1)
   end
 end
