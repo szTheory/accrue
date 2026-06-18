@@ -57,6 +57,21 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert html =~ "&lt;script&gt;alert(1)&lt;/script&gt;"
       refute html =~ "<script>alert(1)</script>"
     end
+
+    test "uses toast layer and semantic status color tokens" do
+      css = File.read!("assets/css/app.css")
+
+      assert css =~ ".ax-flash-group"
+      assert css =~ "z-index: var(--ax-z-toast)"
+      assert css =~ ".ax-flash-success"
+      assert css =~ "var(--ax-status-success-bg)"
+      assert css =~ ".ax-flash-warning"
+      assert css =~ "var(--ax-status-warning-bg)"
+      assert css =~ ".ax-flash-error"
+      assert css =~ "var(--ax-status-danger-bg)"
+      assert css =~ ".ax-flash-info"
+      assert css =~ "var(--ax-status-info-bg)"
+    end
   end
 
   describe "Button" do
@@ -182,7 +197,7 @@ defmodule AccrueAdmin.NavigationComponentsTest do
   end
 
   describe "DropdownMenu" do
-    test "renders accessible text actions instead of icon-only affordances" do
+    test "renders native disclosure actions with accessible text and descriptions" do
       html =
         render_component(&DropdownMenu.dropdown_menu/1, %{
           label: "Invoice actions",
@@ -202,10 +217,19 @@ defmodule AccrueAdmin.NavigationComponentsTest do
         })
 
       assert html =~ ~s(<details)
-      assert html =~ ~s(role="menu")
+      assert html =~ ~s(data-component-group="toolbar-search-filter-sort")
       assert html =~ "Invoice actions"
       assert html =~ "Preview the live invoice PDF"
       assert html =~ "ax-dropdown-item-danger"
+      refute html =~ ~s(role="menu")
+      refute html =~ ~s(role="menuitem")
+    end
+
+    test "uses semantic danger styling for destructive disclosure actions" do
+      css = File.read!("assets/css/app.css")
+
+      assert css =~ ".ax-dropdown-item-danger .ax-dropdown-item-label"
+      assert css =~ "var(--ax-status-danger-text)"
     end
   end
 

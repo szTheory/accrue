@@ -46,4 +46,29 @@ defmodule AccrueAdmin.Components.GlobalSearchTest do
       assert html =~ ~s(data-path="/billing/webhooks?status=dead")
     end
   end
+
+  describe "command palette group contract" do
+    test "renders modal-layer dialog markup with active-result styling proof" do
+      html =
+        render_component(GlobalSearch, %{
+          id: "global-search",
+          mount_path: "/billing",
+          query: "",
+          results: %{customers: [], invoices: [], subscriptions: []},
+          is_open: true,
+          loading: false
+        })
+
+      css = File.read!("assets/css/app.css")
+
+      assert html =~ ~s(data-component-group="toolbar-search-filter-sort")
+      assert html =~ ~s(role="dialog")
+      assert html =~ ~s(aria-modal="true")
+      assert html =~ ~s(aria-label="Global search")
+      assert css =~ ".ax-command-palette-wrapper"
+      assert css =~ "z-index: var(--ax-z-modal)"
+      assert css =~ ".ax-command-palette-item.ax-active"
+      assert css =~ "var(--ax-interactive-selected)"
+    end
+  end
 end
