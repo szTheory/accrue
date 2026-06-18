@@ -4,9 +4,23 @@ slug: primitive-form-components-component-lab
 audited: 2026-06-17
 baseline: 189-UI-SPEC.md (approved)
 screenshots: captured (Playwright, chromium-desktop 1280px and chromium-mobile — mobile PNGs exceeded tool limit; reviewed desktop light + dark captures)
+resolution: >
+  Post-audit (2026-06-18): two WARNINGs fixed in commit c038c987 — page heading
+  now "Component Kitchen" + spec sub-description; n/a labels now "n/a — {reason}".
+  The "mobile dark column invisible" BLOCKER is a FALSE POSITIVE: the auditor could
+  not load the mobile PNGs and inferred from CSS. `grid-template-columns: 1fr` with
+  two grid children STACKS them (dark below light), not hides one — verified: the
+  mobile capture is 1084x195616px with both columns present, and there is no
+  display:none on the columns. Remaining WARNINGs (String.upcase family-label map,
+  legacy pre-matrix sections, dark accent pop) are minor dev-lab polish, deferred.
 ---
 
 # Phase 189 — UI Review
+
+> **Update 2026-06-18:** heading + n/a-label WARNINGs fixed (commit c038c987);
+> a11y suite re-run green. The mobile "BLOCKER" was a false positive (CSS-only
+> inference; both columns stack vertically on mobile — confirmed via the actual
+> 1084x195616 PNG). See `resolution` in frontmatter.
 
 **Audited:** 2026-06-17
 **Baseline:** 189-UI-SPEC.md (approved design contract)
