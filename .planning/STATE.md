@@ -25,9 +25,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 ## Current Position
 
-Phase: 189 (primitive-form-components-component-lab) — EXECUTING
-Plan: 7 of 7
-Status: Phase complete — ready for verification
+Phase: 189 (primitive-form-components-component-lab) — EXECUTION COMPLETE, VERIFICATION PENDING
+Plan: 7 of 7 complete
+Status: All 7 plans done + code review resolved (1 a11y BLOCKER + 7 WARNINGs fixed). Verifier verdict human_needed: CMP-01..05 pass on automated evidence; outstanding = Playwright e2e run (npm run e2e:a11y && npm run e2e from accrue_admin) + maintainer screenshot review of /billing/dev/components — the milestone's required phase-boundary gate (run /gsd-ui-review).
 Last activity: 2026-06-18
 
 ## Post-v1.48 Pause Rule
@@ -44,7 +44,7 @@ v1.53 Admin UI Design-System Hardening is open as a quality / interaction-correc
 |-------|------|--------------|--------|
 | 187 | Audit & Baseline | VER-01 | Complete (2026-06-15) |
 | 188 | Foundations hardening | FND-01, FND-02, FND-03, FND-04, FND-05, FND-06 | Complete (2026-06-17, approved) |
-| 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Not started |
+| 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Execution complete — verification pending (e2e + screenshot) |
 | 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Not started |
 | 191 | Page & flow interaction pass + fixture stress + microcopy | IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02 | Not started |
 | 192 | Idempotent verification & sign-off | VER-02, VER-03, VER-04 | Not started |
