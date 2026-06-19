@@ -60,24 +60,24 @@ and the contributor working in the component system. 33 requirements across 8 th
 
 ### IXN — Interaction integrity (the defects screenshots miss)
 
-- [ ] **IXN-01**: Every modal and drawer renders above its scrim and is fully visible and interactive (never hidden behind the overlay), traps focus, restores focus to its trigger on close, and dismisses predictably via Escape and click-outside.
-- [ ] **IXN-02**: Scrolling works correctly on every page and container — no scroll traps, no nested-scroll dead-ends, no content left unreachable behind sticky regions.
-- [ ] **IXN-03**: Focus is never lost or hidden after a LiveView patch, and keyboard-only operation completes every primary flow.
-- [ ] **IXN-04**: Floating/overlay elements (dropdowns, popovers, tooltips, toasts) appear in the correct position relative to their trigger and never obscure the controls they relate to.
-- [ ] **IXN-05**: Each interaction defect recorded in the Phase-187 ledger is fixed and covered by a regression test so it cannot silently return.
+- [x] **IXN-01**: Every modal and drawer renders above its scrim and is fully visible and interactive (never hidden behind the overlay), traps focus, restores focus to its trigger on close, and dismisses predictably via Escape and click-outside.
+- [x] **IXN-02**: Scrolling works correctly on every page and container — no scroll traps, no nested-scroll dead-ends, no content left unreachable behind sticky regions.
+- [x] **IXN-03**: Focus is never lost or hidden after a LiveView patch, and keyboard-only operation completes every primary flow.
+- [x] **IXN-04**: Floating/overlay elements (dropdowns, popovers, tooltips, toasts) appear in the correct position relative to their trigger and never obscure the controls they relate to.
+- [x] **IXN-05**: Each interaction defect recorded in the Phase-187 ledger is fixed and covered by a regression test so it cannot silently return.
 
 ### PAGE — Page/flow JTBD coverage
 
-- [ ] **PAGE-01**: Every admin page is walked against its primary persona/JTBD across happy, empty, loading, error, permission-denied, boundary, and advanced paths, and renders correctly in each.
-- [ ] **PAGE-02**: Empty states explain the next useful action and distinguish "no data" from "data unavailable" from "permission denied."
-- [ ] **PAGE-03**: LiveView disconnected/reconnecting state is communicated to the operator and disables actions that cannot be performed while stale.
-- [ ] **PAGE-04**: Every page is verified at 320 / 375 / 768 / 1024 / 1440 widths in light and dark with no layout break, clipping, or off-screen content.
+- [x] **PAGE-01**: Every admin page is walked against its primary persona/JTBD across happy, empty, loading, error, permission-denied, boundary, and advanced paths, and renders correctly in each.
+- [x] **PAGE-02**: Empty states explain the next useful action and distinguish "no data" from "data unavailable" from "permission denied."
+- [x] **PAGE-03**: LiveView disconnected/reconnecting state is communicated to the operator and disables actions that cannot be performed while stale.
+- [x] **PAGE-04**: Every page is verified at 320 / 375 / 768 / 1024 / 1440 widths in light and dark with no layout break, clipping, or off-screen content.
 
 ### CPY — Microcopy
 
-- [ ] **CPY-01**: Error messages state what happened and how to recover (no bare "oops / invalid / failed / forbidden").
-- [ ] **CPY-02**: Destructive-action confirmations name the specific object and its consequence.
-- [ ] **CPY-03**: Domain vocabulary is consistent across headings, tabs, filters, buttons, and alerts.
+- [x] **CPY-01**: Error messages state what happened and how to recover (no bare "oops / invalid / failed / forbidden").
+- [x] **CPY-02**: Destructive-action confirmations name the specific object and its consequence.
+- [x] **CPY-03**: Domain vocabulary is consistent across headings, tabs, filters, buttons, and alerts.
 
 ### SEED — Fixture stress (exercise the matrix)
 
@@ -111,18 +111,18 @@ and the contributor working in the component system. 33 requirements across 8 th
 | GRP-02 | 190 | Complete |
 | GRP-03 | 190 | Complete |
 | GRP-04 | 190 | Complete |
-| IXN-01 | 191 | Pending |
-| IXN-02 | 191 | Pending |
-| IXN-03 | 191 | Pending |
-| IXN-04 | 191 | Pending |
-| IXN-05 | 191 | Pending |
-| PAGE-01 | 191 | Pending |
-| PAGE-02 | 191 | Pending |
-| PAGE-03 | 191 | Pending |
-| PAGE-04 | 191 | Pending |
-| CPY-01 | 191 | Pending |
-| CPY-02 | 191 | Pending |
-| CPY-03 | 191 | Pending |
+| IXN-01 | 191 | Complete |
+| IXN-02 | 191 | Complete |
+| IXN-03 | 191 | Complete |
+| IXN-04 | 191 | Complete |
+| IXN-05 | 191 | Complete |
+| PAGE-01 | 191 | Complete |
+| PAGE-02 | 191 | Complete |
+| PAGE-03 | 191 | Complete |
+| PAGE-04 | 191 | Complete |
+| CPY-01 | 191 | Complete |
+| CPY-02 | 191 | Complete |
+| CPY-03 | 191 | Complete |
 | SEED-01 | 191 | Pending |
 | SEED-02 | 191 | Pending |
 | VER-02 | 192 | Pending |

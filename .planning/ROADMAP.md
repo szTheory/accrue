@@ -48,7 +48,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [x] **Phase 187: Audit & Baseline** — Refresh the rubric (adds interaction-integrity, layer/z-index, microcopy); run the full matrix (viewport × theme × state) + live interaction testing of the running admin UI; produce a severity-ranked defect ledger + scored baseline = the only-forward reference point. (completed 2026-06-15)
 - [ ] **Phase 188: Foundations hardening** — Typography bundles, reading-measure application, formal z-index/layer system, motion-gap closure, inert-Tailwind resolution, and dark-mode role/focus/scrollbar/disabled completeness — root-level fixes.
 - [ ] **Phase 189: Primitive & form components + component lab** — Every component in isolation × full state matrix × theme × viewport × a11y; root-level (DRY) fixes; grow `/dev/components` into the systematic gallery (no PhoenixStorybook dep).
-- [ ] **Phase 190: Navigation, data-display & meta-component cohesion** — App shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component groups; spacing rhythm, hierarchy, responsive behavior, operator-stress states.
+- [x] **Phase 190: Navigation, data-display & meta-component cohesion** — App shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component groups; spacing rhythm, hierarchy, responsive behavior, operator-stress states.
 - [ ] **Phase 191: Page & flow interaction pass + fixture stress + microcopy** — Walk every page against its JTBD across all paths; fix the Phase-187 behavioral defects; expand `examples/accrue_host` seeds for missing matrix cells; on-brand microcopy pass.
 - [ ] **Phase 192: Idempotent verification & sign-off** — Full re-run + adversarial multi-lens judge; only-forward scorecard ≥ baseline (zero regressions); regression guardrails in CI; maintainer screenshot UAT.
 
@@ -224,7 +224,17 @@ Plans:
   4. Microcopy is corrected across the surface: error messages state what happened and how to recover (no bare "oops / invalid / failed / forbidden"); destructive-action confirmations name the specific object and its consequence; domain vocabulary is consistent across headings, tabs, filters, buttons, and alerts.
   5. `examples/accrue_host` seeds reach every matrix cell in one click — null/missing optional fields, permission-denied, boundary pagination, high counts, non-ASCII names, disconnected/reconnecting state (in addition to existing long-name / multi-currency / dunning edges) — and the seed expansion is idempotent (re-runnable) and deterministic, consistent with the existing keyed-insert seed contract.
 
-**Plans:** TBD
+**Plans:** 7 plans
+
+Plans:
+- [x] 191-01-PLAN.md — Manifest-driven Phase 191 browser harness and AX187 coverage audit
+- [ ] 191-02-PLAN.md — Deterministic E2E fixture matrix and one-click seed endpoint
+- [ ] 191-03-PLAN.md — Shared modal, drawer, and step-up overlay focus/layer closure
+- [ ] 191-04-PLAN.md — Patch focus, disconnected state, floating controls, and scroll reachability
+- [ ] 191-05-PLAN.md — Page-state and destructive-action microcopy pass
+- [ ] 191-06-PLAN.md — Example-host Phase 191 seed reachability and idempotency
+- [ ] 191-07-PLAN.md — Full evidence closeout, AX187 ledger, and human operator scan
+
 **UI hint**: yes
 
 ### Phase 192: Idempotent verification & sign-off
@@ -335,8 +345,8 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
 | 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
 | 189. Primitive & form components + component lab | v1.53 | 7/7 | Complete   | 2026-06-18 |
-| 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Human Verification |  |
-| 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 0/TBD | Not started | - |
+| 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Complete | 2026-06-18 |
+| 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 1/7 | In Progress|  |
 | 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
