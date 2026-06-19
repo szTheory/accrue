@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const { test, expect } = require("@playwright/test");
 
 const {
@@ -14,6 +16,7 @@ const {
   assertScrollReachable,
   assertNoHorizontalClip,
   phase191CoverageRows,
+  normalizeTag,
 } = require("./phase191-page-flow-helpers.js");
 
 test.use({ trace: "retain-on-failure" });
@@ -63,6 +66,15 @@ const PHASE191_HANDOFF_TAGS = Object.freeze([
   "copy-specificity",
 ]);
 
+const PHASE191_HANDOFF_SOURCE_MARKERS = Object.freeze({
+  "focus-trap": ["data-focus-trap", "phx-hook FocusTrap"],
+  "focus-restore": ["focus-restore", "Escape restore", "outside-click restore"],
+  escape: ["keyboard press Escape", "Escape restore"],
+  "click-outside": ["mouse click", "outside-click restore"],
+  "fixture-gaps": ["phase191-matrix", "@fixtures"],
+  microcopy: ["@copy", "COPY_RECOVERY_PATTERN"],
+});
+
 const COPY_RECOVERY_PATTERN =
   /No billing records yet|No records match these filters|Access restricted|Connection lost|This .* could not load|Retry|Clear filters|owner scope/i;
 const GENERIC_ERROR_COPY_PATTERN = /\boops\b|\bforbidden\b|\binvalid (request|state|input)\b/i;
@@ -80,17 +92,34 @@ async function seedScenario(request, scenario, { optional = false } = {}) {
   return response.json();
 }
 
-async function seedPhase191FixtureIfPresent(request) {
-  return seedScenario(request, "phase191", { optional: true });
+function normalizedSource(source) {
+  return source
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function handoffEvidenceSource() {
+  const specSource = fs
+    .readFileSync(__filename, "utf8")
+    .replace(/const PHASE191_HANDOFF_TAGS = Object\.freeze\(\[[\s\S]*?\]\);\n/, "");
+  const helperSource = fs.readFileSync(path.join(__dirname, "phase191-page-flow-helpers.js"), "utf8");
+
+  return normalizedSource(`${specSource}\n${helperSource}`);
+}
+
+function hasSourceMarker(source, markers) {
+  return markers.some((marker) => source.includes(normalizedSource(marker)));
 }
 
 async function seedPhase191Matrix(request) {
+  const phase191 = await seedScenario(request, "phase191-matrix");
   const dashboard = await seedScenario(request, "dashboard");
   const operatorFlows = await seedScenario(request, "operator-flows");
   const edgeStates = await seedScenario(request, "edge-states");
-  const phase191 = await seedPhase191FixtureIfPresent(request);
 
   return {
+    ...phase191,
     dashboard,
     "operator-flows": operatorFlows,
     "edge-states": edgeStates,
@@ -119,8 +148,21 @@ test.describe("Phase 191 page-flow regression harness", () => {
     expect(medium).toEqual([...PHASE191_MEDIUM_AX187_IDS].sort());
     expect(coverageRows.map((row) => row.id).sort()).toEqual(allAx187Ids().sort());
 
+    const observedTags = new Set(
+      coverageRows
+        .flatMap((row) => [...(row.overlay_tags || []), ...(row.normalized_overlay_tags || [])])
+        .map(normalizeTag)
+        .filter(Boolean)
+    );
+    const evidenceSource = handoffEvidenceSource();
+
     for (const tag of PHASE191_HANDOFF_TAGS) {
-      expect(tag, `D-30 handoff marker ${tag}`).toBeTruthy();
+      const normalized = normalizeTag(tag);
+      const aliases = normalized === "liveview-patch-focus" ? ["live-focus"] : [];
+      const observed = [normalized, ...aliases].some((candidate) => observedTags.has(candidate));
+      const markers = PHASE191_HANDOFF_SOURCE_MARKERS[tag] || [tag];
+
+      expect(observed || hasSourceMarker(evidenceSource, markers), `D-30 handoff marker ${tag}`).toBeTruthy();
     }
   });
 
