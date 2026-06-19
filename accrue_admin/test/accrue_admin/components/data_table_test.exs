@@ -296,6 +296,23 @@ defmodule AccrueAdmin.DataTableTest do
     refute html =~ ~s(data-role="load-more")
   end
 
+  test "emits Phase 191 focus anchors for filter, selection, and pagination controls", %{
+    conn: conn
+  } do
+    {:ok, _view, html} =
+      live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
+
+    assert html =~ ~s(data-phase191-focus="filter-form")
+    assert html =~ ~s(data-phase191-focus="filter-q")
+    assert html =~ ~s(data-phase191-focus="filter-status")
+    assert html =~ ~s(data-phase191-focus="filter-submit")
+    assert html =~ ~s(data-phase191-focus="clear-filters")
+    assert html =~ ~s(data-phase191-focus="selection-status")
+    assert html =~ ~s(data-phase191-focus="toggle-all")
+    assert html =~ ~s(data-phase191-focus="toggle-row")
+    assert html =~ ~s(data-phase191-focus="load-more")
+  end
+
   test "distinguishes true-empty from filtered-empty recovery actions", %{conn: conn} do
     FixtureStore.put_rows([])
 

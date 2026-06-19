@@ -225,6 +225,22 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       refute html =~ ~s(role="menuitem")
     end
 
+    test "emits Phase 191 focus and floating-panel anchors" do
+      html =
+        render_component(&DropdownMenu.dropdown_menu/1, %{
+          label: "Invoice actions",
+          items: [
+            %{label: "Open PDF", href: "/billing/invoices/in_123/pdf"},
+            %{label: "Void invoice", href: "/billing/invoices/in_123/void", danger: true}
+          ]
+        })
+
+      assert html =~ ~s(data-phase191-focus="dropdown")
+      assert html =~ ~s(data-phase191-focus="dropdown-trigger")
+      assert html =~ ~s(data-phase191-focus="dropdown-panel")
+      assert html =~ ~s(data-floating-panel="dropdown")
+    end
+
     test "uses semantic danger styling for destructive disclosure actions" do
       css = File.read!("assets/css/app.css")
 
@@ -274,6 +290,21 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       refute html =~ ~s(role="tablist")
       refute html =~ ~s(role="tab")
       refute html =~ ~s(role="tabpanel")
+    end
+
+    test "emits Phase 191 focus anchors on tab links" do
+      html =
+        render_component(&Tabs.tabs/1, %{
+          active: "events",
+          tabs: [
+            %{id: "overview", label: "Overview", href: "/billing/customers/cus_123"},
+            %{id: "events", label: "Events", href: "/billing/customers/cus_123/events", count: 12}
+          ]
+        })
+
+      assert html =~ ~s(data-phase191-focus="tab-list")
+      assert html =~ ~s(data-phase191-focus="tab-link")
+      assert html =~ ~s(data-phase191-focus-current="true")
     end
   end
 
@@ -419,6 +450,18 @@ defmodule AccrueAdmin.NavigationComponentsTest do
       assert 1 == html |> String.split(~s(aria-current="page")) |> length() |> Kernel.-(1)
       refute html =~ ~s(role="tablist")
       refute html =~ ~s(role="tabpanel")
+    end
+
+    test "emits Phase 191 focus anchors on window patch links" do
+      html =
+        render_component(&WindowSelector.window_selector/1, %{
+          current_window: "30d",
+          base_path: "/billing/analytics/recovery"
+        })
+
+      assert html =~ ~s(data-phase191-focus="window-selector")
+      assert html =~ ~s(data-phase191-focus="window-link")
+      assert html =~ ~s(data-phase191-focus-current="true")
     end
 
     test "constructs correct patch hrefs from base_path" do

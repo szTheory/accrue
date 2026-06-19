@@ -50,6 +50,35 @@ defmodule AccrueAdmin.Components.FilterChipBarTest do
     assert html =~ "Clear"
   end
 
+  test "emits Phase 191 focus anchors for active chip apply and clear actions" do
+    html =
+      render_component(&FilterChipBar.filter_chip_bar/1,
+        items: [
+          %{
+            id: :status,
+            label: "Status",
+            value: "past due",
+            tone: :amber,
+            active: true,
+            href: "/billing/invoices?status=past_due"
+          },
+          %{
+            id: :owner_scope,
+            label: "Owner scope",
+            value: "platform",
+            tone: :slate,
+            active: true,
+            remove_href: "/billing/invoices"
+          }
+        ],
+        label: "Active invoice filters"
+      )
+
+    assert html =~ ~s(data-phase191-focus="filter-chip-bar")
+    assert html =~ ~s(data-phase191-focus="filter-chip-apply")
+    assert html =~ ~s(data-phase191-focus="filter-chip-clear")
+  end
+
   test "does not render Clear link when remove_href is absent" do
     html =
       render_component(&FilterChipBar.filter_chip_bar/1,
