@@ -72,7 +72,8 @@ defmodule AccrueAdmin.Copy.BillingEvent do
 
   def billing_events_when_unknown, do: "Unknown"
 
-  def billing_event_not_found, do: "Event not found."
+  def billing_event_not_found,
+    do: "Event not found. Open the events list and confirm owner scope before retrying."
 
   # --- Event detail (EventLive) — prefix event_detail_*
 

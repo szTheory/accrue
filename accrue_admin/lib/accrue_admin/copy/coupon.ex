@@ -108,5 +108,6 @@ defmodule AccrueAdmin.Copy.Coupon do
 
   def coupon_promotion_code_status_active_until_prefix, do: "Active until "
 
-  def coupon_not_found, do: "Coupon not found."
+  def coupon_not_found,
+    do: "Coupon not found. Open the coupons list and confirm owner scope before retrying."
 end

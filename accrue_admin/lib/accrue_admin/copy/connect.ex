@@ -211,5 +211,7 @@ defmodule AccrueAdmin.Copy.Connect do
   def connect_account_error_field_must_be_integer_minor(field_label),
     do: "#{field_label} must be an integer minor-unit amount"
 
-  def connect_account_not_found, do: "Connect account not found."
+  def connect_account_not_found,
+    do:
+      "Connect account not found. Open the Connect list and confirm owner scope before retrying."
 end

@@ -36,6 +36,7 @@ defmodule AccrueAdmin.Copy do
   defdelegate subscription_action_braintree_guidance(), to: Subscription
   defdelegate subscription_action_braintree_swap_setup_guidance(), to: Subscription
   defdelegate subscription_action_stripe_guidance(), to: Subscription
+  defdelegate subscription_confirm_workflow_message(action_type, opts), to: Subscription
   defdelegate subscription_lifecycle_ended_label(), to: Subscription
   defdelegate subscription_page_title(), to: Subscription
 
@@ -392,6 +393,79 @@ defmodule AccrueAdmin.Copy do
   defdelegate event_detail_eyebrow(), to: BillingEvent
   defdelegate event_detail_section_heading(), to: BillingEvent
 
+  def page_state_copy(:true_empty, opts) do
+    resource = option(opts, :resource, "billing records")
+    owner_scope = option(opts, :owner_scope, "the active organization")
+
+    %{
+      heading: "No billing records yet",
+      body:
+        "Records appear here after Accrue records activity for #{owner_scope}. If you expected #{resource}, confirm owner scope or seed state."
+    }
+  end
+
+  def page_state_copy(:filtered_empty, opts) do
+    resource = option(opts, :resource, "billing records")
+    owner_scope = option(opts, :owner_scope, "the active organization")
+
+    %{
+      heading: "No records match these filters",
+      body: "Clear filters or adjust owner scope #{owner_scope} to review matching #{resource}."
+    }
+  end
+
+  def page_state_copy(:data_unavailable, opts) do
+    resource = option(opts, :resource, "billing data")
+    recovery = option(opts, :recovery, "retry the request")
+
+    %{
+      heading: "#{sentence_case(resource)} unavailable",
+      body:
+        "The #{resource} projection is unavailable. #{sentence_case(recovery)}; if it persists, inspect logs for the owner scope."
+    }
+  end
+
+  def page_state_copy(:permission_denied, opts) do
+    object = option(opts, :object, "this billing record")
+    owner_scope = option(opts, :owner_scope, "the active organization")
+
+    %{
+      heading: "Access restricted",
+      body:
+        "This admin account cannot view #{object}. Switch #{owner_scope} or ask an administrator to grant billing admin access."
+    }
+  end
+
+  def page_state_copy(:disconnected, opts) do
+    resource = option(opts, :resource, "billing actions")
+
+    %{
+      heading: "#{sentence_case(resource)} paused",
+      body: "Connection lost. Reconnecting before actions can run."
+    }
+  end
+
+  def page_state_copy(:reconnecting, opts) do
+    resource = option(opts, :resource, "billing actions")
+
+    %{
+      heading: "#{sentence_case(resource)} restored",
+      body: "Connection restored. Review the current state before running an action."
+    }
+  end
+
+  def page_state_copy(:recoverable_error, opts) do
+    resource = option(opts, :resource, "billing record")
+    owner_scope = option(opts, :owner_scope, "the active organization")
+    recovery = option(opts, :recovery, "retry the request")
+
+    %{
+      heading: "#{sentence_case(resource)} could not load",
+      body:
+        "This #{resource} could not load. #{sentence_case(recovery)}; if it persists, inspect logs for owner scope #{owner_scope}."
+    }
+  end
+
   def data_table_default_empty_title, do: "Nothing in this list yet"
 
   @doc "Shared DataTable filter toolbar primary submit (VERIFY-01 / UI-SPEC secondary CTA)."
@@ -448,9 +522,18 @@ defmodule AccrueAdmin.Copy do
   def payment_processor_action_warning(payment_intent),
     do: "Processor requires action: " <> inspect(payment_intent)
 
-  def charge_not_found, do: "Charge not found."
+  def charge_not_found,
+    do: "Charge not found. Open the payments list and confirm owner scope before retrying."
 
   def charge_prepare_refund_warning, do: "Prepare a refund before confirming."
+
+  def charge_refund_confirm_message(opts) do
+    charge_id = option(opts, :charge_id, "this charge")
+    amount = option(opts, :amount, "the selected amount")
+    audit_subject = option(opts, :audit_subject, "a refund ledger row")
+
+    "Refund charge #{charge_id}: This will create a #{amount} refund, record #{audit_subject}, and record an admin audit row. Continue?"
+  end
 
   def charge_refund_created_info,
     do: "Refund created with fee-aware fields from the billing facade."
@@ -567,10 +650,16 @@ defmodule AccrueAdmin.Copy do
 
   def webhooks_index_empty_copy,
     do:
-      "Stripe events appear here after they are recorded for this organization. If you expected deliveries, check filters or confirm your endpoint is receiving traffic."
+      "Webhook deliveries appear here after Stripe events are recorded for this organization. If you expected deliveries, check filters or confirm your endpoint is receiving traffic."
 
   def webhooks_bulk_replay_confirm_question(count),
-    do: "Replay #{count} failed or dead webhook rows for the active organization?"
+    do: webhooks_bulk_replay_confirm_question(count, owner_scope: "the active organization")
+
+  def webhooks_bulk_replay_confirm_question(count, opts) do
+    owner_scope = option(opts, :owner_scope, "the active organization")
+
+    "Replay #{count} failed or dead webhook rows for #{owner_scope}: This will requeue matching webhook deliveries and record an admin audit event. Continue?"
+  end
 
   def webhooks_bulk_no_rows_warning,
     do: "No failed or dead-lettered webhook rows match the current filters."
@@ -727,4 +816,16 @@ defmodule AccrueAdmin.Copy do
   def home_activity_events_link, do: "Open event log"
 
   def home_activity_webhooks_link, do: "Open webhooks"
+
+  defp option(opts, key, default) do
+    opts
+    |> Keyword.get(key, default)
+    |> to_string()
+  end
+
+  defp sentence_case(""), do: ""
+
+  defp sentence_case(<<first::binary-size(1), rest::binary>>) do
+    String.upcase(first) <> rest
+  end
 end

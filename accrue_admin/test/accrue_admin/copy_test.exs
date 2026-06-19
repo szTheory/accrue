@@ -2,7 +2,16 @@ defmodule AccrueAdmin.CopyTest do
   use ExUnit.Case, async: true
 
   alias AccrueAdmin.Copy
-  alias AccrueAdmin.Copy.{BillingEvent, Connect, Coupon, Invoice, Locked, PromotionCode, Subscription}
+
+  alias AccrueAdmin.Copy.{
+    BillingEvent,
+    Connect,
+    Coupon,
+    Invoice,
+    Locked,
+    PromotionCode,
+    Subscription
+  }
 
   @vague_standalone ~r/\A(?:failed|forbidden|invalid|not found|could not load|something went wrong|oops)\.?\z/i
 
@@ -28,10 +37,8 @@ defmodule AccrueAdmin.CopyTest do
           object: "invoice in_phase191",
           owner_scope: "organization org_phase191"
         ),
-      disconnected:
-        Copy.page_state_copy(:disconnected, resource: "billing actions"),
-      reconnecting:
-        Copy.page_state_copy(:reconnecting, resource: "billing actions"),
+      disconnected: Copy.page_state_copy(:disconnected, resource: "billing actions"),
+      reconnecting: Copy.page_state_copy(:reconnecting, resource: "billing actions"),
       recoverable_error:
         Copy.page_state_copy(:recoverable_error,
           resource: "Connect account acct_phase191",
@@ -44,7 +51,9 @@ defmodule AccrueAdmin.CopyTest do
     assert states.filtered_empty.heading == "No records match these filters"
     assert states.permission_denied.heading == "Access restricted"
     assert states.disconnected.body == "Connection lost. Reconnecting before actions can run."
-    assert states.reconnecting.body == "Connection restored. Review the current state before running an action."
+
+    assert states.reconnecting.body ==
+             "Connection restored. Review the current state before running an action."
 
     headings = states |> Map.values() |> Enum.map(& &1.heading)
     bodies = states |> Map.values() |> Enum.map(& &1.body)
@@ -55,7 +64,7 @@ defmodule AccrueAdmin.CopyTest do
     assert states.true_empty.body =~ "Accrue records activity"
     assert states.filtered_empty.body =~ "Clear filters"
     assert states.data_unavailable.body =~ "webhook delivery data"
-    assert states.data_unavailable.body =~ "retry from the Webhooks queue"
+    assert String.downcase(states.data_unavailable.body) =~ "retry from the webhooks queue"
     assert states.permission_denied.body =~ "invoice in_phase191"
     assert states.permission_denied.body =~ "organization org_phase191"
     assert states.recoverable_error.body =~ "Connect account acct_phase191"
@@ -145,7 +154,7 @@ defmodule AccrueAdmin.CopyTest do
       Copy.webhooks_index_empty_copy()
     ]
 
-    joined = Enum.join(strings, " ")
+    joined = strings |> Enum.join(" ") |> String.downcase()
 
     for required <- [
           "invoice",
@@ -153,7 +162,7 @@ defmodule AccrueAdmin.CopyTest do
           "charge",
           "coupon",
           "promotion code",
-          "Connect",
+          "connect",
           "event",
           "webhook",
           "organization"

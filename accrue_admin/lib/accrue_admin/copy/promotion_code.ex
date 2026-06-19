@@ -95,5 +95,7 @@ defmodule AccrueAdmin.Copy.PromotionCode do
 
   def promotion_code_kpi_meta_unlimited_cap, do: "Unlimited cap"
 
-  def promotion_code_not_found, do: "Promotion code not found."
+  def promotion_code_not_found,
+    do:
+      "Promotion code not found. Open the promotion codes list and confirm owner scope before retrying."
 end

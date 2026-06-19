@@ -131,7 +131,24 @@ defmodule AccrueAdmin.Copy.Invoice do
   def invoice_confirm_cancel, do: "Cancel"
 
   def invoice_confirm_workflow_message(action_label, source_suffix),
-    do: "#{action_label} will use the existing invoice workflow APIs.#{source_suffix}"
+    do:
+      invoice_confirm_workflow_message(
+        action_label,
+        "this invoice",
+        "run the existing invoice workflow APIs",
+        "record an admin audit row for the invoice action",
+        source_suffix
+      )
+
+  def invoice_confirm_workflow_message(
+        action_label,
+        invoice_label,
+        billing_effect,
+        audit_consequence,
+        source_suffix
+      ) do
+    "#{action_label}: This will #{billing_effect} for #{invoice_label} and #{audit_consequence}.#{source_suffix} Continue?"
+  end
 
   def invoice_confirm_source_event_suffix(source_event_id),
     do: " Source event ##{source_event_id} will be linked."
@@ -209,5 +226,6 @@ defmodule AccrueAdmin.Copy.Invoice do
   def invoice_draft_locked_guidance, do: "Only draft invoices can be adjusted from admin."
   def invoice_manual_row_badge, do: "Manual adjustment"
 
-  def invoice_not_found, do: "Invoice not found."
+  def invoice_not_found,
+    do: "Invoice not found. Open the invoice list and confirm owner scope before retrying."
 end

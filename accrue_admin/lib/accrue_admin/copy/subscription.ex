@@ -62,7 +62,69 @@ defmodule AccrueAdmin.Copy.Subscription do
     do:
       "Stripe can natively schedule end-of-period cancellation and resume that scheduled end when the subscription remains active. Fake mirrors the supported change flow locally for merge-blocking operator proof."
 
+  def subscription_confirm_workflow_message(action_type, opts) do
+    subscription_id = Keyword.get(opts, :subscription_id, "this subscription")
+    customer_id = Keyword.get(opts, :customer_id, "this customer")
+    source_event_id = Keyword.get(opts, :source_event_id)
+    source = source_suffix(source_event_id)
+
+    "#{subscription_action_label(action_type)} #{subscription_id}: This will #{subscription_billing_effect(action_type)} for customer #{customer_id} and record an admin audit row.#{source} Continue?"
+  end
+
   def subscription_lifecycle_ended_label, do: "ended"
 
   def subscription_page_title, do: "Subscription"
+
+  defp subscription_action_label("cancel_now"), do: "Cancel subscription"
+  defp subscription_action_label("cancel_at_period_end"), do: "Cancel subscription renewal"
+  defp subscription_action_label("pause"), do: "Pause subscription collection"
+  defp subscription_action_label("resume"), do: "Resume subscription"
+  defp subscription_action_label("swap_plan"), do: "Swap subscription plan"
+  defp subscription_action_label("update_quantity"), do: "Update subscription quantity"
+  defp subscription_action_label("add_item"), do: "Add subscription item"
+  defp subscription_action_label("update_item_quantity"), do: "Update subscription item quantity"
+  defp subscription_action_label("remove_item"), do: "Remove subscription item"
+  defp subscription_action_label(action_type), do: "Run #{humanize_action(action_type)}"
+
+  defp subscription_billing_effect("cancel_now"),
+    do:
+      "end billing for the current billing period immediately where the processor supports that semantic"
+
+  defp subscription_billing_effect("cancel_at_period_end"),
+    do:
+      "turn off renewal now and preserve access through the current billing period where the processor supports that semantic"
+
+  defp subscription_billing_effect("pause"),
+    do: "pause collection without deleting the subscription record"
+
+  defp subscription_billing_effect("resume"),
+    do: "resume billing from the current subscription state"
+
+  defp subscription_billing_effect("swap_plan"),
+    do: "change the plan and apply the selected proration behavior"
+
+  defp subscription_billing_effect("update_quantity"),
+    do: "change the top-level subscription quantity"
+
+  defp subscription_billing_effect("add_item"),
+    do: "add a subscription item to the billing schedule"
+
+  defp subscription_billing_effect("update_item_quantity"),
+    do: "change the selected subscription item quantity"
+
+  defp subscription_billing_effect("remove_item"),
+    do: "remove the selected subscription item from future billing"
+
+  defp subscription_billing_effect(action_type),
+    do: "run #{humanize_action(action_type)} through the subscription workflow"
+
+  defp source_suffix(nil), do: ""
+  defp source_suffix(""), do: ""
+  defp source_suffix(source_event_id), do: " Source event ##{source_event_id} will be linked."
+
+  defp humanize_action(action_type) do
+    action_type
+    |> to_string()
+    |> String.replace("_", " ")
+  end
 end
