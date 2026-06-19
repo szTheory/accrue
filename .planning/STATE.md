@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-stopped_at: Completed 191-03-PLAN.md
-last_updated: "2026-06-19T15:23:16.332Z"
+stopped_at: Completed 191-04-PLAN.md
+last_updated: "2026-06-19T16:00:15.067Z"
 last_activity: 2026-06-19
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 32
-  completed_plans: 29
+  completed_plans: 30
   percent: 67
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 191 (page-flow-interaction-pass-fixture-stress-microcopy) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
 Last activity: 2026-06-19
@@ -159,6 +159,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 191 P02 | 7 min | 2 tasks | 3 files |
 | Phase 191 P06 | 7 min | 2 tasks | 4 files |
 | Phase 191 P03 | 16m | 2 tasks | 10 files |
+| Phase 191 P04 | 29 min | 2 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -248,6 +249,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 191-03]: FocusTrap stays package-local instead of adding a third-party focus-management dependency. — Avoids Phase 191 dependency scope while satisfying overlay focus integrity.
 - [Phase 191-03]: Step-up modal Escape, outside click, and cancel all dismiss through step_up_dismiss while confirmation remains an explicit submit path. — Preserves the security boundary that destructive confirmation requires an explicit submit.
 - [Phase 191-03]: The generated admin JS bundle is committed with the hook registration so served admin assets include FocusTrap. — Generated runtime assets must match app.js hook registration.
+- [Phase 191]: Phase 191 focus verification uses data-phase191-focus anchors on shared components instead of brittle page-specific selectors. — Keeps patch-focus verification stable across routes and reusable components.
+- [Phase 191]: Admin static JS/CSS bundles are committed with source hook and CSS changes so served admin assets match implementation. — The admin E2E server serves compiled assets, so generated bundles must track hook registration and CSS updates.
+- [Phase 191]: Connection state is sourced from LiveView lifecycle events and expressed through a shared shell hook/status region. — Satisfies T-191-08 without adding manually clickable status state.
 
 ### Pending Todos
 
@@ -301,8 +305,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-19T15:23:16.327Z
-Stopped at: Completed 191-03-PLAN.md
+Last session: 2026-06-19T16:00:15.062Z
+Stopped at: Completed 191-04-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
