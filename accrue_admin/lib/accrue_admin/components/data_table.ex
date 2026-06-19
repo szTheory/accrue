@@ -124,19 +124,35 @@ defmodule AccrueAdmin.Components.DataTable do
       id={@id}
       class="ax-data-table"
       data-role="data-table"
+      data-phase191-focus="data-table"
       data-component-group="table-empty-loading-error-pagination"
     >
       <header class="ax-data-table-header">
-        <form action={@path} method="get" class="ax-data-table-filters" data-role="filter-form">
+        <form
+          action={@path}
+          method="get"
+          class="ax-data-table-filters"
+          data-role="filter-form"
+          data-phase191-focus="filter-form"
+        >
           <div :for={field <- @filter_fields} class="ax-data-table-filter">
             <label for={field_id(@id, field)} class="ax-label"><%= field_label(field) %></label>
-            <.filter_input id={field_id(@id, field)} field={field} value={Map.get(@filter_params, field_param(field))} />
+            <.filter_input
+              id={field_id(@id, field)}
+              field={field}
+              value={Map.get(@filter_params, field_param(field))}
+              focus_key={field_param(field)}
+            />
           </div>
           <div :for={{key, value} <- @filter_params} :if={!field_defined?(@filter_fields, key)}>
             <input type="hidden" name={key} value={value} />
           </div>
-          <button type="submit" class="ax-button ax-button-primary"><%= @filter_submit_label %></button>
-          <a href={@path} class="ax-button ax-button-ghost"><%= Copy.data_table_clear_filters_label() %></a>
+          <button type="submit" class="ax-button ax-button-primary" data-phase191-focus="filter-submit">
+            <%= @filter_submit_label %>
+          </button>
+          <a href={@path} class="ax-button ax-button-ghost" data-phase191-focus="clear-filters">
+            <%= Copy.data_table_clear_filters_label() %>
+          </a>
         </form>
       </header>
 
@@ -153,6 +169,7 @@ defmodule AccrueAdmin.Components.DataTable do
           phx-target={@myself}
           class="ax-button ax-button-secondary"
           data-role="load-newer"
+          data-phase191-focus="load-newer"
         >
           Load newer rows
         </button>
@@ -167,19 +184,27 @@ defmodule AccrueAdmin.Components.DataTable do
           href={@path}
           class="ax-button ax-button-secondary"
           data-role="clear-filters"
+          data-phase191-focus="clear-filters"
         >
           <%= Copy.data_table_clear_filters_label() %>
         </a>
       </div>
 
       <div :if={!Enum.empty?(@rows) and @selectable} class="ax-data-table-selection" data-role="selection-bar">
-        <p class="ax-body" data-role="selected-count"><%= "#{MapSet.size(@selected_ids)} selected" %></p>
+        <p
+          class="ax-body"
+          data-phase191-focus="selection-status"
+          role="status"
+          aria-live="polite"
+          data-role="selected-count"
+        ><%= "#{MapSet.size(@selected_ids)} selected" %></p>
         <button
           type="button"
           phx-click="toggle-all"
           phx-target={@myself}
           class="ax-button ax-button-ghost"
           data-role="toggle-all"
+          data-phase191-focus="toggle-all"
           aria-label={toggle_all_label(assigns)}
         >
           <%= if all_visible_selected?(assigns), do: "Clear visible", else: "Select visible" %>
@@ -209,6 +234,7 @@ defmodule AccrueAdmin.Components.DataTable do
                   phx-target={@myself}
                   class="ax-button ax-button-ghost"
                   data-role="toggle-row"
+                  data-phase191-focus="toggle-row"
                   data-row-id={row_identity(row, @row_id)}
                   aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
                   aria-label={selection_label(@selected_ids, row, @row_id, @card_title, @columns)}
@@ -237,6 +263,7 @@ defmodule AccrueAdmin.Components.DataTable do
               phx-target={@myself}
               class="ax-button ax-button-ghost"
               data-role="toggle-row"
+              data-phase191-focus="toggle-row"
               data-row-id={row_identity(row, @row_id)}
               aria-pressed={selected?(@selected_ids, row_identity(row, @row_id))}
               aria-label={selection_label(@selected_ids, row, @row_id, @card_title, @columns)}
@@ -263,6 +290,7 @@ defmodule AccrueAdmin.Components.DataTable do
           phx-target={@myself}
           class="ax-button ax-button-secondary"
           data-role="load-more"
+          data-phase191-focus="load-more"
         >
           Load more
         </button>
@@ -274,12 +302,13 @@ defmodule AccrueAdmin.Components.DataTable do
   attr(:field, :map, required: true)
   attr(:id, :string, required: true)
   attr(:value, :any, default: nil)
+  attr(:focus_key, :string, required: true)
 
   defp filter_input(%{field: %{type: :select} = field} = assigns) do
     assigns = assign(assigns, :options, Map.get(field, :options, []))
 
     ~H"""
-    <select id={@id} name={field_param(@field)} class="ax-select">
+    <select id={@id} name={field_param(@field)} class="ax-select" data-phase191-focus={"filter-#{@focus_key}"}>
       <option value="">All</option>
       <option :for={option <- @options} value={option_value(option)} selected={option_selected?(@value, option)}>
         <%= option_label(option) %>
@@ -298,13 +327,21 @@ defmodule AccrueAdmin.Components.DataTable do
       value="true"
       checked={@value in [true, "true", "1", 1]}
       class="ax-checkbox"
+      data-phase191-focus={"filter-#{@focus_key}"}
     />
     """
   end
 
   defp filter_input(assigns) do
     ~H"""
-    <input id={@id} type="text" name={field_param(@field)} value={@value} class="ax-input" />
+    <input
+      id={@id}
+      type="text"
+      name={field_param(@field)}
+      value={@value}
+      class="ax-input"
+      data-phase191-focus={"filter-#{@focus_key}"}
+    />
     """
   end
 

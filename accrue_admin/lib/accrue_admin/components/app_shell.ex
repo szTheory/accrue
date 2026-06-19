@@ -84,7 +84,12 @@ defmodule AccrueAdmin.Components.AppShell do
 
         <Topbar.topbar brand={@brand} page_title={@page_title} theme={@theme} />
 
-        <main class="ax-shell-content" id="main-content">
+        <main
+          class="ax-shell-content"
+          id="main-content"
+          tabindex="-1"
+          data-phase191-focus="main-content"
+        >
           <%= render_slot(@inner_block) %>
         </main>
       </div>

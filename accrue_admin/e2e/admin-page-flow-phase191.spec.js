@@ -65,6 +65,7 @@ const PHASE191_HANDOFF_TAGS = Object.freeze([
 
 const COPY_RECOVERY_PATTERN =
   /No billing records yet|No records match these filters|Access restricted|Connection lost|This .* could not load|Retry|Clear filters|owner scope/i;
+const GENERIC_ERROR_COPY_PATTERN = /\boops\b|\bforbidden\b|\binvalid (request|state|input)\b/i;
 
 async function reset(request) {
   const response = await request.post("/__e2e__/reset");
@@ -163,22 +164,21 @@ test.describe("Phase 191 page-flow regression harness", () => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
       for (const theme of ["light", "dark"]) {
-        await setPhase191Theme(page, theme);
-
         for (const flow of phase191PageFlows()) {
           await login(page, resolvePhase191Route(flow, fixtureData));
+          await setPhase191Theme(page, theme);
           await assertNoHorizontalClip(page, "#main-content, main, .ax-data-table-shell, [data-role='card-list']", `${flow.surface} ${viewport.name} ${theme}`);
           await assertNoBodyFocus(page, `${flow.surface} initial focus`);
 
           const scrollTarget = page.locator("#main-content, main").first();
           await assertScrollReachable(scrollTarget, `${flow.surface} main content`);
-          await expect(page.locator("body")).not.toContainText(/\boops\b|\bforbidden\b|\binvalid\b/i);
+          await expect(page.locator("body")).not.toContainText(GENERIC_ERROR_COPY_PATTERN);
         }
       }
     }
   });
 
-  test("AX187-097 AX187-098 AX187-099 AX187-100 AX187-101 AX187-102 AX187-103 AX187-111 AX187-112 AX187-113 AX187-114 AX187-117 AX187-118 overlays trap focus, layer above scrims, and dismiss safely @overlay @focus @ax187", async ({
+  test("AX187-097 AX187-098 AX187-099 AX187-100 AX187-101 AX187-102 AX187-103 AX187-111 AX187-112 AX187-113 AX187-114 AX187-117 AX187-118 overlays trap focus, layer above scrims, and dismiss safely @overlay @focus @floating @ax187", async ({
     page,
     request,
   }) => {

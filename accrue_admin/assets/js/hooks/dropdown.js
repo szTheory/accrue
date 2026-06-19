@@ -1,12 +1,27 @@
+function focusSummary(details) {
+  const summary = details.querySelector("summary");
+  if (summary && typeof summary.focus === "function") {
+    summary.focus({ preventScroll: true });
+  }
+}
+
+function closeDropdown(details, { restoreFocus = false } = {}) {
+  details.removeAttribute("open");
+
+  if (restoreFocus) {
+    focusSummary(details);
+  }
+}
+
 // Native <details class="ax-dropdown"> menus only toggle when their <summary> is
-// clicked, so they stay open when the user clicks elsewhere — surprising for a menu.
-// These document-level listeners dismiss any open dropdown on outside-click or Escape,
-// matching the least-surprise behavior expected of a menu component.
+// clicked, so they stay open when the user clicks elsewhere. These document-level
+// listeners dismiss any open dropdown on outside-click or Escape and restore focus
+// to the disclosure trigger, matching the expected menu control loop.
 export function initDropdowns() {
   document.addEventListener("click", (event) => {
     document.querySelectorAll("details.ax-dropdown[open]").forEach((details) => {
       if (!details.contains(event.target)) {
-        details.removeAttribute("open");
+        closeDropdown(details, { restoreFocus: true });
       }
     });
   });
@@ -14,9 +29,7 @@ export function initDropdowns() {
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     document.querySelectorAll("details.ax-dropdown[open]").forEach((details) => {
-      details.removeAttribute("open");
-      const summary = details.querySelector("summary");
-      if (summary) summary.focus();
+      closeDropdown(details, { restoreFocus: true });
     });
   });
 }

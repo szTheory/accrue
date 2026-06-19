@@ -910,15 +910,18 @@ html.accrue-admin[data-theme="dark"] .ax-topbar-brand-name {
 
 .ax-breadcrumbs-list {
   align-items: center;
+  flex-wrap: wrap;
   margin: 0;
   padding: 0;
   list-style: none;
+  min-width: 0;
 }
 
 .ax-breadcrumbs-item {
   display: inline-flex;
   align-items: center;
   gap: var(--ax-space-sm);
+  min-width: 0;
 }
 
 .ax-filter-chip-bar,
@@ -1043,13 +1046,14 @@ a.ax-kpi-card--linked:focus-visible {
   display: inline-flex;
   align-items: center;
   width: fit-content;
+  max-width: 100%;
   min-height: 1.75rem;
   padding: 0.125rem 0.6875rem;
   border-radius: 999px;
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.2;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .ax-kpi-delta-moss {
@@ -1310,13 +1314,15 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-timeline-list {
   display: grid;
   gap: var(--ax-space-lg);
+  min-width: 0;
 }
 
 .ax-timeline-item {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--ax-space-md);
+  min-width: 0;
 }
 
 .ax-timeline-dot {
@@ -1356,6 +1362,8 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-timeline-card {
   display: grid;
   gap: var(--ax-space-sm);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ax-timeline-details summary,
@@ -1389,24 +1397,32 @@ a.ax-kpi-card--linked:focus-visible {
 .ax-json-viewer {
   display: grid;
   gap: var(--ax-space-lg);
+  min-width: 0;
 }
 
 .ax-json-tree-root,
 .ax-json-children {
   display: grid;
   gap: var(--ax-space-sm);
+  min-width: 0;
 }
 
 .ax-json-details,
 .ax-json-leaf {
   padding-left: var(--ax-space-sm);
   border-left: 1px solid color-mix(in srgb, var(--ax-border) 80%, transparent);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 .ax-json-key {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   margin-right: var(--ax-space-sm);
   font-family: var(--ax-font-mono);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ax-json-summary,
@@ -1414,6 +1430,7 @@ a.ax-kpi-card--linked:focus-visible {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-family: var(--ax-font-mono);
   word-break: break-word;
+  min-width: 0;
 }
 
 .ax-json-copy {
@@ -1478,6 +1495,8 @@ a.ax-kpi-card--linked:focus-visible {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-size: 0.875rem;
   line-height: var(--ax-leading-normal);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ax-breadcrumbs-link,
@@ -1775,6 +1794,8 @@ a.ax-kpi-card--linked:focus-visible {
   border-radius: var(--ax-radius-lg);
   background: var(--ax-elevated);
   box-shadow: var(--ax-shadow-sm);
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .ax-card-elevated {
@@ -2068,9 +2089,27 @@ a.ax-kpi-card--linked:focus-visible {
   overflow-x: auto;
 }
 
+.ax-data-table,
+.ax-data-table-cards,
+.ax-data-table-card,
+.ax-data-table-card-header,
+.ax-data-table-card-fields,
+.ax-data-table-card-field,
+.ax-data-table-filter,
+.ax-data-table-selection,
+.ax-data-table-footer {
+  min-width: 0;
+}
+
 .ax-data-table-cards {
   display: grid;
   gap: var(--ax-space-md);
+}
+
+.ax-data-table-card,
+.ax-data-table-card dd,
+.ax-data-table-card dt {
+  overflow-wrap: anywhere;
 }
 
 @media (min-width: 768px) { /* --ax-bp-md ↑ */
@@ -2159,6 +2198,7 @@ a.ax-kpi-card--linked:focus-visible {
 
 .ax-dropdown {
   position: relative;
+  max-width: 100%;
   width: fit-content;
 }
 
@@ -2176,6 +2216,10 @@ a.ax-kpi-card--linked:focus-visible {
   top: calc(100% + 0.5rem);
   right: 0;
   min-width: 15rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+  max-height: min(24rem, calc(100vh - 6rem));
+  overflow: auto;
+  overscroll-behavior: contain;
   padding: var(--ax-space-sm);
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-radius-md);
@@ -2235,6 +2279,23 @@ details[open].ax-dropdown .ax-dropdown-panel {
   opacity: 1;
   transform: translateY(0px);
   pointer-events: auto;
+}
+
+@media (max-width: 599.98px) {
+  .ax-dropdown {
+    width: 100%;
+  }
+
+  .ax-dropdown-trigger {
+    width: 100%;
+  }
+
+  .ax-dropdown-panel {
+    left: 0;
+    right: auto;
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 .ax-tabs {
@@ -2441,8 +2502,9 @@ details[open].ax-dropdown .ax-dropdown-panel {
 
 .ax-command-palette-body {
   min-height: 10rem;
-  max-height: 28rem;
+  max-height: min(28rem, calc(82vh - 8rem));
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 0 var(--ax-space-md) var(--ax-space-md);
 }
 
@@ -2864,6 +2926,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-home-section {
   display: grid;
   gap: var(--ax-space-md);
+  min-width: 0;
 }
 
 .ax-section-head {
@@ -2871,6 +2934,12 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--ax-space-md);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ax-section-head > * {
+  min-width: 0;
 }
 
 /* Quiet inline link (label + trailing arrow) */
@@ -3106,6 +3175,7 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
 .ax-related {
   display: grid;
   gap: var(--ax-space-md);
+  min-width: 0;
 }
 
 .ax-related-title {
@@ -3121,12 +3191,16 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   padding: 0;
   display: grid;
   gap: var(--ax-space-2xs);
+  min-width: 0;
 }
 
 .ax-related-item {
   display: flex;
   align-items: center;
   gap: var(--ax-space-sm);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: var(--ax-space-sm);
   border: 1px solid transparent;
   border-radius: var(--ax-radius-sm);
@@ -3165,6 +3239,8 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
   font-weight: 600;
   font-size: var(--ax-type-sm);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ax-related-value {
@@ -3173,7 +3249,9 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
   color: var(--ax-muted);
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ax-related-chevron {

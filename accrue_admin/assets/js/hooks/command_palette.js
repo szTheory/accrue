@@ -32,11 +32,7 @@ export const CommandPalette = {
         setTimeout(() => input.focus(), 0);
       }
     } else if (!isOpen && this.wasOpen) {
-      // Palette just closed: restore focus to the trigger element
-      if (this.previousFocus && typeof this.previousFocus.focus === "function") {
-        // Defer past the CSS exit transition so the focus ring appears after the palette is gone
-        setTimeout(() => this.previousFocus.focus(), 0);
-      }
+      this.restoreFocus();
       this.previousFocus = null;
     }
 
@@ -92,6 +88,24 @@ export const CommandPalette = {
   isOpen() {
     const wrapper = this.el.closest(".ax-command-palette-wrapper");
     return wrapper && wrapper.dataset.open === "true";
+  },
+
+  restoreFocus() {
+    const preferred = this.previousFocus && this.previousFocus.isConnected
+      ? this.previousFocus
+      : document.querySelector("[data-command-palette-trigger], #main-content, main");
+
+    if (preferred && typeof preferred.focus === "function") {
+      const needsTemporaryTabIndex =
+        preferred.tabIndex < 0 && !preferred.hasAttribute("tabindex");
+
+      if (needsTemporaryTabIndex) {
+        preferred.setAttribute("tabindex", "-1");
+      }
+
+      // Defer past the CSS exit transition so the focus ring appears after the palette is gone.
+      setTimeout(() => preferred.focus({ preventScroll: true }), 0);
+    }
   },
 
   moveActive(step) {

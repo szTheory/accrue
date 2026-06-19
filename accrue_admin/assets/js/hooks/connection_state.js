@@ -22,6 +22,12 @@ function restoreAttribute(element, name, value) {
   }
 }
 
+function focusWithoutScroll(element) {
+  if (element && typeof element.focus === "function") {
+    element.focus({ preventScroll: true });
+  }
+}
+
 export const ConnectionState = {
   mounted() {
     this.status = this.el.querySelector("[data-connection-status]");
@@ -46,6 +52,7 @@ export const ConnectionState = {
     window.addEventListener("online", this.handleOnline);
 
     this.setState("connected", { hidden: true });
+    this.ensurePageFocus();
   },
 
   disconnected() {
@@ -136,10 +143,19 @@ export const ConnectionState = {
     const focusWasLost = !active || active === document.body;
     const target = this.preStaleFocus;
 
-    if (focusWasLost && target && target.isConnected && typeof target.focus === "function") {
-      target.focus({ preventScroll: true });
+    if (focusWasLost && target && target.isConnected) {
+      focusWithoutScroll(target);
     }
 
     this.preStaleFocus = null;
+  },
+
+  ensurePageFocus() {
+    window.requestAnimationFrame(() => {
+      if (document.activeElement && document.activeElement !== document.body) return;
+
+      const target = this.el.querySelector("#main-content, main");
+      focusWithoutScroll(target);
+    });
   }
 };

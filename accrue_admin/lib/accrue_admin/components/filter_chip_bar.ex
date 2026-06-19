@@ -17,7 +17,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
       |> assign(:has_items, Enum.any?(assigns.items, &chip_active?/1))
 
     ~H"""
-    <section class={["ax-filter-chip-bar", @class]} aria-label={@label}>
+    <section class={["ax-filter-chip-bar", @class]} aria-label={@label} data-phase191-focus="filter-chip-bar">
       <header class="ax-filter-chip-header">
         <p class="ax-eyebrow">Filters</p>
         <p class="ax-body"><%= @label %></p>
@@ -50,6 +50,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         :if={@activation_href}
         href={@activation_href}
         class="ax-filter-chip-label ax-filter-chip-activation"
+        data-phase191-focus="filter-chip-apply"
         aria-label={"Apply #{chip_accessible_label(@item)} filter"}
       ><%= @label_text %></a>
       <span :if={!@activation_href} class="ax-filter-chip-label"><%= @label_text %></span>
@@ -58,6 +59,7 @@ defmodule AccrueAdmin.Components.FilterChipBar do
         :if={Map.get(@item, :remove_href)}
         href={Map.get(@item, :remove_href)}
         class="ax-filter-chip-action"
+        data-phase191-focus="filter-chip-clear"
         aria-label={"Remove #{chip_accessible_label(@item)} filter"}
       >
         Clear
