@@ -81,8 +81,8 @@ and the contributor working in the component system. 33 requirements across 8 th
 
 ### SEED — Fixture stress (exercise the matrix)
 
-- [ ] **SEED-01**: `examples/accrue_host` seeds reach every matrix cell in one click — null/missing optional fields, permission-denied, boundary pagination, high counts, non-ASCII names, and disconnected/reconnecting state — in addition to the existing long-name / multi-currency / dunning edge states.
-- [ ] **SEED-02**: Seed expansion is idempotent (re-runnable) and deterministic, consistent with the existing keyed-insert seed contract.
+- [x] **SEED-01**: `examples/accrue_host` seeds reach every matrix cell in one click — null/missing optional fields, permission-denied, boundary pagination, high counts, non-ASCII names, and disconnected/reconnecting state — in addition to the existing long-name / multi-currency / dunning edge states.
+- [x] **SEED-02**: Seed expansion is idempotent (re-runnable) and deterministic, consistent with the existing keyed-insert seed contract.
 
 ### VER — Idempotent verification & sign-off
 
@@ -123,8 +123,8 @@ and the contributor working in the component system. 33 requirements across 8 th
 | CPY-01 | 191 | Complete |
 | CPY-02 | 191 | Complete |
 | CPY-03 | 191 | Complete |
-| SEED-01 | 191 | Pending |
-| SEED-02 | 191 | Pending |
+| SEED-01 | 191 | Complete |
+| SEED-02 | 191 | Complete |
 | VER-02 | 192 | Pending |
 | VER-03 | 192 | Pending |
 | VER-04 | 192 | Pending |

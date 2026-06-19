@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
 status: executing
-stopped_at: Phase 191 context gathered
-last_updated: "2026-06-19T14:39:23.317Z"
+stopped_at: Completed 191-02-PLAN.md
+last_updated: "2026-06-19T14:50:08.316Z"
 last_activity: 2026-06-19
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 32
-  completed_plans: 26
+  completed_plans: 27
   percent: 67
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 ## Current Position
 
 Phase: 191 (page-flow-interaction-pass-fixture-stress-microcopy) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
 Last activity: 2026-06-19
@@ -156,6 +156,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 190 P05 | serial | 3 tasks | 5 files |
 | Phase 190 P06 | 19min | 2 tasks | 3 files |
 | Phase 191 P01 | 12 min | 3 tasks | 4 files |
+| Phase 191 P02 | 7 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -238,6 +239,8 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 190]: 190-05: Keep validation pending-baseline-evidence until admin-baseline.spec.js completes. — All other automated gates passed, but baseline hung under bounded retry and cannot support approved validation status.
 - [Phase 191]: Phase 191 page-flow inventory derives from baseline-manifest.js, not a second route list.
 - [Phase 191]: High-severity owner_phase 191 AX187 rows must be directly cited in the Phase 191 spec; medium rows may be covered by AX187 ID or normalized overlay tag.
+- [Phase 191]: Phase 191 matrix route records use static test-only UUIDs so reset plus reseed returns stable detail route IDs. — Plan 191-02 requires deterministic route IDs for page-flow fixtures.
+- [Phase 191]: The phase191-matrix endpoint remains in test/support E2E plug routes only; no production router or auth paths changed. — T-191-04 mitigation requires fixture reachability without production forced-state routes or auth bypasses.
 
 ### Pending Todos
 
@@ -291,8 +294,8 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-19T14:38:58.837Z
-Stopped at: Phase 191 context gathered
+Last session: 2026-06-19T14:50:08.310Z
+Stopped at: Completed 191-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
