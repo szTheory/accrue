@@ -384,17 +384,17 @@ await expect(page.locator("#main-content")).toBeVisible();
 |---|-------|---------|---------------|
 | A1 | `ajv` is the standard Node JSON Schema validator if full draft-07 validation is added. | Standard Stack | Low; planner can avoid adding `ajv` and use local validators, or add a human verification checkpoint before install. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 192 add a dedicated schema validator package?**
    - What we know: Current artifacts can be parsed and custom-validated with Node; `ajv` exists and passed registry legitimacy but was not verified from official docs in this session. [VERIFIED: npm registry]
-   - What's unclear: Whether maintainers want another dev dependency for stricter JSON Schema validation.
-   - Recommendation: Do not add `ajv` by default; only add it behind an explicit planner checkpoint.
+   - RESOLVED: Do not add `ajv` by default in Phase 192. Use custom fail-closed Node validation for the known Phase 187/192 artifact shapes. If an executor later proves full draft-07 JSON Schema validation is necessary, that package addition requires an explicit maintainer checkpoint before install.
+   - Planning impact: PLAN.md must not depend on a new validator package for success. Verifier tasks should parse and validate the required fields directly and fail closed on unknown or malformed artifact rows.
 
 2. **Where should final evidence artifacts live in CI?**
    - What we know: Decisions require manifest refs and no bulky committed PNG/ZIP artifacts; GitHub Actions can upload artifacts. [VERIFIED: 192-CONTEXT.md] [CITED: https://docs.github.com/en/actions/tutorials/store-and-share-data]
-   - What's unclear: Retention length and whether final evidence should be PR-only, workflow-dispatch-only, or attached to release closeout.
-   - Recommendation: Keep PR guardrails bounded; use workflow-dispatch final evidence run for full screenshot/trace/model evidence.
+   - RESOLVED: Keep PR guardrails bounded and deterministic. Run full screenshot, trace, visual/brand/microcopy advisory scoring, and maintainer review evidence as a Phase 192 final evidence workflow or manual release-closeout run. Store bulky screenshots, traces, reports, and ZIPs as CI/generated artifacts with repo-relative refs and checksums in `artifacts.manifest.json`; commit only structured scorecard/sign-off artifacts and manifest references.
+   - Planning impact: PLAN.md must schedule a non-PR-gating final evidence generation step before `phase192:scorecard` and `phase192:signoff`, and must verify each required lens has current evidence refs in `artifacts.manifest.json`.
 
 ## Environment Availability
 

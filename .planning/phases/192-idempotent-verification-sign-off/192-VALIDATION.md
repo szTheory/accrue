@@ -40,9 +40,11 @@ created: 2026-06-19
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 192-01-01 | 01 | 1 | VER-02 | T-192-01 | Reject malformed or missing scorecard artifacts without eval/dynamic code | Node artifact verifier | `node scripts/ci/verify_phase192_scorecard.mjs` | no - W0 | pending |
 | 192-01-02 | 01 | 1 | VER-02 | T-192-02 | Preserve repo-relative evidence refs under allowed roots only | Node artifact verifier | `node scripts/ci/verify_phase192_scorecard.mjs --manifest` | no - W0 | pending |
-| 192-02-01 | 02 | 1 | VER-02, VER-04 | T-192-03 | Generate markdown from structured artifacts; do not let markdown override JSON/NDJSON | Node reducer/verifier | `cd accrue_admin && npm run phase192:scorecard && cd .. && node scripts/ci/verify_phase192_scorecard.mjs` | no - W0 | pending |
-| 192-03-01 | 03 | 2 | VER-03 | T-192-04 | Run deterministic browser/a11y/motion guardrails serially without secrets | CI / Playwright | full guardrail command list from this file | partial | pending |
-| 192-04-01 | 04 | 2 | VER-04 | T-192-05 | Sign-off package exposes explicit maintainer accept/block checklist and artifact links | Static doc verifier | `node scripts/ci/verify_phase192_signoff.mjs` | no - W0 | pending |
+| 192-02-01 | 02 | 2 | VER-02 | T-192-03 | Build reducer and validate fixture output shapes; do not let markdown override JSON/NDJSON | Node reducer self-test / dry-run | `node accrue_admin/e2e/phase192-scorecard.mjs --self-test`; `cd accrue_admin && npm run phase192:scorecard -- --self-test`; `node accrue_admin/e2e/phase192-scorecard.mjs --dry-run` | no - W0 planned by 192-02 | pending |
+| 192-03-01 | 03 | 1 | VER-03 | T-192-04 | Run deterministic browser/a11y/motion guardrails serially without secrets | CI / Playwright | `bash scripts/ci/verify_phase192_guardrail_contract.sh`; `cd accrue_admin && npm run phase192:component-lab`; `bash scripts/ci/verify_phase192_admin_guardrails.sh` | partial - W0 planned by 192-03 | pending |
+| 192-04-01 | 04 | 2 | VER-03 | T-192-05 | Wire deterministic guardrails into CI without promoting final evidence commands to PR gates | CI static verifier | `bash scripts/ci/verify_phase192_ci_contract.sh` | no - depends on 192-03 | pending |
+| 192-05-01 | 05 | 3 | VER-04 | T-192-05 | Sign-off package exposes explicit maintainer accept/block checklist and artifact links | Static doc verifier | `node accrue_admin/e2e/phase192-gallery.mjs --self-test`; `cd accrue_admin && npm run phase192:signoff && cd .. && node scripts/ci/verify_phase192_signoff.mjs` | no - W0 planned by 192-05 | pending |
+| 192-06-02 | 06 | 4 | VER-02, VER-04 | T-192-06-02 | Final evidence inventory preserves Phase 187 artifacts and writes final artifacts only under the Phase 192 directory | Final evidence inventory / scorecard | `node -e "...execFileSync('node',['accrue_admin/e2e/phase192-scorecard.mjs','--dry-run'])..."`; `cd accrue_admin && npm run phase192:scorecard`; `cd accrue_admin && npm run phase192:signoff` | no - depends on 192-01, 192-02, 192-05 | pending |
 
 *Status: pending, green, red, flaky*
 
@@ -50,10 +52,13 @@ created: 2026-06-19
 
 ## Wave 0 Requirements
 
-- [ ] `scripts/ci/verify_phase192_scorecard.mjs` - validates `final.cells.json`, `scorecard.delta.json`, `regressions.ndjson`, and `artifacts.manifest.json` against strict comparison rules.
-- [ ] `scripts/ci/verify_phase192_signoff.mjs` - verifies `192-SIGN-OFF.md` has executive status, curated gallery rows, CI guardrail status, artifact links, and explicit checklist outcome.
-- [ ] `accrue_admin/e2e/phase192-scorecard.mjs` or equivalent - creates final cells from raw evidence without mutating Phase 187 artifacts.
-- [ ] Component-lab structural coverage command selected and wired into CI, using existing registry/ExUnit/verifier patterns.
+`nyquist_compliant` remains `false` until these planned Wave 0 verifier dependencies have been executed and their files exist. The unchecked boxes below are not open design gaps; each item names the owning plan and command chain that creates or proves it.
+
+- [ ] Plan 192-01 owns `scripts/ci/verify_phase192_scorecard.mjs`; execute `node scripts/ci/verify_phase192_scorecard.mjs --self-test` and `node --check scripts/ci/verify_phase192_scorecard.mjs`. This verifier validates `final.cells.json`, `scorecard.delta.json`, `regressions.ndjson`, and `artifacts.manifest.json` against strict comparison rules after Plan 192-06 regenerates them from the final evidence workflow.
+- [ ] Plan 192-01 owns `scripts/ci/verify_phase192_signoff.mjs`; execute `node scripts/ci/verify_phase192_signoff.mjs --self-test` and `node --check scripts/ci/verify_phase192_signoff.mjs`. This verifier checks `192-SIGN-OFF.md` after Plan 192-05 generates it.
+- [ ] Plan 192-02 owns `accrue_admin/e2e/phase192-scorecard.mjs` and package-script wiring; execute `node accrue_admin/e2e/phase192-scorecard.mjs --self-test`, `cd accrue_admin && npm run phase192:scorecard -- --self-test`, and `node accrue_admin/e2e/phase192-scorecard.mjs --dry-run`. The dry-run is the Phase-192-only evidence inventory path used by Plan 192-06 and must not mutate `.planning/phases/187-audit-baseline/*` or write final scorecard artifacts before Plan 192-06.
+- [ ] Plan 192-03 owns component-lab structural coverage through `phase192:component-lab`; execute `cd accrue_admin && npm run phase192:component-lab` and `bash scripts/ci/verify_phase192_guardrail_contract.sh`. Plan 192-04 then proves CI wiring with `bash scripts/ci/verify_phase192_ci_contract.sh`.
+- [ ] Plan 192-05 owns `accrue_admin/e2e/phase192-gallery.mjs` and `phase192:signoff`; execute `node accrue_admin/e2e/phase192-gallery.mjs --self-test`, `cd accrue_admin && npm run phase192:signoff`, and `node scripts/ci/verify_phase192_signoff.mjs`.
 
 ---
 
@@ -68,11 +73,11 @@ created: 2026-06-19
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all missing references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < one task commit
+- [ ] All tasks have `<automated>` verify or named Wave 0 dependencies owned by Plans 192-01 through 192-05.
+- [ ] Sampling continuity: no 3 consecutive tasks without automated verify.
+- [ ] Wave 0 covers all missing references through the owner-plan command chain listed above.
+- [ ] No watch-mode flags.
+- [ ] Feedback latency < one task commit.
 - [ ] `nyquist_compliant: true` set in frontmatter after Wave 0 verifier files exist
 
 **Approval:** pending
