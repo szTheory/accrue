@@ -49,7 +49,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [ ] **Phase 188: Foundations hardening** — Typography bundles, reading-measure application, formal z-index/layer system, motion-gap closure, inert-Tailwind resolution, and dark-mode role/focus/scrollbar/disabled completeness — root-level fixes.
 - [ ] **Phase 189: Primitive & form components + component lab** — Every component in isolation × full state matrix × theme × viewport × a11y; root-level (DRY) fixes; grow `/dev/components` into the systematic gallery (no PhoenixStorybook dep).
 - [x] **Phase 190: Navigation, data-display & meta-component cohesion** — App shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component groups; spacing rhythm, hierarchy, responsive behavior, operator-stress states.
-- [ ] **Phase 191: Page & flow interaction pass + fixture stress + microcopy** — Walk every page against its JTBD across all paths; fix the Phase-187 behavioral defects; expand `examples/accrue_host` seeds for missing matrix cells; on-brand microcopy pass.
+- [x] **Phase 191: Page & flow interaction pass + fixture stress + microcopy** — Walk every page against its JTBD across all paths; fix the Phase-187 behavioral defects; expand `examples/accrue_host` seeds for missing matrix cells; on-brand microcopy pass. (completed 2026-06-19)
 - [ ] **Phase 192: Idempotent verification & sign-off** — Full re-run + adversarial multi-lens judge; only-forward scorecard ≥ baseline (zero regressions); regression guardrails in CI; maintainer screenshot UAT.
 
 ### Phase Details
