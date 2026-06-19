@@ -59,6 +59,40 @@ defmodule AccrueAdmin.Components.AppShellTest do
     assert html =~ "Acme Corp"
   end
 
+  test "renders Phase 191 connection status and stale action contract" do
+    html =
+      render_component(
+        fn assigns ->
+          assigns = assigns
+
+          ~H"""
+          <AppShell.app_shell
+            brand={%{app_name: "Accrue", logo_url: nil}}
+            current_path="/billing"
+            mount_path="/billing"
+            page_title="Dashboard"
+            theme="system"
+            active_organization_name={nil}
+          >
+            <button class="ax-button ax-button-primary" phx-click="refund_charge">
+              Refund charge
+            </button>
+          </AppShell.app_shell>
+          """
+        end,
+        %{}
+      )
+
+    assert html =~ ~s(id="accrue-admin-shell")
+    assert html =~ ~s(phx-hook="ConnectionState")
+    assert html =~ ~s(data-connection-state="connected")
+    assert html =~ ~s(data-stale-disable-selector=)
+    assert html =~ ~s(role="status")
+    assert html =~ ~s(aria-live="polite")
+    assert html =~ "Connection lost. Reconnecting before actions can run."
+    assert html =~ "Connection restored. Review the current state before running an action."
+  end
+
   test "sidebar renders journey group headings and promoted recovery link" do
     html =
       render_component(
