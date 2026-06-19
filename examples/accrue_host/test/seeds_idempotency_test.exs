@@ -17,6 +17,18 @@ defmodule AccrueHost.SeedsIdempotencyTest do
   use AccrueHost.DataCase, async: false
 
   alias Accrue.Events.Event
+  alias Accrue.Connect.Account
+
+  alias Accrue.Billing.{
+    Charge,
+    Coupon,
+    Customer,
+    Invoice,
+    PromotionCode,
+    Subscription
+  }
+
+  alias Accrue.Webhook.WebhookEvent
   alias AccrueHost.Accounts.User
   alias AccrueHost.Billing
   alias AccrueHost.Repo
@@ -86,6 +98,39 @@ defmodule AccrueHost.SeedsIdempotencyTest do
       assert Repo.aggregate(from(u in User, where: u.email == "past-due@example.com"), :count) ==
                1
     end
+
+    test "re-running the seed keeps Phase 191 fixture rows and append-only events stable" do
+      Code.eval_file(@seed_path)
+
+      first_counts = phase191_fixture_counts()
+      first_route_ids = phase191_route_ids()
+
+      assert first_counts == %{
+               customers: 28,
+               subscriptions: 2,
+               invoices: 1,
+               charges: 1,
+               coupons: 1,
+               promotion_codes: 1,
+               connect_accounts: 1,
+               webhooks: 1,
+               events: 1
+             }
+
+      assert first_route_ids.customer_id == "19100000-0000-4000-8000-00000000a001"
+      assert first_route_ids.subscription_id == "19100000-0000-4000-8000-00000000a002"
+      assert first_route_ids.invoice_id == "19100000-0000-4000-8000-00000000a003"
+      assert first_route_ids.charge_id == "19100000-0000-4000-8000-00000000a004"
+      assert first_route_ids.coupon_id == "19100000-0000-4000-8000-00000000a005"
+      assert first_route_ids.promotion_code_id == "19100000-0000-4000-8000-00000000a006"
+      assert first_route_ids.connect_account_id == "19100000-0000-4000-8000-00000000a007"
+      assert first_route_ids.webhook_id == "19100000-0000-4000-8000-00000000a008"
+
+      Code.eval_file(@seed_path)
+
+      assert phase191_fixture_counts() == first_counts
+      assert phase191_route_ids() == first_route_ids
+    end
   end
 
   defp seed_dunning_event_count do
@@ -99,5 +144,80 @@ defmodule AccrueHost.SeedsIdempotencyTest do
     org = Repo.get_by!(AccrueHost.Accounts.Organization, slug: slug)
     {:ok, %{subscription: subscription}} = Billing.billing_state_for(org)
     subscription.dunning_campaign_started_at
+  end
+
+  defp phase191_fixture_counts do
+    %{
+      customers:
+        Repo.aggregate(
+          from(c in Customer, where: like(c.processor_id, "cus_phase191_host%")),
+          :count
+        ),
+      subscriptions:
+        Repo.aggregate(
+          from(s in Subscription, where: like(s.processor_id, "sub_phase191_host%")),
+          :count
+        ),
+      invoices:
+        Repo.aggregate(
+          from(i in Invoice, where: like(i.processor_id, "in_phase191_host%")),
+          :count
+        ),
+      charges:
+        Repo.aggregate(
+          from(c in Charge, where: like(c.processor_id, "ch_phase191_host%")),
+          :count
+        ),
+      coupons:
+        Repo.aggregate(
+          from(c in Coupon, where: like(c.processor_id, "coupon_phase191_host%")),
+          :count
+        ),
+      promotion_codes:
+        Repo.aggregate(
+          from(p in PromotionCode, where: like(p.processor_id, "promo_phase191_host%")),
+          :count
+        ),
+      connect_accounts:
+        Repo.aggregate(
+          from(a in Account, where: like(a.stripe_account_id, "acct_phase191_host%")),
+          :count
+        ),
+      webhooks:
+        Repo.aggregate(
+          from(w in WebhookEvent, where: like(w.processor_event_id, "evt_phase191_host%")),
+          :count
+        ),
+      events:
+        Repo.aggregate(
+          from(e in Event, where: like(e.idempotency_key, "seed-phase191-%")),
+          :count
+        )
+    }
+  end
+
+  defp phase191_route_ids do
+    %{
+      customer_id:
+        id_for(Customer, processor: "fake", processor_id: "cus_phase191_host_customer"),
+      subscription_id:
+        id_for(Subscription, processor: "fake", processor_id: "sub_phase191_host_active"),
+      invoice_id: id_for(Invoice, processor: "fake", processor_id: "in_phase191_host_boundary"),
+      charge_id: id_for(Charge, processor: "fake", processor_id: "ch_phase191_host_boundary"),
+      coupon_id: id_for(Coupon, processor: "fake", processor_id: "coupon_phase191_host_unicode"),
+      promotion_code_id:
+        id_for(PromotionCode, processor: "fake", processor_id: "promo_phase191_host_unicode"),
+      connect_account_id: id_for(Account, stripe_account_id: "acct_phase191_host_boundary"),
+      webhook_id:
+        id_for(WebhookEvent, processor: "stripe", processor_event_id: "evt_phase191_host_dead"),
+      source_event_id: id_for(Event, idempotency_key: "seed-phase191-fixture-seeded")
+    }
+  end
+
+  defp id_for(schema, clauses) do
+    case Repo.get_by(schema, clauses) do
+      nil -> nil
+      %{id: id} -> id
+    end
   end
 end
