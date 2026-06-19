@@ -49,7 +49,7 @@ Declared values for Phase 192 verification and sign-off surfaces (all multiples 
 | `--ax-space-3xl` | 64px | Rare page-level separation only; do not use inside dense audit tables |
 
 Exceptions:
-- `--ax-space-2xs` (2px) may appear only in dense pre-existing audit/table affordances inherited from the admin design system.
+- Dense pre-existing audit/table affordances inherited from the admin design system must use the declared spacing scale above; do not introduce or rely on sub-4px spacing tokens.
 - Scorecard and sign-off rows may use compact density, but every interactive evidence link, disclosure, filter, or checklist control must reach a 44px minimum touch target at 320px and 375px.
 - Evidence tables must degrade to stacked rows/cards at 320px and 375px; do not squeeze all artifact columns into a horizontally unreadable table.
 - Long artifact paths, cell IDs, command strings, route IDs, checksums, and NDJSON evidence refs must wrap with `overflow-wrap: anywhere`.
