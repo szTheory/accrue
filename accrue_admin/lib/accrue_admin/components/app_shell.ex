@@ -24,15 +24,62 @@ defmodule AccrueAdmin.Components.AppShell do
         :nav_items,
         Nav.items(assigns.mount_path, assigns.current_path, assigns.nav_attention_counts)
       )
+      |> assign(
+        :stale_disable_selector,
+        Enum.join(
+          [
+            "[data-stale-disable]",
+            "button[phx-click]",
+            "button[phx-submit]",
+            "button[form]",
+            "form[phx-submit] button[type='submit']",
+            "form[phx-submit] button:not([type])",
+            "input[type='submit'][phx-click]",
+            "input[type='submit'][phx-submit]",
+            "[data-role='confirm-action']",
+            "[data-role='confirm-refund']",
+            "[data-role='confirm-replay']",
+            "[data-role='confirm-bulk-replay']",
+            "[data-role='step-up-submit']"
+          ],
+          ", "
+        )
+      )
 
     ~H"""
-    <div class="ax-shell" data-mount-path={@mount_path}>
+    <div
+      id="accrue-admin-shell"
+      class="ax-shell"
+      data-mount-path={@mount_path}
+      data-connection-state="connected"
+      data-stale-disable-selector={@stale_disable_selector}
+      phx-hook="ConnectionState"
+    >
       <Sidebar.sidebar brand={@brand} current_path={@current_path} items={@nav_items} />
 
       <div class="ax-shell-main">
         <div :if={@active_organization_name} class="ax-active-org-banner" role="status">
           <span class="ax-label">Active organization</span>
           <span class="ax-active-org-name"><%= @active_organization_name %></span>
+        </div>
+
+        <div
+          id="accrue-admin-connection-status"
+          class="ax-connection-state"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          data-connection-status
+          data-connection-state="connected"
+          hidden
+        >
+          <span class="ax-status-dot" aria-hidden="true"></span>
+          <span
+            data-connection-state-message
+            data-disconnected-copy="Connection lost. Reconnecting before actions can run."
+            data-restored-copy="Connection restored. Review the current state before running an action."
+          >
+          </span>
         </div>
 
         <Topbar.topbar brand={@brand} page_title={@page_title} theme={@theme} />

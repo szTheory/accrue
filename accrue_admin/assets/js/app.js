@@ -5,6 +5,7 @@ import { initThemeControls } from "./hooks/accrue_theme";
 import { initShellNav } from "./hooks/accrue_shell_nav";
 import { initDropdowns } from "./hooks/dropdown";
 import { CommandPalette } from "./hooks/command_palette";
+import { ConnectionState } from "./hooks/connection_state";
 import { FocusTrap } from "./hooks/focus_trap";
 import { SidebarCollapse } from "./hooks/sidebar_collapse";
 
@@ -26,7 +27,7 @@ ready(() => {
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   params: csrfToken ? { _csrf_token: csrfToken } : {},
-  hooks: { CommandPalette, FocusTrap, SidebarCollapse }
+  hooks: { CommandPalette, ConnectionState, FocusTrap, SidebarCollapse }
 });
 
 liveSocket.connect();

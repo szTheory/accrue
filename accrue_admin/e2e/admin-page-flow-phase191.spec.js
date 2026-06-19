@@ -106,7 +106,7 @@ function allAx187Ids() {
   return [...PHASE191_HIGH_AX187_IDS, ...PHASE191_MEDIUM_AX187_IDS];
 }
 
-test.describe("Phase 191 page-flow regression harness @ax187 @fixtures @copy @responsive @scroll @reconnect", () => {
+test.describe("Phase 191 page-flow regression harness", () => {
   test("AX187 source map covers owner-phase 191 rows and D-30 categories @ax187", async () => {
     const defects = loadPhase191Defects();
     const high = defects.filter((defect) => defect.severity === "high").map((defect) => defect.id).sort();
@@ -238,7 +238,7 @@ test.describe("Phase 191 page-flow regression harness @ax187 @fixtures @copy @re
     context,
   }) => {
     await reset(request);
-    await seedPhase191Matrix(request);
+    const fixtureData = await seedPhase191Matrix(request);
     await login(page, "/billing/customers");
 
     const search = page.locator('input[type="search"], [data-role="filter-form"] input, #search-trigger').first();
@@ -247,17 +247,19 @@ test.describe("Phase 191 page-flow regression harness @ax187 @fixtures @copy @re
     await page.keyboard.press("Enter");
     await assertNoBodyFocus(page, "customer filter patch focus");
 
+    await login(page, resolvePhase191Route("charge-detail", fixtureData));
+    const staleAction = page.getByRole("button", { name: "Refund charge" });
+    await expect(staleAction).toBeVisible();
+    await staleAction.focus();
+
     await context.setOffline(true);
     await expect(page.getByText(/Connection lost\. Reconnecting before actions can run\./i)).toBeVisible();
-    const mutatingActions = page.locator('button:has-text("Refund"), button:has-text("Void"), button:has-text("Replay"), button:has-text("Cancel")');
-    const count = await mutatingActions.count();
-    for (let index = 0; index < count; index += 1) {
-      await expect(mutatingActions.nth(index)).toBeDisabled();
-    }
+    await expect(staleAction).toBeDisabled();
 
     await context.setOffline(false);
     await expect(page.getByText(/Connection restored\. Review the current state before running an action\./i)).toBeVisible();
-    await assertNoBodyFocus(page, "customer reconnect focus");
+    await expect(staleAction).toBeEnabled();
+    await assertNoBodyFocus(page, "charge reconnect focus");
   });
 
   test("AX187-340 AX187-341 AX187-342 AX187-343 AX187-344 AX187-345 AX187-346 AX187-347 AX187-348 AX187-349 AX187-350 AX187-351 AX187-352 AX187-353 AX187-354 AX187-355 AX187-356 AX187-357 AX187-358 AX187-359 AX187-360 AX187-361 AX187-362 AX187-363 AX187-364 AX187-365 AX187-366 AX187-367 AX187-368 AX187-369 AX187-370 AX187-371 AX187-372 AX187-373 AX187-374 AX187-375 AX187-376 AX187-377 AX187-378 AX187-379 AX187-380 AX187-381 AX187-382 AX187-383 AX187-384 AX187-385 AX187-386 AX187-387 AX187-388 AX187-389 AX187-390 AX187-391 AX187-392 AX187-393 AX187-394 AX187-395 AX187-396 AX187-397 AX187-398 AX187-399 AX187-400 AX187-401 AX187-402 AX187-403 AX187-404 AX187-405 AX187-406 AX187-407 AX187-408 AX187-409 AX187-410 AX187-411 AX187-412 AX187-413 AX187-414 AX187-415 AX187-416 AX187-417 AX187-418 AX187-419 AX187-420 AX187-421 AX187-422 AX187-423 AX187-424 AX187-425 AX187-426 AX187-427 AX187-428 AX187-429 AX187-430 AX187-431 AX187-432 AX187-433 AX187-434 AX187-435 AX187-440 AX187-441 AX187-442 AX187-443 state copy is recoverable and object-specific @copy @fixtures @ax187", async ({

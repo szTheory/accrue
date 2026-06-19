@@ -548,6 +548,39 @@ button {
   font-weight: 600;
 }
 
+.ax-connection-state {
+  display: flex;
+  align-items: center;
+  gap: var(--ax-space-sm);
+  margin: var(--ax-space-sm) var(--ax-space-lg) 0;
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  border: 1px solid var(--ax-status-info-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-status-info-bg);
+  color: var(--ax-status-info-text);
+  font: var(--ax-type-body-sm-font);
+}
+
+.ax-connection-state[hidden] {
+  display: none;
+}
+
+.ax-connection-state[data-connection-state="disconnected"] {
+  border-color: var(--ax-status-warning-border);
+  background: var(--ax-status-warning-bg);
+  color: var(--ax-status-warning-text);
+}
+
+.ax-connection-state[data-connection-state="restored"] {
+  border-color: var(--ax-status-info-border);
+  background: var(--ax-status-info-bg);
+  color: var(--ax-status-info-text);
+}
+
+.ax-connection-state .ax-status-dot {
+  flex: none;
+}
+
 .ax-sidebar-brand {
   align-items: center;
   margin-bottom: var(--ax-space-xl);
