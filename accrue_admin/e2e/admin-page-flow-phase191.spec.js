@@ -106,7 +106,7 @@ function allAx187Ids() {
   return [...PHASE191_HIGH_AX187_IDS, ...PHASE191_MEDIUM_AX187_IDS];
 }
 
-test.describe("Phase 191 page-flow regression harness @ax187 @fixtures @copy @responsive @overlay @focus @scroll @reconnect", () => {
+test.describe("Phase 191 page-flow regression harness @ax187 @fixtures @copy @responsive @scroll @reconnect", () => {
   test("AX187 source map covers owner-phase 191 rows and D-30 categories @ax187", async () => {
     const defects = loadPhase191Defects();
     const high = defects.filter((defect) => defect.severity === "high").map((defect) => defect.id).sort();
@@ -184,35 +184,55 @@ test.describe("Phase 191 page-flow regression harness @ax187 @fixtures @copy @re
   }) => {
     await reset(request);
     const fixtureData = await seedPhase191Matrix(request);
-    const webhookRoute = resolvePhase191Route("webhook-detail", fixtureData);
 
-    await login(page, webhookRoute);
+    await login(page, "/billing/dev/components?group=drawer-form");
+    const drawerShell = page.locator("#grp190-drawer-form-shell");
+    await expect(drawerShell).toBeVisible();
+    await expect(drawerShell).toHaveAttribute("phx-hook", "FocusTrap");
+    await expect(drawerShell).toHaveAttribute("data-focus-trap-fallback", "#grp190-drawer-form-shell-title");
+    await assertFocusWithin(page, drawerShell, "drawer-form proof drawer");
 
-    const trigger = page.locator('[data-role="replay-single"], button:has-text("Replay webhook")').first();
-    await expect(trigger).toBeVisible();
-    await trigger.focus();
-    await trigger.click();
+    const drawerPanel = drawerShell.locator(".ax-detail-drawer");
+    await assertTopPointerTarget(drawerPanel.locator(".ax-detail-drawer-header"), "drawer-form proof header");
+    const drawerPrimaryAction = drawerPanel.locator("button:has-text('Save contact')");
+    await drawerPrimaryAction.scrollIntoViewIfNeeded();
+    await assertTopPointerTarget(drawerPrimaryAction, "drawer-form proof primary action");
 
-    const overlay = page.locator('[role="dialog"], [data-role="confirm-panel"], .ax-detail-drawer').first();
-    await expect(overlay).toBeVisible();
-    await assertTopPointerTarget(overlay, "webhook replay overlay");
-    await assertFocusWithin(page, overlay, "webhook replay overlay");
+    const chargeRoute = resolvePhase191Route("charge-detail", fixtureData);
+    await login(page, chargeRoute);
 
-    const primary = overlay.locator("button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex='-1'])").first();
-    await assertTopPointerTarget(primary, "webhook replay primary control");
+    const refundRowsBefore = await page.locator("text=fee refunded").count();
+    await page.locator("#charge-refund-form").evaluate((form) => form.requestSubmit());
+
+    const confirmPanel = page.locator('[data-role="confirm-panel"]');
+    await expect(confirmPanel).toBeVisible();
+
+    const confirmRefund = confirmPanel.locator('[data-role="confirm-refund"]');
+    await confirmRefund.focus();
+    await confirmRefund.click();
+
+    const stepUp = page.locator("#accrue-admin-step-up-dialog");
+    await expect(stepUp).toBeVisible();
+    await expect(stepUp).toHaveAttribute("phx-hook", "FocusTrap");
+    await expect(stepUp).toHaveAttribute("data-focus-trap-close-event", "step_up_dismiss");
+    await assertFocusWithin(page, stepUp, "charge refund step-up modal");
+    await assertTopPointerTarget(stepUp.locator(".ax-step-up-modal"), "charge refund step-up panel");
+    await assertTopPointerTarget(stepUp.locator('[data-role="step-up-submit"]'), "charge refund step-up submit");
 
     await page.keyboard.press("Escape");
-    await expect(overlay).toBeHidden();
-    await expect(trigger).toBeFocused();
+    await expect(stepUp).toBeHidden();
+    await assertNoBodyFocus(page, "charge refund step-up Escape restore");
+    await expect(page.locator("text=fee refunded")).toHaveCount(refundRowsBefore);
 
-    await trigger.click();
-    await expect(overlay).toBeVisible();
+    await confirmRefund.click();
+    await expect(stepUp).toBeVisible();
     await page.mouse.click(2, 2);
-    await expect(overlay).toBeHidden();
-    await expect(trigger).toBeFocused();
+    await expect(stepUp).toBeHidden();
+    await assertNoBodyFocus(page, "charge refund step-up outside-click restore");
+    await expect(page.locator("text=fee refunded")).toHaveCount(refundRowsBefore);
   });
 
-  test("AX187-104 AX187-105 AX187-106 AX187-107 AX187-108 AX187-109 AX187-110 AX187-115 AX187-116 LiveView patch and reconnect states keep focus stable @reconnect @focus @ax187", async ({
+  test("AX187-104 AX187-105 AX187-106 AX187-107 AX187-108 AX187-109 AX187-110 AX187-115 AX187-116 LiveView patch and reconnect states keep focus stable @reconnect @ax187", async ({
     page,
     request,
     context,
