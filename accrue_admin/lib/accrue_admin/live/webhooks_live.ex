@@ -85,8 +85,8 @@ defmodule AccrueAdmin.Live.WebhooksLive do
 
             {:noreply, socket}
 
-          {:error, reason} ->
-            {:noreply, push_flash(socket, :error, inspect(reason))}
+          {:error, _reason} ->
+            {:noreply, push_flash(socket, :error, bulk_replay_error_copy(socket))}
         end
     end
   end
@@ -190,7 +190,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
           <section :if={@pending_bulk_replay} class="ax-card" data-role="bulk-replay-confirm">
             <p class="ax-label">Confirm bulk replay</p>
             <p class="ax-body">
-              <%= bulk_replay_confirmation(@pending_bulk_replay.count) %>
+              <%= bulk_replay_confirmation(@pending_bulk_replay.count, @current_owner_scope) %>
             </p>
             <div class="ax-page-header">
               <button
@@ -329,7 +329,19 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   defp normalize_filter_value(value) when is_atom(value), do: Atom.to_string(value)
   defp normalize_filter_value(value), do: value
 
-  defp bulk_replay_confirmation(count), do: Copy.webhooks_bulk_replay_confirm_question(count)
+  defp bulk_replay_confirmation(count, owner_scope) do
+    Copy.webhooks_bulk_replay_confirm_question(count,
+      owner_scope: owner_scope_copy(owner_scope)
+    )
+  end
+
+  defp bulk_replay_error_copy(socket) do
+    Copy.page_state_copy(:recoverable_error,
+      resource: "webhook bulk replay",
+      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
+      recovery: "retry from the filtered webhook queue"
+    ).body
+  end
 
   defp bulk_replay_success(%{mode: :organization}),
     do: Copy.Locked.bulk_replay_success_organization()
@@ -395,6 +407,12 @@ defmodule AccrueAdmin.Live.WebhooksLive do
   end
 
   defp scoped_path(mount_path, suffix, _owner_scope), do: mount_path <> suffix
+
+  defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
+    do: "organization #{slug}"
+
+  defp owner_scope_copy(%{mode: :global}), do: "global owner scope"
+  defp owner_scope_copy(_owner_scope), do: "the active organization scope"
 
   defp default_brand do
     %{app_name: "Billing", logo_url: nil, accent_hex: "#5D79F6", accent_contrast_hex: "#FAFBFC"}

@@ -653,7 +653,7 @@ defmodule AccrueAdmin.Copy do
       "Webhook deliveries appear here after Stripe events are recorded for this organization. If you expected deliveries, check filters or confirm your endpoint is receiving traffic."
 
   def webhooks_bulk_replay_confirm_question(count),
-    do: webhooks_bulk_replay_confirm_question(count, owner_scope: "the active organization")
+    do: webhooks_bulk_replay_confirm_question(count, owner_scope: "the active organization scope")
 
   def webhooks_bulk_replay_confirm_question(count, opts) do
     owner_scope = option(opts, :owner_scope, "the active organization")

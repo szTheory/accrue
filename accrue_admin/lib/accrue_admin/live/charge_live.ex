@@ -69,9 +69,14 @@ defmodule AccrueAdmin.Live.ChargeLive do
       {:noreply, push_flash(socket, :warning, Copy.charge_prepare_refund_warning())}
     else
       case StepUp.require_fresh(socket, step_up_action(action), &execute_refund(&1, action)) do
-        {:ok, socket} -> {:noreply, socket}
-        {:challenge, socket} -> {:noreply, socket}
-        {:error, reason, socket} -> {:noreply, push_flash(socket, :error, inspect(reason))}
+        {:ok, socket} ->
+          {:noreply, socket}
+
+        {:challenge, socket} ->
+          {:noreply, socket}
+
+        {:error, _reason, socket} ->
+          {:noreply, push_flash(socket, :error, charge_refund_error_copy(socket))}
       end
     end
   end
@@ -242,7 +247,7 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
             <section :if={@pending_refund} class="ax-card" data-role="confirm-panel">
               <p class="ax-label">Confirm refund</p>
-              <p class="ax-body ax-measure"><%= refund_copy(@pending_refund, @charge.currency) %></p>
+              <p class="ax-body ax-measure"><%= refund_copy(@pending_refund, @charge) %></p>
               <div class="ax-page-header">
                 <button phx-click="confirm_refund" class="ax-button ax-button-primary" data-role="confirm-refund">
                   Confirm refund
@@ -428,8 +433,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
         |> refresh_charge(socket.assigns.charge.id)
         |> push_flash(:info, Copy.charge_refund_created_info())
 
-      {:error, reason} ->
-        push_flash(socket, :error, inspect(reason))
+      {:error, _reason} ->
+        push_flash(socket, :error, charge_refund_error_copy(socket))
     end
     |> assign(:pending_refund, nil)
   end
@@ -611,11 +616,8 @@ defmodule AccrueAdmin.Live.ChargeLive do
 
   defp money_text(_amount_minor, _currency), do: "--"
 
-  defp refund_copy(action, currency) do
-    amount = money_text(action.amount_minor, currency)
-
-    fee_note =
-      "Existing refunds will continue to show stripe_fee_refunded_amount_minor and merchant_loss_amount_minor."
+  defp refund_copy(action, charge) do
+    amount = money_text(action.amount_minor, charge.currency)
 
     source =
       if action.source_event_id do
@@ -624,8 +626,33 @@ defmodule AccrueAdmin.Live.ChargeLive do
         ""
       end
 
-    "Refund #{amount}. #{fee_note}#{source}"
+    base =
+      Copy.charge_refund_confirm_message(
+        charge_id: charge.id,
+        amount: amount,
+        audit_subject: "a refund ledger row"
+      )
+
+    if source == "" do
+      base
+    else
+      String.replace_suffix(base, " Continue?", ".#{source} Continue?")
+    end
   end
+
+  defp charge_refund_error_copy(socket) do
+    Copy.page_state_copy(:recoverable_error,
+      resource: "charge #{socket.assigns.charge.id} refund",
+      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
+      recovery: "retry from the charge refund panel"
+    ).body
+  end
+
+  defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
+    do: "organization #{slug}"
+
+  defp owner_scope_copy(%{mode: :global}), do: "global owner scope"
+  defp owner_scope_copy(_owner_scope), do: "the active organization scope"
 
   defp push_flash(socket, kind, message) do
     assign(socket, :flashes, [%{kind: kind, message: message} | socket.assigns.flashes])

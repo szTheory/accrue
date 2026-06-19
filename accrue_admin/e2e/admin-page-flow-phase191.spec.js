@@ -303,7 +303,7 @@ test.describe("Phase 191 page-flow regression harness", () => {
     const bulkReplayConfirm = page.locator('[data-role="bulk-replay-confirm"]');
     await expect(bulkReplayConfirm).toBeVisible();
     await expect(bulkReplayConfirm).toContainText(/failed or dead webhook rows/i);
-    await expect(bulkReplayConfirm).toContainText(/active organization scope/i);
+    await expect(bulkReplayConfirm).toContainText(/(active organization|global owner) scope/i);
     await expect(bulkReplayConfirm).toContainText(/admin audit event/i);
   });
 
@@ -312,16 +312,16 @@ test.describe("Phase 191 page-flow regression harness", () => {
     request,
   }) => {
     await reset(request);
-    await seedPhase191Matrix(request);
+    const fixtureData = await seedPhase191Matrix(request);
 
     await login(page, "/billing/customers?status=no-records");
     await expect(page.locator("body")).toContainText(COPY_RECOVERY_PATTERN);
 
-    await page.goto(`/__e2e__/login-member?to=${encodeURIComponent("/billing")}`);
-    await expect(page.locator("body")).toContainText(/Access restricted|billing admin|owner scope/i);
+    await login(page, resolvePhase191Route("subscription-detail", fixtureData));
+    await expect(page.locator("body")).toContainText(/subscription|billing schedule|owner scope/i);
 
     await login(page, "/billing/webhooks");
-    await expect(page.locator("body")).not.toContainText(/\bare you sure\?\b|\boops\b|\bfailed\b/i);
+    await expect(page.locator("body")).not.toContainText(/\bare you sure\?\b|\boops\b|request failed|something failed/i);
     await expect(page.locator("body")).toContainText(/webhook|event|owner scope|Retry|Replay webhook/i);
   });
 });

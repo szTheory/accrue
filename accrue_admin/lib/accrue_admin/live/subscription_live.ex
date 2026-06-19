@@ -89,9 +89,14 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
                step_up_action(action, socket.assigns.subscription),
                &execute_pending_action(&1, action)
              ) do
-          {:ok, socket} -> {:noreply, socket}
-          {:challenge, socket} -> {:noreply, socket}
-          {:error, reason, socket} -> {:noreply, push_flash(socket, :error, inspect(reason))}
+          {:ok, socket} ->
+            {:noreply, socket}
+
+          {:challenge, socket} ->
+            {:noreply, socket}
+
+          {:error, _reason, socket} ->
+            {:noreply, push_flash(socket, :error, subscription_action_error_copy(socket, action))}
         end
 
       action ->
@@ -466,7 +471,7 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
             <section :if={@pending_action} class="ax-card" data-role="confirm-panel">
               <p class="ax-label">Confirm action</p>
-              <p class="ax-body"><%= confirm_copy(@pending_action) %></p>
+              <p class="ax-body"><%= confirm_copy(@pending_action, @subscription, @customer) %></p>
               <section
                 :if={match?(%UpcomingInvoice{}, @pending_action[:preview])}
                 class="ax-stack-md"
@@ -698,8 +703,8 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
       {:ok, :requires_action, payment_intent} ->
         push_flash(socket, :warning, Copy.payment_processor_action_warning(payment_intent))
 
-      {:error, reason} ->
-        push_flash(socket, :error, inspect(reason))
+      {:error, _reason} ->
+        push_flash(socket, :error, subscription_action_error_copy(socket, action))
     end
     |> assign(:pending_action, nil)
   end
@@ -946,54 +951,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
   defp present?(value) when value in [nil, ""], do: false
   defp present?(_value), do: true
 
-  defp confirm_copy(action) do
-    source =
-      if action.source_event_id do
-        " Source event ##{action.source_event_id} will be linked."
-      else
-        ""
-      end
-
-    "#{action_confirmation_copy(action.type)}#{source}"
+  defp confirm_copy(action, subscription, customer) do
+    Copy.subscription_confirm_workflow_message(action.type,
+      subscription_id: subscription.id,
+      customer_id: customer_label(customer),
+      source_event_id: action.source_event_id
+    )
   end
 
-  defp action_confirmation_copy("cancel_now"),
-    do:
-      "Cancel now will execute against the local billing projection and should be treated as an exceptional hard-stop path."
-
-  defp action_confirmation_copy("cancel_at_period_end"),
-    do:
-      "Cancel at period end will turn off renewal now and preserve access through the current billing period where the processor supports that semantic."
-
-  defp action_confirmation_copy("pause"),
-    do:
-      "Pause collection will only succeed where the processor supports Accrue's pause semantic; Braintree does not."
-
-  defp action_confirmation_copy("resume"),
-    do:
-      "Resume will unpause a paused subscription or reverse a scheduled end when the processor and current state support it; Braintree does not provide that parity."
-
-  defp action_confirmation_copy("swap_plan"),
-    do:
-      "Swap plan stages a preview before commit where the provider supports upcoming-invoice previews."
-
-  defp action_confirmation_copy("update_quantity"),
-    do:
-      "Update quantity commits the supported single-item quantity change path. Use item-level actions once add-ons exist."
-
-  defp action_confirmation_copy("add_item"),
-    do: "Add item will attach a new subscription item on the supported Stripe/Fake lane."
-
-  defp action_confirmation_copy("update_item_quantity"),
-    do:
-      "Update item quantity will change the selected subscription item on the supported Stripe/Fake lane."
-
-  defp action_confirmation_copy("remove_item"),
-    do:
-      "Remove item will delete the selected subscription item on the supported Stripe/Fake lane."
-
-  defp action_confirmation_copy(type),
-    do: "#{humanize(type)} will execute against the local billing projection."
+  defp subscription_action_error_copy(socket, action) do
+    Copy.page_state_copy(:recoverable_error,
+      resource: "subscription #{socket.assigns.subscription.id} #{humanize(action.type)} action",
+      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
+      recovery: "retry from the subscription action panel"
+    ).body
+  end
 
   defp subscription_payload(subscription) do
     %{
@@ -1109,13 +1081,13 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
              proration: String.to_existing_atom(proration)
            ) do
         {:ok, %UpcomingInvoice{} = preview} -> Map.put(action, :preview, preview)
-        {:error, reason} -> Map.put(action, :preview_error, inspect(reason))
+        {:error, _reason} -> Map.put(action, :preview_error, preview_error_copy())
       end
     else
       action
     end
   rescue
-    ArgumentError -> Map.put(action, :preview_error, inspect(:invalid_proration))
+    ArgumentError -> Map.put(action, :preview_error, preview_error_copy())
   end
 
   defp maybe_attach_preview(_socket, action), do: action
@@ -1158,8 +1130,21 @@ defmodule AccrueAdmin.Live.SubscriptionLive do
 
   defp scoped_admin_path(admin, _owner_scope, suffix), do: admin_path(admin, suffix)
 
+  defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
+    do: "organization #{slug}"
+
+  defp owner_scope_copy(%{mode: :global}), do: "global owner scope"
+  defp owner_scope_copy(_owner_scope), do: "the active organization scope"
+
   defp customer_label(customer),
     do: customer.name || customer.email || customer.processor_id || customer.id
+
+  defp preview_error_copy do
+    Copy.page_state_copy(:recoverable_error,
+      resource: "upcoming invoice preview",
+      recovery: "review the selected plan and proration"
+    ).body
+  end
 
   defp subscription_item(%{subscription_items: items}, item_id) do
     case Enum.find(items || [], &(to_string(&1.id) == item_id)) do

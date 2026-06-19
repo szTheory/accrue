@@ -73,9 +73,14 @@ defmodule AccrueAdmin.Live.InvoiceLive do
                step_up_action(action, socket.assigns.invoice),
                &execute_action(&1, action)
              ) do
-          {:ok, socket} -> {:noreply, socket}
-          {:challenge, socket} -> {:noreply, socket}
-          {:error, reason, socket} -> {:noreply, push_flash(socket, :error, inspect(reason))}
+          {:ok, socket} ->
+            {:noreply, socket}
+
+          {:challenge, socket} ->
+            {:noreply, socket}
+
+          {:error, _reason, socket} ->
+            {:noreply, push_flash(socket, :error, invoice_action_error_copy(socket, action))}
         end
 
       action ->
@@ -117,7 +122,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
          push_flash(
            socket,
            :error,
-           Copy.invoice_pdf_render_failed_prefix() <> inspect(reason)
+           invoice_pdf_error_copy(reason)
          )}
     end
   end
@@ -178,7 +183,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
          |> push_flash(:info, Copy.invoice_remove_manual_item_success())}
 
       {:error, _reason} ->
-        {:noreply, push_flash(socket, :error, "Could not remove line item")}
+        {:noreply, push_flash(socket, :error, invoice_remove_item_error_copy())}
     end
   end
 
@@ -308,7 +313,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
 
             <section :if={@pending_action} class="ax-card" data-role="confirm-panel">
               <p class="ax-label"><%= Copy.invoice_confirm_panel_label() %></p>
-              <p class="ax-body"><%= confirm_copy(@pending_action) %></p>
+              <p class="ax-body"><%= confirm_copy(@pending_action, @invoice) %></p>
               <div class="ax-page-header">
                 <button phx-click="confirm_action" class="ax-button ax-button-primary" data-role="confirm-action">
                   <%= Copy.invoice_confirm_action_verb() %> <%= humanize(@pending_action.type) %>
@@ -589,8 +594,8 @@ defmodule AccrueAdmin.Live.InvoiceLive do
       {:ok, :requires_action, payment_intent} ->
         push_flash(socket, :warning, Copy.payment_processor_action_warning(payment_intent))
 
-      {:error, reason} ->
-        push_flash(socket, :error, inspect(reason))
+      {:error, _reason} ->
+        push_flash(socket, :error, invoice_action_error_copy(socket, action))
     end
     |> assign(:pending_action, nil)
   end
@@ -722,7 +727,7 @@ defmodule AccrueAdmin.Live.InvoiceLive do
   defp present?(value) when value in [nil, ""], do: false
   defp present?(_value), do: true
 
-  defp confirm_copy(action) do
+  defp confirm_copy(action, invoice) do
     source =
       if action.source_event_id do
         Copy.invoice_confirm_source_event_suffix(action.source_event_id)
@@ -730,8 +735,63 @@ defmodule AccrueAdmin.Live.InvoiceLive do
         ""
       end
 
-    Copy.invoice_confirm_workflow_message(humanize(action.type), source)
+    Copy.Invoice.invoice_confirm_workflow_message(
+      invoice_action_label(action.type),
+      "invoice #{invoice.id}",
+      invoice_billing_effect(action.type),
+      "record an admin audit row for the invoice action",
+      source
+    )
   end
+
+  defp invoice_action_label("finalize"), do: Copy.invoice_action_finalize()
+  defp invoice_action_label("pay"), do: Copy.invoice_action_manual_pay()
+  defp invoice_action_label("void"), do: Copy.invoice_action_void()
+  defp invoice_action_label("mark_uncollectible"), do: Copy.invoice_action_mark_uncollectible()
+  defp invoice_action_label(type), do: humanize(type)
+
+  defp invoice_billing_effect("finalize"),
+    do: "move the invoice status into the finalized billing workflow"
+
+  defp invoice_billing_effect("pay"),
+    do: "attempt manual payment through the existing invoice workflow"
+
+  defp invoice_billing_effect("void"),
+    do: "move the invoice status to void without contacting the processor"
+
+  defp invoice_billing_effect("mark_uncollectible"),
+    do: "move the invoice status to uncollectible and stop normal collection"
+
+  defp invoice_billing_effect(type),
+    do: "run #{humanize(type)} through the invoice workflow"
+
+  defp invoice_action_error_copy(socket, action) do
+    Copy.page_state_copy(:recoverable_error,
+      resource: "invoice #{socket.assigns.invoice.id} #{humanize(action.type)} action",
+      owner_scope: owner_scope_copy(socket.assigns.current_owner_scope),
+      recovery: "retry from the invoice action panel"
+    ).body
+  end
+
+  defp invoice_pdf_error_copy(_reason) do
+    Copy.page_state_copy(:recoverable_error,
+      resource: "invoice PDF",
+      recovery: "retry Open PDF from the invoice detail page"
+    ).body
+  end
+
+  defp invoice_remove_item_error_copy do
+    Copy.page_state_copy(:recoverable_error,
+      resource: "manual invoice line item",
+      recovery: "retry removal from the draft invoice line items"
+    ).body
+  end
+
+  defp owner_scope_copy(%{mode: :organization, organization_slug: slug}) when is_binary(slug),
+    do: "organization #{slug}"
+
+  defp owner_scope_copy(%{mode: :global}), do: "global owner scope"
+  defp owner_scope_copy(_owner_scope), do: "the active organization scope"
 
   defp pdf_summary(invoice) do
     cond do
