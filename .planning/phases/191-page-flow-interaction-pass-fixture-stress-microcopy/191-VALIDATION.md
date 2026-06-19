@@ -1,9 +1,9 @@
 ---
 phase: 191
 slug: page-flow-interaction-pass-fixture-stress-microcopy
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: approved
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-18
 ---
 
@@ -70,11 +70,24 @@ created: 2026-06-18
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify steps or Wave 0 dependencies.
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verification.
-- [ ] Wave 0 covers the missing Phase 191 page-flow spec, fixture matrix helper, forced-state helpers, seed idempotency updates, and AX187 audit.
-- [ ] No watch-mode flags in verification commands.
-- [ ] Per-task feedback latency stays bounded by focused checks.
-- [ ] Set `nyquist_compliant: true` in frontmatter after Wave 0 gaps are closed and all plan tasks map to automated or justified manual checks.
+- [x] All tasks have `<automated>` verify steps or Wave 0 dependencies.
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification.
+- [x] Wave 0 covers the missing Phase 191 page-flow spec, fixture matrix helper, forced-state helpers, seed idempotency updates, and AX187 audit.
+- [x] No watch-mode flags in verification commands.
+- [x] Per-task feedback latency stays bounded by focused checks.
+- [x] `nyquist_compliant` is true after the automated gate set passed and the coverage ledger was written.
+- [x] Human UAT passed on 2026-06-19; user confirmed the UAT worked and approved moving beyond the checkpoint.
 
-**Approval:** pending
+**Approval:** approved by human UAT on 2026-06-19. Signal: user reported "i did all the UAT and it worked so that passed we can move beyond the UAT now".
+
+## Closeout Evidence
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `node scripts/ci/verify_phase191_ax187_coverage.mjs` | pass | `178` owner-phase rows, `70/70` direct high-severity coverage, `108/108` medium coverage. |
+| `cd accrue_admin && npm run e2e:phase191` | pass | `14 passed` on desktop/mobile. |
+| `cd accrue_admin && npm run e2e:a11y` | pass | `2 passed`. |
+| `cd accrue_admin && npm run e2e:group-contracts` | pass | `16 passed` after rerun without the build-lock collision. |
+| `cd accrue_admin && mix test test/accrue_admin/copy_test.exs test/accrue_admin/components/app_shell_test.exs test/accrue_admin/components/data_table_test.exs test/accrue_admin/components/filter_chip_bar_test.exs test/accrue_admin/components/navigation_components_test.exs test/accrue_admin/components/overlay_components_test.exs test/accrue_admin/e2e_fixtures_test.exs` | pass | `75 tests, 0 failures`. |
+| `cd examples/accrue_host && mix test test/seeds_idempotency_test.exs test/accrue_host/phase191_seed_reachability_test.exs` | pass | 4 tests, 0 failures; host seed reachability/idempotency passed. |
+| Human UAT checkpoint | pass | 2026-06-19: user confirmed all UAT worked and approved moving beyond UAT. |

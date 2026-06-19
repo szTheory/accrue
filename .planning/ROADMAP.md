@@ -233,7 +233,7 @@ Plans:
 - [x] 191-04-PLAN.md — Patch focus, disconnected state, floating controls, and scroll reachability
 - [x] 191-05-PLAN.md — Page-state and destructive-action microcopy pass
 - [x] 191-06-PLAN.md — Example-host Phase 191 seed reachability and idempotency
-- [ ] 191-07-PLAN.md — Full evidence closeout, AX187 ledger, and human operator scan
+- [x] 191-07-PLAN.md — Full evidence closeout, AX187 ledger, and human operator scan
 
 **UI hint**: yes
 
