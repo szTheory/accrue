@@ -244,6 +244,229 @@ defmodule AccrueAdmin.E2E.Fixtures do
     %{first_customer_id: List.first(customers).id}
   end
 
+  def seed_phase191_matrix! do
+    reset!()
+
+    owner_id = "19100000-0000-4000-8000-00000000f001"
+    now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
+    five_days_ago = DateTime.add(now, -5 * 86_400, :second)
+    next_period = DateTime.add(now, 30 * 86_400, :second)
+
+    customer =
+      insert_customer(%{
+        id: "19100000-0000-4000-8000-000000000001",
+        owner_id: owner_id,
+        name: "E2E Phase 191 株式会社 Café Boundary Customer",
+        email: "phase191-customer@example.com",
+        processor_id: "cus_e2e_phase191_customer",
+        preferred_locale: nil,
+        preferred_timezone: nil,
+        metadata: %{
+          "phase191_fixture" => "non_ascii",
+          "phase191_boundary" => "primary-route"
+        },
+        data: %{
+          "phase191_high_count" => 100_000,
+          "optional_profile_fields" => nil
+        }
+      })
+
+    subscription =
+      insert_subscription(customer, %{
+        id: "19100000-0000-4000-8000-000000000002",
+        processor_id: "sub_e2e_phase191_active",
+        status: :active,
+        current_period_start: now,
+        current_period_end: next_period,
+        metadata: %{"phase191_fixture" => "route"},
+        data: %{"phase191_high_count" => 100_000}
+      })
+
+    at_risk_sub =
+      %Subscription{id: "19100000-0000-4000-8000-000000000010"}
+      |> Subscription.force_status_changeset(%{
+        customer_id: customer.id,
+        processor: "fake",
+        processor_id: "sub_e2e_phase191_at_risk",
+        status: :past_due,
+        past_due_since: five_days_ago,
+        dunning_campaign_started_at: five_days_ago,
+        cancel_at_period_end: false,
+        current_period_start: DateTime.add(now, -25 * 86_400, :second),
+        current_period_end: DateTime.add(now, 5 * 86_400, :second),
+        lock_version: 1,
+        metadata: %{"phase191_fixture" => "at-risk"},
+        data: %{"recovery_state" => "phase191"}
+      })
+      |> TestRepo.insert!()
+
+    invoice =
+      insert_invoice(customer, subscription, %{
+        id: "19100000-0000-4000-8000-000000000003",
+        processor_id: "in_e2e_phase191_boundary",
+        status: :open,
+        number: "E2E-191-JPY-001",
+        currency: "jpy",
+        total_minor: 100_000,
+        amount_due_minor: 100_000,
+        amount_remaining_minor: 100_000,
+        amount_paid_minor: 0,
+        hosted_url: nil,
+        pdf_url: nil,
+        collection_method: "send_invoice",
+        metadata: %{"phase191_fixture" => "null-optional-fields"},
+        data: %{"memo" => nil, "phase191_non_ascii_note" => "請求書"}
+      })
+
+    charge =
+      insert_charge(customer, subscription, %{
+        id: "19100000-0000-4000-8000-000000000004",
+        processor_id: "ch_e2e_phase191_boundary",
+        status: "succeeded",
+        currency: "jpy",
+        amount_cents: 100_000,
+        stripe_fee_amount_minor: nil,
+        fees_settled_at: nil,
+        metadata: %{"phase191_fixture" => "high-count"},
+        data: %{"phase191_high_count" => 100_000, "receipt_url" => nil}
+      })
+
+    coupon =
+      insert_coupon(%{
+        id: "19100000-0000-4000-8000-000000000005",
+        processor_id: "coupon_e2e_phase191_unicode",
+        name: "Crème Phase 191 株式会社 Coupon",
+        duration: "repeating",
+        duration_in_months: 3,
+        percent_off: Decimal.new("19.1"),
+        max_redemptions: 100_000,
+        times_redeemed: 1,
+        metadata: %{"phase191_fixture" => "non_ascii"},
+        data: %{"copy_state" => "promotion boundary"}
+      })
+
+    promo_code =
+      insert_promo_code(coupon, %{
+        id: "19100000-0000-4000-8000-000000000006",
+        processor_id: "promo_e2e_phase191_unicode",
+        code: "ÉTÉ191",
+        max_redemptions: 100_000,
+        times_redeemed: 1,
+        metadata: %{"phase191_fixture" => "non_ascii"},
+        data: %{"phase191_non_ascii_name" => "été"}
+      })
+
+    connect_account =
+      insert_connect_account(owner_id, %{
+        id: "19100000-0000-4000-8000-000000000007",
+        stripe_account_id: "acct_e2e_phase191",
+        email: "phase191-connect@example.com",
+        charges_enabled: false,
+        payouts_enabled: false,
+        details_submitted: false,
+        requirements: %{"currently_due" => ["external_account"]},
+        capabilities: %{"card_payments" => "pending"},
+        data: %{"phase191_null_future_requirement" => nil}
+      })
+
+    webhook =
+      insert_webhook(%{
+        id: "19100000-0000-4000-8000-000000000008",
+        processor_event_id: "evt_e2e_phase191_dead",
+        type: "invoice.payment_failed",
+        status: :dead,
+        data: %{
+          "id" => "evt_e2e_phase191_dead",
+          "object" => "event",
+          "phase191" => true
+        },
+        raw_body:
+          ~s({"id":"evt_e2e_phase191_dead","type":"invoice.payment_failed","phase191":true})
+      })
+
+    {:ok, source_event} =
+      Events.record(%{
+        type: "phase191.fixture.seeded",
+        subject_type: "Phase191Fixture",
+        subject_id: customer.id,
+        actor_type: "admin",
+        actor_id: "e2e_phase191",
+        idempotency_key: "e2e_phase191_event",
+        data: %{"namespace" => "e2e_phase191"}
+      })
+
+    insert_customer(%{
+      id: "19100000-0000-4000-8000-000000000009",
+      owner_id: "19100000-0000-4000-8000-00000000f009",
+      name: "E2E Phase 191 One Row Customer",
+      email: "phase191-one@example.com",
+      processor_id: "cus_e2e_phase191_one",
+      metadata: %{"phase191_boundary" => "one-row"}
+    })
+
+    Enum.each(1..26, fn index ->
+      padded = String.pad_leading(Integer.to_string(index), 2, "0")
+
+      insert_customer(%{
+        name: "E2E Phase 191 Page Customer #{padded}",
+        email: "phase191-page-#{padded}@example.com",
+        processor_id: "cus_e2e_phase191_page_#{padded}",
+        metadata: %{"phase191_boundary" => "more-than-one-page"},
+        data: %{"phase191_index" => index}
+      })
+    end)
+
+    zero_rows =
+      Customer
+      |> where([customer], customer.processor_id == "cus_e2e_phase191_zero")
+      |> TestRepo.aggregate(:count, :id)
+
+    one_row =
+      Customer
+      |> where([customer], customer.processor_id == "cus_e2e_phase191_one")
+      |> TestRepo.aggregate(:count, :id)
+
+    more_than_one_page =
+      Customer
+      |> where([customer], like(customer.processor_id, "cus_e2e_phase191_page_%"))
+      |> TestRepo.aggregate(:count, :id)
+
+    %{
+      namespace: "e2e_phase191",
+      customer_id: customer.id,
+      subscription_id: subscription.id,
+      jpy_invoice_id: invoice.id,
+      charge_id: charge.id,
+      coupon_id: coupon.id,
+      promo_code_id: promo_code.id,
+      connect_account_id: connect_account.id,
+      source_event_id: source_event.id,
+      single_webhook_id: webhook.id,
+      at_risk_sub_id: at_risk_sub.id,
+      phase191_customer_id: customer.id,
+      phase191_subscription_id: subscription.id,
+      phase191_invoice_id: invoice.id,
+      phase191_charge_id: charge.id,
+      phase191_coupon_id: coupon.id,
+      phase191_promo_code_id: promo_code.id,
+      phase191_connect_account_id: connect_account.id,
+      phase191_event_id: source_event.id,
+      phase191_webhook_id: webhook.id,
+      phase191_at_risk_sub_id: at_risk_sub.id,
+      boundary_counts: %{
+        zero_rows: zero_rows,
+        one_row: one_row,
+        more_than_one_page: more_than_one_page,
+        high_count: 100_000
+      },
+      boundary_filters: %{
+        zero_rows: "processor_id=cus_e2e_phase191_zero",
+        one_row: "processor_id=cus_e2e_phase191_one",
+        more_than_one_page: "processor_id starts with cus_e2e_phase191_page_"
+      }
+    }
+  end
+
   def current_counts do
     %{
       webhook_replayed:
@@ -258,6 +481,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
   end
 
   defp insert_customer(attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       owner_type: "User",
       owner_id: Ecto.UUID.generate(),
@@ -269,10 +494,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %Customer{}
     |> Customer.changeset(Map.merge(defaults, attrs))
+    |> put_id(id)
     |> TestRepo.insert!()
   end
 
   defp insert_subscription(customer, attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       customer_id: customer.id,
       processor: "fake",
@@ -286,10 +514,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %Subscription{}
     |> Subscription.changeset(Map.merge(defaults, attrs))
+    |> put_id(id)
     |> TestRepo.insert!()
   end
 
   defp insert_invoice(customer, subscription, attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       customer_id: customer.id,
       subscription_id: subscription.id,
@@ -310,10 +541,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %Invoice{}
     |> Invoice.changeset(Map.merge(defaults, attrs))
+    |> put_id(id)
     |> TestRepo.insert!()
   end
 
   defp insert_charge(customer, subscription, attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       customer_id: customer.id,
       subscription_id: subscription.id,
@@ -329,6 +563,7 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %Charge{}
     |> Charge.changeset(Map.merge(defaults, attrs))
+    |> put_id(id)
     |> TestRepo.insert!()
   end
 
@@ -349,6 +584,8 @@ defmodule AccrueAdmin.E2E.Fixtures do
   end
 
   defp insert_coupon(attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       processor: "fake",
       processor_id: "coupon_" <> Integer.to_string(System.unique_integer([:positive])),
@@ -364,10 +601,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %Coupon{}
     |> Coupon.changeset(Map.merge(defaults, attrs))
+    |> put_id(id)
     |> TestRepo.insert!()
   end
 
   defp insert_promo_code(coupon, attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       processor: "fake",
       processor_id: "promo_" <> Integer.to_string(System.unique_integer([:positive])),
@@ -381,10 +621,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %PromotionCode{}
     |> PromotionCode.changeset(Map.merge(defaults, attrs))
+    |> put_id(id)
     |> TestRepo.insert!()
   end
 
   defp insert_connect_account(owner_id, attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       stripe_account_id: "acct_e2e_" <> Integer.to_string(System.unique_integer([:positive])),
       type: "standard",
@@ -402,10 +645,13 @@ defmodule AccrueAdmin.E2E.Fixtures do
 
     %Account{}
     |> Account.changeset(Map.merge(defaults, attrs))
+    |> put_id(id)
     |> TestRepo.insert!()
   end
 
   defp insert_webhook(attrs) do
+    {id, attrs} = Map.pop(attrs, :id)
+
     defaults = %{
       processor: "stripe",
       processor_event_id: "evt_" <> Integer.to_string(System.unique_integer([:positive])),
@@ -424,7 +670,11 @@ defmodule AccrueAdmin.E2E.Fixtures do
     attrs
     |> Map.delete(:status)
     |> WebhookEvent.ingest_changeset()
+    |> put_id(id)
     |> Ecto.Changeset.put_change(:status, status)
     |> TestRepo.insert!()
   end
+
+  defp put_id(changeset, nil), do: changeset
+  defp put_id(changeset, id), do: Ecto.Changeset.put_change(changeset, :id, id)
 end

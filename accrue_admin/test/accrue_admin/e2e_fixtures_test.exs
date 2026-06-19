@@ -203,15 +203,29 @@ defmodule AccrueAdmin.E2EFixturesTest do
     assert result.phase191_at_risk_sub_id == result.at_risk_sub_id
 
     assert TestRepo.get!(Customer, result.customer_id).processor_id == "cus_e2e_phase191_customer"
-    assert TestRepo.get!(Subscription, result.subscription_id).processor_id == "sub_e2e_phase191_active"
-    assert TestRepo.get!(Invoice, result.jpy_invoice_id).processor_id == "in_e2e_phase191_boundary"
+
+    assert TestRepo.get!(Subscription, result.subscription_id).processor_id ==
+             "sub_e2e_phase191_active"
+
+    assert TestRepo.get!(Invoice, result.jpy_invoice_id).processor_id ==
+             "in_e2e_phase191_boundary"
+
     assert TestRepo.get!(Charge, result.charge_id).processor_id == "ch_e2e_phase191_boundary"
     assert TestRepo.get!(Coupon, result.coupon_id).processor_id == "coupon_e2e_phase191_unicode"
-    assert TestRepo.get!(PromotionCode, result.promo_code_id).processor_id == "promo_e2e_phase191_unicode"
-    assert TestRepo.get!(Account, result.connect_account_id).stripe_account_id == "acct_e2e_phase191"
+
+    assert TestRepo.get!(PromotionCode, result.promo_code_id).processor_id ==
+             "promo_e2e_phase191_unicode"
+
+    assert TestRepo.get!(Account, result.connect_account_id).stripe_account_id ==
+             "acct_e2e_phase191"
+
     assert TestRepo.get!(Event, result.source_event_id).idempotency_key == "e2e_phase191_event"
-    assert TestRepo.get!(WebhookEvent, result.single_webhook_id).processor_event_id == "evt_e2e_phase191_dead"
-    assert TestRepo.get!(Subscription, result.at_risk_sub_id).processor_id == "sub_e2e_phase191_at_risk"
+
+    assert TestRepo.get!(WebhookEvent, result.single_webhook_id).processor_event_id ==
+             "evt_e2e_phase191_dead"
+
+    assert TestRepo.get!(Subscription, result.at_risk_sub_id).processor_id ==
+             "sub_e2e_phase191_at_risk"
   end
 
   @tag :phase191
