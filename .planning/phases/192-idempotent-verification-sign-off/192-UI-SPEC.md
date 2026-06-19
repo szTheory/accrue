@@ -1,10 +1,11 @@
 ---
 phase: 192
 slug: idempotent-verification-sign-off
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-19
+reviewed_at: 2026-06-19
 ---
 
 # Phase 192 - UI Design Contract
