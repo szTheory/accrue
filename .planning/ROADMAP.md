@@ -231,7 +231,7 @@ Plans:
 - [x] 191-02-PLAN.md — Deterministic E2E fixture matrix and one-click seed endpoint
 - [x] 191-03-PLAN.md — Shared modal, drawer, and step-up overlay focus/layer closure
 - [x] 191-04-PLAN.md — Patch focus, disconnected state, floating controls, and scroll reachability
-- [ ] 191-05-PLAN.md — Page-state and destructive-action microcopy pass
+- [x] 191-05-PLAN.md — Page-state and destructive-action microcopy pass
 - [x] 191-06-PLAN.md — Example-host Phase 191 seed reachability and idempotency
 - [ ] 191-07-PLAN.md — Full evidence closeout, AX187 ledger, and human operator scan
 
@@ -346,7 +346,7 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
 | 189. Primitive & form components + component lab | v1.53 | 7/7 | Complete   | 2026-06-18 |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Complete | 2026-06-18 |
-| 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 5/7 | In Progress|  |
+| 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 6/7 | In Progress|  |
 | 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
 
 ## Historical Backlog Anchors (not active scope)
