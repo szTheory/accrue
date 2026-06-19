@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
-status: executing
-stopped_at: Phase 191 verified complete
-last_updated: "2026-06-19T20:31:15.000Z"
+status: verifying
+stopped_at: Phase 192 context gathered
+last_updated: "2026-06-19T20:54:08.683Z"
 last_activity: 2026-06-19
 progress:
   total_phases: 6
@@ -260,6 +260,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ### Pending Todos
 
+- **White-label billing portal design system** (`.planning/todos/pending/2026-06-19-white-label-billing-portal-design-system.md`) — Capture follow-up from CohortFlow `/billing` UAT: make `accrue_portal` white-label friendly, align the demo portal with host brand colors, style the unstyled `/billing/subscriptions` `View details` link, and plan a broader portal UI component/design-system pass.
 - **[RESOLVED 2026-06-18 via `/gsd-debug`] Phase-187 `Admin live interaction baseline` e2e times out (>300s).** Root cause was NOT DOM-size/per-node iteration (disproven — selectors resolve in 10–80ms): `probeAffordanceAndStates` called unbounded `await locator.hover()` on a disabled `.ax-button` (Phase 189 added disabled specimens to the kitchen); `.ax-button:disabled` has `pointer-events: none` (app.css:1332), so Playwright's hover actionability check never resolves and inherits the 180s test budget — ×2 serial projects → >300s. Fix: bound `hover()`/`focus()` with `{ timeout: 1_000 }` in `accrue_admin/e2e/admin-interactions.spec.js`. Re-verified: 2 passed (25.7s) both projects. Session: `.planning/debug/resolved/phase-187-baseline-timeout.md`.
 - **[RESOLVED 2026-06-18 via `/gsd-quick` 260618-3pu] Component-lab family headers used `String.upcase(family)`** (rendered "BUTTON"/"FORM-FIELD"). Replaced with a `family_label/1` map in `accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex` covering all 16 `applicable_states` families with the approved Phase-189 UI-SPEC `####` copywriting labels + a humanizing catch-all for future families. `189-UI-REVIEW.md` WARNING discharged.
 
@@ -310,9 +311,9 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-19T16:22:53.147Z
-Stopped at: Completed 191-05-PLAN.md
-Resume file: None
+Last session: 2026-06-19T20:54:08.679Z
+Stopped at: Phase 192 context gathered
+Resume file: .planning/phases/192-idempotent-verification-sign-off/192-CONTEXT.md
 
 ## Operator Next Steps
 
