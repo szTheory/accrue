@@ -583,10 +583,14 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
       )
       |> String.replace(
         "--ax-status-success-text: #2f6b4f;",
-        "--ax-status-success-text: #e9f5ee;", global: false)
+        "--ax-status-success-text: #e9f5ee;",
+        global: false
+      )
       |> String.replace(
         "--ax-status-danger-on-solid: #fff;",
-        "--ax-status-danger-on-solid: #9b1c1c;", global: false)
+        "--ax-status-danger-on-solid: #9b1c1c;",
+        global: false
+      )
       |> String.replace("--ax-focus-ring: #174ea6;", "--ax-focus-ring: #fafbfc;", global: false)
       |> String.replace("--ax-scrollbar-thumb: #5d6a73;", "--ax-scrollbar-thumb: #fff;",
         global: false
@@ -752,7 +756,8 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
 
     # The subtree dark block is the second occurrence of --ax-disabled-text in theme.css.
     # Split on the known block opener to target only the subtree dark block.
-    subtree_open = "html.accrue-admin [data-theme=\"dark\"],\n.accrue-admin [data-theme=\"dark\"] {"
+    subtree_open =
+      "html.accrue-admin [data-theme=\"dark\"],\n.accrue-admin [data-theme=\"dark\"] {"
 
     assert original =~ subtree_open,
            "subtree dark block opener not found in theme.css — update fixture anchor"
@@ -803,7 +808,9 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     tmp_dir = tmp_dir!()
     seed_tmp_dir!(tmp_dir)
 
-    kitchen_path = Path.join(tmp_dir, "accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex")
+    kitchen_path =
+      Path.join(tmp_dir, "accrue_admin/lib/accrue_admin/dev/component_kitchen_live.ex")
+
     original = File.read!(kitchen_path)
 
     # Inject a style= attribute on an element that also carries ax-button (inside a ~H""" heredoc)

@@ -520,15 +520,20 @@ require_fixed "$ROOT_DIR/accrue_admin/mix.exs" '"guides/motion.md"'
 
 # Phase 189 CMP-05: no per-page CSS overrides of primitive ax-* classes.
 # Only app.css and theme.css may define primitive selectors.
+# Note: the `|| true` guards against `set -euo pipefail` aborting on the
+# no-hit path. With no matches (or no input files), grep exits 1 and GNU
+# xargs propagates 123 — a portability trap vs BSD xargs (macOS) which
+# exits 0 on empty input. An empty result is the *passing* case here.
 primitive_override_hit=$(
   find "$ROOT_DIR/accrue_admin/assets/css" -name "*.css" \
     ! -name "app.css" ! -name "theme.css" -print0 |
     xargs -0 grep -E '\.ax-(button|field|input|select|status-badge|icon|money|json|empty)[^{]*\{' 2>/dev/null |
     head -n 1
-)
+) || true
 [[ -z "$primitive_override_hit" ]] || fail "per-page CSS overrides of primitive ax-* classes are not allowed (CMP-05): $primitive_override_hit"
 
 # Phase 189 CMP-05: no raw inline style= on primitive component wrappers.
+# `|| true` for the same no-hit portability reason as above.
 inline_style_hit=$(
   find "$ROOT_DIR/accrue_admin/lib" -type f \( -name '*.ex' -o -name '*.heex' \) -print0 |
     xargs -0 perl -0ne '
@@ -541,7 +546,7 @@ inline_style_hit=$(
       }
     ' 2>/dev/null |
     head -n 1
-)
+) || true
 [[ -z "$inline_style_hit" ]] || fail "raw inline style= on primitive ax-* elements is not allowed (CMP-05): $inline_style_hit"
 
 echo "package docs verified for accrue $accrue_version, accrue_admin $accrue_admin_version, and accrue_portal $accrue_portal_version"
