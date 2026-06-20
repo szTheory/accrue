@@ -5,6 +5,8 @@ defmodule AccrueAdmin.Components.Timeline do
 
   use Phoenix.Component
 
+  alias AccrueAdmin.Components.StatusBadge
+
   attr(:items, :list, required: true)
   attr(:label, :string, default: "Timeline")
   attr(:empty_label, :string, default: "No events yet")
@@ -21,9 +23,9 @@ defmodule AccrueAdmin.Components.Timeline do
             <div class="ax-timeline-header">
               <div>
                 <p class="ax-label"><%= Map.get(item, :title, "Event") %></p>
-                <p :if={Map.get(item, :at)} class="ax-body ax-muted"><%= Map.get(item, :at) %></p>
+                <time :if={Map.get(item, :at)} class="ax-timeline-time"><%= Map.get(item, :at) %></time>
               </div>
-              <span :if={Map.get(item, :status)} class="ax-timeline-status"><%= humanize(Map.get(item, :status)) %></span>
+              <StatusBadge.status_badge :if={Map.get(item, :status)} status={Map.get(item, :status)} tone={tone(item)} />
             </div>
 
             <p :if={Map.get(item, :body)} class="ax-body"><%= Map.get(item, :body) %></p>
@@ -38,7 +40,7 @@ defmodule AccrueAdmin.Components.Timeline do
         </li>
       </ol>
 
-      <p :if={@items == []} class="ax-body ax-filter-chip-empty"><%= @empty_label %></p>
+      <p :if={@items == []} class="ax-body ax-timeline-empty"><%= @empty_label %></p>
     </section>
     """
   end
@@ -54,15 +56,4 @@ defmodule AccrueAdmin.Components.Timeline do
       _ -> "ink"
     end
   end
-
-  defp humanize(value) when is_atom(value), do: value |> Atom.to_string() |> humanize()
-
-  defp humanize(value) when is_binary(value) do
-    value
-    |> String.replace("_", " ")
-    |> String.split()
-    |> Enum.map_join(" ", &String.capitalize/1)
-  end
-
-  defp humanize(_value), do: "Unknown"
 end
