@@ -917,6 +917,53 @@ if Mix.env() != :prod do
           ]
         },
 
+        # ── Theme picker family ──────────────────────────────────────────────────────
+        # Unified light/dark/system segmented control. "selected" demonstrates the
+        # active "thumb" on a non-default segment.
+        %{
+          family: "theme-picker",
+          variant: "segmented",
+          ax_class: "ax-theme-picker ax-theme-picker-option",
+          tokens: [
+            "--ax-sunken",
+            "--ax-elevated",
+            "--ax-accent-border",
+            "--ax-border",
+            "--ax-primary",
+            "--ax-muted",
+            "--ax-focus-ring",
+            "--ax-transition-colors"
+          ],
+          applicable_states: ["default", "selected"],
+          na_states: [
+            %{
+              state: "hover",
+              reason:
+                "inactive-segment hover is a CSS background shift only — not a distinct rendered specimen"
+            },
+            %{
+              state: "focus",
+              reason:
+                "focus ring shows on keyboard focus (roving tabindex) — a live state, not a forced static specimen"
+            },
+            %{state: "active", reason: "selection is instant — no persistent pressed visual"},
+            %{state: "pressed", reason: "no press-scale state separate from the click"},
+            %{state: "disabled", reason: "the theme picker is always enabled — no disabled state"},
+            %{state: "loading", reason: "preference toggles instantly — no async loading state"},
+            %{state: "error", reason: "no validation — the control cannot be in an error state"},
+            %{state: "empty", reason: "one segment is always active — there is no empty state"},
+            %{
+              state: "overflow",
+              reason:
+                "labels collapse to icon-only below 768px via CSS — a responsive collapse, not overflow"
+            }
+          ],
+          specimens: [
+            %{label: "System (default)", props: %{theme: "system"}, content: nil},
+            %{label: "Light active (selected)", props: %{theme: "light"}, content: nil}
+          ]
+        },
+
         # ── Select family ────────────────────────────────────────────────────────────
         # Select renders class={["ax-field-control", "ax-select-control", ...]} → "ax-select-control" appears.
         %{

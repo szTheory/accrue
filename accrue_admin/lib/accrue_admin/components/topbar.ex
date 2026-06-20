@@ -6,6 +6,7 @@ defmodule AccrueAdmin.Components.Topbar do
   use Phoenix.Component
 
   alias AccrueAdmin.Components.Icon
+  alias AccrueAdmin.Components.ThemePicker
 
   attr(:brand, :map, required: true)
   attr(:page_title, :string, required: true)
@@ -38,17 +39,7 @@ defmodule AccrueAdmin.Components.Topbar do
           <span class="ax-icon-label">Menu</span>
         </button>
 
-        <div class="ax-theme-toggle" role="group" aria-label="Color theme">
-          <button type="button" class={theme_button_class(@theme, "light")} data-theme-target="light">
-            Light
-          </button>
-          <button type="button" class={theme_button_class(@theme, "dark")} data-theme-target="dark">
-            Dark
-          </button>
-          <button type="button" class={theme_button_class(@theme, "system")} data-theme-target="system">
-            System
-          </button>
-        </div>
+        <ThemePicker.theme_picker theme={@theme} />
 
         <div class="ax-topbar-brand-chip">
           <span class="ax-label">Brand</span>
@@ -57,13 +48,5 @@ defmodule AccrueAdmin.Components.Topbar do
       </div>
     </header>
     """
-  end
-
-  defp theme_button_class(current_theme, button_theme) do
-    if current_theme == button_theme do
-      "ax-theme-button ax-theme-button-active"
-    else
-      "ax-theme-button"
-    end
   end
 end

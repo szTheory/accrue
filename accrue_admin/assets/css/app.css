@@ -516,7 +516,6 @@ button {
 
 .ax-sidebar-brand,
 .ax-topbar,
-.ax-theme-toggle,
 .ax-kpi-grid {
   gap: var(--ax-space-md);
 }
@@ -524,7 +523,6 @@ button {
 .ax-sidebar-brand,
 .ax-topbar,
 .ax-topbar-actions,
-.ax-theme-toggle,
 .ax-shell-main {
   display: flex;
 }
@@ -680,7 +678,6 @@ button {
 
 .ax-sidebar-link,
 .ax-card,
-.ax-theme-button,
 .ax-icon-button,
 .ax-topbar-brand-chip {
   border: 1px solid var(--ax-border);
@@ -714,8 +711,6 @@ button {
 
 .ax-sidebar-link:hover,
 .ax-sidebar-link:focus-visible,
-.ax-theme-button:hover,
-.ax-theme-button:focus-visible,
 .ax-icon-button:hover,
 .ax-icon-button:focus-visible,
 .ax-link:hover,
@@ -773,7 +768,7 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
 .ax-label,
 .ax-eyebrow,
 .ax-sidebar-link-label,
-.ax-theme-button,
+.ax-theme-picker-option,
 .ax-icon-label {
   font: var(--ax-type-label-font);
   letter-spacing: var(--ax-type-label-tracking); /* ax-type-exception: semantic label group exposes composed role tracking. */
@@ -841,33 +836,66 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   gap: var(--ax-space-sm);
 }
 
-.ax-icon-button,
-.ax-theme-button {
+.ax-icon-button {
   border-radius: 999px;
   background: var(--ax-elevated);
   color: var(--ax-primary);
-}
-
-.ax-icon-button {
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0 0.875rem;
 }
 
-.ax-theme-toggle {
-  display: none;
+/* Color-theme picker — a unified segmented control (light / dark / system).
+   One recessed track; the active segment is a contained, raised "thumb" with a
+   subtle Cobalt accent ring. Icon + label per segment; labels collapse to
+   icon-only on narrow viewports (the accessible name survives via aria-label). */
+.ax-theme-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-md);
+  background: var(--ax-sunken);
 }
 
-.ax-theme-button {
-  min-height: 2.5rem;
-  padding: 0 0.875rem;
+.ax-theme-picker-option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-xs);
+  padding: 0.375rem 0.625rem;
+  border: 0;
+  border-radius: calc(var(--ax-radius-md) - 3px);
+  background: transparent;
+  color: var(--ax-muted);
+  cursor: pointer;
+  transition: var(--ax-transition-colors);
 }
 
-.ax-theme-button.ax-theme-button-active {
-  background: var(--ax-elevated);
-  border-color: var(--ax-accent);
+.ax-theme-picker-option:not(.ax-theme-picker-option-active):hover {
+  background: var(--ax-interactive-hover);
   color: var(--ax-primary);
-  box-shadow: inset 0 0 0 1px var(--ax-accent);
+}
+
+.ax-theme-picker-option-active {
+  background: var(--ax-elevated);
+  color: var(--ax-primary);
+  box-shadow: inset 0 0 0 1px var(--ax-accent-border);
+}
+
+@media (max-width: 767px) {
+  /* Collapse to icon-only; aria-label/title keep the segment's accessible name. */
+  .ax-theme-picker-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 .ax-topbar-brand-chip {
@@ -885,9 +913,10 @@ html.accrue-admin[data-theme="dark"] .ax-sidebar-link.ax-sidebar-link-active {
   font-weight: 600;
 }
 
-/* Dark + system@dark: keep topbar controls readable even when host theme tokens are present. */
-html.accrue-admin[data-theme="dark"] .ax-theme-button,
-html.accrue-admin[data-theme="dark"] .ax-theme-button.ax-theme-button-active,
+/* Dark + system@dark: keep the active segment + brand chip readable even when
+   host theme tokens are present. Inactive segments use --ax-muted (the active
+   affordance is the raised thumb + accent ring, so it survives regardless). */
+html.accrue-admin[data-theme="dark"] .ax-theme-picker-option-active,
 html.accrue-admin[data-theme="dark"] .ax-topbar-brand-chip,
 html.accrue-admin[data-theme="dark"] .ax-topbar-brand-chip .ax-label,
 html.accrue-admin[data-theme="dark"] .ax-topbar-brand-name {
@@ -895,8 +924,7 @@ html.accrue-admin[data-theme="dark"] .ax-topbar-brand-name {
 }
 
 @media (prefers-color-scheme: dark) {
-  html.accrue-admin[data-theme="system"] .ax-theme-button,
-  html.accrue-admin[data-theme="system"] .ax-theme-button.ax-theme-button-active,
+  html.accrue-admin[data-theme="system"] .ax-theme-picker-option-active,
   html.accrue-admin[data-theme="system"] .ax-topbar-brand-chip,
   html.accrue-admin[data-theme="system"] .ax-topbar-brand-chip .ax-label,
   html.accrue-admin[data-theme="system"] .ax-topbar-brand-name {
@@ -2667,7 +2695,6 @@ html.accrue-admin[data-theme="dark"] .ax-data-table-shell .ax-link {
     padding-right: 1.5rem;
   }
 
-  .ax-theme-toggle,
   .ax-topbar-brand-chip {
     display: inline-flex;
   }
@@ -3477,7 +3504,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 
 .ax-button:focus-visible,
 .ax-sidebar-link:focus-visible,
-.ax-theme-button:focus-visible,
+.ax-theme-picker-option:focus-visible,
 .ax-icon-button:focus-visible,
 .ax-link:focus-visible,
 .ax-dropdown-item:focus-visible,
@@ -3537,7 +3564,6 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-button[data-ax-force~="hover"],
 .ax-dropdown-item:hover,
 .ax-sidebar-link:hover,
-.ax-theme-button:hover,
 .ax-icon-button:hover,
 .ax-tab-more-item:hover,
 .ax-search-trigger:hover,
@@ -3560,8 +3586,7 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
 .ax-tab-active,
 [aria-current="page"],
 [aria-selected="true"],
-.ax-filter-chip-active,
-.ax-theme-button.ax-theme-button-active {
+.ax-filter-chip-active {
   background: var(--ax-interactive-selected);
 }
 

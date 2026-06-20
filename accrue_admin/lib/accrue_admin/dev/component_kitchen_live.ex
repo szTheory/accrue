@@ -29,6 +29,7 @@ if Mix.env() != :prod do
       StatusBadge,
       Tabs,
       Textarea,
+      ThemePicker,
       Toggle,
       Tooltip,
       WindowSelector
@@ -939,6 +940,7 @@ if Mix.env() != :prod do
     defp family_label("tooltip"), do: "Tooltip"
     defp family_label("inline-id"), do: "Inline code / ID"
     defp family_label("empty-state"), do: "Empty state"
+    defp family_label("theme-picker"), do: "Theme picker"
 
     defp family_label(family) when is_binary(family) do
       family
@@ -1314,6 +1316,23 @@ if Mix.env() != :prod do
         name={"#{@id}n"}
         label="Email notifications"
       />
+      """
+    end
+
+    # ── Theme picker ─────────────────────────────────────────────────────────────
+    defp do_render_specimen("theme-picker", "selected", _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <ThemePicker.theme_picker theme="light" />
+      """
+    end
+
+    defp do_render_specimen("theme-picker", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <ThemePicker.theme_picker theme="system" />
       """
     end
 
