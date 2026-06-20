@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
-current_phase: 188
-current_phase_name: foundations-hardening
-status: ready_to_plan
-stopped_at: Phase 188 complete (8/8) — ready to discuss Phase 189
-last_updated: 2026-06-20T14:02:59.647Z
+current_phase: 53
+status: Awaiting next milestone
+stopped_at: Completed 188-08-PLAN.md
+last_updated: "2026-06-20T15:24:38.192Z"
 last_activity: 2026-06-20
-last_activity_desc: Phase 188 execution started
+last_activity_desc: Milestone v1.53 completed and archived
 progress:
   total_phases: 6
   completed_phases: 6
   total_plans: 39
   completed_plans: 39
   percent: 100
+current_phase_name: (none — v1.53 complete)
 ---
 
 # Project State
@@ -25,15 +25,14 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 189 — primitive form components component lab
+**Current focus:** Planning next milestone (v1.53 shipped & archived 2026-06-20; stable core / demand-driven posture)
 
 ## Current Position
 
-Phase: 189
-Plan: Not started
-Status: Ready to plan
-Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): resolved by Phase 192 guardrail execution and final scorecard verification.
-Last activity: 2026-06-20
+Phase: Milestone v1.53 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-20 — Milestone v1.53 completed and archived
 
 ## Post-v1.48 Pause Rule
 
@@ -43,13 +42,13 @@ v1.53 Admin UI Design-System Hardening is open as a quality / interaction-correc
 
 ## Milestone Progress
 
-### v1.53 Phase Summary (OPEN — Admin UI Design-System Hardening; deps strictly linear 187→188→189→190→191→192)
+### v1.53 Phase Summary (SHIPPED & ARCHIVED 2026-06-20 — Admin UI Design-System Hardening; deps strictly linear 187→188→189→190→191→192)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 187 | Audit & Baseline | VER-01 | Complete (2026-06-15) |
 | 188 | Foundations hardening | FND-01, FND-02, FND-03, FND-04, FND-05, FND-06 | Complete (2026-06-17, approved) |
-| 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Execution complete — verification pending (e2e + screenshot) |
+| 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Complete (2026-06-18, verified) |
 | 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Complete — shift-left UAT automated (0 human steps) |
 | 191 | Page & flow interaction pass + fixture stress + microcopy | IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02 | Complete (2026-06-19, verified) |
 | 192 | Idempotent verification & sign-off | VER-02, VER-03, VER-04 | Complete (2026-06-20, approved) |
@@ -289,6 +288,22 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 
 ## Deferred Items
 
+### Acknowledged at v1.53 milestone close (2026-06-20)
+
+9 open artifacts acknowledged and deferred at milestone close — all carryover from earlier milestones or future-roadmap work, none v1.53-scoped:
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | admin-shared-detail-components (20260602) | missing (v1.50-era; superseded by shipped shared detail components) |
+| quick_task | 260413-jri-bump-lattice-stripe-to-1-0-and-unblock-p | unknown (historical) |
+| quick_task | 260414-l9q-automate-phase-3-human-verification-item | unknown (historical) |
+| quick_task | 260602-6xv-seamless-multi-project-docker-dx-for-exa | unknown (v1.49/v1.50 Docker DX; shipped) |
+| quick_task | 260604-tjz-docker-dx-for-accrue-host-admin-ui-ephem | unknown (Docker DX; shipped) |
+| quick_task | 260605-dkx-docker-native-boot-shared-traefik-proxy | unknown (Docker DX; shipped, committed main 260605-dkx) |
+| quick_task | 260605-gys-add-dedicated-admin-example-com-billing- | unknown (historical) |
+| todo | 2026-06-19-brandbook-use-accrue-favicon.md | pending (brandbook follow-up) |
+| todo | 2026-06-19-white-label-billing-portal-design-system.md | pending (future portal design-system pass) |
+
 ### v1.53 deferrals (recorded at milestone open 2026-06-14)
 
 | Category | Item | Status | Reason | Revisit trigger |
@@ -324,8 +339,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- v1.53 Admin UI Design-System Hardening has completed Phases 187–192.
-- Phase 192 final scorecard and sign-off are verifier-clean with maintainer approval.
-- Next gate is milestone closeout / archival, after deciding how to handle the mixed dirty worktree.
-
-</content>
+- Start the next milestone with /gsd-new-milestone

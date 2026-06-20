@@ -1,5 +1,28 @@
 # Milestones
 
+## v1.53 Admin UI Design-System Hardening (Shipped: 2026-06-20; archived 2026-06-20)
+
+**Phases completed:** 6 phases (187–192), 39 plans, 68 tasks. Quality / interaction-correctness / design-system investment in the already-shipped `accrue_admin` operator UI — **not** a broad feature milestone (no new billing primitives, no breaking API/route changes, no Tailwind migration). Took the admin UI from *considered* (v1.51) to *interaction-correct and component-systematic* via a fractal audit (foundations → primitives → groups → pages → flows) locked behind an idempotent only-forward verification loop.
+
+**Key accomplishments:**
+
+- **Audit & baseline (187):** Refreshed the v1.51 rubric to 12 dimensions (added interaction-integrity, layer/z-index, microcopy) and built a manifest-driven baseline pipeline — 50 audited surfaces, **21,276 scored cells**, an **800-row AX187 severity-ranked defect ledger** with owner-phase routing, trace-backed live-interaction probes, and a checksum-backed evidence manifest as the only-forward reference point.
+- **Foundations hardening (188):** Resolved the inert Tailwind config to one package-local styling SSOT; introduced composed `ax-*` typography role bundles + a reading-measure consumer; formalized a tokenized z-index/layer scale (base→sticky→dropdown→popover→drawer→modal→toast) with no ad-hoc literals; closed motion-token gaps with `prefers-reduced-motion`; and made every semantic role (focus rings, scrollbars, disabled states) contrast-correct in light and dark — all root-level, enforced by static guards + negative fixtures.
+- **Primitive & form components + lab (189):** Extended the `/dev/components` kitchen into a registry-driven state-matrix gallery (14 families, 7-field schema, `data-ax-state`/`data-theme` cells) covering the full state matrix in both themes; added 8 new primitives (textarea, checkbox, radio, toggle, spinner, tooltip, empty-state, inline-id); and made component-root token fixes (focus ring, error/danger tokens, disabled/read-only, StatusBadge migration, axe duplicate-id fix) that propagate to every consuming page.
+- **Group & meta-component cohesion (190):** Audited recurring component *groups* as units (page-header+actions+breadcrumbs, toolbar+search+filters, table+empty/loading/error/pagination, KPI+chart+table, detail-header+metadata, modal-confirm, drawer+form, tabs+subviews) from a canonical group-contract registry — responsive table→card degradation, consistent KPI cards, no box-prison nesting, de-emphasized pagination when empty.
+- **Page/flow interaction pass + microcopy (191):** Walked every admin page against its persona/JTBD across all paths; fixed the Phase-187 behavioral defects (modal-behind-scrim, scroll traps, post-LiveView-patch focus loss, overlay z-index) with a package-local FocusTrap + regression coverage; added LiveView disconnected/reconnecting state with stale-action disabling; ran an on-brand microcopy pass (recoverable errors, object-named destructive confirmations, consistent domain vocabulary); and expanded idempotent `examples/accrue_host` seeds so every matrix cell is one-click reachable.
+- **Idempotent verification & sign-off (192):** Re-ran the full audit and scored every cell with an adversarial multi-lens judge — **final scorecard ≥ Phase-187 baseline across all 21,276 cells with zero regressions**; wired the deterministic regression guardrails (interaction e2e, axe a11y, reduced-motion, component-lab coverage) into a merge-blocking CI job; and obtained explicit maintainer sign-off (ACCEPT), discharging v1.51's open photographic-sign-off tech-debt.
+
+**Verification:** 33/33 requirements (VER-01, FND-01..06, CMP-01..05, GRP-01..04, IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02, VER-02..04). All six phases have VERIFICATION reports; maintainer sign-off ACCEPT recorded for Phase 192.
+
+**Milestone audit:** `v1.53-MILESTONE-AUDIT.md` initially `gaps_found` — all gaps were documentation/traceability reconciliation (missing 188/192 VERIFICATION.md, stale REQUIREMENTS.md checkboxes, draft 192-VALIDATION.md, ROADMAP markers), **closed inline at milestone close**. CI runs the deterministic guardrail boundary but not scorecard/sign-off regeneration — accepted as locally-reproducible closeout evidence.
+
+**Known deferred items at close (9, all benign carryover):** 7 stale quick-tasks (already-shipped v1.49/v1.50 Docker DX + historical), 2 pending todos (brandbook favicon, future white-label portal design-system). None v1.53-scoped — see STATE.md Deferred Items. Standing tooling deferrals: TOOL-01 (PhoenixStorybook), TOOL-02 (pixel-diff VR), TOOL-03 (tokens.css distributable).
+
+**Archives:** [`milestones/v1.53-ROADMAP.md`](milestones/v1.53-ROADMAP.md), [`milestones/v1.53-REQUIREMENTS.md`](milestones/v1.53-REQUIREMENTS.md), [`milestones/v1.53-MILESTONE-AUDIT.md`](milestones/v1.53-MILESTONE-AUDIT.md). Phase trees remain in `.planning/phases/187-*..192-*`. Planning git tag `v1.53`.
+
+---
+
 ## v1.52 Brand System (Shipped: 2026-06-14; archived 2026-06-14)
 
 **Phases completed:** 7 phases (180–186), 29 plans. Brand/DX investment in adopter-facing presentation surfaces — **not** a broad feature milestone (no new billing primitives).

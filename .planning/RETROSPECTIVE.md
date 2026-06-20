@@ -1367,12 +1367,54 @@ A brand/DX milestone (no billing primitives): a 14-section critical audit of the
 
 ---
 
+## Milestone: v1.53 — Admin UI Design-System Hardening
+
+**Shipped:** 2026-06-20
+**Phases:** 6 (187–192) | **Plans:** 39
+
+### What Was Built
+
+A quality / interaction-correctness / design-system hardening pass on the already-shipped `accrue_admin` operator UI (no billing primitives, no breaking API/route changes, no Tailwind migration). A fractal audit (foundations → primitives → groups → pages → flows) produced a refreshed 12-dimension rubric and a 21,276-cell scored baseline + 800-row AX187 defect ledger (187); foundations were hardened to one styling SSOT with composed `ax-*` typography bundles, a tokenized z-index/layer scale, motion-token closure, and contrast-correct dark-mode roles (188); every primitive/form component was systematized in a registry-driven `/dev/components` state-matrix gallery (14 families, 8 new primitives) with component-root token fixes (189); recurring component *groups* were audited as units from a canonical group-contract registry (190); the Phase-187 behavioral interaction defects were fixed with a package-local FocusTrap + regression coverage, LiveView disconnected-state handling, an on-brand microcopy pass, and idempotent one-click seed reachability (191); and the whole thing was locked behind an idempotent only-forward scorecard ≥ baseline (zero regressions), merge-blocking CI guardrails, and maintainer sign-off (192). 33/33 requirements.
+
+### What Worked
+
+- **The only-forward baseline as a contract.** Phase 187's structured artifacts (`baseline.cells.json` 21,276 cells, `defects.ndjson` 800 rows with owner-phase routing) made every later phase's job concrete and made Phase 192's "≥ baseline, zero regressions" a mechanical check rather than a judgment call.
+- **Fractal ordering (foundations → primitives → groups → pages → flows)** meant root-level fixes propagated: token/role fixes in 188–189 removed whole classes of defects downstream instead of per-page patching.
+- **Catching what screenshots can't see.** Live interaction probes + a package-local FocusTrap with regression tests caught and locked the behavioral defects (modal-behind-scrim, scroll traps, post-LiveView-patch focus loss, overlay z-index) that v1.51's LLM-scored stills were blind to — directly discharging v1.51's photographic-sign-off tech-debt.
+- **Shift-left on human gates.** Phase 190 converted its UAT to deterministic Playwright/bash gates (0 human steps); deterministic guardrails wired merge-blocking into CI.
+
+### What Was Inefficient
+
+- **The CSS bundle gotcha bit again.** The admin serves a committed Tailwind-built `priv/static/accrue_admin.css`, not source `app.css` — Phase 189 shipped dead CSS fixes until the rebuild step was understood (recorded in memory). Repeated friction across the admin-UI arc.
+- **A disabled-specimen `pointer-events:none` interaction** caused the Phase-187 baseline e2e to hang >300s (unbounded `hover()`), needing a `/gsd-debug` session — a foreseeable consequence of adding disabled specimens without bounding actionability waits.
+- **Documentation/traceability drift.** Phases 188 and 192 reached final evidence without writing their `VERIFICATION.md` files, REQUIREMENTS.md checkboxes lagged the sign-off, and 192-VALIDATION.md stayed `draft` — the milestone audit landed `gaps_found` on pure bookkeeping, all closed inline at milestone close. The implementation was done; the GSD artifacts hadn't caught up.
+
+### Patterns Established
+
+- **Idempotent only-forward verification:** a structured, re-runnable baseline + a scorecard reducer that fails closed on any score/coverage downgrade, so re-running the milestone only ever surfaces *new* gaps.
+- **Component-root-only fixes (D-14)** with lockstep registry/schema updates (D-08) and a frozen cell-id grammar (D-12) — a discipline that keeps a component lab honest.
+- **Test-only fixture endpoints in `test/support` E2E plug routes** (never production router/auth) for one-click matrix-cell reachability.
+
+### Key Lessons
+
+- **Write the VERIFICATION.md when the phase's evidence is green, not at milestone close.** Phase-boundary artifacts are cheap in the moment and expensive to reconstruct under an audit. The audit gate is only as trustworthy as the artifacts it reads.
+- **Structured artifacts beat prose for "is it done?"** — `regressions.ndjson` with 0 rows is a far stronger close signal than any narrative, and it's what made the milestone audit's `gaps_found` obviously about bookkeeping rather than substance.
+- **Re-litigated CSS-pipeline friction is a signal to encode the build step into the workflow,** not to keep paying the tax each phase.
+
+### Cost Observations
+
+- Model mix: not tracked (GSD routing: mechanical agents on Sonnet, planning/verifier/researcher on inherited Opus).
+- Notable: the heaviest artifacts (21,276-cell matrices, 800-row ledgers) are generated, not authored — cost concentrated in harness/verifier authoring (187, 192) and the interaction-defect remediation (191), with cheap autonomous execution between deterministic gates.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
+| v1.53 | short | 6 | **VER/FND/CMP/GRP/IXN/PAGE/CPY/SEED** — fractal admin design-system hardening (foundations→primitives→groups→pages→flows): 12-dimension rubric + 21,276-cell only-forward baseline + 800-row AX187 ledger; package-local FocusTrap + regression coverage for behavioral defects screenshots miss; idempotent scorecard ≥ baseline (0 regressions) + merge-blocking CI guardrails; maintainer sign-off discharged v1.51 photographic-sign-off tech-debt. Audit `gaps_found` (doc/traceability only) closed inline at close. Phases **187–192** under **`.planning/phases/`**; archives **`milestones/v1.53-*`**. |
 | v1.29 | short | 3 | **MG-01..MG-07** — Mailglass framework integration replacing `mjml_eex` + `phoenix_swoosh`; explicit `Mailglass.deliver/1` `idempotency_key` replaces Oban `unique: [period: 60]`; `/dev/mail` LiveView replaces `mix accrue.mail.preview`; 13 templates ported, 26 MJML/text assets deleted; `mailglass_cleanup_test` enforces non-regression in CI; phases **88–90** under **`milestones/v1.29-phases/`**; archives **`milestones/v1.29-*`**. |
 | v1.46 | ~2 days | 3 | **MNT-01** — maintenance release: ENT-10 dual-column webhook scope fix, dep updates, @since annotation cleanup, credo wired in accrue_portal, Three Zeros gate green across all 3 packages, 1.3.0 Hex publish. Audit-gap closure phases (152+153) added retroactively to close VERIFICATION.md + REQUIREMENTS gaps. |
 | v1.47 | short | 5 | **ADV/POL/PRF** — closed ENT-10 advisory-cache correctness and polish, then made entitlements gating, metered usage, and Oban recovery wiring executable in `examples/accrue_host`; closed old adopter-proof thread and moved SEED-002 to future-roadmap backlog. |

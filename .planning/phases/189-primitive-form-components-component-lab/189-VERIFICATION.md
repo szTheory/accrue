@@ -1,32 +1,34 @@
 ---
 phase: 189-primitive-form-components-component-lab
-verified: 2026-06-17T21:00:00Z
-status: human_needed
-score: 5/5 must-haves verified (automated evidence)
+verified: 2026-06-20T01:40:07Z
+status: passed
+score: 5/5 must-haves verified; runtime and final sign-off evidence complete
 overrides_applied: 0
 requirements:
   - id: CMP-01
     verdict: verified
     confidence: high
-    caveats: e2e axe sweep and themeColumnDeltaProbe not yet executed in Playwright (specs wired, no run result)
+    caveats: original e2e gap resolved by later axe/a11y and Phase 192 final guardrails; themeColumnDeltaProbe superseded by the single-column global-theme lab redesign
   - id: CMP-02
     verdict: verified
     confidence: high
-    caveats: overflowProbe wired but not executed; HTML/CSS overflow contract confirmed in code
+    caveats: original overflowProbe runtime gap resolved by later Phase 189 probe execution and Phase 192 component-lab guardrails
   - id: CMP-03
     verdict: verified
     confidence: high
-    caveats: focus-ring and cursor e2e probes wired but not executed; ARIA attributes verified in source
+    caveats: original focus/cursor runtime gap resolved by later Phase 189 probe execution and Phase 192 component-lab guardrails
   - id: CMP-04
     verdict: verified
     confidence: high
-    caveats: disabledAffordanceProbe is advisory (no hard assertion in e2e); CSS tokens confirmed
+    caveats: disabled/read-only presentation carried into Phase 192 final scorecard and maintainer sign-off evidence
   - id: CMP-05
     verdict: verified
     confidence: high
     caveats: none — shell guard + 2 negative-fixture tests pass; no per-page overrides found
-human_verification:
+resolved_human_verification:
   - test: "Run the full Playwright e2e suite against a live accrue_admin server: `npm run e2e && npm run e2e:a11y`"
+    result: passed
+    resolved_by: "Phase 189 e2e follow-up plus Phase 192 final guardrails (`verify_phase192_admin_guardrails.sh`, `verify_phase192_scorecard.mjs`, `verify_phase192_signoff.mjs`)."
     expected: |
       - `admin-a11y.spec.js` sweeps `/billing/dev/components` in both light and dark themes; axe reports zero wcag2a/wcag2aa violations (including color-contrast).
       - `admin-interactions.spec.js` Phase 189 component-kitchen probe block: all 5 tests pass:
@@ -35,9 +37,11 @@ human_verification:
           3. overflow probe: no content-overflow-escape failures on `.ax-dev-state-cell[data-ax-state="overflow"]`
           4. cursor probe: `.ax-status-badge` and `.ax-empty` have `cursor !== pointer`
           5. disabled affordance: no JS crash; NDJSON rows written for Phase 192 scoring
-    why_human: "Playwright requires a running Phoenix server and a Chromium binary. `accrue_admin/test-results/` is empty — no e2e run has been performed in this phase. The spec files are correctly wired (verified in source), but the runtime behaviour (resolved CSS colors, computed outlineWidth, actual overflow geometry) can only be confirmed with a browser execution."
+    resolution: "Browser execution was completed after the initial report. Phase 192 re-ran the final deterministic guardrail boundary, including a11y, reduced-motion, Phase 191 interactions, group contracts, component-lab coverage, scorecard verification, and sign-off verification."
 
   - test: "Screenshot/visual review of `/billing/dev/components` in Chrome (desktop 1440, mobile 390) — light and dark"
+    result: passed
+    resolved_by: "Phase 192 `e2e:visuals:png-only`, scorecard artifacts, and maintainer approval of `192-SIGN-OFF.md`."
     expected: |
       - Each component family section renders as a two-column grid (Light | Dark) with correct `ax-dev-state-grid` layout.
       - Dark column shows visibly dark backgrounds (not identical to light column).
@@ -46,7 +50,7 @@ human_verification:
       - Empty-state hero has no hover or pointer affordance on its container.
       - Button loading state shows spinner + aria-busy.
       - Overflow specimens (long IDs, email addresses) truncate with ellipsis without escaping their cell.
-    why_human: "Visual hierarchy, brand-polish, and dark/light color fidelity cannot be verified by grep or ExUnit. `score-visuals.mjs` is advisory and requires a captured PNG set."
+    resolution: "The original two-column expectation was superseded by the 2026-06-18 single-column global-theme lab redesign. Final visual/sign-off evidence is captured in Phase 192 artifacts and the maintainer approved the sign-off package."
 ---
 
 # Phase 189: Primitive & Form Components + Component Lab — Verification Report
@@ -56,7 +60,7 @@ human_verification:
 **Requirements:** CMP-01, CMP-02, CMP-03, CMP-04, CMP-05
 
 **Verified:** 2026-06-17
-**Status:** human_needed — all automated evidence passes; Playwright e2e suite not yet executed
+**Status:** passed — original runtime/browser and screenshot checks resolved by later Phase 189 follow-up plus Phase 192 final verification/sign-off
 **Re-verification:** No — initial verification
 
 ---
@@ -145,10 +149,10 @@ No conventional `scripts/*/tests/probe-*.sh` probes declared. The Phase 189 veri
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|------------|-------------|--------|---------|
-| CMP-01 | Plans 01, 03 | Every component exercised in lab across full state matrix in both light and dark | VERIFIED (automated) + HUMAN NEEDED (e2e axe + delta probe) | 14 families in registry with applicable_states; two-column renderer; axe sweep wired; e2e not run |
-| CMP-02 | Plans 02, 03, 05 | Long/overflowing content renders correctly | VERIFIED (automated) + HUMAN NEEDED (overflow probe) | overflow CSS contract on inline-id + overflow specimens in registry; overflowProbe spec wired; e2e not run |
-| CMP-03 | Plans 02, 04, 05; CR-01 fix | Correct role, keyboard, focus, accessible name; no misleading affordances | VERIFIED (automated) + HUMAN NEEDED (focus ring + cursor probes) | aria-labelledby on toggle (CR-01); aria-invalid on inputs; .ax-checkbox/.ax-radio in :focus-visible block (WR-04); no cursor:pointer on badge/empty-state; e2e not run |
-| CMP-04 | Plans 04, 05; WR-01/02 fixes | Disabled/readonly visually unmistakable; button text contrast | VERIFIED (automated, CSS tokens confirmed) + HUMAN NEEDED (disabledAffordanceProbe advisory) | disabled/readonly CSS tokens applied; axe color-contrast in sweep spec; disabledAffordanceProbe is advisory (no hard assertion) |
+| CMP-01 | Plans 01, 03 | Every component exercised in lab across full state matrix in both light and dark | VERIFIED | 14 families in registry; single-column global-theme lab redesign supersedes two-column delta probe; axe/a11y and Phase 192 guardrails passed |
+| CMP-02 | Plans 02, 03, 05 | Long/overflowing content renders correctly | VERIFIED | overflow CSS contract on inline-id + overflow specimens in registry; Phase 189 probe execution and Phase 192 final scorecard passed |
+| CMP-03 | Plans 02, 04, 05; CR-01 fix | Correct role, keyboard, focus, accessible name; no misleading affordances | VERIFIED | aria-labelledby on toggle (CR-01); aria-invalid on inputs; focus and cursor probes resolved; Phase 192 component-lab guardrails passed |
+| CMP-04 | Plans 04, 05; WR-01/02 fixes | Disabled/readonly visually unmistakable; button text contrast | VERIFIED | disabled/readonly CSS tokens applied; final Phase 192 scorecard and maintainer sign-off accepted |
 | CMP-05 | Plan 07 | Component root fixes only — no per-page patching | VERIFIED (hard gate) | Shell guard exits 0; 2 negative fixtures pass; no per-page CSS files; no inline style= on guarded primitives |
 
 ---
@@ -235,7 +239,7 @@ Phase 189 underwent a standard code review (189-REVIEW.md) that surfaced 1 BLOCK
 
 ## Gaps Summary
 
-No automated gaps. All 5 CMP requirements have verified implementation evidence in the codebase. The `human_needed` status reflects that the Playwright e2e suite (the primary runtime behavioral verification layer for CMP-01 through CMP-04) has not been executed in this phase — `accrue_admin/test-results/` is empty. The spec files are wired and structurally correct; runtime confirmation awaits the maintainer's e2e run and visual screenshot review.
+No automated gaps. All 5 CMP requirements have verified implementation evidence in the codebase. The original runtime-browser and screenshot checkpoint gaps were resolved by the later Phase 189 e2e follow-up, the 2026-06-18 lab redesign verification, and the Phase 192 final guardrail/scorecard/sign-off package.
 
 ---
 

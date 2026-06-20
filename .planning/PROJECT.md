@@ -29,25 +29,19 @@ A historical anchor, dormant seed, or deferred idea never opens milestone scope 
 
 v1.49 **Realistic Demo App & Adoption Evidence** shipped on **2026-06-02**. The checked-in host now has rich PingPal-style demo data, Docker-first local evaluation, deterministic Playwright E2E coverage, CI Docker smoke, mandatory periodic live-Stripe parity, and a Start Here documentation path for adopters.
 
-## Current Milestone: v1.53 — Admin UI Design-System Hardening
+## Most recently shipped milestone: v1.53 — Admin UI Design-System Hardening (**shipped & archived 2026-06-20**)
 
-**Goal:** Take the already-shipped `accrue_admin` operator UI from *considered* (v1.51) to *interaction-correct and component-systematic* — audit the design system fractally (foundations → primitives → component groups → pages → flows), catch and fix the behavioral defects screenshot scoring can't see (modal-behind-scrim, scroll traps, focus loss, overlay z-index, hover-on-empty-state, disabled-looks-enabled), formalize every component in isolation across its full state matrix, and lock it all behind an idempotent only-forward verification loop.
+**Goal (ACHIEVED):** Take the already-shipped `accrue_admin` operator UI from *considered* (v1.51) to *interaction-correct and component-systematic* — audit the design system fractally (foundations → primitives → component groups → pages → flows), catch and fix the behavioral defects screenshot scoring can't see (modal-behind-scrim, scroll traps, focus loss, overlay z-index, hover-on-empty-state, disabled-looks-enabled), formalize every component in isolation across its full state matrix, and lock it all behind an idempotent only-forward verification loop.
 
-**Reopen decision (required by the post-v1.48 pause rule, recorded here before STATE/ROADMAP change):** Justification class is **explicit strategy change** (design quality of the flagship adopter-facing surface elevated to a strategic priority — same class accepted for v1.50/v1.51/v1.52) **plus firsthand-observed interaction defects** in the running demo (concrete failure evidence, not speculative polish). This is a hardening pass on the existing admin UI surface — **no new billing primitives, no breaking API/route changes, no Tailwind migration**; the demo/host chrome and `accrue_portal` are out of scope.
+**Delivered (Phases 187–192, 39/39 plans, 33/33 requirements):** a refreshed 12-dimension rubric with a 21,276-cell scored baseline + 800-row AX187 defect ledger (187); one package-local styling SSOT, composed `ax-*` typography bundles, a tokenized z-index/layer scale, motion-token closure, and contrast-correct dark-mode roles (188); a registry-driven `/dev/components` state-matrix gallery (14 families) + 8 new primitives + component-root token fixes (189); group/meta-component cohesion from a canonical group-contract registry with responsive table→card degradation (190); a package-local FocusTrap + regression coverage for the Phase-187 behavioral defects, LiveView disconnected-state handling, an on-brand microcopy pass, and idempotent one-click seed reachability (191); and a final scorecard ≥ baseline across all 21,276 cells with **zero regressions**, merge-blocking CI regression guardrails, and maintainer sign-off ACCEPT — discharging v1.51's open photographic-sign-off tech-debt (192).
 
-**Differentiated value over v1.50–v1.52** (which shipped the token system, per-screen rubric, motion spec, brand book): v1.51 audited *screens*, not *components in isolation* (only 7 of 28 components are formally specced), its sign-off was LLM-scored stills (logged `tech_debt`) blind to interaction bugs, and component-*group* cohesion plus a few foundation gaps (typography bundles, z-index/layer formalization, inert-Tailwind decision) were left open.
+**Reopen decision (recorded per the post-v1.48 pause rule):** Justification class **explicit strategy change** (design quality of the flagship adopter-facing surface elevated to a strategic priority — same class accepted for v1.50/v1.51/v1.52) **plus firsthand-observed interaction defects** in the running demo (concrete failure evidence). A hardening pass on the existing admin UI surface — no new billing primitives, no breaking API/route changes, no Tailwind migration; demo/host chrome and `accrue_portal` out of scope (all honored).
 
-**Target features (Phases 187–192):**
-- **187** Audit & Baseline — refreshed rubric (adds interaction-integrity, layer/z-index, microcopy dimensions); full matrix (viewport × theme × state) + live interaction testing; severity-ranked defect ledger = the only-forward baseline.
-- **188** Foundations hardening — typography bundles, reading-measure application, formal z-index/layer system, motion-gap closure, inert-Tailwind resolution, dark-mode role/focus/scrollbar/disabled completeness.
-- **189** Primitive & form components + component lab — every component in isolation × full state matrix × theme × viewport × a11y; root-level (DRY) fixes; `/dev/components` grown into the systematic gallery (no PhoenixStorybook dep).
-- **190** Navigation, data-display & meta-component cohesion — app shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component *groups*; spacing rhythm, hierarchy, responsive, operator-stress states.
-- **191** Page & flow interaction pass + fixture stress + microcopy — every page against its JTBD across all paths; fix the Phase-187 behavioral defects; expand `examples/accrue_host` seeds for missing cells; on-brand microcopy.
-- **192** Idempotent verification & sign-off — full re-run + adversarial multi-lens judge; only-forward scorecard ≥ baseline (no regressions); regression guardrails (interaction e2e, a11y, reduced-motion, lab coverage); maintainer UAT.
+**Closeout proof:** Phases 187–192; planning tag `v1.53`; milestone audit `gaps_found` → all documentation/traceability gaps closed inline at milestone close; see `.planning/MILESTONES.md` v1.53 entry, `.planning/milestones/v1.53-ROADMAP.md`, `.planning/milestones/v1.53-REQUIREMENTS.md`, and `.planning/milestones/v1.53-MILESTONE-AUDIT.md`. CI runs the deterministic guardrail boundary; scorecard/sign-off regeneration accepted as locally-reproducible closeout evidence.
 
-**Key context:** Component lab = extend the in-app `/dev/components` kitchen (no new dependency). Sign-off = adversarial multi-agent judge loop + maintainer screenshot checkpoints at phase boundaries (closes v1.51's open photographic-sign-off tech-debt). Standing constraints carried forward: custom `ax-*` CSS + tokens stay SSOT; backward-compatible APIs/routes. Authoritative scope source: the approved scoping plan; prior design source `.planning/research/v1.51-admin-ui-depth-design.md`.
+**Key context:** Component lab extends the in-app `/dev/components` kitchen (no new dependency; TOOL-01 PhoenixStorybook deferred). Standing constraints honored: custom `ax-*` CSS + tokens stayed SSOT; backward-compatible APIs/routes. Design source `.planning/research/v1.51-admin-ui-depth-design.md`. With v1.53 shipped, the project returns to **stable core / demand-driven** posture.
 
-## Most recently shipped milestone: v1.52 Brand System (**shipped & archived 2026-06-14**)
+## Prior shipped milestone: v1.52 Brand System (**shipped & archived 2026-06-14**)
 
 **Goal (ACHIEVED):** Pressure-test the brand book seed (`prompts/accrue-brand-book.md`) through a 14-section critical audit, run a user-judged SVG logo tournament to a locked winner, and ship a committed, self-contained `brandbook/` — standalone HTML brand book, full SVG logo system, design tokens, and voice/microcopy/marketing copy.
 
@@ -520,12 +514,12 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.53 — Admin UI Design-System Hardening is OPEN (opened 2026-06-14, Phases 187–192).** Reopened under the post-v1.48 pause rule via explicit strategy change + firsthand-observed interaction defects (see Current Milestone section above). This is the fourth pass on the `accrue_admin` surface, building forward on the v1.50→v1.52 arc.
+**v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. With v1.53 shipped, the project returns to **stable core / demand-driven expansion** posture — no milestone currently open.
 
-The v1.50→v1.52 arc (Admin UI Foundation → Admin UI Depth Pass → Brand System) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy. v1.53 hardens the *interaction correctness* and *component-level systematization* of that surface.
+The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → Design-System Hardening) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded, interaction-correct operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
 
-**Last shipped planning milestone:** **v1.52** — Phases **180–186** — **2026-06-14** (Brand System)
-**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.52 shipped no new package code; v1.53 is admin-UI-only, no core package code expected)
+**Last shipped planning milestone:** **v1.53** — Phases **187–192** — **2026-06-20** (Admin UI Design-System Hardening)
+**Hex.pm:** accrue 1.4.0 · accrue_admin 1.4.0 · accrue_portal 1.4.0 (unchanged — v1.50–v1.53 shipped no new core package code; v1.53 was admin-UI/CSS/test-only)
 
 ## Prior shipped milestone
 
@@ -545,7 +539,21 @@ The v1.50→v1.52 arc (Admin UI Foundation → Admin UI Depth Pass → Brand Sys
 
 ### Active
 
-**Milestone v1.53 — Admin UI Design-System Hardening (OPEN, Phases 187–192).** Requirements grouped by theme in `.planning/REQUIREMENTS.md`: **FND** (foundations), **CMP** (component systematization), **GRP** (meta-component cohesion), **IXN** (interaction integrity), **PAGE** (page/flow JTBD coverage), **CPY** (microcopy), **SEED** (fixture stress), **VER** (idempotent verification). See the Current Milestone section above for the recorded reopen decision.
+**None.** No milestone is currently open. The project is in stable core / demand-driven expansion posture as of 2026-06-20 (after v1.53 shipped). The next milestone is defined via `/gsd-new-milestone` and requires a concrete adopter failure, correctness/security/data-loss risk, repeated support issue, operational failure, or explicit strategy change per the post-v1.48 pause rule.
+
+### Validated v1.53 (archived in `.planning/milestones/v1.53-REQUIREMENTS.md`; milestone shipped & archived 2026-06-20)
+
+Admin UI Design-System Hardening — 33/33 satisfied across Phases 187–192.
+
+- ✓ **VER-01** — refreshed 12-dimension rubric + 21,276-cell scored baseline + 800-row AX187 severity-ranked defect ledger as the only-forward reference point — v1.53
+- ✓ **FND-01..FND-06** — composed `ax-*` typography bundles + reading-measure; tokenized z-index/layer scale (no ad-hoc literals); motion-token closure with `prefers-reduced-motion`; inert-Tailwind resolved to one styling SSOT; contrast-correct dark-mode roles (focus rings, scrollbars, disabled) — v1.53
+- ✓ **CMP-01..CMP-05** — registry-driven `/dev/components` state-matrix gallery (14 families) + 8 new primitives; full state matrix × theme × viewport; a11y (role/keyboard/focus/name); component-root token fixes propagating to all consumers — v1.53
+- ✓ **GRP-01..GRP-04** — recurring component *groups* audited as units from a canonical group-contract registry; responsive table→card degradation; consistent KPI cards; de-emphasized empty pagination — v1.53
+- ✓ **IXN-01..IXN-05** — package-local FocusTrap + regression coverage for Phase-187 behavioral defects (modal-behind-scrim, scroll traps, post-patch focus loss, overlay z-index); keyboard-complete flows — v1.53
+- ✓ **PAGE-01..PAGE-04** — every page walked against persona/JTBD across happy/empty/loading/error/permission/boundary/disconnected paths; verified at 320/375/768/1024/1440 in light+dark — v1.53
+- ✓ **CPY-01..CPY-03** — recoverable error microcopy, object-named destructive confirmations, consistent domain vocabulary — v1.53
+- ✓ **SEED-01..SEED-02** — idempotent `examples/accrue_host` seeds reaching every matrix cell in one click — v1.53
+- ✓ **VER-02..VER-04** — final scorecard ≥ baseline across all 21,276 cells (zero regressions); merge-blocking CI regression guardrails; maintainer sign-off ACCEPT (closes v1.51 photographic-sign-off tech-debt) — v1.53
 
 ### Validated v1.52 (archived in `.planning/milestones/v1.52-REQUIREMENTS.md`; milestone shipped & archived 2026-06-14)
 
@@ -634,4 +642,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-14 — opened milestone v1.53 Admin UI Design-System Hardening (Phases 187–192). Reopen recorded under post-v1.48 pause rule (explicit strategy change + firsthand-observed interaction defects). Hardening pass on the `accrue_admin` surface: component-level systematization, interaction-defect remediation, meta-component cohesion, foundation gap-closure, idempotent only-forward verification. Prior: v1.52 Brand System shipped & archived (Phases 180–186).*
+*Last updated: 2026-06-20 after v1.53 milestone — Admin UI Design-System Hardening shipped & archived (Phases 187–192, 39 plans, 33/33 requirements). Final scorecard ≥ Phase-187 baseline across 21,276 cells with zero regressions; merge-blocking CI guardrails; maintainer sign-off ACCEPT (discharged v1.51 photographic-sign-off tech-debt). Milestone-audit doc/traceability gaps closed inline at close. Project returned to stable core / demand-driven posture; no milestone open. Prior: v1.52 Brand System (Phases 180–186).*

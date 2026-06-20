@@ -10,7 +10,7 @@ status: ready-for-phase-191-planning
 
 Phase 190 built the group contract lab/probe surface for navigation, data display, metadata, and component cohesion. It intentionally did not close overlay interaction behavior, fixture expansion, or broad microcopy work assigned to Phase 191.
 
-Browser probe implementation is present in `accrue_admin/e2e/admin-group-contracts.spec.js`, but local Playwright execution is still blocked before tests by e2e server migration startup returning `{:error, "killed"}`. Phase 191 should rerun the Phase 190 browser suite before treating this handoff as verified runtime evidence.
+Browser probe implementation is present in `accrue_admin/e2e/admin-group-contracts.spec.js` and is now the automated Phase 190 gate via `cd accrue_admin && npm run e2e:group-contracts`. CI job `admin-group-contracts` also runs `scripts/ci/verify_phase190_automation_contract.sh`, which keeps this handoff tag-complete and prevents stale runtime notes from returning.
 
 ## Phase 190 Visibility Defects Covered by Lab Probes
 
@@ -72,14 +72,14 @@ These owner_phase `190` rows are visibility/group-contract defects addressed by 
 ## D-30: LiveView patch focus
 
 - **Phase 191 owner:** LiveView navigation/patch focus management.
-- **Keys:** AX187-116; overlay_tags: `live_focus`.
+- **Keys:** AX187-116; overlay_tags: `liveview-patch-focus`.
 - **Boundary:** Phase 190 representative probes sample live routes for group drift, not focus after patch.
 - **Phase 191 acceptance target:** LiveView patches set focus to the correct heading, alert, or retained control without dumping focus to the document body.
 
 ## D-30: fixture gaps
 
 - **Phase 191 owner:** Fixture completeness for overlay and page-flow edge cases.
-- **Keys:** AX187-116, AX187-442, AX187-443, AX187-444, AX187-445; overlay_tags: `fixture-gap`.
+- **Keys:** AX187-116, AX187-442, AX187-443, AX187-444, AX187-445; overlay_tags: `fixture-gaps`.
 - **Boundary:** Phase 190 does not expand the Phase 187 fixture matrix and keeps representative live probes narrow per D-07.
 - **Phase 191 acceptance target:** Add the minimum fixture states needed to prove focus, dismissal, scroll, permission, disconnected/reconnecting, and error-copy behavior.
 
@@ -92,6 +92,6 @@ These owner_phase `190` rows are visibility/group-contract defects addressed by 
 
 ## Phase 191 Starting Checks
 
-1. Rerun `cd accrue_admin && npm run e2e -- e2e/admin-group-contracts.spec.js` after local test database capacity is healthy.
+1. Keep `cd accrue_admin && npm run e2e:group-contracts` green when touching shared group locators, proof roots, or kitchen specimens.
 2. Build Phase 191 tests from the D-30 categories above without marking Phase 190 visibility rows incomplete.
 3. Keep generated traces/screenshots under ignored Playwright output paths; cite AX187 IDs and overlay tags in committed planning artifacts.
