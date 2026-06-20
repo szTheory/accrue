@@ -316,6 +316,25 @@ defmodule AccrueAdmin.DisplayComponentsTest do
       assert html =~ "Inspect details"
       assert html =~ "Moved to DLQ"
       assert html =~ "Next retry requires manual action"
+
+      # one ax-timeline-item per item (two fixture items)
+      assert length(String.split(html, "ax-timeline-item")) - 1 == 2
+      # status renders via the shared StatusBadge
+      assert html =~ "ax-status-badge"
+      # timestamp renders in a semantic <time> element
+      assert html =~ "<time"
+      assert html =~ "ax-timeline-time"
+      # dedicated empty-state class no longer borrows the filter-chip empty style
+      refute html =~ "ax-filter-chip-empty"
+    end
+
+    test "renders a dedicated calm empty state with no items" do
+      html = render_component(&Timeline.timeline/1, %{items: [], empty_label: "No events yet"})
+
+      assert html =~ "ax-timeline-empty"
+      assert html =~ "No events yet"
+      refute html =~ "ax-filter-chip-empty"
+      refute html =~ "ax-timeline-item"
     end
 
     test "related resources keep item rhythm without turning each link into a nested card" do

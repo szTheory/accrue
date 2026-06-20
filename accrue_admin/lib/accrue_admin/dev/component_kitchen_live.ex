@@ -30,6 +30,7 @@ if Mix.env() != :prod do
       Tabs,
       Textarea,
       ThemePicker,
+      Timeline,
       Toggle,
       Tooltip,
       WindowSelector
@@ -941,6 +942,7 @@ if Mix.env() != :prod do
     defp family_label("inline-id"), do: "Inline code / ID"
     defp family_label("empty-state"), do: "Empty state"
     defp family_label("theme-picker"), do: "Theme picker"
+    defp family_label("timeline"), do: "Timeline"
 
     defp family_label(family) when is_binary(family) do
       family
@@ -1558,6 +1560,45 @@ if Mix.env() != :prod do
         body="Create a subscription to start billing your customers."
         class="ax-empty-no-data"
       />
+      """
+    end
+
+    # ── Timeline ─────────────────────────────────────────────────────────────────
+    defp do_render_specimen("timeline", "empty", _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <Timeline.timeline items={[]} />
+      """
+    end
+
+    defp do_render_specimen("timeline", _state, _specimen, _theme) do
+      sample = [
+        %{
+          title: "Payment succeeded",
+          at: "Apr 15, 2026 09:14",
+          status: :succeeded,
+          body: "Invoice in_123 paid"
+        },
+        %{
+          title: "Webhook retrying",
+          at: "Apr 15, 2026 09:12",
+          status: :retrying,
+          body: "payment_intent.payment_failed",
+          details: "{\"attempt\": 2}"
+        },
+        %{
+          title: "Subscription canceled",
+          at: "Apr 14, 2026 17:02",
+          status: :canceled,
+          meta: "Ends at period end"
+        }
+      ]
+
+      assigns = %{sample: sample, __changed__: %{}}
+
+      ~H"""
+      <Timeline.timeline items={@sample} />
       """
     end
 

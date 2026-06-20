@@ -964,6 +964,65 @@ if Mix.env() != :prod do
           ]
         },
 
+        # ── Timeline family ──────────────────────────────────────────────────────────
+        # Threaded event feed. The default specimen MUST be non-empty so the rendered
+        # HTML contains `ax-timeline-item` (render-coverage guardrail needs two tokens
+        # AND that the variant token actually appears in the default specimen's markup).
+        %{
+          family: "timeline",
+          variant: "threaded",
+          ax_class: "ax-timeline ax-timeline-item",
+          tokens: [
+            "--ax-border-strong",
+            "--ax-elevated",
+            "--ax-success",
+            "--ax-accent",
+            "--ax-warning",
+            "--ax-muted",
+            "--ax-primary",
+            "--ax-radius-lg",
+            "--ax-space-lg",
+            "--ax-transition-colors"
+          ],
+          applicable_states: ["default", "hover", "empty"],
+          na_states: [
+            %{
+              state: "selected",
+              reason: "a read-only event feed has no selectable row — nodes are not selectable"
+            },
+            %{
+              state: "focus",
+              reason:
+                "details summary focus is a live keyboard state, not a static specimen"
+            },
+            %{
+              state: "active",
+              reason: "timeline rows are non-interactive — no active/press state applies"
+            },
+            %{state: "pressed", reason: "timeline rows have no press-scale or pressed visual"},
+            %{
+              state: "disabled",
+              reason: "an event feed is always rendered — disabled does not apply"
+            },
+            %{
+              state: "loading",
+              reason: "loading belongs to the surrounding data context, not the feed itself"
+            },
+            %{
+              state: "error",
+              reason: "the feed renders whatever events it receives — no per-feed error state"
+            },
+            %{
+              state: "overflow",
+              reason: "long bodies wrap via overflow-wrap, not a distinct specimen"
+            }
+          ],
+          specimens: [
+            %{label: "Multi-tone feed", props: %{}, content: nil},
+            %{label: "Empty", props: %{}, content: nil}
+          ]
+        },
+
         # ── Select family ────────────────────────────────────────────────────────────
         # Select renders class={["ax-field-control", "ax-select-control", ...]} → "ax-select-control" appears.
         %{
