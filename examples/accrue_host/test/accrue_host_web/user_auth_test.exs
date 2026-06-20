@@ -4,6 +4,8 @@ defmodule AccrueHostWeb.UserAuthTest do
   alias Phoenix.LiveView
   alias AccrueHost.Accounts
   alias AccrueHost.Accounts.Scope
+  alias AccrueHost.Accounts.UserSession
+  alias AccrueHost.Repo
   alias AccrueHostWeb.UserAuth
 
   import AccrueHost.AccountsFixtures
@@ -62,6 +64,42 @@ defmodule AccrueHostWeb.UserAuthTest do
     test "redirects to the configured path", %{conn: conn, user: user} do
       conn = conn |> put_session(:user_return_to, "/hello") |> UserAuth.log_in_user(user)
       assert redirected_to(conn) == "/hello"
+    end
+
+    test "drops a stale/foreign active_organization_id instead of FK-crashing", %{
+      conn: conn,
+      user: user
+    } do
+      # A non-existent org id in the session (e.g. left over from a reseed that
+      # re-UUID'd the org) must not FK-violate the user_sessions insert.
+      stale_org_id = Ecto.UUID.generate()
+
+      conn =
+        conn
+        |> put_session(:active_organization_id, stale_org_id)
+        |> UserAuth.log_in_user(user)
+
+      assert redirected_to(conn) == ~p"/"
+      assert get_session(conn, :user_token)
+      session = Repo.get_by!(UserSession, user_id: user.id)
+      assert is_nil(session.active_organization_id)
+    end
+
+    test "preserves the active_organization_id when the user is still a member", %{
+      conn: conn,
+      user: user
+    } do
+      organization = organization_fixture(%{owner: user})
+      _membership = organization_membership_fixture(%{organization: organization, user: user})
+
+      conn =
+        conn
+        |> put_session(:active_organization_id, organization.id)
+        |> UserAuth.log_in_user(user)
+
+      assert redirected_to(conn) == ~p"/"
+      session = Repo.get_by!(UserSession, user_id: user.id)
+      assert session.active_organization_id == organization.id
     end
 
     test "writes a cookie if remember_me is configured", %{conn: conn, user: user} do

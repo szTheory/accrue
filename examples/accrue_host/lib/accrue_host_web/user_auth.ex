@@ -120,7 +120,7 @@ defmodule AccrueHostWeb.UserAuth do
         type: session_type(params),
         ip: client_ip(conn),
         user_agent: get_req_header(conn, "user-agent") |> List.first(),
-        active_organization_id: get_session(conn, :active_organization_id)
+        active_organization_id: validated_active_organization_id(conn, user)
       )
 
     remember_me = get_session(conn, :user_remember_me)
@@ -130,6 +130,35 @@ defmodule AccrueHostWeb.UserAuth do
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params, remember_me)
     |> maybe_assign_default_organization_scope(user)
+  end
+
+  # Only carry the session's active org into a new user_sessions row if it still
+  # exists AND the user is currently a member. A stale cookie — e.g. after a
+  # reseed re-UUIDs the org, the org is soft-deleted, or a cross-user cookie
+  # carries a foreign org id — would otherwise FK-violate
+  # user_sessions_active_organization_id_fkey and 500 the login. Returning nil is
+  # safe: maybe_assign_default_organization_scope/2 re-derives the active org
+  # from the user's live memberships immediately after.
+  defp validated_active_organization_id(conn, %User{} = user) do
+    case get_session(conn, :active_organization_id) do
+      nil ->
+        nil
+
+      org_id ->
+        member? =
+          from(m in OrganizationMembership,
+            join: o in Organization,
+            on: o.id == m.organization_id,
+            where:
+              m.user_id == ^user.id and m.organization_id == ^org_id and
+                is_nil(o.deleted_at),
+            select: 1,
+            limit: 1
+          )
+          |> Repo.exists?()
+
+        if member?, do: org_id, else: nil
+    end
   end
 
   defp session_type(%{"remember_me" => "true"}), do: :remember_me
