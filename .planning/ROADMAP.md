@@ -50,7 +50,7 @@ Stop rule: if proposed work is polish-only with a documented workaround and no r
 - [ ] **Phase 189: Primitive & form components + component lab** — Every component in isolation × full state matrix × theme × viewport × a11y; root-level (DRY) fixes; grow `/dev/components` into the systematic gallery (no PhoenixStorybook dep).
 - [x] **Phase 190: Navigation, data-display & meta-component cohesion** — App shell / nav / tabs / pagination + tables / cards / detail / timeline / KPI + recurring component groups; spacing rhythm, hierarchy, responsive behavior, operator-stress states.
 - [x] **Phase 191: Page & flow interaction pass + fixture stress + microcopy** — Walk every page against its JTBD across all paths; fix the Phase-187 behavioral defects; expand `examples/accrue_host` seeds for missing matrix cells; on-brand microcopy pass. (completed 2026-06-19)
-- [ ] **Phase 192: Idempotent verification & sign-off** — Full re-run + adversarial multi-lens judge; only-forward scorecard ≥ baseline (zero regressions); regression guardrails in CI; maintainer screenshot UAT.
+- [x] **Phase 192: Idempotent verification & sign-off** — Full re-run + adversarial multi-lens judge; only-forward scorecard ≥ baseline (zero regressions); regression guardrails in CI; maintainer screenshot UAT. (completed 2026-06-20, approved)
 
 ### Phase Details
 
@@ -124,11 +124,13 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 188-07-PLAN.md — Full automated verification and maintainer foundation-kitchen checkpoint
+- [x] 188-07-PLAN.md — Full automated verification and maintainer foundation-kitchen checkpoint
 
 Cross-cutting constraints:
+
 - Composed type, layer, semantic role, motion, and Tailwind SSOT fixes stay at root `accrue_admin` design-system surfaces; no per-page patching.
 - `/billing/dev/components` is the maintainer proof surface for foundation specimens in light and dark modes.
+
 **UI hint**: yes
 
 ### Phase 189: Primitive & form components + component lab
@@ -166,9 +168,11 @@ Plans:
 - [x] 189-07-PLAN.md — CMP-05 verifier guard + negative fixtures + maintainer screenshot checkpoint
 
 Cross-cutting constraints:
+
 - All component fixes at component root (HEEx + theme.css/app.css) only; no per-page patches (D-14).
 - Registry // schema changes require lockstep  updates (D-08).
 - Cell-id grammar  is frozen (D-12).
+
 **UI hint**: yes
 
 ### Phase 190: Navigation, data-display & meta-component cohesion
@@ -227,6 +231,7 @@ Plans:
 **Plans:** 7 plans
 
 Plans:
+
 - [x] 191-01-PLAN.md — Manifest-driven Phase 191 browser harness and AX187 coverage audit
 - [x] 191-02-PLAN.md — Deterministic E2E fixture matrix and one-click seed endpoint
 - [x] 191-03-PLAN.md — Shared modal, drawer, and step-up overlay focus/layer closure
@@ -343,11 +348,11 @@ Full details: [v1.48 roadmap archive](milestones/v1.48-ROADMAP.md)
 | 185. Voice, Microcopy & Marketing Copy | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 186. HTML Brand Book Assembly & Quality Gate | v1.52 | 3/3 | Complete | 2026-06-14 |
 | 187. Audit & Baseline | v1.53 | 5/5 | Complete    | 2026-06-15 |
-| 188. Foundations hardening | v1.53 | 6/7 | In Progress|  |
+| 188. Foundations hardening | v1.53 | 8/8 | Complete   | 2026-06-20 |
 | 189. Primitive & form components + component lab | v1.53 | 7/7 | Complete   | 2026-06-18 |
 | 190. Navigation, data-display & meta-component cohesion | v1.53 | 6/6 | Complete | 2026-06-18 |
 | 191. Page & flow interaction pass + fixture stress + microcopy | v1.53 | 6/7 | In Progress|  |
-| 192. Idempotent verification & sign-off | v1.53 | 0/TBD | Not started | - |
+| 192. Idempotent verification & sign-off | v1.53 | 6/6 | Complete   | 2026-06-20 |
 
 ## Historical Backlog Anchors (not active scope)
 

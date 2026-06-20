@@ -2,16 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.53
 milestone_name: Admin UI Design-System Hardening
-status: verifying
-stopped_at: Phase 192 context gathered
-last_updated: "2026-06-19T20:54:08.683Z"
-last_activity: 2026-06-19
+current_phase: 188
+current_phase_name: foundations-hardening
+status: executing
+stopped_at: Completed 188-08-PLAN.md
+last_updated: "2026-06-20T13:50:23.918Z"
+last_activity: 2026-06-20
+last_activity_desc: Phase 188 execution started
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 32
-  completed_plans: 32
-  percent: 83
+  completed_phases: 6
+  total_plans: 39
+  completed_plans: 39
+  percent: 100
 ---
 
 # Project State
@@ -22,15 +25,15 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 
 **Core value:** A Phoenix developer can install Accrue + its companion admin UI, and launch a real SaaS with subscription billing on day one — complete, production-grade, idiomatic Elixir DX, strong domain modeling, tamper-evident audit ledger, great observability, and zero breaking-change pain through v1.x.
 
-**Current focus:** Phase 191 — page-flow-interaction-pass-fixture-stress-microcopy
+**Current focus:** Phase 188 — foundations-hardening
 
 ## Current Position
 
-Phase: 191 (page-flow-interaction-pass-fixture-stress-microcopy) — COMPLETE
-Plan: 7 of 7
-Status: Verified complete
-Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): Phase-187 observation test "Admin live interaction baseline" times out >300s in probeAffordanceAndStates because Phase 189 grew /billing/dev/components ~10x — needs the probe scoped/skipped for the kitchen (/gsd-debug candidate, tracked for Phase 192).
-Last activity: 2026-06-19
+Phase: 188 (foundations-hardening) — EXECUTING
+Plan: 2 of 8
+Status: Ready to execute
+Carried follow-up (from Phase 189, NOT a Phase 190 planning gate): resolved by Phase 192 guardrail execution and final scorecard verification.
+Last activity: 2026-06-20 -- Phase 188 execution started
 
 ## Post-v1.48 Pause Rule
 
@@ -49,7 +52,7 @@ v1.53 Admin UI Design-System Hardening is open as a quality / interaction-correc
 | 189 | Primitive & form components + component lab | CMP-01, CMP-02, CMP-03, CMP-04, CMP-05 | Execution complete — verification pending (e2e + screenshot) |
 | 190 | Navigation, data-display & meta-component cohesion | GRP-01, GRP-02, GRP-03, GRP-04 | Complete — shift-left UAT automated (0 human steps) |
 | 191 | Page & flow interaction pass + fixture stress + microcopy | IXN-01..05, PAGE-01..04, CPY-01..03, SEED-01..02 | Complete (2026-06-19, verified) |
-| 192 | Idempotent verification & sign-off | VER-02, VER-03, VER-04 | Not started |
+| 192 | Idempotent verification & sign-off | VER-02, VER-03, VER-04 | Complete (2026-06-20, approved) |
 
 Coverage: 33/33 v1.53 requirements mapped (each REQ-ID → exactly one phase). Per-phase counts: 187→1 · 188→6 · 189→5 · 190→4 · 191→14 · 192→3 = 33. Authoritative scope source: the approved scoping plan; prior design source `.planning/research/v1.51-admin-ui-depth-design.md`.
 
@@ -162,6 +165,7 @@ Coverage: 22/22 v1.51 requirements mapped (each REQ-ID → exactly one phase). D
 | Phase 191 P04 | 29 min | 2 tasks | 19 files |
 | Phase 191 P05 | 16m 34s | 2 tasks | 13 files |
 | Phase 191 P07 | 12m | 2 tasks | 3 files |
+| Phase 188 P08 | 68 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -257,6 +261,9 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 - [Phase 191]: Page-state and destructive-action copy belongs in AccrueAdmin.Copy modules, not inline LiveView strings. — Plan 191-05 centralizes CPY/PAGE microcopy contracts for reuse and browser verification.
 - [Phase 191]: Visible action failures use recoverable resource-specific copy instead of raw inspect(reason). — Mitigates T-191-10 information disclosure while preserving operator recovery guidance.
 - [Phase 191]: Browser copy assertions target mounted page-flow DOM states, avoiding auth redirects with unstable empty bodies. — Keeps Phase 191 DOM checks deterministic without changing auth routing in this plan.
+- [Phase ?]: data-ax-force=focus detached DOM probe for headless Chromium focus-ring e2e
+- [Phase ?]: Production copy fix in subscription.ex preferred over relaxing CPY-02 assertions
+- [Phase ?]: Stale webhook test assertions aligned with current copy functions
 
 ### Pending Todos
 
@@ -311,14 +318,14 @@ The scheduled `live-stripe` job (`.github/workflows/ci.yml`, "Stripe test-mode p
 
 ## Session Continuity
 
-Last session: 2026-06-19T20:54:08.679Z
-Stopped at: Phase 192 context gathered
-Resume file: .planning/phases/192-idempotent-verification-sign-off/192-CONTEXT.md
+Last session: 2026-06-20T13:50:23.911Z
+Stopped at: Completed 188-08-PLAN.md
+Resume file: None
 
 ## Operator Next Steps
 
-- v1.53 Admin UI Design-System Hardening is **open** with a created roadmap (Phases 187–192, strictly linear).
-- Phase 191 execution, closeout UAT, code review, and verification are complete; next gate is Phase 192 planning/execution.
-- Each phase is executed research-backed and verified via the GSD UI workflow (`/gsd-ui-phase` design-contract + `/gsd-ui-review`), with an adversarial multi-lens judge and a maintainer screenshot checkpoint at every phase boundary.
+- v1.53 Admin UI Design-System Hardening has completed Phases 187–192.
+- Phase 192 final scorecard and sign-off are verifier-clean with maintainer approval.
+- Next gate is milestone closeout / archival, after deciding how to handle the mixed dirty worktree.
 
 </content>
