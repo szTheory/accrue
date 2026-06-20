@@ -287,6 +287,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
 
     assert %{"error" => flash_error} =
              Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+
     assert flash_error == AccrueAdmin.Copy.Locked.owner_access_denied()
 
     assert redirect
