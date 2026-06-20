@@ -2,11 +2,12 @@ name: CI
 
 # Job id contract — stable YAML `jobs:` keys relied on by docs, `act`, and anchors:
 # `release-manifest-ssot`, `release-gate`, `phase18-tax-gate`, `admin-drift-docs`,
-# `host-integration`, `playwright-e2e`, `host-docker-smoke`,
-# `annotation-sweep`, `live-stripe`.
+# `admin-group-contracts`, `admin-hardening-guardrails`, `host-integration`,
+# `playwright-e2e`, `host-docker-smoke`, `annotation-sweep`, `live-stripe`.
 # Merge-blocking on pull_request: `release-manifest-ssot`, `docs-contracts-shift-left`,
-# `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `host-integration`,
-# `playwright-e2e`, `host-docker-smoke`, `annotation-sweep`.
+# `release-gate`, `phase18-tax-gate`, `admin-drift-docs`, `admin-group-contracts`,
+# `admin-hardening-guardrails`, `host-integration`, `playwright-e2e`,
+# `host-docker-smoke`, `annotation-sweep`.
 # Mandatory periodic: `live-stripe` (Stripe test-mode parity) runs on
 # `workflow_dispatch` and `schedule` only to catch upstream Stripe API drift.
 
@@ -428,6 +429,239 @@ jobs:
           grep -q 'accrue_admin "/billing"' accrue_admin/guides/admin_ui.md
           grep -q 'accrue_admin.assets.build' accrue_admin/guides/admin_ui.md
 
+  admin-group-contracts:
+    name: Admin group contracts (Phase 190)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_ADMIN_E2E_PORT: 4017
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect Phase 190 browser-relevant changes
+        id: phase190_changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          relevant=false
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            relevant=true
+          else
+            from_sha="$BEFORE_SHA"
+            if [ "$GITHUB_EVENT_NAME" = "pull_request" ] && [ -n "$BASE_SHA" ]; then
+              from_sha="$BASE_SHA"
+            fi
+
+            if [ -z "$from_sha" ] || printf '%s' "$from_sha" | grep -Eq '^0+$'; then
+              relevant=true
+            else
+              git diff --name-only "$from_sha" "$GITHUB_SHA" > /tmp/phase190-changed-files.txt
+              if grep -Eq '^(accrue/|accrue_admin/|scripts/ci/verify_phase190_automation_contract\.sh|\.github/workflows/ci\.yml|\.planning/phases/190-navigation-data-display-meta-component-cohesion/)' /tmp/phase190-changed-files.txt; then
+                relevant=true
+              fi
+            fi
+          fi
+
+          echo "relevant=$relevant" >> "$GITHUB_OUTPUT"
+          echo "Phase 190 browser-relevant changes: $relevant"
+
+      - name: Phase 190 automation contract
+        run: bash scripts/ci/verify_phase190_automation_contract.sh
+
+      - name: Set up BEAM
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
+
+      - name: Install Hex
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        run: mix local.hex --force
+
+      - name: Set up Node
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Restore accrue_admin deps cache
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        uses: actions/cache@v5
+        with:
+          path: accrue_admin/deps
+          key: ${{ runner.os }}-otp28-elixir119-phase190-admin-deps-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp28-elixir119-phase190-admin-deps-
+
+      - name: Install admin deps
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        run: cd accrue_admin && mix deps.get
+
+      - name: Compile admin package
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Install browser deps
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        run: cd accrue_admin && npm ci
+
+      - name: Install Chromium
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        run: cd accrue_admin && npx playwright install --with-deps chromium
+
+      - name: Run Phase 190 group-contract browser gate
+        if: steps.phase190_changes.outputs.relevant == 'true'
+        run: cd accrue_admin && npm run e2e:group-contracts
+
+      - name: Upload Playwright report
+        if: failure() && steps.phase190_changes.outputs.relevant == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: admin-group-contracts-playwright-report
+          path: accrue_admin/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Playwright traces
+        if: failure() && steps.phase190_changes.outputs.relevant == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: admin-group-contracts-playwright-traces
+          path: accrue_admin/test-results
+          if-no-files-found: ignore
+
+  admin-hardening-guardrails:
+    name: Admin hardening guardrails (Phase 192)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: localhost
+      ACCRUE_ADMIN_E2E_PORT: 4018
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Phase 192 CI contract
+        run: bash scripts/ci/verify_phase192_ci_contract.sh
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '28.0'
+          elixir-version: '1.19.5'
+
+      - name: Install Hex
+        run: mix local.hex --force
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: accrue_admin/package-lock.json
+
+      - name: Restore accrue_admin deps cache
+        uses: actions/cache@v5
+        with:
+          path: accrue_admin/deps
+          key: ${{ runner.os }}-otp28-elixir119-phase192-admin-deps-${{ hashFiles('accrue_admin/mix.lock', 'accrue/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp28-elixir119-phase192-admin-deps-
+
+      - name: Install admin deps
+        run: cd accrue_admin && mix deps.get
+
+      - name: Compile admin package
+        run: cd accrue_admin && mix compile --warnings-as-errors
+
+      - name: Install browser deps
+        run: cd accrue_admin && npm ci
+
+      - name: Install Chromium
+        run: cd accrue_admin && npx playwright install --with-deps chromium
+
+      - name: Phase 192 local guardrail contract
+        run: bash scripts/ci/verify_phase192_guardrail_contract.sh
+
+      - name: Run Phase 192 admin hardening guardrails
+        run: bash scripts/ci/verify_phase192_admin_guardrails.sh
+
+      - name: Upload Phase 192 Playwright report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase192-admin-playwright-report
+          path: accrue_admin/playwright-report
+          if-no-files-found: ignore
+
+      - name: Upload Phase 192 Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase192-admin-playwright-evidence
+          path: accrue_admin/test-results
+          if-no-files-found: ignore
+
+      - name: Upload Phase 192 generated evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase192-generated-evidence
+          path: |
+            .planning/phases/192-idempotent-verification-sign-off/final.cells.json
+            .planning/phases/192-idempotent-verification-sign-off/scorecard.delta.json
+            .planning/phases/192-idempotent-verification-sign-off/regressions.ndjson
+            .planning/phases/192-idempotent-verification-sign-off/artifacts.manifest.json
+            .planning/phases/192-idempotent-verification-sign-off/192-SCORECARD.md
+          if-no-files-found: ignore
+
   host-integration:
     # Phoenix/LiveView compatibility proof for Phase 15:
     # host-integration proves Phoenix 1.8 / LiveView 1.1 by running the seeded host app
@@ -712,6 +946,8 @@ jobs:
         release-gate,
         phase18-tax-gate,
         admin-drift-docs,
+        admin-group-contracts,
+        admin-hardening-guardrails,
         host-integration,
         playwright-e2e,
         host-docker-smoke,
@@ -738,8 +974,8 @@ jobs:
           ANNOTATION_SWEEP_IGNORE_MESSAGE: 'first\.\.last inside match is deprecated'
         run: >-
           bash scripts/ci/annotation_sweep.sh release-manifest-ssot docs-contracts-shift-left
-          release-gate phase18-tax-gate admin-drift-docs host-integration playwright-e2e
-          host-docker-smoke
+          release-gate phase18-tax-gate admin-drift-docs admin-group-contracts admin-hardening-guardrails
+          host-integration playwright-e2e host-docker-smoke
 
   # ---------------------------------------------------------------------
   # Mandatory periodic live-Stripe fidelity job (quick task 260414-l9q).

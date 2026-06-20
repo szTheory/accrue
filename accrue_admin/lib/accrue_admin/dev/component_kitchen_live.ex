@@ -485,6 +485,70 @@ if Mix.env() != :prod do
               </tbody>
             </table>
           </section>
+
+          <section class="ax-card ax-dev-section" aria-labelledby="command-palette-motion-proof-title">
+            <div class="ax-dev-section-head">
+              <div>
+                <p class="ax-eyebrow">Motion proof</p>
+                <h3 id="command-palette-motion-proof-title" class="ax-heading">Command palette open state</h3>
+              </div>
+              <span class="ax-dev-chip">reduced-motion target</span>
+            </div>
+
+            <p class="ax-body ax-dev-caption">
+              Static proof surface for the global search palette transition contract. The live command palette owns keyboard behavior; this specimen keeps the open-state CSS target present for deterministic token checks.
+            </p>
+
+            <div class="ax-command-palette-wrapper ax-dev-command-palette-specimen" data-open="true" data-component-group="toolbar-search-filter-sort">
+              <div
+                class="ax-command-palette"
+                role="dialog"
+                aria-modal="false"
+                aria-label="Command palette motion specimen"
+              >
+                <form onsubmit="return false;">
+                  <div class="ax-command-palette-input-group">
+                    <Icon.icon name={:search} size="md" class="ax-command-palette-search-icon" />
+                    <input
+                      type="text"
+                      class="ax-command-palette-input"
+                      value="customer recovery"
+                      aria-label="Command palette specimen search"
+                      readonly
+                    />
+                    <span class="ax-spinner" aria-hidden="true"></span>
+                  </div>
+                </form>
+
+                <div class="ax-command-palette-body">
+                  <div class="ax-command-palette-empty">
+                    <p class="ax-eyebrow">Jump to</p>
+                    <ul class="ax-command-palette-list">
+                      <li class="ax-command-palette-list-item">
+                        <a class="ax-command-palette-item" href={@admin_mount_path <> "/customers"}>
+                          <Icon.icon name={:users} size="sm" /> <span>Look up a customer</span>
+                        </a>
+                      </li>
+                      <li class="ax-command-palette-list-item">
+                        <a class="ax-command-palette-item" href={@admin_mount_path <> "/invoices?status=open"}>
+                          <Icon.icon name={:invoices} size="sm" /> <span>Clear the invoice queue</span>
+                        </a>
+                      </li>
+                      <li class="ax-command-palette-list-item">
+                        <a class="ax-command-palette-item" href={@admin_mount_path <> "/analytics/recovery"}>
+                          <Icon.icon name={:recovery} size="sm" /> <span>Recover at-risk revenue</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="ax-command-palette-footer">
+                  <span class="ax-shortcut"><kbd>esc</kbd> Close</span>
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
       </AppShell.app_shell>
       """

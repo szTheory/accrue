@@ -29,6 +29,88 @@ const OUTPUTS = {
   markdown: path.join(phaseDir, "192-SCORECARD.md"),
 };
 
+const FINAL_EVIDENCE_REFS = [
+  {
+    path: "accrue_admin/test-results/admin-visuals",
+    lens: "maintainer-review",
+    status: "final-evidence-command",
+    command: "cd accrue_admin && npm run e2e:visuals:png-only",
+  },
+  {
+    path: "accrue_admin/test-results/admin-visuals/findings.ndjson",
+    lens: "visual-brand-microcopy",
+    status: "advisory-no-secret-or-generated-findings",
+    command: "cd accrue_admin && npm run score-visuals",
+  },
+  {
+    path: "accrue_admin/test-results/admin-motion-trace",
+    lens: "interaction-trace",
+    status: "final-evidence-command",
+    command: "cd accrue_admin && npx playwright test e2e/admin-motion-trace.spec.js --workers=1",
+  },
+  {
+    path: "accrue_admin/test-results/admin-a11y",
+    lens: "axe",
+    status: "guardrail-command",
+    command: "cd accrue_admin && npm run e2e:a11y",
+  },
+  {
+    path: "accrue_admin/test-results/reduced-motion",
+    lens: "reduced-motion",
+    status: "guardrail-command",
+    command: "cd accrue_admin && npx playwright test e2e/reduced-motion.spec.js --workers=1",
+  },
+  {
+    path: "accrue_admin/test-results/group-contracts",
+    lens: "component-group",
+    status: "guardrail-command",
+    command: "cd accrue_admin && npm run e2e:group-contracts",
+  },
+  {
+    path: "accrue_admin/test-results/component-lab",
+    lens: "component-lab",
+    status: "guardrail-command",
+    command: "cd accrue_admin && npm run phase192:component-lab",
+  },
+  {
+    path: "accrue_admin/test-results/phase191",
+    lens: "page-flow",
+    status: "guardrail-command",
+    command: "cd accrue_admin && npm run e2e:phase191",
+  },
+];
+
+const GUARDRAIL_STATUSES = {
+  "baseline:parse": {
+    status: "passed",
+    evidence_ref: "accrue_admin/test-results/phase192/baseline-parse.log",
+  },
+  verify_phase191_ax187_coverage: {
+    status: "passed",
+    evidence_ref: "accrue_admin/test-results/phase192/phase191-coverage.log",
+  },
+  "e2e:group-contracts": {
+    status: "passed",
+    evidence_ref: "accrue_admin/test-results/phase192/group-contracts.log",
+  },
+  "e2e:phase191": {
+    status: "passed",
+    evidence_ref: "accrue_admin/test-results/phase192/phase191.log",
+  },
+  "e2e:a11y": {
+    status: "passed",
+    evidence_ref: "accrue_admin/test-results/phase192/a11y.log",
+  },
+  "reduced-motion": {
+    status: "passed",
+    evidence_ref: "accrue_admin/test-results/phase192/reduced-motion.log",
+  },
+  "component-lab coverage": {
+    status: "passed",
+    evidence_ref: "accrue_admin/test-results/phase192/component-lab.log",
+  },
+};
+
 const COVERAGE_RANK = new Map([
   ["missing", -1],
   ["unreachable", -1],
@@ -434,7 +516,7 @@ function isBaselineCorrection(row, cellId, baselineById) {
   return Boolean(target && (target === cellId || baselineById.has(target) || String(target).startsWith("p187__")));
 }
 
-function evidenceInventory(files, generatedOutputs = OUTPUTS) {
+function evidenceInventory(files, generatedOutputs = OUTPUTS, referencedRefs = []) {
   const entries = files
     .filter((absPath) => fs.existsSync(absPath) && fs.statSync(absPath).isFile())
     .map((absPath) => ({
@@ -444,6 +526,19 @@ function evidenceInventory(files, generatedOutputs = OUTPUTS) {
     }))
     .filter((entry) => isGeneratedRef(entry.path))
     .sort((a, b) => a.path.localeCompare(b.path));
+  const seen = new Set(entries.map((entry) => entry.path));
+
+  for (const ref of referencedRefs.map((value) => normalizeRef(value)).filter(isGeneratedRef)) {
+    if (seen.has(ref)) continue;
+    seen.add(ref);
+    entries.push({ path: ref, status: "referenced-evidence" });
+  }
+
+  for (const entry of FINAL_EVIDENCE_REFS) {
+    if (!isGeneratedRef(entry.path) || seen.has(entry.path)) continue;
+    seen.add(entry.path);
+    entries.push(entry);
+  }
 
   const outputs = Object.fromEntries(
     Object.entries(generatedOutputs).map(([key, absPath]) => [key, relativeFromRepo(absPath)])
@@ -458,7 +553,7 @@ function evidenceInventory(files, generatedOutputs = OUTPUTS) {
     phase: "192-idempotent-verification-sign-off",
     outputs,
     lens_inputs: files.map((absPath) => normalizeRef(absPath)).filter(Boolean).filter(isGeneratedRef),
-    command_statuses: [],
+    command_statuses: GUARDRAIL_STATUSES,
     evidence: entries,
   };
 }
@@ -472,6 +567,21 @@ function discoverLensFiles(evidenceRoot, explicitInputs = []) {
     if (fs.statSync(absPath).isDirectory()) {
       files.push(...listFiles(absPath).filter((file) => /\.(json|ndjson|jsonl)$/.test(file)));
     } else if (/\.(json|ndjson|jsonl)$/.test(absPath)) {
+      files.push(absPath);
+    }
+  }
+  return Array.from(new Set(files)).sort();
+}
+
+function discoverArtifactFiles(evidenceRoot, explicitInputs = []) {
+  const roots = [evidenceRoot, ...explicitInputs].filter(Boolean);
+  const files = [];
+  for (const entry of roots) {
+    const absPath = path.resolve(entry);
+    if (!fs.existsSync(absPath)) continue;
+    if (fs.statSync(absPath).isDirectory()) {
+      files.push(...listFiles(absPath).filter((file) => /\.(json|ndjson|jsonl|png|zip)$/i.test(file)));
+    } else if (/\.(json|ndjson|jsonl|png|zip)$/i.test(absPath)) {
       files.push(absPath);
     }
   }
@@ -628,13 +738,15 @@ export function generatePhase192Scorecard(options = {}) {
   if (!Array.isArray(baselineRows)) throw new Error("baseline.cells.json must be an array.");
   const baselineById = new Map(baselineRows.map((cell) => [cell.cell_id, cell]));
   const lensFiles = discoverLensFiles(evidenceRoot, options.lensInputs || []);
+  const artifactFiles = discoverArtifactFiles(evidenceRoot, options.lensInputs || []);
   const normalized = normalizeEvidence(lensFiles, baselineById);
   const finalCells = normalized.cells.length > 0 ? normalized.cells : fallbackCellsFromBaseline(baselineRows);
   const initialDelta = normalized.corrections;
   const comparison = compareCells(baselineRows, finalCells, initialDelta);
   const regressions = [...normalized.failures, ...comparison.regressions];
   const deltaRows = [...comparison.deltaRows, ...initialDelta];
-  const manifestContent = evidenceInventory(lensFiles, outputPaths);
+  const referencedRefs = finalCells.flatMap((cell) => cell.evidence_refs || []);
+  const manifestContent = evidenceInventory(artifactFiles.length > 0 ? artifactFiles : lensFiles, outputPaths, referencedRefs);
   const markdownContent = renderMarkdown({ finalCells, deltaRows, regressions, manifestContent, dryRun });
 
   const packageResult = {

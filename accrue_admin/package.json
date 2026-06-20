@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "e2e": "env -u NO_COLOR playwright test",
+    "e2e:group-contracts": "env -u NO_COLOR playwright test e2e/admin-group-contracts.spec.js --timeout=60000 --workers=1",
     "e2e:visuals:png-only": "env -u NO_COLOR playwright test e2e/admin-visuals.spec.js",
     "e2e:phase191": "env -u NO_COLOR playwright test e2e/admin-page-flow-phase191.spec.js --timeout=60000 --workers=1",
     "e2e:a11y": "env -u NO_COLOR playwright test e2e/admin-a11y.spec.js",

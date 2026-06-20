@@ -38,6 +38,59 @@ const DECISION_IDS = Array.from({ length: 30 }, (_value, index) => {
 
 const UI_SPEC_WIDTHS = [320, 375, 768, 1024, 1440];
 
+const GROUP_FINDABILITY = {
+  "page-header-actions-breadcrumbs": [
+    /Quarter close/i,
+    /Review subscriptions/i,
+    /Export review/i,
+    /Open runbook/i,
+  ],
+  "toolbar-search-filter-sort": [
+    /Search/i,
+    /Status/i,
+    /Open/i,
+    /Apply filters/i,
+    /Clear filters/i,
+    /Oldest first/i,
+  ],
+  "table-empty-loading-error-pagination": [
+    /Invoice queue proof table/i,
+    /Past due/i,
+    /Filtered empty/i,
+    /Retry/i,
+    /No pagination/i,
+    /Load more/i,
+  ],
+  "kpi-chart-table": [
+    /Recovered MRR/i,
+    /At risk/i,
+    /Retry scheduled/i,
+    /Annual enterprise renewal/i,
+  ],
+  "detail-header-metadata-actions": [
+    /Subscription sub_group_visibility_demo/i,
+    /Status active/i,
+    /Owner scope/i,
+    /Review subscription/i,
+  ],
+  "modal-confirm": [
+    /Confirm action/i,
+    /Cancel renewal schedule/i,
+    /Cancel renewal/i,
+  ],
+  "drawer-form": [
+    /Edit billing contact/i,
+    /Billing email/i,
+    /Owner scope is required/i,
+    /Save contact/i,
+  ],
+  "tabs-subviews": [
+    /Webhook delivery attempts/i,
+    /30 days UTC/i,
+    /Overview/i,
+  ],
+};
+
 const representativeRoutes = [
   { category: "shell-nav-tabs", group: "page-header-actions-breadcrumbs", path: "/billing/dev/components" },
   { category: "list-table", group: "table-empty-loading-error-pagination", path: "/billing/invoices" },
@@ -133,6 +186,20 @@ async function assertAllGroupRootsVisible(page) {
     await expect(root, `${slug} proof root`).toHaveCount(1);
     await expect(root, `${slug} proof root`).toBeVisible();
     await expect(root.locator("[data-group-state]").first(), `${slug} state chips`).toBeVisible();
+  }
+}
+
+async function assertOperatorStressFindability(page) {
+  for (const slug of REQUIRED_SLUGS) {
+    const root = proofRoot(page, slug);
+    await expect(root, `${slug} proof root`).toBeVisible();
+    await expect(root.locator(".ax-dev-group-header h4.ax-heading"), `${slug} identity heading`).toBeVisible();
+    await expect(root.locator(".ax-dev-group-state-chip").first(), `${slug} state summary`).toBeVisible();
+    expect(await visibleFocusableCount(root), `${slug} has an immediately reachable action/control`).toBeGreaterThan(0);
+
+    for (const expectedText of GROUP_FINDABILITY[slug]) {
+      await expect(root, `${slug} exposes ${expectedText}`).toContainText(expectedText);
+    }
   }
 }
 
@@ -267,6 +334,120 @@ async function assertNoOffscreenActions(page, width) {
   }
 
   expect(focusFailures, `focusable action failures at ${width}px`).toEqual([]);
+}
+
+async function assertOperatorStressLayout(page, width, theme) {
+  await page.setViewportSize({ width, height: 900 });
+  await setTheme(page, theme);
+
+  const result = await page.evaluate(
+    ({ slugs, selector }) => {
+      const failures = [];
+      const roots = Array.from(
+        document.querySelectorAll("section.ax-dev-group-specimen[id^='grp190-'][data-component-group]")
+      );
+      const rootSlugs = roots.map((root) => root.getAttribute("data-component-group"));
+
+      const visible = (element) => {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      };
+
+      const label = (element) =>
+        (element.getAttribute("aria-label") || element.textContent || element.id || element.tagName)
+          .trim()
+          .replace(/\s+/g, " ")
+          .slice(0, 80);
+
+      const overlaps = (a, b) => {
+        const left = Math.max(a.left, b.left);
+        const right = Math.min(a.right, b.right);
+        const top = Math.max(a.top, b.top);
+        const bottom = Math.min(a.bottom, b.bottom);
+        return right - left > 3 && bottom - top > 3;
+      };
+
+      for (const root of roots) {
+        const group = root.getAttribute("data-component-group");
+        const header = root.querySelector(".ax-dev-group-header");
+        const body = root.querySelector(".ax-dev-group-body");
+        const rootRect = root.getBoundingClientRect();
+
+        if (!slugs.includes(group)) {
+          failures.push({ type: "unexpected-group", group });
+        }
+
+        if (rootRect.left < -1 || rootRect.right > window.innerWidth + 1) {
+          failures.push({
+            type: "proof-root-horizontal-overflow",
+            group,
+            left: rootRect.left,
+            right: rootRect.right,
+            viewport: window.innerWidth,
+          });
+        }
+
+        if (!header || !body || !visible(header) || !visible(body)) {
+          failures.push({ type: "missing-header-body", group });
+        } else {
+          const headerRect = header.getBoundingClientRect();
+          const bodyRect = body.getBoundingClientRect();
+          if (bodyRect.top < headerRect.bottom - 1) {
+            failures.push({
+              type: "hierarchy-overlap",
+              group,
+              headerBottom: headerRect.bottom,
+              bodyTop: bodyRect.top,
+            });
+          }
+        }
+
+        for (const card of root.querySelectorAll(".ax-card")) {
+          if (card === root) continue;
+          const containingCard = card.parentElement?.closest(".ax-card");
+          if (!containingCard || containingCard === root) continue;
+          if (card.closest(".ax-dev-group-state-grid")) continue;
+          failures.push({
+            type: "nested-card",
+            group,
+            outer: label(containingCard),
+            inner: label(card),
+          });
+        }
+
+        const actions = Array.from(root.querySelectorAll(selector)).filter((element) => {
+          if (!visible(element)) return false;
+          if (element.closest(".ax-dropdown-panel")) return false;
+          return true;
+        });
+
+        for (let index = 0; index < actions.length; index += 1) {
+          for (let otherIndex = index + 1; otherIndex < actions.length; otherIndex += 1) {
+            const first = actions[index];
+            const second = actions[otherIndex];
+            if (first.contains(second) || second.contains(first)) continue;
+            if (overlaps(first.getBoundingClientRect(), second.getBoundingClientRect())) {
+              failures.push({
+                type: "action-overlap",
+                group,
+                first: label(first),
+                second: label(second),
+              });
+            }
+          }
+        }
+      }
+
+      return { rootSlugs, failures };
+    },
+    { slugs: REQUIRED_SLUGS, selector: actionSelector() }
+  );
+
+  expect(result.rootSlugs.sort(), "proof roots exist before operator-stress layout scan").toEqual(
+    [...REQUIRED_SLUGS].sort()
+  );
+  expect(result.failures, `operator-stress layout failures at ${width}px in ${theme}`).toEqual([]);
 }
 
 async function assertRepresentativeRoute(page, route) {
@@ -410,6 +591,17 @@ test.describe("Phase 190 group contract browser probes", () => {
   test("long-content actions stay reachable at UI-spec widths", async ({ page }) => {
     for (const width of UI_SPEC_WIDTHS) {
       await assertNoOffscreenActions(page, width);
+    }
+  });
+
+  test("operator-stress group scan is deterministic across themes and breakpoints", async ({ page }) => {
+    for (const theme of ["light", "dark"]) {
+      await setTheme(page, theme);
+      await assertOperatorStressFindability(page);
+
+      for (const width of UI_SPEC_WIDTHS) {
+        await assertOperatorStressLayout(page, width, theme);
+      }
     }
   });
 });

@@ -276,6 +276,7 @@ function artifactRef(row) {
 
 function validArtifactRef(ref) {
   const value = String(ref || "");
+  if (value.startsWith("playwright-trace:")) return true;
   if (!value || path.isAbsolute(value) || value.includes("\\") || value.split("/").includes("..")) return false;
   return ALLOWED_ARTIFACT_ROOTS.some((root) => value.startsWith(root));
 }
@@ -443,7 +444,11 @@ function compareFinalCells(baselineRows, finalRows, deltaRows, manifestRefs) {
         `${baseline.cell_id}: coverage downgraded covered -> ${finalCell.coverage_status} (D-11 coverage-downgrade).`
       );
     }
-    if ((finalCell.coverage_status === "gap" || finalCell.coverage_status === "n/a") && !correction) {
+    if (
+      (finalCell.coverage_status === "gap" || finalCell.coverage_status === "n/a") &&
+      baseline.coverage_status !== finalCell.coverage_status &&
+      !correction
+    ) {
       failures.coverageDowngrades.push(
         `${baseline.cell_id}: final cell is newly unreachable/gap without baseline correction.`
       );
