@@ -134,6 +134,38 @@ volumes. The image layer cache only invalidates when `bin/` changes. The runtime
 caches already give us the fast loop, so there's nothing to gain from build-layer
 gymnastics here.
 
+### Editing the Accrue libraries (sibling path deps) — also hot
+
+The whole point of this demo is iterating on `accrue`, `accrue_admin`, and
+`accrue_portal` — which the host consumes as `path:` deps, not the host's own
+`lib/`. Phoenix's dev code reloader **only recompiles the endpoint's own app by
+default**, so historically a change to e.g. `accrue_admin/lib/.../sidebar.ex`
+would sit there, stale, until you `docker compose restart web`. That foot-gun is
+now closed in `config/dev.exs`:
+
+- **`reloadable_apps: [:accrue_host, :accrue, :accrue_admin, :accrue_portal]`** —
+  the load-bearing fix. The code reloader recompiles the sibling path deps on the
+  **next request**, so the new code is always served without a restart.
+- **`live_reload: dirs/patterns`** watching `../../accrue*/lib` (and the admin
+  built bundle) — the sibling source lives *outside* this app dir, so the watcher
+  has to be pointed at it explicitly. With it, the browser **auto-refreshes** on
+  the change instead of you hitting reload.
+
+So: **edit any `.ex`/`.heex` in the Accrue libs → it just shows up**, same as
+editing the host. No `restart`, no `mix`.
+
+**The one exception — admin CSS.** `accrue_admin` serves its **committed**
+`priv/static/accrue_admin.css` bundle, *not* source `assets/css/app.css`. Editing
+`app.css` alone ships nothing. You must rebuild the bundle:
+
+```bash
+cd accrue_admin && mix accrue_admin.assets.build   # regenerates priv/static/accrue_admin.css
+```
+
+Once rebuilt, the bundle change *is* watched (`accrue_admin/priv/static` is in
+`dirs`), so the page auto-reloads — but the rebuild step itself is manual. Commit
+the regenerated bundle with your CSS change.
+
 ## Footguns (lessons learned)
 
 - **The image builds a HarfBuzz NIF from Rust source — don't "fix" it by emulating.**

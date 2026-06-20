@@ -58,9 +58,31 @@ config :accrue_host, AccrueHostWeb.Endpoint,
 # different ports.
 
 # Reload browser tabs when matching files change.
+#
+# This host `path:`-depends on the sibling Accrue libs (accrue, accrue_admin,
+# accrue_portal). By default Phoenix's dev code reloader only recompiles the
+# endpoint's own app (`:accrue_host`), so editing a sibling lib's source left the
+# running server serving stale compiled code until a manual `docker compose
+# restart web`. Two settings fix that:
+#   * `reloadable_apps` — recompile the sibling path deps on the next request too
+#     (this is the load-bearing fix; it guarantees recompile-on-request).
+#   * `live_reload: dirs/patterns` — watch the sibling lib dirs (they live OUTSIDE
+#     this dir, at /workspace/{accrue,accrue_admin,accrue_portal}) and the
+#     accrue_admin built CSS bundle, so the browser auto-refreshes on the change.
+# NOTE: CSS still needs `mix accrue_admin.assets.build` first — the admin serves
+# the COMMITTED priv/static/accrue_admin.css bundle, not source app.css. Once the
+# bundle is rebuilt, the change to priv/static is watched and auto-reloads.
 config :accrue_host, AccrueHostWeb.Endpoint,
+  reloadable_apps: [:accrue_host, :accrue, :accrue_admin, :accrue_portal],
   live_reload: [
     web_console_logger: true,
+    # Watch the sibling lib dirs + the admin built bundle (outside this app dir).
+    dirs: [
+      "../../accrue/lib",
+      "../../accrue_admin/lib",
+      "../../accrue_admin/priv/static",
+      "../../accrue_portal/lib"
+    ],
     patterns: [
       # Static assets, except user uploads
       ~r"priv/static/(?!uploads/).*\.(js|css|png|jpeg|jpg|gif|svg)$",
@@ -68,7 +90,13 @@ config :accrue_host, AccrueHostWeb.Endpoint,
       ~r"priv/gettext/.*\.po$",
       # Router, Controllers, LiveViews and LiveComponents
       ~r"lib/accrue_host_web/router\.ex$",
-      ~r"lib/accrue_host_web/(controllers|live|components)/.*\.(ex|heex)$"
+      ~r"lib/accrue_host_web/(controllers|live|components)/.*\.(ex|heex)$",
+      # Sibling Accrue libs (path deps): recompile + reload on their source and
+      # (for accrue_admin) on the rebuilt static CSS/JS bundle.
+      ~r"accrue/lib/.*\.(ex|heex)$",
+      ~r"accrue_admin/lib/.*\.(ex|heex)$",
+      ~r"accrue_admin/priv/static/.*\.(css|js)$",
+      ~r"accrue_portal/lib/.*\.(ex|heex)$"
     ]
   ]
 
