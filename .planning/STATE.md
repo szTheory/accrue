@@ -279,6 +279,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260618-3pu | Component-lab family-label map (replace `String.upcase(family)` with UI-SPEC labels) | 2026-06-18 | b5cf3527 | [260618-3pu-component-lab-family-label-map](./quick/260618-3pu-component-lab-family-label-map/) |
+| 260620-gmv | Green main CI — format test file + harden CMP-05 xargs guards (GNU-vs-BSD portability) | 2026-06-20 | 0ce75413 | [260620-gmv-fix-ci-format-xargs](./quick/260620-gmv-fix-ci-format-xargs/) |
 
 ### Milestone Intake Rules
 
