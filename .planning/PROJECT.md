@@ -514,7 +514,7 @@ zero blockers; non-critical follow-ups + partial Nyquist 123–125 deferred).
 
 ## Current State
 
-**v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. With v1.53 shipped, the project returns to **stable core / demand-driven expansion** posture — no milestone currently open.
+**v1.53 — Admin UI Design-System Hardening shipped & archived 2026-06-20 (Phases 187–192, 39/39 plans, 33/33 requirements).** The fourth pass on the `accrue_admin` surface is complete: the operator UI is now *interaction-correct and component-systematic*, with a final scorecard ≥ the Phase-187 baseline across 21,276 cells (zero regressions), merge-blocking CI regression guardrails, and maintainer sign-off. With v1.53 shipped, the project returns to **stable-core / demand-driven expansion** posture — no milestone currently open.
 
 The v1.50→v1.53 arc (Admin UI Foundation → Depth Pass → Brand System → Design-System Hardening) closed out the adopter-facing presentation/DX investment: a coherent, distinctly-branded, interaction-correct operator UI plus a committed standalone brand book (`brandbook/`), logo system, design tokens, and voice/copy.
 
