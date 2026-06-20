@@ -9,7 +9,9 @@
     "e2e:install": "playwright install chromium",
     "score-visuals": "node e2e/score-visuals.mjs",
     "baseline:artifacts": "node e2e/baseline-artifacts.mjs",
-    "baseline:parse": "node -e 'const fs=require(\"fs\"), path=require(\"path\"); const root=path.resolve(\"..\"); JSON.parse(fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/baseline.cells.json\"),\"utf8\")); const nd=fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/defects.ndjson\"),\"utf8\").split(/\\r?\\n/).filter(Boolean); for (const line of nd) JSON.parse(line); JSON.parse(fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/artifacts.manifest.json\"),\"utf8\")); console.log(\"baseline artifacts parse ok\")'"
+    "baseline:parse": "node -e 'const fs=require(\"fs\"), path=require(\"path\"); const root=path.resolve(\"..\"); JSON.parse(fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/baseline.cells.json\"),\"utf8\")); const nd=fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/defects.ndjson\"),\"utf8\").split(/\\r?\\n/).filter(Boolean); for (const line of nd) JSON.parse(line); JSON.parse(fs.readFileSync(path.join(root,\".planning/phases/187-audit-baseline/artifacts.manifest.json\"),\"utf8\")); console.log(\"baseline artifacts parse ok\")'",
+    "phase192:component-lab": "mix test test/accrue_admin/dev/component_registry_test.exs test/accrue_admin/dev/component_group_registry_test.exs",
+    "phase192:guardrails": "bash ../scripts/ci/verify_phase192_admin_guardrails.sh"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
