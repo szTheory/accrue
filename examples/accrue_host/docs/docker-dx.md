@@ -184,6 +184,41 @@ gymnastics here.
   named-volume shadows in `docker-compose.yml`; otherwise host build artifacts can
   leak into the Linux container.
 
+## Known compile warnings (expected — won't fix)
+
+On a fresh `make up`/`make build`, the dependency-compile phase prints a handful
+of `... is undefined (module ... is not available or is yet to be defined)`
+warnings. **These are all expected, cosmetic, and originate in upstream sibling
+libraries — not in Accrue's own code.** They have **zero runtime impact** on the
+demo. We deliberately do **not** patch them (we don't vendor-patch upstream deps
+for a demo's compile log). If one of these is raised as a bug, the answer is
+"known and harmless":
+
+- **`premailex` → `struct Meeseeks.Error is undefined`**
+  (`premailex/lib/premailex/html_parser/meeseeks.ex:33`). premailex compiles
+  both its Floki and Meeseeks parser adapters unconditionally; we use Floki
+  (present), and `:meeseeks` is not pulled in, so the unused adapter's
+  `rescue e in Meeseeks.Error` references a never-loaded module. The Meeseeks
+  code path never executes.
+
+- **`rendro` → `JSV.*` / `YamlElixir.*` are undefined**
+  (`rendro/lib/rendro/public_api/validator.ex`,
+  `rendro/lib/rendro/viewer_evidence/{validator,frontmatter}.ex`). rendro declares
+  `:jsv` and `:yaml_elixir` as `only: [:dev, :test], runtime: false`, so they're
+  absent when rendro compiles as a host dependency. The affected validators
+  (viewer-evidence / public-API manifest validation) aren't on the demo's
+  invoice-PDF path.
+
+- **`mailglass_admin` → `MailglassAdmin.OptionalDeps.MailglassInbound.available?/0`
+  is undefined** (`mailglass_admin/lib/mailglass_admin/inbound_live.ex:552`,
+  `.../operator/shell.ex:41`). Standard optional-dependency guard
+  (`Code.ensure_loaded?(@gateway) and @gateway.available?()`) for the
+  `mailglass_inbound` integration we don't install. The runtime guard is correct;
+  the compiler just can't statically resolve the optional module.
+
+If we ever turn the host demo's build into warnings-as-errors, scope these three
+deps out explicitly rather than trying to fix them.
+
 ## References
 
 - Docker's Traefik guide — https://docs.docker.com/guides/traefik/
