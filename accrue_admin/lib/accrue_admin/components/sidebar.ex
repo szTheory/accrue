@@ -30,7 +30,10 @@ defmodule AccrueAdmin.Components.Sidebar do
         <%= if @brand.logo_url do %>
           <img src={@brand.logo_url} alt={@brand.app_name} class="ax-sidebar-logo" />
         <% else %>
-          <span class="ax-sidebar-mark" aria-hidden="true">A</span>
+          <svg class="ax-sidebar-brandmark" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M0 30h10v10H0Zm10-10h10v20H10Zm10-10h10v30H20ZM30 0h10v40H30Z" />
+            <path fill="#5E9E84" d="M30 0h10v40H30Z" />
+          </svg>
         <% end %>
 
         <div>

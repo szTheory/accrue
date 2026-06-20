@@ -68,9 +68,11 @@ defmodule AccrueAdmin.Layouts do
     """
   end
 
-  # Inline SVG favicon: an "A" monogram on the brand ink square. Inlined as a data
-  # URI (CSP `img-src` allows `data:`) so no extra route or static file is needed.
-  @favicon_svg ~s(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#111418"/><path d="M16 6.5 23 25.5h-3.4l-1.45-4.1h-4.3L12.4 25.5H9L16 6.5Zm0 6.4-1.5 4.3h3L16 12.9Z" fill="#FAFBFC"/></svg>)
+  # Inline SVG favicon: the Accrue brand mark (ascending stepped bars, moss accent
+  # bar) on the brand ink square for small-size legibility. Mirrors
+  # brandbook/logo/favicon.svg. Inlined as a data URI (CSP `img-src` allows
+  # `data:`) so no extra route or static file is needed.
+  @favicon_svg ~s(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#111418"/><path fill="#FAFBFC" d="M4 31h7v6H4Zm7-7h7v13h-7Zm7-7h7v20h-7Zm7-7h7v27h-7Z"/><path fill="#5E9E84" d="M25 10h7v27h-7Z"/></svg>)
   @favicon_data_uri "data:image/svg+xml;base64," <> Base.encode64(@favicon_svg)
 
   @spec favicon_data_uri() :: String.t()

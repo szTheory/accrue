@@ -613,6 +613,18 @@ button {
   object-fit: contain;
 }
 
+/*
+ * Default Accrue brand mark (shown when no host white-label logo_url is set).
+ * Ink bars use `currentColor`, so they inherit the sidebar foreground and flip
+ * automatically with the theme (the dark-theme block below pins `.ax-sidebar`
+ * to a light ink); the moss accent bar stays constant on both themes.
+ */
+.ax-sidebar-brandmark {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+}
+
 .ax-sidebar-name,
 .ax-heading,
 .ax-display,
