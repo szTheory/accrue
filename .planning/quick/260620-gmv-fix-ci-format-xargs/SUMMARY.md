@@ -55,8 +55,60 @@ Fixes:
 
 Verified: **all 14 bash contracts** in the Docs/bash CI job pass locally (exit 0).
 
+## Round 3 — second format gate (accrue_admin) + sandbox-pollution false alarm
+
+With the Docs/bash job green, the **Release gate** matrix failed at **"Accrue admin
+format"** — a *separate* format step from round 1's "Accrue format" (core). Core had
+fully passed (format→compile→test→credo→dialyzer→docs→audit), confirming the gate runs
+admin steps only after core is green.
+
+- **`accrue_admin/test/accrue_admin/live/webhook_live_test.exs`** — `mix format`
+  (stray blank line in a multi-line assert; pre-existing from `ede1354d`, Phase 188-08).
+- Pre-flight before pushing: ran admin `compile --warnings-as-errors` (clean), `credo
+  --strict` (no issues), full `mix test` suite. The suite first showed **3 failures**
+  (`query_modules_test.exs:231` etc. with `connect-e2e@example.com`/`acct_e2e_edge` rows)
+  — the documented **prior-session Playwright sandbox-pollution** gotcha. Dropping +
+  recreating the test DB cleared it → **320 tests / 0 failures**. CI starts fresh, so it
+  was never affected. Also confirmed `accrue_portal` format clean.
+
+## Round 4 — Host integration gate: ExUnit copy drift
+
+With format gates green, the required **Host integration** gate (`scripts/ci/accrue_host_uat.sh`
+→ host `mix verify.full`) failed at its `bounded_mix_tests` phase: two `examples/accrue_host`
+tests asserted the OLD org-billing denial copy, but `7bb642b2` (feat 191-05) changed the
+canonical copy. Fixed to reference `AccrueAdmin.Copy.Locked.owner_access_denied()` (drift-proof);
+also updated the skipped denial e2e spec. Verified locally: 3 tests/0 failures.
+
+## Round 5 — Host integration gate: browser_playwright phase
+
+Fixing round 4 let the gate advance to its `browser_playwright` phase, which failed on
+`e2e/phase13-canonical-demo.spec.js` (the sole e2e failure — CI reported "1 failed"). Two
+v1.53-driven drifts in that one spec:
+
+1. **Webhook-replay confirm copy** (`:205`) — `single_replay_confirmation/2` now embeds the
+   dynamic webhook id ("Replay webhook `<id>` for the active organization: ... Continue?").
+   Switched the assertion to a regex on the stable explanatory tail.
+2. **Audit-row locator strict-mode violation** (`:75`) — v1.53 added a bulk row-**select**
+   column to the events table, so `getByRole("cell", {name: "admin.webhook.replay.completed"})`
+   matched both the select-button cell and the value cell. Added `exact: true`. (Not a
+   regression — replay completed and the audit row was present.)
+
+Local verification (set up a working host e2e env: `deps.get`, test DB, chromium):
+- Full host mix suite: **194 tests / 0 failures** (clean DB).
+- `phase13 @phase15-trust` spec: **passes in isolation** (8.6s), twice.
+- Other 9 e2e specs were already green on CI ("1 failed" = phase13 only); a full local
+  e2e run OOM-killed my machine (chromium+BEAM, `exit 137`) — an environment limit, not a
+  test failure, and irrelevant to CI's clean runner.
+
 ## Result
 
-Round 1: `0ce75413` (format + xargs), pushed `0d697e89..0ce75413`.
-Round 2: planning-doc contract restore (REQUIREMENTS.md + ROADMAP/PROJECT needles).
-CI watched to green.
+- Round 1 — `0ce75413`: `mix format` core test + harden CMP-05 `xargs` guards (GNU-vs-BSD).
+- Round 2 — `93e8eeb9`: restore planning-doc contract invariants (REQUIREMENTS.md +
+  ROADMAP/PROJECT standing needles) broken by the v1.53 close.
+- Round 3 — `9313082b`: `mix format` accrue_admin webhook_live_test.
+- Round 4 — `8fe8f091`: host denial-copy assertions → canonical `Copy.Locked`.
+- Round 5 — host `phase13` e2e: replay-confirm regex + audit-cell `exact: true`.
+
+Each push surfaced the next failure the prior `set -e` / earlier-phase step had masked — all
+five were pre-existing red on `main` from Phases 188–191, stacked and serialized. Final CI
+run watched to confirm fully green.

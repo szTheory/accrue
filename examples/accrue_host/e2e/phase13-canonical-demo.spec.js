@@ -72,7 +72,9 @@ function replayAuditEventLocator(page, testInfo) {
     return page.locator("article").filter({ hasText: "admin.webhook.replay.completed" });
   }
 
-  return page.getByRole("cell", { name: "admin.webhook.replay.completed" });
+  // exact: true so we don't also match the row-select cell, whose accessible name is
+  // "Select admin.webhook.replay.completed" (bulk-select column added in v1.53).
+  return page.getByRole("cell", { name: "admin.webhook.replay.completed", exact: true });
 }
 
 test("@phase15-trust canonical first-run and admin replay walkthrough stays release-blocking", async ({
@@ -202,7 +204,12 @@ test("@phase15-trust canonical first-run and admin replay walkthrough stays rele
   await captureState(page, testInfo, "admin-webhook-detail");
 
   await page.locator("[data-role='replay-single']").click();
-  await expect(page.getByText("Replay webhook for the active organization?")).toBeVisible({
+  // Confirm copy is AccrueAdmin.Copy.Locked.single_replay_confirmation/2, which embeds the
+  // dynamic webhook id ("Replay webhook <id> for the active organization: ..."); match the
+  // stable explanatory tail so the assertion can't drift on the id or scope wording.
+  await expect(
+    page.getByText(/This will requeue the webhook delivery and record an admin audit event/)
+  ).toBeVisible({
     timeout: 15_000
   });
   await page.locator("[data-role='confirm-replay']").click();
