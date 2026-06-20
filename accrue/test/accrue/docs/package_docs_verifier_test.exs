@@ -468,6 +468,46 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     assert output =~ "z-index literals"
   end
 
+  test "package docs verifier rejects micro-stack z-index without ax-z-micro-stack annotation (D-10)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+
+    # Inject a shell with isolation and an internal z-index: 0 WITHOUT the ax-z-micro-stack comment
+    File.write!(
+      app_css_path,
+      File.read!(app_css_path) <>
+        "\n.ax-drift-shell { isolation: isolate; }\n.ax-drift-backdrop { z-index: 0; }\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "z-index literals"
+  end
+
+  test "package docs verifier rejects micro-stack z-index without isolation on the shell (D-10)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    app_css_path = Path.join(tmp_dir, "accrue_admin/assets/css/app.css")
+
+    # Inject a z-index: 0 with ax-z-micro-stack annotation but NO isolation: isolate context
+    File.write!(
+      app_css_path,
+      File.read!(app_css_path) <>
+        "\n.ax-drift-backdrop { z-index: 0; /* ax-z-micro-stack: backdrop in unisolated context */ }\n"
+    )
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "z-index literals"
+  end
+
   test "package docs verifier rejects raw type declarations in package CSS" do
     tmp_dir = tmp_dir!()
     seed_tmp_dir!(tmp_dir)

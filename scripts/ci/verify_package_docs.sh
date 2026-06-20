@@ -361,16 +361,45 @@ heex_utility_hit=$(
 
 z_index_hit=$(
   perl -0ne '
-    s{/\*.*?\*/}{}gs;
-    while (/z-index\s*:\s*(-?[0-9]+)/gi) {
+    use strict;
+    my $raw = $_;
+    my @lines = split /\n/, $raw;
+    my $in_block_comment = 0;
+    for (my $i = 0; $i < @lines; $i++) {
+      my $line = $lines[$i];
+      # Track block comment state to skip z-index inside comments
+      if ($in_block_comment) {
+        $in_block_comment = 0 if $line =~ /\*\//;
+        next;
+      }
+      if ($line =~ /\/\*/ && $line !~ /\*\//) {
+        $in_block_comment = 1;
+        next;
+      }
+      # Strip inline comment for value extraction only
+      (my $code = $line) =~ s{/\*.*?\*/}{}g;
+      next unless $code =~ /z-index\s*:\s*(-?[0-9]+)/i;
       my $value = $1;
-      next if $value eq "-1" || $value eq "0" || $value eq "1";
-      print "$value\n";
-      last;
+      # Larger numerics always fail
+      if ($value ne "-1" && $value ne "0" && $value ne "1") {
+        print "$value\n";
+        last;
+      }
+      # For -1/0/1: require ax-z-micro-stack annotation on this raw line (inline comment)
+      unless ($line =~ /ax-z-micro-stack/) {
+        print "undocumented micro-stack: $value\n";
+        last;
+      }
+      # Also require isolation: isolate somewhere in the preceding ~25 raw lines
+      my $lookback = join("\n", @lines[($i > 25 ? $i - 25 : 0) .. $i]);
+      unless ($lookback =~ /isolation\s*:\s*isolate/) {
+        print "micro-stack without isolation: $value\n";
+        last;
+      }
     }
   ' "$app_css"
 )
-[[ -z "$z_index_hit" ]] || fail "$app_css must not contain z-index literals outside micro-stacking exceptions (FND-02 z-index literals)"
+[[ -z "$z_index_hit" ]] || fail "$app_css must not contain z-index literals outside documented isolated micro-stacks (FND-02 z-index literals — pair micro-stacking 0/1/-1 with ax-z-micro-stack comment and isolation: isolate on the shell)"
 
 raw_type_hit=$(
   awk '
