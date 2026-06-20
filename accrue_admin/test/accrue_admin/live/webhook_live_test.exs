@@ -142,7 +142,7 @@ defmodule AccrueAdmin.WebhookLiveTest do
     {:ok, view, _html} = live(conn, "/billing/webhooks/#{webhook.id}?org=allowed-org")
 
     html = render_click(element(view, "[data-role='replay-single']"))
-    assert html =~ "Replay webhook for the active organization?"
+    assert html =~ "requeue the webhook delivery and record an admin audit event"
 
     html = render_click(element(view, "[data-role='confirm-replay']"))
     assert html =~ "Replay requested for the active organization."
@@ -285,8 +285,9 @@ defmodule AccrueAdmin.WebhookLiveTest do
              redirect =
              live(conn, "/billing/webhooks/#{denied_webhook.id}?org=allowed-org")
 
-    assert %{"error" => "You don't have access to billing for this organization."} =
+    assert %{"error" => flash_error} =
              Phoenix.LiveView.Utils.verify_flash(AccrueAdmin.TestEndpoint, flash_token)
+    assert flash_error == AccrueAdmin.Copy.Locked.owner_access_denied()
 
     assert redirect
   end

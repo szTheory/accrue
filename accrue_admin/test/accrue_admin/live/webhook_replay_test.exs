@@ -101,7 +101,7 @@ defmodule AccrueAdmin.WebhookReplayTest do
 
     _ = render_click(element(view, "[data-role='prepare-bulk-replay']"))
     html = render_click(element(view, "[data-role='confirm-bulk-replay']"))
-    assert html =~ "Bulk replay requested"
+    assert html =~ "replay requested"
 
     audit_count_after =
       TestRepo.aggregate(

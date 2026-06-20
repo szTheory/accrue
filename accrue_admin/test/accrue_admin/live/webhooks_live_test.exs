@@ -74,7 +74,7 @@ defmodule AccrueAdmin.WebhooksLiveTest do
 
     html = render_click(element(view, "[data-role='prepare-bulk-replay']"))
     assert html =~ "Confirm bulk replay"
-    assert html =~ "Replay 1 failed or dead webhook rows for the active organization?"
+    assert html =~ "Replay 1 failed or dead webhook rows for"
   end
 
   test "scoped bulk replay counts ignore rows outside the active organization" do

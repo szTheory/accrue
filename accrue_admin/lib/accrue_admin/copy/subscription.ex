@@ -88,7 +88,7 @@ defmodule AccrueAdmin.Copy.Subscription do
 
   defp subscription_billing_effect("cancel_now"),
     do:
-      "end billing for the current billing period immediately where the processor supports that semantic"
+      "Cancel now will execute against the local billing projection and end the current billing period immediately where the provider supports immediate cancellation"
 
   defp subscription_billing_effect("cancel_at_period_end"),
     do:
@@ -101,7 +101,8 @@ defmodule AccrueAdmin.Copy.Subscription do
     do: "resume billing from the current subscription state"
 
   defp subscription_billing_effect("swap_plan"),
-    do: "change the plan and apply the selected proration behavior"
+    do:
+      "Swap plan stages a preview before commit where the provider supports upcoming-invoice previews. This will change the plan and apply the selected proration behavior"
 
   defp subscription_billing_effect("update_quantity"),
     do: "change the top-level subscription quantity"
