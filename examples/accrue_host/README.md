@@ -55,6 +55,8 @@ prints a copy-pasteable block with:
   open `/admin`), and the 5 customer personas (tenant-facing billing flows only, not
   admin-capable): `healthy@example.com`, `past-due@example.com`, `canceled@example.com`,
   `enterprise@example.com`, `trialing@example.com`, all with password **`accrue-demo-password`**.
+  Use `healthy@example.com` for the happy-path `/billing` portal walkthrough; it
+  has a seeded user-owned subscription, default card, and paid invoice.
 
 `make open` jumps straight to the running demo in your browser; `make url` reprints
 the stable + fallback URLs without the full banner. No live Stripe keys are required
@@ -212,9 +214,11 @@ Then walk the public CohortFlow story in this order:
 2. Post one signed webhook through the real `/webhooks/stripe` endpoint. The
    focused proof suite uses `customer.subscription.created` for this step.
    If ingest fails, see [`../../accrue/guides/troubleshooting.md`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-raw-body) (**`ACCRUE-DX-WEBHOOK-RAW-BODY`**) and [`../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing`](../../accrue/guides/troubleshooting.md#accrue-dx-webhook-secret-missing) (**`ACCRUE-DX-WEBHOOK-SECRET-MISSING`**) for stable fix paths — VERIFY-01 authority stays under [**#proof-and-verification**](#proof-and-verification).
-3. Visit `/billing` as a customer to confirm the CohortFlow-branded portal shows
-   subscription, invoice, and payment method state. Visit `/admin` as the
-   operator to inspect billing state, webhook ingest, and replay visibility.
+3. Visit `/billing` as `healthy@example.com` to confirm the CohortFlow-branded
+   customer portal shows subscription, invoice, and payment method state.
+   `/app/billing` is workspace/org billing; `/billing` is the signed-in user's
+   customer portal. Visit `/admin` as the operator to inspect billing state,
+   webhook ingest, and replay visibility.
 4. Run the focused proof suite after you have walked the story yourself:
 
 ```bash

@@ -3,6 +3,19 @@ import AccrueHost.Seeds.Helpers
 
 now = Accrue.Clock.utc_now()
 days_ago = fn days -> DateTime.add(now, -days * 86_400, :second) end
+days_from_now = fn days -> DateTime.add(now, days * 86_400, :second) end
+
+ensure_processor_row = fn schema, changeset_fun, lookup, attrs ->
+  case Repo.get_by(schema, lookup) do
+    nil ->
+      struct(schema)
+      |> changeset_fun.(attrs)
+      |> Repo.insert!()
+
+    existing ->
+      existing
+  end
+end
 
 # OPERATOR / SaaS-admin persona — grants access to the /admin console.
 # This is NOT a customer account. It has no org, no subscription, no dunning events.
@@ -21,6 +34,120 @@ unless match?(
        ) do
   {:ok, _healthy_sub} = AccrueHost.Billing.subscribe(healthy_org, "price_basic")
 end
+
+# The mounted /billing portal resolves the signed-in user as the customer. Keep
+# this B2C-shaped portal state separate from the workspace-owned /app/billing row.
+{:ok, healthy_portal_customer} = AccrueHost.Billing.customer_for(healthy_user)
+
+healthy_portal_subscription =
+  case AccrueHost.Billing.billing_state_for(healthy_user) do
+    {:ok, %{subscription: %Accrue.Billing.Subscription{} = subscription}} ->
+      subscription
+
+    {:ok, %{subscription: nil}} ->
+      ensure_processor_row.(
+        Accrue.Billing.Subscription,
+        &Accrue.Billing.Subscription.force_status_changeset/2,
+        [processor: "fake", processor_id: "sub_seed_healthy_portal_launch"],
+        %{
+          customer_id: healthy_portal_customer.id,
+          processor: "fake",
+          processor_id: "sub_seed_healthy_portal_launch",
+          status: :active,
+          current_period_start: days_ago.(1),
+          current_period_end: days_from_now.(29),
+          cancel_at_period_end: false,
+          automatic_tax: false,
+          metadata: %{"seed_persona" => "healthy_portal"},
+          data: %{"portal_seed" => true}
+        }
+      )
+  end
+
+_healthy_portal_subscription_item =
+  ensure_processor_row.(
+    Accrue.Billing.SubscriptionItem,
+    &Accrue.Billing.SubscriptionItem.changeset/2,
+    [processor: "fake", processor_id: "si_seed_healthy_portal_launch"],
+    %{
+      subscription_id: healthy_portal_subscription.id,
+      processor: "fake",
+      processor_id: "si_seed_healthy_portal_launch",
+      price_id: "price_basic",
+      processor_plan_id: "price_basic",
+      processor_product_id: "prod_fake_price_basic",
+      quantity: 1,
+      current_period_start: healthy_portal_subscription.current_period_start,
+      current_period_end: healthy_portal_subscription.current_period_end,
+      metadata: %{"seed_persona" => "healthy_portal"},
+      data: %{}
+    }
+  )
+
+healthy_portal_payment_method =
+  ensure_processor_row.(
+    Accrue.Billing.PaymentMethod,
+    &Accrue.Billing.PaymentMethod.changeset/2,
+    [processor: "fake", processor_id: "pm_seed_healthy_portal_default"],
+    %{
+      customer_id: healthy_portal_customer.id,
+      processor: "fake",
+      processor_id: "pm_seed_healthy_portal_default",
+      type: "card",
+      is_default: true,
+      fingerprint: "fp_seed_healthy_portal_default",
+      card_brand: "Visa",
+      card_last4: "4242",
+      card_exp_month: 12,
+      card_exp_year: 2032,
+      exp_month: 12,
+      exp_year: 2032,
+      metadata: %{"seed_persona" => "healthy_portal"},
+      data: %{}
+    }
+  )
+
+if healthy_portal_customer.default_payment_method_id != healthy_portal_payment_method.id do
+  healthy_portal_customer
+  |> Accrue.Billing.Customer.changeset(%{
+    default_payment_method_id: healthy_portal_payment_method.id
+  })
+  |> Repo.update!()
+end
+
+_healthy_portal_invoice =
+  ensure_processor_row.(
+    Accrue.Billing.Invoice,
+    &Accrue.Billing.Invoice.force_status_changeset/2,
+    [processor: "fake", processor_id: "in_seed_healthy_portal_launch_paid"],
+    %{
+      customer_id: healthy_portal_customer.id,
+      subscription_id: healthy_portal_subscription.id,
+      processor: "fake",
+      processor_id: "in_seed_healthy_portal_launch_paid",
+      status: :paid,
+      number: "PORTAL-LAUNCH-001",
+      currency: "usd",
+      subtotal_minor: 1_500,
+      tax_minor: 0,
+      total_minor: 1_500,
+      total_cents: 1_500,
+      amount_due_minor: 1_500,
+      amount_paid_minor: 1_500,
+      amount_remaining_minor: 0,
+      hosted_url: "http://accrue.localhost/billing/invoices/PORTAL-LAUNCH-001",
+      pdf_url: nil,
+      collection_method: "charge_automatically",
+      billing_reason: "subscription_cycle",
+      finalized_at: days_ago.(1),
+      paid_at: days_ago.(1),
+      period_start: days_ago.(31),
+      period_end: days_ago.(1),
+      due_date: days_from_now.(29),
+      metadata: %{"seed_persona" => "healthy_portal"},
+      data: %{"portal_seed" => true}
+    }
+  )
 
 # 2. PAST-DUE demo account (banner-ON) — subscribed, then flipped into a dunning campaign
 past_due_user = ensure_demo_user("past-due@example.com")

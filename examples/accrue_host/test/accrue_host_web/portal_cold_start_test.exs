@@ -12,6 +12,7 @@ defmodule AccrueHostWeb.PortalColdStartTest do
 
   use AccrueHostWeb.ConnCase, async: false
 
+  alias AccrueHost.Accounts.User
   alias AccrueHost.Repo
   alias AccrueHostWeb.Router
 
@@ -62,5 +63,73 @@ defmodule AccrueHostWeb.PortalColdStartTest do
       assert redirected_to(conn) == ~p"/users/log-in"
       assert get_session(conn, :user_return_to) == ~p"/billing"
     end
+  end
+
+  describe "seeded CohortFlow portal walkthrough" do
+    setup :seed_hero_accounts
+
+    test "healthy customer sees subscriptions, payment methods, and invoices in /billing", %{
+      conn: conn
+    } do
+      user = Repo.get_by!(User, email: "healthy@example.com")
+      conn = log_in_user(conn, user)
+
+      dashboard =
+        conn
+        |> get(~p"/billing")
+        |> html_response(200)
+
+      assert dashboard =~ AccruePortal.Copy.home_heading()
+      refute dashboard =~ AccruePortal.Copy.home_empty_body()
+      assert dashboard =~ "Status: active"
+      assert dashboard_metric_count(dashboard, 1) == 3
+
+      payment_methods =
+        conn
+        |> recycle()
+        |> log_in_user(user)
+        |> get(~p"/billing/payment-methods")
+        |> html_response(200)
+
+      assert payment_methods =~ "Visa"
+      assert payment_methods =~ "ending in 4242"
+      assert payment_methods =~ AccruePortal.Copy.payment_methods_default_badge()
+
+      invoices =
+        conn
+        |> recycle()
+        |> log_in_user(user)
+        |> get(~p"/billing/invoices")
+        |> html_response(200)
+
+      assert invoices =~ "PORTAL-LAUNCH-001"
+      assert invoices =~ "Status: paid"
+    end
+  end
+
+  defp seed_hero_accounts(_context) do
+    case Accrue.Processor.Fake.start_link([]) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
+
+    :ok = Accrue.Processor.Fake.reset()
+
+    previous_env = Application.get_env(:accrue, :env)
+    Application.put_env(:accrue, :env, :dev)
+
+    Code.compiler_options(ignore_module_conflict: true)
+    Code.eval_file("priv/repo/seeds.exs")
+    Code.compiler_options(ignore_module_conflict: false)
+
+    on_exit(fn -> Application.put_env(:accrue, :env, previous_env) end)
+
+    :ok
+  end
+
+  defp dashboard_metric_count(html, expected_count) do
+    ~r/<p class="portal-metric">\s*#{expected_count}\s*<\/p>/
+    |> Regex.scan(html)
+    |> length()
   end
 end
