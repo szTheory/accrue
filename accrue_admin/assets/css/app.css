@@ -1458,6 +1458,62 @@ a.ax-kpi-card--linked:focus-visible {
   color: var(--ax-muted);
 }
 
+/* Threaded-feed elevation: a continuous rail threading calm node-anchored entries.
+   Scoped overrides placed AFTER the shared grouped selectors so KPI/json rules stay intact. */
+
+/* (a) RAIL — drawn only BETWEEN consecutive nodes, never above the first or below the last.
+   Anchored at the node-column center (dot is 0.6875rem wide, in an auto column), running from
+   just below the dot down through the inter-item gap (--ax-space-lg) into the next node. */
+.ax-timeline-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: calc(0.6875rem / 2);
+  top: calc(0.5rem + 0.6875rem);
+  width: 1px;
+  height: calc(100% - 0.6875rem - 0.5rem + var(--ax-space-lg));
+  background: var(--ax-border-strong);
+  transform: translateX(-0.5px);
+  z-index: 0;
+}
+
+/* (b) NODE — calmer, smaller dot with a surface-colored ring so the rail reads as passing behind. */
+.ax-timeline-dot {
+  width: 0.6875rem;
+  height: 0.6875rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 0 0 3px var(--ax-elevated);
+  z-index: 1;
+}
+
+/* (c) ENTRY — borderless, transparent threaded-feed row with a quiet hover surface.
+   Overrides the shared .ax-kpi-card/.ax-timeline-card group (border/background/padding/radius). */
+.ax-timeline-card {
+  padding: var(--ax-space-sm) var(--ax-space-md);
+  border: 0;
+  border-radius: var(--ax-radius-md);
+  background: transparent;
+  transition: var(--ax-transition-colors);
+}
+
+.ax-timeline-card:hover {
+  background: var(--ax-interactive-hover);
+}
+
+/* (d) TIMESTAMP — semantic <time>, tabular figures, muted. */
+.ax-timeline-time {
+  display: block;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--ax-type-sm);
+  color: var(--ax-muted);
+}
+
+/* (e) EMPTY — calm, centered, muted block (no border/pill). */
+.ax-timeline-empty {
+  padding: var(--ax-space-lg);
+  text-align: center;
+  color: var(--ax-muted);
+}
+
 .ax-json-viewer {
   display: grid;
   gap: var(--ax-space-lg);
