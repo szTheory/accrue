@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-14 — v1.53 Admin UI Design-System
 Phase: Milestone v1.53 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-06-20 — Milestone v1.53 completed and archived
+Last activity: 2026-06-20 — Completed quick task 260620-ps2: elevate Timeline (vertical rail + threaded-feed entries, StatusBadge reuse, lab registration)
 
 ## Post-v1.48 Pause Rule
 
@@ -285,6 +285,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260620-mfh | Host dev DX — hot-reload sibling Accrue libs (`reloadable_apps` + live_reload `dirs`/patterns), no `restart web`; CSS still needs `assets.build` | 2026-06-20 | 60920f46 | [260620-mfh-host-sibling-hot-reload](./quick/260620-mfh-host-sibling-hot-reload/) |
 | 260620-mn0 | Admin sidebar — render combined Accrue logo lockup (one theme-aware SVG), drop duplicated `app_name`/`Accrue Admin` brand text | 2026-06-20 | 54163ace | [260620-mn0-admin-sidebar-logo-lockup](./quick/260620-mn0-admin-sidebar-logo-lockup/) |
 | 260620-n4q | Redesign theme picker as on-brand segmented control (icon+text, radiogroup+arrow-keys); extract `ThemePicker` component + register in component lab | 2026-06-20 | ec45880e | [260620-n4q-theme-picker-segmented](./quick/260620-n4q-theme-picker-segmented/) |
+| 260620-ps2 | Elevate Timeline into a proper on-brand timeline — continuous vertical rail + threaded-feed entries (borderless, hover surface), reuse `StatusBadge` (tone passthrough), `<time>` tabular figures, dedicated empty state; register `timeline` family in component lab | 2026-06-20 | f6cda082 | [260620-ps2-elevate-the-timeline-component-into-a-pr](./quick/260620-ps2-elevate-the-timeline-component-into-a-pr/) |
 
 ### Milestone Intake Rules
 
