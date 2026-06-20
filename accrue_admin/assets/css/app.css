@@ -614,15 +614,17 @@ button {
 }
 
 /*
- * Default Accrue brand mark (shown when no host white-label logo_url is set).
- * Ink bars use `currentColor`, so they inherit the sidebar foreground and flip
- * automatically with the theme (the dark-theme block below pins `.ax-sidebar`
- * to a light ink); the moss accent bar stays constant on both themes.
+ * Default Accrue logo lockup (mark + wordmark, shown when no host white-label
+ * logo_url is set). Sized by height; the ~4:1 viewBox scales the width. The ink
+ * bars and wordmark use `currentColor`, so they inherit the sidebar foreground
+ * and flip automatically with the theme (the dark-theme block below pins
+ * `.ax-sidebar` to a light ink); the moss accent bar stays constant.
  */
-.ax-sidebar-brandmark {
-  width: 2.25rem;
-  height: 2.25rem;
-  flex-shrink: 0;
+.ax-sidebar-logo-mark {
+  height: 2rem;
+  width: auto;
+  max-width: 100%;
+  display: block;
 }
 
 .ax-sidebar-name,
@@ -704,13 +706,6 @@ button {
 
 .ax-sidebar-link-active .ax-sidebar-link-icon {
   color: var(--ax-accent-readable);
-}
-
-.ax-sidebar-brand-sub {
-  /* ax-type-exception: component-local typography is documented until this selector is migrated to a composed role utility in markup. */
-  margin: 0;
-  font-size: var(--ax-type-xs);
-  color: var(--ax-muted);
 }
 
 .ax-sidebar-link:visited {
