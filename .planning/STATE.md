@@ -281,6 +281,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260618-3pu | Component-lab family-label map (replace `String.upcase(family)` with UI-SPEC labels) | 2026-06-18 | b5cf3527 | [260618-3pu-component-lab-family-label-map](./quick/260618-3pu-component-lab-family-label-map/) |
 | 260620-gmv | Green main CI — format test file + harden CMP-05 xargs guards (GNU-vs-BSD portability) | 2026-06-20 | 0ce75413 | [260620-gmv-fix-ci-format-xargs](./quick/260620-gmv-fix-ci-format-xargs/) |
 | 260620-lie | Fix host login 500 — validate stale `active_organization_id` against live memberships before session insert (FK crash) | 2026-06-20 | 69867bb9 | [260620-lie-fix-stale-active-org-login](./quick/260620-lie-fix-stale-active-org-login/) |
+| 260620-luy | Use the real Accrue brand mark in admin chrome (sidebar + favicon), theme-aware; white-label `logo_url` still overrides | 2026-06-20 | d307f091 | [260620-luy-admin-brand-mark](./quick/260620-luy-admin-brand-mark/) |
 
 ### Milestone Intake Rules
 
