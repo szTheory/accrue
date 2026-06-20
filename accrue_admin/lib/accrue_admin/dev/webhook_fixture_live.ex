@@ -76,7 +76,7 @@ if Mix.env() != :prod do
               ]}
             />
             <p class="ax-eyebrow">Fixture payloads</p>
-            <h2 class="ax-display">Reference webhook payload shapes without leaving admin</h2>
+            <h1 class="ax-display">Reference webhook payload shapes without leaving admin</h1>
           </header>
 
           <section :if={!@available?} class="ax-card">

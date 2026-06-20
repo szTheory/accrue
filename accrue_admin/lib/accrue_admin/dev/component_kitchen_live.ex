@@ -81,7 +81,7 @@ if Mix.env() != :prod do
                 %{label: "Component kitchen"}
               ]}
             />
-            <h2 class="ax-display">Component Kitchen</h2>
+            <h1 class="ax-display">Component Kitchen</h1>
             <p class="ax-page-description">Primitive and form components — full state matrix. Use the topbar theme toggle to review light and dark.</p>
           </header>
 

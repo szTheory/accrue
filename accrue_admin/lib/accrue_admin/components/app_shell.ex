@@ -82,7 +82,7 @@ defmodule AccrueAdmin.Components.AppShell do
           </span>
         </div>
 
-        <Topbar.topbar brand={@brand} page_title={@page_title} theme={@theme} />
+        <Topbar.topbar theme={@theme} />
 
         <main
           class="ax-shell-content"

@@ -64,7 +64,7 @@ if Mix.env() != :prod do
               ]}
             />
             <p class="ax-eyebrow">Fake processor controls</p>
-            <h2 class="ax-display">Advance the shared non-prod billing clock</h2>
+            <h1 class="ax-display">Advance the shared non-prod billing clock</h1>
             <p class="ax-body ax-page-copy">
               Uses `Accrue.Processor.Fake.advance/2` so previews and local projections stay aligned
               with the same in-memory clock.

@@ -45,7 +45,7 @@ if Mix.env() != :prod do
               ]}
             />
             <p class="ax-eyebrow">State inspection</p>
-            <h2 class="ax-display">Inspect live Fake processor state from the package</h2>
+            <h1 class="ax-display">Inspect live Fake processor state from the package</h1>
           </header>
 
           <section :if={!@available?} class="ax-card">

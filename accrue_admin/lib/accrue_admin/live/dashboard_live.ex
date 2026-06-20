@@ -49,7 +49,7 @@ defmodule AccrueAdmin.Live.DashboardLive do
       <section class="ax-page ax-home">
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs items={[%{label: Copy.dashboard_breadcrumb_home()}]} />
-          <h2 class="ax-display"><%= Copy.home_intro_headline() %></h2>
+          <h1 class="ax-display"><%= Copy.home_intro_headline() %></h1>
           <p class="ax-body ax-page-copy"><%= Copy.home_intro_copy() %></p>
         </header>
 

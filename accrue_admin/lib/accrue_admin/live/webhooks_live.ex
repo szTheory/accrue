@@ -134,8 +134,7 @@ defmodule AccrueAdmin.Live.WebhooksLive do
               %{label: "Webhooks"}
             ]}
           />
-          <p class="ax-eyebrow">Webhook operations</p>
-          <h2 class="ax-display">Replay, inspect, and trace webhook delivery</h2>
+          <h1 class="ax-display">Replay, inspect, and trace webhook delivery</h1>
           <p class="ax-body ax-page-copy">
             Operators can filter inbound webhook rows, jump into forensic payload detail, and
             bulk requeue the current dead-letter slice without adding a second replay system.

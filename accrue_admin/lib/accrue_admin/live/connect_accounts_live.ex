@@ -46,8 +46,7 @@ defmodule AccrueAdmin.Live.ConnectAccountsLive do
               %{label: AccrueAdmin.Copy.connect_accounts_breadcrumb_connect()}
             ]}
           />
-          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.connect_accounts_eyebrow() %></p>
-          <h2 class="ax-display"><%= AccrueAdmin.Copy.connect_accounts_headline() %></h2>
+          <h1 class="ax-display"><%= AccrueAdmin.Copy.connect_accounts_headline() %></h1>
           <p class="ax-body ax-page-copy">
             <%= AccrueAdmin.Copy.connect_accounts_page_copy_primary() %>
           </p>

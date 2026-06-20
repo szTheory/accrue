@@ -47,8 +47,7 @@ defmodule AccrueAdmin.Live.CouponsLive do
               %{label: AccrueAdmin.Copy.coupon_breadcrumb_coupons()}
             ]}
           />
-          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.coupon_index_eyebrow() %></p>
-          <h2 class="ax-display"><%= AccrueAdmin.Copy.coupon_index_headline() %></h2>
+          <h1 class="ax-display"><%= AccrueAdmin.Copy.coupon_index_headline() %></h1>
           <p class="ax-body ax-page-copy">
             <%= AccrueAdmin.Copy.coupon_index_body_primary() %>
           </p>

@@ -99,9 +99,8 @@ defmodule AccrueAdmin.Live.Analytics.RecoveryLive do
       <section class="ax-page">
         <header class="ax-page-header">
           <Breadcrumbs.breadcrumbs items={[%{label: "Analytics"}, %{label: "Recovery"}]} />
-          <p class="ax-eyebrow">Recovery Dashboard</p>
           <div class="ax-heading-row">
-            <h2 class="ax-display">Revenue Recovery</h2>
+            <h1 class="ax-display">Revenue Recovery</h1>
             <a
               href="https://hexdocs.pm/accrue/analytics.html#cutoff-semantics"
               target="_blank"

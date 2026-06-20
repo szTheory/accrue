@@ -89,8 +89,7 @@ defmodule AccrueAdmin.Live.SubscriptionsLive do
               %{label: "Subscriptions"}
             ]}
           />
-          <p class="ax-eyebrow">Subscriptions</p>
-          <h2 class="ax-display">Lifecycle-safe subscription search</h2>
+          <h1 class="ax-display">Lifecycle-safe subscription search</h1>
           <p class="ax-body ax-page-copy">
             Subscription list filters run on the shared query layer and expose canonical lifecycle
             states without requiring raw status checks in the UI.

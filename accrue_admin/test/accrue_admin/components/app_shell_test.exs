@@ -29,7 +29,13 @@ defmodule AccrueAdmin.Components.AppShellTest do
         %{}
       )
 
-    assert html =~ "Accrue Admin"
+    # The brand app_name is now honored as the sidebar brand-lockup accessible
+    # name (white-label correct) rather than in a topbar brand chip.
+    assert html =~ ~s(aria-label="Accrue Admin")
+    assert html =~ "<title>Accrue Admin</title>"
+    # The redundant topbar brand chip and topbar page-title (ax-heading) are gone.
+    refute html =~ "ax-topbar-brand-chip"
+    refute html =~ ~s(<h1 class="ax-heading">)
     refute html =~ "Internal billing operations"
   end
 

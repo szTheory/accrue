@@ -83,8 +83,7 @@ defmodule AccrueAdmin.Live.EventsLive do
               %{label: AccrueAdmin.Copy.billing_events_breadcrumb_events()}
             ]}
           />
-          <p class="ax-eyebrow"><%= billing_events_eyebrow(@current_owner_scope) %></p>
-          <h2 class="ax-display"><%= billing_events_heading(@current_owner_scope) %></h2>
+          <h1 class="ax-display"><%= billing_events_heading(@current_owner_scope) %></h1>
           <p class="ax-body ax-page-copy">
             <%= billing_events_copy(@current_owner_scope) %>
           </p>
@@ -203,11 +202,6 @@ defmodule AccrueAdmin.Live.EventsLive do
     |> assign(:admin_mount_path, admin["mount_path"] || "/billing")
     |> assign(:current_path, admin_path(admin, "/events"))
   end
-
-  defp billing_events_eyebrow(%OwnerScope{mode: :organization}),
-    do: AccrueAdmin.Copy.billing_events_eyebrow_organization()
-
-  defp billing_events_eyebrow(_owner_scope), do: AccrueAdmin.Copy.billing_events_eyebrow_global()
 
   defp billing_events_heading(%OwnerScope{mode: :organization}),
     do: AccrueAdmin.Copy.billing_events_heading_organization()

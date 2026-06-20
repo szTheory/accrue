@@ -63,8 +63,7 @@ defmodule AccrueAdmin.Live.CustomersLive do
               %{label: "Customers"}
             ]}
           />
-          <p class="ax-eyebrow">Customers</p>
-          <h2 class="ax-display">Searchable customer projections</h2>
+          <h1 class="ax-display">Searchable customer projections</h1>
           <p class="ax-body ax-page-copy">
             Customer rows come from the shared admin query layer and stay backed by local billing
             projections only.

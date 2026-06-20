@@ -53,7 +53,7 @@ if Mix.env() != :prod do
               ]}
             />
             <p class="ax-eyebrow">Fixtures</p>
-            <h2 class="ax-display">Preview deterministic Accrue email assigns</h2>
+            <h1 class="ax-display">Preview deterministic Accrue email assigns</h1>
             <p class="ax-body ax-page-copy">
               Reads directly from `Accrue.Emails.Fixtures.all/0`; no DB rows, processor calls, or
               template overrides are introduced here.

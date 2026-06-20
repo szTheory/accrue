@@ -8,18 +8,12 @@ defmodule AccrueAdmin.Components.Topbar do
   alias AccrueAdmin.Components.Icon
   alias AccrueAdmin.Components.ThemePicker
 
-  attr(:brand, :map, required: true)
-  attr(:page_title, :string, required: true)
   attr(:theme, :string, default: "system")
 
   def topbar(assigns) do
     ~H"""
     <header class="ax-topbar">
-      <div class="ax-topbar-copy">
-        <a href="#main-content" class="ax-skip-link">Skip to content</a>
-        <p class="ax-eyebrow"><%= @brand.app_name %></p>
-        <h1 class="ax-heading"><%= @page_title %></h1>
-      </div>
+      <a href="#main-content" class="ax-skip-link">Skip to content</a>
 
       <div class="ax-topbar-actions">
         <button
@@ -40,11 +34,6 @@ defmodule AccrueAdmin.Components.Topbar do
         </button>
 
         <ThemePicker.theme_picker theme={@theme} />
-
-        <div class="ax-topbar-brand-chip">
-          <span class="ax-label">Brand</span>
-          <span class="ax-topbar-brand-name"><%= @brand.app_name %></span>
-        </div>
       </div>
     </header>
     """

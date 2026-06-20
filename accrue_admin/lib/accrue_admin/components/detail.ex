@@ -71,7 +71,7 @@ defmodule AccrueAdmin.Components.Detail do
       <div class="ax-summary-main">
         <p :if={@eyebrow} class="ax-eyebrow"><%= @eyebrow %></p>
         <div class="ax-summary-title-row">
-          <h2 class="ax-summary-title"><%= @title %></h2>
+          <h1 class="ax-summary-title"><%= @title %></h1>
           <%= render_slot(@status) %>
         </div>
         <div :if={@facts != []} class="ax-summary-facts"><%= render_slot(@facts) %></div>

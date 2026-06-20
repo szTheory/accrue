@@ -46,8 +46,7 @@ defmodule AccrueAdmin.Live.PromotionCodesLive do
               %{label: AccrueAdmin.Copy.promotion_codes_breadcrumb_index()}
             ]}
           />
-          <p class="ax-eyebrow"><%= AccrueAdmin.Copy.promotion_codes_index_eyebrow() %></p>
-          <h2 class="ax-display"><%= AccrueAdmin.Copy.promotion_codes_index_headline() %></h2>
+          <h1 class="ax-display"><%= AccrueAdmin.Copy.promotion_codes_index_headline() %></h1>
           <p class="ax-body ax-page-copy">
             <%= AccrueAdmin.Copy.promotion_codes_index_body_primary() %>
           </p>

@@ -65,8 +65,7 @@ defmodule AccrueAdmin.Live.InvoicesLive do
               %{label: Copy.invoices_index_breadcrumb_invoices()}
             ]}
           />
-          <p class="ax-eyebrow"><%= Copy.invoices_index_eyebrow() %></p>
-          <h2 class="ax-display"><%= Copy.invoices_index_headline() %></h2>
+          <h1 class="ax-display"><%= Copy.invoices_index_headline() %></h1>
           <p class="ax-body ax-page-copy">
             <%= Copy.invoices_index_body() %>
           </p>
