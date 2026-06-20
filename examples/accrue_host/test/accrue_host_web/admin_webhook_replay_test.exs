@@ -198,7 +198,7 @@ defmodule AccrueHostWeb.AdminWebhookReplayTest do
             {:redirect, %{to: "/admin/webhooks?org=" <> _slug, flash: %{"error" => denial_copy}}}} =
              live(conn, "/admin/webhooks/#{outsider_webhook.id}?org=#{allowed_org.slug}")
 
-    assert denial_copy == "You don't have access to billing for this organization."
+    assert denial_copy == AccrueAdmin.Copy.Locked.owner_access_denied()
 
     assert {:ok, _view, ambiguous_html} =
              live(conn, "/admin/webhooks/#{ambiguous_webhook.id}?org=#{allowed_org.slug}")

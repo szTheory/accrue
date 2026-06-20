@@ -16,6 +16,9 @@ test.skip("admin customer detail denies out-of-scope organization rows", async (
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
   await expect(
-    page.getByText("You don't have access to billing for this organization.", { exact: true })
+    page.getByText(
+      "Access restricted. This admin account cannot view billing for this organization. Switch owner scope or ask an administrator to grant billing admin access.",
+      { exact: true }
+    )
   ).toBeVisible({ timeout: 15_000 });
 });

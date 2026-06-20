@@ -68,11 +68,13 @@ defmodule AccrueHostWeb.OrgBillingAccessTest do
   end
 
   defp assert_denied_redirect(result, expected_path) do
+    expected_copy = AccrueAdmin.Copy.Locked.owner_access_denied()
+
     assert {:error,
             {:redirect,
              %{
                to: ^expected_path,
-               flash: %{"error" => "You don't have access to billing for this organization."}
+               flash: %{"error" => ^expected_copy}
              }}} =
              result
   end
