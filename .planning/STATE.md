@@ -284,6 +284,7 @@ Decisions are logged in PROJECT.md. Recent decisions affecting current work:
 | 260620-luy | Use the real Accrue brand mark in admin chrome (sidebar + favicon), theme-aware; white-label `logo_url` still overrides | 2026-06-20 | d307f091 | [260620-luy-admin-brand-mark](./quick/260620-luy-admin-brand-mark/) |
 | 260620-mfh | Host dev DX — hot-reload sibling Accrue libs (`reloadable_apps` + live_reload `dirs`/patterns), no `restart web`; CSS still needs `assets.build` | 2026-06-20 | 60920f46 | [260620-mfh-host-sibling-hot-reload](./quick/260620-mfh-host-sibling-hot-reload/) |
 | 260620-mn0 | Admin sidebar — render combined Accrue logo lockup (one theme-aware SVG), drop duplicated `app_name`/`Accrue Admin` brand text | 2026-06-20 | 54163ace | [260620-mn0-admin-sidebar-logo-lockup](./quick/260620-mn0-admin-sidebar-logo-lockup/) |
+| 260620-n4q | Redesign theme picker as on-brand segmented control (icon+text, radiogroup+arrow-keys); extract `ThemePicker` component + register in component lab | 2026-06-20 | ec45880e | [260620-n4q-theme-picker-segmented](./quick/260620-n4q-theme-picker-segmented/) |
 
 ### Milestone Intake Rules
 
