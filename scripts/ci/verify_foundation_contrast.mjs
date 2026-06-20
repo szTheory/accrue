@@ -9,7 +9,8 @@ const css = fs.readFileSync(themePath, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 const scopes = {
   light: /html\.accrue-admin\s*\{([\s\S]*?)\n\}/,
   dark: /html\.accrue-admin\[data-theme="dark"\]\s*\{([\s\S]*?)\n\}/,
-  systemDark: /html\.accrue-admin\[data-theme="system"\]\s*\{([\s\S]*?)\n\s*\}\n\}/
+  systemDark: /html\.accrue-admin\[data-theme="system"\]\s*\{([\s\S]*?)\n\s*\}\n\}/,
+  subtreeDark: /(?:html\.accrue-admin\s+\[data-theme="dark"\][^\{]*,\s*)?\.accrue-admin\s+\[data-theme="dark"\]\s*\{([\s\S]*?)\n\}/
 };
 
 function extract(body) {

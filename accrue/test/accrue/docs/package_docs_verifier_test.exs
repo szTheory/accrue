@@ -707,6 +707,78 @@ defmodule Accrue.Docs.PackageDocsVerifierTest do
     copy_fixture!("examples/accrue_host/docs/adoption-proof-matrix.md", tmp_dir)
   end
 
+  test "package docs verifier rejects dynamic HEEx class expression with Tailwind utility (D-15 FND-04)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    # Inject a LiveView component file with a dynamic class={...} expression containing a
+    # Tailwind utility (hidden). This tests the D-15 blind spot: the guard must scan not just
+    # literal class="..." but also class={...} dynamic expressions.
+    component_path = Path.join(tmp_dir, "accrue_admin/lib/accrue_admin/dev/drifted_component.ex")
+    File.mkdir_p!(Path.dirname(component_path))
+
+    File.write!(component_path, ~s"""
+    defmodule AccrueAdmin.Dev.DriftedComponent do
+      use Phoenix.LiveComponent
+
+      def render(assigns) do
+        ~H\"\"\"
+        <span class={if @loading, do: "ax-spinner", else: "hidden"} aria-hidden="true"></span>
+        \"\"\"
+      end
+    end
+    """)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "Tailwind utility authoring"
+  end
+
+  test "package docs verifier rejects subtree-dark semantic contrast drift (FND-05 D-18/D-19)" do
+    tmp_dir = tmp_dir!()
+    seed_tmp_dir!(tmp_dir)
+
+    theme_path = Path.join(tmp_dir, "accrue_admin/assets/css/theme.css")
+
+    # Drift a token in the subtree dark scope (html.accrue-admin [data-theme="dark"] /
+    # .accrue-admin [data-theme="dark"]) so its contrast ratio fails in that scope.
+    # Strategy: replace the --ax-disabled-text value in the subtree dark block to a
+    # near-zero contrast color (#252e3c ≈ the disabled bg #202832 — both very dark).
+    # The explicit dark block (html.accrue-admin[data-theme="dark"]) is unmodified so
+    # only the subtreeDark scope check triggers the failure.
+    original = File.read!(theme_path)
+
+    # The subtree dark block is the second occurrence of --ax-disabled-text in theme.css.
+    # Split on the known block opener to target only the subtree dark block.
+    subtree_open = "html.accrue-admin [data-theme=\"dark\"],\n.accrue-admin [data-theme=\"dark\"] {"
+
+    assert original =~ subtree_open,
+           "subtree dark block opener not found in theme.css — update fixture anchor"
+
+    # Replace --ax-disabled-text only within the subtree dark block by splitting on the opener
+    [before_subtree, subtree_and_after] = String.split(original, subtree_open, parts: 2)
+
+    drifted_subtree =
+      String.replace(
+        subtree_and_after,
+        "--ax-disabled-text: #c0c9d2;",
+        "--ax-disabled-text: #252e3c;",
+        global: false
+      )
+
+    drifted = before_subtree <> subtree_open <> drifted_subtree
+
+    File.write!(theme_path, drifted)
+
+    {output, status} = run_verifier(tmp_dir)
+
+    assert status != 0
+    assert output =~ "[verify_package_docs]"
+    assert output =~ "contrast" or output =~ "[foundation_contrast]"
+  end
+
   test "package docs verifier rejects per-page CSS overrides of primitive ax-* classes (CMP-05)" do
     tmp_dir = tmp_dir!()
     seed_tmp_dir!(tmp_dir)

@@ -344,20 +344,35 @@ fi
 heex_utility_hit=$(
   find "$ROOT_DIR/accrue_admin/lib" -type f \( -name '*.ex' -o -name '*.heex' \) -print0 |
     xargs -0 perl -0ne '
+      # Pattern to detect obvious Tailwind utility tokens (spacing, layout, visibility, etc.)
+      my $tailwind_re = qr/(^|\s)(mt-|mb-|mx-|my-|p-|px-|py-|flex\b|grid\b|hidden\b|block\b|inline\b|rounded\b|shadow\b|text-|bg-|w-|h-|sr-only\b)/;
       while (/~H"""(.*?)"""/sg) {
         my $template = $1;
+        # Check literal quoted class attributes: class="..."
         while ($template =~ /class="([^"]*)"/g) {
           my $class = $1;
           next if $class =~ /\bax-/;
-          if ($class =~ /(^|\s)(mt-|mb-|mx-|my-|p-|px-|py-|flex\b|grid\b|hidden\b|block\b|rounded\b|shadow\b|text-|bg-)/) {
-            print "$ARGV: $class\n";
+          if ($class =~ $tailwind_re) {
+            print "$ARGV (literal class): $class\n";
+          }
+        }
+        # Check dynamic class expressions: class={...} — extract string literals inside
+        while ($template =~ /class=\{([^\}]*)\}/g) {
+          my $expr = $1;
+          # Extract all double-quoted string fragments from the expression
+          while ($expr =~ /"([^"]*)"/g) {
+            my $frag = $1;
+            next if $frag =~ /\bax-/;
+            if ($frag =~ $tailwind_re) {
+              print "$ARGV (dynamic class): $frag\n";
+            }
           }
         }
       }
     ' |
     head -n 1
 )
-[[ -z "$heex_utility_hit" ]] || fail "HEEx Tailwind utility authoring is not allowed in accrue_admin/lib: $heex_utility_hit"
+[[ -z "$heex_utility_hit" ]] || fail "HEEx Tailwind utility authoring is not allowed in accrue_admin/lib (literal or dynamic class expressions): $heex_utility_hit"
 
 z_index_hit=$(
   perl -0ne '

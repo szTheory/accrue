@@ -164,7 +164,7 @@ defmodule AccrueAdmin.Components.GlobalSearch do
                   class="ax-command-palette-input"
                   id="global-search-input"
                 />
-                <span id="search-spinner" class={if @loading, do: "ax-spinner", else: "hidden"} aria-hidden="true"></span>
+                <span id="search-spinner" class="ax-spinner" hidden={not @loading} aria-hidden="true"></span>
               </div>
             </form>
 
