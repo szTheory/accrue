@@ -466,6 +466,17 @@ defmodule AccrueAdmin.Copy do
     }
   end
 
+  @doc """
+  Shared DataTable footer count, plural-aware on the `{singular, plural}` row_label tuple.
+
+      data_table_row_count(1, {"event", "events"})  #=> "Showing 1 event"
+      data_table_row_count(3, {"event", "events"})  #=> "Showing 3 events"
+  """
+  def data_table_row_count(count, {singular, plural}) do
+    word = if count == 1, do: singular, else: plural
+    "Showing #{count} #{word}"
+  end
+
   def data_table_default_empty_title, do: "Nothing in this list yet"
 
   @doc "Shared DataTable filter toolbar primary submit (VERIFY-01 / UI-SPEC secondary CTA)."

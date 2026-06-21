@@ -134,7 +134,8 @@ defmodule AccrueAdmin.DataTableTest do
        |> Phoenix.Component.assign(:table_params, Map.get(session, "params", %{}))
        |> Phoenix.Component.assign(:path, "/admin/fixtures")
        |> Phoenix.Component.assign(:poll_interval_ms, Map.get(session, "poll_interval_ms", 5_000))
-       |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))}
+       |> Phoenix.Component.assign(:table_caption, Map.get(session, "table_caption"))
+       |> Phoenix.Component.assign(:test_pid, Map.get(session, "test_pid"))}
     end
 
     @impl true
@@ -149,6 +150,10 @@ defmodule AccrueAdmin.DataTableTest do
         limit={2}
         dom_limit={4}
         poll_interval_ms={@poll_interval_ms}
+        selectable={true}
+        bulk_action_label="Retry selected"
+        bulk_action_event="retry_selected"
+        row_label={{"result", "results"}}
         columns={[
           %{id: :label, label: "Label"},
           %{id: :status, label: "Status"},
@@ -167,6 +172,15 @@ defmodule AccrueAdmin.DataTableTest do
         table_caption={@table_caption}
       />
       """
+    end
+
+    @impl true
+    def handle_info({:data_table_bulk_action, event, ids}, socket) do
+      if pid = socket.assigns[:test_pid] do
+        send(pid, {:bulk_action_received, event, ids})
+      end
+
+      {:noreply, socket}
     end
   end
 
@@ -292,7 +306,7 @@ defmodule AccrueAdmin.DataTableTest do
     {:ok, _view, html} =
       live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
 
-    assert html =~ ~s(data-role="row-count">2 rows loaded<)
+    assert html =~ ~s(data-role="row-count">Showing 2 results<)
     refute html =~ ~s(data-role="load-more")
   end
 
@@ -355,6 +369,27 @@ defmodule AccrueAdmin.DataTableTest do
       )
 
     assert html =~ ~s(data-role="selected-count">1 selected<)
+  end
+
+  test "bulk-action button emits {:data_table_bulk_action, event, ids} to the parent", %{
+    conn: conn
+  } do
+    {:ok, view, html} =
+      live_isolated(conn, TableLive,
+        session: %{"params" => %{"status" => "open"}, "test_pid" => self()}
+      )
+
+    # No selection yet → no bulk-action button rendered.
+    refute html =~ ~s(data-role="bulk-action")
+
+    html = render_click(element(view, "[data-role='toggle-all']"))
+    assert html =~ ~s(data-role="bulk-action")
+    assert html =~ "Retry selected"
+
+    render_click(element(view, "[data-role='bulk-action']"))
+
+    assert_receive {:bulk_action_received, "retry_selected", ids}
+    assert Enum.sort(ids) == ["row-4", "row-5"]
   end
 
   test "renders default empty state copy from AccrueAdmin.Copy when no rows match", %{conn: conn} do

@@ -34,7 +34,10 @@ defmodule AccrueAdmin.Components.DataTable do
       |> assign_new(:cursor_field, fn -> :inserted_at end)
       |> assign_new(:row_id, fn -> :id end)
       |> assign_new(:resource_plural, fn -> "rows" end)
-      |> assign_new(:selectable, fn -> true end)
+      |> assign_new(:selectable, fn -> false end)
+      |> assign_new(:bulk_action_label, fn -> nil end)
+      |> assign_new(:bulk_action_event, fn -> nil end)
+      |> assign_new(:row_label, fn -> {"result", "results"} end)
       |> assign_new(:enable_polling, fn -> true end)
       |> assign_new(:poll_interval_ms, fn -> 5_000 end)
       |> assign_new(:newer_count, fn -> 0 end)
@@ -105,6 +108,18 @@ defmodule AccrueAdmin.Components.DataTable do
       end
 
     {:noreply, assign(socket, :selected_ids, selected_ids)}
+  end
+
+  def handle_event("bulk-action", _params, socket) do
+    # Do NOT mutate selection here — notify the parent LiveView so it owns the side
+    # effect (confirm + action). Standard LiveComponent→parent message pattern.
+    send(
+      self(),
+      {:data_table_bulk_action, socket.assigns.bulk_action_event,
+       MapSet.to_list(socket.assigns.selected_ids)}
+    )
+
+    {:noreply, socket}
   end
 
   def handle_event("load-newer", _params, socket) do
@@ -209,6 +224,16 @@ defmodule AccrueAdmin.Components.DataTable do
         >
           <%= if all_visible_selected?(assigns), do: "Clear visible", else: "Select visible" %>
         </button>
+        <button
+          :if={@bulk_action_event && MapSet.size(@selected_ids) > 0}
+          type="button"
+          phx-click="bulk-action"
+          phx-target={@myself}
+          class="ax-button ax-button-primary"
+          data-role="bulk-action"
+        >
+          <%= @bulk_action_label %>
+        </button>
       </div>
 
       <div
@@ -282,7 +307,7 @@ defmodule AccrueAdmin.Components.DataTable do
       </div>
 
       <footer :if={!Enum.empty?(@rows)} class="ax-data-table-footer">
-        <p class="ax-body" data-role="row-count"><%= "#{length(@rows)} rows loaded" %></p>
+        <p class="ax-body" data-role="row-count"><%= Copy.data_table_row_count(length(@rows), @row_label) %></p>
         <button
           :if={@next_cursor}
           type="button"
