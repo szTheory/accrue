@@ -74,18 +74,36 @@ defmodule AccrueAdmin.CustomersLiveTest do
                "/billing/customers?q=Captain&owner_type=Team&has_default_payment_method=true"
              )
 
-    assert html =~ "Searchable customer projections"
+    # New find-and-open surface: plain heading + description, no projections jargon.
+    assert html =~ Copy.customers_index_heading()
+    assert html =~ Copy.customers_index_description()
+    refute html =~ "Searchable customer projections"
+
     assert html =~ ~s(<caption)
     assert html =~ Copy.customers_index_table_caption()
     assert html =~ "Captain Customer"
+
+    # Payment-method column relabelled and softened (no raw pm id leaked into the list).
+    assert html =~ "Payment method"
     assert html =~ "On file"
-    assert html =~ "Billing signals"
-    assert html =~ "Off"
+    refute html =~ "pm_team_default"
+
+    # Billing-signals column dropped from the list (always-Off, belongs on detail).
+    refute html =~ "Billing signals"
+
+    # Owner-types KPI dropped; the two clean KPIs remain.
+    refute html =~ "Distinct host billable types"
+
+    # owner_type filter renders as a derived select (not a free-text input).
+    assert html =~ ~s(name="owner_type")
+    assert html =~ "<select"
+
+    # Copyable ID chip rendered via the registered Clipboard hook.
+    assert html =~ "ax-id-badge"
+    assert html =~ ~s(phx-hook="Clipboard")
+
     refute html =~ "Other Customer"
     assert html =~ "/billing/customers/"
-    # UX-01: billing signal chips use label scale (no 12px utility on touched chips)
-    assert html =~ "ax-chip ax-label"
-    refute html =~ "ax-text-12"
   end
 
   test "renders Copy-backed empty index when search excludes all customers", %{conn: conn} do

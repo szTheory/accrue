@@ -73,4 +73,22 @@ defmodule AccrueAdmin.SubscriptionsLiveTest do
     assert html =~ "ax-filter-chip-slate"
     assert html =~ "?view=all"
   end
+
+  # Shared SPA-filter contract smoke (260621-io6): proves the parent-targeted
+  # data_table_filter form drives a push_patch on a SECOND page beyond customers.
+  test "submitting the shared filter form push_patches the table path with filter params", %{
+    conn: conn
+  } do
+    conn = Phoenix.ConnTest.init_test_session(conn, admin_token: "admin")
+
+    assert {:ok, view, _html} = live(conn, "/billing/subscriptions?view=all")
+
+    view
+    |> form(~s([data-role="filter-form"]), %{"q" => "acme"})
+    |> render_submit()
+
+    to = assert_patch(view)
+    assert to =~ "/billing/subscriptions"
+    assert to =~ "q=acme"
+  end
 end

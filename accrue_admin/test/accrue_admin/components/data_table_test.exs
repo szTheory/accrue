@@ -175,6 +175,15 @@ defmodule AccrueAdmin.DataTableTest do
     end
 
     @impl true
+    def handle_event("data_table_filter", params, socket) do
+      if pid = socket.assigns[:test_pid] do
+        send(pid, {:data_table_filter_received, Map.drop(params, ["_target", "_csrf_token"])})
+      end
+
+      {:noreply, socket}
+    end
+
+    @impl true
     def handle_info({:data_table_bulk_action, event, ids}, socket) do
       if pid = socket.assigns[:test_pid] do
         send(pid, {:bulk_action_received, event, ids})
@@ -310,7 +319,12 @@ defmodule AccrueAdmin.DataTableTest do
         session: %{"params" => %{"q" => "closed", "status" => "closed"}}
       )
 
-    assert html =~ ~s(action="/admin/fixtures")
+    # New SPA contract: the filter form drives the PARENT via data_table_filter,
+    # not a full-page GET to the table path (no action= / method=get).
+    refute html =~ ~s(action="/admin/fixtures")
+    refute html =~ ~s(method="get")
+    assert html =~ ~s(phx-change="data_table_filter")
+    assert html =~ ~s(phx-submit="data_table_filter")
     assert html =~ ~s(name="q" value="closed")
     assert html =~ ~s(<option value="closed" selected="")
     assert html =~ "Newest closed"
@@ -486,6 +500,71 @@ defmodule AccrueAdmin.DataTableTest do
 
     assert html =~ "Nothing in this list yet"
     assert html =~ "Billing records appear here when they match this view"
+  end
+
+  describe "SPA filters + infinite-scroll contract (260621-io6)" do
+    test "filter form is parent-targeted with debounced text inputs (no phx-target)", %{conn: conn} do
+      {:ok, _view, html} =
+        live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
+
+      # phx-change/phx-submit land on the PARENT LiveView (no phx-target on the form).
+      assert html =~ ~s(phx-change="data_table_filter")
+      assert html =~ ~s(phx-submit="data_table_filter")
+      refute html =~ ~s(action="/admin/fixtures")
+      # Free-text q input debounces so typing does not patch on every keystroke.
+      assert html =~ ~s(phx-debounce="300")
+    end
+
+    test "Clear is a LiveView patch link to the table path, not a full-page GET anchor", %{
+      conn: conn
+    } do
+      FixtureStore.put_rows([])
+
+      {:ok, _view, html} =
+        live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
+
+      # The filtered-empty Clear control is a patch link carrying the table path.
+      assert html =~ ~s(data-role="clear-filters")
+      assert html =~ ~s(data-phx-link="patch")
+    end
+
+    test "renders a viewport-bottom sentinel only while a next cursor exists under dom_limit", %{
+      conn: conn
+    } do
+      # 5 rows, limit 2, dom_limit 4 → next_cursor present and rows (2) < dom_limit.
+      {:ok, view, html} =
+        live_isolated(conn, TableLive, session: %{"params" => %{"status" => "open"}})
+
+      assert html =~ ~s(data-role="viewport-sentinel")
+      assert html =~ "phx-viewport-bottom"
+      # Load more button remains for a11y / no-JS / past-cap loading.
+      assert html =~ ~s(data-role="load-more")
+
+      # A view with no further pages must not render the sentinel.
+      {:ok, _view, closed_html} =
+        live_isolated(conn, TableLive, session: %{"params" => %{"status" => "closed"}})
+
+      refute closed_html =~ ~s(data-role="viewport-sentinel")
+      refute closed_html =~ ~s(data-role="load-more")
+
+      # Sentinel reuses the existing load-more event (parity with the button).
+      loaded = render_click(element(view, "[data-role='load-more']"))
+      assert loaded =~ "Oldest open"
+    end
+
+    test "the filter form submit reaches the PARENT LiveView (no phx-target)", %{conn: conn} do
+      {:ok, view, _html} =
+        live_isolated(conn, TableLive,
+          session: %{"params" => %{"status" => "open"}, "test_pid" => self()}
+        )
+
+      view
+      |> form(~s([data-role="filter-form"]), %{"q" => "closed", "status" => "closed"})
+      |> render_submit()
+
+      # Parent-targeted: the event lands on TableLive's handle_event, not the component.
+      assert_receive {:data_table_filter_received, %{"q" => "closed", "status" => "closed"}}
+    end
   end
 
   # ─── Nyquist structural guards (Phase 176-06) ───────────────────────────────
