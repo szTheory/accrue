@@ -3924,6 +3924,42 @@ html.accrue-admin::-webkit-scrollbar-thumb:hover {
   max-inline-size: 12ch;
 }
 
+/* Click-to-copy ID chip (interactive sibling of ax-inline-id). Borrows the
+   segmented/theme-picker chip language for resting + hover; monospace via the
+   code font tokens; truncates within a max-width; a [data-copied] rule keyed on
+   the attribute the Clipboard hook sets gives subtle confirmation. Tokens only. */
+.ax-id-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ax-space-2xs);
+  max-inline-size: 16ch;
+  padding: var(--ax-space-2xs) var(--ax-space-xs);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-radius-sm);
+  background: var(--ax-sunken);
+  color: var(--ax-primary);
+  cursor: pointer;
+  vertical-align: middle;
+  transition: var(--ax-transition-colors);
+}
+
+.ax-id-badge:hover {
+  background: var(--ax-interactive-hover);
+  border-color: var(--ax-border-strong);
+}
+
+.ax-id-badge-text {
+  font: var(--ax-type-code-xs-font);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-id-badge[data-copied="true"] {
+  border-color: var(--ax-success);
+  color: var(--ax-success-readable);
+}
+
 /* FIX 5 — Tooltip: z-layer via --ax-z-popover; opacity-driven show/hide
    so CSS transitions can fire (no display:none toggle). */
 .ax-tooltip-wrapper { position: relative; display: inline-flex; }

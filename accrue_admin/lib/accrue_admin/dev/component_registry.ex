@@ -1813,6 +1813,64 @@ if Mix.env() != :prod do
           ]
         },
 
+        # ── IdBadge family ─────────────────────────────────────────────────────────
+        # Interactive click-to-copy ID chip (sibling of inline-id). Rendered:
+        # class={["ax-id-badge", "ax-id-badge-default", class]}. The default specimen
+        # MUST render the variant class `ax-id-badge-default` (render-coverage guardrail
+        # splits ax_class and asserts the variant class appears in the page HTML).
+        %{
+          family: "id-badge",
+          variant: "default",
+          ax_class: "ax-id-badge ax-id-badge-default",
+          tokens: [
+            "--ax-font-mono",
+            "--ax-type-code-xs-font",
+            "--ax-border",
+            "--ax-border-strong",
+            "--ax-sunken",
+            "--ax-interactive-hover",
+            "--ax-success",
+            "--ax-transition-colors"
+          ],
+          # Click-to-copy control; copy success is a transient JS state (the hook sets
+          # data-copied). Only the resting default is a forced static specimen.
+          applicable_states: ["default"],
+          na_states: [
+            %{
+              state: "hover",
+              reason:
+                "hover is a CSS background shift on the chip — a live pointer state, not a forced static specimen"
+            },
+            %{
+              state: "focus",
+              reason: "focus ring shows on keyboard focus — a live state, not a static specimen"
+            },
+            %{
+              state: "active",
+              reason: "copy fires instantly on click — no persistent pressed visual"
+            },
+            %{state: "pressed", reason: "no press-scale state separate from the click"},
+            %{
+              state: "selected",
+              reason: "copy success (data-copied) is a transient JS feedback, not a selection state"
+            },
+            %{state: "disabled", reason: "the copy chip is always enabled"},
+            %{state: "loading", reason: "clipboard write is synchronous-feeling — no loading state"},
+            %{state: "error", reason: "no validation — the chip cannot be in an error state"},
+            %{
+              state: "empty",
+              reason: "id_value is required — an empty chip is not a valid component state"
+            },
+            %{
+              state: "overflow",
+              reason: "long ids truncate within the chip max-width via ellipsis — not a distinct specimen"
+            }
+          ],
+          specimens: [
+            %{label: "Default ID chip", props: %{id_value: "cus_phase191_host_1"}, content: nil}
+          ]
+        },
+
         # ── EmptyState family ──────────────────────────────────────────────────────
         # Rendered: class={["ax-empty", class]}
         %{

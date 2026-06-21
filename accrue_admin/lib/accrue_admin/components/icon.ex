@@ -19,7 +19,7 @@ defmodule AccrueAdmin.Components.Icon do
             coupons promotions connect search arrow_right arrow_long_right
             chevron_right chevron_down chevron_up_down x_mark check check_circle
             exclamation_triangle information_circle external clock banknotes
-            replay funnel plus building dots_vertical inbox
+            replay funnel plus building dots_vertical inbox copy
             sun moon computer_desktop)a
 
   @doc """
@@ -166,6 +166,10 @@ defmodule AccrueAdmin.Components.Icon do
   defp paths(:inbox),
     do:
       ~s(<path d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z"/>)
+
+  defp paths(:copy),
+    do:
+      ~s(<path d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/>)
 
   defp paths(:sun),
     do:

@@ -1,6 +1,6 @@
 import { Socket } from "../../deps/phoenix/priv/static/phoenix.mjs";
 import { LiveSocket } from "../../deps/phoenix_live_view/priv/static/phoenix_live_view.esm.js";
-import { initClipboardControls } from "./hooks/clipboard";
+import { initClipboardControls, Clipboard } from "./hooks/clipboard";
 import { initThemeControls } from "./hooks/accrue_theme";
 import { initShellNav } from "./hooks/accrue_shell_nav";
 import { initDropdowns } from "./hooks/dropdown";
@@ -45,7 +45,7 @@ ready(() => {
 const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 const liveSocket = new LiveSocket("/live", Socket, {
   params: csrfToken ? { _csrf_token: csrfToken } : {},
-  hooks: { CommandPalette, ConnectionState, FocusTrap, SidebarCollapse }
+  hooks: { CommandPalette, ConnectionState, FocusTrap, SidebarCollapse, Clipboard }
 });
 
 liveSocket.connect();

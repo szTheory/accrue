@@ -17,6 +17,7 @@ if Mix.env() != :prod do
       FlashGroup,
       FunnelChart,
       Icon,
+      IdBadge,
       InlineId,
       Input,
       JsonViewer,
@@ -940,6 +941,7 @@ if Mix.env() != :prod do
     defp family_label("spinner"), do: "Loading"
     defp family_label("tooltip"), do: "Tooltip"
     defp family_label("inline-id"), do: "Inline code / ID"
+    defp family_label("id-badge"), do: "ID badge"
     defp family_label("empty-state"), do: "Empty state"
     defp family_label("theme-picker"), do: "Theme picker"
     defp family_label("segmented"), do: "Segmented filter"
@@ -1568,6 +1570,15 @@ if Mix.env() != :prod do
 
       ~H"""
       <InlineId.inline_id id_value="cus_ABC123" class="ax-inline-id-short" />
+      """
+    end
+
+    # ── IdBadge ───────────────────────────────────────────────────────────────────
+    defp do_render_specimen("id-badge", _state, _specimen, _theme) do
+      assigns = %{__changed__: %{}}
+
+      ~H"""
+      <IdBadge.id_badge id="lab-id-badge-default" id_value="cus_phase191_host_1" />
       """
     end
 
